@@ -1,0 +1,439 @@
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Scanner;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.Function2;
+import org.apache.spark.api.java.function.PairFlatMapFunction;
+
+import scala.Tuple2;
+import scala.Tuple4;
+class TupleXComparator implements Comparator<Tuple2<Double,Double>>, Serializable {
+    
+	 public int compare(Tuple2<Double,Double> point1, Tuple2<Double,Double> point2) {
+	    if(point1._1()>point2._1())
+	    {
+	    	return 1;
+	    }
+	    else if (point1._1()<point2._1())
+	    {
+	    	return -1;
+	    }
+	    else return 0;
+	    }
+}
+class TupleYComparator implements Comparator<Tuple2<Double,Double>>, Serializable {
+  
+	 public int compare(Tuple2<Double,Double> point1, Tuple2<Double,Double> point2) {
+	    if(point1._2()>point2._2())
+	    {
+	    	return 1;
+	    }
+	    else if (point1._2()<point2._2())
+	    {
+	    	return -1;
+	    }
+	    else return 0;
+	    }
+}
+class TupleX1Comparator implements Comparator<Tuple4<Double,Double,Double,Double>>, Serializable {
+   
+	 public int compare(Tuple4<Double,Double,Double,Double> point1, Tuple4<Double,Double,Double,Double> point2) {
+	    if(point1._1()>point2._1())
+	    {
+	    	return 1;
+	    }
+	    else if (point1._1()<point2._1())
+	    {
+	    	return -1;
+	    }
+	    else return 0;
+	    }
+}
+class TupleY1Comparator implements Comparator<Tuple4<Double,Double,Double,Double>>, Serializable {
+   
+	 public int compare(Tuple4<Double,Double,Double,Double> point1, Tuple4<Double,Double,Double,Double> point2) {
+	    if(point1._2()>point2._2())
+	    {
+	    	return 1;
+	    }
+	    else if (point1._2()<point2._2())
+	    {
+	    	return -1;
+	    }
+	    else return 0;
+	    }
+}
+class TupleX2Comparator implements Comparator<Tuple4<Double,Double,Double,Double>>, Serializable {
+   
+	 public int compare(Tuple4<Double,Double,Double,Double> point1, Tuple4<Double,Double,Double,Double> point2) {
+	    if(point1._3()>point2._3())
+	    {
+	    	return 1;
+	    }
+	    else if (point1._3()<point2._3())
+	    {
+	    	return -1;
+	    }
+	    else return 0;
+	    }
+}
+class TupleY2Comparator implements Comparator<Tuple4<Double,Double,Double,Double>>, Serializable {
+   
+	 public int compare(Tuple4<Double,Double,Double,Double> point1, Tuple4<Double,Double,Double,Double> point2) {
+	    if(point1._4()>point2._4())
+	    {
+	    	return 1;
+	    }
+	    else if (point1._4()<point2._4())
+	    {
+	    	return -1;
+	    }
+	    else return 0;
+	    }
+}
+class PartitionAssignGridPoint implements PairFlatMapFunction<java.util.Iterator<Tuple2<Double,Double>>,Integer,Tuple2<Double,Double>>, Serializable 
+{
+//This function is to assign grid index to each point in large dataset.
+	int gridNumberHorizontal;
+	int gridNumberVertical;
+	Double[] gridHorizontalBorder;
+	Double[] gridVerticalBorder;
+
+	public PartitionAssignGridPoint(int gridNumberHorizontal, int gridNumberVertical, Double[] gridHorizontalBorder, Double[] gridVerticalBorder) {
+		// TODO Auto-generated constructor stub
+		this.gridNumberHorizontal=gridNumberHorizontal;
+		this.gridNumberVertical=gridNumberVertical;
+		this.gridHorizontalBorder=gridHorizontalBorder;
+		this.gridVerticalBorder=gridVerticalBorder;
+	}
+
+	public Iterable<Tuple2<Integer, Tuple2<Double, Double>>> call(Iterator<Tuple2<Double,Double>> s) throws Exception 	
+	{
+		int id=-1;
+		ArrayList<Tuple2<Integer, Tuple2<Double, Double>>> list=new ArrayList<Tuple2<Integer, Tuple2<Double, Double>>>();
+		
+		while(s.hasNext())
+				{
+				Tuple2<Double,Double> currentElement=s.next();
+					for(int i=0;i<gridNumberHorizontal;i++)
+					{
+						for(int j=0;j<gridNumberVertical;j++)
+						{
+							
+							if(currentElement._1()>=gridHorizontalBorder[i] && currentElement._1()<=gridHorizontalBorder[i+1] && currentElement._2()>=gridVerticalBorder[j] && currentElement._2()<=gridVerticalBorder[j+1])
+							{
+								id=i*gridNumberHorizontal+j;
+								list.add(new Tuple2(id,currentElement));
+							}
+						}
+					}
+				}
+				
+		
+		return list;
+	}
+}
+class PartitionAssignGridRectangle implements PairFlatMapFunction<java.util.Iterator<Tuple4<Double,Double,Double,Double>>,Integer,Tuple4<Double,Double,Double,Double>>, Serializable 
+{
+//This function is to assign grid index to each rectangle in large dataset.
+	int gridNumberHorizontal;
+	int gridNumberVertical;
+	Double[] gridHorizontalBorder;
+	Double[] gridVerticalBorder;
+
+	public PartitionAssignGridRectangle(int gridNumberHorizontal, int gridNumberVertical, Double[] gridHorizontalBorder, Double[] gridVerticalBorder) {
+		// TODO Auto-generated constructor stub
+		this.gridNumberHorizontal=gridNumberHorizontal;
+		this.gridNumberVertical=gridNumberVertical;
+		this.gridHorizontalBorder=gridHorizontalBorder;
+		this.gridVerticalBorder=gridVerticalBorder;
+	}
+
+	public Iterable<Tuple2<Integer, Tuple4<Double,Double,Double, Double>>> call(Iterator<Tuple4<Double,Double,Double,Double>> s) throws Exception 	
+	{
+		int id=-1;
+		ArrayList<Tuple2<Integer, Tuple4<Double,Double,Double, Double>>> list=new ArrayList<Tuple2<Integer, Tuple4<Double,Double,Double, Double>>>();
+		
+		while(s.hasNext())
+		{
+					
+			Tuple4<Double,Double,Double,Double> currentElement=s.next();
+					for(int i=0;i<gridNumberHorizontal;i++)
+					{
+						for(int j=0;j<gridNumberVertical;j++)
+						{
+							Boolean Vertex1Condition=currentElement._1()>=gridHorizontalBorder[i] && currentElement._1()<=gridHorizontalBorder[i+1]&&currentElement._3()>=gridHorizontalBorder[i] && currentElement._3()<=gridHorizontalBorder[i+1] ;
+							Boolean Vertex2Condition=currentElement._2()>=gridVerticalBorder[j] && currentElement._2()<=gridVerticalBorder[j+1]&&currentElement._4()>=gridVerticalBorder[j] && currentElement._4()<=gridVerticalBorder[j+1];
+							
+							if(Vertex1Condition && Vertex2Condition )
+							{
+								//Fully contain
+								id=i*gridNumberHorizontal+j;
+								list.add(new Tuple2(id,currentElement));
+							}
+							else if(!Vertex1Condition && !Vertex2Condition)
+								{
+									//Fully disjoint
+									continue;
+								}
+								else
+								{
+									//Overlap
+									id=i*gridNumberHorizontal+j;
+									list.add(new Tuple2(id,currentElement));
+								}
+						}
+					}
+		}
+		
+		
+		return list;
+	}
+}
+public class SpatialJoinQueryPartition {
+
+	static void JoinQuery(String TargetSetLocation,String QueryAreaSetLocation,String OutputLocation,int GridNumberHorizontal,int GridNumberVertical)
+	{
+		SparkConf conf=new SparkConf().setAppName("ParallelSpatialJoinQueryWithGridFile").setMaster("spark://192.168.56.101:7077").set("spark.local.ip", "192.168.56.101").set("spark.driver.host", "192.168.56.101");
+		JavaSparkContext spark=new JavaSparkContext(conf);
+		spark.addJar("target/operation-0.0.1-SNAPSHOT-ParallelJoin.jar");
+		//Input data from HDFS into RDD
+				JavaRDD<String> TargetSet = spark.textFile(TargetSetLocation);
+				JavaRDD<String> QueryAreaSet = spark.textFile(QueryAreaSetLocation);
+		//Map the data with particular format
+			JavaRDD<Tuple2<Double,Double>> MapTargetSet=TargetSet.map(new Function<String,Tuple2<Double,Double>>(){
+						public Tuple2<Double, Double> call(String s){
+							double x1,y1;
+							//Use try-catch in case that the first row of the dataset is the instruction of columns.
+							//try
+							{
+						 x1=Double.parseDouble(Arrays.asList(s.split(",")).get(2));
+						 y1=Double.parseDouble(Arrays.asList(s.split(",")).get(3));
+							}
+							/*catch(Exception e)
+							{
+								x1=0.00;
+								y1=0.00;
+							}*/
+						return new Tuple2(x1,y1);
+						}
+			});
+			MapTargetSet.cache();
+			JavaRDD<Tuple4<Double,Double,Double,Double>> MapQueryAreaSet=QueryAreaSet.map(new Function<String,Tuple4<Double,Double,Double,Double>>(){
+				public Tuple4<Double,Double,Double, Double> call(String s){
+					double x1,y1,x2,y2;
+					//Use try-catch in case that the first row of the dataset is the instruction of columns.
+					//try
+					{
+					 x1=Double.parseDouble(Arrays.asList(s.split(",")).get(2));
+					 y1=Double.parseDouble(Arrays.asList(s.split(",")).get(3));
+					 x2=Double.parseDouble(Arrays.asList(s.split(",")).get(4));
+					 y2=Double.parseDouble(Arrays.asList(s.split(",")).get(5));
+					}
+					/*catch(Exception e)
+					{
+						x1=0.00;
+						y1=0.00;
+						x2=0.00;
+						y2=0.00;
+					}*/
+				return new Tuple4(x1,y1,x2,y2);
+				}	
+			});
+			MapQueryAreaSet.cache();
+	
+//Find the border of both of the two datasets---------------
+			Double minLongitude;
+			Double minLatitude;
+			Double maxLongitude;
+			Double maxLatitude;
+			Double minLongtitude1QueryAreaSet=MapQueryAreaSet.min(new TupleX1Comparator())._1();
+			Double maxLongtitude1QueryAreaSet=MapQueryAreaSet.max(new TupleX1Comparator())._1();
+			Double minLatitude1QueryAreaSet=MapQueryAreaSet.min(new TupleY1Comparator())._2();
+			Double maxLatitude1QueryAreaSet=MapQueryAreaSet.max(new TupleY1Comparator())._2();
+			Double minLongtitude2QueryAreaSet=MapQueryAreaSet.min(new TupleX2Comparator())._3();
+			Double maxLongtitude2QueryAreaSet=MapQueryAreaSet.max(new TupleX2Comparator())._3();
+			Double minLatitude2QueryAreaSet=MapQueryAreaSet.min(new TupleY2Comparator())._4();
+			Double maxLatitude2QueryAreaSet=MapQueryAreaSet.max(new TupleY2Comparator())._4();
+			Double minLongtitudeQueryAreaSet;
+			Double maxLongtitudeQueryAreaSet;
+			Double minLatitudeQueryAreaSet;
+			Double maxLatitudeQueryAreaSet;
+			//TargetSet min/max longitude and latitude
+			minLongitude=MapTargetSet.min(new TupleXComparator())._1();
+			maxLongitude=MapTargetSet.max(new TupleXComparator())._1();
+			minLatitude=MapTargetSet.min(new TupleYComparator())._2();
+			maxLatitude=MapTargetSet.max(new TupleYComparator())._2();
+			//QueryAreaSet min/max longitude and latitude
+			if(minLongtitude1QueryAreaSet<minLongtitude2QueryAreaSet)
+			{
+				minLongtitudeQueryAreaSet=minLongtitude1QueryAreaSet;
+			}
+			else
+			{
+				minLongtitudeQueryAreaSet=minLongtitude2QueryAreaSet;
+			}
+			if(maxLongtitude1QueryAreaSet>maxLongtitude2QueryAreaSet)
+			{
+				maxLongtitudeQueryAreaSet=maxLongtitude1QueryAreaSet;
+			}
+			else
+			{
+				maxLongtitudeQueryAreaSet=maxLongtitude2QueryAreaSet;
+			}
+			if(minLatitude1QueryAreaSet<minLatitude2QueryAreaSet)
+			{
+				minLatitudeQueryAreaSet=minLatitude1QueryAreaSet;
+			}
+			else
+			{
+				minLatitudeQueryAreaSet=minLatitude2QueryAreaSet;
+			}
+			if(maxLatitude1QueryAreaSet>maxLatitude2QueryAreaSet)
+			{
+				maxLatitudeQueryAreaSet=maxLatitude1QueryAreaSet;
+			}
+			else
+			{
+				maxLatitudeQueryAreaSet=maxLatitude2QueryAreaSet;
+			}
+			//Border found
+			if(minLongitude>minLongtitudeQueryAreaSet)
+			{
+				minLongitude=minLongtitudeQueryAreaSet;
+			}
+			if(maxLongitude<maxLongtitudeQueryAreaSet)
+			{
+				maxLongitude=maxLongtitudeQueryAreaSet;
+			}
+			if(minLatitude>minLatitudeQueryAreaSet)
+			{
+				minLatitude=minLatitudeQueryAreaSet;
+			}
+			if(maxLatitude<maxLatitudeQueryAreaSet)
+			{
+				maxLatitude=maxLatitudeQueryAreaSet;
+			}
+//Build Grid file-------------------
+			Double[] gridHorizontalBorder = new Double[GridNumberHorizontal+1];
+			Double[] gridVerticalBorder=new Double[GridNumberVertical+1];
+			double LongitudeIncrement=(maxLongitude-minLongitude)/GridNumberHorizontal;
+			double LatitudeIncrement=(maxLatitude-minLatitude)/GridNumberVertical;
+			for(int i=0;i<GridNumberHorizontal+1;i++)
+			{
+				gridHorizontalBorder[i]=minLongitude+LongitudeIncrement*i;
+			}
+			for(int i=0;i<GridNumberVertical+1;i++)
+			{
+				gridVerticalBorder[i]=minLatitude+LatitudeIncrement*i;
+			}
+//Assign grid ID to both of the two dataset---------------------
+			JavaPairRDD<Integer,Tuple2<Double,Double>> TargetSetWithID=MapTargetSet.mapPartitionsToPair(new PartitionAssignGridPoint(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
+			//TargetSetWithID.saveAsTextFile(OutputLocation);
+			JavaPairRDD<Integer,Tuple4<Double,Double,Double,Double>> QueryAreaSetWithID=MapQueryAreaSet.mapPartitionsToPair(new PartitionAssignGridRectangle(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
+			//QueryAreaSetWithID.saveAsTextFile(OutputLocation);
+//Join two dataset
+			JavaPairRDD<Integer, Tuple2<Iterable<Tuple4<Double, Double, Double, Double>>, Iterable<Tuple2<Double, Double>>>> jointSet=QueryAreaSetWithID.cogroup(TargetSetWithID);
+//Calculate the relation between one point and one query area
+			JavaPairRDD<Tuple4<Double,Double,Double,Double>,String> result=jointSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer,Tuple2<Iterable<Tuple4<Double, Double, Double, Double>>, Iterable<Tuple2<Double, Double>>>>, Tuple4<Double,Double,Double,Double>,String>()
+					{
+
+				public Iterable<Tuple2<Tuple4<Double, Double, Double, Double>, String>> call(
+						Tuple2<Integer, Tuple2<Iterable<Tuple4<Double, Double, Double, Double>>, Iterable<Tuple2<Double, Double>>>> t)
+						throws Exception {
+					// TODO Auto-generated method stub
+					ArrayList<Tuple2<Tuple4<Double, Double, Double, Double>, String>> QueryAreaAndPoint=new ArrayList();
+					Iterator<Tuple4<Double, Double, Double, Double>> QueryAreaIterator=t._2()._1().iterator();
+					Iterator<Tuple2<Double, Double>> PointIterator=t._2()._2().iterator();
+					while(QueryAreaIterator.hasNext())
+					{
+						Tuple4<Double, Double, Double, Double> currentQueryArea=QueryAreaIterator.next();
+						//String QueryArea=currentQueryArea._1().toString()+","+currentQueryArea._2().toString()+","+currentQueryArea._3().toString()+","+currentQueryArea._4().toString();
+						String QueryArea="";
+						while(PointIterator.hasNext())
+						{
+							Tuple2<Double, Double> currentPoint=PointIterator.next();
+							if(currentPoint._1()>=currentQueryArea._1() && currentPoint._1()<=currentQueryArea._3() && currentPoint._2()>=currentQueryArea._2() && currentPoint._2()<=currentQueryArea._2())
+							{
+								QueryArea=QueryArea+","+currentPoint._1()+","+currentPoint._2();
+							}
+							
+						}
+						
+						QueryAreaAndPoint.add(new Tuple2<Tuple4<Double, Double, Double, Double>, String>(currentQueryArea,QueryArea));
+					}
+					
+					return QueryAreaAndPoint;
+				}
+		
+			});
+//Delete the duplicate result
+			JavaPairRDD<Tuple4<Double,Double,Double,Double>,String> refinedResult=result.reduceByKey(new Function2<String,String,String>(){
+
+				public String call(String v1, String v2) throws Exception {
+					if(v1=="" && v2!="")
+					{
+						return v2;
+					}
+					else if(v1!="" && v2=="")
+					{
+						return v1;
+					}
+					else if(v1!="" && v2!="")
+					{
+						return v1+","+v2;
+					}
+					else
+					{
+						return "";
+					}
+				}});
+//Persist the result on HDFS
+			refinedResult.repartition(1).saveAsTextFile(OutputLocation);
+	}
+	public static void main(String[] args) {
+
+		Scanner scan = new Scanner(System.in);
+		System.out.println("This is parallel spatial join query");
+		System.out.println("Please enter the target set in HDFS:");
+		String sHadoop = scan.next();
+		System.out.println("Please enter the query window set in HDFS:");
+		String querywindow = scan.next();
+		URI uri=URI.create("hdfs://192.168.56.101:54310/test/jointempResult.txt");
+		Path pathhadoop=new Path(uri);
+		Configuration confhadoop=new Configuration();
+		confhadoop.set("fs.hdfs.impl", 
+			        org.apache.hadoop.hdfs.DistributedFileSystem.class.getName()
+			    );
+		confhadoop.set("fs.file.impl",
+			        org.apache.hadoop.fs.LocalFileSystem.class.getName()
+			    );
+		try {
+			FileSystem filehadoop =FileSystem.get(uri, confhadoop);
+			filehadoop.delete(pathhadoop, true);
+			System.out.println("Old output file has been deleted!");
+			//;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		JoinQuery(sHadoop,querywindow,"hdfs://192.168.56.101:54310/test/jointempResult.txt", 100, 100);
+		scan.close();
+
+	}
+
+}
