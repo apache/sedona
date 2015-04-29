@@ -113,7 +113,6 @@ class PartitionAssignGridPoint implements PairFlatMapFunction<java.util.Iterator
 	Double[] gridVerticalBorder;
 
 	public PartitionAssignGridPoint(int gridNumberHorizontal, int gridNumberVertical, Double[] gridHorizontalBorder, Double[] gridVerticalBorder) {
-		// TODO Auto-generated constructor stub
 		this.gridNumberHorizontal=gridNumberHorizontal;
 		this.gridNumberVertical=gridNumberVertical;
 		this.gridHorizontalBorder=gridHorizontalBorder;
@@ -205,11 +204,11 @@ class PartitionAssignGridRectangle implements PairFlatMapFunction<java.util.Iter
 }
 public class SpatialJoinQueryPartition {
 
-	static void JoinQuery(String TargetSetLocation,String QueryAreaSetLocation,String OutputLocation,int GridNumberHorizontal,int GridNumberVertical)
+	static void JoinQuery(String IPaddress,String TargetSetLocation,String parts1,String QueryAreaSetLocation,String parts2,String OutputLocation,int GridNumberHorizontal,int GridNumberVertical)
 	{
-		SparkConf conf=new SparkConf().setAppName("ParallelSpatialJoinQueryWithGridFile").setMaster("spark://192.168.56.101:7077").set("spark.local.ip", "192.168.56.101").set("spark.driver.host", "192.168.56.101");
+		SparkConf conf=new SparkConf().setAppName("ParallelSpatialJoinQueryWithGridFile").setMaster("spark://"+IPaddress+":7077").set("spark.local.ip", IPaddress).set("spark.driver.host", IPaddress);
 		JavaSparkContext spark=new JavaSparkContext(conf);
-		spark.addJar("target/operation-0.0.1-SNAPSHOT-ParallelJoin.jar");
+		spark.addJar("target/operation-0.0.1-SNAPSHOT-paralleljoinedges.jar");
 		//Input data from HDFS into RDD
 				JavaRDD<String> TargetSet = spark.textFile(TargetSetLocation);
 				JavaRDD<String> QueryAreaSet = spark.textFile(QueryAreaSetLocation);
@@ -230,8 +229,9 @@ public class SpatialJoinQueryPartition {
 							}*/
 						return new Tuple2(x1,y1);
 						}
-			});
-			MapTargetSet.cache();
+			}).repartition(Integer.parseInt(parts1));
+			//});
+						MapTargetSet.cache();
 			JavaRDD<Tuple4<Double,Double,Double,Double>> MapQueryAreaSet=QueryAreaSet.map(new Function<String,Tuple4<Double,Double,Double,Double>>(){
 				public Tuple4<Double,Double,Double, Double> call(String s){
 					double x1,y1,x2,y2;
@@ -252,7 +252,7 @@ public class SpatialJoinQueryPartition {
 					}*/
 				return new Tuple4(x1,y1,x2,y2);
 				}	
-			});
+			}).repartition(Integer.parseInt(parts2));
 			MapQueryAreaSet.cache();
 	
 //Find the border of both of the two datasets---------------
@@ -332,6 +332,10 @@ public class SpatialJoinQueryPartition {
 			Double[] gridVerticalBorder=new Double[GridNumberVertical+1];
 			double LongitudeIncrement=(maxLongitude-minLongitude)/GridNumberHorizontal;
 			double LatitudeIncrement=(maxLatitude-minLatitude)/GridNumberVertical;
+			System.out.println(maxLongitude);
+			System.out.println(minLongitude);
+			System.out.println(maxLatitude);
+			System.out.println(minLatitude);
 			for(int i=0;i<GridNumberHorizontal+1;i++)
 			{
 				gridHorizontalBorder[i]=minLongitude+LongitudeIncrement*i;
@@ -342,9 +346,7 @@ public class SpatialJoinQueryPartition {
 			}
 //Assign grid ID to both of the two dataset---------------------
 			JavaPairRDD<Integer,Tuple2<Double,Double>> TargetSetWithID=MapTargetSet.mapPartitionsToPair(new PartitionAssignGridPoint(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
-			//TargetSetWithID.saveAsTextFile(OutputLocation);
 			JavaPairRDD<Integer,Tuple4<Double,Double,Double,Double>> QueryAreaSetWithID=MapQueryAreaSet.mapPartitionsToPair(new PartitionAssignGridRectangle(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
-			//QueryAreaSetWithID.saveAsTextFile(OutputLocation);
 //Join two dataset
 			JavaPairRDD<Integer, Tuple2<Iterable<Tuple4<Double, Double, Double, Double>>, Iterable<Tuple2<Double, Double>>>> jointSet=QueryAreaSetWithID.cogroup(TargetSetWithID);
 //Calculate the relation between one point and one query area
@@ -354,21 +356,20 @@ public class SpatialJoinQueryPartition {
 				public Iterable<Tuple2<Tuple4<Double, Double, Double, Double>, String>> call(
 						Tuple2<Integer, Tuple2<Iterable<Tuple4<Double, Double, Double, Double>>, Iterable<Tuple2<Double, Double>>>> t)
 						throws Exception {
-					// TODO Auto-generated method stub
 					ArrayList<Tuple2<Tuple4<Double, Double, Double, Double>, String>> QueryAreaAndPoint=new ArrayList();
 					Iterator<Tuple4<Double, Double, Double, Double>> QueryAreaIterator=t._2()._1().iterator();
-					Iterator<Tuple2<Double, Double>> PointIterator=t._2()._2().iterator();
+					
 					while(QueryAreaIterator.hasNext())
 					{
 						Tuple4<Double, Double, Double, Double> currentQueryArea=QueryAreaIterator.next();
-						//String QueryArea=currentQueryArea._1().toString()+","+currentQueryArea._2().toString()+","+currentQueryArea._3().toString()+","+currentQueryArea._4().toString();
 						String QueryArea="";
+						Iterator<Tuple2<Double, Double>> PointIterator=t._2()._2().iterator();
 						while(PointIterator.hasNext())
 						{
 							Tuple2<Double, Double> currentPoint=PointIterator.next();
-							if(currentPoint._1()>=currentQueryArea._1() && currentPoint._1()<=currentQueryArea._3() && currentPoint._2()>=currentQueryArea._2() && currentPoint._2()<=currentQueryArea._2())
+							if(currentPoint._1()>=currentQueryArea._1() && currentPoint._1()<=currentQueryArea._3() && currentPoint._2()>=currentQueryArea._2() && currentPoint._2()<=currentQueryArea._4())
 							{
-								QueryArea=QueryArea+","+currentPoint._1()+","+currentPoint._2();
+								QueryArea=QueryArea+"|"+currentPoint._1()+","+currentPoint._2()+"|";
 							}
 							
 						}
@@ -394,7 +395,7 @@ public class SpatialJoinQueryPartition {
 					}
 					else if(v1!="" && v2!="")
 					{
-						return v1+","+v2;
+						return v1+""+v2;
 					}
 					else
 					{
@@ -408,11 +409,17 @@ public class SpatialJoinQueryPartition {
 
 		Scanner scan = new Scanner(System.in);
 		System.out.println("This is parallel spatial join query");
+		System.out.println("Please enter the master IP address:");
+		String IPaddress=scan.next();
 		System.out.println("Please enter the target set in HDFS:");
 		String sHadoop = scan.next();
+		System.out.println("Please enter the number of partitions you want for this set:");
+		String parts1=scan.next();
 		System.out.println("Please enter the query window set in HDFS:");
 		String querywindow = scan.next();
-		URI uri=URI.create("hdfs://192.168.56.101:54310/test/jointempResult.txt");
+		System.out.println("Please enter the number of partitions you want for this set:");
+		String parts2=scan.next();
+		URI uri=URI.create("hdfs://"+IPaddress+":54310/test/jointempResult.txt");
 		Path pathhadoop=new Path(uri);
 		Configuration confhadoop=new Configuration();
 		confhadoop.set("fs.hdfs.impl", 
@@ -425,13 +432,11 @@ public class SpatialJoinQueryPartition {
 			FileSystem filehadoop =FileSystem.get(uri, confhadoop);
 			filehadoop.delete(pathhadoop, true);
 			System.out.println("Old output file has been deleted!");
-			//;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		JoinQuery(sHadoop,querywindow,"hdfs://192.168.56.101:54310/test/jointempResult.txt", 100, 100);
+		JoinQuery(IPaddress,"hdfs://"+IPaddress+":54310/"+sHadoop,parts1,"hdfs://"+IPaddress+":54310/"+querywindow,parts2,"hdfs://"+IPaddress+":54310/test/jointempResult.txt", 10, 10);
 		scan.close();
 
 	}
