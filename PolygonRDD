@@ -1,0 +1,120 @@
+package geospatial.operation;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.VoidFunction;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.Polygon;
+
+public class PolygonRDD implements Serializable{
+	private JavaRDD<Polygon> polygonRDD;
+	public PolygonRDD(JavaRDD<Polygon> polygonRDD)
+	{
+		this.polygonRDD=polygonRDD;
+	}
+	public PolygonRDD(JavaSparkContext spark, String InputLocation)
+	{
+		polygonRDD=spark.textFile(InputLocation).map(new Function<String,Polygon>()
+			{
+			public Polygon call(String s)
+			{	
+				List<String> input=Arrays.asList(s.split(","));
+				List<Coordinate> coordinates = null;
+				while(input.iterator().hasNext())
+				{
+					
+					coordinates.add(new Coordinate(Double.parseDouble(input.iterator().next()),Double.parseDouble(input.iterator().next())));
+				}
+				
+				 GeometryFactory fact = new GeometryFactory();
+				 LinearRing linear = new GeometryFactory().createLinearRing((Coordinate[]) coordinates.toArray());
+				 Polygon polygon = new Polygon(linear, null, fact);
+				 return polygon;
+			}
+			});
+	}
+	public PolygonRDD getMBR()
+	{
+		
+		JavaRDD<Polygon> mbrRDD=this.polygonRDD.map(new Function<Polygon,Polygon>(){
+			
+			public Polygon call(Polygon s)
+			{
+				Polygon MBR= (Polygon)s.getEnvelope();
+				return MBR;
+			}
+		});
+		return new PolygonRDD(mbrRDD);
+		
+	}
+	public PolygonRDD getConvexHull()
+	{
+		
+		JavaRDD<Polygon> ConvexHullRDD=this.polygonRDD.map(new Function<Polygon,Polygon>(){
+			
+			public Polygon call(Polygon s)
+			{
+				Polygon ConvexHull= (Polygon)s.convexHull();
+				return ConvexHull;
+			}
+		});
+		return new PolygonRDD(ConvexHullRDD);
+		
+	}
+	public void persistOnFile(String outputLocation)
+	{
+		JavaRDD<String> fileRDD=this.polygonRDD.map(new Function<Polygon,String>(){
+			
+			public String call(Polygon s)
+			{
+				String result=s.toString();
+				return result;
+			}
+		});
+		fileRDD.saveAsTextFile(outputLocation);
+	}
+	public PolygonRDD findRectangle()
+	{
+		JavaRDD<Polygon> rectangleRDD=this.polygonRDD.filter(new Function<Polygon,Boolean>()
+				{
+					public Boolean call(Polygon s)
+					{
+						return s.isRectangle();
+					}
+				});
+
+		return new PolygonRDD(rectangleRDD);
+		
+	}
+	public PolygonRDD SpatialRangeQuery(double LeftUpperX, double LeftUpperY,double RightLowerX,double RightLowerY)
+	{
+		List<Coordinate> coordinates = null;
+		coordinates.add(new Coordinate(LeftUpperX,LeftUpperY));
+		coordinates.add(new Coordinate(RightLowerX,RightLowerY));
+		GeometryFactory fact = new GeometryFactory();
+		LinearRing linear = new GeometryFactory().createLinearRing((Coordinate[]) coordinates.toArray());
+		final Polygon polygon = new Polygon(linear, null, fact);
+		JavaRDD<Polygon> resultRDD=this.polygonRDD.filter(new Function<Polygon,Boolean>()
+				{
+					
+				public Boolean call(Polygon s)
+					{
+						if(s.coveredBy(polygon))
+						{
+							return true;
+						}
+						else return false;
+					}
+				});
+		return new PolygonRDD(resultRDD);
+	}
+	}
