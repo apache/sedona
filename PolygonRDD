@@ -1,16 +1,24 @@
-package geospatial.operation;
+package GeoSpark;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
-import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.VoidFunction;
+import org.apache.spark.api.java.function.Function2;
+import org.apache.spark.api.java.function.PairFlatMapFunction;
+
+import scala.Tuple2;
+import Functions.PartitionAssignGridPolygon;
+import Functions.PolygonRangeFilter;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Polygon;
@@ -19,102 +27,257 @@ public class PolygonRDD implements Serializable{
 	private JavaRDD<Polygon> polygonRDD;
 	public PolygonRDD(JavaRDD<Polygon> polygonRDD)
 	{
-		this.polygonRDD=polygonRDD;
+		this.setPolygonRDD(polygonRDD);
 	}
 	public PolygonRDD(JavaSparkContext spark, String InputLocation)
 	{
-		polygonRDD=spark.textFile(InputLocation).map(new Function<String,Polygon>()
+		this.setPolygonRDD(spark.textFile(InputLocation).map(new Function<String,Polygon>()
 			{
 			public Polygon call(String s)
 			{	
 				List<String> input=Arrays.asList(s.split(","));
 				List<Coordinate> coordinates = null;
-				while(input.iterator().hasNext())
+				for(int i=0;i<input.size();i=i+2)
 				{
-					
-					coordinates.add(new Coordinate(Double.parseDouble(input.iterator().next()),Double.parseDouble(input.iterator().next())));
+					coordinates.add(new Coordinate(Double.parseDouble(input.get(i)),Double.parseDouble(input.get(i+1))));
 				}
-				
 				 GeometryFactory fact = new GeometryFactory();
 				 LinearRing linear = new GeometryFactory().createLinearRing((Coordinate[]) coordinates.toArray());
 				 Polygon polygon = new Polygon(linear, null, fact);
 				 return polygon;
 			}
-			});
+			}));
 	}
-	public PolygonRDD getMBR()
+	public JavaRDD<Polygon> getPolygonRDD() {
+		return polygonRDD;
+	}
+	public void setPolygonRDD(JavaRDD<Polygon> polygonRDD) {
+		this.polygonRDD = polygonRDD;
+	}
+	public PolygonRDD SpatialRangeQuery(Envelope envelope,Integer condition)
 	{
-		
-		JavaRDD<Polygon> mbrRDD=this.polygonRDD.map(new Function<Polygon,Polygon>(){
+		JavaRDD<Polygon> result=this.polygonRDD.filter(new PolygonRangeFilter(envelope,condition));
+		return new PolygonRDD(result);
+	}
+	public PolygonRDD SpatialRangeQuery(Polygon polygon,Integer condition)
+	{
+		JavaRDD<Polygon> result=this.polygonRDD.filter(new PolygonRangeFilter(polygon,condition));
+		return new PolygonRDD(result);
+	}
+	public RectangleRDD MinimumBoundingRectangle()
+	{
+	JavaRDD<Envelope> rectangleRDD=this.polygonRDD.map(new Function<Polygon,Envelope>(){
 			
-			public Polygon call(Polygon s)
+			public Envelope call(Polygon s)
 			{
-				Polygon MBR= (Polygon)s.getEnvelope();
+				Envelope MBR= s.getEnvelopeInternal();
 				return MBR;
 			}
 		});
-		return new PolygonRDD(mbrRDD);
-		
+		return new RectangleRDD(rectangleRDD);
 	}
-	public PolygonRDD getConvexHull()
+	public JavaPairRDD<Polygon,String> SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
-		
-		JavaRDD<Polygon> ConvexHullRDD=this.polygonRDD.map(new Function<Polygon,Polygon>(){
-			
-			public Polygon call(Polygon s)
-			{
-				Polygon ConvexHull= (Polygon)s.convexHull();
-				return ConvexHull;
-			}
-		});
-		return new PolygonRDD(ConvexHullRDD);
-		
-	}
-	public void persistOnFile(String outputLocation)
-	{
-		JavaRDD<String> fileRDD=this.polygonRDD.map(new Function<Polygon,String>(){
-			
-			public String call(Polygon s)
-			{
-				String result=s.toString();
-				return result;
-			}
-		});
-		fileRDD.saveAsTextFile(outputLocation);
-	}
-	public PolygonRDD findRectangle()
-	{
-		JavaRDD<Polygon> rectangleRDD=this.polygonRDD.filter(new Function<Polygon,Boolean>()
+		//Find the border of both of the two datasets---------------
+		final Integer condition=Condition;
+		//condition=0 means only consider fully contain in query, condition=1 means consider full contain and partial contain(overlap).
+	
+		Double minLongtitudeQueryAreaSet;
+		Double maxLongtitudeQueryAreaSet;
+		Double minLatitudeQueryAreaSet;
+		Double maxLatitudeQueryAreaSet;
+		Double minLongtitudeTargetSet;
+		Double maxLongtitudeTargetSet;
+		Double minLatitudeTargetSet;
+		Double maxLatitudeTargetSet;
+		Double minLongtitude1QueryAreaSet=polygonRDD.getPolygonRDD().min(new PolygonXMinComparator()).getEnvelopeInternal().getMinX();
+		Double maxLongtitude1QueryAreaSet=polygonRDD.getPolygonRDD().max(new PolygonXMinComparator()).getEnvelopeInternal().getMinX();
+		Double minLatitude1QueryAreaSet=polygonRDD.getPolygonRDD().min(new PolygonYMinComparator()).getEnvelopeInternal().getMinY();
+		Double maxLatitude1QueryAreaSet=polygonRDD.getPolygonRDD().max(new PolygonYMinComparator()).getEnvelopeInternal().getMinY();
+		Double minLongtitude2QueryAreaSet=polygonRDD.getPolygonRDD().min(new PolygonXMaxComparator()).getEnvelopeInternal().getMaxX();
+		Double maxLongtitude2QueryAreaSet=polygonRDD.getPolygonRDD().max(new PolygonXMaxComparator()).getEnvelopeInternal().getMaxX();
+		Double minLatitude2QueryAreaSet=polygonRDD.getPolygonRDD().min(new PolygonYMaxComparator()).getEnvelopeInternal().getMaxY();
+		Double maxLatitude2QueryAreaSet=polygonRDD.getPolygonRDD().max(new PolygonYMaxComparator()).getEnvelopeInternal().getMaxY();
+		Double minLongtitude1TargetSet=this.polygonRDD.min(new PolygonXMinComparator()).getEnvelopeInternal().getMinX();
+		Double maxLongtitude1TargetSet=this.polygonRDD.max(new PolygonXMinComparator()).getEnvelopeInternal().getMinX();
+		Double minLatitude1TargetSet=this.polygonRDD.min(new PolygonYMinComparator()).getEnvelopeInternal().getMinY();
+		Double maxLatitude1TargetSet=this.polygonRDD.max(new PolygonYMinComparator()).getEnvelopeInternal().getMinY();
+		Double minLongtitude2TargetSet=this.polygonRDD.min(new PolygonXMaxComparator()).getEnvelopeInternal().getMaxX();
+		Double maxLongtitude2TargetSet=this.polygonRDD.max(new PolygonXMaxComparator()).getEnvelopeInternal().getMaxX();
+		Double minLatitude2TargetSet=this.polygonRDD.min(new PolygonYMaxComparator()).getEnvelopeInternal().getMaxY();
+		Double maxLatitude2TargetSet=this.polygonRDD.max(new PolygonYMaxComparator()).getEnvelopeInternal().getMaxY();
+		//QueryAreaSet min/max longitude and latitude
+		if(minLongtitude1QueryAreaSet<minLongtitude2QueryAreaSet)
+		{
+			minLongtitudeQueryAreaSet=minLongtitude1QueryAreaSet;
+		}
+		else
+		{
+			minLongtitudeQueryAreaSet=minLongtitude2QueryAreaSet;
+		}
+		if(maxLongtitude1QueryAreaSet>maxLongtitude2QueryAreaSet)
+		{
+			maxLongtitudeQueryAreaSet=maxLongtitude1QueryAreaSet;
+		}
+		else
+		{
+			maxLongtitudeQueryAreaSet=maxLongtitude2QueryAreaSet;
+		}
+		if(minLatitude1QueryAreaSet<minLatitude2QueryAreaSet)
+		{
+			minLatitudeQueryAreaSet=minLatitude1QueryAreaSet;
+		}
+		else
+		{
+			minLatitudeQueryAreaSet=minLatitude2QueryAreaSet;
+		}
+		if(maxLatitude1QueryAreaSet>maxLatitude2QueryAreaSet)
+		{
+			maxLatitudeQueryAreaSet=maxLatitude1QueryAreaSet;
+		}
+		else
+		{
+			maxLatitudeQueryAreaSet=maxLatitude2QueryAreaSet;
+		}
+		//TargetSet min/max longitude and latitude
+		if(minLongtitude1TargetSet<minLongtitude2TargetSet)
+		{
+			minLongtitudeTargetSet=minLongtitude1TargetSet;
+		}
+		else
+		{
+			minLongtitudeTargetSet=minLongtitude2TargetSet;
+		}
+		if(maxLongtitude1TargetSet>maxLongtitude2TargetSet)
+		{
+			maxLongtitudeTargetSet=maxLongtitude1TargetSet;
+		}
+		else
+		{
+			maxLongtitudeTargetSet=maxLongtitude2TargetSet;
+		}
+		if(minLatitude1TargetSet<minLatitude2TargetSet)
+		{
+			minLatitudeTargetSet=minLatitude1TargetSet;
+		}
+		else
+		{
+			minLatitudeTargetSet=minLatitude2TargetSet;
+		}
+		if(maxLatitude1TargetSet>maxLatitude2TargetSet)
+		{
+			maxLatitudeTargetSet=maxLatitude1TargetSet;
+		}
+		else
+		{
+			maxLatitudeTargetSet=maxLatitude2TargetSet;
+		}
+		//Border found
+		Double minLongitude=minLongtitudeTargetSet;
+		Double minLatitude=minLatitudeTargetSet;
+		Double maxLongitude=maxLongtitudeTargetSet;
+		Double maxLatitude=maxLatitudeTargetSet;
+		if(minLongitude>minLongtitudeQueryAreaSet)
+		{
+			minLongitude=minLongtitudeQueryAreaSet;
+		}
+		if(maxLongitude<maxLongtitudeQueryAreaSet)
+		{
+			maxLongitude=maxLongtitudeQueryAreaSet;
+		}
+		if(minLatitude>minLatitudeQueryAreaSet)
+		{
+			minLatitude=minLatitudeQueryAreaSet;
+		}
+		if(maxLatitude<maxLatitudeQueryAreaSet)
+		{
+			maxLatitude=maxLatitudeQueryAreaSet;
+		}
+//Build Grid file-------------------
+		Double[] gridHorizontalBorder = new Double[GridNumberHorizontal+1];
+		Double[] gridVerticalBorder=new Double[GridNumberVertical+1];
+		double LongitudeIncrement=(maxLongitude-minLongitude)/GridNumberHorizontal;
+		double LatitudeIncrement=(maxLatitude-minLatitude)/GridNumberVertical;
+		System.out.println(maxLongitude);
+		System.out.println(minLongitude);
+		System.out.println(maxLatitude);
+		System.out.println(minLatitude);
+		for(int i=0;i<GridNumberHorizontal+1;i++)
+		{
+			gridHorizontalBorder[i]=minLongitude+LongitudeIncrement*i;
+		}
+		for(int i=0;i<GridNumberVertical+1;i++)
+		{
+			gridVerticalBorder[i]=minLatitude+LatitudeIncrement*i;
+		}
+		//Assign grid ID to both of the two dataset---------------------
+		JavaPairRDD<Integer,Polygon> TargetSetWithID=this.polygonRDD.mapPartitionsToPair(new PartitionAssignGridPolygon(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
+		JavaPairRDD<Integer,Polygon> QueryAreaSetWithID=polygonRDD.getPolygonRDD().mapPartitionsToPair(new PartitionAssignGridPolygon(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
+//Join two dataset
+		JavaPairRDD<Integer, Tuple2<Iterable<Polygon>, Iterable<Polygon>>> jointSet=QueryAreaSetWithID.cogroup(TargetSetWithID);
+//Calculate the relation between one point and one query area
+		JavaPairRDD<Polygon,String> result=jointSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer,Tuple2<Iterable<Polygon>, Iterable<Polygon>>>, Polygon,String>()
 				{
-					public Boolean call(Polygon s)
-					{
-						return s.isRectangle();
-					}
-				});
 
-		return new PolygonRDD(rectangleRDD);
-		
-	}
-	public PolygonRDD SpatialRangeQuery(double LeftUpperX, double LeftUpperY,double RightLowerX,double RightLowerY)
-	{
-		List<Coordinate> coordinates = null;
-		coordinates.add(new Coordinate(LeftUpperX,LeftUpperY));
-		coordinates.add(new Coordinate(RightLowerX,RightLowerY));
-		GeometryFactory fact = new GeometryFactory();
-		LinearRing linear = new GeometryFactory().createLinearRing((Coordinate[]) coordinates.toArray());
-		final Polygon polygon = new Polygon(linear, null, fact);
-		JavaRDD<Polygon> resultRDD=this.polygonRDD.filter(new Function<Polygon,Boolean>()
+			public Iterable<Tuple2<Polygon, String>> call(
+					Tuple2<Integer, Tuple2<Iterable<Polygon>, Iterable<Polygon>>> t)
+					throws Exception {
+				ArrayList<Tuple2<Polygon, String>> QueryAreaAndPoint=new ArrayList();
+				Iterator<Polygon> QueryAreaIterator=t._2()._1().iterator();
+				
+				while(QueryAreaIterator.hasNext())
 				{
-					
-				public Boolean call(Polygon s)
+					Polygon currentQueryArea=QueryAreaIterator.next();
+					String QueryArea="";
+					Iterator<Polygon> TargetIterator=t._2()._2().iterator();
+					while(TargetIterator.hasNext())
 					{
-						if(s.coveredBy(polygon))
+						Polygon currentTarget=TargetIterator.next();
+						if(condition==0){
+						if(currentQueryArea.contains(currentTarget))
 						{
-							return true;
+							QueryArea=QueryArea+"|"+currentTarget.getCoordinates()+"|";
 						}
-						else return false;
+						}
+						else
+						{
+							if(currentQueryArea.intersects(currentTarget))
+							{
+								QueryArea=QueryArea+"|"+currentTarget.getCoordinates()+"|";
+							}
+						}
 					}
-				});
-		return new PolygonRDD(resultRDD);
+					
+					QueryAreaAndPoint.add(new Tuple2<Polygon, String>(currentQueryArea,QueryArea));
+				}
+				
+				return QueryAreaAndPoint;
+			}
+	
+		});
+//Delete the duplicate result
+		JavaPairRDD<Polygon,String> refinedResult=result.reduceByKey(new Function2<String,String,String>(){
+
+			public String call(String v1, String v2) throws Exception {
+				if(v1=="" && v2!="")
+				{
+					return v2;
+				}
+				else if(v1!="" && v2=="")
+				{
+					return v1;
+				}
+				else if(v1!="" && v2!="")
+				{
+					return v1+""+v2;
+				}
+				else
+				{
+					return "";
+				}
+			}});
+		//Persist the result on HDFS
+		//refinedResult.repartition(1).saveAsTextFile(OutputLocation);
+		return refinedResult;
 	}
-	}
+}
