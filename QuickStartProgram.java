@@ -25,7 +25,6 @@ public class QuickStartProgram {
 		String querywindowString = scan.next();
 		System.out.println("Please enter the output location in HDFS:");
 		String outputlocation = scan.next();
-		//URI uri=URI.create("hdfs://192.168.56.101:54310/test/tempResult.txt");
 		URI uri=URI.create(outputlocation);
 		Path pathhadoop=new Path(uri);
 		Configuration confhadoop=new Configuration();
@@ -52,7 +51,6 @@ public class QuickStartProgram {
 		RectangleRDD rectangleR1=new RectangleRDD(spark,sHadoop);
 		//Call spatial range query. The number 1 is which means consider the overlap cases. If it is 0, that means only consider fully contain cases.
 		RectangleRDD rectangleR2=rectangleR1.SpatialRangeQuery(querywindow, 1);
-		//rectangleR2.getRectangleRDD().saveAsTextFile("hdfs://192.168.56.101:54310/test/tempResult.txt");
 		rectangleR2.getRectangleRDD().saveAsTextFile(outputlocation);
 		scan.close();
 	
