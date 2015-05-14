@@ -12,6 +12,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
+import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
 import Functions.PartitionAssignGridPoint;
@@ -162,68 +163,74 @@ public class PointRDD implements Serializable{
 		JavaPairRDD<Integer,Point> TargetSetWithID=this.pointRDD.mapPartitionsToPair(new PartitionAssignGridPoint(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
 		JavaPairRDD<Integer,Envelope> QueryAreaSetWithID=rectangleRDD.getRectangleRDD().mapPartitionsToPair(new PartitionAssignGridRectangle(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
 //Join two dataset
-		JavaPairRDD<Integer, Tuple2<Iterable<Envelope>, Iterable<Point>>> jointSet=QueryAreaSetWithID.cogroup(TargetSetWithID);
+		JavaPairRDD<Integer, Tuple2<Iterable<Envelope>, Iterable<Point>>> jointSet=QueryAreaSetWithID.cogroup(TargetSetWithID).repartition((QueryAreaSetWithID.partitions().size()+TargetSetWithID.partitions().size())*2);
 //Calculate the relation between one point and one query area
-		JavaPairRDD<Envelope,String> result=jointSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer,Tuple2<Iterable<Envelope>, Iterable<Point>>>, Envelope,String>()
-				{
+				JavaPairRDD<Envelope,Point> queryResult=jointSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer,Tuple2<Iterable<Envelope>, Iterable<Point>>>, Envelope,Point>()
+						{
 
-			public Iterable<Tuple2<Envelope, String>> call(
-					Tuple2<Integer, Tuple2<Iterable<Envelope>, Iterable<Point>>> t)
-					throws Exception {
-				ArrayList<Tuple2<Envelope, String>> QueryAreaAndPoint=new ArrayList();
-				Iterator<Envelope> QueryAreaIterator=t._2()._1().iterator();
-				
-				while(QueryAreaIterator.hasNext())
-				{
-					Envelope currentQueryArea=QueryAreaIterator.next();
-					String QueryArea="";
-					Iterator<Point> PointIterator=t._2()._2().iterator();
-					while(PointIterator.hasNext())
-					{
-						Point currentPoint=PointIterator.next();
-						if(condition==0){
-						if(currentQueryArea.contains(currentPoint.getCoordinate()))
+					public Iterable<Tuple2<Envelope, Point>> call(
+							Tuple2<Integer, Tuple2<Iterable<Envelope>, Iterable<Point>>> t)
+							throws Exception {
+						ArrayList<Tuple2<Envelope, Point>> QueryAreaAndTarget=new ArrayList();
+						Iterator<Envelope> QueryAreaIterator=t._2()._1().iterator();
+						
+						while(QueryAreaIterator.hasNext())
 						{
-							QueryArea=QueryArea+"|"+currentPoint.getX()+","+currentPoint.getY()+"|";
-						}
-						}
-						else
-						{
-							if(currentQueryArea.intersects(currentPoint.getCoordinate()))
+							Envelope currentQueryArea=QueryAreaIterator.next();
+							Iterator<Point> TargetIterator=t._2()._2().iterator();
+							while(TargetIterator.hasNext())
 							{
-								QueryArea=QueryArea+"|"+currentPoint.getX()+","+currentPoint.getY()+"|";
+								Point currentTarget=TargetIterator.next();
+								if(condition==0){
+								if(currentQueryArea.contains(currentTarget.getCoordinate()))
+								{
+									QueryAreaAndTarget.add(new Tuple2<Envelope,Point>(currentQueryArea,currentTarget));
+								}
+								}
+								else
+								{
+									if(currentQueryArea.intersects(currentTarget.getCoordinate()))
+									{
+										QueryAreaAndTarget.add(new Tuple2<Envelope,Point>(currentQueryArea,currentTarget));
+									}
+								}
 							}
 						}
+						
+						return QueryAreaAndTarget;
 					}
-					
-					QueryAreaAndPoint.add(new Tuple2<Envelope, String>(currentQueryArea,QueryArea));
-				}
-				
-				return QueryAreaAndPoint;
-			}
-	
-		});
-//Delete the duplicate result
-		JavaPairRDD<Envelope,String> refinedResult=result.reduceByKey(new Function2<String,String,String>(){
+			
+				});
+		//Delete the duplicate result
+				JavaPairRDD<Envelope, Iterable<Point>> aggregatedResult=queryResult.groupByKey();
+				JavaPairRDD<Envelope,String> refinedResult=aggregatedResult.mapToPair(new PairFunction<Tuple2<Envelope,Iterable<Point>>,Envelope,String>()
+						{
 
-			public String call(String v1, String v2) throws Exception {
-				if(v1=="" && v2!="")
-				{
-					return v2;
-				}
-				else if(v1!="" && v2=="")
-				{
-					return v1;
-				}
-				else if(v1!="" && v2!="")
-				{
-					return v1+""+v2;
-				}
-				else
-				{
-					return "";
-				}
-			}});
+							public Tuple2<Envelope, String> call(Tuple2<Envelope, Iterable<Point>> t)
+									{
+								Integer commaFlag=0;
+								Iterator<Point> valueIterator=t._2().iterator();
+								String result="";
+								while(valueIterator.hasNext())
+								{
+									Point currentTarget=valueIterator.next();
+									String currentTargetString=""+currentTarget.getX()+","+currentTarget.getY();
+									if(!result.contains(currentTargetString))
+									{
+										
+										if(commaFlag==0)
+										{
+											result=result+currentTargetString;
+											commaFlag=1;
+										}
+										else result=result+","+currentTargetString;
+									}
+								}
+								
+								return new Tuple2<Envelope, String>(t._1(),result);
+							}
+					
+						});
 //Persist the result on HDFS
 		//refinedResult.repartition(1).saveAsTextFile(OutputLocation);
 		return refinedResult;
@@ -327,68 +334,77 @@ public class PointRDD implements Serializable{
 //Join two dataset
 		JavaPairRDD<Integer, Tuple2<Iterable<Polygon>, Iterable<Point>>> jointSet=QueryAreaSetWithID.cogroup(TargetSetWithID);
 //Calculate the relation between one point and one query area
-		JavaPairRDD<Polygon,String> result=jointSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer,Tuple2<Iterable<Polygon>, Iterable<Point>>>, Polygon,String>()
+		JavaPairRDD<Polygon,Point> queryResult=jointSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer,Tuple2<Iterable<Polygon>, Iterable<Point>>>, Polygon,Point>()
 				{
 
-			public Iterable<Tuple2<Polygon, String>> call(
+			public Iterable<Tuple2<Polygon, Point>> call(
 					Tuple2<Integer, Tuple2<Iterable<Polygon>, Iterable<Point>>> t)
 					throws Exception {
-				ArrayList<Tuple2<Polygon, String>> QueryAreaAndPoint=new ArrayList();
+				ArrayList<Tuple2<Polygon, Point>> QueryAreaAndTarget=new ArrayList();
 				Iterator<Polygon> QueryAreaIterator=t._2()._1().iterator();
 				
 				while(QueryAreaIterator.hasNext())
 				{
 					Polygon currentQueryArea=QueryAreaIterator.next();
-					String QueryArea="";
-					Iterator<Point> PointIterator=t._2()._2().iterator();
-					while(PointIterator.hasNext())
+					Iterator<Point> TargetIterator=t._2()._2().iterator();
+					while(TargetIterator.hasNext())
 					{
-						Point currentPoint=PointIterator.next();
+						Point currentTarget=TargetIterator.next();
 						if(condition==0){
-						if(currentQueryArea.contains(currentPoint))
+						if(currentQueryArea.contains(currentTarget))
 						{
-							QueryArea=QueryArea+"|"+currentPoint.getX()+","+currentPoint.getY()+"|";
+							QueryAreaAndTarget.add(new Tuple2<Polygon,Point>(currentQueryArea,currentTarget));
 						}
 						}
 						else
 						{
-							if(currentQueryArea.intersects(currentPoint))
+							if(currentQueryArea.intersects(currentTarget))
 							{
-								QueryArea=QueryArea+"|"+currentPoint.getX()+","+currentPoint.getY()+"|";
+								QueryAreaAndTarget.add(new Tuple2<Polygon,Point>(currentQueryArea,currentTarget));
 							}
 						}
 					}
-					
-					QueryAreaAndPoint.add(new Tuple2<Polygon, String>(currentQueryArea,QueryArea));
 				}
 				
-				return QueryAreaAndPoint;
+				return QueryAreaAndTarget;
 			}
 	
 		});
 //Delete the duplicate result
-		JavaPairRDD<Polygon,String> refinedResult=result.reduceByKey(new Function2<String,String,String>(){
+		JavaPairRDD<Polygon, Iterable<Point>> aggregatedResult=queryResult.groupByKey();
+		JavaPairRDD<Polygon,String> refinedResult=aggregatedResult.mapToPair(new PairFunction<Tuple2<Polygon,Iterable<Point>>,Polygon,String>()
+				{
 
-			public String call(String v1, String v2) throws Exception {
-				if(v1=="" && v2!="")
-				{
-					return v2;
-				}
-				else if(v1!="" && v2=="")
-				{
-					return v1;
-				}
-				else if(v1!="" && v2!="")
-				{
-					return v1+""+v2;
-				}
-				else
-				{
-					return "";
-				}
-			}});
+					public Tuple2<Polygon, String> call(Tuple2<Polygon, Iterable<Point>> t)
+							{
+						Integer commaFlag=0;
+						Iterator<Point> valueIterator=t._2().iterator();
+						String result="";
+						while(valueIterator.hasNext())
+						{
+							Point currentTarget=valueIterator.next();
+							String currentTargetString=""+currentTarget.getX()+","+currentTarget.getY();
+							if(!result.contains(currentTargetString))
+							{
+								if(commaFlag==0)
+								{
+									result=result+currentTargetString;
+									commaFlag=1;
+								}
+								else result=result+","+currentTargetString;
+							}
+						}
+						
+						return new Tuple2<Polygon, String>(t._1(),result);
+					}
+			
+				});
 //Persist the result on HDFS
 		//refinedResult.repartition(1).saveAsTextFile(OutputLocation);
 		return refinedResult;
+	}
+	public void saveSRDD(String outputlocation)
+	{
+		this.pointRDD.saveAsTextFile(outputlocation);
 	}
 }

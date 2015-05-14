@@ -12,6 +12,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
+import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
 import Functions.PartitionAssignGridRectangle;
@@ -196,21 +197,20 @@ public class RectangleRDD implements Serializable {
 		JavaPairRDD<Integer,Envelope> TargetSetWithID=this.rectangleRDD.mapPartitionsToPair(new PartitionAssignGridRectangle(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
 		JavaPairRDD<Integer,Envelope> QueryAreaSetWithID=rectangleRDD.getRectangleRDD().mapPartitionsToPair(new PartitionAssignGridRectangle(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
 //Join two dataset
-		JavaPairRDD<Integer, Tuple2<Iterable<Envelope>, Iterable<Envelope>>> jointSet=QueryAreaSetWithID.cogroup(TargetSetWithID);
+		JavaPairRDD<Integer, Tuple2<Iterable<Envelope>, Iterable<Envelope>>> jointSet=QueryAreaSetWithID.cogroup(TargetSetWithID).repartition((QueryAreaSetWithID.partitions().size()+TargetSetWithID.partitions().size())*2);
 //Calculate the relation between one point and one query area
-		JavaPairRDD<Envelope,String> result=jointSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer,Tuple2<Iterable<Envelope>, Iterable<Envelope>>>, Envelope,String>()
+		JavaPairRDD<Envelope,Envelope> queryResult=jointSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer,Tuple2<Iterable<Envelope>, Iterable<Envelope>>>, Envelope,Envelope>()
 				{
 
-			public Iterable<Tuple2<Envelope, String>> call(
+			public Iterable<Tuple2<Envelope, Envelope>> call(
 					Tuple2<Integer, Tuple2<Iterable<Envelope>, Iterable<Envelope>>> t)
 					throws Exception {
-				ArrayList<Tuple2<Envelope, String>> QueryAreaAndPoint=new ArrayList();
+				ArrayList<Tuple2<Envelope, Envelope>> QueryAreaAndTarget=new ArrayList();
 				Iterator<Envelope> QueryAreaIterator=t._2()._1().iterator();
 				
 				while(QueryAreaIterator.hasNext())
 				{
 					Envelope currentQueryArea=QueryAreaIterator.next();
-					String QueryArea="";
 					Iterator<Envelope> TargetIterator=t._2()._2().iterator();
 					while(TargetIterator.hasNext())
 					{
@@ -218,48 +218,53 @@ public class RectangleRDD implements Serializable {
 						if(condition==0){
 						if(currentQueryArea.contains(currentTarget))
 						{
-							QueryArea=QueryArea+"|"+currentTarget.getMinX()+","+currentTarget.getMinY()+","+currentTarget.getMaxX()+","+currentTarget.getMaxY()+"|";
+							QueryAreaAndTarget.add(new Tuple2<Envelope,Envelope>(currentQueryArea,currentTarget));
 						}
 						}
 						else
 						{
 							if(currentQueryArea.intersects(currentTarget))
 							{
-								QueryArea=QueryArea+"|"+currentTarget.getMinX()+","+currentTarget.getMinY()+","+currentTarget.getMaxX()+","+currentTarget.getMaxY()+"|";
+								QueryAreaAndTarget.add(new Tuple2<Envelope,Envelope>(currentQueryArea,currentTarget));
 							}
 						}
 					}
-					
-					QueryAreaAndPoint.add(new Tuple2<Envelope, String>(currentQueryArea,QueryArea));
 				}
 				
-				return QueryAreaAndPoint;
+				return QueryAreaAndTarget;
 			}
 	
 		});
 //Delete the duplicate result
-		JavaPairRDD<Envelope,String> refinedResult=result.reduceByKey(new Function2<String,String,String>(){
+		JavaPairRDD<Envelope, Iterable<Envelope>> aggregatedResult=queryResult.groupByKey();
+		JavaPairRDD<Envelope,String> refinedResult=aggregatedResult.mapToPair(new PairFunction<Tuple2<Envelope,Iterable<Envelope>>,Envelope,String>()
+				{
 
-			public String call(String v1, String v2) throws Exception {
-				if(v1=="" && v2!="")
-				{
-					return v2;
-				}
-				else if(v1!="" && v2=="")
-				{
-					return v1;
-				}
-				else if(v1!="" && v2!="")
-				{
-					return v1+""+v2;
-				}
-				else
-				{
-					return "";
-				}
-			}});
+					public Tuple2<Envelope, String> call(Tuple2<Envelope, Iterable<Envelope>> t)
+							{
+						Integer commaFlag=0;
+						Iterator<Envelope> valueIterator=t._2().iterator();
+						String result="";
+						while(valueIterator.hasNext())
+						{
+							Envelope currentTarget=valueIterator.next();
+							String currentTargetString=""+currentTarget.getMinX()+","+currentTarget.getMinY()+","+currentTarget.getMaxX()+","+currentTarget.getMaxY();
+							if(!result.contains(currentTargetString))
+							{
+								if(commaFlag==0)
+								{
+									result=result+currentTargetString;
+									commaFlag=1;
+								}
+								else result=result+","+currentTargetString;
+							}
+						}
+						
+						return new Tuple2<Envelope, String>(t._1(),result);
+					}
+			
+				});
 		//Persist the result on HDFS
-		//refinedResult.repartition(1).saveAsTextFile(OutputLocation);
 		return refinedResult;
 	}
 }
