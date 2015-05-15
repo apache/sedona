@@ -62,7 +62,7 @@ public class PolygonRDD implements Serializable{
 	public void setPolygonRDD(JavaRDD<Polygon> polygonRDD) {
 		this.polygonRDD = polygonRDD;
 	}
-	public void rePatitrtition(Integer number)
+	public void rePartition(Integer number)
 	{
 		this.polygonRDD=this.polygonRDD.repartition(number);
 	}
