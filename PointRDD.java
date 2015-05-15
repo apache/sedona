@@ -23,6 +23,7 @@ import Functions.PointRangeFilter;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
@@ -36,9 +37,10 @@ public class PointRDD implements Serializable{
 	{
 		this.setPointRDD(spark.textFile(InputLocation).map(new Function<String,Point>()
 				{
-				GeometryFactory fact = new GeometryFactory();
+				
 				public Point call(String s)
 				{	
+					GeometryFactory fact = new GeometryFactory();
 					List<String> input=Arrays.asList(s.split(","));
 					Coordinate coordinate = new Coordinate(Double.parseDouble(input.get(0)),Double.parseDouble(input.get(1)));
 					Point point=fact.createPoint(coordinate);
@@ -235,6 +237,7 @@ public class PointRDD implements Serializable{
 		//refinedResult.repartition(1).saveAsTextFile(OutputLocation);
 		return refinedResult;
 	}
+
 	public JavaPairRDD<Polygon,String> SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		//Find the border of both of the two datasets---------------
@@ -403,8 +406,101 @@ public class PointRDD implements Serializable{
 		//refinedResult.repartition(1).saveAsTextFile(OutputLocation);
 		return refinedResult;
 	}
-	public void saveSRDD(String outputlocation)
+	public JavaPairRDD<Polygon,String> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
-		this.pointRDD.saveAsTextFile(outputlocation);
+		final Integer condition=Condition;
+		//Create mapping between polygons and their minimum bounding box
+		JavaPairRDD<Envelope,Polygon> polygonRDDwithKey=polygonRDD.getPolygonRDD().mapToPair(new PairFunction<Polygon,Envelope,Polygon>(){
+			
+			public Tuple2<Envelope,Polygon> call(Polygon s)
+			{
+				Envelope MBR= s.getEnvelopeInternal();
+				return new Tuple2<Envelope,Polygon>(MBR,s);
+			}
+		}).repartition(polygonRDD.getPolygonRDD().partitions().size()*2);
+
+	//Filter phase
+		RectangleRDD rectangleRDD=polygonRDD.MinimumBoundingRectangle();
+		JavaPairRDD<Envelope,String> filterResult=this.SpatialJoinQuery(rectangleRDD, condition, GridNumberHorizontal, GridNumberVertical);
+//Refine phase
+		JavaPairRDD<Envelope, Tuple2<Iterable<Polygon>, Iterable<String>>> joinSet=polygonRDDwithKey.cogroup(filterResult).repartition((polygonRDDwithKey.partitions().size()+filterResult.partitions().size())*2);
+		JavaPairRDD<Polygon,Point> RefineResult=joinSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Envelope,Tuple2<Iterable<Polygon>,Iterable<String>>>,Polygon,Point>(){
+			public Iterable<Tuple2<Polygon, Point>> call(Tuple2<Envelope, Tuple2<Iterable<Polygon>, Iterable<String>>> t){
+				ArrayList<Tuple2<Polygon, Point>> QueryAreaAndTarget=new ArrayList();
+				Iterator<Polygon> QueryAreaIterator=t._2()._1().iterator();
+				
+				while(QueryAreaIterator.hasNext())
+				{
+					Polygon currentQueryArea=QueryAreaIterator.next();
+					Iterator<String> TargetIteratorString=t._2()._2().iterator();
+					while(TargetIteratorString.hasNext())
+					{
+						String currentTargetString=TargetIteratorString.next();
+						ArrayList<Point> Target=new ArrayList<Point>();
+						
+						Iterator<String> stringIterator=Arrays.asList(currentTargetString.split(",")).iterator();
+						
+						while(stringIterator.hasNext())
+						{
+							GeometryFactory fact = new GeometryFactory();
+							Coordinate coordinate = new Coordinate(Double.parseDouble(stringIterator.next()),Double.parseDouble(stringIterator.next()));
+							Point point=fact.createPoint(coordinate);
+							Target.add(point);
+						}
+						Iterator<Point> targetIterator=Target.iterator();
+						while(targetIterator.hasNext()){
+						Point currentTarget=targetIterator.next();
+						
+						if(condition==0){
+						if(currentQueryArea.contains(currentTarget))
+						{
+							QueryAreaAndTarget.add(new Tuple2<Polygon,Point>(currentQueryArea,currentTarget));
+						}
+						}
+						else
+						{
+							if(currentQueryArea.intersects(currentTarget))
+							{
+								QueryAreaAndTarget.add(new Tuple2<Polygon,Point>(currentQueryArea,currentTarget));
+							}
+						}
+						}
+					}
+				}
+				return QueryAreaAndTarget;
+			}});
+
+		//Delete the duplicate result
+				JavaPairRDD<Polygon, Iterable<Point>> aggregatedResult=RefineResult.groupByKey();
+				JavaPairRDD<Polygon,String> refinedResult=aggregatedResult.mapToPair(new PairFunction<Tuple2<Polygon,Iterable<Point>>,Polygon,String>()
+						{
+
+							public Tuple2<Polygon, String> call(Tuple2<Polygon, Iterable<Point>> t)
+									{
+								Integer commaFlag=0;
+								Iterator<Point> valueIterator=t._2().iterator();
+								String result="";
+								while(valueIterator.hasNext())
+								{
+									Point currentTarget=valueIterator.next();
+									String currentTargetString=""+currentTarget.getX()+","+currentTarget.getY();
+									if(!result.contains(currentTargetString))
+									{
+										if(commaFlag==0)
+										{
+											result=result+currentTargetString;
+											commaFlag=1;
+										}
+										else result=result+","+currentTargetString;
+									}
+								}
+								
+								return new Tuple2<Polygon, String>(t._1(),result);
+							}
+					
+						});
+		//Persist the result on HDFS
+				//refinedResult.repartition(1).saveAsTextFile(OutputLocation);
+				return refinedResult;
 	}
 }
