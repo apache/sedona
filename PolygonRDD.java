@@ -37,14 +37,20 @@ public class PolygonRDD implements Serializable{
 			public Polygon call(String s)
 			{	
 				List<String> input=Arrays.asList(s.split(","));
-				List<Coordinate> coordinates = null;
-				for(int i=0;i<input.size();i=i+2)
+				ArrayList<Coordinate> coordinatesList = new ArrayList<Coordinate>();
+				/*for(int i=0;i<input.size();i=i+2)
 				{
-					coordinates.add(new Coordinate(Double.parseDouble(input.get(i)),Double.parseDouble(input.get(i+1))));
-				}
-				coordinates.add(new Coordinate(Double.parseDouble(input.get(input.size()-2)),Double.parseDouble(input.get(input.size()-1))));
-				 GeometryFactory fact = new GeometryFactory();
-				 LinearRing linear = new GeometryFactory().createLinearRing((Coordinate[]) coordinates.toArray());
+					coordinatesList.add(new Coordinate(Double.parseDouble(input.get(i)),Double.parseDouble(input.get(i+1))));
+				}*/
+				coordinatesList.add(new Coordinate(Double.parseDouble(input.get(0)),Double.parseDouble(input.get(1))));
+				coordinatesList.add(new Coordinate(Double.parseDouble(input.get(0)),Double.parseDouble(input.get(3))));
+				coordinatesList.add(new Coordinate(Double.parseDouble(input.get(2)),Double.parseDouble(input.get(3))));
+				coordinatesList.add(new Coordinate(Double.parseDouble(input.get(2)),Double.parseDouble(input.get(1))));
+				coordinatesList.add(new Coordinate(Double.parseDouble(input.get(0)),Double.parseDouble(input.get(1))));
+				Coordinate[] coordinates=new Coordinate[coordinatesList.size()];
+				coordinates=coordinatesList.toArray(coordinates);
+				GeometryFactory fact = new GeometryFactory();
+				 LinearRing linear = new GeometryFactory().createLinearRing(coordinates);
 				 Polygon polygon = new Polygon(linear, null, fact);
 				 return polygon;
 			}
@@ -56,6 +62,10 @@ public class PolygonRDD implements Serializable{
 	public void setPolygonRDD(JavaRDD<Polygon> polygonRDD) {
 		this.polygonRDD = polygonRDD;
 	}
+	public void rePatitrtition(Integer number)
+	{
+		this.polygonRDD=this.polygonRDD.repartition(number);
+	}
 	public PolygonRDD SpatialRangeQuery(Envelope envelope,Integer condition)
 	{
 		JavaRDD<Polygon> result=this.polygonRDD.filter(new PolygonRangeFilter(envelope,condition));
@@ -66,10 +76,6 @@ public class PolygonRDD implements Serializable{
 		JavaRDD<Polygon> result=this.polygonRDD.filter(new PolygonRangeFilter(polygon,condition));
 		return new PolygonRDD(result);
 	}
-/*	public PolygonRDD SpatialRangeQueryFilterRefine(Polygon polygon,Integer condition)
-	{
-		
-	}*/
 	public RectangleRDD MinimumBoundingRectangle()
 	{
 	JavaRDD<Envelope> rectangleRDD=this.polygonRDD.map(new Function<Polygon,Envelope>(){
@@ -276,7 +282,11 @@ public class PolygonRDD implements Serializable{
 									String currentTargetString="";
 									for(int i=0;i<count;i++)
 									{
+										if(currentTargetString==""){
 										currentTargetString=currentTargetString+polygonCoordinate[i].x+","+polygonCoordinate[i].y;
+									
+										}
+										else currentTargetString=currentTargetString+","+polygonCoordinate[i].x+","+polygonCoordinate[i].y;
 									}
 									if(!result.contains(currentTargetString))
 									{
@@ -296,5 +306,189 @@ public class PolygonRDD implements Serializable{
 				//Persist the result on HDFS
 				return refinedResult;
 
+	}
+JavaPairRDD<Polygon,String> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
+	{
+	final Integer condition=Condition;
+//Create mapping between MBR and polygon
+	JavaPairRDD<Envelope,Polygon> polygonRDDwithKey1=polygonRDD.getPolygonRDD().mapToPair(new PairFunction<Polygon,Envelope,Polygon>(){
+		
+		public Tuple2<Envelope,Polygon> call(Polygon s)
+		{
+			Envelope MBR= s.getEnvelopeInternal();
+			return new Tuple2<Envelope,Polygon>(MBR,s);
+		}
+	}).repartition(polygonRDD.getPolygonRDD().partitions().size()*2);	
+	JavaPairRDD<Envelope,Polygon> polygonRDDwithKey2=this.polygonRDD.mapToPair(new PairFunction<Polygon,Envelope,Polygon>(){
+			
+			public Tuple2<Envelope,Polygon> call(Polygon s)
+			{
+				Envelope MBR= s.getEnvelopeInternal();
+				return new Tuple2<Envelope,Polygon>(MBR,s);
+			}
+		}).repartition(this.polygonRDD.partitions().size()*2);
+	
+//Filter phase
+		RectangleRDD rectangleRDD1=this.MinimumBoundingRectangle();
+		RectangleRDD rectangleRDD2=polygonRDD.MinimumBoundingRectangle();
+		JavaPairRDD<Envelope,String> filterResult=rectangleRDD1.SpatialJoinQuery(rectangleRDD2, Condition, GridNumberHorizontal, GridNumberVertical);
+//Refine phase
+		//Exchange the key and the value
+		JavaPairRDD<Envelope,Iterable<Envelope>> filterResultIterable=filterResult.mapToPair(new PairFunction<Tuple2<Envelope,String>,Envelope,Iterable<Envelope>>()
+				{
+
+					public Tuple2<Envelope, Iterable<Envelope>> call(
+							Tuple2<Envelope, String> t)  {
+						
+						String currentTargetString=t._2();
+						ArrayList<Envelope> Target=new ArrayList<Envelope>();
+						
+						Iterator<String> stringIterator=Arrays.asList(currentTargetString.split(",")).iterator();
+						
+						while(stringIterator.hasNext())
+						{
+							Envelope envelope=new Envelope(Double.parseDouble(stringIterator.next()),Double.parseDouble(stringIterator.next()),Double.parseDouble(stringIterator.next()),Double.parseDouble(stringIterator.next()));
+							Target.add(envelope);
+						}
+						
+						return new Tuple2<Envelope,Iterable<Envelope>>(t._1(),Target);
+					}
+			
+				});
+		JavaPairRDD<Envelope,Envelope> filterResultTransformed=filterResultIterable.flatMapToPair(new PairFlatMapFunction<Tuple2<Envelope,Iterable<Envelope>>,Envelope,Envelope>()
+				{
+
+					public Iterable<Tuple2<Envelope, Envelope>> call(
+							Tuple2<Envelope, Iterable<Envelope>> t){
+						ArrayList<Tuple2<Envelope,Envelope>> result=new ArrayList<Tuple2<Envelope,Envelope>>();
+						Iterator<Envelope> targetIterator=t._2().iterator();
+						while(targetIterator.hasNext())
+						{
+							Envelope currentTarget=targetIterator.next();
+							result.add(new Tuple2<Envelope,Envelope>(t._1(),currentTarget));
+						}
+						return result;
+					}
+			
+				});
+		//Find the mapping polygon for every query MBR and then exchange the location with the query value
+		JavaPairRDD<Envelope, Tuple2<Iterable<Polygon>, Iterable<Envelope>>> findPolygon1=polygonRDDwithKey1.cogroup(filterResultTransformed).repartition((polygonRDDwithKey1.partitions().size()+filterResultTransformed.partitions().size())*2);
+		JavaPairRDD<Envelope,Polygon> findPolygon2=findPolygon1.flatMapToPair(new PairFlatMapFunction<Tuple2<Envelope,Tuple2<Iterable<Polygon>,Iterable<Envelope>>>,Envelope,Polygon>()
+				{
+
+					public Iterable<Tuple2<Envelope,Polygon>> call(
+							Tuple2<Envelope, Tuple2<Iterable<Polygon>, Iterable<Envelope>>> t){
+						ArrayList<Tuple2<Envelope,Polygon>> QueryAreaAndTarget=new ArrayList<Tuple2<Envelope,Polygon>>();
+						Iterator<Polygon> QueryAreaIterator=t._2()._1().iterator();
+						
+						while(QueryAreaIterator.hasNext())
+						{
+							Polygon currentQueryArea=QueryAreaIterator.next();
+							Iterator<Envelope> TargetIterator=t._2()._2().iterator();
+							while(TargetIterator.hasNext())
+							{
+								Envelope currentTarget=TargetIterator.next();
+								QueryAreaAndTarget.add(new Tuple2<Envelope,Polygon>(currentTarget,currentQueryArea));
+							}
+						
+						}
+						return QueryAreaAndTarget;
+					}
+			
+				});
+		JavaPairRDD<Envelope, Tuple2<Iterable<Polygon>, Iterable<Polygon>>> findPolygon3=polygonRDDwithKey2.cogroup(findPolygon2).repartition((polygonRDDwithKey2.partitions().size()+findPolygon2.partitions().size()));
+		JavaPairRDD<Polygon,Polygon> filterResultWithPolygon=findPolygon3.flatMapToPair(new PairFlatMapFunction<Tuple2<Envelope,Tuple2<Iterable<Polygon>,Iterable<Polygon>>>,Polygon,Polygon>()
+				{
+
+					public Iterable<Tuple2<Polygon, Polygon>> call(Tuple2<Envelope, Tuple2<Iterable<Polygon>, Iterable<Polygon>>> t){
+						
+						
+						ArrayList<Tuple2<Polygon,Polygon>> QueryAreaAndTarget=new ArrayList<Tuple2<Polygon,Polygon>>();
+						Iterator<Polygon> QueryAreaIterator=t._2()._1().iterator();
+						
+						while(QueryAreaIterator.hasNext())
+						{
+							Polygon currentQueryArea=QueryAreaIterator.next();
+							Iterator<Polygon> TargetIterator=t._2()._2().iterator();
+							while(TargetIterator.hasNext())
+							{
+								Polygon currentTarget=TargetIterator.next();
+								QueryAreaAndTarget.add(new Tuple2<Polygon,Polygon>(currentTarget,currentQueryArea));
+							}
+						
+						}
+						return QueryAreaAndTarget;
+					}
+			
+				});
+		//Query on polygons instead of MBR
+		JavaPairRDD<Polygon,Iterable<Polygon>> groupedFilterResult=filterResultWithPolygon.groupByKey();
+		JavaPairRDD<Polygon,String> refinedResult=groupedFilterResult.mapToPair(new PairFunction<Tuple2<Polygon,Iterable<Polygon>>,Polygon,String>()
+				{
+
+					public Tuple2<Polygon, String> call(Tuple2<Polygon, Iterable<Polygon>>t) {
+						Integer commaFlag=0;
+						Iterator<Polygon> valueIterator=t._2().iterator();
+						String result="";
+						while(valueIterator.hasNext())
+						{
+							Polygon currentTarget=valueIterator.next();
+							if(condition==0){
+							if(t._1().contains(currentTarget)){
+							Coordinate[] polygonCoordinate=currentTarget.getCoordinates();
+							Integer count=polygonCoordinate.length;
+							String currentTargetString="";
+							for(int i=0;i<count;i++)
+							{
+								if(currentTargetString==""){
+								currentTargetString=currentTargetString+polygonCoordinate[i].x+","+polygonCoordinate[i].y;
+							
+								}
+								else currentTargetString=currentTargetString+","+polygonCoordinate[i].x+","+polygonCoordinate[i].y;
+							}
+							if(!result.contains(currentTargetString))
+							{
+								if(commaFlag==0)
+								{
+									result=result+currentTargetString;
+									commaFlag=1;
+								}
+								else result=result+","+currentTargetString;
+							}
+							}
+							}
+							else
+							{
+								if(t._1().intersects(currentTarget)){
+									Coordinate[] polygonCoordinate=currentTarget.getCoordinates();
+									Integer count=polygonCoordinate.length;
+									String currentTargetString="";
+									for(int i=0;i<count;i++)
+									{
+										if(currentTargetString==""){
+										currentTargetString=currentTargetString+polygonCoordinate[i].x+","+polygonCoordinate[i].y;
+									
+										}
+										else currentTargetString=currentTargetString+","+polygonCoordinate[i].x+","+polygonCoordinate[i].y;
+									}
+									if(!result.contains(currentTargetString))
+									{
+										if(commaFlag==0)
+										{
+											result=result+currentTargetString;
+											commaFlag=1;
+										}
+										else result=result+","+currentTargetString;
+									}
+									}
+							}
+						}
+						
+						return new Tuple2<Polygon, String>(t._1(),result);
+					}
+			
+				});
+//Return the refined result
+		return refinedResult;
 	}
 }
