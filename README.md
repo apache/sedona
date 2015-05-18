@@ -11,7 +11,7 @@ GeoSpark consists of three layers: Apache Spark Layer, Spatial RDD Layer and Spa
 1. Apache Hadoop 2.4.0
 2. Apache Spark 1.2.1
 3. JDK 1.7
-4. Maven
+4. Maven 2
 5. JTS Topology Suite version 1.13
 
 ### Steps
@@ -24,9 +24,53 @@ GeoSpark consists of three layers: Apache Spark Layer, Spatial RDD Layer and Spa
 Please check the "QuickStartProgram.java" in GeoSpark root folder for a sample program with GeoSpark.
 
 ## Function checklist
-1. PointRDD
 
-  1)
+### PointRDD
+
+ * `Constructor: PointRDD(JavaRDD<Point> pointRDD)`
+
+This function creates a new PointRDD instance from an existing PointRDD.
+
+  * `Constructor: PointRDD(JavaSparkContext spark, String InputLocation)`
+
+This function creates a new PointRDD instance from an input file.
   
-2. RectangleRDD
-3. PolygonRDD
+  * `void rePartition(Integer partitions)`
+  * `PointRDD SpatialRangeQuery(Envelope envelope,Integer condition)`
+  * `PointRDD SpatialRangeQuery(Polygon polygon,Integer condition)`
+  * `JavaPairRDD<Envelope,String> SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+  * `JavaPairRDD<Polygon,String> SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+  * `JavaPairRDD<Polygon,String> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+
+### RectangleRDD
+
+  * `Constructor: RectangleRDD(JavaRDD<Envelope> rectangleRDD)`
+ 
+This function creates a new RectangleRDD instance from an existing RectangleRDD.
+
+  * `Constructor: RectangleRDD(JavaSparkContext spark, String InputLocation)`
+ 
+This function creates a new RectangleRDD instance from an input file.  
+
+  * `void rePartition(Integer partitions)`
+  * `RectangleRDD SpatialRangeQuery(Envelope envelope,Integer condition)`
+  * `RectangleRDD SpatialRangeQuery(Polygon polygon,Integer condition)`
+  * `JavaPairRDD<Envelope,String> SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+  * `JavaPairRDD<Polygon,String> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+
+### PolygonRDD
+
+  * `Constructor: PolygonRDD(JavaRDD<Polygon> polygonRDD)`
+
+This function creates a new PolygonRDD instance from an existing PolygonRDD.
+
+  * `Constructor: PolygonRDD(JavaSparkContext spark, String InputLocation)`
+
+This function creates a new PolygonRDD instance from an input file.
+
+  * `void rePartition(Integer partitions)`
+  * `RectangleRDD MinimumBoundingRectangle()`
+  * `PolygonRDD SpatialRangeQuery(Envelope envelope,Integer condition)`
+  * `PolygonRDD SpatialRangeQuery(Polygon polygon,Integer condition)`
+  * `JavaPairRDD<Polygon,String> SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+  * `JavaPairRDD<Polygon,String> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
