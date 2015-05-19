@@ -20,9 +20,13 @@ import Functions.PolygonRangeFilter;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.precision.GeometryPrecisionReducer;
 
 public class PolygonRDD implements Serializable{
 	private JavaRDD<Polygon> polygonRDD;
@@ -38,15 +42,11 @@ public class PolygonRDD implements Serializable{
 			{	
 				List<String> input=Arrays.asList(s.split(","));
 				ArrayList<Coordinate> coordinatesList = new ArrayList<Coordinate>();
-				/*for(int i=0;i<input.size();i=i+2)
+				for(int i=0;i<input.size();i=i+2)
 				{
 					coordinatesList.add(new Coordinate(Double.parseDouble(input.get(i)),Double.parseDouble(input.get(i+1))));
-				}*/
-				coordinatesList.add(new Coordinate(Double.parseDouble(input.get(0)),Double.parseDouble(input.get(1))));
-				coordinatesList.add(new Coordinate(Double.parseDouble(input.get(0)),Double.parseDouble(input.get(3))));
-				coordinatesList.add(new Coordinate(Double.parseDouble(input.get(2)),Double.parseDouble(input.get(3))));
-				coordinatesList.add(new Coordinate(Double.parseDouble(input.get(2)),Double.parseDouble(input.get(1))));
-				coordinatesList.add(new Coordinate(Double.parseDouble(input.get(0)),Double.parseDouble(input.get(1))));
+				}
+				coordinatesList.add(coordinatesList.get(0));
 				Coordinate[] coordinates=new Coordinate[coordinatesList.size()];
 				coordinates=coordinatesList.toArray(coordinates);
 				GeometryFactory fact = new GeometryFactory();
@@ -490,5 +490,35 @@ JavaPairRDD<Polygon,String> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Intege
 				});
 //Return the refined result
 		return refinedResult;
+	}
+public Polygon PolygonUnion()
+	{
+		Polygon result=this.polygonRDD.reduce(new Function2<Polygon,Polygon,Polygon>()
+				{
+
+					public Polygon call(Polygon v1, Polygon v2){
+						
+						//Reduce precision in JTS to avoid TopologyException
+						PrecisionModel pModel=new PrecisionModel();
+						GeometryPrecisionReducer pReducer=new GeometryPrecisionReducer(pModel);
+						Geometry p1=pReducer.reduce(v1);
+						Geometry p2=pReducer.reduce(v2);
+						//Union two polygons
+						Geometry polygonGeom=p1.union(p2);
+						Coordinate[] coordinates=polygonGeom.getCoordinates();
+						ArrayList<Coordinate> coordinateList=new ArrayList<Coordinate>(Arrays.asList(coordinates));
+						Coordinate lastCoordinate=coordinateList.get(0);
+						coordinateList.add(lastCoordinate);
+						Coordinate[] coordinatesClosed=new Coordinate[coordinateList.size()];
+						coordinatesClosed=coordinateList.toArray(coordinatesClosed);
+						GeometryFactory fact = new GeometryFactory();
+						LinearRing linear = new GeometryFactory().createLinearRing(coordinatesClosed);
+						Polygon polygon = new Polygon(linear, null, fact);
+						//Return the two polygon union result
+						return polygon;
+					}
+			
+				});
+		return result;
 	}
 }
