@@ -39,6 +39,23 @@ Please check out the "QuickStartProgram.java" in GeoSpark root folder for a samp
 3. Put the java files in your your Maven project
 4. Go ahead to modify GeoSpark source code!
 
+## Required input spatial dataset schema
+
+### Point
+
+(Longitude, Latitude)
+
+### Rectangle
+
+(Longitude 1, Longitude 2, Latitude 1, Latitude 2)
+
+Two pairs of longitude and latitude present the vertexes lie on the diagonal of one rectangle.
+
+### Polygon
+
+(Longitude, Latitude, Longitude, Latitude, ...)
+
+Each tuple contains unlimited points.
 
 ## Main functionality checklist
 
