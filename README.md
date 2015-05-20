@@ -21,7 +21,7 @@ GeoSpark consists of three layers: Apache Spark Layer, Spatial RDD Layer and Spa
 4. Use spatial RDDs to store spatial data and call needed functions
 
 ### One quick start program
-Please check the "QuickStartProgram.java" in GeoSpark root folder for a sample program with GeoSpark.
+Please check out the "QuickStartProgram.java" in GeoSpark root folder for a sample program with GeoSpark.
 
 ## Function checklist
 
@@ -36,11 +36,29 @@ This function creates a new PointRDD instance from an existing PointRDD.
 This function creates a new PointRDD instance from an input file.
   
   * `void rePartition(Integer partitions)`
+
+This function repartitions the PointRDD according to the parameter "partitions".
+
   * `PointRDD SpatialRangeQuery(Envelope envelope,Integer condition)`
+ 
+This function executes a spatial range query on the PointRDD. The first parameter stands for the query window and the second one stands for the spatial predicate. The query result is one PointRDD. Note: The query window is a rectangle which is called Envelope type in JTS topology suite. The spatial predicate can be either "fully contain" (0) or "overlap and fully contain" (1).
+
   * `PointRDD SpatialRangeQuery(Polygon polygon,Integer condition)`
-  * `JavaPairRDD<Envelope,String> SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
-  * `JavaPairRDD<Polygon,String> SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
-  * `JavaPairRDD<Polygon,String> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+
+This function executes a spatial range query on the PointRDD. The first parameter stands for the query window and the second one stands for the spatial predicate. The query result is one PointRDD. Note: The query window is a Polygon which is one type in JTS topology suite. The spatial predicate can be either "fully contain" (0) or "overlap and fully contain" (1).  
+
+  * `RectanglePairRDD SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+ 
+This function executes a spatial join query on the PointRDD. This function firstly creates one grid file based on spatial coordinates of the two input datasets and each element from both of the two input datasets is assigned to one grid cell. Then this functions joins the elements, which lie inside the same grid, from two input datasets. The first parameter is one RectangleRDD which contains a set of rectangle query windows, the second one stands for the spatial predicate, the third one is the granularity of the grid file on horizontal direction and the fourth one is the granularity of the grid file on vertical direction. The query result is one RectanglePairRDD which can be parsed or persisted on files. Note: Every query window is a rectangle which is called Envelope type in JTS topology suite. The spatial predicate can be either "fully contain" (0) or "overlap and fully contain" (1).
+
+  * `PolygonPairRDD SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+ 
+This function executes a spatial join query on the PointRDD. This function firstly creates one grid file based on spatial coordinates of the two input datasets and each element from both of the two input datasets is assigned to one grid cell. Then this functions joins the elements, which lie inside the same grid, from two input datasets. The first parameter is one PolygonRDD which contains a set of polygon query windows, the second one stands for the spatial predicate, the third one is the granularity of the grid file on horizontal direction and the fourth one is the granularity of the grid file on vertical direction. The query result is one PolygonPairRDD which can be parsed or persisted on files. Note: Every query window is a Polygon which is one type in JTS topology suite. The spatial predicate can be either "fully contain" (0) or "overlap and fully contain" (1).  
+
+  * `PolygonPairRDD SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+ 
+This function executes a spatial join query on the PointRDD. This function firstly uses the Minimum Bounding Rectangle set of the first parameter to call SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical). Then this function uses the first parameter instead its MBR to refine the spatial join query result. The first parameter is one PolygonRDD which contains a set of polygon query windows, the second one stands for the spatial predicate, the third one is the granularity of the grid file on horizontal direction and the fourth one is the granularity of the grid file on vertical direction. Note: Every query window is a Polygon which is one type in JTS topology suite. The spatial predicate can be either "fully contain" (0) or "overlap and fully contain" (1).   
+
 
 ### RectangleRDD
 
@@ -53,10 +71,24 @@ This function creates a new RectangleRDD instance from an existing RectangleRDD.
 This function creates a new RectangleRDD instance from an input file.  
 
   * `void rePartition(Integer partitions)`
+  
+This function repartitions the PointRDD according to the parameter "partitions". 
+  
   * `RectangleRDD SpatialRangeQuery(Envelope envelope,Integer condition)`
+ 
+This function executes a spatial range query on the RectangleRDD. The first parameter stands for the query window and the second one stands for the spatial predicate. The query result is one RectangleRDD. Note: The query window is a rectangle which is called Envelope type in JTS topology suite. The spatial predicate can be either "fully contain" (0) or "overlap and fully contain" (1).  
+
   * `RectangleRDD SpatialRangeQuery(Polygon polygon,Integer condition)`
-  * `JavaPairRDD<Envelope,String> SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
-  * `JavaPairRDD<Polygon,String> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+ 
+This function executes a spatial range query on the PointRDD. The first parameter stands for the query window and the second one stands for the spatial predicate. The query result is one RectangleRDD. Note: The query window is a Polygon which is one type in JTS topology suite. The spatial predicate can be either "fully contain" (0) or "overlap and fully contain" (1).    
+
+  * `RectanglePairRDD SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+  * 
+This function executes a spatial join query on the RectangleRDD. This function firstly creates one grid file based on spatial coordinates of the two input datasets and each element from both of the two input datasets is assigned to one grid cell. Then this functions joins the elements, which lie inside the same grid, from two input datasets. The first parameter is one RectangleRDD which contains a set of rectangle query windows, the second one stands for the spatial predicate, the third one is the granularity of the grid file on horizontal direction and the fourth one is the granularity of the grid file on vertical direction. The query result is one RectanglePairRDD which can be parsed or persisted on files. Note: Every query window is a rectangle which is called Envelope type in JTS topology suite. The spatial predicate can be either "fully contain" (0) or "overlap and fully contain" (1).  
+
+  * `PolygonPairRDD SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+   
+  This function executes a spatial join query on the RectangleRDD. This function firstly uses the Minimum Bounding Rectangle set of the first parameter to call SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical). Then this function uses the first parameter instead its MBR to refine the spatial join query result. The first parameter is one PolygonRDD which contains a set of polygon query windows, the second one stands for the spatial predicate, the third one is the granularity of the grid file on horizontal direction and the fourth one is the granularity of the grid file on vertical direction. The query result is one PolygonPairRDD which can be parsed or persisted on files. Note: Every query window is a Polygon which is one type in JTS topology suite. The spatial predicate can be either "fully contain" (0) or "overlap and fully contain" (1).
 
 ### PolygonRDD
 
@@ -69,8 +101,29 @@ This function creates a new PolygonRDD instance from an existing PolygonRDD.
 This function creates a new PolygonRDD instance from an input file.
 
   * `void rePartition(Integer partitions)`
+
+This function repartitions the PointRDD according to the parameter "partitions".
+
   * `RectangleRDD MinimumBoundingRectangle()`
+ 
+This function returns a RectangleRDD which contains the minimum bounding rectangles for all of the polygons in this PolygonRDD.
+
   * `PolygonRDD SpatialRangeQuery(Envelope envelope,Integer condition)`
+ 
+This function executes a spatial range query on the PolygonRDD. The first parameter stands for the query window and the second one stands for the spatial predicate. The query result is one PolygonRDD. Note: The query window is a rectangle which is called Envelope type in JTS topology suite. The spatial predicate can be either "fully contain" (0) or "overlap and fully contain" (1).  
+
   * `PolygonRDD SpatialRangeQuery(Polygon polygon,Integer condition)`
-  * `JavaPairRDD<Polygon,String> SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
-  * `JavaPairRDD<Polygon,String> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+ 
+This function executes a spatial range query on the PointRDD. The first parameter stands for the query window and the second one stands for the spatial predicate. The query result is one PolygonRDD. Note: The query window is a Polygon which is one type in JTS topology suite. The spatial predicate can be either "fully contain" (0) or "overlap and fully contain" (1).    
+
+  * `PolygonPairRDD SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+ 
+This function executes a spatial join query on the PolygonRDD. This function firstly creates one grid file based on spatial coordinates of the two input datasets and each element from both of the two input datasets is assigned to one grid cell. Then this functions joins the elements, which lie inside the same grid, from two input datasets. The first parameter is one PolygonRDD which contains a set of polygon query windows, the second one stands for the spatial predicate, the third one is the granularity of the grid file on horizontal direction and the fourth one is the granularity of the grid file on vertical direction. Note: Every query window is a Polygon which is one type in JTS topology suite. The query result is one PolygonPairRDD which can be parsed or persisted on files. The spatial predicate can be either "fully contain" (0) or "overlap and fully contain" (1).  
+
+  * `PolygonPairRDD SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+ 
+This function executes a spatial join query on the PolygonRDD. This function firstly uses the Minimum Bounding Rectangle sets of the first parameter and this PolygonRDD to call SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical). Then this function uses the first parameter and this PolygonRDD instead their MBR to refine the spatial join query result. The first parameter is one PolygonRDD which contains a set of polygon query windows, the second one stands for the spatial predicate, the third one is the granularity of the grid file on horizontal direction and the fourth one is the granularity of the grid file on vertical direction. The query result is one PolygonPairRDD which can be parsed or persisted on files. Note: Every query window is a Polygon which is one type in JTS topology suite. The spatial predicate can be either "fully contain" (0) or "overlap and fully contain" (1).  
+
+  * `Union PolygonUnion()`
+
+This function unions all of the polygons in this PolygonRDD and returns the result as one Polygon. Note: The result is one Polygon which is one type in JTS topology suite.
