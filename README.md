@@ -23,7 +23,7 @@ GeoSpark consists of three layers: Apache Spark Layer, Spatial RDD Layer and Spa
 ### One quick start program
 Please check out the "QuickStartProgram.java" in GeoSpark root folder for a sample program with GeoSpark.
 
-## Function checklist
+## Main functionality checklist
 
 ### PointRDD
 
@@ -127,3 +127,35 @@ This function executes a spatial join query on the PolygonRDD. This function fir
   * `Union PolygonUnion()`
 
 This function unions all of the polygons in this PolygonRDD and returns the result as one Polygon. Note: The result is one Polygon which is one type in JTS topology suite.
+
+### RectanglePairRDD
+
+  * `JavaPairRDD<Envelope,ArrayList<Point>> ParseToPoint()`
+
+This function parses the result of join queries to a regular formats for the ease of use. The result of this function contains an Envelope which is the key of this RDD and a ArrayList<Point> which is the value. The Points in ArrayList satisfy the particular spatial predicate with the key Envelope. Note: Envelope and Point are types in JTS Topology Suite which present rectangle and point.
+
+  * `JavaPairRDD<Envelope,ArrayList<Envelope>> ParseToRectangle()`
+ 
+This function parses the result of join queries to a regular formats for the ease of use. The result of this function contains an Envelope which is the key of this RDD and a ArrayList<Envelope> which is the value. The Envelopes in ArrayList satisfy the particular spatial predicate with the key Envelope. Note: Envelope is one type in JTS Topology Suite which presents rectangle.
+
+  * `void PersistOnFile(String OutpuLocation)`
+
+This function persists this RectanglePairRDD to one particular OutputLocation.
+
+### PolygonPairRDD
+  
+  * `JavaPairRDD<Polygon,ArrayList<Point>> ParseToPoint()`
+ 
+This function parses the result of join queries to a regular formats for the ease of use. The result of this function contains a Polygon which is the key of this RDD and a ArrayList<Point> which is the value. The Points in ArrayList satisfy the particular spatial predicate with the key Polygon. Note: Polygon and Point are types in JTS Topology Suite which present polygon and point.  
+
+  * `JavaPairRDD<Polygon,ArrayList<Envelope>> ParseToRectangle()`
+ 
+This function parses the result of join queries to a regular formats for the ease of use. The result of this function contains a Polygon which is the key of this RDD and a ArrayList<Envelope> which is the value. The Envelopes in ArrayList satisfy the particular spatial predicate with the key Polygon. Note: Polygon and Envelope are types in JTS Topology Suite which present polygon and rectangle.    
+
+  * `JavaPairRDD<Polygon,ArrayList<Polygon>> ParseToRectangle()`
+ 
+This function parses the result of join queries to a regular formats for the ease of use. The result of this function contains an Polygon which is the key of this RDD and a ArrayList<Polygon> which is the value. The Polygons in ArrayList satisfy the particular spatial predicate with the key Polygon. Note: Polygon is one type in JTS Topology Suite which presents polygon.
+
+  * `void PersistOnFile(String OutputLocation)`
+ 
+This function persists this PolygonPairRDD to one particular OutputLocation.  
