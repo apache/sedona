@@ -63,7 +63,7 @@ public class RectangleRDD implements Serializable {
 		JavaRDD<Envelope> result=this.rectangleRDD.filter(new RectangleRangeFilter(polygon,condition));
 		return new RectangleRDD(result);
 	}
-	public JavaPairRDD<Envelope,String> SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
+	public RectanglePairRDD SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		//Find the border of both of the two datasets---------------
 		final Integer condition=Condition;
@@ -268,10 +268,12 @@ public class RectangleRDD implements Serializable {
 					}
 			
 				});
-		//Persist the result on HDFS
-		return refinedResult;
+		
+		//return refinedResult;
+		RectanglePairRDD result=new RectanglePairRDD(refinedResult);
+		return result;
 	}
-	public JavaPairRDD<Polygon,String> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
+	public PolygonPairRDD SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		final Integer condition=Condition;
 	//Create mapping between polygons and their minimum bounding box
@@ -285,7 +287,8 @@ public class RectangleRDD implements Serializable {
 		}).repartition(polygonRDD.getPolygonRDD().partitions().size()*2);
 	//Filter phase
 		RectangleRDD rectangleRDD=polygonRDD.MinimumBoundingRectangle();
-		JavaPairRDD<Envelope,String> filterResult=this.SpatialJoinQuery(rectangleRDD, Condition, GridNumberHorizontal, GridNumberVertical);
+		RectanglePairRDD filterResultPairRDD=this.SpatialJoinQuery(rectangleRDD, Condition, GridNumberHorizontal, GridNumberVertical);
+		JavaPairRDD<Envelope,String> filterResult=filterResultPairRDD.getRectanglePairRDD();
 	//Refine phase
 		JavaPairRDD<Envelope, Tuple2<Iterable<Polygon>, Iterable<String>>> joinSet=polygonRDDwithKey.cogroup(filterResult).repartition((polygonRDDwithKey.partitions().size()+filterResult.partitions().size())*2);
 		JavaPairRDD<Polygon,Envelope> RefineResult=joinSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Envelope,Tuple2<Iterable<Polygon>,Iterable<String>>>,Polygon,Envelope>(){
@@ -371,7 +374,8 @@ public class RectangleRDD implements Serializable {
 							}
 					
 						});
-				//Persist the result on HDFS
-				return refinedResult;
+				//return refinedResult;
+				PolygonPairRDD result=new PolygonPairRDD(refinedResult);
+				return result;
 	}
 }
