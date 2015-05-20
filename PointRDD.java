@@ -10,7 +10,6 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
 
@@ -23,7 +22,6 @@ import Functions.PointRangeFilter;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
@@ -68,7 +66,7 @@ public class PointRDD implements Serializable{
 		JavaRDD<Point> result=this.pointRDD.filter(new PointRangeFilter(polygon,condition));
 		return new PointRDD(result);
 	}
-	public JavaPairRDD<Envelope,String> SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
+	public RectanglePairRDD SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		//Find the border of both of the two datasets---------------
 		final Integer condition=Condition;
@@ -233,12 +231,11 @@ public class PointRDD implements Serializable{
 							}
 					
 						});
-//Persist the result on HDFS
-		//refinedResult.repartition(1).saveAsTextFile(OutputLocation);
-		return refinedResult;
+				RectanglePairRDD result=new RectanglePairRDD(refinedResult);
+		return result;
 	}
 
-	public JavaPairRDD<Polygon,String> SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
+	public PolygonPairRDD SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		//Find the border of both of the two datasets---------------
 		final Integer condition=Condition;
@@ -402,11 +399,10 @@ public class PointRDD implements Serializable{
 					}
 			
 				});
-//Persist the result on HDFS
-		//refinedResult.repartition(1).saveAsTextFile(OutputLocation);
-		return refinedResult;
+		PolygonPairRDD result=new PolygonPairRDD(refinedResult);
+		return result;
 	}
-	public JavaPairRDD<Polygon,String> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
+	public PolygonPairRDD SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		final Integer condition=Condition;
 		//Create mapping between polygons and their minimum bounding box
@@ -421,8 +417,9 @@ public class PointRDD implements Serializable{
 
 	//Filter phase
 		RectangleRDD rectangleRDD=polygonRDD.MinimumBoundingRectangle();
-		JavaPairRDD<Envelope,String> filterResult=this.SpatialJoinQuery(rectangleRDD, condition, GridNumberHorizontal, GridNumberVertical);
-//Refine phase
+		RectanglePairRDD filterResultPairRDD=this.SpatialJoinQuery(rectangleRDD, condition, GridNumberHorizontal, GridNumberVertical);
+		JavaPairRDD<Envelope,String> filterResult=filterResultPairRDD.getRectanglePairRDD();
+	//Refine phase
 		JavaPairRDD<Envelope, Tuple2<Iterable<Polygon>, Iterable<String>>> joinSet=polygonRDDwithKey.cogroup(filterResult).repartition((polygonRDDwithKey.partitions().size()+filterResult.partitions().size())*2);
 		JavaPairRDD<Polygon,Point> RefineResult=joinSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Envelope,Tuple2<Iterable<Polygon>,Iterable<String>>>,Polygon,Point>(){
 			public Iterable<Tuple2<Polygon, Point>> call(Tuple2<Envelope, Tuple2<Iterable<Polygon>, Iterable<String>>> t){
@@ -499,8 +496,7 @@ public class PointRDD implements Serializable{
 							}
 					
 						});
-		//Persist the result on HDFS
-				//refinedResult.repartition(1).saveAsTextFile(OutputLocation);
-				return refinedResult;
+				PolygonPairRDD result = new PolygonPairRDD(refinedResult);
+				return result;
 	}
 }
