@@ -4,9 +4,25 @@ A Cluster Computing System for Processing Large-Scale Spatial and Spatio-Tempora
 ## Introduction
 GeoSpark consists of three layers: Apache Spark Layer, Spatial RDD Layer and Spatial Query Processing Layer. Apache Spark Layer provides basic Apache Spark functionalities that include loading / storing data to disk as well as regular RDD operations. Spatial RDD Layer consists of three novel Spatial Resilient Distributed Datasets (SRDDs) which extend regular Apache Spark RDD to support geometrical and spatial objects. GeoSpark provides a geometrical operations library that access Spatial RDDs to perform basic geometrical operations. The Spatial Query Processing Layer executes spatial queries (e.g., Spatial Join) on Spatial RDDs.
 
-## How to make use of GeoSpark
+## How to process spatial data with GeoSpark (For general users) 
 
-### Prerequisites (For Scala and Java)
+### Prerequisites
+
+1. Apache Hadoop 2.4.0
+2. Apache Spark 1.2.1
+3. JDK 1.7
+
+### Steps
+
+1. Setup Apache Hadoop Distributed File System and Apache Spark cluster
+2. Load spatail data into Hadoop Distributed File System
+3. Call "java -jar GeoSpark.jar" in GeoSpark.jar folder
+4. Follow the instruction on the command window to use needed spatial functions as well as specified parameters
+5. GeoSpark will submit Spark tasks and persist the result to HDFS
+
+## How to make use of GeoSpark in your own program (For Scala and Java developers)
+
+### Prerequisites
 
 1. Apache Hadoop 2.4.0
 2. Apache Spark 1.2.1
@@ -22,7 +38,7 @@ GeoSpark consists of three layers: Apache Spark Layer, Spatial RDD Layer and Spa
 Please check out the "QuickStartProgram.java" in GeoSpark root folder for a sample program with GeoSpark.
 
 
-## How to modify GeoSpark source code (In Java)
+## How to modify GeoSpark source code (For Java developers)
 
 ### Prerequisites
 
@@ -53,7 +69,7 @@ Two pairs of longitude and latitude present the vertexes lie on the diagonal of 
 
 ### Polygon
 
-(Longitude, Latitude, Longitude, Latitude, ...)
+(Longitude 1, Latitude 1, Longitude 2, Latitude 2, ...)
 
 Each tuple contains unlimited points.
 
