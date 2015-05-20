@@ -21,7 +21,6 @@ import Functions.PolygonRangeFilter;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Polygon;
@@ -46,6 +45,11 @@ public class PolygonRDD implements Serializable{
 				{
 					coordinatesList.add(new Coordinate(Double.parseDouble(input.get(i)),Double.parseDouble(input.get(i+1))));
 				}
+				/*coordinatesList.add(new Coordinate(Double.parseDouble(input.get(0)),Double.parseDouble(input.get(1))));
+				coordinatesList.add(new Coordinate(Double.parseDouble(input.get(0)),Double.parseDouble(input.get(3))));
+				coordinatesList.add(new Coordinate(Double.parseDouble(input.get(2)),Double.parseDouble(input.get(3))));
+				coordinatesList.add(new Coordinate(Double.parseDouble(input.get(2)),Double.parseDouble(input.get(1))));
+				*/
 				coordinatesList.add(coordinatesList.get(0));
 				Coordinate[] coordinates=new Coordinate[coordinatesList.size()];
 				coordinates=coordinatesList.toArray(coordinates);
@@ -88,7 +92,7 @@ public class PolygonRDD implements Serializable{
 		});
 		return new RectangleRDD(rectangleRDD);
 	}
-	public JavaPairRDD<Polygon,String> SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
+	public PolygonPairRDD SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		//Find the border of both of the two datasets---------------
 		final Integer condition=Condition;
@@ -295,7 +299,7 @@ public class PolygonRDD implements Serializable{
 											result=result+currentTargetString;
 											commaFlag=1;
 										}
-										else result=result+","+currentTargetString;
+										else result=result+";"+currentTargetString;
 									}
 								}
 								
@@ -303,11 +307,12 @@ public class PolygonRDD implements Serializable{
 							}
 					
 						});
-				//Persist the result on HDFS
-				return refinedResult;
+				//Return the result
+				PolygonPairRDD result=new PolygonPairRDD(refinedResult);
+				return result;
 
 	}
-JavaPairRDD<Polygon,String> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
+public PolygonPairRDD SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 	final Integer condition=Condition;
 //Create mapping between MBR and polygon
@@ -331,7 +336,8 @@ JavaPairRDD<Polygon,String> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Intege
 //Filter phase
 		RectangleRDD rectangleRDD1=this.MinimumBoundingRectangle();
 		RectangleRDD rectangleRDD2=polygonRDD.MinimumBoundingRectangle();
-		JavaPairRDD<Envelope,String> filterResult=rectangleRDD1.SpatialJoinQuery(rectangleRDD2, Condition, GridNumberHorizontal, GridNumberVertical);
+		RectanglePairRDD filterResultPairRDD=rectangleRDD1.SpatialJoinQuery(rectangleRDD2, Condition, GridNumberHorizontal, GridNumberVertical);
+		JavaPairRDD<Envelope,String> filterResult=filterResultPairRDD.getRectanglePairRDD();
 //Refine phase
 		//Exchange the key and the value
 		JavaPairRDD<Envelope,Iterable<Envelope>> filterResultIterable=filterResult.mapToPair(new PairFunction<Tuple2<Envelope,String>,Envelope,Iterable<Envelope>>()
@@ -489,7 +495,8 @@ JavaPairRDD<Polygon,String> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Intege
 			
 				});
 //Return the refined result
-		return refinedResult;
+		PolygonPairRDD result=new PolygonPairRDD(refinedResult);
+		return result;
 	}
 public Polygon PolygonUnion()
 	{
