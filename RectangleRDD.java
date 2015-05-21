@@ -29,7 +29,7 @@ public class RectangleRDD implements Serializable {
 	private JavaRDD<Envelope> rectangleRDD;
 	public RectangleRDD(JavaRDD<Envelope> rectangleRDD)
 	{
-		this.setRectangleRDD(rectangleRDD);
+		this.setRectangleRDD(rectangleRDD.cache());
 	}
 	public RectangleRDD(JavaSparkContext spark, String InputLocation)
 	{
@@ -41,7 +41,7 @@ public class RectangleRDD implements Serializable {
 				 Envelope envelope = new Envelope(Double.parseDouble(input.get(0)),Double.parseDouble(input.get(2)),Double.parseDouble(input.get(1)),Double.parseDouble(input.get(3)));
 				 return envelope;
 			}
-			}));
+			}).cache());
 	}
 	public JavaRDD<Envelope> getRectangleRDD() {
 		return rectangleRDD;
@@ -200,6 +200,159 @@ public class RectangleRDD implements Serializable {
 		//Assign grid ID to both of the two dataset---------------------
 		JavaPairRDD<Integer,Envelope> TargetSetWithID=this.rectangleRDD.mapPartitionsToPair(new PartitionAssignGridRectangle(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
 		JavaPairRDD<Integer,Envelope> QueryAreaSetWithID=rectangleRDD.getRectangleRDD().mapPartitionsToPair(new PartitionAssignGridRectangle(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
+//Join two dataset
+		JavaPairRDD<Integer, Tuple2<Iterable<Envelope>, Iterable<Envelope>>> jointSet=QueryAreaSetWithID.cogroup(TargetSetWithID).repartition((QueryAreaSetWithID.partitions().size()+TargetSetWithID.partitions().size())*2);
+//Calculate the relation between one point and one query area
+		JavaPairRDD<Envelope,Envelope> queryResult=jointSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer,Tuple2<Iterable<Envelope>, Iterable<Envelope>>>, Envelope,Envelope>()
+				{
+
+			public Iterable<Tuple2<Envelope, Envelope>> call(
+					Tuple2<Integer, Tuple2<Iterable<Envelope>, Iterable<Envelope>>> t)
+					throws Exception {
+				ArrayList<Tuple2<Envelope, Envelope>> QueryAreaAndTarget=new ArrayList();
+				Iterator<Envelope> QueryAreaIterator=t._2()._1().iterator();
+				
+				while(QueryAreaIterator.hasNext())
+				{
+					Envelope currentQueryArea=QueryAreaIterator.next();
+					Iterator<Envelope> TargetIterator=t._2()._2().iterator();
+					while(TargetIterator.hasNext())
+					{
+						Envelope currentTarget=TargetIterator.next();
+						if(condition==0){
+						if(currentQueryArea.contains(currentTarget))
+						{
+							QueryAreaAndTarget.add(new Tuple2<Envelope,Envelope>(currentQueryArea,currentTarget));
+						}
+						}
+						else
+						{
+							if(currentQueryArea.intersects(currentTarget))
+							{
+								QueryAreaAndTarget.add(new Tuple2<Envelope,Envelope>(currentQueryArea,currentTarget));
+							}
+						}
+					}
+				}
+				
+				return QueryAreaAndTarget;
+			}
+	
+		});
+//Delete the duplicate result
+		JavaPairRDD<Envelope, Iterable<Envelope>> aggregatedResult=queryResult.groupByKey();
+		JavaPairRDD<Envelope,String> refinedResult=aggregatedResult.mapToPair(new PairFunction<Tuple2<Envelope,Iterable<Envelope>>,Envelope,String>()
+				{
+
+					public Tuple2<Envelope, String> call(Tuple2<Envelope, Iterable<Envelope>> t)
+							{
+						Integer commaFlag=0;
+						Iterator<Envelope> valueIterator=t._2().iterator();
+						String result="";
+						while(valueIterator.hasNext())
+						{
+							Envelope currentTarget=valueIterator.next();
+							String currentTargetString=""+currentTarget.getMinX()+","+currentTarget.getMaxX()+","+currentTarget.getMinY()+","+currentTarget.getMaxY();
+							if(!result.contains(currentTargetString))
+							{
+								if(commaFlag==0)
+								{
+									result=result+currentTargetString;
+									commaFlag=1;
+								}
+								else result=result+","+currentTargetString;
+							}
+						}
+						
+						return new Tuple2<Envelope, String>(t._1(),result);
+					}
+			
+				});
+		
+		//return refinedResult;
+		RectanglePairRDD result=new RectanglePairRDD(refinedResult);
+		return result;
+	}
+	public RectanglePairRDD SpatialJoinQuery(Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
+	{
+		//Find the border of both of the two datasets---------------
+		final Integer condition=Condition;
+		//condition=0 means only consider fully contain in query, condition=1 means consider full contain and partial contain(overlap).
+	
+		Double minLongtitudeTargetSet;
+		Double maxLongtitudeTargetSet;
+		Double minLatitudeTargetSet;
+		Double maxLatitudeTargetSet;
+		Double minLongtitude1TargetSet=this.rectangleRDD.min(new RectangleXMinComparator()).getMinX();
+		Double maxLongtitude1TargetSet=this.rectangleRDD.max(new RectangleXMinComparator()).getMinX();
+		Double minLatitude1TargetSet=this.rectangleRDD.min(new RectangleYMinComparator()).getMinY();
+		Double maxLatitude1TargetSet=this.rectangleRDD.max(new RectangleYMinComparator()).getMinY();
+		Double minLongtitude2TargetSet=this.rectangleRDD.min(new RectangleXMaxComparator()).getMaxX();
+		Double maxLongtitude2TargetSet=this.rectangleRDD.max(new RectangleXMaxComparator()).getMaxX();
+		Double minLatitude2TargetSet=this.rectangleRDD.min(new RectangleYMaxComparator()).getMaxY();
+		Double maxLatitude2TargetSet=this.rectangleRDD.max(new RectangleYMaxComparator()).getMaxY();
+
+
+		//QueryAreaSet min/max longitude and latitude
+		
+		//TargetSet min/max longitude and latitude
+		if(minLongtitude1TargetSet<minLongtitude2TargetSet)
+		{
+			minLongtitudeTargetSet=minLongtitude1TargetSet;
+		}
+		else
+		{
+			minLongtitudeTargetSet=minLongtitude2TargetSet;
+		}
+		if(maxLongtitude1TargetSet>maxLongtitude2TargetSet)
+		{
+			maxLongtitudeTargetSet=maxLongtitude1TargetSet;
+		}
+		else
+		{
+			maxLongtitudeTargetSet=maxLongtitude2TargetSet;
+		}
+		if(minLatitude1TargetSet<minLatitude2TargetSet)
+		{
+			minLatitudeTargetSet=minLatitude1TargetSet;
+		}
+		else
+		{
+			minLatitudeTargetSet=minLatitude2TargetSet;
+		}
+		if(maxLatitude1TargetSet>maxLatitude2TargetSet)
+		{
+			maxLatitudeTargetSet=maxLatitude1TargetSet;
+		}
+		else
+		{
+			maxLatitudeTargetSet=maxLatitude2TargetSet;
+		}
+		//Border found
+		Double minLongitude=minLongtitudeTargetSet;
+		Double minLatitude=minLatitudeTargetSet;
+		Double maxLongitude=maxLongtitudeTargetSet;
+		Double maxLatitude=maxLatitudeTargetSet;
+//Build Grid file-------------------
+		Double[] gridHorizontalBorder = new Double[GridNumberHorizontal+1];
+		Double[] gridVerticalBorder=new Double[GridNumberVertical+1];
+		double LongitudeIncrement=(maxLongitude-minLongitude)/GridNumberHorizontal;
+		double LatitudeIncrement=(maxLatitude-minLatitude)/GridNumberVertical;
+		System.out.println(maxLongitude);
+		System.out.println(minLongitude);
+		System.out.println(maxLatitude);
+		System.out.println(minLatitude);
+		for(int i=0;i<GridNumberHorizontal+1;i++)
+		{
+			gridHorizontalBorder[i]=minLongitude+LongitudeIncrement*i;
+		}
+		for(int i=0;i<GridNumberVertical+1;i++)
+		{
+			gridVerticalBorder[i]=minLatitude+LatitudeIncrement*i;
+		}
+		//Assign grid ID to both of the two dataset---------------------
+		JavaPairRDD<Integer,Envelope> TargetSetWithID=this.rectangleRDD.mapPartitionsToPair(new PartitionAssignGridRectangle(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
+		JavaPairRDD<Integer,Envelope> QueryAreaSetWithID=this.rectangleRDD.mapPartitionsToPair(new PartitionAssignGridRectangle(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
 //Join two dataset
 		JavaPairRDD<Integer, Tuple2<Iterable<Envelope>, Iterable<Envelope>>> jointSet=QueryAreaSetWithID.cogroup(TargetSetWithID).repartition((QueryAreaSetWithID.partitions().size()+TargetSetWithID.partitions().size())*2);
 //Calculate the relation between one point and one query area
