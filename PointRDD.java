@@ -29,7 +29,7 @@ public class PointRDD implements Serializable{
 	private JavaRDD<Point> pointRDD;
 	public PointRDD(JavaRDD<Point> pointRDD)
 	{
-		this.setPointRDD(pointRDD);
+		this.setPointRDD(pointRDD.cache());
 	}
 	public PointRDD(JavaSparkContext spark, String InputLocation)
 	{
@@ -44,7 +44,7 @@ public class PointRDD implements Serializable{
 					Point point=fact.createPoint(coordinate);
 					return point;
 				}
-				}));
+				}).cache());
 	}
 	public JavaRDD<Point> getPointRDD() {
 		return pointRDD;
@@ -66,7 +66,7 @@ public class PointRDD implements Serializable{
 		JavaRDD<Point> result=this.pointRDD.filter(new PointRangeFilter(polygon,condition));
 		return new PointRDD(result);
 	}
-	public RectanglePairRDD SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
+	public SpatialPairRDD<Envelope,ArrayList<Point>> SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		//Find the border of both of the two datasets---------------
 		final Integer condition=Condition;
@@ -231,11 +231,29 @@ public class PointRDD implements Serializable{
 							}
 					
 						});
-				RectanglePairRDD result=new RectanglePairRDD(refinedResult);
+				SpatialPairRDD<Envelope,ArrayList<Point>> result=new SpatialPairRDD<Envelope,ArrayList<Point>>(refinedResult.mapToPair(new PairFunction<Tuple2<Envelope,String>,Envelope,ArrayList<Point>>()
+				{
+
+					public Tuple2<Envelope, ArrayList<Point>> call(Tuple2<Envelope, String> t)
+					{
+						List<String> resultListString= Arrays.asList(t._2().split(","));
+						Iterator<String> targetIterator=resultListString.iterator();
+						ArrayList<Point> resultList=new ArrayList<Point>();
+						while(targetIterator.hasNext())
+						{
+							GeometryFactory fact = new GeometryFactory();
+							Coordinate coordinate=new Coordinate(Double.parseDouble(targetIterator.next()),Double.parseDouble(targetIterator.next()));
+							Point currentTarget=fact.createPoint(coordinate);
+							resultList.add(currentTarget);
+						}
+						return new Tuple2<Envelope,ArrayList<Point>>(t._1(),resultList);
+					}
+					
+				}));
 		return result;
 	}
 
-	public PolygonPairRDD SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
+	public SpatialPairRDD<Polygon,ArrayList<Point>> SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		//Find the border of both of the two datasets---------------
 		final Integer condition=Condition;
@@ -399,10 +417,28 @@ public class PointRDD implements Serializable{
 					}
 			
 				});
-		PolygonPairRDD result=new PolygonPairRDD(refinedResult);
+		SpatialPairRDD<Polygon,ArrayList<Point>> result=new SpatialPairRDD<Polygon,ArrayList<Point>>(refinedResult.mapToPair(new PairFunction<Tuple2<Polygon,String>,Polygon,ArrayList<Point>>()
+				{
+
+			public Tuple2<Polygon, ArrayList<Point>> call(Tuple2<Polygon, String> t)
+			{
+				List<String> resultListString= Arrays.asList(t._2().split(","));
+				Iterator<String> targetIterator=resultListString.iterator();
+				ArrayList<Point> resultList=new ArrayList<Point>();
+				while(targetIterator.hasNext())
+				{
+					GeometryFactory fact = new GeometryFactory();
+					Coordinate coordinate=new Coordinate(Double.parseDouble(targetIterator.next()),Double.parseDouble(targetIterator.next()));
+					Point currentTarget=fact.createPoint(coordinate);
+					resultList.add(currentTarget);
+				}
+				return new Tuple2<Polygon,ArrayList<Point>>(t._1(),resultList);
+			}
+			
+		}));
 		return result;
 	}
-	public PolygonPairRDD SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
+	public SpatialPairRDD<Polygon,ArrayList<Point>> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		final Integer condition=Condition;
 		//Create mapping between polygons and their minimum bounding box
@@ -417,36 +453,26 @@ public class PointRDD implements Serializable{
 
 	//Filter phase
 		RectangleRDD rectangleRDD=polygonRDD.MinimumBoundingRectangle();
-		RectanglePairRDD filterResultPairRDD=this.SpatialJoinQuery(rectangleRDD, condition, GridNumberHorizontal, GridNumberVertical);
-		JavaPairRDD<Envelope,String> filterResult=filterResultPairRDD.getRectanglePairRDD();
+		SpatialPairRDD<Envelope,ArrayList<Point>> filterResultPairRDD=this.SpatialJoinQuery(rectangleRDD, condition, GridNumberHorizontal, GridNumberVertical);
+		JavaPairRDD<Envelope,ArrayList<Point>> filterResult=filterResultPairRDD.getSpatialPairRDD();
 	//Refine phase
-		JavaPairRDD<Envelope, Tuple2<Iterable<Polygon>, Iterable<String>>> joinSet=polygonRDDwithKey.cogroup(filterResult).repartition((polygonRDDwithKey.partitions().size()+filterResult.partitions().size())*2);
-		JavaPairRDD<Polygon,Point> RefineResult=joinSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Envelope,Tuple2<Iterable<Polygon>,Iterable<String>>>,Polygon,Point>(){
-			public Iterable<Tuple2<Polygon, Point>> call(Tuple2<Envelope, Tuple2<Iterable<Polygon>, Iterable<String>>> t){
-				ArrayList<Tuple2<Polygon, Point>> QueryAreaAndTarget=new ArrayList();
+		JavaPairRDD<Envelope, Tuple2<Iterable<Polygon>, Iterable<ArrayList<Point>>>> joinSet=polygonRDDwithKey.cogroup(filterResult).repartition((polygonRDDwithKey.partitions().size()+filterResult.partitions().size())*2);
+		JavaPairRDD<Polygon,Point> RefineResult=joinSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Envelope,Tuple2<Iterable<Polygon>,Iterable<ArrayList<Point>>>>,Polygon,Point>(){
+			public Iterable<Tuple2<Polygon, Point>> call(Tuple2<Envelope, Tuple2<Iterable<Polygon>, Iterable<ArrayList<Point>>>> t){
+				ArrayList<Tuple2<Polygon, Point>> QueryAreaAndTarget=new ArrayList<Tuple2<Polygon, Point>>();
 				Iterator<Polygon> QueryAreaIterator=t._2()._1().iterator();
 				
 				while(QueryAreaIterator.hasNext())
 				{
 					Polygon currentQueryArea=QueryAreaIterator.next();
-					Iterator<String> TargetIteratorString=t._2()._2().iterator();
-					while(TargetIteratorString.hasNext())
+					Iterator<ArrayList<Point>> TargetIteratorOutLoop=t._2()._2().iterator();
+					while(TargetIteratorOutLoop.hasNext())
 					{
-						String currentTargetString=TargetIteratorString.next();
-						ArrayList<Point> Target=new ArrayList<Point>();
+						ArrayList<Point> currentTargetOutLoop=TargetIteratorOutLoop.next();
 						
-						Iterator<String> stringIterator=Arrays.asList(currentTargetString.split(",")).iterator();
-						
-						while(stringIterator.hasNext())
-						{
-							GeometryFactory fact = new GeometryFactory();
-							Coordinate coordinate = new Coordinate(Double.parseDouble(stringIterator.next()),Double.parseDouble(stringIterator.next()));
-							Point point=fact.createPoint(coordinate);
-							Target.add(point);
-						}
-						Iterator<Point> targetIterator=Target.iterator();
-						while(targetIterator.hasNext()){
-						Point currentTarget=targetIterator.next();
+						Iterator<Point> targetOutLoopIterator=currentTargetOutLoop.iterator();
+						while(targetOutLoopIterator.hasNext()){
+						Point currentTarget=targetOutLoopIterator.next();
 						
 						if(condition==0){
 						if(currentQueryArea.contains(currentTarget))
@@ -496,7 +522,25 @@ public class PointRDD implements Serializable{
 							}
 					
 						});
-				PolygonPairRDD result = new PolygonPairRDD(refinedResult);
+				SpatialPairRDD<Polygon,ArrayList<Point>> result = new SpatialPairRDD<Polygon,ArrayList<Point>>(refinedResult.mapToPair(new PairFunction<Tuple2<Polygon,String>,Polygon,ArrayList<Point>>()
+				{
+
+					public Tuple2<Polygon, ArrayList<Point>> call(Tuple2<Polygon, String> t)
+					{
+						List<String> resultListString= Arrays.asList(t._2().split(","));
+						Iterator<String> targetIterator=resultListString.iterator();
+						ArrayList<Point> resultList=new ArrayList<Point>();
+						while(targetIterator.hasNext())
+						{
+							GeometryFactory fact = new GeometryFactory();
+							Coordinate coordinate=new Coordinate(Double.parseDouble(targetIterator.next()),Double.parseDouble(targetIterator.next()));
+							Point currentTarget=fact.createPoint(coordinate);
+							resultList.add(currentTarget);
+						}
+						return new Tuple2<Polygon,ArrayList<Point>>(t._1(),resultList);
+					}
+					
+				}));
 				return result;
 	}
 }
