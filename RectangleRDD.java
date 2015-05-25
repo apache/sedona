@@ -63,7 +63,7 @@ public class RectangleRDD implements Serializable {
 		JavaRDD<Envelope> result=this.rectangleRDD.filter(new RectangleRangeFilter(polygon,condition));
 		return new RectangleRDD(result);
 	}
-	public RectanglePairRDD SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
+	public SpatialPairRDD<Envelope,ArrayList<Envelope>> SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		//Find the border of both of the two datasets---------------
 		final Integer condition=Condition;
@@ -270,10 +270,26 @@ public class RectangleRDD implements Serializable {
 				});
 		
 		//return refinedResult;
-		RectanglePairRDD result=new RectanglePairRDD(refinedResult);
+		SpatialPairRDD<Envelope,ArrayList<Envelope>> result=new SpatialPairRDD<Envelope,ArrayList<Envelope>>(refinedResult.mapToPair(new PairFunction<Tuple2<Envelope,String>,Envelope,ArrayList<Envelope>>()
+				{
+
+			public Tuple2<Envelope, ArrayList<Envelope>> call(Tuple2<Envelope, String> t)
+			{
+				List<String> resultListString= Arrays.asList(t._2().split(","));
+				Iterator<String> targetIterator=resultListString.iterator();
+				ArrayList<Envelope> resultList=new ArrayList<Envelope>();
+				while(targetIterator.hasNext())
+				{
+					Envelope currentTarget=new Envelope(Double.parseDouble(targetIterator.next()),Double.parseDouble(targetIterator.next()),Double.parseDouble(targetIterator.next()),Double.parseDouble(targetIterator.next()));
+					resultList.add(currentTarget);
+				}
+				return new Tuple2<Envelope,ArrayList<Envelope>>(t._1(),resultList);
+			}
+			
+		}));
 		return result;
 	}
-	public RectanglePairRDD SpatialJoinQuery(Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
+	public SpatialPairRDD<Envelope,ArrayList<Envelope>> SpatialJoinQuery(Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		//Find the border of both of the two datasets---------------
 		final Integer condition=Condition;
@@ -423,10 +439,26 @@ public class RectangleRDD implements Serializable {
 				});
 		
 		//return refinedResult;
-		RectanglePairRDD result=new RectanglePairRDD(refinedResult);
+		SpatialPairRDD<Envelope,ArrayList<Envelope>> result=new SpatialPairRDD<Envelope,ArrayList<Envelope>>(refinedResult.mapToPair(new PairFunction<Tuple2<Envelope,String>,Envelope,ArrayList<Envelope>>()
+				{
+
+			public Tuple2<Envelope, ArrayList<Envelope>> call(Tuple2<Envelope, String> t)
+			{
+				List<String> resultListString= Arrays.asList(t._2().split(","));
+				Iterator<String> targetIterator=resultListString.iterator();
+				ArrayList<Envelope> resultList=new ArrayList<Envelope>();
+				while(targetIterator.hasNext())
+				{
+					Envelope currentTarget=new Envelope(Double.parseDouble(targetIterator.next()),Double.parseDouble(targetIterator.next()),Double.parseDouble(targetIterator.next()),Double.parseDouble(targetIterator.next()));
+					resultList.add(currentTarget);
+				}
+				return new Tuple2<Envelope,ArrayList<Envelope>>(t._1(),resultList);
+			}
+			
+		}));
 		return result;
 	}
-	public PolygonPairRDD SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
+	public SpatialPairRDD<Polygon,ArrayList<Envelope>> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		final Integer condition=Condition;
 	//Create mapping between polygons and their minimum bounding box
@@ -440,33 +472,26 @@ public class RectangleRDD implements Serializable {
 		}).repartition(polygonRDD.getPolygonRDD().partitions().size()*2);
 	//Filter phase
 		RectangleRDD rectangleRDD=polygonRDD.MinimumBoundingRectangle();
-		RectanglePairRDD filterResultPairRDD=this.SpatialJoinQuery(rectangleRDD, Condition, GridNumberHorizontal, GridNumberVertical);
-		JavaPairRDD<Envelope,String> filterResult=filterResultPairRDD.getRectanglePairRDD();
+		SpatialPairRDD<Envelope,ArrayList<Envelope>> filterResultPairRDD=this.SpatialJoinQuery(rectangleRDD, Condition, GridNumberHorizontal, GridNumberVertical);
+		JavaPairRDD<Envelope,ArrayList<Envelope>> filterResult=filterResultPairRDD.getSpatialPairRDD();
 	//Refine phase
-		JavaPairRDD<Envelope, Tuple2<Iterable<Polygon>, Iterable<String>>> joinSet=polygonRDDwithKey.cogroup(filterResult).repartition((polygonRDDwithKey.partitions().size()+filterResult.partitions().size())*2);
-		JavaPairRDD<Polygon,Envelope> RefineResult=joinSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Envelope,Tuple2<Iterable<Polygon>,Iterable<String>>>,Polygon,Envelope>(){
+		JavaPairRDD<Envelope, Tuple2<Iterable<Polygon>, Iterable<ArrayList<Envelope>>>> joinSet=polygonRDDwithKey.cogroup(filterResult).repartition((polygonRDDwithKey.partitions().size()+filterResult.partitions().size())*2);
+		JavaPairRDD<Polygon,Envelope> RefineResult=joinSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Envelope,Tuple2<Iterable<Polygon>,Iterable<ArrayList<Envelope>>>>,Polygon,Envelope>(){
 			//GeometryFactory fact = new GeometryFactory();
-			public Iterable<Tuple2<Polygon, Envelope>> call(Tuple2<Envelope, Tuple2<Iterable<Polygon>, Iterable<String>>> t){
+			public Iterable<Tuple2<Polygon, Envelope>> call(Tuple2<Envelope, Tuple2<Iterable<Polygon>, Iterable<ArrayList<Envelope>>>> t){
 				ArrayList<Tuple2<Polygon, Envelope>> QueryAreaAndTarget=new ArrayList();
 				Iterator<Polygon> QueryAreaIterator=t._2()._1().iterator();
 				
 				while(QueryAreaIterator.hasNext())
 				{
 					Polygon currentQueryArea=QueryAreaIterator.next();
-					Iterator<String> TargetIteratorString=t._2()._2().iterator();
-					while(TargetIteratorString.hasNext())
+					Iterator<ArrayList<Envelope>> TargetIteratorOutLoop=t._2()._2().iterator();
+					while(TargetIteratorOutLoop.hasNext())
 					{
-						String currentTargetString=TargetIteratorString.next();
-						ArrayList<Envelope> Target=new ArrayList<Envelope>();
+						ArrayList<Envelope> currentTargetOutLoop=TargetIteratorOutLoop.next();
 						
-						Iterator<String> stringIterator=Arrays.asList(currentTargetString.split(",")).iterator();
 						
-						while(stringIterator.hasNext())
-						{
-							Envelope envelope=new Envelope(Double.parseDouble(stringIterator.next()),Double.parseDouble(stringIterator.next()),Double.parseDouble(stringIterator.next()),Double.parseDouble(stringIterator.next()));
-							Target.add(envelope);
-						}
-						Iterator<Envelope> targetIterator=Target.iterator();
+						Iterator<Envelope> targetIterator=currentTargetOutLoop.iterator();
 						while(targetIterator.hasNext()){
 						Envelope currentTarget=targetIterator.next();
 						ArrayList<Coordinate> coordinatesList = new ArrayList<Coordinate>();
@@ -528,7 +553,24 @@ public class RectangleRDD implements Serializable {
 					
 						});
 				//return refinedResult;
-				PolygonPairRDD result=new PolygonPairRDD(refinedResult);
+				SpatialPairRDD<Polygon,ArrayList<Envelope>> result=new SpatialPairRDD<Polygon,ArrayList<Envelope>>(refinedResult.mapToPair(new PairFunction<Tuple2<Polygon,String>,Polygon,ArrayList<Envelope>>()
+				{
+
+					public Tuple2<Polygon, ArrayList<Envelope>> call(Tuple2<Polygon, String> t)
+					{
+						List<String> resultListString= Arrays.asList(t._2().split(","));
+						Iterator<String> targetIterator=resultListString.iterator();
+						ArrayList<Envelope> resultList=new ArrayList<Envelope>();
+						while(targetIterator.hasNext())
+						{
+				
+							Envelope currentTarget=new Envelope(Double.parseDouble(targetIterator.next()),Double.parseDouble(targetIterator.next()),Double.parseDouble(targetIterator.next()),Double.parseDouble(targetIterator.next()));
+							resultList.add(currentTarget);
+						}
+						return new Tuple2<Polygon,ArrayList<Envelope>>(t._1(),resultList);
+					}
+					
+				}));
 				return result;
 	}
 }
