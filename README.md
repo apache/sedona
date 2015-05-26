@@ -179,3 +179,6 @@ This function executes a spatial join query on the PolygonRDD. This function fir
 This function unions all of the polygons in this PolygonRDD and returns the result as one Polygon. Note: The result is one Polygon which is one type in JTS topology suite.
 
 ### SpatialPairRDD
+
+* `Constructor: SpatialPairRDD(JavaPairRDD<T1,T2> spatialPairRDD)`
+* `SpatialPairRDD<T1, Integer> countByKey()`
