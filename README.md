@@ -77,8 +77,6 @@ Each tuple contains unlimited points.
 
 ### PointRDD
 
- * `Constructor: PointRDD(JavaRDD<Point> pointRDD)`
-
   * `Constructor: PointRDD(JavaSparkContext spark, String InputLocation)`
 
  
@@ -120,6 +118,10 @@ Each tuple contains unlimited points.
 
   * `SpatialPairRDD<Envelope,ArrayList<Envelope>> SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
 
+
+  * `SpatialPairRDD<Envelope,ArrayList<Envelope>> SpatialJoinQuery(Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+
+
   * `SpatialPairRDD<Polygon,ArrayList<Envelope>> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
    
 
@@ -144,9 +146,12 @@ Each tuple contains unlimited points.
 
   * `SpatialPairRDD<Polygon,ArrayList<Polygon>> SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
  
+  * `SpatialPairRDD<Polygon,ArrayList<Polygon>> SpatialJoinQuery(Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+ 
 
   * `SpatialPairRDD<Polygon,ArrayList<Polygon>> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
  
+  * `SpatialPairRDD<Polygon,ArrayList<Polygon>> SpatialJoinQueryWithMBR(Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
 
   * `Union PolygonUnion()`
 
@@ -154,4 +159,5 @@ Each tuple contains unlimited points.
 ### SpatialPairRDD
 
 * `Constructor: SpatialPairRDD(JavaPairRDD<T1,T2> spatialPairRDD)`
+
 * `SpatialPairRDD<T1, Integer> countByKey()`
