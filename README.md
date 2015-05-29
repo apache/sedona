@@ -10,7 +10,7 @@ GeoSpark consists of three layers: Apache Spark Layer, Spatial RDD Layer and Spa
 
 1. Apache Hadoop 2.4.0
 2. Apache Spark 1.2.1
-3. JDK 1.7
+3. JRE 1.7
 
 ### Steps
 
