@@ -87,6 +87,10 @@ Each tuple contains unlimited points.
  
 
   * `PointRDD SpatialRangeQuery(Polygon polygon,Integer condition)`
+  
+  * `Double[] boundary()` 
+ 
+  * `SpatialPairRDD<Point,ArrayList<Point>> SpatialJoinQuery(PointRDD pointRDD,Double Distance,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
 
 
   * `SpatialPairRDD<Envelope,ArrayList<Point>> SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
@@ -161,3 +165,9 @@ Each tuple contains unlimited points.
 * `Constructor: SpatialPairRDD(JavaPairRDD<T1,T2> spatialPairRDD)`
 
 * `SpatialPairRDD<T1, Integer> countByKey()`
+
+* `SpatialPairRDD<T1, Point> FlatMapToPoint()`
+
+* `SpatialPairRDD<T1, Envelope> FlatMapToRectangle()`
+
+* `SpatialPairRDD<T1, Polygon> FlatMapToPolygon()`
