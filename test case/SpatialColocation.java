@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -7,14 +8,30 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.Function;
 
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 
+import GeoSpark.Circle;
+import GeoSpark.CircleRDD;
 import GeoSpark.PointRDD;
 import GeoSpark.SpatialPairRDD;
 
-
+class PointToCircle implements Function<Point,Circle>, Serializable
+{
+	private Double radius;
+	public PointToCircle(Double radius)
+	{
+		this.radius=radius;
+	}
+	public Circle call(Point v1) throws Exception {
+		return new Circle(v1,radius);
+	}
+	
+}
 public class colocation {
 
 	public static void main(String[] args) {
@@ -57,7 +74,7 @@ public class colocation {
 		Double start=Double.parseDouble(Arrays.asList(input.split(",")).get(0));
 		Double end=Double.parseDouble(Arrays.asList(input.split(",")).get(1));
 		Integer points=Integer.parseInt(Arrays.asList(input.split(",")).get(2));
-		Double[] distances=new Double[points];
+		final Double[] distances=new Double[points];
 		Double[] functions=new Double[points];
 		Double increment=(end-start)/(points-1);
 		for(int i=0;i<points;i++)
@@ -115,7 +132,8 @@ public class colocation {
 		Long n2=pointRDD2.getPointRDD().count();
 		//System.out.println(n2);
 		for(int i=0;i<points;i++){
-		SpatialPairRDD<Point,Point> adjacentMatrix=pointRDD1.SpatialJoinQuery(pointRDD2, distances[i], 1, 100, 100).FlatMapToPoint();
+		CircleRDD circleRDD=new CircleRDD(pointRDD2.getPointRDD().map(new PointToCircle(distances[i])));
+		SpatialPairRDD<Circle,Point> adjacentMatrix=pointRDD1.SpatialJoinQuery(circleRDD, 1, 100, 100).FlatMapToPoint();
 		Long sum=adjacentMatrix.getSpatialPairRDD().count();
 		functions[i]=Math.sqrt((area*sum)/(3.1415926*n1*n2))-distances[i];
 		}

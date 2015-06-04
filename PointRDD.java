@@ -19,7 +19,6 @@ import Functions.PartitionAssignGridPolygon;
 import Functions.PartitionAssignGridRectangle;
 import Functions.PointRangeFilter;
 
-
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -80,153 +79,42 @@ public class PointRDD implements Serializable{
 		JavaRDD<Point> result=this.pointRDD.filter(new PointRangeFilter(polygon,condition));
 		return new PointRDD(result);
 	}
-	public SpatialPairRDD<Point,ArrayList<Point>> SpatialJoinQuery(PointRDD pointRDD,Double Distance,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
+	public SpatialPairRDD<Circle,ArrayList<Point>> SpatialJoinQuery(CircleRDD circleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
-		//Find the border of both of the two datasets---------------
-		final Double distance=Distance;
 		final Integer condition=Condition;
-		//condition=0 means only consider fully contain in query, condition=1 means consider full contain and partial contain(overlap).
-		Double minLongitude;
-		Double minLatitude;
-		Double maxLongitude;
-		Double maxLatitude;
-		//QueryAreaSet min/max longitude and latitude
-		Double minLongtitudeQueryAreaSet=pointRDD.getPointRDD().min(new PointXComparator()).getX();
-		Double maxLongtitudeQueryAreaSet=pointRDD.getPointRDD().max(new PointXComparator()).getX();
-		Double minLatitudeQueryAreaSet=pointRDD.getPointRDD().min(new PointYComparator()).getY();
-		Double maxLatitudeQueryAreaSet=pointRDD.getPointRDD().max(new PointYComparator()).getY();
-		//TargetSet min/max longitude and latitude
-		minLongitude=this.pointRDD.min(new PointXComparator()).getX();
-		maxLongitude=this.pointRDD.max(new PointXComparator()).getX();
-		minLatitude=this.pointRDD.min(new PointYComparator()).getY();
-		maxLatitude=this.pointRDD.max(new PointYComparator()).getY();
-
-		//Border found
-		if(minLongitude>minLongtitudeQueryAreaSet)
-		{
-			minLongitude=minLongtitudeQueryAreaSet;
-		}
-		if(maxLongitude<maxLongtitudeQueryAreaSet)
-		{
-			maxLongitude=maxLongtitudeQueryAreaSet;
-		}
-		if(minLatitude>minLatitudeQueryAreaSet)
-		{
-			minLatitude=minLatitudeQueryAreaSet;
-		}
-		if(maxLatitude<maxLatitudeQueryAreaSet)
-		{
-			maxLatitude=maxLatitudeQueryAreaSet;
-		}
-//Build Grid file-------------------
-		Double[] gridHorizontalBorder = new Double[GridNumberHorizontal+1];
-		Double[] gridVerticalBorder=new Double[GridNumberVertical+1];
-		double LongitudeIncrement=(maxLongitude-minLongitude)/GridNumberHorizontal;
-		double LatitudeIncrement=(maxLatitude-minLatitude)/GridNumberVertical;
-		System.out.println(maxLongitude);
-		System.out.println(minLongitude);
-		System.out.println(maxLatitude);
-		System.out.println(minLatitude);
-		for(int i=0;i<GridNumberHorizontal+1;i++)
-		{
-			gridHorizontalBorder[i]=minLongitude+LongitudeIncrement*i;
-		}
-		for(int i=0;i<GridNumberVertical+1;i++)
-		{
-			gridVerticalBorder[i]=minLatitude+LatitudeIncrement*i;
-		}
-		//Assign grid ID to both of the two dataset---------------------
-		JavaPairRDD<Integer,Point> TargetSetWithID=this.pointRDD.mapPartitionsToPair(new PartitionAssignGridPoint(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
-		JavaPairRDD<Integer,Point> QueryAreaSetWithID=pointRDD.getPointRDD().mapPartitionsToPair(new PartitionAssignGridPoint(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
-//Join two dataset
-		JavaPairRDD<Integer, Tuple2<Iterable<Point>, Iterable<Point>>> jointSet=QueryAreaSetWithID.cogroup(TargetSetWithID).repartition((QueryAreaSetWithID.partitions().size()+TargetSetWithID.partitions().size())*2);
-//Calculate the relation between one point and one query area
-				JavaPairRDD<Point,Point> queryResult=jointSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer,Tuple2<Iterable<Point>, Iterable<Point>>>, Point,Point>()
-						{
-
-					public Iterable<Tuple2<Point, Point>> call(
-							Tuple2<Integer, Tuple2<Iterable<Point>, Iterable<Point>>> t)
-							throws Exception {
-						ArrayList<Tuple2<Point, Point>> QueryAreaAndTarget=new ArrayList();
-						Iterator<Point> QueryAreaIterator=t._2()._1().iterator();
-						
-						while(QueryAreaIterator.hasNext())
-						{
-							Point currentQueryArea=QueryAreaIterator.next();
-							Iterator<Point> TargetIterator=t._2()._2().iterator();
-							while(TargetIterator.hasNext())
-							{
-								Point currentTarget=TargetIterator.next();
-								if(condition==0){
-								if(currentQueryArea.distance(currentTarget)<distance)
-								{
-									QueryAreaAndTarget.add(new Tuple2<Point,Point>(currentQueryArea,currentTarget));
-								}
-								}
-								else
-								{
-									if(currentQueryArea.distance(currentTarget)<=distance)
-									{
-										QueryAreaAndTarget.add(new Tuple2<Point,Point>(currentQueryArea,currentTarget));
-									}
-								}
-							}
-						}
-						
-						return QueryAreaAndTarget;
-					}
-			
-				});
-		//Delete the duplicate result
-				JavaPairRDD<Point, Iterable<Point>> aggregatedResult=queryResult.groupByKey();
-				JavaPairRDD<Point,String> refinedResult=aggregatedResult.mapToPair(new PairFunction<Tuple2<Point,Iterable<Point>>,Point,String>()
-						{
-
-							public Tuple2<Point, String> call(Tuple2<Point, Iterable<Point>> t)
-									{
-								Integer commaFlag=0;
-								Iterator<Point> valueIterator=t._2().iterator();
-								String result="";
-								while(valueIterator.hasNext())
-								{
-									Point currentTarget=valueIterator.next();
-									String currentTargetString=""+currentTarget.getX()+","+currentTarget.getY();
-									if(!result.contains(currentTargetString))
-									{
-										
-										if(commaFlag==0)
-										{
-											result=result+currentTargetString;
-											commaFlag=1;
-										}
-										else result=result+","+currentTargetString;
-									}
-								}
-								
-								return new Tuple2<Point, String>(t._1(),result);
-							}
-					
-						});
-				SpatialPairRDD<Point,ArrayList<Point>> result=new SpatialPairRDD<Point,ArrayList<Point>>(refinedResult.mapToPair(new PairFunction<Tuple2<Point,String>,Point,ArrayList<Point>>()
+		JavaPairRDD<Envelope,ArrayList<Point>> filteredByMBR=this.SpatialJoinQuery(circleRDD.MinimumBoundingRectangle(), Condition, GridNumberHorizontal, GridNumberVertical).getSpatialPairRDD();
+		JavaPairRDD<Circle,ArrayList<Point>> refinedByCircle=filteredByMBR.mapToPair(new PairFunction<Tuple2<Envelope,ArrayList<Point>>,Circle,ArrayList<Point>>()
 				{
 
-					public Tuple2<Point, ArrayList<Point>> call(Tuple2<Point, String> t)
-					{
-						List<String> resultListString= Arrays.asList(t._2().split(","));
-						Iterator<String> targetIterator=resultListString.iterator();
-						ArrayList<Point> resultList=new ArrayList<Point>();
+					public Tuple2<Circle, ArrayList<Point>> call(
+							Tuple2<Envelope, ArrayList<Point>> t){
+						Circle queryArea=Circle.MBRtoCircle(t._1());
+						ArrayList<Point> targets=t._2();
+						ArrayList<Point> newResult=new ArrayList<Point>();
+						Iterator<Point> targetIterator=targets.iterator();
 						while(targetIterator.hasNext())
 						{
-							GeometryFactory fact = new GeometryFactory();
-							Coordinate coordinate=new Coordinate(Double.parseDouble(targetIterator.next()),Double.parseDouble(targetIterator.next()));
-							Point currentTarget=fact.createPoint(coordinate);
-							resultList.add(currentTarget);
+							Point point=targetIterator.next();
+							if(condition==0)
+							{
+								if(queryArea.contains(point))
+								{
+									newResult.add(point);
+								}
+							}
+							else
+							{
+								if(queryArea.intersects(point))
+								{
+									newResult.add(point);
+								}
+							}
 						}
-						return new Tuple2<Point,ArrayList<Point>>(t._1(),resultList);
+						return new Tuple2(queryArea,newResult);
 					}
-					
-				}));
-		return result;
+
+				});
+		return new SpatialPairRDD<Circle,ArrayList<Point>>(refinedByCircle);
 	}
 	public SpatialPairRDD<Envelope,ArrayList<Point>> SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
