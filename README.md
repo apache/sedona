@@ -168,6 +168,12 @@ Each tuple contains unlimited points.
 * `RectangleRDD MinimumBoundingRectangle()`
 * `PointRDD Centre()`
 
+### Circle
+
+* `Constructor: Circle(Double x, Double y, Double radius)`
+* `Constructor: Circle(Point point, Double radius)`
+* `Envelope getMBR()`
+* `static Circle MBRtoCircle(Envelope mbr)()`
 
 ### SpatialPairRDD
 
