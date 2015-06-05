@@ -155,3 +155,67 @@ class PolygonYMaxComparator implements Comparator<Polygon>, Serializable
 	    else return 0;
 	    }
 }
+class CircleXMinComparator implements Comparator<Circle>, Serializable {
+	  
+	 public int compare(Circle circle1, Circle circle2) {
+		 Envelope envelope1=circle1.getMBR();
+		 Envelope envelope2=circle1.getMBR();
+	    if(envelope1.getMinX()>envelope2.getMinX())
+	    {
+	    	return 1;
+	    }
+	    else if (envelope1.getMinX()<envelope2.getMinX())
+	    {
+	    	return -1;
+	    }
+	    else return 0;
+	    }
+}
+class CircleYMinComparator implements Comparator<Circle>, Serializable {
+	  
+	 public int compare(Circle circle1, Circle circle2) {
+		 Envelope envelope1=circle1.getMBR();
+		 Envelope envelope2=circle1.getMBR();
+	    if(envelope1.getMinY()>envelope2.getMinY())
+	    {
+	    	return 1;
+	    }
+	    else if (envelope1.getMinY()<envelope2.getMinY())
+	    {
+	    	return -1;
+	    }
+	    else return 0;
+	    }
+}
+class CircleXMaxComparator implements Comparator<Circle>, Serializable {
+	  
+	 public int compare(Circle circle1, Circle circle2) {
+		 Envelope envelope1=circle1.getMBR();
+		 Envelope envelope2=circle1.getMBR();
+	    if(envelope1.getMaxX()>envelope2.getMaxX())
+	    {
+	    	return 1;
+	    }
+	    else if (envelope1.getMaxX()<envelope2.getMaxX())
+	    {
+	    	return -1;
+	    }
+	    else return 0;
+	    }
+}
+class CircleYMaxComparator implements Comparator<Circle>, Serializable {
+	  
+	 public int compare(Circle circle1, Circle circle2) {
+		 Envelope envelope1=circle1.getMBR();
+		 Envelope envelope2=circle1.getMBR();
+	    if(envelope1.getMaxY()>envelope2.getMaxY())
+	    {
+	    	return 1;
+	    }
+	    else if (envelope1.getMaxY()<envelope2.getMaxY())
+	    {
+	    	return -1;
+	    }
+	    else return 0;
+	    }
+}

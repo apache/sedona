@@ -18,6 +18,7 @@ import scala.Tuple2;
 import Functions.PartitionAssignGridPolygon;
 import Functions.PolygonRangeFilter;
 
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -45,6 +46,11 @@ public class PolygonRDD implements Serializable{
 				{
 					coordinatesList.add(new Coordinate(Double.parseDouble(input.get(i)),Double.parseDouble(input.get(i+1))));
 				}
+				/*coordinatesList.add(new Coordinate(Double.parseDouble(input.get(0)),Double.parseDouble(input.get(1))));
+				coordinatesList.add(new Coordinate(Double.parseDouble(input.get(0)),Double.parseDouble(input.get(3))));
+				coordinatesList.add(new Coordinate(Double.parseDouble(input.get(2)),Double.parseDouble(input.get(3))));
+				coordinatesList.add(new Coordinate(Double.parseDouble(input.get(2)),Double.parseDouble(input.get(1))));
+				*/
 				coordinatesList.add(coordinatesList.get(0));
 				Coordinate[] coordinates=new Coordinate[coordinatesList.size()];
 				coordinates=coordinatesList.toArray(coordinates);
@@ -64,6 +70,52 @@ public class PolygonRDD implements Serializable{
 	public void rePartition(Integer number)
 	{
 		this.polygonRDD=this.polygonRDD.repartition(number);
+	}
+	public Double[] boundary()
+	{
+		
+		Double[] boundary = new Double[4];
+		Double minLongtitude1=this.polygonRDD.min(new PolygonXMinComparator()).getEnvelopeInternal().getMinX();
+		Double maxLongtitude1=this.polygonRDD.max(new PolygonXMinComparator()).getEnvelopeInternal().getMinX();
+		Double minLatitude1=this.polygonRDD.min(new PolygonYMinComparator()).getEnvelopeInternal().getMinY();
+		Double maxLatitude1=this.polygonRDD.max(new PolygonYMinComparator()).getEnvelopeInternal().getMinY();
+		Double minLongtitude2=this.polygonRDD.min(new PolygonXMaxComparator()).getEnvelopeInternal().getMaxX();
+		Double maxLongtitude2=this.polygonRDD.max(new PolygonXMaxComparator()).getEnvelopeInternal().getMaxX();
+		Double minLatitude2=this.polygonRDD.min(new PolygonYMaxComparator()).getEnvelopeInternal().getMaxY();
+		Double maxLatitude2=this.polygonRDD.max(new PolygonYMaxComparator()).getEnvelopeInternal().getMaxY(); 
+		if(minLongtitude1<minLongtitude2)
+		{
+			boundary[0]=minLongtitude1;
+		}
+		else
+		{
+			boundary[0]=minLongtitude2;
+		}
+		if(minLatitude1<minLatitude2)
+		{
+			boundary[1]=minLatitude1;
+		}
+		else
+		{
+			boundary[1]=minLatitude2;
+		}
+		if(maxLongtitude1>maxLongtitude2)
+		{
+			boundary[2]=maxLongtitude1;
+		}
+		else
+		{
+			boundary[2]=maxLongtitude2;
+		}
+		if(maxLatitude1>maxLatitude2)
+		{
+			boundary[3]=maxLatitude1;
+		}
+		else
+		{
+			boundary[3]=maxLatitude2;
+		}
+		return boundary;
 	}
 	public PolygonRDD SpatialRangeQuery(Envelope envelope,Integer condition)
 	{

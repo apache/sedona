@@ -37,7 +37,7 @@ public class Circle implements Serializable {
 	}
 	public Envelope getMBR()
 	{
-		Envelope mbr=new Envelope(centre.getCoordinate().x-radius,centre.getCoordinate().y-radius,centre.getCoordinate().x+radius,centre.getCoordinate().y+radius);
+		Envelope mbr=new Envelope(centre.getX()-radius,centre.getX()+radius,centre.getY()-radius,centre.getY()+radius);
 		return mbr;
 	}
 	public static Circle MBRtoCircle(Envelope mbr)

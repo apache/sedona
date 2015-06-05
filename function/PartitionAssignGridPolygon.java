@@ -29,6 +29,7 @@ public class PartitionAssignGridPolygon implements PairFlatMapFunction<java.util
 
 			public Iterable<Tuple2<Integer, Polygon>> call(Iterator<Polygon> s) throws Exception 	
 			{
+				//int id=-1;
 				ArrayList<Tuple2<Integer, Polygon>> list=new ArrayList<Tuple2<Integer, Polygon>>();
 				
 				while(s.hasNext())
@@ -41,8 +42,29 @@ public class PartitionAssignGridPolygon implements PairFlatMapFunction<java.util
 								for(int i=0;i<gridNumberHorizontal;i++)
 								{
 									Envelope currentGrid=new Envelope(gridHorizontalBorder[i],gridHorizontalBorder[i+1],gridVerticalBorder[j],gridVerticalBorder[j+1]);
+									/*Boolean Vertex1Condition=currentElement.getEnvelopeInternal().getMinX()>=gridHorizontalBorder[i] && currentElement.getEnvelopeInternal().getMinX()<=gridHorizontalBorder[i+1]&&currentElement.getEnvelopeInternal().getMaxX()>=gridHorizontalBorder[i] && currentElement.getEnvelopeInternal().getMaxX()<=gridHorizontalBorder[i+1] ;
+									Boolean Vertex2Condition=currentElement.getEnvelopeInternal().getMinY()>=gridVerticalBorder[j] && currentElement.getEnvelopeInternal().getMinY()<=gridVerticalBorder[j+1]&&currentElement.getEnvelopeInternal().getMaxY()>=gridVerticalBorder[j] && currentElement.getEnvelopeInternal().getMaxY()<=gridVerticalBorder[j+1];
+									
+									if(Vertex1Condition && Vertex2Condition )
+									{
+										//Fully contain
+										id=i*gridNumberHorizontal+j;
+										list.add(new Tuple2(id,currentElement));
+									}
+									else if(!Vertex1Condition && !Vertex2Condition)
+										{
+											//Fully disjoint
+											continue;
+										}
+										else
+										{
+											//Overlap
+											id=i*gridNumberHorizontal+j;
+											list.add(new Tuple2(id,currentElement));
+										}*/
 									if(currentGrid.intersects(currentElement.getEnvelopeInternal())||currentGrid.contains(currentElement.getEnvelopeInternal())||currentElement.getEnvelopeInternal().contains(currentGrid))
 									{
+										//id=j*gridNumberHorizontal+i;
 										list.add(new Tuple2(id,currentElement));
 									}
 									id++;

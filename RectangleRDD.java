@@ -15,8 +15,10 @@ import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
+import Functions.GridFileMaker;
 import Functions.PartitionAssignGridRectangle;
 import Functions.RectangleRangeFilter;
+
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -26,7 +28,9 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 public class RectangleRDD implements Serializable {
+
 	private JavaRDD<Envelope> rectangleRDD;
+	
 	public RectangleRDD(JavaRDD<Envelope> rectangleRDD)
 	{
 		this.setRectangleRDD(rectangleRDD.cache());
@@ -63,12 +67,78 @@ public class RectangleRDD implements Serializable {
 		JavaRDD<Envelope> result=this.rectangleRDD.filter(new RectangleRangeFilter(polygon,condition));
 		return new RectangleRDD(result);
 	}
+	public Double[] boundary()
+	{
+		Double[] boundary = new Double[4];
+		Double minLongtitude1=this.rectangleRDD.min(new RectangleXMinComparator()).getMinX();
+		Double maxLongtitude1=this.rectangleRDD.max(new RectangleXMinComparator()).getMinX();
+		Double minLatitude1=this.rectangleRDD.min(new RectangleYMinComparator()).getMinY();
+		Double maxLatitude1=this.rectangleRDD.max(new RectangleYMinComparator()).getMinY();
+		Double minLongtitude2=this.rectangleRDD.min(new RectangleXMaxComparator()).getMaxX();
+		Double maxLongtitude2=this.rectangleRDD.max(new RectangleXMaxComparator()).getMaxX();
+		Double minLatitude2=this.rectangleRDD.min(new RectangleYMaxComparator()).getMaxY();
+		Double maxLatitude2=this.rectangleRDD.max(new RectangleYMaxComparator()).getMaxY();
+		if(minLongtitude1<minLongtitude2)
+		{
+			boundary[0]=minLongtitude1;
+		}
+		else
+		{
+			boundary[0]=minLongtitude2;
+		}
+		if(minLatitude1<minLatitude2)
+		{
+			boundary[1]=minLatitude1;
+		}
+		else
+		{
+			boundary[1]=minLatitude2;
+		}
+		if(maxLongtitude1>maxLongtitude2)
+		{
+			boundary[2]=maxLongtitude1;
+		}
+		else
+		{
+			boundary[2]=maxLongtitude2;
+		}
+		if(maxLatitude1>maxLatitude2)
+		{
+			boundary[3]=maxLatitude1;
+		}
+		else
+		{
+			boundary[3]=maxLatitude2;
+		}
+		return boundary;
+	}
 	public SpatialPairRDD<Envelope,ArrayList<Envelope>> SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		//Find the border of both of the two datasets---------------
 		final Integer condition=Condition;
 		//condition=0 means only consider fully contain in query, condition=1 means consider full contain and partial contain(overlap).
 	
+	/*	Double[] boundaryQueryAreaSet=new Double[4];
+		Double[] boundaryTargetSet=new Double[4];
+		boundaryQueryAreaSet=rectangleRDD.boundarySeeker();
+		boundaryTargetSet=this.boundarySeeker();
+		Double minLongtitudeQueryAreaSet=boundaryQueryAreaSet[0];
+		Double maxLongtitudeQueryAreaSet=boundaryQueryAreaSet[2];
+		Double minLatitudeQueryAreaSet=boundaryQueryAreaSet[1];
+		Double maxLatitudeQueryAreaSet=boundaryQueryAreaSet[3];
+		Double minLongtitudeTargetSet=boundaryTargetSet[0];
+		Double maxLongtitudeTargetSet=boundaryTargetSet[2];
+		Double minLatitudeTargetSet=boundaryTargetSet[1];
+		Double maxLatitudeTargetSet=boundaryTargetSet[3];	
+		System.out.println(boundaryQueryAreaSet[0]);
+		System.out.println(boundaryQueryAreaSet[1]);
+		System.out.println(boundaryQueryAreaSet[2]);
+		System.out.println(boundaryQueryAreaSet[3]);
+		System.out.println(boundaryTargetSet[0]);
+		System.out.println(boundaryTargetSet[1]);
+		System.out.println(boundaryTargetSet[2]);
+		System.out.println(boundaryTargetSet[3]);
+	*/	
 		Double minLongtitudeQueryAreaSet;
 		Double maxLongtitudeQueryAreaSet;
 		Double minLatitudeQueryAreaSet;
@@ -180,7 +250,13 @@ public class RectangleRDD implements Serializable {
 		{
 			maxLatitude=maxLatitudeQueryAreaSet;
 		}
+		/*Double[] boundaryForBoth={minLongitude,minLatitude,maxLongitude,maxLatitude};
+		Tuple2<Integer,Envelope>[] gridFile=new Tuple2[GridNumberHorizontal*GridNumberVertical];
+		GridFileMaker GFMaker=new GridFileMaker(boundaryForBoth,GridNumberHorizontal,GridNumberVertical);
+		gridFile=GFMaker.GridFile();
+		System.out.println(gridFile);*/
 //Build Grid file-------------------
+		
 		Double[] gridHorizontalBorder = new Double[GridNumberHorizontal+1];
 		Double[] gridVerticalBorder=new Double[GridNumberVertical+1];
 		double LongitudeIncrement=(maxLongitude-minLongitude)/GridNumberHorizontal;
@@ -227,7 +303,7 @@ public class RectangleRDD implements Serializable {
 						}
 						else
 						{
-							if(currentQueryArea.intersects(currentTarget))
+							if(currentQueryArea.intersects(currentTarget)||currentQueryArea.covers(currentTarget))
 							{
 								QueryAreaAndTarget.add(new Tuple2<Envelope,Envelope>(currentQueryArea,currentTarget));
 							}

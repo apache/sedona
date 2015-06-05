@@ -46,6 +46,51 @@ public class CircleRDD implements Serializable{
 					
 				}));
 	}
+	public Double[] boundary()
+	{
+		Double[] boundary = new Double[4]; 
+		Double minLongtitude1=this.circleRDD.min(new CircleXMinComparator()).getMBR().getMinX();
+		Double maxLongtitude1=this.circleRDD.max(new CircleXMinComparator()).getMBR().getMinX();
+		Double minLatitude1=this.circleRDD.min(new CircleYMinComparator()).getMBR().getMinY();
+		Double maxLatitude1=this.circleRDD.max(new CircleYMinComparator()).getMBR().getMinY();
+		Double minLongtitude2=this.circleRDD.min(new CircleXMaxComparator()).getMBR().getMaxX();
+		Double maxLongtitude2=this.circleRDD.max(new CircleXMaxComparator()).getMBR().getMaxX();
+		Double minLatitude2=this.circleRDD.min(new CircleYMaxComparator()).getMBR().getMaxY();
+		Double maxLatitude2=this.circleRDD.max(new CircleYMaxComparator()).getMBR().getMaxY();
+		if(minLongtitude1<minLongtitude2)
+		{
+			boundary[0]=minLongtitude1;
+		}
+		else
+		{
+			boundary[0]=minLongtitude2;
+		}
+		if(minLatitude1<minLatitude2)
+		{
+			boundary[1]=minLatitude1;
+		}
+		else
+		{
+			boundary[1]=minLatitude2;
+		}
+		if(maxLongtitude1>maxLongtitude2)
+		{
+			boundary[2]=maxLongtitude1;
+		}
+		else
+		{
+			boundary[2]=maxLongtitude2;
+		}
+		if(maxLatitude1>maxLatitude2)
+		{
+			boundary[3]=maxLatitude1;
+		}
+		else
+		{
+			boundary[3]=maxLatitude2;
+		}
+		return boundary;
+	}
 	public PointRDD Centre()
 	{
 		return new PointRDD(this.getCircleRDD().map(new Function<Circle,Point>()

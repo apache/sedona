@@ -52,7 +52,10 @@ public class RectangleRangeFilter implements Function<Envelope,Boolean>,Serializ
 	else 
 	{
 		ArrayList<Coordinate> coordinates = new ArrayList<Coordinate>();
+		coordinates.add(new Coordinate(tuple.getMinX(),tuple.getMinY()));
+		coordinates.add(new Coordinate(tuple.getMinX(),tuple.getMaxY()));
 		coordinates.add(new Coordinate(tuple.getMaxX(),tuple.getMaxY()));
+		coordinates.add(new Coordinate(tuple.getMaxX(),tuple.getMinY()));
 		coordinates.add(new Coordinate(tuple.getMinX(),tuple.getMinY()));
 		GeometryFactory fact = new GeometryFactory();
 		LinearRing linear = new GeometryFactory().createLinearRing((Coordinate[]) coordinates.toArray());
