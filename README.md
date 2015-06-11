@@ -1,6 +1,8 @@
 # GeoSpark
 A Cluster Computing System for Processing Large-Scale Spatial and Spatio-Temporal Data
 
+![GeoSpark Logo](http://datasyslab.ghost.io/content/images/2015/06/GeoSpark.png)
+
 ## Introduction
 GeoSpark consists of three layers: Apache Spark Layer, Spatial RDD Layer and Spatial Query Processing Layer. Apache Spark Layer provides basic Apache Spark functionalities that include loading / storing data to disk as well as regular RDD operations. Spatial RDD Layer consists of three novel Spatial Resilient Distributed Datasets (SRDDs) which extend regular Apache Spark RDD to support geometrical and spatial objects. GeoSpark provides a geometrical operations library that access Spatial RDDs to perform basic geometrical operations. The Spatial Query Processing Layer executes spatial queries (e.g., Spatial Join) on Spatial RDDs.
 
