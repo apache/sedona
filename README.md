@@ -1,4 +1,5 @@
 ![GeoSpark Logo](http://datasyslab.ghost.io/content/images/2015/06/GeoSpark.png)
+
 A Cluster Computing System for Processing Large-Scale Spatial and Spatio-Temporal Data
 
 
