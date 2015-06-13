@@ -159,3 +159,15 @@ Each tuple contains unlimited points.
 * `SpatialPairRDD<T1, Envelope> FlatMapToRectangle()`
 
 * `SpatialPairRDD<T1, Polygon> FlatMapToPolygon()`
+
+## Contributor
+
+Jia Yu (jiayu2@asu.edu)
+
+Mohamed Sarwat (msarwat@asu.edu)
+
+## Acknowledge
+
+GeoSaprk makes used of JTS Topology Suite Version 1.13 for some geometrical computations.
+
+JTS Topology Suite website: http://tsusiatsoftware.net/jts/main.html
