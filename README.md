@@ -166,7 +166,7 @@ Jia Yu (jiayu2@asu.edu)
 
 Mohamed Sarwat (msarwat@asu.edu)
 
-## Acknowledge
+## Acknowledgement
 
 GeoSaprk makes used of JTS Topology Suite Version 1.13 for some geometrical computations.
 
