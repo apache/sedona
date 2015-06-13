@@ -2,23 +2,8 @@
 
 GeoSpark is an in-memory cluster computing system for processing large-scale spatial data. GeoSpark extends Apache Spark to support spatial data types and operations. In other words, the system extends the resilient distributed datasets (RDDs) concept to support spatial data. This problem is quite challenging due to the fact that (1) spatial data may be quite complex, e.g., rivers' and cities' geometrical boundaries, (2) spatial (and geometric) operations (e.g., Overlap, Intersect, Convex Hull, Cartographic Distances) cannot be easily and efficiently expressed using regular RDD transformations and actions. GeoSpark extends RDDs to form Spatial RDDs (SRDDs) and efficiently partitions SRDD data elements across machines and introduces novel parallelized spatial (geometric operations that follows the Open Geosptial Consortium (OGC) standard) transformations and actions (for SRDD) that provide a more intuitive interface for users to write spatial data analytics programs. Moreover, GeoSpark extends the SRDD layer to execute spatial queries (e.g., Range query, KNN query, and Join query) on large-scale spatial datasets. After geometrical objects are retrieved in the Spatial RDD layer, users can invoke spatial query processing operations provided in the Spatial Query Processing Layer of GeoSpark which runs over the in-memory cluster, decides how spatial object-relational tuples could be stored, indexed, and accessed using SRDDs, and returns the spatial query results required by user.
 
-## How to process spatial data with GeoSpark (For general users) 
 
-### Prerequisites
-
-1. Apache Hadoop 2.4.0 and later
-2. Apache Spark 1.2.1 and later
-3. JRE 1.7
-
-### Steps
-
-1. Setup Apache Hadoop Distributed File System and Apache Spark cluster
-2. Load spatail data into Hadoop Distributed File System
-3. Call "java -jar GeoSpark.jar" in GeoSpark.jar folder
-4. Follow the instruction on the command window to use needed spatial functions as well as specified parameters
-5. GeoSpark will submit Spark tasks and persist the result to HDFS
-
-## How to make use of GeoSpark in your own program (For Scala and Java developers)
+## How to get started (For Scala and Java developers)
 
 ### Prerequisites
 
@@ -32,8 +17,8 @@ GeoSpark is an in-memory cluster computing system for processing large-scale spa
 2. Add GeoSpark.jar into your build environment
 3. Go ahead to use GeoSpark spatial RDDs to store spatial data and call needed functions!
 
-### One quick start program (In Java)
-Please check out the "QuickStartProgram.java" in GeoSpark root folder for a sample program with GeoSpark.
+### GeoSpark Programming Examples (In Java)
+Please check out the "test case" folder for two programming examples with GeoSpark. One is spatial join and the other one is spatial aggregation. 
 
 
 ## How to modify GeoSpark source code (For Java developers)
@@ -55,19 +40,21 @@ Please check out the "QuickStartProgram.java" in GeoSpark root folder for a samp
 
 ## Required input spatial dataset schema
 
+GeoSpark supports either Comma-Separated Values (CSV) or Tab-separated values (TSV) as the input format. Users only need to specify input format as Splitter and the start column of spatial info in one tuple as Offset when call Constructors.
+
 ### Point
 
-(Longitude, Latitude)
+Tuple(column, column,..., Longitude, Latitude, column, column,...)
 
 ### Rectangle
 
-(Longitude 1, Longitude 2, Latitude 1, Latitude 2)
+(column, column,...,Longitude 1, Longitude 2, Latitude 1, Latitude 2,column, column,...)
 
 Two pairs of longitude and latitude present the vertexes lie on the diagonal of one rectangle.
 
 ### Polygon
 
-(Longitude 1, Latitude 1, Longitude 2, Latitude 2, ...)
+(column, column,...,Longitude 1, Latitude 1, Longitude 2, Latitude 2, ...)
 
 Each tuple contains unlimited points.
 
@@ -75,50 +62,41 @@ Each tuple contains unlimited points.
 
 ### PointRDD
 
-  * `Constructor: PointRDD(JavaSparkContext spark, String InputLocation)`
+* `Constructor: PointRDD(JavaRDD<point> pointRDD)`
+
+* `Constructor: PointRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter)`  
+
+* `Constructor: PointRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter,Integer partitions)`
+* `Envelope boundary()`
+* `PointRDD SpatialRangeQuery(Envelope envelope,Integer condition)`
  
-  * `Constructor: PointRDD(JavaRDD<point> pointRDD)`
-
- 
-  * `void rePartition(Integer partitions)`
+* `PointRDD SpatialRangeQuery(Polygon polygon,Integer condition)`
 
 
-  * `PointRDD SpatialRangeQuery(Envelope envelope,Integer condition)`
- 
 
-  * `PointRDD SpatialRangeQuery(Polygon polygon,Integer condition)`
-  
-  * `Double[] boundary()` 
- 
-  * `SpatialPairRDD<Point,ArrayList<Point>> SpatialJoinQuery(CircleRDD circleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+* `SpatialPairRDD<Point,ArrayList<Point>> SpatialJoinQuery(CircleRDD circleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
 
+* `SpatialPairRDD<Envelope,ArrayList<Point>> SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
 
-  * `SpatialPairRDD<Envelope,ArrayList<Point>> SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
- 
+* `SpatialPairRDD<Polygon,ArrayList<Point>> SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
 
-  * `SpatialPairRDD<Polygon,ArrayList<Point>> SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
- 
-
-  * `SpatialPairRDD<Polygon,ArrayList<Point>> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
- 
+* `SpatialPairRDD<Polygon,ArrayList<Point>> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
 
 ### RectangleRDD
 
   * `Constructor: RectangleRDD(JavaRDD<Envelope> rectangleRDD)`
+  * `Constructor: RectangleRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter)`
+  * `Constructor: RectangleRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter,Integer partitions)`
  
-
+  * `Envelope boundary()` 
   * `Constructor: RectangleRDD(JavaSparkContext spark, String InputLocation)`
- 
-
-  * `void rePartition(Integer partitions)`
-  
  
   * `RectangleRDD SpatialRangeQuery(Envelope envelope,Integer condition)`
  
 
   * `RectangleRDD SpatialRangeQuery(Polygon polygon,Integer condition)`
   
-  * `Double[] boundary()` 
+
  
   * `SpatialPairRDD<Envelope,ArrayList<Envelope>> SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
 
@@ -131,17 +109,13 @@ Each tuple contains unlimited points.
 
 ### PolygonRDD
 
-  * `Constructor: PolygonRDD(JavaRDD<Polygon> polygonRDD)`
-
-
-  * `Constructor: PolygonRDD(JavaSparkContext spark, String InputLocation)`
-
-
-  * `void rePartition(Integer partitions)`
+  * `Constructor: PolygonRDD(JavaRDD<Envelope> rectangleRDD)`
+  * `Constructor: PolygonRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter)`
+  * `Constructor: PolygonRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter,Integer partitions)`
 
   * `RectangleRDD MinimumBoundingRectangle()`
- 
-
+  * `Envelope boundary()`
+  * `Union PolygonUnion()`
   * `PolygonRDD SpatialRangeQuery(Envelope envelope,Integer condition)`
  
 
@@ -157,7 +131,7 @@ Each tuple contains unlimited points.
  
   * `SpatialPairRDD<Polygon,ArrayList<Polygon>> SpatialJoinQueryWithMBR(Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
 
-  * `Union PolygonUnion()`
+
 
 ### CircleRDD
 
@@ -165,6 +139,7 @@ Each tuple contains unlimited points.
 * `Constructor: CircleRDD(Double x, Double y, Double Radius)`
 * `RectangleRDD MinimumBoundingRectangle()`
 * `PointRDD Centre()`
+* `Envelope boundary()`
 
 ### Circle
 
