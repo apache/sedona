@@ -44,7 +44,7 @@ GeoSpark supports either Comma-Separated Values (CSV) or Tab-separated values (T
 
 ### Point
 
-Tuple(column, column,..., Longitude, Latitude, column, column,...)
+(column, column,..., Longitude, Latitude, column, column,...)
 
 ### Rectangle
 
