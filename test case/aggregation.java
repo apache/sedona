@@ -49,24 +49,16 @@ public class aggregation {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	
-		SparkConf conf=new SparkConf().setAppName("GeoSpark_Aggregation").setMaster("spark://"+IP+":7077").set("spark.cores.max", "136").set("spark.executor.memory", "13g").set("spark.executor.cores", "8").set("spark.local.ip", IP).set("spark.driver.memory", "13g").set("spark.driver.cores", "8").set("spark.driver.host", IP).set("spark.shuffle.memoryFraction", "0").set("spark.storage.memoryFraction", "0.6").set("spark.eventLog.enabled","true").set("spark.eventLog.dir", "/tmp/spark-events/").set("spark.history.retainedApplications", "1000");		
+		SparkConf conf=new SparkConf().setAppName("GeoSpark_Aggregation").setMaster("spark://"+IP+":7077").set("spark.cores.max", "136").set("spark.executor.memory", "59g").set("spark.executor.cores", "8").set("spark.local.ip", IP).set("spark.driver.memory", "13g").set("spark.driver.cores", "8").set("spark.driver.host", IP).set("spark.shuffle.memoryFraction", "0.2").set("spark.storage.memoryFraction", "0.6").set("spark.eventLog.enabled","true").set("spark.eventLog.dir", "/tmp/spark-events/").set("spark.history.retainedApplications", "1000");		
 		JavaSparkContext spark=new JavaSparkContext(conf);
 		//Add full jar which contains all the dependencies
 		spark.addJar("target/GeoSpark-0.1-GeoSpark.jar");
 		PointRDD pointRDD1=new PointRDD(spark,set1,offset1,Splitter1,partitions1);
-
-		RectangleRDD rectangleRDD1=new RectangleRDD(spark,querywindowset,offset2,Splitter2,partitions2);
-
-		
-		SpatialPairRDD<Envelope,ArrayList<Point>> join=pointRDD1.SpatialJoinQuery(rectangleRDD1,condition, gridhorizontal, gridvertical);
-		try {
-			join.countByKey().getSpatialPairRDD().saveAsTextFile(outputlocation);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		RectangleRDD rectangleRDD2=new RectangleRDD(spark,querywindowset,offset2,Splitter2,partitions2);
+		SpatialPairRDD<Envelope,ArrayList<Point>> join=pointRDD1.SpatialJoinQuery(rectangleRDD2,condition, gridhorizontal, gridvertical);
+		join.countByKey().getSpatialPairRDD().saveAsTextFile(outputlocation);
 		spark.stop();
+
 	
 	}
 
