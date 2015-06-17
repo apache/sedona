@@ -16,8 +16,8 @@ import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
 import Functions.PartitionAssignGridPolygon;
+import Functions.PartitionAssignGridRectangle;
 import Functions.PolygonRangeFilter;
-
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -34,23 +34,20 @@ public class PolygonRDD implements Serializable{
 	{
 		this.setPolygonRDD(polygonRDD.cache());
 	}
-	public PolygonRDD(JavaSparkContext spark, String InputLocation)
+	public PolygonRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter,Integer partitions)
 	{
-		this.setPolygonRDD(spark.textFile(InputLocation).map(new Function<String,Polygon>()
+		
+		final Integer offSet=Offset;
+		this.setPolygonRDD(spark.textFile(InputLocation,partitions).map(new Function<String,Polygon>()
 			{
 			public Polygon call(String s)
 			{	
 				List<String> input=Arrays.asList(s.split(","));
 				ArrayList<Coordinate> coordinatesList = new ArrayList<Coordinate>();
-				for(int i=0;i<input.size();i=i+2)
+				for(int i=offSet;i<input.size();i=i+2)
 				{
 					coordinatesList.add(new Coordinate(Double.parseDouble(input.get(i)),Double.parseDouble(input.get(i+1))));
 				}
-				/*coordinatesList.add(new Coordinate(Double.parseDouble(input.get(0)),Double.parseDouble(input.get(1))));
-				coordinatesList.add(new Coordinate(Double.parseDouble(input.get(0)),Double.parseDouble(input.get(3))));
-				coordinatesList.add(new Coordinate(Double.parseDouble(input.get(2)),Double.parseDouble(input.get(3))));
-				coordinatesList.add(new Coordinate(Double.parseDouble(input.get(2)),Double.parseDouble(input.get(1))));
-				*/
 				coordinatesList.add(coordinatesList.get(0));
 				Coordinate[] coordinates=new Coordinate[coordinatesList.size()];
 				coordinates=coordinatesList.toArray(coordinates);
@@ -71,7 +68,7 @@ public class PolygonRDD implements Serializable{
 	{
 		this.polygonRDD=this.polygonRDD.repartition(number);
 	}
-	public Double[] boundary()
+	public Envelope boundary()
 	{
 		
 		Double[] boundary = new Double[4];
@@ -115,7 +112,7 @@ public class PolygonRDD implements Serializable{
 		{
 			boundary[3]=maxLatitude2;
 		}
-		return boundary;
+		return new Envelope(boundary[0],boundary[2],boundary[1],boundary[3]);
 	}
 	public PolygonRDD SpatialRangeQuery(Envelope envelope,Integer condition)
 	{
@@ -142,179 +139,94 @@ public class PolygonRDD implements Serializable{
 	public SpatialPairRDD<Polygon,ArrayList<Polygon>> SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		//Find the border of both of the two datasets---------------
-		final Integer condition=Condition;
-		//condition=0 means only consider fully contain in query, condition=1 means consider full contain and partial contain(overlap).
-	
-		Double minLongtitudeQueryAreaSet;
-		Double maxLongtitudeQueryAreaSet;
-		Double minLatitudeQueryAreaSet;
-		Double maxLatitudeQueryAreaSet;
-		Double minLongtitudeTargetSet;
-		Double maxLongtitudeTargetSet;
-		Double minLatitudeTargetSet;
-		Double maxLatitudeTargetSet;
-		Double minLongtitude1QueryAreaSet=polygonRDD.getPolygonRDD().min(new PolygonXMinComparator()).getEnvelopeInternal().getMinX();
-		Double maxLongtitude1QueryAreaSet=polygonRDD.getPolygonRDD().max(new PolygonXMinComparator()).getEnvelopeInternal().getMinX();
-		Double minLatitude1QueryAreaSet=polygonRDD.getPolygonRDD().min(new PolygonYMinComparator()).getEnvelopeInternal().getMinY();
-		Double maxLatitude1QueryAreaSet=polygonRDD.getPolygonRDD().max(new PolygonYMinComparator()).getEnvelopeInternal().getMinY();
-		Double minLongtitude2QueryAreaSet=polygonRDD.getPolygonRDD().min(new PolygonXMaxComparator()).getEnvelopeInternal().getMaxX();
-		Double maxLongtitude2QueryAreaSet=polygonRDD.getPolygonRDD().max(new PolygonXMaxComparator()).getEnvelopeInternal().getMaxX();
-		Double minLatitude2QueryAreaSet=polygonRDD.getPolygonRDD().min(new PolygonYMaxComparator()).getEnvelopeInternal().getMaxY();
-		Double maxLatitude2QueryAreaSet=polygonRDD.getPolygonRDD().max(new PolygonYMaxComparator()).getEnvelopeInternal().getMaxY();
-		Double minLongtitude1TargetSet=this.polygonRDD.min(new PolygonXMinComparator()).getEnvelopeInternal().getMinX();
-		Double maxLongtitude1TargetSet=this.polygonRDD.max(new PolygonXMinComparator()).getEnvelopeInternal().getMinX();
-		Double minLatitude1TargetSet=this.polygonRDD.min(new PolygonYMinComparator()).getEnvelopeInternal().getMinY();
-		Double maxLatitude1TargetSet=this.polygonRDD.max(new PolygonYMinComparator()).getEnvelopeInternal().getMinY();
-		Double minLongtitude2TargetSet=this.polygonRDD.min(new PolygonXMaxComparator()).getEnvelopeInternal().getMaxX();
-		Double maxLongtitude2TargetSet=this.polygonRDD.max(new PolygonXMaxComparator()).getEnvelopeInternal().getMaxX();
-		Double minLatitude2TargetSet=this.polygonRDD.min(new PolygonYMaxComparator()).getEnvelopeInternal().getMaxY();
-		Double maxLatitude2TargetSet=this.polygonRDD.max(new PolygonYMaxComparator()).getEnvelopeInternal().getMaxY();
-		//QueryAreaSet min/max longitude and latitude
-		if(minLongtitude1QueryAreaSet<minLongtitude2QueryAreaSet)
-		{
-			minLongtitudeQueryAreaSet=minLongtitude1QueryAreaSet;
-		}
-		else
-		{
-			minLongtitudeQueryAreaSet=minLongtitude2QueryAreaSet;
-		}
-		if(maxLongtitude1QueryAreaSet>maxLongtitude2QueryAreaSet)
-		{
-			maxLongtitudeQueryAreaSet=maxLongtitude1QueryAreaSet;
-		}
-		else
-		{
-			maxLongtitudeQueryAreaSet=maxLongtitude2QueryAreaSet;
-		}
-		if(minLatitude1QueryAreaSet<minLatitude2QueryAreaSet)
-		{
-			minLatitudeQueryAreaSet=minLatitude1QueryAreaSet;
-		}
-		else
-		{
-			minLatitudeQueryAreaSet=minLatitude2QueryAreaSet;
-		}
-		if(maxLatitude1QueryAreaSet>maxLatitude2QueryAreaSet)
-		{
-			maxLatitudeQueryAreaSet=maxLatitude1QueryAreaSet;
-		}
-		else
-		{
-			maxLatitudeQueryAreaSet=maxLatitude2QueryAreaSet;
-		}
-		//TargetSet min/max longitude and latitude
-		if(minLongtitude1TargetSet<minLongtitude2TargetSet)
-		{
-			minLongtitudeTargetSet=minLongtitude1TargetSet;
-		}
-		else
-		{
-			minLongtitudeTargetSet=minLongtitude2TargetSet;
-		}
-		if(maxLongtitude1TargetSet>maxLongtitude2TargetSet)
-		{
-			maxLongtitudeTargetSet=maxLongtitude1TargetSet;
-		}
-		else
-		{
-			maxLongtitudeTargetSet=maxLongtitude2TargetSet;
-		}
-		if(minLatitude1TargetSet<minLatitude2TargetSet)
-		{
-			minLatitudeTargetSet=minLatitude1TargetSet;
-		}
-		else
-		{
-			minLatitudeTargetSet=minLatitude2TargetSet;
-		}
-		if(maxLatitude1TargetSet>maxLatitude2TargetSet)
-		{
-			maxLatitudeTargetSet=maxLatitude1TargetSet;
-		}
-		else
-		{
-			maxLatitudeTargetSet=maxLatitude2TargetSet;
-		}
-		//Border found
-		Double minLongitude=minLongtitudeTargetSet;
-		Double minLatitude=minLatitudeTargetSet;
-		Double maxLongitude=maxLongtitudeTargetSet;
-		Double maxLatitude=maxLatitudeTargetSet;
-		if(minLongitude>minLongtitudeQueryAreaSet)
-		{
-			minLongitude=minLongtitudeQueryAreaSet;
-		}
-		if(maxLongitude<maxLongtitudeQueryAreaSet)
-		{
-			maxLongitude=maxLongtitudeQueryAreaSet;
-		}
-		if(minLatitude>minLatitudeQueryAreaSet)
-		{
-			minLatitude=minLatitudeQueryAreaSet;
-		}
-		if(maxLatitude<maxLatitudeQueryAreaSet)
-		{
-			maxLatitude=maxLatitudeQueryAreaSet;
-		}
-//Build Grid file-------------------
-		Double[] gridHorizontalBorder = new Double[GridNumberHorizontal+1];
-		Double[] gridVerticalBorder=new Double[GridNumberVertical+1];
-		double LongitudeIncrement=(maxLongitude-minLongitude)/GridNumberHorizontal;
-		double LatitudeIncrement=(maxLatitude-minLatitude)/GridNumberVertical;
-		System.out.println(maxLongitude);
-		System.out.println(minLongitude);
-		System.out.println(maxLatitude);
-		System.out.println(minLatitude);
-		for(int i=0;i<GridNumberHorizontal+1;i++)
-		{
-			gridHorizontalBorder[i]=minLongitude+LongitudeIncrement*i;
-		}
-		for(int i=0;i<GridNumberVertical+1;i++)
-		{
-			gridVerticalBorder[i]=minLatitude+LatitudeIncrement*i;
-		}
+				final Integer condition=Condition;
+				//Find the border of both of the two datasets---------------
+						//condition=0 means only consider fully contain in query, condition=1 means consider full contain and partial contain(overlap).
+						//QueryAreaSet min/max longitude and latitude
+						Envelope QueryWindowSetBoundary=polygonRDD.boundary();
+						//TargetSet min/max longitude and latitude
+						Envelope TargetSetBoundary=this.boundary();
+						Envelope boundary;
+						//Border found
+						JavaRDD<Polygon> TargetPreFiltered;
+						JavaRDD<Polygon> QueryAreaPreFiltered;
+						if(QueryWindowSetBoundary.contains(TargetSetBoundary))
+						{
+							boundary=TargetSetBoundary;
+							TargetPreFiltered=this.polygonRDD;
+							QueryAreaPreFiltered=polygonRDD.getPolygonRDD().filter(new PolygonPreFilter(boundary));
+						}
+						else if(TargetSetBoundary.contains(QueryWindowSetBoundary))
+						{
+							boundary=QueryWindowSetBoundary;
+							TargetPreFiltered=this.polygonRDD.filter(new PolygonPreFilter(boundary));
+							QueryAreaPreFiltered=polygonRDD.getPolygonRDD();
+						}
+						else if(QueryWindowSetBoundary.intersects(TargetSetBoundary))
+						{
+							boundary=QueryWindowSetBoundary.intersection(TargetSetBoundary);
+							TargetPreFiltered=this.polygonRDD.filter(new PolygonPreFilter(boundary));
+							QueryAreaPreFiltered=polygonRDD.getPolygonRDD().filter(new PolygonPreFilter(boundary));
+						}
+						else
+						{
+							System.out.println("Two input sets are not overlapped");
+							return null;
+						}
+				//Build Grid file-------------------
+						Double[] gridHorizontalBorder = new Double[GridNumberHorizontal+1];
+						Double[] gridVerticalBorder=new Double[GridNumberVertical+1];
+						double LongitudeIncrement=(boundary.getMaxX()-boundary.getMinX())/GridNumberHorizontal;
+						double LatitudeIncrement=(boundary.getMaxY()-boundary.getMinY())/GridNumberVertical;
+						for(int i=0;i<GridNumberHorizontal+1;i++)
+						{
+							gridHorizontalBorder[i]=boundary.getMinX()+LongitudeIncrement*i;
+						}
+						for(int i=0;i<GridNumberVertical+1;i++)
+						{
+							gridVerticalBorder[i]=boundary.getMinY()+LatitudeIncrement*i;
+						}
+						
 		//Assign grid ID to both of the two dataset---------------------
 		JavaPairRDD<Integer,Polygon> TargetSetWithID=this.polygonRDD.mapPartitionsToPair(new PartitionAssignGridPolygon(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
 		JavaPairRDD<Integer,Polygon> QueryAreaSetWithID=polygonRDD.getPolygonRDD().mapPartitionsToPair(new PartitionAssignGridPolygon(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
-//Join two dataset
-		JavaPairRDD<Integer, Tuple2<Iterable<Polygon>, Iterable<Polygon>>> jointSet=QueryAreaSetWithID.cogroup(TargetSetWithID).repartition((QueryAreaSetWithID.partitions().size()+TargetSetWithID.partitions().size())*2);
+		//Remove cache from memory
+		this.polygonRDD.unpersist();
+		polygonRDD.getPolygonRDD().unpersist();
+		//Join two dataset
+				JavaPairRDD<Integer, Tuple2<Polygon,Polygon>> jointSet1=QueryAreaSetWithID.join(TargetSetWithID,TargetSetWithID.partitions().size()*2);//.repartition((QueryAreaSetWithID.partitions().size()+TargetSetWithID.partitions().size())*2);
 		//Calculate the relation between one point and one query area
-				JavaPairRDD<Polygon,Polygon> queryResult=jointSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer,Tuple2<Iterable<Polygon>, Iterable<Polygon>>>, Polygon,Polygon>()
+				JavaPairRDD<Polygon,Polygon> jointSet=jointSet1.mapToPair(new PairFunction<Tuple2<Integer,Tuple2<Polygon,Polygon>>,Polygon,Polygon>()
 						{
 
-					public Iterable<Tuple2<Polygon, Polygon>> call(
-							Tuple2<Integer, Tuple2<Iterable<Polygon>, Iterable<Polygon>>> t)
-							throws Exception {
-						ArrayList<Tuple2<Polygon, Polygon>> QueryAreaAndTarget=new ArrayList();
-						Iterator<Polygon> QueryAreaIterator=t._2()._1().iterator();
-						
-						while(QueryAreaIterator.hasNext())
-						{
-							Polygon currentQueryArea=QueryAreaIterator.next();
-							Iterator<Polygon> TargetIterator=t._2()._2().iterator();
-							while(TargetIterator.hasNext())
-							{
-								Polygon currentTarget=TargetIterator.next();
-								if(condition==0){
-								if(currentQueryArea.contains(currentTarget))
-								{
-									QueryAreaAndTarget.add(new Tuple2<Polygon,Polygon>(currentQueryArea,currentTarget));
-								}
-								}
-								else
-								{
-									if(currentQueryArea.intersects(currentTarget))
-									{
-										QueryAreaAndTarget.add(new Tuple2<Polygon,Polygon>(currentQueryArea,currentTarget));
-									}
-								}
+							public Tuple2<Polygon, Polygon> call(
+									Tuple2<Integer, Tuple2<Polygon, Polygon>> t){
+								return t._2();
 							}
-						}
-						
-						return QueryAreaAndTarget;
-					}
-			
-				});
+					
+						});
+				JavaPairRDD<Polygon,Polygon> queryResult=jointSet.filter(new Function<Tuple2<Polygon,Polygon>,Boolean>()
+						{
+
+							public Boolean call(Tuple2<Polygon, Polygon> v1){
+								if(condition==0){
+									if(v1._1().contains(v1._2()))
+									{
+										return true;
+									}
+									else return false;
+									}
+									else
+									{
+										if(v1._1().contains(v1._2())||v1._1().intersects(v1._2()))
+										{
+											return true;
+										}
+										else return false;
+									}
+							}
+							
+						});
 		//Delete the duplicate result
 				JavaPairRDD<Polygon, Iterable<Polygon>> aggregatedResult=queryResult.groupByKey();
 				JavaPairRDD<Polygon,String> refinedResult=aggregatedResult.mapToPair(new PairFunction<Tuple2<Polygon,Iterable<Polygon>>,Polygon,String>()

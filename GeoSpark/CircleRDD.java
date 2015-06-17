@@ -46,7 +46,7 @@ public class CircleRDD implements Serializable{
 					
 				}));
 	}
-	public Double[] boundary()
+	public Envelope boundary()
 	{
 		Double[] boundary = new Double[4]; 
 		Double minLongtitude1=this.circleRDD.min(new CircleXMinComparator()).getMBR().getMinX();
@@ -89,7 +89,7 @@ public class CircleRDD implements Serializable{
 		{
 			boundary[3]=maxLatitude2;
 		}
-		return boundary;
+		return new Envelope(boundary[0],boundary[2],boundary[1],boundary[3]);
 	}
 	public PointRDD Centre()
 	{

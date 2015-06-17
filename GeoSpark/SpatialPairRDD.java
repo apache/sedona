@@ -40,7 +40,7 @@ public class SpatialPairRDD<T1,T2> implements Serializable{
 		return spatialPairRDD;
 	}
 	public void setSpatialPairRDD(JavaPairRDD<T1,T2> spatialPairRDD) {
-		this.spatialPairRDD = spatialPairRDD.cache();
+		this.spatialPairRDD = spatialPairRDD;
 	}
 	public void SavaAsFile(String OutputLocation)
 	{
