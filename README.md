@@ -11,6 +11,8 @@ GeoSpark is an in-memory cluster computing system for processing large-scale spa
 2. Apache Spark 1.2.1 and later
 3. JDK 1.7
 
+Note: GeoSpark has been tested on Apache Spark 1.2, 1.3, 1.4 and Apache Hadoop 2.4, 2.6.
+
 ### Steps
 
 1. Create your own project
