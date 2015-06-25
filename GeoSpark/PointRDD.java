@@ -10,6 +10,7 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
 
@@ -25,6 +26,8 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.index.quadtree.Quadtree;
+import com.vividsolutions.jts.index.strtree.STRtree;
 class PointFormatMapper implements Serializable,Function<String,Point>
 {
 	Integer offset=0;
@@ -120,20 +123,20 @@ public class PointRDD implements Serializable{
 		if(QueryWindowSetBoundary.contains(TargetSetBoundary))
 		{
 			boundary=TargetSetBoundary;
-			TargetPreFiltered=this.pointRDD;
-			QueryAreaPreFiltered=circleRDD.getCircleRDD().filter(new CirclePreFilter(boundary));
+			//TargetPreFiltered=this.pointRDD;
+			//QueryAreaPreFiltered=circleRDD.getCircleRDD().filter(new CirclePreFilter(boundary));
 		}
 		else if(TargetSetBoundary.contains(QueryWindowSetBoundary))
 		{
 			boundary=QueryWindowSetBoundary;
-			TargetPreFiltered=this.pointRDD.filter(new PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
-			QueryAreaPreFiltered=circleRDD.getCircleRDD();
+			//TargetPreFiltered=this.pointRDD.filter(new PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
+			//QueryAreaPreFiltered=circleRDD.getCircleRDD();
 		}
 		else if(QueryWindowSetBoundary.intersects(TargetSetBoundary))
 		{
 			boundary=QueryWindowSetBoundary.intersection(TargetSetBoundary);
-			TargetPreFiltered=this.pointRDD.filter(new PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
-			QueryAreaPreFiltered=circleRDD.getCircleRDD().filter(new CirclePreFilter(boundary));
+			//TargetPreFiltered=this.pointRDD.filter(new PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
+			//QueryAreaPreFiltered=circleRDD.getCircleRDD().filter(new CirclePreFilter(boundary));
 		}
 		else
 		{
@@ -156,8 +159,8 @@ public class PointRDD implements Serializable{
 		}
 //Assign grid ID to both of the two dataset---------------------
 		
-		JavaPairRDD<Integer,Point> TargetSetWithIDtemp=TargetPreFiltered.mapPartitionsToPair(new PartitionAssignGridPoint(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
-		JavaPairRDD<Integer,Circle> QueryAreaSetWithID1=QueryAreaPreFiltered.mapPartitionsToPair(new PartitionAssignGridCircle(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
+		JavaPairRDD<Integer,Point> TargetSetWithIDtemp=this.pointRDD.mapPartitionsToPair(new PartitionAssignGridPoint(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
+		JavaPairRDD<Integer,Circle> QueryAreaSetWithID1=circleRDD.getCircleRDD().mapPartitionsToPair(new PartitionAssignGridCircle(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
 		this.pointRDD.unpersist();
 		circleRDD.getCircleRDD().unpersist();
 		JavaPairRDD<Integer,Point> QueryAreaSetWithIDtemp=QueryAreaSetWithID1.mapToPair(new PairFunction<Tuple2<Integer,Circle>,Integer,Point>()
@@ -187,53 +190,40 @@ public class PointRDD implements Serializable{
 				JavaPairRDD<Point,Point> queryResult=jointSet1.filter(new CircleFilterPoint(Radius,Condition));
 //Delete the duplicate result
 				JavaPairRDD<Point, Iterable<Point>> aggregatedResult=queryResult.groupByKey();
-				JavaPairRDD<Point,String> refinedResult=aggregatedResult.mapToPair(new PairFunction<Tuple2<Point,Iterable<Point>>,Point,String>()
+				JavaPairRDD<Point,ArrayList<Point>> refinedResult=aggregatedResult.mapToPair(new PairFunction<Tuple2<Point,Iterable<Point>>,Point,ArrayList<Point>>()
 						{
 
-							public Tuple2<Point, String> call(Tuple2<Point, Iterable<Point>> t)
-									{
-								Integer commaFlag=0;
-								Iterator<Point> valueIterator=t._2().iterator();
-								String result="";
-								while(valueIterator.hasNext())
+							public Tuple2<Point, ArrayList<Point>> call(Tuple2<Point, Iterable<Point>> v){
+								ArrayList<Point> list=new ArrayList<Point>();
+								ArrayList<Point> result=new ArrayList<Point>();
+								Iterator<Point> targetIterator=v._2().iterator();
+								while(targetIterator.hasNext())
 								{
-									Point currentTarget=valueIterator.next();
-									String currentTargetString=""+currentTarget.getX()+","+currentTarget.getY();
-									if(!result.contains(currentTargetString))
-									{
-										
-										if(commaFlag==0)
-										{
-											result=result+currentTargetString;
-											commaFlag=1;
-										}
-										else result=result+","+currentTargetString;
-									}
+									list.add(targetIterator.next());
 								}
 								
-								return new Tuple2<Point, String>(t._1(),result);
+								for(int i=0;i<list.size();i++)
+								{
+									Integer duplicationFlag=0;
+									Point currentPointi=list.get(i);
+									for(int j=i+1;j<list.size();j++)
+									{
+										Point currentPointj=list.get(j);
+										if(currentPointi.equals(currentPointj))
+										{
+											duplicationFlag=1;
+										}
+									}
+									if(duplicationFlag==0)
+									{
+										result.add(currentPointi);
+									}
+								}
+								return new Tuple2<Point,ArrayList<Point>>(v._1(),result);
 							}
 					
 						});
-				SpatialPairRDD<Point,ArrayList<Point>> result=new SpatialPairRDD<Point,ArrayList<Point>>(refinedResult.mapToPair(new PairFunction<Tuple2<Point,String>,Point,ArrayList<Point>>()
-				{
-
-					public Tuple2<Point, ArrayList<Point>> call(Tuple2<Point, String> t)
-					{
-						List<String> resultListString= Arrays.asList(t._2().split(","));
-						Iterator<String> targetIterator=resultListString.iterator();
-						ArrayList<Point> resultList=new ArrayList<Point>();
-						while(targetIterator.hasNext())
-						{
-							GeometryFactory fact = new GeometryFactory();
-							Coordinate coordinate=new Coordinate(Double.parseDouble(targetIterator.next()),Double.parseDouble(targetIterator.next()));
-							Point currentTarget=fact.createPoint(coordinate);
-							resultList.add(currentTarget);
-						}
-						return new Tuple2<Point,ArrayList<Point>>(t._1(),resultList);
-					}
-					
-				}));
+				SpatialPairRDD<Point,ArrayList<Point>> result=new SpatialPairRDD<Point,ArrayList<Point>>(refinedResult);
 		return result;
 	}
 	public SpatialPairRDD<Envelope,ArrayList<Point>> SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
@@ -254,20 +244,20 @@ public class PointRDD implements Serializable{
 		if(QueryWindowSetBoundary.contains(TargetSetBoundary))
 		{
 			boundary=TargetSetBoundary;
-			TargetPreFiltered=this.pointRDD;
-			QueryAreaPreFiltered=rectangleRDD.getRectangleRDD().filter(new RectanglePreFilter(boundary));
+			//TargetPreFiltered=this.pointRDD;
+			//QueryAreaPreFiltered=rectangleRDD.getRectangleRDD().filter(new RectanglePreFilter(boundary));
 		}
 		else if(TargetSetBoundary.contains(QueryWindowSetBoundary))
 		{
 			boundary=QueryWindowSetBoundary;
-			TargetPreFiltered=this.pointRDD.filter(new PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
-			QueryAreaPreFiltered=rectangleRDD.getRectangleRDD();
+			//TargetPreFiltered=this.pointRDD.filter(new PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
+			//QueryAreaPreFiltered=rectangleRDD.getRectangleRDD();
 		}
 		else if(QueryWindowSetBoundary.intersects(TargetSetBoundary))
 		{
 			boundary=QueryWindowSetBoundary.intersection(TargetSetBoundary);
-			TargetPreFiltered=this.pointRDD.filter(new PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
-			QueryAreaPreFiltered=rectangleRDD.getRectangleRDD().filter(new RectanglePreFilter(boundary));
+			//TargetPreFiltered=this.pointRDD.filter(new PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
+			//QueryAreaPreFiltered=rectangleRDD.getRectangleRDD().filter(new RectanglePreFilter(boundary));
 		}
 		else
 		{
@@ -290,8 +280,8 @@ public class PointRDD implements Serializable{
 			gridVerticalBorder[i]=boundary.getMinY()+LatitudeIncrement*i;
 		}
 		//Assign grid ID to both of the two dataset---------------------
-		JavaPairRDD<Integer,Point> TargetSetWithIDtemp=TargetPreFiltered.mapPartitionsToPair(new PartitionAssignGridPoint(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
-		JavaPairRDD<Integer,Envelope> QueryAreaSetWithIDtemp=QueryAreaPreFiltered.mapPartitionsToPair(new PartitionAssignGridRectangle(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
+		JavaPairRDD<Integer,Point> TargetSetWithIDtemp=this.pointRDD.mapPartitionsToPair(new PartitionAssignGridPoint(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
+		JavaPairRDD<Integer,Envelope> QueryAreaSetWithIDtemp=rectangleRDD.getRectangleRDD().mapPartitionsToPair(new PartitionAssignGridRectangle(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
 		//Remove cache from memory
 		this.pointRDD.unpersist();
 		rectangleRDD.getRectangleRDD().unpersist();
@@ -331,57 +321,372 @@ public class PointRDD implements Serializable{
 			}});
 		//Delete the duplicate result
 				JavaPairRDD<Envelope, Iterable<Point>> aggregatedResult=queryResult.groupByKey();
-		
-				JavaPairRDD<Envelope,String> refinedResult=aggregatedResult.mapToPair(new PairFunction<Tuple2<Envelope,Iterable<Point>>,Envelope,String>()
+				JavaPairRDD<Envelope,ArrayList<Point>> refinedResult=aggregatedResult.mapToPair(new PairFunction<Tuple2<Envelope,Iterable<Point>>,Envelope,ArrayList<Point>>()
 						{
 
-							public Tuple2<Envelope, String> call(Tuple2<Envelope, Iterable<Point>> t)
-									{
-								Integer commaFlag=0;
-								Iterator<Point> valueIterator=t._2().iterator();
-								String result="";
-								while(valueIterator.hasNext())
+							public Tuple2<Envelope, ArrayList<Point>> call(Tuple2<Envelope, Iterable<Point>> v){
+								ArrayList<Point> list=new ArrayList<Point>();
+								ArrayList<Point> result=new ArrayList<Point>();
+								Iterator<Point> targetIterator=v._2().iterator();
+								while(targetIterator.hasNext())
 								{
-									Point currentTarget=valueIterator.next();
-									String currentTargetString=""+currentTarget.getX()+","+currentTarget.getY();
-									if(!result.contains(currentTargetString))
-									{
-										
-										if(commaFlag==0)
-										{
-											result=result+currentTargetString;
-											commaFlag=1;
-										}
-										else result=result+","+currentTargetString;
-									}
+									list.add(targetIterator.next());
 								}
 								
-								return new Tuple2<Envelope, String>(t._1(),result);
+								for(int i=0;i<list.size();i++)
+								{
+									Integer duplicationFlag=0;
+									Point currentPointi=list.get(i);
+									for(int j=i+1;j<list.size();j++)
+									{
+										Point currentPointj=list.get(j);
+										if(currentPointi.equals(currentPointj))
+										{
+											duplicationFlag=1;
+										}
+									}
+									if(duplicationFlag==0)
+									{
+										result.add(currentPointi);
+									}
+								}
+								return new Tuple2<Envelope,ArrayList<Point>>(v._1(),result);
 							}
 					
 						});
-				SpatialPairRDD<Envelope,ArrayList<Point>> result=new SpatialPairRDD<Envelope,ArrayList<Point>>(refinedResult.mapToPair(new PairFunction<Tuple2<Envelope,String>,Envelope,ArrayList<Point>>()
-				{
-
-					public Tuple2<Envelope, ArrayList<Point>> call(Tuple2<Envelope, String> t)
-					{
-						List<String> resultListString= Arrays.asList(t._2().split(","));
-						Iterator<String> targetIterator=resultListString.iterator();
-						ArrayList<Point> resultList=new ArrayList<Point>();
-						while(targetIterator.hasNext())
-						{
-							GeometryFactory fact = new GeometryFactory();
-							Coordinate coordinate=new Coordinate(Double.parseDouble(targetIterator.next()),Double.parseDouble(targetIterator.next()));
-							Point currentTarget=fact.createPoint(coordinate);
-							resultList.add(currentTarget);
-						}
-						return new Tuple2<Envelope,ArrayList<Point>>(t._1(),resultList);
-					}
-					
-				}));
+				SpatialPairRDD<Envelope,ArrayList<Point>> result=new SpatialPairRDD<Envelope,ArrayList<Point>>(refinedResult);
 		return result;
+
 	}
 
+
+	
+	
+	
+	public SpatialPairRDD<Envelope,ArrayList<Point>> SpatialJoinQueryWithIndex(RectangleRDD rectangleRDD,Integer GridNumberHorizontal,Integer GridNumberVertical,String Index)
+	{
+		//Find the border of both of the two datasets---------------
+		//final Integer condition=Condition;
+		final String index=Index;
+		//condition=0 means only consider fully contain in query, condition=1 means consider full contain and partial contain(overlap).
+		//QueryAreaSet min/max longitude and latitude
+		Envelope QueryWindowSetBoundary=rectangleRDD.boundary();
+		//TargetSet min/max longitude and latitude
+		Envelope TargetSetBoundary=this.boundary();
+		Envelope boundary=QueryWindowSetBoundary;
+		//Integer currentPartitionsTargetSet=this.pointRDD.partitions().size()/2;
+		//Integer currentPartitionQuerySet=rectangleRDD.getRectangleRDD().partitions().size();
+		//Border found
+		JavaRDD<Point> TargetPreFiltered;//=this.pointRDD.filter(new PointPreFilter(boundary));
+		JavaRDD<Envelope> QueryAreaPreFiltered;//=rectangleRDD.getRectangleRDD().filter(new RectanglePreFilter(boundary));
+		if(QueryWindowSetBoundary.contains(TargetSetBoundary))
+		{
+			boundary=TargetSetBoundary;
+			//TargetPreFiltered=this.pointRDD;
+			//QueryAreaPreFiltered=rectangleRDD.getRectangleRDD().filter(new RectanglePreFilter(boundary));
+		}
+		else if(TargetSetBoundary.contains(QueryWindowSetBoundary))
+		{
+			boundary=QueryWindowSetBoundary;
+			//TargetPreFiltered=this.pointRDD.filter(new PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
+			//QueryAreaPreFiltered=rectangleRDD.getRectangleRDD();
+		}
+		else if(QueryWindowSetBoundary.intersects(TargetSetBoundary))
+		{
+			boundary=QueryWindowSetBoundary.intersection(TargetSetBoundary);
+			//TargetPreFiltered=this.pointRDD.filter(new PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
+			//QueryAreaPreFiltered=rectangleRDD.getRectangleRDD().filter(new RectanglePreFilter(boundary));
+		}
+		else
+		{
+			System.out.println("Two input sets are not overlapped");
+			return null;
+		}
+		//JavaRDD<Point> TargetPreFiltered=this.pointRDD.filter(new PointPreFilter(boundary));
+		//JavaRDD<Envelope> QueryAreaPreFiltered=rectangleRDD.getRectangleRDD().filter(new RectanglePreFilter(boundary));
+//Build Grid file-------------------
+		Double[] gridHorizontalBorder = new Double[GridNumberHorizontal+1];
+		Double[] gridVerticalBorder=new Double[GridNumberVertical+1];
+		double LongitudeIncrement=(boundary.getMaxX()-boundary.getMinX())/GridNumberHorizontal;
+		double LatitudeIncrement=(boundary.getMaxY()-boundary.getMinY())/GridNumberVertical;
+		for(int i=0;i<GridNumberHorizontal+1;i++)
+		{
+			gridHorizontalBorder[i]=boundary.getMinX()+LongitudeIncrement*i;
+		}
+		for(int i=0;i<GridNumberVertical+1;i++)
+		{
+			gridVerticalBorder[i]=boundary.getMinY()+LatitudeIncrement*i;
+		}
+		//Assign grid ID to both of the two dataset---------------------
+		JavaPairRDD<Integer,Point> TargetSetWithIDtemp=this.pointRDD.mapPartitionsToPair(new PartitionAssignGridPoint(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
+		JavaPairRDD<Integer,Envelope> QueryAreaSetWithIDtemp=rectangleRDD.getRectangleRDD().mapPartitionsToPair(new PartitionAssignGridRectangle(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
+		//Remove cache from memory
+		this.pointRDD.unpersist();
+		rectangleRDD.getRectangleRDD().unpersist();
+		JavaPairRDD<Integer,Point> TargetSetWithID=TargetSetWithIDtemp;//.repartition(TargetSetWithIDtemp.partitions().size()*2);
+		JavaPairRDD<Integer,Envelope> QueryAreaSetWithID=QueryAreaSetWithIDtemp;//.repartition(TargetSetWithIDtemp.partitions().size()*2);
+//Join two dataset
+		//JavaPairRDD<Integer,Tuple2<Envelope,Point>> joinSet1=QueryAreaSetWithID.join(TargetSetWithID, TargetSetWithIDtemp.partitions().size()*2);
+		JavaPairRDD<Integer,Tuple2<Iterable<Envelope>,Iterable<Point>>> cogroupSet=QueryAreaSetWithID.cogroup(TargetSetWithID, TargetSetWithIDtemp.partitions().size()*2);
+		
+		JavaPairRDD<Envelope,ArrayList<Point>> queryResult=cogroupSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer,Tuple2<Iterable<Envelope>,Iterable<Point>>>,Envelope,ArrayList<Point>>()
+				{
+
+					public Iterable<Tuple2<Envelope, ArrayList<Point>>> call(
+							Tuple2<Integer, Tuple2<Iterable<Envelope>, Iterable<Point>>> t)
+					{
+						
+							if(index=="quadtree")
+							{
+								Quadtree qt=new Quadtree();
+								Iterator<Point> targetIterator=t._2()._2().iterator();
+								Iterator<Envelope> queryAreaIterator=t._2()._1().iterator();
+								ArrayList<Tuple2<Envelope,ArrayList<Point>>> result=new ArrayList();
+								while(targetIterator.hasNext())
+								{
+									Point currentTarget=targetIterator.next();
+									qt.insert(currentTarget.getEnvelopeInternal(), currentTarget);
+								}
+								while(queryAreaIterator.hasNext())
+								{
+									Envelope currentQueryArea=queryAreaIterator.next();
+									List<Point> queryList=qt.query(currentQueryArea);
+									if(queryList.size()!=0){
+									result.add(new Tuple2<Envelope,ArrayList<Point>>(currentQueryArea,new ArrayList<Point>(queryList)));
+									}
+								}
+								return result;
+							}
+							else
+							{
+								STRtree rt=new STRtree();
+								Iterator<Point> targetIterator=t._2()._2().iterator();
+								Iterator<Envelope> queryAreaIterator=t._2()._1().iterator();
+								ArrayList<Tuple2<Envelope,ArrayList<Point>>> result=new ArrayList();
+								while(targetIterator.hasNext())
+								{
+									Point currentTarget=targetIterator.next();
+									rt.insert(currentTarget.getEnvelopeInternal(), currentTarget);
+								}
+								while(queryAreaIterator.hasNext())
+								{
+									Envelope currentQueryArea=queryAreaIterator.next();
+									List<Point> queryList=rt.query(currentQueryArea);
+									if(queryList.size()!=0){
+									result.add(new Tuple2<Envelope,ArrayList<Point>>(currentQueryArea,new ArrayList<Point>(queryList)));
+									}
+								}
+								return result;
+							}
+						
+					}
+			
+				});
+		//Delete the duplicate result
+				JavaPairRDD<Envelope, ArrayList<Point>> aggregatedResult=queryResult.reduceByKey(new Function2<ArrayList<Point>,ArrayList<Point>,ArrayList<Point>>()
+						{
+
+							public ArrayList<Point> call(ArrayList<Point> v1,
+									ArrayList<Point> v2) {
+								ArrayList<Point> v3=v1;
+								v3.addAll(v2);
+								return v2;
+							}
+					
+						});
+				JavaPairRDD<Envelope,ArrayList<Point>> refinedResult=aggregatedResult.mapToPair(new PairFunction<Tuple2<Envelope,ArrayList<Point>>,Envelope,ArrayList<Point>>()
+						{
+
+							public Tuple2<Envelope, ArrayList<Point>> call(Tuple2<Envelope, ArrayList<Point>> v){
+								ArrayList<Point> result=new ArrayList<Point>();
+								Iterator<Point> targetIterator=v._2().iterator();
+								for(int i=0;i<v._2().size();i++)
+								{
+									Integer duplicationFlag=0;
+									Point currentPointi=v._2().get(i);
+									for(int j=i+1;j<v._2().size();j++)
+									{
+										Point currentPointj=v._2().get(j);
+										if(currentPointi.equals(currentPointj))
+										{
+											duplicationFlag=1;
+										}
+									}
+									if(duplicationFlag==0)
+									{
+										result.add(currentPointi);
+									}
+								}
+								return new Tuple2<Envelope,ArrayList<Point>>(v._1(),result);
+							}
+					
+						});
+				SpatialPairRDD<Envelope,ArrayList<Point>> result=new SpatialPairRDD<Envelope,ArrayList<Point>>(refinedResult);
+		return result;
+	}
+	
+	
+	
+	
+	public SpatialPairRDD<Point,ArrayList<Point>> SpatialJoinQueryWithIndex(CircleRDD circleRDD,Integer GridNumberHorizontal,Integer GridNumberVertical,String Index)
+	{
+		//Find the border of both of the two datasets---------------
+				//condition=0 means only consider fully contain in query, condition=1 means consider full contain and partial contain(overlap).
+				//QueryAreaSet min/max longitude and latitude
+				final String index=Index;
+				Envelope QueryWindowSetBoundary=circleRDD.boundary();
+				//TargetSet min/max longitude and latitude
+				Envelope TargetSetBoundary=this.boundary();
+				Envelope boundary;
+				//Border found
+				JavaRDD<Point> TargetPreFiltered;
+				JavaRDD<Circle> QueryAreaPreFiltered;
+				//Integer currentPartitionsTargetSet=this.pointRDD.partitions().size()/2;
+				//Integer currentPartitionQuerySet=circleRDD.getCircleRDD().partitions().size();
+				if(QueryWindowSetBoundary.contains(TargetSetBoundary))
+				{
+					boundary=TargetSetBoundary;
+					//TargetPreFiltered=this.pointRDD;
+					//QueryAreaPreFiltered=circleRDD.getCircleRDD().filter(new CirclePreFilter(boundary));
+				}
+				else if(TargetSetBoundary.contains(QueryWindowSetBoundary))
+				{
+					boundary=QueryWindowSetBoundary;
+					//TargetPreFiltered=this.pointRDD.filter(new PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
+					//QueryAreaPreFiltered=circleRDD.getCircleRDD();
+				}
+				else if(QueryWindowSetBoundary.intersects(TargetSetBoundary))
+				{
+					boundary=QueryWindowSetBoundary.intersection(TargetSetBoundary);
+					//TargetPreFiltered=this.pointRDD.filter(new PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
+					//QueryAreaPreFiltered=circleRDD.getCircleRDD().filter(new CirclePreFilter(boundary));
+				}
+				else
+				{
+					System.out.println("Two input sets are not overlapped");
+					return null;
+				}
+
+		//Build Grid file-------------------
+				Double[] gridHorizontalBorder = new Double[GridNumberHorizontal+1];
+				Double[] gridVerticalBorder=new Double[GridNumberVertical+1];
+				double LongitudeIncrement=(boundary.getMaxX()-boundary.getMinX())/GridNumberHorizontal;
+				double LatitudeIncrement=(boundary.getMaxY()-boundary.getMinY())/GridNumberVertical;
+				for(int i=0;i<GridNumberHorizontal+1;i++)
+				{
+					gridHorizontalBorder[i]=boundary.getMinX()+LongitudeIncrement*i;
+				}
+				for(int i=0;i<GridNumberVertical+1;i++)
+				{
+					gridVerticalBorder[i]=boundary.getMinY()+LatitudeIncrement*i;
+				}
+		//Assign grid ID to both of the two dataset---------------------
+				
+				JavaPairRDD<Integer,Point> TargetSetWithIDtemp=this.pointRDD.mapPartitionsToPair(new PartitionAssignGridPoint(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
+				JavaPairRDD<Integer,Circle> QueryAreaSetWithIDtemp=circleRDD.getCircleRDD().mapPartitionsToPair(new PartitionAssignGridCircle(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
+				this.pointRDD.unpersist();
+				circleRDD.getCircleRDD().unpersist();
+				JavaPairRDD<Integer,Point> TargetSetWithID=TargetSetWithIDtemp;//.repartition(TargetSetWithIDtemp.partitions().size()*2);
+				JavaPairRDD<Integer,Circle> QueryAreaSetWithID=QueryAreaSetWithIDtemp;//.repartition(TargetSetWithIDtemp.partitions().size()*2);
+//Join two dataset
+				JavaPairRDD<Integer,Tuple2<Iterable<Circle>,Iterable<Point>>> cogroupSet=QueryAreaSetWithID.cogroup(TargetSetWithID, TargetSetWithIDtemp.partitions().size()*2);
+		
+		JavaPairRDD<Circle,ArrayList<Point>> queryResult=cogroupSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer,Tuple2<Iterable<Circle>,Iterable<Point>>>,Circle,ArrayList<Point>>()
+				{
+
+					public Iterable<Tuple2<Circle, ArrayList<Point>>> call(
+							Tuple2<Integer, Tuple2<Iterable<Circle>, Iterable<Point>>> t)
+					{
+						
+							if(index=="quadtree")
+							{
+								Quadtree qt=new Quadtree();
+								Iterator<Point> targetIterator=t._2()._2().iterator();
+								Iterator<Circle> queryAreaIterator=t._2()._1().iterator();
+								ArrayList<Tuple2<Circle,ArrayList<Point>>> result=new ArrayList();
+								while(targetIterator.hasNext())
+								{
+									Point currentTarget=targetIterator.next();
+									qt.insert(currentTarget.getEnvelopeInternal(), currentTarget);
+								}
+								while(queryAreaIterator.hasNext())
+								{
+									Circle currentQueryArea=queryAreaIterator.next();
+									List<Point> queryList=qt.query(currentQueryArea.getMBR());
+									if(queryList.size()!=0){
+									result.add(new Tuple2<Circle,ArrayList<Point>>(currentQueryArea,new ArrayList<Point>(queryList)));
+									}
+								}
+								return result;
+							}
+							else
+							{
+								STRtree rt=new STRtree();
+								Iterator<Point> targetIterator=t._2()._2().iterator();
+								Iterator<Circle> queryAreaIterator=t._2()._1().iterator();
+								ArrayList<Tuple2<Circle,ArrayList<Point>>> result=new ArrayList();
+								while(targetIterator.hasNext())
+								{
+									Point currentTarget=targetIterator.next();
+									rt.insert(currentTarget.getEnvelopeInternal(), currentTarget);
+								}
+								while(queryAreaIterator.hasNext())
+								{
+									Circle currentQueryArea=queryAreaIterator.next();
+									List<Point> queryList=rt.query(currentQueryArea.getMBR());
+									if(queryList.size()!=0){
+									result.add(new Tuple2<Circle,ArrayList<Point>>(currentQueryArea,new ArrayList<Point>(queryList)));
+									}
+								}
+								return result;
+							}
+						
+					}
+			
+				});
+		//Delete the duplicate result
+				JavaPairRDD<Circle, ArrayList<Point>> aggregatedResult=queryResult.reduceByKey(new Function2<ArrayList<Point>,ArrayList<Point>,ArrayList<Point>>()
+						{
+
+							public ArrayList<Point> call(ArrayList<Point> v1,
+									ArrayList<Point> v2) {
+								ArrayList<Point> v3=v1;
+								v3.addAll(v2);
+								return v2;
+							}
+					
+						});
+				JavaPairRDD<Point,ArrayList<Point>> refinedResult=aggregatedResult.mapToPair(new PairFunction<Tuple2<Circle,ArrayList<Point>>,Point,ArrayList<Point>>()
+						{
+
+							public Tuple2<Point, ArrayList<Point>> call(Tuple2<Circle, ArrayList<Point>> v){
+								ArrayList<Point> result=new ArrayList<Point>();
+								Iterator<Point> targetIterator=v._2().iterator();
+								for(int i=0;i<v._2().size();i++)
+								{
+									Integer duplicationFlag=0;
+									Point currentPointi=v._2().get(i);
+									for(int j=i+1;j<v._2().size();j++)
+									{
+										Point currentPointj=v._2().get(j);
+										if(currentPointi.equals(currentPointj))
+										{
+											duplicationFlag=1;
+										}
+									}
+									if(duplicationFlag==0)
+									{
+										result.add(currentPointi);
+									}
+								}
+								return new Tuple2<Point,ArrayList<Point>>(v._1().getCentre(),result);
+							}
+					
+						});
+				SpatialPairRDD<Point,ArrayList<Point>> result=new SpatialPairRDD<Point,ArrayList<Point>>(refinedResult);
+		return result;
+	}
+	
 	public SpatialPairRDD<Polygon,ArrayList<Point>> SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		//Find the border of both of the two datasets---------------
@@ -497,6 +802,7 @@ public class PointRDD implements Serializable{
 		}));
 		return result;
 	}
+	
 	public SpatialPairRDD<Polygon,ArrayList<Point>> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		final Integer condition=Condition;
