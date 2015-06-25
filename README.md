@@ -62,10 +62,10 @@ Each tuple contains unlimited points.
 
 ## Spatial Index
 
-GeoSpark supports two Spatial Indexes, Quad-Tree and R-Tree. There are two methods can create a desired Spatial Index.
+GeoSpark supports two Spatial Indexes, Quad-Tree and R-Tree. There are two methods in GeoSpark can create a desired Spatial Index.
 
-1. Instantialize SpatialIndexRDD like PointIndexRDD, RectangleIndexRDD or PolygonIndexRDD. The index woulbe be created and cached in memory automatically.
-2. Call SpatialJoinQueryWithIndex and specify IndexName in the parameters. GeoSpark will create local spatial index on each machine on-the-fly.
+1. Instantialize SpatialIndexRDDs like PointIndexRDD, RectangleIndexRDD or PolygonIndexRDD. GeoSpark will create Spatial Index and cache it in memory automatically.
+2. Call SpatialJoinQueryWithIndex in SpatialRDDs and specify IndexName in the parameters. GeoSpark will create local spatial index on each machine on-the-fly when it does spatial join query.
 
 ## Main functionality checklist
 
