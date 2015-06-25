@@ -60,6 +60,13 @@ Two pairs of longitude and latitude present the vertexes lie on the diagonal of 
 
 Each tuple contains unlimited points.
 
+## Spatial Index
+
+GeoSpark supports two Spatial Indexes, Quad-Tree and R-Tree. There are two methods can create a desired Spatial Index.
+
+1. Instantialize SpatialIndexRDD like PointIndexRDD, RectangleIndexRDD or PolygonIndexRDD. The index woulbe be created and cached in memory automatically.
+2. Call SpatialJoinQueryWithIndex and specify IndexName in the parameters. GeoSpark will create local spatial index on each machine on-the-fly.
+
 ## Main functionality checklist
 
 ### PointRDD
@@ -83,6 +90,8 @@ Each tuple contains unlimited points.
 * `SpatialPairRDD<Polygon,ArrayList<Point>> SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
 
 * `SpatialPairRDD<Polygon,ArrayList<Point>> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+* `SpatialPairRDD<Envelope,ArrayList<Point>> SpatialJoinQueryWithIndex(RectangleRDD rectangleRDD,Integer GridNumberHorizontal,Integer GridNumberVertical, String IndexName)`
+* `SpatialPairRDD<Envelope,ArrayList<Point>> SpatialJoinQueryWithIndex(PolygonRDD polygonRDD,Integer GridNumberHorizontal,Integer GridNumberVertical, String IndexName)` 
 
 ### RectangleRDD
 
@@ -107,6 +116,8 @@ Each tuple contains unlimited points.
 
 
   * `SpatialPairRDD<Polygon,ArrayList<Envelope>> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
+  * `SpatialPairRDD<Envelope,ArrayList<Point>> SpatialJoinQueryWithIndex(RectangleRDD rectangleRDD,Integer GridNumberHorizontal,Integer GridNumberVertical, String IndexName)`
+  * `SpatialPairRDD<Envelope,ArrayList<Point>> SpatialJoinQueryWithIndex(PolygonRDD polygonRDD,Integer GridNumberHorizontal,Integer GridNumberVertical, String IndexName)` 
    
 
 ### PolygonRDD
@@ -133,7 +144,26 @@ Each tuple contains unlimited points.
  
   * `SpatialPairRDD<Polygon,ArrayList<Polygon>> SpatialJoinQueryWithMBR(Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)`
 
+###PointIndexRDD
 
+  * `Constructor: RectangleRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter,String IndexName)`
+  * `Constructor: RectangleRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter,Integer partitions,String IndexName)`
+  *  `PointRDD SpatialRangeQuery(Envelope envelope)`
+  *  `PointRDD SpatialRangeQuery(Polygon polygon)`
+
+###RectangleIndexRDD
+
+  * `Constructor: RectangleRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter,String IndexName)`
+  * `Constructor: RectangleRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter,Integer partitions,String IndexName)`
+  * `RectangleRDD SpatialRangeQuery(Envelope envelope)`
+  * `RectangleRDD SpatialRangeQuery(Polygon polygon)`
+
+###PolygonIndexRDD
+
+  * `Constructor: RectangleRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter,String IndexName)`
+  * `Constructor: RectangleRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter,Integer partitions,String IndexName)`
+  * `PolygonRDD SpatialRangeQuery(Envelope envelope)`
+  * `PolygonRDD SpatialRangeQuery(Polygon polygon)`
 
 ### CircleRDD
 
@@ -170,6 +200,6 @@ Mohamed Sarwat (msarwat@asu.edu)
 
 ## Acknowledgement
 
-GeoSaprk makes used of JTS Topology Suite Version 1.13 for some geometrical computations.
+GeoSaprk makes use of JTS Topology Suite Version 1.13 for some geometrical computations.
 
 JTS Topology Suite website: http://tsusiatsoftware.net/jts/main.html
