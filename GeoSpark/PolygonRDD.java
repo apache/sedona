@@ -27,7 +27,41 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.precision.GeometryPrecisionReducer;
-
+class PolygonFormatMapper implements Function<String,Polygon>,Serializable
+{
+	Integer offset=0;
+	String splitter="csv";
+	public PolygonFormatMapper(Integer Offset,String Splitter)
+	{
+		this.offset=Offset;
+		this.splitter=Splitter;
+	}
+	public Polygon call(String s)
+	{	
+		String seperater=",";
+		if(this.splitter.contains("tsv"))
+		{
+			seperater="\t";
+		}
+		else
+		{
+			seperater=",";
+		}
+		List<String> input=Arrays.asList(s.split(seperater));
+		ArrayList<Coordinate> coordinatesList = new ArrayList<Coordinate>();
+		for(int i=this.offset;i<input.size();i=i+2)
+		{
+			coordinatesList.add(new Coordinate(Double.parseDouble(input.get(i)),Double.parseDouble(input.get(i+1))));
+		}
+		coordinatesList.add(coordinatesList.get(0));
+		Coordinate[] coordinates=new Coordinate[coordinatesList.size()];
+		coordinates=coordinatesList.toArray(coordinates);
+		GeometryFactory fact = new GeometryFactory();
+		 LinearRing linear = new GeometryFactory().createLinearRing(coordinates);
+		 Polygon polygon = new Polygon(linear, null, fact);
+		 return polygon;
+	}
+}
 public class PolygonRDD implements Serializable{
 	private JavaRDD<Polygon> polygonRDD;
 	public PolygonRDD(JavaRDD<Polygon> polygonRDD)
@@ -37,26 +71,12 @@ public class PolygonRDD implements Serializable{
 	public PolygonRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter,Integer partitions)
 	{
 		
-		final Integer offSet=Offset;
-		this.setPolygonRDD(spark.textFile(InputLocation,partitions).map(new Function<String,Polygon>()
-			{
-			public Polygon call(String s)
-			{	
-				List<String> input=Arrays.asList(s.split(","));
-				ArrayList<Coordinate> coordinatesList = new ArrayList<Coordinate>();
-				for(int i=offSet;i<input.size();i=i+2)
-				{
-					coordinatesList.add(new Coordinate(Double.parseDouble(input.get(i)),Double.parseDouble(input.get(i+1))));
-				}
-				coordinatesList.add(coordinatesList.get(0));
-				Coordinate[] coordinates=new Coordinate[coordinatesList.size()];
-				coordinates=coordinatesList.toArray(coordinates);
-				GeometryFactory fact = new GeometryFactory();
-				 LinearRing linear = new GeometryFactory().createLinearRing(coordinates);
-				 Polygon polygon = new Polygon(linear, null, fact);
-				 return polygon;
-			}
-			}).cache());
+		this.setPolygonRDD(spark.textFile(InputLocation,partitions).map(new PolygonFormatMapper(Offset,Splitter)).cache());
+	}
+	public PolygonRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter)
+	{
+		
+		this.setPolygonRDD(spark.textFile(InputLocation).map(new PolygonFormatMapper(Offset,Splitter)).cache());
 	}
 	public JavaRDD<Polygon> getPolygonRDD() {
 		return polygonRDD;
