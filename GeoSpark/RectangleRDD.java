@@ -15,7 +15,6 @@ import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
-import Functions.GridFileMaker;
 import Functions.PartitionAssignGridPoint;
 import Functions.PartitionAssignGridRectangle;
 import Functions.RectangleRangeFilter;
