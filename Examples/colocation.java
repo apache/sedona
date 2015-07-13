@@ -15,6 +15,7 @@
  * 12. Grid number on Y-axis (Default: 100)
  * Result is saved at "hdfs://"+IP+":54310/test/tempResult.txt";
  * */
+ package Examples;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
