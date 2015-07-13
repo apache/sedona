@@ -19,7 +19,7 @@ contained by it will be attached behind it in this instance.
  * */
 
 
-
+package Examples;
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.io.Serializable;
