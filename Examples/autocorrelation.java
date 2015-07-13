@@ -15,6 +15,7 @@
  * 12. Grid number on Y-axis (Default: 100)
  * Result is saved at "hdfs://"+IP+":54310/test/tempResult.txt";
  * */
+package Examples;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
