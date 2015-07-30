@@ -196,6 +196,13 @@ GeoSpark supports two Spatial Indexes, Quad-Tree and R-Tree. There are two metho
 
 * `SpatialPairRDD<T1, Polygon> FlatMapToPolygon()`
 
+
+
+## Acknowledgement
+
+GeoSaprk makes use of JTS Topology Suite Version 1.13 for some geometrical computations.
+
+JTS Topology Suite website: http://tsusiatsoftware.net/jts/main.html
 ## Contact
 
 ### Contributors
@@ -208,8 +215,5 @@ Mohamed Sarwat (msarwat@asu.edu)
 ###Project website
 Please visit [GeoSpark project wesbite](http://www.public.asu.edu/~jiayu2/geospark/index.html) for latest news and releases.
 
-## Acknowledgement
-
-GeoSaprk makes use of JTS Topology Suite Version 1.13 for some geometrical computations.
-
-JTS Topology Suite website: http://tsusiatsoftware.net/jts/main.html
+### DataSys Lab
+GeoSpark is one of the projects under [DataSys Lab](http://www.datasyslab.org/) at Arizona State University. The mission of DataSys Lab is designing and developing experimental data management systems (e.g., database systems).
