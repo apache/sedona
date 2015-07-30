@@ -196,11 +196,17 @@ GeoSpark supports two Spatial Indexes, Quad-Tree and R-Tree. There are two metho
 
 * `SpatialPairRDD<T1, Polygon> FlatMapToPolygon()`
 
-## Contributor
+## Contact
 
+### Contributors
 Jia Yu (jiayu2@asu.edu)
 
+Jinxuan Wu (jinxuanw@asu.edu)
+
 Mohamed Sarwat (msarwat@asu.edu)
+
+###Project website
+Please visit [GeoSpark project wesbite](http://www.public.asu.edu/~jiayu2/geospark/index.html) for latest news and releases.
 
 ## Acknowledgement
 
