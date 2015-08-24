@@ -1,19 +1,17 @@
 package GeoSpark;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
+import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
-
+import org.apache.spark.broadcast.Broadcast;
 import scala.Tuple2;
 import Functions.PartitionAssignGridCircle;
 import Functions.PartitionAssignGridPoint;
@@ -427,73 +425,63 @@ public class PointRDD implements Serializable{
 		JavaPairRDD<Integer,Envelope> QueryAreaSetWithID=QueryAreaSetWithIDtemp;//.repartition(TargetSetWithIDtemp.partitions().size()*2);
 //Join two dataset
 		//JavaPairRDD<Integer,Tuple2<Envelope,Point>> joinSet1=QueryAreaSetWithID.join(TargetSetWithID, TargetSetWithIDtemp.partitions().size()*2);
-		JavaPairRDD<Integer,Tuple2<Iterable<Envelope>,Iterable<Point>>> cogroupSet=QueryAreaSetWithID.cogroup(TargetSetWithID, TargetSetWithIDtemp.partitions().size()*2);
+		JavaPairRDD<Integer,Tuple2<Iterable<Envelope>,Iterable<Point>>> cogroupSet=QueryAreaSetWithID.cogroup(TargetSetWithID, TargetSetWithIDtemp.partitions().size() * 2);
 		
-		JavaPairRDD<Envelope,ArrayList<Point>> queryResult=cogroupSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer,Tuple2<Iterable<Envelope>,Iterable<Point>>>,Envelope,ArrayList<Point>>()
-				{
+		JavaPairRDD<Envelope,ArrayList<Point>> queryResult=cogroupSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer, Tuple2<Iterable<Envelope>, Iterable<Point>>>, Envelope, ArrayList<Point>>() {
 
-					public Iterable<Tuple2<Envelope, ArrayList<Point>>> call(
-							Tuple2<Integer, Tuple2<Iterable<Envelope>, Iterable<Point>>> t)
-					{
-						
-							if(index=="quadtree")
-							{
-								Quadtree qt=new Quadtree();
-								Iterator<Point> targetIterator=t._2()._2().iterator();
-								Iterator<Envelope> queryAreaIterator=t._2()._1().iterator();
-								ArrayList<Tuple2<Envelope,ArrayList<Point>>> result=new ArrayList();
-								while(targetIterator.hasNext())
-								{
-									Point currentTarget=targetIterator.next();
-									qt.insert(currentTarget.getEnvelopeInternal(), currentTarget);
-								}
-								while(queryAreaIterator.hasNext())
-								{
-									Envelope currentQueryArea=queryAreaIterator.next();
-									List<Point> queryList=qt.query(currentQueryArea);
-									if(queryList.size()!=0){
-									result.add(new Tuple2<Envelope,ArrayList<Point>>(currentQueryArea,new ArrayList<Point>(queryList)));
-									}
-								}
-								return result;
-							}
-							else
-							{
-								STRtree rt=new STRtree();
-								Iterator<Point> targetIterator=t._2()._2().iterator();
-								Iterator<Envelope> queryAreaIterator=t._2()._1().iterator();
-								ArrayList<Tuple2<Envelope,ArrayList<Point>>> result=new ArrayList();
-								while(targetIterator.hasNext())
-								{
-									Point currentTarget=targetIterator.next();
-									rt.insert(currentTarget.getEnvelopeInternal(), currentTarget);
-								}
-								while(queryAreaIterator.hasNext())
-								{
-									Envelope currentQueryArea=queryAreaIterator.next();
-									List<Point> queryList=rt.query(currentQueryArea);
-									if(queryList.size()!=0){
-									result.add(new Tuple2<Envelope,ArrayList<Point>>(currentQueryArea,new ArrayList<Point>(queryList)));
-									}
-								}
-								return result;
-							}
-						
+			public Iterable<Tuple2<Envelope, ArrayList<Point>>> call(
+					Tuple2<Integer, Tuple2<Iterable<Envelope>, Iterable<Point>>> t) {
+
+				if (index == "quadtree") {
+					Quadtree qt = new Quadtree();
+					Iterator<Point> targetIterator = t._2()._2().iterator();
+					Iterator<Envelope> queryAreaIterator = t._2()._1().iterator();
+					ArrayList<Tuple2<Envelope, ArrayList<Point>>> result = new ArrayList();
+					while (targetIterator.hasNext()) {
+						Point currentTarget = targetIterator.next();
+						qt.insert(currentTarget.getEnvelopeInternal(), currentTarget);
 					}
-			
-				});
-		//Delete the duplicate result
-				JavaPairRDD<Envelope, ArrayList<Point>> aggregatedResult=queryResult.reduceByKey(new Function2<ArrayList<Point>,ArrayList<Point>,ArrayList<Point>>()
-						{
+					while (queryAreaIterator.hasNext()) {
+						Envelope currentQueryArea = queryAreaIterator.next();
+						List<Point> queryList = qt.query(currentQueryArea);
+						if (queryList.size() != 0) {
+							result.add(new Tuple2<Envelope, ArrayList<Point>>(currentQueryArea, new ArrayList<Point>(queryList)));
+						}
+					}
+					return result;
+				} else {
+					STRtree rt = new STRtree();
+					Iterator<Point> targetIterator = t._2()._2().iterator();
+					Iterator<Envelope> queryAreaIterator = t._2()._1().iterator();
+					ArrayList<Tuple2<Envelope, ArrayList<Point>>> result = new ArrayList();
+					while (targetIterator.hasNext()) {
+						Point currentTarget = targetIterator.next();
+						rt.insert(currentTarget.getEnvelopeInternal(), currentTarget);
+					}
+					while (queryAreaIterator.hasNext()) {
+						Envelope currentQueryArea = queryAreaIterator.next();
+						List<Point> queryList = rt.query(currentQueryArea);
+						if (queryList.size() != 0) {
+							result.add(new Tuple2<Envelope, ArrayList<Point>>(currentQueryArea, new ArrayList<Point>(queryList)));
+						}
+					}
+					return result;
+				}
 
-							public ArrayList<Point> call(ArrayList<Point> v1,
-									ArrayList<Point> v2) {
-								ArrayList<Point> v3=v1;
-								v3.addAll(v2);
-								return v2;
-							}
-					
-						});
+			}
+
+		});
+		//Delete the duplicate result
+				JavaPairRDD<Envelope, ArrayList<Point>> aggregatedResult=queryResult.reduceByKey(new Function2<ArrayList<Point>, ArrayList<Point>, ArrayList<Point>>() {
+
+					public ArrayList<Point> call(ArrayList<Point> v1,
+												 ArrayList<Point> v2) {
+						ArrayList<Point> v3 = v1;
+						v3.addAll(v2);
+						return v2;
+					}
+
+				});
 				JavaPairRDD<Envelope,ArrayList<Point>> refinedResult=aggregatedResult.mapToPair(new PairFunction<Tuple2<Envelope,ArrayList<Point>>,Envelope,ArrayList<Point>>()
 						{
 
@@ -734,24 +722,23 @@ public class PointRDD implements Serializable{
 		}
 		//Assign grid ID to both of the two dataset---------------------
 		JavaPairRDD<Integer,Point> TargetSetWithIDtemp=TargetPreFiltered.mapPartitionsToPair(new PartitionAssignGridPoint(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
-		JavaPairRDD<Integer,Polygon> QueryAreaSetWithIDtemp=QueryAreaPreFiltered.mapPartitionsToPair(new PartitionAssignGridPolygon(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
+		JavaPairRDD<Integer,Polygon> QueryAreaSetWithIDtemp=QueryAreaPreFiltered.mapPartitionsToPair(new PartitionAssignGridPolygon(GridNumberHorizontal, GridNumberVertical, gridHorizontalBorder, gridVerticalBorder));
 		//Remove cache from memory
 		this.pointRDD.unpersist();
 		polygonRDD.getPolygonRDD().unpersist();
 		JavaPairRDD<Integer,Point> TargetSetWithID=TargetSetWithIDtemp;//.repartition(TargetSetWithIDtemp.partitions().size()*2);
 		JavaPairRDD<Integer,Polygon> QueryAreaSetWithID=QueryAreaSetWithIDtemp;//.repartition(TargetSetWithIDtemp.partitions().size()*2);
 //Join two dataset
-		JavaPairRDD<Integer,Tuple2<Polygon,Point>> joinSet1=QueryAreaSetWithID.join(TargetSetWithID, TargetSetWithIDtemp.partitions().size()*2);
-		JavaPairRDD<Polygon,Point> joinSet=joinSet1.mapToPair(new PairFunction<Tuple2<Integer,Tuple2<Polygon,Point>>,Polygon,Point>()
-				{
+		JavaPairRDD<Integer,Tuple2<Polygon,Point>> joinSet1=QueryAreaSetWithID.join(TargetSetWithID, TargetSetWithIDtemp.partitions().size() * 2);
+		JavaPairRDD<Polygon,Point> joinSet=joinSet1.mapToPair(new PairFunction<Tuple2<Integer, Tuple2<Polygon, Point>>, Polygon, Point>() {
 
-					public Tuple2<Polygon, Point> call(
-							Tuple2<Integer, Tuple2<Polygon, Point>> t)
-							throws Exception {
-						return t._2();
-					}
-			
-				});
+			public Tuple2<Polygon, Point> call(
+					Tuple2<Integer, Tuple2<Polygon, Point>> t)
+					throws Exception {
+				return t._2();
+			}
+
+		});
 //Delete the duplicate result
 		JavaPairRDD<Polygon, Iterable<Point>> aggregatedResult=joinSet.groupByKey();
 		JavaPairRDD<Polygon,String> refinedResult=aggregatedResult.mapToPair(new PairFunction<Tuple2<Polygon,Iterable<Point>>,Polygon,String>()
@@ -907,5 +894,61 @@ public class PointRDD implements Serializable{
 					
 				}));
 				return result;
+	}
+
+
+	public List<Point> SpatialKnnQuery(final Broadcast<Point> p, final Integer k){
+		//For each partation, build a priority queue that holds the topk
+		@SuppressWarnings("serial")
+		class PointCmp implements Comparator<Point>, Serializable{
+
+			public int compare(Point p1, Point p2) {
+				// TODO Auto-generated method stub
+				double distance1 = p1.getCoordinate().distance(p.value().getCoordinate());
+				double distance2 = p2.getCoordinate().distance(p.value().getCoordinate());
+				if(distance1 > distance2){
+					return 1;
+				}
+				else if(distance1 == distance2){
+					return 0;
+				}
+				return -1;
+			}
+
+		}
+		final PointCmp pcmp = new PointCmp();
+
+		JavaRDD<Point> tmp = this.pointRDD.mapPartitions(new FlatMapFunction<Iterator<Point>, Point> (){
+
+			public Iterable<Point> call(Iterator<Point> input) throws Exception {
+				PriorityQueue<Point> pq = new PriorityQueue<Point>(k, pcmp);
+				while(input.hasNext()){
+					if(pq.size()  < k){
+						pq.offer(input.next());
+					}
+					else{
+						Point curpoint = input.next();
+						double distance = curpoint.getCoordinate().distance(p.getValue().getCoordinate());
+						double largestDistanceInPriQueue = pq.peek().getCoordinate().distance(p.value().getCoordinate());
+						if(largestDistanceInPriQueue > distance){
+							pq.poll();
+							pq.offer(curpoint);
+						}
+					}
+				}
+
+				ArrayList<Point> res = new ArrayList<Point> ();
+				for(int i = 0; i < k; i++){
+					res.add(pq.poll());
+				}
+				//return is what?
+				return res;
+			}
+		});
+
+		//Take the top k
+
+		return tmp.takeOrdered(k,  pcmp);
+
 	}
 }
