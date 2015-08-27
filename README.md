@@ -53,6 +53,14 @@ GeoSpark supports two Spatial Indexes, Quad-Tree and R-Tree. There are two metho
 1. Instantialize SpatialIndexRDDs like PointIndexRDD, RectangleIndexRDD or PolygonIndexRDD with "rtree" or "quadtree". GeoSpark will create corresponding local Spatial Index on each machine and cache it in memory automatically.
 2. Call SpatialJoinQueryWithIndex in SpatialRDDs like PointRDD, RectangleRDD or PolygonRDD and specify IndexName with "rtree" or "quadtree". GeoSpark will create corresponding local Spatial Index on each machine on-the-fly when it does spatial join query.
 
+### Geometrical operation
+
+GeoSpark currently provides native support for Inside, Overlap, DatasetBoundary, Minimum Bounding Rectangle and Polygon Union in SRDDS following [Open Geospatial Consortium (OGC) standard](http://www.opengeospatial.org/standards).
+
+### Spatial Operation
+
+GeoSpark so far provides spatial range query, join query and KNN query in SRDDs.
+
 ## How to modify GeoSpark source code (For Java developers)
 
 ### Prerequisites
