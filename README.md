@@ -80,6 +80,35 @@ GeoSpark so far provides spatial range query, join query and KNN query in SRDDs.
 3. Put the java files in your your Maven project
 4. Go ahead to modify GeoSpark source code!
 
+## Publication
+
+GeoSpark: A Cluster Computing Framework for Processing Large-Scale Spatial Data
+
+Jia Yu, Jinxuan Wu, Mohamed Sarwat
+
+To appear at ACM International Conference on Advances in Geographic Information Systems ACM SIGSPATIAL GIS 2015, Seattle, WA, USA November 2015
+
+
+## Acknowledgement
+
+GeoSaprk makes use of JTS Topology Suite Version 1.13 for some geometrical computations.
+
+JTS Topology Suite website: http://tsusiatsoftware.net/jts/main.html
+## Contact
+
+### Contributors
+* [Jia Yu](http://www.public.asu.edu/~jiayu2/) (Email: jiayu2@asu.edu)
+
+* Jinxuan Wu (Email: jinxuanw@asu.edu)
+
+* [Mohamed Sarwat](http://faculty.engineering.asu.edu/sarwat/) (Email: msarwat@asu.edu)
+
+###Project website
+Please visit [GeoSpark project wesbite](http://www.public.asu.edu/~jiayu2/geospark/index.html) for latest news and releases.
+
+### DataSys Lab
+GeoSpark is one of the projects under [DataSys Lab](http://www.datasyslab.org/) at Arizona State University. The mission of DataSys Lab is designing and developing experimental data management systems (e.g., database systems).
+
 
 ## Main functionality checklist
 
@@ -208,22 +237,4 @@ GeoSpark so far provides spatial range query, join query and KNN query in SRDDs.
 
 
 
-## Acknowledgement
 
-GeoSaprk makes use of JTS Topology Suite Version 1.13 for some geometrical computations.
-
-JTS Topology Suite website: http://tsusiatsoftware.net/jts/main.html
-## Contact
-
-### Contributors
-Jia Yu (jiayu2@asu.edu)
-
-Jinxuan Wu (jinxuanw@asu.edu)
-
-Mohamed Sarwat (msarwat@asu.edu)
-
-###Project website
-Please visit [GeoSpark project wesbite](http://www.public.asu.edu/~jiayu2/geospark/index.html) for latest news and releases.
-
-### DataSys Lab
-GeoSpark is one of the projects under [DataSys Lab](http://www.datasyslab.org/) at Arizona State University. The mission of DataSys Lab is designing and developing experimental data management systems (e.g., database systems).
