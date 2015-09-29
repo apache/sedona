@@ -1,4 +1,4 @@
-package GeoSpark;
+package org.datasyslab.geospark.spatialRDD;
 
 import java.io.Serializable;
 
@@ -7,6 +7,7 @@ import org.apache.spark.api.java.function.Function;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
+import org.datasyslab.geospark.gemotryObjects.*;
 
 public class CircleRDD implements Serializable{
 	private JavaRDD<Circle> circleRDD;
