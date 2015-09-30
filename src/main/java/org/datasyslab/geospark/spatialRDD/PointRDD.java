@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package GeoSpark;
 
 import java.io.Serializable;
@@ -26,6 +29,7 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
 import com.vividsolutions.jts.index.strtree.STRtree;
+// TODO: Auto-generated Javadoc
 class PointFormatMapper implements Serializable,Function<String,Point>
 {
 	Integer offset=0;
@@ -55,37 +59,100 @@ class PointFormatMapper implements Serializable,Function<String,Point>
 }
  
 
+/**
+ * The Class PointRDD.
+ */
 public class PointRDD implements Serializable{
+	
+	/** The point rdd. */
 	private JavaRDD<Point> pointRDD;
+	
+	/**
+	 * Instantiates a new point rdd.
+	 *
+	 * @param pointRDD the point rdd
+	 */
 	public PointRDD(JavaRDD<Point> pointRDD)
 	{
 		this.setPointRDD(pointRDD.cache());
 	}
+	
+	/**
+	 * Instantiates a new point rdd.
+	 *
+	 * @param spark the spark
+	 * @param InputLocation the input location
+	 * @param Offset the offset
+	 * @param Splitter the splitter
+	 * @param partitions the partitions
+	 */
 	public PointRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter,Integer partitions)
 	{
 		//final Integer offset=Offset;
 		this.setPointRDD(spark.textFile(InputLocation,partitions).map(new PointFormatMapper(Offset,Splitter)).cache());
 	}
+	
+	/**
+	 * Instantiates a new point rdd.
+	 *
+	 * @param spark the spark
+	 * @param InputLocation the input location
+	 * @param Offset the offset
+	 * @param Splitter the splitter
+	 */
 	public PointRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter)
 	{
 		//final Integer offset=Offset;
 		this.setPointRDD(spark.textFile(InputLocation).map(new PointFormatMapper(Offset,Splitter)).cache());
 	}
+	
+	/**
+	 * Gets the point rdd.
+	 *
+	 * @return the point rdd
+	 */
 	public JavaRDD<Point> getPointRDD() {
 		return pointRDD;
 	}
+	
+	/**
+	 * Sets the point rdd.
+	 *
+	 * @param pointRDD the new point rdd
+	 */
 	public void setPointRDD(JavaRDD<Point> pointRDD) {
 		this.pointRDD = pointRDD;
 	}
+	
+	/**
+	 * Re partition.
+	 *
+	 * @param partitions the partitions
+	 * @return the java rdd
+	 */
 	public JavaRDD<Point> rePartition(Integer partitions)
 	{
 		return this.pointRDD.repartition(partitions);
 	}
+	
+	/**
+	 * Spatial range query.
+	 *
+	 * @param envelope the envelope
+	 * @param condition the condition
+	 * @return the point rdd
+	 */
 	public PointRDD SpatialRangeQuery(Envelope envelope,Integer condition)
 	{
 		JavaRDD<Point> result=this.pointRDD.filter(new PointRangeFilter(envelope,condition));
 		return new PointRDD(result);
 	}
+	
+	/**
+	 * Boundary.
+	 *
+	 * @return the envelope
+	 */
 	public Envelope boundary()
 	{
 		Double[] boundary=new Double[4];
@@ -99,11 +166,30 @@ public class PointRDD implements Serializable{
 		boundary[3]=maxLatitude;
 		return new Envelope(minLongitude,maxLongitude,minLatitude,maxLatitude);
 	}
+	
+	/**
+	 * Spatial range query.
+	 *
+	 * @param polygon the polygon
+	 * @param condition the condition
+	 * @return the point rdd
+	 */
 	public PointRDD SpatialRangeQuery(Polygon polygon,Integer condition)
 	{
 		JavaRDD<Point> result=this.pointRDD.filter(new PointRangeFilter(polygon,condition));
 		return new PointRDD(result);
 	}
+	
+	/**
+	 * Spatial join query.
+	 *
+	 * @param circleRDD the circle rdd
+	 * @param Radius the radius
+	 * @param Condition the condition
+	 * @param GridNumberHorizontal the grid number horizontal
+	 * @param GridNumberVertical the grid number vertical
+	 * @return the spatial pair rdd
+	 */
 	public SpatialPairRDD<Point,ArrayList<Point>> SpatialJoinQuery(CircleRDD circleRDD,Double Radius,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		//Find the border of both of the two datasets---------------
@@ -224,6 +310,16 @@ public class PointRDD implements Serializable{
 				SpatialPairRDD<Point,ArrayList<Point>> result=new SpatialPairRDD<Point,ArrayList<Point>>(refinedResult);
 		return result;
 	}
+	
+	/**
+	 * Spatial join query.
+	 *
+	 * @param rectangleRDD the rectangle rdd
+	 * @param Condition the condition
+	 * @param GridNumberHorizontal the grid number horizontal
+	 * @param GridNumberVertical the grid number vertical
+	 * @return the spatial pair rdd
+	 */
 	public SpatialPairRDD<Envelope,ArrayList<Point>> SpatialJoinQuery(RectangleRDD rectangleRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		//Find the border of both of the two datasets---------------
@@ -361,6 +457,15 @@ public class PointRDD implements Serializable{
 	
 	
 	
+	/**
+	 * Spatial join query with index.
+	 *
+	 * @param rectangleRDD the rectangle rdd
+	 * @param GridNumberHorizontal the grid number horizontal
+	 * @param GridNumberVertical the grid number vertical
+	 * @param Index the index
+	 * @return the spatial pair rdd
+	 */
 	public SpatialPairRDD<Envelope,ArrayList<Point>> SpatialJoinQueryWithIndex(RectangleRDD rectangleRDD,Integer GridNumberHorizontal,Integer GridNumberVertical,String Index)
 	{
 		//Find the border of both of the two datasets---------------
@@ -516,6 +621,15 @@ public class PointRDD implements Serializable{
 	
 	
 	
+	/**
+	 * Spatial join query with index.
+	 *
+	 * @param circleRDD the circle rdd
+	 * @param GridNumberHorizontal the grid number horizontal
+	 * @param GridNumberVertical the grid number vertical
+	 * @param Index the index
+	 * @return the spatial pair rdd
+	 */
 	public SpatialPairRDD<Point,ArrayList<Point>> SpatialJoinQueryWithIndex(CircleRDD circleRDD,Integer GridNumberHorizontal,Integer GridNumberVertical,String Index)
 	{
 		//Find the border of both of the two datasets---------------
@@ -675,6 +789,15 @@ public class PointRDD implements Serializable{
 		return result;
 	}
 	
+	/**
+	 * Spatial join query.
+	 *
+	 * @param polygonRDD the polygon rdd
+	 * @param Condition the condition
+	 * @param GridNumberHorizontal the grid number horizontal
+	 * @param GridNumberVertical the grid number vertical
+	 * @return the spatial pair rdd
+	 */
 	public SpatialPairRDD<Polygon,ArrayList<Point>> SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		//Find the border of both of the two datasets---------------
@@ -790,6 +913,15 @@ public class PointRDD implements Serializable{
 		return result;
 	}
 	
+	/**
+	 * Spatial join query with mbr.
+	 *
+	 * @param polygonRDD the polygon rdd
+	 * @param Condition the condition
+	 * @param GridNumberHorizontal the grid number horizontal
+	 * @param GridNumberVertical the grid number vertical
+	 * @return the spatial pair rdd
+	 */
 	public SpatialPairRDD<Polygon,ArrayList<Point>> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		final Integer condition=Condition;
@@ -897,6 +1029,13 @@ public class PointRDD implements Serializable{
 	}
 
 
+	/**
+	 * Spatial knn query.
+	 *
+	 * @param p the p
+	 * @param k the k
+	 * @return the list
+	 */
 	public List<Point> SpatialKnnQuery(final Broadcast<Point> p, final Integer k){
 		//For each partation, build a priority queue that holds the topk
 		@SuppressWarnings("serial")

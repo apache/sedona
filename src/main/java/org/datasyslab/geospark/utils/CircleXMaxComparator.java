@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.datasyslab.geospark.utils;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -5,12 +8,16 @@ import org.datasyslab.geospark.gemotryObjects.Circle;
 import java.io.Serializable;
 import java.util.Comparator;
 
+// TODO: Auto-generated Javadoc
 /**
  * Created by jinxuanw on 9/29/15.
  */
-class CircleXMaxComparator extends GemotryComparator implements Comparator<Circle>, Serializable {
+public class CircleXMaxComparator extends GemotryComparator implements Comparator<Circle>, Serializable {
 
-	 public int compare(Circle circle1, Circle circle2) {
+	 /* (non-Javadoc)
+ 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+ 	 */
+ 	public int compare(Circle circle1, Circle circle2) {
 		 Envelope envelope1=circle1.getMBR();
 		 Envelope envelope2=circle1.getMBR();
 	    if(envelope1.getMaxX()>envelope2.getMaxX())

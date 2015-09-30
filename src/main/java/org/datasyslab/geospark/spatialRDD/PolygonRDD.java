@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package GeoSpark;
 
 import java.io.Serializable;
@@ -27,6 +30,7 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.precision.GeometryPrecisionReducer;
+// TODO: Auto-generated Javadoc
 class PolygonFormatMapper implements Function<String,Polygon>,Serializable
 {
 	Integer offset=0;
@@ -62,32 +66,87 @@ class PolygonFormatMapper implements Function<String,Polygon>,Serializable
 		 return polygon;
 	}
 }
+
+/**
+ * The Class PolygonRDD.
+ */
 public class PolygonRDD implements Serializable{
+	
+	/** The polygon rdd. */
 	private JavaRDD<Polygon> polygonRDD;
+	
+	/**
+	 * Instantiates a new polygon rdd.
+	 *
+	 * @param polygonRDD the polygon rdd
+	 */
 	public PolygonRDD(JavaRDD<Polygon> polygonRDD)
 	{
 		this.setPolygonRDD(polygonRDD.cache());
 	}
+	
+	/**
+	 * Instantiates a new polygon rdd.
+	 *
+	 * @param spark the spark
+	 * @param InputLocation the input location
+	 * @param Offset the offset
+	 * @param Splitter the splitter
+	 * @param partitions the partitions
+	 */
 	public PolygonRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter,Integer partitions)
 	{
 		
 		this.setPolygonRDD(spark.textFile(InputLocation,partitions).map(new PolygonFormatMapper(Offset,Splitter)).cache());
 	}
+	
+	/**
+	 * Instantiates a new polygon rdd.
+	 *
+	 * @param spark the spark
+	 * @param InputLocation the input location
+	 * @param Offset the offset
+	 * @param Splitter the splitter
+	 */
 	public PolygonRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter)
 	{
 		
 		this.setPolygonRDD(spark.textFile(InputLocation).map(new PolygonFormatMapper(Offset,Splitter)).cache());
 	}
+	
+	/**
+	 * Gets the polygon rdd.
+	 *
+	 * @return the polygon rdd
+	 */
 	public JavaRDD<Polygon> getPolygonRDD() {
 		return polygonRDD;
 	}
+	
+	/**
+	 * Sets the polygon rdd.
+	 *
+	 * @param polygonRDD the new polygon rdd
+	 */
 	public void setPolygonRDD(JavaRDD<Polygon> polygonRDD) {
 		this.polygonRDD = polygonRDD;
 	}
+	
+	/**
+	 * Re partition.
+	 *
+	 * @param number the number
+	 */
 	public void rePartition(Integer number)
 	{
 		this.polygonRDD=this.polygonRDD.repartition(number);
 	}
+	
+	/**
+	 * Boundary.
+	 *
+	 * @return the envelope
+	 */
 	public Envelope boundary()
 	{
 		
@@ -134,16 +193,38 @@ public class PolygonRDD implements Serializable{
 		}
 		return new Envelope(boundary[0],boundary[2],boundary[1],boundary[3]);
 	}
+	
+	/**
+	 * Spatial range query.
+	 *
+	 * @param envelope the envelope
+	 * @param condition the condition
+	 * @return the polygon rdd
+	 */
 	public PolygonRDD SpatialRangeQuery(Envelope envelope,Integer condition)
 	{
 		JavaRDD<Polygon> result=this.polygonRDD.filter(new PolygonRangeFilter(envelope,condition));
 		return new PolygonRDD(result);
 	}
+	
+	/**
+	 * Spatial range query.
+	 *
+	 * @param polygon the polygon
+	 * @param condition the condition
+	 * @return the polygon rdd
+	 */
 	public PolygonRDD SpatialRangeQuery(Polygon polygon,Integer condition)
 	{
 		JavaRDD<Polygon> result=this.polygonRDD.filter(new PolygonRangeFilter(polygon,condition));
 		return new PolygonRDD(result);
 	}
+	
+	/**
+	 * Minimum bounding rectangle.
+	 *
+	 * @return the rectangle rdd
+	 */
 	public RectangleRDD MinimumBoundingRectangle()
 	{
 	JavaRDD<Envelope> rectangleRDD=this.polygonRDD.map(new Function<Polygon,Envelope>(){
@@ -156,6 +237,16 @@ public class PolygonRDD implements Serializable{
 		});
 		return new RectangleRDD(rectangleRDD);
 	}
+	
+	/**
+	 * Spatial join query.
+	 *
+	 * @param polygonRDD the polygon rdd
+	 * @param Condition the condition
+	 * @param GridNumberHorizontal the grid number horizontal
+	 * @param GridNumberVertical the grid number vertical
+	 * @return the spatial pair rdd
+	 */
 	public SpatialPairRDD<Polygon,ArrayList<Polygon>> SpatialJoinQuery(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 		//Find the border of both of the two datasets---------------
@@ -318,6 +409,15 @@ public class PolygonRDD implements Serializable{
 
 	}
 	
+/**
+ * Spatial join query with mbr.
+ *
+ * @param polygonRDD the polygon rdd
+ * @param Condition the condition
+ * @param GridNumberHorizontal the grid number horizontal
+ * @param GridNumberVertical the grid number vertical
+ * @return the spatial pair rdd
+ */
 public SpatialPairRDD<Polygon,ArrayList<Polygon>> SpatialJoinQueryWithMBR(PolygonRDD polygonRDD,Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 	{
 	final Integer condition=Condition;
@@ -523,6 +623,15 @@ public SpatialPairRDD<Polygon,ArrayList<Polygon>> SpatialJoinQueryWithMBR(Polygo
 		}));
 		return result;
 	}
+
+/**
+ * Spatial join query.
+ *
+ * @param Condition the condition
+ * @param GridNumberHorizontal the grid number horizontal
+ * @param GridNumberVertical the grid number vertical
+ * @return the spatial pair rdd
+ */
 public SpatialPairRDD<Polygon,ArrayList<Polygon>> SpatialJoinQuery(Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 {
 	//Find the border of both of the two datasets---------------
@@ -712,6 +821,14 @@ public SpatialPairRDD<Polygon,ArrayList<Polygon>> SpatialJoinQuery(Integer Condi
 
 }
 
+/**
+ * Spatial join query with mbr.
+ *
+ * @param Condition the condition
+ * @param GridNumberHorizontal the grid number horizontal
+ * @param GridNumberVertical the grid number vertical
+ * @return the spatial pair rdd
+ */
 public SpatialPairRDD<Polygon,ArrayList<Polygon>> SpatialJoinQueryWithMBR(Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical)
 {
 final Integer condition=Condition;
@@ -909,6 +1026,11 @@ JavaPairRDD<Envelope,Polygon> polygonRDDwithKey=this.polygonRDD.mapToPair(new Pa
 	return result;
 }
 
+/**
+ * Polygon union.
+ *
+ * @return the polygon
+ */
 public Polygon PolygonUnion()
 	{
 		Polygon result=this.polygonRDD.reduce(new Function2<Polygon,Polygon,Polygon>()

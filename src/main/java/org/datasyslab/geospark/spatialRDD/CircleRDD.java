@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.datasyslab.geospark.spatialRDD;
 
 import java.io.Serializable;
@@ -9,12 +12,31 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 import org.datasyslab.geospark.gemotryObjects.*;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class CircleRDD.
+ */
 public class CircleRDD implements Serializable{
+	
+	/** The circle rdd. */
 	private JavaRDD<Circle> circleRDD;
+	
+	/**
+	 * Instantiates a new circle rdd.
+	 *
+	 * @param circleRDD the circle rdd
+	 */
 	public CircleRDD(JavaRDD<Circle> circleRDD)
 	{
 		this.setCircleRDD(circleRDD.cache());
 	}
+	
+	/**
+	 * Instantiates a new circle rdd.
+	 *
+	 * @param pointRDD the point rdd
+	 * @param Radius the radius
+	 */
 	public CircleRDD(PointRDD pointRDD, Double Radius)
 	{
 		final Double radius=Radius;
@@ -28,13 +50,30 @@ public class CircleRDD implements Serializable{
 			
 				});
 	}
+	
+	/**
+	 * Gets the circle rdd.
+	 *
+	 * @return the circle rdd
+	 */
 	public JavaRDD<Circle> getCircleRDD() {
 		return circleRDD;
 	}
 
+	/**
+	 * Sets the circle rdd.
+	 *
+	 * @param circleRDD the new circle rdd
+	 */
 	public void setCircleRDD(JavaRDD<Circle> circleRDD) {
 		this.circleRDD = circleRDD;
 	}
+	
+	/**
+	 * Minimum bounding rectangle.
+	 *
+	 * @return the rectangle rdd
+	 */
 	public RectangleRDD MinimumBoundingRectangle()
 	{
 		return new RectangleRDD(this.getCircleRDD().map(new Function<Circle,Envelope>()
@@ -47,6 +86,12 @@ public class CircleRDD implements Serializable{
 					
 				}));
 	}
+	
+	/**
+	 * Boundary.
+	 *
+	 * @return the envelope
+	 */
 	public Envelope boundary()
 	{
 		Double[] boundary = new Double[4]; 
@@ -92,6 +137,12 @@ public class CircleRDD implements Serializable{
 		}
 		return new Envelope(boundary[0],boundary[2],boundary[1],boundary[3]);
 	}
+	
+	/**
+	 * Centre.
+	 *
+	 * @return the point rdd
+	 */
 	public PointRDD Centre()
 	{
 		return new PointRDD(this.getCircleRDD().map(new Function<Circle,Point>()

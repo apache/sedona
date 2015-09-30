@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.datasyslab.geospark.utilstest;
 
 import static org.junit.Assert.*;
@@ -12,8 +15,15 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 
+// TODO: Auto-generated Javadoc
+/**
+ * A factory for creating TestComparator objects.
+ */
 public class TestComparatorFactory {
 
+	/**
+	 * Test point x comparator.
+	 */
 	@Test
 	public void testPointXComparator() {
 		
@@ -28,6 +38,9 @@ public class TestComparatorFactory {
 		assertEquals(0, pcomp.compare(point1, point2));
 	}
 	
+	/**
+	 * Test gemotry comparator factory.
+	 */
 	@Test
 	public void testGemotryComparatorFactory() {
 		double lon1 = -105.0;
