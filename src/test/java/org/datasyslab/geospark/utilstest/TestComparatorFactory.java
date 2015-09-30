@@ -16,6 +16,7 @@ public class TestComparatorFactory {
 
 	@Test
 	public void testPointXComparator() {
+		
 		double lon = -105.0;
 		double lat = 40.0;
 		Coordinate[] coordinates = new Coordinate[] {new Coordinate(lon,lat)};
@@ -45,4 +46,6 @@ public class TestComparatorFactory {
 		PointXComparator pcomp =  (PointXComparator)ComparatorCollection.createComparator("Point", "X");
 		assertEquals(-1, pcomp.compare(point1, point2));
 	}
+	
+	
 }
