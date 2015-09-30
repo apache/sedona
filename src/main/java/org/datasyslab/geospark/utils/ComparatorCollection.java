@@ -1,4 +1,4 @@
-package GeoSpark;
+package org.datasyslab.geospark.utils;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -7,25 +7,22 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
+import org.datasyslab.geospark.gemotryObjects.*;
 
 public class ComparatorCollection {
-
+	
+	public static GemotryComparator createComparator(String gemotryType, String axis){
+		GemotryComparator comp = null;
+		switch(gemotryType.toUpperCase()) {
+		case "POINT":
+			if(axis.toUpperCase().equals("X"))
+				comp = new PointXComparator();
+			break;
+		}
+		return comp;
+	}
 }
-class PointXComparator implements Comparator<Point>, Serializable {
-    
-	 public int compare(Point point1, Point point2) {
-	    if(point1.getX()>point2.getX())
-	    {
-	    	return 1;
-	    }
-	    else if (point1.getX()<point2.getX())
-	    {
-	    	return -1;
-	    }
-	    else return 0;
-	    }
-}
-class PointYComparator implements Comparator<Point>, Serializable {
+class PointYComparator extends GemotryComparator implements Comparator<Point>, Serializable {
  
 	 public int compare(Point point1, Point point2) {
 	    if(point1.getY()>point2.getY())
@@ -39,7 +36,7 @@ class PointYComparator implements Comparator<Point>, Serializable {
 	    else return 0;
 	    }
 }
-class RectangleXMinComparator implements Comparator<Envelope>, Serializable {
+class RectangleXMinComparator extends GemotryComparator implements Comparator<Envelope>, Serializable {
   
 	 public int compare(Envelope envelope1, Envelope envelope2) {
 	    if(envelope1.getMinX()>envelope2.getMinX())
@@ -53,7 +50,7 @@ class RectangleXMinComparator implements Comparator<Envelope>, Serializable {
 	    else return 0;
 	    }
 }
-class RectangleYMinComparator implements Comparator<Envelope>, Serializable {
+class RectangleYMinComparator extends GemotryComparator implements Comparator<Envelope>, Serializable {
 	  
 	 public int compare(Envelope envelope1, Envelope envelope2) {
 	    if(envelope1.getMinY()>envelope2.getMinY())
@@ -67,7 +64,7 @@ class RectangleYMinComparator implements Comparator<Envelope>, Serializable {
 	    else return 0;
 	    }
 }
-class RectangleXMaxComparator implements Comparator<Envelope>, Serializable {
+class RectangleXMaxComparator extends GemotryComparator implements Comparator<Envelope>, Serializable {
 	  
 	 public int compare(Envelope envelope1, Envelope envelope2) {
 	    if(envelope1.getMaxX()>envelope2.getMaxX())
@@ -81,7 +78,7 @@ class RectangleXMaxComparator implements Comparator<Envelope>, Serializable {
 	    else return 0;
 	    }
 }
-class RectangleYMaxComparator implements Comparator<Envelope>, Serializable {
+class RectangleYMaxComparator extends GemotryComparator implements Comparator<Envelope>, Serializable {
 	  
 	 public int compare(Envelope envelope1, Envelope envelope2) {
 	    if(envelope1.getMaxY()>envelope2.getMaxY())
@@ -95,7 +92,7 @@ class RectangleYMaxComparator implements Comparator<Envelope>, Serializable {
 	    else return 0;
 	    }
 }
-class PolygonXMinComparator implements Comparator<Polygon>, Serializable
+class PolygonXMinComparator extends GemotryComparator implements Comparator<Polygon>, Serializable
 {
 	
 	public int compare(Polygon polygon1, Polygon polygon2) {
@@ -110,7 +107,7 @@ class PolygonXMinComparator implements Comparator<Polygon>, Serializable
 	    else return 0;
 	    }
 }
-class PolygonYMinComparator implements Comparator<Polygon>, Serializable
+class PolygonYMinComparator extends GemotryComparator implements Comparator<Polygon>, Serializable
 {
 	
 	public int compare(Polygon polygon1, Polygon polygon2) {
@@ -125,7 +122,7 @@ class PolygonYMinComparator implements Comparator<Polygon>, Serializable
 	    else return 0;
 	    }
 }
-class PolygonXMaxComparator implements Comparator<Polygon>, Serializable
+class PolygonXMaxComparator extends GemotryComparator implements Comparator<Polygon>, Serializable
 {
 	
 	public int compare(Polygon polygon1, Polygon polygon2) {
@@ -140,7 +137,7 @@ class PolygonXMaxComparator implements Comparator<Polygon>, Serializable
 	    else return 0;
 	    }
 }
-class PolygonYMaxComparator implements Comparator<Polygon>, Serializable
+class PolygonYMaxComparator extends GemotryComparator implements Comparator<Polygon>, Serializable
 {
 	
 	public int compare(Polygon polygon1, Polygon polygon2) {
@@ -155,7 +152,7 @@ class PolygonYMaxComparator implements Comparator<Polygon>, Serializable
 	    else return 0;
 	    }
 }
-class CircleXMinComparator implements Comparator<Circle>, Serializable {
+class CircleXMinComparator extends GemotryComparator implements Comparator<Circle>, Serializable {
 	  
 	 public int compare(Circle circle1, Circle circle2) {
 		 Envelope envelope1=circle1.getMBR();
@@ -171,7 +168,7 @@ class CircleXMinComparator implements Comparator<Circle>, Serializable {
 	    else return 0;
 	    }
 }
-class CircleYMinComparator implements Comparator<Circle>, Serializable {
+class CircleYMinComparator extends GemotryComparator implements Comparator<Circle>, Serializable {
 	  
 	 public int compare(Circle circle1, Circle circle2) {
 		 Envelope envelope1=circle1.getMBR();
@@ -187,7 +184,7 @@ class CircleYMinComparator implements Comparator<Circle>, Serializable {
 	    else return 0;
 	    }
 }
-class CircleXMaxComparator implements Comparator<Circle>, Serializable {
+class CircleXMaxComparator extends GemotryComparator implements Comparator<Circle>, Serializable {
 	  
 	 public int compare(Circle circle1, Circle circle2) {
 		 Envelope envelope1=circle1.getMBR();
@@ -203,7 +200,7 @@ class CircleXMaxComparator implements Comparator<Circle>, Serializable {
 	    else return 0;
 	    }
 }
-class CircleYMaxComparator implements Comparator<Circle>, Serializable {
+class CircleYMaxComparator extends GemotryComparator implements Comparator<Circle>, Serializable {
 	  
 	 public int compare(Circle circle1, Circle circle2) {
 		 Envelope envelope1=circle1.getMBR();
