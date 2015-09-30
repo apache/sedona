@@ -8,7 +8,7 @@ import java.util.Comparator;
 /**
  * Created by jinxuanw on 9/29/15.
  */
-class RectangleXMinComparator extends GemotryComparator implements Comparator<Envelope>, Serializable {
+public class RectangleXMinComparator extends GemotryComparator implements Comparator<Envelope>, Serializable {
 
 	 public int compare(Envelope envelope1, Envelope envelope2) {
 	    if(envelope1.getMinX()>envelope2.getMinX())

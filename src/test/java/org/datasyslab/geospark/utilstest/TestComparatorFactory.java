@@ -24,7 +24,7 @@ public class TestComparatorFactory {
 		GeometryFactory geometryFactory = new GeometryFactory();
 		Point point1  =  new Point(coordinateSequence,geometryFactory);
 		Point point2  =  new Point(coordinateSequence,geometryFactory);
-		PointXComparator pcomp =  (PointXComparator)ComparatorCollection.createComparator("Point", "X");
+		PointXComparator pcomp =  (PointXComparator)ComparatorFactory.createComparator("Point", "X");
 		assertEquals(0, pcomp.compare(point1, point2));
 	}
 	
@@ -43,7 +43,7 @@ public class TestComparatorFactory {
 		coordinateSequence = new CoordinateArraySequence(coordinates);
 		Point point2  =  new Point(coordinateSequence,geometryFactory);
 		
-		PointXComparator pcomp =  (PointXComparator)ComparatorCollection.createComparator("Point", "X");
+		PointXComparator pcomp =  (PointXComparator)ComparatorFactory.createComparator("Point", "X");
 		assertEquals(-1, pcomp.compare(point1, point2));
 	}
 	

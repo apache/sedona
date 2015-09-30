@@ -8,7 +8,7 @@ import java.util.Comparator;
 /**
  * Created by jinxuanw on 9/29/15.
  */
-class CircleXMinComparator extends GemotryComparator implements Comparator<Circle>, Serializable {
+public class CircleXMinComparator extends GemotryComparator implements Comparator<Circle>, Serializable {
 
 	 public int compare(Circle circle1, Circle circle2) {
 		 Envelope envelope1=circle1.getMBR();

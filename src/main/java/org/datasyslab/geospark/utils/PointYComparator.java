@@ -8,7 +8,7 @@ import java.util.Comparator;
 /**
  * Created by jinxuanw on 9/29/15.
  */
-class PointYComparator extends GemotryComparator implements Comparator<Point>, Serializable {
+public class PointYComparator extends GemotryComparator implements Comparator<Point>, Serializable {
 
 	 public int compare(Point point1, Point point2) {
 	    if(point1.getY()>point2.getY())

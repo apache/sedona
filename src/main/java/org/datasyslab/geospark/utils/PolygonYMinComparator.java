@@ -8,7 +8,7 @@ import java.util.Comparator;
 /**
  * Created by jinxuanw on 9/29/15.
  */
-class PolygonYMinComparator extends GemotryComparator implements Comparator<Polygon>, Serializable
+public class PolygonYMinComparator extends GemotryComparator implements Comparator<Polygon>, Serializable
 {
 
 	public int compare(Polygon polygon1, Polygon polygon2) {
