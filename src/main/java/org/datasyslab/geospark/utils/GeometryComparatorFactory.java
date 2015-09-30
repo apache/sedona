@@ -7,7 +7,7 @@ package org.datasyslab.geospark.utils;
 /**
  * A factory for creating Comparator objects.
  */
-public class ComparatorFactory {
+public class GeometryComparatorFactory {
 	
 	/**
 	 * Creates a new Comparator object.
