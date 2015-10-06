@@ -11,6 +11,7 @@ import org.apache.spark.api.java.function.Function;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 import org.datasyslab.geospark.gemotryObjects.*;
+import org.datasyslab.geospark.utils.*;;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -95,14 +96,15 @@ public class CircleRDD implements Serializable{
 	public Envelope boundary()
 	{
 		Double[] boundary = new Double[4]; 
-		Double minLongtitude1=this.circleRDD.min(new CircleXMinComparator()).getMBR().getMinX();
-		Double maxLongtitude1=this.circleRDD.max(new CircleXMinComparator()).getMBR().getMinX();
-		Double minLatitude1=this.circleRDD.min(new CircleYMinComparator()).getMBR().getMinY();
-		Double maxLatitude1=this.circleRDD.max(new CircleYMinComparator()).getMBR().getMinY();
-		Double minLongtitude2=this.circleRDD.min(new CircleXMaxComparator()).getMBR().getMaxX();
-		Double maxLongtitude2=this.circleRDD.max(new CircleXMaxComparator()).getMBR().getMaxX();
-		Double minLatitude2=this.circleRDD.min(new CircleYMaxComparator()).getMBR().getMaxY();
-		Double maxLatitude2=this.circleRDD.max(new CircleYMaxComparator()).getMBR().getMaxY();
+		GeometryComparatorFactory gemoFactory;
+		Double minLongtitude1=this.circleRDD.min((CircleXMinComparator)GeometryComparatorFactory.createComparator("circle", "x", "min")).getMBR().getMinX();
+		Double maxLongtitude1=this.circleRDD.max((CircleXMinComparator)GeometryComparatorFactory.createComparator("circle", "x", "min")).getMBR().getMinX();
+		Double minLatitude1=this.circleRDD.min((CircleYMinComparator)GeometryComparatorFactory.createComparator("circle", "y", "min")).getMBR().getMinY();
+		Double maxLatitude1=this.circleRDD.max((CircleYMinComparator)GeometryComparatorFactory.createComparator("circle", "y", "min")).getMBR().getMinY();
+		Double minLongtitude2=this.circleRDD.min((CircleXMaxComparator)GeometryComparatorFactory.createComparator("circle", "x", "max")).getMBR().getMaxX();
+		Double maxLongtitude2=this.circleRDD.max((CircleXMaxComparator)GeometryComparatorFactory.createComparator("circle", "x", "max")).getMBR().getMaxX();
+		Double minLatitude2=this.circleRDD.min((CircleYMaxComparator)GeometryComparatorFactory.createComparator("circle", "y", "max")).getMBR().getMaxY();
+		Double maxLatitude2=this.circleRDD.max((CircleYMaxComparator)GeometryComparatorFactory.createComparator("circle", "y", "max")).getMBR().getMaxY();
 		if(minLongtitude1<minLongtitude2)
 		{
 			boundary[0]=minLongtitude1;
