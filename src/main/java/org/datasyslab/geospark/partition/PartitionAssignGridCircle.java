@@ -7,7 +7,7 @@ import java.util.Iterator;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 
 import scala.Tuple2;
-import GeoSpark.Circle;
+import org.datasyslab.geospark.gemotryObjects.*;
 
 import com.vividsolutions.jts.geom.Envelope;
 

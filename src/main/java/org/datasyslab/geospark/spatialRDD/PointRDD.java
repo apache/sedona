@@ -18,11 +18,8 @@ import org.apache.spark.broadcast.Broadcast;
 
 
 import scala.Tuple2;
-import Functions.PartitionAssignGridCircle;
-import Functions.PartitionAssignGridPoint;
-import Functions.PartitionAssignGridPolygon;
-import Functions.PartitionAssignGridRectangle;
-import Functions.PointRangeFilter;
+import org.datasyslab.geospark.partition.*;
+import org.datasyslab.geospark.rangeFilter.PointRangeFilter;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -34,6 +31,8 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 
 import org.datasyslab.geospark.utils.*;
 import org.datasyslab.geospark.gemotryObjects.*;
+import org.datasyslab.geospark.boundryFilter.*;;
+
 // TODO: Auto-generated Javadoc
 class PointFormatMapper implements Serializable, Function<String, Point> {
 	Integer offset = 0;
