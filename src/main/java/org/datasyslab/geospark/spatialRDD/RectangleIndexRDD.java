@@ -1,4 +1,4 @@
-package org.datasyslab.geospark.indexedRDD;
+package org.datasyslab.geospark.spatialRDD;
 
 import java.io.Serializable;
 import java.util.ArrayList;
