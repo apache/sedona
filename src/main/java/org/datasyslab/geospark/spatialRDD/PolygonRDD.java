@@ -1,7 +1,7 @@
 /*
  * 
  */
-package GeoSpark;
+package org.datasyslab.geospark.spatialRDD;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -30,6 +30,9 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.precision.GeometryPrecisionReducer;
+
+import org.datasyslab.geospark.utils.*;
+
 // TODO: Auto-generated Javadoc
 class PolygonFormatMapper implements Function<String,Polygon>,Serializable
 {
@@ -151,14 +154,14 @@ public class PolygonRDD implements Serializable{
 	{
 		
 		Double[] boundary = new Double[4];
-		Double minLongtitude1=this.polygonRDD.min(new PolygonXMinComparator()).getEnvelopeInternal().getMinX();
-		Double maxLongtitude1=this.polygonRDD.max(new PolygonXMinComparator()).getEnvelopeInternal().getMinX();
-		Double minLatitude1=this.polygonRDD.min(new PolygonYMinComparator()).getEnvelopeInternal().getMinY();
-		Double maxLatitude1=this.polygonRDD.max(new PolygonYMinComparator()).getEnvelopeInternal().getMinY();
-		Double minLongtitude2=this.polygonRDD.min(new PolygonXMaxComparator()).getEnvelopeInternal().getMaxX();
-		Double maxLongtitude2=this.polygonRDD.max(new PolygonXMaxComparator()).getEnvelopeInternal().getMaxX();
-		Double minLatitude2=this.polygonRDD.min(new PolygonYMaxComparator()).getEnvelopeInternal().getMaxY();
-		Double maxLatitude2=this.polygonRDD.max(new PolygonYMaxComparator()).getEnvelopeInternal().getMaxY(); 
+		Double minLongtitude1=this.polygonRDD.min((PolygonXMinComparator)GeometryComparatorFactory.createComparator("polygon", "x", "min")).getEnvelopeInternal().getMinX();
+		Double maxLongtitude1=this.polygonRDD.max((PolygonXMinComparator)GeometryComparatorFactory.createComparator("polygon", "x", "min")).getEnvelopeInternal().getMinX();
+		Double minLatitude1=this.polygonRDD.min((PolygonYMinComparator)GeometryComparatorFactory.createComparator("polygon", "y", "min")).getEnvelopeInternal().getMinY();
+		Double maxLatitude1=this.polygonRDD.max((PolygonYMinComparator)GeometryComparatorFactory.createComparator("polygon", "y", "min")).getEnvelopeInternal().getMinY();
+		Double minLongtitude2=this.polygonRDD.min((PolygonXMaxComparator)GeometryComparatorFactory.createComparator("polygon", "x", "max")).getEnvelopeInternal().getMaxX();
+		Double maxLongtitude2=this.polygonRDD.max((PolygonXMaxComparator)GeometryComparatorFactory.createComparator("polygon", "x", "max")).getEnvelopeInternal().getMaxX();
+		Double minLatitude2=this.polygonRDD.min((PolygonYMaxComparator)GeometryComparatorFactory.createComparator("polygon", "y", "max")).getEnvelopeInternal().getMaxY();
+		Double maxLatitude2=this.polygonRDD.max((PolygonYMaxComparator)GeometryComparatorFactory.createComparator("polygon", "y", "max")).getEnvelopeInternal().getMaxY(); 
 		if(minLongtitude1<minLongtitude2)
 		{
 			boundary[0]=minLongtitude1;

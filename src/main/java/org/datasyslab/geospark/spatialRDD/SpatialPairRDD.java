@@ -1,7 +1,7 @@
 /*
  * 
  */
-package GeoSpark;
+package org.datasyslab.geospark.spatialRDD;
 
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -17,41 +17,41 @@ import org.datasyslab.geospark.utils.*;;
 /**
  * The Class CircleRDD.
  */
-public class CircleRDD implements Serializable{
-	
+public class CircleRDD implements Serializable {
+
 	/** The circle rdd. */
 	private JavaRDD<Circle> circleRDD;
-	
+
 	/**
 	 * Instantiates a new circle rdd.
 	 *
-	 * @param circleRDD the circle rdd
+	 * @param circleRDD
+	 *            the circle rdd
 	 */
-	public CircleRDD(JavaRDD<Circle> circleRDD)
-	{
+	public CircleRDD(JavaRDD<Circle> circleRDD) {
 		this.setCircleRDD(circleRDD.cache());
 	}
-	
+
 	/**
 	 * Instantiates a new circle rdd.
 	 *
-	 * @param pointRDD the point rdd
-	 * @param Radius the radius
+	 * @param pointRDD
+	 *            the point rdd
+	 * @param Radius
+	 *            the radius
 	 */
-	public CircleRDD(PointRDD pointRDD, Double Radius)
-	{
-		final Double radius=Radius;
-		this.circleRDD=pointRDD.getPointRDD().map(new Function<Point,Circle>()
-				{
+	public CircleRDD(PointRDD pointRDD, Double Radius) {
+		final Double radius = Radius;
+		this.circleRDD = pointRDD.getPointRDD().map(new Function<Point, Circle>() {
 
-					public Circle call(Point v1) {
-						
-						return new Circle(v1,radius);
-					}
-			
-				});
+			public Circle call(Point v1) {
+
+				return new Circle(v1, radius);
+			}
+
+		});
 	}
-	
+
 	/**
 	 * Gets the circle rdd.
 	 *
@@ -64,97 +64,96 @@ public class CircleRDD implements Serializable{
 	/**
 	 * Sets the circle rdd.
 	 *
-	 * @param circleRDD the new circle rdd
+	 * @param circleRDD
+	 *            the new circle rdd
 	 */
 	public void setCircleRDD(JavaRDD<Circle> circleRDD) {
 		this.circleRDD = circleRDD;
 	}
-	
+
 	/**
 	 * Minimum bounding rectangle.
 	 *
 	 * @return the rectangle rdd
 	 */
-	public RectangleRDD MinimumBoundingRectangle()
-	{
-		return new RectangleRDD(this.getCircleRDD().map(new Function<Circle,Envelope>()
-				{
+	public RectangleRDD MinimumBoundingRectangle() {
+		return new RectangleRDD(this.getCircleRDD().map(new Function<Circle, Envelope>() {
 
-					public Envelope call(Circle v1) {
-						
-						return v1.getMBR();
-					}
-					
-				}));
+			public Envelope call(Circle v1) {
+
+				return v1.getMBR();
+			}
+
+		}));
 	}
-	
+
 	/**
 	 * Boundary.
 	 *
 	 * @return the envelope
 	 */
-	public Envelope boundary()
-	{
-		Double[] boundary = new Double[4]; 
-		GeometryComparatorFactory gemoFactory;
-		Double minLongtitude1=this.circleRDD.min((CircleXMinComparator)GeometryComparatorFactory.createComparator("circle", "x", "min")).getMBR().getMinX();
-		Double maxLongtitude1=this.circleRDD.max((CircleXMinComparator)GeometryComparatorFactory.createComparator("circle", "x", "min")).getMBR().getMinX();
-		Double minLatitude1=this.circleRDD.min((CircleYMinComparator)GeometryComparatorFactory.createComparator("circle", "y", "min")).getMBR().getMinY();
-		Double maxLatitude1=this.circleRDD.max((CircleYMinComparator)GeometryComparatorFactory.createComparator("circle", "y", "min")).getMBR().getMinY();
-		Double minLongtitude2=this.circleRDD.min((CircleXMaxComparator)GeometryComparatorFactory.createComparator("circle", "x", "max")).getMBR().getMaxX();
-		Double maxLongtitude2=this.circleRDD.max((CircleXMaxComparator)GeometryComparatorFactory.createComparator("circle", "x", "max")).getMBR().getMaxX();
-		Double minLatitude2=this.circleRDD.min((CircleYMaxComparator)GeometryComparatorFactory.createComparator("circle", "y", "max")).getMBR().getMaxY();
-		Double maxLatitude2=this.circleRDD.max((CircleYMaxComparator)GeometryComparatorFactory.createComparator("circle", "y", "max")).getMBR().getMaxY();
-		if(minLongtitude1<minLongtitude2)
-		{
-			boundary[0]=minLongtitude1;
+	public Envelope boundary() {
+		Double[] boundary = new Double[4];
+		Double minLongtitude1 = this.circleRDD
+				.min((CircleXMinComparator) GeometryComparatorFactory.createComparator("circle", "x", "min")).getMBR()
+				.getMinX();
+		Double maxLongtitude1 = this.circleRDD
+				.max((CircleXMinComparator) GeometryComparatorFactory.createComparator("circle", "x", "min")).getMBR()
+				.getMinX();
+		Double minLatitude1 = this.circleRDD
+				.min((CircleYMinComparator) GeometryComparatorFactory.createComparator("circle", "y", "min")).getMBR()
+				.getMinY();
+		Double maxLatitude1 = this.circleRDD
+				.max((CircleYMinComparator) GeometryComparatorFactory.createComparator("circle", "y", "min")).getMBR()
+				.getMinY();
+		Double minLongtitude2 = this.circleRDD
+				.min((CircleXMaxComparator) GeometryComparatorFactory.createComparator("circle", "x", "max")).getMBR()
+				.getMaxX();
+		Double maxLongtitude2 = this.circleRDD
+				.max((CircleXMaxComparator) GeometryComparatorFactory.createComparator("circle", "x", "max")).getMBR()
+				.getMaxX();
+		Double minLatitude2 = this.circleRDD
+				.min((CircleYMaxComparator) GeometryComparatorFactory.createComparator("circle", "y", "max")).getMBR()
+				.getMaxY();
+		Double maxLatitude2 = this.circleRDD
+				.max((CircleYMaxComparator) GeometryComparatorFactory.createComparator("circle", "y", "max")).getMBR()
+				.getMaxY();
+		if (minLongtitude1 < minLongtitude2) {
+			boundary[0] = minLongtitude1;
+		} else {
+			boundary[0] = minLongtitude2;
 		}
-		else
-		{
-			boundary[0]=minLongtitude2;
+		if (minLatitude1 < minLatitude2) {
+			boundary[1] = minLatitude1;
+		} else {
+			boundary[1] = minLatitude2;
 		}
-		if(minLatitude1<minLatitude2)
-		{
-			boundary[1]=minLatitude1;
+		if (maxLongtitude1 > maxLongtitude2) {
+			boundary[2] = maxLongtitude1;
+		} else {
+			boundary[2] = maxLongtitude2;
 		}
-		else
-		{
-			boundary[1]=minLatitude2;
+		if (maxLatitude1 > maxLatitude2) {
+			boundary[3] = maxLatitude1;
+		} else {
+			boundary[3] = maxLatitude2;
 		}
-		if(maxLongtitude1>maxLongtitude2)
-		{
-			boundary[2]=maxLongtitude1;
-		}
-		else
-		{
-			boundary[2]=maxLongtitude2;
-		}
-		if(maxLatitude1>maxLatitude2)
-		{
-			boundary[3]=maxLatitude1;
-		}
-		else
-		{
-			boundary[3]=maxLatitude2;
-		}
-		return new Envelope(boundary[0],boundary[2],boundary[1],boundary[3]);
+		return new Envelope(boundary[0], boundary[2], boundary[1], boundary[3]);
 	}
-	
-	/**
-	 * Centre.
-	 *
-	 * @return the point rdd
-	 */
-	public PointRDD Centre()
-	{
-		return new PointRDD(this.getCircleRDD().map(new Function<Circle,Point>()
-				{
 
-					public Point call(Circle v1) {
-						
-						return v1.getCentre();
-					}
-					
-				}));
+	/**
+	 * Center.
+	 *
+	 * @return the center point of each circle in the RDD
+	 */
+	public PointRDD Center() {
+		return new PointRDD(this.getCircleRDD().map(new Function<Circle, Point>() {
+
+			public Point call(Circle v1) {
+
+				return v1.getCentre();
+			}
+
+		}));
 	}
 }

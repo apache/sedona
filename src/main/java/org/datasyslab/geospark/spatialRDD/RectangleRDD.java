@@ -1,7 +1,7 @@
 /*
  * 
  */
-package GeoSpark;
+package org.datasyslab.geospark.spatialRDD;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,6 +17,7 @@ import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
 
+
 import scala.Tuple2;
 import Functions.PartitionAssignGridPoint;
 import Functions.PartitionAssignGridRectangle;
@@ -30,6 +31,9 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
 import com.vividsolutions.jts.index.strtree.STRtree;
+
+import org.datasyslab.geospark.utils.*;
+
 // TODO: Auto-generated Javadoc
 class RectangleFormatMapper implements Serializable,Function<String,Envelope>
 {
@@ -168,14 +172,14 @@ public class RectangleRDD implements Serializable {
 	public Envelope boundary()
 	{
 		Double[] boundary = new Double[4];
-		Double minLongtitude1=this.rectangleRDD.min(new RectangleXMinComparator()).getMinX();
-		Double maxLongtitude1=this.rectangleRDD.max(new RectangleXMinComparator()).getMinX();
-		Double minLatitude1=this.rectangleRDD.min(new RectangleYMinComparator()).getMinY();
-		Double maxLatitude1=this.rectangleRDD.max(new RectangleYMinComparator()).getMinY();
-		Double minLongtitude2=this.rectangleRDD.min(new RectangleXMaxComparator()).getMaxX();
-		Double maxLongtitude2=this.rectangleRDD.max(new RectangleXMaxComparator()).getMaxX();
-		Double minLatitude2=this.rectangleRDD.min(new RectangleYMaxComparator()).getMaxY();
-		Double maxLatitude2=this.rectangleRDD.max(new RectangleYMaxComparator()).getMaxY();
+		Double minLongtitude1=this.rectangleRDD.min((RectangleXMinComparator)GeometryComparatorFactory.createComparator("rectangle", "x", "min")).getMinX();
+		Double maxLongtitude1=this.rectangleRDD.max((RectangleXMinComparator)GeometryComparatorFactory.createComparator("rectangle", "x", "min")).getMinX();
+		Double minLatitude1=this.rectangleRDD.min((RectangleYMinComparator)GeometryComparatorFactory.createComparator("rectangle", "y", "min")).getMinY();
+		Double maxLatitude1=this.rectangleRDD.max((RectangleYMinComparator)GeometryComparatorFactory.createComparator("rectangle", "y", "min")).getMinY();
+		Double minLongtitude2=this.rectangleRDD.min((RectangleXMaxComparator)GeometryComparatorFactory.createComparator("rectangle", "x", "max")).getMaxX();
+		Double maxLongtitude2=this.rectangleRDD.max((RectangleXMaxComparator)GeometryComparatorFactory.createComparator("rectangle", "x", "max")).getMaxX();
+		Double minLatitude2=this.rectangleRDD.min((RectangleYMaxComparator)GeometryComparatorFactory.createComparator("rectangle", "y", "max")).getMaxY();
+		Double maxLatitude2=this.rectangleRDD.max((RectangleYMaxComparator)GeometryComparatorFactory.createComparator("rectangle", "y", "max")).getMaxY();
 		if(minLongtitude1<minLongtitude2)
 		{
 			boundary[0]=minLongtitude1;
