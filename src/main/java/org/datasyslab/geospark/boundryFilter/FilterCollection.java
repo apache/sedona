@@ -1,4 +1,4 @@
-package GeoSpark;
+package org.datasyslab.geospark.boundryFilter;
 
 import java.io.Serializable;
 import java.util.ArrayList;

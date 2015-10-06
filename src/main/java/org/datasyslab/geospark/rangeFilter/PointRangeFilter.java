@@ -1,4 +1,4 @@
-package Functions;
+package org.datasyslab.geospark.rangeFilter;
 
 import java.io.Serializable;
 

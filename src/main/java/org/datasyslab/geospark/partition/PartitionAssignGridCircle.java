@@ -1,4 +1,4 @@
-package Functions;
+package org.datasyslab.geospark.partition;
 
 import java.io.Serializable;
 import java.util.ArrayList;
