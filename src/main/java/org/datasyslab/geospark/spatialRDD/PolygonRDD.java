@@ -18,9 +18,7 @@ import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
-import Functions.PartitionAssignGridPolygon;
-import Functions.PartitionAssignGridRectangle;
-import Functions.PolygonRangeFilter;
+
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -32,6 +30,9 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.precision.GeometryPrecisionReducer;
 
 import org.datasyslab.geospark.utils.*;
+import org.datasyslab.geospark.boundryFilter.*;
+import org.datasyslab.geospark.rangeFilter.*;
+import org.datasyslab.geospark.partition.*;
 
 // TODO: Auto-generated Javadoc
 class PolygonFormatMapper implements Function<String,Polygon>,Serializable

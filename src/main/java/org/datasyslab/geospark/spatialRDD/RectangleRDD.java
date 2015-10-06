@@ -19,9 +19,6 @@ import org.apache.spark.api.java.function.PairFunction;
 
 
 import scala.Tuple2;
-import Functions.PartitionAssignGridPoint;
-import Functions.PartitionAssignGridRectangle;
-import Functions.RectangleRangeFilter;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -33,6 +30,9 @@ import com.vividsolutions.jts.index.quadtree.Quadtree;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
 import org.datasyslab.geospark.utils.*;
+import org.datasyslab.geospark.boundryFilter.*;
+import org.datasyslab.geospark.rangeFilter.*;
+import org.datasyslab.geospark.partition.*;
 
 // TODO: Auto-generated Javadoc
 class RectangleFormatMapper implements Serializable,Function<String,Envelope>
