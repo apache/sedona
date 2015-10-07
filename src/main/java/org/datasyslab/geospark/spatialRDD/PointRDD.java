@@ -144,19 +144,7 @@ public class PointRDD implements Serializable {
 		return this.pointRDD.repartition(partitions);
 	}
 
-	/**
-	 * Spatial range query.
-	 *
-	 * @param envelope
-	 *            the envelope
-	 * @param condition
-	 *            the condition
-	 * @return the point rdd
-	 */
-	public PointRDD SpatialRangeQuery(Envelope envelope, Integer condition) {
-		JavaRDD<Point> result = this.pointRDD.filter(new PointRangeFilter(envelope, condition));
-		return new PointRDD(result);
-	}
+	
 
 	/**
 	 * Boundary.
@@ -179,20 +167,6 @@ public class PointRDD implements Serializable {
 		boundary[2] = maxLongitude;
 		boundary[3] = maxLatitude;
 		return new Envelope(minLongitude, maxLongitude, minLatitude, maxLatitude);
-	}
-
-	/**
-	 * Spatial range query.
-	 *
-	 * @param polygon
-	 *            the polygon
-	 * @param condition
-	 *            the condition
-	 * @return the point rdd
-	 */
-	public PointRDD SpatialRangeQuery(Polygon polygon, Integer condition) {
-		JavaRDD<Point> result = this.pointRDD.filter(new PointRangeFilter(polygon, condition));
-		return new PointRDD(result);
 	}
 
 	/**
