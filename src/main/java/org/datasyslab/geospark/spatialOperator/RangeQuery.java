@@ -16,6 +16,7 @@ public class RangeQuery {
 	
 	//I think this part can be refactored.
 	
+	//todo: refactor all this into one rangeQuery
 	/**
 	 * Spatial range query.
 	 * @param pointRDD
