@@ -138,31 +138,7 @@ public class RectangleRDD implements Serializable {
 		return this.rectangleRDD.repartition(partitions);
 	}
 	
-	/**
-	 * Spatial range query.
-	 *
-	 * @param envelope the envelope
-	 * @param condition the condition
-	 * @return the rectangle rdd
-	 */
-	public RectangleRDD SpatialRangeQuery(Envelope envelope,Integer condition)
-	{
-		JavaRDD<Envelope> result=this.rectangleRDD.filter(new RectangleRangeFilter(envelope,condition));
-		return new RectangleRDD(result);
-	}
 	
-	/**
-	 * Spatial range query.
-	 *
-	 * @param polygon the polygon
-	 * @param condition the condition
-	 * @return the rectangle rdd
-	 */
-	public RectangleRDD SpatialRangeQuery(Polygon polygon,Integer condition)
-	{
-		JavaRDD<Envelope> result=this.rectangleRDD.filter(new RectangleRangeFilter(polygon,condition));
-		return new RectangleRDD(result);
-	}
 	
 	/**
 	 * Boundary.
