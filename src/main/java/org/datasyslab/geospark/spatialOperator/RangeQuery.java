@@ -4,6 +4,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.datasyslab.geospark.rangeFilter.PointRangeFilter;
 import org.datasyslab.geospark.rangeFilter.PolygonRangeFilter;
 import org.datasyslab.geospark.rangeFilter.RectangleRangeFilter;
+import org.datasyslab.geospark.spatialRDD.GeometryRDD;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.datasyslab.geospark.spatialRDD.RectangleRDD;
@@ -15,6 +16,8 @@ import com.vividsolutions.jts.geom.Polygon;
 public class RangeQuery {
 	
 	//I think this part can be refactored.
+	//I think I should use factory method, to return a rangeQuery object?
+	//Try template later.
 	
 	//todo: refactor all this into one rangeQuery
 	/**
