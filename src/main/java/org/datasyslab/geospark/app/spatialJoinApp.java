@@ -43,22 +43,22 @@ import com.vividsolutions.jts.geom.Point;
 public class spatialJoinApp {
 	public static void main(String[] args) {
 		String IP = args[0];
-		String set1 = "hdfs://" + IP + ":9000/" + args[1];
+		String set1 = "hdfs://" + IP + ":54310/" + args[1];
 		Integer partitions1 = Integer.parseInt(args[2]);
 		Integer offset1 = Integer.parseInt(args[3]);
 		String Splitter1 = args[4];
-		String querywindowset = "hdfs://" + IP + ":9000/" + args[5];
+		String querywindowset = "hdfs://" + IP + ":54310/" + args[5];
 		Integer partitions2 = Integer.parseInt(args[6]);
 		Integer offset2 = Integer.parseInt(args[7]);
 		String Splitter2 = args[8];
 		Integer condition = Integer.parseInt(args[9]);
 		Integer gridhorizontal = Integer.parseInt(args[10]);
 		Integer gridvertical = Integer.parseInt(args[11]);
-		String outputlocation = "hdfs://" + IP + ":9000/tempResult";
+		String outputlocation = "hdfs://" + IP + ":54310/tempResult";
 		URI uri = URI.create(outputlocation);
 		Path pathhadoop = new Path(uri);
 
-		SparkConf conf = new SparkConf().setAppName("sample join");
+		SparkConf conf = new SparkConf().setAppName("GeoSpark_join");
 		// SparkConf().setAppName("GeoSpark_Aggregation").setMaster("spark://"+IP+":7077").set("spark.cores.max",
 		// "136").set("spark.executor.memory",
 		// "50g").set("spark.executor.cores", "8").set("spark.local.ip",
