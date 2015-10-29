@@ -22,8 +22,13 @@ Note: GeoSpark has been tested on Apache Spark 1.2, 1.3, 1.4 and Apache Hadoop 2
 3. You can now use GeoSpark spatial RDDs in your Apache Spark program to store spatial data and call needed functions!
 
 ### GeoSpark Programming Examples (In Java)
-Please check out the "test case" folder for two programming examples with GeoSpark. One is spatial join and the other one is spatial aggregation. 
+1. Spatial queries in "app" folder: Spatial range, join and KNN.
+2. Spatial analysis examples in "app" foler: Spatial aggregation, spatial autocorrelation and spatial co-location
 
+
+## Java API usage
+
+Please refer [GeoSpark Java API Usage](http://www.public.asu.edu/~jiayu2/geospark/javadoc/index.html)
 
 
 ## Spatial Resilient Distributed Datasets (SRDDs)
@@ -80,13 +85,10 @@ GeoSpark so far provides spatial range query, join query and KNN query in SRDDs.
 3. Put the java files in your your Maven project
 4. Go ahead to modify GeoSpark source code!
 
-## Java API usage
-
-Please refer [GeoSpark Java API Usage](http://www.public.asu.edu/~jiayu2/geospark/javadoc/index.html)
 
 ## Publication
 
-GeoSpark: A Cluster Computing Framework for Processing Large-Scale Spatial Data[PDF](http://www.public.asu.edu/~jiayu2/geospark/publication/GeoSpark_ShortPaper.pdf)
+GeoSpark: A Cluster Computing Framework for Processing Large-Scale Spatial Data [[PDF](http://www.public.asu.edu/~jiayu2/geospark/publication/GeoSpark_ShortPaper.pdf)]
 
 Jia Yu, Jinxuan Wu, Mohamed Sarwat
 
