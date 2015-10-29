@@ -1,5 +1,16 @@
 package org.datasyslab.geospark.app;
-
+/* This is an example of GeoSpark range query
+ * Introduction: In spatial range query, you provide a query area (in spatialRDD) and one query area set is joined with one Spatial RDD. The query area set which is composed of rectangles or polygons can be also stored in Spatial RDD. GeoSpark then joins the two Spatial RDDs
+and returns a new Spatial RDD instance which is extended from the original SRDDs. For one query area, the object
+contained by it will be attached behind it in this instance.
+ * Arguments: 
+ * 1. Spark master IP;
+ * 2. Input 1 location;
+ * 3. Input 1 partitions number;
+ * 4. Input 1 spatial info starting column;
+ * 5. Format name "tsv || csv || wkt";
+ * Result is saved at "hdfs://"+IP+":54310/test/tempResult.txt";
+ * */
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;

@@ -1,5 +1,16 @@
 package org.datasyslab.geospark.app;
 
+/* This is an example of GeoSpark range query
+ * Introduction: In spatial KNN query, you provide a pointset (in spatialRDD).You also need to provide one poin
+ * and a point area, running KNN query will return K nearest point to the original point.
+ * Arguments: 
+ * 1. Spark master IP;
+ * 2. Input 1 location;
+ * 3. Input 1 partitions number;
+ * 4. Input 1 spatial info starting column;
+ * 5. Format name "tsv || csv || wkt";
+ * Result is saved at "hdfs://"+IP+":54310/test/tempResult.txt";
+ */
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
