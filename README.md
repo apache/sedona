@@ -80,9 +80,13 @@ GeoSpark so far provides spatial range query, join query and KNN query in SRDDs.
 3. Put the java files in your your Maven project
 4. Go ahead to modify GeoSpark source code!
 
+## Java API usage
+
+Please refer [GeoSpark Java API Usage](http://www.public.asu.edu/~jiayu2/geospark/javadoc/index.html)
+
 ## Publication
 
-GeoSpark: A Cluster Computing Framework for Processing Large-Scale Spatial Data
+GeoSpark: A Cluster Computing Framework for Processing Large-Scale Spatial Data[PDF](http://www.public.asu.edu/~jiayu2/geospark/publication/GeoSpark_ShortPaper.pdf)
 
 Jia Yu, Jinxuan Wu, Mohamed Sarwat
 
@@ -93,13 +97,13 @@ To appear at ACM International Conference on Advances in Geographic Information 
 
 GeoSaprk makes use of JTS Topology Suite Version 1.13 for some geometrical computations.
 
-JTS Topology Suite website: http://tsusiatsoftware.net/jts/main.html
+Please refer [JTS Topology Suite website](http://tsusiatsoftware.net/jts/main.html) for more details.
 ## Contact
 
 ### Contributors
 * [Jia Yu](http://www.public.asu.edu/~jiayu2/) (Email: jiayu2@asu.edu)
 
-* Jinxuan Wu (Email: jinxuanw@asu.edu)
+* [Jinxuan Wu](http://www.public.asu.edu/~jinxuanw/) (Email: jinxuanw@asu.edu)
 
 * [Mohamed Sarwat](http://faculty.engineering.asu.edu/sarwat/) (Email: msarwat@asu.edu)
 
