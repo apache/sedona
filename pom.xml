@@ -29,11 +29,6 @@
 			<artifactId>jts</artifactId>
 			<version>1.13</version>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-ganglia-lgpl_2.11</artifactId>
-			<version>1.3.1</version>
-		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -45,61 +40,6 @@
 					<source>1.7</source>
 					<target>1.7</target>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>1.5</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-
-						<configuration>
-							<shadedArtifactAttached>true</shadedArtifactAttached>
-							<shadedClassifierName>GeoSpark</shadedClassifierName>
-							<artifactSet>
-								<includes>
-									<include>*:*</include>
-								</includes>
-
-							</artifactSet>
-							<transformers>
-								<transformer
-									implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-									<resource>reference.conf</resource>
-								</transformer>
-								<transformer
-									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<manifestEntries>
-										<addMavenDescriptor>false</addMavenDescriptor>
-										<manifest>
-											<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-											<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-										</manifest>
-										<manifestEntries>
-											<Trusted-Library>true</Trusted-Library>
-										</manifestEntries>
-									</manifestEntries>
-								</transformer>
-							</transformers>
-							<archive>
-							</archive>
-							<filters>
-								<filter>
-									<artifact>*:*</artifact>
-									<excludes>
-										<exclude>META-INF/*.SF</exclude>
-										<exclude>META-INF/*.DSA</exclude>
-										<exclude>META-INF/*.RSA</exclude>
-									</excludes>
-								</filter>
-							</filters>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 		<resources>
