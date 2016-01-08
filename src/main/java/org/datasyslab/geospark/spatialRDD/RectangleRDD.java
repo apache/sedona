@@ -6,33 +6,24 @@ package org.datasyslab.geospark.spatialRDD;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
 
+import org.apache.spark.HashPartitioner;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.Function2;
-import org.apache.spark.api.java.function.PairFlatMapFunction;
-import org.apache.spark.api.java.function.PairFunction;
 
+
+import com.vividsolutions.jts.geom.Envelope;
+
+import org.apache.spark.api.java.function.PairFunction;
+import org.apache.spark.broadcast.Broadcast;
+import org.apache.spark.storage.StorageLevel;
+import org.datasyslab.geospark.utils.*;
 
 import scala.Tuple2;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.index.quadtree.Quadtree;
-import com.vividsolutions.jts.index.strtree.STRtree;
-
-import org.datasyslab.geospark.utils.*;
-import org.datasyslab.geospark.boundryFilter.*;
-import org.datasyslab.geospark.rangeFilter.*;
-import org.datasyslab.geospark.partition.*;
 
 // TODO: Auto-generated Javadoc
 class RectangleFormatMapper implements Serializable,Function<String,Envelope>
@@ -52,7 +43,7 @@ class RectangleFormatMapper implements Serializable,Function<String,Envelope>
 		{
 			seperater="\t";
 		}
-		else
+		else if(this.splitter.contains("tsv"))
 		{
 			seperater=",";
 		}
@@ -67,9 +58,14 @@ class RectangleFormatMapper implements Serializable,Function<String,Envelope>
  */
 public class RectangleRDD implements Serializable {
 
+	public JavaPairRDD<Integer, Envelope> gridRectangleRDD;
+	public long totalNumberofRecords;
 	/** The rectangle rdd. */
-	private JavaRDD<Envelope> rectangleRDD;
-	
+	public JavaRDD<Envelope> rectangleRDD;
+
+	ArrayList<Double> grid;
+
+	Double[] boundary = new Double[4];
 	/**
 	 * Instantiates a new rectangle rdd.
 	 *
@@ -108,7 +104,64 @@ public class RectangleRDD implements Serializable {
 		//final Integer offset=Offset;
 		this.setRectangleRDD(spark.textFile(InputLocation).map(new RectangleFormatMapper(Offset,Splitter)).cache());
 	}
-	
+
+	public RectangleRDD(JavaSparkContext sc, String inputLocation, Integer offSet, String splitter, String gridType, Integer numPartitions) {
+		this.rectangleRDD = sc.textFile(inputLocation, numPartitions).map(new RectangleFormatMapper(offSet, splitter));
+
+		this.totalNumberofRecords = this.rectangleRDD.count();
+
+		int sampleNumberOfRecords = RDDSampleUtils.getSampleNumbers(numPartitions, totalNumberofRecords);
+		ArrayList<Envelope> rectangleSampleList = new ArrayList<Envelope> (rectangleRDD.takeSample(false, sampleNumberOfRecords));
+
+		Collections.sort(rectangleSampleList, new RectangleXMinComparator());
+
+		this.boundary();
+
+		grid = new ArrayList<Double>();
+		int curLocation = 0;
+		int step = sampleNumberOfRecords / numPartitions;
+
+		while(curLocation < sampleNumberOfRecords) {
+			grid.add(rectangleSampleList.get(curLocation).getMinX());
+			curLocation += step;
+		}
+		grid.set(0, boundary[0]);
+		grid.set(grid.size() - 1, boundary[2]);
+
+		final Broadcast<ArrayList<Double>> gridBroadcasted= sc.broadcast(grid);
+		//todo: I'm not sure, make be change to mapToPartitions will be faster?
+		JavaPairRDD<Integer, Envelope> unPartitionedGridRectangleRDD = this.rectangleRDD.mapToPair(new PairFunction<Envelope, Integer, Envelope>() {
+			@Override
+			public Tuple2<Integer, Envelope> call(Envelope envelope) throws Exception {
+				//Do a Binary Search..
+				ArrayList<Double> grid = gridBroadcasted.getValue();
+				//Binary search to find index;
+				int low = 0, high = grid.size();
+				int result = 0;
+				while (low <= high) {
+					int mid = (low + high) / 2;
+					//todo: Double is not accurate..
+					if (grid.get(mid) > envelope.getMinX())
+						high = mid - 1;
+					else if (grid.get(mid) < envelope.getMinX())
+						low = mid + 1;
+					else {
+						result = mid;
+						break;
+					}
+				}
+				if (result != (low + high) / 2)
+					result = high;
+
+				return new Tuple2<Integer, Envelope>(result, envelope);
+			}
+		});
+
+		this.gridRectangleRDD = unPartitionedGridRectangleRDD.partitionBy(new HashPartitioner(numPartitions)).persist(StorageLevel.DISK_ONLY());
+	}
+
+
+
 	/**
 	 * Gets the rectangle rdd.
 	 *
@@ -147,7 +200,6 @@ public class RectangleRDD implements Serializable {
 	 */
 	public Envelope boundary()
 	{
-		Double[] boundary = new Double[4];
 		Double minLongtitude1=this.rectangleRDD.min((RectangleXMinComparator)GeometryComparatorFactory.createComparator("rectangle", "x", "min")).getMinX();
 		Double maxLongtitude1=this.rectangleRDD.max((RectangleXMinComparator)GeometryComparatorFactory.createComparator("rectangle", "x", "min")).getMinX();
 		Double minLatitude1=this.rectangleRDD.min((RectangleYMinComparator)GeometryComparatorFactory.createComparator("rectangle", "y", "min")).getMinY();
@@ -190,144 +242,5 @@ public class RectangleRDD implements Serializable {
 		}
 		return new Envelope(boundary[0],boundary[2],boundary[1],boundary[3]);
 	}
-	
-	/**
-	 * Spatial join query with index.
-	 *
-	 * @param Condition the condition
-	 * @param GridNumberHorizontal the grid number horizontal
-	 * @param GridNumberVertical the grid number vertical
-	 * @param Index the index
-	 * @return the spatial pair rdd
-	 */
-	public SpatialPairRDD<Envelope,ArrayList<Envelope>> SpatialJoinQueryWithIndex(Integer Condition,Integer GridNumberHorizontal,Integer GridNumberVertical,String Index)
-	{
-		//Find the border of both of the two datasets---------------
-		final String index=Index;
-		final Integer condition=Condition;
-		//Find the border of both of the two datasets---------------
-				//condition=0 means only consider fully contain in query, condition=1 means consider full contain and partial contain(overlap).
-				//QueryAreaSet min/max longitude and latitude
-				//TargetSet min/max longitude and latitude
-				Envelope boundary=this.boundary();;
-				//Border found
-	
-		//Build Grid file-------------------
-				Double[] gridHorizontalBorder = new Double[GridNumberHorizontal+1];
-				Double[] gridVerticalBorder=new Double[GridNumberVertical+1];
-				double LongitudeIncrement=(boundary.getMaxX()-boundary.getMinX())/GridNumberHorizontal;
-				double LatitudeIncrement=(boundary.getMaxY()-boundary.getMinY())/GridNumberVertical;
-				for(int i=0;i<GridNumberHorizontal+1;i++)
-				{
-					gridHorizontalBorder[i]=boundary.getMinX()+LongitudeIncrement*i;
-				}
-				for(int i=0;i<GridNumberVertical+1;i++)
-				{
-					gridVerticalBorder[i]=boundary.getMinY()+LatitudeIncrement*i;
-				}
-		//Assign grid ID to both of the two dataset---------------------
-		JavaPairRDD<Integer,Envelope> TargetSetWithIDtemp=this.rectangleRDD.mapPartitionsToPair(new PartitionAssignGridRectangle(GridNumberHorizontal,GridNumberVertical,gridHorizontalBorder,gridVerticalBorder));
-		JavaPairRDD<Integer,Envelope> QueryAreaSetWithIDtemp=TargetSetWithIDtemp;
-		//Remove cache from memory
-		this.rectangleRDD.unpersist();
-		JavaPairRDD<Integer,Envelope> TargetSetWithID=TargetSetWithIDtemp;//.repartition(TargetSetWithIDtemp.partitions().size()*2);
-		JavaPairRDD<Integer,Envelope> QueryAreaSetWithID=QueryAreaSetWithIDtemp;//.repartition(TargetSetWithIDtemp.partitions().size()*2);
-//Join two dataset
-		JavaPairRDD<Integer,Tuple2<Iterable<Envelope>,Iterable<Envelope>>> cogroupSet=QueryAreaSetWithID.cogroup(TargetSetWithID, TargetSetWithIDtemp.partitions().size()*2);
-		
-		JavaPairRDD<Envelope,ArrayList<Envelope>> queryResult=cogroupSet.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer,Tuple2<Iterable<Envelope>,Iterable<Envelope>>>,Envelope,ArrayList<Envelope>>()
-				{
 
-					public Iterable<Tuple2<Envelope, ArrayList<Envelope>>> call(
-							Tuple2<Integer, Tuple2<Iterable<Envelope>, Iterable<Envelope>>> t)
-					{
-						
-							if(index=="quadtree")
-							{
-								Quadtree qt=new Quadtree();
-								Iterator<Envelope> targetIterator=t._2()._2().iterator();
-								Iterator<Envelope> queryAreaIterator=t._2()._1().iterator();
-								ArrayList<Tuple2<Envelope,ArrayList<Envelope>>> result=new ArrayList();
-								while(targetIterator.hasNext())
-								{
-									Envelope currentTarget=targetIterator.next();
-									qt.insert(currentTarget, currentTarget);
-								}
-								while(queryAreaIterator.hasNext())
-								{
-									Envelope currentQueryArea=queryAreaIterator.next();
-									List<Envelope> queryList=qt.query(currentQueryArea);
-									if(queryList.size()!=0){
-									result.add(new Tuple2<Envelope,ArrayList<Envelope>>(currentQueryArea,new ArrayList<Envelope>(queryList)));
-									}
-								}
-								return result;
-							}
-							else
-							{
-								STRtree rt=new STRtree();
-								Iterator<Envelope> targetIterator=t._2()._2().iterator();
-								Iterator<Envelope> queryAreaIterator=t._2()._1().iterator();
-								ArrayList<Tuple2<Envelope,ArrayList<Envelope>>> result=new ArrayList();
-								while(targetIterator.hasNext())
-								{
-									Envelope currentTarget=targetIterator.next();
-									rt.insert(currentTarget, currentTarget);
-								}
-								while(queryAreaIterator.hasNext())
-								{
-									Envelope currentQueryArea=queryAreaIterator.next();
-									List<Envelope> queryList=rt.query(currentQueryArea);
-									if(queryList.size()!=0){
-									result.add(new Tuple2<Envelope,ArrayList<Envelope>>(currentQueryArea,new ArrayList<Envelope>(queryList)));
-									}
-								}
-								return result;
-							}
-						
-					}
-			
-				});
-		//Delete the duplicate result
-				JavaPairRDD<Envelope, ArrayList<Envelope>> aggregatedResult=queryResult.reduceByKey(new Function2<ArrayList<Envelope>,ArrayList<Envelope>,ArrayList<Envelope>>()
-						{
-
-							public ArrayList<Envelope> call(ArrayList<Envelope> v1,
-									ArrayList<Envelope> v2) {
-								ArrayList<Envelope> v3=v1;
-								v3.addAll(v2);
-								return v2;
-							}
-					
-						});
-				JavaPairRDD<Envelope,ArrayList<Envelope>> refinedResult=aggregatedResult.mapToPair(new PairFunction<Tuple2<Envelope,ArrayList<Envelope>>,Envelope,ArrayList<Envelope>>()
-						{
-
-							public Tuple2<Envelope, ArrayList<Envelope>> call(Tuple2<Envelope, ArrayList<Envelope>> v){
-								ArrayList<Envelope> result=new ArrayList<Envelope>();
-								Iterator<Envelope> targetIterator=v._2().iterator();
-								for(int i=0;i<v._2().size();i++)
-								{
-									Integer duplicationFlag=0;
-									Envelope currentPointi=v._2().get(i);
-									for(int j=i+1;j<v._2().size();j++)
-									{
-										Envelope currentPointj=v._2().get(j);
-										if(currentPointi.equals(currentPointj))
-										{
-											duplicationFlag=1;
-										}
-									}
-									if(duplicationFlag==0)
-									{
-										result.add(currentPointi);
-									}
-								}
-								return new Tuple2<Envelope,ArrayList<Envelope>>(v._1(),result);
-							}
-					
-						});
-				SpatialPairRDD<Envelope,ArrayList<Envelope>> result=new SpatialPairRDD<Envelope,ArrayList<Envelope>>(refinedResult);
-		return result;
-	}
 }
