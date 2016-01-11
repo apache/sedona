@@ -3,10 +3,15 @@
  */
 package org.datasyslab.geospark.spatialRDD;
 
-import java.io.Serializable;
-import java.util.*;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
+import org.apache.avro.io.parsing.Symbol;
 import org.apache.commons.lang.IllegalClassException;
+import org.apache.log4j.Logger;
 import org.apache.spark.HashPartitioner;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -15,49 +20,52 @@ import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.broadcast.Broadcast;
-
-
-import scala.Tuple2;
-
 import org.apache.spark.storage.StorageLevel;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.index.strtree.STRtree;
-
-import org.datasyslab.geospark.utils.*;
-;
-import org.apache.log4j.Logger;
+import org.datasyslab.geospark.gemotryObjects.EnvelopeWithGrid;
+import org.datasyslab.geospark.utils.GeometryComparatorFactory;
+import org.datasyslab.geospark.utils.PointXComparator;
+import org.datasyslab.geospark.utils.PointYComparator;
+import org.datasyslab.geospark.utils.RDDSampleUtils;
 import org.wololo.geojson.GeoJSON;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+
+import scala.Tuple2;
+
+;
+
 // TODO: Auto-generated Javadoc
 class PointFormatMapper implements Serializable, Function<String, Point> {
-	Integer offset = 0;
-	String splitter = "csv";
+    Integer offset = 0;
+    String splitter = "csv";
 
 
-	public PointFormatMapper(Integer Offset, String Splitter) {
-		this.offset = Offset;
-		this.splitter = Splitter;
-	}
+    public PointFormatMapper(Integer Offset, String Splitter) {
+        this.offset = Offset;
+        this.splitter = Splitter;
+    }
 
-	public Point call(String s) {
-		String seperater = ",";
-		if (this.splitter.contains("tsv")) {
-			seperater = "\t";
-		} else {
-			seperater = ",";
-		}
-		GeometryFactory fact = new GeometryFactory();
-		List<String> input = Arrays.asList(s.split(seperater));
-		Coordinate coordinate = new Coordinate(Double.parseDouble(input.get(0 + this.offset)),
-				Double.parseDouble(input.get(1 + this.offset)));
-		Point point = fact.createPoint(coordinate);
-		return point;
-	}
+    public Point call(String s) {
+        String splitter = ",";
+        if (this.splitter.contains("tsv")) {
+            splitter = "\t";
+        } else {
+            splitter = ",";
+        }
+        GeometryFactory fact = new GeometryFactory();
+        List<String> input = Arrays.asList(s.split(splitter));
+        Coordinate coordinate = new Coordinate(Double.parseDouble(input.get(0 + this.offset)),
+                Double.parseDouble(input.get(1 + this.offset)));
+        Point point = fact.createPoint(coordinate);
+        return point;
+    }
 }
 
 /**
@@ -67,188 +75,275 @@ public class PointRDD implements Serializable {
 
     static Logger log = Logger.getLogger(PointFormatMapper.class.getName());
     public long totalNumberOfRecords;
-    /** The point rdd. */
-	private JavaRDD<Point> pointRDD;
-
-
     /**
      * The boundary of this RDD, calculated in constructor method,
      */
     public Double[] boundary = new Double[4];
-
     /**
      * The boundary of this RDD, calculated in constructor method.
      */
     public Envelope boundaryEnvelope;
+    //Define a JavaPairRDD<Int, Point>
+    public JavaPairRDD<Integer, Point> gridPointRDD;
+    //Define a JavaPairRDD<Int, STRTREE>
+    public JavaPairRDD<Integer, STRtree> indexedRDD;
+    //Raw point RDD
+    public JavaRDD<Point> rawPointRDD;
+
+    public ArrayList<EnvelopeWithGrid> envelopeGrids;
+
     /**
-	 * Instantiates a new point rdd.
-	 *
-	 * @param pointRDD
-	 *            the point rdd
-	 */
-	public PointRDD(JavaRDD<Point> pointRDD) {
-		this.setPointRDD(pointRDD.cache());
-	}
-
-	//Define a JavaPairRDD<Int, Point>
-	public JavaPairRDD<Integer, Point> gridPointRDD;
-	//Define a JavaPairRDD<Int, STRTREE>
-	public JavaPairRDD<Integer,STRtree> indexedRDD;
-
-	public ArrayList<Double> getGrid() {
-		return grid;
-	}
-
-	//Variable Table: Grid
-    public ArrayList<Double> grid;
-    /**
-     * gridType, could be "x", "y". Later we will add kd-tree based grid.
+     * Instantiates a new point rdd.
+     *
+     * @param rawPointRDD the point rdd
      */
-    String gridType;
-	//List of duplicates... 如果在grid 边界上? 一个点在两个partition里都有. 那么
+    public PointRDD(JavaRDD<Point> rawPointRDD) {
+        this.setRawPointRDD(rawPointRDD);
+    }
 
+    /**
+     * Instantiates a new point rdd.
+     *
+     * @param spark         the spark
+     * @param InputLocation the input location
+     * @param Offset        the offset
+     * @param Splitter      the splitter
+     * @param partitions    the partitions
+     */
+    public PointRDD(JavaSparkContext spark, String InputLocation, Integer Offset, String Splitter, Integer partitions) {
+        // final Integer offset=Offset;
+        this.setRawPointRDD(
+                spark.textFile(InputLocation, partitions).map(new PointFormatMapper(Offset, Splitter)).cache());
+    }
 
+    /**
+     * New  constructor crate by Jinxuan Wu.
+     *
+     * This constructor is capable of build grided RDD.
+     */
+    public PointRDD(JavaSparkContext sc, String InputLocation, Integer offset, String splitter, String gridType, Integer numPartitions) {
+        this.rawPointRDD = sc.textFile(InputLocation).map(new PointFormatMapper(offset, splitter));
 
-	//突然感觉如果join的第二个参数如果是set, 是不是比较好.
+        this.totalNumberOfRecords = this.rawPointRDD.count();
 
+        //Calculate the number of samples we need to take.
+        int sampleNumberOfRecords = RDDSampleUtils.getSampleNumbers(numPartitions, totalNumberOfRecords);
 
-	/*
-		Method: Cache Grided RDD.
-	 */
-	/*
-		Method: Build Grid, do a Spark Sample. Should create a Table.
-	 */
-
-	//对于有多种实现的, 应该怎么写代码呢? 通过参数?
-	/*
-		Method: Build Index,
-		Need to make sure we have a table of grid
-	 */
-
-
-	//Method: Write RDD to GeoJSON
-
-	//Method: Write RDD to ShapeFile
-
-	/**
-	 * Instantiates a new point rdd.
-	 *
-	 * @param spark
-	 *            the spark
-	 * @param InputLocation
-	 *            the input location
-	 * @param Offset
-	 *            the offset
-	 * @param Splitter
-	 *            the splitter
-	 * @param partitions
-	 *            the partitions
-	 */
-	public PointRDD(JavaSparkContext spark, String InputLocation, Integer Offset, String Splitter, Integer partitions) {
-		// final Integer offset=Offset;
-		this.setPointRDD(
-				spark.textFile(InputLocation, partitions).map(new PointFormatMapper(Offset, Splitter)).cache());
-	}
-
-	/**
-	 *
-	 * New pointRDD constructure crate by Jinxuan Wu.
-	 *
-	 * @param sc
-	 * @param InputLocation
-	 * @param offset
-	 * @param splitter
-	 * @param gridType
-	 * @param numPartitions, althouth this is provided by the user, but should be multiple of number of cores.
-	 */
-	//Create By Jinxuan Wu.
-	//
-	public PointRDD(JavaSparkContext sc, String InputLocation, Integer offset, String splitter, String gridType, Integer numPartitions) {
-		this.pointRDD = sc.textFile(InputLocation, numPartitions).map(new PointFormatMapper(offset, splitter));
-
-		this.totalNumberOfRecords = this.pointRDD.count();
-
-		//Calculate the number of samples we need to take.
-		int sampleNumberOfRecords = RDDSampleUtils.getSampleNumbers(numPartitions, totalNumberOfRecords);
-
-		if( sampleNumberOfRecords == 0) {
-            log.warn("the number of input is too small, no need to create a grid");
-            //todo: Fix it later, Unable to return null..
-		}
-
-		//Take Sample
-        ArrayList<Point> pointSampleList = new ArrayList<Point>(this.pointRDD.takeSample(false, sampleNumberOfRecords));
-		//Sort
-        //todo: Switch Case
-		//Cause troubles in scala.
-        Collections.sort(pointSampleList, new PointXComparator());
+        if(sampleNumberOfRecords == -1) {
+            throw new IllegalArgumentException("The input size is smaller the number of grid, please reduce the grid size!");
+        }
+        //Take Sample
+        //todo: This creates troubles.. In fact it should be List interface. But List reports problems in Scala Shell, seems that it can not implement polymorphism and Still use List.
+        ArrayList<Point> pointSampleList = new ArrayList<Point>(this.rawPointRDD.takeSample(false, sampleNumberOfRecords));
+        //Sort
+        Comparator<Point> comparator = null;
+        switch (gridType) {
+            case "X":
+                comparator = new PointXComparator();
+                break;
+            case "Y":
+                comparator = new PointYComparator();
+                break;
+            case "X-Y":
+                //Will first sort based on X, then partition, then sort and partition based on Y.
+                comparator = new PointXComparator();
+                break;
+            case "STRtree":
+                throw new IllegalArgumentException("STRtree is currently now implemented, to be finished in version 0.3");
+            default:
+                throw new IllegalArgumentException("Grid type not recognied, please check again.");
+        }
 
         //Get minX and minY;
         this.boundary();
 
-		//Pick and create boundary;
-        int curLocation = 0;
-        int step = sampleNumberOfRecords / numPartitions;
-		//If step = 0, which  means data set is really small, choose the
-        grid = new ArrayList<Double> ();
 
-        while(curLocation < sampleNumberOfRecords) {
-            grid.add(pointSampleList.get(curLocation).getX());
-            curLocation += step; // 0 + 10?
+        //Pick and create boundary;
+
+        JavaPairRDD<Integer, Point> unPartitionedGridPointRDD;
+
+        //This is the case where data size is too small. We will just create one grid
+        if(sampleNumberOfRecords == 0) {
+            //If the sample Number is too small, we will just use one grid instead.
+            System.err.println("The grid size is " + numPartitions * numPartitions + "for 2-dimension X-Y grid" + numPartitions + " for 1-dimension grid");
+            System.err.println("The sample size is " + totalNumberOfRecords/100);
+            System.err.println("input size is too small, we can not guarantee one grid have at least one record in it");
+            System.err.println("we will just build one grid for all input");
+            envelopeGrids = new ArrayList<EnvelopeWithGrid>();
+            envelopeGrids.add(new EnvelopeWithGrid(this.boundaryEnvelope, 0));
         }
-        grid.set(0, boundary[0]);
-        grid.set(grid.size() - 1, boundary[2]);
-        // We can make this grid as broadcast variable:
-        final Broadcast<ArrayList<Double>> gridBroadcasted= sc.broadcast(grid);
-        //todo: I'm not sure, make be change to mapToPartitions will be faster?
-		//Using search insert position. This is not correct... where does that
-		JavaPairRDD<Integer, Point> unPartitionedGridPointRDD = this.pointRDD.mapToPair(new PairFunction<Point, Integer, Point>() {
-			@Override
-			public Tuple2<Integer, Point> call(Point point) throws Exception {
-				//Do a Binary Search..
-				ArrayList<Double> grid = gridBroadcasted.getValue();
-				//Binary search to find index;
-				//In binary high is the index number that is just smaller than target.
-//				int low = 0, high = grid.size();
-//				int result = 0;
-//				while (low <= high) {
-//					int mid = (low + high) / 2;
-//					//todo: Double is not accurate..
-//					if (Double.compare(grid.get(mid).doubleValue(), point.getX()) == 1 )
-//						high = mid - 1;
-//					else if (Double.compare(grid.get(mid).doubleValue(), point.getX()) == -1)
-//						low = mid + 1;
-//					else {
-//						high = mid;
-//						//check correctness later
-//						break;
-//					}
-//				}
-				int begin = 0, end = grid.size() - 1;
+        else if (gridType.equals("X-Y")) {
+            //Ideally we want, One partition => One Grid. And each partition have equal size.
+            //We use upper bound of sqrt(# of partition) for X and Y.
+            Collections.sort(pointSampleList, comparator);
+            GeometryFactory geometryFactory = new GeometryFactory();
 
-				int result = 0;
-				while( begin < end ) {
-					int mid = (begin + end) / 2;
-					if(Double.compare(grid.get(mid).doubleValue(), point.getX()) == -1) {
-						begin = mid + 1;
-					}
-					else
-						end = mid;
-				}
+            //Expand the sampleList to include boundary.
 
-				result = begin;
+            pointSampleList.set(0, geometryFactory.createPoint(new Coordinate(boundary[0], boundary[1])));
+            pointSampleList.set(sampleNumberOfRecords-1, geometryFactory.createPoint(new Coordinate(boundary[2], boundary[3])));
 
-				return new Tuple2<Integer, Point>(result, point);
-			}
-		});
-		//Note, we don't need cache this RDD in memory, store it in the disk is enough.
-		//todo, may be refactor this so that user have choice.
-		//todo, measure this part's time. Using log4j debug level.
-		//todo, This hashPartitioner could be improved by a simple %, becuase we know they're parition number.
-		this.gridPointRDD = unPartitionedGridPointRDD.partitionBy(new HashPartitioner(numPartitions)).persist(StorageLevel.DISK_ONLY());
+            //todo: [Verify] Duplicate should not be a problem right?
 
-	}
+            //We need to create upper(n) envelope...
+            //todo: May be use bar instead of vertices? This variable name need to refactor
 
+            Integer stepInXAxis = sampleNumberOfRecords / numPartitions;
+            Integer stepInYAxis = stepInXAxis / numPartitions;
+
+            if(stepInYAxis == 0 || stepInXAxis == 0) {
+                throw new IllegalArgumentException("[Error]" +
+                        sampleNumberOfRecords +
+                        "The number of partitions you provided is too large. I'm unable to build" +
+                                "that Grid by sampling 1 percent of total record");
+            }
+            int index = 0;
+
+            envelopeGrids = new ArrayList<EnvelopeWithGrid>();
+
+            //XAxis
+            ArrayList<Double> xAxisMidPointList = new ArrayList<Double>();
+            ArrayList<Point> xAxisSubList = new ArrayList<Point>();
+
+            for (int i = 0; i < sampleNumberOfRecords; i += stepInXAxis) {
+                xAxisSubList.add(pointSampleList.get(i + stepInXAxis - 1));
+            }
+
+            //Build MidPoint
+            xAxisMidPointList.add(boundaryEnvelope.getMinX());
+            for(int j = 0; j < xAxisSubList.size() - 1; j++) {
+                Double mid = (xAxisSubList.get(j).getX() + xAxisSubList.get(j+1).getX())/2;
+                xAxisMidPointList.add(mid);
+            }
+            xAxisMidPointList.add(boundaryEnvelope.getMaxX());
+
+            //yAxis
+
+            for(int j = 0; j < xAxisSubList.size();j++) {
+                //Fetch the X bar.
+
+                ArrayList<Point> xAxisBar = new ArrayList<Point>(pointSampleList.subList(j*stepInXAxis, (j+1)*stepInXAxis));
+
+                Collections.sort(xAxisBar, new PointYComparator());
+
+                //Pick y Axis.
+                ArrayList<Point> yAxisSubList = new ArrayList<Point>();
+
+                for(int k = 0; k < xAxisBar.size(); k+=stepInYAxis) {
+                    yAxisSubList.add(xAxisBar.get(k + stepInYAxis - 1));
+                }
+                //Calculate midpoint.
+
+
+                ArrayList<Double> yAxisMidPointList = new ArrayList<Double>(yAxisSubList.size() - 1);
+                yAxisMidPointList.add((boundaryEnvelope.getMinY()));
+                for(int k = 0; k < yAxisSubList.size() - 1; k++) {
+                    Double mid = (yAxisSubList.get(k).getY() + yAxisSubList.get(k+1).getY()) / 2;
+                    yAxisMidPointList.add(mid);
+                }
+                yAxisMidPointList.add(boundaryEnvelope.getMaxY());
+
+                //Build Grid.
+                //x1,x2,y1,y2
+                for(int k = 0; k < yAxisMidPointList.size() - 1; k++ ) {
+                    envelopeGrids.add(new EnvelopeWithGrid(xAxisMidPointList.get(j), xAxisMidPointList.get(j + 1), yAxisMidPointList.get(k), yAxisMidPointList.get(k + 1), index));
+                    index++;
+                }
+            }
+        } else if (gridType.equals("X")) {
+            Collections.sort(pointSampleList, comparator);
+            //Below is for X and Y grid.
+            int curLocation = 0;
+            int step = sampleNumberOfRecords / numPartitions;
+            //If step = 0, which  means data set is really small, choose the
+            GeometryComparatorFactory geometryComparatorFactory = new GeometryComparatorFactory();
+
+            //Find Mid Point
+            ArrayList<Point> xAxisBar = new ArrayList<Point>();
+            while (curLocation < sampleNumberOfRecords) {
+                xAxisBar.add(pointSampleList.get(curLocation));
+                curLocation += step;
+            }
+
+            ArrayList<Double> midPointList = new ArrayList<Double>();
+
+            midPointList.add(boundaryEnvelope.getMinX());
+            for(int i = 0; i < xAxisBar.size() - 1; i++) {
+                midPointList.add((xAxisBar.get(i).getX() + xAxisBar.get(i + 1).getX()) / 2);
+            }
+            midPointList.add(boundaryEnvelope.getMaxX());
+            int index = 0;
+            envelopeGrids = new ArrayList<EnvelopeWithGrid>(midPointList.size() - 1);
+            for(int i = 0; i < midPointList.size() - 1; i++) {
+                envelopeGrids.add(new EnvelopeWithGrid(midPointList.get(i), midPointList.get(i + 1), boundaryEnvelope.getMinY(), boundaryEnvelope.getMaxY(), index));
+                index++;
+            }
+        } else if (gridType.equals("Y")) {
+            Collections.sort(pointSampleList, comparator);
+            //Below is for X and Y grid.
+            int curLocation = 0;
+            int step = sampleNumberOfRecords / numPartitions;
+            //If step = 0, which  means data set is really small, choose the
+            GeometryComparatorFactory geometryComparatorFactory = new GeometryComparatorFactory();
+
+            //Find Mid Point
+            ArrayList<Point> yAxisBar = new ArrayList<Point>();
+            while (curLocation < sampleNumberOfRecords) {
+                yAxisBar.add(pointSampleList.get(curLocation));
+                curLocation += step;
+            }
+
+            ArrayList<Double> midPointList = new ArrayList<Double>();
+
+            midPointList.add(boundaryEnvelope.getMinX());
+            for(int i = 0; i < yAxisBar.size() - 1; i++) {
+                midPointList.add((yAxisBar.get(i).getY() + yAxisBar.get(i + 1).getY()) / 2);
+            }
+            midPointList.add(boundaryEnvelope.getMaxY());
+            int index = 0;
+            envelopeGrids = new ArrayList<EnvelopeWithGrid>(midPointList.size() - 1);
+            for(int i = 0; i < midPointList.size() - 1; i++) {
+                envelopeGrids.add(new EnvelopeWithGrid(boundaryEnvelope.getMinX(), boundaryEnvelope.getMaxX(),midPointList.get(i), midPointList.get(i + 1),  index));
+                index++;
+            }
+        }
+
+        //Note, we don't need cache this RDD in memory, store it in the disk is enough.
+        //todo, may be refactor this so that user have choice.
+        //todo, measure this part's time. Using log4j debug level.
+        //todo, This hashPartitioner could be improved by a simple %, becuase we know they're parition number.
+        final Broadcast<ArrayList<EnvelopeWithGrid>> gridEnvelopBroadcasted = sc.broadcast(envelopeGrids);
+        unPartitionedGridPointRDD = this.rawPointRDD.mapToPair(
+                new PairFunction<Point, Integer, Point>() {
+                    @Override
+                    public Tuple2<Integer, Point> call(Point point) throws Exception {
+                        for (EnvelopeWithGrid e : gridEnvelopBroadcasted.getValue()) {
+                            if (e.contains(point.getCoordinate())) {
+                                return new Tuple2<Integer, Point>(e.grid, point);
+                            }
+                        }
+                        //Should never goes here..
+                        throw new Exception("[Error]" +
+                                point.toString() +
+                                "The grid must have errors, it should at least have one grid contain this point");
+                    }
+                }
+        );
+        this.gridPointRDD = unPartitionedGridPointRDD.partitionBy(new HashPartitioner(numPartitions)).persist(StorageLevel.DISK_ONLY());
+    }
+
+    /**
+     * Instantiates a new point rdd.
+     *
+     * @param spark         the spark
+     * @param InputLocation the input location
+     * @param Offset        the offset
+     * @param Splitter      the splitter
+     */
+    public PointRDD(JavaSparkContext spark, String InputLocation, Integer Offset, String Splitter) {
+        // final Integer offset=Offset;
+        this.setRawPointRDD(spark.textFile(InputLocation).map(new PointFormatMapper(Offset, Splitter)).cache());
+    }
 
     /**
      * @author Jinxuan Wu
@@ -261,110 +356,83 @@ public class PointRDD implements Serializable {
             throw new IllegalClassException("To build index, you must build grid first");
         }
 
-		//Use GroupByKey, since I have repartition data, it should be much faster.
-		//todo: Need to test performance here...
-		JavaPairRDD<Integer, Iterable<Point>> gridedPointListRDD = this.gridPointRDD.groupByKey();
+        //Use GroupByKey, since I have repartition data, it should be much faster.
+        //todo: Need to test performance here...
+        JavaPairRDD<Integer, Iterable<Point>> gridedPointListRDD = this.gridPointRDD.groupByKey();
 
-		this.indexedRDD = gridedPointListRDD.flatMapValues(new Function<Iterable<Point>, Iterable<STRtree>>() {
-			@Override
-			public Iterable<STRtree> call(Iterable<Point> points) throws Exception {
-				STRtree rt = new STRtree();
-				for(Point p:points)
-					rt.insert(p.getEnvelopeInternal(), p);
-				ArrayList<STRtree> result = new ArrayList<STRtree>();
-				result.add(rt);
-				return result;
-			}
-		});
+        this.indexedRDD = gridedPointListRDD.flatMapValues(new Function<Iterable<Point>, Iterable<STRtree>>() {
+            @Override
+            public Iterable<STRtree> call(Iterable<Point> points) throws Exception {
+                STRtree rt = new STRtree();
+                for (Point p : points)
+                    rt.insert(p.getEnvelopeInternal(), p);
+                ArrayList<STRtree> result = new ArrayList<STRtree>();
+                result.add(rt);
+                return result;
+            }
+        });
 
-		this.indexedRDD.cache();
+        this.indexedRDD.cache();
     }
 
-	/**
-	 * Instantiates a new point rdd.
-	 *
-	 * @param spark
-	 *            the spark
-	 * @param InputLocation
-	 *            the input location
-	 * @param Offset
-	 *            the offset
-	 * @param Splitter
-	 *            the splitter
-	 */
-	public PointRDD(JavaSparkContext spark, String InputLocation, Integer Offset, String Splitter) {
-		// final Integer offset=Offset;
-		this.setPointRDD(spark.textFile(InputLocation).map(new PointFormatMapper(Offset, Splitter)).cache());
-	}
+    /**
+     * Gets the point rdd.
+     *
+     * @return the point rdd
+     */
+    public JavaRDD<Point> getRawPointRDD() {
+        return rawPointRDD;
+    }
 
-	/**
-	 * Gets the point rdd.
-	 *
-	 * @return the point rdd
-	 */
-	public JavaRDD<Point> getPointRDD() {
-		return pointRDD;
-	}
+    /**
+     * Sets the point rdd.
+     *
+     * @param rawPointRDD the new point rdd
+     */
+    public void setRawPointRDD(JavaRDD<Point> rawPointRDD) {
+        this.rawPointRDD = rawPointRDD;
+    }
 
-	/**
-	 * Sets the point rdd.
-	 *
-	 * @param pointRDD
-	 *            the new point rdd
-	 */
-	public void setPointRDD(JavaRDD<Point> pointRDD) {
-		this.pointRDD = pointRDD;
-	}
-
-	/**
-	 * Re partition.
-	 *
-	 * @param partitions
-	 *            the partitions
-	 * @return the java rdd
-	 */
-	public JavaRDD<Point> rePartition(Integer partitions) {
-		return this.pointRDD.repartition(partitions);
-	}
-
-
-
-	/**
-	 * Boundary.
-	 *
-	 * @return the envelope
-	 */
-	public Envelope boundary() {
-		Double minLongitude = this.pointRDD
-				.min((PointXComparator) GeometryComparatorFactory.createComparator("point", "x")).getX();
-		Double maxLongitude = this.pointRDD
-				.max((PointXComparator) GeometryComparatorFactory.createComparator("point", "x")).getX();
-		Double minLatitude = this.pointRDD
-				.min((PointYComparator) GeometryComparatorFactory.createComparator("point", "y")).getY();
-		Double maxLatitude = this.pointRDD
-				.max((PointYComparator) GeometryComparatorFactory.createComparator("point", "y")).getY();
-		this.boundary[0] = minLongitude;
+    /**
+     * Boundary.
+     *
+     * @return the envelope
+     */
+    public Envelope boundary() {
+        Double minLongitude = this.rawPointRDD
+                .min((PointXComparator) GeometryComparatorFactory.createComparator("point", "x")).getX();
+        Double maxLongitude = this.rawPointRDD
+                .max((PointXComparator) GeometryComparatorFactory.createComparator("point", "x")).getX();
+        Double minLatitude = this.rawPointRDD
+                .min((PointYComparator) GeometryComparatorFactory.createComparator("point", "y")).getY();
+        Double maxLatitude = this.rawPointRDD
+                .max((PointYComparator) GeometryComparatorFactory.createComparator("point", "y")).getY();
+        this.boundary[0] = minLongitude;
         this.boundary[1] = minLatitude;
         this.boundary[2] = maxLongitude;
         this.boundary[3] = maxLatitude;
         this.boundaryEnvelope = new Envelope(minLongitude, maxLongitude, minLatitude, maxLatitude);
-		return boundaryEnvelope;
-	}
+        return boundaryEnvelope;
+    }
+    /*
+        Output the raw RDD as GeoJSON
+     */
+    public void saveAsGeoJSON(String outputLocation) {
+        this.rawPointRDD.mapPartitions(new FlatMapFunction<Iterator<Point>, String>() {
+            @Override
+            public Iterable<String> call(Iterator<Point> pointIterator) throws Exception {
+                ArrayList<String> result = new ArrayList<String>();
+                GeoJSONWriter writer = new GeoJSONWriter();
+                while (pointIterator.hasNext()) {
+                    GeoJSON json = writer.write(pointIterator.next());
+                    String jsonstring = json.toString();
+                    result.add(jsonstring);
+                }
+                return result;
+            }
+        }).saveAsTextFile(outputLocation);
+    }
 
-	public void saveAsGeoJSON(String outputLocation){
-		this.pointRDD.mapPartitions(new FlatMapFunction<Iterator<Point>, String>() {
-			@Override
-			public Iterable<String> call(Iterator<Point> pointIterator) throws Exception {
-				ArrayList<String> result = new ArrayList<String>();
-				GeoJSONWriter writer = new GeoJSONWriter();
-				while(pointIterator.hasNext()) {
-					GeoJSON json = writer.write(pointIterator.next());
-					String jsonstring = json.toString();
-					result.add(jsonstring);
-				}
-				return result;
-			}
-		}).saveAsTextFile(outputLocation);
-	}
+    //Som
 
 }

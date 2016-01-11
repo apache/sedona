@@ -41,8 +41,6 @@ public class JoinQuery {
 	/**
 	 * Spatial join query.
 	 *
-	 * @param rectangleRDD
-	 *            the rectangle rdd
 	 * @param Condition
 	 *            the condition
 	 * @param GridNumberHorizontal
@@ -366,22 +364,22 @@ public class JoinQuery {
 		JavaRDD<Point> TargetPreFiltered;
 		JavaRDD<Circle> QueryAreaPreFiltered;
 		// Integer
-		// currentPartitionsTargetSet=this.pointRDD.partitions().size()/2;
+		// currentPartitionsTargetSet=this.rawPointRDD.partitions().size()/2;
 		// Integer
 		// currentPartitionQuerySet=circleRDD.getCircleRDD().partitions().size();
 		if (QueryWindowSetBoundary.contains(TargetSetBoundary)) {
 			boundary = TargetSetBoundary;
-			// TargetPreFiltered=this.pointRDD;
+			// TargetPreFiltered=this.rawPointRDD;
 			// QueryAreaPreFiltered=circleRDD.getCircleRDD().filter(new
 			// CirclePreFilter(boundary));
 		} else if (TargetSetBoundary.contains(QueryWindowSetBoundary)) {
 			boundary = QueryWindowSetBoundary;
-			// TargetPreFiltered=this.pointRDD.filter(new
+			// TargetPreFiltered=this.rawPointRDD.filter(new
 			// PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
 			// QueryAreaPreFiltered=circleRDD.getCircleRDD();
 		} else if (QueryWindowSetBoundary.intersects(TargetSetBoundary)) {
 			boundary = QueryWindowSetBoundary.intersection(TargetSetBoundary);
-			// TargetPreFiltered=this.pointRDD.filter(new
+			// TargetPreFiltered=this.rawPointRDD.filter(new
 			// PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
 			// QueryAreaPreFiltered=circleRDD.getCircleRDD().filter(new
 			// CirclePreFilter(boundary));
@@ -403,20 +401,20 @@ public class JoinQuery {
 		}
 		// Assign grid ID to both of the two dataset---------------------
 
-		JavaPairRDD<Integer, Point> TargetSetWithIDtemp = pointRDD.getPointRDD()
+		JavaPairRDD<Integer, Point> TargetSetWithIDtemp = pointRDD.getRawPointRDD()
 				.mapPartitionsToPair(new PartitionAssignGridPoint(GridNumberHorizontal, GridNumberVertical,
 						gridHorizontalBorder, gridVerticalBorder));
 		JavaPairRDD<Integer, Circle> QueryAreaSetWithID1 = circleRDD.getCircleRDD()
 				.mapPartitionsToPair(new PartitionAssignGridCircle(GridNumberHorizontal, GridNumberVertical,
 						gridHorizontalBorder, gridVerticalBorder));
-		pointRDD.getPointRDD().unpersist();
+		pointRDD.getRawPointRDD().unpersist();
 		circleRDD.getCircleRDD().unpersist();
 		JavaPairRDD<Integer, Point> QueryAreaSetWithIDtemp = QueryAreaSetWithID1
 				.mapToPair(new PairFunction<Tuple2<Integer, Circle>, Integer, Point>() {
 
 					public Tuple2<Integer, Point> call(Tuple2<Integer, Circle> t) {
 
-						return new Tuple2<Integer, Point>(t._1(), t._2().getCentre());
+						return new Tuple2<Integer, Point>(t._1(), t._2().getCenter());
 					}
 
 				});
@@ -507,7 +505,7 @@ public class JoinQuery {
 			System.out.println("Two input sets are not overlapped");
 			return null;
 		}
-		JavaRDD<Point> TargetPreFiltered = pointRDD.getPointRDD().filter(new PointPreFilter(boundary));
+		JavaRDD<Point> TargetPreFiltered = pointRDD.getRawPointRDD().filter(new PointPreFilter(boundary));
 		JavaRDD<Polygon> QueryAreaPreFiltered = polygonRDD.getPolygonRDD().filter(new PolygonPreFilter(boundary));
 		// Build Grid file-------------------
 		Double[] gridHorizontalBorder = new Double[GridNumberHorizontal + 1];
@@ -528,7 +526,7 @@ public class JoinQuery {
 				.mapPartitionsToPair(new PartitionAssignGridPolygon(GridNumberHorizontal, GridNumberVertical,
 						gridHorizontalBorder, gridVerticalBorder));
 		// Remove cache from memory
-		pointRDD.getPointRDD().unpersist();
+		pointRDD.getRawPointRDD().unpersist();
 		polygonRDD.getPolygonRDD().unpersist();
 		JavaPairRDD<Integer, Point> TargetSetWithID = TargetSetWithIDtemp;// .repartition(TargetSetWithIDtemp.partitions().size()*2);
 		JavaPairRDD<Integer, Polygon> QueryAreaSetWithID = QueryAreaSetWithIDtemp;// .repartition(TargetSetWithIDtemp.partitions().size()*2);
@@ -614,27 +612,27 @@ public class JoinQuery {
 		Envelope TargetSetBoundary = pointRDD.boundary();
 		Envelope boundary = QueryWindowSetBoundary;
 		// Integer
-		// currentPartitionsTargetSet=this.pointRDD.partitions().size()/2;
+		// currentPartitionsTargetSet=this.rawPointRDD.partitions().size()/2;
 		// Integer
 		// currentPartitionQuerySet=rectangleRDD.getRectangleRDD().partitions().size();
 		// Border found
-		JavaRDD<Point> TargetPreFiltered;// =this.pointRDD.filter(new
+		JavaRDD<Point> TargetPreFiltered;// =this.rawPointRDD.filter(new
 		// PointPreFilter(boundary));
 		JavaRDD<Envelope> QueryAreaPreFiltered;// =rectangleRDD.getRectangleRDD().filter(new
 		// RectanglePreFilter(boundary));
 		if (QueryWindowSetBoundary.contains(TargetSetBoundary)) {
 			boundary = TargetSetBoundary;
-			// TargetPreFiltered=this.pointRDD;
+			// TargetPreFiltered=this.rawPointRDD;
 			// QueryAreaPreFiltered=rectangleRDD.getRectangleRDD().filter(new
 			// RectanglePreFilter(boundary));
 		} else if (TargetSetBoundary.contains(QueryWindowSetBoundary)) {
 			boundary = QueryWindowSetBoundary;
-			// TargetPreFiltered=this.pointRDD.filter(new
+			// TargetPreFiltered=this.rawPointRDD.filter(new
 			// PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
 			// QueryAreaPreFiltered=rectangleRDD.getRectangleRDD();
 		} else if (QueryWindowSetBoundary.intersects(TargetSetBoundary)) {
 			boundary = QueryWindowSetBoundary.intersection(TargetSetBoundary);
-			// TargetPreFiltered=this.pointRDD.filter(new
+			// TargetPreFiltered=this.rawPointRDD.filter(new
 			// PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
 			// QueryAreaPreFiltered=rectangleRDD.getRectangleRDD().filter(new
 			// RectanglePreFilter(boundary));
@@ -642,7 +640,7 @@ public class JoinQuery {
 			System.out.println("Two input sets are not overlapped");
 			return null;
 		}
-		// JavaRDD<Point> TargetPreFiltered=this.pointRDD.filter(new
+		// JavaRDD<Point> TargetPreFiltered=this.rawPointRDD.filter(new
 		// PointPreFilter(boundary));
 		// JavaRDD<Envelope>
 		// QueryAreaPreFiltered=rectangleRDD.getRectangleRDD().filter(new
@@ -659,14 +657,14 @@ public class JoinQuery {
 			gridVerticalBorder[i] = boundary.getMinY() + LatitudeIncrement * i;
 		}
 		// Assign grid ID to both of the two dataset---------------------
-		JavaPairRDD<Integer, Point> TargetSetWithIDtemp = pointRDD.getPointRDD()
+		JavaPairRDD<Integer, Point> TargetSetWithIDtemp = pointRDD.getRawPointRDD()
 				.mapPartitionsToPair(new PartitionAssignGridPoint(GridNumberHorizontal, GridNumberVertical,
 						gridHorizontalBorder, gridVerticalBorder));
 		JavaPairRDD<Integer, Envelope> QueryAreaSetWithIDtemp = rectangleRDD.getRectangleRDD()
 				.mapPartitionsToPair(new PartitionAssignGridRectangle(GridNumberHorizontal, GridNumberVertical,
 						gridHorizontalBorder, gridVerticalBorder));
 		// Remove cache from memory
-		pointRDD.getPointRDD().unpersist();
+		pointRDD.getRawPointRDD().unpersist();
 		rectangleRDD.getRectangleRDD().unpersist();
 		JavaPairRDD<Integer, Point> TargetSetWithID = TargetSetWithIDtemp;// .repartition(TargetSetWithIDtemp.partitions().size()*2);
 		JavaPairRDD<Integer, Envelope> QueryAreaSetWithID = QueryAreaSetWithIDtemp;// .repartition(TargetSetWithIDtemp.partitions().size()*2);
@@ -892,27 +890,27 @@ public class JoinQuery {
 		Envelope TargetSetBoundary = pointRDD.boundary();
 		Envelope boundary = QueryWindowSetBoundary;
 		// Integer
-		// currentPartitionsTargetSet=this.pointRDD.partitions().size()/2;
+		// currentPartitionsTargetSet=this.rawPointRDD.partitions().size()/2;
 		// Integer
 		// currentPartitionQuerySet=rectangleRDD.getRectangleRDD().partitions().size();
 		// Border found
-		JavaRDD<Point> TargetPreFiltered;// =this.pointRDD.filter(new
+		JavaRDD<Point> TargetPreFiltered;// =this.rawPointRDD.filter(new
 											// PointPreFilter(boundary));
 		JavaRDD<Envelope> QueryAreaPreFiltered;// =rectangleRDD.getRectangleRDD().filter(new
 												// RectanglePreFilter(boundary));
 		if (QueryWindowSetBoundary.contains(TargetSetBoundary)) {
 			boundary = TargetSetBoundary;
-			// TargetPreFiltered=this.pointRDD;
+			// TargetPreFiltered=this.rawPointRDD;
 			// QueryAreaPreFiltered=rectangleRDD.getRectangleRDD().filter(new
 			// RectanglePreFilter(boundary));
 		} else if (TargetSetBoundary.contains(QueryWindowSetBoundary)) {
 			boundary = QueryWindowSetBoundary;
-			// TargetPreFiltered=this.pointRDD.filter(new
+			// TargetPreFiltered=this.rawPointRDD.filter(new
 			// PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
 			// QueryAreaPreFiltered=rectangleRDD.getRectangleRDD();
 		} else if (QueryWindowSetBoundary.intersects(TargetSetBoundary)) {
 			boundary = QueryWindowSetBoundary.intersection(TargetSetBoundary);
-			// TargetPreFiltered=this.pointRDD.filter(new
+			// TargetPreFiltered=this.rawPointRDD.filter(new
 			// PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
 			// QueryAreaPreFiltered=rectangleRDD.getRectangleRDD().filter(new
 			// RectanglePreFilter(boundary));
@@ -920,7 +918,7 @@ public class JoinQuery {
 			System.out.println("Two input sets are not overlapped");
 			return null;
 		}
-		// JavaRDD<Point> TargetPreFiltered=this.pointRDD.filter(new
+		// JavaRDD<Point> TargetPreFiltered=this.rawPointRDD.filter(new
 		// PointPreFilter(boundary));
 		// JavaRDD<Envelope>
 		// QueryAreaPreFiltered=rectangleRDD.getRectangleRDD().filter(new
@@ -937,14 +935,14 @@ public class JoinQuery {
 			gridVerticalBorder[i] = boundary.getMinY() + LatitudeIncrement * i;
 		}
 		// Assign grid ID to both of the two dataset---------------------
-		JavaPairRDD<Integer, Point> TargetSetWithIDtemp = pointRDD.getPointRDD()
+		JavaPairRDD<Integer, Point> TargetSetWithIDtemp = pointRDD.getRawPointRDD()
 				.mapPartitionsToPair(new PartitionAssignGridPoint(GridNumberHorizontal, GridNumberVertical,
 						gridHorizontalBorder, gridVerticalBorder));
 		JavaPairRDD<Integer, Envelope> QueryAreaSetWithIDtemp = rectangleRDD.getRectangleRDD()
 				.mapPartitionsToPair(new PartitionAssignGridRectangle(GridNumberHorizontal, GridNumberVertical,
 						gridHorizontalBorder, gridVerticalBorder));
 		// Remove cache from memory
-		pointRDD.getPointRDD().unpersist();
+		pointRDD.getRawPointRDD().unpersist();
 		rectangleRDD.getRectangleRDD().unpersist();
 		JavaPairRDD<Integer, Point> TargetSetWithID = TargetSetWithIDtemp;// .repartition(TargetSetWithIDtemp.partitions().size()*2);
 		JavaPairRDD<Integer, Envelope> QueryAreaSetWithID = QueryAreaSetWithIDtemp;// .repartition(TargetSetWithIDtemp.partitions().size()*2);
@@ -1069,22 +1067,22 @@ public class JoinQuery {
 		JavaRDD<Point> TargetPreFiltered;
 		JavaRDD<Circle> QueryAreaPreFiltered;
 		// Integer
-		// currentPartitionsTargetSet=this.pointRDD.partitions().size()/2;
+		// currentPartitionsTargetSet=this.rawPointRDD.partitions().size()/2;
 		// Integer
 		// currentPartitionQuerySet=circleRDD.getCircleRDD().partitions().size();
 		if (QueryWindowSetBoundary.contains(TargetSetBoundary)) {
 			boundary = TargetSetBoundary;
-			// TargetPreFiltered=this.pointRDD;
+			// TargetPreFiltered=this.rawPointRDD;
 			// QueryAreaPreFiltered=circleRDD.getCircleRDD().filter(new
 			// CirclePreFilter(boundary));
 		} else if (TargetSetBoundary.contains(QueryWindowSetBoundary)) {
 			boundary = QueryWindowSetBoundary;
-			// TargetPreFiltered=this.pointRDD.filter(new
+			// TargetPreFiltered=this.rawPointRDD.filter(new
 			// PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
 			// QueryAreaPreFiltered=circleRDD.getCircleRDD();
 		} else if (QueryWindowSetBoundary.intersects(TargetSetBoundary)) {
 			boundary = QueryWindowSetBoundary.intersection(TargetSetBoundary);
-			// TargetPreFiltered=this.pointRDD.filter(new
+			// TargetPreFiltered=this.rawPointRDD.filter(new
 			// PointPreFilter(boundary));//.repartition(currentPartitionsTargetSet);
 			// QueryAreaPreFiltered=circleRDD.getCircleRDD().filter(new
 			// CirclePreFilter(boundary));
@@ -1106,13 +1104,13 @@ public class JoinQuery {
 		}
 		// Assign grid ID to both of the two dataset---------------------
 
-		JavaPairRDD<Integer, Point> TargetSetWithIDtemp = pointRDD.getPointRDD()
+		JavaPairRDD<Integer, Point> TargetSetWithIDtemp = pointRDD.getRawPointRDD()
 				.mapPartitionsToPair(new PartitionAssignGridPoint(GridNumberHorizontal, GridNumberVertical,
 						gridHorizontalBorder, gridVerticalBorder));
 		JavaPairRDD<Integer, Circle> QueryAreaSetWithIDtemp = circleRDD.getCircleRDD()
 				.mapPartitionsToPair(new PartitionAssignGridCircle(GridNumberHorizontal, GridNumberVertical,
 						gridHorizontalBorder, gridVerticalBorder));
-		pointRDD.getPointRDD().unpersist();
+		pointRDD.getRawPointRDD().unpersist();
 		circleRDD.getCircleRDD().unpersist();
 		JavaPairRDD<Integer, Point> TargetSetWithID = TargetSetWithIDtemp;// .repartition(TargetSetWithIDtemp.partitions().size()*2);
 		JavaPairRDD<Integer, Circle> QueryAreaSetWithID = QueryAreaSetWithIDtemp;// .repartition(TargetSetWithIDtemp.partitions().size()*2);
@@ -1197,7 +1195,7 @@ public class JoinQuery {
 								result.add(currentPointi);
 							}
 						}
-						return new Tuple2<Point, ArrayList<Point>>(v._1().getCentre(), result);
+						return new Tuple2<Point, ArrayList<Point>>(v._1().getCenter(), result);
 					}
 
 				});

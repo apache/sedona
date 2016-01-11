@@ -13,8 +13,6 @@ package org.datasyslab.geospark.app;
  */
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -24,16 +22,11 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
-import org.datasyslab.geospark.partition.*;
 import org.datasyslab.geospark.spatialOperator.KNNQuery;
-import org.datasyslab.geospark.gemotryObjects.*;
-import org.datasyslab.geospark.boundryFilter.*;
 import org.datasyslab.geospark.spatialRDD.*;
-import com.vividsolutions.jts.geom.Envelope;
 
 public class KNNQueryApp {
     public static void main(String[] args) throws IOException {
@@ -67,7 +60,7 @@ public class KNNQueryApp {
         PointRDD pointRDD=new PointRDD(spark,set1,offset1,Splitter1,partitions1);
         List<Point> reslist = KNNQuery.SpatialKnnQuery(pointRDD, spark.broadcast(point), 10);
         PointRDD rangeQueryRDD= new PointRDD(spark.parallelize(reslist));
-        rangeQueryRDD.getPointRDD().saveAsTextFile(outputlocation);
+        rangeQueryRDD.getRawPointRDD().saveAsTextFile(outputlocation);
         spark.stop();
     }
 }

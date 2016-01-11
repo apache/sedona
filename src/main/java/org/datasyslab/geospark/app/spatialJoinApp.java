@@ -88,11 +88,11 @@ public class spatialJoinApp {
 
 		/*------------------------ Spatial Join query with local Quad-Tree index --------------------*/
 		// SpatialPairRDD<Envelope,ArrayList<Point>>
-		// join=pointRDD.SpatialJoinQueryWithIndex(rectangleRDD, gridhorizontal,
+		// join=rawPointRDD.SpatialJoinQueryWithIndex(rectangleRDD, gridhorizontal,
 		// gridvertical,"quadtree");
 		/*------------------------ Spatial Join query with local R-Tree index --------------------*/
 		// SpatialPairRDD<Envelope,ArrayList<Point>>
-		// join=pointRDD.SpatialJoinQueryWithIndex(rectangleRDD, gridhorizontal,
+		// join=rawPointRDD.SpatialJoinQueryWithIndex(rectangleRDD, gridhorizontal,
 		// gridvertical,"rtree");
 		/*--------------------------- Aggregate join query result ------------------------------*/
 

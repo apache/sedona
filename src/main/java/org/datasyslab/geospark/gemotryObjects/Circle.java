@@ -4,8 +4,6 @@
 package org.datasyslab.geospark.gemotryObjects;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -18,8 +16,8 @@ import com.vividsolutions.jts.geom.Point;
  */
 public class Circle implements Serializable {
 	
-	/** The centre. */
-	private Point centre;
+	/** The center. */
+	private Point center;
 	
 	/** The radius. */
 	private Double radius;
@@ -27,12 +25,12 @@ public class Circle implements Serializable {
 	/**
 	 * Instantiates a new circle.
 	 *
-	 * @param centre the centre
+	 * @param center the center
 	 * @param radius the radius
 	 */
-	public Circle(Point centre,Double radius)
+	public Circle(Point center, Double radius)
 	{
-		this.centre=centre;
+		this.center = center;
 		this.radius=radius;
 	}
 	
@@ -48,18 +46,18 @@ public class Circle implements Serializable {
 		GeometryFactory fact = new GeometryFactory();
 		Coordinate coordinate = new Coordinate(x,y);
 		Point point=fact.createPoint(coordinate);
-		this.centre=point;
+		this.center =point;
 		this.radius=radius;
 	}
 	
 	/**
-	 * Gets the centre.
+	 * Gets the center.
 	 *
-	 * @return the centre
+	 * @return the center
 	 */
-	public Point getCentre()
+	public Point getCenter()
 	{
-		return this.centre;
+		return this.center;
 	}
 	
 	/**
@@ -87,7 +85,7 @@ public class Circle implements Serializable {
 	 */
 	public Envelope getMBR()
 	{
-		Envelope mbr=new Envelope(centre.getX()-radius,centre.getX()+radius,centre.getY()-radius,centre.getY()+radius);
+		Envelope mbr=new Envelope(center.getX()-radius, center.getX()+radius, center.getY()-radius, center.getY()+radius);
 		return mbr;
 	}
 	
@@ -114,7 +112,7 @@ public class Circle implements Serializable {
 	 */
 	public boolean contains(Point point)
 	{
-		if(this.centre.distance(point)<this.radius)
+		if(this.center.distance(point)<this.radius)
 		{
 			return true;
 		}
@@ -132,7 +130,7 @@ public class Circle implements Serializable {
 	 */
 	public boolean intersects(Point point)
 	{
-		if(this.centre.distance(point)<=this.radius)
+		if(this.center.distance(point)<=this.radius)
 		{
 			return true;
 		}
@@ -140,5 +138,31 @@ public class Circle implements Serializable {
 		{
 			return false;
 		}
+	}
+
+	//Judge whether
+	public boolean intersects(Envelope e)
+	{
+		//todo: implement intersect.
+		Double cx = this.center.getX();
+		Double cy = this.center.getY();
+		Double radius = this.radius;
+		Double recx = (e.getMinX() + e.getMaxX()) / 2;
+		Double rectwidth = e.getMaxX() - e.getMinX();
+		Double rectheight = e.getMaxY() - e.getMinY();
+		Double recy = (e.getMaxY() + e.getMinY()) / 2;
+
+		Double circleDistancex = Math.abs(cx - recx);
+		Double circleDistancey = Math.abs(cy - recy);
+
+		if (circleDistancex > (rectwidth/2 + radius)) { return false; }
+		if (circleDistancey > (rectheight/2 + radius)) { return false; }
+
+		if (circleDistancex <= (rectwidth/2)) { return true; }
+		if (circleDistancey <= (rectheight/2)) { return true; }
+
+		Double cornerDistance_sq = (circleDistancex - rectwidth/2)*(circleDistancex - rectwidth/2) + (circleDistancey - rectheight/2)*(circleDistancey - rectheight/2);
+
+		return (cornerDistance_sq <= (radius*radius));
 	}
 }

@@ -3,7 +3,6 @@ package org.datasyslab.geospark.spatialOperator;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 
-import org.apache.commons.lang.IllegalClassException;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
@@ -21,13 +20,12 @@ import java.util.Properties;
 
 import scala.Tuple2;
 
-import static org.junit.Assert.*;
-
 /**
  * Created by jinxuanwu on 1/5/16.
  */
 public class NewJoinQueryTest {
     public static JavaSparkContext sc;
+
     @BeforeClass
     public static void onceExecutedBeforeAll() {
         SparkConf conf = new SparkConf().setAppName("JoinTest").setMaster("local[2]");
@@ -36,12 +34,17 @@ public class NewJoinQueryTest {
         Logger.getLogger("akka").setLevel(Level.WARN);
     }
 
+    @AfterClass
+    public static void TearDown() {
+        sc.stop();
+    }
+
     @Test
     public void testSpatialJoinQuery() throws Exception {
         //Create rectangeRDD
         Properties prop = new Properties();
         InputStream input = getClass().getClassLoader().getResourceAsStream("point.test.properties");
-        String InputLocation = "";
+        String InputLocation = InputLocation = "file://"+NewJoinQueryTest.class.getClassLoader().getResource("primaryroads.csv").getPath();
         Integer offset = 0;
         String splitter = "";
         String gridType = "";
@@ -51,7 +54,7 @@ public class NewJoinQueryTest {
         try {
             // load a properties file
             prop.load(input);
-            InputLocation = prop.getProperty("inputLocation");
+            //InputLocation = prop.getProperty("inputLocation");
             offset = Integer.parseInt(prop.getProperty("offset"));
             splitter = prop.getProperty("splitter");
             gridType = prop.getProperty("gridType");
@@ -74,23 +77,12 @@ public class NewJoinQueryTest {
 
         PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
 
-        List<Tuple2<Envelope, List<Point>>> result = NewJoinQuery.SpatialJoinQuery(sc, pointRDD, rectangleRDD, true).collect();
-
-        //Print result out;
-        //结果是不是有问题啊, 为什么会有空的envelope? JTS 的contains 应该是不包括在边界上把..
-        for(Tuple2<Envelope, List<Point>> t:result){
-            System.out.print(t._1() + ":");
-            for(Point p:t._2()) {
-                System.out.print(p + ", ");
-            }
-            System.out.print("\n");
-        }
-
+        List<Tuple2<Envelope, List<Point>>> result = NewJoinQuery.SpatialJoinQueryWithOutIndex(sc, pointRDD, rectangleRDD, true).collect();
 
         System.out.println(result.size());
     }
 
-    @Test (expected=NullPointerException.class)
+    @Test(expected = NullPointerException.class)
     public void testSpatialJoinQueryUsingIndexException() throws Exception {
         Properties prop = new Properties();
         InputStream input = getClass().getClassLoader().getResourceAsStream("point.test.properties");
@@ -126,10 +118,10 @@ public class NewJoinQueryTest {
         RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, numPartitions);
 
         PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
-
+        //This should throw exception since the previous constructor doesn't build a grided RDD.
         List<Tuple2<Envelope, List<Point>>> result = NewJoinQuery.SpatialJoinQueryUsingIndex(sc, pointRDD, rectangleRDD, "R-TREE").collect();
-    }
 
+    }
 
     @Test
     public void testSpatialJoinQueryUsingIndex() throws Exception {
@@ -173,19 +165,7 @@ public class NewJoinQueryTest {
         List<Tuple2<Envelope, List<Point>>> result = NewJoinQuery.SpatialJoinQueryUsingIndex(sc, pointRDD, rectangleRDD, "R-Tree").collect();
 
         System.out.println(result.size());
-//        for(Tuple2<Envelope, List<Point>> t:result){
-//            System.out.print(t._1() + ":");
-//            for(Point p:t._2()) {
-//                System.out.print(p + ", ");
-//            }
-//            System.out.print("\n");
-//        }
-    }
 
-
-    @AfterClass
-    public static void TearDown() {
-        sc.stop();
     }
 
 

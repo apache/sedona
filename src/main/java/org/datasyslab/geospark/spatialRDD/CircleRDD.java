@@ -22,6 +22,7 @@ public class CircleRDD implements Serializable {
 	/** The circle rdd. */
 	private JavaRDD<Circle> circleRDD;
 
+
 	/**
 	 * Instantiates a new circle rdd.
 	 *
@@ -42,7 +43,7 @@ public class CircleRDD implements Serializable {
 	 */
 	public CircleRDD(PointRDD pointRDD, Double Radius) {
 		final Double radius = Radius;
-		this.circleRDD = pointRDD.getPointRDD().map(new Function<Point, Circle>() {
+		this.circleRDD = pointRDD.getRawPointRDD().map(new Function<Point, Circle>() {
 
 			public Circle call(Point v1) {
 
@@ -151,7 +152,7 @@ public class CircleRDD implements Serializable {
 
 			public Point call(Circle v1) {
 
-				return v1.getCentre();
+				return v1.getCenter();
 			}
 
 		}));

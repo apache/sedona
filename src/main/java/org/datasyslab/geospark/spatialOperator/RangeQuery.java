@@ -30,7 +30,7 @@ public class RangeQuery {
 	 * @return the point rdd
 	 */
 	public static PointRDD SpatialRangeQuery(PointRDD pointRDD, Envelope envelope, Integer condition) {
-		JavaRDD<Point> result = pointRDD.getPointRDD().filter(new PointRangeFilter(envelope, condition));
+		JavaRDD<Point> result = pointRDD.getRawPointRDD().filter(new PointRangeFilter(envelope, condition));
 		return new PointRDD(result);
 	}
 	
@@ -44,7 +44,7 @@ public class RangeQuery {
 	 * @return the point rdd
 	 */
 	public static PointRDD SpatialRangeQuery(PointRDD pointRDD, Polygon polygon, Integer condition) {
-		JavaRDD<Point> result = pointRDD.getPointRDD().filter(new PointRangeFilter(polygon, condition));
+		JavaRDD<Point> result = pointRDD.getRawPointRDD().filter(new PointRangeFilter(polygon, condition));
 		return new PointRDD(result);
 	}
 	

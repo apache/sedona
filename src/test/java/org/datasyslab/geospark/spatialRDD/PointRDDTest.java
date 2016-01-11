@@ -7,6 +7,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.datasyslab.geospark.gemotryObjects.EnvelopeWithGrid;
 import org.datasyslab.geospark.utils.RDDSampleUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -26,53 +27,42 @@ import static org.junit.Assert.assertEquals;
  */
 public class PointRDDTest implements Serializable{
     public static JavaSparkContext sc;
+    static Properties prop;
+    static InputStream input;
+    static String InputLocation;
+    static Integer offset;
+    static String splitter;
+    static String gridType;
+    static String indexType;
+    static Integer numPartitions;
     @BeforeClass
     public static void onceExecutedBeforeAll() {
-        SparkConf conf = new SparkConf().setAppName("JobTileMatchWithAcronymExpension").setMaster("local[2]");
+        SparkConf conf = new SparkConf().setAppName("PointRDDTest").setMaster("local[2]");
         sc = new JavaSparkContext(conf);
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
-    }
+        prop = new Properties();
+        input = PointRDDTest.class.getClassLoader().getResourceAsStream("point.test.properties");
 
-    @Test
-    public void testGetSampleNumbers() throws Exception {
-        assertEquals(0, RDDSampleUtils.getSampleNumbers(2, 10));
-        assertEquals(10, RDDSampleUtils.getSampleNumbers(2, 100));
-        assertEquals(10, RDDSampleUtils.getSampleNumbers(2, 101));
-        assertEquals(10, RDDSampleUtils.getSampleNumbers(2, 104));
-        assertEquals(10, RDDSampleUtils.getSampleNumbers(2, 110));
-        assertEquals(12, RDDSampleUtils.getSampleNumbers(2, 120));
-        assertEquals(100, RDDSampleUtils.getSampleNumbers(2, 1010));
-        assertEquals(110, RDDSampleUtils.getSampleNumbers(2, 1110));
-        assertEquals(100, RDDSampleUtils.getSampleNumbers(10, 1000));
-        assertEquals(99, RDDSampleUtils.getSampleNumbers(9, 1000));
-        assertEquals(110, RDDSampleUtils.getSampleNumbers(10, 1100));
-    }
+        //Hard code to a file in resource folder. But you can replace it later in the try-catch field in your hdfs system.
+        InputLocation = "file://"+PointRDDTest.class.getClassLoader().getResource("primaryroads.csv").getPath();
 
-
-
-    @Test
-    public void testConstructor() throws Exception {
-        Properties prop = new Properties();
-        InputStream input = getClass().getClassLoader().getResourceAsStream("point.test.properties");
-        String InputLocation = "";
-        Integer offset = 0;
-        String splitter = "";
-        String gridType = "";
-        String indexType = "";
-        Integer numPartitions = 0;
+        offset = 0;
+        splitter = "";
+        gridType = "";
+        indexType = "";
+        numPartitions = 0;
 
         try {
             // load a properties file
             prop.load(input);
-
-            InputLocation = prop.getProperty("inputLocation");
+            // There is a field in the property file, you can edit your own file location there.
+            // InputLocation = prop.getProperty("inputLocation");
             offset = Integer.parseInt(prop.getProperty("offset"));
             splitter = prop.getProperty("splitter");
             gridType = prop.getProperty("gridType");
             indexType = prop.getProperty("indexType");
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
-
         } catch (IOException ex) {
             ex.printStackTrace();
         } finally {
@@ -84,13 +74,21 @@ public class PointRDDTest implements Serializable{
                 }
             }
         }
+    }
 
+
+
+
+    /*
+        This test case will load a sample data file and
+     */
+    @Test
+    public void testConstructor() throws Exception {
         PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
         //todo: Set this to debug level
-        for (Double d : pointRDD.grid) {
+        for (EnvelopeWithGrid d : pointRDD.envelopeGrids) {
             System.out.println(d);
         }
-
 
         //todo: Move this into log4j.
         Map<Integer, Object> map = pointRDD.gridPointRDD.countByKey();
@@ -101,82 +99,62 @@ public class PointRDDTest implements Serializable{
         }
     }
 
+    /*
+     *  This test case test whether the X-Y grid can be build correctly.
+     */
+    @Test
+    public void testXYGrid() throws Exception {
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "X-Y", 2);
+
+        //todo: Move this into log4j.
+        Map<Integer, Object> map = pointRDD.gridPointRDD.countByKey();
+
+        System.out.println(map.size());
+
+        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+            Long number = (Long) entry.getValue();
+            Double percentage = number.doubleValue() / pointRDD.totalNumberOfRecords;
+            System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+        }
+    }
+
+    /*
+     * If we try to build a index on a rawPointRDD which is not construct with grid. We shall see an error.
+     */
     @Test(expected=IllegalClassException.class)
     public void testBuildIndexWithoutSetGrid() throws Exception {
-        Properties prop = new Properties();
-        InputStream input = getClass().getClassLoader().getResourceAsStream("point.test.properties");
-        String InputLocation = "";
-        Integer offset = 0;
-        String splitter = "";
-        String gridType = "";
-        String indexType = "";
-        Integer numPartitions = 0;
-
-        try {
-            // load a properties file
-            prop.load(input);
-
-            InputLocation = prop.getProperty("inputLocation");
-            offset = Integer.parseInt(prop.getProperty("offset"));
-            splitter = prop.getProperty("splitter");
-            gridType = prop.getProperty("gridType");
-            indexType = prop.getProperty("indexType");
-            numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
         PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
         pointRDD.buildIndex("R-Tree");
     }
 
-
+    /*
+        Test build Index.
+     */
     @Test
     public void testBuildIndex() throws Exception {
-        Properties prop = new Properties();
-        InputStream input = getClass().getClassLoader().getResourceAsStream("point.test.properties");
-        String InputLocation = "";
-        Integer offset = 0;
-        String splitter = "";
-        String gridType = "";
-        String indexType = "";
-        Integer numPartitions = 0;
-
-        try {
-            // load a properties file
-            prop.load(input);
-
-            InputLocation = prop.getProperty("inputLocation");
-            offset = Integer.parseInt(prop.getProperty("offset"));
-            splitter = prop.getProperty("splitter");
-            gridType = prop.getProperty("gridType");
-            indexType = prop.getProperty("indexType");
-            numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
         PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
         pointRDD.buildIndex("R-Tree");
         List<Point> result = pointRDD.indexedRDD.take(1).get(0)._2().query(pointRDD.boundaryEnvelope);
+    }
+    /*
+     *  If we want to use a grid type that is not supported yet, an exception will be throwed out.
+     */
+    @Test(expected=IllegalArgumentException.class)
+    public void testBuildWithNoExistsGrid() throws Exception {
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "ff", numPartitions);
+    }
+
+    /*
+     * If the partition number is set too large, we will
+     */
+    @Test(expected=IllegalArgumentException.class)
+    public void testTooLargePartitionNumber() throws Exception {
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "X-Y", 1000000);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testBuildWithSTRtreeGrid() throws Exception {
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "STRtree", numPartitions);
     }
 
     @AfterClass

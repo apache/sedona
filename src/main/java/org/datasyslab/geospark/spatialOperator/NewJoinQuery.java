@@ -4,15 +4,14 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
-import org.apache.hadoop.util.hash.Hash;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.storage.StorageLevel;
+import org.datasyslab.geospark.gemotryObjects.EnvelopeWithGrid;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 
@@ -29,58 +28,13 @@ public class NewJoinQuery implements Serializable{
 
     public static JavaPairRDD<Envelope, List<Point>> SpatialJoinQueryUsingIndex(JavaSparkContext sc, PointRDD pointRDD, RectangleRDD rectangleRDD, String indexType) {
 
-        //Check if pointRDD have index.
+        //Check if rawPointRDD have index.
         if(pointRDD.indexedRDD == null) {
             throw new NullPointerException("Need to invoke buildIndex() first, indexedRDD is null");
         }
 
-        //Build Grid, same as without Grid
-        final Broadcast<ArrayList<Double>> gridBroadcasted= sc.broadcast(pointRDD.grid);
-        //todo: Add logic, if this is cached, no need to calculate it again.
+        JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySet = getIntegerEnvelopeJavaPairRDD(sc, pointRDD, rectangleRDD);
 
-        JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySetBeforePartition = rectangleRDD.getRectangleRDD().flatMapToPair(new PairFlatMapFunction<Envelope, Integer, Envelope>() {
-            @Override
-            public Iterable<Tuple2<Integer, Envelope>> call(Envelope envelope) throws Exception {
-                ArrayList<Tuple2<Integer, Envelope>> result = new ArrayList<Tuple2<Integer, Envelope>>();
-
-                ArrayList<Double> grid = gridBroadcasted.getValue();
-                //todo: target1 is a bad name, change later.
-                Double target1 = envelope.getMinX();
-                //Find lower bound:
-                int begin = 0, end = grid.size() - 1;
-
-                int lowerbound = 0, upperbound = 0;
-                while( begin < end ) {
-                    int mid = (begin + end) / 2;
-                    if(Double.compare(grid.get(mid).doubleValue(), target1) == -1) {
-                        begin = mid + 1;
-                    }
-                    else
-                        end = mid;
-                }
-                lowerbound = begin;
-
-                begin = 0;
-                end = grid.size() - 1;
-                while(begin < end) {
-                    int mid = (begin + end) / 2 + 1;
-                    if(grid.get(mid).compareTo(envelope.getMaxX())> 0 ? true : false )
-                        end = mid - 1;
-                    else
-                        begin = mid;
-                }
-                upperbound = end;
-
-                for(int i = lowerbound; i <= upperbound; i++) {
-                    result.add(new Tuple2<Integer, Envelope>(i, envelope));
-                }
-                return result;
-            }
-        });
-
-        //Reparition, so that when cogroup, less data shuffle.
-        //todo, change storage level to memory based on third parameter.
-        JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySet = tmpGridRDDForQuerySetBeforePartition.partitionBy(pointRDD.gridPointRDD.partitioner().get()).persist(StorageLevel.DISK_ONLY());
 
         JavaPairRDD<Integer, Tuple2<Iterable<STRtree>, Iterable<Envelope>>> cogroupResult = pointRDD.indexedRDD.cogroup(tmpGridRDDForQuerySet);
 
@@ -108,28 +62,16 @@ public class NewJoinQuery implements Serializable{
         });
 
         //AggregateByKey?
-        JavaPairRDD<Envelope, HashSet<Point>> joinResultAfterAggregation = joinResultBeforeAggregation.reduceByKey(new Function2<HashSet<Point>, HashSet<Point>, HashSet<Point>>() {
-            @Override
-            public HashSet<Point> call(HashSet<Point> points, HashSet<Point> points2) throws Exception {
-                points.addAll(points2);
-                return points;
-            }
-        });
-
-
-        JavaPairRDD<Envelope, List<Point>> joinListResultAfterAggregation = joinResultAfterAggregation.mapValues(new Function<HashSet<Point>, List<Point>>() {
-            @Override
-            public List<Point> call(HashSet<Point> points) throws Exception {
-                return new ArrayList<Point>(points);
-            }
-        });
+        JavaPairRDD<Envelope, List<Point>> joinListResultAfterAggregation = aggregateJoinResult(joinResultBeforeAggregation);
 
         return joinListResultAfterAggregation;
     }
 
-    public static JavaPairRDD<Envelope, List<Point>> SpatialJoinQuery(JavaSparkContext sc, PointRDD pointRDD, RectangleRDD rectangleRDD, boolean cacheTmpGrid) {
-        //for rectangle, create a pairRDD use the sameGrid as pointRDD
-        final Broadcast<ArrayList<Double>> gridBroadcasted= sc.broadcast(pointRDD.grid);
+
+
+    public static JavaPairRDD<Integer, Envelope> getIntegerEnvelopeJavaPairRDDAndCacheInMemory(JavaSparkContext sc, PointRDD pointRDD, RectangleRDD rectangleRDD) {
+        //Build Grid, same as without Grid
+        final Broadcast<ArrayList<EnvelopeWithGrid>> gridBroadcasted= sc.broadcast(pointRDD.envelopeGrids);
         //todo: Add logic, if this is cached, no need to calculate it again.
 
         JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySetBeforePartition = rectangleRDD.getRectangleRDD().flatMapToPair(new PairFlatMapFunction<Envelope, Integer, Envelope>() {
@@ -137,36 +79,11 @@ public class NewJoinQuery implements Serializable{
             public Iterable<Tuple2<Integer, Envelope>> call(Envelope envelope) throws Exception {
                 ArrayList<Tuple2<Integer, Envelope>> result = new ArrayList<Tuple2<Integer, Envelope>>();
 
-                ArrayList<Double> grid = gridBroadcasted.getValue();
-                //todo: target1 is a bad name, change later.
-                Double target1 = envelope.getMinX();
-                //Find lower bound:
-                int begin = 0, end = grid.size() - 1;
+                ArrayList<EnvelopeWithGrid> grid = gridBroadcasted.getValue();
 
-                int lowerbound = 0, upperbound = 0;
-                while( begin < end ) {
-                    int mid = (begin + end) / 2;
-                    if(Double.compare(grid.get(mid).doubleValue(), target1) == -1) {
-                        begin = mid + 1;
-                    }
-                    else
-                        end = mid;
-                }
-                lowerbound = begin;
-
-                begin = 0;
-                end = grid.size() - 1;
-                while(begin < end) {
-                    int mid = (begin + end) / 2 + 1;
-                    if(grid.get(mid).compareTo(envelope.getMaxX())> 0 ? true : false )
-                        end = mid - 1;
-                    else
-                        begin = mid;
-                }
-                upperbound = end;
-
-                for(int i = lowerbound; i <= upperbound; i++) {
-                    result.add(new Tuple2<Integer, Envelope>(i, envelope));
+                for(EnvelopeWithGrid e:grid) {
+                    if(e.intersects(envelope))
+                        result.add(new Tuple2<Integer, Envelope>(e.grid, envelope));
                 }
                 return result;
             }
@@ -174,8 +91,12 @@ public class NewJoinQuery implements Serializable{
 
         //Reparition, so that when cogroup, less data shuffle.
         //todo, change storage level to memory based on third parameter.
-        JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySet = tmpGridRDDForQuerySetBeforePartition.partitionBy(pointRDD.gridPointRDD.partitioner().get()).persist(StorageLevel.DISK_ONLY());
+        return tmpGridRDDForQuerySetBeforePartition.partitionBy(pointRDD.gridPointRDD.partitioner().get()).cache();
+    }
 
+    public static JavaPairRDD<Envelope, List<Point>> SpatialJoinQueryWithOutIndex(JavaSparkContext sc, PointRDD pointRDD, RectangleRDD rectangleRDD, boolean cacheTmpGrid) {
+        //todo: Add logic, if this is cached, no need to calculate it again.
+        JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySet = getIntegerEnvelopeJavaPairRDD(sc, pointRDD, rectangleRDD);
 
         //cogroup
         JavaPairRDD<Integer, Tuple2<Iterable<Point>, Iterable<Envelope>>> cogroupResult = pointRDD.gridPointRDD.cogroup(tmpGridRDDForQuerySet);
@@ -202,8 +123,14 @@ public class NewJoinQuery implements Serializable{
                 return result;
             }
         });
+        JavaPairRDD<Envelope, List<Point>> joinListResultAfterAggregation = aggregateJoinResult(joinResultBeforeAggregation);
 
 
+        return joinListResultAfterAggregation;
+        //Conver HashSet to a better way? May ArrayList,
+    }
+
+    public static JavaPairRDD<Envelope, List<Point>> aggregateJoinResult(JavaPairRDD<Envelope, HashSet<Point>> joinResultBeforeAggregation) {
         //AggregateByKey?
         JavaPairRDD<Envelope, HashSet<Point>> joinResultAfterAggregation = joinResultBeforeAggregation.reduceByKey(new Function2<HashSet<Point>, HashSet<Point>, HashSet<Point>>() {
             @Override
@@ -214,14 +141,36 @@ public class NewJoinQuery implements Serializable{
         });
 
 
-        JavaPairRDD<Envelope, List<Point>> joinListResultAfterAggregation = joinResultAfterAggregation.mapValues(new Function<HashSet<Point>, List<Point>>() {
+        return joinResultAfterAggregation.mapValues(new Function<HashSet<Point>, List<Point>>() {
             @Override
             public List<Point> call(HashSet<Point> points) throws Exception {
                 return new ArrayList<Point>(points);
             }
         });
+    }
 
-        return joinListResultAfterAggregation;
-        //Conver HashSet to a better way? May ArrayList,
+    public static JavaPairRDD<Integer, Envelope> getIntegerEnvelopeJavaPairRDD(JavaSparkContext sc, PointRDD pointRDD, RectangleRDD rectangleRDD) {
+        //Build Grid, same as without Grid
+        final Broadcast<ArrayList<EnvelopeWithGrid>> gridBroadcasted= sc.broadcast(pointRDD.envelopeGrids);
+        //todo: Add logic, if this is cached, no need to calculate it again.
+
+        JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySetBeforePartition = rectangleRDD.getRectangleRDD().flatMapToPair(new PairFlatMapFunction<Envelope, Integer, Envelope>() {
+            @Override
+            public Iterable<Tuple2<Integer, Envelope>> call(Envelope envelope) throws Exception {
+                ArrayList<Tuple2<Integer, Envelope>> result = new ArrayList<Tuple2<Integer, Envelope>>();
+
+                ArrayList<EnvelopeWithGrid> grid = gridBroadcasted.getValue();
+
+                for(EnvelopeWithGrid e:grid) {
+                    if(e.intersects(envelope))
+                        result.add(new Tuple2<Integer, Envelope>(e.grid, envelope));
+                }
+                return result;
+            }
+        });
+
+        //Reparition, so that when cogroup, less data shuffle.
+        //todo, change storage level to memory based on third parameter.
+        return tmpGridRDDForQuerySetBeforePartition.partitionBy(pointRDD.gridPointRDD.partitioner().get()).persist(StorageLevel.DISK_ONLY());
     }
 }

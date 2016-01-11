@@ -13,7 +13,6 @@ contained by it will be attached behind it in this instance.
  * */
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -22,16 +21,9 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Point;
 
-import org.datasyslab.geospark.partition.*;
-import org.datasyslab.geospark.gemotryObjects.*;
-import org.datasyslab.geospark.boundryFilter.*;
 import org.datasyslab.geospark.spatialRDD.*;
 import org.datasyslab.geospark.spatialOperator.RangeQuery;
-
-
-import com.vividsolutions.jts.geom.Envelope;
 
 public class rangeQueryApp {
     public static void main(String[] args) throws IOException {
@@ -60,7 +52,7 @@ public class rangeQueryApp {
         Envelope envelope = new Envelope(-100.0, 100.0, -100.0, 100.0);
         PointRDD pointRDD=new PointRDD(spark,set1,offset1,Splitter1,partitions1);
         PointRDD rangeQueryRDD=RangeQuery.SpatialRangeQuery(pointRDD, envelope, 0);
-        rangeQueryRDD.getPointRDD().saveAsTextFile(outputlocation);
+        rangeQueryRDD.getRawPointRDD().saveAsTextFile(outputlocation);
         spark.stop();
     }
 }

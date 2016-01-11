@@ -11,22 +11,23 @@ public class RDDSampleUtils {
      * @return
      */
     public static int getSampleNumbers(Integer numPartitions, long totalNumberOfRecords) {
-		long sampleNumbers = totalNumberOfRecords / 10;
+		long sampleNumbers = totalNumberOfRecords / 100;
 		if(sampleNumbers > Integer.MAX_VALUE) {
 			sampleNumbers = Integer.MAX_VALUE;
 		}
+        int result;
+        // Partition size is too big. Should throw exception for this.
+        if(totalNumberOfRecords <= numPartitions ) {
+            return -1;
+        }
 
-		int result =  (int) (sampleNumbers) / numPartitions * numPartitions;
-        if (sampleNumbers < numPartitions) {
+        Integer SquareOfnumPartitions = numPartitions * numPartitions;
+        if (sampleNumbers < SquareOfnumPartitions) {
             result = 0;
         }
-        if(result == 0) {
-            //todo: need second though, how to deal with smal partition
-            return 1;
-        } else {
-
-             return result;
+        else {
+            result = (int) (sampleNumbers) / SquareOfnumPartitions * SquareOfnumPartitions;
         }
-
+        return result;
 	}
 }
