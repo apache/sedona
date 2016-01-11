@@ -41,7 +41,7 @@ public class DistanceJoinQueryTest {
         sc = new JavaSparkContext(conf);
         prop = new Properties();
         input = DistanceJoinQueryTest.class.getClassLoader().getResourceAsStream("point.test.properties");
-        InputLocation = "";
+        InputLocation = "file://"+NewJoinQueryTest.class.getClassLoader().getResource("primaryroads.csv").getPath();
         offset = 0;
         splitter = "";
         gridType = "";
@@ -52,7 +52,7 @@ public class DistanceJoinQueryTest {
             // load a properties file
             prop.load(input);
 
-            InputLocation = prop.getProperty("inputLocation");
+            //InputLocation = prop.getProperty("inputLocation");
             offset = Integer.parseInt(prop.getProperty("offset"));
             splitter = prop.getProperty("splitter");
             gridType = prop.getProperty("gridType");

@@ -44,7 +44,7 @@ public class NewJoinQueryTest {
         //Create rectangeRDD
         Properties prop = new Properties();
         InputStream input = getClass().getClassLoader().getResourceAsStream("point.test.properties");
-        String InputLocation = InputLocation = "file://"+NewJoinQueryTest.class.getClassLoader().getResource("primaryroads.csv").getPath();
+        String InputLocation = "file://"+NewJoinQueryTest.class.getClassLoader().getResource("primaryroads.csv").getPath();
         Integer offset = 0;
         String splitter = "";
         String gridType = "";

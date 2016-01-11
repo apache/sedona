@@ -43,7 +43,7 @@ public class RectangleRDDTest implements Serializable{
         Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
         input = PointRDDTest.class.getClassLoader().getResourceAsStream("point.test.properties");
-        InputLocation = "";
+        InputLocation = "file://"+RectangleRDD.class.getClassLoader().getResource("primaryroads.csv").getPath();
         offset = 0;
         splitter = "";
         gridType = "";
@@ -53,7 +53,7 @@ public class RectangleRDDTest implements Serializable{
         try {
             // load a properties file
             prop.load(input);
-            InputLocation = prop.getProperty("inputLocation");
+            //InputLocation = prop.getProperty("inputLocation");
             offset = Integer.parseInt(prop.getProperty("offset"));
             splitter = prop.getProperty("splitter");
             gridType = prop.getProperty("gridType");
