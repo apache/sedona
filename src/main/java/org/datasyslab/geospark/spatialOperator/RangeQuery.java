@@ -30,7 +30,7 @@ public class RangeQuery {
 	 * @return the point rdd
 	 */
 	public static PointRDD SpatialRangeQuery(PointRDD pointRDD, Envelope envelope, Integer condition) {
-		JavaRDD<Point> result = pointRDD.getPointRDD().filter(new PointRangeFilter(envelope, condition));
+		JavaRDD<Point> result = pointRDD.getRawPointRDD().filter(new PointRangeFilter(envelope, condition));
 		return new PointRDD(result);
 	}
 	
@@ -44,7 +44,7 @@ public class RangeQuery {
 	 * @return the point rdd
 	 */
 	public static PointRDD SpatialRangeQuery(PointRDD pointRDD, Polygon polygon, Integer condition) {
-		JavaRDD<Point> result = pointRDD.getPointRDD().filter(new PointRangeFilter(polygon, condition));
+		JavaRDD<Point> result = pointRDD.getRawPointRDD().filter(new PointRangeFilter(polygon, condition));
 		return new PointRDD(result);
 	}
 	
@@ -57,7 +57,7 @@ public class RangeQuery {
 	 */
 	public static PolygonRDD SpatialRangeQuery(PolygonRDD polygonRDD, Envelope envelope,Integer condition)
 	{
-		JavaRDD<Polygon> result=polygonRDD.getPolygonRDD().filter(new PolygonRangeFilter(envelope,condition));
+		JavaRDD<Polygon> result=polygonRDD.getRawPolygonRDD().filter(new PolygonRangeFilter(envelope,condition));
 		return new PolygonRDD(result);
 	}
 	
@@ -70,7 +70,7 @@ public class RangeQuery {
 	 */
 	public static PolygonRDD SpatialRangeQuery(PolygonRDD polygonRDD, Polygon polygon,Integer condition)
 	{
-		JavaRDD<Polygon> result=polygonRDD.getPolygonRDD().filter(new PolygonRangeFilter(polygon,condition));
+		JavaRDD<Polygon> result=polygonRDD.getRawPolygonRDD().filter(new PolygonRangeFilter(polygon,condition));
 		return new PolygonRDD(result);
 	}
 	
@@ -83,7 +83,7 @@ public class RangeQuery {
 	 */
 	public RectangleRDD SpatialRangeQuery(RectangleRDD rectangleRDD, Envelope envelope,Integer condition)
 	{
-		JavaRDD<Envelope> result= rectangleRDD.getRectangleRDD().filter(new RectangleRangeFilter(envelope,condition));
+		JavaRDD<Envelope> result= rectangleRDD.getRawRectangleRDD().filter(new RectangleRangeFilter(envelope,condition));
 		return new RectangleRDD(result);
 	}
 	
@@ -96,7 +96,7 @@ public class RangeQuery {
 	 */
 	public static RectangleRDD SpatialRangeQuery(RectangleRDD rectangleRDD, Polygon polygon,Integer condition)
 	{
-		JavaRDD<Envelope> result=rectangleRDD.getRectangleRDD().filter(new RectangleRangeFilter(polygon,condition));
+		JavaRDD<Envelope> result=rectangleRDD.getRawRectangleRDD().filter(new RectangleRangeFilter(polygon,condition));
 		return new RectangleRDD(result);
 	}
 }
