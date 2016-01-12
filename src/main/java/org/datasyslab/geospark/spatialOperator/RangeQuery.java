@@ -57,7 +57,7 @@ public class RangeQuery {
 	 */
 	public static PolygonRDD SpatialRangeQuery(PolygonRDD polygonRDD, Envelope envelope,Integer condition)
 	{
-		JavaRDD<Polygon> result=polygonRDD.getPolygonRDD().filter(new PolygonRangeFilter(envelope,condition));
+		JavaRDD<Polygon> result=polygonRDD.getRawPolygonRDD().filter(new PolygonRangeFilter(envelope,condition));
 		return new PolygonRDD(result);
 	}
 	
@@ -70,7 +70,7 @@ public class RangeQuery {
 	 */
 	public static PolygonRDD SpatialRangeQuery(PolygonRDD polygonRDD, Polygon polygon,Integer condition)
 	{
-		JavaRDD<Polygon> result=polygonRDD.getPolygonRDD().filter(new PolygonRangeFilter(polygon,condition));
+		JavaRDD<Polygon> result=polygonRDD.getRawPolygonRDD().filter(new PolygonRangeFilter(polygon,condition));
 		return new PolygonRDD(result);
 	}
 	

@@ -171,6 +171,8 @@ public class RectangleRDD implements Serializable {
 
 		ArrayList<Envelope> rectangleSampleList = new ArrayList<Envelope> (rawRectangleRDD.takeSample(false, sampleNumberOfRecords));
 
+		this.boundary();
+
 		//Sort
 		Comparator<Envelope> comparator = null;
 		switch (gridType) {
@@ -190,7 +192,7 @@ public class RectangleRDD implements Serializable {
 				throw new IllegalArgumentException("Grid type not recognied, please check again.");
 		}
 
-		this.boundary();
+
 
 		GeometryFactory geometryFactory = new GeometryFactory();
 		

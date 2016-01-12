@@ -121,8 +121,8 @@ public class RectangleRDDTest implements Serializable{
      */
     @Test(expected=IllegalClassException.class)
     public void testBuildIndexWithoutSetGrid() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
-        pointRDD.buildIndex("R-Tree");
+        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, numPartitions);
+        rectangleRDD.buildIndex("R-Tree");
     }
 
     /*
