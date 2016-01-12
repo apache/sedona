@@ -1,11 +1,7 @@
 ![GeoSpark Logo](http://datasyslab.ghost.io/content/images/2015/06/GeoSpark.png) current version: v0.2
 
 [![Build Status](https://travis-ci.org/jinxuan/GeoSpark.svg)](https://travis-ci.org/jinxuan/GeoSpark) 
-<a href="https://scan.coverity.com/projects/jinxuan-geospark">
-  <img alt="Coverity Scan Build Status"
-       src="https://scan.coverity.com/projects/7544/badge.svg"/>
-</a>
-
+[![codecov.io](https://codecov.io/github/jinxuan/GeoSpark/coverage.svg?branch=master)](https://codecov.io/github/jinxuan/GeoSpark?branch=master)
 GeoSpark is a cluster computing system for processing large-scale spatial data. GeoSpark extends Apache Spark with a set of out-of-the-box Spatial Resilient Distributed Datasets (SRDDs) that efficiently load, process, and analyze large-scale spatial data across machines. This problem is quite challenging due to the fact that (1) spatial data may be quite complex, e.g., rivers' and cities' geometrical boundaries, (2) spatial (and geometric) operations (e.g., Overlap, Intersect, Convex Hull, Cartographic Distances) cannot be easily and efficiently expressed using regular RDD transformations and actions. eoSpark provides APIs for Apache Spark programmer to easily develop their spatial analysis programs with Spatial Resilient Distributed Datasets (SRDDs) which have in house support for geometrical and distance operations. Experiments show that GeoSpark is scalable and exhibits faster run-time performance than Hadoop-based systems in spatial analysis applications like spatial join, spatial aggregation, spatial autocorrelation analysis and spatial co-location pattern recognition.
 
 
