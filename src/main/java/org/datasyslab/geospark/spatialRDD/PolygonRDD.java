@@ -33,8 +33,6 @@ import org.datasyslab.geospark.utils.PolygonXMinComparator;
 import org.datasyslab.geospark.utils.PolygonYMaxComparator;
 import org.datasyslab.geospark.utils.PolygonYMinComparator;
 import org.datasyslab.geospark.utils.RDDSampleUtils;
-import org.datasyslab.geospark.utils.RectangleXMinComparator;
-import org.datasyslab.geospark.utils.RectangleYMinComparator;
 import org.wololo.jts2geojson.GeoJSONReader;
 
 import java.io.Serializable;
