@@ -1,6 +1,5 @@
 package org.datasyslab.geospark.spatialOperator;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
@@ -15,7 +14,6 @@ import org.datasyslab.geospark.gemotryObjects.Circle;
 import org.datasyslab.geospark.gemotryObjects.EnvelopeWithGrid;
 import org.datasyslab.geospark.spatialRDD.CircleRDD;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
-import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -33,12 +31,12 @@ public class DistanceJoin {
             //Just use grid of Convert pointRDD2 to CircleRDD.
         CircleRDD circleRDD2 = new CircleRDD(pointRDD2, distance);
         //For debug;
-//        for(EnvelopeWithGrid e: pointRDD1.envelopeGrids) {
+//        for(EnvelopeWithGrid e: pointRDD1.grids) {
 //            System.out.println(e);
 //        }
         //Build grid on circleRDD2.
 
-        final Broadcast<ArrayList<EnvelopeWithGrid>> envelopeWithGrid = sc.broadcast(pointRDD1.envelopeGrids);
+        final Broadcast<ArrayList<EnvelopeWithGrid>> envelopeWithGrid = sc.broadcast(pointRDD1.grids);
 
         JavaPairRDD<Integer, Circle> tmpGridedCircleForQuerySetBeforePartition = circleRDD2.getCircleRDD().flatMapToPair(new PairFlatMapFunction<Circle, Integer, Circle>() {
             @Override
@@ -118,7 +116,7 @@ public class DistanceJoin {
 
         //Build grid on circleRDD2.
 
-        final Broadcast<ArrayList<EnvelopeWithGrid>> envelopeWithGrid = sc.broadcast(pointRDD1.envelopeGrids);
+        final Broadcast<ArrayList<EnvelopeWithGrid>> envelopeWithGrid = sc.broadcast(pointRDD1.grids);
 
         JavaPairRDD<Integer, Circle> tmpGridedCircleForQuerySetBeforePartition = circleRDD2.getCircleRDD().flatMapToPair(new PairFlatMapFunction<Circle, Integer, Circle>() {
             @Override

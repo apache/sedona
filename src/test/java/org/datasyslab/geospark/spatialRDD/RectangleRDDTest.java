@@ -1,6 +1,8 @@
 package org.datasyslab.geospark.spatialRDD;
 
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 
 import org.apache.commons.lang.IllegalClassException;
 import org.apache.log4j.Level;
@@ -8,7 +10,6 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.geospark.gemotryObjects.EnvelopeWithGrid;
-import org.datasyslab.geospark.utils.RDDSampleUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,12 +38,12 @@ public class RectangleRDDTest implements Serializable{
     static Integer numPartitions;
     @BeforeClass
     public static void onceExecutedBeforeAll() {
-        SparkConf conf = new SparkConf().setAppName("PointRDDTest").setMaster("local[2]");
+        SparkConf conf = new SparkConf().setAppName("RectangleTest").setMaster("local[2]");
         sc = new JavaSparkContext(conf);
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
-        input = PointRDDTest.class.getClassLoader().getResourceAsStream("point.test.properties");
+        input = PointRDDTest.class.getClassLoader().getResourceAsStream("rectangle.test.properties");
         InputLocation = "file://"+RectangleRDD.class.getClassLoader().getResource("primaryroads.csv").getPath();
         offset = 0;
         splitter = "";
@@ -80,17 +81,18 @@ public class RectangleRDDTest implements Serializable{
      */
     @Test
     public void testConstructor() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
+        //The grid type is X right now.
+        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
         //todo: Set this to debug level
-        for (EnvelopeWithGrid d : pointRDD.envelopeGrids) {
+        for (EnvelopeWithGrid d : rectangleRDD.grids) {
             System.out.println(d);
         }
 
         //todo: Move this into log4j.
-        Map<Integer, Object> map = pointRDD.gridPointRDD.countByKey();
+        Map<Integer, Object> map = rectangleRDD.gridRectangleRDD.countByKey();
         for (Map.Entry<Integer, Object> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
-            Double percentage = number.doubleValue() / pointRDD.totalNumberOfRecords;
+            Double percentage = number.doubleValue() / rectangleRDD.totalNumberOfRecords;
             System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
     }
@@ -100,16 +102,16 @@ public class RectangleRDDTest implements Serializable{
      */
     @Test
     public void testXYGrid() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "X-Y", 2);
+        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, "X-Y", 10);
 
         //todo: Move this into log4j.
-        Map<Integer, Object> map = pointRDD.gridPointRDD.countByKey();
+        Map<Integer, Object> map = rectangleRDD.gridRectangleRDD.countByKey();
 
         System.out.println(map.size());
 
         for (Map.Entry<Integer, Object> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
-            Double percentage = number.doubleValue() / pointRDD.totalNumberOfRecords;
+            Double percentage = number.doubleValue() / rectangleRDD.totalNumberOfRecords;
             System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
     }
@@ -128,16 +130,19 @@ public class RectangleRDDTest implements Serializable{
      */
     @Test
     public void testBuildIndex() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
-        pointRDD.buildIndex("R-Tree");
-        List<Point> result = pointRDD.indexedRDD.take(1).get(0)._2().query(pointRDD.boundaryEnvelope);
+        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
+        rectangleRDD.buildIndex("R-Tree");
+        List<Polygon> result = rectangleRDD.indexedRDD.take(1).get(0)._2().query(rectangleRDD.boundaryEnvelope);
+        for(Polygon e: result) {
+            System.out.println(e.getEnvelopeInternal());
+        }
     }
     /*
      *  If we want to use a grid type that is not supported yet, an exception will be throwed out.
      */
     @Test(expected=IllegalArgumentException.class)
     public void testBuildWithNoExistsGrid() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "ff", numPartitions);
+        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, "ff", numPartitions);
     }
 
     /*
@@ -145,12 +150,7 @@ public class RectangleRDDTest implements Serializable{
      */
     @Test(expected=IllegalArgumentException.class)
     public void testTooLargePartitionNumber() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "X-Y", 1000000);
-    }
-
-    @Test(expected=IllegalArgumentException.class)
-    public void testBuildWithSTRtreeGrid() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "STRtree", numPartitions);
+        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, "X-Y", 1000000);
     }
 
     @AfterClass

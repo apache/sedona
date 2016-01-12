@@ -8,8 +8,9 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.strtree.STRtree;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 
-import org.apache.avro.io.parsing.Symbol;
 import org.apache.commons.lang.IllegalClassException;
 import org.apache.log4j.Logger;
 import org.apache.spark.HashPartitioner;
@@ -27,6 +28,7 @@ import org.datasyslab.geospark.utils.PointXComparator;
 import org.datasyslab.geospark.utils.PointYComparator;
 import org.datasyslab.geospark.utils.RDDSampleUtils;
 import org.wololo.geojson.GeoJSON;
+import org.wololo.jts2geojson.GeoJSONReader;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
 import java.io.Serializable;
@@ -39,31 +41,53 @@ import java.util.List;
 
 import scala.Tuple2;
 
-;
-
-// TODO: Auto-generated Javadoc
 class PointFormatMapper implements Serializable, Function<String, Point> {
     Integer offset = 0;
     String splitter = "csv";
-
 
     public PointFormatMapper(Integer Offset, String Splitter) {
         this.offset = Offset;
         this.splitter = Splitter;
     }
 
-    public Point call(String s) {
-        String splitter = ",";
-        if (this.splitter.contains("tsv")) {
-            splitter = "\t";
-        } else {
-            splitter = ",";
-        }
+    public PointFormatMapper( String Splitter) {
+        this.offset = 0;
+        this.splitter = Splitter;
+    }
+
+    public Point call(String line) throws Exception {
+        Point point = null;
         GeometryFactory fact = new GeometryFactory();
-        List<String> input = Arrays.asList(s.split(splitter));
-        Coordinate coordinate = new Coordinate(Double.parseDouble(input.get(0 + this.offset)),
-                Double.parseDouble(input.get(1 + this.offset)));
-        Point point = fact.createPoint(coordinate);
+        List<String> lineSplitList;
+        Coordinate coordinate;
+        switch (splitter) {
+            case "csv":
+                lineSplitList = Arrays.asList(line.split(","));
+                coordinate= new Coordinate(Double.parseDouble(lineSplitList.get(0 + this.offset)),
+                        Double.parseDouble(lineSplitList.get(1 + this.offset)));
+                point = fact.createPoint(coordinate);
+                break;
+            case "tsv":
+                lineSplitList = Arrays.asList(line.split(","));
+                coordinate = new Coordinate(Double.parseDouble(lineSplitList.get(0 + this.offset)),
+                        Double.parseDouble(lineSplitList.get(1 + this.offset)));
+                point = fact.createPoint(coordinate);
+                break;
+            case "geojson":
+                GeoJSONReader reader = new GeoJSONReader();
+                point = (Point)reader.read(line);
+                break;
+            case "wtk":
+                WKTReader wtkreader = new WKTReader();
+                try {
+                    point = (Point)wtkreader.read(line);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                break;
+            default:
+                throw new Exception("Input type not recognized, ");
+        }
         return point;
     }
 }
@@ -90,7 +114,7 @@ public class PointRDD implements Serializable {
     //Raw point RDD
     public JavaRDD<Point> rawPointRDD;
 
-    public ArrayList<EnvelopeWithGrid> envelopeGrids;
+    public ArrayList<EnvelopeWithGrid> grids;
 
     /**
      * Instantiates a new point rdd.
@@ -157,6 +181,10 @@ public class PointRDD implements Serializable {
         //Get minX and minY;
         this.boundary();
 
+        GeometryFactory geometryFactory = new GeometryFactory();
+
+        pointSampleList.set(0, geometryFactory.createPoint(new Coordinate(boundary[0], boundary[1])));
+        pointSampleList.set(sampleNumberOfRecords-1, geometryFactory.createPoint(new Coordinate(boundary[2], boundary[3])));
 
         //Pick and create boundary;
 
@@ -169,24 +197,14 @@ public class PointRDD implements Serializable {
             System.err.println("The sample size is " + totalNumberOfRecords/100);
             System.err.println("input size is too small, we can not guarantee one grid have at least one record in it");
             System.err.println("we will just build one grid for all input");
-            envelopeGrids = new ArrayList<EnvelopeWithGrid>();
-            envelopeGrids.add(new EnvelopeWithGrid(this.boundaryEnvelope, 0));
-        }
-        else if (gridType.equals("X-Y")) {
+            grids = new ArrayList<EnvelopeWithGrid>();
+            grids.add(new EnvelopeWithGrid(this.boundaryEnvelope, 0));
+        } else if (gridType.equals("X-Y")) {
             //Ideally we want, One partition => One Grid. And each partition have equal size.
             //We use upper bound of sqrt(# of partition) for X and Y.
             Collections.sort(pointSampleList, comparator);
-            GeometryFactory geometryFactory = new GeometryFactory();
-
-            //Expand the sampleList to include boundary.
-
-            pointSampleList.set(0, geometryFactory.createPoint(new Coordinate(boundary[0], boundary[1])));
-            pointSampleList.set(sampleNumberOfRecords-1, geometryFactory.createPoint(new Coordinate(boundary[2], boundary[3])));
 
             //todo: [Verify] Duplicate should not be a problem right?
-
-            //We need to create upper(n) envelope...
-            //todo: May be use bar instead of vertices? This variable name need to refactor
 
             Integer stepInXAxis = sampleNumberOfRecords / numPartitions;
             Integer stepInYAxis = stepInXAxis / numPartitions;
@@ -199,7 +217,7 @@ public class PointRDD implements Serializable {
             }
             int index = 0;
 
-            envelopeGrids = new ArrayList<EnvelopeWithGrid>();
+            grids = new ArrayList<EnvelopeWithGrid>();
 
             //XAxis
             ArrayList<Double> xAxisMidPointList = new ArrayList<Double>();
@@ -246,7 +264,7 @@ public class PointRDD implements Serializable {
                 //Build Grid.
                 //x1,x2,y1,y2
                 for(int k = 0; k < yAxisMidPointList.size() - 1; k++ ) {
-                    envelopeGrids.add(new EnvelopeWithGrid(xAxisMidPointList.get(j), xAxisMidPointList.get(j + 1), yAxisMidPointList.get(k), yAxisMidPointList.get(k + 1), index));
+                    grids.add(new EnvelopeWithGrid(xAxisMidPointList.get(j), xAxisMidPointList.get(j + 1), yAxisMidPointList.get(k), yAxisMidPointList.get(k + 1), index));
                     index++;
                 }
             }
@@ -273,9 +291,9 @@ public class PointRDD implements Serializable {
             }
             midPointList.add(boundaryEnvelope.getMaxX());
             int index = 0;
-            envelopeGrids = new ArrayList<EnvelopeWithGrid>(midPointList.size() - 1);
+            grids = new ArrayList<EnvelopeWithGrid>(midPointList.size() - 1);
             for(int i = 0; i < midPointList.size() - 1; i++) {
-                envelopeGrids.add(new EnvelopeWithGrid(midPointList.get(i), midPointList.get(i + 1), boundaryEnvelope.getMinY(), boundaryEnvelope.getMaxY(), index));
+                grids.add(new EnvelopeWithGrid(midPointList.get(i), midPointList.get(i + 1), boundaryEnvelope.getMinY(), boundaryEnvelope.getMaxY(), index));
                 index++;
             }
         } else if (gridType.equals("Y")) {
@@ -301,9 +319,9 @@ public class PointRDD implements Serializable {
             }
             midPointList.add(boundaryEnvelope.getMaxY());
             int index = 0;
-            envelopeGrids = new ArrayList<EnvelopeWithGrid>(midPointList.size() - 1);
+            grids = new ArrayList<EnvelopeWithGrid>(midPointList.size() - 1);
             for(int i = 0; i < midPointList.size() - 1; i++) {
-                envelopeGrids.add(new EnvelopeWithGrid(boundaryEnvelope.getMinX(), boundaryEnvelope.getMaxX(),midPointList.get(i), midPointList.get(i + 1),  index));
+                grids.add(new EnvelopeWithGrid(boundaryEnvelope.getMinX(), boundaryEnvelope.getMaxX(),midPointList.get(i), midPointList.get(i + 1),  index));
                 index++;
             }
         }
@@ -312,7 +330,7 @@ public class PointRDD implements Serializable {
         //todo, may be refactor this so that user have choice.
         //todo, measure this part's time. Using log4j debug level.
         //todo, This hashPartitioner could be improved by a simple %, becuase we know they're parition number.
-        final Broadcast<ArrayList<EnvelopeWithGrid>> gridEnvelopBroadcasted = sc.broadcast(envelopeGrids);
+        final Broadcast<ArrayList<EnvelopeWithGrid>> gridEnvelopBroadcasted = sc.broadcast(grids);
         unPartitionedGridPointRDD = this.rawPointRDD.mapToPair(
                 new PairFunction<Point, Integer, Point>() {
                     @Override

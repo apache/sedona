@@ -71,10 +71,10 @@ public class NewJoinQuery implements Serializable{
 
     public static JavaPairRDD<Integer, Envelope> getIntegerEnvelopeJavaPairRDDAndCacheInMemory(JavaSparkContext sc, PointRDD pointRDD, RectangleRDD rectangleRDD) {
         //Build Grid, same as without Grid
-        final Broadcast<ArrayList<EnvelopeWithGrid>> gridBroadcasted= sc.broadcast(pointRDD.envelopeGrids);
+        final Broadcast<ArrayList<EnvelopeWithGrid>> gridBroadcasted= sc.broadcast(pointRDD.grids);
         //todo: Add logic, if this is cached, no need to calculate it again.
 
-        JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySetBeforePartition = rectangleRDD.getRectangleRDD().flatMapToPair(new PairFlatMapFunction<Envelope, Integer, Envelope>() {
+        JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySetBeforePartition = rectangleRDD.getRawRectangleRDD().flatMapToPair(new PairFlatMapFunction<Envelope, Integer, Envelope>() {
             @Override
             public Iterable<Tuple2<Integer, Envelope>> call(Envelope envelope) throws Exception {
                 ArrayList<Tuple2<Integer, Envelope>> result = new ArrayList<Tuple2<Integer, Envelope>>();
@@ -151,10 +151,10 @@ public class NewJoinQuery implements Serializable{
 
     public static JavaPairRDD<Integer, Envelope> getIntegerEnvelopeJavaPairRDD(JavaSparkContext sc, PointRDD pointRDD, RectangleRDD rectangleRDD) {
         //Build Grid, same as without Grid
-        final Broadcast<ArrayList<EnvelopeWithGrid>> gridBroadcasted= sc.broadcast(pointRDD.envelopeGrids);
+        final Broadcast<ArrayList<EnvelopeWithGrid>> gridBroadcasted= sc.broadcast(pointRDD.grids);
         //todo: Add logic, if this is cached, no need to calculate it again.
 
-        JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySetBeforePartition = rectangleRDD.getRectangleRDD().flatMapToPair(new PairFlatMapFunction<Envelope, Integer, Envelope>() {
+        JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySetBeforePartition = rectangleRDD.getRawRectangleRDD().flatMapToPair(new PairFlatMapFunction<Envelope, Integer, Envelope>() {
             @Override
             public Iterable<Tuple2<Integer, Envelope>> call(Envelope envelope) throws Exception {
                 ArrayList<Tuple2<Integer, Envelope>> result = new ArrayList<Tuple2<Integer, Envelope>>();

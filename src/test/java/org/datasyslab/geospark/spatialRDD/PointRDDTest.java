@@ -8,7 +8,6 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.geospark.gemotryObjects.EnvelopeWithGrid;
-import org.datasyslab.geospark.utils.RDDSampleUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -86,7 +85,7 @@ public class PointRDDTest implements Serializable{
     public void testConstructor() throws Exception {
         PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
         //todo: Set this to debug level
-        for (EnvelopeWithGrid d : pointRDD.envelopeGrids) {
+        for (EnvelopeWithGrid d : pointRDD.grids) {
             System.out.println(d);
         }
 
@@ -104,7 +103,7 @@ public class PointRDDTest implements Serializable{
      */
     @Test
     public void testXYGrid() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "X-Y", 2);
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "X-Y", 10);
 
         //todo: Move this into log4j.
         Map<Integer, Object> map = pointRDD.gridPointRDD.countByKey();
@@ -150,11 +149,6 @@ public class PointRDDTest implements Serializable{
     @Test(expected=IllegalArgumentException.class)
     public void testTooLargePartitionNumber() throws Exception {
         PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "X-Y", 1000000);
-    }
-
-    @Test(expected=IllegalArgumentException.class)
-    public void testBuildWithSTRtreeGrid() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "STRtree", numPartitions);
     }
 
     @AfterClass
