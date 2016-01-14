@@ -14,15 +14,7 @@ import org.datasyslab.geospark.spatialRDD.PointRDD;
 
 import com.vividsolutions.jts.geom.Point;
 
-/**
- * Spatial knn query.
- *
- * @param p
- *                        the p
- * @param k
- *                        the k
- * @return the list
- */
+
 public class KNNQuery {
 	public static List<Point> SpatialKnnQuery(PointRDD pointRDD, final Broadcast<Point> p, final Integer k) {
 		// For each partation, build a priority queue that holds the topk
@@ -30,7 +22,6 @@ public class KNNQuery {
 		class PointCmp implements Comparator<Point>, Serializable {
 
 			public int compare(Point p1, Point p2) {
-				// TODO Auto-generated method stub
 				double distance1 = p1.getCoordinate().distance(p.value().getCoordinate());
 				double distance2 = p2.getCoordinate().distance(p.value().getCoordinate());
 				if (distance1 > distance2) {
@@ -67,7 +58,6 @@ public class KNNQuery {
 				for (int i = 0; i < k; i++) {
 					res.add(pq.poll());
 				}
-				// return is what?
 				return res;
 			}
 		});

@@ -228,7 +228,7 @@ public class RectangleRDD implements Serializable {
 			ArrayList<Double> midPointList = new ArrayList<Double>();
 
 			midPointList.add(boundaryEnvelope.getMinX());
-			for(int i = 0; i < xAxisBar.size() - 1; i++) {
+			for(int i = 1; i < xAxisBar.size() - 1; i++) {
 				midPointList.add((xAxisBar.get(i).getX() + xAxisBar.get(i + 1).getX()) / 2);
 			}
 			midPointList.add(boundaryEnvelope.getMaxX());
@@ -257,7 +257,7 @@ public class RectangleRDD implements Serializable {
 			ArrayList<Double> midPointList = new ArrayList<Double>();
 
 			midPointList.add(boundaryEnvelope.getMinX());
-			for(int i = 0; i < yAxisBar.size() - 1; i++) {
+			for(int i = 1; i < yAxisBar.size() - 1; i++) {
 				midPointList.add((yAxisBar.get(i).getY() + yAxisBar.get(i + 1).getY()) / 2);
 			}
 			midPointList.add(boundaryEnvelope.getMaxY());
@@ -311,7 +311,7 @@ public class RectangleRDD implements Serializable {
 
 			//yAxis
 
-			for(int j = 0; j < xAxisSubList.size();j++) {
+			for(int j = 0; j < xAxisSubList.size() ;j++) {
 				//Fetch the X bar.
 
 				ArrayList<Envelope> xAxisBar = new ArrayList<Envelope>(rectangleSampleList.subList(j*stepInXAxis, (j+1)*stepInXAxis));
@@ -394,7 +394,10 @@ public class RectangleRDD implements Serializable {
 				STRtree rt = new STRtree();
 				GeometryFactory geometryFactory = new GeometryFactory();
 				for (Envelope e : envelopes)
-					rt.insert(e, geometryFactory.toGeometry(e));
+					try {
+						rt.insert(e, geometryFactory.toGeometry(e));
+					} catch (ClassCastException e1) {
+					}
 				ArrayList<STRtree> result = new ArrayList<STRtree>();
 				result.add(rt);
 				return result;

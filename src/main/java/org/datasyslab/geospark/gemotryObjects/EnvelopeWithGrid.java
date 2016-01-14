@@ -17,8 +17,4 @@ public class EnvelopeWithGrid extends Envelope{
         super(e);
         this.grid = grid;
     }
-//    //Grid is no longer soly double now...
-//    public String toString(){
-//
-//    }
 }

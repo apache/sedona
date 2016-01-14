@@ -21,20 +21,13 @@ import java.util.List;
 
 import scala.Tuple2;
 
-/**
- * Created by jinxuanwu on 1/7/16.
- */
 public class DistanceJoin {
     public static JavaPairRDD<Point, List<Point>> SpatialJoinQueryWithoutIndex(JavaSparkContext sc, PointRDD pointRDD1, PointRDD pointRDD2, Double distance) {
-            //Grid filter, Maybe we can filter those key doesn't overlap the destination.
+        //Grid filter, Maybe we can filter those key doesn't overlap the destination.
 
-            //Just use grid of Convert pointRDD2 to CircleRDD.
+        //Just use grid of Convert pointRDD2 to CircleRDD.
         CircleRDD circleRDD2 = new CircleRDD(pointRDD2, distance);
-        //For debug;
-//        for(EnvelopeWithGrid e: pointRDD1.grids) {
-//            System.out.println(e);
-//        }
-        //Build grid on circleRDD2.
+
 
         final Broadcast<ArrayList<EnvelopeWithGrid>> envelopeWithGrid = sc.broadcast(pointRDD1.grids);
 
@@ -45,13 +38,13 @@ public class DistanceJoin {
 
                 ArrayList<EnvelopeWithGrid> grid = envelopeWithGrid.getValue();
 
-                for(EnvelopeWithGrid e:grid) {
+                for (EnvelopeWithGrid e : grid) {
                     try {
-                    if(circle.intersects(e)) {
-                        result.add(new Tuple2<Integer, Circle>(e.grid, circle));
-                    }
+                        if (circle.intersects(e)) {
+                            result.add(new Tuple2<Integer, Circle>(e.grid, circle));
+                        }
                     } catch (NullPointerException exp) {
-                        System.out.println(e.toString()+circle.toString());
+                        System.out.println(e.toString() + circle.toString());
                     }
                 }
                 return result;
@@ -70,8 +63,9 @@ public class DistanceJoin {
 
                 Tuple2<Iterable<Point>, Iterable<Circle>> cogroupTupleList = cogroup._2();
                 ArrayList<Point> points = new ArrayList<Point>();
-                for(Point p:cogroupTupleList._1()) {
-                    points.add(p);;
+                for (Point p : cogroupTupleList._1()) {
+                    points.add(p);
+                    ;
                 }
                 for (Circle c : cogroupTupleList._2()) {
                     HashSet<Point> poinitHashSet = new HashSet<Point>();
@@ -125,8 +119,8 @@ public class DistanceJoin {
 
                 ArrayList<EnvelopeWithGrid> grid = envelopeWithGrid.getValue();
 
-                for(EnvelopeWithGrid e:grid) {
-                    if(circle.intersects(e)) {
+                for (EnvelopeWithGrid e : grid) {
+                    if (circle.intersects(e)) {
                         result.add(new Tuple2<Integer, Circle>(e.grid, circle));
                     }
                 }
@@ -145,9 +139,9 @@ public class DistanceJoin {
                 ArrayList<Tuple2<Point, HashSet<Point>>> result = new ArrayList<Tuple2<Point, HashSet<Point>>>();
 
                 Tuple2<Iterable<STRtree>, Iterable<Circle>> cogroupTupleList = cogroup._2();
-                for(Circle c : cogroupTupleList._2()) {
+                for (Circle c : cogroupTupleList._2()) {
                     List<Point> pointList = new ArrayList<Point>();
-                    for(STRtree s:cogroupTupleList._1()) {
+                    for (STRtree s : cogroupTupleList._1()) {
                         //这可以? 他都不知道类型把..
                         pointList = s.query(c.getMBR());
 

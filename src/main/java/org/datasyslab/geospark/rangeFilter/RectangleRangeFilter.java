@@ -24,12 +24,12 @@ public class RectangleRangeFilter implements Function<Envelope,Boolean>,Serializ
 		this.rangeRectangle=envelope;
 		this.rangeFlag=0;
 	}
-	public RectangleRangeFilter(Polygon polygon,Integer condition)
-	{
-		this.condition=condition;
-		this.rangePolygon=polygon;
-		this.rangeFlag=1;
-	}
+//	public RectangleRangeFilter(Polygon polygon,Integer condition)
+//	{
+//		this.condition=condition;
+//		this.rangePolygon=polygon;
+//		this.rangeFlag=1;
+//	}
 	public Boolean call(Envelope tuple) throws Exception {
 	if(rangeFlag==0){
 			if(condition==0)
@@ -49,34 +49,38 @@ public class RectangleRangeFilter implements Function<Envelope,Boolean>,Serializ
 				else return false; 
 			}
 	}
-	else 
-	{
-		ArrayList<Coordinate> coordinates = new ArrayList<Coordinate>();
-		coordinates.add(new Coordinate(tuple.getMinX(),tuple.getMinY()));
-		coordinates.add(new Coordinate(tuple.getMinX(),tuple.getMaxY()));
-		coordinates.add(new Coordinate(tuple.getMaxX(),tuple.getMaxY()));
-		coordinates.add(new Coordinate(tuple.getMaxX(),tuple.getMinY()));
-		coordinates.add(new Coordinate(tuple.getMinX(),tuple.getMinY()));
-		GeometryFactory fact = new GeometryFactory();
-		LinearRing linear = new GeometryFactory().createLinearRing((Coordinate[]) coordinates.toArray());
-		Polygon polygon = new Polygon(linear, null, fact);
-		if(condition==0)
-		{
-			
-			if(rangePolygon.contains(polygon))
-			{
-				return true;
-			}
-			else return false;
-		}
-		else
-		{
-			if(rangePolygon.intersects(polygon))
-			{
-				return true;
-			}
-			else return false; 
-		}
+	//todo:  fix later;
+	else {
+		return false;
 	}
+//	else
+//	{
+//		ArrayList<Coordinate> coordinates = new ArrayList<Coordinate>();
+//		coordinates.add(new Coordinate(tuple.getMinX(),tuple.getMinY()));
+//		coordinates.add(new Coordinate(tuple.getMinX(),tuple.getMaxY()));
+//		coordinates.add(new Coordinate(tuple.getMaxX(),tuple.getMaxY()));
+//		coordinates.add(new Coordinate(tuple.getMaxX(),tuple.getMinY()));
+//		coordinates.add(new Coordinate(tuple.getMinX(),tuple.getMinY()));
+//		GeometryFactory fact = new GeometryFactory();
+//		LinearRing linear = new GeometryFactory().createLinearRing((Coordinate[]) coordinates.toArray());
+//		Polygon polygon = new Polygon(linear, null, fact);
+//		if(condition==0)
+//		{
+//
+//			if(rangePolygon.contains(polygon))
+//			{
+//				return true;
+//			}
+//			else return false;
+//		}
+//		else
+//		{
+//			if(rangePolygon.intersects(polygon))
+//			{
+//				return true;
+//			}
+//			else return false;
+//		}
+//	}
 	}
 }

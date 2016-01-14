@@ -362,7 +362,6 @@ public class PointRDD implements Serializable {
         // final Integer offset=Offset;
         this.setRawPointRDD(spark.textFile(InputLocation).map(new PointFormatMapper(Offset, Splitter)).cache());
     }
-
     /**
      * @author Jinxuan Wu
      *

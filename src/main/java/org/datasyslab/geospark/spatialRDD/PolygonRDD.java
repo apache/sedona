@@ -28,6 +28,8 @@ import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.gemotryObjects.EnvelopeWithGrid;
 import org.datasyslab.geospark.utils.GeometryComparatorFactory;
+import org.datasyslab.geospark.utils.PointXComparator;
+import org.datasyslab.geospark.utils.PointYComparator;
 import org.datasyslab.geospark.utils.PolygonXMaxComparator;
 import org.datasyslab.geospark.utils.PolygonXMinComparator;
 import org.datasyslab.geospark.utils.PolygonYMaxComparator;
@@ -247,7 +249,7 @@ public class PolygonRDD implements Serializable {
             ArrayList<Double> midPointList = new ArrayList<Double>();
 
             midPointList.add(boundaryEnvelope.getMinX());
-            for(int i = 0; i < xAxisBar.size() - 1; i++) {
+            for(int i = 1; i < xAxisBar.size() - 1; i++) {
                 midPointList.add((xAxisBar.get(i).getX() + xAxisBar.get(i + 1).getX()) / 2);
             }
             midPointList.add(boundaryEnvelope.getMaxX());
@@ -440,51 +442,25 @@ public class PolygonRDD implements Serializable {
      * @return the envelope
      */
     public Envelope boundary() {
+        minXEnvelope = this.rawPolygonRDD
+                .min((PolygonXMinComparator) GeometryComparatorFactory.createComparator("polygon", "x", "min")).getEnvelopeInternal();
+        Double minLongitude = minXEnvelope.getMinX();
 
-        Envelope envelopeInternal = this.rawPolygonRDD.min((PolygonXMinComparator) GeometryComparatorFactory.createComparator("polygon", "x", "min")).getEnvelopeInternal();
-        Double minLongtitude1 = envelopeInternal.getMinX();
-        Envelope envelopeInternal1 = this.rawPolygonRDD.max((PolygonXMinComparator) GeometryComparatorFactory.createComparator("polygon", "x", "min")).getEnvelopeInternal();
-        Double maxLongtitude1 = envelopeInternal1.getMinX();
-        Envelope envelopeInternal2 = this.rawPolygonRDD.min((PolygonYMinComparator) GeometryComparatorFactory.createComparator("polygon", "y", "min")).getEnvelopeInternal();
-        Double minLatitude1 = envelopeInternal2.getMinY();
-        Envelope envelopeInternal3 = this.rawPolygonRDD.max((PolygonYMinComparator) GeometryComparatorFactory.createComparator("polygon", "y", "min")).getEnvelopeInternal();
-        Double maxLatitude1 = envelopeInternal3.getMinY();
-        Envelope envelopeInternal4 = this.rawPolygonRDD.min((PolygonXMaxComparator) GeometryComparatorFactory.createComparator("polygon", "x", "max")).getEnvelopeInternal();
-        Double minLongtitude2 = envelopeInternal4.getMaxX();
-        Envelope envelopeInternal5 = this.rawPolygonRDD.max((PolygonXMaxComparator) GeometryComparatorFactory.createComparator("polygon", "x", "max")).getEnvelopeInternal();
-        Double maxLongtitude2 = envelopeInternal5.getMaxX();
-        Envelope envelopeInternal6 = this.rawPolygonRDD.min((PolygonYMaxComparator) GeometryComparatorFactory.createComparator("polygon", "y", "max")).getEnvelopeInternal();
-        Double minLatitude2 = envelopeInternal6.getMaxY();
-        Envelope envelopeInternal7 = this.rawPolygonRDD.max((PolygonYMaxComparator) GeometryComparatorFactory.createComparator("polygon", "y", "max")).getEnvelopeInternal();
-        Double maxLatitude2 = envelopeInternal7.getMaxY();
-        if (minLongtitude1 < minLongtitude2) {
-            minXEnvelope = envelopeInternal;
-            boundary[0] = minLongtitude1;
-        } else {
-            minXEnvelope = envelopeInternal1;
-            boundary[0] = minLongtitude2;
-        }
-        if (minLatitude1 < minLatitude2) {
-            minYEnvelope = envelopeInternal2;
-            boundary[1] = minLatitude1;
-        } else {
-            minYEnvelope = envelopeInternal3;
-            boundary[1] = minLatitude2;
-        }
-        if (maxLongtitude1 > maxLongtitude2) {
-            maxXEnvelope = envelopeInternal4;
-            boundary[2] = maxLongtitude1;
-        } else {
-            maxXEnvelope = envelopeInternal5;
-            boundary[2] = maxLongtitude2;
-        }
-        if (maxLatitude1 > maxLatitude2) {
-            maxYEnvelope = envelopeInternal6;
-            boundary[3] = maxLatitude1;
-        } else {
-            maxYEnvelope = envelopeInternal7;
-            boundary[3] = maxLatitude2;
-        }
+        maxXEnvelope = this.rawPolygonRDD
+                .max((PolygonXMaxComparator) GeometryComparatorFactory.createComparator("polygon", "x", "max")).getEnvelopeInternal();
+        Double maxLongitude = maxXEnvelope.getMaxX();
+
+        minYEnvelope = this.rawPolygonRDD
+                .min((PolygonYMinComparator) GeometryComparatorFactory.createComparator("polygon", "y", "min")).getEnvelopeInternal();
+        Double minLatitude = minYEnvelope.getMinY();
+
+        maxYEnvelope = this.rawPolygonRDD
+                .max((PolygonYMaxComparator) GeometryComparatorFactory.createComparator("polygon", "y", "max")).getEnvelopeInternal();
+        Double maxLatitude = maxYEnvelope.getMaxY();
+        this.boundary[0] = minLongitude;
+        this.boundary[1] = minLatitude;
+        this.boundary[2] = maxLongitude;
+        this.boundary[3] = maxLatitude;
         this.boundaryEnvelope = new Envelope(boundary[0],boundary[2],boundary[1],boundary[3]);
         return new Envelope(boundary[0], boundary[2], boundary[1], boundary[3]);
     }

@@ -40,7 +40,7 @@ public class NewJoinQuery implements Serializable{
 
         //flatMapToPair, use HashSet.
         //This will be really time consuiming.. But the memory usage will be less then previous solution.
-        //todo: Will this implementation reduce shuffle???
+        //todo: Verify this implementation reduce shuffle???
         JavaPairRDD<Envelope, HashSet<Point>> joinResultBeforeAggregation = cogroupResult.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer, Tuple2<Iterable<STRtree>, Iterable<Envelope>>>, Envelope, HashSet<Point>>() {
             @Override
             public Iterable<Tuple2<Envelope, HashSet<Point>>> call(Tuple2<Integer, Tuple2<Iterable<STRtree>, Iterable<Envelope>>> cogroup) throws Exception {
@@ -50,7 +50,6 @@ public class NewJoinQuery implements Serializable{
                 for(Envelope e : cogroupTupleList._2()) {
                     List<Point> pointList = new ArrayList<Point>();
                     for(STRtree s:cogroupTupleList._1()) {
-                        //这可以? 他都不知道类型把..
                         pointList = s.query(e);
                     }
                     HashSet<Point> pointSet = new HashSet<Point>(pointList);
@@ -104,7 +103,7 @@ public class NewJoinQuery implements Serializable{
 
         //flatMapToPair, use HashSet.
         //This will be really time consuiming.. But the memory usage will be less then in version 1.0
-        //todo: Will this implementation reduce shuffle???
+        //todo: Verify this implementation will reduce shuffle
         JavaPairRDD<Envelope, HashSet<Point>> joinResultBeforeAggregation = cogroupResult.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer, Tuple2<Iterable<Point>, Iterable<Envelope>>>, Envelope, HashSet<Point>>() {
             @Override
             public Iterable<Tuple2<Envelope, HashSet<Point>>> call(Tuple2<Integer, Tuple2<Iterable<Point>, Iterable<Envelope>>> cogroup) throws Exception {
@@ -149,6 +148,10 @@ public class NewJoinQuery implements Serializable{
         });
     }
 
+    /*
+        The method will take two parameters, one
+        This method will create a grid RDD for rectangle,
+     */
     public static JavaPairRDD<Integer, Envelope> getIntegerEnvelopeJavaPairRDD(JavaSparkContext sc, PointRDD pointRDD, RectangleRDD rectangleRDD) {
         //Build Grid, same as without Grid
         final Broadcast<ArrayList<EnvelopeWithGrid>> gridBroadcasted= sc.broadcast(pointRDD.grids);
@@ -173,4 +176,10 @@ public class NewJoinQuery implements Serializable{
         //todo, change storage level to memory based on third parameter.
         return tmpGridRDDForQuerySetBeforePartition.partitionBy(pointRDD.gridPointRDD.partitioner().get()).persist(StorageLevel.DISK_ONLY());
     }
+
+    //point join polygon
+
+
+
+
 }
