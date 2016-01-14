@@ -19,12 +19,12 @@ public class PointRangeFilter implements Function<Point,Boolean>,Serializable {
 		this.rangeRectangle=envelope;
 		this.rangeFlag=0;
 	}
-	public PointRangeFilter(Polygon polygon,Integer condition)
-	{
-		this.condition=condition;
-		this.rangePolygon=polygon;
-		this.rangeFlag=1;
-	}
+//	public PointRangeFilter(Polygon polygon,Integer condition)
+//	{
+//		this.condition=condition;
+//		this.rangePolygon=polygon;
+//		this.rangeFlag=1;
+//	}
 	public Boolean call(Point tuple) throws Exception {
 		if(rangeFlag==0){
 			if(condition==0)
@@ -44,24 +44,28 @@ public class PointRangeFilter implements Function<Point,Boolean>,Serializable {
 				else return false; 
 			}
 		}
-	else
-	{
-		if(condition==0)
-		{
-			if(rangePolygon.contains(tuple))
-			{
-				return true;
-			}
-			else return false;
+		//todo:  fix later;
+		else {
+			return false;
 		}
-		else
-		{
-			if(rangePolygon.intersects(tuple))
-			{
-				return true;
-			}
-			else return false; 
-		}
-	}
+//	else
+//	{
+//		if(condition==0)
+//		{
+//			if(rangePolygon.contains(tuple))
+//			{
+//				return true;
+//			}
+//			else return false;
+//		}
+//		else
+//		{
+//			if(rangePolygon.intersects(tuple))
+//			{
+//				return true;
+//			}
+//			else return false;
+//		}
+//	}
 	}
 }
