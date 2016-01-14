@@ -97,7 +97,7 @@ public class Circle implements Serializable {
 	 */
 	public static Circle MBRtoCircle(Envelope mbr)
 	{
-		Double radius=(mbr.getMinX()+mbr.getMaxX())/2;
+		Double radius=(mbr.getMaxX() - mbr.getMinX())/2;
 		GeometryFactory fact = new GeometryFactory();
 		Coordinate coordinate = new Coordinate(mbr.getMinX()+radius,mbr.getMinY()+radius);
 		Point point=fact.createPoint(coordinate);

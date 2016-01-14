@@ -17,27 +17,34 @@ public class CircleTest {
 
     @Test
     public void testGetCenter() throws Exception {
-
+        Circle circle = new Circle(0.0, 0.0, 0.1);
+        assertEquals(circle.getCenter().getX(), 0.0, 0.01);
     }
 
     @Test
     public void testGetRadius() throws Exception {
-
+        Circle circle = new Circle(0.0, 0.0, 0.1);
+        assertEquals(circle.getRadius(), 0.1, 0.01);
     }
 
     @Test
     public void testSetRadius() throws Exception {
-
+        Circle circle = new Circle(0.0, 0.0, 0.1);
+        circle.setRadius(0.2);
+        assertEquals(circle.getRadius(), 0.2, 0.01);
     }
 
     @Test
     public void testGetMBR() throws Exception {
+        Circle circle = new Circle(0.0, 0.0, 0.1);
 
+        assertEquals(circle.getMBR().getMinX(), circle.getCenter().getX() - circle.getRadius(), 0.01);
     }
 
     @Test
     public void testMBRtoCircle() throws Exception {
-
+        Envelope e = new Envelope(-0.1, 0.1, -0.1, 0.1);
+        assertEquals(Circle.MBRtoCircle(e).getCenter().getX(), 0.0, 0.01);
     }
 
     @Test
