@@ -1,4 +1,4 @@
-![GeoSpark Logo](http://datasyslab.ghost.io/content/images/2015/06/GeoSpark.png) current version: v0.2
+![GeoSpark Logo](http://datasyslab.ghost.io/content/images/2015/06/GeoSpark.png)
 
 [![Build Status](https://travis-ci.org/jinxuan/GeoSpark.svg)](https://travis-ci.org/jinxuan/GeoSpark) 
 [![codecov.io](https://codecov.io/github/jinxuan/GeoSpark/coverage.svg?branch=master)](https://codecov.io/github/jinxuan/GeoSpark?branch=master)
