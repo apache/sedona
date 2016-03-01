@@ -111,7 +111,7 @@ Please refer [JTS Topology Suite website](http://tsusiatsoftware.net/jts/main.ht
 * [Mohamed Sarwat](http://faculty.engineering.asu.edu/sarwat/) (Email: msarwat@asu.edu)
 
 ###Project website
-Please visit [GeoSpark project wesbite](http://www.public.asu.edu/~jiayu2/geospark/index.html) for latest news and releases.
+Please visit [GeoSpark project wesbite](http://geospark.datasyslab.org) for latest news and releases.
 
 ### DataSys Lab
 GeoSpark is one of the projects under [DataSys Lab](http://www.datasyslab.org/) at Arizona State University. The mission of DataSys Lab is designing and developing experimental data management systems (e.g., database systems).
