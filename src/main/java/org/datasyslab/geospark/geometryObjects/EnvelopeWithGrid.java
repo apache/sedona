@@ -1,4 +1,4 @@
-package org.datasyslab.geospark.gemotryObjects;
+package org.datasyslab.geospark.geometryObjects;
 
 import com.vividsolutions.jts.geom.Envelope;
 

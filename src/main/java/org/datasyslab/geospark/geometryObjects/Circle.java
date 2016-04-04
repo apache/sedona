@@ -1,7 +1,7 @@
 /*
  * 
  */
-package org.datasyslab.geospark.gemotryObjects;
+package org.datasyslab.geospark.geometryObjects;
 
 import java.io.Serializable;
 

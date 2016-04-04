@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
+import org.datasyslab.geospark.geometryObjects.Circle;
 import org.datasyslab.geospark.utils.GeometryComparatorFactory;
 import org.junit.Assert;
 import org.junit.Test;
