@@ -1,10 +1,10 @@
 /*
- * 
+ *
  */
 package org.datasyslab.geospark.utils;
 
 import com.vividsolutions.jts.geom.Envelope;
-import org.datasyslab.geospark.gemotryObjects.Circle;
+import org.datasyslab.geospark.geometryObjects.Circle;
 import java.io.Serializable;
 import java.util.Comparator;
 

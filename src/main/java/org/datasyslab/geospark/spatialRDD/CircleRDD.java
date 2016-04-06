@@ -1,5 +1,5 @@
 /*
- * 
+ *
  */
 package org.datasyslab.geospark.spatialRDD;
 
@@ -10,7 +10,7 @@ import org.apache.spark.api.java.function.Function;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
-import org.datasyslab.geospark.gemotryObjects.*;
+import org.datasyslab.geospark.geometryObjects.*;
 import org.datasyslab.geospark.utils.*;;
 
 // TODO: Auto-generated Javadoc
