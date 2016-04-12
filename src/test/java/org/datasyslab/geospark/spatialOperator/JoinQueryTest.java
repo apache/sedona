@@ -1,12 +1,16 @@
 package org.datasyslab.geospark.spatialOperator;
 
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+
 import org.datasyslab.geospark.spatialRDD.PointRDD;
+import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -18,12 +22,10 @@ import java.util.Properties;
 
 import scala.Tuple2;
 
-import static org.junit.Assert.assertEquals;
-
 /**
- * Created by jinxuanwu on 1/8/16.
+ * Created by jinxuanwu on 1/5/16.
  */
-public class DistanceJoinQueryTest {
+public class JoinQueryTest {
     public static JavaSparkContext sc;
     static Properties prop;
     static InputStream input;
@@ -33,12 +35,13 @@ public class DistanceJoinQueryTest {
     static String gridType;
     static String indexType;
     static Integer numPartitions;
+
     @BeforeClass
     public static void onceExecutedBeforeAll() {
-        Logger.getLogger("org").setLevel(Level.WARN);
-        Logger.getLogger("akka").setLevel(Level.WARN);
         SparkConf conf = new SparkConf().setAppName("JoinTest").setMaster("local[2]");
         sc = new JavaSparkContext(conf);
+        Logger.getLogger("org").setLevel(Level.WARN);
+        Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
         input = DistanceJoinQueryTest.class.getClassLoader().getResourceAsStream("point.test.properties");
         InputLocation = "file://"+JoinQueryTest.class.getClassLoader().getResource("primaryroads.csv").getPath();
@@ -72,32 +75,47 @@ public class DistanceJoinQueryTest {
         }
     }
 
-    @Test
-    public void testDistancelJoinQuery() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "X-Y", numPartitions);
-        PointRDD pointRDD2 = new PointRDD(sc, InputLocation, offset, splitter, "X-Y", numPartitions);
-
-        List<Tuple2<Point, List<Point>>> result = DistanceJoin.SpatialJoinQueryWithoutIndex(sc, pointRDD, pointRDD2, 0.01).collect();
-
-        assertEquals(pointRDD.getRawPointRDD().distinct().count(), pointRDD.getRawPointRDD().distinct().count());
-
-    }
-
-    @Test
-    public void testDistancelJoinQueryWithIndex() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "X-Y", numPartitions);
-        PointRDD pointRDD2 = new PointRDD(sc, InputLocation, offset, splitter, "X-Y", numPartitions);
-
-        pointRDD.buildIndex("r-tree");
-        List<Tuple2<Point, List<Point>>> result = DistanceJoin.SpatialJoinQueryUsingIndex(sc, pointRDD, pointRDD2, 0.01).collect();
-
-        assertEquals(pointRDD.getRawPointRDD().distinct().count(), pointRDD.getRawPointRDD().distinct().count());
-
-    }
-
-
     @AfterClass
     public static void TearDown() {
         sc.stop();
     }
+
+    @Test
+    public void testSpatialJoinQuery() throws Exception {
+
+        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, numPartitions);
+
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
+
+        List<Tuple2<Envelope, List<Point>>> result = JoinQuery.SpatialJoinQueryWithOutIndex(sc, pointRDD, rectangleRDD, true).collect();
+
+        System.out.println(result.size());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testSpatialJoinQueryUsingIndexException() throws Exception {
+        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, numPartitions);
+
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
+        //This should throw exception since the previous constructor doesn't build a grided RDD.
+        List<Tuple2<Envelope, List<Point>>> result = JoinQuery.SpatialJoinQueryUsingIndex(sc, pointRDD, rectangleRDD).collect();
+
+    }
+
+    @Test
+    public void testSpatialJoinQueryUsingIndex() throws Exception {
+
+        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, numPartitions);
+
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
+
+        pointRDD.buildIndex("strtree");
+
+        List<Tuple2<Envelope, List<Point>>> result = JoinQuery.SpatialJoinQueryUsingIndex(sc, pointRDD, rectangleRDD).collect();
+
+        System.out.println(result.size());
+
+    }
+
+
 }

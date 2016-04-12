@@ -7,7 +7,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.datasyslab.geospark.gemotryObjects.EnvelopeWithGrid;
+import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -86,7 +86,7 @@ public class PointRDDTest implements Serializable{
         PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
         //todo: Set this to debug level
         for (EnvelopeWithGrid d : pointRDD.grids) {
-            System.out.println(d);
+            //System.out.println("PointRDD grids: "+d);
         }
 
         //todo: Move this into log4j.
@@ -101,10 +101,33 @@ public class PointRDDTest implements Serializable{
     /*
      *  This test case test whether the X-Y grid can be build correctly.
      */
+    /*
     @Test
     public void testXYGrid() throws Exception {
         PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "X-Y", 10);
+        for (EnvelopeWithGrid d : pointRDD.grids) {
+        	System.out.println("PointRDD grids: "+d.grid);
+        }
+        //todo: Move this into log4j.
+        Map<Integer, Object> map = pointRDD.gridPointRDD.countByKey();
 
+        System.out.println(map.size());
+
+        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+            Long number = (Long) entry.getValue();
+            Double percentage = number.doubleValue() / pointRDD.totalNumberOfRecords;
+            System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+        }
+    }*/
+    /*
+     *  This test case test whether the STR-Tree grid can be build correctly.
+     */
+    @Test
+    public void testSTRtreeGrid() throws Exception {
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "strtree", 10);
+        for (EnvelopeWithGrid d : pointRDD.grids) {
+        	System.out.println("Str-Tree PointRDD grids: "+d.grid);
+        }
         //todo: Move this into log4j.
         Map<Integer, Object> map = pointRDD.gridPointRDD.countByKey();
 
@@ -116,7 +139,28 @@ public class PointRDDTest implements Serializable{
             System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
     }
+    /*
+     *  This test case test whether the Quad-Tree grid can be build correctly.
+     */
+    
+    @Test
+    public void testQuadtreeGrid() throws Exception {
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "quadtree", 10);
+        for (EnvelopeWithGrid d : pointRDD.grids) {
+        	System.out.println("Quad-Tree PointRDD grids: "+d.grid);
+        }
+        //todo: Move this into log4j.
+        Map<Integer, Object> map = pointRDD.gridPointRDD.countByKey();
 
+        System.out.println(map.size());
+
+        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+            Long number = (Long) entry.getValue();
+            Double percentage = number.doubleValue() / pointRDD.totalNumberOfRecords;
+            System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+        }
+    }
+    
     /*
      * If we try to build a index on a rawPointRDD which is not construct with grid. We shall see an error.
      */
@@ -132,7 +176,7 @@ public class PointRDDTest implements Serializable{
     @Test
     public void testBuildIndex() throws Exception {
         PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
-        pointRDD.buildIndex("R-Tree");
+        pointRDD.buildIndex("stree");
         List<Point> result = pointRDD.indexedRDD.take(1).get(0)._2().query(pointRDD.boundaryEnvelope);
     }
     /*

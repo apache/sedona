@@ -7,7 +7,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.datasyslab.geospark.gemotryObjects.EnvelopeWithGrid;
+import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -79,29 +79,28 @@ public class PolygonRDDTest {
         //The grid type is X right now.
         PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
         //todo: Set this to debug level
-        for (EnvelopeWithGrid d : polygonRDD.grids) {
-            System.out.println(d);
-        }
+
 
         //todo: Move this into log4j.
         Map<Integer, Object> map = polygonRDD.gridPolygonRDD.countByKey();
         for (Map.Entry<Integer, Object> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / polygonRDD.totalNumberOfRecords;
-            System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+            //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
     }
 
     /*
      *  This test case test whether the X-Y grid can be build correctly.
      */
+    /*
     @Test
     public void testXYGrid() throws Exception {
         //The grid type is X right now.
         PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, "X-Y", 10);
         //todo: Set this to debug level
         for (EnvelopeWithGrid d : polygonRDD.grids) {
-            System.out.println(d);
+            System.out.println("PolygonRDD grids: "+d.grid);
         }
 
         //todo: Move this into log4j.
@@ -111,8 +110,50 @@ public class PolygonRDDTest {
             Double percentage = number.doubleValue() / polygonRDD.totalNumberOfRecords;
             System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
-    }
+    }*/
+    /*
+     *  This test case test whether the STR-Tree grid can be build correctly.
+     */
+    @Test
+    public void testSTRtreeGrid() throws Exception {
+        //The grid type is X right now.
+        PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, "strtree", 10);
+        //todo: Set this to debug level
+        for (EnvelopeWithGrid d : polygonRDD.grids) {
+            System.out.println("STR Tree PolygonRDD grids: "+d.grid);
+        }
 
+        //todo: Move this into log4j.
+        Map<Integer, Object> map = polygonRDD.gridPolygonRDD.countByKey();
+        System.out.println(map.size());
+        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+            Long number = (Long) entry.getValue();
+            Double percentage = number.doubleValue() / polygonRDD.totalNumberOfRecords;
+            System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+        }
+    }
+    /*
+     *  This test case test whether the Quad-Tree grid can be build correctly.
+     */
+    
+    @Test
+    public void testQuadtreeGrid() throws Exception {
+        //The grid type is X right now.
+        PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, "quadtree", 10);
+        //todo: Set this to debug level
+        for (EnvelopeWithGrid d : polygonRDD.grids) {
+            System.out.println("Quad-Tree PolygonRDD grids: "+d.grid);
+        }
+
+        //todo: Move this into log4j.
+        Map<Integer, Object> map = polygonRDD.gridPolygonRDD.countByKey();
+        System.out.println(map.size());
+        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+            Long number = (Long) entry.getValue();
+            Double percentage = number.doubleValue() / polygonRDD.totalNumberOfRecords;
+            System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+        }
+    }
     /*
      * If we try to build a index on a rawPointRDD which is not construct with grid. We shall see an error.
      */
@@ -131,7 +172,7 @@ public class PolygonRDDTest {
         polygonRDD.buildIndex("R-Tree");
         List<Polygon> result = polygonRDD.indexedRDD.take(1).get(0)._2().query(polygonRDD.boundaryEnvelope);
         for(Polygon e: result) {
-            System.out.println(e.getEnvelopeInternal());
+            //System.out.println(e.getEnvelopeInternal());
         }
     }
     /*
