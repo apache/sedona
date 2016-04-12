@@ -11,6 +11,7 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.index.quadtree.Quadtree;
 import com.vividsolutions.jts.index.strtree.STRtree;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
@@ -24,17 +25,17 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
+import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.storage.StorageLevel;
-import org.datasyslab.geospark.gemotryObjects.EnvelopeWithGrid;
+import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
 import org.datasyslab.geospark.utils.GeometryComparatorFactory;
-import org.datasyslab.geospark.utils.PointXComparator;
-import org.datasyslab.geospark.utils.PointYComparator;
 import org.datasyslab.geospark.utils.PolygonXMaxComparator;
 import org.datasyslab.geospark.utils.PolygonXMinComparator;
 import org.datasyslab.geospark.utils.PolygonYMaxComparator;
 import org.datasyslab.geospark.utils.PolygonYMinComparator;
 import org.datasyslab.geospark.utils.RDDSampleUtils;
+import org.datasyslab.geospark.utils.SpatialPartitioner;
 import org.wololo.jts2geojson.GeoJSONReader;
 
 import java.io.Serializable;
@@ -110,63 +111,86 @@ class PolygonFormatMapper implements Function<String, Polygon>, Serializable {
     }
 }
 
+
 /**
- * The Class PolygonRDD.
+ * The Class PolygonRDD. It accommodates Polygon object.
+ * @author Arizona State University DataSystems Lab
+ *
  */
 public class PolygonRDD implements Serializable {
 
+    /**
+     * The total number of records stored in this RDD
+     */
     public long totalNumberOfRecords;
-    /** The rectangle rdd. */
+    
+    /**
+     * The original Spatial RDD which has not been spatial partitioned and has not index
+     */
     public JavaRDD<Polygon> rawPolygonRDD;
-
-    ArrayList<Double> grid;
-
+   
+    
+    /**
+     * The boundary of this RDD, calculated in constructor method, represented by an array
+     */
     Double[] boundary = new Double[4];
 
+    /**
+     * The boundary of this RDD, calculated in constructor method, represented by an envelope
+     */
     public Envelope boundaryEnvelope;
 
+    /**
+     * The SpatialRDD partitioned by spatial grids. Each integer is a spatial partition id
+     */
     public JavaPairRDD<Integer, Polygon> gridPolygonRDD;
 
+    /**
+     * The SpatialRDD partitioned by spatial grids. Each integer is a spatial partition id
+     */
     public ArrayList<EnvelopeWithGrid> grids;
 
 
     //todo, replace this STRtree to be more generalized, such as QuadTree.
+    /**
+     * The partitoned SpatialRDD with built spatial indexes. Each integer is a spatial partition id
+     */
     public JavaPairRDD<Integer, STRtree> indexedRDD;
+    
+    
     private Envelope minXEnvelope;
     private Envelope minYEnvelope;
     private Envelope maxXEnvelope;
     private Envelope maxYEnvelope;
 
+
     /**
-     * Instantiates a new polygon rdd.
-     *
-     * @param rawPolygonRDD the polygon rdd
+     * Initialize one SpatialRDD with one existing SpatialRDD
+     * @param rawPolygonRDD One existing raw SpatialRDD
      */
     public PolygonRDD(JavaRDD<Polygon> rawPolygonRDD) {
         this.setRawPolygonRDD(rawPolygonRDD.cache());
     }
 
     /**
-     * Instantiates a new polygon rdd.
-     *
-     * @param spark         the spark
-     * @param InputLocation the input location
-     * @param Offset        the offset
-     * @param Splitter      the splitter
-     * @param partitions    the partitions
-     */
+     * Initialize one raw SpatialRDD with a raw input file
+     * @param spark SparkContext which defines some Spark configurations
+     * @param InputLocation specify the input path which can be a HDFS path
+     * @param Offset specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
+     * @param Splitter specify the input file format: csv, tsv, geojson, wkt
+     * @param partitions specify the partition number of the SpatialRDD
+     */ 
     public PolygonRDD(JavaSparkContext spark, String InputLocation, Integer Offset, String Splitter, Integer partitions) {
 
         this.setRawPolygonRDD(spark.textFile(InputLocation, partitions).map(new PolygonFormatMapper(Offset, Splitter)).cache());
     }
 
     /**
-     * Instantiates a new polygon rdd.
-     *
-     * @param spark         the spark
-     * @param InputLocation the input location
-     * @param Offset        the offset
-     * @param Splitter      the splitter
+     * Initialize one raw SpatialRDD with a raw input file
+     * @param spark SparkContext which defines some Spark configurations
+     * @param InputLocation specify the input path which can be a HDFS path
+     * @param Offset specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
+     * @param Splitter specify the input file format: csv, tsv, geojson, wkt
      */
     public PolygonRDD(JavaSparkContext spark, String InputLocation, Integer Offset, String Splitter) {
 
@@ -174,15 +198,24 @@ public class PolygonRDD implements Serializable {
     }
 
     /**
-     * Gets the polygon rdd.
+     * Get the raw SpatialRDD
      *
-     * @return the polygon rdd
+     * @return The raw SpatialRDD
      */
     public JavaRDD<Polygon> getRawPolygonRDD() {
         return rawPolygonRDD;
     }
 
     //todo: remove offset.
+    /**
+     * Initialize one raw SpatialRDD with a raw input file and do spatial partitioning on it
+     * @param sc spark SparkContext which defines some Spark configurations
+     * @param inputLocation specify the input path which can be a HDFS path
+     * @param offSet specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
+     * @param splitter specify the input file format: csv, tsv, geojson, wkt
+     * @param gridType specify the spatial partitioning method: X-Y (equal size grids), strtree, quadtree
+     * @param numPartitions specify the partition number of the SpatialRDD
+     */
     public PolygonRDD(JavaSparkContext sc, String inputLocation, Integer offSet, String splitter, String gridType, Integer numPartitions) {
         this.rawPolygonRDD = sc.textFile(inputLocation).map(new PolygonFormatMapper(offSet, splitter));
 
@@ -194,32 +227,45 @@ public class PolygonRDD implements Serializable {
 
         //Sort
         Comparator<Polygon> comparator = null;
+        this.boundary();
+        GeometryFactory geometryFactory = new GeometryFactory();
         switch (gridType) {
             case "X":
                 comparator = new PolygonXMinComparator();
+                //If we don't +1, it will be recognized as point instead of rectangle
+                polygonSampleList.set(0, (Polygon)geometryFactory.toGeometry(minXEnvelope));
+                polygonSampleList.set(1, (Polygon)geometryFactory.toGeometry(minYEnvelope));
+                polygonSampleList.set(sampleNumberOfRecords-2, (Polygon)geometryFactory.toGeometry(maxYEnvelope));
+                polygonSampleList.set(sampleNumberOfRecords-1, (Polygon)geometryFactory.toGeometry(maxXEnvelope));
                 break;
             case "Y":
                 comparator = new PolygonYMinComparator();
+                //If we don't +1, it will be recognized as point instead of rectangle
+                polygonSampleList.set(0, (Polygon)geometryFactory.toGeometry(minXEnvelope));
+                polygonSampleList.set(1, (Polygon)geometryFactory.toGeometry(minYEnvelope));
+                polygonSampleList.set(sampleNumberOfRecords-2, (Polygon)geometryFactory.toGeometry(maxYEnvelope));
+                polygonSampleList.set(sampleNumberOfRecords-1, (Polygon)geometryFactory.toGeometry(maxXEnvelope));
                 break;
             case "X-Y":
                 //Will first sort based on X, then partition, then sort and partition based on Y.
                 comparator = new PolygonXMinComparator();
+                //If we don't +1, it will be recognized as point instead of rectangle
+                polygonSampleList.set(0, (Polygon)geometryFactory.toGeometry(minXEnvelope));
+                polygonSampleList.set(1, (Polygon)geometryFactory.toGeometry(minYEnvelope));
+                polygonSampleList.set(sampleNumberOfRecords-2, (Polygon)geometryFactory.toGeometry(maxYEnvelope));
+                polygonSampleList.set(sampleNumberOfRecords-1, (Polygon)geometryFactory.toGeometry(maxXEnvelope));
                 break;
-            case "STRtree":
-                throw new IllegalArgumentException("STRtree is currently now implemented, to be finished in version 0.3");
+            case "strtree":
+            	break;
+            case "quadtree":
+            	break;
             default:
-                throw new IllegalArgumentException("Grid type not recognied, please check again.");
+                throw new IllegalArgumentException("Partitioning method is not recognized,, please check again.");
         }
 
-        this.boundary();
 
-        GeometryFactory geometryFactory = new GeometryFactory();
 
-        //If we don't +1, it will be recognized as point instead of rectangle
-        polygonSampleList.set(0, (Polygon)geometryFactory.toGeometry(minXEnvelope));
-        polygonSampleList.set(1, (Polygon)geometryFactory.toGeometry(minYEnvelope));
-        polygonSampleList.set(sampleNumberOfRecords-2, (Polygon)geometryFactory.toGeometry(maxYEnvelope));
-        polygonSampleList.set(sampleNumberOfRecords-1, (Polygon)geometryFactory.toGeometry(maxXEnvelope));
+
 
         if(sampleNumberOfRecords == 0) {
             //If the sample Number is too small, we will just use one grid instead.
@@ -366,9 +412,52 @@ public class PolygonRDD implements Serializable {
                 }
             }
         }
-
+        else if(gridType.equals("strtree"))
+        {
+        	STRtree strtree=new STRtree(polygonSampleList.size()/numPartitions);
+        	for(int i=0;i<polygonSampleList.size();i++)
+        	{
+        		strtree.insert(polygonSampleList.get(i).getEnvelopeInternal(), polygonSampleList.get(i));
+        	}
+        	List<Envelope> unnumberedGrid=strtree.queryBoundary();
+        	grids=new ArrayList<EnvelopeWithGrid>();
+        	for(int i=0;i<unnumberedGrid.size();i++)
+        	{
+        		grids.add(new EnvelopeWithGrid(unnumberedGrid.get(i),i));
+        	}
+        	//Note: this is to add four super big grids at the end of the grid list. This boundary of this grid is actually
+        	//the boundary of the entire dataset. The super big grid is to make sure none of records will be missed because
+        	//the original grids are built on top of sampling data which is not accurate.
+        	grids.add(new EnvelopeWithGrid(new Envelope(this.boundary[0],(this.boundary[0]+this.boundary[1])/2.0,this.boundary[2],(this.boundary[2]+this.boundary[3])/2.0),grids.size()));
+           	grids.add(new EnvelopeWithGrid(new Envelope((this.boundary[0]+this.boundary[1])/2.0,this.boundary[1],(this.boundary[2]+this.boundary[3])/2.0,this.boundary[3]),grids.size()));
+           	grids.add(new EnvelopeWithGrid(new Envelope(this.boundary[0],(this.boundary[0]+this.boundary[1])/2.0,(this.boundary[2]+this.boundary[3])/2.0,this.boundary[3]),grids.size()));
+           	grids.add(new EnvelopeWithGrid(new Envelope((this.boundary[0]+this.boundary[1])/2.0,this.boundary[1],this.boundary[2],(this.boundary[2]+this.boundary[3])/2.0),grids.size()));
+           	grids.add(new EnvelopeWithGrid(this.boundaryEnvelope,grids.size()));
+        }
+        else if(gridType.equals("quadtree"))
+        {
+        	Quadtree quadtree=new Quadtree();
+        	for(int i=0;i<polygonSampleList.size();i++)
+        	{
+        		quadtree.insert(polygonSampleList.get(i).getEnvelopeInternal(), polygonSampleList.get(i));
+        	}
+        	List<Envelope> unnumberedGrid=quadtree.queryBoundary();
+        	grids=new ArrayList<EnvelopeWithGrid>();
+        	for(int i=0;i<unnumberedGrid.size();i++)
+        	{
+        		grids.add(new EnvelopeWithGrid(unnumberedGrid.get(i),i));
+        	}
+        	//Note: this is to add four super big grids at the end of the grid list. This boundary of this grid is actually
+        	//the boundary of the entire dataset. The super big grid is to make sure none of records will be missed because
+        	//the original grids are built on top of sampling data which is not accurate.
+        	grids.add(new EnvelopeWithGrid(new Envelope(this.boundary[0],(this.boundary[0]+this.boundary[1])/2.0,this.boundary[2],(this.boundary[2]+this.boundary[3])/2.0),grids.size()));
+           	grids.add(new EnvelopeWithGrid(new Envelope((this.boundary[0]+this.boundary[1])/2.0,this.boundary[1],(this.boundary[2]+this.boundary[3])/2.0,this.boundary[3]),grids.size()));
+           	grids.add(new EnvelopeWithGrid(new Envelope(this.boundary[0],(this.boundary[0]+this.boundary[1])/2.0,(this.boundary[2]+this.boundary[3])/2.0,this.boundary[3]),grids.size()));
+           	grids.add(new EnvelopeWithGrid(new Envelope((this.boundary[0]+this.boundary[1])/2.0,this.boundary[1],this.boundary[2],(this.boundary[2]+this.boundary[3])/2.0),grids.size()));
+           	grids.add(new EnvelopeWithGrid(this.boundaryEnvelope,grids.size()));
+        }
         final Broadcast<ArrayList<EnvelopeWithGrid>> gridEnvelopBroadcasted = sc.broadcast(grids);
-        JavaPairRDD<Integer,Polygon> unPartitionedGridPolygonRDD = this.rawPolygonRDD.flatMapToPair(
+        /*JavaPairRDD<Integer,Polygon> unPartitionedGridPolygonRDD = this.rawPolygonRDD.flatMapToPair(
                 new PairFlatMapFunction<Polygon, Integer, Polygon>() {
                     @Override
                     public Iterable<Tuple2<Integer, Polygon>> call(Polygon polygon) throws Exception {
@@ -390,11 +479,51 @@ public class PolygonRDD implements Serializable {
                         return result;
                     }
                 }
+        );*/
+        JavaPairRDD<Integer,Polygon> unPartitionedGridPolygonRDD = this.rawPolygonRDD.mapToPair(
+                new PairFunction<Polygon, Integer, Polygon>() {
+                    @Override
+                    public Tuple2<Integer, Polygon> call(Polygon polygon) throws Exception {
+                        //ArrayList<Tuple2<Integer, Polygon>> result = new ArrayList<Tuple2<Integer, Polygon>>();
+                        //todo.. This is is really not efficient way of doing this.
+                        GeometryFactory geometryFactory = new GeometryFactory();
+                        for (EnvelopeWithGrid e : gridEnvelopBroadcasted.getValue()) {
+                            if (e.contains(polygon.getEnvelopeInternal())) {
+                                return new Tuple2<Integer, Polygon>(e.grid, polygon);
+                            }
+                        }
+                        return new Tuple2<Integer, Polygon>(gridEnvelopBroadcasted.getValue().size()-1, polygon);
+                        
+                       
+                    }
+                }
         );
-
-        this.gridPolygonRDD = unPartitionedGridPolygonRDD.partitionBy(new HashPartitioner(numPartitions)).persist(StorageLevel.DISK_ONLY());
+        switch (gridType) {
+        case "X":
+        	this.gridPolygonRDD = unPartitionedGridPolygonRDD.partitionBy(new SpatialPartitioner(numPartitions)).persist(StorageLevel.DISK_ONLY());
+            break;
+        case "Y":
+        	this.gridPolygonRDD = unPartitionedGridPolygonRDD.partitionBy(new SpatialPartitioner(numPartitions)).persist(StorageLevel.DISK_ONLY());
+            break;
+        case "X-Y":
+        	this.gridPolygonRDD = unPartitionedGridPolygonRDD.partitionBy(new SpatialPartitioner(numPartitions)).persist(StorageLevel.DISK_ONLY());
+            break;
+        case "strtree":
+        	this.gridPolygonRDD = unPartitionedGridPolygonRDD.partitionBy(new SpatialPartitioner(grids.size())).persist(StorageLevel.DISK_ONLY());
+        	break;
+        case "quadtree":
+        	this.gridPolygonRDD = unPartitionedGridPolygonRDD.partitionBy(new SpatialPartitioner(grids.size())).persist(StorageLevel.DISK_ONLY());
+        	break;
+        default:
+            throw new IllegalArgumentException("Partitioning method is not recognized,, please check again.");
     }
-
+        
+    }
+    
+    /**
+     * Create an IndexedRDD and cache it in memory. Need to have a grided RDD first. The index is build on each partition.
+     * @param indexType Specify the index type: strtree, quadtree
+     */
     public void buildIndex(String indexType) {
 
         if (this.gridPolygonRDD == null) {
@@ -419,26 +548,28 @@ public class PolygonRDD implements Serializable {
         this.indexedRDD.cache();
     }
     /**
-     * Sets the polygon rdd.
+     * Set the raw SpatialRDD
      *
-     * @param rawPolygonRDD the new polygon rdd
+     * @param rawPolygonRDD One existing SpatialRDD
      */
     public void setRawPolygonRDD(JavaRDD<Polygon> rawPolygonRDD) {
         this.rawPolygonRDD = rawPolygonRDD;
     }
 
-    /**
-     * Re partition.
-     *
-     * @param number the number
-     */
-    public void rePartition(Integer number) {
-        this.rawPolygonRDD = this.rawPolygonRDD.repartition(number);
-    }
+	/**
+	 * Repartition the raw SpatialRDD.
+	 *
+	 * @param partitions the partitions number
+	 * @return the repartitioned raw SpatialRDD
+	 */
+	public JavaRDD<Polygon> rePartition(Integer partitions)
+	{
+		return this.rawPolygonRDD.repartition(partitions);
+	}
+	
 
     /**
-     * Boundary.
-     *
+     * Return the boundary of the entire SpatialRDD in terms of an envelope format
      * @return the envelope
      */
     public Envelope boundary() {
@@ -466,7 +597,7 @@ public class PolygonRDD implements Serializable {
     }
 
     /**
-     * Minimum bounding rectangle.
+     * Return RectangleRDD version of the PolygonRDD. Each record in RectangleRDD is the Minimum bounding rectangle of the corresponding Polygon
      *
      * @return the rectangle rdd
      */
@@ -482,7 +613,7 @@ public class PolygonRDD implements Serializable {
     }
 
     /**
-     * Polygon union.
+     * Return a polygon which is the union of the entire polygon dataset
      *
      * @return the polygon
      */

@@ -19,15 +19,13 @@ public class RangeQuery {
 	//Try template later.
 	
 	//todo: refactor all this into one rangeQuery
+
 	/**
-	 * Spatial range query.
-	 * @param pointRDD
-	 * 			the point RDD.
-	 * @param envelope
-	 *            the envelope
-	 * @param condition
-	 *            the condition
-	 * @return the point rdd
+	 * Spatial range query on top of PointRDD
+	 * @param pointRDD Input PointRDD
+	 * @param envelope Query window
+	 * @param condition 0 means query predicate is "contains", 1 means query predicate is "intersects"
+	 * @return A PointRDD contains qualified records
 	 */
 	public static PointRDD SpatialRangeQuery(PointRDD pointRDD, Envelope envelope, Integer condition) {
 		JavaRDD<Point> result = pointRDD.getRawPointRDD().filter(new PointRangeFilter(envelope, condition));
@@ -51,11 +49,11 @@ public class RangeQuery {
 //	}
 	
 	/**
-	 * Spatial range query.
-	 *
-	 * @param envelope the envelope
-	 * @param condition the condition
-	 * @return the polygon rdd
+	 * Spatial range query on top of PolygonRDD
+	 * @param polygonRDD Input PolygonRDD
+	 * @param envelope Query window
+	 * @param condition 0 means query predicate is "contains", 1 means query predicate is "intersects"
+	 * @return A PolygonRDD contains qualified records
 	 */
 	public static PolygonRDD SpatialRangeQuery(PolygonRDD polygonRDD, Envelope envelope,Integer condition)
 	{
@@ -76,12 +74,13 @@ public class RangeQuery {
 //		return new PolygonRDD(result);
 //	}
 //
+
 	/**
-	 * Spatial range query.
-	 *
-	 * @param envelope the envelope
-	 * @param condition the condition
-	 * @return the rectangle rdd
+	 * Spatial range query on top of RectangleRDD
+	 * @param rectangleRDD Input Rectangle RDD
+	 * @param envelope Query window
+	 * @param condition 0 means query predicate is "contains", 1 means query predicate is "intersects"
+	 * @return A RectangleRDD contains qualified records
 	 */
 	public static RectangleRDD SpatialRangeQuery(RectangleRDD rectangleRDD, Envelope envelope,Integer condition)
 	{

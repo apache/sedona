@@ -14,13 +14,13 @@ public class GeometryComparatorFactory {
 	 *
 	 * @param Two strings as input, should be in format like ("point", "x");
 	 * @param axis the axis
-	 * @return the gemotry comparator
+	 * @return the geometry comparator
 	 */
-	public static GemotryComparator createComparator(String gemotryType, String axis){
+	public static GeometryComparator createComparator(String geometryType, String axis){
 
-		GemotryComparator comp = null;
+		GeometryComparator comp = null;
 		try {
-			switch(gemotryType.toUpperCase()) {
+			switch(geometryType.toUpperCase()) {
 			case "POINT":
 				if(axis.toUpperCase().equals("X")) {
 					comp = new PointXComparator();
@@ -45,11 +45,11 @@ public class GeometryComparatorFactory {
 	 * @param Two strings as input, should be in format like ("point", "x");
 	 * @param axis the axis
 	 * @param extrema, whether we want the max or the min
-	 * @return the gemotry comparator
+	 * @return the geometry comparator
 	 */
-	public static GemotryComparator createComparator(String gemotryType, String axis, String extrema){
-		GemotryComparator comp = null;
-		switch(gemotryType.toUpperCase()) {
+	public static GeometryComparator createComparator(String geometryType, String axis, String extrema){
+		GeometryComparator comp = null;
+		switch(geometryType.toUpperCase()) {
 			case "CIRCLE":
 				if(axis.toUpperCase().equals("X")) {
 					return extrema.toUpperCase().equals("MAX")?new CircleXMaxComparator():new CircleXMinComparator();

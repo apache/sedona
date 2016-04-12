@@ -10,9 +10,9 @@ import java.util.Comparator;
 
 // TODO: Auto-generated Javadoc
 /**
- * Created by jinxuanw on 9/29/15.
+ * Created by GeoSpark Team on 9/29/15.
  */
-public class RectangleXMaxComparator extends GemotryComparator implements Comparator<Envelope>, Serializable {
+public class RectangleXMaxComparator extends GeometryComparator implements Comparator<Envelope>, Serializable {
 
 	 /* (non-Javadoc)
  	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)

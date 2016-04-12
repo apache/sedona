@@ -8,6 +8,8 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.index.quadtree.Quadtree;
 import com.vividsolutions.jts.index.strtree.STRtree;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
@@ -19,15 +21,17 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
+import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.storage.StorageLevel;
-import org.datasyslab.geospark.gemotryObjects.EnvelopeWithGrid;
+import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
 import org.datasyslab.geospark.utils.GeometryComparatorFactory;
 import org.datasyslab.geospark.utils.RDDSampleUtils;
 import org.datasyslab.geospark.utils.RectangleXMaxComparator;
 import org.datasyslab.geospark.utils.RectangleXMinComparator;
 import org.datasyslab.geospark.utils.RectangleYMaxComparator;
 import org.datasyslab.geospark.utils.RectangleYMinComparator;
+import org.datasyslab.geospark.utils.SpatialPartitioner;
 import org.wololo.jts2geojson.GeoJSONReader;
 
 import java.io.Serializable;
@@ -98,70 +102,100 @@ class RectangleFormatMapper implements Serializable,Function<String,Envelope>
 	}
 }
 
+
 /**
- * The Class RectangleRDD.
+ * The Class RectangleRDD. It accommodates Rectangle object.
+ * @author Arizona State University DataSystems Lab
+ *
  */
 public class RectangleRDD implements Serializable {
 
 
 
+	/**
+	 * The total number of records stored in this RDD
+	 */
 	public long totalNumberOfRecords;
-	/** The rectangle rdd. */
+	
+	/**
+	 * The original Spatial RDD which has not been spatial partitioned and has not index
+	 */
 	public JavaRDD<Envelope> rawRectangleRDD;
 
-	ArrayList<Double> grid;
 
+
+	/**
+	 * The boundary of this RDD, calculated in constructor method, represented by an array
+	 */
 	Double[] boundary = new Double[4];
 
+	/**
+	 * The boundary of this RDD, calculated in constructor method, represented by an envelope
+	 */
 	public Envelope boundaryEnvelope;
 
+	/**
+	 * The SpatialRDD partitioned by spatial grids. Each integer is a spatial partition id
+	 */
 	public JavaPairRDD<Integer, Envelope> gridRectangleRDD;
 
+	/**
+	 * The SpatialRDD partitioned by spatial grids. Each integer is a spatial partition id
+	 */
 	public ArrayList<EnvelopeWithGrid> grids;
 
 
 	//todo, replace this STRtree to be more generalized, such as QuadTree.
+	/**
+	 * The partitoned SpatialRDD with built spatial indexes. Each integer is a spatial partition id
+	 */
 	public JavaPairRDD<Integer, STRtree> indexedRDD;
 
 	/**
-	 * Instantiates a new rectangle rdd.
-	 *
-	 * @param rawRectangleRDD the rectangle rdd
+	 * Initialize one SpatialRDD with one existing SpatialRDD
+	 * @param rawRectangleRDD One existing raw RectangleRDD
 	 */
 	public RectangleRDD(JavaRDD<Envelope> rawRectangleRDD)
 	{
 		this.setRawRectangleRDD(rawRectangleRDD.cache());
 	}
 	
-	/**
-	 * Instantiates a new rectangle rdd.
-	 *
-	 * @param spark the spark
-	 * @param InputLocation the input location
-	 * @param Offset the offset
-	 * @param Splitter the splitter
-	 * @param partitions the partitions
-	 */
+    /**
+     * Initialize one raw SpatialRDD with a raw input file
+     * @param spark SparkContext which defines some Spark configurations
+     * @param InputLocation specify the input path which can be a HDFS path
+     * @param Offset specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
+     * @param Splitter specify the input file format: csv, tsv, geojson, wkt
+     * @param partitions specify the partition number of the SpatialRDD
+     */
 	public RectangleRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter,Integer partitions)
 	{
 		//final Integer offset=Offset;
 		this.setRawRectangleRDD(spark.textFile(InputLocation,partitions).map(new RectangleFormatMapper(Offset,Splitter)).cache());
 	}
 	
-	/**
-	 * Instantiates a new rectangle rdd.
-	 *
-	 * @param spark the spark
-	 * @param InputLocation the input location
-	 * @param Offset the offset
-	 * @param Splitter the splitter
-	 */
+    /**
+     * Initialize one raw SpatialRDD with a raw input file
+     * @param spark SparkContext which defines some Spark configurations
+     * @param InputLocation specify the input path which can be a HDFS path
+     * @param Offset specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
+     * @param Splitter specify the input file format: csv, tsv, geojson, wkt
+     */
 	public RectangleRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter)
 	{
 		//final Integer offset=Offset;
 		this.setRawRectangleRDD(spark.textFile(InputLocation).map(new RectangleFormatMapper(Offset,Splitter)).cache());
 	}
-
+	
+    /**
+     * Initialize one raw SpatialRDD with a raw input file and do spatial partitioning on it
+     * @param sc spark SparkContext which defines some Spark configurations
+     * @param inputLocation specify the input path which can be a HDFS path
+     * @param offSet specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
+     * @param splitter specify the input file format: csv, tsv, geojson, wkt
+     * @param gridType specify the spatial partitioning method: X-Y (equal size grids), strtree, quadtree
+     * @param numPartitions specify the partition number of the SpatialRDD
+     */
 	public RectangleRDD(JavaSparkContext sc, String inputLocation, Integer offSet, String splitter, String gridType, Integer numPartitions) {
 		this.rawRectangleRDD = sc.textFile(inputLocation).map(new RectangleFormatMapper(offSet, splitter));
 
@@ -175,29 +209,36 @@ public class RectangleRDD implements Serializable {
 
 		//Sort
 		Comparator<Envelope> comparator = null;
+		GeometryFactory geometryFactory = new GeometryFactory();
 		switch (gridType) {
 			case "X":
 				comparator = new RectangleXMinComparator();
+				
+				rectangleSampleList.set(0, new Envelope(boundary[0], boundary[0],boundary[2], boundary[2] ));
+				rectangleSampleList.set(sampleNumberOfRecords-1, new Envelope(boundary[1], boundary[1],boundary[3], boundary[3] ));
 				break;
 			case "Y":
 				comparator = new RectangleYMinComparator();
+				rectangleSampleList.set(0, new Envelope(boundary[0], boundary[0],boundary[2], boundary[2] ));
+				rectangleSampleList.set(sampleNumberOfRecords-1, new Envelope(boundary[1], boundary[1],boundary[3], boundary[3] ));
 				break;
 			case "X-Y":
 				//Will first sort based on X, then partition, then sort and partition based on Y.
 				comparator = new RectangleXMinComparator();
+				rectangleSampleList.set(0, new Envelope(boundary[0], boundary[0],boundary[2], boundary[2] ));
+				rectangleSampleList.set(sampleNumberOfRecords-1, new Envelope(boundary[1], boundary[1],boundary[3], boundary[3] ));
 				break;
-			case "STRtree":
-				throw new IllegalArgumentException("STRtree is currently now implemented, to be finished in version 0.3");
+            case "strtree":
+            	break;
+            case "quadtree":
+            	break;
 			default:
-				throw new IllegalArgumentException("Grid type not recognied, please check again.");
+				throw new IllegalArgumentException("Partitioning method is not recognized,, please check again.");
 		}
 
 
 
-		GeometryFactory geometryFactory = new GeometryFactory();
-		
-		rectangleSampleList.set(0, new Envelope(boundary[0], boundary[0],boundary[2], boundary[2] ));
-		rectangleSampleList.set(sampleNumberOfRecords-1, new Envelope(boundary[1], boundary[1],boundary[3], boundary[3] ));
+
 		JavaPairRDD<Integer, Envelope> unPartitionedGridPointRDD;
 		
 		if(sampleNumberOfRecords == 0) {
@@ -345,9 +386,52 @@ public class RectangleRDD implements Serializable {
 				}
 			}
 		}
-
+        else if(gridType.equals("strtree"))
+        {
+        	STRtree strtree=new STRtree(rectangleSampleList.size()/numPartitions);
+        	for(int i=0;i<rectangleSampleList.size();i++)
+        	{
+        		strtree.insert(rectangleSampleList.get(i), rectangleSampleList.get(i));
+        	}
+        	List<Envelope> unnumberedGrid=strtree.queryBoundary();
+        	grids=new ArrayList<EnvelopeWithGrid>();
+        	for(int i=0;i<unnumberedGrid.size();i++)
+        	{
+        		grids.add(new EnvelopeWithGrid(unnumberedGrid.get(i),grids.size()));
+        	}
+        	//Note: this is to add four super big grids at the end of the grid list. This boundary of this grid is actually
+        	//the boundary of the entire dataset. The super big grid is to make sure none of records will be missed because
+        	//the original grids are built on top of sampling data which is not accurate.
+        	grids.add(new EnvelopeWithGrid(new Envelope(this.boundary[0],(this.boundary[0]+this.boundary[1])/2.0,this.boundary[2],(this.boundary[2]+this.boundary[3])/2.0),grids.size()));
+           	grids.add(new EnvelopeWithGrid(new Envelope((this.boundary[0]+this.boundary[1])/2.0,this.boundary[1],(this.boundary[2]+this.boundary[3])/2.0,this.boundary[3]),grids.size()));
+           	grids.add(new EnvelopeWithGrid(new Envelope(this.boundary[0],(this.boundary[0]+this.boundary[1])/2.0,(this.boundary[2]+this.boundary[3])/2.0,this.boundary[3]),grids.size()));
+           	grids.add(new EnvelopeWithGrid(new Envelope((this.boundary[0]+this.boundary[1])/2.0,this.boundary[1],this.boundary[2],(this.boundary[2]+this.boundary[3])/2.0),grids.size()));
+           	grids.add(new EnvelopeWithGrid(this.boundaryEnvelope,grids.size()));
+        }
+        else if(gridType.equals("quadtree"))
+        {
+        	Quadtree quadtree=new Quadtree();
+        	for(int i=0;i<rectangleSampleList.size();i++)
+        	{
+        		quadtree.insert(rectangleSampleList.get(i), rectangleSampleList.get(i));
+        	}
+        	List<Envelope> unnumberedGrid=quadtree.queryBoundary();
+        	grids=new ArrayList<EnvelopeWithGrid>();
+        	for(int i=0;i<unnumberedGrid.size();i++)
+        	{
+        		grids.add(new EnvelopeWithGrid(unnumberedGrid.get(i),grids.size()));
+        	}
+        	//Note: this is to add four super big grids at the end of the grid list. This boundary of this grid is actually
+        	//the boundary of the entire dataset. The super big grid is to make sure none of records will be missed because
+        	//the original grids are built on top of sampling data which is not accurate.
+        	grids.add(new EnvelopeWithGrid(new Envelope(this.boundary[0],(this.boundary[0]+this.boundary[1])/2.0,this.boundary[2],(this.boundary[2]+this.boundary[3])/2.0),grids.size()));
+           	grids.add(new EnvelopeWithGrid(new Envelope((this.boundary[0]+this.boundary[1])/2.0,this.boundary[1],(this.boundary[2]+this.boundary[3])/2.0,this.boundary[3]),grids.size()));
+           	grids.add(new EnvelopeWithGrid(new Envelope(this.boundary[0],(this.boundary[0]+this.boundary[1])/2.0,(this.boundary[2]+this.boundary[3])/2.0,this.boundary[3]),grids.size()));
+           	grids.add(new EnvelopeWithGrid(new Envelope((this.boundary[0]+this.boundary[1])/2.0,this.boundary[1],this.boundary[2],(this.boundary[2]+this.boundary[3])/2.0),grids.size()));
+           	grids.add(new EnvelopeWithGrid(this.boundaryEnvelope,grids.size()));
+        }
 		final Broadcast<ArrayList<EnvelopeWithGrid>> gridEnvelopBroadcasted = sc.broadcast(grids);
-		JavaPairRDD<Integer,Envelope> unPartitionedGridRectangleRDD = this.rawRectangleRDD.flatMapToPair(
+		/*JavaPairRDD<Integer,Envelope> unPartitionedGridRectangleRDD = this.rawRectangleRDD.flatMapToPair(
 				new PairFlatMapFunction<Envelope, Integer, Envelope>() {
 					@Override
 					public Iterable<Tuple2<Integer, Envelope>> call(Envelope envelope) throws Exception {
@@ -367,17 +451,52 @@ public class RectangleRDD implements Serializable {
 						return result;
 					}
 				}
-		);
+		);*/
+		JavaPairRDD<Integer,Envelope> unPartitionedGridRectangleRDD = this.rawRectangleRDD.mapToPair(
+				new PairFunction<Envelope, Integer, Envelope>() {
+					@Override
+					public Tuple2<Integer, Envelope> call(Envelope envelope) throws Exception {
+						
+						for (EnvelopeWithGrid e : gridEnvelopBroadcasted.getValue()) {
+							if (e.contains(envelope)) {
+								//result.add(new Tuple2<Integer, Envelope>(e.grid, envelope));
+								return new Tuple2<Integer,Envelope>(e.grid,envelope);
+							}
+						}
 
-		this.gridRectangleRDD = unPartitionedGridRectangleRDD.partitionBy(new HashPartitioner(numPartitions)).persist(StorageLevel.DISK_ONLY());
+						    return new Tuple2<Integer, Envelope>(gridEnvelopBroadcasted.getValue().size()-1, envelope);
+						
+						
+					}
+				}
+		);
+		switch (gridType) {
+		case "X":
+			this.gridRectangleRDD = unPartitionedGridRectangleRDD.partitionBy(new SpatialPartitioner(numPartitions)).persist(StorageLevel.DISK_ONLY());
+			break;
+		case "Y":
+			this.gridRectangleRDD = unPartitionedGridRectangleRDD.partitionBy(new SpatialPartitioner(numPartitions)).persist(StorageLevel.DISK_ONLY());
+			break;
+		case "X-Y":
+			this.gridRectangleRDD = unPartitionedGridRectangleRDD.partitionBy(new SpatialPartitioner(numPartitions)).persist(StorageLevel.DISK_ONLY());
+			break;
+        case "strtree":
+        	this.gridRectangleRDD = unPartitionedGridRectangleRDD.partitionBy(new SpatialPartitioner(grids.size())).persist(StorageLevel.DISK_ONLY());
+        	break;
+        case "quadtree":
+        	this.gridRectangleRDD = unPartitionedGridRectangleRDD.partitionBy(new SpatialPartitioner(grids.size())).persist(StorageLevel.DISK_ONLY());
+        	break;
+		default:
+			throw new IllegalArgumentException("Partitioning method is not recognized,, please check again.");
+	}
+		
 	}
 
 
-	/**
-	 * @author Jinxuan Wu
-	 *
-	 * Create an IndexedRDD and cached it. Need to have a grided RDD first.
-	 */
+    /**
+     * Create an IndexedRDD and cache it in memory. Need to have a grided RDD first. The index is build on each partition.
+     * @param indexType Specify the index type: strtree, quadtree
+     */
 	public void buildIndex(String indexType) {
 
 		if (this.gridRectangleRDD == null) {
@@ -405,29 +524,30 @@ public class RectangleRDD implements Serializable {
 		});
 		this.indexedRDD.cache();
 	}
-	/**
-	 * Gets the rectangle rdd.
-	 *
-	 * @return the rectangle rdd
-	 */
+
+    /**
+     * Get the raw SpatialRDD
+     *
+     * @return the raw SpatialRDD
+     */
 	public JavaRDD<Envelope> getRawRectangleRDD() {
 		return rawRectangleRDD;
 	}
 	
-	/**
-	 * Sets the rectangle rdd.
-	 *
-	 * @param rawRectangleRDD the new rectangle rdd
-	 */
+    /**
+     * Set the raw SpatialRDD.
+     *
+     * @param rawRectangleRDD One existing SpatialRDD
+     */
 	public void setRawRectangleRDD(JavaRDD<Envelope> rawRectangleRDD) {
 		this.rawRectangleRDD = rawRectangleRDD;
 	}
 	
 	/**
-	 * Re partition.
+	 * Repartition the raw SpatialRDD.
 	 *
-	 * @param partitions the partitions
-	 * @return the java rdd
+	 * @param partitions the partitions number
+	 * @return the repartitioned raw SpatialRDD
 	 */
 	public JavaRDD<Envelope> rePartition(Integer partitions)
 	{
@@ -436,11 +556,11 @@ public class RectangleRDD implements Serializable {
 	
 	
 	
-	/**
-	 * Boundary.
-	 *
-	 * @return the envelope
-	 */
+    /**
+     * Return the boundary of the entire SpatialRDD in terms of an envelope format
+     *
+     * @return the envelope
+     */
 	public Envelope boundary()
 	{
 		Double minLongtitude1=this.rawRectangleRDD.min((RectangleXMinComparator)GeometryComparatorFactory.createComparator("rectangle", "x", "min")).getMinX();
