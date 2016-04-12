@@ -13,7 +13,7 @@ import com.vividsolutions.jts.geom.Point;
  * The Class PointXComparator.
  * 
  */
-public class PointXComparator extends GemotryComparator implements Comparator<Point>, Serializable {
+public class PointXComparator extends GeometryComparator implements Comparator<Point>, Serializable {
     
 
  	/** 

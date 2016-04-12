@@ -11,7 +11,7 @@ import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.storage.StorageLevel;
-import org.datasyslab.geospark.gemotryObjects.EnvelopeWithGrid;
+import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 
@@ -23,10 +23,17 @@ import java.util.List;
 import scala.Tuple2;
 
 //todo: Replace older join query class.
-public class NewJoinQuery implements Serializable{
+public class JoinQuery implements Serializable{
 
 
-    public static JavaPairRDD<Envelope, List<Point>> SpatialJoinQueryUsingIndex(JavaSparkContext sc, PointRDD pointRDD, RectangleRDD rectangleRDD, String indexType) {
+    /**
+     * Spatial Join Query between a RectangleRDD and a PointRDD using index nested loop. The PointRDD should be indexed in advance.
+     * @param sc SparkContext which defines some Spark configurations
+     * @param pointRDD Indexed PointRDD
+     * @param rectangleRDD RectangleRDD
+     * @return A PairRDD which follows the schema: Envelope, A list of points covered by this envelope
+     */
+    public static JavaPairRDD<Envelope, List<Point>> SpatialJoinQueryUsingIndex(JavaSparkContext sc, PointRDD pointRDD, RectangleRDD rectangleRDD) {
 
         //Check if rawPointRDD have index.
         if(pointRDD.indexedRDD == null) {
@@ -67,8 +74,8 @@ public class NewJoinQuery implements Serializable{
     }
 
 
-
-    public static JavaPairRDD<Integer, Envelope> getIntegerEnvelopeJavaPairRDDAndCacheInMemory(JavaSparkContext sc, PointRDD pointRDD, RectangleRDD rectangleRDD) {
+ 
+    private static JavaPairRDD<Integer, Envelope> getIntegerEnvelopeJavaPairRDDAndCacheInMemory(JavaSparkContext sc, PointRDD pointRDD, RectangleRDD rectangleRDD) {
         //Build Grid, same as without Grid
         final Broadcast<ArrayList<EnvelopeWithGrid>> gridBroadcasted= sc.broadcast(pointRDD.grids);
         //todo: Add logic, if this is cached, no need to calculate it again.
@@ -92,7 +99,15 @@ public class NewJoinQuery implements Serializable{
         //todo, change storage level to memory based on third parameter.
         return tmpGridRDDForQuerySetBeforePartition.partitionBy(pointRDD.gridPointRDD.partitioner().get()).cache();
     }
-
+    
+    /**
+     * Spatial Join Query between a RectangleRDD and a PointRDD using regular nested loop. The PointRDD should be indexed in advance.
+     * @param sc SparkContext which defines some Spark configurations
+     * @param pointRDD Indexed PointRDD
+     * @param rectangleRDD RectangleRDD
+     * @param cacheTmpGrid Deprecated . Use "true"
+     * @return A PairRDD which follows the schema: Envelope, A list of points covered by this envelope
+     */
     public static JavaPairRDD<Envelope, List<Point>> SpatialJoinQueryWithOutIndex(JavaSparkContext sc, PointRDD pointRDD, RectangleRDD rectangleRDD, boolean cacheTmpGrid) {
         //todo: Add logic, if this is cached, no need to calculate it again.
         JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySet = getIntegerEnvelopeJavaPairRDD(sc, pointRDD, rectangleRDD);
@@ -129,7 +144,7 @@ public class NewJoinQuery implements Serializable{
         //Conver HashSet to a better way? May ArrayList,
     }
 
-    public static JavaPairRDD<Envelope, List<Point>> aggregateJoinResult(JavaPairRDD<Envelope, HashSet<Point>> joinResultBeforeAggregation) {
+    private static JavaPairRDD<Envelope, List<Point>> aggregateJoinResult(JavaPairRDD<Envelope, HashSet<Point>> joinResultBeforeAggregation) {
         //AggregateByKey?
         JavaPairRDD<Envelope, HashSet<Point>> joinResultAfterAggregation = joinResultBeforeAggregation.reduceByKey(new Function2<HashSet<Point>, HashSet<Point>, HashSet<Point>>() {
             @Override
@@ -152,7 +167,7 @@ public class NewJoinQuery implements Serializable{
         The method will take two parameters, one
         This method will create a grid RDD for rectangle,
      */
-    public static JavaPairRDD<Integer, Envelope> getIntegerEnvelopeJavaPairRDD(JavaSparkContext sc, PointRDD pointRDD, RectangleRDD rectangleRDD) {
+    private static JavaPairRDD<Integer, Envelope> getIntegerEnvelopeJavaPairRDD(JavaSparkContext sc, PointRDD pointRDD, RectangleRDD rectangleRDD) {
         //Build Grid, same as without Grid
         final Broadcast<ArrayList<EnvelopeWithGrid>> gridBroadcasted= sc.broadcast(pointRDD.grids);
         //todo: Add logic, if this is cached, no need to calculate it again.

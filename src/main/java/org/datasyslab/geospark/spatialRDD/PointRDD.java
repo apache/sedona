@@ -7,6 +7,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.index.quadtree.Quadtree;
 import com.vividsolutions.jts.index.strtree.STRtree;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
@@ -27,6 +28,7 @@ import org.datasyslab.geospark.utils.GeometryComparatorFactory;
 import org.datasyslab.geospark.utils.PointXComparator;
 import org.datasyslab.geospark.utils.PointYComparator;
 import org.datasyslab.geospark.utils.RDDSampleUtils;
+import org.datasyslab.geospark.utils.SpatialPartitioner;
 import org.wololo.geojson.GeoJSON;
 import org.wololo.jts2geojson.GeoJSONReader;
 import org.wololo.jts2geojson.GeoJSONWriter;
@@ -77,10 +79,10 @@ class PointFormatMapper implements Serializable, Function<String, Point> {
                 GeoJSONReader reader = new GeoJSONReader();
                 point = (Point)reader.read(line);
                 break;
-            case "wtk":
-                WKTReader wtkreader = new WKTReader();
+            case "wkt":
+                WKTReader wktreader = new WKTReader();
                 try {
-                    point = (Point)wtkreader.read(line);
+                    point = (Point)wktreader.read(line);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
@@ -92,47 +94,61 @@ class PointFormatMapper implements Serializable, Function<String, Point> {
     }
 }
 
+
 /**
- * The Class PointRDD.
+ * The Class PointRDD. It accommodates Point object.
+ * @author Arizona State University DataSystems Lab
+ *
  */
 public class PointRDD implements Serializable {
 
     static Logger log = Logger.getLogger(PointFormatMapper.class.getName());
+    /**
+     * The total number of records stored in this RDD
+     */
     public long totalNumberOfRecords;
     /**
-     * The boundary of this RDD, calculated in constructor method,
+     * The boundary of this RDD, calculated in constructor method, represented by an array
      */
     public Double[] boundary = new Double[4];
     /**
-     * The boundary of this RDD, calculated in constructor method.
+     * The boundary of this RDD, calculated in constructor method, represented by an envelope
      */
     public Envelope boundaryEnvelope;
-    //Define a JavaPairRDD<Int, Point>
+    /**
+     * The SpatialRDD partitioned by spatial grids. Each integer is a spatial partition id
+     */
     public JavaPairRDD<Integer, Point> gridPointRDD;
-    //Define a JavaPairRDD<Int, STRTREE>
+    /**
+     * The partitoned SpatialRDD with built spatial indexes. Each integer is a spatial partition id
+     */
     public JavaPairRDD<Integer, STRtree> indexedRDD;
-    //Raw point RDD
+    /**
+     * The original Spatial RDD which has not been spatial partitioned and has not index
+     */
     public JavaRDD<Point> rawPointRDD;
-
+    /**
+     * The spatial partition boundaries.
+     */
     public ArrayList<EnvelopeWithGrid> grids;
 
+
     /**
-     * Instantiates a new point rdd.
-     *
-     * @param rawPointRDD the point rdd
+     * Initialize one SpatialRDD with one existing SpatialRDD
+     * @param rawPointRDD One existing rawPointRDD
      */
     public PointRDD(JavaRDD<Point> rawPointRDD) {
         this.setRawPointRDD(rawPointRDD);
     }
 
+
     /**
-     * Instantiates a new point rdd.
-     *
-     * @param spark         the spark
-     * @param InputLocation the input location
-     * @param Offset        the offset
-     * @param Splitter      the splitter
-     * @param partitions    the partitions
+     * Initialize one raw SpatialRDD with a raw input file
+     * @param spark SparkContext which defines some Spark configurations
+     * @param InputLocation specify the input path which can be a HDFS path
+     * @param Offset specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
+     * @param Splitter specify the input file format: csv, tsv, geojson, wkt
+     * @param partitions specify the partition number of the SpatialRDD
      */
     public PointRDD(JavaSparkContext spark, String InputLocation, Integer Offset, String Splitter, Integer partitions) {
         // final Integer offset=Offset;
@@ -141,9 +157,26 @@ public class PointRDD implements Serializable {
     }
 
     /**
-     * New  constructor crate by Jinxuan Wu.
-     *
-     * This constructor is capable of build grided RDD.
+     * Initialize one raw SpatialRDD with a raw input file
+     * @param spark SparkContext which defines some Spark configurations
+     * @param InputLocation specify the input path which can be a HDFS path
+     * @param Offset specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
+     * @param Splitter specify the input file format: csv, tsv, geojson, wkt
+     */
+    public PointRDD(JavaSparkContext spark, String InputLocation, Integer Offset, String Splitter) {
+        // final Integer offset=Offset;
+        this.setRawPointRDD(
+                spark.textFile(InputLocation).map(new PointFormatMapper(Offset, Splitter)).cache());
+    }
+    
+    /**
+     * Initialize one raw SpatialRDD with a raw input file and do spatial partitioning on it
+     * @param sc spark SparkContext which defines some Spark configurations
+     * @param InputLocation specify the input path which can be a HDFS path
+     * @param offset specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
+     * @param splitter specify the input file format: csv, tsv, geojson, wkt
+     * @param gridType specify the spatial partitioning method: X-Y (equal size grids), strtree, quadtree
+     * @param numPartitions specify the partition number of the SpatialRDD
      */
     public PointRDD(JavaSparkContext sc, String InputLocation, Integer offset, String splitter, String gridType, Integer numPartitions) {
         this.rawPointRDD = sc.textFile(InputLocation).map(new PointFormatMapper(offset, splitter));
@@ -160,31 +193,40 @@ public class PointRDD implements Serializable {
         //todo: This creates troubles.. In fact it should be List interface. But List reports problems in Scala Shell, seems that it can not implement polymorphism and Still use List.
         ArrayList<Point> pointSampleList = new ArrayList<Point>(this.rawPointRDD.takeSample(false, sampleNumberOfRecords));
         //Sort
-        Comparator<Point> comparator = null;
-        switch (gridType) {
-            case "X":
-                comparator = new PointXComparator();
-                break;
-            case "Y":
-                comparator = new PointYComparator();
-                break;
-            case "X-Y":
-                //Will first sort based on X, then partition, then sort and partition based on Y.
-                comparator = new PointXComparator();
-                break;
-            case "STRtree":
-                throw new IllegalArgumentException("STRtree is currently now implemented, to be finished in version 0.3");
-            default:
-                throw new IllegalArgumentException("Grid type not recognied, please check again.");
-        }
-
         //Get minX and minY;
         this.boundary();
 
         GeometryFactory geometryFactory = new GeometryFactory();
+        Comparator<Point> comparator = null;
+        
+        switch (gridType) {
+            case "X":
+                comparator = new PointXComparator();
+                pointSampleList.set(0, geometryFactory.createPoint(new Coordinate(boundary[0], boundary[1])));
+                pointSampleList.set(sampleNumberOfRecords-1, geometryFactory.createPoint(new Coordinate(boundary[2], boundary[3])));
+                break;
+            case "Y":
+                comparator = new PointYComparator();
+                pointSampleList.set(0, geometryFactory.createPoint(new Coordinate(boundary[0], boundary[1])));
+                pointSampleList.set(sampleNumberOfRecords-1, geometryFactory.createPoint(new Coordinate(boundary[2], boundary[3])));
+                break;
+            case "X-Y":
+                //Will first sort based on X, then partition, then sort and partition based on Y.
+                comparator = new PointXComparator();
+                pointSampleList.set(0, geometryFactory.createPoint(new Coordinate(boundary[0], boundary[1])));
+                pointSampleList.set(sampleNumberOfRecords-1, geometryFactory.createPoint(new Coordinate(boundary[2], boundary[3])));
+                break;
+            case "strtree":
+            	break;
+            case "quadtree":
+            	break;
+            default:
+                throw new IllegalArgumentException("Partitioning method is not recognized, please check again.");
+        }
 
-        pointSampleList.set(0, geometryFactory.createPoint(new Coordinate(boundary[0], boundary[1])));
-        pointSampleList.set(sampleNumberOfRecords-1, geometryFactory.createPoint(new Coordinate(boundary[2], boundary[3])));
+
+
+
 
         //Pick and create boundary;
 
@@ -325,7 +367,50 @@ public class PointRDD implements Serializable {
                 index++;
             }
         }
-
+        else if(gridType.equals("strtree"))
+        {
+        	STRtree strtree=new STRtree(pointSampleList.size()/numPartitions);
+        	for(int i=0;i<pointSampleList.size();i++)
+        	{
+        		strtree.insert(pointSampleList.get(i).getEnvelopeInternal(), pointSampleList.get(i));
+        	}
+        	List<Envelope> unnumberedGrid=strtree.queryBoundary();
+        	grids=new ArrayList<EnvelopeWithGrid>();
+        	for(int i=0;i<unnumberedGrid.size();i++)
+        	{
+        		grids.add(new EnvelopeWithGrid(unnumberedGrid.get(i),i));
+        	}
+        	//Note: this is to add four super big grids at the end of the grid list. This boundary of this grid is actually
+        	//the boundary of the entire dataset. The super big grid is to make sure none of records will be missed because
+        	//the original grids are built on top of sampling data which is not accurate.
+        	grids.add(new EnvelopeWithGrid(new Envelope(this.boundary[0],(this.boundary[0]+this.boundary[1])/2.0,this.boundary[2],(this.boundary[2]+this.boundary[3])/2.0),grids.size()));
+           	grids.add(new EnvelopeWithGrid(new Envelope((this.boundary[0]+this.boundary[1])/2.0,this.boundary[1],(this.boundary[2]+this.boundary[3])/2.0,this.boundary[3]),grids.size()));
+           	grids.add(new EnvelopeWithGrid(new Envelope(this.boundary[0],(this.boundary[0]+this.boundary[1])/2.0,(this.boundary[2]+this.boundary[3])/2.0,this.boundary[3]),grids.size()));
+           	grids.add(new EnvelopeWithGrid(new Envelope((this.boundary[0]+this.boundary[1])/2.0,this.boundary[1],this.boundary[2],(this.boundary[2]+this.boundary[3])/2.0),grids.size()));
+           	grids.add(new EnvelopeWithGrid(this.boundaryEnvelope,grids.size()));
+        }
+        else if(gridType.equals("quadtree"))
+        {
+        	Quadtree quadtree=new Quadtree();
+        	for(int i=0;i<pointSampleList.size();i++)
+        	{
+        		quadtree.insert(pointSampleList.get(i).getEnvelopeInternal(), pointSampleList.get(i));
+        	}
+        	List<Envelope> unnumberedGrid=quadtree.queryBoundary();
+        	grids=new ArrayList<EnvelopeWithGrid>();
+        	for(int i=0;i<unnumberedGrid.size();i++)
+        	{
+        		grids.add(new EnvelopeWithGrid(unnumberedGrid.get(i),i));
+        	}
+        	//Note: this is to add four super big grids at the end of the grid list. This boundary of this grid is actually
+        	//the boundary of the entire dataset. The super big grid is to make sure none of records will be missed because
+        	//the original grids are built on top of sampling data which is not accurate.
+        	grids.add(new EnvelopeWithGrid(new Envelope(this.boundary[0],(this.boundary[0]+this.boundary[1])/2.0,this.boundary[2],(this.boundary[2]+this.boundary[3])/2.0),grids.size()));
+           	grids.add(new EnvelopeWithGrid(new Envelope((this.boundary[0]+this.boundary[1])/2.0,this.boundary[1],(this.boundary[2]+this.boundary[3])/2.0,this.boundary[3]),grids.size()));
+           	grids.add(new EnvelopeWithGrid(new Envelope(this.boundary[0],(this.boundary[0]+this.boundary[1])/2.0,(this.boundary[2]+this.boundary[3])/2.0,this.boundary[3]),grids.size()));
+           	grids.add(new EnvelopeWithGrid(new Envelope((this.boundary[0]+this.boundary[1])/2.0,this.boundary[1],this.boundary[2],(this.boundary[2]+this.boundary[3])/2.0),grids.size()));
+           	grids.add(new EnvelopeWithGrid(this.boundaryEnvelope,grids.size()));
+        }
         //Note, we don't need cache this RDD in memory, store it in the disk is enough.
         //todo, may be refactor this so that user have choice.
         //todo, measure this part's time. Using log4j debug level.
@@ -347,25 +432,33 @@ public class PointRDD implements Serializable {
                     }
                 }
         );
-        this.gridPointRDD = unPartitionedGridPointRDD.partitionBy(new HashPartitioner(numPartitions)).persist(StorageLevel.DISK_ONLY());
+        switch (gridType) {
+        case "X":
+        	this.gridPointRDD = unPartitionedGridPointRDD.partitionBy(new SpatialPartitioner(numPartitions)).persist(StorageLevel.DISK_ONLY());
+            break;
+        case "Y":
+        	this.gridPointRDD = unPartitionedGridPointRDD.partitionBy(new SpatialPartitioner(numPartitions)).persist(StorageLevel.DISK_ONLY());
+            break;
+        case "X-Y":
+        	this.gridPointRDD = unPartitionedGridPointRDD.partitionBy(new SpatialPartitioner(numPartitions)).persist(StorageLevel.DISK_ONLY());
+            break;
+        case "strtree":
+        	this.gridPointRDD = unPartitionedGridPointRDD.partitionBy(new SpatialPartitioner(grids.size())).persist(StorageLevel.DISK_ONLY());
+        	break;
+        case "quadtree":
+        	this.gridPointRDD = unPartitionedGridPointRDD.partitionBy(new SpatialPartitioner(grids.size())).persist(StorageLevel.DISK_ONLY());
+        	break;
+        default:
+            throw new IllegalArgumentException("Partitioning method is not recognized, please check again.");
     }
 
-    /**
-     * Instantiates a new point rdd.
-     *
-     * @param spark         the spark
-     * @param InputLocation the input location
-     * @param Offset        the offset
-     * @param Splitter      the splitter
-     */
-    public PointRDD(JavaSparkContext spark, String InputLocation, Integer Offset, String Splitter) {
-        // final Integer offset=Offset;
-        this.setRawPointRDD(spark.textFile(InputLocation).map(new PointFormatMapper(Offset, Splitter)).cache());
+        
     }
+
+
     /**
-     * @author Jinxuan Wu
-     *
-     * Create an IndexedRDD and cached it. Need to have a grided RDD first.
+     * Create an IndexedRDD and cache it in memory. Need to have a grided RDD first. The index is build on each partition.
+     * @param indexType Specify the index type: strtree, quadtree
      */
     public void buildIndex(String indexType) {
 
@@ -376,7 +469,7 @@ public class PointRDD implements Serializable {
         //Use GroupByKey, since I have repartition data, it should be much faster.
         //todo: Need to test performance here...
         JavaPairRDD<Integer, Iterable<Point>> gridedPointListRDD = this.gridPointRDD.groupByKey();
-
+  
         this.indexedRDD = gridedPointListRDD.flatMapValues(new Function<Iterable<Point>, Iterable<STRtree>>() {
             @Override
             public Iterable<STRtree> call(Iterable<Point> points) throws Exception {
@@ -386,6 +479,7 @@ public class PointRDD implements Serializable {
                 ArrayList<STRtree> result = new ArrayList<STRtree>();
                 result.add(rt);
                 return result;
+                
             }
         });
 
@@ -393,25 +487,25 @@ public class PointRDD implements Serializable {
     }
 
     /**
-     * Gets the point rdd.
+     * Get the raw SpatialRDD
      *
-     * @return the point rdd
+     * @return the raw SpatialRDD
      */
     public JavaRDD<Point> getRawPointRDD() {
         return rawPointRDD;
     }
 
     /**
-     * Sets the point rdd.
+     * Set the raw SpatialRDD.
      *
-     * @param rawPointRDD the new point rdd
+     * @param rawPointRDD One existing SpatialRDD
      */
     public void setRawPointRDD(JavaRDD<Point> rawPointRDD) {
         this.rawPointRDD = rawPointRDD;
     }
 
     /**
-     * Boundary.
+     * Return the boundary of the entire SpatialRDD in terms of an envelope format
      *
      * @return the envelope
      */
@@ -431,8 +525,10 @@ public class PointRDD implements Serializable {
         this.boundaryEnvelope = new Envelope(minLongitude, maxLongitude, minLatitude, maxLatitude);
         return boundaryEnvelope;
     }
-    /*
-        Output the raw RDD as GeoJSON
+
+    /**
+     * Output the raw RDD as GeoJSON
+     * @param outputLocation Output location
      */
     public void saveAsGeoJSON(String outputLocation) {
         this.rawPointRDD.mapPartitions(new FlatMapFunction<Iterator<Point>, String>() {
@@ -449,7 +545,17 @@ public class PointRDD implements Serializable {
             }
         }).saveAsTextFile(outputLocation);
     }
-
-    //Som
+    
+	/**
+	 * Repartition the raw SpatialRDD.
+	 *
+	 * @param partitions the partitions number
+	 * @return the repartitioned raw SpatialRDD
+	 */
+	public JavaRDD<Point> rePartition(Integer partitions)
+	{
+		return this.rawPointRDD.repartition(partitions);
+	}
+	
 
 }

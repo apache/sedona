@@ -10,9 +10,9 @@ import java.util.Comparator;
 
 // TODO: Auto-generated Javadoc
 /**
- * Created by jinxuanw on 9/29/15.
+ * Created by GeoSpark Team on 9/29/15.
  */
-public class PolygonXMaxComparator extends GemotryComparator implements Comparator<Polygon>, Serializable
+public class PolygonXMaxComparator extends GeometryComparator implements Comparator<Polygon>, Serializable
 {
 
 	/* (non-Javadoc)

@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.datasyslab</groupId>
 	<artifactId>geospark</artifactId>
-	<version>0.2</version>
+	<version>0.3</version>
 	<name>GeoSpark</name>
 	<description>spatial</description>
 	<packaging>jar</packaging>
@@ -22,13 +22,23 @@
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-core_2.10</artifactId>
-			<version>1.5.2</version>
+			<version>1.6.1</version>
 		</dependency>
+		<dependency>
+			<groupId>com</groupId>
+			<artifactId>JTSplus</artifactId>
+			<version>1.14</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/test/resources/JTSplus/1.14/JTSplus-1.14.jar</systemPath>
+		</dependency>
+		<!--
 		<dependency>
 			<groupId>com.vividsolutions</groupId>
 			<artifactId>jts</artifactId>
-			<version>1.13</version>
+			<version>1.14</version>
 		</dependency>
+		-->
+
 		<dependency>
 			<groupId>org.wololo</groupId>
 			<artifactId>jts2geojson</artifactId>

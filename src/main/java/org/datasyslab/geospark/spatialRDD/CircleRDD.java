@@ -1,5 +1,5 @@
 /*
- *
+ * 
  */
 package org.datasyslab.geospark.spatialRDD;
 
@@ -10,12 +10,18 @@ import org.apache.spark.api.java.function.Function;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
+
 import org.datasyslab.geospark.geometryObjects.*;
 import org.datasyslab.geospark.utils.*;;
 
 // TODO: Auto-generated Javadoc
 /**
- * The Class CircleRDD.
+ * 
+ */
+/**
+ * The Class CircleRDD. It accommodates Circle object. 
+ * @author Arizona State University DataSystems Lab
+ *
  */
 public class CircleRDD implements Serializable {
 
@@ -34,7 +40,7 @@ public class CircleRDD implements Serializable {
 	}
 
 	/**
-	 * Instantiates a new circle rdd.
+	 * Instantiates a new circle rdd. Each Circle in this RDD uses one Point in PointRDD as the center and the specified radius as the radius
 	 *
 	 * @param pointRDD
 	 *            the point rdd
@@ -54,7 +60,7 @@ public class CircleRDD implements Serializable {
 	}
 
 	/**
-	 * Gets the circle rdd.
+	 * Get the circle rdd.
 	 *
 	 * @return the circle rdd
 	 */
@@ -63,7 +69,7 @@ public class CircleRDD implements Serializable {
 	}
 
 	/**
-	 * Sets the circle rdd.
+	 * Set the circle rdd.
 	 *
 	 * @param circleRDD
 	 *            the new circle rdd
@@ -72,11 +78,11 @@ public class CircleRDD implements Serializable {
 		this.circleRDD = circleRDD;
 	}
 
-	/**
-	 * Minimum bounding rectangle.
-	 *
-	 * @return the rectangle rdd
-	 */
+    /**
+     * Return RectangleRDD version of the CircleRDD. Each record in RectangleRDD is the Minimum bounding rectangle of the corresponding Circle
+     *
+     * @return the rectangle rdd
+     */
 	public RectangleRDD MinimumBoundingRectangle() {
 		return new RectangleRDD(this.getCircleRDD().map(new Function<Circle, Envelope>() {
 
@@ -89,8 +95,7 @@ public class CircleRDD implements Serializable {
 	}
 
 	/**
-	 * Boundary.
-	 *
+	 * Return the boundary of the entire SpatialRDD in terms of an envelope format
 	 * @return the envelope
 	 */
 	public Envelope boundary() {
@@ -143,7 +148,7 @@ public class CircleRDD implements Serializable {
 	}
 
 	/**
-	 * Center.
+	 * Return the PointRDD which is used to create this CircleRDD.
 	 *
 	 * @return the center point of each circle in the RDD
 	 */

@@ -1,7 +1,7 @@
 /*
  * 
  */
-package org.datasyslab.geospark.geometryObjects;
+package org.datasyslab.geospark.gemotryObjects;
 
 import java.io.Serializable;
 
@@ -79,9 +79,9 @@ public class Circle implements Serializable {
 	}
 	
 	/**
-	 * Gets the Minimum Boundring Rectangle.
+	 * Gets the mbr.
 	 *
-	 * @return the Minimum Boundring Rectangle
+	 * @return the mbr
 	 */
 	public Envelope getMBR()
 	{
@@ -90,9 +90,9 @@ public class Circle implements Serializable {
 	}
 	
 	/**
-	 * Convert A Minimum Bounding Rectangle to a circle
+	 * MB rto circle.
 	 *
-	 * @param mbr the Minimum Boundring Rectangle
+	 * @param mbr the mbr
 	 * @return the circle
 	 */
 	public static Circle MBRtoCircle(Envelope mbr)
@@ -105,7 +105,7 @@ public class Circle implements Serializable {
 	}
 	
 	/**
-	 * Check whether the circle contains a point.
+	 * Contains.
 	 *
 	 * @param point the point
 	 * @return true, if successful
@@ -123,7 +123,7 @@ public class Circle implements Serializable {
 	}
 	
 	/**
-	 * Check whether the circle intersects a point. This one considers the case that the point is on the circle boundary.
+	 * Intersects.
 	 *
 	 * @param point the point
 	 * @return true, if successful

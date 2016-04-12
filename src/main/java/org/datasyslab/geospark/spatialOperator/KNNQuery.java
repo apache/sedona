@@ -16,6 +16,13 @@ import com.vividsolutions.jts.geom.Point;
 
 
 public class KNNQuery {
+	/**
+	 * Spatial K Nearest Neighbors query
+	 * @param pointRDD specify the input pointRDD
+	 * @param p specify the query center 
+	 * @param k specify the K
+	 * @return A list which contains K nearest points
+	 */
 	public static List<Point> SpatialKnnQuery(PointRDD pointRDD, final Broadcast<Point> p, final Integer k) {
 		// For each partation, build a priority queue that holds the topk
 		@SuppressWarnings("serial")
@@ -31,7 +38,6 @@ public class KNNQuery {
 				}
 				return -1;
 			}
-
 		}
 		final PointCmp pcmp = new PointCmp();
 

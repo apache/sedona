@@ -84,26 +84,47 @@ public class RectangleRDDTest implements Serializable{
         //The grid type is X right now.
         RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
         //todo: Set this to debug level
-        for (EnvelopeWithGrid d : rectangleRDD.grids) {
-            System.out.println(d);
-        }
+
 
         //todo: Move this into log4j.
         Map<Integer, Object> map = rectangleRDD.gridRectangleRDD.countByKey();
         for (Map.Entry<Integer, Object> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / rectangleRDD.totalNumberOfRecords;
-            System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+            //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
     }
 
     /*
      *  This test case test whether the X-Y grid can be build correctly.
      */
+    /*
     @Test
     public void testXYGrid() throws Exception {
         RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, "X-Y", 10);
+        for (EnvelopeWithGrid d : rectangleRDD.grids) {
+        	System.out.println("RectangleRDD grids: "+d.grid);
+        }
+        //todo: Move this into log4j.
+        Map<Integer, Object> map = rectangleRDD.gridRectangleRDD.countByKey();
 
+        System.out.println(map.size());
+
+        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+            Long number = (Long) entry.getValue();
+            Double percentage = number.doubleValue() / rectangleRDD.totalNumberOfRecords;
+            System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+        }
+    }*/
+    /*
+     *  This test case test whether the STR-Tree grid can be build correctly.
+     */
+    @Test
+    public void testSTRtreeGrid() throws Exception {
+        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, "strtree", 10);
+        for (EnvelopeWithGrid d : rectangleRDD.grids) {
+        	System.out.println("STR-Tree RectangleRDD grids: "+d.grid);
+        }
         //todo: Move this into log4j.
         Map<Integer, Object> map = rectangleRDD.gridRectangleRDD.countByKey();
 
@@ -115,7 +136,28 @@ public class RectangleRDDTest implements Serializable{
             System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
     }
+    /*
+     *  This test case test whether the Quad-Tree grid can be build correctly.
+     */
+    
+    @Test
+    public void testQuadtreeGrid() throws Exception {
+        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, "quadtree", 10);
+        for (EnvelopeWithGrid d : rectangleRDD.grids) {
+        	System.out.println("Quad-Tree RectangleRDD grids: "+d.grid);
+        }
+        //todo: Move this into log4j.
+        Map<Integer, Object> map = rectangleRDD.gridRectangleRDD.countByKey();
 
+        System.out.println(map.size());
+
+        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+            Long number = (Long) entry.getValue();
+            Double percentage = number.doubleValue() / rectangleRDD.totalNumberOfRecords;
+            System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+        }
+    }
+    
     /*
      * If we try to build a index on a rawPointRDD which is not construct with grid. We shall see an error.
      */
@@ -136,7 +178,7 @@ public class RectangleRDDTest implements Serializable{
         //todo, here have their might be a problem where the result is essentially a point(dirty data) and jts will throw exception.
         try {
             for(Polygon e: result) {
-                System.out.println(e.getEnvelopeInternal());
+                //System.out.println(e.getEnvelopeInternal());
             }
         } catch (Exception e) {
 

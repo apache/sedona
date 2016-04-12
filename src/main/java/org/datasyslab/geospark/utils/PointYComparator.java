@@ -10,9 +10,9 @@ import java.util.Comparator;
 
 // TODO: Auto-generated Javadoc
 /**
- * Created by jinxuanw on 9/29/15.
+ * Created by GeoSpark Team on 9/29/15.
  */
-public class PointYComparator extends GemotryComparator implements Comparator<Point>, Serializable {
+public class PointYComparator extends GeometryComparator implements Comparator<Point>, Serializable {
 
 	 /* (non-Javadoc)
  	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
