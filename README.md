@@ -23,8 +23,8 @@ Note: GeoSpark has been tested on Apache Spark 1.2, 1.3, 1.4 and Apache Hadoop 2
 3. You can now use GeoSpark spatial RDDs in your Apache Spark program to store spatial data and call needed functions!
 
 ### GeoSpark Programming Examples (In Java)
-1. Spatial queries in "app" folder: Spatial range, join and KNN.
-2. Spatial analysis examples in "app" foler: Spatial aggregation, spatial autocorrelation and spatial co-location
+1. Spatial queries in "\src\test\java" folder: Spatial range, join and KNN.
+2. Spatial analysis examples in [GeoSpark website](http://geospark.datasyslab.org/).
 
 
 ## Java API usage
@@ -36,30 +36,29 @@ Please refer [GeoSpark Java API Usage](http://www.public.asu.edu/~jiayu2/geospar
 
 GeoSpark extends RDDs to form Spatial RDDs (SRDDs) and efficiently partitions SRDD data elements across machines and introduces novel parallelized spatial (geometric operations that follows the Open Geosptial Consortium (OGC) standard) transformations and actions (for SRDD) that provide a more intuitive interface for users to write spatial data analytics programs. Moreover, GeoSpark extends the SRDD layer to execute spatial queries (e.g., Range query, KNN query, and Join query) on large-scale spatial datasets. After geometrical objects are retrieved in the Spatial RDD layer, users can invoke spatial query processing operations provided in the Spatial Query Processing Layer of GeoSpark which runs over the in-memory cluster, decides how spatial object-relational tuples could be stored, indexed, and accessed using SRDDs, and returns the spatial query results required by user.
 
-GeoSpark supports either Comma-Separated Values (CSV) or Tab-separated values (TSV) as the input format. Users only need to specify input format as Splitter and the start column of spatial info in one tuple as Offset when call Constructors.
+GeoSpark supports Comma-Separated Values (CSV), Tab-separated values (TSV), Well-Known-Text and GeoJSON as the input formats. Users only need to specify input format as when call Constructors.
 
 ### PointRDD
 
-(column, column,..., Longitude, Latitude, column, column,...)
+(Longitude, Latitude)
 
 ### RectangleRDD
 
-(column, column,...,Longitude 1, Longitude 2, Latitude 1, Latitude 2,column, column,...)
+(Longitude 1, Longitude 2, Latitude 1, Latitude 2)
 
 Two pairs of longitude and latitude present the vertexes lie on the diagonal of one rectangle.
 
 ### PolygonRDD
 
-(column, column,...,Longitude 1, Latitude 1, Longitude 2, Latitude 2, ...)
+(Longitude 1, Latitude 1, Longitude 2, Latitude 2, ...)
 
 Each tuple contains unlimited points.
 
 ### Spatial Index
 
-GeoSpark supports two Spatial Indexes, Quad-Tree and R-Tree. There are two methods in GeoSpark can create a desired Spatial Index.
+GeoSpark supports two Spatial Indexes, Quad-Tree and R-Tree.
 
-1. Instantialize SpatialIndexRDDs like PointIndexRDD, RectangleIndexRDD or PolygonIndexRDD with "rtree" or "quadtree". GeoSpark will create corresponding local Spatial Index on each machine and cache it in memory automatically.
-2. Call SpatialJoinQueryWithIndex in SpatialRDDs like PointRDD, RectangleRDD or PolygonRDD and specify IndexName with "rtree" or "quadtree". GeoSpark will create corresponding local Spatial Index on each machine on-the-fly when it does spatial join query.
+After creating a SpatialRDD, you can call buildIndex to build local indexes on each RDD partition.
 
 ### Geometrical operation
 
@@ -77,7 +76,7 @@ GeoSpark so far provides spatial range query, join query and KNN query in SRDDs.
 2. Apache Spark 1.2.1 and later
 3. JDK 1.7
 4. Maven 2
-5. JTS Topology Suite version 1.13
+5. GeoSpark self-defined JTS Topology Suite version 1.14
 
 ### Steps
 
@@ -89,11 +88,19 @@ GeoSpark so far provides spatial range query, join query and KNN query in SRDDs.
 
 ## Publication
 
-GeoSpark: A Cluster Computing Framework for Processing Large-Scale Spatial Data [[PDF](http://www.public.asu.edu/~jiayu2/geospark/publication/GeoSpark_ShortPaper.pdf)]
+**A Demonstration of GeoSpark: A Cluster Computing Framework for Processing Big Spatial Data** [[PDF]()]
 
 Jia Yu, Jinxuan Wu, Mohamed Sarwat
 
-To appear at ACM International Conference on Advances in Geographic Information Systems ACM SIGSPATIAL GIS 2015, Seattle, WA, USA November 2015
+IEEE International Conference on Data Engineering, ICDE 2016, Helsinki, Finland May 2016
+
+
+
+**GeoSpark: A Cluster Computing Framework for Processing Large-Scale Spatial Data** [[PDF](http://www.public.asu.edu/~jiayu2/geospark/publication/GeoSpark_ShortPaper.pdf)]
+
+Jia Yu, Jinxuan Wu, Mohamed Sarwat
+
+ACM International Conference on Advances in Geographic Information Systems ACM SIGSPATIAL GIS 2015, Seattle, WA, USA November 2015
 
 
 ## Acknowledgement
