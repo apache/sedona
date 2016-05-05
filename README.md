@@ -89,11 +89,9 @@ GeoSpark so far provides spatial range query, join query and KNN query in SRDDs.
 
 ## Publication
 
-GeoSpark: A Cluster Computing Framework for Processing Large-Scale Spatial Data [[PDF](http://www.public.asu.edu/~jiayu2/geospark/publication/GeoSpark_ShortPaper.pdf)]
+Jia Yu, Jinxuan Wu, Mohamed Sarwat. "A Demonstration of GeoSpark: A Cluster Computing Framework for Processing Big Spatial Data" [[PDF](http://www.public.asu.edu/~jiayu2/geospark/publication/GeoSpark_ShortPaper.pdf)]. (demo paper) To appear at IEEE International Conference on Data Engineering ICDE 2016, Helsinki, FI, May 2016
 
-Jia Yu, Jinxuan Wu, Mohamed Sarwat
-
-To appear at ACM International Conference on Advances in Geographic Information Systems ACM SIGSPATIAL GIS 2015, Seattle, WA, USA November 2015
+Jia Yu, Jinxuan Wu, Mohamed Sarwat. "GeoSpark: A Cluster Computing Framework for Processing Large-Scale Spatial Data" [[PDF](http://www.public.asu.edu/~jiayu2/geospark/publication/GeoSpark_ShortPaper.pdf)]. (short paper) In Proceeding of the ACM International Conference on Advances in Geographic Information Systems ACM SIGSPATIAL GIS 2015, Seattle, WA, USA November 2015
 
 
 ## Acknowledgement
