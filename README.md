@@ -13,7 +13,7 @@ GeoSpark is a cluster computing system for processing large-scale spatial data. 
 2. Apache Spark 1.2.1 and later
 3. JDK 1.7
 
-Note: GeoSpark has been tested on Apache Spark 1.2, 1.3, 1.4 and Apache Hadoop 2.4, 2.6.
+Note: GeoSpark has been tested on Apache Spark 1.2, 1.3, 1.4, 1.5 and Apache Hadoop 2.4, 2.6.
 
 ### Steps
 
@@ -21,14 +21,14 @@ Note: GeoSpark has been tested on Apache Spark 1.2, 1.3, 1.4 and Apache Hadoop 2
 2. Add GeoSpark.jar into your Apache Spark build environment
 3. You can now use GeoSpark spatial RDDs in your Apache Spark program to store spatial data and call needed functions!
 
-### GeoSpark Programming Examples (In Java)
-1. Spatial queries in "app" folder: Spatial range, join and KNN.
-2. Spatial analysis examples in "app" foler: Spatial aggregation, spatial autocorrelation and spatial co-location
+### GeoSpark Programming Examples (Works in Scala and Java)
+1. Spatial queries in "org.datasyslab.geospark.showcase" folder: Spatial range, join and KNN.
+2. Spatial analysis examples in GeoSpark website: Spatial aggregation
 
 
-## Java API usage
+## Scala and Java API usage
 
-Please refer [GeoSpark Java API Usage](http://www.public.asu.edu/~jiayu2/geospark/javadoc/index.html)
+Please refer [GeoSpark Scala and Java API Usage](http://www.public.asu.edu/~jiayu2/geospark/javadoc/index.html)
 
 
 ## Spatial Resilient Distributed Datasets (SRDDs)
@@ -55,10 +55,7 @@ Each tuple contains unlimited points.
 
 ### Spatial Index
 
-GeoSpark supports two Spatial Indexes, Quad-Tree and R-Tree. There are two methods in GeoSpark can create a desired Spatial Index.
-
-1. Instantialize SpatialIndexRDDs like PointIndexRDD, RectangleIndexRDD or PolygonIndexRDD with "rtree" or "quadtree". GeoSpark will create corresponding local Spatial Index on each machine and cache it in memory automatically.
-2. Call SpatialJoinQueryWithIndex in SpatialRDDs like PointRDD, RectangleRDD or PolygonRDD and specify IndexName with "rtree" or "quadtree". GeoSpark will create corresponding local Spatial Index on each machine on-the-fly when it does spatial join query.
+GeoSpark supports two Spatial Indexes, Quad-Tree and R-Tree. 
 
 ### Geometrical operation
 
@@ -68,22 +65,6 @@ GeoSpark currently provides native support for Inside, Overlap, DatasetBoundary,
 
 GeoSpark so far provides spatial range query, join query and KNN query in SRDDs.
 
-## How to modify GeoSpark source code (For Java developers)
-
-### Prerequisites
-
-1. Apache Hadoop 2.4.0 and later
-2. Apache Spark 1.2.1 and later
-3. JDK 1.7
-4. Maven 2
-5. JTS Topology Suite version 1.13
-
-### Steps
-
-1. Create Java Maven project
-2. Add the dependecies of Apache Hadoop, Spark and JTS Topology Suite
-3. Put the java files in your your Maven project
-4. Go ahead to modify GeoSpark source code!
 
 
 ## Publication
