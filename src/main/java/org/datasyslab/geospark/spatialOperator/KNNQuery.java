@@ -10,61 +10,120 @@ import java.util.PriorityQueue;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.broadcast.Broadcast;
+import org.datasyslab.geospark.knnJudgement.PointDistanceComparator;
+import org.datasyslab.geospark.knnJudgement.PointKnnJudgement;
+import org.datasyslab.geospark.knnJudgement.PointKnnJudgementUsingIndex;
+import org.datasyslab.geospark.knnJudgement.PolygonDistanceComparator;
+import org.datasyslab.geospark.knnJudgement.PolygonKnnJudgement;
+import org.datasyslab.geospark.knnJudgement.RectangleDistanceComparator;
+import org.datasyslab.geospark.knnJudgement.RectangleKnnJudgement;
+import org.datasyslab.geospark.knnJudgement.RectangleKnnJudgementUsingIndex;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
+import org.datasyslab.geospark.spatialRDD.PolygonRDD;
+import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 
-public class KNNQuery {
-	public static List<Point> SpatialKnnQuery(PointRDD pointRDD, final Broadcast<Point> p, final Integer k) {
+public class KNNQuery implements Serializable{
+	/**
+	 * Spatial K Nearest Neighbors query
+	 * @param pointRDD specify the input pointRDD
+	 * @param p specify the query center 
+	 * @param k specify the K
+	 * @return A list which contains K nearest points
+	 */
+	public static List<Point> SpatialKnnQuery(PointRDD pointRDD, Point queryCenter, Integer k) {
 		// For each partation, build a priority queue that holds the topk
 		@SuppressWarnings("serial")
-		class PointCmp implements Comparator<Point>, Serializable {
 
-			public int compare(Point p1, Point p2) {
-				double distance1 = p1.getCoordinate().distance(p.value().getCoordinate());
-				double distance2 = p2.getCoordinate().distance(p.value().getCoordinate());
-				if (distance1 > distance2) {
-					return 1;
-				} else if (distance1 == distance2) {
-					return 0;
-				}
-				return -1;
-			}
-
-		}
-		final PointCmp pcmp = new PointCmp();
-
-		JavaRDD<Point> tmp = pointRDD.getRawPointRDD().mapPartitions(new FlatMapFunction<Iterator<Point>, Point>() {
-
-			public Iterable<Point> call(Iterator<Point> input) throws Exception {
-				PriorityQueue<Point> pq = new PriorityQueue<Point>(k, pcmp);
-				while (input.hasNext()) {
-					if (pq.size() < k) {
-						pq.offer(input.next());
-					} else {
-						Point curpoint = input.next();
-						double distance = curpoint.getCoordinate().distance(p.getValue().getCoordinate());
-						double largestDistanceInPriQueue = pq.peek().getCoordinate()
-								.distance(p.value().getCoordinate());
-						if (largestDistanceInPriQueue > distance) {
-							pq.poll();
-							pq.offer(curpoint);
-						}
-					}
-				}
-
-				ArrayList<Point> res = new ArrayList<Point>();
-				for (int i = 0; i < k; i++) {
-					res.add(pq.poll());
-				}
-				return res;
-			}
-		});
+		JavaRDD<Point> tmp = pointRDD.getRawPointRDD().mapPartitions(new PointKnnJudgement(queryCenter,k));
 
 		// Take the top k
 
-		return tmp.takeOrdered(k, pcmp);
+		return tmp.takeOrdered(k, new PointDistanceComparator(queryCenter));
 
 	}
+	/**
+	 * Spatial K Nearest Neighbors query using index
+	 * @param pointRDD specify the input pointRDD
+	 * @param p specify the query center 
+	 * @param k specify the K
+	 * @return A list which contains K nearest points
+	 */
+	public static List<Point> SpatialKnnQueryUsingIndex(PointRDD pointRDD, Point queryCenter, Integer k) {
+		// For each partation, build a priority queue that holds the topk
+		//@SuppressWarnings("serial")
+
+        if(pointRDD.indexedRDDNoId == null) {
+            throw new NullPointerException("Need to invoke buildIndex() first, indexedRDDNoId is null");
+        }
+		JavaRDD<Point> tmp = pointRDD.indexedRDDNoId.mapPartitions(new PointKnnJudgementUsingIndex(queryCenter,k));
+
+		// Take the top k
+
+		return tmp.takeOrdered(k, new PointDistanceComparator(queryCenter));
+
+	}
+	/**
+	 * Spatial K Nearest Neighbors query
+	 * @param rectangelRDD specify the input rectangelRDD
+	 * @param p specify the query center 
+	 * @param k specify the K
+	 * @return A list which contains K nearest points
+	 */
+	public static List<Envelope> SpatialKnnQuery(RectangleRDD objectRDD, Point queryCenter, Integer k) {
+		// For each partation, build a priority queue that holds the topk
+		@SuppressWarnings("serial")
+
+		JavaRDD<Envelope> tmp = objectRDD.getRawRectangleRDD().mapPartitions(new RectangleKnnJudgement(queryCenter,k));
+
+		// Take the top k
+
+		return tmp.takeOrdered(k, new RectangleDistanceComparator(queryCenter));
+
+	}
+	/**
+	 * Spatial K Nearest Neighbors query using index
+	 * @param rectangelRDD specify the input rectangelRDD
+	 * @param p specify the query center 
+	 * @param k specify the K
+	 * @return A list which contains K nearest points
+	 */
+	public static List<Envelope> SpatialKnnQueryUsingIndex(RectangleRDD objectRDD, Point queryCenter, Integer k) {
+		// For each partation, build a priority queue that holds the topk
+		//@SuppressWarnings("serial")
+
+        if(objectRDD.indexedRDDNoId == null) {
+            throw new NullPointerException("Need to invoke buildIndex() first, indexedRDDNoId is null");
+        }
+		JavaRDD<Envelope> tmp = objectRDD.indexedRDDNoId.mapPartitions(new RectangleKnnJudgementUsingIndex(queryCenter,k));
+
+		// Take the top k
+
+		return tmp.takeOrdered(k, new RectangleDistanceComparator(queryCenter));
+
+	}
+	/**
+	 * Spatial K Nearest Neighbors query
+	 * @param polygonRDD specify the input polygonRDD
+	 * @param p specify the query center 
+	 * @param k specify the K
+	 * @return A list which contains K nearest points
+	 */
+	public static List<Polygon> SpatialKnnQuery(PolygonRDD objectRDD, Point queryCenter, Integer k) {
+		// For each partation, build a priority queue that holds the topk
+		@SuppressWarnings("serial")
+
+		JavaRDD<Polygon> tmp = objectRDD.getRawPolygonRDD().mapPartitions(new PolygonKnnJudgement(queryCenter,k));
+
+		// Take the top k
+
+		return tmp.takeOrdered(k, new PolygonDistanceComparator(queryCenter));
+
+	}
+	
 }

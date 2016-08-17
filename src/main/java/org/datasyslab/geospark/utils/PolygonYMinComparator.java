@@ -12,7 +12,7 @@ import java.util.Comparator;
 /**
  * Created by jinxuanw on 9/29/15.
  */
-public class PolygonYMinComparator extends GemotryComparator implements Comparator<Polygon>, Serializable
+public class PolygonYMinComparator extends GeometryComparator implements Comparator<Polygon>, Serializable
 {
 
 	/* (non-Javadoc)

@@ -1,0 +1,4 @@
+org.datasyslab.geospark.geometryObjects
+org.datasyslab.geospark.spatialOperator
+org.datasyslab.geospark.spatialRDD
+org.datasyslab.geospark.utils

@@ -13,16 +13,14 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
 import scala.Tuple2;
-
 import static org.junit.Assert.assertEquals;
 
-/**
- * Created by jinxuanwu on 1/8/16.
- */
+
 public class DistanceJoinQueryTest {
     public static JavaSparkContext sc;
     static Properties prop;
@@ -41,7 +39,7 @@ public class DistanceJoinQueryTest {
         sc = new JavaSparkContext(conf);
         prop = new Properties();
         input = DistanceJoinQueryTest.class.getClassLoader().getResourceAsStream("point.test.properties");
-        InputLocation = "file://"+NewJoinQueryTest.class.getClassLoader().getResource("primaryroads.csv").getPath();
+        InputLocation = "file://"+DistanceJoinQueryTest.class.getClassLoader().getResource("primaryroads.csv").getPath();
         offset = 0;
         splitter = "";
         gridType = "";
@@ -74,10 +72,10 @@ public class DistanceJoinQueryTest {
 
     @Test
     public void testDistancelJoinQuery() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "X-Y", numPartitions);
-        PointRDD pointRDD2 = new PointRDD(sc, InputLocation, offset, splitter, "X-Y", numPartitions);
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
+        PointRDD pointRDD2 = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
 
-        List<Tuple2<Point, List<Point>>> result = DistanceJoin.SpatialJoinQueryWithoutIndex(sc, pointRDD, pointRDD2, 0.01).collect();
+        List<Tuple2<Point, HashSet<Point>>> result = DistanceJoin.SpatialJoinQueryWithoutIndex(sc, pointRDD, pointRDD2, 0.01).collect();
 
         assertEquals(pointRDD.getRawPointRDD().distinct().count(), pointRDD.getRawPointRDD().distinct().count());
 
@@ -85,11 +83,11 @@ public class DistanceJoinQueryTest {
 
     @Test
     public void testDistancelJoinQueryWithIndex() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "X-Y", numPartitions);
-        PointRDD pointRDD2 = new PointRDD(sc, InputLocation, offset, splitter, "X-Y", numPartitions);
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
+        PointRDD pointRDD2 = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
 
         pointRDD.buildIndex("r-tree");
-        List<Tuple2<Point, List<Point>>> result = DistanceJoin.SpatialJoinQueryUsingIndex(sc, pointRDD, pointRDD2, 0.01, "R-TREE").collect();
+        List<Tuple2<Point, List<Point>>> result = DistanceJoin.SpatialJoinQueryUsingIndex(sc, pointRDD, pointRDD2, 0.01).collect();
 
         assertEquals(pointRDD.getRawPointRDD().distinct().count(), pointRDD.getRawPointRDD().distinct().count());
 
