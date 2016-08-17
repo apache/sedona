@@ -1,6 +1,33 @@
-language: java
+os:
+  - linux
 
-before_install:
-  - pip install --user codecov
-after_success:
-  - codecov
+language: java
+sudo: false
+
+git:
+  submodules: false
+
+## ----------------------------------------------------------------------
+## Build tools
+## ----------------------------------------------------------------------
+
+
+## ----------------------------------------------------------------------
+## Perform build:
+## ----------------------------------------------------------------------
+
+script:
+
+  - maven clean
+  - maven install
+
+
+## ----------------------------------------------------------------------
+## Notification
+## ----------------------------------------------------------------------
+notifications:
+  email:
+    recipients:
+      - jiayu2@asu.edu
+    on_success: always
+    on_failure: always
