@@ -3,7 +3,6 @@ os:
 
 language: java
 sudo: false
-
 git:
   submodules: false
 
