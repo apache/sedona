@@ -23,9 +23,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Properties;
 
-/**
- * Created by jinxuanwu on 1/5/16.
- */
 public class testGeoJS {
     public static JavaSparkContext sc;
 

@@ -10,8 +10,8 @@ import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.storage.StorageLevel;
-import org.datasyslab.geospark.gemotryObjects.Circle;
-import org.datasyslab.geospark.gemotryObjects.EnvelopeWithGrid;
+import org.datasyslab.geospark.geometryObjects.Circle;
+import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
 import org.datasyslab.geospark.spatialRDD.CircleRDD;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
 
@@ -22,21 +22,31 @@ import java.util.List;
 import scala.Tuple2;
 
 public class DistanceJoin {
-    public static JavaPairRDD<Point, List<Point>> SpatialJoinQueryWithoutIndex(JavaSparkContext sc, PointRDD pointRDD1, PointRDD pointRDD2, Double distance) {
+	
+    /**
+     * Deprecated. This method is to be updated for using index.
+     * Spatial Join Query between two PointRDDs using regular nested loop. For each point in PointRDD2, it will find the points in PointRDD1 which are within the specified distance of this point.
+     * @param sc SparkContext which defines some Spark configurations
+     * @param pointRDD1 PointRDD1
+     * @param pointRDD2 PointRDD2
+     * @param distance specify the distance predicate between two points
+     * @return A PairRDD which follows the schema: Point in PoitRDD2, a list of qualified points in PointRDD1
+     */
+    public static JavaPairRDD<Point, HashSet<Point>> SpatialJoinQueryWithoutIndex(JavaSparkContext sc, PointRDD pointRDD1, PointRDD pointRDD2, Double distance) {
         //Grid filter, Maybe we can filter those key doesn't overlap the destination.
 
         //Just use grid of Convert pointRDD2 to CircleRDD.
         CircleRDD circleRDD2 = new CircleRDD(pointRDD2, distance);
 
 
-        final Broadcast<ArrayList<EnvelopeWithGrid>> envelopeWithGrid = sc.broadcast(pointRDD1.grids);
+        final Broadcast<HashSet<EnvelopeWithGrid>> envelopeWithGrid = sc.broadcast(pointRDD1.grids);
 
         JavaPairRDD<Integer, Circle> tmpGridedCircleForQuerySetBeforePartition = circleRDD2.getCircleRDD().flatMapToPair(new PairFlatMapFunction<Circle, Integer, Circle>() {
             @Override
             public Iterable<Tuple2<Integer, Circle>> call(Circle circle) throws Exception {
-                ArrayList<Tuple2<Integer, Circle>> result = new ArrayList<Tuple2<Integer, Circle>>();
+            	HashSet<Tuple2<Integer, Circle>> result = new HashSet<Tuple2<Integer, Circle>>();
 
-                ArrayList<EnvelopeWithGrid> grid = envelopeWithGrid.getValue();
+            	HashSet<EnvelopeWithGrid> grid = envelopeWithGrid.getValue();
 
                 for (EnvelopeWithGrid e : grid) {
                     try {
@@ -59,10 +69,10 @@ public class DistanceJoin {
         JavaPairRDD<Point, HashSet<Point>> joinResultBeforeAggregation = cogroupResult.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer, Tuple2<Iterable<Point>, Iterable<Circle>>>, Point, HashSet<Point>>() {
             @Override
             public Iterable<Tuple2<Point, HashSet<Point>>> call(Tuple2<Integer, Tuple2<Iterable<Point>, Iterable<Circle>>> cogroup) throws Exception {
-                ArrayList<Tuple2<Point, HashSet<Point>>> result = new ArrayList<Tuple2<Point, HashSet<Point>>>();
+            	HashSet<Tuple2<Point, HashSet<Point>>> result = new HashSet<Tuple2<Point, HashSet<Point>>>();
 
                 Tuple2<Iterable<Point>, Iterable<Circle>> cogroupTupleList = cogroup._2();
-                ArrayList<Point> points = new ArrayList<Point>();
+                HashSet<Point> points = new HashSet<Point>();
                 for (Point p : cogroupTupleList._1()) {
                     points.add(p);
                     ;
@@ -91,10 +101,10 @@ public class DistanceJoin {
             }
         });
 
-        JavaPairRDD<Point, List<Point>> joinListResultAfterAggregation = joinResultAfterAggregation.mapValues(new Function<HashSet<Point>, List<Point>>() {
+        JavaPairRDD<Point, HashSet<Point>> joinListResultAfterAggregation = joinResultAfterAggregation.mapValues(new Function<HashSet<Point>, HashSet<Point>>() {
             @Override
-            public List<Point> call(HashSet<Point> points) throws Exception {
-                return new ArrayList<Point>(points);
+            public HashSet<Point> call(HashSet<Point> points) throws Exception {
+                return new HashSet<Point>(points);
             }
         });
 
@@ -102,7 +112,15 @@ public class DistanceJoin {
     }
 
 
-    public static JavaPairRDD<Point, List<Point>> SpatialJoinQueryUsingIndex(JavaSparkContext sc, PointRDD pointRDD1, PointRDD pointRDD2, Double distance, String indexType) {
+    /**
+     * Spatial Join Query between two PointRDDs using index nested loop. PointRDD1 should be indexed in advance. For each point in PointRDD2, it will find the points in PointRDD1 which are within the specified distance of this point.
+     * @param sc SparkContext which defines some Spark configurations
+     * @param pointRDD1 PointRDD1
+     * @param pointRDD2 PointRDD2
+     * @param distance specify the distance predicate between two points
+     * @return A PairRDD which follows the schema: Point in PoitRDD2, a list of qualified points in PointRDD1
+     */
+    public static JavaPairRDD<Point, List<Point>> SpatialJoinQueryUsingIndex(JavaSparkContext sc, PointRDD pointRDD1, PointRDD pointRDD2, Double distance) {
         //Grid filter, Maybe we can filter those key doesn't overlap the destination.
 
         //Just use grid of Convert pointRDD2 to CircleRDD.
@@ -110,14 +128,14 @@ public class DistanceJoin {
 
         //Build grid on circleRDD2.
 
-        final Broadcast<ArrayList<EnvelopeWithGrid>> envelopeWithGrid = sc.broadcast(pointRDD1.grids);
+        final Broadcast<HashSet<EnvelopeWithGrid>> envelopeWithGrid = sc.broadcast(pointRDD1.grids);
 
         JavaPairRDD<Integer, Circle> tmpGridedCircleForQuerySetBeforePartition = circleRDD2.getCircleRDD().flatMapToPair(new PairFlatMapFunction<Circle, Integer, Circle>() {
             @Override
             public Iterable<Tuple2<Integer, Circle>> call(Circle circle) throws Exception {
-                ArrayList<Tuple2<Integer, Circle>> result = new ArrayList<Tuple2<Integer, Circle>>();
+            	HashSet<Tuple2<Integer, Circle>> result = new HashSet<Tuple2<Integer, Circle>>();
 
-                ArrayList<EnvelopeWithGrid> grid = envelopeWithGrid.getValue();
+                HashSet<EnvelopeWithGrid> grid = envelopeWithGrid.getValue();
 
                 for (EnvelopeWithGrid e : grid) {
                     if (circle.intersects(e)) {
@@ -136,7 +154,7 @@ public class DistanceJoin {
         JavaPairRDD<Point, HashSet<Point>> joinResultBeforeAggregation = cogroupResult.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer, Tuple2<Iterable<STRtree>, Iterable<Circle>>>, Point, HashSet<Point>>() {
             @Override
             public Iterable<Tuple2<Point, HashSet<Point>>> call(Tuple2<Integer, Tuple2<Iterable<STRtree>, Iterable<Circle>>> cogroup) throws Exception {
-                ArrayList<Tuple2<Point, HashSet<Point>>> result = new ArrayList<Tuple2<Point, HashSet<Point>>>();
+            	HashSet<Tuple2<Point, HashSet<Point>>> result = new HashSet<Tuple2<Point, HashSet<Point>>>();
 
                 Tuple2<Iterable<STRtree>, Iterable<Circle>> cogroupTupleList = cogroup._2();
                 for (Circle c : cogroupTupleList._2()) {
