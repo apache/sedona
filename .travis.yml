@@ -17,8 +17,8 @@ git:
 
 script:
 
-  - maven clean
-  - maven install
+  - mvn clean
+  - mvn install
 
 
 ## ----------------------------------------------------------------------
