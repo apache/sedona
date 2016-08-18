@@ -27,8 +27,9 @@ Note: GeoSpark has been tested on Apache Spark 1.2, 1.3, 1.4, 1.5 and Apache Had
 ### Steps
 
 1. Create your own Apache Spark project
-2. Add GeoSpark.jar into your Apache Spark build environment
-3. You can now use GeoSpark spatial RDDs in your Apache Spark program to store spatial data and call needed functions!
+2. Download GeoSpark source code or compiled binary jar.
+3. Put GeoSpark source code with your own code and compile together. Or add GeoSpark.jar into your compilation local dependency (GeoSpark will be added to Maven central soon).
+4. You can now use GeoSpark spatial RDDs in your Apache Spark program to store spatial data and call needed functions!
 
 ### GeoSpark Programming Examples (Java)
 
@@ -40,29 +41,29 @@ Spatial queries Java example in "org.datasyslab.geospark.showcase" folder: Spati
 ####Spatial range query
 
 `
-var objectRDD = new RectangleRDD(sc, inputLocation, offset, "csv");
+val objectRDD = new RectangleRDD(sc, inputLocation, offset, "csv");
 `
 
 `
-var resultSize = RangeQuery.SpatialRangeQuery(objectRDD, queryEnvelope, 0).getRawRectangleRDD().count();
+val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, queryEnvelope, 0).getRawRectangleRDD().count();
 `
 
 ####Spatial KNN query
 
 `
-var objectRDD = new RectangleRDD(sc, inputLocation, offset, "csv");
+val objectRDD = new RectangleRDD(sc, inputLocation, offset, "csv");
 `
 
 `
-var result = KNNQuery.SpatialKnnQuery(objectRDD, queryPoint, 1000);
+val result = KNNQuery.SpatialKnnQuery(objectRDD, queryPoint, 1000);
 `
 ####Spatial join query with index
 `
-var rectangleRDD = new RectangleRDD(sc, inputLocation2, offset2, "csv");
+val rectangleRDD = new RectangleRDD(sc, inputLocation2, offset2, "csv");
 `
 
 `
-var objectRDD = new RectangleRDD(sc, inputLocation, offset ,"wkt","rtree",numPartitions);
+val objectRDD = new RectangleRDD(sc, inputLocation, offset ,"wkt","rtree",numPartitions);
 `
 
 `
@@ -70,11 +71,11 @@ objectRDD.buildIndex("rtree");
 `
 
 `
-var joinQuery = new JoinQuery(sc,objectRDD,rectangleRDD); 
+val joinQuery = new JoinQuery(sc,objectRDD,rectangleRDD); 
 `
 
 `
-var resultSize = joinQuery.SpatialJoinQueryUsingIndex(objectRDD,rectangleRDD).count();
+val resultSize = joinQuery.SpatialJoinQueryUsingIndex(objectRDD,rectangleRDD).count();
 `
 
 ## Scala and Java API usage
@@ -105,13 +106,13 @@ Two pairs of longitude and latitude present the vertexes lie on the diagonal of 
 Each tuple contains unlimited points.
 
 ##Supported data format
-GeoSpark supports Comma-Separated Values (CSV), Tab-separated values (TSV), Well-Known Text (WKT), and  GeoJSON as the input formats. Users only need to specify input format as Splitter and the start column (if necessary) of spatial info in one tuple as Offset when call Constructors.
+GeoSpark supports Comma-Separated Values ("csv"), Tab-separated values ("tsv"), Well-Known Text ("wkt"), and  GeoJSON ("geojson") as the input formats. Users only need to specify input format as Splitter and the start column (if necessary) of spatial info in one tuple as Offset when call Constructors.
 
 ## Important features
 
 ### Spatial partitioning
 
-GeoSpark supports equal size, R-Tree and Voronoi diagram spatial partitioning methods. Spatial partitioning is to repartition RDD according to objects' spatial locations. Spatial join on spatial paritioned RDD will be very fast.
+GeoSpark supports equal size ("equalgrid"), R-Tree ("rtree") and Voronoi diagram ("voronoi") spatial partitioning methods. Spatial partitioning is to repartition RDD according to objects' spatial locations. Spatial join on spatial paritioned RDD will be very fast.
 
 ### Spatial Index
 
