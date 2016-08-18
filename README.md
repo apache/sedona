@@ -2,6 +2,15 @@
 
 [![Build Status](https://travis-ci.org/jinxuan/GeoSpark.svg)](https://travis-ci.org/jiayuasu/GeoSpark) 
 
+##  Version information
+
+| Version     | Summary |
+|-------------|---------------|
+| 0.1       |  Support spatial range, join and Knn         |
+| 0.2       | Improve code structure and refactor API         |
+| 0.3       | Support load balanced spatial partitioning methods (also serve as the global index); Optimize code for iterative spatial data mining|
+| master    | even with 0.3         |
+
 GeoSpark is a cluster computing system for processing large-scale spatial data. GeoSpark extends Apache Spark with a set of out-of-the-box Spatial Resilient Distributed Datasets (SRDDs) that efficiently load, process, and analyze large-scale spatial data across machines. This problem is quite challenging due to the fact that (1) spatial data may be quite complex, e.g., rivers' and cities' geometrical boundaries, (2) spatial (and geometric) operations (e.g., Overlap, Intersect, Convex Hull, Cartographic Distances) cannot be easily and efficiently expressed using regular RDD transformations and actions. GeoSpark provides APIs for Apache Spark programmer to easily develop their spatial analysis programs with Spatial Resilient Distributed Datasets (SRDDs) which have in house support for geometrical and distance operations. Experiments show that GeoSpark is scalable and exhibits faster run-time performance than Hadoop-based systems in spatial analysis applications like spatial join, spatial aggregation, spatial autocorrelation analysis and spatial co-location pattern recognition.
 
 
@@ -21,10 +30,52 @@ Note: GeoSpark has been tested on Apache Spark 1.2, 1.3, 1.4, 1.5 and Apache Had
 2. Add GeoSpark.jar into your Apache Spark build environment
 3. You can now use GeoSpark spatial RDDs in your Apache Spark program to store spatial data and call needed functions!
 
-### GeoSpark Programming Examples (Works in Scala and Java)
-1. Spatial queries in "org.datasyslab.geospark.showcase" folder: Spatial range, join and KNN.
-2. Spatial analysis examples in GeoSpark website: Spatial aggregation
+### GeoSpark Programming Examples (Java)
 
+Spatial queries Java example in "org.datasyslab.geospark.showcase" folder: Spatial range, join and KNN.
+
+
+### GeoSpark Programming Examples (Scala)
+
+####Spatial range query
+
+`
+var objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter);
+`
+
+`
+var resultSize = RangeQuery.SpatialRangeQuery(objectRDD, queryEnvelope, 0).getRawRectangleRDD().count();
+`
+
+####Spatial KNN query
+
+`
+var objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter);
+`
+
+`
+var result = KNNQuery.SpatialKnnQuery(objectRDD, queryPoint, 1000);
+`
+####Spatial join query with index
+`
+var rectangleRDD = new RectangleRDD(sc, inputLocation2, offset2, splitter2);
+`
+
+`
+var objectRDD = new RectangleRDD(sc, inputLocation, offset ,splitter,gridType,numPartitions);
+`
+
+`
+objectRDD.buildIndex("rtree");
+`
+
+`
+var joinQuery = new JoinQuery(sc,objectRDD,rectangleRDD); 
+`
+
+`
+var resultSize = joinQuery.SpatialJoinQueryUsingIndex(objectRDD,rectangleRDD).count();
+`
 
 ## Scala and Java API usage
 
@@ -53,6 +104,10 @@ Two pairs of longitude and latitude present the vertexes lie on the diagonal of 
 
 Each tuple contains unlimited points.
 
+### Spatial partitioning
+
+GeoSpark supports equal size, R-Tree and Voronoi diagram spatial partitioning methods. Spatial partitioning is to repartition RDD according to objects' spatial locations. Spatial join on spatial paritioned RDD will be very fast.
+
 ### Spatial Index
 
 GeoSpark supports two Spatial Indexes, Quad-Tree and R-Tree. 
@@ -66,19 +121,18 @@ GeoSpark currently provides native support for Inside, Overlap, DatasetBoundary,
 GeoSpark so far provides spatial range query, join query and KNN query in SRDDs.
 
 
-
 ## Publication
 
-Jia Yu, Jinxuan Wu, Mohamed Sarwat. ["A Demonstration of GeoSpark: A Cluster Computing Framework for Processing Big Spatial Data"](). (demo paper) To appear at IEEE International Conference on Data Engineering ICDE 2016, Helsinki, FI, May 2016
+Jia Yu, Jinxuan Wu, Mohamed Sarwat. ["A Demonstration of GeoSpark: A Cluster Computing Framework for Processing Big Spatial Data"](). (demo paper) In Proceeding of IEEE International Conference on Data Engineering ICDE 2016, Helsinki, FI, May 2016
 
 Jia Yu, Jinxuan Wu, Mohamed Sarwat. ["GeoSpark: A Cluster Computing Framework for Processing Large-Scale Spatial Data"](http://www.public.asu.edu/~jiayu2/geospark/publication/GeoSpark_ShortPaper.pdf). (short paper) In Proceeding of the ACM International Conference on Advances in Geographic Information Systems ACM SIGSPATIAL GIS 2015, Seattle, WA, USA November 2015
 
 
 ## Acknowledgement
 
-GeoSaprk makes use of JTS Topology Suite Version 1.13 for some geometrical computations.
+GeoSaprk makes use of JTS Plus (An extended JTS Topology Suite Version 1.14) for some geometrical computations.
 
-Please refer [JTS Topology Suite website](http://tsusiatsoftware.net/jts/main.html) for more details.
+Please refer to [JTS Topology Suite website](http://tsusiatsoftware.net/jts/main.html) and [JTS Plus](https://github.com/jiayuasu/JTSplus) for more details.
 ## Contact
 
 ### Contributors
