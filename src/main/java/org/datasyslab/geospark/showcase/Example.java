@@ -130,9 +130,6 @@ public class Example implements Serializable{
 		case "pointjoinindex":
 			testSpatialJoinQueryUsingIndex();
 			break;
-		case "pointjoinspark":
-			testSpatialJoinQueryUsingSpark();
-			break;
 		default:
             throw new Exception("Query type is not recognized, ");
 		}			
