@@ -40,7 +40,7 @@ Spatial queries Java example in "org.datasyslab.geospark.showcase" folder: Spati
 ####Spatial range query
 
 `
-var objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter);
+var objectRDD = new RectangleRDD(sc, inputLocation, offset, "csv");
 `
 
 `
@@ -50,7 +50,7 @@ var resultSize = RangeQuery.SpatialRangeQuery(objectRDD, queryEnvelope, 0).getRa
 ####Spatial KNN query
 
 `
-var objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter);
+var objectRDD = new RectangleRDD(sc, inputLocation, offset, "csv");
 `
 
 `
@@ -58,11 +58,11 @@ var result = KNNQuery.SpatialKnnQuery(objectRDD, queryPoint, 1000);
 `
 ####Spatial join query with index
 `
-var rectangleRDD = new RectangleRDD(sc, inputLocation2, offset2, splitter2);
+var rectangleRDD = new RectangleRDD(sc, inputLocation2, offset2, "csv");
 `
 
 `
-var objectRDD = new RectangleRDD(sc, inputLocation, offset ,splitter,gridType,numPartitions);
+var objectRDD = new RectangleRDD(sc, inputLocation, offset ,"wkt","rtree",numPartitions);
 `
 
 `
