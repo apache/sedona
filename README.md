@@ -86,7 +86,7 @@ Please refer [GeoSpark Scala and Java API Usage](http://www.public.asu.edu/~jiay
 
 GeoSpark extends RDDs to form Spatial RDDs (SRDDs) and efficiently partitions SRDD data elements across machines and introduces novel parallelized spatial (geometric operations that follows the Open Geosptial Consortium (OGC) standard) transformations and actions (for SRDD) that provide a more intuitive interface for users to write spatial data analytics programs. Moreover, GeoSpark extends the SRDD layer to execute spatial queries (e.g., Range query, KNN query, and Join query) on large-scale spatial datasets. After geometrical objects are retrieved in the Spatial RDD layer, users can invoke spatial query processing operations provided in the Spatial Query Processing Layer of GeoSpark which runs over the in-memory cluster, decides how spatial object-relational tuples could be stored, indexed, and accessed using SRDDs, and returns the spatial query results required by user.
 
-GeoSpark supports either Comma-Separated Values (CSV) or Tab-separated values (TSV) as the input format. Users only need to specify input format as Splitter and the start column of spatial info in one tuple as Offset when call Constructors.
+
 
 ### PointRDD
 
@@ -103,6 +103,11 @@ Two pairs of longitude and latitude present the vertexes lie on the diagonal of 
 (column, column,...,Longitude 1, Latitude 1, Longitude 2, Latitude 2, ...)
 
 Each tuple contains unlimited points.
+
+##Supported data format
+GeoSpark supports Comma-Separated Values (CSV), Tab-separated values (TSV), Well-Known Text (WKT), and  GeoJSON as the input formats. Users only need to specify input format as Splitter and the start column (if necessary) of spatial info in one tuple as Offset when call Constructors.
+
+## Important features
 
 ### Spatial partitioning
 
