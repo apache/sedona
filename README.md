@@ -24,12 +24,24 @@ GeoSpark is a cluster computing system for processing large-scale spatial data. 
 
 Note: GeoSpark has been tested on Apache Spark 1.2, 1.3, 1.4, 1.5 and Apache Hadoop 2.4, 2.6.
 
-### Steps
+### How to use GeoSpark APIs in an interactive Spark shell (Scala)
 
-1. Create your own Apache Spark project
-2. Download GeoSpark source code or compiled binary jar.
-3. Put GeoSpark source code with your own code and compile together. Or add GeoSpark.jar into your compilation local dependency (GeoSpark will be added to Maven central soon).
-4. You can now use GeoSpark spatial RDDs in your Apache Spark program to store spatial data and call needed functions!
+1. Have your Spark cluster ready.
+2. Run Spark shell with GeoSpark as a dependency.
+
+  `
+  ./bin/spark-shell --jars GeoSpark_Precompile_0.3_WithDependencies.jar
+  `
+
+3. You can now call GeoSpark APIs directly in your Spark shell!
+
+### How to use GeoSpark APIs in a self-contained Spark application (Scala and Java)
+
+1. Create your own Apache Spark project in Scala or Java
+2. Download GeoSpark source code or pre-compiled binary jar.
+3. Put GeoSpark source code with your own code and compile together. Or add GeoSpark.jar into your local compilation dependency (GeoSpark will be added to Maven central soon).
+4. You can now use GeoSpark APIs in your Spark program!
+5. Use spark-submit to submit your compiled self-contained Spark program.
 
 ### GeoSpark Programming Examples (Java)
 
