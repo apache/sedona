@@ -1,6 +1,6 @@
 ![GeoSpark Logo](http://www.public.asu.edu/~jiayu2/geospark/logo.png)
 
-[![Build Status](https://travis-ci.org/jinxuan/GeoSpark.svg)](https://travis-ci.org/jiayuasu/GeoSpark) 
+[![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark)
 
 ##  Version information
 
@@ -21,6 +21,7 @@ GeoSpark is a cluster computing system for processing large-scale spatial data. 
 1. Apache Hadoop 2.4.0 and later
 2. Apache Spark 1.2.1 and later
 3. JDK 1.7
+4. Compiled GeoSpark jar (Run 'mvn clean install' at source code folder or Download [pre-compiled GeoSpark jar](https://github.com/DataSystemsLab/GeoSpark/releases/tag/0.3) under "Release" tag)
 
 Note: GeoSpark has been tested on Apache Spark 1.2, 1.3, 1.4, 1.5 and Apache Hadoop 2.4, 2.6.
 
