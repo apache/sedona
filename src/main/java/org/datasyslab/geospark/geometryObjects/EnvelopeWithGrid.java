@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.geometryObjects;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import com.vividsolutions.jts.geom.Envelope;
 
 

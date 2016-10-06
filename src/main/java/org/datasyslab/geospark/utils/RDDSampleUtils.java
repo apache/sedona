@@ -1,5 +1,10 @@
 package org.datasyslab.geospark.utils;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
 
 public class RDDSampleUtils {
     /**

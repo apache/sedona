@@ -1,17 +1,16 @@
-/*
- * 
- */
 package org.datasyslab.geospark.utils;
+
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
 
 import com.vividsolutions.jts.geom.Envelope;
 
 import java.io.Serializable;
 import java.util.Comparator;
 
-// TODO: Auto-generated Javadoc
-/**
- * Created by GeoSpark Team on 9/29/15.
- */
 public class RectangleXMaxComparator extends GeometryComparator implements Comparator<Envelope>, Serializable {
 
 	 /* (non-Javadoc)

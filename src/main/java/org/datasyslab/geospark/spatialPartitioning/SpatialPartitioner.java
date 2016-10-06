@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.spatialPartitioning;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import java.io.Serializable;
 
 import org.apache.spark.Partitioner;
@@ -14,11 +20,8 @@ public class SpatialPartitioner extends Partitioner implements Serializable{
 
 	public SpatialPartitioner(int grids)
 	{
-	  if(grids>10)
-	  {
-		  this.numParts = grids+grids/10;
-	  }
-	  else this.numParts = grids+1;
+
+		numParts=grids;
 	}
 	
 	@Override

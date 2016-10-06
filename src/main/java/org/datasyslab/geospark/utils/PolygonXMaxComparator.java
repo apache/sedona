@@ -1,17 +1,16 @@
-/*
- * 
- */
 package org.datasyslab.geospark.utils;
+
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
 
 import com.vividsolutions.jts.geom.Polygon;
 
 import java.io.Serializable;
 import java.util.Comparator;
 
-// TODO: Auto-generated Javadoc
-/**
- * Created by GeoSpark Team on 9/29/15.
- */
 public class PolygonXMaxComparator extends GeometryComparator implements Comparator<Polygon>, Serializable
 {
 

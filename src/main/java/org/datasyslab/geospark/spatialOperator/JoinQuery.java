@@ -1,20 +1,22 @@
 package org.datasyslab.geospark.spatialOperator;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
 import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaRDD;
+
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
-import org.apache.spark.api.java.function.PairFlatMapFunction;
-import org.apache.spark.api.java.function.PairFunction;
-import org.apache.spark.broadcast.Broadcast;
-import org.apache.spark.storage.StorageLevel;
-import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
+
 import org.datasyslab.geospark.joinJudgement.PointByPolygonJudgement;
 import org.datasyslab.geospark.joinJudgement.PointByPolygonJudgementUsingIndex;
 import org.datasyslab.geospark.joinJudgement.PointByRectangleJudgement;
@@ -23,9 +25,7 @@ import org.datasyslab.geospark.joinJudgement.PolygonByPolygonJudgement;
 import org.datasyslab.geospark.joinJudgement.PolygonByPolygonJudgementUsingIndex;
 import org.datasyslab.geospark.joinJudgement.RectangleByRectangleJudgement;
 import org.datasyslab.geospark.joinJudgement.RectangleByRectangleJudgementUsingIndex;
-import org.datasyslab.geospark.spatialPartitioning.MissingObjectsHandler;
-import org.datasyslab.geospark.spatialPartitioning.PartitionJudgement;
-import org.datasyslab.geospark.spatialPartitioning.SpatialPartitioner;
+
 import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.datasyslab.geospark.spatialRDD.RectangleRDD;
@@ -39,16 +39,21 @@ import java.util.List;
 import scala.Tuple2;
 
 //todo: Replace older join query class.
-/**
- * @author sparkadmin
- *
- */
+
+
 public class JoinQuery implements Serializable{
 
 	public PolygonRDD polygonRDD;
 	public RectangleRDD rectangleRDD;
 	double distance=0.0;
 	JavaSparkContext sc;
+	
+	/** 
+	 * Do spatial partitioning for the query window dataset
+	 * @param sc SparkContext
+	 * @param pointRDD
+	 * @param rectangleRDDUnpartitioned
+	 */
 	public JoinQuery(JavaSparkContext sc,PointRDD pointRDD, RectangleRDD rectangleRDDUnpartitioned)
 	{
         if(pointRDD.gridPointRDD == null) {
@@ -60,6 +65,13 @@ public class JoinQuery implements Serializable{
 		this.sc=sc;
 		//this.rectangleRDD.gridRectangleRDD.persist(StorageLevel.MEMORY_ONLY());
 	}
+	
+	/**
+	 * Do spatial partitioning for the query window dataset
+	 * @param sc SparkContext
+	 * @param objectRDD
+	 * @param rectangleRDDUnpartitioned
+	 */
 	public JoinQuery(JavaSparkContext sc,RectangleRDD objectRDD, RectangleRDD rectangleRDDUnpartitioned)
 	{
         if(objectRDD.gridRectangleRDD == null) {
@@ -70,6 +82,13 @@ public class JoinQuery implements Serializable{
 		this.rectangleRDD.SpatialPartition(objectRDD.grids);
 		this.sc=sc;
 	}
+	
+	/**
+	 * Do spatial partitioning for the query window dataset
+	 * @param sc SparkContext
+	 * @param pointRDD
+	 * @param polygonRDDUnpartitioned
+	 */
 	public JoinQuery(JavaSparkContext sc,PointRDD pointRDD, PolygonRDD polygonRDDUnpartitioned)
 	{
         if(pointRDD.gridPointRDD == null) {
@@ -81,6 +100,12 @@ public class JoinQuery implements Serializable{
 		this.sc=sc;
 	}
 
+	/**
+	 * Do spatial partitioning for the query window dataset
+	 * @param sc SparkContext
+	 * @param objectRDD
+	 * @param polygonRDDUnpartitioned
+	 */
 	public JoinQuery(JavaSparkContext sc,PolygonRDD objectRDD, PolygonRDD polygonRDDUnpartitioned)
 	{
         if(objectRDD.gridPolygonRDD == null) {
@@ -94,7 +119,6 @@ public class JoinQuery implements Serializable{
 
     /**
      * Spatial Join Query between a RectangleRDD and a PointRDD using index nested loop. The PointRDD should be indexed in advance.
-     * @param sc SparkContext which defines some Spark configurations
      * @param pointRDD Indexed PointRDD
      * @param rectangleRDD RectangleRDD
      * @return A PairRDD which follows the schema: Envelope, A list of points covered by this envelope
@@ -108,66 +132,50 @@ public class JoinQuery implements Serializable{
         if(pointRDD.gridPointRDD == null) {
             throw new NullPointerException("Need to do spatial partitioning first, gridedSRDD is null");
         }
-        //JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySet = getIntegerEnvelopeJavaPairRDD(pointRDD, rectangleRDD);
-      //Handle missing objects by spatial partitioning
-        MissingObjectsHandler handler=new MissingObjectsHandler();
-        JavaPairRDD<Envelope, HashSet<Point>> missingObjectResult=handler.handleMissingObjectsUsingIndex(sc,pointRDD, rectangleRDD);
-        
+ 
         JavaPairRDD<Integer, Tuple2<Iterable<STRtree>, Iterable<Envelope>>> cogroupResult = pointRDD.indexedRDD.cogroup(this.rectangleRDD.gridRectangleRDD);
 
         //flatMapToPair, use HashSet.
-        //This will be really time consuiming.. But the memory usage will be less then previous solution.
-        //todo: Verify this implementation reduce shuffle???
-        JavaPairRDD<Envelope, HashSet<Point>> joinResultMissingResults = cogroupResult.flatMapToPair(new PointByRectangleJudgementUsingIndex(pointRDD.grids.size()));
-        JavaPairRDD<Envelope, HashSet<Point>> joinResultBeforeAggregation=joinResultMissingResults.union(missingObjectResult);
-        //AggregateByKey?
-        JavaPairRDD<Envelope, HashSet<Point>> joinListResultAfterAggregation = aggregateJoinResultPointByRectangle(joinResultBeforeAggregation);
+
+        JavaPairRDD<Envelope, HashSet<Point>> joinResultWithDuplicates = cogroupResult.flatMapToPair(new PointByRectangleJudgementUsingIndex(pointRDD.grids.size()));
+        
+        JavaPairRDD<Envelope, HashSet<Point>> joinListResultAfterAggregation = aggregateJoinResultPointByRectangle(joinResultWithDuplicates);
 
         return joinListResultAfterAggregation;
     }
 
-    
     /**
-     * Spatial Join Query between a RectangleRDD and a PointRDD using regular nested loop. The PointRDD should be indexed in advance.
-     * @param sc SparkContext which defines some Spark configurations
-     * @param pointRDD Indexed PointRDD
-     * @param rectangleRDD RectangleRDD
-     * @param cacheTmpGrid Deprecated . Use "true"
-     * @return A PairRDD which follows the schema: Envelope, A list of points covered by this envelope
+     * Spatial Join Query between a RectangleRDD and a PointRDD using regular nested loop.
+     * @param pointRDD
+     * @param rectangleRDD
+     * @return
      */
     public JavaPairRDD<Envelope, HashSet<Point>> SpatialJoinQuery(PointRDD pointRDD,RectangleRDD rectangleRDD) {
         //todo: Add logic, if this is cached, no need to calculate it again.
-       // JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySet = getIntegerEnvelopeJavaPairRDD( pointRDD, rectangleRDD);
 
-    	
-    	
         if(pointRDD.gridPointRDD == null) {
             throw new NullPointerException("Need to do spatial partitioning first, gridedSRDD is null");
         }
-        //Handle missing objects by spatial partitioning
-        MissingObjectsHandler handler=new MissingObjectsHandler();
-        JavaPairRDD<Envelope, HashSet<Point>> missingObjectResult=handler.handleMissingObjects(sc,pointRDD, rectangleRDD);
         
         JavaPairRDD<Integer, Tuple2<Iterable<Point>, Iterable<Envelope>>> cogroupResult = pointRDD.gridPointRDD.cogroup(this.rectangleRDD.gridRectangleRDD);
             
 
-            //flatMapToPair, use HashSet.
-            //This will be really time consuiming.. But the memory usage will be less then in version 1.0
-            //todo: Verify this implementation will reduce shuffle
-            
-            JavaPairRDD<Envelope, HashSet<Point>> joinResultMissingResults = cogroupResult.flatMapToPair(new PointByRectangleJudgement(pointRDD.grids.size()));
-            
-            JavaPairRDD<Envelope, HashSet<Point>> joinResultBeforeAggregation=joinResultMissingResults.union(missingObjectResult);
-            JavaPairRDD<Envelope, HashSet<Point>> joinListResultAfterAggregation = aggregateJoinResultPointByRectangle(joinResultBeforeAggregation);
-            return joinListResultAfterAggregation;
-            //Conver HashSet to a better way? May ArrayList,
+        //flatMapToPair, use HashSet.
+
+        JavaPairRDD<Envelope, HashSet<Point>> joinResultWithDuplicates = cogroupResult.flatMapToPair(new PointByRectangleJudgement(pointRDD.grids.size()));
+        
+        JavaPairRDD<Envelope, HashSet<Point>> joinListResultAfterAggregation = aggregateJoinResultPointByRectangle(joinResultWithDuplicates);
+        
+        return joinListResultAfterAggregation;
+        
 
     }
     
  
 
     /**
-     * @param objectRDD should be indexed and spatial-partitioned first
+     * Spatial Join Query using index nested loop. The ObjectRDD should be indexed in advance.
+     * @param objectRDD
      * @param rectangleRDD
      * @return
      */
@@ -180,29 +188,20 @@ public class JoinQuery implements Serializable{
         if(objectRDD.gridRectangleRDD == null) {
             throw new NullPointerException("Need to do spatial partitioning first, gridedSRDD is null");
         }
-        //JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySet = getIntegerEnvelopeJavaPairRDD(pointRDD, rectangleRDD);
-
-        //Handle missing objects by spatial partitioning
-        MissingObjectsHandler handler=new MissingObjectsHandler();
-        JavaPairRDD<Envelope, HashSet<Envelope>> missingObjectResult=handler.handleMissingObjectsUsingIndex(sc,objectRDD, rectangleRDD);
         
         JavaPairRDD<Integer, Tuple2<Iterable<STRtree>, Iterable<Envelope>>> cogroupResult = objectRDD.indexedRDD.cogroup(this.rectangleRDD.gridRectangleRDD);
 
-        //flatMapToPair, use HashSet.
-        //This will be really time consuiming.. But the memory usage will be less then previous solution.
-        //todo: Verify this implementation reduce shuffle???
-        JavaPairRDD<Envelope, HashSet<Envelope>> joinResultMissingResults = cogroupResult.flatMapToPair(new RectangleByRectangleJudgementUsingIndex(objectRDD.grids.size()));
-        JavaPairRDD<Envelope, HashSet<Envelope>> joinResultBeforeAggregation=joinResultMissingResults.union(missingObjectResult);
+        JavaPairRDD<Envelope, HashSet<Envelope>> joinResultWithDuplicates = cogroupResult.flatMapToPair(new RectangleByRectangleJudgementUsingIndex(objectRDD.grids.size()));
         //AggregateByKey?
-        JavaPairRDD<Envelope, HashSet<Envelope>> joinListResultAfterAggregation = aggregateJoinResultRectangleByRectangle(joinResultBeforeAggregation);
+        JavaPairRDD<Envelope, HashSet<Envelope>> joinListResultAfterAggregation = aggregateJoinResultRectangleByRectangle(joinResultWithDuplicates);
 
         return joinListResultAfterAggregation;
     }
 
     
-
     /**
-     * @param objectRDD should be spatial partitioned first
+     * Spatial Join Query using regular nested loop.
+     * @param objectRDD
      * @param rectangleRDD
      * @return
      */
@@ -215,60 +214,53 @@ public class JoinQuery implements Serializable{
         if(objectRDD.gridRectangleRDD == null) {
             throw new NullPointerException("Need to do spatial partitioning first, gridedSRDD is null");
         }
-        	//Handle missing objects by spatial partitioning
-        	MissingObjectsHandler handler=new MissingObjectsHandler();
-        	JavaPairRDD<Envelope, HashSet<Envelope>> missingObjectResult=handler.handleMissingObjects(sc,objectRDD, rectangleRDD);
-        
-            JavaPairRDD<Integer, Tuple2<Iterable<Envelope>, Iterable<Envelope>>> cogroupResult = objectRDD.gridRectangleRDD.cogroup(this.rectangleRDD.gridRectangleRDD);
+        JavaPairRDD<Integer, Tuple2<Iterable<Envelope>, Iterable<Envelope>>> cogroupResult = objectRDD.gridRectangleRDD.cogroup(this.rectangleRDD.gridRectangleRDD);
 
+        JavaPairRDD<Envelope, HashSet<Envelope>> joinResultWithDuplicates = cogroupResult.flatMapToPair(new RectangleByRectangleJudgement(objectRDD.grids.size()));
 
-            //flatMapToPair, use HashSet.
-            //This will be really time consuiming.. But the memory usage will be less then in version 1.0
-            //todo: Verify this implementation will reduce shuffle
-            JavaPairRDD<Envelope, HashSet<Envelope>> joinResultMissingResults = cogroupResult.flatMapToPair(new RectangleByRectangleJudgement(objectRDD.grids.size()));
-            JavaPairRDD<Envelope, HashSet<Envelope>> joinResultBeforeAggregation=joinResultMissingResults.union(missingObjectResult);
-            JavaPairRDD<Envelope, HashSet<Envelope>> joinListResultAfterAggregation = aggregateJoinResultRectangleByRectangle(joinResultBeforeAggregation);
-            return joinListResultAfterAggregation;
-            //Conver HashSet to a better way? May ArrayList,
+        JavaPairRDD<Envelope, HashSet<Envelope>> joinListResultAfterAggregation = aggregateJoinResultRectangleByRectangle(joinResultWithDuplicates);
+            
+        return joinListResultAfterAggregation;
 
     }
     
 
-   /**
- * @param pointRDD should be spatial partitioned first
- * @param polygonRDD
- * @return
- */
-public JavaPairRDD<Polygon, HashSet<Point>> SpatialJoinQuery(PointRDD pointRDD,PolygonRDD polygonRDD) {
-       //todo: Add logic, if this is cached, no need to calculate it again.
-      // JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySet = getIntegerEnvelopeJavaPairRDD( pointRDD, rectangleRDD);
+   
+    /**
+     * Spatial Join Query using regular nested loop.
+     * @param pointRDD
+     * @param polygonRDD
+     * @return
+     */
+    public JavaPairRDD<Polygon, HashSet<Point>> SpatialJoinQuery(PointRDD pointRDD,PolygonRDD polygonRDD) {
+    	//todo: Add logic, if this is cached, no need to calculate it again.
+    	// JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySet = getIntegerEnvelopeJavaPairRDD( pointRDD, rectangleRDD);
 
-       //cogroup
+    	//cogroup
    	
        if(pointRDD.gridPointRDD == null) {
            throw new NullPointerException("Need to do spatial partitioning first, gridedSRDD is null");
        }
 
-           JavaPairRDD<Integer, Tuple2<Iterable<Point>, Iterable<Polygon>>> cogroupResult = pointRDD.gridPointRDD.cogroup(this.polygonRDD.gridPolygonRDD);
+       JavaPairRDD<Integer, Tuple2<Iterable<Point>, Iterable<Polygon>>> cogroupResult = pointRDD.gridPointRDD.cogroup(this.polygonRDD.gridPolygonRDD);
 
-
-           //flatMapToPair, use HashSet.
-           //This will be really time consuiming.. But the memory usage will be less then in version 1.0
-           //todo: Verify this implementation will reduce shuffle
-           JavaPairRDD<Polygon, HashSet<Point>> joinResultBeforeAggregation = cogroupResult.flatMapToPair(new PointByPolygonJudgement());
-           JavaPairRDD<Polygon, HashSet<Point>> joinListResultAfterAggregation = aggregateJoinResultPointByPolygon(joinResultBeforeAggregation);
-           return joinListResultAfterAggregation;
-           //Conver HashSet to a better way? May ArrayList,
+       JavaPairRDD<Polygon, HashSet<Point>> joinResultWithDuplicates = cogroupResult.flatMapToPair(new PointByPolygonJudgement());
+       
+       JavaPairRDD<Polygon, HashSet<Point>> joinListResultAfterAggregation = aggregateJoinResultPointByPolygon(joinResultWithDuplicates);
+       
+       return joinListResultAfterAggregation;
 
    }
 
 
-   /**
- * @param pointRDD should be indexed and spatial-partitioned in advance.
- * @param polygonRDD
- * @return
- */
-public JavaPairRDD<Polygon, HashSet<Point>> SpatialJoinQueryUsingIndex(PointRDD pointRDD,PolygonRDD polygonRDD) {
+   
+    /**
+     * Spatial Join Query using index nested loop. The PointRDD should be indexed in advance.
+     * @param pointRDD
+     * @param polygonRDD
+     * @return
+     */
+    public JavaPairRDD<Polygon, HashSet<Point>> SpatialJoinQueryUsingIndex(PointRDD pointRDD,PolygonRDD polygonRDD) {
 
        //Check if rawPointRDD have index.
        if(pointRDD.indexedRDD == null) {
@@ -277,29 +269,26 @@ public JavaPairRDD<Polygon, HashSet<Point>> SpatialJoinQueryUsingIndex(PointRDD 
        if(pointRDD.gridPointRDD == null) {
            throw new NullPointerException("Need to do spatial partitioning first, gridedSRDD is null");
        }
-       //JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySet = getIntegerEnvelopeJavaPairRDD(pointRDD, rectangleRDD);
-
 
        JavaPairRDD<Integer, Tuple2<Iterable<STRtree>, Iterable<Polygon>>> cogroupResult = pointRDD.indexedRDD.cogroup(this.polygonRDD.gridPolygonRDD);
 
-       //flatMapToPair, use HashSet.
-       //This will be really time consuiming.. But the memory usage will be less then previous solution.
-       //todo: Verify this implementation reduce shuffle???
-       JavaPairRDD<Polygon, HashSet<Point>> joinResultBeforeAggregation = cogroupResult.flatMapToPair(new PointByPolygonJudgementUsingIndex());
+       JavaPairRDD<Polygon, HashSet<Point>> joinResultWithDuplicates = cogroupResult.flatMapToPair(new PointByPolygonJudgementUsingIndex());
 
        //AggregateByKey?
-       JavaPairRDD<Polygon, HashSet<Point>> joinListResultAfterAggregation = aggregateJoinResultPointByPolygon(joinResultBeforeAggregation);
+       JavaPairRDD<Polygon, HashSet<Point>> joinListResultAfterAggregation = aggregateJoinResultPointByPolygon(joinResultWithDuplicates);
 
        return joinListResultAfterAggregation;
    }
    
 
-   /**
- * @param objectRDD should be indexed and spatial-partitioned first
- * @param windowRDD
- * @return
- */
-public JavaPairRDD<Polygon, HashSet<Polygon>> SpatialJoinQueryUsingIndex(PolygonRDD objectRDD,PolygonRDD windowRDD) {
+   
+    /**
+     * Spatial Join Query using index nested loop. The objectRDD should be indexed in advance.
+     * @param objectRDD
+     * @param windowRDD
+     * @return
+     */
+    public JavaPairRDD<Polygon, HashSet<Polygon>> SpatialJoinQueryUsingIndex(PolygonRDD objectRDD,PolygonRDD windowRDD) {
 
        //Check if rawPointRDD have index.
        if(objectRDD.indexedRDD == null) {
@@ -308,32 +297,23 @@ public JavaPairRDD<Polygon, HashSet<Polygon>> SpatialJoinQueryUsingIndex(Polygon
        if(objectRDD.gridPolygonRDD == null) {
            throw new NullPointerException("Need to do spatial partitioning first, gridedSRDD is null");
        }
-       //JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySet = getIntegerEnvelopeJavaPairRDD(pointRDD, rectangleRDD);
-
-       //Handle missing objects by spatial partitioning
-       MissingObjectsHandler handler=new MissingObjectsHandler();
-       JavaPairRDD<Polygon, HashSet<Polygon>> missingObjectResult=handler.handleMissingObjectsUsingIndex(sc,objectRDD, windowRDD);
-       
        JavaPairRDD<Integer, Tuple2<Iterable<STRtree>, Iterable<Polygon>>> cogroupResult = objectRDD.indexedRDD.cogroup(this.polygonRDD.gridPolygonRDD);
 
-       //flatMapToPair, use HashSet.
-       //This will be really time consuiming.. But the memory usage will be less then previous solution.
-       //todo: Verify this implementation reduce shuffle???
-       JavaPairRDD<Polygon, HashSet<Polygon>> joinResultMissingResults = cogroupResult.flatMapToPair(new PolygonByPolygonJudgementUsingIndex(objectRDD.grids.size()));
-       JavaPairRDD<Polygon, HashSet<Polygon>> joinResultBeforeAggregation=joinResultMissingResults.union(missingObjectResult);
-       //AggregateByKey?
-       JavaPairRDD<Polygon, HashSet<Polygon>> joinListResultAfterAggregation = aggregateJoinResultPolygonByPolygon(joinResultBeforeAggregation);
+       JavaPairRDD<Polygon, HashSet<Polygon>> joinResultWithDuplicates = cogroupResult.flatMapToPair(new PolygonByPolygonJudgementUsingIndex(objectRDD.grids.size()));
+
+       JavaPairRDD<Polygon, HashSet<Polygon>> joinListResultAfterAggregation = aggregateJoinResultPolygonByPolygon(joinResultWithDuplicates);
 
        return joinListResultAfterAggregation;
    }
 
 
-   /**
- * @param objectRDD should be spatial partitioned first
- * @param polygonRDD
- * @return
- */
-public JavaPairRDD<Polygon, HashSet<Polygon>> SpatialJoinQuery(PolygonRDD objectRDD,PolygonRDD polygonRDD) {
+    /**
+     * Spatial Join Query using regular nested loop.
+     * @param objectRDD
+     * @param polygonRDD
+     * @return
+     */
+    public JavaPairRDD<Polygon, HashSet<Polygon>> SpatialJoinQuery(PolygonRDD objectRDD,PolygonRDD polygonRDD) {
        //todo: Add logic, if this is cached, no need to calculate it again.
       // JavaPairRDD<Integer, Envelope> tmpGridRDDForQuerySet = getIntegerEnvelopeJavaPairRDD( pointRDD, rectangleRDD);
 
@@ -342,21 +322,14 @@ public JavaPairRDD<Polygon, HashSet<Polygon>> SpatialJoinQuery(PolygonRDD object
        if(objectRDD.gridPolygonRDD == null) {
            throw new NullPointerException("Need to do spatial partitioning first, gridedSRDD is null");
        }
-       	//Handle missing objects by spatial partitioning
-       	MissingObjectsHandler handler=new MissingObjectsHandler();
-       	JavaPairRDD<Polygon, HashSet<Polygon>> missingObjectResult=handler.handleMissingObjects(sc,objectRDD, polygonRDD);
+   
+       JavaPairRDD<Integer, Tuple2<Iterable<Polygon>, Iterable<Polygon>>> cogroupResult = objectRDD.gridPolygonRDD.cogroup(this.polygonRDD.gridPolygonRDD);
        
-           JavaPairRDD<Integer, Tuple2<Iterable<Polygon>, Iterable<Polygon>>> cogroupResult = objectRDD.gridPolygonRDD.cogroup(this.polygonRDD.gridPolygonRDD);
-
-
-           //flatMapToPair, use HashSet.
-           //This will be really time consuiming.. But the memory usage will be less then in version 1.0
-           //todo: Verify this implementation will reduce shuffle
-           JavaPairRDD<Polygon, HashSet<Polygon>> joinResultMissingResults = cogroupResult.flatMapToPair(new PolygonByPolygonJudgement(objectRDD.grids.size()));
-           JavaPairRDD<Polygon, HashSet<Polygon>> joinResultBeforeAggregation=joinResultMissingResults.union(missingObjectResult);
-           JavaPairRDD<Polygon, HashSet<Polygon>> joinListResultAfterAggregation = aggregateJoinResultPolygonByPolygon(joinResultBeforeAggregation);
-           return joinListResultAfterAggregation;
-           //Conver HashSet to a better way? May ArrayList,
+       JavaPairRDD<Polygon, HashSet<Polygon>> joinResultWithDuplicates = cogroupResult.flatMapToPair(new PolygonByPolygonJudgement(objectRDD.grids.size()));
+       
+       JavaPairRDD<Polygon, HashSet<Polygon>> joinListResultAfterAggregation = aggregateJoinResultPolygonByPolygon(joinResultWithDuplicates);
+       
+       return joinListResultAfterAggregation;
 
    }  
 

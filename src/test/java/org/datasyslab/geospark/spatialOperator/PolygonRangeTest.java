@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.spatialOperator;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -16,6 +22,7 @@ import org.datasyslab.geospark.spatialRDD.PointRDDTest;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDDTest;
+import org.datasyslab.geospark.spatialRDD.RectangleRDDTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -61,6 +68,7 @@ public class PolygonRangeTest {
             prop.load(input);
             // There is a field in the property file, you can edit your own file location there.
             // InputLocation = prop.getProperty("inputLocation");
+            InputLocation = "file://"+RectangleRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
             splitter = prop.getProperty("splitter");
             indexType = prop.getProperty("indexType");
@@ -100,7 +108,7 @@ public class PolygonRangeTest {
     	PolygonRDD.buildIndex("rtree");
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = RangeQuery.SpatialRangeQueryUsingIndex(PolygonRDD, queryEnvelope).getRawPolygonRDD().count();
+    		long resultSize = RangeQuery.SpatialRangeQueryUsingIndex(PolygonRDD, queryEnvelope,0).getRawPolygonRDD().count();
     		assert resultSize>-1;
     	}
         

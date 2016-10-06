@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.utils;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;

@@ -1,7 +1,10 @@
-/*
- * 
- */
 package org.datasyslab.geospark.geometryObjects;
+
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
 
 import java.io.Serializable;
 
@@ -10,10 +13,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class Circle.
- */
+
 public class Circle implements Serializable {
 	
 	/** The center. */

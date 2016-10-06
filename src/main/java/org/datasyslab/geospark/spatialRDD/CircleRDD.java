@@ -1,7 +1,10 @@
-/*
- * 
- */
 package org.datasyslab.geospark.spatialRDD;
+
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
 
 import java.io.Serializable;
 
@@ -15,9 +18,7 @@ import org.datasyslab.geospark.geometryObjects.*;
 import org.datasyslab.geospark.utils.*;;
 
 // TODO: Auto-generated Javadoc
-/**
- * 
- */
+
 /**
  * The Class CircleRDD. It accommodates Circle object. 
  * @author Arizona State University DataSystems Lab

@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.spatialOperator;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import java.io.Serializable;
 import java.util.Iterator;
 
@@ -88,10 +94,10 @@ public class RangeQuery implements Serializable{
 	 * Spatial range query on top of PolygonRDD
 	 * @param polygonRDD Input PolygonRDD
 	 * @param envelope Query window
-	 * @param condition 0 means query predicate is "contains", 1 means query predicate is "intersects"
+	 * @param condition 0 means query predicate is "contains", 1 means query predicate is "intersects" 
 	 * @return A PolygonRDD contains qualified records
 	 */
-	public static PolygonRDD SpatialRangeQueryUsingIndex(PolygonRDD polygonRDD, Envelope envelope)
+	public static PolygonRDD SpatialRangeQueryUsingIndex(PolygonRDD polygonRDD, Envelope envelope, Integer condition)
 	{
         if(polygonRDD.indexedRDDNoId == null) {
             throw new NullPointerException("Need to invoke buildIndex() first, indexedRDDNoId is null");

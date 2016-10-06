@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.spatialPartitioning;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,8 +19,8 @@ import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
 /**
+ * 
  * Construct a grid file. Each grid is a rtree leaf node.
- * @author sparkadmin
  *
  */
 public class RtreePartitioning implements Serializable{

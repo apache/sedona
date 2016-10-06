@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.joinJudgement;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,7 +34,7 @@ public class PointByRectangleJudgementUsingIndex implements PairFlatMapFunction<
 		if(cogroup._1()>=gridNumber)
 		{
 			//Ok. We found this partition contains missing objects. Lets ignore this part.
-			return result;
+			//return result;
 		}
 		Iterator<Envelope> iteratorWindow=cogroup._2()._2().iterator();
         Iterator<STRtree> iteratorTree=cogroup._2()._1().iterator();
