@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.knnJudgement;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import java.io.Serializable;
 import java.util.Comparator;
 

@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.spatialOperator;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -16,6 +22,7 @@ import org.datasyslab.geospark.spatialRDD.PointRDDTest;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDDTest;
+import org.datasyslab.geospark.spatialRDD.RectangleRDDTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -62,6 +69,7 @@ public class PolygonKnnTest {
             prop.load(input);
             // There is a field in the property file, you can edit your own file location there.
             // InputLocation = prop.getProperty("inputLocation");
+            InputLocation = "file://"+PolygonKnnTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
             splitter = prop.getProperty("splitter");
             indexType = prop.getProperty("indexType");

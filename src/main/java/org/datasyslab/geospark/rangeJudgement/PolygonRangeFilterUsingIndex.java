@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.rangeJudgement;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,13 +26,13 @@ public class PolygonRangeFilterUsingIndex implements FlatMapFunction<Iterator<ST
 
 	}
 	@Override
-	public Iterable<Polygon> call(Iterator<STRtree> t) throws Exception {
+	public Iterator<Polygon> call(Iterator<STRtree> t) throws Exception {
 		// TODO Auto-generated method stub
 		assert t.hasNext()==true;
 		STRtree strtree= t.next();
 		List<Polygon> result=new ArrayList<Polygon>();
 		result=strtree.query(this.rangeRectangle);
-		return result;
+		return result.iterator();
 	}
 
 }

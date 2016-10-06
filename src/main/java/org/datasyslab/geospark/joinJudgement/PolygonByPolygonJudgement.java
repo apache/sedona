@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.joinJudgement;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -23,13 +29,8 @@ public class PolygonByPolygonJudgement implements PairFlatMapFunction<Tuple2<Int
 
 	
 	@Override
-	 public Iterable<Tuple2<Polygon, HashSet<Polygon>>> call(Tuple2<Integer, Tuple2<Iterable<Polygon>, Iterable<Polygon>>> cogroup) throws Exception {
+	 public Iterator<Tuple2<Polygon, HashSet<Polygon>>> call(Tuple2<Integer, Tuple2<Iterable<Polygon>, Iterable<Polygon>>> cogroup) throws Exception {
 		HashSet<Tuple2<Polygon, HashSet<Polygon>>> result = new HashSet<Tuple2<Polygon, HashSet<Polygon>>>();
-		if(cogroup._1()>=gridNumber)
-		{
-			//Ok. We found this partition contains missing objects. Lets ignore this part.
-			return result;
-		}
         Iterator<Polygon> iteratorWindow=cogroup._2()._2().iterator();
         while(iteratorWindow.hasNext()) {
         	Polygon window=iteratorWindow.next();
@@ -43,7 +44,7 @@ public class PolygonByPolygonJudgement implements PairFlatMapFunction<Tuple2<Int
             }
             result.add(new Tuple2<Polygon, HashSet<Polygon>>(window, objectHashSet));
         }
-        return result;
+        return result.iterator();
     }
 
 }

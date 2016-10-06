@@ -1,7 +1,10 @@
-/*
- * 
- */
 package org.datasyslab.geospark.spatialRDD;
+
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -61,10 +64,7 @@ import scala.Tuple2;
  * @author Arizona State University DataSystems Lab
  *
  */
-/**
- * @author sparkadmin
- *
- */
+
 public class RectangleRDD implements Serializable {
 
 
@@ -158,7 +158,7 @@ public class RectangleRDD implements Serializable {
      * @param inputLocation specify the input path which can be a HDFS path
      * @param offSet specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
      * @param splitter specify the input file format: csv, tsv, geojson, wkt
-     * @param gridType specify the spatial partitioning method: X-Y (equal size grids), strtree, quadtree
+     * @param gridType specify the spatial partitioning method: equalgrid, rtree, voronoi
      * @param numPartitions specify the partition number of the SpatialRDD
      */
 	public RectangleRDD(JavaSparkContext sc, String inputLocation, Integer offSet, String splitter, String gridType, Integer numPartitions) {
@@ -214,9 +214,9 @@ public class RectangleRDD implements Serializable {
         JavaPairRDD<Integer,Envelope> unPartitionedGridRectangleRDD = this.rawRectangleRDD.flatMapToPair(
                 new PairFlatMapFunction<Envelope, Integer, Envelope>() {
                     @Override
-                    public Iterable<Tuple2<Integer, Envelope>> call(Envelope recntangle) throws Exception {
+                    public Iterator<Tuple2<Integer, Envelope>> call(Envelope recntangle) throws Exception {
                     	HashSet<Tuple2<Integer, Envelope>> result = PartitionJudgement.getPartitionID(grids,recntangle);
-                        return result;
+                        return result.iterator();
                     }
                 }
         );
@@ -224,7 +224,15 @@ public class RectangleRDD implements Serializable {
         this.gridRectangleRDD = unPartitionedGridRectangleRDD.partitionBy(new SpatialPartitioner(grids.size()));//.persist(StorageLevel.DISK_ONLY());
 
 	}
-		
+
+    /**
+     *Initialize one raw SpatialRDD with a raw input file and do spatial partitioning on it without specifying the number of partitions.
+     * @param sc spark SparkContext which defines some Spark configurations
+     * @param inputLocation specify the input path which can be a HDFS path
+     * @param offSet specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
+     * @param splitter specify the input file format: csv, tsv, geojson, wkt
+     * @param gridType specify the spatial partitioning method: equalgrid, rtree, voronoi
+     */
 	public RectangleRDD(JavaSparkContext sc, String inputLocation, Integer offSet, String splitter, String gridType) {
 		this.rawRectangleRDD = sc.textFile(inputLocation).map(new RectangleFormatMapper(offSet, splitter));
 		this.rawRectangleRDD.persist(StorageLevel.MEMORY_ONLY());
@@ -279,9 +287,9 @@ public class RectangleRDD implements Serializable {
         JavaPairRDD<Integer,Envelope> unPartitionedGridRectangleRDD = this.rawRectangleRDD.flatMapToPair(
                 new PairFlatMapFunction<Envelope, Integer, Envelope>() {
                     @Override
-                    public Iterable<Tuple2<Integer, Envelope>> call(Envelope recntangle) throws Exception {
+                    public Iterator<Tuple2<Integer, Envelope>> call(Envelope recntangle) throws Exception {
                     	HashSet<Tuple2<Integer, Envelope>> result = PartitionJudgement.getPartitionID(grids,recntangle);
-                        return result;
+                        return result.iterator();
                     }
                 }
         );
@@ -292,7 +300,7 @@ public class RectangleRDD implements Serializable {
 
     /**
      * Create an IndexedRDD and cache it in memory. Need to have a grided RDD first. The index is build on each partition.
-     * @param indexType Specify the index type: strtree, quadtree
+     * @param indexType Specify the index type: rtree, quadtree
      */
 	public void buildIndex(String indexType) {
 
@@ -301,7 +309,7 @@ public class RectangleRDD implements Serializable {
             this.indexedRDDNoId =  this.rawRectangleRDD.mapPartitions(new FlatMapFunction<Iterator<Envelope>,STRtree>()
             		{
 						@Override
-						public Iterable<STRtree> call(Iterator<Envelope> t)
+						public Iterator<STRtree> call(Iterator<Envelope> t)
 								throws Exception {
 							// TODO Auto-generated method stub
 							 STRtree rt = new STRtree();
@@ -312,7 +320,7 @@ public class RectangleRDD implements Serializable {
 							}
 							HashSet<STRtree> result = new HashSet<STRtree>();
 			                    result.add(rt);
-			                    return result;
+			                    return result.iterator();
 						}
             	
             		});
@@ -433,9 +441,9 @@ public class RectangleRDD implements Serializable {
         JavaPairRDD<Integer,Envelope> unPartitionedGridRectangleRDD = this.rawRectangleRDD.flatMapToPair(
                 new PairFlatMapFunction<Envelope, Integer, Envelope>() {
                     @Override
-                    public Iterable<Tuple2<Integer, Envelope>> call(Envelope recntangle) throws Exception {
+                    public Iterator<Tuple2<Integer, Envelope>> call(Envelope recntangle) throws Exception {
                     	HashSet<Tuple2<Integer, Envelope>> result = PartitionJudgement.getPartitionID(grids,recntangle);
-                        return result;
+                        return result.iterator();
                     }
                 }
         );

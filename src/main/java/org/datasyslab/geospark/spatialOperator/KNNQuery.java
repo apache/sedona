@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.spatialOperator;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -32,7 +38,7 @@ public class KNNQuery implements Serializable{
 	/**
 	 * Spatial K Nearest Neighbors query
 	 * @param pointRDD specify the input pointRDD
-	 * @param p specify the query center 
+	 * @param queryCenter specify the query center 
 	 * @param k specify the K
 	 * @return A list which contains K nearest points
 	 */
@@ -50,7 +56,7 @@ public class KNNQuery implements Serializable{
 	/**
 	 * Spatial K Nearest Neighbors query using index
 	 * @param pointRDD specify the input pointRDD
-	 * @param p specify the query center 
+	 * @param queryCenter specify the query center 
 	 * @param k specify the K
 	 * @return A list which contains K nearest points
 	 */
@@ -70,8 +76,8 @@ public class KNNQuery implements Serializable{
 	}
 	/**
 	 * Spatial K Nearest Neighbors query
-	 * @param rectangelRDD specify the input rectangelRDD
-	 * @param p specify the query center 
+	 * @param objectRDD specify the input rectangelRDD
+	 * @param queryCenter specify the query center 
 	 * @param k specify the K
 	 * @return A list which contains K nearest points
 	 */
@@ -88,8 +94,8 @@ public class KNNQuery implements Serializable{
 	}
 	/**
 	 * Spatial K Nearest Neighbors query using index
-	 * @param rectangelRDD specify the input rectangelRDD
-	 * @param p specify the query center 
+	 * @param objectRDD specify the input rectangelRDD
+	 * @param queryCenter specify the query center 
 	 * @param k specify the K
 	 * @return A list which contains K nearest points
 	 */
@@ -109,8 +115,8 @@ public class KNNQuery implements Serializable{
 	}
 	/**
 	 * Spatial K Nearest Neighbors query
-	 * @param polygonRDD specify the input polygonRDD
-	 * @param p specify the query center 
+	 * @param objectRDD specify the input polygonRDD
+	 * @param queryCenter specify the query center 
 	 * @param k specify the K
 	 * @return A list which contains K nearest points
 	 */

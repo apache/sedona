@@ -1,9 +1,11 @@
-/*
- * 
- */
 package org.datasyslab.geospark.utils;
 
-// TODO: Auto-generated Javadoc
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 /**
  * A factory for creating Comparator objects.
  */

@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.spatialOperator;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
@@ -17,6 +23,7 @@ import org.datasyslab.geospark.spatialRDD.PointRDD;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import scala.Tuple2;
@@ -43,7 +50,7 @@ public class DistanceJoin {
 
         JavaPairRDD<Integer, Circle> tmpGridedCircleForQuerySetBeforePartition = circleRDD2.getCircleRDD().flatMapToPair(new PairFlatMapFunction<Circle, Integer, Circle>() {
             @Override
-            public Iterable<Tuple2<Integer, Circle>> call(Circle circle) throws Exception {
+            public Iterator<Tuple2<Integer, Circle>> call(Circle circle) throws Exception {
             	HashSet<Tuple2<Integer, Circle>> result = new HashSet<Tuple2<Integer, Circle>>();
 
             	HashSet<EnvelopeWithGrid> grid = envelopeWithGrid.getValue();
@@ -57,7 +64,7 @@ public class DistanceJoin {
                         System.out.println(e.toString() + circle.toString());
                     }
                 }
-                return result;
+                return result.iterator();
 
             }
         });
@@ -68,7 +75,7 @@ public class DistanceJoin {
 
         JavaPairRDD<Point, HashSet<Point>> joinResultBeforeAggregation = cogroupResult.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer, Tuple2<Iterable<Point>, Iterable<Circle>>>, Point, HashSet<Point>>() {
             @Override
-            public Iterable<Tuple2<Point, HashSet<Point>>> call(Tuple2<Integer, Tuple2<Iterable<Point>, Iterable<Circle>>> cogroup) throws Exception {
+            public Iterator<Tuple2<Point, HashSet<Point>>> call(Tuple2<Integer, Tuple2<Iterable<Point>, Iterable<Circle>>> cogroup) throws Exception {
             	HashSet<Tuple2<Point, HashSet<Point>>> result = new HashSet<Tuple2<Point, HashSet<Point>>>();
 
                 Tuple2<Iterable<Point>, Iterable<Circle>> cogroupTupleList = cogroup._2();
@@ -87,7 +94,7 @@ public class DistanceJoin {
                     }
                     result.add(new Tuple2<Point, HashSet<Point>>(c.getCenter(), poinitHashSet));
                 }
-                return result;
+                return result.iterator();
             }
         });
 
@@ -132,7 +139,7 @@ public class DistanceJoin {
 
         JavaPairRDD<Integer, Circle> tmpGridedCircleForQuerySetBeforePartition = circleRDD2.getCircleRDD().flatMapToPair(new PairFlatMapFunction<Circle, Integer, Circle>() {
             @Override
-            public Iterable<Tuple2<Integer, Circle>> call(Circle circle) throws Exception {
+            public Iterator<Tuple2<Integer, Circle>> call(Circle circle) throws Exception {
             	HashSet<Tuple2<Integer, Circle>> result = new HashSet<Tuple2<Integer, Circle>>();
 
                 HashSet<EnvelopeWithGrid> grid = envelopeWithGrid.getValue();
@@ -142,7 +149,7 @@ public class DistanceJoin {
                         result.add(new Tuple2<Integer, Circle>(e.grid, circle));
                     }
                 }
-                return result;
+                return result.iterator();
 
             }
         });
@@ -153,7 +160,7 @@ public class DistanceJoin {
 
         JavaPairRDD<Point, HashSet<Point>> joinResultBeforeAggregation = cogroupResult.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer, Tuple2<Iterable<STRtree>, Iterable<Circle>>>, Point, HashSet<Point>>() {
             @Override
-            public Iterable<Tuple2<Point, HashSet<Point>>> call(Tuple2<Integer, Tuple2<Iterable<STRtree>, Iterable<Circle>>> cogroup) throws Exception {
+            public Iterator<Tuple2<Point, HashSet<Point>>> call(Tuple2<Integer, Tuple2<Iterable<STRtree>, Iterable<Circle>>> cogroup) throws Exception {
             	HashSet<Tuple2<Point, HashSet<Point>>> result = new HashSet<Tuple2<Point, HashSet<Point>>>();
 
                 Tuple2<Iterable<STRtree>, Iterable<Circle>> cogroupTupleList = cogroup._2();
@@ -169,7 +176,7 @@ public class DistanceJoin {
                     HashSet<Point> pointSet = new HashSet<Point>(pointList);
                     result.add(new Tuple2<Point, HashSet<Point>>(c.getCenter(), pointSet));
                 }
-                return result;
+                return result.iterator();
             }
 
         });

@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.knnJudgement;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,7 +27,7 @@ public class PointKnnJudgement implements FlatMapFunction<Iterator<Point>, Point
 		this.k=k;
 	}
 	@Override
-	public Iterable<Point> call(Iterator<Point> input) throws Exception {
+	public Iterator<Point> call(Iterator<Point> input) throws Exception {
 		// TODO Auto-generated method stub
 		
 		PriorityQueue<Point> pq = new PriorityQueue<Point>(k, new PointDistanceComparator(queryCenter));
@@ -44,7 +50,7 @@ public class PointKnnJudgement implements FlatMapFunction<Iterator<Point>, Point
 		for (int i = 0; i < k; i++) {
 			res.add(pq.poll());
 		}
-		return res;
+		return res.iterator();
 	}
 
 }

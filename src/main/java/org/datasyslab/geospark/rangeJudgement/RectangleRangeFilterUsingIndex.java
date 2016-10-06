@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.rangeJudgement;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,7 +27,7 @@ public class RectangleRangeFilterUsingIndex implements FlatMapFunction<Iterator<
 
 	}
 	@Override
-	public Iterable<Envelope> call(Iterator<STRtree> t) throws Exception {
+	public Iterator<Envelope> call(Iterator<STRtree> t) throws Exception {
 		// TODO Auto-generated method stub
 		assert t.hasNext()==true;
 		STRtree strtree= t.next();
@@ -33,7 +39,7 @@ public class RectangleRangeFilterUsingIndex implements FlatMapFunction<Iterator<
 		{
 			result.add(initialResultIterator.next().getEnvelopeInternal());
 		}
-		return result;
+		return result.iterator();
 	}
 
 }

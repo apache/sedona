@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.spatialRDD;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -10,6 +16,7 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
+import org.datasyslab.geospark.spatialOperator.PointJoinTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -19,6 +26,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -42,7 +50,7 @@ public class RectangleRDDTest implements Serializable{
         Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
         input = RectangleRDDTest.class.getClassLoader().getResourceAsStream("rectangle.test.properties");
-        InputLocation = "file://"+RectangleRDD.class.getClassLoader().getResource("primaryroads.csv").getPath();
+        InputLocation = "file://"+RectangleRDDTest.class.getClassLoader().getResource("primaryroads.csv").getPath();
         offset = 0;
         splitter = "";
         gridType = "";
@@ -53,6 +61,7 @@ public class RectangleRDDTest implements Serializable{
             // load a properties file
             prop.load(input);
             //InputLocation = prop.getProperty("inputLocation");
+            InputLocation = "file://"+RectangleRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
             splitter = prop.getProperty("splitter");
             gridType = prop.getProperty("gridType");
@@ -85,8 +94,8 @@ public class RectangleRDDTest implements Serializable{
 
 
         //todo: Move this into log4j.
-        Map<Integer, Object> map = rectangleRDD.gridRectangleRDD.countByKey();
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        Map<Integer, Long> map = rectangleRDD.gridRectangleRDD.countByKey();
+        for (Entry<Integer, Long> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / rectangleRDD.totalNumberOfRecords;
             //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
@@ -120,18 +129,18 @@ public class RectangleRDDTest implements Serializable{
     @Test
     public void testEqualSizeGridsSpatialPartitioing() throws Exception {
     	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, "equalgrid", 10);
-        for (EnvelopeWithGrid d : rectangleRDD.grids) {
+        /*for (EnvelopeWithGrid d : rectangleRDD.grids) {
         	System.out.println("RectangleRDD spatial partitioning grids: "+d.grid);
-        }
+        }*/
         //todo: Move this into log4j.
-        Map<Integer, Object> map = rectangleRDD.gridRectangleRDD.countByKey();
+        Map<Integer, Long> map = rectangleRDD.gridRectangleRDD.countByKey();
 
-        System.out.println(map.size());
+        //System.out.println(map.size());
 
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        for (Entry<Integer, Long> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / rectangleRDD.totalNumberOfRecords;
-            System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+           // System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
     }
     /*
@@ -140,18 +149,18 @@ public class RectangleRDDTest implements Serializable{
     @Test
     public void testHilbertCurveSpatialPartitioing() throws Exception {
     	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, "hilbert", 10);
-        for (EnvelopeWithGrid d : rectangleRDD.grids) {
+        /*for (EnvelopeWithGrid d : rectangleRDD.grids) {
         	System.out.println("RectangleRDD spatial partitioning grids: "+d.grid);
-        }
+        }*/
         //todo: Move this into log4j.
-        Map<Integer, Object> map = rectangleRDD.gridRectangleRDD.countByKey();
+        Map<Integer, Long> map = rectangleRDD.gridRectangleRDD.countByKey();
 
-        System.out.println(map.size());
+        //System.out.println(map.size());
 
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        for (Entry<Integer, Long> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / rectangleRDD.totalNumberOfRecords;
-            System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+           // System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
     }
     /*
@@ -164,14 +173,14 @@ public class RectangleRDDTest implements Serializable{
         	System.out.println("RectangleRDD spatial partitioning grids: "+d.grid);
         }
         //todo: Move this into log4j.
-        Map<Integer, Object> map = rectangleRDD.gridRectangleRDD.countByKey();
+        Map<Integer, Long> map = rectangleRDD.gridRectangleRDD.countByKey();
 
-        System.out.println(map.size());
+       // System.out.println(map.size());
 
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        for (Entry<Integer, Long> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / rectangleRDD.totalNumberOfRecords;
-            System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+            //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
     }
     /*
@@ -180,18 +189,18 @@ public class RectangleRDDTest implements Serializable{
     @Test
     public void testVoronoiSpatialPartitioing() throws Exception {
     	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, "voronoi", 10);
-        for (EnvelopeWithGrid d : rectangleRDD.grids) {
+        /*for (EnvelopeWithGrid d : rectangleRDD.grids) {
         	System.out.println("RectangleRDD spatial partitioning grids: "+d.grid);
-        }
+        }*/
         //todo: Move this into log4j.
-        Map<Integer, Object> map = rectangleRDD.gridRectangleRDD.countByKey();
+        Map<Integer, Long> map = rectangleRDD.gridRectangleRDD.countByKey();
 
-        System.out.println(map.size());
+        //System.out.println(map.size());
 
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        for (Entry<Integer, Long> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / rectangleRDD.totalNumberOfRecords;
-            System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+            //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
     }
 

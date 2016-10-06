@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.spatialRDD;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Polygon;
 
@@ -17,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 public class PolygonRDDTest {
@@ -48,6 +55,7 @@ public class PolygonRDDTest {
             // load a properties file
             prop.load(input);
             //InputLocation = prop.getProperty("inputLocation");
+            InputLocation = "file://"+PolygonRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
             splitter = prop.getProperty("splitter");
             gridType = prop.getProperty("gridType");
@@ -80,8 +88,8 @@ public class PolygonRDDTest {
 
 
         //todo: Move this into log4j.
-        Map<Integer, Object> map = polygonRDD.gridPolygonRDD.countByKey();
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        Map<Integer, Long> map = polygonRDD.gridPolygonRDD.countByKey();
+        for (Entry<Integer, Long> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / polygonRDD.totalNumberOfRecords;
             //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
@@ -119,11 +127,11 @@ public class PolygonRDDTest {
         	System.out.println("PolygonRDD spatial partitioning grids: "+d.grid);
         }
         //todo: Move this into log4j.
-        Map<Integer, Object> map = polygonRDD.gridPolygonRDD.countByKey();
+        Map<Integer, Long> map = polygonRDD.gridPolygonRDD.countByKey();
 
         System.out.println(map.size());
 
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        for (Entry<Integer, Long> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / polygonRDD.totalNumberOfRecords;
             System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
@@ -136,17 +144,17 @@ public class PolygonRDDTest {
     public void testHilbertCurveSpatialPartitioing() throws Exception {
     	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, "hilbert", 10);
         for (EnvelopeWithGrid d : polygonRDD.grids) {
-        	System.out.println("PolygonRDD spatial partitioning grids: "+d.grid);
+        	//System.out.println("PolygonRDD spatial partitioning grids: "+d.grid);
         }
         //todo: Move this into log4j.
-        Map<Integer, Object> map = polygonRDD.gridPolygonRDD.countByKey();
+        Map<Integer, Long> map = polygonRDD.gridPolygonRDD.countByKey();
 
-        System.out.println(map.size());
+       // System.out.println(map.size());
 
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        for (Entry<Integer, Long> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / polygonRDD.totalNumberOfRecords;
-            System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+            //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
     }
     /*
@@ -156,17 +164,17 @@ public class PolygonRDDTest {
     public void testRTreeSpatialPartitioing() throws Exception {
     	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, "rtree", 10);
         for (EnvelopeWithGrid d : polygonRDD.grids) {
-        	System.out.println("PolygonRDD spatial partitioning grids: "+d.grid);
+        	//System.out.println("PolygonRDD spatial partitioning grids: "+d.grid);
         }
         //todo: Move this into log4j.
-        Map<Integer, Object> map = polygonRDD.gridPolygonRDD.countByKey();
+        Map<Integer, Long> map = polygonRDD.gridPolygonRDD.countByKey();
 
-        System.out.println(map.size());
+        //System.out.println(map.size());
 
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        for (Entry<Integer, Long> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / polygonRDD.totalNumberOfRecords;
-            System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+            //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
     }
     /*
@@ -176,17 +184,17 @@ public class PolygonRDDTest {
     public void testVoronoiSpatialPartitioing() throws Exception {
     	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, "voronoi", 10);
         for (EnvelopeWithGrid d : polygonRDD.grids) {
-        	System.out.println("PolygonRDD spatial partitioning grids: "+d.grid);
+        	//System.out.println("PolygonRDD spatial partitioning grids: "+d.grid);
         }
         //todo: Move this into log4j.
-        Map<Integer, Object> map = polygonRDD.gridPolygonRDD.countByKey();
+        Map<Integer, Long> map = polygonRDD.gridPolygonRDD.countByKey();
 
-        System.out.println(map.size());
+        //System.out.println(map.size());
 
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        for (Entry<Integer, Long> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / polygonRDD.totalNumberOfRecords;
-            System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+            //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
     }
 

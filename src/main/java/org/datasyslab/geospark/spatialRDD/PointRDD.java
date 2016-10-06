@@ -1,7 +1,10 @@
-/*
- * 
- */
 package org.datasyslab.geospark.spatialRDD;
+
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -60,6 +63,7 @@ import scala.Tuple2;
  * @author Arizona State University DataSystems Lab
  *
  */
+
 public class PointRDD implements Serializable {
 
     static Logger log = Logger.getLogger(PointFormatMapper.class.getName());
@@ -139,7 +143,7 @@ public class PointRDD implements Serializable {
      * @param InputLocation specify the input path which can be a HDFS path
      * @param offset specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
      * @param splitter specify the input file format: csv, tsv, geojson, wkt
-     * @param gridType specify the spatial partitioning method: X-Y (equal size grids), strtree, quadtree
+     * @param gridType specify the spatial partitioning method: equalgrid, rtree, voronoi
      * @param numPartitions specify the partition number of the SpatialRDD
      */
     public PointRDD(JavaSparkContext sc, String InputLocation, Integer offset, String splitter, String gridType, Integer numPartitions) {
@@ -203,10 +207,10 @@ public class PointRDD implements Serializable {
         //todo, measure this part's time. Using log4j debug level.
         //todo, This hashPartitioner could be improved by a simple %, becuase we know they're parition number.
         final Broadcast<HashSet<EnvelopeWithGrid>> gridEnvelopBroadcasted = sc.broadcast(grids);
-        JavaPairRDD<Integer, Point> unPartitionedGridPointRDD = this.rawPointRDD.mapToPair(
-                new PairFunction<Point, Integer, Point>() {
+        JavaPairRDD<Integer, Point> unPartitionedGridPointRDD = this.rawPointRDD.flatMapToPair(
+                new PairFlatMapFunction<Point, Integer, Point>() {
                     @Override
-                    public Tuple2<Integer, Point> call(Point point) throws Exception {
+                    public Iterator<Tuple2<Integer, Point>> call(Point point) throws Exception {
                     	return PartitionJudgement.getPartitionID(grids,point);
                         
                     }
@@ -218,6 +222,14 @@ public class PointRDD implements Serializable {
         
     }
 
+    /**
+     * Initialize one raw SpatialRDD with a raw input file and do spatial partitioning on it without specifying the number of partitions.
+     * @param sc spark SparkContext which defines some Spark configurations
+     * @param InputLocation specify the input path which can be a HDFS path
+     * @param offset specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
+     * @param splitter specify the input file format: csv, tsv, geojson, wkt
+     * @param gridType specify the spatial partitioning method: equalgrid, rtree, voronoi
+     */    
     public PointRDD(JavaSparkContext sc, String InputLocation, Integer offset, String splitter, String gridType) {
         this.rawPointRDD = sc.textFile(InputLocation).map(new PointFormatMapper(offset, splitter));
         this.rawPointRDD.persist(StorageLevel.MEMORY_ONLY());
@@ -281,10 +293,10 @@ public class PointRDD implements Serializable {
         //todo, measure this part's time. Using log4j debug level.
         //todo, This hashPartitioner could be improved by a simple %, becuase we know they're parition number.
         //final Broadcast<HashSet<EnvelopeWithGrid>> gridEnvelopBroadcasted = sc.broadcast(grids);
-        JavaPairRDD<Integer, Point> unPartitionedGridPointRDD = this.rawPointRDD.mapToPair(
-                new PairFunction<Point, Integer, Point>() {
+        JavaPairRDD<Integer, Point> unPartitionedGridPointRDD = this.rawPointRDD.flatMapToPair(
+                new PairFlatMapFunction<Point, Integer, Point>() {
                     @Override
-                    public Tuple2<Integer, Point> call(Point point) throws Exception {
+                    public Iterator<Tuple2<Integer, Point>> call(Point point) throws Exception {
                     	 return PartitionJudgement.getPartitionID(grids,point);
                        
                     }
@@ -298,7 +310,7 @@ public class PointRDD implements Serializable {
     
     /**
      * Create an IndexedRDD and cache it in memory. Need to have a grided RDD first. The index is build on each partition.
-     * @param indexType Specify the index type: strtree, quadtree
+     * @param indexType Specify the index type: rtree, quadtree
      */
     public void buildIndex(String indexType) {
 
@@ -309,7 +321,7 @@ public class PointRDD implements Serializable {
             this.indexedRDDNoId =  this.rawPointRDD.mapPartitions(new FlatMapFunction<Iterator<Point>,STRtree>()
             		{
 						@Override
-						public Iterable<STRtree> call(Iterator<Point> t)
+						public Iterator<STRtree> call(Iterator<Point> t)
 								throws Exception {
 							// TODO Auto-generated method stub
 							 STRtree rt = new STRtree();
@@ -320,7 +332,7 @@ public class PointRDD implements Serializable {
 							HashSet<STRtree> result = new HashSet<STRtree>();
 							rt.query(new Envelope(0.0,0.0,0.0,0.0));
 			                    result.add(rt);
-			                    return result;
+			                    return result.iterator();
 						}
             	
             		}).persist(StorageLevel.MEMORY_ONLY());
@@ -332,41 +344,7 @@ public class PointRDD implements Serializable {
         //Use GroupByKey, since I have repartition data, it should be much faster.
         //todo: Need to test performance here...
         JavaPairRDD<Integer, Iterable<Point>> gridedPointListRDD = this.gridPointRDD.groupByKey();
-        /*
-        JavaPairRDD<Integer,Iterable<STRtree>> indexedRDDwithoutFlat=this.gridPointRDD.mapPartitionsToPair(new PairFlatMapFunction<Iterator<Tuple2<Integer,Point>>,Integer,Iterable<STRtree>>(){
 
-			@Override
-			public Iterable<Tuple2<Integer, Iterable<STRtree>>> call(
-					Iterator<Tuple2<Integer, Point>> t) throws Exception {
-				// TODO Auto-generated method stub
-				 STRtree rt = new STRtree();
-				 Tuple2<Integer, Point> iteratorInstance =null;
-				 HashSet<STRtree> treeset=new  HashSet<STRtree>();
-				 HashSet<Tuple2<Integer, Iterable<STRtree>>> partitionResult=new HashSet<Tuple2<Integer, Iterable<STRtree>>>();
-				while(t.hasNext())
-				{
-					iteratorInstance=t.next();
-					rt.insert(iteratorInstance._2().getEnvelopeInternal(),iteratorInstance._2());
-				}
-				 treeset.add(rt);
-				 Tuple2<Integer,Iterable<STRtree>> result=new Tuple2<Integer,Iterable<STRtree>>(iteratorInstance._1(),treeset);
-				 partitionResult.add(result);
-				return partitionResult;
-			}});
-        this.indexedRDD=indexedRDDwithoutFlat.flatMapToPair(new PairFlatMapFunction<Tuple2<Integer,Iterable<STRtree>>,Integer,STRtree>()
-        		{
-					@Override
-					public Iterable<Tuple2<Integer, STRtree>> call(
-							Tuple2<Integer, Iterable<STRtree>> t)
-							throws Exception {
-						// TODO Auto-generated method stub
-						STRtree rt=t._2().iterator().next();
-						HashSet<Tuple2<Integer, STRtree>> result=new HashSet<Tuple2<Integer, STRtree>>();
-						result.add(new Tuple2<Integer, STRtree>(t._1(),rt));
-						return result;
-					}
-        		});
-        */
        
         this.indexedRDD = gridedPointListRDD.flatMapValues(new Function<Iterable<Point>, Iterable<STRtree>>() {
             @Override
@@ -383,7 +361,7 @@ public class PointRDD implements Serializable {
                 return result;
             }
         }
-        );//.partitionBy(new SpatialPartitioner(grids.size()));
+        );
         this.indexedRDD.persist(StorageLevel.MEMORY_ONLY());
         //this.rawPointRDD.unpersist();
         }
@@ -436,7 +414,7 @@ public class PointRDD implements Serializable {
     public void saveAsGeoJSON(String outputLocation) {
         this.rawPointRDD.mapPartitions(new FlatMapFunction<Iterator<Point>, String>() {
             @Override
-            public Iterable<String> call(Iterator<Point> pointIterator) throws Exception {
+            public Iterator<String> call(Iterator<Point> pointIterator) throws Exception {
                 ArrayList<String> result = new ArrayList<String>();
                 GeoJSONWriter writer = new GeoJSONWriter();
                 while (pointIterator.hasNext()) {
@@ -444,7 +422,7 @@ public class PointRDD implements Serializable {
                     String jsonstring = json.toString();
                     result.add(jsonstring);
                 }
-                return result;
+                return result.iterator();
             }
         }).saveAsTextFile(outputLocation);
     }

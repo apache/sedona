@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.spatialPartitioning;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,37 +26,24 @@ public class PartitionJudgement implements Serializable{
 	{
 		
 	}
-	public static Tuple2<Integer, Point> getPartitionID(HashSet<EnvelopeWithGrid> grid,Point point)
+	public static Iterator<Tuple2<Integer, Point>> getPartitionID(HashSet<EnvelopeWithGrid> grid,Point point)
 	{
-		//HashSet<Tuple2<Integer, Point>> result = new HashSet<Tuple2<Integer, Point>>();
+		HashSet<Tuple2<Integer, Point>> result = new HashSet<Tuple2<Integer, Point>>();
 		Iterator<EnvelopeWithGrid> iteratorGrid=grid.iterator();
 		EnvelopeWithGrid gridInstance=null;
-		Random random = new Random();
-		int randomID=grid.size();
+		int overflowContainerID=grid.size();
 		while(iteratorGrid.hasNext())
 		{
 			gridInstance=iteratorGrid.next();
 			if(gridInstance.contains(point.getCoordinate()))
 			{
-				return new Tuple2<Integer, Point>(gridInstance.grid,point);
+				result.add(new Tuple2<Integer, Point>(gridInstance.grid,point));
 				 
 			}
 		}
-		//We missed this object. Copy this object to all partitions. Normally, no point should reach here if use equal grid.
-		/*iteratorGrid=grid.iterator();
-		while(iteratorGrid.hasNext())
-		{
-			EnvelopeWithGrid gridInstance=iteratorGrid.next();
-			result.add(new Tuple2<Integer, Point>(gridInstance.grid,point));
-		}*/
-		
-		//We missed this object. Copy this object to all partitions. Normally, no point should reach here if use equal grid.
-		//We partition these missed objects into random additional partitions and distribute them.
-		if(grid.size()>10)
-		{
-			randomID=random.nextInt(grid.size()/10) + grid.size();
-		}
-		return new Tuple2<Integer,Point>(randomID,point);
+
+		result.add(new Tuple2<Integer, Point>(overflowContainerID,point));
+		return result.iterator();
 	}
 	
 	public static HashSet<Tuple2<Integer, Envelope>> getPartitionID(HashSet<EnvelopeWithGrid> grid,Envelope envelope)
@@ -58,25 +51,24 @@ public class PartitionJudgement implements Serializable{
 		HashSet<Tuple2<Integer, Envelope>> result = new HashSet<Tuple2<Integer, Envelope>>();
 		Iterator<EnvelopeWithGrid> iteratorGrid=grid.iterator();
 		EnvelopeWithGrid gridInstance=null;
-		Random random = new Random();
-		int randomID=grid.size();
+		int overflowContainerID=grid.size();
+		boolean containFlag=false;
 		while(iteratorGrid.hasNext())
 		{
 			gridInstance=iteratorGrid.next();
-			if(gridInstance.intersects(envelope) || gridInstance.contains(envelope))
+			if(gridInstance.contains(envelope))
 			{
+				result.add(new Tuple2<Integer, Envelope>(gridInstance.grid, envelope));
+				containFlag=true;
+			}
+			else if (gridInstance.intersects(envelope)||envelope.contains(gridInstance))
+			{		
 				result.add(new Tuple2<Integer, Envelope>(gridInstance.grid, envelope));
 			}
 		}
-		if(result.size()==0)
+		if(containFlag==false)
 		{
-			//We missed this object. Copy this object to all partitions
-			//We partition these missed objects into random additional partitions and distribute them.
-			if(grid.size()>10)
-			{
-				randomID=random.nextInt(grid.size()/10) + grid.size();
-			}
-			result.add(new Tuple2<Integer, Envelope>(randomID,envelope));
+			result.add(new Tuple2<Integer, Envelope>(overflowContainerID,envelope));
 		}
 		return result;
 	}
@@ -86,25 +78,24 @@ public class PartitionJudgement implements Serializable{
 		HashSet<Tuple2<Integer, Polygon>> result = new HashSet<Tuple2<Integer, Polygon>>();
 		Iterator<EnvelopeWithGrid> iteratorGrid=grid.iterator();
 		EnvelopeWithGrid gridInstance=null;
-		Random random = new Random();
-		int randomID=grid.size();
+		int overflowContainerID=grid.size();
+		boolean containFlag=false;
 		while(iteratorGrid.hasNext())
 		{
 			gridInstance=iteratorGrid.next();
-			if(gridInstance.intersects(polygon.getEnvelopeInternal())||gridInstance.contains(polygon.getEnvelopeInternal()))
+			if(gridInstance.contains(polygon.getEnvelopeInternal()))
 			{
 				result.add(new Tuple2<Integer, Polygon>(gridInstance.grid, polygon));
+				containFlag=true;
+			}
+			else if(gridInstance.intersects(polygon.getEnvelopeInternal())||polygon.getEnvelopeInternal().contains(gridInstance))
+			{
+				result.add(new Tuple2<Integer, Polygon>(gridInstance.grid, polygon));	
 			}
 		}
-		if(result.size()==0)
+		if(containFlag==false)
 		{
-			//We missed this object. Copy this object to all partitions
-			//We partition these missed objects into random additional partitions and distribute them.
-			if(grid.size()>10)
-			{
-				randomID=random.nextInt(grid.size()/10) + grid.size();
-			}
-			result.add(new Tuple2<Integer, Polygon>(randomID,polygon));
+			result.add(new Tuple2<Integer, Polygon>(overflowContainerID,polygon));
 		}
 		return result;
 	}

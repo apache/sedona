@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.knnJudgement;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,12 +30,12 @@ public class RectangleKnnJudgementUsingIndex implements FlatMapFunction<Iterator
 		this.k=k;
 	}
 	@Override
-	public Iterable<Envelope> call(Iterator<STRtree> t) throws Exception {
+	public Iterator<Envelope> call(Iterator<STRtree> t) throws Exception {
 		// TODO Auto-generated method stub
 		GeometryFactory fact= new GeometryFactory();
 		STRtree strtree	=	t.next();
 		Envelope[] localK = strtree.kNearestNeighbour(queryCenter.getEnvelopeInternal(), queryCenter, new GeometryItemDistance(), k);
-		return Arrays.asList(localK);
+		return Arrays.asList(localK).iterator();
 	}
 	
 }

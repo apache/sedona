@@ -1,8 +1,15 @@
 package org.datasyslab.geospark.joinJudgement;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 
@@ -20,7 +27,7 @@ public class PointByPolygonJudgement implements PairFlatMapFunction<Tuple2<Integ
 
 	
 	@Override
-	 public Iterable<Tuple2<Polygon, HashSet<Point>>> call(Tuple2<Integer, Tuple2<Iterable<Point>, Iterable<Polygon>>> cogroup) throws Exception {
+	 public Iterator<Tuple2<Polygon, HashSet<Point>>> call(Tuple2<Integer, Tuple2<Iterable<Point>, Iterable<Polygon>>> cogroup) throws Exception {
         ArrayList<Tuple2<Polygon, HashSet<Point>>> result = new ArrayList<Tuple2<Polygon, HashSet<Point>>>();
 
         Tuple2<Iterable<Point>, Iterable<Polygon>> cogroupTupleList = cogroup._2();
@@ -33,7 +40,7 @@ public class PointByPolygonJudgement implements PairFlatMapFunction<Tuple2<Integ
             }
             result.add(new Tuple2<Polygon, HashSet<Point>>(e, poinitHashSet));
         }
-        return result;
+        return result.iterator();
     }
 
 }

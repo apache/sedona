@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.spatialOperator;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -49,7 +55,7 @@ public class RectangleRangeTest {
         input = RectangleRangeTest.class.getClassLoader().getResourceAsStream("rectangle.test.properties");
 
         //Hard code to a file in resource folder. But you can replace it later in the try-catch field in your hdfs system.
-        InputLocation = "file://"+RectangleRDDTest.class.getClassLoader().getResource("primaryroads.csv").getPath();
+        InputLocation = "file://"+RectangleRangeTest.class.getClassLoader().getResource("primaryroads.csv").getPath();
 
         offset = 0;
         splitter = "";
@@ -61,6 +67,7 @@ public class RectangleRangeTest {
             prop.load(input);
             // There is a field in the property file, you can edit your own file location there.
             // InputLocation = prop.getProperty("inputLocation");
+            InputLocation = "file://"+RectangleRangeTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
             splitter = prop.getProperty("splitter");
             indexType = prop.getProperty("indexType");

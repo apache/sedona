@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.joinJudgement;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,18 +31,13 @@ public class PolygonByPolygonJudgementUsingIndex implements PairFlatMapFunction<
 	}
 
 	@Override
-    public Iterable<Tuple2<Polygon, HashSet<Polygon>>> call(Tuple2<Integer, Tuple2<Iterable<STRtree>, Iterable<Polygon>>> cogroup) throws Exception {
+    public Iterator<Tuple2<Polygon, HashSet<Polygon>>> call(Tuple2<Integer, Tuple2<Iterable<STRtree>, Iterable<Polygon>>> cogroup) throws Exception {
 		HashSet<Tuple2<Polygon, HashSet<Polygon>>> result = new HashSet<Tuple2<Polygon, HashSet<Polygon>>>();
-		if(cogroup._1()>=gridNumber)
-		{
-			//Ok. We found this partition contains missing objects. Lets ignore this part.
-			return result;
-		}
 		Iterator<Polygon> iteratorWindow=cogroup._2()._2().iterator();
         Iterator<STRtree> iteratorTree=cogroup._2()._1().iterator();
         if(!iteratorTree.hasNext())
         {
-        	return result;
+        	return result.iterator();
         }
         STRtree strtree = iteratorTree.next();
         while(iteratorWindow.hasNext()) {
@@ -46,7 +47,7 @@ public class PolygonByPolygonJudgementUsingIndex implements PairFlatMapFunction<
             HashSet<Polygon> resultHashSet = new HashSet<Polygon>(queryResult);
             result.add(new Tuple2<Polygon, HashSet<Polygon>>(window, resultHashSet));    
         }
-        return result;
+        return result.iterator();
     }
 
 }

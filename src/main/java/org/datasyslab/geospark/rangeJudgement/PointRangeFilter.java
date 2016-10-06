@@ -1,5 +1,11 @@
 package org.datasyslab.geospark.rangeJudgement;
 
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
 import java.io.Serializable;
 
 import org.apache.spark.api.java.function.Function;

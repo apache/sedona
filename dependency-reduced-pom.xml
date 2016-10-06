@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.datasyslab</groupId>
-  <artifactId>geospark</artifactId>
+  <artifactId>geospark-precompiled</artifactId>
   <name>GeoSpark</name>
-  <version>0.3</version>
-  <description>spatial</description>
+  <version>0.3.1</version>
+  <description>Spark-2.X</description>
   <build>
     <resources>
       <resource>
