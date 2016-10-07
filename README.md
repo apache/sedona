@@ -22,12 +22,12 @@ GeoSpark is a cluster computing system for processing large-scale spatial data. 
 
 ### Prerequisites
 
-1. Apache Hadoop 2.4.0 and later
-2. Apache Spark 1.2.1 and later
-3. JDK 1.7
-4. Compiled GeoSpark jar (Run 'mvn clean install' at source code folder or Download [pre-compiled GeoSpark jar](https://github.com/DataSystemsLab/GeoSpark/releases/tag/0.3) under "Release" tag)
+1. Apache Spark 2.X releases (Apache Spark 1.X releases support available in GeoSpark for Spark 1.X branch)
+2. JDK 1.7
+3. Compiled GeoSpark jar (Run 'mvn clean install' at source code folder or Download [pre-compiled GeoSpark jar](https://github.com/DataSystemsLab/GeoSpark/releases) under "Release" tag).
+4. You might need to modify the dependencies in "POM.xml" and make it consistent with your environment.
 
-Note: GeoSpark has been tested on Apache Spark 1.2, 1.3, 1.4, 1.5 and Apache Hadoop 2.4, 2.6.
+Note: GeoSpark Master branch supports Apache Spark 2.X releases and GeoSpark for Spark 1.X branch supports Apache Spark 1.X releases. Please refer to the proper branch you need.
 
 ### How to use GeoSpark APIs in an interactive Spark shell (Scala)
 
@@ -35,7 +35,7 @@ Note: GeoSpark has been tested on Apache Spark 1.2, 1.3, 1.4, 1.5 and Apache Had
 2. Run Spark shell with GeoSpark as a dependency.
 
   `
-  ./bin/spark-shell --jars GeoSpark_Precompile_0.3_WithDependencies.jar
+  ./bin/spark-shell --jars GeoSpark_COMPILED.jar
   `
 
 3. You can now call GeoSpark APIs directly in your Spark shell!
@@ -43,7 +43,7 @@ Note: GeoSpark has been tested on Apache Spark 1.2, 1.3, 1.4, 1.5 and Apache Had
 ### How to use GeoSpark APIs in a self-contained Spark application (Scala and Java)
 
 1. Create your own Apache Spark project in Scala or Java
-2. Download GeoSpark source code or pre-compiled binary jar.
+2. Download GeoSpark source code or download [pre-compiled GeoSpark jar](https://github.com/DataSystemsLab/GeoSpark/releases) under "Release" tag.
 3. Put GeoSpark source code with your own code and compile together. Or add GeoSpark.jar into your local compilation dependency (GeoSpark will be added to Maven central soon).
 4. You can now use GeoSpark APIs in your Spark program!
 5. Use spark-submit to submit your compiled self-contained Spark program.
