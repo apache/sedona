@@ -54,7 +54,7 @@ Note: GeoSpark Master branch supports Apache Spark 2.X releases and GeoSpark for
 
 1. Create your own Apache Spark project in Scala or Java
 2. Download GeoSpark source code or download [pre-compiled GeoSpark jar](https://github.com/DataSystemsLab/GeoSpark/releases) under "Release" tag.
-3. Put GeoSpark source code with your own code and compile together. Or add GeoSpark.jar into your local compilation dependency (GeoSpark will be added to Maven central soon).
+3. Put GeoSpark source code with your own code and compile together. Or add GeoSpark.jar into your local compilation dependency.
 4. You can now use GeoSpark APIs in your Spark program!
 5. Use spark-submit to submit your compiled self-contained Spark program.
 
