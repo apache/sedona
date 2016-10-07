@@ -4,14 +4,43 @@
 	<groupId>org.datasyslab</groupId>
 	<artifactId>geospark</artifactId>
 	<version>0.3.1</version>
-	<name>GeoSpark</name>
-	<description>Spark-2.X</description>
+	
+	<name>${project.groupId}:${project.artifactId}</name>
+	<description>Geospatial extension for Apache Spark</description>
+	<url>http://geospark.datasyslab.org/</url>
 	<packaging>jar</packaging>
+ 
+    <licenses>
+        <license>
+            <name>MIT license</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
 
-
+    <developers>
+        <developer>
+            <name>Jia Yu</name>
+            <email>jiayu2@asu.edu</email>
+            <organization>Arizona State University Data Systems Lab</organization>
+            <organizationUrl>http://www.datasyslab.org/</organizationUrl>
+        </developer>
+        <developer>
+            <name>Mohamed Sarwat</name>
+            <email>msarwat@asu.edu</email>
+            <organization>Arizona State University Data Systems Lab</organization>
+            <organizationUrl>http://www.datasyslab.org/</organizationUrl>
+        </developer>
+    </developers>
+	<scm>
+        <connection>scm:git:git@github.com:DataSystemsLab/GeoSpark.git</connection>
+        <developerConnection>scm:git:git@github.com:DataSystemsLab/GeoSpark.git</developerConnection>
+        <url>git@github.com:DataSystemsLab/GeoSpark.git</url>
+    </scm>
+    
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -24,6 +53,7 @@
 			<artifactId>spark-core_2.11</artifactId>
 			<version>2.0.0</version>
 		</dependency>
+		
 		<!--
 		<dependency>
 			<groupId>com</groupId>
@@ -31,15 +61,9 @@
 			<version>1.14</version>
 			<scope>system</scope>
 			<systemPath>${project.basedir}/src/test/resources/JTSplus/1.14/JTSplus-1.14.jar</systemPath>
-		</dependency>-->
-
-		<!--
-		<dependency>
-			<groupId>com.vividsolutions</groupId>
-			<artifactId>jts</artifactId>
-			<version>1.14</version>
 		</dependency>
 		-->
+
 		<dependency>
 			<groupId>org.wololo</groupId>
 			<artifactId>jts2geojson</artifactId>
@@ -53,8 +77,65 @@
 			</exclusions>
 		</dependency>
 	</dependencies>
+	
 	<build>
-		<plugins>
+		<plugins>		
+			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.7</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <stagingProfileId>21756750b51471</stagingProfileId>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
+            </plugin>
+            
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
