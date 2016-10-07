@@ -17,8 +17,7 @@ git:
 
 script:
 
-  - mvn clean
-  - mvn install
+  - mvn clean install -DskipTests
 
 
 ## ----------------------------------------------------------------------
