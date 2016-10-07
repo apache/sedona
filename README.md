@@ -1,19 +1,16 @@
 ![GeoSpark Logo](http://www.public.asu.edu/~jiayu2/geospark/logo.png)
 
-[![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark)
-
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark)
+[![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark)
 
 ##  Version information
 
 
 |      Version     	| Summary                                                                                                                                                                                                               	|
 |:----------------:	|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
-|        0.1       	| Support spatial range, join and Knn                                                                                                                                                                                   	|
-|        0.2       	| Improve code structure and refactor API                                                                                                                                                                               	|
-|        0.3       	| Major updates: Significantly shorten query time on spatial join for skewed data; Support load balanced spatial partitioning methods (also serve as the global index); Optimize code for iterative spatial data mining 	|
 |       0.3.1      	| Bug fix: Support Apache Spark 2.X version, fix a bug which results in inaccurate results when doing join query, add more unit test cases                                                                              	|
-|   Master branch  	| even with 0.3.1                                                                                                                                                                                                       	|
+|        0.3       	| Major updates: Significantly shorten query time on spatial join for skewed data; Support load balanced spatial partitioning methods (also serve as the global index); Optimize code for iterative spatial data mining 	|
+|        0.2       	| Improve code structure and refactor API                                                    |           |        0.1       	| Support spatial range, join and Knn               |
+|   Master branch  	| even with 0.3.1                                                                                                                                                                                                      	|
 | Spark 1.X branch 	| even with 0.3.1 but only supports Apache Spark 1.X                                                                                                                                                                    	|
 
 
@@ -21,6 +18,14 @@ GeoSpark is a cluster computing system for processing large-scale spatial data. 
 
 
 ## How to get started (For Scala and Java developers)
+
+GeoSpark artifacts are hosted in Maven Central. You can add a Maven dependency with the following coordinates:
+
+```
+groupId: org.datasyslab
+artifactId: geospark
+version: 0.3.1
+```
 
 ### Prerequisites
 
