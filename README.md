@@ -58,52 +58,17 @@ Note: GeoSpark Master branch supports Apache Spark 2.X releases and GeoSpark for
 4. You can now use GeoSpark APIs in your Spark program!
 5. Use spark-submit to submit your compiled self-contained Spark program.
 
-### GeoSpark Programming Examples (Java)
-
-Spatial queries Java example in "org.datasyslab.geospark.showcase" folder: Spatial range, join and KNN.
-
-
 ### GeoSpark Programming Examples (Scala)
 
-####Spatial range query
+[GeoSpark Scala Example](https://gist.github.com/jiayuasu/bcecaa2e9e6f280a0f9a72bb7549ffaa)
 
-`
-val objectRDD = new RectangleRDD(sc, inputLocation, offset, "csv");
-`
+[Test Data](https://github.com/DataSystemsLab/GeoSpark/tree/master/src/test/resources)
 
-`
-val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, queryEnvelope, 0).getRawRectangleRDD().count();
-`
+### GeoSpark Programming Examples (Java)
 
-####Spatial KNN query
+[GeoSpark Java Example](https://github.com/DataSystemsLab/GeoSpark/blob/master/src/main/java/org/datasyslab/geospark/showcase/Example.java)
 
-`
-val objectRDD = new RectangleRDD(sc, inputLocation, offset, "csv");
-`
-
-`
-val result = KNNQuery.SpatialKnnQuery(objectRDD, queryPoint, 1000);
-`
-####Spatial join query with index
-`
-val rectangleRDD = new RectangleRDD(sc, inputLocation2, offset2, "csv");
-`
-
-`
-val objectRDD = new RectangleRDD(sc, inputLocation, offset ,"wkt","rtree",numPartitions);
-`
-
-`
-objectRDD.buildIndex("rtree");
-`
-
-`
-val joinQuery = new JoinQuery(sc,objectRDD,rectangleRDD); 
-`
-
-`
-val resultSize = joinQuery.SpatialJoinQueryUsingIndex(objectRDD,rectangleRDD).count();
-`
+[Test Data](https://github.com/DataSystemsLab/GeoSpark/tree/master/src/test/resources)
 
 ## Scala and Java API usage
 
