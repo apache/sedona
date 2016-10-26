@@ -45,29 +45,29 @@ public class PointFormatMapper implements Serializable, Function<String, Point> 
                 coordinate= new Coordinate(Double.parseDouble(lineSplitList.get(0 + this.offset)),
                         Double.parseDouble(lineSplitList.get(1 + this.offset)));
                 point = fact.createPoint(coordinate);
+                point.setUserData(line);
                 break;
             case "tsv":
                 lineSplitList = Arrays.asList(line.split("\t"));
                 coordinate = new Coordinate(Double.parseDouble(lineSplitList.get(0 + this.offset)),
                         Double.parseDouble(lineSplitList.get(1 + this.offset)));
                 point = fact.createPoint(coordinate);
+                point.setUserData(line);
                 break;
             case "geojson":
                 GeoJSONReader reader = new GeoJSONReader();
                 point = (Point)reader.read(line);
+                point.setUserData(line);
                 break;
             case "wkt":
             	lineSplitList = Arrays.asList(line.split("\t"));
                 WKTReader wktreader = new WKTReader();
-                try {
-                	Envelope envelope=wktreader.read(lineSplitList.get(offset)).getEnvelopeInternal();
-                	coordinate = new Coordinate (envelope.getMinX(),envelope.getMinY());
-                    point = fact.createPoint(coordinate);
-                } catch (NullPointerException e) {
-                	coordinate = new Coordinate (85.01,34.01);
-                    point = fact.createPoint(coordinate);
-                    //e.printStackTrace();
-                }
+                Envelope envelope=wktreader.read(lineSplitList.get(offset)).getEnvelopeInternal();
+                coordinate = new Coordinate (envelope.getMinX(),envelope.getMinY());
+                point = fact.createPoint(coordinate);
+                coordinate = new Coordinate (85.01,34.01);
+                point = fact.createPoint(coordinate);
+                point.setUserData(line);
                 break;
             default:
                 throw new Exception("Input type not recognized, ");

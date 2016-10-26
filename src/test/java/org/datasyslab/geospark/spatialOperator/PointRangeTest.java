@@ -72,7 +72,7 @@ public class PointRangeTest {
             splitter = prop.getProperty("splitter");
             indexType = prop.getProperty("indexType");
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
-            queryEnvelope=new Envelope (-85.01,-84.01,34.01,35.01);
+            queryEnvelope=new Envelope (-90.01,-80.01,30.01,40.01);
             loopTimes=5;
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -99,8 +99,10 @@ public class PointRangeTest {
     		long resultSize = RangeQuery.SpatialRangeQuery(pointRDD, queryEnvelope, 0).getRawPointRDD().count();
     		assert resultSize>-1;
     	}
+    	assert RangeQuery.SpatialRangeQuery(pointRDD, queryEnvelope, 0).getRawPointRDD().take(10).get(1).getUserData().toString()!=null;
         
     }
+    
     @Test
     public void testSpatialRangeQueryUsingIndex() throws Exception {
     	PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter);
@@ -110,6 +112,7 @@ public class PointRangeTest {
     		long resultSize = RangeQuery.SpatialRangeQueryUsingIndex(pointRDD, queryEnvelope, 0).getRawPointRDD().count();
     		assert resultSize>-1;
     	}
+    	assert RangeQuery.SpatialRangeQueryUsingIndex(pointRDD, queryEnvelope, 0).getRawPointRDD().take(10).get(1).getUserData().toString() !=null;
         
     }
 

@@ -2,10 +2,36 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.datasyslab</groupId>
-  <artifactId>geospark-precompiled</artifactId>
-  <name>GeoSpark</name>
-  <version>0.3.1</version>
-  <description>Spark-2.X</description>
+  <artifactId>geospark</artifactId>
+  <name>${project.groupId}:${project.artifactId}</name>
+  <version>0.3.2</version>
+  <description>Geospatial extension for Apache Spark</description>
+  <url>http://geospark.datasyslab.org/</url>
+  <developers>
+    <developer>
+      <name>Jia Yu</name>
+      <email>jiayu2@asu.edu</email>
+      <organization>Arizona State University Data Systems Lab</organization>
+      <organizationUrl>http://www.datasyslab.org/</organizationUrl>
+    </developer>
+    <developer>
+      <name>Mohamed Sarwat</name>
+      <email>msarwat@asu.edu</email>
+      <organization>Arizona State University Data Systems Lab</organization>
+      <organizationUrl>http://www.datasyslab.org/</organizationUrl>
+    </developer>
+  </developers>
+  <licenses>
+    <license>
+      <name>MIT license</name>
+      <url>https://opensource.org/licenses/MIT</url>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:git:git@github.com:DataSystemsLab/GeoSpark.git</connection>
+    <developerConnection>scm:git:git@github.com:DataSystemsLab/GeoSpark.git</developerConnection>
+    <url>git@github.com:DataSystemsLab/GeoSpark.git</url>
+  </scm>
   <build>
     <resources>
       <resource>
@@ -14,31 +40,23 @@
     </resources>
     <plugins>
       <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.1</version>
         <configuration>
           <source>1.7</source>
           <target>1.7</target>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.7.5.201505241946</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>report</id>
-            <phase>test</phase>
-            <goals>
-              <goal>report</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
@@ -87,6 +105,202 @@
         <exclusion>
           <artifactId>hamcrest-core</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-core_2.11</artifactId>
+      <version>2.0.1</version>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>avro-mapred</artifactId>
+          <groupId>org.apache.avro</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>chill_2.11</artifactId>
+          <groupId>com.twitter</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>chill-java</artifactId>
+          <groupId>com.twitter</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>xbean-asm5-shaded</artifactId>
+          <groupId>org.apache.xbean</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>hadoop-client</artifactId>
+          <groupId>org.apache.hadoop</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spark-launcher_2.11</artifactId>
+          <groupId>org.apache.spark</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spark-network-common_2.11</artifactId>
+          <groupId>org.apache.spark</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spark-network-shuffle_2.11</artifactId>
+          <groupId>org.apache.spark</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spark-unsafe_2.11</artifactId>
+          <groupId>org.apache.spark</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jets3t</artifactId>
+          <groupId>net.java.dev.jets3t</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>curator-recipes</artifactId>
+          <groupId>org.apache.curator</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>javax.servlet-api</artifactId>
+          <groupId>javax.servlet</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-lang3</artifactId>
+          <groupId>org.apache.commons</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-math3</artifactId>
+          <groupId>org.apache.commons</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jsr305</artifactId>
+          <groupId>com.google.code.findbugs</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>slf4j-api</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jul-to-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jcl-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>log4j</artifactId>
+          <groupId>log4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>slf4j-log4j12</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>compress-lzf</artifactId>
+          <groupId>com.ning</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>snappy-java</artifactId>
+          <groupId>org.xerial.snappy</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>lz4</artifactId>
+          <groupId>net.jpountz.lz4</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>RoaringBitmap</artifactId>
+          <groupId>org.roaringbitmap</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-net</artifactId>
+          <groupId>commons-net</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>scala-library</artifactId>
+          <groupId>org.scala-lang</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>json4s-jackson_2.11</artifactId>
+          <groupId>org.json4s</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jersey-client</artifactId>
+          <groupId>org.glassfish.jersey.core</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jersey-common</artifactId>
+          <groupId>org.glassfish.jersey.core</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jersey-server</artifactId>
+          <groupId>org.glassfish.jersey.core</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jersey-container-servlet</artifactId>
+          <groupId>org.glassfish.jersey.containers</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jersey-container-servlet-core</artifactId>
+          <groupId>org.glassfish.jersey.containers</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>mesos</artifactId>
+          <groupId>org.apache.mesos</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>netty-all</artifactId>
+          <groupId>io.netty</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>netty</artifactId>
+          <groupId>io.netty</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>stream</artifactId>
+          <groupId>com.clearspring.analytics</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>metrics-core</artifactId>
+          <groupId>io.dropwizard.metrics</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>metrics-jvm</artifactId>
+          <groupId>io.dropwizard.metrics</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>metrics-json</artifactId>
+          <groupId>io.dropwizard.metrics</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>metrics-graphite</artifactId>
+          <groupId>io.dropwizard.metrics</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jackson-module-scala_2.11</artifactId>
+          <groupId>com.fasterxml.jackson.module</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>ivy</artifactId>
+          <groupId>org.apache.ivy</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>oro</artifactId>
+          <groupId>oro</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>pyrolite</artifactId>
+          <groupId>net.razorvine</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>py4j</artifactId>
+          <groupId>net.sf.py4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spark-tags_2.11</artifactId>
+          <groupId>org.apache.spark</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>unused</artifactId>
+          <groupId>org.spark-project.spark</groupId>
         </exclusion>
       </exclusions>
     </dependency>

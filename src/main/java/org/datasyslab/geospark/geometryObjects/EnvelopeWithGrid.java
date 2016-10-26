@@ -10,7 +10,7 @@ import com.vividsolutions.jts.geom.Envelope;
 
 
 /**
- * The class extends Envelope with one additional id.
+ * The class extends JTS Envelope with one additional data field
  *
  */
 public class EnvelopeWithGrid extends Envelope{

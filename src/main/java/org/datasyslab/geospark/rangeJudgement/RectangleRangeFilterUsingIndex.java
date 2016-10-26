@@ -37,7 +37,11 @@ public class RectangleRangeFilterUsingIndex implements FlatMapFunction<Iterator<
 		Iterator<Geometry> initialResultIterator=initialResult.iterator();
 		while(initialResultIterator.hasNext())
 		{
-			result.add(initialResultIterator.next().getEnvelopeInternal());
+			Geometry oneResultPoly=(Geometry)initialResultIterator.next();
+			Envelope oneResult=oneResultPoly.getEnvelopeInternal();
+			oneResult.setUserData(oneResultPoly.getUserData());
+			result.add(oneResult);
+			
 		}
 		return result.iterator();
 	}

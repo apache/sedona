@@ -147,9 +147,66 @@ public class RectangleRDD implements Serializable {
 		this.setRawRectangleRDD(spark.textFile(InputLocation).map(new RectangleFormatMapper(Offset,Splitter)));//.persist(StorageLevel.MEMORY_AND_DISK_SER()));
 	}
 	
+	/**
+	 * Transform a rawRectangleRDD to a RectangelRDD with a a specified spatial partitioning grid type
+	 * @param rawRectangleRDD
+	 * @param gridType
+	 */
+	public RectangleRDD(JavaRDD<Envelope> rawRectangleRDD, String gridType)
+	{
+		this.setRawRectangleRDD(rawRectangleRDD);
+		this.rawRectangleRDD.persist(StorageLevel.MEMORY_ONLY());
+		totalNumberOfRecords = this.rawRectangleRDD.count();
+		
+		int numPartitions=this.rawRectangleRDD.getNumPartitions();
+		
+		doSpatialPartitioning(gridType,numPartitions);
+		
+		
+		//final Broadcast<HashSet<EnvelopeWithGrid>> gridEnvelopBroadcasted = sc.broadcast(grids);
+        JavaPairRDD<Integer,Envelope> unPartitionedGridRectangleRDD = this.rawRectangleRDD.flatMapToPair(
+                new PairFlatMapFunction<Envelope, Integer, Envelope>() {
+                    @Override
+                    public Iterator<Tuple2<Integer, Envelope>> call(Envelope recntangle) throws Exception {
+                    	HashSet<Tuple2<Integer, Envelope>> result = PartitionJudgement.getPartitionID(grids,recntangle);
+                        return result.iterator();
+                    }
+                }
+        );
+        this.rawRectangleRDD.unpersist();
+        this.gridRectangleRDD = unPartitionedGridRectangleRDD.partitionBy(new SpatialPartitioner(grids.size()));//.persist(StorageLevel.DISK_ONLY());
+	}
 
-
-
+	/**
+	 * Transform a rawRectangleRDD to a RectangelRDD with a a specified spatial partitioning grid type and the number of partitions
+	 * @param rawRectangleRDD
+	 * @param gridType
+	 * @param numPartitions
+	 */
+	public RectangleRDD(JavaRDD<Envelope> rawRectangleRDD, String gridType, Integer numPartitions)
+	{
+		this.setRawRectangleRDD(rawRectangleRDD);
+		this.rawRectangleRDD.persist(StorageLevel.MEMORY_ONLY());
+		totalNumberOfRecords = this.rawRectangleRDD.count();
+		
+		
+		
+		doSpatialPartitioning(gridType,numPartitions);
+		
+		
+		//final Broadcast<HashSet<EnvelopeWithGrid>> gridEnvelopBroadcasted = sc.broadcast(grids);
+        JavaPairRDD<Integer,Envelope> unPartitionedGridRectangleRDD = this.rawRectangleRDD.flatMapToPair(
+                new PairFlatMapFunction<Envelope, Integer, Envelope>() {
+                    @Override
+                    public Iterator<Tuple2<Integer, Envelope>> call(Envelope recntangle) throws Exception {
+                    	HashSet<Tuple2<Integer, Envelope>> result = PartitionJudgement.getPartitionID(grids,recntangle);
+                        return result.iterator();
+                    }
+                }
+        );
+        this.rawRectangleRDD.unpersist();
+        this.gridRectangleRDD = unPartitionedGridRectangleRDD.partitionBy(new SpatialPartitioner(grids.size()));//.persist(StorageLevel.DISK_ONLY());
+	}
 	
 	
     /**
@@ -167,50 +224,10 @@ public class RectangleRDD implements Serializable {
 		totalNumberOfRecords = this.rawRectangleRDD.count();
 		
 		
-		int sampleNumberOfRecords = RDDSampleUtils.getSampleNumbers(numPartitions, totalNumberOfRecords);
-
-		ArrayList<Envelope> rectangleSampleList = new ArrayList<Envelope> (rawRectangleRDD.takeSample(false, sampleNumberOfRecords));
-
-		this.boundary();
-
-		JavaPairRDD<Integer, Envelope> unPartitionedGridPointRDD;
-		
-		if(sampleNumberOfRecords == 0) {
-			//If the sample Number is too small, we will just use one grid instead.
-			System.err.println("The grid size is " + numPartitions * numPartitions + "for 2-dimension X-Y grid" + numPartitions + " for 1-dimension grid");
-			System.err.println("The sample size is " + totalNumberOfRecords /100);
-			System.err.println("input size is too small, we can not guarantee one grid have at least one record in it");
-			System.err.println("we will just build one grid for all input");
-			grids = new HashSet<EnvelopeWithGrid>();
-			grids.add(new EnvelopeWithGrid(this.boundaryEnvelope, 0));
-		} 
-     
-	else if (gridType.equals("equalgrid")) {
-    	EqualPartitioning equalPartitioning =new EqualPartitioning(this.boundaryEnvelope,numPartitions);
-    	grids=equalPartitioning.getGrids();
-    }
-    else if(gridType.equals("hilbert"))
-    {
-    	HilbertPartitioning hilbertPartitioning=new HilbertPartitioning(rectangleSampleList.toArray(new Envelope[rectangleSampleList.size()]),this.boundaryEnvelope,numPartitions);
-    	grids=hilbertPartitioning.getGrids();
-    }
-    else if(gridType.equals("rtree"))
-    {
-    	RtreePartitioning rtreePartitioning=new RtreePartitioning(rectangleSampleList.toArray(new Envelope[rectangleSampleList.size()]),this.boundaryEnvelope,numPartitions);
-    	grids=rtreePartitioning.getGrids();
-    }
-    else if(gridType.equals("voronoi"))
-    {
-    	VoronoiPartitioning voronoiPartitioning=new VoronoiPartitioning(rectangleSampleList.toArray(new Envelope[rectangleSampleList.size()]),this.boundaryEnvelope,numPartitions);
-    	grids=voronoiPartitioning.getGrids();
-    }
-    else
-    {
-    	throw new IllegalArgumentException("Partitioning method is not recognized, please check again.");
-    }
+		doSpatialPartitioning(gridType,numPartitions);
 		
 		
-		final Broadcast<HashSet<EnvelopeWithGrid>> gridEnvelopBroadcasted = sc.broadcast(grids);
+		//final Broadcast<HashSet<EnvelopeWithGrid>> gridEnvelopBroadcasted = sc.broadcast(grids);
         JavaPairRDD<Integer,Envelope> unPartitionedGridRectangleRDD = this.rawRectangleRDD.flatMapToPair(
                 new PairFlatMapFunction<Envelope, Integer, Envelope>() {
                     @Override
@@ -240,6 +257,26 @@ public class RectangleRDD implements Serializable {
 		
 		int numPartitions=this.rawRectangleRDD.getNumPartitions();
 		
+		doSpatialPartitioning(gridType,numPartitions);
+		
+		//final Broadcast<HashSet<EnvelopeWithGrid>> gridEnvelopBroadcasted = sc.broadcast(grids);
+        JavaPairRDD<Integer,Envelope> unPartitionedGridRectangleRDD = this.rawRectangleRDD.flatMapToPair(
+                new PairFlatMapFunction<Envelope, Integer, Envelope>() {
+                    @Override
+                    public Iterator<Tuple2<Integer, Envelope>> call(Envelope recntangle) throws Exception {
+                    	HashSet<Tuple2<Integer, Envelope>> result = PartitionJudgement.getPartitionID(grids,recntangle);
+                        return result.iterator();
+                    }
+                }
+        );
+        this.rawRectangleRDD.unpersist();
+        this.gridRectangleRDD = unPartitionedGridRectangleRDD.partitionBy(new SpatialPartitioner(grids.size()));//.persist(StorageLevel.DISK_ONLY());
+
+	}
+	
+	
+	private void doSpatialPartitioning(String gridType, int numPartitions)
+	{
 		int sampleNumberOfRecords = RDDSampleUtils.getSampleNumbers(numPartitions, totalNumberOfRecords);
 
 		ArrayList<Envelope> rectangleSampleList = new ArrayList<Envelope> (rawRectangleRDD.takeSample(false, sampleNumberOfRecords));
@@ -282,20 +319,6 @@ public class RectangleRDD implements Serializable {
     	throw new IllegalArgumentException("Partitioning method is not recognized, please check again.");
     }
 		
-		
-		final Broadcast<HashSet<EnvelopeWithGrid>> gridEnvelopBroadcasted = sc.broadcast(grids);
-        JavaPairRDD<Integer,Envelope> unPartitionedGridRectangleRDD = this.rawRectangleRDD.flatMapToPair(
-                new PairFlatMapFunction<Envelope, Integer, Envelope>() {
-                    @Override
-                    public Iterator<Tuple2<Integer, Envelope>> call(Envelope recntangle) throws Exception {
-                    	HashSet<Tuple2<Integer, Envelope>> result = PartitionJudgement.getPartitionID(grids,recntangle);
-                        return result.iterator();
-                    }
-                }
-        );
-        this.rawRectangleRDD.unpersist();
-        this.gridRectangleRDD = unPartitionedGridRectangleRDD.partitionBy(new SpatialPartitioner(grids.size()));//.persist(StorageLevel.DISK_ONLY());
-
 	}
 
     /**
@@ -316,7 +339,9 @@ public class RectangleRDD implements Serializable {
 							 GeometryFactory geometryFactory = new GeometryFactory();
 							while(t.hasNext()){
 								Envelope envelope=t.next();
-			                    rt.insert(envelope, geometryFactory.toGeometry(envelope));
+								Geometry item= geometryFactory.toGeometry(envelope);
+								item.setUserData(envelope.getUserData());
+			                    rt.insert(envelope, item);
 							}
 							HashSet<STRtree> result = new HashSet<STRtree>();
 			                    result.add(rt);
@@ -351,6 +376,8 @@ public class RectangleRDD implements Serializable {
 		}
 	}
 
+
+	
     /**
      * Get the raw SpatialRDD
      *

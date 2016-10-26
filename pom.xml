@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.datasyslab</groupId>
 	<artifactId>geospark</artifactId>
-	<version>0.3.1</version>
+	<version>0.3.2</version>
 	
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>Geospatial extension for Apache Spark</description>
@@ -54,12 +54,17 @@
 			<version>2.0.1</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.datasyslab</groupId>
+			<artifactId>JTSplus</artifactId>
+			<version>0.1.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.wololo</groupId>
 			<artifactId>jts2geojson</artifactId>
 			<version>0.7.0</version>
-		
 			<exclusions>
 				<exclusion>
 			<groupId>com.vividsolutions</groupId>
@@ -70,8 +75,7 @@
 	</dependencies>
 	
 	<build>
-	<plugins>
-
+		<plugins>		
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -84,8 +88,7 @@
                     </execution>
                 </executions>
             </plugin>
-            
-         
+          
             
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -95,26 +98,6 @@
 					<source>1.7</source>
 					<target>1.7</target>
 				</configuration>
-			</plugin>
-			
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.5.201505241946</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>report</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			
 			<plugin>

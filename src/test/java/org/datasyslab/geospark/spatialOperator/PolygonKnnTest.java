@@ -22,6 +22,7 @@ import org.datasyslab.geospark.spatialRDD.PointRDDTest;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDDTest;
+import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 import org.datasyslab.geospark.spatialRDD.RectangleRDDTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -96,15 +97,30 @@ public class PolygonKnnTest {
 
     @Test
     public void testSpatialKnnQuery() throws Exception {
-    	PolygonRDD PolygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter);
+    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter);
 
     	for(int i=0;i<loopTimes;i++)
     	{
-    		List<Polygon> result = KNNQuery.SpatialKnnQuery(PolygonRDD, queryPoint, 5);
+    		List<Polygon> result = KNNQuery.SpatialKnnQuery(polygonRDD, queryPoint, 5);
     		assert result.size()>-1;
+    		assert result.get(0).getUserData().toString()!=null;
+    		//System.out.println(result.get(0).getUserData().toString());
     	}
 
     }
+    
+    @Test
+    public void testSpatialKnnQueryUsingIndex() throws Exception {
+    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter);
+    	polygonRDD.buildIndex("rtree");
+    	for(int i=0;i<loopTimes;i++)
+    	{
+    		List<Polygon> result = KNNQuery.SpatialKnnQueryUsingIndex(polygonRDD, queryPoint, 5);
+    		assert result.size()>-1;
+    		assert result.get(0).getUserData().toString()!=null;
+    		//System.out.println(result.get(0).getUserData().toString());
+    	}
 
+    }
 
 }
