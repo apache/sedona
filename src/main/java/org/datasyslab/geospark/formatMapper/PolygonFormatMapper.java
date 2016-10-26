@@ -51,6 +51,7 @@ public class PolygonFormatMapper implements Function<String, Polygon>, Serializa
                 }
                 linear = fact.createLinearRing(coordinatesList.toArray(new Coordinate[coordinatesList.size()]));
                 polygon = new Polygon(linear, null, fact);
+                polygon.setUserData(line);
                 break;
             case "tsv":
                 lineSplitList = Arrays.asList(line.split("\t"));
@@ -62,19 +63,18 @@ public class PolygonFormatMapper implements Function<String, Polygon>, Serializa
                 coordinates = coordinatesList.toArray(coordinates);
                 linear = fact.createLinearRing(coordinates);
                 polygon = new Polygon(linear, null, fact);
+                polygon.setUserData(line);
                 break;
             case "geojson":
                 GeoJSONReader reader = new GeoJSONReader();
                 polygon = (Polygon) reader.read(line);
+                polygon.setUserData(line);
                 break;
             case "wkt":
             	lineSplitList=Arrays.asList(line.split("\t"));
                 WKTReader wtkreader = new WKTReader();
-                try {
-                    polygon = (Polygon) wtkreader.read(lineSplitList.get(offset));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
+                polygon = (Polygon) wtkreader.read(lineSplitList.get(offset));
+                polygon.setUserData(line);
                 break;
             default:
                 throw new Exception("Input type not recognized, ");

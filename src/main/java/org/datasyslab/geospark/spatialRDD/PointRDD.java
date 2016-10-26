@@ -108,7 +108,63 @@ public class PointRDD implements Serializable {
     public PointRDD(JavaRDD<Point> rawPointRDD) {
         this.setRawPointRDD(rawPointRDD);
     }
+    
+    /**
+     * Transform a rawPointRDD to a PointRDD with a specified spatial partitioning grid type and the number of partitions
+     * @param rawPointRDD
+     * @param gridType gridType specify the spatial partitioning method
+     * @param numPartitions specify the partition number of the SpatialRDD
+     */
+    public PointRDD(JavaRDD<Point> rawPointRDD,String gridType, Integer numPartitions) {
+        this.setRawPointRDD(rawPointRDD);
+        this.rawPointRDD.persist(StorageLevel.MEMORY_ONLY());
+        this.totalNumberOfRecords = this.rawPointRDD.count();
 
+        doSpatialPartitioning(gridType,numPartitions);
+        
+
+        //final Broadcast<HashSet<EnvelopeWithGrid>> gridEnvelopBroadcasted = sc.broadcast(grids);
+        JavaPairRDD<Integer, Point> unPartitionedGridPointRDD = this.rawPointRDD.flatMapToPair(
+                new PairFlatMapFunction<Point, Integer, Point>() {
+                    @Override
+                    public Iterator<Tuple2<Integer, Point>> call(Point point) throws Exception {
+                    	return PartitionJudgement.getPartitionID(grids,point);
+                        
+                    }
+                }
+        );
+        this.rawPointRDD.unpersist();
+        this.gridPointRDD = unPartitionedGridPointRDD.partitionBy(new SpatialPartitioner(grids.size()));//.persist(StorageLevel.DISK_ONLY());
+
+    }
+
+    /**
+     * Transform a rawPointRDD to a PointRDD with a specified spatial partitioning grid type
+     * @param rawPointRDD
+     * @param gridType gridType specify the spatial partitioning method
+     */
+    public PointRDD(JavaRDD<Point> rawPointRDD,String gridType) {
+        this.setRawPointRDD(rawPointRDD);
+        this.rawPointRDD.persist(StorageLevel.MEMORY_ONLY());
+        this.totalNumberOfRecords = this.rawPointRDD.count();
+
+        int numPartitions=this.rawPointRDD.getNumPartitions();
+        
+        doSpatialPartitioning(gridType,numPartitions);
+        
+        JavaPairRDD<Integer, Point> unPartitionedGridPointRDD = this.rawPointRDD.flatMapToPair(
+                new PairFlatMapFunction<Point, Integer, Point>() {
+                    @Override
+                    public Iterator<Tuple2<Integer, Point>> call(Point point) throws Exception {
+                    	 return PartitionJudgement.getPartitionID(grids,point);
+                       
+                    }
+                }
+        );
+        this.rawPointRDD.unpersist();
+        this.gridPointRDD = unPartitionedGridPointRDD.partitionBy(new SpatialPartitioner(grids.size()));//.persist(StorageLevel.DISK_ONLY());
+
+    }
 
     /**
      * Initialize one raw SpatialRDD with a raw input file
@@ -151,62 +207,9 @@ public class PointRDD implements Serializable {
         this.rawPointRDD.persist(StorageLevel.MEMORY_ONLY());
         this.totalNumberOfRecords = this.rawPointRDD.count();
 
-        //Calculate the number of samples we need to take.
-        int sampleNumberOfRecords = RDDSampleUtils.getSampleNumbers(numPartitions, totalNumberOfRecords);
-
-        if(sampleNumberOfRecords == -1) {
-            throw new IllegalArgumentException("The input size is smaller the number of grid, please reduce the grid size!");
-        }
-        //Take Sample
-        //todo: This creates troubles.. In fact it should be List interface. But List reports problems in Scala Shell, seems that it can not implement polymorphism and Still use List.
-        ArrayList<Point> pointSampleList = new ArrayList<Point>(this.rawPointRDD.takeSample(false, sampleNumberOfRecords));
-        //Sort
-        //Get minX and minY;
-        this.boundary();
-        //Pick and create boundary;
-
+        doSpatialPartitioning(gridType,numPartitions);
         
-
-        //This is the case where data size is too small. We will just create one grid
-        if(sampleNumberOfRecords == 0) {
-            //If the sample Number is too small, we will just use one grid instead.
-            System.err.println("The grid size is " + numPartitions * numPartitions + "for 2-dimension X-Y grid" + numPartitions + " for 1-dimension grid");
-            System.err.println("The sample size is " + totalNumberOfRecords/100);
-            System.err.println("input size is too small, we can not guarantee one grid have at least one record in it");
-            System.err.println("we will just build one grid for all input");
-            grids = new HashSet<EnvelopeWithGrid>();
-            grids.add(new EnvelopeWithGrid(this.boundaryEnvelope, 0));
-        } else if (gridType.equals("equalgrid")) {
-        	EqualPartitioning equalPartitioning =new EqualPartitioning(this.boundaryEnvelope,numPartitions);
-        	grids=equalPartitioning.getGrids();
-        }
-        else if(gridType.equals("hilbert"))
-        {
-        	HilbertPartitioning hilbertPartitioning=new HilbertPartitioning(pointSampleList.toArray(new Point[pointSampleList.size()]),this.boundaryEnvelope,numPartitions);
-        	grids=hilbertPartitioning.getGrids();
-        }
-        else if(gridType.equals("rtree"))
-        {
-        	RtreePartitioning rtreePartitioning=new RtreePartitioning(pointSampleList.toArray(new Point[pointSampleList.size()]),this.boundaryEnvelope,numPartitions);
-        	grids=rtreePartitioning.getGrids();
-        }
-        else if(gridType.equals("voronoi"))
-        {
-        	VoronoiPartitioning voronoiPartitioning=new VoronoiPartitioning(pointSampleList.toArray(new Point[pointSampleList.size()]),this.boundaryEnvelope,numPartitions);
-        	grids=voronoiPartitioning.getGrids();
-        }
-        else
-        {
-        	throw new IllegalArgumentException("Partitioning method is not recognized, please check again.");
-        }
-
-        
-        
-        //Note, we don't need cache this RDD in memory, store it in the disk is enough.
-        //todo, may be refactor this so that user have choice.
-        //todo, measure this part's time. Using log4j debug level.
-        //todo, This hashPartitioner could be improved by a simple %, becuase we know they're parition number.
-        final Broadcast<HashSet<EnvelopeWithGrid>> gridEnvelopBroadcasted = sc.broadcast(grids);
+        //final Broadcast<HashSet<EnvelopeWithGrid>> gridEnvelopBroadcasted = sc.broadcast(grids);
         JavaPairRDD<Integer, Point> unPartitionedGridPointRDD = this.rawPointRDD.flatMapToPair(
                 new PairFlatMapFunction<Point, Integer, Point>() {
                     @Override
@@ -237,6 +240,26 @@ public class PointRDD implements Serializable {
 
         int numPartitions=this.rawPointRDD.getNumPartitions();
         
+        doSpatialPartitioning(gridType,numPartitions);
+        
+
+        JavaPairRDD<Integer, Point> unPartitionedGridPointRDD = this.rawPointRDD.flatMapToPair(
+                new PairFlatMapFunction<Point, Integer, Point>() {
+                    @Override
+                    public Iterator<Tuple2<Integer, Point>> call(Point point) throws Exception {
+                    	 return PartitionJudgement.getPartitionID(grids,point);
+                       
+                    }
+                }
+        );
+        this.rawPointRDD.unpersist();
+        this.gridPointRDD = unPartitionedGridPointRDD.partitionBy(new SpatialPartitioner(grids.size()));//.persist(StorageLevel.DISK_ONLY());
+
+        
+    }
+    
+	private void doSpatialPartitioning(String gridType, int numPartitions)
+	{
         //Calculate the number of samples we need to take.
         int sampleNumberOfRecords = RDDSampleUtils.getSampleNumbers(numPartitions, totalNumberOfRecords);
 
@@ -285,28 +308,8 @@ public class PointRDD implements Serializable {
         {
         	throw new IllegalArgumentException("Partitioning method is not recognized, please check again.");
         }
-
-        
-        
-        //Note, we don't need cache this RDD in memory, store it in the disk is enough.
-        //todo, may be refactor this so that user have choice.
-        //todo, measure this part's time. Using log4j debug level.
-        //todo, This hashPartitioner could be improved by a simple %, becuase we know they're parition number.
-        //final Broadcast<HashSet<EnvelopeWithGrid>> gridEnvelopBroadcasted = sc.broadcast(grids);
-        JavaPairRDD<Integer, Point> unPartitionedGridPointRDD = this.rawPointRDD.flatMapToPair(
-                new PairFlatMapFunction<Point, Integer, Point>() {
-                    @Override
-                    public Iterator<Tuple2<Integer, Point>> call(Point point) throws Exception {
-                    	 return PartitionJudgement.getPartitionID(grids,point);
-                       
-                    }
-                }
-        );
-        this.rawPointRDD.unpersist();
-        this.gridPointRDD = unPartitionedGridPointRDD.partitionBy(new SpatialPartitioner(grids.size()));//.persist(StorageLevel.DISK_ONLY());
-
-        
-    }
+	}
+    
     
     /**
      * Create an IndexedRDD and cache it in memory. Need to have a grided RDD first. The index is build on each partition.

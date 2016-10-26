@@ -94,24 +94,24 @@ public class PolygonRangeTest {
 
     @Test
     public void testSpatialRangeQuery() throws Exception {
-    	PolygonRDD PolygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter);
+    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter);
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = RangeQuery.SpatialRangeQuery(PolygonRDD, queryEnvelope, 0).getRawPolygonRDD().count();
+    		long resultSize = RangeQuery.SpatialRangeQuery(polygonRDD, queryEnvelope, 0).getRawPolygonRDD().count();
     		assert resultSize>-1;
     	}
-        
+     	assert RangeQuery.SpatialRangeQuery(polygonRDD, queryEnvelope, 0).getRawPolygonRDD().take(10).get(1).getUserData().toString()!=null;
     }
     @Test
     public void testSpatialRangeQueryUsingIndex() throws Exception {
-    	PolygonRDD PolygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter);
-    	PolygonRDD.buildIndex("rtree");
+    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter);
+    	polygonRDD.buildIndex("rtree");
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = RangeQuery.SpatialRangeQueryUsingIndex(PolygonRDD, queryEnvelope,0).getRawPolygonRDD().count();
+    		long resultSize = RangeQuery.SpatialRangeQueryUsingIndex(polygonRDD, queryEnvelope,0).getRawPolygonRDD().count();
     		assert resultSize>-1;
     	}
-        
+     	assert RangeQuery.SpatialRangeQueryUsingIndex(polygonRDD, queryEnvelope, 0).getRawPolygonRDD().take(10).get(1).getUserData().toString()!=null;
     }
 
 }

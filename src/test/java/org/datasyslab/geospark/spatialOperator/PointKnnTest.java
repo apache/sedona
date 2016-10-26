@@ -11,6 +11,8 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
+import io.netty.handler.codec.http.HttpContentEncoder.Result;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
@@ -98,8 +100,10 @@ public class PointKnnTest {
     	{
     		List<Point> result = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, 5);
     		assert result.size()>-1;
+    		assert result.get(0).getUserData().toString()!=null;
+    		//System.out.println(result.get(0).getUserData().toString());
     	}
-
+    	
     }
     @Test
     public void testSpatialKnnQueryUsingIndex() throws Exception {
@@ -109,6 +113,8 @@ public class PointKnnTest {
     	{
     		List<Point> result = KNNQuery.SpatialKnnQueryUsingIndex(pointRDD, queryPoint, 5);
     		assert result.size()>-1;
+    		assert result.get(0).getUserData().toString()!=null;
+    		//System.out.println(result.get(0).getUserData().toString());
     	}
 
     }

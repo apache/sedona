@@ -21,6 +21,7 @@ import org.datasyslab.geospark.knnJudgement.PointKnnJudgement;
 import org.datasyslab.geospark.knnJudgement.PointKnnJudgementUsingIndex;
 import org.datasyslab.geospark.knnJudgement.PolygonDistanceComparator;
 import org.datasyslab.geospark.knnJudgement.PolygonKnnJudgement;
+import org.datasyslab.geospark.knnJudgement.PolygonKnnJudgementUsingIndex;
 import org.datasyslab.geospark.knnJudgement.RectangleDistanceComparator;
 import org.datasyslab.geospark.knnJudgement.RectangleKnnJudgement;
 import org.datasyslab.geospark.knnJudgement.RectangleKnnJudgementUsingIndex;
@@ -131,5 +132,25 @@ public class KNNQuery implements Serializable{
 		return tmp.takeOrdered(k, new PolygonDistanceComparator(queryCenter));
 
 	}
-	
+	/**
+	 * Spatial K Nearest Neighbors query using index
+	 * @param objectRDD specify the input rectangelRDD
+	 * @param queryCenter specify the query center 
+	 * @param k specify the K
+	 * @return A list which contains K nearest points
+	 */
+	public static List<Polygon> SpatialKnnQueryUsingIndex(PolygonRDD objectRDD, Point queryCenter, Integer k) {
+		// For each partation, build a priority queue that holds the topk
+		//@SuppressWarnings("serial")
+
+        if(objectRDD.indexedRDDNoId == null) {
+            throw new NullPointerException("Need to invoke buildIndex() first, indexedRDDNoId is null");
+        }
+		JavaRDD<Polygon> tmp = objectRDD.indexedRDDNoId.mapPartitions(new PolygonKnnJudgementUsingIndex(queryCenter,k));
+
+		// Take the top k
+
+		return tmp.takeOrdered(k, new PolygonDistanceComparator(queryCenter));
+
+	}
 }
