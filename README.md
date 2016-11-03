@@ -5,6 +5,8 @@
 
 GeoSpark is a cluster computing system for processing large-scale spatial data. GeoSpark extends Apache Spark with a set of out-of-the-box Spatial Resilient Distributed Datasets (SRDDs) that efficiently load, process, and analyze large-scale spatial data across machines. GeoSpark provides APIs for Apache Spark programmer to easily develop their spatial analysis programs with Spatial Resilient Distributed Datasets (SRDDs) which have in house support for geometrical and distance operations.
 
+GeoSpark is listed as **Infrastructure Project** in **Apache Spark  Third Party Project Wiki Page** ([Link](https://cwiki.apache.org/confluence/display/SPARK/Third+Party+Projects))
+
 GeoSpark artifacts are hosted in Maven Central. You can add a Maven dependency with the following coordinates:
 
 ```
@@ -13,7 +15,13 @@ artifactId: geospark
 version: 0.3.2
 ```
 
-GeoSpark is listed as **Infrastructure Project** in **Apache Spark  Third Party Project Wiki Page** ([Link](https://cwiki.apache.org/confluence/display/SPARK/Third+Party+Projects))
+```
+groupId: org.datasyslab
+artifactId: geospark
+version: 0.3.2-spark-1.x
+```
+
+
 
 ##  Version information ([Full List](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Full-Version-Release-notes))
 
@@ -24,7 +32,7 @@ GeoSpark is listed as **Infrastructure Project** in **Apache Spark  Third Party 
 |       0.3.1      	| Bug fix: Support Apache Spark 2.X version, fix a bug which results in inaccurate results when doing join query, add more unit test cases                                                                              	|
 |        0.3       	| Major updates: Significantly shorten query time on spatial join for skewed data; Support load balanced spatial partitioning methods (also serve as the global index); Optimize code for iterative spatial data mining 	|
 |   Master branch  	| even with 0.3.2                                                                                                                                                                                                     	 	|
-| Spark 1.X branch 	| even with 0.3.1 but only supports Apache Spark 1.X        																																								|
+| Spark 1.X branch 	| even with 0.3.2 but only supports Apache Spark 1.X        																																								|
 
 ## How to get started (For Scala and Java developers)
 
