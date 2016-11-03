@@ -6,54 +6,27 @@ package org.datasyslab.geospark.spatialRDD;
  *
  */
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.index.quadtree.Quadtree;
 import com.vividsolutions.jts.index.strtree.STRtree;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKTReader;
-
-import org.apache.commons.lang.IllegalClassException;
-import org.apache.spark.HashPartitioner;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
-import org.apache.spark.api.java.function.PairFunction;
-import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.formatMapper.RectangleFormatMapper;
 import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
-import org.datasyslab.geospark.spatialPartitioning.EqualPartitioning;
-import org.datasyslab.geospark.spatialPartitioning.HilbertPartitioning;
-import org.datasyslab.geospark.spatialPartitioning.PartitionJudgement;
-import org.datasyslab.geospark.spatialPartitioning.RtreePartitioning;
-import org.datasyslab.geospark.spatialPartitioning.SpatialPartitioner;
-import org.datasyslab.geospark.spatialPartitioning.VoronoiPartitioning;
-import org.datasyslab.geospark.utils.GeometryComparatorFactory;
-import org.datasyslab.geospark.utils.RDDSampleUtils;
-import org.datasyslab.geospark.utils.RectangleXMaxComparator;
-import org.datasyslab.geospark.utils.RectangleXMinComparator;
-import org.datasyslab.geospark.utils.RectangleYMaxComparator;
-import org.datasyslab.geospark.utils.RectangleYMinComparator;
-import org.wololo.jts2geojson.GeoJSONReader;
+import org.datasyslab.geospark.spatialPartitioning.*;
+import org.datasyslab.geospark.utils.*;
+import scala.Tuple2;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-
-import scala.Tuple2;
 
 // TODO: Auto-generated Javadoc
 
@@ -476,5 +449,18 @@ public class RectangleRDD implements Serializable {
         );
         this.rawRectangleRDD.unpersist();
         this.gridRectangleRDD = unPartitionedGridRectangleRDD.partitionBy(new SpatialPartitioner(grids.size())).persist(StorageLevel.MEMORY_ONLY());
+	}
+
+
+
+	public void Looper() {
+
+        System.out.println(this.rawRectangleRDD);
+        System.out.println(this.rawRectangleRDD.count());
+
+        System.out.println("-------------------");
+
+        this.rawRectangleRDD.foreach(x -> System.out.println(x + ":)"));
+
 	}
 }
