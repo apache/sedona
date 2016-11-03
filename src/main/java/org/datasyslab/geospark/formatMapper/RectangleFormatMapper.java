@@ -49,6 +49,7 @@ public class RectangleFormatMapper implements Serializable,Function<String,Envel
 				y1 = Double.parseDouble(lineSplitList.get(offset + 1));
 				y2 = Double.parseDouble(lineSplitList.get(offset + 3));
 				rectangle = new Envelope(x1, x2, y1, y2);
+				rectangle.setUserData(line);
 				break;
 			case "tsv":
 				lineSplitList = Arrays.asList(line.split("\t"));
@@ -57,21 +58,19 @@ public class RectangleFormatMapper implements Serializable,Function<String,Envel
 				y1 = Double.parseDouble(lineSplitList.get(offset + 1));
 				y2 = Double.parseDouble(lineSplitList.get(offset + 3));
 				rectangle = new Envelope(x1, x2, y1, y2);
+				rectangle.setUserData(line);
 				break;
 			case "geojson":
 				GeoJSONReader reader = new GeoJSONReader();
 				Geometry result = reader.read(line);
 				rectangle =result.getEnvelopeInternal();
+				rectangle.setUserData(line);
 				break;
 			case "wkt":
 				lineSplitList=Arrays.asList(line.split("\t"));
 				WKTReader wtkreader = new WKTReader();
-				try {
 				rectangle = wtkreader.read(lineSplitList.get(offset)).getEnvelopeInternal();
-                } catch (NullPointerException e) {
-                    rectangle= new Envelope(85.01,86.01,34.01,35.01);
-                    //e.printStackTrace();
-                }
+				rectangle.setUserData(line);
 				break;
 			default:
 				throw new Exception("Input type not recognized, ");

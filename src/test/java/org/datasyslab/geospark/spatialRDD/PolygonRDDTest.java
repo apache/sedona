@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 public class PolygonRDDTest {
@@ -88,7 +89,7 @@ public class PolygonRDDTest {
 
         //todo: Move this into log4j.
         Map<Integer, Object> map = polygonRDD.gridPolygonRDD.countByKey();
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        for (Entry<Integer, Object> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / polygonRDD.totalNumberOfRecords;
             //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
@@ -130,7 +131,7 @@ public class PolygonRDDTest {
 
         System.out.println(map.size());
 
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        for (Entry<Integer, Object> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / polygonRDD.totalNumberOfRecords;
             System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
@@ -150,7 +151,7 @@ public class PolygonRDDTest {
 
        // System.out.println(map.size());
 
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        for (Entry<Integer, Object> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / polygonRDD.totalNumberOfRecords;
             //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
@@ -170,7 +171,7 @@ public class PolygonRDDTest {
 
         //System.out.println(map.size());
 
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        for (Entry<Integer, Object> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / polygonRDD.totalNumberOfRecords;
             //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
@@ -190,7 +191,7 @@ public class PolygonRDDTest {
 
         //System.out.println(map.size());
 
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        for (Entry<Integer, Object> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / polygonRDD.totalNumberOfRecords;
             //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));

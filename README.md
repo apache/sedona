@@ -1,37 +1,59 @@
 ![GeoSpark Logo](http://www.public.asu.edu/~jiayu2/geospark/logo.png)
 
-[![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark)
+[![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark)
 
-##  Version information
 
-| Version     | Summary |
-|-------------|---------------|
-| 0.1       |  Support spatial range, join and Knn         |
-| 0.2       | Improve code structure and refactor API         |
-| 0.3       | Major updates: Significantly shorten query time on spatial join for skewed data; Support load balanced spatial partitioning methods (also serve as the global index); Optimize code for iterative spatial data mining|
-| master    | even with 0.3         |
+GeoSpark is a cluster computing system for processing large-scale spatial data. GeoSpark extends Apache Spark with a set of out-of-the-box Spatial Resilient Distributed Datasets (SRDDs) that efficiently load, process, and analyze large-scale spatial data across machines. GeoSpark provides APIs for Apache Spark programmer to easily develop their spatial analysis programs with Spatial Resilient Distributed Datasets (SRDDs) which have in house support for geometrical and distance operations.
 
-GeoSpark is a cluster computing system for processing large-scale spatial data. GeoSpark extends Apache Spark with a set of out-of-the-box Spatial Resilient Distributed Datasets (SRDDs) that efficiently load, process, and analyze large-scale spatial data across machines. This problem is quite challenging due to the fact that (1) spatial data may be quite complex, e.g., rivers' and cities' geometrical boundaries, (2) spatial (and geometric) operations (e.g., Overlap, Intersect, Convex Hull, Cartographic Distances) cannot be easily and efficiently expressed using regular RDD transformations and actions. GeoSpark provides APIs for Apache Spark programmer to easily develop their spatial analysis programs with Spatial Resilient Distributed Datasets (SRDDs) which have in house support for geometrical and distance operations. Experiments show that GeoSpark is scalable and exhibits faster run-time performance than Hadoop-based systems in spatial analysis applications like spatial join, spatial aggregation, spatial autocorrelation analysis and spatial co-location pattern recognition.
+GeoSpark is listed as **Infrastructure Project** in **Apache Spark  Third Party Project Wiki Page** ([Link](https://cwiki.apache.org/confluence/display/SPARK/Third+Party+Projects))
 
+GeoSpark artifacts are hosted in Maven Central. You can add a Maven dependency with the following coordinates:
+
+```
+groupId: org.datasyslab
+artifactId: geospark
+version: 0.3.2
+```
+
+```
+groupId: org.datasyslab
+artifactId: geospark
+version: 0.3.2-spark-1.x
+```
+
+
+
+##  Version information ([Full List](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Full-Version-Release-notes))
+
+
+|      Version     	| Summary                                                                                                                                                                                                               	|
+|:----------------:	|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
+|       0.3.2      	| Functionality enhancement: 1. [JTSplus Spatial Objects](https://github.com/jiayuasu/JTSplus) now carry the original input data. Each object stores "UserData" and provides getter and setter. 2. Add a new SpatialRDD constructor to transform a regular data RDD to a spatial partitioned SpatialRDD.                                                                             	|
+|       0.3.1      	| Bug fix: Support Apache Spark 2.X version, fix a bug which results in inaccurate results when doing join query, add more unit test cases                                                                              	|
+|        0.3       	| Major updates: Significantly shorten query time on spatial join for skewed data; Support load balanced spatial partitioning methods (also serve as the global index); Optimize code for iterative spatial data mining 	|
+|   Master branch  	| even with 0.3.2                                                                                                                                                                                                     	 	|
+| Spark 1.X branch 	| even with 0.3.2 but only supports Apache Spark 1.X        																																								|
 
 ## How to get started (For Scala and Java developers)
 
+
+
 ### Prerequisites
 
-1. Apache Hadoop 2.4.0 and later
-2. Apache Spark 1.2.1 and later
-3. JDK 1.7
-4. Compiled GeoSpark jar (Run 'mvn clean install' at source code folder or Download [pre-compiled GeoSpark jar](https://github.com/DataSystemsLab/GeoSpark/releases/tag/0.3) under "Release" tag)
+1. Apache Spark 2.X releases (Apache Spark 1.X releases support available in GeoSpark for Spark 1.X branch)
+2. JDK 1.7
+3. You might need to modify the dependencies in "POM.xml" and make it consistent with your environment.
 
-Note: GeoSpark has been tested on Apache Spark 1.2, 1.3, 1.4, 1.5 and Apache Hadoop 2.4, 2.6.
+Note: GeoSpark Master branch supports Apache Spark 2.X releases and GeoSpark for Spark 1.X branch supports Apache Spark 1.X releases. Please refer to the proper branch you need.
 
 ### How to use GeoSpark APIs in an interactive Spark shell (Scala)
 
 1. Have your Spark cluster ready.
-2. Run Spark shell with GeoSpark as a dependency.
+2. Download [pre-compiled GeoSpark jar](https://github.com/DataSystemsLab/GeoSpark/releases) under "Release" tag.
+3. Run Spark shell with GeoSpark as a dependency.
 
   `
-  ./bin/spark-shell --jars GeoSpark_Precompile_0.3_WithDependencies.jar
+  ./bin/spark-shell --jars GeoSpark_COMPILED.jar
   `
 
 3. You can now call GeoSpark APIs directly in your Spark shell!
@@ -39,57 +61,21 @@ Note: GeoSpark has been tested on Apache Spark 1.2, 1.3, 1.4, 1.5 and Apache Had
 ### How to use GeoSpark APIs in a self-contained Spark application (Scala and Java)
 
 1. Create your own Apache Spark project in Scala or Java
-2. Download GeoSpark source code or pre-compiled binary jar.
-3. Put GeoSpark source code with your own code and compile together. Or add GeoSpark.jar into your local compilation dependency (GeoSpark will be added to Maven central soon).
+2. Add GeoSpark Maven coordinates into your project dependencies.
 4. You can now use GeoSpark APIs in your Spark program!
 5. Use spark-submit to submit your compiled self-contained Spark program.
 
-### GeoSpark Programming Examples (Java)
-
-Spatial queries Java example in "org.datasyslab.geospark.showcase" folder: Spatial range, join and KNN.
-
-
 ### GeoSpark Programming Examples (Scala)
 
-####Spatial range query
+[GeoSpark Scala Example](https://gist.github.com/jiayuasu/bcecaa2e9e6f280a0f9a72bb7549ffaa)
 
-`
-val objectRDD = new RectangleRDD(sc, inputLocation, offset, "csv");
-`
+[Test Data](https://github.com/DataSystemsLab/GeoSpark/tree/master/src/test/resources)
 
-`
-val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, queryEnvelope, 0).getRawRectangleRDD().count();
-`
+### GeoSpark Programming Examples (Java)
 
-####Spatial KNN query
+[GeoSpark Java Example](https://github.com/DataSystemsLab/GeoSpark/blob/master/src/main/java/org/datasyslab/geospark/showcase/Example.java)
 
-`
-val objectRDD = new RectangleRDD(sc, inputLocation, offset, "csv");
-`
-
-`
-val result = KNNQuery.SpatialKnnQuery(objectRDD, queryPoint, 1000);
-`
-####Spatial join query with index
-`
-val rectangleRDD = new RectangleRDD(sc, inputLocation2, offset2, "csv");
-`
-
-`
-val objectRDD = new RectangleRDD(sc, inputLocation, offset ,"wkt","rtree",numPartitions);
-`
-
-`
-objectRDD.buildIndex("rtree");
-`
-
-`
-val joinQuery = new JoinQuery(sc,objectRDD,rectangleRDD); 
-`
-
-`
-val resultSize = joinQuery.SpatialJoinQueryUsingIndex(objectRDD,rectangleRDD).count();
-`
+[Test Data](https://github.com/DataSystemsLab/GeoSpark/tree/master/src/test/resources)
 
 ## Scala and Java API usage
 
@@ -118,7 +104,7 @@ Two pairs of longitude and latitude present the vertexes lie on the diagonal of 
 
 Each tuple contains unlimited points.
 
-##Supported data format
+## Supported data format
 GeoSpark supports Comma-Separated Values ("csv"), Tab-separated values ("tsv"), Well-Known Text ("wkt"), and  GeoJSON ("geojson") as the input formats. Users only need to specify input format as Splitter and the start column (if necessary) of spatial info in one tuple as Offset when call Constructors.
 
 ## Important features
@@ -152,6 +138,21 @@ Jia Yu, Jinxuan Wu, Mohamed Sarwat. ["GeoSpark: A Cluster Computing Framework fo
 GeoSaprk makes use of JTS Plus (An extended JTS Topology Suite Version 1.14) for some geometrical computations.
 
 Please refer to [JTS Topology Suite website](http://tsusiatsoftware.net/jts/main.html) and [JTS Plus](https://github.com/jiayuasu/JTSplus) for more details.
+
+## Thanks for the help from GeoSpark community
+We appreciate the help and suggestions from the following GeoSpark users (List is increasing..):
+
+* @gaufung
+* @lrojas94
+* @mdespriee
+* @sabman
+* @samchorlton
+* @Tsarazin
+* @TBuc
+* ...
+
+
+
 ## Contact
 
 ### Contributors
@@ -161,7 +162,7 @@ Please refer to [JTS Topology Suite website](http://tsusiatsoftware.net/jts/main
 
 * [Mohamed Sarwat](http://faculty.engineering.asu.edu/sarwat/) (Email: msarwat@asu.edu)
 
-###Project website
+### Project website
 Please visit [GeoSpark project wesbite](http://geospark.datasyslab.org) for latest news and releases.
 
 ### DataSys Lab

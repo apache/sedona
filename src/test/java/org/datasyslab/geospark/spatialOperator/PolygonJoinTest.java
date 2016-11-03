@@ -94,8 +94,14 @@ public class PolygonJoinTest {
         JoinQuery joinQuery = new JoinQuery(sc,objectRDD,polygonRDD); 
         
         List<Tuple2<Polygon, HashSet<Polygon>>> result = joinQuery.SpatialJoinQuery(objectRDD,polygonRDD).collect();
-
-        System.out.println(result.size());
+        assert result.get(0)._1().getUserData()!=null;
+        for(int i=0;i<result.size();i++)
+        {
+        	if(result.get(i)._2().size()!=0)
+        	{
+        		assert result.get(i)._2().iterator().next().getUserData()!=null;
+        	}
+        }
     }
 
     @Test(expected = NullPointerException.class)
@@ -123,9 +129,14 @@ public class PolygonJoinTest {
         JoinQuery joinQuery = new JoinQuery(sc,objectRDD,polygonRDD);
         
         List<Tuple2<Polygon, HashSet<Polygon>>> result = joinQuery.SpatialJoinQueryUsingIndex(objectRDD,polygonRDD).collect();
-
-        System.out.println(result.size());
-
+        assert result.get(0)._1().getUserData()!=null;
+        for(int i=0;i<result.size();i++)
+        {
+        	if(result.get(i)._2().size()!=0)
+        	{
+        		assert result.get(i)._2().iterator().next().getUserData()!=null;
+        	}
+        }
     }
 
     @Test

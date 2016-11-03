@@ -2,16 +2,45 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.datasyslab</groupId>
-	<artifactId>geospark-precompiled</artifactId>
-	<version>0.3.1</version>
-	<name>GeoSpark</name>
-	<description>Spark-1.X</description>
+	<artifactId>geospark</artifactId>
+	<version>0.3.2-spark-1.x</version>
+	
+	<name>${project.groupId}:${project.artifactId}</name>
+	<description>Geospatial extension for Apache Spark</description>
+	<url>http://geospark.datasyslab.org/</url>
 	<packaging>jar</packaging>
+ 
+    <licenses>
+        <license>
+            <name>MIT license</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
 
-
+    <developers>
+        <developer>
+            <name>Jia Yu</name>
+            <email>jiayu2@asu.edu</email>
+            <organization>Arizona State University Data Systems Lab</organization>
+            <organizationUrl>http://www.datasyslab.org/</organizationUrl>
+        </developer>
+        <developer>
+            <name>Mohamed Sarwat</name>
+            <email>msarwat@asu.edu</email>
+            <organization>Arizona State University Data Systems Lab</organization>
+            <organizationUrl>http://www.datasyslab.org/</organizationUrl>
+        </developer>
+    </developers>
+	<scm>
+        <connection>scm:git:git@github.com:DataSystemsLab/GeoSpark.git</connection>
+        <developerConnection>scm:git:git@github.com:DataSystemsLab/GeoSpark.git</developerConnection>
+        <url>git@github.com:DataSystemsLab/GeoSpark.git</url>
+    </scm>
+    
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -23,28 +52,19 @@
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-core_2.10</artifactId>
 			<version>1.6.2</version>
+			<scope>provided</scope>
 		</dependency>
-		<!--
+		
 		<dependency>
-			<groupId>com</groupId>
+			<groupId>org.datasyslab</groupId>
 			<artifactId>JTSplus</artifactId>
-			<version>1.14</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/test/resources/JTSplus/1.14/JTSplus-1.14.jar</systemPath>
-		</dependency>-->
-
-		<!--
-		<dependency>
-			<groupId>com.vividsolutions</groupId>
-			<artifactId>jts</artifactId>
-			<version>1.14</version>
+			<version>0.1.0</version>
 		</dependency>
-		-->
+
 		<dependency>
 			<groupId>org.wololo</groupId>
 			<artifactId>jts2geojson</artifactId>
 			<version>0.7.0</version>
-		
 			<exclusions>
 				<exclusion>
 			<groupId>com.vividsolutions</groupId>
@@ -53,8 +73,23 @@
 			</exclusions>
 		</dependency>
 	</dependencies>
+	
 	<build>
-		<plugins>
+		<plugins>		
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+          
+            
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -63,26 +98,6 @@
 					<source>1.7</source>
 					<target>1.7</target>
 				</configuration>
-			</plugin>
-			
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.5.201505241946</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>report</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			
 			<plugin>
