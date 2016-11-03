@@ -93,8 +93,14 @@ public class RectangleJoinTest {
         JoinQuery joinQuery = new JoinQuery(sc,objectRDD,rectangleRDD); 
         
         List<Tuple2<Envelope, HashSet<Envelope>>> result = joinQuery.SpatialJoinQuery(objectRDD,rectangleRDD).collect();
-
-        System.out.println(result.size());
+        assert result.get(0)._1().getUserData()!=null;
+        for(int i=0;i<result.size();i++)
+        {
+        	if(result.get(i)._2().size()!=0)
+        	{
+        		assert result.get(i)._2().iterator().next().getUserData()!=null;
+        	}
+        }
     }
 
     @Test(expected = NullPointerException.class)
@@ -122,8 +128,14 @@ public class RectangleJoinTest {
         JoinQuery joinQuery = new JoinQuery(sc,objectRDD,rectangleRDD);
         
         List<Tuple2<Envelope, HashSet<Envelope>>> result = joinQuery.SpatialJoinQueryUsingIndex(objectRDD,rectangleRDD).collect();
-
-        System.out.println(result.size());
+        assert result.get(0)._1().getUserData()!=null;
+        for(int i=0;i<result.size();i++)
+        {
+        	if(result.get(i)._2().size()!=0)
+        	{
+        		assert result.get(i)._2().iterator().next().getUserData()!=null;
+        	}
+        }
 
     }
     @Test

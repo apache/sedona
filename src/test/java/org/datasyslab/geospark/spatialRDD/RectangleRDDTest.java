@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -94,7 +95,7 @@ public class RectangleRDDTest implements Serializable{
 
         //todo: Move this into log4j.
         Map<Integer, Object> map = rectangleRDD.gridRectangleRDD.countByKey();
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        for (Entry<Integer, Object> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / rectangleRDD.totalNumberOfRecords;
             //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
@@ -136,7 +137,7 @@ public class RectangleRDDTest implements Serializable{
 
         //System.out.println(map.size());
 
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        for (Entry<Integer, Object> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / rectangleRDD.totalNumberOfRecords;
            // System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
@@ -156,7 +157,7 @@ public class RectangleRDDTest implements Serializable{
 
         //System.out.println(map.size());
 
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        for (Entry<Integer, Object> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / rectangleRDD.totalNumberOfRecords;
            // System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
@@ -176,7 +177,7 @@ public class RectangleRDDTest implements Serializable{
 
        // System.out.println(map.size());
 
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        for (Entry<Integer, Object> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / rectangleRDD.totalNumberOfRecords;
             //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
@@ -196,7 +197,7 @@ public class RectangleRDDTest implements Serializable{
 
         //System.out.println(map.size());
 
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
+        for (Entry<Integer, Object> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / rectangleRDD.totalNumberOfRecords;
             //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));

@@ -95,8 +95,14 @@ public class PointJoinTest {
         JoinQuery joinQuery = new JoinQuery(sc,pointRDD,rectangleRDD); 
         
         List<Tuple2<Envelope, HashSet<Point>>> result = joinQuery.SpatialJoinQuery(pointRDD,rectangleRDD).collect();
-
-        System.out.println(result.size());
+        assert result.get(1)._1().getUserData()!=null;
+        for(int i=0;i<result.size();i++)
+        {
+        	if(result.get(i)._2().size()!=0)
+        	{
+        		assert result.get(i)._2().iterator().next().getUserData()!=null;
+        	}
+        }
     }
 
     @Test(expected = NullPointerException.class)
@@ -124,8 +130,14 @@ public class PointJoinTest {
         JoinQuery joinQuery = new JoinQuery(sc,pointRDD,rectangleRDD);
         
         List<Tuple2<Envelope, HashSet<Point>>> result = joinQuery.SpatialJoinQueryUsingIndex(pointRDD,rectangleRDD).collect();
-
-        System.out.println(result.size());
+        assert result.get(1)._1().getUserData()!=null;
+        for(int i=0;i<result.size();i++)
+        {
+        	if(result.get(i)._2().size()!=0)
+        	{
+        		assert result.get(i)._2().iterator().next().getUserData()!=null;
+        	}
+        }
 
     }
 

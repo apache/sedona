@@ -100,6 +100,8 @@ public class RectangleKnnTest {
     	{
     		List<Envelope> result = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, 5);
     		assert result.size()>-1;
+    		assert result.get(0).getUserData().toString()!=null;
+    		//System.out.println(result.get(0).getUserData().toString());
     	}
 
     }
@@ -111,6 +113,8 @@ public class RectangleKnnTest {
     	{
     		List<Envelope> result = KNNQuery.SpatialKnnQueryUsingIndex(rectangleRDD, queryPoint, 5);
     		assert result.size()>-1;
+    		assert result.get(0).getUserData().toString()!=null;
+    		//System.out.println(result.get(0).getUserData().toString());
     	}
 
     }

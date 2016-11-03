@@ -9,6 +9,7 @@ package org.datasyslab.geospark.joinJudgement;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 

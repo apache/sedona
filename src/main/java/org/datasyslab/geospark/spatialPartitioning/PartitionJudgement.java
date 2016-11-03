@@ -26,7 +26,7 @@ public class PartitionJudgement implements Serializable{
 	{
 		
 	}
-	public static HashSet<Tuple2<Integer, Point>> getPartitionID(HashSet<EnvelopeWithGrid> grid,Point point)
+	public static Iterable<Tuple2<Integer, Point>> getPartitionID(HashSet<EnvelopeWithGrid> grid,Point point)
 	{
 		HashSet<Tuple2<Integer, Point>> result = new HashSet<Tuple2<Integer, Point>>();
 		Iterator<EnvelopeWithGrid> iteratorGrid=grid.iterator();
