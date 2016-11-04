@@ -1,23 +1,5 @@
 package org.datasyslab.geospark.spatialRDD;
 
-/**
- * 
- * @author Arizona State University DataSystems Lab
- *
- */
-
-import com.vividsolutions.jts.geom.Point;
-
-import org.apache.commons.lang.IllegalClassException;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -26,7 +8,25 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.GridType;
+import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
+import com.vividsolutions.jts.geom.Point;
 
 public class PointRDDTest implements Serializable{
     public static JavaSparkContext sc;
@@ -34,9 +34,9 @@ public class PointRDDTest implements Serializable{
     static InputStream input;
     static String InputLocation;
     static Integer offset;
-    static String splitter;
-    static String gridType;
-    static String indexType;
+    static FileDataSplitter splitter;
+    static GridType gridType;
+    static IndexType indexType;
     static Integer numPartitions;
     @BeforeClass
     public static void onceExecutedBeforeAll() {
@@ -51,9 +51,9 @@ public class PointRDDTest implements Serializable{
         InputLocation = "file://"+PointRDDTest.class.getClassLoader().getResource("primaryroads.csv").getPath();
 
         offset = 0;
-        splitter = "";
-        gridType = "";
-        indexType = "";
+        splitter = null;
+        gridType = null;
+        indexType = null;
         numPartitions = 0;
 
         try {
@@ -63,9 +63,9 @@ public class PointRDDTest implements Serializable{
             // InputLocation = prop.getProperty("inputLocation");
             InputLocation = "file://"+PointRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
-            splitter = prop.getProperty("splitter");
-            gridType = prop.getProperty("gridType");
-            indexType = prop.getProperty("indexType");
+            splitter = FileDataSplitter.valueOf(prop.getProperty("splitter").toUpperCase());
+            gridType = GridType.valueOf(prop.getProperty("gridType").toUpperCase());
+            indexType = IndexType.valueOf(prop.getProperty("indexType").toUpperCase());
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -129,7 +129,7 @@ public class PointRDDTest implements Serializable{
      */
     @Test
     public void testEqualSizeGridsSpatialPartitioing() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "equalgrid", 10);
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, GridType.EQUALGRID, 10);
         for (EnvelopeWithGrid d : pointRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
@@ -149,7 +149,7 @@ public class PointRDDTest implements Serializable{
      */
     @Test
     public void testHilbertCurveSpatialPartitioing() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "hilbert", 10);
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, GridType.HILBERT, 10);
         for (EnvelopeWithGrid d : pointRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
@@ -169,7 +169,7 @@ public class PointRDDTest implements Serializable{
      */
     @Test
     public void testRTreeSpatialPartitioing() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "rtree", 10);
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, GridType.RTREE, 10);
         for (EnvelopeWithGrid d : pointRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
@@ -189,7 +189,7 @@ public class PointRDDTest implements Serializable{
      */
     @Test
     public void testVoronoiSpatialPartitioing() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "voronoi", 10);
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, GridType.VORONOI, 10);
         for (EnvelopeWithGrid d : pointRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
@@ -212,7 +212,7 @@ public class PointRDDTest implements Serializable{
     @Test//(expected=IllegalClassException.class)
     public void testBuildIndexWithoutSetGrid() throws Exception {
         PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
-        pointRDD.buildIndex("");
+        pointRDD.buildIndex(null);
     }
 
     /*
@@ -221,7 +221,7 @@ public class PointRDDTest implements Serializable{
     @Test
     public void testBuildIndex() throws Exception {
         PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
-        pointRDD.buildIndex("");
+        pointRDD.buildIndex(null);
         List<Point> result = pointRDD.indexedRDD.take(1).get(0)._2().query(pointRDD.boundaryEnvelope);
     }
     /*
@@ -229,7 +229,7 @@ public class PointRDDTest implements Serializable{
      */
     @Test(expected=IllegalArgumentException.class)
     public void testBuildWithNoExistsGrid() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "ff", numPartitions);
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, null, numPartitions);
     }
 
     /*

@@ -1,5 +1,24 @@
 package org.datasyslab.geospark.spatialRDD;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.GridType;
+import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 /**
  * 
  * @author Arizona State University DataSystems Lab
@@ -9,32 +28,15 @@ package org.datasyslab.geospark.spatialRDD;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Polygon;
 
-import org.apache.commons.lang.IllegalClassException;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-
 public class PolygonRDDTest {
     public static JavaSparkContext sc;
     static Properties prop;
     static InputStream input;
     static String InputLocation;
     static Integer offset;
-    static String splitter;
-    static String gridType;
-    static String indexType;
+    static FileDataSplitter splitter;
+    static GridType gridType;
+    static IndexType indexType;
     static Integer numPartitions;
     @BeforeClass
     public static void onceExecutedBeforeAll() {
@@ -46,9 +48,9 @@ public class PolygonRDDTest {
         input = PolygonRDDTest.class.getClassLoader().getResourceAsStream("polygon.test.properties");
         InputLocation = "file://"+PolygonRDDTest.class.getClassLoader().getResource("primaryroads-polygon.csv").getPath();
         offset = 0;
-        splitter = "";
-        gridType = "";
-        indexType = "";
+        splitter = null;
+        gridType = null;
+        indexType = null;
         numPartitions = 0;
 
         try {
@@ -57,9 +59,9 @@ public class PolygonRDDTest {
             //InputLocation = prop.getProperty("inputLocation");
             InputLocation = "file://"+PolygonRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
-            splitter = prop.getProperty("splitter");
-            gridType = prop.getProperty("gridType");
-            indexType = prop.getProperty("indexType");
+            splitter = FileDataSplitter.valueOf(prop.getProperty("splitter").toUpperCase());
+            gridType = GridType.valueOf(prop.getProperty("gridType").toUpperCase());
+            indexType = IndexType.valueOf(prop.getProperty("indexType").toUpperCase());
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -122,7 +124,7 @@ public class PolygonRDDTest {
      */
     @Test
     public void testEqualSizeGridsSpatialPartitioing() throws Exception {
-    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, "equalgrid", 10);
+    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, GridType.EQUALGRID, 10);
         for (EnvelopeWithGrid d : polygonRDD.grids) {
         	System.out.println("PolygonRDD spatial partitioning grids: "+d.grid);
         }
@@ -142,7 +144,7 @@ public class PolygonRDDTest {
      */
     @Test
     public void testHilbertCurveSpatialPartitioing() throws Exception {
-    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, "hilbert", 10);
+    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, GridType.HILBERT, 10);
         for (EnvelopeWithGrid d : polygonRDD.grids) {
         	//System.out.println("PolygonRDD spatial partitioning grids: "+d.grid);
         }
@@ -162,7 +164,7 @@ public class PolygonRDDTest {
      */
     @Test
     public void testRTreeSpatialPartitioing() throws Exception {
-    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, "rtree", 10);
+    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, GridType.RTREE, 10);
         for (EnvelopeWithGrid d : polygonRDD.grids) {
         	//System.out.println("PolygonRDD spatial partitioning grids: "+d.grid);
         }
@@ -182,7 +184,7 @@ public class PolygonRDDTest {
      */
     @Test
     public void testVoronoiSpatialPartitioing() throws Exception {
-    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, "voronoi", 10);
+    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, GridType.VORONOI, 10);
         for (EnvelopeWithGrid d : polygonRDD.grids) {
         	//System.out.println("PolygonRDD spatial partitioning grids: "+d.grid);
         }
@@ -205,7 +207,7 @@ public class PolygonRDDTest {
     @Test//(expected=IllegalClassException.class)
     public void testBuildIndexWithoutSetGrid() throws Exception {
         PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, numPartitions);
-        polygonRDD.buildIndex("R-Tree");
+        polygonRDD.buildIndex(IndexType.RTREE);
     }
 
     /*
@@ -214,7 +216,7 @@ public class PolygonRDDTest {
     @Test
     public void testBuildIndex() throws Exception {
         PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
-        polygonRDD.buildIndex("R-Tree");
+        polygonRDD.buildIndex(IndexType.RTREE);
         List<Polygon> result = polygonRDD.indexedRDD.take(1).get(0)._2().query(polygonRDD.boundaryEnvelope);
         for(Polygon e: result) {
             //System.out.println(e.getEnvelopeInternal());
@@ -239,7 +241,7 @@ public void testMBR() throws Exception {
      */
     @Test(expected=IllegalArgumentException.class)
     public void testBuildWithNoExistsGrid() throws Exception {
-        PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, "ff", numPartitions);
+        PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, null, numPartitions);
     }
 
     /*

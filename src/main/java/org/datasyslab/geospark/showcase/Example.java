@@ -11,15 +11,20 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
+import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.GridType;
+import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.spatialOperator.JoinQuery;
 import org.datasyslab.geospark.spatialOperator.KNNQuery;
 import org.datasyslab.geospark.spatialOperator.RangeQuery;
 import org.datasyslab.geospark.spatialRDD.RectangleRDD;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -36,13 +41,13 @@ public class Example implements Serializable{
     
     static String inputLocation;
     static Integer offset;
-    static String splitter;
+    static FileDataSplitter splitter;
     static Integer numPartitions;
     
     static String inputLocation2;
     static Integer offset2;
-    static String splitter2;
-    static String gridType="";
+    static FileDataSplitter splitter2;
+    static GridType gridType;
     static int numPartitions2;
     
     static int loopTimes;
@@ -62,7 +67,7 @@ public class Example implements Serializable{
 		jarPath=args[2]+"geospark-0.3.jar";
 		inputLocation=args[3];
 		offset=Integer.parseInt(args[4]);
-		splitter=args[5];
+		splitter=FileDataSplitter.valueOf(args[5].toUpperCase());
 		numPartitions=Integer.parseInt(args[6]);
 		loopTimes=Integer.parseInt(args[7]);
 		queryName=args[8];
@@ -70,9 +75,9 @@ public class Example implements Serializable{
 		{
 			inputLocation2=args[9];
 			offset2=Integer.parseInt(args[10]);			
-			splitter2=args[11];
+			splitter2=FileDataSplitter.valueOf(args[11].toUpperCase());
 			numPartitions2=Integer.parseInt(args[12]);
-			gridType=args[13];
+			gridType=GridType.valueOf(args[13].toUpperCase());
 		}
 		conf=new SparkConf().setAppName(queryName+"+"+inputLocation+"+"+gridType+"+"+cores+"+"+numPartitions).setMaster(masterName)
 				.set("spark.history.fs.logDirectory", "/home/ubuntu/sparkeventlog")
@@ -148,7 +153,7 @@ public class Example implements Serializable{
     	double randomNumber=random.nextInt(10)+random.nextDouble();
     	queryEnvelope=new Envelope (-90.01+randomNumber,-80.01+randomNumber,30.01+randomNumber,40.01+randomNumber);
     	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter);
-    	objectRDD.buildIndex("rtree");
+    	objectRDD.buildIndex(IndexType.RTREE);
     	for(int i=0;i<loopTimes;i++)
     	{
     		long resultSize = RangeQuery.SpatialRangeQueryUsingIndex(objectRDD, queryEnvelope, 0).getRawRectangleRDD().count();
@@ -175,7 +180,7 @@ public class Example implements Serializable{
     	double randomNumber=random.nextInt(10)+random.nextDouble();
     	queryPoint=fact.createPoint(new Coordinate(-84.01+randomNumber, 34.01+randomNumber));
     	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter);
-    	objectRDD.buildIndex("rtree");
+    	objectRDD.buildIndex(IndexType.RTREE);
     	for(int i=0;i<loopTimes;i++)
     	{
     		List<Envelope> result = KNNQuery.SpatialKnnQueryUsingIndex(objectRDD, queryPoint, 1000);
@@ -203,7 +208,7 @@ public class Example implements Serializable{
     	//polygonRDD.rawPolygonRDD.unpersist();
     	RectangleRDD objectRDD;
   	objectRDD = new RectangleRDD(sc, inputLocation, offset ,splitter,gridType,numPartitions);
-    	objectRDD.buildIndex("rtree");
+    	objectRDD.buildIndex(IndexType.RTREE);
     	JoinQuery joinQuery = new JoinQuery(sc,objectRDD,rectangleRDD);
     	for(int i=0;i<loopTimes;i++)
     	{

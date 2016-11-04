@@ -1,5 +1,23 @@
 package org.datasyslab.geospark.spatialOperator;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.GridType;
+import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.spatialRDD.PolygonRDD;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 /**
  * 
  * @author Arizona State University DataSystems Lab
@@ -7,23 +25,6 @@ package org.datasyslab.geospark.spatialOperator;
  */
 
 import com.vividsolutions.jts.geom.Polygon;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.datasyslab.geospark.spatialRDD.PointRDD;
-import org.datasyslab.geospark.spatialRDD.PolygonRDD;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
 
 import scala.Tuple2;
 
@@ -34,9 +35,9 @@ public class PolygonJoinTest {
     static InputStream input;
     static String InputLocation;
     static Integer offset;
-    static String splitter;
-    static String gridType;
-    static String indexType;
+    static FileDataSplitter splitter;
+    static GridType gridType;
+    static IndexType indexType;
     static Integer numPartitions;
 
     @BeforeClass
@@ -49,9 +50,9 @@ public class PolygonJoinTest {
         input = PolygonJoinTest.class.getClassLoader().getResourceAsStream("polygon.test.properties");
         InputLocation = "file://"+PolygonJoinTest.class.getClassLoader().getResource("primaryroads-polygon.csv").getPath();
         offset = 0;
-        splitter = "";
-        gridType = "";
-        indexType = "";
+        splitter = null;
+        gridType = null;
+        indexType = null;
         numPartitions = 0;
 
         try {
@@ -61,9 +62,9 @@ public class PolygonJoinTest {
             //InputLocation = prop.getProperty("inputLocation");
             InputLocation = "file://"+PolygonJoinTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
-            splitter = prop.getProperty("splitter");
-            gridType = prop.getProperty("gridType");
-            indexType = prop.getProperty("indexType");
+            splitter = FileDataSplitter.valueOf(prop.getProperty("splitter").toUpperCase());
+            gridType = GridType.valueOf(prop.getProperty("gridType").toUpperCase());
+            indexType = IndexType.valueOf(prop.getProperty("indexType").toUpperCase());
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
 
         } catch (IOException ex) {
@@ -124,7 +125,7 @@ public class PolygonJoinTest {
 
     	PolygonRDD objectRDD = new PolygonRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
 
-    	objectRDD.buildIndex("strtree");
+    	objectRDD.buildIndex(IndexType.RTREE);
 
         JoinQuery joinQuery = new JoinQuery(sc,objectRDD,polygonRDD);
         
@@ -171,7 +172,7 @@ public class PolygonJoinTest {
         
         PolygonRDD queryWindowRDD4 = new PolygonRDD(sc, InputLocation, offset, splitter);
 
-        PolygonRDD objectRDD4 = new PolygonRDD(sc, InputLocation, offset, splitter, "equalgrid", 20);
+        PolygonRDD objectRDD4 = new PolygonRDD(sc, InputLocation, offset, splitter, GridType.EQUALGRID, 20);
 
         JoinQuery joinQuery4 = new JoinQuery(sc,objectRDD4,queryWindowRDD4); 
         
@@ -180,7 +181,7 @@ public class PolygonJoinTest {
         
         PolygonRDD queryWindowRDD5 = new PolygonRDD(sc, InputLocation, offset, splitter);
         
-        PolygonRDD objectRDD5 = new PolygonRDD(sc, InputLocation, offset, splitter, "rtree", 20);
+        PolygonRDD objectRDD5 = new PolygonRDD(sc, InputLocation, offset, splitter, GridType.RTREE, 20);
 
         JoinQuery joinQuery5 = new JoinQuery(sc,objectRDD5,queryWindowRDD5); 
         
@@ -189,7 +190,7 @@ public class PolygonJoinTest {
         
         PolygonRDD queryWindowRDD6 = new PolygonRDD(sc, InputLocation, offset, splitter);
         
-        PolygonRDD objectRDD6 = new PolygonRDD(sc, InputLocation, offset, splitter, "voronoi", 20);
+        PolygonRDD objectRDD6 = new PolygonRDD(sc, InputLocation, offset, splitter, GridType.VORONOI, 20);
 
         JoinQuery joinQuery6 = new JoinQuery(sc,objectRDD6,queryWindowRDD6); 
         
@@ -198,9 +199,9 @@ public class PolygonJoinTest {
         
         PolygonRDD queryWindowRDD7 = new PolygonRDD(sc, InputLocation, offset, splitter);
 
-        PolygonRDD objectRDD7 = new PolygonRDD(sc, InputLocation, offset, splitter, "equalgrid", 20);
+        PolygonRDD objectRDD7 = new PolygonRDD(sc, InputLocation, offset, splitter, GridType.EQUALGRID, 20);
         
-        objectRDD7.buildIndex("strtree");
+        objectRDD7.buildIndex(IndexType.RTREE);
 
         JoinQuery joinQuery7 = new JoinQuery(sc,objectRDD7,queryWindowRDD7); 
         
@@ -209,9 +210,9 @@ public class PolygonJoinTest {
         
         PolygonRDD queryWindowRDD8 = new PolygonRDD(sc, InputLocation, offset, splitter);
         
-        PolygonRDD objectRDD8 = new PolygonRDD(sc, InputLocation, offset, splitter, "rtree", 40);
+        PolygonRDD objectRDD8 = new PolygonRDD(sc, InputLocation, offset, splitter, GridType.RTREE, 40);
 
-        objectRDD8.buildIndex("strtree");
+        objectRDD8.buildIndex(IndexType.RTREE);
         
         JoinQuery joinQuery8 = new JoinQuery(sc,objectRDD8,queryWindowRDD8); 
         
@@ -220,9 +221,9 @@ public class PolygonJoinTest {
         
         PolygonRDD queryWindowRDD9 = new PolygonRDD(sc, InputLocation, offset, splitter);
         
-        PolygonRDD objectRDD9 = new PolygonRDD(sc, InputLocation, offset, splitter, "voronoi", 20);
+        PolygonRDD objectRDD9 = new PolygonRDD(sc, InputLocation, offset, splitter, GridType.VORONOI, 20);
 
-        objectRDD9.buildIndex("strtree");
+        objectRDD9.buildIndex(IndexType.RTREE);
         
         JoinQuery joinQuery9 = new JoinQuery(sc,objectRDD9,queryWindowRDD9); 
         

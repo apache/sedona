@@ -1,26 +1,5 @@
 package org.datasyslab.geospark.spatialRDD;
 
-/**
- * 
- * @author Arizona State University DataSystems Lab
- *
- */
-
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-
-import org.apache.commons.lang.IllegalClassException;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
-import org.datasyslab.geospark.spatialOperator.PointJoinTest;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -29,7 +8,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.GridType;
+import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import com.vividsolutions.jts.geom.Polygon;
 
 
 public class RectangleRDDTest implements Serializable{
@@ -38,9 +29,9 @@ public class RectangleRDDTest implements Serializable{
     static InputStream input;
     static String InputLocation;
     static Integer offset;
-    static String splitter;
-    static String gridType;
-    static String indexType;
+    static FileDataSplitter splitter;
+    static GridType gridType;
+    static IndexType indexType;
     static Integer numPartitions;
     @BeforeClass
     public static void onceExecutedBeforeAll() {
@@ -52,9 +43,9 @@ public class RectangleRDDTest implements Serializable{
         input = RectangleRDDTest.class.getClassLoader().getResourceAsStream("rectangle.test.properties");
         InputLocation = "file://"+RectangleRDDTest.class.getClassLoader().getResource("primaryroads.csv").getPath();
         offset = 0;
-        splitter = "";
-        gridType = "";
-        indexType = "";
+        splitter = null;
+        gridType = null;
+        indexType = null;
         numPartitions = 0;
 
         try {
@@ -63,9 +54,9 @@ public class RectangleRDDTest implements Serializable{
             //InputLocation = prop.getProperty("inputLocation");
             InputLocation = "file://"+RectangleRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
-            splitter = prop.getProperty("splitter");
-            gridType = prop.getProperty("gridType");
-            indexType = prop.getProperty("indexType");
+            splitter = FileDataSplitter.valueOf(prop.getProperty("splitter").toUpperCase());
+            gridType = GridType.valueOf(prop.getProperty("gridType").toUpperCase());
+            indexType = IndexType.valueOf(prop.getProperty("indexType").toUpperCase());
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -128,7 +119,7 @@ public class RectangleRDDTest implements Serializable{
      */
     @Test
     public void testEqualSizeGridsSpatialPartitioing() throws Exception {
-    	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, "equalgrid", 10);
+    	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, GridType.EQUALGRID, 10);
         /*for (EnvelopeWithGrid d : rectangleRDD.grids) {
         	System.out.println("RectangleRDD spatial partitioning grids: "+d.grid);
         }*/
@@ -148,7 +139,7 @@ public class RectangleRDDTest implements Serializable{
      */
     @Test
     public void testHilbertCurveSpatialPartitioing() throws Exception {
-    	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, "hilbert", 10);
+    	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, GridType.HILBERT, 10);
         /*for (EnvelopeWithGrid d : rectangleRDD.grids) {
         	System.out.println("RectangleRDD spatial partitioning grids: "+d.grid);
         }*/
@@ -168,7 +159,7 @@ public class RectangleRDDTest implements Serializable{
      */
     @Test
     public void testRTreeSpatialPartitioing() throws Exception {
-    	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, "rtree", 10);
+    	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, GridType.RTREE, 10);
         for (EnvelopeWithGrid d : rectangleRDD.grids) {
         	System.out.println("RectangleRDD spatial partitioning grids: "+d.grid);
         }
@@ -188,7 +179,7 @@ public class RectangleRDDTest implements Serializable{
      */
     @Test
     public void testVoronoiSpatialPartitioing() throws Exception {
-    	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, "voronoi", 10);
+    	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, GridType.VORONOI, 10);
         /*for (EnvelopeWithGrid d : rectangleRDD.grids) {
         	System.out.println("RectangleRDD spatial partitioning grids: "+d.grid);
         }*/
@@ -211,7 +202,7 @@ public class RectangleRDDTest implements Serializable{
     @Test//(expected=IllegalClassException.class)
     public void testBuildIndexWithoutSetGrid() throws Exception {
         RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, numPartitions);
-        rectangleRDD.buildIndex("R-Tree");
+        rectangleRDD.buildIndex(IndexType.RTREE);
     }
 
     /*
@@ -220,7 +211,7 @@ public class RectangleRDDTest implements Serializable{
     @Test
     public void testBuildIndex() throws Exception {
         RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
-        rectangleRDD.buildIndex("R-Tree");
+        rectangleRDD.buildIndex(IndexType.RTREE);
         List<Polygon> result = rectangleRDD.indexedRDD.take(1).get(0)._2().query(rectangleRDD.boundaryEnvelope);
         //todo, here have their might be a problem where the result is essentially a point(dirty data) and jts will throw exception.
         try {
@@ -236,7 +227,7 @@ public class RectangleRDDTest implements Serializable{
      */
     @Test(expected=IllegalArgumentException.class)
     public void testBuildWithNoExistsGrid() throws Exception {
-        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, "ff", numPartitions);
+        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, null, numPartitions);
     }
 
     /*
