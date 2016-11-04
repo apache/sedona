@@ -1,37 +1,21 @@
 package org.datasyslab.geospark.spatialOperator;
 
-/**
- * 
- * @author Arizona State University DataSystems Lab
- *
- */
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
-import org.datasyslab.geospark.spatialRDD.PointRDDTest;
-import org.datasyslab.geospark.spatialRDD.PolygonRDD;
-import org.datasyslab.geospark.spatialRDD.RectangleRDD;
-import org.datasyslab.geospark.spatialRDD.RectangleRDDTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Properties;
-
-import static org.junit.Assert.assertEquals;
+import com.vividsolutions.jts.geom.Envelope;
 
 
 public class PointRangeTest {
@@ -40,8 +24,8 @@ public class PointRangeTest {
     static InputStream input;
     static String InputLocation;
     static Integer offset;
-    static String splitter;
-    static String indexType;
+    static FileDataSplitter splitter;
+    static IndexType indexType;
     static Integer numPartitions;
     static Envelope queryEnvelope;
     static int loopTimes;
@@ -58,8 +42,8 @@ public class PointRangeTest {
         InputLocation = "file://"+PointRangeTest.class.getClassLoader().getResource("primaryroads.csv").getPath();
 
         offset = 0;
-        splitter = "";
-        indexType = "";
+        splitter = null;
+        indexType = null;
         numPartitions = 0;
 
         try {
@@ -69,8 +53,8 @@ public class PointRangeTest {
             // InputLocation = prop.getProperty("inputLocation");
             InputLocation = "file://"+PointRangeTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
-            splitter = prop.getProperty("splitter");
-            indexType = prop.getProperty("indexType");
+            splitter = FileDataSplitter.valueOf(prop.getProperty("splitter").toUpperCase());
+            indexType = IndexType.valueOf(prop.getProperty("indexType").toUpperCase());
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
             queryEnvelope=new Envelope (-90.01,-80.01,30.01,40.01);
             loopTimes=5;
@@ -106,7 +90,7 @@ public class PointRangeTest {
     @Test
     public void testSpatialRangeQueryUsingIndex() throws Exception {
     	PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter);
-    	pointRDD.buildIndex("rtree");
+    	pointRDD.buildIndex(IndexType.RTREE);
     	for(int i=0;i<loopTimes;i++)
     	{
     		long resultSize = RangeQuery.SpatialRangeQueryUsingIndex(pointRDD, queryEnvelope, 0).getRawPointRDD().count();

@@ -1,5 +1,23 @@
 package org.datasyslab.geospark.spatialOperator;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.GridType;
+import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.spatialRDD.RectangleRDD;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 /**
  * 
  * @author Arizona State University DataSystems Lab
@@ -7,23 +25,6 @@ package org.datasyslab.geospark.spatialOperator;
  */
 
 import com.vividsolutions.jts.geom.Envelope;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.datasyslab.geospark.spatialRDD.RectangleRDD;
-import org.datasyslab.geospark.spatialRDD.RectangleRDDTest;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
 
 import scala.Tuple2;
 
@@ -33,9 +34,9 @@ public class RectangleJoinTest {
     static InputStream input;
     static String InputLocation;
     static Integer offset;
-    static String splitter;
-    static String gridType;
-    static String indexType;
+    static FileDataSplitter splitter;
+    static GridType gridType;
+    static IndexType indexType;
     static Integer numPartitions;
 
     @BeforeClass
@@ -48,9 +49,9 @@ public class RectangleJoinTest {
         input = RectangleJoinTest.class.getClassLoader().getResourceAsStream("rectangle.test.properties");
         InputLocation = "file://"+RectangleJoinTest.class.getClassLoader().getResource("primaryroads.csv").getPath();
         offset = 0;
-        splitter = "";
-        gridType = "";
-        indexType = "";
+        splitter = null;
+        gridType = null;
+        indexType = null;
         numPartitions = 0;
 
         try {
@@ -60,9 +61,9 @@ public class RectangleJoinTest {
             //InputLocation = prop.getProperty("inputLocation");
             InputLocation = "file://"+RectangleJoinTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
-            splitter = prop.getProperty("splitter");
-            gridType = prop.getProperty("gridType");
-            indexType = prop.getProperty("indexType");
+            splitter = FileDataSplitter.valueOf(prop.getProperty("splitter").toUpperCase());
+            gridType = GridType.valueOf(prop.getProperty("gridType").toUpperCase());
+            indexType = IndexType.valueOf(prop.getProperty("indexType").toUpperCase());
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
 
         } catch (IOException ex) {
@@ -123,7 +124,7 @@ public class RectangleJoinTest {
 
         RectangleRDD objectRDD = new RectangleRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
 
-        objectRDD.buildIndex("strtree");
+        objectRDD.buildIndex(IndexType.RTREE);
 
         JoinQuery joinQuery = new JoinQuery(sc,objectRDD,rectangleRDD);
         
@@ -170,7 +171,7 @@ public class RectangleJoinTest {
         
         RectangleRDD rectangleRDD4 = new RectangleRDD(sc, InputLocation, offset, splitter);
 
-        RectangleRDD objectRDD4 = new RectangleRDD(sc, InputLocation, offset, splitter, "equalgrid", 20);
+        RectangleRDD objectRDD4 = new RectangleRDD(sc, InputLocation, offset, splitter, GridType.EQUALGRID, 20);
 
         JoinQuery joinQuery4 = new JoinQuery(sc,objectRDD4,rectangleRDD4); 
         
@@ -179,7 +180,7 @@ public class RectangleJoinTest {
         
         RectangleRDD rectangleRDD5 = new RectangleRDD(sc, InputLocation, offset, splitter);
         
-        RectangleRDD objectRDD5 = new RectangleRDD(sc, InputLocation, offset, splitter, "rtree", 20);
+        RectangleRDD objectRDD5 = new RectangleRDD(sc, InputLocation, offset, splitter, GridType.RTREE, 20);
 
         JoinQuery joinQuery5 = new JoinQuery(sc,objectRDD5,rectangleRDD5); 
         
@@ -188,7 +189,7 @@ public class RectangleJoinTest {
         
         RectangleRDD rectangleRDD6 = new RectangleRDD(sc, InputLocation, offset, splitter);
         
-        RectangleRDD objectRDD6 = new RectangleRDD(sc, InputLocation, offset, splitter, "voronoi", 20);
+        RectangleRDD objectRDD6 = new RectangleRDD(sc, InputLocation, offset, splitter, GridType.VORONOI, 20);
 
         JoinQuery joinQuery6 = new JoinQuery(sc,objectRDD6,rectangleRDD6); 
         
@@ -197,9 +198,9 @@ public class RectangleJoinTest {
         
         RectangleRDD rectangleRDD7 = new RectangleRDD(sc, InputLocation, offset, splitter);
 
-        RectangleRDD objectRDD7 = new RectangleRDD(sc, InputLocation, offset, splitter, "equalgrid", 20);
+        RectangleRDD objectRDD7 = new RectangleRDD(sc, InputLocation, offset, splitter, GridType.EQUALGRID, 20);
         
-        objectRDD7.buildIndex("strtree");
+        objectRDD7.buildIndex(IndexType.RTREE);
 
         JoinQuery joinQuery7 = new JoinQuery(sc,objectRDD7,rectangleRDD7); 
         
@@ -208,9 +209,9 @@ public class RectangleJoinTest {
         
         RectangleRDD rectangleRDD8 = new RectangleRDD(sc, InputLocation, offset, splitter);
         
-        RectangleRDD objectRDD8 = new RectangleRDD(sc, InputLocation, offset, splitter, "rtree", 30);
+        RectangleRDD objectRDD8 = new RectangleRDD(sc, InputLocation, offset, splitter, GridType.RTREE, 30);
 
-        objectRDD8.buildIndex("strtree");
+        objectRDD8.buildIndex(IndexType.RTREE);
         
         JoinQuery joinQuery8 = new JoinQuery(sc,objectRDD8,rectangleRDD8); 
         
@@ -219,9 +220,9 @@ public class RectangleJoinTest {
         
         RectangleRDD rectangleRDD9 = new RectangleRDD(sc, InputLocation, offset, splitter);
         
-        RectangleRDD objectRDD9 = new RectangleRDD(sc, InputLocation, offset, splitter, "voronoi", 20);
+        RectangleRDD objectRDD9 = new RectangleRDD(sc, InputLocation, offset, splitter, GridType.VORONOI, 20);
 
-        objectRDD9.buildIndex("strtree");
+        objectRDD9.buildIndex(IndexType.RTREE);
         
         JoinQuery joinQuery9 = new JoinQuery(sc,objectRDD9,rectangleRDD9); 
         

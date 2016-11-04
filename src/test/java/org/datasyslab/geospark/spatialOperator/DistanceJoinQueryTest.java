@@ -1,5 +1,25 @@
 package org.datasyslab.geospark.spatialOperator;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.GridType;
+import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.spatialRDD.PointRDD;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 /**
  * 
  * @author Arizona State University DataSystems Lab
@@ -8,24 +28,7 @@ package org.datasyslab.geospark.spatialOperator;
 
 import com.vividsolutions.jts.geom.Point;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.datasyslab.geospark.spatialRDD.PointRDD;
-import org.datasyslab.geospark.spatialRDD.RectangleRDDTest;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-
 import scala.Tuple2;
-import static org.junit.Assert.assertEquals;
 
 
 public class DistanceJoinQueryTest {
@@ -34,9 +37,9 @@ public class DistanceJoinQueryTest {
     static InputStream input;
     static String InputLocation;
     static Integer offset;
-    static String splitter;
-    static String gridType;
-    static String indexType;
+    static FileDataSplitter splitter;
+    static GridType gridType;
+    static IndexType indexType;
     static Integer numPartitions;
     static double distance;
     @BeforeClass
@@ -49,9 +52,9 @@ public class DistanceJoinQueryTest {
         input = DistanceJoinQueryTest.class.getClassLoader().getResourceAsStream("point.test.properties");
         InputLocation = "file://"+DistanceJoinQueryTest.class.getClassLoader().getResource("primaryroads.csv").getPath();
         offset = 2;
-        splitter = "";
-        gridType = "";
-        indexType = "";
+        splitter = null;
+        gridType = null;
+        indexType = null;
         numPartitions = 0;
 
         try {
@@ -61,9 +64,9 @@ public class DistanceJoinQueryTest {
             //InputLocation = prop.getProperty("inputLocation");
             InputLocation = "file://"+DistanceJoinQueryTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
-            splitter = prop.getProperty("splitter");
-            gridType = prop.getProperty("gridType");
-            indexType = prop.getProperty("indexType");
+            splitter = FileDataSplitter.valueOf(prop.getProperty("splitter").toUpperCase());
+            gridType = GridType.valueOf(prop.getProperty("gridType").toUpperCase());
+            indexType = IndexType.valueOf(prop.getProperty("indexType").toUpperCase());
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
             distance=Double.parseDouble(prop.getProperty("distance"));
         } catch (IOException ex) {
@@ -95,7 +98,7 @@ public class DistanceJoinQueryTest {
         PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
         PointRDD pointRDD2 = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
 
-        pointRDD.buildIndex("r-tree");
+        pointRDD.buildIndex(IndexType.RTREE);
         List<Tuple2<Point, List<Point>>> result = DistanceJoin.SpatialJoinQueryUsingIndex(sc, pointRDD, pointRDD2, distance).collect();
 
         assertEquals(pointRDD.getRawPointRDD().distinct().count(), pointRDD.getRawPointRDD().distinct().count());

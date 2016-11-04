@@ -1,5 +1,7 @@
 package org.datasyslab.geospark.utils;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * 
  * @author Arizona State University DataSystems Lab
@@ -7,8 +9,6 @@ package org.datasyslab.geospark.utils;
  */
 
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class RDDSampleUtilsTest {
 
