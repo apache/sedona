@@ -8,14 +8,11 @@ package org.datasyslab.geospark.knnJudgement;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.spark.api.java.function.FlatMapFunction;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.strtree.GeometryItemDistance;

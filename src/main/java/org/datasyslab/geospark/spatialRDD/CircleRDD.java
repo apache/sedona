@@ -10,12 +10,15 @@ import java.io.Serializable;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
+import org.datasyslab.geospark.geometryObjects.Circle;
+import org.datasyslab.geospark.utils.CircleXMaxComparator;
+import org.datasyslab.geospark.utils.CircleXMinComparator;
+import org.datasyslab.geospark.utils.CircleYMaxComparator;
+import org.datasyslab.geospark.utils.CircleYMinComparator;
+import org.datasyslab.geospark.utils.GeometryComparatorFactory;
 
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Point;
-
-import org.datasyslab.geospark.geometryObjects.*;
-import org.datasyslab.geospark.utils.*;;
+import com.vividsolutions.jts.geom.Point;;
 
 // TODO: Auto-generated Javadoc
 

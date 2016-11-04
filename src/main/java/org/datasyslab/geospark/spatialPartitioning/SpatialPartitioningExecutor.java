@@ -1,9 +1,11 @@
 package org.datasyslab.geospark.spatialPartitioning;
 
+import org.datasyslab.geospark.enums.GridType;
+
 public class SpatialPartitioningExecutor {
 
 	int numPartitions;
-	String gridType;
+	GridType gridType;
 	public SpatialPartitioningExecutor()
 	{
 		

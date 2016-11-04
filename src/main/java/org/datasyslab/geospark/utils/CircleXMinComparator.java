@@ -1,5 +1,10 @@
 package org.datasyslab.geospark.utils;
 
+import java.io.Serializable;
+import java.util.Comparator;
+
+import org.datasyslab.geospark.geometryObjects.Circle;
+
 /**
  * 
  * @author Arizona State University DataSystems Lab
@@ -7,11 +12,6 @@ package org.datasyslab.geospark.utils;
  */
 
 import com.vividsolutions.jts.geom.Envelope;
-
-import org.datasyslab.geospark.geometryObjects.Circle;
-
-import java.io.Serializable;
-import java.util.Comparator;
 
 public class CircleXMinComparator extends GeometryComparator implements Comparator<Circle>, Serializable {
 

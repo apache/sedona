@@ -1,23 +1,10 @@
 package org.datasyslab.geospark.spatialRDD;
 
-/**
- * 
- * @author Arizona State University DataSystems Lab
- *
- */
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.geom.PrecisionModel;
-import com.vividsolutions.jts.index.strtree.STRtree;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKTReader;
-import com.vividsolutions.jts.precision.GeometryPrecisionReducer;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -26,8 +13,10 @@ import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
-import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.storage.StorageLevel;
+import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.GridType;
+import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.formatMapper.PolygonFormatMapper;
 import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
 import org.datasyslab.geospark.spatialPartitioning.EqualPartitioning;
@@ -42,16 +31,22 @@ import org.datasyslab.geospark.utils.PolygonXMinComparator;
 import org.datasyslab.geospark.utils.PolygonYMaxComparator;
 import org.datasyslab.geospark.utils.PolygonYMinComparator;
 import org.datasyslab.geospark.utils.RDDSampleUtils;
-import org.wololo.jts2geojson.GeoJSONReader;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.index.strtree.STRtree;
+import com.vividsolutions.jts.precision.GeometryPrecisionReducer;
 
 import scala.Tuple2;
 
@@ -131,9 +126,9 @@ public class PolygonRDD implements Serializable {
      * @param Splitter specify the input file format: csv, tsv, geojson, wkt
      * @param partitions specify the partition number of the SpatialRDD
      */ 
-    public PolygonRDD(JavaSparkContext spark, String InputLocation, Integer Offset, String Splitter, Integer partitions) {
+    public PolygonRDD(JavaSparkContext spark, String InputLocation, Integer Offset, FileDataSplitter splitter, Integer partitions) {
 
-        this.setRawPolygonRDD(spark.textFile(InputLocation, partitions).map(new PolygonFormatMapper(Offset, Splitter)));//.persist(StorageLevel.MEMORY_ONLY()));
+        this.setRawPolygonRDD(spark.textFile(InputLocation, partitions).map(new PolygonFormatMapper(Offset, splitter)));//.persist(StorageLevel.MEMORY_ONLY()));
     }
 
     /**
@@ -143,9 +138,9 @@ public class PolygonRDD implements Serializable {
      * @param Offset specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
      * @param Splitter specify the input file format: csv, tsv, geojson, wkt
      */
-    public PolygonRDD(JavaSparkContext spark, String InputLocation, Integer Offset, String Splitter) {
+    public PolygonRDD(JavaSparkContext spark, String InputLocation, Integer Offset, FileDataSplitter splitter) {
 
-        this.setRawPolygonRDD(spark.textFile(InputLocation).map(new PolygonFormatMapper(Offset, Splitter)));//.persist(StorageLevel.MEMORY_ONLY()));
+        this.setRawPolygonRDD(spark.textFile(InputLocation).map(new PolygonFormatMapper(Offset, splitter)));//.persist(StorageLevel.MEMORY_ONLY()));
     }
 
 
@@ -166,7 +161,7 @@ public class PolygonRDD implements Serializable {
      * @param gridType
      * @param numPartitions
      */
-    public PolygonRDD(JavaRDD<Polygon> rawPolygonRDD, String gridType, Integer numPartitions)
+    public PolygonRDD(JavaRDD<Polygon> rawPolygonRDD, GridType gridType, Integer numPartitions)
     {
     	this.setRawPolygonRDD(rawPolygonRDD.persist(StorageLevel.MEMORY_ONLY()));
     	 this.rawPolygonRDD.persist(StorageLevel.MEMORY_ONLY());
@@ -195,7 +190,7 @@ public class PolygonRDD implements Serializable {
      * @param rawPolygonRDD
      * @param gridType
      */
-    public PolygonRDD(JavaRDD<Polygon> rawPolygonRDD, String gridType)
+    public PolygonRDD(JavaRDD<Polygon> rawPolygonRDD, GridType gridType)
     {
     	this.setRawPolygonRDD(rawPolygonRDD.persist(StorageLevel.MEMORY_ONLY()));
     	this.rawPolygonRDD.persist(StorageLevel.MEMORY_ONLY());
@@ -230,7 +225,7 @@ public class PolygonRDD implements Serializable {
      * @param gridType specify the spatial partitioning method: equalgrid, rtree, voronoi
      * @param numPartitions specify the partition number of the SpatialRDD
      */
-    public PolygonRDD(JavaSparkContext sc, String inputLocation, Integer offSet, String splitter, String gridType, Integer numPartitions) {
+    public PolygonRDD(JavaSparkContext sc, String inputLocation, Integer offSet, FileDataSplitter splitter, GridType gridType, Integer numPartitions) {
         this.rawPolygonRDD = sc.textFile(inputLocation).map(new PolygonFormatMapper(offSet, splitter));
         this.rawPolygonRDD.persist(StorageLevel.MEMORY_ONLY());
         totalNumberOfRecords = this.rawPolygonRDD.count();
@@ -262,7 +257,7 @@ public class PolygonRDD implements Serializable {
      * @param splitter specify the input file format: csv, tsv, geojson, wkt
      * @param gridType specify the spatial partitioning method: equalgrid, rtree, voronoi
      */
-    public PolygonRDD(JavaSparkContext sc, String inputLocation, Integer offSet, String splitter, String gridType) {
+    public PolygonRDD(JavaSparkContext sc, String inputLocation, Integer offSet, FileDataSplitter splitter, GridType gridType) {
         this.rawPolygonRDD = sc.textFile(inputLocation).map(new PolygonFormatMapper(offSet, splitter));
         this.rawPolygonRDD.persist(StorageLevel.MEMORY_ONLY());
         totalNumberOfRecords = this.rawPolygonRDD.count();
@@ -288,7 +283,7 @@ public class PolygonRDD implements Serializable {
         
     }
     
-    private void doSpatialPartitioning(String gridType, int numPartitions)
+    private void doSpatialPartitioning(GridType gridType, int numPartitions)
     {
         int sampleNumberOfRecords = RDDSampleUtils.getSampleNumbers(numPartitions, totalNumberOfRecords);
 
@@ -304,21 +299,21 @@ public class PolygonRDD implements Serializable {
             System.err.println("we will just build one grid for all input");
             grids = new HashSet<EnvelopeWithGrid>();
             grids.add(new EnvelopeWithGrid(this.boundaryEnvelope, 0));
-        }  else if (gridType.equals("equalgrid")) {
+        }  else if (gridType == GridType.EQUALGRID) {
         	EqualPartitioning equalPartitioning =new EqualPartitioning(this.boundaryEnvelope,numPartitions);
         	grids=equalPartitioning.getGrids();
         }
-        else if(gridType.equals("hilbert"))
+        else if(gridType == GridType.HILBERT)
         {
         	HilbertPartitioning hilbertPartitioning=new HilbertPartitioning(polygonSampleList.toArray(new Polygon[polygonSampleList.size()]),this.boundaryEnvelope,numPartitions);
         	grids=hilbertPartitioning.getGrids();
         }
-        else if(gridType.equals("rtree"))
+        else if(gridType == GridType.RTREE)
         {
         	RtreePartitioning rtreePartitioning=new RtreePartitioning(polygonSampleList.toArray(new Polygon[polygonSampleList.size()]),this.boundaryEnvelope,numPartitions);
         	grids=rtreePartitioning.getGrids();
         }
-        else if(gridType.equals("voronoi"))
+        else if(gridType == GridType.VORONOI)
         {
         	VoronoiPartitioning voronoiPartitioning=new VoronoiPartitioning(polygonSampleList.toArray(new Polygon[polygonSampleList.size()]),this.boundaryEnvelope,numPartitions);
         	grids=voronoiPartitioning.getGrids();
@@ -334,7 +329,7 @@ public class PolygonRDD implements Serializable {
      * Create an IndexedRDD and cache it in memory. Need to have a grided RDD first. The index is build on each partition.
      * @param indexType Specify the index type: rtree, quadtree
      */
-    public void buildIndex(String indexType) {
+    public void buildIndex(IndexType indexType) {
 
         if (this.gridPolygonRDD == null) {
         	

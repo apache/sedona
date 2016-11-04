@@ -1,33 +1,21 @@
 package org.datasyslab.geospark.spatialRDD;
 
-/**
- * 
- * @author Arizona State University DataSystems Lab
- *
- */
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.index.quadtree.Quadtree;
-import com.vividsolutions.jts.index.strtree.STRtree;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKTReader;
-
-import org.apache.commons.lang.IllegalClassException;
 import org.apache.log4j.Logger;
-import org.apache.spark.HashPartitioner;
-import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
-import org.apache.spark.api.java.function.PairFunction;
-import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.storage.StorageLevel;
+import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.GridType;
+import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.formatMapper.PointFormatMapper;
 import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
 import org.datasyslab.geospark.spatialPartitioning.EqualPartitioning;
@@ -41,18 +29,11 @@ import org.datasyslab.geospark.utils.PointXComparator;
 import org.datasyslab.geospark.utils.PointYComparator;
 import org.datasyslab.geospark.utils.RDDSampleUtils;
 import org.wololo.geojson.GeoJSON;
-import org.wololo.jts2geojson.GeoJSONReader;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
-import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 import scala.Tuple2;
 
@@ -115,7 +96,7 @@ public class PointRDD implements Serializable {
      * @param gridType gridType specify the spatial partitioning method
      * @param numPartitions specify the partition number of the SpatialRDD
      */
-    public PointRDD(JavaRDD<Point> rawPointRDD,String gridType, Integer numPartitions) {
+    public PointRDD(JavaRDD<Point> rawPointRDD,GridType gridType, Integer numPartitions) {
         this.setRawPointRDD(rawPointRDD);
         this.rawPointRDD.persist(StorageLevel.MEMORY_ONLY());
         this.totalNumberOfRecords = this.rawPointRDD.count();
@@ -143,7 +124,7 @@ public class PointRDD implements Serializable {
      * @param rawPointRDD
      * @param gridType gridType specify the spatial partitioning method
      */
-    public PointRDD(JavaRDD<Point> rawPointRDD,String gridType) {
+    public PointRDD(JavaRDD<Point> rawPointRDD,GridType gridType) {
         this.setRawPointRDD(rawPointRDD);
         this.rawPointRDD.persist(StorageLevel.MEMORY_ONLY());
         this.totalNumberOfRecords = this.rawPointRDD.count();
@@ -174,10 +155,10 @@ public class PointRDD implements Serializable {
      * @param Splitter specify the input file format: csv, tsv, geojson, wkt
      * @param partitions specify the partition number of the SpatialRDD
      */
-    public PointRDD(JavaSparkContext spark, String InputLocation, Integer Offset, String Splitter, Integer partitions) {
+    public PointRDD(JavaSparkContext spark, String InputLocation, Integer Offset, FileDataSplitter splitter, Integer partitions) {
         // final Integer offset=Offset;
         this.setRawPointRDD(
-                spark.textFile(InputLocation, partitions).map(new PointFormatMapper(Offset, Splitter)));//.persist(StorageLevel.MEMORY_AND_DISK_SER()));
+                spark.textFile(InputLocation, partitions).map(new PointFormatMapper(Offset, splitter)));//.persist(StorageLevel.MEMORY_AND_DISK_SER()));
     }
 
     /**
@@ -187,10 +168,10 @@ public class PointRDD implements Serializable {
      * @param Offset specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
      * @param Splitter specify the input file format: csv, tsv, geojson, wkt
      */
-    public PointRDD(JavaSparkContext spark, String InputLocation, Integer Offset, String Splitter) {
+    public PointRDD(JavaSparkContext spark, String InputLocation, Integer Offset, FileDataSplitter splitter) {
         // final Integer offset=Offset;
         this.setRawPointRDD(
-                spark.textFile(InputLocation).map(new PointFormatMapper(Offset, Splitter)));//.persist(StorageLevel.MEMORY_AND_DISK_SER()));
+                spark.textFile(InputLocation).map(new PointFormatMapper(Offset, splitter)));//.persist(StorageLevel.MEMORY_AND_DISK_SER()));
     }
     
     /**
@@ -202,7 +183,7 @@ public class PointRDD implements Serializable {
      * @param gridType specify the spatial partitioning method: equalgrid, rtree, voronoi
      * @param numPartitions specify the partition number of the SpatialRDD
      */
-    public PointRDD(JavaSparkContext sc, String InputLocation, Integer offset, String splitter, String gridType, Integer numPartitions) {
+    public PointRDD(JavaSparkContext sc, String InputLocation, Integer offset, FileDataSplitter splitter, GridType gridType, Integer numPartitions) {
         this.rawPointRDD = sc.textFile(InputLocation).map(new PointFormatMapper(offset, splitter));
         this.rawPointRDD.persist(StorageLevel.MEMORY_ONLY());
         this.totalNumberOfRecords = this.rawPointRDD.count();
@@ -233,7 +214,7 @@ public class PointRDD implements Serializable {
      * @param splitter specify the input file format: csv, tsv, geojson, wkt
      * @param gridType specify the spatial partitioning method: equalgrid, rtree, voronoi
      */    
-    public PointRDD(JavaSparkContext sc, String InputLocation, Integer offset, String splitter, String gridType) {
+    public PointRDD(JavaSparkContext sc, String InputLocation, Integer offset, FileDataSplitter splitter, GridType gridType) {
         this.rawPointRDD = sc.textFile(InputLocation).map(new PointFormatMapper(offset, splitter));
         this.rawPointRDD.persist(StorageLevel.MEMORY_ONLY());
         this.totalNumberOfRecords = this.rawPointRDD.count();
@@ -258,7 +239,7 @@ public class PointRDD implements Serializable {
         
     }
     
-	private void doSpatialPartitioning(String gridType, int numPartitions)
+	private void doSpatialPartitioning(GridType gridType, int numPartitions)
 	{
         //Calculate the number of samples we need to take.
         int sampleNumberOfRecords = RDDSampleUtils.getSampleNumbers(numPartitions, totalNumberOfRecords);
@@ -285,21 +266,21 @@ public class PointRDD implements Serializable {
             System.err.println("we will just build one grid for all input");
             grids = new HashSet<EnvelopeWithGrid>();
             grids.add(new EnvelopeWithGrid(this.boundaryEnvelope, 0));
-        } else if (gridType.equals("equalgrid")) {
+        } else if (gridType == GridType.EQUALGRID) {
         	EqualPartitioning equalPartitioning =new EqualPartitioning(this.boundaryEnvelope,numPartitions);
         	grids=equalPartitioning.getGrids();
         }
-        else if(gridType.equals("hilbert"))
+        else if(gridType == GridType.HILBERT)
         {
         	HilbertPartitioning hilbertPartitioning=new HilbertPartitioning(pointSampleList.toArray(new Point[pointSampleList.size()]),this.boundaryEnvelope,numPartitions);
         	grids=hilbertPartitioning.getGrids();
         }
-        else if(gridType.equals("rtree"))
+        else if(gridType == GridType.RTREE)
         {
         	RtreePartitioning rtreePartitioning=new RtreePartitioning(pointSampleList.toArray(new Point[pointSampleList.size()]),this.boundaryEnvelope,numPartitions);
         	grids=rtreePartitioning.getGrids();
         }
-        else if(gridType.equals("voronoi"))
+        else if(gridType == GridType.VORONOI)
         {
         	VoronoiPartitioning voronoiPartitioning=new VoronoiPartitioning(pointSampleList.toArray(new Point[pointSampleList.size()]),this.boundaryEnvelope,numPartitions);
         	grids=voronoiPartitioning.getGrids();
@@ -315,7 +296,7 @@ public class PointRDD implements Serializable {
      * Create an IndexedRDD and cache it in memory. Need to have a grided RDD first. The index is build on each partition.
      * @param indexType Specify the index type: rtree, quadtree
      */
-    public void buildIndex(String indexType) {
+    public void buildIndex(IndexType indexType) {
 
         if (this.gridPointRDD == null) {
 

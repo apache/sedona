@@ -1,13 +1,9 @@
 package org.datasyslab.geospark.spatialOperator;
 
-/**
- * 
- * @author Arizona State University DataSystems Lab
- *
- */
-
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.index.strtree.STRtree;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -21,10 +17,14 @@ import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
 import org.datasyslab.geospark.spatialRDD.CircleRDD;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 import scala.Tuple2;
 

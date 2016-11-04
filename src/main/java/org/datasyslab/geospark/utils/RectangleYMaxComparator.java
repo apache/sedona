@@ -1,5 +1,8 @@
 package org.datasyslab.geospark.utils;
 
+import java.io.Serializable;
+import java.util.Comparator;
+
 /**
  * 
  * @author Arizona State University DataSystems Lab
@@ -7,9 +10,6 @@ package org.datasyslab.geospark.utils;
  */
 
 import com.vividsolutions.jts.geom.Envelope;
-
-import java.io.Serializable;
-import java.util.Comparator;
 
 public class RectangleYMaxComparator extends GeometryComparator implements Comparator<Envelope>, Serializable {
 

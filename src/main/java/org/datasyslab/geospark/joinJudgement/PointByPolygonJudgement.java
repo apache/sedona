@@ -13,11 +13,10 @@ import java.util.Iterator;
 
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 
-import scala.Tuple2;
-
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+
+import scala.Tuple2;
 
 public class PointByPolygonJudgement implements PairFlatMapFunction<Tuple2<Integer, Tuple2<Iterable<Point>, Iterable<Polygon>>>, Polygon, HashSet<Point>>, Serializable{
 

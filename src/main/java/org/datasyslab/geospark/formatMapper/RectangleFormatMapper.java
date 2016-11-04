@@ -11,26 +11,26 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.spark.api.java.function.Function;
+import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.wololo.jts2geojson.GeoJSONReader;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 
 public class RectangleFormatMapper implements Serializable,Function<String,Envelope>
 {
 	Integer offset = 0;
-	String splitter = "csv";
+	FileDataSplitter splitter = FileDataSplitter.CSV;
 
-	public RectangleFormatMapper(Integer Offset, String Splitter) {
+	public RectangleFormatMapper(Integer Offset, FileDataSplitter Splitter) {
 		this.offset = Offset;
 		this.splitter = Splitter;
 	}
 
-	public RectangleFormatMapper( String Splitter) {
+	public RectangleFormatMapper( FileDataSplitter Splitter) {
 		this.offset = 0;
 		this.splitter = Splitter;
 	}
@@ -42,8 +42,8 @@ public class RectangleFormatMapper implements Serializable,Function<String,Envel
 		Coordinate coordinate;
 		Double x1,x2,y1,y2;
 		switch (splitter) {
-			case "csv":
-				lineSplitList = Arrays.asList(line.split(","));
+			case CSV:
+				lineSplitList = Arrays.asList(line.split(splitter.getSplitter()));
 				x1 = Double.parseDouble(lineSplitList.get(offset));
 				x2 = Double.parseDouble(lineSplitList.get(offset + 2));
 				y1 = Double.parseDouble(lineSplitList.get(offset + 1));
@@ -51,8 +51,8 @@ public class RectangleFormatMapper implements Serializable,Function<String,Envel
 				rectangle = new Envelope(x1, x2, y1, y2);
 				rectangle.setUserData(line);
 				break;
-			case "tsv":
-				lineSplitList = Arrays.asList(line.split("\t"));
+			case TSV:
+				lineSplitList = Arrays.asList(line.split(splitter.getSplitter()));
 				x1 = Double.parseDouble(lineSplitList.get(offset));
 				x2 = Double.parseDouble(lineSplitList.get(offset + 2));
 				y1 = Double.parseDouble(lineSplitList.get(offset + 1));
@@ -60,14 +60,14 @@ public class RectangleFormatMapper implements Serializable,Function<String,Envel
 				rectangle = new Envelope(x1, x2, y1, y2);
 				rectangle.setUserData(line);
 				break;
-			case "geojson":
+			case GEOJSON:
 				GeoJSONReader reader = new GeoJSONReader();
 				Geometry result = reader.read(line);
 				rectangle =result.getEnvelopeInternal();
 				rectangle.setUserData(line);
 				break;
-			case "wkt":
-				lineSplitList=Arrays.asList(line.split("\t"));
+			case WKT:
+				lineSplitList=Arrays.asList(line.split(splitter.getSplitter()));
 				WKTReader wtkreader = new WKTReader();
 				rectangle = wtkreader.read(lineSplitList.get(offset)).getEnvelopeInternal();
 				rectangle.setUserData(line);

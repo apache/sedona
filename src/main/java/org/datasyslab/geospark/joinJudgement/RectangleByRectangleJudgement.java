@@ -7,16 +7,14 @@ package org.datasyslab.geospark.joinJudgement;
  */
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 
-import scala.Tuple2;
-
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Point;
+
+import scala.Tuple2;
 
 public class RectangleByRectangleJudgement implements PairFlatMapFunction<Tuple2<Integer, Tuple2<Iterable<Envelope>, Iterable<Envelope>>>, Envelope, HashSet<Envelope>>, Serializable{
 

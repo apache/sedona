@@ -7,10 +7,8 @@ package org.datasyslab.geospark.spatialOperator;
  */
 
 import java.io.Serializable;
-import java.util.Iterator;
 
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.rangeJudgement.PointRangeFilter;
 import org.datasyslab.geospark.rangeJudgement.PointRangeFilterUsingIndex;
 import org.datasyslab.geospark.rangeJudgement.PolygonRangeFilter;
@@ -24,7 +22,6 @@ import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.index.strtree.STRtree;
 public class RangeQuery implements Serializable{
 	
 	//I think this part can be refactored.
