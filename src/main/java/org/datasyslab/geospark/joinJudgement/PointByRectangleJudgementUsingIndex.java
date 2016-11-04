@@ -14,11 +14,11 @@ import java.util.List;
 
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 
-import scala.Tuple2;
-
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.strtree.STRtree;
+
+import scala.Tuple2;
 
 public class PointByRectangleJudgementUsingIndex implements PairFlatMapFunction<Tuple2<Integer, Tuple2<Iterable<STRtree>, Iterable<Envelope>>>, Envelope, HashSet<Point>>, Serializable{
 

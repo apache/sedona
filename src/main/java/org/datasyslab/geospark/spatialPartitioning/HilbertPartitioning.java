@@ -7,7 +7,6 @@ package org.datasyslab.geospark.spatialPartitioning;
  */
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 

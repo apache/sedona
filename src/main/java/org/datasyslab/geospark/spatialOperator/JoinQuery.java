@@ -1,5 +1,24 @@
 package org.datasyslab.geospark.spatialOperator;
 
+import java.io.Serializable;
+import java.util.HashSet;
+
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.Function2;
+import org.datasyslab.geospark.joinJudgement.PointByPolygonJudgement;
+import org.datasyslab.geospark.joinJudgement.PointByPolygonJudgementUsingIndex;
+import org.datasyslab.geospark.joinJudgement.PointByRectangleJudgement;
+import org.datasyslab.geospark.joinJudgement.PointByRectangleJudgementUsingIndex;
+import org.datasyslab.geospark.joinJudgement.PolygonByPolygonJudgement;
+import org.datasyslab.geospark.joinJudgement.PolygonByPolygonJudgementUsingIndex;
+import org.datasyslab.geospark.joinJudgement.RectangleByRectangleJudgement;
+import org.datasyslab.geospark.joinJudgement.RectangleByRectangleJudgementUsingIndex;
+import org.datasyslab.geospark.spatialRDD.PointRDD;
+import org.datasyslab.geospark.spatialRDD.PolygonRDD;
+import org.datasyslab.geospark.spatialRDD.RectangleRDD;
+
 /**
  * 
  * @author Arizona State University DataSystems Lab
@@ -10,31 +29,6 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.index.strtree.STRtree;
-
-import org.apache.spark.api.java.JavaPairRDD;
-
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.Function2;
-
-import org.datasyslab.geospark.joinJudgement.PointByPolygonJudgement;
-import org.datasyslab.geospark.joinJudgement.PointByPolygonJudgementUsingIndex;
-import org.datasyslab.geospark.joinJudgement.PointByRectangleJudgement;
-import org.datasyslab.geospark.joinJudgement.PointByRectangleJudgementUsingIndex;
-import org.datasyslab.geospark.joinJudgement.PolygonByPolygonJudgement;
-import org.datasyslab.geospark.joinJudgement.PolygonByPolygonJudgementUsingIndex;
-import org.datasyslab.geospark.joinJudgement.RectangleByRectangleJudgement;
-import org.datasyslab.geospark.joinJudgement.RectangleByRectangleJudgementUsingIndex;
-
-import org.datasyslab.geospark.spatialRDD.PointRDD;
-import org.datasyslab.geospark.spatialRDD.PolygonRDD;
-import org.datasyslab.geospark.spatialRDD.RectangleRDD;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 
 import scala.Tuple2;
 

@@ -7,19 +7,16 @@ package org.datasyslab.geospark.spatialPartitioning;
  */
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Random;
 
 import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
 
-import scala.Tuple2;
-
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+
+import scala.Tuple2;
 
 public class PartitionJudgement implements Serializable{
 	public PartitionJudgement()

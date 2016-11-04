@@ -1,5 +1,21 @@
 package org.datasyslab.geospark.spatialOperator;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Properties;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.spatialRDD.PointRDD;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 /**
  * 
  * @author Arizona State University DataSystems Lab
@@ -7,31 +23,8 @@ package org.datasyslab.geospark.spatialOperator;
  */
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
-
-import io.netty.handler.codec.http.HttpContentEncoder.Result;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.datasyslab.geospark.spatialRDD.PointRDD;
-import org.datasyslab.geospark.spatialRDD.PointRDDTest;
-import org.datasyslab.geospark.spatialRDD.RectangleRDDTest;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-
-import static org.junit.Assert.*;
 
 
 public class PointKnnTest {
@@ -40,8 +33,8 @@ public class PointKnnTest {
     static InputStream input;
     static String InputLocation;
     static Integer offset;
-    static String splitter;
-    static String indexType;
+    static FileDataSplitter splitter;
+    static IndexType indexType;
     static Integer numPartitions;
     static int loopTimes;
     static Point queryPoint;
@@ -58,8 +51,8 @@ public class PointKnnTest {
         InputLocation = "file://"+PointKnnTest.class.getClassLoader().getResource("primaryroads.csv").getPath();
 
         offset = 0;
-        splitter = "";
-        indexType = "";
+        splitter = null;
+        indexType = null;
         numPartitions = 0;
         GeometryFactory fact=new GeometryFactory();
         try {
@@ -69,8 +62,8 @@ public class PointKnnTest {
             // InputLocation = prop.getProperty("inputLocation");
             InputLocation = "file://"+PointKnnTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
-            splitter = prop.getProperty("splitter");
-            indexType = prop.getProperty("indexType");
+            splitter = FileDataSplitter.valueOf(prop.getProperty("splitter").toUpperCase());
+            indexType = IndexType.valueOf(prop.getProperty("indexType").toUpperCase());
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
             loopTimes=5;
         } catch (IOException ex) {
@@ -108,7 +101,7 @@ public class PointKnnTest {
     @Test
     public void testSpatialKnnQueryUsingIndex() throws Exception {
     	PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter);
-    	pointRDD.buildIndex("rtree");
+    	pointRDD.buildIndex(IndexType.RTREE);
     	for(int i=0;i<loopTimes;i++)
     	{
     		List<Point> result = KNNQuery.SpatialKnnQueryUsingIndex(pointRDD, queryPoint, 5);

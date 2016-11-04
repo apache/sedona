@@ -1,33 +1,20 @@
 package org.datasyslab.geospark.spatialRDD;
 
-/**
- * 
- * @author Arizona State University DataSystems Lab
- *
- */
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.index.quadtree.Quadtree;
-import com.vividsolutions.jts.index.strtree.STRtree;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKTReader;
-
-import org.apache.commons.lang.IllegalClassException;
-import org.apache.spark.HashPartitioner;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
-import org.apache.spark.api.java.function.PairFunction;
-import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.storage.StorageLevel;
+import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.GridType;
+import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.formatMapper.RectangleFormatMapper;
 import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
 import org.datasyslab.geospark.spatialPartitioning.EqualPartitioning;
@@ -42,16 +29,11 @@ import org.datasyslab.geospark.utils.RectangleXMaxComparator;
 import org.datasyslab.geospark.utils.RectangleXMinComparator;
 import org.datasyslab.geospark.utils.RectangleYMaxComparator;
 import org.datasyslab.geospark.utils.RectangleYMinComparator;
-import org.wololo.jts2geojson.GeoJSONReader;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 import scala.Tuple2;
 
@@ -128,10 +110,10 @@ public class RectangleRDD implements Serializable {
      * @param Splitter specify the input file format: csv, tsv, geojson, wkt
      * @param partitions specify the partition number of the SpatialRDD
      */
-	public RectangleRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter,Integer partitions)
+	public RectangleRDD(JavaSparkContext spark, String InputLocation,Integer Offset,FileDataSplitter splitter,Integer partitions)
 	{
 		//final Integer offset=Offset;
-		this.setRawRectangleRDD(spark.textFile(InputLocation,partitions).map(new RectangleFormatMapper(Offset,Splitter)));//.persist(StorageLevel.MEMORY_AND_DISK_SER()));
+		this.setRawRectangleRDD(spark.textFile(InputLocation,partitions).map(new RectangleFormatMapper(Offset,splitter)));//.persist(StorageLevel.MEMORY_AND_DISK_SER()));
 	}
 	
     /**
@@ -141,10 +123,10 @@ public class RectangleRDD implements Serializable {
      * @param Offset specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
      * @param Splitter specify the input file format: csv, tsv, geojson, wkt
      */
-	public RectangleRDD(JavaSparkContext spark, String InputLocation,Integer Offset,String Splitter)
+	public RectangleRDD(JavaSparkContext spark, String InputLocation,Integer Offset,FileDataSplitter splitter)
 	{
 		//final Integer offset=Offset;
-		this.setRawRectangleRDD(spark.textFile(InputLocation).map(new RectangleFormatMapper(Offset,Splitter)));//.persist(StorageLevel.MEMORY_AND_DISK_SER()));
+		this.setRawRectangleRDD(spark.textFile(InputLocation).map(new RectangleFormatMapper(Offset,splitter)));//.persist(StorageLevel.MEMORY_AND_DISK_SER()));
 	}
 	
 	/**
@@ -152,7 +134,7 @@ public class RectangleRDD implements Serializable {
 	 * @param rawRectangleRDD
 	 * @param gridType
 	 */
-	public RectangleRDD(JavaRDD<Envelope> rawRectangleRDD, String gridType)
+	public RectangleRDD(JavaRDD<Envelope> rawRectangleRDD, GridType gridType)
 	{
 		this.setRawRectangleRDD(rawRectangleRDD);
 		this.rawRectangleRDD.persist(StorageLevel.MEMORY_ONLY());
@@ -183,7 +165,7 @@ public class RectangleRDD implements Serializable {
 	 * @param gridType
 	 * @param numPartitions
 	 */
-	public RectangleRDD(JavaRDD<Envelope> rawRectangleRDD, String gridType, Integer numPartitions)
+	public RectangleRDD(JavaRDD<Envelope> rawRectangleRDD, GridType gridType, Integer numPartitions)
 	{
 		this.setRawRectangleRDD(rawRectangleRDD);
 		this.rawRectangleRDD.persist(StorageLevel.MEMORY_ONLY());
@@ -218,7 +200,7 @@ public class RectangleRDD implements Serializable {
      * @param gridType specify the spatial partitioning method: equalgrid, rtree, voronoi
      * @param numPartitions specify the partition number of the SpatialRDD
      */
-	public RectangleRDD(JavaSparkContext sc, String inputLocation, Integer offSet, String splitter, String gridType, Integer numPartitions) {
+	public RectangleRDD(JavaSparkContext sc, String inputLocation, Integer offSet, FileDataSplitter splitter, GridType gridType, Integer numPartitions) {
 		this.rawRectangleRDD = sc.textFile(inputLocation).map(new RectangleFormatMapper(offSet, splitter));
 		this.rawRectangleRDD.persist(StorageLevel.MEMORY_ONLY());
 		totalNumberOfRecords = this.rawRectangleRDD.count();
@@ -250,7 +232,7 @@ public class RectangleRDD implements Serializable {
      * @param splitter specify the input file format: csv, tsv, geojson, wkt
      * @param gridType specify the spatial partitioning method: equalgrid, rtree, voronoi
      */
-	public RectangleRDD(JavaSparkContext sc, String inputLocation, Integer offSet, String splitter, String gridType) {
+	public RectangleRDD(JavaSparkContext sc, String inputLocation, Integer offSet, FileDataSplitter splitter, GridType gridType) {
 		this.rawRectangleRDD = sc.textFile(inputLocation).map(new RectangleFormatMapper(offSet, splitter));
 		this.rawRectangleRDD.persist(StorageLevel.MEMORY_ONLY());
 		totalNumberOfRecords = this.rawRectangleRDD.count();
@@ -275,7 +257,7 @@ public class RectangleRDD implements Serializable {
 	}
 	
 	
-	private void doSpatialPartitioning(String gridType, int numPartitions)
+	private void doSpatialPartitioning(GridType gridType, int numPartitions)
 	{
 		int sampleNumberOfRecords = RDDSampleUtils.getSampleNumbers(numPartitions, totalNumberOfRecords);
 
@@ -295,21 +277,21 @@ public class RectangleRDD implements Serializable {
 			grids.add(new EnvelopeWithGrid(this.boundaryEnvelope, 0));
 		} 
      
-	else if (gridType.equals("equalgrid")) {
+	else if (gridType == GridType.EQUALGRID) {
     	EqualPartitioning equalPartitioning =new EqualPartitioning(this.boundaryEnvelope,numPartitions);
     	grids=equalPartitioning.getGrids();
     }
-    else if(gridType.equals("hilbert"))
+    else if(gridType == GridType.HILBERT)
     {
     	HilbertPartitioning hilbertPartitioning=new HilbertPartitioning(rectangleSampleList.toArray(new Envelope[rectangleSampleList.size()]),this.boundaryEnvelope,numPartitions);
     	grids=hilbertPartitioning.getGrids();
     }
-    else if(gridType.equals("rtree"))
+    else if(gridType == GridType.RTREE)
     {
     	RtreePartitioning rtreePartitioning=new RtreePartitioning(rectangleSampleList.toArray(new Envelope[rectangleSampleList.size()]),this.boundaryEnvelope,numPartitions);
     	grids=rtreePartitioning.getGrids();
     }
-    else if(gridType.equals("voronoi"))
+    else if(gridType == GridType.VORONOI)
     {
     	VoronoiPartitioning voronoiPartitioning=new VoronoiPartitioning(rectangleSampleList.toArray(new Envelope[rectangleSampleList.size()]),this.boundaryEnvelope,numPartitions);
     	grids=voronoiPartitioning.getGrids();
@@ -325,7 +307,7 @@ public class RectangleRDD implements Serializable {
      * Create an IndexedRDD and cache it in memory. Need to have a grided RDD first. The index is build on each partition.
      * @param indexType Specify the index type: rtree, quadtree
      */
-	public void buildIndex(String indexType) {
+	public void buildIndex(IndexType indexType) {
 
 		if (this.gridRectangleRDD == null) {
         	//This index is built on top of unpartitioned SRDD

@@ -9,7 +9,6 @@ package org.datasyslab.geospark.knnJudgement;
 import java.io.Serializable;
 import java.util.Comparator;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 
 public class PointDistanceComparator implements Comparator<Point>, Serializable{

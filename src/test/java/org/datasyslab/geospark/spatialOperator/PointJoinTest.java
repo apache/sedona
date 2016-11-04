@@ -1,5 +1,24 @@
 package org.datasyslab.geospark.spatialOperator;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.GridType;
+import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.spatialRDD.PointRDD;
+import org.datasyslab.geospark.spatialRDD.RectangleRDD;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 /**
  * 
  * @author Arizona State University DataSystems Lab
@@ -8,23 +27,6 @@ package org.datasyslab.geospark.spatialOperator;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.datasyslab.geospark.spatialRDD.PointRDD;
-import org.datasyslab.geospark.spatialRDD.RectangleRDD;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
 
 import scala.Tuple2;
 
@@ -36,9 +38,9 @@ public class PointJoinTest {
     static String InputLocation;
     static String InputLocationQueryWindow;
     static Integer offset;
-    static String splitter;
-    static String gridType;
-    static String indexType;
+    static FileDataSplitter splitter;
+    static GridType gridType;
+    static IndexType indexType;
     static Integer numPartitions;
 
     @BeforeClass
@@ -51,9 +53,9 @@ public class PointJoinTest {
         input = PointJoinTest.class.getClassLoader().getResourceAsStream("point.test.properties");
         InputLocation = "file://"+PointJoinTest.class.getClassLoader().getResource("primaryroads.csv").getPath();
         offset = 0;
-        splitter = "";
-        gridType = "";
-        indexType = "";
+        splitter = null;
+        gridType = null;
+        indexType = null;
         numPartitions = 0;
 
         try {
@@ -62,9 +64,9 @@ public class PointJoinTest {
             InputLocation = "file://"+PointJoinTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             InputLocationQueryWindow = "file://"+PointJoinTest.class.getClassLoader().getResource(prop.getProperty("queryWindowSet")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
-            splitter = prop.getProperty("splitter");
-            gridType = prop.getProperty("gridType");
-            indexType = prop.getProperty("indexType");
+            splitter = FileDataSplitter.valueOf(prop.getProperty("splitter").toUpperCase());
+            gridType = GridType.valueOf(prop.getProperty("gridType").toUpperCase());
+            indexType = IndexType.valueOf(prop.getProperty("indexType").toUpperCase());
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
 
         } catch (IOException ex) {
@@ -125,7 +127,7 @@ public class PointJoinTest {
 
         PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
 
-        pointRDD.buildIndex("strtree");
+        pointRDD.buildIndex(IndexType.RTREE);
 
         JoinQuery joinQuery = new JoinQuery(sc,pointRDD,rectangleRDD);
         
@@ -173,7 +175,7 @@ public class PointJoinTest {
         
         RectangleRDD rectangleRDD4 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
 
-        PointRDD pointRDD4 = new PointRDD(sc, InputLocation, offset, splitter, "equalgrid", 20);
+        PointRDD pointRDD4 = new PointRDD(sc, InputLocation, offset, splitter, GridType.EQUALGRID, 20);
 
         JoinQuery joinQuery4 = new JoinQuery(sc,pointRDD4,rectangleRDD4); 
         
@@ -182,7 +184,7 @@ public class PointJoinTest {
         
         RectangleRDD rectangleRDD5 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
         
-        PointRDD pointRDD5 = new PointRDD(sc, InputLocation, offset, splitter, "rtree", 20);
+        PointRDD pointRDD5 = new PointRDD(sc, InputLocation, offset, splitter, GridType.RTREE, 20);
 
         JoinQuery joinQuery5 = new JoinQuery(sc,pointRDD5,rectangleRDD5); 
         
@@ -191,7 +193,7 @@ public class PointJoinTest {
         
         RectangleRDD rectangleRDD6 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
         
-        PointRDD pointRDD6 = new PointRDD(sc, InputLocation, offset, splitter, "voronoi", 20);
+        PointRDD pointRDD6 = new PointRDD(sc, InputLocation, offset, splitter, GridType.VORONOI, 20);
 
         JoinQuery joinQuery6 = new JoinQuery(sc,pointRDD6,rectangleRDD6); 
         
@@ -200,9 +202,9 @@ public class PointJoinTest {
         
         RectangleRDD rectangleRDD7 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
 
-        PointRDD pointRDD7 = new PointRDD(sc, InputLocation, offset, splitter, "equalgrid", 20);
+        PointRDD pointRDD7 = new PointRDD(sc, InputLocation, offset, splitter, GridType.EQUALGRID, 20);
         
-        pointRDD7.buildIndex("strtree");
+        pointRDD7.buildIndex(IndexType.RTREE);
 
         JoinQuery joinQuery7 = new JoinQuery(sc,pointRDD7,rectangleRDD7); 
         
@@ -211,9 +213,9 @@ public class PointJoinTest {
         
         RectangleRDD rectangleRDD8 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
         
-        PointRDD pointRDD8 = new PointRDD(sc, InputLocation, offset, splitter, "rtree", 80);
+        PointRDD pointRDD8 = new PointRDD(sc, InputLocation, offset, splitter, GridType.RTREE, 80);
 
-        pointRDD8.buildIndex("strtree");
+        pointRDD8.buildIndex(IndexType.RTREE);
         
         JoinQuery joinQuery8 = new JoinQuery(sc,pointRDD8,rectangleRDD8); 
         
@@ -222,9 +224,9 @@ public class PointJoinTest {
         
         RectangleRDD rectangleRDD9 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
         
-        PointRDD pointRDD9 = new PointRDD(sc, InputLocation, offset, splitter, "voronoi", 20);
+        PointRDD pointRDD9 = new PointRDD(sc, InputLocation, offset, splitter, GridType.VORONOI, 20);
 
-        pointRDD9.buildIndex("strtree");
+        pointRDD9.buildIndex(IndexType.RTREE);
         
         JoinQuery joinQuery9 = new JoinQuery(sc,pointRDD9,rectangleRDD9); 
         

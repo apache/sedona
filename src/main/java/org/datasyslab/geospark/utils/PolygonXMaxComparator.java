@@ -1,5 +1,8 @@
 package org.datasyslab.geospark.utils;
 
+import java.io.Serializable;
+import java.util.Comparator;
+
 /**
  * 
  * @author Arizona State University DataSystems Lab
@@ -7,9 +10,6 @@ package org.datasyslab.geospark.utils;
  */
 
 import com.vividsolutions.jts.geom.Polygon;
-
-import java.io.Serializable;
-import java.util.Comparator;
 
 public class PolygonXMaxComparator extends GeometryComparator implements Comparator<Polygon>, Serializable
 {

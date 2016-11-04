@@ -7,15 +7,9 @@ package org.datasyslab.geospark.spatialOperator;
  */
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
-import java.util.PriorityQueue;
 
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.FlatMapFunction;
-import org.apache.spark.broadcast.Broadcast;
 import org.datasyslab.geospark.knnJudgement.PointDistanceComparator;
 import org.datasyslab.geospark.knnJudgement.PointKnnJudgement;
 import org.datasyslab.geospark.knnJudgement.PointKnnJudgementUsingIndex;
@@ -32,7 +26,6 @@ import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.index.strtree.STRtree;
 
 
 public class KNNQuery implements Serializable{

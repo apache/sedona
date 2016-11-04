@@ -7,15 +7,12 @@ package org.datasyslab.geospark.knnJudgement;
  */
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 
 import org.apache.spark.api.java.function.FlatMapFunction;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 

@@ -11,25 +11,25 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.spark.api.java.function.Function;
+import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.wololo.jts2geojson.GeoJSONReader;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 
 public class PointFormatMapper implements Serializable, Function<String, Point> {
     Integer offset = 0;
-    String splitter = "csv";
+    FileDataSplitter splitter = FileDataSplitter.CSV;
 
-    public PointFormatMapper(Integer Offset, String Splitter) {
+    public PointFormatMapper(Integer Offset, FileDataSplitter Splitter) {
         this.offset = Offset;
         this.splitter = Splitter;
     }
 
-    public PointFormatMapper( String Splitter) {
+    public PointFormatMapper( FileDataSplitter Splitter) {
         this.offset = 0;
         this.splitter = Splitter;
     }
@@ -40,27 +40,27 @@ public class PointFormatMapper implements Serializable, Function<String, Point> 
         List<String> lineSplitList;
         Coordinate coordinate;
         switch (splitter) {
-            case "csv":
-                lineSplitList = Arrays.asList(line.split(","));
+            case CSV:
+                lineSplitList = Arrays.asList(line.split(splitter.getSplitter()));
                 coordinate= new Coordinate(Double.parseDouble(lineSplitList.get(0 + this.offset)),
                         Double.parseDouble(lineSplitList.get(1 + this.offset)));
                 point = fact.createPoint(coordinate);
                 point.setUserData(line);
                 break;
-            case "tsv":
-                lineSplitList = Arrays.asList(line.split("\t"));
+            case TSV:
+                lineSplitList = Arrays.asList(line.split(splitter.getSplitter()));
                 coordinate = new Coordinate(Double.parseDouble(lineSplitList.get(0 + this.offset)),
                         Double.parseDouble(lineSplitList.get(1 + this.offset)));
                 point = fact.createPoint(coordinate);
                 point.setUserData(line);
                 break;
-            case "geojson":
+            case GEOJSON:
                 GeoJSONReader reader = new GeoJSONReader();
                 point = (Point)reader.read(line);
                 point.setUserData(line);
                 break;
-            case "wkt":
-            	lineSplitList = Arrays.asList(line.split("\t"));
+            case WKT:
+            	lineSplitList = Arrays.asList(line.split(splitter.getSplitter()));
                 WKTReader wktreader = new WKTReader();
                 Envelope envelope=wktreader.read(lineSplitList.get(offset)).getEnvelopeInternal();
                 coordinate = new Coordinate (envelope.getMinX(),envelope.getMinY());
