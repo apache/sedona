@@ -1,10 +1,10 @@
-package org.datasyslab.geospark.geometryObjects;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: Circle.java
+ * PATH: org.datasyslab.geospark.geometryObjects.Circle.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
  */
+package org.datasyslab.geospark.geometryObjects;
 
 import java.io.Serializable;
 
@@ -14,6 +14,10 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class Circle.
+ */
 public class Circle implements Serializable {
 	
 	/** The center. */
@@ -79,9 +83,9 @@ public class Circle implements Serializable {
 	}
 	
 	/**
-	 * Gets the Minimum Boundring Rectangle.
+	 * Gets the mbr.
 	 *
-	 * @return the Minimum Boundring Rectangle
+	 * @return the mbr
 	 */
 	public Envelope getMBR()
 	{
@@ -90,9 +94,9 @@ public class Circle implements Serializable {
 	}
 	
 	/**
-	 * Convert A Minimum Bounding Rectangle to a circle
+	 * MB rto circle.
 	 *
-	 * @param mbr the Minimum Boundring Rectangle
+	 * @param mbr the mbr
 	 * @return the circle
 	 */
 	public static Circle MBRtoCircle(Envelope mbr)
@@ -105,7 +109,7 @@ public class Circle implements Serializable {
 	}
 	
 	/**
-	 * Check whether the circle contains a point.
+	 * Contains.
 	 *
 	 * @param point the point
 	 * @return true, if successful
@@ -123,7 +127,7 @@ public class Circle implements Serializable {
 	}
 	
 	/**
-	 * Check whether the circle intersects a point. This one considers the case that the point is on the circle boundary.
+	 * Intersects.
 	 *
 	 * @param point the point
 	 * @return true, if successful
@@ -140,6 +144,12 @@ public class Circle implements Serializable {
 		}
 	}
 
+	/**
+	 * Intersects.
+	 *
+	 * @param e the e
+	 * @return true, if successful
+	 */
 	//Judge whether
 	public boolean intersects(Envelope e)
 	{

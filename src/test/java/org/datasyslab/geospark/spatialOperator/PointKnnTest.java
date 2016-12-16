@@ -1,3 +1,9 @@
+/**
+ * FILE: PointKnnTest.java
+ * PATH: org.datasyslab.geospark.spatialOperator.PointKnnTest.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.spatialOperator;
 
 import java.io.IOException;
@@ -27,17 +33,45 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PointKnnTest.
+ */
 public class PointKnnTest {
+    
+    /** The sc. */
     public static JavaSparkContext sc;
+    
+    /** The prop. */
     static Properties prop;
+    
+    /** The input. */
     static InputStream input;
+    
+    /** The Input location. */
     static String InputLocation;
+    
+    /** The offset. */
     static Integer offset;
+    
+    /** The splitter. */
     static FileDataSplitter splitter;
+    
+    /** The index type. */
     static IndexType indexType;
+    
+    /** The num partitions. */
     static Integer numPartitions;
+    
+    /** The loop times. */
     static int loopTimes;
+    
+    /** The query point. */
     static Point queryPoint;
+    
+    /**
+     * Once executed before all.
+     */
     @BeforeClass
     public static void onceExecutedBeforeAll(){
         SparkConf conf = new SparkConf().setAppName("PointKnn").setMaster("local[2]");
@@ -80,11 +114,19 @@ public class PointKnnTest {
         queryPoint = fact.createPoint(new Coordinate(-84.01, 34.01));
     }
 
+    /**
+     * Teardown.
+     */
     @AfterClass
     public static void teardown(){
         sc.stop();
     }
 
+    /**
+     * Test spatial knn query.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testSpatialKnnQuery() throws Exception {
     	PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter);
@@ -98,6 +140,12 @@ public class PointKnnTest {
     	}
     	
     }
+    
+    /**
+     * Test spatial knn query using index.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testSpatialKnnQueryUsingIndex() throws Exception {
     	PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter);

@@ -1,3 +1,9 @@
+/**
+ * FILE: PointJoinTest.java
+ * PATH: org.datasyslab.geospark.spatialOperator.PointJoinTest.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.spatialOperator;
 
 import java.io.IOException;
@@ -31,18 +37,45 @@ import com.vividsolutions.jts.geom.Point;
 import scala.Tuple2;
 
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PointJoinTest.
+ */
 public class PointJoinTest {
+    
+    /** The sc. */
     public static JavaSparkContext sc;
+    
+    /** The prop. */
     static Properties prop;
+    
+    /** The input. */
     static InputStream input;
+    
+    /** The Input location. */
     static String InputLocation;
+    
+    /** The Input location query window. */
     static String InputLocationQueryWindow;
+    
+    /** The offset. */
     static Integer offset;
+    
+    /** The splitter. */
     static FileDataSplitter splitter;
+    
+    /** The grid type. */
     static GridType gridType;
+    
+    /** The index type. */
     static IndexType indexType;
+    
+    /** The num partitions. */
     static Integer numPartitions;
 
+    /**
+     * Once executed before all.
+     */
     @BeforeClass
     public static void onceExecutedBeforeAll() {
         SparkConf conf = new SparkConf().setAppName("PointJoin").setMaster("local[2]");
@@ -82,11 +115,19 @@ public class PointJoinTest {
         }
     }
 
+    /**
+     * Tear down.
+     */
     @AfterClass
     public static void TearDown() {
         sc.stop();
     }
 
+    /**
+     * Test spatial join query.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testSpatialJoinQuery() throws Exception {
 
@@ -107,6 +148,11 @@ public class PointJoinTest {
         }
     }
 
+    /**
+     * Test spatial join query using index exception.
+     *
+     * @throws Exception the exception
+     */
     @Test(expected = NullPointerException.class)
     public void testSpatialJoinQueryUsingIndexException() throws Exception {
         RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter, numPartitions);
@@ -120,6 +166,11 @@ public class PointJoinTest {
 
     }
 
+    /**
+     * Test spatial join query using index.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testSpatialJoinQueryUsingIndex() throws Exception {
 
@@ -143,6 +194,11 @@ public class PointJoinTest {
 
     }
 
+    /**
+     * Test join correctness.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testJoinCorrectness() throws Exception {
 

@@ -1,10 +1,10 @@
-package org.datasyslab.geospark.spatialPartitioning;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: VoronoiPartitioning.java
+ * PATH: org.datasyslab.geospark.spatialPartitioning.VoronoiPartitioning.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
  */
+package org.datasyslab.geospark.spatialPartitioning;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -22,8 +22,22 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.triangulate.VoronoiDiagramBuilder;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class VoronoiPartitioning.
+ */
 public class VoronoiPartitioning implements Serializable{
+	
+	/** The grids. */
 	HashSet<EnvelopeWithGrid> grids=new HashSet<EnvelopeWithGrid>();
+	
+	/**
+	 * Instantiates a new voronoi partitioning.
+	 *
+	 * @param SampleList the sample list
+	 * @param boundary the boundary
+	 * @param partitions the partitions
+	 */
 	public VoronoiPartitioning(Point[] SampleList,Envelope boundary,int partitions)
 	{
 		GeometryFactory fact = new GeometryFactory();
@@ -45,6 +59,14 @@ public class VoronoiPartitioning implements Serializable{
 		}
 		//grids.add(new EnvelopeWithGrid(boundary,grids.size()));
 	}
+	
+	/**
+	 * Instantiates a new voronoi partitioning.
+	 *
+	 * @param SampleList the sample list
+	 * @param boundary the boundary
+	 * @param partitions the partitions
+	 */
 	public VoronoiPartitioning(Envelope[] SampleList,Envelope boundary,int partitions)
 	{
 		GeometryFactory fact = new GeometryFactory();
@@ -67,6 +89,14 @@ public class VoronoiPartitioning implements Serializable{
 		}
 		//grids.add(new EnvelopeWithGrid(boundary,grids.size()));
 	}
+	
+	/**
+	 * Instantiates a new voronoi partitioning.
+	 *
+	 * @param SampleList the sample list
+	 * @param boundary the boundary
+	 * @param partitions the partitions
+	 */
 	public VoronoiPartitioning(Polygon[] SampleList,Envelope boundary,int partitions)
 	{
 		GeometryFactory fact = new GeometryFactory();
@@ -89,8 +119,11 @@ public class VoronoiPartitioning implements Serializable{
 		}
 		//grids.add(new EnvelopeWithGrid(boundary,grids.size()));
 	}
+	
 	/**
-	 * @return Return the generated grid file
+	 * Gets the grids.
+	 *
+	 * @return the grids
 	 */
 	public HashSet<EnvelopeWithGrid> getGrids() {
 		

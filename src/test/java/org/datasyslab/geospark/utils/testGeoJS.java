@@ -1,3 +1,9 @@
+/**
+ * FILE: testGeoJS.java
+ * PATH: org.datasyslab.geospark.utils.testGeoJS.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.utils;
 
 import org.apache.log4j.Level;
@@ -20,9 +26,18 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class testGeoJS.
+ */
 public class testGeoJS {
+    
+    /** The sc. */
     public static JavaSparkContext sc;
 
+    /**
+     * Once executed before all.
+     */
     @BeforeClass
     public static void onceExecutedBeforeAll() {
         SparkConf conf = new SparkConf().setAppName("JobTileMatchWithAcronymExpension").setMaster("local[2]");
@@ -31,6 +46,9 @@ public class testGeoJS {
         Logger.getLogger("akka").setLevel(Level.WARN);
     }
 
+    /**
+     * Jts 2 geonjs.
+     */
     @Test
     public void jts2geonjs(){
         GeometryFactory geometryFactory = new GeometryFactory();
@@ -44,6 +62,9 @@ public class testGeoJS {
         System.out.println(jsonstring);
     }
 
+    /**
+     * Tear down.
+     */
     @AfterClass
     public static void TearDown() {
         sc.stop();

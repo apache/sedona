@@ -1,3 +1,9 @@
+/**
+ * FILE: DistanceJoin.java
+ * PATH: org.datasyslab.geospark.spatialOperator.DistanceJoin.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.spatialOperator;
 
 import java.util.ArrayList;
@@ -28,16 +34,20 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 
 import scala.Tuple2;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class DistanceJoin.
+ */
 public class DistanceJoin {
 	
     /**
-     * Deprecated. This method is to be updated for using index.
-     * Spatial Join Query between two PointRDDs using regular nested loop. For each point in PointRDD2, it will find the points in PointRDD1 which are within the specified distance of this point.
-     * @param sc SparkContext which defines some Spark configurations
-     * @param pointRDD1 PointRDD1
-     * @param pointRDD2 PointRDD2
-     * @param distance specify the distance predicate between two points
-     * @return A PairRDD which follows the schema: Point in PoitRDD2, a list of qualified points in PointRDD1
+     * Spatial join query without index.
+     *
+     * @param sc the sc
+     * @param pointRDD1 the point RDD 1
+     * @param pointRDD2 the point RDD 2
+     * @param distance the distance
+     * @return the java pair RDD
      */
     public static JavaPairRDD<Point, HashSet<Point>> SpatialJoinQueryWithoutIndex(JavaSparkContext sc, PointRDD pointRDD1, PointRDD pointRDD2, Double distance) {
         //Grid filter, Maybe we can filter those key doesn't overlap the destination.
@@ -120,12 +130,13 @@ public class DistanceJoin {
 
 
     /**
-     * Spatial Join Query between two PointRDDs using index nested loop. PointRDD1 should be indexed in advance. For each point in PointRDD2, it will find the points in PointRDD1 which are within the specified distance of this point.
-     * @param sc SparkContext which defines some Spark configurations
-     * @param pointRDD1 PointRDD1
-     * @param pointRDD2 PointRDD2
-     * @param distance specify the distance predicate between two points
-     * @return A PairRDD which follows the schema: Point in PoitRDD2, a list of qualified points in PointRDD1
+     * Spatial join query using index.
+     *
+     * @param sc the sc
+     * @param pointRDD1 the point RDD 1
+     * @param pointRDD2 the point RDD 2
+     * @param distance the distance
+     * @return the java pair RDD
      */
     public static JavaPairRDD<Point, List<Point>> SpatialJoinQueryUsingIndex(JavaSparkContext sc, PointRDD pointRDD1, PointRDD pointRDD2, Double distance) {
         //Grid filter, Maybe we can filter those key doesn't overlap the destination.

@@ -1,3 +1,9 @@
+/**
+ * FILE: PolygonYMaxComparator.java
+ * PATH: org.datasyslab.geospark.utils.PolygonYMaxComparator.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.utils;
 
 import java.io.Serializable;
@@ -11,6 +17,10 @@ import java.util.Comparator;
 
 import com.vividsolutions.jts.geom.Polygon;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PolygonYMaxComparator.
+ */
 public class PolygonYMaxComparator extends GeometryComparator implements Comparator<Polygon>, Serializable
 {
 

@@ -1,10 +1,10 @@
-package org.datasyslab.geospark.joinJudgement;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: PointByPolygonJudgement.java
+ * PATH: org.datasyslab.geospark.joinJudgement.PointByPolygonJudgement.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
  */
+package org.datasyslab.geospark.joinJudgement;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -18,13 +18,23 @@ import com.vividsolutions.jts.geom.Polygon;
 
 import scala.Tuple2;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PointByPolygonJudgement.
+ */
 public class PointByPolygonJudgement implements PairFlatMapFunction<Tuple2<Integer, Tuple2<Iterable<Point>, Iterable<Polygon>>>, Polygon, HashSet<Point>>, Serializable{
 
+	/**
+	 * Instantiates a new point by polygon judgement.
+	 */
 	public PointByPolygonJudgement()
 	{
 	}
 
 	
+	/* (non-Javadoc)
+	 * @see org.apache.spark.api.java.function.PairFlatMapFunction#call(java.lang.Object)
+	 */
 	@Override
 	 public Iterator<Tuple2<Polygon, HashSet<Point>>> call(Tuple2<Integer, Tuple2<Iterable<Point>, Iterable<Polygon>>> cogroup) throws Exception {
         ArrayList<Tuple2<Polygon, HashSet<Point>>> result = new ArrayList<Tuple2<Polygon, HashSet<Point>>>();

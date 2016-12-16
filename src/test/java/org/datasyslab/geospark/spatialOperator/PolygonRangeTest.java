@@ -1,3 +1,9 @@
+/**
+ * FILE: PolygonRangeTest.java
+ * PATH: org.datasyslab.geospark.spatialOperator.PolygonRangeTest.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.spatialOperator;
 
 import java.io.IOException;
@@ -20,17 +26,45 @@ import org.junit.Test;
 import com.vividsolutions.jts.geom.Envelope;
 
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PolygonRangeTest.
+ */
 public class PolygonRangeTest {
+    
+    /** The sc. */
     public static JavaSparkContext sc;
+    
+    /** The prop. */
     static Properties prop;
+    
+    /** The input. */
     static InputStream input;
+    
+    /** The Input location. */
     static String InputLocation;
+    
+    /** The offset. */
     static Integer offset;
+    
+    /** The splitter. */
     static FileDataSplitter splitter;
+    
+    /** The index type. */
     static IndexType indexType;
+    
+    /** The num partitions. */
     static Integer numPartitions;
+    
+    /** The query envelope. */
     static Envelope queryEnvelope;
+    
+    /** The loop times. */
     static int loopTimes;
+    
+    /**
+     * Once executed before all.
+     */
     @BeforeClass
     public static void onceExecutedBeforeAll() {
         SparkConf conf = new SparkConf().setAppName("PolygonRange").setMaster("local[2]");
@@ -72,11 +106,20 @@ public class PolygonRangeTest {
             }
         }
     }
+    
+    /**
+     * Tear down.
+     */
     @AfterClass
     public static void TearDown() {
         sc.stop();
     }
 
+    /**
+     * Test spatial range query.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testSpatialRangeQuery() throws Exception {
     	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter);
@@ -87,6 +130,12 @@ public class PolygonRangeTest {
     	}
      	assert RangeQuery.SpatialRangeQuery(polygonRDD, queryEnvelope, 0).getRawPolygonRDD().take(10).get(1).getUserData().toString()!=null;
     }
+    
+    /**
+     * Test spatial range query using index.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testSpatialRangeQueryUsingIndex() throws Exception {
     	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter);

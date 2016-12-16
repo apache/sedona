@@ -1,10 +1,10 @@
-package org.datasyslab.geospark.showcase;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: Example.java
+ * PATH: org.datasyslab.geospark.showcase.Example.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
  */
+package org.datasyslab.geospark.showcase;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -30,32 +30,80 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class Example.
+ */
 public class Example implements Serializable{
+    
+    /** The sc. */
     public static JavaSparkContext sc;
+    
+    /** The fact. */
     static GeometryFactory fact=new GeometryFactory();
+    
+    /** The cores. */
     static String cores;
     
+    /** The prop. */
     static Properties prop;
+    
+    /** The query name. */
     static String queryName;
+    
+    /** The input. */
     static InputStream input;
     
+    /** The input location. */
     static String inputLocation;
+    
+    /** The offset. */
     static Integer offset;
+    
+    /** The splitter. */
     static FileDataSplitter splitter;
+    
+    /** The num partitions. */
     static Integer numPartitions;
     
+    /** The input location 2. */
     static String inputLocation2;
+    
+    /** The offset 2. */
     static Integer offset2;
+    
+    /** The splitter 2. */
     static FileDataSplitter splitter2;
+    
+    /** The grid type. */
     static GridType gridType;
+    
+    /** The num partitions 2. */
     static int numPartitions2;
     
+    /** The loop times. */
     static int loopTimes;
+    
+    /** The query point. */
     static Point queryPoint;
+    
+    /** The query envelope. */
     static Envelope queryEnvelope;
+    
+    /** The conf. */
     static SparkConf conf;
+    
+    /** The master name. */
     static String masterName;
+    
+    /** The jar path. */
     static String jarPath;
+	
+	/**
+	 * The main method.
+	 *
+	 * @param args the arguments
+	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
@@ -133,6 +181,12 @@ public class Example implements Serializable{
 		
 		TearDown();
 	}
+    
+    /**
+     * Test spatial range query.
+     *
+     * @throws Exception the exception
+     */
     public static void testSpatialRangeQuery() throws Exception {
     	Random random=new Random();
     	double randomNumber=random.nextInt(10)+random.nextDouble();
@@ -148,6 +202,11 @@ public class Example implements Serializable{
     
 
     
+    /**
+     * Test spatial range query using index.
+     *
+     * @throws Exception the exception
+     */
     public static void testSpatialRangeQueryUsingIndex() throws Exception {
     	Random random=new Random();
     	double randomNumber=random.nextInt(10)+random.nextDouble();
@@ -162,6 +221,11 @@ public class Example implements Serializable{
         
     }
 
+    /**
+     * Test spatial knn query.
+     *
+     * @throws Exception the exception
+     */
     public static void testSpatialKnnQuery() throws Exception {
     	Random random=new Random();
     	double randomNumber=random.nextInt(10)+random.nextDouble();
@@ -175,6 +239,11 @@ public class Example implements Serializable{
     	}
     }
 
+    /**
+     * Test spatial knn query using index.
+     *
+     * @throws Exception the exception
+     */
     public static void testSpatialKnnQueryUsingIndex() throws Exception {
     	Random random=new Random();
     	double randomNumber=random.nextInt(10)+random.nextDouble();
@@ -188,6 +257,11 @@ public class Example implements Serializable{
     	}
     }
  
+    /**
+     * Test spatial join query.
+     *
+     * @throws Exception the exception
+     */
     public static void testSpatialJoinQuery() throws Exception {
     	RectangleRDD rectangleRDD = new RectangleRDD(sc, inputLocation2, offset2, splitter2);
     	//polygonRDD.rawPolygonRDD.unpersist();
@@ -203,6 +277,11 @@ public class Example implements Serializable{
     	}
     }
     
+    /**
+     * Test spatial join query using index.
+     *
+     * @throws Exception the exception
+     */
     public static void testSpatialJoinQueryUsingIndex() throws Exception {
     	RectangleRDD rectangleRDD = new RectangleRDD(sc, inputLocation2, offset2, splitter2);
     	//polygonRDD.rawPolygonRDD.unpersist();
@@ -218,6 +297,9 @@ public class Example implements Serializable{
     }
     
 
+    /**
+     * Tear down.
+     */
     public static void TearDown() {
         sc.stop();
     }

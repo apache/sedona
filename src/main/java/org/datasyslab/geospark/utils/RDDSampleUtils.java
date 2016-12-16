@@ -1,17 +1,24 @@
+/**
+ * FILE: RDDSampleUtils.java
+ * PATH: org.datasyslab.geospark.utils.RDDSampleUtils.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.utils;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * The Class RDDSampleUtils.
  */
 
 public class RDDSampleUtils {
+    
     /**
-     * Calculate the number of sampled records to build grid for this RDD.
-     * @param numPartitions the sampled records will be the multiple of numberOfPartitions.
-     * @param totalNumberOfRecords the number of records in the RDD
-     * @return the number of sample records
+     * Gets the sample numbers.
+     *
+     * @param numPartitions the num partitions
+     * @param totalNumberOfRecords the total number of records
+     * @return the sample numbers
      */
     public static int getSampleNumbers(Integer numPartitions, long totalNumberOfRecords) {
 		long sampleNumbers = totalNumberOfRecords / 100;

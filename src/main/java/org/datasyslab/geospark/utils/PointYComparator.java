@@ -1,3 +1,9 @@
+/**
+ * FILE: PointYComparator.java
+ * PATH: org.datasyslab.geospark.utils.PointYComparator.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.utils;
 
 import java.io.Serializable;
@@ -12,6 +18,10 @@ import java.util.Comparator;
 import com.vividsolutions.jts.geom.Point;
 
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PointYComparator.
+ */
 public class PointYComparator extends GeometryComparator implements Comparator<Point>, Serializable {
 
 	 /* (non-Javadoc)

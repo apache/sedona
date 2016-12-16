@@ -1,10 +1,10 @@
-package org.datasyslab.geospark.joinJudgement;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: RectangleByRectangleJudgement.java
+ * PATH: org.datasyslab.geospark.joinJudgement.RectangleByRectangleJudgement.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
  */
+package org.datasyslab.geospark.joinJudgement;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -16,15 +16,29 @@ import com.vividsolutions.jts.geom.Envelope;
 
 import scala.Tuple2;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class RectangleByRectangleJudgement.
+ */
 public class RectangleByRectangleJudgement implements PairFlatMapFunction<Tuple2<Integer, Tuple2<Iterable<Envelope>, Iterable<Envelope>>>, Envelope, HashSet<Envelope>>, Serializable{
 
+	/** The grid number. */
 	int gridNumber;
+	
+	/**
+	 * Instantiates a new rectangle by rectangle judgement.
+	 *
+	 * @param gridNumber the grid number
+	 */
 	public RectangleByRectangleJudgement(int gridNumber)
 	{
 		this.gridNumber=gridNumber;
 	}
 
 	
+	/* (non-Javadoc)
+	 * @see org.apache.spark.api.java.function.PairFlatMapFunction#call(java.lang.Object)
+	 */
 	@Override
 	 public Iterator<Tuple2<Envelope, HashSet<Envelope>>> call(Tuple2<Integer, Tuple2<Iterable<Envelope>, Iterable<Envelope>>> cogroup) throws Exception {
 		HashSet<Tuple2<Envelope, HashSet<Envelope>>> result = new HashSet<Tuple2<Envelope, HashSet<Envelope>>>();

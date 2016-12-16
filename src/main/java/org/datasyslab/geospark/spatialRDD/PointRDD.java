@@ -1,3 +1,9 @@
+/**
+ * FILE: PointRDD.java
+ * PATH: org.datasyslab.geospark.spatialRDD.PointRDD.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.spatialRDD;
 
 import java.io.Serializable;

@@ -1,10 +1,10 @@
-package org.datasyslab.geospark.formatMapper;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: PointFormatMapper.java
+ * PATH: org.datasyslab.geospark.formatMapper.PointFormatMapper.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
  */
+package org.datasyslab.geospark.formatMapper;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -20,20 +20,42 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.WKTReader;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PointFormatMapper.
+ */
 public class PointFormatMapper implements Serializable, Function<String, Point> {
+    
+    /** The offset. */
     Integer offset = 0;
+    
+    /** The splitter. */
     FileDataSplitter splitter = FileDataSplitter.CSV;
 
+    /**
+     * Instantiates a new point format mapper.
+     *
+     * @param Offset the offset
+     * @param Splitter the splitter
+     */
     public PointFormatMapper(Integer Offset, FileDataSplitter Splitter) {
         this.offset = Offset;
         this.splitter = Splitter;
     }
 
+    /**
+     * Instantiates a new point format mapper.
+     *
+     * @param Splitter the splitter
+     */
     public PointFormatMapper( FileDataSplitter Splitter) {
         this.offset = 0;
         this.splitter = Splitter;
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.spark.api.java.function.Function#call(java.lang.Object)
+     */
     public Point call(String line) throws Exception {
         Point point = null;
         GeometryFactory fact = new GeometryFactory();

@@ -1,9 +1,14 @@
+/**
+ * FILE: GeometryComparatorFactory.java
+ * PATH: org.datasyslab.geospark.utils.GeometryComparatorFactory.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.utils;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * A factory for creating GeometryComparator objects.
  */
 
 /**
@@ -12,9 +17,9 @@ package org.datasyslab.geospark.utils;
 public class GeometryComparatorFactory {
 	
 	/**
-	 * Creates a new Comparator object.
+	 * Creates a new GeometryComparator object.
 	 *
-	 * @param Two strings as input, should be in format like ("point", "x");
+	 * @param geometryType the geometry type
 	 * @param axis the axis
 	 * @return the geometry comparator
 	 */
@@ -42,11 +47,11 @@ public class GeometryComparatorFactory {
 	}
 	
 	/**
-	 * Creates a new Comparator object.
+	 * Creates a new GeometryComparator object.
 	 *
-	 * @param Two strings as input, should be in format like ("point", "x");
+	 * @param geometryType the geometry type
 	 * @param axis the axis
-	 * @param extrema, whether we want the max or the min
+	 * @param extrema the extrema
 	 * @return the geometry comparator
 	 */
 	public static GeometryComparator createComparator(String geometryType, String axis, String extrema){

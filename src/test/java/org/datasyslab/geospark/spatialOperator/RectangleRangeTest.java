@@ -1,3 +1,9 @@
+/**
+ * FILE: RectangleRangeTest.java
+ * PATH: org.datasyslab.geospark.spatialOperator.RectangleRangeTest.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.spatialOperator;
 
 import java.io.IOException;

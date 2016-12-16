@@ -1,10 +1,10 @@
-package org.datasyslab.geospark.spatialOperator;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: KNNQuery.java
+ * PATH: org.datasyslab.geospark.spatialOperator.KNNQuery.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
  */
+package org.datasyslab.geospark.spatialOperator;
 
 import java.io.Serializable;
 import java.util.List;
@@ -28,13 +28,19 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class KNNQuery.
+ */
 public class KNNQuery implements Serializable{
+	
 	/**
-	 * Spatial K Nearest Neighbors query
-	 * @param pointRDD specify the input pointRDD
-	 * @param queryCenter specify the query center 
-	 * @param k specify the K
-	 * @return A list which contains K nearest points
+	 * Spatial knn query.
+	 *
+	 * @param pointRDD the point RDD
+	 * @param queryCenter the query center
+	 * @param k the k
+	 * @return the list
 	 */
 	public static List<Point> SpatialKnnQuery(PointRDD pointRDD, Point queryCenter, Integer k) {
 		// For each partation, build a priority queue that holds the topk
@@ -47,12 +53,14 @@ public class KNNQuery implements Serializable{
 		return tmp.takeOrdered(k, new PointDistanceComparator(queryCenter));
 
 	}
+	
 	/**
-	 * Spatial K Nearest Neighbors query using index
-	 * @param pointRDD specify the input pointRDD
-	 * @param queryCenter specify the query center 
-	 * @param k specify the K
-	 * @return A list which contains K nearest points
+	 * Spatial knn query using index.
+	 *
+	 * @param pointRDD the point RDD
+	 * @param queryCenter the query center
+	 * @param k the k
+	 * @return the list
 	 */
 	public static List<Point> SpatialKnnQueryUsingIndex(PointRDD pointRDD, Point queryCenter, Integer k) {
 		// For each partation, build a priority queue that holds the topk
@@ -68,12 +76,14 @@ public class KNNQuery implements Serializable{
 		return tmp.takeOrdered(k, new PointDistanceComparator(queryCenter));
 
 	}
+	
 	/**
-	 * Spatial K Nearest Neighbors query
-	 * @param objectRDD specify the input rectangelRDD
-	 * @param queryCenter specify the query center 
-	 * @param k specify the K
-	 * @return A list which contains K nearest points
+	 * Spatial knn query.
+	 *
+	 * @param objectRDD the object RDD
+	 * @param queryCenter the query center
+	 * @param k the k
+	 * @return the list
 	 */
 	public static List<Envelope> SpatialKnnQuery(RectangleRDD objectRDD, Point queryCenter, Integer k) {
 		// For each partation, build a priority queue that holds the topk
@@ -86,12 +96,14 @@ public class KNNQuery implements Serializable{
 		return tmp.takeOrdered(k, new RectangleDistanceComparator(queryCenter));
 
 	}
+	
 	/**
-	 * Spatial K Nearest Neighbors query using index
-	 * @param objectRDD specify the input rectangelRDD
-	 * @param queryCenter specify the query center 
-	 * @param k specify the K
-	 * @return A list which contains K nearest points
+	 * Spatial knn query using index.
+	 *
+	 * @param objectRDD the object RDD
+	 * @param queryCenter the query center
+	 * @param k the k
+	 * @return the list
 	 */
 	public static List<Envelope> SpatialKnnQueryUsingIndex(RectangleRDD objectRDD, Point queryCenter, Integer k) {
 		// For each partation, build a priority queue that holds the topk
@@ -107,12 +119,14 @@ public class KNNQuery implements Serializable{
 		return tmp.takeOrdered(k, new RectangleDistanceComparator(queryCenter));
 
 	}
+	
 	/**
-	 * Spatial K Nearest Neighbors query
-	 * @param objectRDD specify the input polygonRDD
-	 * @param queryCenter specify the query center 
-	 * @param k specify the K
-	 * @return A list which contains K nearest points
+	 * Spatial knn query.
+	 *
+	 * @param objectRDD the object RDD
+	 * @param queryCenter the query center
+	 * @param k the k
+	 * @return the list
 	 */
 	public static List<Polygon> SpatialKnnQuery(PolygonRDD objectRDD, Point queryCenter, Integer k) {
 		// For each partation, build a priority queue that holds the topk
@@ -125,12 +139,14 @@ public class KNNQuery implements Serializable{
 		return tmp.takeOrdered(k, new PolygonDistanceComparator(queryCenter));
 
 	}
+	
 	/**
-	 * Spatial K Nearest Neighbors query using index
-	 * @param objectRDD specify the input rectangelRDD
-	 * @param queryCenter specify the query center 
-	 * @param k specify the K
-	 * @return A list which contains K nearest points
+	 * Spatial knn query using index.
+	 *
+	 * @param objectRDD the object RDD
+	 * @param queryCenter the query center
+	 * @param k the k
+	 * @return the list
 	 */
 	public static List<Polygon> SpatialKnnQueryUsingIndex(PolygonRDD objectRDD, Point queryCenter, Integer k) {
 		// For each partation, build a priority queue that holds the topk

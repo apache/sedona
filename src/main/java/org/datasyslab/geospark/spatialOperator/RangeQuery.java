@@ -1,10 +1,10 @@
-package org.datasyslab.geospark.spatialOperator;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: RangeQuery.java
+ * PATH: org.datasyslab.geospark.spatialOperator.RangeQuery.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
  */
+package org.datasyslab.geospark.spatialOperator;
 
 import java.io.Serializable;
 
@@ -22,6 +22,11 @@ import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+// TODO: Auto-generated Javadoc
+
+/**
+ * The Class RangeQuery.
+ */
 public class RangeQuery implements Serializable{
 	
 	//I think this part can be refactored.
@@ -31,11 +36,12 @@ public class RangeQuery implements Serializable{
 	//todo: refactor all this into one rangeQuery
 
 	/**
-	 * Spatial range query on top of PointRDD
-	 * @param pointRDD Input PointRDD
-	 * @param envelope Query window
-	 * @param condition 0 means query predicate is "contains", 1 means query predicate is "intersects"
-	 * @return A PointRDD contains qualified records
+	 * Spatial range query.
+	 *
+	 * @param pointRDD the point RDD
+	 * @param envelope the envelope
+	 * @param condition the condition
+	 * @return the point RDD
 	 */
 	public static PointRDD SpatialRangeQuery(PointRDD pointRDD, Envelope envelope, Integer condition) {
 		JavaRDD<Point> result = pointRDD.getRawPointRDD().filter(new PointRangeFilter(envelope, condition));
@@ -43,11 +49,12 @@ public class RangeQuery implements Serializable{
 	}
 	
 	/**
-	 * Spatial range query on top of PointRDD
-	 * @param pointRDD Input PointRDD
-	 * @param envelope Query window
-	 * @param condition 0 means query predicate is "contains", 1 means query predicate is "intersects"
-	 * @return A PointRDD contains qualified records
+	 * Spatial range query using index.
+	 *
+	 * @param pointRDD the point RDD
+	 * @param envelope the envelope
+	 * @param condition the condition
+	 * @return the point RDD
 	 */
 	public static PointRDD SpatialRangeQueryUsingIndex(PointRDD pointRDD, Envelope envelope, Integer condition) {
         if(pointRDD.indexedRDDNoId == null) {
@@ -59,15 +66,12 @@ public class RangeQuery implements Serializable{
 	
 	
 	/**
-	 * Spatial range query for point.
+	 * Spatial range query.
 	 *
-	 * @param polygon
-	 *            the polygon
-	 * @param condition
-	 *            the condition
-	 * @return the point rdd
-	 *
-	 * //todo: for some unknown reason, use polygon will not return correct result and didn't pass the test case.
+	 * @param polygonRDD the polygon RDD
+	 * @param envelope the envelope
+	 * @param condition the condition
+	 * @return the polygon RDD
 	 */
 //	public static PointRDD SpatialRangeQuery(PointRDD pointRDD, Polygon polygon, Integer condition) {
 //		JavaRDD<Point> result = pointRDD.getRawPointRDD().filter(new PointRangeFilter(polygon, condition));
@@ -88,11 +92,12 @@ public class RangeQuery implements Serializable{
 	}
 	
 	/**
-	 * Spatial range query on top of PolygonRDD
-	 * @param polygonRDD Input PolygonRDD
-	 * @param envelope Query window
-	 * @param condition 0 means query predicate is "contains", 1 means query predicate is "intersects" 
-	 * @return A PolygonRDD contains qualified records
+	 * Spatial range query using index.
+	 *
+	 * @param polygonRDD the polygon RDD
+	 * @param envelope the envelope
+	 * @param condition the condition
+	 * @return the polygon RDD
 	 */
 	public static PolygonRDD SpatialRangeQueryUsingIndex(PolygonRDD polygonRDD, Envelope envelope, Integer condition)
 	{
@@ -117,12 +122,13 @@ public class RangeQuery implements Serializable{
 //
 
 	/**
-	 * Spatial range query on top of RectangleRDD
-	 * @param rectangleRDD Input Rectangle RDD
-	 * @param envelope Query window
-	 * @param condition 0 means query predicate is "contains", 1 means query predicate is "intersects"
-	 * @return A RectangleRDD contains qualified records
-	 */
+ * Spatial range query.
+ *
+ * @param rectangleRDD the rectangle RDD
+ * @param envelope the envelope
+ * @param condition the condition
+ * @return the rectangle RDD
+ */
 	public static RectangleRDD SpatialRangeQuery(RectangleRDD rectangleRDD, Envelope envelope,Integer condition)
 	{
 		JavaRDD<Envelope> result= rectangleRDD.getRawRectangleRDD().filter(new RectangleRangeFilter(envelope,condition));
@@ -130,11 +136,12 @@ public class RangeQuery implements Serializable{
 	}
 	
 	/**
-	 * Spatial range query on top of RectangleRDD
-	 * @param rectangleRDD Input Rectangle RDD
-	 * @param envelope Query window
-	 * @param condition 0 means query predicate is "contains", 1 means query predicate is "intersects"
-	 * @return A RectangleRDD contains qualified records
+	 * Spatial range query using index.
+	 *
+	 * @param rectangleRDD the rectangle RDD
+	 * @param envelope the envelope
+	 * @param condition the condition
+	 * @return the rectangle RDD
 	 */
 	public static RectangleRDD SpatialRangeQueryUsingIndex(RectangleRDD rectangleRDD, Envelope envelope,Integer condition)
 	{
