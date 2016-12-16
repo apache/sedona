@@ -41,14 +41,14 @@ public class PointFormatMapper implements Serializable, Function<String, Point> 
         Coordinate coordinate;
         switch (splitter) {
             case CSV:
-                lineSplitList = Arrays.asList(line.split(splitter.getSplitter()));
+                lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
                 coordinate= new Coordinate(Double.parseDouble(lineSplitList.get(0 + this.offset)),
                         Double.parseDouble(lineSplitList.get(1 + this.offset)));
                 point = fact.createPoint(coordinate);
                 point.setUserData(line);
                 break;
             case TSV:
-                lineSplitList = Arrays.asList(line.split(splitter.getSplitter()));
+                lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
                 coordinate = new Coordinate(Double.parseDouble(lineSplitList.get(0 + this.offset)),
                         Double.parseDouble(lineSplitList.get(1 + this.offset)));
                 point = fact.createPoint(coordinate);
@@ -60,7 +60,7 @@ public class PointFormatMapper implements Serializable, Function<String, Point> 
                 point.setUserData(line);
                 break;
             case WKT:
-            	lineSplitList = Arrays.asList(line.split(splitter.getSplitter()));
+            	lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
                 WKTReader wktreader = new WKTReader();
                 Envelope envelope=wktreader.read(lineSplitList.get(offset)).getEnvelopeInternal();
                 coordinate = new Coordinate (envelope.getMinX(),envelope.getMinY());

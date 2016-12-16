@@ -4,5 +4,13 @@ public enum GridType {
 	EQUALGRID,
 	HILBERT,
 	RTREE,
-	VORONOI
+	VORONOI;
+	
+	public static GridType getGridType(String str) {
+	    for (GridType me : GridType.values()) {
+	        if (me.name().equalsIgnoreCase(str))
+	            return me;
+	    }
+	    return null;
+	}
 }

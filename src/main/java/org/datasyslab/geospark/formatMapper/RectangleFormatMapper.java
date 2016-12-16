@@ -43,7 +43,7 @@ public class RectangleFormatMapper implements Serializable,Function<String,Envel
 		Double x1,x2,y1,y2;
 		switch (splitter) {
 			case CSV:
-				lineSplitList = Arrays.asList(line.split(splitter.getSplitter()));
+				lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
 				x1 = Double.parseDouble(lineSplitList.get(offset));
 				x2 = Double.parseDouble(lineSplitList.get(offset + 2));
 				y1 = Double.parseDouble(lineSplitList.get(offset + 1));
@@ -52,7 +52,7 @@ public class RectangleFormatMapper implements Serializable,Function<String,Envel
 				rectangle.setUserData(line);
 				break;
 			case TSV:
-				lineSplitList = Arrays.asList(line.split(splitter.getSplitter()));
+				lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
 				x1 = Double.parseDouble(lineSplitList.get(offset));
 				x2 = Double.parseDouble(lineSplitList.get(offset + 2));
 				y1 = Double.parseDouble(lineSplitList.get(offset + 1));
@@ -67,7 +67,7 @@ public class RectangleFormatMapper implements Serializable,Function<String,Envel
 				rectangle.setUserData(line);
 				break;
 			case WKT:
-				lineSplitList=Arrays.asList(line.split(splitter.getSplitter()));
+				lineSplitList=Arrays.asList(line.split(splitter.getDelimiter()));
 				WKTReader wtkreader = new WKTReader();
 				rectangle = wtkreader.read(lineSplitList.get(offset)).getEnvelopeInternal();
 				rectangle.setUserData(line);

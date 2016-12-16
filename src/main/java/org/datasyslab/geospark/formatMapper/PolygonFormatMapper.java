@@ -44,7 +44,7 @@ public class PolygonFormatMapper implements Function<String, Polygon>, Serializa
         LinearRing linear;
         switch (splitter) {
             case CSV:
-                lineSplitList = Arrays.asList(line.split(splitter.getSplitter()));
+                lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
                 coordinatesList = new ArrayList<Coordinate>();
                 for (int i = this.offset; i < lineSplitList.size(); i+=2) {
                     coordinatesList.add(new Coordinate(Double.parseDouble(lineSplitList.get(i)), Double.parseDouble(lineSplitList.get(i + 1))));
@@ -54,7 +54,7 @@ public class PolygonFormatMapper implements Function<String, Polygon>, Serializa
                 polygon.setUserData(line);
                 break;
             case TSV:
-                lineSplitList = Arrays.asList(line.split(splitter.getSplitter()));
+                lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
                 coordinatesList = new ArrayList<Coordinate>();
                 for (int i = this.offset; i < lineSplitList.size(); i = i + 2) {
                     coordinatesList.add(new Coordinate(Double.parseDouble(lineSplitList.get(i)), Double.parseDouble(lineSplitList.get(i + 1))));
@@ -71,7 +71,7 @@ public class PolygonFormatMapper implements Function<String, Polygon>, Serializa
                 polygon.setUserData(line);
                 break;
             case WKT:
-            	lineSplitList=Arrays.asList(line.split(splitter.getSplitter()));
+            	lineSplitList=Arrays.asList(line.split(splitter.getDelimiter()));
                 WKTReader wtkreader = new WKTReader();
                 polygon = (Polygon) wtkreader.read(lineSplitList.get(offset));
                 polygon.setUserData(line);
