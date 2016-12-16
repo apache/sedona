@@ -54,9 +54,9 @@ public class RectangleRDDTest implements Serializable{
             //InputLocation = prop.getProperty("inputLocation");
             InputLocation = "file://"+RectangleRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
-            splitter = FileDataSplitter.valueOf(prop.getProperty("splitter").toUpperCase());
-            gridType = GridType.valueOf(prop.getProperty("gridType").toUpperCase());
-            indexType = IndexType.valueOf(prop.getProperty("indexType").toUpperCase());
+            splitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
+            gridType = GridType.getGridType(prop.getProperty("gridType"));
+            indexType = IndexType.getIndexType(prop.getProperty("indexType"));
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
         } catch (IOException ex) {
             ex.printStackTrace();

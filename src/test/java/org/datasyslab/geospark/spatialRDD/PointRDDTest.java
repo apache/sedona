@@ -62,10 +62,14 @@ public class PointRDDTest implements Serializable{
             // There is a field in the property file, you can edit your own file location there.
             // InputLocation = prop.getProperty("inputLocation");
             InputLocation = "file://"+PointRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
+            
             offset = Integer.parseInt(prop.getProperty("offset"));
-            splitter = FileDataSplitter.valueOf(prop.getProperty("splitter").toUpperCase());
-            gridType = GridType.valueOf(prop.getProperty("gridType").toUpperCase());
-            indexType = IndexType.valueOf(prop.getProperty("indexType").toUpperCase());
+            splitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
+            gridType = GridType.getGridType(prop.getProperty("gridType"));
+            indexType = IndexType.getIndexType(prop.getProperty("indexType"));
+            
+            
+
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
         } catch (IOException ex) {
             ex.printStackTrace();

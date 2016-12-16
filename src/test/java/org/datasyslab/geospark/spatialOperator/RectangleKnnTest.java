@@ -63,8 +63,8 @@ public class RectangleKnnTest {
             // InputLocation = prop.getProperty("inputLocation");
             InputLocation = "file://"+RectangleKnnTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
-            splitter = FileDataSplitter.valueOf(prop.getProperty("splitter").toUpperCase());
-            indexType = IndexType.valueOf(prop.getProperty("indexType").toUpperCase());
+            splitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
+            indexType = IndexType.getIndexType(prop.getProperty("indexType"));
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
             loopTimes=5;
         } catch (IOException ex) {

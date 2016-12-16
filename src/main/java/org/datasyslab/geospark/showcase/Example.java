@@ -67,7 +67,7 @@ public class Example implements Serializable{
 		jarPath=args[2]+"geospark-0.3.jar";
 		inputLocation=args[3];
 		offset=Integer.parseInt(args[4]);
-		splitter=FileDataSplitter.valueOf(args[5].toUpperCase());
+		splitter=FileDataSplitter.getFileDataSplitter(args[5]);
 		numPartitions=Integer.parseInt(args[6]);
 		loopTimes=Integer.parseInt(args[7]);
 		queryName=args[8];
@@ -75,9 +75,9 @@ public class Example implements Serializable{
 		{
 			inputLocation2=args[9];
 			offset2=Integer.parseInt(args[10]);			
-			splitter2=FileDataSplitter.valueOf(args[11].toUpperCase());
+			splitter2=FileDataSplitter.getFileDataSplitter(args[11]);
 			numPartitions2=Integer.parseInt(args[12]);
-			gridType=GridType.valueOf(args[13].toUpperCase());
+			gridType=GridType.getGridType(args[13]);
 		}
 		conf=new SparkConf().setAppName(queryName+"+"+inputLocation+"+"+gridType+"+"+cores+"+"+numPartitions).setMaster(masterName)
 				.set("spark.history.fs.logDirectory", "/home/ubuntu/sparkeventlog")

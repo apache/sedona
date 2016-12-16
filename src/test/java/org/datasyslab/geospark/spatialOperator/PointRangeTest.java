@@ -53,8 +53,8 @@ public class PointRangeTest {
             // InputLocation = prop.getProperty("inputLocation");
             InputLocation = "file://"+PointRangeTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
-            splitter = FileDataSplitter.valueOf(prop.getProperty("splitter").toUpperCase());
-            indexType = IndexType.valueOf(prop.getProperty("indexType").toUpperCase());
+            splitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
+            indexType = IndexType.getIndexType(prop.getProperty("indexType"));
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
             queryEnvelope=new Envelope (-90.01,-80.01,30.01,40.01);
             loopTimes=5;
