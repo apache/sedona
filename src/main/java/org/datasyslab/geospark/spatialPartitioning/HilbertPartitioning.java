@@ -1,10 +1,10 @@
-package org.datasyslab.geospark.spatialPartitioning;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: HilbertPartitioning.java
+ * PATH: org.datasyslab.geospark.spatialPartitioning.HilbertPartitioning.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
  */
+package org.datasyslab.geospark.spatialPartitioning;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -16,12 +16,27 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class HilbertPartitioning.
+ */
 public class HilbertPartitioning implements Serializable{
 
+	/** The splits. */
 	//Partition ID
 	protected int[] splits;
+	
+	/** The grids. */
 	//Partition boundaries
 	HashSet<EnvelopeWithGrid> grids;
+	
+	/**
+	 * Instantiates a new hilbert partitioning.
+	 *
+	 * @param SampleList the sample list
+	 * @param boundary the boundary
+	 * @param partitions the partitions
+	 */
 	public HilbertPartitioning(Point[] SampleList,Envelope boundary,int partitions)
 	{
 		//this.boundary=boundary;
@@ -53,6 +68,14 @@ public class HilbertPartitioning implements Serializable{
 	    //gridWithID.add(new EnvelopeWithGrid(boundary,gridWithID.size()));
 	    this.grids=gridWithID;
 	}
+	
+	/**
+	 * Instantiates a new hilbert partitioning.
+	 *
+	 * @param SampleList the sample list
+	 * @param boundary the boundary
+	 * @param partitions the partitions
+	 */
 	public HilbertPartitioning(Envelope[] SampleList,Envelope boundary,int partitions)
 	{
 		//this.boundary=boundary;
@@ -84,6 +107,14 @@ public class HilbertPartitioning implements Serializable{
 		    //gridWithID.add(new EnvelopeWithGrid(boundary,gridWithID.size()));
 		    this.grids=gridWithID;
 	}
+	
+	/**
+	 * Instantiates a new hilbert partitioning.
+	 *
+	 * @param SampleList the sample list
+	 * @param boundary the boundary
+	 * @param partitions the partitions
+	 */
 	public HilbertPartitioning(Polygon[] SampleList,Envelope boundary,int partitions)
 	{
 		//this.boundary=boundary;
@@ -119,10 +150,11 @@ public class HilbertPartitioning implements Serializable{
 	
 
 	  /**
-	   * Create a HilbertCurvePartitioner from a list of points
-	   * @param hValues
-	   * @param partitions
-	   */
+  	 * Creates the from H values.
+  	 *
+  	 * @param hValues the h values
+  	 * @param partitions the partitions
+  	 */
 	  protected void createFromHValues(int[] hValues, int partitions) {
 	    Arrays.sort(hValues);
 
@@ -133,14 +165,15 @@ public class HilbertPartitioning implements Serializable{
 	      this.splits[i] = quantile == hValues.length ? maxH : hValues[quantile];
 	    }
 	  }
+	
 	/**
-	   * Compute Hilbert curve value for a point (x, y) in a square of size
-	   * (n*n)
-	   * @param n - Size of the square
-	   * @param x - x dimension (short)
-	   * @param y - y dimension (short)
-	   * @return
-	   */
+	 * Compute H value.
+	 *
+	 * @param n the n
+	 * @param x the x
+	 * @param y the y
+	 * @return the int
+	 */
 	  public static int computeHValue(int n, int x, int y) {
 	    int h = 0;
 	    for (int s = n/2; s > 0; s/=2) {
@@ -161,18 +194,42 @@ public class HilbertPartitioning implements Serializable{
 	    }
 	    return h;
 	  }
-	  public int[] getPartitionBounds()
+	  
+  	/**
+	   * Gets the partition bounds.
+	   *
+	   * @return the partition bounds
+	   */
+  	public int[] getPartitionBounds()
 	  {
 		  return splits;
 	  }
-	  public static int locationMapping (double axisMin, double axisLocation,double axisMax)
+	  
+  	/**
+	   * Location mapping.
+	   *
+	   * @param axisMin the axis min
+	   * @param axisLocation the axis location
+	   * @param axisMax the axis max
+	   * @return the int
+	   */
+  	public static int locationMapping (double axisMin, double axisLocation,double axisMax)
 	  {
 		  Double gridLocation;
 		  int gridResolution=Short.MAX_VALUE;
 		  gridLocation=(axisLocation-axisMin)*gridResolution/(axisMax-axisMin);
 		  return gridLocation.intValue();
 	  }
-	  //The following three methods are used in RDD tuple-wise function
+	  
+  	/**
+	   * Grid ID.
+	   *
+	   * @param boundary the boundary
+	   * @param point the point
+	   * @param partitionBounds the partition bounds
+	   * @return the int
+	   */
+  	//The following three methods are used in RDD tuple-wise function
 	  public static int gridID(Envelope boundary,Point point,int[] partitionBounds) {
 		  int x=locationMapping(boundary.getMinX(),boundary.getMaxX(),point.getX());
 		  int y=locationMapping(boundary.getMinY(),boundary.getMaxY(),point.getY());
@@ -183,7 +240,16 @@ public class HilbertPartitioning implements Serializable{
 		      partition = -partition - 1;
 		    return partition;
 		  }
-	  public static int gridID(Envelope boundary,Envelope envelope,int[] partitionBounds) {
+	  
+  	/**
+	   * Grid ID.
+	   *
+	   * @param boundary the boundary
+	   * @param envelope the envelope
+	   * @param partitionBounds the partition bounds
+	   * @return the int
+	   */
+  	public static int gridID(Envelope boundary,Envelope envelope,int[] partitionBounds) {
 		  int x=locationMapping(boundary.getMinX(),boundary.getMaxX(),(envelope.getMinX()+envelope.getMaxX())/2.0);
 		  int y=locationMapping(boundary.getMinY(),boundary.getMaxY(),(envelope.getMinY()+envelope.getMaxY())/2.0);
 		  int gridResolution=Short.MAX_VALUE;
@@ -194,7 +260,16 @@ public class HilbertPartitioning implements Serializable{
 		      partition = -partition - 1;
 		    return partition;
 		  }
-	  public static int gridID(Envelope boundary,Polygon polygon,int[] partitionBounds) {
+	  
+  	/**
+	   * Grid ID.
+	   *
+	   * @param boundary the boundary
+	   * @param polygon the polygon
+	   * @param partitionBounds the partition bounds
+	   * @return the int
+	   */
+  	public static int gridID(Envelope boundary,Polygon polygon,int[] partitionBounds) {
 		  Envelope envelope=polygon.getEnvelopeInternal();
 		  int x=locationMapping(boundary.getMinX(),boundary.getMaxX(),(envelope.getMinX()+envelope.getMaxX())/2.0);
 		  int y=locationMapping(boundary.getMinY(),boundary.getMaxY(),(envelope.getMinY()+envelope.getMaxY())/2.0);
@@ -206,6 +281,14 @@ public class HilbertPartitioning implements Serializable{
 		      partition = -partition - 1;
 		    return partition;
 		  }
+		
+		/**
+		 * Update envelope.
+		 *
+		 * @param envelope the envelope
+		 * @param i the i
+		 * @return the envelope
+		 */
 		public static Envelope updateEnvelope(Envelope envelope, Point i)
 		{
 			double minX=envelope.getMinX();
@@ -230,6 +313,14 @@ public class HilbertPartitioning implements Serializable{
 			}
 			return new Envelope(minX,maxX,minY,maxY);
 		}
+		
+		/**
+		 * Update envelope.
+		 *
+		 * @param envelope the envelope
+		 * @param i the i
+		 * @return the envelope
+		 */
 		public static Envelope updateEnvelope(Envelope envelope, Envelope i)
 		{
 			double minX=envelope.getMinX();
@@ -254,6 +345,14 @@ public class HilbertPartitioning implements Serializable{
 			}
 			return new Envelope(minX,maxX,minY,maxY);
 		}
+		
+		/**
+		 * Update envelope.
+		 *
+		 * @param envelope the envelope
+		 * @param polygon the polygon
+		 * @return the envelope
+		 */
 		public static Envelope updateEnvelope(Envelope envelope, Polygon polygon)
 		{
 			double minX=envelope.getMinX();
@@ -279,8 +378,11 @@ public class HilbertPartitioning implements Serializable{
 			}
 			return new Envelope(minX,maxX,minY,maxY);
 		}
+		
 		/**
-		 * @return Return the generated grid file
+		 * Gets the grids.
+		 *
+		 * @return the grids
 		 */
 		public HashSet<EnvelopeWithGrid> getGrids() {
 			

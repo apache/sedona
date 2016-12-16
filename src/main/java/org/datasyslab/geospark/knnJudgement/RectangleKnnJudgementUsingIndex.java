@@ -1,10 +1,10 @@
-package org.datasyslab.geospark.knnJudgement;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: RectangleKnnJudgementUsingIndex.java
+ * PATH: org.datasyslab.geospark.knnJudgement.RectangleKnnJudgementUsingIndex.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
  */
+package org.datasyslab.geospark.knnJudgement;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -20,14 +20,33 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.strtree.GeometryItemDistance;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class RectangleKnnJudgementUsingIndex.
+ */
 public class RectangleKnnJudgementUsingIndex implements FlatMapFunction<Iterator<STRtree>, Envelope>, Serializable{
+	
+	/** The k. */
 	int k;
+	
+	/** The query center. */
 	Point queryCenter;
+	
+	/**
+	 * Instantiates a new rectangle knn judgement using index.
+	 *
+	 * @param queryCenter the query center
+	 * @param k the k
+	 */
 	public RectangleKnnJudgementUsingIndex(Point queryCenter,int k)
 	{
 		this.queryCenter=queryCenter;
 		this.k=k;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
+	 */
 	@Override
 	public Iterator<Envelope> call(Iterator<STRtree> t) throws Exception {
 		// TODO Auto-generated method stub

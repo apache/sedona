@@ -1,3 +1,9 @@
+/**
+ * FILE: RDDSampleUtilsTest.java
+ * PATH: org.datasyslab.geospark.utils.RDDSampleUtilsTest.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.utils;
 
 import static org.junit.Assert.assertEquals;
@@ -10,8 +16,17 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class RDDSampleUtilsTest.
+ */
 public class RDDSampleUtilsTest {
 
+    /**
+     * Test get sample numbers.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testGetSampleNumbers() throws Exception {
         assertEquals(0, RDDSampleUtils.getSampleNumbers(2, 10));

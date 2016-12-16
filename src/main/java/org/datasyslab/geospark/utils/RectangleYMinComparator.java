@@ -1,3 +1,9 @@
+/**
+ * FILE: RectangleYMinComparator.java
+ * PATH: org.datasyslab.geospark.utils.RectangleYMinComparator.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.utils;
 
 import java.io.Serializable;
@@ -11,6 +17,10 @@ import java.util.Comparator;
 
 import com.vividsolutions.jts.geom.Envelope;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class RectangleYMinComparator.
+ */
 public class RectangleYMinComparator extends GeometryComparator implements Comparator<Envelope>, Serializable {
 
 	 /* (non-Javadoc)

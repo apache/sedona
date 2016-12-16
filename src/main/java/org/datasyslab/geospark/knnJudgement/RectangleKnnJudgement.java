@@ -1,10 +1,10 @@
-package org.datasyslab.geospark.knnJudgement;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: RectangleKnnJudgement.java
+ * PATH: org.datasyslab.geospark.knnJudgement.RectangleKnnJudgement.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
  */
+package org.datasyslab.geospark.knnJudgement;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -18,14 +18,33 @@ import com.vividsolutions.jts.geom.Point;
 
 
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class RectangleKnnJudgement.
+ */
 public class RectangleKnnJudgement implements FlatMapFunction<Iterator<Envelope>, Envelope>, Serializable{
+	
+	/** The k. */
 	int k;
+	
+	/** The query center. */
 	Point queryCenter;
+	
+	/**
+	 * Instantiates a new rectangle knn judgement.
+	 *
+	 * @param queryCenter the query center
+	 * @param k the k
+	 */
 	public RectangleKnnJudgement(Point queryCenter,int k)
 	{
 		this.queryCenter=queryCenter;
 		this.k=k;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
+	 */
 	@Override
 	public Iterator<Envelope> call(Iterator<Envelope> input) throws Exception {
 		// TODO Auto-generated method stub

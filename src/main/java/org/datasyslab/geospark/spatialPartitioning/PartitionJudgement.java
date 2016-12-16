@@ -1,10 +1,10 @@
-package org.datasyslab.geospark.spatialPartitioning;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: PartitionJudgement.java
+ * PATH: org.datasyslab.geospark.spatialPartitioning.PartitionJudgement.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
  */
+package org.datasyslab.geospark.spatialPartitioning;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -18,11 +18,27 @@ import com.vividsolutions.jts.geom.Polygon;
 
 import scala.Tuple2;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PartitionJudgement.
+ */
 public class PartitionJudgement implements Serializable{
+	
+	/**
+	 * Instantiates a new partition judgement.
+	 */
 	public PartitionJudgement()
 	{
 		
 	}
+	
+	/**
+	 * Gets the partition ID.
+	 *
+	 * @param grid the grid
+	 * @param point the point
+	 * @return the partition ID
+	 */
 	public static Iterator<Tuple2<Integer, Point>> getPartitionID(HashSet<EnvelopeWithGrid> grid,Point point)
 	{
 		HashSet<Tuple2<Integer, Point>> result = new HashSet<Tuple2<Integer, Point>>();
@@ -43,6 +59,13 @@ public class PartitionJudgement implements Serializable{
 		return result.iterator();
 	}
 	
+	/**
+	 * Gets the partition ID.
+	 *
+	 * @param grid the grid
+	 * @param envelope the envelope
+	 * @return the partition ID
+	 */
 	public static HashSet<Tuple2<Integer, Envelope>> getPartitionID(HashSet<EnvelopeWithGrid> grid,Envelope envelope)
 	{
 		HashSet<Tuple2<Integer, Envelope>> result = new HashSet<Tuple2<Integer, Envelope>>();
@@ -70,6 +93,13 @@ public class PartitionJudgement implements Serializable{
 		return result;
 	}
 	
+	/**
+	 * Gets the partition ID.
+	 *
+	 * @param grid the grid
+	 * @param polygon the polygon
+	 * @return the partition ID
+	 */
 	public static HashSet<Tuple2<Integer, Polygon>> getPartitionID(HashSet<EnvelopeWithGrid> grid,Polygon polygon)
 	{
 		HashSet<Tuple2<Integer, Polygon>> result = new HashSet<Tuple2<Integer, Polygon>>();

@@ -1,10 +1,10 @@
-package org.datasyslab.geospark.spatialRDD;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: CircleRDD.java
+ * PATH: org.datasyslab.geospark.spatialRDD.CircleRDD.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
  */
+package org.datasyslab.geospark.spatialRDD;
 
 import java.io.Serializable;
 
@@ -23,9 +23,7 @@ import com.vividsolutions.jts.geom.Point;;
 // TODO: Auto-generated Javadoc
 
 /**
- * The Class CircleRDD. It accommodates Circle object. 
- * @author Arizona State University DataSystems Lab
- *
+ * The Class CircleRDD.
  */
 public class CircleRDD implements Serializable {
 
@@ -34,22 +32,19 @@ public class CircleRDD implements Serializable {
 
 
 	/**
-	 * Instantiates a new circle rdd.
+	 * Instantiates a new circle RDD.
 	 *
-	 * @param circleRDD
-	 *            the circle rdd
+	 * @param circleRDD the circle RDD
 	 */
 	public CircleRDD(JavaRDD<Circle> circleRDD) {
 		this.setCircleRDD(circleRDD.cache());
 	}
 
 	/**
-	 * Instantiates a new circle rdd. Each Circle in this RDD uses one Point in PointRDD as the center and the specified radius as the radius
+	 * Instantiates a new circle RDD.
 	 *
-	 * @param pointRDD
-	 *            the point rdd
-	 * @param Radius
-	 *            the radius
+	 * @param pointRDD the point RDD
+	 * @param Radius the radius
 	 */
 	public CircleRDD(PointRDD pointRDD, Double Radius) {
 		final Double radius = Radius;
@@ -64,28 +59,27 @@ public class CircleRDD implements Serializable {
 	}
 
 	/**
-	 * Get the circle rdd.
+	 * Gets the circle RDD.
 	 *
-	 * @return the circle rdd
+	 * @return the circle RDD
 	 */
 	public JavaRDD<Circle> getCircleRDD() {
 		return circleRDD;
 	}
 
 	/**
-	 * Set the circle rdd.
+	 * Sets the circle RDD.
 	 *
-	 * @param circleRDD
-	 *            the new circle rdd
+	 * @param circleRDD the new circle RDD
 	 */
 	public void setCircleRDD(JavaRDD<Circle> circleRDD) {
 		this.circleRDD = circleRDD;
 	}
 
     /**
-     * Return RectangleRDD version of the CircleRDD. Each record in RectangleRDD is the Minimum bounding rectangle of the corresponding Circle
+     * Minimum bounding rectangle.
      *
-     * @return the rectangle rdd
+     * @return the rectangle RDD
      */
 	public RectangleRDD MinimumBoundingRectangle() {
 		return new RectangleRDD(this.getCircleRDD().map(new Function<Circle, Envelope>() {
@@ -99,7 +93,8 @@ public class CircleRDD implements Serializable {
 	}
 
 	/**
-	 * Return the boundary of the entire SpatialRDD in terms of an envelope format
+	 * Boundary.
+	 *
 	 * @return the envelope
 	 */
 	public Envelope boundary() {
@@ -152,9 +147,9 @@ public class CircleRDD implements Serializable {
 	}
 
 	/**
-	 * Return the PointRDD which is used to create this CircleRDD.
+	 * Center.
 	 *
-	 * @return the center point of each circle in the RDD
+	 * @return the point RDD
 	 */
 	public PointRDD Center() {
 		return new PointRDD(this.getCircleRDD().map(new Function<Circle, Point>() {

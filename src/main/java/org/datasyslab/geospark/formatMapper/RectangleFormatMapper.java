@@ -1,10 +1,10 @@
-package org.datasyslab.geospark.formatMapper;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: RectangleFormatMapper.java
+ * PATH: org.datasyslab.geospark.formatMapper.RectangleFormatMapper.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
  */
+package org.datasyslab.geospark.formatMapper;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -20,21 +20,43 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.WKTReader;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class RectangleFormatMapper.
+ */
 public class RectangleFormatMapper implements Serializable,Function<String,Envelope>
 {
+	
+	/** The offset. */
 	Integer offset = 0;
+	
+	/** The splitter. */
 	FileDataSplitter splitter = FileDataSplitter.CSV;
 
+	/**
+	 * Instantiates a new rectangle format mapper.
+	 *
+	 * @param Offset the offset
+	 * @param Splitter the splitter
+	 */
 	public RectangleFormatMapper(Integer Offset, FileDataSplitter Splitter) {
 		this.offset = Offset;
 		this.splitter = Splitter;
 	}
 
+	/**
+	 * Instantiates a new rectangle format mapper.
+	 *
+	 * @param Splitter the splitter
+	 */
 	public RectangleFormatMapper( FileDataSplitter Splitter) {
 		this.offset = 0;
 		this.splitter = Splitter;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.apache.spark.api.java.function.Function#call(java.lang.Object)
+	 */
 	public Envelope call(String line) throws Exception {
 		Envelope rectangle = null;
 		GeometryFactory fact = new GeometryFactory();

@@ -1,10 +1,10 @@
-package org.datasyslab.geospark.formatMapper;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: PolygonFormatMapper.java
+ * PATH: org.datasyslab.geospark.formatMapper.PolygonFormatMapper.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
  */
+package org.datasyslab.geospark.formatMapper;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -21,20 +21,42 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.WKTReader;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PolygonFormatMapper.
+ */
 public class PolygonFormatMapper implements Function<String, Polygon>, Serializable {
+    
+    /** The offset. */
     Integer offset = 0;
+    
+    /** The splitter. */
     FileDataSplitter splitter = FileDataSplitter.CSV;
 
+    /**
+     * Instantiates a new polygon format mapper.
+     *
+     * @param Offset the offset
+     * @param Splitter the splitter
+     */
     public PolygonFormatMapper(Integer Offset, FileDataSplitter Splitter) {
         this.offset = Offset;
         this.splitter = Splitter;
     }
 
+    /**
+     * Instantiates a new polygon format mapper.
+     *
+     * @param Splitter the splitter
+     */
     public PolygonFormatMapper(FileDataSplitter Splitter) {
         this.offset = 0;
         this.splitter = Splitter;
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.spark.api.java.function.Function#call(java.lang.Object)
+     */
     public Polygon call(String line) throws Exception {
         Polygon polygon = null;
         GeometryFactory fact = new GeometryFactory();

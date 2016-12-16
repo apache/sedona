@@ -1,3 +1,9 @@
+/**
+ * FILE: RectangleXMaxComparator.java
+ * PATH: org.datasyslab.geospark.utils.RectangleXMaxComparator.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.utils;
 
 import java.io.Serializable;
@@ -11,6 +17,10 @@ import java.util.Comparator;
 
 import com.vividsolutions.jts.geom.Envelope;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class RectangleXMaxComparator.
+ */
 public class RectangleXMaxComparator extends GeometryComparator implements Comparator<Envelope>, Serializable {
 
 	 /* (non-Javadoc)

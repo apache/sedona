@@ -1,3 +1,9 @@
+/**
+ * FILE: PointRangeTest.java
+ * PATH: org.datasyslab.geospark.spatialOperator.PointRangeTest.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.spatialOperator;
 
 import java.io.IOException;
@@ -18,17 +24,45 @@ import org.junit.Test;
 import com.vividsolutions.jts.geom.Envelope;
 
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PointRangeTest.
+ */
 public class PointRangeTest {
+    
+    /** The sc. */
     public static JavaSparkContext sc;
+    
+    /** The prop. */
     static Properties prop;
+    
+    /** The input. */
     static InputStream input;
+    
+    /** The Input location. */
     static String InputLocation;
+    
+    /** The offset. */
     static Integer offset;
+    
+    /** The splitter. */
     static FileDataSplitter splitter;
+    
+    /** The index type. */
     static IndexType indexType;
+    
+    /** The num partitions. */
     static Integer numPartitions;
+    
+    /** The query envelope. */
     static Envelope queryEnvelope;
+    
+    /** The loop times. */
     static int loopTimes;
+    
+    /**
+     * Once executed before all.
+     */
     @BeforeClass
     public static void onceExecutedBeforeAll() {
         SparkConf conf = new SparkConf().setAppName("PointRange").setMaster("local[2]");
@@ -70,11 +104,20 @@ public class PointRangeTest {
             }
         }
     }
+    
+    /**
+     * Tear down.
+     */
     @AfterClass
     public static void TearDown() {
         sc.stop();
     }
 
+    /**
+     * Test spatial range query.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testSpatialRangeQuery() throws Exception {
     	PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter);
@@ -87,6 +130,11 @@ public class PointRangeTest {
         
     }
     
+    /**
+     * Test spatial range query using index.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testSpatialRangeQueryUsingIndex() throws Exception {
     	PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter);

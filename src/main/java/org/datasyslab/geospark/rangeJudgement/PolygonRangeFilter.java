@@ -1,10 +1,10 @@
-package org.datasyslab.geospark.rangeJudgement;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: PolygonRangeFilter.java
+ * PATH: org.datasyslab.geospark.rangeJudgement.PolygonRangeFilter.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
  */
+package org.datasyslab.geospark.rangeJudgement;
 
 import java.io.Serializable;
 
@@ -14,12 +14,30 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PolygonRangeFilter.
+ */
 public class PolygonRangeFilter implements Function<Polygon,Boolean>,Serializable {
+	
+	/** The condition. */
 	Integer condition=0;
+	
+	/** The range rectangle. */
 	Envelope rangeRectangle=new Envelope();
+	
+	/** The range polygon. */
 	Polygon rangePolygon;
+	
+	/** The range flag. */
 	Integer rangeFlag=0;
 	
+	/**
+	 * Instantiates a new polygon range filter.
+	 *
+	 * @param envelope the envelope
+	 * @param condition the condition
+	 */
 	public PolygonRangeFilter(Envelope envelope,Integer condition)
 	{
 		this.condition=condition;
@@ -31,6 +49,9 @@ public class PolygonRangeFilter implements Function<Polygon,Boolean>,Serializabl
 //		this.condition=condition;
 //		this.rangePolygon=polygon;
 //		this.rangeFlag=1;
+/* (non-Javadoc)
+ * @see org.apache.spark.api.java.function.Function#call(java.lang.Object)
+ */
 //	}
 	public Boolean call(Polygon tuple) throws Exception {
 	if(rangeFlag==0){

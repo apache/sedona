@@ -1,3 +1,9 @@
+/**
+ * FILE: RectangleRDDTest.java
+ * PATH: org.datasyslab.geospark.spatialRDD.RectangleRDDTest.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.spatialRDD;
 
 import java.io.IOException;
@@ -23,16 +29,42 @@ import org.junit.Test;
 import com.vividsolutions.jts.geom.Polygon;
 
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class RectangleRDDTest.
+ */
 public class RectangleRDDTest implements Serializable{
+    
+    /** The sc. */
     public static JavaSparkContext sc;
+    
+    /** The prop. */
     static Properties prop;
+    
+    /** The input. */
     static InputStream input;
+    
+    /** The Input location. */
     static String InputLocation;
+    
+    /** The offset. */
     static Integer offset;
+    
+    /** The splitter. */
     static FileDataSplitter splitter;
+    
+    /** The grid type. */
     static GridType gridType;
+    
+    /** The index type. */
     static IndexType indexType;
+    
+    /** The num partitions. */
     static Integer numPartitions;
+    
+    /**
+     * Once executed before all.
+     */
     @BeforeClass
     public static void onceExecutedBeforeAll() {
         SparkConf conf = new SparkConf().setAppName("RectangleTest").setMaster("local[2]");
@@ -74,6 +106,11 @@ public class RectangleRDDTest implements Serializable{
 
 
 
+    /**
+     * Test constructor.
+     *
+     * @throws Exception the exception
+     */
     /*
         This test case will load a sample data file and
      */
@@ -114,6 +151,11 @@ public class RectangleRDDTest implements Serializable{
             System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
     }*/
+    /**
+     * Test equal size grids spatial partitioing.
+     *
+     * @throws Exception the exception
+     */
     /*
      *  This test case test whether the equal size grids can be build correctly.
      */
@@ -134,6 +176,12 @@ public class RectangleRDDTest implements Serializable{
            // System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
     }
+    
+    /**
+     * Test hilbert curve spatial partitioing.
+     *
+     * @throws Exception the exception
+     */
     /*
      *  This test case test whether the Hilbert Curve grid can be build correctly.
      */
@@ -154,6 +202,12 @@ public class RectangleRDDTest implements Serializable{
            // System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
     }
+    
+    /**
+     * Test R tree spatial partitioing.
+     *
+     * @throws Exception the exception
+     */
     /*
      *  This test case test whether the STR-Tree grid can be build correctly.
      */
@@ -174,6 +228,12 @@ public class RectangleRDDTest implements Serializable{
             //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
     }
+    
+    /**
+     * Test voronoi spatial partitioing.
+     *
+     * @throws Exception the exception
+     */
     /*
      *  This test case test whether the Voronoi grid can be build correctly.
      */
@@ -196,6 +256,11 @@ public class RectangleRDDTest implements Serializable{
     }
 
     
+    /**
+     * Test build index without set grid.
+     *
+     * @throws Exception the exception
+     */
     /*
      * If we try to build a index on a rawRectangleRDD which is not construct with grid. We shall see an error.
      */
@@ -205,6 +270,11 @@ public class RectangleRDDTest implements Serializable{
         rectangleRDD.buildIndex(IndexType.RTREE);
     }
 
+    /**
+     * Test build index.
+     *
+     * @throws Exception the exception
+     */
     /*
         Test build Index.
      */
@@ -222,6 +292,12 @@ public class RectangleRDDTest implements Serializable{
 
         }
     }
+    
+    /**
+     * Test build with no exists grid.
+     *
+     * @throws Exception the exception
+     */
     /*
      *  If we want to use a grid type that is not supported yet, an exception will be throwed out.
      */
@@ -230,6 +306,11 @@ public class RectangleRDDTest implements Serializable{
         RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, null, numPartitions);
     }
 
+    /**
+     * Test too large partition number.
+     *
+     * @throws Exception the exception
+     */
     /*
      * If the partition number is set too large, we will
      */
@@ -238,6 +319,9 @@ public class RectangleRDDTest implements Serializable{
         RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, gridType, 1000000);
     }
 
+    /**
+     * Tear down.
+     */
     @AfterClass
     public static void TearDown() {
         sc.stop();

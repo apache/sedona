@@ -1,10 +1,10 @@
-package org.datasyslab.geospark.spatialPartitioning;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: EqualPartitioning.java
+ * PATH: org.datasyslab.geospark.spatialPartitioning.EqualPartitioning.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
  */
+package org.datasyslab.geospark.spatialPartitioning;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -15,19 +15,21 @@ import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
 
 import com.vividsolutions.jts.geom.Envelope;
 
+// TODO: Auto-generated Javadoc
 /**
- * This class generates a grid file. Each grid in this file has the same length, width and area.
- * @author GeoSpark Team
- *
+ * The Class EqualPartitioning.
  */
 public class EqualPartitioning implements Serializable{
 
+	/** The grids. */
 	HashSet<EnvelopeWithGrid> grids=new HashSet<EnvelopeWithGrid>();
 
 	
 	/**
-	 * @param boundary The boundary of the entire dataset
-	 * @param partitions Grids number in the grid file
+	 * Instantiates a new equal partitioning.
+	 *
+	 * @param boundary the boundary
+	 * @param partitions the partitions
 	 */
 	public  EqualPartitioning(Envelope boundary,int partitions)
 	{
@@ -63,7 +65,9 @@ public class EqualPartitioning implements Serializable{
 
 
 	/**
-	 * @return Return the generated grid file
+	 * Gets the grids.
+	 *
+	 * @return the grids
 	 */
 	public HashSet<EnvelopeWithGrid> getGrids() {
 		

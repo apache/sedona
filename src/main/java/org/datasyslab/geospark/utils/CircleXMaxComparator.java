@@ -1,3 +1,9 @@
+/**
+ * FILE: CircleXMaxComparator.java
+ * PATH: org.datasyslab.geospark.utils.CircleXMaxComparator.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.utils;
 
 import java.io.Serializable;

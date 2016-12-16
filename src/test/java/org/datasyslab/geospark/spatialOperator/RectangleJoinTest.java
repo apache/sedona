@@ -1,3 +1,9 @@
+/**
+ * FILE: RectangleJoinTest.java
+ * PATH: org.datasyslab.geospark.spatialOperator.RectangleJoinTest.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.spatialOperator;
 
 import java.io.IOException;
@@ -28,17 +34,42 @@ import com.vividsolutions.jts.geom.Envelope;
 
 import scala.Tuple2;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class RectangleJoinTest.
+ */
 public class RectangleJoinTest {
+    
+    /** The sc. */
     public static JavaSparkContext sc;
+    
+    /** The prop. */
     static Properties prop;
+    
+    /** The input. */
     static InputStream input;
+    
+    /** The Input location. */
     static String InputLocation;
+    
+    /** The offset. */
     static Integer offset;
+    
+    /** The splitter. */
     static FileDataSplitter splitter;
+    
+    /** The grid type. */
     static GridType gridType;
+    
+    /** The index type. */
     static IndexType indexType;
+    
+    /** The num partitions. */
     static Integer numPartitions;
 
+    /**
+     * Once executed before all.
+     */
     @BeforeClass
     public static void onceExecutedBeforeAll() {
         SparkConf conf = new SparkConf().setAppName("RectangleJoin").setMaster("local[2]");
@@ -79,11 +110,19 @@ public class RectangleJoinTest {
         }
     }
 
+    /**
+     * Tear down.
+     */
     @AfterClass
     public static void TearDown() {
         sc.stop();
     }
 
+    /**
+     * Test spatial join query.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testSpatialJoinQuery() throws Exception {
 
@@ -104,6 +143,11 @@ public class RectangleJoinTest {
         }
     }
 
+    /**
+     * Test spatial join query using index exception.
+     *
+     * @throws Exception the exception
+     */
     @Test(expected = NullPointerException.class)
     public void testSpatialJoinQueryUsingIndexException() throws Exception {
         RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, numPartitions);
@@ -117,6 +161,11 @@ public class RectangleJoinTest {
 
     }
 
+    /**
+     * Test spatial join query using index.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testSpatialJoinQueryUsingIndex() throws Exception {
 
@@ -139,6 +188,12 @@ public class RectangleJoinTest {
         }
 
     }
+    
+    /**
+     * Test join correctness.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testJoinCorrectness() throws Exception {
 

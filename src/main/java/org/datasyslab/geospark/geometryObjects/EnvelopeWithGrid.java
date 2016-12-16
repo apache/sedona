@@ -1,28 +1,31 @@
-package org.datasyslab.geospark.geometryObjects;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: EnvelopeWithGrid.java
+ * PATH: org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
  */
+package org.datasyslab.geospark.geometryObjects;
 
 import com.vividsolutions.jts.geom.Envelope;
 
 
+// TODO: Auto-generated Javadoc
 /**
- * The class extends JTS Envelope with one additional data field
- *
+ * The Class EnvelopeWithGrid.
  */
 public class EnvelopeWithGrid extends Envelope{
+    
+    /** The grid. */
     public int grid;
 
     /**
-     * Initialize an envelope with a grid 
-     * @param x1 Xmin	
-     * @param x2 Xmax
-     * @param y1 Ymin
-     * @param y2 Ymax
-     * @param grid id
+     * Instantiates a new envelope with grid.
+     *
+     * @param x1 the x 1
+     * @param x2 the x 2
+     * @param y1 the y 1
+     * @param y2 the y 2
+     * @param grid the grid
      */
     public EnvelopeWithGrid(double x1, double x2, double y1, double y2, int grid) {
         super(x1, x2, y1, y2);
@@ -30,9 +33,10 @@ public class EnvelopeWithGrid extends Envelope{
     }
 
     /**
-     * Initialize an envelope with a grid 
-     * @param e Envelope
-     * @param grid id
+     * Instantiates a new envelope with grid.
+     *
+     * @param e the e
+     * @param grid the grid
      */
     public EnvelopeWithGrid(Envelope e, int grid) {
         super(e);

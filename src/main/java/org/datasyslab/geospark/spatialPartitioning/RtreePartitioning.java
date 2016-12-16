@@ -1,10 +1,10 @@
-package org.datasyslab.geospark.spatialPartitioning;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: RtreePartitioning.java
+ * PATH: org.datasyslab.geospark.spatialPartitioning.RtreePartitioning.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
  */
+package org.datasyslab.geospark.spatialPartitioning;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -17,20 +17,21 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * Construct a grid file. Each grid is a rtree leaf node.
- *
+ * The Class RtreePartitioning.
  */
 public class RtreePartitioning implements Serializable{
 
+	/** The grids. */
 	HashSet<EnvelopeWithGrid> grids=new HashSet<EnvelopeWithGrid>();
 	
 	/**
-	 * 
-	 * @param SampleList Sample taken from the entire dataset
-	 * @param boundary Boundary of the entire dataset
-	 * @param partitions Grids of the grid file
+	 * Instantiates a new rtree partitioning.
+	 *
+	 * @param SampleList the sample list
+	 * @param boundary the boundary
+	 * @param partitions the partitions
 	 */
 	public RtreePartitioning(Point[] SampleList,Envelope boundary,int partitions)
 	{
@@ -48,10 +49,11 @@ public class RtreePartitioning implements Serializable{
 	}
 	
 	/**
-	 * 
-	 * @param SampleList Sample taken from the entire dataset
-	 * @param boundary Boundary of the entire dataset
-	 * @param partitions Grids of the grid file
+	 * Instantiates a new rtree partitioning.
+	 *
+	 * @param SampleList the sample list
+	 * @param boundary the boundary
+	 * @param partitions the partitions
 	 */
 	public RtreePartitioning(Envelope[] SampleList,Envelope boundary,int partitions)
 	{
@@ -69,10 +71,11 @@ public class RtreePartitioning implements Serializable{
 	}
 	
 	/**
-	 * 
-	 * @param SampleList Sample taken from the entire dataset
-	 * @param boundary Boundary of the entire dataset
-	 * @param partitions Grids of the grid file
+	 * Instantiates a new rtree partitioning.
+	 *
+	 * @param SampleList the sample list
+	 * @param boundary the boundary
+	 * @param partitions the partitions
 	 */
 	public RtreePartitioning(Polygon[] SampleList,Envelope boundary,int partitions)
 	{
@@ -91,7 +94,9 @@ public class RtreePartitioning implements Serializable{
 	}
 	
 	/**
-	 * @return Return the generated grid file
+	 * Gets the grids.
+	 *
+	 * @return the grids
 	 */
 	public HashSet<EnvelopeWithGrid> getGrids() {
 		

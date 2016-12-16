@@ -1,3 +1,9 @@
+/**
+ * FILE: DistanceJoinQueryTest.java
+ * PATH: org.datasyslab.geospark.spatialOperator.DistanceJoinQueryTest.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.spatialOperator;
 
 import static org.junit.Assert.assertEquals;
@@ -31,17 +37,45 @@ import com.vividsolutions.jts.geom.Point;
 import scala.Tuple2;
 
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class DistanceJoinQueryTest.
+ */
 public class DistanceJoinQueryTest {
+    
+    /** The sc. */
     public static JavaSparkContext sc;
+    
+    /** The prop. */
     static Properties prop;
+    
+    /** The input. */
     static InputStream input;
+    
+    /** The Input location. */
     static String InputLocation;
+    
+    /** The offset. */
     static Integer offset;
+    
+    /** The splitter. */
     static FileDataSplitter splitter;
+    
+    /** The grid type. */
     static GridType gridType;
+    
+    /** The index type. */
     static IndexType indexType;
+    
+    /** The num partitions. */
     static Integer numPartitions;
+    
+    /** The distance. */
     static double distance;
+    
+    /**
+     * Once executed before all.
+     */
     @BeforeClass
     public static void onceExecutedBeforeAll() {
         Logger.getLogger("org").setLevel(Level.WARN);
@@ -82,6 +116,11 @@ public class DistanceJoinQueryTest {
         }
     }
 
+    /**
+     * Test distancel join query.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testDistancelJoinQuery() throws Exception {
         PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
@@ -93,6 +132,11 @@ public class DistanceJoinQueryTest {
 
     }
 
+    /**
+     * Test distancel join query with index.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testDistancelJoinQueryWithIndex() throws Exception {
         PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
@@ -106,6 +150,9 @@ public class DistanceJoinQueryTest {
     }
 
 
+    /**
+     * Tear down.
+     */
     @AfterClass
     public static void TearDown() {
         sc.stop();

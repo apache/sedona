@@ -1,3 +1,9 @@
+/**
+ * FILE: JoinQuery.java
+ * PATH: org.datasyslab.geospark.spatialOperator.JoinQuery.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.spatialOperator;
 
 import java.io.Serializable;
@@ -32,21 +38,33 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 
 import scala.Tuple2;
 
+// TODO: Auto-generated Javadoc
 //todo: Replace older join query class.
 
 
+/**
+ * The Class JoinQuery.
+ */
 public class JoinQuery implements Serializable{
 
+	/** The polygon RDD. */
 	public PolygonRDD polygonRDD;
+	
+	/** The rectangle RDD. */
 	public RectangleRDD rectangleRDD;
+	
+	/** The distance. */
 	double distance=0.0;
+	
+	/** The sc. */
 	JavaSparkContext sc;
 	
-	/** 
-	 * Do spatial partitioning for the query window dataset
-	 * @param sc SparkContext
-	 * @param pointRDD
-	 * @param rectangleRDDUnpartitioned
+	/**
+	 * Instantiates a new join query.
+	 *
+	 * @param sc the sc
+	 * @param pointRDD the point RDD
+	 * @param rectangleRDDUnpartitioned the rectangle RDD unpartitioned
 	 */
 	public JoinQuery(JavaSparkContext sc,PointRDD pointRDD, RectangleRDD rectangleRDDUnpartitioned)
 	{
@@ -61,10 +79,11 @@ public class JoinQuery implements Serializable{
 	}
 	
 	/**
-	 * Do spatial partitioning for the query window dataset
-	 * @param sc SparkContext
-	 * @param objectRDD
-	 * @param rectangleRDDUnpartitioned
+	 * Instantiates a new join query.
+	 *
+	 * @param sc the sc
+	 * @param objectRDD the object RDD
+	 * @param rectangleRDDUnpartitioned the rectangle RDD unpartitioned
 	 */
 	public JoinQuery(JavaSparkContext sc,RectangleRDD objectRDD, RectangleRDD rectangleRDDUnpartitioned)
 	{
@@ -78,10 +97,11 @@ public class JoinQuery implements Serializable{
 	}
 	
 	/**
-	 * Do spatial partitioning for the query window dataset
-	 * @param sc SparkContext
-	 * @param pointRDD
-	 * @param polygonRDDUnpartitioned
+	 * Instantiates a new join query.
+	 *
+	 * @param sc the sc
+	 * @param pointRDD the point RDD
+	 * @param polygonRDDUnpartitioned the polygon RDD unpartitioned
 	 */
 	public JoinQuery(JavaSparkContext sc,PointRDD pointRDD, PolygonRDD polygonRDDUnpartitioned)
 	{
@@ -95,10 +115,11 @@ public class JoinQuery implements Serializable{
 	}
 
 	/**
-	 * Do spatial partitioning for the query window dataset
-	 * @param sc SparkContext
-	 * @param objectRDD
-	 * @param polygonRDDUnpartitioned
+	 * Instantiates a new join query.
+	 *
+	 * @param sc the sc
+	 * @param objectRDD the object RDD
+	 * @param polygonRDDUnpartitioned the polygon RDD unpartitioned
 	 */
 	public JoinQuery(JavaSparkContext sc,PolygonRDD objectRDD, PolygonRDD polygonRDDUnpartitioned)
 	{
@@ -112,10 +133,11 @@ public class JoinQuery implements Serializable{
 	}
 
     /**
-     * Spatial Join Query between a RectangleRDD and a PointRDD using index nested loop. The PointRDD should be indexed in advance.
-     * @param pointRDD Indexed PointRDD
-     * @param rectangleRDD RectangleRDD
-     * @return A PairRDD which follows the schema: Envelope, A list of points covered by this envelope
+     * Spatial join query using index.
+     *
+     * @param pointRDD the point RDD
+     * @param rectangleRDD the rectangle RDD
+     * @return the java pair RDD
      */
     public JavaPairRDD<Envelope, HashSet<Point>> SpatialJoinQueryUsingIndex(PointRDD pointRDD,RectangleRDD rectangleRDD) {
 
@@ -139,10 +161,11 @@ public class JoinQuery implements Serializable{
     }
 
     /**
-     * Spatial Join Query between a RectangleRDD and a PointRDD using regular nested loop.
-     * @param pointRDD
-     * @param rectangleRDD
-     * @return
+     * Spatial join query.
+     *
+     * @param pointRDD the point RDD
+     * @param rectangleRDD the rectangle RDD
+     * @return the java pair RDD
      */
     public JavaPairRDD<Envelope, HashSet<Point>> SpatialJoinQuery(PointRDD pointRDD,RectangleRDD rectangleRDD) {
         //todo: Add logic, if this is cached, no need to calculate it again.
@@ -168,10 +191,11 @@ public class JoinQuery implements Serializable{
  
 
     /**
-     * Spatial Join Query using index nested loop. The ObjectRDD should be indexed in advance.
-     * @param objectRDD
-     * @param rectangleRDD
-     * @return
+     * Spatial join query using index.
+     *
+     * @param objectRDD the object RDD
+     * @param rectangleRDD the rectangle RDD
+     * @return the java pair RDD
      */
     public JavaPairRDD<Envelope, HashSet<Envelope>> SpatialJoinQueryUsingIndex(RectangleRDD objectRDD,RectangleRDD rectangleRDD) {
 
@@ -194,10 +218,11 @@ public class JoinQuery implements Serializable{
 
     
     /**
-     * Spatial Join Query using regular nested loop.
-     * @param objectRDD
-     * @param rectangleRDD
-     * @return
+     * Spatial join query.
+     *
+     * @param objectRDD the object RDD
+     * @param rectangleRDD the rectangle RDD
+     * @return the java pair RDD
      */
     public JavaPairRDD<Envelope, HashSet<Envelope>> SpatialJoinQuery(RectangleRDD objectRDD,RectangleRDD rectangleRDD) {
         //todo: Add logic, if this is cached, no need to calculate it again.
@@ -221,10 +246,11 @@ public class JoinQuery implements Serializable{
 
    
     /**
-     * Spatial Join Query using regular nested loop.
-     * @param pointRDD
-     * @param polygonRDD
-     * @return
+     * Spatial join query.
+     *
+     * @param pointRDD the point RDD
+     * @param polygonRDD the polygon RDD
+     * @return the java pair RDD
      */
     public JavaPairRDD<Polygon, HashSet<Point>> SpatialJoinQuery(PointRDD pointRDD,PolygonRDD polygonRDD) {
     	//todo: Add logic, if this is cached, no need to calculate it again.
@@ -249,10 +275,11 @@ public class JoinQuery implements Serializable{
 
    
     /**
-     * Spatial Join Query using index nested loop. The PointRDD should be indexed in advance.
-     * @param pointRDD
-     * @param polygonRDD
-     * @return
+     * Spatial join query using index.
+     *
+     * @param pointRDD the point RDD
+     * @param polygonRDD the polygon RDD
+     * @return the java pair RDD
      */
     public JavaPairRDD<Polygon, HashSet<Point>> SpatialJoinQueryUsingIndex(PointRDD pointRDD,PolygonRDD polygonRDD) {
 
@@ -277,10 +304,11 @@ public class JoinQuery implements Serializable{
 
    
     /**
-     * Spatial Join Query using index nested loop. The objectRDD should be indexed in advance.
-     * @param objectRDD
-     * @param windowRDD
-     * @return
+     * Spatial join query using index.
+     *
+     * @param objectRDD the object RDD
+     * @param windowRDD the window RDD
+     * @return the java pair RDD
      */
     public JavaPairRDD<Polygon, HashSet<Polygon>> SpatialJoinQueryUsingIndex(PolygonRDD objectRDD,PolygonRDD windowRDD) {
 
@@ -302,10 +330,11 @@ public class JoinQuery implements Serializable{
 
 
     /**
-     * Spatial Join Query using regular nested loop.
-     * @param objectRDD
-     * @param polygonRDD
-     * @return
+     * Spatial join query.
+     *
+     * @param objectRDD the object RDD
+     * @param polygonRDD the polygon RDD
+     * @return the java pair RDD
      */
     public JavaPairRDD<Polygon, HashSet<Polygon>> SpatialJoinQuery(PolygonRDD objectRDD,PolygonRDD polygonRDD) {
        //todo: Add logic, if this is cached, no need to calculate it again.

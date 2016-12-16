@@ -1,3 +1,9 @@
+/**
+ * FILE: PolygonRDD.java
+ * PATH: org.datasyslab.geospark.spatialRDD.PolygonRDD.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.spatialRDD;
 
 import java.io.Serializable;
@@ -53,55 +59,36 @@ import scala.Tuple2;
 
 // TODO: Auto-generated Javadoc
 
-
-
 /**
- * The Class PolygonRDD. It accommodates Polygon object.
- * @author Arizona State University DataSystems Lab
- *
+ * The Class PolygonRDD.
  */
 public class PolygonRDD implements Serializable {
 
-    /**
-     * The total number of records stored in this RDD
-     */
+    /** The total number of records. */
     public long totalNumberOfRecords;
     
-    /**
-     * The original Spatial RDD which has not been spatial partitioned and has not index
-     */
+    /** The raw polygon RDD. */
     public JavaRDD<Polygon> rawPolygonRDD;
    
     
-    /**
-     * The boundary of this RDD, calculated in constructor method, represented by an array
-     */
+    /** The boundary. */
     Double[] boundary = new Double[4];
 
-    /**
-     * The boundary of this RDD, calculated in constructor method, represented by an envelope
-     */
+    /** The boundary envelope. */
     public Envelope boundaryEnvelope;
 
-    /**
-     * The SpatialRDD partitioned by spatial grids. Each integer is a spatial partition id
-     */
+    /** The grid polygon RDD. */
     public JavaPairRDD<Integer, Polygon> gridPolygonRDD;
 
-    /**
-     * The SpatialRDD partitioned by spatial grids. Each integer is a spatial partition id
-     */
+    /** The grids. */
     public HashSet<EnvelopeWithGrid> grids;
 
 
     //todo, replace this STRtree to be more generalized, such as QuadTree.
-    /**
-     * The partitoned SpatialRDD with built spatial indexes. Each integer is a spatial partition id
-     */
+    /** The indexed RDD. */
     public JavaPairRDD<Integer, STRtree> indexedRDD;
-    /**
-     * The partitoned SpatialRDD with built spatial indexes.  Indexes are built on JavaRDD without spatial partitioning.
-     */
+    
+    /** The indexed RDD no id. */
     public JavaRDD<STRtree> indexedRDDNoId;
     
     private Envelope minXEnvelope;
@@ -111,20 +98,22 @@ public class PolygonRDD implements Serializable {
 
 
     /**
-     * Initialize one SpatialRDD with one existing SpatialRDD
-     * @param rawPolygonRDD One existing raw SpatialRDD
+     * Instantiates a new polygon RDD.
+     *
+     * @param rawPolygonRDD the raw polygon RDD
      */
     public PolygonRDD(JavaRDD<Polygon> rawPolygonRDD) {
         this.setRawPolygonRDD(rawPolygonRDD.persist(StorageLevel.MEMORY_ONLY()));
     }
 
     /**
-     * Initialize one raw SpatialRDD with a raw input file
-     * @param spark SparkContext which defines some Spark configurations
-     * @param InputLocation specify the input path which can be a HDFS path
-     * @param Offset specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
-     * @param Splitter specify the input file format: csv, tsv, geojson, wkt
-     * @param partitions specify the partition number of the SpatialRDD
+     * Instantiates a new polygon RDD.
+     *
+     * @param spark the spark
+     * @param InputLocation the input location
+     * @param Offset the offset
+     * @param splitter the splitter
+     * @param partitions the partitions
      */ 
     public PolygonRDD(JavaSparkContext spark, String InputLocation, Integer Offset, FileDataSplitter splitter, Integer partitions) {
 
@@ -132,11 +121,12 @@ public class PolygonRDD implements Serializable {
     }
 
     /**
-     * Initialize one raw SpatialRDD with a raw input file
-     * @param spark SparkContext which defines some Spark configurations
-     * @param InputLocation specify the input path which can be a HDFS path
-     * @param Offset specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
-     * @param Splitter specify the input file format: csv, tsv, geojson, wkt
+     * Instantiates a new polygon RDD.
+     *
+     * @param spark the spark
+     * @param InputLocation the input location
+     * @param Offset the offset
+     * @param splitter the splitter
      */
     public PolygonRDD(JavaSparkContext spark, String InputLocation, Integer Offset, FileDataSplitter splitter) {
 
@@ -147,19 +137,20 @@ public class PolygonRDD implements Serializable {
 
     
     /**
-     * Get the raw SpatialRDD
+     * Gets the raw polygon RDD.
      *
-     * @return The raw SpatialRDD
+     * @return the raw polygon RDD
      */
     public JavaRDD<Polygon> getRawPolygonRDD() {
         return rawPolygonRDD;
     }
 
     /**
-     * Transform a rawRectangleRDD to a RectangelRDD with a a specified spatial partitioning grid type and the number of partitions
-     * @param rawPolygonRDD
-     * @param gridType
-     * @param numPartitions
+     * Instantiates a new polygon RDD.
+     *
+     * @param rawPolygonRDD the raw polygon RDD
+     * @param gridType the grid type
+     * @param numPartitions the num partitions
      */
     public PolygonRDD(JavaRDD<Polygon> rawPolygonRDD, GridType gridType, Integer numPartitions)
     {
@@ -186,9 +177,10 @@ public class PolygonRDD implements Serializable {
     
     
     /**
-     * Transform a rawRectangleRDD to a RectangelRDD with a a specified spatial partitioning grid type and the number of partitions
-     * @param rawPolygonRDD
-     * @param gridType
+     * Instantiates a new polygon RDD.
+     *
+     * @param rawPolygonRDD the raw polygon RDD
+     * @param gridType the grid type
      */
     public PolygonRDD(JavaRDD<Polygon> rawPolygonRDD, GridType gridType)
     {
@@ -217,13 +209,14 @@ public class PolygonRDD implements Serializable {
     
     //todo: remove offset.
     /**
-     * Initialize one raw SpatialRDD with a raw input file and do spatial partitioning on it
-     * @param sc spark SparkContext which defines some Spark configurations
-     * @param inputLocation specify the input path which can be a HDFS path
-     * @param offSet specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
-     * @param splitter specify the input file format: csv, tsv, geojson, wkt
-     * @param gridType specify the spatial partitioning method: equalgrid, rtree, voronoi
-     * @param numPartitions specify the partition number of the SpatialRDD
+     * Instantiates a new polygon RDD.
+     *
+     * @param sc the sc
+     * @param inputLocation the input location
+     * @param offSet the off set
+     * @param splitter the splitter
+     * @param gridType the grid type
+     * @param numPartitions the num partitions
      */
     public PolygonRDD(JavaSparkContext sc, String inputLocation, Integer offSet, FileDataSplitter splitter, GridType gridType, Integer numPartitions) {
         this.rawPolygonRDD = sc.textFile(inputLocation).map(new PolygonFormatMapper(offSet, splitter));
@@ -250,12 +243,13 @@ public class PolygonRDD implements Serializable {
     }
     
     /**
-     *Initialize one raw SpatialRDD with a raw input file and do spatial partitioning on it without specifying the number of partitions.
-     * @param sc spark SparkContext which defines some Spark configurations
-     * @param inputLocation specify the input path which can be a HDFS path
-     * @param offSet specify the starting column of valid spatial attributes in CSV and TSV. e.g. XXXX,XXXX,x,y,XXXX,XXXX
-     * @param splitter specify the input file format: csv, tsv, geojson, wkt
-     * @param gridType specify the spatial partitioning method: equalgrid, rtree, voronoi
+     * Instantiates a new polygon RDD.
+     *
+     * @param sc the sc
+     * @param inputLocation the input location
+     * @param offSet the off set
+     * @param splitter the splitter
+     * @param gridType the grid type
      */
     public PolygonRDD(JavaSparkContext sc, String inputLocation, Integer offSet, FileDataSplitter splitter, GridType gridType) {
         this.rawPolygonRDD = sc.textFile(inputLocation).map(new PolygonFormatMapper(offSet, splitter));
@@ -326,8 +320,9 @@ public class PolygonRDD implements Serializable {
 
     
     /**
-     * Create an IndexedRDD and cache it in memory. Need to have a grided RDD first. The index is build on each partition.
-     * @param indexType Specify the index type: rtree, quadtree
+     * Builds the index.
+     *
+     * @param indexType the index type
      */
     public void buildIndex(IndexType indexType) {
 
@@ -373,20 +368,21 @@ public class PolygonRDD implements Serializable {
         this.indexedRDD.persist(StorageLevel.MEMORY_ONLY());
         }
     }
+    
     /**
-     * Set the raw SpatialRDD
+     * Sets the raw polygon RDD.
      *
-     * @param rawPolygonRDD One existing SpatialRDD
+     * @param rawPolygonRDD the new raw polygon RDD
      */
     public void setRawPolygonRDD(JavaRDD<Polygon> rawPolygonRDD) {
         this.rawPolygonRDD = rawPolygonRDD;
     }
 
 	/**
-	 * Repartition the raw SpatialRDD.
+	 * Re partition.
 	 *
-	 * @param partitions the partitions number
-	 * @return the repartitioned raw SpatialRDD
+	 * @param partitions the partitions
+	 * @return the java RDD
 	 */
 	public JavaRDD<Polygon> rePartition(Integer partitions)
 	{
@@ -395,7 +391,8 @@ public class PolygonRDD implements Serializable {
 	
 
     /**
-     * Return the boundary of the entire SpatialRDD in terms of an envelope format
+     * Boundary.
+     *
      * @return the envelope
      */
     public Envelope boundary() {
@@ -423,9 +420,9 @@ public class PolygonRDD implements Serializable {
     }
 
     /**
-     * Return RectangleRDD version of the PolygonRDD. Each record in RectangleRDD is the Minimum bounding rectangle of the corresponding Polygon
+     * Minimum bounding rectangle.
      *
-     * @return the rectangle rdd
+     * @return the rectangle RDD
      */
     public RectangleRDD MinimumBoundingRectangle() {
         JavaRDD<Envelope> rectangleRDD = this.rawPolygonRDD.map(new Function<Polygon, Envelope>() {
@@ -439,7 +436,7 @@ public class PolygonRDD implements Serializable {
     }
 
     /**
-     * Return a polygon which is the union of the entire polygon dataset
+     * Polygon union.
      *
      * @return the polygon
      */
@@ -473,6 +470,11 @@ public class PolygonRDD implements Serializable {
     }
     
  
+    /**
+     * Spatial partition.
+     *
+     * @param gridsFromOtherSRDD the grids from other SRDD
+     */
     public void SpatialPartition(HashSet<EnvelopeWithGrid> gridsFromOtherSRDD) {
 
 		//final Integer offset=Offset;

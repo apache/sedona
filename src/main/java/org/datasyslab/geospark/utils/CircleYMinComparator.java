@@ -1,3 +1,9 @@
+/**
+ * FILE: CircleYMinComparator.java
+ * PATH: org.datasyslab.geospark.utils.CircleYMinComparator.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.utils;
 
 import java.io.Serializable;
@@ -13,6 +19,10 @@ import org.datasyslab.geospark.geometryObjects.Circle;
 
 import com.vividsolutions.jts.geom.Envelope;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class CircleYMinComparator.
+ */
 public class CircleYMinComparator extends GeometryComparator implements Comparator<Circle>, Serializable {
 
 	 /* (non-Javadoc)
