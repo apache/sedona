@@ -2,10 +2,11 @@
 
 [![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark)
 
+GeoSpark is listed as **Infrastructure Project** on **Apache Spark Official Third Party Project Page** ([http://spark.apache.org/third-party-projects.html](http://spark.apache.org/third-party-projects.html))
 
 GeoSpark is a cluster computing system for processing large-scale spatial data. GeoSpark extends Apache Spark with a set of out-of-the-box Spatial Resilient Distributed Datasets (SRDDs) that efficiently load, process, and analyze large-scale spatial data across machines. GeoSpark provides APIs for Apache Spark programmer to easily develop their spatial analysis programs with Spatial Resilient Distributed Datasets (SRDDs) which have in house support for geometrical and distance operations.
 
-GeoSpark is listed as **Infrastructure Project** in **Apache Spark  Third Party Project Wiki Page** ([Link](https://cwiki.apache.org/confluence/display/SPARK/Third+Party+Projects))
+
 
 GeoSpark artifacts are hosted in Maven Central. You can add a Maven dependency with the following coordinates:
 
@@ -15,7 +16,7 @@ artifactId: geospark
 version: 0.3.2
 ```
 
-The following artifact supports Apache Spark 1.X versions:
+The following version supports Apache Spark 1.X versions:
 
 ```
 groupId: org.datasyslab
