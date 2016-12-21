@@ -1,7 +1,7 @@
 /**
  * FILE: CircleRDD.java
  * PATH: org.datasyslab.geospark.spatialRDD.CircleRDD.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialRDD;
@@ -48,11 +48,11 @@ public class CircleRDD implements Serializable {
 	 */
 	public CircleRDD(PointRDD pointRDD, Double Radius) {
 		final Double radius = Radius;
-		this.circleRDD = pointRDD.getRawPointRDD().map(new Function<Point, Circle>() {
+		this.circleRDD = pointRDD.getRawSpatialRDD().map(new Function<Object, Circle>() {
 
-			public Circle call(Point v1) {
+			public Circle call(Object v1) {
 
-				return new Circle(v1, radius);
+				return new Circle((Point)v1, radius);
 			}
 
 		});

@@ -1,7 +1,7 @@
 /**
  * FILE: PointYComparator.java
  * PATH: org.datasyslab.geospark.utils.PointYComparator.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.utils;
@@ -22,17 +22,17 @@ import com.vividsolutions.jts.geom.Point;
 /**
  * The Class PointYComparator.
  */
-public class PointYComparator extends GeometryComparator implements Comparator<Point>, Serializable {
+public class PointYComparator extends GeometryComparator implements Comparator<Object>, Serializable {
 
 	 /* (non-Javadoc)
  	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
  	 */
- 	public int compare(Point point1, Point point2) {
-	    if(point1.getY()>point2.getY())
+ 	public int compare(Object point1, Object point2) {
+	    if(((Point) point1).getY()>((Point) point2).getY())
 	    {
 	    	return 1;
 	    }
-	    else if (point1.getY()<point2.getY())
+	    else if (((Point) point1).getY()<((Point) point2).getY())
 	    {
 	    	return -1;
 	    }

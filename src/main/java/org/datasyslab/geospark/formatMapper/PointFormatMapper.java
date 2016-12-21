@@ -1,7 +1,7 @@
 /**
  * FILE: PointFormatMapper.java
  * PATH: org.datasyslab.geospark.formatMapper.PointFormatMapper.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.formatMapper;
@@ -24,7 +24,7 @@ import com.vividsolutions.jts.io.WKTReader;
 /**
  * The Class PointFormatMapper.
  */
-public class PointFormatMapper implements Serializable, Function<String, Point> {
+public class PointFormatMapper implements Serializable, Function<String, Object> {
     
     /** The offset. */
     Integer offset = 0;

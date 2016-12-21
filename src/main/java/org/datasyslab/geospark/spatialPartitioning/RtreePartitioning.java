@@ -1,20 +1,18 @@
 /**
  * FILE: RtreePartitioning.java
  * PATH: org.datasyslab.geospark.spatialPartitioning.RtreePartitioning.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialPartitioning;
 
 import java.io.Serializable;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
-
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.Geometry;
+
 import com.vividsolutions.jts.index.strtree.STRtree;
 
 // TODO: Auto-generated Javadoc
@@ -24,7 +22,8 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 public class RtreePartitioning implements Serializable{
 
 	/** The grids. */
-	HashSet<EnvelopeWithGrid> grids=new HashSet<EnvelopeWithGrid>();
+	List<Envelope> grids=new ArrayList<Envelope>();
+	
 	
 	/**
 	 * Instantiates a new rtree partitioning.
@@ -32,65 +31,34 @@ public class RtreePartitioning implements Serializable{
 	 * @param SampleList the sample list
 	 * @param boundary the boundary
 	 * @param partitions the partitions
+	 * @throws Exception the exception
 	 */
-	public RtreePartitioning(Point[] SampleList,Envelope boundary,int partitions)
+	public RtreePartitioning(List SampleList,Envelope boundary,int partitions) throws Exception
 	{
-		STRtree strtree=new STRtree(SampleList.length/partitions);
-    	for(int i=0;i<SampleList.length;i++)
+		STRtree strtree=new STRtree(SampleList.size()/partitions);
+    	for(int i=0;i<SampleList.size();i++)
     	{
-    		strtree.insert(SampleList[i].getEnvelopeInternal(), SampleList[i]);
+    		if(SampleList.get(i) instanceof Envelope)
+    		{
+    			Envelope spatialObject = (Envelope)SampleList.get(i);
+    			strtree.insert(spatialObject, spatialObject);
+    		}
+    		else if(SampleList.get(i) instanceof Geometry)
+    		{
+    			Geometry spatialObject = (Geometry)SampleList.get(i);
+    			strtree.insert(spatialObject.getEnvelopeInternal(), spatialObject);
+    		}
+    		else
+    		{
+    			throw new Exception("[RtreePartitioning][Constrcutor] Unsupported spatial object type");
+    		}
     	}
     	List<Envelope> envelopes=strtree.queryBoundary();
     	for(int i=0;i<envelopes.size();i++)
     	{
-    		grids.add(new EnvelopeWithGrid(envelopes.get(i),i));
+    		grids.add(envelopes.get(i));
     	}
     	//grids.add(new EnvelopeWithGrid(boundary,grids.size()));
-	}
-	
-	/**
-	 * Instantiates a new rtree partitioning.
-	 *
-	 * @param SampleList the sample list
-	 * @param boundary the boundary
-	 * @param partitions the partitions
-	 */
-	public RtreePartitioning(Envelope[] SampleList,Envelope boundary,int partitions)
-	{
-		STRtree strtree=new STRtree(SampleList.length/partitions);
-    	for(int i=0;i<SampleList.length;i++)
-    	{
-    		strtree.insert(SampleList[i], SampleList[i]);
-    	}
-    	List<Envelope> envelopes=strtree.queryBoundary();
-    	for(int i=0;i<envelopes.size();i++)
-    	{
-    		grids.add(new EnvelopeWithGrid(envelopes.get(i),i));
-    	}
-    	//grids.add(new EnvelopeWithGrid(boundary,grids.size()));
-	}
-	
-	/**
-	 * Instantiates a new rtree partitioning.
-	 *
-	 * @param SampleList the sample list
-	 * @param boundary the boundary
-	 * @param partitions the partitions
-	 */
-	public RtreePartitioning(Polygon[] SampleList,Envelope boundary,int partitions)
-	{
-		STRtree strtree=new STRtree(SampleList.length/partitions);
-    	for(int i=0;i<SampleList.length;i++)
-    	{
-    		strtree.insert(SampleList[i].getEnvelopeInternal(), SampleList[i]);
-    	}
-    	List<Envelope> envelopes=strtree.queryBoundary();
-    	for(int i=0;i<envelopes.size();i++)
-    	{
-    		grids.add(new EnvelopeWithGrid(envelopes.get(i),i));
-    	}
-    	//grids.add(new EnvelopeWithGrid(boundary,grids.size()));
-    	
 	}
 	
 	/**
@@ -98,7 +66,7 @@ public class RtreePartitioning implements Serializable{
 	 *
 	 * @return the grids
 	 */
-	public HashSet<EnvelopeWithGrid> getGrids() {
+	public List<Envelope> getGrids() {
 		
 		return this.grids;
 		

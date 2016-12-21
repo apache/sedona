@@ -1,7 +1,7 @@
 /**
  * FILE: Example.java
  * PATH: org.datasyslab.geospark.showcase.Example.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.showcase;
@@ -127,24 +127,24 @@ public class Example implements Serializable{
 			numPartitions2=Integer.parseInt(args[12]);
 			gridType=GridType.getGridType(args[13]);
 		}
-		conf=new SparkConf().setAppName(queryName+"+"+inputLocation+"+"+gridType+"+"+cores+"+"+numPartitions).setMaster(masterName)
-				.set("spark.history.fs.logDirectory", "/home/ubuntu/sparkeventlog")
-				.set("spark.history.retainedApplications", "10000")
-				.set("spark.eventLog.enabled", "true")
-				.set("spark.eventLog.dir", "/home/ubuntu/sparkeventlog")
-				.set("spark.executor.memory", "50g")
-				.set("spark.core.connection.ack.wait.timeout","900")
-				.set("spark.akka.timeout","900")
-				.set("spark.akka.frameSize","256")
-				.set("spark.memory.storageFraction", "0.8")
-				.set("spark.driver.memory", "50g")
-				.set("spark.cores.max",cores)
-				.set("spark.driver.cores","8")
-				.set("spark.driver.maxResultSize", "10g")
+		conf=new SparkConf().setAppName(queryName+"+"+inputLocation+"+"+gridType+"+"+cores+"+"+numPartitions).setMaster(masterName);
+				//.set("spark.history.fs.logDirectory", "/home/ubuntu/sparkeventlog")
+				//.set("spark.history.retainedApplications", "10000")
+				//.set("spark.eventLog.enabled", "true")
+				//.set("spark.eventLog.dir", "/home/ubuntu/sparkeventlog")
+				//.set("spark.executor.memory", "50g")
+				//.set("spark.core.connection.ack.wait.timeout","900")
+				//.set("spark.akka.timeout","900")
+				//.set("spark.akka.frameSize","256")
+				//.set("spark.memory.storageFraction", "0.8")
+				//.set("spark.driver.memory", "50g")
+				//.set("spark.cores.max",cores)
+				//.set("spark.driver.cores","8")
+				//.set("spark.driver.maxResultSize", "10g")
 				//.set("spark.tachyonStore.url", "tachyon://"+args[0]+":19998")
 				//.set("spark.externalBlockStore.url", "alluxio://"+args[0]+":19998")
 				//.set("spark.externalBlockStore.blockManager", "org.apache.spark.storage.TachyonBlockManager")
-				.set("log4j.rootCategory","ERROR, console");
+				//.set("log4j.rootCategory","ERROR, console");
 		sc = new JavaSparkContext(conf);
 		sc.addJar(jarPath);
         Logger.getLogger("org").setLevel(Level.WARN);
@@ -192,10 +192,10 @@ public class Example implements Serializable{
     	double randomNumber=random.nextInt(10)+random.nextDouble();
     	queryEnvelope=new Envelope (-90.01+randomNumber,-80.01+randomNumber,30.01+randomNumber,40.01+randomNumber);
     	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter);
-    	objectRDD.rawRectangleRDD.persist(StorageLevel.MEMORY_ONLY());
+    	objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = RangeQuery.SpatialRangeQuery(objectRDD, queryEnvelope, 0).getRawRectangleRDD().count();
+    		long resultSize = RangeQuery.SpatialRangeQuery(objectRDD, queryEnvelope, 0,false).count();
     		assert resultSize>-1;
     	}
     }
@@ -212,10 +212,11 @@ public class Example implements Serializable{
     	double randomNumber=random.nextInt(10)+random.nextDouble();
     	queryEnvelope=new Envelope (-90.01+randomNumber,-80.01+randomNumber,30.01+randomNumber,40.01+randomNumber);
     	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter);
-    	objectRDD.buildIndex(IndexType.RTREE);
+    	objectRDD.buildIndex(IndexType.RTREE,false);
+    	objectRDD.indexedRawRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = RangeQuery.SpatialRangeQueryUsingIndex(objectRDD, queryEnvelope, 0).getRawRectangleRDD().count();
+    		long resultSize = RangeQuery.SpatialRangeQuery(objectRDD, queryEnvelope, 0,true).count();
     		assert resultSize>-1;
     	}
         
@@ -231,10 +232,10 @@ public class Example implements Serializable{
     	double randomNumber=random.nextInt(10)+random.nextDouble();
     	queryPoint=fact.createPoint(new Coordinate(-84.01+randomNumber, 34.01+randomNumber));
     	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter);
-    	objectRDD.getRawRectangleRDD().persist(StorageLevel.MEMORY_ONLY());
+    	objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
-    		List<Envelope> result = KNNQuery.SpatialKnnQuery(objectRDD, queryPoint, 1000);
+    		List<Envelope> result = KNNQuery.SpatialKnnQuery(objectRDD, queryPoint, 1000,false);
     		assert result.size()>-1;
     	}
     }
@@ -249,10 +250,11 @@ public class Example implements Serializable{
     	double randomNumber=random.nextInt(10)+random.nextDouble();
     	queryPoint=fact.createPoint(new Coordinate(-84.01+randomNumber, 34.01+randomNumber));
     	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter);
-    	objectRDD.buildIndex(IndexType.RTREE);
+    	objectRDD.buildIndex(IndexType.RTREE,false);
+    	objectRDD.indexedRawRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
-    		List<Envelope> result = KNNQuery.SpatialKnnQueryUsingIndex(objectRDD, queryPoint, 1000);
+    		List<Envelope> result = KNNQuery.SpatialKnnQuery(objectRDD, queryPoint, 1000, true);
     		assert result.size()>-1;
     	}
     }
@@ -264,15 +266,14 @@ public class Example implements Serializable{
      */
     public static void testSpatialJoinQuery() throws Exception {
     	RectangleRDD rectangleRDD = new RectangleRDD(sc, inputLocation2, offset2, splitter2);
-    	//polygonRDD.rawPolygonRDD.unpersist();
-    	RectangleRDD objectRDD;
-    	objectRDD = new RectangleRDD(sc, inputLocation, offset ,splitter,gridType,numPartitions);
-    	objectRDD.gridRectangleRDD.persist(StorageLevel.MEMORY_ONLY());
-    	JoinQuery joinQuery = new JoinQuery(sc,objectRDD,rectangleRDD); 
+    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset ,splitter,numPartitions);
+    	objectRDD.spatialPartitioning(GridType.RTREE);
+    	rectangleRDD.spatialPartitioning(objectRDD.grids);
+    	objectRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
     		
-    		long resultSize = joinQuery.SpatialJoinQuery(objectRDD,rectangleRDD).count();
+    		long resultSize = JoinQuery.SpatialJoinQuery(objectRDD,rectangleRDD,false).count();
     		assert resultSize>0;
     	}
     }
@@ -284,14 +285,14 @@ public class Example implements Serializable{
      */
     public static void testSpatialJoinQueryUsingIndex() throws Exception {
     	RectangleRDD rectangleRDD = new RectangleRDD(sc, inputLocation2, offset2, splitter2);
-    	//polygonRDD.rawPolygonRDD.unpersist();
-    	RectangleRDD objectRDD;
-  	objectRDD = new RectangleRDD(sc, inputLocation, offset ,splitter,gridType,numPartitions);
-    	objectRDD.buildIndex(IndexType.RTREE);
-    	JoinQuery joinQuery = new JoinQuery(sc,objectRDD,rectangleRDD);
+  		RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset ,splitter,numPartitions);
+  		objectRDD.spatialPartitioning(GridType.RTREE);
+  		rectangleRDD.spatialPartitioning(objectRDD.grids);
+    	objectRDD.buildIndex(IndexType.RTREE,true);
+    	objectRDD.indexedRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = joinQuery.SpatialJoinQueryUsingIndex(objectRDD,rectangleRDD).count();
+    		long resultSize = JoinQuery.SpatialJoinQuery(objectRDD,rectangleRDD,true).count();
     		assert resultSize>0;
     	}
     }

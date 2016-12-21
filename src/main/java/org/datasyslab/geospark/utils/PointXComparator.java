@@ -1,7 +1,7 @@
 /**
  * FILE: PointXComparator.java
  * PATH: org.datasyslab.geospark.utils.PointXComparator.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.utils;
@@ -21,18 +21,18 @@ import com.vividsolutions.jts.geom.Point;
 /**
  * The Class PointXComparator.
  */
-public class PointXComparator extends GeometryComparator implements Comparator<Point>, Serializable {
+public class PointXComparator extends GeometryComparator implements Comparator<Object>, Serializable {
     
 
  	/* (non-Javadoc)
 	  * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	  */
-	 public int compare(Point point1, Point point2) {
-	    if(point1.getX()>point2.getX())
+	 public int compare(Object point1, Object point2) {
+	    if(((Point)point1).getX()>((Point)point2).getX())
 	    {
 	    	return 1;
 	    }
-	    else if (point1.getX()<point2.getX())
+	    else if (((Point)point1).getX()<((Point)point2).getX())
 	    {
 	    	return -1;
 	    }

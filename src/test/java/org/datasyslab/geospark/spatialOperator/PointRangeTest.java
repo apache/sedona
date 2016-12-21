@@ -1,7 +1,7 @@
 /**
  * FILE: PointRangeTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.PointRangeTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
@@ -120,13 +120,13 @@ public class PointRangeTest {
      */
     @Test
     public void testSpatialRangeQuery() throws Exception {
-    	PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter);
+    	PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter);
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = RangeQuery.SpatialRangeQuery(pointRDD, queryEnvelope, 0).getRawPointRDD().count();
+    		long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0,false).count();
     		assert resultSize>-1;
     	}
-    	assert RangeQuery.SpatialRangeQuery(pointRDD, queryEnvelope, 0).getRawPointRDD().take(10).get(1).getUserData().toString()!=null;
+    	assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0,false).take(10).get(1).getUserData().toString()!=null;
         
     }
     
@@ -137,15 +137,14 @@ public class PointRangeTest {
      */
     @Test
     public void testSpatialRangeQueryUsingIndex() throws Exception {
-    	PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter);
-    	pointRDD.buildIndex(IndexType.RTREE);
+    	PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter);
+    	spatialRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = RangeQuery.SpatialRangeQueryUsingIndex(pointRDD, queryEnvelope, 0).getRawPointRDD().count();
+    		long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0,true).count();
     		assert resultSize>-1;
     	}
-    	assert RangeQuery.SpatialRangeQueryUsingIndex(pointRDD, queryEnvelope, 0).getRawPointRDD().take(10).get(1).getUserData().toString() !=null;
-        
+    	assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0,true).take(10).get(1).getUserData().toString() !=null;
     }
 
 }
