@@ -19,6 +19,8 @@ script:
 
   - mvn clean install -DskipTests
 
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
 
 ## ----------------------------------------------------------------------
 ## Notification

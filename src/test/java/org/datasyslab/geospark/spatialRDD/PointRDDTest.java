@@ -1,7 +1,7 @@
 /**
  * FILE: PointRDDTest.java
  * PATH: org.datasyslab.geospark.spatialRDD.PointRDDTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialRDD;
@@ -21,10 +21,11 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
-import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * 
@@ -33,6 +34,8 @@ import org.junit.Test;
  */
 
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.index.quadtree.Quadtree;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -116,9 +119,6 @@ public class PointRDDTest implements Serializable{
         }
     }
 
-
-
-
     /**
      * Test constructor.
      *
@@ -129,66 +129,41 @@ public class PointRDDTest implements Serializable{
      */
     @Test
     public void testConstructor() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
         //todo: Set this to debug level
-        for (EnvelopeWithGrid d : pointRDD.grids) {
-            //System.out.println("PointRDD grids: "+d);
-        }
-
-        //todo: Move this into log4j.
-        Map<Integer, Long> map = pointRDD.gridPointRDD.countByKey();
-        for (Entry<Integer, Long> entry : map.entrySet()) {
-            Long number = (Long) entry.getValue();
-            Double percentage = number.doubleValue() / pointRDD.totalNumberOfRecords;
-            //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
-        }
+        assert spatialRDD.totalNumberOfRecords>=1;
+        assert spatialRDD.boundary!=null;
+        assert spatialRDD.boundaryEnvelope!=null;
     }
 
-    /*
-     *  This test case test whether the X-Y grid can be build correctly.
-     */
-    /*
-    @Test
-    public void testXYGrid() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "X-Y", 10);
-        for (EnvelopeWithGrid d : pointRDD.grids) {
-        	System.out.println("PointRDD grids: "+d.grid);
-        }
-        //todo: Move this into log4j.
-        Map<Integer, Object> map = pointRDD.gridPointRDD.countByKey();
-
-        System.out.println(map.size());
-
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
-            Long number = (Long) entry.getValue();
-            Double percentage = number.doubleValue() / pointRDD.totalNumberOfRecords;
-            System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
-        }
-    }*/
     /**
-     * Test equal size grids spatial partitioing.
+     * Test equal partitioning.
      *
      * @throws Exception the exception
      */
     /*
-     *  This test case test whether the equal size grids can be build correctly.
+     *  This test case test whether the Hilbert Curve grid can be build correctly.
      */
     @Test
-    public void testEqualSizeGridsSpatialPartitioing() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, GridType.EQUALGRID, 10);
-        for (EnvelopeWithGrid d : pointRDD.grids) {
-        	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
+    public void testEqualPartitioning() throws Exception {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, 10);
+        spatialRDD.spatialPartitioning(GridType.EQUALGRID);
+        for (Envelope d : spatialRDD.grids) {
+        	//System.out.println("PointRDD spatial partitioning grids: "+d);
         }
+        //System.out.println(spatialRDD.boundaryEnvelope);
         //todo: Move this into log4j.
-        Map<Integer, Long> map = pointRDD.gridPointRDD.countByKey();
+        Map<Integer, Long> map = spatialRDD.spatialPartitionedRDD.countByKey();
 
-        System.out.println(map.size());
+      //  System.out.println(map.size());
 
         for (Entry<Integer, Long> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
-            Double percentage = number.doubleValue() / pointRDD.totalNumberOfRecords;
-            //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+            Double percentage = number.doubleValue() / spatialRDD.totalNumberOfRecords;
+           // System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
+        //System.out.println("Original number of records: "+spatialRDD.countWithoutDuplicates()+" Spatial partitioned records: "+spatialRDD.countWithoutDuplicatesSPRDD());
+        assert spatialRDD.countWithoutDuplicates()==spatialRDD.countWithoutDuplicatesSPRDD();
     }
     
     /**
@@ -201,20 +176,23 @@ public class PointRDDTest implements Serializable{
      */
     @Test
     public void testHilbertCurveSpatialPartitioing() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, GridType.HILBERT, 10);
-        for (EnvelopeWithGrid d : pointRDD.grids) {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, 10);
+        spatialRDD.spatialPartitioning(GridType.HILBERT);
+        for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
         //todo: Move this into log4j.
-        Map<Integer, Long> map = pointRDD.gridPointRDD.countByKey();
+        Map<Integer, Long> map = spatialRDD.spatialPartitionedRDD.countByKey();
 
       //  System.out.println(map.size());
 
         for (Entry<Integer, Long> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
-            Double percentage = number.doubleValue() / pointRDD.totalNumberOfRecords;
+            Double percentage = number.doubleValue() / spatialRDD.totalNumberOfRecords;
            // System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
+        //System.out.println("Original number of records: "+spatialRDD.countWithoutDuplicates()+" Spatial partitioned records: "+spatialRDD.countWithoutDuplicatesSPRDD());
+        assert spatialRDD.countWithoutDuplicates()==spatialRDD.countWithoutDuplicatesSPRDD();
     }
     
     /**
@@ -227,20 +205,24 @@ public class PointRDDTest implements Serializable{
      */
     @Test
     public void testRTreeSpatialPartitioing() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, GridType.RTREE, 10);
-        for (EnvelopeWithGrid d : pointRDD.grids) {
-        	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, 10);
+        spatialRDD.spatialPartitioning(GridType.RTREE);
+        for (Envelope d : spatialRDD.grids) {
+        	//System.out.println("PointRDD spatial partitioning grids: "+d);
         }
+        //System.out.println(spatialRDD.boundaryEnvelope);
         //todo: Move this into log4j.
-        Map<Integer, Long> map = pointRDD.gridPointRDD.countByKey();
+        Map<Integer, Long> map = spatialRDD.spatialPartitionedRDD.countByKey();
 
         //System.out.println(map.size());
 
         for (Entry<Integer, Long> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
-            Double percentage = number.doubleValue() / pointRDD.totalNumberOfRecords;
-           // System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+            Double percentage = number.doubleValue() / spatialRDD.totalNumberOfRecords;
+            //System.out.println("Rtree "+entry.getKey() + " : " + String.format("%.4f", percentage));
         }
+        //System.out.println("Original number of records: "+spatialRDD.countWithoutDuplicates()+" Spatial partitioned records: "+spatialRDD.countWithoutDuplicatesSPRDD());
+        assert spatialRDD.countWithoutDuplicates()==spatialRDD.countWithoutDuplicatesSPRDD();
     }
     
     /**
@@ -253,20 +235,23 @@ public class PointRDDTest implements Serializable{
      */
     @Test
     public void testVoronoiSpatialPartitioing() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, GridType.VORONOI, 10);
-        for (EnvelopeWithGrid d : pointRDD.grids) {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, 10);
+        spatialRDD.spatialPartitioning(GridType.VORONOI);
+        for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
         //todo: Move this into log4j.
-        Map<Integer, Long> map = pointRDD.gridPointRDD.countByKey();
+        Map<Integer, Long> map = spatialRDD.spatialPartitionedRDD.countByKey();
 
         //System.out.println(map.size());
 
         for (Entry<Integer, Long> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
-            Double percentage = number.doubleValue() / pointRDD.totalNumberOfRecords;
-          //  System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+            Double percentage = number.doubleValue() / spatialRDD.totalNumberOfRecords;
+            //System.out.println("Voronoi "+entry.getKey() + " : " + String.format("%.4f", percentage));
         }
+        //System.out.println("Original number of records: "+spatialRDD.countWithoutDuplicates()+" Spatial partitioned records: "+spatialRDD.countWithoutDuplicatesSPRDD());
+        assert spatialRDD.countWithoutDuplicates()==spatialRDD.countWithoutDuplicatesSPRDD();
     }
 
     
@@ -275,54 +260,52 @@ public class PointRDDTest implements Serializable{
      *
      * @throws Exception the exception
      */
-    /*
-     * If we try to build a index on a rawPointRDD which is not construct with grid. We shall see an error.
-     */
-    @Test//(expected=IllegalClassException.class)
+    @Test
     public void testBuildIndexWithoutSetGrid() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
-        pointRDD.buildIndex(null);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
+        spatialRDD.buildIndex(IndexType.RTREE,false);
     }
 
+
     /**
-     * Test build index.
+     * Test build rtree index.
      *
      * @throws Exception the exception
-     */
-    /*
-        Test build Index.
      */
     @Test
-    public void testBuildIndex() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
-        pointRDD.buildIndex(null);
-        List<Point> result = pointRDD.indexedRDD.take(1).get(0)._2().query(pointRDD.boundaryEnvelope);
-    }
+    public void testBuildRtreeIndex() throws Exception {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
+        spatialRDD.spatialPartitioning(gridType);
+        spatialRDD.buildIndex(IndexType.RTREE,true);
+        if(spatialRDD.indexedRDD.take(1).get(0)._2() instanceof STRtree)
+        {
+            List<Point> result = ((STRtree) spatialRDD.indexedRDD.take(1).get(0)._2()).query(spatialRDD.boundaryEnvelope);
+        }
+        else
+        {
+            List<Point> result = ((Quadtree) spatialRDD.indexedRDD.take(1).get(0)._2()).query(spatialRDD.boundaryEnvelope);
+
+        }
+        }
     
     /**
-     * Test build with no exists grid.
+     * Test build quadtree index.
      *
      * @throws Exception the exception
      */
-    /*
-     *  If we want to use a grid type that is not supported yet, an exception will be throwed out.
-     */
-    @Test(expected=IllegalArgumentException.class)
-    public void testBuildWithNoExistsGrid() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, null, numPartitions);
-    }
-
-    /**
-     * Test too large partition number.
-     *
-     * @throws Exception the exception
-     */
-    /*
-     * If the partition number is set too large, we will
-     */
-    @Test(expected=IllegalArgumentException.class)
-    public void testTooLargePartitionNumber() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, 1000000);
+    @Test
+    public void testBuildQuadtreeIndex() throws Exception {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
+        spatialRDD.spatialPartitioning(gridType);
+        spatialRDD.buildIndex(IndexType.QUADTREE,true);
+        if(spatialRDD.indexedRDD.take(1).get(0)._2() instanceof STRtree)
+        {
+            List<Point> result = ((STRtree) spatialRDD.indexedRDD.take(1).get(0)._2()).query(spatialRDD.boundaryEnvelope);
+        }
+        else
+        {
+            List<Point> result = ((Quadtree) spatialRDD.indexedRDD.take(1).get(0)._2()).query(spatialRDD.boundaryEnvelope);
+        }
     }
 
     /**

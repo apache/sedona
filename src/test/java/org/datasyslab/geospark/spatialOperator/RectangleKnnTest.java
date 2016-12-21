@@ -1,7 +1,7 @@
 /**
  * FILE: RectangleKnnTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.RectangleKnnTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
@@ -134,7 +134,7 @@ public class RectangleKnnTest {
 
     	for(int i=0;i<loopTimes;i++)
     	{
-    		List<Envelope> result = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, 5);
+    		List<Envelope> result = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, 5, false);
     		assert result.size()>-1;
     		assert result.get(0).getUserData().toString()!=null;
     		//System.out.println(result.get(0).getUserData().toString());
@@ -150,10 +150,10 @@ public class RectangleKnnTest {
     @Test
     public void testSpatialKnnQueryUsingIndex() throws Exception {
     	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter);
-    	rectangleRDD.buildIndex(IndexType.RTREE);
+    	rectangleRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)
     	{
-    		List<Envelope> result = KNNQuery.SpatialKnnQueryUsingIndex(rectangleRDD, queryPoint, 5);
+    		List<Envelope> result = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, 5, true);
     		assert result.size()>-1;
     		assert result.get(0).getUserData().toString()!=null;
     		//System.out.println(result.get(0).getUserData().toString());

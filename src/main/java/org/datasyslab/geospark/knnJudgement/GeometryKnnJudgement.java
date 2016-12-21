@@ -1,7 +1,7 @@
 /**
- * FILE: PointKnnJudgement.java
- * PATH: org.datasyslab.geospark.knnJudgement.PointKnnJudgement.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * FILE: GeometryKnnJudgement.java
+ * PATH: org.datasyslab.geospark.knnJudgement.GeometryKnnJudgement.java
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.knnJudgement;
@@ -14,15 +14,16 @@ import java.util.PriorityQueue;
 
 import org.apache.spark.api.java.function.FlatMapFunction;
 
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 
 
 // TODO: Auto-generated Javadoc
 /**
- * The Class PointKnnJudgement.
+ * The Class GeometryKnnJudgement.
  */
-public class PointKnnJudgement implements FlatMapFunction<Iterator<Point>, Point>, Serializable{
+public class GeometryKnnJudgement implements FlatMapFunction<Iterator<Object>, Object>, Serializable{
 	
 	/** The k. */
 	int k;
@@ -31,12 +32,12 @@ public class PointKnnJudgement implements FlatMapFunction<Iterator<Point>, Point
 	Point queryCenter;
 	
 	/**
-	 * Instantiates a new point knn judgement.
+	 * Instantiates a new geometry knn judgement.
 	 *
 	 * @param queryCenter the query center
 	 * @param k the k
 	 */
-	public PointKnnJudgement(Point queryCenter,int k)
+	public GeometryKnnJudgement(Point queryCenter,int k)
 	{
 		this.queryCenter=queryCenter;
 		this.k=k;
@@ -46,15 +47,15 @@ public class PointKnnJudgement implements FlatMapFunction<Iterator<Point>, Point
 	 * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
 	 */
 	@Override
-	public Iterator<Point> call(Iterator<Point> input) throws Exception {
+	public Iterator<Object> call(Iterator<Object> input) throws Exception {
 		// TODO Auto-generated method stub
 		
-		PriorityQueue<Point> pq = new PriorityQueue<Point>(k, new PointDistanceComparator(queryCenter));
+		PriorityQueue<Geometry> pq = new PriorityQueue<Geometry>(k, new GeometryDistanceComparator(queryCenter));
 		while (input.hasNext()) {
 			if (pq.size() < k) {
-				pq.offer(input.next());
+				pq.offer((Geometry)input.next());
 			} else {
-				Point curpoint = input.next();
+				Geometry curpoint = (Geometry)input.next();
 				double distance = curpoint.getCoordinate().distance(queryCenter.getCoordinate());
 				double largestDistanceInPriQueue = pq.peek().getCoordinate()
 						.distance(queryCenter.getCoordinate());
@@ -64,8 +65,7 @@ public class PointKnnJudgement implements FlatMapFunction<Iterator<Point>, Point
 				}
 			}
 		}
-
-		ArrayList<Point> res = new ArrayList<Point>();
+		ArrayList res = new ArrayList<Point>();
 		for (int i = 0; i < k; i++) {
 			res.add(pq.poll());
 		}

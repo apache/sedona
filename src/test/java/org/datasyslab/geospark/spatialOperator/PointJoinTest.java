@@ -1,7 +1,7 @@
 /**
  * FILE: PointJoinTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.PointJoinTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
@@ -20,6 +20,7 @@ import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
+import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -33,6 +34,7 @@ import org.junit.Test;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 
 import scala.Tuple2;
 
@@ -58,6 +60,9 @@ public class PointJoinTest {
     /** The Input location query window. */
     static String InputLocationQueryWindow;
     
+    /** The Input location query polygon. */
+    static String InputLocationQueryPolygon;
+    
     /** The offset. */
     static Integer offset;
     
@@ -73,13 +78,15 @@ public class PointJoinTest {
     /** The num partitions. */
     static Integer numPartitions;
 
+    /** The conf. */
+    static SparkConf conf;
+    
     /**
      * Once executed before all.
      */
     @BeforeClass
     public static void onceExecutedBeforeAll() {
-        SparkConf conf = new SparkConf().setAppName("PointJoin").setMaster("local[2]");
-        sc = new JavaSparkContext(conf);
+    	conf = new SparkConf().setAppName("PointJoin").setMaster("local[2]");
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
@@ -96,6 +103,7 @@ public class PointJoinTest {
             prop.load(input);          
             InputLocation = "file://"+PointJoinTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             InputLocationQueryWindow = "file://"+PointJoinTest.class.getClassLoader().getResource(prop.getProperty("queryWindowSet")).getPath();
+            InputLocationQueryPolygon = "file://"+PointJoinTest.class.getClassLoader().getResource(prop.getProperty("queryPolygonSet")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
             splitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
             gridType = GridType.getGridType(prop.getProperty("gridType"));
@@ -123,21 +131,56 @@ public class PointJoinTest {
         sc.stop();
     }
 
+    
+    
+    /**
+     * Test spatial join query with rectangle RDD.
+     *
+     * @throws Exception the exception
+     */
+    /*
+    @Test(expected = NullPointerException.class)
+    public void testSpatialJoinQueryUsingIndexException() throws Exception {
+        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter, numPartitions);
+
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
+        
+        spatialRDD.spatialPartitioning(gridType);
+        
+        queryRDD.spatialPartitioning(spatialRDD.grids);
+        
+        List<Tuple2<Envelope, HashSet<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD,queryRDD,true).collect();
+        
+        assert result.get(1)._1().getUserData()!=null;
+        for(int i=0;i<result.size();i++)
+        {
+        	if(result.get(i)._2().size()!=0)
+        	{
+        		assert result.get(i)._2().iterator().next().getUserData()!=null;
+        	}
+        }
+
+    }
+    */
     /**
      * Test spatial join query.
      *
      * @throws Exception the exception
      */
     @Test
-    public void testSpatialJoinQuery() throws Exception {
+    public void testSpatialJoinQueryWithRectangleRDD() throws Exception {
+        sc = new JavaSparkContext(conf);
+    	
+        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter, numPartitions);
 
-        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter, numPartitions);
-
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
-
-        JoinQuery joinQuery = new JoinQuery(sc,pointRDD,rectangleRDD); 
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
         
-        List<Tuple2<Envelope, HashSet<Point>>> result = joinQuery.SpatialJoinQuery(pointRDD,rectangleRDD).collect();
+        spatialRDD.spatialPartitioning(gridType);
+        
+        queryRDD.spatialPartitioning(spatialRDD.grids);
+        
+        List<Tuple2<Envelope, HashSet<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD,queryRDD,false).collect();
+        
         assert result.get(1)._1().getUserData()!=null;
         for(int i=0;i<result.size();i++)
         {
@@ -146,43 +189,28 @@ public class PointJoinTest {
         		assert result.get(i)._2().iterator().next().getUserData()!=null;
         	}
         }
+        sc.close();
     }
 
     /**
-     * Test spatial join query using index exception.
-     *
-     * @throws Exception the exception
-     */
-    @Test(expected = NullPointerException.class)
-    public void testSpatialJoinQueryUsingIndexException() throws Exception {
-        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter, numPartitions);
-
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
-        
-        JoinQuery joinQuery = new JoinQuery(sc,pointRDD,rectangleRDD);
-        
-        //This should throw exception since the previous constructor doesn't build a grided RDD.
-        List<Tuple2<Envelope, HashSet<Point>>> result = joinQuery.SpatialJoinQueryUsingIndex(pointRDD,rectangleRDD).collect();
-
-    }
-
-    /**
-     * Test spatial join query using index.
+     * Test spatial join query with polygon RDD.
      *
      * @throws Exception the exception
      */
     @Test
-    public void testSpatialJoinQueryUsingIndex() throws Exception {
+    public void testSpatialJoinQueryWithPolygonRDD() throws Exception {
+        sc = new JavaSparkContext(conf);
 
-        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter, numPartitions);
+        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter, numPartitions);
 
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
-
-        pointRDD.buildIndex(IndexType.RTREE);
-
-        JoinQuery joinQuery = new JoinQuery(sc,pointRDD,rectangleRDD);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
         
-        List<Tuple2<Envelope, HashSet<Point>>> result = joinQuery.SpatialJoinQueryUsingIndex(pointRDD,rectangleRDD).collect();
+        spatialRDD.spatialPartitioning(gridType);
+        
+        queryRDD.spatialPartitioning(spatialRDD.grids);
+        
+        List<Tuple2<Polygon, HashSet<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD,queryRDD,false).collect();
+        
         assert result.get(1)._1().getUserData()!=null;
         for(int i=0;i<result.size();i++)
         {
@@ -191,109 +219,311 @@ public class PointJoinTest {
         		assert result.get(i)._2().iterator().next().getUserData()!=null;
         	}
         }
-
+        sc.close();
     }
-
+    
     /**
-     * Test join correctness.
+     * Test spatial join query with rectangle RDD using rtree index.
      *
      * @throws Exception the exception
      */
     @Test
-    public void testJoinCorrectness() throws Exception {
+    public void testSpatialJoinQueryWithRectangleRDDUsingRtreeIndex() throws Exception {
+        sc = new JavaSparkContext(conf);
+    	
+        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter, numPartitions);
 
-        RectangleRDD rectangleRDD1 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
+        
+        spatialRDD.spatialPartitioning(gridType);
+        
+        spatialRDD.buildIndex(IndexType.RTREE, true);
+        
+        queryRDD.spatialPartitioning(spatialRDD.grids);
+        
+        List<Tuple2<Envelope, HashSet<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD,queryRDD,false).collect();
+        
+        assert result.get(1)._1().getUserData()!=null;
+        for(int i=0;i<result.size();i++)
+        {
+        	if(result.get(i)._2().size()!=0)
+        	{
+        		assert result.get(i)._2().iterator().next().getUserData()!=null;
+        	}
+        }
+        sc.close();
+    }
 
-        PointRDD pointRDD1 = new PointRDD(sc, InputLocation, offset, splitter, gridType, 20);
+    /**
+     * Test spatial join query with polygon RDD using R tree index.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void testSpatialJoinQueryWithPolygonRDDUsingRTreeIndex() throws Exception {
+        sc = new JavaSparkContext(conf);
+    	
+        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter, numPartitions);
 
-        JoinQuery joinQuery1 = new JoinQuery(sc,pointRDD1,rectangleRDD1); 
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
         
-        List<Tuple2<Envelope, HashSet<Point>>> result1 = joinQuery1.SpatialJoinQuery(pointRDD1,rectangleRDD1).collect();
+        spatialRDD.spatialPartitioning(gridType);
         
+        spatialRDD.buildIndex(IndexType.RTREE, true);
         
-        RectangleRDD rectangleRDD2 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
+        queryRDD.spatialPartitioning(spatialRDD.grids);
         
-        PointRDD pointRDD2 = new PointRDD(sc, InputLocation, offset, splitter, gridType, 40);
+        List<Tuple2<Polygon, HashSet<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD,queryRDD,false).collect();
+        
+        assert result.get(1)._1().getUserData()!=null;
+        for(int i=0;i<result.size();i++)
+        {
+        	if(result.get(i)._2().size()!=0)
+        	{
+        		assert result.get(i)._2().iterator().next().getUserData()!=null;
+        	}
+        }
+        sc.close();
+    }
 
-        JoinQuery joinQuery2 = new JoinQuery(sc,pointRDD2,rectangleRDD2); 
-        
-        List<Tuple2<Envelope, HashSet<Point>>> result2 = joinQuery2.SpatialJoinQuery(pointRDD2,rectangleRDD2).collect();
-        
-        
-        RectangleRDD rectangleRDD3 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
-        
-        PointRDD pointRDD3 = new PointRDD(sc, InputLocation, offset, splitter, gridType, 80);
+    /**
+     * Test spatial join query with rectangle RDD using quadtree index.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void testSpatialJoinQueryWithRectangleRDDUsingQuadtreeIndex() throws Exception {
+        sc = new JavaSparkContext(conf);
 
-        JoinQuery joinQuery3 = new JoinQuery(sc,pointRDD3,rectangleRDD3); 
-        
-        List<Tuple2<Envelope, HashSet<Point>>> result3 = joinQuery3.SpatialJoinQuery(pointRDD3,rectangleRDD3).collect();
-        
-        
-        RectangleRDD rectangleRDD4 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
+        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter, numPartitions);
 
-        PointRDD pointRDD4 = new PointRDD(sc, InputLocation, offset, splitter, GridType.EQUALGRID, 20);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
+  
+        spatialRDD.spatialPartitioning(gridType);
+        
+        spatialRDD.buildIndex(IndexType.QUADTREE, true);
+        
+        queryRDD.spatialPartitioning(spatialRDD.grids);
+        
+        List<Tuple2<Envelope, HashSet<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD,queryRDD,false).collect();
+        
+        assert result.get(1)._1().getUserData()!=null;
+        for(int i=0;i<result.size();i++)
+        {
+        	if(result.get(i)._2().size()!=0)
+        	{
+        		assert result.get(i)._2().iterator().next().getUserData()!=null;
+        	}
+        }
+        sc.close();
+    }
 
-        JoinQuery joinQuery4 = new JoinQuery(sc,pointRDD4,rectangleRDD4); 
-        
-        List<Tuple2<Envelope, HashSet<Point>>> result4 = joinQuery4.SpatialJoinQuery(pointRDD4,rectangleRDD4).collect();
-        
-        
-        RectangleRDD rectangleRDD5 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
-        
-        PointRDD pointRDD5 = new PointRDD(sc, InputLocation, offset, splitter, GridType.RTREE, 20);
+    /**
+     * Test spatial join query with polygon RDD using quad tree index.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void testSpatialJoinQueryWithPolygonRDDUsingQuadTreeIndex() throws Exception {
+        sc = new JavaSparkContext(conf);
+    	
+        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter, numPartitions);
 
-        JoinQuery joinQuery5 = new JoinQuery(sc,pointRDD5,rectangleRDD5); 
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
         
-        List<Tuple2<Envelope, HashSet<Point>>> result5 = joinQuery5.SpatialJoinQuery(pointRDD5,rectangleRDD5).collect();
+        spatialRDD.spatialPartitioning(gridType);
         
+        spatialRDD.buildIndex(IndexType.QUADTREE, true);
         
-        RectangleRDD rectangleRDD6 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
+        queryRDD.spatialPartitioning(spatialRDD.grids);
         
-        PointRDD pointRDD6 = new PointRDD(sc, InputLocation, offset, splitter, GridType.VORONOI, 20);
+        List<Tuple2<Polygon, HashSet<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD,queryRDD,false).collect();
+        
+        assert result.get(1)._1().getUserData()!=null;
+        for(int i=0;i<result.size();i++)
+        {
+        	if(result.get(i)._2().size()!=0)
+        	{
+        		assert result.get(i)._2().iterator().next().getUserData()!=null;
+        	}
+        }
+        sc.close();
+    }
+    
+    
+    /**
+     * Test join correctness with rectangle RDD.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void testJoinCorrectnessWithRectangleRDD() throws Exception {
+        sc = new JavaSparkContext(conf);
+    	
+        RectangleRDD queryRDD1 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
 
-        JoinQuery joinQuery6 = new JoinQuery(sc,pointRDD6,rectangleRDD6); 
+        PointRDD spatialRDD1 = new PointRDD(sc, InputLocation, offset, splitter, 20);
         
-        List<Tuple2<Envelope, HashSet<Point>>> result6 = joinQuery6.SpatialJoinQuery(pointRDD6,rectangleRDD6).collect();
+        spatialRDD1.spatialPartitioning(GridType.RTREE);
+        
+        queryRDD1.spatialPartitioning(spatialRDD1.grids);
+        
+        List<Tuple2<Envelope, HashSet<Point>>> result1 = JoinQuery.SpatialJoinQuery(spatialRDD1,queryRDD1,false).collect();
+        
+        RectangleRDD queryRDD2 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
+        
+        PointRDD spatialRDD2 = new PointRDD(sc, InputLocation, offset, splitter, 40);
+        
+        spatialRDD2.spatialPartitioning(GridType.RTREE);
+        
+        queryRDD2.spatialPartitioning(spatialRDD2.grids);
+        
+        List<Tuple2<Envelope, HashSet<Point>>> result2 = JoinQuery.SpatialJoinQuery(spatialRDD2,queryRDD2,false).collect();
         
         
-        RectangleRDD rectangleRDD7 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
+        RectangleRDD queryRDD3 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
+        
+        PointRDD spatialRDD3 = new PointRDD(sc, InputLocation, offset, splitter, 80);
+        
+        spatialRDD3.spatialPartitioning(GridType.RTREE);
+        
+        queryRDD3.spatialPartitioning(spatialRDD3.grids);
+        
+        List<Tuple2<Envelope, HashSet<Point>>> result3 = JoinQuery.SpatialJoinQuery(spatialRDD3,queryRDD3,false).collect();
+        
+        
+        RectangleRDD queryRDD4 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
 
-        PointRDD pointRDD7 = new PointRDD(sc, InputLocation, offset, splitter, GridType.EQUALGRID, 20);
+        PointRDD spatialRDD4 = new PointRDD(sc, InputLocation, offset, splitter, 20);
         
-        pointRDD7.buildIndex(IndexType.RTREE);
+        spatialRDD4.spatialPartitioning(GridType.VORONOI);
+        
+        queryRDD4.spatialPartitioning(spatialRDD4.grids);
+        
+        List<Tuple2<Envelope, HashSet<Point>>> result4 = JoinQuery.SpatialJoinQuery(spatialRDD4,queryRDD4,false).collect();
+        
+        
+        RectangleRDD queryRDD5 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
+        
+        PointRDD spatialRDD5 = new PointRDD(sc, InputLocation, offset, splitter, 20);
+        
+        spatialRDD5.spatialPartitioning(GridType.HILBERT);
+        
+        queryRDD5.spatialPartitioning(spatialRDD5.grids);
+        
+        List<Tuple2<Envelope, HashSet<Point>>> result5 = JoinQuery.SpatialJoinQuery(spatialRDD5,queryRDD5,false).collect();
+        
+        
+        RectangleRDD queryRDD6 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
+        
+        PointRDD spatialRDD6 = new PointRDD(sc, InputLocation, offset, splitter, 20);
+        
+        spatialRDD6.spatialPartitioning(GridType.RTREE);
+        
+        spatialRDD6.buildIndex(IndexType.RTREE, true);
+        
+        queryRDD6.spatialPartitioning(spatialRDD6.grids);
+        
+        List<Tuple2<Envelope, HashSet<Point>>> result6 = JoinQuery.SpatialJoinQuery(spatialRDD6,queryRDD6,true).collect();
+        
+        
+        RectangleRDD queryRDD7 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
 
-        JoinQuery joinQuery7 = new JoinQuery(sc,pointRDD7,rectangleRDD7); 
+        PointRDD spatialRDD7 = new PointRDD(sc, InputLocation, offset, splitter, 20);
         
-        List<Tuple2<Envelope, HashSet<Point>>> result7 = joinQuery7.SpatialJoinQueryUsingIndex(pointRDD7,rectangleRDD7).collect();
+        spatialRDD7.spatialPartitioning(GridType.RTREE);
+        
+        spatialRDD7.buildIndex(IndexType.QUADTREE,true);
+        
+        queryRDD7.spatialPartitioning(spatialRDD7.grids);
+        
+        List<Tuple2<Envelope, HashSet<Point>>> result7 = JoinQuery.SpatialJoinQuery(spatialRDD7,queryRDD7,true).collect();
         
         
-        RectangleRDD rectangleRDD8 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
+        RectangleRDD queryRDD8 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
         
-        PointRDD pointRDD8 = new PointRDD(sc, InputLocation, offset, splitter, GridType.RTREE, 80);
+        PointRDD spatialRDD8 = new PointRDD(sc, InputLocation, offset, splitter, 80);
 
-        pointRDD8.buildIndex(IndexType.RTREE);
+        spatialRDD8.spatialPartitioning(GridType.RTREE);
         
-        JoinQuery joinQuery8 = new JoinQuery(sc,pointRDD8,rectangleRDD8); 
+        spatialRDD8.buildIndex(IndexType.RTREE,true);
         
-        List<Tuple2<Envelope, HashSet<Point>>> result8 = joinQuery8.SpatialJoinQueryUsingIndex(pointRDD8,rectangleRDD8).collect();
+        queryRDD8.spatialPartitioning(spatialRDD8.grids);
+                
+        List<Tuple2<Envelope, HashSet<Point>>> result8 = JoinQuery.SpatialJoinQuery(spatialRDD8,queryRDD8,true).collect();
         
         
-        RectangleRDD rectangleRDD9 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
+        RectangleRDD queryRDD9 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
         
-        PointRDD pointRDD9 = new PointRDD(sc, InputLocation, offset, splitter, GridType.VORONOI, 20);
+        PointRDD spatialRDD9 = new PointRDD(sc, InputLocation, offset, splitter, 80);
 
-        pointRDD9.buildIndex(IndexType.RTREE);
+        spatialRDD9.spatialPartitioning(GridType.RTREE);
         
-        JoinQuery joinQuery9 = new JoinQuery(sc,pointRDD9,rectangleRDD9); 
+        spatialRDD9.buildIndex(IndexType.QUADTREE,true);
         
-        List<Tuple2<Envelope, HashSet<Point>>> result9 = joinQuery9.SpatialJoinQueryUsingIndex(pointRDD9,rectangleRDD9).collect();
+        queryRDD9.spatialPartitioning(spatialRDD9.grids);  
+        
+        List<Tuple2<Envelope, HashSet<Point>>> result9 = JoinQuery.SpatialJoinQuery(spatialRDD9,queryRDD9,true).collect();
+        
+        RectangleRDD queryRDD10 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
+        
+        PointRDD spatialRDD10 = new PointRDD(sc, InputLocation, offset, splitter, 80);
+
+        spatialRDD10.spatialPartitioning(GridType.VORONOI);
+        
+        spatialRDD10.buildIndex(IndexType.RTREE,true);
+        
+        queryRDD10.spatialPartitioning(spatialRDD10.grids);
+                
+        List<Tuple2<Envelope, HashSet<Point>>> result10 = JoinQuery.SpatialJoinQuery(spatialRDD10,queryRDD10,true).collect();
+        
+        
+        RectangleRDD queryRDD11 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
+        
+        PointRDD spatialRDD11 = new PointRDD(sc, InputLocation, offset, splitter, 80);
+
+        spatialRDD11.spatialPartitioning(GridType.VORONOI);
+        
+        spatialRDD11.buildIndex(IndexType.QUADTREE,true);
+        
+        queryRDD11.spatialPartitioning(spatialRDD11.grids);  
+        
+        List<Tuple2<Envelope, HashSet<Point>>> result11 = JoinQuery.SpatialJoinQuery(spatialRDD11,queryRDD11,true).collect();
+        
+        RectangleRDD queryRDD12 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
+        
+        PointRDD spatialRDD12 = new PointRDD(sc, InputLocation, offset, splitter, 80);
+
+        spatialRDD12.spatialPartitioning(GridType.EQUALGRID);
+        
+        spatialRDD12.buildIndex(IndexType.RTREE,true);
+        
+        queryRDD12.spatialPartitioning(spatialRDD12.grids);
+                
+        List<Tuple2<Envelope, HashSet<Point>>> result12 = JoinQuery.SpatialJoinQuery(spatialRDD12,queryRDD12,true).collect();
+        
+        
+        RectangleRDD queryRDD13 = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter);
+        
+        PointRDD spatialRDD13 = new PointRDD(sc, InputLocation, offset, splitter, 40);
+
+        spatialRDD13.spatialPartitioning(GridType.EQUALGRID);
+        
+        spatialRDD13.buildIndex(IndexType.QUADTREE,true);
+        
+        queryRDD13.spatialPartitioning(spatialRDD13.grids);  
+        
+        List<Tuple2<Envelope, HashSet<Point>>> result13 = JoinQuery.SpatialJoinQuery(spatialRDD13,queryRDD13,true).collect();
+        
         if (result1.size()!=result2.size() || result1.size()!=result3.size()
         		|| result1.size()!=result4.size()|| result1.size()!=result5.size()
         		|| result1.size()!=result6.size()|| result1.size()!=result7.size()
         		|| result1.size()!=result8.size()|| result1.size()!=result9.size()
+        		|| result1.size()!=result10.size()|| result1.size()!=result11.size()
+        		//|| result1.size()!=result12.size()|| result1.size()!=result13.size()
         		)
         {
-        	System.out.println("-----Point join results are not consistent-----");
+        	System.out.println("-----Point join Recntangle results are not consistent-----");
         	System.out.println(result1.size());
         	System.out.println(result2.size());
         	System.out.println(result3.size());
@@ -303,11 +533,208 @@ public class PointJoinTest {
         	System.out.println(result7.size());
         	System.out.println(result8.size());
         	System.out.println(result9.size());
-        	System.out.println("-----Point join results are not consistent--Done---");
-        	throw new Exception("Point join results are not consistent!");
+        	System.out.println(result10.size());
+        	System.out.println(result11.size());
+        	System.out.println(result12.size());
+        	System.out.println(result13.size());
+        	System.out.println("-----Point join Rectangle results are not consistent--Done---");
+        	throw new Exception("Point join rectangle results are not consistent!");
         }
-        
-        
+        sc.close();
     }
 
+    /**
+     * Test join correctness with polygon RDD.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void testJoinCorrectnessWithPolygonRDD() throws Exception {
+        sc = new JavaSparkContext(conf);
+    	
+        PolygonRDD queryRDD1 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
+
+        PointRDD spatialRDD1 = new PointRDD(sc, InputLocation, offset, splitter, 20);
+        
+        spatialRDD1.spatialPartitioning(GridType.RTREE);
+        
+        queryRDD1.spatialPartitioning(spatialRDD1.grids);
+        
+        List<Tuple2<Polygon, HashSet<Point>>> result1 = JoinQuery.SpatialJoinQuery(spatialRDD1,queryRDD1,false).collect();
+        
+        PolygonRDD queryRDD2 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
+        
+        PointRDD spatialRDD2 = new PointRDD(sc, InputLocation, offset, splitter, 40);
+        
+        spatialRDD2.spatialPartitioning(GridType.RTREE);
+        
+        queryRDD2.spatialPartitioning(spatialRDD2.grids);
+        
+        List<Tuple2<Polygon, HashSet<Point>>> result2 = JoinQuery.SpatialJoinQuery(spatialRDD2,queryRDD2,false).collect();
+        
+        
+        PolygonRDD queryRDD3 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
+        
+        PointRDD spatialRDD3 = new PointRDD(sc, InputLocation, offset, splitter, 80);
+        
+        spatialRDD3.spatialPartitioning(GridType.RTREE);
+        
+        queryRDD3.spatialPartitioning(spatialRDD3.grids);
+        
+        List<Tuple2<Polygon, HashSet<Point>>> result3 = JoinQuery.SpatialJoinQuery(spatialRDD3,queryRDD3,false).collect();
+        
+        
+        PolygonRDD queryRDD4 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
+
+        PointRDD spatialRDD4 = new PointRDD(sc, InputLocation, offset, splitter, 20);
+        
+        spatialRDD4.spatialPartitioning(GridType.VORONOI);
+        
+        queryRDD4.spatialPartitioning(spatialRDD4.grids);
+        
+        List<Tuple2<Polygon, HashSet<Point>>> result4 = JoinQuery.SpatialJoinQuery(spatialRDD4,queryRDD4,false).collect();
+        
+        
+        PolygonRDD queryRDD5 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
+        
+        PointRDD spatialRDD5 = new PointRDD(sc, InputLocation, offset, splitter, 20);
+        
+        spatialRDD5.spatialPartitioning(GridType.HILBERT);
+        
+        queryRDD5.spatialPartitioning(spatialRDD5.grids);
+        
+        List<Tuple2<Polygon, HashSet<Point>>> result5 = JoinQuery.SpatialJoinQuery(spatialRDD5,queryRDD5,false).collect();
+        
+        
+        PolygonRDD queryRDD6 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
+        
+        PointRDD spatialRDD6 = new PointRDD(sc, InputLocation, offset, splitter, 20);
+        
+        spatialRDD6.spatialPartitioning(GridType.RTREE);
+        
+        spatialRDD6.buildIndex(IndexType.RTREE, true);
+        
+        queryRDD6.spatialPartitioning(spatialRDD6.grids);
+        
+        List<Tuple2<Polygon, HashSet<Point>>> result6 = JoinQuery.SpatialJoinQuery(spatialRDD6,queryRDD6,true).collect();
+        
+        
+        PolygonRDD queryRDD7 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
+
+        PointRDD spatialRDD7 = new PointRDD(sc, InputLocation, offset, splitter, 20);
+        
+        spatialRDD7.spatialPartitioning(GridType.RTREE);
+        
+        spatialRDD7.buildIndex(IndexType.QUADTREE,true);
+        
+        queryRDD7.spatialPartitioning(spatialRDD7.grids);
+        
+        List<Tuple2<Polygon, HashSet<Point>>> result7 = JoinQuery.SpatialJoinQuery(spatialRDD7,queryRDD7,true).collect();
+        
+        
+        PolygonRDD queryRDD8 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
+        
+        PointRDD spatialRDD8 = new PointRDD(sc, InputLocation, offset, splitter, 80);
+
+        spatialRDD8.spatialPartitioning(GridType.RTREE);
+        
+        spatialRDD8.buildIndex(IndexType.RTREE,true);
+        
+        queryRDD8.spatialPartitioning(spatialRDD8.grids);
+                
+        List<Tuple2<Polygon, HashSet<Point>>> result8 = JoinQuery.SpatialJoinQuery(spatialRDD8,queryRDD8,true).collect();
+        
+        
+        PolygonRDD queryRDD9 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
+        
+        PointRDD spatialRDD9 = new PointRDD(sc, InputLocation, offset, splitter, 80);
+
+        spatialRDD9.spatialPartitioning(GridType.RTREE);
+        
+        spatialRDD9.buildIndex(IndexType.QUADTREE,true);
+        
+        queryRDD9.spatialPartitioning(spatialRDD9.grids);  
+        
+        List<Tuple2<Polygon, HashSet<Point>>> result9 = JoinQuery.SpatialJoinQuery(spatialRDD9,queryRDD9,true).collect();
+        
+        PolygonRDD queryRDD10 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
+        
+        PointRDD spatialRDD10 = new PointRDD(sc, InputLocation, offset, splitter, 80);
+
+        spatialRDD10.spatialPartitioning(GridType.VORONOI);
+        
+        spatialRDD10.buildIndex(IndexType.RTREE,true);
+        
+        queryRDD10.spatialPartitioning(spatialRDD10.grids);
+                
+        List<Tuple2<Polygon, HashSet<Point>>> result10 = JoinQuery.SpatialJoinQuery(spatialRDD10,queryRDD10,true).collect();
+        
+        
+        PolygonRDD queryRDD11 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
+        
+        PointRDD spatialRDD11 = new PointRDD(sc, InputLocation, offset, splitter, 80);
+
+        spatialRDD11.spatialPartitioning(GridType.VORONOI);
+        
+        spatialRDD11.buildIndex(IndexType.QUADTREE,true);
+        
+        queryRDD11.spatialPartitioning(spatialRDD11.grids);  
+        
+        List<Tuple2<Polygon, HashSet<Point>>> result11 = JoinQuery.SpatialJoinQuery(spatialRDD11,queryRDD11,true).collect();
+        
+        
+        PolygonRDD queryRDD12 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
+        
+        PointRDD spatialRDD12 = new PointRDD(sc, InputLocation, offset, splitter, 80);
+
+        spatialRDD12.spatialPartitioning(GridType.EQUALGRID);
+        
+        spatialRDD12.buildIndex(IndexType.RTREE,true);
+        
+        queryRDD12.spatialPartitioning(spatialRDD12.grids);
+                
+        List<Tuple2<Polygon, HashSet<Point>>> result12 = JoinQuery.SpatialJoinQuery(spatialRDD12,queryRDD12,true).collect();
+        
+        PolygonRDD queryRDD13 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
+        
+        PointRDD spatialRDD13 = new PointRDD(sc, InputLocation, offset, splitter, 80);
+
+        spatialRDD13.spatialPartitioning(GridType.EQUALGRID);
+        
+        spatialRDD13.buildIndex(IndexType.QUADTREE,true);
+        
+        queryRDD13.spatialPartitioning(spatialRDD13.grids);  
+        
+        List<Tuple2<Polygon, HashSet<Point>>> result13 = JoinQuery.SpatialJoinQuery(spatialRDD13,queryRDD13,true).collect();
+        
+        if (result1.size()!=result2.size() || result1.size()!=result3.size()
+        		|| result1.size()!=result4.size()|| result1.size()!=result5.size()
+        		|| result1.size()!=result6.size()|| result1.size()!=result7.size()
+        		|| result1.size()!=result8.size()|| result1.size()!=result9.size()
+        		|| result1.size()!=result10.size()|| result1.size()!=result11.size()
+        		//|| result1.size()!=result12.size()|| result1.size()!=result13.size()
+        		)
+        {
+        	System.out.println("-----Point join Polygon results are not consistent-----");
+        	System.out.println(result1.size());
+        	System.out.println(result2.size());
+        	System.out.println(result3.size());
+        	System.out.println(result4.size());
+        	System.out.println(result5.size());
+        	System.out.println(result6.size());
+        	System.out.println(result7.size());
+        	System.out.println(result8.size());
+        	System.out.println(result9.size());
+        	System.out.println(result10.size());
+        	System.out.println(result11.size());
+        	System.out.println(result12.size());
+        	System.out.println(result13.size());
+        	System.out.println("-----Point join Polygon results are not consistent--Done---");
+        	throw new Exception("Point join polygon results are not consistent!");
+        }
+        sc.close();
+    }
+
+    
+    
 }

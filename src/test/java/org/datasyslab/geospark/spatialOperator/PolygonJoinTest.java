@@ -1,7 +1,7 @@
 /**
  * FILE: PolygonJoinTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.PolygonJoinTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
@@ -20,9 +20,14 @@ import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
+import org.datasyslab.geospark.spatialRDD.PolygonRDD;
+import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * 
@@ -53,6 +58,12 @@ public class PolygonJoinTest {
     /** The Input location. */
     static String InputLocation;
     
+    /** The Input location query window. */
+    static String InputLocationQueryWindow;
+    
+    /** The Input location query polygon. */
+    static String InputLocationQueryPolygon;
+    
     /** The offset. */
     static Integer offset;
     
@@ -68,18 +79,19 @@ public class PolygonJoinTest {
     /** The num partitions. */
     static Integer numPartitions;
 
+    /** The conf. */
+    static SparkConf conf;
+    
     /**
      * Once executed before all.
      */
     @BeforeClass
     public static void onceExecutedBeforeAll() {
-        SparkConf conf = new SparkConf().setAppName("PolygonJoin").setMaster("local[2]");
-        sc = new JavaSparkContext(conf);
+    	conf = new SparkConf().setAppName("PolygonJoin").setMaster("local[2]");
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
         input = PolygonJoinTest.class.getClassLoader().getResourceAsStream("polygon.test.properties");
-        InputLocation = "file://"+PolygonJoinTest.class.getClassLoader().getResource("primaryroads-polygon.csv").getPath();
         offset = 0;
         splitter = null;
         gridType = null;
@@ -92,6 +104,8 @@ public class PolygonJoinTest {
 
             //InputLocation = prop.getProperty("inputLocation");
             InputLocation = "file://"+PolygonJoinTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
+            InputLocationQueryWindow="file://"+PolygonJoinTest.class.getClassLoader().getResource(prop.getProperty("queryWindowSet")).getPath();
+            InputLocationQueryPolygon="file://"+PolygonJoinTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
             splitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
             gridType = GridType.getGridType(prop.getProperty("gridType"));
@@ -119,22 +133,27 @@ public class PolygonJoinTest {
         sc.stop();
     }
 
+
     /**
-     * Test spatial join query.
+     * Test spatial join query with polygon RDD.
      *
      * @throws Exception the exception
      */
     @Test
-    public void testSpatialJoinQuery() throws Exception {
+    public void testSpatialJoinQueryWithPolygonRDD() throws Exception {
+        sc = new JavaSparkContext(conf);
 
-    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, numPartitions);
+        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter, numPartitions);
 
-        PolygonRDD objectRDD = new PolygonRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
-
-        JoinQuery joinQuery = new JoinQuery(sc,objectRDD,polygonRDD); 
+        PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, offset, splitter, numPartitions);
         
-        List<Tuple2<Polygon, HashSet<Polygon>>> result = joinQuery.SpatialJoinQuery(objectRDD,polygonRDD).collect();
-        assert result.get(0)._1().getUserData()!=null;
+        spatialRDD.spatialPartitioning(gridType);
+        
+        queryRDD.spatialPartitioning(spatialRDD.grids);
+        
+        List<Tuple2<Polygon, HashSet<Polygon>>> result = JoinQuery.SpatialJoinQuery(spatialRDD,queryRDD,false).collect();
+        
+        assert result.get(1)._1().getUserData()!=null;
         for(int i=0;i<result.size();i++)
         {
         	if(result.get(i)._2().size()!=0)
@@ -142,44 +161,33 @@ public class PolygonJoinTest {
         		assert result.get(i)._2().iterator().next().getUserData()!=null;
         	}
         }
+        sc.close();
     }
+    
+
 
     /**
-     * Test spatial join query using index exception.
-     *
-     * @throws Exception the exception
-     */
-    @Test(expected = NullPointerException.class)
-    public void testSpatialJoinQueryUsingIndexException() throws Exception {
-    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, numPartitions);
-
-    	PolygonRDD objectRDD = new PolygonRDD(sc, InputLocation, offset, splitter, numPartitions);
-        
-        JoinQuery joinQuery = new JoinQuery(sc,objectRDD,polygonRDD);
-        
-        //This should throw exception since the previous constructor doesn't build a grided RDD.
-        List<Tuple2<Polygon, HashSet<Polygon>>> result = joinQuery.SpatialJoinQueryUsingIndex(objectRDD,polygonRDD).collect();
-
-    }
-
-    /**
-     * Test spatial join query using index.
+     * Test spatial join query with polygon RDD using R tree index.
      *
      * @throws Exception the exception
      */
     @Test
-    public void testSpatialJoinQueryUsingIndex() throws Exception {
+    public void testSpatialJoinQueryWithPolygonRDDUsingRTreeIndex() throws Exception {
+        sc = new JavaSparkContext(conf);
+    	
+        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter, numPartitions);
 
-    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, numPartitions);
-
-    	PolygonRDD objectRDD = new PolygonRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
-
-    	objectRDD.buildIndex(IndexType.RTREE);
-
-        JoinQuery joinQuery = new JoinQuery(sc,objectRDD,polygonRDD);
+        PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, offset, splitter, numPartitions);
         
-        List<Tuple2<Polygon, HashSet<Polygon>>> result = joinQuery.SpatialJoinQueryUsingIndex(objectRDD,polygonRDD).collect();
-        assert result.get(0)._1().getUserData()!=null;
+        spatialRDD.spatialPartitioning(gridType);
+        
+        spatialRDD.buildIndex(IndexType.RTREE, true);
+        
+        queryRDD.spatialPartitioning(spatialRDD.grids);
+        
+        List<Tuple2<Polygon, HashSet<Polygon>>> result = JoinQuery.SpatialJoinQuery(spatialRDD,queryRDD,false).collect();
+        
+        assert result.get(1)._1().getUserData()!=null;
         for(int i=0;i<result.size();i++)
         {
         	if(result.get(i)._2().size()!=0)
@@ -187,108 +195,191 @@ public class PolygonJoinTest {
         		assert result.get(i)._2().iterator().next().getUserData()!=null;
         	}
         }
+        sc.close();
     }
 
+
     /**
-     * Test join correctness.
+     * Test spatial join query with polygon RDD using quad tree index.
      *
      * @throws Exception the exception
      */
     @Test
-    public void testJoinCorrectness() throws Exception {
+    public void testSpatialJoinQueryWithPolygonRDDUsingQuadTreeIndex() throws Exception {
+        sc = new JavaSparkContext(conf);
+    	
+        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter, numPartitions);
 
-        PolygonRDD queryWindowRDD1 = new PolygonRDD(sc, InputLocation, offset, splitter);
+        PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, offset, splitter, numPartitions);
+        
+        spatialRDD.spatialPartitioning(gridType);
+        
+        spatialRDD.buildIndex(IndexType.QUADTREE, true);
+        
+        queryRDD.spatialPartitioning(spatialRDD.grids);
+        
+        List<Tuple2<Polygon, HashSet<Polygon>>> result = JoinQuery.SpatialJoinQuery(spatialRDD,queryRDD,false).collect();
+        
+        assert result.get(1)._1().getUserData()!=null;
+        for(int i=0;i<result.size();i++)
+        {
+        	if(result.get(i)._2().size()!=0)
+        	{
+        		assert result.get(i)._2().iterator().next().getUserData()!=null;
+        	}
+        }
+        sc.close();
+    }
+    
 
-        PolygonRDD objectRDD1 = new PolygonRDD(sc, InputLocation, offset, splitter, gridType, 20);
+    /**
+     * Test join correctness with polygon RDD.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void testJoinCorrectnessWithPolygonRDD() throws Exception {
+        sc = new JavaSparkContext(conf);
+    	
+        PolygonRDD queryRDD1 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
 
-        JoinQuery joinQuery1 = new JoinQuery(sc,objectRDD1,queryWindowRDD1); 
+        PolygonRDD spatialRDD1 = new PolygonRDD(sc, InputLocation, offset, splitter, 20);
         
-        List<Tuple2<Polygon, HashSet<Polygon>>> result1 = joinQuery1.SpatialJoinQuery(objectRDD1,queryWindowRDD1).collect();
+        spatialRDD1.spatialPartitioning(GridType.RTREE);
+        
+        queryRDD1.spatialPartitioning(spatialRDD1.grids);
+        
+        List<Tuple2<Polygon, HashSet<Polygon>>> result1 = JoinQuery.SpatialJoinQuery(spatialRDD1,queryRDD1,false).collect();
+        
+        PolygonRDD queryRDD2 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
+        
+        PolygonRDD spatialRDD2 = new PolygonRDD(sc, InputLocation, offset, splitter, 40);
+        
+        spatialRDD2.spatialPartitioning(GridType.RTREE);
+        
+        queryRDD2.spatialPartitioning(spatialRDD2.grids);
+        
+        List<Tuple2<Polygon, HashSet<Polygon>>> result2 = JoinQuery.SpatialJoinQuery(spatialRDD2,queryRDD2,false).collect();
         
         
-        PolygonRDD queryWindowRDD2 = new PolygonRDD(sc, InputLocation, offset, splitter);
+        PolygonRDD queryRDD3 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
         
-        PolygonRDD objectRDD2 = new PolygonRDD(sc, InputLocation, offset, splitter, gridType, 30);
+        PolygonRDD spatialRDD3 = new PolygonRDD(sc, InputLocation, offset, splitter, 50);
+        
+        spatialRDD3.spatialPartitioning(GridType.RTREE);
+        
+        queryRDD3.spatialPartitioning(spatialRDD3.grids);
+        
+        List<Tuple2<Polygon, HashSet<Polygon>>> result3 = JoinQuery.SpatialJoinQuery(spatialRDD3,queryRDD3,false).collect();
+        
+        
+        PolygonRDD queryRDD4 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
 
-        JoinQuery joinQuery2 = new JoinQuery(sc,objectRDD2,queryWindowRDD2); 
+        PolygonRDD spatialRDD4 = new PolygonRDD(sc, InputLocation, offset, splitter, 20);
         
-        List<Tuple2<Polygon, HashSet<Polygon>>> result2 = joinQuery2.SpatialJoinQuery(objectRDD2,queryWindowRDD2).collect();
+        spatialRDD4.spatialPartitioning(GridType.VORONOI);
+        
+        queryRDD4.spatialPartitioning(spatialRDD4.grids);
+        
+        List<Tuple2<Polygon, HashSet<Polygon>>> result4 = JoinQuery.SpatialJoinQuery(spatialRDD4,queryRDD4,false).collect();
         
         
-        PolygonRDD queryWindowRDD3 = new PolygonRDD(sc, InputLocation, offset, splitter);
+        PolygonRDD queryRDD5 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
         
-        PolygonRDD objectRDD3 = new PolygonRDD(sc, InputLocation, offset, splitter, gridType, 40);
+        PolygonRDD spatialRDD5 = new PolygonRDD(sc, InputLocation, offset, splitter, 20);
+        
+        spatialRDD5.spatialPartitioning(GridType.HILBERT);
+        
+        queryRDD5.spatialPartitioning(spatialRDD5.grids);
+        
+        List<Tuple2<Polygon, HashSet<Polygon>>> result5 = JoinQuery.SpatialJoinQuery(spatialRDD5,queryRDD5,false).collect();
+        
+        
+        PolygonRDD queryRDD6 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
+        
+        PolygonRDD spatialRDD6 = new PolygonRDD(sc, InputLocation, offset, splitter, 20);
+        
+        spatialRDD6.spatialPartitioning(GridType.RTREE);
+        
+        spatialRDD6.buildIndex(IndexType.RTREE, true);
+        
+        queryRDD6.spatialPartitioning(spatialRDD6.grids);
+        
+        List<Tuple2<Polygon, HashSet<Polygon>>> result6 = JoinQuery.SpatialJoinQuery(spatialRDD6,queryRDD6,true).collect();
+        
+        
+        PolygonRDD queryRDD7 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
 
-        JoinQuery joinQuery3 = new JoinQuery(sc,objectRDD3,queryWindowRDD3); 
+        PolygonRDD spatialRDD7 = new PolygonRDD(sc, InputLocation, offset, splitter, 20);
         
-        List<Tuple2<Polygon, HashSet<Polygon>>> result3 = joinQuery3.SpatialJoinQuery(objectRDD3,queryWindowRDD3).collect();
+        spatialRDD7.spatialPartitioning(GridType.RTREE);
+        
+        spatialRDD7.buildIndex(IndexType.QUADTREE,true);
+        
+        queryRDD7.spatialPartitioning(spatialRDD7.grids);
+        
+        List<Tuple2<Polygon, HashSet<Polygon>>> result7 = JoinQuery.SpatialJoinQuery(spatialRDD7,queryRDD7,true).collect();
         
         
-        PolygonRDD queryWindowRDD4 = new PolygonRDD(sc, InputLocation, offset, splitter);
+        PolygonRDD queryRDD8 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
+        
+        PolygonRDD spatialRDD8 = new PolygonRDD(sc, InputLocation, offset, splitter, 50);
 
-        PolygonRDD objectRDD4 = new PolygonRDD(sc, InputLocation, offset, splitter, GridType.EQUALGRID, 20);
+        spatialRDD8.spatialPartitioning(GridType.RTREE);
+        
+        spatialRDD8.buildIndex(IndexType.RTREE,true);
+        
+        queryRDD8.spatialPartitioning(spatialRDD8.grids);
+                
+        List<Tuple2<Polygon, HashSet<Polygon>>> result8 = JoinQuery.SpatialJoinQuery(spatialRDD8,queryRDD8,true).collect();
+        
+        
+        PolygonRDD queryRDD9 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
+        
+        PolygonRDD spatialRDD9 = new PolygonRDD(sc, InputLocation, offset, splitter, 50);
 
-        JoinQuery joinQuery4 = new JoinQuery(sc,objectRDD4,queryWindowRDD4); 
+        spatialRDD9.spatialPartitioning(GridType.RTREE);
         
-        List<Tuple2<Polygon, HashSet<Polygon>>> result4 = joinQuery4.SpatialJoinQuery(objectRDD4,queryWindowRDD4).collect();
+        spatialRDD9.buildIndex(IndexType.QUADTREE,true);
         
+        queryRDD9.spatialPartitioning(spatialRDD9.grids);  
         
-        PolygonRDD queryWindowRDD5 = new PolygonRDD(sc, InputLocation, offset, splitter);
+        List<Tuple2<Polygon, HashSet<Polygon>>> result9 = JoinQuery.SpatialJoinQuery(spatialRDD9,queryRDD9,true).collect();
         
-        PolygonRDD objectRDD5 = new PolygonRDD(sc, InputLocation, offset, splitter, GridType.RTREE, 20);
+        PolygonRDD queryRDD10 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
+        
+        PolygonRDD spatialRDD10 = new PolygonRDD(sc, InputLocation, offset, splitter, 50);
 
-        JoinQuery joinQuery5 = new JoinQuery(sc,objectRDD5,queryWindowRDD5); 
+        spatialRDD10.spatialPartitioning(GridType.VORONOI);
         
-        List<Tuple2<Polygon, HashSet<Polygon>>> result5 = joinQuery5.SpatialJoinQuery(objectRDD5,queryWindowRDD5).collect();
+        spatialRDD10.buildIndex(IndexType.RTREE,true);
+        
+        queryRDD10.spatialPartitioning(spatialRDD10.grids);
+                
+        List<Tuple2<Polygon, HashSet<Polygon>>> result10 = JoinQuery.SpatialJoinQuery(spatialRDD10,queryRDD10,true).collect();
         
         
-        PolygonRDD queryWindowRDD6 = new PolygonRDD(sc, InputLocation, offset, splitter);
+        PolygonRDD queryRDD11 = new PolygonRDD(sc, InputLocationQueryPolygon, offset, splitter);
         
-        PolygonRDD objectRDD6 = new PolygonRDD(sc, InputLocation, offset, splitter, GridType.VORONOI, 20);
+        PolygonRDD spatialRDD11 = new PolygonRDD(sc, InputLocation, offset, splitter, 50);
 
-        JoinQuery joinQuery6 = new JoinQuery(sc,objectRDD6,queryWindowRDD6); 
+        spatialRDD11.spatialPartitioning(GridType.VORONOI);
         
-        List<Tuple2<Polygon, HashSet<Polygon>>> result6 = joinQuery6.SpatialJoinQuery(objectRDD6,queryWindowRDD6).collect();
+        spatialRDD11.buildIndex(IndexType.QUADTREE,true);
         
+        queryRDD11.spatialPartitioning(spatialRDD11.grids);  
         
-        PolygonRDD queryWindowRDD7 = new PolygonRDD(sc, InputLocation, offset, splitter);
+        List<Tuple2<Polygon, HashSet<Polygon>>> result11 = JoinQuery.SpatialJoinQuery(spatialRDD11,queryRDD11,true).collect();
 
-        PolygonRDD objectRDD7 = new PolygonRDD(sc, InputLocation, offset, splitter, GridType.EQUALGRID, 20);
-        
-        objectRDD7.buildIndex(IndexType.RTREE);
-
-        JoinQuery joinQuery7 = new JoinQuery(sc,objectRDD7,queryWindowRDD7); 
-        
-        List<Tuple2<Polygon, HashSet<Polygon>>> result7 = joinQuery7.SpatialJoinQueryUsingIndex(objectRDD7,queryWindowRDD7).collect();
-        
-        
-        PolygonRDD queryWindowRDD8 = new PolygonRDD(sc, InputLocation, offset, splitter);
-        
-        PolygonRDD objectRDD8 = new PolygonRDD(sc, InputLocation, offset, splitter, GridType.RTREE, 40);
-
-        objectRDD8.buildIndex(IndexType.RTREE);
-        
-        JoinQuery joinQuery8 = new JoinQuery(sc,objectRDD8,queryWindowRDD8); 
-        
-        List<Tuple2<Polygon, HashSet<Polygon>>> result8 = joinQuery8.SpatialJoinQueryUsingIndex(objectRDD8,queryWindowRDD8).collect();
-        
-        
-        PolygonRDD queryWindowRDD9 = new PolygonRDD(sc, InputLocation, offset, splitter);
-        
-        PolygonRDD objectRDD9 = new PolygonRDD(sc, InputLocation, offset, splitter, GridType.VORONOI, 20);
-
-        objectRDD9.buildIndex(IndexType.RTREE);
-        
-        JoinQuery joinQuery9 = new JoinQuery(sc,objectRDD9,queryWindowRDD9); 
-        
-        List<Tuple2<Polygon, HashSet<Polygon>>> result9 = joinQuery9.SpatialJoinQueryUsingIndex(objectRDD9,queryWindowRDD9).collect();
         if (result1.size()!=result2.size() || result1.size()!=result3.size()
         		|| result1.size()!=result4.size()|| result1.size()!=result5.size()
         		|| result1.size()!=result6.size()|| result1.size()!=result7.size()
         		|| result1.size()!=result8.size()|| result1.size()!=result9.size()
+        		|| result1.size()!=result10.size()|| result1.size()!=result11.size()
+  //      		|| result1.size()!=result12.size()|| result1.size()!=result13.size()
         		)
         {
-        	System.out.println("-----Polygon join results are not consistent-----");
+        	System.out.println("-----Polygon join Polygon results are not consistent-----");
         	System.out.println(result1.size());
         	System.out.println(result2.size());
         	System.out.println(result3.size());
@@ -298,11 +389,14 @@ public class PolygonJoinTest {
         	System.out.println(result7.size());
         	System.out.println(result8.size());
         	System.out.println(result9.size());
-        	System.out.println("-----Polygon join results are not consistent--Done---");
+        	System.out.println(result10.size());
+        	System.out.println(result11.size());
+//        	System.out.println(result12.size());
+//        	System.out.println(result13.size());
+        	System.out.println("-----Polygon join Polygon results are not consistent--Done---");
         	throw new Exception("Polygon join results are not consistent!");
         }
-        
-        
+        sc.close();
     }
 
 
