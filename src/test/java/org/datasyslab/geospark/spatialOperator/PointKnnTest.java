@@ -1,7 +1,7 @@
 /**
  * FILE: PointKnnTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.PointKnnTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
@@ -133,7 +133,7 @@ public class PointKnnTest {
 
     	for(int i=0;i<loopTimes;i++)
     	{
-    		List<Point> result = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, 5);
+    		List<Point> result = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, 5, false);
     		assert result.size()>-1;
     		assert result.get(0).getUserData().toString()!=null;
     		//System.out.println(result.get(0).getUserData().toString());
@@ -149,10 +149,10 @@ public class PointKnnTest {
     @Test
     public void testSpatialKnnQueryUsingIndex() throws Exception {
     	PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter);
-    	pointRDD.buildIndex(IndexType.RTREE);
+    	pointRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)
     	{
-    		List<Point> result = KNNQuery.SpatialKnnQueryUsingIndex(pointRDD, queryPoint, 5);
+    		List<Point> result = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, 5, true);
     		assert result.size()>-1;
     		assert result.get(0).getUserData().toString()!=null;
     		//System.out.println(result.get(0).getUserData().toString());

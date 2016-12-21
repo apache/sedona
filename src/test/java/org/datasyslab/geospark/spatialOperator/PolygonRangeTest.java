@@ -1,7 +1,7 @@
 /**
  * FILE: PolygonRangeTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.PolygonRangeTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
@@ -18,6 +18,7 @@ import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDDTest;
+import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 import org.datasyslab.geospark.spatialRDD.RectangleRDDTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -122,13 +123,14 @@ public class PolygonRangeTest {
      */
     @Test
     public void testSpatialRangeQuery() throws Exception {
-    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter);
+    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, offset, splitter);
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = RangeQuery.SpatialRangeQuery(polygonRDD, queryEnvelope, 0).getRawPolygonRDD().count();
+    		long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0,false).count();
     		assert resultSize>-1;
     	}
-     	assert RangeQuery.SpatialRangeQuery(polygonRDD, queryEnvelope, 0).getRawPolygonRDD().take(10).get(1).getUserData().toString()!=null;
+    	assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0,false).take(10).get(1).getUserData().toString()!=null;
+        
     }
     
     /**
@@ -138,14 +140,14 @@ public class PolygonRangeTest {
      */
     @Test
     public void testSpatialRangeQueryUsingIndex() throws Exception {
-    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter);
-    	polygonRDD.buildIndex(IndexType.RTREE);
+    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, offset, splitter);
+    	spatialRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = RangeQuery.SpatialRangeQueryUsingIndex(polygonRDD, queryEnvelope,0).getRawPolygonRDD().count();
+    		long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0,true).count();
     		assert resultSize>-1;
     	}
-     	assert RangeQuery.SpatialRangeQueryUsingIndex(polygonRDD, queryEnvelope, 0).getRawPolygonRDD().take(10).get(1).getUserData().toString()!=null;
+    	assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0,true).take(10).get(1).getUserData().toString() !=null;
     }
 
 }

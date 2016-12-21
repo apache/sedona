@@ -1,7 +1,7 @@
 /**
  * FILE: PolygonYMaxComparator.java
  * PATH: org.datasyslab.geospark.utils.PolygonYMaxComparator.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.utils;
@@ -21,18 +21,18 @@ import com.vividsolutions.jts.geom.Polygon;
 /**
  * The Class PolygonYMaxComparator.
  */
-public class PolygonYMaxComparator extends GeometryComparator implements Comparator<Polygon>, Serializable
+public class PolygonYMaxComparator extends GeometryComparator implements Comparator<Object>, Serializable
 {
 
 	/* (non-Javadoc)
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
-	public int compare(Polygon polygon1, Polygon polygon2) {
-	    if(polygon1.getEnvelopeInternal().getMaxY()>polygon2.getEnvelopeInternal().getMaxY())
+	public int compare(Object polygon1, Object polygon2) {
+	    if(((Polygon) polygon1).getEnvelopeInternal().getMaxY()>((Polygon) polygon2).getEnvelopeInternal().getMaxY())
 	    {
 	    	return 1;
 	    }
-	    else if (polygon1.getEnvelopeInternal().getMaxY()<polygon2.getEnvelopeInternal().getMaxY())
+	    else if (((Polygon) polygon1).getEnvelopeInternal().getMaxY()<((Polygon) polygon2).getEnvelopeInternal().getMaxY())
 	    {
 	    	return -1;
 	    }

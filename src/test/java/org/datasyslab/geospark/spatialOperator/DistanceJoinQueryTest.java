@@ -1,12 +1,10 @@
 /**
  * FILE: DistanceJoinQueryTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.DistanceJoinQueryTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
-
-import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -123,12 +121,13 @@ public class DistanceJoinQueryTest {
      */
     @Test
     public void testDistancelJoinQuery() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
-        PointRDD pointRDD2 = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
-
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
+        PointRDD pointRDD2 = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
+        pointRDD.spatialPartitioning(GridType.RTREE);
+        pointRDD.buildIndex(IndexType.RTREE,true);
+        pointRDD2.spatialPartitioning(pointRDD.grids);
         List<Tuple2<Point, HashSet<Point>>> result = DistanceJoin.SpatialJoinQueryWithoutIndex(sc, pointRDD, pointRDD2, distance).collect();
-
-        assertEquals(pointRDD.getRawPointRDD().distinct().count(), pointRDD.getRawPointRDD().distinct().count());
+        assert result.size() >0;
 
     }
 
@@ -139,14 +138,13 @@ public class DistanceJoinQueryTest {
      */
     @Test
     public void testDistancelJoinQueryWithIndex() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
-        PointRDD pointRDD2 = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
-
-        pointRDD.buildIndex(IndexType.RTREE);
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
+        PointRDD pointRDD2 = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
+        pointRDD.spatialPartitioning(GridType.RTREE);
+        pointRDD.buildIndex(IndexType.RTREE,true);
+        pointRDD2.spatialPartitioning(pointRDD.grids);
         List<Tuple2<Point, List<Point>>> result = DistanceJoin.SpatialJoinQueryUsingIndex(sc, pointRDD, pointRDD2, distance).collect();
-
-        assertEquals(pointRDD.getRawPointRDD().distinct().count(), pointRDD.getRawPointRDD().distinct().count());
-
+        assert result.size() >0;
     }
 
 

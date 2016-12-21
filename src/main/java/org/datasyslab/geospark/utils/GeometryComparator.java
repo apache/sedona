@@ -1,7 +1,7 @@
 /**
  * FILE: GeometryComparator.java
  * PATH: org.datasyslab.geospark.utils.GeometryComparator.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.utils;

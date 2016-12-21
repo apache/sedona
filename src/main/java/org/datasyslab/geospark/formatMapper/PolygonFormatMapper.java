@@ -1,7 +1,7 @@
 /**
  * FILE: PolygonFormatMapper.java
  * PATH: org.datasyslab.geospark.formatMapper.PolygonFormatMapper.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.formatMapper;
@@ -25,7 +25,7 @@ import com.vividsolutions.jts.io.WKTReader;
 /**
  * The Class PolygonFormatMapper.
  */
-public class PolygonFormatMapper implements Function<String, Polygon>, Serializable {
+public class PolygonFormatMapper implements Function<String, Object>, Serializable {
     
     /** The offset. */
     Integer offset = 0;

@@ -1,7 +1,7 @@
 /**
  * FILE: RectangleRangeTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.RectangleRangeTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
@@ -16,6 +16,7 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -24,17 +25,45 @@ import org.junit.Test;
 import com.vividsolutions.jts.geom.Envelope;
 
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class RectangleRangeTest.
+ */
 public class RectangleRangeTest {
+    
+    /** The sc. */
     public static JavaSparkContext sc;
+    
+    /** The prop. */
     static Properties prop;
+    
+    /** The input. */
     static InputStream input;
+    
+    /** The Input location. */
     static String InputLocation;
+    
+    /** The offset. */
     static Integer offset;
+    
+    /** The splitter. */
     static FileDataSplitter splitter;
+    
+    /** The index type. */
     static IndexType indexType;
+    
+    /** The num partitions. */
     static Integer numPartitions;
+    
+    /** The query envelope. */
     static Envelope queryEnvelope;
+    
+    /** The loop times. */
     static int loopTimes;
+    
+    /**
+     * Once executed before all.
+     */
     @BeforeClass
     public static void onceExecutedBeforeAll() {
         SparkConf conf = new SparkConf().setAppName("RectangleRange").setMaster("local[2]");
@@ -76,31 +105,46 @@ public class RectangleRangeTest {
             }
         }
     }
+    
+    /**
+     * Tear down.
+     */
     @AfterClass
     public static void TearDown() {
         sc.stop();
     }
 
+    /**
+     * Test spatial range query.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testSpatialRangeQuery() throws Exception {
-    	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter);
+    	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter);
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = RangeQuery.SpatialRangeQuery(rectangleRDD, queryEnvelope, 0).getRawRectangleRDD().count();
+    		long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0,false).count();
     		assert resultSize>-1;
     	}
-    	assert RangeQuery.SpatialRangeQuery(rectangleRDD, queryEnvelope, 0).getRawRectangleRDD().take(10).get(1).getUserData().toString()!=null;
+    	assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0,false).take(10).get(1).getUserData().toString()!=null;
+        
     }
+    
+    /**
+     * Test spatial range query using index.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testSpatialRangeQueryUsingIndex() throws Exception {
-    	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter);
-    	rectangleRDD.buildIndex(IndexType.RTREE);
+    	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter);
+    	spatialRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = RangeQuery.SpatialRangeQueryUsingIndex(rectangleRDD, queryEnvelope, 0).getRawRectangleRDD().count();
+    		long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0,true).count();
     		assert resultSize>-1;
     	}
-    	assert RangeQuery.SpatialRangeQueryUsingIndex(rectangleRDD, queryEnvelope, 0).getRawRectangleRDD().take(10).get(1).getUserData().toString()!=null;
+    	assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0,true).take(10).get(1).getUserData().toString() !=null;
     }
-
 }

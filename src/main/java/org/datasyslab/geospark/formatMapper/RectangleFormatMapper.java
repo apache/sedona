@@ -1,7 +1,7 @@
 /**
  * FILE: RectangleFormatMapper.java
  * PATH: org.datasyslab.geospark.formatMapper.RectangleFormatMapper.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab.
+ * Copyright (c) 2016 Arizona State University Data Systems Lab.
  * All rights reserved.
  */
 package org.datasyslab.geospark.formatMapper;
@@ -24,7 +24,7 @@ import com.vividsolutions.jts.io.WKTReader;
 /**
  * The Class RectangleFormatMapper.
  */
-public class RectangleFormatMapper implements Serializable,Function<String,Envelope>
+public class RectangleFormatMapper implements Serializable,Function<String,Object>
 {
 	
 	/** The offset. */
