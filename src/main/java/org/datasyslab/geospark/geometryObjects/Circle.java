@@ -1,8 +1,8 @@
 /**
  * FILE: Circle.java
  * PATH: org.datasyslab.geospark.geometryObjects.Circle.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
 package org.datasyslab.geospark.geometryObjects;
 

@@ -1,8 +1,8 @@
 /**
  * FILE: RectangleJoinTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.RectangleJoinTest.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
 
@@ -77,6 +77,7 @@ public class RectangleJoinTest {
     @BeforeClass
     public static void onceExecutedBeforeAll() {
     	conf = new SparkConf().setAppName("RectangleJoin").setMaster("local[2]");
+        sc = new JavaSparkContext(conf);
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
@@ -127,12 +128,10 @@ public class RectangleJoinTest {
      * @throws Exception the exception
      */
     @Test
-    public void testSpatialJoinQueryWithRectangleRDD() throws Exception {
-        sc = new JavaSparkContext(conf);
-    	
-        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocation, offset, splitter, numPartitions);
+    public void testSpatialJoinQueryWithRectangleRDD() throws Exception {    	
+        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
 
-        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, numPartitions);
+        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
         
         spatialRDD.spatialPartitioning(gridType);
         
@@ -148,7 +147,6 @@ public class RectangleJoinTest {
         		assert result.get(i)._2().iterator().next().getUserData()!=null;
         	}
         }
-        sc.close();
     }
 
 
@@ -160,11 +158,10 @@ public class RectangleJoinTest {
      */
     @Test
     public void testSpatialJoinQueryWithRectangleRDDUsingRtreeIndex() throws Exception {
-        sc = new JavaSparkContext(conf);
     	
-        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocation, offset, splitter, numPartitions);
+        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
 
-        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, numPartitions);
+        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
         
         spatialRDD.spatialPartitioning(gridType);
         
@@ -182,7 +179,6 @@ public class RectangleJoinTest {
         		assert result.get(i)._2().iterator().next().getUserData()!=null;
         	}
         }
-        sc.close();
     }
 
 
@@ -193,11 +189,10 @@ public class RectangleJoinTest {
      */
     @Test
     public void testSpatialJoinQueryWithRectangleRDDUsingQuadtreeIndex() throws Exception {
-        sc = new JavaSparkContext(conf);
 
-        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocation, offset, splitter, numPartitions);
+        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
 
-        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, numPartitions);
+        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
   
         spatialRDD.spatialPartitioning(gridType);
         
@@ -215,7 +210,6 @@ public class RectangleJoinTest {
         		assert result.get(i)._2().iterator().next().getUserData()!=null;
         	}
         }
-        sc.close();
     }
 
 
@@ -227,11 +221,10 @@ public class RectangleJoinTest {
      */
     @Test
     public void testJoinCorrectnessWithRectangleRDD() throws Exception {
-        sc = new JavaSparkContext(conf);
     	
-        RectangleRDD queryRDD1 = new RectangleRDD(sc, InputLocation, offset, splitter);
+        RectangleRDD queryRDD1 = new RectangleRDD(sc, InputLocation, offset, splitter, true);
 
-        RectangleRDD spatialRDD1 = new RectangleRDD(sc, InputLocation, offset, splitter, 20);
+        RectangleRDD spatialRDD1 = new RectangleRDD(sc, InputLocation, offset, splitter, true, 20);
         
         spatialRDD1.spatialPartitioning(GridType.RTREE);
         
@@ -239,9 +232,9 @@ public class RectangleJoinTest {
         
         List<Tuple2<Envelope, HashSet<Envelope>>> result1 = JoinQuery.SpatialJoinQuery(spatialRDD1,queryRDD1,false).collect();
         
-        RectangleRDD queryRDD2 = new RectangleRDD(sc, InputLocation, offset, splitter);
+        RectangleRDD queryRDD2 = new RectangleRDD(sc, InputLocation, offset, splitter, true);
         
-        RectangleRDD spatialRDD2 = new RectangleRDD(sc, InputLocation, offset, splitter, 40);
+        RectangleRDD spatialRDD2 = new RectangleRDD(sc, InputLocation, offset, splitter, true, 40);
         
         spatialRDD2.spatialPartitioning(GridType.RTREE);
         
@@ -250,9 +243,9 @@ public class RectangleJoinTest {
         List<Tuple2<Envelope, HashSet<Envelope>>> result2 = JoinQuery.SpatialJoinQuery(spatialRDD2,queryRDD2,false).collect();
         
         
-        RectangleRDD queryRDD3 = new RectangleRDD(sc, InputLocation, offset, splitter);
+        RectangleRDD queryRDD3 = new RectangleRDD(sc, InputLocation, offset, splitter, true);
         
-        RectangleRDD spatialRDD3 = new RectangleRDD(sc, InputLocation, offset, splitter, 50);
+        RectangleRDD spatialRDD3 = new RectangleRDD(sc, InputLocation, offset, splitter, true, 50);
         
         spatialRDD3.spatialPartitioning(GridType.RTREE);
         
@@ -261,9 +254,9 @@ public class RectangleJoinTest {
         List<Tuple2<Envelope, HashSet<Envelope>>> result3 = JoinQuery.SpatialJoinQuery(spatialRDD3,queryRDD3,false).collect();
         
         
-        RectangleRDD queryRDD4 = new RectangleRDD(sc, InputLocation, offset, splitter);
+        RectangleRDD queryRDD4 = new RectangleRDD(sc, InputLocation, offset, splitter, true);
 
-        RectangleRDD spatialRDD4 = new RectangleRDD(sc, InputLocation, offset, splitter, 20);
+        RectangleRDD spatialRDD4 = new RectangleRDD(sc, InputLocation, offset, splitter, true, 20);
         
         spatialRDD4.spatialPartitioning(GridType.VORONOI);
         
@@ -272,9 +265,9 @@ public class RectangleJoinTest {
         List<Tuple2<Envelope, HashSet<Envelope>>> result4 = JoinQuery.SpatialJoinQuery(spatialRDD4,queryRDD4,false).collect();
         
         
-        RectangleRDD queryRDD5 = new RectangleRDD(sc, InputLocation, offset, splitter);
+        RectangleRDD queryRDD5 = new RectangleRDD(sc, InputLocation, offset, splitter, true);
         
-        RectangleRDD spatialRDD5 = new RectangleRDD(sc, InputLocation, offset, splitter, 20);
+        RectangleRDD spatialRDD5 = new RectangleRDD(sc, InputLocation, offset, splitter, true, 20);
         
         spatialRDD5.spatialPartitioning(GridType.HILBERT);
         
@@ -283,9 +276,9 @@ public class RectangleJoinTest {
         List<Tuple2<Envelope, HashSet<Envelope>>> result5 = JoinQuery.SpatialJoinQuery(spatialRDD5,queryRDD5,false).collect();
         
         
-        RectangleRDD queryRDD6 = new RectangleRDD(sc, InputLocation, offset, splitter);
+        RectangleRDD queryRDD6 = new RectangleRDD(sc, InputLocation, offset, splitter, true);
         
-        RectangleRDD spatialRDD6 = new RectangleRDD(sc, InputLocation, offset, splitter, 20);
+        RectangleRDD spatialRDD6 = new RectangleRDD(sc, InputLocation, offset, splitter, true, 20);
         
         spatialRDD6.spatialPartitioning(GridType.RTREE);
         
@@ -296,9 +289,9 @@ public class RectangleJoinTest {
         List<Tuple2<Envelope, HashSet<Envelope>>> result6 = JoinQuery.SpatialJoinQuery(spatialRDD6,queryRDD6,true).collect();
         
         
-        RectangleRDD queryRDD7 = new RectangleRDD(sc, InputLocation, offset, splitter);
+        RectangleRDD queryRDD7 = new RectangleRDD(sc, InputLocation, offset, splitter, false);
 
-        RectangleRDD spatialRDD7 = new RectangleRDD(sc, InputLocation, offset, splitter, 20);
+        RectangleRDD spatialRDD7 = new RectangleRDD(sc, InputLocation, offset, splitter, false, 20);
         
         spatialRDD7.spatialPartitioning(GridType.RTREE);
         
@@ -309,9 +302,9 @@ public class RectangleJoinTest {
         List<Tuple2<Envelope, HashSet<Envelope>>> result7 = JoinQuery.SpatialJoinQuery(spatialRDD7,queryRDD7,true).collect();
         
         
-        RectangleRDD queryRDD8 = new RectangleRDD(sc, InputLocation, offset, splitter);
+        RectangleRDD queryRDD8 = new RectangleRDD(sc, InputLocation, offset, splitter, false);
         
-        RectangleRDD spatialRDD8 = new RectangleRDD(sc, InputLocation, offset, splitter, 50);
+        RectangleRDD spatialRDD8 = new RectangleRDD(sc, InputLocation, offset, splitter, false, 50);
 
         spatialRDD8.spatialPartitioning(GridType.RTREE);
         
@@ -322,9 +315,9 @@ public class RectangleJoinTest {
         List<Tuple2<Envelope, HashSet<Envelope>>> result8 = JoinQuery.SpatialJoinQuery(spatialRDD8,queryRDD8,true).collect();
         
         
-        RectangleRDD queryRDD9 = new RectangleRDD(sc, InputLocation, offset, splitter);
+        RectangleRDD queryRDD9 = new RectangleRDD(sc, InputLocation, offset, splitter, false);
         
-        RectangleRDD spatialRDD9 = new RectangleRDD(sc, InputLocation, offset, splitter, 50);
+        RectangleRDD spatialRDD9 = new RectangleRDD(sc, InputLocation, offset, splitter, false, 50);
 
         spatialRDD9.spatialPartitioning(GridType.RTREE);
         
@@ -334,9 +327,9 @@ public class RectangleJoinTest {
         
         List<Tuple2<Envelope, HashSet<Envelope>>> result9 = JoinQuery.SpatialJoinQuery(spatialRDD9,queryRDD9,true).collect();
         
-        RectangleRDD queryRDD10 = new RectangleRDD(sc, InputLocation, offset, splitter);
+        RectangleRDD queryRDD10 = new RectangleRDD(sc, InputLocation, offset, splitter, false);
         
-        RectangleRDD spatialRDD10 = new RectangleRDD(sc, InputLocation, offset, splitter, 50);
+        RectangleRDD spatialRDD10 = new RectangleRDD(sc, InputLocation, offset, splitter, false, 50);
 
         spatialRDD10.spatialPartitioning(GridType.VORONOI);
         
@@ -347,9 +340,9 @@ public class RectangleJoinTest {
         List<Tuple2<Envelope, HashSet<Envelope>>> result10 = JoinQuery.SpatialJoinQuery(spatialRDD10,queryRDD10,true).collect();
         
         
-        RectangleRDD queryRDD11 = new RectangleRDD(sc, InputLocation, offset, splitter);
+        RectangleRDD queryRDD11 = new RectangleRDD(sc, InputLocation, offset, splitter, false);
         
-        RectangleRDD spatialRDD11 = new RectangleRDD(sc, InputLocation, offset, splitter, 50);
+        RectangleRDD spatialRDD11 = new RectangleRDD(sc, InputLocation, offset, splitter, false, 50);
 
         spatialRDD11.spatialPartitioning(GridType.VORONOI);
         
@@ -381,7 +374,6 @@ public class RectangleJoinTest {
         	System.out.println("-----Rectangle join Rectangle results are not consistent--Done---");
         	throw new Exception("Rectangle join Rectangle results are not consistent!");
         }
-        sc.close();
     }
 
  

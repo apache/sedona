@@ -1,8 +1,8 @@
 /**
  * FILE: RectangleRDDTest.java
  * PATH: org.datasyslab.geospark.spatialRDD.RectangleRDDTest.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
 package org.datasyslab.geospark.spatialRDD;
 
@@ -116,7 +116,7 @@ public class RectangleRDDTest implements Serializable{
      */
     @Test
     public void testConstructor() throws Exception {
-        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, numPartitions);
+        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
         //todo: Set this to debug level
         assert spatialRDD.totalNumberOfRecords>=1;
         assert spatialRDD.boundary!=null;
@@ -133,7 +133,7 @@ public class RectangleRDDTest implements Serializable{
      */
     @Test
     public void testHilbertCurveSpatialPartitioing() throws Exception {
-    	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, 10);
+    	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, 10);
         spatialRDD.spatialPartitioning(GridType.HILBERT);
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
@@ -162,7 +162,7 @@ public class RectangleRDDTest implements Serializable{
      */
     @Test
     public void testRTreeSpatialPartitioing() throws Exception {
-    	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, 10);
+    	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, 10);
         spatialRDD.spatialPartitioning(GridType.RTREE);
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
@@ -191,7 +191,7 @@ public class RectangleRDDTest implements Serializable{
      */
     @Test
     public void testVoronoiSpatialPartitioing() throws Exception {
-    	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, 10);
+    	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, 10);
         spatialRDD.spatialPartitioning(GridType.VORONOI);
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
@@ -218,7 +218,7 @@ public class RectangleRDDTest implements Serializable{
      */
     @Test
     public void testBuildIndexWithoutSetGrid() throws Exception {
-    	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, numPartitions);
+    	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
         spatialRDD.buildIndex(IndexType.RTREE,false);
     }
 
@@ -230,7 +230,7 @@ public class RectangleRDDTest implements Serializable{
      */
     @Test
     public void testBuildRtreeIndex() throws Exception {
-    	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, numPartitions);
+    	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
         spatialRDD.spatialPartitioning(gridType);
         spatialRDD.buildIndex(IndexType.RTREE,true);
         if(spatialRDD.indexedRDD.take(1).get(0)._2() instanceof STRtree)
@@ -251,7 +251,7 @@ public class RectangleRDDTest implements Serializable{
      */
     @Test
     public void testBuildQuadtreeIndex() throws Exception {
-    	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, numPartitions);
+    	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
         spatialRDD.spatialPartitioning(gridType);
         spatialRDD.buildIndex(IndexType.QUADTREE,true);
         if(spatialRDD.indexedRDD.take(1).get(0)._2() instanceof STRtree)

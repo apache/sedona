@@ -1,9 +1,10 @@
 /**
  * FILE: FileDataSplitter.java
  * PATH: org.datasyslab.geospark.enums.FileDataSplitter.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
+
 package org.datasyslab.geospark.enums;
 
 import java.io.Serializable;
@@ -40,8 +41,14 @@ public enum FileDataSplitter implements Serializable{
 	    return null;
 	}
 	
+	/** The splitter. */
 	private String splitter;
 
+	/**
+	 * Instantiates a new file data splitter.
+	 *
+	 * @param splitter the splitter
+	 */
 	private FileDataSplitter(String splitter) {
 		this.splitter = splitter;
 	}

@@ -1,8 +1,8 @@
 /**
  * FILE: RectangleRangeTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.RectangleRangeTest.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
 
@@ -121,7 +121,7 @@ public class RectangleRangeTest {
      */
     @Test
     public void testSpatialRangeQuery() throws Exception {
-    	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter);
+    	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true);
     	for(int i=0;i<loopTimes;i++)
     	{
     		long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0,false).count();
@@ -138,7 +138,7 @@ public class RectangleRangeTest {
      */
     @Test
     public void testSpatialRangeQueryUsingIndex() throws Exception {
-    	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter);
+    	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true);
     	spatialRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)
     	{

@@ -1,8 +1,8 @@
 /**
  * FILE: EqualPartitioning.java
  * PATH: org.datasyslab.geospark.spatialPartitioning.EqualPartitioning.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
 package org.datasyslab.geospark.spatialPartitioning;
 

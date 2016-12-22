@@ -1,8 +1,8 @@
 /**
  * FILE: PolygonRangeTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.PolygonRangeTest.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
 
@@ -123,7 +123,7 @@ public class PolygonRangeTest {
      */
     @Test
     public void testSpatialRangeQuery() throws Exception {
-    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, offset, splitter);
+    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true);
     	for(int i=0;i<loopTimes;i++)
     	{
     		long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0,false).count();
@@ -140,7 +140,7 @@ public class PolygonRangeTest {
      */
     @Test
     public void testSpatialRangeQueryUsingIndex() throws Exception {
-    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, offset, splitter);
+    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true);
     	spatialRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)
     	{

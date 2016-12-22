@@ -1,8 +1,8 @@
 /**
  * FILE: DistanceJoin.java
  * PATH: org.datasyslab.geospark.spatialOperator.DistanceJoin.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
 
@@ -62,9 +62,10 @@ public class DistanceJoin {
 
         final Broadcast<List<Envelope>> envelopeWithGrid = sc.broadcast(pointRDD1.grids);
 
-        JavaPairRDD<Integer, Circle> tmpGridedCircleForQuerySetBeforePartition = circleRDD2.getCircleRDD().flatMapToPair(new PairFlatMapFunction<Circle, Integer, Circle>() {
+        JavaPairRDD<Integer, Circle> tmpGridedCircleForQuerySetBeforePartition = circleRDD2.rawSpatialRDD.flatMapToPair(new PairFlatMapFunction<Object, Integer, Circle>() {
             @Override
-            public Iterator<Tuple2<Integer, Circle>> call(Circle circle) throws Exception {
+            public Iterator<Tuple2<Integer, Circle>> call(Object spatialObject) throws Exception {
+            	Circle circle = (Circle)spatialObject;
             	HashSet<Tuple2<Integer, Circle>> result = new HashSet<Tuple2<Integer, Circle>>();
 
             	List<Envelope> grid = envelopeWithGrid.getValue();
@@ -167,9 +168,10 @@ public class DistanceJoin {
 
         final Broadcast<List<Envelope>> envelopeWithGrid = sc.broadcast(pointRDD1.grids);
 
-        JavaPairRDD<Integer, Circle> tmpGridedCircleForQuerySetBeforePartition = circleRDD2.getCircleRDD().flatMapToPair(new PairFlatMapFunction<Circle, Integer, Circle>() {
+        JavaPairRDD<Integer, Circle> tmpGridedCircleForQuerySetBeforePartition = circleRDD2.rawSpatialRDD.flatMapToPair(new PairFlatMapFunction<Object, Integer, Circle>() {
             @Override
-            public Iterator<Tuple2<Integer, Circle>> call(Circle circle) throws Exception {
+            public Iterator<Tuple2<Integer, Circle>> call(Object spatialObject) throws Exception {
+            	Circle circle = (Circle) spatialObject;
             	HashSet<Tuple2<Integer, Circle>> result = new HashSet<Tuple2<Integer, Circle>>();
             	List<Envelope> grid = envelopeWithGrid.getValue();
 

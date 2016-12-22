@@ -1,8 +1,8 @@
 /**
  * FILE: PolygonKnnTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.PolygonKnnTest.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
 
@@ -131,7 +131,7 @@ public class PolygonKnnTest {
      */
     @Test
     public void testSpatialKnnQuery() throws Exception {
-    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter);
+    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, splitter, true);
 
     	for(int i=0;i<loopTimes;i++)
     	{
@@ -150,7 +150,7 @@ public class PolygonKnnTest {
      */
     @Test
     public void testSpatialKnnQueryUsingIndex() throws Exception {
-    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter);
+    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, splitter, true);
     	polygonRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)
     	{
