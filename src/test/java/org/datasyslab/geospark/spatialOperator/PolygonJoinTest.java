@@ -202,7 +202,6 @@ public class PolygonJoinTest {
      */
     @Test
     public void testSpatialJoinQueryWithPolygonRDDUsingQuadTreeIndex() throws Exception {
-        sc = new JavaSparkContext(conf);
     	
         PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions);
 
