@@ -1,22 +1,10 @@
-package org.datasyslab.geospark.spatialRDD;
-
 /**
- * 
- * @author Arizona State University DataSystems Lab
- *
+ * FILE: PointRDDTest.java
+ * PATH: org.datasyslab.geospark.spatialRDD.PointRDDTest.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
-
-import com.vividsolutions.jts.geom.Point;
-
-import org.apache.commons.lang.IllegalClassException;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.datasyslab.geospark.geometryObjects.EnvelopeWithGrid;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+package org.datasyslab.geospark.spatialRDD;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,18 +14,65 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.GridType;
+import org.datasyslab.geospark.enums.IndexType;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
+import com.vividsolutions.jts.geom.Envelope;
+
+/**
+ * 
+ * @author Arizona State University DataSystems Lab
+ *
+ */
+
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.index.quadtree.Quadtree;
+import com.vividsolutions.jts.index.strtree.STRtree;
+
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PointRDDTest.
+ */
 public class PointRDDTest implements Serializable{
+    
+    /** The sc. */
     public static JavaSparkContext sc;
+    
+    /** The prop. */
     static Properties prop;
+    
+    /** The input. */
     static InputStream input;
+    
+    /** The Input location. */
     static String InputLocation;
+    
+    /** The offset. */
     static Integer offset;
-    static String splitter;
-    static String gridType;
-    static String indexType;
+    
+    /** The splitter. */
+    static FileDataSplitter splitter;
+    
+    /** The grid type. */
+    static GridType gridType;
+    
+    /** The index type. */
+    static IndexType indexType;
+    
+    /** The num partitions. */
     static Integer numPartitions;
+    
+    /**
+     * Once executed before all.
+     */
     @BeforeClass
     public static void onceExecutedBeforeAll() {
         SparkConf conf = new SparkConf().setAppName("PointRDDTest").setMaster("local[2]");
@@ -51,9 +86,9 @@ public class PointRDDTest implements Serializable{
         InputLocation = "file://"+PointRDDTest.class.getClassLoader().getResource("primaryroads.csv").getPath();
 
         offset = 0;
-        splitter = "";
-        gridType = "";
-        indexType = "";
+        splitter = null;
+        gridType = null;
+        indexType = null;
         numPartitions = 0;
 
         try {
@@ -62,10 +97,14 @@ public class PointRDDTest implements Serializable{
             // There is a field in the property file, you can edit your own file location there.
             // InputLocation = prop.getProperty("inputLocation");
             InputLocation = "file://"+PointRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
+            
             offset = Integer.parseInt(prop.getProperty("offset"));
-            splitter = prop.getProperty("splitter");
-            gridType = prop.getProperty("gridType");
-            indexType = prop.getProperty("indexType");
+            splitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
+            gridType = GridType.getGridType(prop.getProperty("gridType"));
+            indexType = IndexType.getIndexType(prop.getProperty("indexType"));
+            
+            
+
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -80,166 +119,155 @@ public class PointRDDTest implements Serializable{
         }
     }
 
-
-
-
+    /**
+     * Test constructor.
+     *
+     * @throws Exception the exception
+     */
     /*
         This test case will load a sample data file and
      */
     @Test
     public void testConstructor() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter,true, numPartitions);
         //todo: Set this to debug level
-        for (EnvelopeWithGrid d : pointRDD.grids) {
-            //System.out.println("PointRDD grids: "+d);
-        }
-
-        //todo: Move this into log4j.
-        Map<Integer, Object> map = pointRDD.gridPointRDD.countByKey();
-        for (Entry<Integer, Object> entry : map.entrySet()) {
-            Long number = (Long) entry.getValue();
-            Double percentage = number.doubleValue() / pointRDD.totalNumberOfRecords;
-            //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
-        }
+        assert spatialRDD.totalNumberOfRecords>=1;
+        assert spatialRDD.boundary!=null;
+        assert spatialRDD.boundaryEnvelope!=null;
     }
 
-    /*
-     *  This test case test whether the X-Y grid can be build correctly.
+    /**
+     * Test equal partitioning.
+     *
+     * @throws Exception the exception
      */
     /*
-    @Test
-    public void testXYGrid() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "X-Y", 10);
-        for (EnvelopeWithGrid d : pointRDD.grids) {
-        	System.out.println("PointRDD grids: "+d.grid);
-        }
-        //todo: Move this into log4j.
-        Map<Integer, Object> map = pointRDD.gridPointRDD.countByKey();
-
-        System.out.println(map.size());
-
-        for (Map.Entry<Integer, Object> entry : map.entrySet()) {
-            Long number = (Long) entry.getValue();
-            Double percentage = number.doubleValue() / pointRDD.totalNumberOfRecords;
-            System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
-        }
-    }*/
-    /*
-     *  This test case test whether the equal size grids can be build correctly.
+     *  This test case test whether the Hilbert Curve grid can be build correctly.
      */
     @Test
-    public void testEqualSizeGridsSpatialPartitioing() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "equalgrid", 10);
-        for (EnvelopeWithGrid d : pointRDD.grids) {
-        	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
+    public void testEqualPartitioning() throws Exception {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, 10);
+        spatialRDD.spatialPartitioning(GridType.EQUALGRID);
+        for (Envelope d : spatialRDD.grids) {
+        	//System.out.println("PointRDD spatial partitioning grids: "+d);
         }
-        //todo: Move this into log4j.
-        Map<Integer, Object> map = pointRDD.gridPointRDD.countByKey();
-
-        System.out.println(map.size());
-
-        for (Entry<Integer, Object> entry : map.entrySet()) {
-            Long number = (Long) entry.getValue();
-            Double percentage = number.doubleValue() / pointRDD.totalNumberOfRecords;
-            //System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
-        }
+        //System.out.println(spatialRDD.boundaryEnvelope);
+        assert spatialRDD.countWithoutDuplicates()==spatialRDD.countWithoutDuplicatesSPRDD();
     }
+    
+    /**
+     * Test hilbert curve spatial partitioing.
+     *
+     * @throws Exception the exception
+     */
     /*
      *  This test case test whether the Hilbert Curve grid can be build correctly.
      */
     @Test
     public void testHilbertCurveSpatialPartitioing() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "hilbert", 10);
-        for (EnvelopeWithGrid d : pointRDD.grids) {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,10);
+        spatialRDD.spatialPartitioning(GridType.HILBERT);
+        for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
-        //todo: Move this into log4j.
-        Map<Integer, Object> map = pointRDD.gridPointRDD.countByKey();
-
-      //  System.out.println(map.size());
-
-        for (Entry<Integer, Object> entry : map.entrySet()) {
-            Long number = (Long) entry.getValue();
-            Double percentage = number.doubleValue() / pointRDD.totalNumberOfRecords;
-           // System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
-        }
+        assert spatialRDD.countWithoutDuplicates()==spatialRDD.countWithoutDuplicatesSPRDD();
     }
+    
+    /**
+     * Test R tree spatial partitioing.
+     *
+     * @throws Exception the exception
+     */
     /*
      *  This test case test whether the STR-Tree grid can be build correctly.
      */
     @Test
     public void testRTreeSpatialPartitioing() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "rtree", 10);
-        for (EnvelopeWithGrid d : pointRDD.grids) {
-        	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,10);
+        spatialRDD.spatialPartitioning(GridType.RTREE);
+        for (Envelope d : spatialRDD.grids) {
+        	//System.out.println("PointRDD spatial partitioning grids: "+d);
         }
-        //todo: Move this into log4j.
-        Map<Integer, Object> map = pointRDD.gridPointRDD.countByKey();
-
-        //System.out.println(map.size());
-
-        for (Entry<Integer, Object> entry : map.entrySet()) {
-            Long number = (Long) entry.getValue();
-            Double percentage = number.doubleValue() / pointRDD.totalNumberOfRecords;
-           // System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
-        }
+ 
+        assert spatialRDD.countWithoutDuplicates()==spatialRDD.countWithoutDuplicatesSPRDD();
     }
+    
+    /**
+     * Test voronoi spatial partitioing.
+     *
+     * @throws Exception the exception
+     */
     /*
      *  This test case test whether the Voronoi grid can be build correctly.
      */
     @Test
     public void testVoronoiSpatialPartitioing() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "voronoi", 10);
-        for (EnvelopeWithGrid d : pointRDD.grids) {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,10);
+        spatialRDD.spatialPartitioning(GridType.VORONOI);
+        for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
-        //todo: Move this into log4j.
-        Map<Integer, Object> map = pointRDD.gridPointRDD.countByKey();
 
-        //System.out.println(map.size());
-
-        for (Entry<Integer, Object> entry : map.entrySet()) {
-            Long number = (Long) entry.getValue();
-            Double percentage = number.doubleValue() / pointRDD.totalNumberOfRecords;
-          //  System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
-        }
+        assert spatialRDD.countWithoutDuplicates()==spatialRDD.countWithoutDuplicatesSPRDD();
     }
 
     
-    /*
-     * If we try to build a index on a rawPointRDD which is not construct with grid. We shall see an error.
-     */
-    @Test//(expected=IllegalClassException.class)
-    public void testBuildIndexWithoutSetGrid() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
-        pointRDD.buildIndex("");
-    }
-
-    /*
-        Test build Index.
+    /**
+     * Test build index without set grid.
+     *
+     * @throws Exception the exception
      */
     @Test
-    public void testBuildIndex() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
-        pointRDD.buildIndex("");
-        List<Point> result = pointRDD.indexedRDD.take(1).get(0)._2().query(pointRDD.boundaryEnvelope);
-    }
-    /*
-     *  If we want to use a grid type that is not supported yet, an exception will be throwed out.
-     */
-    @Test(expected=IllegalArgumentException.class)
-    public void testBuildWithNoExistsGrid() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, "ff", numPartitions);
+    public void testBuildIndexWithoutSetGrid() throws Exception {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,numPartitions);
+        spatialRDD.buildIndex(IndexType.RTREE,false);
     }
 
-    /*
-     * If the partition number is set too large, we will
+
+    /**
+     * Test build rtree index.
+     *
+     * @throws Exception the exception
      */
-    @Test(expected=IllegalArgumentException.class)
-    public void testTooLargePartitionNumber() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, gridType, 1000000);
+    @Test
+    public void testBuildRtreeIndex() throws Exception {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,numPartitions);
+        spatialRDD.spatialPartitioning(gridType);
+        spatialRDD.buildIndex(IndexType.RTREE,true);
+        if(spatialRDD.indexedRDD.take(1).get(0)._2() instanceof STRtree)
+        {
+            List<Point> result = ((STRtree) spatialRDD.indexedRDD.take(1).get(0)._2()).query(spatialRDD.boundaryEnvelope);
+        }
+        else
+        {
+            List<Point> result = ((Quadtree) spatialRDD.indexedRDD.take(1).get(0)._2()).query(spatialRDD.boundaryEnvelope);
+
+        }
+        }
+    
+    /**
+     * Test build quadtree index.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void testBuildQuadtreeIndex() throws Exception {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+        spatialRDD.spatialPartitioning(gridType);
+        spatialRDD.buildIndex(IndexType.QUADTREE,true);
+        if(spatialRDD.indexedRDD.take(1).get(0)._2() instanceof STRtree)
+        {
+            List<Point> result = ((STRtree) spatialRDD.indexedRDD.take(1).get(0)._2()).query(spatialRDD.boundaryEnvelope);
+        }
+        else
+        {
+            List<Point> result = ((Quadtree) spatialRDD.indexedRDD.take(1).get(0)._2()).query(spatialRDD.boundaryEnvelope);
+        }
     }
 
+    /**
+     * Tear down.
+     */
     @AfterClass
     public static void TearDown() {
         sc.stop();
