@@ -1,12 +1,11 @@
 /**
  * FILE: PointFormatMapper.java
  * PATH: org.datasyslab.geospark.formatMapper.PointFormatMapper.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
 package org.datasyslab.geospark.formatMapper;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,36 +23,35 @@ import com.vividsolutions.jts.io.WKTReader;
 /**
  * The Class PointFormatMapper.
  */
-public class PointFormatMapper implements Serializable, Function<String, Object> {
-    
-    /** The offset. */
-    Integer offset = 0;
-    
-    /** The splitter. */
-    FileDataSplitter splitter = FileDataSplitter.CSV;
+public class PointFormatMapper extends FormatMapper implements Function<String, Object> {
 
-    /**
-     * Instantiates a new point format mapper.
-     *
-     * @param Offset the offset
-     * @param Splitter the splitter
-     */
-    public PointFormatMapper(Integer Offset, FileDataSplitter Splitter) {
-        this.offset = Offset;
-        this.splitter = Splitter;
-    }
 
-    /**
-     * Instantiates a new point format mapper.
-     *
-     * @param Splitter the splitter
-     */
-    public PointFormatMapper( FileDataSplitter Splitter) {
-        this.offset = 0;
-        this.splitter = Splitter;
-    }
+	/**
+	 * Instantiates a new point format mapper.
+	 *
+	 * @param Splitter the splitter
+	 * @param carryInputData the carry input data
+	 */
+	public PointFormatMapper(FileDataSplitter Splitter, boolean carryInputData) {
+		super(Splitter, carryInputData);
+		// TODO Auto-generated constructor stub
+	}
 
-    /* (non-Javadoc)
+	/**
+	 * Instantiates a new point format mapper.
+	 *
+	 * @param startOffset the start offset
+	 * @param endOffset the end offset
+	 * @param Splitter the splitter
+	 * @param carryInputData the carry input data
+	 */
+	public PointFormatMapper(Integer startOffset, Integer endOffset, FileDataSplitter Splitter,
+			boolean carryInputData) {
+		super(startOffset, endOffset, Splitter, carryInputData);
+		// TODO Auto-generated constructor stub
+	}
+
+	/* (non-Javadoc)
      * @see org.apache.spark.api.java.function.Function#call(java.lang.Object)
      */
     public Point call(String line) throws Exception {
@@ -64,35 +62,45 @@ public class PointFormatMapper implements Serializable, Function<String, Object>
         switch (splitter) {
             case CSV:
                 lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
-                coordinate= new Coordinate(Double.parseDouble(lineSplitList.get(0 + this.offset)),
-                        Double.parseDouble(lineSplitList.get(1 + this.offset)));
+                coordinate= new Coordinate(Double.parseDouble(lineSplitList.get(0 + this.startOffset)),
+                        Double.parseDouble(lineSplitList.get(1 + this.startOffset)));
                 point = fact.createPoint(coordinate);
-                point.setUserData(line);
+                if(this.carryInputData)
+                {
+                    point.setUserData(line);
+                }
                 break;
             case TSV:
                 lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
-                coordinate = new Coordinate(Double.parseDouble(lineSplitList.get(0 + this.offset)),
-                        Double.parseDouble(lineSplitList.get(1 + this.offset)));
+                coordinate = new Coordinate(Double.parseDouble(lineSplitList.get(0 + this.startOffset)),
+                        Double.parseDouble(lineSplitList.get(1 + this.startOffset)));
                 point = fact.createPoint(coordinate);
-                point.setUserData(line);
+                if(this.carryInputData)
+                {
+                    point.setUserData(line);
+                }
                 break;
             case GEOJSON:
                 GeoJSONReader reader = new GeoJSONReader();
                 point = (Point)reader.read(line);
-                point.setUserData(line);
+                if(this.carryInputData)
+                {
+                    point.setUserData(line);
+                }
                 break;
             case WKT:
             	lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
                 WKTReader wktreader = new WKTReader();
-                Envelope envelope=wktreader.read(lineSplitList.get(offset)).getEnvelopeInternal();
+                Envelope envelope=wktreader.read(lineSplitList.get(this.startOffset)).getEnvelopeInternal();
                 coordinate = new Coordinate (envelope.getMinX(),envelope.getMinY());
                 point = fact.createPoint(coordinate);
                 coordinate = new Coordinate (85.01,34.01);
                 point = fact.createPoint(coordinate);
-                point.setUserData(line);
+                if(this.carryInputData)
+                {
+                    point.setUserData(line);
+                }
                 break;
-            default:
-                throw new Exception("Input type not recognized, ");
         }
         return point;
     }

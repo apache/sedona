@@ -1,8 +1,8 @@
 /**
  * FILE: DistanceJoinQueryTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.DistanceJoinQueryTest.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
 
@@ -121,8 +121,8 @@ public class DistanceJoinQueryTest {
      */
     @Test
     public void testDistancelJoinQuery() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
-        PointRDD pointRDD2 = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+        PointRDD pointRDD2 = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions);
         pointRDD.spatialPartitioning(GridType.RTREE);
         pointRDD.buildIndex(IndexType.RTREE,true);
         pointRDD2.spatialPartitioning(pointRDD.grids);
@@ -138,8 +138,8 @@ public class DistanceJoinQueryTest {
      */
     @Test
     public void testDistancelJoinQueryWithIndex() throws Exception {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
-        PointRDD pointRDD2 = new PointRDD(sc, InputLocation, offset, splitter, numPartitions);
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+        PointRDD pointRDD2 = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions);
         pointRDD.spatialPartitioning(GridType.RTREE);
         pointRDD.buildIndex(IndexType.RTREE,true);
         pointRDD2.spatialPartitioning(pointRDD.grids);

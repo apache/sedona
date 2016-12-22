@@ -1,29 +1,26 @@
 /**
  * FILE: PolygonRDD.java
  * PATH: org.datasyslab.geospark.spatialRDD.PolygonRDD.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
 package org.datasyslab.geospark.spatialRDD;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 
 import org.datasyslab.geospark.enums.FileDataSplitter;
-
 import org.datasyslab.geospark.formatMapper.PolygonFormatMapper;
 
-import org.datasyslab.geospark.utils.GeometryComparatorFactory;
-import org.datasyslab.geospark.utils.PolygonXMaxComparator;
-import org.datasyslab.geospark.utils.PolygonXMinComparator;
-import org.datasyslab.geospark.utils.PolygonYMaxComparator;
-import org.datasyslab.geospark.utils.PolygonYMinComparator;
-import org.datasyslab.geospark.utils.RDDSampleUtils;
+import org.wololo.geojson.GeoJSON;
+import org.wololo.jts2geojson.GeoJSONWriter;
 
 /**
  * 
@@ -48,10 +45,6 @@ import com.vividsolutions.jts.precision.GeometryPrecisionReducer;
  */
 public class PolygonRDD extends SpatialRDD {
     
-    private Envelope minXEnvelope;
-    private Envelope minYEnvelope;
-    private Envelope maxXEnvelope;
-    private Envelope maxYEnvelope;
 
 
     /**
@@ -75,58 +68,65 @@ public class PolygonRDD extends SpatialRDD {
     /**
      * Instantiates a new polygon RDD.
      *
-     * @param spark the spark
+     * @param sparkContext the spark context
      * @param InputLocation the input location
-     * @param Offset the offset
+     * @param startOffset the start offset
+     * @param endOffset the end offset
      * @param splitter the splitter
+     * @param carryInputData the carry input data
      * @param partitions the partitions
-     */ 
-    public PolygonRDD(JavaSparkContext spark, String InputLocation, Integer Offset, FileDataSplitter splitter, Integer partitions) {
-        this.setRawSpatialRDD(spark.textFile(InputLocation, partitions).map(new PolygonFormatMapper(Offset, splitter)));
-        this.boundary();
-        this.totalNumberOfRecords = this.rawSpatialRDD.count();    }
-
-    /**
-     * Instantiates a new polygon RDD.
-     *
-     * @param spark the spark
-     * @param InputLocation the input location
-     * @param Offset the offset
-     * @param splitter the splitter
      */
-    public PolygonRDD(JavaSparkContext spark, String InputLocation, Integer Offset, FileDataSplitter splitter) {
-        this.setRawSpatialRDD(spark.textFile(InputLocation).map(new PolygonFormatMapper(Offset, splitter)));
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset, FileDataSplitter splitter, boolean carryInputData, Integer partitions) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).map(new PolygonFormatMapper(startOffset,endOffset, splitter,carryInputData)));
         this.boundary();
         this.totalNumberOfRecords = this.rawSpatialRDD.count();
     }
 
-    /* (non-Javadoc)
-     * @see org.datasyslab.geospark.spatialRDD.SpatialRDD#boundary()
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param startOffset the start offset
+     * @param endOffset the end offset
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
      */
-    public Envelope boundary() {
-        minXEnvelope = ((Polygon) this.rawSpatialRDD
-                .min((PolygonXMinComparator) GeometryComparatorFactory.createComparator("polygon", "x", "min"))).getEnvelopeInternal();
-        Double minLongitude = minXEnvelope.getMinX();
-
-        maxXEnvelope = ((Polygon) this.rawSpatialRDD
-                .max((PolygonXMaxComparator) GeometryComparatorFactory.createComparator("polygon", "x", "max"))).getEnvelopeInternal();
-        Double maxLongitude = maxXEnvelope.getMaxX();
-
-        minYEnvelope = ((Polygon) this.rawSpatialRDD
-                .min((PolygonYMinComparator) GeometryComparatorFactory.createComparator("polygon", "y", "min"))).getEnvelopeInternal();
-        Double minLatitude = minYEnvelope.getMinY();
-
-        maxYEnvelope = ((Polygon) this.rawSpatialRDD
-                .max((PolygonYMaxComparator) GeometryComparatorFactory.createComparator("polygon", "y", "max"))).getEnvelopeInternal();
-        Double maxLatitude = maxYEnvelope.getMaxY();
-        this.boundary[0] = minLongitude;
-        this.boundary[1] = minLatitude;
-        this.boundary[2] = maxLongitude;
-        this.boundary[3] = maxLatitude;
-        this.boundaryEnvelope = new Envelope(boundary[0],boundary[2],boundary[1],boundary[3]);
-        return new Envelope(boundary[0], boundary[2], boundary[1], boundary[3]);
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset, FileDataSplitter splitter, boolean carryInputData) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).map(new PolygonFormatMapper(startOffset, endOffset, splitter, carryInputData)));
+        this.boundary();
+        this.totalNumberOfRecords = this.rawSpatialRDD.count();
     }
 
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param partitions the partitions
+     */
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Integer partitions) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).map(new PolygonFormatMapper(splitter,carryInputData)));
+        this.boundary();
+        this.totalNumberOfRecords = this.rawSpatialRDD.count();
+    }
+
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     */
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).map(new PolygonFormatMapper(splitter, carryInputData)));
+        this.boundary();
+        this.totalNumberOfRecords = this.rawSpatialRDD.count();
+    }
+    
     /**
      * Minimum bounding rectangle.
      *
@@ -172,6 +172,28 @@ public class PolygonRDD extends SpatialRDD {
             }
         });
         return (Polygon)result;
+    }
+    
+    /**
+     * Save as geo JSON.
+     *
+     * @param outputLocation the output location
+     */
+    public void saveAsGeoJSON(String outputLocation) {
+        this.rawSpatialRDD.mapPartitions(new FlatMapFunction<Iterator<Object>, String>() {
+            @Override
+            public Iterator<String> call(Iterator<Object> iterator) throws Exception {
+                ArrayList<String> result = new ArrayList<String>();
+                GeoJSONWriter writer = new GeoJSONWriter();
+                while (iterator.hasNext()) {
+                	Geometry spatialObject = (Geometry)iterator.next();
+                    GeoJSON json = writer.write(spatialObject);
+                    String jsonstring = json.toString();
+                    result.add(jsonstring);
+                }
+                return result.iterator();
+            }
+        }).saveAsTextFile(outputLocation);
     }
 }
 

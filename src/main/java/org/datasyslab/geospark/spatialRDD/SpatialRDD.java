@@ -1,8 +1,8 @@
 /**
  * FILE: SpatialRDD.java
  * PATH: org.datasyslab.geospark.spatialRDD.SpatialRDD.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
 package org.datasyslab.geospark.spatialRDD;
 
@@ -20,6 +20,7 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.geometryObjects.Circle;
 import org.datasyslab.geospark.spatialPartitioning.EqualPartitioning;
 import org.datasyslab.geospark.spatialPartitioning.HilbertPartitioning;
 import org.datasyslab.geospark.spatialPartitioning.PartitionJudgement;
@@ -27,6 +28,10 @@ import org.datasyslab.geospark.spatialPartitioning.RtreePartitioning;
 import org.datasyslab.geospark.spatialPartitioning.SpatialPartitioner;
 import org.datasyslab.geospark.spatialPartitioning.VoronoiPartitioning;
 import org.datasyslab.geospark.utils.RDDSampleUtils;
+import org.datasyslab.geospark.utils.XMaxComparator;
+import org.datasyslab.geospark.utils.XMinComparator;
+import org.datasyslab.geospark.utils.YMaxComparator;
+import org.datasyslab.geospark.utils.YMinComparator;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -339,6 +344,56 @@ public abstract class SpatialRDD implements Serializable{
 	        }
 	}
 	
+    /**
+     * Boundary.
+     *
+     * @return the envelope
+     */
+    public Envelope boundary() {
+        
+        try
+        {
+        	Object minXEnvelope = this.rawSpatialRDD.min(new XMinComparator());
+        	Object minYEnvelope = this.rawSpatialRDD.min(new YMinComparator());
+        	Object maxXEnvelope = this.rawSpatialRDD.max(new XMaxComparator());
+        	Object maxYEnvelope = this.rawSpatialRDD.max(new YMaxComparator());
+        	
+        	this.boundary[0] = ((Geometry)minXEnvelope).getEnvelopeInternal().getMinX();
+            this.boundary[1] = ((Geometry)minYEnvelope).getEnvelopeInternal().getMinY();
+            this.boundary[2] = ((Geometry)maxXEnvelope).getEnvelopeInternal().getMaxX();
+            this.boundary[3] = ((Geometry)maxYEnvelope).getEnvelopeInternal().getMaxY();
+        }
+        catch(ClassCastException castError)
+        {
+        	if(castError.getMessage().contains("Circle"))
+        	{
+            	Object minXEnvelope = this.rawSpatialRDD.min(new XMinComparator());
+            	Object minYEnvelope = this.rawSpatialRDD.min(new YMinComparator());
+            	Object maxXEnvelope = this.rawSpatialRDD.max(new XMaxComparator());
+            	Object maxYEnvelope = this.rawSpatialRDD.max(new YMaxComparator());
+            	
+            	this.boundary[0] = ((Circle)minXEnvelope).getMBR().getMinX();
+                this.boundary[1] = ((Circle)minYEnvelope).getMBR().getMinY();
+                this.boundary[2] = ((Circle)maxXEnvelope).getMBR().getMaxX();
+                this.boundary[3] = ((Circle)maxYEnvelope).getMBR().getMaxY();
+        	}
+        	else if(castError.getMessage().contains("Envelope"))
+        	{
+            	Object minXEnvelope = this.rawSpatialRDD.min(new XMinComparator());
+            	Object minYEnvelope = this.rawSpatialRDD.min(new YMinComparator());
+            	Object maxXEnvelope = this.rawSpatialRDD.max(new XMaxComparator());
+            	Object maxYEnvelope = this.rawSpatialRDD.max(new YMaxComparator());
+            	
+            	this.boundary[0] = ((Envelope)minXEnvelope).getMinX();
+                this.boundary[1] = ((Envelope)minYEnvelope).getMinY();
+                this.boundary[2] = ((Envelope)maxXEnvelope).getMaxX();
+                this.boundary[3] = ((Envelope)maxYEnvelope).getMaxY();
+        	}
+        }
+        this.boundaryEnvelope =  new Envelope(boundary[0],boundary[2],boundary[1],boundary[3]);
+        return this.boundaryEnvelope;
+    }
+	
 	/**
 	 * Gets the raw spatial RDD.
 	 *
@@ -356,14 +411,6 @@ public abstract class SpatialRDD implements Serializable{
 	public void setRawSpatialRDD(JavaRDD<Object> rawSpatialRDD) {
 		this.rawSpatialRDD = rawSpatialRDD;
 	}
-	
-	/**
-	 * Boundary.
-	 *
-	 * @return the envelope
-	 */
-	public abstract Envelope boundary();
-	
 	
 
 }

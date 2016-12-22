@@ -1,8 +1,8 @@
 /**
  * FILE: PointKnnTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.PointKnnTest.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
 
@@ -129,7 +129,7 @@ public class PointKnnTest {
      */
     @Test
     public void testSpatialKnnQuery() throws Exception {
-    	PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter);
+    	PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, true);
 
     	for(int i=0;i<loopTimes;i++)
     	{
@@ -148,7 +148,7 @@ public class PointKnnTest {
      */
     @Test
     public void testSpatialKnnQueryUsingIndex() throws Exception {
-    	PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter);
+    	PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, true);
     	pointRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)
     	{

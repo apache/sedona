@@ -1,8 +1,8 @@
 /**
  * FILE: PointRDD.java
  * PATH: org.datasyslab.geospark.spatialRDD.PointRDD.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
 package org.datasyslab.geospark.spatialRDD;
 
@@ -19,13 +19,9 @@ import org.datasyslab.geospark.enums.FileDataSplitter;
 
 import org.datasyslab.geospark.formatMapper.PointFormatMapper;
 
-import org.datasyslab.geospark.utils.GeometryComparatorFactory;
-import org.datasyslab.geospark.utils.PointXComparator;
-import org.datasyslab.geospark.utils.PointYComparator;
 import org.wololo.geojson.GeoJSON;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
@@ -60,53 +56,63 @@ public class PointRDD extends SpatialRDD {
     /**
      * Instantiates a new point RDD.
      *
-     * @param spark the spark
+     * @param sparkContext the spark context
      * @param InputLocation the input location
      * @param Offset the offset
      * @param splitter the splitter
+     * @param carryInputData the carry input data
      * @param partitions the partitions
      */
-    public PointRDD(JavaSparkContext spark, String InputLocation, Integer Offset, FileDataSplitter splitter, Integer partitions) {
-        this.setRawSpatialRDD(spark.textFile(InputLocation, partitions).map(new PointFormatMapper(Offset, splitter)));
+    public PointRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter, boolean carryInputData, Integer partitions) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).map(new PointFormatMapper(Offset,Offset, splitter, carryInputData)));
         this.boundary();
         this.totalNumberOfRecords = this.rawSpatialRDD.count();
     }
 
-    
     /**
      * Instantiates a new point RDD.
      *
-     * @param spark the spark
+     * @param sparkContext the spark context
      * @param InputLocation the input location
      * @param Offset the offset
      * @param splitter the splitter
+     * @param carryInputData the carry input data
      */
-    public PointRDD (JavaSparkContext spark, String InputLocation, Integer Offset, FileDataSplitter splitter) {
-        this.setRawSpatialRDD(spark.textFile(InputLocation).map(new PointFormatMapper(Offset, splitter)));
+    public PointRDD (JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter, boolean carryInputData) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).map(new PointFormatMapper(Offset, Offset, splitter, carryInputData)));
         this.boundary();
         this.totalNumberOfRecords = this.rawSpatialRDD.count();
     }
 
-    /* (non-Javadoc)
-     * @see org.datasyslab.geospark.spatialRDD.SpatialRDD#boundary()
+    /**
+     * Instantiates a new point RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param partitions the partitions
      */
-    public Envelope boundary() {
-        Double minLongitude = ((Point) this.rawSpatialRDD
-                .min((PointXComparator) GeometryComparatorFactory.createComparator("point", "x"))).getX();
-        Double maxLongitude = ((Point) this.rawSpatialRDD
-                .max((PointXComparator) GeometryComparatorFactory.createComparator("point", "x"))).getX();
-        Double minLatitude = ((Point) this.rawSpatialRDD
-                .min((PointYComparator) GeometryComparatorFactory.createComparator("point", "y"))).getY();
-        Double maxLatitude = ((Point) this.rawSpatialRDD
-                .max((PointYComparator) GeometryComparatorFactory.createComparator("point", "y"))).getY();
-        this.boundary[0] = minLongitude;
-        this.boundary[1] = minLatitude;
-        this.boundary[2] = maxLongitude;
-        this.boundary[3] = maxLatitude;
-        this.boundaryEnvelope = new Envelope(minLongitude, maxLongitude, minLatitude, maxLatitude);
-        return boundaryEnvelope;
+    public PointRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Integer partitions) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).map(new PointFormatMapper(0, 0, splitter, carryInputData)));
+        this.boundary();
+        this.totalNumberOfRecords = this.rawSpatialRDD.count();
     }
 
+    /**
+     * Instantiates a new point RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     */
+    public PointRDD (JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).map(new PointFormatMapper(0, 0, splitter, carryInputData)));
+        this.boundary();
+        this.totalNumberOfRecords = this.rawSpatialRDD.count();
+    }
+    
     /**
      * Save as geo JSON.
      *

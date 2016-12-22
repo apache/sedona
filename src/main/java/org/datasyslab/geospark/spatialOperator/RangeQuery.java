@@ -1,8 +1,8 @@
 /**
  * FILE: RangeQuery.java
  * PATH: org.datasyslab.geospark.spatialOperator.RangeQuery.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
 
@@ -13,12 +13,14 @@ import org.apache.spark.api.java.function.Function;
 import org.datasyslab.geospark.rangeJudgement.GeometryRangeFilter;
 import org.datasyslab.geospark.rangeJudgement.RangeFilterUsingIndex;
 import org.datasyslab.geospark.rangeJudgement.RectangleRangeFilter;
+import org.datasyslab.geospark.spatialRDD.LineStringRDD;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 // TODO: Auto-generated Javadoc
@@ -42,7 +44,7 @@ public class RangeQuery implements Serializable{
 		if(useIndex==true)
 		{
 	        if(spatialRDD.indexedRawRDD == null) {
-	            throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index.");
+	            throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index on rawSpatialRDD.");
 	        }
 			JavaRDD<Object> result = spatialRDD.indexedRawRDD.mapPartitions(new RangeFilterUsingIndex(queryWindow));
 			return result.map(new Function<Object, Point>()
@@ -82,7 +84,7 @@ public class RangeQuery implements Serializable{
 		if(useIndex==true)
 		{
 	        if(spatialRDD.indexedRawRDD == null) {
-	            throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index.");
+	            throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index on rawSpatialRDD.");
 	        }
 			JavaRDD<Object> result = spatialRDD.indexedRawRDD.mapPartitions(new RangeFilterUsingIndex(queryWindow));
 			return result.map(new Function<Object, Point>()
@@ -123,7 +125,7 @@ public class RangeQuery implements Serializable{
 		if(useIndex==true)
 		{
 	        if(spatialRDD.indexedRawRDD == null) {
-	            throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index.");
+	            throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index on rawSpatialRDD.");
 	        }
 			JavaRDD<Object> result = spatialRDD.indexedRawRDD.mapPartitions(new RangeFilterUsingIndex(queryWindow));
 			return result.map(new Function<Object, Polygon>()
@@ -164,7 +166,7 @@ public class RangeQuery implements Serializable{
 		if(useIndex==true)
 		{
 	        if(spatialRDD.indexedRawRDD == null) {
-	            throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index.");
+	            throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index on rawSpatialRDD.");
 	        }
 			JavaRDD<Object> result = spatialRDD.indexedRawRDD.mapPartitions(new RangeFilterUsingIndex(queryWindow));
 			return result.map(new Function<Object, Polygon>()
@@ -205,7 +207,7 @@ public class RangeQuery implements Serializable{
 		if(useIndex==true)
 		{
 	        if(spatialRDD.indexedRawRDD == null) {
-	            throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index.");
+	            throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index on rawSpatialRDD.");
 	        }
 			JavaRDD<Object> result = spatialRDD.indexedRawRDD.mapPartitions(new RangeFilterUsingIndex(queryWindow));
 			return result.map(new Function<Object, Envelope>()
@@ -230,6 +232,88 @@ public class RangeQuery implements Serializable{
 				@Override
 				public Envelope call(Object spatialObject) throws Exception {
 					return (Envelope)spatialObject;
+				}
+				
+			});
+		}
+	}
+	
+	/**
+	 * Spatial range query.
+	 *
+	 * @param spatialRDD the spatial RDD
+	 * @param queryWindow the query window
+	 * @param condition the condition
+	 * @param useIndex the use index
+	 * @return the java RDD
+	 * @throws Exception the exception
+	 */
+	public static JavaRDD<LineString> SpatialRangeQuery(LineStringRDD spatialRDD, Envelope queryWindow,Integer condition,boolean useIndex) throws Exception
+	{
+		if(useIndex==true)
+		{
+	        if(spatialRDD.indexedRawRDD == null) {
+	            throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index on rawSpatialRDD.");
+	        }
+			JavaRDD<Object> result = spatialRDD.indexedRawRDD.mapPartitions(new RangeFilterUsingIndex(queryWindow));
+			return result.map(new Function<Object, LineString>()
+			{
+
+				@Override
+				public LineString call(Object spatialObject) throws Exception {
+					return (LineString)spatialObject;
+				}
+				
+			});
+		}
+		else{
+			JavaRDD<Object> result = spatialRDD.getRawSpatialRDD().filter(new GeometryRangeFilter(queryWindow, condition));
+			return result.map(new Function<Object,LineString>()
+			{
+				@Override
+				public LineString call(Object spatialObject) throws Exception {
+					return (LineString)spatialObject;
+				}
+				
+			});
+		}
+	}
+	
+	/**
+	 * Spatial range query.
+	 *
+	 * @param spatialRDD the spatial RDD
+	 * @param queryWindow the query window
+	 * @param condition the condition
+	 * @param useIndex the use index
+	 * @return the java RDD
+	 * @throws Exception the exception
+	 */
+	public static JavaRDD<LineString> SpatialRangeQuery(LineStringRDD spatialRDD, Polygon queryWindow,Integer condition,boolean useIndex) throws Exception
+	{
+		if(useIndex==true)
+		{
+	        if(spatialRDD.indexedRawRDD == null) {
+	            throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index on rawSpatialRDD.");
+	        }
+			JavaRDD<Object> result = spatialRDD.indexedRawRDD.mapPartitions(new RangeFilterUsingIndex(queryWindow));
+			return result.map(new Function<Object, LineString>()
+			{
+
+				@Override
+				public LineString call(Object spatialObject) throws Exception {
+					return (LineString)spatialObject;
+				}
+				
+			});
+		}
+		else{
+			JavaRDD<Object> result = spatialRDD.getRawSpatialRDD().filter(new GeometryRangeFilter(queryWindow, condition));
+			return result.map(new Function<Object,LineString>()
+			{
+				@Override
+				public LineString call(Object spatialObject) throws Exception {
+					return (LineString)spatialObject;
 				}
 				
 			});

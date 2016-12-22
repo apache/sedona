@@ -1,8 +1,8 @@
 /**
  * FILE: RectangleKnnTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.RectangleKnnTest.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
 
@@ -130,7 +130,7 @@ public class RectangleKnnTest {
      */
     @Test
     public void testSpatialKnnQuery() throws Exception {
-    	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter);
+    	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true);
 
     	for(int i=0;i<loopTimes;i++)
     	{
@@ -149,7 +149,7 @@ public class RectangleKnnTest {
      */
     @Test
     public void testSpatialKnnQueryUsingIndex() throws Exception {
-    	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter);
+    	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true);
     	rectangleRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)
     	{

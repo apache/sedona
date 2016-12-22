@@ -1,8 +1,8 @@
 /**
  * FILE: CircleRDD.java
  * PATH: org.datasyslab.geospark.spatialRDD.CircleRDD.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
 package org.datasyslab.geospark.spatialRDD;
 
@@ -11,11 +11,7 @@ import java.io.Serializable;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.datasyslab.geospark.geometryObjects.Circle;
-import org.datasyslab.geospark.utils.CircleXMaxComparator;
-import org.datasyslab.geospark.utils.CircleXMinComparator;
-import org.datasyslab.geospark.utils.CircleYMaxComparator;
-import org.datasyslab.geospark.utils.CircleYMinComparator;
-import org.datasyslab.geospark.utils.GeometryComparatorFactory;
+
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;;
@@ -25,10 +21,7 @@ import com.vividsolutions.jts.geom.Point;;
 /**
  * The Class CircleRDD.
  */
-public class CircleRDD implements Serializable {
-
-	/** The circle rdd. */
-	private JavaRDD<Circle> circleRDD;
+public class CircleRDD extends SpatialRDD {
 
 
 	/**
@@ -37,7 +30,15 @@ public class CircleRDD implements Serializable {
 	 * @param circleRDD the circle RDD
 	 */
 	public CircleRDD(JavaRDD<Circle> circleRDD) {
-		this.setCircleRDD(circleRDD.cache());
+		this.rawSpatialRDD = circleRDD.map(new Function<Circle,Object>()
+		{
+
+			@Override
+			public Object call(Circle circle) throws Exception {
+				return circle;
+			}
+			
+		});
 	}
 
 	/**
@@ -48,33 +49,24 @@ public class CircleRDD implements Serializable {
 	 */
 	public CircleRDD(PointRDD pointRDD, Double Radius) {
 		final Double radius = Radius;
-		this.circleRDD = pointRDD.getRawSpatialRDD().map(new Function<Object, Circle>() {
+		JavaRDD<Circle> circleRDD = pointRDD.rawSpatialRDD.map(new Function<Object, Circle>() {
 
 			public Circle call(Object v1) {
 
 				return new Circle((Point)v1, radius);
 			}
+		});
+		this.rawSpatialRDD = circleRDD.map(new Function<Circle,Object>()
+		{
 
+			@Override
+			public Object call(Circle circle) throws Exception {
+				return circle;
+			}
+			
 		});
 	}
 
-	/**
-	 * Gets the circle RDD.
-	 *
-	 * @return the circle RDD
-	 */
-	public JavaRDD<Circle> getCircleRDD() {
-		return circleRDD;
-	}
-
-	/**
-	 * Sets the circle RDD.
-	 *
-	 * @param circleRDD the new circle RDD
-	 */
-	public void setCircleRDD(JavaRDD<Circle> circleRDD) {
-		this.circleRDD = circleRDD;
-	}
 
     /**
      * Minimum bounding rectangle.
@@ -82,68 +74,15 @@ public class CircleRDD implements Serializable {
      * @return the rectangle RDD
      */
 	public RectangleRDD MinimumBoundingRectangle() {
-		return new RectangleRDD(this.getCircleRDD().map(new Function<Circle, Envelope>() {
+		return new RectangleRDD(this.rawSpatialRDD.map(new Function<Object, Envelope>() {
 
-			public Envelope call(Circle v1) {
+			public Envelope call(Object spatialObject) {
 
-				return v1.getMBR();
+				Circle circle = (Circle) spatialObject;
+				return circle.getMBR();
 			}
 
 		}));
-	}
-
-	/**
-	 * Boundary.
-	 *
-	 * @return the envelope
-	 */
-	public Envelope boundary() {
-		Double[] boundary = new Double[4];
-		Double minLongtitude1 = this.circleRDD
-				.min((CircleXMinComparator) GeometryComparatorFactory.createComparator("circle", "x", "min")).getMBR()
-				.getMinX();
-		Double maxLongtitude1 = this.circleRDD
-				.max((CircleXMinComparator) GeometryComparatorFactory.createComparator("circle", "x", "min")).getMBR()
-				.getMinX();
-		Double minLatitude1 = this.circleRDD
-				.min((CircleYMinComparator) GeometryComparatorFactory.createComparator("circle", "y", "min")).getMBR()
-				.getMinY();
-		Double maxLatitude1 = this.circleRDD
-				.max((CircleYMinComparator) GeometryComparatorFactory.createComparator("circle", "y", "min")).getMBR()
-				.getMinY();
-		Double minLongtitude2 = this.circleRDD
-				.min((CircleXMaxComparator) GeometryComparatorFactory.createComparator("circle", "x", "max")).getMBR()
-				.getMaxX();
-		Double maxLongtitude2 = this.circleRDD
-				.max((CircleXMaxComparator) GeometryComparatorFactory.createComparator("circle", "x", "max")).getMBR()
-				.getMaxX();
-		Double minLatitude2 = this.circleRDD
-				.min((CircleYMaxComparator) GeometryComparatorFactory.createComparator("circle", "y", "max")).getMBR()
-				.getMaxY();
-		Double maxLatitude2 = this.circleRDD
-				.max((CircleYMaxComparator) GeometryComparatorFactory.createComparator("circle", "y", "max")).getMBR()
-				.getMaxY();
-		if (minLongtitude1 < minLongtitude2) {
-			boundary[0] = minLongtitude1;
-		} else {
-			boundary[0] = minLongtitude2;
-		}
-		if (minLatitude1 < minLatitude2) {
-			boundary[1] = minLatitude1;
-		} else {
-			boundary[1] = minLatitude2;
-		}
-		if (maxLongtitude1 > maxLongtitude2) {
-			boundary[2] = maxLongtitude1;
-		} else {
-			boundary[2] = maxLongtitude2;
-		}
-		if (maxLatitude1 > maxLatitude2) {
-			boundary[3] = maxLatitude1;
-		} else {
-			boundary[3] = maxLatitude2;
-		}
-		return new Envelope(boundary[0], boundary[2], boundary[1], boundary[3]);
 	}
 
 	/**
@@ -152,11 +91,11 @@ public class CircleRDD implements Serializable {
 	 * @return the point RDD
 	 */
 	public PointRDD Center() {
-		return new PointRDD(this.getCircleRDD().map(new Function<Circle, Point>() {
+		return new PointRDD(this.rawSpatialRDD.map(new Function<Object, Point>() {
 
-			public Point call(Circle v1) {
+			public Point call(Object spatialObject) {
 
-				return v1.getCenter();
+				return ((Circle)spatialObject).getCenter();
 			}
 
 		}));

@@ -1,8 +1,8 @@
 /**
  * FILE: Example.java
  * PATH: org.datasyslab.geospark.showcase.Example.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
 package org.datasyslab.geospark.showcase;
 
@@ -191,7 +191,7 @@ public class Example implements Serializable{
     	Random random=new Random();
     	double randomNumber=random.nextInt(10)+random.nextDouble();
     	queryEnvelope=new Envelope (-90.01+randomNumber,-80.01+randomNumber,30.01+randomNumber,40.01+randomNumber);
-    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter);
+    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true);
     	objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
@@ -211,7 +211,7 @@ public class Example implements Serializable{
     	Random random=new Random();
     	double randomNumber=random.nextInt(10)+random.nextDouble();
     	queryEnvelope=new Envelope (-90.01+randomNumber,-80.01+randomNumber,30.01+randomNumber,40.01+randomNumber);
-    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter);
+    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true);
     	objectRDD.buildIndex(IndexType.RTREE,false);
     	objectRDD.indexedRawRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
@@ -231,7 +231,7 @@ public class Example implements Serializable{
     	Random random=new Random();
     	double randomNumber=random.nextInt(10)+random.nextDouble();
     	queryPoint=fact.createPoint(new Coordinate(-84.01+randomNumber, 34.01+randomNumber));
-    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter);
+    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true);
     	objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
@@ -249,7 +249,7 @@ public class Example implements Serializable{
     	Random random=new Random();
     	double randomNumber=random.nextInt(10)+random.nextDouble();
     	queryPoint=fact.createPoint(new Coordinate(-84.01+randomNumber, 34.01+randomNumber));
-    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter);
+    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true);
     	objectRDD.buildIndex(IndexType.RTREE,false);
     	objectRDD.indexedRawRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
@@ -265,8 +265,8 @@ public class Example implements Serializable{
      * @throws Exception the exception
      */
     public static void testSpatialJoinQuery() throws Exception {
-    	RectangleRDD rectangleRDD = new RectangleRDD(sc, inputLocation2, offset2, splitter2);
-    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset ,splitter,numPartitions);
+    	RectangleRDD rectangleRDD = new RectangleRDD(sc, inputLocation2, offset2, splitter2, true);
+    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset ,splitter,true, numPartitions);
     	objectRDD.spatialPartitioning(GridType.RTREE);
     	rectangleRDD.spatialPartitioning(objectRDD.grids);
     	objectRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY());
@@ -284,8 +284,8 @@ public class Example implements Serializable{
      * @throws Exception the exception
      */
     public static void testSpatialJoinQueryUsingIndex() throws Exception {
-    	RectangleRDD rectangleRDD = new RectangleRDD(sc, inputLocation2, offset2, splitter2);
-  		RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset ,splitter,numPartitions);
+    	RectangleRDD rectangleRDD = new RectangleRDD(sc, inputLocation2, offset2, splitter2, true);
+  		RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset ,splitter,true, numPartitions);
   		objectRDD.spatialPartitioning(GridType.RTREE);
   		rectangleRDD.spatialPartitioning(objectRDD.grids);
     	objectRDD.buildIndex(IndexType.RTREE,true);

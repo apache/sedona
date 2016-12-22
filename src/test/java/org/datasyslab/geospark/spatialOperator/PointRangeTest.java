@@ -1,8 +1,8 @@
 /**
  * FILE: PointRangeTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.PointRangeTest.java
- * Copyright (c) 2016 Arizona State University Data Systems Lab.
- * All rights reserved.
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All right reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
 
@@ -120,7 +120,7 @@ public class PointRangeTest {
      */
     @Test
     public void testSpatialRangeQuery() throws Exception {
-    	PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter);
+    	PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true);
     	for(int i=0;i<loopTimes;i++)
     	{
     		long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0,false).count();
@@ -137,7 +137,7 @@ public class PointRangeTest {
      */
     @Test
     public void testSpatialRangeQueryUsingIndex() throws Exception {
-    	PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter);
+    	PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true);
     	spatialRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)
     	{
