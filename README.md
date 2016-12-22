@@ -2,23 +2,26 @@
 
 [![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark)
 
+GeoSpark is listed as **Infrastructure Project** on **Apache Spark Official Third Party Project Page** ([http://spark.apache.org/third-party-projects.html](http://spark.apache.org/third-party-projects.html))
 
 GeoSpark is a cluster computing system for processing large-scale spatial data. GeoSpark extends Apache Spark with a set of out-of-the-box Spatial Resilient Distributed Datasets (SRDDs) that efficiently load, process, and analyze large-scale spatial data across machines. GeoSpark provides APIs for Apache Spark programmer to easily develop their spatial analysis programs with Spatial Resilient Distributed Datasets (SRDDs) which have in house support for geometrical and distance operations.
 
-GeoSpark is listed as **Infrastructure Project** in **Apache Spark  Third Party Project Wiki Page** ([Link](https://cwiki.apache.org/confluence/display/SPARK/Third+Party+Projects))
+
 
 GeoSpark artifacts are hosted in Maven Central. You can add a Maven dependency with the following coordinates:
 
 ```
 groupId: org.datasyslab
 artifactId: geospark
-version: 0.3.2
+version: 0.4.0
 ```
+
+The following version supports Apache Spark 1.X versions:
 
 ```
 groupId: org.datasyslab
 artifactId: geospark
-version: 0.3.2-spark-1.x
+version: 0.4.0-spark-1.x
 ```
 
 
@@ -28,9 +31,10 @@ version: 0.3.2-spark-1.x
 
 |      Version     	| Summary                                                                                                                                                                                                               	|
 |:----------------:	|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
+| 0.4.0| **Major updates:** ([Example](https://github.com/DataSystemsLab/GeoSpark/blob/master/src/main/java/org/datasyslab/geospark/showcase/Example.java)) 1. Refactor constrcutor API usage. 2. Simplify Spatial Join Query API. 3. Add native support for LineStringRDD; **Functionality enhancement:** 1. Release the persist function back to users. 2. Add more exception explanations.
 |       0.3.2      	| Functionality enhancement: 1. [JTSplus Spatial Objects](https://github.com/jiayuasu/JTSplus) now carry the original input data. Each object stores "UserData" and provides getter and setter. 2. Add a new SpatialRDD constructor to transform a regular data RDD to a spatial partitioned SpatialRDD.                                                                             	|
 |       0.3.1      	| Bug fix: Support Apache Spark 2.X version, fix a bug which results in inaccurate results when doing join query, add more unit test cases                                                                              	|
-|        0.3       	| Major updates: Significantly shorten query time on spatial join for skewed data; Support load balanced spatial partitioning methods (also serve as the global index); Optimize code for iterative spatial data mining 	|
+|        0.3       	| Major updates: Significantly shorten query time on spatial join for skewed data; Support load balanced spatial partitioning methods (also serve as the global index); Optimize code for iterative spatial data mining 	||
 |   Master branch  	| even with 0.3.2                                                                                                                                                                                                     	 	|
 | Spark 1.X branch 	| even with 0.3.2 but only supports Apache Spark 1.X        																																								|
 
@@ -86,36 +90,20 @@ Please refer [GeoSpark Scala and Java API Usage](http://www.public.asu.edu/~jiay
 
 GeoSpark extends RDDs to form Spatial RDDs (SRDDs) and efficiently partitions SRDD data elements across machines and introduces novel parallelized spatial (geometric operations that follows the Open Geosptial Consortium (OGC) standard) transformations and actions (for SRDD) that provide a more intuitive interface for users to write spatial data analytics programs. Moreover, GeoSpark extends the SRDD layer to execute spatial queries (e.g., Range query, KNN query, and Join query) on large-scale spatial datasets. After geometrical objects are retrieved in the Spatial RDD layer, users can invoke spatial query processing operations provided in the Spatial Query Processing Layer of GeoSpark which runs over the in-memory cluster, decides how spatial object-relational tuples could be stored, indexed, and accessed using SRDDs, and returns the spatial query results required by user.
 
-
-
-### PointRDD
-
-(column, column,..., Longitude, Latitude, column, column,...)
-
-### RectangleRDD
-
-(column, column,...,Longitude 1, Longitude 2, Latitude 1, Latitude 2,column, column,...)
-
-Two pairs of longitude and latitude present the vertexes lie on the diagonal of one rectangle.
-
-### PolygonRDD
-
-(column, column,...,Longitude 1, Latitude 1, Longitude 2, Latitude 2, ...)
-
-Each tuple contains unlimited points.
+**Supported Spatial RDDs: PointRDD, RectangleRDD, PolygonRDD, LineStringRDD**
 
 ## Supported data format
-GeoSpark supports Comma-Separated Values ("csv"), Tab-separated values ("tsv"), Well-Known Text ("wkt"), and  GeoJSON ("geojson") as the input formats. Users only need to specify input format as Splitter and the start column (if necessary) of spatial info in one tuple as Offset when call Constructors.
+GeoSpark supports Comma-Separated Values (**CSV**), Tab-separated values (**TSV**), Well-Known Text (**WKT**), and  **GeoJSON** as the input formats. Users only need to specify input format as Splitter and the start and end offset (if necessary) of spatial fields in one row when call Constructors.
 
 ## Important features
 
 ### Spatial partitioning
 
-GeoSpark supports equal size ("equalgrid"), R-Tree ("rtree") and Voronoi diagram ("voronoi") spatial partitioning methods. Spatial partitioning is to repartition RDD according to objects' spatial locations. Spatial join on spatial paritioned RDD will be very fast.
+GeoSpark supports R-Tree (**RTREE**) and Voronoi diagram (**VORONOI**) spatial partitioning methods. Spatial partitioning is to repartition RDD according to objects' spatial locations. Spatial join on spatial paritioned RDD will be very fast.
 
 ### Spatial Index
 
-GeoSpark supports two Spatial Indexes, Quad-Tree and R-Tree. 
+GeoSpark supports two Spatial Indexes, Quad-Tree (**QUADTREE**) and R-Tree (**RTREE**). Quad-Tree doesn't support Spatial K Nearest Neighbors query.
 
 ### Geometrical operation
 
@@ -165,5 +153,5 @@ We appreciate the help and suggestions from the following GeoSpark users (List i
 ### Project website
 Please visit [GeoSpark project wesbite](http://geospark.datasyslab.org) for latest news and releases.
 
-### DataSys Lab
-GeoSpark is one of the projects under [DataSys Lab](http://www.datasyslab.org/) at Arizona State University. The mission of DataSys Lab is designing and developing experimental data management systems (e.g., database systems).
+### Data Systems Lab
+GeoSpark is one of the projects under [Data Systems Lab](http://www.datasyslab.org/) at Arizona State University. The mission of Data Systems Lab is designing and developing experimental data management systems (e.g., database systems).

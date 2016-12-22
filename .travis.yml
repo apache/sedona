@@ -2,7 +2,7 @@ os:
   - linux
 
 language: java
-sudo: true
+sudo: false
 git:
   submodules: false
 
@@ -17,9 +17,10 @@ git:
 
 script:
 
-  - mvn clean
-  - mvn install
+  - mvn clean install -DskipTests
 
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
 
 ## ----------------------------------------------------------------------
 ## Notification
