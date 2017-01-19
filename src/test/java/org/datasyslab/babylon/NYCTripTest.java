@@ -54,7 +54,7 @@ class NYCTripMapper implements FlatMapFunction<String, Object> {
     Coordinate[] coordinates;
     LinearRing linear;
     int actualEndOffset;
-    public Iterator call(String line) throws Exception {
+    public Iterable<Object> call(String line) throws Exception {
         List result= new ArrayList<LineString>();
         Geometry spatialObject = null;
         MultiLineString multiSpatialObjects = null;
@@ -65,7 +65,7 @@ class NYCTripMapper implements FlatMapFunction<String, Object> {
         coordinatesList.add(new Coordinate(Double.parseDouble(lineSplitList.get(8))*-1.0, Double.parseDouble(lineSplitList.get(9))));
         spatialObject = fact.createLineString(coordinatesList.toArray(new Coordinate[coordinatesList.size()]));
         result.add((LineString)spatialObject);
-        return result.iterator();
+        return result;
     }
 
 } 

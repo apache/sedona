@@ -143,6 +143,7 @@ public class PolygonRDDTest {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
         //todo: Move this into log4j.
+        /*
         Map<Integer, Long> map = spatialRDD.spatialPartitionedRDD.countByKey();
 
       //  System.out.println(map.size());
@@ -152,6 +153,7 @@ public class PolygonRDDTest {
             Double percentage = number.doubleValue() / spatialRDD.totalNumberOfRecords;
            // System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
+        */
     }
     
     /**
@@ -170,15 +172,17 @@ public class PolygonRDDTest {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
         //todo: Move this into log4j.
+        /*
         Map<Integer, Long> map = spatialRDD.spatialPartitionedRDD.countByKey();
 
-        //System.out.println(map.size());
+      //  System.out.println(map.size());
 
         for (Entry<Integer, Long> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / spatialRDD.totalNumberOfRecords;
            // System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
+        */
     }
     
     /**
@@ -197,15 +201,17 @@ public class PolygonRDDTest {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
         //todo: Move this into log4j.
+        /*
         Map<Integer, Long> map = spatialRDD.spatialPartitionedRDD.countByKey();
 
-        //System.out.println(map.size());
+      //  System.out.println(map.size());
 
         for (Entry<Integer, Long> entry : map.entrySet()) {
             Long number = (Long) entry.getValue();
             Double percentage = number.doubleValue() / spatialRDD.totalNumberOfRecords;
-          //  System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+           // System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
+        */
     }
 
     
