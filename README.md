@@ -121,7 +121,7 @@ Jia Yu, Jinxuan Wu, Mohamed Sarwat. ["GeoSpark: A Cluster Computing Framework fo
 
 ## Acknowledgement
 
-GeoSaprk makes use of JTS Plus (An extended JTS Topology Suite Version 1.14) for some geometrical computations.
+GeoSpark makes use of JTS Plus (An extended JTS Topology Suite Version 1.14) for some geometrical computations.
 
 Please refer to [JTS Topology Suite website](http://tsusiatsoftware.net/jts/main.html) and [JTS Plus](https://github.com/jiayuasu/JTSplus) for more details.
 
