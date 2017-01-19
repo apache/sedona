@@ -2,7 +2,7 @@
  * FILE: PointRDDTest.java
  * PATH: org.datasyslab.geospark.spatialRDD.PointRDDTest.java
  * Copyright (c) 2017 Arizona State University Data Systems Lab
- * All right reserved.
+ * All rights reserved.
  */
 package org.datasyslab.geospark.spatialRDD;
 
@@ -152,6 +152,17 @@ public class PointRDDTest implements Serializable{
         	//System.out.println("PointRDD spatial partitioning grids: "+d);
         }
         //System.out.println(spatialRDD.boundaryEnvelope);
+        //todo: Move this into log4j.
+        Map<Integer, Long> map = spatialRDD.spatialPartitionedRDD.countByKey();
+
+      //  System.out.println(map.size());
+
+        for (Entry<Integer, Long> entry : map.entrySet()) {
+            Long number = (Long) entry.getValue();
+            Double percentage = number.doubleValue() / spatialRDD.totalNumberOfRecords;
+           // System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+        }
+        //System.out.println("Original number of records: "+spatialRDD.countWithoutDuplicates()+" Spatial partitioned records: "+spatialRDD.countWithoutDuplicatesSPRDD());
         assert spatialRDD.countWithoutDuplicates()==spatialRDD.countWithoutDuplicatesSPRDD();
     }
     
@@ -170,6 +181,17 @@ public class PointRDDTest implements Serializable{
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
+        //todo: Move this into log4j.
+        Map<Integer, Long> map = spatialRDD.spatialPartitionedRDD.countByKey();
+
+      //  System.out.println(map.size());
+
+        for (Entry<Integer, Long> entry : map.entrySet()) {
+            Long number = (Long) entry.getValue();
+            Double percentage = number.doubleValue() / spatialRDD.totalNumberOfRecords;
+           // System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
+        }
+        //System.out.println("Original number of records: "+spatialRDD.countWithoutDuplicates()+" Spatial partitioned records: "+spatialRDD.countWithoutDuplicatesSPRDD());
         assert spatialRDD.countWithoutDuplicates()==spatialRDD.countWithoutDuplicatesSPRDD();
     }
     
@@ -188,7 +210,18 @@ public class PointRDDTest implements Serializable{
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d);
         }
- 
+        //System.out.println(spatialRDD.boundaryEnvelope);
+        //todo: Move this into log4j.
+        Map<Integer, Long> map = spatialRDD.spatialPartitionedRDD.countByKey();
+
+        //System.out.println(map.size());
+
+        for (Entry<Integer, Long> entry : map.entrySet()) {
+            Long number = (Long) entry.getValue();
+            Double percentage = number.doubleValue() / spatialRDD.totalNumberOfRecords;
+            //System.out.println("Rtree "+entry.getKey() + " : " + String.format("%.4f", percentage));
+        }
+        //System.out.println("Original number of records: "+spatialRDD.countWithoutDuplicates()+" Spatial partitioned records: "+spatialRDD.countWithoutDuplicatesSPRDD());
         assert spatialRDD.countWithoutDuplicates()==spatialRDD.countWithoutDuplicatesSPRDD();
     }
     
@@ -207,7 +240,17 @@ public class PointRDDTest implements Serializable{
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
+        //todo: Move this into log4j.
+        Map<Integer, Long> map = spatialRDD.spatialPartitionedRDD.countByKey();
 
+        //System.out.println(map.size());
+
+        for (Entry<Integer, Long> entry : map.entrySet()) {
+            Long number = (Long) entry.getValue();
+            Double percentage = number.doubleValue() / spatialRDD.totalNumberOfRecords;
+            //System.out.println("Voronoi "+entry.getKey() + " : " + String.format("%.4f", percentage));
+        }
+        //System.out.println("Original number of records: "+spatialRDD.countWithoutDuplicates()+" Spatial partitioned records: "+spatialRDD.countWithoutDuplicatesSPRDD());
         assert spatialRDD.countWithoutDuplicates()==spatialRDD.countWithoutDuplicatesSPRDD();
     }
 

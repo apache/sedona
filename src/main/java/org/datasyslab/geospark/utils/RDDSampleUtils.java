@@ -2,7 +2,7 @@
  * FILE: RDDSampleUtils.java
  * PATH: org.datasyslab.geospark.utils.RDDSampleUtils.java
  * Copyright (c) 2017 Arizona State University Data Systems Lab
- * All right reserved.
+ * All rights reserved.
  */
 package org.datasyslab.geospark.utils;
 
