@@ -24,14 +24,14 @@ public class OverlayOperator {
 	public BufferedImage backImage;
 	
 	/** The distributed back image. */
-	public JavaPairRDD<Integer,BufferedImage> distributedBackImage;
+	public JavaPairRDD<Integer,ImageSerializableWrapper> distributedBackImage;
 	
 	/**
 	 * Instantiates a new overlay operator.
 	 *
 	 * @param distributedBackImage the distributed back image
 	 */
-	public OverlayOperator(JavaPairRDD<Integer,BufferedImage> distributedBackImage)
+	public OverlayOperator(JavaPairRDD<Integer,ImageSerializableWrapper> distributedBackImage)
 	{
 		this.distributedBackImage = distributedBackImage;
 	}
@@ -52,17 +52,17 @@ public class OverlayOperator {
 	 * @param distributedFontImage the distributed font image
 	 * @return true, if successful
 	 */
-	public boolean JoinImage(JavaPairRDD<Integer,BufferedImage> distributedFontImage)
+	public boolean JoinImage(JavaPairRDD<Integer,ImageSerializableWrapper> distributedFontImage)
 	{
-		this.distributedBackImage = this.distributedBackImage.cogroup(distributedFontImage).mapToPair(new PairFunction<Tuple2<Integer,Tuple2<Iterable<BufferedImage>,Iterable<BufferedImage>>>,Integer,BufferedImage>()
+		this.distributedBackImage = this.distributedBackImage.cogroup(distributedFontImage).mapToPair(new PairFunction<Tuple2<Integer,Tuple2<Iterable<ImageSerializableWrapper>,Iterable<ImageSerializableWrapper>>>,Integer,ImageSerializableWrapper>()
 		{
 			@Override
-			public Tuple2<Integer, BufferedImage> call(
-					Tuple2<Integer, Tuple2<Iterable<BufferedImage>, Iterable<BufferedImage>>> imagePair)
+			public Tuple2<Integer, ImageSerializableWrapper> call(
+					Tuple2<Integer, Tuple2<Iterable<ImageSerializableWrapper>, Iterable<ImageSerializableWrapper>>> imagePair)
 						throws Exception {
 				int imagePartitionId = imagePair._1;
-				Iterator<BufferedImage> backImageIterator = imagePair._2._1.iterator();
-				Iterator<BufferedImage> frontImageIterator = imagePair._2._2.iterator();
+				Iterator<ImageSerializableWrapper> backImageIterator = imagePair._2._1.iterator();
+				Iterator<ImageSerializableWrapper> frontImageIterator = imagePair._2._2.iterator();
 				if(backImageIterator.hasNext()==false)
 				{
 					throw new Exception("[OverlayOperator][JoinImage] The back image iterator didn't get any image partitions.");
@@ -71,8 +71,8 @@ public class OverlayOperator {
 				{
 					throw new Exception("[OverlayOperator][JoinImage] The front image iterator didn't get any image partitions.");
 				}
-				BufferedImage backImage = backImageIterator.next();
-				BufferedImage frontImage = frontImageIterator.next();
+				BufferedImage backImage = backImageIterator.next().image;
+				BufferedImage frontImage = frontImageIterator.next().image;
 				if(backImage.getWidth()!=frontImage.getWidth()||backImage.getHeight()!=frontImage.getHeight())
 				{
 					throw new Exception("[OverlayOperator][JoinImage] The two given image don't have the same width or the same height.");
@@ -83,7 +83,7 @@ public class OverlayOperator {
 				Graphics graphics = combinedImage.getGraphics();
 				graphics.drawImage(backImage, 0, 0, null);
 				graphics.drawImage(frontImage, 0, 0, null);
-				return new Tuple2(imagePartitionId,combinedImage);
+				return new Tuple2<Integer, ImageSerializableWrapper>(imagePartitionId,new ImageSerializableWrapper(combinedImage));
 			}
 		});
 		return true;
