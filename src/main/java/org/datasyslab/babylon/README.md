@@ -50,10 +50,10 @@ You also can support your desired image type by easily extending the photo filte
 You also can build your new self-designed effects by easily extending the visualization operator!
 
 ### Example
-Here is [an runnable single machine exmaple code](https://github.com/jiayuasu/GeoSpark/blob/master/src/main/java/org/datasyslab/babylon/showcase/Example.java). You can clone this repository and directly run it on you local machine!
+Here is [a runnable single machine exmaple code](https://github.com/jiayuasu/GeoSpark/blob/master/src/main/java/org/datasyslab/babylon/showcase/Example.java). You can clone this repository and directly run it on you local machine!
 
 ### Scala and Java API
-Please refer to [Babylon Scala and Java API]().
+Please refer to [Babylon Scala and Java API](http://www.public.asu.edu/~jiayu2/geospark/javadoc/latest/).
 ### Supported Spatial Objects and Input format
 
 All spatial obects and input formats supported by GeoSpark
