@@ -2,7 +2,7 @@
  * FILE: LineStringRDD.java
  * PATH: org.datasyslab.geospark.spatialRDD.LineStringRDD.java
  * Copyright (c) 2017 Arizona State University Data Systems Lab
- * All right reserved.
+ * All rights reserved.
  */
 package org.datasyslab.geospark.spatialRDD;
 
@@ -58,7 +58,7 @@ public class LineStringRDD extends SpatialRDD{
      * @param partitions the partitions
      */
     public LineStringRDD(JavaSparkContext SparkContext, String InputLocation, Integer startOffset, Integer endOffset, FileDataSplitter splitter, boolean carryInputData, Integer partitions) {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation, partitions).map(new LineStringFormatMapper(startOffset, endOffset, splitter, carryInputData)));
+        this.setRawSpatialRDD(SparkContext.textFile(InputLocation, partitions).flatMap(new LineStringFormatMapper(startOffset, endOffset, splitter, carryInputData)));
         this.boundary();
         this.totalNumberOfRecords = this.rawSpatialRDD.count();
     }
@@ -75,7 +75,7 @@ public class LineStringRDD extends SpatialRDD{
      * @param carryInputData the carry input data
      */
     public LineStringRDD(JavaSparkContext SparkContext, String InputLocation, Integer startOffset, Integer endOffset, FileDataSplitter splitter, boolean carryInputData) {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation).map(new LineStringFormatMapper(startOffset, endOffset, splitter, carryInputData)));
+        this.setRawSpatialRDD(SparkContext.textFile(InputLocation).flatMap(new LineStringFormatMapper(startOffset, endOffset, splitter, carryInputData)));
         this.boundary();
         this.totalNumberOfRecords = this.rawSpatialRDD.count();
     }
@@ -90,7 +90,7 @@ public class LineStringRDD extends SpatialRDD{
      * @param partitions the partitions
      */
     public LineStringRDD(JavaSparkContext SparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Integer partitions) {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation, partitions).map(new LineStringFormatMapper(splitter, carryInputData)));
+        this.setRawSpatialRDD(SparkContext.textFile(InputLocation, partitions).flatMap(new LineStringFormatMapper(splitter, carryInputData)));
         this.boundary();
         this.totalNumberOfRecords = this.rawSpatialRDD.count();
     }
@@ -105,7 +105,35 @@ public class LineStringRDD extends SpatialRDD{
      * @param carryInputData the carry input data
      */
     public LineStringRDD(JavaSparkContext SparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData) {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation).map(new LineStringFormatMapper(splitter, carryInputData)));
+        this.setRawSpatialRDD(SparkContext.textFile(InputLocation).flatMap(new LineStringFormatMapper(splitter, carryInputData)));
+        this.boundary();
+        this.totalNumberOfRecords = this.rawSpatialRDD.count();
+    }
+    
+    
+    /**
+     * Instantiates a new line string RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param partitions the partitions
+     * @param userSuppliedMapper the user supplied mapper
+     */
+    public LineStringRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(userSuppliedMapper));
+        this.boundary();
+        this.totalNumberOfRecords = this.rawSpatialRDD.count();
+    }
+    
+    /**
+     * Instantiates a new line string RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param userSuppliedMapper the user supplied mapper
+     */
+    public LineStringRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(userSuppliedMapper));
         this.boundary();
         this.totalNumberOfRecords = this.rawSpatialRDD.count();
     }
