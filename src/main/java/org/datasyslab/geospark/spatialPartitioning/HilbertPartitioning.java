@@ -2,7 +2,7 @@
  * FILE: HilbertPartitioning.java
  * PATH: org.datasyslab.geospark.spatialPartitioning.HilbertPartitioning.java
  * Copyright (c) 2017 Arizona State University Data Systems Lab
- * All right reserved.
+ * All rights reserved.
  */
 package org.datasyslab.geospark.spatialPartitioning;
 
