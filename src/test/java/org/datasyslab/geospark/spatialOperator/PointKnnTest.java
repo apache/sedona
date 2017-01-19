@@ -2,7 +2,7 @@
  * FILE: PointKnnTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.PointKnnTest.java
  * Copyright (c) 2017 Arizona State University Data Systems Lab
- * All right reserved.
+ * All rights reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
 

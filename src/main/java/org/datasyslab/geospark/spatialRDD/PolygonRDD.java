@@ -2,7 +2,7 @@
  * FILE: PolygonRDD.java
  * PATH: org.datasyslab.geospark.spatialRDD.PolygonRDD.java
  * Copyright (c) 2017 Arizona State University Data Systems Lab
- * All right reserved.
+ * All rights reserved.
  */
 package org.datasyslab.geospark.spatialRDD;
 
@@ -77,7 +77,7 @@ public class PolygonRDD extends SpatialRDD {
      * @param partitions the partitions
      */
     public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset, FileDataSplitter splitter, boolean carryInputData, Integer partitions) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).map(new PolygonFormatMapper(startOffset,endOffset, splitter,carryInputData)));
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(new PolygonFormatMapper(startOffset,endOffset, splitter,carryInputData)));
         this.boundary();
         this.totalNumberOfRecords = this.rawSpatialRDD.count();
     }
@@ -93,7 +93,7 @@ public class PolygonRDD extends SpatialRDD {
      * @param carryInputData the carry input data
      */
     public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset, FileDataSplitter splitter, boolean carryInputData) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).map(new PolygonFormatMapper(startOffset, endOffset, splitter, carryInputData)));
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(new PolygonFormatMapper(startOffset, endOffset, splitter, carryInputData)));
         this.boundary();
         this.totalNumberOfRecords = this.rawSpatialRDD.count();
     }
@@ -108,7 +108,7 @@ public class PolygonRDD extends SpatialRDD {
      * @param partitions the partitions
      */
     public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Integer partitions) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).map(new PolygonFormatMapper(splitter,carryInputData)));
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(new PolygonFormatMapper(splitter,carryInputData)));
         this.boundary();
         this.totalNumberOfRecords = this.rawSpatialRDD.count();
     }
@@ -122,7 +122,7 @@ public class PolygonRDD extends SpatialRDD {
      * @param carryInputData the carry input data
      */
     public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).map(new PolygonFormatMapper(splitter, carryInputData)));
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(new PolygonFormatMapper(splitter, carryInputData)));
         this.boundary();
         this.totalNumberOfRecords = this.rawSpatialRDD.count();
     }
@@ -143,6 +143,33 @@ public class PolygonRDD extends SpatialRDD {
         return new RectangleRDD(rectangleRDD);
     }
 
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param partitions the partitions
+     * @param userSuppliedMapper the user supplied mapper
+     */
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(userSuppliedMapper));
+        this.boundary();
+        this.totalNumberOfRecords = this.rawSpatialRDD.count();
+    }
+    
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param userSuppliedMapper the user supplied mapper
+     */
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(userSuppliedMapper));
+        this.boundary();
+        this.totalNumberOfRecords = this.rawSpatialRDD.count();
+    }
+    
     /**
      * Polygon union.
      *

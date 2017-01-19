@@ -6,3 +6,6 @@
 /.project
 /dependency-reduced-pom.xml
 /bin/
+/doc/
+/conf/
+/log/

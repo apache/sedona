@@ -2,30 +2,33 @@
  * FILE: LineStringFormatMapper.java
  * PATH: org.datasyslab.geospark.formatMapper.LineStringFormatMapper.java
  * Copyright (c) 2017 Arizona State University Data Systems Lab
- * All right reserved.
+ * All rights reserved.
  */
 package org.datasyslab.geospark.formatMapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
-import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.FlatMapFunction;
 
 import org.datasyslab.geospark.enums.FileDataSplitter;
 
 import org.wololo.jts2geojson.GeoJSONReader;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.io.WKTReader;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Class LineStringFormatMapper.
  */
-public class LineStringFormatMapper extends FormatMapper implements Function<String, Object> {
+public class LineStringFormatMapper extends FormatMapper implements FlatMapFunction<String, Object> {
 	
 	/**
 	 * Instantiates a new line string format mapper.
@@ -55,8 +58,10 @@ public class LineStringFormatMapper extends FormatMapper implements Function<Str
 	/* (non-Javadoc)
      * @see org.apache.spark.api.java.function.Function#call(java.lang.Object)
      */
-    public LineString call(String line) throws Exception {
-        LineString lineString = null;
+    public Iterable<Object> call(String line) throws Exception {
+    	List result= new ArrayList<LineString>();
+        Geometry spatialObject = null;
+        MultiLineString multiSpatialObjects = null;
         GeometryFactory fact = new GeometryFactory();
         List<String> lineSplitList;
         ArrayList<Coordinate> coordinatesList;
@@ -69,11 +74,12 @@ public class LineStringFormatMapper extends FormatMapper implements Function<Str
                 for (int i = this.startOffset; i <= actualEndOffset; i+=2) {
                     coordinatesList.add(new Coordinate(Double.parseDouble(lineSplitList.get(i)), Double.parseDouble(lineSplitList.get(i + 1))));
                 }
-                lineString = fact.createLineString(coordinatesList.toArray(new Coordinate[coordinatesList.size()]));
+                spatialObject = fact.createLineString(coordinatesList.toArray(new Coordinate[coordinatesList.size()]));
                 if(this.carryInputData)
                 {
-                    lineString.setUserData(line);
+                	spatialObject.setUserData(line);
                 }
+                result.add((LineString)spatialObject);
                 break;
             case TSV:
                 lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
@@ -82,31 +88,74 @@ public class LineStringFormatMapper extends FormatMapper implements Function<Str
                 for (int i = this.startOffset; i <= actualEndOffset; i+=2) {
                     coordinatesList.add(new Coordinate(Double.parseDouble(lineSplitList.get(i)), Double.parseDouble(lineSplitList.get(i + 1))));
                 }
-                lineString = fact.createLineString(coordinatesList.toArray(new Coordinate[coordinatesList.size()]));
+                spatialObject = fact.createLineString(coordinatesList.toArray(new Coordinate[coordinatesList.size()]));
                 if(this.carryInputData)
                 {
-                    lineString.setUserData(line);
+                	spatialObject.setUserData(line);
                 }
+                result.add((LineString)spatialObject);
                 break;
             case GEOJSON:
                 GeoJSONReader reader = new GeoJSONReader();
-                lineString = (LineString) reader.read(line);
-                if(this.carryInputData)
+                spatialObject = reader.read(line);
+                if(spatialObject instanceof MultiLineString)
                 {
-                    lineString.setUserData(line);
+                	/*
+                	 * If this line has a "Multi" type spatial object, GeoSpark separates them to a list of single objects 
+                	 * and assign original input line to each object.
+                	 */
+                	multiSpatialObjects = (MultiLineString) spatialObject;
+                	for(int i=0;i<multiSpatialObjects.getNumGeometries();i++)
+                	{
+                		spatialObject = multiSpatialObjects.getGeometryN(i);
+                		if(this.carryInputData)
+                		{
+                    		spatialObject.setUserData(line);
+                		}
+                		result.add((LineString) spatialObject);
+                	}
+                }
+                else
+                {
+                    if(this.carryInputData)
+                    {
+                    	spatialObject.setUserData(line);
+                    }
+                    result.add((LineString)spatialObject);
                 }
                 break;
             case WKT:
             	lineSplitList=Arrays.asList(line.split(splitter.getDelimiter()));
-                WKTReader wtkreader = new WKTReader();
-                lineString = (LineString) wtkreader.read(lineSplitList.get(this.startOffset));
-                if(this.carryInputData)
+                WKTReader wktreader = new WKTReader();
+                spatialObject = wktreader.read(lineSplitList.get(this.startOffset));
+                if(spatialObject instanceof MultiLineString)
                 {
-                    lineString.setUserData(line);
+                	multiSpatialObjects = (MultiLineString) spatialObject;
+                	for(int i=0;i<multiSpatialObjects.getNumGeometries();i++)
+                	{
+                    	/*
+                    	 * If this line has a "Multi" type spatial object, GeoSpark separates them to a list of single objects 
+                    	 * and assign original input line to each object.
+                    	 */
+                		spatialObject = multiSpatialObjects.getGeometryN(i);
+                		if(this.carryInputData)
+                		{
+                    		spatialObject.setUserData(line);
+                		}
+                		result.add((LineString) spatialObject);
+                	}
+                }
+                else
+                {
+                    if(this.carryInputData)
+                    {
+                    	spatialObject.setUserData(line);
+                    }
+                    result.add((LineString)spatialObject);
                 }
                 break;
         }
-        return lineString;
+        return result;
     }
 
 
