@@ -1,6 +1,7 @@
 ![GeoSpark Logo](http://www.public.asu.edu/~jiayu2/geospark/logo.png)
 
 [![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark)
+[![Join the chat at https://gitter.im/geospark-datasys/Lobby](https://badges.gitter.im/geospark-datasys/Lobby.svg)](https://gitter.im/geospark-datasys/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 GeoSpark is listed as **Infrastructure Project** on **Apache Spark Official Third Party Project Page** ([http://spark.apache.org/third-party-projects.html](http://spark.apache.org/third-party-projects.html))
 
@@ -28,35 +29,28 @@ version: 0.5.0-spark-1.x
 
 ##  Version information ([Full List](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Full-Version-Release-notes))
 
-[![Join the chat at https://gitter.im/geospark-datasys/Lobby](https://badges.gitter.im/geospark-datasys/Lobby.svg)](https://gitter.im/geospark-datasys/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 
 |      Version     	| Summary                                                                                                                                                                                                               	|
 |:----------------:	|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
-| 0.5.0| **Major updates:** We are pleased to announce the initial version of [Babylon](https://github.com/DataSystemsLab/GeoSpark/tree/master/src/main/java/org/datasyslab/babylon) a large-scale in-memory geospatial visualization system extending GeoSpark. Babylon and GeoSpark are integrated together. You can just import GeoSpark and enjoy! More detials are available here: [Babylon GeoSpatial Visualization](https://github.com/DataSystemsLab/GeoSpark/tree/master/src/main/java/org/datasyslab/babylon);
+| 0.5.0| **Major updates:** We are pleased to announce the initial version of [Babylon](https://github.com/DataSystemsLab/GeoSpark/tree/master/src/main/java/org/datasyslab/babylon) a large-scale in-memory geospatial visualization system extending GeoSpark. Babylon and GeoSpark are integrated together. You can just import GeoSpark and enjoy! More details are available here: [Babylon GeoSpatial Visualization](https://github.com/DataSystemsLab/GeoSpark/tree/master/src/main/java/org/datasyslab/babylon);
 | 0.4.0| **Major updates:** ([Example](https://github.com/DataSystemsLab/GeoSpark/blob/master/src/main/java/org/datasyslab/geospark/showcase/Example.java)) 1. Refactor constrcutor API usage. 2. Simplify Spatial Join Query API. 3. Add native support for LineStringRDD; **Functionality enhancement:** 1. Release the persist function back to users. 2. Add more exception explanations.|
 
 ##News
-### Babylon Visualization Framework on GeoSpark is now available!
-Babylon is a large-scale in-memory geospatial visualization system.
+* GeoSpark Gitter Chat is now online! Chat with our GeoSpark users and ask questions!
+* **Babylon Visualization Framework** on GeoSpark is now available!
+Babylon is a large-scale in-memory geospatial visualization system. More details are available here: [Babylon GeoSpatial Visualization](https://github.com/DataSystemsLab/GeoSpark/tree/master/src/main/java/org/datasyslab/babylon)
 
-Babylon provides native support for general cartographic design by extending GeoSpark to process large-scale spatial data. It can visulize Spatial RDD and Spatial Queries and render super high resolution image in parallel.
-
-Babylon and GeoSpark are integrated together. You just need to import GeoSpark and enjoy them! More detials are available here: [Babylon GeoSpatial Visualization](https://github.com/DataSystemsLab/GeoSpark/tree/master/src/main/java/org/datasyslab/babylon) 
-
-### Babylon Gallery
 <img src="http://www.public.asu.edu/~jiayu2/geospark/picture/usrail.png" width="250">
 <img src="http://www.public.asu.edu/~jiayu2/geospark/picture/nycheatmap.png" width="250">
 <img src="http://www.public.asu.edu/~jiayu2/geospark/picture/ustweet.png" width="250">
 
-## How to get started (For Scala and Java developers)
-
+## How to get started (For GeoSpark Scala and Java developers)
 
 
 ### Prerequisites
 
 1. Apache Spark 2.X releases (Apache Spark 1.X releases support available in GeoSpark for Spark 1.X branch)
-2. JDK 1.7
+2. JDK 1.7 or later
 3. You might need to modify the dependencies in "POM.xml" and make it consistent with your environment.
 
 Note: GeoSpark Master branch supports Apache Spark 2.X releases and GeoSpark for Spark 1.X branch supports Apache Spark 1.X releases. Please refer to the proper branch you need.
@@ -82,7 +76,9 @@ Note: GeoSpark Master branch supports Apache Spark 2.X releases and GeoSpark for
 
 ### GeoSpark Programming Examples (Scala)
 
-[GeoSpark Scala Example](https://gist.github.com/jiayuasu/bcecaa2e9e6f280a0f9a72bb7549ffaa)
+[GeoSpark Scala Example for GeoSpark 0.4 or later](https://gist.github.com/jiayuasu/e3571e982c518bb522e6c6c962207255)
+
+[GeoSpark Scala Example for GeoSpark 0.3.x](https://gist.github.com/jiayuasu/bcecaa2e9e6f280a0f9a72bb7549ffaa)
 
 [Test Data](https://github.com/DataSystemsLab/GeoSpark/tree/master/src/test/resources)
 
@@ -94,6 +90,8 @@ Note: GeoSpark Master branch supports Apache Spark 2.X releases and GeoSpark for
 
 ## Scala and Java API usage
 
+Note: Scala can call Java APIs seamlessly. That means GeoSpark Scala users use the same APIs with GeoSpark Java users.
+
 Please refer to [GeoSpark Scala and Java API Usage](http://www.public.asu.edu/~jiayu2/geospark/javadoc/)
 
 
@@ -104,17 +102,35 @@ GeoSpark extends RDDs to form Spatial RDDs (SRDDs) and efficiently partitions SR
 **Supported Spatial RDDs: PointRDD, RectangleRDD, PolygonRDD, LineStringRDD**
 
 ## Supported data format
-GeoSpark supports Comma-Separated Values (**CSV**), Tab-separated values (**TSV**), Well-Known Text (**WKT**), and  **GeoJSON** as the input formats. Users only need to specify input format as Splitter and the start and end offset (if necessary) of spatial fields in one row when call Constructors. GeoSpark also takes **any user-supplied format mapper function** to support the desired format.
+**Native input format support**
+
+Comma-Separated Values (**FileDataSplitter.CSV**), Tab-separated values (**FileDataSplitter.TSV**), Well-Known Text (**FileDataSplitter.WKT**), and  GeoJSON (**FileDataSplitter.GeoJSON**) as the input formats. Users only need to specify input format as Splitter and the start and end offset (if necessary) of spatial fields in one row when call Constructors.
+
+**User-supplied input format mapper**
+
+Examples: [user-supplied input format mapper](https://github.com/DataSystemsLab/GeoSpark/tree/master/src/main/java/org/datasyslab/geospark/showcase)
+
+You can load your mapper like this:
+
+```
+mySpatialRDD = PointRDD(sparkContext, InputLocation, userSuppliedMapper);
+mySpatialRDD = PointRDD(sparkContext, InputLocation, PartitionNum, userSuppliedMapper);
+
+mySpatialRDD = LineStringRDD(sparkContext, InputLocation, userSuppliedMapper);
+mySpatialRDD = LineStringRDD(sparkContext, InputLocation, PartitionNum, userSuppliedMapper);
+...
+
+```
 
 ## Important features
 
 ### Spatial partitioning
 
-GeoSpark supports R-Tree (**RTREE**) and Voronoi diagram (**VORONOI**) spatial partitioning methods. Spatial partitioning is to repartition RDD according to objects' spatial locations. Spatial join on spatial paritioned RDD will be very fast.
+GeoSpark supports R-Tree (**GridType.RTREE**) and Voronoi diagram (**GridType.VORONOI**) spatial partitioning methods. Spatial partitioning is to repartition RDD according to objects' spatial locations. Spatial join on spatial paritioned RDD will be very fast.
 
 ### Spatial Index
 
-GeoSpark supports two Spatial Indexes, Quad-Tree (**QUADTREE**) and R-Tree (**RTREE**). Quad-Tree doesn't support Spatial K Nearest Neighbors query.
+GeoSpark supports two Spatial Indexes, Quad-Tree (**IndexType.QUADTREE**) and R-Tree (**IndexType.RTREE**). Quad-Tree doesn't support Spatial K Nearest Neighbors query.
 
 ### Geometrical operation
 
@@ -129,7 +145,7 @@ Babylon is a large-scale in-memory geospatial visualization system.
 
 Babylon provides native support for general cartographic design by extending GeoSpark to process large-scale spatial data. It can visulize Spatial RDD and Spatial Queries and render super high resolution image in parallel.
 
-Babylon and GeoSpark are integrated together. You just need to import GeoSpark and enjoy them! More detials are available here: [Babylon GeoSpatial Visualization](https://github.com/DataSystemsLab/GeoSpark/tree/master/src/main/java/org/datasyslab/babylon) 
+Babylon and GeoSpark are integrated together. You just need to import GeoSpark and enjoy them! More details are available here: [Babylon GeoSpatial Visualization](https://github.com/DataSystemsLab/GeoSpark/tree/master/src/main/java/org/datasyslab/babylon) 
 
 ## Babylon Gallery
 <img src="http://www.public.asu.edu/~jiayu2/geospark/picture/usrail.png" width="250">
@@ -149,21 +165,15 @@ GeoSpark makes use of JTS Plus (An extended JTS Topology Suite Version 1.14) for
 
 Please refer to [JTS Topology Suite website](http://tsusiatsoftware.net/jts/main.html) and [JTS Plus](https://github.com/jiayuasu/JTSplus) for more details.
 
-## Thanks for the help from GeoSpark community
-We appreciate the help and suggestions from the following GeoSpark users (List is increasing..):
-
-* @gaufung
-* @lrojas94
-* @mdespriee
-* @sabman
-* @samchorlton
-* @Tsarazin
-* @TBuc
-* ...
-
 
 
 ## Contact
+
+### Questions
+
+* Please join [![Join the chat at https://gitter.im/geospark-datasys/Lobby](https://badges.gitter.im/geospark-datasys/Lobby.svg)](https://gitter.im/geospark-datasys/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+* Email us!
 
 ### Contributors
 * [Jia Yu](http://www.public.asu.edu/~jiayu2/) (Email: jiayu2@asu.edu)
@@ -177,3 +187,16 @@ Please visit [GeoSpark project wesbite](http://geospark.datasyslab.org) for late
 
 ### Data Systems Lab
 GeoSpark is one of the projects under [Data Systems Lab](http://www.datasyslab.org/) at Arizona State University. The mission of Data Systems Lab is designing and developing experimental data management systems (e.g., database systems).
+
+## Thanks for the help from GeoSpark community
+We appreciate the help and suggestions from the following GeoSpark users (The list is growing..):
+
+* @gaufung
+* @lrojas94
+* @mdespriee
+* @sabman
+* @samchorlton
+* @Tsarazin
+* @TBuc
+* ...
+
