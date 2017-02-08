@@ -83,7 +83,7 @@ public abstract class SpatialRDD implements Serializable{
 	 */
 	public boolean spatialPartitioning(GridType gridType) throws Exception
 	{
-        int numPartitions = this.rawSpatialRDD.getNumPartitions();
+        int numPartitions = this.rawSpatialRDD.rdd().partitions().length;
 		if(this.boundaryEnvelope==null)
         {
         	throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD boundary is null. Please call boundary() first.");
