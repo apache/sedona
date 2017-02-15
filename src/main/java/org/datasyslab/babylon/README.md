@@ -36,8 +36,10 @@ You also can buld your new image filter by easily extending the photo filter!
 * PNG
 * JPG
 * GIF
+* More!
 
-You also can support your desired image type by easily extending image generator!
+You also can support your desired image type by easily extending image generator! (JPG format is temporarily unavailable due to the lack of OpenJDK support)
+
 
 
 ### Current Visualization effect
