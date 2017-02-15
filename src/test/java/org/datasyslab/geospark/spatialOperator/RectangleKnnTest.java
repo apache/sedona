@@ -8,6 +8,7 @@ package org.datasyslab.geospark.spatialOperator;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -72,6 +73,9 @@ public class RectangleKnnTest {
     /** The query point. */
     static Point queryPoint;
     
+    /** The top K. */
+    static int topK;
+    
     /**
      * Once executed before all.
      */
@@ -115,6 +119,7 @@ public class RectangleKnnTest {
             }
         }
         queryPoint = fact.createPoint(new Coordinate(-84.01, 34.01));
+        topK = 100;
     }
 
     /**
@@ -136,7 +141,7 @@ public class RectangleKnnTest {
 
     	for(int i=0;i<loopTimes;i++)
     	{
-    		List<Envelope> result = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, 5, false);
+    		List<Envelope> result = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, topK, false);
     		assert result.size()>-1;
     		assert result.get(0).getUserData().toString()!=null;
     		//System.out.println(result.get(0).getUserData().toString());
@@ -155,7 +160,7 @@ public class RectangleKnnTest {
     	rectangleRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)
     	{
-    		List<Envelope> result = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, 5, true);
+    		List<Envelope> result = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, topK, true);
     		assert result.size()>-1;
     		assert result.get(0).getUserData().toString()!=null;
     		//System.out.println(result.get(0).getUserData().toString());
@@ -163,20 +168,29 @@ public class RectangleKnnTest {
 
     }
     
+    /**
+     * Test spatial KNN correctness.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testSpatialKNNCorrectness() throws Exception
     {
     	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true);
-		List<Envelope> resultNoIndex = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, 10, false);
+		List<Envelope> resultNoIndex = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, topK, false);
 		rectangleRDD.buildIndex(IndexType.RTREE,false);
-		List<Envelope> resultWithIndex = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, 10, true);
+		List<Envelope> resultWithIndex = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, topK, true);
+		
+		List<Envelope> resultNoIndexModifiable = new ArrayList<Envelope>(resultNoIndex);
+		List<Envelope> resultWithIndexModifiable = new ArrayList<Envelope>(resultWithIndex);
+
 		RectangleDistanceComparator rectangleDistanceComparator = new RectangleDistanceComparator(this.queryPoint,true);
-		Collections.sort(resultNoIndex,rectangleDistanceComparator);
-		Collections.sort(resultWithIndex,rectangleDistanceComparator);
+		Collections.sort(resultNoIndexModifiable,rectangleDistanceComparator);
+		Collections.sort(resultWithIndexModifiable,rectangleDistanceComparator);
 		int difference = 0;
-		for(int i = 0;i<5;i++)
+		for(int i = 0;i<topK;i++)
 		{
-			if(rectangleDistanceComparator.compare(resultNoIndex.get(i), resultWithIndex.get(i))!=0)
+			if(rectangleDistanceComparator.compare(resultNoIndexModifiable.get(i), resultWithIndexModifiable.get(i))!=0)
 			{
 				difference++;
 			}

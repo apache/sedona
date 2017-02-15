@@ -25,10 +25,10 @@ public class NativeJavaImageGenerator extends ImageGenerator{
 	 */
 	@Override
 	public boolean SaveAsFile(BufferedImage pixelImage, String outputPath, ImageType imageType) {
-		File outputImage = new File(outputPath+"."+imageType.name());
+		File outputImage = new File(outputPath+"."+imageType.getTypeName());
 		outputImage.getParentFile().mkdirs();
 		try {
-			ImageIO.write(pixelImage,imageType.name(),outputImage);
+			ImageIO.write(pixelImage,imageType.getTypeName(),outputImage);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

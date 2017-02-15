@@ -21,11 +21,14 @@ public class GeometryDistanceComparator implements Comparator<Object>, Serializa
 	/** The query center. */
 	Point queryCenter;
 	
+	/** The normal order. */
 	boolean normalOrder;
+	
 	/**
 	 * Instantiates a new geometry distance comparator.
 	 *
 	 * @param queryCenter the query center
+	 * @param normalOrder the normal order
 	 */
 	public GeometryDistanceComparator(Point queryCenter,boolean normalOrder)
 	{

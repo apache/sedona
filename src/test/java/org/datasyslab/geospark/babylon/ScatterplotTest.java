@@ -1,10 +1,10 @@
 /**
  * FILE: ScatterplotTest.java
- * PATH: org.datasyslab.babylon.ScatterplotTest.java
+ * PATH: org.datasyslab.geospark.babylon.ScatterplotTest.java
  * Copyright (c) 2017 Arizona State University Data Systems Lab
  * All rights reserved.
  */
-package org.datasyslab.babylon;
+package org.datasyslab.geospark.babylon;
 
 import java.awt.Color;
 import java.io.InputStream;
@@ -19,8 +19,7 @@ import org.datasyslab.babylon.extension.visualizationEffect.ScatterPlot;
 import org.datasyslab.babylon.utils.ImageType;
 import org.datasyslab.babylon.utils.RasterizationUtils;
 import org.datasyslab.geospark.enums.FileDataSplitter;
-import org.datasyslab.geospark.showcase.UserSuppliedLineStringMapper;
-import org.datasyslab.geospark.showcase.UserSuppliedPolygonMapper;
+
 import org.datasyslab.geospark.spatialRDD.LineStringRDD;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
@@ -193,7 +192,7 @@ public class ScatterplotTest {
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/scatterplot/PointRDD",ImageType.png);
+		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/scatterplot/PointRDD",ImageType.PNG);
 	}
 	
 	/**
@@ -208,7 +207,7 @@ public class ScatterplotTest {
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.RED, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/scatterplot/RectangleRDD",ImageType.gif);	
+		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/scatterplot/RectangleRDD",ImageType.GIF);	
 	}
 	
 	/**
@@ -224,7 +223,7 @@ public class ScatterplotTest {
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/scatterplot/PolygonRDD",ImageType.gif);		
+		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/scatterplot/PolygonRDD",ImageType.GIF);		
 	}
 	
 	/**
@@ -242,6 +241,6 @@ public class ScatterplotTest {
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/scatterplot/LineStringRDD",ImageType.jpg);		
+		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/scatterplot/LineStringRDD",ImageType.GIF);		
 	}
 }

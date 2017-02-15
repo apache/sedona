@@ -74,6 +74,9 @@ public class PolygonKnnTest {
     /** The query point. */
     static Point queryPoint;
     
+    /** The top K. */
+    static int topK;
+    
     /**
      * Once executed before all.
      */
@@ -117,6 +120,7 @@ public class PolygonKnnTest {
             }
         }
         queryPoint = fact.createPoint(new Coordinate(-84.01, 34.01));
+        topK = 100;
     }
 
     /**
@@ -138,7 +142,7 @@ public class PolygonKnnTest {
 
     	for(int i=0;i<loopTimes;i++)
     	{
-    		List<Polygon> result = KNNQuery.SpatialKnnQuery(polygonRDD, queryPoint, 5, false);
+    		List<Polygon> result = KNNQuery.SpatialKnnQuery(polygonRDD, queryPoint, topK, false);
     		assert result.size()>-1;
     		assert result.get(0).getUserData().toString()!=null;
     		//System.out.println(result.get(0).getUserData().toString());
@@ -157,7 +161,7 @@ public class PolygonKnnTest {
     	polygonRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)
     	{
-    		List<Polygon> result = KNNQuery.SpatialKnnQuery(polygonRDD, queryPoint, 5, true);
+    		List<Polygon> result = KNNQuery.SpatialKnnQuery(polygonRDD, queryPoint, topK, true);
     		assert result.size()>-1;
     		assert result.get(0).getUserData().toString()!=null;
     		//System.out.println(result.get(0).getUserData().toString());
@@ -165,18 +169,23 @@ public class PolygonKnnTest {
 
     }
     
+    /**
+     * Test spatial KNN correctness.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testSpatialKNNCorrectness() throws Exception
     {
     	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, splitter, true);
-		List<Polygon> resultNoIndex = KNNQuery.SpatialKnnQuery(polygonRDD, queryPoint, 5, false);
+		List<Polygon> resultNoIndex = KNNQuery.SpatialKnnQuery(polygonRDD, queryPoint, topK, false);
 		polygonRDD.buildIndex(IndexType.RTREE,false);
-		List<Polygon> resultWithIndex = KNNQuery.SpatialKnnQuery(polygonRDD, queryPoint, 5, true);
+		List<Polygon> resultWithIndex = KNNQuery.SpatialKnnQuery(polygonRDD, queryPoint, topK, true);
 		GeometryDistanceComparator geometryDistanceComparator = new GeometryDistanceComparator(this.queryPoint,true);
 		Collections.sort(resultNoIndex,geometryDistanceComparator);
 		Collections.sort(resultWithIndex,geometryDistanceComparator);
 		int difference = 0;
-		for(int i = 0;i<5;i++)
+		for(int i = 0;i<topK;i++)
 		{
 			if(geometryDistanceComparator.compare(resultNoIndex.get(i), resultWithIndex.get(i))!=0)
 			{

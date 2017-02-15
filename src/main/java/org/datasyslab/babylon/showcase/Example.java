@@ -109,7 +109,7 @@ public class Example {
 			visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
 			NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-			imageGenerator.SaveAsFile(visualizationOperator.pixelImage, outputPath, ImageType.png);	
+			imageGenerator.SaveAsFile(visualizationOperator.pixelImage, outputPath, ImageType.PNG);	
 		}
 		catch(Exception e)
 		{
@@ -133,7 +133,7 @@ public class Example {
 			HeatMap visualizationOperator = new HeatMap(1000,600,USMainLandBoundary,false,2);
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
 			NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-			imageGenerator.SaveAsFile(visualizationOperator.pixelImage, outputPath,ImageType.jpg);
+			imageGenerator.SaveAsFile(visualizationOperator.pixelImage, outputPath,ImageType.GIF);
 		}
 		catch(Exception e)
 		{
@@ -171,7 +171,7 @@ public class Example {
 			overlayOperator.JoinImage(frontImage.pixelImage);
 			
 			NativeJavaImageGenerator imageGenerator = new NativeJavaImageGenerator();
-			imageGenerator.SaveAsFile(overlayOperator.backImage, outputPath,ImageType.png);
+			imageGenerator.SaveAsFile(overlayOperator.backImage, outputPath,ImageType.PNG);
 		}
 		catch(Exception e)
 		{
@@ -195,7 +195,7 @@ public class Example {
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
 			visualizationOperator.stitchImagePartitions();
 			NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-			imageGenerator.SaveAsFile(visualizationOperator.pixelImage, outputPath,ImageType.jpg);
+			imageGenerator.SaveAsFile(visualizationOperator.pixelImage, outputPath,ImageType.GIF);
 		}
 		catch(Exception e)
 		{

@@ -20,11 +20,15 @@ public class RectangleDistanceComparator implements Comparator<Envelope>, Serial
 	
 	/** The query center. */
 	Point queryCenter;
+	
+	/** The normal order. */
 	boolean normalOrder;
+	
 	/**
 	 * Instantiates a new rectangle distance comparator.
 	 *
 	 * @param queryCenter the query center
+	 * @param normalOrder the normal order
 	 */
 	public RectangleDistanceComparator(Point queryCenter, boolean normalOrder)
 	{

@@ -20,6 +20,15 @@ import scala.Tuple2;
  */
 public abstract class ImageGenerator implements Serializable{
 
+	/**
+	 * Save as file.
+	 *
+	 * @param distributedPixelImage the distributed pixel image
+	 * @param outputPath the output path
+	 * @param imageType the image type
+	 * @return true, if successful
+	 * @throws Exception the exception
+	 */
 	public boolean SaveAsFile(JavaPairRDD<Integer,ImageSerializableWrapper> distributedPixelImage, String outputPath, ImageType imageType) throws Exception
 	{
 		List<Tuple2<Integer,ImageSerializableWrapper>> imagePartitions = distributedPixelImage.collect();
@@ -35,6 +44,7 @@ public abstract class ImageGenerator implements Serializable{
 	 *
 	 * @param pixelImage the pixel image
 	 * @param outputPath the output path
+	 * @param imageType the image type
 	 * @return true, if successful
 	 * @throws Exception the exception
 	 */

@@ -72,6 +72,9 @@ public class PointKnnTest {
     /** The query point. */
     static Point queryPoint;
     
+    /** The top K. */
+    static int topK;
+    
     /**
      * Once executed before all.
      */
@@ -115,6 +118,7 @@ public class PointKnnTest {
             }
         }
         queryPoint = fact.createPoint(new Coordinate(-84.01, 34.01));
+        topK = 100;
     }
 
     /**
@@ -136,7 +140,7 @@ public class PointKnnTest {
 
     	for(int i=0;i<loopTimes;i++)
     	{
-    		List<Point> result = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, 5, false);
+    		List<Point> result = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, false);
     		assert result.size()>-1;
     		assert result.get(0).getUserData().toString()!=null;
     		//System.out.println(result.get(0).getUserData().toString());
@@ -155,7 +159,7 @@ public class PointKnnTest {
     	pointRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)
     	{
-    		List<Point> result = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, 5, true);
+    		List<Point> result = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, true);
     		assert result.size()>-1;
     		assert result.get(0).getUserData().toString()!=null;
     		//System.out.println(result.get(0).getUserData().toString());
@@ -163,18 +167,23 @@ public class PointKnnTest {
 
     }
     
+    /**
+     * Test spatial KNN correctness.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testSpatialKNNCorrectness() throws Exception
     {
     	PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, true);
-		List<Point> resultNoIndex = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, 5, false);
+		List<Point> resultNoIndex = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, false);
     	pointRDD.buildIndex(IndexType.RTREE,false);
-		List<Point> resultWithIndex = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, 5, true);
+		List<Point> resultWithIndex = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, true);
 		GeometryDistanceComparator geometryDistanceComparator = new GeometryDistanceComparator(this.queryPoint,true);
 		Collections.sort(resultNoIndex,geometryDistanceComparator);
 		Collections.sort(resultWithIndex,geometryDistanceComparator);
 		int difference = 0;
-		for(int i = 0;i<5;i++)
+		for(int i = 0;i<topK;i++)
 		{
 			if(geometryDistanceComparator.compare(resultNoIndex.get(i), resultWithIndex.get(i))!=0)
 			{

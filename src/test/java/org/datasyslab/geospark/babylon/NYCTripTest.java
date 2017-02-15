@@ -1,22 +1,30 @@
 /**
- * FILE: HeatmapTest.java
- * PATH: org.datasyslab.babylon.HeatmapTest.java
+ * FILE: NYCTripTest.java
+ * PATH: org.datasyslab.geospark.babylon.NYCTripTest.java
  * Copyright (c) 2017 Arizona State University Data Systems Lab
  * All rights reserved.
  */
-package org.datasyslab.babylon;
+package org.datasyslab.geospark.babylon;
 
+import java.awt.Color;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.babylon.extension.imageGenerator.NativeJavaImageGenerator;
 import org.datasyslab.babylon.extension.visualizationEffect.HeatMap;
 import org.datasyslab.babylon.utils.ImageType;
+import org.datasyslab.babylon.utils.RasterizationUtils;
 import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.showcase.UserSuppliedPolygonMapper;
 import org.datasyslab.geospark.spatialRDD.LineStringRDD;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
@@ -25,12 +33,48 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.io.WKTReader;
+
+class NYCTripMapper implements FlatMapFunction<String, Object> {
+	 
+	List result= new ArrayList<Polygon>();
+    Geometry spatialObject = null;
+    MultiPolygon multiSpatialObjects = null;
+    GeometryFactory fact = new GeometryFactory();
+    List<String> lineSplitList;
+    ArrayList<Coordinate> coordinatesList;
+    Coordinate[] coordinates;
+    LinearRing linear;
+    int actualEndOffset;
+    public Iterator call(String line) throws Exception {
+        List result= new ArrayList<LineString>();
+        Geometry spatialObject = null;
+        MultiLineString multiSpatialObjects = null;
+        List<String> lineSplitList;
+        lineSplitList = Arrays.asList(line.split(","));
+        coordinatesList = new ArrayList<Coordinate>();
+        coordinatesList.add(new Coordinate(Double.parseDouble(lineSplitList.get(5))*-1.0, Double.parseDouble(lineSplitList.get(6))));
+        coordinatesList.add(new Coordinate(Double.parseDouble(lineSplitList.get(8))*-1.0, Double.parseDouble(lineSplitList.get(9))));
+        spatialObject = fact.createLineString(coordinatesList.toArray(new Coordinate[coordinatesList.size()]));
+        result.add((LineString)spatialObject);
+        return result.iterator();
+    }
+
+} 
 
 /**
- * The Class HeatmapTest.
+ * The Class NYCTripTest.
  */
-public class HeatmapTest {
+public class NYCTripTest {
 
     /** The spark context. */
     static JavaSparkContext sparkContext;
@@ -89,8 +133,8 @@ public class HeatmapTest {
     /** The Line string num partitions. */
     static Integer LineStringNumPartitions;
     
-    /** The US main land boundary. */
-    static Envelope USMainLandBoundary;
+    /** The NYC boundary. */
+    static Envelope NYCBoundary;
     
 	/**
 	 * Sets the up before class.
@@ -104,36 +148,35 @@ public class HeatmapTest {
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
-        
-        inputProp = HeatmapTest.class.getClassLoader().getResourceAsStream("babylon.point.properties");
+        inputProp = ScatterplotTest.class.getClassLoader().getResourceAsStream("point.test.properties");
         prop.load(inputProp);
-        PointInputLocation = "file://"+HeatmapTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
-        PointOffset = Integer.parseInt(prop.getProperty("offset"));;
-        PointSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
+        PointInputLocation = "file://"+ScatterplotTest.class.getClassLoader().getResource("tweets.tsv").getPath();
+        PointOffset = 1;
+        PointSplitter = FileDataSplitter.WKT;
         PointNumPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
         
-        inputProp = HeatmapTest.class.getClassLoader().getResourceAsStream("babylon.rectangle.properties");
+        inputProp = ScatterplotTest.class.getClassLoader().getResourceAsStream("rectangle.test.properties");
         prop.load(inputProp);
-        RectangleInputLocation = "file://"+HeatmapTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
+        RectangleInputLocation = "file://"+ScatterplotTest.class.getClassLoader().getResource("zcta510.csv").getPath();
         RectangleOffset = Integer.parseInt(prop.getProperty("offset"));
         RectangleSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
         RectangleNumPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
         
-        inputProp = HeatmapTest.class.getClassLoader().getResourceAsStream("babylon.polygon.properties");
+        inputProp = ScatterplotTest.class.getClassLoader().getResourceAsStream("polygon.test.properties");
         prop.load(inputProp);
-        PolygonInputLocation = "file://"+HeatmapTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
+        PolygonInputLocation = "file://"+ScatterplotTest.class.getClassLoader().getResource("county.csv").getPath();
         PolygonOffset = Integer.parseInt(prop.getProperty("offset"));
         PolygonSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
         PolygonNumPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
 
-        inputProp = HeatmapTest.class.getClassLoader().getResourceAsStream("babylon.linestring.properties");
+        inputProp = ScatterplotTest.class.getClassLoader().getResourceAsStream("linestring.test.properties");
         prop.load(inputProp);
-        LineStringInputLocation = "file://"+HeatmapTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
+        LineStringInputLocation = "file://"+ScatterplotTest.class.getClassLoader().getResource("trip-sample.csv").getPath();
         LineStringOffset = Integer.parseInt(prop.getProperty("offset"));
         LineStringSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
-        LineStringNumPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
+        LineStringNumPartitions = 8;
         
-        USMainLandBoundary = new Envelope(-126.790180,-64.630926,24.863836,50.000);
+        NYCBoundary = new Envelope(-74.25,-73.7,40.5,40.9);
 	}
 
 	/**
@@ -147,61 +190,23 @@ public class HeatmapTest {
 	}
 
 	/**
-	 * Test point RDD visualization.
-	 *
-	 * @throws Exception the exception
-	 */
-	@Test
-	public void testPointRDDVisualization() throws Exception {
-		PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
-		HeatMap visualizationOperator = new HeatMap(800,500,USMainLandBoundary,false,3);
-		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/heatmap/PointRDD", ImageType.png);
-	}
-	
-	/**
-	 * Test rectangle RDD visualization.
-	 *
-	 * @throws Exception the exception
-	 */
-	@Test
-	public void testRectangleRDDVisualization() throws Exception {
-		RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
-		HeatMap visualizationOperator = new HeatMap(800,500,USMainLandBoundary,false,2);
-		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/heatmap/RectangleRDD", ImageType.png);
-	
-	}
-	
-	/**
-	 * Test polygon RDD visualization.
-	 *
-	 * @throws Exception the exception
-	 */
-	@Test
-	public void testPolygonRDDVisualization() throws Exception {
-		//UserSuppliedPolygonMapper userSuppliedPolygonMapper = new UserSuppliedPolygonMapper();
-		PolygonRDD spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions);
-		HeatMap visualizationOperator = new HeatMap(800,500,USMainLandBoundary,false,2);
-		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/heatmap/PolygonRDD", ImageType.jpg);	
-		
-	}
-	
-	/**
 	 * Test line string RDD visualization.
 	 *
 	 * @throws Exception the exception
 	 */
-	@Test
 	public void testLineStringRDDVisualization() throws Exception {
-		LineStringRDD spatialRDD = new LineStringRDD(sparkContext, LineStringInputLocation, LineStringSplitter, false, LineStringNumPartitions);
-		HeatMap visualizationOperator = new HeatMap(800,500,USMainLandBoundary,false,2);
+		
+		int resolutionY = 800;
+		int resolutionX = RasterizationUtils.GetWidthFromHeight(resolutionY, NYCBoundary);
+		
+		NYCTripMapper nycTripMapper = new NYCTripMapper();
+		UserSuppliedPolygonMapper userSuppliedPolygonMapper = new UserSuppliedPolygonMapper();
+		
+		LineStringRDD spatialRDD = new LineStringRDD(sparkContext, LineStringInputLocation, LineStringNumPartitions, nycTripMapper);
+		HeatMap visualizationOperator = new HeatMap(resolutionX,resolutionY,NYCBoundary,false,2);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
+		
 		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/heatmap/LineStringRDD", ImageType.jpg);	
+		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/heatmap/NYCTrip", ImageType.PNG);	
 	}
 }
