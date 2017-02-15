@@ -47,18 +47,15 @@ public class GeometryKnnJudgement implements FlatMapFunction<Iterator<Object>, O
 	 * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
 	 */
 	@Override
-	public Iterator<Object> call(Iterator<Object> input) throws Exception {
-		// TODO Auto-generated method stub
-		
-		PriorityQueue<Geometry> pq = new PriorityQueue<Geometry>(k, new GeometryDistanceComparator(queryCenter));
+	public Iterator<Object> call(Iterator<Object> input) throws Exception {		
+		PriorityQueue<Geometry> pq = new PriorityQueue<Geometry>(k, new GeometryDistanceComparator(queryCenter,false));
 		while (input.hasNext()) {
 			if (pq.size() < k) {
 				pq.offer((Geometry)input.next());
 			} else {
 				Geometry curpoint = (Geometry)input.next();
-				double distance = curpoint.getCoordinate().distance(queryCenter.getCoordinate());
-				double largestDistanceInPriQueue = pq.peek().getCoordinate()
-						.distance(queryCenter.getCoordinate());
+				double distance = curpoint.distance(queryCenter);
+				double largestDistanceInPriQueue = pq.peek().distance(queryCenter);
 				if (largestDistanceInPriQueue > distance) {
 					pq.poll();
 					pq.offer(curpoint);

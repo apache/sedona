@@ -15,6 +15,7 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.babylon.extension.imageGenerator.NativeJavaImageGenerator;
 import org.datasyslab.babylon.extension.visualizationEffect.HeatMap;
+import org.datasyslab.babylon.utils.ImageType;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.spatialRDD.LineStringRDD;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
@@ -156,7 +157,7 @@ public class HeatmapTest {
 		HeatMap visualizationOperator = new HeatMap(800,500,USMainLandBoundary,false,3);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/heatmap/PointRDD");
+		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/heatmap/PointRDD", ImageType.png);
 	}
 	
 	/**
@@ -170,7 +171,7 @@ public class HeatmapTest {
 		HeatMap visualizationOperator = new HeatMap(800,500,USMainLandBoundary,false,2);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/heatmap/RectangleRDD");
+		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/heatmap/RectangleRDD", ImageType.png);
 	
 	}
 	
@@ -186,7 +187,7 @@ public class HeatmapTest {
 		HeatMap visualizationOperator = new HeatMap(800,500,USMainLandBoundary,false,2);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/heatmap/PolygonRDD");	
+		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/heatmap/PolygonRDD", ImageType.jpg);	
 		
 	}
 	
@@ -201,6 +202,6 @@ public class HeatmapTest {
 		HeatMap visualizationOperator = new HeatMap(800,500,USMainLandBoundary,false,2);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/heatmap/LineStringRDD");	
+		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/heatmap/LineStringRDD", ImageType.jpg);	
 	}
 }

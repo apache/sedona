@@ -12,7 +12,7 @@
 
 ## Main Features
 
-### Extensible Visualization operator
+### Extensible Visualization operator (just like playing LEGO bricks)!
 
 * Support super high resolution image generation: parallel map image rendering
 * Visualize Spatial RDD and Spatial Queries (Spatial Range, Spatial K Nearest Neighbors, Spatial Join)
@@ -22,7 +22,7 @@
 ### Overlay Operator
 Overlay one map layer with many other map layers!
 
-### Various Image filter
+### Various Image Filter
 * Gaussian Blur
 * Box Blur
 * Embose
@@ -34,10 +34,10 @@ You also can buld your new image filter by easily extending the photo filter!
 
 ### Various Image Type
 * PNG
-* JPEG
+* JPG
 * GIF
 
-You also can support your desired image type by easily extending the photo filter!
+You also can support your desired image type by easily extending image generator!
 
 
 ### Current Visualization effect

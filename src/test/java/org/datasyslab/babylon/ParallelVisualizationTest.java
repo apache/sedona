@@ -15,6 +15,7 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.babylon.extension.imageGenerator.NativeJavaImageGenerator;
 import org.datasyslab.babylon.extension.visualizationEffect.HeatMap;
+import org.datasyslab.babylon.utils.ImageType;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.spatialRDD.LineStringRDD;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
@@ -177,7 +178,7 @@ public class ParallelVisualizationTest {
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		visualizationOperator.stitchImagePartitions();
 		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/parallelvisualization/PointRDD");
+		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/parallelvisualization/PointRDD",ImageType.gif);
 	}
 	
 	/**
@@ -192,7 +193,7 @@ public class ParallelVisualizationTest {
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		visualizationOperator.stitchImagePartitions();
 		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/parallelvisualization/RectangleRDD");
+		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/parallelvisualization/RectangleRDD",ImageType.png);
 	}
 	
 	/**
@@ -208,7 +209,7 @@ public class ParallelVisualizationTest {
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		visualizationOperator.stitchImagePartitions();
 		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/parallelvisualization/PolygonRDD");
+		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/parallelvisualization/PolygonRDD",ImageType.jpg);
 	}
 	
 	/**
@@ -223,6 +224,6 @@ public class ParallelVisualizationTest {
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		visualizationOperator.stitchImagePartitions();
 		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/parallelvisualization/LineStringRDD");
+		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/parallelvisualization/LineStringRDD",ImageType.gif);
 	}
 }

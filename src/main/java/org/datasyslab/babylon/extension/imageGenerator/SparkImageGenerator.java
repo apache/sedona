@@ -11,6 +11,7 @@ import java.awt.image.BufferedImage;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.datasyslab.babylon.core.ImageGenerator;
 import org.datasyslab.babylon.core.ImageSerializableWrapper;
+import org.datasyslab.babylon.utils.ImageType;
 
 /**
  * The Class SparkImageGenerator.
@@ -21,7 +22,7 @@ public class SparkImageGenerator extends ImageGenerator{
 	 * @see org.datasyslab.babylon.core.ImageGenerator#SaveAsFile(org.apache.spark.api.java.JavaPairRDD, java.lang.String)
 	 */
 	@Override
-	public boolean SaveAsFile(JavaPairRDD<Integer,ImageSerializableWrapper> distributedPixelImage, String outputPath)
+	public boolean SaveAsFile(JavaPairRDD<Integer,ImageSerializableWrapper> distributedPixelImage, String outputPath, ImageType imageType)
 	{
 		distributedPixelImage.saveAsObjectFile(outputPath);
 		return true;
@@ -31,7 +32,7 @@ public class SparkImageGenerator extends ImageGenerator{
 	 * @see org.datasyslab.babylon.core.ImageGenerator#SaveAsFile(java.awt.image.BufferedImage, java.lang.String)
 	 */
 	@Override
-	public boolean SaveAsFile(BufferedImage pixelImage, String outputPath) throws Exception {
+	public boolean SaveAsFile(BufferedImage pixelImage, String outputPath, ImageType imageType) throws Exception {
 		throw new Exception("[SparkImageGenerator][SaveAsFile] This method hasn't been implemented yet.");
 	}
 

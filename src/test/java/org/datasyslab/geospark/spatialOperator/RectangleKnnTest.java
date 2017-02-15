@@ -8,6 +8,7 @@ package org.datasyslab.geospark.spatialOperator;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -17,6 +18,7 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.knnJudgement.RectangleDistanceComparator;
 import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -159,6 +161,27 @@ public class RectangleKnnTest {
     		//System.out.println(result.get(0).getUserData().toString());
     	}
 
+    }
+    
+    @Test
+    public void testSpatialKNNCorrectness() throws Exception
+    {
+    	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true);
+		List<Envelope> resultNoIndex = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, 10, false);
+		rectangleRDD.buildIndex(IndexType.RTREE,false);
+		List<Envelope> resultWithIndex = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, 10, true);
+		RectangleDistanceComparator rectangleDistanceComparator = new RectangleDistanceComparator(this.queryPoint,true);
+		Collections.sort(resultNoIndex,rectangleDistanceComparator);
+		Collections.sort(resultWithIndex,rectangleDistanceComparator);
+		int difference = 0;
+		for(int i = 0;i<5;i++)
+		{
+			if(rectangleDistanceComparator.compare(resultNoIndex.get(i), resultWithIndex.get(i))!=0)
+			{
+				difference++;
+			}
+		}
+		assert difference==0;
     }
 
 }

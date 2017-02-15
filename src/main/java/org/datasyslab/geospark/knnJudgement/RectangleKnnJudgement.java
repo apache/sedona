@@ -49,7 +49,7 @@ public class RectangleKnnJudgement implements FlatMapFunction<Iterator<Object>, 
 	public Iterator<Object> call(Iterator<Object> input) throws Exception {
 		// TODO Auto-generated method stub
 		
-		PriorityQueue<Envelope> pq = new PriorityQueue<Envelope>(k, new RectangleDistanceComparator(queryCenter));
+		PriorityQueue<Envelope> pq = new PriorityQueue<Envelope>(k, new RectangleDistanceComparator(queryCenter, false));
 		while (input.hasNext()) {
 			if (pq.size() < k) {
 				pq.offer((Envelope)input.next());
