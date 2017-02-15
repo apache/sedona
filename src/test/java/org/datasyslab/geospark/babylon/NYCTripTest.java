@@ -1,10 +1,10 @@
 /**
  * FILE: NYCTripTest.java
- * PATH: org.datasyslab.babylon.NYCTripTest.java
+ * PATH: org.datasyslab.geospark.babylon.NYCTripTest.java
  * Copyright (c) 2017 Arizona State University Data Systems Lab
  * All rights reserved.
  */
-package org.datasyslab.babylon;
+package org.datasyslab.geospark.babylon;
 
 import java.awt.Color;
 import java.io.InputStream;
@@ -21,6 +21,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.babylon.extension.imageGenerator.NativeJavaImageGenerator;
 import org.datasyslab.babylon.extension.visualizationEffect.HeatMap;
+import org.datasyslab.babylon.utils.ImageType;
 import org.datasyslab.babylon.utils.RasterizationUtils;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.showcase.UserSuppliedPolygonMapper;
@@ -206,6 +207,6 @@ public class NYCTripTest {
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		
 		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/heatmap/NYCTrip");	
+		imageGenerator.SaveAsFile(visualizationOperator.pixelImage, "./target/heatmap/NYCTrip", ImageType.PNG);	
 	}
 }

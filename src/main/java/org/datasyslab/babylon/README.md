@@ -12,7 +12,7 @@
 
 ## Main Features
 
-### Extensible Visualization operator
+### Extensible Visualization operator (just like playing LEGO bricks)!
 
 * Support super high resolution image generation: parallel map image rendering
 * Visualize Spatial RDD and Spatial Queries (Spatial Range, Spatial K Nearest Neighbors, Spatial Join)
@@ -22,7 +22,7 @@
 ### Overlay Operator
 Overlay one map layer with many other map layers!
 
-### Various Image filter
+### Various Image Filter
 * Gaussian Blur
 * Box Blur
 * Embose
@@ -34,10 +34,12 @@ You also can buld your new image filter by easily extending the photo filter!
 
 ### Various Image Type
 * PNG
-* JPEG
+* JPG
 * GIF
+* More!
 
-You also can support your desired image type by easily extending the photo filter!
+You also can support your desired image type by easily extending image generator! (JPG format is temporarily unavailable due to the lack of OpenJDK support)
+
 
 
 ### Current Visualization effect
@@ -50,7 +52,7 @@ You also can support your desired image type by easily extending the photo filte
 You also can build your new self-designed effects by easily extending the visualization operator!
 
 ### Example
-Here is [a runnable single machine exmaple code](https://github.com/jiayuasu/GeoSpark/blob/master/src/main/java/org/datasyslab/babylon/showcase/Example.java). You can clone this repository and directly run it on you local machine!
+Here is [a runnable single machine exmaple code](https://github.com/DataSystemsLab/GeoSpark/blob/master/src/main/java/org/datasyslab/babylon/showcase/Example.java). You can clone this repository and directly run it on you local machine!
 
 ### Scala and Java API
 Please refer to [Babylon Scala and Java API](http://www.public.asu.edu/~jiayu2/geospark/javadoc/latest/).

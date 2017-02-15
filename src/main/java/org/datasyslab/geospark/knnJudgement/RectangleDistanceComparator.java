@@ -21,14 +21,19 @@ public class RectangleDistanceComparator implements Comparator<Envelope>, Serial
 	/** The query center. */
 	Point queryCenter;
 	
+	/** The normal order. */
+	boolean normalOrder;
+	
 	/**
 	 * Instantiates a new rectangle distance comparator.
 	 *
 	 * @param queryCenter the query center
+	 * @param normalOrder the normal order
 	 */
-	public RectangleDistanceComparator(Point queryCenter)
+	public RectangleDistanceComparator(Point queryCenter, boolean normalOrder)
 	{
-		this.queryCenter=queryCenter;
+		this.queryCenter = queryCenter;
+		this.normalOrder = normalOrder;
 	}
 	
 	/* (non-Javadoc)
@@ -37,11 +42,24 @@ public class RectangleDistanceComparator implements Comparator<Envelope>, Serial
 	public int compare(Envelope p1, Envelope p2) {
 		double distance1 = p1.distance(queryCenter.getEnvelopeInternal());
 		double distance2 = p2.distance(queryCenter.getEnvelopeInternal());
-		if (distance1 > distance2) {
-			return 1;
-		} else if (distance1 == distance2) {
-			return 0;
+		if(this.normalOrder)
+		{
+			if (distance1 > distance2) {
+				return 1;
+			} else if (distance1 == distance2) {
+				return 0;
+			}
+			return -1;
 		}
-		return -1;
+		else
+		{
+			if (distance1 > distance2) {
+				return -1;
+			} else if (distance1 == distance2) {
+				return 0;
+			}
+			return 1;
+		}
+
 	}
 }

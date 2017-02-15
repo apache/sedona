@@ -57,7 +57,7 @@ public class KnnJudgementUsingIndex implements FlatMapFunction<Iterator<Object>,
 		}
 		else
 		{
-			throw new Exception("[KnnJudgementUsingIndex][Call]QuadTree index doesn't support KNN search.");
+			throw new Exception("[KnnJudgementUsingIndex][Call] QuadTree index doesn't support KNN search.");
 		}
 		List result = new ArrayList();
 		for(int i=0;i<localK.length;i++)

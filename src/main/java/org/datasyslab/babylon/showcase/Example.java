@@ -21,6 +21,7 @@ import org.datasyslab.babylon.extension.imageGenerator.NativeJavaImageGenerator;
 import org.datasyslab.babylon.extension.visualizationEffect.ChoroplethMap;
 import org.datasyslab.babylon.extension.visualizationEffect.HeatMap;
 import org.datasyslab.babylon.extension.visualizationEffect.ScatterPlot;
+import org.datasyslab.babylon.utils.ImageType;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
@@ -108,7 +109,7 @@ public class Example {
 			visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
 			NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-			imageGenerator.SaveAsFile(visualizationOperator.pixelImage, outputPath);	
+			imageGenerator.SaveAsFile(visualizationOperator.pixelImage, outputPath, ImageType.PNG);	
 		}
 		catch(Exception e)
 		{
@@ -132,7 +133,7 @@ public class Example {
 			HeatMap visualizationOperator = new HeatMap(1000,600,USMainLandBoundary,false,2);
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
 			NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-			imageGenerator.SaveAsFile(visualizationOperator.pixelImage, outputPath);
+			imageGenerator.SaveAsFile(visualizationOperator.pixelImage, outputPath,ImageType.GIF);
 		}
 		catch(Exception e)
 		{
@@ -170,7 +171,7 @@ public class Example {
 			overlayOperator.JoinImage(frontImage.pixelImage);
 			
 			NativeJavaImageGenerator imageGenerator = new NativeJavaImageGenerator();
-			imageGenerator.SaveAsFile(overlayOperator.backImage, outputPath);
+			imageGenerator.SaveAsFile(overlayOperator.backImage, outputPath,ImageType.PNG);
 		}
 		catch(Exception e)
 		{
@@ -194,7 +195,7 @@ public class Example {
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
 			visualizationOperator.stitchImagePartitions();
 			NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-			imageGenerator.SaveAsFile(visualizationOperator.pixelImage, outputPath);
+			imageGenerator.SaveAsFile(visualizationOperator.pixelImage, outputPath,ImageType.GIF);
 		}
 		catch(Exception e)
 		{

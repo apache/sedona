@@ -13,6 +13,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import org.datasyslab.babylon.core.ImageGenerator;
+import org.datasyslab.babylon.utils.ImageType;
 
 /**
  * The Class NativeJavaImageGenerator.
@@ -23,11 +24,11 @@ public class NativeJavaImageGenerator extends ImageGenerator{
 	 * @see org.datasyslab.babylon.core.ImageGenerator#SaveAsFile(java.awt.image.BufferedImage, java.lang.String)
 	 */
 	@Override
-	public boolean SaveAsFile(BufferedImage pixelImage, String outputPath) {
-		File outputImage = new File(outputPath+".png");
+	public boolean SaveAsFile(BufferedImage pixelImage, String outputPath, ImageType imageType) {
+		File outputImage = new File(outputPath+"."+imageType.getTypeName());
 		outputImage.getParentFile().mkdirs();
 		try {
-			ImageIO.write(pixelImage,"png",outputImage);
+			ImageIO.write(pixelImage,imageType.getTypeName(),outputImage);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
