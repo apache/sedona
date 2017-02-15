@@ -1,10 +1,10 @@
 /**
  * FILE: ChoroplethmapTest.java
- * PATH: org.datasyslab.babylon.ChoroplethmapTest.java
+ * PATH: org.datasyslab.geospark.babylon.ChoroplethmapTest.java
  * Copyright (c) 2017 Arizona State University Data Systems Lab
  * All rights reserved.
  */
-package org.datasyslab.babylon;
+package org.datasyslab.geospark.babylon;
 
 import java.awt.Color;
 import java.io.InputStream;
@@ -20,6 +20,7 @@ import org.datasyslab.babylon.core.OverlayOperator;
 import org.datasyslab.babylon.extension.imageGenerator.NativeJavaImageGenerator;
 import org.datasyslab.babylon.extension.visualizationEffect.ChoroplethMap;
 import org.datasyslab.babylon.extension.visualizationEffect.ScatterPlot;
+import org.datasyslab.babylon.utils.ImageType;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
@@ -181,7 +182,7 @@ public class ChoroplethmapTest implements Serializable{
 		overlayOperator.JoinImage(frontImage.pixelImage);
 		
 		NativeJavaImageGenerator imageGenerator = new NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(overlayOperator.backImage,"./target/choroplethmap/RectangleRDD-combined");
+		imageGenerator.SaveAsFile(overlayOperator.backImage,"./target/choroplethmap/RectangleRDD-combined", ImageType.PNG);
 	}
 	
 	/**
@@ -211,7 +212,7 @@ public class ChoroplethmapTest implements Serializable{
 		overlayOperator.JoinImage(frontImage.pixelImage);
 		
 		NativeJavaImageGenerator imageGenerator = new NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(overlayOperator.backImage, "./target/choroplethmap/PolygonRDD-combined");
+		imageGenerator.SaveAsFile(overlayOperator.backImage, "./target/choroplethmap/PolygonRDD-combined", ImageType.GIF);
 		
 	}
 
