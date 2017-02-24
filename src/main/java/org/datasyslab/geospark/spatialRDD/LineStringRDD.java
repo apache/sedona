@@ -20,7 +20,7 @@ import org.wololo.jts2geojson.GeoJSONWriter;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.LineString;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -33,11 +33,11 @@ public class LineStringRDD extends SpatialRDD{
 	 *
 	 * @param rawSpatialRDD the raw spatial RDD
 	 */
-	public LineStringRDD(JavaRDD<Polygon> rawSpatialRDD) {
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
+	public LineStringRDD(JavaRDD<LineString> rawSpatialRDD) {
+		this.rawSpatialRDD = rawSpatialRDD.map(new Function<LineString,Object>()
 		{
 			@Override
-			public Object call(Polygon spatialObject) throws Exception {
+			public Object call(LineString spatialObject) throws Exception {
 				return spatialObject;
 			}
 			
