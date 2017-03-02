@@ -26,11 +26,8 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class testGeoJS.
- */
-public class testGeoJS {
+
+public class testGeoJSON {
     
     /** The sc. */
     public static JavaSparkContext sc;
@@ -46,11 +43,9 @@ public class testGeoJS {
         Logger.getLogger("akka").setLevel(Level.WARN);
     }
 
-    /**
-     * Jts 2 geonjs.
-     */
+
     @Test
-    public void jts2geonjs(){
+    public void jts2geonjson(){
         GeometryFactory geometryFactory = new GeometryFactory();
         Coordinate coordinate = new Coordinate(1.0, 2.0);
         Geometry point = geometryFactory.createPoint(coordinate);
@@ -62,6 +57,7 @@ public class testGeoJS {
         System.out.println(jsonstring);
     }
 
+    
     /**
      * Tear down.
      */

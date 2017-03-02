@@ -191,7 +191,7 @@ public class Example implements Serializable{
     	Random random=new Random();
     	double randomNumber=random.nextInt(10)+random.nextDouble();
     	queryEnvelope=new Envelope (-90.01+randomNumber,-80.01+randomNumber,30.01+randomNumber,40.01+randomNumber);
-    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true);
+    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY());
     	objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
@@ -211,7 +211,7 @@ public class Example implements Serializable{
     	Random random=new Random();
     	double randomNumber=random.nextInt(10)+random.nextDouble();
     	queryEnvelope=new Envelope (-90.01+randomNumber,-80.01+randomNumber,30.01+randomNumber,40.01+randomNumber);
-    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true);
+    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY());
     	objectRDD.buildIndex(IndexType.RTREE,false);
     	objectRDD.indexedRawRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
@@ -231,7 +231,7 @@ public class Example implements Serializable{
     	Random random=new Random();
     	double randomNumber=random.nextInt(10)+random.nextDouble();
     	queryPoint=fact.createPoint(new Coordinate(-84.01+randomNumber, 34.01+randomNumber));
-    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true);
+    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY());
     	objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
@@ -249,7 +249,7 @@ public class Example implements Serializable{
     	Random random=new Random();
     	double randomNumber=random.nextInt(10)+random.nextDouble();
     	queryPoint=fact.createPoint(new Coordinate(-84.01+randomNumber, 34.01+randomNumber));
-    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true);
+    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY());
     	objectRDD.buildIndex(IndexType.RTREE,false);
     	objectRDD.indexedRawRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
@@ -266,7 +266,7 @@ public class Example implements Serializable{
      */
     public static void testSpatialJoinQuery() throws Exception {
     	RectangleRDD rectangleRDD = new RectangleRDD(sc, inputLocation2, offset2, splitter2, true);
-    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset ,splitter,true, numPartitions);
+    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset ,splitter,true, numPartitions, StorageLevel.MEMORY_ONLY());
     	objectRDD.spatialPartitioning(GridType.RTREE);
     	rectangleRDD.spatialPartitioning(objectRDD.grids);
     	objectRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY());
@@ -285,7 +285,7 @@ public class Example implements Serializable{
      */
     public static void testSpatialJoinQueryUsingIndex() throws Exception {
     	RectangleRDD rectangleRDD = new RectangleRDD(sc, inputLocation2, offset2, splitter2, true);
-  		RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset ,splitter,true, numPartitions);
+  		RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset ,splitter,true, numPartitions, StorageLevel.MEMORY_ONLY());
   		objectRDD.spatialPartitioning(GridType.RTREE);
   		rectangleRDD.spatialPartitioning(objectRDD.grids);
     	objectRDD.buildIndex(IndexType.RTREE,true);

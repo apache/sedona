@@ -18,6 +18,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
+import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.geometryObjects.Circle;
@@ -41,7 +42,6 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 
 import scala.Tuple2;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class SpatialRDD.
  */
@@ -412,5 +412,29 @@ public abstract class SpatialRDD implements Serializable{
 		this.rawSpatialRDD = rawSpatialRDD;
 	}
 	
-
+	/**
+	 * Analyze.
+	 *
+	 * @param newLevel the new level
+	 * @return true, if successful
+	 */
+	public boolean analyze(StorageLevel newLevel)
+	{
+		this.rawSpatialRDD.persist(newLevel);
+		this.boundary();
+        this.totalNumberOfRecords = this.rawSpatialRDD.count();
+        return true;
+	}
+	
+	/**
+	 * Analyze.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean analyze()
+	{
+		this.boundary();
+        this.totalNumberOfRecords = this.rawSpatialRDD.count();
+        return true;
+	}
 }
