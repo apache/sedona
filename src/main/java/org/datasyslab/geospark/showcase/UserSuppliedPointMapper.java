@@ -30,15 +30,22 @@ public class UserSuppliedPointMapper implements FlatMapFunction<String, Object>{
      */
     public Iterator call(String line) throws Exception {
         List result= new ArrayList<Point>();
-        //Remove all quotes in the input line
-        String lineNoQuote = line.replace("\"", "");
-        List<String> lineSplitList;
-        //Remove split the line by comma
-        lineSplitList=Arrays.asList(lineNoQuote.split(","));
-        double latitude = Double.parseDouble(lineSplitList.get(2));
-        double longitude = Double.parseDouble(lineSplitList.get(3));
-        spatialObject = fact.createPoint(new Coordinate(latitude,longitude));
-        result.add(spatialObject);
+        try{
+        	List<String> lineSplitList;
+        	//Split the line by comma
+        	lineSplitList=Arrays.asList(line.split(","));
+        	//Remove all quotes in the input line
+        	String latitudeString = lineSplitList.get(2).replaceAll("\"", "");
+        	String longitudeString = lineSplitList.get(3).replaceAll("\"", "");
+        	double latitude = Double.parseDouble(latitudeString);
+        	double longitude = Double.parseDouble(longitudeString);
+        	spatialObject = fact.createPoint(new Coordinate(longitude,latitude));
+        	result.add(spatialObject);
+        }
+        catch(Exception e)
+        {
+        	//Get one error. The data probably is dirty. Just skip this line.
+        }
         return result.iterator();
     }
 
