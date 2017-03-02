@@ -15,7 +15,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
-
+import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.formatMapper.PolygonFormatMapper;
 
@@ -38,8 +38,6 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.precision.GeometryPrecisionReducer;
 
 
-// TODO: Auto-generated Javadoc
-
 /**
  * The Class PolygonRDD.
  */
@@ -51,7 +49,9 @@ public class PolygonRDD extends SpatialRDD {
      * Instantiates a new polygon RDD.
      *
      * @param rawSpatialRDD the raw spatial RDD
+     * @deprecated Please append RDD Storage Level after all the existing parameters
      */
+	@Deprecated
     public PolygonRDD(JavaRDD<Polygon> rawSpatialRDD) {
 		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
 		{
@@ -61,8 +61,7 @@ public class PolygonRDD extends SpatialRDD {
 			}
 			
 		});
-        this.boundary();
-        this.totalNumberOfRecords = this.rawSpatialRDD.count();
+        this.analyze();
     }
 
     /**
@@ -75,11 +74,12 @@ public class PolygonRDD extends SpatialRDD {
      * @param splitter the splitter
      * @param carryInputData the carry input data
      * @param partitions the partitions
+     * @deprecated Please append RDD Storage Level after all the existing parameters
      */
+	@Deprecated
     public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset, FileDataSplitter splitter, boolean carryInputData, Integer partitions) {
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(new PolygonFormatMapper(startOffset,endOffset, splitter,carryInputData)));
-        this.boundary();
-        this.totalNumberOfRecords = this.rawSpatialRDD.count();
+        this.analyze();
     }
 
     /**
@@ -91,11 +91,12 @@ public class PolygonRDD extends SpatialRDD {
      * @param endOffset the end offset
      * @param splitter the splitter
      * @param carryInputData the carry input data
+     * @deprecated Please append RDD Storage Level after all the existing parameters
      */
+	@Deprecated
     public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset, FileDataSplitter splitter, boolean carryInputData) {
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(new PolygonFormatMapper(startOffset, endOffset, splitter, carryInputData)));
-        this.boundary();
-        this.totalNumberOfRecords = this.rawSpatialRDD.count();
+        this.analyze();
     }
 
     /**
@@ -106,11 +107,12 @@ public class PolygonRDD extends SpatialRDD {
      * @param splitter the splitter
      * @param carryInputData the carry input data
      * @param partitions the partitions
+     * @deprecated Please append RDD Storage Level after all the existing parameters
      */
+	@Deprecated
     public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Integer partitions) {
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(new PolygonFormatMapper(splitter,carryInputData)));
-        this.boundary();
-        this.totalNumberOfRecords = this.rawSpatialRDD.count();
+        this.analyze();
     }
 
     /**
@@ -120,11 +122,155 @@ public class PolygonRDD extends SpatialRDD {
      * @param InputLocation the input location
      * @param splitter the splitter
      * @param carryInputData the carry input data
+     * @deprecated Please append RDD Storage Level after all the existing parameters
      */
+	@Deprecated
     public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData) {
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(new PolygonFormatMapper(splitter, carryInputData)));
-        this.boundary();
-        this.totalNumberOfRecords = this.rawSpatialRDD.count();
+        this.analyze();
+    }
+    
+
+
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param partitions the partitions
+     * @param userSuppliedMapper the user supplied mapper
+     * @deprecated Please append RDD Storage Level after all the existing parameters
+     */
+	@Deprecated
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(userSuppliedMapper));
+        this.analyze();
+    }
+    
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param userSuppliedMapper the user supplied mapper
+     * @deprecated Please append RDD Storage Level after all the existing parameters
+     */
+	@Deprecated
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(userSuppliedMapper));
+        this.analyze();
+    }
+        
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param rawSpatialRDD the raw spatial RDD
+     * @param newLevel the new level
+     */
+    public PolygonRDD(JavaRDD<Polygon> rawSpatialRDD, StorageLevel newLevel) {
+		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
+		{
+			@Override
+			public Object call(Polygon spatialObject) throws Exception {
+				return spatialObject;
+			}
+			
+		});
+        this.analyze(newLevel);
+    }
+
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param startOffset the start offset
+     * @param endOffset the end offset
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param partitions the partitions
+     * @param newLevel the new level
+     */
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset,
+    		FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(new PolygonFormatMapper(startOffset,endOffset, splitter,carryInputData)));
+        this.analyze(newLevel);
+    }
+
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param startOffset the start offset
+     * @param endOffset the end offset
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param newLevel the new level
+     */
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset,
+    		FileDataSplitter splitter, boolean carryInputData, StorageLevel newLevel) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(new PolygonFormatMapper(startOffset, endOffset, splitter, carryInputData)));
+        this.analyze(newLevel);
+    }
+
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param partitions the partitions
+     * @param newLevel the new level
+     */
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation,
+    		FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(new PolygonFormatMapper(splitter,carryInputData)));
+        this.analyze(newLevel);
+    }
+
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param newLevel the new level
+     */
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation,
+    		FileDataSplitter splitter, boolean carryInputData, StorageLevel newLevel) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(new PolygonFormatMapper(splitter, carryInputData)));
+        this.analyze(newLevel);
+    }
+    
+
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param partitions the partitions
+     * @param userSuppliedMapper the user supplied mapper
+     * @param newLevel the new level
+     */
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper, StorageLevel newLevel) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(userSuppliedMapper));
+        this.analyze(newLevel);
+    }
+    
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param userSuppliedMapper the user supplied mapper
+     * @param newLevel the new level
+     */
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper, StorageLevel newLevel) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(userSuppliedMapper));
+        this.analyze(newLevel);
     }
     
     /**
@@ -132,6 +278,7 @@ public class PolygonRDD extends SpatialRDD {
      *
      * @return the rectangle RDD
      */
+    @Deprecated
     public RectangleRDD MinimumBoundingRectangle() {
         JavaRDD<Envelope> rectangleRDD = this.rawSpatialRDD.map(new Function<Object, Envelope>() {
 
@@ -141,33 +288,6 @@ public class PolygonRDD extends SpatialRDD {
             }
         });
         return new RectangleRDD(rectangleRDD);
-    }
-
-    /**
-     * Instantiates a new polygon RDD.
-     *
-     * @param sparkContext the spark context
-     * @param InputLocation the input location
-     * @param partitions the partitions
-     * @param userSuppliedMapper the user supplied mapper
-     */
-    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(userSuppliedMapper));
-        this.boundary();
-        this.totalNumberOfRecords = this.rawSpatialRDD.count();
-    }
-    
-    /**
-     * Instantiates a new polygon RDD.
-     *
-     * @param sparkContext the spark context
-     * @param InputLocation the input location
-     * @param userSuppliedMapper the user supplied mapper
-     */
-    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(userSuppliedMapper));
-        this.boundary();
-        this.totalNumberOfRecords = this.rawSpatialRDD.count();
     }
     
     /**

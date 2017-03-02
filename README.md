@@ -44,9 +44,10 @@ Inside, Overlap, DatasetBoundary, Minimum Bounding Rectangl, Polygon Union
 ## Spatial Operation
 Spatial Range Query, Spatial Join Query, and Spatial K Nearest Neighbors Query.
 
-# GeoSpark Tutorial ([more](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Tutorial))
+# GeoSpark Tutorial ([more](https://github.com/DataSystemsLab/GeoSpark/wiki))
+GeoSpark full tutorial is available at GeoSpark GitHub Wiki: [https://github.com/DataSystemsLab/GeoSpark/wiki](https://github.com/DataSystemsLab/GeoSpark/wiki)
 
-#Babylon Visualization Framework on GeoSpark
+# Babylon Visualization Framework on GeoSpark
 Babylon is a large-scale in-memory geospatial visualization system.
 
 Babylon provides native support for general cartographic design by extending GeoSpark to process large-scale spatial data. It can visulize Spatial RDD and Spatial Queries and render super high resolution image in parallel.
@@ -81,10 +82,8 @@ Please refer to [JTS Topology Suite website](http://tsusiatsoftware.net/jts/main
 
 * Email us!
 
-## Contributors
+## Contact
 * [Jia Yu](http://www.public.asu.edu/~jiayu2/) (Email: jiayu2@asu.edu)
-
-* [Jinxuan Wu](http://www.public.asu.edu/~jinxuanw/) (Email: jinxuanw@asu.edu)
 
 * [Mohamed Sarwat](http://faculty.engineering.asu.edu/sarwat/) (Email: msarwat@asu.edu)
 

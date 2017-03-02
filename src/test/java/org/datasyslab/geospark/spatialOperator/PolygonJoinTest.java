@@ -24,6 +24,7 @@ import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -231,7 +232,7 @@ public class PolygonJoinTest {
      *
      * @throws Exception the exception
      */
-    @Test
+    @Ignore
     public void testJoinCorrectnessWithPolygonRDD() throws Exception {
     	
         PolygonRDD queryRDD1 = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, false);
