@@ -23,6 +23,7 @@ import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -219,7 +220,7 @@ public class RectangleJoinTest {
      *
      * @throws Exception the exception
      */
-    @Test
+    @Ignore
     public void testJoinCorrectnessWithRectangleRDD() throws Exception {
     	
         RectangleRDD queryRDD1 = new RectangleRDD(sc, InputLocation, offset, splitter, true);
