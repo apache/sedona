@@ -29,6 +29,7 @@ import org.datasyslab.babylon.utils.RasterizationUtils;
 import org.datasyslab.geospark.spatialRDD.SpatialRDD;
 
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -286,7 +287,7 @@ public abstract class VisualizationOperator implements Serializable{
 			{
 
 				@Override
-				public Iterable<Tuple2<Integer, Long>> call(Iterator<Tuple2<Integer, Long>> currentPartition) throws Exception  {
+				public List<Tuple2<Integer, Long>> call(Iterator<Tuple2<Integer, Long>> currentPartition) throws Exception  {
 					//This function will iterate all tuples within this partition twice. Complexity 2N. 
 					//First round, iterate all tuples to build a hash map. This hash map guarantees constant <key, value> access time.
 					// Another way is to do a sort on the data and then achieve constant access time in the second round. Complexity is N*log(N).
@@ -410,7 +411,7 @@ public abstract class VisualizationOperator implements Serializable{
 			{
 
 				@Override
-				public Iterable<Tuple2<Integer, ImageSerializableWrapper>> call(Iterator<Tuple2<Integer, Color>> currentPartition)
+				public List<Tuple2<Integer, ImageSerializableWrapper>> call(Iterator<Tuple2<Integer, Color>> currentPartition)
 						throws Exception {
 					BufferedImage imagePartition = new BufferedImage(partitionIntervalX,partitionIntervalY,BufferedImage.TYPE_INT_ARGB);
 					Tuple2<Integer,Color> pixelColor=null;
@@ -551,10 +552,6 @@ public abstract class VisualizationOperator implements Serializable{
 				{
 					return RasterizationUtils.FindPixelCoordinates(resolutionX,resolutionY,datasetBoundary,(Point)spatialObject,reverseSpatialCoordinate);
 				}
-				else if(spatialObject instanceof Envelope)
-				{
-					return RasterizationUtils.FindPixelCoordinates(resolutionX,resolutionY,datasetBoundary,(Envelope)spatialObject,reverseSpatialCoordinate);
-				}
 				else if(spatialObject instanceof Polygon)
 				{
 					return RasterizationUtils.FindPixelCoordinates(resolutionX,resolutionY,datasetBoundary,(Polygon)spatialObject,reverseSpatialCoordinate);
@@ -565,7 +562,7 @@ public abstract class VisualizationOperator implements Serializable{
 				}
 				else
 				{
-					throw new Exception("[VisualizationOperator][Rasterize] Unsupported spatial object types.");
+					throw new Exception("[VisualizationOperator][Rasterize] Unsupported spatial object types. Babylon only supports Point, Polygon, LineString");
 				}
 			}
 		});

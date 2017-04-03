@@ -1,6 +1,6 @@
 /**
- * FILE: testGeoJS.java
- * PATH: org.datasyslab.geospark.utils.testGeoJS.java
+ * FILE: testGeoJSON.java
+ * PATH: org.datasyslab.geospark.utils.testGeoJSON.java
  * Copyright (c) 2017 Arizona State University Data Systems Lab
  * All rights reserved.
  */
@@ -26,11 +26,11 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
-// TODO: Auto-generated Javadoc
+
 /**
- * The Class testGeoJS.
+ * The Class testGeoJSON.
  */
-public class testGeoJS {
+public class testGeoJSON {
     
     /** The sc. */
     public static JavaSparkContext sc;
@@ -46,22 +46,25 @@ public class testGeoJS {
         Logger.getLogger("akka").setLevel(Level.WARN);
     }
 
+
     /**
-     * Jts 2 geonjs.
+     * Jts 2 geonjson.
      */
     @Test
-    public void jts2geonjs(){
+    public void jts2geonjson(){
         GeometryFactory geometryFactory = new GeometryFactory();
         Coordinate coordinate = new Coordinate(1.0, 2.0);
+        
         Geometry point = geometryFactory.createPoint(coordinate);
-
+        point.setUserData(null);
         GeoJSONWriter writer = new GeoJSONWriter();
         GeoJSON json = writer.write(point);
-        String jsonstring = json.toString();
+        //String jsonstring = json.toString();
 
-        System.out.println(jsonstring);
+        //System.out.println(jsonstring);
     }
 
+    
     /**
      * Tear down.
      */

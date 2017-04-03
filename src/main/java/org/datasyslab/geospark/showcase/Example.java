@@ -29,6 +29,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -191,11 +192,11 @@ public class Example implements Serializable{
     	Random random=new Random();
     	double randomNumber=random.nextInt(10)+random.nextDouble();
     	queryEnvelope=new Envelope (-90.01+randomNumber,-80.01+randomNumber,30.01+randomNumber,40.01+randomNumber);
-    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true);
+    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY());
     	objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = RangeQuery.SpatialRangeQuery(objectRDD, queryEnvelope, 0,false).count();
+    		long resultSize = RangeQuery.SpatialRangeQuery(objectRDD, queryEnvelope, false,false).count();
     		assert resultSize>-1;
     	}
     }
@@ -211,12 +212,12 @@ public class Example implements Serializable{
     	Random random=new Random();
     	double randomNumber=random.nextInt(10)+random.nextDouble();
     	queryEnvelope=new Envelope (-90.01+randomNumber,-80.01+randomNumber,30.01+randomNumber,40.01+randomNumber);
-    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true);
+    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY());
     	objectRDD.buildIndex(IndexType.RTREE,false);
     	objectRDD.indexedRawRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = RangeQuery.SpatialRangeQuery(objectRDD, queryEnvelope, 0,true).count();
+    		long resultSize = RangeQuery.SpatialRangeQuery(objectRDD, queryEnvelope, false,true).count();
     		assert resultSize>-1;
     	}
         
@@ -231,11 +232,11 @@ public class Example implements Serializable{
     	Random random=new Random();
     	double randomNumber=random.nextInt(10)+random.nextDouble();
     	queryPoint=fact.createPoint(new Coordinate(-84.01+randomNumber, 34.01+randomNumber));
-    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true);
+    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY());
     	objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
-    		List<Envelope> result = KNNQuery.SpatialKnnQuery(objectRDD, queryPoint, 1000,false);
+    		List<Polygon> result = KNNQuery.SpatialKnnQuery(objectRDD, queryPoint, 1000,false);
     		assert result.size()>-1;
     	}
     }
@@ -249,12 +250,12 @@ public class Example implements Serializable{
     	Random random=new Random();
     	double randomNumber=random.nextInt(10)+random.nextDouble();
     	queryPoint=fact.createPoint(new Coordinate(-84.01+randomNumber, 34.01+randomNumber));
-    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true);
+    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY());
     	objectRDD.buildIndex(IndexType.RTREE,false);
     	objectRDD.indexedRawRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
-    		List<Envelope> result = KNNQuery.SpatialKnnQuery(objectRDD, queryPoint, 1000, true);
+    		List<Polygon> result = KNNQuery.SpatialKnnQuery(objectRDD, queryPoint, 1000, true);
     		assert result.size()>-1;
     	}
     }
@@ -266,14 +267,14 @@ public class Example implements Serializable{
      */
     public static void testSpatialJoinQuery() throws Exception {
     	RectangleRDD rectangleRDD = new RectangleRDD(sc, inputLocation2, offset2, splitter2, true);
-    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset ,splitter,true, numPartitions);
+    	RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset ,splitter,true, numPartitions, StorageLevel.MEMORY_ONLY());
     	objectRDD.spatialPartitioning(GridType.RTREE);
     	rectangleRDD.spatialPartitioning(objectRDD.grids);
     	objectRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
     		
-    		long resultSize = JoinQuery.SpatialJoinQuery(objectRDD,rectangleRDD,false).count();
+    		long resultSize = JoinQuery.SpatialJoinQuery(objectRDD,rectangleRDD,false,true).count();
     		assert resultSize>0;
     	}
     }
@@ -285,14 +286,14 @@ public class Example implements Serializable{
      */
     public static void testSpatialJoinQueryUsingIndex() throws Exception {
     	RectangleRDD rectangleRDD = new RectangleRDD(sc, inputLocation2, offset2, splitter2, true);
-  		RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset ,splitter,true, numPartitions);
+  		RectangleRDD objectRDD = new RectangleRDD(sc, inputLocation, offset ,splitter,true, numPartitions, StorageLevel.MEMORY_ONLY());
   		objectRDD.spatialPartitioning(GridType.RTREE);
   		rectangleRDD.spatialPartitioning(objectRDD.grids);
     	objectRDD.buildIndex(IndexType.RTREE,true);
     	objectRDD.indexedRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = JoinQuery.SpatialJoinQuery(objectRDD,rectangleRDD,true).count();
+    		long resultSize = JoinQuery.SpatialJoinQuery(objectRDD,rectangleRDD,true,false).count();
     		assert resultSize>0;
     	}
     }

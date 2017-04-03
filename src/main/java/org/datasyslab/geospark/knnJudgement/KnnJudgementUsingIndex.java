@@ -13,8 +13,10 @@ import java.util.List;
 
 import org.apache.spark.api.java.function.FlatMapFunction;
 
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.index.SpatialIndex;
 import com.vividsolutions.jts.index.strtree.GeometryItemDistance;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
@@ -46,7 +48,7 @@ public class KnnJudgementUsingIndex implements FlatMapFunction<Iterator<Object>,
 	 * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
 	 */
 	@Override
-	public Iterable<Object> call(Iterator<Object> treeIndexes) throws Exception {
+	public List call(Iterator<Object> treeIndexes) throws Exception {
 		// TODO Auto-generated method stub
 		GeometryFactory fact= new GeometryFactory();
 		Object treeIndex = treeIndexes.next();
@@ -57,7 +59,7 @@ public class KnnJudgementUsingIndex implements FlatMapFunction<Iterator<Object>,
 		}
 		else
 		{
-			throw new Exception("[KnnJudgementUsingIndex][Call]QuadTree index doesn't support KNN search.");
+			throw new Exception("[KnnJudgementUsingIndex][Call] QuadTree index doesn't support KNN search.");
 		}
 		List result = new ArrayList();
 		for(int i=0;i<localK.length;i++)

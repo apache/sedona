@@ -17,7 +17,6 @@ import org.wololo.jts2geojson.GeoJSONReader;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.WKTReader;
@@ -57,13 +56,10 @@ public class PointFormatMapper extends FormatMapper implements FlatMapFunction<S
 	/* (non-Javadoc)
      * @see org.apache.spark.api.java.function.Function#call(java.lang.Object)
      */
-    public Iterable<Object> call(String line) throws Exception {
-        List result= new ArrayList<Point>();
-        Geometry spatialObject = null;
+    public List call(String line) throws Exception {
     	MultiPoint multiSpatialObjects = null;
-        GeometryFactory fact = new GeometryFactory();
-        List<String> lineSplitList;
         Coordinate coordinate;
+    	List result= new ArrayList<Point>();
         switch (splitter) {
             case CSV:
                 lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));

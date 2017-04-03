@@ -15,12 +15,14 @@ import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.wololo.jts2geojson.GeoJSONReader;
 
-import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.WKTReader;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class RectangleFormatMapper.
  */
@@ -35,7 +37,6 @@ public class RectangleFormatMapper extends FormatMapper implements FlatMapFuncti
 	 */
 	public RectangleFormatMapper(FileDataSplitter Splitter, boolean carryInputData) {
 		super(Splitter, carryInputData);
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -49,19 +50,16 @@ public class RectangleFormatMapper extends FormatMapper implements FlatMapFuncti
 	public RectangleFormatMapper(Integer startOffset, Integer endOffset, FileDataSplitter Splitter,
 			boolean carryInputData) {
 		super(startOffset, endOffset, Splitter, carryInputData);
-		// TODO Auto-generated constructor stub
 	}
 
 	/* (non-Javadoc)
 	 * @see org.apache.spark.api.java.function.Function#call(java.lang.Object)
 	 */
-	public Iterable<Object> call(String line) throws Exception {
-		Envelope rectangle = null;
-		List result= new ArrayList<Envelope>();
-		Geometry spatialObject = null;
+	public List call(String line) throws Exception {
 		MultiPolygon multiSpatialObjects = null;
-		List<String> lineSplitList;
+    	List result= new ArrayList<Polygon>();
 		Double x1,x2,y1,y2;
+        LinearRing linear;
 		switch (splitter) {
 			case CSV:
 				lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
@@ -69,12 +67,19 @@ public class RectangleFormatMapper extends FormatMapper implements FlatMapFuncti
 				x2 = Double.parseDouble(lineSplitList.get(this.startOffset + 2));
 				y1 = Double.parseDouble(lineSplitList.get(this.startOffset + 1));
 				y2 = Double.parseDouble(lineSplitList.get(this.startOffset + 3));
-				rectangle = new Envelope(x1, x2, y1, y2);
+		        coordinates = new Coordinate[5];
+		        coordinates[0]=new Coordinate(x1,y1);
+		        coordinates[1]=new Coordinate(x1,y2);
+		        coordinates[2]=new Coordinate(x2,y2);
+		        coordinates[3]=new Coordinate(x2,y1);
+		        coordinates[4]=coordinates[0];
+                linear = fact.createLinearRing(coordinates);
+                spatialObject = new Polygon(linear, null, fact);
 				if(this.carryInputData)
 				{
-					rectangle.setUserData(line);
+					spatialObject.setUserData(line);
 				}
-				result.add(rectangle);
+				result.add(spatialObject);
 				break;
 			case TSV:
 				lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
@@ -82,12 +87,19 @@ public class RectangleFormatMapper extends FormatMapper implements FlatMapFuncti
 				x2 = Double.parseDouble(lineSplitList.get(this.startOffset + 2));
 				y1 = Double.parseDouble(lineSplitList.get(this.startOffset + 1));
 				y2 = Double.parseDouble(lineSplitList.get(this.startOffset + 3));
-				rectangle = new Envelope(x1, x2, y1, y2);
+		        coordinates = new Coordinate[5];
+		        coordinates[0]=new Coordinate(x1,y1);
+		        coordinates[1]=new Coordinate(x1,y2);
+		        coordinates[2]=new Coordinate(x2,y2);
+		        coordinates[3]=new Coordinate(x2,y1);
+		        coordinates[4]=coordinates[0];
+                linear = fact.createLinearRing(coordinates);
+                spatialObject = new Polygon(linear, null, fact);
 				if(this.carryInputData)
 				{
-					rectangle.setUserData(line);
+					spatialObject.setUserData(line);
 				}
-				result.add(rectangle);
+				result.add(spatialObject);
 				break;
 			case GEOJSON:
                 GeoJSONReader reader = new GeoJSONReader();
@@ -102,20 +114,44 @@ public class RectangleFormatMapper extends FormatMapper implements FlatMapFuncti
                 	for(int i=0;i<multiSpatialObjects.getNumGeometries();i++)
                 	{
                 		spatialObject = multiSpatialObjects.getGeometryN(i);
+        				x1 = spatialObject.getEnvelopeInternal().getMinX();
+        				x2 = spatialObject.getEnvelopeInternal().getMaxX();
+        				y1 = spatialObject.getEnvelopeInternal().getMinY();
+        				y2 = spatialObject.getEnvelopeInternal().getMaxY();
+        		        coordinates = new Coordinate[5];
+        		        coordinates[0]=new Coordinate(x1,y1);
+        		        coordinates[1]=new Coordinate(x1,y2);
+        		        coordinates[2]=new Coordinate(x2,y2);
+        		        coordinates[3]=new Coordinate(x2,y1);
+        		        coordinates[4]=coordinates[0];
+                        linear = fact.createLinearRing(coordinates);
+                        spatialObject = new Polygon(linear, null, fact);
                 		if(this.carryInputData)
                 		{
                     		spatialObject.setUserData(line);
                 		}
-                		result.add(spatialObject.getEnvelopeInternal());
+                		result.add(spatialObject);
                 	}
                 }
                 else
                 {
+    				x1 = spatialObject.getEnvelopeInternal().getMinX();
+    				x2 = spatialObject.getEnvelopeInternal().getMaxX();
+    				y1 = spatialObject.getEnvelopeInternal().getMinY();
+    				y2 = spatialObject.getEnvelopeInternal().getMaxY();
+    		        coordinates = new Coordinate[5];
+    		        coordinates[0]=new Coordinate(x1,y1);
+    		        coordinates[1]=new Coordinate(x1,y2);
+    		        coordinates[2]=new Coordinate(x2,y2);
+    		        coordinates[3]=new Coordinate(x2,y1);
+    		        coordinates[4]=coordinates[0];
+                    linear = fact.createLinearRing(coordinates);
+                    spatialObject = new Polygon(linear, null, fact);
                     if(this.carryInputData)
                     {
                     	spatialObject.setUserData(line);
                     }
-            		result.add(spatialObject.getEnvelopeInternal());
+            		result.add(spatialObject);
                 }
                 break;
 			case WKT:
@@ -132,20 +168,44 @@ public class RectangleFormatMapper extends FormatMapper implements FlatMapFuncti
                     	 * and assign original input line to each object.
                     	 */
                 		spatialObject = multiSpatialObjects.getGeometryN(i);
+        				x1 = spatialObject.getEnvelopeInternal().getMinX();
+        				x2 = spatialObject.getEnvelopeInternal().getMaxX();
+        				y1 = spatialObject.getEnvelopeInternal().getMinY();
+        				y2 = spatialObject.getEnvelopeInternal().getMaxY();
+        		        coordinates = new Coordinate[5];
+        		        coordinates[0]=new Coordinate(x1,y1);
+        		        coordinates[1]=new Coordinate(x1,y2);
+        		        coordinates[2]=new Coordinate(x2,y2);
+        		        coordinates[3]=new Coordinate(x2,y1);
+        		        coordinates[4]=coordinates[0];
+                        linear = fact.createLinearRing(coordinates);
+                        spatialObject = new Polygon(linear, null, fact);
                 		if(this.carryInputData)
                 		{
                     		spatialObject.setUserData(line);
                 		}
-                		result.add(spatialObject.getEnvelopeInternal());
+                		result.add(spatialObject);
                 	}
                 }
                 else
                 {
+    				x1 = spatialObject.getEnvelopeInternal().getMinX();
+    				x2 = spatialObject.getEnvelopeInternal().getMaxX();
+    				y1 = spatialObject.getEnvelopeInternal().getMinY();
+    				y2 = spatialObject.getEnvelopeInternal().getMaxY();
+    		        coordinates = new Coordinate[5];
+    		        coordinates[0]=new Coordinate(x1,y1);
+    		        coordinates[1]=new Coordinate(x1,y2);
+    		        coordinates[2]=new Coordinate(x2,y2);
+    		        coordinates[3]=new Coordinate(x2,y1);
+    		        coordinates[4]=coordinates[0];
+                    linear = fact.createLinearRing(coordinates);
+                    spatialObject = new Polygon(linear, null, fact);
                     if(this.carryInputData)
                     {
                     	spatialObject.setUserData(line);
                     }
-            		result.add(spatialObject.getEnvelopeInternal());
+            		result.add(spatialObject);
                 }
                 break;
 		}

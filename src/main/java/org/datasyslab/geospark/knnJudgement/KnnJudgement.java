@@ -1,6 +1,6 @@
 /**
- * FILE: GeometryKnnJudgement.java
- * PATH: org.datasyslab.geospark.knnJudgement.GeometryKnnJudgement.java
+ * FILE: KnnJudgement.java
+ * PATH: org.datasyslab.geospark.knnJudgement.KnnJudgement.java
  * Copyright (c) 2017 Arizona State University Data Systems Lab
  * All rights reserved.
  */
@@ -23,7 +23,7 @@ import com.vividsolutions.jts.geom.Point;
 /**
  * The Class GeometryKnnJudgement.
  */
-public class GeometryKnnJudgement implements FlatMapFunction<Iterator<Object>, Object>, Serializable{
+public class KnnJudgement implements FlatMapFunction<Iterator<Object>, Object>, Serializable{
 	
 	/** The k. */
 	int k;
@@ -37,7 +37,7 @@ public class GeometryKnnJudgement implements FlatMapFunction<Iterator<Object>, O
 	 * @param queryCenter the query center
 	 * @param k the k
 	 */
-	public GeometryKnnJudgement(Point queryCenter,int k)
+	public KnnJudgement(Point queryCenter,int k)
 	{
 		this.queryCenter=queryCenter;
 		this.k=k;
@@ -47,25 +47,22 @@ public class GeometryKnnJudgement implements FlatMapFunction<Iterator<Object>, O
 	 * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
 	 */
 	@Override
-	public Iterable<Object> call(Iterator<Object> input) throws Exception {
-		// TODO Auto-generated method stub
-		
-		PriorityQueue<Geometry> pq = new PriorityQueue<Geometry>(k, new GeometryDistanceComparator(queryCenter));
+	public ArrayList<Object> call(Iterator<Object> input) throws Exception {		
+		PriorityQueue<Object> pq = new PriorityQueue<Object>(k, new GeometryDistanceComparator(queryCenter,false));
 		while (input.hasNext()) {
 			if (pq.size() < k) {
-				pq.offer((Geometry)input.next());
+				pq.offer(input.next());
 			} else {
 				Geometry curpoint = (Geometry)input.next();
-				double distance = curpoint.getCoordinate().distance(queryCenter.getCoordinate());
-				double largestDistanceInPriQueue = pq.peek().getCoordinate()
-						.distance(queryCenter.getCoordinate());
+				double distance = curpoint.distance(queryCenter);
+				double largestDistanceInPriQueue = ((Geometry) pq.peek()).distance(queryCenter);
 				if (largestDistanceInPriQueue > distance) {
 					pq.poll();
 					pq.offer(curpoint);
 				}
 			}
 		}
-		ArrayList res = new ArrayList<Point>();
+		ArrayList<Object> res = new ArrayList<Object>();
 		for (int i = 0; i < k; i++) {
 			res.add(pq.poll());
 		}

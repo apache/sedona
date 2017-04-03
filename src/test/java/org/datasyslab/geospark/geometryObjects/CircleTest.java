@@ -8,33 +8,32 @@ package org.datasyslab.geospark.geometryObjects;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Test;
+import java.util.HashSet;
 
-/**
- * 
- * @author Arizona State University DataSystems Lab
- *
- */
+import org.junit.Test;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class CircleTest.
  */
 public class CircleTest {
 
-    /**
+   /** The geom fact. */
+   public static GeometryFactory geomFact = new GeometryFactory();
+	/**
      * Test get center.
      *
      * @throws Exception the exception
      */
     @Test
     public void testGetCenter() throws Exception {
-        Circle circle = new Circle(0.0, 0.0, 0.1);
-        assertEquals(circle.getCenter().getX(), 0.0, 0.01);
+    	
+    	
+        Circle circle = new Circle(geomFact.createPoint(new Coordinate(0.0,0.0)), 0.1);
+        assertEquals(circle.getCenterPoint().x, 0.0, 0.01);
     }
 
     /**
@@ -44,7 +43,7 @@ public class CircleTest {
      */
     @Test
     public void testGetRadius() throws Exception {
-        Circle circle = new Circle(0.0, 0.0, 0.1);
+        Circle circle = new Circle(geomFact.createPoint(new Coordinate(0.0,0.0)), 0.1);
         assertEquals(circle.getRadius(), 0.1, 0.01);
     }
 
@@ -55,7 +54,7 @@ public class CircleTest {
      */
     @Test
     public void testSetRadius() throws Exception {
-        Circle circle = new Circle(0.0, 0.0, 0.1);
+        Circle circle = new Circle(geomFact.createPoint(new Coordinate(0.0,0.0)), 0.1);
         circle.setRadius(0.2);
         assertEquals(circle.getRadius(), 0.2, 0.01);
     }
@@ -67,20 +66,9 @@ public class CircleTest {
      */
     @Test
     public void testGetMBR() throws Exception {
-        Circle circle = new Circle(0.0, 0.0, 0.1);
+        Circle circle = new Circle(geomFact.createPoint(new Coordinate(0.0,0.0)), 0.1);
 
-        assertEquals(circle.getMBR().getMinX(), circle.getCenter().getX() - circle.getRadius(), 0.01);
-    }
-
-    /**
-     * Test MB rto circle.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testMBRtoCircle() throws Exception {
-        Envelope e = new Envelope(-0.1, 0.1, -0.1, 0.1);
-        assertEquals(Circle.MBRtoCircle(e).getCenter().getX(), 0.0, 0.01);
+        assertEquals(circle.getEnvelopeInternal().getMinX(), circle.getCenterPoint().x - circle.getRadius(), 0.01);
     }
 
     /**
@@ -90,12 +78,10 @@ public class CircleTest {
      */
     @Test
     public void testContains() throws Exception {
-        Circle circle = new Circle(0.0, 0.0, 0.1);
+        Circle circle = new Circle(geomFact.createPoint(new Coordinate(0.0,0.0)), 0.1);
         GeometryFactory geometryFactory = new GeometryFactory();
-        assertEquals(true, circle.contains(geometryFactory.createPoint(new Coordinate(0.0, 0.0))));
+        assertEquals(true, circle.covers(geometryFactory.createPoint(new Coordinate(0.0, 0.0))));
     }
-
-
 
     /**
      * Test intersects.
@@ -104,27 +90,17 @@ public class CircleTest {
      */
     @Test
     public void testIntersects() throws Exception {
-
-    }
-
-    /**
-     * Test intersects 1.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testIntersects1() throws Exception {
-        Circle circle = new Circle(0.0, 0.0, 0.1);
+        Circle circle = new Circle(geomFact.createPoint(new Coordinate(0.0,0.0)), 0.1);
         Envelope envelope = new Envelope(-0.1, 0.1, -0.1, 0.1);
-        assertEquals(true, circle.intersects(envelope));
+        assertEquals(true, circle.getEnvelopeInternal().covers(envelope));
 
-        circle = new Circle(-0.1, 0.0, 0.1);
+        circle = new Circle(geomFact.createPoint(new Coordinate(-0.1,0.0)), 0.1);
         envelope = new Envelope(-0.1, 0.1, -0.1, 0.1);
-        assertEquals(true, circle.intersects(envelope));
+        assertEquals(true, circle.getEnvelopeInternal().intersects(envelope));
 
-        circle = new Circle(-0.3, 0.0, 0.1);
+        circle = new Circle(geomFact.createPoint(new Coordinate(-0.3,0.0)), 0.1);
         envelope = new Envelope(-0.1, 0.1, -0.1, 0.1);
-        assertEquals(false, circle.intersects(envelope));
+        assertEquals(false, circle.getEnvelopeInternal().intersects(envelope));
     }
 
     /**
@@ -134,8 +110,30 @@ public class CircleTest {
      */
     @Test
     public void testIntersectsRealData() throws Exception {
-        Circle circle = new Circle(-112.574945, 45.987772, 0.01);
+        Circle circle = new Circle(geomFact.createPoint(new Coordinate(-112.574945, 45.987772)), 0.01);
         Envelope envelope = new Envelope(-158.104182, -65.649956, 17.982169, 48.803593);
-        assertEquals(true, circle.intersects(envelope));
+        assertEquals(true, circle.getEnvelopeInternal().intersects(envelope));
+    }
+    
+    /**
+     * Test equality.
+     */
+    @Test
+    public void testEquality()
+    {
+        Circle circle1 = new Circle(geomFact.createPoint(new Coordinate(-112.574945, 45.987772)), 0.01);
+        Circle circle2 = new Circle(geomFact.createPoint(new Coordinate(-112.574945, 45.987772)), 0.01);
+        Circle circle3 = new Circle(geomFact.createPoint(new Coordinate(-112.574945, 45.987772)), 0.01);
+        Circle circle4 = new Circle(geomFact.createPoint(new Coordinate(-112.574945, 45.987772)), 0.01);
+        Circle circle5 = new Circle(geomFact.createPoint(new Coordinate(-112.574945, 45.987772)), 0.01);
+        Circle circle6 = new Circle(geomFact.createPoint(new Coordinate(-112.574942, 45.987772)), 0.01);
+        HashSet<Circle> result = new HashSet<Circle>();
+        result.add(circle1);
+        result.add(circle2);
+        result.add(circle3);
+        result.add(circle4);
+        result.add(circle5);
+        result.add(circle6);
+        assert result.size()==2;
     }
 }

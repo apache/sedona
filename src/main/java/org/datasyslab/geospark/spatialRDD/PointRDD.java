@@ -252,27 +252,5 @@ public class PointRDD extends SpatialRDD {
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(userSuppliedMapper));
         this.analyze(newLevel);
     }
-    
-    /**
-     * Save as geo JSON.
-     *
-     * @param outputLocation the output location
-     */
-    public void saveAsGeoJSON(String outputLocation) {
-        this.rawSpatialRDD.mapPartitions(new FlatMapFunction<Iterator<Object>, String>() {
-            @Override
-            public Iterable<String> call(Iterator<Object> iterator) throws Exception {
-                ArrayList<String> result = new ArrayList<String>();
-                GeoJSONWriter writer = new GeoJSONWriter();
-                while (iterator.hasNext()) {
-                	Geometry spatialObject = (Geometry)iterator.next();
-                    GeoJSON json = writer.write(spatialObject);
-                    String jsonstring = json.toString();
-                    result.add(jsonstring);
-                }
-                return result;
-            }
-        }).saveAsTextFile(outputLocation);
-    }
 
 }

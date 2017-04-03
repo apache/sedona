@@ -1,6 +1,6 @@
 /**
- * FILE: GeometryByPolygonJudgement.java
- * PATH: org.datasyslab.geospark.joinJudgement.GeometryByPolygonJudgement.java
+ * FILE: GeometryByCircleJudgement.java
+ * PATH: org.datasyslab.geospark.joinJudgement.GeometryByCircleJudgement.java
  * Copyright (c) 2017 Arizona State University Data Systems Lab
  * All rights reserved.
  */
@@ -11,26 +11,27 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import org.apache.spark.api.java.function.PairFlatMapFunction;
+import org.datasyslab.geospark.geometryObjects.Circle;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
 
 import scala.Tuple2;
 
+
 /**
- * The Class GeometryByPolygonJudgement.
+ * The Class GeometryByCircleJudgement.
  */
-public class GeometryByPolygonJudgement implements PairFlatMapFunction<Tuple2<Integer, Tuple2<Iterable<Object>, Iterable<Object>>>, Polygon, HashSet<Geometry>>, Serializable{
+public class GeometryByCircleJudgement implements PairFlatMapFunction<Tuple2<Integer, Tuple2<Iterable<Object>, Iterable<Object>>>, Circle, HashSet<Geometry>>, Serializable{
 	
 	/** The consider boundary intersection. */
 	boolean considerBoundaryIntersection=false;
 	
 	/**
-	 * Instantiates a new geometry by polygon judgement.
+	 * Instantiates a new geometry by circle judgement.
 	 *
 	 * @param considerBoundaryIntersection the consider boundary intersection
 	 */
-	public GeometryByPolygonJudgement(boolean considerBoundaryIntersection)
+	public GeometryByCircleJudgement(boolean considerBoundaryIntersection)
 	{
 		this.considerBoundaryIntersection = considerBoundaryIntersection;
 	}
@@ -38,11 +39,11 @@ public class GeometryByPolygonJudgement implements PairFlatMapFunction<Tuple2<In
 	 * @see org.apache.spark.api.java.function.PairFlatMapFunction#call(java.lang.Object)
 	 */
 	@Override
-	 public HashSet<Tuple2<Polygon, HashSet<Geometry>>> call(Tuple2<Integer, Tuple2<Iterable<Object>, Iterable<Object>>> cogroup) throws Exception {
-		HashSet<Tuple2<Polygon, HashSet<Geometry>>> result = new HashSet<Tuple2<Polygon, HashSet<Geometry>>>();
+	 public HashSet<Tuple2<Circle, HashSet<Geometry>>> call(Tuple2<Integer, Tuple2<Iterable<Object>, Iterable<Object>>> cogroup) throws Exception {
+		HashSet<Tuple2<Circle, HashSet<Geometry>>> result = new HashSet<Tuple2<Circle, HashSet<Geometry>>>();
         Iterator iteratorWindow=cogroup._2()._2().iterator();
         while(iteratorWindow.hasNext()) {
-        	Polygon window=(Polygon)iteratorWindow.next();
+        	Circle window=(Circle)iteratorWindow.next();
             HashSet<Geometry> resultHashSet = new HashSet<Geometry>();
             Iterator<Object> iteratorObject=cogroup._2()._1().iterator();
             while (iteratorObject.hasNext()) {
@@ -60,7 +61,7 @@ public class GeometryByPolygonJudgement implements PairFlatMapFunction<Tuple2<In
             	}
             }
             if(resultHashSet.size()==0) continue;
-            result.add(new Tuple2<Polygon, HashSet<Geometry>>(window, resultHashSet));
+            result.add(new Tuple2<Circle, HashSet<Geometry>>(window, resultHashSet));
         }
         return result;
     }
