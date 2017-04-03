@@ -14,16 +14,20 @@ import java.util.List;
 import org.apache.spark.api.java.function.FlatMapFunction;
 
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.index.SpatialIndex;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class RangeFilterUsingIndex.
  */
 public class RangeFilterUsingIndex implements FlatMapFunction<Iterator<Object>,Object>, Serializable{
 
+	/** The consider boundary intersection. */
+	boolean considerBoundaryIntersection=false;
+	
 	/** The query window. */
 	Object queryWindow;
 
@@ -31,9 +35,11 @@ public class RangeFilterUsingIndex implements FlatMapFunction<Iterator<Object>,O
 	 * Instantiates a new range filter using index.
 	 *
 	 * @param queryWindow the query window
+	 * @param considerBoundaryIntersection the consider boundary intersection
 	 */
-	public RangeFilterUsingIndex(Envelope queryWindow)
+	public RangeFilterUsingIndex(Envelope queryWindow,boolean considerBoundaryIntersection)
 	{
+		this.considerBoundaryIntersection=considerBoundaryIntersection;
 		this.queryWindow=queryWindow;
 
 	}
@@ -42,13 +48,22 @@ public class RangeFilterUsingIndex implements FlatMapFunction<Iterator<Object>,O
 	 * Instantiates a new range filter using index.
 	 *
 	 * @param queryWindow the query window
+	 * @param considerBoundaryIntersection the consider boundary intersection
 	 */
-	public RangeFilterUsingIndex(Polygon queryWindow)
+	public RangeFilterUsingIndex(Polygon queryWindow,boolean considerBoundaryIntersection)
 	{
+		this.considerBoundaryIntersection=considerBoundaryIntersection;
 		this.queryWindow=queryWindow;
 
 	}
 	
+	/**
+	 * Call.
+	 *
+	 * @param treeIndexes the tree indexes
+	 * @return the iterator
+	 * @throws Exception the exception
+	 */
 	/* (non-Javadoc)
 	 * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
 	 */
@@ -59,14 +74,41 @@ public class RangeFilterUsingIndex implements FlatMapFunction<Iterator<Object>,O
 		if(treeIndex instanceof STRtree)
 		{
 			STRtree strtree= (STRtree) treeIndex;
-			List result=new ArrayList();
+			List<Object> result=new ArrayList<Object>();
 			if(this.queryWindow instanceof Envelope)
 			{
-				result=strtree.query((Envelope)this.queryWindow);
+				if(considerBoundaryIntersection)
+				{
+					result=strtree.query((Envelope)this.queryWindow);
+				}
+				else
+				{
+					List<Object> intermediateResult = strtree.query((Envelope)this.queryWindow);
+					for(Object spatialObject:intermediateResult)
+					{
+						if(((Envelope)this.queryWindow).contains(((Geometry)spatialObject).getEnvelopeInternal()))
+						{
+							result.add(spatialObject);
+						}
+					}
+				}
+				
 			}
 			else
 			{
-				result=strtree.query(((Polygon)this.queryWindow).getEnvelopeInternal());
+				List tempResult=new ArrayList();
+				tempResult=strtree.query(((Polygon)this.queryWindow).getEnvelopeInternal());
+				for(Object spatialObject:tempResult)
+				{
+					if(considerBoundaryIntersection)
+					{
+						if(((Polygon)this.queryWindow).intersects((Geometry)spatialObject)) result.add(spatialObject);
+					}
+					else
+					{
+						if(((Polygon)this.queryWindow).covers((Geometry)spatialObject)) result.add(spatialObject);
+					}
+				}
 			}
 			return result.iterator();
 		}
@@ -80,7 +122,18 @@ public class RangeFilterUsingIndex implements FlatMapFunction<Iterator<Object>,O
 			}
 			else
 			{
-				result=quadtree.query(((Polygon)this.queryWindow).getEnvelopeInternal());
+				List tempResult=new ArrayList();
+				tempResult=quadtree.query(((Polygon)this.queryWindow).getEnvelopeInternal());
+				for(Object spatialObject:tempResult)
+				{
+					if(considerBoundaryIntersection)
+					{
+						if(((Polygon)this.queryWindow).intersects((Geometry)spatialObject)) result.add(spatialObject);
+					}
+					else
+					{
+						if(((Polygon)this.queryWindow).covers((Geometry)spatialObject)) result.add(spatialObject);
+					}				}
 			}
 			return result.iterator();
 		}

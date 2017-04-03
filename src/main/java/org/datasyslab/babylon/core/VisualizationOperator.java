@@ -29,6 +29,7 @@ import org.datasyslab.babylon.utils.RasterizationUtils;
 import org.datasyslab.geospark.spatialRDD.SpatialRDD;
 
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -551,10 +552,6 @@ public abstract class VisualizationOperator implements Serializable{
 				{
 					return RasterizationUtils.FindPixelCoordinates(resolutionX,resolutionY,datasetBoundary,(Point)spatialObject,reverseSpatialCoordinate).iterator();
 				}
-				else if(spatialObject instanceof Envelope)
-				{
-					return RasterizationUtils.FindPixelCoordinates(resolutionX,resolutionY,datasetBoundary,(Envelope)spatialObject,reverseSpatialCoordinate).iterator();
-				}
 				else if(spatialObject instanceof Polygon)
 				{
 					return RasterizationUtils.FindPixelCoordinates(resolutionX,resolutionY,datasetBoundary,(Polygon)spatialObject,reverseSpatialCoordinate).iterator();
@@ -565,7 +562,7 @@ public abstract class VisualizationOperator implements Serializable{
 				}
 				else
 				{
-					throw new Exception("[VisualizationOperator][Rasterize] Unsupported spatial object types.");
+					throw new Exception("[VisualizationOperator][Rasterize] Unsupported spatial object types. Babylon only supports Point, Polygon, LineString");
 				}
 			}
 		});

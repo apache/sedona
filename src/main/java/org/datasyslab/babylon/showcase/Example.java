@@ -157,7 +157,7 @@ public class Example {
 			spatialRDD.spatialPartitioning(GridType.RTREE);
 			queryRDD.spatialPartitioning(spatialRDD.grids);
 	  		spatialRDD.buildIndex(IndexType.RTREE,true);
-			JavaPairRDD<Polygon,Long> joinResult = JoinQuery.SpatialJoinQueryCountByKey(spatialRDD,queryRDD,true);
+			JavaPairRDD<Polygon,Long> joinResult = JoinQuery.SpatialJoinQueryCountByKey(spatialRDD,queryRDD,true,false);
 
 			ChoroplethMap visualizationOperator = new ChoroplethMap(1000,600,USMainLandBoundary,false);
 			visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.RED, true);

@@ -167,7 +167,7 @@ public class ChoroplethmapTest implements Serializable{
 		spatialRDD.spatialPartitioning(GridType.RTREE);
 		queryRDD.spatialPartitioning(spatialRDD.grids);
   		spatialRDD.buildIndex(IndexType.RTREE,true);
-  		JavaPairRDD<Envelope,Long> joinResult = JoinQuery.SpatialJoinQueryCountByKey(spatialRDD,queryRDD,true);
+  		JavaPairRDD<Polygon,Long> joinResult = JoinQuery.SpatialJoinQueryCountByKey(spatialRDD,queryRDD,true,true);
   		
   		ChoroplethMap visualizationOperator = new ChoroplethMap(1000,600,USMainLandBoundary,false);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.RED, true);
@@ -198,7 +198,7 @@ public class ChoroplethmapTest implements Serializable{
 		spatialRDD.spatialPartitioning(GridType.RTREE);
 		queryRDD.spatialPartitioning(spatialRDD.grids);
   		spatialRDD.buildIndex(IndexType.RTREE,true);
-		JavaPairRDD<Polygon,Long> joinResult = JoinQuery.SpatialJoinQueryCountByKey(spatialRDD,queryRDD,true);
+		JavaPairRDD<Polygon,Long> joinResult = JoinQuery.SpatialJoinQueryCountByKey(spatialRDD,queryRDD,true,true);
 
 		ChoroplethMap visualizationOperator = new ChoroplethMap(1000,600,USMainLandBoundary,false);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.RED, true);

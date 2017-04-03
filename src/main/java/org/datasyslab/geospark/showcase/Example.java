@@ -29,6 +29,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -195,7 +196,7 @@ public class Example implements Serializable{
     	objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = RangeQuery.SpatialRangeQuery(objectRDD, queryEnvelope, 0,false).count();
+    		long resultSize = RangeQuery.SpatialRangeQuery(objectRDD, queryEnvelope, false,false).count();
     		assert resultSize>-1;
     	}
     }
@@ -216,7 +217,7 @@ public class Example implements Serializable{
     	objectRDD.indexedRawRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = RangeQuery.SpatialRangeQuery(objectRDD, queryEnvelope, 0,true).count();
+    		long resultSize = RangeQuery.SpatialRangeQuery(objectRDD, queryEnvelope, false,true).count();
     		assert resultSize>-1;
     	}
         
@@ -235,7 +236,7 @@ public class Example implements Serializable{
     	objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
-    		List<Envelope> result = KNNQuery.SpatialKnnQuery(objectRDD, queryPoint, 1000,false);
+    		List<Polygon> result = KNNQuery.SpatialKnnQuery(objectRDD, queryPoint, 1000,false);
     		assert result.size()>-1;
     	}
     }
@@ -254,7 +255,7 @@ public class Example implements Serializable{
     	objectRDD.indexedRawRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
-    		List<Envelope> result = KNNQuery.SpatialKnnQuery(objectRDD, queryPoint, 1000, true);
+    		List<Polygon> result = KNNQuery.SpatialKnnQuery(objectRDD, queryPoint, 1000, true);
     		assert result.size()>-1;
     	}
     }
@@ -273,7 +274,7 @@ public class Example implements Serializable{
     	for(int i=0;i<loopTimes;i++)
     	{
     		
-    		long resultSize = JoinQuery.SpatialJoinQuery(objectRDD,rectangleRDD,false).count();
+    		long resultSize = JoinQuery.SpatialJoinQuery(objectRDD,rectangleRDD,false,true).count();
     		assert resultSize>0;
     	}
     }
@@ -292,7 +293,7 @@ public class Example implements Serializable{
     	objectRDD.indexedRDD.persist(StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = JoinQuery.SpatialJoinQuery(objectRDD,rectangleRDD,true).count();
+    		long resultSize = JoinQuery.SpatialJoinQuery(objectRDD,rectangleRDD,true,false).count();
     		assert resultSize>0;
     	}
     }

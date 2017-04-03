@@ -6,17 +6,15 @@
  */
 package org.datasyslab.geospark.spatialRDD;
 
-import java.io.Serializable;
-
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.datasyslab.geospark.geometryObjects.Circle;
 
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Point;;
-
-// TODO: Auto-generated Javadoc
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * The Class CircleRDD.
@@ -44,60 +42,78 @@ public class CircleRDD extends SpatialRDD {
 	/**
 	 * Instantiates a new circle RDD.
 	 *
-	 * @param pointRDD the point RDD
+	 * @param spatialRDD the spatial RDD
 	 * @param Radius the radius
 	 */
-	public CircleRDD(PointRDD pointRDD, Double Radius) {
+	public CircleRDD(SpatialRDD spatialRDD, Double Radius) {
 		final Double radius = Radius;
-		JavaRDD<Circle> circleRDD = pointRDD.rawSpatialRDD.map(new Function<Object, Circle>() {
+		this.rawSpatialRDD = spatialRDD.rawSpatialRDD.map(new Function<Object, Object>() {
 
-			public Circle call(Object v1) {
+			public Object call(Object v1) {
 
-				return new Circle((Point)v1, radius);
+				return new Circle((Geometry) v1, radius);
 			}
-		});
-		this.rawSpatialRDD = circleRDD.map(new Function<Circle,Object>()
-		{
-
-			@Override
-			public Object call(Circle circle) throws Exception {
-				return circle;
-			}
-			
 		});
 	}
 
-
-    /**
-     * Minimum bounding rectangle.
-     *
-     * @return the rectangle RDD
-     */
-	public RectangleRDD MinimumBoundingRectangle() {
-		return new RectangleRDD(this.rawSpatialRDD.map(new Function<Object, Envelope>() {
-
-			public Envelope call(Object spatialObject) {
-
-				Circle circle = (Circle) spatialObject;
-				return circle.getMBR();
-			}
-
-		}));
-	}
 
 	/**
-	 * Center.
+	 * Gets the center point as spatial RDD.
 	 *
-	 * @return the point RDD
+	 * @return the center point as spatial RDD
 	 */
-	public PointRDD Center() {
+	public PointRDD getCenterPointAsSpatialRDD() {
 		return new PointRDD(this.rawSpatialRDD.map(new Function<Object, Point>() {
 
 			public Point call(Object spatialObject) {
 
-				return ((Circle)spatialObject).getCenter();
+				return (Point)((Circle)spatialObject).getCenterGeometry();
 			}
+		}));
+	}
+	
+	/**
+	 * Gets the center polygon as spatial RDD.
+	 *
+	 * @return the center polygon as spatial RDD
+	 */
+	public PolygonRDD getCenterPolygonAsSpatialRDD() {
+		return new PolygonRDD(this.rawSpatialRDD.map(new Function<Object, Polygon>() {
 
+			public Polygon call(Object spatialObject) {
+
+				return (Polygon)((Circle)spatialObject).getCenterGeometry();
+			}
+		}));
+	}
+	
+	/**
+	 * Gets the center line string RDD as spatial RDD.
+	 *
+	 * @return the center line string RDD as spatial RDD
+	 */
+	public LineStringRDD getCenterLineStringRDDAsSpatialRDD() {
+		return new LineStringRDD(this.rawSpatialRDD.map(new Function<Object, LineString>() {
+
+			public LineString call(Object spatialObject) {
+
+				return (LineString)((Circle)spatialObject).getCenterGeometry();
+			}
+		}));
+	}
+	
+	/**
+	 * Gets the center rectangle RDD as spatial RDD.
+	 *
+	 * @return the center rectangle RDD as spatial RDD
+	 */
+	public RectangleRDD getCenterRectangleRDDAsSpatialRDD() {
+		return new RectangleRDD(this.rawSpatialRDD.map(new Function<Object, Polygon>() {
+
+			public Polygon call(Object spatialObject) {
+
+				return (Polygon)((Circle)spatialObject).getCenterGeometry();
+			}
 		}));
 	}
 }

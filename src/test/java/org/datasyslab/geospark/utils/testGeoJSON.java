@@ -1,6 +1,6 @@
 /**
- * FILE: testGeoJS.java
- * PATH: org.datasyslab.geospark.utils.testGeoJS.java
+ * FILE: testGeoJSON.java
+ * PATH: org.datasyslab.geospark.utils.testGeoJSON.java
  * Copyright (c) 2017 Arizona State University Data Systems Lab
  * All rights reserved.
  */
@@ -27,6 +27,9 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
 
+/**
+ * The Class testGeoJSON.
+ */
 public class testGeoJSON {
     
     /** The sc. */
@@ -44,6 +47,9 @@ public class testGeoJSON {
     }
 
 
+    /**
+     * Jts 2 geonjson.
+     */
     @Test
     public void jts2geonjson(){
         GeometryFactory geometryFactory = new GeometryFactory();

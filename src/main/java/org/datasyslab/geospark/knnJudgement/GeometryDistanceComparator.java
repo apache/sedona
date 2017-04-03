@@ -40,8 +40,8 @@ public class GeometryDistanceComparator implements Comparator<Object>, Serializa
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
 	public int compare(Object p1, Object p2) {
-		double distance1 = ((Geometry) p1).getEnvelopeInternal().distance(queryCenter.getEnvelopeInternal());
-		double distance2 = ((Geometry) p2).getEnvelopeInternal().distance(queryCenter.getEnvelopeInternal());
+		double distance1 = ((Geometry) p1).distance(queryCenter);
+		double distance2 = ((Geometry) p2).distance(queryCenter);
 		if(this.normalOrder)
 		{
 			if (distance1 > distance2) {
