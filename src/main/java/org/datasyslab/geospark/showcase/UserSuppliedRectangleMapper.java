@@ -25,7 +25,7 @@ import com.vividsolutions.jts.io.WKTReader;
 /**
  * The Class UserSuppliedRectangleMapper.
  */
-public class UserSuppliedRectangleMapper implements FlatMapFunction<String, Object>{
+public class UserSuppliedRectangleMapper implements FlatMapFunction<String, Geometry>{
     
     /** The spatial object. */
     Geometry spatialObject = null;

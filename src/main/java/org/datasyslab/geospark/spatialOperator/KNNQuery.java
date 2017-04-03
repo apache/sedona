@@ -11,25 +11,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.Function;
 import org.datasyslab.geospark.knnJudgement.KnnJudgementUsingIndex;
 import org.datasyslab.geospark.knnJudgement.GeometryDistanceComparator;
-import org.datasyslab.geospark.knnJudgement.GeometryKnnJudgement;
-import org.datasyslab.geospark.knnJudgement.RectangleDistanceComparator;
-import org.datasyslab.geospark.knnJudgement.RectangleKnnJudgement;
+import org.datasyslab.geospark.knnJudgement.KnnJudgement;
 import org.datasyslab.geospark.spatialRDD.LineStringRDD;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
-
-// TODO: Auto-generated Javadoc
 /**
  * The Class KNNQuery.
  */
@@ -64,7 +57,7 @@ public class KNNQuery implements Serializable{
 		}
 		else
 		{
-			JavaRDD<Object> tmp = spatialRDD.getRawSpatialRDD().mapPartitions(new GeometryKnnJudgement(queryCenter,k));
+			JavaRDD<Object> tmp = spatialRDD.getRawSpatialRDD().mapPartitions(new KnnJudgement(queryCenter,k));
 			List<Object> result = tmp.takeOrdered(k, new GeometryDistanceComparator(queryCenter,true));
 			List<Point> geometryResult = new ArrayList<Point>();
 			for(Object spatialObject:result)
@@ -86,7 +79,7 @@ public class KNNQuery implements Serializable{
 	 * @param useIndex the use index
 	 * @return the list
 	 */
-	public static List<Envelope> SpatialKnnQuery(RectangleRDD spatialRDD, Point queryCenter, Integer k, boolean useIndex) {
+	public static List<Polygon> SpatialKnnQuery(RectangleRDD spatialRDD, Point queryCenter, Integer k, boolean useIndex) {
 		// For each partation, build a priority queue that holds the topk
 		//@SuppressWarnings("serial")
 		if(useIndex)
@@ -95,36 +88,26 @@ public class KNNQuery implements Serializable{
 	            throw new NullPointerException("Need to invoke buildIndex() first, indexedRDDNoId is null");
 	        }
 			JavaRDD<Object> tmp = spatialRDD.indexedRawRDD.mapPartitions(new KnnJudgementUsingIndex(queryCenter,k));
-			JavaRDD<Envelope> result = tmp.map(new Function<Object, Envelope>()
+			List<Object> result = tmp.takeOrdered(k, new GeometryDistanceComparator(queryCenter,true));
+			List<Polygon> geometryResult = new ArrayList<Polygon>();
+			for(Object spatialObject:result)
 			{
-
-				@Override
-				public Envelope call(Object spatialObject) throws Exception {
-					Envelope returnSpatialObject = ((Geometry)spatialObject).getEnvelopeInternal();
-					if( ((Geometry)spatialObject).getUserData()!=null)
-					{
-						returnSpatialObject.setUserData(((Geometry)spatialObject).getUserData());
-					}
-					return returnSpatialObject;
-				}
-				
-			});
+				geometryResult.add((Polygon)spatialObject);
+			}
 			// Take the top k
-			return result.takeOrdered(k, new RectangleDistanceComparator(queryCenter, true));
+			return geometryResult;
 		}
 		else
 		{
-			JavaRDD<Object> tmp = spatialRDD.getRawSpatialRDD().mapPartitions(new RectangleKnnJudgement(queryCenter,k));
-			JavaRDD<Envelope> result = tmp.map(new Function<Object,Envelope>()
+			JavaRDD<Object> tmp = spatialRDD.getRawSpatialRDD().mapPartitions(new KnnJudgement(queryCenter,k));
+			List<Object> result = tmp.takeOrdered(k, new GeometryDistanceComparator(queryCenter,true));
+			List<Polygon> geometryResult = new ArrayList<Polygon>();
+			for(Object spatialObject:result)
 			{
-
-				@Override
-				public Envelope call(Object spatialObject) throws Exception {
-					return (Envelope) spatialObject;
-				}
-			});
+				geometryResult.add((Polygon)spatialObject);
+			}
 			// Take the top k
-			return result.takeOrdered(k, new RectangleDistanceComparator(queryCenter, true));
+			return geometryResult;
 		}
 	}
 
@@ -157,7 +140,7 @@ public class KNNQuery implements Serializable{
 		}
 		else
 		{
-			JavaRDD<Object> tmp = spatialRDD.getRawSpatialRDD().mapPartitions(new GeometryKnnJudgement(queryCenter,k));
+			JavaRDD<Object> tmp = spatialRDD.getRawSpatialRDD().mapPartitions(new KnnJudgement(queryCenter,k));
 			List<Object> result = tmp.takeOrdered(k, new GeometryDistanceComparator(queryCenter,true));
 			List<Polygon> geometryResult = new ArrayList<Polygon>();
 			for(Object spatialObject:result)
@@ -198,7 +181,7 @@ public class KNNQuery implements Serializable{
 		}
 		else
 		{
-			JavaRDD<Object> tmp = spatialRDD.getRawSpatialRDD().mapPartitions(new GeometryKnnJudgement(queryCenter,k));
+			JavaRDD<Object> tmp = spatialRDD.getRawSpatialRDD().mapPartitions(new KnnJudgement(queryCenter,k));
 			List<Object> result = tmp.takeOrdered(k, new GeometryDistanceComparator(queryCenter,true));
 			List<LineString> geometryResult = new ArrayList<LineString>();
 			for(Object spatialObject:result)

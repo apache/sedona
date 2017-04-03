@@ -9,14 +9,13 @@ package org.datasyslab.geospark.knnJudgement;
 import java.io.Serializable;
 import java.util.Comparator;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class RectangleDistanceComparator.
  */
-public class RectangleDistanceComparator implements Comparator<Envelope>, Serializable{
+public class RectangleDistanceComparator implements Comparator<Polygon>, Serializable{
 	
 	/** The query center. */
 	Point queryCenter;
@@ -39,9 +38,9 @@ public class RectangleDistanceComparator implements Comparator<Envelope>, Serial
 	/* (non-Javadoc)
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
-	public int compare(Envelope p1, Envelope p2) {
-		double distance1 = p1.distance(queryCenter.getEnvelopeInternal());
-		double distance2 = p2.distance(queryCenter.getEnvelopeInternal());
+	public int compare(Polygon p1, Polygon p2) {
+		double distance1 = p1.distance(queryCenter);
+		double distance2 = p2.distance(queryCenter);
 		if(this.normalOrder)
 		{
 			if (distance1 > distance2) {

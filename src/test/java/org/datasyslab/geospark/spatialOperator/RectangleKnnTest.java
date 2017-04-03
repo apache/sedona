@@ -35,6 +35,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 
 
 // TODO: Auto-generated Javadoc
@@ -141,7 +142,7 @@ public class RectangleKnnTest {
 
     	for(int i=0;i<loopTimes;i++)
     	{
-    		List<Envelope> result = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, topK, false);
+    		List<Polygon> result = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, topK, false);
     		assert result.size()>-1;
     		assert result.get(0).getUserData().toString()!=null;
     		//System.out.println(result.get(0).getUserData().toString());
@@ -160,7 +161,7 @@ public class RectangleKnnTest {
     	rectangleRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)
     	{
-    		List<Envelope> result = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, topK, true);
+    		List<Polygon> result = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, topK, true);
     		assert result.size()>-1;
     		assert result.get(0).getUserData().toString()!=null;
     		//System.out.println(result.get(0).getUserData().toString());
@@ -177,12 +178,12 @@ public class RectangleKnnTest {
     public void testSpatialKNNCorrectness() throws Exception
     {
     	RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true);
-		List<Envelope> resultNoIndex = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, topK, false);
+		List<Polygon> resultNoIndex = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, topK, false);
 		rectangleRDD.buildIndex(IndexType.RTREE,false);
-		List<Envelope> resultWithIndex = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, topK, true);
+		List<Polygon> resultWithIndex = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, topK, true);
 		
-		List<Envelope> resultNoIndexModifiable = new ArrayList<Envelope>(resultNoIndex);
-		List<Envelope> resultWithIndexModifiable = new ArrayList<Envelope>(resultWithIndex);
+		List<Polygon> resultNoIndexModifiable = new ArrayList<Polygon>(resultNoIndex);
+		List<Polygon> resultWithIndexModifiable = new ArrayList<Polygon>(resultWithIndex);
 
 		RectangleDistanceComparator rectangleDistanceComparator = new RectangleDistanceComparator(this.queryPoint,true);
 		Collections.sort(resultNoIndexModifiable,rectangleDistanceComparator);

@@ -26,7 +26,7 @@ import com.vividsolutions.jts.io.WKTReader;
 /**
  * The Class UserSuppliedLineStringMapper.
  */
-public class UserSuppliedLineStringMapper implements FlatMapFunction<String, Object>{
+public class UserSuppliedLineStringMapper implements FlatMapFunction<String, Geometry>{
     
     /** The spatial object. */
     Geometry spatialObject = null;

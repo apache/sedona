@@ -1,6 +1,6 @@
 /**
- * FILE: GeometryRangeFilter.java
- * PATH: org.datasyslab.geospark.rangeJudgement.GeometryRangeFilter.java
+ * FILE: RangeFilter.java
+ * PATH: org.datasyslab.geospark.rangeJudgement.RangeFilter.java
  * Copyright (c) 2017 Arizona State University Data Systems Lab
  * All rights reserved.
  */
@@ -18,10 +18,10 @@ import com.vividsolutions.jts.geom.Polygon;
 /**
  * The Class GeometryRangeFilter.
  */
-public class GeometryRangeFilter implements Function<Object,Boolean>,Serializable {
+public class RangeFilter implements Function<Object,Boolean>,Serializable {
 	
 	/** The condition. */
-	Integer condition=0;
+	boolean considerBoundaryIntersection=false;
 	
 	/** The query window. */
 	Object queryWindow;
@@ -30,11 +30,11 @@ public class GeometryRangeFilter implements Function<Object,Boolean>,Serializabl
 	 * Instantiates a new geometry range filter.
 	 *
 	 * @param queryWindow the query window
-	 * @param condition the condition
+	 * @param considerBoundaryIntersection the consider boundary intersection
 	 */
-	public GeometryRangeFilter(Envelope queryWindow,Integer condition)
+	public RangeFilter(Envelope queryWindow,boolean considerBoundaryIntersection)
 	{
-		this.condition=condition;
+		this.considerBoundaryIntersection=considerBoundaryIntersection;
 		this.queryWindow=queryWindow;
 	}
 	
@@ -42,11 +42,11 @@ public class GeometryRangeFilter implements Function<Object,Boolean>,Serializabl
 	 * Instantiates a new geometry range filter.
 	 *
 	 * @param queryWindow the query window
-	 * @param condition the condition
+	 * @param considerBoundaryIntersection the consider boundary intersection
 	 */
-	public GeometryRangeFilter(Polygon queryWindow,Integer condition)
+	public RangeFilter(Polygon queryWindow,boolean considerBoundaryIntersection)
 	{
-		this.condition=condition;
+		this.considerBoundaryIntersection=considerBoundaryIntersection;
 		this.queryWindow=queryWindow;
 	}
 	
@@ -54,7 +54,7 @@ public class GeometryRangeFilter implements Function<Object,Boolean>,Serializabl
 	 * @see org.apache.spark.api.java.function.Function#call(java.lang.Object)
 	 */
 	public Boolean call(Object tuple) throws Exception {
-			if(condition==0)
+			if(considerBoundaryIntersection==false)
 			{
 				if(queryWindow instanceof Envelope)
 				{

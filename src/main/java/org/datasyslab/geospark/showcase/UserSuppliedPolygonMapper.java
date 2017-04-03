@@ -24,7 +24,7 @@ import com.vividsolutions.jts.io.WKTReader;
 /**
  * The Class UserSuppliedPolygonMapper.
  */
-public class UserSuppliedPolygonMapper implements FlatMapFunction<String, Object>{
+public class UserSuppliedPolygonMapper implements FlatMapFunction<String, Geometry>{
 	
 	/** The result. */
 	List result= new ArrayList<Polygon>();

@@ -9,14 +9,8 @@ package org.datasyslab.geospark.utils;
 import java.io.Serializable;
 import java.util.Comparator;
 
-import org.datasyslab.geospark.geometryObjects.Circle;
-
-
-
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class XMinComparator.
  */
@@ -26,50 +20,18 @@ public class XMinComparator implements Comparator<Object>, Serializable {
  	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
  	 */
  	public int compare(Object spatialObject1, Object spatialObject2) {
- 		if(spatialObject1 instanceof Envelope)
+ 		
+ 		if(((Geometry) spatialObject1).getEnvelopeInternal().getMinX()>((Geometry) spatialObject2).getEnvelopeInternal().getMinX())
  		{
- 		    if(((Envelope) spatialObject1).getMinX()>((Envelope) spatialObject2).getMinX())
- 		    {
- 		    	return 1;
- 		    }
- 		    else if (((Envelope) spatialObject1).getMinX()<((Envelope) spatialObject2).getMinX())
- 		    {
- 		    	return -1;
- 		    }
- 		    else
- 		    {
- 		    	return 0;
- 		    }
+ 			return 1;
  		}
- 		else if(spatialObject1 instanceof Circle)
+ 		else if (((Geometry) spatialObject1).getEnvelopeInternal().getMinX()<((Geometry) spatialObject2).getEnvelopeInternal().getMinX())
  		{
- 		    if(((Circle) spatialObject1).getMBR().getMinX()>((Circle) spatialObject2).getMBR().getMinX())
- 		    {
- 		    	return 1;
- 		    }
- 		    else if (((Circle) spatialObject1).getMBR().getMinX()<((Circle) spatialObject2).getMBR().getMinX())
- 		    {
- 		    	return -1;
- 		    }
- 		    else
- 		    {
- 		    	return 0;
- 		    }
+ 			return -1;
  		}
  		else
  		{
- 		    if(((Geometry) spatialObject1).getEnvelopeInternal().getMinX()>((Geometry) spatialObject2).getEnvelopeInternal().getMinX())
- 		    {
- 		    	return 1;
- 		    }
- 		    else if (((Geometry) spatialObject1).getEnvelopeInternal().getMinX()<((Geometry) spatialObject2).getEnvelopeInternal().getMinX())
- 		    {
- 		    	return -1;
- 		    }
- 		    else
- 		    {
- 		    	return 0;
- 		    }
+ 			return 0;
  		}
  	}
 }

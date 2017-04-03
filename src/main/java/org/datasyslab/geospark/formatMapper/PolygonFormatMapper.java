@@ -20,6 +20,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.WKTReader;
 
@@ -59,15 +60,10 @@ public class PolygonFormatMapper extends FormatMapper implements FlatMapFunction
      * @see org.apache.spark.api.java.function.Function#call(java.lang.Object)
      */
     public Iterator call(String line) throws Exception {
-        List result= new ArrayList<Polygon>();
-        Geometry spatialObject = null;
         MultiPolygon multiSpatialObjects = null;
-        GeometryFactory fact = new GeometryFactory();
-        List<String> lineSplitList;
-        ArrayList<Coordinate> coordinatesList;
-        Coordinate[] coordinates;
         LinearRing linear;
         int actualEndOffset;
+    	List result= new ArrayList<Polygon>();
         switch (splitter) {
             case CSV:
                 lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));

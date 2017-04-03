@@ -22,6 +22,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.WKTReader;
 
 // TODO: Auto-generated Javadoc
@@ -60,11 +61,7 @@ public class LineStringFormatMapper extends FormatMapper implements FlatMapFunct
      */
     public Iterator call(String line) throws Exception {
     	List result= new ArrayList<LineString>();
-        Geometry spatialObject = null;
         MultiLineString multiSpatialObjects = null;
-        GeometryFactory fact = new GeometryFactory();
-        List<String> lineSplitList;
-        ArrayList<Coordinate> coordinatesList;
         int actualEndOffset;
         switch (splitter) {
             case CSV:

@@ -123,10 +123,10 @@ public class PointRangeTest {
     	PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true);
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0,false).count();
+    		long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false,false).count();
     		assert resultSize>-1;
     	}
-    	assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0,false).take(10).get(1).getUserData().toString()!=null;
+    	assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false,false).take(10).get(1).getUserData().toString()!=null;
         
     }
     
@@ -141,10 +141,10 @@ public class PointRangeTest {
     	spatialRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)
     	{
-    		long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0,true).count();
+    		long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false,true).count();
     		assert resultSize>-1;
     	}
-    	assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0,true).take(10).get(1).getUserData().toString() !=null;
+    	assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false,true).take(10).get(1).getUserData().toString() !=null;
     }
 
 }

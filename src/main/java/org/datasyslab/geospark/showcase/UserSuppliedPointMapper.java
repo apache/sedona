@@ -1,3 +1,9 @@
+/**
+ * FILE: UserSuppliedPointMapper.java
+ * PATH: org.datasyslab.geospark.showcase.UserSuppliedPointMapper.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.showcase;
 
 import java.util.ArrayList;
@@ -14,7 +20,10 @@ import com.vividsolutions.jts.geom.Point;
 
 
 
-public class UserSuppliedPointMapper implements FlatMapFunction<String, Object>{
+/**
+ * The Class UserSuppliedPointMapper.
+ */
+public class UserSuppliedPointMapper implements FlatMapFunction<String, Geometry>{
     
     /** The spatial object. */
     Geometry spatialObject = null;
