@@ -7,8 +7,15 @@
 package org.datasyslab.geospark.formatMapper;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.datasyslab.geospark.enums.FileDataSplitter;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -28,6 +35,21 @@ public abstract class FormatMapper implements Serializable{
 
     /** The carry input data. */
     public boolean carryInputData = false;
+    
+    /** The fact. */
+    public GeometryFactory fact = new GeometryFactory();
+    
+    /** The line split list. */
+    public List<String> lineSplitList;
+    
+    /** The coordinates list. */
+    public ArrayList<Coordinate> coordinatesList;
+    
+    /** The coordinates. */
+    public Coordinate[] coordinates;
+    
+	/** The spatial object. */
+	Geometry spatialObject = null;
     
     /**
      * Instantiates a new format mapper.

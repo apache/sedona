@@ -32,46 +32,23 @@ public class PartitionJudgement implements Serializable{
 	 * @return the partition ID
 	 * @throws Exception the exception
 	 */
-	public static Iterable<Tuple2<Integer, Object>> getPartitionID(List<Envelope> grids,Object spatialObject) throws Exception
+	public static HashSet<Tuple2<Integer, Object>> getPartitionID(List<Envelope> grids,Object spatialObject) throws Exception
 	{
 		HashSet<Tuple2<Integer, Object>> result = new HashSet<Tuple2<Integer, Object>>();
 		int overflowContainerID=grids.size();
 		boolean containFlag=false;
 		for(int gridId=0;gridId<grids.size();gridId++)
-		{
-			if(spatialObject instanceof Envelope)
+		{	
+			if(grids.get(gridId).covers(((Geometry) spatialObject).getEnvelopeInternal()))
 			{
-				Envelope castedSpatialObject = (Envelope) spatialObject;
-				if(grids.get(gridId).contains(castedSpatialObject))
-				{
-					result.add(new Tuple2<Integer, Object>(gridId, castedSpatialObject));
-					containFlag=true;
-				}
-				else if (grids.get(gridId).intersects(castedSpatialObject)||castedSpatialObject.contains(grids.get(gridId)))
-				{		
-					result.add(new Tuple2<Integer, Object>(gridId, castedSpatialObject));
-					//containFlag=true;
-				}
+				result.add(new Tuple2<Integer, Object>(gridId, spatialObject));
+				containFlag=true;
 			}
-			else if(spatialObject instanceof Geometry)
+			else if(grids.get(gridId).intersects(((Geometry) spatialObject).getEnvelopeInternal())||((Geometry) spatialObject).getEnvelopeInternal().covers(grids.get(gridId)))
 			{
-				Geometry castedSpatialObject = (Geometry) spatialObject;
-				if(grids.get(gridId).contains(castedSpatialObject.getEnvelopeInternal()))
-				{
-					result.add(new Tuple2<Integer, Object>(gridId, castedSpatialObject));
-					containFlag=true;
-				}
-				else if(grids.get(gridId).intersects(castedSpatialObject.getEnvelopeInternal())||castedSpatialObject.getEnvelopeInternal().contains(grids.get(gridId)))
-				{
-					result.add(new Tuple2<Integer, Object>(gridId, castedSpatialObject));
-					//containFlag=true;
-				}
+				result.add(new Tuple2<Integer, Object>(gridId, spatialObject));
+				//containFlag=true;
 			}
-			else
-			{
-				throw new Exception("[PartitionJudgement][getPartitionID] Unsupported spatial object type");
-			}
-
 		}
 		if(containFlag==false)
 		{

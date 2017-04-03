@@ -258,41 +258,5 @@ public class LineStringRDD extends SpatialRDD{
         this.analyze(newLevel);
     }
     
-    /**
-     * Minimum bounding rectangle.
-     *
-     * @return the rectangle RDD
-     */
-    @Deprecated
-    public RectangleRDD MinimumBoundingRectangle() {
-        JavaRDD<Envelope> rectangleRDD = this.rawSpatialRDD.map(new Function<Object, Envelope>() {
-            public Envelope call(Object spatialObject) {
-                Envelope MBR = ((Geometry)spatialObject).getEnvelopeInternal();
-                return MBR;
-            }
-        });
-        return new RectangleRDD(rectangleRDD);
-    }
-    
-    /**
-     * Save as geo JSON.
-     *
-     * @param outputLocation the output location
-     */
-    public void saveAsGeoJSON(String outputLocation) {
-        this.rawSpatialRDD.mapPartitions(new FlatMapFunction<Iterator<Object>, String>() {
-            @Override
-            public Iterable<String> call(Iterator<Object> iterator) throws Exception {
-                ArrayList<String> result = new ArrayList<String>();
-                GeoJSONWriter writer = new GeoJSONWriter();
-                while (iterator.hasNext()) {
-                	Geometry spatialObject = (Geometry)iterator.next();
-                    GeoJSON json = writer.write(spatialObject);
-                    String jsonstring = json.toString();
-                    result.add(jsonstring);
-                }
-                return result;
-            }
-        }).saveAsTextFile(outputLocation);
-    }
+
 }

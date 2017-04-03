@@ -273,22 +273,6 @@ public class PolygonRDD extends SpatialRDD {
         this.analyze(newLevel);
     }
     
-    /**
-     * Minimum bounding rectangle.
-     *
-     * @return the rectangle RDD
-     */
-    @Deprecated
-    public RectangleRDD MinimumBoundingRectangle() {
-        JavaRDD<Envelope> rectangleRDD = this.rawSpatialRDD.map(new Function<Object, Envelope>() {
-
-            public Envelope call(Object spatialObject) {
-                Envelope MBR = ((Polygon)spatialObject).getEnvelope().getEnvelopeInternal();//.getEnvelopeInternal();
-                return MBR;
-            }
-        });
-        return new RectangleRDD(rectangleRDD);
-    }
     
     /**
      * Polygon union.
@@ -296,7 +280,7 @@ public class PolygonRDD extends SpatialRDD {
      * @return the polygon
      */
     public Polygon PolygonUnion() {
-        Object result = this.rawSpatialRDD.reduce(new Function2<Object, Object, Object>() {
+    	Object result = this.rawSpatialRDD.reduce(new Function2<Object, Object, Object>() {
             public Polygon call(Object v1, Object v2) {
                 //Reduce precision in JTS to avoid TopologyException
                 PrecisionModel pModel = new PrecisionModel();
@@ -321,25 +305,6 @@ public class PolygonRDD extends SpatialRDD {
         return (Polygon)result;
     }
     
-    /**
-     * Save as geo JSON.
-     *
-     * @param outputLocation the output location
-     */
-    public void saveAsGeoJSON(String outputLocation) {
-        this.rawSpatialRDD.mapPartitions(new FlatMapFunction<Iterator<Object>, String>() {
-            @Override
-            public Iterable<String> call(Iterator<Object> iterator) throws Exception {
-                ArrayList<String> result = new ArrayList<String>();
-                GeoJSONWriter writer = new GeoJSONWriter();
-                while (iterator.hasNext()) {
-                	Geometry spatialObject = (Geometry)iterator.next();
-                    GeoJSON json = writer.write(spatialObject);
-                    String jsonstring = json.toString();
-                    result.add(jsonstring);
-                }
-                return result;
-            }
-        }).saveAsTextFile(outputLocation);
-    }
+
 }
+

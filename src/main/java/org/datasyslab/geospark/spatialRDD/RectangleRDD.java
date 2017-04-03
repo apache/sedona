@@ -16,6 +16,8 @@ import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.formatMapper.RectangleFormatMapper;
 
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * The Class RectangleRDD.
@@ -32,13 +34,13 @@ public class RectangleRDD extends SpatialRDD {
 	 * @deprecated Please append RDD Storage Level after all the existing parameters
 	 */
 	@Deprecated
-	public RectangleRDD(JavaRDD<Envelope> rawSpatialRDD)
+	public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD)
 	{
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Envelope,Object>()
+		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
 		{
 
 			@Override
-			public Object call(Envelope spatialObject) throws Exception {
+			public Object call(Polygon spatialObject) throws Exception {
 				return spatialObject;
 			}
 			
@@ -150,13 +152,13 @@ public class RectangleRDD extends SpatialRDD {
      * @param rawSpatialRDD the raw spatial RDD
      * @param newLevel the new level
      */
-	public RectangleRDD(JavaRDD<Envelope> rawSpatialRDD, StorageLevel newLevel)
+	public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD, StorageLevel newLevel)
 	{
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Envelope,Object>()
+		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
 		{
 
 			@Override
-			public Object call(Envelope spatialObject) throws Exception {
+			public Object call(Polygon spatialObject) throws Exception {
 				return spatialObject;
 			}
 			

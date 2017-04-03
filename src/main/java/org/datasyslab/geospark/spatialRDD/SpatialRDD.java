@@ -21,7 +21,6 @@ import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
-import org.datasyslab.geospark.geometryObjects.Circle;
 import org.datasyslab.geospark.spatialPartitioning.EqualPartitioning;
 import org.datasyslab.geospark.spatialPartitioning.HilbertPartitioning;
 import org.datasyslab.geospark.spatialPartitioning.PartitionJudgement;
@@ -33,16 +32,21 @@ import org.datasyslab.geospark.utils.XMaxComparator;
 import org.datasyslab.geospark.utils.XMinComparator;
 import org.datasyslab.geospark.utils.YMaxComparator;
 import org.datasyslab.geospark.utils.YMinComparator;
+import org.wololo.geojson.GeoJSON;
+import org.wololo.jts2geojson.GeoJSONWriter;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.index.SpatialIndex;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
 import scala.Tuple2;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class SpatialRDD.
  */
@@ -64,7 +68,7 @@ public abstract class SpatialRDD implements Serializable{
     public JavaPairRDD<Integer, Object> spatialPartitionedRDD;
     
     /** The indexed RDD. */
-    public JavaPairRDD<Integer, Object> indexedRDD;
+    public JavaPairRDD<Integer, SpatialIndex> indexedRDD;
     
     /** The indexed raw RDD. */
     public JavaRDD<Object> indexedRawRDD;
@@ -84,7 +88,7 @@ public abstract class SpatialRDD implements Serializable{
 	 */
 	public boolean spatialPartitioning(GridType gridType) throws Exception
 	{
-        int numPartitions = this.rawSpatialRDD.rdd().partitions().length;
+        int numPartitions = this.rawSpatialRDD.rdd().partitions().length;;
 		if(this.boundaryEnvelope==null)
         {
         	throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD boundary is null. Please call boundary() first.");
@@ -210,32 +214,13 @@ public abstract class SpatialRDD implements Serializable{
 	    	  this.indexedRawRDD =  this.rawSpatialRDD.mapPartitions(new FlatMapFunction<Iterator<Object>,Object>()
 	    	  {
 	    		  @Override
-	        	  public Iterable<Object> call(Iterator<Object> spatialObjects) throws Exception {
+	        	  public HashSet<Object> call(Iterator<Object> spatialObjects) throws Exception {
 	        		  if(indexType == IndexType.RTREE)
 	        		  {
 		        		  STRtree rt = new STRtree();
 		        		  while(spatialObjects.hasNext()){
-		        			  Object spatialObject = spatialObjects.next();
-		        			  if(spatialObject instanceof Envelope)
-		        			  {
-		        				  GeometryFactory geometryFactory = new GeometryFactory();
-		        				  Envelope castedSpatialObject = (Envelope) spatialObject;
-		        				  Geometry item= geometryFactory.toGeometry(castedSpatialObject);
-		        				  if(castedSpatialObject.getUserData()!=null)
-		        				  {
-		        					  item.setUserData(castedSpatialObject.getUserData());
-		        				  }
-		        				  rt.insert(castedSpatialObject, item);
-		        			  }
-		        			  else if(spatialObject instanceof Geometry)
-		        			  {
-		        				  Geometry castedSpatialObject = (Geometry) spatialObject;
-		        				  rt.insert(castedSpatialObject.getEnvelopeInternal(), castedSpatialObject);
-		        			  }
-		        			  else
-		        			  {
-		        				  throw new Exception("[AbstractSpatialRDD][buildIndex] Unsupported spatial partitioning method.");
-		        			  }
+		        			  Geometry spatialObject = (Geometry)spatialObjects.next();
+		        			  rt.insert(spatialObject.getEnvelopeInternal(), spatialObject);
 		        		  }
 		        		  HashSet<Object> result = new HashSet<Object>();
 		        		  rt.query(new Envelope(0.0,0.0,0.0,0.0));
@@ -246,27 +231,8 @@ public abstract class SpatialRDD implements Serializable{
 	        		  {
 	        			  Quadtree rt = new Quadtree();
 		        		  while(spatialObjects.hasNext()){
-		        			  Object spatialObject = spatialObjects.next();
-		        			  if(spatialObject instanceof Envelope)
-		        			  {
-		        				  GeometryFactory geometryFactory = new GeometryFactory();
-		        				  Envelope castedSpatialObject = (Envelope) spatialObject;
-		        				  Geometry item= geometryFactory.toGeometry(castedSpatialObject);
-		        				  if(castedSpatialObject.getUserData()!=null)
-		        				  {
-		        					  item.setUserData(castedSpatialObject.getUserData());
-		        				  }
-		        				  rt.insert(castedSpatialObject, item);
-		        			  }
-		        			  else if(spatialObject instanceof Geometry)
-		        			  {
-		        				  Geometry castedSpatialObject = (Geometry) spatialObject;
-		        				  rt.insert(castedSpatialObject.getEnvelopeInternal(), castedSpatialObject);
-		        			  }
-		        			  else
-		        			  {
-		        				  throw new Exception("[AbstractSpatialRDD][buildIndex] Unsupported spatial partitioning method.");
-		        			  }
+		        			  Geometry spatialObject = (Geometry)spatialObjects.next();
+		        			  rt.insert(spatialObject.getEnvelopeInternal(), spatialObject);
 		        		  }
 		        		  HashSet<Object> result = new HashSet<Object>();
 		        		  rt.query(new Envelope(0.0,0.0,0.0,0.0));
@@ -284,31 +250,18 @@ public abstract class SpatialRDD implements Serializable{
   				  throw new Exception("[AbstractSpatialRDD][buildIndex] spatialPartitionedRDD is null. Please do spatial partitioning before build index.");
 	        	}
 	        	JavaPairRDD<Integer, Iterable<Object>> groupBySpatialPartitionedRDD = this.spatialPartitionedRDD.groupByKey();       
-	        	this.indexedRDD = groupBySpatialPartitionedRDD.flatMapValues(new Function<Iterable<Object>, Iterable<Object>>() {
+	        	this.indexedRDD = groupBySpatialPartitionedRDD.flatMapValues(new Function<Iterable<Object>, Iterable<SpatialIndex>>() {
 	        		@Override
-	        		public Iterable<Object> call(Iterable<Object> spatialObjects) throws Exception {
+	        		public Iterable<SpatialIndex> call(Iterable<Object> spatialObjects) throws Exception {
 	        			if(indexType == IndexType.RTREE)
 	        			{
 		        			STRtree rt = new STRtree();
-		        			Iterator iterator=spatialObjects.iterator();
+		        			Iterator<Object> iterator=spatialObjects.iterator();
 		        			while(iterator.hasNext()){
-		        				Object spatialObject = iterator.next();
-		        				if(spatialObject instanceof Envelope)
-		        				{
-									Envelope castedSpatialObject = (Envelope) spatialObject;
-									rt.insert(castedSpatialObject, castedSpatialObject);
-		        				}
-		        				else if(spatialObject instanceof Geometry)
-		        				{
-									Geometry castedSpatialObject = (Geometry) spatialObject;
-									rt.insert(castedSpatialObject.getEnvelopeInternal(), castedSpatialObject);
-		        				}
-		        				else
-		        				{
-						        	throw new Exception("[AbstractSpatialRDD][buildIndex] Unsupported spatial partitioning method.");
-		        				}
+		        				Geometry spatialObject = (Geometry)iterator.next();
+		        				rt.insert(spatialObject.getEnvelopeInternal(), spatialObject);
 		        			}
-		        			HashSet<Object> result = new HashSet<Object>();
+		        			HashSet<SpatialIndex> result = new HashSet<SpatialIndex>();
 		        			rt.query(new Envelope(0.0,0.0,0.0,0.0));
 		        			result.add(rt);
 		        			return result;
@@ -316,25 +269,13 @@ public abstract class SpatialRDD implements Serializable{
 	        			else
 	        			{
 		        			Quadtree rt = new Quadtree();
-		        			Iterator iterator=spatialObjects.iterator();
+		        			Iterator<Object> iterator=spatialObjects.iterator();
 		        			while(iterator.hasNext()){
-		        				Object spatialObject = iterator.next();
-		        				if(spatialObject instanceof Envelope)
-		        				{
-									Envelope castedSpatialObject = (Envelope) spatialObject;
-									rt.insert(castedSpatialObject, castedSpatialObject);
-		        				}
-		        				else if(spatialObject instanceof Geometry)
-		        				{
-									Geometry castedSpatialObject = (Geometry) spatialObject;
-									rt.insert(castedSpatialObject.getEnvelopeInternal(), castedSpatialObject);
-		        				}
-		        				else
-		        				{
-						        	throw new Exception("[AbstractSpatialRDD][buildIndex] Unsupported spatial partitioning method.");
-		        				}
+		        				Geometry spatialObject = (Geometry) iterator.next();
+		        				Geometry castedSpatialObject = (Geometry) spatialObject;
+		        				rt.insert(castedSpatialObject.getEnvelopeInternal(), castedSpatialObject);
 		        			}
-		        			HashSet<Object> result = new HashSet<Object>();
+		        			HashSet<SpatialIndex> result = new HashSet<SpatialIndex>();
 		        			rt.query(new Envelope(0.0,0.0,0.0,0.0));
 		        			result.add(rt);
 		        			return result;
@@ -351,46 +292,14 @@ public abstract class SpatialRDD implements Serializable{
      * @return the envelope
      */
     public Envelope boundary() {
-        
-        try
-        {
-        	Object minXEnvelope = this.rawSpatialRDD.min(new XMinComparator());
-        	Object minYEnvelope = this.rawSpatialRDD.min(new YMinComparator());
-        	Object maxXEnvelope = this.rawSpatialRDD.max(new XMaxComparator());
-        	Object maxYEnvelope = this.rawSpatialRDD.max(new YMaxComparator());
-        	
-        	this.boundary[0] = ((Geometry)minXEnvelope).getEnvelopeInternal().getMinX();
-            this.boundary[1] = ((Geometry)minYEnvelope).getEnvelopeInternal().getMinY();
-            this.boundary[2] = ((Geometry)maxXEnvelope).getEnvelopeInternal().getMaxX();
-            this.boundary[3] = ((Geometry)maxYEnvelope).getEnvelopeInternal().getMaxY();
-        }
-        catch(ClassCastException castError)
-        {
-        	if(castError.getMessage().contains("Circle"))
-        	{
-            	Object minXEnvelope = this.rawSpatialRDD.min(new XMinComparator());
-            	Object minYEnvelope = this.rawSpatialRDD.min(new YMinComparator());
-            	Object maxXEnvelope = this.rawSpatialRDD.max(new XMaxComparator());
-            	Object maxYEnvelope = this.rawSpatialRDD.max(new YMaxComparator());
-            	
-            	this.boundary[0] = ((Circle)minXEnvelope).getMBR().getMinX();
-                this.boundary[1] = ((Circle)minYEnvelope).getMBR().getMinY();
-                this.boundary[2] = ((Circle)maxXEnvelope).getMBR().getMaxX();
-                this.boundary[3] = ((Circle)maxYEnvelope).getMBR().getMaxY();
-        	}
-        	else if(castError.getMessage().contains("Envelope"))
-        	{
-            	Object minXEnvelope = this.rawSpatialRDD.min(new XMinComparator());
-            	Object minYEnvelope = this.rawSpatialRDD.min(new YMinComparator());
-            	Object maxXEnvelope = this.rawSpatialRDD.max(new XMaxComparator());
-            	Object maxYEnvelope = this.rawSpatialRDD.max(new YMaxComparator());
-            	
-            	this.boundary[0] = ((Envelope)minXEnvelope).getMinX();
-                this.boundary[1] = ((Envelope)minYEnvelope).getMinY();
-                this.boundary[2] = ((Envelope)maxXEnvelope).getMaxX();
-                this.boundary[3] = ((Envelope)maxYEnvelope).getMaxY();
-        	}
-        }
+    	Object minXEnvelope = this.rawSpatialRDD.min(new XMinComparator());
+    	Object minYEnvelope = this.rawSpatialRDD.min(new YMinComparator());
+    	Object maxXEnvelope = this.rawSpatialRDD.max(new XMaxComparator());
+    	Object maxYEnvelope = this.rawSpatialRDD.max(new YMaxComparator());    	
+    	this.boundary[0] = ((Geometry) minXEnvelope).getEnvelopeInternal().getMinX();
+    	this.boundary[1] = ((Geometry) minYEnvelope).getEnvelopeInternal().getMinY();
+    	this.boundary[2] = ((Geometry) maxXEnvelope).getEnvelopeInternal().getMaxX();
+    	this.boundary[3] = ((Geometry) maxYEnvelope).getEnvelopeInternal().getMaxY();
         this.boundaryEnvelope =  new Envelope(boundary[0],boundary[2],boundary[1],boundary[3]);
         return this.boundaryEnvelope;
     }
@@ -438,4 +347,56 @@ public abstract class SpatialRDD implements Serializable{
         this.totalNumberOfRecords = this.rawSpatialRDD.count();
         return true;
 	}
+	
+    /**
+     * Save as geo JSON.
+     *
+     * @param outputLocation the output location
+     */
+    public void saveAsGeoJSON(String outputLocation) {
+        this.rawSpatialRDD.mapPartitions(new FlatMapFunction<Iterator<Object>, String>() {
+            @Override
+            public Iterable<String> call(Iterator<Object> iterator) throws Exception {
+                ArrayList<String> result = new ArrayList<String>();
+                GeoJSONWriter writer = new GeoJSONWriter();
+                while (iterator.hasNext()) {
+                	Geometry spatialObject = (Geometry)iterator.next();
+                    GeoJSON json = writer.write(spatialObject);
+                    String jsonstring = json.toString();
+                    result.add(jsonstring);
+                }
+                return result;
+            }
+        }).saveAsTextFile(outputLocation);
+    }
+    
+    /**
+     * Minimum bounding rectangle.
+     *
+     * @return the rectangle RDD
+     */
+    @Deprecated
+    public RectangleRDD MinimumBoundingRectangle() {
+        JavaRDD<Polygon> rectangleRDD = this.rawSpatialRDD.map(new Function<Object, Polygon>() {
+            public Polygon call(Object spatialObject) {
+        		Double x1,x2,y1,y2;
+                LinearRing linear;
+                Coordinate[] coordinates = new Coordinate[5];
+                GeometryFactory fact = new GeometryFactory();
+            	x1 = ((Geometry) spatialObject).getEnvelopeInternal().getMinX();
+				x2 = ((Geometry) spatialObject).getEnvelopeInternal().getMaxX();
+				y1 = ((Geometry) spatialObject).getEnvelopeInternal().getMinY();
+				y2 = ((Geometry) spatialObject).getEnvelopeInternal().getMaxY();
+		        coordinates[0]=new Coordinate(x1,y1);
+		        coordinates[1]=new Coordinate(x1,y2);
+		        coordinates[2]=new Coordinate(x2,y2);
+		        coordinates[3]=new Coordinate(x2,y1);
+		        coordinates[4]=coordinates[0];
+                linear = fact.createLinearRing(coordinates);
+                Polygon polygonObject = new Polygon(linear, null, fact);
+                return polygonObject;
+            }
+        });
+        return new RectangleRDD(rectangleRDD);
+    }
 }

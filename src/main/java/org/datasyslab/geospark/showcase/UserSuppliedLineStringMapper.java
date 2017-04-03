@@ -26,7 +26,7 @@ import com.vividsolutions.jts.io.WKTReader;
 /**
  * The Class UserSuppliedLineStringMapper.
  */
-public class UserSuppliedLineStringMapper implements FlatMapFunction<String, Object>{
+public class UserSuppliedLineStringMapper implements FlatMapFunction<String, Geometry>{
     
     /** The spatial object. */
     Geometry spatialObject = null;
@@ -55,7 +55,7 @@ public class UserSuppliedLineStringMapper implements FlatMapFunction<String, Obj
     /* (non-Javadoc)
      * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
      */
-    public Iterable<Object> call(String line) throws Exception {
+    public List call(String line) throws Exception {
         List result= new ArrayList<LineString>();
         Geometry spatialObject = null;
         MultiLineString multiSpatialObjects = null;

@@ -24,7 +24,7 @@ import com.vividsolutions.jts.io.WKTReader;
 /**
  * The Class UserSuppliedPolygonMapper.
  */
-public class UserSuppliedPolygonMapper implements FlatMapFunction<String, Object>{
+public class UserSuppliedPolygonMapper implements FlatMapFunction<String, Geometry>{
 	
 	/** The result. */
 	List result= new ArrayList<Polygon>();
@@ -56,7 +56,7 @@ public class UserSuppliedPolygonMapper implements FlatMapFunction<String, Object
     /* (non-Javadoc)
      * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
      */
-    public Iterable<Object> call(String line) throws Exception {
+    public List call(String line) throws Exception {
         List result= new ArrayList<Polygon>();
         Geometry spatialObject = null;
         MultiPolygon multiSpatialObjects = null;

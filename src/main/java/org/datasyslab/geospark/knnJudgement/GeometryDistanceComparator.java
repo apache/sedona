@@ -21,14 +21,19 @@ public class GeometryDistanceComparator implements Comparator<Object>, Serializa
 	/** The query center. */
 	Point queryCenter;
 	
+	/** The normal order. */
+	boolean normalOrder;
+	
 	/**
 	 * Instantiates a new geometry distance comparator.
 	 *
 	 * @param queryCenter the query center
+	 * @param normalOrder the normal order
 	 */
-	public GeometryDistanceComparator(Point queryCenter)
+	public GeometryDistanceComparator(Point queryCenter,boolean normalOrder)
 	{
-		this.queryCenter=queryCenter;
+		this.queryCenter = queryCenter;
+		this.normalOrder = normalOrder;
 	}
 	
 	/* (non-Javadoc)
@@ -37,11 +42,24 @@ public class GeometryDistanceComparator implements Comparator<Object>, Serializa
 	public int compare(Object p1, Object p2) {
 		double distance1 = ((Geometry) p1).distance(queryCenter);
 		double distance2 = ((Geometry) p2).distance(queryCenter);
-		if (distance1 > distance2) {
-			return 1;
-		} else if (distance1 == distance2) {
-			return 0;
+		if(this.normalOrder)
+		{
+			if (distance1 > distance2) {
+				return 1;
+			} else if (distance1 == distance2) {
+				return 0;
+			}
+			return -1;
 		}
-		return -1;
+		else
+		{
+			if (distance1 > distance2) {
+				return -1;
+			} else if (distance1 == distance2) {
+				return 0;
+			}
+			return 1;
+		}
+
 	}
 }
