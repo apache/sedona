@@ -588,7 +588,7 @@ public class JoinQuery implements Serializable{
      * @return the java pair RDD
      * @throws Exception the exception
      */
-    public static JavaPairRDD<Point, HashSet<Point>> DistanceJoinQuery(PointRDD spatialRDD,PointRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
+    public static JavaPairRDD<Point, HashSet<Point>> DistanceJoinQuery(PointRDD spatialRDD,CircleRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
         if(useIndex)
         {
         	JavaPairRDD<Circle, HashSet<Geometry>> joinListResultAfterAggregation = executeDistanceJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection); 
@@ -639,7 +639,7 @@ public class JoinQuery implements Serializable{
      * @return the java pair RDD
      * @throws Exception the exception
      */
-    public static JavaPairRDD<LineString, HashSet<LineString>> DistanceJoinQuery(LineStringRDD spatialRDD,LineStringRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
+    public static JavaPairRDD<LineString, HashSet<LineString>> DistanceJoinQuery(LineStringRDD spatialRDD, CircleRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
         if(useIndex)
         {
         	JavaPairRDD<Circle, HashSet<Geometry>> joinListResultAfterAggregation = executeDistanceJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection); 
