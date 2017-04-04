@@ -23,6 +23,8 @@ import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.spatialOperator.JoinQuery;
 import org.datasyslab.geospark.spatialOperator.KNNQuery;
 import org.datasyslab.geospark.spatialOperator.RangeQuery;
+import org.datasyslab.geospark.spatialRDD.CircleRDD;
+import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -172,6 +174,12 @@ public class Example implements Serializable{
 		case "pointjoinindex":
 			testSpatialJoinQueryUsingIndex();
 			break;
+		case "pointdistancejoin":
+			testSpatialJoinQuery();
+			break;
+		case "pointdistancejoinindex":
+			testSpatialJoinQueryUsingIndex();
+			break;
 		default:
             throw new Exception("Query type is not recognized, ");
 		}			
@@ -298,7 +306,46 @@ public class Example implements Serializable{
     	}
     }
     
-
+    /**
+     * Test spatial join query.
+     *
+     * @throws Exception the exception
+     */
+    public static void testDistanceJoinQuery() throws Exception {
+    	PointRDD pointRDD = new PointRDD(sc, inputLocation2, offset2, splitter2, true);
+    	CircleRDD windowRDD = new CircleRDD(pointRDD,0.1);
+    	PointRDD objectRDD = new PointRDD(sc, inputLocation, offset ,splitter,true, numPartitions, StorageLevel.MEMORY_ONLY());
+    	objectRDD.spatialPartitioning(GridType.RTREE);
+    	windowRDD.spatialPartitioning(objectRDD.grids);
+    	objectRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY());
+    	for(int i=0;i<loopTimes;i++)
+    	{
+    		
+    		long resultSize = JoinQuery.DistanceJoinQuery(objectRDD,windowRDD,false,true).count();
+    		assert resultSize>0;
+    	}
+    }
+    
+    /**
+     * Test spatial join query using index.
+     *
+     * @throws Exception the exception
+     */
+    public static void testDistanceJoinQueryUsingIndex() throws Exception {
+    	PointRDD pointRDD = new PointRDD(sc, inputLocation2, offset2, splitter2, true);
+    	CircleRDD windowRDD = new CircleRDD(pointRDD,0.1);
+    	PointRDD objectRDD = new PointRDD(sc, inputLocation, offset ,splitter,true, numPartitions, StorageLevel.MEMORY_ONLY());
+  		objectRDD.spatialPartitioning(GridType.RTREE);
+  		windowRDD.spatialPartitioning(objectRDD.grids);
+    	objectRDD.buildIndex(IndexType.RTREE,true);
+    	objectRDD.indexedRDD.persist(StorageLevel.MEMORY_ONLY());
+    	for(int i=0;i<loopTimes;i++)
+    	{
+    		long resultSize = JoinQuery.DistanceJoinQuery(objectRDD,windowRDD,true,true).count();
+    		assert resultSize>0;
+    	}
+    }
+    
     /**
      * Tear down.
      */
