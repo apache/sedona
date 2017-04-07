@@ -49,7 +49,7 @@ Inside, Overlap, DatasetBoundary, Minimum Bounding Rectangl, Polygon Union
 Spatial Range Query, Spatial Join Query, and Spatial K Nearest Neighbors Query.
 ## Users
 
-### Comanies that are using GeoSpark (incomplete list)
+### Companies that are using GeoSpark (incomplete list)
 
 [<img src="https://www.bluedme.com/wp-content/uploads/2015/10/cropped-LOGO-Blue-DME-PNG-3.png" width="150">](https://www.bluedme.com/)
 
