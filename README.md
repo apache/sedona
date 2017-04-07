@@ -47,6 +47,14 @@ Inside, Overlap, DatasetBoundary, Minimum Bounding Rectangl, Polygon Union
 
 ## Spatial Operation
 Spatial Range Query, Spatial Join Query, and Spatial K Nearest Neighbors Query.
+## Users
+
+### Comanies that are using GeoSpark (incomplete list)
+
+[<img src="https://www.bluedme.com/wp-content/uploads/2015/10/cropped-LOGO-Blue-DME-PNG-3.png" width="150">](https://www.bluedme.com/)
+
+
+Please make a Pull Request to add yourself!
 
 # GeoSpark Tutorial ([more](https://github.com/DataSystemsLab/GeoSpark/wiki))
 GeoSpark full tutorial is available at GeoSpark GitHub Wiki: [https://github.com/DataSystemsLab/GeoSpark/wiki](https://github.com/DataSystemsLab/GeoSpark/wiki)
@@ -59,8 +67,8 @@ Babylon provides native support for general cartographic design by extending Geo
 Babylon and GeoSpark are integrated together. You just need to import GeoSpark and enjoy them! More details are available here: [Babylon GeoSpatial Visualization](https://github.com/DataSystemsLab/GeoSpark/tree/master/src/main/java/org/datasyslab/babylon) 
 
 ## Babylon Gallery
-<img src="http://www.public.asu.edu/~jiayu2/geospark/picture/usrail.png" width="250">
-<img src="http://www.public.asu.edu/~jiayu2/geospark/picture/nycheatmap.png" width="250">
+<img style="float: left;" src="http://www.public.asu.edu/~jiayu2/geospark/picture/usrail.png" width="250">
+<img style="float: left;" src="http://www.public.asu.edu/~jiayu2/geospark/picture/nycheatmap.png" width="250">
 <img src="http://www.public.asu.edu/~jiayu2/geospark/picture/ustweet.png" width="250">
 
 # Publication
