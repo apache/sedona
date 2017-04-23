@@ -1,5 +1,9 @@
-# BABYLON
-**Babylon is a large-scale in-memory geospatial visualization system**
+# BABYLON: a distributed in-memory geospatial visualization system
+[![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark)[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon)[![Join the chat at https://gitter.im/geospark-datasys/Lobby](https://badges.gitter.im/geospark-datasys/Lobby.svg)](https://gitter.im/geospark-datasys/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+**Latest Babylon Visualizatio:** `0.1.1` ` April 23 2017`
+
+**Supported Apache Spark version:** `2.0+(Master branch)` `1.0+(1.X branch) `
 
 **Babylon** provides native support for general cartographic design  by extending **GeoSpark** to process large-scale spatial data. 
 ## Babylon Gallery
@@ -33,9 +37,8 @@ Overlay one map layer with many other map layers!
 You also can buld your new image filter by easily extending the photo filter!
 
 ### Various Image Type
-* PNG
-* JPG
-* GIF
+* Raster image: PNG, JPG, GIF
+* Vector image: SVG
 * More!
 
 You also can support your desired image type by easily extending image generator! (JPG format is temporarily unavailable due to the lack of OpenJDK support)
@@ -51,8 +54,8 @@ You also can support your desired image type by easily extending image generator
 
 You also can build your new self-designed effects by easily extending the visualization operator!
 
-### Example
-Here is [a runnable single machine exmaple code](https://github.com/DataSystemsLab/GeoSpark/blob/master/src/main/java/org/datasyslab/babylon/showcase/Example.java). You can clone this repository and directly run it on you local machine!
+### Babylon Tutorial ([more](https://github.com/DataSystemsLab/GeoSpark/wiki))
+Babylon full tutorial is available at GeoSpark GitHub Wiki: [https://github.com/DataSystemsLab/GeoSpark/wiki](https://github.com/DataSystemsLab/GeoSpark/wiki)
 
 ### Scala and Java API
 Please refer to [Babylon Scala and Java API](http://www.public.asu.edu/~jiayu2/geospark/javadoc/latest/).
