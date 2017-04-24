@@ -1,9 +1,15 @@
 ![GeoSpark Logo](http://www.public.asu.edu/~jiayu2/geospark/logo.png)
 
-[![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark)
+
+| Version   |      GeoSpark Core      |  [Babylon Viz System](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon)|
+|:----------:|:-------------:|:------:|
+| Stable |  0.6.1 | 0.1.1 |
+| Latest |  [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark)   |   [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon) |
+| Source code |  [![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark) | [![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark) |
+
 [![Join the chat at https://gitter.im/geospark-datasys/Lobby](https://badges.gitter.im/geospark-datasys/Lobby.svg)](https://gitter.im/geospark-datasys/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-``` Supported Apache Spark version: 2.0+(Master branch), 1.0+(1.X branch) ```
+**Supported Apache Spark version:** `2.0+(Master branch)` `1.0+(1.X branch) `
 
 GeoSpark is listed as **Infrastructure Project** on [**Apache Spark Official Third Party Project Page**](http://spark.apache.org/third-party-projects.html)
 
@@ -15,16 +21,7 @@ GeoSpark artifacts are hosted in Maven Central: [**Maven Central Coordinates**](
 
 
 
-#  Version information ([more](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Full-Version-Release-notes))
-
-
-|      Version     	| Summary                                                                                                                                                                                                               	|
-|:----------------:	|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
-|0.6.0| **Major updates:** (1) DistanceJoin is merged into JoinQuery. GeoSpark now supports complete DistanceJoin between Points, Polygons, and LineStrings. (2) Add Refine Phase to Spatial Range and Join Query. Use real polygon coordinates instead of its MBR to filter the final results. **API changes:** All spatial range and join  queries now take a parameter called *ConsiderBoundaryIntersection*. This will tell GeoSpark whether returns the objects intersect with windows.|
-|0.5.3| **Bug fix:** Fix [Issue #69](https://github.com/DataSystemsLab/GeoSpark/issues/69): Now, if two objects have the same coordinates but different non-spatial attributes (UserData), GeoSpark treats them as different objects.|
-|0.5.2| **Bug fix:** Fix [Issue #58](https://github.com/DataSystemsLab/GeoSpark/issues/58) and [Issue #60](https://github.com/DataSystemsLab/GeoSpark/issues/60); **Performance enhancement:**: (1) Deprecate all old Spatial RDD constructors. See the JavaDoc [here](http://www.public.asu.edu/~jiayu2/geospark/javadoc/0.5.2/). (2) Recommend the new SRDD constructors which take an additional RDD storage level and automatically cache rawSpatialRDD to accelerate internal SRDD analyze step|
-|0.5.1| **Bug fix:** (1) GeoSpark: Fix inaccurate KNN result when K is large (2) GeoSpark: Replace incompatible Spark API call [Issue #55](https://github.com/DataSystemsLab/GeoSpark/issues/55); (3) Babylon: Remove JPG output format temporarily due to the lack of OpenJDK support|
-| 0.5.0| **Major updates:** We are pleased to announce the initial version of [Babylon](https://github.com/DataSystemsLab/GeoSpark/tree/master/src/main/java/org/datasyslab/babylon) a large-scale in-memory geospatial visualization system extending GeoSpark. Babylon and GeoSpark are integrated together. You can just import GeoSpark and enjoy! More details are available here: [Babylon GeoSpatial Visualization](https://github.com/DataSystemsLab/GeoSpark/tree/master/src/main/java/org/datasyslab/babylon)|
+##  Version release notes: [click here](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Full-Version-Release-notes)
 
 
 # Important features ([more](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Important-Features))
@@ -37,30 +34,38 @@ Supported Spatial RDDs: PointRDD, RectangleRDD, PolygonRDD, LineStringRDD
 **User-supplied input format mapper**: Any input formats
 
 ## Spatial Partitioning
-Supported Spatial Partitioning techniques: R-Tree, Voronoi diagram
+Supported Spatial Partitioning techniques: R-Tree, Voronoi diagram, Uniform grids (Experimental), Hilbert Curve (Experimental)
 
 ## Spatial Index
-Supported Spatial Indexes: Quad-Tree and R-Tree. Quad-Tree doesn't support Spatial K Nearest Neighbors query.
+Supported Spatial Indexes: Quad-Tree and R-Tree. R-Tree supports Spatial K Nearest Neighbors query.
 
 ## Geometrical operation
 Inside, Overlap, DatasetBoundary, Minimum Bounding Rectangl, Polygon Union
 
 ## Spatial Operation
 Spatial Range Query, Spatial Join Query, and Spatial K Nearest Neighbors Query.
+## Users
+
+### Companies that are using GeoSpark (incomplete list)
+
+[<img src="https://www.bluedme.com/wp-content/uploads/2015/10/cropped-LOGO-Blue-DME-PNG-3.png" width="150">](https://www.bluedme.com/)
+
+
+Please make a Pull Request to add yourself!
 
 # GeoSpark Tutorial ([more](https://github.com/DataSystemsLab/GeoSpark/wiki))
 GeoSpark full tutorial is available at GeoSpark GitHub Wiki: [https://github.com/DataSystemsLab/GeoSpark/wiki](https://github.com/DataSystemsLab/GeoSpark/wiki)
 
-# Babylon Visualization Framework on GeoSpark
+# Babylon Visualization System on GeoSpark
 Babylon is a large-scale in-memory geospatial visualization system.
 
 Babylon provides native support for general cartographic design by extending GeoSpark to process large-scale spatial data. It can visulize Spatial RDD and Spatial Queries and render super high resolution image in parallel.
 
-Babylon and GeoSpark are integrated together. You just need to import GeoSpark and enjoy them! More details are available here: [Babylon GeoSpatial Visualization](https://github.com/DataSystemsLab/GeoSpark/tree/master/src/main/java/org/datasyslab/babylon) 
+Babylon and GeoSpark are integrated together. You just need to import GeoSpark and enjoy them! More details are available here: [Babylon GeoSpatial Visualization](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon) 
 
 ## Babylon Gallery
-<img src="http://www.public.asu.edu/~jiayu2/geospark/picture/usrail.png" width="250">
-<img src="http://www.public.asu.edu/~jiayu2/geospark/picture/nycheatmap.png" width="250">
+<img style="float: left;" src="http://www.public.asu.edu/~jiayu2/geospark/picture/usrail.png" width="250">
+<img style="float: left;" src="http://www.public.asu.edu/~jiayu2/geospark/picture/nycheatmap.png" width="250">
 <img src="http://www.public.asu.edu/~jiayu2/geospark/picture/ustweet.png" width="250">
 
 # Publication
