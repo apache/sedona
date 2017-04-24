@@ -215,13 +215,16 @@ public class ScatterplotTest {
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		ImageGenerator imageGenerator = new  SparkImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.distributedRasterImage, "/Users/jiayu/GitHub/GeoSpark-jiayu-repo/target/scatterplot/PointRDD-parallel-raster",ImageType.PNG);
+		
+        String scatterPlotOutputPath = System.getProperty("user.dir") + "/target/scatterplot/";
+
+		imageGenerator.SaveAsFile(visualizationOperator.distributedRasterImage, scatterPlotOutputPath+"PointRDD-parallel-raster",ImageType.PNG);
 		
 		visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary,false,-1,-1,true,true);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		imageGenerator = new  SparkImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.distributedVectorImage, "/Users/jiayu/GitHub/GeoSpark-jiayu-repo/target/scatterplot/PointRDD-parallel-vector",ImageType.SVG);
+		imageGenerator.SaveAsFile(visualizationOperator.distributedVectorImage, scatterPlotOutputPath+"PointRDD-parallel-vector",ImageType.SVG);
 	}
 	
 	/**

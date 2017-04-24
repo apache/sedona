@@ -60,7 +60,7 @@ public class testGeoJSON {
         GeoJSON json = writer.write(point);
         String jsonstring = json.toString();
 
-        System.out.println(jsonstring);
+       // System.out.println(jsonstring);
     }
 
     
