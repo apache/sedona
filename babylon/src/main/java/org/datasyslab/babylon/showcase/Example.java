@@ -233,7 +233,6 @@ public class Example {
 			visualizationOperator.stitchImagePartitions();
 			ImageGenerator imageGenerator = new NativeJavaImageGenerator();
 			imageGenerator.SaveAsFile(visualizationOperator.rasterImage, outputPath,ImageType.PNG);
-			imageGenerator = new  NativeJavaImageGenerator();
 		}
 		catch(Exception e)
 		{
