@@ -2,7 +2,7 @@ os:
   - linux
 
 language: java
-sudo: false
+sudo: required
 git:
   submodules: false
 
