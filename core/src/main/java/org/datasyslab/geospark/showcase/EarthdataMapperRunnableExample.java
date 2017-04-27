@@ -1,3 +1,9 @@
+/**
+ * FILE: EarthdataMapperRunnableExample.java
+ * PATH: org.datasyslab.geospark.showcase.EarthdataMapperRunnableExample.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.showcase;
 
 import org.apache.log4j.Level;
@@ -13,6 +19,10 @@ import org.datasyslab.geospark.spatialRDD.PointRDD;
 
 import com.vividsolutions.jts.geom.Envelope;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class EarthdataMapperRunnableExample.
+ */
 public class EarthdataMapperRunnableExample {
 
     /** The sc. */
@@ -37,16 +47,26 @@ public class EarthdataMapperRunnableExample {
     /** The loop times. */
     static int loopTimes;
     
-    static int HDFincrement = 5;
+    /** The HDF increment. */
+    static int HDFIncrement = 5;
     
-    static int HDFoffset = 2;
+    /** The HDF offset. */
+    static int HDFOffset = 2;
     
-    static String HDFrootGroupName = "MOD_Swath_LST";
+    /** The HDF root group name. */
+    static String HDFRootGroupName = "MOD_Swath_LST";
     
+    /** The HDF data variable name. */
     static String HDFDataVariableName = "LST";
     
+    /** The url prefix. */
     static String urlPrefix = "";
 	
+	/**
+	 * The main method.
+	 *
+	 * @param args the arguments
+	 */
 	public static void main(String[] args) {
         SparkConf conf = new SparkConf().setAppName("EarthdataMapperRunnableExample").setMaster("local[2]");
         sc = new JavaSparkContext(conf);
@@ -58,17 +78,20 @@ public class EarthdataMapperRunnableExample {
         queryEnvelope=new Envelope (-90.01,-80.01,30.01,40.01);
         numPartitions = 5;
         loopTimes=1;
-        HDFincrement=5;
-        HDFoffset=2;
-        HDFrootGroupName = "MOD_Swath_LST";
+        HDFIncrement=5;
+        HDFOffset=2;
+        HDFRootGroupName = "MOD_Swath_LST";
         HDFDataVariableName = "LST";
         urlPrefix = System.getProperty("user.dir")+"/src/test/resources/modis/";
         testSpatialRangeQuery();
         testSpatialRangeQueryUsingIndex();
 	}
 
+    /**
+     * Test spatial range query.
+     */
     public static void testSpatialRangeQuery() {
-    	EarthdataHDFPointMapper earthdataHDFPoint = new EarthdataHDFPointMapper(HDFincrement,HDFoffset,HDFrootGroupName,
+    	EarthdataHDFPointMapper earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement,HDFOffset,HDFRootGroupName,
     			HDFDataVariableName,urlPrefix);
     	PointRDD spatialRDD = new PointRDD(sc, InputLocation, numPartitions, earthdataHDFPoint,StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
@@ -84,8 +107,11 @@ public class EarthdataMapperRunnableExample {
     	}        
     }
 
+    /**
+     * Test spatial range query using index.
+     */
     public static void testSpatialRangeQueryUsingIndex() {
-    	EarthdataHDFPointMapper earthdataHDFPoint = new EarthdataHDFPointMapper(HDFincrement,HDFoffset,HDFrootGroupName,
+    	EarthdataHDFPointMapper earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement,HDFOffset,HDFRootGroupName,
     			HDFDataVariableName,urlPrefix);
     	PointRDD spatialRDD = new PointRDD(sc, InputLocation, numPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY());
     	try {

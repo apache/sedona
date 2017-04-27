@@ -169,16 +169,14 @@ public class EarthdataHDFPointMapper implements FlatMapFunction<String, Geometry
 	    		if(switchCoordinateXY)
 	    		{
 		    		coordinate = new Coordinate(SerNetCDFUtils.getDataSym(longitudeArray, j, i),
-		    				SerNetCDFUtils.getDataSym(latitudeArray, j, i));
+		    				SerNetCDFUtils.getDataSym(latitudeArray, j, i),SerNetCDFUtils.getDataAsym(dataArray, j, i, offset, increment));
 	    		}
 	    		else
 	    		{
 		    		coordinate = new Coordinate(SerNetCDFUtils.getDataSym(latitudeArray, j, i),
-		    				SerNetCDFUtils.getDataSym(longitudeArray, j, i));
+		    				SerNetCDFUtils.getDataSym(longitudeArray, j, i),SerNetCDFUtils.getDataAsym(dataArray, j, i, offset, increment));
 	    		}
-	    		String userData = String.valueOf(SerNetCDFUtils.getDataAsym(dataArray, j, i, offset, increment));
 	    		Point observation = geometryFactory.createPoint(coordinate);
-	    		observation.setUserData(userData);
 	    		hdfData.add(observation);
 	    	}
 	    }
