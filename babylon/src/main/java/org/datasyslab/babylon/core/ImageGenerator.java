@@ -30,6 +30,7 @@ public abstract class ImageGenerator implements Serializable{
 	 * @param imageType the image type
 	 * @return true, if successful
 	 * @throws Exception the exception
+	 * @deprecated Old image generator has been deprecated. Please use BabylonImageGenerator instead.
 	 */
 	public boolean SaveAsFile(JavaPairRDD distributedImage, String outputPath, ImageType imageType) throws Exception
 	{
@@ -67,6 +68,7 @@ public abstract class ImageGenerator implements Serializable{
 	 * @param imageType the image type
 	 * @return true, if successful
 	 * @throws Exception the exception
+	 * @deprecated Old image generator has been deprecated. Please use BabylonImageGenerator instead.
 	 */
 	public abstract boolean SaveAsFile(BufferedImage rasterImage, String outputPath, ImageType imageType) throws Exception;
 	
@@ -78,6 +80,7 @@ public abstract class ImageGenerator implements Serializable{
 	 * @param imageType the image type
 	 * @return true, if successful
 	 * @throws Exception the exception
+	 * @deprecated Old image generator has been deprecated. Please use BabylonImageGenerator instead.
 	 */
 	public abstract boolean SaveAsFile(List<String> vectorImage, String outputPath, ImageType imageType) throws Exception;
 

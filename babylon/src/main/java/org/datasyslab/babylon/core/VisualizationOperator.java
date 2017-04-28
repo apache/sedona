@@ -26,7 +26,7 @@ import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.broadcast.Broadcast;
-
+import org.datasyslab.babylon.utils.ColorizeOption;
 import org.datasyslab.babylon.utils.RasterizationUtils;
 import org.datasyslab.geospark.spatialRDD.SpatialRDD;
 import org.jfree.graphics2d.svg.SVGGraphics2D;
@@ -41,11 +41,11 @@ import com.vividsolutions.jts.geom.Polygon;
 import scala.Tuple2;
 
 
-class RasterPixelCountComparator implements Comparator<Tuple2<Integer, Long>>, Serializable
+class RasterPixelCountComparator implements Comparator<Tuple2<Integer, Double>>, Serializable
 {
 
 	@Override
-	public int compare(Tuple2<Integer, Long> spatialObject1, Tuple2<Integer, Long> spatialObject2) {
+	public int compare(Tuple2<Integer, Double> spatialObject1, Tuple2<Integer, Double> spatialObject2) {
 		if(spatialObject1._2>spatialObject2._2)
 		{
 			return 1;
@@ -58,11 +58,11 @@ class RasterPixelCountComparator implements Comparator<Tuple2<Integer, Long>>, S
 	}
 }
 
-class VectorObjectCountComparator implements Comparator<Tuple2<Object, Long>>, Serializable
+class VectorObjectCountComparator implements Comparator<Tuple2<Object, Double>>, Serializable
 {
 
 	@Override
-	public int compare(Tuple2<Object, Long> spatialObject1, Tuple2<Object, Long> spatialObject2) {
+	public int compare(Tuple2<Object, Double> spatialObject1, Tuple2<Object, Double> spatialObject2) {
 		if(spatialObject1._2>spatialObject2._2)
 		{
 			return 1;
@@ -75,11 +75,11 @@ class VectorObjectCountComparator implements Comparator<Tuple2<Object, Long>>, S
 	}
 }
 
-class PixelSerialIdComparator implements Comparator<Tuple2<Integer, Long>>
+class PixelSerialIdComparator implements Comparator<Tuple2<Integer, Double>>
 {
 
 	@Override
-	public int compare(Tuple2<Integer, Long> spatialObject1, Tuple2<Integer, Long> spatialObject2) {
+	public int compare(Tuple2<Integer, Double> spatialObject1, Tuple2<Integer, Double> spatialObject2) {
 		if(spatialObject1._1>spatialObject2._1)
 		{
 			return 1;
@@ -97,9 +97,10 @@ class PixelSerialIdComparator implements Comparator<Tuple2<Integer, Long>>
  */
 public abstract class VisualizationOperator implements Serializable{
 	
-	/** The cumulative count. */
-	protected boolean cumulativeCount=false; // Scatter plot doesn't use cumulative count.
-	
+	/** The colorize option. Scatter plot can select uniform color or z-axis value option to visualize.
+	 *  Heat map must select spatial aggregation.
+	 * */
+	protected ColorizeOption colorizeOption = ColorizeOption.UNIFORMCOLOR;
 	/** The reverse spatial coordinate. */
 	protected boolean reverseSpatialCoordinate; // Switch the x and y when draw the final image
 	
@@ -138,10 +139,10 @@ public abstract class VisualizationOperator implements Serializable{
 	protected boolean generateVectorImage=false;
 	
 	/** The count matrix. */
-	protected List<Tuple2<Integer,Long>> countMatrix;
+	protected List<Tuple2<Integer,Double>> countMatrix;
 	
 	/** The distributed count matrix. */
-	protected JavaPairRDD<Integer, Long> distributedRasterCountMatrix;
+	protected JavaPairRDD<Integer, Double> distributedRasterCountMatrix;
 	
 	/** The distributed color matrix. */
 	protected JavaPairRDD<Integer, Color> distributedRasterColorMatrix;
@@ -158,7 +159,7 @@ public abstract class VisualizationOperator implements Serializable{
 	/*
 	 * Parameters determine vector image
 	 */
-	protected JavaPairRDD<Object,Long> distributedVectorObjects;
+	protected JavaPairRDD<Object,Double> distributedVectorObjects;
 	
 	/** The distributed vector colors. */
 	protected JavaPairRDD<Object,Color> distributedVectorColors;
@@ -210,11 +211,9 @@ public abstract class VisualizationOperator implements Serializable{
 	/** The parallel render image. */
 	protected boolean parallelRenderImage = false;
 		
-	/** The spark context. */
 	/*
 	 * Parameter for the overall system
 	 */
-	JavaSparkContext sparkContext;
 	
 	/** The Constant logger. */
 	final static Logger logger = Logger.getLogger(VisualizationOperator.class);
@@ -226,7 +225,7 @@ public abstract class VisualizationOperator implements Serializable{
 	 * @param resolutionX the resolution X
 	 * @param resolutionY the resolution Y
 	 * @param datasetBoundary the dataset boundary
-	 * @param cumulativeCount the cumulative count
+	 * @param colorizeOption the colorize option
 	 * @param reverseSpatialCoordinate the reverse spatial coordinate
 	 * @param partitionX the partition X
 	 * @param partitionY the partition Y
@@ -234,7 +233,7 @@ public abstract class VisualizationOperator implements Serializable{
 	 * @param parallelRenderImage the parallel render image
 	 * @param generateVectorImage the generate vector image
 	 */
-	public VisualizationOperator(int resolutionX, int resolutionY,Envelope datasetBoundary, boolean cumulativeCount, boolean reverseSpatialCoordinate,
+	public VisualizationOperator(int resolutionX, int resolutionY,Envelope datasetBoundary, ColorizeOption colorizeOption, boolean reverseSpatialCoordinate,
 			int partitionX, int partitionY, boolean parallelPhotoFilter, boolean parallelRenderImage, boolean generateVectorImage)
 	{
 		logger.debug("[VisualizationOperator][Constructor][Start]");
@@ -249,8 +248,8 @@ public abstract class VisualizationOperator implements Serializable{
 		/*
 		 * Variables below control how to initialize a raster image
 		 */
-		this.countMatrix = new ArrayList<Tuple2<Integer,Long>>();
-		this.cumulativeCount = cumulativeCount;
+		this.countMatrix = new ArrayList<Tuple2<Integer,Double>>();
+		this.colorizeOption = colorizeOption;
 		this.partitionX = partitionX;
 		this.partitionY = partitionY;
 		this.partitionIntervalX = this.resolutionX/this.partitionX;
@@ -261,7 +260,7 @@ public abstract class VisualizationOperator implements Serializable{
 		{
 			for(int i=0;i<resolutionX;i++)
 			{
-				countMatrix.add(new Tuple2<Integer,Long>(serialId,(long) 0));
+				countMatrix.add(new Tuple2<Integer,Double>(serialId,new Double(0.0)));
 				serialId++;
 			}
 		}
@@ -288,7 +287,7 @@ public abstract class VisualizationOperator implements Serializable{
 	 * @return the java pair RDD
 	 * @throws Exception the exception
 	 */
-	private JavaPairRDD<Integer,Long> spatialPartitioning() throws Exception
+	private JavaPairRDD<Integer,Double> spatialPartitioning() throws Exception
 	{
 		this.distributedRasterCountMatrix = this.distributedRasterCountMatrix.partitionBy(new VisualizationPartitioner(this.resolutionX,this.resolutionY,this.partitionX,this.partitionY));
 		return this.distributedRasterCountMatrix;
@@ -302,7 +301,7 @@ public abstract class VisualizationOperator implements Serializable{
 	 * @return the java pair RDD
 	 * @throws Exception the exception
 	 */
-	protected JavaPairRDD<Integer, Long> ApplyPhotoFilter(JavaSparkContext sparkContext) throws Exception
+	protected JavaPairRDD<Integer, Double> ApplyPhotoFilter(JavaSparkContext sparkContext) throws Exception
 	{
 		logger.debug("[VisualizationOperator][ApplyPhotoFilter][Start]");
 		if(this.parallelPhotoFilter)
@@ -312,20 +311,20 @@ public abstract class VisualizationOperator implements Serializable{
 				this.spatialPartitioning();
 				this.hasBeenSpatialPartitioned = true;
 			}
-			this.distributedRasterCountMatrix = this.distributedRasterCountMatrix.mapPartitionsToPair(new PairFlatMapFunction<Iterator<Tuple2<Integer,Long>>,Integer,Long>()
+			this.distributedRasterCountMatrix = this.distributedRasterCountMatrix.mapPartitionsToPair(new PairFlatMapFunction<Iterator<Tuple2<Integer,Double>>,Integer,Double>()
 			{
 
 				@Override
-				public Iterator<Tuple2<Integer, Long>> call(Iterator<Tuple2<Integer, Long>> currentPartition) throws Exception  {
+				public Iterator<Tuple2<Integer, Double>> call(Iterator<Tuple2<Integer, Double>> currentPartition) throws Exception  {
 					//This function will iterate all tuples within this partition twice. Complexity 2N. 
 					//First round, iterate all tuples to build a hash map. This hash map guarantees constant <key, value> access time.
 					// Another way is to do a sort on the data and then achieve constant access time in the second round. Complexity is N*log(N).
-					HashMap<Integer,Long> pixelCountHashMap = new HashMap<Integer,Long>();
-					List<Tuple2<Integer,Long>> oldPixelCounts = new ArrayList<Tuple2<Integer,Long>>();
-					List<Tuple2<Integer,Long>> newPixelCounts = new ArrayList<Tuple2<Integer,Long>>();
+					HashMap<Integer,Double> pixelCountHashMap = new HashMap<Integer,Double>();
+					List<Tuple2<Integer,Double>> oldPixelCounts = new ArrayList<Tuple2<Integer,Double>>();
+					List<Tuple2<Integer,Double>> newPixelCounts = new ArrayList<Tuple2<Integer,Double>>();
 					while(currentPartition.hasNext())
 					{
-						Tuple2<Integer, Long> currentPixelCount = currentPartition.next();
+						Tuple2<Integer, Double> currentPixelCount = currentPartition.next();
 						pixelCountHashMap.put(currentPixelCount._1, currentPixelCount._2);
 						oldPixelCounts.add(currentPixelCount);
 					}
@@ -333,7 +332,7 @@ public abstract class VisualizationOperator implements Serializable{
 					for(int i=0;i<oldPixelCounts.size();i++)
 					{
 						Tuple2<Integer,Integer> centerPixelCoordinate = RasterizationUtils.Decode1DTo2DId(resolutionX, resolutionY, oldPixelCounts.get(i)._1);
-						Long pixelCount = new Long(0);
+						Double pixelCount = new Double(0.0);
 						int neighborCount=0;
 						for (int x = -photoFilterRadius; x <= photoFilterRadius; x++) {
 							for (int y = -photoFilterRadius; y <= photoFilterRadius; y++) {
@@ -341,7 +340,7 @@ public abstract class VisualizationOperator implements Serializable{
 								int neighborPixelY = centerPixelCoordinate._2+y;
 								if(neighborPixelX<resolutionX&&neighborPixelX>=0&&neighborPixelY<resolutionY&&neighborPixelY>=0)
 								{
-									Long neighborPixelCount =pixelCountHashMap.get(RasterizationUtils.Encode2DTo1DId(resolutionX, resolutionY, neighborPixelX, neighborPixelY));
+									Double neighborPixelCount =pixelCountHashMap.get(RasterizationUtils.Encode2DTo1DId(resolutionX, resolutionY, neighborPixelX, neighborPixelY));
 									if(neighborPixelCount==null)
 									{
 										//This neighbor is not in this partition. Skip. Each center pixel should find at least (radius+1)*(radius+1) neighbors in its own partition.
@@ -352,7 +351,7 @@ public abstract class VisualizationOperator implements Serializable{
 								}
 							}
 						}
-						Tuple2<Integer,Long> newCenterPixel = new Tuple2<Integer,Long>(oldPixelCounts.get(i)._1,pixelCount);
+						Tuple2<Integer,Double> newCenterPixel = new Tuple2<Integer,Double>(oldPixelCounts.get(i)._1,pixelCount);
 						newPixelCounts.add(newCenterPixel);
 						if(neighborCount<(photoFilterRadius+1)*(photoFilterRadius+1))
 						{
@@ -365,28 +364,28 @@ public abstract class VisualizationOperator implements Serializable{
 		}
 		else
 		{
-			List<Tuple2<Integer,Long>> collectedCountMatrix = this.distributedRasterCountMatrix.collect();
-			List<Tuple2<Integer,Long>> originalCountMatrix = new ArrayList<Tuple2<Integer,Long>>(collectedCountMatrix);
+			List<Tuple2<Integer,Double>> collectedCountMatrix = this.distributedRasterCountMatrix.collect();
+			List<Tuple2<Integer,Double>> originalCountMatrix = new ArrayList<Tuple2<Integer,Double>>(collectedCountMatrix);
 			Collections.sort(originalCountMatrix, new PixelSerialIdComparator());
-			final Broadcast<List<Tuple2<Integer,Long>>> broadcastCountMatrix = sparkContext.broadcast(originalCountMatrix);
-			this.distributedRasterCountMatrix = this.distributedRasterCountMatrix.mapToPair(new PairFunction<Tuple2<Integer,Long>,Integer,Long>()
+			final Broadcast<List<Tuple2<Integer,Double>>> broadcastCountMatrix = sparkContext.broadcast(originalCountMatrix);
+			this.distributedRasterCountMatrix = this.distributedRasterCountMatrix.mapToPair(new PairFunction<Tuple2<Integer,Double>,Integer,Double>()
 			{
 				@Override
-				public Tuple2<Integer, Long> call(Tuple2<Integer, Long> pixel) throws Exception {
+				public Tuple2<Integer, Double> call(Tuple2<Integer, Double> pixel) throws Exception {
 					Tuple2<Integer,Integer> centerPixelCoordinate = RasterizationUtils.Decode1DTo2DId(resolutionX, resolutionY, pixel._1);
-					Long pixelCount = new Long(0);
+					Double pixelCount = new Double(0.0);
 					for (int x = -photoFilterRadius; x <= photoFilterRadius; x++) {
 						for (int y = -photoFilterRadius; y <= photoFilterRadius; y++) {
 							int neighborPixelX = centerPixelCoordinate._1+x;
 							int neighborPixelY = centerPixelCoordinate._2+y;
 							if(neighborPixelX<resolutionX&&neighborPixelX>=0&&neighborPixelY<resolutionY&&neighborPixelY>=0)
 							{
-								Long neighborPixelCount = broadcastCountMatrix.getValue().get(RasterizationUtils.Encode2DTo1DId(resolutionX, resolutionY, neighborPixelX, neighborPixelY))._2;
+								Double neighborPixelCount = broadcastCountMatrix.getValue().get(RasterizationUtils.Encode2DTo1DId(resolutionX, resolutionY, neighborPixelX, neighborPixelY))._2;
 								pixelCount+=Math.round(neighborPixelCount*PhotoFilterConvolutionMatrix[x + photoFilterRadius][y + photoFilterRadius]);
 							}
 						}
 					}
-					return new Tuple2<Integer,Long>(pixel._1,pixelCount);
+					return new Tuple2<Integer,Double>(pixel._1,pixelCount);
 				}				
 			});
 		}
@@ -406,14 +405,15 @@ public abstract class VisualizationOperator implements Serializable{
 
 		if(this.generateVectorImage)
 		{
-			final long maxWeight = this.distributedVectorObjects.max(new VectorObjectCountComparator())._2;
-			final long minWeight = 0;
-			this.distributedVectorColors = this.distributedVectorObjects.mapValues(new Function<Long,Color>()
+			final Double maxWeight = this.distributedVectorObjects.max(new VectorObjectCountComparator())._2;
+			final Double minWeight = 0.0;
+			this.distributedVectorColors = this.distributedVectorObjects.mapValues(new Function<Double,Color>()
 			{
 
 				@Override
-				public Color call(Long objectCount) throws Exception {
-					Long normalizedObjectCount = (objectCount-minWeight)*255/(maxWeight-minWeight);
+				public Color call(Double objectCount) throws Exception {
+					
+					Long normalizedObjectCount = new Double((objectCount-minWeight)*255/(maxWeight-minWeight)).longValue();
 					Color objectColor = EncodeToColor(normalizedObjectCount.intValue());
 					return objectColor;
 				}
@@ -422,14 +422,14 @@ public abstract class VisualizationOperator implements Serializable{
 		}
 		else
 		{
-			final long maxWeight = this.distributedRasterCountMatrix.max(new RasterPixelCountComparator())._2;
-			final long minWeight = 0;
-			this.distributedRasterColorMatrix = this.distributedRasterCountMatrix.mapValues(new Function<Long, Color>()
+			final Double maxWeight = this.distributedRasterCountMatrix.max(new RasterPixelCountComparator())._2;
+			final Double minWeight = 0.0;
+			this.distributedRasterColorMatrix = this.distributedRasterCountMatrix.mapValues(new Function<Double, Color>()
 			{
 
 				@Override
-				public Color call(Long pixelCount) throws Exception {
-					Long normalizedPixelCount = (pixelCount-minWeight)*255/(maxWeight-minWeight);
+				public Color call(Double pixelCount) throws Exception {
+					Double normalizedPixelCount = (pixelCount-minWeight)*255/(maxWeight-minWeight);
 					Color pixelColor = EncodeToColor(normalizedPixelCount.intValue());
 					return pixelColor;
 				}
@@ -677,37 +677,44 @@ public abstract class VisualizationOperator implements Serializable{
 	 * @param useSparkDefaultPartition the use spark default partition
 	 * @return the java pair RDD
 	 */
-	protected JavaPairRDD<Integer, Long> Rasterize(JavaSparkContext sparkContext, 
+	protected JavaPairRDD<Integer, Double> Rasterize(JavaSparkContext sparkContext, 
 			SpatialRDD spatialRDD,boolean useSparkDefaultPartition) {
 		logger.debug("[VisualizationOperator][Rasterize][Start]");
 		JavaRDD<Object> rawSpatialRDD = spatialRDD.rawSpatialRDD;
 		if(generateVectorImage)
 		{
-				this.distributedVectorObjects = rawSpatialRDD.flatMapToPair(new PairFlatMapFunction<Object,Object, Long>(){
+				this.distributedVectorObjects = rawSpatialRDD.flatMapToPair(new PairFlatMapFunction<Object,Object, Double>(){
 					@Override
-					public Iterator<Tuple2<Object,Long>> call(Object spatialObject) throws Exception {
+					public Iterator<Tuple2<Object,Double>> call(Object spatialObject) throws Exception {
 						GeometryFactory geometryFactory = new GeometryFactory();
-						List<Tuple2<Object,Long>> result = new ArrayList<Tuple2<Object,Long>>();
+						List<Tuple2<Object,Double>> result = new ArrayList<Tuple2<Object,Double>>();
 						if(spatialObject instanceof Point)
 						{
 							if(!datasetBoundary.covers(((Point) spatialObject).getEnvelopeInternal())) return result.iterator();							
 							Coordinate coordinate =  RasterizationUtils.FindPixelCoordinates(resolutionX,resolutionY,datasetBoundary,((Point) spatialObject).getCoordinate(),reverseSpatialCoordinate,false,true);
 							Point rasterizedObject = geometryFactory.createPoint(coordinate);
-							result.add(new Tuple2<Object,Long>(rasterizedObject,new Long(1)));
+							if(colorizeOption==ColorizeOption.ZAXIS)
+							{
+								result.add(new Tuple2<Object,Double>(rasterizedObject,((Point) spatialObject).getCoordinate().z));
+							}
+							else
+							{
+								result.add(new Tuple2<Object,Double>(rasterizedObject,new Double(1.0)));
+							}
 							return result.iterator();
 						}
 						else if(spatialObject instanceof Polygon)
 						{
 							if(!datasetBoundary.covers(((Polygon) spatialObject).getEnvelopeInternal())) return result.iterator();							
 							Coordinate[] spatialCoordinates = RasterizationUtils.FindPixelCoordinates(resolutionX,resolutionY,datasetBoundary,((Polygon) spatialObject).getCoordinates(),reverseSpatialCoordinate,false,true);
-							result.add(new Tuple2<Object,Long>(geometryFactory.createPolygon(spatialCoordinates),new Long(1))); 
+							result.add(new Tuple2<Object,Double>(geometryFactory.createPolygon(spatialCoordinates),new Double(1.0))); 
 							return result.iterator();
 						}
 						else if(spatialObject instanceof LineString)
 						{
 							if(!datasetBoundary.covers(((LineString) spatialObject).getEnvelopeInternal())) return result.iterator();							
 							Coordinate[] spatialCoordinates = RasterizationUtils.FindPixelCoordinates(resolutionX,resolutionY,datasetBoundary,((LineString) spatialObject).getCoordinates(),reverseSpatialCoordinate,false,true);
-							result.add(new Tuple2<Object,Long>(geometryFactory.createLineString(spatialCoordinates), new Long(1))); 
+							result.add(new Tuple2<Object,Double>(geometryFactory.createLineString(spatialCoordinates), new Double(1.0))); 
 							return result.iterator();
 						}
 						else
@@ -718,14 +725,14 @@ public abstract class VisualizationOperator implements Serializable{
 
 		}
 		else{
-		JavaPairRDD<Integer, Long> spatialRDDwithPixelId = rawSpatialRDD.flatMapToPair(new PairFlatMapFunction<Object,Integer,Long>()
+		JavaPairRDD<Integer, Double> spatialRDDwithPixelId = rawSpatialRDD.flatMapToPair(new PairFlatMapFunction<Object,Integer,Double>()
 		{
 			@Override
-			public Iterator<Tuple2<Integer, Long>> call(Object spatialObject) throws Exception {
+			public Iterator<Tuple2<Integer, Double>> call(Object spatialObject) throws Exception {
 
 					if(spatialObject instanceof Point)
 					{
-						return RasterizationUtils.FindPixelCoordinates(resolutionX,resolutionY,datasetBoundary,(Point)spatialObject,reverseSpatialCoordinate).iterator();
+						return RasterizationUtils.FindPixelCoordinates(resolutionX,resolutionY,datasetBoundary,(Point)spatialObject,colorizeOption,reverseSpatialCoordinate).iterator();
 					}
 					else if(spatialObject instanceof Polygon)
 					{
@@ -741,17 +748,22 @@ public abstract class VisualizationOperator implements Serializable{
 					}
 			}
 		});
-		JavaPairRDD<Integer, Long> originalImage = sparkContext.parallelizePairs(this.countMatrix);
+		JavaPairRDD<Integer, Double> originalImage = sparkContext.parallelizePairs(this.countMatrix);
 		spatialRDDwithPixelId = spatialRDDwithPixelId.union(originalImage);
-		JavaPairRDD<Integer, Long> pixelWeights = spatialRDDwithPixelId.reduceByKey(new Function2<Long,Long,Long>()
+		JavaPairRDD<Integer, Double> pixelWeights = spatialRDDwithPixelId.reduceByKey(new Function2<Double,Double,Double>()
 		{
 			@Override
-			public Long call(Long count1, Long count2) throws Exception {
-				if(cumulativeCount==true)
+			public Double call(Double count1, Double count2) throws Exception {
+				if(colorizeOption==ColorizeOption.SPATIALAGGREGATION)
 				{
 					return count1+count2;
 				}
-				else return new Long(count1);
+				else 
+				{
+					//TODO, colorizeOption for uniform color and z-axis color follow the same aggregate strategy 
+					// which takes the large value. We need to find a better strategy to distinguish them.
+					return count1>count2?count1:count2;
+				}	
 			}			
 		});
 		this.distributedRasterCountMatrix = pixelWeights;
@@ -770,43 +782,45 @@ public abstract class VisualizationOperator implements Serializable{
 	 * @param useSparkDefaultPartition the use spark default partition
 	 * @return the java pair RDD
 	 */
-	protected JavaPairRDD<Integer, Long> Rasterize(JavaSparkContext sparkContext, 
+	protected JavaPairRDD<Integer, Double> Rasterize(JavaSparkContext sparkContext, 
 			JavaPairRDD<Object,Long> spatialPairRDD,boolean useSparkDefaultPartition) {
 		logger.debug("[VisualizationOperator][Rasterize][Start]");
 		if(generateVectorImage)
 		{
 			this.onlyDrawOutline = false;
-			this.distributedVectorObjects = spatialPairRDD.flatMapToPair(new PairFlatMapFunction<Tuple2<Object,Long>,Object,Long>(){
+			this.distributedVectorObjects = spatialPairRDD.flatMapToPair(new PairFlatMapFunction<Tuple2<Object,Long>,Object,Double>(){
 				@Override
-				public Iterator<Tuple2<Object, Long>> call(Tuple2<Object, Long> spatialObject) throws Exception {
+				public Iterator<Tuple2<Object, Double>> call(Tuple2<Object, Long> spatialObject) throws Exception {
 					GeometryFactory geometryFactory = new GeometryFactory();
-					List<Tuple2<Object,Long>> result = new ArrayList<Tuple2<Object,Long>>();
+					List<Tuple2<Object,Double>> result = new ArrayList<Tuple2<Object,Double>>();
 					if(!datasetBoundary.covers(((Polygon) spatialObject._1()).getEnvelopeInternal())) return result.iterator();							
 					Coordinate[] spatialCoordinates = RasterizationUtils.FindPixelCoordinates(resolutionX,resolutionY,datasetBoundary,((Polygon) spatialObject._1()).getCoordinates(),reverseSpatialCoordinate,false,true);
-					result.add(new Tuple2<Object,Long>(geometryFactory.createPolygon(spatialCoordinates),spatialObject._2())); 
+					result.add(new Tuple2<Object,Double>(geometryFactory.createPolygon(spatialCoordinates),new Double(spatialObject._2()))); 
 					return result.iterator();
 				}});
 		}
 		else
 		{
-			JavaPairRDD<Integer, Long> spatialRDDwithPixelId = spatialPairRDD.flatMapToPair(new PairFlatMapFunction<Tuple2<Object,Long>,Integer,Long>()
+			JavaPairRDD<Integer, Double> spatialRDDwithPixelId = spatialPairRDD.flatMapToPair(new PairFlatMapFunction<Tuple2<Object,Long>,Integer,Double>()
 			{
 				@Override
-				public Iterator<Tuple2<Integer, Long>> call(Tuple2<Object,Long> spatialObject) throws Exception {
-						return RasterizationUtils.FindPixelCoordinates(resolutionX,resolutionY,datasetBoundary,(Polygon)spatialObject._1(),reverseSpatialCoordinate,(Long)spatialObject._2()).iterator();
+				public Iterator<Tuple2<Integer, Double>> call(Tuple2<Object,Long> spatialObject) throws Exception {
+						return RasterizationUtils.FindPixelCoordinates(resolutionX,resolutionY,datasetBoundary,(Polygon)spatialObject._1(),reverseSpatialCoordinate,new Double(spatialObject._2())).iterator();
 				}
 			});
-			JavaPairRDD<Integer, Long> originalImage = sparkContext.parallelizePairs(this.countMatrix);
-			JavaPairRDD<Integer,Long> completeSpatialRDDwithPixelId = spatialRDDwithPixelId.union(originalImage);
-			JavaPairRDD<Integer, Long> pixelWeights = completeSpatialRDDwithPixelId.reduceByKey(new Function2<Long,Long,Long>()
+			JavaPairRDD<Integer, Double> originalImage = sparkContext.parallelizePairs(this.countMatrix);
+			JavaPairRDD<Integer,Double> completeSpatialRDDwithPixelId = spatialRDDwithPixelId.union(originalImage);
+			JavaPairRDD<Integer, Double> pixelWeights = completeSpatialRDDwithPixelId.reduceByKey(new Function2<Double,Double,Double>()
 			{
 				@Override
-				public Long call(Long count1, Long count2) throws Exception {
-					if(cumulativeCount==true)
+				public Double call(Double count1, Double count2) throws Exception {
+					if(colorizeOption==ColorizeOption.SPATIALAGGREGATION)
 					{
 						return count1+count2;
 					}
-					else return new Long(count1>count2?count1:count2);
+					else {
+						return count1>count2?count1:count2;
+					}
 				}		
 			});
 			this.distributedRasterCountMatrix = pixelWeights;

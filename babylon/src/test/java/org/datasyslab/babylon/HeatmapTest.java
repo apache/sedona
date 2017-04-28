@@ -13,7 +13,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.datasyslab.babylon.extension.imageGenerator.NativeJavaImageGenerator;
+import org.datasyslab.babylon.extension.imageGenerator.BabylonImageGenerator;
 import org.datasyslab.babylon.extension.visualizationEffect.HeatMap;
 import org.datasyslab.babylon.utils.ImageType;
 import org.datasyslab.geospark.enums.FileDataSplitter;
@@ -156,8 +156,8 @@ public class HeatmapTest {
 		PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
 		HeatMap visualizationOperator = new HeatMap(800,500,USMainLandBoundary,false,3);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.rasterImage, "./target/heatmap/PointRDD", ImageType.PNG);
+		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/heatmap/PointRDD", ImageType.PNG);
 	}
 	
 	/**
@@ -170,8 +170,8 @@ public class HeatmapTest {
 		RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
 		HeatMap visualizationOperator = new HeatMap(800,500,USMainLandBoundary,false,2);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.rasterImage, "./target/heatmap/RectangleRDD", ImageType.PNG);
+		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/heatmap/RectangleRDD", ImageType.PNG);
 	
 	}
 	
@@ -186,8 +186,8 @@ public class HeatmapTest {
 		PolygonRDD spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions);
 		HeatMap visualizationOperator = new HeatMap(800,500,USMainLandBoundary,false,2);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.rasterImage, "./target/heatmap/PolygonRDD", ImageType.GIF);	
+		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/heatmap/PolygonRDD", ImageType.GIF);	
 		
 	}
 	
@@ -201,7 +201,7 @@ public class HeatmapTest {
 		LineStringRDD spatialRDD = new LineStringRDD(sparkContext, LineStringInputLocation, LineStringSplitter, false, LineStringNumPartitions);
 		HeatMap visualizationOperator = new HeatMap(800,500,USMainLandBoundary,false,2);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.rasterImage, "./target/heatmap/LineStringRDD", ImageType.GIF);	
+		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/heatmap/LineStringRDD", ImageType.GIF);	
 	}
 }

@@ -189,12 +189,20 @@ public class RasterizationUtils implements Serializable{
 	 * @param reverseSpatialCoordinate the reverse spatial coordinate
 	 * @return the list
 	 */
-	public static List<Tuple2<Integer,Long>> FindPixelCoordinates(int resolutionX, int resolutionY, Envelope datasetBoundary, Point spatialObject,boolean reverseSpatialCoordinate)
+	public static List<Tuple2<Integer,Double>> FindPixelCoordinates(int resolutionX, int resolutionY, Envelope datasetBoundary, Point spatialObject,ColorizeOption colorizeOption,boolean reverseSpatialCoordinate)
 	{
 		Tuple2<Integer,Integer> pixelCoordinate = FindOnePixelCoordinate(resolutionX,resolutionY,datasetBoundary,spatialObject.getCoordinate(),reverseSpatialCoordinate);
-		List<Tuple2<Integer,Long>> result = new ArrayList<Tuple2<Integer,Long>>();
+		List<Tuple2<Integer,Double>> result = new ArrayList<Tuple2<Integer,Double>>();
 		try {
-			result.add(new Tuple2<Integer,Long>(Encode2DTo1DId(resolutionX,resolutionY,pixelCoordinate._1,pixelCoordinate._2),(long) 1));
+			
+			if(colorizeOption == ColorizeOption.ZAXIS)
+			{
+				result.add(new Tuple2<Integer,Double>(Encode2DTo1DId(resolutionX,resolutionY,pixelCoordinate._1,pixelCoordinate._2),spatialObject.getCoordinate().z));
+			}
+			else
+			{
+				result.add(new Tuple2<Integer,Double>(Encode2DTo1DId(resolutionX,resolutionY,pixelCoordinate._1,pixelCoordinate._2),new Double(1.0)));
+			}
 		} catch (Exception e) {
 			/*
 			 * This spatial object is out of the given dataset boudanry. It is ignored here.
@@ -251,29 +259,6 @@ public class RasterizationUtils implements Serializable{
 		return new Coordinate(pixelCoordinate._1(),pixelCoordinate._2());
 	}
 	
-	/**
-	 * Find pixel coordinates.
-	 *
-	 * @param resolutionX the resolution X
-	 * @param resolutionY the resolution Y
-	 * @param datasetBoundary the dataset boundary
-	 * @param spatialObject the spatial object
-	 * @param reverseSpatialCoordinate the reverse spatial coordinate
-	 * @return the list
-	 */
-	public static List<Tuple2<Integer,Long>> FindPixelCoordinates(int resolutionX, int resolutionY, Envelope datasetBoundary, Envelope spatialObject,boolean reverseSpatialCoordinate)
-	{
-		
-		Tuple2<Integer,Integer> pixelMinBound = FindOnePixelCoordinate(resolutionX,resolutionY,datasetBoundary,new Coordinate(spatialObject.getMinX(),spatialObject.getMinY()),reverseSpatialCoordinate);
-		Tuple2<Integer,Integer> pixelMaxBound = FindOnePixelCoordinate(resolutionX,resolutionY,datasetBoundary,new Coordinate(spatialObject.getMaxX(),spatialObject.getMaxY()),reverseSpatialCoordinate);
-		List<Tuple2<Integer,Long>> result = new ArrayList<Tuple2<Integer,Long>>();
-		result.addAll(FindPixelCoordinates(resolutionX,resolutionY,pixelMinBound,new Tuple2<Integer,Integer>(pixelMinBound._1,pixelMaxBound._2),reverseSpatialCoordinate));
-		result.addAll(FindPixelCoordinates(resolutionX,resolutionY,new Tuple2<Integer,Integer>(pixelMinBound._1,pixelMaxBound._2),pixelMaxBound,reverseSpatialCoordinate));
-		result.addAll(FindPixelCoordinates(resolutionX,resolutionY,pixelMaxBound,new Tuple2<Integer,Integer>(pixelMaxBound._1,pixelMinBound._2),reverseSpatialCoordinate));
-		result.addAll(FindPixelCoordinates(resolutionX,resolutionY,new Tuple2<Integer,Integer>(pixelMaxBound._1,pixelMinBound._2),pixelMinBound,reverseSpatialCoordinate));
-		return result;
-	} 
-	
 	
 	/**
 	 * Find pixel coordinates.
@@ -285,9 +270,9 @@ public class RasterizationUtils implements Serializable{
 	 * @param reverseSpatialCoordinate the reverse spatial coordinate
 	 * @return the list
 	 */
-	public static List<Tuple2<Integer,Long>> FindPixelCoordinates(int resolutionX, int resolutionY, Envelope datasetBoundary, Polygon spatialObject,boolean reverseSpatialCoordinate)
+	public static List<Tuple2<Integer,Double>> FindPixelCoordinates(int resolutionX, int resolutionY, Envelope datasetBoundary, Polygon spatialObject,boolean reverseSpatialCoordinate)
 	{
-		List<Tuple2<Integer,Long>> result = new ArrayList<Tuple2<Integer,Long>>();
+		List<Tuple2<Integer,Double>> result = new ArrayList<Tuple2<Integer,Double>>();
 		for(int i=0;i<spatialObject.getCoordinates().length-1;i++)
 		{
 			Tuple2<Integer,Integer> pixelCoordinate1 = FindOnePixelCoordinate(resolutionX,resolutionY,datasetBoundary,spatialObject.getCoordinates()[i],reverseSpatialCoordinate);
@@ -309,9 +294,9 @@ public class RasterizationUtils implements Serializable{
 	 * @param objectWeight the object weight
 	 * @return the list
 	 */
-	public static List<Tuple2<Integer,Long>> FindPixelCoordinates(int resolutionX, int resolutionY, Envelope datasetBoundary, Polygon spatialObject,boolean reverseSpatialCoordinate,Long objectWeight)
+	public static List<Tuple2<Integer,Double>> FindPixelCoordinates(int resolutionX, int resolutionY, Envelope datasetBoundary, Polygon spatialObject,boolean reverseSpatialCoordinate,Double objectWeight)
 	{
-		List<Tuple2<Integer,Long>> result = new ArrayList<Tuple2<Integer,Long>>();
+		List<Tuple2<Integer,Double>> result = new ArrayList<Tuple2<Integer,Double>>();
 		GeometryFactory geometryfactory = new GeometryFactory();
 		ArrayList<Coordinate> coordinatesList = new ArrayList<Coordinate>();
 		LinearRing linear;
@@ -336,7 +321,7 @@ public class RasterizationUtils implements Serializable{
 					int serialId;
 					try {
 						serialId = Encode2DTo1DId(resolutionX,resolutionY,i,j);
-						result.add(new Tuple2<Integer,Long>(serialId,new Long(objectWeight)));
+						result.add(new Tuple2<Integer,Double>(serialId,new Double(objectWeight)));
 					} catch (Exception e) {
 						/*
 						 * This spatial object is out of the given dataset boundary. It is ignored here.
@@ -354,53 +339,12 @@ public class RasterizationUtils implements Serializable{
 	 *
 	 * @param resolutionX the resolution X
 	 * @param resolutionY the resolution Y
-	 * @param datasetBoundary the dataset boundary
-	 * @param spatialObject the spatial object
-	 * @param reverseSpatialCoordinate the reverse spatial coordinate
-	 * @param objectWeight the object weight
-	 * @return the list
-	 */
-	public static List<Tuple2<Integer,Long>> FindPixelCoordinates(int resolutionX, int resolutionY, Envelope datasetBoundary, Envelope spatialObject,boolean reverseSpatialCoordinate,Long objectWeight)
-	{
-		List<Tuple2<Integer,Long>> result = new ArrayList<Tuple2<Integer,Long>>();
-		Coordinate minBound = new Coordinate(spatialObject.getMinX(),spatialObject.getMinY());
-		Coordinate maxBound = new Coordinate(spatialObject.getMaxX(),spatialObject.getMaxY());
-		Tuple2<Integer,Integer> minPixelBound = FindOnePixelCoordinate(resolutionX,resolutionY,datasetBoundary,minBound,reverseSpatialCoordinate);
-		Tuple2<Integer,Integer> maxPixelBound = FindOnePixelCoordinate(resolutionX,resolutionY,datasetBoundary,maxBound,reverseSpatialCoordinate);
-		int minPixelX = minPixelBound._1;
-		int maxPixelX = maxPixelBound._1;
-		int minPixelY = minPixelBound._2;
-		int maxPixelY = maxPixelBound._2;
-		for(int j = minPixelY;j<=maxPixelY;j++)
-		{
-			for(int i=minPixelX;i<=maxPixelX;i++)
-			{
-				int serialId;
-				try {
-					serialId = Encode2DTo1DId(resolutionX,resolutionY,i,j);
-					result.add(new Tuple2<Integer,Long>(serialId,new Long(objectWeight)));
-				} catch (Exception e) {
-					/*
-					 * This spatial object is out of the given dataset boundary. It is ignored here.
-					 */
-				}
-
-			}
-		}
-		return result;
-	}
-	
-	/**
-	 * Find pixel coordinates.
-	 *
-	 * @param resolutionX the resolution X
-	 * @param resolutionY the resolution Y
 	 * @param pixelCoordinate1 the pixel coordinate 1
 	 * @param pixelCoordinate2 the pixel coordinate 2
 	 * @param reverseSpatialCoordinate the reverse spatial coordinate
 	 * @return the list
 	 */
-	public static List<Tuple2<Integer,Long>> FindPixelCoordinates(int resolutionX, int resolutionY, Tuple2<Integer,Integer> pixelCoordinate1, Tuple2<Integer,Integer> pixelCoordinate2,boolean reverseSpatialCoordinate)
+	public static List<Tuple2<Integer,Double>> FindPixelCoordinates(int resolutionX, int resolutionY, Tuple2<Integer,Integer> pixelCoordinate1, Tuple2<Integer,Integer> pixelCoordinate2,boolean reverseSpatialCoordinate)
 	{
 		/*
 		 * This function uses Bresenham's line algorithm to plot pixels touched by a given line segment.
@@ -417,13 +361,13 @@ public class RasterizationUtils implements Serializable{
 		int eps = 0; //cumulative errors
 		dx = Math.abs(dx); 
 		dy = Math.abs(dy);
-		List<Tuple2<Integer,Long>> result = new ArrayList<Tuple2<Integer,Long>>();
+		List<Tuple2<Integer,Double>> result = new ArrayList<Tuple2<Integer,Double>>();
 		if (dx > dy) 
 		{
 			for (x = x1; x != x2; x += ux)
 			{
 				try {
-					result.add(new Tuple2<Integer,Long>(Encode2DTo1DId(resolutionX,resolutionY,x,y),(long) 1));
+					result.add(new Tuple2<Integer,Double>(Encode2DTo1DId(resolutionX,resolutionY,x,y),new Double(1.0)));
 				} catch (Exception e) {
 					/*
 					 * This spatial object is out of the given dataset boudanry. It is ignored here.
@@ -441,7 +385,7 @@ public class RasterizationUtils implements Serializable{
 			for (y = y1; y != y2; y += uy)
 			{
 				try {
-					result.add(new Tuple2<Integer,Long>(Encode2DTo1DId(resolutionX,resolutionY,x,y),(long) 1));
+					result.add(new Tuple2<Integer,Double>(Encode2DTo1DId(resolutionX,resolutionY,x,y),new Double(1.0)));
 				} catch (Exception e) {
 					/*
 					 * This spatial object is out of the given dataset boudanry. It is ignored here.
@@ -467,9 +411,9 @@ public class RasterizationUtils implements Serializable{
 	 * @param reverseSpatialCoordinate the reverse spatial coordinate
 	 * @return the list
 	 */
-	public static List<Tuple2<Integer,Long>> FindPixelCoordinates(int resolutionX, int resolutionY, Envelope datasetBoundary, LineString spatialObject,boolean reverseSpatialCoordinate)
+	public static List<Tuple2<Integer,Double>> FindPixelCoordinates(int resolutionX, int resolutionY, Envelope datasetBoundary, LineString spatialObject,boolean reverseSpatialCoordinate)
 	{	
-		List<Tuple2<Integer,Long>> result = new ArrayList<Tuple2<Integer,Long>>();
+		List<Tuple2<Integer,Double>> result = new ArrayList<Tuple2<Integer,Double>>();
 		for(int i=0;i<spatialObject.getCoordinates().length-1;i++)
 		{
 			Tuple2<Integer,Integer> pixelCoordinate1 = FindOnePixelCoordinate(resolutionX,resolutionY,datasetBoundary,spatialObject.getCoordinates()[i],reverseSpatialCoordinate);

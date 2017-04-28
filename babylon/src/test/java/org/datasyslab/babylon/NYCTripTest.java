@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
-import org.datasyslab.babylon.extension.imageGenerator.NativeJavaImageGenerator;
+import org.datasyslab.babylon.extension.imageGenerator.BabylonImageGenerator;
 import org.datasyslab.babylon.extension.visualizationEffect.HeatMap;
 import org.datasyslab.babylon.utils.ImageType;
 import org.datasyslab.babylon.utils.RasterizationUtils;
@@ -201,7 +201,7 @@ public class NYCTripTest {
 		HeatMap visualizationOperator = new HeatMap(resolutionX,resolutionY,NYCBoundary,false,2);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		
-		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.rasterImage, "./target/heatmap/NYCTrip", ImageType.PNG);	
+		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/heatmap/NYCTrip", ImageType.PNG);	
 	}
 }
