@@ -16,17 +16,19 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.babylon.core.ImageGenerator;
 import org.datasyslab.babylon.core.OverlayOperator;
-import org.datasyslab.babylon.extension.imageGenerator.NativeJavaImageGenerator;
-import org.datasyslab.babylon.extension.imageGenerator.SparkImageGenerator;
+import org.datasyslab.babylon.extension.imageGenerator.BabylonImageGenerator;
 import org.datasyslab.babylon.extension.visualizationEffect.ChoroplethMap;
 import org.datasyslab.babylon.extension.visualizationEffect.HeatMap;
 import org.datasyslab.babylon.extension.visualizationEffect.ScatterPlot;
+import org.datasyslab.babylon.utils.ColorizeOption;
 import org.datasyslab.babylon.utils.ImageType;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.formatMapper.EarthdataHDFPointMapper;
 import org.datasyslab.geospark.spatialOperator.JoinQuery;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
@@ -97,6 +99,24 @@ public class Example {
     /** The US main land boundary. */
     static Envelope USMainLandBoundary;
     
+    static String earthdataInputLocation;
+        
+    static Integer earthdataNumPartitions;
+    
+    static int HDFIncrement = 5;
+    
+    static int HDFOffset = 2;
+    
+    static String HDFRootGroupName = "MOD_Swath_LST";
+    
+    /** The HDF data variable name. */
+    static String HDFDataVariableName = "LST";
+    
+    static boolean HDFswitchXY = true;
+    
+    /** The url prefix. */
+    static String urlPrefix = "";
+    
 	/**
 	 * Builds the scatter plot.
 	 *
@@ -110,20 +130,20 @@ public class Example {
 			ScatterPlot visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary,false);
 			visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
-			ImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-			imageGenerator.SaveAsFile(visualizationOperator.rasterImage, outputPath, ImageType.PNG);
+			BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+			imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, outputPath, ImageType.PNG);
 			
 			visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary,false,-1,-1,false,true);
 			visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
-			imageGenerator = new NativeJavaImageGenerator();
-			imageGenerator.SaveAsFile(visualizationOperator.vectorImage, outputPath,ImageType.SVG);
+			imageGenerator = new BabylonImageGenerator();
+			imageGenerator.SaveVectorImageAsLocalFile(visualizationOperator.vectorImage, outputPath,ImageType.SVG);
 			
 			visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary,false,-1,-1,true,true);
 			visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
-			imageGenerator = new SparkImageGenerator();
-			imageGenerator.SaveAsFile(visualizationOperator.distributedVectorImage, "file://"+outputPath,ImageType.SVG);
+			imageGenerator = new BabylonImageGenerator();
+			imageGenerator.SaveVectorImageAsSparkFile(visualizationOperator.distributedVectorImage, "file://"+outputPath+"-distributed",ImageType.SVG);
 		}
 		catch(Exception e)
 		{
@@ -146,8 +166,8 @@ public class Example {
 			RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
 			HeatMap visualizationOperator = new HeatMap(1000,600,USMainLandBoundary,false,2);
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
-			NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-			imageGenerator.SaveAsFile(visualizationOperator.rasterImage, outputPath,ImageType.PNG);
+			BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+			imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, outputPath,ImageType.PNG);
 		}
 		catch(Exception e)
 		{
@@ -184,8 +204,8 @@ public class Example {
 			OverlayOperator overlayOperator = new OverlayOperator(visualizationOperator.rasterImage);
 			overlayOperator.JoinImage(frontImage.rasterImage);
 			
-			NativeJavaImageGenerator imageGenerator = new NativeJavaImageGenerator();
-			imageGenerator.SaveAsFile(overlayOperator.backRasterImage, outputPath,ImageType.PNG);
+			BabylonImageGenerator imageGenerator = new BabylonImageGenerator();
+			imageGenerator.SaveRasterImageAsLocalFile(overlayOperator.backRasterImage, outputPath,ImageType.PNG);
 		}
 		catch(Exception e)
 		{
@@ -207,8 +227,8 @@ public class Example {
 			RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
 			HeatMap visualizationOperator = new HeatMap(1000,600,USMainLandBoundary,false,2,4,4,true,true);
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
-			ImageGenerator imageGenerator = new NativeJavaImageGenerator();
-			imageGenerator.SaveAsFile(visualizationOperator.distributedRasterImage, outputPath,ImageType.PNG);
+			BabylonImageGenerator imageGenerator = new BabylonImageGenerator();
+			imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.distributedRasterImage, outputPath,ImageType.PNG);
 		}
 		catch(Exception e)
 		{
@@ -231,8 +251,8 @@ public class Example {
 			HeatMap visualizationOperator = new HeatMap(1000,600,USMainLandBoundary,false,2,4,4,true,true);
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
 			visualizationOperator.stitchImagePartitions();
-			ImageGenerator imageGenerator = new NativeJavaImageGenerator();
-			imageGenerator.SaveAsFile(visualizationOperator.rasterImage, outputPath,ImageType.PNG);
+			BabylonImageGenerator imageGenerator = new BabylonImageGenerator();
+			imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, outputPath,ImageType.PNG);
 		}
 		catch(Exception e)
 		{
@@ -242,6 +262,24 @@ public class Example {
 		return true;			
 	}
 	
+	public static boolean earthdataVisualization(String outputPath)
+	{
+    	
+		try {
+			EarthdataHDFPointMapper earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement,HDFOffset,HDFRootGroupName,
+	    			HDFDataVariableName,HDFswitchXY,urlPrefix);
+	    	PointRDD spatialRDD = new PointRDD(sparkContext, earthdataInputLocation, earthdataNumPartitions, earthdataHDFPoint,StorageLevel.MEMORY_ONLY());
+			ScatterPlot visualizationOperator = new ScatterPlot(1000,600,spatialRDD.boundaryEnvelope,ColorizeOption.ZAXIS,false,false);
+			visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.BLUE, true);
+			visualizationOperator.Visualize(sparkContext, spatialRDD);
+			BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+			imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, outputPath, ImageType.PNG);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
 	/**
 	 * The main method.
 	 *
@@ -262,9 +300,10 @@ public class Example {
 		
         String scatterPlotOutputPath = System.getProperty("user.dir")+"/"+demoOutputPath + "/scatterplot";
         String heatMapOutputPath = System.getProperty("user.dir")+"/"+demoOutputPath+"/heatmap";
-        String choroplethMapOutputPath = System.getProperty("user.dir")+demoOutputPath+"/choroplethmap";
+        String choroplethMapOutputPath = System.getProperty("user.dir")+"/"+demoOutputPath+"/choroplethmap";
         String parallelFilterRenderStitchOutputPath = System.getProperty("user.dir")+"/"+demoOutputPath+"/parallelfilterrenderstitchheatmap";
-        
+        String earthdataScatterPlotOutputPath = System.getProperty("user.dir")+"/"+demoOutputPath+"/earthdatascatterplot";
+
         PointInputLocation = "file://"+System.getProperty("user.dir")+"/"+resourcePath+prop.getProperty("inputLocation");
         PointOffset = Integer.parseInt(prop.getProperty("offset"));;
         PointSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
@@ -293,11 +332,20 @@ public class Example {
         
         USMainLandBoundary = new Envelope(-126.790180,-64.630926,24.863836,50.000);
 
+        earthdataInputLocation = System.getProperty("user.dir")+"/src/test/resources/modis/modis.csv";
+        earthdataNumPartitions = 5;
+        HDFIncrement=5;
+        HDFOffset=2;
+        HDFRootGroupName = "MOD_Swath_LST";
+        HDFDataVariableName = "LST";
+        HDFswitchXY = true;
+        urlPrefix = System.getProperty("user.dir")+"/src/test/resources/modis/";
+        
         if(buildScatterPlot(scatterPlotOutputPath)&&buildHeatMap(heatMapOutputPath)
         		&&buildChoroplethMap(choroplethMapOutputPath)&&parallelFilterRenderStitch(parallelFilterRenderStitchOutputPath+"-stitched")
-        		&&parallelFilterRenderNoStitch(parallelFilterRenderStitchOutputPath))
+        		&&parallelFilterRenderNoStitch(parallelFilterRenderStitchOutputPath)&&earthdataVisualization(earthdataScatterPlotOutputPath))
         {
-        	System.out.println("All 4 Babylon Demos have passed.");
+        	System.out.println("All 5 Babylon Demos have passed.");
         }
         else
         {

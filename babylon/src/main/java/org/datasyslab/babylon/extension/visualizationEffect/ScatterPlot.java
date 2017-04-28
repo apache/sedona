@@ -8,10 +8,12 @@ package org.datasyslab.babylon.extension.visualizationEffect;
 
 import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.babylon.core.VisualizationOperator;
+import org.datasyslab.babylon.utils.ColorizeOption;
 import org.datasyslab.geospark.spatialRDD.SpatialRDD;
 
 import com.vividsolutions.jts.geom.Envelope;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class ScatterPlot.
  */
@@ -27,7 +29,7 @@ public class ScatterPlot extends VisualizationOperator {
 	 * @deprecated This function always generates raster image. Please append one more parameter to the end: boolean generateVectorImage
 	 */
 	public ScatterPlot(int resolutionX, int resolutionY, Envelope datasetBoundary, boolean reverseSpatialCoordinate) {
-		super(resolutionX, resolutionY, datasetBoundary,false,reverseSpatialCoordinate,-1,-1,false,false,false);
+		super(resolutionX, resolutionY, datasetBoundary,ColorizeOption.UNIFORMCOLOR,reverseSpatialCoordinate,-1,-1,false,false,false);
 	}
 
 	/**
@@ -40,7 +42,7 @@ public class ScatterPlot extends VisualizationOperator {
 	 * @param generateVectorImage the generate vector image
 	 */
 	public ScatterPlot(int resolutionX, int resolutionY, Envelope datasetBoundary, boolean reverseSpatialCoordinate, boolean generateVectorImage) {
-		super(resolutionX, resolutionY, datasetBoundary,false,reverseSpatialCoordinate,-1,-1,false,false,generateVectorImage);
+		super(resolutionX, resolutionY, datasetBoundary,ColorizeOption.UNIFORMCOLOR,reverseSpatialCoordinate,-1,-1,false,false,generateVectorImage);
 	}
 	
 	/**
@@ -57,7 +59,7 @@ public class ScatterPlot extends VisualizationOperator {
 	 */
 	public ScatterPlot(int resolutionX, int resolutionY,Envelope datasetBoundary, boolean reverseSpatialCoordinate,
 			int partitionX, int partitionY, boolean parallelRenderImage, boolean generateVectorImage) {
-		super(resolutionX, resolutionY, datasetBoundary,false,reverseSpatialCoordinate,
+		super(resolutionX, resolutionY, datasetBoundary,ColorizeOption.UNIFORMCOLOR,reverseSpatialCoordinate,
 			partitionX, partitionY, false, parallelRenderImage,generateVectorImage);
 	}
 	
@@ -74,7 +76,62 @@ public class ScatterPlot extends VisualizationOperator {
 	 */
 	public ScatterPlot(int resolutionX, int resolutionY,Envelope datasetBoundary, boolean reverseSpatialCoordinate,
 			int partitionX, int partitionY, boolean parallelRenderImage) {
-		super(resolutionX, resolutionY, datasetBoundary,false,reverseSpatialCoordinate,
+		super(resolutionX, resolutionY, datasetBoundary,ColorizeOption.UNIFORMCOLOR,reverseSpatialCoordinate,
+			partitionX, partitionY, false, parallelRenderImage,false);
+	}
+	
+	
+
+	/**
+	 * Instantiates a new scatter plot.
+	 *
+	 * @param resolutionX the resolution X
+	 * @param resolutionY the resolution Y
+	 * @param datasetBoundary the dataset boundary
+	 * @param colorizeOption the colorize option
+	 * @param reverseSpatialCoordinate the reverse spatial coordinate
+	 * @param generateVectorImage the generate vector image
+	 */
+	public ScatterPlot(int resolutionX, int resolutionY, Envelope datasetBoundary, ColorizeOption colorizeOption, boolean reverseSpatialCoordinate, boolean generateVectorImage) {
+		super(resolutionX, resolutionY, datasetBoundary,colorizeOption,reverseSpatialCoordinate,-1,-1,false,false,generateVectorImage);
+	}
+	
+
+	/**
+	 * Instantiates a new scatter plot.
+	 *
+	 * @param resolutionX the resolution X
+	 * @param resolutionY the resolution Y
+	 * @param datasetBoundary the dataset boundary
+	 * @param colorizeOption the colorize option
+	 * @param reverseSpatialCoordinate the reverse spatial coordinate
+	 * @param partitionX the partition X
+	 * @param partitionY the partition Y
+	 * @param parallelRenderImage the parallel render image
+	 * @param generateVectorImage the generate vector image
+	 */
+	public ScatterPlot(int resolutionX, int resolutionY,Envelope datasetBoundary, ColorizeOption colorizeOption, boolean reverseSpatialCoordinate,
+			int partitionX, int partitionY, boolean parallelRenderImage, boolean generateVectorImage) {
+		super(resolutionX, resolutionY, datasetBoundary,colorizeOption,reverseSpatialCoordinate,
+			partitionX, partitionY, false, parallelRenderImage,generateVectorImage);
+	}
+	
+
+	/**
+	 * Instantiates a new scatter plot.
+	 *
+	 * @param resolutionX the resolution X
+	 * @param resolutionY the resolution Y
+	 * @param datasetBoundary the dataset boundary
+	 * @param colorizeOption the colorize option
+	 * @param reverseSpatialCoordinate the reverse spatial coordinate
+	 * @param partitionX the partition X
+	 * @param partitionY the partition Y
+	 * @param parallelRenderImage the parallel render image
+	 */
+	public ScatterPlot(int resolutionX, int resolutionY,Envelope datasetBoundary, ColorizeOption colorizeOption, boolean reverseSpatialCoordinate,
+			int partitionX, int partitionY, boolean parallelRenderImage) {
+		super(resolutionX, resolutionY, datasetBoundary,colorizeOption,reverseSpatialCoordinate,
 			partitionX, partitionY, false, parallelRenderImage,false);
 	}
 	
