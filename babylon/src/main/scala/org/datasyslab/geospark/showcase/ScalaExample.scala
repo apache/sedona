@@ -20,12 +20,10 @@ import org.datasyslab.babylon.extension.imageGenerator.BabylonImageGenerator
 import org.datasyslab.babylon.extension.visualizationEffect.ChoroplethMap
 import org.datasyslab.babylon.extension.visualizationEffect.HeatMap
 import org.datasyslab.babylon.extension.visualizationEffect.ScatterPlot
-import org.datasyslab.babylon.utils.ColorizeOption
-import org.datasyslab.babylon.utils.ImageType
+import org.datasyslab.babylon.utils.{ColorizeOption, EarthdataHDFPointMapper, ImageType}
 import org.datasyslab.geospark.enums.FileDataSplitter
 import org.datasyslab.geospark.enums.GridType
 import org.datasyslab.geospark.enums.IndexType
-import org.datasyslab.geospark.formatMapper.EarthdataHDFPointMapper
 import org.datasyslab.geospark.spatialOperator.JoinQuery
 import org.datasyslab.geospark.spatialRDD.PointRDD
 import org.datasyslab.geospark.spatialRDD.PolygonRDD
@@ -80,6 +78,7 @@ object ScalaExample extends App{
 	val HDFOffset = 2
 	val HDFRootGroupName = "MOD_Swath_LST"
 	val HDFDataVariableName = "LST"
+	val HDFDataVariableList = Array("LST", "QC", "Error_LST", "Emis_31", "Emis_32")
 	val HDFswitchXY = true
 	val urlPrefix = System.getProperty("user.dir") + "/src/test/resources/modis/"
 
@@ -188,7 +187,8 @@ object ScalaExample extends App{
 	}
 
 	def earthdataVisualization(outputPath: String): Boolean = {
-		val earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName, HDFDataVariableName, HDFswitchXY, urlPrefix)
+		val earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName,
+			HDFDataVariableList, HDFDataVariableName, HDFswitchXY, urlPrefix)
 		val spatialRDD = new PointRDD(sparkContext, earthdataInputLocation, earthdataNumPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY)
 		val visualizationOperator = new ScatterPlot(1000, 600, spatialRDD.boundaryEnvelope, ColorizeOption.ZAXIS, false, false)
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.BLUE, true)

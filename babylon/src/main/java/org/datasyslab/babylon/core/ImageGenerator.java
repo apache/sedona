@@ -1,6 +1,6 @@
 /**
- * FILE: AbstractImageGenerator.java
- * PATH: org.datasyslab.babylon.core.AbstractImageGenerator.java
+ * FILE: ImageGenerator.java
+ * PATH: org.datasyslab.babylon.core.ImageGenerator.java
  * Copyright (c) 2017 Arizona State University Data Systems Lab
  * All rights reserved.
  */
@@ -19,10 +19,6 @@ import org.datasyslab.babylon.utils.ImageType;
 import scala.Tuple2;
 
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class AbstractImageGenerator.
- */
 public abstract class ImageGenerator implements Serializable{
 
 

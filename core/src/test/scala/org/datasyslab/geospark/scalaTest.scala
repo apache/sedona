@@ -5,6 +5,7 @@ import org.apache.log4j.{Level, Logger}
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{SparkConf, SparkContext}
 import org.datasyslab.geospark.enums.{FileDataSplitter, GridType, IndexType}
+import org.datasyslab.geospark.formatMapper.EarthdataHDFPointMapper
 import org.datasyslab.geospark.spatialOperator.{JoinQuery, KNNQuery, RangeQuery}
 import org.datasyslab.geospark.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}
 import org.scalatest.FunSpec
@@ -125,6 +126,30 @@ class scalaTest extends FunSpec {
 			for(i <- 1 to eachQueryLoopTimes)
 			{
 				val resultSize = JoinQuery.DistanceJoinQuery(objectRDD,queryWindowRDD,true,true).count
+			}
+		}
+
+		it("should pass earthdata format mapper test") {
+			val InputLocation = System.getProperty("user.dir") + "/src/test/resources/modis/modis.csv"
+			val splitter = FileDataSplitter.CSV
+			val indexType = IndexType.RTREE
+			val queryEnvelope = new Envelope(-90.01, -80.01, 30.01, 40.01)
+			val numPartitions = 5
+			val loopTimes = 1
+			val HDFIncrement = 5
+			val HDFOffset = 2
+			val HDFRootGroupName = "MOD_Swath_LST"
+			val HDFDataVariableName = "LST"
+			val urlPrefix = System.getProperty("user.dir") + "/src/test/resources/modis/"
+			val HDFDataVariableList = Array("LST", "QC", "Error_LST", "Emis_31", "Emis_32")
+
+			val earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName, HDFDataVariableList, HDFDataVariableName, urlPrefix)
+			val spatialRDD = new PointRDD(sc, InputLocation, numPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY)
+			var i = 0
+			while (i < loopTimes) {
+				var resultSize = 0L
+				resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).count
+				i=i+1
 			}
 		}
 	}

@@ -1,10 +1,5 @@
 package org.datasyslab.geospark.io;
 
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
@@ -24,6 +19,9 @@ import com.vividsolutions.jts.geom.Envelope;
 
 // TODO: Auto-generated Javadoc
 
+/**
+ * The Class EarthdataHDFTest.
+ */
 public class EarthdataHDFTest {
     
     /** The sc. */
@@ -48,14 +46,22 @@ public class EarthdataHDFTest {
     /** The loop times. */
     static int loopTimes;
     
+    /** The HD fincrement. */
     static int HDFincrement = 5;
     
+    /** The HD foffset. */
     static int HDFoffset = 2;
     
+    /** The HD froot group name. */
     static String HDFrootGroupName = "MOD_Swath_LST";
     
+    /** The HDF data variable list. */
+    static String[] HDFDataVariableList = {"LST","QC","Error_LST","Emis_31","Emis_32"};
+
+    /** The HDF data variable name. */
     static String HDFDataVariableName = "LST";
     
+    /** The url prefix. */
     static String urlPrefix = "";
     /**
      * Once executed before all.
@@ -95,7 +101,7 @@ public class EarthdataHDFTest {
     @Test
     public void testSpatialRangeQuery() throws Exception {
     	EarthdataHDFPointMapper earthdataHDFPoint = new EarthdataHDFPointMapper(HDFincrement,HDFoffset,HDFrootGroupName,
-    			HDFDataVariableName,urlPrefix);
+    			HDFDataVariableList,HDFDataVariableName,urlPrefix);
     	PointRDD spatialRDD = new PointRDD(sc, InputLocation, numPartitions, earthdataHDFPoint,StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
@@ -112,7 +118,7 @@ public class EarthdataHDFTest {
     @Test
     public void testSpatialRangeQueryUsingIndex() throws Exception {
     	EarthdataHDFPointMapper earthdataHDFPoint = new EarthdataHDFPointMapper(HDFincrement,HDFoffset,HDFrootGroupName,
-    			HDFDataVariableName,urlPrefix);
+    			HDFDataVariableList,HDFDataVariableName,urlPrefix);
     	PointRDD spatialRDD = new PointRDD(sc, InputLocation, numPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY());
     	spatialRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)

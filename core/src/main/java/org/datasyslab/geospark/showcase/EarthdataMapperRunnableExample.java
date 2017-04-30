@@ -59,6 +59,9 @@ public class EarthdataMapperRunnableExample {
     /** The HDF data variable name. */
     static String HDFDataVariableName = "LST";
     
+    /** The HDF data variable list. */
+    static String[] HDFDataVariableList = {"LST","QC","Error_LST","Emis_31","Emis_32"};
+
     /** The url prefix. */
     static String urlPrefix = "";
 	
@@ -92,7 +95,7 @@ public class EarthdataMapperRunnableExample {
      */
     public static void testSpatialRangeQuery() {
     	EarthdataHDFPointMapper earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement,HDFOffset,HDFRootGroupName,
-    			HDFDataVariableName,urlPrefix);
+    			HDFDataVariableList,HDFDataVariableName,urlPrefix);
     	PointRDD spatialRDD = new PointRDD(sc, InputLocation, numPartitions, earthdataHDFPoint,StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
@@ -112,7 +115,7 @@ public class EarthdataMapperRunnableExample {
      */
     public static void testSpatialRangeQueryUsingIndex() {
     	EarthdataHDFPointMapper earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement,HDFOffset,HDFRootGroupName,
-    			HDFDataVariableName,urlPrefix);
+    			HDFDataVariableList,HDFDataVariableName,urlPrefix);
     	PointRDD spatialRDD = new PointRDD(sc, InputLocation, numPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY());
     	try {
 			spatialRDD.buildIndex(IndexType.RTREE,false);

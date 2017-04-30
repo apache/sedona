@@ -4,7 +4,7 @@
  * Copyright (c) 2017 Arizona State University Data Systems Lab
  * All rights reserved.
  */
-package org.datasyslab.geospark.formatMapper;
+package org.datasyslab.babylon.utils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
