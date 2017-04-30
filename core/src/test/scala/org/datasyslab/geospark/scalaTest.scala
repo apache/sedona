@@ -13,7 +13,7 @@ class scalaTest extends FunSpec {
 
 	describe("GeoSpark in Scala") {
 
-		val conf = new SparkConf().setAppName("GeoSparkRunnableExample").setMaster("local[2]")
+		val conf = new SparkConf().setAppName("scalaTest").setMaster("local[2]")
 		val sc = new SparkContext(conf)
 		Logger.getLogger("org").setLevel(Level.WARN)
 		Logger.getLogger("akka").setLevel(Level.WARN)

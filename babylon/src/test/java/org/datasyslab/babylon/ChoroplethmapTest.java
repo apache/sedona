@@ -16,7 +16,8 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.datasyslab.babylon.core.OverlayOperator;
+import org.datasyslab.babylon.core.RasterOverlayOperator;
+import org.datasyslab.babylon.core.VectorOverlayOperator;
 import org.datasyslab.babylon.extension.imageGenerator.BabylonImageGenerator;
 import org.datasyslab.babylon.extension.visualizationEffect.ChoroplethMap;
 import org.datasyslab.babylon.extension.visualizationEffect.ScatterPlot;
@@ -177,7 +178,7 @@ public class ChoroplethmapTest implements Serializable{
 		frontImage.Visualize(sparkContext, queryRDD);
 
 		
-		OverlayOperator overlayOperator = new OverlayOperator(visualizationOperator.rasterImage);
+		RasterOverlayOperator overlayOperator = new RasterOverlayOperator(visualizationOperator.rasterImage);
 		overlayOperator.JoinImage(frontImage.rasterImage);
 		
 		BabylonImageGenerator imageGenerator = new BabylonImageGenerator();
@@ -206,12 +207,12 @@ public class ChoroplethmapTest implements Serializable{
 		ScatterPlot frontImage = new ScatterPlot(1000,600,USMainLandBoundary,false);
 		frontImage.CustomizeColor(0, 0, 0, 255, Color.GREEN, true);
 		frontImage.Visualize(sparkContext, queryRDD);
-		
-		OverlayOperator overlayOperator = new OverlayOperator(visualizationOperator.rasterImage);
-		overlayOperator.JoinImage(frontImage.rasterImage);
+
+		RasterOverlayOperator rasterOverlayOperator = new RasterOverlayOperator(visualizationOperator.rasterImage);
+		rasterOverlayOperator.JoinImage(frontImage.rasterImage);
 		
 		BabylonImageGenerator imageGenerator = new BabylonImageGenerator();
-		imageGenerator.SaveRasterImageAsLocalFile(overlayOperator.backRasterImage, "./target/choroplethmap/PolygonRDD-combined", ImageType.GIF);
+		imageGenerator.SaveRasterImageAsLocalFile(rasterOverlayOperator.backRasterImage, "./target/choroplethmap/PolygonRDD-combined", ImageType.GIF);
 		
 		visualizationOperator = new ChoroplethMap(1000,600,USMainLandBoundary,false,true);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.RED, true);
@@ -225,11 +226,11 @@ public class ChoroplethmapTest implements Serializable{
 		
 		imageGenerator.SaveVectorImageAsLocalFile(frontImage.vectorImage, "./target/choroplethmap/PolygonRDD-combined-2", ImageType.SVG);
 
-		overlayOperator = new OverlayOperator(visualizationOperator.vectorImage,true);
-		overlayOperator.JoinImage(frontImage.vectorImage);
+		VectorOverlayOperator vectorOverlayOperator = new VectorOverlayOperator(visualizationOperator.vectorImage);
+		vectorOverlayOperator.JoinImage(frontImage.vectorImage);
 		
 		imageGenerator = new BabylonImageGenerator();
-		imageGenerator.SaveVectorImageAsLocalFile(overlayOperator.backVectorImage, "./target/choroplethmap/PolygonRDD-combined", ImageType.SVG);
+		imageGenerator.SaveVectorImageAsLocalFile(vectorOverlayOperator.backVectorImage, "./target/choroplethmap/PolygonRDD-combined", ImageType.SVG);
 	}
 
 }

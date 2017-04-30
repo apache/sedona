@@ -17,8 +17,7 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
-import org.datasyslab.babylon.core.ImageGenerator;
-import org.datasyslab.babylon.core.OverlayOperator;
+import org.datasyslab.babylon.core.RasterOverlayOperator;
 import org.datasyslab.babylon.extension.imageGenerator.BabylonImageGenerator;
 import org.datasyslab.babylon.extension.visualizationEffect.ChoroplethMap;
 import org.datasyslab.babylon.extension.visualizationEffect.HeatMap;
@@ -201,7 +200,7 @@ public class Example {
 			frontImage.CustomizeColor(0, 0, 0, 255, Color.GREEN, true);
 			frontImage.Visualize(sparkContext, queryRDD);
 			
-			OverlayOperator overlayOperator = new OverlayOperator(visualizationOperator.rasterImage);
+			RasterOverlayOperator overlayOperator = new RasterOverlayOperator(visualizationOperator.rasterImage);
 			overlayOperator.JoinImage(frontImage.rasterImage);
 			
 			BabylonImageGenerator imageGenerator = new BabylonImageGenerator();

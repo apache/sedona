@@ -1,5 +1,5 @@
 /**
-	* FILE: Example.java
+	* FILE: ScalaExample.java
 	* PATH: org.datasyslab.geospark.showcase.ScalaExample.scala
 	* Copyright (c) 2017 Arizona State University Data Systems Lab
 	* All rights reserved.
