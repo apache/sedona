@@ -151,8 +151,6 @@ public class PointRDDTest implements Serializable{
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d);
         }
-        //System.out.println(spatialRDD.boundaryEnvelope);
-
     }
     
     /**
@@ -170,7 +168,6 @@ public class PointRDDTest implements Serializable{
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
-
     }
     
     /**
@@ -188,8 +185,6 @@ public class PointRDDTest implements Serializable{
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d);
         }
-        //System.out.println(spatialRDD.boundaryEnvelope);
-
     }
     
     /**
@@ -207,7 +202,6 @@ public class PointRDDTest implements Serializable{
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
-
     }
 
     

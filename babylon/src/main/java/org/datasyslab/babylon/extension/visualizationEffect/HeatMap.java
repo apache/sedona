@@ -13,6 +13,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 
 import org.datasyslab.babylon.core.VisualizationOperator;
 import org.datasyslab.babylon.extension.photoFilter.GaussianBlur;
+import org.datasyslab.babylon.utils.ColorizeOption;
 import org.datasyslab.geospark.spatialRDD.SpatialRDD;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -36,7 +37,7 @@ public class HeatMap extends VisualizationOperator{
 	public HeatMap(int resolutionX, int resolutionY, Envelope datasetBoundary, boolean reverseSpatialCoordinate,int blurRadius)
 	
 	{
-		super(resolutionX, resolutionY, datasetBoundary, true, reverseSpatialCoordinate,-1,-1,false,false,false);
+		super(resolutionX, resolutionY, datasetBoundary, ColorizeOption.SPATIALAGGREGATION, reverseSpatialCoordinate,-1,-1,false,false,false);
 		GaussianBlur gaussianBlur = new GaussianBlur(blurRadius);
 		this.InitPhotoFilterWeightMatrix(gaussianBlur);
 	}
@@ -58,7 +59,7 @@ public class HeatMap extends VisualizationOperator{
 			int partitionX, int partitionY, boolean parallelPhotoFilter, boolean parallelRenderImage)
 	
 	{
-		super(resolutionX, resolutionY, datasetBoundary, true, reverseSpatialCoordinate,
+		super(resolutionX, resolutionY, datasetBoundary, ColorizeOption.SPATIALAGGREGATION, reverseSpatialCoordinate,
 				partitionX, partitionY, parallelPhotoFilter, parallelRenderImage,false);
 		GaussianBlur gaussianBlur = new GaussianBlur(blurRadius);
 		this.InitPhotoFilterWeightMatrix(gaussianBlur);

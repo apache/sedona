@@ -6,6 +6,9 @@
  */
 package org.datasyslab.geospark.utils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
@@ -13,6 +16,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.wololo.geojson.Feature;
 import org.wololo.geojson.GeoJSON;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
@@ -57,10 +61,12 @@ public class testGeoJSON {
         Geometry point = geometryFactory.createPoint(coordinate);
 
         GeoJSONWriter writer = new GeoJSONWriter();
-        GeoJSON json = writer.write(point);
-        String jsonstring = json.toString();
-
-       // System.out.println(jsonstring);
+        Map<String,Object> userData = new HashMap<String,Object>();
+        userData.put("UserData", "Payload");
+        Feature jsonFeature = new Feature(writer.write(point),userData);
+        
+        String jsonstring = jsonFeature.toString();
+        assert jsonstring.equals("{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[1.0,2.0]},\"properties\":{\"UserData\":\"Payload\"}}");
     }
 
     

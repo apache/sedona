@@ -143,7 +143,6 @@ public class PolygonRDDTest {
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
-
     }
     
     /**
@@ -161,7 +160,6 @@ public class PolygonRDDTest {
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
-
     }
     
     /**
@@ -179,7 +177,6 @@ public class PolygonRDDTest {
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
-
     }
 
     
