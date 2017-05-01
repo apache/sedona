@@ -1,7 +1,7 @@
 # BABYLON: a distributed geospatial visualization system
 | Version   |      GeoSpark Core      |  [Babylon Viz System](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon)|
 |:----------:|:-------------:|:------:|
-| Stable |  0.6.1 | 0.1.1 |
+| Stable |  0.6.2 | 0.2.0 |
 | Latest |  [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark)   |   [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon) |
 | Source code |  [![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark) | [![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark) |
 
@@ -13,7 +13,15 @@
 
 **Babylon** artifacts are hosted in Maven Central: [**Maven Central Coordinates**](https://github.com/DataSystemsLab/GeoSpark/wiki/Babylon-Maven-Central-Coordinates)
 
+**Babylon GeoSpark compatibility**: [**Reference Sheet**](https://github.com/DataSystemsLab/GeoSpark/wiki/Babylon-GeoSpark-compatibility)
+
+
 ##  Version release notes: [click here](https://github.com/DataSystemsLab/GeoSpark/wiki/Babylon-Full-Version-Release-notes)
+
+## News!
+
+* GeoSpark (0.6.2 and later) is able to load, query and save NASA Petabytes NetCDF/HDF Earth Data! ([Scala Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/scala/org/datasyslab/geospark/showcase),[Java Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/java/org/datasyslab/geospark/showcase))
+* Babylon (0.2.0  and later) is able to visualize NASA Petabytes NetCDF/HDF Earth Data and output to distributed PNG/SVG images! ([Scala Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon/src/main/scala/org/datasyslab/geospark/showcase),[Java Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon/src/main/java/org/datasyslab/babylon/showcase))
 
 ## Babylon Gallery
 

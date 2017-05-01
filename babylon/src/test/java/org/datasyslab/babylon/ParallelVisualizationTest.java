@@ -13,7 +13,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.datasyslab.babylon.extension.imageGenerator.NativeJavaImageGenerator;
+import org.datasyslab.babylon.extension.imageGenerator.BabylonImageGenerator;
 import org.datasyslab.babylon.extension.visualizationEffect.HeatMap;
 import org.datasyslab.babylon.utils.ImageType;
 import org.datasyslab.geospark.enums.FileDataSplitter;
@@ -177,8 +177,8 @@ public class ParallelVisualizationTest {
 		HeatMap visualizationOperator = new HeatMap(resolutionX,resolutionY,USMainLandBoundary,false,2,partitionX,partitionY,true,true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		visualizationOperator.stitchImagePartitions();
-		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.rasterImage, "./target/parallelvisualization/PointRDD",ImageType.GIF);
+		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/parallelvisualization/PointRDD",ImageType.GIF);
 	}
 	
 	/**
@@ -192,8 +192,8 @@ public class ParallelVisualizationTest {
 		HeatMap visualizationOperator = new HeatMap(resolutionX,resolutionY,USMainLandBoundary,false,2,partitionX,partitionY,true,true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		visualizationOperator.stitchImagePartitions();
-		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.rasterImage, "./target/parallelvisualization/RectangleRDD",ImageType.PNG);
+		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/parallelvisualization/RectangleRDD",ImageType.PNG);
 	}
 	
 	/**
@@ -208,8 +208,8 @@ public class ParallelVisualizationTest {
 		HeatMap visualizationOperator = new HeatMap(resolutionX,resolutionY,USMainLandBoundary,false,2,partitionX,partitionY,true,true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		visualizationOperator.stitchImagePartitions();
-		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.rasterImage, "./target/parallelvisualization/PolygonRDD",ImageType.GIF);
+		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/parallelvisualization/PolygonRDD",ImageType.GIF);
 	}
 	
 	/**
@@ -223,7 +223,7 @@ public class ParallelVisualizationTest {
 		HeatMap visualizationOperator = new HeatMap(resolutionX,resolutionY,USMainLandBoundary,false,2,partitionX,partitionY,true,true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		visualizationOperator.stitchImagePartitions();
-		NativeJavaImageGenerator imageGenerator = new  NativeJavaImageGenerator();
-		imageGenerator.SaveAsFile(visualizationOperator.rasterImage, "./target/parallelvisualization/LineStringRDD",ImageType.GIF);
+		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/parallelvisualization/LineStringRDD",ImageType.GIF);
 	}
 }
