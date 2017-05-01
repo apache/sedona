@@ -17,18 +17,17 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
-import org.datasyslab.babylon.core.ImageGenerator;
-import org.datasyslab.babylon.core.OverlayOperator;
+import org.datasyslab.babylon.core.RasterOverlayOperator;
 import org.datasyslab.babylon.extension.imageGenerator.BabylonImageGenerator;
 import org.datasyslab.babylon.extension.visualizationEffect.ChoroplethMap;
 import org.datasyslab.babylon.extension.visualizationEffect.HeatMap;
 import org.datasyslab.babylon.extension.visualizationEffect.ScatterPlot;
 import org.datasyslab.babylon.utils.ColorizeOption;
+import org.datasyslab.babylon.utils.EarthdataHDFPointMapper;
 import org.datasyslab.babylon.utils.ImageType;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
-import org.datasyslab.geospark.formatMapper.EarthdataHDFPointMapper;
 import org.datasyslab.geospark.spatialOperator.JoinQuery;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
@@ -111,6 +110,9 @@ public class Example {
     
     /** The HDF data variable name. */
     static String HDFDataVariableName = "LST";
+    
+    /** The HDF data variable list. */
+    static String[] HDFDataVariableList = {"LST","QC","Error_LST","Emis_31","Emis_32"};
     
     static boolean HDFswitchXY = true;
     
@@ -201,7 +203,7 @@ public class Example {
 			frontImage.CustomizeColor(0, 0, 0, 255, Color.GREEN, true);
 			frontImage.Visualize(sparkContext, queryRDD);
 			
-			OverlayOperator overlayOperator = new OverlayOperator(visualizationOperator.rasterImage);
+			RasterOverlayOperator overlayOperator = new RasterOverlayOperator(visualizationOperator.rasterImage);
 			overlayOperator.JoinImage(frontImage.rasterImage);
 			
 			BabylonImageGenerator imageGenerator = new BabylonImageGenerator();
@@ -267,7 +269,7 @@ public class Example {
     	
 		try {
 			EarthdataHDFPointMapper earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement,HDFOffset,HDFRootGroupName,
-	    			HDFDataVariableName,HDFswitchXY,urlPrefix);
+					HDFDataVariableList,HDFDataVariableName,HDFswitchXY,urlPrefix);
 	    	PointRDD spatialRDD = new PointRDD(sparkContext, earthdataInputLocation, earthdataNumPartitions, earthdataHDFPoint,StorageLevel.MEMORY_ONLY());
 			ScatterPlot visualizationOperator = new ScatterPlot(1000,600,spatialRDD.boundaryEnvelope,ColorizeOption.ZAXIS,false,false);
 			visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.BLUE, true);

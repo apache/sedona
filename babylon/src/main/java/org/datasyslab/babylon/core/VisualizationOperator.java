@@ -783,28 +783,28 @@ public abstract class VisualizationOperator implements Serializable{
 	 * @return the java pair RDD
 	 */
 	protected JavaPairRDD<Integer, Double> Rasterize(JavaSparkContext sparkContext, 
-			JavaPairRDD<Object,Long> spatialPairRDD,boolean useSparkDefaultPartition) {
+			JavaPairRDD<Polygon,Long> spatialPairRDD,boolean useSparkDefaultPartition) {
 		logger.debug("[VisualizationOperator][Rasterize][Start]");
 		if(generateVectorImage)
 		{
 			this.onlyDrawOutline = false;
-			this.distributedVectorObjects = spatialPairRDD.flatMapToPair(new PairFlatMapFunction<Tuple2<Object,Long>,Object,Double>(){
+			this.distributedVectorObjects = spatialPairRDD.flatMapToPair(new PairFlatMapFunction<Tuple2<Polygon,Long>,Object,Double>(){
 				@Override
-				public Iterator<Tuple2<Object, Double>> call(Tuple2<Object, Long> spatialObject) throws Exception {
+				public Iterator<Tuple2<Object, Double>> call(Tuple2<Polygon, Long> spatialObject) throws Exception {
 					GeometryFactory geometryFactory = new GeometryFactory();
 					List<Tuple2<Object,Double>> result = new ArrayList<Tuple2<Object,Double>>();
 					if(!datasetBoundary.covers(((Polygon) spatialObject._1()).getEnvelopeInternal())) return result.iterator();							
 					Coordinate[] spatialCoordinates = RasterizationUtils.FindPixelCoordinates(resolutionX,resolutionY,datasetBoundary,((Polygon) spatialObject._1()).getCoordinates(),reverseSpatialCoordinate,false,true);
-					result.add(new Tuple2<Object,Double>(geometryFactory.createPolygon(spatialCoordinates),new Double(spatialObject._2()))); 
+					result.add(new Tuple2<Object,Double>(geometryFactory.createPolygon(spatialCoordinates),new Double(spatialObject._2())));
 					return result.iterator();
 				}});
 		}
 		else
 		{
-			JavaPairRDD<Integer, Double> spatialRDDwithPixelId = spatialPairRDD.flatMapToPair(new PairFlatMapFunction<Tuple2<Object,Long>,Integer,Double>()
+			JavaPairRDD<Integer, Double> spatialRDDwithPixelId = spatialPairRDD.flatMapToPair(new PairFlatMapFunction<Tuple2<Polygon,Long>,Integer,Double>()
 			{
 				@Override
-				public Iterator<Tuple2<Integer, Double>> call(Tuple2<Object,Long> spatialObject) throws Exception {
+				public Iterator<Tuple2<Integer, Double>> call(Tuple2<Polygon,Long> spatialObject) throws Exception {
 						return RasterizationUtils.FindPixelCoordinates(resolutionX,resolutionY,datasetBoundary,(Polygon)spatialObject._1(),reverseSpatialCoordinate,new Double(spatialObject._2())).iterator();
 				}
 			});

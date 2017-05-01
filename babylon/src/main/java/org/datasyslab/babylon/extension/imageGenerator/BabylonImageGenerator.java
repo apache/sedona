@@ -15,14 +15,14 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import org.datasyslab.babylon.core.AbstractImageGenerator;
+import org.datasyslab.babylon.core.ImageGenerator;
 import org.datasyslab.babylon.utils.ImageType;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Class BabylonImageGenerator.
  */
-public class BabylonImageGenerator extends AbstractImageGenerator{
+public class BabylonImageGenerator extends ImageGenerator{
 	
 	/* (non-Javadoc)
 	 * @see org.datasyslab.babylon.core.AbstractImageGenerator#SaveRasterImageAsLocalFile(java.awt.image.BufferedImage, java.lang.String, org.datasyslab.babylon.utils.ImageType)
@@ -76,7 +76,6 @@ public class BabylonImageGenerator extends AbstractImageGenerator{
 				ex.printStackTrace();
 
 			}
-
 		}
 		return true;
 	}

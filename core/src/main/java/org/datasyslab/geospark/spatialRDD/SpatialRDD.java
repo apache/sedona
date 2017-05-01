@@ -8,9 +8,11 @@ package org.datasyslab.geospark.spatialRDD;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
@@ -32,6 +34,7 @@ import org.datasyslab.geospark.utils.XMaxComparator;
 import org.datasyslab.geospark.utils.XMinComparator;
 import org.datasyslab.geospark.utils.YMaxComparator;
 import org.datasyslab.geospark.utils.YMinComparator;
+import org.wololo.geojson.Feature;
 import org.wololo.geojson.GeoJSON;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
@@ -361,8 +364,18 @@ public abstract class SpatialRDD implements Serializable{
                 GeoJSONWriter writer = new GeoJSONWriter();
                 while (iterator.hasNext()) {
                 	Geometry spatialObject = (Geometry)iterator.next();
-                    GeoJSON json = writer.write(spatialObject);
-                    String jsonstring = json.toString();
+                    Feature jsonFeature;
+                    if(spatialObject.getUserData()!=null)
+                    {
+                        Map<String,Object> userData = new HashMap<String,Object>();
+                        userData.put("UserData", spatialObject.getUserData());
+                    	jsonFeature = new Feature(writer.write(spatialObject),userData);
+                    }
+                    else
+                    {
+                    	jsonFeature = new Feature(writer.write(spatialObject),null);
+                    }
+                    String jsonstring = jsonFeature.toString();
                     result.add(jsonstring);
                 }
                 return result.iterator();

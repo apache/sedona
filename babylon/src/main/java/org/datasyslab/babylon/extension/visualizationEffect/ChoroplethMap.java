@@ -8,6 +8,7 @@ package org.datasyslab.babylon.extension.visualizationEffect;
 
 import java.awt.Color;
 
+import com.vividsolutions.jts.geom.Polygon;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.babylon.core.VisualizationOperator;
@@ -150,7 +151,7 @@ public class ChoroplethMap extends VisualizationOperator{
 	 * @return true, if successful
 	 * @throws Exception the exception
 	 */
-	public boolean Visualize(JavaSparkContext sparkContext, JavaPairRDD spatialPairRDD) throws Exception {		
+	public boolean Visualize(JavaSparkContext sparkContext, JavaPairRDD<Polygon,Long> spatialPairRDD) throws Exception {
 		this.Rasterize(sparkContext, spatialPairRDD, true);
 		this.Colorize();
 		this.RenderImage(sparkContext);
