@@ -4,12 +4,12 @@
 	<groupId>org.datasyslab</groupId>
 	<artifactId>geospark</artifactId>
 	<version>0.6.2</version>
-	
+
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>Geospatial extension for Apache Spark</description>
 	<url>http://geospark.datasyslab.org/</url>
 	<packaging>jar</packaging>
- 
+
     <licenses>
         <license>
             <name>MIT license</name>
@@ -36,13 +36,13 @@
         <developerConnection>scm:git:git@github.com:DataSystemsLab/GeoSpark.git</developerConnection>
         <url>git@github.com:DataSystemsLab/GeoSpark.git</url>
     </scm>
-    
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <scala.version>2.11.8</scala.version>
         <scala.compat.version>2.11</scala.compat.version>
 	</properties>
-	
+
 	<dependencies>
         <dependency>
 			<groupId>org.apache.spark</groupId>
@@ -50,7 +50,7 @@
 			<version>2.1.0</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.datasyslab</groupId>
 			<artifactId>JTSplus</artifactId>
@@ -68,7 +68,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
 		<dependency>
   			<groupId>org.datasyslab</groupId>
   			<artifactId>sernetcdf</artifactId>
@@ -147,6 +147,7 @@
                         <goal>shade</goal>
                     </goals>
                     <configuration>
+                        <minimizeJar>true</minimizeJar>
                         <transformers>
                         <!--  use transformer to handle merge of META-INF/services - see http://java.net/jira/browse/JERSEY-440?focusedCommentId=14822&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#action_14822 -->
                             <transformer
@@ -161,7 +162,17 @@
        						 <Main-Class>akka.Main</Main-Class>
        						 </manifestEntries>
        						 </transformer>
-                        </transformers> 
+                        </transformers>
+                        <relocations>
+                            <!-- <relocation>
+                                <pattern>com.vividsolutions.jts</pattern>
+                                <shadedPattern>com.vividsolutions.jtsgeospark</shadedPattern>
+                            </relocation> -->
+                            <relocation>
+                                <pattern>org.datasyslab.JTSplus</pattern>
+                                <shadedPattern>org.datasyslab.JTSplusgeospark</shadedPattern>
+                            </relocation>
+                        </relocations>
                         <filters>
                             <!--  filter to address "Invalid signature file" issue - see http://stackoverflow.com/a/6743609/589215-->
                             <filter>
@@ -275,7 +286,7 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
