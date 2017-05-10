@@ -54,8 +54,12 @@
                                     <shadedPattern>com.vividsolutions.jtsgeospark</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>com.google.guava</pattern>
-                                    <shadedPattern>com.google.guavageospark</shadedPattern>
+                                    <pattern>com.google.common</pattern>
+                                    <shadedPattern>com.google.commongeospark</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.google.thirdparty</pattern>
+                                    <shadedPattern>com.google.thirdpartygeospark</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>
