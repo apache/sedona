@@ -48,7 +48,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <minimizeJar>true</minimizeJar>
+                            <!--<minimizeJar>true</minimizeJar>-->
                             <relocations>
                                 <relocation>
                                     <pattern>com.vividsolutions.jts</pattern>

@@ -164,10 +164,6 @@
                                 </transformer>
                             </transformers>
                             <relocations>
-                                <!-- <relocation>
-                                    <pattern>com.vividsolutions.jts</pattern>
-                                    <shadedPattern>com.vividsolutions.jtsgeospark</shadedPattern>
-                                </relocation> -->
                                 <relocation>
                                     <pattern>org.datasyslab.JTSplus</pattern>
                                     <shadedPattern>org.datasyslab.JTSplusgeospark</shadedPattern>
