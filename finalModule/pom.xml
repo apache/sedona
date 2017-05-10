@@ -48,11 +48,14 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <!--<minimizeJar>true</minimizeJar>-->
                             <relocations>
                                 <relocation>
                                     <pattern>com.vividsolutions.jts</pattern>
                                     <shadedPattern>com.vividsolutions.jtsgeospark</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.google.guava</pattern>
+                                    <shadedPattern>com.google.guavageospark</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>
