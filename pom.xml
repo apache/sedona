@@ -10,5 +10,6 @@
   <modules>
     <module>core</module>
     <module>babylon</module>
+    <module>finalModule</module>
   </modules>
 </project>
