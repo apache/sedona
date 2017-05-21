@@ -22,6 +22,7 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.WKTReader;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class UserSuppliedRectangleMapper.
  */

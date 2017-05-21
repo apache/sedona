@@ -20,6 +20,7 @@ import com.vividsolutions.jts.index.SpatialIndex;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class RangeFilterUsingIndex.
  */

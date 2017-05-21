@@ -14,12 +14,11 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDDTest;
-import org.datasyslab.geospark.spatialRDD.RectangleRDD;
-import org.datasyslab.geospark.spatialRDD.RectangleRDDTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -88,7 +87,7 @@ public class PolygonRangeTest {
             prop.load(input);
             // There is a field in the property file, you can edit your own file location there.
             // InputLocation = prop.getProperty("inputLocation");
-            InputLocation = "file://"+RectangleRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
+            InputLocation = "file://"+PolygonRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
             splitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
             indexType = IndexType.getIndexType(prop.getProperty("indexType"));
@@ -123,7 +122,7 @@ public class PolygonRangeTest {
      */
     @Test
     public void testSpatialRangeQuery() throws Exception {
-    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true);
+    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true,StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
     		long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false,false).count();
@@ -140,7 +139,7 @@ public class PolygonRangeTest {
      */
     @Test
     public void testSpatialRangeQueryUsingIndex() throws Exception {
-    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true);
+    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true,StorageLevel.MEMORY_ONLY());
     	spatialRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)
     	{

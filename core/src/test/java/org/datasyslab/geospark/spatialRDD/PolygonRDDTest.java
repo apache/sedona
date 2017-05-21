@@ -17,6 +17,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
@@ -120,7 +121,7 @@ public class PolygonRDDTest {
      */
     @Test
     public void testConstructor() throws Exception {
-        PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions);
+        PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions,StorageLevel.MEMORY_ONLY());
         //todo: Set this to debug level
         assert spatialRDD.totalNumberOfRecords>=1;
         assert spatialRDD.boundary!=null;
@@ -138,7 +139,7 @@ public class PolygonRDDTest {
      */
     @Test
     public void testHilbertCurveSpatialPartitioing() throws Exception {
-    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, 10);
+    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, 10,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.HILBERT);
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
@@ -155,7 +156,7 @@ public class PolygonRDDTest {
      */
     @Test
     public void testRTreeSpatialPartitioing() throws Exception {
-    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, 10);
+    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, 10,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.RTREE);
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
@@ -172,7 +173,7 @@ public class PolygonRDDTest {
      */
     @Test
     public void testVoronoiSpatialPartitioing() throws Exception {
-    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, 10);
+    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, 10,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.VORONOI);
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
@@ -187,7 +188,7 @@ public class PolygonRDDTest {
      */
     @Test
     public void testBuildIndexWithoutSetGrid() throws Exception {
-    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions);
+    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions,StorageLevel.MEMORY_ONLY());
         spatialRDD.buildIndex(IndexType.RTREE,false);
     }
 
@@ -199,7 +200,7 @@ public class PolygonRDDTest {
      */
     @Test
     public void testBuildRtreeIndex() throws Exception {
-    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions);
+    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(gridType);
         spatialRDD.buildIndex(IndexType.RTREE,true);
         if(spatialRDD.indexedRDD.take(1).get(0)._2() instanceof STRtree)
@@ -220,7 +221,7 @@ public class PolygonRDDTest {
      */
     @Test
     public void testBuildQuadtreeIndex() throws Exception {
-    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions);
+    	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(gridType);
         spatialRDD.buildIndex(IndexType.QUADTREE,true);
         if(spatialRDD.indexedRDD.take(1).get(0)._2() instanceof STRtree)
@@ -241,7 +242,7 @@ public class PolygonRDDTest {
      */
     @Test
     public void testMBR() throws Exception {
-    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions);
+    	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions,StorageLevel.MEMORY_ONLY());
     	RectangleRDD rectangleRDD=polygonRDD.MinimumBoundingRectangle();
     	List<Object> result = rectangleRDD.rawSpatialRDD.collect();
     	assert result.size()>-1;

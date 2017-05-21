@@ -18,6 +18,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
@@ -129,7 +130,7 @@ public class PointRDDTest implements Serializable{
      */
     @Test
     public void testConstructor() throws Exception {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter,true, numPartitions);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter,true, numPartitions,StorageLevel.MEMORY_ONLY());
         //todo: Set this to debug level
         assert spatialRDD.totalNumberOfRecords>=1;
         assert spatialRDD.boundary!=null;
@@ -146,7 +147,7 @@ public class PointRDDTest implements Serializable{
      */
     @Test
     public void testEqualPartitioning() throws Exception {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, 10);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, 10,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.EQUALGRID);
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d);
@@ -163,7 +164,7 @@ public class PointRDDTest implements Serializable{
      */
     @Test
     public void testHilbertCurveSpatialPartitioing() throws Exception {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,10);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,10,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.HILBERT);
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
@@ -180,7 +181,7 @@ public class PointRDDTest implements Serializable{
      */
     @Test
     public void testRTreeSpatialPartitioing() throws Exception {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,10);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,10,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.RTREE);
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d);
@@ -197,7 +198,7 @@ public class PointRDDTest implements Serializable{
      */
     @Test
     public void testVoronoiSpatialPartitioing() throws Exception {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,10);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,10,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.VORONOI);
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
@@ -212,7 +213,7 @@ public class PointRDDTest implements Serializable{
      */
     @Test
     public void testBuildIndexWithoutSetGrid() throws Exception {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,numPartitions);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,numPartitions,StorageLevel.MEMORY_ONLY());
         spatialRDD.buildIndex(IndexType.RTREE,false);
     }
 
@@ -224,7 +225,7 @@ public class PointRDDTest implements Serializable{
      */
     @Test
     public void testBuildRtreeIndex() throws Exception {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,numPartitions);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,numPartitions,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(gridType);
         spatialRDD.buildIndex(IndexType.RTREE,true);
         if(spatialRDD.indexedRDD.take(1).get(0)._2() instanceof STRtree)
@@ -245,7 +246,7 @@ public class PointRDDTest implements Serializable{
      */
     @Test
     public void testBuildQuadtreeIndex() throws Exception {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(gridType);
         spatialRDD.buildIndex(IndexType.QUADTREE,true);
         if(spatialRDD.indexedRDD.take(1).get(0)._2() instanceof STRtree)

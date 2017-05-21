@@ -15,6 +15,7 @@ import org.datasyslab.geospark.geometryObjects.Circle;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class DuplicatesHandler.
  */

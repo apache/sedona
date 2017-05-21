@@ -14,6 +14,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
@@ -120,11 +121,12 @@ public class PointRangeTest {
      */
     @Test
     public void testSpatialRangeQuery() throws Exception {
-    	PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true);
+    	PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
     		long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false,false).count();
-    		assert resultSize>-1;
+    		System.out.println("testSpatialRangeQuery: "+resultSize);
+    		assert resultSize==3157;
     	}
     	assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false,false).take(10).get(1).getUserData().toString()!=null;
         
@@ -137,12 +139,12 @@ public class PointRangeTest {
      */
     @Test
     public void testSpatialRangeQueryUsingIndex() throws Exception {
-    	PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true);
+    	PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,StorageLevel.MEMORY_ONLY());
     	spatialRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)
     	{
     		long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false,true).count();
-    		assert resultSize>-1;
+    		assert resultSize==3157;
     	}
     	assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false,true).take(10).get(1).getUserData().toString() !=null;
     }

@@ -152,5 +152,22 @@ class scalaTest extends FunSpec {
 				i=i+1
 			}
 		}
+
+		it("should pass CRS transformed spatial range query") {
+			val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY, "epsg:4326","epsg:3005")
+			for(i <- 1 to eachQueryLoopTimes)
+			{
+				val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false,false).count
+			}
+		}
+
+		it("should pass CRS transformed spatial range query using index") {
+			val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY, "epsg:4326","epsg:3005")
+			objectRDD.buildIndex(PointRDDIndexType,false)
+			for(i <- 1 to eachQueryLoopTimes)
+			{
+				val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false,true).count
+			}
+		}
 	}
 }

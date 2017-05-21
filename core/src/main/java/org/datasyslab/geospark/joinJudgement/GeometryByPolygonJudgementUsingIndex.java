@@ -22,6 +22,7 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 
 import scala.Tuple2;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class GeometryByPolygonJudgementUsingIndex.
  */

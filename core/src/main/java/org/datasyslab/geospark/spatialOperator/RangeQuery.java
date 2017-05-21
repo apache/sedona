@@ -16,13 +16,14 @@ import org.datasyslab.geospark.spatialRDD.LineStringRDD;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.datasyslab.geospark.spatialRDD.RectangleRDD;
+import org.datasyslab.geospark.utils.CRSTransformation;
 
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class RangeQuery.
  */
@@ -32,13 +33,18 @@ public class RangeQuery implements Serializable{
 	 * Spatial range query.
 	 *
 	 * @param spatialRDD the spatial RDD
-	 * @param queryWindow the query window
+	 * @param originalQueryWindow the original query window
 	 * @param considerBoundaryIntersection the consider boundary intersection
 	 * @param useIndex the use index
 	 * @return the java RDD
 	 * @throws Exception the exception
 	 */
-	public static JavaRDD<Point> SpatialRangeQuery(PointRDD spatialRDD, Envelope queryWindow, boolean considerBoundaryIntersection, boolean useIndex) throws Exception {
+	public static JavaRDD<Point> SpatialRangeQuery(PointRDD spatialRDD, Envelope originalQueryWindow, boolean considerBoundaryIntersection, boolean useIndex) throws Exception {
+		Envelope queryWindow = originalQueryWindow;
+		if(spatialRDD.getCRStransformation())
+		{
+			queryWindow = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryWindow);
+		}
 		if(useIndex==true)
 		{
 	        if(spatialRDD.indexedRawRDD == null) {
@@ -72,13 +78,19 @@ public class RangeQuery implements Serializable{
 	 * Spatial range query.
 	 *
 	 * @param spatialRDD the spatial RDD
-	 * @param queryWindow the query window
+	 * @param originalQueryWindow the original query window
 	 * @param considerBoundaryIntersection the consider boundary intersection
 	 * @param useIndex the use index
 	 * @return the java RDD
 	 * @throws Exception the exception
 	 */
-	public static JavaRDD<Point> SpatialRangeQuery(PointRDD spatialRDD, Polygon queryWindow, boolean considerBoundaryIntersection, boolean useIndex) throws Exception {
+	public static JavaRDD<Point> SpatialRangeQuery(PointRDD spatialRDD, Polygon originalQueryWindow, boolean considerBoundaryIntersection, boolean useIndex) throws Exception {
+		Polygon queryWindow = originalQueryWindow;
+		if(spatialRDD.getCRStransformation())
+		{
+			queryWindow = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryWindow);
+		}
+		
 		if(useIndex==true)
 		{
 	        if(spatialRDD.indexedRawRDD == null) {
@@ -112,14 +124,20 @@ public class RangeQuery implements Serializable{
 	 * Spatial range query.
 	 *
 	 * @param spatialRDD the spatial RDD
-	 * @param queryWindow the query window
+	 * @param originalQueryWindow the original query window
 	 * @param considerBoundaryIntersection the consider boundary intersection
 	 * @param useIndex the use index
 	 * @return the java RDD
 	 * @throws Exception the exception
 	 */
-	public static JavaRDD<Polygon> SpatialRangeQuery(PolygonRDD spatialRDD, Envelope queryWindow,boolean considerBoundaryIntersection,boolean useIndex) throws Exception
+	public static JavaRDD<Polygon> SpatialRangeQuery(PolygonRDD spatialRDD, Envelope originalQueryWindow,boolean considerBoundaryIntersection,boolean useIndex) throws Exception
 	{
+		Envelope queryWindow = originalQueryWindow;
+		if(spatialRDD.getCRStransformation())
+		{
+			queryWindow = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryWindow);
+		}
+		
 		if(useIndex==true)
 		{
 	        if(spatialRDD.indexedRawRDD == null) {
@@ -153,14 +171,20 @@ public class RangeQuery implements Serializable{
 	 * Spatial range query.
 	 *
 	 * @param spatialRDD the spatial RDD
-	 * @param queryWindow the query window
+	 * @param originalQueryWindow the original query window
 	 * @param considerBoundaryIntersection the consider boundary intersection
 	 * @param useIndex the use index
 	 * @return the java RDD
 	 * @throws Exception the exception
 	 */
-	public static JavaRDD<Polygon> SpatialRangeQuery(PolygonRDD spatialRDD, Polygon queryWindow,boolean considerBoundaryIntersection,boolean useIndex) throws Exception
+	public static JavaRDD<Polygon> SpatialRangeQuery(PolygonRDD spatialRDD, Polygon originalQueryWindow,boolean considerBoundaryIntersection,boolean useIndex) throws Exception
 	{
+		Polygon queryWindow = originalQueryWindow;
+		if(spatialRDD.getCRStransformation())
+		{
+			queryWindow = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryWindow);
+		}
+		
 		if(useIndex==true)
 		{
 	        if(spatialRDD.indexedRawRDD == null) {
@@ -194,14 +218,20 @@ public class RangeQuery implements Serializable{
 	 * Spatial range query.
 	 *
 	 * @param spatialRDD the spatial RDD
-	 * @param queryWindow the query window
+	 * @param originalQueryWindow the original query window
 	 * @param considerBoundaryIntersection the consider boundary intersection
 	 * @param useIndex the use index
 	 * @return the java RDD
 	 * @throws Exception the exception
 	 */
-	public static JavaRDD<Polygon> SpatialRangeQuery(RectangleRDD spatialRDD, Envelope queryWindow,boolean considerBoundaryIntersection,boolean useIndex) throws Exception
+	public static JavaRDD<Polygon> SpatialRangeQuery(RectangleRDD spatialRDD, Envelope originalQueryWindow,boolean considerBoundaryIntersection,boolean useIndex) throws Exception
 	{
+		Envelope queryWindow = originalQueryWindow;
+		if(spatialRDD.getCRStransformation())
+		{
+			queryWindow = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryWindow);
+		}
+		
 		if(useIndex==true)
 		{
 	        if(spatialRDD.indexedRawRDD == null) {
@@ -236,14 +266,20 @@ public class RangeQuery implements Serializable{
 	 * Spatial range query.
 	 *
 	 * @param spatialRDD the spatial RDD
-	 * @param queryWindow the query window
+	 * @param originalQueryWindow the original query window
 	 * @param considerBoundaryIntersection the consider boundary intersection
 	 * @param useIndex the use index
 	 * @return the java RDD
 	 * @throws Exception the exception
 	 */
-	public static JavaRDD<LineString> SpatialRangeQuery(LineStringRDD spatialRDD, Envelope queryWindow,boolean considerBoundaryIntersection,boolean useIndex) throws Exception
+	public static JavaRDD<LineString> SpatialRangeQuery(LineStringRDD spatialRDD, Envelope originalQueryWindow,boolean considerBoundaryIntersection,boolean useIndex) throws Exception
 	{
+		Envelope queryWindow = originalQueryWindow;
+		if(spatialRDD.getCRStransformation())
+		{
+			queryWindow = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryWindow);
+		}
+		
 		if(useIndex==true)
 		{
 	        if(spatialRDD.indexedRawRDD == null) {
@@ -277,14 +313,20 @@ public class RangeQuery implements Serializable{
 	 * Spatial range query.
 	 *
 	 * @param spatialRDD the spatial RDD
-	 * @param queryWindow the query window
+	 * @param originalQueryWindow the original query window
 	 * @param considerBoundaryIntersection the consider boundary intersection
 	 * @param useIndex the use index
 	 * @return the java RDD
 	 * @throws Exception the exception
 	 */
-	public static JavaRDD<LineString> SpatialRangeQuery(LineStringRDD spatialRDD, Polygon queryWindow,boolean considerBoundaryIntersection,boolean useIndex) throws Exception
+	public static JavaRDD<LineString> SpatialRangeQuery(LineStringRDD spatialRDD, Polygon originalQueryWindow,boolean considerBoundaryIntersection,boolean useIndex) throws Exception
 	{
+		Polygon queryWindow = originalQueryWindow;
+		if(spatialRDD.getCRStransformation())
+		{
+			queryWindow = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryWindow);
+		}
+		
 		if(useIndex==true)
 		{
 	        if(spatialRDD.indexedRawRDD == null) {

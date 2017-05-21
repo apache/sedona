@@ -12,6 +12,7 @@ import java.util.Comparator;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class RectangleDistanceComparator.
  */

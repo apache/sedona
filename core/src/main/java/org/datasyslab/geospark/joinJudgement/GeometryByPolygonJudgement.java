@@ -17,6 +17,7 @@ import com.vividsolutions.jts.geom.Polygon;
 
 import scala.Tuple2;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class GeometryByPolygonJudgement.
  */
