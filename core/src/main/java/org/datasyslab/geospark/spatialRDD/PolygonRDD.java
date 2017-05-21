@@ -38,6 +38,7 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.precision.GeometryPrecisionReducer;
 
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class PolygonRDD.
  */
@@ -305,6 +306,137 @@ public class PolygonRDD extends SpatialRDD {
         return (Polygon)result;
     }
     
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param rawSpatialRDD the raw spatial RDD
+     * @param newLevel the new level
+     * @param sourceEpsgCRSCode the source epsg CRS code
+     * @param targetEpsgCode the target epsg code
+     */
+    public PolygonRDD(JavaRDD<Polygon> rawSpatialRDD, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode) {
+		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
+		{
+			@Override
+			public Object call(Polygon spatialObject) throws Exception {
+				return spatialObject;
+			}
+		});
+		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+        this.analyze(newLevel);
+    }
+
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param startOffset the start offset
+     * @param endOffset the end offset
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param partitions the partitions
+     * @param newLevel the new level
+     * @param sourceEpsgCRSCode the source epsg CRS code
+     * @param targetEpsgCode the target epsg code
+     */
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset,
+    		FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(new PolygonFormatMapper(startOffset,endOffset, splitter,carryInputData)));
+		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+        this.analyze(newLevel);
+    }
+
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param startOffset the start offset
+     * @param endOffset the end offset
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param newLevel the new level
+     * @param sourceEpsgCRSCode the source epsg CRS code
+     * @param targetEpsgCode the target epsg code
+     */
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset,
+    		FileDataSplitter splitter, boolean carryInputData, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(new PolygonFormatMapper(startOffset, endOffset, splitter, carryInputData)));
+		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+        this.analyze(newLevel);
+    }
+
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param partitions the partitions
+     * @param newLevel the new level
+     * @param sourceEpsgCRSCode the source epsg CRS code
+     * @param targetEpsgCode the target epsg code
+     */
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation,
+    		FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(new PolygonFormatMapper(splitter,carryInputData)));
+		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+        this.analyze(newLevel);
+    }
+
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param newLevel the new level
+     * @param sourceEpsgCRSCode the source epsg CRS code
+     * @param targetEpsgCode the target epsg code
+     */
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation,
+    		FileDataSplitter splitter, boolean carryInputData, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(new PolygonFormatMapper(splitter, carryInputData)));
+		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+        this.analyze(newLevel);
+    }
+    
+
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param partitions the partitions
+     * @param userSuppliedMapper the user supplied mapper
+     * @param newLevel the new level
+     * @param sourceEpsgCRSCode the source epsg CRS code
+     * @param targetEpsgCode the target epsg code
+     */
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(userSuppliedMapper));
+		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+        this.analyze(newLevel);
+    }
+    
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param userSuppliedMapper the user supplied mapper
+     * @param newLevel the new level
+     * @param sourceEpsgCRSCode the source epsg CRS code
+     * @param targetEpsgCode the target epsg code
+     */
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(userSuppliedMapper));
+		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+        this.analyze(newLevel);
+    }
 
 }
 

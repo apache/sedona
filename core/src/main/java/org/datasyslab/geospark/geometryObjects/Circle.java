@@ -16,6 +16,7 @@ import com.vividsolutions.jts.geom.GeometryComponentFilter;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.GeometryFilter;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class Circle.
  */

@@ -1,3 +1,9 @@
+/**
+ * FILE: EarthdataHDFTest.java
+ * PATH: org.datasyslab.geospark.io.EarthdataHDFTest.java
+ * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.io;
 
 import org.apache.log4j.Level;

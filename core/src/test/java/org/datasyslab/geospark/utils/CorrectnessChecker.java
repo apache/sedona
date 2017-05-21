@@ -36,6 +36,7 @@ import com.vividsolutions.jts.geom.Polygon;
 
 import scala.Tuple2;
 
+// TODO: Auto-generated Javadoc
 class PointByPolygonSortComparator implements Comparator<Tuple2<Polygon,HashSet<Point>>>
 {
 
