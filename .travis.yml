@@ -2,6 +2,8 @@ os:
   - linux
 
 language: java
+jdk:
+  - oraclejdk8
 sudo: required
 git:
   submodules: false
