@@ -20,6 +20,7 @@ import com.vividsolutions.jts.geom.Point;
 
 
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class UserSuppliedPointMapper.
  */

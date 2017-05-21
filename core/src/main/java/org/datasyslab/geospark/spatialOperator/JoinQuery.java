@@ -35,6 +35,7 @@ import com.vividsolutions.jts.index.SpatialIndex;
 
 import scala.Tuple2;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class JoinQuery.
  */
@@ -51,7 +52,20 @@ public class JoinQuery implements Serializable{
 	 */
 	private static JavaPairRDD<Polygon, HashSet<Geometry>> executeSpatialJoinUsingIndex(SpatialRDD spatialRDD,SpatialRDD queryRDD,boolean considerBoundaryIntersection) throws Exception
 	{
-    	//Check if rawPointRDD have index.
+        // Check CRS information before doing calculation. The two input RDDs are supposed to have the same EPSG code if they require CRS transformation.
+		if(spatialRDD.getCRStransformation()!=queryRDD.getCRStransformation())
+        {
+            throw new Exception("[JoinQuery][SpatialJoinQuery]one input RDD doesn't perform necessary CRS transformation. Please check your RDD constructors.");
+        }
+        else if(spatialRDD.getCRStransformation()==true && queryRDD.getCRStransformation()==true)
+        {
+        	if(spatialRDD.getTargetEpgsgCode().equalsIgnoreCase(queryRDD.getTargetEpgsgCode())==false)
+        	{
+                throw new Exception("[JoinQuery][SpatialJoinQuery] the EPSG codes of two input RDDs are different. Please check your RDD constructors.");
+        	}
+        }
+		
+		//Check if rawPointRDD have index.
         if(spatialRDD.indexedRDD == null) {
             throw new Exception("[JoinQuery][SpatialJoinQuery] Index doesn't exist. Please build index.");
         }
@@ -86,7 +100,20 @@ public class JoinQuery implements Serializable{
 	 */
 	private static JavaPairRDD<Polygon, HashSet<Geometry>> executeSpatialJoinNoIndex(SpatialRDD spatialRDD,SpatialRDD queryRDD,boolean considerBoundaryIntersection) throws Exception
 	{
-        if(spatialRDD.spatialPartitionedRDD == null) {
+        // Check CRS information before doing calculation. The two input RDDs are supposed to have the same EPSG code if they require CRS transformation.
+		if(spatialRDD.getCRStransformation()!=queryRDD.getCRStransformation())
+        {
+            throw new Exception("[JoinQuery][SpatialJoinQuery]one input RDD doesn't perform necessary CRS transformation. Please check your RDD constructors.");
+        }
+        else if(spatialRDD.getCRStransformation()==true && queryRDD.getCRStransformation()==true)
+        {
+        	if(spatialRDD.getTargetEpgsgCode().equalsIgnoreCase(queryRDD.getTargetEpgsgCode())==false)
+        	{
+                throw new Exception("[JoinQuery][SpatialJoinQuery] the EPSG codes of two input RDDs are different. Please check your RDD constructors.");
+        	}
+        }
+		
+		if(spatialRDD.spatialPartitionedRDD == null) {
             throw new Exception("[JoinQuery][SpatialJoinQuery]spatialRDD SpatialPartitionedRDD is null. Please do spatial partitioning.");
         }
         else if(queryRDD.spatialPartitionedRDD == null)
@@ -117,20 +144,33 @@ public class JoinQuery implements Serializable{
 	 */
 	private static JavaPairRDD<Circle, HashSet<Geometry>> executeDistanceJoinUsingIndex(SpatialRDD spatialRDD,SpatialRDD queryRDD,boolean considerBoundaryIntersection) throws Exception
 	{
-    	//Check if rawPointRDD have index.
+        // Check CRS information before doing calculation. The two input RDDs are supposed to have the same EPSG code if they require CRS transformation.
+		if(spatialRDD.getCRStransformation()!=queryRDD.getCRStransformation())
+        {
+            throw new Exception("[JoinQuery][DistanceJoinQuery]one input RDD doesn't perform necessary CRS transformation. Please check your RDD constructors.");
+        }
+        else if(spatialRDD.getCRStransformation()==true && queryRDD.getCRStransformation()==true)
+        {
+        	if(spatialRDD.getTargetEpgsgCode().equalsIgnoreCase(queryRDD.getTargetEpgsgCode())==false)
+        	{
+                throw new Exception("[JoinQuery][DistanceJoinQuery] the EPSG codes of two input RDDs are different. Please check your RDD constructors.");
+        	}
+        }
+		
+		//Check if rawPointRDD have index.
         if(spatialRDD.indexedRDD == null) {
-            throw new Exception("[JoinQuery][SpatialJoinQuery] Index doesn't exist. Please build index.");
+            throw new Exception("[JoinQuery][DistanceJoinQuery] Index doesn't exist. Please build index.");
         }
         if(spatialRDD.spatialPartitionedRDD == null) {
-            throw new Exception("[JoinQuery][SpatialJoinQuery]spatialRDD SpatialPartitionedRDD is null. Please do spatial partitioning.");
+            throw new Exception("[JoinQuery][DistanceJoinQuery]spatialRDD SpatialPartitionedRDD is null. Please do spatial partitioning.");
         }
         else if(queryRDD.spatialPartitionedRDD == null)
         {
-            throw new Exception("[JoinQuery][SpatialJoinQuery]queryRDD SpatialPartitionedRDD is null. Please use the spatialRDD's grids to do spatial partitioning.");
+            throw new Exception("[JoinQuery][DistanceJoinQuery]queryRDD SpatialPartitionedRDD is null. Please use the spatialRDD's grids to do spatial partitioning.");
         }
         else if(queryRDD.grids.equals(spatialRDD.grids)==false)
         {
-            throw new Exception("[JoinQuery][SpatialJoinQuery]queryRDD is not partitioned by the same grids with spatialRDD. Please make sure they both use the same grids otherwise wrong results will appear.");
+            throw new Exception("[JoinQuery][DistanceJoinQuery]queryRDD is not partitioned by the same grids with spatialRDD. Please make sure they both use the same grids otherwise wrong results will appear.");
         }
         JavaPairRDD<Integer, Tuple2<Iterable<SpatialIndex>, Iterable<Object>>> cogroupResult = spatialRDD.indexedRDD.cogroup(queryRDD.spatialPartitionedRDD);
 
@@ -152,16 +192,29 @@ public class JoinQuery implements Serializable{
 	 */
 	private static JavaPairRDD<Circle, HashSet<Geometry>> executeDistanceJoinNoIndex(SpatialRDD spatialRDD,SpatialRDD queryRDD,boolean considerBoundaryIntersection) throws Exception
 	{
-        if(spatialRDD.spatialPartitionedRDD == null) {
-            throw new Exception("[JoinQuery][SpatialJoinQuery]spatialRDD SpatialPartitionedRDD is null. Please do spatial partitioning.");
+        // Check CRS information before doing calculation. The two input RDDs are supposed to have the same EPSG code if they require CRS transformation.
+		if(spatialRDD.getCRStransformation()!=queryRDD.getCRStransformation())
+        {
+            throw new Exception("[JoinQuery][DistanceJoinQuery]one input RDD doesn't perform necessary CRS transformation. Please check your RDD constructors.");
+        }
+        else if(spatialRDD.getCRStransformation()==true && queryRDD.getCRStransformation()==true)
+        {
+        	if(spatialRDD.getTargetEpgsgCode().equalsIgnoreCase(queryRDD.getTargetEpgsgCode())==false)
+        	{
+                throw new Exception("[JoinQuery][DistanceJoinQuery] the EPSG codes of two input RDDs are different. Please check your RDD constructors.");
+        	}
+        }
+		
+		if(spatialRDD.spatialPartitionedRDD == null) {
+            throw new Exception("[JoinQuery][DistanceJoinQuery]spatialRDD SpatialPartitionedRDD is null. Please do spatial partitioning.");
         }
         else if(queryRDD.spatialPartitionedRDD == null)
         {
-            throw new Exception("[JoinQuery][SpatialJoinQuery]queryRDD SpatialPartitionedRDD is null. Please use the spatialRDD's grids to do spatial partitioning.");
+            throw new Exception("[JoinQuery][DistanceJoinQuery]queryRDD SpatialPartitionedRDD is null. Please use the spatialRDD's grids to do spatial partitioning.");
         }
         else if(queryRDD.grids.equals(spatialRDD.grids)==false)
         {
-            throw new Exception("[JoinQuery][SpatialJoinQuery]queryRDD is not partitioned by the same grids with spatialRDD. Please make sure they both use the same grids otherwise wrong results will appear.");
+            throw new Exception("[JoinQuery][DistanceJoinQuery]queryRDD is not partitioned by the same grids with spatialRDD. Please make sure they both use the same grids otherwise wrong results will appear.");
         }
         JavaPairRDD<Integer, Tuple2<Iterable<Object>, Iterable<Object>>> cogroupResult = spatialRDD.spatialPartitionedRDD.cogroup(queryRDD.spatialPartitionedRDD);
             

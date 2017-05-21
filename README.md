@@ -3,7 +3,7 @@
 
 | Version   |      GeoSpark Core      |  [Babylon Viz System](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon)|
 |:----------:|:-------------:|:------:|
-| Stable |  0.6.2 | 0.2.0 |
+| Stable |  0.7.0 | 0.2.0 |
 | Latest |  [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark)   |   [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon) |
 | Source code |  [![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark) | [![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark) |
 
@@ -48,6 +48,11 @@ Inside, Overlap, DatasetBoundary, Minimum Bounding Rectangl, Polygon Union
 
 ## Spatial Operation
 Spatial Range Query, Spatial Join Query, and Spatial K Nearest Neighbors Query.
+
+## Coordinate Reference System (CRS) Transformation (aka. Coordinate projection)
+
+GeoSpark allows users to transform the original CRS (e.g., degree based coordinates such as EPSG:4326 and WGS84) to any other CRS (e.g., meter based coordinates such as EPSG:3005) so that it can accurately process both geographic data and geometrical data. Please specify your desired CRS in GeoSpark Spatial RDD constructor ([Example](https://github.com/DataSystemsLab/GeoSpark/blob/master/core/src/main/scala/org/datasyslab/geospark/showcase/ScalaExample.scala#L221)).
+
 ## Users
 
 ### Companies that are using GeoSpark (incomplete list)

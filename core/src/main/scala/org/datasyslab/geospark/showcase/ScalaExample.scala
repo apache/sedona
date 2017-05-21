@@ -62,7 +62,8 @@ object ScalaExample extends App{
 	testSpatialJoinQueryUsingIndex()
 	testDistanceJoinQuery()
 	testDistanceJoinQueryUsingIndex()
-
+	testCRSTransformationSpatialRangeQuery()
+	testCRSTransformationSpatialRangeQueryUsingIndex()
 	sc.stop()
 	System.out.println("All GeoSpark DEMOs passed!")
 
@@ -215,5 +216,40 @@ object ScalaExample extends App{
 	}
 	}
 
+	@throws[Exception]
+	def testCRSTransformationSpatialRangeQuery(): Unit = {
+		val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY, "epsg:4326", "epsg:3005")
+		objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY)
+		var i = 0
+		while ( {
+			i < eachQueryLoopTimes
+		}) {
+			val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false, false).count
+			assert(resultSize > -1)
+
+			{
+				i += 1; i - 1
+			}
+		}
+	}
+
+
+	@throws[Exception]
+	def testCRSTransformationSpatialRangeQueryUsingIndex(): Unit = {
+		val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY, "epsg:4326", "epsg:3005")
+		objectRDD.buildIndex(PointRDDIndexType, false)
+		objectRDD.indexedRawRDD.persist(StorageLevel.MEMORY_ONLY)
+		var i = 0
+		while ( {
+			i < eachQueryLoopTimes
+		}) {
+			val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false, true).count
+			assert(resultSize > -1)
+
+			{
+				i += 1; i - 1
+			}
+		}
+	}
 
 }

@@ -18,11 +18,13 @@ import org.datasyslab.geospark.spatialRDD.LineStringRDD;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.datasyslab.geospark.spatialRDD.RectangleRDD;
+import org.datasyslab.geospark.utils.CRSTransformation;
 
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class KNNQuery.
  */
@@ -32,14 +34,20 @@ public class KNNQuery implements Serializable{
 	 * Spatial knn query.
 	 *
 	 * @param spatialRDD the spatial RDD
-	 * @param queryCenter the query center
+	 * @param originalQueryWindow the original query window
 	 * @param k the k
 	 * @param useIndex the use index
 	 * @return the list
 	 */
-	public static List<Point> SpatialKnnQuery(PointRDD spatialRDD, Point queryCenter, Integer k, boolean useIndex) {
+	public static List<Point> SpatialKnnQuery(PointRDD spatialRDD, Point originalQueryWindow, Integer k, boolean useIndex) {
 		// For each partation, build a priority queue that holds the topk
 		//@SuppressWarnings("serial")
+		Point queryCenter = originalQueryWindow;
+		if(spatialRDD.getCRStransformation())
+		{
+			queryCenter = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryWindow);
+		}
+		
 		if(useIndex)
 		{
 	        if(spatialRDD.indexedRawRDD == null) {
@@ -74,14 +82,20 @@ public class KNNQuery implements Serializable{
 	 * Spatial knn query.
 	 *
 	 * @param spatialRDD the spatial RDD
-	 * @param queryCenter the query center
+	 * @param originalQueryWindow the original query window
 	 * @param k the k
 	 * @param useIndex the use index
 	 * @return the list
 	 */
-	public static List<Polygon> SpatialKnnQuery(RectangleRDD spatialRDD, Point queryCenter, Integer k, boolean useIndex) {
+	public static List<Polygon> SpatialKnnQuery(RectangleRDD spatialRDD, Point originalQueryWindow, Integer k, boolean useIndex) {
 		// For each partation, build a priority queue that holds the topk
 		//@SuppressWarnings("serial")
+		Point queryCenter = originalQueryWindow;
+		if(spatialRDD.getCRStransformation())
+		{
+			queryCenter = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryWindow);
+		}
+		
 		if(useIndex)
 		{
 	        if(spatialRDD.indexedRawRDD == null) {
@@ -115,14 +129,20 @@ public class KNNQuery implements Serializable{
 	 * Spatial knn query.
 	 *
 	 * @param spatialRDD the spatial RDD
-	 * @param queryCenter the query center
+	 * @param originalQueryWindow the original query window
 	 * @param k the k
 	 * @param useIndex the use index
 	 * @return the list
 	 */
-	public static List<Polygon> SpatialKnnQuery(PolygonRDD spatialRDD, Point queryCenter, Integer k, boolean useIndex) {
+	public static List<Polygon> SpatialKnnQuery(PolygonRDD spatialRDD, Point originalQueryWindow, Integer k, boolean useIndex) {
 		// For each partation, build a priority queue that holds the topk
 		//@SuppressWarnings("serial")
+		Point queryCenter = originalQueryWindow;
+		if(spatialRDD.getCRStransformation())
+		{
+			queryCenter = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryWindow);
+		}
+		
 		if(useIndex)
 		{
 	        if(spatialRDD.indexedRawRDD == null) {
@@ -156,14 +176,20 @@ public class KNNQuery implements Serializable{
 	 * Spatial knn query.
 	 *
 	 * @param spatialRDD the spatial RDD
-	 * @param queryCenter the query center
+	 * @param originalQueryWindow the original query window
 	 * @param k the k
 	 * @param useIndex the use index
 	 * @return the list
 	 */
-	public static List<LineString> SpatialKnnQuery(LineStringRDD spatialRDD, Point queryCenter, Integer k, boolean useIndex) {
+	public static List<LineString> SpatialKnnQuery(LineStringRDD spatialRDD, Point originalQueryWindow, Integer k, boolean useIndex) {
 		// For each partation, build a priority queue that holds the topk
 		//@SuppressWarnings("serial")
+		Point queryCenter = originalQueryWindow;
+		if(spatialRDD.getCRStransformation())
+		{
+			queryCenter = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryWindow);
+		}
+		
 		if(useIndex)
 		{
 	        if(spatialRDD.indexedRawRDD == null) {

@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.datasyslab</groupId>
 	<artifactId>geospark</artifactId>
-	<version>0.6.2-spark-1.x</version>
+	<version>0.7.0-spark-1.x</version>
 	
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>Geospatial extension for Apache Spark</description>
@@ -41,6 +41,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <scala.version>2.10.6</scala.version>
         <scala.compat.version>2.10</scala.compat.version>
+        <geotools.version>17.0</geotools.version>        
 	</properties>
 	
 	<dependencies>
@@ -48,7 +49,7 @@
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-core_2.10</artifactId>
 			<version>1.6.3</version>
-			<scope>provided</scope>
+            <scope>provided</scope>
 		</dependency>
 		
 		<dependency>
@@ -64,7 +65,7 @@
 			<exclusions>
 				<exclusion>
 			<groupId>com.vividsolutions</groupId>
-			<artifactId>jts</artifactId>
+			<artifactId>jts-core</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -73,8 +74,34 @@
   			<groupId>org.datasyslab</groupId>
   			<artifactId>sernetcdf</artifactId>
   			<version>0.1.0</version>
-		</dependency>
-
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-main</artifactId>
+            <version>${geotools.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vividsolutions</groupId>
+                    <artifactId>jts</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-referencing</artifactId>
+            <version>${geotools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-epsg-hsql</artifactId>
+            <version>${geotools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-epsg-extension</artifactId>
+            <version>${geotools.version}</version>
+        </dependency>
         <!-- Test -->
         <dependency>
             <groupId>junit</groupId>
@@ -101,7 +128,18 @@
             <scope>test</scope>
         </dependency>
 	</dependencies>
-
+    <repositories>
+      <repository>
+          <id>maven2-repository.dev.java.net</id>
+          <name>Java.net repository</name>
+          <url>http://download.java.net/maven/2</url>
+      </repository>
+      <repository>
+          <id>osgeo</id>
+          <name>Open Source Geospatial Foundation Repository</name>
+          <url>http://download.osgeo.org/webdav/geotools/</url>
+      </repository>
+    </repositories>
 	<build>
         <sourceDirectory>src/main/java</sourceDirectory>
 		<plugins>

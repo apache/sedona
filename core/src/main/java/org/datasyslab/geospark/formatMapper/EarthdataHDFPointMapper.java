@@ -226,10 +226,13 @@ public class EarthdataHDFPointMapper implements FlatMapFunction<String, Geometry
 	    		}
 	    		Point observation = geometryFactory.createPoint(coordinate);
 	    		String userData = "";
-	    		for(int k=0;k<dataVariableList.length;k++)
+
+	    		for(int k=0;k<dataVariableList.length-1;k++)
 	    		{
-	    			userData+=SerNetCDFUtils.getDataAsym(dataArrayList[k], j, i, offset, increment);
+	    			userData+=SerNetCDFUtils.getDataAsym(dataArrayList[k], j, i, offset, increment)+" ";
 	    		}
+				userData+=SerNetCDFUtils.getDataAsym(dataArrayList[dataVariableList.length-1], j, i, offset, increment);
+
 	    		observation.setUserData(userData);
 	    		hdfData.add(observation);
 	    	}

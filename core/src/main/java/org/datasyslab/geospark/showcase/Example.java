@@ -129,9 +129,12 @@ public class Example implements Serializable{
 			testSpatialJoinQueryUsingIndex();
 			testDistanceJoinQuery();
 			testDistanceJoinQueryUsingIndex();
+			testCRSTransformationSpatialRangeQuery();
+			testCRSTransformationSpatialRangeQueryUsingIndex();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("GeoSpark DEMOs failed!");
+			return;
 		}		
         sc.stop();
 		System.out.println("All GeoSpark DEMOs passed!");
@@ -294,6 +297,40 @@ public class Example implements Serializable{
     		assert resultSize>0;
     	}
     }
-    
+
+
+	/**
+	 * Test CRS transformation spatial range query.
+	 *
+	 * @throws Exception the exception
+	 */
+	public static void testCRSTransformationSpatialRangeQuery() throws Exception {
+		objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY(),"epsg:4326","epsg:3005");
+		objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
+		for(int i=0;i<eachQueryLoopTimes;i++)
+		{
+			long resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false,false).count();
+			assert resultSize>-1;
+		}
+	}
+
+
+
+	/**
+	 * Test CRS transformation spatial range query using index.
+	 *
+	 * @throws Exception the exception
+	 */
+	public static void testCRSTransformationSpatialRangeQueryUsingIndex() throws Exception {
+		objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY(), "epsg:4326","epsg:3005");
+		objectRDD.buildIndex(PointRDDIndexType,false);
+		objectRDD.indexedRawRDD.persist(StorageLevel.MEMORY_ONLY());
+		for(int i=0;i<eachQueryLoopTimes;i++)
+		{
+			long resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false,true).count();
+			assert resultSize>-1;
+		}
+
+	}
 
 }
