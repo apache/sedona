@@ -18,6 +18,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import scala.Tuple2;
 
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class GeometryByCircleJudgement.
  */

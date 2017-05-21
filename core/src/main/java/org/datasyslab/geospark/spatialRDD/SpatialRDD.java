@@ -34,8 +34,12 @@ import org.datasyslab.geospark.utils.XMaxComparator;
 import org.datasyslab.geospark.utils.XMinComparator;
 import org.datasyslab.geospark.utils.YMaxComparator;
 import org.datasyslab.geospark.utils.YMinComparator;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
 import org.wololo.geojson.Feature;
-import org.wololo.geojson.GeoJSON;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -50,6 +54,7 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 
 import scala.Tuple2;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class SpatialRDD.
  */
@@ -81,7 +86,47 @@ public abstract class SpatialRDD implements Serializable{
 
 	/** The grids. */
     public List<Envelope> grids;
-    
+
+	/** The CR stransformation. */
+	private boolean CRStransformation=false;;
+	
+	/** The source epsg code. */
+	private String sourceEpsgCode="";
+	
+	/** The target epgsg code. */
+	private String targetEpgsgCode="";
+	
+	/**
+	 * CRS transform.
+	 *
+	 * @param sourceEpsgCRSCode the source epsg CRS code
+	 * @param targetEpsgCRSCode the target epsg CRS code
+	 * @return true, if successful
+	 */
+	protected boolean CRSTransform(String sourceEpsgCRSCode, String targetEpsgCRSCode)
+	{
+		try {
+    	CoordinateReferenceSystem sourceCRS = CRS.decode(sourceEpsgCRSCode);
+		CoordinateReferenceSystem targetCRS = CRS.decode(targetEpsgCRSCode);
+		final MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS, false);
+		this.CRStransformation=true;
+		this.sourceEpsgCode=sourceEpsgCRSCode;
+		this.targetEpgsgCode=targetEpsgCRSCode;
+		this.rawSpatialRDD = this.rawSpatialRDD.map(new Function<Object,Object>()
+		{
+			@Override
+			public Object call(Object originalObject) throws Exception {
+				return JTS.transform((Geometry)originalObject,transform);
+			}
+		});
+		return true;
+		} catch (FactoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+	}
+
 	/**
 	 * Spatial partitioning.
 	 *
@@ -331,7 +376,7 @@ public abstract class SpatialRDD implements Serializable{
 	 * @param newLevel the new level
 	 * @return true, if successful
 	 */
-	public boolean analyze(StorageLevel newLevel)
+	protected boolean analyze(StorageLevel newLevel)
 	{
 		this.rawSpatialRDD.persist(newLevel);
 		this.boundary();
@@ -344,7 +389,7 @@ public abstract class SpatialRDD implements Serializable{
 	 *
 	 * @return true, if successful
 	 */
-	public boolean analyze()
+	protected boolean analyze()
 	{
 		this.boundary();
         this.totalNumberOfRecords = this.rawSpatialRDD.count();
@@ -412,4 +457,33 @@ public abstract class SpatialRDD implements Serializable{
         });
         return new RectangleRDD(rectangleRDD);
     }
+
+	/**
+	 * Gets the CR stransformation.
+	 *
+	 * @return the CR stransformation
+	 */
+	public boolean getCRStransformation() {
+		return CRStransformation;
+	}
+
+	/**
+	 * Gets the source epsg code.
+	 *
+	 * @return the source epsg code
+	 */
+	public String getSourceEpsgCode() {
+		return sourceEpsgCode;
+	}
+
+	/**
+	 * Gets the target epgsg code.
+	 *
+	 * @return the target epgsg code
+	 */
+	public String getTargetEpgsgCode() {
+		return targetEpgsgCode;
+	}
+
+
 }

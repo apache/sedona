@@ -14,6 +14,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.spatialRDD.LineStringRDD;
@@ -123,7 +124,7 @@ public class LineStringRangeTest {
      */
     @Test
     public void testSpatialRangeQuery() throws Exception {
-    	LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true);
+    	LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true,StorageLevel.MEMORY_ONLY());
     	for(int i=0;i<loopTimes;i++)
     	{
     		long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false,false).count();
@@ -140,7 +141,7 @@ public class LineStringRangeTest {
      */
     @Test
     public void testSpatialRangeQueryUsingIndex() throws Exception {
-    	LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true);
+    	LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true,StorageLevel.MEMORY_ONLY());
     	spatialRDD.buildIndex(IndexType.RTREE,false);
     	for(int i=0;i<loopTimes;i++)
     	{
