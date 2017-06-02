@@ -40,6 +40,26 @@ public class LineStringRDD extends SpatialRDD{
 		});
         this.analyze();
     }
+	
+	/**
+	 * Instantiates a new line string RDD.
+	 *
+	 * @param rawSpatialRDD the raw spatial RDD
+	 * @param sourceEpsgCRSCode the source epsg CRS code
+	 * @param targetEpsgCode the target epsg code
+	 */
+	public LineStringRDD(JavaRDD<LineString> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode) {
+		this.rawSpatialRDD = rawSpatialRDD.map(new Function<LineString,Object>()
+		{
+			@Override
+			public Object call(LineString spatialObject) throws Exception {
+				return spatialObject;
+			}
+			
+		});
+		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+        this.analyze();
+    }
 
     /**
      * Instantiates a new line string RDD.

@@ -44,10 +44,29 @@ public class RectangleRDD extends SpatialRDD {
 			public Object call(Polygon spatialObject) throws Exception {
 				return spatialObject;
 			}
-			
 		});
         this.analyze();
+	}
+	
+	/**
+	 * Instantiates a new rectangle RDD.
+	 *
+	 * @param rawSpatialRDD the raw spatial RDD
+	 * @param sourceEpsgCRSCode the source epsg CRS code
+	 * @param targetEpsgCode the target epsg code
+	 */
+	public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode)
+	{
+		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
+		{
 
+			@Override
+			public Object call(Polygon spatialObject) throws Exception {
+				return spatialObject;
+			}
+		});
+		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+        this.analyze();
 	}
 	
 	/**

@@ -88,13 +88,13 @@ public abstract class SpatialRDD implements Serializable{
     public List<Envelope> grids;
 
 	/** The CR stransformation. */
-	private boolean CRStransformation=false;;
+	protected boolean CRStransformation=false;;
 	
 	/** The source epsg code. */
-	private String sourceEpsgCode="";
+	protected String sourceEpsgCode="";
 	
 	/** The target epgsg code. */
-	private String targetEpgsgCode="";
+	protected String targetEpgsgCode="";
 	
 	/**
 	 * CRS transform.

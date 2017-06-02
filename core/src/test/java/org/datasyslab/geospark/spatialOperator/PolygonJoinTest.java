@@ -20,14 +20,10 @@ import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
-import org.datasyslab.geospark.spatialRDD.PolygonRDD;
-import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Polygon;
 
 /**
@@ -36,10 +32,7 @@ import com.vividsolutions.jts.geom.Polygon;
  *
  */
 
-import com.vividsolutions.jts.geom.Polygon;
-
 import scala.Tuple2;
-
 
 // TODO: Auto-generated Javadoc
 /**
@@ -225,6 +218,8 @@ public class PolygonJoinTest {
         	}
         }
     }
+    
+
     
 
 }

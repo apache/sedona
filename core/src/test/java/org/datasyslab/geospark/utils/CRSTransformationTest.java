@@ -16,6 +16,7 @@ import java.util.Properties;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
@@ -26,6 +27,7 @@ import org.datasyslab.geospark.spatialOperator.JoinQuery;
 import org.datasyslab.geospark.spatialOperator.KNNQuery;
 import org.datasyslab.geospark.spatialOperator.PointJoinTest;
 import org.datasyslab.geospark.spatialOperator.RangeQuery;
+import org.datasyslab.geospark.spatialRDD.CircleRDD;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.junit.After;
@@ -302,5 +304,23 @@ public class CRSTransformationTest {
         		assert result.get(i)._2().iterator().next().getUserData()!=null;
         	}
         }
+    }
+    
+    /**
+     * Test polygon distance join with CRS transformation.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void testPolygonDistanceJoinWithCRSTransformation() throws Exception{
+        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3857");
+    	CircleRDD windowRDD = new CircleRDD(queryRDD,0.1);
+    	PolygonRDD objectRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3857");
+    	objectRDD.rawSpatialRDD.repartition(4);
+    	objectRDD.spatialPartitioning(GridType.RTREE);
+    	objectRDD.buildIndex(IndexType.RTREE,true);
+    	windowRDD.spatialPartitioning(objectRDD.grids);
+    	JavaPairRDD<Polygon,HashSet<Polygon>> resultRDD = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true,false);
+    	assert resultRDD.count() == 5885;
     }
 }
