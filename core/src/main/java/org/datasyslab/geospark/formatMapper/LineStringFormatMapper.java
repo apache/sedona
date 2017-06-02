@@ -14,7 +14,8 @@ import java.util.List;
 import org.apache.spark.api.java.function.FlatMapFunction;
 
 import org.datasyslab.geospark.enums.FileDataSplitter;
-
+import org.wololo.geojson.Feature;
+import org.wololo.geojson.GeoJSONFactory;
 import org.wololo.jts2geojson.GeoJSONReader;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -63,6 +64,7 @@ public class LineStringFormatMapper extends FormatMapper implements FlatMapFunct
     	List result= new ArrayList<LineString>();
         MultiLineString multiSpatialObjects = null;
         int actualEndOffset;
+        try{
         switch (splitter) {
             case CSV:
                 lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
@@ -95,6 +97,15 @@ public class LineStringFormatMapper extends FormatMapper implements FlatMapFunct
             case GEOJSON:
                 GeoJSONReader reader = new GeoJSONReader();
                 spatialObject = reader.read(line);
+                if(line.contains("Feature"))
+                {
+                	Feature feature = (Feature) GeoJSONFactory.create(line);
+                	spatialObject = reader.read(feature.getGeometry());
+                }
+                else
+                {
+                    spatialObject = reader.read(line);
+                }
                 if(spatialObject instanceof MultiLineString)
                 {
                 	/*
@@ -152,6 +163,11 @@ public class LineStringFormatMapper extends FormatMapper implements FlatMapFunct
                 }
                 break;
         }
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
         return result.iterator();
     }
 

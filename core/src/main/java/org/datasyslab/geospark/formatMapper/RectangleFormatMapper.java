@@ -13,6 +13,8 @@ import java.util.List;
 
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.wololo.geojson.Feature;
+import org.wololo.geojson.GeoJSONFactory;
 import org.wololo.jts2geojson.GeoJSONReader;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -56,11 +58,13 @@ public class RectangleFormatMapper extends FormatMapper implements FlatMapFuncti
 	/* (non-Javadoc)
 	 * @see org.apache.spark.api.java.function.Function#call(java.lang.Object)
 	 */
-	public Iterator call(String line) throws Exception {
+	public Iterator call(String line) {
+		
 		MultiPolygon multiSpatialObjects = null;
     	List result= new ArrayList<Polygon>();
 		Double x1,x2,y1,y2;
         LinearRing linear;
+        try{
 		switch (splitter) {
 			case CSV:
 				lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
@@ -105,6 +109,15 @@ public class RectangleFormatMapper extends FormatMapper implements FlatMapFuncti
 			case GEOJSON:
                 GeoJSONReader reader = new GeoJSONReader();
                 spatialObject = reader.read(line);
+                if(line.contains("Feature"))
+                {
+                	Feature feature = (Feature) GeoJSONFactory.create(line);
+                	spatialObject = reader.read(feature.getGeometry());
+                }
+                else
+                {
+                    spatialObject = reader.read(line);
+                }
                 if(spatialObject instanceof MultiPolygon)
                 {
                 	/*
@@ -210,6 +223,13 @@ public class RectangleFormatMapper extends FormatMapper implements FlatMapFuncti
                 }
                 break;
 		}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 		return result.iterator();
+		
+
 	}
 }

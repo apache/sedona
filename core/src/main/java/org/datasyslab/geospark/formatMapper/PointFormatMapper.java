@@ -13,6 +13,8 @@ import java.util.List;
 
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.wololo.geojson.Feature;
+import org.wololo.geojson.GeoJSONFactory;
 import org.wololo.jts2geojson.GeoJSONReader;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -60,6 +62,7 @@ public class PointFormatMapper extends FormatMapper implements FlatMapFunction<S
     	MultiPoint multiSpatialObjects = null;
         Coordinate coordinate;
     	List result= new ArrayList<Point>();
+        try{
         switch (splitter) {
             case CSV:
                 lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
@@ -86,6 +89,15 @@ public class PointFormatMapper extends FormatMapper implements FlatMapFunction<S
             case GEOJSON:
                 GeoJSONReader reader = new GeoJSONReader();
                 spatialObject = reader.read(line);
+                if(line.contains("Feature"))
+                {
+                	Feature feature = (Feature) GeoJSONFactory.create(line);
+                	spatialObject = reader.read(feature.getGeometry());
+                }
+                else
+                {
+                    spatialObject = reader.read(line);
+                }
                 if(spatialObject instanceof MultiPoint)
                 {
                 	/*
@@ -143,6 +155,11 @@ public class PointFormatMapper extends FormatMapper implements FlatMapFunction<S
                 }
                 break;
         }
+        }
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
         return result.iterator();
     }
 }
