@@ -36,10 +36,28 @@ public class CircleRDD extends SpatialRDD {
 			public Object call(Circle circle) throws Exception {
 				return circle;
 			}
-			
 		});
 	}
 
+	/**
+	 * Instantiates a new circle RDD.
+	 *
+	 * @param circleRDD the circle RDD
+	 * @param sourceEpsgCRSCode the source epsg CRS code
+	 * @param targetEpsgCRSCode the target epsg CRS code
+	 */
+	public CircleRDD(JavaRDD<Circle> circleRDD, String sourceEpsgCRSCode, String targetEpsgCRSCode) {
+		this.rawSpatialRDD = circleRDD.map(new Function<Circle,Object>()
+		{
+
+			@Override
+			public Object call(Circle circle) throws Exception {
+				return circle;
+			}
+		});
+		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCRSCode);
+	}
+	
 	/**
 	 * Instantiates a new circle RDD.
 	 *
@@ -55,6 +73,9 @@ public class CircleRDD extends SpatialRDD {
 				return new Circle((Geometry) v1, radius);
 			}
 		});
+		this.CRStransformation = spatialRDD.CRStransformation;
+		this.sourceEpsgCode = spatialRDD.sourceEpsgCode;
+		this.targetEpgsgCode = spatialRDD.targetEpgsgCode;
 	}
 
 

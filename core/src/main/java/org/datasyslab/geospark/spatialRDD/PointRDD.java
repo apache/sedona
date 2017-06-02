@@ -54,6 +54,29 @@ public class PointRDD extends SpatialRDD {
         this.analyze();
 	}
 	
+	/**
+	 * Instantiates a new point RDD.
+	 *
+	 * @param rawSpatialRDD the raw spatial RDD
+	 * @param sourceEpsgCRSCode the source epsg CRS code
+	 * @param targetEpsgCode the target epsg code
+	 */
+	public PointRDD(JavaRDD<Point> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode)
+	{
+		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Point,Object>()
+		{
+
+			@Override
+			public Object call(Point spatialObject) throws Exception {
+				return spatialObject;
+			}
+			
+		});
+		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+        this.analyze();
+	}
+	
+	
     /**
      * Instantiates a new point RDD.
      *

@@ -868,6 +868,7 @@ public class CorrectnessChecker {
             	}
             }
             
+            
             /**
              * Test overlapped polygon distance join correctness.
              *
@@ -960,7 +961,7 @@ public class CorrectnessChecker {
             	Collections.sort(resultNoIndex,new PolygonByPolygonSortComparator());
             	//System.out.println("Number of windows: " + resultNoIndex.size());
             	assert resultNoIndex.size()==0;
-            }          
+            }
 
         /**
          * Tear down.
