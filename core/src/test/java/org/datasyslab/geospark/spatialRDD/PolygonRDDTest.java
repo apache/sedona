@@ -55,6 +55,8 @@ public class PolygonRDDTest {
     /** The Input location. */
     static String InputLocation;
     
+    static String InputLocationGeojson;
+    
     /** The offset. */
     static Integer offset;
     
@@ -93,6 +95,7 @@ public class PolygonRDDTest {
             prop.load(input);
             //InputLocation = prop.getProperty("inputLocation");
             InputLocation = "file://"+PolygonRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
+            InputLocationGeojson = "file://"+PolygonRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocationGeojson")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
             splitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
             gridType = GridType.getGridType(prop.getProperty("gridType"));
@@ -128,6 +131,14 @@ public class PolygonRDDTest {
         assert spatialRDD.boundaryEnvelope!=null;
     }
 
+    @Test
+    public void testGeoJSONConstructor() throws Exception {
+        PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocationGeojson, FileDataSplitter.GEOJSON, true, 4,StorageLevel.MEMORY_ONLY());
+        //todo: Set this to debug level
+        assert spatialRDD.totalNumberOfRecords==1001;
+        assert spatialRDD.boundary!=null;
+        assert spatialRDD.boundaryEnvelope!=null;
+    }
     
     /**
      * Test hilbert curve spatial partitioing.
@@ -143,16 +154,6 @@ public class PolygonRDDTest {
         spatialRDD.spatialPartitioning(GridType.HILBERT);
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
-        }
-        //todo: Move this into log4j.
-        Map<Integer, Long> map = spatialRDD.spatialPartitionedRDD.countByKey();
-
-      //  System.out.println(map.size());
-
-        for (Entry<Integer, Long> entry : map.entrySet()) {
-            Long number = (Long) entry.getValue();
-            Double percentage = number.doubleValue() / spatialRDD.totalNumberOfRecords;
-           // System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
         }
     }
     
@@ -171,16 +172,7 @@ public class PolygonRDDTest {
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
-        //todo: Move this into log4j.
-        Map<Integer, Long> map = spatialRDD.spatialPartitionedRDD.countByKey();
 
-        //System.out.println(map.size());
-
-        for (Entry<Integer, Long> entry : map.entrySet()) {
-            Long number = (Long) entry.getValue();
-            Double percentage = number.doubleValue() / spatialRDD.totalNumberOfRecords;
-           // System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
-        }
     }
     
     /**
@@ -198,16 +190,7 @@ public class PolygonRDDTest {
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
-        //todo: Move this into log4j.
-        Map<Integer, Long> map = spatialRDD.spatialPartitionedRDD.countByKey();
 
-        //System.out.println(map.size());
-
-        for (Entry<Integer, Long> entry : map.entrySet()) {
-            Long number = (Long) entry.getValue();
-            Double percentage = number.doubleValue() / spatialRDD.totalNumberOfRecords;
-          //  System.out.println(entry.getKey() + " : " + String.format("%.4f", percentage));
-        }
     }
 
     
