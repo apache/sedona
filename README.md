@@ -1,11 +1,10 @@
 ![GeoSpark Logo](http://www.public.asu.edu/~jiayu2/geospark/logo.png)
 
 
-| Version   |      GeoSpark Core      |  [Babylon Viz System](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon)|
-|:----------:|:-------------:|:------:|
-| Stable |  0.7.0 | 0.2.0 |
-| Latest |  [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark)   |   [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon) |
-| Source code |  [![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark) | [![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark) |
+| Status   |      Stable    | Latest | Source code|
+|:----------:|:-------------:|:------:|:------:|
+| GeoSpark |  0.7.0 | [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark) | [![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark)[![codecov.io](http://codecov.io/github/jiayuasu/GeoSpark/coverage.svg?branch=master)](http://codecov.io/github/jiayuasu/GeoSpark?branch=master)|
+| [Babylon Viz System](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon) |   0.2.0  |   [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon) | [![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark)[![codecov.io](http://codecov.io/github/jiayuasu/GeoSpark/coverage.svg?branch=master)](http://codecov.io/github/jiayuasu/GeoSpark?branch=master)|
 
 [![Join the chat at https://gitter.im/geospark-datasys/Lobby](https://badges.gitter.im/geospark-datasys/Lobby.svg)](https://gitter.im/geospark-datasys/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -33,7 +32,7 @@ GeoSpark artifacts are hosted in Maven Central: [**Maven Central Coordinates**](
 Supported Spatial RDDs: PointRDD, RectangleRDD, PolygonRDD, LineStringRDD
 
 ## Supported input data format
-**Native input format support**: CSV, TSV, WKT, GeoJSON, NASA Earth Data NetCDF/HDF (***New!***)
+**Native input format support**: CSV, TSV, WKT, GeoJSON, NASA Earth Data NetCDF/HDF (**New!**)
 
 **User-supplied input format mapper**: Any input formats
 
@@ -47,11 +46,11 @@ Supported Spatial Indexes: Quad-Tree and R-Tree. R-Tree supports Spatial K Neare
 Inside, Overlap, DatasetBoundary, Minimum Bounding Rectangl, Polygon Union
 
 ## Spatial Operation
-Spatial Range Query, Spatial Join Query, and Spatial K Nearest Neighbors Query.
+Spatial Range Query, Distance Join Query, Spatial Join Query, and Spatial K Nearest Neighbors Query.
 
 ## Coordinate Reference System (CRS) Transformation (aka. Coordinate projection)
 
-GeoSpark allows users to transform the original CRS (e.g., degree based coordinates such as EPSG:4326 and WGS84) to any other CRS (e.g., meter based coordinates such as EPSG:3005) so that it can accurately process both geographic data and geometrical data. Please specify your desired CRS in GeoSpark Spatial RDD constructor ([Example](https://github.com/DataSystemsLab/GeoSpark/blob/master/core/src/main/scala/org/datasyslab/geospark/showcase/ScalaExample.scala#L221)).
+GeoSpark allows users to transform the original CRS (e.g., degree based coordinates such as EPSG:4326 and WGS84) to any other CRS (e.g., meter based coordinates such as EPSG:3857) so that it can accurately process both geographic data and geometrical data. Please specify your desired CRS in GeoSpark Spatial RDD constructor ([Example](https://github.com/DataSystemsLab/GeoSpark/blob/master/core/src/main/scala/org/datasyslab/geospark/showcase/ScalaExample.scala#L221)).
 
 ## Users
 
