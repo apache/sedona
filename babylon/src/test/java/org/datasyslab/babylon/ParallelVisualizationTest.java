@@ -113,7 +113,8 @@ public class ParallelVisualizationTest {
 	public static void setUpBeforeClass() throws Exception {
 		SparkConf sparkConf = new SparkConf().setAppName("ParallelVisualizationTest").setMaster("local[4]");
 		sparkContext = new JavaSparkContext(sparkConf);
-        Logger.getLogger("org").setLevel(Level.WARN);
+        Logger.getLogger("org.apache").setLevel(Level.WARN);
+        Logger.getLogger("org.datasyslab").setLevel(Level.INFO);
         Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
         
@@ -178,7 +179,7 @@ public class ParallelVisualizationTest {
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		visualizationOperator.stitchImagePartitions();
 		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
-		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/parallelvisualization/PointRDD",ImageType.GIF);
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/parallelvisualization/PointRDD",ImageType.PNG);
 	}
 	
 	/**
@@ -209,7 +210,7 @@ public class ParallelVisualizationTest {
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		visualizationOperator.stitchImagePartitions();
 		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
-		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/parallelvisualization/PolygonRDD",ImageType.GIF);
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/parallelvisualization/PolygonRDD",ImageType.PNG);
 	}
 	
 	/**
@@ -224,6 +225,6 @@ public class ParallelVisualizationTest {
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		visualizationOperator.stitchImagePartitions();
 		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
-		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/parallelvisualization/LineStringRDD",ImageType.GIF);
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/parallelvisualization/LineStringRDD",ImageType.PNG);
 	}
 }

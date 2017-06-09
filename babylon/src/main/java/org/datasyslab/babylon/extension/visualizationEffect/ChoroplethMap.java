@@ -9,6 +9,7 @@ package org.datasyslab.babylon.extension.visualizationEffect;
 import java.awt.Color;
 
 import com.vividsolutions.jts.geom.Polygon;
+import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.babylon.core.VisualizationOperator;
@@ -20,6 +21,9 @@ import com.vividsolutions.jts.geom.Envelope;
  * The Class ChoroplethMap.
  */
 public class ChoroplethMap extends VisualizationOperator{
+
+	/** The Constant logger. */
+	final static Logger logger = Logger.getLogger(ChoroplethMap.class);
 
 	/**
 	 * Instantiates a new choropleth map.
@@ -152,9 +156,11 @@ public class ChoroplethMap extends VisualizationOperator{
 	 * @throws Exception the exception
 	 */
 	public boolean Visualize(JavaSparkContext sparkContext, JavaPairRDD<Polygon,Long> spatialPairRDD) throws Exception {
+		logger.info("[Babylon][Visualize][Start]");
 		this.Rasterize(sparkContext, spatialPairRDD, true);
 		this.Colorize();
 		this.RenderImage(sparkContext);
+		logger.info("[Babylon][Visualize][Stop]");
 		return true;
 	}
 

@@ -38,6 +38,8 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
+import org.junit.Ignore;
+import org.junit.Test;
 
 class NYCTripMapper implements FlatMapFunction<String, Object> {
 	 
@@ -140,12 +142,13 @@ public class NYCTripTest {
 	public static void setUpBeforeClass() throws Exception {
 		SparkConf sparkConf = new SparkConf().setAppName("HeatmapTest").setMaster("local[4]");
 		sparkContext = new JavaSparkContext(sparkConf);
-        Logger.getLogger("org").setLevel(Level.WARN);
+        Logger.getLogger("org.apache").setLevel(Level.WARN);
+        Logger.getLogger("org.datasyslab").setLevel(Level.INFO);
         Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
         inputProp = ScatterplotTest.class.getClassLoader().getResourceAsStream("point.test.properties");
         prop.load(inputProp);
-        PointInputLocation = "file://"+ScatterplotTest.class.getClassLoader().getResource("tweets.tsv").getPath();
+        PointInputLocation = "file://"+NYCTripTest.class.getClassLoader().getResource("tweets.tsv").getPath();
         PointOffset = 1;
         PointSplitter = FileDataSplitter.WKT;
         PointNumPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
@@ -189,6 +192,7 @@ public class NYCTripTest {
 	 *
 	 * @throws Exception the exception
 	 */
+	@Ignore
 	public void testLineStringRDDVisualization() throws Exception {
 		
 		int resolutionY = 800;

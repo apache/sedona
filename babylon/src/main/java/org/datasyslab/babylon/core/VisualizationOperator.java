@@ -10,12 +10,7 @@ import java.awt.Color;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
@@ -26,9 +21,12 @@ import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.broadcast.Broadcast;
+
 import org.datasyslab.babylon.utils.ColorizeOption;
+import org.datasyslab.babylon.utils.Pixel;
 import org.datasyslab.babylon.utils.RasterizationUtils;
 import org.datasyslab.geospark.spatialRDD.SpatialRDD;
+
 import org.jfree.graphics2d.svg.SVGGraphics2D;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -41,11 +39,11 @@ import com.vividsolutions.jts.geom.Polygon;
 import scala.Tuple2;
 
 
-class RasterPixelCountComparator implements Comparator<Tuple2<Integer, Double>>, Serializable
+class RasterPixelCountComparator implements Comparator<Tuple2<Pixel, Double>>, Serializable
 {
 
 	@Override
-	public int compare(Tuple2<Integer, Double> spatialObject1, Tuple2<Integer, Double> spatialObject2) {
+	public int compare(Tuple2<Pixel, Double> spatialObject1, Tuple2<Pixel, Double> spatialObject2) {
 		if(spatialObject1._2>spatialObject2._2)
 		{
 			return 1;
@@ -75,16 +73,19 @@ class VectorObjectCountComparator implements Comparator<Tuple2<Object, Double>>,
 	}
 }
 
-class PixelSerialIdComparator implements Comparator<Tuple2<Integer, Double>>
+class PixelSerialIdComparator implements Comparator<Tuple2<Pixel, Double>>
 {
 
-	@Override
-	public int compare(Tuple2<Integer, Double> spatialObject1, Tuple2<Integer, Double> spatialObject2) {
-		if(spatialObject1._1>spatialObject2._1)
+    @Override
+	public int compare(Tuple2<Pixel, Double> spatialObject1, Tuple2<Pixel, Double> spatialObject2) {
+        int spatialObject1id = spatialObject1._1().hashCode();
+        int spatialObject2id = spatialObject2._1().hashCode();
+
+        if(spatialObject1id>spatialObject2id)
 		{
 			return 1;
 		}
-		else if(spatialObject1._1<spatialObject2._1)
+		else if(spatialObject1id<spatialObject2id)
 		{
 			return -1;
 		}
@@ -142,10 +143,10 @@ public abstract class VisualizationOperator implements Serializable{
 	protected List<Tuple2<Integer,Double>> countMatrix;
 	
 	/** The distributed count matrix. */
-	protected JavaPairRDD<Integer, Double> distributedRasterCountMatrix;
+	protected JavaPairRDD<Pixel, Double> distributedRasterCountMatrix;
 	
 	/** The distributed color matrix. */
-	protected JavaPairRDD<Integer, Color> distributedRasterColorMatrix;
+	protected JavaPairRDD<Pixel, Color> distributedRasterColorMatrix;
 	
 	/** The raster image. */
 	public BufferedImage rasterImage=null;
@@ -202,10 +203,10 @@ public abstract class VisualizationOperator implements Serializable{
 	/** The has been spatial partitioned. */
 	protected boolean hasBeenSpatialPartitioned=false;
 	
-	/** The parallel photo filter. */
 	/*
 	 * Parameter tells whether do photo filter in parallel and do rendering in parallel
 	 */
+	/** The parallel photo filter. */
 	protected boolean parallelPhotoFilter = false;
 	
 	/** The parallel render image. */
@@ -236,7 +237,7 @@ public abstract class VisualizationOperator implements Serializable{
 	public VisualizationOperator(int resolutionX, int resolutionY,Envelope datasetBoundary, ColorizeOption colorizeOption, boolean reverseSpatialCoordinate,
 			int partitionX, int partitionY, boolean parallelPhotoFilter, boolean parallelRenderImage, boolean generateVectorImage)
 	{
-		logger.debug("[VisualizationOperator][Constructor][Start]");
+		logger.info("[Babylon][Constructor][Start]");
 		this.resolutionX = resolutionX;
 		this.resolutionY = resolutionY;
 		this.datasetBoundary = datasetBoundary;
@@ -264,7 +265,7 @@ public abstract class VisualizationOperator implements Serializable{
 				serialId++;
 			}
 		}
-		logger.debug("[VisualizationOperator][Constructor][Stop]");
+		logger.info("[Babylon][Constructor][Stop]");
 	}
 	
 	
@@ -287,12 +288,24 @@ public abstract class VisualizationOperator implements Serializable{
 	 * @return the java pair RDD
 	 * @throws Exception the exception
 	 */
-	private JavaPairRDD<Integer,Double> spatialPartitioning() throws Exception
+	private JavaPairRDD<Pixel,Double> spatialPartitioningWithoutDuplicates() throws Exception
 	{
 		this.distributedRasterCountMatrix = this.distributedRasterCountMatrix.partitionBy(new VisualizationPartitioner(this.resolutionX,this.resolutionY,this.partitionX,this.partitionY));
 		return this.distributedRasterCountMatrix;
 	}
-	
+
+	private JavaPairRDD<Pixel,Double> spatialPartitioningWithDuplicates() throws Exception
+	{
+		this.distributedRasterCountMatrix = this.distributedRasterCountMatrix.flatMapToPair(new PairFlatMapFunction<Tuple2<Pixel, Double>, Pixel, Double>() {
+			@Override
+			public Iterator<Tuple2<Pixel, Double>> call(Tuple2<Pixel, Double> pixelDoubleTuple2) throws Exception {
+				VisualizationPartitioner vizPartitioner = new VisualizationPartitioner(resolutionX,resolutionY,partitionX,partitionY);
+				return vizPartitioner.getPartitionIDs(pixelDoubleTuple2, photoFilterRadius).iterator();
+			}
+		});
+		this.distributedRasterCountMatrix = this.distributedRasterCountMatrix.partitionBy(new VisualizationPartitioner(this.resolutionX,this.resolutionY,this.partitionX,this.partitionY));
+		return this.distributedRasterCountMatrix;
+	}
 	
 	/**
 	 * Apply photo filter.
@@ -301,78 +314,93 @@ public abstract class VisualizationOperator implements Serializable{
 	 * @return the java pair RDD
 	 * @throws Exception the exception
 	 */
-	protected JavaPairRDD<Integer, Double> ApplyPhotoFilter(JavaSparkContext sparkContext) throws Exception
+	protected JavaPairRDD<Pixel, Double> ApplyPhotoFilter(JavaSparkContext sparkContext) throws Exception
 	{
-		logger.debug("[VisualizationOperator][ApplyPhotoFilter][Start]");
+		logger.info("[Babylon][ApplyPhotoFilter][Start]");
 		if(this.parallelPhotoFilter)
 		{
 			if(this.hasBeenSpatialPartitioned==false)
 			{
-				this.spatialPartitioning();
+				this.spatialPartitioningWithDuplicates();
 				this.hasBeenSpatialPartitioned = true;
 			}
-			this.distributedRasterCountMatrix = this.distributedRasterCountMatrix.mapPartitionsToPair(new PairFlatMapFunction<Iterator<Tuple2<Integer,Double>>,Integer,Double>()
+			this.distributedRasterCountMatrix = this.distributedRasterCountMatrix.mapPartitionsToPair(new PairFlatMapFunction<Iterator<Tuple2<Pixel,Double>>,Pixel,Double>()
 			{
 
 				@Override
-				public Iterator<Tuple2<Integer, Double>> call(Iterator<Tuple2<Integer, Double>> currentPartition) throws Exception  {
-					//This function will iterate all tuples within this partition twice. Complexity 2N. 
-					//First round, iterate all tuples to build a hash map. This hash map guarantees constant <key, value> access time.
-					// Another way is to do a sort on the data and then achieve constant access time in the second round. Complexity is N*log(N).
-					HashMap<Integer,Double> pixelCountHashMap = new HashMap<Integer,Double>();
-					List<Tuple2<Integer,Double>> oldPixelCounts = new ArrayList<Tuple2<Integer,Double>>();
-					List<Tuple2<Integer,Double>> newPixelCounts = new ArrayList<Tuple2<Integer,Double>>();
+				public Iterator<Tuple2<Pixel, Double>> call(Iterator<Tuple2<Pixel, Double>> currentPartition) throws Exception  {
+					// This function uses an efficient algorithm to recompute the pixel value. For each existing pixel,
+					// we calculate its impact for all pixels within its impact range and add its impact values.
+					HashMap<Pixel,Double> pixelCountHashMap = new HashMap<Pixel,Double>();
 					while(currentPartition.hasNext())
 					{
-						Tuple2<Integer, Double> currentPixelCount = currentPartition.next();
-						pixelCountHashMap.put(currentPixelCount._1, currentPixelCount._2);
-						oldPixelCounts.add(currentPixelCount);
-					}
-					//Second round, update the original count by applying photo filter
-					for(int i=0;i<oldPixelCounts.size();i++)
-					{
-						Tuple2<Integer,Integer> centerPixelCoordinate = RasterizationUtils.Decode1DTo2DId(resolutionX, resolutionY, oldPixelCounts.get(i)._1);
-						Double pixelCount = new Double(0.0);
-						int neighborCount=0;
+						Tuple2<Pixel, Double> currentPixelCount = currentPartition.next();
+						Tuple2<Integer,Integer> centerPixelCoordinate = new Tuple2<Integer,Integer>(currentPixelCount._1().getX(),currentPixelCount._1().getY());
+						// Find all pixels that are in the working pixel's impact range
 						for (int x = -photoFilterRadius; x <= photoFilterRadius; x++) {
 							for (int y = -photoFilterRadius; y <= photoFilterRadius; y++) {
 								int neighborPixelX = centerPixelCoordinate._1+x;
 								int neighborPixelY = centerPixelCoordinate._2+y;
-								if(neighborPixelX<resolutionX&&neighborPixelX>=0&&neighborPixelY<resolutionY&&neighborPixelY>=0)
+								if(currentPixelCount._1().getCurrentPartitionId()<0)
 								{
-									Double neighborPixelCount =pixelCountHashMap.get(RasterizationUtils.Encode2DTo1DId(resolutionX, resolutionY, neighborPixelX, neighborPixelY));
-									if(neighborPixelCount==null)
-									{
-										//This neighbor is not in this partition. Skip. Each center pixel should find at least (radius+1)*(radius+1) neighbors in its own partition.
-										continue;
-									}
-									neighborCount++;
-									pixelCount+=Math.round(neighborPixelCount*PhotoFilterConvolutionMatrix[x + photoFilterRadius][y + photoFilterRadius]);
+									throw new Exception("[VisualizationOperator][ApplyPhotoFilter] this pixel doesn't have currentPartitionId that is assigned in VisualizationPartitioner.");
+								}
+								if (neighborPixelX<0||neighborPixelX>resolutionX||neighborPixelY<0||neighborPixelY>resolutionY)
+								{
+                                    // This neighbor pixel is out of boundary so that we don't record its sum. We don't plot this pixel on the final sub image.
+                                    continue;
+                                }
+								if(RasterizationUtils.CalculatePartitionId(resolutionX, resolutionY, partitionX, partitionY, neighborPixelX, neighborPixelY)!=currentPixelCount._1().getCurrentPartitionId())
+								{
+									// This neighbor pixel is not in this image partition so that we don't record its sum. We don't plot this pixel on the final sub image.
+									continue;
+								}
+								Double neighborPixelCount = pixelCountHashMap.get(new Pixel(neighborPixelX, neighborPixelY,resolutionX,resolutionY));
+								// For that pixel, sum up its new count
+								if (neighborPixelCount!=null)
+								{
+									neighborPixelCount+=currentPixelCount._2()*PhotoFilterConvolutionMatrix[x + photoFilterRadius][y + photoFilterRadius];
+									pixelCountHashMap.remove(new Pixel(neighborPixelX,neighborPixelY,resolutionX,resolutionY));
+									Pixel newPixel = new Pixel(neighborPixelX, neighborPixelY, resolutionX,resolutionY,false, RasterizationUtils.CalculatePartitionId(resolutionX, resolutionY, partitionX, partitionY, neighborPixelX, neighborPixelY));
+									pixelCountHashMap.put(newPixel,neighborPixelCount);
+								}
+								else
+								{
+									neighborPixelCount = currentPixelCount._2()*PhotoFilterConvolutionMatrix[x + photoFilterRadius][y + photoFilterRadius];
+									Pixel newPixel = new Pixel(neighborPixelX, neighborPixelY, resolutionX,resolutionY,false, RasterizationUtils.CalculatePartitionId(resolutionX, resolutionY, partitionX, partitionY, neighborPixelX, neighborPixelY));
+									pixelCountHashMap.put(newPixel,neighborPixelCount);
 								}
 							}
 						}
-						Tuple2<Integer,Double> newCenterPixel = new Tuple2<Integer,Double>(oldPixelCounts.get(i)._1,pixelCount);
-						newPixelCounts.add(newCenterPixel);
-						if(neighborCount<(photoFilterRadius+1)*(photoFilterRadius+1))
-						{
-							throw new Exception("[VisualizationOperator][ApplyPhotoFilter] The pixel gets too few neighbors:" + neighborCount +"; Expected "+(photoFilterRadius+1)*(photoFilterRadius+1));
-						}
 					}
-					return newPixelCounts.iterator();
+					// Loop over the result map and convert the map. This is not efficient and can be replaced by a better way.
+					List<Tuple2<Pixel,Double>> resultSet = new ArrayList<Tuple2<Pixel,Double>>();
+					Iterator<java.util.Map.Entry<Pixel, Double>> hashmapIterator = pixelCountHashMap.entrySet().iterator();
+					while(hashmapIterator.hasNext())
+					{
+                        Map.Entry<Pixel,Double> cursorEntry = hashmapIterator.next();
+					    resultSet.add(new Tuple2<Pixel, Double>(cursorEntry.getKey(),cursorEntry.getValue()));
+					}
+					return resultSet.iterator();
 				}
 			});
 		}
 		else
 		{
-			List<Tuple2<Integer,Double>> collectedCountMatrix = this.distributedRasterCountMatrix.collect();
-			List<Tuple2<Integer,Double>> originalCountMatrix = new ArrayList<Tuple2<Integer,Double>>(collectedCountMatrix);
-			Collections.sort(originalCountMatrix, new PixelSerialIdComparator());
-			final Broadcast<List<Tuple2<Integer,Double>>> broadcastCountMatrix = sparkContext.broadcast(originalCountMatrix);
-			this.distributedRasterCountMatrix = this.distributedRasterCountMatrix.mapToPair(new PairFunction<Tuple2<Integer,Double>,Integer,Double>()
+			List<Tuple2<Pixel,Double>> collectedCountMatrix = this.distributedRasterCountMatrix.collect();
+			HashMap<Pixel,Double> hashCountMatrix = new HashMap<Pixel,Double>();
+			for(Tuple2<Pixel,Double> pixelCount:collectedCountMatrix)
+			{
+			    hashCountMatrix.put(pixelCount._1(),pixelCount._2());
+            }
+			//List<Tuple2<Pixel,Double>> originalCountMatrix = new ArrayList<Tuple2<Pixel,Double>>(collectedCountMatrix);
+			//Collections.sort(originalCountMatrix, new PixelSerialIdComparator());
+			final Broadcast<HashMap<Pixel,Double>> broadcastCountMatrix = sparkContext.broadcast(hashCountMatrix);
+			this.distributedRasterCountMatrix = this.distributedRasterCountMatrix.mapToPair(new PairFunction<Tuple2<Pixel,Double>,Pixel,Double>()
 			{
 				@Override
-				public Tuple2<Integer, Double> call(Tuple2<Integer, Double> pixel) throws Exception {
-					Tuple2<Integer,Integer> centerPixelCoordinate = RasterizationUtils.Decode1DTo2DId(resolutionX, resolutionY, pixel._1);
+				public Tuple2<Pixel, Double> call(Tuple2<Pixel, Double> pixel) throws Exception {
+					Tuple2<Integer,Integer> centerPixelCoordinate = new Tuple2<Integer, Integer>(pixel._1().getX(),pixel._1().getY());
 					Double pixelCount = new Double(0.0);
 					for (int x = -photoFilterRadius; x <= photoFilterRadius; x++) {
 						for (int y = -photoFilterRadius; y <= photoFilterRadius; y++) {
@@ -380,16 +408,21 @@ public abstract class VisualizationOperator implements Serializable{
 							int neighborPixelY = centerPixelCoordinate._2+y;
 							if(neighborPixelX<resolutionX&&neighborPixelX>=0&&neighborPixelY<resolutionY&&neighborPixelY>=0)
 							{
-								Double neighborPixelCount = broadcastCountMatrix.getValue().get(RasterizationUtils.Encode2DTo1DId(resolutionX, resolutionY, neighborPixelX, neighborPixelY))._2;
-								pixelCount+=Math.round(neighborPixelCount*PhotoFilterConvolutionMatrix[x + photoFilterRadius][y + photoFilterRadius]);
+								Double neighborPixelCount = broadcastCountMatrix.getValue().get(new Pixel(neighborPixelX,neighborPixelY,resolutionX,resolutionY));
+								if (neighborPixelCount==null)
+								{
+								    // Some of its neighbors are blank.
+								    neighborPixelCount=0.0;
+                                }
+								pixelCount+=neighborPixelCount*PhotoFilterConvolutionMatrix[x + photoFilterRadius][y + photoFilterRadius];
 							}
 						}
 					}
-					return new Tuple2<Integer,Double>(pixel._1,pixelCount);
+					return new Tuple2<Pixel,Double>(pixel._1,pixelCount);
 				}				
 			});
 		}
-		logger.debug("[VisualizationOperator][ApplyPhotoFilter][Stop]");
+		logger.info("[Babylon][ApplyPhotoFilter][Stop]");
 		return this.distributedRasterCountMatrix;
 	}
 	
@@ -399,9 +432,9 @@ public abstract class VisualizationOperator implements Serializable{
 	 *
 	 * @return the java pair RDD
 	 */
-	protected JavaPairRDD<Integer, Color> Colorize()
+	protected boolean Colorize()
 	{
-		logger.debug("[VisualizationOperator][Colorize][Start]");
+		logger.info("[Babylon][Colorize][Start]");
 
 		if(this.generateVectorImage)
 		{
@@ -436,8 +469,8 @@ public abstract class VisualizationOperator implements Serializable{
 			});
 		}
 
-		logger.debug("[VisualizationOperator][Colorize][Stop]");
-		return this.distributedRasterColorMatrix;
+		logger.info("[Babylon][Colorize][Stop]");
+		return true;
 	}
 	
 	/**
@@ -449,7 +482,7 @@ public abstract class VisualizationOperator implements Serializable{
 	 */
 	protected boolean RenderImage(JavaSparkContext sparkContext) throws Exception
 	{
-		logger.debug("[VisualizationOperator][RenderImage][Start]");
+		logger.info("[Babylon][RenderImage][Start]");
 		if(this.generateVectorImage)
 		{
 			this.distributedVectorImage = this.distributedVectorColors.mapToPair(new PairFunction<Tuple2<Object,Color>, Integer, String>()
@@ -507,7 +540,7 @@ public abstract class VisualizationOperator implements Serializable{
 			        }
 			        else
 			        {
-						throw new Exception("[VisualizationOperator][RenderImage] Unsupported spatial object types. Babylon only supports Point, Polygon, LineString");
+						throw new Exception("[Babylon][RenderImage] Unsupported spatial object types. Babylon only supports Point, Polygon, LineString");
 			        }
 				}
 			});
@@ -541,46 +574,51 @@ public abstract class VisualizationOperator implements Serializable{
 		{
 			if(this.hasBeenSpatialPartitioned==false)
 			{
-				this.spatialPartitioning();
+				this.spatialPartitioningWithoutDuplicates();
 				this.hasBeenSpatialPartitioned = true;
 			}
 			this.distributedRasterImage = this.distributedRasterColorMatrix.mapPartitionsToPair(
-					new PairFlatMapFunction<Iterator<Tuple2<Integer,Color>>,Integer,ImageSerializableWrapper>()
+					new PairFlatMapFunction<Iterator<Tuple2<Pixel,Color>>,Integer,ImageSerializableWrapper>()
 			{
 				@Override
-				public Iterator<Tuple2<Integer, ImageSerializableWrapper>> call(Iterator<Tuple2<Integer, Color>> currentPartition)
+				public Iterator<Tuple2<Integer, ImageSerializableWrapper>> call(Iterator<Tuple2<Pixel, Color>> currentPartition)
 						throws Exception {
 					BufferedImage imagePartition = new BufferedImage(partitionIntervalX,partitionIntervalY,BufferedImage.TYPE_INT_ARGB);
-					Tuple2<Integer,Color> pixelColor=null;
+					Tuple2<Pixel,Color> pixelColor=null;
 					Tuple2<Integer,Integer> pixelCoordinate = null;
 					while(currentPartition.hasNext())
 					{
 						//Render color in this image partition pixel-wise.
 						pixelColor = currentPartition.next();
-						pixelCoordinate =  RasterizationUtils.Decode1DTo2DId(resolutionX, resolutionY, pixelColor._1);
+						pixelCoordinate =  new Tuple2<Integer, Integer>(pixelColor._1().getX(),pixelColor._1().getY());
 						imagePartition.setRGB(pixelCoordinate._1%partitionIntervalX, (partitionIntervalY -1)-pixelCoordinate._2%partitionIntervalY, pixelColor._2.getRGB());
 					}
+                    List<Tuple2<Integer, ImageSerializableWrapper>> result = new ArrayList<Tuple2<Integer, ImageSerializableWrapper>>();
+                    if (pixelCoordinate==null)
+					{
+					    // No pixels in this partition. Skip this subimage
+                        return result.iterator();
+                    }
 					int partitionCoordinateX = pixelCoordinate._1/partitionIntervalX;
 					int partitionCoordinateY = pixelCoordinate._2/partitionIntervalY;
-					List<Tuple2<Integer, ImageSerializableWrapper>> result = new ArrayList<Tuple2<Integer, ImageSerializableWrapper>>();
 					result.add(new Tuple2<Integer, ImageSerializableWrapper>(RasterizationUtils.Encode2DTo1DId(partitionX, partitionY, partitionCoordinateX, partitionCoordinateY),new ImageSerializableWrapper(imagePartition)));
 					return result.iterator();
-				}		
+				}
 			});
 		}
 		else if(this.parallelRenderImage==false && this.generateVectorImage==false)
 		{
 			BufferedImage renderedImage = new BufferedImage(this.resolutionX,this.resolutionY,BufferedImage.TYPE_INT_ARGB);
-			List<Tuple2<Integer,Color>> colorMatrix = this.distributedRasterColorMatrix.collect();
-			for(Tuple2<Integer,Color> pixelColor:colorMatrix)
+			List<Tuple2<Pixel,Color>> colorMatrix = this.distributedRasterColorMatrix.collect();
+			for(Tuple2<Pixel,Color> pixelColor:colorMatrix)
 			{
-				int pixelX = RasterizationUtils.Decode1DTo2DId(this.resolutionX,this.resolutionY,pixelColor._1)._1;
-				int pixelY = RasterizationUtils.Decode1DTo2DId(this.resolutionX,this.resolutionY,pixelColor._1)._2;
+				int pixelX = pixelColor._1().getX();
+				int pixelY = pixelColor._1().getY();
 				renderedImage.setRGB(pixelX, (this.resolutionY-1)-pixelY, pixelColor._2.getRGB());
 			}
 			this.rasterImage = renderedImage;
 		}
-		logger.debug("[VisualizationOperator][RenderImage][Stop]");
+		logger.info("[Babylon][RenderImage][Stop]");
 		return true;
 	}
 	
@@ -593,9 +631,10 @@ public abstract class VisualizationOperator implements Serializable{
 	 */
 	public boolean stitchImagePartitions() throws Exception
 	{
+		logger.info("[Babylon][stitchImagePartitions][Start]");
 		if(this.distributedRasterImage==null)
 		{
-			throw new Exception("[VisualizationOperator][stitchImagePartitions] The distributed pixel image is null. No need to stitch.");
+			throw new Exception("[Babylon][stitchImagePartitions] The distributed pixel image is null. No need to stitch.");
 		}
 		List<Tuple2<Integer, ImageSerializableWrapper>> imagePartitions = this.distributedRasterImage.collect();
 		BufferedImage renderedImage = new BufferedImage(this.resolutionX,this.resolutionY,BufferedImage.TYPE_INT_ARGB);
@@ -610,6 +649,7 @@ public abstract class VisualizationOperator implements Serializable{
 			renderedImage.setRGB(partitionMinX, partitionMinY, partitionIntervalX, partitionIntervalY, rgbArray, 0, partitionIntervalX);
 		}
 		this.rasterImage = renderedImage;
+		logger.info("[Babylon][stitchImagePartitions][Stop]");
 		return true;
 	}
 
@@ -626,7 +666,7 @@ public abstract class VisualizationOperator implements Serializable{
 	 */
 	public boolean CustomizeColor(int red, int green, int blue, int colorAlpha, Color controlColorChannel, boolean useInverseRatioForControlColorChannel)
 	{
-		logger.debug("[VisualizationOperator][CustomizeColor][Start]");
+		logger.info("[Babylon][CustomizeColor][Start]");
 		this.red = red;
 		this.green = green;
 		this.blue = blue;
@@ -634,7 +674,7 @@ public abstract class VisualizationOperator implements Serializable{
 		this.controlColorChannel= controlColorChannel;
 
 		this.useInverseRatioForControlColorChannel = useInverseRatioForControlColorChannel;
-		logger.debug("[VisualizationOperator][CustomizeColor][Stop]");
+		logger.info("[Babylon][CustomizeColor][Stop]");
 		return true;
 	}
 	
@@ -659,7 +699,7 @@ public abstract class VisualizationOperator implements Serializable{
 		{
 			blue=useInverseRatioForControlColorChannel?255-normailizedCount:normailizedCount;
 		}
-		else throw new Exception("[VisualizationOperator][GenerateColor] Unsupported changing color color type. It should be in R,G,B");
+		else throw new Exception("[Babylon][GenerateColor] Unsupported changing color color type. It should be in R,G,B");
 		
 		if(normailizedCount==0)
 		{
@@ -677,9 +717,9 @@ public abstract class VisualizationOperator implements Serializable{
 	 * @param useSparkDefaultPartition the use spark default partition
 	 * @return the java pair RDD
 	 */
-	protected JavaPairRDD<Integer, Double> Rasterize(JavaSparkContext sparkContext, 
+	protected JavaPairRDD<Pixel, Double> Rasterize(JavaSparkContext sparkContext,
 			SpatialRDD spatialRDD,boolean useSparkDefaultPartition) {
-		logger.debug("[VisualizationOperator][Rasterize][Start]");
+		logger.info("[Babylon][Rasterize][Start]");
 		JavaRDD<Object> rawSpatialRDD = spatialRDD.rawSpatialRDD;
 		if(generateVectorImage)
 		{
@@ -719,16 +759,16 @@ public abstract class VisualizationOperator implements Serializable{
 						}
 						else
 						{
-							throw new Exception("[VisualizationOperator][Rasterize] Unsupported spatial object types. Babylon only supports Point, Polygon, LineString");
+							throw new Exception("[Babylon][Rasterize] Unsupported spatial object types. Babylon only supports Point, Polygon, LineString");
 						}
 					}});
 
 		}
 		else{
-		JavaPairRDD<Integer, Double> spatialRDDwithPixelId = rawSpatialRDD.flatMapToPair(new PairFlatMapFunction<Object,Integer,Double>()
+		JavaPairRDD<Pixel, Double> spatialRDDwithPixelId = rawSpatialRDD.flatMapToPair(new PairFlatMapFunction<Object,Pixel,Double>()
 		{
 			@Override
-			public Iterator<Tuple2<Integer, Double>> call(Object spatialObject) throws Exception {
+			public Iterator<Tuple2<Pixel, Double>> call(Object spatialObject) throws Exception {
 
 					if(spatialObject instanceof Point)
 					{
@@ -744,13 +784,28 @@ public abstract class VisualizationOperator implements Serializable{
 					}
 					else
 					{
-						throw new Exception("[VisualizationOperator][Rasterize] Unsupported spatial object types. Babylon only supports Point, Polygon, LineString");
+						throw new Exception("[Babylon][Rasterize] Unsupported spatial object types. Babylon only supports Point, Polygon, LineString");
 					}
 			}
 		});
-		JavaPairRDD<Integer, Double> originalImage = sparkContext.parallelizePairs(this.countMatrix);
-		spatialRDDwithPixelId = spatialRDDwithPixelId.union(originalImage);
-		JavaPairRDD<Integer, Double> pixelWeights = spatialRDDwithPixelId.reduceByKey(new Function2<Double,Double,Double>()
+		//JavaPairRDD<Integer, Double> originalImage = sparkContext.parallelizePairs(this.countMatrix);
+		//spatialRDDwithPixelId = spatialRDDwithPixelId.union(originalImage);
+
+
+            spatialRDDwithPixelId = spatialRDDwithPixelId.filter(new Function<Tuple2<Pixel, Double>, Boolean>() {
+                @Override
+                public Boolean call(Tuple2<Pixel, Double> pixelCount) throws Exception {
+                    if (pixelCount._1().getX() < 0 || pixelCount._1().getX() > resolutionX || pixelCount._1().getY() < 0 || pixelCount._1().getY() > resolutionY)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+            });
+            JavaPairRDD<Pixel, Double> pixelWeights = spatialRDDwithPixelId.reduceByKey(new Function2<Double,Double,Double>()
 		{
 			@Override
 			public Double call(Double count1, Double count2) throws Exception {
@@ -768,7 +823,7 @@ public abstract class VisualizationOperator implements Serializable{
 		});
 		this.distributedRasterCountMatrix = pixelWeights;
 		}
-		logger.debug("[VisualizationOperator][Rasterize][Stop]");
+		logger.info("[Babylon][Rasterize][Stop]");
 		return this.distributedRasterCountMatrix;
 	}
 	
@@ -782,9 +837,9 @@ public abstract class VisualizationOperator implements Serializable{
 	 * @param useSparkDefaultPartition the use spark default partition
 	 * @return the java pair RDD
 	 */
-	protected JavaPairRDD<Integer, Double> Rasterize(JavaSparkContext sparkContext, 
+	protected JavaPairRDD<Pixel, Double> Rasterize(JavaSparkContext sparkContext,
 			JavaPairRDD<Polygon,Long> spatialPairRDD,boolean useSparkDefaultPartition) {
-		logger.debug("[VisualizationOperator][Rasterize][Start]");
+		logger.info("[Babylon][Rasterize][Start]");
 		if(generateVectorImage)
 		{
 			this.onlyDrawOutline = false;
@@ -801,16 +856,29 @@ public abstract class VisualizationOperator implements Serializable{
 		}
 		else
 		{
-			JavaPairRDD<Integer, Double> spatialRDDwithPixelId = spatialPairRDD.flatMapToPair(new PairFlatMapFunction<Tuple2<Polygon,Long>,Integer,Double>()
+			JavaPairRDD<Pixel, Double> spatialRDDwithPixelId = spatialPairRDD.flatMapToPair(new PairFlatMapFunction<Tuple2<Polygon,Long>,Pixel,Double>()
 			{
 				@Override
-				public Iterator<Tuple2<Integer, Double>> call(Tuple2<Polygon,Long> spatialObject) throws Exception {
+				public Iterator<Tuple2<Pixel, Double>> call(Tuple2<Polygon,Long> spatialObject) throws Exception {
 						return RasterizationUtils.FindPixelCoordinates(resolutionX,resolutionY,datasetBoundary,(Polygon)spatialObject._1(),reverseSpatialCoordinate,new Double(spatialObject._2())).iterator();
 				}
 			});
-			JavaPairRDD<Integer, Double> originalImage = sparkContext.parallelizePairs(this.countMatrix);
-			JavaPairRDD<Integer,Double> completeSpatialRDDwithPixelId = spatialRDDwithPixelId.union(originalImage);
-			JavaPairRDD<Integer, Double> pixelWeights = completeSpatialRDDwithPixelId.reduceByKey(new Function2<Double,Double,Double>()
+			//JavaPairRDD<Pixel, Double> originalImage = sparkContext.parallelizePairs(this.countMatrix);
+			//JavaPairRDD<Integer,Double> completeSpatialRDDwithPixelId = spatialRDDwithPixelId.union(originalImage);
+            spatialRDDwithPixelId = spatialRDDwithPixelId.filter(new Function<Tuple2<Pixel, Double>, Boolean>() {
+                @Override
+                public Boolean call(Tuple2<Pixel, Double> pixelCount) throws Exception {
+                    if (pixelCount._1().getX() < 0 || pixelCount._1().getX() > resolutionX || pixelCount._1().getY() < 0 || pixelCount._1().getY() > resolutionY)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+            });
+			JavaPairRDD<Pixel, Double> pixelWeights = spatialRDDwithPixelId.reduceByKey(new Function2<Double,Double,Double>()
 			{
 				@Override
 				public Double call(Double count1, Double count2) throws Exception {
@@ -825,7 +893,7 @@ public abstract class VisualizationOperator implements Serializable{
 			});
 			this.distributedRasterCountMatrix = pixelWeights;
 		}
-		logger.debug("[VisualizationOperator][Rasterize][Stop]");
+		logger.info("[Babylon][Rasterize][Stop]");
 		return this.distributedRasterCountMatrix;
 	}
 

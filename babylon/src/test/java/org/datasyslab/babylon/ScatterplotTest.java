@@ -109,8 +109,9 @@ public class ScatterplotTest {
 	public static void setUpBeforeClass() throws Exception {
 		SparkConf sparkConf = new SparkConf().setAppName("ScatterplotTest").setMaster("local[4]");
 		sparkContext = new JavaSparkContext(sparkConf);
-        Logger.getLogger("org").setLevel(Level.WARN);
-        Logger.getLogger("akka").setLevel(Level.WARN);
+        Logger.getLogger("org.apache").setLevel(Level.WARN);
+		Logger.getLogger("org.datasyslab").setLevel(Level.INFO);
+		Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
         
         inputProp = ScatterplotTest.class.getClassLoader().getResourceAsStream("babylon.point.properties");

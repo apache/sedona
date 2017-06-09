@@ -6,6 +6,7 @@
  */
 package org.datasyslab.babylon.extension.visualizationEffect;
 
+import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.babylon.core.VisualizationOperator;
 import org.datasyslab.babylon.utils.ColorizeOption;
@@ -18,7 +19,10 @@ import com.vividsolutions.jts.geom.Envelope;
  * The Class ScatterPlot.
  */
 public class ScatterPlot extends VisualizationOperator {
-	
+
+	/** The Constant logger. */
+	final static Logger logger = Logger.getLogger(ScatterPlot.class);
+
 	/**
 	 * Instantiates a new scatter plot.
 	 *
@@ -144,9 +148,11 @@ public class ScatterPlot extends VisualizationOperator {
 	 * @throws Exception the exception
 	 */
 	public boolean Visualize(JavaSparkContext sparkContext, SpatialRDD spatialRDD) throws Exception {
+		logger.info("[Babylon][Visualize][Start]");
 		this.Rasterize(sparkContext, spatialRDD, true);
 		this.Colorize();
 		this.RenderImage(sparkContext);
+		logger.info("[Babylon][Visualize][Stop]");
 		return true;
 	}
 

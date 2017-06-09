@@ -101,8 +101,9 @@ public class HeatmapTest {
 	public static void setUpBeforeClass() throws Exception {
 		SparkConf sparkConf = new SparkConf().setAppName("HeatmapTest").setMaster("local[4]");
 		sparkContext = new JavaSparkContext(sparkConf);
-        Logger.getLogger("org").setLevel(Level.WARN);
-        Logger.getLogger("akka").setLevel(Level.WARN);
+		Logger.getLogger("org.apache").setLevel(Level.WARN);
+		Logger.getLogger("org.datasyslab").setLevel(Level.INFO);
+		Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
         
         inputProp = HeatmapTest.class.getClassLoader().getResourceAsStream("babylon.point.properties");
@@ -187,7 +188,7 @@ public class HeatmapTest {
 		HeatMap visualizationOperator = new HeatMap(800,500,USMainLandBoundary,false,2);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
-		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/heatmap/PolygonRDD", ImageType.GIF);	
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/heatmap/PolygonRDD", ImageType.PNG);
 		
 	}
 	
@@ -202,6 +203,6 @@ public class HeatmapTest {
 		HeatMap visualizationOperator = new HeatMap(800,500,USMainLandBoundary,false,2);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
-		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/heatmap/LineStringRDD", ImageType.GIF);	
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/heatmap/LineStringRDD", ImageType.PNG);
 	}
 }

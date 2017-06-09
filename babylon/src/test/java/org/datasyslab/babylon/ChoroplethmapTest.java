@@ -110,8 +110,9 @@ public class ChoroplethmapTest implements Serializable{
 	public static void setUpBeforeClass() throws Exception {
 		SparkConf sparkConf = new SparkConf().setAppName("ChoroplethmapTest").setMaster("local[4]");
 		sparkContext = new JavaSparkContext(sparkConf);
-        Logger.getLogger("org").setLevel(Level.WARN);
-        Logger.getLogger("akka").setLevel(Level.WARN);
+		Logger.getLogger("org.apache").setLevel(Level.WARN);
+		Logger.getLogger("org.datasyslab").setLevel(Level.INFO);
+		Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
         
         inputProp = ChoroplethmapTest.class.getClassLoader().getResourceAsStream("babylon.point.properties");

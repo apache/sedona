@@ -9,6 +9,7 @@ package org.datasyslab.babylon.extension.visualizationEffect;
 import java.awt.Color;
 
 
+import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaSparkContext;
 
 import org.datasyslab.babylon.core.VisualizationOperator;
@@ -24,6 +25,9 @@ import com.vividsolutions.jts.geom.Envelope;
  * The Class HeatMap.
  */
 public class HeatMap extends VisualizationOperator{
+
+	/** The Constant logger. */
+	final static Logger logger = Logger.getLogger(HeatMap.class);
 
 	/**
 	 * Instantiates a new heat map.
@@ -122,11 +126,13 @@ public class HeatMap extends VisualizationOperator{
 	 * @throws Exception the exception
 	 */
 	public boolean Visualize(JavaSparkContext sparkContext, SpatialRDD spatialRDD) throws Exception {
+		logger.info("[Babylon][Visualize][Start]");
 		this.CustomizeColor(255, 255, 0, 255, Color.GREEN, true);
 		this.Rasterize(sparkContext, spatialRDD, true);
 		this.ApplyPhotoFilter(sparkContext);
 		this.Colorize();
 		this.RenderImage(sparkContext);
+		logger.info("[Babylon][Visualize][Stop]");
 		return true;
 	}
 
