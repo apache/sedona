@@ -69,7 +69,7 @@ public class VisualizationPartitioner extends Partitioner implements Serializabl
 	 * @param pixelDoubleTuple2
 	 * @return
 	 */
-	public List<Tuple2<Pixel, Double>> getPartitionIDs(Tuple2<Pixel, Double> pixelDoubleTuple2, int photoFilterRadius)
+	public List<Tuple2<Pixel, Double>> assignPartitionIDs(Tuple2<Pixel, Double> pixelDoubleTuple2, int photoFilterRadius)
 	{
 		ArrayList<Tuple2<Pixel, Double>> duplicatePixelList = new ArrayList<Tuple2<Pixel, Double>>();
 		ArrayList<Integer> existingPartitionIds = new ArrayList<Integer>();
@@ -91,6 +91,8 @@ public class VisualizationPartitioner extends Partitioner implements Serializabl
 				int neighborPixelY = pixelDoubleTuple2._1().getY()+y;
 				try {
 					int partitionId = RasterizationUtils.CalculatePartitionId(this.resolutionX,this.resolutionY,this.partitionX, this.partitionY, neighborPixelX, neighborPixelY);
+					// This partition id is out of the image boundary
+					if(partitionId<0) continue;
 					if(!existingPartitionIds.contains(partitionId))
 					{
 						Pixel newPixel = pixelDoubleTuple2._1();
@@ -107,5 +109,18 @@ public class VisualizationPartitioner extends Partitioner implements Serializabl
 		return duplicatePixelList;
 
 	}
-
+	/**
+	 * Assign partition IDs to this pixel. This partitioning method will not introduce
+	 * duplicates.
+	 * @param pixelDoubleTuple2
+	 * @return
+	 */
+	public Tuple2<Pixel, Double> assignPartitionID(Tuple2<Pixel, Double> pixelDoubleTuple2)
+	{
+		int partitionId = RasterizationUtils.CalculatePartitionId(this.resolutionX,this.resolutionY,this.partitionX, this.partitionY, pixelDoubleTuple2._1.getX(), pixelDoubleTuple2._1.getY());
+		Pixel newPixel = pixelDoubleTuple2._1();
+		newPixel.setCurrentPartitionId(partitionId);
+		newPixel.setDuplicate(false);
+		return new Tuple2<Pixel,Double>(newPixel, pixelDoubleTuple2._2());
+	}
 }

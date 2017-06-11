@@ -187,7 +187,7 @@ public class RasterizationUtils implements Serializable{
 			partitionId = RasterizationUtils.Encode2DTo1DId(partitionX,partitionY,partitionCoordinateX,partitionCoordinateY);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		return partitionId;
 	}

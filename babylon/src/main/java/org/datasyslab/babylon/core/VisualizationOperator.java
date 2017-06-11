@@ -281,30 +281,34 @@ public abstract class VisualizationOperator implements Serializable{
 		this.PhotoFilterConvolutionMatrix =  photoFilter.getConvolutionMatrix();
 		return true;
 	}
-	
-	/**
-	 * Spatial partitioning.
-	 *
-	 * @return the java pair RDD
-	 * @throws Exception the exception
-	 */
-	private JavaPairRDD<Pixel,Double> spatialPartitioningWithoutDuplicates() throws Exception
+
+	private boolean spatialPartitioningWithoutDuplicates() throws Exception
 	{
-		this.distributedRasterCountMatrix = this.distributedRasterCountMatrix.partitionBy(new VisualizationPartitioner(this.resolutionX,this.resolutionY,this.partitionX,this.partitionY));
-		return this.distributedRasterCountMatrix;
+		this.distributedRasterColorMatrix = this.distributedRasterColorMatrix.mapToPair(new PairFunction<Tuple2<Pixel, Color>, Pixel, Color>() {
+			@Override
+			public Tuple2<Pixel, Color> call(Tuple2<Pixel, Color> pixelDoubleTuple2) throws Exception {
+				Pixel newPixel = new Pixel(pixelDoubleTuple2._1().getX(),pixelDoubleTuple2._1().getY(),resolutionX,resolutionY);
+				newPixel.setDuplicate(false);
+				newPixel.setCurrentPartitionId(RasterizationUtils.CalculatePartitionId(resolutionX,resolutionY,partitionX, partitionY, pixelDoubleTuple2._1.getX(), pixelDoubleTuple2._1.getY()));
+				Tuple2<Pixel,Color> newPixelDoubleTuple2 = new Tuple2<Pixel, Color>(newPixel, pixelDoubleTuple2._2());
+				return newPixelDoubleTuple2;
+			}
+		});
+		this.distributedRasterColorMatrix = this.distributedRasterColorMatrix.partitionBy(new VisualizationPartitioner(this.resolutionX,this.resolutionY,this.partitionX,this.partitionY));
+		return true;
 	}
 
-	private JavaPairRDD<Pixel,Double> spatialPartitioningWithDuplicates() throws Exception
+	private boolean spatialPartitioningWithDuplicates() throws Exception
 	{
 		this.distributedRasterCountMatrix = this.distributedRasterCountMatrix.flatMapToPair(new PairFlatMapFunction<Tuple2<Pixel, Double>, Pixel, Double>() {
 			@Override
 			public Iterator<Tuple2<Pixel, Double>> call(Tuple2<Pixel, Double> pixelDoubleTuple2) throws Exception {
 				VisualizationPartitioner vizPartitioner = new VisualizationPartitioner(resolutionX,resolutionY,partitionX,partitionY);
-				return vizPartitioner.getPartitionIDs(pixelDoubleTuple2, photoFilterRadius).iterator();
+				return vizPartitioner.assignPartitionIDs(pixelDoubleTuple2, photoFilterRadius).iterator();
 			}
 		});
 		this.distributedRasterCountMatrix = this.distributedRasterCountMatrix.partitionBy(new VisualizationPartitioner(this.resolutionX,this.resolutionY,this.partitionX,this.partitionY));
-		return this.distributedRasterCountMatrix;
+		return true;
 	}
 	
 	/**

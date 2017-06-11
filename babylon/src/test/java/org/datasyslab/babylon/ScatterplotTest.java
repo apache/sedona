@@ -16,6 +16,7 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.babylon.extension.imageGenerator.BabylonImageGenerator;
 import org.datasyslab.babylon.extension.visualizationEffect.ScatterPlot;
+import org.datasyslab.babylon.utils.ColorizeOption;
 import org.datasyslab.babylon.utils.ImageType;
 import org.datasyslab.babylon.utils.RasterizationUtils;
 import org.datasyslab.geospark.enums.FileDataSplitter;
@@ -200,6 +201,24 @@ public class ScatterplotTest {
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		imageGenerator = new  BabylonImageGenerator();
 		imageGenerator.SaveVectorImageAsLocalFile(visualizationOperator.vectorImage, "./target/scatterplot/PointRDD",ImageType.SVG);
+	}
+
+	/**
+	 * Test point RDD visualization.
+	 *
+	 * @throws Exception the exception
+	 */
+	@Test
+	public void testPointRDDVisualizationWithParallelRendering() throws Exception {
+		PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
+		ScatterPlot visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary, ColorizeOption.UNIFORMCOLOR,
+				false, 4, 4, true, false);
+		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
+		visualizationOperator.Visualize(sparkContext, spatialRDD);
+		visualizationOperator.stitchImagePartitions();
+		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/scatterplot/PointRDD-parallelrender",ImageType.PNG);
+		//imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.distributedRasterImage, "./target/scatterplot/PointRDD-parallelrender",ImageType.PNG);
 	}
 	
 	/**
