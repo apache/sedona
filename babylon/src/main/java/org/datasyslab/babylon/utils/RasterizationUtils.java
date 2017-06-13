@@ -167,12 +167,16 @@ public class RasterizationUtils implements Serializable{
 	 */
 	public static int Encode2DTo1DId(int resolutionX, int resolutionY, int twoDimensionIdX,int twoDimensionIdY) throws Exception
 	{
-
+		if(twoDimensionIdX<0||twoDimensionIdX>=resolutionX||twoDimensionIdY<0||twoDimensionIdY>=resolutionY)
+		{
+			throw new Exception("[RasterizationUtils][Encode2DTo1DId] This given 2 dimension coordinate is "+twoDimensionIdX+" "+twoDimensionIdY+". This coordinate is out of the given boundary and will be dropped.");
+		}
+		/*
 		if((twoDimensionIdX+twoDimensionIdY*resolutionX)<0 ||(twoDimensionIdX+twoDimensionIdY*resolutionX)>(resolutionX*resolutionY-1))
 		{
 			throw new Exception("[RasterizationUtils][Encode2DTo1DId] This given 2 dimension coordinate is "+twoDimensionIdX+" "+twoDimensionIdY+". This coordinate is out of the given boundary and will be dropped.");
 		}
-
+		*/
 		return twoDimensionIdX+twoDimensionIdY*resolutionX;
 	}
 	
@@ -227,7 +231,7 @@ public class RasterizationUtils implements Serializable{
 			// This pixel is out of boundary. Should be ignored.
 			return result;
 		}
-		if(colorizeOption == ColorizeOption.ZAXIS)
+		if(colorizeOption == ColorizeOption.EARTHOBSERVATION)
 		{
 			Pixel newPixel = new Pixel(pixelCoordinate._1,pixelCoordinate._2, resolutionX,resolutionY);
 			result.add(new Tuple2<Pixel,Double>(newPixel,spatialObject.getCoordinate().z));

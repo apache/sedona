@@ -4,14 +4,14 @@ import java.io.Serializable;
 
 public enum ColorizeOption implements Serializable{
 	
-	ZAXIS("zaxis"),
+	EARTHOBSERVATION("EARTHOBSERVATION"),
 	
 	SPATIALAGGREGATION("spatialaggregation"),
 	
-	UNIFORMCOLOR("uniformcolor");
+	NORMAL("normal");
 
 	/** The type name. */
-	private String typeName="uniformcolor";
+	private String typeName="normal";
 	
 	/**
 	 * Instantiates a new image type.

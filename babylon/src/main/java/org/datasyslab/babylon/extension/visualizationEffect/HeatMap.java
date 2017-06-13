@@ -74,46 +74,46 @@ public class HeatMap extends VisualizationOperator{
 	 * @see org.datasyslab.babylon.core.VisualizationOperator#EncodeToColor(int)
 	 */
 	@Override
-	protected Color EncodeToColor(int normailizedCount) throws Exception
+	protected Integer EncodeToRGB(int normailizedCount) throws Exception
 	{
 		int alpha = 150;
 		Color[] colors = new Color[]{new Color(153,255,0,alpha),new Color(204,255,0,alpha),new Color(255,255,0,alpha),
 		      new Color(255,204,0,alpha),new Color(255,153,0,alpha),new Color(255,102,0,alpha),
 		      new Color(255,51,0,alpha),new Color(255,0,0,alpha)};
 	    if (normailizedCount < 1){
-	        return new Color(255,255,255,0);
+	        return new Color(255,255,255,0).getRGB();
 	    }
 	    else if(normailizedCount<30)
 	    {
-	    	return colors[0];
+	    	return colors[0].getRGB();
 	    }
 	    else if(normailizedCount<50)
 	    {
-	    	return colors[1];
+	    	return colors[1].getRGB();
 	    }
 	    else if(normailizedCount<70)
 	    {
-	    	return colors[2];
+	    	return colors[2].getRGB();
 	    }
 	    else if(normailizedCount<100)
 	    {
-	    	return colors[3];
+	    	return colors[3].getRGB();
 	    }
 	    else if(normailizedCount<130)
 	    {
-	    	return colors[4];
+	    	return colors[4].getRGB();
 	    }
 	    else if(normailizedCount<160)
 	    {
-	    	return colors[5];
+	    	return colors[5].getRGB();
 	    }
 	    else if(normailizedCount<190)
 	    {
-	    	return colors[6];
+	    	return colors[6].getRGB();
 	    }
 	    else
 	    {
-	    	return colors[7];
+	    	return colors[7].getRGB();
 	    }
 	}
 	

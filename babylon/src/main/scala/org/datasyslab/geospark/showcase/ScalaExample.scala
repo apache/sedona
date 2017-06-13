@@ -190,7 +190,7 @@ object ScalaExample extends App{
 		val earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName,
 			HDFDataVariableList, HDFDataVariableName, HDFswitchXY, urlPrefix)
 		val spatialRDD = new PointRDD(sparkContext, earthdataInputLocation, earthdataNumPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY)
-		val visualizationOperator = new ScatterPlot(1000, 600, spatialRDD.boundaryEnvelope, ColorizeOption.ZAXIS, false, false)
+		val visualizationOperator = new ScatterPlot(1000, 600, spatialRDD.boundaryEnvelope, ColorizeOption.EARTHOBSERVATION, false, false)
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.BLUE, true)
 		visualizationOperator.Visualize(sparkContext, spatialRDD)
 		val imageGenerator = new BabylonImageGenerator

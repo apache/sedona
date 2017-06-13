@@ -114,7 +114,7 @@ public class ParallelVisualizationTest {
 		SparkConf sparkConf = new SparkConf().setAppName("ParallelVisualizationTest").setMaster("local[4]");
 		sparkContext = new JavaSparkContext(sparkConf);
         Logger.getLogger("org.apache").setLevel(Level.WARN);
-        Logger.getLogger("org.datasyslab").setLevel(Level.INFO);
+        Logger.getLogger("org.datasyslab").setLevel(Level.DEBUG);
         Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
         
@@ -188,15 +188,29 @@ public class ParallelVisualizationTest {
 	 * @throws Exception the exception
 	 */
 	@Test
-	public void testRectangleRDDVisualization() throws Exception {
+	public void testRectangleRDDVisualizationWithTiles() throws Exception {
 		RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
 		HeatMap visualizationOperator = new HeatMap(resolutionX,resolutionY,USMainLandBoundary,false,2,partitionX,partitionY,true,true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
 		visualizationOperator.stitchImagePartitions();
 		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
-		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/parallelvisualization/RectangleRDD",ImageType.PNG);
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/parallelvisualization/RectangleRDDWithTiles",ImageType.PNG);
 	}
-	
+
+    /**
+     * Test rectangle RDD visualization.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void testRectangleRDDVisualizationNoTiles() throws Exception {
+        RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
+        HeatMap visualizationOperator = new HeatMap(resolutionX,resolutionY,USMainLandBoundary,false,5,partitionX,partitionY,true,false);
+        visualizationOperator.Visualize(sparkContext, spatialRDD);
+        BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+        imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/parallelvisualization/RectangleRDDNoTiles",ImageType.PNG);
+    }
+
 	/**
 	 * Test polygon RDD visualization.
 	 *

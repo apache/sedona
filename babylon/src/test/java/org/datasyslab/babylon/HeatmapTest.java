@@ -102,7 +102,7 @@ public class HeatmapTest {
 		SparkConf sparkConf = new SparkConf().setAppName("HeatmapTest").setMaster("local[4]");
 		sparkContext = new JavaSparkContext(sparkConf);
 		Logger.getLogger("org.apache").setLevel(Level.WARN);
-		Logger.getLogger("org.datasyslab").setLevel(Level.INFO);
+		Logger.getLogger("org.datasyslab").setLevel(Level.DEBUG);
 		Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
         
@@ -169,11 +169,11 @@ public class HeatmapTest {
 	@Test
 	public void testRectangleRDDVisualization() throws Exception {
 		RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
-		HeatMap visualizationOperator = new HeatMap(800,500,USMainLandBoundary,false,2);
+		HeatMap visualizationOperator = new HeatMap(800,500,USMainLandBoundary,false,2, 4,4,false,true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
+		visualizationOperator.stitchImagePartitions();
 		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
 		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/heatmap/RectangleRDD", ImageType.PNG);
-	
 	}
 	
 	/**

@@ -111,7 +111,7 @@ public class ChoroplethmapTest implements Serializable{
 		SparkConf sparkConf = new SparkConf().setAppName("ChoroplethmapTest").setMaster("local[4]");
 		sparkContext = new JavaSparkContext(sparkConf);
 		Logger.getLogger("org.apache").setLevel(Level.WARN);
-		Logger.getLogger("org.datasyslab").setLevel(Level.INFO);
+		Logger.getLogger("org.datasyslab").setLevel(Level.DEBUG);
 		Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
         

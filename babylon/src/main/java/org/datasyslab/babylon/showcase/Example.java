@@ -271,7 +271,7 @@ public class Example {
 			EarthdataHDFPointMapper earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement,HDFOffset,HDFRootGroupName,
 					HDFDataVariableList,HDFDataVariableName,HDFswitchXY,urlPrefix);
 	    	PointRDD spatialRDD = new PointRDD(sparkContext, earthdataInputLocation, earthdataNumPartitions, earthdataHDFPoint,StorageLevel.MEMORY_ONLY());
-			ScatterPlot visualizationOperator = new ScatterPlot(1000,600,spatialRDD.boundaryEnvelope,ColorizeOption.ZAXIS,false,false);
+			ScatterPlot visualizationOperator = new ScatterPlot(1000,600,spatialRDD.boundaryEnvelope,ColorizeOption.EARTHOBSERVATION,false,false);
 			visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.BLUE, true);
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
 			BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();

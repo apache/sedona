@@ -111,7 +111,7 @@ public class ScatterplotTest {
 		SparkConf sparkConf = new SparkConf().setAppName("ScatterplotTest").setMaster("local[4]");
 		sparkContext = new JavaSparkContext(sparkConf);
         Logger.getLogger("org.apache").setLevel(Level.WARN);
-		Logger.getLogger("org.datasyslab").setLevel(Level.INFO);
+		Logger.getLogger("org.datasyslab").setLevel(Level.DEBUG);
 		Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
         
@@ -211,7 +211,7 @@ public class ScatterplotTest {
 	@Test
 	public void testPointRDDVisualizationWithParallelRendering() throws Exception {
 		PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
-		ScatterPlot visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary, ColorizeOption.UNIFORMCOLOR,
+		ScatterPlot visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary, ColorizeOption.NORMAL,
 				false, 4, 4, true, false);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);

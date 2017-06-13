@@ -36,7 +36,7 @@ public class ChoroplethMap extends VisualizationOperator{
 	 */
 	public ChoroplethMap(int resolutionX, int resolutionY, Envelope datasetBoundary,
 			boolean reverseSpatialCoordinate) {
-		super(resolutionX, resolutionY, datasetBoundary, ColorizeOption.UNIFORMCOLOR, reverseSpatialCoordinate,-1,-1,false,false,false);
+		super(resolutionX, resolutionY, datasetBoundary, ColorizeOption.NORMAL, reverseSpatialCoordinate,-1,-1,false,false,false);
 	}
 	
 	/**
@@ -50,7 +50,7 @@ public class ChoroplethMap extends VisualizationOperator{
 	 */
 	public ChoroplethMap(int resolutionX, int resolutionY, Envelope datasetBoundary,
 			boolean reverseSpatialCoordinate, boolean generateVectorImage) {
-		super(resolutionX, resolutionY, datasetBoundary, ColorizeOption.UNIFORMCOLOR, reverseSpatialCoordinate,-1,-1,false,false,generateVectorImage);
+		super(resolutionX, resolutionY, datasetBoundary, ColorizeOption.NORMAL, reverseSpatialCoordinate,-1,-1,false,false,generateVectorImage);
 	}
 	
 	/**
@@ -66,7 +66,7 @@ public class ChoroplethMap extends VisualizationOperator{
 	 */
 	public ChoroplethMap(int resolutionX, int resolutionY, Envelope datasetBoundary,boolean reverseSpatialCoordinate,
 			int partitionX, int partitionY, boolean parallelRenderImage) {
-		super(resolutionX, resolutionY, datasetBoundary, ColorizeOption.UNIFORMCOLOR, reverseSpatialCoordinate,
+		super(resolutionX, resolutionY, datasetBoundary, ColorizeOption.NORMAL, reverseSpatialCoordinate,
 				partitionX, partitionY, false, parallelRenderImage,false);
 	}
 
@@ -84,7 +84,7 @@ public class ChoroplethMap extends VisualizationOperator{
 	 */
 	public ChoroplethMap(int resolutionX, int resolutionY, Envelope datasetBoundary,boolean reverseSpatialCoordinate,
 			int partitionX, int partitionY, boolean parallelRenderImage, boolean generateVectorImage) {
-		super(resolutionX, resolutionY, datasetBoundary, ColorizeOption.UNIFORMCOLOR, reverseSpatialCoordinate,
+		super(resolutionX, resolutionY, datasetBoundary, ColorizeOption.NORMAL, reverseSpatialCoordinate,
 				partitionX, partitionY, false, parallelRenderImage,generateVectorImage);
 	}
 	

@@ -128,17 +128,16 @@ public class Pixel implements Serializable{
      */
     @Override
     public boolean equals(Object o) {
-        /*
-        if (o == this) return true;
-        if (!(o instanceof Pixel)) {
-            return false;
-        }
-        Pixel pixel = (Pixel) o;
-        return this.getX() == pixel.getX() && this.getY() == pixel.getY() && this.getCurrentPartitionId() == pixel.getCurrentPartitionId()
-                && this.isDuplicate() == pixel.isDuplicate();
-                */
-        return this.hashCode() == o.hashCode();
 
+        /*
+        Pixel anotherObject = (Pixel) o;
+        if(this.hashCode()==anotherObject.hashCode()&&this.getCurrentPartitionId()==anotherObject.getCurrentPartitionId()&&this.isDuplicate()==anotherObject.isDuplicate())
+        {
+            return true;
+        }
+        else return false;
+        */
+        return this.hashCode()==o.hashCode();
     }
 
 
