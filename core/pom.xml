@@ -102,6 +102,17 @@
             <artifactId>gt-epsg-extension</artifactId>
             <version>${geotools.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-shapefile</artifactId>
+            <version>${geotools.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vividsolutions</groupId>
+                    <artifactId>jts</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <!-- Test -->
         <dependency>
             <groupId>junit</groupId>
