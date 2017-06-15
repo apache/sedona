@@ -8,6 +8,7 @@ import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.FeatureSource;
 import org.geotools.feature.FeatureCollection;
+import org.geotools.feature.FeatureIterator;
 import org.junit.*;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -17,7 +18,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -40,12 +43,12 @@ public class ShapeRDDTest implements Serializable{
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
         //Hard code to a file in resource folder. But you can replace it later in the try-catch field in your hdfs system.
-        InputLocation = ShapeRDDTest.class.getClassLoader().getResource("shapefiles/polygon").getPath();
     }
 
     @Test
     public void testLoadShapeFile() throws IOException {
         // load shape with geotool.shapefile
+        InputLocation = ShapeRDDTest.class.getClassLoader().getResource("shapefiles/polygon").getPath();
         File file = new File(InputLocation);
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("url", file.toURI().toURL());
@@ -58,6 +61,110 @@ public class ShapeRDDTest implements Serializable{
         // load shapes with our tool
         ShapeRDD shapeRDD = new ShapeRDD(InputLocation,sc);
         Assert.assertEquals(shapeRDD.getShapeWritableRDD().collect().size(), collection.size());
+    }
+
+    @Test
+    public void testLoadShapeFilePolygon() throws IOException{
+        InputLocation = ShapeRDDTest.class.getClassLoader().getResource("shapefiles/polygon").getPath();
+        // load shape with geotool.shapefile
+        File file = new File(InputLocation);
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("url", file.toURI().toURL());
+        DataStore dataStore = DataStoreFinder.getDataStore(map);
+        String typeName = dataStore.getTypeNames()[0];
+        FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore
+                .getFeatureSource(typeName);
+        Filter filter = Filter.INCLUDE;
+        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures(filter);
+        FeatureIterator<SimpleFeature> features = collection.features();
+        ArrayList<String> featureTexts = new ArrayList<String>();
+        while(features.hasNext()){
+            SimpleFeature feature = features.next();
+            featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
+        }
+        final Iterator<String> featureIterator = featureTexts.iterator();
+        ShapeRDD shapeRDD = new ShapeRDD(InputLocation,sc);
+        for (com.vividsolutions.jts.geom.Geometry geometry : shapeRDD.getShapeWritableRDD().collect()) {
+            Assert.assertEquals(featureIterator.next(), geometry.toText());
+        }
+    }
+
+    @Test
+    public void testLoadShapeFilePolyLine() throws IOException{
+        InputLocation = ShapeRDDTest.class.getClassLoader().getResource("shapefiles/polyline").getPath();
+        // load shape with geotool.shapefile
+        File file = new File(InputLocation);
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("url", file.toURI().toURL());
+        DataStore dataStore = DataStoreFinder.getDataStore(map);
+        String typeName = dataStore.getTypeNames()[0];
+        FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore
+                .getFeatureSource(typeName);
+        Filter filter = Filter.INCLUDE;
+        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures(filter);
+        FeatureIterator<SimpleFeature> features = collection.features();
+        ArrayList<String> featureTexts = new ArrayList<String>();
+        while(features.hasNext()){
+            SimpleFeature feature = features.next();
+            featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
+        }
+        final Iterator<String> featureIterator = featureTexts.iterator();
+        ShapeRDD shapeRDD = new ShapeRDD(InputLocation,sc);
+        for (com.vividsolutions.jts.geom.Geometry geometry : shapeRDD.getShapeWritableRDD().collect()) {
+            Assert.assertEquals(featureIterator.next(), geometry.toText());
+        }
+    }
+
+    @Test
+    public void testLoadShapeFileMultiPoint() throws IOException{
+        InputLocation = ShapeRDDTest.class.getClassLoader().getResource("shapefiles/multipoint").getPath();
+        // load shape with geotool.shapefile
+        File file = new File(InputLocation);
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("url", file.toURI().toURL());
+        DataStore dataStore = DataStoreFinder.getDataStore(map);
+        String typeName = dataStore.getTypeNames()[0];
+        FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore
+                .getFeatureSource(typeName);
+        Filter filter = Filter.INCLUDE;
+        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures(filter);
+        FeatureIterator<SimpleFeature> features = collection.features();
+        ArrayList<String> featureTexts = new ArrayList<String>();
+        while(features.hasNext()){
+            SimpleFeature feature = features.next();
+            featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
+        }
+        final Iterator<String> featureIterator = featureTexts.iterator();
+        ShapeRDD shapeRDD = new ShapeRDD(InputLocation,sc);
+        for (com.vividsolutions.jts.geom.Geometry geometry : shapeRDD.getShapeWritableRDD().collect()) {
+            Assert.assertEquals(featureIterator.next(), geometry.toText());
+        }
+    }
+
+    @Test
+    public void testLoadShapeFilePoint() throws IOException{
+        InputLocation = ShapeRDDTest.class.getClassLoader().getResource("shapefiles/point").getPath();
+        // load shape with geotool.shapefile
+        File file = new File(InputLocation);
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("url", file.toURI().toURL());
+        DataStore dataStore = DataStoreFinder.getDataStore(map);
+        String typeName = dataStore.getTypeNames()[0];
+        FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore
+                .getFeatureSource(typeName);
+        Filter filter = Filter.INCLUDE;
+        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures(filter);
+        FeatureIterator<SimpleFeature> features = collection.features();
+        ArrayList<String> featureTexts = new ArrayList<String>();
+        while(features.hasNext()){
+            SimpleFeature feature = features.next();
+            featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
+        }
+        final Iterator<String> featureIterator = featureTexts.iterator();
+        ShapeRDD shapeRDD = new ShapeRDD(InputLocation,sc);
+        for (com.vividsolutions.jts.geom.Geometry geometry : shapeRDD.getShapeWritableRDD().collect()) {
+            Assert.assertEquals(featureIterator.next(), geometry.toText());
+        }
     }
 
     @After
