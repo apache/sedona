@@ -1,6 +1,7 @@
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils;
 
 import com.vividsolutions.jts.geom.*;
+import io.netty.buffer.ByteBuf;
 import org.apache.commons.io.EndianUtils;
 import org.geotools.geometry.jts.coordinatesequence.CoordinateSequences;
 
@@ -9,6 +10,8 @@ import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,51 +53,77 @@ public class ShpParseUtil implements ShapeFileConst{
         return contentArray;
     }
 
+    public static CoordinateSequence readCoordinates(ByteBuffer byteBuffer, int numPoints){
+        CoordinateSequence coordinateSequence = geometryFactory.getCoordinateSequenceFactory().create(numPoints,2);
+        DoubleBuffer dbuffer = byteBuffer.asDoubleBuffer();
+        double[] ordinates = new double[numPoints*2];
+        dbuffer.get(ordinates);
+        for(int i = 0;i < numPoints; ++i){
+            coordinateSequence.setOrdinate(i, 0, ordinates[i*2]);
+            coordinateSequence.setOrdinate(i, 1, ordinates[i*2 + 1]);
+        }
+        return coordinateSequence;
+    }
+
     public static int parseRecordHeadID(DataInputStream inputStream) throws IOException{
         int id = inputStream.readInt();
         return id;
     }
 
-    public static void validateShapeType(DataInputStream inputStream)
+    public static void validateShapeType(ByteBuffer byteBuffer)
             throws IOException, ShapeTypeNotMatchException
     {
-        int recordTokenType = EndianUtils.swapInteger(inputStream.readInt());
+        int recordTokenType = byteBuffer.getInt();
         if(recordTokenType != currentTokenType) throw new ShapeTypeNotMatchException();
     }
 
-    public static Point parsePoint(DataInputStream inputStream)
+    public static Point parsePoint(ByteBuffer byteBuffer)
             throws IOException
     {
-        double x = EndianUtils.swapDouble(inputStream.readDouble());
-        double y = EndianUtils.swapDouble(inputStream.readDouble());
-//        byte[] bytesx = new byte[DOUBLE_LENGTH];
-//        inputStream.readFully(bytesx);
-//        double x = EndianUtils.swapDouble(ByteBuffer.wrap(bytesx).getDouble());
-//        inputStream.readFully(bytesx);
-//        double y = ByteBuffer.wrap(bytesx).getDouble();
+        double x = byteBuffer.getDouble();
+        double y = byteBuffer.getDouble();
         Point point = geometryFactory.createPoint(new Coordinate(x, y));
         return point;
+    }
+
+    /**
+     * This is for parsing objects with shape type = MultiPoint
+     * @param byteBuffer
+     * @return
+     * @throws IOException
+     */
+    public static MultiPoint parseMultiPoints(ByteBuffer byteBuffer)
+            throws IOException
+    {
+        byteBuffer.position(byteBuffer.position() + 4 * DOUBLE_LENGTH);
+        int numPoints = byteBuffer.getInt();
+        CoordinateSequence coordinateSequence = readCoordinates(byteBuffer, numPoints);
+        MultiPoint multiPoint = geometryFactory.createMultiPoint(coordinateSequence);
+        return multiPoint;
     }
 
 
     /**
      * This is for parsing records with token type = 5(Polygon). It will return a Polygon object with a MBR as bounding box.
-     * @param inputStream
+     * @param byteBuffer
      * @return
      * @throws IOException
      * @throws ShapeTypeNotMatchException
      */
-    public static MultiPolygon parsePolygon(DataInputStream inputStream)
+    public static MultiPolygon parsePolygon(ByteBuffer byteBuffer)
             throws IOException
     {
-        LinearRing boundBox = parseBoundingBox(inputStream);
-        int numRings = EndianUtils.swapInteger(inputStream.readInt());
-        int numPoints = EndianUtils.swapInteger(inputStream.readInt());
+        byteBuffer.position(byteBuffer.position() + 4 * DOUBLE_LENGTH);
+        int numRings = byteBuffer.getInt();
+        int numPoints = byteBuffer.getInt();
         int[] ringsOffsets = new int[numRings+1];
         for(int i = 0;i < numRings; ++i){
-            ringsOffsets[i] = EndianUtils.swapInteger(inputStream.readInt());
+            ringsOffsets[i] = byteBuffer.getInt();
         }
         ringsOffsets[numRings] = numPoints;
+
+        //read all points out
+        CoordinateSequence coordinateSequence = readCoordinates(byteBuffer, numPoints);
 
         List<LinearRing> holes = new ArrayList<LinearRing>();
         List<LinearRing> shells = new ArrayList<LinearRing>();
@@ -102,16 +131,13 @@ public class ShpParseUtil implements ShapeFileConst{
         // reading coordinates and assign to holes or shells
         for(int i = 0;i < numRings; ++i){
             int readScale = ringsOffsets[i+1] - ringsOffsets[i];
-            Coordinate[] coordinates = new Coordinate[readScale];
+            CoordinateSequence csRing = geometryFactory.getCoordinateSequenceFactory().create(readScale,2);
             for(int j = 0;j < readScale; ++j){
-                coordinates[j] = parsePoint(inputStream).getCoordinate();
+                csRing.setOrdinate(j, 0, coordinateSequence.getOrdinate(ringsOffsets[i]+j, 0));
+                csRing.setOrdinate(j, 1, coordinateSequence.getOrdinate(ringsOffsets[i]+j, 1));
             }
-            if(coordinates.length < 3) continue; // if points less than 3, it's not a ring, we just abandon it
-            LinearRing ring = geometryFactory.createLinearRing(coordinates);
-            CoordinateSequence csRing = geometryFactory.getCoordinateSequenceFactory().create(coordinates);
-            if(coordinates[0].x == -99.602176){
-                int k = 0;
-            }
+            if(csRing.size() < 3) continue; // if points less than 3, it's not a ring, we just abandon it
+            LinearRing ring = geometryFactory.createLinearRing(csRing);
             if(CoordinateSequences.isCCW(csRing)){// is a hole
                 holes.add(ring);
             }else{// current coordinate sequance is a
@@ -158,49 +184,33 @@ public class ShpParseUtil implements ShapeFileConst{
         return geometryFactory.createMultiPolygon(polygons);
     }
 
-    /**
-     * This is for parsing objects with shape type = MultiPoint
-     * @param inputStream
-     * @return
-     * @throws IOException
-     */
-    public static MultiPoint parseMultiPoints(DataInputStream inputStream)
-            throws IOException
-    {
-        LinearRing boundBox = parseBoundingBox(inputStream);
-        int numPoints = EndianUtils.swapInteger(inputStream.readInt());
-        Point[] points = new Point[numPoints];
-        for(int i = 0;i < numPoints; ++i){
-            points[i] = parsePoint(inputStream);
-        }
-        MultiPoint multiPoint = geometryFactory.createMultiPoint(points);
-        return multiPoint;
-    }
 
     /**
      * This is for parsing objects with shape type = PolyLine
-     * @param inputStream
+     * @param byteBuffer
      * @return
      */
-    public static MultiLineString parsePolyLine(DataInputStream inputStream)
-    throws IOException
+    public static MultiLineString parsePolyLine(ByteBuffer byteBuffer)
+            throws IOException
     {
-        LinearRing boundBox = parseBoundingBox(inputStream);
-        int numParts = EndianUtils.swapInteger(inputStream.readInt());
-        int numPoints = EndianUtils.swapInteger(inputStream.readInt());
+        byteBuffer.position(byteBuffer.position() + 4 * DOUBLE_LENGTH);
+        int numParts = byteBuffer.getInt();
+        int numPoints = byteBuffer.getInt();
         int[] stringOffsets = new int[numParts+1];
         for(int i = 0;i < numParts; ++i){
-            stringOffsets[i] = EndianUtils.swapInteger(inputStream.readInt());
+            stringOffsets[i] = byteBuffer.getInt();
         }
+        CoordinateSequence coordinateSequence = readCoordinates(byteBuffer, numPoints);
         stringOffsets[numParts] = numPoints;
         LineString[] lines = new LineString[numParts];
         for(int i = 0;i < numParts; ++i){
             int readScale = stringOffsets[i+1] - stringOffsets[i];
-            Coordinate[] coordinates = new Coordinate[readScale];
+            CoordinateSequence csString = geometryFactory.getCoordinateSequenceFactory().create(readScale,2);
             for(int j = 0;j < readScale; ++j){
-                coordinates[j] = parsePoint(inputStream).getCoordinate();
+                csString.setOrdinate(j, 0, coordinateSequence.getOrdinate(stringOffsets[i]+j, 0));
+                csString.setOrdinate(j, 1, coordinateSequence.getOrdinate(stringOffsets[i]+j, 1));
             }
-            lines[i] = geometryFactory.createLineString(coordinates);
+            lines[i] = geometryFactory.createLineString(csString);
         }
         return geometryFactory.createMultiLineString(lines);
     }
@@ -230,23 +240,25 @@ public class ShpParseUtil implements ShapeFileConst{
 
     public static Geometry primitiveToShape(byte[] sourceBytes) throws IOException {
         DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(sourceBytes));
+        ByteBuffer byteBuffer = ByteBuffer.wrap(sourceBytes);
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         try{
-            validateShapeType(inputStream);
+            validateShapeType(byteBuffer);
         }catch(ShapeTypeNotMatchException e){
             e.printStackTrace();
         }
         switch(currentTokenType){
             case 1:{
-                return parsePoint(inputStream);
+                return parsePoint(byteBuffer);
             }
             case 3:{
-                return parsePolyLine(inputStream);
+                return parsePolyLine(byteBuffer);
             }
             case 5:{
-                return parsePolygon(inputStream);
+                return parsePolygon(byteBuffer);
             }
             case 8:{
-                return parseMultiPoints(inputStream);
+                return parseMultiPoints(byteBuffer);
             }
             default:{
                 return null;
