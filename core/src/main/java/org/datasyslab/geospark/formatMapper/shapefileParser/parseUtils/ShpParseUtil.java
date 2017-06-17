@@ -1,5 +1,6 @@
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils;
 
+import com.vividsolutions.jts.algorithm.CGAlgorithms;
 import com.vividsolutions.jts.geom.*;
 import io.netty.buffer.ByteBuf;
 import org.apache.commons.io.EndianUtils;
@@ -36,8 +37,6 @@ public class ShpParseUtil implements ShapeFileConst{
         int fileVersion = EndianUtils.swapInteger(inputStream.readInt());
         currentTokenType = EndianUtils.swapInteger(inputStream.readInt());
         inputStream.skip(HEAD_BOX_NUM * DOUBLE_LENGTH);
-        System.out.println();
-
     }
 
     public static void initializeGeometryFactory(){
@@ -144,7 +143,6 @@ public class ShpParseUtil implements ShapeFileConst{
                 shells.add(ring);
             }
         }
-
         // assign shells and holes to polygons
         Polygon[] polygons = null;
         //if only one shell, assign all holes to it directly. If there is no holes, we set each shell as polygon
@@ -163,15 +161,38 @@ public class ShpParseUtil implements ShapeFileConst{
             }
             // for every hole, find home
             for(LinearRing hole : holes){
+                //prepare test objects
+                LinearRing testRing = hole;
                 LinearRing minShell = null;
+                Envelope minEnv = null;
+                Envelope testEnv = testRing.getEnvelopeInternal();
+                Coordinate testPt = testRing.getCoordinateN(0);
+                LinearRing tryRing;
+
                 for(LinearRing shell : shells){
-                    if(shell.contains(hole) && ( minShell == null || minShell.contains(shell) )) minShell = shell;
+                    tryRing = shell;
+                    Envelope tryEnv = tryRing.getEnvelopeInternal();
+                    if (minShell != null) {
+                        minEnv = minShell.getEnvelopeInternal();
+                    }
+                    boolean isContained = false;
+                    Coordinate[] coordList = tryRing.getCoordinates();
+                    if (tryEnv.contains(testEnv)
+                            && (CGAlgorithms.isPointInRing(testPt, coordList) || (pointInList(
+                            testPt, coordList)))) {
+                        isContained = true;
+                    }
+                    if (isContained) {
+                        if ((minShell == null) || minEnv.contains(tryEnv)) {
+                            minShell = tryRing;
+                        }
+                    }
                 }
                 if(minShell == null){// no shell contains this hole, set it to shell
                     shells.add(hole);
                     holesWithinShells.add(new ArrayList<LinearRing>());
                 }else{// contained by a shell, assign hole to it
-                    holesWithinShells.get(holesWithinShells.indexOf(minShell)).add(hole);
+                    holesWithinShells.get(shells.indexOf(minShell)).add(hole);
                 }
             }
             // create multi polygon
@@ -182,6 +203,30 @@ public class ShpParseUtil implements ShapeFileConst{
             }
         }
         return geometryFactory.createMultiPolygon(polygons);
+    }
+
+    /**
+     * returns true if testPoint is a point in the pointList list.
+     * @param testPoint
+     * @param pointList
+     * @return
+     */
+    static boolean pointInList(Coordinate testPoint, Coordinate[] pointList) {
+        Coordinate p;
+
+        for (int t = pointList.length - 1; t >= 0; t--) {
+            p = pointList[t];
+
+            // nan test; x!=x iff x is nan
+            if ((testPoint.x == p.x)
+                    && (testPoint.y == p.y)
+                    && ((testPoint.z == p.z) || (!(testPoint.z == testPoint.z)))
+                    ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 
