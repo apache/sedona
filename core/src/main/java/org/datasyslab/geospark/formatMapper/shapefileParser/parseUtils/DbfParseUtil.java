@@ -2,11 +2,8 @@ package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils;
 
 import org.apache.commons.io.EndianUtils;
 import org.apache.hadoop.io.Text;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.ShapeFileConst;
-import scala.Char;
 
 import java.io.DataInputStream;
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +13,9 @@ import java.util.List;
  */
 public class DbfParseUtil implements ShapeFileConst {
 
+    /**
+     * Information abstracted from .dbf file header
+     */
     public static class DbfInfoBundle{
         /** number of record in current .dbf file */
         public int numRecord = 0;
@@ -39,12 +39,20 @@ public class DbfParseUtil implements ShapeFileConst {
 
     }
 
+    /** current info bundle */
     public static DbfInfoBundle infoBundle = null;
 
+    /** reset info bundle, call it before starting parsing a new .dbf file */
     public static void renewParser(){
         infoBundle = null;
     }
 
+    /**
+     * parse header of .dbf file and draw information for next step
+     * @param inputStream
+     * @return
+     * @throws IOException
+     */
     public static DbfInfoBundle parseFileHead(DataInputStream inputStream) throws IOException {
         //create info bundle
         infoBundle = new DbfInfoBundle();
@@ -102,6 +110,13 @@ public class DbfParseUtil implements ShapeFileConst {
         return infoBundle;
     }
 
+    /**
+     * draw raw byte array of effective record
+     * @param inputStream
+     * @param dbfInfo
+     * @return
+     * @throws IOException
+     */
     public static byte[] parsePrimitiveRecord(DataInputStream inputStream, DbfInfoBundle dbfInfo) throws IOException {
         if(dbfInfo.isDone()) return null;
         byte flag = inputStream.readByte();
@@ -118,6 +133,12 @@ public class DbfParseUtil implements ShapeFileConst {
         return primitiveBytes;
     }
 
+    /**
+     * abstract attributes from primitive bytes according to field descriptors.
+     * @param inputStream
+     * @return
+     * @throws IOException
+     */
     public static String primitiveToAttributes(DataInputStream inputStream) throws IOException {
         byte[] delimiter = {'\t'};
         Text attributes = new Text();

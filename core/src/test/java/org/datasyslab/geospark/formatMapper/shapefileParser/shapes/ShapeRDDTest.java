@@ -45,6 +45,10 @@ public class ShapeRDDTest implements Serializable{
         //Hard code to a file in resource folder. But you can replace it later in the try-catch field in your hdfs system.
     }
 
+    /**
+     * Test if shapeRDD get correct number of shapes from .shp file
+     * @throws IOException
+     */
     @Test
     public void testLoadShapeFile() throws IOException {
         // load shape with geotool.shapefile
@@ -63,6 +67,10 @@ public class ShapeRDDTest implements Serializable{
         Assert.assertEquals(shapeRDD.getShapeWritableRDD().collect().size(), collection.size());
     }
 
+    /**
+     * test if shapeRDD load .shp fie with shape type = Polygon correctly.
+     * @throws IOException
+     */
     @Test
     public void testLoadShapeFilePolygon() throws IOException{
         InputLocation = ShapeRDDTest.class.getClassLoader().getResource("shapefiles/polygon").getPath();
@@ -89,6 +97,10 @@ public class ShapeRDDTest implements Serializable{
         }
     }
 
+    /**
+     * test if shapeRDD load .shp fie with shape type = PolyLine correctly.
+     * @throws IOException
+     */
     @Test
     public void testLoadShapeFilePolyLine() throws IOException{
         InputLocation = ShapeRDDTest.class.getClassLoader().getResource("shapefiles/polyline").getPath();
@@ -115,6 +127,10 @@ public class ShapeRDDTest implements Serializable{
         }
     }
 
+    /**
+     * Test if shapeRDD load shape type = MultiPoint correctly.
+     * @throws IOException
+     */
     @Test
     public void testLoadShapeFileMultiPoint() throws IOException{
         InputLocation = ShapeRDDTest.class.getClassLoader().getResource("shapefiles/multipoint").getPath();
@@ -141,8 +157,42 @@ public class ShapeRDDTest implements Serializable{
         }
     }
 
+    /**
+     * Test if shapeRDD load shape type = Point correctly.
+     * @throws IOException
+     */
     @Test
     public void testLoadShapeFilePoint() throws IOException{
+        InputLocation = ShapeRDDTest.class.getClassLoader().getResource("shapefiles/point").getPath();
+        // load shape with geotool.shapefile
+        File file = new File(InputLocation);
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("url", file.toURI().toURL());
+        DataStore dataStore = DataStoreFinder.getDataStore(map);
+        String typeName = dataStore.getTypeNames()[0];
+        FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore
+                .getFeatureSource(typeName);
+        Filter filter = Filter.INCLUDE;
+        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures(filter);
+        FeatureIterator<SimpleFeature> features = collection.features();
+        ArrayList<String> featureTexts = new ArrayList<String>();
+        while(features.hasNext()){
+            SimpleFeature feature = features.next();
+            featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
+        }
+        final Iterator<String> featureIterator = featureTexts.iterator();
+        ShapeRDD shapeRDD = new ShapeRDD(InputLocation,sc);
+        for (com.vividsolutions.jts.geom.Geometry geometry : shapeRDD.getShapeWritableRDD().collect()) {
+            Assert.assertEquals(featureIterator.next(), geometry.toText());
+        }
+    }
+
+    /**
+     * Test if shapeRDD load .dbf file correctly
+     * @throws IOException
+     */
+    @Test
+    public void testLoadDbfFile() throws IOException{
         InputLocation = ShapeRDDTest.class.getClassLoader().getResource("shapefiles/point").getPath();
         // load shape with geotool.shapefile
         File file = new File(InputLocation);
