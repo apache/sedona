@@ -3,14 +3,12 @@ package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.BytesWritable;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.VoidFunction;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.DbfParseUtil;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.ShpParseUtil;
 import scala.Tuple2;
 
 import java.io.ByteArrayInputStream;
@@ -28,21 +26,23 @@ public class ShapeRDD implements Serializable{
 
     public ShapeRDD(String filePath, JavaSparkContext sparkContext){
         geometryFactory = new GeometryFactory();
-        JavaPairRDD<ShapeKey, PrimitiveShapeWritable> shapePrimitiveRdd = sparkContext.newAPIHadoopFile(
+        JavaPairRDD<ShapeKey, PrimitiveShape> shapePrimitiveRdd = sparkContext.newAPIHadoopFile(
                 filePath,
                 ShapeInputFormat.class,
                 ShapeKey.class,
-                PrimitiveShapeWritable.class,
+                PrimitiveShape.class,
                 new Configuration()
         );
         shapeRDD = shapePrimitiveRdd.map(PrimitiveToShape);
     }
 
-    private static final Function<Tuple2<ShapeKey, PrimitiveShapeWritable>, Geometry> PrimitiveToShape
-            = new Function<Tuple2<ShapeKey, PrimitiveShapeWritable>, Geometry>(){
-        public Geometry call(Tuple2<ShapeKey, PrimitiveShapeWritable> primitiveTuple) throws Exception {
+    private static final Function<Tuple2<ShapeKey, PrimitiveShape>, Geometry> PrimitiveToShape
+            = new Function<Tuple2<ShapeKey, PrimitiveShape>, Geometry>(){
+        public Geometry call(Tuple2<ShapeKey, PrimitiveShape> primitiveTuple) throws Exception {
             Geometry shape = null;
-            shape = ShpParseUtil.primitiveToShape(primitiveTuple._2().getPrimitiveRecord().getBytes(), geometryFactory);
+            // parse bytes to shape
+            shape = primitiveTuple._2().getShape(geometryFactory);
+            // parse bytes to attributes
             if(primitiveTuple._2().getPrimitiveAttribute() != null){
                 DataInputStream dbfInputStream = new DataInputStream(
                         new ByteArrayInputStream(primitiveTuple._2().getPrimitiveAttribute().getBytes()));

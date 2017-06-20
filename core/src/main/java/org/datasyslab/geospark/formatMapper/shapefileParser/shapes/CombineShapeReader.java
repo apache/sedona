@@ -13,7 +13,7 @@ import java.io.IOException;
 /**
  * Created by zongsizhang on 6/1/17.
  */
-public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShapeWritable> {
+public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
 
     /** id of input path of .shp file */
     private FileSplit shpSplit = null;
@@ -40,7 +40,7 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShapeWri
     private final static String SHX_SUFFIX = "shx";
 
     /** value of current record */
-    private PrimitiveShapeWritable value = null;
+    private PrimitiveShape value = null;
 
     /** flag of whether .dbf exists */
     private boolean hasDbf = false;
@@ -101,8 +101,8 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShapeWri
         return shapeFileReader.getCurrentKey();
     }
 
-    public PrimitiveShapeWritable getCurrentValue() throws IOException, InterruptedException {
-        value = new PrimitiveShapeWritable();
+    public PrimitiveShape getCurrentValue() throws IOException, InterruptedException {
+        value = new PrimitiveShape();
         value.setPrimitiveRecord(shapeFileReader.getCurrentValue());
         if(hasDbf && hasNextDbf) value.setPrimitiveAttribute(dbfFileReader.getCurrentValue());
         return value;

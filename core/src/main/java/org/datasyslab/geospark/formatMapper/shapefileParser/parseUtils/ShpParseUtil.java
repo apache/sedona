@@ -59,12 +59,4 @@ public class ShpParseUtil implements ShapeFileConst{
         return false;
     }
 
-    public static Geometry primitiveToShape(byte[] sourceBytes, GeometryFactory geometryFactory) throws IOException {
-        ShapeReader reader = new ByteBufferReader(sourceBytes, false);
-        ShapeType type = ShapeType.getType(reader.readInt());
-        ShapeParser parser = type.getParser(geometryFactory);
-        return parser.parserShape(reader);
-    }
-
-
 }

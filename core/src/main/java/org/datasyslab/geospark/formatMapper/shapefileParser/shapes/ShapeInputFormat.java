@@ -12,8 +12,8 @@ import java.io.IOException;
 /**
  * Created by zongsizhang on 5/3/17.
  */
-public class ShapeInputFormat extends CombineFileInputFormat<ShapeKey, PrimitiveShapeWritable> {
-    public RecordReader<ShapeKey, PrimitiveShapeWritable> createRecordReader(InputSplit split, TaskAttemptContext context) throws IOException {
+public class ShapeInputFormat extends CombineFileInputFormat<ShapeKey, PrimitiveShape> {
+    public RecordReader<ShapeKey, PrimitiveShape> createRecordReader(InputSplit split, TaskAttemptContext context) throws IOException {
         return new CombineShapeReader();
     }
 

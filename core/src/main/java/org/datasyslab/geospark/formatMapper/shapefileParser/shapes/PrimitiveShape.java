@@ -1,17 +1,20 @@
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.Writable;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.ByteBufferReader;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.ShapeReader;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeParser;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeType;
 
-import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * Created by zongsizhang on 6/1/17.
  */
-public class PrimitiveShapeWritable implements Writable{
+public class PrimitiveShape implements Serializable{
 
     /** primitive bytes of one record */
     private BytesWritable primitiveRecord = null;
@@ -26,13 +29,9 @@ public class PrimitiveShapeWritable implements Writable{
         return primitiveRecord;
     }
 
-    public void setPrimitiveRecord(BytesWritable primitiveRecord) {
-        this.primitiveRecord = primitiveRecord;
-    }
-
-
-    public void write(DataOutput dataOutput) throws IOException {
-
+    public void setPrimitiveRecord(ShpRecord shpRecord) {
+        this.primitiveRecord = shpRecord.getBytes();
+        shapeType = ShapeType.getType(shpRecord.getTypeID());
     }
 
     public BytesWritable getPrimitiveAttribute() {
@@ -43,15 +42,14 @@ public class PrimitiveShapeWritable implements Writable{
         this.primitiveAttribute = primitiveAttribute;
     }
 
-    public void readFields(DataInput dataInput) throws IOException {
-
-    }
-
     public ShapeType getShapeType() {
         return shapeType;
     }
 
-    public void setShapeType(ShapeType shapeType) {
-        this.shapeType = shapeType;
+    public Geometry getShape(GeometryFactory geometryFactory) throws IOException {
+        ShapeParser parser = shapeType.getParser(geometryFactory);
+        ShapeReader reader = new ByteBufferReader(primitiveRecord.getBytes(), false);
+        return parser.parserShape(reader);
     }
+
 }

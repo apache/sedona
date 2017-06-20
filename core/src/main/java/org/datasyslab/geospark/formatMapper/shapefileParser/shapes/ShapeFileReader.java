@@ -16,13 +16,13 @@ import java.io.IOException;
 /**
  * Created by zongsizhang on 5/3/17.
  */
-public class ShapeFileReader extends RecordReader<ShapeKey, BytesWritable> {
+public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
 
     /** record id */
     private ShapeKey recordKey = null;
 
     /** primitive bytes value */
-    private BytesWritable recordContent = null;
+    private ShpRecord recordContent = null;
 
     /** inputstream for .shp file */
     private FSDataInputStream shpInputStream = null;
@@ -31,7 +31,6 @@ public class ShapeFileReader extends RecordReader<ShapeKey, BytesWritable> {
     ShpFileParser parser = null;
 
     public void initialize(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
-        ShpParseUtil.initializeGeometryFactory();
         FileSplit fileSplit = (FileSplit)split;
         Path filePath = fileSplit.getPath();
         FileSystem fileSys = filePath.getFileSystem(context.getConfiguration());
@@ -42,12 +41,10 @@ public class ShapeFileReader extends RecordReader<ShapeKey, BytesWritable> {
     }
 
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        if(ShpParseUtil.remainLength <= 0) return false;
+        if(getProgress() >= 1) return false;
         recordKey = new ShapeKey();
-        recordContent = new BytesWritable();
         recordKey.setIndex(parser.parseRecordHeadID());
-        byte[] primitiveContent = parser.parseRecordPrimitiveContent();
-        recordContent.set(primitiveContent, 0, primitiveContent.length);
+        recordContent = parser.parseRecordPrimitiveContent();
         return true;
     }
 
@@ -55,7 +52,7 @@ public class ShapeFileReader extends RecordReader<ShapeKey, BytesWritable> {
         return recordKey;
     }
 
-    public BytesWritable getCurrentValue() throws IOException, InterruptedException {
+    public ShpRecord getCurrentValue() throws IOException, InterruptedException {
         return recordContent;
     }
 

@@ -4,6 +4,7 @@ import org.apache.commons.io.EndianUtils;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.DataInputStreamReader;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.ShapeFileConst;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.ShapeReader;
+import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShpRecord;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -42,13 +43,15 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
         reader.skip(HEAD_BOX_NUM * DOUBLE_LENGTH);
     }
 
-    public byte[] parseRecordPrimitiveContent() throws IOException{
+    public ShpRecord parseRecordPrimitiveContent() throws IOException{
+        // get length of record content
         int contentLength = reader.readInt();
         long recordLength = 16 * (contentLength + 4);
         remainLength -= recordLength;
-        byte[] contentArray = new byte[contentLength * 2];
+        int typeID = EndianUtils.swapInteger(reader.readInt());
+        byte[] contentArray = new byte[contentLength * 2 - INT_LENGTH];// exclude the 4 bytes we read for shape type
         reader.read(contentArray,0,contentArray.length);
-        return contentArray;
+        return new ShpRecord(contentArray, typeID);
     }
 
     public int parseRecordHeadID() throws IOException{
