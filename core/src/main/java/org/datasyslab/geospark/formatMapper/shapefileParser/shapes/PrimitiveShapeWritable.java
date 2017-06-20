@@ -2,6 +2,7 @@ package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Writable;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeType;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -17,6 +18,9 @@ public class PrimitiveShapeWritable implements Writable{
 
     /** primitive bytes from one record */
     private BytesWritable primitiveAttribute = null;
+
+    /** shape type */
+    ShapeType shapeType = ShapeType.NULL;
 
     public BytesWritable getPrimitiveRecord() {
         return primitiveRecord;
@@ -41,5 +45,13 @@ public class PrimitiveShapeWritable implements Writable{
 
     public void readFields(DataInput dataInput) throws IOException {
 
+    }
+
+    public ShapeType getShapeType() {
+        return shapeType;
+    }
+
+    public void setShapeType(ShapeType shapeType) {
+        this.shapeType = shapeType;
     }
 }

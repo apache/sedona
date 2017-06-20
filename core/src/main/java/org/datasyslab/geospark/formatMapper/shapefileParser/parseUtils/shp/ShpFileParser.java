@@ -57,7 +57,7 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
     }
 
     public float getProgress(){
-        return (float)remainLength / (float) fileLength;
+        return 1 - (float)remainLength / (float) fileLength;
     }
 
 }
