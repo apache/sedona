@@ -9,6 +9,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.ShpParseUtil;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShpFileParser;
 
 import java.io.IOException;
 
@@ -26,21 +27,26 @@ public class ShapeFileReader extends RecordReader<ShapeKey, BytesWritable> {
     /** inputstream for .shp file */
     private FSDataInputStream shpInputStream = null;
 
+    /** file parser */
+    ShpFileParser parser = null;
+
     public void initialize(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
         ShpParseUtil.initializeGeometryFactory();
         FileSplit fileSplit = (FileSplit)split;
         Path filePath = fileSplit.getPath();
         FileSystem fileSys = filePath.getFileSystem(context.getConfiguration());
         shpInputStream = fileSys.open(filePath);
-        ShpParseUtil.parseShapeFileHead(shpInputStream);
+        //assign inputstream to parser and parse file header to init;
+        parser = new ShpFileParser(shpInputStream);
+        parser.parseShapeFileHead();
     }
 
     public boolean nextKeyValue() throws IOException, InterruptedException {
         if(ShpParseUtil.remainLength <= 0) return false;
         recordKey = new ShapeKey();
         recordContent = new BytesWritable();
-        recordKey.setIndex(ShpParseUtil.parseRecordHeadID(shpInputStream));
-        byte[] primitiveContent = ShpParseUtil.parseRecordPrimitiveContent(shpInputStream);
+        recordKey.setIndex(parser.parseRecordHeadID());
+        byte[] primitiveContent = parser.parseRecordPrimitiveContent();
         recordContent.set(primitiveContent, 0, primitiveContent.length);
         return true;
     }
@@ -54,7 +60,7 @@ public class ShapeFileReader extends RecordReader<ShapeKey, BytesWritable> {
     }
 
     public float getProgress() throws IOException, InterruptedException {
-        return (float)(ShpParseUtil.fileLength - ShpParseUtil.remainLength) / (float) ShpParseUtil.fileLength;
+        return parser.getProgress();
     }
 
     public void close() throws IOException {

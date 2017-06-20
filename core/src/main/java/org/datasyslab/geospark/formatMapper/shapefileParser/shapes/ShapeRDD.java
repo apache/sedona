@@ -1,6 +1,7 @@
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.spark.api.java.JavaPairRDD;
@@ -23,9 +24,10 @@ public class ShapeRDD implements Serializable{
 
     JavaRDD<Geometry> shapeRDD;
 
-    JavaPairRDD<ShapeKey, BytesWritable> primitiveShapeRDD;
+    public static GeometryFactory geometryFactory;
 
     public ShapeRDD(String filePath, JavaSparkContext sparkContext){
+        geometryFactory = new GeometryFactory();
         JavaPairRDD<ShapeKey, PrimitiveShapeWritable> shapePrimitiveRdd = sparkContext.newAPIHadoopFile(
                 filePath,
                 ShapeInputFormat.class,
@@ -34,14 +36,13 @@ public class ShapeRDD implements Serializable{
                 new Configuration()
         );
         shapeRDD = shapePrimitiveRdd.map(PrimitiveToShape);
-        //shapeRDD.foreach(PrintShape);
     }
 
-    public static final Function<Tuple2<ShapeKey, PrimitiveShapeWritable>, Geometry> PrimitiveToShape
+    private static final Function<Tuple2<ShapeKey, PrimitiveShapeWritable>, Geometry> PrimitiveToShape
             = new Function<Tuple2<ShapeKey, PrimitiveShapeWritable>, Geometry>(){
         public Geometry call(Tuple2<ShapeKey, PrimitiveShapeWritable> primitiveTuple) throws Exception {
             Geometry shape = null;
-            shape = ShpParseUtil.primitiveToShape(primitiveTuple._2().getPrimitiveRecord().getBytes());
+            shape = ShpParseUtil.primitiveToShape(primitiveTuple._2().getPrimitiveRecord().getBytes(), geometryFactory);
             if(primitiveTuple._2().getPrimitiveAttribute() != null){
                 DataInputStream dbfInputStream = new DataInputStream(
                         new ByteArrayInputStream(primitiveTuple._2().getPrimitiveAttribute().getBytes()));
@@ -51,11 +52,13 @@ public class ShapeRDD implements Serializable{
         }
     };
 
-    public static final VoidFunction<Geometry> PrintShape = new VoidFunction<Geometry>() {
+    private static final VoidFunction<Geometry> PrintShape = new VoidFunction<Geometry>() {
         public void call(Geometry shape) throws Exception {
             System.out.println(shape.toText());
         }
     };
+
+
 
     public JavaRDD<Geometry> getShapeWritableRDD() {
         return shapeRDD;
