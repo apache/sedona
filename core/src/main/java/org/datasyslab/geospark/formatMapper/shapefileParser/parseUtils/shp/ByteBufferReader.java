@@ -1,4 +1,4 @@
-package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils;
+package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

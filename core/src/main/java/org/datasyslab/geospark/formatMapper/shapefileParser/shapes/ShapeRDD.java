@@ -8,7 +8,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.VoidFunction;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.DbfParseUtil;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.DbfParseUtil;
 import scala.Tuple2;
 
 import java.io.ByteArrayInputStream;

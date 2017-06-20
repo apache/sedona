@@ -1,4 +1,4 @@
-package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils;
+package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -39,7 +39,7 @@ public class DataInputStreamReader extends ShapeReader {
 
     @Override
     public void read(double[] doubles) throws IOException {
-        byte[] bytes = new byte[doubles.length * DOUBLE_LENGTH];
+        byte[] bytes = new byte[doubles.length * ShapeFileConst.DOUBLE_LENGTH];
         inputStream.readFully(bytes);
         DoubleBuffer doubleBuffer = ByteBuffer.wrap(bytes).asDoubleBuffer();
         doubleBuffer.get(doubles);

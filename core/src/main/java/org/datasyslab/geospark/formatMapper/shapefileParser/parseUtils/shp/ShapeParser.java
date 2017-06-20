@@ -2,8 +2,6 @@ package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.ShapeFileConst;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.ShapeReader;
 
 import java.io.IOException;
 import java.io.Serializable;

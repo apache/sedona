@@ -7,7 +7,7 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.DbfParseUtil;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.DbfParseUtil;
 
 import java.io.IOException;
 

@@ -3,12 +3,10 @@ package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.ShpParseUtil;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShpFileParser;
 
 import java.io.IOException;

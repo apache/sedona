@@ -3,8 +3,8 @@ package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.apache.hadoop.io.BytesWritable;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.ByteBufferReader;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.ShapeReader;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ByteBufferReader;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeReader;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeParser;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeType;
 

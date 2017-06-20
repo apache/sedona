@@ -1,4 +1,4 @@
-package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils;
+package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.hadoop.util.hash.Hash;

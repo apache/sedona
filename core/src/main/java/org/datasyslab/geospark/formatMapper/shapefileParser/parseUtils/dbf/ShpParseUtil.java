@@ -1,28 +1,15 @@
-package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils;
+package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf;
 
-import com.vividsolutions.jts.algorithm.CGAlgorithms;
 import com.vividsolutions.jts.geom.*;
-import io.netty.buffer.ByteBuf;
-import org.apache.commons.io.EndianUtils;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeParser;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeType;
-import org.geotools.geometry.jts.coordinatesequence.CoordinateSequences;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeFileConst;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeReader;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.DoubleBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by zongsizhang on 5/3/17.
  */
-public class ShpParseUtil implements ShapeFileConst{
+public class ShpParseUtil implements ShapeFileConst {
 
     public static CoordinateSequence readCoordinates(ShapeReader reader, int numPoints, GeometryFactory geometryFactory) throws IOException {
         CoordinateSequence coordinateSequence = geometryFactory.getCoordinateSequenceFactory().create(numPoints,2);

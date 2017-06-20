@@ -1,9 +1,6 @@
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
 import org.apache.commons.io.EndianUtils;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.DataInputStreamReader;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.ShapeFileConst;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.ShapeReader;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShpRecord;
 
 import java.io.DataInputStream;

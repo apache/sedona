@@ -1,7 +1,8 @@
-package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils;
+package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf;
 
 import org.apache.commons.io.EndianUtils;
 import org.apache.hadoop.io.Text;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeFileConst;
 
 import java.io.DataInputStream;
 import java.io.IOException;
