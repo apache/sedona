@@ -9,6 +9,7 @@ import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by zongsizhang on 6/1/17.
@@ -104,7 +105,7 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
     public PrimitiveShape getCurrentValue() throws IOException, InterruptedException {
         value = new PrimitiveShape();
         value.setPrimitiveRecord(shapeFileReader.getCurrentValue());
-        if(hasDbf && hasNextDbf) value.setPrimitiveAttribute(dbfFileReader.getCurrentValue());
+        if(hasDbf && hasNextDbf) value.setPrimitiveAttribute(dbfFileReader.getCurrentValue(), dbfFileReader.getFieldDescriptors());
         return value;
     }
 

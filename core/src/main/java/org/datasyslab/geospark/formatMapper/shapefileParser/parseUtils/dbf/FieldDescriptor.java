@@ -1,7 +1,5 @@
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf;
 
-import org.apache.hadoop.io.Text;
-
 import java.io.Serializable;
 
 /**
@@ -10,7 +8,7 @@ import java.io.Serializable;
 public class FieldDescriptor implements Serializable{
 
     /** field name */
-    private Text filedName = null;
+    private String filedName = null;
 
     /** field type */
     private byte fieldType = 0;
@@ -21,11 +19,11 @@ public class FieldDescriptor implements Serializable{
     /** decimal count */
     private byte fieldDecimalCount = 0;
 
-    public Text getFiledName() {
+    public String getFiledName() {
         return filedName;
     }
 
-    public void setFiledName(Text filedName) {
+    public void setFiledName(String filedName) {
         this.filedName = filedName;
     }
 

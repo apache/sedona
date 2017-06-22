@@ -14,38 +14,21 @@ import java.util.List;
  */
 public class DbfParseUtil implements ShapeFileConst {
 
-    /**
-     * Information abstracted from .dbf file header
-     */
-    public static class DbfInfoBundle{
-        /** number of record in current .dbf file */
-        public int numRecord = 0;
+    /** number of record get from header */
+    public int numRecord = 0;
 
-        /** number of bytes in current .dbf file */
-        public int numBytesRecord = 0;
+    /** number of bytes per record */
+    public int numBytesRecord = 0;
 
-        /** List of fieldDescriptor */
-        public List<FieldDescriptor> fieldDescriptors = null;
+    /** number of records already read. Records that is ignored also counted in */
+    public int numRecordRead;
 
-        /** num of records read */
-        public int numRecordRead = 0;
-
-        public boolean isDone(){
-            return numRecordRead >= numRecord;
-        }
-
-        public float getProgress(){
-            return (float)numRecordRead / (float)numRecord;
-        }
-
+    public boolean isDone(){
+        return numRecordRead >= numRecord;
     }
 
-    /** current info bundle */
-    public static DbfInfoBundle infoBundle = null;
-
-    /** reset info bundle, call it before starting parsing a new .dbf file */
-    public static void renewParser(){
-        infoBundle = null;
+    public float getProgress(){
+        return (float)numRecordRead / (float)numRecord;
     }
 
     /**
@@ -54,20 +37,18 @@ public class DbfParseUtil implements ShapeFileConst {
      * @return
      * @throws IOException
      */
-    public static DbfInfoBundle parseFileHead(DataInputStream inputStream) throws IOException {
-        //create info bundle
-        infoBundle = new DbfInfoBundle();
+    public List<FieldDescriptor> parseFileHead(DataInputStream inputStream) throws IOException {
         // version
         inputStream.readByte();
         // date YYMMDD format
         byte[] date = new byte[3];
         inputStream.readFully(date);
         // number of records in file
-        infoBundle.numRecord = EndianUtils.swapInteger(inputStream.readInt());
+        numRecord = EndianUtils.swapInteger(inputStream.readInt());
         // number of bytes in header
         int numBytes = EndianUtils.swapShort(inputStream.readShort());
         // number of bytes in file
-        infoBundle.numBytesRecord =  EndianUtils.swapShort(inputStream.readShort());
+        numBytesRecord =  EndianUtils.swapShort(inputStream.readShort());
         // skip reserved 2 byte
         inputStream.skipBytes(2);
         // skip flag indicating incomplete transaction
@@ -83,8 +64,8 @@ public class DbfParseUtil implements ShapeFileConst {
         // skip reserved 2 bytes
         inputStream.skipBytes(2);
         // parse n filed descriptors
+        List<FieldDescriptor> fieldDescriptors = new ArrayList<>();
         byte terminator = inputStream.readByte();
-        infoBundle.fieldDescriptors = new ArrayList<FieldDescriptor>();
         while(terminator != FIELD_DESCRIPTOR_TERMINATOR){
             FieldDescriptor descriptor = new FieldDescriptor();
             //read field name
@@ -105,32 +86,31 @@ public class DbfParseUtil implements ShapeFileConst {
             descriptor.setFieldDecimalCount(inputStream.readByte());
             // skip the next 14 bytes
             inputStream.skipBytes(14);
-            infoBundle.fieldDescriptors.add(descriptor);
+            fieldDescriptors.add(descriptor);
             terminator = inputStream.readByte();
         }
-        return infoBundle;
+        return fieldDescriptors;
     }
 
     /**
      * draw raw byte array of effective record
      * @param inputStream
-     * @param dbfInfo
      * @return
      * @throws IOException
      */
-    public static byte[] parsePrimitiveRecord(DataInputStream inputStream, DbfInfoBundle dbfInfo) throws IOException {
-        if(dbfInfo.isDone()) return null;
+    public byte[] parsePrimitiveRecord(DataInputStream inputStream) throws IOException {
+        if(isDone()) return null;
         byte flag = inputStream.readByte();
-        final int recordLength = dbfInfo.numBytesRecord - 1;//exclude skip the record flag when read and skip
+        final int recordLength = numBytesRecord - 1;//exclude skip the record flag when read and skip
         while(flag == RECORD_DELETE_FLAG){
             inputStream.skipBytes(recordLength);
-            dbfInfo.numRecordRead++;
+            numRecordRead++;
             flag = inputStream.readByte();
         }
         if(flag == FILE_END_FLAG) return null;
         byte[] primitiveBytes = new byte[recordLength];
         inputStream.readFully(primitiveBytes);
-        dbfInfo.numRecordRead++; //update number of record read
+        numRecordRead++; //update number of record read
         return primitiveBytes;
     }
 
@@ -140,31 +120,16 @@ public class DbfParseUtil implements ShapeFileConst {
      * @return
      * @throws IOException
      */
-    public static String primitiveToAttributes(DataInputStream inputStream) throws IOException {
+    public static String primitiveToAttributes(DataInputStream inputStream, List<FieldDescriptor> fieldDescriptors)
+            throws IOException
+    {
         byte[] delimiter = {'\t'};
         Text attributes = new Text();
-        for(FieldDescriptor descriptor : DbfParseUtil.infoBundle.fieldDescriptors){
+        for(FieldDescriptor descriptor : fieldDescriptors){
             byte[] fldBytes = new byte[descriptor.getFieldLength()];
             inputStream.readFully(fldBytes);
-            switch(descriptor.getFieldType()){
-                case 'C':
-                {
-                    attributes.append(fldBytes,0,fldBytes.length);
-                    attributes.append(delimiter,0,1);
-                    break;
-                }
-                case 'N' | 'F':
-                {
-                    attributes.append(fldBytes,0,fldBytes.length);
-                    attributes.append(delimiter,0,1);
-                    break;
-                }
-                case 'D':{
-                    attributes.append(fldBytes,0,fldBytes.length);
-                    attributes.append(delimiter,0,1);
-                    break;
-                }
-            }
+            attributes.append(fldBytes,0,fldBytes.length);
+            attributes.append(delimiter,0,1);
         }
         return attributes.toString();
     }

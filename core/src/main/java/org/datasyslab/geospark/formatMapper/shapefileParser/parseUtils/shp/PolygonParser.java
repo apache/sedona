@@ -2,7 +2,6 @@ package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
 import com.vividsolutions.jts.algorithm.CGAlgorithms;
 import com.vividsolutions.jts.geom.*;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.ShpParseUtil;
 import org.geotools.geometry.jts.coordinatesequence.CoordinateSequences;
 
 import java.io.IOException;

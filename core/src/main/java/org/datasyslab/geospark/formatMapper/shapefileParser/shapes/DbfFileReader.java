@@ -1,5 +1,6 @@
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -8,8 +9,10 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.DbfParseUtil;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.FieldDescriptor;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by zongsizhang on 6/2/17.
@@ -29,19 +32,23 @@ public class DbfFileReader extends org.apache.hadoop.mapreduce.RecordReader<Shap
     private int id = 0;
 
     /** Info Bundle of current dbf file */
-    private DbfParseUtil.DbfInfoBundle dbfInfo = null;
+    List<FieldDescriptor> fieldDescriptors = null;
+
+    /** Dbf parser */
+    DbfParseUtil dbfParser = null;
 
     public void initialize(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
         FileSplit fileSplit = (FileSplit)split;
         Path inputPath = fileSplit.getPath();
         FileSystem fileSys = inputPath.getFileSystem(context.getConfiguration());
         inputStream = fileSys.open(inputPath);
-        dbfInfo = DbfParseUtil.parseFileHead(inputStream);
+        dbfParser = new DbfParseUtil();
+        fieldDescriptors = dbfParser.parseFileHead(inputStream);
     }
 
     public boolean nextKeyValue() throws IOException, InterruptedException {
         // first check deleted flag
-        byte[] curbytes = DbfParseUtil.parsePrimitiveRecord(inputStream, dbfInfo);
+        byte[] curbytes = dbfParser.parsePrimitiveRecord(inputStream);
         if(curbytes == null){
             value = null;
             return false;
@@ -63,10 +70,14 @@ public class DbfFileReader extends org.apache.hadoop.mapreduce.RecordReader<Shap
     }
 
     public float getProgress() throws IOException, InterruptedException {
-        return dbfInfo.getProgress();
+        return dbfParser.getProgress();
     }
 
     public void close() throws IOException {
 
+    }
+
+    public List<FieldDescriptor> getFieldDescriptors() {
+        return fieldDescriptors;
     }
 }

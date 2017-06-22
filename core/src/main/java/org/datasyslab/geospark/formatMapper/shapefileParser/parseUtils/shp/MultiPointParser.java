@@ -4,7 +4,6 @@ import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiPoint;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.ShpParseUtil;
 
 import java.io.IOException;
 

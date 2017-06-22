@@ -1,8 +1,8 @@
-package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf;
+package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
-import com.vividsolutions.jts.geom.*;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeFileConst;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeReader;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateSequence;
+import com.vividsolutions.jts.geom.GeometryFactory;
 
 import java.io.IOException;
 

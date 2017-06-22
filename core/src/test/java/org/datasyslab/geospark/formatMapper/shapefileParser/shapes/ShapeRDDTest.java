@@ -193,7 +193,7 @@ public class ShapeRDDTest implements Serializable{
      */
     @Test
     public void testLoadDbfFile() throws IOException{
-        InputLocation = ShapeRDDTest.class.getClassLoader().getResource("shapefiles/point").getPath();
+        InputLocation = ShapeRDDTest.class.getClassLoader().getResource("shapefiles/dbf").getPath();
         // load shape with geotool.shapefile
         File file = new File(InputLocation);
         Map<String, Object> map = new HashMap<String, Object>();
@@ -217,8 +217,9 @@ public class ShapeRDDTest implements Serializable{
         }
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterClass
+    public static void tearDown() throws Exception {
+        sc.stop();
     }
 
 }
