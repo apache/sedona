@@ -1,3 +1,9 @@
+/**
+ * FILE: ShpRecord.java
+ * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShpRecord.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
 import org.apache.hadoop.io.BytesWritable;
@@ -5,9 +11,6 @@ import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.Shape
 
 import java.io.Serializable;
 
-/**
- * Created by zongsizhang on 6/19/17.
- */
 public class ShpRecord implements Serializable {
 
     /** primitive byte contents */

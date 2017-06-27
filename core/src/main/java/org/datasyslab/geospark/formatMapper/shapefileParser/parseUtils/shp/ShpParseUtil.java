@@ -1,3 +1,9 @@
+/**
+ * FILE: ShpParseUtil.java
+ * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShpParseUtil.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -6,9 +12,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 
 import java.io.IOException;
 
-/**
- * Created by zongsizhang on 5/3/17.
- */
 public class ShpParseUtil implements ShapeFileConst {
 
     public static CoordinateSequence readCoordinates(ShapeReader reader, int numPoints, GeometryFactory geometryFactory) throws IOException {

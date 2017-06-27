@@ -1,26 +1,28 @@
+/**
+ * FILE: ShapefileRDD.java
+ * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapefileRDD.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import org.apache.hadoop.conf.Configuration;
+import com.vividsolutions.jts.geom.*;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.VoidFunction;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.DbfParseUtil;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.TypeUnknownException;
 import scala.Tuple2;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-/**
- * Created by zongsizhang on 5/23/17.
- */
-public class ShapeRDD implements Serializable{
+public class ShapefileRDD implements Serializable{
 
     /** shape collection */
     private JavaRDD<Geometry> shapeRDD = null;
@@ -29,7 +31,7 @@ public class ShapeRDD implements Serializable{
 
     /** field descriptor of  */
 
-    public ShapeRDD(String filePath, JavaSparkContext sparkContext){
+    public ShapefileRDD(JavaSparkContext sparkContext, String filePath){
         geometryFactory = new GeometryFactory();
         JavaPairRDD<ShapeKey, PrimitiveShape> shapePrimitiveRdd = sparkContext.newAPIHadoopFile(
                 filePath,
@@ -71,9 +73,45 @@ public class ShapeRDD implements Serializable{
     };
 
 
+    public JavaRDD<Geometry> getShapeRDD()
+    {
+        return this.shapeRDD;
+    }
 
-    public JavaRDD<Geometry> getShapeWritableRDD() {
-        return shapeRDD;
+    public JavaRDD<Object> getSpatialRDD() {
+        return shapeRDD.flatMap(new FlatMapFunction<Geometry, Object>()
+        {
+			@Override
+			public Iterator<Object> call(Geometry spatialObject) throws Exception {
+                List<Object> result = new ArrayList<Object>();
+                if(spatialObject instanceof MultiPoint)
+			    {
+                    MultiPoint multiObjects = (MultiPoint)spatialObject;
+                    for (int i=0;i<multiObjects.getNumGeometries();i++)
+                    {
+                        result.add(multiObjects.getGeometryN(i));
+                    }
+                }
+                if(spatialObject instanceof MultiLineString)
+                {
+                    MultiLineString multiObjects = (MultiLineString)spatialObject;
+                    for (int i=0;i<multiObjects.getNumGeometries();i++)
+                    {
+                        result.add(multiObjects.getGeometryN(i));
+                    }
+                }
+                if (spatialObject instanceof MultiPolygon)
+                {
+                    MultiPolygon multiObjects = (MultiPolygon)spatialObject;
+                    for (int i=0;i<multiObjects.getNumGeometries();i++)
+                    {
+                        result.add(multiObjects.getGeometryN(i));
+                    }
+                }
+				return result.iterator();
+			}
+        	
+        });
     }
 
 }

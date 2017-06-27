@@ -1,3 +1,9 @@
+/**
+ * FILE: ByteBufferReader.java
+ * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ByteBufferReader.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
 import java.io.IOException;
@@ -5,9 +11,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
-/**
- * Created by zongsizhang on 6/19/17.
- */
 public class ByteBufferReader extends ShapeReader{
 
     private ByteBuffer buffer = null;

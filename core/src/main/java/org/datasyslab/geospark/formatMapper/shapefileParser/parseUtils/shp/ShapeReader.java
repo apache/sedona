@@ -1,11 +1,14 @@
+/**
+ * FILE: ShapeReader.java
+ * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeReader.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
 import java.io.IOException;
 import java.io.Serializable;
 
-/**
- * Created by zongsizhang on 6/19/17.
- */
 public abstract class ShapeReader implements Serializable, ShapeFileConst{
 
     /**

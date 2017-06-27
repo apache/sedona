@@ -1,3 +1,9 @@
+/**
+ * FILE: CombineShapeReader.java
+ * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.shapes.CombineShapeReader.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
 import org.apache.commons.io.FilenameUtils;
@@ -11,9 +17,6 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Created by zongsizhang on 6/1/17.
- */
 public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
 
     /** id of input path of .shp file */

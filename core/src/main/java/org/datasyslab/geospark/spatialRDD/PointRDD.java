@@ -1,7 +1,7 @@
 /**
  * FILE: PointRDD.java
  * PATH: org.datasyslab.geospark.spatialRDD.PointRDD.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialRDD;
@@ -37,21 +37,10 @@ public class PointRDD extends SpatialRDD {
 	 * Instantiates a new point RDD.
 	 *
 	 * @param rawSpatialRDD the raw spatial RDD
-	 * @deprecated Please append RDD Storage Level after all the existing parameters
 	 */
-	@Deprecated
-	public PointRDD(JavaRDD<Point> rawSpatialRDD)
+	public PointRDD(JavaRDD<Object> rawSpatialRDD)
 	{
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Point,Object>()
-		{
-
-			@Override
-			public Object call(Point spatialObject) throws Exception {
-				return spatialObject;
-			}
-			
-		});
-        this.analyze();
+		this.rawSpatialRDD = rawSpatialRDD;
 	}
 	
 	/**

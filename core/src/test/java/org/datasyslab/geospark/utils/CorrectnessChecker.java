@@ -1,7 +1,7 @@
 /**
  * FILE: CorrectnessChecker.java
  * PATH: org.datasyslab.geospark.utils.CorrectnessChecker.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.geospark.utils;
@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.Function;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.spatialOperator.JoinQuery;
@@ -341,8 +342,22 @@ public class CorrectnessChecker {
      */
     @Test
     public void testInsidePointJoinCorrectness() throws Exception{
-    	PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet));
-        PointRDD objectRDD = new PointRDD(sc.parallelize(this.testInsidePointSet));
+    	PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet).map(new Function<Polygon, Object>(
+
+		) {
+			@Override
+			public Object call(Polygon v1) throws Exception {
+				return v1;
+			}
+		}));
+        PointRDD objectRDD = new PointRDD(sc.parallelize(this.testInsidePointSet).map(new Function<Point, Object>(
+
+		) {
+			@Override
+			public Object call(Point v1) throws Exception {
+				return v1;
+			}
+		}));
         objectRDD.rawSpatialRDD.repartition(4);
         objectRDD.spatialPartitioning(GridType.RTREE);
         objectRDD.buildIndex(IndexType.RTREE,true);
@@ -405,8 +420,22 @@ public class CorrectnessChecker {
          */
         @Test
         public void testOnBoundaryPointJoinCorrectness() throws Exception{
-        	PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet));
-            PointRDD objectRDD = new PointRDD(sc.parallelize(this.testOnBoundaryPointSet));
+        	PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet).map(new Function<Polygon, Object>(
+
+			) {
+				@Override
+				public Object call(Polygon v1) throws Exception {
+					return v1;
+				}
+			}));
+            PointRDD objectRDD = new PointRDD(sc.parallelize(this.testOnBoundaryPointSet).map(new Function<Point, Object>(
+
+			) {
+				@Override
+				public Object call(Point v1) throws Exception {
+					return v1;
+				}
+			}));
             objectRDD.rawSpatialRDD.repartition(4);
             objectRDD.spatialPartitioning(GridType.RTREE);
             objectRDD.buildIndex(IndexType.RTREE,true);
@@ -469,8 +498,22 @@ public class CorrectnessChecker {
          */
         @Test
         public void testOutsidePointJoinCorrectness() throws Exception{
-        	PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet));
-            PointRDD objectRDD = new PointRDD(sc.parallelize(this.testOutsidePointSet));
+        	PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet).map(new Function<Polygon, Object>(
+
+			) {
+				@Override
+				public Object call(Polygon v1) throws Exception {
+					return v1;
+				}
+			}));
+            PointRDD objectRDD = new PointRDD(sc.parallelize(this.testOutsidePointSet).map(new Function<Point, Object>(
+
+			) {
+				@Override
+				public Object call(Point v1) throws Exception {
+					return v1;
+				}
+			}));
             objectRDD.rawSpatialRDD.repartition(4);
             objectRDD.spatialPartitioning(GridType.RTREE);
             objectRDD.buildIndex(IndexType.RTREE,true);
@@ -497,8 +540,22 @@ public class CorrectnessChecker {
          */
         @Test
         public void testInsideLineStringJoinCorrectness() throws Exception{
-        	PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet));
-            LineStringRDD objectRDD = new LineStringRDD(sc.parallelize(this.testInsideLineStringSet));
+        	PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet).map(new Function<Polygon, Object>(
+
+			) {
+				@Override
+				public Object call(Polygon v1) throws Exception {
+					return v1;
+				}
+			}));
+            LineStringRDD objectRDD = new LineStringRDD(sc.parallelize(this.testInsideLineStringSet).map(new Function<LineString, Object>(
+
+			) {
+				@Override
+				public Object call(LineString v1) throws Exception {
+					return v1;
+				}
+			}));
             objectRDD.rawSpatialRDD.repartition(4);
             objectRDD.spatialPartitioning(GridType.RTREE);
             objectRDD.buildIndex(IndexType.RTREE,true);
@@ -561,8 +618,22 @@ public class CorrectnessChecker {
          */
         @Test
         public void testOverlappedLineStringJoinCorrectness() throws Exception{
-        	PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet));
-        	LineStringRDD objectRDD = new LineStringRDD(sc.parallelize(this.testOverlappedLineStringSet));
+        	PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet).map(new Function<Polygon, Object>(
+
+			) {
+				@Override
+				public Object call(Polygon v1) throws Exception {
+					return v1;
+				}
+			}));
+        	LineStringRDD objectRDD = new LineStringRDD(sc.parallelize(this.testOverlappedLineStringSet).map(new Function<LineString, Object>(
+
+			) {
+				@Override
+				public Object call(LineString v1) throws Exception {
+					return v1;
+				}
+			}));
         	objectRDD.rawSpatialRDD.repartition(4);
         	objectRDD.spatialPartitioning(GridType.RTREE);
         	objectRDD.buildIndex(IndexType.RTREE,true);
@@ -625,8 +696,22 @@ public class CorrectnessChecker {
              */
             @Test
             public void testOutsideLineStringJoinCorrectness() throws Exception{
-            	PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet));
-            	LineStringRDD objectRDD = new LineStringRDD(sc.parallelize(this.testOutsideLineStringSet));
+            	PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet).map(new Function<Polygon, Object>(
+
+				) {
+					@Override
+					public Object call(Polygon v1) throws Exception {
+						return v1;
+					}
+				}));
+            	LineStringRDD objectRDD = new LineStringRDD(sc.parallelize(this.testOutsideLineStringSet).map(new Function<LineString, Object>(
+
+				) {
+					@Override
+					public Object call(LineString v1) throws Exception {
+						return v1;
+					}
+				}));
                 objectRDD.rawSpatialRDD.repartition(4);
                 objectRDD.spatialPartitioning(GridType.RTREE);
                 objectRDD.buildIndex(IndexType.RTREE,true);
@@ -654,8 +739,22 @@ public class CorrectnessChecker {
              */
             @Test
             public void testInsidePolygonJoinCorrectness() throws Exception{
-            	PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet));
-            	PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(this.testInsidePolygonSet));
+            	PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet).map(new Function<Polygon, Object>(
+
+				) {
+					@Override
+					public Object call(Polygon v1) throws Exception {
+						return v1;
+					}
+				}));
+            	PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(this.testInsidePolygonSet).map(new Function<Polygon, Object>(
+
+				) {
+					@Override
+					public Object call(Polygon v1) throws Exception {
+						return v1;
+					}
+				}));
                 objectRDD.rawSpatialRDD.repartition(4);
                 objectRDD.spatialPartitioning(GridType.RTREE);
                 objectRDD.buildIndex(IndexType.RTREE,true);
@@ -718,8 +817,22 @@ public class CorrectnessChecker {
              */
             @Test
             public void testOverlappedPolygonJoinCorrectness() throws Exception{
-            	PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet));
-            	PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(this.testOverlappedPolygonSet));
+            	PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet).map(new Function<Polygon, Object>(
+
+				) {
+					@Override
+					public Object call(Polygon v1) throws Exception {
+						return v1;
+					}
+				}));
+            	PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(this.testOverlappedPolygonSet).map(new Function<Polygon, Object>(
+
+				) {
+					@Override
+					public Object call(Polygon v1) throws Exception {
+						return v1;
+					}
+				}));
             	objectRDD.rawSpatialRDD.repartition(4);
             	objectRDD.spatialPartitioning(GridType.RTREE);
             	objectRDD.buildIndex(IndexType.RTREE,true);
@@ -782,8 +895,22 @@ public class CorrectnessChecker {
              */
             @Test
             public void testOutsidePolygonJoinCorrectness() throws Exception{
-            	PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet));
-            	PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(this.testOutsidePolygonSet));
+            	PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet).map(new Function<Polygon, Object>(
+
+				) {
+					@Override
+					public Object call(Polygon v1) throws Exception {
+						return v1;
+					}
+				}));
+            	PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(this.testOutsidePolygonSet).map(new Function<Polygon, Object>(
+
+				) {
+					@Override
+					public Object call(Polygon v1) throws Exception {
+						return v1;
+					}
+				}));
             	objectRDD.rawSpatialRDD.repartition(4);
             	objectRDD.spatialPartitioning(GridType.RTREE);
             	objectRDD.buildIndex(IndexType.RTREE,true);
@@ -810,9 +937,23 @@ public class CorrectnessChecker {
              */
             @Test
             public void testInsidePolygonDistanceJoinCorrectness() throws Exception{
-            	PolygonRDD centerGeometryRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet));
+            	PolygonRDD centerGeometryRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet).map(new Function<Polygon, Object>(
+
+				) {
+					@Override
+					public Object call(Polygon v1) throws Exception {
+						return v1;
+					}
+				}));
             	CircleRDD windowRDD = new CircleRDD(centerGeometryRDD,0.1);
-            	PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(this.testInsidePolygonSet));
+            	PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(this.testInsidePolygonSet).map(new Function<Polygon, Object>(
+
+				) {
+					@Override
+					public Object call(Polygon v1) throws Exception {
+						return v1;
+					}
+				}));
             	objectRDD.rawSpatialRDD.repartition(4);
             	objectRDD.spatialPartitioning(GridType.RTREE);
             	objectRDD.buildIndex(IndexType.RTREE,true);
@@ -876,9 +1017,23 @@ public class CorrectnessChecker {
              */
             @Test
             public void testOverlappedPolygonDistanceJoinCorrectness() throws Exception{
-            	PolygonRDD centerGeometryRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet));
+            	PolygonRDD centerGeometryRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet).map(new Function<Polygon, Object>(
+
+				) {
+					@Override
+					public Object call(Polygon v1) throws Exception {
+						return v1;
+					}
+				}));
             	CircleRDD windowRDD = new CircleRDD(centerGeometryRDD,0.1);
-            	PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(this.testOverlappedPolygonSet));
+            	PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(this.testOverlappedPolygonSet).map(new Function<Polygon, Object>(
+
+				) {
+					@Override
+					public Object call(Polygon v1) throws Exception {
+						return v1;
+					}
+				}));
             	objectRDD.rawSpatialRDD.repartition(4);
             	objectRDD.spatialPartitioning(GridType.RTREE);
             	objectRDD.buildIndex(IndexType.RTREE,true);
@@ -941,9 +1096,23 @@ public class CorrectnessChecker {
              */
             @Test
             public void testOutsidePolygonDistanceJoinCorrectness() throws Exception{
-            	PolygonRDD centerGeometryRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet));
+            	PolygonRDD centerGeometryRDD = new PolygonRDD(sc.parallelize(this.testPolygonWindowSet).map(new Function<Polygon, Object>(
+
+				) {
+					@Override
+					public Object call(Polygon v1) throws Exception {
+						return v1;
+					}
+				}));
             	CircleRDD windowRDD = new CircleRDD(centerGeometryRDD,0.1);
-            	PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(this.testOutsidePolygonSet));
+            	PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(this.testOutsidePolygonSet).map(new Function<Polygon, Object>(
+
+				) {
+					@Override
+					public Object call(Polygon v1) throws Exception {
+						return v1;
+					}
+				}));
             	objectRDD.rawSpatialRDD.repartition(4);
             	objectRDD.spatialPartitioning(GridType.RTREE);
             	objectRDD.buildIndex(IndexType.RTREE,true);

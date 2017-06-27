@@ -1,3 +1,9 @@
+/**
+ * FILE: ShapeFileConst.java
+ * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeFileConst.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
 import com.google.common.collect.ImmutableMap;
@@ -7,9 +13,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by zongsizhang on 5/3/17.
- */
 public interface ShapeFileConst {
 
     /**

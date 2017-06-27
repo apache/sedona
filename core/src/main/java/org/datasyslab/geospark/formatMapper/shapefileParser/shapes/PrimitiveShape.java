@@ -1,3 +1,9 @@
+/**
+ * FILE: PrimitiveShape.java
+ * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.shapes.PrimitiveShape.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -14,9 +20,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by zongsizhang on 6/1/17.
- */
 public class PrimitiveShape implements Serializable{
 
     /** primitive bytes of one record */

@@ -1,3 +1,9 @@
+/**
+ * FILE: DbfParseUtil.java
+ * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.DbfParseUtil.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf;
 
 import org.apache.commons.io.EndianUtils;
@@ -9,9 +15,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by zongsizhang on 5/29/17.
- */
 public class DbfParseUtil implements ShapeFileConst {
 
     /** number of record get from header */

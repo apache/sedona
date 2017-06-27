@@ -1,10 +1,13 @@
+/**
+ * FILE: FieldDescriptor.java
+ * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.FieldDescriptor.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf;
 
 import java.io.Serializable;
 
-/**
- * Created by zongsizhang on 6/2/17.
- */
 public class FieldDescriptor implements Serializable{
 
     /** field name */

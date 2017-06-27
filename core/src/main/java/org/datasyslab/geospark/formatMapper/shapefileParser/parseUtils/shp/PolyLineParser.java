@@ -1,3 +1,9 @@
+/**
+ * FILE: PolyLineParser.java
+ * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.PolyLineParser.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
 import com.vividsolutions.jts.geom.CoordinateSequence;
@@ -7,9 +13,6 @@ import com.vividsolutions.jts.geom.LineString;
 
 import java.io.IOException;
 
-/**
- * Created by zongsizhang on 6/19/17.
- */
 public class PolyLineParser extends ShapeParser{
 
     public PolyLineParser(GeometryFactory geometryFactory) {

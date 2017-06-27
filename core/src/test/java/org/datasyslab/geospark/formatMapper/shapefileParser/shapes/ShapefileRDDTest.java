@@ -1,9 +1,19 @@
+/**
+ * FILE: ShapefileRDDTest.java
+ * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapefileRDDTest.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.datasyslab.geospark.spatialOperator.RangeQuery;
+import org.datasyslab.geospark.spatialRDD.LineStringRDD;
+import org.datasyslab.geospark.spatialRDD.PointRDD;
+import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.FeatureSource;
@@ -14,21 +24,19 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import static org.junit.Assert.*;
 
-/**
- * Created by zongsizhang on 6/13/17.
- */
-public class ShapeRDDTest implements Serializable{
+public class ShapefileRDDTest implements Serializable{
 
     /** The sc. */
     public static JavaSparkContext sc;
@@ -38,7 +46,7 @@ public class ShapeRDDTest implements Serializable{
 
     @BeforeClass
     public static void onceExecutedBeforeAll() {
-        SparkConf conf = new SparkConf().setAppName("ShapeRDDTest").setMaster("local[2]").set("spark.executor.cores","2");
+        SparkConf conf = new SparkConf().setAppName("ShapefileRDDTest").setMaster("local[2]").set("spark.executor.cores","2");
         sc = new JavaSparkContext(conf);
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
@@ -52,7 +60,7 @@ public class ShapeRDDTest implements Serializable{
     @Test
     public void testLoadShapeFile() throws IOException {
         // load shape with geotool.shapefile
-        InputLocation = ShapeRDDTest.class.getClassLoader().getResource("shapefiles/polygon").getPath();
+        InputLocation = ShapefileRDDTest.class.getClassLoader().getResource("shapefiles/polygon").getPath();
         File file = new File(InputLocation);
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("url", file.toURI().toURL());
@@ -63,8 +71,9 @@ public class ShapeRDDTest implements Serializable{
         Filter filter = Filter.INCLUDE;
         FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures(filter);
         // load shapes with our tool
-        ShapeRDD shapeRDD = new ShapeRDD(InputLocation,sc);
-        Assert.assertEquals(shapeRDD.getShapeWritableRDD().collect().size(), collection.size());
+        ShapefileRDD shapefileRDD = new ShapefileRDD(sc,InputLocation);
+        Assert.assertEquals(shapefileRDD.getShapeRDD().collect().size(), collection.size());
+        dataStore.dispose();
     }
 
     /**
@@ -73,7 +82,7 @@ public class ShapeRDDTest implements Serializable{
      */
     @Test
     public void testLoadShapeFilePolygon() throws IOException{
-        InputLocation = ShapeRDDTest.class.getClassLoader().getResource("shapefiles/polygon").getPath();
+        InputLocation = ShapefileRDDTest.class.getClassLoader().getResource("shapefiles/polygon").getPath();
         // load shape with geotool.shapefile
         File file = new File(InputLocation);
         Map<String, Object> map = new HashMap<String, Object>();
@@ -91,10 +100,18 @@ public class ShapeRDDTest implements Serializable{
             featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
         }
         final Iterator<String> featureIterator = featureTexts.iterator();
-        ShapeRDD shapeRDD = new ShapeRDD(InputLocation,sc);
-        for (com.vividsolutions.jts.geom.Geometry geometry : shapeRDD.getShapeWritableRDD().collect()) {
+        ShapefileRDD shapefileRDD = new ShapefileRDD(sc,InputLocation);
+        PolygonRDD spatialRDD = new PolygonRDD(shapefileRDD.getSpatialRDD());
+        try {
+			RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180,180,-90,90), false, false).count();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        for (Geometry geometry : shapefileRDD.getShapeRDD().collect()) {
             Assert.assertEquals(featureIterator.next(), geometry.toText());
         }
+        dataStore.dispose();
     }
 
     /**
@@ -103,7 +120,7 @@ public class ShapeRDDTest implements Serializable{
      */
     @Test
     public void testLoadShapeFilePolyLine() throws IOException{
-        InputLocation = ShapeRDDTest.class.getClassLoader().getResource("shapefiles/polyline").getPath();
+        InputLocation = ShapefileRDDTest.class.getClassLoader().getResource("shapefiles/polyline").getPath();
         // load shape with geotool.shapefile
         File file = new File(InputLocation);
         Map<String, Object> map = new HashMap<String, Object>();
@@ -121,10 +138,18 @@ public class ShapeRDDTest implements Serializable{
             featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
         }
         final Iterator<String> featureIterator = featureTexts.iterator();
-        ShapeRDD shapeRDD = new ShapeRDD(InputLocation,sc);
-        for (com.vividsolutions.jts.geom.Geometry geometry : shapeRDD.getShapeWritableRDD().collect()) {
+        ShapefileRDD shapefileRDD = new ShapefileRDD(sc,InputLocation);
+        LineStringRDD spatialRDD = new LineStringRDD(shapefileRDD.getSpatialRDD());
+        try {
+			RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180,180,-90,90), false, false).count();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        for (Geometry geometry : shapefileRDD.getShapeRDD().collect()) {
             Assert.assertEquals(featureIterator.next(), geometry.toText());
         }
+        dataStore.dispose();
     }
 
     /**
@@ -133,7 +158,7 @@ public class ShapeRDDTest implements Serializable{
      */
     @Test
     public void testLoadShapeFileMultiPoint() throws IOException{
-        InputLocation = ShapeRDDTest.class.getClassLoader().getResource("shapefiles/multipoint").getPath();
+        InputLocation = ShapefileRDDTest.class.getClassLoader().getResource("shapefiles/multipoint").getPath();
         // load shape with geotool.shapefile
         File file = new File(InputLocation);
         Map<String, Object> map = new HashMap<String, Object>();
@@ -151,10 +176,11 @@ public class ShapeRDDTest implements Serializable{
             featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
         }
         final Iterator<String> featureIterator = featureTexts.iterator();
-        ShapeRDD shapeRDD = new ShapeRDD(InputLocation,sc);
-        for (com.vividsolutions.jts.geom.Geometry geometry : shapeRDD.getShapeWritableRDD().collect()) {
+        ShapefileRDD shapefileRDD = new ShapefileRDD(sc,InputLocation);
+        for (Geometry geometry : shapefileRDD.getShapeRDD().collect()) {
             Assert.assertEquals(featureIterator.next(), geometry.toText());
         }
+        dataStore.dispose();
     }
 
     /**
@@ -163,7 +189,7 @@ public class ShapeRDDTest implements Serializable{
      */
     @Test
     public void testLoadShapeFilePoint() throws IOException{
-        InputLocation = ShapeRDDTest.class.getClassLoader().getResource("shapefiles/point").getPath();
+        InputLocation = ShapefileRDDTest.class.getClassLoader().getResource("shapefiles/point").getPath();
         // load shape with geotool.shapefile
         File file = new File(InputLocation);
         Map<String, Object> map = new HashMap<String, Object>();
@@ -181,10 +207,18 @@ public class ShapeRDDTest implements Serializable{
             featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
         }
         final Iterator<String> featureIterator = featureTexts.iterator();
-        ShapeRDD shapeRDD = new ShapeRDD(InputLocation,sc);
-        for (com.vividsolutions.jts.geom.Geometry geometry : shapeRDD.getShapeWritableRDD().collect()) {
+        ShapefileRDD shapefileRDD = new ShapefileRDD(sc,InputLocation);
+        PointRDD spatialRDD = new PointRDD(shapefileRDD.getSpatialRDD());
+        try {
+			RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180,180,-90,90), false, false).count();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        for (Geometry geometry : shapefileRDD.getShapeRDD().collect()) {
             Assert.assertEquals(featureIterator.next(), geometry.toText());
         }
+        dataStore.dispose();
     }
 
     /**
@@ -193,7 +227,7 @@ public class ShapeRDDTest implements Serializable{
      */
     @Test
     public void testLoadDbfFile() throws IOException{
-        InputLocation = ShapeRDDTest.class.getClassLoader().getResource("shapefiles/dbf").getPath();
+        InputLocation = ShapefileRDDTest.class.getClassLoader().getResource("shapefiles/dbf").getPath();
         // load shape with geotool.shapefile
         File file = new File(InputLocation);
         Map<String, Object> map = new HashMap<String, Object>();
@@ -211,10 +245,18 @@ public class ShapeRDDTest implements Serializable{
             featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
         }
         final Iterator<String> featureIterator = featureTexts.iterator();
-        ShapeRDD shapeRDD = new ShapeRDD(InputLocation,sc);
-        for (com.vividsolutions.jts.geom.Geometry geometry : shapeRDD.getShapeWritableRDD().collect()) {
+        ShapefileRDD shapefileRDD = new ShapefileRDD(sc,InputLocation);
+        PolygonRDD spatialRDD = new PolygonRDD(shapefileRDD.getSpatialRDD());
+        try {
+			RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180,180,-90,90), false, false).count();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        for (Geometry geometry : shapefileRDD.getShapeRDD().collect()) {
             Assert.assertEquals(featureIterator.next(), geometry.toText());
         }
+        dataStore.dispose();
     }
 
     @AfterClass

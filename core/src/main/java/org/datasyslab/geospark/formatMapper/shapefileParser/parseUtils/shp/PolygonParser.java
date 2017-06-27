@@ -1,3 +1,9 @@
+/**
+ * FILE: PolygonParser.java
+ * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.PolygonParser.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
 import com.vividsolutions.jts.algorithm.CGAlgorithms;
@@ -8,9 +14,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by zongsizhang on 6/19/17.
- */
 public class PolygonParser extends ShapeParser{
 
     public PolygonParser(GeometryFactory geometryFactory) {

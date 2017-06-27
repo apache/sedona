@@ -1,3 +1,9 @@
+/**
+ * FILE: DbfFileReader.java
+ * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.shapes.DbfFileReader.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
 import org.apache.hadoop.conf.Configuration;
@@ -14,9 +20,6 @@ import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.Field
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Created by zongsizhang on 6/2/17.
- */
 public class DbfFileReader extends org.apache.hadoop.mapreduce.RecordReader<ShapeKey, BytesWritable> {
 
     /** inputstream of .dbf file */

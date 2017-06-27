@@ -1,7 +1,7 @@
 /**
  * FILE: PolygonRDD.java
  * PATH: org.datasyslab.geospark.spatialRDD.PolygonRDD.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialRDD;
@@ -50,19 +50,15 @@ public class PolygonRDD extends SpatialRDD {
      * Instantiates a new polygon RDD.
      *
      * @param rawSpatialRDD the raw spatial RDD
-     * @deprecated Please append RDD Storage Level after all the existing parameters
      */
-	@Deprecated
-    public PolygonRDD(JavaRDD<Polygon> rawSpatialRDD) {
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
-		{
-			@Override
-			public Object call(Polygon spatialObject) throws Exception {
-				return spatialObject;
-			}
-			
-		});
-        this.analyze();
+    public PolygonRDD(JavaRDD<Object> rawSpatialRDD) {
+		this.rawSpatialRDD = rawSpatialRDD;
+    }
+    
+    public PolygonRDD(JavaRDD<Object> rawSpatialRDD, Envelope datasetBoundary, Integer approxmiateTotalCount) {
+		this.rawSpatialRDD = rawSpatialRDD;
+		this.boundaryEnvelope = datasetBoundary;
+		this.totalNumberOfRecords = approxmiateTotalCount;
     }
 	
     /**
