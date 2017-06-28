@@ -20,7 +20,7 @@ public class ShpRecord implements Serializable {
     private int typeID = -1;
 
     /**
-     *
+     * create a ShpRecord with primitive bytes and shape type id we abstract from .shp file
      * @param byteArray
      * @param shapeTypeID
      */

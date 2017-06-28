@@ -7,6 +7,11 @@
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
 public class TypeUnknownException extends Exception{
+
+    /**
+     * create an exception indicates that the shape type number we get from .shp file is valid
+     * @param typeID
+     */
     public TypeUnknownException(int typeID) {
         super("Unknown shape type " + typeID);
     }

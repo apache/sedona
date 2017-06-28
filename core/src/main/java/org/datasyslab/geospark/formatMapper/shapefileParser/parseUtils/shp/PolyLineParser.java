@@ -15,10 +15,20 @@ import java.io.IOException;
 
 public class PolyLineParser extends ShapeParser{
 
+    /**
+     * create a parser that can abstract a MultiPolyline from input source with given GeometryFactory
+     * @param geometryFactory
+     */
     public PolyLineParser(GeometryFactory geometryFactory) {
         super(geometryFactory);
     }
 
+    /**
+     * abstract a Polyline shape
+     * @param reader
+     * @return
+     * @throws IOException
+     */
     @Override
     public Geometry parserShape(ShapeReader reader) throws IOException {
         reader.skip(4 * DOUBLE_LENGTH);

@@ -27,10 +27,18 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
     /** input reader */
     ShapeReader reader = null;
 
+    /**
+     * create a new shape file parser with a input source that is instance of DataInputStream
+     * @param inputStream
+     */
     public ShpFileParser(DataInputStream inputStream) {
         reader = new DataInputStreamReader(inputStream);
     }
 
+    /**
+     * extract and validate information from .shp file header
+     * @throws IOException
+     */
     public void parseShapeFileHead()
             throws IOException
     {
@@ -43,6 +51,11 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
         reader.skip(HEAD_BOX_NUM * DOUBLE_LENGTH);
     }
 
+    /**
+     * abstract information from record header and then copy primitive bytes data of record to a primitive record.
+     * @return
+     * @throws IOException
+     */
     public ShpRecord parseRecordPrimitiveContent() throws IOException{
         // get length of record content
         int contentLength = reader.readInt();
@@ -54,11 +67,20 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
         return new ShpRecord(contentArray, typeID);
     }
 
+    /**
+     * abstract id number from record header
+     * @return
+     * @throws IOException
+     */
     public int parseRecordHeadID() throws IOException{
         int id = reader.readInt();
         return id;
     }
 
+    /**
+     * get current progress of parsing records.
+     * @return
+     */
     public float getProgress(){
         return 1 - (float)remainLength / (float) fileLength;
     }

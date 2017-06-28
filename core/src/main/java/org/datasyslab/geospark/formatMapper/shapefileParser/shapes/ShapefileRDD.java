@@ -50,11 +50,6 @@ public class ShapefileRDD implements Serializable{
             // parse bytes to shape
             try{
                 shape = primitiveTuple._2().getShape(geometryFactory);
-                if(primitiveTuple._2().getPrimitiveAttribute() != null){
-                    String attributes = primitiveTuple._2().generateAttributes();
-                    attributes = primitiveTuple._1().getIndex() + "\t" + attributes;
-                    shape.setUserData(attributes);
-                }
             }catch (TypeUnknownException e){
                 e.printStackTrace();
             }catch (IOException e){

@@ -31,6 +31,11 @@ public class ShapeType implements Serializable{
         id = i;
     }
 
+    /**
+     * return the corresponding ShapeType instance by int id
+     * @param idx
+     * @return
+     */
     public static ShapeType getType(int idx){
         ShapeType type;
         switch(idx){
@@ -55,6 +60,11 @@ public class ShapeType implements Serializable{
         return type;
     }
 
+    /**
+     * generate a parser according to current shape type
+     * @param geometryFactory
+     * @return
+     */
     public ShapeParser getParser(GeometryFactory geometryFactory){
         ShapeParser parser = null;
         switch (id){
@@ -76,6 +86,10 @@ public class ShapeType implements Serializable{
         return parser;
     }
 
+    /**
+     * return the shape type id
+     * @return
+     */
     public int getId() {
         return id;
     }

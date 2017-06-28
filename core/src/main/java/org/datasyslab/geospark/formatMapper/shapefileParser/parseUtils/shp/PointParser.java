@@ -15,10 +15,20 @@ import java.io.IOException;
 
 public class PointParser extends ShapeParser {
 
+    /**
+     * create a parser that can abstract a Point from input source with given GeometryFactory
+     * @param geometryFactory
+     */
     public PointParser(GeometryFactory geometryFactory) {
         super(geometryFactory);
     }
 
+    /**
+     * abstract a Point shape
+     * @param reader
+     * @return
+     * @throws IOException
+     */
     @Override
     public Geometry parserShape(ShapeReader reader) throws IOException {
         double x = reader.readDouble();

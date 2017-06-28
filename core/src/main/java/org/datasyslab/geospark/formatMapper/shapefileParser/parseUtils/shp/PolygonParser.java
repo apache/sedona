@@ -16,10 +16,20 @@ import java.util.List;
 
 public class PolygonParser extends ShapeParser{
 
+    /**
+     * create a parser that can abstract a Polygon from input source with given GeometryFactory
+     * @param geometryFactory
+     */
     public PolygonParser(GeometryFactory geometryFactory) {
         super(geometryFactory);
     }
 
+    /**
+     * abstract abstract a Polygon shape
+     * @param reader
+     * @return
+     * @throws IOException
+     */
     @Override
     public Geometry parserShape(ShapeReader reader) throws IOException {
         reader.skip(4 * DOUBLE_LENGTH);
