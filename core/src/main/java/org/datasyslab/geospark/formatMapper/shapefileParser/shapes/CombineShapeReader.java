@@ -108,7 +108,7 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
     public PrimitiveShape getCurrentValue() throws IOException, InterruptedException {
         value = new PrimitiveShape();
         value.setPrimitiveRecord(shapeFileReader.getCurrentValue());
-        if(hasDbf && hasNextDbf) value.setPrimitiveAttribute(dbfFileReader.getCurrentValue(), dbfFileReader.getFieldDescriptors());
+        if(hasDbf && hasNextDbf) value.setPrimitiveAttribute(dbfFileReader.getCurrentValue());
         return value;
     }
 

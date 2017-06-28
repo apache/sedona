@@ -34,13 +34,16 @@ public class DbfParseUtil implements ShapeFileConst {
         return (float)numRecordRead / (float)numRecord;
     }
 
+    /** fieldDescriptors of current .dbf file */
+    public static List<FieldDescriptor> fieldDescriptors = null;
+
     /**
      * parse header of .dbf file and draw information for next step
      * @param inputStream
      * @return
      * @throws IOException
      */
-    public List<FieldDescriptor> parseFileHead(DataInputStream inputStream) throws IOException {
+    public void parseFileHead(DataInputStream inputStream) throws IOException {
         // version
         inputStream.readByte();
         // date YYMMDD format
@@ -67,7 +70,7 @@ public class DbfParseUtil implements ShapeFileConst {
         // skip reserved 2 bytes
         inputStream.skipBytes(2);
         // parse n filed descriptors
-        List<FieldDescriptor> fieldDescriptors = new ArrayList<>();
+        fieldDescriptors = new ArrayList<>();
         byte terminator = inputStream.readByte();
         while(terminator != FIELD_DESCRIPTOR_TERMINATOR){
             FieldDescriptor descriptor = new FieldDescriptor();
@@ -79,6 +82,7 @@ public class DbfParseUtil implements ShapeFileConst {
             while(nameBytes[zeroId] != 0) zeroId++;
             Text fieldName = new Text();
             fieldName.append(nameBytes, 0, zeroId);
+            descriptor.setFiledName(fieldName.toString());
             // read field type
             descriptor.setFieldType(inputStream.readByte());
             // skip reserved field
@@ -92,7 +96,6 @@ public class DbfParseUtil implements ShapeFileConst {
             fieldDescriptors.add(descriptor);
             terminator = inputStream.readByte();
         }
-        return fieldDescriptors;
     }
 
     /**
@@ -123,7 +126,7 @@ public class DbfParseUtil implements ShapeFileConst {
      * @return
      * @throws IOException
      */
-    public static String primitiveToAttributes(DataInputStream inputStream, List<FieldDescriptor> fieldDescriptors)
+    public static String primitiveToAttributes(DataInputStream inputStream)
             throws IOException
     {
         byte[] delimiter = {'\t'};

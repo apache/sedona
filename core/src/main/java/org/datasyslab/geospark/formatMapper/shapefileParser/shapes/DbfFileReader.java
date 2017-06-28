@@ -6,7 +6,6 @@
  */
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -15,10 +14,8 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.DbfParseUtil;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.FieldDescriptor;
 
 import java.io.IOException;
-import java.util.List;
 
 public class DbfFileReader extends org.apache.hadoop.mapreduce.RecordReader<ShapeKey, BytesWritable> {
 
@@ -34,9 +31,6 @@ public class DbfFileReader extends org.apache.hadoop.mapreduce.RecordReader<Shap
     /** generated id of current row */
     private int id = 0;
 
-    /** Info Bundle of current dbf file */
-    List<FieldDescriptor> fieldDescriptors = null;
-
     /** Dbf parser */
     DbfParseUtil dbfParser = null;
 
@@ -46,7 +40,7 @@ public class DbfFileReader extends org.apache.hadoop.mapreduce.RecordReader<Shap
         FileSystem fileSys = inputPath.getFileSystem(context.getConfiguration());
         inputStream = fileSys.open(inputPath);
         dbfParser = new DbfParseUtil();
-        fieldDescriptors = dbfParser.parseFileHead(inputStream);
+        dbfParser.parseFileHead(inputStream);
     }
 
     public boolean nextKeyValue() throws IOException, InterruptedException {
@@ -78,9 +72,5 @@ public class DbfFileReader extends org.apache.hadoop.mapreduce.RecordReader<Shap
 
     public void close() throws IOException {
 
-    }
-
-    public List<FieldDescriptor> getFieldDescriptors() {
-        return fieldDescriptors;
     }
 }

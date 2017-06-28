@@ -31,9 +31,6 @@ public class PrimitiveShape implements Serializable{
     /** shape type */
     ShapeType shapeType = ShapeType.NULL;
 
-    /** dbf field descriptor */
-    List<FieldDescriptor> fieldDescriptorList = null;
-
     public BytesWritable getPrimitiveRecord() {
         return primitiveRecord;
     }
@@ -47,9 +44,8 @@ public class PrimitiveShape implements Serializable{
         return primitiveAttribute;
     }
 
-    public void setPrimitiveAttribute(BytesWritable primitiveAttribute, List<FieldDescriptor> fieldDescriptors) {
+    public void setPrimitiveAttribute(BytesWritable primitiveAttribute) {
         this.primitiveAttribute = primitiveAttribute;
-        fieldDescriptorList = new ArrayList<>(fieldDescriptors);
     }
 
     public String generateAttributes(){
@@ -58,7 +54,7 @@ public class PrimitiveShape implements Serializable{
             try{
                 DataInputStream dbfInputStream = new DataInputStream(
                         new ByteArrayInputStream(primitiveAttribute.getBytes()));
-                attrStr = DbfParseUtil.primitiveToAttributes(dbfInputStream, fieldDescriptorList);
+                attrStr = DbfParseUtil.primitiveToAttributes(dbfInputStream);
             }catch (IOException e){
                 e.printStackTrace();
             }
@@ -71,7 +67,12 @@ public class PrimitiveShape implements Serializable{
         parser = shapeType.getParser(geometryFactory);
         if(parser == null) throw new TypeUnknownException(shapeType.getId());
         ShapeReader reader = new ByteBufferReader(primitiveRecord.getBytes(), false);
-        return parser.parserShape(reader);
+        Geometry shape = parser.parserShape(reader);
+        if(primitiveAttribute != null){
+            String attributes = generateAttributes();
+            shape.setUserData(attributes);
+        }
+        return shape;
     }
 
 }
