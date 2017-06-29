@@ -1,7 +1,7 @@
 /**
  * FILE: Example.java
  * PATH: org.datasyslab.geospark.showcase.Example.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.geospark.showcase;
@@ -17,6 +17,7 @@ import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileRDD;
 import org.datasyslab.geospark.spatialOperator.JoinQuery;
 import org.datasyslab.geospark.spatialOperator.KNNQuery;
 import org.datasyslab.geospark.spatialOperator.RangeQuery;
@@ -88,6 +89,8 @@ public class Example implements Serializable{
     
     /** The range query window. */
     static Envelope rangeQueryWindow;
+    
+    static String ShapeFileInputLocation;
 	
 	/**
 	 * The main method.
@@ -117,9 +120,11 @@ public class Example implements Serializable{
 		geometryFactory=new GeometryFactory();
 		kNNQueryPoint=geometryFactory.createPoint(new Coordinate(-84.01, 34.01));
 		rangeQueryWindow=new Envelope (-90.01,-80.01,30.01,40.01);
-		joinQueryPartitioningType = GridType.RTREE;
+		joinQueryPartitioningType = GridType.QUADTREE;
 		eachQueryLoopTimes=5;
 		
+        ShapeFileInputLocation = resourceFolder+"shapefiles/polygon";
+
 		try {
 			testSpatialRangeQuery();
 			testSpatialRangeQueryUsingIndex();
@@ -131,6 +136,7 @@ public class Example implements Serializable{
 			testDistanceJoinQueryUsingIndex();
 			testCRSTransformationSpatialRangeQuery();
 			testCRSTransformationSpatialRangeQueryUsingIndex();
+			testLoadShapefileIntoPolygonRDD();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("GeoSpark DEMOs failed!");
@@ -216,7 +222,7 @@ public class Example implements Serializable{
     	objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
     	
     	objectRDD.spatialPartitioning(joinQueryPartitioningType);
-    	queryWindowRDD.spatialPartitioning(objectRDD.grids);
+    	queryWindowRDD.spatialPartitioning(objectRDD.partitionTree);
     	
     	objectRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY());
     	queryWindowRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY());
@@ -237,7 +243,7 @@ public class Example implements Serializable{
     	objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
     	
     	objectRDD.spatialPartitioning(joinQueryPartitioningType);
-    	queryWindowRDD.spatialPartitioning(objectRDD.grids);
+    	queryWindowRDD.spatialPartitioning(objectRDD.partitionTree);
     	
     	objectRDD.buildIndex(PointRDDIndexType,true);
     	
@@ -260,8 +266,8 @@ public class Example implements Serializable{
     	objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
     	CircleRDD queryWindowRDD = new CircleRDD(objectRDD,0.1);
     	
-    	objectRDD.spatialPartitioning(GridType.RTREE);
-    	queryWindowRDD.spatialPartitioning(objectRDD.grids);
+    	objectRDD.spatialPartitioning(GridType.QUADTREE);
+    	queryWindowRDD.spatialPartitioning(objectRDD.partitionTree);
     	
     	objectRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY());
     	queryWindowRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY());
@@ -283,8 +289,8 @@ public class Example implements Serializable{
     	objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
     	CircleRDD queryWindowRDD = new CircleRDD(objectRDD,0.1);
     	
-  		objectRDD.spatialPartitioning(GridType.RTREE);
-  		queryWindowRDD.spatialPartitioning(objectRDD.grids);
+  		objectRDD.spatialPartitioning(GridType.QUADTREE);
+  		queryWindowRDD.spatialPartitioning(objectRDD.partitionTree);
   		
     	objectRDD.buildIndex(IndexType.RTREE,true);
     	
@@ -331,6 +337,17 @@ public class Example implements Serializable{
 			assert resultSize>-1;
 		}
 
+	}
+	
+	public static void testLoadShapefileIntoPolygonRDD() throws Exception {
+        ShapefileRDD shapefileRDD = new ShapefileRDD(sc,ShapeFileInputLocation);
+        PolygonRDD spatialRDD = new PolygonRDD(shapefileRDD.getPolygonRDD());
+        try {
+			RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180,180,-90,90), false, false).count();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

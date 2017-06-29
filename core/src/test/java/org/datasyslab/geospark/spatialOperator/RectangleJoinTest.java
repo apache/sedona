@@ -1,7 +1,7 @@
 /**
  * FILE: RectangleJoinTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.RectangleJoinTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
@@ -16,6 +16,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
@@ -131,9 +132,9 @@ public class RectangleJoinTest {
      */
     @Test
     public void testSpatialJoinQueryWithRectangleRDD() throws Exception {    	
-        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
 
-        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
         
         spatialRDD.spatialPartitioning(gridType);
         
@@ -161,9 +162,9 @@ public class RectangleJoinTest {
     @Test
     public void testSpatialJoinQueryWithRectangleRDDUsingRtreeIndex() throws Exception {
     	
-        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
 
-        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
         
         spatialRDD.spatialPartitioning(gridType);
         
@@ -192,9 +193,9 @@ public class RectangleJoinTest {
     @Test
     public void testSpatialJoinQueryWithRectangleRDDUsingQuadtreeIndex() throws Exception {
 
-        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
 
-        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
   
         spatialRDD.spatialPartitioning(gridType);
         

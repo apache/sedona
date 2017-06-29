@@ -14,8 +14,10 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.babylon.extension.imageGenerator.BabylonImageGenerator;
 import org.datasyslab.babylon.extension.visualizationEffect.ScatterPlot;
+import org.datasyslab.babylon.utils.ColorizeOption;
 import org.datasyslab.babylon.utils.ImageType;
 import org.datasyslab.babylon.utils.RasterizationUtils;
 import org.datasyslab.geospark.enums.FileDataSplitter;
@@ -109,8 +111,9 @@ public class ScatterplotTest {
 	public static void setUpBeforeClass() throws Exception {
 		SparkConf sparkConf = new SparkConf().setAppName("ScatterplotTest").setMaster("local[4]");
 		sparkContext = new JavaSparkContext(sparkConf);
-        Logger.getLogger("org").setLevel(Level.WARN);
-        Logger.getLogger("akka").setLevel(Level.WARN);
+        Logger.getLogger("org.apache").setLevel(Level.WARN);
+		Logger.getLogger("org.datasyslab").setLevel(Level.DEBUG);
+		Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
         
         inputProp = ScatterplotTest.class.getClassLoader().getResourceAsStream("babylon.point.properties");
@@ -187,7 +190,7 @@ public class ScatterplotTest {
 	 */
 	@Test
 	public void testPointRDDVisualization() throws Exception {
-		PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
+		PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY());
 		ScatterPlot visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary,false);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
@@ -200,6 +203,24 @@ public class ScatterplotTest {
 		imageGenerator = new  BabylonImageGenerator();
 		imageGenerator.SaveVectorImageAsLocalFile(visualizationOperator.vectorImage, "./target/scatterplot/PointRDD",ImageType.SVG);
 	}
+
+	/**
+	 * Test point RDD visualization.
+	 *
+	 * @throws Exception the exception
+	 */
+	@Test
+	public void testPointRDDVisualizationWithParallelRendering() throws Exception {
+		PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY());
+		ScatterPlot visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary, ColorizeOption.NORMAL,
+				false, 4, 4, true, false);
+		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
+		visualizationOperator.Visualize(sparkContext, spatialRDD);
+		visualizationOperator.stitchImagePartitions();
+		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/scatterplot/PointRDD-parallelrender",ImageType.PNG);
+		//imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.distributedRasterImage, "./target/scatterplot/PointRDD-parallelrender",ImageType.PNG);
+	}
 	
 	/**
 	 * Test point RDD visualization.
@@ -208,7 +229,7 @@ public class ScatterplotTest {
 	 */
 	@Test
 	public void testSaveAsDistributedFile() throws Exception {
-		PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
+		PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY());
 		ScatterPlot visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary,false,2,2,true,false);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
@@ -232,7 +253,7 @@ public class ScatterplotTest {
 	 */
 	@Test
 	public void testRectangleRDDVisualization() throws Exception {
-		RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
+		RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY());
 		ScatterPlot visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary,false);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.RED, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
@@ -254,7 +275,7 @@ public class ScatterplotTest {
 	@Test
 	public void testPolygonRDDVisualization() throws Exception {
 		//UserSuppliedPolygonMapper userSuppliedPolygonMapper = new UserSuppliedPolygonMapper();
-		PolygonRDD spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions);
+		PolygonRDD spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions, StorageLevel.MEMORY_ONLY());
 		ScatterPlot visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary,false);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
@@ -278,7 +299,7 @@ public class ScatterplotTest {
 		int resolutionY = 800;
 		int resolutionX = RasterizationUtils.GetWidthFromHeight(resolutionY, USMainLandBoundary);
 		//UserSuppliedLineStringMapper userSuppliedLineStringMapper = new UserSuppliedLineStringMapper();
-		LineStringRDD spatialRDD = new LineStringRDD(sparkContext, LineStringInputLocation, LineStringSplitter, false, LineStringNumPartitions);
+		LineStringRDD spatialRDD = new LineStringRDD(sparkContext, LineStringInputLocation, LineStringSplitter, false, LineStringNumPartitions, StorageLevel.MEMORY_ONLY());
 		ScatterPlot visualizationOperator = new ScatterPlot(resolutionX,resolutionY,USMainLandBoundary,false);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);

@@ -6,6 +6,7 @@
  */
 package org.datasyslab.babylon.extension.visualizationEffect;
 
+import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.babylon.core.VisualizationOperator;
 import org.datasyslab.babylon.utils.ColorizeOption;
@@ -18,7 +19,10 @@ import com.vividsolutions.jts.geom.Envelope;
  * The Class ScatterPlot.
  */
 public class ScatterPlot extends VisualizationOperator {
-	
+
+	/** The Constant logger. */
+	final static Logger logger = Logger.getLogger(ScatterPlot.class);
+
 	/**
 	 * Instantiates a new scatter plot.
 	 *
@@ -29,7 +33,7 @@ public class ScatterPlot extends VisualizationOperator {
 	 * @deprecated This function always generates raster image. Please append one more parameter to the end: boolean generateVectorImage
 	 */
 	public ScatterPlot(int resolutionX, int resolutionY, Envelope datasetBoundary, boolean reverseSpatialCoordinate) {
-		super(resolutionX, resolutionY, datasetBoundary,ColorizeOption.UNIFORMCOLOR,reverseSpatialCoordinate,-1,-1,false,false,false);
+		super(resolutionX, resolutionY, datasetBoundary,ColorizeOption.NORMAL,reverseSpatialCoordinate,-1,-1,false,false,false);
 	}
 
 	/**
@@ -42,7 +46,7 @@ public class ScatterPlot extends VisualizationOperator {
 	 * @param generateVectorImage the generate vector image
 	 */
 	public ScatterPlot(int resolutionX, int resolutionY, Envelope datasetBoundary, boolean reverseSpatialCoordinate, boolean generateVectorImage) {
-		super(resolutionX, resolutionY, datasetBoundary,ColorizeOption.UNIFORMCOLOR,reverseSpatialCoordinate,-1,-1,false,false,generateVectorImage);
+		super(resolutionX, resolutionY, datasetBoundary,ColorizeOption.NORMAL,reverseSpatialCoordinate,-1,-1,false,false,generateVectorImage);
 	}
 	
 	/**
@@ -59,7 +63,7 @@ public class ScatterPlot extends VisualizationOperator {
 	 */
 	public ScatterPlot(int resolutionX, int resolutionY,Envelope datasetBoundary, boolean reverseSpatialCoordinate,
 			int partitionX, int partitionY, boolean parallelRenderImage, boolean generateVectorImage) {
-		super(resolutionX, resolutionY, datasetBoundary,ColorizeOption.UNIFORMCOLOR,reverseSpatialCoordinate,
+		super(resolutionX, resolutionY, datasetBoundary,ColorizeOption.NORMAL,reverseSpatialCoordinate,
 			partitionX, partitionY, false, parallelRenderImage,generateVectorImage);
 	}
 	
@@ -76,7 +80,7 @@ public class ScatterPlot extends VisualizationOperator {
 	 */
 	public ScatterPlot(int resolutionX, int resolutionY,Envelope datasetBoundary, boolean reverseSpatialCoordinate,
 			int partitionX, int partitionY, boolean parallelRenderImage) {
-		super(resolutionX, resolutionY, datasetBoundary,ColorizeOption.UNIFORMCOLOR,reverseSpatialCoordinate,
+		super(resolutionX, resolutionY, datasetBoundary,ColorizeOption.NORMAL,reverseSpatialCoordinate,
 			partitionX, partitionY, false, parallelRenderImage,false);
 	}
 	
@@ -144,9 +148,11 @@ public class ScatterPlot extends VisualizationOperator {
 	 * @throws Exception the exception
 	 */
 	public boolean Visualize(JavaSparkContext sparkContext, SpatialRDD spatialRDD) throws Exception {
+		logger.info("[Babylon][Visualize][Start]");
 		this.Rasterize(sparkContext, spatialRDD, true);
 		this.Colorize();
 		this.RenderImage(sparkContext);
+		logger.info("[Babylon][Visualize][Stop]");
 		return true;
 	}
 

@@ -11,8 +11,9 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.datasyslab.babylon.core.RasterOverlayOperator
 import org.datasyslab.babylon.extension.imageGenerator.BabylonImageGenerator
 import org.datasyslab.babylon.extension.visualizationEffect.{ChoroplethMap, HeatMap, ScatterPlot}
-import org.datasyslab.babylon.utils.{ColorizeOption, EarthdataHDFPointMapper, ImageType}
+import org.datasyslab.babylon.utils.{ColorizeOption, ImageType}
 import org.datasyslab.geospark.enums.{FileDataSplitter, GridType, IndexType}
+import org.datasyslab.geospark.formatMapper.EarthdataHDFPointMapper
 import org.datasyslab.geospark.spatialOperator.JoinQuery
 import org.datasyslab.geospark.spatialRDD.{PointRDD, PolygonRDD, RectangleRDD}
 import org.scalatest.FunSpec
@@ -69,7 +70,7 @@ class scalaTest extends FunSpec {
 		val urlPrefix = System.getProperty("user.dir") + "/src/test/resources/modis/"
 
 		it("should pass scatter plot") {
-			val spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions)
+			val spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions, StorageLevel.MEMORY_ONLY)
 			var visualizationOperator = new ScatterPlot(1000, 600, USMainLandBoundary, false)
 			visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true)
 			visualizationOperator.Visualize(sparkContext, spatialRDD)
@@ -89,7 +90,7 @@ class scalaTest extends FunSpec {
 		}
 
 		it("should pass heat map") {
-			val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions)
+			val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY)
 			val visualizationOperator = new HeatMap(1000, 600, USMainLandBoundary, false, 2)
 			visualizationOperator.Visualize(sparkContext, spatialRDD)
 			val imageGenerator = new BabylonImageGenerator
@@ -98,8 +99,8 @@ class scalaTest extends FunSpec {
 		}
 
 		it("should pass choropleth map") {
-			val spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions)
-			val queryRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions)
+			val spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY)
+			val queryRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions, StorageLevel.MEMORY_ONLY)
 			spatialRDD.spatialPartitioning(GridType.RTREE)
 			queryRDD.spatialPartitioning(spatialRDD.grids)
 			spatialRDD.buildIndex(IndexType.RTREE, true)
@@ -118,7 +119,7 @@ class scalaTest extends FunSpec {
 		}
 
 		it("should pass parallel filtering and rendering without stitching image tiles") {
-			val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions)
+			val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY)
 			val visualizationOperator = new HeatMap(1000, 600, USMainLandBoundary, false, 2, 4, 4, true, true)
 			visualizationOperator.Visualize(sparkContext, spatialRDD)
 			val imageGenerator = new BabylonImageGenerator
@@ -127,7 +128,7 @@ class scalaTest extends FunSpec {
 		}
 
 		it("should pass parallel filtering and rendering with stitching image tiles") {
-			val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions)
+			val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY)
 			val visualizationOperator = new HeatMap(1000, 600, USMainLandBoundary, false, 2, 4, 4, true, true)
 			visualizationOperator.Visualize(sparkContext, spatialRDD)
 			visualizationOperator.stitchImagePartitions
@@ -140,7 +141,7 @@ class scalaTest extends FunSpec {
 			val earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName,
 				HDFDataVariableList, HDFDataVariableName, HDFswitchXY, urlPrefix)
 			val spatialRDD = new PointRDD(sparkContext, earthdataInputLocation, earthdataNumPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY)
-			val visualizationOperator = new ScatterPlot(1000, 600, spatialRDD.boundaryEnvelope, ColorizeOption.ZAXIS, false, false)
+			val visualizationOperator = new ScatterPlot(1000, 600, spatialRDD.boundaryEnvelope, ColorizeOption.EARTHOBSERVATION, false, false)
 			visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.BLUE, true)
 			visualizationOperator.Visualize(sparkContext, spatialRDD)
 			val imageGenerator = new BabylonImageGenerator

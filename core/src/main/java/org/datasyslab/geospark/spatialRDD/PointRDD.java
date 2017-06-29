@@ -1,7 +1,7 @@
 /**
  * FILE: PointRDD.java
  * PATH: org.datasyslab.geospark.spatialRDD.PointRDD.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialRDD;
@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 
+import com.vividsolutions.jts.geom.Envelope;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
@@ -37,21 +38,17 @@ public class PointRDD extends SpatialRDD {
 	 * Instantiates a new point RDD.
 	 *
 	 * @param rawSpatialRDD the raw spatial RDD
-	 * @deprecated Please append RDD Storage Level after all the existing parameters
 	 */
-	@Deprecated
 	public PointRDD(JavaRDD<Point> rawSpatialRDD)
 	{
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Point,Object>()
-		{
+        this.rawSpatialRDD = rawSpatialRDD.map(new Function<Point,Object>()
+        {
 
-			@Override
-			public Object call(Point spatialObject) throws Exception {
-				return spatialObject;
-			}
-			
-		});
-        this.analyze();
+            @Override
+            public Object call(Point spatialObject) throws Exception {
+                return spatialObject;
+            }
+        });
 	}
 	
 	/**
@@ -70,10 +67,8 @@ public class PointRDD extends SpatialRDD {
 			public Object call(Point spatialObject) throws Exception {
 				return spatialObject;
 			}
-			
 		});
 		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
-        this.analyze();
 	}
 	
 	
@@ -86,12 +81,9 @@ public class PointRDD extends SpatialRDD {
      * @param splitter the splitter
      * @param carryInputData the carry input data
      * @param partitions the partitions
-     * @deprecated Please append RDD Storage Level after all the existing parameters
      */
-	@Deprecated
     public PointRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter, boolean carryInputData, Integer partitions) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(new PointFormatMapper(Offset,Offset, splitter, carryInputData)));
-        this.analyze();
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(new PointFormatMapper(Offset,Offset, splitter, carryInputData)));
     }
 
     /**
@@ -102,12 +94,9 @@ public class PointRDD extends SpatialRDD {
      * @param Offset the offset
      * @param splitter the splitter
      * @param carryInputData the carry input data
-     * @deprecated Please append RDD Storage Level after all the existing parameters
      */
-	@Deprecated
     public PointRDD (JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter, boolean carryInputData) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(new PointFormatMapper(Offset, Offset, splitter, carryInputData)));
-        this.analyze();
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new PointFormatMapper(Offset, Offset, splitter, carryInputData)));
     }
 
     /**
@@ -118,12 +107,9 @@ public class PointRDD extends SpatialRDD {
      * @param splitter the splitter
      * @param carryInputData the carry input data
      * @param partitions the partitions
-     * @deprecated Please append RDD Storage Level after all the existing parameters
      */
-	@Deprecated
     public PointRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Integer partitions) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(new PointFormatMapper(0, 0, splitter, carryInputData)));
-        this.analyze();
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(new PointFormatMapper(0, 0, splitter, carryInputData)));
     }
 
     /**
@@ -133,12 +119,9 @@ public class PointRDD extends SpatialRDD {
      * @param InputLocation the input location
      * @param splitter the splitter
      * @param carryInputData the carry input data
-     * @deprecated Please append RDD Storage Level after all the existing parameters
      */
-	@Deprecated
     public PointRDD (JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(new PointFormatMapper(0, 0, splitter, carryInputData)));
-        this.analyze();
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new PointFormatMapper(0, 0, splitter, carryInputData)));
     }
     
     /**
@@ -148,12 +131,9 @@ public class PointRDD extends SpatialRDD {
      * @param InputLocation the input location
      * @param partitions the partitions
      * @param userSuppliedMapper the user supplied mapper
-     * @deprecated Please append RDD Storage Level after all the existing parameters
      */
-	@Deprecated
     public PointRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(userSuppliedMapper));
-        this.analyze();
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(userSuppliedMapper));
     }
     
     /**
@@ -162,14 +142,166 @@ public class PointRDD extends SpatialRDD {
      * @param sparkContext the spark context
      * @param InputLocation the input location
      * @param userSuppliedMapper the user supplied mapper
-     * @deprecated Please append RDD Storage Level after all the existing parameters
      */
-	@Deprecated
     public PointRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(userSuppliedMapper));
-        this.analyze();
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(userSuppliedMapper));
     }
-        
+
+
+
+
+
+    /**
+     * Instantiates a new point RDD.
+     *
+     * @param rawSpatialRDD the raw spatial RDD
+     * @param datasetBoundary the dataset boundary
+     * @param approximateTotalCount the approximate total count
+     */
+    public PointRDD(JavaRDD<Point> rawSpatialRDD, Envelope datasetBoundary, Integer approximateTotalCount)
+    {
+        this.rawSpatialRDD = rawSpatialRDD.map(new Function<Point,Object>()
+        {
+
+            @Override
+            public Object call(Point spatialObject) throws Exception {
+                return spatialObject;
+            }
+        });
+        this.boundaryEnvelope = datasetBoundary;
+        this.approximateTotalCount = approximateTotalCount;
+    }
+
+    /**
+     * Instantiates a new point RDD.
+     *
+     * @param rawSpatialRDD the raw spatial RDD
+     * @param sourceEpsgCRSCode the source epsg CRS code
+     * @param targetEpsgCode the target epsg code
+     * @param datasetBoundary the dataset boundary
+     * @param approximateTotalCount the approximate total count
+     */
+    public PointRDD(JavaRDD<Point> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode, Envelope datasetBoundary, Integer approximateTotalCount)
+    {
+        this.rawSpatialRDD = rawSpatialRDD.map(new Function<Point,Object>()
+        {
+
+            @Override
+            public Object call(Point spatialObject) throws Exception {
+                return spatialObject;
+            }
+
+        });
+        this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+        this.boundaryEnvelope = datasetBoundary;
+        this.approximateTotalCount = approximateTotalCount;
+    }
+
+
+    /**
+     * Instantiates a new point RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param Offset the offset
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param partitions the partitions
+     * @param datasetBoundary the dataset boundary
+     * @param approximateTotalCount the approximate total count
+     */
+    public PointRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter, boolean carryInputData, Integer partitions, Envelope datasetBoundary, Integer approximateTotalCount) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(new PointFormatMapper(Offset,Offset, splitter, carryInputData)));
+        this.boundaryEnvelope = datasetBoundary;
+        this.approximateTotalCount = approximateTotalCount;
+    }
+
+    /**
+     * Instantiates a new point RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param Offset the offset
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param datasetBoundary the dataset boundary
+     * @param approximateTotalCount the approximate total count
+     */
+    public PointRDD (JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter, boolean carryInputData, Envelope datasetBoundary, Integer approximateTotalCount) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new PointFormatMapper(Offset, Offset, splitter, carryInputData)));
+        this.boundaryEnvelope = datasetBoundary;
+        this.approximateTotalCount = approximateTotalCount;
+    }
+
+    /**
+     * Instantiates a new point RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param partitions the partitions
+     * @param datasetBoundary the dataset boundary
+     * @param approximateTotalCount the approximate total count
+     */
+    public PointRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Integer partitions, Envelope datasetBoundary, Integer approximateTotalCount) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(new PointFormatMapper(0, 0, splitter, carryInputData)));
+        this.boundaryEnvelope = datasetBoundary;
+        this.approximateTotalCount = approximateTotalCount;
+    }
+
+    /**
+     * Instantiates a new point RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param datasetBoundary the dataset boundary
+     * @param approximateTotalCount the approximate total count
+     */
+    public PointRDD (JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Envelope datasetBoundary, Integer approximateTotalCount) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new PointFormatMapper(0, 0, splitter, carryInputData)));
+        this.boundaryEnvelope = datasetBoundary;
+        this.approximateTotalCount = approximateTotalCount;
+    }
+
+    /**
+     * Instantiates a new point RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param partitions the partitions
+     * @param userSuppliedMapper the user supplied mapper
+     * @param datasetBoundary the dataset boundary
+     * @param approximateTotalCount the approximate total count
+     */
+    public PointRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper, Envelope datasetBoundary, Integer approximateTotalCount) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(userSuppliedMapper));
+        this.boundaryEnvelope = datasetBoundary;
+        this.approximateTotalCount = approximateTotalCount;
+    }
+
+    /**
+     * Instantiates a new point RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param userSuppliedMapper the user supplied mapper
+     * @param datasetBoundary the dataset boundary
+     * @param approximateTotalCount the approximate total count
+     */
+    public PointRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper, Envelope datasetBoundary, Integer approximateTotalCount) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(userSuppliedMapper));
+        this.boundaryEnvelope = datasetBoundary;
+        this.approximateTotalCount = approximateTotalCount;
+    }
+
+
+
+
+
+
 	/**
 	 * Instantiates a new point RDD.
 	 *
@@ -202,7 +334,7 @@ public class PointRDD extends SpatialRDD {
      * @param newLevel the new level
      */
     public PointRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(new PointFormatMapper(Offset,Offset, splitter, carryInputData)));
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(new PointFormatMapper(Offset,Offset, splitter, carryInputData)));
         this.analyze(newLevel);
     }
 
@@ -217,7 +349,7 @@ public class PointRDD extends SpatialRDD {
      * @param newLevel the new level
      */
     public PointRDD (JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter, boolean carryInputData, StorageLevel newLevel) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(new PointFormatMapper(Offset, Offset, splitter, carryInputData)));
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new PointFormatMapper(Offset, Offset, splitter, carryInputData)));
         this.analyze(newLevel);
     }
 
@@ -232,7 +364,7 @@ public class PointRDD extends SpatialRDD {
      * @param newLevel the new level
      */
     public PointRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(new PointFormatMapper(0, 0, splitter, carryInputData)));
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(new PointFormatMapper(0, 0, splitter, carryInputData)));
         this.analyze(newLevel);
     }
 
@@ -246,7 +378,7 @@ public class PointRDD extends SpatialRDD {
      * @param newLevel the new level
      */
     public PointRDD (JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, StorageLevel newLevel) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(new PointFormatMapper(0, 0, splitter, carryInputData)));
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new PointFormatMapper(0, 0, splitter, carryInputData)));
         this.analyze(newLevel);
     }
     
@@ -260,7 +392,7 @@ public class PointRDD extends SpatialRDD {
      * @param newLevel the new level
      */
     public PointRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper, StorageLevel newLevel) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(userSuppliedMapper));
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(userSuppliedMapper));
         this.analyze(newLevel);
     }
     
@@ -273,7 +405,7 @@ public class PointRDD extends SpatialRDD {
      * @param newLevel the new level
      */
     public PointRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper, StorageLevel newLevel) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(userSuppliedMapper));
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(userSuppliedMapper));
         this.analyze(newLevel);
     }
 
@@ -314,7 +446,7 @@ public class PointRDD extends SpatialRDD {
      */
     public PointRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter, 
     		boolean carryInputData, Integer partitions, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(new PointFormatMapper(Offset,Offset, splitter, carryInputData)));
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(new PointFormatMapper(Offset,Offset, splitter, carryInputData)));
 		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.analyze(newLevel);
     }
@@ -333,7 +465,7 @@ public class PointRDD extends SpatialRDD {
      */
     public PointRDD (JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter,
     		boolean carryInputData, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(new PointFormatMapper(Offset, Offset, splitter, carryInputData)));
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new PointFormatMapper(Offset, Offset, splitter, carryInputData)));
 		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.analyze(newLevel);
     }
@@ -352,7 +484,7 @@ public class PointRDD extends SpatialRDD {
      */
     public PointRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData,
     		Integer partitions, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(new PointFormatMapper(0, 0, splitter, carryInputData)));
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(new PointFormatMapper(0, 0, splitter, carryInputData)));
 		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.analyze(newLevel);
     }
@@ -370,7 +502,7 @@ public class PointRDD extends SpatialRDD {
      */
     public PointRDD (JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData,
     		StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(new PointFormatMapper(0, 0, splitter, carryInputData)));
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new PointFormatMapper(0, 0, splitter, carryInputData)));
 		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.analyze(newLevel);
     }
@@ -388,7 +520,7 @@ public class PointRDD extends SpatialRDD {
      */
     public PointRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper,
     		StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).flatMap(userSuppliedMapper));
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(userSuppliedMapper));
 		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.analyze(newLevel);
     }
@@ -404,7 +536,7 @@ public class PointRDD extends SpatialRDD {
      * @param targetEpsgCode the target epsg code
      */
     public PointRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).flatMap(userSuppliedMapper));
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(userSuppliedMapper));
 		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.analyze(newLevel);
     }

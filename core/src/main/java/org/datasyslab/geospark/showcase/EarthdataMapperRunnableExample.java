@@ -1,7 +1,7 @@
 /**
  * FILE: EarthdataMapperRunnableExample.java
  * PATH: org.datasyslab.geospark.showcase.EarthdataMapperRunnableExample.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.geospark.showcase;
@@ -88,6 +88,8 @@ public class EarthdataMapperRunnableExample {
         urlPrefix = System.getProperty("user.dir")+"/src/test/resources/modis/";
         testSpatialRangeQuery();
         testSpatialRangeQueryUsingIndex();
+        sc.stop();
+        System.out.println("All GeoSpark Earthdata DEMOs passed!");
 	}
 
     /**

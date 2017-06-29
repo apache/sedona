@@ -9,6 +9,7 @@ package org.datasyslab.babylon.extension.visualizationEffect;
 import java.awt.Color;
 
 
+import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaSparkContext;
 
 import org.datasyslab.babylon.core.VisualizationOperator;
@@ -24,6 +25,9 @@ import com.vividsolutions.jts.geom.Envelope;
  * The Class HeatMap.
  */
 public class HeatMap extends VisualizationOperator{
+
+	/** The Constant logger. */
+	final static Logger logger = Logger.getLogger(HeatMap.class);
 
 	/**
 	 * Instantiates a new heat map.
@@ -70,46 +74,46 @@ public class HeatMap extends VisualizationOperator{
 	 * @see org.datasyslab.babylon.core.VisualizationOperator#EncodeToColor(int)
 	 */
 	@Override
-	protected Color EncodeToColor(int normailizedCount) throws Exception
+	protected Integer EncodeToRGB(int normailizedCount) throws Exception
 	{
 		int alpha = 150;
 		Color[] colors = new Color[]{new Color(153,255,0,alpha),new Color(204,255,0,alpha),new Color(255,255,0,alpha),
 		      new Color(255,204,0,alpha),new Color(255,153,0,alpha),new Color(255,102,0,alpha),
 		      new Color(255,51,0,alpha),new Color(255,0,0,alpha)};
 	    if (normailizedCount < 1){
-	        return new Color(255,255,255,0);
+	        return new Color(255,255,255,0).getRGB();
 	    }
 	    else if(normailizedCount<30)
 	    {
-	    	return colors[0];
+	    	return colors[0].getRGB();
 	    }
 	    else if(normailizedCount<50)
 	    {
-	    	return colors[1];
+	    	return colors[1].getRGB();
 	    }
 	    else if(normailizedCount<70)
 	    {
-	    	return colors[2];
+	    	return colors[2].getRGB();
 	    }
 	    else if(normailizedCount<100)
 	    {
-	    	return colors[3];
+	    	return colors[3].getRGB();
 	    }
 	    else if(normailizedCount<130)
 	    {
-	    	return colors[4];
+	    	return colors[4].getRGB();
 	    }
 	    else if(normailizedCount<160)
 	    {
-	    	return colors[5];
+	    	return colors[5].getRGB();
 	    }
 	    else if(normailizedCount<190)
 	    {
-	    	return colors[6];
+	    	return colors[6].getRGB();
 	    }
 	    else
 	    {
-	    	return colors[7];
+	    	return colors[7].getRGB();
 	    }
 	}
 	
@@ -122,11 +126,13 @@ public class HeatMap extends VisualizationOperator{
 	 * @throws Exception the exception
 	 */
 	public boolean Visualize(JavaSparkContext sparkContext, SpatialRDD spatialRDD) throws Exception {
+		logger.info("[Babylon][Visualize][Start]");
 		this.CustomizeColor(255, 255, 0, 255, Color.GREEN, true);
 		this.Rasterize(sparkContext, spatialRDD, true);
 		this.ApplyPhotoFilter(sparkContext);
 		this.Colorize();
 		this.RenderImage(sparkContext);
+		logger.info("[Babylon][Visualize][Stop]");
 		return true;
 	}
 

@@ -1,7 +1,7 @@
 /**
  * FILE: PolygonRangeTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.PolygonRangeTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
@@ -18,7 +18,6 @@ import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
-import org.datasyslab.geospark.spatialRDD.PolygonRDDTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -75,7 +74,7 @@ public class PolygonRangeTest {
         input = PolygonRangeTest.class.getClassLoader().getResourceAsStream("polygon.test.properties");
 
         //Hard code to a file in resource folder. But you can replace it later in the try-catch field in your hdfs system.
-        InputLocation = "file://"+PolygonRDDTest.class.getClassLoader().getResource("primaryroads-polygon.csv").getPath();
+        InputLocation = "file://"+PolygonRangeTest.class.getClassLoader().getResource("primaryroads-polygon.csv").getPath();
 
         offset = 0;
         splitter = null;
@@ -87,7 +86,7 @@ public class PolygonRangeTest {
             prop.load(input);
             // There is a field in the property file, you can edit your own file location there.
             // InputLocation = prop.getProperty("inputLocation");
-            InputLocation = "file://"+PolygonRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
+            InputLocation = "file://"+PolygonRangeTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
             splitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
             indexType = IndexType.getIndexType(prop.getProperty("indexType"));

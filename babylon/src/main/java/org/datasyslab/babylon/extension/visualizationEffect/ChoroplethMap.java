@@ -9,6 +9,7 @@ package org.datasyslab.babylon.extension.visualizationEffect;
 import java.awt.Color;
 
 import com.vividsolutions.jts.geom.Polygon;
+import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.babylon.core.VisualizationOperator;
@@ -21,6 +22,9 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public class ChoroplethMap extends VisualizationOperator{
 
+	/** The Constant logger. */
+	final static Logger logger = Logger.getLogger(ChoroplethMap.class);
+
 	/**
 	 * Instantiates a new choropleth map.
 	 *
@@ -32,7 +36,7 @@ public class ChoroplethMap extends VisualizationOperator{
 	 */
 	public ChoroplethMap(int resolutionX, int resolutionY, Envelope datasetBoundary,
 			boolean reverseSpatialCoordinate) {
-		super(resolutionX, resolutionY, datasetBoundary, ColorizeOption.UNIFORMCOLOR, reverseSpatialCoordinate,-1,-1,false,false,false);
+		super(resolutionX, resolutionY, datasetBoundary, ColorizeOption.NORMAL, reverseSpatialCoordinate,-1,-1,false,false,false);
 	}
 	
 	/**
@@ -46,7 +50,7 @@ public class ChoroplethMap extends VisualizationOperator{
 	 */
 	public ChoroplethMap(int resolutionX, int resolutionY, Envelope datasetBoundary,
 			boolean reverseSpatialCoordinate, boolean generateVectorImage) {
-		super(resolutionX, resolutionY, datasetBoundary, ColorizeOption.UNIFORMCOLOR, reverseSpatialCoordinate,-1,-1,false,false,generateVectorImage);
+		super(resolutionX, resolutionY, datasetBoundary, ColorizeOption.NORMAL, reverseSpatialCoordinate,-1,-1,false,false,generateVectorImage);
 	}
 	
 	/**
@@ -62,7 +66,7 @@ public class ChoroplethMap extends VisualizationOperator{
 	 */
 	public ChoroplethMap(int resolutionX, int resolutionY, Envelope datasetBoundary,boolean reverseSpatialCoordinate,
 			int partitionX, int partitionY, boolean parallelRenderImage) {
-		super(resolutionX, resolutionY, datasetBoundary, ColorizeOption.UNIFORMCOLOR, reverseSpatialCoordinate,
+		super(resolutionX, resolutionY, datasetBoundary, ColorizeOption.NORMAL, reverseSpatialCoordinate,
 				partitionX, partitionY, false, parallelRenderImage,false);
 	}
 
@@ -80,7 +84,7 @@ public class ChoroplethMap extends VisualizationOperator{
 	 */
 	public ChoroplethMap(int resolutionX, int resolutionY, Envelope datasetBoundary,boolean reverseSpatialCoordinate,
 			int partitionX, int partitionY, boolean parallelRenderImage, boolean generateVectorImage) {
-		super(resolutionX, resolutionY, datasetBoundary, ColorizeOption.UNIFORMCOLOR, reverseSpatialCoordinate,
+		super(resolutionX, resolutionY, datasetBoundary, ColorizeOption.NORMAL, reverseSpatialCoordinate,
 				partitionX, partitionY, false, parallelRenderImage,generateVectorImage);
 	}
 	
@@ -152,9 +156,11 @@ public class ChoroplethMap extends VisualizationOperator{
 	 * @throws Exception the exception
 	 */
 	public boolean Visualize(JavaSparkContext sparkContext, JavaPairRDD<Polygon,Long> spatialPairRDD) throws Exception {
+		logger.info("[Babylon][Visualize][Start]");
 		this.Rasterize(sparkContext, spatialPairRDD, true);
 		this.Colorize();
 		this.RenderImage(sparkContext);
+		logger.info("[Babylon][Visualize][Stop]");
 		return true;
 	}
 

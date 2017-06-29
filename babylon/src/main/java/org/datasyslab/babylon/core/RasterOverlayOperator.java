@@ -9,6 +9,8 @@ package org.datasyslab.babylon.core;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Iterator;
+
+import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.function.PairFunction;
 import scala.Tuple2;
@@ -27,7 +29,10 @@ public class RasterOverlayOperator {
 
 	/** The generate distributed image. */
 	public boolean generateDistributedImage=false;
-	
+
+	/** The Constant logger. */
+	final static Logger logger = Logger.getLogger(RasterOverlayOperator.class);
+
 	/**
 	 * Instantiates a new raster overlay operator.
 	 *
@@ -59,6 +64,7 @@ public class RasterOverlayOperator {
 	 */
 	public boolean JoinImage(JavaPairRDD<Integer,ImageSerializableWrapper> distributedFontImage) throws Exception
 	{
+		logger.info("[Babylon][JoinImage][Start]");
 		if (this.generateDistributedImage==false)
 		{
 			throw new Exception("[OverlayOperator][JoinImage] The back image is not distributed. Please don't use distributed format.");
@@ -92,6 +98,7 @@ public class RasterOverlayOperator {
 		Graphics graphics = combinedImage.getGraphics();
 		graphics.drawImage(backImage, 0, 0, null);
 		graphics.drawImage(frontImage, 0, 0, null);
+		logger.info("[Babylon][JoinImage][Stop]");
 		return new Tuple2<Integer, ImageSerializableWrapper>(imagePartitionId,new ImageSerializableWrapper(combinedImage));
 			}
 		});
