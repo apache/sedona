@@ -26,6 +26,10 @@ GeoSpark artifacts are hosted in Maven Central: [**Maven Central Coordinates**](
 
 * GeoSpark (0.8.0 and later) is able to load and query ESRI ShapeFile (.shp, .shx, .dbf) from local disk and HDFS! ([Scala Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/scala/org/datasyslab/geospark/showcase), [Java Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/java/org/datasyslab/geospark/showcase))
 
+* GeoSpark (0.8.0 and later) provides alternative Spatial RDD constructors to speed up RDD data loading and initlializing. See [Advanced GeoSpark Tutorial](https://github.com/DataSystemsLab/GeoSpark/wiki/Advanced-Tutorial-Tune-your-GeoSpark-Application).
+
+* GeoSpark (0.8.0 and later) provides a new Quad-Tree Spatial Partitioning Method to speed up Join Query. ([Scala Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/scala/org/datasyslab/geospark/showcase), [Java Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/java/org/datasyslab/geospark/showcase))
+
 # Important features ([more](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Important-Features))
 ## Spatial Resilient Distributed Datasets (SRDDs)
 Supported Spatial RDDs: PointRDD, RectangleRDD, PolygonRDD, LineStringRDD

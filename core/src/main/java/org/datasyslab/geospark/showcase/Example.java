@@ -120,7 +120,7 @@ public class Example implements Serializable{
 		geometryFactory=new GeometryFactory();
 		kNNQueryPoint=geometryFactory.createPoint(new Coordinate(-84.01, 34.01));
 		rangeQueryWindow=new Envelope (-90.01,-80.01,30.01,40.01);
-		joinQueryPartitioningType = GridType.RTREE;
+		joinQueryPartitioningType = GridType.QUADTREE;
 		eachQueryLoopTimes=5;
 		
         ShapeFileInputLocation = resourceFolder+"shapefiles/polygon";
@@ -222,7 +222,7 @@ public class Example implements Serializable{
     	objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
     	
     	objectRDD.spatialPartitioning(joinQueryPartitioningType);
-    	queryWindowRDD.spatialPartitioning(objectRDD.grids);
+    	queryWindowRDD.spatialPartitioning(objectRDD.partitionTree);
     	
     	objectRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY());
     	queryWindowRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY());
@@ -243,7 +243,7 @@ public class Example implements Serializable{
     	objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
     	
     	objectRDD.spatialPartitioning(joinQueryPartitioningType);
-    	queryWindowRDD.spatialPartitioning(objectRDD.grids);
+    	queryWindowRDD.spatialPartitioning(objectRDD.partitionTree);
     	
     	objectRDD.buildIndex(PointRDDIndexType,true);
     	
@@ -266,8 +266,8 @@ public class Example implements Serializable{
     	objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
     	CircleRDD queryWindowRDD = new CircleRDD(objectRDD,0.1);
     	
-    	objectRDD.spatialPartitioning(GridType.RTREE);
-    	queryWindowRDD.spatialPartitioning(objectRDD.grids);
+    	objectRDD.spatialPartitioning(GridType.QUADTREE);
+    	queryWindowRDD.spatialPartitioning(objectRDD.partitionTree);
     	
     	objectRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY());
     	queryWindowRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY());
@@ -289,8 +289,8 @@ public class Example implements Serializable{
     	objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
     	CircleRDD queryWindowRDD = new CircleRDD(objectRDD,0.1);
     	
-  		objectRDD.spatialPartitioning(GridType.RTREE);
-  		queryWindowRDD.spatialPartitioning(objectRDD.grids);
+  		objectRDD.spatialPartitioning(GridType.QUADTREE);
+  		queryWindowRDD.spatialPartitioning(objectRDD.partitionTree);
   		
     	objectRDD.buildIndex(IndexType.RTREE,true);
     	

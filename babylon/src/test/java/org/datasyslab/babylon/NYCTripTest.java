@@ -186,7 +186,7 @@ public class NYCTripTest {
 	 *
 	 * @throws Exception the exception
 	 */
-	@Test
+	@Ignore
 	public void testLineStringRDDVisualization() throws Exception {
 		
 		int resolutionY = 800;
