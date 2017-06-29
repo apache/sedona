@@ -1,7 +1,7 @@
 /**
  * FILE: ScatterplotTest.java
  * PATH: org.datasyslab.babylon.ScatterplotTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon;
@@ -37,6 +37,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import scala.Tuple2;
 
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class ScatterplotTest.
  */
@@ -205,7 +206,7 @@ public class ScatterplotTest {
 	}
 
 	/**
-	 * Test point RDD visualization.
+	 * Test point RDD visualization with parallel rendering.
 	 *
 	 * @throws Exception the exception
 	 */
@@ -223,7 +224,7 @@ public class ScatterplotTest {
 	}
 	
 	/**
-	 * Test point RDD visualization.
+	 * Test save as distributed file.
 	 *
 	 * @throws Exception the exception
 	 */

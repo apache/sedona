@@ -1,7 +1,7 @@
 /**
  * FILE: VisualizationOperator.java
  * PATH: org.datasyslab.babylon.core.VisualizationOperator.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon.core;
@@ -41,6 +41,7 @@ import scala.Int;
 import scala.Tuple2;
 
 
+// TODO: Auto-generated Javadoc
 class RasterPixelCountComparator implements Comparator<Tuple2<Pixel, Double>>, Serializable
 {
 
@@ -100,12 +101,10 @@ class PixelSerialIdComparator implements Comparator<Tuple2<Pixel, Double>>
  */
 public abstract class VisualizationOperator implements Serializable{
 
-    /** The colorize option. Scatter plot can select normal or observation (NetCDF/HDF data only) option to visualize.
-     *  Choropleth map must select normal
-     *  Heat map must select spatial aggregation.
-     * */
+    /** The colorize option. */
     protected ColorizeOption colorizeOption = ColorizeOption.NORMAL;
 
+    /** The max pixel count. */
     protected Double maxPixelCount = -1.0;
 
     /** The reverse spatial coordinate. */
@@ -148,10 +147,10 @@ public abstract class VisualizationOperator implements Serializable{
     /** The count matrix. */
     protected List<Tuple2<Integer,Double>> countMatrix;
 
-    /** The distributed count matrix. */
+    /** The distributed raster count matrix. */
     protected JavaPairRDD<Pixel, Double> distributedRasterCountMatrix;
 
-    /** The distributed color matrix. */
+    /** The distributed raster color matrix. */
     protected JavaPairRDD<Pixel, Integer> distributedRasterColorMatrix;
 
     /** The raster image. */
@@ -288,6 +287,12 @@ public abstract class VisualizationOperator implements Serializable{
         return true;
     }
 
+    /**
+     * Spatial partitioning without duplicates.
+     *
+     * @return true, if successful
+     * @throws Exception the exception
+     */
     private boolean spatialPartitioningWithoutDuplicates() throws Exception
     {
         this.distributedRasterColorMatrix = this.distributedRasterColorMatrix.mapToPair(new PairFunction<Tuple2<Pixel, Integer>, Pixel, Integer>() {
@@ -304,6 +309,12 @@ public abstract class VisualizationOperator implements Serializable{
         return true;
     }
 
+    /**
+     * Spatial partitioning with duplicates.
+     *
+     * @return true, if successful
+     * @throws Exception the exception
+     */
     private boolean spatialPartitioningWithDuplicates() throws Exception
     {
         this.distributedRasterCountMatrix = this.distributedRasterCountMatrix.flatMapToPair(new PairFlatMapFunction<Tuple2<Pixel, Double>, Pixel, Double>() {
@@ -476,9 +487,9 @@ public abstract class VisualizationOperator implements Serializable{
 
 
     /**
-     * Generate color matrix.
+     * Colorize.
      *
-     * @return the java pair RDD
+     * @return true, if successful
      */
     protected boolean Colorize()
     {
@@ -768,6 +779,12 @@ public abstract class VisualizationOperator implements Serializable{
         return true;
     }
 
+    /**
+     * Sets the max pixel count.
+     *
+     * @param maxPixelCount the max pixel count
+     * @return true, if successful
+     */
     public boolean setMaxPixelCount(Double maxPixelCount)
     {
         this.maxPixelCount = maxPixelCount;
@@ -829,6 +846,13 @@ public abstract class VisualizationOperator implements Serializable{
         return new Color(red,green,blue,colorAlpha);
     }
 
+    /**
+     * Encode to RGB.
+     *
+     * @param normailizedCount the normailized count
+     * @return the integer
+     * @throws Exception the exception
+     */
     protected Integer EncodeToRGB(int normailizedCount) throws Exception
     {
         if(controlColorChannel.equals(Color.RED))

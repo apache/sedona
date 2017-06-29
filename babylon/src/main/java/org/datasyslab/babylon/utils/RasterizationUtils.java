@@ -1,7 +1,7 @@
 /**
  * FILE: RasterizationUtils.java
  * PATH: org.datasyslab.babylon.utils.RasterizationUtils.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon.utils;
@@ -30,6 +30,7 @@ public class RasterizationUtils implements Serializable{
 
 	/** The Constant logger. */
 	final static Logger logger = Logger.getLogger(RasterizationUtils.class);
+	
 	/**
 	 * Find one pixel coordinate.
 	 *
@@ -204,6 +205,7 @@ public class RasterizationUtils implements Serializable{
 	 * @param resolutionY the resolution Y
 	 * @param datasetBoundary the dataset boundary
 	 * @param spatialObject the spatial object
+	 * @param colorizeOption the colorize option
 	 * @param reverseSpatialCoordinate the reverse spatial coordinate
 	 * @return the list
 	 */

@@ -1,7 +1,7 @@
 /**
  * FILE: ParallelVisualizationTest.java
  * PATH: org.datasyslab.babylon.ParallelVisualizationTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon;
@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import com.vividsolutions.jts.geom.Envelope;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class ParallelVisualizationTest.
  */
@@ -184,7 +185,7 @@ public class ParallelVisualizationTest {
 	}
 	
 	/**
-	 * Test rectangle RDD visualization.
+	 * Test rectangle RDD visualization with tiles.
 	 *
 	 * @throws Exception the exception
 	 */
@@ -199,7 +200,7 @@ public class ParallelVisualizationTest {
 	}
 
     /**
-     * Test rectangle RDD visualization.
+     * Test rectangle RDD visualization no tiles.
      *
      * @throws Exception the exception
      */

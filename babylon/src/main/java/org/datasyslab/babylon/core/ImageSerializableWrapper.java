@@ -1,7 +1,7 @@
 /**
  * FILE: ImageSerializableWrapper.java
  * PATH: org.datasyslab.babylon.core.ImageSerializableWrapper.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon.core;
@@ -12,6 +12,7 @@ import javax.imageio.ImageIO;
 
 import java.awt.image.*;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class ImageSerializableWrapper.
  */

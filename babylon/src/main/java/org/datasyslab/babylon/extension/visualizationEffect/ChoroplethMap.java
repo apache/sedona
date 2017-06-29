@@ -1,7 +1,7 @@
 /**
  * FILE: ChoroplethMap.java
  * PATH: org.datasyslab.babylon.extension.visualizationEffect.ChoroplethMap.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon.extension.visualizationEffect;
@@ -17,6 +17,7 @@ import org.datasyslab.babylon.utils.ColorizeOption;
 
 import com.vividsolutions.jts.geom.Envelope;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class ChoroplethMap.
  */
@@ -32,7 +33,6 @@ public class ChoroplethMap extends VisualizationOperator{
 	 * @param resolutionY the resolution Y
 	 * @param datasetBoundary the dataset boundary
 	 * @param reverseSpatialCoordinate the reverse spatial coordinate
-	 * @deprecated This function always generates raster image. Please append one more parameter to the end: boolean generateVectorImage
 	 */
 	public ChoroplethMap(int resolutionX, int resolutionY, Envelope datasetBoundary,
 			boolean reverseSpatialCoordinate) {

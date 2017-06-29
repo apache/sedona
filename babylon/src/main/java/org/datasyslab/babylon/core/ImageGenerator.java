@@ -1,7 +1,7 @@
 /**
  * FILE: ImageGenerator.java
  * PATH: org.datasyslab.babylon.core.ImageGenerator.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon.core;
@@ -19,6 +19,10 @@ import org.datasyslab.babylon.utils.ImageType;
 import scala.Tuple2;
 
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class ImageGenerator.
+ */
 public abstract class ImageGenerator implements Serializable{
 
 

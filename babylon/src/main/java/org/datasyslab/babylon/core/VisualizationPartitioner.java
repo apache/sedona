@@ -1,7 +1,7 @@
 /**
  * FILE: VisualizationPartitioner.java
  * PATH: org.datasyslab.babylon.core.VisualizationPartitioner.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon.core;
@@ -16,11 +16,13 @@ import org.datasyslab.babylon.utils.RasterizationUtils;
 
 import scala.Tuple2;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class VisualizationPartitioner.
  */
 public class VisualizationPartitioner extends Partitioner implements Serializable{
 
+	/** The partition interval Y. */
 	public int resolutionX,resolutionY,partitionX,partitionY,partitionIntervalX,partitionIntervalY;
 
 
@@ -64,10 +66,11 @@ public class VisualizationPartitioner extends Partitioner implements Serializabl
 	}
 
 	/**
-	 * Assign partition IDs to this pixel. One pixel may have more than one partition Id. This partitioning method will introduce
-	 * duplicates to ensure that all neighby pixels (as well as their buffer) are in the same partition.
-	 * @param pixelDoubleTuple2
-	 * @return
+	 * Assign partition I ds.
+	 *
+	 * @param pixelDoubleTuple2 the pixel double tuple 2
+	 * @param photoFilterRadius the photo filter radius
+	 * @return the list
 	 */
 	public List<Tuple2<Pixel, Double>> assignPartitionIDs(Tuple2<Pixel, Double> pixelDoubleTuple2, int photoFilterRadius)
 	{
@@ -135,11 +138,12 @@ public class VisualizationPartitioner extends Partitioner implements Serializabl
 		return duplicatePixelList;
 
 	}
+	
 	/**
-	 * Assign partition IDs to this pixel. This partitioning method will not introduce
-	 * duplicates.
-	 * @param pixelDoubleTuple2
-	 * @return
+	 * Assign partition ID.
+	 *
+	 * @param pixelDoubleTuple2 the pixel double tuple 2
+	 * @return the tuple 2
 	 */
 	public Tuple2<Pixel, Double> assignPartitionID(Tuple2<Pixel, Double> pixelDoubleTuple2)
 	{
@@ -150,6 +154,17 @@ public class VisualizationPartitioner extends Partitioner implements Serializabl
 		return new Tuple2<Pixel,Double>(newPixel, pixelDoubleTuple2._2());
 	}
 
+	/**
+	 * Calculate partition id.
+	 *
+	 * @param resolutionX the resolution X
+	 * @param resolutionY the resolution Y
+	 * @param partitionX the partition X
+	 * @param partitionY the partition Y
+	 * @param coordinateX the coordinate X
+	 * @param coordinateY the coordinate Y
+	 * @return the int
+	 */
 	public static int CalculatePartitionId(int resolutionX, int resolutionY, int partitionX, int partitionY, int coordinateX, int coordinateY)
 	{
 		int partitionIntervalX = resolutionX / partitionX;

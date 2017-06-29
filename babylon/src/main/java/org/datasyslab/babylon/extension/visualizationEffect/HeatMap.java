@@ -1,7 +1,7 @@
 /**
  * FILE: HeatMap.java
  * PATH: org.datasyslab.babylon.extension.visualizationEffect.HeatMap.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon.extension.visualizationEffect;
@@ -21,6 +21,7 @@ import com.vividsolutions.jts.geom.Envelope;
 
 
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class HeatMap.
  */

@@ -1,7 +1,7 @@
 /**
- * FILE: NYCTripTest.java
- * PATH: org.datasyslab.babylon.NYCTripTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * FILE: NYCTripPointMapper.java
+ * PATH: org.datasyslab.babylon.NYCTripPointMapper.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon;
@@ -14,9 +14,18 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class NYCTripPointMapper.
+ */
 class NYCTripPointMapper implements FlatMapFunction<String, Object> {
 	 
+	/** The result. */
 	List<Point> result= new ArrayList<Point>();
+    
+    /* (non-Javadoc)
+     * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
+     */
     public Iterator call(String line) throws Exception {
         try {
             List result= new ArrayList<LineString>();
