@@ -1,7 +1,7 @@
 /**
  * FILE: RectangleRDDTest.java
  * PATH: org.datasyslab.geospark.spatialRDD.RectangleRDDTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialRDD;
@@ -119,8 +119,7 @@ public class RectangleRDDTest implements Serializable{
     public void testConstructor() throws Exception {
         RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions,StorageLevel.MEMORY_ONLY());
         //todo: Set this to debug level
-        assert spatialRDD.totalNumberOfRecords>=1;
-        assert spatialRDD.boundary!=null;
+        assert spatialRDD.approximateTotalCount>=1;
         assert spatialRDD.boundaryEnvelope!=null;
     }
     
@@ -139,6 +138,7 @@ public class RectangleRDDTest implements Serializable{
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
+        assert spatialRDD.countWithoutDuplicates()==spatialRDD.countWithoutDuplicatesSPRDD();
     }
     
     /**
@@ -156,6 +156,7 @@ public class RectangleRDDTest implements Serializable{
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
+        assert spatialRDD.countWithoutDuplicates()==spatialRDD.countWithoutDuplicatesSPRDD();
     }
     
     /**
@@ -173,6 +174,7 @@ public class RectangleRDDTest implements Serializable{
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
+        assert spatialRDD.countWithoutDuplicates()==spatialRDD.countWithoutDuplicatesSPRDD();
     }
 
     
@@ -198,13 +200,13 @@ public class RectangleRDDTest implements Serializable{
     	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(gridType);
         spatialRDD.buildIndex(IndexType.RTREE,true);
-        if(spatialRDD.indexedRDD.take(1).get(0)._2() instanceof STRtree)
+        if(spatialRDD.indexedRDD.take(1).get(0) instanceof STRtree)
         {
-            List<Point> result = ((STRtree) spatialRDD.indexedRDD.take(1).get(0)._2()).query(spatialRDD.boundaryEnvelope);
+            List<Point> result = ((STRtree) spatialRDD.indexedRDD.take(1).get(0)).query(spatialRDD.boundaryEnvelope);
         }
         else
         {
-            List<Point> result = ((Quadtree) spatialRDD.indexedRDD.take(1).get(0)._2()).query(spatialRDD.boundaryEnvelope);
+            List<Point> result = ((Quadtree) spatialRDD.indexedRDD.take(1).get(0)).query(spatialRDD.boundaryEnvelope);
 
         }
     }
@@ -219,13 +221,13 @@ public class RectangleRDDTest implements Serializable{
     	RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(gridType);
         spatialRDD.buildIndex(IndexType.QUADTREE,true);
-        if(spatialRDD.indexedRDD.take(1).get(0)._2() instanceof STRtree)
+        if(spatialRDD.indexedRDD.take(1).get(0) instanceof STRtree)
         {
-            List<Point> result = ((STRtree) spatialRDD.indexedRDD.take(1).get(0)._2()).query(spatialRDD.boundaryEnvelope);
+            List<Point> result = ((STRtree) spatialRDD.indexedRDD.take(1).get(0)).query(spatialRDD.boundaryEnvelope);
         }
         else
         {
-            List<Point> result = ((Quadtree) spatialRDD.indexedRDD.take(1).get(0)._2()).query(spatialRDD.boundaryEnvelope);
+            List<Point> result = ((Quadtree) spatialRDD.indexedRDD.take(1).get(0)).query(spatialRDD.boundaryEnvelope);
 
         }
     }

@@ -1,7 +1,7 @@
 /**
  * FILE: SpatialRDD.java
  * PATH: org.datasyslab.geospark.spatialRDD.SpatialRDD.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialRDD;
@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.util.hash.Hash;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -23,12 +24,8 @@ import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
-import org.datasyslab.geospark.spatialPartitioning.EqualPartitioning;
-import org.datasyslab.geospark.spatialPartitioning.HilbertPartitioning;
-import org.datasyslab.geospark.spatialPartitioning.PartitionJudgement;
-import org.datasyslab.geospark.spatialPartitioning.RtreePartitioning;
-import org.datasyslab.geospark.spatialPartitioning.SpatialPartitioner;
-import org.datasyslab.geospark.spatialPartitioning.VoronoiPartitioning;
+import org.datasyslab.geospark.spatialPartitioning.*;
+import org.datasyslab.geospark.spatialPartitioning.quadtree.StandardQuadTree;
 import org.datasyslab.geospark.utils.RDDSampleUtils;
 import org.datasyslab.geospark.utils.XMaxComparator;
 import org.datasyslab.geospark.utils.XMinComparator;
@@ -59,43 +56,42 @@ import scala.Tuple2;
  * The Class SpatialRDD.
  */
 public abstract class SpatialRDD implements Serializable{
-	
+
 	/** The Constant logger. */
 	final static Logger logger = Logger.getLogger(SpatialRDD.class);
-    
+
     /** The total number of records. */
-    public long totalNumberOfRecords=-1;
-    
-    /** The boundary. */
-    public Double[] boundary = new Double[4];
-    
+    public long approximateTotalCount=-1;
+
     /** The boundary envelope. */
     public Envelope boundaryEnvelope = null;
-    
+
     /** The spatial partitioned RDD. */
-    public JavaPairRDD<Integer, Object> spatialPartitionedRDD;
-    
+    public JavaRDD<Object> spatialPartitionedRDD;
+
     /** The indexed RDD. */
-    public JavaPairRDD<Integer, SpatialIndex> indexedRDD;
-    
+    public JavaRDD<SpatialIndex> indexedRDD;
+
     /** The indexed raw RDD. */
     public JavaRDD<Object> indexedRawRDD;
-    
+
     /** The raw spatial RDD. */
     public JavaRDD<Object> rawSpatialRDD;
 
 	/** The grids. */
     public List<Envelope> grids;
 
+    public StandardQuadTree partitionTree;
+
 	/** The CR stransformation. */
-	private boolean CRStransformation=false;;
-	
+	protected boolean CRStransformation=false;;
+
 	/** The source epsg code. */
-	private String sourceEpsgCode="";
-	
+	protected String sourceEpsgCode="";
+
 	/** The target epgsg code. */
-	private String targetEpgsgCode="";
-	
+	protected String targetEpgsgCode="";
+
 	/**
 	 * CRS transform.
 	 *
@@ -139,14 +135,14 @@ public abstract class SpatialRDD implements Serializable{
         int numPartitions = this.rawSpatialRDD.rdd().partitions().length;;
 		if(this.boundaryEnvelope==null)
         {
-        	throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD boundary is null. Please call boundary() first.");
+        	throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD boundary is null. Please call analyze() first.");
         }
-        if(this.totalNumberOfRecords==-1)
+        if(this.approximateTotalCount==-1)
         {
-        	throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD volume is unkown. Please call count() first.");
+        	throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD total count is unkown. Please call analyze() first.");
         }
 		//Calculate the number of samples we need to take.
-        int sampleNumberOfRecords = RDDSampleUtils.getSampleNumbers(numPartitions, this.totalNumberOfRecords);
+        int sampleNumberOfRecords = RDDSampleUtils.getSampleNumbers(numPartitions, this.approximateTotalCount);
         //Take Sample
         ArrayList objectSampleList = new ArrayList(this.rawSpatialRDD.takeSample(false, sampleNumberOfRecords));
         //Sort
@@ -170,22 +166,79 @@ public abstract class SpatialRDD implements Serializable{
         	VoronoiPartitioning voronoiPartitioning=new VoronoiPartitioning(objectSampleList,this.boundaryEnvelope,numPartitions);
         	grids=voronoiPartitioning.getGrids();
         }
+		else if (gridType == GridType.QUADTREE) {
+			QuadtreePartitioning quadtreePartitioning = new QuadtreePartitioning(objectSampleList, this.boundaryEnvelope, numPartitions);
+			partitionTree = quadtreePartitioning.getPartitionTree();
+		}
         else
         {
         	throw new Exception("[AbstractSpatialRDD][spatialPartitioning] Unsupported spatial partitioning method.");
         }
-        JavaPairRDD<Integer, Object> spatialNumberingRDD = this.rawSpatialRDD.flatMapToPair(
-                new PairFlatMapFunction<Object, Integer, Object>() {
-                    @Override
-                    public HashSet<Tuple2<Integer, Object>> call(Object spatialObject) throws Exception {
-                    	return PartitionJudgement.getPartitionID(grids,spatialObject);
-                    }
-                }
-        );
-        this.spatialPartitionedRDD = spatialNumberingRDD.partitionBy(new SpatialPartitioner(grids.size()));
-        return true;
+
+
+		if(gridType == GridType.QUADTREE)
+		{
+			JavaPairRDD<Integer, Object> spatialNumberingRDD = this.rawSpatialRDD.flatMapToPair(
+	                new PairFlatMapFunction<Object, Integer, Object>() {
+	                    @Override
+	                    public HashSet<Tuple2<Integer, Object>> call(Object spatialObject) throws Exception {
+	                    	return PartitionJudgement.getPartitionID(partitionTree,spatialObject);
+	                    }
+	                }
+	        );
+			this.spatialPartitionedRDD = spatialNumberingRDD.partitionBy(new SpatialPartitioner(partitionTree.getTotalNumLeafNode())).mapPartitions(new FlatMapFunction<Iterator<Tuple2<Integer,Object>>, Object>(
+	        		) {
+	        			 @Override
+	        			 public List<Object> call(Iterator<Tuple2<Integer, Object>> tuple2Iterator) throws Exception {
+	        				List<Object> result = new ArrayList<Object>();
+	        				while (tuple2Iterator.hasNext())
+	        				{
+	        					result.add(tuple2Iterator.next()._2());
+	        				}
+	        			 	return result;
+	        			 }
+	        		},true);
+		}
+		else
+		{
+			JavaPairRDD<Integer, Object> spatialNumberingRDD = this.rawSpatialRDD.flatMapToPair(
+	                new PairFlatMapFunction<Object, Integer, Object>() {
+	                    @Override
+	                    public HashSet<Tuple2<Integer, Object>> call(Object spatialObject) throws Exception {
+	                    	return PartitionJudgement.getPartitionID(grids,spatialObject);
+	                    }
+	                }
+	        );
+	        this.spatialPartitionedRDD = spatialNumberingRDD.partitionBy(new SpatialPartitioner(grids.size())).mapPartitions(new FlatMapFunction<Iterator<Tuple2<Integer,Object>>, Object>(
+	        		) {
+	        			 @Override
+	        			 public List<Object> call(Iterator<Tuple2<Integer, Object>> tuple2Iterator) throws Exception {
+	        				List<Object> result = new ArrayList<Object>();
+	        				while (tuple2Iterator.hasNext())
+	        				{
+	        					result.add(tuple2Iterator.next()._2());
+	        				}
+	        			 	return result;
+	        			 }
+	        		},true);
+		}
+        JavaRDD<Integer> partitionedResult = this.spatialPartitionedRDD.mapPartitions(new FlatMapFunction<Iterator<Object>, Integer>() {
+			@Override
+			public List<Integer> call(Iterator<Object> objectIterator) throws Exception {
+				List<Integer> counts = new ArrayList<>();
+				Integer count=0;
+				while (objectIterator.hasNext())
+				{
+					Object testObject = objectIterator.next();
+					count++;
+				}
+				counts.add(count);
+				return counts;
+			}
+		}, true);
+		return true;
 	}
-	
+
 	/**
 	 * Spatial partitioning.
 	 *
@@ -204,10 +257,61 @@ public abstract class SpatialRDD implements Serializable{
                 }
         );
         this.grids = otherGrids;
-        this.spatialPartitionedRDD = spatialNumberingRDD.partitionBy(new SpatialPartitioner(grids.size()));
-        return true;
+        this.spatialPartitionedRDD = spatialNumberingRDD.partitionBy(new SpatialPartitioner(grids.size())).mapPartitions(new FlatMapFunction<Iterator<Tuple2<Integer,Object>>, Object>(
+		) {
+			@Override
+			public List<Object> call(Iterator<Tuple2<Integer, Object>> tuple2Iterator) throws Exception {
+				List<Object> result = new ArrayList<Object>();
+				while (tuple2Iterator.hasNext())
+				{
+					result.add(tuple2Iterator.next()._2());
+				}
+				return result;
+			}
+		},true);
+		JavaRDD<Integer> partitionedResult = this.spatialPartitionedRDD.mapPartitions(new FlatMapFunction<Iterator<Object>, Integer>(
+
+		) {
+			@Override
+			public List<Integer> call(Iterator<Object> objectIterator) throws Exception {
+				List<Integer> counts = new ArrayList<>();
+				Integer count=0;
+				while (objectIterator.hasNext())
+				{
+					Object testObject = objectIterator.next();
+					count++;
+				}
+				counts.add(count);
+				return counts;
+			}
+		}, true);
+		return true;
 	}
-	
+
+	public boolean spatialPartitioning(final StandardQuadTree partitionTree) throws Exception {
+		this.spatialPartitionedRDD = this.rawSpatialRDD.flatMapToPair(
+		new PairFlatMapFunction<Object, Integer, Object>() {
+			@Override
+			public HashSet<Tuple2<Integer, Object>> call(Object spatialObject) throws Exception {
+				return PartitionJudgement.getPartitionID(partitionTree, spatialObject);
+			}
+		}
+		).partitionBy(new SpatialPartitioner(partitionTree.getTotalNumLeafNode())).mapPartitions(new FlatMapFunction<Iterator<Tuple2<Integer,Object>>, Object>(
+		) {
+			@Override
+			public List<Object> call(Iterator<Tuple2<Integer, Object>> tuple2Iterator) throws Exception {
+				List<Object> result = new ArrayList<Object>();
+				while (tuple2Iterator.hasNext())
+				{
+					result.add(tuple2Iterator.next()._2());
+				}
+				return result;
+			}
+		},true);
+		this.partitionTree = partitionTree;
+		return true;
+	}
+
 	/**
 	 * Count without duplicates.
 	 *
@@ -224,7 +328,7 @@ public abstract class SpatialRDD implements Serializable{
 		}
 		return resultWithoutDuplicates.size();
 	}
-	
+
 	/**
 	 * Count without duplicates SPRDD.
 	 *
@@ -232,14 +336,7 @@ public abstract class SpatialRDD implements Serializable{
 	 */
 	public long countWithoutDuplicatesSPRDD()
 	{
-		JavaRDD cleanedRDD = this.spatialPartitionedRDD.map(new Function<Tuple2<Integer,Object>,Object>()
-		{
-
-			@Override
-			public Object call(Tuple2<Integer, Object> spatialObjectWithId) throws Exception {
-				return spatialObjectWithId._2();
-			}
-		});
+		JavaRDD cleanedRDD = this.spatialPartitionedRDD;
 		List collectedResult = cleanedRDD.collect();
 		HashSet resultWithoutDuplicates = new HashSet();
 		for(int i=0;i<collectedResult.size();i++)
@@ -248,7 +345,7 @@ public abstract class SpatialRDD implements Serializable{
 		}
 		return resultWithoutDuplicates.size();
 	}
-	
+
 	/**
 	 * Builds the index.
 	 *
@@ -289,7 +386,7 @@ public abstract class SpatialRDD implements Serializable{
 	        		  }
 
 	        	  }
-	          	}); 
+	          	});
 	        }
 	        else
 	        {
@@ -297,43 +394,36 @@ public abstract class SpatialRDD implements Serializable{
 	        	{
   				  throw new Exception("[AbstractSpatialRDD][buildIndex] spatialPartitionedRDD is null. Please do spatial partitioning before build index.");
 	        	}
-	        	JavaPairRDD<Integer, Iterable<Object>> groupBySpatialPartitionedRDD = this.spatialPartitionedRDD.groupByKey();       
-	        	this.indexedRDD = groupBySpatialPartitionedRDD.flatMapValues(new Function<Iterable<Object>, Iterable<SpatialIndex>>() {
-	        		@Override
-	        		public Iterable<SpatialIndex> call(Iterable<Object> spatialObjects) throws Exception {
-	        			if(indexType == IndexType.RTREE)
-	        			{
-		        			STRtree rt = new STRtree();
-		        			Iterator<Object> iterator=spatialObjects.iterator();
-		        			while(iterator.hasNext()){
-		        				Geometry spatialObject = (Geometry)iterator.next();
-		        				rt.insert(spatialObject.getEnvelopeInternal(), spatialObject);
-		        			}
-		        			HashSet<SpatialIndex> result = new HashSet<SpatialIndex>();
-		        			rt.query(new Envelope(0.0,0.0,0.0,0.0));
-		        			result.add(rt);
-		        			return result;
-	        			}
-	        			else
-	        			{
-		        			Quadtree rt = new Quadtree();
-		        			Iterator<Object> iterator=spatialObjects.iterator();
-		        			while(iterator.hasNext()){
-		        				Geometry spatialObject = (Geometry) iterator.next();
-		        				Geometry castedSpatialObject = (Geometry) spatialObject;
-		        				rt.insert(castedSpatialObject.getEnvelopeInternal(), castedSpatialObject);
-		        			}
-		        			HashSet<SpatialIndex> result = new HashSet<SpatialIndex>();
-		        			rt.query(new Envelope(0.0,0.0,0.0,0.0));
-		        			result.add(rt);
-		        			return result;
-	        			}
-	        		}
-	        	}
-	        	);
+				this.indexedRDD = this.spatialPartitionedRDD.mapPartitions(new FlatMapFunction<Iterator<Object>, SpatialIndex>() {
+					@Override
+					public HashSet<SpatialIndex> call(Iterator<Object> objectIterator) throws Exception {
+						if (indexType == IndexType.RTREE) {
+							STRtree rt = new STRtree();
+							while (objectIterator.hasNext()) {
+								Geometry spatialObject = (Geometry) objectIterator.next();
+								rt.insert(spatialObject.getEnvelopeInternal(), spatialObject);
+							}
+							HashSet<SpatialIndex> result = new HashSet<SpatialIndex>();
+							rt.query(new Envelope(0.0, 0.0, 0.0, 0.0));
+							result.add(rt);
+							return result;
+						} else {
+							Quadtree rt = new Quadtree();
+							while (objectIterator.hasNext()) {
+								Geometry spatialObject = (Geometry) objectIterator.next();
+								Geometry castedSpatialObject = (Geometry) spatialObject;
+								rt.insert(castedSpatialObject.getEnvelopeInternal(), castedSpatialObject);
+							}
+							HashSet<SpatialIndex> result = new HashSet<SpatialIndex>();
+							rt.query(new Envelope(0.0, 0.0, 0.0, 0.0));
+							result.add(rt);
+							return result;
+						}
+					}
+				});
 	        }
 	}
-	
+
     /**
      * Boundary.
      *
@@ -343,15 +433,16 @@ public abstract class SpatialRDD implements Serializable{
     	Object minXEnvelope = this.rawSpatialRDD.min(new XMinComparator());
     	Object minYEnvelope = this.rawSpatialRDD.min(new YMinComparator());
     	Object maxXEnvelope = this.rawSpatialRDD.max(new XMaxComparator());
-    	Object maxYEnvelope = this.rawSpatialRDD.max(new YMaxComparator());    	
-    	this.boundary[0] = ((Geometry) minXEnvelope).getEnvelopeInternal().getMinX();
-    	this.boundary[1] = ((Geometry) minYEnvelope).getEnvelopeInternal().getMinY();
-    	this.boundary[2] = ((Geometry) maxXEnvelope).getEnvelopeInternal().getMaxX();
-    	this.boundary[3] = ((Geometry) maxYEnvelope).getEnvelopeInternal().getMaxY();
+    	Object maxYEnvelope = this.rawSpatialRDD.max(new YMaxComparator());
+    	Double[] boundary = new Double[4];
+    	boundary[0] = ((Geometry) minXEnvelope).getEnvelopeInternal().getMinX();
+    	boundary[1] = ((Geometry) minYEnvelope).getEnvelopeInternal().getMinY();
+    	boundary[2] = ((Geometry) maxXEnvelope).getEnvelopeInternal().getMaxX();
+    	boundary[3] = ((Geometry) maxYEnvelope).getEnvelopeInternal().getMaxY();
         this.boundaryEnvelope =  new Envelope(boundary[0],boundary[2],boundary[1],boundary[3]);
         return this.boundaryEnvelope;
     }
-	
+
 	/**
 	 * Gets the raw spatial RDD.
 	 *
@@ -369,33 +460,40 @@ public abstract class SpatialRDD implements Serializable{
 	public void setRawSpatialRDD(JavaRDD<Object> rawSpatialRDD) {
 		this.rawSpatialRDD = rawSpatialRDD;
 	}
-	
+
 	/**
 	 * Analyze.
 	 *
 	 * @param newLevel the new level
 	 * @return true, if successful
 	 */
-	protected boolean analyze(StorageLevel newLevel)
+	public boolean analyze(StorageLevel newLevel)
 	{
 		this.rawSpatialRDD.persist(newLevel);
 		this.boundary();
-        this.totalNumberOfRecords = this.rawSpatialRDD.count();
+        this.approximateTotalCount = this.rawSpatialRDD.count();
         return true;
 	}
-	
+
 	/**
 	 * Analyze.
 	 *
 	 * @return true, if successful
 	 */
-	protected boolean analyze()
+	public boolean analyze()
 	{
 		this.boundary();
-        this.totalNumberOfRecords = this.rawSpatialRDD.count();
+        this.approximateTotalCount = this.rawSpatialRDD.count();
         return true;
 	}
-	
+
+	public boolean analyze(Envelope datasetBoundary, Integer approximateTotalCount)
+	{
+		this.boundaryEnvelope = datasetBoundary;
+		this.approximateTotalCount = this.rawSpatialRDD.count();
+		return true;
+	}
+
     /**
      * Save as geo JSON.
      *
@@ -427,7 +525,7 @@ public abstract class SpatialRDD implements Serializable{
             }
         }).saveAsTextFile(outputLocation);
     }
-    
+
     /**
      * Minimum bounding rectangle.
      *

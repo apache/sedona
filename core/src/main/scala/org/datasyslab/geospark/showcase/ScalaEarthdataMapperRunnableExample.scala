@@ -18,9 +18,6 @@ import org.datasyslab.geospark.spatialOperator.RangeQuery
 import org.datasyslab.geospark.spatialRDD.PointRDD
 import com.vividsolutions.jts.geom.Envelope
 
-
-class ScalaEarthdataMapperRunnableExample {
-
   object ScalaEarthdataMapperRunnableExample extends App {
     val conf = new SparkConf().setAppName("EarthdataMapperRunnableExample").setMaster("local[2]")
     val sc = new SparkContext(conf)
@@ -40,6 +37,8 @@ class ScalaEarthdataMapperRunnableExample {
     val HDFDataVariableList = Array("LST", "QC", "Error_LST", "Emis_31", "Emis_32")
     testSpatialRangeQuery()
     testSpatialRangeQueryUsingIndex()
+    sc.stop()
+    System.out.println("All GeoSpark Earthdata DEMOs passed!")
 
     /**
       * Test spatial range query.
@@ -69,8 +68,4 @@ class ScalaEarthdataMapperRunnableExample {
           i=i+1
       }
       }
-
-  }
-
-
 }

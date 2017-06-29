@@ -1,7 +1,7 @@
 /**
  * FILE: KnnJudgementUsingIndex.java
  * PATH: org.datasyslab.geospark.knnJudgement.KnnJudgementUsingIndex.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.geospark.knnJudgement;
@@ -48,7 +48,7 @@ public class KnnJudgementUsingIndex implements FlatMapFunction<Iterator<Object>,
 	 * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
 	 */
 	@Override
-	public List call(Iterator<Object> treeIndexes) throws Exception {
+	public List<Object> call(Iterator<Object> treeIndexes) throws Exception {
 		// TODO Auto-generated method stub
 		GeometryFactory fact= new GeometryFactory();
 		Object treeIndex = treeIndexes.next();

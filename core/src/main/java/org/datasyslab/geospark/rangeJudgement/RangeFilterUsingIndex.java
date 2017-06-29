@@ -1,7 +1,7 @@
 /**
  * FILE: RangeFilterUsingIndex.java
  * PATH: org.datasyslab.geospark.rangeJudgement.RangeFilterUsingIndex.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.geospark.rangeJudgement;
@@ -69,7 +69,7 @@ public class RangeFilterUsingIndex implements FlatMapFunction<Iterator<Object>,O
 	 * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
 	 */
 	@Override
-	public List call(Iterator<Object> treeIndexes) throws Exception {
+	public List<Object> call(Iterator<Object> treeIndexes) throws Exception {
 		assert treeIndexes.hasNext()==true;
 		Object treeIndex = treeIndexes.next();
 		if(treeIndex instanceof STRtree)

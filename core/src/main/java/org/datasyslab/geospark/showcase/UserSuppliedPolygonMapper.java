@@ -1,7 +1,7 @@
 /**
  * FILE: UserSuppliedPolygonMapper.java
  * PATH: org.datasyslab.geospark.showcase.UserSuppliedPolygonMapper.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.geospark.showcase;
@@ -25,7 +25,7 @@ import com.vividsolutions.jts.io.WKTReader;
 /**
  * The Class UserSuppliedPolygonMapper.
  */
-public class UserSuppliedPolygonMapper implements FlatMapFunction<String, Geometry>{
+public class UserSuppliedPolygonMapper implements FlatMapFunction<Iterator<String>, Object>{
 	
 	/** The result. */
 	List result= new ArrayList<Polygon>();
@@ -53,33 +53,29 @@ public class UserSuppliedPolygonMapper implements FlatMapFunction<String, Geomet
     
     /** The actual end offset. */
     int actualEndOffset;
-    
-    /* (non-Javadoc)
-     * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
-     */
-    public List call(String line) throws Exception {
+
+    @Override
+    public List<Object> call(Iterator<String> stringIterator) throws Exception {
         List result= new ArrayList<Polygon>();
-        Geometry spatialObject = null;
-        MultiPolygon multiSpatialObjects = null;
-        List<String> lineSplitList;
-        lineSplitList=Arrays.asList(line.split("\t"));
-        String newLine = lineSplitList.get(0).replace("\"", "");
-        WKTReader wktreader = new WKTReader();
-        spatialObject = wktreader.read(newLine);
-        if(spatialObject instanceof MultiPolygon)
-        {
-        	multiSpatialObjects = (MultiPolygon) spatialObject;
-        	for(int i=0;i<multiSpatialObjects.getNumGeometries();i++)
-        	{
-                		spatialObject = multiSpatialObjects.getGeometryN(i);
-                		result.add((Polygon) spatialObject);
-                	}
-        }
-        else
-        {
-        	result.add((Polygon)spatialObject);
+        while (stringIterator.hasNext()) {
+            String line = stringIterator.next();
+            Geometry spatialObject = null;
+            MultiPolygon multiSpatialObjects = null;
+            List<String> lineSplitList;
+            lineSplitList = Arrays.asList(line.split("\t"));
+            String newLine = lineSplitList.get(0).replace("\"", "");
+            WKTReader wktreader = new WKTReader();
+            spatialObject = wktreader.read(newLine);
+            if (spatialObject instanceof MultiPolygon) {
+                multiSpatialObjects = (MultiPolygon) spatialObject;
+                for (int i = 0; i < multiSpatialObjects.getNumGeometries(); i++) {
+                    spatialObject = multiSpatialObjects.getGeometryN(i);
+                    result.add((Polygon) spatialObject);
+                }
+            } else {
+                result.add((Polygon) spatialObject);
+            }
         }
         return result;
     }
-
 }

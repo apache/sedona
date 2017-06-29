@@ -1,7 +1,7 @@
 /**
  * FILE: PolygonRDDTest.java
  * PATH: org.datasyslab.geospark.spatialRDD.PolygonRDDTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialRDD;
@@ -23,6 +23,7 @@ import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -54,6 +55,8 @@ public class PolygonRDDTest {
     
     /** The Input location. */
     static String InputLocation;
+    
+    static String InputLocationGeojson;
     
     /** The offset. */
     static Integer offset;
@@ -93,6 +96,7 @@ public class PolygonRDDTest {
             prop.load(input);
             //InputLocation = prop.getProperty("inputLocation");
             InputLocation = "file://"+PolygonRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
+            InputLocationGeojson = "file://"+PolygonRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocationGeojson")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
             splitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
             gridType = GridType.getGridType(prop.getProperty("gridType"));
@@ -123,11 +127,17 @@ public class PolygonRDDTest {
     public void testConstructor() throws Exception {
         PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions,StorageLevel.MEMORY_ONLY());
         //todo: Set this to debug level
-        assert spatialRDD.totalNumberOfRecords>=1;
-        assert spatialRDD.boundary!=null;
+        assert spatialRDD.approximateTotalCount>=1;
         assert spatialRDD.boundaryEnvelope!=null;
     }
 
+    @Ignore
+    public void testGeoJSONConstructor() throws Exception {
+        PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocationGeojson, FileDataSplitter.GEOJSON, true, 4,StorageLevel.MEMORY_ONLY());
+        //todo: Set this to debug level
+        assert spatialRDD.approximateTotalCount==1001;
+        assert spatialRDD.boundaryEnvelope!=null;
+    }
     
     /**
      * Test hilbert curve spatial partitioing.
@@ -161,6 +171,7 @@ public class PolygonRDDTest {
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
+
     }
     
     /**
@@ -178,6 +189,7 @@ public class PolygonRDDTest {
         for (Envelope d : spatialRDD.grids) {
         	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
+
     }
 
     
@@ -203,13 +215,13 @@ public class PolygonRDDTest {
     	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(gridType);
         spatialRDD.buildIndex(IndexType.RTREE,true);
-        if(spatialRDD.indexedRDD.take(1).get(0)._2() instanceof STRtree)
+        if(spatialRDD.indexedRDD.take(1).get(0) instanceof STRtree)
         {
-            List<Polygon> result = ((STRtree) spatialRDD.indexedRDD.take(1).get(0)._2()).query(spatialRDD.boundaryEnvelope);
+            List<Polygon> result = ((STRtree) spatialRDD.indexedRDD.take(1).get(0)).query(spatialRDD.boundaryEnvelope);
         }
         else
         {
-            List<Polygon> result = ((Quadtree) spatialRDD.indexedRDD.take(1).get(0)._2()).query(spatialRDD.boundaryEnvelope);
+            List<Polygon> result = ((Quadtree) spatialRDD.indexedRDD.take(1).get(0)).query(spatialRDD.boundaryEnvelope);
 
         }
     }
@@ -224,13 +236,13 @@ public class PolygonRDDTest {
     	PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(gridType);
         spatialRDD.buildIndex(IndexType.QUADTREE,true);
-        if(spatialRDD.indexedRDD.take(1).get(0)._2() instanceof STRtree)
+        if(spatialRDD.indexedRDD.take(1).get(0) instanceof STRtree)
         {
-            List<Polygon> result = ((STRtree) spatialRDD.indexedRDD.take(1).get(0)._2()).query(spatialRDD.boundaryEnvelope);
+            List<Polygon> result = ((STRtree) spatialRDD.indexedRDD.take(1).get(0)).query(spatialRDD.boundaryEnvelope);
         }
         else
         {
-            List<Polygon> result = ((Quadtree) spatialRDD.indexedRDD.take(1).get(0)._2()).query(spatialRDD.boundaryEnvelope);
+            List<Polygon> result = ((Quadtree) spatialRDD.indexedRDD.take(1).get(0)).query(spatialRDD.boundaryEnvelope);
 
         }
     }

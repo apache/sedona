@@ -1,7 +1,7 @@
 /**
  * FILE: LineStringJoinTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.LineStringJoinTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
@@ -16,6 +16,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
@@ -142,9 +143,9 @@ public class LineStringJoinTest {
     @Test
     public void testSpatialJoinQueryWithLineStringRDD() throws Exception {
 
-        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions);
+        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
 
-        LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions);
+        LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
         
         spatialRDD.spatialPartitioning(gridType);
         
@@ -172,9 +173,9 @@ public class LineStringJoinTest {
     @Test
     public void testSpatialJoinQueryWithPolygonRDDUsingRTreeIndex() throws Exception {
     	
-        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions);
+        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
 
-        LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions);
+        LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
         
         spatialRDD.spatialPartitioning(gridType);
         
@@ -203,9 +204,9 @@ public class LineStringJoinTest {
     @Test
     public void testSpatialJoinQueryWithPolygonRDDUsingQuadTreeIndex() throws Exception {
     	
-        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions);
+        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
 
-        LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions);
+        LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
         
         spatialRDD.spatialPartitioning(gridType);
         

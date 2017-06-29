@@ -1,7 +1,7 @@
 /**
  * FILE: KnnJudgement.java
  * PATH: org.datasyslab.geospark.knnJudgement.KnnJudgement.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.geospark.knnJudgement;
@@ -47,7 +47,7 @@ public class KnnJudgement implements FlatMapFunction<Iterator<Object>, Object>, 
 	 * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
 	 */
 	@Override
-	public ArrayList<Object> call(Iterator<Object> input) throws Exception {		
+	public ArrayList<Object> call(Iterator<Object> input) throws Exception {
 		PriorityQueue<Object> pq = new PriorityQueue<Object>(k, new GeometryDistanceComparator(queryCenter,false));
 		while (input.hasNext()) {
 			if (pq.size() < k) {

@@ -1,7 +1,7 @@
 /**
  * FILE: UserSuppliedLineStringMapper.java
  * PATH: org.datasyslab.geospark.showcase.UserSuppliedLineStringMapper.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.geospark.showcase;
@@ -27,7 +27,7 @@ import com.vividsolutions.jts.io.WKTReader;
 /**
  * The Class UserSuppliedLineStringMapper.
  */
-public class UserSuppliedLineStringMapper implements FlatMapFunction<String, Geometry>{
+public class UserSuppliedLineStringMapper implements FlatMapFunction<Iterator<String>, Object>{
     
     /** The spatial object. */
     Geometry spatialObject = null;
@@ -52,33 +52,29 @@ public class UserSuppliedLineStringMapper implements FlatMapFunction<String, Geo
     
     /** The actual end offset. */
     int actualEndOffset;
-    
-    /* (non-Javadoc)
-     * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
-     */
-    public List call(String line) throws Exception {
-        List result= new ArrayList<LineString>();
-        Geometry spatialObject = null;
-        MultiLineString multiSpatialObjects = null;
-        List<String> lineSplitList;
-        lineSplitList=Arrays.asList(line.split("\t"));
-        String newLine = lineSplitList.get(0).replace("\"", "");
-        WKTReader wktreader = new WKTReader();
-        spatialObject = wktreader.read(newLine);
-        if(spatialObject instanceof MultiLineString)
-        {
-        	multiSpatialObjects = (MultiLineString) spatialObject;
-        	for(int i=0;i<multiSpatialObjects.getNumGeometries();i++)
-        	{
-                		spatialObject = multiSpatialObjects.getGeometryN(i);
-                		result.add((LineString) spatialObject);
-                	}
-        }
-        else
-        {
-        	result.add((LineString)spatialObject);
-        }
-        return result;
-    }
 
+    @Override
+    public List<Object> call(Iterator<String> stringIterator) throws Exception {
+        List result= new ArrayList<LineString>();
+        while (stringIterator.hasNext()) {
+            String line = stringIterator.next();
+            Geometry spatialObject = null;
+            MultiLineString multiSpatialObjects = null;
+            List<String> lineSplitList;
+            lineSplitList = Arrays.asList(line.split("\t"));
+            String newLine = lineSplitList.get(0).replace("\"", "");
+            WKTReader wktreader = new WKTReader();
+            spatialObject = wktreader.read(newLine);
+            if (spatialObject instanceof MultiLineString) {
+                multiSpatialObjects = (MultiLineString) spatialObject;
+                for (int i = 0; i < multiSpatialObjects.getNumGeometries(); i++) {
+                    spatialObject = multiSpatialObjects.getGeometryN(i);
+                    result.add((LineString) spatialObject);
+                }
+            } else {
+                result.add((LineString) spatialObject);
+            }
+        }
+            return result;
+        }
 }
