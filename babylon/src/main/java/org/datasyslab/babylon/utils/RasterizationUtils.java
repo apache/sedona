@@ -180,21 +180,7 @@ public class RasterizationUtils implements Serializable{
 		return twoDimensionIdX+twoDimensionIdY*resolutionX;
 	}
 	
-	public static int CalculatePartitionId(int resolutionX, int resolutionY, int partitionX, int partitionY, int coordinateX, int coordinateY)
-	{
-		int partitionIntervalX = resolutionX / partitionX;
-		int partitionIntervalY = resolutionY / partitionY;
-		int partitionCoordinateX = coordinateX/partitionIntervalX;
-		int partitionCoordinateY = coordinateY/partitionIntervalY;
-		int partitionId = -1;
-		try {
-			partitionId = RasterizationUtils.Encode2DTo1DId(partitionX,partitionY,partitionCoordinateX,partitionCoordinateY);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
-		}
-		return partitionId;
-	}
+
 
 	/**
 	 * Decode 1 D to 2 D id.

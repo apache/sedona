@@ -19,9 +19,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.knnJudgement.GeometryDistanceComparator;
-import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
-import org.datasyslab.geospark.spatialRDD.PolygonRDDTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -90,7 +88,7 @@ public class PolygonKnnTest {
         input = PolygonKnnTest.class.getClassLoader().getResourceAsStream("polygon.test.properties");
 
         //Hard code to a file in resource folder. But you can replace it later in the try-catch field in your hdfs system.
-        InputLocation = "file://"+PolygonRDDTest.class.getClassLoader().getResource("primaryroads-polygon.csv").getPath();
+        InputLocation = "file://"+PolygonKnnTest.class.getClassLoader().getResource("primaryroads-polygon.csv").getPath();
 
         offset = 0;
         splitter = null;

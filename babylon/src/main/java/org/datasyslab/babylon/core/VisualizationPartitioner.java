@@ -74,7 +74,7 @@ public class VisualizationPartitioner extends Partitioner implements Serializabl
 		List<Tuple2<Pixel, Double>> duplicatePixelList = new ArrayList<Tuple2<Pixel, Double>>();
 		//ArrayList<Integer> existingPartitionIds = new ArrayList<Integer>();
 		// First, calculate the correct partition that the pixel belongs to
-		int partitionId = RasterizationUtils.CalculatePartitionId(this.resolutionX,this.resolutionY,this.partitionX, this.partitionY, pixelDoubleTuple2._1.getX(), pixelDoubleTuple2._1.getY());
+		int partitionId = CalculatePartitionId(this.resolutionX,this.resolutionY,this.partitionX, this.partitionY, pixelDoubleTuple2._1.getX(), pixelDoubleTuple2._1.getY());
 		Pixel newPixel = new Pixel(pixelDoubleTuple2._1().getX(),pixelDoubleTuple2._1().getY(),resolutionX,resolutionY);
 		newPixel.setCurrentPartitionId(partitionId);
 		newPixel.setDuplicate(false);
@@ -89,7 +89,7 @@ public class VisualizationPartitioner extends Partitioner implements Serializabl
 		{
 			for (int y:boundaryCondition)
 			{
-				int duplicatePartitionId = RasterizationUtils.CalculatePartitionId(resolutionX,resolutionY,partitionX,partitionY,
+				int duplicatePartitionId = CalculatePartitionId(resolutionX,resolutionY,partitionX,partitionY,
 						pixelDoubleTuple2._1().getX()+x*photoFilterRadius,pixelDoubleTuple2._1().getY()+y*photoFilterRadius);
 				if(duplicatePartitionId!=partitionId&&duplicatePartitionId>=0)
 				{
@@ -143,11 +143,26 @@ public class VisualizationPartitioner extends Partitioner implements Serializabl
 	 */
 	public Tuple2<Pixel, Double> assignPartitionID(Tuple2<Pixel, Double> pixelDoubleTuple2)
 	{
-		int partitionId = RasterizationUtils.CalculatePartitionId(this.resolutionX,this.resolutionY,this.partitionX, this.partitionY, pixelDoubleTuple2._1.getX(), pixelDoubleTuple2._1.getY());
+		int partitionId = CalculatePartitionId(this.resolutionX,this.resolutionY,this.partitionX, this.partitionY, pixelDoubleTuple2._1.getX(), pixelDoubleTuple2._1.getY());
 		Pixel newPixel = pixelDoubleTuple2._1();
 		newPixel.setCurrentPartitionId(partitionId);
 		newPixel.setDuplicate(false);
 		return new Tuple2<Pixel,Double>(newPixel, pixelDoubleTuple2._2());
 	}
 
+	public static int CalculatePartitionId(int resolutionX, int resolutionY, int partitionX, int partitionY, int coordinateX, int coordinateY)
+	{
+		int partitionIntervalX = resolutionX / partitionX;
+		int partitionIntervalY = resolutionY / partitionY;
+		int partitionCoordinateX = coordinateX/partitionIntervalX;
+		int partitionCoordinateY = coordinateY/partitionIntervalY;
+		int partitionId = -1;
+		try {
+			partitionId = RasterizationUtils.Encode2DTo1DId(partitionX,partitionY,partitionCoordinateX,partitionCoordinateY);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+		}
+		return partitionId;
+	}
 }

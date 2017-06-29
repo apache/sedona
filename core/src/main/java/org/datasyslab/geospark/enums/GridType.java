@@ -9,24 +9,35 @@ package org.datasyslab.geospark.enums;
 import java.io.Serializable;
 
 // TODO: Auto-generated Javadoc
+
 /**
  * The Enum GridType.
  */
-public enum GridType implements Serializable{
-	
-/** The equalgrid. */
-//	/** The equalgrid. */
+public enum GridType implements Serializable {
+
+	/**
+	 * The equalgrid.
+	 */
 	EQUALGRID,
-	
-	/** The hilbert. */
+
+	/**
+	 * The hilbert.
+	 */
 	HILBERT,
-	
-	/** The rtree. */
+
+	/**
+	 * The rtree.
+	 */
 	RTREE,
-	
-	/** The voronoi. */
-	VORONOI;
-	
+
+	/**
+	 * The voronoi.
+	 */
+	VORONOI,
+	/**
+	 * The voronoi.
+	 */
+	QUADTREE;
 	/**
 	 * Gets the grid type.
 	 *
@@ -34,10 +45,10 @@ public enum GridType implements Serializable{
 	 * @return the grid type
 	 */
 	public static GridType getGridType(String str) {
-	    for (GridType me : GridType.values()) {
-	        if (me.name().equalsIgnoreCase(str))
-	            return me;
-	    }
-	    return null;
+		for (GridType me : GridType.values()) {
+			if (me.name().equalsIgnoreCase(str))
+				return me;
+		}
+		return null;
 	}
 }

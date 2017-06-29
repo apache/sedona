@@ -295,7 +295,7 @@ public abstract class VisualizationOperator implements Serializable{
             public Tuple2<Pixel, Integer> call(Tuple2<Pixel, Integer> pixelDoubleTuple2) throws Exception {
                 Pixel newPixel = new Pixel(pixelDoubleTuple2._1().getX(),pixelDoubleTuple2._1().getY(),resolutionX,resolutionY);
                 newPixel.setDuplicate(false);
-                newPixel.setCurrentPartitionId(RasterizationUtils.CalculatePartitionId(resolutionX,resolutionY,partitionX, partitionY, pixelDoubleTuple2._1.getX(), pixelDoubleTuple2._1.getY()));
+                newPixel.setCurrentPartitionId(VisualizationPartitioner.CalculatePartitionId(resolutionX,resolutionY,partitionX, partitionY, pixelDoubleTuple2._1.getX(), pixelDoubleTuple2._1.getY()));
                 Tuple2<Pixel,Integer> newPixelDoubleTuple2 = new Tuple2<Pixel, Integer>(newPixel, pixelDoubleTuple2._2());
                 return newPixelDoubleTuple2;
             }
@@ -366,7 +366,7 @@ public abstract class VisualizationOperator implements Serializable{
                                     // This neighbor pixel is out of boundary so that we don't record its sum. We don't plot this pixel on the final sub image.
                                     continue;
                                 }
-                                if(RasterizationUtils.CalculatePartitionId(resolutionX, resolutionY, partitionX, partitionY, neighborPixelX, neighborPixelY)!=currentPixelCount._1().getCurrentPartitionId())
+                                if(VisualizationPartitioner.CalculatePartitionId(resolutionX, resolutionY, partitionX, partitionY, neighborPixelX, neighborPixelY)!=currentPixelCount._1().getCurrentPartitionId())
                                 {
                                     // This neighbor pixel is not in this image partition so that we don't record its sum. We don't plot this pixel on the final sub image.
                                     continue;
@@ -377,13 +377,13 @@ public abstract class VisualizationOperator implements Serializable{
                                 {
                                     neighborPixelCount+=currentPixelCount._2()*PhotoFilterConvolutionMatrix[x + photoFilterRadius][y + photoFilterRadius];
                                     pixelCountHashMap.remove(new Pixel(neighborPixelX,neighborPixelY,resolutionX,resolutionY));
-                                    Pixel newPixel = new Pixel(neighborPixelX, neighborPixelY, resolutionX,resolutionY,false, RasterizationUtils.CalculatePartitionId(resolutionX, resolutionY, partitionX, partitionY, neighborPixelX, neighborPixelY));
+                                    Pixel newPixel = new Pixel(neighborPixelX, neighborPixelY, resolutionX,resolutionY,false, VisualizationPartitioner.CalculatePartitionId(resolutionX, resolutionY, partitionX, partitionY, neighborPixelX, neighborPixelY));
                                     pixelCountHashMap.put(newPixel,neighborPixelCount);
                                 }
                                 else
                                 {
                                     neighborPixelCount = currentPixelCount._2()*PhotoFilterConvolutionMatrix[x + photoFilterRadius][y + photoFilterRadius];
-                                    Pixel newPixel = new Pixel(neighborPixelX, neighborPixelY, resolutionX,resolutionY,false, RasterizationUtils.CalculatePartitionId(resolutionX, resolutionY, partitionX, partitionY, neighborPixelX, neighborPixelY));
+                                    Pixel newPixel = new Pixel(neighborPixelX, neighborPixelY, resolutionX,resolutionY,false, VisualizationPartitioner.CalculatePartitionId(resolutionX, resolutionY, partitionX, partitionY, neighborPixelX, neighborPixelY));
                                     pixelCountHashMap.put(newPixel,neighborPixelCount);
                                 }
                             }

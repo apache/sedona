@@ -88,6 +88,8 @@ public class EarthdataMapperRunnableExample {
         urlPrefix = System.getProperty("user.dir")+"/src/test/resources/modis/";
         testSpatialRangeQuery();
         testSpatialRangeQueryUsingIndex();
+        sc.stop();
+        System.out.println("All GeoSpark Earthdata DEMOs passed!");
 	}
 
     /**
