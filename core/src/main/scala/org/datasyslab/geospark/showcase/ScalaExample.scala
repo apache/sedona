@@ -22,6 +22,7 @@ import org.datasyslab.geospark.spatialRDD.PolygonRDD
 import com.vividsolutions.jts.geom.Coordinate
 import com.vividsolutions.jts.geom.Envelope
 import com.vividsolutions.jts.geom.GeometryFactory
+import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileRDD
 
 
 /**
@@ -53,6 +54,8 @@ object ScalaExample extends App{
 	val rangeQueryWindow=new Envelope (-90.01,-80.01,30.01,40.01)
 	val joinQueryPartitioningType = GridType.RTREE
 	val eachQueryLoopTimes=5
+
+	var ShapeFileInputLocation = resourceFolder+"shapefiles/polygon"
 
 	testSpatialRangeQuery()
 	testSpatialRangeQueryUsingIndex()
@@ -249,6 +252,19 @@ object ScalaExample extends App{
 			{
 				i += 1; i - 1
 			}
+		}
+	}
+
+	@throws[Exception]
+	def testLoadShapefileIntoPolygonRDD(): Unit = {
+		val shapefileRDD = new ShapefileRDD(sc, ShapeFileInputLocation)
+		val spatialRDD = new PolygonRDD(shapefileRDD.getPolygonRDD)
+		try
+			RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180, 180, -90, 90), false, false).count
+		catch {
+			case e: Exception =>
+				// TODO Auto-generated catch block
+				e.printStackTrace()
 		}
 	}
 

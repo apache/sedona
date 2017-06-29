@@ -17,6 +17,7 @@ import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileRDD;
 import org.datasyslab.geospark.spatialOperator.JoinQuery;
 import org.datasyslab.geospark.spatialOperator.KNNQuery;
 import org.datasyslab.geospark.spatialOperator.RangeQuery;
@@ -88,6 +89,8 @@ public class Example implements Serializable{
     
     /** The range query window. */
     static Envelope rangeQueryWindow;
+    
+    static String ShapeFileInputLocation;
 	
 	/**
 	 * The main method.
@@ -120,6 +123,8 @@ public class Example implements Serializable{
 		joinQueryPartitioningType = GridType.RTREE;
 		eachQueryLoopTimes=5;
 		
+        ShapeFileInputLocation = resourceFolder+"shapefiles/polygon";
+
 		try {
 			testSpatialRangeQuery();
 			testSpatialRangeQueryUsingIndex();
@@ -131,6 +136,7 @@ public class Example implements Serializable{
 			testDistanceJoinQueryUsingIndex();
 			testCRSTransformationSpatialRangeQuery();
 			testCRSTransformationSpatialRangeQueryUsingIndex();
+			testLoadShapefileIntoPolygonRDD();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("GeoSpark DEMOs failed!");
@@ -331,6 +337,17 @@ public class Example implements Serializable{
 			assert resultSize>-1;
 		}
 
+	}
+	
+	public static void testLoadShapefileIntoPolygonRDD() throws Exception {
+        ShapefileRDD shapefileRDD = new ShapefileRDD(sc,ShapeFileInputLocation);
+        PolygonRDD spatialRDD = new PolygonRDD(shapefileRDD.getPolygonRDD());
+        try {
+			RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180,180,-90,90), false, false).count();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

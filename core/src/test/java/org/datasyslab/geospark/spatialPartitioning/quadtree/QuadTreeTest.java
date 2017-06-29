@@ -165,10 +165,6 @@ public class QuadTreeTest {
         standardQuadTree.decidePartitionSerialId(serialIdMapping);
         ArrayList<QuadRectangle> allNumberedZoneList = new ArrayList<QuadRectangle>();
         standardQuadTree.getAllZones(allNumberedZoneList);
-        for (QuadRectangle r:allNumberedZoneList)
-        {
-            System.out.println(r);
-        }
     }
     @Test
     public void testQuadTreeStressful() {
