@@ -1,7 +1,7 @@
 /**
  * FILE: Example.java
  * PATH: org.datasyslab.babylon.showcase.Example.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon.showcase;
@@ -23,11 +23,11 @@ import org.datasyslab.babylon.extension.visualizationEffect.ChoroplethMap;
 import org.datasyslab.babylon.extension.visualizationEffect.HeatMap;
 import org.datasyslab.babylon.extension.visualizationEffect.ScatterPlot;
 import org.datasyslab.babylon.utils.ColorizeOption;
-import org.datasyslab.babylon.utils.EarthdataHDFPointMapper;
 import org.datasyslab.babylon.utils.ImageType;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.formatMapper.EarthdataHDFPointMapper;
 import org.datasyslab.geospark.spatialOperator.JoinQuery;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
@@ -36,6 +36,7 @@ import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Polygon;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class Example.
  */
@@ -98,14 +99,19 @@ public class Example {
     /** The US main land boundary. */
     static Envelope USMainLandBoundary;
     
+    /** The earthdata input location. */
     static String earthdataInputLocation;
         
+    /** The earthdata num partitions. */
     static Integer earthdataNumPartitions;
     
+    /** The HDF increment. */
     static int HDFIncrement = 5;
     
+    /** The HDF offset. */
     static int HDFOffset = 2;
     
+    /** The HDF root group name. */
     static String HDFRootGroupName = "MOD_Swath_LST";
     
     /** The HDF data variable name. */
@@ -114,6 +120,7 @@ public class Example {
     /** The HDF data variable list. */
     static String[] HDFDataVariableList = {"LST","QC","Error_LST","Emis_31","Emis_32"};
     
+    /** The HD fswitch XY. */
     static boolean HDFswitchXY = true;
     
     /** The url prefix. */
@@ -128,7 +135,7 @@ public class Example {
 	public static boolean buildScatterPlot(String outputPath)
 	{
 		try{
-			PolygonRDD spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions);
+			PolygonRDD spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions, StorageLevel.MEMORY_ONLY());
 			ScatterPlot visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary,false);
 			visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
@@ -165,7 +172,7 @@ public class Example {
 	public static boolean buildHeatMap(String outputPath)
 	{
 		try{
-			RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
+			RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY());
 			HeatMap visualizationOperator = new HeatMap(1000,600,USMainLandBoundary,false,2);
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
 			BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
@@ -188,8 +195,8 @@ public class Example {
 	public static boolean buildChoroplethMap(String outputPath)
 	{
 		try{
-			PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
-			PolygonRDD queryRDD = new PolygonRDD(sparkContext, PolygonInputLocation,  PolygonSplitter, false, PolygonNumPartitions);
+			PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY());
+			PolygonRDD queryRDD = new PolygonRDD(sparkContext, PolygonInputLocation,  PolygonSplitter, false, PolygonNumPartitions, StorageLevel.MEMORY_ONLY());
 			spatialRDD.spatialPartitioning(GridType.RTREE);
 			queryRDD.spatialPartitioning(spatialRDD.grids);
 	  		spatialRDD.buildIndex(IndexType.RTREE,true);
@@ -218,7 +225,7 @@ public class Example {
 	}
 	
 	/**
-	 * Parallel filter render stitch.
+	 * Parallel filter render no stitch.
 	 *
 	 * @param outputPath the output path
 	 * @return true, if successful
@@ -226,7 +233,7 @@ public class Example {
 	public static boolean parallelFilterRenderNoStitch(String outputPath)
 	{
 		try{
-			RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
+			RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY());
 			HeatMap visualizationOperator = new HeatMap(1000,600,USMainLandBoundary,false,2,4,4,true,true);
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
 			BabylonImageGenerator imageGenerator = new BabylonImageGenerator();
@@ -249,7 +256,7 @@ public class Example {
 	public static boolean parallelFilterRenderStitch(String outputPath)
 	{
 		try{
-			RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
+			RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY());
 			HeatMap visualizationOperator = new HeatMap(1000,600,USMainLandBoundary,false,2,4,4,true,true);
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
 			visualizationOperator.stitchImagePartitions();
@@ -264,6 +271,12 @@ public class Example {
 		return true;			
 	}
 	
+	/**
+	 * Earthdata visualization.
+	 *
+	 * @param outputPath the output path
+	 * @return true, if successful
+	 */
 	public static boolean earthdataVisualization(String outputPath)
 	{
     	
@@ -271,7 +284,7 @@ public class Example {
 			EarthdataHDFPointMapper earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement,HDFOffset,HDFRootGroupName,
 					HDFDataVariableList,HDFDataVariableName,HDFswitchXY,urlPrefix);
 	    	PointRDD spatialRDD = new PointRDD(sparkContext, earthdataInputLocation, earthdataNumPartitions, earthdataHDFPoint,StorageLevel.MEMORY_ONLY());
-			ScatterPlot visualizationOperator = new ScatterPlot(1000,600,spatialRDD.boundaryEnvelope,ColorizeOption.ZAXIS,false,false);
+			ScatterPlot visualizationOperator = new ScatterPlot(1000,600,spatialRDD.boundaryEnvelope,ColorizeOption.EARTHOBSERVATION,false,false);
 			visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.BLUE, true);
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
 			BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
@@ -282,6 +295,7 @@ public class Example {
 		}
 		return true;
 	}
+	
 	/**
 	 * The main method.
 	 *
