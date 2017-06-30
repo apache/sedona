@@ -23,7 +23,7 @@ GeoSpark artifacts are hosted in Maven Central: [**Maven Central Coordinates**](
 ##  Version release notes: [click here](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Full-Version-Release-notes)
 
 ## News!
-
+* GeoSpark and Babylon (v0.1.X-0.2.X) Template Project is available here: [Template Project](https://github.com/jiayuasu/GeoSparkTemplateProject)
 * GeoSpark (0.8.0 and later) is able to load and query ESRI ShapeFile (.shp, .shx, .dbf) from local disk and HDFS! ([Scala Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/scala/org/datasyslab/geospark/showcase), [Java Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/java/org/datasyslab/geospark/showcase))
 
 * GeoSpark (0.8.0 and later) provides alternative Spatial RDD constructors to speed up RDD data loading and initlializing. See [Advanced GeoSpark Tutorial](https://github.com/DataSystemsLab/GeoSpark/wiki/Advanced-Tutorial-Tune-your-GeoSpark-Application).
@@ -72,7 +72,9 @@ GeoSpark allows users to transform the original CRS (e.g., degree based coordina
 Please make a Pull Request to add yourself!
 
 # GeoSpark Tutorial ([more](https://github.com/DataSystemsLab/GeoSpark/wiki))
-GeoSpark full tutorial is available at GeoSpark GitHub Wiki: [https://github.com/DataSystemsLab/GeoSpark/wiki](https://github.com/DataSystemsLab/GeoSpark/wiki)
+GeoSpark full tutorial is available at GeoSpark GitHub Wiki: [GeoSpark GitHub Wiki](https://github.com/DataSystemsLab/GeoSpark/wiki)
+
+GeoSpark Scala and Java template project is available here: [Template Project](https://github.com/jiayuasu/GeoSparkTemplateProject)
 
 # Babylon Visualization System on GeoSpark
 Babylon is a large-scale in-memory geospatial visualization system.
@@ -97,7 +99,7 @@ Jia Yu, Jinxuan Wu, Mohamed Sarwat. ["GeoSpark: A Cluster Computing Framework fo
 
 GeoSpark makes use of JTS Plus (An extended JTS Topology Suite Version 1.14) for some geometrical computations.
 
-Please refer to [JTS Topology Suite website](http://tsusiatsoftware.net/jts/main.html) and [JTS Plus](https://github.com/jiayuasu/JTSplus) for more details.
+Please refer to [JTS Topology Suite](https://github.com/locationtech/jts) and [JTS Plus](https://github.com/jiayuasu/JTSplus) for more details.
 
 
 
@@ -118,7 +120,7 @@ Please refer to [JTS Topology Suite website](http://tsusiatsoftware.net/jts/main
 Please visit [GeoSpark project wesbite](http://geospark.datasyslab.org) for latest news and releases.
 
 ## Data Systems Lab
-GeoSpark is one of the projects under [Data Systems Lab](http://www.datasyslab.org/) at Arizona State University. The mission of Data Systems Lab is designing and developing experimental data management systems (e.g., database systems).
+GeoSpark is one of the projects initiated by [Data Systems Lab](http://www.datasyslab.org/) at Arizona State University. The mission of Data Systems Lab is designing and developing experimental data management systems (e.g., database systems).
 
 # Thanks for the help from GeoSpark community
 We appreciate the help and suggestions from GeoSpark users: [**Thanks List**](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Community-Thanks-List)
