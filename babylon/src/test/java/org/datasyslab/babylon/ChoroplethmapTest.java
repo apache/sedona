@@ -1,7 +1,7 @@
 /**
  * FILE: ChoroplethmapTest.java
  * PATH: org.datasyslab.babylon.ChoroplethmapTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon;
@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.babylon.core.RasterOverlayOperator;
 import org.datasyslab.babylon.core.VectorOverlayOperator;
 import org.datasyslab.babylon.extension.imageGenerator.BabylonImageGenerator;
@@ -36,6 +37,7 @@ import org.junit.Test;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Polygon;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class ChoroplethmapTest.
  */
@@ -110,8 +112,9 @@ public class ChoroplethmapTest implements Serializable{
 	public static void setUpBeforeClass() throws Exception {
 		SparkConf sparkConf = new SparkConf().setAppName("ChoroplethmapTest").setMaster("local[4]");
 		sparkContext = new JavaSparkContext(sparkConf);
-        Logger.getLogger("org").setLevel(Level.WARN);
-        Logger.getLogger("akka").setLevel(Level.WARN);
+		Logger.getLogger("org.apache").setLevel(Level.WARN);
+		Logger.getLogger("org.datasyslab").setLevel(Level.DEBUG);
+		Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
         
         inputProp = ChoroplethmapTest.class.getClassLoader().getResourceAsStream("babylon.point.properties");
@@ -162,8 +165,8 @@ public class ChoroplethmapTest implements Serializable{
 	 */
 	@Test
 	public void testRectangleRDDVisualization() throws Exception {
-		PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
-		RectangleRDD queryRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
+		PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY());
+		RectangleRDD queryRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY());
 		spatialRDD.spatialPartitioning(GridType.RTREE);
 		queryRDD.spatialPartitioning(spatialRDD.grids);
   		spatialRDD.buildIndex(IndexType.RTREE,true);
@@ -193,8 +196,8 @@ public class ChoroplethmapTest implements Serializable{
 	@Test
 	public void testPolygonRDDVisualization() throws Exception {
 		//UserSuppliedPolygonMapper userSuppliedPolygonMapper = new UserSuppliedPolygonMapper();
-		PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
-		PolygonRDD queryRDD = new PolygonRDD(sparkContext, PolygonInputLocation,  PolygonSplitter, false, PolygonNumPartitions);
+		PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY());
+		PolygonRDD queryRDD = new PolygonRDD(sparkContext, PolygonInputLocation,  PolygonSplitter, false, PolygonNumPartitions, StorageLevel.MEMORY_ONLY());
 		spatialRDD.spatialPartitioning(GridType.RTREE);
 		queryRDD.spatialPartitioning(spatialRDD.grids);
   		spatialRDD.buildIndex(IndexType.RTREE,true);

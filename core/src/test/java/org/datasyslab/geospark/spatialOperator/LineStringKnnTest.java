@@ -1,7 +1,7 @@
 /**
  * FILE: LineStringKnnTest.java
  * PATH: org.datasyslab.geospark.spatialOperator.LineStringKnnTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
@@ -18,7 +18,6 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.spatialRDD.LineStringRDD;
-import org.datasyslab.geospark.spatialRDD.LineStringRDDTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -79,7 +78,7 @@ public class LineStringKnnTest {
         input = LineStringKnnTest.class.getClassLoader().getResourceAsStream("linestring.test.properties");
 
         //Hard code to a file in resource folder. But you can replace it later in the try-catch field in your hdfs system.
-        InputLocation = "file://"+LineStringRDDTest.class.getClassLoader().getResource("primaryroads-linestring.csv").getPath();
+        InputLocation = "file://"+LineStringKnnTest.class.getClassLoader().getResource("primaryroads-linestring.csv").getPath();
 
         offset = 0;
         splitter = null;

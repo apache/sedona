@@ -1,7 +1,7 @@
 /**
  * FILE: SpatialPartitioner.java
  * PATH: org.datasyslab.geospark.spatialPartitioning.SpatialPartitioner.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.geospark.spatialPartitioning;
@@ -36,7 +36,6 @@ public class SpatialPartitioner extends Partitioner implements Serializable{
 	@Override
 	public int getPartition(Object key) {
 		// TODO Auto-generated method stub
-		//return (int)key%(numParts);
 		return (int)key;
 	}
 	

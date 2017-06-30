@@ -1,20 +1,33 @@
+/**
+ * FILE: ColorizeOption.java
+ * PATH: org.datasyslab.babylon.utils.ColorizeOption.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
 package org.datasyslab.babylon.utils;
 
 import java.io.Serializable;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Enum ColorizeOption.
+ */
 public enum ColorizeOption implements Serializable{
 	
-	ZAXIS("zaxis"),
+	/** The earthobservation. */
+	EARTHOBSERVATION("EARTHOBSERVATION"),
 	
+	/** The spatialaggregation. */
 	SPATIALAGGREGATION("spatialaggregation"),
 	
-	UNIFORMCOLOR("uniformcolor");
+	/** The normal. */
+	NORMAL("normal");
 
 	/** The type name. */
-	private String typeName="uniformcolor";
+	private String typeName="normal";
 	
 	/**
-	 * Instantiates a new image type.
+	 * Instantiates a new colorize option.
 	 *
 	 * @param typeName the type name
 	 */
@@ -24,10 +37,10 @@ public enum ColorizeOption implements Serializable{
 	}
 	
 	/**
-	 * Gets the image type.
+	 * Gets the colorize option.
 	 *
 	 * @param str the str
-	 * @return the image type
+	 * @return the colorize option
 	 */
 	public static ColorizeOption getColorizeOption(String str) {
 	    for (ColorizeOption me : ColorizeOption.values()) {

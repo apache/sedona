@@ -1,7 +1,7 @@
 /**
  * FILE: BabylonImageGenerator.java
  * PATH: org.datasyslab.babylon.extension.imageGenerator.BabylonImageGenerator.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon.extension.imageGenerator;
@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import org.apache.log4j.Logger;
 import org.datasyslab.babylon.core.ImageGenerator;
 import org.datasyslab.babylon.utils.ImageType;
 
@@ -23,12 +24,15 @@ import org.datasyslab.babylon.utils.ImageType;
  * The Class BabylonImageGenerator.
  */
 public class BabylonImageGenerator extends ImageGenerator{
-	
+
+	/** The Constant logger. */
+	final static Logger logger = Logger.getLogger(BabylonImageGenerator.class);
 	/* (non-Javadoc)
 	 * @see org.datasyslab.babylon.core.AbstractImageGenerator#SaveRasterImageAsLocalFile(java.awt.image.BufferedImage, java.lang.String, org.datasyslab.babylon.utils.ImageType)
 	 */
 	public boolean SaveRasterImageAsLocalFile(BufferedImage rasterImage, String outputPath, ImageType imageType) throws Exception
 	{
+		logger.info("[Babylon][SaveRasterImageAsLocalFile][Start]");
 		File outputImage = new File(outputPath+"."+imageType.getTypeName());
 		outputImage.getParentFile().mkdirs();
 		try {
@@ -36,6 +40,7 @@ public class BabylonImageGenerator extends ImageGenerator{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		logger.info("[Babylon][SaveRasterImageAsLocalFile][Stop]");
 		return true;
 	}
 	
@@ -44,6 +49,7 @@ public class BabylonImageGenerator extends ImageGenerator{
 	 */
 	public boolean SaveVectorImageAsLocalFile(List<String> vectorImage, String outputPath, ImageType imageType) throws Exception
 	{
+		logger.info("[Babylon][SaveVectorImageAsLocalFile][Start]");
 		File outputImage = new File(outputPath+"."+imageType.getTypeName());
 		outputImage.getParentFile().mkdirs();
 		
@@ -77,6 +83,7 @@ public class BabylonImageGenerator extends ImageGenerator{
 
 			}
 		}
+		logger.info("[Babylon][SaveVectorImageAsLocalFile][Stop]");
 		return true;
 	}
 }
