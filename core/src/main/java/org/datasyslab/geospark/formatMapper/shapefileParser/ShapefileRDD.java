@@ -25,16 +25,24 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class ShapefileRDD.
+ */
 public class ShapefileRDD implements Serializable{
 
 
-    /** shape collection */
+    /**  shape collection. */
     private JavaRDD<Geometry> shapeRDD = null;
 
+    /** The geometry factory. */
     public static GeometryFactory geometryFactory;
 
-    /** field descriptor of  */
-
+    /**
+     *  ShapefileRDD
+     * @param sparkContext the spark context
+     * @param filePath the file path
+     */
     public ShapefileRDD(JavaSparkContext sparkContext, String filePath){
         geometryFactory = new GeometryFactory();
         JavaPairRDD<ShapeKey, PrimitiveShape> shapePrimitiveRdd = sparkContext.newAPIHadoopFile(
@@ -47,6 +55,7 @@ public class ShapefileRDD implements Serializable{
         shapeRDD = shapePrimitiveRdd.map(PrimitiveToShape);
     }
 
+    /** The Constant PrimitiveToShape. */
     private static final Function<Tuple2<ShapeKey, PrimitiveShape>, Geometry> PrimitiveToShape
             = new Function<Tuple2<ShapeKey, PrimitiveShape>, Geometry>(){
         public Geometry call(Tuple2<ShapeKey, PrimitiveShape> primitiveTuple) {
@@ -65,6 +74,7 @@ public class ShapefileRDD implements Serializable{
         }
     };
 
+    /** The Print shape. */
     private final VoidFunction<Geometry> PrintShape = new VoidFunction<Geometry>() {
         public void call(Geometry shape) throws Exception {
             System.out.println(shape.toText());
@@ -72,11 +82,21 @@ public class ShapefileRDD implements Serializable{
     };
 
 
+    /**
+     * Gets the shape RDD.
+     *
+     * @return the shape RDD
+     */
     public JavaRDD<Geometry> getShapeRDD()
     {
         return this.shapeRDD;
     }
 
+    /**
+     * Gets the point RDD.
+     *
+     * @return the point RDD
+     */
     public JavaRDD<Point> getPointRDD() {
         return shapeRDD.flatMap(new FlatMapFunction<Geometry, Point>()
         {
@@ -105,6 +125,11 @@ public class ShapefileRDD implements Serializable{
         });
     }
 
+    /**
+     * Gets the polygon RDD.
+     *
+     * @return the polygon RDD
+     */
     public JavaRDD<Polygon> getPolygonRDD() {
         return shapeRDD.flatMap(new FlatMapFunction<Geometry, Polygon>()
         {
@@ -133,6 +158,11 @@ public class ShapefileRDD implements Serializable{
         });
     }
 
+    /**
+     * Gets the line string RDD.
+     *
+     * @return the line string RDD
+     */
     public JavaRDD<LineString> getLineStringRDD() {
         return shapeRDD.flatMap(new FlatMapFunction<Geometry, LineString>()
         {

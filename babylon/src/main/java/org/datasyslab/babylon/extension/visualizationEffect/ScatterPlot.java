@@ -1,7 +1,7 @@
 /**
  * FILE: ScatterPlot.java
  * PATH: org.datasyslab.babylon.extension.visualizationEffect.ScatterPlot.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon.extension.visualizationEffect;
@@ -30,7 +30,6 @@ public class ScatterPlot extends VisualizationOperator {
 	 * @param resolutionY the resolution Y
 	 * @param datasetBoundary the dataset boundary
 	 * @param reverseSpatialCoordinate the reverse spatial coordinate
-	 * @deprecated This function always generates raster image. Please append one more parameter to the end: boolean generateVectorImage
 	 */
 	public ScatterPlot(int resolutionX, int resolutionY, Envelope datasetBoundary, boolean reverseSpatialCoordinate) {
 		super(resolutionX, resolutionY, datasetBoundary,ColorizeOption.NORMAL,reverseSpatialCoordinate,-1,-1,false,false,false);

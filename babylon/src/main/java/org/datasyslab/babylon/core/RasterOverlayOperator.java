@@ -1,7 +1,7 @@
 /**
  * FILE: RasterOverlayOperator.java
  * PATH: org.datasyslab.babylon.core.RasterOverlayOperator.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon.core;

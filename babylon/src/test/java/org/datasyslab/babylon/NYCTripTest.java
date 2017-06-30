@@ -1,7 +1,7 @@
 /**
  * FILE: NYCTripTest.java
  * PATH: org.datasyslab.babylon.NYCTripTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon;
@@ -34,6 +34,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+// TODO: Auto-generated Javadoc
 class NYCTripMapper implements FlatMapFunction<String, Object> {
 	 
 	List result= new ArrayList<Polygon>();

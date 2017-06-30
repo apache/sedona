@@ -1,7 +1,7 @@
 /**
  * FILE: ChoroplethmapTest.java
  * PATH: org.datasyslab.babylon.ChoroplethmapTest.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon;
@@ -37,6 +37,7 @@ import org.junit.Test;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Polygon;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class ChoroplethmapTest.
  */

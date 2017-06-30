@@ -1,7 +1,7 @@
 /**
  * FILE: VectorOverlayOperator.java
  * PATH: org.datasyslab.babylon.core.VectorOverlayOperator.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon.core;
@@ -31,6 +31,7 @@ public class VectorOverlayOperator {
 
     /** The Constant logger. */
     final static Logger logger = Logger.getLogger(VectorOverlayOperator.class);
+    
     /**
      * Instantiates a new vector overlay operator.
      *
