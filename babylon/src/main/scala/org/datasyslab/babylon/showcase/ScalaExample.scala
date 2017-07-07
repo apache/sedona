@@ -4,7 +4,7 @@
 	* Copyright (c) 2017 Arizona State University Data Systems Lab
 	* All rights reserved.
 	*/
-package org.datasyslab.geospark.showcase
+package org.datasyslab.babylon.showcase
 
 import java.awt.Color
 import java.io.FileInputStream
@@ -20,7 +20,7 @@ import org.datasyslab.babylon.extension.imageGenerator.BabylonImageGenerator
 import org.datasyslab.babylon.extension.visualizationEffect.ChoroplethMap
 import org.datasyslab.babylon.extension.visualizationEffect.HeatMap
 import org.datasyslab.babylon.extension.visualizationEffect.ScatterPlot
-import org.datasyslab.babylon.utils.{ColorizeOption, EarthdataHDFPointMapper, ImageType}
+import org.datasyslab.babylon.utils.{ColorizeOption, ImageType}
 import org.datasyslab.geospark.enums.FileDataSplitter
 import org.datasyslab.geospark.enums.GridType
 import org.datasyslab.geospark.enums.IndexType
@@ -29,6 +29,7 @@ import org.datasyslab.geospark.spatialRDD.PointRDD
 import org.datasyslab.geospark.spatialRDD.PolygonRDD
 import org.datasyslab.geospark.spatialRDD.RectangleRDD
 import com.vividsolutions.jts.geom.Envelope
+import org.datasyslab.geospark.formatMapper.EarthdataHDFPointMapper
 
 
 /**
@@ -121,7 +122,7 @@ object ScalaExample extends App{
 		* @return true, if successful
 		*/
 	def buildHeatMap(outputPath: String): Boolean = {
-		val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions)
+		val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY)
 		val visualizationOperator = new HeatMap(1000, 600, USMainLandBoundary, false, 2)
 		visualizationOperator.Visualize(sparkContext, spatialRDD)
 		val imageGenerator = new BabylonImageGenerator
@@ -136,8 +137,8 @@ object ScalaExample extends App{
 		* @return true, if successful
 		*/
 	def buildChoroplethMap(outputPath: String): Boolean = {
-		val spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions)
-		val queryRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions)
+		val spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY)
+		val queryRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions, StorageLevel.MEMORY_ONLY)
 		spatialRDD.spatialPartitioning(GridType.RTREE)
 		queryRDD.spatialPartitioning(spatialRDD.grids)
 		spatialRDD.buildIndex(IndexType.RTREE, true)
@@ -162,7 +163,7 @@ object ScalaExample extends App{
 		* @return true, if successful
 		*/
 	def parallelFilterRenderNoStitch(outputPath: String): Boolean = {
-		val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions)
+		val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY)
 		val visualizationOperator = new HeatMap(1000, 600, USMainLandBoundary, false, 2, 4, 4, true, true)
 		visualizationOperator.Visualize(sparkContext, spatialRDD)
 		val imageGenerator = new BabylonImageGenerator
@@ -177,7 +178,7 @@ object ScalaExample extends App{
 		* @return true, if successful
 		*/
 	def parallelFilterRenderStitch(outputPath: String): Boolean = {
-		val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions)
+		val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY)
 		val visualizationOperator = new HeatMap(1000, 600, USMainLandBoundary, false, 2, 4, 4, true, true)
 		visualizationOperator.Visualize(sparkContext, spatialRDD)
 		visualizationOperator.stitchImagePartitions
@@ -190,7 +191,7 @@ object ScalaExample extends App{
 		val earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName,
 			HDFDataVariableList, HDFDataVariableName, HDFswitchXY, urlPrefix)
 		val spatialRDD = new PointRDD(sparkContext, earthdataInputLocation, earthdataNumPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY)
-		val visualizationOperator = new ScatterPlot(1000, 600, spatialRDD.boundaryEnvelope, ColorizeOption.ZAXIS, false, false)
+		val visualizationOperator = new ScatterPlot(1000, 600, spatialRDD.boundaryEnvelope, ColorizeOption.EARTHOBSERVATION, false, false)
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.BLUE, true)
 		visualizationOperator.Visualize(sparkContext, spatialRDD)
 		val imageGenerator = new BabylonImageGenerator

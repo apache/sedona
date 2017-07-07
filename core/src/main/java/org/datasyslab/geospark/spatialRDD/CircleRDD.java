@@ -85,7 +85,14 @@ public class CircleRDD extends SpatialRDD {
 	 * @return the center point as spatial RDD
 	 */
 	public PointRDD getCenterPointAsSpatialRDD() {
-		return new PointRDD(this.rawSpatialRDD);
+		return new PointRDD(this.rawSpatialRDD.map(new Function<Object, Point>() {
+
+			public Point call(Object spatialObject) {
+
+				return (Point)((Circle)spatialObject).getCenterGeometry();
+			}
+		}));
+
 	}
 	
 	/**
@@ -94,7 +101,13 @@ public class CircleRDD extends SpatialRDD {
 	 * @return the center polygon as spatial RDD
 	 */
 	public PolygonRDD getCenterPolygonAsSpatialRDD() {
-		return new PolygonRDD(this.rawSpatialRDD);
+		return new PolygonRDD(this.rawSpatialRDD.map(new Function<Object, Polygon>() {
+
+			public Polygon call(Object spatialObject) {
+
+				return (Polygon)((Circle)spatialObject).getCenterGeometry();
+			}
+		}));
 	}
 	
 	/**
@@ -103,7 +116,13 @@ public class CircleRDD extends SpatialRDD {
 	 * @return the center line string RDD as spatial RDD
 	 */
 	public LineStringRDD getCenterLineStringRDDAsSpatialRDD() {
-		return new LineStringRDD(this.rawSpatialRDD);
+		return new LineStringRDD(this.rawSpatialRDD.map(new Function<Object, LineString>() {
+
+			public LineString call(Object spatialObject) {
+
+				return (LineString)((Circle)spatialObject).getCenterGeometry();
+			}
+		}));
 	}
 	
 	/**

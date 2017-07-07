@@ -30,7 +30,7 @@ import com.vividsolutions.jts.io.WKTReader;
 /**
  * The Class PolygonFormatMapper.
  */
-public class PolygonFormatMapper extends FormatMapper implements FlatMapFunction<String, Object> {
+public class PolygonFormatMapper extends FormatMapper implements FlatMapFunction<Iterator<String>, Object> {
  
 	
     /**
@@ -58,122 +58,103 @@ public class PolygonFormatMapper extends FormatMapper implements FlatMapFunction
 		// TODO Auto-generated constructor stub
 	}
 
-	/* (non-Javadoc)
-     * @see org.apache.spark.api.java.function.Function#call(java.lang.Object)
-     */
-    public Iterator call(String line) throws Exception {
+    @Override
+    public Iterator<Object> call(Iterator<String> stringIterator) throws Exception {
         MultiPolygon multiSpatialObjects = null;
         LinearRing linear;
         int actualEndOffset;
-    	List result= new ArrayList<Polygon>();
-        try{
-        switch (splitter) {
-            case CSV:
-                lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
-                coordinatesList = new ArrayList<Coordinate>();
-                actualEndOffset = this.endOffset>=0?this.endOffset:(lineSplitList.size()-1);
-                for (int i = this.startOffset; i <= actualEndOffset; i+=2) {
-                    coordinatesList.add(new Coordinate(Double.parseDouble(lineSplitList.get(i)), Double.parseDouble(lineSplitList.get(i + 1))));
-                }
-                linear = fact.createLinearRing(coordinatesList.toArray(new Coordinate[coordinatesList.size()]));
-                spatialObject = new Polygon(linear, null, fact);
-                if(this.carryInputData)
-                {
-                	spatialObject.setUserData(line);
-                }
-                result.add((Polygon)spatialObject);
-                break;
-            case TSV:
-                lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
-                coordinatesList = new ArrayList<Coordinate>();
-                actualEndOffset = this.endOffset>=0?this.endOffset:(lineSplitList.size()-1);
-                for (int i = this.startOffset; i <= actualEndOffset; i = i + 2) {
-                    coordinatesList.add(new Coordinate(Double.parseDouble(lineSplitList.get(i)), Double.parseDouble(lineSplitList.get(i + 1))));
-                }
-                coordinates = new Coordinate[coordinatesList.size()];
-                coordinates = coordinatesList.toArray(coordinates);
-                linear = fact.createLinearRing(coordinates);
-                spatialObject = new Polygon(linear, null, fact);
-                if(this.carryInputData)
-                {
-                	spatialObject.setUserData(line);
-                }
-                result.add((Polygon)spatialObject);
-                break;
-            case GEOJSON:
-                GeoJSONReader reader = new GeoJSONReader();
-                if(line.contains("Feature"))
-                {
-                	Feature feature = (Feature) GeoJSONFactory.create(line);
-                	spatialObject = reader.read(feature.getGeometry());
-                }
-                else
-                {
-                    spatialObject = reader.read(line);
-                }
-                if(spatialObject instanceof MultiPolygon)
-                {
+        List result= new ArrayList<Polygon>();
+        while (stringIterator.hasNext()) {
+            String line = stringIterator.next();
+            try {
+                switch (splitter) {
+                    case CSV:
+                        lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
+                        coordinatesList = new ArrayList<Coordinate>();
+                        actualEndOffset = this.endOffset >= 0 ? this.endOffset : (lineSplitList.size() - 1);
+                        for (int i = this.startOffset; i <= actualEndOffset; i += 2) {
+                            coordinatesList.add(new Coordinate(Double.parseDouble(lineSplitList.get(i)), Double.parseDouble(lineSplitList.get(i + 1))));
+                        }
+                        linear = fact.createLinearRing(coordinatesList.toArray(new Coordinate[coordinatesList.size()]));
+                        spatialObject = new Polygon(linear, null, fact);
+                        if (this.carryInputData) {
+                            spatialObject.setUserData(line);
+                        }
+                        result.add((Polygon) spatialObject);
+                        break;
+                    case TSV:
+                        lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
+                        coordinatesList = new ArrayList<Coordinate>();
+                        actualEndOffset = this.endOffset >= 0 ? this.endOffset : (lineSplitList.size() - 1);
+                        for (int i = this.startOffset; i <= actualEndOffset; i = i + 2) {
+                            coordinatesList.add(new Coordinate(Double.parseDouble(lineSplitList.get(i)), Double.parseDouble(lineSplitList.get(i + 1))));
+                        }
+                        coordinates = new Coordinate[coordinatesList.size()];
+                        coordinates = coordinatesList.toArray(coordinates);
+                        linear = fact.createLinearRing(coordinates);
+                        spatialObject = new Polygon(linear, null, fact);
+                        if (this.carryInputData) {
+                            spatialObject.setUserData(line);
+                        }
+                        result.add((Polygon) spatialObject);
+                        break;
+                    case GEOJSON:
+                        GeoJSONReader reader = new GeoJSONReader();
+                        if (line.contains("Feature")) {
+                            Feature feature = (Feature) GeoJSONFactory.create(line);
+                            spatialObject = reader.read(feature.getGeometry());
+                        } else {
+                            spatialObject = reader.read(line);
+                        }
+                        if (spatialObject instanceof MultiPolygon) {
                 	/*
-                	 * If this line has a "Multi" type spatial object, GeoSpark separates them to a list of single objects 
+                	 * If this line has a "Multi" type spatial object, GeoSpark separates them to a list of single objects
                 	 * and assign original input line to each object.
                 	 */
-                	multiSpatialObjects = (MultiPolygon) spatialObject;
-                	for(int i=0;i<multiSpatialObjects.getNumGeometries();i++)
-                	{
-                		spatialObject = multiSpatialObjects.getGeometryN(i);
-                		if(this.carryInputData)
-                		{
-                    		spatialObject.setUserData(line);
-                		}
-                		result.add((Polygon) spatialObject);
-                	}
-                }
-                else
-                {
-                    if(this.carryInputData)
-                    {
-                    	spatialObject.setUserData(line);
-                    }
-                    result.add((Polygon)spatialObject);
-                }
-                break;
-            case WKT:
-            	lineSplitList=Arrays.asList(line.split(splitter.getDelimiter()));
-                WKTReader wktreader = new WKTReader();
-                spatialObject = wktreader.read(lineSplitList.get(this.startOffset));
-                if(spatialObject instanceof MultiPolygon)
-                {
-                	multiSpatialObjects = (MultiPolygon) spatialObject;
-                	for(int i=0;i<multiSpatialObjects.getNumGeometries();i++)
-                	{
+                            multiSpatialObjects = (MultiPolygon) spatialObject;
+                            for (int i = 0; i < multiSpatialObjects.getNumGeometries(); i++) {
+                                spatialObject = multiSpatialObjects.getGeometryN(i);
+                                if (this.carryInputData) {
+                                    spatialObject.setUserData(line);
+                                }
+                                result.add((Polygon) spatialObject);
+                            }
+                        } else {
+                            if (this.carryInputData) {
+                                spatialObject.setUserData(line);
+                            }
+                            result.add((Polygon) spatialObject);
+                        }
+                        break;
+                    case WKT:
+                        lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
+                        WKTReader wktreader = new WKTReader();
+                        spatialObject = wktreader.read(lineSplitList.get(this.startOffset));
+                        if (spatialObject instanceof MultiPolygon) {
+                            multiSpatialObjects = (MultiPolygon) spatialObject;
+                            for (int i = 0; i < multiSpatialObjects.getNumGeometries(); i++) {
                     	/*
-                    	 * If this line has a "Multi" type spatial object, GeoSpark separates them to a list of single objects 
+                    	 * If this line has a "Multi" type spatial object, GeoSpark separates them to a list of single objects
                     	 * and assign original input line to each object.
                     	 */
-                		spatialObject = multiSpatialObjects.getGeometryN(i);
-                		if(this.carryInputData)
-                		{
-                    		spatialObject.setUserData(line);
-                		}
-                		result.add((Polygon) spatialObject);
-                	}
+                                spatialObject = multiSpatialObjects.getGeometryN(i);
+                                if (this.carryInputData) {
+                                    spatialObject.setUserData(line);
+                                }
+                                result.add((Polygon) spatialObject);
+                            }
+                        } else {
+                            if (this.carryInputData) {
+                                spatialObject.setUserData(line);
+                            }
+                            result.add((Polygon) spatialObject);
+                        }
+                        break;
                 }
-                else
-                {
-                    if(this.carryInputData)
-                    {
-                    	spatialObject.setUserData(line);
-                    }
-                    result.add((Polygon)spatialObject);
-                }
-                break;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        }
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
         return result.iterator();
     }
-
 }

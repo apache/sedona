@@ -1,13 +1,14 @@
 /**
  * FILE: Embose.java
  * PATH: org.datasyslab.babylon.extension.photoFilter.Embose.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon.extension.photoFilter;
 
 import org.datasyslab.babylon.core.PhotoFilter;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class Embose.
  */

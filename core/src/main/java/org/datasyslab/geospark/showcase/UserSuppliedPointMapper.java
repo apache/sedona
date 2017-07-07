@@ -24,7 +24,7 @@ import com.vividsolutions.jts.geom.Point;
 /**
  * The Class UserSuppliedPointMapper.
  */
-public class UserSuppliedPointMapper implements FlatMapFunction<String, Geometry>{
+public class UserSuppliedPointMapper implements FlatMapFunction<Iterator<String>, Object>{
     
     /** The spatial object. */
     Geometry spatialObject = null;
@@ -34,29 +34,27 @@ public class UserSuppliedPointMapper implements FlatMapFunction<String, Geometry
     
     /** The line split list. */
     List<String> lineSplitList;
-    
-    /* (non-Javadoc)
-     * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
-     */
-    public Iterator call(String line) throws Exception {
+
+    @Override
+    public Iterator<Object> call(Iterator<String> stringIterator) throws Exception {
         List result= new ArrayList<Point>();
-        try{
-        	List<String> lineSplitList;
-        	//Split the line by comma
-        	lineSplitList=Arrays.asList(line.split(","));
-        	//Remove all quotes in the input line
-        	String latitudeString = lineSplitList.get(2).replaceAll("\"", "");
-        	String longitudeString = lineSplitList.get(3).replaceAll("\"", "");
-        	double latitude = Double.parseDouble(latitudeString);
-        	double longitude = Double.parseDouble(longitudeString);
-        	spatialObject = fact.createPoint(new Coordinate(longitude,latitude));
-        	result.add(spatialObject);
-        }
-        catch(Exception e)
-        {
-        	//Get one error. The data probably is dirty. Just skip this line.
+        while(stringIterator.hasNext()) {
+            String line = stringIterator.next();
+            try {
+                List<String> lineSplitList;
+                //Split the line by comma
+                lineSplitList = Arrays.asList(line.split(","));
+                //Remove all quotes in the input line
+                String latitudeString = lineSplitList.get(2).replaceAll("\"", "");
+                String longitudeString = lineSplitList.get(3).replaceAll("\"", "");
+                double latitude = Double.parseDouble(latitudeString);
+                double longitude = Double.parseDouble(longitudeString);
+                spatialObject = fact.createPoint(new Coordinate(longitude, latitude));
+                result.add(spatialObject);
+            } catch (Exception e) {
+                //Get one error. The data probably is dirty. Just skip this line.
+            }
         }
         return result.iterator();
     }
-
 }

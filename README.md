@@ -3,8 +3,8 @@
 
 | Status   |      Stable    | Latest | Source code|
 |:----------:|:-------------:|:------:|:------:|
-| GeoSpark |  0.7.0 | [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark) | [![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark)[![codecov.io](http://codecov.io/github/jiayuasu/GeoSpark/coverage.svg?branch=master)](http://codecov.io/github/jiayuasu/GeoSpark?branch=master)|
-| [Babylon Viz System](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon) |   0.2.0  |   [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon) | [![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark)[![codecov.io](http://codecov.io/github/jiayuasu/GeoSpark/coverage.svg?branch=master)](http://codecov.io/github/jiayuasu/GeoSpark?branch=master)|
+| GeoSpark |  0.8.0 | [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark) | [![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark)[![codecov.io](http://codecov.io/github/jiayuasu/GeoSpark/coverage.svg?branch=master)](http://codecov.io/github/jiayuasu/GeoSpark?branch=master)|
+| [Babylon Viz System](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon) |   0.2.1  |   [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon) | [![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark)[![codecov.io](http://codecov.io/github/jiayuasu/GeoSpark/coverage.svg?branch=master)](http://codecov.io/github/jiayuasu/GeoSpark?branch=master)|
 
 [![Join the chat at https://gitter.im/geospark-datasys/Lobby](https://badges.gitter.im/geospark-datasys/Lobby.svg)](https://gitter.im/geospark-datasys/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -23,30 +23,40 @@ GeoSpark artifacts are hosted in Maven Central: [**Maven Central Coordinates**](
 ##  Version release notes: [click here](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Full-Version-Release-notes)
 
 ## News!
+* GeoSpark and Babylon (v0.1.X-0.2.X) Template Project is available here: [Template Project](https://github.com/jiayuasu/GeoSparkTemplateProject)
+* GeoSpark (0.8.0 and later) is able to load and query ESRI ShapeFile (.shp, .shx, .dbf) from local disk and HDFS! ([Scala Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/scala/org/datasyslab/geospark/showcase), [Java Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/java/org/datasyslab/geospark/showcase))
 
-* GeoSpark (0.6.2 and later) is able to load, query and save NASA Petabytes NetCDF/HDF Earth Data! ([Scala Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/scala/org/datasyslab/geospark/showcase),[Java Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/java/org/datasyslab/geospark/showcase))
-* Babylon (0.2.0  and later) is able to visualize NASA Petabytes NetCDF/HDF Earth Data and output to distributed PNG/SVG images! ([Scala Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon/src/main/scala/org/datasyslab/geospark/showcase),[Java Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon/src/main/java/org/datasyslab/babylon/showcase))
+* GeoSpark (0.8.0 and later) provides alternative Spatial RDD constructors to speed up RDD data loading and initlializing. See [Advanced GeoSpark Tutorial](https://github.com/DataSystemsLab/GeoSpark/wiki/Advanced-Tutorial-Tune-your-GeoSpark-Application).
+
+* GeoSpark (0.8.0 and later) provides a new Quad-Tree Spatial Partitioning Method to speed up Join Query. ([Scala Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/scala/org/datasyslab/geospark/showcase), [Java Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/java/org/datasyslab/geospark/showcase))
 
 # Important features ([more](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Important-Features))
 ## Spatial Resilient Distributed Datasets (SRDDs)
 Supported Spatial RDDs: PointRDD, RectangleRDD, PolygonRDD, LineStringRDD
 
 ## Supported input data format
-**Native input format support**: CSV, TSV, WKT, GeoJSON, NASA Earth Data NetCDF/HDF (**New!**)
+**Native input format support**: 
 
-**User-supplied input format mapper**: Any input formats
+* CSV
+* TSV
+* WKT
+* GeoJSON (single-line compact format)
+* NASA Earth Data NetCDF/HDF
+* ESRI ShapeFile(.shp, .shx, .dbf)
+
+**User-supplied input format mapper**: Any single-line input formats
 
 ## Spatial Partitioning
-Supported Spatial Partitioning techniques: R-Tree, Voronoi diagram, Uniform grids (Experimental), Hilbert Curve (Experimental)
+Supported Spatial Partitioning techniques: Quad-Tree, R-Tree, Voronoi diagram, Uniform grids (Experimental), Hilbert Curve (Experimental)
 
 ## Spatial Index
 Supported Spatial Indexes: Quad-Tree and R-Tree. R-Tree supports Spatial K Nearest Neighbors query.
 
 ## Geometrical operation
-Inside, Overlap, DatasetBoundary, Minimum Bounding Rectangl, Polygon Union
+DatasetBoundary, Minimum Bounding Rectangle, Polygon Union
 
 ## Spatial Operation
-Spatial Range Query, Distance Join Query, Spatial Join Query, and Spatial K Nearest Neighbors Query.
+Spatial Range Query, Distance Join Query, Spatial Join Query (Inside and Overlap), and Spatial K Nearest Neighbors Query.
 
 ## Coordinate Reference System (CRS) Transformation (aka. Coordinate projection)
 
@@ -62,7 +72,9 @@ GeoSpark allows users to transform the original CRS (e.g., degree based coordina
 Please make a Pull Request to add yourself!
 
 # GeoSpark Tutorial ([more](https://github.com/DataSystemsLab/GeoSpark/wiki))
-GeoSpark full tutorial is available at GeoSpark GitHub Wiki: [https://github.com/DataSystemsLab/GeoSpark/wiki](https://github.com/DataSystemsLab/GeoSpark/wiki)
+GeoSpark full tutorial is available at GeoSpark GitHub Wiki: [GeoSpark GitHub Wiki](https://github.com/DataSystemsLab/GeoSpark/wiki)
+
+GeoSpark Scala and Java template project is available here: [Template Project](https://github.com/jiayuasu/GeoSparkTemplateProject)
 
 # Babylon Visualization System on GeoSpark
 Babylon is a large-scale in-memory geospatial visualization system.
@@ -87,7 +99,7 @@ Jia Yu, Jinxuan Wu, Mohamed Sarwat. ["GeoSpark: A Cluster Computing Framework fo
 
 GeoSpark makes use of JTS Plus (An extended JTS Topology Suite Version 1.14) for some geometrical computations.
 
-Please refer to [JTS Topology Suite website](http://tsusiatsoftware.net/jts/main.html) and [JTS Plus](https://github.com/jiayuasu/JTSplus) for more details.
+Please refer to [JTS Topology Suite](https://github.com/locationtech/jts) and [JTS Plus](https://github.com/jiayuasu/JTSplus) for more details.
 
 
 
@@ -108,7 +120,7 @@ Please refer to [JTS Topology Suite website](http://tsusiatsoftware.net/jts/main
 Please visit [GeoSpark project wesbite](http://geospark.datasyslab.org) for latest news and releases.
 
 ## Data Systems Lab
-GeoSpark is one of the projects under [Data Systems Lab](http://www.datasyslab.org/) at Arizona State University. The mission of Data Systems Lab is designing and developing experimental data management systems (e.g., database systems).
+GeoSpark is one of the projects initiated by [Data Systems Lab](http://www.datasyslab.org/) at Arizona State University. The mission of Data Systems Lab is designing and developing experimental data management systems (e.g., database systems).
 
 # Thanks for the help from GeoSpark community
 We appreciate the help and suggestions from GeoSpark users: [**Thanks List**](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Community-Thanks-List)

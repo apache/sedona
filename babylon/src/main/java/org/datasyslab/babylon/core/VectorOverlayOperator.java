@@ -1,11 +1,12 @@
 /**
  * FILE: VectorOverlayOperator.java
  * PATH: org.datasyslab.babylon.core.VectorOverlayOperator.java
- * Copyright (c) 2017 Arizona State University Data Systems Lab
+ * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
 package org.datasyslab.babylon.core;
 
+import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.function.Function;
 import scala.Tuple2;
@@ -28,6 +29,9 @@ public class VectorOverlayOperator {
     /** The generate distributed image. */
     public boolean generateDistributedImage=false;
 
+    /** The Constant logger. */
+    final static Logger logger = Logger.getLogger(VectorOverlayOperator.class);
+    
     /**
      * Instantiates a new vector overlay operator.
      *
@@ -59,6 +63,7 @@ public class VectorOverlayOperator {
      */
     public boolean JoinImage(JavaPairRDD<Integer,String> distributedFontImage) throws Exception
     {
+        logger.info("[Babylon][JoinImage][Start]");
         if (this.generateDistributedImage==false)
         {
             throw new Exception("[OverlayOperator][JoinImage] The back image is not distributed. Please don't use distributed format.");
@@ -80,6 +85,7 @@ public class VectorOverlayOperator {
         });
         this.distributedBackVectorImage = this.distributedBackVectorImage.union(distributedFontImageNoHeaderFooter);
         this.distributedBackVectorImage=this.distributedBackVectorImage.sortByKey();
+        logger.info("[Babylon][JoinImage][Stop]");
         return true;
     }
 
@@ -92,6 +98,7 @@ public class VectorOverlayOperator {
      */
     public boolean JoinImage(List<String> frontVectorImage) throws Exception
     {
+        logger.info("[Babylon][JoinImage][Start]");
         if (this.generateDistributedImage==true)
         {
             throw new Exception("[OverlayOperator][JoinImage] The back image is distributed. Please don't use centralized format.");
@@ -108,6 +115,7 @@ public class VectorOverlayOperator {
         }
         copyOf.add(this.backVectorImage.get(this.backVectorImage.size()-1));
         this.backVectorImage = copyOf;
+        logger.info("[Babylon][JoinImage][Stop]");
         return true;
     }
 }

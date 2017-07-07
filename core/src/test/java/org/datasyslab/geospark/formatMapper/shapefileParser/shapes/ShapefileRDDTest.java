@@ -10,6 +10,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileRDD;
 import org.datasyslab.geospark.spatialOperator.RangeQuery;
 import org.datasyslab.geospark.spatialRDD.LineStringRDD;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
@@ -101,7 +102,7 @@ public class ShapefileRDDTest implements Serializable{
         }
         final Iterator<String> featureIterator = featureTexts.iterator();
         ShapefileRDD shapefileRDD = new ShapefileRDD(sc,InputLocation);
-        PolygonRDD spatialRDD = new PolygonRDD(shapefileRDD.getSpatialRDD());
+        PolygonRDD spatialRDD = new PolygonRDD(shapefileRDD.getPolygonRDD());
         try {
 			RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180,180,-90,90), false, false).count();
 		} catch (Exception e) {
@@ -139,7 +140,7 @@ public class ShapefileRDDTest implements Serializable{
         }
         final Iterator<String> featureIterator = featureTexts.iterator();
         ShapefileRDD shapefileRDD = new ShapefileRDD(sc,InputLocation);
-        LineStringRDD spatialRDD = new LineStringRDD(shapefileRDD.getSpatialRDD());
+        LineStringRDD spatialRDD = new LineStringRDD(shapefileRDD.getLineStringRDD());
         try {
 			RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180,180,-90,90), false, false).count();
 		} catch (Exception e) {
@@ -208,7 +209,7 @@ public class ShapefileRDDTest implements Serializable{
         }
         final Iterator<String> featureIterator = featureTexts.iterator();
         ShapefileRDD shapefileRDD = new ShapefileRDD(sc,InputLocation);
-        PointRDD spatialRDD = new PointRDD(shapefileRDD.getSpatialRDD());
+        PointRDD spatialRDD = new PointRDD(shapefileRDD.getPointRDD());
         try {
 			RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180,180,-90,90), false, false).count();
 		} catch (Exception e) {
@@ -246,7 +247,7 @@ public class ShapefileRDDTest implements Serializable{
         }
         final Iterator<String> featureIterator = featureTexts.iterator();
         ShapefileRDD shapefileRDD = new ShapefileRDD(sc,InputLocation);
-        PolygonRDD spatialRDD = new PolygonRDD(shapefileRDD.getSpatialRDD());
+        PolygonRDD spatialRDD = new PolygonRDD(shapefileRDD.getPolygonRDD());
         try {
 			RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180,180,-90,90), false, false).count();
 		} catch (Exception e) {

@@ -16,6 +16,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
@@ -172,9 +173,9 @@ public class PointJoinTest {
     @Test
     public void testSpatialJoinQueryWithRectangleRDD() throws Exception {
     	
-        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter, true, numPartitions);
+        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
 
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
         
         spatialRDD.spatialPartitioning(gridType);
         
@@ -200,9 +201,9 @@ public class PointJoinTest {
     @Test
     public void testSpatialJoinQueryWithPolygonRDD() throws Exception {
 
-        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions);
+        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
 
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
         
         spatialRDD.spatialPartitioning(gridType);
         
@@ -228,9 +229,9 @@ public class PointJoinTest {
     @Test
     public void testSpatialJoinQueryWithRectangleRDDUsingRtreeIndex() throws Exception {
     	
-        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter, true, numPartitions);
+        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
 
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
         
         spatialRDD.spatialPartitioning(gridType);
         
@@ -258,9 +259,9 @@ public class PointJoinTest {
     @Test
     public void testSpatialJoinQueryWithPolygonRDDUsingRTreeIndex() throws Exception {
     	
-        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions);
+        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
 
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
         
         spatialRDD.spatialPartitioning(gridType);
         
@@ -288,9 +289,9 @@ public class PointJoinTest {
     @Test
     public void testSpatialJoinQueryWithRectangleRDDUsingQuadtreeIndex() throws Exception {
 
-        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter, true, numPartitions);
+        RectangleRDD queryRDD = new RectangleRDD(sc, InputLocationQueryWindow, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
 
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
   
         spatialRDD.spatialPartitioning(gridType);
         
@@ -318,9 +319,9 @@ public class PointJoinTest {
     @Test
     public void testSpatialJoinQueryWithPolygonRDDUsingQuadTreeIndex() throws Exception {
     	
-        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions);
+        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
 
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
         
         spatialRDD.spatialPartitioning(gridType);
         
