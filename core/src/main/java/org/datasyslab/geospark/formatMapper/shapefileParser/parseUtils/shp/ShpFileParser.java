@@ -27,9 +27,6 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
     /** input reader */
     ShapeReader reader = null;
 
-    /** bound box */
-    public static BoundBox boundBox = null;
-
     /**
      * create a new shape file parser with a input source that is instance of DataInputStream
      * @param inputStream
@@ -51,13 +48,7 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
         remainLength = fileLength;
         int fileVersion = EndianUtils.swapInteger(reader.readInt());
         currentTokenType = EndianUtils.swapInteger(reader.readInt());
-        if(boundBox == null){
-            reader.skip(HEAD_BOX_NUM * DOUBLE_LENGTH);
-        } else{
-            for(int i = 0;i < HEAD_BOX_NUM; ++i){
-                boundBox.set(i, EndianUtils.swapDouble(reader.readDouble()));
-            }
-        }
+        reader.skip(HEAD_BOX_NUM * DOUBLE_LENGTH);
     }
 
     /**

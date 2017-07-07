@@ -13,8 +13,6 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.VoidFunction;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.BoundBox;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShpFileParser;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.TypeUnknownException;
 import scala.Tuple2;
 
@@ -31,14 +29,10 @@ public class ShapefileRDD implements Serializable{
 
     public static GeometryFactory geometryFactory;
 
-    private BoundBox boundBox = null;
-
     /** field descriptor of  */
 
     public ShapefileRDD(JavaSparkContext sparkContext, String filePath){
         geometryFactory = new GeometryFactory();
-        boundBox = new BoundBox();
-        ShpFileParser.boundBox = boundBox;
         JavaPairRDD<ShapeKey, PrimitiveShape> shapePrimitiveRdd = sparkContext.newAPIHadoopFile(
                 filePath,
                 ShapeInputFormat.class,
@@ -115,7 +109,4 @@ public class ShapefileRDD implements Serializable{
         });
     }
 
-    public BoundBox getBoundBox() {
-        return boundBox;
-    }
 }
