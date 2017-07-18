@@ -13,6 +13,8 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.VoidFunction;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.BoundBox;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShpFileParser;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.TypeUnknownException;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.PrimitiveShape;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapeInputFormat;
@@ -38,6 +40,9 @@ public class ShapefileRDD implements Serializable{
     /** The geometry factory. */
     public static GeometryFactory geometryFactory;
 
+    /** bounding box */
+    private BoundBox boundBox = null;
+
     /**
      *  ShapefileRDD
      * @param sparkContext the spark context
@@ -45,6 +50,8 @@ public class ShapefileRDD implements Serializable{
      */
     public ShapefileRDD(JavaSparkContext sparkContext, String filePath){
         geometryFactory = new GeometryFactory();
+        boundBox = new BoundBox();
+        ShpFileParser.boundBox = boundBox;
         JavaPairRDD<ShapeKey, PrimitiveShape> shapePrimitiveRdd = sparkContext.newAPIHadoopFile(
                 filePath,
                 ShapeInputFormat.class,
@@ -191,4 +198,11 @@ public class ShapefileRDD implements Serializable{
         });
     }
 
+    public BoundBox getBoundBox(){
+        return boundBox;
+    }
+
+    public long count(){
+        return shapeRDD.count();
+    }
 }
