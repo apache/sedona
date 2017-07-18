@@ -6,6 +6,7 @@
  */
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
+import com.vividsolutions.jts.geom.GeometryFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
@@ -18,6 +19,8 @@ import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.FeatureSource;
+import org.geotools.data.shapefile.files.ShpFiles;
+import org.geotools.data.shapefile.shp.ShapefileReader;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.junit.*;
@@ -258,6 +261,34 @@ public class ShapefileRDDTest implements Serializable{
             Assert.assertEquals(featureIterator.next(), geometry.toText());
         }
         dataStore.dispose();
+    }
+
+    /**
+     * Test if parse the boundary in header correctly
+     * @throws IOException
+     */
+    @Test
+    public void testParseBoundary() throws IOException{
+        InputLocation = ShapefileRDDTest.class.getClassLoader().getResource("shapefiles/dbf").getPath();
+        // load shapefile with geotools's reader
+        ShpFiles shpFile = new ShpFiles(InputLocation + "/map.shp");
+        GeometryFactory geometryFactory = new GeometryFactory();
+        ShapefileReader gtlReader = new ShapefileReader(shpFile, false, true, geometryFactory);
+        String gtlbounds =
+                gtlReader.getHeader().minX() + ":" +
+                gtlReader.getHeader().minY() + ":" +
+                gtlReader.getHeader().maxX() + ":" +
+                gtlReader.getHeader().maxY();
+        // read shapefile by our reader
+        ShapefileRDD shapefileRDD = new ShapefileRDD(sc, InputLocation);
+        shapefileRDD.count();
+        String myBounds =
+                shapefileRDD.getBoundBox().getXMin() + ":" +
+                shapefileRDD.getBoundBox().getYMin() + ":" +
+                shapefileRDD.getBoundBox().getXMax() + ":" +
+                shapefileRDD.getBoundBox().getYMax();
+        Assert.assertEquals(gtlbounds, myBounds);
+        gtlReader.close();
     }
 
     @AfterClass
