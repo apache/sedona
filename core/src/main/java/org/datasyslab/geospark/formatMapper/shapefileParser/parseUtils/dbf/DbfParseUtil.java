@@ -135,7 +135,7 @@ public class DbfParseUtil implements ShapeFileConst {
             byte[] fldBytes = new byte[descriptor.getFieldLength()];
             inputStream.readFully(fldBytes);
             //System.out.println(descriptor.getFiledName() + "  " + new String(fldBytes));
-            byte[] attr = fastParse(fldBytes, 0, fldBytes.length).trim().getBytes();
+            byte[] attr = new String(fldBytes).trim().getBytes();
             attributes.append(delimiter, 0, 1);
             attributes.append(attr, 0, attr.length);
         }
