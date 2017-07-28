@@ -750,11 +750,12 @@ public abstract class VisualizationOperator implements Serializable{
 
 
     /**
-     * Stitch image partitions.
+     * Sets the max pixel count.
      *
+     * @param maxPixelCount the max pixel count
      * @return true, if successful
-     * @throws Exception the exception
      */
+    /*
     public boolean stitchImagePartitions() throws Exception
     {
         logger.info("[Babylon][stitchImagePartitions][Start]");
@@ -778,6 +779,7 @@ public abstract class VisualizationOperator implements Serializable{
         logger.info("[Babylon][stitchImagePartitions][Stop]");
         return true;
     }
+    */
 
     /**
      * Sets the max pixel count.

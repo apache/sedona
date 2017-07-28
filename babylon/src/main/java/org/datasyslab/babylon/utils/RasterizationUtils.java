@@ -460,6 +460,11 @@ public class RasterizationUtils implements Serializable{
 			result.addAll(FindPixelCoordinates(resolutionX,resolutionY,pixelCoordinate1,pixelCoordinate2,reverseSpatialCoordinate));
 		}
 		return result;
-		
+	}
+
+	public static String getImageTileName(int zoomLevel, int partitionOnX, int partitionOnY, int tileSerialId)
+	{
+		Tuple2<Integer,Integer> tileCoordinate = RasterizationUtils.Decode1DTo2DId(partitionOnX,partitionOnY,tileSerialId);
+		return zoomLevel+"-"+tileCoordinate._1()+"-"+tileCoordinate._2();
 	}
 }
