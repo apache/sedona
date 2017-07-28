@@ -12,6 +12,7 @@ import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShpRecord;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 
 public class ShpFileParser implements Serializable, ShapeFileConst{
 
@@ -69,6 +70,7 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
         // get length of record content
         int contentLength = reader.readInt();
         long recordLength = 16 * (contentLength + 4);
+        System.out.println(contentLength * 2 - INT_LENGTH + " =========================");
         remainLength -= recordLength;
         int typeID = EndianUtils.swapInteger(reader.readInt());
         byte[] contentArray = new byte[contentLength * 2 - INT_LENGTH];// exclude the 4 bytes we read for shape type
