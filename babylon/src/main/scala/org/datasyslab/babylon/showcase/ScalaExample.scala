@@ -20,15 +20,7 @@ import org.datasyslab.babylon.extension.visualizationEffect.ChoroplethMap
 import org.datasyslab.babylon.extension.visualizationEffect.HeatMap
 import org.datasyslab.babylon.extension.visualizationEffect.ScatterPlot
 import org.datasyslab.babylon.utils.{ColorizeOption, ImageType}
-import org.datasyslab.geospark.enums.FileDataSplitter
-import org.datasyslab.geospark.enums.GridType
-import org.datasyslab.geospark.enums.IndexType
-import org.datasyslab.geospark.spatialOperator.JoinQuery
-import org.datasyslab.geospark.spatialRDD.PointRDD
-import org.datasyslab.geospark.spatialRDD.PolygonRDD
-import org.datasyslab.geospark.spatialRDD.RectangleRDD
 import com.vividsolutions.jts.geom.Envelope
-import org.datasyslab.geospark.formatMapper.EarthdataHDFPointMapper
 
 
 /**

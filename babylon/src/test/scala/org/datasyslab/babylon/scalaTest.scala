@@ -1,4 +1,4 @@
-package org.datasyslab.geospark
+package org.datasyslab.babylon
 
 import java.awt.Color
 import java.io.FileInputStream
