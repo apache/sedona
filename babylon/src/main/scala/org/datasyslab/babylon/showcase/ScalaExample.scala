@@ -21,6 +21,10 @@ import org.datasyslab.babylon.extension.visualizationEffect.HeatMap
 import org.datasyslab.babylon.extension.visualizationEffect.ScatterPlot
 import org.datasyslab.babylon.utils.{ColorizeOption, ImageType}
 import com.vividsolutions.jts.geom.Envelope
+import org.datasyslab.geospark.enums.{FileDataSplitter, GridType, IndexType}
+import org.datasyslab.geospark.formatMapper.EarthdataHDFPointMapper
+import org.datasyslab.geospark.spatialOperator.JoinQuery
+import org.datasyslab.geospark.spatialRDD.{PointRDD, PolygonRDD, RectangleRDD}
 
 
 /**
