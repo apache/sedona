@@ -43,7 +43,10 @@ public class DataInputStreamReader extends ShapeReader {
      */
     @Override
     public int readInt() throws IOException {
-        return inputStream.readInt();
+        byte[] intbytes = new byte[ShapeFileConst.INT_LENGTH];
+        this.read(intbytes);
+
+        return ByteBuffer.wrap(intbytes).getInt();
     }
 
     /* (non-Javadoc)
@@ -51,7 +54,7 @@ public class DataInputStreamReader extends ShapeReader {
      */
     @Override
     public void read(byte[] bytes) throws IOException {
-        inputStream.read(bytes);
+        inputStream.readFully(bytes);
     }
 
     /* (non-Javadoc)
@@ -59,7 +62,7 @@ public class DataInputStreamReader extends ShapeReader {
      */
     @Override
     public void read(byte[] bytes, int offset, int len) throws IOException {
-        inputStream.read(bytes, offset, len);
+        inputStream.readFully(bytes, offset, len);
     }
 
     /* (non-Javadoc)

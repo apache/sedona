@@ -12,6 +12,7 @@ import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShpRecord;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 
 // TODO: Auto-generated Javadoc
 /**
