@@ -13,6 +13,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeType;
 
 import java.io.IOException;
 import java.util.List;
@@ -85,12 +86,16 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
     }
 
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        //only .shp mode
-        if(!hasDbf) return shapeFileReader.nextKeyValue();
-        // with dbf, check consistency first
+
         boolean hasNextShp = shapeFileReader.nextKeyValue();
-        hasNextDbf = dbfFileReader.nextKeyValue();
-        //some dbf records lost
+        if(hasDbf) hasNextDbf = dbfFileReader.nextKeyValue();
+        int curShapeType = shapeFileReader.getCurrentValue().getTypeID();
+        while(curShapeType == ShapeType.NULL.getId() || curShapeType == ShapeType.UNDEFINED.getId()){
+            hasNextShp = shapeFileReader.nextKeyValue();
+            if(hasDbf) hasNextDbf = dbfFileReader.nextKeyValue();
+            curShapeType = shapeFileReader.getCurrentValue().getTypeID();
+        }
+        // check if records match in .shp and .dbf
         if(hasNextShp && !hasNextDbf){
             Exception e = new Exception("shape record loses attributes in .dbf file at ID=" + shapeFileReader.getCurrentKey().getIndex());
             e.printStackTrace();

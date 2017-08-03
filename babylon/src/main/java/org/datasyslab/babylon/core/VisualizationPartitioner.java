@@ -173,7 +173,7 @@ public class VisualizationPartitioner extends Partitioner implements Serializabl
 		int partitionCoordinateY = coordinateY/partitionIntervalY;
 		int partitionId = -1;
 		try {
-			partitionId = RasterizationUtils.Encode2DTo1DId(partitionX,partitionY,partitionCoordinateX,partitionCoordinateY);
+			partitionId = RasterizationUtils.Encode2DTo1DId(partitionX,partitionY,partitionCoordinateX,partitionY-1-partitionCoordinateY);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			//e.printStackTrace();

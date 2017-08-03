@@ -15,21 +15,16 @@ import org.apache.log4j.Logger
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.storage.StorageLevel
-import org.datasyslab.babylon.core.RasterOverlayOperator
-import org.datasyslab.babylon.extension.imageGenerator.BabylonImageGenerator
+import org.datasyslab.babylon.core.{ImageGenerator, RasterOverlayOperator}
 import org.datasyslab.babylon.extension.visualizationEffect.ChoroplethMap
 import org.datasyslab.babylon.extension.visualizationEffect.HeatMap
 import org.datasyslab.babylon.extension.visualizationEffect.ScatterPlot
 import org.datasyslab.babylon.utils.{ColorizeOption, ImageType}
-import org.datasyslab.geospark.enums.FileDataSplitter
-import org.datasyslab.geospark.enums.GridType
-import org.datasyslab.geospark.enums.IndexType
-import org.datasyslab.geospark.spatialOperator.JoinQuery
-import org.datasyslab.geospark.spatialRDD.PointRDD
-import org.datasyslab.geospark.spatialRDD.PolygonRDD
-import org.datasyslab.geospark.spatialRDD.RectangleRDD
 import com.vividsolutions.jts.geom.Envelope
+import org.datasyslab.geospark.enums.{FileDataSplitter, GridType, IndexType}
 import org.datasyslab.geospark.formatMapper.EarthdataHDFPointMapper
+import org.datasyslab.geospark.spatialOperator.JoinQuery
+import org.datasyslab.geospark.spatialRDD.{PointRDD, PolygonRDD, RectangleRDD}
 
 
 /**
@@ -100,18 +95,18 @@ object ScalaExample extends App{
 		var visualizationOperator = new ScatterPlot(1000, 600, USMainLandBoundary, false)
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true)
 		visualizationOperator.Visualize(sparkContext, spatialRDD)
-		var imageGenerator = new BabylonImageGenerator
+		var imageGenerator = new ImageGenerator
 		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, outputPath, ImageType.PNG)
 		visualizationOperator = new ScatterPlot(1000, 600, USMainLandBoundary, false, -1, -1, false, true)
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true)
 		visualizationOperator.Visualize(sparkContext, spatialRDD)
-		imageGenerator = new BabylonImageGenerator
+		imageGenerator = new ImageGenerator
 		imageGenerator.SaveVectorImageAsLocalFile(visualizationOperator.vectorImage, outputPath, ImageType.SVG)
 		visualizationOperator = new ScatterPlot(1000, 600, USMainLandBoundary, false, -1, -1, true, true)
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true)
 		visualizationOperator.Visualize(sparkContext, spatialRDD)
-		imageGenerator = new BabylonImageGenerator
-		imageGenerator.SaveVectorImageAsSparkFile(visualizationOperator.distributedVectorImage, "file://" + outputPath + "-distributed", ImageType.SVG)
+		imageGenerator = new ImageGenerator
+		imageGenerator.SaveVectorImageAsLocalFile(visualizationOperator.distributedVectorImage, "file://" + outputPath + "-distributed", ImageType.SVG)
 		true
 	}
 
@@ -125,7 +120,7 @@ object ScalaExample extends App{
 		val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY)
 		val visualizationOperator = new HeatMap(1000, 600, USMainLandBoundary, false, 2)
 		visualizationOperator.Visualize(sparkContext, spatialRDD)
-		val imageGenerator = new BabylonImageGenerator
+		val imageGenerator = new ImageGenerator
 		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, outputPath, ImageType.PNG)
 		true
 	}
@@ -151,7 +146,7 @@ object ScalaExample extends App{
 		frontImage.Visualize(sparkContext, queryRDD)
 		val overlayOperator = new RasterOverlayOperator(visualizationOperator.rasterImage)
 		overlayOperator.JoinImage(frontImage.rasterImage)
-		val imageGenerator = new BabylonImageGenerator
+		val imageGenerator = new ImageGenerator
 		imageGenerator.SaveRasterImageAsLocalFile(overlayOperator.backRasterImage, outputPath, ImageType.PNG)
 		true
 	}
@@ -166,8 +161,8 @@ object ScalaExample extends App{
 		val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY)
 		val visualizationOperator = new HeatMap(1000, 600, USMainLandBoundary, false, 2, 4, 4, true, true)
 		visualizationOperator.Visualize(sparkContext, spatialRDD)
-		val imageGenerator = new BabylonImageGenerator
-		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.distributedRasterImage, outputPath, ImageType.PNG)
+		val imageGenerator = new ImageGenerator
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.distributedRasterImage, outputPath, ImageType.PNG,0,4,4)
 		true
 	}
 
@@ -181,8 +176,7 @@ object ScalaExample extends App{
 		val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY)
 		val visualizationOperator = new HeatMap(1000, 600, USMainLandBoundary, false, 2, 4, 4, true, true)
 		visualizationOperator.Visualize(sparkContext, spatialRDD)
-		visualizationOperator.stitchImagePartitions
-		val imageGenerator = new BabylonImageGenerator
+		val imageGenerator = new ImageGenerator
 		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, outputPath, ImageType.PNG)
 		true
 	}
@@ -194,7 +188,7 @@ object ScalaExample extends App{
 		val visualizationOperator = new ScatterPlot(1000, 600, spatialRDD.boundaryEnvelope, ColorizeOption.EARTHOBSERVATION, false, false)
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.BLUE, true)
 		visualizationOperator.Visualize(sparkContext, spatialRDD)
-		val imageGenerator = new BabylonImageGenerator
+		val imageGenerator = new ImageGenerator
 		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, outputPath, ImageType.PNG)
 		true
 	}

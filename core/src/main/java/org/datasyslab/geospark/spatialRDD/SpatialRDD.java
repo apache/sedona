@@ -98,7 +98,7 @@ public abstract class SpatialRDD implements Serializable{
 	 * @param targetEpsgCRSCode the target epsg CRS code
 	 * @return true, if successful
 	 */
-	protected boolean CRSTransform(String sourceEpsgCRSCode, String targetEpsgCRSCode)
+	public boolean CRSTransform(String sourceEpsgCRSCode, String targetEpsgCRSCode)
 	{
 		try {
     	CoordinateReferenceSystem sourceCRS = CRS.decode(sourceEpsgCRSCode);

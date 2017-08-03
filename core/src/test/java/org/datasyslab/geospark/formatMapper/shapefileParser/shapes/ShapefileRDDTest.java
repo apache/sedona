@@ -6,6 +6,7 @@
  */
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
+import com.vividsolutions.jts.geom.*;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
@@ -18,15 +19,14 @@ import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.FeatureSource;
+import org.geotools.data.shapefile.files.ShpFiles;
+import org.geotools.data.shapefile.shp.ShapefileReader;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.junit.*;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
-
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
 
 import java.io.File;
 import java.io.IOException;
@@ -254,10 +254,39 @@ public class ShapefileRDDTest implements Serializable{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		assert ((Polygon) spatialRDD.rawSpatialRDD.take(1).get(0)).getUserData().equals("20\t175\t00485050\t0500000US20175\t20175\tSeward\t06\t1655865960\t2777350");
         for (Geometry geometry : shapefileRDD.getShapeRDD().collect()) {
             Assert.assertEquals(featureIterator.next(), geometry.toText());
         }
         dataStore.dispose();
+    }
+
+    /**
+     * Test if parse the boundary in header correctly
+     * @throws IOException
+     */
+    @Test
+    public void testParseBoundary() throws IOException{
+        InputLocation = ShapefileRDDTest.class.getClassLoader().getResource("shapefiles/dbf").getPath();
+        // load shapefile with geotools's reader
+        ShpFiles shpFile = new ShpFiles(InputLocation + "/map.shp");
+        GeometryFactory geometryFactory = new GeometryFactory();
+        ShapefileReader gtlReader = new ShapefileReader(shpFile, false, true, geometryFactory);
+        String gtlbounds =
+                gtlReader.getHeader().minX() + ":" +
+                gtlReader.getHeader().minY() + ":" +
+                gtlReader.getHeader().maxX() + ":" +
+                gtlReader.getHeader().maxY();
+        // read shapefile by our reader
+        ShapefileRDD shapefileRDD = new ShapefileRDD(sc, InputLocation);
+        shapefileRDD.count();
+        String myBounds =
+                shapefileRDD.getBoundBox().getXMin() + ":" +
+                shapefileRDD.getBoundBox().getYMin() + ":" +
+                shapefileRDD.getBoundBox().getXMax() + ":" +
+                shapefileRDD.getBoundBox().getYMax();
+        Assert.assertEquals(gtlbounds, myBounds);
+        gtlReader.close();
     }
 
     @AfterClass

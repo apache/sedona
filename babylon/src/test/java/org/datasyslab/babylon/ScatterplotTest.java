@@ -15,7 +15,8 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
-import org.datasyslab.babylon.extension.imageGenerator.BabylonImageGenerator;
+import org.datasyslab.babylon.core.ImageGenerator;
+import org.datasyslab.babylon.core.ImageStitcher;
 import org.datasyslab.babylon.extension.visualizationEffect.ScatterPlot;
 import org.datasyslab.babylon.utils.ColorizeOption;
 import org.datasyslab.babylon.utils.ImageType;
@@ -195,13 +196,13 @@ public class ScatterplotTest {
 		ScatterPlot visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary,false);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+		ImageGenerator imageGenerator = new  ImageGenerator();
 		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/scatterplot/PointRDD",ImageType.PNG);
 		
 		visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary,false,true);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		imageGenerator = new  BabylonImageGenerator();
+		imageGenerator = new  ImageGenerator();
 		imageGenerator.SaveVectorImageAsLocalFile(visualizationOperator.vectorImage, "./target/scatterplot/PointRDD",ImageType.SVG);
 	}
 
@@ -217,10 +218,10 @@ public class ScatterplotTest {
 				false, 4, 4, true, false);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		visualizationOperator.stitchImagePartitions();
-		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
-		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/scatterplot/PointRDD-parallelrender",ImageType.PNG);
-		//imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.distributedRasterImage, "./target/scatterplot/PointRDD-parallelrender",ImageType.PNG);
+
+		ImageGenerator imageGenerator = new ImageGenerator();
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.distributedRasterImage, "./target/heatmap/PointRDD-parallelrender",ImageType.PNG, 0, 4, 4);
+		ImageStitcher.stitchImagePartitionsFromLocalFile("./target/scatterplot/PointRDD-parallelrender", 1000, 600,0,4,4);
 	}
 	
 	/**
@@ -234,17 +235,17 @@ public class ScatterplotTest {
 		ScatterPlot visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary,false,2,2,true,false);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+		ImageGenerator imageGenerator = new  ImageGenerator();
 		
         String scatterPlotOutputPath = System.getProperty("user.dir") + "/target/scatterplot/";
 
-		imageGenerator.SaveRasterImageAsSparkFile(visualizationOperator.distributedRasterImage, scatterPlotOutputPath+"PointRDD-parallel-raster",ImageType.PNG);
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.distributedRasterImage, scatterPlotOutputPath+"PointRDD-parallel-raster",ImageType.PNG);
 		
 		visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary,false,-1,-1,true,true);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		imageGenerator = new  BabylonImageGenerator();
-		imageGenerator.SaveVectorImageAsSparkFile(visualizationOperator.distributedVectorImage, scatterPlotOutputPath+"PointRDD-parallel-vector",ImageType.SVG);
+		imageGenerator = new  ImageGenerator();
+		imageGenerator.SaveVectorImageAsLocalFile(visualizationOperator.distributedVectorImage, scatterPlotOutputPath+"PointRDD-parallel-vector",ImageType.SVG);
 	}
 	
 	/**
@@ -258,13 +259,13 @@ public class ScatterplotTest {
 		ScatterPlot visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary,false);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.RED, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+		ImageGenerator imageGenerator = new  ImageGenerator();
 		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/scatterplot/RectangleRDD",ImageType.GIF);
 		
 		visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary,false,true);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.RED, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		imageGenerator = new  BabylonImageGenerator();
+		imageGenerator = new  ImageGenerator();
 		imageGenerator.SaveVectorImageAsLocalFile(visualizationOperator.vectorImage, "./target/scatterplot/RectangleRDD",ImageType.SVG);	
 	}
 	
@@ -280,13 +281,13 @@ public class ScatterplotTest {
 		ScatterPlot visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary,false);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+		ImageGenerator imageGenerator = new  ImageGenerator();
 		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/scatterplot/PolygonRDD",ImageType.GIF);
 		
 		visualizationOperator = new ScatterPlot(1000,600,USMainLandBoundary,false,true);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		imageGenerator = new  BabylonImageGenerator();
+		imageGenerator = new  ImageGenerator();
 		imageGenerator.SaveVectorImageAsLocalFile(visualizationOperator.vectorImage, "./target/scatterplot/PolygonRDD",ImageType.SVG);
 	}
 	
@@ -304,13 +305,13 @@ public class ScatterplotTest {
 		ScatterPlot visualizationOperator = new ScatterPlot(resolutionX,resolutionY,USMainLandBoundary,false);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
+		ImageGenerator imageGenerator = new  ImageGenerator();
 		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/scatterplot/LineStringRDD",ImageType.GIF);
 		
 		visualizationOperator = new ScatterPlot(resolutionX,resolutionY,USMainLandBoundary,false,true);
 		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		imageGenerator = new  BabylonImageGenerator();
+		imageGenerator = new  ImageGenerator();
 		imageGenerator.SaveVectorImageAsLocalFile(visualizationOperator.vectorImage, "./target/scatterplot/LineStringRDD",ImageType.SVG);
 	}
 }

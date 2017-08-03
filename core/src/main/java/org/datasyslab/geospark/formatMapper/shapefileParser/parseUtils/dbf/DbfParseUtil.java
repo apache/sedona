@@ -131,13 +131,38 @@ public class DbfParseUtil implements ShapeFileConst {
     {
         byte[] delimiter = {'\t'};
         Text attributes = new Text();
-        for(FieldDescriptor descriptor : fieldDescriptors){
+        for(int i = 0;i < fieldDescriptors.size(); ++i){
+            FieldDescriptor descriptor = fieldDescriptors.get(i);
             byte[] fldBytes = new byte[descriptor.getFieldLength()];
             inputStream.readFully(fldBytes);
-            attributes.append(fldBytes,0,fldBytes.length);
-            attributes.append(delimiter,0,1);
+            //System.out.println(descriptor.getFiledName() + "  " + new String(fldBytes));
+            byte[] attr = new String(fldBytes).trim().getBytes();
+            if(i > 0) attributes.append(delimiter, 0, 1);// first attribute doesn't append '\t'
+            attributes.append(attr, 0, attr.length);
         }
+        String attrs = attributes.toString();
         return attributes.toString();
+
+    }
+
+    /**
+     * Copied from org.geotools.data.shapefile.dbf.fastParse
+     * Performs a faster byte[] to String conversion under the assumption the content
+     * is represented with one byte per char
+     * @param bytes
+     * @param fieldOffset
+     * @param fieldLen
+     * @return
+     */
+    private static String fastParse(final byte[] bytes, final int fieldOffset, final int fieldLen) {
+        // faster reading path, the decoder is for some reason slower,
+        // probably because it has to make extra checks to support multibyte chars
+        final char[] chars = new char[fieldLen];
+        for (int i = 0; i < fieldLen; i++) {
+            // force the byte to a positive integer interpretation before casting to char
+            chars[i] = ((char) (0x00FF & bytes[fieldOffset+i]));
+        }
+        return new String(chars);
     }
 
 

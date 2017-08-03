@@ -17,6 +17,8 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
+import org.datasyslab.babylon.core.ImageGenerator;
+import org.datasyslab.babylon.core.ImageStitcher;
 import org.datasyslab.babylon.core.RasterOverlayOperator;
 import org.datasyslab.babylon.extension.imageGenerator.BabylonImageGenerator;
 import org.datasyslab.babylon.extension.visualizationEffect.ChoroplethMap;
@@ -152,7 +154,7 @@ public class Example {
 			visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
 			imageGenerator = new BabylonImageGenerator();
-			imageGenerator.SaveVectorImageAsSparkFile(visualizationOperator.distributedVectorImage, "file://"+outputPath+"-distributed",ImageType.SVG);
+			imageGenerator.SaveVectorImageAsLocalFile(visualizationOperator.distributedVectorImage, "file://"+outputPath+"-distributed",ImageType.SVG);
 		}
 		catch(Exception e)
 		{
@@ -259,9 +261,9 @@ public class Example {
 			RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY());
 			HeatMap visualizationOperator = new HeatMap(1000,600,USMainLandBoundary,false,2,4,4,true,true);
 			visualizationOperator.Visualize(sparkContext, spatialRDD);
-			visualizationOperator.stitchImagePartitions();
-			BabylonImageGenerator imageGenerator = new BabylonImageGenerator();
-			imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, outputPath,ImageType.PNG);
+			ImageGenerator imageGenerator = new ImageGenerator();
+			imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.distributedRasterImage, outputPath,ImageType.PNG, 0, 4, 4);
+			ImageStitcher.stitchImagePartitionsFromLocalFile(outputPath, 1000, 600,0,4,4);
 		}
 		catch(Exception e)
 		{

@@ -58,4 +58,14 @@ public class ImageSerializableWrapper implements Serializable {
     	System.out.println("I got nothing from the stream!");
     }
   }
+
+  /**
+   * Gets the image.
+   *
+   * @return the image
+   */
+  public BufferedImage getImage()
+  {
+    return this.image;
+  }
 }

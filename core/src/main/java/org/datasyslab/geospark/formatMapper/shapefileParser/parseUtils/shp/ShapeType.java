@@ -11,30 +11,47 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 
 import java.io.Serializable;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class ShapeType.
+ */
 public class ShapeType implements Serializable{
 
+    /** The id. */
     protected final int id;
 
+    /** The Constant UNDEFINED. */
     public static final ShapeType UNDEFINED = new ShapeType(0);
 
+    /** The Constant NULL. */
     public static final ShapeType NULL = new ShapeType(0);
 
+    /** The Constant POINT. */
     public static final ShapeType POINT = new ShapeType(1);
 
+    /** The Constant POLYLINE. */
     public static final ShapeType POLYLINE = new ShapeType(3);
 
+    /** The Constant POLYGON. */
     public static final ShapeType POLYGON = new ShapeType(5);
 
+    /** The Constant MULTIPOINT. */
     public static final ShapeType MULTIPOINT = new ShapeType(8);
 
+    /**
+     * Instantiates a new shape type.
+     *
+     * @param i the i
+     */
     protected ShapeType(int i){
         id = i;
     }
 
     /**
-     * return the corresponding ShapeType instance by int id
-     * @param idx
-     * @return
+     * return the corresponding ShapeType instance by int id.
+     *
+     * @param idx the idx
+     * @return the type
      */
     public static ShapeType getType(int idx){
         ShapeType type;
@@ -61,9 +78,10 @@ public class ShapeType implements Serializable{
     }
 
     /**
-     * generate a parser according to current shape type
-     * @param geometryFactory
-     * @return
+     * generate a parser according to current shape type.
+     *
+     * @param geometryFactory the geometry factory
+     * @return the parser
      */
     public ShapeParser getParser(GeometryFactory geometryFactory){
         ShapeParser parser = null;
@@ -87,8 +105,9 @@ public class ShapeType implements Serializable{
     }
 
     /**
-     * return the shape type id
-     * @return
+     * return the shape type id.
+     *
+     * @return the id
      */
     public int getId() {
         return id;
