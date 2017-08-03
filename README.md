@@ -82,11 +82,15 @@ Babylon is a large-scale in-memory geospatial visualization system.
 
 Babylon provides native support for general cartographic design by extending GeoSpark to process large-scale spatial data. It can visulize Spatial RDD and Spatial Queries and render super high resolution image in parallel.
 
-Babylon and GeoSpark are integrated together. You just need to import GeoSpark and enjoy them! More details are available here: [Babylon GeoSpatial Visualization](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon) 
+More details are available here: [Babylon GeoSpatial Visualization](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon) 
 
 ## Babylon Gallery
 <img style="float: left;" src="http://www.public.asu.edu/~jiayu2/geospark/picture/usrail.png" width="250">
-<img style="float: left;" src="http://www.public.asu.edu/~jiayu2/geospark/picture/nycheatmap.png" width="250">
+
+[Watch High Resolution on a real map](http://www.public.asu.edu/~jiayu2/geospark/picture/overlay.html)
+
+<img src="http://www.public.asu.edu/~jiayu2/geospark/picture/heatmapnycsmall.png" width="500">
+
 <img src="http://www.public.asu.edu/~jiayu2/geospark/picture/ustweet.png" width="250">
 
 # Publication

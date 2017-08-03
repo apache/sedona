@@ -32,8 +32,9 @@
 <img src="http://www.public.asu.edu/~jiayu2/geospark/picture/usrail.png" width="500">
 
 ### Heat Map: New York City Taxi Trips (with a given map background)
-<img src="http://www.public.asu.edu/~jiayu2/geospark/picture/nycheatmap.png" width="500">
+[Watch High Resolution on a real map](http://www.public.asu.edu/~jiayu2/geospark/picture/overlay.html)
 
+<img src="http://www.public.asu.edu/~jiayu2/geospark/picture/heatmapnycsmall.png" width="500">
 ### Choropleth Map + Overlay Operator: USA mainland tweets per USA county (Spatial Join Query)
 <img src="http://www.public.asu.edu/~jiayu2/geospark/picture/ustweet.png" width="500">
 
