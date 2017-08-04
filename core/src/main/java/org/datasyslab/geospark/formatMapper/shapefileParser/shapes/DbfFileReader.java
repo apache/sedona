@@ -10,6 +10,7 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
@@ -17,13 +18,13 @@ import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.DbfPa
 
 import java.io.IOException;
 
-public class DbfFileReader extends org.apache.hadoop.mapreduce.RecordReader<ShapeKey, BytesWritable> {
+public class DbfFileReader extends org.apache.hadoop.mapreduce.RecordReader<ShapeKey, String> {
 
     /** inputstream of .dbf file */
     private FSDataInputStream inputStream = null;
 
     /** primitive bytes array of one row */
-    private BytesWritable value = null;
+    private String value = null;
 
     /** key value of current row */
     private ShapeKey key = null;
@@ -45,13 +46,13 @@ public class DbfFileReader extends org.apache.hadoop.mapreduce.RecordReader<Shap
 
     public boolean nextKeyValue() throws IOException, InterruptedException {
         // first check deleted flag
-        byte[] curbytes = dbfParser.parsePrimitiveRecord(inputStream);
+        String curbytes = dbfParser.parsePrimitiveRecord(inputStream);
         if(curbytes == null){
             value = null;
             return false;
         }
         else{
-            value = new BytesWritable(curbytes);
+            value = new String(curbytes);
             key = new ShapeKey();
             key.setIndex(id++);
             return true;
@@ -62,7 +63,7 @@ public class DbfFileReader extends org.apache.hadoop.mapreduce.RecordReader<Shap
         return key;
     }
 
-    public BytesWritable getCurrentValue() throws IOException, InterruptedException {
+    public String getCurrentValue() throws IOException, InterruptedException {
         return value;
     }
 
