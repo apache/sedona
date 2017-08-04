@@ -198,11 +198,20 @@ public class ShapefileRDD implements Serializable{
         });
     }
 
+    /**
+     * get bound box for shapes this rdd have
+     * @return
+     */
     public BoundBox getBoundBox(){
         return boundBox;
     }
 
+    /**
+     * get count of shapeRDD
+     * @return
+     */
     public long count(){
         return shapeRDD.count();
     }
+
 }
