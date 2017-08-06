@@ -12,8 +12,10 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.VoidFunction;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.BoundBox;
+import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundBox;
+import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundaryInputFormat;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShpFileParser;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.TypeUnknownException;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.PrimitiveShape;
@@ -45,22 +47,28 @@ public class ShapefileRDD implements Serializable{
 
     /**
      *  ShapefileRDD
-     * @param sparkContext the spark context
+     * @param sc the spark context
      * @param filePath the file path
      */
-    public ShapefileRDD(JavaSparkContext sparkContext, String filePath){
+    public ShapefileRDD(JavaSparkContext sc, String filePath){
         geometryFactory = new GeometryFactory();
         boundBox = new BoundBox();
-        ShpFileParser.boundBox = boundBox;
-        JavaPairRDD<ShapeKey, PrimitiveShape> shapePrimitiveRdd = sparkContext.newAPIHadoopFile(
+        JavaPairRDD<ShapeKey, PrimitiveShape> shapePrimitiveRdd = sc.newAPIHadoopFile(
                 filePath,
                 ShapeInputFormat.class,
                 ShapeKey.class,
                 PrimitiveShape.class,
-                sparkContext.hadoopConfiguration()
+                sc.hadoopConfiguration()
         );
         shapeRDD = shapePrimitiveRdd.map(PrimitiveToShape);
     }
+
+    public ShapefileRDD(JavaSparkContext sc, String filePath, boolean solveBoundary){
+        this(sc, filePath);
+        if(solveBoundary) calculateBoundBox(sc, filePath);
+    }
+
+
 
     /** The Constant PrimitiveToShape. */
     private static final Function<Tuple2<ShapeKey, PrimitiveShape>, Geometry> PrimitiveToShape
@@ -80,6 +88,34 @@ public class ShapefileRDD implements Serializable{
 
         }
     };
+
+    /**
+     * read and merge bound boxes of all shapefiles user input, if there is no, leave BoundBox null;
+     * @param sc
+     * @param inputLocation
+     */
+    private void calculateBoundBox(JavaSparkContext sc, String inputLocation){
+        // read bound boxes into memory
+        JavaPairRDD<Long, BoundBox>  bounds = sc.newAPIHadoopFile(
+                inputLocation,
+                BoundaryInputFormat.class,
+                Long.class,
+                BoundBox.class,
+                sc.hadoopConfiguration()
+        );
+        // merge all into one
+        bounds = bounds.reduceByKey(new Function2<BoundBox, BoundBox, BoundBox>() {
+            @Override
+            public BoundBox call(BoundBox box1, BoundBox box2) throws Exception {
+                return BoundBox.mergeBoundBox(box1, box2);
+            }
+        });
+
+        // if there is a result assign it to variable : boundBox
+        if(bounds.count() > 0){
+            boundBox = new BoundBox(bounds.collect().get(0)._2());
+        }
+    }
 
     /** The Print shape. */
     private final VoidFunction<Geometry> PrintShape = new VoidFunction<Geometry>() {

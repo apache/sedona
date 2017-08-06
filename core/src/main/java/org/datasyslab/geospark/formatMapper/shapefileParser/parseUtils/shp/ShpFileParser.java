@@ -7,12 +7,12 @@
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
 import org.apache.commons.io.EndianUtils;
+import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundBox;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShpRecord;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.ByteBuffer;
 
 public class ShpFileParser implements Serializable, ShapeFileConst{
 
@@ -27,9 +27,6 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
 
     /** input reader */
     ShapeReader reader = null;
-
-    /** current boundbox  */
-    public static BoundBox boundBox = null;
 
     /**
      * create a new shape file parser with a input source that is instance of DataInputStream
@@ -53,12 +50,7 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
         int fileVersion = EndianUtils.swapInteger(reader.readInt());
         currentTokenType = EndianUtils.swapInteger(reader.readInt());
         // if bound box is not referenced, skip it
-        if(boundBox == null) reader.skip(HEAD_BOX_NUM * DOUBLE_LENGTH);
-        else{// else assign value
-            for(int i = 0;i < HEAD_BOX_NUM; ++i){
-                boundBox.set(i, EndianUtils.swapDouble(reader.readDouble()));
-            }
-        }
+        reader.skip(HEAD_BOX_NUM * DOUBLE_LENGTH);
     }
 
     /**
