@@ -27,8 +27,6 @@ public class BoundBox implements Serializable{
         this.bounds = otherbox.copyBounds();
     }
 
-
-
     /**
      * construct a initial boundBox with all value 0
      */
@@ -37,7 +35,7 @@ public class BoundBox implements Serializable{
     }
 
     /**
-     * set value at i with value
+     * set tuple at i with value
      * @param i
      * @param value
      */
@@ -45,74 +43,18 @@ public class BoundBox implements Serializable{
         bounds[i] = value;
     }
 
-    public void setXMin(double value){
-        bounds[0] = value;
-    }
-
-    public void setYMin(double value){
-        bounds[0] = value;
-    }
-
-    public void setXMax(double value){
-        bounds[0] = value;
-    }
-
-    public void setYMax(double value){
-        bounds[0] = value;
-    }
-
-    public void setZMin(double value){
-        bounds[0] = value;
-    }
-
-    public void setZMax(double value){
-        bounds[0] = value;
-    }
-
-    public void setMMin(double value){
-        bounds[0] = value;
-    }
-
-    public void setMMax(double value){
-        bounds[0] = value;
-    }
-
-    public double getXMin(){
-        return bounds[0];
-    }
-
-    public double getXMax(){
-        return bounds[2];
-    }
-
-    public double getYMin(){
-        return bounds[1];
-    }
-
-    public double getYMax(){
-        return bounds[3];
-    }
-
-    public double getZMin(){
-        return bounds[4];
-    }
-
-    public double getZMax(){
-        return bounds[5];
-    }
-
-    public double getMMin(){
-        return bounds[6];
-    }
-
-    public double getMMax(){
-        return bounds[7];
-    }
-
+    /**
+     * return a copy of bounds
+     * @return
+     */
     public double[] copyBounds(){
         return Arrays.copyOf(bounds, bounds.length);
     }
 
+    /**
+     * convert bounds array to string
+     * @return
+     */
     @Override
     public String toString() {
         StringBuilder strBuilder = new StringBuilder();
@@ -122,6 +64,92 @@ public class BoundBox implements Serializable{
         return strBuilder.toString();
     }
 
+    /** set min X */
+    public void setXMin(double value){
+        bounds[0] = value;
+    }
+
+    /** set min Y */
+    public void setYMin(double value){
+        bounds[0] = value;
+    }
+
+    /** set max X */
+    public void setXMax(double value){
+        bounds[0] = value;
+    }
+
+    /** set max Y */
+    public void setYMax(double value){
+        bounds[0] = value;
+    }
+
+    /** set min Z */
+    public void setZMin(double value){
+        bounds[0] = value;
+    }
+
+    /** set max Z */
+    public void setZMax(double value){
+        bounds[0] = value;
+    }
+
+    /** set min M */
+    public void setMMin(double value){
+        bounds[0] = value;
+    }
+
+    /** set max M */
+    public void setMMax(double value){
+        bounds[0] = value;
+    }
+
+    /**get min X */
+    public double getXMin(){
+        return bounds[0];
+    }
+
+    /**get max X */
+    public double getXMax(){
+        return bounds[2];
+    }
+
+    /**get min Y */
+    public double getYMin(){
+        return bounds[1];
+    }
+
+    /**get max Y */
+    public double getYMax(){
+        return bounds[3];
+    }
+
+    /**get min Z */
+    public double getZMin(){
+        return bounds[4];
+    }
+
+    /**get max Z */
+    public double getZMax(){
+        return bounds[5];
+    }
+
+    /**get min M */
+    public double getMMin(){
+        return bounds[6];
+    }
+
+    /**get max M */
+    public double getMMax(){
+        return bounds[7];
+    }
+
+    /**
+     * calculate the union of two bound box
+     * @param box1
+     * @param box2
+     * @return
+     */
     public static BoundBox mergeBoundBox(BoundBox box1, BoundBox box2){
         BoundBox box = new BoundBox();
         // merge X
