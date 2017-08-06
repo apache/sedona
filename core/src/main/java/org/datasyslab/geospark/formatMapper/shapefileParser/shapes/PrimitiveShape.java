@@ -22,10 +22,10 @@ import java.util.List;
 
 public class PrimitiveShape implements Serializable{
 
-    /** primitive bytes of one record */
+    /** primitive bytes of one record copied from .shp file */
     private BytesWritable primitiveRecord = null;
 
-    /** primitive bytes from one record */
+    /** attributes of record extracted from .dbf file */
     private String attributes = null;
 
     /** shape type */

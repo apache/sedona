@@ -72,6 +72,6 @@ public class DbfFileReader extends org.apache.hadoop.mapreduce.RecordReader<Shap
     }
 
     public void close() throws IOException {
-
+        inputStream.close();
     }
 }

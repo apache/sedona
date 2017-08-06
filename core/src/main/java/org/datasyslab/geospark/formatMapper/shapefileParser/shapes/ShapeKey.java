@@ -15,6 +15,7 @@ import java.io.IOException;
 
 public class ShapeKey implements Writable{
 
+    /** record id */
     LongWritable index = new LongWritable();
 
     public void write(DataOutput dataOutput) throws IOException {

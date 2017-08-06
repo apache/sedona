@@ -24,6 +24,12 @@ public class ShapeInputFormat extends CombineFileInputFormat<ShapeKey, Primitive
         return new CombineShapeReader();
     }
 
+    /**
+     * enforce isSplitable() to return false so that every getSplits() only return one InputSplit
+     * @param context
+     * @param file
+     * @return
+     */
     @Override
     protected boolean isSplitable(JobContext context, Path file) {
         return false;
@@ -31,6 +37,7 @@ public class ShapeInputFormat extends CombineFileInputFormat<ShapeKey, Primitive
 
     @Override
     public List<InputSplit> getSplits(JobContext job) throws IOException {
+        // get input paths and assign a split for every single path
         String path = job.getConfiguration().get("mapred.input.dir");
         String[] paths = path.split(",");
         List<InputSplit> splits = new ArrayList<>();
