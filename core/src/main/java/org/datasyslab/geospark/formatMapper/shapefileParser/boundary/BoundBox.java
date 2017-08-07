@@ -71,37 +71,37 @@ public class BoundBox implements Serializable{
 
     /** set min Y */
     public void setYMin(double value){
-        bounds[0] = value;
+        bounds[1] = value;
     }
 
     /** set max X */
     public void setXMax(double value){
-        bounds[0] = value;
+        bounds[2] = value;
     }
 
     /** set max Y */
     public void setYMax(double value){
-        bounds[0] = value;
+        bounds[3] = value;
     }
 
     /** set min Z */
     public void setZMin(double value){
-        bounds[0] = value;
+        bounds[4] = value;
     }
 
     /** set max Z */
     public void setZMax(double value){
-        bounds[0] = value;
+        bounds[5] = value;
     }
 
     /** set min M */
     public void setMMin(double value){
-        bounds[0] = value;
+        bounds[6] = value;
     }
 
     /** set max M */
     public void setMMax(double value){
-        bounds[0] = value;
+        bounds[7] = value;
     }
 
     /**get min X */
@@ -164,7 +164,6 @@ public class BoundBox implements Serializable{
         // merge M
         box.setMMin(Math.min(box1.getMMin(), box2.getMMin()));
         box.setMMax(Math.max(box1.getMMax(), box2.getMMax()));
-
         return box;
     }
 }

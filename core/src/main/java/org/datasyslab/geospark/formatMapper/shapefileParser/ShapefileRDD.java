@@ -16,7 +16,6 @@ import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.VoidFunction;
 import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundBox;
 import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundaryInputFormat;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShpFileParser;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.TypeUnknownException;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.PrimitiveShape;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapeInputFormat;
@@ -63,11 +62,6 @@ public class ShapefileRDD implements Serializable{
         shapeRDD = shapePrimitiveRdd.map(PrimitiveToShape);
     }
 
-    public ShapefileRDD(JavaSparkContext sc, String filePath, boolean solveBoundary){
-        this(sc, filePath);
-        if(solveBoundary) calculateBoundBox(sc, filePath);
-    }
-
 
 
     /** The Constant PrimitiveToShape. */
@@ -94,7 +88,7 @@ public class ShapefileRDD implements Serializable{
      * @param sc
      * @param inputLocation
      */
-    private void calculateBoundBox(JavaSparkContext sc, String inputLocation){
+    public static BoundBox calculateBoundBox(JavaSparkContext sc, String inputLocation){
         // read bound boxes into memory
         JavaPairRDD<Long, BoundBox>  bounds = sc.newAPIHadoopFile(
                 inputLocation,
@@ -113,8 +107,8 @@ public class ShapefileRDD implements Serializable{
 
         // if there is a result assign it to variable : boundBox
         if(bounds.count() > 0){
-            boundBox = new BoundBox(bounds.collect().get(0)._2());
-        }
+            return new BoundBox(bounds.collect().get(0)._2());
+        }else return null;
     }
 
     /** The Print shape. */
@@ -240,6 +234,14 @@ public class ShapefileRDD implements Serializable{
      */
     public BoundBox getBoundBox(){
         return boundBox;
+    }
+
+    /**
+     * set bound box of current shapefilerdd
+     * @param boundBox
+     */
+    public void setBoundBox(BoundBox boundBox) {
+        this.boundBox = boundBox;
     }
 
     /**
