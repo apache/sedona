@@ -34,33 +34,70 @@ import java.util.List;
  */
 public class ShapefileRDD implements Serializable{
 
+    /** */
+    private JavaSparkContext sc = null;
 
     /**  shape collection. */
     private JavaRDD<Geometry> shapeRDD = null;
 
     /** The geometry factory. */
-    public static GeometryFactory geometryFactory;
+    public static GeometryFactory geometryFactory = new GeometryFactory();
 
-    /** bounding box */
-    private BoundBox boundBox = null;
+    /** input path */
+    private String inputPath = null;
+
 
     /**
-     *  ShapefileRDD
-     * @param sc the spark context
-     * @param filePath the file path
+     * construct shapefileRDD with default geometryFactory
+     * @param sc
+     * @param filePath
      */
     public ShapefileRDD(JavaSparkContext sc, String filePath){
-        geometryFactory = new GeometryFactory();
-        boundBox = new BoundBox();
+        initialize(sc, filePath, new GeometryFactory());
+    }
+
+    /**
+     * Constructor with customized GeometryFactory
+     * @param sc
+     * @param filePath
+     * @param geometryFactory
+     */
+    public ShapefileRDD(JavaSparkContext sc, String filePath, GeometryFactory geometryFactory){
+        initialize(sc, filePath, geometryFactory);
+    }
+
+    /**
+     * initialize all parameters
+     * @param sc
+     * @param filePath
+     * @param geometryFactory
+     */
+    public void initialize(JavaSparkContext sc, String filePath, GeometryFactory geometryFactory){
+        this.sc = sc;
+        this.inputPath = filePath;
+        ShapefileRDD.geometryFactory = geometryFactory;
+    }
+
+
+
+    /**
+     * generate shapeRDD with given
+     *
+     * @return the shape RDD
+     */
+    public JavaRDD<Geometry> getShapeRDD()
+    {
         JavaPairRDD<ShapeKey, PrimitiveShape> shapePrimitiveRdd = sc.newAPIHadoopFile(
-                filePath,
+                inputPath,
                 ShapeInputFormat.class,
                 ShapeKey.class,
                 PrimitiveShape.class,
                 sc.hadoopConfiguration()
         );
-        shapeRDD = shapePrimitiveRdd.map(PrimitiveToShape);
+        JavaRDD<Geometry> geometries = shapePrimitiveRdd.map(PrimitiveToShape);
+        return geometries;
     }
+
 
 
 
@@ -71,7 +108,7 @@ public class ShapefileRDD implements Serializable{
             Geometry shape = null;
             // parse bytes to shape
             try{
-                shape = primitiveTuple._2().getShape(geometryFactory);
+                shape = primitiveTuple._2().getShape(ShapefileRDD.geometryFactory);
             }catch (TypeUnknownException e){
                 e.printStackTrace();
             }catch (IOException e){
@@ -79,55 +116,38 @@ public class ShapefileRDD implements Serializable{
             }finally {
                 return shape;
             }
-
         }
     };
 
     /**
      * read and merge bound boxes of all shapefiles user input, if there is no, leave BoundBox null;
-     * @param sc
-     * @param inputLocation
      */
-    public static BoundBox calculateBoundBox(JavaSparkContext sc, String inputLocation){
+    public BoundBox getBoundBox(){
         // read bound boxes into memory
         JavaPairRDD<Long, BoundBox>  bounds = sc.newAPIHadoopFile(
-                inputLocation,
+                inputPath,
                 BoundaryInputFormat.class,
                 Long.class,
                 BoundBox.class,
                 sc.hadoopConfiguration()
         );
         // merge all into one
-        bounds = bounds.reduceByKey(new Function2<BoundBox, BoundBox, BoundBox>() {
-            @Override
-            public BoundBox call(BoundBox box1, BoundBox box2) throws Exception {
-                return BoundBox.mergeBoundBox(box1, box2);
-            }
-        });
-
+        bounds = bounds.reduceByKey(reduceBoundBoxes);
         // if there is a result assign it to variable : boundBox
         if(bounds.count() > 0){
             return new BoundBox(bounds.collect().get(0)._2());
         }else return null;
     }
 
-    /** The Print shape. */
-    private final VoidFunction<Geometry> PrintShape = new VoidFunction<Geometry>() {
-        public void call(Geometry shape) throws Exception {
-            System.out.println(shape.toText());
+    /**
+     * function for merging multiple Bound boxes
+     */
+    private static final Function2<BoundBox, BoundBox, BoundBox> reduceBoundBoxes = new Function2<BoundBox, BoundBox, BoundBox>(){
+        @Override
+        public BoundBox call(BoundBox box1, BoundBox box2) throws Exception {
+            return BoundBox.mergeBoundBox(box1, box2);
         }
     };
-
-
-    /**
-     * Gets the shape RDD.
-     *
-     * @return the shape RDD
-     */
-    public JavaRDD<Geometry> getShapeRDD()
-    {
-        return this.shapeRDD;
-    }
 
     /**
      * Gets the point RDD.
@@ -226,22 +246,6 @@ public class ShapefileRDD implements Serializable{
             }
 
         });
-    }
-
-    /**
-     * get bound box for shapes this rdd have
-     * @return
-     */
-    public BoundBox getBoundBox(){
-        return boundBox;
-    }
-
-    /**
-     * set bound box of current shapefilerdd
-     * @param boundBox
-     */
-    public void setBoundBox(BoundBox boundBox) {
-        this.boundBox = boundBox;
     }
 
     /**

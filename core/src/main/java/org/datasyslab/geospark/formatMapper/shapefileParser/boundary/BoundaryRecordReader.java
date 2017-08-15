@@ -28,7 +28,7 @@ public class BoundaryRecordReader extends RecordReader<Long, BoundBox>{
     Configuration configuration = null;
 
     /** index of current file to be read */
-    int id = 0;
+    int id = -1;
 
 
     @Override
@@ -36,7 +36,7 @@ public class BoundaryRecordReader extends RecordReader<Long, BoundBox>{
         CombineFileSplit split = (CombineFileSplit)inputSplit;
         paths = split.getPaths();
         configuration = taskAttemptContext.getConfiguration();
-        id = 0;
+        id = -1;
     }
 
     @Override
@@ -55,17 +55,17 @@ public class BoundaryRecordReader extends RecordReader<Long, BoundBox>{
         // open id file
         FileSystem fs = paths[id].getFileSystem(configuration);
         inputStream = fs.open(paths[id]);
-        // skip first 36 bytes of head, read 64 bytes we need
-        inputStream.skipBytes(36);
-        byte[] bytes = new byte[64];
+        // read header into memory
+        byte[] bytes = new byte[100];
         inputStream.readFully(bytes);
         inputStream.close();
         // use byte buffer to abstract 8 parameters of bound box.
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
+        //skip first 36 bytes
+        buffer.position(buffer.position() + 36);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         double[] bounds = new double[8];
         buffer.asDoubleBuffer().get(bounds);
-        bounds = new double[8];
         return new BoundBox(bounds);
     }
 
