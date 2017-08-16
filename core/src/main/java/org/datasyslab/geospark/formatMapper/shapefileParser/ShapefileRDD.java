@@ -16,6 +16,7 @@ import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.VoidFunction;
 import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundBox;
 import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundaryInputFormat;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShpFileParser;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.TypeUnknownException;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.PrimitiveShape;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapeInputFormat;
@@ -32,74 +33,37 @@ import java.util.List;
 /**
  * The Class ShapefileRDD.
  */
+@Deprecated
 public class ShapefileRDD implements Serializable{
 
-    /** */
-    private JavaSparkContext sc = null;
 
     /**  shape collection. */
     private JavaRDD<Geometry> shapeRDD = null;
 
     /** The geometry factory. */
-    public static GeometryFactory geometryFactory = new GeometryFactory();
+    public static GeometryFactory geometryFactory;
 
-    /** input path */
-    private String inputPath = null;
-
-
-    /**
-     * construct shapefileRDD with default geometryFactory
-     * @param sc
-     * @param filePath
-     */
-    public ShapefileRDD(JavaSparkContext sc, String filePath){
-        initialize(sc, filePath, new GeometryFactory());
-    }
+    /**  bounding box. */
+    private BoundBox boundBox = null;
 
     /**
-     * Constructor with customized GeometryFactory
-     * @param sc
-     * @param filePath
-     * @param geometryFactory
-     */
-    public ShapefileRDD(JavaSparkContext sc, String filePath, GeometryFactory geometryFactory){
-        initialize(sc, filePath, geometryFactory);
-    }
-
-    /**
-     * initialize all parameters
-     * @param sc
-     * @param filePath
-     * @param geometryFactory
-     */
-    public void initialize(JavaSparkContext sc, String filePath, GeometryFactory geometryFactory){
-        this.sc = sc;
-        this.inputPath = filePath;
-        ShapefileRDD.geometryFactory = geometryFactory;
-    }
-
-
-
-    /**
-     * generate shapeRDD with given
+     *  ShapefileRDD.
      *
-     * @return the shape RDD
+     * @param sparkContext the spark context
+     * @param filePath the file path
      */
-    public JavaRDD<Geometry> getShapeRDD()
-    {
-        JavaPairRDD<ShapeKey, PrimitiveShape> shapePrimitiveRdd = sc.newAPIHadoopFile(
-                inputPath,
+    public ShapefileRDD(JavaSparkContext sparkContext, String filePath){
+        geometryFactory = new GeometryFactory();
+        boundBox = new BoundBox();
+        JavaPairRDD<ShapeKey, PrimitiveShape> shapePrimitiveRdd = sparkContext.newAPIHadoopFile(
+                filePath,
                 ShapeInputFormat.class,
                 ShapeKey.class,
                 PrimitiveShape.class,
-                sc.hadoopConfiguration()
+                sparkContext.hadoopConfiguration()
         );
-        JavaRDD<Geometry> geometries = shapePrimitiveRdd.map(PrimitiveToShape);
-        return geometries;
+        shapeRDD = shapePrimitiveRdd.map(PrimitiveToShape);
     }
-
-
-
 
     /** The Constant PrimitiveToShape. */
     private static final Function<Tuple2<ShapeKey, PrimitiveShape>, Geometry> PrimitiveToShape
@@ -108,7 +72,7 @@ public class ShapefileRDD implements Serializable{
             Geometry shape = null;
             // parse bytes to shape
             try{
-                shape = primitiveTuple._2().getShape(ShapefileRDD.geometryFactory);
+                shape = primitiveTuple._2().getShape(geometryFactory);
             }catch (TypeUnknownException e){
                 e.printStackTrace();
             }catch (IOException e){
@@ -116,38 +80,27 @@ public class ShapefileRDD implements Serializable{
             }finally {
                 return shape;
             }
+
         }
     };
 
+    /** The Print shape. */
+    private final VoidFunction<Geometry> PrintShape = new VoidFunction<Geometry>() {
+        public void call(Geometry shape) throws Exception {
+            System.out.println(shape.toText());
+        }
+    };
+
+
     /**
-     * read and merge bound boxes of all shapefiles user input, if there is no, leave BoundBox null;
+     * Gets the shape RDD.
+     *
+     * @return the shape RDD
      */
-    public BoundBox getBoundBox(){
-        // read bound boxes into memory
-        JavaPairRDD<Long, BoundBox>  bounds = sc.newAPIHadoopFile(
-                inputPath,
-                BoundaryInputFormat.class,
-                Long.class,
-                BoundBox.class,
-                sc.hadoopConfiguration()
-        );
-        // merge all into one
-        bounds = bounds.reduceByKey(reduceBoundBoxes);
-        // if there is a result assign it to variable : boundBox
-        if(bounds.count() > 0){
-            return new BoundBox(bounds.collect().get(0)._2());
-        }else return null;
+    public JavaRDD<Geometry> getShapeRDD()
+    {
+        return this.shapeRDD;
     }
-
-    /**
-     * function for merging multiple Bound boxes
-     */
-    private static final Function2<BoundBox, BoundBox, BoundBox> reduceBoundBoxes = new Function2<BoundBox, BoundBox, BoundBox>(){
-        @Override
-        public BoundBox call(BoundBox box1, BoundBox box2) throws Exception {
-            return BoundBox.mergeBoundBox(box1, box2);
-        }
-    };
 
     /**
      * Gets the point RDD.
@@ -157,15 +110,17 @@ public class ShapefileRDD implements Serializable{
     public JavaRDD<Point> getPointRDD() {
         return shapeRDD.flatMap(new FlatMapFunction<Geometry, Point>()
         {
-			@Override
-			public Iterator<Point> call(Geometry spatialObject) throws Exception {
+            @Override
+            public Iterator<Point> call(Geometry spatialObject) throws Exception {
                 List<Point> result = new ArrayList<Point>();
                 if(spatialObject instanceof MultiPoint)
-			    {
+                {
                     MultiPoint multiObjects = (MultiPoint)spatialObject;
                     for (int i=0;i<multiObjects.getNumGeometries();i++)
                     {
-                        result.add((Point) multiObjects.getGeometryN(i));
+                        Point oneObject = (Point) multiObjects.getGeometryN(i);
+                        oneObject.setUserData(multiObjects.getUserData());
+                        result.add(oneObject);
                     }
                 }
                 else if(spatialObject instanceof Point)
@@ -176,9 +131,9 @@ public class ShapefileRDD implements Serializable{
                 {
                     throw new Exception("[ShapefileRDD][getPointRDD] the object type is not Point or MultiPoint type. It is "+spatialObject.getGeometryType());
                 }
-				return result.iterator();
-			}
-        	
+                return result.iterator();
+            }
+
         });
     }
 
@@ -198,7 +153,9 @@ public class ShapefileRDD implements Serializable{
                     MultiPolygon multiObjects = (MultiPolygon)spatialObject;
                     for (int i=0;i<multiObjects.getNumGeometries();i++)
                     {
-                        result.add((Polygon) multiObjects.getGeometryN(i));
+                        Polygon oneObject = (Polygon) multiObjects.getGeometryN(i);
+                        oneObject.setUserData(multiObjects.getUserData());
+                        result.add(oneObject);
                     }
                 }
                 else if (spatialObject instanceof Polygon)
@@ -231,7 +188,9 @@ public class ShapefileRDD implements Serializable{
                     MultiLineString multiObjects = (MultiLineString)spatialObject;
                     for (int i=0;i<multiObjects.getNumGeometries();i++)
                     {
-                        result.add((LineString) multiObjects.getGeometryN(i));
+                        LineString oneObject = (LineString) multiObjects.getGeometryN(i);
+                        oneObject.setUserData(multiObjects.getUserData());
+                        result.add(oneObject);
                     }
                 }
                 else if(spatialObject instanceof LineString)
@@ -247,13 +206,38 @@ public class ShapefileRDD implements Serializable{
 
         });
     }
-
     /**
-     * get count of shapeRDD
-     * @return
+     * Count.
+     *
+     * @return the long
      */
     public long count(){
         return shapeRDD.count();
+    }
+
+    /**
+     * read and merge bound boxes of all shapefiles user input, if there is no, leave BoundBox null;
+     */
+    public BoundBox getBoundBox(JavaSparkContext sc, String inputPath){
+        // read bound boxes into memory
+        JavaPairRDD<Long, BoundBox>  bounds = sc.newAPIHadoopFile(
+                inputPath,
+                BoundaryInputFormat.class,
+                Long.class,
+                BoundBox.class,
+                sc.hadoopConfiguration()
+        );
+        // merge all into one
+        bounds = bounds.reduceByKey(new Function2<BoundBox, BoundBox, BoundBox>(){
+            @Override
+            public BoundBox call(BoundBox box1, BoundBox box2) throws Exception {
+                return BoundBox.mergeBoundBox(box1, box2);
+            }
+        });
+        // if there is a result assign it to variable : boundBox
+        if(bounds.count() > 0){
+            return new BoundBox(bounds.collect().get(0)._2());
+        }else return null;
     }
 
 }
