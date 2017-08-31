@@ -7,9 +7,7 @@
 package org.datasyslab.geospark.spatialPartitioning.quadtree;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressWarnings("serial")
@@ -17,7 +15,7 @@ public class RenderQuadTree extends QuadTreePanel {
 
 	int resolutionX = 600;
 	int resolutionY = 600;
-	protected StandardQuadTree<QuadRectangle> standardQuadTree = new StandardQuadTree<QuadRectangle>(new QuadRectangle(0, 0, resolutionX, resolutionY), 0);;
+	protected StandardQuadTree<QuadRectangle> standardQuadTree;
 
 	public static void main(String[] args) {
 		new RenderQuadTree();
@@ -34,8 +32,7 @@ public class RenderQuadTree extends QuadTreePanel {
 	 * @return
 	 */
 	protected StandardQuadTree<QuadRectangle> createQuadTree() {
-		StandardQuadTree.maxItemByNode = 5;
-		StandardQuadTree.maxLevel = 10;
+		standardQuadTree = new StandardQuadTree<>(new QuadRectangle(0, 0, resolutionX, resolutionY), 0, 5, 10);
 		standardQuadTree.forceGrowUp(3);
 		
 		for(int i = 0;i< 10000;i++)
@@ -56,8 +53,7 @@ public class RenderQuadTree extends QuadTreePanel {
 	}
 
 	private void drawCells(Graphics g) {
-		ArrayList<QuadRectangle> zoneList = new ArrayList<QuadRectangle>();
-		standardQuadTree.getAllZones(zoneList);
+		List<QuadRectangle> zoneList = standardQuadTree.getAllZones();
 		g.setColor(Color.BLACK);
 		for(QuadRectangle r:zoneList)
 		{
@@ -87,23 +83,15 @@ public class RenderQuadTree extends QuadTreePanel {
 
 		g.drawRect((int)quadRectangle.x,(int)quadRectangle.y,(int)quadRectangle.width,(int)quadRectangle.height);
 
-
-		HashSet<Integer> uniqueIdList = new HashSet<Integer>();
-		standardQuadTree.getAllLeafNodeUniqueId(uniqueIdList);
-		HashMap<Integer,Integer> serialIdMapping = standardQuadTree.getSeriaIdMapping(uniqueIdList);
-		standardQuadTree.decidePartitionSerialId(serialIdMapping);
-
+		standardQuadTree.assignPartitionIds();
 
 		g.setColor(Color.ORANGE);
 
-		ArrayList<QuadRectangle> matchedPartitions = new ArrayList<QuadRectangle>();
-		standardQuadTree.getZone(matchedPartitions,quadRectangle);
+		List<QuadRectangle> matchedPartitions = standardQuadTree.findZones(quadRectangle);
 		for(QuadRectangle q:matchedPartitions)
 		{
 			g.drawRect((int)q.x,(int)q.y,(int)q.width,(int)q.height);
 			System.out.println(q.partitionId);
 		}
 	}
-
-
 }

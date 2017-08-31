@@ -13,10 +13,10 @@ import org.datasyslab.geospark.spatialPartitioning.quadtree.StandardQuadTree;
 import scala.Tuple2;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 // TODO: Auto-generated Javadoc
@@ -61,28 +61,20 @@ public class PartitionJudgement implements Serializable{
 		return result.iterator();
 	}
 
-	public static <T extends Geometry> Iterator<Tuple2<Integer, T>> getPartitionID(StandardQuadTree partitionTree, T spatialObject) throws Exception {
-		Set<Tuple2<Integer, T>> result = new HashSet<>();
-		boolean containFlag = false;
-		ArrayList<QuadRectangle> matchedPartitions = new ArrayList<QuadRectangle>();
-		try {
-			partitionTree.getZone(matchedPartitions, new QuadRectangle((spatialObject).getEnvelopeInternal()));
-		}
-		catch (NullPointerException e)
-		{
-			return result.iterator();
-		}
-		for(int i=0;i<matchedPartitions.size();i++)
-		{
-			containFlag=true;
-			result.add(new Tuple2(matchedPartitions.get(i).partitionId, spatialObject));
-		}
+	public static <T extends Geometry> Iterator<Tuple2<Integer, T>> getPartitionID(
+		StandardQuadTree partitionTree,
+		T spatialObject) throws Exception {
 
-		if (containFlag == false) {
-			//throw new Exception("This object cannot find partition: " +spatialObject);
+		Objects.requireNonNull(partitionTree, "partitionTree");
+		Objects.requireNonNull(spatialObject, "spatialObject");
 
-			// This object is not covered by the partition. Should be dropped.
-			// Partition tree from StandardQuadTree do not have missed objects.
+		final Envelope envelope = spatialObject.getEnvelopeInternal();
+
+		final List<QuadRectangle> matchedPartitions = partitionTree.findZones(new QuadRectangle(envelope));
+
+		final Set<Tuple2<Integer, T>> result = new HashSet<>();
+		for (QuadRectangle rectangle : matchedPartitions) {
+			result.add(new Tuple2(rectangle.partitionId, spatialObject));
 		}
 		return result.iterator();
 	}

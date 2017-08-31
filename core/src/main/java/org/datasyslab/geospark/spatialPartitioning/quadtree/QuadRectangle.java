@@ -70,6 +70,18 @@ public class QuadRectangle implements Serializable{
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (o == null || ! (o instanceof QuadRectangle)) {
+            return false;
+        }
+
+        final QuadRectangle other = (QuadRectangle) o;
+        return this.x == other.x && this.y == other.y
+            && this.width == other.width && this.height == other.height
+            && this.partitionId == other.partitionId;
+    }
+
+    @Override
     public int hashCode()
     {
         String stringId = ""+x+y+width+height;
