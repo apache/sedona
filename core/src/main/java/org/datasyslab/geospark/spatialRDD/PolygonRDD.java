@@ -6,28 +6,6 @@
  */
 package org.datasyslab.geospark.spatialRDD;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.FlatMapFunction;
-import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.Function2;
-import org.apache.spark.storage.StorageLevel;
-import org.datasyslab.geospark.enums.FileDataSplitter;
-import org.datasyslab.geospark.formatMapper.PolygonFormatMapper;
-
-import org.wololo.geojson.GeoJSON;
-import org.wololo.jts2geojson.GeoJSONWriter;
-
-/**
- * 
- * @author Arizona State University DataSystems Lab
- *
- */
-
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -36,13 +14,27 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.precision.GeometryPrecisionReducer;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.FlatMapFunction;
+import org.apache.spark.api.java.function.Function2;
+import org.apache.spark.storage.StorageLevel;
+import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.formatMapper.PolygonFormatMapper;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+/**
+ * @author Arizona State University DataSystems Lab
+ */
 
 
 // TODO: Auto-generated Javadoc
 /**
  * The Class PolygonRDD.
  */
-public class PolygonRDD extends SpatialRDD {
+public class PolygonRDD extends SpatialRDD<Polygon> {
     
 
 
@@ -52,14 +44,7 @@ public class PolygonRDD extends SpatialRDD {
      * @param rawSpatialRDD the raw spatial RDD
      */
     public PolygonRDD(JavaRDD<Polygon> rawSpatialRDD) {
-        this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
-        {
-            @Override
-            public Object call(Polygon spatialObject) throws Exception {
-                return spatialObject;
-            }
-
-        });
+        this.rawSpatialRDD = rawSpatialRDD;
     }
 
     /**
@@ -70,14 +55,7 @@ public class PolygonRDD extends SpatialRDD {
      * @param targetEpsgCode the target epsg code
      */
     public PolygonRDD(JavaRDD<Polygon> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode) {
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
-		{
-			@Override
-			public Object call(Polygon spatialObject) throws Exception {
-				return spatialObject;
-			}
-
-		});
+		this.rawSpatialRDD = rawSpatialRDD;
 		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
     }
 
@@ -172,14 +150,7 @@ public class PolygonRDD extends SpatialRDD {
      * @param approximateTotalCount the approximate total count
      */
     public PolygonRDD(JavaRDD<Polygon> rawSpatialRDD, Envelope datasetBoundary, Integer approximateTotalCount) {
-        this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
-        {
-            @Override
-            public Object call(Polygon spatialObject) throws Exception {
-                return spatialObject;
-            }
-
-        });
+        this.rawSpatialRDD = rawSpatialRDD;
         this.boundaryEnvelope = datasetBoundary;
         this.approximateTotalCount = approximateTotalCount;
     }
@@ -194,14 +165,7 @@ public class PolygonRDD extends SpatialRDD {
      * @param approximateTotalCount the approximate total count
      */
     public PolygonRDD(JavaRDD<Polygon> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode, Envelope datasetBoundary, Integer approximateTotalCount) {
-        this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
-        {
-            @Override
-            public Object call(Polygon spatialObject) throws Exception {
-                return spatialObject;
-            }
-
-        });
+        this.rawSpatialRDD = rawSpatialRDD;
         this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.boundaryEnvelope = datasetBoundary;
         this.approximateTotalCount = approximateTotalCount;
@@ -320,14 +284,7 @@ public class PolygonRDD extends SpatialRDD {
      * @param newLevel the new level
      */
     public PolygonRDD(JavaRDD<Polygon> rawSpatialRDD, StorageLevel newLevel) {
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
-		{
-			@Override
-			public Object call(Polygon spatialObject) throws Exception {
-				return spatialObject;
-			}
-			
-		});
+		this.rawSpatialRDD = rawSpatialRDD;
         this.analyze(newLevel);
     }
 
@@ -432,13 +389,13 @@ public class PolygonRDD extends SpatialRDD {
      * @return the polygon
      */
     public Polygon PolygonUnion() {
-    	Object result = this.rawSpatialRDD.reduce(new Function2<Object, Object, Object>() {
-            public Polygon call(Object v1, Object v2) {
+    	Polygon result = this.rawSpatialRDD.reduce(new Function2<Polygon, Polygon, Polygon>() {
+            public Polygon call(Polygon v1, Polygon v2) {
                 //Reduce precision in JTS to avoid TopologyException
                 PrecisionModel pModel = new PrecisionModel();
                 GeometryPrecisionReducer pReducer = new GeometryPrecisionReducer(pModel);
-                Geometry p1 = pReducer.reduce((Polygon) v1);
-                Geometry p2 = pReducer.reduce((Polygon) v2);
+                Geometry p1 = pReducer.reduce(v1);
+                Geometry p2 = pReducer.reduce(v2);
                 //Union two polygons
                 Geometry polygonGeom = p1.union(p2);
                 Coordinate[] coordinates = polygonGeom.getCoordinates();
@@ -454,7 +411,7 @@ public class PolygonRDD extends SpatialRDD {
                 return polygon;
             }
         });
-        return (Polygon)result;
+        return result;
     }
     
     /**
@@ -466,13 +423,7 @@ public class PolygonRDD extends SpatialRDD {
      * @param targetEpsgCode the target epsg code
      */
     public PolygonRDD(JavaRDD<Polygon> rawSpatialRDD, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode) {
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
-		{
-			@Override
-			public Object call(Polygon spatialObject) throws Exception {
-				return spatialObject;
-			}
-		});
+		this.rawSpatialRDD = rawSpatialRDD;
 		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.analyze(newLevel);
     }

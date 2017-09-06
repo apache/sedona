@@ -6,25 +6,21 @@
  */
 package org.datasyslab.geospark.spatialRDD;
 
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Polygon;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
-import org.apache.spark.api.java.function.Function;
 import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
-
 import org.datasyslab.geospark.formatMapper.RectangleFormatMapper;
-
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Class RectangleRDD.
  */
 
-public class RectangleRDD extends SpatialRDD {
+public class RectangleRDD extends SpatialRDD<Polygon> {
 
     
     
@@ -35,14 +31,7 @@ public class RectangleRDD extends SpatialRDD {
 	 */
 	public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD)
 	{
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
-		{
-
-			@Override
-			public Object call(Polygon spatialObject) throws Exception {
-				return spatialObject;
-			}
-		});
+		this.rawSpatialRDD = rawSpatialRDD;
 	}
 	
 	/**
@@ -54,14 +43,7 @@ public class RectangleRDD extends SpatialRDD {
 	 */
 	public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode)
 	{
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
-		{
-
-			@Override
-			public Object call(Polygon spatialObject) throws Exception {
-				return spatialObject;
-			}
-		});
+		this.rawSpatialRDD = rawSpatialRDD;
 		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
 	}
 	
@@ -157,14 +139,7 @@ public class RectangleRDD extends SpatialRDD {
 	 */
 	public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD, Envelope datasetBoundary, Integer approximateTotalCount)
 	{
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
-		{
-
-			@Override
-			public Object call(Polygon spatialObject) throws Exception {
-				return spatialObject;
-			}
-		});
+		this.rawSpatialRDD = rawSpatialRDD;
 		this.boundaryEnvelope = datasetBoundary;
 		this.approximateTotalCount = approximateTotalCount;
 	}
@@ -180,14 +155,7 @@ public class RectangleRDD extends SpatialRDD {
 	 */
 	public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode, Envelope datasetBoundary, Integer approximateTotalCount)
 	{
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
-		{
-
-			@Override
-			public Object call(Polygon spatialObject) throws Exception {
-				return spatialObject;
-			}
-		});
+		this.rawSpatialRDD = rawSpatialRDD;
 		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
 		this.boundaryEnvelope = datasetBoundary;
 		this.approximateTotalCount = approximateTotalCount;
@@ -307,15 +275,7 @@ public class RectangleRDD extends SpatialRDD {
      */
 	public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD, StorageLevel newLevel)
 	{
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
-		{
-
-			@Override
-			public Object call(Polygon spatialObject) throws Exception {
-				return spatialObject;
-			}
-			
-		});
+		this.rawSpatialRDD = rawSpatialRDD;
         this.analyze(newLevel);
 
 	}
@@ -425,15 +385,7 @@ public class RectangleRDD extends SpatialRDD {
      */
 	public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
 	{
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Polygon,Object>()
-		{
-
-			@Override
-			public Object call(Polygon spatialObject) throws Exception {
-				return spatialObject;
-			}
-			
-		});
+		this.rawSpatialRDD = rawSpatialRDD;
 		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.analyze(newLevel);
 

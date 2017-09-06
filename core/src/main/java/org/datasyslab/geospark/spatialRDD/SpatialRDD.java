@@ -6,16 +6,16 @@
  */
 package org.datasyslab.geospark.spatialRDD;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.index.SpatialIndex;
+import com.vividsolutions.jts.index.quadtree.Quadtree;
+import com.vividsolutions.jts.index.strtree.STRtree;
 import org.apache.log4j.Logger;
-import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
@@ -23,7 +23,13 @@ import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
-import org.datasyslab.geospark.spatialPartitioning.*;
+import org.datasyslab.geospark.spatialPartitioning.EqualPartitioning;
+import org.datasyslab.geospark.spatialPartitioning.HilbertPartitioning;
+import org.datasyslab.geospark.spatialPartitioning.PartitionJudgement;
+import org.datasyslab.geospark.spatialPartitioning.QuadtreePartitioning;
+import org.datasyslab.geospark.spatialPartitioning.RtreePartitioning;
+import org.datasyslab.geospark.spatialPartitioning.SpatialPartitioner;
+import org.datasyslab.geospark.spatialPartitioning.VoronoiPartitioning;
 import org.datasyslab.geospark.spatialPartitioning.quadtree.StandardQuadTree;
 import org.datasyslab.geospark.utils.RDDSampleUtils;
 import org.datasyslab.geospark.utils.XMaxComparator;
@@ -37,24 +43,23 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wololo.geojson.Feature;
 import org.wololo.jts2geojson.GeoJSONWriter;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.index.SpatialIndex;
-import com.vividsolutions.jts.index.quadtree.Quadtree;
-import com.vividsolutions.jts.index.strtree.STRtree;
-
 import scala.Tuple2;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Class SpatialRDD.
  */
-public abstract class SpatialRDD implements Serializable{
+public class SpatialRDD<T extends Geometry> implements Serializable{
 
 	/** The Constant logger. */
 	final static Logger logger = Logger.getLogger(SpatialRDD.class);
@@ -66,16 +71,16 @@ public abstract class SpatialRDD implements Serializable{
     public Envelope boundaryEnvelope = null;
 
     /** The spatial partitioned RDD. */
-    public JavaRDD<Object> spatialPartitionedRDD;
+    public JavaRDD<T> spatialPartitionedRDD;
 
     /** The indexed RDD. */
     public JavaRDD<SpatialIndex> indexedRDD;
 
     /** The indexed raw RDD. */
-    public JavaRDD<Object> indexedRawRDD;
+    public JavaRDD<SpatialIndex> indexedRawRDD;
 
     /** The raw spatial RDD. */
-    public JavaRDD<Object> rawSpatialRDD;
+    public JavaRDD<T> rawSpatialRDD;
 
 	/** The grids. */
     public List<Envelope> grids;
@@ -107,11 +112,11 @@ public abstract class SpatialRDD implements Serializable{
 		this.CRStransformation=true;
 		this.sourceEpsgCode=sourceEpsgCRSCode;
 		this.targetEpgsgCode=targetEpsgCRSCode;
-		this.rawSpatialRDD = this.rawSpatialRDD.map(new Function<Object,Object>()
+		this.rawSpatialRDD = this.rawSpatialRDD.map(new Function<T,T>()
 		{
 			@Override
-			public Object call(Object originalObject) throws Exception {
-				return JTS.transform((Geometry)originalObject,transform);
+			public T call(T originalObject) throws Exception {
+				return (T) JTS.transform(originalObject,transform);
 			}
 		});
 		return true;
@@ -177,64 +182,13 @@ public abstract class SpatialRDD implements Serializable{
 
 		if(gridType == GridType.QUADTREE)
 		{
-			JavaPairRDD<Integer, Object> spatialNumberingRDD = this.rawSpatialRDD.flatMapToPair(
-	                new PairFlatMapFunction<Object, Integer, Object>() {
-	                    @Override
-	                    public Iterator<Tuple2<Integer, Object>> call(Object spatialObject) throws Exception {
-	                    	return PartitionJudgement.getPartitionID(partitionTree,spatialObject);
-	                    }
-	                }
-	        );
-			this.spatialPartitionedRDD = spatialNumberingRDD.partitionBy(new SpatialPartitioner(partitionTree.getTotalNumLeafNode())).mapPartitions(new FlatMapFunction<Iterator<Tuple2<Integer,Object>>, Object>(
-	        		) {
-	        			 @Override
-	        			 public Iterator<Object> call(Iterator<Tuple2<Integer, Object>> tuple2Iterator) throws Exception {
-	        				List<Object> result = new ArrayList<Object>();
-	        				while (tuple2Iterator.hasNext())
-	        				{
-	        					result.add(tuple2Iterator.next()._2());
-	        				}
-	        			 	return result.iterator();
-	        			 }
-	        		},true);
+			this.spatialPartitionedRDD = partitionUsingQuadTree(partitionTree);
 		}
 		else
 		{
-			JavaPairRDD<Integer, Object> spatialNumberingRDD = this.rawSpatialRDD.flatMapToPair(
-	                new PairFlatMapFunction<Object, Integer, Object>() {
-	                    @Override
-	                    public Iterator<Tuple2<Integer, Object>> call(Object spatialObject) throws Exception {
-	                    	return PartitionJudgement.getPartitionID(grids,spatialObject);
-	                    }
-	                }
-	        );
-	        this.spatialPartitionedRDD = spatialNumberingRDD.partitionBy(new SpatialPartitioner(grids.size())).mapPartitions(new FlatMapFunction<Iterator<Tuple2<Integer,Object>>, Object>(
-	        		) {
-	        			 @Override
-	        			 public Iterator<Object> call(Iterator<Tuple2<Integer, Object>> tuple2Iterator) throws Exception {
-	        				List<Object> result = new ArrayList<Object>();
-	        				while (tuple2Iterator.hasNext())
-	        				{
-	        					result.add(tuple2Iterator.next()._2());
-	        				}
-	        			 	return result.iterator();
-	        			 }
-	        		},true);
+			this.spatialPartitionedRDD = partitionUsingGrids(grids);
 		}
-        JavaRDD<Integer> partitionedResult = this.spatialPartitionedRDD.mapPartitions(new FlatMapFunction<Iterator<Object>, Integer>() {
-			@Override
-			public Iterator<Integer> call(Iterator<Object> objectIterator) throws Exception {
-				List<Integer> counts = new ArrayList<>();
-				Integer count=0;
-				while (objectIterator.hasNext())
-				{
-					Object testObject = objectIterator.next();
-					count++;
-				}
-				counts.add(count);
-				return counts.iterator();
-			}
-		}, true);
+
 		return true;
 	}
 
@@ -247,68 +201,65 @@ public abstract class SpatialRDD implements Serializable{
 	 */
 	public boolean spatialPartitioning(final List<Envelope> otherGrids) throws Exception
 	{
-        JavaPairRDD<Integer, Object> spatialNumberingRDD = this.rawSpatialRDD.flatMapToPair(
-                new PairFlatMapFunction<Object, Integer, Object>() {
-                    @Override
-                    public Iterator<Tuple2<Integer, Object>> call(Object spatialObject) throws Exception {
-                    	return PartitionJudgement.getPartitionID(otherGrids,spatialObject);
-                    }
-                }
-        );
-        this.grids = otherGrids;
-        this.spatialPartitionedRDD = spatialNumberingRDD.partitionBy(new SpatialPartitioner(grids.size())).mapPartitions(new FlatMapFunction<Iterator<Tuple2<Integer,Object>>, Object>(
-		) {
-			@Override
-			public Iterator<Object> call(Iterator<Tuple2<Integer, Object>> tuple2Iterator) throws Exception {
-				List<Object> result = new ArrayList<Object>();
-				while (tuple2Iterator.hasNext())
-				{
-					result.add(tuple2Iterator.next()._2());
-				}
-				return result.iterator();
-			}
-		},true);
-		JavaRDD<Integer> partitionedResult = this.spatialPartitionedRDD.mapPartitions(new FlatMapFunction<Iterator<Object>, Integer>(
-
-		) {
-			@Override
-			public Iterator<Integer> call(Iterator<Object> objectIterator) throws Exception {
-				List<Integer> counts = new ArrayList<>();
-				Integer count=0;
-				while (objectIterator.hasNext())
-				{
-					Object testObject = objectIterator.next();
-					count++;
-				}
-				counts.add(count);
-				return counts.iterator();
-			}
-		}, true);
+		this.spatialPartitionedRDD = partitionUsingGrids(otherGrids);
+		this.grids = otherGrids;
 		return true;
 	}
 
 	public boolean spatialPartitioning(final StandardQuadTree partitionTree) throws Exception {
-		this.spatialPartitionedRDD = this.rawSpatialRDD.flatMapToPair(
-		new PairFlatMapFunction<Object, Integer, Object>() {
-			@Override
-			public Iterator<Tuple2<Integer, Object>> call(Object spatialObject) throws Exception {
-				return PartitionJudgement.getPartitionID(partitionTree, spatialObject);
-			}
-		}
-		).partitionBy(new SpatialPartitioner(partitionTree.getTotalNumLeafNode())).mapPartitions(new FlatMapFunction<Iterator<Tuple2<Integer,Object>>, Object>(
-		) {
-			@Override
-			public Iterator<Object> call(Iterator<Tuple2<Integer, Object>> tuple2Iterator) throws Exception {
-				List<Object> result = new ArrayList<Object>();
-				while (tuple2Iterator.hasNext())
-				{
-					result.add(tuple2Iterator.next()._2());
-				}
-				return result.iterator();
-			}
-		},true);
+		this.spatialPartitionedRDD = partitionUsingQuadTree(partitionTree);
 		this.partitionTree = partitionTree;
 		return true;
+	}
+
+	private static final class GetTuple2Value<T>
+			implements FlatMapFunction<Iterator<Tuple2<Integer, T>>, T> {
+
+		@Override
+		public Iterator<T> call(final Iterator<Tuple2<Integer, T>> iterator) throws Exception {
+			return new Iterator<T>() {
+				@Override
+				public boolean hasNext() {
+					return iterator.hasNext();
+				}
+
+				@Override
+				public T next() {
+					return iterator.next()._2();
+				}
+
+				@Override
+				public void remove() {
+					throw new NotImplementedException();
+				}
+			};
+		}
+	}
+
+	private JavaRDD<T> partitionUsingQuadTree(final StandardQuadTree<T> quadTree) {
+		final SpatialPartitioner partitioner = new SpatialPartitioner(quadTree.getTotalNumLeafNode());
+		return this.rawSpatialRDD.flatMapToPair(
+				new PairFlatMapFunction<T, Integer, T>() {
+					@Override
+					public Iterator<Tuple2<Integer, T>> call(T spatialObject) throws Exception {
+						return PartitionJudgement.getPartitionID(quadTree, spatialObject);
+					}
+				}
+		).partitionBy(partitioner)
+				.mapPartitions(new GetTuple2Value<T>(),true);
+	}
+
+	private JavaRDD<T> partitionUsingGrids(final List<Envelope> grids) {
+		final SpatialPartitioner partitioner = new SpatialPartitioner(grids.size());
+		return this.rawSpatialRDD.flatMapToPair(
+				new PairFlatMapFunction<T, Integer, T>() {
+					@Override
+					public Iterator<Tuple2<Integer, T>> call(T spatialObject) throws Exception {
+						return PartitionJudgement.getPartitionID(grids, spatialObject);
+					}
+				}
+		).partitionBy(partitioner)
+				.mapPartitions(new GetTuple2Value(), true);
 	}
 
 	/**
@@ -355,18 +306,18 @@ public abstract class SpatialRDD implements Serializable{
 	public void buildIndex(final IndexType indexType,boolean buildIndexOnSpatialPartitionedRDD) throws Exception {
 	      if (buildIndexOnSpatialPartitionedRDD==false) {
 	    	  //This index is built on top of unpartitioned SRDD
-	    	  this.indexedRawRDD =  this.rawSpatialRDD.mapPartitions(new FlatMapFunction<Iterator<Object>,Object>()
+	    	  this.indexedRawRDD =  this.rawSpatialRDD.mapPartitions(new FlatMapFunction<Iterator<T>, SpatialIndex>()
 	    	  {
 	    		  @Override
-	        	  public Iterator<Object> call(Iterator<Object> spatialObjects) throws Exception {
+	        	  public Iterator<SpatialIndex> call(Iterator<T> spatialObjects) throws Exception {
 	        		  if(indexType == IndexType.RTREE)
 	        		  {
 		        		  STRtree rt = new STRtree();
 		        		  while(spatialObjects.hasNext()){
-		        			  Geometry spatialObject = (Geometry)spatialObjects.next();
+		        			  Geometry spatialObject = spatialObjects.next();
 		        			  rt.insert(spatialObject.getEnvelopeInternal(), spatialObject);
 		        		  }
-		        		  HashSet<Object> result = new HashSet<Object>();
+		        		  Set<SpatialIndex> result = new HashSet<>();
 		        		  rt.query(new Envelope(0.0,0.0,0.0,0.0));
 		        		  result.add(rt);
 		        		  return result.iterator();
@@ -375,10 +326,10 @@ public abstract class SpatialRDD implements Serializable{
 	        		  {
 	        			  Quadtree rt = new Quadtree();
 		        		  while(spatialObjects.hasNext()){
-		        			  Geometry spatialObject = (Geometry)spatialObjects.next();
+		        			  Geometry spatialObject = spatialObjects.next();
 		        			  rt.insert(spatialObject.getEnvelopeInternal(), spatialObject);
 		        		  }
-		        		  HashSet<Object> result = new HashSet<Object>();
+						  Set<SpatialIndex> result = new HashSet<>();
 		        		  rt.query(new Envelope(0.0,0.0,0.0,0.0));
 		        		  result.add(rt);
 		        		  return result.iterator();
@@ -393,27 +344,26 @@ public abstract class SpatialRDD implements Serializable{
 	        	{
   				  throw new Exception("[AbstractSpatialRDD][buildIndex] spatialPartitionedRDD is null. Please do spatial partitioning before build index.");
 	        	}
-				this.indexedRDD = this.spatialPartitionedRDD.mapPartitions(new FlatMapFunction<Iterator<Object>, SpatialIndex>() {
+				this.indexedRDD = this.spatialPartitionedRDD.mapPartitions(new FlatMapFunction<Iterator<T>, SpatialIndex>() {
 					@Override
-					public Iterator<SpatialIndex> call(Iterator<Object> objectIterator) throws Exception {
+					public Iterator<SpatialIndex> call(Iterator<T> objectIterator) throws Exception {
 						if (indexType == IndexType.RTREE) {
 							STRtree rt = new STRtree();
 							while (objectIterator.hasNext()) {
-								Geometry spatialObject = (Geometry) objectIterator.next();
+								Geometry spatialObject = objectIterator.next();
 								rt.insert(spatialObject.getEnvelopeInternal(), spatialObject);
 							}
-							HashSet<SpatialIndex> result = new HashSet<SpatialIndex>();
+							Set<SpatialIndex> result = new HashSet();
 							rt.query(new Envelope(0.0, 0.0, 0.0, 0.0));
 							result.add(rt);
 							return result.iterator();
 						} else {
 							Quadtree rt = new Quadtree();
 							while (objectIterator.hasNext()) {
-								Geometry spatialObject = (Geometry) objectIterator.next();
-								Geometry castedSpatialObject = (Geometry) spatialObject;
-								rt.insert(castedSpatialObject.getEnvelopeInternal(), castedSpatialObject);
+								Geometry spatialObject = objectIterator.next();
+								rt.insert(spatialObject.getEnvelopeInternal(), spatialObject);
 							}
-							HashSet<SpatialIndex> result = new HashSet<SpatialIndex>();
+							Set<SpatialIndex> result = new HashSet();
 							rt.query(new Envelope(0.0, 0.0, 0.0, 0.0));
 							result.add(rt);
 							return result.iterator();
@@ -447,7 +397,7 @@ public abstract class SpatialRDD implements Serializable{
 	 *
 	 * @return the raw spatial RDD
 	 */
-	public JavaRDD<Object> getRawSpatialRDD() {
+	public JavaRDD<T> getRawSpatialRDD() {
 		return rawSpatialRDD;
 	}
 
@@ -456,7 +406,7 @@ public abstract class SpatialRDD implements Serializable{
 	 *
 	 * @param rawSpatialRDD the new raw spatial RDD
 	 */
-	public void setRawSpatialRDD(JavaRDD<Object> rawSpatialRDD) {
+	public void setRawSpatialRDD(JavaRDD<T> rawSpatialRDD) {
 		this.rawSpatialRDD = rawSpatialRDD;
 	}
 
@@ -499,10 +449,10 @@ public abstract class SpatialRDD implements Serializable{
      * @param outputLocation the output location
      */
     public void saveAsGeoJSON(String outputLocation) {
-        this.rawSpatialRDD.mapPartitions(new FlatMapFunction<Iterator<Object>, String>() {
+        this.rawSpatialRDD.mapPartitions(new FlatMapFunction<Iterator<T>, String>() {
             @Override
-            public Iterator<String> call(Iterator<Object> iterator) throws Exception {
-                ArrayList<String> result = new ArrayList<String>();
+            public Iterator<String> call(Iterator<T> iterator) throws Exception {
+                ArrayList<String> result = new ArrayList();
                 GeoJSONWriter writer = new GeoJSONWriter();
                 while (iterator.hasNext()) {
                 	Geometry spatialObject = (Geometry)iterator.next();
@@ -532,16 +482,17 @@ public abstract class SpatialRDD implements Serializable{
      */
     @Deprecated
     public RectangleRDD MinimumBoundingRectangle() {
-        JavaRDD<Polygon> rectangleRDD = this.rawSpatialRDD.map(new Function<Object, Polygon>() {
-            public Polygon call(Object spatialObject) {
+        JavaRDD<Polygon> rectangleRDD = this.rawSpatialRDD.map(new Function<T, Polygon>() {
+            public Polygon call(T spatialObject) {
         		Double x1,x2,y1,y2;
                 LinearRing linear;
                 Coordinate[] coordinates = new Coordinate[5];
                 GeometryFactory fact = new GeometryFactory();
-            	x1 = ((Geometry) spatialObject).getEnvelopeInternal().getMinX();
-				x2 = ((Geometry) spatialObject).getEnvelopeInternal().getMaxX();
-				y1 = ((Geometry) spatialObject).getEnvelopeInternal().getMinY();
-				y2 = ((Geometry) spatialObject).getEnvelopeInternal().getMaxY();
+				final Envelope envelope = spatialObject.getEnvelopeInternal();
+				x1 = envelope.getMinX();
+				x2 = envelope.getMaxX();
+				y1 = envelope.getMinY();
+				y2 = envelope.getMaxY();
 		        coordinates[0]=new Coordinate(x1,y1);
 		        coordinates[1]=new Coordinate(x1,y2);
 		        coordinates[2]=new Coordinate(x2,y2);

@@ -6,26 +6,29 @@
  */
 package org.datasyslab.geospark.utils;
 
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+
 import java.io.Serializable;
 import java.util.Comparator;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Class YMaxComparator.
  */
-public class YMaxComparator implements Comparator<Object>, Serializable {
+public class YMaxComparator<T extends Geometry> implements Comparator<T>, Serializable {
 
 	 /* (non-Javadoc)
  	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
  	 */
- 	public int compare(Object spatialObject1, Object spatialObject2) {
- 		if(((Geometry) spatialObject1).getEnvelopeInternal().getMaxY()>((Geometry) spatialObject2).getEnvelopeInternal().getMaxY())
+ 	public int compare(T spatialObject1, T spatialObject2) {
+		final Envelope envelope1 = spatialObject1.getEnvelopeInternal();
+		final Envelope envelope2 = spatialObject2.getEnvelopeInternal();
+ 		if(envelope1.getMaxY() > envelope2.getMaxY())
  		{
  			return 1;
  		}
- 		else if (((Geometry) spatialObject1).getEnvelopeInternal().getMaxY()<((Geometry) spatialObject2).getEnvelopeInternal().getMaxY())
+ 		else if (envelope1.getMaxY() < envelope2.getMaxY())
  		{
  			return -1;
  		}
