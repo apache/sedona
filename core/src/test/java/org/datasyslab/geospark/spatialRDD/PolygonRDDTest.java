@@ -6,13 +6,10 @@
  */
 package org.datasyslab.geospark.spatialRDD;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.index.quadtree.Quadtree;
+import com.vividsolutions.jts.index.strtree.STRtree;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
@@ -25,17 +22,14 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-/**
- * 
- * @author Arizona State University DataSystems Lab
- *
- */
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Properties;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.index.quadtree.Quadtree;
-import com.vividsolutions.jts.index.strtree.STRtree;
+/**
+ * @author Arizona State University DataSystems Lab
+ */
 
 // TODO: Auto-generated Javadoc
 /**
@@ -255,7 +249,7 @@ public class PolygonRDDTest {
     public void testMBR() throws Exception {
     	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions,StorageLevel.MEMORY_ONLY());
     	RectangleRDD rectangleRDD=polygonRDD.MinimumBoundingRectangle();
-    	List<Object> result = rectangleRDD.rawSpatialRDD.collect();
+    	List<Polygon> result = rectangleRDD.rawSpatialRDD.collect();
     	assert result.size()>-1;
     }  
     

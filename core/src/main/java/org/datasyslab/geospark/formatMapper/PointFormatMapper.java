@@ -6,28 +6,26 @@
  */
 package org.datasyslab.geospark.formatMapper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.io.WKTReader;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.wololo.geojson.Feature;
 import org.wololo.geojson.GeoJSONFactory;
 import org.wololo.jts2geojson.GeoJSONReader;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.MultiPoint;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.io.WKTReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Class PointFormatMapper.
  */
-public class PointFormatMapper extends FormatMapper implements FlatMapFunction<Iterator<String>, Object> {
+public class PointFormatMapper extends FormatMapper implements FlatMapFunction<Iterator<String>, Point> {
 
 
 	/**
@@ -56,7 +54,7 @@ public class PointFormatMapper extends FormatMapper implements FlatMapFunction<I
 	}
 
     @Override
-    public Iterator<Object> call(Iterator<String> stringIterator) throws Exception {
+    public Iterator<Point> call(Iterator<String> stringIterator) throws Exception {
         MultiPoint multiSpatialObjects = null;
         Coordinate coordinate;
         List result= new ArrayList<Point>();

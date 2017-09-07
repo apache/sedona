@@ -6,30 +6,27 @@
  */
 package org.datasyslab.geospark.formatMapper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.io.WKTReader;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.wololo.geojson.Feature;
 import org.wololo.geojson.GeoJSONFactory;
 import org.wololo.jts2geojson.GeoJSONReader;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.io.WKTReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Class RectangleFormatMapper.
  */
-public class RectangleFormatMapper extends FormatMapper implements FlatMapFunction<Iterator<String>, Object>
+public class RectangleFormatMapper extends FormatMapper implements FlatMapFunction<Iterator<String>, Polygon>
 {
 
 	/**
@@ -56,7 +53,7 @@ public class RectangleFormatMapper extends FormatMapper implements FlatMapFuncti
 	}
 
 	@Override
-	public Iterator<Object> call(Iterator<String> stringIterator) throws Exception {
+	public Iterator<Polygon> call(Iterator<String> stringIterator) throws Exception {
 		MultiPolygon multiSpatialObjects = null;
 		List result= new ArrayList<Polygon>();
 		Double x1,x2,y1,y2;

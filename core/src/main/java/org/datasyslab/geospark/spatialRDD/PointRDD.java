@@ -6,25 +6,14 @@
  */
 package org.datasyslab.geospark.spatialRDD;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
-
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Point;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
-import org.apache.spark.api.java.function.Function;
 import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
-
 import org.datasyslab.geospark.formatMapper.PointFormatMapper;
-
-import org.wololo.geojson.GeoJSON;
-import org.wololo.jts2geojson.GeoJSONWriter;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 
 
 // TODO: Auto-generated Javadoc
@@ -32,7 +21,7 @@ import com.vividsolutions.jts.geom.Point;
  * The Class PointRDD.
  */
 
-public class PointRDD extends SpatialRDD {
+public class PointRDD extends SpatialRDD<Point> {
     
 	/**
 	 * Instantiates a new point RDD.
@@ -41,14 +30,7 @@ public class PointRDD extends SpatialRDD {
 	 */
 	public PointRDD(JavaRDD<Point> rawSpatialRDD)
 	{
-        this.rawSpatialRDD = rawSpatialRDD.map(new Function<Point,Object>()
-        {
-
-            @Override
-            public Object call(Point spatialObject) throws Exception {
-                return spatialObject;
-            }
-        });
+        this.rawSpatialRDD = rawSpatialRDD;
 	}
 	
 	/**
@@ -60,14 +42,7 @@ public class PointRDD extends SpatialRDD {
 	 */
 	public PointRDD(JavaRDD<Point> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode)
 	{
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Point,Object>()
-		{
-
-			@Override
-			public Object call(Point spatialObject) throws Exception {
-				return spatialObject;
-			}
-		});
+		this.rawSpatialRDD = rawSpatialRDD;
 		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
 	}
 	
@@ -160,14 +135,7 @@ public class PointRDD extends SpatialRDD {
      */
     public PointRDD(JavaRDD<Point> rawSpatialRDD, Envelope datasetBoundary, Integer approximateTotalCount)
     {
-        this.rawSpatialRDD = rawSpatialRDD.map(new Function<Point,Object>()
-        {
-
-            @Override
-            public Object call(Point spatialObject) throws Exception {
-                return spatialObject;
-            }
-        });
+        this.rawSpatialRDD = rawSpatialRDD;
         this.boundaryEnvelope = datasetBoundary;
         this.approximateTotalCount = approximateTotalCount;
     }
@@ -183,15 +151,7 @@ public class PointRDD extends SpatialRDD {
      */
     public PointRDD(JavaRDD<Point> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode, Envelope datasetBoundary, Integer approximateTotalCount)
     {
-        this.rawSpatialRDD = rawSpatialRDD.map(new Function<Point,Object>()
-        {
-
-            @Override
-            public Object call(Point spatialObject) throws Exception {
-                return spatialObject;
-            }
-
-        });
+        this.rawSpatialRDD = rawSpatialRDD;
         this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.boundaryEnvelope = datasetBoundary;
         this.approximateTotalCount = approximateTotalCount;
@@ -297,11 +257,6 @@ public class PointRDD extends SpatialRDD {
         this.approximateTotalCount = approximateTotalCount;
     }
 
-
-
-
-
-
 	/**
 	 * Instantiates a new point RDD.
 	 *
@@ -310,15 +265,7 @@ public class PointRDD extends SpatialRDD {
 	 */
 	public PointRDD(JavaRDD<Point> rawSpatialRDD, StorageLevel newLevel)
 	{
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Point,Object>()
-		{
-
-			@Override
-			public Object call(Point spatialObject) throws Exception {
-				return spatialObject;
-			}
-			
-		});
+		this.rawSpatialRDD = rawSpatialRDD;
         this.analyze(newLevel);
 	}
 	
@@ -419,14 +366,7 @@ public class PointRDD extends SpatialRDD {
 	 */
 	public PointRDD(JavaRDD<Point> rawSpatialRDD, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
 	{
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<Point,Object>()
-		{
-			@Override
-			public Object call(Point spatialObject) throws Exception {
-				return spatialObject;
-			}
-			
-		});
+		this.rawSpatialRDD = rawSpatialRDD;
 		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.analyze(newLevel);
 	}
