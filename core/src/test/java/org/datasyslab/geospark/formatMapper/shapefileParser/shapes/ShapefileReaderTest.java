@@ -1,8 +1,16 @@
+/**
+ * FILE: ShapefileReaderTest.java
+ * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapefileReaderTest.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
+
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
@@ -24,6 +32,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
@@ -31,10 +40,7 @@ import org.opengis.filter.Filter;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by zongsizhang on 8/20/17.
@@ -248,12 +254,23 @@ public class ShapefileReaderTest implements Serializable{
         ArrayList<String> featureTexts = new ArrayList<String>();
         while(features.hasNext()){
             SimpleFeature feature = features.next();
-            featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
+            String attr = "";
+            int i = 0;
+            for (Property property : feature.getProperties()) {
+                if(i == 0){
+                    i++;
+                    continue;
+                }
+                if(i > 1) attr += "\t";
+                attr += String.valueOf(property.getValue());
+                i++;
+            }
+            featureTexts.add(attr);
         }
         final Iterator<String> featureIterator = featureTexts.iterator();
 
         for (Geometry geometry : ShapefileReader.readToGeometryRDD(sc, InputLocation).collect()) {
-            Assert.assertEquals(featureIterator.next(), geometry.toText());
+            Assert.assertEquals(featureIterator.next(), geometry.getUserData());
         }
         dataStore.dispose();
     }
