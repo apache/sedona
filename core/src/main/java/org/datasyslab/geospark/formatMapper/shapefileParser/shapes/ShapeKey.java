@@ -6,31 +6,26 @@
  */
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Writable;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.Serializable;
 
-public class ShapeKey implements Writable{
+public class ShapeKey implements Serializable{
 
-    LongWritable index = new LongWritable();
+    /** record id */
+    Long index = 0l;
 
     public void write(DataOutput dataOutput) throws IOException {
-        dataOutput.writeLong(index.get());
+        dataOutput.writeLong(index);
 
     }
 
     public long getIndex() {
-        return index.get();
+        return index;
     }
 
     public void setIndex(long _index) {
-        index.set(_index);
-    }
-
-    public void readFields(DataInput dataInput) throws IOException {
-
+        index = _index;
     }
 }
