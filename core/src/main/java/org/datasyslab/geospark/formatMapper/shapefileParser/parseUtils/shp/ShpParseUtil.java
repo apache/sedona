@@ -11,15 +11,20 @@ import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import java.io.IOException;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class ShpParseUtil.
+ */
 public class ShpParseUtil implements ShapeFileConst {
 
     /**
      * read numPoints of coordinates from input source.
-     * @param reader
-     * @param numPoints
-     * @param geometryFactory
-     * @return
-     * @throws IOException
+     *
+     * @param reader the reader
+     * @param numPoints the num points
+     * @param geometryFactory the geometry factory
+     * @return the coordinate sequence
+     * @throws IOException Signals that an I/O exception has occurred.
      */
     public static CoordinateSequence readCoordinates(ShapeReader reader, int numPoints, GeometryFactory geometryFactory) throws IOException {
         CoordinateSequence coordinateSequence = geometryFactory.getCoordinateSequenceFactory().create(numPoints,2);
@@ -34,9 +39,10 @@ public class ShpParseUtil implements ShapeFileConst {
 
     /**
      * returns true if testPoint is a point in the pointList list.
-     * @param testPoint
-     * @param pointList
-     * @return
+     *
+     * @param testPoint the test point
+     * @param pointList the point list
+     * @return true, if successful
      */
     public static boolean pointInList(Coordinate testPoint, Coordinate[] pointList) {
         Coordinate p;

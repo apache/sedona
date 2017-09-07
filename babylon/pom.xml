@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.datasyslab</groupId>
 	<artifactId>babylon</artifactId>
-	<version>0.2.1</version>
+	<version>0.2.2</version>
 	
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>Geospatial visualization extension for Apache Spark</description>
@@ -70,7 +70,11 @@
             <version>0.1.0</version>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-core</artifactId>
+            <version>1.11.160</version>
+        </dependency>
         <!-- Test -->
         <dependency>
             <groupId>junit</groupId>

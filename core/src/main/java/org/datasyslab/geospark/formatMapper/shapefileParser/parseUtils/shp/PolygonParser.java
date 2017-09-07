@@ -14,21 +14,27 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PolygonParser.
+ */
 public class PolygonParser extends ShapeParser{
 
     /**
-     * create a parser that can abstract a Polygon from input source with given GeometryFactory
-     * @param geometryFactory
+     * create a parser that can abstract a Polygon from input source with given GeometryFactory.
+     *
+     * @param geometryFactory the geometry factory
      */
     public PolygonParser(GeometryFactory geometryFactory) {
         super(geometryFactory);
     }
 
     /**
-     * abstract abstract a Polygon shape
-     * @param reader
-     * @return
-     * @throws IOException
+     * abstract abstract a Polygon shape.
+     *
+     * @param reader the reader
+     * @return the geometry
+     * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
     public Geometry parserShape(ShapeReader reader) throws IOException {

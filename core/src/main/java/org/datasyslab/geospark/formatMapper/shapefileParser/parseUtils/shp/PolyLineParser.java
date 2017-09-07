@@ -13,21 +13,27 @@ import com.vividsolutions.jts.geom.LineString;
 
 import java.io.IOException;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PolyLineParser.
+ */
 public class PolyLineParser extends ShapeParser{
 
     /**
-     * create a parser that can abstract a MultiPolyline from input source with given GeometryFactory
-     * @param geometryFactory
+     * create a parser that can abstract a MultiPolyline from input source with given GeometryFactory.
+     *
+     * @param geometryFactory the geometry factory
      */
     public PolyLineParser(GeometryFactory geometryFactory) {
         super(geometryFactory);
     }
 
     /**
-     * abstract a Polyline shape
-     * @param reader
-     * @return
-     * @throws IOException
+     * abstract a Polyline shape.
+     *
+     * @param reader the reader
+     * @return the geometry
+     * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
     public Geometry parserShape(ShapeReader reader) throws IOException {

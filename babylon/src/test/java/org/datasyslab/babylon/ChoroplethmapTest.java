@@ -17,9 +17,9 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
+import org.datasyslab.babylon.core.ImageGenerator;
 import org.datasyslab.babylon.core.RasterOverlayOperator;
 import org.datasyslab.babylon.core.VectorOverlayOperator;
-import org.datasyslab.babylon.extension.imageGenerator.BabylonImageGenerator;
 import org.datasyslab.babylon.extension.visualizationEffect.ChoroplethMap;
 import org.datasyslab.babylon.extension.visualizationEffect.ScatterPlot;
 import org.datasyslab.babylon.utils.ImageType;
@@ -184,7 +184,7 @@ public class ChoroplethmapTest implements Serializable{
 		RasterOverlayOperator overlayOperator = new RasterOverlayOperator(visualizationOperator.rasterImage);
 		overlayOperator.JoinImage(frontImage.rasterImage);
 		
-		BabylonImageGenerator imageGenerator = new BabylonImageGenerator();
+		ImageGenerator imageGenerator = new ImageGenerator();
 		imageGenerator.SaveRasterImageAsLocalFile(overlayOperator.backRasterImage,"./target/choroplethmap/RectangleRDD-combined", ImageType.PNG);
 	}
 	
@@ -214,7 +214,7 @@ public class ChoroplethmapTest implements Serializable{
 		RasterOverlayOperator rasterOverlayOperator = new RasterOverlayOperator(visualizationOperator.rasterImage);
 		rasterOverlayOperator.JoinImage(frontImage.rasterImage);
 		
-		BabylonImageGenerator imageGenerator = new BabylonImageGenerator();
+		ImageGenerator imageGenerator = new ImageGenerator();
 		imageGenerator.SaveRasterImageAsLocalFile(rasterOverlayOperator.backRasterImage, "./target/choroplethmap/PolygonRDD-combined", ImageType.GIF);
 		
 		visualizationOperator = new ChoroplethMap(1000,600,USMainLandBoundary,false,true);
@@ -232,7 +232,7 @@ public class ChoroplethmapTest implements Serializable{
 		VectorOverlayOperator vectorOverlayOperator = new VectorOverlayOperator(visualizationOperator.vectorImage);
 		vectorOverlayOperator.JoinImage(frontImage.vectorImage);
 		
-		imageGenerator = new BabylonImageGenerator();
+		imageGenerator = new ImageGenerator();
 		imageGenerator.SaveVectorImageAsLocalFile(vectorOverlayOperator.backVectorImage, "./target/choroplethmap/PolygonRDD-combined", ImageType.SVG);
 	}
 

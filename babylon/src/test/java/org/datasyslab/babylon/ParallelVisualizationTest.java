@@ -14,7 +14,8 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
-import org.datasyslab.babylon.extension.imageGenerator.BabylonImageGenerator;
+import org.datasyslab.babylon.core.ImageGenerator;
+import org.datasyslab.babylon.core.ImageStitcher;
 import org.datasyslab.babylon.extension.visualizationEffect.HeatMap;
 import org.datasyslab.babylon.utils.ImageType;
 import org.datasyslab.geospark.enums.FileDataSplitter;
@@ -179,10 +180,11 @@ public class ParallelVisualizationTest {
 		PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY());
 		HeatMap visualizationOperator = new HeatMap(resolutionX,resolutionY,USMainLandBoundary,false,2,partitionX,partitionY,true,true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		visualizationOperator.stitchImagePartitions();
-		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
-		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/parallelvisualization/PointRDD",ImageType.PNG);
-	}
+
+		ImageGenerator imageGenerator = new  ImageGenerator();
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.distributedRasterImage, "./target/parallelvisualization/PointRDD",ImageType.PNG,0,partitionX, partitionY);
+        ImageStitcher.stitchImagePartitionsFromLocalFile("./target/parallelvisualization/PointRDD", resolutionX,resolutionY,0,partitionX, partitionY);
+    }
 	
 	/**
 	 * Test rectangle RDD visualization with tiles.
@@ -194,9 +196,10 @@ public class ParallelVisualizationTest {
 		RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY());
 		HeatMap visualizationOperator = new HeatMap(resolutionX,resolutionY,USMainLandBoundary,false,2,partitionX,partitionY,true,true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		visualizationOperator.stitchImagePartitions();
-		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
-		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/parallelvisualization/RectangleRDDWithTiles",ImageType.PNG);
+
+		ImageGenerator imageGenerator = new  ImageGenerator();
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.distributedRasterImage, "./target/parallelvisualization/RectangleRDDWithTiles",ImageType.PNG,0,partitionX, partitionY);
+        ImageStitcher.stitchImagePartitionsFromLocalFile("./target/parallelvisualization/RectangleRDDWithTiles", resolutionX,resolutionY,0,partitionX, partitionY);
 	}
 
     /**
@@ -207,10 +210,12 @@ public class ParallelVisualizationTest {
     @Test
     public void testRectangleRDDVisualizationNoTiles() throws Exception {
         RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY());
-        HeatMap visualizationOperator = new HeatMap(resolutionX,resolutionY,USMainLandBoundary,false,5,partitionX,partitionY,true,false);
+        HeatMap visualizationOperator = new HeatMap(resolutionX,resolutionY,USMainLandBoundary,false,5,partitionX,partitionY,true,true);
         visualizationOperator.Visualize(sparkContext, spatialRDD);
-        BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
-        imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/parallelvisualization/RectangleRDDNoTiles",ImageType.PNG);
+
+        ImageGenerator imageGenerator = new  ImageGenerator();
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.distributedRasterImage, "./target/parallelvisualization/RectangleRDDNoTiles",ImageType.PNG, 0, partitionX, partitionY);
+		ImageStitcher.stitchImagePartitionsFromLocalFile("./target/parallelvisualization/RectangleRDDNoTiles", resolutionX,resolutionY,0,partitionX, partitionY);
     }
 
 	/**
@@ -224,9 +229,11 @@ public class ParallelVisualizationTest {
 		PolygonRDD spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions, StorageLevel.MEMORY_ONLY());
 		HeatMap visualizationOperator = new HeatMap(resolutionX,resolutionY,USMainLandBoundary,false,2,partitionX,partitionY,true,true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		visualizationOperator.stitchImagePartitions();
-		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
-		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/parallelvisualization/PolygonRDD",ImageType.PNG);
+		
+		ImageGenerator imageGenerator = new ImageGenerator();
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.distributedRasterImage, "./target/parallelvisualization/PolygonRDD",ImageType.PNG, 0, partitionX, partitionY);
+		ImageStitcher.stitchImagePartitionsFromLocalFile("./target/parallelvisualization/PolygonRDD", resolutionX,resolutionY,0,partitionX, partitionY);
+		
 	}
 	
 	/**
@@ -239,8 +246,9 @@ public class ParallelVisualizationTest {
 		LineStringRDD spatialRDD = new LineStringRDD(sparkContext, LineStringInputLocation, LineStringSplitter, false, LineStringNumPartitions, StorageLevel.MEMORY_ONLY());
 		HeatMap visualizationOperator = new HeatMap(resolutionX,resolutionY,USMainLandBoundary,false,2,partitionX,partitionY,true,true);
 		visualizationOperator.Visualize(sparkContext, spatialRDD);
-		visualizationOperator.stitchImagePartitions();
-		BabylonImageGenerator imageGenerator = new  BabylonImageGenerator();
-		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/parallelvisualization/LineStringRDD",ImageType.PNG);
+		
+		ImageGenerator imageGenerator = new ImageGenerator();
+		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.distributedRasterImage, "./target/parallelvisualization/LineStringRDD",ImageType.PNG, 0, partitionX, partitionY);
+		ImageStitcher.stitchImagePartitionsFromLocalFile("./target/parallelvisualization/LineStringRDD", resolutionX,resolutionY,0,partitionX, partitionY);
 	}
 }

@@ -13,21 +13,27 @@ import com.vividsolutions.jts.geom.MultiPoint;
 
 import java.io.IOException;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class MultiPointParser.
+ */
 public class MultiPointParser extends ShapeParser {
 
     /**
-     * create a parser that can abstract a MultiPolyline from input source with given GeometryFactory
-     * @param geometryFactory
+     * create a parser that can abstract a MultiPolyline from input source with given GeometryFactory.
+     *
+     * @param geometryFactory the geometry factory
      */
     public MultiPointParser(GeometryFactory geometryFactory) {
         super(geometryFactory);
     }
 
     /**
-     * abstract a MultiPoint shape
-     * @param reader
-     * @return
-     * @throws IOException
+     * abstract a MultiPoint shape.
+     *
+     * @param reader the reader
+     * @return the geometry
+     * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
     public Geometry parserShape(ShapeReader reader) throws IOException {
