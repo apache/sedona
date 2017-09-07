@@ -7,37 +7,21 @@
 package org.datasyslab.geospark.geometryObjects;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 import scala.Tuple2;
 
 import java.io.Serializable;
 import java.util.HashSet;
 
-public class PairGeometry implements Serializable {
-    public Geometry keyGeometry;
-    public HashSet valueGeometries;
-    public PairGeometry(Geometry keyGeometry, HashSet valueGeometries)
+public class PairGeometry<K extends Geometry, V extends Geometry> implements Serializable {
+    public K keyGeometry;
+    public HashSet<V> valueGeometries;
+    public PairGeometry(K keyGeometry, HashSet<V> valueGeometries)
     {
         this.keyGeometry = keyGeometry;
         this.valueGeometries = valueGeometries;
     }
-    public Tuple2<Polygon,HashSet<Geometry>> getPolygonTuple2()
-    {
-        return new Tuple2<Polygon,HashSet<Geometry>>((Polygon) keyGeometry,valueGeometries);
-    }
-    public Tuple2<Point,HashSet<Geometry>> getPointTuple2()
-    {
-        return new Tuple2<Point,HashSet<Geometry>>((Point) keyGeometry,valueGeometries);
-    }
-    public Tuple2<LineString,HashSet<Geometry>> getLineStringTuple2()
-    {
-        return new Tuple2<LineString,HashSet<Geometry>>((LineString) keyGeometry,valueGeometries);
-    }
-    public Tuple2<Circle,HashSet<Geometry>> getCircleTuple2()
-    {
-        return new Tuple2<Circle,HashSet<Geometry>>((Circle) keyGeometry,valueGeometries);
+    public Tuple2<K, HashSet<V>> makeTuple2() {
+        return new Tuple2<>(keyGeometry, valueGeometries);
     }
 
     @Override

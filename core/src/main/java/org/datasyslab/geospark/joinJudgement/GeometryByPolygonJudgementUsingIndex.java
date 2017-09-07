@@ -9,13 +9,8 @@ package org.datasyslab.geospark.joinJudgement;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.index.SpatialIndex;
-import com.vividsolutions.jts.index.quadtree.Quadtree;
-import com.vividsolutions.jts.index.strtree.STRtree;
-import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.FlatMapFunction2;
-import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.datasyslab.geospark.geometryObjects.PairGeometry;
-import scala.Tuple2;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -28,7 +23,7 @@ import java.util.List;
 /**
  * The Class GeometryByPolygonJudgementUsingIndex.
  */
-public class GeometryByPolygonJudgementUsingIndex implements FlatMapFunction2<Iterator<SpatialIndex>, Iterator<Object>, PairGeometry>, Serializable {
+public class GeometryByPolygonJudgementUsingIndex<T extends Geometry> implements FlatMapFunction2<Iterator<SpatialIndex>, Iterator<Polygon>, PairGeometry<Polygon, T>>, Serializable {
 
     /**
      * The consider boundary intersection.
@@ -45,22 +40,16 @@ public class GeometryByPolygonJudgementUsingIndex implements FlatMapFunction2<It
     }
 
     @Override
-    public Iterator<PairGeometry> call(Iterator<SpatialIndex> iteratorTree, Iterator<Object> iteratorWindow) throws Exception {
-        List<PairGeometry> result = new ArrayList<>();
+    public Iterator<PairGeometry<Polygon, T>> call(Iterator<SpatialIndex> iteratorTree, Iterator<Polygon> iteratorWindow) throws Exception {
+        List<PairGeometry<Polygon, T>> result = new ArrayList<>();
 
         if (!iteratorTree.hasNext()) {
             return result.iterator();
         }
         SpatialIndex treeIndex = iteratorTree.next();
-        if (treeIndex instanceof STRtree) {
-            treeIndex = (STRtree) treeIndex;
-        } else {
-            treeIndex = (Quadtree) treeIndex;
-        }
         while (iteratorWindow.hasNext()) {
-            Polygon window = (Polygon) iteratorWindow.next();
-            List<Geometry> queryResult = new ArrayList<Geometry>();
-            queryResult = treeIndex.query(window.getEnvelopeInternal());
+            Polygon window = iteratorWindow.next();
+            List<Geometry> queryResult = treeIndex.query(window.getEnvelopeInternal());
             if (queryResult.size() == 0) continue;
             HashSet<Geometry> objectHashSet = new HashSet<Geometry>();
             for (Geometry spatialObject : queryResult) {
