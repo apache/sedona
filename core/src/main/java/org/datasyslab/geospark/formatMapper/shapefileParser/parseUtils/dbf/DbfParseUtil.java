@@ -12,6 +12,7 @@ import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.Shape
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class DbfParseUtil implements ShapeFileConst {
     }
 
     /** fieldDescriptors of current .dbf file */
-    public static List<FieldDescriptor> fieldDescriptors = null;
+    private List<FieldDescriptor> fieldDescriptors = null;
 
     /**
      * parse header of .dbf file and draw information for next step
@@ -104,7 +105,7 @@ public class DbfParseUtil implements ShapeFileConst {
      * @return
      * @throws IOException
      */
-    public byte[] parsePrimitiveRecord(DataInputStream inputStream) throws IOException {
+    public String parsePrimitiveRecord(DataInputStream inputStream) throws IOException {
         if(isDone()) return null;
         byte flag = inputStream.readByte();
         final int recordLength = numBytesRecord - 1;//exclude skip the record flag when read and skip
@@ -117,7 +118,7 @@ public class DbfParseUtil implements ShapeFileConst {
         byte[] primitiveBytes = new byte[recordLength];
         inputStream.readFully(primitiveBytes);
         numRecordRead++; //update number of record read
-        return primitiveBytes;
+        return primitiveToAttributes(ByteBuffer.wrap(primitiveBytes));
     }
 
     /**
@@ -126,7 +127,7 @@ public class DbfParseUtil implements ShapeFileConst {
      * @return
      * @throws IOException
      */
-    public static String primitiveToAttributes(DataInputStream inputStream)
+    public String primitiveToAttributes(DataInputStream inputStream)
             throws IOException
     {
         byte[] delimiter = {'\t'};
@@ -137,6 +138,30 @@ public class DbfParseUtil implements ShapeFileConst {
             inputStream.readFully(fldBytes);
             //System.out.println(descriptor.getFiledName() + "  " + new String(fldBytes));
             byte[] attr = new String(fldBytes).trim().getBytes();
+            if(i > 0) attributes.append(delimiter, 0, 1);// first attribute doesn't append '\t'
+            attributes.append(attr, 0, attr.length);
+        }
+        String attrs = attributes.toString();
+        return attributes.toString();
+
+    }
+
+    /**
+     * abstract attributes from primitive bytes according to field descriptors.
+     * @param buffer
+     * @return
+     * @throws IOException
+     */
+    public String primitiveToAttributes(ByteBuffer buffer)
+            throws IOException
+    {
+        byte[] delimiter = {'\t'};
+        Text attributes = new Text();
+        for(int i = 0;i < fieldDescriptors.size(); ++i){
+            FieldDescriptor descriptor = fieldDescriptors.get(i);
+            byte[] fldBytes = new byte[descriptor.getFieldLength()];
+            buffer.get(fldBytes, 0, fldBytes.length);
+            byte[] attr = fastParse(fldBytes, 0, fldBytes.length).trim().getBytes();
             if(i > 0) attributes.append(delimiter, 0, 1);// first attribute doesn't append '\t'
             attributes.append(attr, 0, attr.length);
         }

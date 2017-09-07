@@ -13,6 +13,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.log4j.Logger;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeType;
 
 import java.io.IOException;
@@ -52,6 +53,9 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
 
     /** flag of whether having next .dbf record */
     private boolean hasNextDbf = false;
+
+    /** dubug logger */
+    final static Logger logger = Logger.getLogger(CombineShapeReader.class);
 
     /**
      * cut the combined split into FileSplit for .shp, .shx and .dbf
@@ -96,12 +100,14 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
             curShapeType = shapeFileReader.getCurrentValue().getTypeID();
         }
         // check if records match in .shp and .dbf
-        if(hasNextShp && !hasNextDbf){
-            Exception e = new Exception("shape record loses attributes in .dbf file at ID=" + shapeFileReader.getCurrentKey().getIndex());
-            e.printStackTrace();
-        }else if(!hasNextShp && hasNextDbf){
-            Exception e = new Exception("Redundant attributes in .dbf exists");
-            e.printStackTrace();
+        if(hasDbf){
+            if(hasNextShp && !hasNextDbf){
+                Exception e = new Exception("shape record loses attributes in .dbf file at ID=" + shapeFileReader.getCurrentKey().getIndex());
+                e.printStackTrace();
+            }else if(!hasNextShp && hasNextDbf){
+                Exception e = new Exception("Redundant attributes in .dbf exists");
+                e.printStackTrace();
+            }
         }
         return hasNextShp;
     }
@@ -113,7 +119,7 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
     public PrimitiveShape getCurrentValue() throws IOException, InterruptedException {
         value = new PrimitiveShape();
         value.setPrimitiveRecord(shapeFileReader.getCurrentValue());
-        if(hasDbf && hasNextDbf) value.setPrimitiveAttribute(dbfFileReader.getCurrentValue());
+        if(hasDbf && hasNextDbf) value.setAttributes(dbfFileReader.getCurrentValue());
         return value;
     }
 

@@ -12,9 +12,10 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.VoidFunction;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.BoundBox;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShpFileParser;
+import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundBox;
+import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundaryInputFormat;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.TypeUnknownException;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.PrimitiveShape;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapeInputFormat;
@@ -31,6 +32,7 @@ import java.util.List;
 /**
  * The Class ShapefileRDD.
  */
+@Deprecated
 public class ShapefileRDD implements Serializable{
 
 
@@ -38,7 +40,7 @@ public class ShapefileRDD implements Serializable{
     private JavaRDD<Geometry> shapeRDD = null;
 
     /** The geometry factory. */
-    public static GeometryFactory geometryFactory;
+    public static GeometryFactory geometryFactory = new GeometryFactory();
 
     /**  bounding box. */
     private BoundBox boundBox = null;
@@ -50,9 +52,7 @@ public class ShapefileRDD implements Serializable{
      * @param filePath the file path
      */
     public ShapefileRDD(JavaSparkContext sparkContext, String filePath){
-        geometryFactory = new GeometryFactory();
         boundBox = new BoundBox();
-        ShpFileParser.boundBox = boundBox;
         JavaPairRDD<ShapeKey, PrimitiveShape> shapePrimitiveRdd = sparkContext.newAPIHadoopFile(
                 filePath,
                 ShapeInputFormat.class,
@@ -108,11 +108,11 @@ public class ShapefileRDD implements Serializable{
     public JavaRDD<Point> getPointRDD() {
         return shapeRDD.flatMap(new FlatMapFunction<Geometry, Point>()
         {
-			@Override
-			public Iterator<Point> call(Geometry spatialObject) throws Exception {
+            @Override
+            public Iterator<Point> call(Geometry spatialObject) throws Exception {
                 List<Point> result = new ArrayList<Point>();
                 if(spatialObject instanceof MultiPoint)
-			    {
+                {
                     MultiPoint multiObjects = (MultiPoint)spatialObject;
                     for (int i=0;i<multiObjects.getNumGeometries();i++)
                     {
@@ -129,9 +129,9 @@ public class ShapefileRDD implements Serializable{
                 {
                     throw new Exception("[ShapefileRDD][getPointRDD] the object type is not Point or MultiPoint type. It is "+spatialObject.getGeometryType());
                 }
-				return result.iterator();
-			}
-        	
+                return result.iterator();
+            }
+
         });
     }
 
@@ -204,16 +204,6 @@ public class ShapefileRDD implements Serializable{
 
         });
     }
-
-    /**
-     * Gets the bound box.
-     *
-     * @return the bound box
-     */
-    public BoundBox getBoundBox(){
-        return boundBox;
-    }
-
     /**
      * Count.
      *
@@ -222,4 +212,30 @@ public class ShapefileRDD implements Serializable{
     public long count(){
         return shapeRDD.count();
     }
+
+    /**
+     * read and merge bound boxes of all shapefiles user input, if there is no, leave BoundBox null;
+     */
+    public BoundBox getBoundBox(JavaSparkContext sc, String inputPath){
+        // read bound boxes into memory
+        JavaPairRDD<Long, BoundBox>  bounds = sc.newAPIHadoopFile(
+                inputPath,
+                BoundaryInputFormat.class,
+                Long.class,
+                BoundBox.class,
+                sc.hadoopConfiguration()
+        );
+        // merge all into one
+        bounds = bounds.reduceByKey(new Function2<BoundBox, BoundBox, BoundBox>(){
+            @Override
+            public BoundBox call(BoundBox box1, BoundBox box2) throws Exception {
+                return BoundBox.mergeBoundBox(box1, box2);
+            }
+        });
+        // if there is a result assign it to variable : boundBox
+        if(bounds.count() > 0){
+            return new BoundBox(bounds.collect().get(0)._2());
+        }else return null;
+    }
+
 }
