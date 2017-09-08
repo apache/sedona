@@ -6,10 +6,8 @@
  */
 package org.datasyslab.geospark.spatialOperator;
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Iterator;
-
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Polygon;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
@@ -20,22 +18,13 @@ import org.datasyslab.geospark.joinJudgement.GeometryByCircleJudgement;
 import org.datasyslab.geospark.joinJudgement.GeometryByCircleJudgementUsingIndex;
 import org.datasyslab.geospark.joinJudgement.GeometryByPolygonJudgement;
 import org.datasyslab.geospark.joinJudgement.GeometryByPolygonJudgementUsingIndex;
-
 import org.datasyslab.geospark.spatialPartitioning.DuplicatesHandler;
 import org.datasyslab.geospark.spatialRDD.CircleRDD;
-import org.datasyslab.geospark.spatialRDD.LineStringRDD;
-import org.datasyslab.geospark.spatialRDD.PointRDD;
-import org.datasyslab.geospark.spatialRDD.PolygonRDD;
-import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 import org.datasyslab.geospark.spatialRDD.SpatialRDD;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.index.SpatialIndex;
-
 import scala.Tuple2;
+
+import java.io.Serializable;
+import java.util.HashSet;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -52,7 +41,7 @@ public class JoinQuery implements Serializable{
      * @return the java pair RDD
      * @throws Exception the exception
      */
-    private static JavaPairRDD<Polygon, HashSet<Geometry>> executeSpatialJoinUsingIndex(SpatialRDD spatialRDD, SpatialRDD queryRDD, boolean considerBoundaryIntersection) throws Exception {
+    private static <T extends Geometry> JavaPairRDD<Polygon, HashSet<T>> executeSpatialJoinUsingIndex(SpatialRDD spatialRDD, SpatialRDD<Polygon> queryRDD, boolean considerBoundaryIntersection) throws Exception {
         // Check CRS information before doing calculation. The two input RDDs are supposed to have the same EPSG code if they require CRS transformation.
         if (spatialRDD.getCRStransformation() != queryRDD.getCRStransformation()) {
             throw new Exception("[JoinQuery][SpatialJoinQuery]one input RDD doesn't perform necessary CRS transformation. Please check your RDD constructors.");
@@ -75,12 +64,12 @@ public class JoinQuery implements Serializable{
         }
 
 
-        JavaRDD<PairGeometry> cogroupResult = spatialRDD.indexedRDD.zipPartitions(queryRDD.spatialPartitionedRDD, new GeometryByPolygonJudgementUsingIndex(considerBoundaryIntersection));
+        JavaRDD<PairGeometry<Polygon, T>> cogroupResult = spatialRDD.indexedRDD.zipPartitions(queryRDD.spatialPartitionedRDD, new GeometryByPolygonJudgementUsingIndex(considerBoundaryIntersection));
 
-        JavaPairRDD<Polygon, HashSet<Geometry>> joinResultWithDuplicates = cogroupResult.mapToPair(new PairFunction<PairGeometry, Polygon, HashSet<Geometry>>() {
+        JavaPairRDD<Polygon, HashSet<T>> joinResultWithDuplicates = cogroupResult.mapToPair(new PairFunction<PairGeometry<Polygon, T>, Polygon, HashSet<T>>() {
             @Override
-            public Tuple2<Polygon, HashSet<Geometry>> call(PairGeometry pairGeometry) throws Exception {
-                return pairGeometry.getPolygonTuple2();
+            public Tuple2<Polygon, HashSet<T>> call(PairGeometry<Polygon, T> pairGeometry) throws Exception {
+                return pairGeometry.makeTuple2();
             }
         });
         return joinResultWithDuplicates;
@@ -95,7 +84,7 @@ public class JoinQuery implements Serializable{
      * @return the java pair RDD
      * @throws Exception the exception
      */
-    private static JavaPairRDD<Polygon, HashSet<Geometry>> executeSpatialJoinNoIndex(SpatialRDD spatialRDD, SpatialRDD queryRDD, boolean considerBoundaryIntersection) throws Exception {
+    private static <T extends Geometry> JavaPairRDD<Polygon, HashSet<T>> executeSpatialJoinNoIndex(SpatialRDD spatialRDD, SpatialRDD<Polygon> queryRDD, boolean considerBoundaryIntersection) throws Exception {
         // Check CRS information before doing calculation. The two input RDDs are supposed to have the same EPSG code if they require CRS transformation.
         if (spatialRDD.getCRStransformation() != queryRDD.getCRStransformation()) {
             throw new Exception("[JoinQuery][SpatialJoinQuery]one input RDD doesn't perform necessary CRS transformation. Please check your RDD constructors.");
@@ -114,12 +103,12 @@ public class JoinQuery implements Serializable{
         }
 
         assert spatialRDD.spatialPartitionedRDD.getNumPartitions()==queryRDD.spatialPartitionedRDD.getNumPartitions();
-        JavaRDD<PairGeometry> cogroupResult = spatialRDD.spatialPartitionedRDD.zipPartitions(queryRDD.spatialPartitionedRDD, new GeometryByPolygonJudgement(considerBoundaryIntersection));
+        JavaRDD<PairGeometry<Polygon, T>> cogroupResult = spatialRDD.spatialPartitionedRDD.zipPartitions(queryRDD.spatialPartitionedRDD, new GeometryByPolygonJudgement(considerBoundaryIntersection));
 
-        JavaPairRDD<Polygon, HashSet<Geometry>> joinResultWithDuplicates = cogroupResult.mapToPair(new PairFunction<PairGeometry, Polygon, HashSet<Geometry>>() {
+        JavaPairRDD<Polygon, HashSet<T>> joinResultWithDuplicates = cogroupResult.mapToPair(new PairFunction<PairGeometry<Polygon, T>, Polygon, HashSet<T>>() {
             @Override
-            public Tuple2<Polygon, HashSet<Geometry>> call(PairGeometry pairGeometry) throws Exception {
-                return pairGeometry.getPolygonTuple2();
+            public Tuple2<Polygon, HashSet<T>> call(PairGeometry<Polygon, T> pairGeometry) throws Exception {
+                return pairGeometry.makeTuple2();
             }
         });
 
@@ -136,7 +125,7 @@ public class JoinQuery implements Serializable{
      * @return the java pair RDD
      * @throws Exception the exception
      */
-    private static JavaPairRDD<Circle, HashSet<Geometry>> executeDistanceJoinUsingIndex(SpatialRDD spatialRDD, SpatialRDD queryRDD, boolean considerBoundaryIntersection) throws Exception {
+    private static <T extends Geometry> JavaPairRDD<Circle, HashSet<T>> executeDistanceJoinUsingIndex(SpatialRDD<T> spatialRDD, SpatialRDD<Circle> queryRDD, boolean considerBoundaryIntersection) throws Exception {
         // Check CRS information before doing calculation. The two input RDDs are supposed to have the same EPSG code if they require CRS transformation.
         if (spatialRDD.getCRStransformation() != queryRDD.getCRStransformation()) {
             throw new Exception("[JoinQuery][DistanceJoinQuery]one input RDD doesn't perform necessary CRS transformation. Please check your RDD constructors.");
@@ -158,12 +147,12 @@ public class JoinQuery implements Serializable{
             throw new Exception("[JoinQuery][SpatialJoinQuery]queryRDD is not partitioned by the same grids with spatialRDD. Please make sure they both use the same grids otherwise wrong results will appear.");
         }
 
-        JavaRDD<PairGeometry> cogroupResult = spatialRDD.indexedRDD.zipPartitions(queryRDD.spatialPartitionedRDD, new GeometryByCircleJudgementUsingIndex(considerBoundaryIntersection));
+        JavaRDD<PairGeometry<Circle, T>> cogroupResult = spatialRDD.indexedRDD.zipPartitions(queryRDD.spatialPartitionedRDD, new GeometryByCircleJudgementUsingIndex(considerBoundaryIntersection));
 
-        JavaPairRDD<Circle, HashSet<Geometry>> joinResultWithDuplicates = cogroupResult.mapToPair(new PairFunction<PairGeometry, Circle, HashSet<Geometry>>() {
+        JavaPairRDD<Circle, HashSet<T>> joinResultWithDuplicates = cogroupResult.mapToPair(new PairFunction<PairGeometry<Circle, T>, Circle, HashSet<T>>() {
             @Override
-            public Tuple2<Circle, HashSet<Geometry>> call(PairGeometry pairGeometry) throws Exception {
-                return pairGeometry.getCircleTuple2();
+            public Tuple2<Circle, HashSet<T>> call(PairGeometry<Circle, T> pairGeometry) throws Exception {
+                return pairGeometry.makeTuple2();
             }
         });
 
@@ -179,7 +168,7 @@ public class JoinQuery implements Serializable{
      * @return the java pair RDD
      * @throws Exception the exception
      */
-    private static JavaPairRDD<Circle, HashSet<Geometry>> executeDistanceJoinNoIndex(SpatialRDD spatialRDD, SpatialRDD queryRDD, boolean considerBoundaryIntersection) throws Exception {
+    private static <T extends Geometry> JavaPairRDD<Circle, HashSet<T>> executeDistanceJoinNoIndex(SpatialRDD<T> spatialRDD, SpatialRDD<Circle> queryRDD, boolean considerBoundaryIntersection) throws Exception {
         // Check CRS information before doing calculation. The two input RDDs are supposed to have the same EPSG code if they require CRS transformation.
         if (spatialRDD.getCRStransformation() != queryRDD.getCRStransformation()) {
             throw new Exception("[JoinQuery][DistanceJoinQuery]one input RDD doesn't perform necessary CRS transformation. Please check your RDD constructors.");
@@ -197,60 +186,18 @@ public class JoinQuery implements Serializable{
             throw new Exception("[JoinQuery][SpatialJoinQuery]queryRDD is not partitioned by the same grids with spatialRDD. Please make sure they both use the same grids otherwise wrong results will appear.");
         }
 
-        JavaRDD<PairGeometry> cogroupResult = spatialRDD.spatialPartitionedRDD.zipPartitions(queryRDD.spatialPartitionedRDD, new GeometryByCircleJudgement(considerBoundaryIntersection));
+        JavaRDD<PairGeometry<Circle, T>> cogroupResult = spatialRDD.spatialPartitionedRDD.zipPartitions(queryRDD.spatialPartitionedRDD, new GeometryByCircleJudgement(considerBoundaryIntersection));
 
-        JavaPairRDD<Circle, HashSet<Geometry>> joinResultWithDuplicates = cogroupResult.mapToPair(new PairFunction<PairGeometry, Circle, HashSet<Geometry>>() {
+        JavaPairRDD<Circle, HashSet<T>> joinResultWithDuplicates = cogroupResult.mapToPair(new PairFunction<PairGeometry<Circle, T>, Circle, HashSet<T>>() {
             @Override
-            public Tuple2<Circle, HashSet<Geometry>> call(PairGeometry pairGeometry) throws Exception {
-                return pairGeometry.getCircleTuple2();
+            public Tuple2<Circle, HashSet<T>> call(PairGeometry<Circle, T> pairGeometry) throws Exception {
+                return pairGeometry.makeTuple2();
             }
         });
 
         return joinResultWithDuplicates;
     }
 
-    /**
-     * Spatial join query.
-     *
-     * @param spatialRDD the spatial RDD
-     * @param queryRDD the query RDD
-     * @param useIndex the use index
-     * @param considerBoundaryIntersection the consider boundary intersection
-     * @return the java pair RDD
-     * @throws Exception the exception
-     */
-    public static JavaPairRDD<Polygon, HashSet<Point>> SpatialJoinQuery(PointRDD spatialRDD,RectangleRDD queryRDD,boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
-
-        JavaPairRDD<Polygon, HashSet<Geometry>> joinListResultAfterAggregation = null;
-        if(useIndex)
-        {
-            joinListResultAfterAggregation = executeSpatialJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-        }
-        else
-        {
-
-            joinListResultAfterAggregation = executeSpatialJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        joinListResultAfterAggregation = DuplicatesHandler.removeDuplicatesGeometryByPolygon(joinListResultAfterAggregation);
-        JavaPairRDD<Polygon, HashSet<Point>> castedResult = joinListResultAfterAggregation.mapValues(new Function<HashSet<Geometry>,HashSet<Point>>()
-        {
-            @Override
-            public HashSet<Point> call(HashSet<Geometry> spatialObjects) throws Exception {
-                HashSet<Point> castedSpatialObjects = new HashSet<Point>();
-                Iterator spatialObjectIterator = spatialObjects.iterator();
-                while(spatialObjectIterator.hasNext())
-                {
-                    castedSpatialObjects.add((Point)spatialObjectIterator.next());
-                }
-                return castedSpatialObjects;
-            }
-
-        });
-        return castedResult;
-    }
-
-
 
     /**
      * Spatial join query.
@@ -262,310 +209,23 @@ public class JoinQuery implements Serializable{
      * @return the java pair RDD
      * @throws Exception the exception
      */
-    public static JavaPairRDD<Polygon, HashSet<Polygon>> SpatialJoinQuery(RectangleRDD spatialRDD,RectangleRDD queryRDD,boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
+    public static <T extends Geometry> JavaPairRDD<Polygon, HashSet<T>> SpatialJoinQuery(SpatialRDD<T> spatialRDD, SpatialRDD<Polygon> queryRDD, boolean useIndex, boolean considerBoundaryIntersection) throws Exception {
+        JavaPairRDD<Polygon, HashSet<T>> resultWithDuplicates = SpatialJoinQueryWithDuplicates(spatialRDD, queryRDD, useIndex, considerBoundaryIntersection);
+        return DuplicatesHandler.removeDuplicates(resultWithDuplicates);
+    }
 
-        JavaPairRDD<Polygon, HashSet<Geometry>> joinListResultAfterAggregation = null;
+    public static <T extends Geometry> JavaPairRDD<Polygon, HashSet<T>> SpatialJoinQueryWithDuplicates(SpatialRDD<T> spatialRDD, SpatialRDD<Polygon> queryRDD, boolean useIndex, boolean considerBoundaryIntersection) throws Exception {
+        JavaPairRDD<Polygon, HashSet<T>> resultWithDuplicates;
         if(useIndex)
         {
-            joinListResultAfterAggregation = executeSpatialJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
+            resultWithDuplicates = executeSpatialJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
         }
         else
         {
-
-            joinListResultAfterAggregation = executeSpatialJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
+            resultWithDuplicates = executeSpatialJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
         }
-        joinListResultAfterAggregation = DuplicatesHandler.removeDuplicatesGeometryByPolygon(joinListResultAfterAggregation);
-        JavaPairRDD<Polygon, HashSet<Polygon>> castedResult = joinListResultAfterAggregation.mapValues(new Function<HashSet<Geometry>,HashSet<Polygon>>()
-        {
-            @Override
-            public HashSet<Polygon> call(HashSet<Geometry> spatialObjects) throws Exception {
-                HashSet<Polygon> castedSpatialObjects = new HashSet<Polygon>();
-                Iterator spatialObjectIterator = spatialObjects.iterator();
-                while(spatialObjectIterator.hasNext())
-                {
-                    castedSpatialObjects.add((Polygon)spatialObjectIterator.next());
-                }
-                return castedSpatialObjects;
-            }
-
-        });
-        return castedResult;
+        return resultWithDuplicates;
     }
-
-    /**
-     * Spatial join query.
-     *
-     * @param spatialRDD the spatial RDD
-     * @param queryRDD the query RDD
-     * @param useIndex the use index
-     * @param considerBoundaryIntersection the consider boundary intersection
-     * @return the java pair RDD
-     * @throws Exception the exception
-     */
-    public static JavaPairRDD<Polygon, HashSet<Point>> SpatialJoinQuery(PointRDD spatialRDD,PolygonRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
-        JavaPairRDD<Polygon, HashSet<Geometry>> joinListResultAfterAggregation = null;
-        if(useIndex)
-        {
-            joinListResultAfterAggregation = executeSpatialJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-        }
-        else
-        {
-
-            joinListResultAfterAggregation = executeSpatialJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        joinListResultAfterAggregation = DuplicatesHandler.removeDuplicatesGeometryByPolygon(joinListResultAfterAggregation);
-        JavaPairRDD<Polygon, HashSet<Point>> castedResult = joinListResultAfterAggregation.mapValues(new Function<HashSet<Geometry>,HashSet<Point>>()
-        {
-            @Override
-            public HashSet<Point> call(HashSet<Geometry> spatialObjects) throws Exception {
-                HashSet<Point> castedSpatialObjects = new HashSet<Point>();
-                Iterator spatialObjectIterator = spatialObjects.iterator();
-                while(spatialObjectIterator.hasNext())
-                {
-                    castedSpatialObjects.add((Point)spatialObjectIterator.next());
-                }
-                return castedSpatialObjects;
-            }
-
-        });
-        return castedResult;
-    }
-
-
-
-    /**
-     * Spatial join query.
-     *
-     * @param spatialRDD the spatial RDD
-     * @param queryRDD the query RDD
-     * @param useIndex the use index
-     * @param considerBoundaryIntersection the consider boundary intersection
-     * @return the java pair RDD
-     * @throws Exception the exception
-     */
-    public static JavaPairRDD<Polygon, HashSet<Polygon>> SpatialJoinQuery(PolygonRDD spatialRDD,PolygonRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
-        JavaPairRDD<Polygon, HashSet<Geometry>> joinListResultAfterAggregation = null;
-        if(useIndex)
-        {
-            joinListResultAfterAggregation = executeSpatialJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-        }
-        else
-        {
-            joinListResultAfterAggregation = executeSpatialJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        joinListResultAfterAggregation = DuplicatesHandler.removeDuplicatesGeometryByPolygon(joinListResultAfterAggregation);
-        JavaPairRDD<Polygon, HashSet<Polygon>> castedResult = joinListResultAfterAggregation.mapValues(new Function<HashSet<Geometry>,HashSet<Polygon>>()
-        {
-            @Override
-            public HashSet<Polygon> call(HashSet<Geometry> spatialObjects) throws Exception {
-                HashSet<Polygon> castedSpatialObjects = new HashSet<Polygon>();
-                Iterator spatialObjectIterator = spatialObjects.iterator();
-                while(spatialObjectIterator.hasNext())
-                {
-                    castedSpatialObjects.add((Polygon)spatialObjectIterator.next());
-                }
-                return castedSpatialObjects;
-            }
-
-        });
-        return castedResult;
-
-    }
-
-    /**
-     * Spatial join query.
-     *
-     * @param spatialRDD the spatial RDD
-     * @param queryRDD the query RDD
-     * @param useIndex the use index
-     * @param considerBoundaryIntersection the consider boundary intersection
-     * @return the java pair RDD
-     * @throws Exception the exception
-     */
-    public static JavaPairRDD<Polygon, HashSet<LineString>> SpatialJoinQuery(LineStringRDD spatialRDD,PolygonRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
-        JavaPairRDD<Polygon, HashSet<Geometry>> joinListResultAfterAggregation = null;
-        if(useIndex)
-        {
-            joinListResultAfterAggregation = executeSpatialJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-        }
-        else
-        {
-
-            joinListResultAfterAggregation = executeSpatialJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        joinListResultAfterAggregation = DuplicatesHandler.removeDuplicatesGeometryByPolygon(joinListResultAfterAggregation);
-        JavaPairRDD<Polygon, HashSet<LineString>> castedResult = joinListResultAfterAggregation.mapValues(new Function<HashSet<Geometry>,HashSet<LineString>>()
-        {
-            @Override
-            public HashSet<LineString> call(HashSet<Geometry> spatialObjects) throws Exception {
-                HashSet<LineString> castedSpatialObjects = new HashSet<LineString>();
-                Iterator spatialObjectIterator = spatialObjects.iterator();
-                while(spatialObjectIterator.hasNext())
-                {
-                    castedSpatialObjects.add((LineString)spatialObjectIterator.next());
-                }
-                return castedSpatialObjects;
-            }
-
-        });
-        return castedResult;
-
-    }
-
-    public static JavaPairRDD<Polygon, HashSet<Point>> SpatialJoinQueryWithDuplicates(PointRDD spatialRDD,RectangleRDD queryRDD,boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
-
-        JavaPairRDD<Polygon, HashSet<Geometry>> joinListResultAfterAggregation = null;
-        if(useIndex)
-        {
-            joinListResultAfterAggregation = executeSpatialJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-        }
-        else
-        {
-
-            joinListResultAfterAggregation = executeSpatialJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        JavaPairRDD<Polygon, HashSet<Point>> castedResult = joinListResultAfterAggregation.mapValues(new Function<HashSet<Geometry>,HashSet<Point>>()
-        {
-            @Override
-            public HashSet<Point> call(HashSet<Geometry> spatialObjects) throws Exception {
-                HashSet<Point> castedSpatialObjects = new HashSet<Point>();
-                Iterator spatialObjectIterator = spatialObjects.iterator();
-                while(spatialObjectIterator.hasNext())
-                {
-                    castedSpatialObjects.add((Point)spatialObjectIterator.next());
-                }
-                return castedSpatialObjects;
-            }
-
-        });
-        return castedResult;
-    }
-
-
-    public static JavaPairRDD<Polygon, HashSet<Polygon>> SpatialJoinQueryWithDuplicates(RectangleRDD spatialRDD,RectangleRDD queryRDD,boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
-
-        JavaPairRDD<Polygon, HashSet<Geometry>> joinListResultAfterAggregation = null;
-        if(useIndex)
-        {
-            joinListResultAfterAggregation = executeSpatialJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-        }
-        else
-        {
-
-            joinListResultAfterAggregation = executeSpatialJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        JavaPairRDD<Polygon, HashSet<Polygon>> castedResult = joinListResultAfterAggregation.mapValues(new Function<HashSet<Geometry>,HashSet<Polygon>>()
-        {
-            @Override
-            public HashSet<Polygon> call(HashSet<Geometry> spatialObjects) throws Exception {
-                HashSet<Polygon> castedSpatialObjects = new HashSet<Polygon>();
-                Iterator spatialObjectIterator = spatialObjects.iterator();
-                while(spatialObjectIterator.hasNext())
-                {
-                    castedSpatialObjects.add((Polygon)spatialObjectIterator.next());
-                }
-                return castedSpatialObjects;
-            }
-
-        });
-        return castedResult;
-    }
-
-    public static JavaPairRDD<Polygon, HashSet<Point>> SpatialJoinQueryWithDuplicates(PointRDD spatialRDD,PolygonRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
-        JavaPairRDD<Polygon, HashSet<Geometry>> joinListResultAfterAggregation = null;
-        if(useIndex)
-        {
-            joinListResultAfterAggregation = executeSpatialJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-        }
-        else
-        {
-
-            joinListResultAfterAggregation = executeSpatialJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        JavaPairRDD<Polygon, HashSet<Point>> castedResult = joinListResultAfterAggregation.mapValues(new Function<HashSet<Geometry>,HashSet<Point>>()
-        {
-            @Override
-            public HashSet<Point> call(HashSet<Geometry> spatialObjects) throws Exception {
-                HashSet<Point> castedSpatialObjects = new HashSet<Point>();
-                Iterator spatialObjectIterator = spatialObjects.iterator();
-                while(spatialObjectIterator.hasNext())
-                {
-                    castedSpatialObjects.add((Point)spatialObjectIterator.next());
-                }
-                return castedSpatialObjects;
-            }
-
-        });
-        return castedResult;
-    }
-
-
-    public static JavaPairRDD<Polygon, HashSet<Polygon>> SpatialJoinQueryWithDuplicates(PolygonRDD spatialRDD,PolygonRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
-        JavaPairRDD<Polygon, HashSet<Geometry>> joinListResultAfterAggregation = null;
-        if(useIndex)
-        {
-            joinListResultAfterAggregation = executeSpatialJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-        }
-        else
-        {
-            joinListResultAfterAggregation = executeSpatialJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        JavaPairRDD<Polygon, HashSet<Polygon>> castedResult = joinListResultAfterAggregation.mapValues(new Function<HashSet<Geometry>,HashSet<Polygon>>()
-        {
-            @Override
-            public HashSet<Polygon> call(HashSet<Geometry> spatialObjects) throws Exception {
-                HashSet<Polygon> castedSpatialObjects = new HashSet<Polygon>();
-                Iterator spatialObjectIterator = spatialObjects.iterator();
-                while(spatialObjectIterator.hasNext())
-                {
-                    castedSpatialObjects.add((Polygon)spatialObjectIterator.next());
-                }
-                return castedSpatialObjects;
-            }
-
-        });
-        return castedResult;
-
-    }
-
-    public static JavaPairRDD<Polygon, HashSet<LineString>> SpatialJoinQueryWithDuplicates(LineStringRDD spatialRDD,PolygonRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
-        JavaPairRDD<Polygon, HashSet<Geometry>> joinListResultAfterAggregation = null;
-        if(useIndex)
-        {
-            joinListResultAfterAggregation = executeSpatialJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-        }
-        else
-        {
-
-            joinListResultAfterAggregation = executeSpatialJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        JavaPairRDD<Polygon, HashSet<LineString>> castedResult = joinListResultAfterAggregation.mapValues(new Function<HashSet<Geometry>,HashSet<LineString>>()
-        {
-            @Override
-            public HashSet<LineString> call(HashSet<Geometry> spatialObjects) throws Exception {
-                HashSet<LineString> castedSpatialObjects = new HashSet<LineString>();
-                Iterator spatialObjectIterator = spatialObjects.iterator();
-                while(spatialObjectIterator.hasNext())
-                {
-                    castedSpatialObjects.add((LineString)spatialObjectIterator.next());
-                }
-                return castedSpatialObjects;
-            }
-
-        });
-        return castedResult;
-
-    }
-
 
     /**
      * Spatial join query count by key.
@@ -577,22 +237,12 @@ public class JoinQuery implements Serializable{
      * @return the java pair RDD
      * @throws Exception the exception
      */
-    public static JavaPairRDD<Polygon, Long> SpatialJoinQueryCountByKey(SpatialRDD spatialRDD,PolygonRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
-        JavaPairRDD<Polygon, HashSet<Geometry>> joinListResultAfterAggregation = null;
-        if(useIndex)
-        {
-            joinListResultAfterAggregation = executeSpatialJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-        }
-        else
-        {
-            joinListResultAfterAggregation = executeSpatialJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        joinListResultAfterAggregation = DuplicatesHandler.removeDuplicatesGeometryByPolygon(joinListResultAfterAggregation);
-        JavaPairRDD<Polygon, Long> resultCountByKey = joinListResultAfterAggregation.mapValues(new Function<HashSet<Geometry>,Long>()
+    public static <T extends Geometry> JavaPairRDD<Polygon, Long> SpatialJoinQueryCountByKey(SpatialRDD<T> spatialRDD, SpatialRDD<Polygon> queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
+        JavaPairRDD<Polygon, HashSet<T>> joinResults = SpatialJoinQuery(spatialRDD, queryRDD, useIndex, considerBoundaryIntersection);
+        JavaPairRDD<Polygon, Long> resultCountByKey = joinResults.mapValues(new Function<HashSet<T>,Long>()
         {
             @Override
-            public Long call(HashSet<Geometry> spatialObjects) throws Exception {
+            public Long call(HashSet<T> spatialObjects) throws Exception {
 
                 return (long) spatialObjects.size();
             }
@@ -600,366 +250,52 @@ public class JoinQuery implements Serializable{
         return resultCountByKey;
     }
 
+    private static <T extends Geometry> JavaPairRDD<T, HashSet<T>> DistanceJoinQueryImpl(SpatialRDD<T> spatialRDD, CircleRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection, boolean allowDuplicates) throws Exception {
+        JavaPairRDD<Circle, HashSet<T>> joinResult = DistanceJoinQueryRawImpl(spatialRDD, queryRDD, useIndex, considerBoundaryIntersection, allowDuplicates);
 
-    /**
-     * Spatial join query count by key.
-     *
-     * @param spatialRDD the spatial RDD
-     * @param queryRDD the query RDD
-     * @param useIndex the use index
-     * @param considerBoundaryIntersection the consider boundary intersection
-     * @return the java pair RDD
-     * @throws Exception the exception
-     */
-    public static JavaPairRDD<Polygon, Long> SpatialJoinQueryCountByKey(SpatialRDD spatialRDD,RectangleRDD queryRDD,boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
+        return joinResult.mapToPair(new PairFunction<Tuple2<Circle,HashSet<T>>,T,HashSet<T>>()
+        {
+            @Override
+            public Tuple2<T, HashSet<T>> call(Tuple2<Circle, HashSet<T>> pairObjects) throws Exception {
+                return new Tuple2<>((T)pairObjects._1.getCenterGeometry(), pairObjects._2());
+            }
+        });
+    }
 
-        JavaPairRDD<Polygon, HashSet<Geometry>> joinListResultAfterAggregation = null;
+    private static <T extends Geometry> JavaPairRDD<Circle, HashSet<T>> DistanceJoinQueryRawImpl(SpatialRDD<T> spatialRDD, CircleRDD queryRDD, boolean useIndex, boolean considerBoundaryIntersection, boolean allowDuplicates) throws Exception {
+        JavaPairRDD<Circle, HashSet<T>> result;
         if(useIndex)
         {
-            joinListResultAfterAggregation = executeSpatialJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
+            result = executeDistanceJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
         }
         else
         {
-            joinListResultAfterAggregation = executeSpatialJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
+            result = executeDistanceJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
         }
-        joinListResultAfterAggregation = DuplicatesHandler.removeDuplicatesGeometryByPolygon(joinListResultAfterAggregation);
-        JavaPairRDD<Polygon, Long> resultCountByKey = joinListResultAfterAggregation.mapValues(new Function<HashSet<Geometry>,Long>()
-        {
-            @Override
-            public Long call(HashSet<Geometry> spatialObjects) throws Exception {
 
-                return (long) spatialObjects.size();
-            }
-        });
-        return resultCountByKey;
+        if (!allowDuplicates) {
+            result = DuplicatesHandler.removeDuplicates(result);
+        }
+        return result;
     }
 
-    /**
-     * Distance join query.
-     *
-     * @param spatialRDD the spatial RDD
-     * @param queryRDD the query RDD
-     * @param useIndex the use index
-     * @param considerBoundaryIntersection the consider boundary intersection
-     * @return the java pair RDD
-     * @throws Exception the exception
-     */
-    public static JavaPairRDD<Polygon, HashSet<Polygon>> DistanceJoinQuery(PolygonRDD spatialRDD,CircleRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
-        JavaPairRDD<Circle, HashSet<Geometry>> joinListResultAfterAggregation = null;
-        if(useIndex)
-        {
-            joinListResultAfterAggregation = executeDistanceJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        else
-        {
-            joinListResultAfterAggregation = executeDistanceJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-        }
-        joinListResultAfterAggregation = DuplicatesHandler.removeDuplicatesGeometryByCircle(joinListResultAfterAggregation);
-        JavaPairRDD<Polygon, HashSet<Polygon>> castedResult = joinListResultAfterAggregation.mapToPair(new PairFunction<Tuple2<Circle,HashSet<Geometry>>,Polygon,HashSet<Polygon>>()
-        {
-            @Override
-            public Tuple2<Polygon, HashSet<Polygon>> call(Tuple2<Circle, HashSet<Geometry>> pairObjects) throws Exception {
-                HashSet<Polygon> castedSpatialObjects = new HashSet<Polygon>();
-                Iterator<Geometry> spatialObjectIterator = pairObjects._2.iterator();
-                while(spatialObjectIterator.hasNext())
-                {
-                    Polygon castedSpatialObject = (Polygon)spatialObjectIterator.next();
-                    castedSpatialObjects.add(castedSpatialObject);
-                }
-                return new Tuple2<Polygon,HashSet<Polygon>>((Polygon)pairObjects._1.getCenterGeometry(),castedSpatialObjects);
-            }
-        });
-        return castedResult;
+    public static <T extends Geometry> JavaPairRDD<T, HashSet<T>> DistanceJoinQuery(SpatialRDD<T> spatialRDD, CircleRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
+        return DistanceJoinQueryImpl(spatialRDD, queryRDD, useIndex, considerBoundaryIntersection, false);
     }
 
-    /**
-     * Distance join query.
-     *
-     * @param spatialRDD the spatial RDD
-     * @param queryRDD the query RDD
-     * @param useIndex the use index
-     * @param considerBoundaryIntersection the consider boundary intersection
-     * @return the java pair RDD
-     * @throws Exception the exception
-     */
-    public static JavaPairRDD<Point, HashSet<Point>> DistanceJoinQuery(PointRDD spatialRDD,CircleRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
-        JavaPairRDD<Circle, HashSet<Geometry>> joinListResultAfterAggregation = null;
-        if(useIndex)
-        {
-            joinListResultAfterAggregation = executeDistanceJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        else
-        {
-            joinListResultAfterAggregation = executeDistanceJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-        }
-        joinListResultAfterAggregation = DuplicatesHandler.removeDuplicatesGeometryByCircle(joinListResultAfterAggregation);
-        JavaPairRDD<Point, HashSet<Point>> castedResult = joinListResultAfterAggregation.mapToPair(new PairFunction<Tuple2<Circle,HashSet<Geometry>>,Point,HashSet<Point>>()
-        {
-            @Override
-            public Tuple2<Point, HashSet<Point>> call(Tuple2<Circle, HashSet<Geometry>> pairObjects) throws Exception {
-                HashSet<Point> castedSpatialObjects = new HashSet<Point>();
-                Iterator<Geometry> spatialObjectIterator = pairObjects._2.iterator();
-                while(spatialObjectIterator.hasNext())
-                {
-                    Point castedSpatialObject = (Point)spatialObjectIterator.next();
-                    castedSpatialObjects.add(castedSpatialObject);
-                }
-                return new Tuple2<Point,HashSet<Point>>((Point)pairObjects._1.getCenterGeometry(),castedSpatialObjects);
-            }
-        });
-        return castedResult;
+    public static <T extends Geometry> JavaPairRDD<T, HashSet<T>> DistanceJoinQueryWithDuplicates(SpatialRDD<T> spatialRDD, CircleRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
+        return DistanceJoinQueryImpl(spatialRDD, queryRDD, useIndex, considerBoundaryIntersection, true);
     }
 
-    /**
-     * Distance join query.
-     *
-     * @param spatialRDD the spatial RDD
-     * @param queryRDD the query RDD
-     * @param useIndex the use index
-     * @param considerBoundaryIntersection the consider boundary intersection
-     * @return the java pair RDD
-     * @throws Exception the exception
-     */
-    public static JavaPairRDD<LineString, HashSet<LineString>> DistanceJoinQuery(LineStringRDD spatialRDD, CircleRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
-        JavaPairRDD<Circle, HashSet<Geometry>> joinListResultAfterAggregation = null;
-        if(useIndex)
-        {
-            joinListResultAfterAggregation = executeDistanceJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        else
-        {
-            joinListResultAfterAggregation = executeDistanceJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        joinListResultAfterAggregation = DuplicatesHandler.removeDuplicatesGeometryByCircle(joinListResultAfterAggregation);
-        JavaPairRDD<LineString, HashSet<LineString>> castedResult = joinListResultAfterAggregation.mapToPair(new PairFunction<Tuple2<Circle,HashSet<Geometry>>,LineString,HashSet<LineString>>()
+    public static <T extends Geometry> JavaPairRDD<T, Long> DistanceJoinQueryCountByKey(SpatialRDD<T> spatialRDD,CircleRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
+        final JavaPairRDD<Circle, HashSet<T>> joinResult = DistanceJoinQueryRawImpl(spatialRDD, queryRDD, useIndex, considerBoundaryIntersection, false);
+        return joinResult.mapToPair(new PairFunction<Tuple2<Circle,HashSet<T>>,T,Long>()
         {
             @Override
-            public Tuple2<LineString, HashSet<LineString>> call(Tuple2<Circle, HashSet<Geometry>> pairObjects) throws Exception {
-                HashSet<LineString> castedSpatialObjects = new HashSet<LineString>();
-                Iterator<Geometry> spatialObjectIterator = pairObjects._2.iterator();
-                while(spatialObjectIterator.hasNext())
-                {
-                    LineString castedSpatialObject = (LineString)spatialObjectIterator.next();
-                    castedSpatialObjects.add(castedSpatialObject);
-                }
-                return new Tuple2<LineString,HashSet<LineString>>((LineString)pairObjects._1.getCenterGeometry(),castedSpatialObjects);
+            public Tuple2<T, Long> call(Tuple2<Circle, HashSet<T>> pairObjects) throws Exception {
+                return new Tuple2<>((T)pairObjects._1.getCenterGeometry(),(long) pairObjects._2.size());
             }
         });
-        return castedResult;
     }
-
-    public static JavaPairRDD<Polygon, HashSet<Polygon>> DistanceJoinQueryWithDuplicates(PolygonRDD spatialRDD,CircleRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
-        JavaPairRDD<Circle, HashSet<Geometry>> joinListResultAfterAggregation = null;
-        if(useIndex)
-        {
-            joinListResultAfterAggregation = executeDistanceJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        else
-        {
-            joinListResultAfterAggregation = executeDistanceJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-        }
-        JavaPairRDD<Polygon, HashSet<Polygon>> castedResult = joinListResultAfterAggregation.mapToPair(new PairFunction<Tuple2<Circle,HashSet<Geometry>>,Polygon,HashSet<Polygon>>()
-        {
-            @Override
-            public Tuple2<Polygon, HashSet<Polygon>> call(Tuple2<Circle, HashSet<Geometry>> pairObjects) throws Exception {
-                HashSet<Polygon> castedSpatialObjects = new HashSet<Polygon>();
-                Iterator<Geometry> spatialObjectIterator = pairObjects._2.iterator();
-                while(spatialObjectIterator.hasNext())
-                {
-                    Polygon castedSpatialObject = (Polygon)spatialObjectIterator.next();
-                    castedSpatialObjects.add(castedSpatialObject);
-                }
-                return new Tuple2<Polygon,HashSet<Polygon>>((Polygon)pairObjects._1.getCenterGeometry(),castedSpatialObjects);
-            }
-        });
-        return castedResult;
-    }
-
-
-
-    public static JavaPairRDD<Point, HashSet<Point>> DistanceJoinQueryWithDuplicates(PointRDD spatialRDD,CircleRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
-        JavaPairRDD<Circle, HashSet<Geometry>> joinListResultAfterAggregation = null;
-        if(useIndex)
-        {
-            joinListResultAfterAggregation = executeDistanceJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        else
-        {
-            joinListResultAfterAggregation = executeDistanceJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-        }
-        JavaPairRDD<Point, HashSet<Point>> castedResult = joinListResultAfterAggregation.mapToPair(new PairFunction<Tuple2<Circle,HashSet<Geometry>>,Point,HashSet<Point>>()
-        {
-            @Override
-            public Tuple2<Point, HashSet<Point>> call(Tuple2<Circle, HashSet<Geometry>> pairObjects) throws Exception {
-                HashSet<Point> castedSpatialObjects = new HashSet<Point>();
-                Iterator<Geometry> spatialObjectIterator = pairObjects._2.iterator();
-                while(spatialObjectIterator.hasNext())
-                {
-                    Point castedSpatialObject = (Point)spatialObjectIterator.next();
-                    castedSpatialObjects.add(castedSpatialObject);
-                }
-                return new Tuple2<Point,HashSet<Point>>((Point)pairObjects._1.getCenterGeometry(),castedSpatialObjects);
-            }
-        });
-        return castedResult;
-    }
-
-    public static JavaPairRDD<LineString, HashSet<LineString>> DistanceJoinQueryWithDuplicates(LineStringRDD spatialRDD, CircleRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
-        JavaPairRDD<Circle, HashSet<Geometry>> joinListResultAfterAggregation = null;
-        if(useIndex)
-        {
-            joinListResultAfterAggregation = executeDistanceJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        else
-        {
-            joinListResultAfterAggregation = executeDistanceJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        JavaPairRDD<LineString, HashSet<LineString>> castedResult = joinListResultAfterAggregation.mapToPair(new PairFunction<Tuple2<Circle,HashSet<Geometry>>,LineString,HashSet<LineString>>()
-        {
-            @Override
-            public Tuple2<LineString, HashSet<LineString>> call(Tuple2<Circle, HashSet<Geometry>> pairObjects) throws Exception {
-                HashSet<LineString> castedSpatialObjects = new HashSet<LineString>();
-                Iterator<Geometry> spatialObjectIterator = pairObjects._2.iterator();
-                while(spatialObjectIterator.hasNext())
-                {
-                    LineString castedSpatialObject = (LineString)spatialObjectIterator.next();
-                    castedSpatialObjects.add(castedSpatialObject);
-                }
-                return new Tuple2<LineString,HashSet<LineString>>((LineString)pairObjects._1.getCenterGeometry(),castedSpatialObjects);
-            }
-        });
-        return castedResult;
-    }
-
-
-    /**
-     * Distance join query count by key.
-     *
-     * @param spatialRDD the spatial RDD
-     * @param queryRDD the query RDD
-     * @param useIndex the use index
-     * @param considerBoundaryIntersection the consider boundary intersection
-     * @return the java pair RDD
-     * @throws Exception the exception
-     */
-    public static JavaPairRDD<Polygon, Long> DistanceJoinQueryCountByKey(PolygonRDD spatialRDD,CircleRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
-        JavaPairRDD<Circle, HashSet<Geometry>> joinListResultAfterAggregation = null;
-        if(useIndex)
-        {
-            joinListResultAfterAggregation = executeDistanceJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        else
-        {
-            joinListResultAfterAggregation = executeDistanceJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-        }
-        JavaPairRDD<Polygon, Long> castedResult = joinListResultAfterAggregation.mapToPair(new PairFunction<Tuple2<Circle,HashSet<Geometry>>,Polygon,Long>()
-        {
-            @Override
-            public Tuple2<Polygon, Long> call(Tuple2<Circle, HashSet<Geometry>> pairObjects) throws Exception {
-                HashSet<Polygon> castedSpatialObjects = new HashSet<Polygon>();
-                Iterator<Geometry> spatialObjectIterator = pairObjects._2.iterator();
-                while(spatialObjectIterator.hasNext())
-                {
-                    Polygon castedSpatialObject = (Polygon)spatialObjectIterator.next();
-                    castedSpatialObjects.add(castedSpatialObject);
-                }
-                return new Tuple2<Polygon,Long>((Polygon)pairObjects._1.getCenterGeometry(),(long) castedSpatialObjects.size());
-            }
-        });
-        return castedResult;
-    }
-
-
-
-
-
-    /**
-     * Distance join query count by key.
-     *
-     * @param spatialRDD the spatial RDD
-     * @param queryRDD the query RDD
-     * @param useIndex the use index
-     * @param considerBoundaryIntersection the consider boundary intersection
-     * @return the java pair RDD
-     * @throws Exception the exception
-     */
-    public static JavaPairRDD<Point, Long> DistanceJoinQueryCountByKey(PointRDD spatialRDD,PointRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
-        JavaPairRDD<Circle, HashSet<Geometry>> joinListResultAfterAggregation = null;
-        if(useIndex)
-        {
-            joinListResultAfterAggregation = executeDistanceJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        else
-        {
-            joinListResultAfterAggregation = executeDistanceJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-        }
-        joinListResultAfterAggregation = DuplicatesHandler.removeDuplicatesGeometryByCircle(joinListResultAfterAggregation);
-        JavaPairRDD<Point, Long> castedResult = joinListResultAfterAggregation.mapToPair(new PairFunction<Tuple2<Circle,HashSet<Geometry>>,Point,Long>()
-        {
-            @Override
-            public Tuple2<Point, Long> call(Tuple2<Circle, HashSet<Geometry>> pairObjects) throws Exception {
-                HashSet<Point> castedSpatialObjects = new HashSet<Point>();
-                Iterator<Geometry> spatialObjectIterator = pairObjects._2.iterator();
-                while(spatialObjectIterator.hasNext())
-                {
-                    Point castedSpatialObject = (Point)spatialObjectIterator.next();
-                    castedSpatialObjects.add(castedSpatialObject);
-                }
-                return new Tuple2<Point,Long>((Point)pairObjects._1.getCenterGeometry(),(long) castedSpatialObjects.size());
-            }
-        });
-        return castedResult;
-    }
-
-    /**
-     * Distance join query count by key.
-     *
-     * @param spatialRDD the spatial RDD
-     * @param queryRDD the query RDD
-     * @param useIndex the use index
-     * @param considerBoundaryIntersection the consider boundary intersection
-     * @return the java pair RDD
-     * @throws Exception the exception
-     */
-    public static JavaPairRDD<LineString, Long> DistanceJoinQueryCountByKey(LineStringRDD spatialRDD,LineStringRDD queryRDD, boolean useIndex,boolean considerBoundaryIntersection) throws Exception {
-        JavaPairRDD<Circle, HashSet<Geometry>> joinListResultAfterAggregation = null;
-        if(useIndex)
-        {
-            joinListResultAfterAggregation = executeDistanceJoinUsingIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-
-        }
-        else
-        {
-            joinListResultAfterAggregation = executeDistanceJoinNoIndex(spatialRDD,queryRDD,considerBoundaryIntersection);
-        }
-        joinListResultAfterAggregation = DuplicatesHandler.removeDuplicatesGeometryByCircle(joinListResultAfterAggregation);
-        JavaPairRDD<LineString, Long> castedResult = joinListResultAfterAggregation.mapToPair(new PairFunction<Tuple2<Circle,HashSet<Geometry>>,LineString,Long>()
-        {
-            @Override
-            public Tuple2<LineString, Long> call(Tuple2<Circle, HashSet<Geometry>> pairObjects) throws Exception {
-                HashSet<LineString> castedSpatialObjects = new HashSet<LineString>();
-                Iterator<Geometry> spatialObjectIterator = pairObjects._2.iterator();
-                while(spatialObjectIterator.hasNext())
-                {
-                    LineString castedSpatialObject = (LineString)spatialObjectIterator.next();
-                    castedSpatialObjects.add(castedSpatialObject);
-                }
-                return new Tuple2<LineString,Long>((LineString)pairObjects._1.getCenterGeometry(),(long) castedSpatialObjects.size());
-            }
-        });
-        return castedResult;
-    }
-
 }
 
