@@ -227,14 +227,24 @@ public class JoinQuery implements Serializable{
     }
 
     /**
-     * Spatial join query.
+     * Joins two sets of geometries on 'contains' or 'intersects' relationship.
      *
-     * @param spatialRDD the spatial RDD
-     * @param queryRDD the query RDD
-     * @param useIndex the use index
-     * @param considerBoundaryIntersection the consider boundary intersection
-     * @return the java pair RDD
-     * @throws Exception the exception
+     * One set of geometries must be a set of polygons.
+     *
+     * If {@code considerBoundaryIntersection} is {@code true}, returns pairs of geometries
+     * which intersect. Otherwise, returns pairs of geometries where first geometry contains second geometry.
+     *
+     * If {@code useIndex} is false, the join uses nested loop algorithm to identify matching geometries.
+     *
+     * If {@code useIndex} is true, the join scans polygons and uses an index of geometries
+     * built prior to invoking the join to lookup matches.
+     *
+     * @param spatialRDD Set of geometries
+     * @param queryRDD Set of polygons
+     * @param useIndex Boolean indicating whether the join should use the index from {@code spatialRDD.indexedRDD}
+     * @param considerBoundaryIntersection Join relationship type: 'intersects' if true, 'contains' otherwise
+     * @param <T> Type of the geometries in spatialRDD set
+     * @return RDD of pairs where each pair contains a polygon and a set of matching geometries
      */
     public static <T extends Geometry> JavaPairRDD<Polygon, HashSet<T>> SpatialJoinQuery(SpatialRDD<T> spatialRDD, SpatialRDD<Polygon> queryRDD, boolean useIndex, boolean considerBoundaryIntersection) throws Exception {
         final JoinParamsInternal joinParams = new JoinParamsInternal(useIndex, considerBoundaryIntersection, false);
@@ -242,6 +252,9 @@ public class JoinQuery implements Serializable{
         return collectGeometriesByKey(joinResults);
     }
 
+    /**
+     * A faster version of SpatialJoinQuery which may produce duplicate results.
+     */
     public static <T extends Geometry> JavaPairRDD<Polygon, HashSet<T>> SpatialJoinQueryWithDuplicates(SpatialRDD<T> spatialRDD, SpatialRDD<Polygon> queryRDD, boolean useIndex, boolean considerBoundaryIntersection) throws Exception {
         final JoinParamsInternal joinParams = new JoinParamsInternal(useIndex, considerBoundaryIntersection, true);
         final JavaPairRDD<Polygon, T> joinResults = spatialJoinInt(spatialRDD, queryRDD, joinParams);
@@ -262,6 +275,25 @@ public class JoinQuery implements Serializable{
         }
     }
 
+    /**
+     * Joins two sets of geometries on 'contains' or 'intersects' relationship.
+     *
+     * One set of geometries must be a set of polygons.
+     *
+     * If {@link JoinParams#considerBoundaryIntersection} is {@code true}, returns pairs of geometries
+     * which intersect. Otherwise, returns pairs of geometries where first geometry contains second geometry.
+     *
+     * By default, the join uses nested loop algorithm to find pairs of matching geometries.
+     *
+     * If {@link JoinParams#polygonIndexType} is specified, the join builds an index of the specified type
+     * from polygons partition, then scans the other partition and looks up matching polygons in the index.
+     *
+     * @param spatialRDD Set of geometries
+     * @param queryRDD Set of polygons
+     * @param joinParams Join parameters including relationship type ('contains' vs. 'intersects')
+     * @param <T> Type of the geometries in spatialRDD set
+     * @return RDD of pairs of matching geometries
+     */
     public static <T extends Geometry> JavaPairRDD<Polygon, T> spatialJoin(SpatialRDD<T> spatialRDD, SpatialRDD<Polygon> queryRDD, JoinParams joinParams) throws Exception {
         final JoinParamsInternal params = new JoinParamsInternal(joinParams.considerBoundaryIntersection, joinParams.polygonIndexType);
         return spatialJoinInt(spatialRDD, queryRDD, params);
