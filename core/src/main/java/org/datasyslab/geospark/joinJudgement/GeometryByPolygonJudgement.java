@@ -9,9 +9,7 @@ package org.datasyslab.geospark.joinJudgement;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 import org.apache.spark.api.java.function.FlatMapFunction2;
-import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.datasyslab.geospark.geometryObjects.PairGeometry;
-import scala.Tuple2;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,7 +22,7 @@ import java.util.List;
 /**
  * The Class GeometryByPolygonJudgement.
  */
-public class GeometryByPolygonJudgement implements FlatMapFunction2<Iterator<Object>, Iterator<Object>, PairGeometry>, Serializable {
+public class GeometryByPolygonJudgement<T extends Geometry> implements FlatMapFunction2<Iterator<T>, Iterator<Polygon>, PairGeometry<Polygon, T>>, Serializable {
 
     /**
      * The consider boundary intersection.
@@ -41,18 +39,18 @@ public class GeometryByPolygonJudgement implements FlatMapFunction2<Iterator<Obj
     }
 
     @Override
-    public Iterator<PairGeometry> call(Iterator<Object> iteratorObject, Iterator<Object> iteratorWindow) throws Exception {
-        List<PairGeometry> result = new ArrayList<PairGeometry>();
-        List<Object> queryObjects = new ArrayList<Object>();
+    public Iterator<PairGeometry<Polygon, T>> call(Iterator<T> iteratorObject, Iterator<Polygon> iteratorWindow) throws Exception {
+        List<PairGeometry<Polygon, T>> result = new ArrayList<>();
+        List<T> queryObjects = new ArrayList<>();
         while(iteratorObject.hasNext())
         {
             queryObjects.add(iteratorObject.next());
         }
         while (iteratorWindow.hasNext()) {
-            Polygon window = (Polygon) iteratorWindow.next();
+            Polygon window = iteratorWindow.next();
             HashSet<Geometry> resultHashSet = new HashSet<Geometry>();
             for (int i =0;i<queryObjects.size();i++) {
-                Geometry object = (Geometry) queryObjects.get(i);
+                Geometry object = queryObjects.get(i);
                 if (considerBoundaryIntersection) {
                     if (window.intersects(object)) {
                         resultHashSet.add(object);

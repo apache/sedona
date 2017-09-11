@@ -7,15 +7,14 @@
 package org.datasyslab.geospark.knnJudgement;
 
 
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
+import org.apache.spark.api.java.function.FlatMapFunction;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.PriorityQueue;
-
-import org.apache.spark.api.java.function.FlatMapFunction;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 
 
 
@@ -23,7 +22,7 @@ import com.vividsolutions.jts.geom.Point;
 /**
  * The Class GeometryKnnJudgement.
  */
-public class KnnJudgement implements FlatMapFunction<Iterator<Object>, Object>, Serializable{
+public class KnnJudgement<T extends Geometry> implements FlatMapFunction<Iterator<T>, Object>, Serializable{
 	
 	/** The k. */
 	int k;
@@ -47,13 +46,13 @@ public class KnnJudgement implements FlatMapFunction<Iterator<Object>, Object>, 
 	 * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
 	 */
 	@Override
-	public Iterator<Object> call(Iterator<Object> input) throws Exception {		
+	public Iterator<Object> call(Iterator<T> input) throws Exception {
 		PriorityQueue<Object> pq = new PriorityQueue<Object>(k, new GeometryDistanceComparator(queryCenter,false));
 		while (input.hasNext()) {
 			if (pq.size() < k) {
 				pq.offer(input.next());
 			} else {
-				Geometry curpoint = (Geometry)input.next();
+				Geometry curpoint = input.next();
 				double distance = curpoint.distance(queryCenter);
 				double largestDistanceInPriQueue = ((Geometry) pq.peek()).distance(queryCenter);
 				if (largestDistanceInPriQueue > distance) {

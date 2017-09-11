@@ -7,21 +7,19 @@
 package org.datasyslab.geospark.spatialRDD;
 
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.LineString;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
-import org.apache.spark.api.java.function.Function;
 import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.formatMapper.LineStringFormatMapper;
-
-import com.vividsolutions.jts.geom.LineString;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Class LineStringRDD.
  */
-public class LineStringRDD extends SpatialRDD{
+public class LineStringRDD extends SpatialRDD<LineString> {
 	
 	/**
 	 * Instantiates a new line string RDD.
@@ -29,13 +27,7 @@ public class LineStringRDD extends SpatialRDD{
 	 * @param rawSpatialRDD the raw spatial RDD
 	 */
 	public LineStringRDD(JavaRDD<LineString> rawSpatialRDD) {
-        this.rawSpatialRDD = rawSpatialRDD.map(new Function<LineString,Object>()
-        {
-            @Override
-            public Object call(LineString spatialObject) throws Exception {
-                return spatialObject;
-            }
-        });
+        this.rawSpatialRDD = rawSpatialRDD;
     }
 	
 	/**
@@ -46,14 +38,7 @@ public class LineStringRDD extends SpatialRDD{
 	 * @param targetEpsgCode the target epsg code
 	 */
 	public LineStringRDD(JavaRDD<LineString> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode) {
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<LineString,Object>()
-		{
-			@Override
-			public Object call(LineString spatialObject) throws Exception {
-				return spatialObject;
-			}
-			
-		});
+		this.rawSpatialRDD = rawSpatialRDD;
 		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
     }
 
@@ -146,13 +131,7 @@ public class LineStringRDD extends SpatialRDD{
      * @param approximateTotalCount the approximate total count
      */
     public LineStringRDD(JavaRDD<LineString> rawSpatialRDD, Envelope datasetBoundary, Integer approximateTotalCount) {
-        this.rawSpatialRDD = rawSpatialRDD.map(new Function<LineString,Object>()
-        {
-            @Override
-            public Object call(LineString spatialObject) throws Exception {
-                return spatialObject;
-            }
-        });
+        this.rawSpatialRDD = rawSpatialRDD;
         this.boundaryEnvelope = datasetBoundary;
         this.approximateTotalCount = approximateTotalCount;
     }
@@ -167,14 +146,7 @@ public class LineStringRDD extends SpatialRDD{
      * @param approximateTotalCount the approximate total count
      */
     public LineStringRDD(JavaRDD<LineString> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode, Envelope datasetBoundary, Integer approximateTotalCount) {
-        this.rawSpatialRDD = rawSpatialRDD.map(new Function<LineString,Object>()
-        {
-            @Override
-            public Object call(LineString spatialObject) throws Exception {
-                return spatialObject;
-            }
-
-        });
+        this.rawSpatialRDD = rawSpatialRDD;
         this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.boundaryEnvelope = datasetBoundary;
         this.approximateTotalCount = approximateTotalCount;
@@ -293,14 +265,7 @@ public class LineStringRDD extends SpatialRDD{
 	 * @param newLevel the new level
 	 */
 	public LineStringRDD(JavaRDD<LineString> rawSpatialRDD, StorageLevel newLevel) {
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<LineString,Object>()
-		{
-			@Override
-			public Object call(LineString spatialObject) throws Exception {
-				return spatialObject;
-			}
-			
-		});
+		this.rawSpatialRDD = rawSpatialRDD;
 		this.analyze(newLevel);
     }
 
@@ -410,14 +375,7 @@ public class LineStringRDD extends SpatialRDD{
 	 * @param targetEpsgCode the target epsg code
 	 */
 	public LineStringRDD(JavaRDD<LineString> rawSpatialRDD, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode) {
-		this.rawSpatialRDD = rawSpatialRDD.map(new Function<LineString,Object>()
-		{
-			@Override
-			public Object call(LineString spatialObject) throws Exception {
-				return spatialObject;
-			}
-			
-		});
+		this.rawSpatialRDD = rawSpatialRDD;
 		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
 		this.analyze(newLevel);
     }

@@ -6,25 +6,24 @@
  */
 package org.datasyslab.geospark.rangeJudgement;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.apache.spark.api.java.function.FlatMapFunction;
-
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.index.SpatialIndex;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
 import com.vividsolutions.jts.index.strtree.STRtree;
+import org.apache.spark.api.java.function.FlatMapFunction;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Class RangeFilterUsingIndex.
  */
-public class RangeFilterUsingIndex implements FlatMapFunction<Iterator<Object>,Object>, Serializable{
+public class RangeFilterUsingIndex implements FlatMapFunction<Iterator<SpatialIndex>, Object>, Serializable{
 
 	/** The consider boundary intersection. */
 	boolean considerBoundaryIntersection=false;
@@ -69,9 +68,9 @@ public class RangeFilterUsingIndex implements FlatMapFunction<Iterator<Object>,O
 	 * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
 	 */
 	@Override
-	public Iterator<Object> call(Iterator<Object> treeIndexes) throws Exception {
+	public Iterator<Object> call(Iterator<SpatialIndex> treeIndexes) throws Exception {
 		assert treeIndexes.hasNext()==true;
-		Object treeIndex = treeIndexes.next();
+		SpatialIndex treeIndex = treeIndexes.next();
 		if(treeIndex instanceof STRtree)
 		{
 			STRtree strtree= (STRtree) treeIndex;
@@ -97,8 +96,7 @@ public class RangeFilterUsingIndex implements FlatMapFunction<Iterator<Object>,O
 			}
 			else
 			{
-				List tempResult=new ArrayList();
-				tempResult=strtree.query(((Polygon)this.queryWindow).getEnvelopeInternal());
+				List tempResult = strtree.query(((Polygon)this.queryWindow).getEnvelopeInternal());
 				for(Object spatialObject:tempResult)
 				{
 					if(considerBoundaryIntersection)

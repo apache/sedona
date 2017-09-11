@@ -6,31 +6,26 @@
  */
 package org.datasyslab.geospark.formatMapper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.io.WKTReader;
 import org.apache.spark.api.java.function.FlatMapFunction;
-
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.wololo.geojson.Feature;
 import org.wololo.geojson.GeoJSONFactory;
 import org.wololo.jts2geojson.GeoJSONReader;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.MultiLineString;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.io.WKTReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Class LineStringFormatMapper.
  */
-public class LineStringFormatMapper extends FormatMapper implements FlatMapFunction<Iterator<String>, Object> {
+public class LineStringFormatMapper extends FormatMapper implements FlatMapFunction<Iterator<String>, LineString> {
 	
 	/**
 	 * Instantiates a new line string format mapper.
@@ -59,7 +54,7 @@ public class LineStringFormatMapper extends FormatMapper implements FlatMapFunct
 
 
     @Override
-    public Iterator<Object> call(Iterator<String> stringIterator) throws Exception {
+    public Iterator<LineString> call(Iterator<String> stringIterator) throws Exception {
         List result= new ArrayList<LineString>();
         MultiLineString multiSpatialObjects = null;
         int actualEndOffset;

@@ -8,10 +8,8 @@ package org.datasyslab.geospark.joinJudgement;
 
 import com.vividsolutions.jts.geom.Geometry;
 import org.apache.spark.api.java.function.FlatMapFunction2;
-import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.datasyslab.geospark.geometryObjects.Circle;
 import org.datasyslab.geospark.geometryObjects.PairGeometry;
-import scala.Tuple2;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -25,7 +23,7 @@ import java.util.List;
 /**
  * The Class GeometryByCircleJudgement.
  */
-public class GeometryByCircleJudgement implements FlatMapFunction2<Iterator<Object>, Iterator<Object>, PairGeometry>, Serializable {
+public class GeometryByCircleJudgement<T extends Geometry> implements FlatMapFunction2<Iterator<T>, Iterator<Circle>, PairGeometry<Circle, T>>, Serializable {
 
     /**
      * The consider boundary intersection.
@@ -42,9 +40,9 @@ public class GeometryByCircleJudgement implements FlatMapFunction2<Iterator<Obje
     }
 
     @Override
-    public Iterator<PairGeometry> call(Iterator<Object> iteratorObject, Iterator<Object> iteratorWindow) throws Exception {
-        List<PairGeometry> result = new ArrayList<PairGeometry>();
-        List<Object> queryObjects = new ArrayList<Object>();
+    public Iterator<PairGeometry<Circle, T>> call(Iterator<T> iteratorObject, Iterator<Circle> iteratorWindow) throws Exception {
+        List<PairGeometry<Circle, T>> result = new ArrayList<>();
+        List<T> queryObjects = new ArrayList<>();
         while(iteratorObject.hasNext())
         {
             queryObjects.add(iteratorObject.next());

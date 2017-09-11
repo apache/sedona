@@ -20,7 +20,7 @@ import com.vividsolutions.jts.geom.Polygon;
 /**
  * The Class CircleRDD.
  */
-public class CircleRDD extends SpatialRDD {
+public class CircleRDD extends SpatialRDD<Circle> {
 
 
 	/**
@@ -29,14 +29,7 @@ public class CircleRDD extends SpatialRDD {
 	 * @param circleRDD the circle RDD
 	 */
 	public CircleRDD(JavaRDD<Circle> circleRDD) {
-		this.rawSpatialRDD = circleRDD.map(new Function<Circle,Object>()
-		{
-
-			@Override
-			public Object call(Circle circle) throws Exception {
-				return circle;
-			}
-		});
+		this.rawSpatialRDD = circleRDD;
 	}
 
 	/**
@@ -47,14 +40,7 @@ public class CircleRDD extends SpatialRDD {
 	 * @param targetEpsgCRSCode the target epsg CRS code
 	 */
 	public CircleRDD(JavaRDD<Circle> circleRDD, String sourceEpsgCRSCode, String targetEpsgCRSCode) {
-		this.rawSpatialRDD = circleRDD.map(new Function<Circle,Object>()
-		{
-
-			@Override
-			public Object call(Circle circle) throws Exception {
-				return circle;
-			}
-		});
+		this.rawSpatialRDD = circleRDD;
 		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCRSCode);
 	}
 	
@@ -85,11 +71,10 @@ public class CircleRDD extends SpatialRDD {
 	 * @return the center point as spatial RDD
 	 */
 	public PointRDD getCenterPointAsSpatialRDD() {
-		return new PointRDD(this.rawSpatialRDD.map(new Function<Object, Point>() {
+		return new PointRDD(this.rawSpatialRDD.map(new Function<Circle, Point>() {
 
-			public Point call(Object spatialObject) {
-
-				return (Point)((Circle)spatialObject).getCenterGeometry();
+			public Point call(Circle circle) {
+				return (Point)circle.getCenterGeometry();
 			}
 		}));
 
@@ -101,11 +86,11 @@ public class CircleRDD extends SpatialRDD {
 	 * @return the center polygon as spatial RDD
 	 */
 	public PolygonRDD getCenterPolygonAsSpatialRDD() {
-		return new PolygonRDD(this.rawSpatialRDD.map(new Function<Object, Polygon>() {
+		return new PolygonRDD(this.rawSpatialRDD.map(new Function<Circle, Polygon>() {
 
-			public Polygon call(Object spatialObject) {
+			public Polygon call(Circle circle) {
 
-				return (Polygon)((Circle)spatialObject).getCenterGeometry();
+				return (Polygon)circle.getCenterGeometry();
 			}
 		}));
 	}
@@ -116,11 +101,11 @@ public class CircleRDD extends SpatialRDD {
 	 * @return the center line string RDD as spatial RDD
 	 */
 	public LineStringRDD getCenterLineStringRDDAsSpatialRDD() {
-		return new LineStringRDD(this.rawSpatialRDD.map(new Function<Object, LineString>() {
+		return new LineStringRDD(this.rawSpatialRDD.map(new Function<Circle, LineString>() {
 
-			public LineString call(Object spatialObject) {
+			public LineString call(Circle circle) {
 
-				return (LineString)((Circle)spatialObject).getCenterGeometry();
+				return (LineString) circle.getCenterGeometry();
 			}
 		}));
 	}
@@ -131,11 +116,11 @@ public class CircleRDD extends SpatialRDD {
 	 * @return the center rectangle RDD as spatial RDD
 	 */
 	public RectangleRDD getCenterRectangleRDDAsSpatialRDD() {
-		return new RectangleRDD(this.rawSpatialRDD.map(new Function<Object, Polygon>() {
+		return new RectangleRDD(this.rawSpatialRDD.map(new Function<Circle, Polygon>() {
 
-			public Polygon call(Object spatialObject) {
+			public Polygon call(Circle circle) {
 
-				return (Polygon)((Circle)spatialObject).getCenterGeometry();
+				return (Polygon) circle.getCenterGeometry();
 			}
 		}));
 	}
