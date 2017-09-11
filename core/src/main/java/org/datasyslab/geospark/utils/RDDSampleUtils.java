@@ -12,40 +12,50 @@ package org.datasyslab.geospark.utils;
  */
 
 public class RDDSampleUtils {
+   
     
     /**
      * Gets the sample numbers.
      *
      * @param numPartitions the num partitions
      * @param totalNumberOfRecords the total number of records
+     * @param givenSampleNumbers the given sample numbers
      * @return the sample numbers
      * @throws Exception the exception
      */
-    public static int getSampleNumbers(Integer numPartitions, long totalNumberOfRecords) throws Exception {
-    	long sampleNumbers;
-    	/*
-    	 * If the input RDD is too small, Geospark will use the entire RDD instead of taking samples.
-    	 */
-    	if(totalNumberOfRecords>=1000)
+    public static int getSampleNumbers(Integer numPartitions, long totalNumberOfRecords, long givenSampleNumbers) throws Exception{
+    	Long sampleNumber = new Long(0);
+
+    	if(givenSampleNumbers>0)
     	{
-    		sampleNumbers = totalNumberOfRecords / 100;
+    		// This means that the user manually specifies the sample number
+    		sampleNumber = givenSampleNumbers;
+    		return sampleNumber.intValue();
     	}
     	else
     	{
-    		sampleNumbers = totalNumberOfRecords;
+    		// Follow GeoSpark internal sampling rule
+        	/*
+        	 * If the input RDD is too small, Geospark will use the entire RDD instead of taking samples.
+        	 */
+        	if(totalNumberOfRecords>=1000)
+        	{
+        		sampleNumber = totalNumberOfRecords / 100;
+        	}
+        	else
+        	{
+        		sampleNumber = totalNumberOfRecords;
+        	}
+        	
+    		if(sampleNumber > Integer.MAX_VALUE) {
+    			sampleNumber = new Long(Integer.MAX_VALUE);
+    		}
+            if(sampleNumber < 2*numPartitions ) {
+                // Partition size is too big. Should throw exception for this.
+                throw new Exception("[RDDSampleUtils][getSampleNumbers] Too many RDD partitions. Call SpatialRDD.setSampleNumber() to manually increase sample or make partitionNum less than "+sampleNumber/2);
+            }
+            return sampleNumber.intValue();
     	}
-    	
-		if(sampleNumbers > Integer.MAX_VALUE) {
-			sampleNumbers = Integer.MAX_VALUE;
-		}
-        int result=(int)sampleNumbers;
-        // Partition size is too big. Should throw exception for this.
-        
-        if(sampleNumbers < 2*numPartitions ) {
-            throw new Exception("[RDDSampleUtils][getSampleNumbers] Too many RDD partitions. Please make this RDD's partitions less than "+sampleNumbers/2);
-        }
-        
-        return result;
 
 	}
 }

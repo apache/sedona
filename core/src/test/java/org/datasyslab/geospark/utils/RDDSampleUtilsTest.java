@@ -29,13 +29,13 @@ public class RDDSampleUtilsTest {
      */
     @Test
     public void testGetSampleNumbers() throws Exception {
-        assertEquals(10, RDDSampleUtils.getSampleNumbers(2, 10));
-        assertEquals(100, RDDSampleUtils.getSampleNumbers(2, 100));
-        assertEquals(10, RDDSampleUtils.getSampleNumbers(5, 1000));
-        assertEquals(100, RDDSampleUtils.getSampleNumbers(5, 10000));
-        assertEquals(100, RDDSampleUtils.getSampleNumbers(5, 10001));
-        assertEquals(1000, RDDSampleUtils.getSampleNumbers(5, 100011));
-        assertEquals(1000, RDDSampleUtils.getSampleNumbers(6, 100011));
+        assertEquals(10, RDDSampleUtils.getSampleNumbers(2, 10,-1));
+        assertEquals(100, RDDSampleUtils.getSampleNumbers(2, 100,-1));
+        assertEquals(10, RDDSampleUtils.getSampleNumbers(5, 1000,-1));
+        assertEquals(100, RDDSampleUtils.getSampleNumbers(5, 10000,-1));
+        assertEquals(100, RDDSampleUtils.getSampleNumbers(5, 10001,-1));
+        assertEquals(1000, RDDSampleUtils.getSampleNumbers(5, 100011,-1));
+        assertEquals(99, RDDSampleUtils.getSampleNumbers(6, 100011,99));
     }
     
     /**
@@ -46,8 +46,8 @@ public class RDDSampleUtilsTest {
     @Test(expected=Exception.class)
     public void testTooManyPartitions() throws Exception
     {
-        assertEquals(10, RDDSampleUtils.getSampleNumbers(6, 1010));
-        assertEquals(11, RDDSampleUtils.getSampleNumbers(6, 1110));
-        assertEquals(100, RDDSampleUtils.getSampleNumbers(100, 10000));
+        assertEquals(10, RDDSampleUtils.getSampleNumbers(6, 1010,-1));
+        assertEquals(11, RDDSampleUtils.getSampleNumbers(6, 1110,-1));
+        assertEquals(100, RDDSampleUtils.getSampleNumbers(100, 10000,-1));
     }
 }

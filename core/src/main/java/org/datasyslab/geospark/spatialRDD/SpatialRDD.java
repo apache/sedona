@@ -87,6 +87,22 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 
     public StandardQuadTree partitionTree;
 
+    /** The sample number. */
+    public Long sampleNumber = (long) -1;
+    
+	public Long getSampleNumber() {
+		return sampleNumber;
+	}
+
+	/**
+	 * Sets the sample number.
+	 *
+	 * @param sampleNumber the new sample number
+	 */
+	public void setSampleNumber(Long sampleNumber) {
+		this.sampleNumber = sampleNumber;
+	}
+    
 	/** The CR stransformation. */
 	protected boolean CRStransformation=false;;
 
@@ -146,7 +162,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
         	throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD total count is unkown. Please call analyze() first.");
         }
 		//Calculate the number of samples we need to take.
-        int sampleNumberOfRecords = RDDSampleUtils.getSampleNumbers(numPartitions, this.approximateTotalCount);
+        int sampleNumberOfRecords = RDDSampleUtils.getSampleNumbers(numPartitions, this.approximateTotalCount,this.sampleNumber);
         //Take Sample
         ArrayList objectSampleList = new ArrayList(this.rawSpatialRDD.takeSample(false, sampleNumberOfRecords));
         //Sort
