@@ -2,7 +2,6 @@ package org.datasyslab.geospark.joinJudgement;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.index.SpatialIndex;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
 import com.vividsolutions.jts.index.strtree.STRtree;
@@ -17,9 +16,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public class DynamicIndexLookupJudgement<T extends Geometry>
+public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
         extends JudgementBase
-        implements FlatMapFunction2<Iterator<T>, Iterator<Polygon>, Pair<Polygon, T>>, Serializable {
+        implements FlatMapFunction2<Iterator<T>, Iterator<U>, Pair<U, T>>, Serializable {
 
     private final IndexType indexType;
 
@@ -29,17 +28,17 @@ public class DynamicIndexLookupJudgement<T extends Geometry>
     }
 
     @Override
-    public Iterator<Pair<Polygon, T>> call(final Iterator<T> shapes, final Iterator<Polygon> polygons) throws Exception {
+    public Iterator<Pair<U, T>> call(final Iterator<T> shapes, final Iterator<U> windowShapes) throws Exception {
 
-        if (!polygons.hasNext()) {
+        if (!windowShapes.hasNext()) {
             return Collections.emptyIterator();
         }
 
-        final SpatialIndex spatialIndex = buildIndex(polygons);
+        final SpatialIndex spatialIndex = buildIndex(windowShapes);
 
-        return new Iterator<Pair<Polygon, T>>() {
+        return new Iterator<Pair<U, T>>() {
             // A batch of pre-computed matches
-            private List<Pair<Polygon, T>> batch = null;
+            private List<Pair<U, T>> batch = null;
             // An index of the element from 'batch' to return next
             private int nextIndex = 0;
 
@@ -53,13 +52,13 @@ public class DynamicIndexLookupJudgement<T extends Geometry>
             }
 
             @Override
-            public Pair<Polygon, T> next() {
+            public Pair<U, T> next() {
                 if (batch == null) {
                     populateNextBatch();
                 }
 
                 if (batch != null) {
-                    final Pair<Polygon, T> result = batch.get(nextIndex);
+                    final Pair<U, T> result = batch.get(nextIndex);
                     nextIndex++;
                     if (nextIndex >= batch.size()) {
                         populateNextBatch();
@@ -85,7 +84,7 @@ public class DynamicIndexLookupJudgement<T extends Geometry>
                     final T shape = shapes.next();
                     final List candidates = spatialIndex.query(shape.getEnvelopeInternal());
                     for (Object candidate : candidates) {
-                        final Polygon polygon = (Polygon) candidate;
+                        final U polygon = (U) candidate;
                         if (match(polygon, shape)) {
                             batch.add(Pair.of(polygon, shape));
                         }
@@ -106,10 +105,10 @@ public class DynamicIndexLookupJudgement<T extends Geometry>
         };
     }
 
-    private SpatialIndex buildIndex(Iterator<Polygon> polygons) {
+    private SpatialIndex buildIndex(Iterator<U> polygons) {
         final SpatialIndex index = newIndex();
         while (polygons.hasNext()) {
-            Polygon polygon = polygons.next();
+            U polygon = polygons.next();
             index.insert(polygon.getEnvelopeInternal(), polygon);
         }
         index.query(new Envelope(0.0,0.0,0.0,0.0));

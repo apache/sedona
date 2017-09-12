@@ -7,7 +7,6 @@
 package org.datasyslab.geospark.joinJudgement;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.spark.api.java.function.FlatMapFunction2;
 
@@ -16,13 +15,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class NestedLoopJudgement<T extends Geometry>
+public class NestedLoopJudgement<T extends Geometry, U extends Geometry>
         extends JudgementBase
-        implements FlatMapFunction2<Iterator<T>, Iterator<Polygon>, Pair<Polygon, T>>, Serializable {
+        implements FlatMapFunction2<Iterator<T>, Iterator<U>, Pair<U, T>>, Serializable {
 
     /**
-     * Instantiates a new geometry by polygon judgement.
-     *
      * @param considerBoundaryIntersection the consider boundary intersection
      */
     public NestedLoopJudgement(boolean considerBoundaryIntersection) {
@@ -30,15 +27,15 @@ public class NestedLoopJudgement<T extends Geometry>
     }
 
     @Override
-    public Iterator<Pair<Polygon, T>> call(Iterator<T> iteratorObject, Iterator<Polygon> iteratorWindow) throws Exception {
-        List<Pair<Polygon, T>> result = new ArrayList<>();
+    public Iterator<Pair<U, T>> call(Iterator<T> iteratorObject, Iterator<U> iteratorWindow) throws Exception {
+        List<Pair<U, T>> result = new ArrayList<>();
         List<T> queryObjects = new ArrayList<>();
         while(iteratorObject.hasNext())
         {
             queryObjects.add(iteratorObject.next());
         }
         while (iteratorWindow.hasNext()) {
-            Polygon window = iteratorWindow.next();
+            U window = iteratorWindow.next();
             for (int i =0;i<queryObjects.size();i++) {
                 T object = queryObjects.get(i);
                 if (match(window, object)) {

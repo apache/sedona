@@ -191,15 +191,15 @@ public class JoinQuery implements Serializable{
         }
     }
 
-    private static <T extends Geometry> JavaPairRDD<Polygon, T> spatialJoinInt(
+    private static <T extends Geometry, U extends Geometry> JavaPairRDD<U, T> spatialJoinInt(
         SpatialRDD<T> spatialRDD,
-        SpatialRDD<Polygon> queryRDD,
+        SpatialRDD<U> queryRDD,
         JoinParamsInternal joinParams) throws Exception {
 
         verifyCRSMatch(spatialRDD, queryRDD);
         verifyPartitioningMatch(spatialRDD, queryRDD);
 
-        final JavaRDD<Pair<Polygon, T>> resultWithDuplicates;
+        final JavaRDD<Pair<U, T>> resultWithDuplicates;
         if(joinParams.useIndex) {
             Objects.requireNonNull(spatialRDD.indexedRDD, "[JoinQuery] Index doesn't exist. Please build index.");
 
@@ -207,7 +207,7 @@ public class JoinQuery implements Serializable{
             resultWithDuplicates = spatialRDD.indexedRDD.zipPartitions(queryRDD.spatialPartitionedRDD, judgement);
 
         } else {
-            final FlatMapFunction2<Iterator<T>, Iterator<Polygon>, Pair<Polygon, T>> judgement;
+            final FlatMapFunction2<Iterator<T>, Iterator<U>, Pair<U, T>> judgement;
             if (joinParams.polygonIndexType != null) {
                 judgement = new DynamicIndexLookupJudgement(joinParams.considerBoundaryIntersection, joinParams.polygonIndexType);
             } else {
@@ -216,11 +216,11 @@ public class JoinQuery implements Serializable{
             resultWithDuplicates = spatialRDD.spatialPartitionedRDD.zipPartitions(queryRDD.spatialPartitionedRDD, judgement);
         }
 
-        final JavaRDD<Pair<Polygon, T>> result = joinParams.allowDuplicates ? resultWithDuplicates : resultWithDuplicates.distinct();
+        final JavaRDD<Pair<U, T>> result = joinParams.allowDuplicates ? resultWithDuplicates : resultWithDuplicates.distinct();
 
-        return result.mapToPair(new PairFunction<Pair<Polygon, T>, Polygon, T>() {
+        return result.mapToPair(new PairFunction<Pair<U, T>, U, T>() {
             @Override
-            public Tuple2<Polygon, T> call(Pair<Polygon, T> pair) throws Exception {
+            public Tuple2<U, T> call(Pair<U, T> pair) throws Exception {
                 return new Tuple2<>(pair.getKey(), pair.getValue());
             }
         });
@@ -278,8 +278,6 @@ public class JoinQuery implements Serializable{
     /**
      * Joins two sets of geometries on 'contains' or 'intersects' relationship.
      *
-     * One set of geometries must be a set of polygons.
-     *
      * If {@link JoinParams#considerBoundaryIntersection} is {@code true}, returns pairs of geometries
      * which intersect. Otherwise, returns pairs of geometries where first geometry contains second geometry.
      *
@@ -294,7 +292,7 @@ public class JoinQuery implements Serializable{
      * @param <T> Type of the geometries in spatialRDD set
      * @return RDD of pairs of matching geometries
      */
-    public static <T extends Geometry> JavaPairRDD<Polygon, T> spatialJoin(SpatialRDD<T> spatialRDD, SpatialRDD<Polygon> queryRDD, JoinParams joinParams) throws Exception {
+    public static <T extends Geometry, U extends Geometry> JavaPairRDD<U, T> spatialJoin(SpatialRDD<T> spatialRDD, SpatialRDD<U> queryRDD, JoinParams joinParams) throws Exception {
         final JoinParamsInternal params = new JoinParamsInternal(joinParams.considerBoundaryIntersection, joinParams.polygonIndexType);
         return spatialJoinInt(spatialRDD, queryRDD, params);
     }
