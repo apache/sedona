@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.storage.StorageLevel;
 import org.apache.spark.util.random.SamplingUtils;
@@ -33,10 +34,6 @@ import org.datasyslab.geospark.spatialPartitioning.SpatialPartitioner;
 import org.datasyslab.geospark.spatialPartitioning.VoronoiPartitioning;
 import org.datasyslab.geospark.spatialPartitioning.quadtree.StandardQuadTree;
 import org.datasyslab.geospark.utils.RDDSampleUtils;
-import org.datasyslab.geospark.utils.XMaxComparator;
-import org.datasyslab.geospark.utils.XMinComparator;
-import org.datasyslab.geospark.utils.YMaxComparator;
-import org.datasyslab.geospark.utils.YMinComparator;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.FactoryException;
@@ -397,24 +394,52 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 	        }
 	}
 
-    /**
-     * Boundary.
-     *
-     * @return the envelope
-     */
-    public Envelope boundary() {
-    	Object minXEnvelope = this.rawSpatialRDD.min(new XMinComparator());
-    	Object minYEnvelope = this.rawSpatialRDD.min(new YMinComparator());
-    	Object maxXEnvelope = this.rawSpatialRDD.max(new XMaxComparator());
-    	Object maxYEnvelope = this.rawSpatialRDD.max(new YMaxComparator());
-    	Double[] boundary = new Double[4];
-    	boundary[0] = ((Geometry) minXEnvelope).getEnvelopeInternal().getMinX();
-    	boundary[1] = ((Geometry) minYEnvelope).getEnvelopeInternal().getMinY();
-    	boundary[2] = ((Geometry) maxXEnvelope).getEnvelopeInternal().getMaxX();
-    	boundary[3] = ((Geometry) maxYEnvelope).getEnvelopeInternal().getMaxY();
-        this.boundaryEnvelope =  new Envelope(boundary[0],boundary[2],boundary[1],boundary[3]);
-        return this.boundaryEnvelope;
-    }
+	public static final class BoundaryAggregation {
+		public static Envelope combine(Envelope agg1, Envelope agg2) throws Exception {
+			if (agg1 == null) {
+				return agg2;
+			}
+
+			if (agg2 == null) {
+				return agg1;
+			}
+
+			return new Envelope(
+				Math.min(agg1.getMinX(), agg2.getMinX()),
+				Math.max(agg1.getMaxX(), agg2.getMaxX()),
+				Math.min(agg1.getMinY(), agg2.getMinY()),
+				Math.max(agg1.getMaxY(), agg2.getMaxY()));
+		}
+
+		public static Envelope add(Envelope agg, Geometry object) throws Exception {
+			return combine(object.getEnvelopeInternal(), agg);
+		}
+	}
+
+	/**
+	 * Boundary.
+	 *
+	 * @return the envelope
+	 */
+	public Envelope boundary() {
+		final Function2 combOp =
+			new Function2<Envelope, Envelope, Envelope>() {
+				@Override
+				public Envelope call(Envelope agg1, Envelope agg2) throws Exception {
+					return BoundaryAggregation.combine(agg1, agg2);
+				}
+			};
+
+		final Function2 seqOp = new Function2<Envelope, Geometry, Envelope>() {
+			@Override
+			public Envelope call(Envelope agg, Geometry object) throws Exception {
+				return BoundaryAggregation.add(agg, object);
+			}
+		};
+
+		this.boundaryEnvelope = (Envelope) this.rawSpatialRDD.aggregate(null, seqOp, combOp);
+		return this.boundaryEnvelope;
+	}
 
 	/**
 	 * Gets the raw spatial RDD.
