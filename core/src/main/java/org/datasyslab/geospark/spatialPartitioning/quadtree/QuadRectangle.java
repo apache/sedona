@@ -11,8 +11,9 @@ import com.vividsolutions.jts.geom.Envelope;
 import java.io.Serializable;
 
 public class QuadRectangle implements Serializable{
-    public double x, y, width, height;
+    public final double x, y, width, height;
     public Integer partitionId = -1;
+
     public QuadRectangle(Envelope envelope)
     {
         this.x = envelope.getMinX();
@@ -20,7 +21,16 @@ public class QuadRectangle implements Serializable{
         this.width = envelope.getWidth();
         this.height = envelope.getHeight();
     }
+
     public QuadRectangle(double x, double y, double width, double height) {
+        if (width < 0) {
+            throw new IllegalArgumentException("width must be >= 0");
+        }
+
+        if (height < 0) {
+            throw new IllegalArgumentException("height must be >= 0");
+        }
+
         this.x = x;
         this.y = y;
         this.width = width;
@@ -28,14 +38,12 @@ public class QuadRectangle implements Serializable{
     }
 
     public boolean contains(int x, int y) {
-        return this.width > 0 && this.height > 0
-                && x >= this.x && x <= this.x + this.width
+        return x >= this.x && x <= this.x + this.width
                 && y >= this.y && y <= this.y + this.height;
     }
 
     public boolean contains(QuadRectangle r) {
-        return this.width > 0 && this.height > 0 && r.width > 0 && r.height > 0
-                && r.x >= this.x && r.x + r.width <= this.x + this.width
+        return r.x >= this.x && r.x + r.width <= this.x + this.width
                 && r.y >= this.y && r.y + r.height <= this.y + this.height;
     }
     /*
