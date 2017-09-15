@@ -44,7 +44,6 @@ import org.opengis.referencing.operation.MathTransform;
 import org.wololo.geojson.Feature;
 import org.wololo.jts2geojson.GeoJSONWriter;
 import scala.Tuple2;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -246,7 +245,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 
 				@Override
 				public void remove() {
-					throw new NotImplementedException();
+					throw new UnsupportedOperationException();
 				}
 			};
 		}
