@@ -45,11 +45,11 @@ public class GeometryByPolygonJudgementUsingIndex implements FlatMapFunction2<It
     }
 
     @Override
-    public Iterator<PairGeometry> call(Iterator<SpatialIndex> iteratorTree, Iterator<Object> iteratorWindow) throws Exception {
+    public List<PairGeometry> call(Iterator<SpatialIndex> iteratorTree, Iterator<Object> iteratorWindow) throws Exception {
         List<PairGeometry> result = new ArrayList<>();
 
         if (!iteratorTree.hasNext()) {
-            return result.iterator();
+            return result;
         }
         SpatialIndex treeIndex = iteratorTree.next();
         if (treeIndex instanceof STRtree) {
@@ -78,6 +78,6 @@ public class GeometryByPolygonJudgementUsingIndex implements FlatMapFunction2<It
             if (objectHashSet.size() == 0) continue;
             result.add(new PairGeometry(window, objectHashSet));
         }
-        return result.iterator();
+        return result;
     }
 }

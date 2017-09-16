@@ -54,7 +54,7 @@ public class UserSuppliedLineStringMapper implements FlatMapFunction<Iterator<St
     int actualEndOffset;
 
     @Override
-    public Iterator<Object> call(Iterator<String> stringIterator) throws Exception {
+    public List<Object> call(Iterator<String> stringIterator) throws Exception {
         List result= new ArrayList<LineString>();
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
@@ -75,6 +75,6 @@ public class UserSuppliedLineStringMapper implements FlatMapFunction<Iterator<St
                 result.add((LineString) spatialObject);
             }
         }
-            return result.iterator();
+            return result;
         }
 }

@@ -69,7 +69,7 @@ public class RangeFilterUsingIndex implements FlatMapFunction<Iterator<Object>,O
 	 * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
 	 */
 	@Override
-	public Iterator<Object> call(Iterator<Object> treeIndexes) throws Exception {
+	public List<Object> call(Iterator<Object> treeIndexes) throws Exception {
 		assert treeIndexes.hasNext()==true;
 		Object treeIndex = treeIndexes.next();
 		if(treeIndex instanceof STRtree)
@@ -111,7 +111,7 @@ public class RangeFilterUsingIndex implements FlatMapFunction<Iterator<Object>,O
 					}
 				}
 			}
-			return result.iterator();
+			return result;
 		}
 		else
 		{
@@ -136,7 +136,7 @@ public class RangeFilterUsingIndex implements FlatMapFunction<Iterator<Object>,O
 						if(((Polygon)this.queryWindow).covers((Geometry)spatialObject)) result.add(spatialObject);
 					}				}
 			}
-			return result.iterator();
+			return result;
 		}
 	}
 }

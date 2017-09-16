@@ -48,7 +48,7 @@ public class KnnJudgementUsingIndex implements FlatMapFunction<Iterator<Object>,
 	 * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
 	 */
 	@Override
-	public Iterator<Object> call(Iterator<Object> treeIndexes) throws Exception {
+	public List<Object> call(Iterator<Object> treeIndexes) throws Exception {
 		// TODO Auto-generated method stub
 		GeometryFactory fact= new GeometryFactory();
 		Object treeIndex = treeIndexes.next();
@@ -66,7 +66,7 @@ public class KnnJudgementUsingIndex implements FlatMapFunction<Iterator<Object>,
 		{
 			result.add(localK[i]);
 		}
-		return result.iterator();
+		return result;
 	}
 	
 }

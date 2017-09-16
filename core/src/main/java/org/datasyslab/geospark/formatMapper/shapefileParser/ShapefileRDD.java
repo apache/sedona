@@ -109,7 +109,7 @@ public class ShapefileRDD implements Serializable{
         return shapeRDD.flatMap(new FlatMapFunction<Geometry, Point>()
         {
             @Override
-            public Iterator<Point> call(Geometry spatialObject) throws Exception {
+            public List<Point> call(Geometry spatialObject) throws Exception {
                 List<Point> result = new ArrayList<Point>();
                 if(spatialObject instanceof MultiPoint)
                 {
@@ -129,7 +129,7 @@ public class ShapefileRDD implements Serializable{
                 {
                     throw new Exception("[ShapefileRDD][getPointRDD] the object type is not Point or MultiPoint type. It is "+spatialObject.getGeometryType());
                 }
-                return result.iterator();
+                return result;
             }
 
         });
@@ -144,7 +144,7 @@ public class ShapefileRDD implements Serializable{
         return shapeRDD.flatMap(new FlatMapFunction<Geometry, Polygon>()
         {
             @Override
-            public Iterator<Polygon> call(Geometry spatialObject) throws Exception {
+            public List<Polygon> call(Geometry spatialObject) throws Exception {
                 List<Polygon> result = new ArrayList<Polygon>();
                 if (spatialObject instanceof MultiPolygon)
                 {
@@ -164,7 +164,7 @@ public class ShapefileRDD implements Serializable{
                 {
                     throw new Exception("[ShapefileRDD][getPolygonRDD] the object type is not Polygon or MultiPolygon type. It is "+spatialObject.getGeometryType());
                 }
-                return result.iterator();
+                return result;
             }
 
         });
@@ -179,7 +179,7 @@ public class ShapefileRDD implements Serializable{
         return shapeRDD.flatMap(new FlatMapFunction<Geometry, LineString>()
         {
             @Override
-            public Iterator<LineString> call(Geometry spatialObject) throws Exception {
+            public List<LineString> call(Geometry spatialObject) throws Exception {
                 List<LineString> result = new ArrayList<LineString>();
                 if(spatialObject instanceof MultiLineString)
                 {
@@ -199,7 +199,7 @@ public class ShapefileRDD implements Serializable{
                 {
                     throw new Exception("[ShapefileRDD][getLineStringRDD] the object type is not LineString or MultiLineString type. It is "+spatialObject.getGeometryType());
                 }
-                return result.iterator();
+                return result;
             }
 
         });

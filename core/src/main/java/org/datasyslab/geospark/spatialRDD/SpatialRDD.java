@@ -195,7 +195,7 @@ public abstract class SpatialRDD implements Serializable{
 			JavaPairRDD<Integer, Object> spatialNumberingRDD = this.rawSpatialRDD.flatMapToPair(
 	                new PairFlatMapFunction<Object, Integer, Object>() {
 	                    @Override
-	                    public Iterator<Tuple2<Integer, Object>> call(Object spatialObject) throws Exception {
+	                    public HashSet<Tuple2<Integer, Object>> call(Object spatialObject) throws Exception {
 	                    	return PartitionJudgement.getPartitionID(partitionTree,spatialObject);
 	                    }
 	                }
@@ -203,13 +203,13 @@ public abstract class SpatialRDD implements Serializable{
 			this.spatialPartitionedRDD = spatialNumberingRDD.partitionBy(new SpatialPartitioner(partitionTree.getTotalNumLeafNode())).mapPartitions(new FlatMapFunction<Iterator<Tuple2<Integer,Object>>, Object>(
 	        		) {
 	        			 @Override
-	        			 public Iterator<Object> call(Iterator<Tuple2<Integer, Object>> tuple2Iterator) throws Exception {
+	        			 public List<Object> call(Iterator<Tuple2<Integer, Object>> tuple2Iterator) throws Exception {
 	        				List<Object> result = new ArrayList<Object>();
 	        				while (tuple2Iterator.hasNext())
 	        				{
 	        					result.add(tuple2Iterator.next()._2());
 	        				}
-	        			 	return result.iterator();
+	        			 	return result;
 	        			 }
 	        		},true);
 		}
@@ -218,7 +218,7 @@ public abstract class SpatialRDD implements Serializable{
 			JavaPairRDD<Integer, Object> spatialNumberingRDD = this.rawSpatialRDD.flatMapToPair(
 	                new PairFlatMapFunction<Object, Integer, Object>() {
 	                    @Override
-	                    public Iterator<Tuple2<Integer, Object>> call(Object spatialObject) throws Exception {
+	                    public HashSet<Tuple2<Integer, Object>> call(Object spatialObject) throws Exception {
 	                    	return PartitionJudgement.getPartitionID(grids,spatialObject);
 	                    }
 	                }
@@ -226,19 +226,19 @@ public abstract class SpatialRDD implements Serializable{
 	        this.spatialPartitionedRDD = spatialNumberingRDD.partitionBy(new SpatialPartitioner(grids.size())).mapPartitions(new FlatMapFunction<Iterator<Tuple2<Integer,Object>>, Object>(
 	        		) {
 	        			 @Override
-	        			 public Iterator<Object> call(Iterator<Tuple2<Integer, Object>> tuple2Iterator) throws Exception {
+	        			 public List<Object> call(Iterator<Tuple2<Integer, Object>> tuple2Iterator) throws Exception {
 	        				List<Object> result = new ArrayList<Object>();
 	        				while (tuple2Iterator.hasNext())
 	        				{
 	        					result.add(tuple2Iterator.next()._2());
 	        				}
-	        			 	return result.iterator();
+	        			 	return result;
 	        			 }
 	        		},true);
 		}
         JavaRDD<Integer> partitionedResult = this.spatialPartitionedRDD.mapPartitions(new FlatMapFunction<Iterator<Object>, Integer>() {
 			@Override
-			public Iterator<Integer> call(Iterator<Object> objectIterator) throws Exception {
+			public List<Integer> call(Iterator<Object> objectIterator) throws Exception {
 				List<Integer> counts = new ArrayList<>();
 				Integer count=0;
 				while (objectIterator.hasNext())
@@ -247,7 +247,7 @@ public abstract class SpatialRDD implements Serializable{
 					count++;
 				}
 				counts.add(count);
-				return counts.iterator();
+				return counts;
 			}
 		}, true);
 		return true;
@@ -265,7 +265,7 @@ public abstract class SpatialRDD implements Serializable{
         JavaPairRDD<Integer, Object> spatialNumberingRDD = this.rawSpatialRDD.flatMapToPair(
                 new PairFlatMapFunction<Object, Integer, Object>() {
                     @Override
-                    public Iterator<Tuple2<Integer, Object>> call(Object spatialObject) throws Exception {
+                    public HashSet<Tuple2<Integer, Object>> call(Object spatialObject) throws Exception {
                     	return PartitionJudgement.getPartitionID(otherGrids,spatialObject);
                     }
                 }
@@ -274,20 +274,20 @@ public abstract class SpatialRDD implements Serializable{
         this.spatialPartitionedRDD = spatialNumberingRDD.partitionBy(new SpatialPartitioner(grids.size())).mapPartitions(new FlatMapFunction<Iterator<Tuple2<Integer,Object>>, Object>(
 		) {
 			@Override
-			public Iterator<Object> call(Iterator<Tuple2<Integer, Object>> tuple2Iterator) throws Exception {
+			public List<Object> call(Iterator<Tuple2<Integer, Object>> tuple2Iterator) throws Exception {
 				List<Object> result = new ArrayList<Object>();
 				while (tuple2Iterator.hasNext())
 				{
 					result.add(tuple2Iterator.next()._2());
 				}
-				return result.iterator();
+				return result;
 			}
 		},true);
 		JavaRDD<Integer> partitionedResult = this.spatialPartitionedRDD.mapPartitions(new FlatMapFunction<Iterator<Object>, Integer>(
 
 		) {
 			@Override
-			public Iterator<Integer> call(Iterator<Object> objectIterator) throws Exception {
+			public List<Integer> call(Iterator<Object> objectIterator) throws Exception {
 				List<Integer> counts = new ArrayList<>();
 				Integer count=0;
 				while (objectIterator.hasNext())
@@ -296,7 +296,7 @@ public abstract class SpatialRDD implements Serializable{
 					count++;
 				}
 				counts.add(count);
-				return counts.iterator();
+				return counts;
 			}
 		}, true);
 		return true;
@@ -306,20 +306,20 @@ public abstract class SpatialRDD implements Serializable{
 		this.spatialPartitionedRDD = this.rawSpatialRDD.flatMapToPair(
 		new PairFlatMapFunction<Object, Integer, Object>() {
 			@Override
-			public Iterator<Tuple2<Integer, Object>> call(Object spatialObject) throws Exception {
+			public HashSet<Tuple2<Integer, Object>> call(Object spatialObject) throws Exception {
 				return PartitionJudgement.getPartitionID(partitionTree, spatialObject);
 			}
 		}
 		).partitionBy(new SpatialPartitioner(partitionTree.getTotalNumLeafNode())).mapPartitions(new FlatMapFunction<Iterator<Tuple2<Integer,Object>>, Object>(
 		) {
 			@Override
-			public Iterator<Object> call(Iterator<Tuple2<Integer, Object>> tuple2Iterator) throws Exception {
+			public List<Object> call(Iterator<Tuple2<Integer, Object>> tuple2Iterator) throws Exception {
 				List<Object> result = new ArrayList<Object>();
 				while (tuple2Iterator.hasNext())
 				{
 					result.add(tuple2Iterator.next()._2());
 				}
-				return result.iterator();
+				return result;
 			}
 		},true);
 		this.partitionTree = partitionTree;
@@ -373,7 +373,7 @@ public abstract class SpatialRDD implements Serializable{
 	    	  this.indexedRawRDD =  this.rawSpatialRDD.mapPartitions(new FlatMapFunction<Iterator<Object>,Object>()
 	    	  {
 	    		  @Override
-	        	  public Iterator<Object> call(Iterator<Object> spatialObjects) throws Exception {
+	        	  public HashSet<Object> call(Iterator<Object> spatialObjects) throws Exception {
 	        		  if(indexType == IndexType.RTREE)
 	        		  {
 		        		  STRtree rt = new STRtree();
@@ -384,7 +384,7 @@ public abstract class SpatialRDD implements Serializable{
 		        		  HashSet<Object> result = new HashSet<Object>();
 		        		  rt.query(new Envelope(0.0,0.0,0.0,0.0));
 		        		  result.add(rt);
-		        		  return result.iterator();
+		        		  return result;
 	        		  }
 	        		  else
 	        		  {
@@ -396,7 +396,7 @@ public abstract class SpatialRDD implements Serializable{
 		        		  HashSet<Object> result = new HashSet<Object>();
 		        		  rt.query(new Envelope(0.0,0.0,0.0,0.0));
 		        		  result.add(rt);
-		        		  return result.iterator();
+		        		  return result;
 	        		  }
 
 	        	  }
@@ -410,7 +410,7 @@ public abstract class SpatialRDD implements Serializable{
 	        	}
 				this.indexedRDD = this.spatialPartitionedRDD.mapPartitions(new FlatMapFunction<Iterator<Object>, SpatialIndex>() {
 					@Override
-					public Iterator<SpatialIndex> call(Iterator<Object> objectIterator) throws Exception {
+					public HashSet<SpatialIndex> call(Iterator<Object> objectIterator) throws Exception {
 						if (indexType == IndexType.RTREE) {
 							STRtree rt = new STRtree();
 							while (objectIterator.hasNext()) {
@@ -420,7 +420,7 @@ public abstract class SpatialRDD implements Serializable{
 							HashSet<SpatialIndex> result = new HashSet<SpatialIndex>();
 							rt.query(new Envelope(0.0, 0.0, 0.0, 0.0));
 							result.add(rt);
-							return result.iterator();
+							return result;
 						} else {
 							Quadtree rt = new Quadtree();
 							while (objectIterator.hasNext()) {
@@ -431,7 +431,7 @@ public abstract class SpatialRDD implements Serializable{
 							HashSet<SpatialIndex> result = new HashSet<SpatialIndex>();
 							rt.query(new Envelope(0.0, 0.0, 0.0, 0.0));
 							result.add(rt);
-							return result.iterator();
+							return result;
 						}
 					}
 				});
@@ -516,7 +516,7 @@ public abstract class SpatialRDD implements Serializable{
     public void saveAsGeoJSON(String outputLocation) {
         this.rawSpatialRDD.mapPartitions(new FlatMapFunction<Iterator<Object>, String>() {
             @Override
-            public Iterator<String> call(Iterator<Object> iterator) throws Exception {
+            public List<String> call(Iterator<Object> iterator) throws Exception {
                 ArrayList<String> result = new ArrayList<String>();
                 GeoJSONWriter writer = new GeoJSONWriter();
                 while (iterator.hasNext()) {
@@ -535,7 +535,7 @@ public abstract class SpatialRDD implements Serializable{
                     String jsonstring = jsonFeature.toString();
                     result.add(jsonstring);
                 }
-                return result.iterator();
+                return result;
             }
         }).saveAsTextFile(outputLocation);
     }

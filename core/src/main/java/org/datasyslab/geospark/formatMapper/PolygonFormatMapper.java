@@ -59,7 +59,7 @@ public class PolygonFormatMapper extends FormatMapper implements FlatMapFunction
 	}
 
     @Override
-    public Iterator<Object> call(Iterator<String> stringIterator) throws Exception {
+    public List<Object> call(Iterator<String> stringIterator) throws Exception {
         MultiPolygon multiSpatialObjects = null;
         LinearRing linear;
         int actualEndOffset;
@@ -155,6 +155,6 @@ public class PolygonFormatMapper extends FormatMapper implements FlatMapFunction
                 e.printStackTrace();
             }
         }
-        return result.iterator();
+        return result;
     }
 }

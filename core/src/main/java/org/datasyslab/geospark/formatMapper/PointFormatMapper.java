@@ -56,7 +56,7 @@ public class PointFormatMapper extends FormatMapper implements FlatMapFunction<I
 	}
 
     @Override
-    public Iterator<Object> call(Iterator<String> stringIterator) throws Exception {
+    public List<Object> call(Iterator<String> stringIterator) throws Exception {
         MultiPoint multiSpatialObjects = null;
         Coordinate coordinate;
         List result= new ArrayList<Point>();
@@ -142,6 +142,6 @@ public class PointFormatMapper extends FormatMapper implements FlatMapFunction<I
                 e.printStackTrace();
             }
         }
-        return result.iterator();
+        return result;
     }
 }

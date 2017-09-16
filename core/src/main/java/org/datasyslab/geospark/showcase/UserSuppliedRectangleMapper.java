@@ -53,7 +53,7 @@ public class UserSuppliedRectangleMapper implements FlatMapFunction<Iterator<Str
     int actualEndOffset;
 
     @Override
-    public Iterator<Object> call(Iterator<String> stringIterator) throws Exception {
+    public List<Object> call(Iterator<String> stringIterator) throws Exception {
         List result= new ArrayList<Envelope>();
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
@@ -74,6 +74,6 @@ public class UserSuppliedRectangleMapper implements FlatMapFunction<Iterator<Str
                 result.add(((Polygon) spatialObject).getEnvelopeInternal());
             }
         }
-        return result.iterator();
+        return result;
     }
 }

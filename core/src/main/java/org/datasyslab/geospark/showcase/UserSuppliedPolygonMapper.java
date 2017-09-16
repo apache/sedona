@@ -55,7 +55,7 @@ public class UserSuppliedPolygonMapper implements FlatMapFunction<Iterator<Strin
     int actualEndOffset;
 
     @Override
-    public Iterator<Object> call(Iterator<String> stringIterator) throws Exception {
+    public List<Object> call(Iterator<String> stringIterator) throws Exception {
         List result= new ArrayList<Polygon>();
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
@@ -76,6 +76,6 @@ public class UserSuppliedPolygonMapper implements FlatMapFunction<Iterator<Strin
                 result.add((Polygon) spatialObject);
             }
         }
-        return result.iterator();
+        return result;
     }
 }

@@ -56,7 +56,7 @@ public class RectangleFormatMapper extends FormatMapper implements FlatMapFuncti
 	}
 
 	@Override
-	public Iterator<Object> call(Iterator<String> stringIterator) throws Exception {
+	public List<Object> call(Iterator<String> stringIterator) throws Exception {
 		MultiPolygon multiSpatialObjects = null;
 		List result= new ArrayList<Polygon>();
 		Double x1,x2,y1,y2;
@@ -209,6 +209,6 @@ public class RectangleFormatMapper extends FormatMapper implements FlatMapFuncti
 				e.printStackTrace();
 			}
 		}
-		return result.iterator();
+		return result;
 	}
 }
