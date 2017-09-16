@@ -23,6 +23,7 @@ import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -130,7 +131,7 @@ public class PolygonRDDTest {
         assert spatialRDD.boundaryEnvelope!=null;
     }
 
-    @Test
+    @Ignore
     public void testGeoJSONConstructor() throws Exception {
         PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocationGeojson, FileDataSplitter.GEOJSON, true, 4,StorageLevel.MEMORY_ONLY());
         //todo: Set this to debug level

@@ -59,7 +59,7 @@ public class LineStringFormatMapper extends FormatMapper implements FlatMapFunct
 
 
     @Override
-    public Iterator<Object> call(Iterator<String> stringIterator) throws Exception {
+    public List<Object> call(Iterator<String> stringIterator) throws Exception {
         List result= new ArrayList<LineString>();
         MultiLineString multiSpatialObjects = null;
         int actualEndOffset;
@@ -151,6 +151,6 @@ public class LineStringFormatMapper extends FormatMapper implements FlatMapFunct
                 e.printStackTrace();
             }
         }
-        return result.iterator();
+        return result;
     }
 }

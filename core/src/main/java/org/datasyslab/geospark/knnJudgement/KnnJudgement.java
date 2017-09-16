@@ -10,6 +10,7 @@ package org.datasyslab.geospark.knnJudgement;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.PriorityQueue;
 
 import org.apache.spark.api.java.function.FlatMapFunction;
@@ -47,7 +48,7 @@ public class KnnJudgement implements FlatMapFunction<Iterator<Object>, Object>, 
 	 * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
 	 */
 	@Override
-	public Iterator<Object> call(Iterator<Object> input) throws Exception {		
+	public List<Object> call(Iterator<Object> input) throws Exception {		
 		PriorityQueue<Object> pq = new PriorityQueue<Object>(k, new GeometryDistanceComparator(queryCenter,false));
 		while (input.hasNext()) {
 			if (pq.size() < k) {
@@ -66,7 +67,7 @@ public class KnnJudgement implements FlatMapFunction<Iterator<Object>, Object>, 
 		for (int i = 0; i < k; i++) {
 			res.add(pq.poll());
 		}
-		return res.iterator();
+		return res;
 	}
 
 }

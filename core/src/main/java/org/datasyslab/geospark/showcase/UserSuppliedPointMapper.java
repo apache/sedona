@@ -36,7 +36,7 @@ public class UserSuppliedPointMapper implements FlatMapFunction<Iterator<String>
     List<String> lineSplitList;
 
     @Override
-    public Iterator<Object> call(Iterator<String> stringIterator) throws Exception {
+    public List<Object> call(Iterator<String> stringIterator) throws Exception {
         List result= new ArrayList<Point>();
         while(stringIterator.hasNext()) {
             String line = stringIterator.next();
@@ -55,6 +55,6 @@ public class UserSuppliedPointMapper implements FlatMapFunction<Iterator<String>
                 //Get one error. The data probably is dirty. Just skip this line.
             }
         }
-        return result.iterator();
+        return result;
     }
 }

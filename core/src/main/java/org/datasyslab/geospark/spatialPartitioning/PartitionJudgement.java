@@ -35,7 +35,7 @@ public class PartitionJudgement implements Serializable{
 	 * @return the partition ID
 	 * @throws Exception the exception
 	 */
-	public static Iterator<Tuple2<Integer, Object>> getPartitionID(List<Envelope> grids,Object spatialObject) throws Exception
+	public static HashSet<Tuple2<Integer, Object>> getPartitionID(List<Envelope> grids,Object spatialObject) throws Exception
 	{
 		HashSet<Tuple2<Integer, Object>> result = new HashSet<Tuple2<Integer, Object>>();
 		int overflowContainerID=grids.size();
@@ -57,10 +57,10 @@ public class PartitionJudgement implements Serializable{
 		{
 			result.add(new Tuple2<Integer, Object>(overflowContainerID,spatialObject));
 		}
-		return result.iterator();
+		return result;
 	}
 
-	public static Iterator<Tuple2<Integer, Object>> getPartitionID(StandardQuadTree partitionTree, Object spatialObject) throws Exception {
+	public static HashSet<Tuple2<Integer, Object>> getPartitionID(StandardQuadTree partitionTree, Object spatialObject) throws Exception {
 		HashSet<Tuple2<Integer, Object>> result = new HashSet<Tuple2<Integer, Object>>();
 		boolean containFlag = false;
 		ArrayList<QuadRectangle> matchedPartitions = new ArrayList<QuadRectangle>();
@@ -69,7 +69,7 @@ public class PartitionJudgement implements Serializable{
 		}
 		catch (NullPointerException e)
 		{
-			return result.iterator();
+			return result;
 		}
 		for(int i=0;i<matchedPartitions.size();i++)
 		{
@@ -83,6 +83,6 @@ public class PartitionJudgement implements Serializable{
 			// This object is not covered by the partition. Should be dropped.
 			// Partition tree from StandardQuadTree do not have missed objects.
 		}
-		return result.iterator();
+		return result;
 	}
 }

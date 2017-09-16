@@ -42,7 +42,7 @@ public class GeometryByCircleJudgement implements FlatMapFunction2<Iterator<Obje
     }
 
     @Override
-    public Iterator<PairGeometry> call(Iterator<Object> iteratorObject, Iterator<Object> iteratorWindow) throws Exception {
+    public List<PairGeometry> call(Iterator<Object> iteratorObject, Iterator<Object> iteratorWindow) throws Exception {
         List<PairGeometry> result = new ArrayList<PairGeometry>();
         List<Object> queryObjects = new ArrayList<Object>();
         while(iteratorObject.hasNext())
@@ -67,6 +67,6 @@ public class GeometryByCircleJudgement implements FlatMapFunction2<Iterator<Obje
             if (resultHashSet.size() == 0) continue;
             result.add(new PairGeometry(window,resultHashSet));
         }
-        return result.iterator();
+        return result;
     }
 }

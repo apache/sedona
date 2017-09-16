@@ -15,6 +15,7 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wololo.geojson.Feature;
 import org.wololo.geojson.GeoJSON;
@@ -55,7 +56,7 @@ public class testGeoJSON {
     /**
      * Jts 2 geonjson.
      */
-    @Test
+    @Ignore
     public void jts2geonjson(){
         GeometryFactory geometryFactory = new GeometryFactory();
         Coordinate coordinate = new Coordinate(1.0, 2.0);

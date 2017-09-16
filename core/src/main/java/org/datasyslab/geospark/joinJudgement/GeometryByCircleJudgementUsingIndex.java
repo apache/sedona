@@ -44,10 +44,10 @@ public class GeometryByCircleJudgementUsingIndex implements FlatMapFunction2<Ite
     }
 
     @Override
-    public Iterator<PairGeometry> call(Iterator<SpatialIndex> iteratorTree, Iterator<Object> iteratorWindow) throws Exception {
+    public List<PairGeometry> call(Iterator<SpatialIndex> iteratorTree, Iterator<Object> iteratorWindow) throws Exception {
         List<PairGeometry> result = new ArrayList<PairGeometry>();
         if (!iteratorTree.hasNext()) {
-            return result.iterator();
+            return result;
         }
         SpatialIndex treeIndex = iteratorTree.next();
         if (treeIndex instanceof STRtree) {
@@ -76,6 +76,6 @@ public class GeometryByCircleJudgementUsingIndex implements FlatMapFunction2<Ite
             if (objectHashSet.size() == 0) continue;
             result.add(new PairGeometry(window, objectHashSet));
         }
-        return result.iterator();
+        return result;
     }
 }

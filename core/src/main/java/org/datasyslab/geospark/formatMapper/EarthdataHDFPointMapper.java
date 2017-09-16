@@ -187,7 +187,7 @@ public class EarthdataHDFPointMapper implements FlatMapFunction<Iterator<String>
 	}
 
 	@Override
-	public Iterator<Geometry> call(Iterator<String> stringIterator) throws Exception {
+	public List<Geometry> call(Iterator<String> stringIterator) throws Exception {
 		List<Geometry> hdfData = new ArrayList<Geometry>();
 		while (stringIterator.hasNext()) {
 			String hdfAddress = stringIterator.next();
@@ -225,6 +225,6 @@ public class EarthdataHDFPointMapper implements FlatMapFunction<Iterator<String>
 				}
 			}
 		}
-		return hdfData.iterator();
+		return hdfData;
 	}
 }
