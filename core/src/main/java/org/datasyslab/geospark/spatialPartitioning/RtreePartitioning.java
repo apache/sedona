@@ -6,14 +6,12 @@
  */
 package org.datasyslab.geospark.spatialPartitioning;
 
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.index.strtree.STRtree;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-
-import com.vividsolutions.jts.index.strtree.STRtree;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -22,43 +20,28 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 public class RtreePartitioning implements Serializable{
 
 	/** The grids. */
-	List<Envelope> grids=new ArrayList<Envelope>();
+	final List<Envelope> grids = new ArrayList<>();
 	
 	
 	/**
 	 * Instantiates a new rtree partitioning.
 	 *
-	 * @param SampleList the sample list
+	 * @param samples the sample list
 	 * @param boundary the boundary
 	 * @param partitions the partitions
 	 * @throws Exception the exception
 	 */
-	public RtreePartitioning(List SampleList,Envelope boundary,int partitions) throws Exception
+	public RtreePartitioning(List<Envelope> samples, Envelope boundary, int partitions) throws Exception
 	{
-		STRtree strtree=new STRtree(SampleList.size()/partitions);
-    	for(int i=0;i<SampleList.size();i++)
-    	{
-    		if(SampleList.get(i) instanceof Envelope)
-    		{
-    			Envelope spatialObject = (Envelope)SampleList.get(i);
-    			strtree.insert(spatialObject, spatialObject);
-    		}
-    		else if(SampleList.get(i) instanceof Geometry)
-    		{
-    			Geometry spatialObject = (Geometry)SampleList.get(i);
-    			strtree.insert(spatialObject.getEnvelopeInternal(), spatialObject);
-    		}
-    		else
-    		{
-    			throw new Exception("[RtreePartitioning][Constrcutor] Unsupported spatial object type");
-    		}
+		STRtree strtree=new STRtree(samples.size()/partitions);
+		for (Envelope sample : samples) {
+			strtree.insert(sample, sample);
     	}
+
     	List<Envelope> envelopes=strtree.queryBoundary();
-    	for(int i=0;i<envelopes.size();i++)
-    	{
-    		grids.add(envelopes.get(i));
+		for (Envelope envelope : envelopes) {
+    		grids.add(envelope);
     	}
-    	//grids.add(new EnvelopeWithGrid(boundary,grids.size()));
 	}
 	
 	/**

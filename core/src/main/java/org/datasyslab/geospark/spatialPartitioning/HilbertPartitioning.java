@@ -6,93 +6,56 @@
  */
 package org.datasyslab.geospark.spatialPartitioning;
 
+import com.vividsolutions.jts.geom.Envelope;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-
-
-// TODO: Auto-generated Javadoc
-/**
- * The Class HilbertPartitioning.
- */
 public class HilbertPartitioning implements Serializable{
+
+	private static final int GRID_RESOLUTION = Short.MAX_VALUE;
 
 	/** The splits. */
 	//Partition ID
 	protected int[] splits;
 	
 	/** The grids. */
-	List<Envelope> grids=new ArrayList<Envelope>();
+	List<Envelope> grids=new ArrayList<>();
 
 	/**
 	 * Instantiates a new hilbert partitioning.
 	 *
-	 * @param SampleList the sample list
+	 * @param samples the sample list
 	 * @param boundary the boundary
 	 * @param partitions the partitions
 	 * @throws Exception the exception
 	 */
-	public HilbertPartitioning(List SampleList,Envelope boundary,int partitions) throws Exception
+	public HilbertPartitioning(List<Envelope> samples, Envelope boundary, int partitions) throws Exception
 	{
 		//this.boundary=boundary;
-		int gridResolution=Short.MAX_VALUE;
-	    int[] hValues = new int[SampleList.size()];
-	    Envelope [] gridWithoutID=new Envelope[partitions];
-	    if(SampleList.get(0) instanceof Envelope)
-	    {
-		    for (int i = 0; i < SampleList.size(); i++){
-		    	Envelope spatialObject = (Envelope)SampleList.get(i);
-		    	int x=locationMapping(boundary.getMinX(),boundary.getMaxX(),(spatialObject.getMinX()+spatialObject.getMaxX())/2.0);
-		    	int y=locationMapping(boundary.getMinY(),boundary.getMaxY(),(spatialObject.getMinY()+spatialObject.getMaxY())/2.0);
-		    	hValues[i] = computeHValue(gridResolution+1,x,y);
-		    }
-	    }
-	    else if(SampleList.get(0) instanceof Geometry)
-	    {
-		    for (int i = 0; i < SampleList.size(); i++){
-			      Envelope envelope=((Geometry)SampleList.get(i)).getEnvelopeInternal();
-			      int x=locationMapping(boundary.getMinX(),boundary.getMaxX(),(envelope.getMinX()+envelope.getMaxX())/2.0);
-			      int y=locationMapping(boundary.getMinY(),boundary.getMaxY(),(envelope.getMinY()+envelope.getMaxY())/2.0);
-			      hValues[i] = computeHValue(gridResolution+1,x,y);
-			    }
-	    }
-	    else
-	    {
-	    	throw new Exception("[HilbertPartitioning][Constrcutor] Unsupported spatial object type");
-	    }
+	    int[] hValues = new int[samples.size()];
+		for (int i = 0; i < samples.size(); i++){
+			hValues[i] = computeHValue(boundary, samples.get(i));
+		}
 
 	    createFromHValues(hValues, partitions);
-	    for(int i=0;i<SampleList.size();i++)
-	    {
-	    	Envelope initialBoundary=null;
-	    	Object spatialObject = SampleList.get(i);
-	    	if(SampleList.get(0) instanceof Envelope)
-	    	{
-	    		initialBoundary = (Envelope)spatialObject;
-	    	}
-	    	else if(SampleList.get(0) instanceof Geometry)
-	    	{
-	    		initialBoundary = ((Geometry)spatialObject).getEnvelopeInternal();
-	    	}
-	    	else
-	    	{
-	    		throw new Exception("[HilbertPartitioning][Constrcutor] Unsupported spatial object type");
-	    	}
-	    	int partitionID=gridID(boundary,SampleList.get(i),splits);
-	    	gridWithoutID[partitionID]=initialBoundary;
+
+		// Aggregate samples by partition; compute bounding box of all the samples in each partition
+		Envelope [] gridWithoutID = new Envelope[partitions];
+		for (Envelope sample : samples) {
+	    	int partitionID = gridID(boundary, sample, splits);
+			Envelope current = gridWithoutID[partitionID];
+			if (current == null) {
+				gridWithoutID[partitionID] = sample;
+			} else {
+				gridWithoutID[partitionID] = updateEnvelope(current, sample);
+			}
 	    }
-	    for(int i=0;i<SampleList.size();i++)
-	    {
-	    	int partitionID=gridID(boundary,SampleList.get(i),splits);
-	    	gridWithoutID[partitionID]=updateEnvelope(gridWithoutID[partitionID],SampleList.get(i));
-	    }
-	    for(int i=0;i<gridWithoutID.length;i++)
-	    {
-	    	this.grids.add(gridWithoutID[i]);
+
+	    for (Envelope envelope : gridWithoutID) {
+	    	this.grids.add(envelope);
 	    }
 	}
 	
@@ -160,11 +123,9 @@ public class HilbertPartitioning implements Serializable{
 	   * @param axisMax the axis max
 	   * @return the int
 	   */
-  	public static int locationMapping (double axisMin, double axisLocation,double axisMax)
+  	public static int locationMapping(double axisMin, double axisLocation, double axisMax)
 	  {
-		  Double gridLocation;
-		  int gridResolution=Short.MAX_VALUE;
-		  gridLocation=(axisLocation-axisMin)*gridResolution/(axisMax-axisMin);
+		  Double gridLocation = (axisLocation-axisMin) * GRID_RESOLUTION / (axisMax-axisMin);
 		  return gridLocation.intValue();
 	  }
 	  
@@ -178,34 +139,23 @@ public class HilbertPartitioning implements Serializable{
 	   * @return the int
 	   * @throws Exception the exception
 	   */
-	  public static int gridID(Envelope boundary,Object spatialObject,int[] partitionBounds) throws Exception
+	public static int gridID(Envelope boundary, Envelope spatialObject, int[] partitionBounds) throws Exception
   	{
-  		int x = 0;
-  		int y = 0;
-  		if(spatialObject instanceof Envelope)
-  		{
-  			x=locationMapping(boundary.getMinX(),boundary.getMaxX(),(((Envelope)spatialObject).getMinX()+((Envelope)spatialObject).getMaxX())/2.0);
-  			y=locationMapping(boundary.getMinY(),boundary.getMaxY(),(((Envelope)spatialObject).getMinY()+((Envelope)spatialObject).getMaxY())/2.0);
-  		}
-  		else if(spatialObject instanceof Geometry)
-  		{
-  			Envelope envelope=((Geometry)spatialObject).getEnvelopeInternal();
-  			x=locationMapping(boundary.getMinX(),boundary.getMaxX(),(envelope.getMinX()+envelope.getMaxX())/2.0);
-  			y=locationMapping(boundary.getMinY(),boundary.getMaxY(),(envelope.getMinY()+envelope.getMaxY())/2.0);
-  		}
-  		else
-  		{
-			throw new Exception("[HilbertPartitioning][gridID] Unsupported spatial object type");
-  		}
-		int gridResolution=Short.MAX_VALUE;
-		int hValue = computeHValue(gridResolution+1,x,y);
+		int hValue = computeHValue(boundary, spatialObject);
 		int partition = Arrays.binarySearch(partitionBounds, hValue);
-		if (partition < 0)
-		   partition = -partition - 1;
+		if (partition < 0) {
+			partition = -partition - 1;
+		}
 		return partition;
   	}
-		
-		/**
+
+	private static int computeHValue(Envelope boundary, Envelope spatialObject) {
+		int x = locationMapping(boundary.getMinX(), boundary.getMaxX(),(spatialObject.getMinX() + spatialObject.getMaxX())/2.0);
+		int y = locationMapping(boundary.getMinY(), boundary.getMaxY(),(spatialObject.getMinY() + spatialObject.getMaxY())/2.0);
+		return computeHValue(GRID_RESOLUTION+1, x, y);
+	}
+
+	/**
 		 * Update envelope.
 		 *
 		 * @param envelope the envelope
@@ -213,57 +163,14 @@ public class HilbertPartitioning implements Serializable{
 		 * @return the envelope
 		 * @throws Exception the exception
 		 */
-		public static Envelope updateEnvelope(Envelope envelope, Object spatialObject) throws Exception
+		public static Envelope updateEnvelope(Envelope envelope, Envelope spatialObject) throws Exception
 		{
-			double minX=envelope.getMinX();
-			double maxX=envelope.getMaxX();
-			double minY=envelope.getMinY();
-			double maxY=envelope.getMaxY();
-			if(spatialObject instanceof Envelope)
-			{
-				Envelope i = (Envelope)spatialObject;
-				if(minX>i.getMinX())
-				{
-					minX=i.getMinX();
-				}
-				if(maxX<i.getMaxX())
-				{
-					maxX=i.getMaxX();
-				}
-				if(minY>i.getMinY())
-				{
-					minY=i.getMinY();
-				}
-				if(maxY<i.getMaxY())
-				{
-					maxY=i.getMaxY();
-				}
-			}
-			else if(spatialObject instanceof Geometry)
-			{
-				Envelope i=((Geometry)spatialObject).getEnvelopeInternal();
-				if(minX>i.getMinX())
-				{
-					minX=i.getMinX();
-				}
-				if(maxX<i.getMaxX())
-				{
-					maxX=i.getMaxX();
-				}
-				if(minY>i.getMinY())
-				{
-					minY=i.getMinY();
-				}
-				if(maxY<i.getMaxY())
-				{
-					maxY=i.getMaxY();
-				}
-			}
-			else
-			{
-				throw new Exception("[HilbertPartitioning][updateEnvelope] Unsupported spatial object type");
-			}
-			return new Envelope(minX,maxX,minY,maxY);
+			double minX = Math.min(envelope.getMinX(), spatialObject.getMinX());
+			double maxX = Math.max(envelope.getMaxX(), spatialObject.getMaxX());
+			double minY = Math.min(envelope.getMinY(), spatialObject.getMinY());
+			double maxY = Math.max(envelope.getMaxY(), spatialObject.getMaxY());
+
+			return new Envelope(minX, maxX, minY, maxY);
 		}
 		
 		
@@ -273,8 +180,6 @@ public class HilbertPartitioning implements Serializable{
 		 * @return the grids
 		 */
 		public List<Envelope> getGrids() {
-			
 			return this.grids;
-			
 		}
 }
