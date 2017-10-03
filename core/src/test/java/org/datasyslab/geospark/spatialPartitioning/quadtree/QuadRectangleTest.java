@@ -15,14 +15,24 @@ public class QuadRectangleTest {
 
     @Test
     public void testContains() {
-        QuadRectangle r1 = new QuadRectangle(0, 0, 10, 10);
-        QuadRectangle r2 = new QuadRectangle(0, 0, 10, 10);
+        QuadRectangle r1 = makeRect(0, 0, 10, 10);
+        QuadRectangle r2 = makeRect(0, 0, 10, 10);
 
-        // contains
+        // contains rectange
         assertTrue(r1.contains(r2));
 
-        // dont contains
-        r2.width = 11;
-        assertFalse(r1.contains(r2));
+        // contains point
+        assertTrue(r1.contains(makeRect(5, 5, 0, 0)));
+
+        // doesn't contain rectangle
+        QuadRectangle r3 = makeRect(0, 0, 11, 10);
+        assertFalse(r1.contains(r3));
+
+        // doesn't contain point
+        assertFalse(r1.contains(makeRect(5, 12, 0, 0)));
+    }
+
+    private QuadRectangle makeRect(double x, double y, double width, double height) {
+        return new QuadRectangle(x, y, width, height);
     }
 }
