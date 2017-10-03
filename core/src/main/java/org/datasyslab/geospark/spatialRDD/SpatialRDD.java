@@ -21,6 +21,7 @@ import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.storage.StorageLevel;
+import org.apache.spark.util.random.SamplingUtils;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.spatialPartitioning.EqualPartitioning;
@@ -87,9 +88,9 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
     public StandardQuadTree partitionTree;
 
     /** The sample number. */
-    public Long sampleNumber = (long) -1;
+    private int sampleNumber = -1;
     
-	public Long getSampleNumber() {
+	public int getSampleNumber() {
 		return sampleNumber;
 	}
 
@@ -98,7 +99,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 	 *
 	 * @param sampleNumber the new sample number
 	 */
-	public void setSampleNumber(Long sampleNumber) {
+	public void setSampleNumber(int sampleNumber) {
 		this.sampleNumber = sampleNumber;
 	}
     
@@ -160,10 +161,18 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
         {
         	throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD total count is unkown. Please call analyze() first.");
         }
-		//Calculate the number of samples we need to take.
+
+        //Calculate the number of samples we need to take.
         int sampleNumberOfRecords = RDDSampleUtils.getSampleNumbers(numPartitions, this.approximateTotalCount,this.sampleNumber);
         //Take Sample
-        ArrayList objectSampleList = new ArrayList(this.rawSpatialRDD.takeSample(false, sampleNumberOfRecords));
+		// RDD.takeSample implementation tends to scan the data multiple times to gather the exact
+		// number of samples requested. Repeated scans increase the latency of the join. This increase
+		// is significant for large datasets.
+		// See https://github.com/apache/spark/blob/412b0e8969215411b97efd3d0984dc6cac5d31e0/core/src/main/scala/org/apache/spark/rdd/RDD.scala#L508
+		// Here, we choose to get samples faster over getting exactly specified number of samples.
+		final double fraction = SamplingUtils.computeFractionForSampleSize(sampleNumberOfRecords, approximateTotalCount, false);
+		List objectSampleList = this.rawSpatialRDD.sample(false, fraction).collect();
+
         //Sort
         if(gridType == GridType.EQUALGRID)
         {

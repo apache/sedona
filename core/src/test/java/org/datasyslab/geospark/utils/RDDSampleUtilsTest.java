@@ -6,29 +6,21 @@
  */
 package org.datasyslab.geospark.utils;
 
-import static org.junit.Assert.assertEquals;
-
-/**
- * 
- * @author Arizona State University DataSystems Lab
- *
- */
-
 import org.junit.Test;
 
-// TODO: Auto-generated Javadoc
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 /**
- * The Class RDDSampleUtilsTest.
+ * @author Arizona State University DataSystems Lab
  */
 public class RDDSampleUtilsTest {
 
     /**
      * Test get sample numbers.
-     *
-     * @throws Exception the exception
      */
     @Test
-    public void testGetSampleNumbers() throws Exception {
+    public void testGetSampleNumbers() {
         assertEquals(10, RDDSampleUtils.getSampleNumbers(2, 10,-1));
         assertEquals(100, RDDSampleUtils.getSampleNumbers(2, 100,-1));
         assertEquals(10, RDDSampleUtils.getSampleNumbers(5, 1000,-1));
@@ -36,18 +28,31 @@ public class RDDSampleUtilsTest {
         assertEquals(100, RDDSampleUtils.getSampleNumbers(5, 10001,-1));
         assertEquals(1000, RDDSampleUtils.getSampleNumbers(5, 100011,-1));
         assertEquals(99, RDDSampleUtils.getSampleNumbers(6, 100011,99));
+        assertEquals(999, RDDSampleUtils.getSampleNumbers(20, 999,-1));
+        assertEquals(40, RDDSampleUtils.getSampleNumbers(20, 1000,-1));
     }
     
     /**
      * Test too many partitions.
-     *
-     * @throws Exception the exception
      */
-    @Test(expected=Exception.class)
-    public void testTooManyPartitions() throws Exception
+    @Test
+    public void testTooManyPartitions()
     {
-        assertEquals(10, RDDSampleUtils.getSampleNumbers(6, 1010,-1));
-        assertEquals(11, RDDSampleUtils.getSampleNumbers(6, 1110,-1));
-        assertEquals(100, RDDSampleUtils.getSampleNumbers(100, 10000,-1));
+        assertFailure(505, 999);
+        assertFailure(505, 1000);
+        assertFailure(10, 1000, 2100);
+    }
+
+    private void assertFailure(int numPartitions, long totalNumberOfRecords) {
+        assertFailure(numPartitions, totalNumberOfRecords, -1);
+    }
+
+    private void assertFailure(int numPartitions, long totalNumberOfRecords, int givenSampleNumber) {
+        try {
+            RDDSampleUtils.getSampleNumbers(numPartitions, totalNumberOfRecords, givenSampleNumber);
+            fail("Expected IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
     }
 }
