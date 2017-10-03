@@ -6,6 +6,32 @@
  */
 package org.datasyslab.geospark.utils;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.storage.StorageLevel;
+import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.GridType;
+import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.geometryObjects.Circle;
+import org.datasyslab.geospark.knnJudgement.GeometryDistanceComparator;
+import org.datasyslab.geospark.spatialOperator.JoinQuery;
+import org.datasyslab.geospark.spatialOperator.KNNQuery;
+import org.datasyslab.geospark.spatialOperator.RangeQuery;
+import org.datasyslab.geospark.spatialRDD.CircleRDD;
+import org.datasyslab.geospark.spatialRDD.PointRDD;
+import org.datasyslab.geospark.spatialRDD.PolygonRDD;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import scala.Tuple2;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -13,35 +39,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.storage.StorageLevel;
-import org.datasyslab.geospark.enums.FileDataSplitter;
-import org.datasyslab.geospark.enums.GridType;
-import org.datasyslab.geospark.enums.IndexType;
-import org.datasyslab.geospark.knnJudgement.GeometryDistanceComparator;
-import org.datasyslab.geospark.spatialOperator.JoinQuery;
-import org.datasyslab.geospark.spatialOperator.KNNQuery;
-import org.datasyslab.geospark.spatialOperator.PointJoinTest;
-import org.datasyslab.geospark.spatialOperator.RangeQuery;
-import org.datasyslab.geospark.spatialRDD.CircleRDD;
-import org.datasyslab.geospark.spatialRDD.PointRDD;
-import org.datasyslab.geospark.spatialRDD.PolygonRDD;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-
-import scala.Tuple2;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -320,7 +319,14 @@ public class CRSTransformationTest {
     	objectRDD.spatialPartitioning(GridType.RTREE);
     	objectRDD.buildIndex(IndexType.RTREE,true);
     	windowRDD.spatialPartitioning(objectRDD.grids);
-    	JavaPairRDD<Polygon,HashSet<Polygon>> resultRDD = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true,false);
-    	assert resultRDD.count() == 5885;
+
+    	List<Tuple2<Polygon, HashSet<Polygon>>> results = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true,false).collect();
+    	assertEquals(5885, results.size());
+
+    	for (Tuple2<Polygon, HashSet<Polygon>> tuple : results) {
+    	    for (Polygon polygon : tuple._2()) {
+    	        assertTrue(new Circle(tuple._1(), 0.1).covers(polygon));
+            }
+        }
     }
 }
