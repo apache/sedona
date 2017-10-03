@@ -7,7 +7,6 @@
 package org.datasyslab.geospark.joinJudgement;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.index.SpatialIndex;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.spark.api.java.function.FlatMapFunction2;
@@ -17,13 +16,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class IndexLookupJudgement<T extends Geometry>
+public class IndexLookupJudgement<T extends Geometry, U extends Geometry>
         extends JudgementBase
-        implements FlatMapFunction2<Iterator<SpatialIndex>, Iterator<Polygon>, Pair<Polygon, T>>, Serializable {
+        implements FlatMapFunction2<Iterator<SpatialIndex>, Iterator<U>, Pair<U, T>>, Serializable {
 
     /**
-     * Instantiates a new geometry by polygon judgement using index.
-     *
      * @param considerBoundaryIntersection the consider boundary intersection
      */
     public IndexLookupJudgement(boolean considerBoundaryIntersection) {
@@ -31,8 +28,8 @@ public class IndexLookupJudgement<T extends Geometry>
     }
 
     @Override
-    public Iterator<Pair<Polygon, T>> call(Iterator<SpatialIndex> iteratorTree, Iterator<Polygon> iteratorWindow) throws Exception {
-        List<Pair<Polygon, T>> result = new ArrayList<>();
+    public Iterator<Pair<U, T>> call(Iterator<SpatialIndex> iteratorTree, Iterator<U> iteratorWindow) throws Exception {
+        List<Pair<U, T>> result = new ArrayList<>();
 
         if (!iteratorTree.hasNext()) {
             return result.iterator();
@@ -40,7 +37,7 @@ public class IndexLookupJudgement<T extends Geometry>
 
         SpatialIndex treeIndex = iteratorTree.next();
         while (iteratorWindow.hasNext()) {
-            Polygon window = iteratorWindow.next();
+            U window = iteratorWindow.next();
             List<Geometry> queryResult = treeIndex.query(window.getEnvelopeInternal());
             if (queryResult.size() == 0) continue;
             for (Geometry spatialObject : queryResult) {

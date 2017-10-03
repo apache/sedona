@@ -1,6 +1,6 @@
 /target/
 /.idea
-/GeoSpark.iml
+/*.iml
 /.settings/
 /.classpath
 /.project
