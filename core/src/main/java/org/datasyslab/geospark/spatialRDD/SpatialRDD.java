@@ -168,7 +168,16 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 		// See https://github.com/apache/spark/blob/412b0e8969215411b97efd3d0984dc6cac5d31e0/core/src/main/scala/org/apache/spark/rdd/RDD.scala#L508
 		// Here, we choose to get samples faster over getting exactly specified number of samples.
 		final double fraction = SamplingUtils.computeFractionForSampleSize(sampleNumberOfRecords, approximateTotalCount, false);
-		List objectSampleList = this.rawSpatialRDD.sample(false, fraction).collect();
+		List<Envelope> samples = this.rawSpatialRDD.sample(false, fraction)
+			.map(new Function<T, Envelope>() {
+				@Override
+				public Envelope call(T geometry) throws Exception {
+					return geometry.getEnvelopeInternal();
+				}
+			})
+			.collect();
+
+		logger.info("Collected " + samples.size() + " samples");
 
         //Sort
         if(gridType == GridType.EQUALGRID)
@@ -178,21 +187,21 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
         }
         else if(gridType == GridType.HILBERT)
         {
-        	HilbertPartitioning hilbertPartitioning=new HilbertPartitioning(objectSampleList,this.boundaryEnvelope,numPartitions);
+        	HilbertPartitioning hilbertPartitioning=new HilbertPartitioning(samples,this.boundaryEnvelope,numPartitions);
         	grids=hilbertPartitioning.getGrids();
         }
         else if(gridType == GridType.RTREE)
         {
-        	RtreePartitioning rtreePartitioning=new RtreePartitioning(objectSampleList,this.boundaryEnvelope,numPartitions);
+        	RtreePartitioning rtreePartitioning=new RtreePartitioning(samples,this.boundaryEnvelope,numPartitions);
         	grids=rtreePartitioning.getGrids();
         }
         else if(gridType == GridType.VORONOI)
         {
-        	VoronoiPartitioning voronoiPartitioning=new VoronoiPartitioning(objectSampleList,this.boundaryEnvelope,numPartitions);
+        	VoronoiPartitioning voronoiPartitioning=new VoronoiPartitioning(samples,this.boundaryEnvelope,numPartitions);
         	grids=voronoiPartitioning.getGrids();
         }
 		else if (gridType == GridType.QUADTREE) {
-			QuadtreePartitioning quadtreePartitioning = new QuadtreePartitioning(objectSampleList, this.boundaryEnvelope, numPartitions);
+			QuadtreePartitioning quadtreePartitioning = new QuadtreePartitioning(samples, this.boundaryEnvelope, numPartitions);
 			partitionTree = quadtreePartitioning.getPartitionTree();
 		}
         else

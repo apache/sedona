@@ -7,7 +7,6 @@
 package org.datasyslab.geospark.spatialPartitioning;
 
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
 import org.datasyslab.geospark.spatialPartitioning.quadtree.QuadRectangle;
 import org.datasyslab.geospark.spatialPartitioning.quadtree.StandardQuadTree;
 
@@ -28,11 +27,11 @@ public class QuadtreePartitioning implements Serializable {
      * @param boundary   the boundary
      * @param partitions the partitions
      */
-    public QuadtreePartitioning(List<? extends Geometry> samples, Envelope boundary, int partitions) throws Exception {
+    public QuadtreePartitioning(List<Envelope> samples, Envelope boundary, int partitions) throws Exception {
         this(samples, boundary, partitions, -1);
     }
 
-    public QuadtreePartitioning(List<? extends Geometry> samples, Envelope boundary, final int partitions, int minTreeLevel)
+    public QuadtreePartitioning(List<Envelope> samples, Envelope boundary, final int partitions, int minTreeLevel)
             throws Exception {
         partitionTree = new StandardQuadTree(new QuadRectangle(boundary), 0,
             samples.size() / partitions, 100000);
@@ -40,9 +39,8 @@ public class QuadtreePartitioning implements Serializable {
             partitionTree.forceGrowUp(minTreeLevel);
         }
 
-        for (final Geometry sample : samples) {
-            final Envelope envelope = sample.getEnvelopeInternal();
-            partitionTree.insert(new QuadRectangle(envelope), 1);
+        for (final Envelope sample : samples) {
+            partitionTree.insert(new QuadRectangle(sample), 1);
         }
 
         partitionTree.assignPartitionIds();

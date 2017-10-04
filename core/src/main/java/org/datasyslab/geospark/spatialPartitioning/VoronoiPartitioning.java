@@ -6,10 +6,6 @@
  */
 package org.datasyslab.geospark.spatialPartitioning;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -18,6 +14,10 @@ import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.triangulate.VoronoiDiagramBuilder;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -31,40 +31,25 @@ public class VoronoiPartitioning implements Serializable{
 	/**
 	 * Instantiates a new voronoi partitioning.
 	 *
-	 * @param SampleList the sample list
+	 * @param samples the sample list
 	 * @param boundary the boundary
 	 * @param partitions the partitions
 	 * @throws Exception the exception
 	 */
-	public VoronoiPartitioning(List SampleList,Envelope boundary,int partitions) throws Exception
+	public VoronoiPartitioning(List<Envelope> samples, Envelope boundary, int partitions) throws Exception
 	{
 		GeometryFactory fact = new GeometryFactory();
 		ArrayList<Point> subSampleList=new ArrayList<Point>();
 		MultiPoint mp;
 		
 		//Take a subsample accoring to the partitions
-		if(SampleList.get(0) instanceof Envelope)
+		for(int i=0;i<samples.size();i=i+samples.size()/partitions)
 		{
-			for(int i=0;i<SampleList.size();i=i+SampleList.size()/partitions)
-			{
-				Envelope envelope=(Envelope)SampleList.get(i);
-				Coordinate coordinate = new Coordinate((envelope.getMinX()+envelope.getMaxX())/2.0,(envelope.getMinY()+envelope.getMaxY())/2.0);
-				subSampleList.add(fact.createPoint(coordinate));
-			}
+			Envelope envelope = samples.get(i);
+			Coordinate coordinate = new Coordinate((envelope.getMinX()+envelope.getMaxX())/2.0,(envelope.getMinY()+envelope.getMaxY())/2.0);
+			subSampleList.add(fact.createPoint(coordinate));
 		}
-		else if(SampleList.get(0) instanceof Geometry)
-		{
-			for(int i=0;i<SampleList.size();i=i+SampleList.size()/partitions)
-			{
-				Envelope envelope=((Geometry)SampleList.get(i)).getEnvelopeInternal();
-				Coordinate coordinate = new Coordinate((envelope.getMinX()+envelope.getMaxX())/2.0,(envelope.getMinY()+envelope.getMaxY())/2.0);
-				subSampleList.add(fact.createPoint(coordinate));
-			}
-		}
-		else
-		{
-	    	throw new Exception("[VoronoiPartitioning][Constrcutor] Unsupported spatial object type");
-		}
+
 		mp=fact.createMultiPoint(subSampleList.toArray(new Point[subSampleList.size()]));
 		VoronoiDiagramBuilder voronoiBuilder = new VoronoiDiagramBuilder();
 		voronoiBuilder.setSites(mp);
