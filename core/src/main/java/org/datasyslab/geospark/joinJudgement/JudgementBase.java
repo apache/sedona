@@ -1,13 +1,14 @@
 package org.datasyslab.geospark.joinJudgement;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.TaskContext;
 import org.datasyslab.geospark.utils.HalfOpenRectangle;
-import org.datasyslab.geospark.utils.ReferencePointUtils;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -73,25 +74,34 @@ abstract class JudgementBase implements Serializable {
     }
 
     protected boolean match(Geometry left, Geometry right) {
-        if (!geoMatch(left, right)) {
-            return false;
+        if (extent != null) {
+            // Handle easy case: points. Since each point is assigned to exactly one partition,
+            // different partitions cannot emit duplicate results.
+            if (left instanceof Point || right instanceof Point) {
+                return geoMatch(left, right);
+            }
+
+            // Neither geometry is a point
+
+            // Check if reference point of the intersection of the bounding boxes lies within
+            // the extent of this partition. If not, don't run any checks. Let the partition
+            // that contains the reference point do all the work.
+            Envelope intersection =
+                left.getEnvelopeInternal().intersection(right.getEnvelopeInternal());
+            if (!intersection.isNull()) {
+                final Point referencePoint =
+                    makePoint(intersection.getMinX(), intersection.getMinY(), left.getFactory());
+                if (!extent.contains(referencePoint)) {
+                    return false;
+                }
+            }
         }
 
-        if (extent == null) {
-            return true;
-        }
+        return geoMatch(left, right);
+    }
 
-        // Handle easy case: points. Since each point is assigned to exactly one partition,
-        // different partitions cannot emit duplicate results.
-        if (left instanceof Point || right instanceof Point) {
-            return true;
-        }
-
-        // For more complex geometries, check if reference point of the intersection lies
-        // within the extent of this partition.
-        final Geometry intersection = left.intersection(right);
-        final Point referencePoint = ReferencePointUtils.getReferencePoint(intersection);
-        return extent.contains(referencePoint);
+    private Point makePoint(double x, double y, GeometryFactory factory) {
+        return factory.createPoint(new Coordinate(x, y));
     }
 
     private boolean geoMatch(Geometry left, Geometry right) {
