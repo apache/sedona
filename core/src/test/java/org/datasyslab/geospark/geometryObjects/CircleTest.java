@@ -6,35 +6,39 @@
  */
 package org.datasyslab.geospark.geometryObjects;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.HashSet;
-
-import org.junit.Test;
-
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Class CircleTest.
  */
 public class CircleTest {
+    /** The geom fact. */
+    private static GeometryFactory geomFact = new GeometryFactory();
+    private static WKTReader wktReader = new WKTReader();
 
-   /** The geom fact. */
-   public static GeometryFactory geomFact = new GeometryFactory();
 	/**
      * Test get center.
      *
      * @throws Exception the exception
      */
     @Test
-    public void testGetCenter() throws Exception {
-    	
-    	
-        Circle circle = new Circle(geomFact.createPoint(new Coordinate(0.0,0.0)), 0.1);
-        assertEquals(circle.getCenterPoint().x, 0.0, 0.01);
+    public void testGetCenter() throws Exception 
+    {
+        Circle circle = new Circle(makePoint(0.0,0.0), 0.1);
+        assertEquals(makePoint(0.0,0.0).getCoordinate(), circle.getCenterPoint());
     }
 
     /**
@@ -44,8 +48,8 @@ public class CircleTest {
      */
     @Test
     public void testGetRadius() throws Exception {
-        Circle circle = new Circle(geomFact.createPoint(new Coordinate(0.0,0.0)), 0.1);
-        assertEquals(circle.getRadius(), 0.1, 0.01);
+        Circle circle = new Circle(makePoint(0.0,0.0), 0.1);
+        assertEquals(0.1, circle.getRadius(), 0.01);
     }
 
     /**
@@ -55,7 +59,7 @@ public class CircleTest {
      */
     @Test
     public void testSetRadius() throws Exception {
-        Circle circle = new Circle(geomFact.createPoint(new Coordinate(0.0,0.0)), 0.1);
+        Circle circle = new Circle(makePoint(0.0,0.0), 0.1);
         circle.setRadius(0.2);
         assertEquals(circle.getRadius(), 0.2, 0.01);
     }
@@ -66,10 +70,9 @@ public class CircleTest {
      * @throws Exception the exception
      */
     @Test
-    public void testGetMBR() throws Exception {
-        Circle circle = new Circle(geomFact.createPoint(new Coordinate(0.0,0.0)), 0.1);
-
-        assertEquals(circle.getEnvelopeInternal().getMinX(), circle.getCenterPoint().x - circle.getRadius(), 0.01);
+    public void testGetEnvelopeInternal() throws Exception {
+        Circle circle = new Circle(makePoint(0.0,0.0), 0.1);
+        assertEquals(new Envelope(-0.1, 0.1, -0.1, 0.1), circle.getEnvelopeInternal());
     }
 
     /**
@@ -78,10 +81,38 @@ public class CircleTest {
      * @throws Exception the exception
      */
     @Test
-    public void testContains() throws Exception {
-        Circle circle = new Circle(geomFact.createPoint(new Coordinate(0.0,0.0)), 0.1);
-        GeometryFactory geometryFactory = new GeometryFactory();
-        assertEquals(true, circle.covers(geometryFactory.createPoint(new Coordinate(0.0, 0.0))));
+    public void testCovers() throws Exception {
+        Circle circle = new Circle(makePoint(0.0, 0.0), 0.5);
+
+        assertTrue(circle.covers(makePoint(0.0, 0.0)));
+        assertTrue(circle.covers(makePoint(0.1, 0.2)));
+        assertFalse(circle.covers(makePoint(0.4, 0.4)));
+        assertFalse(circle.covers(makePoint(-1, 0.4)));
+
+        assertTrue(circle.covers(parseWkt("MULTIPOINT ((0.1 0.1), (0.2 0.4))")));
+        assertFalse(circle.covers(parseWkt("MULTIPOINT ((0.1 0.1), (1.2 0.4))")));
+        assertFalse(circle.covers(parseWkt("MULTIPOINT ((1.1 0.1), (0.2 1.4))")));
+
+        assertTrue(circle.covers(parseWkt("POLYGON ((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1))")));
+        assertTrue(circle.covers(parseWkt("POLYGON ((-0.5 0, 0 0.5, 0.5 0, -0.5 0))")));
+        assertFalse(circle.covers(parseWkt("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))")));
+        assertFalse(circle.covers(parseWkt("POLYGON ((0.4 0.4, 0.4 0.45, 0.45 0.45, 0.45 0.4, 0.4 0.4))")));
+
+        assertTrue(circle.covers(parseWkt("MULTIPOLYGON (((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1)), " +
+            "((-0.5 0, 0 0.5, 0.5 0, -0.5 0)))")));
+        assertFalse(circle.covers(parseWkt("MULTIPOLYGON (((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1)), " +
+            "((0 0, 0 1, 1 1, 1 0, 0 0)))")));
+        assertFalse(circle.covers(parseWkt("MULTIPOLYGON (((0.4 0.4, 0.4 0.45, 0.45 0.45, 0.45 0.4, 0.4 0.4)), " +
+            "((0 0, 0 1, 1 1, 1 0, 0 0)))")));
+
+        assertTrue(circle.covers(parseWkt("LINESTRING (-0.1 0, 0.2 0.3)")));
+        assertTrue(circle.covers(parseWkt("LINESTRING (-0.5 0, 0 0.5, 0.5 0)")));
+        assertFalse(circle.covers(parseWkt("LINESTRING (-0.1 0, 0 1)")));
+        assertFalse(circle.covers(parseWkt("LINESTRING (0.4 0.4, 0.45 0.45)")));
+
+        assertTrue(circle.covers(parseWkt("MULTILINESTRING ((-0.1 0, 0.2 0.3), (-0.5 0, 0 0.5, 0.5 0))")));
+        assertFalse(circle.covers(parseWkt("MULTILINESTRING ((-0.1 0, 0.2 0.3), (-0.1 0, 0 1))")));
+        assertFalse(circle.covers(parseWkt("MULTILINESTRING ((0.4 0.4, 0.45 0.45), (-0.1 0, 0 1))")));
     }
 
     /**
@@ -91,29 +122,55 @@ public class CircleTest {
      */
     @Test
     public void testIntersects() throws Exception {
-        Circle circle = new Circle(geomFact.createPoint(new Coordinate(0.0,0.0)), 0.1);
-        Envelope envelope = new Envelope(-0.1, 0.1, -0.1, 0.1);
-        assertEquals(true, circle.getEnvelopeInternal().covers(envelope));
+        Circle circle = new Circle(makePoint(0.0,0.0), 0.5);
+        assertTrue(circle.intersects(makePoint(0, 0)));
+        assertTrue(circle.intersects(makePoint(0.1, 0.2)));
+        assertFalse(circle.intersects(makePoint(0.4, 0.4)));
+        assertFalse(circle.intersects(makePoint(-1, 0.4)));
 
-        circle = new Circle(geomFact.createPoint(new Coordinate(-0.1,0.0)), 0.1);
-        envelope = new Envelope(-0.1, 0.1, -0.1, 0.1);
-        assertEquals(true, circle.getEnvelopeInternal().intersects(envelope));
+        assertTrue(circle.intersects(parseWkt("MULTIPOINT ((0.1 0.1), (0.2 0.4))")));
+        assertTrue(circle.intersects(parseWkt("MULTIPOINT ((0.1 0.1), (1.2 0.4))")));
+        assertFalse(circle.intersects(parseWkt("MULTIPOINT ((1.1 0.1), (0.2 1.4))")));
 
-        circle = new Circle(geomFact.createPoint(new Coordinate(-0.3,0.0)), 0.1);
-        envelope = new Envelope(-0.1, 0.1, -0.1, 0.1);
-        assertEquals(false, circle.getEnvelopeInternal().intersects(envelope));
-    }
+        // Polygon is fully contained within the circle
+        assertTrue(circle.intersects(parseWkt("POLYGON ((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1))")));
+        assertTrue(circle.intersects(parseWkt("POLYGON ((-0.5 0, 0 0.5, 0.5 0, -0.5 0))")));
+        // Polygon boundary intersects the circle
+        assertTrue(circle.intersects(parseWkt("POLYGON ((0 0, 1 1, 1 0, 0 0))")));
+        // Polygon contains the circle
+        assertTrue(circle.intersects(parseWkt("POLYGON ((-1 -1, -1 1, 1 1, 1.5 0.5, 1 -1, -1 -1))")));
+        // Polygon with a hole intersects the circle, but doesn't contain circle center
+        assertTrue(circle.intersects(parseWkt("POLYGON ((-1 -1, -1 1, 1 1, 1 -1, -1 -1), " +
+            "(-0.1 -0.1, 0.1 -0.1, 0.1 0.1, -0.1 0.1, -0.1 -0.1))")));
 
-    /**
-     * Test intersects real data.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testIntersectsRealData() throws Exception {
-        Circle circle = new Circle(geomFact.createPoint(new Coordinate(-112.574945, 45.987772)), 0.01);
-        Envelope envelope = new Envelope(-158.104182, -65.649956, 17.982169, 48.803593);
-        assertEquals(true, circle.getEnvelopeInternal().intersects(envelope));
+        // No intersection
+        assertFalse(circle.intersects(parseWkt("POLYGON ((0.4 0.4, 0.4 0.45, 0.45 0.45, 0.45 0.4, 0.4 0.4))")));
+        assertFalse(circle.intersects(parseWkt("POLYGON ((-1 0, -1 1, 0 1, 0 2, -1 2, -1 0))")));
+        assertFalse(circle.intersects(parseWkt("POLYGON ((-1 -1, -1 1, 1 1, 1 -1, -1 -1), " +
+            "(-0.6 -0.6, 0.6 -0.6, 0.6 0.6, -0.6 0.6, -0.6 -0.6))")));
+
+        assertTrue(circle.intersects(parseWkt("MULTIPOLYGON (((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1)), " +
+            "((-0.5 0, 0 0.5, 0.5 0, -0.5 0)))")));
+        assertTrue(circle.intersects(parseWkt("MULTIPOLYGON (((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1)), " +
+            "((-1 0, -1 1, 0 1, 0 2, -1 2, -1 0)))")));
+        assertFalse(circle.intersects(parseWkt("MULTIPOLYGON (((0.4 0.4, 0.4 0.45, 0.45 0.45, 0.45 0.4, 0.4 0.4)), " +
+            "((-1 0, -1 1, 0 1, 0 2, -1 2, -1 0)))")));
+
+        // Line intersects at 2 points
+        assertTrue(circle.intersects(parseWkt("LINESTRING (-1 -1, 1 1)")));
+        // Line intersects at one point
+        assertTrue(circle.intersects(parseWkt("LINESTRING (-1 0.5, 1 0.5)")));
+        // Line is fully within the circle
+        assertTrue(circle.intersects(parseWkt("LINESTRING (0 0, 0.1 0.2)")));
+
+        // No intersection
+        assertFalse(circle.intersects(parseWkt("LINESTRING (0.4 0.4, 1 1)")));
+        assertFalse(circle.intersects(parseWkt("LINESTRING (-0.4 -0.4, -2 -3.2)")));
+        assertFalse(circle.intersects(parseWkt("LINESTRING (0.1 0.5, 1 0.5)")));
+
+        assertTrue(circle.intersects(parseWkt("MULTILINESTRING ((-1 -1, 1 1), (-1 0.5, 1 0.5))")));
+        assertTrue(circle.intersects(parseWkt("MULTILINESTRING ((-1 -1, 1 1), (0.4 0.4, 1 1))")));
+        assertFalse(circle.intersects(parseWkt("MULTILINESTRING ((0.1 0.5, 1 0.5), (0.4 0.4, 1 1))")));
     }
     
     /**
@@ -122,19 +179,20 @@ public class CircleTest {
     @Test
     public void testEquality()
     {
-        Circle circle1 = new Circle(geomFact.createPoint(new Coordinate(-112.574945, 45.987772)), 0.01);
-        Circle circle2 = new Circle(geomFact.createPoint(new Coordinate(-112.574945, 45.987772)), 0.01);
-        Circle circle3 = new Circle(geomFact.createPoint(new Coordinate(-112.574945, 45.987772)), 0.01);
-        Circle circle4 = new Circle(geomFact.createPoint(new Coordinate(-112.574945, 45.987772)), 0.01);
-        Circle circle5 = new Circle(geomFact.createPoint(new Coordinate(-112.574945, 45.987772)), 0.01);
-        Circle circle6 = new Circle(geomFact.createPoint(new Coordinate(-112.574942, 45.987772)), 0.01);
-        HashSet<Circle> result = new HashSet<Circle>();
-        result.add(circle1);
-        result.add(circle2);
-        result.add(circle3);
-        result.add(circle4);
-        result.add(circle5);
-        result.add(circle6);
-        assert result.size()==2;
+        assertEquals(
+            new Circle(makePoint(-112.574945, 45.987772), 0.01),
+            new Circle(makePoint(-112.574945, 45.987772), 0.01));
+
+        assertNotEquals(
+            new Circle(makePoint(-112.574945, 45.987772), 0.01),
+            new Circle(makePoint(-112.574942, 45.987772), 0.01));
+    }
+
+    private Point makePoint(double x, double y) {
+        return geomFact.createPoint(new Coordinate(x, y));
+    }
+
+    private Geometry parseWkt(String wkt) throws ParseException {
+        return wktReader.read(wkt);
     }
 }
