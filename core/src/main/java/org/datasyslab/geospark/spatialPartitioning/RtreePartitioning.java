@@ -27,11 +27,10 @@ public class RtreePartitioning implements Serializable{
 	 * Instantiates a new rtree partitioning.
 	 *
 	 * @param samples the sample list
-	 * @param boundary the boundary
 	 * @param partitions the partitions
 	 * @throws Exception the exception
 	 */
-	public RtreePartitioning(List<Envelope> samples, Envelope boundary, int partitions) throws Exception
+	public RtreePartitioning(List<Envelope> samples, int partitions) throws Exception
 	{
 		STRtree strtree=new STRtree(samples.size()/partitions);
 		for (Envelope sample : samples) {

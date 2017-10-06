@@ -32,11 +32,10 @@ public class VoronoiPartitioning implements Serializable{
 	 * Instantiates a new voronoi partitioning.
 	 *
 	 * @param samples the sample list
-	 * @param boundary the boundary
 	 * @param partitions the partitions
 	 * @throws Exception the exception
 	 */
-	public VoronoiPartitioning(List<Envelope> samples, Envelope boundary, int partitions) throws Exception
+	public VoronoiPartitioning(List<Envelope> samples, int partitions) throws Exception
 	{
 		GeometryFactory fact = new GeometryFactory();
 		ArrayList<Point> subSampleList=new ArrayList<Point>();

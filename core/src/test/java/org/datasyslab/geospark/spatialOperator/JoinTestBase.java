@@ -6,9 +6,15 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.spatialRDD.LineStringRDD;
+import org.datasyslab.geospark.spatialRDD.PointRDD;
+import org.datasyslab.geospark.spatialRDD.PolygonRDD;
+import org.datasyslab.geospark.spatialRDD.RectangleRDD;
+import org.datasyslab.geospark.spatialRDD.SpatialRDD;
 import scala.Tuple2;
 
 import java.io.IOException;
@@ -44,9 +50,6 @@ class JoinTestBase {
     /** The splitter. */
     static FileDataSplitter splitter;
 
-    /** The grid type. */
-    static GridType gridType;
-
     /** The index type. */
     static IndexType indexType;
 
@@ -56,6 +59,16 @@ class JoinTestBase {
     /** The conf. */
     static SparkConf conf;
 
+    protected final GridType gridType;
+
+    protected final boolean useLegacyPartitionAPIs;
+
+    protected JoinTestBase(GridType gridType, boolean useLegacyPartitionAPIs, int numPartitions) {
+        this.gridType = gridType;
+        this.useLegacyPartitionAPIs = useLegacyPartitionAPIs;
+        this.numPartitions = numPartitions;
+    }
+
     protected static void initialize(final String testSuiteName, final String propertiesFileName) {
         conf = new SparkConf().setAppName(testSuiteName).setMaster("local[2]");
         sc = new JavaSparkContext(conf);
@@ -64,12 +77,9 @@ class JoinTestBase {
         prop = new Properties();
         final ClassLoader classLoader = JoinTestBase.class.getClassLoader();
         final InputStream input = classLoader.getResourceAsStream(propertiesFileName);
-        InputLocation = "file://"+ classLoader.getResource("primaryroads.csv").getPath();
         offset = 0;
         splitter = null;
-        gridType = null;
         indexType = null;
-        numPartitions = 0;
 
         try {
             // load a properties file
@@ -79,9 +89,7 @@ class JoinTestBase {
             InputLocationQueryPolygon = "file://"+ classLoader.getResource(prop.getProperty("queryPolygonSet")).getPath();
             offset = Integer.parseInt(prop.getProperty("offset"));
             splitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
-            gridType = GridType.getGridType(prop.getProperty("gridType"));
             indexType = IndexType.getIndexType(prop.getProperty("indexType"));
-            numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
         } catch (IOException ex) {
             ex.printStackTrace();
         } finally {
@@ -94,6 +102,41 @@ class JoinTestBase {
             }
         }
     }
+
+    protected PointRDD createPointRDD(String location) {
+        final PointRDD rdd = new PointRDD(sc, location, splitter, true, numPartitions);
+        return new PointRDD(rdd.rawSpatialRDD, StorageLevel.MEMORY_ONLY());
+    }
+
+    protected LineStringRDD createLineStringRDD(String location) {
+        final LineStringRDD rdd = new LineStringRDD(sc, location, splitter, true, numPartitions);
+        return new LineStringRDD(rdd.rawSpatialRDD, StorageLevel.MEMORY_ONLY());
+    }
+
+    protected PolygonRDD createPolygonRDD(String location) {
+        final PolygonRDD rdd = new PolygonRDD(sc, location, splitter, true, numPartitions);
+        return new PolygonRDD(rdd.rawSpatialRDD, StorageLevel.MEMORY_ONLY());
+    }
+
+    protected RectangleRDD createRectangleRDD(String location) {
+        final RectangleRDD rdd = new RectangleRDD(sc, location, splitter, true, numPartitions);
+        return new RectangleRDD(rdd.rawSpatialRDD, StorageLevel.MEMORY_ONLY());
+    }
+
+    protected void partitionRdds(SpatialRDD<? extends Geometry> queryRDD,
+                                 SpatialRDD<? extends Geometry> spatialRDD) throws Exception {
+        spatialRDD.spatialPartitioning(gridType);
+        if (useLegacyPartitionAPIs) {
+            if (gridType != GridType.QUADTREE) {
+                queryRDD.spatialPartitioning(spatialRDD.grids);
+            } else {
+                queryRDD.spatialPartitioning(spatialRDD.partitionTree);
+            }
+        } else {
+            queryRDD.spatialPartitioning(spatialRDD.getPartitioner());
+        }
+    }
+
 
     protected <T extends Geometry> long countJoinResults(List<Tuple2<Polygon, HashSet<T>>> results) {
         int count = 0;

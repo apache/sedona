@@ -20,7 +20,7 @@ public class StandardQuadTree<T> implements Serializable {
 
     private final int level;
     private int nodeNum=0;
-    
+
     // the four sub regions,
     // may be null if not needed
     private StandardQuadTree<T>[] regions;
@@ -172,6 +172,16 @@ public class StandardQuadTree<T> implements Serializable {
         }
     }
 
+    public void dropElements() {
+        traverse(new Visitor<T>() {
+            @Override
+            public boolean visit(StandardQuadTree<T> tree) {
+                tree.nodes.clear();
+                return true;
+            }
+        });
+    }
+
     public List<T> getElements(QuadRectangle r) {
         int region = this.findRegion(r, false);
 
@@ -216,7 +226,6 @@ public class StandardQuadTree<T> implements Serializable {
         }
     }
 
-
     private void addAllElements(final List<T> list) {
         traverse(new Visitor<T>() {
             @Override
@@ -244,6 +253,21 @@ public class StandardQuadTree<T> implements Serializable {
         });
 
         return zones;
+    }
+
+    public List<QuadRectangle> getLeafZones() {
+        final List<QuadRectangle> leafZones = new ArrayList<>();
+        traverse(new Visitor<T>() {
+            @Override
+            public boolean visit(StandardQuadTree<T> tree) {
+                if (tree.isLeaf()) {
+                    leafZones.add(tree.zone);
+                }
+                return true;
+            }
+        });
+
+        return leafZones;
     }
 
     public int getTotalNumLeafNode() {

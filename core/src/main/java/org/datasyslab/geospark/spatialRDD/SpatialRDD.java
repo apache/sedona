@@ -26,12 +26,13 @@ import org.apache.spark.util.random.SamplingUtils;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.spatialPartitioning.EqualPartitioning;
+import org.datasyslab.geospark.spatialPartitioning.FlatGridPartitioner;
 import org.datasyslab.geospark.spatialPartitioning.HilbertPartitioning;
-import org.datasyslab.geospark.spatialPartitioning.PartitionJudgement;
 import org.datasyslab.geospark.spatialPartitioning.QuadtreePartitioning;
 import org.datasyslab.geospark.spatialPartitioning.RtreePartitioning;
 import org.datasyslab.geospark.spatialPartitioning.SpatialPartitioner;
 import org.datasyslab.geospark.spatialPartitioning.VoronoiPartitioning;
+import org.datasyslab.geospark.spatialPartitioning.quadtree.QuadTreePartitioner;
 import org.datasyslab.geospark.spatialPartitioning.quadtree.StandardQuadTree;
 import org.datasyslab.geospark.utils.RDDSampleUtils;
 import org.geotools.geometry.jts.JTS;
@@ -84,6 +85,8 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
     public List<Envelope> grids;
 
     public StandardQuadTree partitionTree;
+
+    private SpatialPartitioner partitioner;
 
     /** The sample number. */
     private int sampleNumber = -1;
@@ -180,65 +183,78 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 
 		logger.info("Collected " + samples.size() + " samples");
 
-        //Sort
-        if(gridType == GridType.EQUALGRID)
-        {
-        	EqualPartitioning EqualPartitioning=new EqualPartitioning(this.boundaryEnvelope,numPartitions);
-        	grids=EqualPartitioning.getGrids();
-        }
-        else if(gridType == GridType.HILBERT)
-        {
-        	HilbertPartitioning hilbertPartitioning=new HilbertPartitioning(samples,this.boundaryEnvelope,numPartitions);
-        	grids=hilbertPartitioning.getGrids();
-        }
-        else if(gridType == GridType.RTREE)
-        {
-        	RtreePartitioning rtreePartitioning=new RtreePartitioning(samples,this.boundaryEnvelope,numPartitions);
-        	grids=rtreePartitioning.getGrids();
-        }
-        else if(gridType == GridType.VORONOI)
-        {
-        	VoronoiPartitioning voronoiPartitioning=new VoronoiPartitioning(samples,this.boundaryEnvelope,numPartitions);
-        	grids=voronoiPartitioning.getGrids();
-        }
-		else if (gridType == GridType.QUADTREE) {
-			QuadtreePartitioning quadtreePartitioning = new QuadtreePartitioning(samples, this.boundaryEnvelope, numPartitions);
-			partitionTree = quadtreePartitioning.getPartitionTree();
-		}
-        else
-        {
-        	throw new Exception("[AbstractSpatialRDD][spatialPartitioning] Unsupported spatial partitioning method.");
-        }
+		// Add some padding at the top and right of the boundaryEnvelope to make
+		// sure all geometries lie within the half-open rectangle.
+		final Envelope paddedBoundary = new Envelope(
+			boundaryEnvelope.getMinX(), boundaryEnvelope.getMaxX() + 0.01,
+			boundaryEnvelope.getMinY(), boundaryEnvelope.getMaxY() + 0.01);
 
-
-		if(gridType == GridType.QUADTREE)
-		{
-			this.spatialPartitionedRDD = partitionUsingQuadTree(partitionTree);
+		switch(gridType) {
+			case EQUALGRID: {
+				EqualPartitioning EqualPartitioning = new EqualPartitioning(paddedBoundary, numPartitions);
+				grids = EqualPartitioning.getGrids();
+				partitioner = new FlatGridPartitioner(grids);
+				break;
+			}
+			case HILBERT: {
+				HilbertPartitioning hilbertPartitioning=new HilbertPartitioning(samples, paddedBoundary, numPartitions);
+				grids=hilbertPartitioning.getGrids();
+				partitioner = new FlatGridPartitioner(grids);
+				break;
+			}
+			case RTREE: {
+				RtreePartitioning rtreePartitioning=new RtreePartitioning(samples, numPartitions);
+				grids=rtreePartitioning.getGrids();
+				partitioner = new FlatGridPartitioner(grids);
+				break;
+			}
+			case VORONOI: {
+				VoronoiPartitioning voronoiPartitioning=new VoronoiPartitioning(samples, numPartitions);
+				grids=voronoiPartitioning.getGrids();
+				partitioner = new FlatGridPartitioner(grids);
+				break;
+			}
+			case QUADTREE: {
+				QuadtreePartitioning quadtreePartitioning = new QuadtreePartitioning(samples, paddedBoundary, numPartitions);
+				partitionTree = quadtreePartitioning.getPartitionTree();
+				partitioner = new QuadTreePartitioner(partitionTree);
+				break;
+			}
+			default:
+				throw new Exception("[AbstractSpatialRDD][spatialPartitioning] Unsupported spatial partitioning method.");
 		}
-		else
-		{
-			this.spatialPartitionedRDD = partitionUsingGrids(grids);
-		}
 
+		this.spatialPartitionedRDD = partition(partitioner);
 		return true;
 	}
 
-	/**
-	 * Spatial partitioning.
-	 *
-	 * @param otherGrids the other grids
-	 * @return true, if successful
-	 * @throws Exception the exception
-	 */
-	public boolean spatialPartitioning(final List<Envelope> otherGrids) throws Exception
+	public SpatialPartitioner getPartitioner()
 	{
-		this.spatialPartitionedRDD = partitionUsingGrids(otherGrids);
+		return partitioner;
+	}
+
+	public void spatialPartitioning(SpatialPartitioner partitioner)
+	{
+		this.partitioner = partitioner;
+		this.spatialPartitionedRDD = partition(partitioner);
+	}
+
+	/**
+	 * @deprecated Use spatialPartitioning(SpatialPartitioner partitioner)
+	 */
+	public boolean spatialPartitioning(final List<Envelope> otherGrids) throws Exception {
+		this.partitioner = new FlatGridPartitioner(otherGrids);
+		this.spatialPartitionedRDD = partition(partitioner);
 		this.grids = otherGrids;
 		return true;
 	}
 
+	/**
+	 * @deprecated Use spatialPartitioning(SpatialPartitioner partitioner)
+	 */
 	public boolean spatialPartitioning(final StandardQuadTree partitionTree) throws Exception {
-		this.spatialPartitionedRDD = partitionUsingQuadTree(partitionTree);
+		this.partitioner = new QuadTreePartitioner(partitionTree);
+		this.spatialPartitionedRDD = partition(partitioner);
 		this.partitionTree = partitionTree;
 		return true;
 	}
@@ -267,30 +283,16 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 		}
 	}
 
-	private JavaRDD<T> partitionUsingQuadTree(final StandardQuadTree<T> quadTree) {
-		final SpatialPartitioner partitioner = new SpatialPartitioner(quadTree.getTotalNumLeafNode());
+	private JavaRDD<T> partition(final SpatialPartitioner partitioner) {
 		return this.rawSpatialRDD.flatMapToPair(
-				new PairFlatMapFunction<T, Integer, T>() {
-					@Override
-					public Iterator<Tuple2<Integer, T>> call(T spatialObject) throws Exception {
-						return PartitionJudgement.getPartitionID(quadTree, spatialObject);
-					}
+			new PairFlatMapFunction<T, Integer, T>() {
+				@Override
+				public Iterator<Tuple2<Integer, T>> call(T spatialObject) throws Exception {
+					return partitioner.placeObject(spatialObject);
 				}
+			}
 		).partitionBy(partitioner)
-				.mapPartitions(new GetTuple2Value<T>(),true);
-	}
-
-	private JavaRDD<T> partitionUsingGrids(final List<Envelope> grids) {
-		final SpatialPartitioner partitioner = new SpatialPartitioner(grids.size());
-		return this.rawSpatialRDD.flatMapToPair(
-				new PairFlatMapFunction<T, Integer, T>() {
-					@Override
-					public Iterator<Tuple2<Integer, T>> call(T spatialObject) throws Exception {
-						return PartitionJudgement.getPartitionID(grids, spatialObject);
-					}
-				}
-		).partitionBy(partitioner)
-				.mapPartitions(new GetTuple2Value(), true);
+			.mapPartitions(new GetTuple2Value<T>(),true);
 	}
 
 	/**

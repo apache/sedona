@@ -11,6 +11,7 @@ import com.vividsolutions.jts.index.SpatialIndex;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.spark.api.java.function.FlatMapFunction2;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,10 +22,10 @@ public class IndexLookupJudgement<T extends Geometry, U extends Geometry>
         implements FlatMapFunction2<Iterator<SpatialIndex>, Iterator<U>, Pair<U, T>>, Serializable {
 
     /**
-     * @param considerBoundaryIntersection the consider boundary intersection
+     * @see JudgementBase
      */
-    public IndexLookupJudgement(boolean considerBoundaryIntersection) {
-        super(considerBoundaryIntersection);
+    public IndexLookupJudgement(boolean considerBoundaryIntersection, @Nullable DedupParams dedupParams) {
+        super(considerBoundaryIntersection, dedupParams);
     }
 
     @Override
@@ -34,6 +35,8 @@ public class IndexLookupJudgement<T extends Geometry, U extends Geometry>
         if (!iteratorTree.hasNext()) {
             return result.iterator();
         }
+
+        initPartition();
 
         SpatialIndex treeIndex = iteratorTree.next();
         while (iteratorWindow.hasNext()) {

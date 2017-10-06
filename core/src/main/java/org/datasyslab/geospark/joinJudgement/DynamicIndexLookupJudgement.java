@@ -6,9 +6,14 @@ import com.vividsolutions.jts.index.SpatialIndex;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
 import com.vividsolutions.jts.index.strtree.STRtree;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.apache.spark.TaskContext;
 import org.apache.spark.api.java.function.FlatMapFunction2;
 import org.datasyslab.geospark.enums.IndexType;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,10 +25,16 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
         extends JudgementBase
         implements FlatMapFunction2<Iterator<T>, Iterator<U>, Pair<U, T>>, Serializable {
 
+    private static final Logger log = LogManager.getLogger(DynamicIndexLookupJudgement.class);
+
     private final IndexType indexType;
 
-    public DynamicIndexLookupJudgement(boolean considerBoundaryIntersection, IndexType indexType) {
-        super(considerBoundaryIntersection);
+    /**
+     * @see JudgementBase
+     */
+    public DynamicIndexLookupJudgement(boolean considerBoundaryIntersection, IndexType indexType,
+                                       @Nullable DedupParams dedupParams) {
+        super(considerBoundaryIntersection, dedupParams);
         this.indexType = indexType;
     }
 
@@ -34,6 +45,8 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
             return Collections.emptyIterator();
         }
 
+        initPartition();
+
         final SpatialIndex spatialIndex = buildIndex(windowShapes);
 
         return new Iterator<Pair<U, T>>() {
@@ -41,6 +54,8 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
             private List<Pair<U, T>> batch = null;
             // An index of the element from 'batch' to return next
             private int nextIndex = 0;
+
+            private int shapeCnt = 0;
 
             @Override
             public boolean hasNext() {
@@ -81,6 +96,7 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
                 batch = new ArrayList<>();
 
                 while (shapes.hasNext()) {
+                    shapeCnt ++;
                     final T shape = shapes.next();
                     final List candidates = spatialIndex.query(shape.getEnvelopeInternal());
                     for (Object candidate : candidates) {
@@ -89,6 +105,7 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
                             batch.add(Pair.of(polygon, shape));
                         }
                     }
+                    logMilestone(shapeCnt, 100 * 1000, "Streaming shapes");
                     if (!batch.isEmpty()) {
                         return true;
                     }
@@ -106,12 +123,15 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
     }
 
     private SpatialIndex buildIndex(Iterator<U> polygons) {
+        long count = 0;
         final SpatialIndex index = newIndex();
         while (polygons.hasNext()) {
             U polygon = polygons.next();
             index.insert(polygon.getEnvelopeInternal(), polygon);
+            count++;
         }
         index.query(new Envelope(0.0,0.0,0.0,0.0));
+        log("Loaded %d shapes into an index", count);
         return index;
     }
 
@@ -123,6 +143,20 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
                 return new Quadtree();
             default:
                 throw new IllegalArgumentException("Unsupported index type: " + indexType);
+        }
+    }
+
+    private void log(String message, Object...params) {
+        if (Level.INFO.isGreaterOrEqual(log.getEffectiveLevel())) {
+            final int partitionId = TaskContext.getPartitionId();
+            final long threadId = Thread.currentThread().getId();
+            log.info("[" + threadId + ", PID=" + partitionId + "] " + String.format(message, params));
+        }
+    }
+
+    private void logMilestone(long cnt, long threshold, String name) {
+        if (cnt > 1 && cnt % threshold == 1) {
+            log("[%s] Reached a milestone: %d", name, cnt);
         }
     }
 }

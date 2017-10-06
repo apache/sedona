@@ -37,7 +37,7 @@ public class QuadRectangle implements Serializable{
         this.height = height;
     }
 
-    public boolean contains(int x, int y) {
+    public boolean contains(double x, double y) {
         return x >= this.x && x <= this.x + this.width
                 && y >= this.y && y <= this.y + this.height;
     }

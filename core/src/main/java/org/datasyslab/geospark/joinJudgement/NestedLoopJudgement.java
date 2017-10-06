@@ -10,6 +10,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.spark.api.java.function.FlatMapFunction2;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,14 +21,16 @@ public class NestedLoopJudgement<T extends Geometry, U extends Geometry>
         implements FlatMapFunction2<Iterator<T>, Iterator<U>, Pair<U, T>>, Serializable {
 
     /**
-     * @param considerBoundaryIntersection the consider boundary intersection
+     * @see JudgementBase
      */
-    public NestedLoopJudgement(boolean considerBoundaryIntersection) {
-        super(considerBoundaryIntersection);
+    public NestedLoopJudgement(boolean considerBoundaryIntersection, @Nullable DedupParams dedupParams) {
+        super(considerBoundaryIntersection, dedupParams);
     }
 
     @Override
     public Iterator<Pair<U, T>> call(Iterator<T> iteratorObject, Iterator<U> iteratorWindow) throws Exception {
+        initPartition();
+
         List<Pair<U, T>> result = new ArrayList<>();
         List<T> queryObjects = new ArrayList<>();
         while(iteratorObject.hasNext())
