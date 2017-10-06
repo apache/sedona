@@ -50,6 +50,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 // TODO: Auto-generated Javadoc
@@ -424,31 +425,75 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 			return combine(object.getEnvelopeInternal(), agg);
 		}
 	}
+	
+	public static final class BoundaryAndCount implements Serializable {
+		private final Envelope boundary;
+		private final long count;
 
-	/**
-	 * Boundary.
-	 *
-	 * @return the envelope
-	 */
-	public Envelope boundary() {
-		final Function2 combOp =
-			new Function2<Envelope, Envelope, Envelope>() {
-				@Override
-				public Envelope call(Envelope agg1, Envelope agg2) throws Exception {
-					return BoundaryAggregation.combine(agg1, agg2);
-				}
-			};
-
-		final Function2 seqOp = new Function2<Envelope, Geometry, Envelope>() {
-			@Override
-			public Envelope call(Envelope agg, Geometry object) throws Exception {
-				return BoundaryAggregation.add(agg, object);
+		public BoundaryAndCount(Envelope boundary, long count) {
+			Objects.requireNonNull(boundary, "Boundary cannot be null");
+			if (count <= 0) {
+				throw new IllegalArgumentException("Count must be > 0");
 			}
-		};
+			this.boundary = boundary;
+			this.count = count;
+		}
 
-		this.boundaryEnvelope = (Envelope) this.rawSpatialRDD.aggregate(null, seqOp, combOp);
-		return this.boundaryEnvelope;
+		public Envelope getBoundary() {
+			return boundary;
+		}
+
+		public long getCount() {
+			return count;
+		}
 	}
+
+    public static final class BoundaryAndCountAggregation {
+        public static BoundaryAndCount combine(BoundaryAndCount agg1, BoundaryAndCount agg2) throws Exception {
+            if (agg1 == null) {
+                return agg2;
+            }
+
+            if (agg2 == null) {
+                return agg1;
+            }
+
+            return new BoundaryAndCount(
+                BoundaryAggregation.combine(agg1.boundary, agg2.boundary), 
+                agg1.count + agg2.count);
+        }
+
+        public static BoundaryAndCount add(BoundaryAndCount agg, Geometry object) throws Exception {
+            return combine(new BoundaryAndCount(object.getEnvelopeInternal(), 1), agg);
+        }
+    }
+
+    /**
+     * Boundary.
+     *
+     * @return the envelope
+     */
+    public Envelope boundary() {
+        final Function2 combOp =
+            new Function2<BoundaryAndCount, BoundaryAndCount, BoundaryAndCount>() {
+                @Override
+                public BoundaryAndCount call(BoundaryAndCount agg1, BoundaryAndCount agg2) throws Exception {
+                    return BoundaryAndCountAggregation.combine(agg1, agg2);
+                }
+            };
+
+        final Function2 seqOp = new Function2<BoundaryAndCount, Geometry, BoundaryAndCount>() {
+            @Override
+            public BoundaryAndCount call(BoundaryAndCount agg, Geometry object) throws Exception {
+                return BoundaryAndCountAggregation.add(agg, object);
+            }
+        };
+
+        BoundaryAndCount agg = (BoundaryAndCount) this.rawSpatialRDD.aggregate(null, seqOp, combOp);
+        this.boundaryEnvelope = agg.boundary;
+        this.approximateTotalCount = agg.count;
+        return this.boundaryEnvelope;
+    }
 
 	/**
 	 * Gets the raw spatial RDD.
@@ -478,7 +523,6 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 	{
 		this.rawSpatialRDD.persist(newLevel);
 		this.boundary();
-        this.approximateTotalCount = this.rawSpatialRDD.count();
         return true;
 	}
 
@@ -490,14 +534,13 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 	public boolean analyze()
 	{
 		this.boundary();
-        this.approximateTotalCount = this.rawSpatialRDD.count();
         return true;
 	}
 
 	public boolean analyze(Envelope datasetBoundary, Integer approximateTotalCount)
 	{
 		this.boundaryEnvelope = datasetBoundary;
-		this.approximateTotalCount = this.rawSpatialRDD.count();
+		this.approximateTotalCount = approximateTotalCount;
 		return true;
 	}
 
