@@ -321,7 +321,7 @@ public class CRSTransformationTest {
     	windowRDD.spatialPartitioning(objectRDD.grids);
 
     	List<Tuple2<Polygon, HashSet<Polygon>>> results = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true,false).collect();
-    	assertEquals(5885, results.size());
+    	assertEquals(5467, results.size());
 
     	for (Tuple2<Polygon, HashSet<Polygon>> tuple : results) {
     	    for (Polygon polygon : tuple._2()) {

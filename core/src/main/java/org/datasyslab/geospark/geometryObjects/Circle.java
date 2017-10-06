@@ -12,9 +12,13 @@ import com.vividsolutions.jts.geom.CoordinateSequenceComparator;
 import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryComponentFilter;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.GeometryFilter;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -101,59 +105,160 @@ public class Circle extends Geometry {
 		this.MBR=new Envelope(this.centerPoint.x-this.radius, this.centerPoint.x+this.radius, this.centerPoint.y-this.radius, this.centerPoint.y+this.radius);
 	}
 	
-	/* (non-Javadoc)
-	 * @see com.vividsolutions.jts.geom.Geometry#covers(com.vividsolutions.jts.geom.Geometry)
-	 */
-	@Override
-	public boolean covers(Geometry g) {
-		// short-circuit test
-		if (! getEnvelopeInternal().covers(g.getEnvelopeInternal()))
-			return false;
-		// optimization for rectangle arguments
-		if (isRectangle()) {
-			// since we have already tested that the test envelope is covered
-			return true;
-		}
-		double x1,x2,y1,y2;
-		x1=g.getEnvelopeInternal().getMinX();
-		x2=g.getEnvelopeInternal().getMaxX();
-		y1=g.getEnvelopeInternal().getMinY();
-		y2=g.getEnvelopeInternal().getMaxY();	
-		return covers(x1,y1)&&covers(x1,y2)&&covers(x2,y2)&&covers(x2,y1);
-	}
-	
-	/* (non-Javadoc)
-	 * @see com.vividsolutions.jts.geom.Geometry#intersects(com.vividsolutions.jts.geom.Geometry)
-	 */
-	@Override
-	public boolean intersects(Geometry g) {
-		// short-circuit test
-		if (! getEnvelopeInternal().covers(g.getEnvelopeInternal()))
-			return false;
-		// optimization for rectangle arguments
-		if (isRectangle()) {
-			// since we have already tested that the test envelope is covered
-			return true;
-		}
-		double x1,x2,y1,y2;
-		x1=g.getEnvelopeInternal().getMinX();
-		x2=g.getEnvelopeInternal().getMaxX();
-		y1=g.getEnvelopeInternal().getMinY();
-		y2=g.getEnvelopeInternal().getMaxY();	
-		return covers(x1,y1)||covers(x1,y2)||covers(x2,y2)||covers(x2,y1);
-	}
-	
-	/**
-	 * Covers.
-	 *
-	 * @param x the x
-	 * @param y the y
-	 * @return true, if successful
-	 */
-	public boolean covers(double x, double y) {
-		double distance = Math.sqrt((x-this.centerPoint.x)*(x-this.centerPoint.x)+(y-this.centerPoint.y)*(y-this.centerPoint.y));
-		return distance<=this.radius?true:false;
-	}
+    /* (non-Javadoc)
+     * @see com.vividsolutions.jts.geom.Geometry#covers(com.vividsolutions.jts.geom.Geometry)
+     */
+    @Override
+    public boolean covers(Geometry other) {
+        // short-circuit test
+        Envelope otherEnvelope = other.getEnvelopeInternal();
+        if (! getEnvelopeInternal().covers(otherEnvelope)) {
+            return false;
+        }
+
+        if (other instanceof Point) {
+            return covers((Point) other);
+        }
+
+        if (other instanceof LineString) {
+            return covers((LineString) other);
+        }
+
+        if (other instanceof Polygon) {
+            return covers(((Polygon) other).getExteriorRing());
+        }
+
+        if (other instanceof GeometryCollection) {
+            GeometryCollection collection = (GeometryCollection) other;
+            for (int i=0; i<collection.getNumGeometries(); i++) {
+                if (!covers(collection.getGeometryN(i))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        throw new IllegalArgumentException("Circle.covers() doesn't support geometry type " +
+            other.getGeometryType());
+    }
+
+    private boolean covers(LineString lineString) {
+        for (int i=0; i<lineString.getNumPoints(); i++) {
+            if (!covers(lineString.getPointN(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean covers(Point point) {
+        double deltaX = point.getX() - centerPoint.x;
+        double deltaY = point.getY() - centerPoint.y;
+
+        return  (deltaX * deltaX + deltaY * deltaY) <= radius * radius;
+    }
+
+    /* (non-Javadoc)
+     * @see com.vividsolutions.jts.geom.Geometry#intersects(com.vividsolutions.jts.geom.Geometry)
+     */
+    @Override
+    public boolean intersects(Geometry other) {
+        // short-circuit test
+        Envelope otherEnvelope = other.getEnvelopeInternal();
+        if (! getEnvelopeInternal().intersects(otherEnvelope)) {
+            return false;
+        }
+
+        if (other instanceof Point) {
+            return covers((Point) other);
+        }
+
+        if (other instanceof LineString) {
+            return intersects((LineString) other);
+        }
+
+        if (other instanceof Polygon) {
+            return intersects((Polygon) other);
+        }
+
+        if (other instanceof GeometryCollection) {
+            GeometryCollection collection = (GeometryCollection) other;
+            for (int i=0; i<collection.getNumGeometries(); i++) {
+                if (intersects(collection.getGeometryN(i))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        throw new IllegalArgumentException("Circle.intersects() doesn't support geometry type " +
+            other.getGeometryType());
+    }
+
+    private boolean intersects(Polygon polygon) {
+        if (intersects(polygon.getExteriorRing())) {
+            return true;
+        }
+
+        if (polygon.contains(factory.createPoint(centerPoint))) {
+            return true;
+        }
+
+        if (polygon.getNumInteriorRing() == 0) {
+            return false;
+        }
+
+        for (int i=0; i<polygon.getNumInteriorRing(); i++) {
+            if (intersects(polygon.getInteriorRingN(i))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean intersects(LineString lineString) {
+        for (int i=0; i<lineString.getNumPoints() - 1; i++) {
+            if (intersects(lineString.getPointN(i), lineString.getPointN(i+1))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return true if a line from `start` to `end` intersects this circle
+     */
+    private boolean intersects(Point start, Point end) {
+        double deltaX = end.getX() - start.getX();
+        double deltaY = end.getY() - start.getY();
+
+        double centerDeltaX = start.getX() - centerPoint.x;
+        double centerDeltaY = start.getY() - centerPoint.y;
+
+        // Building and solving quadractic equation: ax2 + bx + c = 0
+        double a = deltaX * deltaX + deltaY * deltaY;
+        double b = 2 * (deltaX * centerDeltaX + deltaY * centerDeltaY);
+        double c = centerDeltaX * centerDeltaX + centerDeltaY * centerDeltaY - radius * radius;
+
+        double discriminant = b * b - 4 * a * c;
+
+        if (discriminant < 0) {
+            return false;
+        }
+
+        double t1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+        if (t1 >= 0 && t1 <= 1) {
+            return true;
+        }
+
+        double t2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+        if (t2 >= 0 && t2 <= 1) {
+            return true;
+        }
+
+        return (Math.signum(t1) != Math.signum(t2));
+    }
 	 
 	/* (non-Javadoc)
 	 * @see com.vividsolutions.jts.geom.Geometry#getGeometryType()
