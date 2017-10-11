@@ -144,6 +144,13 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 		}
 	}
 
+    public boolean spatialPartitioning(GridType gridType) throws Exception
+    {
+        int numPartitions = this.rawSpatialRDD.rdd().partitions().length;
+        spatialPartitioning(gridType, numPartitions);
+        return true;
+    }
+
 	/**
 	 * Spatial partitioning.
 	 *
@@ -151,9 +158,12 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 	 * @return true, if successful
 	 * @throws Exception the exception
 	 */
-	public boolean spatialPartitioning(GridType gridType) throws Exception
+	public void spatialPartitioning(GridType gridType, int numPartitions) throws Exception
 	{
-        int numPartitions = this.rawSpatialRDD.rdd().partitions().length;;
+        if (numPartitions <= 0) {
+            throw new IllegalArgumentException("Number of partitions must be >= 0");
+        }
+
 		if(this.boundaryEnvelope==null)
         {
         	throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD boundary is null. Please call analyze() first.");
@@ -225,7 +235,6 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 		}
 
 		this.spatialPartitionedRDD = partition(partitioner);
-		return true;
 	}
 
 	public SpatialPartitioner getPartitioner()
@@ -492,8 +501,13 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
         };
 
         BoundaryAndCount agg = (BoundaryAndCount) this.rawSpatialRDD.aggregate(null, seqOp, combOp);
-        this.boundaryEnvelope = agg.boundary;
-        this.approximateTotalCount = agg.count;
+        if (agg != null) {
+            this.boundaryEnvelope = agg.boundary;
+            this.approximateTotalCount = agg.count;
+        } else {
+            this.boundaryEnvelope = null;
+            this.approximateTotalCount = 0;
+        }
         return this.boundaryEnvelope;
     }
 
