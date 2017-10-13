@@ -12,11 +12,8 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
+import org.datasyslab.geospark.GeoSparkTestBase;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.spatialRDD.CircleRDD;
@@ -42,10 +39,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
-public class JoinQueryCorrectnessChecker {
-    /** The sc. */
-    public static JavaSparkContext sc;
-    
+public class JoinQueryCorrectnessChecker extends GeoSparkTestBase {
+
     /** The test polygon window set. */
     public static List<Polygon> testPolygonWindowSet;
     
@@ -97,10 +92,7 @@ public class JoinQueryCorrectnessChecker {
      */
     @BeforeClass
     public static void onceExecutedBeforeAll() {
-        Logger.getLogger("org").setLevel(Level.WARN);
-        Logger.getLogger("akka").setLevel(Level.WARN);
-        SparkConf conf = new SparkConf().setAppName("CorrectnessChecker").setMaster("local[2]");
-        sc = new JavaSparkContext(conf);
+        GeoSparkTestBase.initialize(JoinQueryCorrectnessChecker.class.getSimpleName());
 
         // Define the user data saved in window objects and data objects
         testPolygonWindowSet = new ArrayList<>();

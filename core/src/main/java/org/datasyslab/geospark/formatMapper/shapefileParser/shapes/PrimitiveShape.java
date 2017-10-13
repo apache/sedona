@@ -8,30 +8,33 @@ package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import org.apache.hadoop.io.BytesWritable;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.*;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeParser;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeReaderFactory;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeType;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.TypeUnknownException;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 
-public class PrimitiveShape implements Serializable{
+public class PrimitiveShape implements Serializable {
 
     /** primitive bytes of one record copied from .shp file */
-    private byte[] primitiveRecord = null;
+    private final byte[] primitiveRecord;
+
+    /** shape type */
+    private final ShapeType shapeType;
 
     /** attributes of record extracted from .dbf file */
     private String attributes = null;
 
-    /** shape type */
-    public ShapeType shapeType = ShapeType.NULL;
+    public PrimitiveShape(ShpRecord record) {
+        this.primitiveRecord = record.getBytes().getBytes();
+        this.shapeType = ShapeType.getType(record.getTypeID());
+    }
 
     public byte[] getPrimitiveRecord() {
         return primitiveRecord;
-    }
-
-    public void setPrimitiveRecord(ShpRecord shpRecord) {
-        this.primitiveRecord = shpRecord.getBytes().getBytes();
-        shapeType = ShapeType.getType(shpRecord.getTypeID());
     }
 
     public String getAttributes() {
@@ -43,11 +46,9 @@ public class PrimitiveShape implements Serializable{
     }
 
     public Geometry getShape(GeometryFactory geometryFactory) throws IOException, TypeUnknownException {
-        ShapeParser parser = null;
-        parser = shapeType.getParser(geometryFactory);
-        if(parser == null) throw new TypeUnknownException(shapeType.getId());
-        ShapeReader reader = new ByteBufferReader(primitiveRecord, false);
-        Geometry shape = parser.parserShape(reader);
+        ShapeParser parser = shapeType.getParser(geometryFactory);
+        ByteBuffer shapeBuffer = ByteBuffer.wrap(primitiveRecord);
+        Geometry shape = parser.parseShape(ShapeReaderFactory.fromByteBuffer(shapeBuffer));
         if(attributes != null){
             shape.setUserData(attributes);
         }

@@ -447,4 +447,9 @@ public class Circle extends Geometry {
 	    if (mbr.getMaxY() > env.getMaxY()) return 1;
 	    return 0;
 	}
+
+	@Override
+	public String toString() {
+		return "Circle of radius " + radius + " around " + centerGeometry;
+	}
 }

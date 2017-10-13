@@ -8,11 +8,8 @@ package org.datasyslab.geospark.spatialOperator;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
+import org.datasyslab.geospark.GeoSparkTestBase;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
@@ -33,10 +30,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-class JoinTestBase {
-
-    /** The sc. */
-    public static JavaSparkContext sc;
+class JoinTestBase extends GeoSparkTestBase {
 
     /** The prop. */
     static Properties prop;
@@ -62,9 +56,6 @@ class JoinTestBase {
     /** The num partitions. */
     static Integer numPartitions;
 
-    /** The conf. */
-    static SparkConf conf;
-
     protected final GridType gridType;
 
     protected final boolean useLegacyPartitionAPIs;
@@ -76,10 +67,8 @@ class JoinTestBase {
     }
 
     protected static void initialize(final String testSuiteName, final String propertiesFileName) {
-        conf = new SparkConf().setAppName(testSuiteName).setMaster("local[2]");
-        sc = new JavaSparkContext(conf);
-        Logger.getLogger("org").setLevel(Level.WARN);
-        Logger.getLogger("akka").setLevel(Level.WARN);
+        GeoSparkTestBase.initialize(testSuiteName);
+
         prop = new Properties();
         final ClassLoader classLoader = JoinTestBase.class.getClassLoader();
         final InputStream input = classLoader.getResourceAsStream(propertiesFileName);

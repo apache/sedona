@@ -6,7 +6,14 @@
  */
 package org.datasyslab.geospark.formatMapper.shapefileParser;
 
-import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -15,7 +22,6 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundBox;
 import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundaryInputFormat;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.TypeUnknownException;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.PrimitiveShape;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapeInputFormat;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapeKey;
@@ -24,7 +30,6 @@ import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import scala.Tuple2;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -75,17 +80,8 @@ public class ShapefileReader {
         return shapePrimitiveRdd.map(new Function<Tuple2<ShapeKey, PrimitiveShape>, Geometry>() {
             @Override
             public Geometry call(Tuple2<ShapeKey, PrimitiveShape> primitiveTuple) throws Exception {
-                Geometry shape = null;
                 // parse bytes to shape
-                try{
-                    shape = primitiveTuple._2().getShape(geometryFactory);
-                }catch (TypeUnknownException e){
-                    e.printStackTrace();
-                }catch (IOException e){
-                    e.printStackTrace();
-                }finally {
-                    return shape;
-                }
+                return primitiveTuple._2().getShape(geometryFactory);
             }
         });
     }
