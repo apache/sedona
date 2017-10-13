@@ -12,15 +12,14 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiPoint;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class MultiPointParser.
- */
+import static org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeFileConst.DOUBLE_LENGTH;
+
 public class MultiPointParser extends ShapeParser {
 
     /**
-     * create a parser that can abstract a MultiPolyline from input source with given GeometryFactory.
+     * create a parser that can abstract a MultiPoint from input source with given GeometryFactory.
      *
      * @param geometryFactory the geometry factory
      */
@@ -31,15 +30,15 @@ public class MultiPointParser extends ShapeParser {
     /**
      * abstract a MultiPoint shape.
      *
-     * @param reader the reader
+     * @param buffer the reader
      * @return the geometry
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public Geometry parserShape(ShapeReader reader) throws IOException {
-        reader.skip(4 * DOUBLE_LENGTH);
-        int numPoints = reader.readInt();
-        CoordinateSequence coordinateSequence = ShpParseUtil.readCoordinates(reader, numPoints, geometryFactory);
+    public Geometry parseShape(ByteBuffer buffer) throws IOException {
+        buffer.position(buffer.position() + 4 * DOUBLE_LENGTH);
+        int numPoints = buffer.getInt();
+        CoordinateSequence coordinateSequence = ShpParseUtil.readCoordinates(buffer, numPoints, geometryFactory);
         MultiPoint multiPoint = geometryFactory.createMultiPoint(coordinateSequence);
         return multiPoint;
     }

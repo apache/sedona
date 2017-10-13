@@ -9,7 +9,9 @@ package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.GeometryFactory;
+
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -26,10 +28,10 @@ public class ShpParseUtil implements ShapeFileConst {
      * @return the coordinate sequence
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static CoordinateSequence readCoordinates(ShapeReader reader, int numPoints, GeometryFactory geometryFactory) throws IOException {
+    public static CoordinateSequence readCoordinates(ByteBuffer reader, int numPoints, GeometryFactory geometryFactory) throws IOException {
         CoordinateSequence coordinateSequence = geometryFactory.getCoordinateSequenceFactory().create(numPoints,2);
         double[] ordinates = new double[numPoints*2];
-        reader.read(ordinates);
+        reader.asDoubleBuffer().get(ordinates);
         for(int i = 0;i < numPoints; ++i){
             coordinateSequence.setOrdinate(i, 0, ordinates[i*2]);
             coordinateSequence.setOrdinate(i, 1, ordinates[i*2 + 1]);

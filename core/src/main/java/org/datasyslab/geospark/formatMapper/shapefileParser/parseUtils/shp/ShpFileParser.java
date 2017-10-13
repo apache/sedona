@@ -7,7 +7,6 @@
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
 import org.apache.commons.io.EndianUtils;
-import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundBox;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShpRecord;
 
 import java.io.DataInputStream;
@@ -26,14 +25,14 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
     public long remainLength = 0;
 
     /** input reader */
-    ShapeReader reader = null;
+    private final DataInputStream reader;
 
     /**
      * create a new shape file parser with a input source that is instance of DataInputStream
      * @param inputStream
      */
     public ShpFileParser(DataInputStream inputStream) {
-        reader = new DataInputStreamReader(inputStream);
+        reader = inputStream;
     }
 
     /**

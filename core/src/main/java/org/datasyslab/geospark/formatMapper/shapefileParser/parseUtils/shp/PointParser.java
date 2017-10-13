@@ -12,11 +12,8 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class PointParser.
- */
 public class PointParser extends ShapeParser {
 
     /**
@@ -31,14 +28,14 @@ public class PointParser extends ShapeParser {
     /**
      * abstract a Point shape.
      *
-     * @param reader the reader
+     * @param buffer the reader
      * @return the geometry
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public Geometry parserShape(ShapeReader reader) throws IOException {
-        double x = reader.readDouble();
-        double y = reader.readDouble();
+    public Geometry parseShape(ByteBuffer buffer) throws IOException {
+        double x = buffer.getDouble();
+        double y = buffer.getDouble();
         Point point = geometryFactory.createPoint(new Coordinate(x, y));
         return point;
     }

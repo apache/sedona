@@ -17,7 +17,6 @@ import org.apache.log4j.Logger;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeType;
 
 import java.io.IOException;
-import java.util.List;
 
 public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
 
@@ -44,9 +43,6 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
 
     /** suffix of index file */
     private final static String SHX_SUFFIX = "shx";
-
-    /** value of current record */
-    private PrimitiveShape value = null;
 
     /** flag of whether .dbf exists */
     private boolean hasDbf = false;
@@ -117,8 +113,7 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
     }
 
     public PrimitiveShape getCurrentValue() throws IOException, InterruptedException {
-        value = new PrimitiveShape();
-        value.setPrimitiveRecord(shapeFileReader.getCurrentValue());
+        PrimitiveShape value = new PrimitiveShape(shapeFileReader.getCurrentValue());
         if(hasDbf && hasNextDbf) value.setAttributes(dbfFileReader.getCurrentValue());
         return value;
     }

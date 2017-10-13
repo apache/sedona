@@ -11,15 +11,12 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class ShapeParser.
- */
-public abstract class ShapeParser implements Serializable, ShapeFileConst{
+public abstract class ShapeParser implements Serializable {
 
     /** The geometry factory. */
-    protected GeometryFactory geometryFactory = null;
+    protected final GeometryFactory geometryFactory;
 
     /**
      * Instantiates a new shape parser.
@@ -33,10 +30,9 @@ public abstract class ShapeParser implements Serializable, ShapeFileConst{
     /**
      * parse the shape to a geometry.
      *
-     * @param reader the reader
+     * @param buffer the buffer
      * @return the geometry
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public abstract Geometry parserShape(ShapeReader reader) throws IOException;
-
+    public abstract Geometry parseShape(ByteBuffer buffer) throws IOException;
 }
