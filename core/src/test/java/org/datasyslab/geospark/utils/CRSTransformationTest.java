@@ -6,11 +6,7 @@
  */
 package org.datasyslab.geospark.utils;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.*;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
@@ -320,10 +316,10 @@ public class CRSTransformationTest {
     	objectRDD.buildIndex(IndexType.RTREE,true);
     	windowRDD.spatialPartitioning(objectRDD.grids);
 
-    	List<Tuple2<Polygon, HashSet<Polygon>>> results = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true,false).collect();
+    	List<Tuple2<Geometry, HashSet<Polygon>>> results = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true,false).collect();
     	assertEquals(5467, results.size());
 
-    	for (Tuple2<Polygon, HashSet<Polygon>> tuple : results) {
+    	for (Tuple2<Geometry, HashSet<Polygon>> tuple : results) {
     	    for (Polygon polygon : tuple._2()) {
     	        assertTrue(new Circle(tuple._1(), 0.1).covers(polygon));
             }

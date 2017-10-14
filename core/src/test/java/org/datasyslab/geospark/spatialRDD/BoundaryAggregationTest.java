@@ -1,3 +1,9 @@
+/**
+ * FILE: BoundaryAggregationTest.java
+ * PATH: org.datasyslab.geospark.spatialRDD.BoundaryAggregationTest.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.spatialRDD;
 
 import com.vividsolutions.jts.geom.Coordinate;

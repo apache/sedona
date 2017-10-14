@@ -1,3 +1,9 @@
+/**
+ * FILE: FlatGridPartitioner.java
+ * PATH: org.datasyslab.geospark.spatialPartitioning.FlatGridPartitioner.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.spatialPartitioning;
 
 import com.vividsolutions.jts.geom.Envelope;

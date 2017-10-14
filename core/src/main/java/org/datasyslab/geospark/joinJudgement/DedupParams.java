@@ -1,3 +1,9 @@
+/**
+ * FILE: DedupParams.java
+ * PATH: org.datasyslab.geospark.joinJudgement.DedupParams.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.joinJudgement;
 
 import com.vividsolutions.jts.geom.Envelope;

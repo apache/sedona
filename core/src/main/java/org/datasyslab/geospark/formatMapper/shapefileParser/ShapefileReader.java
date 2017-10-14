@@ -1,3 +1,9 @@
+/**
+ * FILE: ShapefileReader.java
+ * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
+ */
 package org.datasyslab.geospark.formatMapper.shapefileParser;
 
 import com.vividsolutions.jts.geom.*;

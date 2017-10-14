@@ -357,11 +357,11 @@ public class JoinQueryCorrectnessChecker {
         verifyJoinResults(resultNoIndex);
     }
 
-    private <T extends Geometry> void verifyJoinResults(List<Tuple2<Polygon, HashSet<T>>> result) {
+    private <U extends Geometry, T extends Geometry> void verifyJoinResults(List<Tuple2<U, HashSet<T>>> result) {
         assertEquals(200, result.size());
-        for(Tuple2<Polygon,HashSet<T>> tuple: result)
+        for(Tuple2<U,HashSet<T>> tuple: result)
         {
-            Polygon window = tuple._1;
+            U window = tuple._1;
             Set<T> objects = tuple._2;
             String windowUserData = (String) window.getUserData();
 
@@ -411,10 +411,10 @@ public class JoinQueryCorrectnessChecker {
         PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(this.testInsidePolygonSet),StorageLevel.MEMORY_ONLY());
         prepareRDDs(objectRDD, windowRDD);
 
-        List<Tuple2<Polygon,HashSet<Polygon>>> result = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true,false).collect();
+        List<Tuple2<Geometry, HashSet<Polygon>>> result = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true,false).collect();
         verifyJoinResults(result);
 
-        List<Tuple2<Polygon,HashSet<Polygon>>> resultNoIndex = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, false,false).collect();
+        List<Tuple2<Geometry, HashSet<Polygon>>> resultNoIndex = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, false,false).collect();
         verifyJoinResults(resultNoIndex);
     }
 
@@ -430,10 +430,10 @@ public class JoinQueryCorrectnessChecker {
         PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(this.testOverlappedPolygonSet),StorageLevel.MEMORY_ONLY());
         prepareRDDs(objectRDD, windowRDD);
 
-        List<Tuple2<Polygon,HashSet<Polygon>>> result = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true,true).collect();
+        List<Tuple2<Geometry, HashSet<Polygon>>> result = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true,true).collect();
         verifyJoinResults(result);
 
-        List<Tuple2<Polygon,HashSet<Polygon>>> resultNoIndex = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, false,true).collect();
+        List<Tuple2<Geometry, HashSet<Polygon>>> resultNoIndex = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, false,true).collect();
         verifyJoinResults(resultNoIndex);
     }
 
@@ -449,10 +449,10 @@ public class JoinQueryCorrectnessChecker {
         PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(this.testOutsidePolygonSet),StorageLevel.MEMORY_ONLY());
         prepareRDDs(objectRDD, windowRDD);
 
-        List<Tuple2<Polygon,HashSet<Polygon>>> result = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true,true).collect();
+        List<Tuple2<Geometry, HashSet<Polygon>>> result = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true,true).collect();
         assertEquals(0, result.size());
 
-        List<Tuple2<Polygon,HashSet<Polygon>>> resultNoIndex = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, false,true).collect();
+        List<Tuple2<Geometry, HashSet<Polygon>>> resultNoIndex = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, false,true).collect();
         assertEquals(0, resultNoIndex.size());
     }
 }
