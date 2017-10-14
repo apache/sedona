@@ -53,7 +53,7 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
 
         initPartition();
 
-        final SpatialIndex spatialIndex = buildIndex(windowShapes);
+        final SpatialIndex spatialIndex = buildIndex(shapes);
 
         return new Iterator<Pair<U, T>>() {
             // A batch of pre-computed matches
@@ -92,7 +92,7 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
             }
 
             private boolean populateNextBatch() {
-                if (!shapes.hasNext()) {
+                if (!windowShapes.hasNext()) {
                     if (batch != null) {
                         batch = null;
                     }
@@ -101,14 +101,14 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
 
                 batch = new ArrayList<>();
 
-                while (shapes.hasNext()) {
+                while (windowShapes.hasNext()) {
                     shapeCnt ++;
-                    final T shape = shapes.next();
-                    final List candidates = spatialIndex.query(shape.getEnvelopeInternal());
+                    final U windowShape = windowShapes.next();
+                    final List candidates = spatialIndex.query(windowShape.getEnvelopeInternal());
                     for (Object candidate : candidates) {
-                        final U polygon = (U) candidate;
-                        if (match(polygon, shape)) {
-                            batch.add(Pair.of(polygon, shape));
+                        final T object = (T) candidate;
+                        if (match(windowShape, object)) {
+                            batch.add(Pair.of(windowShape, object));
                         }
                     }
                     logMilestone(shapeCnt, 100 * 1000, "Streaming shapes");
@@ -128,12 +128,12 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
         };
     }
 
-    private SpatialIndex buildIndex(Iterator<U> polygons) {
+    private SpatialIndex buildIndex(Iterator<T> geometries) {
         long count = 0;
         final SpatialIndex index = newIndex();
-        while (polygons.hasNext()) {
-            U polygon = polygons.next();
-            index.insert(polygon.getEnvelopeInternal(), polygon);
+        while (geometries.hasNext()) {
+            T geometry = geometries.next();
+            index.insert(geometry.getEnvelopeInternal(), geometry);
             count++;
         }
         index.query(new Envelope(0.0,0.0,0.0,0.0));
