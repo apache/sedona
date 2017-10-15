@@ -9,6 +9,6 @@
 	<url>http://maven.apache.org</url>
   <modules>
     <module>core</module>
-    <module>babylon</module>
+    <module>viz</module>
   </modules>
 </project>
