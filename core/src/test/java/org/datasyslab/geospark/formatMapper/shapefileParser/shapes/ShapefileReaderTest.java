@@ -10,7 +10,6 @@ package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
@@ -42,9 +41,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 
-/**
- * Created by zongsizhang on 8/20/17.
- */
 public class ShapefileReaderTest implements Serializable{
 
     /** The sc. */

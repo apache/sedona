@@ -30,10 +30,7 @@ import scala.Tuple2;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -156,7 +153,7 @@ public class CRSTransformationTest {
     	for(int i=0;i<loopTimes;i++)
     	{
     		long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false,false).count();
-    		assert resultSize==5314;
+    		assert resultSize==3127;
     	}
     	assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false,false).take(10).get(1).getUserData().toString()!=null;
         
@@ -174,7 +171,7 @@ public class CRSTransformationTest {
     	for(int i=0;i<loopTimes;i++)
     	{
     		long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false,true).count();
-    		assert resultSize==5314;
+            assert resultSize==3127;
     	}
     	assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false,true).take(10).get(1).getUserData().toString() !=null;
     }
@@ -230,8 +227,10 @@ public class CRSTransformationTest {
     	pointRDD.buildIndex(IndexType.RTREE,false);
 		List<Point> resultWithIndex = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, true);
 		GeometryDistanceComparator geometryDistanceComparator = new GeometryDistanceComparator(this.queryPoint,true);
-		Collections.sort(resultNoIndex,geometryDistanceComparator);
-		Collections.sort(resultWithIndex,geometryDistanceComparator);
+        List<Point> resultNoIndexModifiable = new ArrayList<>(resultNoIndex);
+        List<Point> resultWithIndexModifiable = new ArrayList<>(resultWithIndex);
+		Collections.sort(resultNoIndexModifiable,geometryDistanceComparator);
+		Collections.sort(resultWithIndexModifiable,geometryDistanceComparator);
 		int difference = 0;
 		for(int i = 0;i<topK;i++)
 		{

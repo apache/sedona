@@ -452,7 +452,7 @@ public class JoinQueryCorrectnessChecker {
         List<Tuple2<Geometry, HashSet<Polygon>>> result = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true,true).collect();
         assertEquals(0, result.size());
 
-        List<Tuple2<Geometry, HashSet<Polygon>>> resultNoIndex = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, false,true).collect();
+        List<Tuple2<Geometry,HashSet<Polygon>>> resultNoIndex = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, false,true).collect();
         assertEquals(0, resultNoIndex.size());
     }
 }

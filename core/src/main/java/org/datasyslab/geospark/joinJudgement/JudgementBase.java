@@ -41,7 +41,7 @@ import java.util.List;
  * is specified, the implementation of the `match` method assumes that condition (1) holds.
  */
 abstract class JudgementBase implements Serializable {
-    private static final Logger log = LogManager.getLogger(DynamicIndexLookupJudgement.class);
+    private static final Logger log = LogManager.getLogger(JudgementBase.class);
 
     private final boolean considerBoundaryIntersection;
     private final DedupParams dedupParams;

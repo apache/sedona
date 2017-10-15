@@ -8,6 +8,7 @@ package org.datasyslab.geospark.spatialOperator;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -24,14 +25,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-/**
- * 
- * @author Arizona State University DataSystems Lab
- *
- */
-
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
@@ -180,8 +174,10 @@ public class PointKnnTest {
     	pointRDD.buildIndex(IndexType.RTREE,false);
 		List<Point> resultWithIndex = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, true);
 		GeometryDistanceComparator geometryDistanceComparator = new GeometryDistanceComparator(this.queryPoint,true);
-		Collections.sort(resultNoIndex,geometryDistanceComparator);
-		Collections.sort(resultWithIndex,geometryDistanceComparator);
+        List<Point> mResultNoIndex = new ArrayList<>(resultNoIndex);
+        List<Point> mResultWithIndex = new ArrayList<>(resultNoIndex);
+        Collections.sort(mResultNoIndex,geometryDistanceComparator);
+		Collections.sort(mResultWithIndex,geometryDistanceComparator);
 		int difference = 0;
 		for(int i = 0;i<topK;i++)
 		{

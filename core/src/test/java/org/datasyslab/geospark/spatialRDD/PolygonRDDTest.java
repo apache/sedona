@@ -22,10 +22,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * @author Arizona State University DataSystems Lab
- */
-
 // TODO: Auto-generated Javadoc
 /**
  * The Class PolygonRDDTest.

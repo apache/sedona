@@ -6,6 +6,7 @@
  */
 package org.datasyslab.geospark.utils;
 
+import com.vividsolutions.jts.geom.Geometry;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.opengis.geometry.MismatchedDimensionException;
@@ -112,5 +113,27 @@ public class CRSTransformation {
 				e.printStackTrace();
 				return null;
 			}
+	}
+
+	public static <T extends Geometry> T Transform(String sourceEpsgCRSCode, String targetEpsgCRSCode, T sourceObject)
+	{
+		try {
+			CoordinateReferenceSystem sourceCRS = CRS.decode(sourceEpsgCRSCode);
+			CoordinateReferenceSystem targetCRS = CRS.decode(targetEpsgCRSCode);
+			final MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS, false);
+			return (T)JTS.transform(sourceObject,transform);
+		} catch (FactoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		} catch (MismatchedDimensionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		} catch (TransformException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

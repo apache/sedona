@@ -3,8 +3,8 @@
 
 | Status   |      Stable    | Latest | Source code|
 |:----------:|:-------------:|:------:|:------:|
-| GeoSpark |  0.8.2 | [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark) | [![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark)[![codecov.io](http://codecov.io/github/jiayuasu/GeoSpark/coverage.svg?branch=master)](http://codecov.io/github/jiayuasu/GeoSpark?branch=master)|
-| [Babylon Viz System](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon) |   0.2.2  |   [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon) | [![Build Status](https://travis-ci.org/jiayuasu/GeoSpark.svg?branch=master)](https://travis-ci.org/jiayuasu/GeoSpark)[![codecov.io](http://codecov.io/github/jiayuasu/GeoSpark/coverage.svg?branch=master)](http://codecov.io/github/jiayuasu/GeoSpark?branch=master)|
+| GeoSpark |  0.9.0 | [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|
+| [GeoSparkViz](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon) |   0.2.2  |   [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|
 
 [GeoSpark@Twitter](https://twitter.com/GeoSpark_ASU)||[GeoSpark Discussion Board](https://groups.google.com/forum/#!forum/geospark-discussion-board)||[![Join the chat at https://gitter.im/geospark-datasys/Lobby](https://badges.gitter.im/geospark-datasys/Lobby.svg)](https://gitter.im/geospark-datasys/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -23,11 +23,11 @@ GeoSpark artifacts are hosted in Maven Central: [**Maven Central Coordinates**](
 ##  Version release notes: [click here](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Full-Version-Release-notes)
 
 ## News!
-* GeoSpark and Babylon (v0.1.X-0.2.X) Template Project is available here: [Template Project](https://github.com/jiayuasu/GeoSparkTemplateProject)
+* Welcome GeoSpark new contributor, Masha Basmanova (@mbasmanova) from Facebook. Masha has contributed more than 10 PRs to GeoSpark on refactoring GeoSpark architecture and improving GeoSpark join performance!
+* Welcome GeoSpark new contributor, Zongsi Zhang (@zongsizhang) from Arizona State University. Zongsi participated the design of GeoSpark Shapefile parser and he has done a great job!.
+* GeoSpark 0.9.0 supports heterogeneous SpatialRDD
 
-* GeoSpark (0.8.0 and later) provides alternative Spatial RDD constructors to speed up RDD data loading and initlializing. See [Advanced GeoSpark Tutorial](https://github.com/DataSystemsLab/GeoSpark/wiki/Advanced-Tutorial-Tune-your-GeoSpark-Application).
-
-* GeoSpark (0.8.0 and later) provides a new Quad-Tree Spatial Partitioning Method to speed up Join Query. ([Scala Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/scala/org/datasyslab/geospark/showcase), [Java Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/java/org/datasyslab/geospark/showcase))
+* GeoSpark 0.9.0 provides newly designed spatial join algorithms with faster join speed. No API changes, you can try it out without pain!
 
 # Important features ([more](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Important-Features))
 ## Spatial Resilient Distributed Datasets (SRDDs)
@@ -77,14 +77,14 @@ GeoSpark Scala and Java template project is available here: [Template Project](h
 
 GeoSpark Function Use Cases: [Scala Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/scala/org/datasyslab/geospark/showcase), [Java Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/java/org/datasyslab/geospark/showcase)
 
-# Babylon Visualization System on GeoSpark
-Babylon is a large-scale in-memory geospatial visualization system.
+# GeoSpark Visualization Extension (GeoSparkViz)
+GeoSparkViz is a large-scale in-memory geospatial visualization system.
 
-Babylon provides native support for general cartographic design by extending GeoSpark to process large-scale spatial data. It can visulize Spatial RDD and Spatial Queries and render super high resolution image in parallel.
+GeoSparkViz provides native support for general cartographic design by extending GeoSpark to process large-scale spatial data. It can visulize Spatial RDD and Spatial Queries and render super high resolution image in parallel.
 
-More details are available here: [Babylon GeoSpatial Visualization](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon) 
+More details are available here: [GeoSpark Visualization Extension](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon) 
 
-## Babylon Gallery
+## GeoSparkViz Gallery
 <img style="float: left;" src="http://www.public.asu.edu/~jiayu2/geospark/picture/usrail.png" width="250">
 
 [Watch High Resolution on a real map](http://www.public.asu.edu/~jiayu2/geospark/picture/overlay.html)

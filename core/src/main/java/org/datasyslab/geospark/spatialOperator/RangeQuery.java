@@ -8,20 +8,12 @@ package org.datasyslab.geospark.spatialOperator;
 
 import java.io.Serializable;
 
+import com.vividsolutions.jts.geom.*;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.Function;
 import org.datasyslab.geospark.rangeJudgement.RangeFilter;
 import org.datasyslab.geospark.rangeJudgement.RangeFilterUsingIndex;
-import org.datasyslab.geospark.spatialRDD.LineStringRDD;
-import org.datasyslab.geospark.spatialRDD.PointRDD;
-import org.datasyslab.geospark.spatialRDD.PolygonRDD;
-import org.datasyslab.geospark.spatialRDD.RectangleRDD;
+import org.datasyslab.geospark.spatialRDD.*;
 import org.datasyslab.geospark.utils.CRSTransformation;
-
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -33,326 +25,52 @@ public class RangeQuery implements Serializable{
 	 * Spatial range query.
 	 *
 	 * @param spatialRDD the spatial RDD
-	 * @param originalQueryWindow the original query window
+	 * @param originalQueryGeometry the original query window
 	 * @param considerBoundaryIntersection the consider boundary intersection
 	 * @param useIndex the use index
 	 * @return the java RDD
 	 * @throws Exception the exception
 	 */
-	public static JavaRDD<Point> SpatialRangeQuery(PointRDD spatialRDD, Envelope originalQueryWindow, boolean considerBoundaryIntersection, boolean useIndex) throws Exception {
-		Envelope queryWindow = originalQueryWindow;
-		if(spatialRDD.getCRStransformation())
-		{
-			queryWindow = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryWindow);
-		}
-		if(useIndex==true)
-		{
-	        if(spatialRDD.indexedRawRDD == null) {
-	            throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index on rawSpatialRDD.");
-	        }
-			JavaRDD<Object> result = spatialRDD.indexedRawRDD.mapPartitions(new RangeFilterUsingIndex(queryWindow,considerBoundaryIntersection));
-			return result.map(new Function<Object, Point>()
-			{
-
-				@Override
-				public Point call(Object spatialObject) throws Exception {
-					return (Point)spatialObject;
-				}
-				
-			});
-		}
-		else{
-			JavaRDD<Object> result = spatialRDD.getRawSpatialRDD().filter(new RangeFilter(queryWindow, considerBoundaryIntersection));
-			return result.map(new Function<Object,Point>()
-			{
-				@Override
-				public Point call(Object spatialObject) throws Exception {
-					return (Point)spatialObject;
-				}
-				
-			});
-		}
-	}
-	
-	/**
-	 * Spatial range query.
-	 *
-	 * @param spatialRDD the spatial RDD
-	 * @param originalQueryWindow the original query window
-	 * @param considerBoundaryIntersection the consider boundary intersection
-	 * @param useIndex the use index
-	 * @return the java RDD
-	 * @throws Exception the exception
-	 */
-	public static JavaRDD<Point> SpatialRangeQuery(PointRDD spatialRDD, Polygon originalQueryWindow, boolean considerBoundaryIntersection, boolean useIndex) throws Exception {
-		Polygon queryWindow = originalQueryWindow;
-		if(spatialRDD.getCRStransformation())
-		{
-			queryWindow = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryWindow);
-		}
-		
-		if(useIndex==true)
-		{
-	        if(spatialRDD.indexedRawRDD == null) {
-	            throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index on rawSpatialRDD.");
-	        }
-			JavaRDD<Object> result = spatialRDD.indexedRawRDD.mapPartitions(new RangeFilterUsingIndex(queryWindow,considerBoundaryIntersection));
-			return result.map(new Function<Object, Point>()
-			{
-
-				@Override
-				public Point call(Object spatialObject) throws Exception {
-					return (Point)spatialObject;
-				}
-				
-			});
-		}
-		else{
-			JavaRDD<Object> result = spatialRDD.getRawSpatialRDD().filter(new RangeFilter(queryWindow, considerBoundaryIntersection));
-			return result.map(new Function<Object,Point>()
-			{
-				@Override
-				public Point call(Object spatialObject) throws Exception {
-					return (Point)spatialObject;
-				}
-				
-			});
-		}
-	}
-	
-	/**
-	 * Spatial range query.
-	 *
-	 * @param spatialRDD the spatial RDD
-	 * @param originalQueryWindow the original query window
-	 * @param considerBoundaryIntersection the consider boundary intersection
-	 * @param useIndex the use index
-	 * @return the java RDD
-	 * @throws Exception the exception
-	 */
-	public static JavaRDD<Polygon> SpatialRangeQuery(PolygonRDD spatialRDD, Envelope originalQueryWindow,boolean considerBoundaryIntersection,boolean useIndex) throws Exception
+	public static <U extends Geometry, T extends Geometry> JavaRDD<T> SpatialRangeQuery(SpatialRDD<T> spatialRDD, U originalQueryGeometry, boolean considerBoundaryIntersection, boolean useIndex) throws Exception
 	{
-		Envelope queryWindow = originalQueryWindow;
+		U queryGeometry = originalQueryGeometry;
 		if(spatialRDD.getCRStransformation())
 		{
-			queryWindow = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryWindow);
+			queryGeometry = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryGeometry);
 		}
-		
+
 		if(useIndex==true)
 		{
-	        if(spatialRDD.indexedRawRDD == null) {
-	            throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index on rawSpatialRDD.");
-	        }
-			JavaRDD<Object> result = spatialRDD.indexedRawRDD.mapPartitions(new RangeFilterUsingIndex(queryWindow,considerBoundaryIntersection));
-			return result.map(new Function<Object, Polygon>()
-			{
-
-				@Override
-				public Polygon call(Object spatialObject) throws Exception {
-					return (Polygon)spatialObject;
-				}
-				
-			});
+			if(spatialRDD.indexedRawRDD == null) {
+				throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index on rawSpatialRDD.");
+			}
+			return spatialRDD.indexedRawRDD.mapPartitions(new RangeFilterUsingIndex(queryGeometry,considerBoundaryIntersection));
 		}
 		else{
-			JavaRDD<Object> result = spatialRDD.getRawSpatialRDD().filter(new RangeFilter(queryWindow, considerBoundaryIntersection));
-			return result.map(new Function<Object,Polygon>()
-			{
-				@Override
-				public Polygon call(Object spatialObject) throws Exception {
-					return (Polygon)spatialObject;
-				}
-				
-			});
+			return spatialRDD.getRawSpatialRDD().filter(new RangeFilter(queryGeometry, considerBoundaryIntersection));
 		}
 	}
-	
+
 	/**
 	 * Spatial range query.
 	 *
 	 * @param spatialRDD the spatial RDD
-	 * @param originalQueryWindow the original query window
+	 * @param queryWindow the original query window
 	 * @param considerBoundaryIntersection the consider boundary intersection
 	 * @param useIndex the use index
 	 * @return the java RDD
 	 * @throws Exception the exception
 	 */
-	public static JavaRDD<Polygon> SpatialRangeQuery(PolygonRDD spatialRDD, Polygon originalQueryWindow,boolean considerBoundaryIntersection,boolean useIndex) throws Exception
+	public static <U extends Geometry, T extends Geometry> JavaRDD<T> SpatialRangeQuery(SpatialRDD<T> spatialRDD, Envelope queryWindow, boolean considerBoundaryIntersection, boolean useIndex) throws Exception
 	{
-		Polygon queryWindow = originalQueryWindow;
-		if(spatialRDD.getCRStransformation())
-		{
-			queryWindow = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryWindow);
-		}
-		
-		if(useIndex==true)
-		{
-	        if(spatialRDD.indexedRawRDD == null) {
-	            throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index on rawSpatialRDD.");
-	        }
-			JavaRDD<Object> result = spatialRDD.indexedRawRDD.mapPartitions(new RangeFilterUsingIndex(queryWindow,considerBoundaryIntersection));
-			return result.map(new Function<Object, Polygon>()
-			{
-
-				@Override
-				public Polygon call(Object spatialObject) throws Exception {
-					return (Polygon)spatialObject;
-				}
-				
-			});
-		}
-		else{
-			JavaRDD<Object> result = spatialRDD.getRawSpatialRDD().filter(new RangeFilter(queryWindow, considerBoundaryIntersection));
-			return result.map(new Function<Object,Polygon>()
-			{
-				@Override
-				public Polygon call(Object spatialObject) throws Exception {
-					return (Polygon)spatialObject;
-				}
-				
-			});
-		}
-	}
-	
-	/**
-	 * Spatial range query.
-	 *
-	 * @param spatialRDD the spatial RDD
-	 * @param originalQueryWindow the original query window
-	 * @param considerBoundaryIntersection the consider boundary intersection
-	 * @param useIndex the use index
-	 * @return the java RDD
-	 * @throws Exception the exception
-	 */
-	public static JavaRDD<Polygon> SpatialRangeQuery(RectangleRDD spatialRDD, Envelope originalQueryWindow,boolean considerBoundaryIntersection,boolean useIndex) throws Exception
-	{
-		Envelope queryWindow = originalQueryWindow;
-		if(spatialRDD.getCRStransformation())
-		{
-			queryWindow = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryWindow);
-		}
-		
-		if(useIndex==true)
-		{
-	        if(spatialRDD.indexedRawRDD == null) {
-	            throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index on rawSpatialRDD.");
-	        }
-			JavaRDD<Object> result = spatialRDD.indexedRawRDD.mapPartitions(new RangeFilterUsingIndex(queryWindow,considerBoundaryIntersection));
-			return result.map(new Function<Object, Polygon>()
-			{
-
-				@Override
-				public Polygon call(Object spatialObject) throws Exception {
-
-					return (Polygon) spatialObject;
-				}
-				
-			});
-		}
-		else{
-			JavaRDD<Object> result = spatialRDD.getRawSpatialRDD().filter(new RangeFilter(queryWindow, considerBoundaryIntersection));
-			return result.map(new Function<Object,Polygon>()
-			{
-				@Override
-				public Polygon call(Object spatialObject) throws Exception {
-					return (Polygon)spatialObject;
-				}
-				
-			});
-		}
-	}
-	
-	/**
-	 * Spatial range query.
-	 *
-	 * @param spatialRDD the spatial RDD
-	 * @param originalQueryWindow the original query window
-	 * @param considerBoundaryIntersection the consider boundary intersection
-	 * @param useIndex the use index
-	 * @return the java RDD
-	 * @throws Exception the exception
-	 */
-	public static JavaRDD<LineString> SpatialRangeQuery(LineStringRDD spatialRDD, Envelope originalQueryWindow,boolean considerBoundaryIntersection,boolean useIndex) throws Exception
-	{
-		Envelope queryWindow = originalQueryWindow;
-		if(spatialRDD.getCRStransformation())
-		{
-			queryWindow = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryWindow);
-		}
-		
-		if(useIndex==true)
-		{
-	        if(spatialRDD.indexedRawRDD == null) {
-	            throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index on rawSpatialRDD.");
-	        }
-			JavaRDD<Object> result = spatialRDD.indexedRawRDD.mapPartitions(new RangeFilterUsingIndex(queryWindow,considerBoundaryIntersection));
-			return result.map(new Function<Object, LineString>()
-			{
-
-				@Override
-				public LineString call(Object spatialObject) throws Exception {
-					return (LineString)spatialObject;
-				}
-				
-			});
-		}
-		else{
-			JavaRDD<Object> result = spatialRDD.getRawSpatialRDD().filter(new RangeFilter(queryWindow,considerBoundaryIntersection));
-			return result.map(new Function<Object,LineString>()
-			{
-				@Override
-				public LineString call(Object spatialObject) throws Exception {
-					return (LineString)spatialObject;
-				}
-				
-			});
-		}
-	}
-	
-	/**
-	 * Spatial range query.
-	 *
-	 * @param spatialRDD the spatial RDD
-	 * @param originalQueryWindow the original query window
-	 * @param considerBoundaryIntersection the consider boundary intersection
-	 * @param useIndex the use index
-	 * @return the java RDD
-	 * @throws Exception the exception
-	 */
-	public static JavaRDD<LineString> SpatialRangeQuery(LineStringRDD spatialRDD, Polygon originalQueryWindow,boolean considerBoundaryIntersection,boolean useIndex) throws Exception
-	{
-		Polygon queryWindow = originalQueryWindow;
-		if(spatialRDD.getCRStransformation())
-		{
-			queryWindow = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryWindow);
-		}
-		
-		if(useIndex==true)
-		{
-	        if(spatialRDD.indexedRawRDD == null) {
-	            throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index on rawSpatialRDD.");
-	        }
-			JavaRDD<Object> result = spatialRDD.indexedRawRDD.mapPartitions(new RangeFilterUsingIndex(queryWindow,considerBoundaryIntersection));
-			return result.map(new Function<Object, LineString>()
-			{
-
-				@Override
-				public LineString call(Object spatialObject) throws Exception {
-					return (LineString)spatialObject;
-				}
-				
-			});
-		}
-		else{
-			JavaRDD<Object> result = spatialRDD.getRawSpatialRDD().filter(new RangeFilter(queryWindow, considerBoundaryIntersection));
-			return result.map(new Function<Object,LineString>()
-			{
-				@Override
-				public LineString call(Object spatialObject) throws Exception {
-					return (LineString)spatialObject;
-				}
-				
-			});
-		}
+		Coordinate[] coordinates = new Coordinate[5];
+		coordinates[0]=new Coordinate(queryWindow.getMinX(), queryWindow.getMinY());
+		coordinates[1]=new Coordinate(queryWindow.getMinX(), queryWindow.getMaxY());
+		coordinates[2]=new Coordinate(queryWindow.getMaxX(), queryWindow.getMaxY());
+		coordinates[3]=new Coordinate(queryWindow.getMaxX(), queryWindow.getMinY());
+		coordinates[4]=coordinates[0];
+		GeometryFactory geometryFactory = new GeometryFactory();
+		U queryGeometry = (U) geometryFactory.createPolygon(coordinates);
+		return SpatialRangeQuery(spatialRDD, queryGeometry, considerBoundaryIntersection, useIndex);
 	}
 }

@@ -8,6 +8,7 @@ package org.datasyslab.geospark.spatialOperator;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -180,8 +181,12 @@ public class PolygonKnnTest {
 		polygonRDD.buildIndex(IndexType.RTREE,false);
 		List<Polygon> resultWithIndex = KNNQuery.SpatialKnnQuery(polygonRDD, queryPoint, topK, true);
 		GeometryDistanceComparator geometryDistanceComparator = new GeometryDistanceComparator(this.queryPoint,true);
-		Collections.sort(resultNoIndex,geometryDistanceComparator);
-		Collections.sort(resultWithIndex,geometryDistanceComparator);
+
+        List<Polygon> mResultNoIndex = new ArrayList<>(resultNoIndex);
+        List<Polygon> mResultWithIndex = new ArrayList<>(resultNoIndex);
+
+		Collections.sort(mResultNoIndex,geometryDistanceComparator);
+		Collections.sort(mResultWithIndex,geometryDistanceComparator);
 		int difference = 0;
 		for(int i = 0;i<topK;i++)
 		{

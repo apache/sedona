@@ -16,10 +16,10 @@ import com.vividsolutions.jts.geom.Point;
 /**
  * The Class GeometryDistanceComparator.
  */
-public class GeometryDistanceComparator implements Comparator<Object>, Serializable{
+public class GeometryDistanceComparator<T extends Geometry> implements Comparator<T>, Serializable{
 	
 	/** The query center. */
-	Point queryCenter;
+	T queryCenter;
 	
 	/** The normal order. */
 	boolean normalOrder;
@@ -30,7 +30,7 @@ public class GeometryDistanceComparator implements Comparator<Object>, Serializa
 	 * @param queryCenter the query center
 	 * @param normalOrder the normal order
 	 */
-	public GeometryDistanceComparator(Point queryCenter,boolean normalOrder)
+	public GeometryDistanceComparator(T queryCenter,boolean normalOrder)
 	{
 		this.queryCenter = queryCenter;
 		this.normalOrder = normalOrder;
@@ -39,9 +39,9 @@ public class GeometryDistanceComparator implements Comparator<Object>, Serializa
 	/* (non-Javadoc)
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
-	public int compare(Object p1, Object p2) {
-		double distance1 = ((Geometry) p1).distance(queryCenter);
-		double distance2 = ((Geometry) p2).distance(queryCenter);
+	public int compare(T p1, T p2) {
+		double distance1 = ( p1).distance(queryCenter);
+		double distance2 = (p2).distance(queryCenter);
 		if(this.normalOrder)
 		{
 			if (distance1 > distance2) {

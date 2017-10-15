@@ -6,57 +6,21 @@
  */
 package org.datasyslab.geospark.rangeJudgement;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.index.SpatialIndex;
-import com.vividsolutions.jts.index.quadtree.Quadtree;
-import com.vividsolutions.jts.index.strtree.STRtree;
 import org.apache.spark.api.java.function.FlatMapFunction;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 // TODO: Auto-generated Javadoc
-/**
- * The Class RangeFilterUsingIndex.
- */
-public class RangeFilterUsingIndex implements FlatMapFunction<Iterator<SpatialIndex>, Object>, Serializable{
 
-	/** The consider boundary intersection. */
-	boolean considerBoundaryIntersection=false;
-	
-	/** The query window. */
-	Object queryWindow;
+public class RangeFilterUsingIndex<U extends Geometry, T extends Geometry> extends JudgementBase implements FlatMapFunction<Iterator<SpatialIndex>, T>{
 
-	/**
-	 * Instantiates a new range filter using index.
-	 *
-	 * @param queryWindow the query window
-	 * @param considerBoundaryIntersection the consider boundary intersection
-	 */
-	public RangeFilterUsingIndex(Envelope queryWindow,boolean considerBoundaryIntersection)
-	{
-		this.considerBoundaryIntersection=considerBoundaryIntersection;
-		this.queryWindow=queryWindow;
-
+	public RangeFilterUsingIndex(U queryWindow, boolean considerBoundaryIntersection) {
+		super(queryWindow, considerBoundaryIntersection);
 	}
-	
-	/**
-	 * Instantiates a new range filter using index.
-	 *
-	 * @param queryWindow the query window
-	 * @param considerBoundaryIntersection the consider boundary intersection
-	 */
-	public RangeFilterUsingIndex(Polygon queryWindow,boolean considerBoundaryIntersection)
-	{
-		this.considerBoundaryIntersection=considerBoundaryIntersection;
-		this.queryWindow=queryWindow;
-
-	}
-	
 	/**
 	 * Call.
 	 *
@@ -68,73 +32,18 @@ public class RangeFilterUsingIndex implements FlatMapFunction<Iterator<SpatialIn
 	 * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
 	 */
 	@Override
-	public Iterator<Object> call(Iterator<SpatialIndex> treeIndexes) throws Exception {
+	public Iterator<T> call(Iterator<SpatialIndex> treeIndexes) throws Exception {
 		assert treeIndexes.hasNext()==true;
 		SpatialIndex treeIndex = treeIndexes.next();
-		if(treeIndex instanceof STRtree)
+		List<T> results=new ArrayList<T>();
+		List<T> tempResults = treeIndex.query(this.queryGeometry.getEnvelopeInternal());
+		for (T tempResult:tempResults)
 		{
-			STRtree strtree= (STRtree) treeIndex;
-			List<Object> result=new ArrayList<Object>();
-			if(this.queryWindow instanceof Envelope)
+			if(match(tempResult,queryGeometry))
 			{
-				if(considerBoundaryIntersection)
-				{
-					result=strtree.query((Envelope)this.queryWindow);
-				}
-				else
-				{
-					List<Object> intermediateResult = strtree.query((Envelope)this.queryWindow);
-					for(Object spatialObject:intermediateResult)
-					{
-						if(((Envelope)this.queryWindow).contains(((Geometry)spatialObject).getEnvelopeInternal()))
-						{
-							result.add(spatialObject);
-						}
-					}
-				}
-				
+				results.add(tempResult);
 			}
-			else
-			{
-				List tempResult = strtree.query(((Polygon)this.queryWindow).getEnvelopeInternal());
-				for(Object spatialObject:tempResult)
-				{
-					if(considerBoundaryIntersection)
-					{
-						if(((Polygon)this.queryWindow).intersects((Geometry)spatialObject)) result.add(spatialObject);
-					}
-					else
-					{
-						if(((Polygon)this.queryWindow).covers((Geometry)spatialObject)) result.add(spatialObject);
-					}
-				}
-			}
-			return result.iterator();
 		}
-		else
-		{
-			Quadtree quadtree= (Quadtree) treeIndex;
-			List result=new ArrayList();
-			if(this.queryWindow instanceof Envelope)
-			{
-				result=quadtree.query((Envelope)this.queryWindow);
-			}
-			else
-			{
-				List tempResult=new ArrayList();
-				tempResult=quadtree.query(((Polygon)this.queryWindow).getEnvelopeInternal());
-				for(Object spatialObject:tempResult)
-				{
-					if(considerBoundaryIntersection)
-					{
-						if(((Polygon)this.queryWindow).intersects((Geometry)spatialObject)) result.add(spatialObject);
-					}
-					else
-					{
-						if(((Polygon)this.queryWindow).covers((Geometry)spatialObject)) result.add(spatialObject);
-					}				}
-			}
-			return result.iterator();
-		}
+		return results.iterator();
 	}
 }

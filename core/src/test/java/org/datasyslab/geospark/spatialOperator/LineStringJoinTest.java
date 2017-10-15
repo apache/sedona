@@ -26,9 +26,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * @author Arizona State University DataSystems Lab
- */
 @RunWith(Parameterized.class)
 public class LineStringJoinTest extends JoinTestBase {
 

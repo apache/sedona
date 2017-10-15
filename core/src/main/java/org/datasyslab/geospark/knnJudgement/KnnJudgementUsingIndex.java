@@ -6,7 +6,7 @@
  */
 package org.datasyslab.geospark.knnJudgement;
 
-import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.index.SpatialIndex;
 import com.vividsolutions.jts.index.strtree.GeometryItemDistance;
 import com.vividsolutions.jts.index.strtree.STRtree;
@@ -21,13 +21,13 @@ import java.util.List;
 /**
  * The Class KnnJudgementUsingIndex.
  */
-public class KnnJudgementUsingIndex implements FlatMapFunction<Iterator<SpatialIndex>, Object>, Serializable{
+public class KnnJudgementUsingIndex<U extends Geometry, T extends Geometry> implements FlatMapFunction<Iterator<SpatialIndex>, T>, Serializable{
 	
 	/** The k. */
 	int k;
 	
 	/** The query center. */
-	Point queryCenter;
+	U queryCenter;
 	
 	/**
 	 * Instantiates a new knn judgement using index.
@@ -35,7 +35,7 @@ public class KnnJudgementUsingIndex implements FlatMapFunction<Iterator<SpatialI
 	 * @param queryCenter the query center
 	 * @param k the k
 	 */
-	public KnnJudgementUsingIndex(Point queryCenter,int k)
+	public KnnJudgementUsingIndex(U queryCenter,int k)
 	{
 		this.queryCenter=queryCenter;
 		this.k=k;
@@ -45,7 +45,7 @@ public class KnnJudgementUsingIndex implements FlatMapFunction<Iterator<SpatialI
 	 * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
 	 */
 	@Override
-	public Iterator<Object> call(Iterator<SpatialIndex> treeIndexes) throws Exception {
+	public Iterator<T> call(Iterator<SpatialIndex> treeIndexes) throws Exception {
 		SpatialIndex treeIndex = treeIndexes.next();
 		final Object[] localK;
 		if(treeIndex instanceof STRtree)
@@ -56,10 +56,10 @@ public class KnnJudgementUsingIndex implements FlatMapFunction<Iterator<SpatialI
 		{
 			throw new Exception("[KnnJudgementUsingIndex][Call] QuadTree index doesn't support KNN search.");
 		}
-		List result = new ArrayList();
+		List<T> result = new ArrayList();
 		for(int i=0;i<localK.length;i++)
 		{
-			result.add(localK[i]);
+			result.add((T) localK[i]);
 		}
 		return result.iterator();
 	}

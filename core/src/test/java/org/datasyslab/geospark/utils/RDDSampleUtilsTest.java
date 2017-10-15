@@ -11,9 +11,6 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-/**
- * @author Arizona State University DataSystems Lab
- */
 public class RDDSampleUtilsTest {
 
     /**

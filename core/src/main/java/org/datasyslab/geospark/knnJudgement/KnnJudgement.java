@@ -22,13 +22,13 @@ import java.util.PriorityQueue;
 /**
  * The Class GeometryKnnJudgement.
  */
-public class KnnJudgement<T extends Geometry> implements FlatMapFunction<Iterator<T>, Object>, Serializable{
+public class KnnJudgement<U extends Geometry, T extends Geometry> implements FlatMapFunction<Iterator<T>, T>, Serializable{
 	
 	/** The k. */
 	int k;
 	
 	/** The query center. */
-	Point queryCenter;
+	U queryCenter;
 	
 	/**
 	 * Instantiates a new geometry knn judgement.
@@ -36,7 +36,7 @@ public class KnnJudgement<T extends Geometry> implements FlatMapFunction<Iterato
 	 * @param queryCenter the query center
 	 * @param k the k
 	 */
-	public KnnJudgement(Point queryCenter,int k)
+	public KnnJudgement(U queryCenter,int k)
 	{
 		this.queryCenter=queryCenter;
 		this.k=k;
@@ -46,13 +46,13 @@ public class KnnJudgement<T extends Geometry> implements FlatMapFunction<Iterato
 	 * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
 	 */
 	@Override
-	public Iterator<Object> call(Iterator<T> input) throws Exception {
-		PriorityQueue<Object> pq = new PriorityQueue<Object>(k, new GeometryDistanceComparator(queryCenter,false));
+	public Iterator<T> call(Iterator<T> input) throws Exception {
+		PriorityQueue<T> pq = new PriorityQueue<T>(k, new GeometryDistanceComparator(queryCenter,false));
 		while (input.hasNext()) {
 			if (pq.size() < k) {
 				pq.offer(input.next());
 			} else {
-				Geometry curpoint = input.next();
+				T curpoint = input.next();
 				double distance = curpoint.distance(queryCenter);
 				double largestDistanceInPriQueue = ((Geometry) pq.peek()).distance(queryCenter);
 				if (largestDistanceInPriQueue > distance) {
@@ -61,7 +61,7 @@ public class KnnJudgement<T extends Geometry> implements FlatMapFunction<Iterato
 				}
 			}
 		}
-		ArrayList<Object> res = new ArrayList<Object>();
+		ArrayList<T> res = new ArrayList<T>();
 		for (int i = 0; i < k; i++) {
 			res.add(pq.poll());
 		}

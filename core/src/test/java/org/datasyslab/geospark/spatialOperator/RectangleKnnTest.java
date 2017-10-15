@@ -13,29 +13,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import com.vividsolutions.jts.geom.*;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.IndexType;
-import org.datasyslab.geospark.knnJudgement.RectangleDistanceComparator;
+import org.datasyslab.geospark.knnJudgement.GeometryDistanceComparator;
 import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-/**
- * 
- * @author Arizona State University DataSystems Lab
- *
- */
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 
 
 // TODO: Auto-generated Javadoc
@@ -185,7 +175,7 @@ public class RectangleKnnTest {
 		List<Polygon> resultNoIndexModifiable = new ArrayList<Polygon>(resultNoIndex);
 		List<Polygon> resultWithIndexModifiable = new ArrayList<Polygon>(resultWithIndex);
 
-		RectangleDistanceComparator rectangleDistanceComparator = new RectangleDistanceComparator(this.queryPoint,true);
+		GeometryDistanceComparator rectangleDistanceComparator = new GeometryDistanceComparator(this.queryPoint,true);
 		Collections.sort(resultNoIndexModifiable,rectangleDistanceComparator);
 		Collections.sort(resultWithIndexModifiable,rectangleDistanceComparator);
 		int difference = 0;
