@@ -4,7 +4,7 @@
 | Status   |      Stable    | Latest | Source code|
 |:----------:|:-------------:|:------:|:------:|
 | GeoSpark |  0.8.2 | [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/geospark) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|
-| [GeoSparkViz](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon) |   0.2.2  |   [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|
+| [GeoSparkViz](https://github.com/DataSystemsLab/GeoSpark/tree/master/viz) |   0.2.2  |   [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.datasyslab/babylon) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|
 
 [GeoSpark@Twitter](https://twitter.com/GeoSpark_ASU)||[GeoSpark Discussion Board](https://groups.google.com/forum/#!forum/geospark-discussion-board)||[![Join the chat at https://gitter.im/geospark-datasys/Lobby](https://badges.gitter.im/geospark-datasys/Lobby.svg)](https://gitter.im/geospark-datasys/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -79,7 +79,7 @@ GeoSparkViz is a large-scale in-memory geospatial visualization system.
 
 GeoSparkViz provides native support for general cartographic design by extending GeoSpark to process large-scale spatial data. It can visulize Spatial RDD and Spatial Queries and render super high resolution image in parallel.
 
-More details are available here: [GeoSpark Visualization Extension](https://github.com/DataSystemsLab/GeoSpark/tree/master/babylon) 
+More details are available here: [GeoSpark Visualization Extension](https://github.com/DataSystemsLab/GeoSpark/tree/master/viz) 
 
 ## GeoSparkViz Gallery
 <img style="float: left;" src="http://www.public.asu.edu/~jiayu2/geospark/picture/usrail.png" width="250">
@@ -124,6 +124,3 @@ Please visit [GeoSpark project wesbite](http://geospark.datasyslab.org) for late
 
 ## Data Systems Lab
 GeoSpark is one of the projects initiated by [Data Systems Lab](http://www.datasyslab.org/) at Arizona State University. The mission of Data Systems Lab is designing and developing experimental data management systems (e.g., database systems).
-
-# Thanks for the help from GeoSpark community
-We appreciate the help and suggestions from GeoSpark users: [**Thanks List**](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Community-Thanks-List)
