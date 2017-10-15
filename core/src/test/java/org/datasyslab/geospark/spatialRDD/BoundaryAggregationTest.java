@@ -13,10 +13,8 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
+import org.datasyslab.geospark.spatialRddTool.StatCalculator;
 import org.junit.Test;
-
-import static org.datasyslab.geospark.spatialRDD.SpatialRDD.BoundaryAggregation.add;
-import static org.datasyslab.geospark.spatialRDD.SpatialRDD.BoundaryAggregation.combine;
 import static org.junit.Assert.assertEquals;
 
 public class BoundaryAggregationTest {
@@ -29,42 +27,42 @@ public class BoundaryAggregationTest {
     {
         Envelope agg = null;
 
-        agg = add(agg, makePoint(0, 0));
+        agg = StatCalculator.add(agg, makePoint(0, 0));
         assertEquals(new Envelope(0, 0, 0, 0), agg);
 
-        agg = add(agg, makePoint(0, 1));
+        agg = StatCalculator.add(agg, makePoint(0, 1));
         assertEquals(new Envelope(0, 0, 0, 1), agg);
 
-        agg = add(agg, makePoint(1, 1));
+        agg = StatCalculator.add(agg, makePoint(1, 1));
         assertEquals(new Envelope(0, 1, 0, 1), agg);
 
         // Add point inside
         {
-            Envelope newAgg = add(agg, makePoint(0.5, 0.7));
+            Envelope newAgg = StatCalculator.add(agg, makePoint(0.5, 0.7));
             assertEquals(new Envelope(0, 1, 0, 1), newAgg);
         }
 
         // Add point on the border
         {
-            Envelope newAgg = add(agg, makePoint(0.5, 0));
+            Envelope newAgg = StatCalculator.add(agg, makePoint(0.5, 0));
             assertEquals(new Envelope(0, 1, 0, 1), newAgg);
         }
 
         // Add point outside, on the right
         {
-            Envelope newAgg = add(agg, makePoint(1.5, 0.2));
+            Envelope newAgg = StatCalculator.add(agg, makePoint(1.5, 0.2));
             assertEquals(new Envelope(0, 1.5, 0, 1), newAgg);
         }
 
         // Add point outside, on the top
         {
-            Envelope newAgg = add(agg, makePoint(0.5, 1.2));
+            Envelope newAgg = StatCalculator.add(agg, makePoint(0.5, 1.2));
             assertEquals(new Envelope(0, 1, 0, 1.2), newAgg);
         }
 
         // Add point outside, on the left and on the bottom
         {
-            Envelope newAgg = add(agg, makePoint(-4, -1));
+            Envelope newAgg = StatCalculator.add(agg, makePoint(-4, -1));
             assertEquals(new Envelope(-4, 1, -1, 1), newAgg);
         }
     }
@@ -75,28 +73,28 @@ public class BoundaryAggregationTest {
         Envelope agg = null;
 
         // Add a triangle
-        agg = add(agg, parseWkt("POLYGON ((0 0, 0 1, 1 1, 0 0))"));
+        agg = StatCalculator.add(agg, parseWkt("POLYGON ((0 0, 0 1, 1 1, 0 0))"));
         assertEquals(new Envelope(0, 1, 0, 1), agg);
 
         // Add inner polygon
-        agg = add(agg, parseWkt("POLYGON ((0.1 0.1, 0.1 0.7, 0.7 0.7, 0.1 0.1))"));
+        agg = StatCalculator.add(agg, parseWkt("POLYGON ((0.1 0.1, 0.1 0.7, 0.7 0.7, 0.1 0.1))"));
         assertEquals(new Envelope(0, 1, 0, 1), agg);
 
         // Add intersecting polygon
         {
-            Envelope newAgg = add(agg, parseWkt("POLYGON ((0.5 1, 1.2 2, 3 0.8, 1.1 0.4, 0.5 1))"));
+            Envelope newAgg = StatCalculator.add(agg, parseWkt("POLYGON ((0.5 1, 1.2 2, 3 0.8, 1.1 0.4, 0.5 1))"));
             assertEquals(new Envelope(0, 3, 0, 2), newAgg);
         }
 
         // Add disjoint polygon
         {
-            Envelope newAgg = add(agg, parseWkt("POLYGON ((-2 -0.5, -1 0.5, -0.4 -1, -2 -0.5))"));
+            Envelope newAgg = StatCalculator.add(agg, parseWkt("POLYGON ((-2 -0.5, -1 0.5, -0.4 -1, -2 -0.5))"));
             assertEquals(new Envelope(-2, 1, -1, 1), newAgg);
         }
 
         // Add containing polygon
         {
-            Envelope newAgg = add(agg, parseWkt("POLYGON ((-1 -1, -1 2, 2 2, 2 -1, -1 -1))"));
+            Envelope newAgg = StatCalculator.add(agg, parseWkt("POLYGON ((-1 -1, -1 2, 2 2, 2 -1, -1 -1))"));
             assertEquals(new Envelope(-1, 2, -1, 2), newAgg);
         }
     }
@@ -105,42 +103,42 @@ public class BoundaryAggregationTest {
     public void testCombine() throws Exception
     {
         Envelope agg = new Envelope(0, 1, 0, 1);
-        agg = combine(null, agg);
+        agg = StatCalculator.combine(null, agg);
         assertEquals(new Envelope(0, 1, 0, 1), agg);
 
         // Add inner rectangle
         {
-            Envelope newAgg = combine(agg, new Envelope(0.1, 0.5, 0.3, 0.8));
+            Envelope newAgg = StatCalculator.combine(agg, new Envelope(0.1, 0.5, 0.3, 0.8));
             assertEquals(new Envelope(0, 1, 0, 1), newAgg);
         }
 
         // Add disjoint rectangle
         {
-            Envelope newAgg = combine(agg, new Envelope(2, 2.5, 3, 8));
+            Envelope newAgg = StatCalculator.combine(agg, new Envelope(2, 2.5, 3, 8));
             assertEquals(new Envelope(0, 2.5, 0, 8), newAgg);
         }
 
         // Add a rectangle intersecting on the left side
         {
-            Envelope newAgg = combine(agg, new Envelope(-1, 0.5, 0.2, 0.4));
+            Envelope newAgg = StatCalculator.combine(agg, new Envelope(-1, 0.5, 0.2, 0.4));
             assertEquals(new Envelope(-1, 1, 0, 1), newAgg);
         }
 
         // Add a rectangle intersecting on the right side
         {
-            Envelope newAgg = combine(agg, new Envelope(0.7, 3.4, 0.1, 0.3));
+            Envelope newAgg = StatCalculator.combine(agg, new Envelope(0.7, 3.4, 0.1, 0.3));
             assertEquals(new Envelope(0, 3.4, 0, 1), newAgg);
         }
 
         // Add a rectangle intersecting both top and bottom sides
         {
-            Envelope newAgg = combine(agg, new Envelope(0.1, 0.5, -1, 10));
+            Envelope newAgg = StatCalculator.combine(agg, new Envelope(0.1, 0.5, -1, 10));
             assertEquals(new Envelope(0, 1, -1, 10), newAgg);
         }
 
         // Add containing rectangle
         {
-            Envelope newAgg = combine(agg, new Envelope(-1, 2, -0.3, 5));
+            Envelope newAgg = StatCalculator.combine(agg, new Envelope(-1, 2, -0.3, 5));
             assertEquals(new Envelope(-1, 2, -0.3, 5), newAgg);
         }
     }

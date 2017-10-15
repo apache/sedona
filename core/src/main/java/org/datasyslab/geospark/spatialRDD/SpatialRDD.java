@@ -13,8 +13,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.index.SpatialIndex;
-import com.vividsolutions.jts.index.quadtree.Quadtree;
-import com.vividsolutions.jts.index.strtree.STRtree;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.FlatMapFunction;
@@ -34,6 +32,8 @@ import org.datasyslab.geospark.spatialPartitioning.SpatialPartitioner;
 import org.datasyslab.geospark.spatialPartitioning.VoronoiPartitioning;
 import org.datasyslab.geospark.spatialPartitioning.quadtree.QuadTreePartitioner;
 import org.datasyslab.geospark.spatialPartitioning.quadtree.StandardQuadTree;
+import org.datasyslab.geospark.spatialRddTool.IndexBuilder;
+import org.datasyslab.geospark.spatialRddTool.StatCalculator;
 import org.datasyslab.geospark.utils.RDDSampleUtils;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
@@ -51,8 +51,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -268,30 +266,6 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 		return true;
 	}
 
-	private static final class GetTuple2Value<T>
-			implements FlatMapFunction<Iterator<Tuple2<Integer, T>>, T> {
-
-		@Override
-		public Iterator<T> call(final Iterator<Tuple2<Integer, T>> iterator) throws Exception {
-			return new Iterator<T>() {
-				@Override
-				public boolean hasNext() {
-					return iterator.hasNext();
-				}
-
-				@Override
-				public T next() {
-					return iterator.next()._2();
-				}
-
-				@Override
-				public void remove() {
-					throw new UnsupportedOperationException();
-				}
-			};
-		}
-	}
-
 	private JavaRDD<T> partition(final SpatialPartitioner partitioner) {
 		return this.rawSpatialRDD.flatMapToPair(
 			new PairFlatMapFunction<T, Integer, T>() {
@@ -301,7 +275,26 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 				}
 			}
 		).partitionBy(partitioner)
-			.mapPartitions(new GetTuple2Value<T>(),true);
+			.mapPartitions(new FlatMapFunction<Iterator<Tuple2<Integer, T>>, T>() {
+				@Override
+				public Iterator<T> call(final Iterator<Tuple2<Integer, T>> tuple2Iterator) throws Exception {
+					return new Iterator<T>() {
+						@Override
+						public boolean hasNext() {
+							return tuple2Iterator.hasNext();
+						}
+
+						@Override
+						public T next() {
+							return tuple2Iterator.next()._2();
+						}
+
+						@Override
+						public void remove() {
+							throw new UnsupportedOperationException();
+						}
+					};				}
+			}, true);
 	}
 
 	/**
@@ -348,37 +341,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 	public void buildIndex(final IndexType indexType,boolean buildIndexOnSpatialPartitionedRDD) throws Exception {
 	      if (buildIndexOnSpatialPartitionedRDD==false) {
 	    	  //This index is built on top of unpartitioned SRDD
-	    	  this.indexedRawRDD =  this.rawSpatialRDD.mapPartitions(new FlatMapFunction<Iterator<T>, SpatialIndex>()
-	    	  {
-	    		  @Override
-	        	  public Iterator<SpatialIndex> call(Iterator<T> spatialObjects) throws Exception {
-	        		  if(indexType == IndexType.RTREE)
-	        		  {
-		        		  STRtree rt = new STRtree();
-		        		  while(spatialObjects.hasNext()){
-		        			  Geometry spatialObject = spatialObjects.next();
-		        			  rt.insert(spatialObject.getEnvelopeInternal(), spatialObject);
-		        		  }
-		        		  Set<SpatialIndex> result = new HashSet<>();
-		        		  rt.query(new Envelope(0.0,0.0,0.0,0.0));
-		        		  result.add(rt);
-		        		  return result.iterator();
-	        		  }
-	        		  else
-	        		  {
-	        			  Quadtree rt = new Quadtree();
-		        		  while(spatialObjects.hasNext()){
-		        			  Geometry spatialObject = spatialObjects.next();
-		        			  rt.insert(spatialObject.getEnvelopeInternal(), spatialObject);
-		        		  }
-						  Set<SpatialIndex> result = new HashSet<>();
-		        		  rt.query(new Envelope(0.0,0.0,0.0,0.0));
-		        		  result.add(rt);
-		        		  return result.iterator();
-	        		  }
-
-	        	  }
-	          	});
+	    	  this.indexedRawRDD =  this.rawSpatialRDD.mapPartitions(new IndexBuilder(indexType));
 	        }
 	        else
 	        {
@@ -386,128 +349,17 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 	        	{
   				  throw new Exception("[AbstractSpatialRDD][buildIndex] spatialPartitionedRDD is null. Please do spatial partitioning before build index.");
 	        	}
-				this.indexedRDD = this.spatialPartitionedRDD.mapPartitions(new FlatMapFunction<Iterator<T>, SpatialIndex>() {
-					@Override
-					public Iterator<SpatialIndex> call(Iterator<T> objectIterator) throws Exception {
-						if (indexType == IndexType.RTREE) {
-							STRtree rt = new STRtree();
-							while (objectIterator.hasNext()) {
-								Geometry spatialObject = objectIterator.next();
-								rt.insert(spatialObject.getEnvelopeInternal(), spatialObject);
-							}
-							Set<SpatialIndex> result = new HashSet();
-							rt.query(new Envelope(0.0, 0.0, 0.0, 0.0));
-							result.add(rt);
-							return result.iterator();
-						} else {
-							Quadtree rt = new Quadtree();
-							while (objectIterator.hasNext()) {
-								Geometry spatialObject = objectIterator.next();
-								rt.insert(spatialObject.getEnvelopeInternal(), spatialObject);
-							}
-							Set<SpatialIndex> result = new HashSet();
-							rt.query(new Envelope(0.0, 0.0, 0.0, 0.0));
-							result.add(rt);
-							return result.iterator();
-						}
-					}
-				});
+				this.indexedRDD = this.spatialPartitionedRDD.mapPartitions(new IndexBuilder(indexType));
 	        }
 	}
 
-	public static final class BoundaryAggregation {
-		public static Envelope combine(Envelope agg1, Envelope agg2) throws Exception {
-			if (agg1 == null) {
-				return agg2;
-			}
-
-			if (agg2 == null) {
-				return agg1;
-			}
-
-			return new Envelope(
-				Math.min(agg1.getMinX(), agg2.getMinX()),
-				Math.max(agg1.getMaxX(), agg2.getMaxX()),
-				Math.min(agg1.getMinY(), agg2.getMinY()),
-				Math.max(agg1.getMaxY(), agg2.getMaxY()));
-		}
-
-		public static Envelope add(Envelope agg, Geometry object) throws Exception {
-			return combine(object.getEnvelopeInternal(), agg);
-		}
-	}
-	
-	public static final class BoundaryAndCount implements Serializable {
-		private final Envelope boundary;
-		private final long count;
-
-		public BoundaryAndCount(Envelope boundary, long count) {
-			Objects.requireNonNull(boundary, "Boundary cannot be null");
-			if (count <= 0) {
-				throw new IllegalArgumentException("Count must be > 0");
-			}
-			this.boundary = boundary;
-			this.count = count;
-		}
-
-		public Envelope getBoundary() {
-			return boundary;
-		}
-
-		public long getCount() {
-			return count;
-		}
-	}
-
-    public static final class BoundaryAndCountAggregation {
-        public static BoundaryAndCount combine(BoundaryAndCount agg1, BoundaryAndCount agg2) throws Exception {
-            if (agg1 == null) {
-                return agg2;
-            }
-
-            if (agg2 == null) {
-                return agg1;
-            }
-
-            return new BoundaryAndCount(
-                BoundaryAggregation.combine(agg1.boundary, agg2.boundary), 
-                agg1.count + agg2.count);
-        }
-
-        public static BoundaryAndCount add(BoundaryAndCount agg, Geometry object) throws Exception {
-            return combine(new BoundaryAndCount(object.getEnvelopeInternal(), 1), agg);
-        }
-    }
-
     /**
      * Boundary.
-     *
+     * @deprecated Call analyze() instead
      * @return the envelope
      */
     public Envelope boundary() {
-        final Function2 combOp =
-            new Function2<BoundaryAndCount, BoundaryAndCount, BoundaryAndCount>() {
-                @Override
-                public BoundaryAndCount call(BoundaryAndCount agg1, BoundaryAndCount agg2) throws Exception {
-                    return BoundaryAndCountAggregation.combine(agg1, agg2);
-                }
-            };
-
-        final Function2 seqOp = new Function2<BoundaryAndCount, Geometry, BoundaryAndCount>() {
-            @Override
-            public BoundaryAndCount call(BoundaryAndCount agg, Geometry object) throws Exception {
-                return BoundaryAndCountAggregation.add(agg, object);
-            }
-        };
-
-        BoundaryAndCount agg = (BoundaryAndCount) this.rawSpatialRDD.aggregate(null, seqOp, combOp);
-        if (agg != null) {
-            this.boundaryEnvelope = agg.boundary;
-            this.approximateTotalCount = agg.count;
-        } else {
-            this.boundaryEnvelope = null;
-            this.approximateTotalCount = 0;
-        }
+		this.analyze();
         return this.boundaryEnvelope;
     }
 
@@ -537,8 +389,8 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 	 */
 	public boolean analyze(StorageLevel newLevel)
 	{
-		this.rawSpatialRDD.persist(newLevel);
-		this.boundary();
+		this.rawSpatialRDD = this.rawSpatialRDD.persist(newLevel);
+		this.analyze();
         return true;
 	}
 
@@ -549,8 +401,30 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 	 */
 	public boolean analyze()
 	{
-		this.boundary();
-        return true;
+		final Function2 combOp =
+				new Function2<StatCalculator, StatCalculator, StatCalculator>() {
+					@Override
+					public StatCalculator call(StatCalculator agg1, StatCalculator agg2) throws Exception {
+						return StatCalculator.combine(agg1, agg2);
+					}
+				};
+
+		final Function2 seqOp = new Function2<StatCalculator, Geometry, StatCalculator>() {
+			@Override
+			public StatCalculator call(StatCalculator agg, Geometry object) throws Exception {
+				return StatCalculator.add(agg, object);
+			}
+		};
+
+		StatCalculator agg = (StatCalculator) this.rawSpatialRDD.aggregate(null, seqOp, combOp);
+		if (agg != null) {
+			this.boundaryEnvelope = agg.getBoundary();
+			this.approximateTotalCount = agg.getCount();
+		} else {
+			this.boundaryEnvelope = null;
+			this.approximateTotalCount = 0;
+		}
+		return true;
 	}
 
 	public boolean analyze(Envelope datasetBoundary, Integer approximateTotalCount)
