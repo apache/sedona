@@ -11,13 +11,12 @@ import com.vividsolutions.jts.geom.*;
 import org.geotools.geometry.jts.coordinatesequence.CoordinateSequences;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class PolygonParser.
- */
+import static org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeFileConst.DOUBLE_LENGTH;
+
 public class PolygonParser extends ShapeParser{
 
     /**
@@ -32,23 +31,23 @@ public class PolygonParser extends ShapeParser{
     /**
      * abstract abstract a Polygon shape.
      *
-     * @param reader the reader
+     * @param buffer the reader
      * @return the geometry
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public Geometry parserShape(ShapeReader reader) throws IOException {
-        reader.skip(4 * DOUBLE_LENGTH);
-        int numRings = reader.readInt();
-        int numPoints = reader.readInt();
+    public Geometry parseShape(ByteBuffer buffer) throws IOException {
+        buffer.position(buffer.position() + 4 * DOUBLE_LENGTH);
+        int numRings = buffer.getInt();
+        int numPoints = buffer.getInt();
         int[] ringsOffsets = new int[numRings+1];
-        for(int i = 0;i < numRings; ++i){
-            ringsOffsets[i] = reader.readInt();
+        for(int i = 0;i < numRings; ++i) {
+            ringsOffsets[i] = buffer.getInt();
         }
         ringsOffsets[numRings] = numPoints;
 
         //read all points out
-        CoordinateSequence coordinateSequence = ShpParseUtil.readCoordinates(reader, numPoints, geometryFactory);
+        CoordinateSequence coordinateSequence = ShpParseUtil.readCoordinates(buffer, numPoints, geometryFactory);
 
         List<LinearRing> holes = new ArrayList<LinearRing>();
         List<LinearRing> shells = new ArrayList<LinearRing>();

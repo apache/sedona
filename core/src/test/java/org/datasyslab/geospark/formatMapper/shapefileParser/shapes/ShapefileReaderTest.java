@@ -27,6 +27,7 @@ import org.geotools.data.FeatureSource;
 import org.geotools.data.shapefile.files.ShpFiles;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -39,15 +40,17 @@ import org.opengis.filter.Filter;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class ShapefileReaderTest implements Serializable{
 
     /** The sc. */
     public static JavaSparkContext sc;
 
-    /** The Input location. */
-    public static String InputLocation;
+    private DataStore dataStore;
 
     @BeforeClass
     public static void onceExecutedBeforeAll() {
@@ -57,6 +60,13 @@ public class ShapefileReaderTest implements Serializable{
         Logger.getLogger("akka").setLevel(Level.WARN);
         //Hard code to a file in resource folder. But you can replace it later in the try-catch field in your hdfs system.
     }
+    
+    @After
+    public void tearDownSingleTest() {
+        if (dataStore != null) {
+            dataStore.dispose();
+        }
+    }
 
     /**
      * Test correctness of parsing shapefile
@@ -65,20 +75,11 @@ public class ShapefileReaderTest implements Serializable{
     @Test
     public void testReadToGeometryRDD() throws IOException {
         // load shape with geotool.shapefile
-        InputLocation = ShapefileRDDTest.class.getClassLoader().getResource("shapefiles/polygon").getPath();
-        File file = new File(InputLocation);
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("url", file.toURI().toURL());
-        DataStore dataStore = DataStoreFinder.getDataStore(map);
-        String typeName = dataStore.getTypeNames()[0];
-        FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore
-                .getFeatureSource(typeName);
-        Filter filter = Filter.INCLUDE;
-        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures(filter);
+        String inputLocation = getShapeFilePath("polygon");
+        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = loadFeatures(inputLocation);
         // load shapes with our tool
-        JavaRDD<Geometry> shapeRDD = ShapefileReader.readToGeometryRDD(sc, InputLocation);
+        JavaRDD<Geometry> shapeRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
         Assert.assertEquals(shapeRDD.collect().size(), collection.size());
-        dataStore.dispose();
     }
 
     /**
@@ -86,18 +87,10 @@ public class ShapefileReaderTest implements Serializable{
      * @throws IOException
      */
     @Test
-    public void testReadToPolygonRDD() throws IOException {
-        InputLocation = ShapefileRDDTest.class.getClassLoader().getResource("shapefiles/polygon").getPath();
+    public void testReadToPolygonRDD() throws Exception {
+        String inputLocation = getShapeFilePath("polygon");
         // load shape with geotool.shapefile
-        File file = new File(InputLocation);
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("url", file.toURI().toURL());
-        DataStore dataStore = DataStoreFinder.getDataStore(map);
-        String typeName = dataStore.getTypeNames()[0];
-        FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore
-                .getFeatureSource(typeName);
-        Filter filter = Filter.INCLUDE;
-        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures(filter);
+        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = loadFeatures(inputLocation);
         FeatureIterator<SimpleFeature> features = collection.features();
         ArrayList<String> featureTexts = new ArrayList<String>();
         while(features.hasNext()){
@@ -106,19 +99,15 @@ public class ShapefileReaderTest implements Serializable{
         }
         final Iterator<String> featureIterator = featureTexts.iterator();
 
-        JavaRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, InputLocation);
+        JavaRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
         PolygonRDD spatialRDD = ShapefileReader.geometryToPolygon(geometryRDD);
 
-        try {
-            RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180,180,-90,90), false, false).count();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        long count = RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180,180,-90,90), false, false).count();
+        Assert.assertEquals(spatialRDD.rawSpatialRDD.count(), count);
+        
         for (Geometry geometry : geometryRDD.collect()) {
             Assert.assertEquals(featureIterator.next(), geometry.toText());
         }
-        dataStore.dispose();
     }
 
     /**
@@ -126,18 +115,10 @@ public class ShapefileReaderTest implements Serializable{
      * @throws IOException
      */
     @Test
-    public void testreadToLineStringRDD() throws IOException{
-        InputLocation = ShapefileRDDTest.class.getClassLoader().getResource("shapefiles/polyline").getPath();
+    public void testReadToLineStringRDD() throws Exception {
+        String inputLocation = getShapeFilePath("polyline");
         // load shape with geotool.shapefile
-        File file = new File(InputLocation);
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("url", file.toURI().toURL());
-        DataStore dataStore = DataStoreFinder.getDataStore(map);
-        String typeName = dataStore.getTypeNames()[0];
-        FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore
-                .getFeatureSource(typeName);
-        Filter filter = Filter.INCLUDE;
-        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures(filter);
+        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = loadFeatures(inputLocation);
         FeatureIterator<SimpleFeature> features = collection.features();
         ArrayList<String> featureTexts = new ArrayList<String>();
         while(features.hasNext()){
@@ -145,18 +126,15 @@ public class ShapefileReaderTest implements Serializable{
             featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
         }
         final Iterator<String> featureIterator = featureTexts.iterator();
-        JavaRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, InputLocation);
+        JavaRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
         LineStringRDD spatialRDD = ShapefileReader.geometryToLineString(geometryRDD);
-        try {
-            RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180,180,-90,90), false, false).count();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+
+        long count = RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180,180,-90,90), false, false).count();
+        Assert.assertEquals(spatialRDD.rawSpatialRDD.count(), count);
+
         for (Geometry geometry : geometryRDD.collect()) {
             Assert.assertEquals(featureIterator.next(), geometry.toText());
         }
-        dataStore.dispose();
     }
 
     /**
@@ -164,18 +142,10 @@ public class ShapefileReaderTest implements Serializable{
      * @throws IOException
      */
     @Test
-    public void testReadToPointRDD_Point() throws IOException{
-        InputLocation = ShapefileRDDTest.class.getClassLoader().getResource("shapefiles/point").getPath();
+    public void testReadToPointRDD_Point() throws Exception {
+        String inputLocation = getShapeFilePath("point");
         // load shape with geotool.shapefile
-        File file = new File(InputLocation);
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("url", file.toURI().toURL());
-        DataStore dataStore = DataStoreFinder.getDataStore(map);
-        String typeName = dataStore.getTypeNames()[0];
-        FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore
-                .getFeatureSource(typeName);
-        Filter filter = Filter.INCLUDE;
-        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures(filter);
+        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = loadFeatures(inputLocation);
         FeatureIterator<SimpleFeature> features = collection.features();
         ArrayList<String> featureTexts = new ArrayList<String>();
         while(features.hasNext()){
@@ -183,18 +153,15 @@ public class ShapefileReaderTest implements Serializable{
             featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
         }
         final Iterator<String> featureIterator = featureTexts.iterator();
-        JavaRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, InputLocation);
+        JavaRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
         PointRDD spatialRDD = ShapefileReader.geometryToPoint(geometryRDD);
-        try {
-            RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180,180,-90,90), false, false).count();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+
+        long count = RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180,180,-90,90), false, false).count();
+        Assert.assertEquals(spatialRDD.rawSpatialRDD.count(), count);
+
         for (Geometry geometry : geometryRDD.collect()) {
             Assert.assertEquals(featureIterator.next(), geometry.toText());
         }
-        dataStore.dispose();
     }
 
     /**
@@ -203,17 +170,9 @@ public class ShapefileReaderTest implements Serializable{
      */
     @Test
     public void testReadToPointRDD_MultiPoint() throws IOException{
-        InputLocation = ShapefileRDDTest.class.getClassLoader().getResource("shapefiles/multipoint").getPath();
+        String inputLocation = getShapeFilePath("multipoint");
         // load shape with geotool.shapefile
-        File file = new File(InputLocation);
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("url", file.toURI().toURL());
-        DataStore dataStore = DataStoreFinder.getDataStore(map);
-        String typeName = dataStore.getTypeNames()[0];
-        FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore
-                .getFeatureSource(typeName);
-        Filter filter = Filter.INCLUDE;
-        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures(filter);
+        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = loadFeatures(inputLocation);
         FeatureIterator<SimpleFeature> features = collection.features();
         ArrayList<String> featureTexts = new ArrayList<String>();
         while(features.hasNext()){
@@ -221,12 +180,11 @@ public class ShapefileReaderTest implements Serializable{
             featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
         }
         final Iterator<String> featureIterator = featureTexts.iterator();
-        JavaRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, InputLocation);
+        JavaRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
         PointRDD spatialRDD = ShapefileReader.geometryToPoint(geometryRDD);
         for (Geometry geometry : geometryRDD.collect()) {
             Assert.assertEquals(featureIterator.next(), geometry.toText());
         }
-        dataStore.dispose();
     }
 
     /**
@@ -235,17 +193,9 @@ public class ShapefileReaderTest implements Serializable{
      */
     @Test
     public void testLoadDbfFile() throws IOException{
-        InputLocation = ShapefileRDDTest.class.getClassLoader().getResource("shapefiles/dbf").getPath();
+        String inputLocation = getShapeFilePath("dbf");
         // load shape with geotool.shapefile
-        File file = new File(InputLocation);
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("url", file.toURI().toURL());
-        DataStore dataStore = DataStoreFinder.getDataStore(map);
-        String typeName = dataStore.getTypeNames()[0];
-        FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore
-                .getFeatureSource(typeName);
-        Filter filter = Filter.INCLUDE;
-        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures(filter);
+        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = loadFeatures(inputLocation);
         FeatureIterator<SimpleFeature> features = collection.features();
         ArrayList<String> featureTexts = new ArrayList<String>();
         while(features.hasNext()){
@@ -265,10 +215,9 @@ public class ShapefileReaderTest implements Serializable{
         }
         final Iterator<String> featureIterator = featureTexts.iterator();
 
-        for (Geometry geometry : ShapefileReader.readToGeometryRDD(sc, InputLocation).collect()) {
+        for (Geometry geometry : ShapefileReader.readToGeometryRDD(sc, inputLocation).collect()) {
             Assert.assertEquals(featureIterator.next(), geometry.getUserData());
         }
-        dataStore.dispose();
     }
 
     /**
@@ -277,9 +226,9 @@ public class ShapefileReaderTest implements Serializable{
      */
     @Test
     public void testReadBoundary() throws IOException{
-        InputLocation = ShapefileRDDTest.class.getClassLoader().getResource("shapefiles/dbf").getPath();
+        String inputLocation = getShapeFilePath("dbf");
         // load shapefile with geotools's reader
-        ShpFiles shpFile = new ShpFiles(InputLocation + "/map.shp");
+        ShpFiles shpFile = new ShpFiles(inputLocation + "/map.shp");
         GeometryFactory geometryFactory = new GeometryFactory();
         org.geotools.data.shapefile.shp.ShapefileReader gtlReader = new org.geotools.data.shapefile.shp.ShapefileReader(shpFile, false, true, geometryFactory);
         String gtlbounds =
@@ -288,7 +237,7 @@ public class ShapefileReaderTest implements Serializable{
                         gtlReader.getHeader().maxX() + ":" +
                         gtlReader.getHeader().maxY();
         // read shapefile by our reader
-        BoundBox bounds = ShapefileReader.readBoundBox(sc, InputLocation);
+        BoundBox bounds = ShapefileReader.readBoundBox(sc, inputLocation);
         String myBounds =
                 bounds.getXMin() + ":" +
                         bounds.getYMin() + ":" +
@@ -298,7 +247,21 @@ public class ShapefileReaderTest implements Serializable{
         gtlReader.close();
     }
 
+    private String getShapeFilePath(String fileName) {
+        return ShapefileRDDTest.class.getClassLoader().getResource("shapefiles/" + fileName).getPath();
+    }
 
+    private FeatureCollection<SimpleFeatureType, SimpleFeature> loadFeatures(String filePath) throws IOException {
+        File file = new File(filePath);
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("url", file.toURI().toURL());
+        DataStore dataStore = DataStoreFinder.getDataStore(map);
+        String typeName = dataStore.getTypeNames()[0];
+        FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore
+            .getFeatureSource(typeName);
+        Filter filter = Filter.INCLUDE;
+        return source.getFeatures(filter);
+    }
 
     @AfterClass
     public static void tearDown() throws Exception {
