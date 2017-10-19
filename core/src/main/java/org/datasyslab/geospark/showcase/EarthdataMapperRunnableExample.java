@@ -6,18 +6,19 @@
  */
 package org.datasyslab.geospark.showcase;
 
+import com.vividsolutions.jts.geom.Envelope;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.serializer.KryoSerializer;
 import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.formatMapper.EarthdataHDFPointMapper;
+import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator;
 import org.datasyslab.geospark.spatialOperator.RangeQuery;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -72,6 +73,8 @@ public class EarthdataMapperRunnableExample {
 	 */
 	public static void main(String[] args) {
         SparkConf conf = new SparkConf().setAppName("EarthdataMapperRunnableExample").setMaster("local[2]");
+        conf.set("spark.serializer", KryoSerializer.class.getName());
+        conf.set("spark.kryo.registrator", GeoSparkKryoRegistrator.class.getName());
         sc = new JavaSparkContext(conf);
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
