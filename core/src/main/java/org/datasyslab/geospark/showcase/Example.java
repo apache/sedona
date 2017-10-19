@@ -14,11 +14,13 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.serializer.KryoSerializer;
 import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileRDD;
+import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator;
 import org.datasyslab.geospark.spatialOperator.JoinQuery;
 import org.datasyslab.geospark.spatialOperator.KNNQuery;
 import org.datasyslab.geospark.spatialOperator.RangeQuery;
@@ -98,7 +100,10 @@ public class Example implements Serializable{
 	 */
 	public static void main(String[] args) {
 		SparkConf conf = new SparkConf().setAppName("GeoSparkRunnableExample").setMaster("local[2]");
-        sc = new JavaSparkContext(conf);
+		conf.set("spark.serializer", KryoSerializer.class.getName());
+		conf.set("spark.kryo.registrator", GeoSparkKryoRegistrator.class.getName());
+
+		sc = new JavaSparkContext(conf);
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
         

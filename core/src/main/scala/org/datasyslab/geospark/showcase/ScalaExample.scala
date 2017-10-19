@@ -22,7 +22,9 @@ import org.datasyslab.geospark.spatialRDD.PolygonRDD
 import com.vividsolutions.jts.geom.Coordinate
 import com.vividsolutions.jts.geom.Envelope
 import com.vividsolutions.jts.geom.GeometryFactory
+import org.apache.spark.serializer.KryoSerializer
 import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileRDD
+import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
 
 
 /**
@@ -31,6 +33,9 @@ import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileRDD
 object ScalaExample extends App{
 
 	val conf = new SparkConf().setAppName("GeoSparkRunnableExample").setMaster("local[2]")
+	conf.set("spark.serializer", classOf[KryoSerializer].getName)
+	conf.set("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName)
+
 	val sc = new SparkContext(conf)
 	Logger.getLogger("org").setLevel(Level.WARN)
 	Logger.getLogger("akka").setLevel(Level.WARN)
