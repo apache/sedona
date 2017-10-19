@@ -7,10 +7,7 @@
 package org.datasyslab.geospark.spatialRDD;
 
 import com.vividsolutions.jts.geom.Envelope;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
+import org.datasyslab.geospark.GeoSparkTestBase;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
@@ -19,11 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class SpatialRDDTestBase
+public class SpatialRDDTestBase extends GeoSparkTestBase
 {
-    /** The sc. */
-    public static JavaSparkContext sc;
-
     /** The prop. */
     static Properties prop;
 
@@ -55,10 +49,8 @@ public class SpatialRDDTestBase
      * Once executed before all.
      */
     protected static void initialize(final String testSuiteName, final String propertiesFileName) {
-        SparkConf conf = new SparkConf().setAppName(testSuiteName).setMaster("local[2]");
-        sc = new JavaSparkContext(conf);
-        Logger.getLogger("org").setLevel(Level.WARN);
-        Logger.getLogger("akka").setLevel(Level.WARN);
+        GeoSparkTestBase.initialize(testSuiteName);
+
         prop = new Properties();
         ClassLoader classLoader = SpatialRDDTestBase.class.getClassLoader();
         input = classLoader.getResourceAsStream(propertiesFileName);

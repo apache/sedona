@@ -7,33 +7,57 @@
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
 import org.apache.commons.io.EndianUtils;
-import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundBox;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShpRecord;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 
 public class ShpFileParser implements Serializable, ShapeFileConst{
 
-    /** shape type of current .shp file */
-    public int currentTokenType = 0;
-
     /** lenth of file in bytes */
-    public long fileLength = 0;
+    private long fileLength = 0;
 
     /** remain length of bytes to parse */
-    public long remainLength = 0;
+    private long remainLength = 0;
 
     /** input reader */
-    ShapeReader reader = null;
+    private final SafeReader reader;
+
+    /**
+     * A limited wrapper around FSDataInputStream providing proper implementations
+     * for methods of FSDataInputStream which are known to be broken on some platforms.
+     */
+    private static final class SafeReader
+    {
+        private final FSDataInputStream input;
+
+        private SafeReader(FSDataInputStream input) {
+            this.input = input;
+        }
+
+        public int readInt() throws IOException {
+            byte[] bytes = new byte[ShapeFileConst.INT_LENGTH];
+            input.readFully(bytes);
+            return ByteBuffer.wrap(bytes).getInt();
+        }
+
+        public void skip(int numBytes) throws IOException {
+            input.skip(numBytes);
+        }
+
+        public void read(byte[] buffer, int offset, int length) throws IOException {
+            input.readFully(buffer, offset, length);
+        }
+    }
 
     /**
      * create a new shape file parser with a input source that is instance of DataInputStream
      * @param inputStream
      */
-    public ShpFileParser(DataInputStream inputStream) {
-        reader = new DataInputStreamReader(inputStream);
+    public ShpFileParser(FSDataInputStream inputStream) {
+        reader = new SafeReader(inputStream);
     }
 
     /**
@@ -43,12 +67,12 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
     public void parseShapeFileHead()
             throws IOException
     {
-        int fileCode = reader.readInt();
+        reader.skip(INT_LENGTH);
         reader.skip(HEAD_EMPTY_NUM * INT_LENGTH);
-        fileLength = 16 * reader.readInt() - HEAD_FILE_LENGTH_16BIT * 16;
+        fileLength = 16 * (reader.readInt() - HEAD_FILE_LENGTH_16BIT);
         remainLength = fileLength;
-        int fileVersion = EndianUtils.swapInteger(reader.readInt());
-        currentTokenType = EndianUtils.swapInteger(reader.readInt());
+        // Skip 2 integers: file version and token type
+        reader.skip(2 * INT_LENGTH);
         // if bound box is not referenced, skip it
         reader.skip(HEAD_BOX_NUM * DOUBLE_LENGTH);
     }
@@ -75,8 +99,7 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
      * @throws IOException
      */
     public int parseRecordHeadID() throws IOException{
-        int id = reader.readInt();
-        return id;
+        return reader.readInt();
     }
 
     /**

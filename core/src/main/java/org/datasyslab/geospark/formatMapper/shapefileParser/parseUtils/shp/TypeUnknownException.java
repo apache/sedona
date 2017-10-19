@@ -10,7 +10,7 @@ package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 /**
  * The Class TypeUnknownException.
  */
-public class TypeUnknownException extends Exception{
+public class TypeUnknownException extends RuntimeException {
 
     /**
      * create an exception indicates that the shape type number we get from .shp file is valid

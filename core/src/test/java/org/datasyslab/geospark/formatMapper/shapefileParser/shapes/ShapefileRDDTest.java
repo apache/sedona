@@ -99,7 +99,14 @@ public class ShapefileRDDTest implements Serializable{
         ArrayList<String> featureTexts = new ArrayList<String>();
         while(features.hasNext()){
             SimpleFeature feature = features.next();
-            featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
+            Object geometry = feature.getDefaultGeometry();
+            if (geometry instanceof MultiPolygon) {
+                MultiPolygon multiPolygon = (MultiPolygon) geometry;
+                if (multiPolygon.getNumGeometries() == 1) {
+                    geometry = multiPolygon.getGeometryN(0);
+                }
+            }
+            featureTexts.add(String.valueOf(geometry));
         }
         final Iterator<String> featureIterator = featureTexts.iterator();
         ShapefileRDD shapefileRDD = new ShapefileRDD(sc,InputLocation);
@@ -244,7 +251,14 @@ public class ShapefileRDDTest implements Serializable{
         ArrayList<String> featureTexts = new ArrayList<String>();
         while(features.hasNext()){
             SimpleFeature feature = features.next();
-            featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
+            Object geometry = feature.getDefaultGeometry();
+            if (geometry instanceof MultiPolygon) {
+                MultiPolygon multiPolygon = (MultiPolygon) geometry;
+                if (multiPolygon.getNumGeometries() == 1) {
+                    geometry = multiPolygon.getGeometryN(0);
+                }
+            }
+            featureTexts.add(String.valueOf(geometry));
         }
         final Iterator<String> featureIterator = featureTexts.iterator();
         ShapefileRDD shapefileRDD = new ShapefileRDD(sc,InputLocation);

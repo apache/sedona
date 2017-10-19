@@ -13,11 +13,9 @@ import com.vividsolutions.jts.geom.LineString;
 
 import java.io.IOException;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class PolyLineParser.
- */
-public class PolyLineParser extends ShapeParser{
+import static org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeFileConst.DOUBLE_LENGTH;
+
+public class PolyLineParser extends ShapeParser {
 
     /**
      * create a parser that can abstract a MultiPolyline from input source with given GeometryFactory.
@@ -36,26 +34,24 @@ public class PolyLineParser extends ShapeParser{
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public Geometry parserShape(ShapeReader reader) throws IOException {
+    public Geometry parseShape(ShapeReader reader) {
         reader.skip(4 * DOUBLE_LENGTH);
         int numParts = reader.readInt();
         int numPoints = reader.readInt();
-        int[] stringOffsets = new int[numParts+1];
-        for(int i = 0;i < numParts; ++i){
-            stringOffsets[i] = reader.readInt();
-        }
-        CoordinateSequence coordinateSequence = ShpParseUtil.readCoordinates(reader, numPoints, geometryFactory);
-        stringOffsets[numParts] = numPoints;
+
+        int[] offsets = readOffsets(reader, numParts, numPoints);
+
         LineString[] lines = new LineString[numParts];
-        for(int i = 0;i < numParts; ++i){
-            int readScale = stringOffsets[i+1] - stringOffsets[i];
-            CoordinateSequence csString = geometryFactory.getCoordinateSequenceFactory().create(readScale,2);
-            for(int j = 0;j < readScale; ++j){
-                csString.setOrdinate(j, 0, coordinateSequence.getOrdinate(stringOffsets[i]+j, 0));
-                csString.setOrdinate(j, 1, coordinateSequence.getOrdinate(stringOffsets[i]+j, 1));
-            }
+        for(int i = 0; i < numParts; ++i){
+            int readScale = offsets[i+1] - offsets[i];
+            CoordinateSequence csString = readCoordinates(reader, readScale);
             lines[i] = geometryFactory.createLineString(csString);
         }
+
+        if (numParts == 1) {
+            return lines[0];
+        }
+
         return geometryFactory.createMultiLineString(lines);
     }
 }
