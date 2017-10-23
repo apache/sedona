@@ -32,7 +32,7 @@ class scalaTest extends FunSpec {
 		val PolygonRDDSplitter = FileDataSplitter.CSV
 		val PolygonRDDNumPartitions = 5
 		val PolygonRDDStartOffset = 0
-		val PolygonRDDEndOffset = 8
+		val PolygonRDDEndOffset = 9
 
 		val geometryFactory=new GeometryFactory()
 		val kNNQueryPoint=geometryFactory.createPoint(new Coordinate(-84.01, 34.01))

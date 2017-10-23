@@ -7,26 +7,19 @@
 package org.datasyslab.geospark.formatMapper;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.io.WKTReader;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
-import org.wololo.geojson.Feature;
-import org.wololo.geojson.GeoJSONFactory;
-import org.wololo.jts2geojson.GeoJSONReader;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class RectangleFormatMapper.
- */
-public class RectangleFormatMapper extends FormatMapper implements FlatMapFunction<Iterator<String>, Polygon>
+public class RectangleFormatMapper extends FormatMapper
+	implements FlatMapFunction<Iterator<String>, Polygon>
 {
 
 	/**
@@ -54,158 +47,53 @@ public class RectangleFormatMapper extends FormatMapper implements FlatMapFuncti
 
 	@Override
 	public Iterator<Polygon> call(Iterator<String> stringIterator) throws Exception {
-		MultiPolygon multiSpatialObjects = null;
-		List result= new ArrayList<Polygon>();
-		Double x1,x2,y1,y2;
-		LinearRing linear;
+		List<Polygon> result = new ArrayList<>();
 		while (stringIterator.hasNext()) {
 			String line = stringIterator.next();
-			try {
-				switch (splitter) {
-					case CSV:
-						lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
-						x1 = Double.parseDouble(lineSplitList.get(this.startOffset));
-						x2 = Double.parseDouble(lineSplitList.get(this.startOffset + 2));
-						y1 = Double.parseDouble(lineSplitList.get(this.startOffset + 1));
-						y2 = Double.parseDouble(lineSplitList.get(this.startOffset + 3));
-						coordinates = new Coordinate[5];
-						coordinates[0] = new Coordinate(x1, y1);
-						coordinates[1] = new Coordinate(x1, y2);
-						coordinates[2] = new Coordinate(x2, y2);
-						coordinates[3] = new Coordinate(x2, y1);
-						coordinates[4] = coordinates[0];
-						linear = fact.createLinearRing(coordinates);
-						spatialObject = new Polygon(linear, null, fact);
-						if (this.carryInputData) {
-							spatialObject.setUserData(line);
-						}
-						result.add(spatialObject);
-						break;
-					case TSV:
-						lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
-						x1 = Double.parseDouble(lineSplitList.get(this.startOffset));
-						x2 = Double.parseDouble(lineSplitList.get(this.startOffset + 2));
-						y1 = Double.parseDouble(lineSplitList.get(this.startOffset + 1));
-						y2 = Double.parseDouble(lineSplitList.get(this.startOffset + 3));
-						coordinates = new Coordinate[5];
-						coordinates[0] = new Coordinate(x1, y1);
-						coordinates[1] = new Coordinate(x1, y2);
-						coordinates[2] = new Coordinate(x2, y2);
-						coordinates[3] = new Coordinate(x2, y1);
-						coordinates[4] = coordinates[0];
-						linear = fact.createLinearRing(coordinates);
-						spatialObject = new Polygon(linear, null, fact);
-						if (this.carryInputData) {
-							spatialObject.setUserData(line);
-						}
-						result.add(spatialObject);
-						break;
-					case GEOJSON:
-						GeoJSONReader reader = new GeoJSONReader();
-						spatialObject = reader.read(line);
-						if (line.contains("Feature")) {
-							Feature feature = (Feature) GeoJSONFactory.create(line);
-							spatialObject = reader.read(feature.getGeometry());
-						} else {
-							spatialObject = reader.read(line);
-						}
-						if (spatialObject instanceof MultiPolygon) {
-                	/*
-                	 * If this line has a "Multi" type spatial object, GeoSpark separates them to a list of single objects
-                	 * and assign original input line to each object.
-                	 */
-							multiSpatialObjects = (MultiPolygon) spatialObject;
-							for (int i = 0; i < multiSpatialObjects.getNumGeometries(); i++) {
-								spatialObject = multiSpatialObjects.getGeometryN(i);
-								x1 = spatialObject.getEnvelopeInternal().getMinX();
-								x2 = spatialObject.getEnvelopeInternal().getMaxX();
-								y1 = spatialObject.getEnvelopeInternal().getMinY();
-								y2 = spatialObject.getEnvelopeInternal().getMaxY();
-								coordinates = new Coordinate[5];
-								coordinates[0] = new Coordinate(x1, y1);
-								coordinates[1] = new Coordinate(x1, y2);
-								coordinates[2] = new Coordinate(x2, y2);
-								coordinates[3] = new Coordinate(x2, y1);
-								coordinates[4] = coordinates[0];
-								linear = fact.createLinearRing(coordinates);
-								spatialObject = new Polygon(linear, null, fact);
-								if (this.carryInputData) {
-									spatialObject.setUserData(line);
-								}
-								result.add(spatialObject);
-							}
-						} else {
-							x1 = spatialObject.getEnvelopeInternal().getMinX();
-							x2 = spatialObject.getEnvelopeInternal().getMaxX();
-							y1 = spatialObject.getEnvelopeInternal().getMinY();
-							y2 = spatialObject.getEnvelopeInternal().getMaxY();
-							coordinates = new Coordinate[5];
-							coordinates[0] = new Coordinate(x1, y1);
-							coordinates[1] = new Coordinate(x1, y2);
-							coordinates[2] = new Coordinate(x2, y2);
-							coordinates[3] = new Coordinate(x2, y1);
-							coordinates[4] = coordinates[0];
-							linear = fact.createLinearRing(coordinates);
-							spatialObject = new Polygon(linear, null, fact);
-							if (this.carryInputData) {
-								spatialObject.setUserData(line);
-							}
-							result.add(spatialObject);
-						}
-						break;
-					case WKT:
-						lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
-						WKTReader wktreader = new WKTReader();
-						spatialObject = wktreader.read(lineSplitList.get(this.startOffset));
-						if (spatialObject instanceof MultiPolygon) {
-							multiSpatialObjects = (MultiPolygon) spatialObject;
-							for (int i = 0; i < multiSpatialObjects.getNumGeometries(); i++) {
-                    	/*
-                    	 * If this line has a "Multi" type spatial object, GeoSpark separates them to a list of single objects
-                    	 * and assign original input line to each object.
-                    	 */
-								spatialObject = multiSpatialObjects.getGeometryN(i);
-								x1 = spatialObject.getEnvelopeInternal().getMinX();
-								x2 = spatialObject.getEnvelopeInternal().getMaxX();
-								y1 = spatialObject.getEnvelopeInternal().getMinY();
-								y2 = spatialObject.getEnvelopeInternal().getMaxY();
-								coordinates = new Coordinate[5];
-								coordinates[0] = new Coordinate(x1, y1);
-								coordinates[1] = new Coordinate(x1, y2);
-								coordinates[2] = new Coordinate(x2, y2);
-								coordinates[3] = new Coordinate(x2, y1);
-								coordinates[4] = coordinates[0];
-								linear = fact.createLinearRing(coordinates);
-								spatialObject = new Polygon(linear, null, fact);
-								if (this.carryInputData) {
-									spatialObject.setUserData(line);
-								}
-								result.add(spatialObject);
-							}
-						} else {
-							x1 = spatialObject.getEnvelopeInternal().getMinX();
-							x2 = spatialObject.getEnvelopeInternal().getMaxX();
-							y1 = spatialObject.getEnvelopeInternal().getMinY();
-							y2 = spatialObject.getEnvelopeInternal().getMaxY();
-							coordinates = new Coordinate[5];
-							coordinates[0] = new Coordinate(x1, y1);
-							coordinates[1] = new Coordinate(x1, y2);
-							coordinates[2] = new Coordinate(x2, y2);
-							coordinates[3] = new Coordinate(x2, y1);
-							coordinates[4] = coordinates[0];
-							linear = fact.createLinearRing(coordinates);
-							spatialObject = new Polygon(linear, null, fact);
-							if (this.carryInputData) {
-								spatialObject.setUserData(line);
-							}
-							result.add(spatialObject);
-						}
-						break;
+			switch (splitter) {
+				case CSV:
+				case TSV: {
+					String[] columns = line.split(splitter.getDelimiter());
+					double x1 = Double.parseDouble(columns[this.startOffset]);
+					double x2 = Double.parseDouble(columns[this.startOffset + 2]);
+					double y1 = Double.parseDouble(columns[this.startOffset + 1]);
+					double y2 = Double.parseDouble(columns[this.startOffset + 3]);
+
+					Coordinate[] coordinates = new Coordinate[5];
+					coordinates[0] = new Coordinate(x1, y1);
+					coordinates[1] = new Coordinate(x1, y2);
+					coordinates[2] = new Coordinate(x2, y2);
+					coordinates[3] = new Coordinate(x2, y1);
+					coordinates[4] = coordinates[0];
+
+					LinearRing linear = factory.createLinearRing(coordinates);
+					Polygon polygon = new Polygon(linear, null, factory);
+					if (this.carryInputData) {
+						polygon.setUserData(line);
+					}
+					result.add(polygon);
+					break;
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
+				case GEOJSON: {
+					Geometry geometry = readGeoJSON(line);
+					addGeometry(geometry, result);
+					break;
+				}
+				case WKT: {
+					Geometry geometry = readWkt(line);
+					addGeometry(geometry, result);
+					break;
+				}
 			}
 		}
 		return result.iterator();
+	}
+
+	private void addGeometry(Geometry geometry, List<Polygon> result) {
+		if (geometry instanceof MultiPolygon) {
+            addMultiGeometry((MultiPolygon) geometry, result);
+        } else {
+            result.add((Polygon) (geometry.getEnvelope()));
+        }
 	}
 }

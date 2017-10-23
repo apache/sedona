@@ -7,26 +7,19 @@
 package org.datasyslab.geospark.formatMapper;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.io.WKTReader;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
-import org.wololo.geojson.Feature;
-import org.wololo.geojson.GeoJSONFactory;
-import org.wololo.jts2geojson.GeoJSONReader;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class PolygonFormatMapper.
- */
-public class PolygonFormatMapper extends FormatMapper implements FlatMapFunction<Iterator<String>, Polygon> {
+public class PolygonFormatMapper extends FormatMapper
+    implements FlatMapFunction<Iterator<String>, Polygon> {
  
 	
     /**
@@ -37,7 +30,6 @@ public class PolygonFormatMapper extends FormatMapper implements FlatMapFunction
      */
     public PolygonFormatMapper(FileDataSplitter Splitter, boolean carryInputData) {
 		super(Splitter, carryInputData);
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -51,106 +43,45 @@ public class PolygonFormatMapper extends FormatMapper implements FlatMapFunction
 	public PolygonFormatMapper(Integer startOffset, Integer endOffset, FileDataSplitter Splitter,
 			boolean carryInputData) {
 		super(startOffset, endOffset, Splitter, carryInputData);
-		// TODO Auto-generated constructor stub
 	}
 
     @Override
     public Iterator<Polygon> call(Iterator<String> stringIterator) throws Exception {
-        MultiPolygon multiSpatialObjects = null;
-        LinearRing linear;
-        int actualEndOffset;
-        List result= new ArrayList<Polygon>();
+        List<Polygon> result = new ArrayList<>();
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
-            try {
-                switch (splitter) {
-                    case CSV:
-                        lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
-                        coordinatesList = new ArrayList<Coordinate>();
-                        actualEndOffset = this.endOffset >= 0 ? this.endOffset : (lineSplitList.size() - 1);
-                        for (int i = this.startOffset; i <= actualEndOffset; i += 2) {
-                            coordinatesList.add(new Coordinate(Double.parseDouble(lineSplitList.get(i)), Double.parseDouble(lineSplitList.get(i + 1))));
-                        }
-                        linear = fact.createLinearRing(coordinatesList.toArray(new Coordinate[coordinatesList.size()]));
-                        spatialObject = new Polygon(linear, null, fact);
-                        if (this.carryInputData) {
-                            spatialObject.setUserData(line);
-                        }
-                        result.add((Polygon) spatialObject);
-                        break;
-                    case TSV:
-                        lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
-                        coordinatesList = new ArrayList<Coordinate>();
-                        actualEndOffset = this.endOffset >= 0 ? this.endOffset : (lineSplitList.size() - 1);
-                        for (int i = this.startOffset; i <= actualEndOffset; i = i + 2) {
-                            coordinatesList.add(new Coordinate(Double.parseDouble(lineSplitList.get(i)), Double.parseDouble(lineSplitList.get(i + 1))));
-                        }
-                        coordinates = new Coordinate[coordinatesList.size()];
-                        coordinates = coordinatesList.toArray(coordinates);
-                        linear = fact.createLinearRing(coordinates);
-                        spatialObject = new Polygon(linear, null, fact);
-                        if (this.carryInputData) {
-                            spatialObject.setUserData(line);
-                        }
-                        result.add((Polygon) spatialObject);
-                        break;
-                    case GEOJSON:
-                        GeoJSONReader reader = new GeoJSONReader();
-                        if (line.contains("Feature")) {
-                            Feature feature = (Feature) GeoJSONFactory.create(line);
-                            spatialObject = reader.read(feature.getGeometry());
-                        } else {
-                            spatialObject = reader.read(line);
-                        }
-                        if (spatialObject instanceof MultiPolygon) {
-                	/*
-                	 * If this line has a "Multi" type spatial object, GeoSpark separates them to a list of single objects
-                	 * and assign original input line to each object.
-                	 */
-                            multiSpatialObjects = (MultiPolygon) spatialObject;
-                            for (int i = 0; i < multiSpatialObjects.getNumGeometries(); i++) {
-                                spatialObject = multiSpatialObjects.getGeometryN(i);
-                                if (this.carryInputData) {
-                                    spatialObject.setUserData(line);
-                                }
-                                result.add((Polygon) spatialObject);
-                            }
-                        } else {
-                            if (this.carryInputData) {
-                                spatialObject.setUserData(line);
-                            }
-                            result.add((Polygon) spatialObject);
-                        }
-                        break;
-                    case WKT:
-                        lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
-                        WKTReader wktreader = new WKTReader();
-                        spatialObject = wktreader.read(lineSplitList.get(this.startOffset));
-                        if (spatialObject instanceof MultiPolygon) {
-                            multiSpatialObjects = (MultiPolygon) spatialObject;
-                            for (int i = 0; i < multiSpatialObjects.getNumGeometries(); i++) {
-                    	/*
-                    	 * If this line has a "Multi" type spatial object, GeoSpark separates them to a list of single objects
-                    	 * and assign original input line to each object.
-                    	 */
-                                spatialObject = multiSpatialObjects.getGeometryN(i);
-                                if (this.carryInputData) {
-                                    spatialObject.setUserData(line);
-                                }
-                                result.add((Polygon) spatialObject);
-                            }
-                        } else {
-                            if (this.carryInputData) {
-                                spatialObject.setUserData(line);
-                            }
-                            result.add((Polygon) spatialObject);
-                        }
-                        break;
+            switch (splitter) {
+                case CSV:
+                case TSV: {
+                    Coordinate[] coordinates = readCoordinates(line);
+                    LinearRing linearRing = factory.createLinearRing(coordinates);
+                    Polygon polygon = factory.createPolygon(linearRing);
+                    if (this.carryInputData) {
+                        polygon.setUserData(line);
+                    }
+                    result.add(polygon);
+                    break;
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+                case GEOJSON: {
+                    Geometry geometry = readGeoJSON(line);
+                    addGeometry(geometry, result);
+                    break;
+                }
+                case WKT: {
+                    Geometry geometry = readWkt(line);
+                    addGeometry(geometry, result);
+                    break;
+                }
             }
         }
         return result.iterator();
+    }
+
+    private void addGeometry(Geometry geometry, List<Polygon> result) {
+        if (geometry instanceof MultiPolygon) {
+            addMultiGeometry((MultiPolygon) geometry, result);
+        } else {
+            result.add((Polygon) geometry);
+        }
     }
 }
