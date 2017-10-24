@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import static org.datasyslab.geospark.spatialOperator.JoinQuery.BuildSide.BUILD_RIGHT;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
@@ -94,8 +95,8 @@ public class PolygonJoinTest extends JoinTestBase {
         final PolygonRDD spatialRDD = createPolygonRDD(InputLocation);
         partitionRdds(queryRDD, spatialRDD);
 
-        final JoinQuery.JoinParams joinParams = new JoinQuery.JoinParams(intersects, indexType);
-        final List<Tuple2<Polygon, Polygon>> results = JoinQuery.spatialJoin(spatialRDD, queryRDD, joinParams).collect();
+        final JoinQuery.JoinParams joinParams = new JoinQuery.JoinParams(intersects, indexType, BUILD_RIGHT);
+        final List<Tuple2<Polygon, Polygon>> results = JoinQuery.spatialJoin(queryRDD, spatialRDD, joinParams).collect();
         sanityCheckFlatJoinResults(results);
 
         final long expectedCount = (gridType == GridType.QUADTREE)
