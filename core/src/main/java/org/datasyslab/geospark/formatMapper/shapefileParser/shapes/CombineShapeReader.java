@@ -7,6 +7,8 @@
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
@@ -17,6 +19,9 @@ import org.apache.log4j.Logger;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeType;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.util.ArrayList;
 
 public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
 
@@ -74,7 +79,24 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
         // if shape file doesn't exists, throw an IOException
         if(shpSplit == null) throw new IOException("Can't find .shp file.");
         else{
-            shapeFileReader = new ShapeFileReader();
+            if(shxSplit != null){
+                // shape file exists, extract .shp with .shx
+                // first read all indexes into memory
+                Path filePath = shxSplit.getPath();
+                FileSystem fileSys = filePath.getFileSystem(context.getConfiguration());
+                FSDataInputStream shxInpuStream = fileSys.open(filePath);
+                shxInpuStream.skip(24);
+                int shxFileLength = shxInpuStream.readInt() * 2 - 100; // get length in bytes, exclude header
+                // skip following 72 bytes in header
+                shxInpuStream.skip(72);
+                byte[] bytes = new byte[shxFileLength];
+                // read all indexes into memory, skip first 50 bytes(header)
+                shxInpuStream.readFully(bytes, 0, bytes.length);
+                IntBuffer buffer = ByteBuffer.wrap(bytes).asIntBuffer();
+                int[] indexes = new int[shxFileLength / 4];
+                buffer.get(indexes);
+                shapeFileReader = new ShapeFileReader(indexes);
+            }else shapeFileReader = new ShapeFileReader(); // no index, construct with no parameter
             shapeFileReader.initialize(shpSplit, context);
         }
         if(dbfSplit != null){

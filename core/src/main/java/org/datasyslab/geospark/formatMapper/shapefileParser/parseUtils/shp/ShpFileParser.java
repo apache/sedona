@@ -94,6 +94,22 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
     }
 
     /**
+     * abstract information from record header and then copy primitive bytes data of record to a primitive record.
+     * @return
+     * @throws IOException
+     */
+    public ShpRecord parseRecordPrimitiveContent(int length) throws IOException{
+        // get length of record content
+        int contentLength = reader.readInt();
+        long recordLength = 16 * (contentLength + 4);
+        remainLength -= recordLength;
+        int typeID = EndianUtils.swapInteger(reader.readInt());
+        byte[] contentArray = new byte[length];// exclude the 4 bytes we read for shape type
+        reader.read(contentArray,0,contentArray.length);
+        return new ShpRecord(contentArray, typeID);
+    }
+
+    /**
      * abstract id number from record header
      * @return
      * @throws IOException

@@ -55,7 +55,7 @@ public class ShapefileReaderTest implements Serializable{
 
     @BeforeClass
     public static void onceExecutedBeforeAll() {
-        SparkConf conf = new SparkConf().setAppName("ShapefileRDDTest").setMaster("local[2]").set("spark.executor.cores","2");
+        SparkConf conf = new SparkConf().setAppName("ShapefileRDDTest").setMaster("local[2]").set("spark.executor.cores","2").set("spark.executor.memory", "4g");
         sc = new JavaSparkContext(conf);
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
@@ -269,6 +269,21 @@ public class ShapefileReaderTest implements Serializable{
             .getFeatureSource(typeName);
         Filter filter = Filter.INCLUDE;
         return source.getFeatures(filter);
+    }
+
+    /**
+     * Test correctness of parsing shapefile
+     * @throws IOException
+     */
+    @Test
+    public void testShxFile() throws IOException {
+        // load shape with geotool.shapefile
+        String inputLocation = "/Users/zongsizhang/Downloads/water-polygons-split-4326";
+        //FeatureCollection<SimpleFeatureType, SimpleFeature> collection = loadFeatures(inputLocation);
+        // load shapes with our tool
+        JavaRDD<Geometry> shapeRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
+        System.out.println(shapeRDD.count());
+        //Assert.assertEquals(shapeRDD.collect().size(), collection.size());
     }
 
     @AfterClass
