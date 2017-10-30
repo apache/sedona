@@ -70,13 +70,20 @@ public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
 
 
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        if(useIndex){// with index, try first
-            if((indexId + 1) * 2 == indexes.length) return false;
-            int currentLength = indexes[indexId * 2 + 1] * 2 - 4;
+        if(useIndex){
+            /**
+             * with index, iterate until end and extract bytes with information from indexes
+             */
+            if(indexId == indexes.length) return false;
+            // check offset, if current offset in inputStream not match with information in shx, move it
+            if(shpInputStream.getPos() < indexes[indexId] * 2){
+                shpInputStream.skip(indexes[indexId] * 2 - shpInputStream.getPos());
+            }
+            int currentLength = indexes[indexId + 1] * 2 - 4;
             recordKey = new ShapeKey();
             recordKey.setIndex(parser.parseRecordHeadID());
             recordContent = parser.parseRecordPrimitiveContent(currentLength);
-            indexId++;
+            indexId += 2;
             return true;
         }else{
             if(getProgress() >= 2) return false;
