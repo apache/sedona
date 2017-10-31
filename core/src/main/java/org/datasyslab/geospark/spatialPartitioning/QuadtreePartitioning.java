@@ -33,8 +33,11 @@ public class QuadtreePartitioning implements Serializable {
 
     public QuadtreePartitioning(List<Envelope> samples, Envelope boundary, final int partitions, int minTreeLevel)
             throws Exception {
+        // Make sure the tree doesn't get too deep in case of data skew
+        int maxLevel = partitions;
+        int maxItemsPerNode = samples.size() / partitions;
         partitionTree = new StandardQuadTree(new QuadRectangle(boundary), 0,
-            samples.size() / partitions, 100000);
+            maxItemsPerNode, maxLevel);
         if (minTreeLevel > 0) {
             partitionTree.forceGrowUp(minTreeLevel);
         }
