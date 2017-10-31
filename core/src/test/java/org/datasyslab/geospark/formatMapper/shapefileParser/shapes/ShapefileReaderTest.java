@@ -55,7 +55,7 @@ public class ShapefileReaderTest implements Serializable{
 
     @BeforeClass
     public static void onceExecutedBeforeAll() {
-        SparkConf conf = new SparkConf().setAppName("ShapefileRDDTest").setMaster("local[2]").set("spark.executor.cores","2");
+        SparkConf conf = new SparkConf().setAppName("ShapefileRDDTest").setMaster("local[2]").set("spark.executor.cores","2").set("spark.executor.memory", "4g");
         sc = new JavaSparkContext(conf);
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
@@ -266,7 +266,7 @@ public class ShapefileReaderTest implements Serializable{
         DataStore dataStore = DataStoreFinder.getDataStore(map);
         String typeName = dataStore.getTypeNames()[0];
         FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore
-            .getFeatureSource(typeName);
+                .getFeatureSource(typeName);
         Filter filter = Filter.INCLUDE;
         return source.getFeatures(filter);
     }

@@ -16,6 +16,8 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShpFileParser;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Iterator;
 
 public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
 
@@ -31,6 +33,30 @@ public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
     /** file parser */
     ShpFileParser parser = null;
 
+    /** Iterator of indexes of records */
+    private int[] indexes;
+
+    /** whether use index, true when using indexes */
+    private boolean useIndex = false;
+
+    /** current index id */
+    private int indexId = 0;
+
+    /**
+     * empty constructor
+     */
+    public ShapeFileReader() {
+    }
+
+    /**
+     * constructor with index
+     * @param indexes
+     */
+    public ShapeFileReader(int[] indexes) {
+        this.indexes = indexes;
+        useIndex = true;
+    }
+
     public void initialize(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
         FileSplit fileSplit = (FileSplit)split;
         Path filePath = fileSplit.getPath();
@@ -41,12 +67,31 @@ public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
         parser.parseShapeFileHead();
     }
 
+
+
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        if(getProgress() >= 1) return false;
-        recordKey = new ShapeKey();
-        recordKey.setIndex(parser.parseRecordHeadID());
-        recordContent = parser.parseRecordPrimitiveContent();
-        return true;
+        if(useIndex){
+            /**
+             * with index, iterate until end and extract bytes with information from indexes
+             */
+            if(indexId == indexes.length) return false;
+            // check offset, if current offset in inputStream not match with information in shx, move it
+            if(shpInputStream.getPos() < indexes[indexId] * 2){
+                shpInputStream.skip(indexes[indexId] * 2 - shpInputStream.getPos());
+            }
+            int currentLength = indexes[indexId + 1] * 2 - 4;
+            recordKey = new ShapeKey();
+            recordKey.setIndex(parser.parseRecordHeadID());
+            recordContent = parser.parseRecordPrimitiveContent(currentLength);
+            indexId += 2;
+            return true;
+        }else{
+            if(getProgress() >= 1) return false;
+            recordKey = new ShapeKey();
+            recordKey.setIndex(parser.parseRecordHeadID());
+            recordContent = parser.parseRecordPrimitiveContent();
+            return true;
+        }
     }
 
     public ShapeKey getCurrentKey() throws IOException, InterruptedException {
