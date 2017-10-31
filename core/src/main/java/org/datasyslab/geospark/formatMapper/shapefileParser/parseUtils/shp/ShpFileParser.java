@@ -69,7 +69,7 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
     {
         reader.skip(INT_LENGTH);
         reader.skip(HEAD_EMPTY_NUM * INT_LENGTH);
-        fileLength = 16 * (reader.readInt() - HEAD_FILE_LENGTH_16BIT);
+        fileLength = 2 * ((long)reader.readInt() - HEAD_FILE_LENGTH_16BIT);
         remainLength = fileLength;
         // Skip 2 integers: file version and token type
         reader.skip(2 * INT_LENGTH);
@@ -85,7 +85,7 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
     public ShpRecord parseRecordPrimitiveContent() throws IOException{
         // get length of record content
         int contentLength = reader.readInt();
-        long recordLength = 16 * (contentLength + 4);
+        long recordLength = 2 * (contentLength + 4);
         remainLength -= recordLength;
         int typeID = EndianUtils.swapInteger(reader.readInt());
         byte[] contentArray = new byte[contentLength * 2 - INT_LENGTH];// exclude the 4 bytes we read for shape type
@@ -101,7 +101,7 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
     public ShpRecord parseRecordPrimitiveContent(int length) throws IOException{
         // get length of record content
         int contentLength = reader.readInt();
-        long recordLength = 16 * (contentLength + 4);
+        long recordLength = 2 * (contentLength + 4);
         remainLength -= recordLength;
         int typeID = EndianUtils.swapInteger(reader.readInt());
         byte[] contentArray = new byte[length];// exclude the 4 bytes we read for shape type

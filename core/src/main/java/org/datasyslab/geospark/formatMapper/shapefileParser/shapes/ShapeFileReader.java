@@ -86,7 +86,7 @@ public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
             indexId += 2;
             return true;
         }else{
-            if(getProgress() >= 2) return false;
+            if(getProgress() >= 1) return false;
             recordKey = new ShapeKey();
             recordKey.setIndex(parser.parseRecordHeadID());
             recordContent = parser.parseRecordPrimitiveContent();
