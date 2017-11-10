@@ -26,6 +26,8 @@ import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.spatialPartitioning.EqualPartitioning;
 import org.datasyslab.geospark.spatialPartitioning.FlatGridPartitioner;
 import org.datasyslab.geospark.spatialPartitioning.HilbertPartitioning;
+import org.datasyslab.geospark.spatialPartitioning.KDBTree;
+import org.datasyslab.geospark.spatialPartitioning.KDBTreePartitioner;
 import org.datasyslab.geospark.spatialPartitioning.QuadtreePartitioning;
 import org.datasyslab.geospark.spatialPartitioning.RtreePartitioning;
 import org.datasyslab.geospark.spatialPartitioning.SpatialPartitioner;
@@ -226,6 +228,15 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 				QuadtreePartitioning quadtreePartitioning = new QuadtreePartitioning(samples, paddedBoundary, numPartitions);
 				partitionTree = quadtreePartitioning.getPartitionTree();
 				partitioner = new QuadTreePartitioner(partitionTree);
+				break;
+			}
+			case KDBTREE: {
+				final KDBTree tree = new KDBTree(samples.size() / numPartitions, numPartitions, paddedBoundary);
+				for (final Envelope sample : samples) {
+					tree.insert(sample);
+				}
+				tree.assignLeafIds();
+				partitioner = new KDBTreePartitioner(tree);
 				break;
 			}
 			default:

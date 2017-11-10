@@ -84,6 +84,7 @@ public class JoinQueryCorrectnessChecker extends GeoSparkTestBase {
         return Arrays.asList(new Object[][] {
             { GridType.RTREE},
             { GridType.QUADTREE},
+            { GridType.KDBTREE},
         });
     }
 
@@ -197,13 +198,8 @@ public class JoinQueryCorrectnessChecker extends GeoSparkTestBase {
         objectRDD.rawSpatialRDD.repartition(4);
         objectRDD.spatialPartitioning(gridType);
         objectRDD.buildIndex(IndexType.RTREE,true);
-        if (gridType == GridType.QUADTREE) {
-            windowRDD.spatialPartitioning(objectRDD.partitionTree);
-        } else {
-            windowRDD.spatialPartitioning(objectRDD.grids);
-        }
+        windowRDD.spatialPartitioning(objectRDD.getPartitioner());
     }
-
 
     /**
      * Test inside point join correctness.

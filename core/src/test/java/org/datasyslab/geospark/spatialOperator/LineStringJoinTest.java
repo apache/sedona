@@ -43,6 +43,7 @@ public class LineStringJoinTest extends JoinTestBase {
             { GridType.RTREE, false, 11 },
             { GridType.QUADTREE, true, 11 },
             { GridType.QUADTREE, false, 11},
+            { GridType.KDBTREE, false, 11},
         });
     }
 
@@ -139,7 +140,7 @@ public class LineStringJoinTest extends JoinTestBase {
 
         sanityCheckFlatJoinResults(results);
 
-        long expectedCount = (gridType == GridType.QUADTREE)
+        long expectedCount = expectToPreserveOriginalDuplicates()
             ? expectedMatchWithOriginalDuplicatesCount : expectedMatchCount;
         assertEquals(expectedCount, results.size());
     }

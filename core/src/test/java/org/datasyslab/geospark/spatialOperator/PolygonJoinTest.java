@@ -43,6 +43,7 @@ public class PolygonJoinTest extends JoinTestBase {
             { GridType.RTREE, false, 11 },
             { GridType.QUADTREE, true, 11 },
             { GridType.QUADTREE, false, 11},
+            { GridType.KDBTREE, false, 11},
         });
     }
 
@@ -98,7 +99,7 @@ public class PolygonJoinTest extends JoinTestBase {
         final List<Tuple2<Polygon, Polygon>> results = JoinQuery.spatialJoin(spatialRDD, queryRDD, joinParams).collect();
         sanityCheckFlatJoinResults(results);
 
-        final long expectedCount = (gridType == GridType.QUADTREE)
+        final long expectedCount = expectToPreserveOriginalDuplicates()
             ? getExpectedWithOriginalDuplicatesCount(intersects) : getExpectedCount(intersects);
         assertEquals(expectedCount, results.size());
     }

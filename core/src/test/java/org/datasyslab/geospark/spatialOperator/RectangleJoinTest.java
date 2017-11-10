@@ -41,6 +41,7 @@ public class RectangleJoinTest extends JoinTestBase {
             { GridType.RTREE, false, 11 },
             { GridType.QUADTREE, true, 11 },
             { GridType.QUADTREE, false, 11},
+            { GridType.KDBTREE, false, 11},
         });
     }
 
@@ -135,7 +136,7 @@ public class RectangleJoinTest extends JoinTestBase {
 
         sanityCheckFlatJoinResults(result);
 
-        final long expectedCount = (gridType == GridType.QUADTREE)
+        final long expectedCount = expectToPreserveOriginalDuplicates()
             ? expectedMatchWithOriginalDuplicatesCount : expectedMatchCount;
         assertEquals(expectedCount, result.size());
     }
