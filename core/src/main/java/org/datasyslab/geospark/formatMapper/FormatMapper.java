@@ -6,74 +6,115 @@
  */
 package org.datasyslab.geospark.formatMapper;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.datasyslab.geospark.enums.FileDataSplitter;
-
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
+import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.wololo.geojson.Feature;
+import org.wololo.geojson.GeoJSONFactory;
+import org.wololo.jts2geojson.GeoJSONReader;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class FormatMapper.
- */
-public abstract class FormatMapper implements Serializable{
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.util.List;
 
-	
+public abstract class FormatMapper implements Serializable {
+
     /** The start offset. */
-    public Integer startOffset = 0;
+    protected final int startOffset;
 
     /** The end offset. */
-    public Integer endOffset = -1; /* If the initial value is negative, GeoSpark will consider each field as a spatial attribute if the target object is LineString or Polygon. */
+    /* If the initial value is negative, GeoSpark will consider each field as a spatial attribute if the target object is LineString or Polygon. */
+    protected final int endOffset;
     
     /** The splitter. */
-    public FileDataSplitter splitter = FileDataSplitter.CSV;
+    protected final FileDataSplitter splitter;
 
     /** The carry input data. */
-    public boolean carryInputData = false;
+    protected final boolean carryInputData;
     
-    /** The fact. */
-    public GeometryFactory fact = new GeometryFactory();
-    
-    /** The line split list. */
-    public List<String> lineSplitList;
-    
-    /** The coordinates list. */
-    public ArrayList<Coordinate> coordinatesList;
-    
-    /** The coordinates. */
-    public Coordinate[] coordinates;
-    
-	/** The spatial object. */
-	Geometry spatialObject = null;
-    
+    /** The factory. */
+    transient protected GeometryFactory factory = new GeometryFactory();
+
+    transient protected GeoJSONReader geoJSONReader = new GeoJSONReader();
+
+    transient protected WKTReader wktReader = new WKTReader();
+
     /**
      * Instantiates a new format mapper.
      *
      * @param startOffset the start offset
      * @param endOffset the end offset
-     * @param Splitter the splitter
+     * @param splitter the splitter
      * @param carryInputData the carry input data
      */
-    public FormatMapper(Integer startOffset, Integer endOffset, FileDataSplitter Splitter, boolean carryInputData) {
+    public FormatMapper(int startOffset, int endOffset, FileDataSplitter splitter, boolean carryInputData) {
         this.startOffset = startOffset;
         this.endOffset = endOffset;
-        this.splitter = Splitter;
+        this.splitter = splitter;
         this.carryInputData = carryInputData;
     }
 
     /**
      * Instantiates a new format mapper.
      *
-     * @param Splitter the splitter
+     * @param splitter the splitter
      * @param carryInputData the carry input data
      */
-    public FormatMapper(FileDataSplitter Splitter, boolean carryInputData) {
-        this.splitter = Splitter;
-        this.carryInputData = carryInputData;
+    public FormatMapper(FileDataSplitter splitter, boolean carryInputData) {
+        this(0, -1, splitter, carryInputData);
+    }
+
+    private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
+        inputStream.defaultReadObject();
+        factory = new GeometryFactory();
+        wktReader = new WKTReader();
+        geoJSONReader = new GeoJSONReader();
+    }
+
+    protected Geometry readGeoJSON(String geoJson) {
+        final Geometry geometry;
+        if (geoJson.contains("Feature")) {
+            Feature feature = (Feature) GeoJSONFactory.create(geoJson);
+            geometry = geoJSONReader.read(feature.getGeometry());
+        } else {
+            geometry = geoJSONReader.read(geoJson);
+        }
+
+        if (carryInputData) {
+            geometry.setUserData(geoJson);
+        }
+        return geometry;
+    }
+
+    protected Geometry readWkt(String line) throws ParseException {
+        final String[] columns = line.split(splitter.getDelimiter());
+        final Geometry geometry = wktReader.read(columns[this.startOffset]);
+        if (carryInputData) {
+            geometry.setUserData(line);
+        }
+        return geometry;
+    }
+
+    protected Coordinate[] readCoordinates(String line) {
+        final String[] columns = line.split(splitter.getDelimiter());
+        final int actualEndOffset = this.endOffset >= 0 ? this.endOffset : (columns.length - 1);
+        final Coordinate[] coordinates = new Coordinate[(actualEndOffset - startOffset + 1)/2];
+        for (int i = this.startOffset; i <= actualEndOffset; i += 2) {
+            coordinates[i/2] = new Coordinate(Double.parseDouble(columns[i]), Double.parseDouble(columns[i+1]));
+        }
+        return coordinates;
+    }
+
+    protected <T extends Geometry> void addMultiGeometry(GeometryCollection multiGeometry, List<T> result) {
+        for (int i=0; i<multiGeometry.getNumGeometries(); i++) {
+            T geometry = (T) multiGeometry.getGeometryN(i);
+            geometry.setUserData(multiGeometry.getUserData());
+            result.add(geometry);
+        }
     }
 }

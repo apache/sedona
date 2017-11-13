@@ -7,25 +7,18 @@
 package org.datasyslab.geospark.formatMapper;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.io.WKTReader;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
-import org.wololo.geojson.Feature;
-import org.wololo.geojson.GeoJSONFactory;
-import org.wololo.jts2geojson.GeoJSONReader;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class PointFormatMapper.
- */
-public class PointFormatMapper extends FormatMapper implements FlatMapFunction<Iterator<String>, Point> {
+public class PointFormatMapper extends FormatMapper
+    implements FlatMapFunction<Iterator<String>, Point> {
 
 
 	/**
@@ -36,7 +29,6 @@ public class PointFormatMapper extends FormatMapper implements FlatMapFunction<I
 	 */
 	public PointFormatMapper(FileDataSplitter Splitter, boolean carryInputData) {
 		super(Splitter, carryInputData);
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -50,96 +42,46 @@ public class PointFormatMapper extends FormatMapper implements FlatMapFunction<I
 	public PointFormatMapper(Integer startOffset, Integer endOffset, FileDataSplitter Splitter,
 			boolean carryInputData) {
 		super(startOffset, endOffset, Splitter, carryInputData);
-		// TODO Auto-generated constructor stub
 	}
 
     @Override
-    public Iterator<Point> call(Iterator<String> stringIterator) throws Exception {
-        MultiPoint multiSpatialObjects = null;
-        Coordinate coordinate;
-        List result= new ArrayList<Point>();
+    public Iterator<Point> call(final Iterator<String> stringIterator) throws Exception {
+        List<Point> result = new ArrayList<>();
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
-            try {
-                switch (splitter) {
-                    case CSV:
-                        lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
-                        coordinate = new Coordinate(Double.parseDouble(lineSplitList.get(0 + this.startOffset)),
-                                Double.parseDouble(lineSplitList.get(1 + this.startOffset)));
-                        spatialObject = fact.createPoint(coordinate);
-                        if (this.carryInputData) {
-                            spatialObject.setUserData(line);
-                        }
-                        result.add((Point) spatialObject);
-                        break;
-                    case TSV:
-                        lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
-                        coordinate = new Coordinate(Double.parseDouble(lineSplitList.get(0 + this.startOffset)),
-                                Double.parseDouble(lineSplitList.get(1 + this.startOffset)));
-                        spatialObject = fact.createPoint(coordinate);
-                        if (this.carryInputData) {
-                            spatialObject.setUserData(line);
-                        }
-                        result.add((Point) spatialObject);
-                        break;
-                    case GEOJSON:
-                        GeoJSONReader reader = new GeoJSONReader();
-                        spatialObject = reader.read(line);
-                        if (line.contains("Feature")) {
-                            Feature feature = (Feature) GeoJSONFactory.create(line);
-                            spatialObject = reader.read(feature.getGeometry());
-                        } else {
-                            spatialObject = reader.read(line);
-                        }
-                        if (spatialObject instanceof MultiPoint) {
-                	/*
-                	 * If this line has a "Multi" type spatial object, GeoSpark separates them to a list of single objects
-                	 * and assign original input line to each object.
-                	 */
-                            multiSpatialObjects = (MultiPoint) spatialObject;
-                            for (int i = 0; i < multiSpatialObjects.getNumGeometries(); i++) {
-                                spatialObject = multiSpatialObjects.getGeometryN(i);
-                                if (this.carryInputData) {
-                                    spatialObject.setUserData(line);
-                                }
-                                result.add((Point) spatialObject);
-                            }
-                        } else {
-                            if (this.carryInputData) {
-                                spatialObject.setUserData(line);
-                            }
-                            result.add((Point) spatialObject);
-                        }
-                        break;
-                    case WKT:
-                        lineSplitList = Arrays.asList(line.split(splitter.getDelimiter()));
-                        WKTReader wktreader = new WKTReader();
-                        spatialObject = wktreader.read(lineSplitList.get(this.startOffset));
-                        if (spatialObject instanceof MultiPoint) {
-                            multiSpatialObjects = (MultiPoint) spatialObject;
-                            for (int i = 0; i < multiSpatialObjects.getNumGeometries(); i++) {
-                    	/*
-                    	 * If this line has a "Multi" type spatial object, GeoSpark separates them to a list of single objects
-                    	 * and assign original input line to each object.
-                    	 */
-                                spatialObject = multiSpatialObjects.getGeometryN(i);
-                                if (this.carryInputData) {
-                                    spatialObject.setUserData(line);
-                                }
-                                result.add((Point) spatialObject);
-                            }
-                        } else {
-                            if (this.carryInputData) {
-                                spatialObject.setUserData(line);
-                            }
-                            result.add((Point) spatialObject);
-                        }
-                        break;
+            switch (splitter) {
+                case CSV:
+                case TSV: {
+                    String[] columns = line.split(splitter.getDelimiter());
+                    Coordinate coordinate = new Coordinate(
+                        Double.parseDouble(columns[this.startOffset]),
+                        Double.parseDouble(columns[1 + this.startOffset]));
+                    Point point = factory.createPoint(coordinate);
+                    if (this.carryInputData) {
+                        point.setUserData(line);
+                    }
+                    result.add(point);
+                    break;
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+                case GEOJSON: {
+                    Geometry geometry = readGeoJSON(line);
+                    addGeometry(geometry, result);
+                    break;
+                }
+                case WKT:
+                    Geometry geometry = readWkt(line);
+                    addGeometry(geometry, result);
+                    break;
             }
         }
         return result.iterator();
+    }
+
+    private void addGeometry(Geometry geometry, List<Point> result) {
+        if (geometry instanceof MultiPoint) {
+            addMultiGeometry((MultiPoint) geometry, result);
+        } else {
+            result.add((Point) geometry);
+        }
     }
 }
