@@ -2,11 +2,15 @@ package org.datasyslab.geospark
 
 import com.vividsolutions.jts.geom.{Coordinate, Envelope, GeometryFactory, Polygon}
 import org.apache.log4j.{Level, Logger}
+import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{SparkConf, SparkContext}
 import org.datasyslab.geospark.enums.{FileDataSplitter, GridType, IndexType}
 import org.datasyslab.geospark.formatMapper.EarthdataHDFPointMapper
 import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileRDD
+import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
+import org.datasyslab.geospark.spatialOperator.JoinQuery.BuildSide.BUILD_LEFT
+import org.datasyslab.geospark.spatialOperator.JoinQuery.{BuildSide, JoinParams}
 import org.datasyslab.geospark.spatialOperator.{JoinQuery, KNNQuery, RangeQuery}
 import org.datasyslab.geospark.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}
 import org.scalatest.FunSpec
@@ -16,6 +20,9 @@ class scalaTest extends FunSpec {
 	describe("GeoSpark in Scala") {
 
 		val conf = new SparkConf().setAppName("scalaTest").setMaster("local[2]")
+		conf.set("spark.serializer", classOf[KryoSerializer].getName)
+		conf.set("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName)
+
 		val sc = new SparkContext(conf)
 		Logger.getLogger("org").setLevel(Level.WARN)
 		Logger.getLogger("akka").setLevel(Level.WARN)
@@ -30,6 +37,7 @@ class scalaTest extends FunSpec {
 
 		val PolygonRDDInputLocation = resourceFolder + "primaryroads-polygon.csv"
 		val PolygonRDDSplitter = FileDataSplitter.CSV
+		val PolygonRDDIndexType = IndexType.RTREE
 		val PolygonRDDNumPartitions = 5
 		val PolygonRDDStartOffset = 0
 		val PolygonRDDEndOffset = 8
@@ -79,7 +87,7 @@ class scalaTest extends FunSpec {
 			val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
 
 			objectRDD.spatialPartitioning(joinQueryPartitioningType)
-			queryWindowRDD.spatialPartitioning(objectRDD.grids)
+			queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
 
 			for(i <- 1 to eachQueryLoopTimes)
 			{
@@ -87,12 +95,12 @@ class scalaTest extends FunSpec {
 			}
 		}
 
-		it("should pass spatial join query using index") {
+		it("should pass spatial join query using index on points") {
 			val queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true)
 			val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
 
 			objectRDD.spatialPartitioning(joinQueryPartitioningType)
-			queryWindowRDD.spatialPartitioning(objectRDD.grids)
+			queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
 
 			objectRDD.buildIndex(PointRDDIndexType,true)
 
@@ -102,12 +110,54 @@ class scalaTest extends FunSpec {
 			}
 		}
 
+		it("should pass spatial join query using index on polygons") {
+			val queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true)
+			val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
+
+			objectRDD.spatialPartitioning(joinQueryPartitioningType)
+			queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
+
+			queryWindowRDD.buildIndex(PolygonRDDIndexType,true)
+
+			for(i <- 1 to eachQueryLoopTimes)
+			{
+				val resultSize = JoinQuery.SpatialJoinQuery(objectRDD,queryWindowRDD,true,false).count()
+			}
+		}
+
+		it("should pass spatial join query and build index on points the fly") {
+			val queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true)
+			val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
+
+			objectRDD.spatialPartitioning(joinQueryPartitioningType)
+			queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
+
+			for(i <- 1 to eachQueryLoopTimes)
+			{
+				val resultSize = JoinQuery.SpatialJoinQuery(objectRDD,queryWindowRDD,true,false).count()
+			}
+		}
+
+		it("should pass spatial join query and build index on polygons on the fly") {
+			val queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true)
+			val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
+
+			objectRDD.spatialPartitioning(joinQueryPartitioningType)
+			queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
+
+			for(i <- 1 to eachQueryLoopTimes)
+			{
+				val joinParams = new JoinParams(false, PolygonRDDIndexType, BUILD_LEFT)
+				val resultSize = JoinQuery.spatialJoin(queryWindowRDD, objectRDD, joinParams).count()
+			}
+		}
+
 		it("should pass distance join query") {
 			val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
 			val queryWindowRDD = new CircleRDD(objectRDD,0.1)
 
 			objectRDD.spatialPartitioning(GridType.RTREE)
-			queryWindowRDD.spatialPartitioning(objectRDD.grids)
+			queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
 
 			for(i <- 1 to eachQueryLoopTimes)
 			{
@@ -120,7 +170,7 @@ class scalaTest extends FunSpec {
 			val queryWindowRDD = new CircleRDD(objectRDD,0.1)
 
 			objectRDD.spatialPartitioning(GridType.RTREE)
-			queryWindowRDD.spatialPartitioning(objectRDD.grids)
+			queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
 
 			objectRDD.buildIndex(IndexType.RTREE,true)
 

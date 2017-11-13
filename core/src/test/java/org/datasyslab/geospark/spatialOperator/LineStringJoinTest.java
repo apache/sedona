@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import static org.datasyslab.geospark.spatialOperator.JoinQuery.BuildSide.BUILD_LEFT;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
@@ -134,8 +135,8 @@ public class LineStringJoinTest extends JoinTestBase {
 
         partitionRdds(queryRDD, spatialRDD);
 
-        JoinQuery.JoinParams joinParams = new JoinQuery.JoinParams(true, indexType);
-        List<Tuple2<Polygon, LineString>> results = JoinQuery.spatialJoin(spatialRDD, queryRDD, joinParams).collect();
+        JoinQuery.JoinParams joinParams = new JoinQuery.JoinParams(true, indexType, BUILD_LEFT);
+        List<Tuple2<Polygon, LineString>> results = JoinQuery.spatialJoin(queryRDD, spatialRDD, joinParams).collect();
 
         sanityCheckFlatJoinResults(results);
 
