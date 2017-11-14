@@ -37,7 +37,13 @@ public enum GridType implements Serializable {
 	/**
 	 * The voronoi.
 	 */
-	QUADTREE;
+	QUADTREE,
+
+	/**
+	 * K-D-B-tree (k-dimensional B-tree)
+	 */
+	KDBTREE;
+
 	/**
 	 * Gets the grid type.
 	 *

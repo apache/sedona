@@ -132,6 +132,9 @@ class JoinTestBase extends GeoSparkTestBase {
         }
     }
 
+    protected boolean expectToPreserveOriginalDuplicates() {
+        return gridType == GridType.QUADTREE || gridType == GridType.KDBTREE;
+    }
 
     protected <T extends Geometry> long countJoinResults(List<Tuple2<Polygon, HashSet<T>>> results) {
         int count = 0;

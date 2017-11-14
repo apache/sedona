@@ -48,6 +48,7 @@ public class PointJoinTest extends JoinTestBase {
             { GridType.RTREE, false, 11 },
             { GridType.QUADTREE, true, 11 },
             { GridType.QUADTREE, false, 11},
+            { GridType.KDBTREE, false, 11},
         });
     }
 
@@ -163,9 +164,9 @@ public class PointJoinTest extends JoinTestBase {
     }
 
     @Test
-    public void testDynamicRTreeWithRectanges() throws Exception {
+    public void testDynamicRTreeWithRectangles() throws Exception {
         final RectangleRDD rectangleRDD = createRectangleRDD();
-        final long expectedCount = (gridType == GridType.QUADTREE)
+        final long expectedCount = expectToPreserveOriginalDuplicates()
             ? expectedRectangleMatchWithOriginalDuplicatesCount : expectedRectangleMatchCount;
         testDynamicRTreeInt(rectangleRDD, IndexType.RTREE, expectedCount);
     }
@@ -173,7 +174,7 @@ public class PointJoinTest extends JoinTestBase {
     @Test
     public void testDynamicRTreeWithPolygons() throws Exception {
         PolygonRDD polygonRDD = createPolygonRDD();
-        final long expectedCount = (gridType == GridType.QUADTREE)
+        final long expectedCount = expectToPreserveOriginalDuplicates()
             ? expectedPolygonMatchWithOriginalDuplicatesCount : expectedPolygonMatchCount;
         testDynamicRTreeInt(polygonRDD, IndexType.RTREE, expectedCount);
     }
