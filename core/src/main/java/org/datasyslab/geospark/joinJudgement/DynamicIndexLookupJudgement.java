@@ -19,6 +19,7 @@ import org.apache.spark.TaskContext;
 import org.apache.spark.api.java.function.FlatMapFunction2;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.spatialOperator.JoinQuery.BuildSide;
+import org.datasyslab.geospark.monitoring.GeoSparkMetric;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -39,6 +40,10 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
 
     private final IndexType indexType;
     private final BuildSide buildSide;
+    private final GeoSparkMetric buildCount;
+    private final GeoSparkMetric streamCount;
+    private final GeoSparkMetric resultCount;
+    private final GeoSparkMetric candidateCount;
 
     /**
      * @see JudgementBase
@@ -46,16 +51,28 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
     public DynamicIndexLookupJudgement(boolean considerBoundaryIntersection,
                                        IndexType indexType,
                                        BuildSide buildSide,
-                                       @Nullable DedupParams dedupParams) {
+                                       @Nullable DedupParams dedupParams,
+                                       GeoSparkMetric buildCount,
+                                       GeoSparkMetric streamCount,
+                                       GeoSparkMetric resultCount,
+                                       GeoSparkMetric candidateCount) {
         super(considerBoundaryIntersection, dedupParams);
         this.indexType = indexType;
         this.buildSide = buildSide;
+        this.buildCount = buildCount;
+        this.streamCount = streamCount;
+        this.resultCount = resultCount;
+        this.candidateCount = candidateCount;
     }
 
     @Override
     public Iterator<Pair<U, T>> call(final Iterator<U> leftShapes, final Iterator<T> rightShapes) throws Exception {
 
         if (!leftShapes.hasNext() || !rightShapes.hasNext()) {
+            buildCount.add(0);
+            streamCount.add(0);
+            resultCount.add(0);
+            candidateCount.add(0);
             return Collections.emptyIterator();
         }
 
@@ -123,17 +140,21 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
 
                 while (streamShapes.hasNext()) {
                     shapeCnt ++;
+                    streamCount.add(1);
                     final Geometry streamShape = streamShapes.next();
                     final List candidates = spatialIndex.query(streamShape.getEnvelopeInternal());
                     for (Object candidate : candidates) {
+                        candidateCount.add(1);
                         final Geometry buildShape = (Geometry) candidate;
                         if (buildLeft) {
                             if (match(buildShape, streamShape)) {
                                 batch.add(Pair.of((U) buildShape, (T) streamShape));
+                                resultCount.add(1);
                             }
                         } else {
                             if (match(streamShape, buildShape)) {
                                 batch.add(Pair.of((U) streamShape, (T) buildShape));
+                                resultCount.add(1);
                             }
                         }
                     }
@@ -165,6 +186,7 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
         }
         index.query(new Envelope(0.0,0.0,0.0,0.0));
         log("Loaded %d shapes into an index in %d ms", count, elapsedSince(startTime));
+        buildCount.add((int) count);
         return index;
     }
 

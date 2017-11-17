@@ -1,31 +1,39 @@
 package org.datasyslab.geospark
 
-import com.vividsolutions.jts.geom.{Coordinate, Envelope, GeometryFactory, Polygon}
+import com.vividsolutions.jts.geom.{Coordinate, Envelope, GeometryFactory}
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{SparkConf, SparkContext}
 import org.datasyslab.geospark.enums.{FileDataSplitter, GridType, IndexType}
 import org.datasyslab.geospark.formatMapper.EarthdataHDFPointMapper
-import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileRDD
 import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
+import org.datasyslab.geospark.spatialOperator.JoinQuery.JoinParams
+import org.datasyslab.geospark.monitoring.GeoSparkListener
 import org.datasyslab.geospark.spatialOperator.JoinQuery.BuildSide.BUILD_LEFT
-import org.datasyslab.geospark.spatialOperator.JoinQuery.{BuildSide, JoinParams}
 import org.datasyslab.geospark.spatialOperator.{JoinQuery, KNNQuery, RangeQuery}
 import org.datasyslab.geospark.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}
-import org.scalatest.FunSpec
+import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
-class scalaTest extends FunSpec {
+class scalaTest extends FunSpec with BeforeAndAfterAll {
 
-	describe("GeoSpark in Scala") {
-
+	implicit lazy val sc = {
 		val conf = new SparkConf().setAppName("scalaTest").setMaster("local[2]")
 		conf.set("spark.serializer", classOf[KryoSerializer].getName)
 		conf.set("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName)
 
 		val sc = new SparkContext(conf)
+		sc.addSparkListener(new GeoSparkListener)
 		Logger.getLogger("org").setLevel(Level.WARN)
 		Logger.getLogger("akka").setLevel(Level.WARN)
+		sc
+	}
+
+	override def afterAll(): Unit = {
+		sc.stop
+	}
+
+	describe("GeoSpark in Scala") {
 
 		val resourceFolder = System.getProperty("user.dir")+"/src/test/resources/"
 

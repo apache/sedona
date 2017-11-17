@@ -10,6 +10,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function2;
@@ -21,6 +22,8 @@ import org.datasyslab.geospark.joinJudgement.DynamicIndexLookupJudgement;
 import org.datasyslab.geospark.joinJudgement.LeftIndexLookupJudgement;
 import org.datasyslab.geospark.joinJudgement.NestedLoopJudgement;
 import org.datasyslab.geospark.joinJudgement.RightIndexLookupJudgement;
+import org.datasyslab.geospark.monitoring.GeoSparkMetric;
+import org.datasyslab.geospark.monitoring.GeoSparkMetrics;
 import org.datasyslab.geospark.spatialPartitioning.SpatialPartitioner;
 import org.datasyslab.geospark.spatialRDD.CircleRDD;
 import org.datasyslab.geospark.spatialRDD.SpatialRDD;
@@ -351,6 +354,12 @@ public class JoinQuery {
         verifyCRSMatch(leftRDD, rightRDD);
         verifyPartitioningMatch(leftRDD, rightRDD);
 
+        SparkContext sparkContext = leftRDD.spatialPartitionedRDD.context();
+        GeoSparkMetric buildCount = GeoSparkMetrics.createMetric(sparkContext, "buildCount");
+        GeoSparkMetric streamCount = GeoSparkMetrics.createMetric(sparkContext, "streamCount");
+        GeoSparkMetric resultCount = GeoSparkMetrics.createMetric(sparkContext, "resultCount");
+        GeoSparkMetric candidateCount = GeoSparkMetrics.createMetric(sparkContext, "candidateCount");
+
         final SpatialPartitioner partitioner =
                 (SpatialPartitioner) rightRDD.spatialPartitionedRDD.partitioner().get();
         final DedupParams dedupParams = partitioner.getDedupParams();
@@ -372,7 +381,8 @@ public class JoinQuery {
                         joinParams.considerBoundaryIntersection,
                         joinParams.indexType,
                         joinParams.buildSide,
-                        dedupParams);
+                        dedupParams,
+                        buildCount, streamCount, resultCount, candidateCount);
                 resultWithDuplicates = leftRDD.spatialPartitionedRDD.zipPartitions(rightRDD.spatialPartitionedRDD, judgement);
             }
         } else if (joinParams.indexType != null) {
@@ -381,7 +391,8 @@ public class JoinQuery {
                     joinParams.considerBoundaryIntersection,
                     joinParams.indexType,
                     joinParams.buildSide,
-                    dedupParams);
+                    dedupParams,
+                    buildCount, streamCount, resultCount, candidateCount);
             resultWithDuplicates = leftRDD.spatialPartitionedRDD.zipPartitions(rightRDD.spatialPartitionedRDD, judgement);
         } else {
             NestedLoopJudgement judgement = new NestedLoopJudgement(joinParams.considerBoundaryIntersection, dedupParams);
