@@ -129,4 +129,4 @@ Please refer to [JTS Topology Suite](https://github.com/locationtech/jts) and [J
 Please visit [GeoSpark project wesbite](http://geospark.datasyslab.org) for latest news and releases.
 
 ## Data Systems Lab
-GeoSpark is one of the projects initiated by [Data Systems Lab](http://www.datasyslab.org/) at Arizona State University. The mission of Data Systems Lab is designing and developing experimental data management systems (e.g., database systems).
+GeoSpark is one of the projects initiated by [Data Systems Lab](https://www.datasyslab.net/) at Arizona State University. The mission of Data Systems Lab is designing and developing experimental data management systems (e.g., database systems).
