@@ -4,7 +4,7 @@
 | Status   |      Stable    | Latest | Source code|
 |:----------:|:-------------:|:------:|:------:|
 | GeoSpark |  [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/geospark/0.8.2.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Maven-Central-Coordinates) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/geospark.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Maven-Central-Coordinates) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|
-| [GeoSparkViz](https://github.com/DataSystemsLab/GeoSpark/tree/master/viz) |   [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/babylon/0.2.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/Babylon-Maven-Central-Coordinates) | [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/babylon/0.2.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/Babylon-Maven-Central-Coordinates)  | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|
+| [GeoSparkViz](https://github.com/DataSystemsLab/GeoSpark/tree/master/viz) |   [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/babylon/0.2.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/Babylon-Maven-Central-Coordinates) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/babylon.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/Babylon-Maven-Central-Coordinates) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|
 
 [GeoSpark@Twitter](https://twitter.com/GeoSpark_ASU)||[GeoSpark Discussion Board](https://groups.google.com/forum/#!forum/geospark-discussion-board)||[![Join the chat at https://gitter.im/geospark-datasys/Lobby](https://badges.gitter.im/geospark-datasys/Lobby.svg)](https://gitter.im/geospark-datasys/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -36,6 +36,17 @@ GeoSpark artifacts are hosted in Maven Central: [**Maven Central Coordinates**](
 ## Spatial Resilient Distributed Datasets (SRDDs)
 Supported Spatial RDDs: PointRDD, RectangleRDD, PolygonRDD, LineStringRDD
 
+The generic SpatialRDD supports heterogenous geometries:
+
+* Point
+* Polygon
+* Line string
+* Multi-point
+* Multi-polygon
+* Multi-line string
+* GeometryCollection
+
+
 ## Supported input data format
 **Native input format support**: 
 
@@ -49,7 +60,7 @@ Supported Spatial RDDs: PointRDD, RectangleRDD, PolygonRDD, LineStringRDD
 **User-supplied input format mapper**: Any single-line input formats
 
 ## Spatial Partitioning
-Supported Spatial Partitioning techniques: Quad-Tree, R-Tree, Voronoi diagram, Uniform grids (Experimental), Hilbert Curve (Experimental)
+Supported Spatial Partitioning techniques: Quad-Tree, KDB-Tree, R-Tree, Voronoi diagram, Uniform grids (Experimental), Hilbert Curve (Experimental)
 
 ## Spatial Index
 Supported Spatial Indexes: Quad-Tree and R-Tree. R-Tree supports Spatial K Nearest Neighbors query.
