@@ -22,7 +22,7 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.List;
 
-public abstract class FormatMapper implements Serializable {
+public class FormatMapper implements Serializable {
 
     /** The start offset. */
     protected final int startOffset;
