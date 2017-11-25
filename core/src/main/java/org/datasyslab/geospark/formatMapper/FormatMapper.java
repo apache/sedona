@@ -76,7 +76,7 @@ public class FormatMapper implements Serializable {
         geoJSONReader = new GeoJSONReader();
     }
 
-    protected Geometry readGeoJSON(String geoJson) {
+    public Geometry readGeoJSON(String geoJson) {
         final Geometry geometry;
         if (geoJson.contains("Feature")) {
             Feature feature = (Feature) GeoJSONFactory.create(geoJson);
@@ -91,7 +91,7 @@ public class FormatMapper implements Serializable {
         return geometry;
     }
 
-    protected Geometry readWkt(String line) throws ParseException {
+    public Geometry readWkt(String line) throws ParseException {
         final String[] columns = line.split(splitter.getDelimiter());
         final Geometry geometry = wktReader.read(columns[this.startOffset]);
         if (carryInputData) {
@@ -100,7 +100,7 @@ public class FormatMapper implements Serializable {
         return geometry;
     }
 
-    protected Coordinate[] readCoordinates(String line) {
+    public Coordinate[] readCoordinates(String line) {
         final String[] columns = line.split(splitter.getDelimiter());
         final int actualEndOffset = this.endOffset >= 0 ? this.endOffset : (columns.length - 1);
         final Coordinate[] coordinates = new Coordinate[(actualEndOffset - startOffset + 1)/2];
@@ -110,7 +110,7 @@ public class FormatMapper implements Serializable {
         return coordinates;
     }
 
-    protected <T extends Geometry> void addMultiGeometry(GeometryCollection multiGeometry, List<T> result) {
+    public <T extends Geometry> void addMultiGeometry(GeometryCollection multiGeometry, List<T> result) {
         for (int i=0; i<multiGeometry.getNumGeometries(); i++) {
             T geometry = (T) multiGeometry.getGeometryN(i);
             geometry.setUserData(multiGeometry.getUserData());
