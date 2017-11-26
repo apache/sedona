@@ -22,7 +22,7 @@ import org.datasyslab.geospark.utils.CRSTransformation;
 public class RangeQuery implements Serializable{
 
 	/**
-	 * Spatial range query.
+	 * Spatial range query. Return objects in SpatialRDD are covered/intersected by originalQueryGeometry
 	 *
 	 * @param spatialRDD the spatial RDD
 	 * @param originalQueryGeometry the original query window
@@ -44,15 +44,15 @@ public class RangeQuery implements Serializable{
 			if(spatialRDD.indexedRawRDD == null) {
 				throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index on rawSpatialRDD.");
 			}
-			return spatialRDD.indexedRawRDD.mapPartitions(new RangeFilterUsingIndex(queryGeometry,considerBoundaryIntersection));
+			return spatialRDD.indexedRawRDD.mapPartitions(new RangeFilterUsingIndex(queryGeometry,considerBoundaryIntersection,true));
 		}
 		else{
-			return spatialRDD.getRawSpatialRDD().filter(new RangeFilter(queryGeometry, considerBoundaryIntersection));
+			return spatialRDD.getRawSpatialRDD().filter(new RangeFilter(queryGeometry, considerBoundaryIntersection,true));
 		}
 	}
 
 	/**
-	 * Spatial range query.
+	 * Spatial range query. Return objects in SpatialRDD are covered/intersected by queryWindow/Envelope
 	 *
 	 * @param spatialRDD the spatial RDD
 	 * @param queryWindow the original query window
@@ -72,5 +72,58 @@ public class RangeQuery implements Serializable{
 		GeometryFactory geometryFactory = new GeometryFactory();
 		U queryGeometry = (U) geometryFactory.createPolygon(coordinates);
 		return SpatialRangeQuery(spatialRDD, queryGeometry, considerBoundaryIntersection, useIndex);
+	}
+
+    /**
+     * Spatial range query. Return objects in SpatialRDD cover/intersect by queryWindow/Envelope
+     *
+     * @param spatialRDD the spatial RDD
+     * @param queryWindow the original query window
+     * @param considerBoundaryIntersection the consider boundary intersection
+     * @param useIndex the use index
+     * @return the java RDD
+     * @throws Exception the exception
+     */
+    public static <U extends Geometry, T extends Geometry> JavaRDD<T> SpatialRangeQuery(Envelope queryWindow, SpatialRDD<T> spatialRDD, boolean considerBoundaryIntersection, boolean useIndex) throws Exception
+    {
+        Coordinate[] coordinates = new Coordinate[5];
+        coordinates[0]=new Coordinate(queryWindow.getMinX(), queryWindow.getMinY());
+        coordinates[1]=new Coordinate(queryWindow.getMinX(), queryWindow.getMaxY());
+        coordinates[2]=new Coordinate(queryWindow.getMaxX(), queryWindow.getMaxY());
+        coordinates[3]=new Coordinate(queryWindow.getMaxX(), queryWindow.getMinY());
+        coordinates[4]=coordinates[0];
+        GeometryFactory geometryFactory = new GeometryFactory();
+        U queryGeometry = (U) geometryFactory.createPolygon(coordinates);
+        return SpatialRangeQuery(queryGeometry, spatialRDD, considerBoundaryIntersection, useIndex);
+    }
+
+    /**
+     * Spatial range query. Return objects in SpatialRDD cover/intersect originalQueryGeometry
+     *
+     * @param spatialRDD the spatial RDD
+     * @param originalQueryGeometry the original query window
+     * @param considerBoundaryIntersection the consider boundary intersection
+     * @param useIndex the use index
+     * @return the java RDD
+     * @throws Exception the exception
+     */
+	public static <U extends Geometry, T extends Geometry> JavaRDD<T> SpatialRangeQuery(U originalQueryGeometry, SpatialRDD<T> spatialRDD, boolean considerBoundaryIntersection, boolean useIndex) throws Exception
+	{
+		U queryGeometry = originalQueryGeometry;
+		if(spatialRDD.getCRStransformation())
+		{
+			queryGeometry = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(),spatialRDD.getTargetEpgsgCode(), originalQueryGeometry);
+		}
+
+		if(useIndex==true)
+		{
+			if(spatialRDD.indexedRawRDD == null) {
+				throw new Exception("[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index on rawSpatialRDD.");
+			}
+			return spatialRDD.indexedRawRDD.mapPartitions(new RangeFilterUsingIndex(queryGeometry,considerBoundaryIntersection,false));
+		}
+		else{
+			return spatialRDD.getRawSpatialRDD().filter(new RangeFilter(queryGeometry, considerBoundaryIntersection,false));
+		}
 	}
 }
