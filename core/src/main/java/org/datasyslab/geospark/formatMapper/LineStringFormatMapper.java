@@ -50,16 +50,6 @@ public class LineStringFormatMapper extends FormatMapper
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
             switch (splitter) {
-                case CSV:
-                case TSV: {
-                    Coordinate[] coordinates = readCoordinates(line);
-                    LineString lineString = factory.createLineString(coordinates);
-                    if (this.carryInputData) {
-                        lineString.setUserData(line);
-                    }
-                    result.add(lineString);
-                    break;
-                }
                 case GEOJSON: {
                     Geometry geometry = readGeoJSON(line);
                     addGeometry(geometry, result);
@@ -68,6 +58,16 @@ public class LineStringFormatMapper extends FormatMapper
                 case WKT: {
                     Geometry geometry = readWkt(line);
                     addGeometry(geometry, result);
+                    break;
+                }
+                default:
+                {
+                    Coordinate[] coordinates = readCoordinates(line);
+                    LineString lineString = factory.createLineString(coordinates);
+                    if (this.carryInputData) {
+                        lineString.setUserData(line);
+                    }
+                    result.add(lineString);
                     break;
                 }
             }
