@@ -51,17 +51,6 @@ public class PolygonFormatMapper extends FormatMapper
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
             switch (splitter) {
-                case CSV:
-                case TSV: {
-                    Coordinate[] coordinates = readCoordinates(line);
-                    LinearRing linearRing = factory.createLinearRing(coordinates);
-                    Polygon polygon = factory.createPolygon(linearRing);
-                    if (this.carryInputData) {
-                        polygon.setUserData(line);
-                    }
-                    result.add(polygon);
-                    break;
-                }
                 case GEOJSON: {
                     Geometry geometry = readGeoJSON(line);
                     addGeometry(geometry, result);
@@ -70,6 +59,17 @@ public class PolygonFormatMapper extends FormatMapper
                 case WKT: {
                     Geometry geometry = readWkt(line);
                     addGeometry(geometry, result);
+                    break;
+                }
+                default:
+                {
+                    Coordinate[] coordinates = readCoordinates(line);
+                    LinearRing linearRing = factory.createLinearRing(coordinates);
+                    Polygon polygon = factory.createPolygon(linearRing);
+                    if (this.carryInputData) {
+                        polygon.setUserData(line);
+                    }
+                    result.add(polygon);
                     break;
                 }
             }

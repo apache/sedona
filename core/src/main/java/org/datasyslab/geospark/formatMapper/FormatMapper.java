@@ -13,6 +13,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.GeometryType;
 import org.wololo.geojson.Feature;
 import org.wololo.geojson.GeoJSONFactory;
 import org.wololo.jts2geojson.GeoJSONReader;
@@ -30,13 +31,15 @@ public class FormatMapper implements Serializable {
     /** The end offset. */
     /* If the initial value is negative, GeoSpark will consider each field as a spatial attribute if the target object is LineString or Polygon. */
     protected final int endOffset;
-    
+
     /** The splitter. */
     protected final FileDataSplitter splitter;
 
     /** The carry input data. */
     protected final boolean carryInputData;
-    
+
+    protected GeometryType geometryType = null;
+
     /** The factory. */
     transient protected GeometryFactory factory = new GeometryFactory();
 
@@ -67,6 +70,18 @@ public class FormatMapper implements Serializable {
      */
     public FormatMapper(FileDataSplitter splitter, boolean carryInputData) {
         this(0, -1, splitter, carryInputData);
+    }
+
+    public FormatMapper(int startOffset, int endOffset, FileDataSplitter splitter, boolean carryInputData, GeometryType geometryType)
+    {
+        this(startOffset, endOffset, splitter, carryInputData);
+        this.geometryType = geometryType;
+    }
+
+    public FormatMapper(FileDataSplitter splitter, boolean carryInputData, GeometryType geometryType)
+    {
+        this(splitter, carryInputData);
+        this.geometryType = geometryType;
     }
 
     private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
@@ -115,6 +130,39 @@ public class FormatMapper implements Serializable {
             T geometry = (T) multiGeometry.getGeometryN(i);
             geometry.setUserData(multiGeometry.getUserData());
             result.add(geometry);
+        }
+    }
+
+    public Geometry readGeometry(String line) throws ParseException {
+        switch (this.splitter)
+        {
+            case WKT:
+                return readWkt(line);
+            case GEOJSON:
+                return readGeoJSON(line);
+            default:
+            {
+                if(this.geometryType==null)
+                {
+                    throw new IllegalArgumentException("[GeoSpark][FormatMapper] You must specify GeometryType when you use delimiter rather WKT or GeoJSON");
+                }
+                else
+                {
+                    return createGeometry(readCoordinates(line),geometryType);
+                }
+            }
+        }
+    }
+    private Geometry createGeometry (Coordinate[] coordinates, GeometryType geometryType)
+    {
+        GeometryFactory geometryFactory = new GeometryFactory();
+        switch (geometryType)
+        {
+            case POINT: return geometryFactory.createPoint(coordinates[0]);
+            case POLYGON: return geometryFactory.createPolygon(coordinates);
+            case LINESTRING: return geometryFactory.createLineString(coordinates);
+            // Read string to point if no geometry type specified but GeoSpark should never reach here
+            default: return geometryFactory.createPoint(coordinates[0]);
         }
     }
 }

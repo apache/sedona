@@ -1,14 +1,7 @@
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
 import com.esotericsoftware.kryo.io.Input;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.MultiLineString;
-import com.vividsolutions.jts.geom.MultiPoint;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.*;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -66,11 +59,18 @@ public class ShapeSerde {
         }
 
         throw new UnsupportedOperationException("Geometry type is not supported: " +
-            geometry.getClass().getSimpleName());
+                geometry.getClass().getSimpleName());
     }
 
     public static Geometry deserialize(Input input, GeometryFactory factory) {
         ShapeReader reader = ShapeReaderFactory.fromInput(input);
+        ShapeType type = ShapeType.getType(reader.readByte());
+        ShapeParser parser = type.getParser(factory);
+        return parser.parseShape(reader);
+    }
+
+    public static Geometry deserialize(byte[] input, GeometryFactory factory) {
+        ShapeReader reader = ShapeReaderFactory.fromByteBuffer(ByteBuffer.wrap(input));
         ShapeType type = ShapeType.getType(reader.readByte());
         ShapeParser parser = type.getParser(factory);
         return parser.parseShape(reader);

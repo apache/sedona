@@ -51,8 +51,18 @@ public class RectangleFormatMapper extends FormatMapper
 		while (stringIterator.hasNext()) {
 			String line = stringIterator.next();
 			switch (splitter) {
-				case CSV:
-				case TSV: {
+				case GEOJSON: {
+					Geometry geometry = readGeoJSON(line);
+					addGeometry(geometry, result);
+					break;
+				}
+				case WKT: {
+					Geometry geometry = readWkt(line);
+					addGeometry(geometry, result);
+					break;
+				}
+				default:
+				{
 					String[] columns = line.split(splitter.getDelimiter());
 					double x1 = Double.parseDouble(columns[this.startOffset]);
 					double x2 = Double.parseDouble(columns[this.startOffset + 2]);
@@ -72,16 +82,6 @@ public class RectangleFormatMapper extends FormatMapper
 						polygon.setUserData(line);
 					}
 					result.add(polygon);
-					break;
-				}
-				case GEOJSON: {
-					Geometry geometry = readGeoJSON(line);
-					addGeometry(geometry, result);
-					break;
-				}
-				case WKT: {
-					Geometry geometry = readWkt(line);
-					addGeometry(geometry, result);
 					break;
 				}
 			}

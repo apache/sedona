@@ -50,19 +50,6 @@ public class PointFormatMapper extends FormatMapper
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
             switch (splitter) {
-                case CSV:
-                case TSV: {
-                    String[] columns = line.split(splitter.getDelimiter());
-                    Coordinate coordinate = new Coordinate(
-                        Double.parseDouble(columns[this.startOffset]),
-                        Double.parseDouble(columns[1 + this.startOffset]));
-                    Point point = factory.createPoint(coordinate);
-                    if (this.carryInputData) {
-                        point.setUserData(line);
-                    }
-                    result.add(point);
-                    break;
-                }
                 case GEOJSON: {
                     Geometry geometry = readGeoJSON(line);
                     addGeometry(geometry, result);
@@ -71,6 +58,17 @@ public class PointFormatMapper extends FormatMapper
                 case WKT:
                     Geometry geometry = readWkt(line);
                     addGeometry(geometry, result);
+                    break;
+                default:
+                    String[] columns = line.split(splitter.getDelimiter());
+                    Coordinate coordinate = new Coordinate(
+                            Double.parseDouble(columns[this.startOffset]),
+                            Double.parseDouble(columns[1 + this.startOffset]));
+                    Point point = factory.createPoint(coordinate);
+                    if (this.carryInputData) {
+                        point.setUserData(line);
+                    }
+                    result.add(point);
                     break;
             }
         }
