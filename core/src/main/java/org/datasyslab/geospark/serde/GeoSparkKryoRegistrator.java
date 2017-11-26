@@ -21,7 +21,7 @@ public class GeoSparkKryoRegistrator implements KryoRegistrator {
     public void registerClasses(Kryo kryo) {
         GeometrySerde serializer = new GeometrySerde();
 
-        log.warn("Registering custom serializers for geometry types");
+        log.info("Registering custom serializers for geometry types");
 
         kryo.register(Point.class, serializer);
         kryo.register(LineString.class, serializer);
