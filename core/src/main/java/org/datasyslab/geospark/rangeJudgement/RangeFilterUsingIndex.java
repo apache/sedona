@@ -18,8 +18,8 @@ import java.util.List;
 
 public class RangeFilterUsingIndex<U extends Geometry, T extends Geometry> extends JudgementBase implements FlatMapFunction<Iterator<SpatialIndex>, T>{
 
-	public RangeFilterUsingIndex(U queryWindow, boolean considerBoundaryIntersection) {
-		super(queryWindow, considerBoundaryIntersection);
+	public RangeFilterUsingIndex(U queryWindow, boolean considerBoundaryIntersection, boolean leftCoveredByRight) {
+		super(queryWindow, considerBoundaryIntersection, leftCoveredByRight);
 	}
 	/**
 	 * Call.
@@ -39,10 +39,21 @@ public class RangeFilterUsingIndex<U extends Geometry, T extends Geometry> exten
 		List<T> tempResults = treeIndex.query(this.queryGeometry.getEnvelopeInternal());
 		for (T tempResult:tempResults)
 		{
-			if(match(tempResult,queryGeometry))
+			if (leftCoveredByRight)
 			{
-				results.add(tempResult);
+				if(match(tempResult,queryGeometry))
+				{
+					results.add(tempResult);
+				}
 			}
+			else
+			{
+				if(match(queryGeometry,tempResult))
+				{
+					results.add(tempResult);
+				}
+			}
+
 		}
 		return results.iterator();
 	}

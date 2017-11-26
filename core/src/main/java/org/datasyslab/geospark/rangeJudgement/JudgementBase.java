@@ -11,6 +11,7 @@ abstract class JudgementBase<U extends Geometry> implements Serializable {
     private static final Logger log = LogManager.getLogger(JudgementBase.class);
     private boolean considerBoundaryIntersection;
     U queryGeometry;
+    protected boolean leftCoveredByRight = true;
 
     /**
      * Instantiates a new range filter using index.
@@ -18,10 +19,11 @@ abstract class JudgementBase<U extends Geometry> implements Serializable {
      * @param queryWindow the query window
      * @param considerBoundaryIntersection the consider boundary intersection
      */
-    public JudgementBase(U queryWindow,boolean considerBoundaryIntersection)
+    public JudgementBase(U queryWindow,boolean considerBoundaryIntersection, boolean leftCoveredByRight)
     {
         this.considerBoundaryIntersection=considerBoundaryIntersection;
         this.queryGeometry=queryWindow;
+        this.leftCoveredByRight = leftCoveredByRight;
     }
     protected boolean match(Geometry spatialObject, Geometry queryWindow) {
         if(considerBoundaryIntersection)
