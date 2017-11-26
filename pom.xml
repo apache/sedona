@@ -9,6 +9,7 @@
 	<url>http://maven.apache.org</url>
   <modules>
     <module>core</module>
+    <module>sql</module>    
     <module>viz</module>
   </modules>
 </project>
