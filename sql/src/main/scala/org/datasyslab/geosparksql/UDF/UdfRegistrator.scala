@@ -31,7 +31,7 @@ import org.apache.spark.sql.geosparksql.GeometryWrapper
 import org.datasyslab.geospark.enums.{FileDataSplitter, GeometryType}
 import org.datasyslab.geospark.formatMapper.FormatMapper
 
-class UdfRegistrator {
+object UdfRegistrator {
   def resigterFormatMapper(sparkSession: SparkSession): Unit =
   {
     sparkSession.udf.register("ST_Point", (x: Double, y:Double)=>{
