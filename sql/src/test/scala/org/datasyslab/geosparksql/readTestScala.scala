@@ -38,8 +38,7 @@ class readTestScala extends FunSpec with BeforeAndAfterAll {
 
     it("Read CSV point into a SpatialRDD")
     {
-      val udfRegister = new UdfRegistrator
-      udfRegister.registerAll(sparkSession)
+      UdfRegistrator.registerAll(sparkSession)
       var df = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(csvPointInputLocation)
       df.show()
       df.createOrReplaceTempView("inputtable")
@@ -54,8 +53,7 @@ class readTestScala extends FunSpec with BeforeAndAfterAll {
 
     it("Read CSV point into a SpatialRDD by passing coordinates")
     {
-      val udfRegister = new UdfRegistrator
-      udfRegister.registerAll(sparkSession)
+      UdfRegistrator.registerAll(sparkSession)
       var df = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation)
       df.show()
       df.createOrReplaceTempView("inputtable")
@@ -70,8 +68,7 @@ class readTestScala extends FunSpec with BeforeAndAfterAll {
 
     it("Read CSV point into a SpatialRDD with unique Id by passing coordinates")
     {
-      val udfRegister = new UdfRegistrator
-      udfRegister.registerAll(sparkSession)
+      UdfRegistrator.registerAll(sparkSession)
       var df = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation)
       df.show()
       df.createOrReplaceTempView("inputtable")
@@ -87,8 +84,7 @@ class readTestScala extends FunSpec with BeforeAndAfterAll {
 
     it("Read mixed WKT geometries into a SpatialRDD")
     {
-      val udfRegistrator = new UdfRegistrator
-      udfRegistrator.registerAll(sparkSession)
+      UdfRegistrator.registerAll(sparkSession)
       var df = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
       df.show()
       df.createOrReplaceTempView("inputtable")
@@ -103,8 +99,7 @@ class readTestScala extends FunSpec with BeforeAndAfterAll {
 
     it("Read mixed WKT geometries into a SpatialRDD with uniqueId")
     {
-      val udfRegistrator = new UdfRegistrator
-      udfRegistrator.registerAll(sparkSession)
+      UdfRegistrator.registerAll(sparkSession)
       var df = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
       df.show()
       df.createOrReplaceTempView("inputtable")

@@ -46,8 +46,7 @@ public class readTestJava implements Serializable {
     @Test
     public void testReadCsv()
     {
-        UdfRegistrator udfRegistrator = new UdfRegistrator();
-        udfRegistrator.registerAll(sparkSession);
+        UdfRegistrator.registerAll(sparkSession);
         Dataset<Row> df = sparkSession.read().format("csv").option("delimiter","\t").option("header","false").load(csvPointInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
@@ -63,8 +62,7 @@ public class readTestJava implements Serializable {
     @Test
     public void testReadCsvUsingCoordinates()
     {
-        UdfRegistrator udfRegistrator = new UdfRegistrator();
-        udfRegistrator.registerAll(sparkSession);
+        UdfRegistrator.registerAll(sparkSession);
         Dataset<Row> df = sparkSession.read().format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
@@ -80,8 +78,7 @@ public class readTestJava implements Serializable {
     @Test
     public void testReadCsvWithIdUsingCoordinates()
     {
-        UdfRegistrator udfRegistrator = new UdfRegistrator();
-        udfRegistrator.registerAll(sparkSession);
+        UdfRegistrator.registerAll(sparkSession);
         Dataset<Row> df = sparkSession.read().format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
@@ -97,8 +94,7 @@ public class readTestJava implements Serializable {
     @Test
     public void testReadWkt()
     {
-        UdfRegistrator udfRegistrator = new UdfRegistrator();
-        udfRegistrator.registerAll(sparkSession);
+        UdfRegistrator.registerAll(sparkSession);
         Dataset<Row> df = sparkSession.read().format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
@@ -114,8 +110,7 @@ public class readTestJava implements Serializable {
     @Test
     public void testReadWktWithId()
     {
-        UdfRegistrator udfRegistrator = new UdfRegistrator();
-        udfRegistrator.registerAll(sparkSession);
+        UdfRegistrator.registerAll(sparkSession);
         Dataset<Row> df = sparkSession.read().format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
