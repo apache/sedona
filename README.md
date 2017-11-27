@@ -3,7 +3,8 @@
 
 | Status   |      Stable    | Latest | Source code|
 |:----------:|:-------------:|:------:|:------:|
-| GeoSpark |  [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/geospark/0.8.2.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Maven-Central-Coordinates) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/geospark.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Maven-Central-Coordinates) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|
+| GeoSpark |  [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/geospark.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Maven-Central-Coordinates) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/geospark.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Maven-Central-Coordinates) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|
+| GeoSparkSQL [WIP] |  [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/geospark-sql.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSparkSQL-Maven-Central-Coordinates) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/geospark-sql.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSparkSQL-Maven-Central-Coordinates) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|
 | [GeoSparkViz](https://github.com/DataSystemsLab/GeoSpark/tree/master/viz) |   [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/babylon/0.2.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/Babylon-Maven-Central-Coordinates) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/babylon.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/Babylon-Maven-Central-Coordinates) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|
 
 [GeoSpark@Twitter](https://twitter.com/GeoSpark_ASU)||[GeoSpark Discussion Board](https://groups.google.com/forum/#!forum/geospark-discussion-board)||[![Join the chat at https://gitter.im/geospark-datasys/Lobby](https://badges.gitter.im/geospark-datasys/Lobby.svg)](https://gitter.im/geospark-datasys/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -23,11 +24,13 @@ GeoSpark artifacts are hosted in Maven Central: [**Maven Central Coordinates**](
 ##  Version release notes: [click here](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Full-Version-Release-notes)
 
 ## News!
-* In order to download GeoSpark 0.9.0-SNAPSHOT, read this: [GeoSpark Maven Coordinate](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Maven-Central-Coordinates). GeoSpark 0.9.0 will bring you 
+* GeoSpark 0.9.0 is released (more details in [Release notes](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Full-Version-Release-notes))
 	* much less memory consumption powered by GeoSpark customized serializer
 	* much faster spatial/distance join speed
 	* SpatialRDD that supports heterogenous geometries
-	* range, join, knn queries on heterogenous geometries. 
+	* range, join, knn queries on heterogenous geometries
+	* Add KDB-Tree spatial partitioning
+	* Create SpatialRDD from DataFrame / Create DataFrame from SpatialRDD (requires GeoSparkSQL) ([Scala example](https://github.com/DataSystemsLab/GeoSpark/blob/master/sql/src/test/scala/org/datasyslab/geosparksql/readTestScala.scala)[Java example](https://github.com/DataSystemsLab/GeoSpark/blob/master/sql/src/test/java/org/datasyslab/geosparksql/readTestJava.java))
 * Welcome GeoSpark new contributor, Masha Basmanova (@mbasmanova) from Facebook. Masha has contributed more than 10 PRs to GeoSpark on refactoring GeoSpark architecture and improving GeoSpark join performance!
 * Welcome GeoSpark new contributor, Zongsi Zhang (@zongsizhang) from Arizona State University. Zongsi participated the design of GeoSpark Shapefile parser and he has done a great job!
 
@@ -45,9 +48,11 @@ The generic SpatialRDD supports heterogenous geometries:
 * Multi-polygon
 * Multi-line string
 * GeometryCollection
+* Circle
 
 
 ## Supported input data format
+
 **Native input format support**: 
 
 * CSV
@@ -57,10 +62,13 @@ The generic SpatialRDD supports heterogenous geometries:
 * NASA Earth Data NetCDF/HDF
 * ESRI ShapeFile(.shp, .shx, .dbf)
 
+**SparkSQL DataFrame support**: Create SpatialRDD from DataFrame / Create DataFrame from SpatialRDD
+
+
 **User-supplied input format mapper**: Any single-line input formats
 
 ## Spatial Partitioning
-Supported Spatial Partitioning techniques: Quad-Tree, KDB-Tree, R-Tree, Voronoi diagram, Uniform grids (Experimental), Hilbert Curve (Experimental)
+Supported Spatial Partitioning techniques: Quad-Tree (recommend), KDB-Tree (recommend), R-Tree, Voronoi diagram, Uniform grids (Experimental), Hilbert Curve (Experimental)
 
 ## Spatial Index
 Supported Spatial Indexes: Quad-Tree and R-Tree. R-Tree supports Spatial K Nearest Neighbors query.
