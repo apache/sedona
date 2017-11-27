@@ -50,7 +50,7 @@
             <groupId>org.datasyslab</groupId>
             <artifactId>geospark</artifactId>
             <version>${project.version}</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>        
         <dependency>
             <groupId>org.apache.spark</groupId>
@@ -147,6 +147,12 @@
                                 <arg>${project.build.directory}/.scala_dependencies</arg>
                             </args>
                         </configuration>
+                    </execution>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>doc-jar</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
