@@ -262,7 +262,6 @@ public class JoinQuery {
      * 
      * Duplicates present in the input RDDs will be reflected in the join results.
      *
-     * @param <U> Type of the geometries in queryRDD/circleRDD set
      * @param <T> Type of the geometries in spatialRDD set
      * @param spatialRDD Set of geometries
      * @param queryRDD Set of geometries
@@ -296,7 +295,6 @@ public class JoinQuery {
      * Because the results are reported as a HashSet, any duplicates in the original spatialRDD will
      * be eliminated.
      *
-     * @param <U> Type of the geometries in queryRDD/circleRDD set
      * @param <T> Type of the geometries in spatialRDD set
      * @param spatialRDD Set of geometries
      * @param queryRDD Set of geometries
@@ -319,7 +317,6 @@ public class JoinQuery {
     /**
      * A faster version of {@link #DistanceJoinQuery(SpatialRDD, CircleRDD, boolean, boolean)} which may produce duplicate results.
      *
-     * @param <U> Type of the geometries in queryRDD/circleRDD set
      * @param <T> Type of the geometries in spatialRDD set
      * @param spatialRDD Set of geometries
      * @param queryRDD Set of geometries
@@ -344,7 +341,6 @@ public class JoinQuery {
      * 
      * Duplicates present in the input RDDs will be reflected in the join results.
      *
-     * @param <U> Type of the geometries in queryRDD/circleRDD set
      * @param <T> Type of the geometries in spatialRDD set
      * @param spatialRDD Set of geometries
      * @param queryRDD Set of geometries
