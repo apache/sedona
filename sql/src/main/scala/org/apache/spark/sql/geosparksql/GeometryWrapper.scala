@@ -14,7 +14,7 @@ class GeometryWrapper extends Serializable {
   def this(geometryString: String, fileDataSplitter: FileDataSplitter, geometryType: GeometryType)
   {
     this()
-    var formatMapper = new FormatMapper(fileDataSplitter, true, geometryType)
+    var formatMapper = new FormatMapper(fileDataSplitter, false, geometryType)
     this.geometry = formatMapper.readGeometry(geometryString)
   }
 

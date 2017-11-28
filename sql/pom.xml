@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.datasyslab</groupId>
 	<artifactId>geospark-sql</artifactId>
-	<version>0.9.0</version>
+	<version>0.9.1</version>
 
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>SQL Extension of GeoSpark</description>
@@ -51,7 +51,7 @@
             <artifactId>geospark</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
-        </dependency>        
+        </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_2.11</artifactId>

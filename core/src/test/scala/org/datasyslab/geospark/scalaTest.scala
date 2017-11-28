@@ -53,7 +53,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
 		val geometryFactory=new GeometryFactory()
 		val kNNQueryPoint=geometryFactory.createPoint(new Coordinate(-84.01, 34.01))
 		val rangeQueryWindow=new Envelope (-90.01,-80.01,30.01,40.01)
-		val joinQueryPartitioningType = GridType.RTREE
+		val joinQueryPartitioningType = GridType.QUADTREE
 		val eachQueryLoopTimes=1
 
 		it("should pass spatial range query") {
@@ -164,7 +164,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
 			val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
 			val queryWindowRDD = new CircleRDD(objectRDD,0.1)
 
-			objectRDD.spatialPartitioning(GridType.RTREE)
+			objectRDD.spatialPartitioning(GridType.QUADTREE)
 			queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
 
 			for(i <- 1 to eachQueryLoopTimes)
@@ -177,7 +177,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
 			val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
 			val queryWindowRDD = new CircleRDD(objectRDD,0.1)
 
-			objectRDD.spatialPartitioning(GridType.RTREE)
+			objectRDD.spatialPartitioning(GridType.QUADTREE)
 			queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
 
 			objectRDD.buildIndex(IndexType.RTREE,true)

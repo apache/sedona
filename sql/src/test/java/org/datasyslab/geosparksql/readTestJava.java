@@ -4,12 +4,17 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.datasyslab.geospark.enums.GridType;
+import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader;
 import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator;
+import org.datasyslab.geospark.spatialOperator.JoinQuery;
+import org.datasyslab.geospark.spatialRDD.CircleRDD;
 import org.datasyslab.geospark.spatialRDD.SpatialRDD;
 import org.datasyslab.geosparksql.UDF.UdfRegistrator;
 import org.datasyslab.geosparksql.utils.Adapter;
@@ -130,6 +135,68 @@ public class readTestJava implements Serializable {
         spatialRDD.rawSpatialRDD = ShapefileReader.readToGeometryRDD(JavaSparkContext.fromSparkContext(sparkSession.sparkContext()),shapefileInputLocation);
         spatialRDD.analyze();
         Adapter.toDf(spatialRDD,sparkSession).show();
+    }
+
+    @Test
+    public void testSpatialJoinToDataFrame() throws Exception {
+        UdfRegistrator.registerAll(sparkSession);
+
+        Dataset<Row> pointCsvDf = sparkSession.read().format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation);
+        pointCsvDf.createOrReplaceTempView("pointtable");
+        Dataset<Row> pointDf = sparkSession.sql("select ST_PointWithId(pointtable._c0,pointtable._c1,\"mypointid\") as arealandmark from pointtable");
+        SpatialRDD pointRDD = new SpatialRDD<Geometry>();
+        pointRDD.rawSpatialRDD = Adapter.toJavaRdd(pointDf);
+        pointRDD.analyze();
+
+        Dataset<Row> polygonWktDf = sparkSession.read().format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation);
+        polygonWktDf.createOrReplaceTempView("polygontable");
+        Dataset<Row> polygonDf = sparkSession.sql("select ST_GeomFromTextWithId(polygontable._c0,\"wkt\", concat(polygontable._c3,'\t',polygontable._c5)) as usacounty from polygontable");
+        SpatialRDD polygonRDD = new SpatialRDD<Geometry>();
+        polygonRDD.rawSpatialRDD = Adapter.toJavaRdd(polygonDf);
+        polygonRDD.analyze();
+
+        pointRDD.spatialPartitioning(GridType.QUADTREE);
+        polygonRDD.spatialPartitioning(pointRDD.getPartitioner());
+
+        pointRDD.buildIndex(IndexType.QUADTREE, true);
+
+        JavaPairRDD joinResultPairRDD = JoinQuery.SpatialJoinQueryFlat(pointRDD, polygonRDD, true, true);
+
+        Dataset joinResultDf = Adapter.toDf(joinResultPairRDD, sparkSession);
+
+        joinResultDf.show();
+    }
+
+    @Test
+    public void testDistanceJoinToDataFrame() throws Exception {
+        UdfRegistrator.registerAll(sparkSession);
+
+        Dataset<Row> pointCsvDf = sparkSession.read().format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation);
+        pointCsvDf.createOrReplaceTempView("pointtable");
+        Dataset<Row> pointDf = sparkSession.sql("select ST_PointWithId(pointtable._c0,pointtable._c1,\"mypointid\") as arealandmark from pointtable");
+        SpatialRDD pointRDD = new SpatialRDD<Geometry>();
+        pointRDD.rawSpatialRDD = Adapter.toJavaRdd(pointDf);
+        pointRDD.analyze();
+
+        Dataset<Row> polygonWktDf = sparkSession.read().format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation);
+        polygonWktDf.createOrReplaceTempView("polygontable");
+        Dataset<Row> polygonDf = sparkSession.sql("select ST_GeomFromTextWithId(polygontable._c0,\"wkt\", concat(polygontable._c3,'\t',polygontable._c5)) as usacounty from polygontable");
+        SpatialRDD polygonRDD = new SpatialRDD<Geometry>();
+        polygonRDD.rawSpatialRDD = Adapter.toJavaRdd(polygonDf);
+        polygonRDD.analyze();
+
+        CircleRDD circleRDD = new CircleRDD(polygonRDD, 0.2);
+
+        pointRDD.spatialPartitioning(GridType.QUADTREE);
+        circleRDD.spatialPartitioning(pointRDD.getPartitioner());
+
+        pointRDD.buildIndex(IndexType.QUADTREE, true);
+
+        JavaPairRDD joinResultPairRDD = JoinQuery.DistanceJoinQueryFlat(pointRDD, circleRDD, true, true);
+
+        Dataset joinResultDf = Adapter.toDf(joinResultPairRDD, sparkSession);
+
+        joinResultDf.show();
     }
 
     /**

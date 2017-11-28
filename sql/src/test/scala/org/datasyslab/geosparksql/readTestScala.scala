@@ -4,10 +4,12 @@ import com.vividsolutions.jts.geom.Geometry
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.sql.SparkSession
+import org.datasyslab.geospark.enums.{GridType, IndexType}
 import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader
 import org.datasyslab.geospark.monitoring.GeoSparkListener
 import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
-import org.datasyslab.geospark.spatialRDD.SpatialRDD
+import org.datasyslab.geospark.spatialOperator.JoinQuery
+import org.datasyslab.geospark.spatialRDD.{CircleRDD, SpatialRDD}
 import org.datasyslab.geosparksql.UDF.UdfRegistrator
 import org.datasyslab.geosparksql.utils.Adapter
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
@@ -120,5 +122,62 @@ class readTestScala extends FunSpec with BeforeAndAfterAll {
       Adapter.toDf(spatialRDD,sparkSession).show()
     }
 
+    it("Convert spatial join result to DataFrame")
+    {
+      UdfRegistrator.registerAll(sparkSession)
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      var polygonDf = sparkSession.sql("select ST_GeomFromTextWithId(polygontable._c0,\"wkt\", concat(polygontable._c3,'\t',polygontable._c5)) as usacounty from polygontable")
+      var polygonRDD = new SpatialRDD[Geometry]
+      polygonRDD.rawSpatialRDD = Adapter.toRdd(polygonDf)
+      polygonRDD.analyze()
+
+      var pointCsvDF = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation)
+      pointCsvDF.createOrReplaceTempView("pointtable")
+      var pointDf = sparkSession.sql("select ST_PointWithId(pointtable._c0,pointtable._c1,\"mypointid\") as arealandmark from pointtable")
+      var pointRDD = new SpatialRDD[Geometry]
+      pointRDD.rawSpatialRDD = Adapter.toRdd(pointDf)
+      pointRDD.analyze()
+
+      pointRDD.spatialPartitioning(GridType.QUADTREE)
+      polygonRDD.spatialPartitioning(pointRDD.getPartitioner)
+
+      pointRDD.buildIndex(IndexType.QUADTREE,true)
+
+      var joinResultPairRDD = JoinQuery.SpatialJoinQueryFlat(pointRDD, polygonRDD, true, true)
+
+      var joinResultDf = Adapter.toDf(joinResultPairRDD, sparkSession)
+      joinResultDf.show()
+    }
+
+    it("Convert distance join result to DataFrame")
+    {
+      UdfRegistrator.registerAll(sparkSession)
+
+      var pointCsvDF = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation)
+      pointCsvDF.createOrReplaceTempView("pointtable")
+      var pointDf = sparkSession.sql("select ST_PointWithId(pointtable._c0,pointtable._c1,\"mypointid\") as arealandmark from pointtable")
+      var pointRDD = new SpatialRDD[Geometry]
+      pointRDD.rawSpatialRDD = Adapter.toRdd(pointDf)
+      pointRDD.analyze()
+
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      var polygonDf = sparkSession.sql("select ST_GeomFromTextWithId(polygontable._c0,\"wkt\", concat(polygontable._c3,'\t',polygontable._c5)) as usacounty from polygontable")
+      var polygonRDD = new SpatialRDD[Geometry]
+      polygonRDD.rawSpatialRDD = Adapter.toRdd(polygonDf)
+      polygonRDD.analyze()
+      var circleRDD = new CircleRDD(polygonRDD, 0.2)
+
+      pointRDD.spatialPartitioning(GridType.QUADTREE)
+      circleRDD.spatialPartitioning(pointRDD.getPartitioner)
+
+      pointRDD.buildIndex(IndexType.QUADTREE,true)
+
+      var joinResultPairRDD = JoinQuery.DistanceJoinQueryFlat(pointRDD, circleRDD, true, true)
+
+      var joinResultDf = Adapter.toDf(joinResultPairRDD, sparkSession)
+      joinResultDf.show()
+    }
 	}
 }
