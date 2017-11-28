@@ -27,7 +27,7 @@ package org.datasyslab.geosparksql.utils
 
 
 import com.vividsolutions.jts.geom.Geometry
-import org.apache.spark.api.java.JavaRDD
+import org.apache.spark.api.java.{JavaPairRDD, JavaRDD}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.geosparksql.GeometryWrapper
 import org.apache.spark.sql.types._
@@ -51,6 +51,22 @@ object Adapter {
     val rowRdd = spatialRDD.rawSpatialRDD.rdd.map[Row](f => Row.fromSeq(f.toString.split("\t").toSeq))
     var fieldArray = new Array[StructField](rowRdd.take(1)(0).size)
     fieldArray(0) = StructField("rddshape", StringType)
+    for (i <- 1 to fieldArray.length-1) fieldArray(i) = StructField("_c"+i, StringType)
+    val schema = StructType(fieldArray)
+    return sparkSession.createDataFrame(rowRdd, schema)
+  }
+
+  def toDf(spatialPairRDD: JavaPairRDD[Geometry, Geometry], sparkSession: SparkSession): DataFrame =
+  {
+    val rowRdd = spatialPairRDD.rdd.map[Row](f =>
+    {
+      val seq1 = f._1.toString.split("\t").toSeq
+      val seq2 = f._2.toString.split("\t").toSeq
+      val result = seq1++seq2
+      Row.fromSeq(result)
+    })
+    var fieldArray = new Array[StructField](rowRdd.take(1)(0).size)
+    fieldArray(0) = StructField("windowrddshape", StringType)
     for (i <- 1 to fieldArray.length-1) fieldArray(i) = StructField("_c"+i, StringType)
     val schema = StructType(fieldArray)
     return sparkSession.createDataFrame(rowRdd, schema)
