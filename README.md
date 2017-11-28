@@ -24,13 +24,14 @@ GeoSpark artifacts are hosted in Maven Central: [**Maven Central Coordinates**](
 ##  Version release notes: [click here](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Full-Version-Release-notes)
 
 ## News!
+* GeoSpark 0.9.1 is released: This is an urgent patch for 0.9.0 which provides an adapter to convert JoinQuery result to DataFrame. [GeoSpark SQL Maven Central coordinate](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSparkSQL-Maven-Central-Coordinates)
 * GeoSpark 0.9.0 is released (more details in [Release notes](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Full-Version-Release-notes))
 	* much less memory consumption powered by GeoSpark customized serializer
 	* much faster spatial/distance join speed
 	* SpatialRDD that supports heterogenous geometries
 	* range, join, knn queries on heterogenous geometries
 	* Add KDB-Tree spatial partitioning
-	* Create SpatialRDD from DataFrame / Create DataFrame from SpatialRDD (requires GeoSparkSQL) ([Scala example](https://github.com/DataSystemsLab/GeoSpark/blob/master/sql/src/test/scala/org/datasyslab/geosparksql/readTestScala.scala)[Java example](https://github.com/DataSystemsLab/GeoSpark/blob/master/sql/src/test/java/org/datasyslab/geosparksql/readTestJava.java))
+	* Create SpatialRDD from DataFrame / Create DataFrame from SpatialRDD (requires GeoSparkSQL) ([Scala example](https://github.com/DataSystemsLab/GeoSpark/blob/master/sql/src/test/scala/org/datasyslab/geosparksql/readTestScala.scala),[Java example](https://github.com/DataSystemsLab/GeoSpark/blob/master/sql/src/test/java/org/datasyslab/geosparksql/readTestJava.java))
 * Welcome GeoSpark new contributor, Masha Basmanova (@mbasmanova) from Facebook. Masha has contributed more than 10 PRs to GeoSpark on refactoring GeoSpark architecture and improving GeoSpark join performance!
 * Welcome GeoSpark new contributor, Zongsi Zhang (@zongsizhang) from Arizona State University. Zongsi participated the design of GeoSpark Shapefile parser and he has done a great job!
 
