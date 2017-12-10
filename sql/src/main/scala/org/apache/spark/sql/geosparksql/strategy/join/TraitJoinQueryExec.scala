@@ -68,8 +68,8 @@ trait TraitJoinQueryExec { self: SparkPlan =>
 
     var geosparkConf = new GeoSparkConf(sparkContext.conf)
 
-    logInfo("Number of partitions on the left: " + leftResultsRaw.partitions.size)
-    logInfo("Number of partitions on the right: " + rightResultsRaw.partitions.size)
+    logDebug("Number of partitions on the left: " + leftResultsRaw.partitions.size)
+    logDebug("Number of partitions on the right: " + rightResultsRaw.partitions.size)
 
     val (leftShapes, rightShapes) =
       toSpatialRddPair(leftResultsRaw, boundLeftShape, rightResultsRaw, boundRightShape)
@@ -91,7 +91,7 @@ trait TraitJoinQueryExec { self: SparkPlan =>
         geosparkConf.setDatasetBoundary(rightShapes.boundaryEnvelope)
       }
     }
-      logInfo(
+    logDebug(
         s"Found ${geosparkConf.getJoinApproximateTotalCount} objects")
     var numPartitions = -1
     try {
@@ -133,17 +133,15 @@ trait TraitJoinQueryExec { self: SparkPlan =>
       }
     }
 
-    logInfo(s"leftShape num partition ${leftShapes.spatialPartitionedRDD.partitions.size()}")
-    logInfo(s"rightShape num partition ${rightShapes.spatialPartitionedRDD.partitions.size()}")
 
     val joinParams = new JoinParams(intersects, geosparkConf.getIndexType, geosparkConf.getJoinBuildSide)
 
-    logInfo(s"leftShape count ${leftShapes.spatialPartitionedRDD.count()}")
-    logInfo(s"rightShape count ${rightShapes.spatialPartitionedRDD.count()}")
+    //logInfo(s"leftShape count ${leftShapes.spatialPartitionedRDD.count()}")
+    //logInfo(s"rightShape count ${rightShapes.spatialPartitionedRDD.count()}")
 
     val matches = JoinQuery.spatialJoin(leftShapes, rightShapes, joinParams)
 
-    logInfo(s"Join result has ${matches.count()} rows")
+    logDebug(s"Join result has ${matches.count()} rows")
 
       matches.rdd.mapPartitions { iter =>
         val filtered =
