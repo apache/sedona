@@ -5,12 +5,11 @@ import org.apache.log4j.{Level, Logger}
 import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{SparkConf, SparkContext}
-import org.datasyslab.geospark.enums.{FileDataSplitter, GridType, IndexType}
+import org.datasyslab.geospark.enums.{FileDataSplitter, GridType, IndexType, JoinBuildSide}
 import org.datasyslab.geospark.formatMapper.EarthdataHDFPointMapper
 import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
 import org.datasyslab.geospark.spatialOperator.JoinQuery.JoinParams
 import org.datasyslab.geospark.monitoring.GeoSparkListener
-import org.datasyslab.geospark.spatialOperator.JoinQuery.BuildSide.BUILD_LEFT
 import org.datasyslab.geospark.spatialOperator.{JoinQuery, KNNQuery, RangeQuery}
 import org.datasyslab.geospark.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
@@ -155,7 +154,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
 
 			for(i <- 1 to eachQueryLoopTimes)
 			{
-				val joinParams = new JoinParams(false, PolygonRDDIndexType, BUILD_LEFT)
+				val joinParams = new JoinParams(false, PolygonRDDIndexType, JoinBuildSide.LEFT)
 				val resultSize = JoinQuery.spatialJoin(queryWindowRDD, objectRDD, joinParams).count()
 			}
 		}

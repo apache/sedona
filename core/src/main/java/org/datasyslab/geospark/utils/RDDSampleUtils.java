@@ -36,14 +36,14 @@ public class RDDSampleUtils {
     	if(givenSampleNumbers > 0)
     	{
     		if (givenSampleNumbers > totalNumberOfRecords) {
-    			throw new IllegalArgumentException("Number of samples cannot be larger than total number of records.");
+    			throw new IllegalArgumentException("[GeoSpark] Number of samples "+givenSampleNumbers+" cannot be larger than total records num "+totalNumberOfRecords);
 			}
     		return givenSampleNumbers;
     	}
 
     	// Make sure that number of records >= 2 * number of partitions
 		if (totalNumberOfRecords < 2 * numPartitions) {
-    		throw new IllegalArgumentException("Number of partitions cannot be larger than half of total number of records.");
+    		throw new IllegalArgumentException("[GeoSpark] Number of partitions "+numPartitions+" cannot be larger than half of total records num "+totalNumberOfRecords);
 		}
 
 		if (totalNumberOfRecords < 1000) {

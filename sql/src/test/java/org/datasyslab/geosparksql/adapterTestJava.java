@@ -17,6 +17,7 @@ import org.datasyslab.geospark.spatialOperator.JoinQuery;
 import org.datasyslab.geospark.spatialRDD.CircleRDD;
 import org.datasyslab.geospark.spatialRDD.SpatialRDD;
 import org.datasyslab.geosparksql.UDF.UdfRegistrator;
+import org.datasyslab.geosparksql.UDT.UdtRegistrator;
 import org.datasyslab.geosparksql.utils.Adapter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -46,12 +47,13 @@ public class readTestJava implements Serializable {
         sparkSession = new SparkSession(sc.sc());
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
+        UdtRegistrator.registerAll();
+        UdfRegistrator.registerAll(sparkSession.sqlContext());
     }
 
     @Test
     public void testReadCsv()
     {
-        UdfRegistrator.registerAll(sparkSession);
         Dataset<Row> df = sparkSession.read().format("csv").option("delimiter","\t").option("header","false").load(csvPointInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
@@ -67,7 +69,6 @@ public class readTestJava implements Serializable {
     @Test
     public void testReadCsvUsingCoordinates()
     {
-        UdfRegistrator.registerAll(sparkSession);
         Dataset<Row> df = sparkSession.read().format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
@@ -83,7 +84,6 @@ public class readTestJava implements Serializable {
     @Test
     public void testReadCsvWithIdUsingCoordinates()
     {
-        UdfRegistrator.registerAll(sparkSession);
         Dataset<Row> df = sparkSession.read().format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
@@ -99,7 +99,6 @@ public class readTestJava implements Serializable {
     @Test
     public void testReadWkt()
     {
-        UdfRegistrator.registerAll(sparkSession);
         Dataset<Row> df = sparkSession.read().format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
@@ -115,7 +114,6 @@ public class readTestJava implements Serializable {
     @Test
     public void testReadWktWithId()
     {
-        UdfRegistrator.registerAll(sparkSession);
         Dataset<Row> df = sparkSession.read().format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
@@ -139,8 +137,6 @@ public class readTestJava implements Serializable {
 
     @Test
     public void testSpatialJoinToDataFrame() throws Exception {
-        UdfRegistrator.registerAll(sparkSession);
-
         Dataset<Row> pointCsvDf = sparkSession.read().format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation);
         pointCsvDf.createOrReplaceTempView("pointtable");
         Dataset<Row> pointDf = sparkSession.sql("select ST_PointWithId(pointtable._c0,pointtable._c1,\"mypointid\") as arealandmark from pointtable");
@@ -169,8 +165,6 @@ public class readTestJava implements Serializable {
 
     @Test
     public void testDistanceJoinToDataFrame() throws Exception {
-        UdfRegistrator.registerAll(sparkSession);
-
         Dataset<Row> pointCsvDf = sparkSession.read().format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation);
         pointCsvDf.createOrReplaceTempView("pointtable");
         Dataset<Row> pointDf = sparkSession.sql("select ST_PointWithId(pointtable._c0,pointtable._c1,\"mypointid\") as arealandmark from pointtable");
@@ -204,6 +198,7 @@ public class readTestJava implements Serializable {
      */
     @AfterClass
     public static void TearDown() {
+        UdfRegistrator.dropAll();
         sparkSession.stop();
     }
 }

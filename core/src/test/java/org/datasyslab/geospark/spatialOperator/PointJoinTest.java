@@ -10,6 +10,7 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.enums.JoinBuildSide;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.datasyslab.geospark.spatialRDD.RectangleRDD;
@@ -26,7 +27,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import static org.datasyslab.geospark.spatialOperator.JoinQuery.BuildSide.BUILD_LEFT;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
@@ -184,7 +184,7 @@ public class PointJoinTest extends JoinTestBase {
 
         partitionRdds(queryRDD, spatialRDD);
 
-        JoinQuery.JoinParams joinParams = new JoinQuery.JoinParams(true, indexType, BUILD_LEFT);
+        JoinQuery.JoinParams joinParams = new JoinQuery.JoinParams(true, indexType, JoinBuildSide.LEFT);
         List<Tuple2<Polygon, Point>> results = JoinQuery.spatialJoin(queryRDD, spatialRDD, joinParams).collect();
 
         sanityCheckFlatJoinResults(results);

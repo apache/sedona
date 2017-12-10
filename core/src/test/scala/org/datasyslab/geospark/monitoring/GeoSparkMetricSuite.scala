@@ -4,7 +4,7 @@ import org.apache.log4j.{Level, Logger}
 import org.apache.spark.{SparkConf, SparkContext, TaskContext}
 import org.scalatest.{BeforeAndAfterAll, FunSuite, FunSuiteLike}
 
-class GeoSparkMetricSuite extends FunSuite with FunSuiteLike with BeforeAndAfterAll {
+class  GeoSparkMetricSuite extends FunSuite with FunSuiteLike with BeforeAndAfterAll {
 
   implicit lazy val sc = {
     val conf = new SparkConf().setAppName(classOf[GeoSparkMetricSuite].getName).setMaster("local[2]")

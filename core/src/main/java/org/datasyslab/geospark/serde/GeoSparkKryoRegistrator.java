@@ -8,6 +8,8 @@ import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.index.quadtree.Quadtree;
+import com.vividsolutions.jts.index.strtree.STRtree;
 import org.apache.log4j.Logger;
 import org.apache.spark.serializer.KryoRegistrator;
 import org.datasyslab.geospark.geometryObjects.Circle;
@@ -31,5 +33,8 @@ public class GeoSparkKryoRegistrator implements KryoRegistrator {
         kryo.register(MultiPolygon.class, serializer);
         kryo.register(GeometryCollection.class, serializer);
         kryo.register(Circle.class, serializer);
+        // TODO: Replace the default serializer with default spatial index serializer
+        kryo.register(Quadtree.class);
+        kryo.register(STRtree.class);
     }
 }
