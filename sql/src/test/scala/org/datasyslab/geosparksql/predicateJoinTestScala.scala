@@ -158,5 +158,32 @@ class predicateJoinTestScala extends FunSpec with BeforeAndAfterAll {
       distanceJoinDf.show(10)
       assert (distanceJoinDf.count()==2998)
     }
+
+    it("Passed ST_Contains in a range and join")
+    {
+      val geosparkConf = new GeoSparkConf(sparkSession.sparkContext.getConf)
+      println(geosparkConf)
+
+      var polygonCsvDf = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(csvPolygonInputLocation)
+      polygonCsvDf.createOrReplaceTempView("polygontable")
+      polygonCsvDf.show()
+      var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20)), \"mypolygonid\") as polygonshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      polygonDf.show()
+
+      var pointCsvDF = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation)
+      pointCsvDF.createOrReplaceTempView("pointtable")
+      pointCsvDF.show()
+      var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20)), \"myPointId\") as pointshape from pointtable")
+      pointDf.createOrReplaceTempView("pointdf")
+      pointDf.show()
+
+      var rangeJoinDf = sparkSession.sql("select * from polygondf, pointdf where ST_Contains(polygondf.polygonshape,pointdf.pointshape) " +
+        "and ST_Contains(ST_PolygonFromEnvelope(1.0,101.0,501.0,601.0), polygondf.polygonshape)")
+
+      rangeJoinDf.explain()
+      rangeJoinDf.show(3)
+      assert (rangeJoinDf.count()==500)
+    }
 	}
 }
