@@ -300,7 +300,7 @@ public class StandardQuadTree<T> implements Serializable {
                 return this.zone;
             }
 
-            throw new ArrayIndexOutOfBoundsException("[Babylon][StandardQuadTree] this pixel is out of the quad tree boundary.");
+            throw new ArrayIndexOutOfBoundsException("[GeoSparkViz][StandardQuadTree] this pixel is out of the quad tree boundary.");
         }
     }
 
@@ -314,11 +314,11 @@ public class StandardQuadTree<T> implements Serializable {
                 assert regions==null;
                 if (zone.contains(x, y)) {
                     // This should not happen
-                    throw new Exception("[Babylon][StandardQuadTree][getParentZone] this leaf node doesn't have enough depth. " +
+                    throw new Exception("[GeoSparkViz][StandardQuadTree][getParentZone] this leaf node doesn't have enough depth. " +
                             "Please check ForceGrowUp. Expected: "+minLevel+" Actual: "+level+". Query point: "+x+" "+y+
                             ". Tree statistics, total leaf nodes: "+getTotalNumLeafNode());
                 } else {
-                    throw new Exception("[Babylon][StandardQuadTree][getParentZone] this pixel is out of the quad tree boundary.");
+                    throw new Exception("[GeoSparkViz][StandardQuadTree][getParentZone] this pixel is out of the quad tree boundary.");
                 }
             } else {
                 return regions[region].getParentZone(x, y, minLevel);
@@ -328,7 +328,7 @@ public class StandardQuadTree<T> implements Serializable {
             return zone;
         }
 
-        throw new Exception("[Babylon][StandardQuadTree][getParentZone] this pixel is out of the quad tree boundary.");
+        throw new Exception("[GeoSparkViz][StandardQuadTree][getParentZone] this pixel is out of the quad tree boundary.");
     }
 
     public List<QuadRectangle> findZones(QuadRectangle r)
