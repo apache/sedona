@@ -8,6 +8,8 @@ package org.datasyslab.geospark.joinJudgement;
 
 import com.vividsolutions.jts.geom.Geometry;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.apache.spark.api.java.function.FlatMapFunction2;
 
 import javax.annotation.Nullable;
@@ -19,6 +21,7 @@ import java.util.List;
 public class NestedLoopJudgement<T extends Geometry, U extends Geometry>
         extends JudgementBase
         implements FlatMapFunction2<Iterator<T>, Iterator<U>, Pair<U, T>>, Serializable {
+    private static final Logger log = LogManager.getLogger(NestedLoopJudgement.class);
 
     /**
      * @see JudgementBase
@@ -41,6 +44,7 @@ public class NestedLoopJudgement<T extends Geometry, U extends Geometry>
             U window = iteratorWindow.next();
             for (int i =0;i<queryObjects.size();i++) {
                 T object = queryObjects.get(i);
+                //log.warn("Check "+window.toText()+" with "+object.toText());
                 if (match(window, object)) {
                     result.add(Pair.of(window, object));
                 }

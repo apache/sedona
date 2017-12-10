@@ -15,6 +15,7 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
+import org.datasyslab.geospark.enums.JoinBuildSide;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.geometryObjects.Circle;
 import org.datasyslab.geospark.joinJudgement.DedupParams;
@@ -31,8 +32,6 @@ import scala.Tuple2;
 
 import java.util.HashSet;
 import java.util.Objects;
-
-import static org.datasyslab.geospark.spatialOperator.JoinQuery.BuildSide.BUILD_RIGHT;
 
 public class JoinQuery {
     private static final Logger log = LogManager.getLogger(JoinQuery.class);
@@ -106,32 +105,27 @@ public class JoinQuery {
             });
     }
 
-    public enum BuildSide {
-        BUILD_LEFT,
-        BUILD_RIGHT,
-    }
-
     public static final class JoinParams {
         public final boolean useIndex;
         public final boolean considerBoundaryIntersection;
         public final boolean allowDuplicates;
         public final IndexType indexType;
-        public final BuildSide buildSide;
+        public final JoinBuildSide joinBuildSide;
 
         public JoinParams(boolean useIndex, boolean considerBoundaryIntersection, boolean allowDuplicates) {
             this.useIndex = useIndex;
             this.considerBoundaryIntersection = considerBoundaryIntersection;
             this.allowDuplicates = allowDuplicates;
             this.indexType = IndexType.RTREE;
-            this.buildSide = BUILD_RIGHT;
+            this.joinBuildSide = JoinBuildSide.RIGHT;
         }
 
-        public JoinParams(boolean considerBoundaryIntersection, IndexType polygonIndexType, BuildSide buildSide) {
+        public JoinParams(boolean considerBoundaryIntersection, IndexType polygonIndexType, JoinBuildSide joinBuildSide) {
             this.useIndex = false;
             this.considerBoundaryIntersection = considerBoundaryIntersection;
             this.allowDuplicates = false;
             this.indexType = polygonIndexType;
-            this.buildSide = buildSide;
+            this.joinBuildSide = joinBuildSide;
         }
     }
 
@@ -414,21 +408,23 @@ public class JoinQuery {
                     new DynamicIndexLookupJudgement(
                         joinParams.considerBoundaryIntersection,
                         joinParams.indexType,
-                        joinParams.buildSide,
+                        joinParams.joinBuildSide,
                         dedupParams,
                         buildCount, streamCount, resultCount, candidateCount);
                 resultWithDuplicates = leftRDD.spatialPartitionedRDD.zipPartitions(rightRDD.spatialPartitionedRDD, judgement);
             }
-        } else if (joinParams.indexType != null) {
+        }/*
+        else if (joinParams.indexType != null) {
             DynamicIndexLookupJudgement judgement =
                 new DynamicIndexLookupJudgement(
                     joinParams.considerBoundaryIntersection,
                     joinParams.indexType,
-                    joinParams.buildSide,
+                    joinParams.joinBuildSide,
                     dedupParams,
                     buildCount, streamCount, resultCount, candidateCount);
             resultWithDuplicates = leftRDD.spatialPartitionedRDD.zipPartitions(rightRDD.spatialPartitionedRDD, judgement);
-        } else {
+        }*/
+        else {
             NestedLoopJudgement judgement = new NestedLoopJudgement(joinParams.considerBoundaryIntersection, dedupParams);
             resultWithDuplicates = rightRDD.spatialPartitionedRDD.zipPartitions(leftRDD.spatialPartitionedRDD, judgement);
         }

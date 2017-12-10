@@ -111,6 +111,7 @@ abstract class JudgementBase implements Serializable {
     }
 
     private boolean geoMatch(Geometry left, Geometry right) {
+        //log.warn("Check "+left.toText()+" with "+right.toText());
         return considerBoundaryIntersection ? left.intersects(right) : left.covers(right);
     }
 }

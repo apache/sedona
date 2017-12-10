@@ -40,7 +40,7 @@ class readTestScala extends FunSpec with BeforeAndAfterAll {
 
     it("Read CSV point into a SpatialRDD")
     {
-      UdfRegistrator.registerAll(sparkSession)
+      UdfRegistrator.registerAll(sparkSession.sqlContext)
       var df = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(csvPointInputLocation)
       df.show()
       df.createOrReplaceTempView("inputtable")
@@ -55,7 +55,7 @@ class readTestScala extends FunSpec with BeforeAndAfterAll {
 
     it("Read CSV point into a SpatialRDD by passing coordinates")
     {
-      UdfRegistrator.registerAll(sparkSession)
+      UdfRegistrator.registerAll(sparkSession.sqlContext)
       var df = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation)
       df.show()
       df.createOrReplaceTempView("inputtable")
@@ -70,7 +70,7 @@ class readTestScala extends FunSpec with BeforeAndAfterAll {
 
     it("Read CSV point into a SpatialRDD with unique Id by passing coordinates")
     {
-      UdfRegistrator.registerAll(sparkSession)
+      UdfRegistrator.registerAll(sparkSession.sqlContext)
       var df = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation)
       df.show()
       df.createOrReplaceTempView("inputtable")
@@ -86,7 +86,7 @@ class readTestScala extends FunSpec with BeforeAndAfterAll {
 
     it("Read mixed WKT geometries into a SpatialRDD")
     {
-      UdfRegistrator.registerAll(sparkSession)
+      UdfRegistrator.registerAll(sparkSession.sqlContext)
       var df = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
       df.show()
       df.createOrReplaceTempView("inputtable")
@@ -101,7 +101,7 @@ class readTestScala extends FunSpec with BeforeAndAfterAll {
 
     it("Read mixed WKT geometries into a SpatialRDD with uniqueId")
     {
-      UdfRegistrator.registerAll(sparkSession)
+      UdfRegistrator.registerAll(sparkSession.sqlContext)
       var df = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
       df.show()
       df.createOrReplaceTempView("inputtable")
@@ -124,7 +124,7 @@ class readTestScala extends FunSpec with BeforeAndAfterAll {
 
     it("Convert spatial join result to DataFrame")
     {
-      UdfRegistrator.registerAll(sparkSession)
+      UdfRegistrator.registerAll(sparkSession.sqlContext)
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
       var polygonDf = sparkSession.sql("select ST_GeomFromTextWithId(polygontable._c0,\"wkt\", concat(polygontable._c3,'\t',polygontable._c5)) as usacounty from polygontable")
@@ -152,8 +152,7 @@ class readTestScala extends FunSpec with BeforeAndAfterAll {
 
     it("Convert distance join result to DataFrame")
     {
-      UdfRegistrator.registerAll(sparkSession)
-
+      UdfRegistrator.registerAll(sparkSession.sqlContext)
       var pointCsvDF = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")
       var pointDf = sparkSession.sql("select ST_PointWithId(pointtable._c0,pointtable._c1,\"mypointid\") as arealandmark from pointtable")

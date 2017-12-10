@@ -17,8 +17,8 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.TaskContext;
 import org.apache.spark.api.java.function.FlatMapFunction2;
+import org.datasyslab.geospark.enums.JoinBuildSide;
 import org.datasyslab.geospark.enums.IndexType;
-import org.datasyslab.geospark.spatialOperator.JoinQuery.BuildSide;
 import org.datasyslab.geospark.monitoring.GeoSparkMetric;
 
 import javax.annotation.Nullable;
@@ -29,7 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static org.datasyslab.geospark.spatialOperator.JoinQuery.BuildSide.BUILD_LEFT;
 import static org.datasyslab.geospark.utils.TimeUtils.elapsedSince;
 
 public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
@@ -39,7 +38,7 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
     private static final Logger log = LogManager.getLogger(DynamicIndexLookupJudgement.class);
 
     private final IndexType indexType;
-    private final BuildSide buildSide;
+    private final JoinBuildSide joinBuildSide;
     private final GeoSparkMetric buildCount;
     private final GeoSparkMetric streamCount;
     private final GeoSparkMetric resultCount;
@@ -50,7 +49,7 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
      */
     public DynamicIndexLookupJudgement(boolean considerBoundaryIntersection,
                                        IndexType indexType,
-                                       BuildSide buildSide,
+                                       JoinBuildSide joinBuildSide,
                                        @Nullable DedupParams dedupParams,
                                        GeoSparkMetric buildCount,
                                        GeoSparkMetric streamCount,
@@ -58,7 +57,7 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
                                        GeoSparkMetric candidateCount) {
         super(considerBoundaryIntersection, dedupParams);
         this.indexType = indexType;
-        this.buildSide = buildSide;
+        this.joinBuildSide = joinBuildSide;
         this.buildCount = buildCount;
         this.streamCount = streamCount;
         this.resultCount = resultCount;
@@ -78,7 +77,7 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
 
         initPartition();
 
-        final boolean buildLeft = (buildSide == BUILD_LEFT);
+        final boolean buildLeft = (joinBuildSide == JoinBuildSide.LEFT);
 
         final Iterator<? extends Geometry> buildShapes;
         final Iterator<? extends Geometry> streamShapes;

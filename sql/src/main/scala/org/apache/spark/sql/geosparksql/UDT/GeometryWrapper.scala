@@ -1,4 +1,4 @@
-package org.apache.spark.sql.geosparksql
+package org.apache.spark.sql.geosparksql.UDT
 
 import com.vividsolutions.jts.geom._
 import org.apache.spark.sql.types.SQLUserDefinedType
@@ -14,7 +14,7 @@ class GeometryWrapper extends Serializable {
   def this(geometryString: String, fileDataSplitter: FileDataSplitter, geometryType: GeometryType)
   {
     this()
-    var formatMapper = new FormatMapper(fileDataSplitter, false, geometryType)
+    var formatMapper = new FormatMapper(fileDataSplitter, true, geometryType)
     this.geometry = formatMapper.readGeometry(geometryString)
   }
 

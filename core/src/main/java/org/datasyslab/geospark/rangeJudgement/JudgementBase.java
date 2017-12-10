@@ -6,7 +6,7 @@ import org.apache.log4j.Logger;
 
 import java.io.Serializable;
 
-abstract class JudgementBase<U extends Geometry> implements Serializable {
+public class JudgementBase<U extends Geometry> implements Serializable {
 
     private static final Logger log = LogManager.getLogger(JudgementBase.class);
     private boolean considerBoundaryIntersection;
@@ -25,7 +25,7 @@ abstract class JudgementBase<U extends Geometry> implements Serializable {
         this.queryGeometry=queryWindow;
         this.leftCoveredByRight = leftCoveredByRight;
     }
-    protected boolean match(Geometry spatialObject, Geometry queryWindow) {
+    public boolean match(Geometry spatialObject, Geometry queryWindow) {
         if(considerBoundaryIntersection)
         {
             if(queryWindow.intersects(spatialObject)) return true;

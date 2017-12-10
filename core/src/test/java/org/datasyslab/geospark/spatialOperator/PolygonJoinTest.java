@@ -9,6 +9,7 @@ package org.datasyslab.geospark.spatialOperator;
 import com.vividsolutions.jts.geom.Polygon;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.enums.JoinBuildSide;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -22,7 +23,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import static org.datasyslab.geospark.spatialOperator.JoinQuery.BuildSide.BUILD_RIGHT;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
@@ -96,7 +96,7 @@ public class PolygonJoinTest extends JoinTestBase {
         final PolygonRDD spatialRDD = createPolygonRDD(InputLocation);
         partitionRdds(queryRDD, spatialRDD);
 
-        final JoinQuery.JoinParams joinParams = new JoinQuery.JoinParams(intersects, indexType, BUILD_RIGHT);
+        final JoinQuery.JoinParams joinParams = new JoinQuery.JoinParams(intersects, indexType, JoinBuildSide.LEFT);
         final List<Tuple2<Polygon, Polygon>> results = JoinQuery.spatialJoin(queryRDD, spatialRDD, joinParams).collect();
         sanityCheckFlatJoinResults(results);
 
