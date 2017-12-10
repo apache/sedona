@@ -1,6 +1,6 @@
 /**
-  * FILE: GeoSparkRegistrator
-  * PATH: org.datasyslab.geosparksql.utils.GeoSparkRegistrator
+  * FILE: GeoSparkSQLRegistrator
+  * PATH: org.datasyslab.geosparksql.utils.GeoSparkSQLRegistrator
   * Copyright (c) GeoSpark Development Team
   *
   * MIT License
@@ -25,6 +25,20 @@
   */
 package org.datasyslab.geosparksql.utils
 
-object GeoSparkRegistrator {
+import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.geosparksql.strategy.join.JoinQueryDetector
+import org.datasyslab.geosparksql.UDF.UdfRegistrator
+import org.datasyslab.geosparksql.UDT.UdtRegistrator
 
+object GeoSparkSQLRegistrator {
+  def registerAll(sqlContext:SQLContext): Unit =
+  {
+    sqlContext.experimental.extraStrategies = JoinQueryDetector :: Nil
+    UdtRegistrator.registerAll()
+    UdfRegistrator.registerAll(sqlContext)
+  }
+  def dropAll(): Unit =
+  {
+    UdfRegistrator.dropAll()
+  }
 }

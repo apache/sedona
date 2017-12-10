@@ -7,25 +7,21 @@ import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
 import org.datasyslab.geosparksql.utils.GeoSparkSQLRegistrator
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
-class constructorTestScala extends FunSpec with BeforeAndAfterAll with GeoSparkSqlTestBase {
+class functionTestScala extends FunSpec with BeforeAndAfterAll {
 
-	implicit lazy val sparkSession = {
-    var tempSparkSession = SparkSession.builder().config("spark.serializer",classOf[KryoSerializer].getName).
-      config("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName).
-      master("local[*]").appName("readTestScala").getOrCreate()
-		val sc = tempSparkSession.sparkContext
-		Logger.getLogger("org").setLevel(Level.WARN)
-		Logger.getLogger("akka").setLevel(Level.WARN)
-    tempSparkSession
-	}
-
+	var sparkSession: SparkSession = _
 
 	override def afterAll(): Unit = {
     GeoSparkSQLRegistrator.dropAll()
-    sparkSession.stop
+    //sparkSession.stop
 	}
 
-	describe("GeoSpark-SQL Constructor Test") {
+	describe("GeoSpark-SQL Function Test") {
+    sparkSession = SparkSession.builder().config("spark.serializer",classOf[KryoSerializer].getName).
+      config("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName).
+      master("local[*]").appName("readTestScala").getOrCreate()
+    Logger.getLogger("org").setLevel(Level.WARN)
+    Logger.getLogger("akka").setLevel(Level.WARN)
 
     GeoSparkSQLRegistrator.registerAll(sparkSession.sqlContext)
 
@@ -37,40 +33,88 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll with GeoSparkS
     val csvPointInputLocation = resourceFolder + "arealm.csv"
     val geoJsonGeomInputLocation = resourceFolder + "testPolygon.json"
 
-    it("Passed ST_Point")
+    it("Passed ST_ConvexHull")
     {
-      var pointCsvDF = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(plainPointInputLocation)
-      pointCsvDF.createOrReplaceTempView("pointtable")
-      var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20)), \"myPointId\") as arealandmark from pointtable")
-      assert(pointDf.count()==1000)
-    }
-
-    it("Passed ST_PointFromText")
-    {
-      var pointCsvDF = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation)
-      pointCsvDF.createOrReplaceTempView("pointtable")
-      pointCsvDF.show()
-      var pointDf = sparkSession.sql("select ST_PointFromText(pointtable._c0,',', \"myPointId\") as arealandmark from pointtable")
-      assert(pointDf.count()==121960)
-    }
-
-    it("Passed ST_GeomFromWKT")
-    {
-      var polygonWktDf = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(mixedWktGeometryInputLocation)
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
       polygonWktDf.show()
       var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-      assert(polygonDf.count()==100)
+      polygonDf.createOrReplaceTempView("polygondf")
+      polygonDf.show()
+      var functionDf = sparkSession.sql("select ST_ConvexHull(polygondf.countyshape) from polygondf")
+      functionDf.show()
     }
 
-    it("Passed ST_GeomFromGeoJSON")
+    it("Passed ST_Envelope")
     {
-      var polygonJsonDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(geoJsonGeomInputLocation)
-      polygonJsonDf.createOrReplaceTempView("polygontable")
-      polygonJsonDf.show()
-      var polygonDf = sparkSession.sql("select ST_GeomFromGeoJSON(polygontable._c0) as countyshape from polygontable")
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      polygonWktDf.show()
+      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
       polygonDf.show()
-      assert(polygonDf.count()==1000)
+      var functionDf = sparkSession.sql("select ST_Envelope(polygondf.countyshape) from polygondf")
+      functionDf.show()
+    }
+
+    it("Passed ST_Centroid")
+    {
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      polygonWktDf.show()
+      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      polygonDf.show()
+      var functionDf = sparkSession.sql("select ST_Centroid(polygondf.countyshape) from polygondf")
+      functionDf.show()
+    }
+
+    it("Passed ST_Length")
+    {
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      polygonWktDf.show()
+      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      polygonDf.show()
+      var functionDf = sparkSession.sql("select ST_Length(polygondf.countyshape) from polygondf")
+      functionDf.show()
+    }
+
+    it("Passed ST_Area")
+    {
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      polygonWktDf.show()
+      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      polygonDf.show()
+      var functionDf = sparkSession.sql("select ST_Area(polygondf.countyshape) from polygondf")
+      functionDf.show()
+    }
+
+    it("Passed ST_Distance")
+    {
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      polygonWktDf.show()
+      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      polygonDf.show()
+      var functionDf = sparkSession.sql("select ST_Distance(polygondf.countyshape, polygondf.countyshape) from polygondf")
+      functionDf.show()
+    }
+
+    it("Passed ST_Transform")
+    {
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      polygonWktDf.show()
+      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      polygonDf.show()
+      var functionDf = sparkSession.sql("select ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857',true) from polygondf")
+      functionDf.show()
     }
 	}
 }

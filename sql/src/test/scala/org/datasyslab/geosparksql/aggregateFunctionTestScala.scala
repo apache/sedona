@@ -1,5 +1,6 @@
 package org.datasyslab.geosparksql
 
+import com.vividsolutions.jts.geom.{Coordinate, GeometryFactory, Polygon}
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.sql.SparkSession
@@ -7,118 +8,58 @@ import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
 import org.datasyslab.geosparksql.utils.GeoSparkSQLRegistrator
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
-class functionTestScala extends FunSpec with BeforeAndAfterAll with GeoSparkSqlTestBase {
+class aggregateFunctionTestScala extends FunSpec with BeforeAndAfterAll {
 
-	implicit lazy val sparkSession = {
-    var tempSparkSession = SparkSession.builder().config("spark.serializer",classOf[KryoSerializer].getName).
-      config("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName).
-      master("local[*]").appName("readTestScala").getOrCreate()
-		val sc = tempSparkSession.sparkContext
-		Logger.getLogger("org").setLevel(Level.WARN)
-		Logger.getLogger("akka").setLevel(Level.WARN)
-    tempSparkSession
-	}
-
+	var sparkSession:SparkSession = _
 
 	override def afterAll(): Unit = {
     GeoSparkSQLRegistrator.dropAll()
-    sparkSession.stop
+    //sparkSession.stop
 	}
 
-	describe("GeoSpark-SQL Constructor Test") {
+	describe("GeoSpark-SQL Aggregate Function Test") {
+    sparkSession = SparkSession.builder().config("spark.serializer",classOf[KryoSerializer].getName).
+      config("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName).
+      master("local[*]").appName("readTestScala").getOrCreate()
+    Logger.getLogger("org").setLevel(Level.WARN)
+    Logger.getLogger("akka").setLevel(Level.WARN)
 
     GeoSparkSQLRegistrator.registerAll(sparkSession.sqlContext)
 
 		val resourceFolder = System.getProperty("user.dir")+"/src/test/resources/"
 
-    val mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv"
+    val csvPolygonInputLocation = resourceFolder + "testunion.csv"
     val plainPointInputLocation = resourceFolder + "testpoint.csv"
-    val shapefileInputLocation = resourceFolder + "shapefiles/polygon"
-    val csvPointInputLocation = resourceFolder + "arealm.csv"
-    val geoJsonGeomInputLocation = resourceFolder + "testPolygon.json"
 
-    it("Passed ST_ConvexHull")
+    it("Passed ST_Envelope_aggr")
     {
-      var polygonWktDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
-      polygonWktDf.createOrReplaceTempView("polygontable")
-      polygonWktDf.show()
-      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      var pointCsvDF = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(plainPointInputLocation)
+      pointCsvDF.createOrReplaceTempView("pointtable")
+      var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20)), \"myPointId\") as arealandmark from pointtable")
+      pointDf.createOrReplaceTempView("pointdf")
+      var boundary = sparkSession.sql("select ST_Envelope_Aggr(pointdf.arealandmark) from pointdf")
+      val coordinates:Array[Coordinate] = new Array[Coordinate](5)
+      coordinates(0) = new Coordinate(1.1,101.1)
+      coordinates(1) = new Coordinate(1.1,1100.1)
+      coordinates(2) = new Coordinate(1000.1,1100.1)
+      coordinates(3) = new Coordinate(1000.1,101.1)
+      coordinates(4) = coordinates(0)
+      val geometryFactory = new GeometryFactory()
+      geometryFactory.createPolygon(coordinates)
+      assert(boundary.take(1)(0).get(0)==geometryFactory.createPolygon(coordinates))
+      }
+
+    it("Passed ST_Union_aggr")
+    {
+
+      var polygonCsvDf = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(csvPolygonInputLocation)
+      polygonCsvDf.createOrReplaceTempView("polygontable")
+      polygonCsvDf.show()
+      var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20)), \"mypolygonid\") as polygonshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
       polygonDf.show()
-      var functionDf = sparkSession.sql("select ST_ConvexHull(polygondf.countyshape) from polygondf")
-      functionDf.show()
-    }
-
-    it("Passed ST_Envelope")
-    {
-      var polygonWktDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
-      polygonWktDf.createOrReplaceTempView("polygontable")
-      polygonWktDf.show()
-      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-      polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
-      var functionDf = sparkSession.sql("select ST_Envelope(polygondf.countyshape) from polygondf")
-      functionDf.show()
-    }
-
-    it("Passed ST_Centroid")
-    {
-      var polygonWktDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
-      polygonWktDf.createOrReplaceTempView("polygontable")
-      polygonWktDf.show()
-      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-      polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
-      var functionDf = sparkSession.sql("select ST_Centroid(polygondf.countyshape) from polygondf")
-      functionDf.show()
-    }
-
-    it("Passed ST_Length")
-    {
-      var polygonWktDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
-      polygonWktDf.createOrReplaceTempView("polygontable")
-      polygonWktDf.show()
-      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-      polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
-      var functionDf = sparkSession.sql("select ST_Length(polygondf.countyshape) from polygondf")
-      functionDf.show()
-    }
-
-    it("Passed ST_Area")
-    {
-      var polygonWktDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
-      polygonWktDf.createOrReplaceTempView("polygontable")
-      polygonWktDf.show()
-      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-      polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
-      var functionDf = sparkSession.sql("select ST_Area(polygondf.countyshape) from polygondf")
-      functionDf.show()
-    }
-
-    it("Passed ST_Distance")
-    {
-      var polygonWktDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
-      polygonWktDf.createOrReplaceTempView("polygontable")
-      polygonWktDf.show()
-      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-      polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
-      var functionDf = sparkSession.sql("select ST_Distance(polygondf.countyshape, polygondf.countyshape) from polygondf")
-      functionDf.show()
-    }
-
-    it("Passed ST_Transform")
-    {
-      var polygonWktDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
-      polygonWktDf.createOrReplaceTempView("polygontable")
-      polygonWktDf.show()
-      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-      polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
-      var functionDf = sparkSession.sql("select ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857',true) from polygondf")
-      functionDf.show()
+      var union = sparkSession.sql("select ST_Union_Aggr(polygondf.polygonshape) from polygondf")
+      assert(union.take(1)(0).get(0).asInstanceOf[Polygon].getArea==10100)
     }
 	}
 }
