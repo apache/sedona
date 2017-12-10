@@ -25,6 +25,180 @@
   */
 package org.apache.spark.sql.geosparksql.expressions
 
-class Functions {
+import com.vividsolutions.jts.geom.Polygon
+import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
+import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
+import org.apache.spark.sql.geosparksql.UDT.GeometryUDT
+import org.apache.spark.sql.types.{DataType, DoubleType}
+import org.apache.spark.unsafe.types.UTF8String
+import org.datasyslab.geosparksql.utils.GeometrySerializer
+import org.geotools.geometry.jts.JTS
+import org.geotools.referencing.CRS
 
+/**
+  * Return the distance between two geometries.
+  * @param inputExpressions This function takes two geometries and calculates the distance between two objects.
+  */
+case class ST_Distance(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback{
+
+  // This is a binary expression
+  assert(inputExpressions.length == 2)
+
+  override def nullable: Boolean = false
+
+  override def toString: String = s" **${ST_Distance.getClass.getName}**  "
+
+  override def children: Seq[Expression] = inputExpressions
+
+  override def eval(inputRow: InternalRow): Any = {
+    assert(inputExpressions.length==2)
+
+    val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
+    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
+
+    val leftGeometry = GeometrySerializer.deserialize(leftArray)
+
+    val rightGeometry = GeometrySerializer.deserialize(rightArray)
+
+    return leftGeometry.distance(rightGeometry)
+  }
+  override def dataType = DoubleType
+}
+
+/**
+  * Return the convex hull of a Geometry.
+  * @param inputExpressions
+  */
+case class ST_ConvexHull(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback
+{
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any =
+  {
+    assert(inputExpressions.length==1)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData]).asInstanceOf[Polygon]
+    new GenericArrayData(GeometrySerializer.serialize(geometry.convexHull()))
+  }
+
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+  * Return the bounding rectangle for a Geometry
+  * @param inputExpressions
+  */
+case class ST_Envelope(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback
+{
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any =
+  {
+    assert(inputExpressions.length==1)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    new GenericArrayData(GeometrySerializer.serialize(geometry.getEnvelope()))
+  }
+
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+  * Return the length measurement of a Geometry
+  * @param inputExpressions
+  */
+case class ST_Length(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback
+{
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any =
+  {
+    assert(inputExpressions.length==1)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    return geometry.getLength
+  }
+
+  override def dataType: DataType = DoubleType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+  * Return the area measurement of a Geometry.
+  * @param inputExpressions
+  */
+case class ST_Area(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback
+{
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any =
+  {
+    assert(inputExpressions.length==1)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    return geometry.getArea
+  }
+
+  override def dataType: DataType = DoubleType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+  * Return mathematical centroid of a geometry.
+  * @param inputExpressions
+  */
+case class ST_Centroid(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback
+{
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any =
+  {
+    assert(inputExpressions.length==1)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    new GenericArrayData(GeometrySerializer.serialize(geometry.getCentroid()))
+}
+
+override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+  * Given a geometry, sourceEPSGcode, and targetEPSGcode, convert the geometry's Spatial Reference System / Coordinate Reference System.
+  * @param inputExpressions
+  */
+case class ST_Transform(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback
+{
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any =
+  {
+    assert(inputExpressions.length==3||inputExpressions.length==4)
+    System.setProperty("org.geotools.referencing.forceXY", "true")
+    if (inputExpressions.length==4)
+    {
+      System.setProperty("org.geotools.referencing.forceXY", inputExpressions(3).eval(input).asInstanceOf[Boolean].toString)
+    }
+    val originalGeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val sourceCRScode = CRS.decode(inputExpressions(1).eval(input).asInstanceOf[UTF8String].toString)
+    val targetCRScode = CRS.decode(inputExpressions(2).eval(input).asInstanceOf[UTF8String].toString)
+    val transform = CRS.findMathTransform(sourceCRScode, targetCRScode, false)
+    new GenericArrayData(GeometrySerializer.serialize(JTS.transform(originalGeometry, transform)))
+
+  }
+
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
 }

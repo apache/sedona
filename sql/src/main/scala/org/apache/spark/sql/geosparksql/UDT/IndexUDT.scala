@@ -25,6 +25,27 @@
   */
 package org.apache.spark.sql.geosparksql.UDT
 
-class IndexUDT {
+import com.vividsolutions.jts.index.SpatialIndex
+import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
+import org.apache.spark.sql.types.{ArrayType, ByteType, DataType, UserDefinedType}
+import org.datasyslab.geosparksql.utils.IndexSerializer
 
+class IndexUDT extends UserDefinedType[SpatialIndex]{
+  override def sqlType: DataType = ArrayType(ByteType, containsNull = false)
+
+  override def serialize(obj: SpatialIndex): GenericArrayData =
+  {
+    return new GenericArrayData(IndexSerializer.serialize(obj))
+  }
+
+  override def deserialize(datum: Any): SpatialIndex =
+  {
+    datum match
+    {
+      case values: ArrayData => {
+        return IndexSerializer.deserialize(values)
+      }
+    }
+  }
+  override def userClass: Class[SpatialIndex] = classOf[SpatialIndex]
 }

@@ -25,6 +25,14 @@
   */
 package org.apache.spark.sql.geosparksql.UDT
 
-object UdtRegistratorWrapper {
+import com.vividsolutions.jts.geom.Geometry
+import com.vividsolutions.jts.index.SpatialIndex
+import org.apache.spark.sql.types.UDTRegistration
 
+object UdtRegistratorWrapper {
+  def registerAll(): Unit =
+  {
+    UDTRegistration.register(classOf[Geometry].getName, classOf[GeometryUDT].getName)
+    UDTRegistration.register(classOf[SpatialIndex].getName, classOf[IndexUDT].getName)
+  }
 }

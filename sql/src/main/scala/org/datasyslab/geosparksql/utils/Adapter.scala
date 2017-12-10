@@ -29,7 +29,7 @@ package org.datasyslab.geosparksql.utils
 import com.vividsolutions.jts.geom.Geometry
 import org.apache.spark.api.java.{JavaPairRDD, JavaRDD}
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.geosparksql.GeometryWrapper
+//import org.apache.spark.sql.geosparksql.GeometryWrapper
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.datasyslab.geospark.spatialRDD.SpatialRDD
@@ -43,7 +43,7 @@ object Adapter {
 
   def toRdd(dataFrame: DataFrame): RDD[Geometry] =
   {
-    return dataFrame.rdd.map[Geometry](f => f.get(0).asInstanceOf[GeometryWrapper].getGeometry())
+    return dataFrame.rdd.map[Geometry](f => f.get(0).asInstanceOf[Geometry])
   }
 
   def toDf(spatialRDD: SpatialRDD[Geometry], sparkSession: SparkSession): DataFrame =

@@ -25,6 +25,13 @@
   */
 package org.datasyslab.geosparksql.UDT
 
+import org.apache.spark.sql.geosparksql.UDT.UdtRegistratorWrapper
+
 object UdtRegistrator {
+
+  def registerAll(): Unit =
+  {
+    UdtRegistratorWrapper.registerAll()
+  }
 
 }

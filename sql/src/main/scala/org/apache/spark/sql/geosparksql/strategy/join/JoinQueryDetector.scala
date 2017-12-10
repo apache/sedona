@@ -1,20 +1,44 @@
-package org.apache.spark.sql.geosparksql.plan
+/**
+  * FILE: JoinQueryDetector
+  * PATH: org.apache.spark.sql.geosparksql.strategy.join.JoinQueryDetector
+  * Copyright (c) GeoSpark Development Team
+  *
+  * MIT License
+  *
+  * Permission is hereby granted, free of charge, to any person obtaining a copy
+  * of this software and associated documentation files (the "Software"), to deal
+  * in the Software without restriction, including without limitation the rights
+  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  * copies of the Software, and to permit persons to whom the Software is
+  * furnished to do so, subject to the following conditions:
+  *
+  * The above copyright notice and this permission notice shall be included in all
+  * copies or substantial portions of the Software.
+  *
+  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  * SOFTWARE.
+  */
+package org.apache.spark.sql.geosparksql.strategy.join
 
 import org.apache.spark.sql.Strategy
-import org.apache.spark.sql.catalyst.expressions.{Expression, Join_Contains, ST_Contains}
+import org.apache.spark.sql.catalyst.expressions.{Expression, LessThan, LessThanOrEqual}
 import org.apache.spark.sql.catalyst.plans.Inner
 import org.apache.spark.sql.catalyst.plans.logical.{Join, LogicalPlan}
 import org.apache.spark.sql.execution.SparkPlan
-import org.apache.spark.sql.expressions.UserDefinedFunction
-import org.apache.spark.sql.types.{ArrayType, BooleanType, ByteType}
-//import org.apache.spark.sql.hive.{HiveGenericUDF, HiveSimpleUDF}
+import org.apache.spark.sql.geosparksql.expressions.{ST_Contains, ST_Distance, ST_Intersects, ST_Within}
+
 /**
-  * Plans `SpatialJoinExec` for inner joins on spatial relationships ST_Contains(a, b)
+  * Plans `RangeJoinExec` for inner joins on spatial relationships ST_Contains(a, b)
   * and ST_Intersects(a, b).
   *
   * Plans `DistanceJoinExec` for inner joins on spatial relationship ST_Distance(a, b) < r.
   */
-object SpatialJoinSelection extends Strategy {
+object JoinQueryDetector extends Strategy {
 
   /**
     * Returns true if specified expression has at least one reference and all its references
@@ -40,13 +64,24 @@ object SpatialJoinSelection extends Strategy {
   def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
 
     // ST_Contains(a, b) - a contains b
-    case Join(left, right, Inner, Some(ST_Contains(_, _, children))) =>
-      planSpatialJoin(left, right, children, false)
+    case Join(left, right, Inner, Some(ST_Contains(Seq(leftShape, rightShape)))) =>
+      planSpatialJoin(left, right, Seq(leftShape,rightShape), false)
 
-    // ST_Intersects(a, b) - a and b intersect
-   // case Join(left, right, Inner, Some(Join_Contains(_, _, children))) =>
-   //   planSpatialJoin(left, right, children, true)
+    // ST_Intersects(a, b) - a intersects b
+    case Join(left, right, Inner, Some(ST_Intersects(Seq(leftShape, rightShape)))) =>
+      planSpatialJoin(left, right, Seq(leftShape,rightShape), true)
 
+    // ST_WITHIN(a, b) - a is within b
+    case Join(left, right, Inner, Some(ST_Within(Seq(leftShape, rightShape)))) =>
+      planSpatialJoin(right, left, Seq(rightShape,leftShape), false)
+
+    // ST_Distance(a, b) <= radius consider boundary intersection
+    case Join(left, right, Inner, Some(LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), radius))) =>
+      planDistanceJoin(left, right, Seq(leftShape,rightShape), radius, true)
+
+    // ST_Distance(a, b) < radius don't consider boundary intersection
+    case Join(left, right, Inner, Some(LessThan(ST_Distance(Seq(leftShape, rightShape)), radius))) =>
+      planDistanceJoin(left, right, Seq(leftShape,rightShape), radius, false)
     case _ =>
       Nil
   }
@@ -64,7 +99,7 @@ object SpatialJoinSelection extends Strategy {
     matchExpressionsToPlans(a, b, left, right) match {
       case Some((planA, planB)) =>
         logInfo(s"Planning spatial join for $relationship relationship")
-        SpatialJoinExec(planLater(planA), planLater(planB), a, b, intersects, extraCondition) :: Nil
+        RangeJoinExec(planLater(planA), planLater(planB), a, b, intersects, extraCondition) :: Nil
       case None =>
         logInfo(
           s"Spatial join for $relationship with arguments not aligned " +
@@ -77,18 +112,21 @@ object SpatialJoinSelection extends Strategy {
                                right: LogicalPlan,
                                children: Seq[Expression],
                                radius: Expression,
+                               intersects: Boolean,
                                extraCondition: Option[Expression] = None): Seq[SparkPlan] = {
     val a = children.head
     val b = children.tail.head
+
+    val relationship = if (intersects) "ST_Distance <=" else "ST_Distance <";
 
     matchExpressionsToPlans(a, b, left, right) match {
       case Some((planA, planB)) =>
         if (radius.references.isEmpty || matches(radius, planA)) {
           logInfo("Planning spatial distance join")
-          DistanceJoinExec(planLater(planA), planLater(planB), a, b, radius, extraCondition) :: Nil
+          DistanceJoinExec(planLater(planA), planLater(planB), a, b, radius, intersects, extraCondition) :: Nil
         } else if (matches(radius, planB)) {
           logInfo("Planning spatial distance join")
-          DistanceJoinExec(planLater(planB), planLater(planA), b, a, radius, extraCondition) :: Nil
+          DistanceJoinExec(planLater(planB), planLater(planA), b, a, radius, intersects, extraCondition) :: Nil
         } else {
           logInfo(
             "Spatial distance join for ST_Distance with non-scalar radius " +
