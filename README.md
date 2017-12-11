@@ -19,7 +19,7 @@ GeoSpark artifacts are hosted in Maven Central: [**Maven Central Coordinates**](
 
 
 
-##  Version release notes: [click here](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates)
+##  Version release notes: [click here](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Release-notes)
 
 ## News!
 * GeoSpark 1.0 is released. This release mainly includes a complete version of **GeoSparkSQL**. Look at these exciting features! Documents are at [GeoSpark Wiki](https://github.com/DataSystemsLab/GeoSpark/wiki) 
