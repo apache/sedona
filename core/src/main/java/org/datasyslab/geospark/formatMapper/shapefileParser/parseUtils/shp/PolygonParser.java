@@ -56,7 +56,7 @@ public class PolygonParser extends ShapeParser{
             int readScale = offsets[i+1] - offsets[i];
             CoordinateSequence csRing = readCoordinates(reader, readScale);
 
-            if(csRing.size() < 3) {
+            if(csRing.size() <= 3) {
                 continue; // if points less than 3, it's not a ring, we just abandon it
             }
 
