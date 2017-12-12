@@ -239,7 +239,7 @@ case class ST_Circle(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     assert(inputExpressions.length==2)
     val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData])
-    val circle = new Circle(geometry, inputExpressions(1).eval(inputRow).asInstanceOf[Double])
+    val circle = new Circle(geometry, inputExpressions(1).eval(inputRow).asInstanceOf[Decimal].toDouble)
     return new GenericArrayData(GeometrySerializer.serialize(circle))
   }
 
