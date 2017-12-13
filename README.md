@@ -22,6 +22,7 @@ GeoSpark artifacts are hosted in Maven Central: [**Maven Central Coordinates**](
 ##  Version release notes: [click here](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Release-notes)
 
 ## News!
+* GeoSpark 1.0.1 is release. This release added the SQL support of SparkSQL 2.2 and includes two minor bug fixes. Now GeoSpark-SQL fully supports SparkSQL 2.1 and 2.2 ([Maven coordinates](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates)).
 * GeoSpark 1.0 is released. This release mainly includes a complete version of **GeoSparkSQL**. Look at these exciting features! Documents are at [GeoSpark Wiki](https://github.com/DataSystemsLab/GeoSpark/wiki) 
   * Supports SQL/MM-Part3, Spatial SQL standard 
   * Supports pure Spark SQL statement. No DSL style any more!
