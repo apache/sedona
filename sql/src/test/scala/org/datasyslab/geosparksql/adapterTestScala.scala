@@ -9,7 +9,6 @@ import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader
 import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
 import org.datasyslab.geospark.spatialOperator.JoinQuery
 import org.datasyslab.geospark.spatialRDD.{CircleRDD, SpatialRDD}
-import org.datasyslab.geosparksql.UDF.UdfRegistrator
 import org.datasyslab.geosparksql.utils.{Adapter, GeoSparkSQLRegistrator}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
@@ -18,7 +17,7 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
 	var sparkSession:SparkSession = _
 
 	override def afterAll(): Unit = {
-    UdfRegistrator.dropAll()
+    //UdfRegistrator.dropAll(sparkSession)
 		//sparkSession.stop
 	}
 
