@@ -12,7 +12,7 @@ class predicateTestScala extends FunSpec with BeforeAndAfterAll {
 	var sparkSession: SparkSession=_
 
 	override def afterAll(): Unit = {
-    GeoSparkSQLRegistrator.dropAll()
+    //GeoSparkSQLRegistrator.dropAll(sparkSession)
     //sparkSession.stop
 	}
 

@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.datasyslab</groupId>
 	<artifactId>geospark-sql</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.1</version>
 
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>SQL Extension of GeoSpark</description>
@@ -41,7 +41,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <scala.version>2.11.8</scala.version>
         <scala.compat.version>2.11</scala.compat.version>
-        <spark.version>2.1.2</spark.version>
+        <spark.version>2.2.1</spark.version>
         <geotools.version>17.0</geotools.version>
 	</properties>
 

@@ -16,7 +16,7 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll {
 
 
 	override def afterAll(): Unit = {
-    GeoSparkSQLRegistrator.dropAll()
+    //GeoSparkSQLRegistrator.dropAll(sparkSession)
     //sparkSession.stop
 	}
 

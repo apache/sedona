@@ -196,7 +196,7 @@ public class adapterTestJava implements Serializable {
      */
     @AfterClass
     public static void TearDown() {
-        GeoSparkSQLRegistrator.dropAll();
+        GeoSparkSQLRegistrator.dropAll(sparkSession);
         sparkSession.stop();
     }
 }
