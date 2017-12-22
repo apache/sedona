@@ -96,6 +96,7 @@ GeoSpark allows users to transform the original CRS (e.g., degree based coordina
 
 [<img src="https://www.bluedme.com/wp-content/uploads/2015/10/cropped-LOGO-Blue-DME-PNG-3.png" width="150">](https://www.bluedme.com/)
 
+[<img src="https://retailrecharged.com/wp-content/uploads/2017/10/logo.png" width="150">](https://www.gyana.co.uk/)
 
 Please make a Pull Request to add yourself!
 
