@@ -17,51 +17,47 @@ GeoSpark is a cluster computing system for processing large-scale spatial data. 
 
 GeoSpark artifacts are hosted in Maven Central: [**Maven Central Coordinates**](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates)
 
+## Companies that are using GeoSpark (incomplete list)
 
+[<img src="https://www.bluedme.com/wp-content/uploads/2015/10/cropped-LOGO-Blue-DME-PNG-3.png" width="150">](https://www.bluedme.com/) [<img src="https://retailrecharged.com/wp-content/uploads/2017/10/logo.png" width="150">](https://www.gyana.co.uk/)
+
+Please make a Pull Request to add yourself!
 
 ##  Version release notes: [click here](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Release-notes)
 
 ## News!
-* GeoSpark 1.0.1 is release. This release added the SQL support of SparkSQL 2.2 and includes two minor bug fixes. Now GeoSpark-SQL fully supports SparkSQL 2.1 and 2.2 ([Maven coordinates](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates)).
-* GeoSpark 1.0 is released. This release mainly includes a complete version of **GeoSparkSQL**. Look at these exciting features! Documents are at [GeoSpark Wiki](https://github.com/DataSystemsLab/GeoSpark/wiki) 
-  * Supports SQL/MM-Part3, Spatial SQL standard 
-  * Supports pure Spark SQL statement. No DSL style any more!
-  * Supports Spark query optimizer: the beloved GeoSpark Spatial Join / predicate pushdown!
-  * Supports multiple GeoSpark parameters: take the control of your own program!
-  * Supports constructors, functions, aggregate functions, and predicates!
-* GeoSparkSQL 1.0 is released. This module contains contributions from Jia Yu, Masha Basmanova, Mohamed Sarwat and Zongsi Zhang. Especially, we want to thank Masha for her great patch on designing spatial join strategy and optimization.
+* We just released a template project about how to [use GeoSpark in Spatial Data Mining](https://github.com/jiayuasu/GeoSparkTemplateProject/tree/master/geospark-analysis): 
+* GeoSpark 1.0 is released. This release mainly includes a complete version of **GeoSparkSQL**. Documents are at [GeoSpark Wiki](https://github.com/DataSystemsLab/GeoSpark/wiki). This module contains contributions from Jia Yu, Masha Basmanova, Mohamed Sarwat and Zongsi Zhang. Especially, we want to thank Masha for her great patch on designing spatial join strategy and optimization.([Maven coordinates](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates))
 * GeoSpark 0.9.1 is released (more details in [Release notes](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Full-Version-Release-notes))
 * Welcome GeoSpark new contributor, Masha Basmanova (@mbasmanova) from Facebook!
 * Welcome GeoSpark new contributor, Zongsi Zhang (@zongsizhang) from Arizona State University!
 
 
-# Important features ([more](https://github.com/DataSystemsLab/GeoSpark/wiki))
+## Important features ([more](https://github.com/DataSystemsLab/GeoSpark/wiki))
 
-## Spatial SQL
+### Spatial SQL on Spark
 GeoSparkSQL fully supports Apache Spark SQL. Features are as follows:
 
   * Supports SQL/MM-Part3, Spatial SQL standard 
-  * Supports pure Spark SQL statement. No DSL style any more!
+  * Supports Spark SQL statement.
   * Supports Spark query optimizer: the beloved GeoSpark Spatial Join / predicate pushdown!
-  * Supports multiple GeoSpark parameters: take the control of your own program!
-  * Supports constructors, functions, aggregate functions, and predicates!
 
-## Spatial Resilient Distributed Datasets (SRDDs)
-Supported Spatial RDDs: PointRDD, RectangleRDD, PolygonRDD, LineStringRDD
+```
+SELECT superhero.name
+FROM city, superhero
+WHERE ST_Contains(city.geom, superhero.geom)
+AND city.name = 'Gotham';
+```
 
-The generic SpatialRDD supports heterogenous geometries:
+### Spatial Resilient Distributed Datasets (SRDDs)
+Supported Special Spatial RDDs: PointRDD, RectangleRDD, PolygonRDD, LineStringRDD
 
-* Point
-* Polygon
-* Line string
-* Multi-point
-* Multi-polygon
-* Multi-line string
-* GeometryCollection
-* Circle
+The generic SpatialRDD supports all the following geometries (they can be mixed in a SpatialRDD):
+
+**Point, Polygon, Line string, Multi-point, Multi-polygon, Multi-line string, GeometryCollection, Circle**
 
 
-## Supported input data format
+### Supported input data format
 
 **Native input format support**: 
 
@@ -74,31 +70,24 @@ The generic SpatialRDD supports heterogenous geometries:
 
 **User-supplied input format mapper**: Any single-line input formats
 
-## Spatial Partitioning
+### Spatial Partitioning
 Supported Spatial Partitioning techniques: Quad-Tree (recommend), KDB-Tree (recommend), R-Tree, Voronoi diagram, Uniform grids (Experimental), Hilbert Curve (Experimental)
 
-## Spatial Index
+### Spatial Index
 Supported Spatial Indexes: Quad-Tree and R-Tree. R-Tree supports Spatial K Nearest Neighbors query.
 
-## Geometrical operation
+### Geometrical operation
 DatasetBoundary, Minimum Bounding Rectangle, Polygon Union
 
-## Spatial Operation
-Spatial Range Query, Distance Join Query, Spatial Join Query (Inside and Overlap), and Spatial K Nearest Neighbors Query.
+### Spatial Operation
+Spatial Range Query, Distance Join Query, Spatial Join Query, and Spatial K Nearest Neighbors Query.
 
-## Coordinate Reference System (CRS) Transformation (aka. Coordinate projection)
+### Coordinate Reference System (CRS) Transformation (aka. Coordinate projection)
 
-GeoSpark allows users to transform the original CRS (e.g., degree based coordinates such as EPSG:4326 and WGS84) to any other CRS (e.g., meter based coordinates such as EPSG:3857) so that it can accurately process both geographic data and geometrical data. Please specify your desired CRS in GeoSpark Spatial RDD constructor ([Example](https://github.com/DataSystemsLab/GeoSpark/blob/master/core/src/main/scala/org/datasyslab/geospark/showcase/ScalaExample.scala#L221)).
+GeoSpark allows users to transform the original CRS (e.g., degree based coordinates such as EPSG:4326 and WGS84) to any other CRS (e.g., meter based coordinates such as EPSG:3857) so that it can accurately process both geographic data and geometrical data.
 
-## Users
 
-### Companies that are using GeoSpark (incomplete list)
 
-[<img src="https://www.bluedme.com/wp-content/uploads/2015/10/cropped-LOGO-Blue-DME-PNG-3.png" width="150">](https://www.bluedme.com/)
-
-[<img src="https://retailrecharged.com/wp-content/uploads/2017/10/logo.png" width="150">](https://www.gyana.co.uk/)
-
-Please make a Pull Request to add yourself!
 
 # GeoSpark Tutorial ([more](https://github.com/DataSystemsLab/GeoSpark/wiki))
 GeoSpark full tutorial is available at GeoSpark GitHub Wiki: [GeoSpark GitHub Wiki](https://github.com/DataSystemsLab/GeoSpark/wiki)
