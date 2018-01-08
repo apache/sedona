@@ -6,22 +6,26 @@ import java.util.Properties
 
 import com.vividsolutions.jts.geom.Envelope
 import org.apache.log4j.{Level, Logger}
+import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{SparkConf, SparkContext}
-import org.datasyslab.geosparkviz.core.{ImageGenerator, RasterOverlayOperator}
-import org.datasyslab.geosparkviz.extension.visualizationEffect.{ChoroplethMap, HeatMap, ScatterPlot}
-import org.datasyslab.geosparkviz.utils.{ColorizeOption, ImageType}
 import org.datasyslab.geospark.enums.{FileDataSplitter, GridType, IndexType}
 import org.datasyslab.geospark.formatMapper.EarthdataHDFPointMapper
 import org.datasyslab.geospark.spatialOperator.JoinQuery
 import org.datasyslab.geospark.spatialRDD.{PointRDD, PolygonRDD, RectangleRDD}
+import org.datasyslab.geosparkviz.core.Serde.GeoSparkVizKryoRegistrator
+import org.datasyslab.geosparkviz.core.{ImageGenerator, RasterOverlayOperator}
+import org.datasyslab.geosparkviz.extension.visualizationEffect.{ChoroplethMap, HeatMap, ScatterPlot}
+import org.datasyslab.geosparkviz.utils.{ColorizeOption, ImageType}
 import org.scalatest.FunSpec
 
 class scalaTest extends FunSpec {
 
 	describe("GeoSparkViz in Scala") {
 
-		val sparkConf = new SparkConf().setAppName("scalaTest").setMaster("local[4]")
+		val sparkConf = new SparkConf().setAppName("scalaTest").setMaster("local[*]")
+		sparkConf.set("spark.serializer", classOf[KryoSerializer].getName)
+		sparkConf.set("spark.kryo.registrator", classOf[GeoSparkVizKryoRegistrator].getName)
 		val sparkContext = new SparkContext(sparkConf)
 		Logger.getLogger("org").setLevel(Level.WARN)
 		Logger.getLogger("akka").setLevel(Level.WARN)
