@@ -178,8 +178,8 @@ public class SpatialIndexSerdeTest {
 
         for(int i = 0;i < geomNum; ++i){
             Point point = geometryFactory.createPoint(new Coordinate(
-                    random.nextDouble() % 180,
-                    random.nextDouble() % 90
+                    random.nextDouble() * 360 - 180,
+                    random.nextDouble() * 180 - 90
             ));
             quadtree.insert(point.getEnvelopeInternal(), point);
         }
