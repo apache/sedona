@@ -13,7 +13,7 @@ import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.Shape
  * Provides methods to efficiently serialize and deserialize geometry types.
  *
  * Supports Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon,
- * GeometryCollection and Circle types.
+ * GeometryCollection, Circle and Envelope types.
  *
  * First byte contains {@link Type#id}. Then go type-specific bytes, followed
  * by user-data attached to the geometry.
