@@ -19,6 +19,14 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * Provides methods to efficiently serialize and deserialize spatialIndex types.
+ *
+ * Support Quadtree, STRtree types
+ *
+ * trees are serialized recursively.
+ */
 public class SpatialIndexSerde extends Serializer{
 
     private static final Logger log = Logger.getLogger(SpatialIndexSerde.class);
