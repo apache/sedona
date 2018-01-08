@@ -19,7 +19,7 @@ public class Pixel implements Serializable{
     
     /** The y. */
     private int y;
-    
+
     /** The resolution X. */
     private int resolutionX;
     
@@ -122,6 +122,13 @@ public class Pixel implements Serializable{
         return y;
     }
 
+    public int getResolutionX() {
+        return resolutionX;
+    }
+
+    public int getResolutionY() {
+        return resolutionY;
+    }
 
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
