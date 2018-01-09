@@ -1,5 +1,6 @@
 ![GeoSpark Logo](http://www.public.asu.edu/~jiayu2/geospark/logo.png)
 
+Page hit count (since Jan. 2018): [![HitCount](http://hits.dwyl.io/DataSystemsLab/GeoSpark.svg)](http://hits.dwyl.io/DataSystemsLab/GeoSpark)
 
 | Status   |      Stable    | Latest | Source code|Spark compatibility|
 |:----------:|:-------------:|:------|:------:|:------|
