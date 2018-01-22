@@ -72,4 +72,12 @@ public class ImageSerializableWrapper implements Serializable {
   {
     return this.image;
   }
+
+  @Override
+  public String toString() {
+    return "Image(" +
+            "width=" + image.getWidth() +
+            "height="+ image.getHeight() +
+            ')';
+  }
 }

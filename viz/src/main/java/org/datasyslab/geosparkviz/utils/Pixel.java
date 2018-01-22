@@ -148,6 +148,17 @@ public class Pixel implements Serializable{
     }
 
 
+    @Override
+    public String toString() {
+        return "Pixel(" +
+                "x=" + x +
+                ", y=" + y +
+                ", width=" + resolutionX +
+                ", height=" + resolutionY +
+                ", isDuplicate=" + isDuplicate +
+                ", tileId=" + currentPartitionId +
+                ')';
+    }
 
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
