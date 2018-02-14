@@ -184,7 +184,7 @@ case class ST_Transform(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any =
   {
-    assert(inputExpressions.length>=3&&inputExpressions.length<=4)
+    assert(inputExpressions.length>=3&&inputExpressions.length<=5)
     System.setProperty("org.geotools.referencing.forceXY", "true")
     if (inputExpressions.length>=4)
     {
