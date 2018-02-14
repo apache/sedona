@@ -57,6 +57,7 @@ object UdfRegistrator {
     sparkSession.sessionState.functionRegistry.registerFunction("ST_Area", ST_Area)
     sparkSession.sessionState.functionRegistry.registerFunction("ST_Centroid", ST_Centroid)
     sparkSession.sessionState.functionRegistry.registerFunction("ST_Transform", ST_Transform)
+    sparkSession.sessionState.functionRegistry.registerFunction("ST_Intersection", ST_Intersection)
   }
 
   def registerAggregateFunctions(sparkSession: SparkSession): Unit =
@@ -93,6 +94,7 @@ object UdfRegistrator {
     sparkSession.sessionState.functionRegistry.dropFunction("ST_Area")
     sparkSession.sessionState.functionRegistry.dropFunction("ST_Centroid")
     sparkSession.sessionState.functionRegistry.dropFunction("ST_Transform")
+    sparkSession.sessionState.functionRegistry.dropFunction("ST_Intersection")
   }
 
   def dropAggregateFunctions(sparkSession: SparkSession): Unit =

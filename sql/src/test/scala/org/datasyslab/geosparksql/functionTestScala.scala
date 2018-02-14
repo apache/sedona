@@ -116,5 +116,17 @@ class functionTestScala extends FunSpec with BeforeAndAfterAll {
       var functionDf = sparkSession.sql("select ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857',true) from polygondf")
       functionDf.show()
     }
+
+    it("Passed ST_Intersection")
+    {
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      polygonWktDf.show()
+      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      polygonDf.show()
+      var functionDf = sparkSession.sql("select ST_Intersection(polygondf.countyshape, polygondf.countyshape) from polygondf")
+      functionDf.show()
+    }
 	}
 }
