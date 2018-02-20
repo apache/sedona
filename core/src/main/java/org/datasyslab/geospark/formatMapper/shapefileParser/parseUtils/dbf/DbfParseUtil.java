@@ -161,11 +161,12 @@ public class DbfParseUtil implements ShapeFileConst {
             FieldDescriptor descriptor = fieldDescriptors.get(i);
             byte[] fldBytes = new byte[descriptor.getFieldLength()];
             buffer.get(fldBytes, 0, fldBytes.length);
-            byte[] attr = fastParse(fldBytes, 0, fldBytes.length).trim().getBytes();
+            String charset = System.getProperty("geospark.global.charset","default");
+            Boolean utf8flag = charset.equalsIgnoreCase("utf8")?true:false;
+            byte[] attr = utf8flag?fldBytes:fastParse(fldBytes, 0, fldBytes.length).trim().getBytes();
             if(i > 0) attributes.append(delimiter, 0, 1);// first attribute doesn't append '\t'
             attributes.append(attr, 0, attr.length);
         }
-        String attrs = attributes.toString();
         return attributes.toString();
 
     }
