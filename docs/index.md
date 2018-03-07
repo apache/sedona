@@ -28,6 +28,7 @@ WHERE ST_Contains(city.geom, superhero.geom)
 AND city.name = 'Gotham';
 ```
 * Complex geometries / trajectories: point, polygon, linestring, multi-point, multi-polygon, multi-linestring, GeometryCollection
+* CSV, TSV, GeoJSON, NASA NetCDF/HDF, Shapefile (.shp, .shx, .dbf): extension must be in lower case
 * Spatial query: range query, range join query, distance join query, K Nearest Neighbor query
 * Spatial index: R-Tree, Quad-Tree
 * Spatial partitioning: KDB-Tree, Quad-Tree, R-Tree, Voronoi diagram, Hilbert curve, Uniform grids
