@@ -3,7 +3,7 @@ pages:
     - Home: index.md
     - News:
       - Release notes: news/GeoSpark-All-Modules-Release-notes.md      
-      - Maven Centrl Coordinate: news/GeoSpark-All-Modules-Maven-Central-Coordinates.md
+      - Maven Central Coordinate: news/GeoSpark-All-Modules-Maven-Central-Coordinates.md
       - Publications: news/publication.md
     - Download:
       - Overview: download/overview.md
