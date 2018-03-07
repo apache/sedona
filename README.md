@@ -27,8 +27,9 @@ Please make a Pull Request to add yourself!
 ##  Version release notes: [click here](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Release-notes)
 
 ## News!
-* We just released a template project about how to [use GeoSpark in Spatial Data Mining](https://github.com/jiayuasu/GeoSparkTemplateProject/tree/master/geospark-analysis): 
-* GeoSpark 1.0 is released. This release mainly includes a complete version of **GeoSparkSQL**. Documents are at [GeoSpark Wiki](https://github.com/DataSystemsLab/GeoSpark/wiki). This module contains contributions from Jia Yu, Masha Basmanova, Mohamed Sarwat and Zongsi Zhang. Especially, we want to thank Masha for her great patch on designing spatial join strategy and optimization.([Maven coordinates](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates))
+* GeoSpark wiki is now moved to [GeoSpark new website](http://datasystemslab.github.io/GeoSpark/)! Users are welcome to contribute your tutorials and stories by making a PR!
+* We just released a template project about how to [use GeoSpark in Spatial Data Mining](https://github.com/jiayuasu/GeoSparkTemplateProject/tree/master/geospark-analysis).
+* GeoSpark 1.0 is released. This release mainly includes a complete version of **GeoSparkSQL**.
 * GeoSpark 0.9.1 is released (more details in [Release notes](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Full-Version-Release-notes))
 * Welcome GeoSpark new contributor, Masha Basmanova (@mbasmanova) from Facebook!
 * Welcome GeoSpark new contributor, Zongsi Zhang (@zongsizhang) from Arizona State University!
@@ -148,7 +149,7 @@ Currently, we have published two papers about GeoSpark. Only these two papers ar
 * [Mohamed Sarwat](http://faculty.engineering.asu.edu/sarwat/) (Email: msarwat@asu.edu)
 
 ## Project website
-Please visit [GeoSpark project wesbite](http://geospark.datasyslab.org) for latest news and releases.
+Please visit [GeoSpark wesbite](http://datasystemslab.github.io/GeoSpark) for latest news and releases.
 
 ## Data Systems Lab
 GeoSpark is one of the projects initiated by [Data Systems Lab](https://www.datasyslab.net/) at Arizona State University. The mission of Data Systems Lab is designing and developing experimental data management systems (e.g., database systems).
