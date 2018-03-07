@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.datasyslab</groupId>
-	<artifactId>geospark-viz_2.3</artifactId>
+	<artifactId>geospark-viz</artifactId>
 	<version>1.1.0</version>
 	
 	<name>${project.groupId}:${project.artifactId}</name>

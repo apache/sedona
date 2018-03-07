@@ -4,9 +4,9 @@ Page hit count (since Jan. 2018): [![HitCount](http://hits.dwyl.io/DataSystemsLa
 
 | Status   |      Stable    | Latest | Source code|Spark compatibility|
 |:----------:|:-------------:|:------|:------:|:------|
-| GeoSpark |  [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/geospark.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/geospark.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|Spark 2.X, 1.X|
-| GeoSparkSQL |  [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/geospark-sql.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/geospark-sql.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)| Spark SQL 2.1, 2.2|
-| [GeoSparkViz](https://github.com/DataSystemsLab/GeoSpark/tree/master/viz) |   [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/geospark-viz.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/geospark-viz.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|Spark 2.X, 1.X|
+| GeoSpark |  [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/geospark.svg)](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Maven-Central-Coordinates/) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/geospark.svg)](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Maven-Central-Coordinates/) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|Spark 2.X, 1.X|
+| GeoSparkSQL |  [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/geospark-sql.svg)](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Maven-Central-Coordinates/) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/geospark-sql.svg)](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Maven-Central-Coordinates/) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)| Spark SQL 2.1, 2.2, 2.3|
+| [GeoSparkViz](https://github.com/DataSystemsLab/GeoSpark/tree/master/viz) |   [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/geospark-viz.svg)](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Maven-Central-Coordinates/) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/geospark-viz.svg)](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Maven-Central-Coordinates/) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|Spark 2.X, 1.X|
 
 [GeoSpark@Twitter](https://twitter.com/GeoSpark_ASU)||[GeoSpark Discussion Board](https://groups.google.com/forum/#!forum/geospark-discussion-board)||[![Join the chat at https://gitter.im/geospark-datasys/Lobby](https://badges.gitter.im/geospark-datasys/Lobby.svg)](https://gitter.im/geospark-datasys/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -16,7 +16,7 @@ GeoSpark is a cluster computing system for processing large-scale spatial data. 
 
 
 
-GeoSpark artifacts are hosted in Maven Central: [**Maven Central Coordinates**](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates)
+GeoSpark artifacts are hosted in Maven Central: [**Maven Central Coordinates**](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Maven-Central-Coordinates/)
 
 ## Companies that are using GeoSpark (incomplete list)
 
@@ -24,18 +24,16 @@ GeoSpark artifacts are hosted in Maven Central: [**Maven Central Coordinates**](
 
 Please make a Pull Request to add yourself!
 
-##  Version release notes: [click here](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Release-notes)
+##  Version release notes: [click here](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Release-notes/)
 
 ## News!
+* GeoSpark 1.1.0 is released. This release contains several bug fixes, new SQL functions and index serializer. **Note, GeoSparkSQL Maven Coordinate changed** [Release notes](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Release-notes/) || [Maven Coordinate](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Maven-Central-Coordinates/)
 * GeoSpark wiki is now moved to [GeoSpark new website](http://datasystemslab.github.io/GeoSpark/)! Users are welcome to contribute your tutorials and stories by making a PR!
 * We just released a template project about how to [use GeoSpark in Spatial Data Mining](https://github.com/jiayuasu/GeoSparkTemplateProject/tree/master/geospark-analysis).
 * GeoSpark 1.0 is released. This release mainly includes a complete version of **GeoSparkSQL**.
-* GeoSpark 0.9.1 is released (more details in [Release notes](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Full-Version-Release-notes))
-* Welcome GeoSpark new contributor, Masha Basmanova (@mbasmanova) from Facebook!
-* Welcome GeoSpark new contributor, Zongsi Zhang (@zongsizhang) from Arizona State University!
 
 
-## Important features ([more](https://github.com/DataSystemsLab/GeoSpark/wiki))
+## Important features ([more](http://datasystemslab.github.io/GeoSpark/))
 
 ### Spatial SQL on Spark
 GeoSparkSQL fully supports Apache Spark SQL. Features are as follows:
@@ -91,8 +89,8 @@ GeoSpark allows users to transform the original CRS (e.g., degree based coordina
 
 
 
-# GeoSpark Tutorial ([more](https://github.com/DataSystemsLab/GeoSpark/wiki))
-GeoSpark full tutorial is available at GeoSpark GitHub Wiki: [GeoSpark GitHub Wiki](https://github.com/DataSystemsLab/GeoSpark/wiki)
+# GeoSpark Tutorial ([more](http://datasystemslab.github.io/GeoSpark/))
+GeoSpark full tutorial is available at [GeoSpark website](http://datasystemslab.github.io/GeoSpark/)
 
 GeoSpark Scala and Java template project is available here: [Template Project](https://github.com/jiayuasu/GeoSparkTemplateProject)
 
