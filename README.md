@@ -1,11 +1,12 @@
 ![GeoSpark Logo](http://www.public.asu.edu/~jiayu2/geospark/logo.png)
 
+Page hit count (since Jan. 2018): [![HitCount](http://hits.dwyl.io/DataSystemsLab/GeoSpark.svg)](http://hits.dwyl.io/DataSystemsLab/GeoSpark)
 
 | Status   |      Stable    | Latest | Source code|Spark compatibility|
 |:----------:|:-------------:|:------|:------:|:------|
-| GeoSpark |  [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/geospark.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/geospark.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|Spark 2.X, 1.X|
-| GeoSparkSQL |  [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/geospark-sql.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/geospark-sql.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)| Spark SQL 2.1, 2.2|
-| [GeoSparkViz](https://github.com/DataSystemsLab/GeoSpark/tree/master/viz) |   [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/geospark-viz.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/geospark-viz.svg)](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|Spark 2.X, 1.X|
+| GeoSpark |  [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/geospark.svg)](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Maven-Central-Coordinates/) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/geospark.svg)](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Maven-Central-Coordinates/) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|Spark 2.X, 1.X|
+| GeoSparkSQL |  [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/geospark-sql.svg)](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Maven-Central-Coordinates/) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/geospark-sql.svg)](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Maven-Central-Coordinates/) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)| Spark SQL 2.1, 2.2, 2.3|
+| [GeoSparkViz](https://github.com/DataSystemsLab/GeoSpark/tree/master/viz) |   [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/geospark-viz.svg)](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Maven-Central-Coordinates/) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/geospark-viz.svg)](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Maven-Central-Coordinates/) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|Spark 2.X, 1.X|
 
 [GeoSpark@Twitter](https://twitter.com/GeoSpark_ASU)||[GeoSpark Discussion Board](https://groups.google.com/forum/#!forum/geospark-discussion-board)||[![Join the chat at https://gitter.im/geospark-datasys/Lobby](https://badges.gitter.im/geospark-datasys/Lobby.svg)](https://gitter.im/geospark-datasys/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -15,52 +16,48 @@ GeoSpark is a cluster computing system for processing large-scale spatial data. 
 
 
 
-GeoSpark artifacts are hosted in Maven Central: [**Maven Central Coordinates**](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Maven-Central-Coordinates)
+GeoSpark artifacts are hosted in Maven Central: [**Maven Central Coordinates**](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Maven-Central-Coordinates/)
 
+## Companies that are using GeoSpark (incomplete list)
 
+[<img src="https://www.bluedme.com/wp-content/uploads/2015/10/cropped-LOGO-Blue-DME-PNG-3.png" width="150">](https://www.bluedme.com/) [<img src="https://retailrecharged.com/wp-content/uploads/2017/10/logo.png" width="150">](https://www.gyana.co.uk/)
 
-##  Version release notes: [click here](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-All-Modules-Release-notes)
+Please make a Pull Request to add yourself!
+
+##  Version release notes: [click here](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Release-notes/)
 
 ## News!
-* GeoSpark 1.0 is released. This release mainly includes a complete version of **GeoSparkSQL**. Look at these exciting features! Documents are at [GeoSpark Wiki](https://github.com/DataSystemsLab/GeoSpark/wiki) 
-  * Supports SQL/MM-Part3, Spatial SQL standard 
-  * Supports pure Spark SQL statement. No DSL style any more!
-  * Supports Spark query optimizer: the beloved GeoSpark Spatial Join / predicate pushdown!
-  * Supports multiple GeoSpark parameters: take the control of your own program!
-  * Supports constructors, functions, aggregate functions, and predicates!
-* GeoSparkSQL 1.0 is released. This module contains contributions from Jia Yu, Masha Basmanova, Mohamed Sarwat and Zongsi Zhang. Especially, we want to thank Masha for her great patch on designing spatial join strategy and optimization.
-* GeoSpark 0.9.1 is released (more details in [Release notes](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Full-Version-Release-notes))
-* Welcome GeoSpark new contributor, Masha Basmanova (@mbasmanova) from Facebook!
-* Welcome GeoSpark new contributor, Zongsi Zhang (@zongsizhang) from Arizona State University!
+* GeoSpark 1.1.0 is released. This release contains several bug fixes, new SQL functions and index serializer. **Note, GeoSparkSQL Maven Coordinate changed** [Release notes](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Release-notes/) || [Maven Coordinate](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Maven-Central-Coordinates/)
+* GeoSpark wiki is now moved to [GeoSpark new website](http://datasystemslab.github.io/GeoSpark/)! Users are welcome to contribute your tutorials and stories by making a PR!
+* We just released a template project about how to [use GeoSpark in Spatial Data Mining](https://github.com/jiayuasu/GeoSparkTemplateProject/tree/master/geospark-analysis).
+* GeoSpark 1.0 is released. This release mainly includes a complete version of **GeoSparkSQL**.
 
 
-# Important features ([more](https://github.com/DataSystemsLab/GeoSpark/wiki))
+## Important features ([more](http://datasystemslab.github.io/GeoSpark/))
 
-## Spatial SQL
+### Spatial SQL on Spark
 GeoSparkSQL fully supports Apache Spark SQL. Features are as follows:
 
   * Supports SQL/MM-Part3, Spatial SQL standard 
-  * Supports pure Spark SQL statement. No DSL style any more!
+  * Supports Spark SQL statement.
   * Supports Spark query optimizer: the beloved GeoSpark Spatial Join / predicate pushdown!
-  * Supports multiple GeoSpark parameters: take the control of your own program!
-  * Supports constructors, functions, aggregate functions, and predicates!
 
-## Spatial Resilient Distributed Datasets (SRDDs)
-Supported Spatial RDDs: PointRDD, RectangleRDD, PolygonRDD, LineStringRDD
+```
+SELECT superhero.name
+FROM city, superhero
+WHERE ST_Contains(city.geom, superhero.geom)
+AND city.name = 'Gotham';
+```
 
-The generic SpatialRDD supports heterogenous geometries:
+### Spatial Resilient Distributed Datasets (SRDDs)
+Supported Special Spatial RDDs: PointRDD, RectangleRDD, PolygonRDD, LineStringRDD
 
-* Point
-* Polygon
-* Line string
-* Multi-point
-* Multi-polygon
-* Multi-line string
-* GeometryCollection
-* Circle
+The generic SpatialRDD supports all the following geometries (they can be mixed in a SpatialRDD):
+
+**Point, Polygon, Line string, Multi-point, Multi-polygon, Multi-line string, GeometryCollection, Circle**
 
 
-## Supported input data format
+### Supported input data format
 
 **Native input format support**: 
 
@@ -73,33 +70,27 @@ The generic SpatialRDD supports heterogenous geometries:
 
 **User-supplied input format mapper**: Any single-line input formats
 
-## Spatial Partitioning
+### Spatial Partitioning
 Supported Spatial Partitioning techniques: Quad-Tree (recommend), KDB-Tree (recommend), R-Tree, Voronoi diagram, Uniform grids (Experimental), Hilbert Curve (Experimental)
 
-## Spatial Index
+### Spatial Index
 Supported Spatial Indexes: Quad-Tree and R-Tree. R-Tree supports Spatial K Nearest Neighbors query.
 
-## Geometrical operation
+### Geometrical operation
 DatasetBoundary, Minimum Bounding Rectangle, Polygon Union
 
-## Spatial Operation
-Spatial Range Query, Distance Join Query, Spatial Join Query (Inside and Overlap), and Spatial K Nearest Neighbors Query.
+### Spatial Operation
+Spatial Range Query, Distance Join Query, Spatial Join Query, and Spatial K Nearest Neighbors Query.
 
-## Coordinate Reference System (CRS) Transformation (aka. Coordinate projection)
+### Coordinate Reference System (CRS) Transformation (aka. Coordinate projection)
 
-GeoSpark allows users to transform the original CRS (e.g., degree based coordinates such as EPSG:4326 and WGS84) to any other CRS (e.g., meter based coordinates such as EPSG:3857) so that it can accurately process both geographic data and geometrical data. Please specify your desired CRS in GeoSpark Spatial RDD constructor ([Example](https://github.com/DataSystemsLab/GeoSpark/blob/master/core/src/main/scala/org/datasyslab/geospark/showcase/ScalaExample.scala#L221)).
-
-## Users
-
-### Companies that are using GeoSpark (incomplete list)
-
-[<img src="https://www.bluedme.com/wp-content/uploads/2015/10/cropped-LOGO-Blue-DME-PNG-3.png" width="150">](https://www.bluedme.com/)
+GeoSpark allows users to transform the original CRS (e.g., degree based coordinates such as EPSG:4326 and WGS84) to any other CRS (e.g., meter based coordinates such as EPSG:3857) so that it can accurately process both geographic data and geometrical data.
 
 
-Please make a Pull Request to add yourself!
 
-# GeoSpark Tutorial ([more](https://github.com/DataSystemsLab/GeoSpark/wiki))
-GeoSpark full tutorial is available at GeoSpark GitHub Wiki: [GeoSpark GitHub Wiki](https://github.com/DataSystemsLab/GeoSpark/wiki)
+
+# GeoSpark Tutorial ([more](http://datasystemslab.github.io/GeoSpark/))
+GeoSpark full tutorial is available at [GeoSpark website](http://datasystemslab.github.io/GeoSpark/)
 
 GeoSpark Scala and Java template project is available here: [Template Project](https://github.com/jiayuasu/GeoSparkTemplateProject)
 
@@ -124,7 +115,7 @@ More details are available here: [GeoSpark Visualization Extension](https://gith
 
 # Publication
 
-Jia Yu, Jinxuan Wu, Mohamed Sarwat. ["A Demonstration of GeoSpark: A Cluster Computing Framework for Processing Big Spatial Data"](). (demo paper) In Proceeding of IEEE International Conference on Data Engineering ICDE 2016, Helsinki, FI, May 2016
+Jia Yu, Jinxuan Wu, Mohamed Sarwat. ["A Demonstration of GeoSpark: A Cluster Computing Framework for Processing Big Spatial Data"](http://www.public.asu.edu/~jiayu2/geospark/publication/GeoSpark_DemoPaper.pdf). (demo paper) In Proceeding of IEEE International Conference on Data Engineering ICDE 2016, Helsinki, FI, May 2016
 
 Jia Yu, Jinxuan Wu, Mohamed Sarwat. ["GeoSpark: A Cluster Computing Framework for Processing Large-Scale Spatial Data"](http://www.public.asu.edu/~jiayu2/geospark/publication/GeoSpark_ShortPaper.pdf). (short paper) In Proceeding of the ACM International Conference on Advances in Geographic Information Systems ACM SIGSPATIAL GIS 2015, Seattle, WA, USA November 2015
 
@@ -156,7 +147,7 @@ Currently, we have published two papers about GeoSpark. Only these two papers ar
 * [Mohamed Sarwat](http://faculty.engineering.asu.edu/sarwat/) (Email: msarwat@asu.edu)
 
 ## Project website
-Please visit [GeoSpark project wesbite](http://geospark.datasyslab.org) for latest news and releases.
+Please visit [GeoSpark wesbite](http://datasystemslab.github.io/GeoSpark) for latest news and releases.
 
 ## Data Systems Lab
 GeoSpark is one of the projects initiated by [Data Systems Lab](https://www.datasyslab.net/) at Arizona State University. The mission of Data Systems Lab is designing and developing experimental data management systems (e.g., database systems).

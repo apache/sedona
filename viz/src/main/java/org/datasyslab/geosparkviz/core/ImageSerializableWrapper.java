@@ -6,6 +6,8 @@
  */
 package org.datasyslab.geosparkviz.core;
 
+import org.apache.log4j.Logger;
+
 import java.io.*;
 
 import javax.imageio.ImageIO;
@@ -17,7 +19,7 @@ import java.awt.image.*;
  * The Class ImageSerializableWrapper.
  */
 public class ImageSerializableWrapper implements Serializable {
-  
+  final static Logger log = Logger.getLogger(ImageSerializableWrapper.class);
   /** The image. */
   protected transient BufferedImage image;
   
@@ -38,6 +40,7 @@ public class ImageSerializableWrapper implements Serializable {
    */
   // Serialization method.
   private void writeObject(ObjectOutputStream out) throws IOException {
+    log.debug("Serializing ImageWrapper");
     out.defaultWriteObject();
     ImageIO.write(image, "png", out);
   }
@@ -51,6 +54,7 @@ public class ImageSerializableWrapper implements Serializable {
    */
   // Deserialization method.
   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    log.debug("De-serializing ImageWrapper");
     in.defaultReadObject();
     image = ImageIO.read(in);
     if(image==null)
@@ -67,5 +71,13 @@ public class ImageSerializableWrapper implements Serializable {
   public BufferedImage getImage()
   {
     return this.image;
+  }
+
+  @Override
+  public String toString() {
+    return "Image(" +
+            "width=" + image.getWidth() +
+            "height="+ image.getHeight() +
+            ')';
   }
 }

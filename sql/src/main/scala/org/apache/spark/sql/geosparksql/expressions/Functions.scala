@@ -25,7 +25,6 @@
   */
 package org.apache.spark.sql.geosparksql.expressions
 
-import com.vividsolutions.jts.geom.Polygon
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
@@ -36,6 +35,7 @@ import org.apache.spark.unsafe.types.UTF8String
 import org.datasyslab.geosparksql.utils.GeometrySerializer
 import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.CRS
+import org.opengis.referencing.operation.MathTransform
 
 /**
   * Return the distance between two geometries.
@@ -80,7 +80,7 @@ case class ST_ConvexHull(inputExpressions: Seq[Expression])
   override def eval(input: InternalRow): Any =
   {
     assert(inputExpressions.length==1)
-    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData]).asInstanceOf[Polygon]
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     new GenericArrayData(GeometrySerializer.serialize(geometry.convexHull()))
   }
 
@@ -184,18 +184,47 @@ case class ST_Transform(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any =
   {
-    assert(inputExpressions.length==3||inputExpressions.length==4)
+    assert(inputExpressions.length>=3&&inputExpressions.length<=5)
     System.setProperty("org.geotools.referencing.forceXY", "true")
-    if (inputExpressions.length==4)
+    if (inputExpressions.length>=4)
     {
       System.setProperty("org.geotools.referencing.forceXY", inputExpressions(3).eval(input).asInstanceOf[Boolean].toString)
     }
     val originalGeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     val sourceCRScode = CRS.decode(inputExpressions(1).eval(input).asInstanceOf[UTF8String].toString)
     val targetCRScode = CRS.decode(inputExpressions(2).eval(input).asInstanceOf[UTF8String].toString)
-    val transform = CRS.findMathTransform(sourceCRScode, targetCRScode, false)
+    var transform:MathTransform = null
+    if (inputExpressions.length == 5)
+    {
+      transform = CRS.findMathTransform(sourceCRScode, targetCRScode, inputExpressions(4).eval(input).asInstanceOf[Boolean])
+    }
+    else
+    {
+      transform = CRS.findMathTransform(sourceCRScode, targetCRScode, false)
+    }
     new GenericArrayData(GeometrySerializer.serialize(JTS.transform(originalGeometry, transform)))
+  }
 
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+  * Return the intersection shape of two geometries. The return type is a geometry
+  * @param inputExpressions
+  */
+case class ST_Intersection(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback
+{
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any =
+  {
+    assert(inputExpressions.length==2)
+    val leftgeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val rightgeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    new GenericArrayData(GeometrySerializer.serialize(leftgeometry.intersection(rightgeometry)))
   }
 
   override def dataType: DataType = new GeometryUDT()

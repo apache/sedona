@@ -37,6 +37,13 @@ object GeoSparkSQLRegistrator {
     UdtRegistrator.registerAll()
     UdfRegistrator.registerAll(sqlContext)
   }
+  def registerAll(sparkSession: SparkSession): Unit =
+  {
+    sparkSession.experimental.extraStrategies = JoinQueryDetector :: Nil
+    UdtRegistrator.registerAll()
+    UdfRegistrator.registerAll(sparkSession)
+  }
+
   def dropAll(sparkSession: SparkSession): Unit =
   {
     UdfRegistrator.dropAll(sparkSession)

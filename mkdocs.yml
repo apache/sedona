@@ -1,0 +1,34 @@
+site_name: GeoSpark Documentation
+pages:
+    - Home: index.md
+    - News:
+      - Release notes: news/GeoSpark-All-Modules-Release-notes.md      
+      - Maven Central Coordinate: news/GeoSpark-All-Modules-Maven-Central-Coordinates.md
+      - Publications: news/publication.md
+    - Download:
+      - Overview: download/overview.md
+      - Set up Spark cluser: download/cluster.md
+      - Spark Scala shell: download/scalashell.md
+      - Self-contain project: download/project.md
+      - Compile the source code: download/compile.md
+    - API:
+      - GeoSpark core: 
+        - Scala/Java doc: api/GeoSpark-Scala-and-Java-API.md
+      - GeoSpark SQL:
+        - Overview: api/sql/GeoSparkSQL-Overview.md
+        - Constructor: api/sql/GeoSparkSQL-Constructor.md
+        - Function: api/sql/GeoSparkSQL-Function.md
+        - Predicate: api/sql/GeoSparkSQL-Predicate.md
+        - Aggregate Function: api/sql/GeoSparkSQL-AggregateFunction.md
+        - Optimizer: api/sql/GeoSparkSQL-Optimizer.md
+        - Parameter: api/sql/GeoSparkSQL-Parameter.md
+      - GeoSpark viz:
+        - Scala/Java doc:  api/Babylon-Scala-and-Java-API.md         
+    - Tutorial:
+      - Benchmark: tutorial/benchmark.md
+      - Tune GeoSpark core: tutorial/Advanced-Tutorial-Tune-your-GeoSpark-Application.md
+      - Runnable demo: tutorial/GeoSpark-Runnable-DEMO.md
+    - Contact: contact.md  
+repo_url: https://github.com/DataSystemsLab/GeoSpark
+theme: cerulean
+google_analytics: ['UA-64886725-1', 'www.public.asu.edu/~jiayu2/geospark/index.html']

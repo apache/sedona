@@ -5,15 +5,7 @@ import com.esotericsoftware.kryo.Registration;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryCollection;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.MultiLineString;
-import com.vividsolutions.jts.geom.MultiPoint;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.*;
 import org.apache.log4j.Logger;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeSerde;
 
@@ -21,7 +13,7 @@ import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.Shape
  * Provides methods to efficiently serialize and deserialize geometry types.
  *
  * Supports Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon,
- * GeometryCollection and Circle types.
+ * GeometryCollection, Circle and Envelope types.
  *
  * First byte contains {@link Type#id}. Then go type-specific bytes, followed
  * by user-data attached to the geometry.
@@ -35,7 +27,8 @@ public class GeometrySerde extends Serializer {
     {
         SHAPE(0),
         CIRCLE(1),
-        GEOMETRYCOLLECTION(2);
+        GEOMETRYCOLLECTION(2),
+        ENVELOPE(3);
 
         private final int id;
 
@@ -76,6 +69,13 @@ public class GeometrySerde extends Serializer {
                 writeGeometry(kryo, out, collection.getGeometryN(i));
             }
             writeUserData(kryo, out, collection);
+        } else if( object instanceof Envelope) {
+            Envelope envelope = (Envelope) object;
+            writeType(out, Type.ENVELOPE);
+            out.writeDouble(envelope.getMinX());
+            out.writeDouble(envelope.getMaxX());
+            out.writeDouble(envelope.getMinY());
+            out.writeDouble(envelope.getMaxY());
         } else {
             throw new UnsupportedOperationException("Cannot serialize object of type " +
                 object.getClass().getName());
@@ -125,6 +125,13 @@ public class GeometrySerde extends Serializer {
                 GeometryCollection collection = geometryFactory.createGeometryCollection(geometries);
                 collection.setUserData(readUserData(kryo, input));
                 return collection;
+            }
+            case ENVELOPE: {
+                double xMin = input.readDouble();
+                double xMax = input.readDouble();
+                double yMin = input.readDouble();
+                double yMax = input.readDouble();
+                return new Envelope(xMin,xMax, yMin, yMax );
             }
             default:
                 throw new UnsupportedOperationException(

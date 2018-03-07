@@ -26,8 +26,8 @@
 package org.datasyslab.geosparksql.UDF
 
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
-import org.apache.spark.sql.{SQLContext, SparkSession}
 import org.apache.spark.sql.geosparksql.expressions._
+import org.apache.spark.sql.{SQLContext, SparkSession}
 
 object UdfRegistrator {
   def resigterConstructors(sparkSession: SparkSession): Unit =
@@ -58,6 +58,7 @@ object UdfRegistrator {
     FunctionRegistry.builtin.registerFunction("ST_Area", ST_Area)
     FunctionRegistry.builtin.registerFunction("ST_Centroid", ST_Centroid)
     FunctionRegistry.builtin.registerFunction("ST_Transform", ST_Transform)
+    FunctionRegistry.builtin.registerFunction("ST_Intersection", ST_Intersection)
   }
 
   def registerAggregateFunctions(sparkSession: SparkSession): Unit =
@@ -94,6 +95,7 @@ object UdfRegistrator {
     FunctionRegistry.builtin.dropFunction("ST_Area")
     FunctionRegistry.builtin.dropFunction("ST_Centroid")
     FunctionRegistry.builtin.dropFunction("ST_Transform")
+    FunctionRegistry.builtin.dropFunction("ST_Intersection")
   }
 
   def dropAggregateFunctions(sparkSession: SparkSession): Unit =
