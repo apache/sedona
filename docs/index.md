@@ -2,6 +2,9 @@
 
 Page hit count (since Jan. 2018): [![HitCount](http://hits.dwyl.io/DataSystemsLab/GeoSpark.svg)](http://hits.dwyl.io/DataSystemsLab/GeoSpark)
 
+[![GitHub stars](https://img.shields.io/github/stars/DatasystemsLab/GeoSpark.svg?style=social&label=Star&maxAge=2592000)](https://GitHub.com/DatasystemsLab/GeoSpark/stargazers/)   [![GitHub forks](https://img.shields.io/github/forks/DatasystemsLab/GeoSpark.svg?style=social&label=Fork&maxAge=2592000)](https://github.com/DatasystemsLab/GeoSpark/network)   [![GitHub license](https://img.shields.io/github/license/DatasystemsLab/GeoSpark.svg)](https://github.com/DataSystemsLab/GeoSpark/blob/master/LICENSE)
+
+
 | Status   |      Stable    | Latest | Source code|Spark compatibility|
 |:----------:|:-------------:|:------|:------:|:------|
 | GeoSpark |  [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/geospark.svg)](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Maven-Central-Coordinates/) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/geospark.svg)](http://datasystemslab.github.io/GeoSpark/news/GeoSpark-All-Modules-Maven-Central-Coordinates/) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|Spark 2.X, 1.X|
