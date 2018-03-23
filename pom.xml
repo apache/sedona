@@ -53,6 +53,24 @@
             <artifactId>spark-core_${scala.compat.version}</artifactId>
             <version>${spark.version}</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-mapreduce-client-core</artifactId>
+            <version>2.7.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <version>2.7.2</version>
+            <scope>provided</scope>
         </dependency>
         <!-- Test -->
         <dependency>
@@ -62,21 +80,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.specs2</groupId>
-            <artifactId>specs2-core_${scala.compat.version}</artifactId>
-            <version>2.4.16</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest_${scala.compat.version}</artifactId>
             <version>2.2.4</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.specs2</groupId>
-            <artifactId>specs2-junit_${scala.compat.version}</artifactId>
-            <version>2.4.16</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -93,58 +99,78 @@
         </repository>
     </repositories>
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>net.alchim31.maven</groupId>
+                    <artifactId>scala-maven-plugin</artifactId>
+                    <version>3.2.1</version>
+                    <executions>
+                        <execution>
+                            <id>scala-compile-first</id>
+                            <phase>process-resources</phase>
+                            <goals>
+                                <goal>add-source</goal>
+                                <goal>compile</goal>
+                            </goals>
+                            <configuration>
+                                <args>
+                                    <arg>-dependencyfile</arg>
+                                    <arg>${project.build.directory}/.scala_dependencies</arg>
+                                </args>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>scala-test-compile</id>
+                            <phase>process-test-resources</phase>
+                            <goals>
+                                <goal>testCompile</goal>
+                            </goals>
+                            <configuration>
+                                <args>
+                                    <arg>-dependencyfile</arg>
+                                    <arg>${project.build.directory}/.scala_dependencies</arg>
+                                </args>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>doc-jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.1</version>
+                    <configuration>
+                        <source>1.7</source>
+                        <target>1.7</target>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
-            </plugin>
             <plugin>
                 <!-- see http://davidb.github.com/scala-maven-plugin -->
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
                 <version>3.2.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>scala-compile-first</id>
-                        <phase>process-resources</phase>
+                        <phase>compile</phase>
                         <goals>
-                            <goal>add-source</goal>
                             <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <args>
-                                <arg>-dependencyfile</arg>
-                                <arg>${project.build.directory}/.scala_dependencies</arg>
-                            </args>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>scala-test-compile</id>
-                        <phase>process-test-resources</phase>
-                        <goals>
-                            <goal>testCompile</goal>
-                        </goals>
-                        <configuration>
-                            <args>
-                                <arg>-dependencyfile</arg>
-                                <arg>${project.build.directory}/.scala_dependencies</arg>
-                            </args>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>doc-jar</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -206,7 +232,7 @@
         </plugins>
         <resources>
             <resource>
-                <directory>src/resource</directory>
+                <directory>src/test/resources</directory>
             </resource>
         </resources>
     </build>
