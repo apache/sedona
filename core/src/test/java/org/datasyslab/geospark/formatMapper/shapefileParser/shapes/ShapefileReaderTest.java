@@ -1,8 +1,27 @@
-/**
- * FILE: ShapefileReaderTest.java
- * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapefileReaderTest.java
- * Copyright (c) 2015-2017 GeoSpark Development Team
- * All rights reserved.
+/*
+ * FILE: ShapefileReaderTest
+ * Copyright (c) 2015 - 2018 GeoSpark Development Team
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
  */
 
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
@@ -46,24 +65,30 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class ShapefileReaderTest implements Serializable{
+public class ShapefileReaderTest
+        implements Serializable
+{
 
-    /** The sc. */
+    /**
+     * The sc.
+     */
     public static JavaSparkContext sc;
 
     private DataStore dataStore;
 
     @BeforeClass
-    public static void onceExecutedBeforeAll() {
-        SparkConf conf = new SparkConf().setAppName("ShapefileRDDTest").setMaster("local[2]").set("spark.executor.cores","2").set("spark.executor.memory", "4g");
+    public static void onceExecutedBeforeAll()
+    {
+        SparkConf conf = new SparkConf().setAppName("ShapefileRDDTest").setMaster("local[2]").set("spark.executor.cores", "2").set("spark.executor.memory", "4g");
         sc = new JavaSparkContext(conf);
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
         //Hard code to a file in resource folder. But you can replace it later in the try-catch field in your hdfs system.
     }
-    
+
     @After
-    public void tearDownSingleTest() {
+    public void tearDownSingleTest()
+    {
         if (dataStore != null) {
             dataStore.dispose();
         }
@@ -71,10 +96,13 @@ public class ShapefileReaderTest implements Serializable{
 
     /**
      * Test correctness of parsing shapefile
+     *
      * @throws IOException
      */
     @Test
-    public void testReadToGeometryRDD() throws IOException {
+    public void testReadToGeometryRDD()
+            throws IOException
+    {
         // load shape with geotool.shapefile
         String inputLocation = getShapeFilePath("polygon");
         FeatureCollection<SimpleFeatureType, SimpleFeature> collection = loadFeatures(inputLocation);
@@ -85,16 +113,19 @@ public class ShapefileReaderTest implements Serializable{
 
     /**
      * Test correctness of parsing files with shape type = Polygon
+     *
      * @throws IOException
      */
     @Test
-    public void testReadToPolygonRDD() throws Exception {
+    public void testReadToPolygonRDD()
+            throws Exception
+    {
         String inputLocation = getShapeFilePath("polygon");
         // load shape with geotool.shapefile
         FeatureCollection<SimpleFeatureType, SimpleFeature> collection = loadFeatures(inputLocation);
         FeatureIterator<SimpleFeature> features = collection.features();
         ArrayList<String> featureTexts = new ArrayList<String>();
-        while(features.hasNext()){
+        while (features.hasNext()) {
             SimpleFeature feature = features.next();
             Object geometry = feature.getDefaultGeometry();
             if (geometry instanceof MultiPolygon) {
@@ -110,9 +141,9 @@ public class ShapefileReaderTest implements Serializable{
         JavaRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
         PolygonRDD spatialRDD = ShapefileReader.geometryToPolygon(geometryRDD);
 
-        long count = RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180,180,-90,90), false, false).count();
+        long count = RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180, 180, -90, 90), false, false).count();
         Assert.assertEquals(spatialRDD.rawSpatialRDD.count(), count);
-        
+
         for (Geometry geometry : geometryRDD.collect()) {
             Assert.assertEquals(featureIterator.next(), geometry.toText());
         }
@@ -120,16 +151,19 @@ public class ShapefileReaderTest implements Serializable{
 
     /**
      * Test correctness of parsing files with shape type = PolyLine
+     *
      * @throws IOException
      */
     @Test
-    public void testReadToLineStringRDD() throws Exception {
+    public void testReadToLineStringRDD()
+            throws Exception
+    {
         String inputLocation = getShapeFilePath("polyline");
         // load shape with geotool.shapefile
         FeatureCollection<SimpleFeatureType, SimpleFeature> collection = loadFeatures(inputLocation);
         FeatureIterator<SimpleFeature> features = collection.features();
         ArrayList<String> featureTexts = new ArrayList<String>();
-        while(features.hasNext()){
+        while (features.hasNext()) {
             SimpleFeature feature = features.next();
             featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
         }
@@ -137,7 +171,7 @@ public class ShapefileReaderTest implements Serializable{
         JavaRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
         LineStringRDD spatialRDD = ShapefileReader.geometryToLineString(geometryRDD);
 
-        long count = RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180,180,-90,90), false, false).count();
+        long count = RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180, 180, -90, 90), false, false).count();
         Assert.assertEquals(spatialRDD.rawSpatialRDD.count(), count);
 
         for (Geometry geometry : geometryRDD.collect()) {
@@ -147,16 +181,19 @@ public class ShapefileReaderTest implements Serializable{
 
     /**
      * Test correctness of parsing files with shape type = Point
+     *
      * @throws IOException
      */
     @Test
-    public void testReadToPointRDD_Point() throws Exception {
+    public void testReadToPointRDD_Point()
+            throws Exception
+    {
         String inputLocation = getShapeFilePath("point");
         // load shape with geotool.shapefile
         FeatureCollection<SimpleFeatureType, SimpleFeature> collection = loadFeatures(inputLocation);
         FeatureIterator<SimpleFeature> features = collection.features();
         ArrayList<String> featureTexts = new ArrayList<String>();
-        while(features.hasNext()){
+        while (features.hasNext()) {
             SimpleFeature feature = features.next();
             featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
         }
@@ -164,7 +201,7 @@ public class ShapefileReaderTest implements Serializable{
         JavaRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
         PointRDD spatialRDD = ShapefileReader.geometryToPoint(geometryRDD);
 
-        long count = RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180,180,-90,90), false, false).count();
+        long count = RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180, 180, -90, 90), false, false).count();
         Assert.assertEquals(spatialRDD.rawSpatialRDD.count(), count);
 
         for (Geometry geometry : geometryRDD.collect()) {
@@ -174,16 +211,19 @@ public class ShapefileReaderTest implements Serializable{
 
     /**
      * Test correctness of parsing files with shape type = MultiPoint
+     *
      * @throws IOException
      */
     @Test
-    public void testReadToPointRDD_MultiPoint() throws IOException{
+    public void testReadToPointRDD_MultiPoint()
+            throws IOException
+    {
         String inputLocation = getShapeFilePath("multipoint");
         // load shape with geotool.shapefile
         FeatureCollection<SimpleFeatureType, SimpleFeature> collection = loadFeatures(inputLocation);
         FeatureIterator<SimpleFeature> features = collection.features();
         ArrayList<String> featureTexts = new ArrayList<String>();
-        while(features.hasNext()){
+        while (features.hasNext()) {
             SimpleFeature feature = features.next();
             featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
         }
@@ -197,25 +237,28 @@ public class ShapefileReaderTest implements Serializable{
 
     /**
      * Test correctness of .dbf parser
+     *
      * @throws IOException
      */
     @Test
-    public void testLoadDbfFile() throws IOException{
+    public void testLoadDbfFile()
+            throws IOException
+    {
         String inputLocation = getShapeFilePath("dbf");
         // load shape with geotool.shapefile
         FeatureCollection<SimpleFeatureType, SimpleFeature> collection = loadFeatures(inputLocation);
         FeatureIterator<SimpleFeature> features = collection.features();
         ArrayList<String> featureTexts = new ArrayList<String>();
-        while(features.hasNext()){
+        while (features.hasNext()) {
             SimpleFeature feature = features.next();
             String attr = "";
             int i = 0;
             for (Property property : feature.getProperties()) {
-                if(i == 0){
+                if (i == 0) {
                     i++;
                     continue;
                 }
-                if(i > 1) attr += "\t";
+                if (i > 1) { attr += "\t"; }
                 attr += String.valueOf(property.getValue());
                 i++;
             }
@@ -230,10 +273,13 @@ public class ShapefileReaderTest implements Serializable{
 
     /**
      * Test if parse the boundary in header correctly
+     *
      * @throws IOException
      */
     @Test
-    public void testReadBoundary() throws IOException{
+    public void testReadBoundary()
+            throws IOException
+    {
         String inputLocation = getShapeFilePath("dbf");
         // load shapefile with geotools's reader
         ShpFiles shpFile = new ShpFiles(inputLocation + "/map.shp");
@@ -255,11 +301,14 @@ public class ShapefileReaderTest implements Serializable{
         gtlReader.close();
     }
 
-    private String getShapeFilePath(String fileName) {
+    private String getShapeFilePath(String fileName)
+    {
         return ShapefileRDDTest.class.getClassLoader().getResource("shapefiles/" + fileName).getPath();
     }
 
-    private FeatureCollection<SimpleFeatureType, SimpleFeature> loadFeatures(String filePath) throws IOException {
+    private FeatureCollection<SimpleFeatureType, SimpleFeature> loadFeatures(String filePath)
+            throws IOException
+    {
         File file = new File(filePath);
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("url", file.toURI().toURL());
@@ -272,7 +321,9 @@ public class ShapefileReaderTest implements Serializable{
     }
 
     @AfterClass
-    public static void tearDown() throws Exception {
+    public static void tearDown()
+            throws Exception
+    {
         sc.stop();
     }
 }

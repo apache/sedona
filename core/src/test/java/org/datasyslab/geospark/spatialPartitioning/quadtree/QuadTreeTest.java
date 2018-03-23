@@ -1,8 +1,27 @@
-/**
- * FILE: QuadTreeTest.java
- * PATH: org.datasyslab.geospark.spatialPartitioning.quadtree.QuadTreeTest.java
- * Copyright (c) 2015-2017 GeoSpark Development Team
- * All rights reserved.
+/*
+ * FILE: QuadTreeTest
+ * Copyright (c) 2015 - 2018 GeoSpark Development Team
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
  */
 package org.datasyslab.geospark.spatialPartitioning.quadtree;
 
@@ -16,10 +35,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class QuadTreeTest {
+public class QuadTreeTest
+{
 
     @Test
-    public void testInsertElements() {
+    public void testInsertElements()
+    {
 
         long startTime;
         long endTime;
@@ -80,7 +101,8 @@ public class QuadTreeTest {
 //        System.out.println("Total execution time hoho: " + (endTime - startTime) + "ms");
     }
 
-    private void assertEqualElements(List<QuadRectangle> expected, List<QuadRectangle> actual) {
+    private void assertEqualElements(List<QuadRectangle> expected, List<QuadRectangle> actual)
+    {
         assertEquals(expected.size(), actual.size());
         for (QuadRectangle r : actual) {
             assertTrue(expected.contains(r));
@@ -88,7 +110,8 @@ public class QuadTreeTest {
     }
 
     @Test
-    public void testIntersectElementsAreInserted() {
+    public void testIntersectElementsAreInserted()
+    {
         StandardQuadTree<QuadRectangle> quadTree = new StandardQuadTree<>(new QuadRectangle(0, 0, 10, 10), 0, 1, 2);
 
         QuadRectangle r1 = new QuadRectangle(1, 1, 1, 1);
@@ -102,7 +125,8 @@ public class QuadTreeTest {
     }
 
     @Test
-    public void testPixelQuadTree() {
+    public void testPixelQuadTree()
+    {
         StandardQuadTree<QuadRectangle> quadTree = new StandardQuadTree<QuadRectangle>(new QuadRectangle(0, 0, 10, 10), 0, 5, 5);
 
         QuadRectangle r1 = new QuadRectangle(1, 1, 0, 0);
@@ -123,7 +147,8 @@ public class QuadTreeTest {
     }
 
     @Test
-    public void testQuadTreeForceGrow() {
+    public void testQuadTreeForceGrow()
+    {
         int resolutionX = 100000;
         int resolutionY = 100000;
 
@@ -131,7 +156,7 @@ public class QuadTreeTest {
         quadTree.forceGrowUp(4);
         int leafPartitionNum = quadTree.getTotalNumLeafNode();
         assertEquals(256, leafPartitionNum);
-    
+
         for (int i = 0; i < 100000; i++) {
             int x = ThreadLocalRandom.current().nextInt(0, resolutionX);
             int y = ThreadLocalRandom.current().nextInt(0, resolutionY);

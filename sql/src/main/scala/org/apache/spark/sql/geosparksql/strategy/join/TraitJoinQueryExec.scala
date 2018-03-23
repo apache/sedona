@@ -1,28 +1,28 @@
-/**
-  * FILE: TraitJoinQueryExec
-  * PATH: org.apache.spark.sql.geosparksql.strategy.join.TraitJoinQueryExec
-  * Copyright (c) GeoSpark Development Team
-  *
-  * MIT License
-  *
-  * Permission is hereby granted, free of charge, to any person obtaining a copy
-  * of this software and associated documentation files (the "Software"), to deal
-  * in the Software without restriction, including without limitation the rights
-  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  * copies of the Software, and to permit persons to whom the Software is
-  * furnished to do so, subject to the following conditions:
-  *
-  * The above copyright notice and this permission notice shall be included in all
-  * copies or substantial portions of the Software.
-  *
-  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-  * SOFTWARE.
-  */
+/*
+ * FILE: TraitJoinQueryExec.scala
+ * Copyright (c) 2015 - 2018 GeoSpark Development Team
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
 package org.apache.spark.sql.geosparksql.strategy.join
 
 import com.vividsolutions.jts.geom.Geometry
@@ -39,7 +39,8 @@ import org.datasyslab.geospark.spatialRDD.SpatialRDD
 import org.datasyslab.geospark.utils.GeoSparkConf
 import org.datasyslab.geosparksql.utils.GeometrySerializer
 
-trait TraitJoinQueryExec { self: SparkPlan =>
+trait TraitJoinQueryExec {
+  self: SparkPlan =>
 
   val left: SparkPlan
   val right: SparkPlan
@@ -76,59 +77,52 @@ trait TraitJoinQueryExec { self: SparkPlan =>
 
     // Only do SpatialRDD analyze when the user doesn't know approximate total count of the spatial partitioning
     // dominant side rdd
-    if (geosparkConf.getJoinApproximateTotalCount == -1)
-    {
-      if (geosparkConf.getJoinSparitionDominantSide == JoinSparitionDominantSide.LEFT)
-      {
+    if (geosparkConf.getJoinApproximateTotalCount == -1) {
+      if (geosparkConf.getJoinSparitionDominantSide == JoinSparitionDominantSide.LEFT) {
         leftShapes.analyze()
         geosparkConf.setJoinApproximateTotalCount(leftShapes.approximateTotalCount)
         geosparkConf.setDatasetBoundary(leftShapes.boundaryEnvelope)
       }
-      else
-      {
+      else {
         rightShapes.analyze()
         geosparkConf.setJoinApproximateTotalCount(rightShapes.approximateTotalCount)
         geosparkConf.setDatasetBoundary(rightShapes.boundaryEnvelope)
       }
     }
     logDebug(
-        s"Found ${geosparkConf.getJoinApproximateTotalCount} objects")
+      s"Found ${geosparkConf.getJoinApproximateTotalCount} objects")
     var numPartitions = -1
     try {
       if (geosparkConf.getJoinSparitionDominantSide == JoinSparitionDominantSide.LEFT) {
-        if(geosparkConf.getFallbackPartitionNum != -1)
-        {
+        if (geosparkConf.getFallbackPartitionNum != -1) {
           numPartitions = geosparkConf.getFallbackPartitionNum
         }
-        else
-        {
+        else {
           numPartitions = leftShapes.rawSpatialRDD.partitions.size()
         }
         doSpatialPartitioning(leftShapes, rightShapes, numPartitions, geosparkConf)
       }
-      else
-      {
-          if (geosparkConf.getFallbackPartitionNum != -1) {
-            numPartitions = geosparkConf.getFallbackPartitionNum
-          }
-          else {
-            numPartitions = rightShapes.rawSpatialRDD.partitions.size()
-          }
-          doSpatialPartitioning(rightShapes, leftShapes, numPartitions, geosparkConf)
+      else {
+        if (geosparkConf.getFallbackPartitionNum != -1) {
+          numPartitions = geosparkConf.getFallbackPartitionNum
+        }
+        else {
+          numPartitions = rightShapes.rawSpatialRDD.partitions.size()
+        }
+        doSpatialPartitioning(rightShapes, leftShapes, numPartitions, geosparkConf)
       }
     }
-    catch
-    {
+    catch {
       case e: IllegalArgumentException => {
         // Partition number are not qualified
         // Use fallback num partitions specified in GeoSparkConf
         if (geosparkConf.getJoinSparitionDominantSide == JoinSparitionDominantSide.LEFT) {
           numPartitions = geosparkConf.getFallbackPartitionNum
-          doSpatialPartitioning(leftShapes,rightShapes,numPartitions,geosparkConf)
+          doSpatialPartitioning(leftShapes, rightShapes, numPartitions, geosparkConf)
         }
         else {
           numPartitions = geosparkConf.getFallbackPartitionNum
-          doSpatialPartitioning(rightShapes,leftShapes,numPartitions,geosparkConf)
+          doSpatialPartitioning(rightShapes, leftShapes, numPartitions, geosparkConf)
         }
       }
     }
@@ -143,29 +137,29 @@ trait TraitJoinQueryExec { self: SparkPlan =>
 
     logDebug(s"Join result has ${matches.count()} rows")
 
-      matches.rdd.mapPartitions { iter =>
-        val filtered =
-          if (extraCondition.isDefined) {
-            val boundCondition = newPredicate(extraCondition.get, left.output ++ right.output)
-            iter.filter {
-              case (l, r) =>
-                val leftRow = l.getUserData.asInstanceOf[UnsafeRow]
-                val rightRow = r.getUserData.asInstanceOf[UnsafeRow]
-                var joiner = GenerateUnsafeRowJoiner.create(left.schema, right.schema)
-                boundCondition.eval(joiner.join(leftRow,rightRow))
-            }
-          } else {
-            iter
+    matches.rdd.mapPartitions { iter =>
+      val filtered =
+        if (extraCondition.isDefined) {
+          val boundCondition = newPredicate(extraCondition.get, left.output ++ right.output)
+          iter.filter {
+            case (l, r) =>
+              val leftRow = l.getUserData.asInstanceOf[UnsafeRow]
+              val rightRow = r.getUserData.asInstanceOf[UnsafeRow]
+              var joiner = GenerateUnsafeRowJoiner.create(left.schema, right.schema)
+              boundCondition.eval(joiner.join(leftRow, rightRow))
           }
-
-        filtered.map {
-          case (l, r) =>
-            val leftRow = l.getUserData.asInstanceOf[UnsafeRow]
-            val rightRow = r.getUserData.asInstanceOf[UnsafeRow]
-            var joiner = GenerateUnsafeRowJoiner.create(left.schema, right.schema)
-          joiner.join(leftRow, rightRow)
+        } else {
+          iter
         }
+
+      filtered.map {
+        case (l, r) =>
+          val leftRow = l.getUserData.asInstanceOf[UnsafeRow]
+          val rightRow = r.getUserData.asInstanceOf[UnsafeRow]
+          var joiner = GenerateUnsafeRowJoiner.create(left.schema, right.schema)
+          joiner.join(leftRow, rightRow)
       }
+    }
   }
 
   protected def toSpatialRdd(rdd: RDD[UnsafeRow],
@@ -174,8 +168,7 @@ trait TraitJoinQueryExec { self: SparkPlan =>
     val spatialRdd = new SpatialRDD[Geometry]
     spatialRdd.setRawSpatialRDD(
       rdd
-        .map { x =>
-        {
+        .map { x => {
           val shape = GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[ArrayData])
           //logInfo(shape.toString)
           shape.setUserData(x.copy)
@@ -187,14 +180,13 @@ trait TraitJoinQueryExec { self: SparkPlan =>
   }
 
   def toSpatialRddPair(buildRdd: RDD[UnsafeRow],
-                    buildExpr: Expression,
-                    streamedRdd: RDD[UnsafeRow],
-                    streamedExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) =
+                       buildExpr: Expression,
+                       streamedRdd: RDD[UnsafeRow],
+                       streamedExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) =
     (toSpatialRdd(buildRdd, buildExpr), toSpatialRdd(streamedRdd, streamedExpr))
 
-  def doSpatialPartitioning(dominantShapes:SpatialRDD[Geometry], followerShapes:SpatialRDD[Geometry],
-                            numPartitions: Integer, geosparkConf: GeoSparkConf): Unit =
-  {
+  def doSpatialPartitioning(dominantShapes: SpatialRDD[Geometry], followerShapes: SpatialRDD[Geometry],
+                            numPartitions: Integer, geosparkConf: GeoSparkConf): Unit = {
     dominantShapes.spatialPartitioning(geosparkConf.getJoinGridType, numPartitions)
     followerShapes.spatialPartitioning(dominantShapes.getPartitioner)
   }

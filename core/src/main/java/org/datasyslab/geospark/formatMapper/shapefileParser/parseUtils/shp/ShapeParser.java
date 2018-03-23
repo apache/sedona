@@ -1,8 +1,27 @@
-/**
- * FILE: ShapeParser.java
- * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeParser.java
- * Copyright (c) 2015-2017 GeoSpark Development Team
- * All rights reserved.
+/*
+ * FILE: ShapeParser
+ * Copyright (c) 2015 - 2018 GeoSpark Development Team
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
  */
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
@@ -13,9 +32,13 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import java.io.IOException;
 import java.io.Serializable;
 
-public abstract class ShapeParser implements Serializable {
+public abstract class ShapeParser
+        implements Serializable
+{
 
-    /** The geometry factory. */
+    /**
+     * The geometry factory.
+     */
     protected final GeometryFactory geometryFactory;
 
     /**
@@ -23,7 +46,8 @@ public abstract class ShapeParser implements Serializable {
      *
      * @param geometryFactory the geometry factory
      */
-    protected ShapeParser(GeometryFactory geometryFactory) {
+    protected ShapeParser(GeometryFactory geometryFactory)
+    {
         this.geometryFactory = geometryFactory;
     }
 
@@ -46,8 +70,8 @@ public abstract class ShapeParser implements Serializable {
      */
     protected CoordinateSequence readCoordinates(ShapeReader reader, int numPoints)
     {
-        CoordinateSequence coordinateSequence = geometryFactory.getCoordinateSequenceFactory().create(numPoints,2);
-        for(int i = 0; i < numPoints; ++i){
+        CoordinateSequence coordinateSequence = geometryFactory.getCoordinateSequenceFactory().create(numPoints, 2);
+        for (int i = 0; i < numPoints; ++i) {
             coordinateSequence.setOrdinate(i, 0, reader.readDouble());
             coordinateSequence.setOrdinate(i, 1, reader.readDouble());
         }
@@ -57,7 +81,7 @@ public abstract class ShapeParser implements Serializable {
     protected int[] readOffsets(ShapeReader reader, int numParts, int maxOffset)
     {
         int[] offsets = new int[numParts + 1];
-        for(int i = 0; i < numParts; ++i) {
+        for (int i = 0; i < numParts; ++i) {
             offsets[i] = reader.readInt();
         }
         offsets[numParts] = maxOffset;

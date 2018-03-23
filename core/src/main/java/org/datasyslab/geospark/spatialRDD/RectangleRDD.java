@@ -1,8 +1,27 @@
-/**
- * FILE: RectangleRDD.java
- * PATH: org.datasyslab.geospark.spatialRDD.RectangleRDD.java
- * Copyright (c) 2015-2017 GeoSpark Development Team
- * All rights reserved.
+/*
+ * FILE: RectangleRDD
+ * Copyright (c) 2015 - 2018 GeoSpark Development Team
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
  */
 package org.datasyslab.geospark.spatialRDD;
 
@@ -16,93 +35,94 @@ import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.formatMapper.RectangleFormatMapper;
 
 // TODO: Auto-generated Javadoc
+
 /**
  * The Class RectangleRDD.
  */
 
-public class RectangleRDD extends SpatialRDD<Polygon> {
+public class RectangleRDD
+        extends SpatialRDD<Polygon>
+{
 
-    
-    
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param rawSpatialRDD the raw spatial RDD
-	 */
-	public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD)
-	{
-		this.rawSpatialRDD = rawSpatialRDD;
-	}
-	
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param rawSpatialRDD the raw spatial RDD
-	 * @param sourceEpsgCRSCode the source epsg CRS code
-	 * @param targetEpsgCode the target epsg code
-	 */
-	public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode)
-	{
-		this.rawSpatialRDD = rawSpatialRDD;
-		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
-	}
-	
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param sparkContext the spark context
-	 * @param InputLocation the input location
-	 * @param Offset the offset
-	 * @param splitter the splitter
-	 * @param carryInputData the carry input data
-	 * @param partitions the partitions
-	 */
-	public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,Integer Offset,FileDataSplitter splitter, boolean carryInputData,Integer partitions)
-	{
-		this.setRawSpatialRDD(sparkContext.textFile(InputLocation,partitions).mapPartitions(new RectangleFormatMapper(Offset,Offset,splitter,carryInputData)));
-	}
-	
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param sparkContext the spark context
-	 * @param InputLocation the input location
-	 * @param Offset the offset
-	 * @param splitter the splitter
-	 * @param carryInputData the carry input data
-	 */
-	public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,Integer Offset,FileDataSplitter splitter, boolean carryInputData)
-	{
-		this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new RectangleFormatMapper(Offset,Offset,splitter,carryInputData)));
-	}
-	
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param sparkContext the spark context
-	 * @param InputLocation the input location
-	 * @param splitter the splitter
-	 * @param carryInputData the carry input data
-	 * @param partitions the partitions
-	 */
-	public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,FileDataSplitter splitter, boolean carryInputData,Integer partitions)
-	{
-		this.setRawSpatialRDD(sparkContext.textFile(InputLocation,partitions).mapPartitions(new RectangleFormatMapper(0,0,splitter,carryInputData)));
-	}
-	
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param sparkContext the spark context
-	 * @param InputLocation the input location
-	 * @param splitter the splitter
-	 * @param carryInputData the carry input data
-	 */
-	public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,FileDataSplitter splitter, boolean carryInputData)
-	{
-		this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new RectangleFormatMapper(0,0,splitter,carryInputData)));
-	}
-	
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param rawSpatialRDD the raw spatial RDD
+     */
+    public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD)
+    {
+        this.rawSpatialRDD = rawSpatialRDD;
+    }
+
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param rawSpatialRDD the raw spatial RDD
+     * @param sourceEpsgCRSCode the source epsg CRS code
+     * @param targetEpsgCode the target epsg code
+     */
+    public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode)
+    {
+        this.rawSpatialRDD = rawSpatialRDD;
+        this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+    }
+
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param Offset the offset
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param partitions the partitions
+     */
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter, boolean carryInputData, Integer partitions)
+    {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(new RectangleFormatMapper(Offset, Offset, splitter, carryInputData)));
+    }
+
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param Offset the offset
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     */
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter, boolean carryInputData)
+    {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new RectangleFormatMapper(Offset, Offset, splitter, carryInputData)));
+    }
+
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param partitions the partitions
+     */
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Integer partitions)
+    {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(new RectangleFormatMapper(0, 0, splitter, carryInputData)));
+    }
+
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     */
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData)
+    {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new RectangleFormatMapper(0, 0, splitter, carryInputData)));
+    }
+
     /**
      * Instantiates a new rectangle RDD.
      *
@@ -111,10 +131,11 @@ public class RectangleRDD extends SpatialRDD<Polygon> {
      * @param partitions the partitions
      * @param userSuppliedMapper the user supplied mapper
      */
-    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper) {
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper)
+    {
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(userSuppliedMapper));
     }
-    
+
     /**
      * Instantiates a new rectangle RDD.
      *
@@ -122,150 +143,146 @@ public class RectangleRDD extends SpatialRDD<Polygon> {
      * @param InputLocation the input location
      * @param userSuppliedMapper the user supplied mapper
      */
-    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper) {
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper)
+    {
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(userSuppliedMapper));
     }
 
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param rawSpatialRDD the raw spatial RDD
+     * @param datasetBoundary the dataset boundary
+     * @param approximateTotalCount the approximate total count
+     */
+    public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD, Envelope datasetBoundary, Integer approximateTotalCount)
+    {
+        this.rawSpatialRDD = rawSpatialRDD;
+        this.boundaryEnvelope = datasetBoundary;
+        this.approximateTotalCount = approximateTotalCount;
+    }
 
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param rawSpatialRDD the raw spatial RDD
+     * @param sourceEpsgCRSCode the source epsg CRS code
+     * @param targetEpsgCode the target epsg code
+     * @param datasetBoundary the dataset boundary
+     * @param approximateTotalCount the approximate total count
+     */
+    public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode, Envelope datasetBoundary, Integer approximateTotalCount)
+    {
+        this.rawSpatialRDD = rawSpatialRDD;
+        this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+        this.boundaryEnvelope = datasetBoundary;
+        this.approximateTotalCount = approximateTotalCount;
+    }
 
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param Offset the offset
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param partitions the partitions
+     * @param datasetBoundary the dataset boundary
+     * @param approximateTotalCount the approximate total count
+     */
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter, boolean carryInputData, Integer partitions, Envelope datasetBoundary, Integer approximateTotalCount)
+    {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(new RectangleFormatMapper(Offset, Offset, splitter, carryInputData)));
+        this.boundaryEnvelope = datasetBoundary;
+        this.approximateTotalCount = approximateTotalCount;
+    }
 
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param Offset the offset
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param datasetBoundary the dataset boundary
+     * @param approximateTotalCount the approximate total count
+     */
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter, boolean carryInputData, Envelope datasetBoundary, Integer approximateTotalCount)
+    {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new RectangleFormatMapper(Offset, Offset, splitter, carryInputData)));
+        this.boundaryEnvelope = datasetBoundary;
+        this.approximateTotalCount = approximateTotalCount;
+    }
 
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param rawSpatialRDD the raw spatial RDD
-	 * @param datasetBoundary the dataset boundary
-	 * @param approximateTotalCount the approximate total count
-	 */
-	public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD, Envelope datasetBoundary, Integer approximateTotalCount)
-	{
-		this.rawSpatialRDD = rawSpatialRDD;
-		this.boundaryEnvelope = datasetBoundary;
-		this.approximateTotalCount = approximateTotalCount;
-	}
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param partitions the partitions
+     * @param datasetBoundary the dataset boundary
+     * @param approximateTotalCount the approximate total count
+     */
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Integer partitions, Envelope datasetBoundary, Integer approximateTotalCount)
+    {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(new RectangleFormatMapper(0, 0, splitter, carryInputData)));
+        this.boundaryEnvelope = datasetBoundary;
+        this.approximateTotalCount = approximateTotalCount;
+    }
 
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param rawSpatialRDD the raw spatial RDD
-	 * @param sourceEpsgCRSCode the source epsg CRS code
-	 * @param targetEpsgCode the target epsg code
-	 * @param datasetBoundary the dataset boundary
-	 * @param approximateTotalCount the approximate total count
-	 */
-	public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode, Envelope datasetBoundary, Integer approximateTotalCount)
-	{
-		this.rawSpatialRDD = rawSpatialRDD;
-		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
-		this.boundaryEnvelope = datasetBoundary;
-		this.approximateTotalCount = approximateTotalCount;
-	}
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param datasetBoundary the dataset boundary
+     * @param approximateTotalCount the approximate total count
+     */
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Envelope datasetBoundary, Integer approximateTotalCount)
+    {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new RectangleFormatMapper(0, 0, splitter, carryInputData)));
+        this.boundaryEnvelope = datasetBoundary;
+        this.approximateTotalCount = approximateTotalCount;
+    }
 
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param sparkContext the spark context
-	 * @param InputLocation the input location
-	 * @param Offset the offset
-	 * @param splitter the splitter
-	 * @param carryInputData the carry input data
-	 * @param partitions the partitions
-	 * @param datasetBoundary the dataset boundary
-	 * @param approximateTotalCount the approximate total count
-	 */
-	public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,Integer Offset,FileDataSplitter splitter, boolean carryInputData,Integer partitions, Envelope datasetBoundary, Integer approximateTotalCount)
-	{
-		this.setRawSpatialRDD(sparkContext.textFile(InputLocation,partitions).mapPartitions(new RectangleFormatMapper(Offset,Offset,splitter,carryInputData)));
-		this.boundaryEnvelope = datasetBoundary;
-		this.approximateTotalCount = approximateTotalCount;
-	}
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param partitions the partitions
+     * @param userSuppliedMapper the user supplied mapper
+     * @param datasetBoundary the dataset boundary
+     * @param approximateTotalCount the approximate total count
+     */
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper, Envelope datasetBoundary, Integer approximateTotalCount)
+    {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(userSuppliedMapper));
+        this.boundaryEnvelope = datasetBoundary;
+        this.approximateTotalCount = approximateTotalCount;
+    }
 
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param sparkContext the spark context
-	 * @param InputLocation the input location
-	 * @param Offset the offset
-	 * @param splitter the splitter
-	 * @param carryInputData the carry input data
-	 * @param datasetBoundary the dataset boundary
-	 * @param approximateTotalCount the approximate total count
-	 */
-	public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,Integer Offset,FileDataSplitter splitter, boolean carryInputData, Envelope datasetBoundary, Integer approximateTotalCount)
-	{
-		this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new RectangleFormatMapper(Offset,Offset,splitter,carryInputData)));
-		this.boundaryEnvelope = datasetBoundary;
-		this.approximateTotalCount = approximateTotalCount;
-	}
-
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param sparkContext the spark context
-	 * @param InputLocation the input location
-	 * @param splitter the splitter
-	 * @param carryInputData the carry input data
-	 * @param partitions the partitions
-	 * @param datasetBoundary the dataset boundary
-	 * @param approximateTotalCount the approximate total count
-	 */
-	public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,FileDataSplitter splitter, boolean carryInputData,Integer partitions, Envelope datasetBoundary, Integer approximateTotalCount)
-	{
-		this.setRawSpatialRDD(sparkContext.textFile(InputLocation,partitions).mapPartitions(new RectangleFormatMapper(0,0,splitter,carryInputData)));
-		this.boundaryEnvelope = datasetBoundary;
-		this.approximateTotalCount = approximateTotalCount;
-	}
-
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param sparkContext the spark context
-	 * @param InputLocation the input location
-	 * @param splitter the splitter
-	 * @param carryInputData the carry input data
-	 * @param datasetBoundary the dataset boundary
-	 * @param approximateTotalCount the approximate total count
-	 */
-	public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,FileDataSplitter splitter, boolean carryInputData, Envelope datasetBoundary, Integer approximateTotalCount)
-	{
-		this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new RectangleFormatMapper(0,0,splitter,carryInputData)));
-		this.boundaryEnvelope = datasetBoundary;
-		this.approximateTotalCount = approximateTotalCount;
-	}
-
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param sparkContext the spark context
-	 * @param InputLocation the input location
-	 * @param partitions the partitions
-	 * @param userSuppliedMapper the user supplied mapper
-	 * @param datasetBoundary the dataset boundary
-	 * @param approximateTotalCount the approximate total count
-	 */
-	public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper, Envelope datasetBoundary, Integer approximateTotalCount) {
-		this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(userSuppliedMapper));
-		this.boundaryEnvelope = datasetBoundary;
-		this.approximateTotalCount = approximateTotalCount;
-	}
-
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param sparkContext the spark context
-	 * @param InputLocation the input location
-	 * @param userSuppliedMapper the user supplied mapper
-	 * @param datasetBoundary the dataset boundary
-	 * @param approximateTotalCount the approximate total count
-	 */
-	public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper, Envelope datasetBoundary, Integer approximateTotalCount) {
-		this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(userSuppliedMapper));
-		this.boundaryEnvelope = datasetBoundary;
-		this.approximateTotalCount = approximateTotalCount;
-	}
-
-
-
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param userSuppliedMapper the user supplied mapper
+     * @param datasetBoundary the dataset boundary
+     * @param approximateTotalCount the approximate total count
+     */
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper, Envelope datasetBoundary, Integer approximateTotalCount)
+    {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(userSuppliedMapper));
+        this.boundaryEnvelope = datasetBoundary;
+        this.approximateTotalCount = approximateTotalCount;
+    }
 
     /**
      * Instantiates a new rectangle RDD.
@@ -273,81 +290,80 @@ public class RectangleRDD extends SpatialRDD<Polygon> {
      * @param rawSpatialRDD the raw spatial RDD
      * @param newLevel the new level
      */
-	public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD, StorageLevel newLevel)
-	{
-		this.rawSpatialRDD = rawSpatialRDD;
+    public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD, StorageLevel newLevel)
+    {
+        this.rawSpatialRDD = rawSpatialRDD;
         this.analyze(newLevel);
+    }
 
-	}
-	
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param sparkContext the spark context
-	 * @param InputLocation the input location
-	 * @param Offset the offset
-	 * @param splitter the splitter
-	 * @param carryInputData the carry input data
-	 * @param partitions the partitions
-	 * @param newLevel the new level
-	 */
-	public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,Integer Offset,
-			FileDataSplitter splitter, boolean carryInputData,Integer partitions, StorageLevel newLevel)
-	{
-		this.setRawSpatialRDD(sparkContext.textFile(InputLocation,partitions).mapPartitions(new RectangleFormatMapper(Offset,Offset,splitter,carryInputData)));
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param Offset the offset
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param partitions the partitions
+     * @param newLevel the new level
+     */
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset,
+            FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel)
+    {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(new RectangleFormatMapper(Offset, Offset, splitter, carryInputData)));
         this.analyze(newLevel);
-	}
-	
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param sparkContext the spark context
-	 * @param InputLocation the input location
-	 * @param Offset the offset
-	 * @param splitter the splitter
-	 * @param carryInputData the carry input data
-	 * @param newLevel the new level
-	 */
-	public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,Integer Offset,
-			FileDataSplitter splitter, boolean carryInputData, StorageLevel newLevel)
-	{
-		this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new RectangleFormatMapper(Offset,Offset,splitter,carryInputData)));
+    }
+
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param Offset the offset
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param newLevel the new level
+     */
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset,
+            FileDataSplitter splitter, boolean carryInputData, StorageLevel newLevel)
+    {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new RectangleFormatMapper(Offset, Offset, splitter, carryInputData)));
         this.analyze(newLevel);
-	}
-	
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param sparkContext the spark context
-	 * @param InputLocation the input location
-	 * @param splitter the splitter
-	 * @param carryInputData the carry input data
-	 * @param partitions the partitions
-	 * @param newLevel the new level
-	 */
-	public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,
-			FileDataSplitter splitter, boolean carryInputData,Integer partitions, StorageLevel newLevel)
-	{
-		this.setRawSpatialRDD(sparkContext.textFile(InputLocation,partitions).mapPartitions(new RectangleFormatMapper(0,0,splitter,carryInputData)));
+    }
+
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param partitions the partitions
+     * @param newLevel the new level
+     */
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,
+            FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel)
+    {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(new RectangleFormatMapper(0, 0, splitter, carryInputData)));
         this.analyze(newLevel);
-	}
-	
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param sparkContext the spark context
-	 * @param InputLocation the input location
-	 * @param splitter the splitter
-	 * @param carryInputData the carry input data
-	 * @param newLevel the new level
-	 */
-	public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,
-			FileDataSplitter splitter, boolean carryInputData, StorageLevel newLevel)
-	{
-		this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new RectangleFormatMapper(0,0,splitter,carryInputData)));
+    }
+
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param newLevel the new level
+     */
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,
+            FileDataSplitter splitter, boolean carryInputData, StorageLevel newLevel)
+    {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new RectangleFormatMapper(0, 0, splitter, carryInputData)));
         this.analyze(newLevel);
-	}
-	
+    }
+
     /**
      * Instantiates a new rectangle RDD.
      *
@@ -357,11 +373,12 @@ public class RectangleRDD extends SpatialRDD<Polygon> {
      * @param userSuppliedMapper the user supplied mapper
      * @param newLevel the new level
      */
-    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper, StorageLevel newLevel) {
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper, StorageLevel newLevel)
+    {
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(userSuppliedMapper));
         this.analyze(newLevel);
     }
-    
+
     /**
      * Instantiates a new rectangle RDD.
      *
@@ -370,11 +387,12 @@ public class RectangleRDD extends SpatialRDD<Polygon> {
      * @param userSuppliedMapper the user supplied mapper
      * @param newLevel the new level
      */
-    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper, StorageLevel newLevel) {
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper, StorageLevel newLevel)
+    {
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(userSuppliedMapper));
         this.analyze(newLevel);
     }
-    
+
     /**
      * Instantiates a new rectangle RDD.
      *
@@ -383,94 +401,93 @@ public class RectangleRDD extends SpatialRDD<Polygon> {
      * @param sourceEpsgCRSCode the source epsg CRS code
      * @param targetEpsgCode the target epsg code
      */
-	public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
-	{
-		this.rawSpatialRDD = rawSpatialRDD;
-		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+    public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
+    {
+        this.rawSpatialRDD = rawSpatialRDD;
+        this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.analyze(newLevel);
+    }
 
-	}
-	
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param sparkContext the spark context
-	 * @param InputLocation the input location
-	 * @param Offset the offset
-	 * @param splitter the splitter
-	 * @param carryInputData the carry input data
-	 * @param partitions the partitions
-	 * @param newLevel the new level
-	 * @param sourceEpsgCRSCode the source epsg CRS code
-	 * @param targetEpsgCode the target epsg code
-	 */
-	public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,Integer Offset,
-			FileDataSplitter splitter, boolean carryInputData,Integer partitions, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
-	{
-		this.setRawSpatialRDD(sparkContext.textFile(InputLocation,partitions).mapPartitions(new RectangleFormatMapper(Offset,Offset,splitter,carryInputData)));
-		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
-		this.analyze(newLevel);
-	}
-	
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param sparkContext the spark context
-	 * @param InputLocation the input location
-	 * @param Offset the offset
-	 * @param splitter the splitter
-	 * @param carryInputData the carry input data
-	 * @param newLevel the new level
-	 * @param sourceEpsgCRSCode the source epsg CRS code
-	 * @param targetEpsgCode the target epsg code
-	 */
-	public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,Integer Offset,
-			FileDataSplitter splitter, boolean carryInputData, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
-	{
-		this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new RectangleFormatMapper(Offset,Offset,splitter,carryInputData)));
-		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
-		this.analyze(newLevel);
-	}
-	
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param sparkContext the spark context
-	 * @param InputLocation the input location
-	 * @param splitter the splitter
-	 * @param carryInputData the carry input data
-	 * @param partitions the partitions
-	 * @param newLevel the new level
-	 * @param sourceEpsgCRSCode the source epsg CRS code
-	 * @param targetEpsgCode the target epsg code
-	 */
-	public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,
-			FileDataSplitter splitter, boolean carryInputData,Integer partitions, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
-	{
-		this.setRawSpatialRDD(sparkContext.textFile(InputLocation,partitions).mapPartitions(new RectangleFormatMapper(0,0,splitter,carryInputData)));
-		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
-		this.analyze(newLevel);
-	}
-	
-	/**
-	 * Instantiates a new rectangle RDD.
-	 *
-	 * @param sparkContext the spark context
-	 * @param InputLocation the input location
-	 * @param splitter the splitter
-	 * @param carryInputData the carry input data
-	 * @param newLevel the new level
-	 * @param sourceEpsgCRSCode the source epsg CRS code
-	 * @param targetEpsgCode the target epsg code
-	 */
-	public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,
-			FileDataSplitter splitter, boolean carryInputData, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
-	{
-		this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new RectangleFormatMapper(0,0,splitter,carryInputData)));
-		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
-		this.analyze(newLevel);
-	}
-	
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param Offset the offset
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param partitions the partitions
+     * @param newLevel the new level
+     * @param sourceEpsgCRSCode the source epsg CRS code
+     * @param targetEpsgCode the target epsg code
+     */
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset,
+            FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
+    {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(new RectangleFormatMapper(Offset, Offset, splitter, carryInputData)));
+        this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+        this.analyze(newLevel);
+    }
+
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param Offset the offset
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param newLevel the new level
+     * @param sourceEpsgCRSCode the source epsg CRS code
+     * @param targetEpsgCode the target epsg code
+     */
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset,
+            FileDataSplitter splitter, boolean carryInputData, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
+    {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new RectangleFormatMapper(Offset, Offset, splitter, carryInputData)));
+        this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+        this.analyze(newLevel);
+    }
+
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param partitions the partitions
+     * @param newLevel the new level
+     * @param sourceEpsgCRSCode the source epsg CRS code
+     * @param targetEpsgCode the target epsg code
+     */
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,
+            FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
+    {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(new RectangleFormatMapper(0, 0, splitter, carryInputData)));
+        this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+        this.analyze(newLevel);
+    }
+
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     * @param sparkContext the spark context
+     * @param InputLocation the input location
+     * @param splitter the splitter
+     * @param carryInputData the carry input data
+     * @param newLevel the new level
+     * @param sourceEpsgCRSCode the source epsg CRS code
+     * @param targetEpsgCode the target epsg code
+     */
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation,
+            FileDataSplitter splitter, boolean carryInputData, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
+    {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(new RectangleFormatMapper(0, 0, splitter, carryInputData)));
+        this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+        this.analyze(newLevel);
+    }
+
     /**
      * Instantiates a new rectangle RDD.
      *
@@ -482,12 +499,13 @@ public class RectangleRDD extends SpatialRDD<Polygon> {
      * @param sourceEpsgCRSCode the source epsg CRS code
      * @param targetEpsgCode the target epsg code
      */
-    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode) {
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
+    {
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(userSuppliedMapper));
-		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+        this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.analyze(newLevel);
     }
-    
+
     /**
      * Instantiates a new rectangle RDD.
      *
@@ -498,9 +516,10 @@ public class RectangleRDD extends SpatialRDD<Polygon> {
      * @param sourceEpsgCRSCode the source epsg CRS code
      * @param targetEpsgCode the target epsg code
      */
-    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode) {
+    public RectangleRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
+    {
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(userSuppliedMapper));
-		this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
+        this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.analyze(newLevel);
     }
 }
