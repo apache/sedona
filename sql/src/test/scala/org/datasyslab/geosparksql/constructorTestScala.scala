@@ -58,6 +58,7 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll {
     val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
 
     val mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv"
+    val mixedWkbGeometryInputLocation = resourceFolder + "county_small_wkb.tsv"
     val plainPointInputLocation = resourceFolder + "testpoint.csv"
     val shapefileInputLocation = resourceFolder + "shapefiles/polygon"
     val csvPointInputLocation = resourceFolder + "arealm.csv"
@@ -83,6 +84,14 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll {
       polygonWktDf.createOrReplaceTempView("polygontable")
       polygonWktDf.show()
       var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      assert(polygonDf.count() == 100)
+    }
+
+    it("Passed ST_GeomFromWKB") {
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      polygonWktDf.show()
+      var polygonDf = sparkSession.sql("select ST_GeomFromWKB(polygontable._c0) as countyshape from polygontable")
       assert(polygonDf.count() == 100)
     }
 

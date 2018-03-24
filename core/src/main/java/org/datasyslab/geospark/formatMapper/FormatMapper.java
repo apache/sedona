@@ -31,6 +31,7 @@ import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
+import com.vividsolutions.jts.io.WKBReader;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GeometryType;
 import org.wololo.geojson.Feature;
@@ -77,6 +78,8 @@ public class FormatMapper
     transient protected GeoJSONReader geoJSONReader = new GeoJSONReader();
 
     transient protected WKTReader wktReader = new WKTReader();
+
+    transient protected WKBReader wkbReader = new WKBReader();
 
     /**
      * Instantiates a new format mapper.
@@ -154,6 +157,18 @@ public class FormatMapper
         return geometry;
     }
 
+    public Geometry readWkb(String line)
+            throws ParseException
+    {
+        final String[] columns = line.split(splitter.getDelimiter());
+        final byte[] aux = WKBReader.hexToBytes(columns[this.startOffset]);
+        final Geometry geometry = wkbReader.read(aux);
+        if (carryInputData) {
+            geometry.setUserData(line);
+        }
+        return geometry;
+    }
+
     public Coordinate[] readCoordinates(String line)
     {
         final String[] columns = line.split(splitter.getDelimiter());
@@ -180,6 +195,8 @@ public class FormatMapper
         switch (this.splitter) {
             case WKT:
                 return readWkt(line);
+            case WKB:
+                return readWkb(line);
             case GEOJSON:
                 return readGeoJSON(line);
             default: {
