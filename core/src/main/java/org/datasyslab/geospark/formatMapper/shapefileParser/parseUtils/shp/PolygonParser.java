@@ -19,14 +19,17 @@ import java.util.List;
 
 import static org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeFileConst.DOUBLE_LENGTH;
 
-public class PolygonParser extends ShapeParser{
+public class PolygonParser
+        extends ShapeParser
+{
 
     /**
      * create a parser that can abstract a Polygon from input source with given GeometryFactory.
      *
      * @param geometryFactory the geometry factory
      */
-    public PolygonParser(GeometryFactory geometryFactory) {
+    public PolygonParser(GeometryFactory geometryFactory)
+    {
         super(geometryFactory);
     }
 
@@ -38,7 +41,8 @@ public class PolygonParser extends ShapeParser{
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public Geometry parseShape(ShapeReader reader) {
+    public Geometry parseShape(ShapeReader reader)
+    {
         reader.skip(4 * DOUBLE_LENGTH);
 
         int numRings = reader.readInt();
@@ -52,11 +56,11 @@ public class PolygonParser extends ShapeParser{
         List<LinearRing> holes = new ArrayList<>();
         List<Polygon> polygons = new ArrayList<>();
 
-        for(int i = 0; i < numRings; ++i){
-            int readScale = offsets[i+1] - offsets[i];
+        for (int i = 0; i < numRings; ++i) {
+            int readScale = offsets[i + 1] - offsets[i];
             CoordinateSequence csRing = readCoordinates(reader, readScale);
 
-            if(csRing.size() <= 3) {
+            if (csRing.size() <= 3) {
                 continue; // if points less than 3, it's not a ring, we just abandon it
             }
 
@@ -64,9 +68,11 @@ public class PolygonParser extends ShapeParser{
             if (shell == null) {
                 shell = ring;
                 shellsCCW = CoordinateSequences.isCCW(csRing);
-            } else if (CoordinateSequences.isCCW(csRing) != shellsCCW) {
+            }
+            else if (CoordinateSequences.isCCW(csRing) != shellsCCW) {
                 holes.add(ring);
-            } else {
+            }
+            else {
                 if (shell != null) {
                     Polygon polygon = geometryFactory.createPolygon(shell, GeometryFactory.toLinearRingArray(holes));
                     polygons.add(polygon);

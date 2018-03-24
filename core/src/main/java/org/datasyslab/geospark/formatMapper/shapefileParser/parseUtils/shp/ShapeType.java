@@ -10,7 +10,9 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 
 import java.io.Serializable;
 
-public enum ShapeType implements Serializable {
+public enum ShapeType
+        implements Serializable
+{
 
     UNDEFINED(0),
     POINT(1),
@@ -20,7 +22,8 @@ public enum ShapeType implements Serializable {
 
     private final int id;
 
-    ShapeType(int id){
+    ShapeType(int id)
+    {
         this.id = id;
     }
 
@@ -30,9 +33,10 @@ public enum ShapeType implements Serializable {
      * @param id the id
      * @return the type
      */
-    public static ShapeType getType(int id){
+    public static ShapeType getType(int id)
+    {
         ShapeType type;
-        switch(id){
+        switch (id) {
             case 1:
                 type = POINT;
                 break;
@@ -57,8 +61,9 @@ public enum ShapeType implements Serializable {
      * @param geometryFactory the geometry factory
      * @return the parser
      */
-    public ShapeParser getParser(GeometryFactory geometryFactory) {
-        switch (this){
+    public ShapeParser getParser(GeometryFactory geometryFactory)
+    {
+        switch (this) {
             case POINT:
                 return new PointParser(geometryFactory);
             case POLYLINE:
@@ -77,7 +82,8 @@ public enum ShapeType implements Serializable {
      *
      * @return the id
      */
-    public int getId() {
+    public int getId()
+    {
         return id;
     }
 }

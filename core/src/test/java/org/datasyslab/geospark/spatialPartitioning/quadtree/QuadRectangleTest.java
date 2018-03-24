@@ -11,10 +11,12 @@ import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class QuadRectangleTest {
+public class QuadRectangleTest
+{
 
     @Test
-    public void testContains() {
+    public void testContains()
+    {
         QuadRectangle r1 = makeRect(0, 0, 10, 10);
         QuadRectangle r2 = makeRect(0, 0, 10, 10);
 
@@ -32,7 +34,8 @@ public class QuadRectangleTest {
         assertFalse(r1.contains(makeRect(5, 12, 0, 0)));
     }
 
-    private QuadRectangle makeRect(double x, double y, double width, double height) {
+    private QuadRectangle makeRect(double x, double y, double width, double height)
+    {
         return new QuadRectangle(x, y, width, height);
     }
 }

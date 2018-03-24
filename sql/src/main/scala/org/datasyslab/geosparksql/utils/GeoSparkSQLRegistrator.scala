@@ -25,27 +25,25 @@
   */
 package org.datasyslab.geosparksql.utils
 
-import org.apache.spark.sql.{SQLContext, SparkSession}
 import org.apache.spark.sql.geosparksql.strategy.join.JoinQueryDetector
+import org.apache.spark.sql.{SQLContext, SparkSession}
 import org.datasyslab.geosparksql.UDF.UdfRegistrator
 import org.datasyslab.geosparksql.UDT.UdtRegistrator
 
 object GeoSparkSQLRegistrator {
-  def registerAll(sqlContext:SQLContext): Unit =
-  {
+  def registerAll(sqlContext: SQLContext): Unit = {
     sqlContext.experimental.extraStrategies = JoinQueryDetector :: Nil
     UdtRegistrator.registerAll()
     UdfRegistrator.registerAll(sqlContext)
   }
-  def registerAll(sparkSession: SparkSession): Unit =
-  {
+
+  def registerAll(sparkSession: SparkSession): Unit = {
     sparkSession.experimental.extraStrategies = JoinQueryDetector :: Nil
     UdtRegistrator.registerAll()
     UdfRegistrator.registerAll(sparkSession)
   }
 
-  def dropAll(sparkSession: SparkSession): Unit =
-  {
+  def dropAll(sparkSession: SparkSession): Unit = {
     UdfRegistrator.dropAll(sparkSession)
   }
 }

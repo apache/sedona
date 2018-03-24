@@ -16,6 +16,7 @@ import org.datasyslab.geospark.utils.HalfOpenRectangle;
 import scala.Tuple2;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -23,10 +24,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public class QuadTreePartitioner extends SpatialPartitioner {
+public class QuadTreePartitioner
+        extends SpatialPartitioner
+{
     private StandardQuadTree<? extends Geometry> quadTree;
 
-    public QuadTreePartitioner(StandardQuadTree<? extends Geometry> quadTree) {
+    public QuadTreePartitioner(StandardQuadTree<? extends Geometry> quadTree)
+    {
         super(GridType.QUADTREE, getLeafGrids(quadTree));
         this.quadTree = quadTree;
 
@@ -36,7 +40,9 @@ public class QuadTreePartitioner extends SpatialPartitioner {
     }
 
     @Override
-    public <T extends Geometry> Iterator<Tuple2<Integer, T>> placeObject(T spatialObject) throws Exception {
+    public <T extends Geometry> Iterator<Tuple2<Integer, T>> placeObject(T spatialObject)
+            throws Exception
+    {
         Objects.requireNonNull(spatialObject, "spatialObject");
 
         final Envelope envelope = spatialObject.getEnvelopeInternal();
@@ -60,17 +66,20 @@ public class QuadTreePartitioner extends SpatialPartitioner {
 
     @Nullable
     @Override
-    public DedupParams getDedupParams() {
+    public DedupParams getDedupParams()
+    {
         return new DedupParams(grids);
     }
 
     @Override
-    public int numPartitions() {
+    public int numPartitions()
+    {
         return grids.size();
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o)
+    {
         if (o == null || !(o instanceof QuadTreePartitioner)) {
             return false;
         }
@@ -79,7 +88,8 @@ public class QuadTreePartitioner extends SpatialPartitioner {
         return other.quadTree.equals(this.quadTree);
     }
 
-    private static List<Envelope> getLeafGrids(StandardQuadTree<? extends Geometry> quadTree) {
+    private static List<Envelope> getLeafGrids(StandardQuadTree<? extends Geometry> quadTree)
+    {
         Objects.requireNonNull(quadTree, "quadTree");
 
         final List<QuadRectangle> zones = quadTree.getLeafZones();

@@ -13,24 +13,31 @@ import org.datasyslab.geospark.joinJudgement.DedupParams;
 import scala.Tuple2;
 
 import javax.annotation.Nullable;
+
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public class FlatGridPartitioner extends SpatialPartitioner {
-    public FlatGridPartitioner(GridType gridType, List<Envelope> grids) {
+public class FlatGridPartitioner
+        extends SpatialPartitioner
+{
+    public FlatGridPartitioner(GridType gridType, List<Envelope> grids)
+    {
         super(gridType, grids);
     }
 
     // For backwards compatibility (see SpatialRDD.spatialPartitioning(otherGrids))
-    public FlatGridPartitioner(List<Envelope> grids) {
+    public FlatGridPartitioner(List<Envelope> grids)
+    {
         super(null, grids);
     }
 
     @Override
-    public <T extends Geometry> Iterator<Tuple2<Integer, T>> placeObject(T spatialObject) throws Exception {
+    public <T extends Geometry> Iterator<Tuple2<Integer, T>> placeObject(T spatialObject)
+            throws Exception
+    {
         Objects.requireNonNull(spatialObject, "spatialObject");
 
         // Some grid types (RTree and Voronoi) don't provide full coverage of the RDD extent and
@@ -41,17 +48,18 @@ public class FlatGridPartitioner extends SpatialPartitioner {
 
         Set<Tuple2<Integer, T>> result = new HashSet();
         boolean containFlag = false;
-        for (int i=0; i<grids.size(); i++) {
+        for (int i = 0; i < grids.size(); i++) {
             final Envelope grid = grids.get(i);
-            if(grid.covers(envelope)) {
+            if (grid.covers(envelope)) {
                 result.add(new Tuple2(i, spatialObject));
-                containFlag=true;
-            } else if(grid.intersects(envelope) || envelope.covers(grid)) {
+                containFlag = true;
+            }
+            else if (grid.intersects(envelope) || envelope.covers(grid)) {
                 result.add(new Tuple2<>(i, spatialObject));
             }
         }
 
-        if(!containFlag) {
+        if (!containFlag) {
             result.add(new Tuple2<>(overflowContainerID, spatialObject));
         }
 
@@ -59,7 +67,8 @@ public class FlatGridPartitioner extends SpatialPartitioner {
     }
 
     @Nullable
-    public DedupParams getDedupParams() {
+    public DedupParams getDedupParams()
+    {
         /**
          * Equal and Hilbert partitioning methods have necessary properties to support de-dup.
          * These methods provide non-overlapping partition extents and not require overflow
@@ -75,12 +84,14 @@ public class FlatGridPartitioner extends SpatialPartitioner {
     }
 
     @Override
-    public int numPartitions() {
+    public int numPartitions()
+    {
         return grids.size() + 1 /* overflow partition */;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o)
+    {
         if (o == null || !(o instanceof FlatGridPartitioner)) {
             return false;
         }

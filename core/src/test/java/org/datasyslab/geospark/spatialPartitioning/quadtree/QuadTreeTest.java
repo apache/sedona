@@ -16,10 +16,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class QuadTreeTest {
+public class QuadTreeTest
+{
 
     @Test
-    public void testInsertElements() {
+    public void testInsertElements()
+    {
 
         long startTime;
         long endTime;
@@ -80,7 +82,8 @@ public class QuadTreeTest {
 //        System.out.println("Total execution time hoho: " + (endTime - startTime) + "ms");
     }
 
-    private void assertEqualElements(List<QuadRectangle> expected, List<QuadRectangle> actual) {
+    private void assertEqualElements(List<QuadRectangle> expected, List<QuadRectangle> actual)
+    {
         assertEquals(expected.size(), actual.size());
         for (QuadRectangle r : actual) {
             assertTrue(expected.contains(r));
@@ -88,7 +91,8 @@ public class QuadTreeTest {
     }
 
     @Test
-    public void testIntersectElementsAreInserted() {
+    public void testIntersectElementsAreInserted()
+    {
         StandardQuadTree<QuadRectangle> quadTree = new StandardQuadTree<>(new QuadRectangle(0, 0, 10, 10), 0, 1, 2);
 
         QuadRectangle r1 = new QuadRectangle(1, 1, 1, 1);
@@ -102,7 +106,8 @@ public class QuadTreeTest {
     }
 
     @Test
-    public void testPixelQuadTree() {
+    public void testPixelQuadTree()
+    {
         StandardQuadTree<QuadRectangle> quadTree = new StandardQuadTree<QuadRectangle>(new QuadRectangle(0, 0, 10, 10), 0, 5, 5);
 
         QuadRectangle r1 = new QuadRectangle(1, 1, 0, 0);
@@ -123,7 +128,8 @@ public class QuadTreeTest {
     }
 
     @Test
-    public void testQuadTreeForceGrow() {
+    public void testQuadTreeForceGrow()
+    {
         int resolutionX = 100000;
         int resolutionY = 100000;
 
@@ -131,7 +137,7 @@ public class QuadTreeTest {
         quadTree.forceGrowUp(4);
         int leafPartitionNum = quadTree.getTotalNumLeafNode();
         assertEquals(256, leafPartitionNum);
-    
+
         for (int i = 0; i < 100000; i++) {
             int x = ThreadLocalRandom.current().nextInt(0, resolutionX);
             int y = ThreadLocalRandom.current().nextInt(0, resolutionY);

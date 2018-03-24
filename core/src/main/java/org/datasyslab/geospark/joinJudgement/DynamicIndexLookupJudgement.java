@@ -17,11 +17,12 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.TaskContext;
 import org.apache.spark.api.java.function.FlatMapFunction2;
-import org.datasyslab.geospark.enums.JoinBuildSide;
 import org.datasyslab.geospark.enums.IndexType;
+import org.datasyslab.geospark.enums.JoinBuildSide;
 import org.datasyslab.geospark.monitoring.GeoSparkMetric;
 
 import javax.annotation.Nullable;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +34,8 @@ import static org.datasyslab.geospark.utils.TimeUtils.elapsedSince;
 
 public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
         extends JudgementBase
-        implements FlatMapFunction2<Iterator<U>, Iterator<T>, Pair<U, T>>, Serializable {
+        implements FlatMapFunction2<Iterator<U>, Iterator<T>, Pair<U, T>>, Serializable
+{
 
     private static final Logger log = LogManager.getLogger(DynamicIndexLookupJudgement.class);
 
@@ -48,13 +50,14 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
      * @see JudgementBase
      */
     public DynamicIndexLookupJudgement(boolean considerBoundaryIntersection,
-                                       IndexType indexType,
-                                       JoinBuildSide joinBuildSide,
-                                       @Nullable DedupParams dedupParams,
-                                       GeoSparkMetric buildCount,
-                                       GeoSparkMetric streamCount,
-                                       GeoSparkMetric resultCount,
-                                       GeoSparkMetric candidateCount) {
+            IndexType indexType,
+            JoinBuildSide joinBuildSide,
+            @Nullable DedupParams dedupParams,
+            GeoSparkMetric buildCount,
+            GeoSparkMetric streamCount,
+            GeoSparkMetric resultCount,
+            GeoSparkMetric candidateCount)
+    {
         super(considerBoundaryIntersection, dedupParams);
         this.indexType = indexType;
         this.joinBuildSide = joinBuildSide;
@@ -65,7 +68,9 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
     }
 
     @Override
-    public Iterator<Pair<U, T>> call(final Iterator<U> leftShapes, final Iterator<T> rightShapes) throws Exception {
+    public Iterator<Pair<U, T>> call(final Iterator<U> leftShapes, final Iterator<T> rightShapes)
+            throws Exception
+    {
 
         if (!leftShapes.hasNext() || !rightShapes.hasNext()) {
             buildCount.add(0);
@@ -84,14 +89,16 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
         if (buildLeft) {
             buildShapes = leftShapes;
             streamShapes = rightShapes;
-        } else {
+        }
+        else {
             buildShapes = rightShapes;
             streamShapes = leftShapes;
         }
 
         final SpatialIndex spatialIndex = buildIndex(buildShapes);
 
-        return new Iterator<Pair<U, T>>() {
+        return new Iterator<Pair<U, T>>()
+        {
             // A batch of pre-computed matches
             private List<Pair<U, T>> batch = null;
             // An index of the element from 'batch' to return next
@@ -100,16 +107,19 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
             private int shapeCnt = 0;
 
             @Override
-            public boolean hasNext() {
+            public boolean hasNext()
+            {
                 if (batch != null) {
                     return true;
-                } else {
+                }
+                else {
                     return populateNextBatch();
                 }
             }
 
             @Override
-            public Pair<U, T> next() {
+            public Pair<U, T> next()
+            {
                 if (batch == null) {
                     populateNextBatch();
                 }
@@ -127,7 +137,8 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
                 throw new NoSuchElementException();
             }
 
-            private boolean populateNextBatch() {
+            private boolean populateNextBatch()
+            {
                 if (!streamShapes.hasNext()) {
                     if (batch != null) {
                         batch = null;
@@ -138,7 +149,7 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
                 batch = new ArrayList<>();
 
                 while (streamShapes.hasNext()) {
-                    shapeCnt ++;
+                    shapeCnt++;
                     streamCount.add(1);
                     final Geometry streamShape = streamShapes.next();
                     final List candidates = spatialIndex.query(streamShape.getEnvelopeInternal());
@@ -150,7 +161,8 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
                                 batch.add(Pair.of((U) buildShape, (T) streamShape));
                                 resultCount.add(1);
                             }
-                        } else {
+                        }
+                        else {
                             if (match(streamShape, buildShape)) {
                                 batch.add(Pair.of((U) streamShape, (T) buildShape));
                                 resultCount.add(1);
@@ -168,13 +180,15 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
             }
 
             @Override
-            public void remove() {
+            public void remove()
+            {
                 throw new UnsupportedOperationException();
             }
         };
     }
 
-    private SpatialIndex buildIndex(Iterator<? extends Geometry> geometries) {
+    private SpatialIndex buildIndex(Iterator<? extends Geometry> geometries)
+    {
         long startTime = System.currentTimeMillis();
         long count = 0;
         final SpatialIndex index = newIndex();
@@ -183,13 +197,14 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
             index.insert(geometry.getEnvelopeInternal(), geometry);
             count++;
         }
-        index.query(new Envelope(0.0,0.0,0.0,0.0));
+        index.query(new Envelope(0.0, 0.0, 0.0, 0.0));
         log("Loaded %d shapes into an index in %d ms", count, elapsedSince(startTime));
         buildCount.add((int) count);
         return index;
     }
 
-    private SpatialIndex newIndex() {
+    private SpatialIndex newIndex()
+    {
         switch (indexType) {
             case RTREE:
                 return new STRtree();
@@ -200,7 +215,8 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
         }
     }
 
-    private void log(String message, Object...params) {
+    private void log(String message, Object... params)
+    {
         if (Level.INFO.isGreaterOrEqual(log.getEffectiveLevel())) {
             final int partitionId = TaskContext.getPartitionId();
             final long threadId = Thread.currentThread().getId();
@@ -208,7 +224,8 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
         }
     }
 
-    private void logMilestone(long cnt, long threshold, String name) {
+    private void logMilestone(long cnt, long threshold, String name)
+    {
         if (cnt > 1 && cnt % threshold == 1) {
             log("[%s] Reached a milestone: %d", name, cnt);
         }

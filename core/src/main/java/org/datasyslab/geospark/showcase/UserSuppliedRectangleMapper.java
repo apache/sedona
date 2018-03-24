@@ -6,13 +6,6 @@
  */
 package org.datasyslab.geospark.showcase;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
-import org.apache.spark.api.java.function.FlatMapFunction;
-
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -21,40 +14,67 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.WKTReader;
+import org.apache.spark.api.java.function.FlatMapFunction;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 // TODO: Auto-generated Javadoc
+
 /**
  * The Class UserSuppliedRectangleMapper.
  */
-public class UserSuppliedRectangleMapper implements FlatMapFunction<Iterator<String>, Object>{
-    
-    /** The spatial object. */
+public class UserSuppliedRectangleMapper
+        implements FlatMapFunction<Iterator<String>, Object>
+{
+
+    /**
+     * The spatial object.
+     */
     Geometry spatialObject = null;
-    
-    /** The multi spatial objects. */
+
+    /**
+     * The multi spatial objects.
+     */
     MultiPolygon multiSpatialObjects = null;
-    
-    /** The fact. */
+
+    /**
+     * The fact.
+     */
     GeometryFactory fact = new GeometryFactory();
-    
-    /** The line split list. */
+
+    /**
+     * The line split list.
+     */
     List<String> lineSplitList;
-    
-    /** The coordinates list. */
+
+    /**
+     * The coordinates list.
+     */
     ArrayList<Coordinate> coordinatesList;
-    
-    /** The coordinates. */
+
+    /**
+     * The coordinates.
+     */
     Coordinate[] coordinates;
-    
-    /** The linear. */
+
+    /**
+     * The linear.
+     */
     LinearRing linear;
-    
-    /** The actual end offset. */
+
+    /**
+     * The actual end offset.
+     */
     int actualEndOffset;
 
     @Override
-    public Iterator<Object> call(Iterator<String> stringIterator) throws Exception {
-        List result= new ArrayList<Envelope>();
+    public Iterator<Object> call(Iterator<String> stringIterator)
+            throws Exception
+    {
+        List result = new ArrayList<Envelope>();
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
             Geometry spatialObject = null;
@@ -70,7 +90,8 @@ public class UserSuppliedRectangleMapper implements FlatMapFunction<Iterator<Str
                     spatialObject = multiSpatialObjects.getGeometryN(i);
                     result.add(((Polygon) spatialObject).getEnvelopeInternal());
                 }
-            } else {
+            }
+            else {
                 result.add(((Polygon) spatialObject).getEnvelopeInternal());
             }
         }

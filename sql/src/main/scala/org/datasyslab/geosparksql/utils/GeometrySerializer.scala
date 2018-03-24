@@ -41,7 +41,7 @@ object GeometrySerializer {
     val kryo = new Kryo()
     val geometrySerde = new GeometrySerde()
     val output = new Output(out)
-    geometrySerde.write(kryo,output,geometry)
+    geometrySerde.write(kryo, output, geometry)
     output.close()
     return out.toByteArray
   }
@@ -51,7 +51,7 @@ object GeometrySerializer {
     val kryo = new Kryo()
     val geometrySerde = new GeometrySerde()
     val input = new Input(in)
-    val geometry = geometrySerde.read(kryo, input,classOf[Geometry])
+    val geometry = geometrySerde.read(kryo, input, classOf[Geometry])
     input.close()
     return geometry.asInstanceOf[Geometry]
   }

@@ -13,14 +13,17 @@ import com.vividsolutions.jts.geom.Point;
 
 import java.io.IOException;
 
-public class PointParser extends ShapeParser {
+public class PointParser
+        extends ShapeParser
+{
 
     /**
      * create a parser that can abstract a Point from input source with given GeometryFactory.
      *
      * @param geometryFactory the geometry factory
      */
-    public PointParser(GeometryFactory geometryFactory) {
+    public PointParser(GeometryFactory geometryFactory)
+    {
         super(geometryFactory);
     }
 
@@ -32,7 +35,8 @@ public class PointParser extends ShapeParser {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public Geometry parseShape(ShapeReader reader) {
+    public Geometry parseShape(ShapeReader reader)
+    {
         double x = reader.readDouble();
         double y = reader.readDouble();
         Point point = geometryFactory.createPoint(new Coordinate(x, y));

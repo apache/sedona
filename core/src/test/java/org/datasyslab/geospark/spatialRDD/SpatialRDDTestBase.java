@@ -16,39 +16,57 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class SpatialRDDTestBase extends GeoSparkTestBase
+public class SpatialRDDTestBase
+        extends GeoSparkTestBase
 {
-    /** The prop. */
+    /**
+     * The prop.
+     */
     static Properties prop;
 
-    /** The input. */
+    /**
+     * The input.
+     */
     static InputStream input;
 
     protected static long inputCount;
     protected static Envelope inputBoundary;
 
-    /** The Input location. */
+    /**
+     * The Input location.
+     */
     static String InputLocation;
 
-    /** The offset. */
+    /**
+     * The offset.
+     */
     static Integer offset;
 
-    /** The splitter. */
+    /**
+     * The splitter.
+     */
     static FileDataSplitter splitter;
 
-    /** The grid type. */
+    /**
+     * The grid type.
+     */
     static GridType gridType;
 
-    /** The index type. */
+    /**
+     * The index type.
+     */
     static IndexType indexType;
 
-    /** The num partitions. */
+    /**
+     * The num partitions.
+     */
     static Integer numPartitions;
 
     /**
      * Once executed before all.
      */
-    protected static void initialize(final String testSuiteName, final String propertiesFileName) {
+    protected static void initialize(final String testSuiteName, final String propertiesFileName)
+    {
         GeoSparkTestBase.initialize(testSuiteName);
 
         prop = new Properties();
@@ -66,26 +84,29 @@ public class SpatialRDDTestBase extends GeoSparkTestBase
             prop.load(input);
             // There is a field in the property file, you can edit your own file location there.
             // InputLocation = prop.getProperty("inputLocation");
-            InputLocation = "file://"+ classLoader.getResource(prop.getProperty("inputLocation")).getPath();
+            InputLocation = "file://" + classLoader.getResource(prop.getProperty("inputLocation")).getPath();
             inputCount = Long.parseLong(prop.getProperty("inputCount"));
             String[] coordinates = prop.getProperty("inputBoundary").split(",");
             inputBoundary = new Envelope(
-                Double.parseDouble(coordinates[0]),
-                Double.parseDouble(coordinates[1]),
-                Double.parseDouble(coordinates[2]),
-                Double.parseDouble(coordinates[3]));
+                    Double.parseDouble(coordinates[0]),
+                    Double.parseDouble(coordinates[1]),
+                    Double.parseDouble(coordinates[2]),
+                    Double.parseDouble(coordinates[3]));
             offset = Integer.parseInt(prop.getProperty("offset"));
             splitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
             gridType = GridType.getGridType(prop.getProperty("gridType"));
             indexType = IndexType.getIndexType(prop.getProperty("indexType"));
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             ex.printStackTrace();
-        } finally {
+        }
+        finally {
             if (input != null) {
                 try {
                     input.close();
-                } catch (IOException e) {
+                }
+                catch (IOException e) {
                     e.printStackTrace();
                 }
             }

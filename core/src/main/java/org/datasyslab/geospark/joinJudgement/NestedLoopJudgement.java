@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import org.apache.spark.api.java.function.FlatMapFunction2;
 
 import javax.annotation.Nullable;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,29 +21,32 @@ import java.util.List;
 
 public class NestedLoopJudgement<T extends Geometry, U extends Geometry>
         extends JudgementBase
-        implements FlatMapFunction2<Iterator<T>, Iterator<U>, Pair<U, T>>, Serializable {
+        implements FlatMapFunction2<Iterator<T>, Iterator<U>, Pair<U, T>>, Serializable
+{
     private static final Logger log = LogManager.getLogger(NestedLoopJudgement.class);
 
     /**
      * @see JudgementBase
      */
-    public NestedLoopJudgement(boolean considerBoundaryIntersection, @Nullable DedupParams dedupParams) {
+    public NestedLoopJudgement(boolean considerBoundaryIntersection, @Nullable DedupParams dedupParams)
+    {
         super(considerBoundaryIntersection, dedupParams);
     }
 
     @Override
-    public Iterator<Pair<U, T>> call(Iterator<T> iteratorObject, Iterator<U> iteratorWindow) throws Exception {
+    public Iterator<Pair<U, T>> call(Iterator<T> iteratorObject, Iterator<U> iteratorWindow)
+            throws Exception
+    {
         initPartition();
 
         List<Pair<U, T>> result = new ArrayList<>();
         List<T> queryObjects = new ArrayList<>();
-        while(iteratorObject.hasNext())
-        {
+        while (iteratorObject.hasNext()) {
             queryObjects.add(iteratorObject.next());
         }
         while (iteratorWindow.hasNext()) {
             U window = iteratorWindow.next();
-            for (int i =0;i<queryObjects.size();i++) {
+            for (int i = 0; i < queryObjects.size(); i++) {
                 T object = queryObjects.get(i);
                 //log.warn("Check "+window.toText()+" with "+object.toText());
                 if (match(window, object)) {

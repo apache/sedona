@@ -1,7 +1,14 @@
 package org.datasyslab.geospark.serde;
 
 import com.esotericsoftware.kryo.Kryo;
-import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
 import com.vividsolutions.jts.index.strtree.STRtree;
 import org.apache.log4j.Logger;
@@ -10,12 +17,15 @@ import org.datasyslab.geospark.geometryObjects.Circle;
 import org.datasyslab.geospark.geometryObjects.GeometrySerde;
 import org.datasyslab.geospark.geometryObjects.SpatialIndexSerde;
 
-public class GeoSparkKryoRegistrator implements KryoRegistrator {
+public class GeoSparkKryoRegistrator
+        implements KryoRegistrator
+{
 
     final static Logger log = Logger.getLogger(GeoSparkKryoRegistrator.class);
 
     @Override
-    public void registerClasses(Kryo kryo) {
+    public void registerClasses(Kryo kryo)
+    {
         GeometrySerde serializer = new GeometrySerde();
         SpatialIndexSerde indexSerializer = new SpatialIndexSerde(serializer);
 

@@ -18,35 +18,40 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class PolygonFormatMapper extends FormatMapper
-    implements FlatMapFunction<Iterator<String>, Polygon> {
- 
-	
+public class PolygonFormatMapper
+        extends FormatMapper
+        implements FlatMapFunction<Iterator<String>, Polygon>
+{
+
     /**
      * Instantiates a new polygon format mapper.
      *
      * @param Splitter the splitter
      * @param carryInputData the carry input data
      */
-    public PolygonFormatMapper(FileDataSplitter Splitter, boolean carryInputData) {
-		super(Splitter, carryInputData);
-	}
+    public PolygonFormatMapper(FileDataSplitter Splitter, boolean carryInputData)
+    {
+        super(Splitter, carryInputData);
+    }
 
-	/**
-	 * Instantiates a new polygon format mapper.
-	 *
-	 * @param startOffset the start offset
-	 * @param endOffset the end offset
-	 * @param Splitter the splitter
-	 * @param carryInputData the carry input data
-	 */
-	public PolygonFormatMapper(Integer startOffset, Integer endOffset, FileDataSplitter Splitter,
-			boolean carryInputData) {
-		super(startOffset, endOffset, Splitter, carryInputData);
-	}
+    /**
+     * Instantiates a new polygon format mapper.
+     *
+     * @param startOffset the start offset
+     * @param endOffset the end offset
+     * @param Splitter the splitter
+     * @param carryInputData the carry input data
+     */
+    public PolygonFormatMapper(Integer startOffset, Integer endOffset, FileDataSplitter Splitter,
+            boolean carryInputData)
+    {
+        super(startOffset, endOffset, Splitter, carryInputData);
+    }
 
     @Override
-    public Iterator<Polygon> call(Iterator<String> stringIterator) throws Exception {
+    public Iterator<Polygon> call(Iterator<String> stringIterator)
+            throws Exception
+    {
         List<Polygon> result = new ArrayList<>();
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
@@ -61,8 +66,7 @@ public class PolygonFormatMapper extends FormatMapper
                     addGeometry(geometry, result);
                     break;
                 }
-                default:
-                {
+                default: {
                     Coordinate[] coordinates = readCoordinates(line);
                     LinearRing linearRing = factory.createLinearRing(coordinates);
                     Polygon polygon = factory.createPolygon(linearRing);
@@ -77,10 +81,12 @@ public class PolygonFormatMapper extends FormatMapper
         return result.iterator();
     }
 
-    private void addGeometry(Geometry geometry, List<Polygon> result) {
+    private void addGeometry(Geometry geometry, List<Polygon> result)
+    {
         if (geometry instanceof MultiPolygon) {
             addMultiGeometry((MultiPolygon) geometry, result);
-        } else {
+        }
+        else {
             result.add((Polygon) geometry);
         }
     }

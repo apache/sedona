@@ -6,26 +6,32 @@
  */
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
-import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.Serializable;
 
-public class ShapeKey implements Serializable{
+public class ShapeKey
+        implements Serializable
+{
 
-    /** record id */
+    /**
+     * record id
+     */
     Long index = 0l;
 
-    public void write(DataOutput dataOutput) throws IOException {
+    public void write(DataOutput dataOutput)
+            throws IOException
+    {
         dataOutput.writeLong(index);
-
     }
 
-    public long getIndex() {
+    public long getIndex()
+    {
         return index;
     }
 
-    public void setIndex(long _index) {
+    public void setIndex(long _index)
+    {
         index = _index;
     }
 }

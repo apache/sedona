@@ -14,43 +14,48 @@ import java.util.ArrayList;
 import java.util.List;
 
 // TODO: Auto-generated Javadoc
+
 /**
  * The Class RtreePartitioning.
  */
-public class RtreePartitioning implements Serializable{
+public class RtreePartitioning
+        implements Serializable
+{
 
-	/** The grids. */
-	final List<Envelope> grids = new ArrayList<>();
-	
-	
-	/**
-	 * Instantiates a new rtree partitioning.
-	 *
-	 * @param samples the sample list
-	 * @param partitions the partitions
-	 * @throws Exception the exception
-	 */
-	public RtreePartitioning(List<Envelope> samples, int partitions) throws Exception
-	{
-		STRtree strtree=new STRtree(samples.size()/partitions);
-		for (Envelope sample : samples) {
-			strtree.insert(sample, sample);
-    	}
+    /**
+     * The grids.
+     */
+    final List<Envelope> grids = new ArrayList<>();
 
-    	List<Envelope> envelopes=strtree.queryBoundary();
-		for (Envelope envelope : envelopes) {
-    		grids.add(envelope);
-    	}
-	}
-	
-	/**
-	 * Gets the grids.
-	 *
-	 * @return the grids
-	 */
-	public List<Envelope> getGrids() {
-		
-		return this.grids;
-		
-	}
+    /**
+     * Instantiates a new rtree partitioning.
+     *
+     * @param samples the sample list
+     * @param partitions the partitions
+     * @throws Exception the exception
+     */
+    public RtreePartitioning(List<Envelope> samples, int partitions)
+            throws Exception
+    {
+        STRtree strtree = new STRtree(samples.size() / partitions);
+        for (Envelope sample : samples) {
+            strtree.insert(sample, sample);
+        }
+
+        List<Envelope> envelopes = strtree.queryBoundary();
+        for (Envelope envelope : envelopes) {
+            grids.add(envelope);
+        }
+    }
+
+    /**
+     * Gets the grids.
+     *
+     * @return the grids
+     */
+    public List<Envelope> getGrids()
+    {
+
+        return this.grids;
+    }
 }

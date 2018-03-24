@@ -65,23 +65,23 @@ object JoinQueryDetector extends Strategy {
 
     // ST_Contains(a, b) - a contains b
     case Join(left, right, Inner, Some(ST_Contains(Seq(leftShape, rightShape)))) =>
-      planSpatialJoin(left, right, Seq(leftShape,rightShape), false)
+      planSpatialJoin(left, right, Seq(leftShape, rightShape), false)
 
     // ST_Intersects(a, b) - a intersects b
     case Join(left, right, Inner, Some(ST_Intersects(Seq(leftShape, rightShape)))) =>
-      planSpatialJoin(left, right, Seq(leftShape,rightShape), true)
+      planSpatialJoin(left, right, Seq(leftShape, rightShape), true)
 
     // ST_WITHIN(a, b) - a is within b
     case Join(left, right, Inner, Some(ST_Within(Seq(leftShape, rightShape)))) =>
-      planSpatialJoin(right, left, Seq(rightShape,leftShape), false)
+      planSpatialJoin(right, left, Seq(rightShape, leftShape), false)
 
     // ST_Distance(a, b) <= radius consider boundary intersection
     case Join(left, right, Inner, Some(LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), radius))) =>
-      planDistanceJoin(left, right, Seq(leftShape,rightShape), radius, true)
+      planDistanceJoin(left, right, Seq(leftShape, rightShape), radius, true)
 
     // ST_Distance(a, b) < radius don't consider boundary intersection
     case Join(left, right, Inner, Some(LessThan(ST_Distance(Seq(leftShape, rightShape)), radius))) =>
-      planDistanceJoin(left, right, Seq(leftShape,rightShape), radius, false)
+      planDistanceJoin(left, right, Seq(leftShape, rightShape), radius, false)
     case _ =>
       Nil
   }

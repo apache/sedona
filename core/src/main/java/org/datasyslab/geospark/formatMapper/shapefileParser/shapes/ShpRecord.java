@@ -7,34 +7,43 @@
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
 import org.apache.hadoop.io.BytesWritable;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeType;
 
 import java.io.Serializable;
 
-public class ShpRecord implements Serializable {
+public class ShpRecord
+        implements Serializable
+{
 
-    /** primitive byte contents */
+    /**
+     * primitive byte contents
+     */
     private BytesWritable bytes = null;
 
-    /** shape type */
+    /**
+     * shape type
+     */
     private int typeID = -1;
 
     /**
      * create a ShpRecord with primitive bytes and shape type id we abstract from .shp file
+     *
      * @param byteArray
      * @param shapeTypeID
      */
-    public ShpRecord(byte[] byteArray, int shapeTypeID) {
+    public ShpRecord(byte[] byteArray, int shapeTypeID)
+    {
         bytes = new BytesWritable();
         bytes.set(byteArray, 0, byteArray.length);
         typeID = shapeTypeID;
     }
 
-    public BytesWritable getBytes() {
+    public BytesWritable getBytes()
+    {
         return bytes;
     }
 
-    public int getTypeID() {
+    public int getTypeID()
+    {
         return typeID;
     }
 }

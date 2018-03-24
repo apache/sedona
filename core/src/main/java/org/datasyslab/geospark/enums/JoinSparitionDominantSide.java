@@ -25,15 +25,16 @@
  */
 package org.datasyslab.geospark.enums;
 
-public enum JoinSparitionDominantSide {
+public enum JoinSparitionDominantSide
+{
     LEFT,
     RIGHT,
     NONE;
 
-    public static JoinSparitionDominantSide getJoinSparitionDominantSide(String str) {
+    public static JoinSparitionDominantSide getJoinSparitionDominantSide(String str)
+    {
         for (JoinSparitionDominantSide me : JoinSparitionDominantSide.values()) {
-            if (me.name().equalsIgnoreCase(str))
-                return me;
+            if (me.name().equalsIgnoreCase(str)) { return me; }
         }
         return null;
     }

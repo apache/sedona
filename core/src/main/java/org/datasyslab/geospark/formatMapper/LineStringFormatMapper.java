@@ -17,35 +17,40 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class LineStringFormatMapper extends FormatMapper
-    implements FlatMapFunction<Iterator<String>, LineString> {
-	
-	/**
-	 * Instantiates a new line string format mapper.
-	 *
-	 * @param Splitter the splitter
-	 * @param carryInputData the carry input data
-	 */
-	public LineStringFormatMapper(FileDataSplitter Splitter, boolean carryInputData) {
-		super(Splitter, carryInputData);
-	}
+public class LineStringFormatMapper
+        extends FormatMapper
+        implements FlatMapFunction<Iterator<String>, LineString>
+{
 
-	/**
-	 * Instantiates a new line string format mapper.
-	 *
-	 * @param startOffset the start offset
-	 * @param endOffset the end offset
-	 * @param Splitter the splitter
-	 * @param carryInputData the carry input data
-	 */
-	public LineStringFormatMapper(Integer startOffset, Integer endOffset, FileDataSplitter Splitter,
-			boolean carryInputData) {
-		super(startOffset, endOffset, Splitter, carryInputData);
-	}
+    /**
+     * Instantiates a new line string format mapper.
+     *
+     * @param Splitter the splitter
+     * @param carryInputData the carry input data
+     */
+    public LineStringFormatMapper(FileDataSplitter Splitter, boolean carryInputData)
+    {
+        super(Splitter, carryInputData);
+    }
 
+    /**
+     * Instantiates a new line string format mapper.
+     *
+     * @param startOffset the start offset
+     * @param endOffset the end offset
+     * @param Splitter the splitter
+     * @param carryInputData the carry input data
+     */
+    public LineStringFormatMapper(Integer startOffset, Integer endOffset, FileDataSplitter Splitter,
+            boolean carryInputData)
+    {
+        super(startOffset, endOffset, Splitter, carryInputData);
+    }
 
     @Override
-    public Iterator<LineString> call(Iterator<String> stringIterator) throws Exception {
+    public Iterator<LineString> call(Iterator<String> stringIterator)
+            throws Exception
+    {
         List<LineString> result = new ArrayList<>();
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
@@ -60,8 +65,7 @@ public class LineStringFormatMapper extends FormatMapper
                     addGeometry(geometry, result);
                     break;
                 }
-                default:
-                {
+                default: {
                     Coordinate[] coordinates = readCoordinates(line);
                     LineString lineString = factory.createLineString(coordinates);
                     if (this.carryInputData) {
@@ -75,10 +79,12 @@ public class LineStringFormatMapper extends FormatMapper
         return result.iterator();
     }
 
-    private void addGeometry(Geometry geometry, List<LineString> result) {
+    private void addGeometry(Geometry geometry, List<LineString> result)
+    {
         if (geometry instanceof MultiLineString) {
             addMultiGeometry((MultiLineString) geometry, result);
-        } else {
+        }
+        else {
             result.add((LineString) geometry);
         }
     }

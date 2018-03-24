@@ -15,14 +15,17 @@ import java.io.IOException;
 
 import static org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeFileConst.DOUBLE_LENGTH;
 
-public class PolyLineParser extends ShapeParser {
+public class PolyLineParser
+        extends ShapeParser
+{
 
     /**
      * create a parser that can abstract a MultiPolyline from input source with given GeometryFactory.
      *
      * @param geometryFactory the geometry factory
      */
-    public PolyLineParser(GeometryFactory geometryFactory) {
+    public PolyLineParser(GeometryFactory geometryFactory)
+    {
         super(geometryFactory);
     }
 
@@ -34,7 +37,8 @@ public class PolyLineParser extends ShapeParser {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public Geometry parseShape(ShapeReader reader) {
+    public Geometry parseShape(ShapeReader reader)
+    {
         reader.skip(4 * DOUBLE_LENGTH);
         int numParts = reader.readInt();
         int numPoints = reader.readInt();
@@ -42,8 +46,8 @@ public class PolyLineParser extends ShapeParser {
         int[] offsets = readOffsets(reader, numParts, numPoints);
 
         LineString[] lines = new LineString[numParts];
-        for(int i = 0; i < numParts; ++i){
-            int readScale = offsets[i+1] - offsets[i];
+        for (int i = 0; i < numParts; ++i) {
+            int readScale = offsets[i + 1] - offsets[i];
             CoordinateSequence csString = readCoordinates(reader, readScale);
             lines[i] = geometryFactory.createLineString(csString);
         }

@@ -24,11 +24,13 @@ import org.junit.Test;
 
 import java.io.Serializable;
 
-public class adapterTestJava implements Serializable {
+public class adapterTestJava
+        implements Serializable
+{
     protected static SparkConf conf;
     protected static JavaSparkContext sc;
     protected static SparkSession sparkSession;
-    public static String resourceFolder = System.getProperty("user.dir")+"/src/test/resources/";
+    public static String resourceFolder = System.getProperty("user.dir") + "/src/test/resources/";
     public static String mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv";
     public static String csvPointInputLocation = resourceFolder + "arealm.csv";
     public static String shapefileInputLocation = resourceFolder + "shapefiles/polygon";
@@ -37,7 +39,8 @@ public class adapterTestJava implements Serializable {
      * Once executed before all.
      */
     @BeforeClass
-    public static void onceExecutedBeforeAll() {
+    public static void onceExecutedBeforeAll()
+    {
         conf = new SparkConf().setAppName("adapterTestJava").setMaster("local[2]");
         conf.set("spark.serializer", org.apache.spark.serializer.KryoSerializer.class.getName());
         conf.set("spark.kryo.registrator", GeoSparkKryoRegistrator.class.getName());
@@ -52,7 +55,7 @@ public class adapterTestJava implements Serializable {
     @Test
     public void testReadCsv()
     {
-        Dataset<Row> df = sparkSession.read().format("csv").option("delimiter","\t").option("header","false").load(csvPointInputLocation);
+        Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", "\t").option("header", "false").load(csvPointInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
         Dataset<Row> spatialDf = sparkSession.sql("select ST_PointFromText(inputtable._c0,\",\",\"mypoint\") as arealandmark from inputtable");
@@ -61,13 +64,13 @@ public class adapterTestJava implements Serializable {
         SpatialRDD spatialRDD = new SpatialRDD<Geometry>();
         spatialRDD.rawSpatialRDD = Adapter.toJavaRdd(spatialDf);
         spatialRDD.analyze();
-        Adapter.toDf(spatialRDD,sparkSession).show();
+        Adapter.toDf(spatialRDD, sparkSession).show();
     }
 
     @Test
     public void testReadCsvUsingCoordinates()
     {
-        Dataset<Row> df = sparkSession.read().format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation);
+        Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
         Dataset<Row> spatialDf = sparkSession.sql("select ST_Point(cast(inputtable._c0 as Decimal(24,20)),cast(inputtable._c1 as Decimal(24,20))) as arealandmark from inputtable");
@@ -76,13 +79,13 @@ public class adapterTestJava implements Serializable {
         SpatialRDD spatialRDD = new SpatialRDD<Geometry>();
         spatialRDD.rawSpatialRDD = Adapter.toJavaRdd(spatialDf);
         spatialRDD.analyze();
-        Adapter.toDf(spatialRDD,sparkSession).show();
+        Adapter.toDf(spatialRDD, sparkSession).show();
     }
 
     @Test
     public void testReadCsvWithIdUsingCoordinates()
     {
-        Dataset<Row> df = sparkSession.read().format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation);
+        Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
         Dataset<Row> spatialDf = sparkSession.sql("select ST_Point(cast(inputtable._c0 as Decimal(24,20)),cast(inputtable._c1 as Decimal(24,20))) as arealandmark from inputtable");
@@ -91,13 +94,13 @@ public class adapterTestJava implements Serializable {
         SpatialRDD spatialRDD = new SpatialRDD<Geometry>();
         spatialRDD.rawSpatialRDD = Adapter.toJavaRdd(spatialDf);
         spatialRDD.analyze();
-        Adapter.toDf(spatialRDD,sparkSession).show();
+        Adapter.toDf(spatialRDD, sparkSession).show();
     }
 
     @Test
     public void testReadWkt()
     {
-        Dataset<Row> df = sparkSession.read().format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation);
+        Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
         Dataset<Row> spatialDf = sparkSession.sql("select ST_GeomFromWKT(inputtable._c0) as usacounty from inputtable");
@@ -106,13 +109,13 @@ public class adapterTestJava implements Serializable {
         SpatialRDD spatialRDD = new SpatialRDD<Geometry>();
         spatialRDD.rawSpatialRDD = Adapter.toJavaRdd(spatialDf);
         spatialRDD.analyze();
-        Adapter.toDf(spatialRDD,sparkSession).show();
+        Adapter.toDf(spatialRDD, sparkSession).show();
     }
 
     @Test
     public void testReadWktWithId()
     {
-        Dataset<Row> df = sparkSession.read().format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation);
+        Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
         Dataset<Row> spatialDf = sparkSession.sql("select ST_GeomFromWKT(inputtable._c0, inputtable._c3, inputtable._c5) as usacounty from inputtable");
@@ -121,28 +124,30 @@ public class adapterTestJava implements Serializable {
         SpatialRDD spatialRDD = new SpatialRDD<Geometry>();
         spatialRDD.rawSpatialRDD = Adapter.toJavaRdd(spatialDf);
         spatialRDD.analyze();
-        Adapter.toDf(spatialRDD,sparkSession).show();
+        Adapter.toDf(spatialRDD, sparkSession).show();
     }
 
     @Test
     public void testReadShapefileToDF()
     {
         SpatialRDD spatialRDD = new SpatialRDD<Geometry>();
-        spatialRDD.rawSpatialRDD = ShapefileReader.readToGeometryRDD(JavaSparkContext.fromSparkContext(sparkSession.sparkContext()),shapefileInputLocation);
+        spatialRDD.rawSpatialRDD = ShapefileReader.readToGeometryRDD(JavaSparkContext.fromSparkContext(sparkSession.sparkContext()), shapefileInputLocation);
         spatialRDD.analyze();
-        Adapter.toDf(spatialRDD,sparkSession).show();
+        Adapter.toDf(spatialRDD, sparkSession).show();
     }
 
     @Test
-    public void testSpatialJoinToDataFrame() throws Exception {
-        Dataset<Row> pointCsvDf = sparkSession.read().format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation);
+    public void testSpatialJoinToDataFrame()
+            throws Exception
+    {
+        Dataset<Row> pointCsvDf = sparkSession.read().format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation);
         pointCsvDf.createOrReplaceTempView("pointtable");
         Dataset<Row> pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable");
         SpatialRDD pointRDD = new SpatialRDD<Geometry>();
         pointRDD.rawSpatialRDD = Adapter.toJavaRdd(pointDf);
         pointRDD.analyze();
 
-        Dataset<Row> polygonWktDf = sparkSession.read().format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation);
+        Dataset<Row> polygonWktDf = sparkSession.read().format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation);
         polygonWktDf.createOrReplaceTempView("polygontable");
         Dataset<Row> polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0, polygontable._c3, polygontable._c5) as usacounty from polygontable");
         SpatialRDD polygonRDD = new SpatialRDD<Geometry>();
@@ -162,15 +167,17 @@ public class adapterTestJava implements Serializable {
     }
 
     @Test
-    public void testDistanceJoinToDataFrame() throws Exception {
-        Dataset<Row> pointCsvDf = sparkSession.read().format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation);
+    public void testDistanceJoinToDataFrame()
+            throws Exception
+    {
+        Dataset<Row> pointCsvDf = sparkSession.read().format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation);
         pointCsvDf.createOrReplaceTempView("pointtable");
         Dataset<Row> pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable");
         SpatialRDD pointRDD = new SpatialRDD<Geometry>();
         pointRDD.rawSpatialRDD = Adapter.toJavaRdd(pointDf);
         pointRDD.analyze();
 
-        Dataset<Row> polygonWktDf = sparkSession.read().format("csv").option("delimiter","\t").option("header","false").load(mixedWktGeometryInputLocation);
+        Dataset<Row> polygonWktDf = sparkSession.read().format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation);
         polygonWktDf.createOrReplaceTempView("polygontable");
         Dataset<Row> polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0, polygontable._c3, polygontable._c5) as usacounty from polygontable");
         SpatialRDD polygonRDD = new SpatialRDD<Geometry>();
@@ -195,7 +202,8 @@ public class adapterTestJava implements Serializable {
      * Tear down.
      */
     @AfterClass
-    public static void TearDown() {
+    public static void TearDown()
+    {
         GeoSparkSQLRegistrator.dropAll(sparkSession);
         sparkSession.stop();
     }

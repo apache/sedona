@@ -10,7 +10,9 @@ import com.vividsolutions.jts.geom.Envelope;
 
 import java.io.Serializable;
 
-public class QuadRectangle implements Serializable{
+public class QuadRectangle
+        implements Serializable
+{
     public final double x, y, width, height;
     public Integer partitionId = -1;
 
@@ -22,7 +24,8 @@ public class QuadRectangle implements Serializable{
         this.height = envelope.getHeight();
     }
 
-    public QuadRectangle(double x, double y, double width, double height) {
+    public QuadRectangle(double x, double y, double width, double height)
+    {
         if (width < 0) {
             throw new IllegalArgumentException("width must be >= 0");
         }
@@ -37,12 +40,14 @@ public class QuadRectangle implements Serializable{
         this.height = height;
     }
 
-    public boolean contains(double x, double y) {
+    public boolean contains(double x, double y)
+    {
         return x >= this.x && x <= this.x + this.width
                 && y >= this.y && y <= this.y + this.height;
     }
 
-    public boolean contains(QuadRectangle r) {
+    public boolean contains(QuadRectangle r)
+    {
         return r.x >= this.x && r.x + r.width <= this.x + this.width
                 && r.y >= this.y && r.y + r.height <= this.y + this.height;
     }
@@ -70,29 +75,32 @@ public class QuadRectangle implements Serializable{
 
     public Envelope getEnvelope()
     {
-        return new Envelope(x,x+width,y,y+height);
-    }
-    @Override
-    public String toString() {
-        return "x: " + x + " y: " + y + " w: " + width + " h: " + height + " PartitionId: "+partitionId;
+        return new Envelope(x, x + width, y, y + height);
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (o == null || ! (o instanceof QuadRectangle)) {
+    public String toString()
+    {
+        return "x: " + x + " y: " + y + " w: " + width + " h: " + height + " PartitionId: " + partitionId;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (o == null || !(o instanceof QuadRectangle)) {
             return false;
         }
 
         final QuadRectangle other = (QuadRectangle) o;
         return this.x == other.x && this.y == other.y
-            && this.width == other.width && this.height == other.height
-            && this.partitionId == other.partitionId;
+                && this.width == other.width && this.height == other.height
+                && this.partitionId == other.partitionId;
     }
 
     @Override
     public int hashCode()
     {
-        String stringId = ""+x+y+width+height;
+        String stringId = "" + x + y + width + height;
         return stringId.hashCode();
     }
 }

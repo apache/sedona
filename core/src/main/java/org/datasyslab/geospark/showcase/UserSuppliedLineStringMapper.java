@@ -6,13 +6,6 @@
  */
 package org.datasyslab.geospark.showcase;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
-import org.apache.spark.api.java.function.FlatMapFunction;
-
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -20,42 +13,68 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.WKTReader;
+import org.apache.spark.api.java.function.FlatMapFunction;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 // TODO: Auto-generated Javadoc
+
 /**
  * The Class UserSuppliedLineStringMapper.
  */
-public class UserSuppliedLineStringMapper implements FlatMapFunction<Iterator<String>, Object>{
-    
-    /** The spatial object. */
+public class UserSuppliedLineStringMapper
+        implements FlatMapFunction<Iterator<String>, Object>
+{
+
+    /**
+     * The spatial object.
+     */
     Geometry spatialObject = null;
-    
-    /** The multi spatial objects. */
+
+    /**
+     * The multi spatial objects.
+     */
     MultiPolygon multiSpatialObjects = null;
-    
-    /** The fact. */
+
+    /**
+     * The fact.
+     */
     GeometryFactory fact = new GeometryFactory();
-    
-    /** The line split list. */
+
+    /**
+     * The line split list.
+     */
     List<String> lineSplitList;
-    
-    /** The coordinates list. */
+
+    /**
+     * The coordinates list.
+     */
     ArrayList<Coordinate> coordinatesList;
-    
-    /** The coordinates. */
+
+    /**
+     * The coordinates.
+     */
     Coordinate[] coordinates;
-    
-    /** The linear. */
+
+    /**
+     * The linear.
+     */
     LinearRing linear;
-    
-    /** The actual end offset. */
+
+    /**
+     * The actual end offset.
+     */
     int actualEndOffset;
 
     @Override
-    public Iterator<Object> call(Iterator<String> stringIterator) throws Exception {
-        List result= new ArrayList<LineString>();
+    public Iterator<Object> call(Iterator<String> stringIterator)
+            throws Exception
+    {
+        List result = new ArrayList<LineString>();
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
             Geometry spatialObject = null;
@@ -71,10 +90,11 @@ public class UserSuppliedLineStringMapper implements FlatMapFunction<Iterator<St
                     spatialObject = multiSpatialObjects.getGeometryN(i);
                     result.add((LineString) spatialObject);
                 }
-            } else {
+            }
+            else {
                 result.add((LineString) spatialObject);
             }
         }
-            return result.iterator();
-        }
+        return result.iterator();
+    }
 }

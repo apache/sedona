@@ -9,6 +9,7 @@ import org.datasyslab.geospark.utils.HalfOpenRectangle;
 import scala.Tuple2;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -16,23 +17,28 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public class KDBTreePartitioner extends SpatialPartitioner {
+public class KDBTreePartitioner
+        extends SpatialPartitioner
+{
     private final KDBTree tree;
 
-    public KDBTreePartitioner(KDBTree tree) {
+    public KDBTreePartitioner(KDBTree tree)
+    {
         super(GridType.KDBTREE, getLeafZones(tree));
         this.tree = tree;
         this.tree.dropElements();
     }
 
     @Override
-    public int numPartitions() {
+    public int numPartitions()
+    {
         return grids.size();
     }
 
     @Override
     public <T extends Geometry> Iterator<Tuple2<Integer, T>> placeObject(T spatialObject)
-        throws Exception {
+            throws Exception
+    {
 
         Objects.requireNonNull(spatialObject, "spatialObject");
 
@@ -57,15 +63,19 @@ public class KDBTreePartitioner extends SpatialPartitioner {
 
     @Nullable
     @Override
-    public DedupParams getDedupParams() {
+    public DedupParams getDedupParams()
+    {
         return new DedupParams(grids);
     }
 
-    private static List<Envelope> getLeafZones(KDBTree tree) {
+    private static List<Envelope> getLeafZones(KDBTree tree)
+    {
         final List<Envelope> leafs = new ArrayList<>();
-        tree.traverse(new KDBTree.Visitor() {
+        tree.traverse(new KDBTree.Visitor()
+        {
             @Override
-            public boolean visit(KDBTree tree) {
+            public boolean visit(KDBTree tree)
+            {
                 if (tree.isLeaf()) {
                     leafs.add(tree.getExtent());
                 }

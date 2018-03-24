@@ -9,21 +9,32 @@ package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf;
 import java.io.Serializable;
 
 // TODO: Auto-generated Javadoc
+
 /**
  * The Class FieldDescriptor.
  */
-public class FieldDescriptor implements Serializable{
+public class FieldDescriptor
+        implements Serializable
+{
 
-    /**  field name. */
+    /**
+     * field name.
+     */
     private String filedName = null;
 
-    /**  field type. */
+    /**
+     * field type.
+     */
     private byte fieldType = 0;
 
-    /**  field length. */
+    /**
+     * field length.
+     */
     private int fieldLength = 0;
 
-    /**  decimal count. */
+    /**
+     * decimal count.
+     */
     private byte fieldDecimalCount = 0;
 
     /**
@@ -31,7 +42,8 @@ public class FieldDescriptor implements Serializable{
      *
      * @return the filed name
      */
-    public String getFiledName() {
+    public String getFiledName()
+    {
         return filedName;
     }
 
@@ -40,7 +52,8 @@ public class FieldDescriptor implements Serializable{
      *
      * @param filedName the new filed name
      */
-    public void setFiledName(String filedName) {
+    public void setFiledName(String filedName)
+    {
         this.filedName = filedName;
     }
 
@@ -49,7 +62,8 @@ public class FieldDescriptor implements Serializable{
      *
      * @return the field type
      */
-    public byte getFieldType() {
+    public byte getFieldType()
+    {
         return fieldType;
     }
 
@@ -58,7 +72,8 @@ public class FieldDescriptor implements Serializable{
      *
      * @param fieldType the new field type
      */
-    public void setFieldType(byte fieldType) {
+    public void setFieldType(byte fieldType)
+    {
         this.fieldType = fieldType;
     }
 
@@ -67,7 +82,8 @@ public class FieldDescriptor implements Serializable{
      *
      * @return the field length
      */
-    public int getFieldLength() {
+    public int getFieldLength()
+    {
         return fieldLength;
     }
 
@@ -76,7 +92,8 @@ public class FieldDescriptor implements Serializable{
      *
      * @param fieldLength the new field length
      */
-    public void setFieldLength(int fieldLength) {
+    public void setFieldLength(int fieldLength)
+    {
         this.fieldLength = fieldLength;
     }
 
@@ -85,7 +102,8 @@ public class FieldDescriptor implements Serializable{
      *
      * @return the field decimal count
      */
-    public byte getFieldDecimalCount() {
+    public byte getFieldDecimalCount()
+    {
         return fieldDecimalCount;
     }
 
@@ -94,7 +112,8 @@ public class FieldDescriptor implements Serializable{
      *
      * @param fieldDecimalCount the new field decimal count
      */
-    public void setFieldDecimalCount(byte fieldDecimalCount) {
+    public void setFieldDecimalCount(byte fieldDecimalCount)
+    {
         this.fieldDecimalCount = fieldDecimalCount;
     }
 }

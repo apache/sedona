@@ -7,11 +7,13 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.serializer.KryoSerializer;
 import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator;
 
-public class GeoSparkTestBase {
+public class GeoSparkTestBase
+{
     protected static SparkConf conf;
     protected static JavaSparkContext sc;
 
-    protected static void initialize(final String testSuiteName) {
+    protected static void initialize(final String testSuiteName)
+    {
         conf = new SparkConf().setAppName(testSuiteName).setMaster("local[2]");
         conf.set("spark.serializer", KryoSerializer.class.getName());
         conf.set("spark.kryo.registrator", GeoSparkKryoRegistrator.class.getName());

@@ -26,23 +26,27 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
-public class RectangleJoinTest extends JoinTestBase {
+public class RectangleJoinTest
+        extends JoinTestBase
+{
 
     private static long expectedMatchCount;
     private static long expectedMatchWithOriginalDuplicatesCount;
 
-    public RectangleJoinTest(GridType gridType, boolean useLegacyPartitionAPIs, int numPartitions) {
+    public RectangleJoinTest(GridType gridType, boolean useLegacyPartitionAPIs, int numPartitions)
+    {
         super(gridType, useLegacyPartitionAPIs, numPartitions);
     }
 
     @Parameterized.Parameters
-    public static Collection testParams() {
+    public static Collection testParams()
+    {
         return Arrays.asList(new Object[][] {
-            { GridType.RTREE, true, 11 },
-            { GridType.RTREE, false, 11 },
-            { GridType.QUADTREE, true, 11 },
-            { GridType.QUADTREE, false, 11},
-            { GridType.KDBTREE, false, 11},
+                {GridType.RTREE, true, 11},
+                {GridType.RTREE, false, 11},
+                {GridType.QUADTREE, true, 11},
+                {GridType.QUADTREE, false, 11},
+                {GridType.KDBTREE, false, 11},
         });
     }
 
@@ -50,18 +54,20 @@ public class RectangleJoinTest extends JoinTestBase {
      * Once executed before all.
      */
     @BeforeClass
-    public static void onceExecutedBeforeAll() {
+    public static void onceExecutedBeforeAll()
+    {
         initialize("RectangleJoin", "rectangle.test.properties");
         expectedMatchCount = Long.parseLong(prop.getProperty("matchCount"));
         expectedMatchWithOriginalDuplicatesCount =
-            Long.parseLong(prop.getProperty("matchWithOriginalDuplicatesCount"));
+                Long.parseLong(prop.getProperty("matchWithOriginalDuplicatesCount"));
     }
 
     /**
      * Tear down.
      */
     @AfterClass
-    public static void TearDown() {
+    public static void TearDown()
+    {
         sc.stop();
     }
 
@@ -71,14 +77,16 @@ public class RectangleJoinTest extends JoinTestBase {
      * @throws Exception the exception
      */
     @Test
-    public void testNestedLoop() throws Exception {
+    public void testNestedLoop()
+            throws Exception
+    {
         RectangleRDD queryRDD = createRectangleRDD();
         RectangleRDD spatialRDD = createRectangleRDD();
-        
+
         partitionRdds(queryRDD, spatialRDD);
-        
-        List<Tuple2<Polygon, HashSet<Polygon>>> result = JoinQuery.SpatialJoinQuery(spatialRDD,queryRDD,false,true).collect();
-        
+
+        List<Tuple2<Polygon, HashSet<Polygon>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, false, true).collect();
+
         sanityCheckJoinResults(result);
         assertEquals(expectedMatchCount, countJoinResults(result));
     }
@@ -89,8 +97,10 @@ public class RectangleJoinTest extends JoinTestBase {
      * @throws Exception the exception
      */
     @Test
-    public void testRTree() throws Exception {
-    	testIndexInt(IndexType.RTREE);
+    public void testRTree()
+            throws Exception
+    {
+        testIndexInt(IndexType.RTREE);
     }
 
     /**
@@ -99,34 +109,44 @@ public class RectangleJoinTest extends JoinTestBase {
      * @throws Exception the exception
      */
     @Test
-    public void testQuadTree() throws Exception {
+    public void testQuadTree()
+            throws Exception
+    {
         testIndexInt(IndexType.QUADTREE);
     }
 
-    private void testIndexInt(IndexType indexType) throws Exception {
+    private void testIndexInt(IndexType indexType)
+            throws Exception
+    {
         RectangleRDD queryRDD = createRectangleRDD();
         RectangleRDD spatialRDD = createRectangleRDD();
 
         partitionRdds(queryRDD, spatialRDD);
         spatialRDD.buildIndex(indexType, true);
 
-        List<Tuple2<Polygon, HashSet<Polygon>>> result = JoinQuery.SpatialJoinQuery(spatialRDD,queryRDD,false,true).collect();
+        List<Tuple2<Polygon, HashSet<Polygon>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, false, true).collect();
 
         sanityCheckJoinResults(result);
         assertEquals(expectedMatchCount, countJoinResults(result));
     }
 
     @Test
-    public void testDynamicRTree() throws Exception {
+    public void testDynamicRTree()
+            throws Exception
+    {
         testDynamicIndexInt(IndexType.RTREE);
     }
 
     @Test
-    public void testDynamicQuadTree() throws Exception {
+    public void testDynamicQuadTree()
+            throws Exception
+    {
         testDynamicIndexInt(IndexType.QUADTREE);
     }
 
-    private void testDynamicIndexInt(IndexType indexType) throws Exception {
+    private void testDynamicIndexInt(IndexType indexType)
+            throws Exception
+    {
         RectangleRDD queryRDD = createRectangleRDD();
         RectangleRDD spatialRDD = createRectangleRDD();
 
@@ -138,11 +158,12 @@ public class RectangleJoinTest extends JoinTestBase {
         sanityCheckFlatJoinResults(result);
 
         final long expectedCount = expectToPreserveOriginalDuplicates()
-            ? expectedMatchWithOriginalDuplicatesCount : expectedMatchCount;
+                ? expectedMatchWithOriginalDuplicatesCount : expectedMatchCount;
         assertEquals(expectedCount, result.size());
     }
 
-    private RectangleRDD createRectangleRDD() {
+    private RectangleRDD createRectangleRDD()
+    {
         return createRectangleRDD(InputLocation);
     }
 }

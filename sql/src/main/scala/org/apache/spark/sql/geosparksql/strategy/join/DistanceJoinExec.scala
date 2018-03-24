@@ -44,29 +44,29 @@ case class DistanceJoinExec(left: SparkPlan,
                             radius: Expression,
                             intersects: Boolean,
                             extraCondition: Option[Expression] = None)
-    extends BinaryExecNode
+  extends BinaryExecNode
     with TraitJoinQueryExec
     with Logging {
 
   private val boundRadius = BindReferences.bindReference(radius, left.output)
+
   override def toSpatialRddPair(
-                              buildRdd: RDD[UnsafeRow],
-                              buildExpr: Expression,
-                              streamedRdd: RDD[UnsafeRow],
-                              streamedExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) =
+                                 buildRdd: RDD[UnsafeRow],
+                                 buildExpr: Expression,
+                                 streamedRdd: RDD[UnsafeRow],
+                                 streamedExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) =
     (toCircleRDD(buildRdd, buildExpr), toSpatialRdd(streamedRdd, streamedExpr))
 
   private def toCircleRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression): SpatialRDD[Geometry] = {
     val spatialRdd = new SpatialRDD[Geometry]
     spatialRdd.setRawSpatialRDD(
       rdd
-        .map { x =>
-          {
-            val shape = GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[ArrayData])
-            val circle = new Circle(shape, boundRadius.eval(x).asInstanceOf[Double])
-            circle.setUserData(x.copy)
-            circle.asInstanceOf[Geometry]
-          }
+        .map { x => {
+          val shape = GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[ArrayData])
+          val circle = new Circle(shape, boundRadius.eval(x).asInstanceOf[Double])
+          circle.setUserData(x.copy)
+          circle.asInstanceOf[Geometry]
+        }
         }
         .toJavaRDD())
     spatialRdd

@@ -11,7 +11,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QuadTreePartitioningTest {
+public class QuadTreePartitioningTest
+{
 
     private final GeometryFactory factory = new GeometryFactory();
 
@@ -20,13 +21,15 @@ public class QuadTreePartitioningTest {
      * in StandardQuadTree.insert
      */
     @Test
-    public void testDataSkew() throws Exception {
+    public void testDataSkew()
+            throws Exception
+    {
 
         // Create an artificially skewed data set of identical envelopes
         final Point point = factory.createPoint(new Coordinate(0, 0));
 
         final List<Envelope> samples = new ArrayList<>();
-        for (int i=0; i<1000; i++) {
+        for (int i = 0; i < 1000; i++) {
             samples.add(point.getEnvelopeInternal());
         }
 

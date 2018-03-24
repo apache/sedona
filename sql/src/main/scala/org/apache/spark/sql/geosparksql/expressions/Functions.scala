@@ -39,10 +39,11 @@ import org.opengis.referencing.operation.MathTransform
 
 /**
   * Return the distance between two geometries.
+  *
   * @param inputExpressions This function takes two geometries and calculates the distance between two objects.
   */
 case class ST_Distance(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback{
+  extends Expression with CodegenFallback {
 
   // This is a binary expression
   assert(inputExpressions.length == 2)
@@ -54,7 +55,7 @@ case class ST_Distance(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 
   override def eval(inputRow: InternalRow): Any = {
-    assert(inputExpressions.length==2)
+    assert(inputExpressions.length == 2)
 
     val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
     val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
@@ -65,21 +66,21 @@ case class ST_Distance(inputExpressions: Seq[Expression])
 
     return leftGeometry.distance(rightGeometry)
   }
+
   override def dataType = DoubleType
 }
 
 /**
   * Return the convex hull of a Geometry.
+  *
   * @param inputExpressions
   */
 case class ST_ConvexHull(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback
-{
+  extends Expression with CodegenFallback {
   override def nullable: Boolean = false
 
-  override def eval(input: InternalRow): Any =
-  {
-    assert(inputExpressions.length==1)
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 1)
     val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     new GenericArrayData(GeometrySerializer.serialize(geometry.convexHull()))
   }
@@ -91,16 +92,15 @@ case class ST_ConvexHull(inputExpressions: Seq[Expression])
 
 /**
   * Return the bounding rectangle for a Geometry
+  *
   * @param inputExpressions
   */
 case class ST_Envelope(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback
-{
+  extends Expression with CodegenFallback {
   override def nullable: Boolean = false
 
-  override def eval(input: InternalRow): Any =
-  {
-    assert(inputExpressions.length==1)
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 1)
     val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     new GenericArrayData(GeometrySerializer.serialize(geometry.getEnvelope()))
   }
@@ -112,16 +112,15 @@ case class ST_Envelope(inputExpressions: Seq[Expression])
 
 /**
   * Return the length measurement of a Geometry
+  *
   * @param inputExpressions
   */
 case class ST_Length(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback
-{
+  extends Expression with CodegenFallback {
   override def nullable: Boolean = false
 
-  override def eval(input: InternalRow): Any =
-  {
-    assert(inputExpressions.length==1)
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 1)
     val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     return geometry.getLength
   }
@@ -133,16 +132,15 @@ case class ST_Length(inputExpressions: Seq[Expression])
 
 /**
   * Return the area measurement of a Geometry.
+  *
   * @param inputExpressions
   */
 case class ST_Area(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback
-{
+  extends Expression with CodegenFallback {
   override def nullable: Boolean = false
 
-  override def eval(input: InternalRow): Any =
-  {
-    assert(inputExpressions.length==1)
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 1)
     val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     return geometry.getArea
   }
@@ -154,52 +152,47 @@ case class ST_Area(inputExpressions: Seq[Expression])
 
 /**
   * Return mathematical centroid of a geometry.
+  *
   * @param inputExpressions
   */
 case class ST_Centroid(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback
-{
+  extends Expression with CodegenFallback {
   override def nullable: Boolean = false
 
-  override def eval(input: InternalRow): Any =
-  {
-    assert(inputExpressions.length==1)
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 1)
     val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     new GenericArrayData(GeometrySerializer.serialize(geometry.getCentroid()))
-}
+  }
 
-override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = new GeometryUDT()
 
   override def children: Seq[Expression] = inputExpressions
 }
 
 /**
   * Given a geometry, sourceEPSGcode, and targetEPSGcode, convert the geometry's Spatial Reference System / Coordinate Reference System.
+  *
   * @param inputExpressions
   */
 case class ST_Transform(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback
-{
+  extends Expression with CodegenFallback {
   override def nullable: Boolean = false
 
-  override def eval(input: InternalRow): Any =
-  {
-    assert(inputExpressions.length>=3&&inputExpressions.length<=5)
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length >= 3 && inputExpressions.length <= 5)
     System.setProperty("org.geotools.referencing.forceXY", "true")
-    if (inputExpressions.length>=4)
-    {
+    if (inputExpressions.length >= 4) {
       System.setProperty("org.geotools.referencing.forceXY", inputExpressions(3).eval(input).asInstanceOf[Boolean].toString)
     }
     val originalGeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     val sourceCRScode = CRS.decode(inputExpressions(1).eval(input).asInstanceOf[UTF8String].toString)
     val targetCRScode = CRS.decode(inputExpressions(2).eval(input).asInstanceOf[UTF8String].toString)
-    var transform:MathTransform = null
-    if (inputExpressions.length == 5)
-    {
+    var transform: MathTransform = null
+    if (inputExpressions.length == 5) {
       transform = CRS.findMathTransform(sourceCRScode, targetCRScode, inputExpressions(4).eval(input).asInstanceOf[Boolean])
     }
-    else
-    {
+    else {
       transform = CRS.findMathTransform(sourceCRScode, targetCRScode, false)
     }
     new GenericArrayData(GeometrySerializer.serialize(JTS.transform(originalGeometry, transform)))
@@ -212,16 +205,15 @@ case class ST_Transform(inputExpressions: Seq[Expression])
 
 /**
   * Return the intersection shape of two geometries. The return type is a geometry
+  *
   * @param inputExpressions
   */
 case class ST_Intersection(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback
-{
+  extends Expression with CodegenFallback {
   override def nullable: Boolean = false
 
-  override def eval(input: InternalRow): Any =
-  {
-    assert(inputExpressions.length==2)
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 2)
     val leftgeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     val rightgeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     new GenericArrayData(GeometrySerializer.serialize(leftgeometry.intersection(rightgeometry)))

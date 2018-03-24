@@ -24,6 +24,7 @@
   * SOFTWARE.
   */
 package org.apache.spark.sql.geosparksql.expressions
+
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
@@ -33,10 +34,11 @@ import org.datasyslab.geosparksql.utils.GeometrySerializer
 
 /**
   * Test if leftGeometry full contains rightGeometry
+  *
   * @param inputExpressions
   */
 case class ST_Contains(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback{
+  extends Expression with CodegenFallback {
 
   // This is a binary expression
   assert(inputExpressions.length == 2)
@@ -57,15 +59,17 @@ case class ST_Contains(inputExpressions: Seq[Expression])
 
     return leftGeometry.covers(rightGeometry)
   }
+
   override def dataType = BooleanType
 }
 
 /**
   * Test if leftGeometry full intersects rightGeometry
+  *
   * @param inputExpressions
   */
 case class ST_Intersects(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback{
+  extends Expression with CodegenFallback {
   override def nullable: Boolean = false
 
   // This is a binary expression
@@ -85,15 +89,17 @@ case class ST_Intersects(inputExpressions: Seq[Expression])
 
     return leftGeometry.intersects(rightGeometry)
   }
+
   override def dataType = BooleanType
 }
 
 /**
   * Test if leftGeometry is full within rightGeometry
+  *
   * @param inputExpressions
   */
 case class ST_Within(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback{
+  extends Expression with CodegenFallback {
   override def nullable: Boolean = false
 
   // This is a binary expression
@@ -113,5 +119,6 @@ case class ST_Within(inputExpressions: Seq[Expression])
 
     return leftGeometry.coveredBy(rightGeometry)
   }
+
   override def dataType = BooleanType
 }

@@ -22,16 +22,20 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 // TODO: Auto-generated Javadoc
+
 /**
  * The Class LineStringRDDTest.
  */
-public class LineStringRDDTest extends SpatialRDDTestBase {
+public class LineStringRDDTest
+        extends SpatialRDDTestBase
+{
 
     /**
      * Once executed before all.
      */
     @BeforeClass
-    public static void onceExecutedBeforeAll() {
+    public static void onceExecutedBeforeAll()
+    {
         initialize(LineStringRDDTest.class.getSimpleName(), "linestring.test.properties");
     }
 
@@ -44,13 +48,14 @@ public class LineStringRDDTest extends SpatialRDDTestBase {
         This test case will load a sample data file and
      */
     @Test
-    public void testConstructor() throws Exception {
-        LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions,StorageLevel.MEMORY_ONLY());
+    public void testConstructor()
+            throws Exception
+    {
+        LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
         assertEquals(inputCount, spatialRDD.approximateTotalCount);
         assertEquals(inputBoundary, spatialRDD.boundaryEnvelope);
     }
 
-    
     /**
      * Test hilbert curve spatial partitioing.
      *
@@ -60,14 +65,16 @@ public class LineStringRDDTest extends SpatialRDDTestBase {
      *  This test case test whether the Hilbert Curve grid can be build correctly.
      */
     @Test
-    public void testHilbertCurveSpatialPartitioing() throws Exception {
-    	LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, 10,StorageLevel.MEMORY_ONLY());
+    public void testHilbertCurveSpatialPartitioing()
+            throws Exception
+    {
+        LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, 10, StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.HILBERT);
         for (Envelope d : spatialRDD.grids) {
-        	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
+            //System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
     }
-    
+
     /**
      * Test R tree spatial partitioing.
      *
@@ -77,14 +84,16 @@ public class LineStringRDDTest extends SpatialRDDTestBase {
      *  This test case test whether the STR-Tree grid can be build correctly.
      */
     @Test
-    public void testRTreeSpatialPartitioing() throws Exception {
-    	LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, 10,StorageLevel.MEMORY_ONLY());
+    public void testRTreeSpatialPartitioing()
+            throws Exception
+    {
+        LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, 10, StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.RTREE);
         for (Envelope d : spatialRDD.grids) {
-        	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
+            //System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
     }
-    
+
     /**
      * Test voronoi spatial partitioing.
      *
@@ -94,26 +103,28 @@ public class LineStringRDDTest extends SpatialRDDTestBase {
      *  This test case test whether the Voronoi grid can be build correctly.
      */
     @Test
-    public void testVoronoiSpatialPartitioing() throws Exception {
-    	LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, 10,StorageLevel.MEMORY_ONLY());
+    public void testVoronoiSpatialPartitioing()
+            throws Exception
+    {
+        LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, 10, StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.VORONOI);
         for (Envelope d : spatialRDD.grids) {
-        	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
+            //System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
     }
 
-    
     /**
      * Test build index without set grid.
      *
      * @throws Exception the exception
      */
     @Test
-    public void testBuildIndexWithoutSetGrid() throws Exception {
-    	LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions,StorageLevel.MEMORY_ONLY());
-        spatialRDD.buildIndex(IndexType.RTREE,false);
+    public void testBuildIndexWithoutSetGrid()
+            throws Exception
+    {
+        LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
+        spatialRDD.buildIndex(IndexType.RTREE, false);
     }
-
 
     /**
      * Test build rtree index.
@@ -121,53 +132,53 @@ public class LineStringRDDTest extends SpatialRDDTestBase {
      * @throws Exception the exception
      */
     @Test
-    public void testBuildRtreeIndex() throws Exception {
-    	LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions,StorageLevel.MEMORY_ONLY());
+    public void testBuildRtreeIndex()
+            throws Exception
+    {
+        LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(gridType);
-        spatialRDD.buildIndex(IndexType.RTREE,true);
-        if(spatialRDD.indexedRDD.take(1).get(0) instanceof STRtree)
-        {
+        spatialRDD.buildIndex(IndexType.RTREE, true);
+        if (spatialRDD.indexedRDD.take(1).get(0) instanceof STRtree) {
             List<Polygon> result = ((STRtree) spatialRDD.indexedRDD.take(1).get(0)).query(spatialRDD.boundaryEnvelope);
         }
-        else
-        {
+        else {
             List<Polygon> result = ((Quadtree) spatialRDD.indexedRDD.take(1).get(0)).query(spatialRDD.boundaryEnvelope);
-
         }
     }
-    
+
     /**
      * Test build quadtree index.
      *
      * @throws Exception the exception
      */
     @Test
-    public void testBuildQuadtreeIndex() throws Exception {
-    	LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions,StorageLevel.MEMORY_ONLY());
+    public void testBuildQuadtreeIndex()
+            throws Exception
+    {
+        LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(gridType);
-        spatialRDD.buildIndex(IndexType.QUADTREE,true);
-        if(spatialRDD.indexedRDD.take(1).get(0) instanceof STRtree)
-        {
+        spatialRDD.buildIndex(IndexType.QUADTREE, true);
+        if (spatialRDD.indexedRDD.take(1).get(0) instanceof STRtree) {
             List<Polygon> result = ((STRtree) spatialRDD.indexedRDD.take(1).get(0)).query(spatialRDD.boundaryEnvelope);
         }
-        else
-        {
+        else {
             List<Polygon> result = ((Quadtree) spatialRDD.indexedRDD.take(1).get(0)).query(spatialRDD.boundaryEnvelope);
-
         }
     }
-    
+
     /**
      * Test MBR.
      *
      * @throws Exception the exception
      */
     @Test
-    public void testMBR() throws Exception {
-    	LineStringRDD lineStringRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions,StorageLevel.MEMORY_ONLY());
-    	RectangleRDD rectangleRDD=lineStringRDD.MinimumBoundingRectangle();
-    	List<Polygon> result = rectangleRDD.rawSpatialRDD.collect();
-    	assert result.size()>-1;
+    public void testMBR()
+            throws Exception
+    {
+        LineStringRDD lineStringRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
+        RectangleRDD rectangleRDD = lineStringRDD.MinimumBoundingRectangle();
+        List<Polygon> result = rectangleRDD.rawSpatialRDD.collect();
+        assert result.size() > -1;
     }  
     
     /*
@@ -183,7 +194,8 @@ public class LineStringRDDTest extends SpatialRDDTestBase {
      * Tear down.
      */
     @AfterClass
-    public static void TearDown() {
+    public static void TearDown()
+    {
         sc.stop();
     }
 }

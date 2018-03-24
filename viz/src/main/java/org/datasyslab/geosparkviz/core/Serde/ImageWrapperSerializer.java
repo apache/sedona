@@ -33,35 +33,42 @@ import org.apache.log4j.Logger;
 import org.datasyslab.geosparkviz.core.ImageSerializableWrapper;
 
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class ImageWrapperSerializer extends Serializer<ImageSerializableWrapper> {
+public class ImageWrapperSerializer
+        extends Serializer<ImageSerializableWrapper>
+{
     final static Logger log = Logger.getLogger(ImageWrapperSerializer.class);
+
     @Override
-    public void write(Kryo kryo, Output output, ImageSerializableWrapper object) {
+    public void write(Kryo kryo, Output output, ImageSerializableWrapper object)
+    {
         try {
             log.debug("Serializing ImageSerializableWrapper...");
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             ImageIO.write(object.getImage(), "png", byteArrayOutputStream);
             output.writeInt(byteArrayOutputStream.size());
             output.write(byteArrayOutputStream.toByteArray());
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public ImageSerializableWrapper read(Kryo kryo, Input input, Class<ImageSerializableWrapper> type) {
+    public ImageSerializableWrapper read(Kryo kryo, Input input, Class<ImageSerializableWrapper> type)
+    {
         try {
             log.debug("De-serializing ImageSerializableWrapper...");
             int length = input.readInt();
             byte[] inputData = new byte[length];
             input.read(inputData);
             return new ImageSerializableWrapper(ImageIO.read(new ByteArrayInputStream(inputData)));
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
         return null;

@@ -1,6 +1,6 @@
 package org.datasyslab.geospark.monitoring
 
-import org.apache.spark.scheduler.{AccumulableInfo, SparkListener, SparkListenerStageCompleted, SparkListenerTaskEnd}
+import org.apache.spark.scheduler.{SparkListener, SparkListenerStageCompleted, SparkListenerTaskEnd}
 
 import scala.collection.mutable
 

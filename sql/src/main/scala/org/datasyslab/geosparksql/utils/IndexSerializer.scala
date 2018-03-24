@@ -38,7 +38,7 @@ object IndexSerializer {
     val out = new ByteArrayOutputStream()
     val kryo = new Kryo()
     val output = new Output(out)
-    kryo.writeObject(output,index)
+    kryo.writeObject(output, index)
     output.close()
     return out.toByteArray
   }

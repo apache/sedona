@@ -23,16 +23,29 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
-import java.awt.*;
+
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.color.ColorSpace;
-import java.awt.image.*;
+import java.awt.image.BandedSampleModel;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.Raster;
+import java.awt.image.RenderedImage;
+import java.awt.image.SampleModel;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -41,16 +54,23 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 // TODO: Auto-generated Javadoc
+
 /**
  * The Class BigBufferedImage.
  */
-public class BigBufferedImage extends BufferedImage {
+public class BigBufferedImage
+        extends BufferedImage
+{
 
-    /** The Constant TMP_DIR. */
+    /**
+     * The Constant TMP_DIR.
+     */
     private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
-    
-    /** The Constant MAX_PIXELS_IN_MEMORY. */
-    public static final int MAX_PIXELS_IN_MEMORY =  1024 * 1024;
+
+    /**
+     * The Constant MAX_PIXELS_IN_MEMORY.
+     */
+    public static final int MAX_PIXELS_IN_MEMORY = 1024 * 1024;
 
     /**
      * Creates the.
@@ -60,15 +80,18 @@ public class BigBufferedImage extends BufferedImage {
      * @param imageType the image type
      * @return the buffered image
      */
-    public static BufferedImage create(int width, int height, int imageType) {
+    public static BufferedImage create(int width, int height, int imageType)
+    {
         if (width * height > MAX_PIXELS_IN_MEMORY) {
             try {
                 final File tempDir = new File(TMP_DIR);
                 return createBigBufferedImage(tempDir, width, height, imageType);
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        } else {
+        }
+        else {
             return new BufferedImage(width, height, imageType);
         }
     }
@@ -81,7 +104,9 @@ public class BigBufferedImage extends BufferedImage {
      * @return the buffered image
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static BufferedImage create(File inputFile, int imageType) throws IOException {
+    public static BufferedImage create(File inputFile, int imageType)
+            throws IOException
+    {
         try (ImageInputStream stream = ImageIO.createImageInputStream(inputFile);) {
             Iterator<ImageReader> readers = ImageIO.getImageReaders(stream);
             if (readers.hasNext()) {
@@ -102,7 +127,8 @@ public class BigBufferedImage extends BufferedImage {
                     generalExecutor.invokeAll(partLoaders);
                     generalExecutor.shutdown();
                     return image;
-                } catch (InterruptedException ex) {
+                }
+                catch (InterruptedException ex) {
                     Logger.getLogger(BigBufferedImage.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
@@ -122,14 +148,15 @@ public class BigBufferedImage extends BufferedImage {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     private static BufferedImage createBigBufferedImage(File tempDir, int width, int height, int imageType)
-            throws FileNotFoundException, IOException {
+            throws FileNotFoundException, IOException
+    {
         FileDataBuffer buffer = new FileDataBuffer(tempDir, width * height, 4);
         ColorModel colorModel = null;
         BandedSampleModel sampleModel = null;
         switch (imageType) {
             case TYPE_INT_RGB:
                 colorModel = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB),
-                        new int[]{8, 8, 8, 0},
+                        new int[] {8, 8, 8, 0},
                         false,
                         false,
                         ComponentColorModel.TRANSLUCENT,
@@ -138,7 +165,7 @@ public class BigBufferedImage extends BufferedImage {
                 break;
             case TYPE_INT_ARGB:
                 colorModel = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB),
-                        new int[]{8, 8, 8, 8},
+                        new int[] {8, 8, 8, 8},
                         true,
                         false,
                         ComponentColorModel.TRANSLUCENT,
@@ -156,18 +183,28 @@ public class BigBufferedImage extends BufferedImage {
     /**
      * The Class ImagePartLoader.
      */
-    private static class ImagePartLoader implements Callable<ImagePartLoader> {
+    private static class ImagePartLoader
+            implements Callable<ImagePartLoader>
+    {
 
-        /** The y. */
+        /**
+         * The y.
+         */
         private final int y;
-        
-        /** The image. */
+
+        /**
+         * The image.
+         */
         private final BufferedImage image;
-        
-        /** The region. */
+
+        /**
+         * The region.
+         */
         private final Rectangle region;
-        
-        /** The file. */
+
+        /**
+         * The file.
+         */
         private final File file;
 
         /**
@@ -179,7 +216,8 @@ public class BigBufferedImage extends BufferedImage {
          * @param file the file
          * @param image the image
          */
-        public ImagePartLoader(int y, int width, int height, File file, BufferedImage image) {
+        public ImagePartLoader(int y, int width, int height, File file, BufferedImage image)
+        {
             this.y = y;
             this.image = image;
             this.file = file;
@@ -190,7 +228,9 @@ public class BigBufferedImage extends BufferedImage {
          * @see java.util.concurrent.Callable#call()
          */
         @Override
-        public ImagePartLoader call() throws Exception {
+        public ImagePartLoader call()
+                throws Exception
+        {
             Thread.currentThread().setPriority((Thread.MIN_PRIORITY + Thread.NORM_PRIORITY) / 2);
             try (ImageInputStream stream = ImageIO.createImageInputStream(file);) {
                 Iterator<ImageReader> readers = ImageIO.getImageReaders(stream);
@@ -217,14 +257,16 @@ public class BigBufferedImage extends BufferedImage {
      * @param isRasterPremultiplied the is raster premultiplied
      * @param properties the properties
      */
-    private BigBufferedImage(ColorModel cm, SimpleRaster raster, boolean isRasterPremultiplied, Hashtable<?, ?> properties) {
+    private BigBufferedImage(ColorModel cm, SimpleRaster raster, boolean isRasterPremultiplied, Hashtable<?, ?> properties)
+    {
         super(cm, raster, isRasterPremultiplied, properties);
     }
 
     /**
      * Dispose.
      */
-    public void dispose() {
+    public void dispose()
+    {
         ((SimpleRaster) getRaster()).dispose();
     }
 
@@ -233,7 +275,8 @@ public class BigBufferedImage extends BufferedImage {
      *
      * @param image the image
      */
-    public static void dispose(RenderedImage image) {
+    public static void dispose(RenderedImage image)
+    {
         if (image instanceof BigBufferedImage) {
             ((BigBufferedImage) image).dispose();
         }
@@ -242,7 +285,9 @@ public class BigBufferedImage extends BufferedImage {
     /**
      * The Class SimpleRaster.
      */
-    private static class SimpleRaster extends WritableRaster {
+    private static class SimpleRaster
+            extends WritableRaster
+    {
 
         /**
          * Instantiates a new simple raster.
@@ -251,36 +296,42 @@ public class BigBufferedImage extends BufferedImage {
          * @param dataBuffer the data buffer
          * @param origin the origin
          */
-        public SimpleRaster(SampleModel sampleModel, FileDataBuffer dataBuffer, Point origin) {
+        public SimpleRaster(SampleModel sampleModel, FileDataBuffer dataBuffer, Point origin)
+        {
             super(sampleModel, dataBuffer, origin);
         }
 
         /**
          * Dispose.
          */
-        public void dispose() {
+        public void dispose()
+        {
             ((FileDataBuffer) getDataBuffer()).dispose();
         }
-
     }
 
     /**
      * The Class FileDataBufferDeleterHook.
      */
-    private static final class FileDataBufferDeleterHook extends Thread {
+    private static final class FileDataBufferDeleterHook
+            extends Thread
+    {
 
         static {
             Runtime.getRuntime().addShutdownHook(new FileDataBufferDeleterHook());
         }
 
-        /** The Constant undisposedBuffers. */
+        /**
+         * The Constant undisposedBuffers.
+         */
         private static final HashSet<FileDataBuffer> undisposedBuffers = new HashSet<>();
 
         /* (non-Javadoc)
          * @see java.lang.Thread#run()
          */
         @Override
-        public void run() {
+        public void run()
+        {
             final FileDataBuffer[] buffers = undisposedBuffers.toArray(new FileDataBuffer[0]);
             for (FileDataBuffer b : buffers) {
                 b.disposeNow();
@@ -291,24 +342,38 @@ public class BigBufferedImage extends BufferedImage {
     /**
      * The Class FileDataBuffer.
      */
-    private static class FileDataBuffer extends DataBuffer {
+    private static class FileDataBuffer
+            extends DataBuffer
+    {
 
-        /** The id. */
+        /**
+         * The id.
+         */
         private final String id = "buffer-" + System.currentTimeMillis() + "-" + ((int) (Math.random() * 1000));
-        
-        /** The dir. */
+
+        /**
+         * The dir.
+         */
         private File dir;
-        
-        /** The path. */
+
+        /**
+         * The path.
+         */
         private String path;
-        
-        /** The files. */
+
+        /**
+         * The files.
+         */
         private File[] files;
-        
-        /** The access files. */
+
+        /**
+         * The access files.
+         */
         private RandomAccessFile[] accessFiles;
-        
-        /** The buffer. */
+
+        /**
+         * The buffer.
+         */
         private MappedByteBuffer[] buffer;
 
         /**
@@ -319,7 +384,9 @@ public class BigBufferedImage extends BufferedImage {
          * @throws FileNotFoundException the file not found exception
          * @throws IOException Signals that an I/O exception has occurred.
          */
-        public FileDataBuffer(File dir, int size) throws FileNotFoundException, IOException {
+        public FileDataBuffer(File dir, int size)
+                throws FileNotFoundException, IOException
+        {
             super(TYPE_BYTE, size);
             this.dir = dir;
             init();
@@ -334,7 +401,9 @@ public class BigBufferedImage extends BufferedImage {
          * @throws FileNotFoundException the file not found exception
          * @throws IOException Signals that an I/O exception has occurred.
          */
-        public FileDataBuffer(File dir, int size, int numBanks) throws FileNotFoundException, IOException {
+        public FileDataBuffer(File dir, int size, int numBanks)
+                throws FileNotFoundException, IOException
+        {
             super(TYPE_BYTE, size, numBanks);
             this.dir = dir;
             init();
@@ -346,7 +415,9 @@ public class BigBufferedImage extends BufferedImage {
          * @throws FileNotFoundException the file not found exception
          * @throws IOException Signals that an I/O exception has occurred.
          */
-        private void init() throws FileNotFoundException, IOException {
+        private void init()
+                throws FileNotFoundException, IOException
+        {
             FileDataBufferDeleterHook.undisposedBuffers.add(this);
             if (dir == null) {
                 dir = new File(".");
@@ -374,7 +445,8 @@ public class BigBufferedImage extends BufferedImage {
          * @see java.awt.image.DataBuffer#getElem(int, int)
          */
         @Override
-        public int getElem(int bank, int i) {
+        public int getElem(int bank, int i)
+        {
             return buffer[bank].get(i) & 0xff;
         }
 
@@ -382,7 +454,8 @@ public class BigBufferedImage extends BufferedImage {
          * @see java.awt.image.DataBuffer#setElem(int, int, int)
          */
         @Override
-        public void setElem(int bank, int i, int val) {
+        public void setElem(int bank, int i, int val)
+        {
             buffer[bank].put(i, (byte) val);
         }
 
@@ -390,14 +463,17 @@ public class BigBufferedImage extends BufferedImage {
          * @see java.lang.Object#finalize()
          */
         @Override
-        protected void finalize() throws Throwable {
+        protected void finalize()
+                throws Throwable
+        {
             dispose();
         }
 
         /**
          * Dispose now.
          */
-        private void disposeNow() {
+        private void disposeNow()
+        {
             final MappedByteBuffer[] disposedBuffer = this.buffer;
             this.buffer = null;
             disposeNow(disposedBuffer);
@@ -406,12 +482,15 @@ public class BigBufferedImage extends BufferedImage {
         /**
          * Dispose.
          */
-        public void dispose() {
+        public void dispose()
+        {
             final MappedByteBuffer[] disposedBuffer = this.buffer;
             this.buffer = null;
-            new Thread() {
+            new Thread()
+            {
                 @Override
-                public void run() {
+                public void run()
+                {
                     disposeNow(disposedBuffer);
                 }
             }.start();
@@ -422,7 +501,8 @@ public class BigBufferedImage extends BufferedImage {
          *
          * @param disposedBuffer the disposed buffer
          */
-        private void disposeNow(final MappedByteBuffer[] disposedBuffer) {
+        private void disposeNow(final MappedByteBuffer[] disposedBuffer)
+        {
             FileDataBufferDeleterHook.undisposedBuffers.remove(this);
             if (disposedBuffer != null) {
                 for (MappedByteBuffer b : disposedBuffer) {
@@ -433,7 +513,8 @@ public class BigBufferedImage extends BufferedImage {
                 for (RandomAccessFile file : accessFiles) {
                     try {
                         file.close();
-                    } catch (IOException e) {
+                    }
+                    catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
@@ -450,6 +531,5 @@ public class BigBufferedImage extends BufferedImage {
                 path = null;
             }
         }
-
     }
 }

@@ -17,42 +17,55 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 
-public class PrimitiveShape implements Serializable {
+public class PrimitiveShape
+        implements Serializable
+{
 
-    /** primitive bytes of one record copied from .shp file */
+    /**
+     * primitive bytes of one record copied from .shp file
+     */
     private final byte[] primitiveRecord;
 
-    /** shape type */
+    /**
+     * shape type
+     */
     private final ShapeType shapeType;
 
-    /** attributes of record extracted from .dbf file */
+    /**
+     * attributes of record extracted from .dbf file
+     */
     private String attributes = null;
 
-    public PrimitiveShape(ShpRecord record) {
+    public PrimitiveShape(ShpRecord record)
+    {
         this.primitiveRecord = record.getBytes().getBytes();
         this.shapeType = ShapeType.getType(record.getTypeID());
     }
 
-    public byte[] getPrimitiveRecord() {
+    public byte[] getPrimitiveRecord()
+    {
         return primitiveRecord;
     }
 
-    public String getAttributes() {
+    public String getAttributes()
+    {
         return attributes;
     }
 
-    public void setAttributes(String attributes) {
+    public void setAttributes(String attributes)
+    {
         this.attributes = attributes;
     }
 
-    public Geometry getShape(GeometryFactory geometryFactory) throws IOException, TypeUnknownException {
+    public Geometry getShape(GeometryFactory geometryFactory)
+            throws IOException, TypeUnknownException
+    {
         ShapeParser parser = shapeType.getParser(geometryFactory);
         ByteBuffer shapeBuffer = ByteBuffer.wrap(primitiveRecord);
         Geometry shape = parser.parseShape(ShapeReaderFactory.fromByteBuffer(shapeBuffer));
-        if(attributes != null){
+        if (attributes != null) {
             shape.setUserData(attributes);
         }
         return shape;
     }
-
 }

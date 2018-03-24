@@ -8,17 +8,21 @@ package org.datasyslab.geospark.spatialPartitioning.quadtree;
 
 import java.io.Serializable;
 
-public class QuadNode<T> implements Serializable{
+public class QuadNode<T>
+        implements Serializable
+{
     QuadRectangle r;
     T element;
 
-    QuadNode(QuadRectangle r, T element) {
+    QuadNode(QuadRectangle r, T element)
+    {
         this.r = r;
         this.element = element;
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return r.toString();
     }
 }

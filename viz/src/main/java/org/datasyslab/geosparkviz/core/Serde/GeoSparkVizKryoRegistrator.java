@@ -32,18 +32,20 @@ import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator;
 import org.datasyslab.geosparkviz.core.ImageSerializableWrapper;
 import org.datasyslab.geosparkviz.utils.Pixel;
 
-import java.awt.image.BufferedImage;
-
-public class GeoSparkVizKryoRegistrator implements KryoRegistrator {
+public class GeoSparkVizKryoRegistrator
+        implements KryoRegistrator
+{
     final static Logger log = Logger.getLogger(GeoSparkVizKryoRegistrator.class);
+
     @Override
-    public void registerClasses(Kryo kryo) {
+    public void registerClasses(Kryo kryo)
+    {
         GeoSparkKryoRegistrator geosparkKryoRegistrator = new GeoSparkKryoRegistrator();
         ImageWrapperSerializer imageWrapperSerializer = new ImageWrapperSerializer();
         PixelSerializer pixelSerializer = new PixelSerializer();
         geosparkKryoRegistrator.registerClasses(kryo);
         log.info("Registering custom serializers for visualization related types");
         kryo.register(ImageSerializableWrapper.class, imageWrapperSerializer);
-        kryo.register(Pixel.class,pixelSerializer);
+        kryo.register(Pixel.class, pixelSerializer);
     }
 }

@@ -15,15 +15,21 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class UserSuppliedPointMapper implements FlatMapFunction<Iterator<String>, Point>{
+public class UserSuppliedPointMapper
+        implements FlatMapFunction<Iterator<String>, Point>
+{
 
-    /** The factory. */
+    /**
+     * The factory.
+     */
     private final GeometryFactory factory = new GeometryFactory();
 
     @Override
-    public Iterator<Point> call(Iterator<String> stringIterator) throws Exception {
+    public Iterator<Point> call(Iterator<String> stringIterator)
+            throws Exception
+    {
         List<Point> result = new ArrayList<Point>();
-        while(stringIterator.hasNext()) {
+        while (stringIterator.hasNext()) {
             String line = stringIterator.next();
             try {
                 //Split the line by comma
@@ -35,7 +41,8 @@ public class UserSuppliedPointMapper implements FlatMapFunction<Iterator<String>
                 double longitude = Double.parseDouble(longitudeString);
                 Point point = factory.createPoint(new Coordinate(longitude, latitude));
                 result.add(point);
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 //Get one error. The data probably is dirty. Just skip this line.
             }
         }

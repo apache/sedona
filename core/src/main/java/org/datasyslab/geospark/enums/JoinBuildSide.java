@@ -31,14 +31,16 @@ import java.io.Serializable;
  * The enumerator type of JoinQuery JoinBuildSide. Each join query has two sides, left shape and right shape.
  * The join side desides which side the spatial index is built on. The other side will be streamed out.
  */
-public enum JoinBuildSide implements Serializable {
+public enum JoinBuildSide
+        implements Serializable
+{
     LEFT,
     RIGHT;
 
-    public static JoinBuildSide getBuildSide(String str) {
+    public static JoinBuildSide getBuildSide(String str)
+    {
         for (JoinBuildSide me : JoinBuildSide.values()) {
-            if (me.name().equalsIgnoreCase(str))
-                return me;
+            if (me.name().equalsIgnoreCase(str)) { return me; }
         }
         return null;
     }

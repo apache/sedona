@@ -1,6 +1,6 @@
 package org.datasyslab.geospark.monitoring
 
-import org.apache.spark.{SparkEnv, TaskContext}
+import org.apache.spark.TaskContext
 import org.apache.spark.util.AccumulatorV2
 
 import scala.collection.mutable

@@ -6,24 +6,29 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.spark.api.java.function.FlatMapFunction2;
 
 import javax.annotation.Nullable;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 public class RightIndexLookupJudgement<T extends Geometry, U extends Geometry>
-    extends JudgementBase
-    implements FlatMapFunction2<Iterator<T>, Iterator<SpatialIndex>, Pair<T, U>>, Serializable {
+        extends JudgementBase
+        implements FlatMapFunction2<Iterator<T>, Iterator<SpatialIndex>, Pair<T, U>>, Serializable
+{
 
     /**
      * @see JudgementBase
      */
-    public RightIndexLookupJudgement(boolean considerBoundaryIntersection, @Nullable DedupParams dedupParams) {
+    public RightIndexLookupJudgement(boolean considerBoundaryIntersection, @Nullable DedupParams dedupParams)
+    {
         super(considerBoundaryIntersection, dedupParams);
     }
 
     @Override
-    public Iterator<Pair<T, U>> call(Iterator<T> streamShapes, Iterator<SpatialIndex> indexIterator) throws Exception {
+    public Iterator<Pair<T, U>> call(Iterator<T> streamShapes, Iterator<SpatialIndex> indexIterator)
+            throws Exception
+    {
         List<Pair<T, U>> result = new ArrayList<>();
 
         if (!indexIterator.hasNext() || !streamShapes.hasNext()) {

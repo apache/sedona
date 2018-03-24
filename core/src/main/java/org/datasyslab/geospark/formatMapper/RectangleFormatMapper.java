@@ -18,82 +18,88 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class RectangleFormatMapper extends FormatMapper
-	implements FlatMapFunction<Iterator<String>, Polygon>
+public class RectangleFormatMapper
+        extends FormatMapper
+        implements FlatMapFunction<Iterator<String>, Polygon>
 {
 
-	/**
-	 * Instantiates a new rectangle format mapper.
-	 *
-	 * @param Splitter the splitter
-	 * @param carryInputData the carry input data
-	 */
-	public RectangleFormatMapper(FileDataSplitter Splitter, boolean carryInputData) {
-		super(Splitter, carryInputData);
-	}
+    /**
+     * Instantiates a new rectangle format mapper.
+     *
+     * @param Splitter the splitter
+     * @param carryInputData the carry input data
+     */
+    public RectangleFormatMapper(FileDataSplitter Splitter, boolean carryInputData)
+    {
+        super(Splitter, carryInputData);
+    }
 
-	/**
-	 * Instantiates a new rectangle format mapper.
-	 *
-	 * @param startOffset the start offset
-	 * @param endOffset the end offset
-	 * @param Splitter the splitter
-	 * @param carryInputData the carry input data
-	 */
-	public RectangleFormatMapper(Integer startOffset, Integer endOffset, FileDataSplitter Splitter,
-			boolean carryInputData) {
-		super(startOffset, endOffset, Splitter, carryInputData);
-	}
+    /**
+     * Instantiates a new rectangle format mapper.
+     *
+     * @param startOffset the start offset
+     * @param endOffset the end offset
+     * @param Splitter the splitter
+     * @param carryInputData the carry input data
+     */
+    public RectangleFormatMapper(Integer startOffset, Integer endOffset, FileDataSplitter Splitter,
+            boolean carryInputData)
+    {
+        super(startOffset, endOffset, Splitter, carryInputData);
+    }
 
-	@Override
-	public Iterator<Polygon> call(Iterator<String> stringIterator) throws Exception {
-		List<Polygon> result = new ArrayList<>();
-		while (stringIterator.hasNext()) {
-			String line = stringIterator.next();
-			switch (splitter) {
-				case GEOJSON: {
-					Geometry geometry = readGeoJSON(line);
-					addGeometry(geometry, result);
-					break;
-				}
-				case WKT: {
-					Geometry geometry = readWkt(line);
-					addGeometry(geometry, result);
-					break;
-				}
-				default:
-				{
-					String[] columns = line.split(splitter.getDelimiter());
-					double x1 = Double.parseDouble(columns[this.startOffset]);
-					double x2 = Double.parseDouble(columns[this.startOffset + 2]);
-					double y1 = Double.parseDouble(columns[this.startOffset + 1]);
-					double y2 = Double.parseDouble(columns[this.startOffset + 3]);
+    @Override
+    public Iterator<Polygon> call(Iterator<String> stringIterator)
+            throws Exception
+    {
+        List<Polygon> result = new ArrayList<>();
+        while (stringIterator.hasNext()) {
+            String line = stringIterator.next();
+            switch (splitter) {
+                case GEOJSON: {
+                    Geometry geometry = readGeoJSON(line);
+                    addGeometry(geometry, result);
+                    break;
+                }
+                case WKT: {
+                    Geometry geometry = readWkt(line);
+                    addGeometry(geometry, result);
+                    break;
+                }
+                default: {
+                    String[] columns = line.split(splitter.getDelimiter());
+                    double x1 = Double.parseDouble(columns[this.startOffset]);
+                    double x2 = Double.parseDouble(columns[this.startOffset + 2]);
+                    double y1 = Double.parseDouble(columns[this.startOffset + 1]);
+                    double y2 = Double.parseDouble(columns[this.startOffset + 3]);
 
-					Coordinate[] coordinates = new Coordinate[5];
-					coordinates[0] = new Coordinate(x1, y1);
-					coordinates[1] = new Coordinate(x1, y2);
-					coordinates[2] = new Coordinate(x2, y2);
-					coordinates[3] = new Coordinate(x2, y1);
-					coordinates[4] = coordinates[0];
+                    Coordinate[] coordinates = new Coordinate[5];
+                    coordinates[0] = new Coordinate(x1, y1);
+                    coordinates[1] = new Coordinate(x1, y2);
+                    coordinates[2] = new Coordinate(x2, y2);
+                    coordinates[3] = new Coordinate(x2, y1);
+                    coordinates[4] = coordinates[0];
 
-					LinearRing linear = factory.createLinearRing(coordinates);
-					Polygon polygon = new Polygon(linear, null, factory);
-					if (this.carryInputData) {
-						polygon.setUserData(line);
-					}
-					result.add(polygon);
-					break;
-				}
-			}
-		}
-		return result.iterator();
-	}
+                    LinearRing linear = factory.createLinearRing(coordinates);
+                    Polygon polygon = new Polygon(linear, null, factory);
+                    if (this.carryInputData) {
+                        polygon.setUserData(line);
+                    }
+                    result.add(polygon);
+                    break;
+                }
+            }
+        }
+        return result.iterator();
+    }
 
-	private void addGeometry(Geometry geometry, List<Polygon> result) {
-		if (geometry instanceof MultiPolygon) {
+    private void addGeometry(Geometry geometry, List<Polygon> result)
+    {
+        if (geometry instanceof MultiPolygon) {
             addMultiGeometry((MultiPolygon) geometry, result);
-        } else {
+        }
+        else {
             result.add((Polygon) (geometry.getEnvelope()));
         }
-	}
+    }
 }

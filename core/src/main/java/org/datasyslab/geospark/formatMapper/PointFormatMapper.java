@@ -17,35 +17,40 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class PointFormatMapper extends FormatMapper
-    implements FlatMapFunction<Iterator<String>, Point> {
+public class PointFormatMapper
+        extends FormatMapper
+        implements FlatMapFunction<Iterator<String>, Point>
+{
 
+    /**
+     * Instantiates a new point format mapper.
+     *
+     * @param Splitter the splitter
+     * @param carryInputData the carry input data
+     */
+    public PointFormatMapper(FileDataSplitter Splitter, boolean carryInputData)
+    {
+        super(Splitter, carryInputData);
+    }
 
-	/**
-	 * Instantiates a new point format mapper.
-	 *
-	 * @param Splitter the splitter
-	 * @param carryInputData the carry input data
-	 */
-	public PointFormatMapper(FileDataSplitter Splitter, boolean carryInputData) {
-		super(Splitter, carryInputData);
-	}
-
-	/**
-	 * Instantiates a new point format mapper.
-	 *
-	 * @param startOffset the start offset
-	 * @param endOffset the end offset
-	 * @param Splitter the splitter
-	 * @param carryInputData the carry input data
-	 */
-	public PointFormatMapper(Integer startOffset, Integer endOffset, FileDataSplitter Splitter,
-			boolean carryInputData) {
-		super(startOffset, endOffset, Splitter, carryInputData);
-	}
+    /**
+     * Instantiates a new point format mapper.
+     *
+     * @param startOffset the start offset
+     * @param endOffset the end offset
+     * @param Splitter the splitter
+     * @param carryInputData the carry input data
+     */
+    public PointFormatMapper(Integer startOffset, Integer endOffset, FileDataSplitter Splitter,
+            boolean carryInputData)
+    {
+        super(startOffset, endOffset, Splitter, carryInputData);
+    }
 
     @Override
-    public Iterator<Point> call(final Iterator<String> stringIterator) throws Exception {
+    public Iterator<Point> call(final Iterator<String> stringIterator)
+            throws Exception
+    {
         List<Point> result = new ArrayList<>();
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
@@ -75,10 +80,12 @@ public class PointFormatMapper extends FormatMapper
         return result.iterator();
     }
 
-    private void addGeometry(Geometry geometry, List<Point> result) {
+    private void addGeometry(Geometry geometry, List<Point> result)
+    {
         if (geometry instanceof MultiPoint) {
             addMultiGeometry((MultiPoint) geometry, result);
-        } else {
+        }
+        else {
             result.add((Point) geometry);
         }
     }

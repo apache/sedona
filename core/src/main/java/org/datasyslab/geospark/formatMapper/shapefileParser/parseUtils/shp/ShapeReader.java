@@ -1,6 +1,7 @@
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
-public interface ShapeReader {
+public interface ShapeReader
+{
 
     int readInt();
 

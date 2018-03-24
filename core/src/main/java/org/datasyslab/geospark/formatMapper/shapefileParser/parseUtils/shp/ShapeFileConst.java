@@ -6,57 +6,71 @@
  */
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
-import com.google.common.collect.ImmutableMap;
-import org.apache.hadoop.util.hash.Hash;
-
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-
 // TODO: Auto-generated Javadoc
+
 /**
  * The Interface ShapeFileConst.
  */
-public interface ShapeFileConst {
+public interface ShapeFileConst
+{
 
     /**
      * Consts for .shp file
      */
     public static final int EXPECT_FILE_CODE = 9994;
-    
-    /** The Constant EXPECT_FILE_VERSION. */
+
+    /**
+     * The Constant EXPECT_FILE_VERSION.
+     */
     public static final int EXPECT_FILE_VERSION = 1000;
-    
-    /** The Constant HEAD_FILE_LENGTH_16BIT. */
+
+    /**
+     * The Constant HEAD_FILE_LENGTH_16BIT.
+     */
     public static final int HEAD_FILE_LENGTH_16BIT = 50;
 
-    /** The Constant HEAD_EMPTY_NUM. */
+    /**
+     * The Constant HEAD_EMPTY_NUM.
+     */
     public static final int HEAD_EMPTY_NUM = 5;
-    
-    /** The Constant HEAD_BOX_NUM. */
+
+    /**
+     * The Constant HEAD_BOX_NUM.
+     */
     public static final int HEAD_BOX_NUM = 8;
 
-    /** The Constant INT_LENGTH. */
+    /**
+     * The Constant INT_LENGTH.
+     */
     public static final int INT_LENGTH = 4;
-    
-    /** The Constant DOUBLE_LENGTH. */
-    public static final int DOUBLE_LENGTH = 8;
 
+    /**
+     * The Constant DOUBLE_LENGTH.
+     */
+    public static final int DOUBLE_LENGTH = 8;
 
     /**
      * Consts for .dbf file
      */
     public static final byte FIELD_DESCRIPTOR_TERMINATOR = 0x0d;
-    
-    /** The Constant FIELD_NAME_LENGTH. */
+
+    /**
+     * The Constant FIELD_NAME_LENGTH.
+     */
     public static final byte FIELD_NAME_LENGTH = 11;
-    
-    /** The Constant RECORD_DELETE_FLAG. */
+
+    /**
+     * The Constant RECORD_DELETE_FLAG.
+     */
     public static final byte RECORD_DELETE_FLAG = 0x2A;
-    
-    /** The Constant FILE_END_FLAG. */
+
+    /**
+     * The Constant FILE_END_FLAG.
+     */
     public static final byte FILE_END_FLAG = 0x1A;
-    
-    /** The Constant RECORD_EXIST_FLAG. */
+
+    /**
+     * The Constant RECORD_EXIST_FLAG.
+     */
     public static final byte RECORD_EXIST_FLAG = 0x20;
 }

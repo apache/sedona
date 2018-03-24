@@ -13,7 +13,9 @@ import java.io.Serializable;
 /**
  * The Enum GeometryType.
  */
-public enum GeometryType implements Serializable {
+public enum GeometryType
+        implements Serializable
+{
 
     POINT,
     POLYGON,
@@ -30,10 +32,10 @@ public enum GeometryType implements Serializable {
      * @param str the str
      * @return the GeometryType
      */
-    public static GeometryType getGeometryType(String str) {
+    public static GeometryType getGeometryType(String str)
+    {
         for (GeometryType me : GeometryType.values()) {
-            if (me.name().equalsIgnoreCase(str))
-                return me;
+            if (me.name().equalsIgnoreCase(str)) { return me; }
         }
         throw new IllegalArgumentException("[" + GeometryType.class + "] Unsupported geometry type:" + str);
     }

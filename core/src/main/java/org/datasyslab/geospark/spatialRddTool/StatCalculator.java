@@ -6,7 +6,9 @@ import com.vividsolutions.jts.geom.Geometry;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class StatCalculator implements Serializable {
+public class StatCalculator
+        implements Serializable
+{
     private Envelope boundary;
     private long count;
 
@@ -19,7 +21,10 @@ public class StatCalculator implements Serializable {
         this.boundary = boundary;
         this.count = count;
     }
-    public static StatCalculator combine(StatCalculator agg1, StatCalculator agg2) throws Exception {
+
+    public static StatCalculator combine(StatCalculator agg1, StatCalculator agg2)
+            throws Exception
+    {
         if (agg1 == null) {
             return agg2;
         }
@@ -32,7 +37,10 @@ public class StatCalculator implements Serializable {
                 StatCalculator.combine(agg1.boundary, agg2.boundary),
                 agg1.count + agg2.count);
     }
-    public static Envelope combine(Envelope agg1, Envelope agg2) throws Exception {
+
+    public static Envelope combine(Envelope agg1, Envelope agg2)
+            throws Exception
+    {
         if (agg1 == null) {
             return agg2;
         }
@@ -48,18 +56,25 @@ public class StatCalculator implements Serializable {
                 Math.max(agg1.getMaxY(), agg2.getMaxY()));
     }
 
-    public static Envelope add(Envelope agg, Geometry object) throws Exception {
+    public static Envelope add(Envelope agg, Geometry object)
+            throws Exception
+    {
         return combine(object.getEnvelopeInternal(), agg);
     }
 
-    public static StatCalculator add(StatCalculator agg, Geometry object) throws Exception {
+    public static StatCalculator add(StatCalculator agg, Geometry object)
+            throws Exception
+    {
         return combine(new StatCalculator(object.getEnvelopeInternal(), 1), agg);
     }
-    public Envelope getBoundary() {
+
+    public Envelope getBoundary()
+    {
         return boundary;
     }
 
-    public long getCount() {
+    public long getCount()
+    {
         return count;
     }
 }

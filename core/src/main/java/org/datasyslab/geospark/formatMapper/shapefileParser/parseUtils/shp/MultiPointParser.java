@@ -15,14 +15,17 @@ import java.io.IOException;
 
 import static org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeFileConst.DOUBLE_LENGTH;
 
-public class MultiPointParser extends ShapeParser {
+public class MultiPointParser
+        extends ShapeParser
+{
 
     /**
      * create a parser that can abstract a MultiPoint from input source with given GeometryFactory.
      *
      * @param geometryFactory the geometry factory
      */
-    public MultiPointParser(GeometryFactory geometryFactory) {
+    public MultiPointParser(GeometryFactory geometryFactory)
+    {
         super(geometryFactory);
     }
 
@@ -34,7 +37,8 @@ public class MultiPointParser extends ShapeParser {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public Geometry parseShape(ShapeReader reader) {
+    public Geometry parseShape(ShapeReader reader)
+    {
         reader.skip(4 * DOUBLE_LENGTH);
         int numPoints = reader.readInt();
         CoordinateSequence coordinateSequence = readCoordinates(reader, numPoints);

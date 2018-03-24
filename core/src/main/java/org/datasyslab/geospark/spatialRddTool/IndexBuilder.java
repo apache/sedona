@@ -12,20 +12,25 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public final class IndexBuilder<T extends Geometry> implements FlatMapFunction<Iterator<T>, SpatialIndex> {
+public final class IndexBuilder<T extends Geometry>
+        implements FlatMapFunction<Iterator<T>, SpatialIndex>
+{
     IndexType indexType;
+
     public IndexBuilder(IndexType indexType)
     {
         this.indexType = indexType;
     }
+
     @Override
-    public Iterator<SpatialIndex> call(Iterator<T> objectIterator) throws Exception {
+    public Iterator<SpatialIndex> call(Iterator<T> objectIterator)
+            throws Exception
+    {
         SpatialIndex spatialIndex;
         if (indexType == IndexType.RTREE) {
             spatialIndex = new STRtree();
         }
-        else
-        {
+        else {
             spatialIndex = new Quadtree();
         }
         while (objectIterator.hasNext()) {

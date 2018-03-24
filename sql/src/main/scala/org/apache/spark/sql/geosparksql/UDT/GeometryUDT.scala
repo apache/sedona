@@ -31,24 +31,23 @@ import org.apache.spark.sql.types._
 import org.datasyslab.geosparksql.utils.GeometrySerializer
 
 
-private[sql] class GeometryUDT extends UserDefinedType[Geometry]{
+private[sql] class GeometryUDT extends UserDefinedType[Geometry] {
   override def sqlType: DataType = ArrayType(ByteType, containsNull = false)
 
   override def userClass: Class[Geometry] = classOf[Geometry]
 
-  override def serialize(obj: Geometry): GenericArrayData =
-  {
+  override def serialize(obj: Geometry): GenericArrayData = {
     new GenericArrayData(GeometrySerializer.serialize(obj))
   }
 
-  override def deserialize(datum: Any): Geometry =
-  {
-    datum match
-    {
+  override def deserialize(datum: Any): Geometry = {
+    datum match {
       case values: ArrayData => {
         return GeometrySerializer.deserialize(values)
       }
     }
   }
+
   case object GeometryUDT extends GeometryUDT
+
 }

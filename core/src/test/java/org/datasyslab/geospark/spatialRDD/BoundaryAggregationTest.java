@@ -15,15 +15,18 @@ import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 import org.datasyslab.geospark.spatialRddTool.StatCalculator;
 import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
 
-public class BoundaryAggregationTest {
+public class BoundaryAggregationTest
+{
 
     private final GeometryFactory factory = new GeometryFactory();
     private final WKTReader wktReader = new WKTReader();
 
     @Test
-    public void testAddPoints() throws Exception
+    public void testAddPoints()
+            throws Exception
     {
         Envelope agg = null;
 
@@ -68,7 +71,8 @@ public class BoundaryAggregationTest {
     }
 
     @Test
-    public void testAddPolygons() throws Exception
+    public void testAddPolygons()
+            throws Exception
     {
         Envelope agg = null;
 
@@ -100,7 +104,8 @@ public class BoundaryAggregationTest {
     }
 
     @Test
-    public void testCombine() throws Exception
+    public void testCombine()
+            throws Exception
     {
         Envelope agg = new Envelope(0, 1, 0, 1);
         agg = StatCalculator.combine(null, agg);
@@ -148,7 +153,9 @@ public class BoundaryAggregationTest {
         return factory.createPoint(new Coordinate(x, y));
     }
 
-    private Geometry parseWkt(String wkt) throws ParseException {
+    private Geometry parseWkt(String wkt)
+            throws ParseException
+    {
         return wktReader.read(wkt);
     }
 }

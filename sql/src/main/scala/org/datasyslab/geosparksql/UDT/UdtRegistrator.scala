@@ -29,8 +29,7 @@ import org.apache.spark.sql.geosparksql.UDT.UdtRegistratorWrapper
 
 object UdtRegistrator {
 
-  def registerAll(): Unit =
-  {
+  def registerAll(): Unit = {
     UdtRegistratorWrapper.registerAll()
   }
 

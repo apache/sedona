@@ -1,6 +1,5 @@
 package org.datasyslab.geospark.spatialPartitioning;
 
-
 import com.vividsolutions.jts.geom.Envelope;
 
 import java.io.Serializable;
@@ -12,7 +11,9 @@ import java.util.List;
 /**
  * see https://en.wikipedia.org/wiki/K-D-B-tree
  */
-public class KDBTree implements Serializable {
+public class KDBTree
+        implements Serializable
+{
 
     private final int maxItemsPerNode;
     private final int maxLevels;
@@ -22,26 +23,31 @@ public class KDBTree implements Serializable {
     private KDBTree[] children;
     private int leafId = 0;
 
-    public KDBTree(int maxItemsPerNode, int maxLevels, Envelope extent) {
+    public KDBTree(int maxItemsPerNode, int maxLevels, Envelope extent)
+    {
         this(maxItemsPerNode, maxLevels, 0, extent);
     }
 
-    private KDBTree(int maxItemsPerNode, int maxLevels, int level, Envelope extent) {
+    private KDBTree(int maxItemsPerNode, int maxLevels, int level, Envelope extent)
+    {
         this.maxItemsPerNode = maxItemsPerNode;
         this.maxLevels = maxLevels;
         this.level = level;
         this.extent = extent;
     }
 
-    public int getItemCount() {
+    public int getItemCount()
+    {
         return items.size();
     }
 
-    public boolean isLeaf() {
+    public boolean isLeaf()
+    {
         return children == null;
     }
 
-    public int getLeafId() {
+    public int getLeafId()
+    {
         if (!isLeaf()) {
             throw new IllegalStateException();
         }
@@ -49,14 +55,17 @@ public class KDBTree implements Serializable {
         return leafId;
     }
 
-    public Envelope getExtent() {
+    public Envelope getExtent()
+    {
         return extent;
     }
 
-    public void insert(Envelope envelope) {
+    public void insert(Envelope envelope)
+    {
         if (items.size() < maxItemsPerNode || level >= maxLevels) {
             items.add(envelope);
-        } else {
+        }
+        else {
             if (children == null) {
                 // Split over longer side
                 boolean splitX = extent.getWidth() > extent.getHeight();
@@ -82,27 +91,34 @@ public class KDBTree implements Serializable {
         }
     }
 
-    public void dropElements() {
-        traverse(new Visitor() {
+    public void dropElements()
+    {
+        traverse(new Visitor()
+        {
             @Override
-            public boolean visit(KDBTree tree) {
+            public boolean visit(KDBTree tree)
+            {
                 tree.items.clear();
                 return true;
             }
         });
     }
 
-    public List<KDBTree> findLeafNodes(final Envelope envelope) {
+    public List<KDBTree> findLeafNodes(final Envelope envelope)
+    {
         final List<KDBTree> matches = new ArrayList<>();
-        traverse(new Visitor() {
+        traverse(new Visitor()
+        {
             @Override
-            public boolean visit(KDBTree tree) {
+            public boolean visit(KDBTree tree)
+            {
                 if (!disjoint(tree.getExtent(), envelope)) {
                     if (tree.isLeaf()) {
                         matches.add(tree);
                     }
                     return true;
-                } else {
+                }
+                else {
                     return false;
                 }
             }
@@ -111,13 +127,16 @@ public class KDBTree implements Serializable {
         return matches;
     }
 
-    private boolean disjoint(Envelope r1, Envelope r2) {
+    private boolean disjoint(Envelope r1, Envelope r2)
+    {
         return !r1.intersects(r2) && !r1.covers(r2) && !r2.covers(r1);
     }
 
-    public interface Visitor {
+    public interface Visitor
+    {
         /**
          * Visits a single node of the tree
+         *
          * @param tree Node to visit
          * @return true to continue traversing the tree; false to stop
          */
@@ -128,7 +147,8 @@ public class KDBTree implements Serializable {
      * Traverses the tree top-down breadth-first and calls the visitor
      * for each node. Stops traversing if a call to Visitor.visit returns false.
      */
-    public void traverse(Visitor visitor) {
+    public void traverse(Visitor visitor)
+    {
         if (!visitor.visit(this)) {
             return;
         }
@@ -140,12 +160,15 @@ public class KDBTree implements Serializable {
         }
     }
 
-    public void assignLeafIds() {
-        traverse(new Visitor() {
+    public void assignLeafIds()
+    {
+        traverse(new Visitor()
+        {
             int id = 0;
 
             @Override
-            public boolean visit(KDBTree tree) {
+            public boolean visit(KDBTree tree)
+            {
                 if (tree.isLeaf()) {
                     tree.leafId = id;
                     id++;
@@ -155,7 +178,8 @@ public class KDBTree implements Serializable {
         });
     }
 
-    private boolean split(boolean splitX) {
+    private boolean split(boolean splitX)
+    {
         final Comparator<Envelope> comparator = splitX ? new XComparator() : new YComparator();
         Collections.sort(items, comparator);
 
@@ -167,16 +191,19 @@ public class KDBTree implements Serializable {
             if (x > extent.getMinX() && x < extent.getMaxX()) {
                 splits = splitAtX(extent, x);
                 splitter = new XSplitter(x);
-            } else {
+            }
+            else {
                 // Too many objects are crowded at the edge of the extent. Can't split.
                 return false;
             }
-        } else {
+        }
+        else {
             double y = middleItem.getMinY();
             if (y > extent.getMinY() && y < extent.getMaxY()) {
                 splits = splitAtY(extent, y);
                 splitter = new YSplitter(y);
-            } else {
+            }
+            else {
                 // Too many objects are crowded at the edge of the extent. Can't split.
                 return false;
             }
@@ -191,17 +218,23 @@ public class KDBTree implements Serializable {
         return true;
     }
 
-    private static final class XComparator implements Comparator<Envelope> {
+    private static final class XComparator
+            implements Comparator<Envelope>
+    {
         @Override
-        public int compare(Envelope o1, Envelope o2) {
+        public int compare(Envelope o1, Envelope o2)
+        {
             double deltaX = o1.getMinX() - o2.getMinX();
             return (int) Math.signum(deltaX != 0 ? deltaX : o1.getMinY() - o2.getMinY());
         }
     }
 
-    private static final class YComparator implements Comparator<Envelope> {
+    private static final class YComparator
+            implements Comparator<Envelope>
+    {
         @Override
-        public int compare(Envelope o1, Envelope o2) {
+        public int compare(Envelope o1, Envelope o2)
+        {
             double deltaY = o1.getMinY() - o2.getMinY();
             return (int) Math.signum(deltaY != 0 ? deltaY : o1.getMinX() - o2.getMinX());
         }
@@ -215,50 +248,61 @@ public class KDBTree implements Serializable {
         boolean split(Envelope envelope);
     }
 
-    private static final class XSplitter implements Splitter {
+    private static final class XSplitter
+            implements Splitter
+    {
         private final double x;
 
-        private XSplitter(double x) {
+        private XSplitter(double x)
+        {
             this.x = x;
         }
 
         @Override
-        public boolean split(Envelope envelope) {
+        public boolean split(Envelope envelope)
+        {
             return envelope.getMinX() <= x;
         }
     }
 
-    private static final class YSplitter implements Splitter {
+    private static final class YSplitter
+            implements Splitter
+    {
         private final double y;
 
-        private YSplitter(double y) {
+        private YSplitter(double y)
+        {
             this.y = y;
         }
 
         @Override
-        public boolean split(Envelope envelope) {
+        public boolean split(Envelope envelope)
+        {
             return envelope.getMinY() <= y;
         }
     }
 
-    private void splitItems(Splitter splitter) {
+    private void splitItems(Splitter splitter)
+    {
         for (Envelope item : items) {
             children[splitter.split(item) ? 0 : 1].insert(item);
         }
     }
 
-    private Envelope[] splitAtX(Envelope envelope, double x) {
-        assert(envelope.getMinX() < x);
-        assert(envelope.getMaxX() > x);
+    private Envelope[] splitAtX(Envelope envelope, double x)
+    {
+        assert (envelope.getMinX() < x);
+        assert (envelope.getMaxX() > x);
         Envelope[] splits = new Envelope[2];
         splits[0] = new Envelope(envelope.getMinX(), x, envelope.getMinY(), envelope.getMaxY());
         splits[1] = new Envelope(x, envelope.getMaxX(), envelope.getMinY(), envelope.getMaxY());
         return splits;
     }
 
-    private Envelope[] splitAtY(Envelope envelope, double y) {
-        assert(envelope.getMinY() < y);
-        assert(envelope.getMaxY() > y);
+    private Envelope[] splitAtY(Envelope envelope, double y)
+    {
+        assert (envelope.getMinY() < y);
+        assert (envelope.getMaxY() > y);
         Envelope[] splits = new Envelope[2];
         splits[0] = new Envelope(envelope.getMinX(), envelope.getMaxX(), envelope.getMinY(), y);
         splits[1] = new Envelope(envelope.getMinX(), envelope.getMaxX(), y, envelope.getMaxY());

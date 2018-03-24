@@ -13,9 +13,13 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import java.io.IOException;
 import java.io.Serializable;
 
-public abstract class ShapeParser implements Serializable {
+public abstract class ShapeParser
+        implements Serializable
+{
 
-    /** The geometry factory. */
+    /**
+     * The geometry factory.
+     */
     protected final GeometryFactory geometryFactory;
 
     /**
@@ -23,7 +27,8 @@ public abstract class ShapeParser implements Serializable {
      *
      * @param geometryFactory the geometry factory
      */
-    protected ShapeParser(GeometryFactory geometryFactory) {
+    protected ShapeParser(GeometryFactory geometryFactory)
+    {
         this.geometryFactory = geometryFactory;
     }
 
@@ -46,8 +51,8 @@ public abstract class ShapeParser implements Serializable {
      */
     protected CoordinateSequence readCoordinates(ShapeReader reader, int numPoints)
     {
-        CoordinateSequence coordinateSequence = geometryFactory.getCoordinateSequenceFactory().create(numPoints,2);
-        for(int i = 0; i < numPoints; ++i){
+        CoordinateSequence coordinateSequence = geometryFactory.getCoordinateSequenceFactory().create(numPoints, 2);
+        for (int i = 0; i < numPoints; ++i) {
             coordinateSequence.setOrdinate(i, 0, reader.readDouble());
             coordinateSequence.setOrdinate(i, 1, reader.readDouble());
         }
@@ -57,7 +62,7 @@ public abstract class ShapeParser implements Serializable {
     protected int[] readOffsets(ShapeReader reader, int numParts, int maxOffset)
     {
         int[] offsets = new int[numParts + 1];
-        for(int i = 0; i < numParts; ++i) {
+        for (int i = 0; i < numParts; ++i) {
             offsets[i] = reader.readInt();
         }
         offsets[numParts] = maxOffset;
