@@ -1,27 +1,8 @@
-/*
- * FILE: ShapefileReader
- * Copyright (c) 2015 - 2018 GeoSpark Development Team
- *
- * MIT License
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
+/**
+ * FILE: ShapefileReader.java
+ * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
  */
 package org.datasyslab.geospark.formatMapper.shapefileParser;
 
@@ -53,37 +34,31 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class ShapefileReader
-{
+public class ShapefileReader {
 
     /**
      * read shapefile in inputPath with default GeometryFactory and return an RDD of Geometry.
-     *
      * @param sc
      * @param inputPath
      * @return
      */
-    public static JavaRDD<Geometry> readToGeometryRDD(JavaSparkContext sc, String inputPath)
-    {
+    public static JavaRDD<Geometry> readToGeometryRDD(JavaSparkContext sc, String inputPath){
         return readShapefile(sc, inputPath, new GeometryFactory());
     }
 
     /**
      * read shapefile in inputPath with customized GeometryFactory and return an RDD of Geometry.
-     *
      * @param sc
      * @param inputPath
      * @param geometryFactory
      * @return
      */
-    public static JavaRDD<Geometry> readToGeometryRDD(JavaSparkContext sc, String inputPath, final GeometryFactory geometryFactory)
-    {
+    public static JavaRDD<Geometry> readToGeometryRDD(JavaSparkContext sc, String inputPath, final GeometryFactory geometryFactory){
         return readShapefile(sc, inputPath, geometryFactory);
     }
 
     /**
      * read shapefiles in inputPath and return an RDD of Geometry.
-     *
      * @param sc
      * @param inputPath
      * @param geometryFactory
@@ -102,12 +77,9 @@ public class ShapefileReader
                 PrimitiveShape.class,
                 sc.hadoopConfiguration()
         );
-        return shapePrimitiveRdd.map(new Function<Tuple2<ShapeKey, PrimitiveShape>, Geometry>()
-        {
+        return shapePrimitiveRdd.map(new Function<Tuple2<ShapeKey, PrimitiveShape>, Geometry>() {
             @Override
-            public Geometry call(Tuple2<ShapeKey, PrimitiveShape> primitiveTuple)
-                    throws Exception
-            {
+            public Geometry call(Tuple2<ShapeKey, PrimitiveShape> primitiveTuple) throws Exception {
                 // parse bytes to shape
                 return primitiveTuple._2().getShape(geometryFactory);
             }
@@ -123,10 +95,9 @@ public class ShapefileReader
     /**
      * read and merge bound boxes of all shapefiles user input, if there is no, leave BoundBox null;
      */
-    public static BoundBox readBoundBox(JavaSparkContext sc, String inputPath)
-    {
+    public static BoundBox readBoundBox(JavaSparkContext sc, String inputPath){
         // read bound boxes into memory
-        JavaPairRDD<Long, BoundBox> bounds = sc.newAPIHadoopFile(
+        JavaPairRDD<Long, BoundBox>  bounds = sc.newAPIHadoopFile(
                 inputPath,
                 BoundaryInputFormat.class,
                 Long.class,
@@ -134,21 +105,18 @@ public class ShapefileReader
                 sc.hadoopConfiguration()
         );
         // merge all into one
-        bounds = bounds.reduceByKey(new Function2<BoundBox, BoundBox, BoundBox>()
-        {
+        bounds = bounds.reduceByKey(new Function2<BoundBox, BoundBox, BoundBox>(){
             @Override
-            public BoundBox call(BoundBox box1, BoundBox box2)
-                    throws Exception
-            {
+            public BoundBox call(BoundBox box1, BoundBox box2) throws Exception {
                 return BoundBox.mergeBoundBox(box1, box2);
             }
         });
         // if there is a result assign it to variable : boundBox
-        if (bounds.count() > 0) {
+        if(bounds.count() > 0){
             return new BoundBox(bounds.collect().get(0)._2());
-        }
-        else { return null; }
+        }else return null;
     }
+
 
     /**
      *
@@ -156,184 +124,177 @@ public class ShapefileReader
      *
      */
 
+
     /**
      * read shapefile and return as an PolygonRDD
-     *
      * @param sc
      * @param inputPath
      * @return
      */
-    public static PolygonRDD readToPolygonRDD(JavaSparkContext sc, String inputPath)
-    {
+    public static PolygonRDD readToPolygonRDD(JavaSparkContext sc, String inputPath){
         return geometryToPolygon(readToGeometryRDD(sc, inputPath));
     }
 
     /**
      * read shapefile with customized GeometryFactory and return as an PolygonRDD
-     *
      * @param sc
      * @param inputPath
      * @param geometryFactory
      * @return
      */
-    public static PolygonRDD readToPolygonRDD(JavaSparkContext sc, String inputPath, final GeometryFactory geometryFactory)
-    {
+    public static PolygonRDD readToPolygonRDD(JavaSparkContext sc, String inputPath, final GeometryFactory geometryFactory){
         return geometryToPolygon(readToGeometryRDD(sc, inputPath, geometryFactory));
     }
 
     /**
      * convert geometry rdd to
-     *
      * @param geometryRDD
      * @return
      */
-    public static PolygonRDD geometryToPolygon(JavaRDD<Geometry> geometryRDD)
-    {
-        return new PolygonRDD(geometryRDD.flatMap(new FlatMapFunction<Geometry, Polygon>()
+    public static PolygonRDD geometryToPolygon(JavaRDD<Geometry> geometryRDD){
+        return new PolygonRDD( geometryRDD.flatMap(new FlatMapFunction<Geometry, Polygon>()
         {
             @Override
-            public Iterator<Polygon> call(Geometry spatialObject)
-                    throws Exception
-            {
+            public Iterator<Polygon> call(Geometry spatialObject) throws Exception {
                 List<Polygon> result = new ArrayList<Polygon>();
-                if (spatialObject instanceof MultiPolygon) {
-                    MultiPolygon multiObjects = (MultiPolygon) spatialObject;
-                    for (int i = 0; i < multiObjects.getNumGeometries(); i++) {
+                if (spatialObject instanceof MultiPolygon)
+                {
+                    MultiPolygon multiObjects = (MultiPolygon)spatialObject;
+                    for (int i=0;i<multiObjects.getNumGeometries();i++)
+                    {
                         Polygon oneObject = (Polygon) multiObjects.getGeometryN(i);
                         oneObject.setUserData(multiObjects.getUserData());
                         result.add(oneObject);
                     }
                 }
-                else if (spatialObject instanceof Polygon) {
+                else if (spatialObject instanceof Polygon)
+                {
                     result.add((Polygon) spatialObject);
                 }
-                else {
-                    throw new Exception("[ShapefileRDD][getPolygonRDD] the object type is not Polygon or MultiPolygon type. It is " + spatialObject.getGeometryType());
+                else
+                {
+                    throw new Exception("[ShapefileRDD][getPolygonRDD] the object type is not Polygon or MultiPolygon type. It is "+spatialObject.getGeometryType());
                 }
                 return result.iterator();
             }
+
         }));
     }
 
     /**
      * read shapefile and return as an PointRDD
-     *
      * @param sc
      * @param inputPath
      * @return
      */
-    public static PointRDD readToPointRDD(JavaSparkContext sc, String inputPath)
-    {
+    public static PointRDD readToPointRDD(JavaSparkContext sc, String inputPath){
         return geometryToPoint(readToGeometryRDD(sc, inputPath));
     }
 
     /**
      * read shapefile with customized GeometryFactory and return as an PointRDD
-     *
      * @param sc
      * @param inputPath
      * @param geometryFactory
      * @return
      */
-    public static PointRDD readToPointRDD(JavaSparkContext sc, String inputPath, final GeometryFactory geometryFactory)
-    {
+    public static PointRDD readToPointRDD(JavaSparkContext sc, String inputPath, final GeometryFactory geometryFactory){
         return geometryToPoint(readToGeometryRDD(sc, inputPath, geometryFactory));
     }
 
     /**
      * convert geometry rdd to
-     *
      * @param geometryRDD
      * @return
      */
-    public static PointRDD geometryToPoint(JavaRDD<Geometry> geometryRDD)
-    {
+    public static PointRDD geometryToPoint(JavaRDD<Geometry> geometryRDD){
         return new PointRDD(
                 geometryRDD.flatMap(new FlatMapFunction<Geometry, Point>()
                 {
                     @Override
-                    public Iterator<Point> call(Geometry spatialObject)
-                            throws Exception
-                    {
+                    public Iterator<Point> call(Geometry spatialObject) throws Exception {
                         List<Point> result = new ArrayList<Point>();
-                        if (spatialObject instanceof MultiPoint) {
-                            MultiPoint multiObjects = (MultiPoint) spatialObject;
-                            for (int i = 0; i < multiObjects.getNumGeometries(); i++) {
+                        if(spatialObject instanceof MultiPoint)
+                        {
+                            MultiPoint multiObjects = (MultiPoint)spatialObject;
+                            for (int i=0;i<multiObjects.getNumGeometries();i++)
+                            {
                                 Point oneObject = (Point) multiObjects.getGeometryN(i);
                                 oneObject.setUserData(multiObjects.getUserData());
                                 result.add(oneObject);
                             }
                         }
-                        else if (spatialObject instanceof Point) {
+                        else if(spatialObject instanceof Point)
+                        {
                             result.add((Point) spatialObject);
                         }
-                        else {
-                            throw new Exception("[ShapefileRDD][getPointRDD] the object type is not Point or MultiPoint type. It is " + spatialObject.getGeometryType());
+                        else
+                        {
+                            throw new Exception("[ShapefileRDD][getPointRDD] the object type is not Point or MultiPoint type. It is "+spatialObject.getGeometryType());
                         }
                         return result.iterator();
                     }
+
                 })
         );
     }
 
     /**
      * read shapefile and return as an LineStringRDD
-     *
      * @param sc
      * @param inputPath
      * @return
      */
-    public static LineStringRDD readToLineStringRDD(JavaSparkContext sc, String inputPath)
-    {
+    public static LineStringRDD readToLineStringRDD(JavaSparkContext sc, String inputPath){
         return geometryToLineString(readToGeometryRDD(sc, inputPath));
     }
 
     /**
      * read shapefile with customized GeometryFactory and return as an LineStringRDD
-     *
      * @param sc
      * @param inputPath
      * @param geometryFactory
      * @return
      */
-    public static LineStringRDD readToLineStringRDD(JavaSparkContext sc, String inputPath, final GeometryFactory geometryFactory)
-    {
+    public static LineStringRDD readToLineStringRDD(JavaSparkContext sc, String inputPath, final GeometryFactory geometryFactory){
         return geometryToLineString(readToGeometryRDD(sc, inputPath, geometryFactory));
     }
 
     /**
      * convert geometry rdd to
-     *
      * @param geometryRDD
      * @return
      */
-    public static LineStringRDD geometryToLineString(JavaRDD<Geometry> geometryRDD)
-    {
+    public static LineStringRDD geometryToLineString(JavaRDD<Geometry> geometryRDD){
         return new LineStringRDD(
                 geometryRDD.flatMap(new FlatMapFunction<Geometry, LineString>()
                 {
                     @Override
-                    public Iterator<LineString> call(Geometry spatialObject)
-                            throws Exception
-                    {
+                    public Iterator<LineString> call(Geometry spatialObject) throws Exception {
                         List<LineString> result = new ArrayList<LineString>();
-                        if (spatialObject instanceof MultiLineString) {
-                            MultiLineString multiObjects = (MultiLineString) spatialObject;
-                            for (int i = 0; i < multiObjects.getNumGeometries(); i++) {
+                        if(spatialObject instanceof MultiLineString)
+                        {
+                            MultiLineString multiObjects = (MultiLineString)spatialObject;
+                            for (int i=0;i<multiObjects.getNumGeometries();i++)
+                            {
                                 LineString oneObject = (LineString) multiObjects.getGeometryN(i);
                                 oneObject.setUserData(multiObjects.getUserData());
                                 result.add(oneObject);
                             }
                         }
-                        else if (spatialObject instanceof LineString) {
+                        else if(spatialObject instanceof LineString)
+                        {
                             result.add((LineString) spatialObject);
                         }
-                        else {
-                            throw new Exception("[ShapefileRDD][getLineStringRDD] the object type is not LineString or MultiLineString type. It is " + spatialObject.getGeometryType());
+                        else
+                        {
+                            throw new Exception("[ShapefileRDD][getLineStringRDD] the object type is not LineString or MultiLineString type. It is "+spatialObject.getGeometryType());
                         }
                         return result.iterator();
                     }
+
                 })
         );
     }
+
 }

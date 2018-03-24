@@ -1,27 +1,8 @@
-/*
- * FILE: CircleTest
- * Copyright (c) 2015 - 2018 GeoSpark Development Team
- *
- * MIT License
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
+/**
+ * FILE: CircleTest.java
+ * PATH: org.datasyslab.geospark.geometryObjects.CircleTest.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
  */
 package org.datasyslab.geospark.geometryObjects;
 
@@ -40,29 +21,24 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 // TODO: Auto-generated Javadoc
-
 /**
  * The Class CircleTest.
  */
-public class CircleTest
-{
-    /**
-     * The geom fact.
-     */
+public class CircleTest {
+    /** The geom fact. */
     private static GeometryFactory geomFact = new GeometryFactory();
     private static WKTReader wktReader = new WKTReader();
 
-    /**
+	/**
      * Test get center.
      *
      * @throws Exception the exception
      */
     @Test
-    public void testGetCenter()
-            throws Exception
+    public void testGetCenter() throws Exception 
     {
-        Circle circle = new Circle(makePoint(0.0, 0.0), 0.1);
-        assertEquals(makePoint(0.0, 0.0).getCoordinate(), circle.getCenterPoint());
+        Circle circle = new Circle(makePoint(0.0,0.0), 0.1);
+        assertEquals(makePoint(0.0,0.0).getCoordinate(), circle.getCenterPoint());
     }
 
     /**
@@ -71,10 +47,8 @@ public class CircleTest
      * @throws Exception the exception
      */
     @Test
-    public void testGetRadius()
-            throws Exception
-    {
-        Circle circle = new Circle(makePoint(0.0, 0.0), 0.1);
+    public void testGetRadius() throws Exception {
+        Circle circle = new Circle(makePoint(0.0,0.0), 0.1);
         assertEquals(0.1, circle.getRadius(), 0.01);
     }
 
@@ -84,10 +58,8 @@ public class CircleTest
      * @throws Exception the exception
      */
     @Test
-    public void testSetRadius()
-            throws Exception
-    {
-        Circle circle = new Circle(makePoint(0.0, 0.0), 0.1);
+    public void testSetRadius() throws Exception {
+        Circle circle = new Circle(makePoint(0.0,0.0), 0.1);
         circle.setRadius(0.2);
         assertEquals(circle.getRadius(), 0.2, 0.01);
     }
@@ -98,10 +70,8 @@ public class CircleTest
      * @throws Exception the exception
      */
     @Test
-    public void testGetEnvelopeInternal()
-            throws Exception
-    {
-        Circle circle = new Circle(makePoint(0.0, 0.0), 0.1);
+    public void testGetEnvelopeInternal() throws Exception {
+        Circle circle = new Circle(makePoint(0.0,0.0), 0.1);
         assertEquals(new Envelope(-0.1, 0.1, -0.1, 0.1), circle.getEnvelopeInternal());
     }
 
@@ -111,9 +81,7 @@ public class CircleTest
      * @throws Exception the exception
      */
     @Test
-    public void testCovers()
-            throws Exception
-    {
+    public void testCovers() throws Exception {
         Circle circle = new Circle(makePoint(0.0, 0.0), 0.5);
 
         assertTrue(circle.covers(makePoint(0.0, 0.0)));
@@ -131,11 +99,11 @@ public class CircleTest
         assertFalse(circle.covers(parseWkt("POLYGON ((0.4 0.4, 0.4 0.45, 0.45 0.45, 0.45 0.4, 0.4 0.4))")));
 
         assertTrue(circle.covers(parseWkt("MULTIPOLYGON (((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1)), " +
-                "((-0.5 0, 0 0.5, 0.5 0, -0.5 0)))")));
+            "((-0.5 0, 0 0.5, 0.5 0, -0.5 0)))")));
         assertFalse(circle.covers(parseWkt("MULTIPOLYGON (((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1)), " +
-                "((0 0, 0 1, 1 1, 1 0, 0 0)))")));
+            "((0 0, 0 1, 1 1, 1 0, 0 0)))")));
         assertFalse(circle.covers(parseWkt("MULTIPOLYGON (((0.4 0.4, 0.4 0.45, 0.45 0.45, 0.45 0.4, 0.4 0.4)), " +
-                "((0 0, 0 1, 1 1, 1 0, 0 0)))")));
+            "((0 0, 0 1, 1 1, 1 0, 0 0)))")));
 
         assertTrue(circle.covers(parseWkt("LINESTRING (-0.1 0, 0.2 0.3)")));
         assertTrue(circle.covers(parseWkt("LINESTRING (-0.5 0, 0 0.5, 0.5 0)")));
@@ -153,10 +121,8 @@ public class CircleTest
      * @throws Exception the exception
      */
     @Test
-    public void testIntersects()
-            throws Exception
-    {
-        Circle circle = new Circle(makePoint(0.0, 0.0), 0.5);
+    public void testIntersects() throws Exception {
+        Circle circle = new Circle(makePoint(0.0,0.0), 0.5);
         assertTrue(circle.intersects(makePoint(0, 0)));
         assertTrue(circle.intersects(makePoint(0.1, 0.2)));
         assertFalse(circle.intersects(makePoint(0.4, 0.4)));
@@ -175,20 +141,20 @@ public class CircleTest
         assertTrue(circle.intersects(parseWkt("POLYGON ((-1 -1, -1 1, 1 1, 1.5 0.5, 1 -1, -1 -1))")));
         // Polygon with a hole intersects the circle, but doesn't contain circle center
         assertTrue(circle.intersects(parseWkt("POLYGON ((-1 -1, -1 1, 1 1, 1 -1, -1 -1), " +
-                "(-0.1 -0.1, 0.1 -0.1, 0.1 0.1, -0.1 0.1, -0.1 -0.1))")));
+            "(-0.1 -0.1, 0.1 -0.1, 0.1 0.1, -0.1 0.1, -0.1 -0.1))")));
 
         // No intersection
         assertFalse(circle.intersects(parseWkt("POLYGON ((0.4 0.4, 0.4 0.45, 0.45 0.45, 0.45 0.4, 0.4 0.4))")));
         assertFalse(circle.intersects(parseWkt("POLYGON ((-1 0, -1 1, 0 1, 0 2, -1 2, -1 0))")));
         assertFalse(circle.intersects(parseWkt("POLYGON ((-1 -1, -1 1, 1 1, 1 -1, -1 -1), " +
-                "(-0.6 -0.6, 0.6 -0.6, 0.6 0.6, -0.6 0.6, -0.6 -0.6))")));
+            "(-0.6 -0.6, 0.6 -0.6, 0.6 0.6, -0.6 0.6, -0.6 -0.6))")));
 
         assertTrue(circle.intersects(parseWkt("MULTIPOLYGON (((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1)), " +
-                "((-0.5 0, 0 0.5, 0.5 0, -0.5 0)))")));
+            "((-0.5 0, 0 0.5, 0.5 0, -0.5 0)))")));
         assertTrue(circle.intersects(parseWkt("MULTIPOLYGON (((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1)), " +
-                "((-1 0, -1 1, 0 1, 0 2, -1 2, -1 0)))")));
+            "((-1 0, -1 1, 0 1, 0 2, -1 2, -1 0)))")));
         assertFalse(circle.intersects(parseWkt("MULTIPOLYGON (((0.4 0.4, 0.4 0.45, 0.45 0.45, 0.45 0.4, 0.4 0.4)), " +
-                "((-1 0, -1 1, 0 1, 0 2, -1 2, -1 0)))")));
+            "((-1 0, -1 1, 0 1, 0 2, -1 2, -1 0)))")));
 
         // Line intersects at 2 points
         assertTrue(circle.intersects(parseWkt("LINESTRING (-1 -1, 1 1)")));
@@ -206,7 +172,7 @@ public class CircleTest
         assertTrue(circle.intersects(parseWkt("MULTILINESTRING ((-1 -1, 1 1), (0.4 0.4, 1 1))")));
         assertFalse(circle.intersects(parseWkt("MULTILINESTRING ((0.1 0.5, 1 0.5), (0.4 0.4, 1 1))")));
     }
-
+    
     /**
      * Test equality.
      */
@@ -214,22 +180,19 @@ public class CircleTest
     public void testEquality()
     {
         assertEquals(
-                new Circle(makePoint(-112.574945, 45.987772), 0.01),
-                new Circle(makePoint(-112.574945, 45.987772), 0.01));
+            new Circle(makePoint(-112.574945, 45.987772), 0.01),
+            new Circle(makePoint(-112.574945, 45.987772), 0.01));
 
         assertNotEquals(
-                new Circle(makePoint(-112.574945, 45.987772), 0.01),
-                new Circle(makePoint(-112.574942, 45.987772), 0.01));
+            new Circle(makePoint(-112.574945, 45.987772), 0.01),
+            new Circle(makePoint(-112.574942, 45.987772), 0.01));
     }
 
-    private Point makePoint(double x, double y)
-    {
+    private Point makePoint(double x, double y) {
         return geomFact.createPoint(new Coordinate(x, y));
     }
 
-    private Geometry parseWkt(String wkt)
-            throws ParseException
-    {
+    private Geometry parseWkt(String wkt) throws ParseException {
         return wktReader.read(wkt);
     }
 }

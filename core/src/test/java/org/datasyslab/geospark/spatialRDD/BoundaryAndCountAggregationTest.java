@@ -1,27 +1,8 @@
-/*
- * FILE: BoundaryAndCountAggregationTest
- * Copyright (c) 2015 - 2018 GeoSpark Development Team
- *
- * MIT License
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
+/**
+ * FILE: BoundaryAndCountAggregationTest.java
+ * PATH: org.datasyslab.geospark.spatialRDD.BoundaryAndCountAggregationTest.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
  */
 package org.datasyslab.geospark.spatialRDD;
 
@@ -34,15 +15,12 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class BoundaryAndCountAggregationTest
-{
+public class BoundaryAndCountAggregationTest {
 
     private final GeometryFactory factory = new GeometryFactory();
 
     @Test
-    public void testAdd()
-            throws Exception
-    {
+    public void testAdd() throws Exception {
         StatCalculator agg = null;
 
         agg = StatCalculator.add(agg, makePoint(0, 1));
@@ -63,8 +41,7 @@ public class BoundaryAndCountAggregationTest
     }
 
     @Test
-    public void testCombine()
-            throws Exception
+    public void testCombine() throws Exception
     {
         StatCalculator agg = StatCalculator.combine(null, new StatCalculator(new Envelope(0, 1, 0, 1), 10));
         assertEquals(10, agg.getCount());
@@ -87,4 +64,5 @@ public class BoundaryAndCountAggregationTest
     {
         return factory.createPoint(new Coordinate(x, y));
     }
+
 }

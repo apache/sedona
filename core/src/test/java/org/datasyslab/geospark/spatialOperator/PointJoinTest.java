@@ -1,27 +1,8 @@
-/*
- * FILE: PointJoinTest
- * Copyright (c) 2015 - 2018 GeoSpark Development Team
- *
- * MIT License
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
+/**
+ * FILE: PointJoinTest.java
+ * PATH: org.datasyslab.geospark.spatialOperator.PointJoinTest.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
 
@@ -49,29 +30,25 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
-public class PointJoinTest
-        extends JoinTestBase
-{
+public class PointJoinTest extends JoinTestBase {
 
     private static long expectedRectangleMatchCount;
     private static long expectedRectangleMatchWithOriginalDuplicatesCount;
     private static long expectedPolygonMatchCount;
     private static long expectedPolygonMatchWithOriginalDuplicatesCount;
 
-    public PointJoinTest(GridType gridType, boolean useLegacyPartitionAPIs, int numPartitions)
-    {
+    public PointJoinTest(GridType gridType, boolean useLegacyPartitionAPIs, int numPartitions) {
         super(gridType, useLegacyPartitionAPIs, numPartitions);
     }
 
     @Parameterized.Parameters
-    public static Collection testParams()
-    {
+    public static Collection testParams() {
         return Arrays.asList(new Object[][] {
-                {GridType.RTREE, true, 11},
-                {GridType.RTREE, false, 11},
-                {GridType.QUADTREE, true, 11},
-                {GridType.QUADTREE, false, 11},
-                {GridType.KDBTREE, false, 11},
+            { GridType.RTREE, true, 11 },
+            { GridType.RTREE, false, 11 },
+            { GridType.QUADTREE, true, 11 },
+            { GridType.QUADTREE, false, 11},
+            { GridType.KDBTREE, false, 11},
         });
     }
 
@@ -79,23 +56,21 @@ public class PointJoinTest
      * Once executed before all.
      */
     @BeforeClass
-    public static void onceExecutedBeforeAll()
-    {
-        initialize("PointJoin", "point.test.properties");
+    public static void onceExecutedBeforeAll() {
+    	initialize("PointJoin", "point.test.properties");
         expectedRectangleMatchCount = Long.parseLong(prop.getProperty("rectangleMatchCount"));
         expectedRectangleMatchWithOriginalDuplicatesCount =
-                Long.parseLong(prop.getProperty("rectangleMatchWithOriginalDuplicatesCount"));
+            Long.parseLong(prop.getProperty("rectangleMatchWithOriginalDuplicatesCount"));
         expectedPolygonMatchCount = Long.parseLong(prop.getProperty("polygonMatchCount"));
         expectedPolygonMatchWithOriginalDuplicatesCount =
-                Long.parseLong(prop.getProperty("polygonMatchWithOriginalDuplicatesCount"));
+            Long.parseLong(prop.getProperty("polygonMatchWithOriginalDuplicatesCount"));
     }
 
     /**
      * Tear down.
      */
     @AfterClass
-    public static void TearDown()
-    {
+    public static void TearDown() {
         sc.stop();
     }
 
@@ -105,9 +80,7 @@ public class PointJoinTest
      * @throws Exception the exception
      */
     @Test
-    public void testNestedLoopWithRectanges()
-            throws Exception
-    {
+    public void testNestedLoopWithRectanges() throws Exception {
         RectangleRDD queryRDD = createRectangleRDD();
         testNestedLoopInt(queryRDD, expectedRectangleMatchCount);
     }
@@ -118,21 +91,17 @@ public class PointJoinTest
      * @throws Exception the exception
      */
     @Test
-    public void testNestedLoopWithPolygons()
-            throws Exception
-    {
+    public void testNestedLoopWithPolygons() throws Exception {
         PolygonRDD queryRDD = createPolygonRDD();
         testNestedLoopInt(queryRDD, expectedPolygonMatchCount);
     }
 
-    private void testNestedLoopInt(SpatialRDD<Polygon> queryRDD, long expectedCount)
-            throws Exception
-    {
+    private void testNestedLoopInt(SpatialRDD<Polygon> queryRDD, long expectedCount) throws Exception {
         PointRDD spatialRDD = createPointRDD();
 
         partitionRdds(queryRDD, spatialRDD);
 
-        List<Tuple2<Polygon, HashSet<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, false, true).collect();
+        List<Tuple2<Polygon, HashSet<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD,false,true).collect();
 
         sanityCheckJoinResults(result);
         assertEquals(expectedCount, countJoinResults(result));
@@ -144,9 +113,7 @@ public class PointJoinTest
      * @throws Exception the exception
      */
     @Test
-    public void testRTreeWithRectanges()
-            throws Exception
-    {
+    public void testRTreeWithRectanges() throws Exception {
         RectangleRDD queryRDD = createRectangleRDD();
         testIndexInt(queryRDD, IndexType.RTREE, expectedRectangleMatchCount);
     }
@@ -157,9 +124,7 @@ public class PointJoinTest
      * @throws Exception the exception
      */
     @Test
-    public void testRTreeWithPolygons()
-            throws Exception
-    {
+    public void testRTreeWithPolygons() throws Exception {
         PolygonRDD queryRDD = createPolygonRDD();
         testIndexInt(queryRDD, IndexType.RTREE, expectedPolygonMatchCount);
     }
@@ -170,9 +135,7 @@ public class PointJoinTest
      * @throws Exception the exception
      */
     @Test
-    public void testQuadTreeWithRectanges()
-            throws Exception
-    {
+    public void testQuadTreeWithRectanges() throws Exception {
         RectangleRDD queryRDD = createRectangleRDD();
         testIndexInt(queryRDD, IndexType.QUADTREE, expectedRectangleMatchCount);
     }
@@ -183,50 +146,40 @@ public class PointJoinTest
      * @throws Exception the exception
      */
     @Test
-    public void testQuadTreeWithPolygons()
-            throws Exception
-    {
+    public void testQuadTreeWithPolygons() throws Exception {
         PolygonRDD queryRDD = createPolygonRDD();
         testIndexInt(queryRDD, IndexType.QUADTREE, expectedPolygonMatchCount);
     }
 
-    private void testIndexInt(SpatialRDD<Polygon> queryRDD, IndexType indexType, long expectedCount)
-            throws Exception
-    {
+    private void testIndexInt(SpatialRDD<Polygon> queryRDD, IndexType indexType, long expectedCount) throws Exception {
         PointRDD spatialRDD = createPointRDD();
 
         partitionRdds(queryRDD, spatialRDD);
         spatialRDD.buildIndex(indexType, true);
 
-        List<Tuple2<Polygon, HashSet<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, false, true).collect();
+        List<Tuple2<Polygon, HashSet<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD,false,true).collect();
 
         sanityCheckJoinResults(result);
         assertEquals(expectedCount, countJoinResults(result));
     }
 
     @Test
-    public void testDynamicRTreeWithRectangles()
-            throws Exception
-    {
+    public void testDynamicRTreeWithRectangles() throws Exception {
         final RectangleRDD rectangleRDD = createRectangleRDD();
         final long expectedCount = expectToPreserveOriginalDuplicates()
-                ? expectedRectangleMatchWithOriginalDuplicatesCount : expectedRectangleMatchCount;
+            ? expectedRectangleMatchWithOriginalDuplicatesCount : expectedRectangleMatchCount;
         testDynamicRTreeInt(rectangleRDD, IndexType.RTREE, expectedCount);
     }
 
     @Test
-    public void testDynamicRTreeWithPolygons()
-            throws Exception
-    {
+    public void testDynamicRTreeWithPolygons() throws Exception {
         PolygonRDD polygonRDD = createPolygonRDD();
         final long expectedCount = expectToPreserveOriginalDuplicates()
-                ? expectedPolygonMatchWithOriginalDuplicatesCount : expectedPolygonMatchCount;
+            ? expectedPolygonMatchWithOriginalDuplicatesCount : expectedPolygonMatchCount;
         testDynamicRTreeInt(polygonRDD, IndexType.RTREE, expectedCount);
     }
 
-    private void testDynamicRTreeInt(SpatialRDD<Polygon> queryRDD, IndexType indexType, long expectedCount)
-            throws Exception
-    {
+    private void testDynamicRTreeInt(SpatialRDD<Polygon> queryRDD, IndexType indexType, long expectedCount) throws Exception {
         PointRDD spatialRDD = createPointRDD();
 
         partitionRdds(queryRDD, spatialRDD);
@@ -238,18 +191,15 @@ public class PointJoinTest
         assertEquals(expectedCount, results.size());
     }
 
-    private RectangleRDD createRectangleRDD()
-    {
+    private RectangleRDD createRectangleRDD() {
         return createRectangleRDD(InputLocationQueryWindow);
     }
 
-    private PolygonRDD createPolygonRDD()
-    {
+    private PolygonRDD createPolygonRDD() {
         return createPolygonRDD(InputLocationQueryPolygon);
     }
 
-    private PointRDD createPointRDD()
-    {
+    private PointRDD createPointRDD() {
         return createPointRDD(InputLocation);
     }
 }

@@ -1,59 +1,29 @@
-/*
- * FILE: FieldDescriptor
- * Copyright (c) 2015 - 2018 GeoSpark Development Team
- *
- * MIT License
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
+/**
+ * FILE: FieldDescriptor.java
+ * PATH: org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.FieldDescriptor.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
  */
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf;
 
 import java.io.Serializable;
 
 // TODO: Auto-generated Javadoc
-
 /**
  * The Class FieldDescriptor.
  */
-public class FieldDescriptor
-        implements Serializable
-{
+public class FieldDescriptor implements Serializable{
 
-    /**
-     * field name.
-     */
+    /**  field name. */
     private String filedName = null;
 
-    /**
-     * field type.
-     */
+    /**  field type. */
     private byte fieldType = 0;
 
-    /**
-     * field length.
-     */
+    /**  field length. */
     private int fieldLength = 0;
 
-    /**
-     * decimal count.
-     */
+    /**  decimal count. */
     private byte fieldDecimalCount = 0;
 
     /**
@@ -61,8 +31,7 @@ public class FieldDescriptor
      *
      * @return the filed name
      */
-    public String getFiledName()
-    {
+    public String getFiledName() {
         return filedName;
     }
 
@@ -71,8 +40,7 @@ public class FieldDescriptor
      *
      * @param filedName the new filed name
      */
-    public void setFiledName(String filedName)
-    {
+    public void setFiledName(String filedName) {
         this.filedName = filedName;
     }
 
@@ -81,8 +49,7 @@ public class FieldDescriptor
      *
      * @return the field type
      */
-    public byte getFieldType()
-    {
+    public byte getFieldType() {
         return fieldType;
     }
 
@@ -91,8 +58,7 @@ public class FieldDescriptor
      *
      * @param fieldType the new field type
      */
-    public void setFieldType(byte fieldType)
-    {
+    public void setFieldType(byte fieldType) {
         this.fieldType = fieldType;
     }
 
@@ -101,8 +67,7 @@ public class FieldDescriptor
      *
      * @return the field length
      */
-    public int getFieldLength()
-    {
+    public int getFieldLength() {
         return fieldLength;
     }
 
@@ -111,8 +76,7 @@ public class FieldDescriptor
      *
      * @param fieldLength the new field length
      */
-    public void setFieldLength(int fieldLength)
-    {
+    public void setFieldLength(int fieldLength) {
         this.fieldLength = fieldLength;
     }
 
@@ -121,8 +85,7 @@ public class FieldDescriptor
      *
      * @return the field decimal count
      */
-    public byte getFieldDecimalCount()
-    {
+    public byte getFieldDecimalCount() {
         return fieldDecimalCount;
     }
 
@@ -131,8 +94,7 @@ public class FieldDescriptor
      *
      * @param fieldDecimalCount the new field decimal count
      */
-    public void setFieldDecimalCount(byte fieldDecimalCount)
-    {
+    public void setFieldDecimalCount(byte fieldDecimalCount) {
         this.fieldDecimalCount = fieldDecimalCount;
     }
 }

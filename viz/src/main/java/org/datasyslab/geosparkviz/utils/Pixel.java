@@ -1,69 +1,35 @@
-/*
- * FILE: Pixel
- * Copyright (c) 2015 - 2018 GeoSpark Development Team
- *
- * MIT License
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
+/**
+ * FILE: Pixel.java
+ * PATH: org.datasyslab.geosparkviz.utils.Pixel.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
  */
 package org.datasyslab.geosparkviz.utils;
 
 import java.io.Serializable;
 
 // TODO: Auto-generated Javadoc
-
 /**
  * The Class Pixel.
  */
-public class Pixel
-        implements Serializable
-{
-
-    /**
-     * The x.
-     */
+public class Pixel implements Serializable{
+    
+    /** The x. */
     private int x;
-
-    /**
-     * The y.
-     */
+    
+    /** The y. */
     private int y;
 
-    /**
-     * The resolution X.
-     */
+    /** The resolution X. */
     private int resolutionX;
-
-    /**
-     * The resolution Y.
-     */
+    
+    /** The resolution Y. */
     private int resolutionY;
-
-    /**
-     * The is duplicate.
-     */
+    
+    /** The is duplicate. */
     private boolean isDuplicate = false;
-
-    /**
-     * The current partition id.
-     */
+    
+    /** The current partition id. */
     private int currentPartitionId = -1;
 
     /**
@@ -80,8 +46,8 @@ public class Pixel
     {
         this.x = x;
         this.y = y;
-        this.resolutionX = resolutionX;
-        this.resolutionY = resolutionY;
+        this.resolutionX=resolutionX;
+        this.resolutionY=resolutionY;
         this.isDuplicate = isDuplicate;
         this.currentPartitionId = currentPartitionId;
     }
@@ -98,17 +64,16 @@ public class Pixel
     {
         this.x = x;
         this.y = y;
-        this.resolutionX = resolutionX;
-        this.resolutionY = resolutionY;
+        this.resolutionX=resolutionX;
+        this.resolutionY=resolutionY;
     }
-
+    
     /**
      * Checks if is duplicate.
      *
      * @return true, if is duplicate
      */
-    public boolean isDuplicate()
-    {
+    public boolean isDuplicate() {
         return isDuplicate;
     }
 
@@ -117,8 +82,7 @@ public class Pixel
      *
      * @param duplicate the new duplicate
      */
-    public void setDuplicate(boolean duplicate)
-    {
+    public void setDuplicate(boolean duplicate) {
         isDuplicate = duplicate;
     }
 
@@ -127,8 +91,7 @@ public class Pixel
      *
      * @return the current partition id
      */
-    public int getCurrentPartitionId()
-    {
+    public int getCurrentPartitionId() {
         return currentPartitionId;
     }
 
@@ -137,8 +100,7 @@ public class Pixel
      *
      * @param currentPartitionId the new current partition id
      */
-    public void setCurrentPartitionId(int currentPartitionId)
-    {
+    public void setCurrentPartitionId(int currentPartitionId) {
         this.currentPartitionId = currentPartitionId;
     }
 
@@ -147,8 +109,7 @@ public class Pixel
      *
      * @return the x
      */
-    public int getX()
-    {
+    public int getX() {
         return x;
     }
 
@@ -157,18 +118,15 @@ public class Pixel
      *
      * @return the y
      */
-    public int getY()
-    {
+    public int getY() {
         return y;
     }
 
-    public int getResolutionX()
-    {
+    public int getResolutionX() {
         return resolutionX;
     }
 
-    public int getResolutionY()
-    {
+    public int getResolutionY() {
         return resolutionY;
     }
 
@@ -176,8 +134,7 @@ public class Pixel
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(Object o)
-    {
+    public boolean equals(Object o) {
 
         /*
         Pixel anotherObject = (Pixel) o;
@@ -187,12 +144,12 @@ public class Pixel
         }
         else return false;
         */
-        return this.hashCode() == o.hashCode();
+        return this.hashCode()==o.hashCode();
     }
 
+
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "Pixel(" +
                 "x=" + x +
                 ", y=" + y +
@@ -207,8 +164,7 @@ public class Pixel
      * @see java.lang.Object#hashCode()
      */
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         /*
         int result = 17;
         result = 31 * result + this.getX();
@@ -218,11 +174,11 @@ public class Pixel
         */
         int id = -1;
         try {
-            id = RasterizationUtils.Encode2DTo1DId(resolutionX, resolutionY, x, y);
-        }
-        catch (Exception e) {
+            id = RasterizationUtils.Encode2DTo1DId(resolutionX,resolutionY,x,y);
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return id;
     }
+
 }

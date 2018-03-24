@@ -1,27 +1,8 @@
-/*
- * FILE: LineStringJoinTest
- * Copyright (c) 2015 - 2018 GeoSpark Development Team
- *
- * MIT License
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
+/**
+ * FILE: LineStringJoinTest.java
+ * PATH: org.datasyslab.geospark.spatialOperator.LineStringJoinTest.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
  */
 package org.datasyslab.geospark.spatialOperator;
 
@@ -47,27 +28,23 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
-public class LineStringJoinTest
-        extends JoinTestBase
-{
+public class LineStringJoinTest extends JoinTestBase {
 
     private static long expectedMatchCount;
     private static long expectedMatchWithOriginalDuplicatesCount;
 
-    public LineStringJoinTest(GridType gridType, boolean useLegacyPartitionAPIs, int numPartitions)
-    {
+    public LineStringJoinTest(GridType gridType, boolean useLegacyPartitionAPIs, int numPartitions) {
         super(gridType, useLegacyPartitionAPIs, numPartitions);
     }
 
     @Parameterized.Parameters
-    public static Collection testParams()
-    {
+    public static Collection testParams() {
         return Arrays.asList(new Object[][] {
-                {GridType.RTREE, true, 11},
-                {GridType.RTREE, false, 11},
-                {GridType.QUADTREE, true, 11},
-                {GridType.QUADTREE, false, 11},
-                {GridType.KDBTREE, false, 11},
+            { GridType.RTREE, true, 11 },
+            { GridType.RTREE, false, 11 },
+            { GridType.QUADTREE, true, 11 },
+            { GridType.QUADTREE, false, 11},
+            { GridType.KDBTREE, false, 11},
         });
     }
 
@@ -75,20 +52,18 @@ public class LineStringJoinTest
      * Once executed before all.
      */
     @BeforeClass
-    public static void onceExecutedBeforeAll()
-    {
+    public static void onceExecutedBeforeAll() {
         initialize("LineStringJoin", "linestring.test.properties");
         expectedMatchCount = Long.parseLong(prop.getProperty("matchCount"));
         expectedMatchWithOriginalDuplicatesCount =
-                Long.parseLong(prop.getProperty("matchWithOriginalDuplicatesCount"));
+            Long.parseLong(prop.getProperty("matchWithOriginalDuplicatesCount"));
     }
 
     /**
      * Tear down.
      */
     @AfterClass
-    public static void TearDown()
-    {
+    public static void TearDown() {
         sc.stop();
     }
 
@@ -98,16 +73,14 @@ public class LineStringJoinTest
      * @throws Exception the exception
      */
     @Test
-    public void testNestedLoop()
-            throws Exception
-    {
+    public void testNestedLoop() throws Exception {
 
         PolygonRDD queryRDD = createPolygonRDD();
         LineStringRDD spatialRDD = createLineStringRDD();
 
         partitionRdds(queryRDD, spatialRDD);
 
-        List<Tuple2<Polygon, HashSet<LineString>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, false, true).collect();
+        List<Tuple2<Polygon, HashSet<LineString>>> result = JoinQuery.SpatialJoinQuery(spatialRDD,queryRDD,false,true).collect();
 
         sanityCheckJoinResults(result);
         assertEquals(expectedMatchCount, countJoinResults(result));
@@ -119,10 +92,8 @@ public class LineStringJoinTest
      * @throws Exception the exception
      */
     @Test
-    public void testRTree()
-            throws Exception
-    {
-        testIndexInt(IndexType.RTREE);
+    public void testRTree() throws Exception {
+    	testIndexInt(IndexType.RTREE);
     }
 
     /**
@@ -131,15 +102,11 @@ public class LineStringJoinTest
      * @throws Exception the exception
      */
     @Test
-    public void testQuadTree()
-            throws Exception
-    {
+    public void testQuadTree() throws Exception {
         testIndexInt(IndexType.QUADTREE);
     }
 
-    private void testIndexInt(IndexType indexType)
-            throws Exception
-    {
+    private void testIndexInt(IndexType indexType) throws Exception {
         PolygonRDD queryRDD = createPolygonRDD();
 
         LineStringRDD spatialRDD = createLineStringRDD();
@@ -147,29 +114,23 @@ public class LineStringJoinTest
         partitionRdds(queryRDD, spatialRDD);
         spatialRDD.buildIndex(indexType, true);
 
-        List<Tuple2<Polygon, HashSet<LineString>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, false, true).collect();
+        List<Tuple2<Polygon, HashSet<LineString>>> result = JoinQuery.SpatialJoinQuery(spatialRDD,queryRDD,false,true).collect();
 
         sanityCheckJoinResults(result);
         assertEquals(expectedMatchCount, countJoinResults(result));
     }
 
     @Test
-    public void testDynamicRTree()
-            throws Exception
-    {
+    public void testDynamicRTree() throws Exception {
         testDynamicIndexInt(IndexType.RTREE);
     }
 
     @Test
-    public void testDynamicQuadTree()
-            throws Exception
-    {
+    public void testDynamicQuadTree() throws Exception {
         testDynamicIndexInt(IndexType.QUADTREE);
     }
 
-    private void testDynamicIndexInt(IndexType indexType)
-            throws Exception
-    {
+    private void testDynamicIndexInt(IndexType indexType) throws Exception {
         PolygonRDD queryRDD = createPolygonRDD();
         LineStringRDD spatialRDD = createLineStringRDD();
 
@@ -181,17 +142,15 @@ public class LineStringJoinTest
         sanityCheckFlatJoinResults(results);
 
         long expectedCount = expectToPreserveOriginalDuplicates()
-                ? expectedMatchWithOriginalDuplicatesCount : expectedMatchCount;
+            ? expectedMatchWithOriginalDuplicatesCount : expectedMatchCount;
         assertEquals(expectedCount, results.size());
     }
 
-    private LineStringRDD createLineStringRDD()
-    {
+    private LineStringRDD createLineStringRDD() {
         return createLineStringRDD(InputLocation);
     }
 
-    private PolygonRDD createPolygonRDD()
-    {
+    private PolygonRDD createPolygonRDD() {
         return createPolygonRDD(InputLocationQueryPolygon);
     }
 }

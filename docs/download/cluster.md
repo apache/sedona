@@ -1,6 +1,6 @@
 # Set up your Apache Spark cluster
 
-Download a Spark distribution from [Spark download page](http://spark.apache.org/downloads.html).
+After downloading a Spark distribution from [Spark download page](http://spark.apache.org/downloads.html), you will find this shell in `./bin/` folder.
 
 ## Preliminary
 1. Set up password-less SSH on your cluster. Each master-worker pair should have bi-directional password-less SSH.

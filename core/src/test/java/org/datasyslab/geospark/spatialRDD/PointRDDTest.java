@@ -1,27 +1,8 @@
-/*
- * FILE: PointRDDTest
- * Copyright (c) 2015 - 2018 GeoSpark Development Team
- *
- * MIT License
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
+/**
+ * FILE: PointRDDTest.java
+ * PATH: org.datasyslab.geospark.spatialRDD.PointRDDTest.java
+ * Copyright (c) 2015-2017 GeoSpark Development Team
+ * All rights reserved.
  */
 package org.datasyslab.geospark.spatialRDD;
 
@@ -41,19 +22,16 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 // TODO: Auto-generated Javadoc
-
 /**
  * The Class PointRDDTest.
  */
-public class PointRDDTest
-        extends SpatialRDDTestBase
+public class PointRDDTest extends SpatialRDDTestBase
 {
     /**
      * Once executed before all.
      */
     @BeforeClass
-    public static void onceExecutedBeforeAll()
-    {
+    public static void onceExecutedBeforeAll() {
         initialize(PointRDDTest.class.getSimpleName(), "point.test.properties");
     }
 
@@ -66,10 +44,8 @@ public class PointRDDTest
         This test case will load a sample data file and
      */
     @Test
-    public void testConstructor()
-            throws Exception
-    {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
+    public void testConstructor() throws Exception {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter,true, numPartitions,StorageLevel.MEMORY_ONLY());
         assertEquals(inputCount, spatialRDD.approximateTotalCount);
         assertEquals(inputBoundary, spatialRDD.boundaryEnvelope);
     }
@@ -83,17 +59,15 @@ public class PointRDDTest
      *  This test case test whether the Hilbert Curve grid can be build correctly.
      */
     @Test
-    public void testEqualPartitioning()
-            throws Exception
-    {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, 10, StorageLevel.MEMORY_ONLY());
+    public void testEqualPartitioning() throws Exception {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, 10,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.EQUALGRID);
         for (Envelope d : spatialRDD.grids) {
-            //System.out.println("PointRDD spatial partitioning grids: "+d);
+        	//System.out.println("PointRDD spatial partitioning grids: "+d);
         }
-        assert spatialRDD.countWithoutDuplicates() == spatialRDD.countWithoutDuplicatesSPRDD();
+        assert spatialRDD.countWithoutDuplicates()==spatialRDD.countWithoutDuplicatesSPRDD();
     }
-
+    
     /**
      * Test hilbert curve spatial partitioing.
      *
@@ -103,17 +77,15 @@ public class PointRDDTest
      *  This test case test whether the Hilbert Curve grid can be build correctly.
      */
     @Test
-    public void testHilbertCurveSpatialPartitioing()
-            throws Exception
-    {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, 10, StorageLevel.MEMORY_ONLY());
+    public void testHilbertCurveSpatialPartitioing() throws Exception {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,10,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.HILBERT);
         for (Envelope d : spatialRDD.grids) {
-            //System.out.println("PointRDD spatial partitioning grids: "+d.grid);
+        	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
-        assert spatialRDD.countWithoutDuplicates() == spatialRDD.countWithoutDuplicatesSPRDD();
+        assert spatialRDD.countWithoutDuplicates()==spatialRDD.countWithoutDuplicatesSPRDD();
     }
-
+    
     /**
      * Test R tree spatial partitioing.
      *
@@ -123,17 +95,15 @@ public class PointRDDTest
      *  This test case test whether the STR-Tree grid can be build correctly.
      */
     @Test
-    public void testRTreeSpatialPartitioing()
-            throws Exception
-    {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, 10, StorageLevel.MEMORY_ONLY());
+    public void testRTreeSpatialPartitioing() throws Exception {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,10,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.RTREE);
         for (Envelope d : spatialRDD.grids) {
-            //System.out.println("PointRDD spatial partitioning grids: "+d);
+        	//System.out.println("PointRDD spatial partitioning grids: "+d);
         }
-        assert spatialRDD.countWithoutDuplicates() == spatialRDD.countWithoutDuplicatesSPRDD();
+        assert spatialRDD.countWithoutDuplicates()==spatialRDD.countWithoutDuplicatesSPRDD();
     }
-
+    
     /**
      * Test voronoi spatial partitioing.
      *
@@ -143,29 +113,27 @@ public class PointRDDTest
      *  This test case test whether the Voronoi grid can be build correctly.
      */
     @Test
-    public void testVoronoiSpatialPartitioing()
-            throws Exception
-    {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, 10, StorageLevel.MEMORY_ONLY());
+    public void testVoronoiSpatialPartitioing() throws Exception {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,10,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.VORONOI);
         for (Envelope d : spatialRDD.grids) {
-            //System.out.println("PointRDD spatial partitioning grids: "+d.grid);
+        	//System.out.println("PointRDD spatial partitioning grids: "+d.grid);
         }
-        assert spatialRDD.countWithoutDuplicates() == spatialRDD.countWithoutDuplicatesSPRDD();
+        assert spatialRDD.countWithoutDuplicates()==spatialRDD.countWithoutDuplicatesSPRDD();
     }
 
+    
     /**
      * Test build index without set grid.
      *
      * @throws Exception the exception
      */
     @Test
-    public void testBuildIndexWithoutSetGrid()
-            throws Exception
-    {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
-        spatialRDD.buildIndex(IndexType.RTREE, false);
+    public void testBuildIndexWithoutSetGrid() throws Exception {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,numPartitions,StorageLevel.MEMORY_ONLY());
+        spatialRDD.buildIndex(IndexType.RTREE,false);
     }
+
 
     /**
      * Test build rtree index.
@@ -173,36 +141,37 @@ public class PointRDDTest
      * @throws Exception the exception
      */
     @Test
-    public void testBuildRtreeIndex()
-            throws Exception
-    {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
+    public void testBuildRtreeIndex() throws Exception {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true,numPartitions,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(gridType);
-        spatialRDD.buildIndex(IndexType.RTREE, true);
-        if (spatialRDD.indexedRDD.take(1).get(0) instanceof STRtree) {
+        spatialRDD.buildIndex(IndexType.RTREE,true);
+        if(spatialRDD.indexedRDD.take(1).get(0) instanceof STRtree)
+        {
             List<Point> result = ((STRtree) spatialRDD.indexedRDD.take(1).get(0)).query(spatialRDD.boundaryEnvelope);
         }
-        else {
+        else
+        {
             List<Point> result = ((Quadtree) spatialRDD.indexedRDD.take(1).get(0)).query(spatialRDD.boundaryEnvelope);
-        }
-    }
 
+        }
+        }
+    
     /**
      * Test build quadtree index.
      *
      * @throws Exception the exception
      */
     @Test
-    public void testBuildQuadtreeIndex()
-            throws Exception
-    {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
+    public void testBuildQuadtreeIndex() throws Exception {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions,StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(gridType);
-        spatialRDD.buildIndex(IndexType.QUADTREE, true);
-        if (spatialRDD.indexedRDD.take(1).get(0) instanceof STRtree) {
+        spatialRDD.buildIndex(IndexType.QUADTREE,true);
+        if(spatialRDD.indexedRDD.take(1).get(0) instanceof STRtree)
+        {
             List<Point> result = ((STRtree) spatialRDD.indexedRDD.take(1).get(0)).query(spatialRDD.boundaryEnvelope);
         }
-        else {
+        else
+        {
             List<Point> result = ((Quadtree) spatialRDD.indexedRDD.take(1).get(0)).query(spatialRDD.boundaryEnvelope);
         }
     }
@@ -211,8 +180,7 @@ public class PointRDDTest
      * Tear down.
      */
     @AfterClass
-    public static void TearDown()
-    {
+    public static void TearDown() {
         sc.stop();
     }
 }
