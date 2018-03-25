@@ -157,7 +157,7 @@ public class adapterTestJava
     @Test
     public void testReadWkb()
     {
-        Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation);
+        Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", "\t").option("header", "false").load(mixedWkbGeometryInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
         Dataset<Row> spatialDf = sparkSession.sql("select ST_GeomFromWKB(inputtable._c0) as usacounty from inputtable");
@@ -172,7 +172,7 @@ public class adapterTestJava
     @Test
     public void testReadWkbWithId()
     {
-        Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation);
+        Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", "\t").option("header", "false").load(mixedWkbGeometryInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
         Dataset<Row> spatialDf = sparkSession.sql("select ST_GeomFromWKB(inputtable._c0, inputtable._c3, inputtable._c5) as usacounty from inputtable");
