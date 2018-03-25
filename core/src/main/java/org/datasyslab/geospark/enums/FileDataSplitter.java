@@ -57,6 +57,11 @@ public enum FileDataSplitter
      */
     WKT("\t"),
 
+    /**
+     * The wkb.
+     */
+    WKB("\t"),
+
     COMMA(","),
 
     TAB("\t"),
