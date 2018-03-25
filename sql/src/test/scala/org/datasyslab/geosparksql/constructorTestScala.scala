@@ -88,9 +88,9 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll {
     }
 
     it("Passed ST_GeomFromWKB") {
-      var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
-      polygonWktDf.createOrReplaceTempView("polygontable")
-      polygonWktDf.show()
+      var polygonWkbDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWkbGeometryInputLocation)
+      polygonWkbDf.createOrReplaceTempView("polygontable")
+      polygonWkbDf.show()
       var polygonDf = sparkSession.sql("select ST_GeomFromWKB(polygontable._c0) as countyshape from polygontable")
       assert(polygonDf.count() == 100)
     }
