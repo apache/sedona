@@ -22,7 +22,7 @@ GeoSpark contains three modules:
 * SQL: SQL interfaces for GeoSpark core.
 * Viz: Visualization extension of GeoSpark core.
 
-**Please visit [GeoSpark website]() for details and documentations.**
+**Please visit [GeoSpark website](http://datasystemslab.github.io/GeoSpark/) for details and documentations.**
 
 ## News!
 * GeoSpark 1.1.0 is released. This release contains new SQL functions, custom Quad-Tree/R-Tree index serializers and bug fixes. GeoSpark 1.1.0 supposrt Apache Spark 2.3. **Note, GeoSparkSQL Maven Coordinate changed** [Release notes](http://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Release-notes/) || [Maven Coordinate](http://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Maven-Central-Coordinates/) (Thanks for the index serializer patch contributed by Zongsi Zhang!)
