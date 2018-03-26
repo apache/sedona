@@ -1,0 +1,3 @@
+Coming soon...
+
+For now, please read [GeoSparkSQL API](../api/sql/GeoSparkSQL-Overview.md) and [GeoSparkSQL Template Project](https://github.com/jiayuasu/GeoSparkTemplateProject/blob/master/geospark-sql/scala/src/main/scala/ScalaExample.scala)

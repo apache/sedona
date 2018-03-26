@@ -31,6 +31,7 @@ groupId: org.datasyslab
 artifactId: geospark-viz
 version: 1.1.0
 ```
+
 ---
 
 # Apache Spark 1.X versions
@@ -47,8 +48,9 @@ groupId: org.datasyslab
 artifactId: babylon
 version: 0.2.1-spark-1.x
 ```
+
 ---
-# SNAPSHOT versions (only supports Spark 2.2)
+# SNAPSHOT versions (only supports Spark 2.3)
 Sometimes GeoSpark has a SNAPSHOT version for the upcoming release. "SNAPSHOT" is uppercase.
 ```
 groupId: org.datasyslab

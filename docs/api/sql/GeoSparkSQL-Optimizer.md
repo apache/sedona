@@ -1,20 +1,30 @@
 # GeoSparkSQL query optimizer
 GeoSpark Spatial operators fully supports Apache SparkSQL query optimizer. It has the following query optimization features:
+
 * Automatically optimizes range join query and distance join query.
 * Automatically performs predicate pushdown.
 
 ## Range join
-Introduction:
-
-*Find geometries from A and geometries from B such that each geometry pair satisfies a certain predicate*
+Introduction: Find geometries from A and geometries from B such that each geometry pair satisfies a certain predicate
 
 Spark SQL Example:
 
+```SQL
+SELECT *
+FROM polygondf, pointdf
+WHERE ST_Contains(polygondf.polygonshape,pointdf.pointshape)
 ```
-select * from polygondf, pointdf where ST_Contains(polygondf.polygonshape,pointdf.pointshape)
-select * from polygondf, pointdf where ST_Intersects(polygondf.polygonshape,pointdf.pointshape)
-select * from pointdf, polygondf where ST_Within(pointdf.pointshape, polygondf.polygonshape)
 
+```SQL
+SELECT *
+FROM polygondf, pointdf
+WHERE ST_Intersects(polygondf.polygonshape,pointdf.pointshape)
+```
+
+```SQL
+SELECT *
+FROM pointdf, polygondf
+WHERE ST_Within(pointdf.pointshape, polygondf.polygonshape)
 ```
 Spark SQL Physical plan:
 ```
@@ -27,21 +37,26 @@ RangeJoin polygonshape#20: geometry, pointshape#43: geometry, false
 
 ```
 
-## Distance join
-Introduction:
+!!!note
+	All join queries in GeoSparkSQL are inner joins
 
-*Find geometries from A and geometries from B such that the internal Euclidean distance of each geometry pair is less or equal than a certain distance*
+## Distance join
+Introduction: Find geometries from A and geometries from B such that the internal Euclidean distance of each geometry pair is less or equal than a certain distance
 
 Spark SQL Example:
 
-*Only consider "fully within a certain distance"*
-```
-select * from pointdf1, pointdf2 where ST_Distance(pointdf1.pointshape1,pointdf2.pointshape2) < 2
+*Only consider ==fully within a certain distance==*
+```SQL
+SELECT *
+FROM pointdf1, pointdf2
+WHERE ST_Distance(pointdf1.pointshape1,pointdf2.pointshape2) < 2
 ```
 
-*Consider "intersects within a certain distance"*
-```
-select * from pointdf1, pointdf2 where ST_Distance(pointdf1.pointshape1,pointdf2.pointshape2) <= 2
+*Consider ==intersects within a certain distance==*
+```SQL
+SELECT *
+FROM pointdf1, pointdf2
+WHERE ST_Distance(pointdf1.pointshape1,pointdf2.pointshape2) <= 2
 ```
 
 Spark SQL Physical plan:
@@ -52,21 +67,22 @@ DistanceJoin pointshape1#12: geometry, pointshape2#33: geometry, 2.0, true
 :  +- *FileScan csv
 +- Project [st_point(cast(_c0#21 as decimal(24,20)), cast(_c1#22 as decimal(24,20)), myPointId) AS pointshape2#33]
    +- *FileScan csv
-
 ```
+
+!!!warning
+	GeoSpark doesn't control the distance's unit (degree or meter). It is same with the geometry. To change the geometry's unit, please transform the coordinate reference system. See [ST_Transform](GeoSparkSQL-Function.md#st_transform).
+
 ## Predicate pushdown
 
-Introduction:
-*Given a join query and a predicate in the same WHERE clause, first executes the Predicate as a filter, then executes the join query*
+Introduction: Given a join query and a predicate in the same WHERE clause, first executes the Predicate as a filter, then executes the join query*
 
 Spark SQL Example:
 
-```
-select * from polygondf, pointdf 
-
-where ST_Contains(polygondf.polygonshape,pointdf.pointshape)
-
-and ST_Contains(ST_PolygonFromEnvelope(1.0,101.0,501.0,601.0), polygondf.polygonshape)
+```SQL
+SELECT *
+FROM polygondf, pointdf 
+WHERE ST_Contains(polygondf.polygonshape,pointdf.pointshape)
+AND ST_Contains(ST_PolygonFromEnvelope(1.0,101.0,501.0,601.0), polygondf.polygonshape)
 ```
 
 Spark SQL Physical plan:

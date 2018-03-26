@@ -1,25 +1,27 @@
-### ST_Envelope_Aggr (A:geometryColumn)
+## ST_Envelope_Aggr
 
-Introduction:
+Introduction: Return the entire envelope boundary of all geometries in A
 
-*Return the entire envelope boundary of all geometries in A*
+Format: `ST_Envelope_Aggr (A:geometryColumn)`
 
-Since: v1.0.0
-
-Spark SQL example:
-```
-select ST_Envelope_Aggr(pointdf.arealandmark) from pointdf
-```
-
-### ST_Union_Aggr (A:geometryColumn)
-
-Introduction:
-
-Since: v1.0.0
-
-*Return the polygon union of all polygons in A*
+Since: `v1.0.0`
 
 Spark SQL example:
+```SQL
+SELECT ST_Envelope_Aggr(pointdf.arealandmark)
+FROM pointdf
 ```
-select ST_Union_Aggr(polygondf.polygonshape) from polygondf
+
+## ST_Union_Aggr
+
+Introduction: Return the polygon union of all polygons in A
+
+Format: `ST_Union_Aggr (A:geometryColumn)`
+
+Since: `v1.0.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_Union_Aggr(polygondf.polygonshape)
+FROM polygondf
 ```

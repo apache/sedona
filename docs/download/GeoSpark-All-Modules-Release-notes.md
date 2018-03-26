@@ -38,9 +38,11 @@ None
 * Add GeoSparkConf class to read GeoSparkConf from SparkConf
 
 **GeoSpark SQL**
+
 * Initial release: fully supports SQL/MM-Part3 Spatial SQL standard
 
 **GeoSpark Viz**
+
 * Republish GeoSpark Viz under "GeoSparkViz" folder. All "Babylon" strings have been replaced to "GeoSparkViz"
 
 ---
@@ -48,7 +50,7 @@ None
 ---
 
 ---
-### v0.9.1 (GeoSpark-core)
+## v0.9.1 (GeoSpark-core)
 * **Bug fixes**: Fixed "Missing values when reading Shapefile": [Issue #141](https://github.com/DataSystemsLab/GeoSpark/issues/141)
 * **Performance improvement**: Solved Issue [#91](https://github.com/DataSystemsLab/GeoSpark/issues/91), [#103](https://github.com/DataSystemsLab/GeoSpark/issues/103), [#104](https://github.com/DataSystemsLab/GeoSpark/issues/104), [#125](https://github.com/DataSystemsLab/GeoSpark/issues/125), [#150](https://github.com/DataSystemsLab/GeoSpark/issues/150).
     * Add GeoSpark customized Kryo Serializer to significantly reduce memory footprint. This serializer which follows Shapefile compression rule takes less memory than the default Kryo. See [PR 139](https://github.com/DataSystemsLab/GeoSpark/pull/139).
@@ -60,12 +62,12 @@ None
     * The generic SpatialRdd supports heterogenous geometries
     * Add KDB-Tree spatial partitioning method which is more balanced than Quad-Tree
     * Range query, Distance query, Range join query, Distance join query, KNN query supports heterogenous inputs.
-### v0.8.2 (GeoSpark-core)
+## v0.8.2 (GeoSpark-core)
 * **Bug fixes**: Fix the shapefile RDD null pointer bug when running in cluster mode. See Issue https://github.com/DataSystemsLab/GeoSpark/issues/115
 * **New function added**: Provide granular control to SpatialRDD sampling utils. SpatialRDD has a setter and getter for a parameter called "sampleNumber". The user can manually specify the sample size for spatial partitioning.
-### v0.8.1 (GeoSpark-core)
+## v0.8.1 (GeoSpark-core)
 * **Bug fixes**: (1) Fix the blank DBF attribute error when load DBF along with SHX file. (2) Allow user to call CRS transformation function at any time. Previously, it was only allowed in GeoSpark constructors
-### v0.8.0 (GeoSpark-core)
+## v0.8.0 (GeoSpark-core)
 * **New input format added**: GeoSpark is able to load and query ESRI ShapeFile (.shp, .shx, .dbf) from local disk and HDFS! Users first need to build a Shapefile RDD by giving Spark Context and an input path then call ShapefileRDD.getSpatialRDD to retrieve Spatial RDD. ([Scala Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/scala/org/datasyslab/geospark/showcase), [Java Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/java/org/datasyslab/geospark/showcase))
 * **Join Query Performance enhancement 1**: GeoSpark provides a new Quad-Tree Spatial Partitioning method to speed up Join Query. Users need to pass GridType.QUADTREE parameter to RDD1.spatialPartitioning() function. Then users need to use RDD1.partitionTree in RDD2.spatialPartitioning() function. This Quad-Tree partitioning method (1) avoids overflowed spatial objects when partitioning spatial objects. (2) checking a spatial object against the Quad-Tree grids is completed in a log complexity tree search. ([Scala Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/scala/org/datasyslab/geospark/showcase), [Java Example](https://github.com/DataSystemsLab/GeoSpark/tree/master/core/src/main/java/org/datasyslab/geospark/showcase))
 * **Join Query Performance enhancement 2**: Internally, GeoSpark uses zipPartitions instead of CoGroup to join two Spatial RDD so that the incurred shuffle overhead decreases.
@@ -77,7 +79,7 @@ None
  3. **If he needs Spatial Join Query or Distance Join Query but knows nothing about his dataset**, the user still has to pass StorageLevel parameter.
 * **Bug fix**: Fix bug [Issue #97](https://github.com/DataSystemsLab/GeoSpark/issues/97) and [Issue #100](https://github.com/DataSystemsLab/GeoSpark/issues/100).
 
-
+## v0.1 - v0.7
 |      Version     	| Summary                                                                                                                                                                                                               	|
 |:----------------:	|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
 |0.7.0| **Coordinate Reference System (CRS) Transformation (aka. Coordinate projection) added:** GeoSpark allows users to transform the original CRS (e.g., degree based coordinates such as EPSG:4326 and WGS84) to any other CRS (e.g., meter based coordinates such as EPSG:3857) so that it can accurately process both geographic data and geometrical data. Please specify your desired CRS in GeoSpark Spatial RDD constructor ([Example](https://github.com/DataSystemsLab/GeoSpark/blob/master/core/src/main/scala/org/datasyslab/geospark/showcase/ScalaExample.scala#L221)); **Unnecessary dependencies removed**: NetCDF/HDF support depends on [SerNetCDF](https://github.com/jiayuasu/SerNetCDF). SetNetCDF becomes optional dependency to reduce fat jar size; **Default JDK/JRE change to JDK/JRE 1.8**: To satisfy CRS transformation requirement, GeoSpark is compiled by JDK 1.8 by default; **Bug fix**: fix a small format bug when output spatial RDD to disk.|
