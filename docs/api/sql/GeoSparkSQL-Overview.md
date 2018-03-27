@@ -21,7 +21,9 @@ var myDataFrame = sparkSession.sql("YOUR_SQL")
 
 GeoSparkSQL supports SparkSQL query optimizer, documentation is [Here](./GeoSparkSQL-Optimizer)
 
-## Usage
+## Quick start
+
+The detailed explanation is here [Write a SQL/DataFrame application](../../tutorial/sql.md).
 
 1. Add GeoSpark-core and GeoSparkSQL into your project POM.xml or build.sbt
 2. Declare your Spark Session
@@ -33,5 +35,5 @@ sparkSession = SparkSession.builder().
 ```
 3. Add the following line after your SparkSession declaration:
 ```Scala
-GeoSparkSQLRegistrator.registerAll(sparkSession.sqlContext)
+GeoSparkSQLRegistrator.registerAll(sparkSession)
 ```

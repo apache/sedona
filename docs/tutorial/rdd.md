@@ -172,7 +172,7 @@ var spatialDf = sparkSession.sql(
    		|FROM inputtable
    	""".stripMargin)
 ```
-3. Use GeoSpark SQL-RDD Adapter to convert a DataFrame to an SpatialRDD
+3. Use GeoSparkSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD
 ```Scala
 var spatialRDD = new SpatialRDD[Geometry]
 spatialRDD.rawSpatialRDD = Adapter.toRdd(spatialDf)
@@ -211,6 +211,7 @@ val sourceCrsCode = "epsg:4326" // WGS84, the most common degree-based CRS
 val targetCrsCode = "epsg:3857" // The most common meter-based CRS
 objectRDD.CRSTransform(sourceCrsCode, targetCrsCode)
 ```
+
 !!!warning
 	CRS transformation should be done right after creating each SpatialRDD, otherwise it will lead to wrong query results. For instace, use something like this:
 	```Scala
