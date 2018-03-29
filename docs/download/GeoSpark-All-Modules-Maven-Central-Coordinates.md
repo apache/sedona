@@ -60,7 +60,7 @@ version: 1.0.0-SNAPSHOT
 
 ```
 groupId: org.datasyslab
-artifactId: geospark-sql
+artifactId: geospark-sql_2.3
 version: 1.0.0-SNAPSHOT
 ```
 
