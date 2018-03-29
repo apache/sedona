@@ -215,7 +215,7 @@ case class ST_Intersection(inputExpressions: Seq[Expression])
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length == 2)
     val leftgeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
-    val rightgeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val rightgeometry = GeometrySerializer.deserialize(inputExpressions(1).eval(input).asInstanceOf[ArrayData])
     new GenericArrayData(GeometrySerializer.serialize(leftgeometry.intersection(rightgeometry)))
   }
 
