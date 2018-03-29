@@ -230,11 +230,6 @@
                 </executions>
             </plugin>
         </plugins>
-        <resources>
-            <resource>
-                <directory>src/test/resources</directory>
-            </resource>
-        </resources>
     </build>
     <profiles>
         <profile>
