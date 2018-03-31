@@ -28,8 +28,9 @@ package org.datasyslab.geosparksql
 
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.serializer.KryoSerializer
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.geosparksql.strategy.join.JoinQueryDetector
+import org.apache.spark.sql.types._
 import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
 import org.datasyslab.geospark.utils.GeoSparkConf
 import org.datasyslab.geosparksql.utils.GeoSparkSQLRegistrator
@@ -204,6 +205,38 @@ class predicateJoinTestScala extends FunSpec with BeforeAndAfterAll {
       rangeJoinDf.explain()
       rangeJoinDf.show(3)
       assert(rangeJoinDf.count() == 500)
+    }
+
+    it("Passed super small data join") {
+      val rawPointDf = sparkSession.createDataFrame(
+        sparkSession.sparkContext.parallelize(
+          Seq(Row(1, "40.0", "-120.0"), Row(2, "30.0", "-110.0"), Row(3, "20.0", "-100.0"))),
+        StructType(
+          List(StructField("id", IntegerType, true), StructField("lat", StringType, true), StructField("lon", StringType, true))
+        ))
+      rawPointDf.createOrReplaceTempView("rawPointDf")
+
+      val pointDF = sparkSession.sql("select id, ST_Point(cast(lat as Decimal(24,20)), cast(lon as Decimal(24,20))) AS latlon_point FROM rawPointDf")
+      pointDF.createOrReplaceTempView("pointDf")
+      pointDF.show(false)
+
+      val rawPolygonDf = sparkSession.createDataFrame(
+        sparkSession.sparkContext.parallelize(
+          Seq(Row("A", 25.0, -115.0, 35.0, -105.0), Row("B", 25.0, -135.0, 35.0, -125.0))),
+        StructType(
+          List(StructField("id", StringType, true), StructField("latmin", DoubleType, true),
+            StructField("lonmin", DoubleType, true), StructField("latmax", DoubleType, true),
+            StructField("lonmax", DoubleType, true))
+        ))
+      rawPolygonDf.createOrReplaceTempView("rawPolygonDf")
+
+      val polygonEnvelopeDF = sparkSession.sql("select id, ST_PolygonFromEnvelope(" +
+        "cast(latmin as Decimal(24,20)), cast(lonmin as Decimal(24,20)), " +
+        "cast(latmax as Decimal(24,20)), cast(lonmax as Decimal(24,20))) AS polygon FROM rawPolygonDf")
+      polygonEnvelopeDF.createOrReplaceTempView("polygonDf")
+
+      val withinEnvelopeDF = sparkSession.sql("select * FROM pointDf, polygonDf WHERE ST_Within(pointDf.latlon_point, polygonDf.polygon)")
+      assert(withinEnvelopeDF.count() == 1)
     }
   }
 }
