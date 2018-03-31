@@ -51,6 +51,7 @@ var sparkSession:SparkSession = SparkSession.builder()
 org.apache.spark" %% "spark-core" % SparkVersion % "compile,
 org.apache.spark" %% "spark-sql" % SparkVersion % "compile
 ```
+
 !!!warning
 	Forgetting to change the package scope will lead to a very big fat JAR and dependency conflicts when call `spark-submit`. For more details, please visit [Maven Dependency Scope](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope).
 
