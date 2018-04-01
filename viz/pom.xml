@@ -4,12 +4,11 @@
     <parent>
         <groupId>org.datasyslab</groupId>
         <artifactId>geospark-parent</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 	<artifactId>geospark-viz</artifactId>
-	<version>1.1.1-SNAPSHOT</version>
-	
+
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>Geospatial visualization extension of GeoSpark</description>
 	<url>http://geospark.datasyslab.org/</url>

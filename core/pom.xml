@@ -4,11 +4,10 @@
     <parent>
         <groupId>org.datasyslab</groupId>
         <artifactId>geospark-parent</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 	<artifactId>geospark</artifactId>
-	<version>1.1.1-SNAPSHOT</version>
 
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>Geospatial extension for Apache Spark</description>
