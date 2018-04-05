@@ -1,4 +1,4 @@
-![GeoSpark Logo](http://www.public.asu.edu/~jiayu2/geospark/logo.png)
+![GeoSpark Logo](https://github.com/DataSystemsLab/GeoSpark/blob/master/GeoSpark_logo.png?raw=true)
 
 |     Stable    | Latest | Source code|
 |:-------------:|:------|:------:|
