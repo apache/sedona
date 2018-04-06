@@ -50,7 +50,7 @@ version: 0.2.1-spark-1.x
 ```
 
 ---
-# SNAPSHOT versions (only supports Spark 2.3)
+# SNAPSHOT versions
 Sometimes GeoSpark has a SNAPSHOT version for the upcoming release. "SNAPSHOT" is uppercase.
 ```
 groupId: org.datasyslab

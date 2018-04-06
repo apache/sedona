@@ -131,7 +131,7 @@ root
 
 ## Transform the Coordinate Reference System
 
-GeoSpark doesn't control the coordinate unit (degree-based or meter-based) of all geometries in a Geometyr column. The unit of all related distances in GeoSparkSQL is same as the unit of all geometries in a Geometyr column.
+GeoSpark doesn't control the coordinate unit (degree-based or meter-based) of all geometries in a Geometry column. The unit of all related distances in GeoSparkSQL is same as the unit of all geometries in a Geometry column.
 
 To convert Coordinate Reference System of the Geometry column created before, use the following code:
 
@@ -213,6 +213,27 @@ The details of a join query is available here [Join query](../api/sql/GeoSparkSQ
 ### Other queries
 
 There are lots of other functions can be combined with these queries. Please read [GeoSparkSQL functions](../api/sql/GeoSparkSQL-Function.md) and [GeoSparkSQL aggregate functions](../api/sql/GeoSparkSQL-AggregateFunction.md).
+
+## Save to permanent storage
+
+To save a Spatial DataFrame to some permanent storage such as Hive tables and HDFS, you can simply convert each geometry in the Geometry type column back to a plain String and save the plain DataFrame to wherever you want.
+
+
+Use the following code to convert the Geometry column in a DataFrame back to a WKT string column:
+```Scala
+sparkSession.udf.register("ST_SaveAsWKT", (geometry: Geometry) => (geometry.toText))
+var stringDf = sparkSession.sql(
+  """
+    |SELECT ST_SaveAsWKT(countyshape)
+    |FROM polygondf
+  """.stripMargin)
+```
+
+!!!note
+	We are working on providing more user-friendly output functions such as ==ST_SaveAsWKT== and ==ST_SaveAsWKB==. Stay tuned!
+
+To load the DataFrame back, you first use the regular method to load the saved string DataFrame from the permanent storage and use ==ST_GeomFromWKT== to re-build the Geometry type column.
+
 
 ## Convert between DataFrame and SpatialRDD
 

@@ -1,4 +1,6 @@
-![GeoSpark Logo](https://github.com/DataSystemsLab/GeoSpark/blob/master/GeoSpark_logo.png)
+#
+
+![GeoSpark Logo](https://github.com/DataSystemsLab/GeoSpark/raw/master/GeoSpark_logo.png)
 
 |     Stable    | Latest | Source code|
 |:-------------:|:------|:------:|

@@ -487,3 +487,89 @@ The output format of the distance join query is [here](#output-format_2).
 	WHERE ST_Distance(city.geom, superhero.geom) <= 10;
 	```
 	Find the super heros within 10 miles of each city
+	
+## Save to permanent storage
+
+You can always save an SpatialRDD back to some permanent storage such as HDFS and Amazon S3. You can save distributed SpatialRDD to WKT, GeoJSON and object files.
+
+!!!note
+	Non-spatial attributes such as price, age and name will also be stored to permanent storage.
+
+### Save an SpatialRDD (not indexed)
+
+Typed SpatialRDD and generic SpatialRDD can be saved to permanent storage.
+
+#### Save to distributed WKT text file
+
+Use the following code to save an SpatialRDD as a distributed WKT text file:
+
+```Scala
+objectRDD.rawSpatialRDD.saveAsTextFile("hdfs://PATH")
+```
+
+#### Save to distributed GeoJSON text file
+
+Use the following code to save an SpatialRDD as a distributed GeoJSON text file:
+
+```Scala
+objectRDD.saveAsGeoJSON("hdfs://PATH")
+```
+
+
+#### Save to distributed object file
+
+Use the following code to save an SpatialRDD as a distributed object file:
+
+```Scala
+objectRDD.rawSpatialRDD.saveAsObjectFile("hdfs://PATH")
+```
+
+!!!note
+	Each object in a distributed object file is a byte array (not human-readable). This byte array is the serialized format of a Geometry or a SpatialIndex.
+
+### Save an SpatialRDD (indexed)
+
+Indexed typed SpatialRDD and generic SpatialRDD can be saved to permanent storage. However, the indexed SpatialRDD has to be stored as a distributed object file.
+
+#### Save to distributed object file
+
+Use the following code to save an SpatialRDD as a distributed object file:
+
+```
+objectRDD.indexedRawRDD.saveAsObjectFile("hdfs://PATH")
+```
+
+### Save an SpatialRDD (spatialPartitioned W/O indexed)
+
+A spatial partitioned RDD can be saved to permanent storage but Spark is not able to maintain the same RDD partition Id of the original RDD. This will lead to wrong join query results. We are working on some solutions. Stay tuned!
+
+### Reload a saved SpatialRDD
+
+You can easily reload an SpatialRDD that has been saved to ==a distributed object file==.
+
+#### Load to a typed SpatialRDD
+
+Use the following code to reload the PointRDD/PolygonRDD/LineStringRDD:
+
+```Scala
+var savedRDD = new PointRDD(sc.objectFile[Point]("hdfs://PATH"))
+
+var savedRDD = new PointRDD(sc.objectFile[Polygon]("hdfs://PATH"))
+
+var savedRDD = new PointRDD(sc.objectFile[LineString]("hdfs://PATH"))
+```
+
+#### Load to a generic SpatialRDD
+
+Use the following code to reload the SpatialRDD:
+
+```Scala
+var savedRDD = new SpatialRDD[Geometry]
+savedRDD.rawSpatialRDD = sc.objectFile[Geometry]("hdfs://PATH")
+```
+
+Use the following code to reload the indexed SpatialRDD:
+```Scala
+var savedRDD = new SpatialRDD[Geometry]
+savedRDD.indexedRawRDD = sc.objectFile[SpatialIndex]("hdfs://PATH")
+```
