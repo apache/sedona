@@ -80,7 +80,7 @@ GeoSparkViz full tutorial is available at GeoSpark GitHub Wiki: [https://github.
 
 ### Supported Spatial Objects and Input format
 
-All spatial obects and input formats supported by GeoSpark
+All spatial obects and input formats supported by GeoSpark.
 
 # Acknowledgement
 
