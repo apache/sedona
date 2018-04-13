@@ -407,4 +407,20 @@ public class GeoSparkVizImageGenerator
         }
         return true;
     }
+
+    /**
+     * Save raster image as Azure Blob file.
+     *
+     * @param rasterImage the raster image
+     * @param originalOutputPath the original output path
+     * @param imageType the image type
+     * @return true, if successful
+     * @throws Exception the exception
+     */
+    public boolean SaveRasterImageAsAzureBlob(BufferedImage rasterImage, String originalOutputPath, ImageType imageType) {
+        logger.info("[GeoSparkViz][SaveRasterImageAsAzureBlob][Start]");
+
+        logger.info("[GeoSparkViz][SaveRasterImageAsHadoopFile][Stop]");
+        return true;
+    }
 }
