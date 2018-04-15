@@ -25,22 +25,27 @@
  */
 package org.datasyslab.geosparkviz.core;
 
-import com.amazonaws.services.s3.model.AmazonS3Exception;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.log4j.Logger;
-import org.datasyslab.geosparkviz.utils.ImageType;
-import org.datasyslab.geosparkviz.utils.RasterizationUtils;
-import org.datasyslab.geosparkviz.utils.S3Operator;
-import scala.Tuple2;
-
-import javax.imageio.ImageIO;
-
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
+
+import javax.imageio.ImageIO;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.log4j.Logger;
+import org.datasyslab.geosparkviz.utils.AzureBlobOperator;
+import org.datasyslab.geosparkviz.utils.ImageType;
+import org.datasyslab.geosparkviz.utils.RasterizationUtils;
+import org.datasyslab.geosparkviz.utils.S3Operator;
+
+import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.microsoft.azure.storage.StorageException;
+
+import scala.Tuple2;
 
 // TODO: Auto-generated Javadoc
 
@@ -215,4 +220,57 @@ public class ImageStitcher
         logger.info("[GeoSparkViz][stitchImagePartitions][Stop]");
         return true;
     }
+
+    /**
+     * Stitch image partitions from Azure Blob file.
+     *
+     * @param containerName the container name
+     * @param accountName the access key
+     * @param accountKey the secret key
+     * @param imageTilePath the image tile path
+     * @param resolutionX the resolution X
+     * @param resolutionY the resolution Y
+     * @param zoomLevel the zoom level
+     * @param partitionOnX the partition on X
+     * @param partitionOnY the partition on Y
+     * @return true, if successful
+     * @throws Exception the exception
+     */
+    public static boolean stitchImagePartitionsFromAzureBlobFile(String containerName, String accountName, String accountKey, String imageTilePath, int resolutionX, int resolutionY, int zoomLevel, int partitionOnX, int partitionOnY)
+            throws Exception {
+        logger.info("[GeoSparkViz][stitchImagePartitionsFromAzureBlobFile][Start]");
+
+        BufferedImage stitchedImage = BigBufferedImage.create(resolutionX, resolutionY, BufferedImage.TYPE_INT_ARGB);
+        AzureBlobOperator azureBlobOperator = new AzureBlobOperator(containerName, accountName, accountKey);
+        //Stitch all image partitions together
+        for (int i = 0; i < partitionOnX * partitionOnY; i++) {
+            BufferedImage imageTile = null;
+            try {
+                imageTile = azureBlobOperator.getImage(imageTilePath + "-" + RasterizationUtils.getImageTileName(zoomLevel, partitionOnX, partitionOnY, i) + ".png");
+            } catch (URISyntaxException e) {
+                continue;
+            } catch (StorageException e) {
+                continue;
+            } catch (IOException e) {
+                continue;
+            }
+            Tuple2<Integer, Integer> partitionCoordinate = RasterizationUtils.Decode1DTo2DId(partitionOnX, partitionOnY, i);
+            int partitionMinX = partitionCoordinate._1 * Math.round(resolutionX / partitionOnX);
+            int partitionMinY = partitionCoordinate._2 * Math.round(resolutionY / partitionOnY);
+            //if(partitionMinX!=0){partitionMinX--;}
+            //if(partitionMinY!=0){partitionMinY--;}
+            int[] rgbArray = imageTile.getRGB(0, 0, imageTile.getWidth(), imageTile.getHeight(), null, 0, imageTile.getWidth());
+            int partitionMaxX = partitionMinX + imageTile.getWidth();
+            int partitionMaxY = partitionMinY + imageTile.getHeight();
+            logger.debug("[GeoSparkViz][stitchImagePartitions] stitching image tile..." + i + " ResolutionX " + resolutionX + " ResolutionY " + resolutionY);
+            logger.debug("[GeoSparkViz][stitchImagePartitions] stitching a image tile..." + i + " MinX " + partitionMinX + " MaxX " + partitionMaxX + " MinY " + partitionMinY + " MaxY " + partitionMaxY);
+            stitchedImage.setRGB(partitionMinX, partitionMinY, imageTile.getWidth(), imageTile.getHeight(), rgbArray, 0, imageTile.getWidth());
+        }
+        ImageGenerator imageGenerator = new ImageGenerator();
+        imageGenerator.SaveRasterImageAsAzureBlob(stitchedImage, containerName, accountName, accountKey,
+                imageTilePath + "-" + zoomLevel + "-stitched", ImageType.PNG);
+        logger.info("[GeoSparkViz][stitchImagePartitionsFromAzureBlobFile][Stop]");
+        return true;
+    }
+
 }

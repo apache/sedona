@@ -25,6 +25,18 @@
  */
 package org.datasyslab.geosparkviz.extension.imageGenerator;
 
+import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
+import java.util.List;
+
+import javax.imageio.ImageIO;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -35,20 +47,14 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.VoidFunction;
 import org.datasyslab.geosparkviz.core.ImageSerializableWrapper;
+import org.datasyslab.geosparkviz.utils.AzureBlobOperator;
 import org.datasyslab.geosparkviz.utils.ImageType;
 import org.datasyslab.geosparkviz.utils.RasterizationUtils;
 import org.datasyslab.geosparkviz.utils.S3Operator;
+
+import com.microsoft.azure.storage.StorageException;
+
 import scala.Tuple2;
-
-import javax.imageio.ImageIO;
-
-import java.awt.image.BufferedImage;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
 
 // TODO: Auto-generated Javadoc
 
@@ -412,15 +418,57 @@ public class GeoSparkVizImageGenerator
      * Save raster image as Azure Blob file.
      *
      * @param rasterImage the raster image
-     * @param originalOutputPath the original output path
+     * @param containerName the container name
+     * @param accountName the account name
+     * @param accountKey the account key
+     * @param path the path
      * @param imageType the image type
      * @return true, if successful
      * @throws Exception the exception
      */
-    public boolean SaveRasterImageAsAzureBlob(BufferedImage rasterImage, String originalOutputPath, ImageType imageType) {
+    public boolean SaveRasterImageAsAzureBlob(BufferedImage rasterImage, String containerName, String accountName, String accountKey, String path, ImageType imageType)
+            throws URISyntaxException, StorageException, InvalidKeyException {
         logger.info("[GeoSparkViz][SaveRasterImageAsAzureBlob][Start]");
-
-        logger.info("[GeoSparkViz][SaveRasterImageAsHadoopFile][Stop]");
+        AzureBlobOperator blobOperator = new AzureBlobOperator(containerName, accountName, accountKey);
+        blobOperator.init();
+        blobOperator.putImage(containerName, path + "." + imageType.getTypeName(), rasterImage);
+        logger.info("[GeoSparkViz][SaveRasterImageAsAzureBlob][Stop]");
         return true;
     }
+
+    /**
+     * Save raster image as Azure Blob file.
+     *
+     * @param distributedImage the distributed image
+     * @param containerName the container name
+     * @param accountName the account name
+     * @param accountKey the account key
+     * @param path the path
+     * @param imageType the image type
+     * @param zoomLevel the zoom level
+     * @param partitionOnX the partition on X
+     * @param partitionOnY the partition on Y
+     * @return true, if successful
+     */
+    public boolean SaveRasterImageAsAzureBlob(JavaPairRDD<Integer, ImageSerializableWrapper> distributedImage, final String containerName, final String accountName, final String accountKey, final String path, final ImageType imageType, final int zoomLevel, final int partitionOnX, final int partitionOnY)
+            throws URISyntaxException, StorageException, InvalidKeyException {
+        logger.info("[GeoSparkViz][SaveRasterImageAsAzureBlob][Start]");
+        AzureBlobOperator blobOperator = new AzureBlobOperator(containerName, accountName, accountKey);
+        blobOperator.init();
+        for (int i = 0; i < partitionOnX * partitionOnY; i++) {
+            blobOperator.deleteImage(containerName, path + "-" + RasterizationUtils.getImageTileName(zoomLevel, partitionOnX, partitionOnY, i) + "." + imageType.getTypeName());
+        }
+        distributedImage.foreach(new VoidFunction<Tuple2<Integer, ImageSerializableWrapper>>()
+        {
+            @Override
+            public void call(Tuple2<Integer, ImageSerializableWrapper> integerImageSerializableWrapperTuple2)
+                    throws Exception
+            {
+                SaveRasterImageAsAzureBlob(integerImageSerializableWrapperTuple2._2.getImage(), containerName, accountName, accountKey, path + "-" + RasterizationUtils.getImageTileName(zoomLevel, partitionOnX, partitionOnY, integerImageSerializableWrapperTuple2._1), imageType);
+            }
+        });
+        logger.info("[GeoSparkViz][SaveRasterImageAsAzureBlob][Stop]");
+        return true;
+    }
+
 }

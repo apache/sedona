@@ -139,4 +139,5 @@ public class HeatmapTest
         ImageGenerator imageGenerator = new ImageGenerator();
         imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/heatmap/LineStringRDD", ImageType.PNG);
     }
+
 }
