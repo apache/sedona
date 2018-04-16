@@ -66,9 +66,6 @@ public class PolygonRDDTest
      *
      * @throws Exception the exception
      */
-    /*
-        This test case will load a sample data file and
-     */
     @Test
     public void testConstructor()
             throws Exception
@@ -76,6 +73,20 @@ public class PolygonRDDTest
         PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
         assertEquals(inputCount, spatialRDD.approximateTotalCount);
         assertEquals(inputBoundary, spatialRDD.boundaryEnvelope);
+    }
+
+    @Test
+    public void testEmptyConstructor()
+            throws Exception
+    {
+        PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
+        spatialRDD.spatialPartitioning(gridType);
+        spatialRDD.buildIndex(IndexType.RTREE, true);
+        // Create an empty spatialRDD and manually assemble it
+        PolygonRDD spatialRDDcopy = new PolygonRDD();
+        spatialRDDcopy.rawSpatialRDD = spatialRDD.rawSpatialRDD;
+        spatialRDDcopy.indexedRawRDD = spatialRDD.indexedRawRDD;
+        spatialRDDcopy.analyze();
     }
 
     @Test
@@ -93,9 +104,6 @@ public class PolygonRDDTest
      *
      * @throws Exception the exception
      */
-    /*
-     *  This test case test whether the Hilbert Curve grid can be build correctly.
-     */
     @Test
     public void testHilbertCurveSpatialPartitioing()
             throws Exception
@@ -112,9 +120,6 @@ public class PolygonRDDTest
      *
      * @throws Exception the exception
      */
-    /*
-     *  This test case test whether the STR-Tree grid can be build correctly.
-     */
     @Test
     public void testRTreeSpatialPartitioing()
             throws Exception
@@ -130,9 +135,6 @@ public class PolygonRDDTest
      * Test voronoi spatial partitioing.
      *
      * @throws Exception the exception
-     */
-    /*
-     *  This test case test whether the Voronoi grid can be build correctly.
      */
     @Test
     public void testVoronoiSpatialPartitioing()

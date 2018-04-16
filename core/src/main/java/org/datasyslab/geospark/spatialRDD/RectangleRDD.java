@@ -43,6 +43,11 @@ import org.datasyslab.geospark.formatMapper.RectangleFormatMapper;
 public class RectangleRDD
         extends SpatialRDD<Polygon>
 {
+    /**
+     * Instantiates a new rectangle RDD.
+     *
+     */
+    public RectangleRDD(){}
 
     /**
      * Instantiates a new rectangle RDD.
