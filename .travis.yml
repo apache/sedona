@@ -31,5 +31,5 @@ notifications:
   email:
     recipients:
       - jiayu2@asu.edu
-    on_success: always
+    on_success: none
     on_failure: always
