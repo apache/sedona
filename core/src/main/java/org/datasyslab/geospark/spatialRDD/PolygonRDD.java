@@ -56,6 +56,11 @@ import java.util.Arrays;
 public class PolygonRDD
         extends SpatialRDD<Polygon>
 {
+    /**
+     * Instantiates a new polygon RDD.
+     *
+     */
+    public PolygonRDD(){}
 
     /**
      * Instantiates a new polygon RDD.

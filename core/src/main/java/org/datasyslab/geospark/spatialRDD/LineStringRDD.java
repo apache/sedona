@@ -42,6 +42,11 @@ import org.datasyslab.geospark.formatMapper.LineStringFormatMapper;
 public class LineStringRDD
         extends SpatialRDD<LineString>
 {
+    /**
+     * Instantiates a new line string RDD.
+     *
+     */
+    public LineStringRDD(){}
 
     /**
      * Instantiates a new line string RDD.
