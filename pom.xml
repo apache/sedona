@@ -45,8 +45,8 @@
         <scala.version>2.11.8</scala.version>
         <scala.compat.version>2.11</scala.compat.version>
         <geotools.version>17.0</geotools.version>
-        <spark.version>2.3.0</spark.version>
-        <spark.compat.version>2.3</spark.compat.version>
+        <spark.version>2.1.2</spark.version>
+        <spark.compat.version>2.1</spark.compat.version>
     </properties>
     <dependencies>
         <dependency>
