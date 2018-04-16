@@ -62,9 +62,6 @@ public class PointRDDTest
      *
      * @throws Exception the exception
      */
-    /*
-        This test case will load a sample data file and
-     */
     @Test
     public void testConstructor()
             throws Exception
@@ -74,13 +71,23 @@ public class PointRDDTest
         assertEquals(inputBoundary, spatialRDD.boundaryEnvelope);
     }
 
+    @Test
+    public void testEmptyConstructor()
+            throws Exception
+    {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
+        spatialRDD.buildIndex(IndexType.RTREE, false);
+        // Create an empty spatialRDD and manually assemble it
+        PointRDD spatialRDDcopy = new PointRDD();
+        spatialRDDcopy.rawSpatialRDD = spatialRDD.rawSpatialRDD;
+        spatialRDDcopy.indexedRawRDD = spatialRDD.indexedRawRDD;
+        spatialRDDcopy.analyze();
+    }
+
     /**
      * Test equal partitioning.
      *
      * @throws Exception the exception
-     */
-    /*
-     *  This test case test whether the Hilbert Curve grid can be build correctly.
      */
     @Test
     public void testEqualPartitioning()
@@ -99,9 +106,6 @@ public class PointRDDTest
      *
      * @throws Exception the exception
      */
-    /*
-     *  This test case test whether the Hilbert Curve grid can be build correctly.
-     */
     @Test
     public void testHilbertCurveSpatialPartitioing()
             throws Exception
@@ -119,9 +123,6 @@ public class PointRDDTest
      *
      * @throws Exception the exception
      */
-    /*
-     *  This test case test whether the STR-Tree grid can be build correctly.
-     */
     @Test
     public void testRTreeSpatialPartitioing()
             throws Exception
@@ -138,9 +139,6 @@ public class PointRDDTest
      * Test voronoi spatial partitioing.
      *
      * @throws Exception the exception
-     */
-    /*
-     *  This test case test whether the Voronoi grid can be build correctly.
      */
     @Test
     public void testVoronoiSpatialPartitioing()
