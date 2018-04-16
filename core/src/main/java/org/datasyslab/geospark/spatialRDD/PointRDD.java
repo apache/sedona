@@ -47,6 +47,12 @@ public class PointRDD
     /**
      * Instantiates a new point RDD.
      *
+     */
+    public PointRDD(){}
+
+    /**
+     * Instantiates a new point RDD.
+     *
      * @param rawSpatialRDD the raw spatial RDD
      */
     public PointRDD(JavaRDD<Point> rawSpatialRDD)
