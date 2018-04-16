@@ -81,6 +81,13 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
     val joinQueryPartitioningType = GridType.QUADTREE
     val eachQueryLoopTimes = 1
 
+    it("should pass the empty constructor test") {
+      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
+      val objectRDDcopy = new PointRDD()
+      objectRDDcopy.rawSpatialRDD = objectRDD.rawSpatialRDD
+      objectRDDcopy.analyze()
+    }
+
     it("should pass spatial range query") {
       val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
       for (i <- 1 to eachQueryLoopTimes) {
