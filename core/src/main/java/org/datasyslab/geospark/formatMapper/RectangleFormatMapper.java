@@ -50,21 +50,20 @@ public class RectangleFormatMapper
      */
     public RectangleFormatMapper(FileDataSplitter Splitter, boolean carryInputData)
     {
-        super(Splitter, carryInputData);
+        super(0, -1, Splitter, carryInputData);
     }
 
     /**
      * Instantiates a new rectangle format mapper.
      *
      * @param startOffset the start offset
-     * @param endOffset the end offset
      * @param Splitter the splitter
      * @param carryInputData the carry input data
      */
-    public RectangleFormatMapper(Integer startOffset, Integer endOffset, FileDataSplitter Splitter,
+    public RectangleFormatMapper(Integer startOffset, FileDataSplitter Splitter,
             boolean carryInputData)
     {
-        super(startOffset, endOffset, Splitter, carryInputData);
+        super(startOffset, startOffset+3, Splitter, carryInputData);
     }
 
     @Override
@@ -86,23 +85,19 @@ public class RectangleFormatMapper
                     break;
                 }
                 default: {
-                    String[] columns = line.split(splitter.getDelimiter());
-                    double x1 = Double.parseDouble(columns[this.startOffset]);
-                    double x2 = Double.parseDouble(columns[this.startOffset + 2]);
-                    double y1 = Double.parseDouble(columns[this.startOffset + 1]);
-                    double y2 = Double.parseDouble(columns[this.startOffset + 3]);
-
+                    // The rectangle mapper reads two coordinates from the input line. The two coordinates are the two on the diagonal.
+                    Coordinate[] diagonalCoordinates = readCoordinates(line);
+                    assert  diagonalCoordinates.length == 2;
                     Coordinate[] coordinates = new Coordinate[5];
-                    coordinates[0] = new Coordinate(x1, y1);
-                    coordinates[1] = new Coordinate(x1, y2);
-                    coordinates[2] = new Coordinate(x2, y2);
-                    coordinates[3] = new Coordinate(x2, y1);
+                    coordinates[0] = diagonalCoordinates[0];
+                    coordinates[1] = new Coordinate(diagonalCoordinates[0].x, diagonalCoordinates[1].y);
+                    coordinates[2] = diagonalCoordinates[1];
+                    coordinates[3] = new Coordinate(diagonalCoordinates[1].x, diagonalCoordinates[0].y);
                     coordinates[4] = coordinates[0];
-
                     LinearRing linear = factory.createLinearRing(coordinates);
                     Polygon polygon = new Polygon(linear, null, factory);
                     if (this.carryInputData) {
-                        polygon.setUserData(line);
+                        polygon.setUserData(otherAttributes);
                     }
                     result.add(polygon);
                     break;

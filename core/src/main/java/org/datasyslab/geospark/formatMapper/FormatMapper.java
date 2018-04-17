@@ -68,6 +68,11 @@ public class FormatMapper
      */
     protected final boolean carryInputData;
 
+    /**
+     * Non-spatial attributes in each input row will be concatenated to a tab separated string
+     */
+    protected String otherAttributes = "";
+
     protected GeometryType geometryType = null;
 
     /**
@@ -78,8 +83,7 @@ public class FormatMapper
     transient protected GeoJSONReader geoJSONReader = new GeoJSONReader();
 
     transient protected WKTReader wktReader = new WKTReader();
-
-    transient protected WKBReader wkbReader = new WKBReader();
+    // For some unknown reasons, the wkb reader cannot be used in transient variable like the wkt reader.
 
     /**
      * Instantiates a new format mapper.
@@ -98,14 +102,13 @@ public class FormatMapper
     }
 
     /**
-     * Instantiates a new format mapper.
-     *
-     * @param splitter the splitter
-     * @param carryInputData the carry input data
+     * Instantiates a new format mapper. This is extensively used in GeoSparkSQL.
+     * @param splitter
+     * @param carryInputData
      */
     public FormatMapper(FileDataSplitter splitter, boolean carryInputData)
     {
-        this(0, -1, splitter, carryInputData);
+        this(0,-1,splitter,carryInputData);
     }
 
     public FormatMapper(int startOffset, int endOffset, FileDataSplitter splitter, boolean carryInputData, GeometryType geometryType)
@@ -114,9 +117,15 @@ public class FormatMapper
         this.geometryType = geometryType;
     }
 
+    /**
+     * This format mapper is used in GeoSparkSQL.
+     * @param splitter
+     * @param carryInputData
+     * @param geometryType
+     */
     public FormatMapper(FileDataSplitter splitter, boolean carryInputData, GeometryType geometryType)
     {
-        this(splitter, carryInputData);
+        this(0, -1, splitter, carryInputData);
         this.geometryType = geometryType;
     }
 
@@ -135,13 +144,27 @@ public class FormatMapper
         if (geoJson.contains("Feature")) {
             Feature feature = (Feature) GeoJSONFactory.create(geoJson);
             geometry = geoJSONReader.read(feature.getGeometry());
+            if (carryInputData) {
+                boolean hasIdFlag = false;
+                if (feature.getId()!=null)
+                {
+                    this.otherAttributes += feature.getId();
+                    hasIdFlag = true;
+                }
+                if (feature.getProperties()!=null)
+                {
+                    if (hasIdFlag)
+                    {
+                        this.otherAttributes +="\t" + feature.getProperties();
+                    }
+                    else this.otherAttributes +=feature.getProperties();
+                }
+                geometry.setUserData(otherAttributes);
+            }
         }
         else {
             geometry = geoJSONReader.read(geoJson);
-        }
-
-        if (carryInputData) {
-            geometry.setUserData(geoJson);
+            // No input data needs to be carried.
         }
         return geometry;
     }
@@ -152,7 +175,23 @@ public class FormatMapper
         final String[] columns = line.split(splitter.getDelimiter());
         final Geometry geometry = wktReader.read(columns[this.startOffset]);
         if (carryInputData) {
-            geometry.setUserData(line);
+            boolean firstColumnFlag = true;
+            for (int i=0; i<columns.length;i++)
+            {
+                if (i!=this.startOffset )
+                {
+                    if (firstColumnFlag)
+                    {
+                        otherAttributes +=columns[i];
+                        firstColumnFlag = false;
+                    }
+                    else
+                    {
+                        otherAttributes += "\t"+columns[i];
+                    }
+                }
+            }
+            geometry.setUserData(otherAttributes);
         }
         return geometry;
     }
@@ -162,9 +201,27 @@ public class FormatMapper
     {
         final String[] columns = line.split(splitter.getDelimiter());
         final byte[] aux = WKBReader.hexToBytes(columns[this.startOffset]);
+        // For some unknown reasons, the wkb reader cannot be used in transient variable like the wkt reader.
+        WKBReader wkbReader = new WKBReader();
         final Geometry geometry = wkbReader.read(aux);
         if (carryInputData) {
-            geometry.setUserData(line);
+            boolean firstColumnFlag = true;
+            for (int i=0; i<columns.length;i++)
+            {
+                if (i!=this.startOffset )
+                {
+                    if (firstColumnFlag)
+                    {
+                        otherAttributes +=columns[i];
+                        firstColumnFlag = false;
+                    }
+                    else
+                    {
+                        otherAttributes += "\t"+columns[i];
+                    }
+                }
+            }
+            geometry.setUserData(otherAttributes);
         }
         return geometry;
     }
@@ -176,6 +233,25 @@ public class FormatMapper
         final Coordinate[] coordinates = new Coordinate[(actualEndOffset - startOffset + 1) / 2];
         for (int i = this.startOffset; i <= actualEndOffset; i += 2) {
             coordinates[i / 2] = new Coordinate(Double.parseDouble(columns[i]), Double.parseDouble(columns[i + 1]));
+        }
+        boolean firstColumnFlag = true;
+        for (int i= 0;i<this.startOffset;i++)
+        {
+            if (firstColumnFlag)
+            {
+                otherAttributes += columns[i];
+                firstColumnFlag = false;
+            }
+            else otherAttributes += "\t" + columns[i];
+        }
+        for (int i=actualEndOffset+1;i<columns.length;i++)
+        {
+            if (firstColumnFlag)
+            {
+                otherAttributes += columns[i];
+                firstColumnFlag = false;
+            }
+            else otherAttributes += "\t" + columns[i];
         }
         return coordinates;
     }
@@ -201,7 +277,7 @@ public class FormatMapper
                 return readGeoJSON(line);
             default: {
                 if (this.geometryType == null) {
-                    throw new IllegalArgumentException("[GeoSpark][FormatMapper] You must specify GeometryType when you use delimiter rather WKT or GeoJSON");
+                    throw new IllegalArgumentException("[GeoSpark][FormatMapper] You must specify GeometryType when you use delimiter rather than WKB, WKT or GeoJSON");
                 }
                 else {
                     return createGeometry(readCoordinates(line), geometryType);
