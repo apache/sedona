@@ -90,7 +90,6 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
 
     it("should pass spatial range query") {
       val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
-      println(objectRDD.rawSpatialRDD.take(1)(0))
       for (i <- 1 to eachQueryLoopTimes) {
         val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false, false).count
       }

@@ -50,7 +50,7 @@ public class PolygonFormatMapper
      */
     public PolygonFormatMapper(FileDataSplitter Splitter, boolean carryInputData)
     {
-        super(0, -1, Splitter, carryInputData);
+        super(Splitter, carryInputData);
     }
 
     /**
@@ -85,17 +85,12 @@ public class PolygonFormatMapper
                     addGeometry(geometry, result);
                     break;
                 }
-                case WKB: {
-                    Geometry geometry = readWkb(line);
-                    addGeometry(geometry, result);
-                    break;
-                }
                 default: {
                     Coordinate[] coordinates = readCoordinates(line);
                     LinearRing linearRing = factory.createLinearRing(coordinates);
                     Polygon polygon = factory.createPolygon(linearRing);
                     if (this.carryInputData) {
-                        polygon.setUserData(otherAttributes);
+                        polygon.setUserData(line);
                     }
                     result.add(polygon);
                     break;

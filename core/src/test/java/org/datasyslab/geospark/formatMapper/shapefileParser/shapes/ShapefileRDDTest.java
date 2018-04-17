@@ -146,7 +146,6 @@ public class ShapefileRDDTest
             }
             featureTexts.add(String.valueOf(geometry));
         }
-        features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
         ShapefileRDD shapefileRDD = new ShapefileRDD(sc, InputLocation);
         PolygonRDD spatialRDD = new PolygonRDD(shapefileRDD.getPolygonRDD());
@@ -189,7 +188,6 @@ public class ShapefileRDDTest
             SimpleFeature feature = features.next();
             featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
         }
-        features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
         ShapefileRDD shapefileRDD = new ShapefileRDD(sc, InputLocation);
         LineStringRDD spatialRDD = new LineStringRDD(shapefileRDD.getLineStringRDD());
@@ -232,7 +230,6 @@ public class ShapefileRDDTest
             SimpleFeature feature = features.next();
             featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
         }
-        features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
         ShapefileRDD shapefileRDD = new ShapefileRDD(sc, InputLocation);
         for (Geometry geometry : shapefileRDD.getShapeRDD().collect()) {
@@ -267,7 +264,6 @@ public class ShapefileRDDTest
             SimpleFeature feature = features.next();
             featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
         }
-        features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
         ShapefileRDD shapefileRDD = new ShapefileRDD(sc, InputLocation);
         PointRDD spatialRDD = new PointRDD(shapefileRDD.getPointRDD());
@@ -317,7 +313,6 @@ public class ShapefileRDDTest
             }
             featureTexts.add(String.valueOf(geometry));
         }
-        features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
         ShapefileRDD shapefileRDD = new ShapefileRDD(sc, InputLocation);
         PolygonRDD spatialRDD = new PolygonRDD(shapefileRDD.getPolygonRDD());

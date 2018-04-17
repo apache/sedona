@@ -64,13 +64,12 @@ public class PointRDDTest
      */
     @Test
     public void testConstructor()
+            throws Exception
     {
         PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
         assertEquals(inputCount, spatialRDD.approximateTotalCount);
         assertEquals(inputBoundary, spatialRDD.boundaryEnvelope);
-        assert spatialRDD.rawSpatialRDD.take(1).get(0).getUserData().equals("testattribute");
     }
-
 
     @Test
     public void testEmptyConstructor()

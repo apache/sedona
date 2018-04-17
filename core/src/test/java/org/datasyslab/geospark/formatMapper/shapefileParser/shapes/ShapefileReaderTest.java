@@ -74,6 +74,8 @@ public class ShapefileReaderTest
      */
     public static JavaSparkContext sc;
 
+    private DataStore dataStore;
+
     @BeforeClass
     public static void onceExecutedBeforeAll()
     {
@@ -82,6 +84,14 @@ public class ShapefileReaderTest
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
         //Hard code to a file in resource folder. But you can replace it later in the try-catch field in your hdfs system.
+    }
+
+    @After
+    public void tearDownSingleTest()
+    {
+        if (dataStore != null) {
+            dataStore.dispose();
+        }
     }
 
     /**
@@ -126,7 +136,6 @@ public class ShapefileReaderTest
             }
             featureTexts.add(String.valueOf(geometry));
         }
-        features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
 
         JavaRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
@@ -158,7 +167,6 @@ public class ShapefileReaderTest
             SimpleFeature feature = features.next();
             featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
         }
-        features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
         JavaRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
         LineStringRDD spatialRDD = ShapefileReader.geometryToLineString(geometryRDD);
@@ -189,7 +197,6 @@ public class ShapefileReaderTest
             SimpleFeature feature = features.next();
             featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
         }
-        features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
         JavaRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
         PointRDD spatialRDD = ShapefileReader.geometryToPoint(geometryRDD);
@@ -220,7 +227,6 @@ public class ShapefileReaderTest
             SimpleFeature feature = features.next();
             featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
         }
-        features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
         JavaRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
         PointRDD spatialRDD = ShapefileReader.geometryToPoint(geometryRDD);
@@ -258,7 +264,6 @@ public class ShapefileReaderTest
             }
             featureTexts.add(attr);
         }
-        features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
 
         for (Geometry geometry : ShapefileReader.readToGeometryRDD(sc, inputLocation).collect()) {

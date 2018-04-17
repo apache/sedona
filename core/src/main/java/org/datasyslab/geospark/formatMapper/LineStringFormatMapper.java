@@ -49,7 +49,7 @@ public class LineStringFormatMapper
      */
     public LineStringFormatMapper(FileDataSplitter Splitter, boolean carryInputData)
     {
-        super(0, -1, Splitter, carryInputData);
+        super(Splitter, carryInputData);
     }
 
     /**
@@ -84,16 +84,11 @@ public class LineStringFormatMapper
                     addGeometry(geometry, result);
                     break;
                 }
-                case WKB: {
-                    Geometry geometry = readWkb(line);
-                    addGeometry(geometry, result);
-                    break;
-                }
                 default: {
                     Coordinate[] coordinates = readCoordinates(line);
                     LineString lineString = factory.createLineString(coordinates);
                     if (this.carryInputData) {
-                        lineString.setUserData(otherAttributes);
+                        lineString.setUserData(line);
                     }
                     result.add(lineString);
                     break;
