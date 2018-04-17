@@ -49,7 +49,7 @@ public class PointFormatMapper
      */
     public PointFormatMapper(FileDataSplitter Splitter, boolean carryInputData)
     {
-        super(0, -1, Splitter, carryInputData);
+        super(0, 1, Splitter, carryInputData);
     }
 
     /**

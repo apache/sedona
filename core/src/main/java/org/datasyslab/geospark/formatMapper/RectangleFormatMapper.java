@@ -50,7 +50,7 @@ public class RectangleFormatMapper
      */
     public RectangleFormatMapper(FileDataSplitter Splitter, boolean carryInputData)
     {
-        super(0, -1, Splitter, carryInputData);
+        super(0, 3, Splitter, carryInputData);
     }
 
     /**
