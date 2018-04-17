@@ -49,21 +49,20 @@ public class PointFormatMapper
      */
     public PointFormatMapper(FileDataSplitter Splitter, boolean carryInputData)
     {
-        super(Splitter, carryInputData);
+        super(0, -1, Splitter, carryInputData);
     }
 
     /**
      * Instantiates a new point format mapper.
      *
      * @param startOffset the start offset
-     * @param endOffset the end offset
      * @param Splitter the splitter
      * @param carryInputData the carry input data
      */
-    public PointFormatMapper(Integer startOffset, Integer endOffset, FileDataSplitter Splitter,
+    public PointFormatMapper(Integer startOffset, FileDataSplitter Splitter,
             boolean carryInputData)
     {
-        super(startOffset, endOffset, Splitter, carryInputData);
+        super(startOffset, startOffset+1, Splitter, carryInputData);
     }
 
     @Override
@@ -79,18 +78,22 @@ public class PointFormatMapper
                     addGeometry(geometry, result);
                     break;
                 }
-                case WKT:
+                case WKT: {
                     Geometry geometry = readWkt(line);
                     addGeometry(geometry, result);
                     break;
+                }
+                case WKB: {
+                    Geometry geometry = readWkb(line);
+                    addGeometry(geometry, result);
+                    break;
+                }
                 default:
-                    String[] columns = line.split(splitter.getDelimiter());
-                    Coordinate coordinate = new Coordinate(
-                            Double.parseDouble(columns[this.startOffset]),
-                            Double.parseDouble(columns[1 + this.startOffset]));
-                    Point point = factory.createPoint(coordinate);
+                    Coordinate[] coordinates = readCoordinates(line);
+                    assert coordinates.length == 1;
+                    Point point = factory.createPoint(coordinates[0]);
                     if (this.carryInputData) {
-                        point.setUserData(line);
+                        point.setUserData(otherAttributes);
                     }
                     result.add(point);
                     break;
