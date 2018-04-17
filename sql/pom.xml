@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.datasyslab</groupId>
         <artifactId>geospark-parent</artifactId>
-        <version>1.1.2-RC1</version>
+        <version>1.1.2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 	<artifactId>geospark-sql_2.3</artifactId>
