@@ -312,6 +312,7 @@ public class ShapefileReaderTest
         FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore
                 .getFeatureSource(typeName);
         Filter filter = Filter.INCLUDE;
+        dataStore.dispose();
         return source.getFeatures(filter);
     }
 
