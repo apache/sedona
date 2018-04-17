@@ -25,6 +25,6 @@ GeoSpark contains three modules:
 **Please visit [GeoSpark website](http://datasystemslab.github.io/GeoSpark/) for details and documentations.**
 
 ## News!
-* GeoSpark 1.1.1 is released. This release contains several bug fixes. Thanks for the patch from Lucas C.! [Release notes](http://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Release-notes/) || [Maven Coordinate](http://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Maven-Central-Coordinates/).
+* ~~GeoSpark 1.1.1 is released~~. GeoSpark 1.1.2 is released. This release contains several bug fixes. Thanks for the patch from Lucas C.! [Release notes](http://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Release-notes/) || [Maven Coordinate](http://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Maven-Central-Coordinates/).
 * GeoSpark 1.1.0 is released. This release contains new SQL functions, custom Quad-Tree/R-Tree index serializers and bug fixes. GeoSpark 1.1.0 supposrt Apache Spark 2.3. **Note, GeoSparkSQL Maven Coordinate changed** [Release notes](http://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Release-notes/) || [Maven Coordinate](http://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Maven-Central-Coordinates/) (Thanks for the index serializer patch contributed by Zongsi Zhang!)
 * GeoSpark wiki is now moved to [GeoSpark new website](http://datasystemslab.github.io/GeoSpark/)! Users are welcome to contribute your tutorials and stories by making a PR!

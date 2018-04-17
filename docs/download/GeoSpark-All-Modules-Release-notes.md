@@ -1,4 +1,4 @@
-## v1.1.1
+## v1.1.2
 
 This version contains several bug fixes and several small improvements.
 
@@ -18,6 +18,10 @@ This version contains several bug fixes and several small improvements.
 **GeoSpark Viz**
 
 None
+
+## v1.1.1
+
+This release has been skipped due to wrong Maven Central configuration.
 
 ## v1.1.0
 
