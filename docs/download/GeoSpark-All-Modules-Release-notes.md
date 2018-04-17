@@ -1,3 +1,24 @@
+## v1.1.1
+
+This version contains several bug fixes and several small improvements.
+
+**GeoSpark Core**
+
+* Added WKB input format support (Issue #[2](https://github.com/DataSystemsLab/GeoSpark/issues/2), [213](https://github.com/DataSystemsLab/GeoSpark/issues/213)): See PR #[203](https://github.com/DataSystemsLab/GeoSpark/pull/203), [216](https://github.com/DataSystemsLab/GeoSpark/pull/216). Thanks for the patch from Lucas C.!
+* Added empty constructors for typed SpatialRDDs. This is especially useful when the users want to load a persisted RDD from disk and assemble a typed SpatialRDD by themselves. See PR #[211](https://github.com/DataSystemsLab/GeoSpark/pull/211)
+* Fixed Issue #[214](https://github.com/DataSystemsLab/GeoSpark/issues/214): duplicated geometry parts when print each Geometry in a SpatialRDD to a String using toString() method. See PR #[216](https://github.com/DataSystemsLab/GeoSpark/pull/216)
+
+**GeoSpark SQL**
+
+* Added ST_GeomFromWKB expression (Issue #[2](https://github.com/DataSystemsLab/GeoSpark/issues/2)): See PR #[203](https://github.com/DataSystemsLab/GeoSpark/pull/203). Thanks for the patch from Lucas C.!
+* Fixed Issue #[193](https://github.com/DataSystemsLab/GeoSpark/issues/193): IllegalArgumentException in RangeJoin: Number of partitions must be >= 0. See PR #[207](https://github.com/DataSystemsLab/GeoSpark/pull/207)
+* Fixed Issue #[204](https://github.com/DataSystemsLab/GeoSpark/issues/204): Wrong ST_Intersection result. See PR #[205](https://github.com/DataSystemsLab/GeoSpark/pull/205)
+* [For Developer] Separate the expression catalog and the udf registrator to simplify the steps of merging patches among different Spark versions. See PR #[209](https://github.com/DataSystemsLab/GeoSpark/pull/209)
+
+**GeoSpark Viz**
+
+None
+
 ## v1.1.0
 
 This version adds very efficient R-Tree and Quad-Tree index serializers and supports Apache Spark and  SparkSQL 2.3. See [Maven Central coordinate](./GeoSpark-All-Modules-Maven-Central-Coordinates) to locate the particular version.
