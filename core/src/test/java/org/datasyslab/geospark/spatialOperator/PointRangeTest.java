@@ -167,7 +167,7 @@ public class PointRangeTest
     public void testSpatialRangeQuery()
             throws Exception
     {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, false);
         for (int i = 0; i < loopTimes; i++) {
             long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).count();
             assert resultSize == 3157;
@@ -184,7 +184,7 @@ public class PointRangeTest
     public void testSpatialRangeQueryUsingIndex()
             throws Exception
     {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, false);
         spatialRDD.buildIndex(IndexType.RTREE, false);
         for (int i = 0; i < loopTimes; i++) {
             long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, true).count();

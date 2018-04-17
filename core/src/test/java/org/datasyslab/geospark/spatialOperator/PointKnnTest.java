@@ -178,7 +178,7 @@ public class PointKnnTest
     public void testSpatialKnnQuery()
             throws Exception
     {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, true);
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, false);
 
         for (int i = 0; i < loopTimes; i++) {
             List<Point> result = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, false);
@@ -197,7 +197,7 @@ public class PointKnnTest
     public void testSpatialKnnQueryUsingIndex()
             throws Exception
     {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, true);
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, false);
         pointRDD.buildIndex(IndexType.RTREE, false);
         for (int i = 0; i < loopTimes; i++) {
             List<Point> result = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, true);
@@ -216,7 +216,7 @@ public class PointKnnTest
     public void testSpatialKNNCorrectness()
             throws Exception
     {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, true);
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, false);
         List<Point> resultNoIndex = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, false);
         pointRDD.buildIndex(IndexType.RTREE, false);
         List<Point> resultWithIndex = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, true);
