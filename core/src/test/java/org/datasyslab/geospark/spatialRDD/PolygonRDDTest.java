@@ -26,6 +26,7 @@
 package org.datasyslab.geospark.spatialRDD;
 
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
 import com.vividsolutions.jts.index.strtree.STRtree;
@@ -37,6 +38,9 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -50,6 +54,8 @@ public class PolygonRDDTest
         extends SpatialRDDTestBase
 {
     private static String InputLocationGeojson;
+    private static String InputLocationWkt;
+    private static String InputLocationWkb;
 
     /**
      * Once executed before all.
@@ -59,6 +65,8 @@ public class PolygonRDDTest
     {
         initialize(PolygonRDDTest.class.getSimpleName(), "polygon.test.properties");
         InputLocationGeojson = "file://" + PolygonRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocationGeojson")).getPath();
+        InputLocationWkt = "file://" + PolygonRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocationWkt")).getPath();
+        InputLocationWkb = "file://" + PolygonRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocationWkb")).getPath();
     }
 
     /**
@@ -68,7 +76,6 @@ public class PolygonRDDTest
      */
     @Test
     public void testConstructor()
-            throws Exception
     {
         PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
         assertEquals(inputCount, spatialRDD.approximateTotalCount);
@@ -91,12 +98,29 @@ public class PolygonRDDTest
 
     @Test
     public void testGeoJSONConstructor()
-            throws Exception
     {
         PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocationGeojson, FileDataSplitter.GEOJSON, true, 4, StorageLevel.MEMORY_ONLY());
-        //todo: Set this to debug level
         assert spatialRDD.approximateTotalCount == 1001;
         assert spatialRDD.boundaryEnvelope != null;
+        assert spatialRDD.rawSpatialRDD.take(1).get(0).getUserData().equals("{STATEFP=01, COUNTYFP=077, TRACTCE=011501, BLKGRPCE=5, AFFGEOID=1500000US010770115015, GEOID=010770115015, NAME=5, LSAD=BG, ALAND=6844991, AWATER=32636}");
+    }
+
+    @Test
+    public void testWktConstructor()
+    {
+        PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocationWkt, FileDataSplitter.WKT, true, StorageLevel.MEMORY_ONLY());
+        assert spatialRDD.approximateTotalCount == 103;
+        assert spatialRDD.boundaryEnvelope != null;
+        assert spatialRDD.rawSpatialRDD.take(1).get(0).getUserData().equals("31\t039\t00835841\t31039\tCuming\tCuming County\t06\tH1\tG4020\t\t\t\tA\t1477895811\t10447360\t+41.9158651\t-096.7885168");
+    }
+
+    @Test
+    public void testWkbConstructor()
+    {
+        PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocationWkb, FileDataSplitter.WKB, true, StorageLevel.MEMORY_ONLY());
+        assert spatialRDD.approximateTotalCount == 103;
+        assert spatialRDD.boundaryEnvelope != null;
+        assert spatialRDD.rawSpatialRDD.take(1).get(0).getUserData().equals("31\t039\t00835841\t31039\tCuming\tCuming County\t06\tH1\tG4020\t\t\t\tA\t1477895811\t10447360\t+41.9158651\t-096.7885168");
     }
 
     /**
@@ -214,7 +238,45 @@ public class PolygonRDDTest
         List<Polygon> result = rectangleRDD.rawSpatialRDD.collect();
         assert result.size() > -1;
     }  
-    
+
+    private String readFirstLine(String filePath)
+    {
+        BufferedReader br = null;
+        FileReader fr = null;
+        String cursor = null;
+        try {
+
+            //br = new BufferedReader(new FileReader(FILENAME));
+            fr = new FileReader(filePath);
+            br = new BufferedReader(fr);
+
+            while ((cursor = br.readLine()) != null) {
+                break;
+            }
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+        } finally {
+
+            try {
+
+                if (br != null)
+                    br.close();
+
+                if (fr != null)
+                    fr.close();
+
+            } catch (IOException ex) {
+
+                ex.printStackTrace();
+
+            }
+
+        }
+        return cursor;
+    }
     /*
     @Test
     public void testPolygonUnion()
