@@ -3,10 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.datasyslab</groupId>
 	<artifactId>geospark-parent</artifactId>
-	<version>1.1.1-SNAPSHOT</version>
+	<version>1.1.1</version>
 	<packaging>pom</packaging>
 	<name>geospark-parent</name>
 	<url>http://maven.apache.org</url>
+    <description>Apache Spark geospatial extention: SpatialRDD, SpatialSQL and map visualization</description>
   <modules>
     <module>core</module>
     <module>sql</module>    
