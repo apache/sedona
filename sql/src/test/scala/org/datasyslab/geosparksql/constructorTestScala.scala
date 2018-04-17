@@ -84,6 +84,7 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll {
       polygonWktDf.createOrReplaceTempView("polygontable")
       polygonWktDf.show()
       var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      polygonDf.show(10)
       assert(polygonDf.count() == 100)
     }
 
@@ -92,6 +93,7 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll {
       polygonWkbDf.createOrReplaceTempView("polygontable")
       polygonWkbDf.show()
       var polygonDf = sparkSession.sql("select ST_GeomFromWKB(polygontable._c0) as countyshape from polygontable")
+      polygonDf.show(10)
       assert(polygonDf.count() == 100)
     }
 
