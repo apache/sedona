@@ -94,7 +94,7 @@ public class PointRDDTest
     public void testEqualPartitioning()
             throws Exception
     {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, 10, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, false, 10, StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.EQUALGRID);
         for (Envelope d : spatialRDD.grids) {
             //System.out.println("PointRDD spatial partitioning grids: "+d);
@@ -111,7 +111,7 @@ public class PointRDDTest
     public void testHilbertCurveSpatialPartitioing()
             throws Exception
     {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, 10, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, false, 10, StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.HILBERT);
         for (Envelope d : spatialRDD.grids) {
             //System.out.println("PointRDD spatial partitioning grids: "+d.grid);
@@ -145,7 +145,7 @@ public class PointRDDTest
     public void testVoronoiSpatialPartitioing()
             throws Exception
     {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, 10, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, false, 10, StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.VORONOI);
         for (Envelope d : spatialRDD.grids) {
             //System.out.println("PointRDD spatial partitioning grids: "+d.grid);
