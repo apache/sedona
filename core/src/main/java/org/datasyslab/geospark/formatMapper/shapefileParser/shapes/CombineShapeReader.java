@@ -35,13 +35,11 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.log4j.Logger;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.FieldDescriptor;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeType;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.List;
 
 public class CombineShapeReader
         extends RecordReader<ShapeKey, PrimitiveShape>
