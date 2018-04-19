@@ -39,7 +39,7 @@ public class FieldDescriptor
     /**
      * field name.
      */
-    private String filedName = null;
+    private String fieldName = null;
 
     /**
      * field type.
@@ -57,23 +57,23 @@ public class FieldDescriptor
     private byte fieldDecimalCount = 0;
 
     /**
-     * Gets the filed name.
+     * Gets the field name.
      *
-     * @return the filed name
+     * @return the field name
      */
-    public String getFiledName()
+    public String getFieldName()
     {
-        return filedName;
+        return fieldName;
     }
 
     /**
-     * Sets the filed name.
+     * Sets the field name.
      *
-     * @param filedName the new filed name
+     * @param fieldName the new field name
      */
-    public void setFiledName(String filedName)
+    public void setFieldName(String fieldName)
     {
-        this.filedName = filedName;
+        this.fieldName = fieldName;
     }
 
     /**
