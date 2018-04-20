@@ -64,6 +64,10 @@ public class DbfParseUtil
         return (float) numRecordRead / (float) numRecord;
     }
 
+    public List<FieldDescriptor> getFieldDescriptors() {
+        return fieldDescriptors;
+    }
+
     /**
      * fieldDescriptors of current .dbf file
      */
@@ -117,7 +121,7 @@ public class DbfParseUtil
             while (nameBytes[zeroId] != 0) { zeroId++; }
             Text fieldName = new Text();
             fieldName.append(nameBytes, 0, zeroId);
-            descriptor.setFiledName(fieldName.toString());
+            descriptor.setFieldName(fieldName.toString());
             // read field type
             descriptor.setFieldType(inputStream.readByte());
             // skip reserved field
