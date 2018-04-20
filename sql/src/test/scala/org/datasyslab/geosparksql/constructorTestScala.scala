@@ -33,7 +33,7 @@ import org.apache.spark.sql.SparkSession
 import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader
 import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
 import org.datasyslab.geospark.spatialRDD.SpatialRDD
-import org.datasyslab.geosparksql.utils.{Adapter, GeoSparkSQLRegistrator}
+import org.datasyslab.geosparksql.utils.{Adapter, DataFrameFactory, GeoSparkSQLRegistrator}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
 class constructorTestScala extends FunSpec with BeforeAndAfterAll {
@@ -55,7 +55,7 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll {
 
     GeoSparkSQLRegistrator.registerAll(sparkSession.sqlContext)
 
-    val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
+    val resourceFolder = System.getProperty("user.dir") + "/sql/src/test/resources/"
 
     val mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv"
     val mixedWkbGeometryInputLocation = resourceFolder + "county_small_wkb.tsv"
@@ -107,11 +107,7 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll {
     }
 
     it("Read shapefile to DataFrame") {
-      var spatialRDD = new SpatialRDD[Geometry]
-      spatialRDD.rawSpatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileInputLocation)
-      spatialRDD.analyze()
-      var shapfileDf = Adapter.toDf(spatialRDD, sparkSession)
-      shapfileDf.show()
+      DataFrameFactory.geometryDFFromShapeFile(sparkSession,shapefileInputLocation).show()
     }
 
     it("Passed ST_Circle") {
@@ -121,5 +117,6 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll {
       circleDf.show()
       assert(circleDf.count() == 1000)
     }
+
   }
 }
