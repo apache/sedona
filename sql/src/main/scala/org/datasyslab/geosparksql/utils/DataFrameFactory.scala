@@ -9,7 +9,6 @@ object DataFrameFactory {
   def geometryDFFromShapeFile(spark: org.apache.spark.sql.SparkSession, folderPath: String): org.apache.spark.sql.DataFrame ={
     val srdd = new SpatialRDD[Geometry]
     srdd.rawSpatialRDD = ShapefileReader.readToGeometryRDD(spark.sparkContext, folderPath)
-    srdd.analyze()
     val df = Adapter.toDf(srdd, spark)
     val fieldNames = ShapefileReader.readFieldNames(spark.sparkContext, folderPath)
     if(fieldNames != null)

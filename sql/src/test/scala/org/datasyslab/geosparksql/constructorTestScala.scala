@@ -60,7 +60,7 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll {
     val mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv"
     val mixedWkbGeometryInputLocation = resourceFolder + "county_small_wkb.tsv"
     val plainPointInputLocation = resourceFolder + "testpoint.csv"
-    val shapefileInputLocation = resourceFolder + "shapefiles/polygon"
+    val shapefileInputLocation = resourceFolder + "shapefiles/dbf"
     val csvPointInputLocation = resourceFolder + "arealm.csv"
     val geoJsonGeomInputLocation = resourceFolder + "testPolygon.json"
 
@@ -107,7 +107,9 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll {
     }
 
     it("Read shapefile to DataFrame") {
-      DataFrameFactory.geometryDFFromShapeFile(sparkSession,shapefileInputLocation).show()
+      val df = DataFrameFactory.geometryDFFromShapeFile(sparkSession,shapefileInputLocation)
+      df.show
+      assert (df.columns(1) == "STATEFP")
     }
 
     it("Passed ST_Circle") {
