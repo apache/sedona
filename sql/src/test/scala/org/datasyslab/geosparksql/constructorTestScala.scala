@@ -55,7 +55,7 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll {
 
     GeoSparkSQLRegistrator.registerAll(sparkSession.sqlContext)
 
-    val resourceFolder = System.getProperty("user.dir") + "/sql/src/test/resources/"
+    val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
 
     val mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv"
     val mixedWkbGeometryInputLocation = resourceFolder + "county_small_wkb.tsv"
