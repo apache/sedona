@@ -42,6 +42,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import static org.junit.Assert.assertEquals;
+
 // TODO: Auto-generated Javadoc
 
 /**
@@ -170,7 +172,7 @@ public class PointRangeTest
         PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, false);
         for (int i = 0; i < loopTimes; i++) {
             long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).count();
-            assert resultSize == 3157;
+            assertEquals(resultSize, 2830);
         }
         assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).take(10).get(1).getUserData().toString() != null;
     }
@@ -188,7 +190,8 @@ public class PointRangeTest
         spatialRDD.buildIndex(IndexType.RTREE, false);
         for (int i = 0; i < loopTimes; i++) {
             long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, true).count();
-            assert resultSize == 3157;
+            System.out.println(resultSize);
+            assertEquals(resultSize, 2830);
         }
         assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, true).take(10).get(1).getUserData().toString() != null;
     }

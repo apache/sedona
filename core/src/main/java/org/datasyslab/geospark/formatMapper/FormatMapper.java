@@ -29,6 +29,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 import com.vividsolutions.jts.io.WKBReader;
@@ -93,12 +94,18 @@ public class FormatMapper
      * @param splitter the splitter
      * @param carryInputData the carry input data
      */
-    public FormatMapper(int startOffset, int endOffset, FileDataSplitter splitter, boolean carryInputData)
+    public FormatMapper(int startOffset, int endOffset, FileDataSplitter splitter, boolean carryInputData, GeometryType geometryType)
     {
         this.startOffset = startOffset;
         this.endOffset = endOffset;
         this.splitter = splitter;
         this.carryInputData = carryInputData;
+        this.geometryType = geometryType;
+        // Only the following formats are allowed to use this format mapper because each input has the geometry type definition
+        if (geometryType == null)
+        {
+            assert splitter == FileDataSplitter.WKB || splitter == FileDataSplitter.WKT || splitter == FileDataSplitter.GEOJSON;
+        }
     }
 
     /**
@@ -108,14 +115,9 @@ public class FormatMapper
      */
     public FormatMapper(FileDataSplitter splitter, boolean carryInputData)
     {
-        this(0,-1,splitter,carryInputData);
+        this(0,-1,splitter,carryInputData, null);
     }
 
-    public FormatMapper(int startOffset, int endOffset, FileDataSplitter splitter, boolean carryInputData, GeometryType geometryType)
-    {
-        this(startOffset, endOffset, splitter, carryInputData);
-        this.geometryType = geometryType;
-    }
 
     /**
      * This format mapper is used in GeoSparkSQL.
@@ -125,8 +127,7 @@ public class FormatMapper
      */
     public FormatMapper(FileDataSplitter splitter, boolean carryInputData, GeometryType geometryType)
     {
-        this(0, -1, splitter, carryInputData);
-        this.geometryType = geometryType;
+        this(0, -1, splitter, carryInputData, geometryType);
     }
 
     private void readObject(ObjectInputStream inputStream)
@@ -146,6 +147,7 @@ public class FormatMapper
             geometry = geoJSONReader.read(feature.getGeometry());
             if (carryInputData) {
                 boolean hasIdFlag = false;
+                otherAttributes = "";
                 if (feature.getId()!=null)
                 {
                     this.otherAttributes += feature.getId();
@@ -176,6 +178,7 @@ public class FormatMapper
         final Geometry geometry = wktReader.read(columns[this.startOffset]);
         if (carryInputData) {
             boolean firstColumnFlag = true;
+            otherAttributes = "";
             for (int i=0; i<columns.length;i++)
             {
                 if (i!=this.startOffset )
@@ -206,6 +209,7 @@ public class FormatMapper
         final Geometry geometry = wkbReader.read(aux);
         if (carryInputData) {
             boolean firstColumnFlag = true;
+            otherAttributes = "";
             for (int i=0; i<columns.length;i++)
             {
                 if (i!=this.startOffset )
@@ -234,24 +238,28 @@ public class FormatMapper
         for (int i = this.startOffset; i <= actualEndOffset; i += 2) {
             coordinates[i / 2] = new Coordinate(Double.parseDouble(columns[i]), Double.parseDouble(columns[i + 1]));
         }
-        boolean firstColumnFlag = true;
-        for (int i= 0;i<this.startOffset;i++)
+        if (carryInputData)
         {
-            if (firstColumnFlag)
+            boolean firstColumnFlag = true;
+            otherAttributes = "";
+            for (int i= 0;i<this.startOffset;i++)
             {
-                otherAttributes += columns[i];
-                firstColumnFlag = false;
+                if (firstColumnFlag)
+                {
+                    otherAttributes += columns[i];
+                    firstColumnFlag = false;
+                }
+                else otherAttributes += "\t" + columns[i];
             }
-            else otherAttributes += "\t" + columns[i];
-        }
-        for (int i=actualEndOffset+1;i<columns.length;i++)
-        {
-            if (firstColumnFlag)
+            for (int i=actualEndOffset+1;i<columns.length;i++)
             {
-                otherAttributes += columns[i];
-                firstColumnFlag = false;
+                if (firstColumnFlag)
+                {
+                    otherAttributes += columns[i];
+                    firstColumnFlag = false;
+                }
+                else otherAttributes += "\t" + columns[i];
             }
-            else otherAttributes += "\t" + columns[i];
         }
         return coordinates;
     }
@@ -289,16 +297,36 @@ public class FormatMapper
     private Geometry createGeometry(Coordinate[] coordinates, GeometryType geometryType)
     {
         GeometryFactory geometryFactory = new GeometryFactory();
+        Geometry geometry = null;
         switch (geometryType) {
             case POINT:
-                return geometryFactory.createPoint(coordinates[0]);
+                geometry = geometryFactory.createPoint(coordinates[0]);
+                break;
             case POLYGON:
-                return geometryFactory.createPolygon(coordinates);
+                geometry = geometryFactory.createPolygon(coordinates);
+                break;
             case LINESTRING:
-                return geometryFactory.createLineString(coordinates);
+                geometry = geometryFactory.createLineString(coordinates);
+                break;
+            case RECTANGLE:
+                // The rectangle mapper reads two coordinates from the input line. The two coordinates are the two on the diagonal.
+                assert  coordinates.length == 2;
+                Coordinate[] polyCoordinates = new Coordinate[5];
+                polyCoordinates[0] = coordinates[0];
+                polyCoordinates[1] = new Coordinate(coordinates[0].x, coordinates[1].y);
+                polyCoordinates[2] = coordinates[1];
+                polyCoordinates[3] = new Coordinate(coordinates[1].x, coordinates[0].y);
+                polyCoordinates[4] = polyCoordinates[0];
+                geometry = factory.createPolygon(polyCoordinates);
+                break;
             // Read string to point if no geometry type specified but GeoSpark should never reach here
             default:
-                return geometryFactory.createPoint(coordinates[0]);
+                geometry = geometryFactory.createPoint(coordinates[0]);
         }
+        if (carryInputData)
+        {
+            geometry.setUserData(otherAttributes);
+        }
+        return geometry;
     }
 }

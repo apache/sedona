@@ -85,6 +85,7 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
       var spatialRDD = new SpatialRDD[Geometry]
       spatialRDD.rawSpatialRDD = Adapter.toRdd(spatialDf)
       spatialRDD.analyze()
+      assert(Adapter.toDf(spatialRDD, sparkSession).columns.length==1)
       Adapter.toDf(spatialRDD, sparkSession).show()
     }
 
@@ -93,12 +94,13 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
       df.show()
       df.createOrReplaceTempView("inputtable")
       // Use Column _c0 as the unique Id but the id can be anything in the same row
-      var spatialDf = sparkSession.sql("select ST_Point(cast(inputtable._c0 as Decimal(24,20)),cast(inputtable._c1 as Decimal(24,20))) as arealandmark from inputtable")
+      var spatialDf = sparkSession.sql("select ST_Point(cast(inputtable._c0 as Decimal(24,20)),cast(inputtable._c1 as Decimal(24,20)), 'myPointId') as arealandmark from inputtable")
       spatialDf.show()
       spatialDf.printSchema()
       var spatialRDD = new SpatialRDD[Geometry]
       spatialRDD.rawSpatialRDD = Adapter.toRdd(spatialDf)
       spatialRDD.analyze()
+      assert(Adapter.toDf(spatialRDD, sparkSession).columns.length==2)
       Adapter.toDf(spatialRDD, sparkSession).show()
     }
 
@@ -113,6 +115,8 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
       spatialRDD.rawSpatialRDD = Adapter.toRdd(spatialDf)
       spatialRDD.analyze()
       Adapter.toDf(spatialRDD, sparkSession).show()
+      assert(Adapter.toDf(spatialRDD, sparkSession).columns.length==1)
+      Adapter.toDf(spatialRDD, sparkSession).show()
     }
 
     it("Read mixed WKT geometries into a SpatialRDD with uniqueId") {
@@ -125,6 +129,7 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
       var spatialRDD = new SpatialRDD[Geometry]
       spatialRDD.rawSpatialRDD = Adapter.toRdd(spatialDf)
       spatialRDD.analyze()
+      assert(Adapter.toDf(spatialRDD, sparkSession).columns.length==3)
       Adapter.toDf(spatialRDD, sparkSession).show()
     }
 
