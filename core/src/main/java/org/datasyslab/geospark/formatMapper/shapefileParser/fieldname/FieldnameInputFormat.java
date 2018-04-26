@@ -1,5 +1,5 @@
 /*
- * FILE: BoundaryInputFormat
+ * FILE: FieldnameInputFormat
  * Copyright (c) 2015 - 2018 GeoSpark Development Team
  *
  * MIT License

@@ -1,5 +1,5 @@
 /*
- * FILE: BoundaryRecordReader
+ * FILE: FieldnameRecordReader
  * Copyright (c) 2015 - 2018 GeoSpark Development Team
  *
  * MIT License
