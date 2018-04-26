@@ -30,10 +30,8 @@ import com.vividsolutions.jts.geom.Geometry
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.sql.SparkSession
-import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader
 import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
-import org.datasyslab.geospark.spatialRDD.SpatialRDD
-import org.datasyslab.geosparksql.utils.{Adapter, DataFrameFactory, GeoSparkSQLRegistrator}
+import org.datasyslab.geosparksql.utils.{DataFrameFactory, GeoSparkSQLRegistrator}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
 class constructorTestScala extends FunSpec with BeforeAndAfterAll {
@@ -74,8 +72,10 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll {
     it("Passed ST_PointFromText") {
       var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")
-      pointCsvDF.show()
-      var pointDf = sparkSession.sql("select ST_PointFromText(pointtable._c0,',', \"myPointId\") as arealandmark from pointtable")
+      pointCsvDF.show(false)
+
+      var pointDf = sparkSession.sql("select ST_PointFromText(concat(_c0,',',_c1),',', \"myPointId\") as arealandmark from pointtable")
+      assert(pointDf.take(1)(0).get(0).asInstanceOf[Geometry].getUserData.asInstanceOf[String].equalsIgnoreCase("myPointId"))
       assert(pointDf.count() == 121960)
     }
 

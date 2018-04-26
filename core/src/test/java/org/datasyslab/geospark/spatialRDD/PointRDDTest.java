@@ -68,7 +68,10 @@ public class PointRDDTest
         PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
         assertEquals(inputCount, spatialRDD.approximateTotalCount);
         assertEquals(inputBoundary, spatialRDD.boundaryEnvelope);
-        assert spatialRDD.rawSpatialRDD.take(1).get(0).getUserData().equals("testattribute");
+        assert spatialRDD.rawSpatialRDD.take(9).get(0).getUserData().equals("testattribute0\ttestattribute1\ttestattribute2");
+        assert spatialRDD.rawSpatialRDD.take(9).get(2).getUserData().equals("testattribute0\ttestattribute1\ttestattribute2");
+        assert spatialRDD.rawSpatialRDD.take(9).get(4).getUserData().equals("testattribute0\ttestattribute1\ttestattribute2");
+        assert spatialRDD.rawSpatialRDD.take(9).get(8).getUserData().equals("testattribute0\ttestattribute1\ttestattribute2");
     }
 
 
