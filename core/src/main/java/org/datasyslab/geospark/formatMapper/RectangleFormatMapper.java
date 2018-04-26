@@ -32,6 +32,7 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.GeometryType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -50,7 +51,7 @@ public class RectangleFormatMapper
      */
     public RectangleFormatMapper(FileDataSplitter Splitter, boolean carryInputData)
     {
-        super(0, 3, Splitter, carryInputData);
+        super(0, 3, Splitter, carryInputData, GeometryType.RECTANGLE);
     }
 
     /**
@@ -63,7 +64,7 @@ public class RectangleFormatMapper
     public RectangleFormatMapper(Integer startOffset, FileDataSplitter Splitter,
             boolean carryInputData)
     {
-        super(startOffset, startOffset+3, Splitter, carryInputData);
+        super(startOffset, startOffset+3, Splitter, carryInputData, GeometryType.RECTANGLE);
     }
 
     @Override
@@ -73,36 +74,7 @@ public class RectangleFormatMapper
         List<Polygon> result = new ArrayList<>();
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
-            switch (splitter) {
-                case GEOJSON: {
-                    Geometry geometry = readGeoJSON(line);
-                    addGeometry(geometry, result);
-                    break;
-                }
-                case WKT: {
-                    Geometry geometry = readWkt(line);
-                    addGeometry(geometry, result);
-                    break;
-                }
-                default: {
-                    // The rectangle mapper reads two coordinates from the input line. The two coordinates are the two on the diagonal.
-                    Coordinate[] diagonalCoordinates = readCoordinates(line);
-                    assert  diagonalCoordinates.length == 2;
-                    Coordinate[] coordinates = new Coordinate[5];
-                    coordinates[0] = diagonalCoordinates[0];
-                    coordinates[1] = new Coordinate(diagonalCoordinates[0].x, diagonalCoordinates[1].y);
-                    coordinates[2] = diagonalCoordinates[1];
-                    coordinates[3] = new Coordinate(diagonalCoordinates[1].x, diagonalCoordinates[0].y);
-                    coordinates[4] = coordinates[0];
-                    LinearRing linear = factory.createLinearRing(coordinates);
-                    Polygon polygon = new Polygon(linear, null, factory);
-                    if (this.carryInputData) {
-                        polygon.setUserData(otherAttributes);
-                    }
-                    result.add(polygon);
-                    break;
-                }
-            }
+            addGeometry(readGeometry(line), result);
         }
         return result.iterator();
     }

@@ -31,6 +31,7 @@ import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.Point;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.GeometryType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -49,7 +50,7 @@ public class PointFormatMapper
      */
     public PointFormatMapper(FileDataSplitter Splitter, boolean carryInputData)
     {
-        super(0, 1, Splitter, carryInputData);
+        super(0, 1, Splitter, carryInputData, GeometryType.POINT);
     }
 
     /**
@@ -62,7 +63,7 @@ public class PointFormatMapper
     public PointFormatMapper(Integer startOffset, FileDataSplitter Splitter,
             boolean carryInputData)
     {
-        super(startOffset, startOffset+1, Splitter, carryInputData);
+        super(startOffset, startOffset+1, Splitter, carryInputData, GeometryType.POINT);
     }
 
     @Override
@@ -72,32 +73,7 @@ public class PointFormatMapper
         List<Point> result = new ArrayList<>();
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
-            switch (splitter) {
-                case GEOJSON: {
-                    Geometry geometry = readGeoJSON(line);
-                    addGeometry(geometry, result);
-                    break;
-                }
-                case WKT: {
-                    Geometry geometry = readWkt(line);
-                    addGeometry(geometry, result);
-                    break;
-                }
-                case WKB: {
-                    Geometry geometry = readWkb(line);
-                    addGeometry(geometry, result);
-                    break;
-                }
-                default:
-                    Coordinate[] coordinates = readCoordinates(line);
-                    assert coordinates.length == 1;
-                    Point point = factory.createPoint(coordinates[0]);
-                    if (this.carryInputData) {
-                        point.setUserData(otherAttributes);
-                    }
-                    result.add(point);
-                    break;
-            }
+            addGeometry(readGeometry(line), result);
         }
         return result.iterator();
     }

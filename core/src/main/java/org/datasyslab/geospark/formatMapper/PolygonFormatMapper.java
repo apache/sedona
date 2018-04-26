@@ -32,6 +32,7 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.GeometryType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -50,7 +51,7 @@ public class PolygonFormatMapper
      */
     public PolygonFormatMapper(FileDataSplitter Splitter, boolean carryInputData)
     {
-        super(0, -1, Splitter, carryInputData);
+        super(0, -1, Splitter, carryInputData, GeometryType.POLYGON);
     }
 
     /**
@@ -64,7 +65,7 @@ public class PolygonFormatMapper
     public PolygonFormatMapper(Integer startOffset, Integer endOffset, FileDataSplitter Splitter,
             boolean carryInputData)
     {
-        super(startOffset, endOffset, Splitter, carryInputData);
+        super(startOffset, endOffset, Splitter, carryInputData, GeometryType.POLYGON);
     }
 
     @Override
@@ -74,33 +75,7 @@ public class PolygonFormatMapper
         List<Polygon> result = new ArrayList<>();
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
-            switch (splitter) {
-                case GEOJSON: {
-                    Geometry geometry = readGeoJSON(line);
-                    addGeometry(geometry, result);
-                    break;
-                }
-                case WKT: {
-                    Geometry geometry = readWkt(line);
-                    addGeometry(geometry, result);
-                    break;
-                }
-                case WKB: {
-                    Geometry geometry = readWkb(line);
-                    addGeometry(geometry, result);
-                    break;
-                }
-                default: {
-                    Coordinate[] coordinates = readCoordinates(line);
-                    LinearRing linearRing = factory.createLinearRing(coordinates);
-                    Polygon polygon = factory.createPolygon(linearRing);
-                    if (this.carryInputData) {
-                        polygon.setUserData(otherAttributes);
-                    }
-                    result.add(polygon);
-                    break;
-                }
-            }
+            addGeometry(readGeometry(line), result);
         }
         return result.iterator();
     }
