@@ -1,3 +1,19 @@
+## v1.1.3
+
+This version contains a critical bug fix for GeoSpark-core RDD API.
+
+**GeoSpark Core**
+
+* Fixed Issue #[222](https://github.com/DataSystemsLab/GeoSpark/issues/222): geometry toString() method has cumulative non-spatial attributes. See PR #[223](https://github.com/DataSystemsLab/GeoSpark/pull/223)
+
+**GeoSpark SQL**
+
+None
+
+**GeoSpark Viz**
+
+None
+
 ## v1.1.2
 
 This version contains several bug fixes and several small improvements.
