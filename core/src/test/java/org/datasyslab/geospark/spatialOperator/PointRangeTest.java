@@ -190,7 +190,6 @@ public class PointRangeTest
         spatialRDD.buildIndex(IndexType.RTREE, false);
         for (int i = 0; i < loopTimes; i++) {
             long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, true).count();
-            System.out.println(resultSize);
             assertEquals(resultSize, 2830);
         }
         assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, true).take(10).get(1).getUserData().toString() != null;

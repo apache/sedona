@@ -86,6 +86,13 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- Test -->
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-minicluster</artifactId>
+            <version>2.7.2</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 	<build>

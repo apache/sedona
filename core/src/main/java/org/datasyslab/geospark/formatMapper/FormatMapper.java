@@ -29,10 +29,9 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKTReader;
 import com.vividsolutions.jts.io.WKBReader;
+import com.vividsolutions.jts.io.WKTReader;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GeometryType;
 import org.wololo.geojson.Feature;
@@ -42,7 +41,10 @@ import org.wololo.jts2geojson.GeoJSONReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class FormatMapper
         implements Serializable
@@ -75,6 +77,7 @@ public class FormatMapper
     protected String otherAttributes = "";
 
     protected GeometryType geometryType = null;
+
 
     /**
      * The factory.
@@ -146,20 +149,30 @@ public class FormatMapper
             Feature feature = (Feature) GeoJSONFactory.create(geoJson);
             geometry = geoJSONReader.read(feature.getGeometry());
             if (carryInputData) {
-                boolean hasIdFlag = false;
+                boolean firstColumnFlag = true;
                 otherAttributes = "";
+                boolean addFieldName = false;
+                Map<String, Object> featurePropertiesproperties = feature.getProperties();
                 if (feature.getId()!=null)
                 {
                     this.otherAttributes += feature.getId();
-                    hasIdFlag = true;
+                    firstColumnFlag = false;
                 }
-                if (feature.getProperties()!=null)
+                if (featurePropertiesproperties!=null)
                 {
-                    if (hasIdFlag)
+                    Iterator<Map.Entry<String, Object>> propertiesIterator = featurePropertiesproperties.entrySet().iterator();
+                    while (propertiesIterator.hasNext())
                     {
-                        this.otherAttributes +="\t" + feature.getProperties();
+                        Map.Entry<String, Object> curProperty = propertiesIterator.next();
+                        if (firstColumnFlag)
+                        {
+                            this.otherAttributes+=curProperty.getValue().toString();
+                            firstColumnFlag = false;
+                        }
+                        else {
+                            this.otherAttributes+="\t"+curProperty.getValue().toString();
+                        }
                     }
-                    else this.otherAttributes +=feature.getProperties();
                 }
                 geometry.setUserData(otherAttributes);
             }

@@ -104,6 +104,25 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
       Adapter.toDf(spatialRDD, sparkSession).show()
     }
 
+    it("Read CSV point into a SpatialRDD with unique Id and add field names") {
+      var df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
+      df.show()
+      df.createOrReplaceTempView("inputtable")
+      // Use Column _c0 as the unique Id but the id can be anything in the same row
+      var spatialDf = sparkSession.sql("select ST_Point(cast(inputtable._c0 as Decimal(24,20)),cast(inputtable._c1 as Decimal(24,20)), 'myPointId', 'myLongId') as arealandmark from inputtable")
+      spatialDf.show()
+      spatialDf.printSchema()
+      var spatialRDD = Adapter.toSpatialRdd(spatialDf, List("id1", "id2"))
+      spatialRDD.analyze()
+      assert(Adapter.toDf(spatialRDD, sparkSession).columns.length==3)
+      val df1 = Adapter.toDf(spatialRDD, sparkSession)
+      assertResult ("[POINT (-88.231077 32.700812),myPointId,myLongId]") (df1.take(10)(5).toString())
+      assertResult("id2") (df1.columns(2))
+      val df2 = Adapter.toDf(spatialRDD, List("id3","id4"), sparkSession)
+      assertResult ("[POINT (-88.231077 32.700812),myPointId,myLongId]") (df2.take(10)(5).toString())
+      assertResult("id4") (df2.columns(2))
+    }
+
     it("Read mixed WKT geometries into a SpatialRDD") {
       var df = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       df.show()
@@ -135,7 +154,7 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
 
     it("Read shapefile to DataFrame") {
       var spatialRDD = new SpatialRDD[Geometry]
-      spatialRDD.rawSpatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileInputLocation)
+      spatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileInputLocation)
       spatialRDD.analyze()
       Adapter.toDf(spatialRDD, sparkSession).show()
     }
@@ -164,6 +183,9 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
 
       var joinResultDf = Adapter.toDf(joinResultPairRDD, sparkSession)
       joinResultDf.show()
+
+      var joinResultDf2 = Adapter.toDf(joinResultPairRDD, List("abc","def"), List(), sparkSession)
+      joinResultDf2.show()
     }
 
     it("Convert distance join result to DataFrame") {

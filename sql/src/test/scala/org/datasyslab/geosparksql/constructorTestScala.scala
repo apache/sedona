@@ -30,8 +30,9 @@ import com.vividsolutions.jts.geom.Geometry
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.sql.SparkSession
+import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader
 import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
-import org.datasyslab.geosparksql.utils.{DataFrameFactory, GeoSparkSQLRegistrator}
+import org.datasyslab.geosparksql.utils.{Adapter, GeoSparkSQLRegistrator}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
 class constructorTestScala extends FunSpec with BeforeAndAfterAll {
@@ -107,7 +108,9 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll {
     }
 
     it("Read shapefile to DataFrame") {
-      val df = DataFrameFactory.geometryDFFromShapeFile(sparkSession,shapefileInputLocation)
+      var spatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileInputLocation)
+      spatialRDD.analyze()
+      val df = Adapter.toDf(spatialRDD, sparkSession)
       df.show
       assert (df.columns(1) == "STATEFP")
     }

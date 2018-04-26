@@ -187,8 +187,7 @@ public class adapterTestJava
     @Test
     public void testReadShapefileToDF()
     {
-        SpatialRDD spatialRDD = new SpatialRDD<Geometry>();
-        spatialRDD.rawSpatialRDD = ShapefileReader.readToGeometryRDD(JavaSparkContext.fromSparkContext(sparkSession.sparkContext()), shapefileInputLocation);
+        SpatialRDD spatialRDD = ShapefileReader.readToGeometryRDD(JavaSparkContext.fromSparkContext(sparkSession.sparkContext()), shapefileInputLocation);
         spatialRDD.analyze();
         Adapter.toDf(spatialRDD, sparkSession).show();
     }
