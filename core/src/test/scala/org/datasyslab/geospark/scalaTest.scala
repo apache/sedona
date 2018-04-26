@@ -66,7 +66,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
     val PointRDDSplitter = FileDataSplitter.CSV
     val PointRDDIndexType = IndexType.RTREE
     val PointRDDNumPartitions = 5
-    val PointRDDOffset = 0
+    val PointRDDOffset = 1
 
     val PolygonRDDInputLocation = resourceFolder + "primaryroads-polygon.csv"
     val PolygonRDDSplitter = FileDataSplitter.CSV

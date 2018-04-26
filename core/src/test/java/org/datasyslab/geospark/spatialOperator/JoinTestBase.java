@@ -142,7 +142,7 @@ class JoinTestBase
 
     protected PointRDD createPointRDD(String location)
     {
-        final PointRDD rdd = new PointRDD(sc, location, splitter, false, numPartitions);
+        final PointRDD rdd = new PointRDD(sc, location, 1, splitter, false, numPartitions);
         return new PointRDD(rdd.rawSpatialRDD, StorageLevel.MEMORY_ONLY());
     }
 

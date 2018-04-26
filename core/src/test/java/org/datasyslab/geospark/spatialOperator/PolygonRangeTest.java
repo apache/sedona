@@ -42,6 +42,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import static org.junit.Assert.assertEquals;
+
 // TODO: Auto-generated Javadoc
 
 /**
@@ -131,7 +133,7 @@ public class PolygonRangeTest
             splitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
             indexType = IndexType.getIndexType(prop.getProperty("indexType"));
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
-            queryEnvelope = new Envelope(-85.01, -84.01, 34.01, 35.01);
+            queryEnvelope = new Envelope(-85.01, -60.01, 34.01, 50.01);
             loopTimes = 5;
         }
         catch (IOException ex) {
@@ -170,7 +172,7 @@ public class PolygonRangeTest
         PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, StorageLevel.MEMORY_ONLY());
         for (int i = 0; i < loopTimes; i++) {
             long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).count();
-            assert resultSize > -1;
+            assertEquals(resultSize, 704);
         }
         assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).take(10).get(1).getUserData().toString() != null;
     }
@@ -188,7 +190,7 @@ public class PolygonRangeTest
         spatialRDD.buildIndex(IndexType.RTREE, false);
         for (int i = 0; i < loopTimes; i++) {
             long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, true).count();
-            assert resultSize > -1;
+            assertEquals(resultSize, 704);
         }
         assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, true).take(10).get(1).getUserData().toString() != null;
     }
