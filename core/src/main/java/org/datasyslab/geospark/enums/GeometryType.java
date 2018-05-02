@@ -43,7 +43,8 @@ public enum GeometryType
     MULTIPOLYGON,
     MULTILINESTRING,
     GEOMETRYCOLLECTION,
-    CIRCLE;
+    CIRCLE,
+    RECTANGLE;
 
     /**
      * Gets the GeometryType.

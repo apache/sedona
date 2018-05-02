@@ -62,16 +62,30 @@ public class PointRDDTest
      *
      * @throws Exception the exception
      */
-    /*
-        This test case will load a sample data file and
-     */
     @Test
     public void testConstructor()
-            throws Exception
     {
         PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
         assertEquals(inputCount, spatialRDD.approximateTotalCount);
         assertEquals(inputBoundary, spatialRDD.boundaryEnvelope);
+        assert spatialRDD.rawSpatialRDD.take(9).get(0).getUserData().equals("testattribute0\ttestattribute1\ttestattribute2");
+        assert spatialRDD.rawSpatialRDD.take(9).get(2).getUserData().equals("testattribute0\ttestattribute1\ttestattribute2");
+        assert spatialRDD.rawSpatialRDD.take(9).get(4).getUserData().equals("testattribute0\ttestattribute1\ttestattribute2");
+        assert spatialRDD.rawSpatialRDD.take(9).get(8).getUserData().equals("testattribute0\ttestattribute1\ttestattribute2");
+    }
+
+
+    @Test
+    public void testEmptyConstructor()
+            throws Exception
+    {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
+        spatialRDD.buildIndex(IndexType.RTREE, false);
+        // Create an empty spatialRDD and manually assemble it
+        PointRDD spatialRDDcopy = new PointRDD();
+        spatialRDDcopy.rawSpatialRDD = spatialRDD.rawSpatialRDD;
+        spatialRDDcopy.indexedRawRDD = spatialRDD.indexedRawRDD;
+        spatialRDDcopy.analyze();
     }
 
     /**
@@ -79,14 +93,11 @@ public class PointRDDTest
      *
      * @throws Exception the exception
      */
-    /*
-     *  This test case test whether the Hilbert Curve grid can be build correctly.
-     */
     @Test
     public void testEqualPartitioning()
             throws Exception
     {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, 10, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, false, 10, StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.EQUALGRID);
         for (Envelope d : spatialRDD.grids) {
             //System.out.println("PointRDD spatial partitioning grids: "+d);
@@ -99,14 +110,11 @@ public class PointRDDTest
      *
      * @throws Exception the exception
      */
-    /*
-     *  This test case test whether the Hilbert Curve grid can be build correctly.
-     */
     @Test
     public void testHilbertCurveSpatialPartitioing()
             throws Exception
     {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, 10, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, false, 10, StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.HILBERT);
         for (Envelope d : spatialRDD.grids) {
             //System.out.println("PointRDD spatial partitioning grids: "+d.grid);
@@ -118,9 +126,6 @@ public class PointRDDTest
      * Test R tree spatial partitioing.
      *
      * @throws Exception the exception
-     */
-    /*
-     *  This test case test whether the STR-Tree grid can be build correctly.
      */
     @Test
     public void testRTreeSpatialPartitioing()
@@ -139,14 +144,11 @@ public class PointRDDTest
      *
      * @throws Exception the exception
      */
-    /*
-     *  This test case test whether the Voronoi grid can be build correctly.
-     */
     @Test
     public void testVoronoiSpatialPartitioing()
             throws Exception
     {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, 10, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, false, 10, StorageLevel.MEMORY_ONLY());
         spatialRDD.spatialPartitioning(GridType.VORONOI);
         for (Envelope d : spatialRDD.grids) {
             //System.out.println("PointRDD spatial partitioning grids: "+d.grid);

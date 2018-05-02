@@ -31,6 +31,7 @@ import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.Point;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.GeometryType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -49,21 +50,20 @@ public class PointFormatMapper
      */
     public PointFormatMapper(FileDataSplitter Splitter, boolean carryInputData)
     {
-        super(Splitter, carryInputData);
+        super(0, 1, Splitter, carryInputData, GeometryType.POINT);
     }
 
     /**
      * Instantiates a new point format mapper.
      *
      * @param startOffset the start offset
-     * @param endOffset the end offset
      * @param Splitter the splitter
      * @param carryInputData the carry input data
      */
-    public PointFormatMapper(Integer startOffset, Integer endOffset, FileDataSplitter Splitter,
+    public PointFormatMapper(Integer startOffset, FileDataSplitter Splitter,
             boolean carryInputData)
     {
-        super(startOffset, endOffset, Splitter, carryInputData);
+        super(startOffset, startOffset+1, Splitter, carryInputData, GeometryType.POINT);
     }
 
     @Override
@@ -73,28 +73,7 @@ public class PointFormatMapper
         List<Point> result = new ArrayList<>();
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
-            switch (splitter) {
-                case GEOJSON: {
-                    Geometry geometry = readGeoJSON(line);
-                    addGeometry(geometry, result);
-                    break;
-                }
-                case WKT:
-                    Geometry geometry = readWkt(line);
-                    addGeometry(geometry, result);
-                    break;
-                default:
-                    String[] columns = line.split(splitter.getDelimiter());
-                    Coordinate coordinate = new Coordinate(
-                            Double.parseDouble(columns[this.startOffset]),
-                            Double.parseDouble(columns[1 + this.startOffset]));
-                    Point point = factory.createPoint(coordinate);
-                    if (this.carryInputData) {
-                        point.setUserData(line);
-                    }
-                    result.add(point);
-                    break;
-            }
+            addGeometry(readGeometry(line), result);
         }
         return result.iterator();
     }

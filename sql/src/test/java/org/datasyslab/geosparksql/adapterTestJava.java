@@ -58,6 +58,7 @@ public class adapterTestJava
     protected static SparkSession sparkSession;
     public static String resourceFolder = System.getProperty("user.dir") + "/src/test/resources/";
     public static String mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv";
+    public static String mixedWkbGeometryInputLocation = resourceFolder + "county_small_wkb.tsv";
     public static String csvPointInputLocation = resourceFolder + "arealm.csv";
     public static String shapefileInputLocation = resourceFolder + "shapefiles/polygon";
 
@@ -145,6 +146,36 @@ public class adapterTestJava
         df.show();
         df.createOrReplaceTempView("inputtable");
         Dataset<Row> spatialDf = sparkSession.sql("select ST_GeomFromWKT(inputtable._c0, inputtable._c3, inputtable._c5) as usacounty from inputtable");
+        spatialDf.show();
+        spatialDf.printSchema();
+        SpatialRDD spatialRDD = new SpatialRDD<Geometry>();
+        spatialRDD.rawSpatialRDD = Adapter.toJavaRdd(spatialDf);
+        spatialRDD.analyze();
+        Adapter.toDf(spatialRDD, sparkSession).show();
+    }
+
+    @Test
+    public void testReadWkb()
+    {
+        Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", "\t").option("header", "false").load(mixedWkbGeometryInputLocation);
+        df.show();
+        df.createOrReplaceTempView("inputtable");
+        Dataset<Row> spatialDf = sparkSession.sql("select ST_GeomFromWKB(inputtable._c0) as usacounty from inputtable");
+        spatialDf.show();
+        spatialDf.printSchema();
+        SpatialRDD spatialRDD = new SpatialRDD<Geometry>();
+        spatialRDD.rawSpatialRDD = Adapter.toJavaRdd(spatialDf);
+        spatialRDD.analyze();
+        Adapter.toDf(spatialRDD, sparkSession).show();
+    }
+
+    @Test
+    public void testReadWkbWithId()
+    {
+        Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", "\t").option("header", "false").load(mixedWkbGeometryInputLocation);
+        df.show();
+        df.createOrReplaceTempView("inputtable");
+        Dataset<Row> spatialDf = sparkSession.sql("select ST_GeomFromWKB(inputtable._c0, inputtable._c3, inputtable._c5) as usacounty from inputtable");
         spatialDf.show();
         spatialDf.printSchema();
         SpatialRDD spatialRDD = new SpatialRDD<Geometry>();

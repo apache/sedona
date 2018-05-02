@@ -114,7 +114,7 @@ public class CombineShapeReader
         CombineFileSplit fileSplit = (CombineFileSplit) split;
         Path[] paths = fileSplit.getPaths();
         for (int i = 0; i < paths.length; ++i) {
-            String suffix = FilenameUtils.getExtension(paths[i].toString());
+            String suffix = FilenameUtils.getExtension(paths[i].toString()).toLowerCase();
             if (suffix.equals(SHP_SUFFIX)) { shpSplit = new FileSplit(paths[i], fileSplit.getOffset(i), fileSplit.getLength(i), fileSplit.getLocations()); }
             else if (suffix.equals(SHX_SUFFIX)) { shxSplit = new FileSplit(paths[i], fileSplit.getOffset(i), fileSplit.getLength(i), fileSplit.getLocations()); }
             else if (suffix.equals(DBF_SUFFIX)) { dbfSplit = new FileSplit(paths[i], fileSplit.getOffset(i), fileSplit.getLength(i), fileSplit.getLocations()); }

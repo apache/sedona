@@ -63,9 +63,6 @@ public class LineStringRDDTest
      *
      * @throws Exception the exception
      */
-    /*
-        This test case will load a sample data file and
-     */
     @Test
     public void testConstructor()
             throws Exception
@@ -75,13 +72,24 @@ public class LineStringRDDTest
         assertEquals(inputBoundary, spatialRDD.boundaryEnvelope);
     }
 
+    @Test
+    public void testEmptyConstructor()
+            throws Exception
+    {
+        LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
+        spatialRDD.spatialPartitioning(gridType);
+        spatialRDD.buildIndex(IndexType.RTREE, true);
+        // Create an empty spatialRDD and manually assemble it
+        LineStringRDD spatialRDDcopy = new LineStringRDD();
+        spatialRDDcopy.rawSpatialRDD = spatialRDD.rawSpatialRDD;
+        spatialRDDcopy.indexedRawRDD = spatialRDD.indexedRawRDD;
+        spatialRDDcopy.analyze();
+    }
+
     /**
      * Test hilbert curve spatial partitioing.
      *
      * @throws Exception the exception
-     */
-    /*
-     *  This test case test whether the Hilbert Curve grid can be build correctly.
      */
     @Test
     public void testHilbertCurveSpatialPartitioing()
@@ -99,9 +107,6 @@ public class LineStringRDDTest
      *
      * @throws Exception the exception
      */
-    /*
-     *  This test case test whether the STR-Tree grid can be build correctly.
-     */
     @Test
     public void testRTreeSpatialPartitioing()
             throws Exception
@@ -117,9 +122,6 @@ public class LineStringRDDTest
      * Test voronoi spatial partitioing.
      *
      * @throws Exception the exception
-     */
-    /*
-     *  This test case test whether the Voronoi grid can be build correctly.
      */
     @Test
     public void testVoronoiSpatialPartitioing()

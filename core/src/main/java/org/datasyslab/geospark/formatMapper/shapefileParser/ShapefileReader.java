@@ -25,14 +25,10 @@
  */
 package org.datasyslab.geospark.formatMapper.shapefileParser;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.MultiLineString;
-import com.vividsolutions.jts.geom.MultiPoint;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.*;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -41,6 +37,8 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundBox;
 import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundaryInputFormat;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.DbfParseUtil;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.FieldDescriptor;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.PrimitiveShape;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapeInputFormat;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapeKey;
@@ -49,7 +47,9 @@ import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
 import scala.Tuple2;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -150,6 +150,41 @@ public class ShapefileReader
         else { return null; }
     }
 
+    /**
+     *
+     * @param sc Spark Context
+     * @param inputPath folder which contains shape file with dbf metadata file
+     * @return List of Strings if dbf file was found; return null if no dbf file
+     * @throws IOException
+     */
+
+    public static List<String> readFieldNames(JavaSparkContext sc, String inputPath) throws IOException {
+        Path path = new Path(inputPath);
+        FileSystem fileSys = FileSystem.get(sc.hadoopConfiguration());
+        FileStatus dbfFile = null;
+        if(!fileSys.exists(path)) throw new IOException("Specified path "+ inputPath + "does not exist");
+        FileStatus[] files =  fileSys.listStatus(path);
+        //find dbf file in the folder
+        for(int i=0;i<files.length;i++) {
+            if(files[i].getPath().getName().toLowerCase().contains("dbf")){
+                dbfFile = files[i];
+                break;
+            }
+        }
+        //parse dbf file if present
+        if(dbfFile != null) {
+            DbfParseUtil dbfParser = new DbfParseUtil();
+            dbfParser.parseFileHead(fileSys.open(dbfFile.getPath()));
+            List<FieldDescriptor> descriptors = dbfParser.getFieldDescriptors();
+            List<String> fieldNames = new ArrayList<String>();
+            fieldNames.add("rddshape");
+            for(int i=0;i<descriptors.size();i++){
+                fieldNames.add(descriptors.get(i).getFieldName());
+            }
+            return fieldNames;
+        } else
+            return null;
+    }
     /**
      *
      * Read To SpatialRDD logics

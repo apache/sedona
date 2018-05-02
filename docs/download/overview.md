@@ -1,4 +1,3 @@
-# Install GeoSpark
 
 ## Direct download
 
@@ -6,9 +5,11 @@ GeoSpark source code is hosted on [GeoSpark GitHub repository](https://github.co
 
 GeoSpark pre-compiled JARs are hosted on [GeoSpark GitHub Releases](https://github.com/DataSystemsLab/GeoSpark/releases).
 
-GeoSpark pre-compiled JARs are hosted on [Maven Central](../news/GeoSpark-All-Modules-Maven-Central-Coordinates).
+GeoSpark pre-compiled JARs are hosted on [Maven Central](GeoSpark-All-Modules-Maven-Central-Coordinates).
 
-## How to install GeoSpark
+GeoSpark release notes are here [Release notes](GeoSpark-All-Modules-Release-notes).
+
+## Install GeoSpark
 
 Before starting the GeoSpark journey, you need to make sure your Apache Spark cluster is ready.
 

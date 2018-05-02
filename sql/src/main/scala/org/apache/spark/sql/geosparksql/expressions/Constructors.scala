@@ -167,6 +167,38 @@ case class ST_GeomFromWKT(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
+
+/**
+  * Return a Geometry from a WKB string
+  *
+  * @param inputExpressions This function takes 1 parameter which is the geometry string. The string format must be WKB.
+  */
+case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    val minInputLength = 1
+    assert(inputExpressions.length >= minInputLength)
+
+    val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
+
+    var fileDataSplitter = FileDataSplitter.WKB
+    var formatMapper = new FormatMapper(fileDataSplitter, false)
+    var geometry = formatMapper.readGeometry(geomString)
+    // If the user specify a bunch of attributes to go with each geometry, we need to store all of them in this geometry
+    if (inputExpressions.length > minInputLength) {
+      geometry.setUserData(generateUserData(minInputLength, inputExpressions, inputRow))
+    }
+    return new GenericArrayData(GeometrySerializer.serialize(geometry))
+  }
+
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
 /**
   * Return a Geometry from a GeoJSON string
   *

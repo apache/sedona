@@ -66,7 +66,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
     val PointRDDSplitter = FileDataSplitter.CSV
     val PointRDDIndexType = IndexType.RTREE
     val PointRDDNumPartitions = 5
-    val PointRDDOffset = 0
+    val PointRDDOffset = 1
 
     val PolygonRDDInputLocation = resourceFolder + "primaryroads-polygon.csv"
     val PolygonRDDSplitter = FileDataSplitter.CSV
@@ -81,15 +81,22 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
     val joinQueryPartitioningType = GridType.QUADTREE
     val eachQueryLoopTimes = 1
 
+    it("should pass the empty constructor test") {
+      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
+      val objectRDDcopy = new PointRDD()
+      objectRDDcopy.rawSpatialRDD = objectRDD.rawSpatialRDD
+      objectRDDcopy.analyze()
+    }
+
     it("should pass spatial range query") {
-      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
+      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
       for (i <- 1 to eachQueryLoopTimes) {
         val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false, false).count
       }
     }
 
     it("should pass spatial range query using index") {
-      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
+      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
       objectRDD.buildIndex(PointRDDIndexType, false)
       for (i <- 1 to eachQueryLoopTimes) {
         val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false, true).count
@@ -97,14 +104,14 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
     }
 
     it("should pass spatial knn query") {
-      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
+      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
       for (i <- 1 to eachQueryLoopTimes) {
         val result = KNNQuery.SpatialKnnQuery(objectRDD, kNNQueryPoint, 1000, false)
       }
     }
 
     it("should pass spatial knn query using index") {
-      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
+      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
       objectRDD.buildIndex(PointRDDIndexType, false)
       for (i <- 1 to eachQueryLoopTimes) {
         val result = KNNQuery.SpatialKnnQuery(objectRDD, kNNQueryPoint, 1000, true)
@@ -113,8 +120,8 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
 
     it("should pass spatial join query") {
       val queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true)
-      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
-
+      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
+      objectRDD.analyze()
       objectRDD.spatialPartitioning(joinQueryPartitioningType)
       queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
 
@@ -125,8 +132,8 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
 
     it("should pass spatial join query using index on points") {
       val queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true)
-      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
-
+      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
+      objectRDD.analyze()
       objectRDD.spatialPartitioning(joinQueryPartitioningType)
       queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
 
@@ -139,8 +146,8 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
 
     it("should pass spatial join query using index on polygons") {
       val queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true)
-      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
-
+      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
+      objectRDD.analyze()
       objectRDD.spatialPartitioning(joinQueryPartitioningType)
       queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
 
@@ -153,8 +160,8 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
 
     it("should pass spatial join query and build index on points the fly") {
       val queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true)
-      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
-
+      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
+      objectRDD.analyze()
       objectRDD.spatialPartitioning(joinQueryPartitioningType)
       queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
 
@@ -165,8 +172,8 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
 
     it("should pass spatial join query and build index on polygons on the fly") {
       val queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true)
-      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
-
+      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
+      objectRDD.analyze()
       objectRDD.spatialPartitioning(joinQueryPartitioningType)
       queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
 
@@ -177,9 +184,9 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
     }
 
     it("should pass distance join query") {
-      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
+      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
       val queryWindowRDD = new CircleRDD(objectRDD, 0.1)
-
+      objectRDD.analyze()
       objectRDD.spatialPartitioning(GridType.QUADTREE)
       queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
 
@@ -189,9 +196,9 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
     }
 
     it("should pass distance join query using index") {
-      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
+      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
       val queryWindowRDD = new CircleRDD(objectRDD, 0.1)
-
+      objectRDD.analyze()
       objectRDD.spatialPartitioning(GridType.QUADTREE)
       queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
 
@@ -217,7 +224,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
       val HDFDataVariableList = Array("LST", "QC", "Error_LST", "Emis_31", "Emis_32")
 
       val earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName, HDFDataVariableList, HDFDataVariableName, urlPrefix)
-      val spatialRDD = new PointRDD(sc, InputLocation, numPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY)
+      val spatialRDD = new PointRDD(sc, InputLocation, numPartitions, earthdataHDFPoint)
       var i = 0
       while (i < loopTimes) {
         var resultSize = 0L
@@ -227,14 +234,14 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
     }
 
     it("should pass CRS transformed spatial range query") {
-      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY, "epsg:4326", "epsg:3005")
+      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false, StorageLevel.NONE, "epsg:4326", "epsg:3005")
       for (i <- 1 to eachQueryLoopTimes) {
         val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false, false).count
       }
     }
 
     it("should pass CRS transformed spatial range query using index") {
-      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY, "epsg:4326", "epsg:3005")
+      val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false, StorageLevel.NONE, "epsg:4326", "epsg:3005")
       objectRDD.buildIndex(PointRDDIndexType, false)
       for (i <- 1 to eachQueryLoopTimes) {
         val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false, true).count

@@ -31,6 +31,7 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.enums.GeometryType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -49,7 +50,7 @@ public class LineStringFormatMapper
      */
     public LineStringFormatMapper(FileDataSplitter Splitter, boolean carryInputData)
     {
-        super(Splitter, carryInputData);
+        super(0, -1, Splitter, carryInputData, GeometryType.LINESTRING);
     }
 
     /**
@@ -63,7 +64,7 @@ public class LineStringFormatMapper
     public LineStringFormatMapper(Integer startOffset, Integer endOffset, FileDataSplitter Splitter,
             boolean carryInputData)
     {
-        super(startOffset, endOffset, Splitter, carryInputData);
+        super(startOffset, endOffset, Splitter, carryInputData, GeometryType.LINESTRING);
     }
 
     @Override
@@ -73,27 +74,7 @@ public class LineStringFormatMapper
         List<LineString> result = new ArrayList<>();
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
-            switch (splitter) {
-                case GEOJSON: {
-                    Geometry geometry = readGeoJSON(line);
-                    addGeometry(geometry, result);
-                    break;
-                }
-                case WKT: {
-                    Geometry geometry = readWkt(line);
-                    addGeometry(geometry, result);
-                    break;
-                }
-                default: {
-                    Coordinate[] coordinates = readCoordinates(line);
-                    LineString lineString = factory.createLineString(coordinates);
-                    if (this.carryInputData) {
-                        lineString.setUserData(line);
-                    }
-                    result.add(lineString);
-                    break;
-                }
-            }
+            addGeometry(readGeometry(line), result);
         }
         return result.iterator();
     }

@@ -68,10 +68,6 @@ trait TraitJoinQueryExec {
     val rightResultsRaw = right.execute().asInstanceOf[RDD[UnsafeRow]]
 
     var geosparkConf = new GeoSparkConf(sparkContext.conf)
-
-    logDebug("Number of partitions on the left: " + leftResultsRaw.partitions.size)
-    logDebug("Number of partitions on the right: " + rightResultsRaw.partitions.size)
-
     val (leftShapes, rightShapes) =
       toSpatialRddPair(leftResultsRaw, boundLeftShape, rightResultsRaw, boundRightShape)
 
@@ -89,8 +85,9 @@ trait TraitJoinQueryExec {
         geosparkConf.setDatasetBoundary(rightShapes.boundaryEnvelope)
       }
     }
-    logDebug(
-      s"Found ${geosparkConf.getJoinApproximateTotalCount} objects")
+    log.info("[GeoSparkSQL] Number of partitions on the left: " + leftResultsRaw.partitions.size)
+    log.info("[GeoSparkSQL] Number of partitions on the right: " + rightResultsRaw.partitions.size)
+
     var numPartitions = -1
     try {
       if (geosparkConf.getJoinSparitionDominantSide == JoinSparitionDominantSide.LEFT) {
@@ -98,7 +95,8 @@ trait TraitJoinQueryExec {
           numPartitions = geosparkConf.getFallbackPartitionNum
         }
         else {
-          numPartitions = leftShapes.rawSpatialRDD.partitions.size()
+          numPartitions = joinPartitionNumOptimizer(leftShapes.rawSpatialRDD.partitions.size(), rightShapes.rawSpatialRDD.partitions.size(),
+            leftShapes.approximateTotalCount)
         }
         doSpatialPartitioning(leftShapes, rightShapes, numPartitions, geosparkConf)
       }
@@ -108,12 +106,15 @@ trait TraitJoinQueryExec {
         }
         else {
           numPartitions = rightShapes.rawSpatialRDD.partitions.size()
+          numPartitions = joinPartitionNumOptimizer(rightShapes.rawSpatialRDD.partitions.size(), leftShapes.rawSpatialRDD.partitions.size(),
+            rightShapes.approximateTotalCount)
         }
         doSpatialPartitioning(rightShapes, leftShapes, numPartitions, geosparkConf)
       }
     }
     catch {
       case e: IllegalArgumentException => {
+        print(e.getMessage)
         // Partition number are not qualified
         // Use fallback num partitions specified in GeoSparkConf
         if (geosparkConf.getJoinSparitionDominantSide == JoinSparitionDominantSide.LEFT) {
@@ -189,5 +190,30 @@ trait TraitJoinQueryExec {
                             numPartitions: Integer, geosparkConf: GeoSparkConf): Unit = {
     dominantShapes.spatialPartitioning(geosparkConf.getJoinGridType, numPartitions)
     followerShapes.spatialPartitioning(dominantShapes.getPartitioner)
+  }
+
+  def joinPartitionNumOptimizer(dominantSidePartNum:Int, followerSidePartNum:Int, dominantSideCount:Long): Int =
+  {
+    log.info("[GeoSparkSQL] Dominant side count: " + dominantSideCount)
+    var numPartition = -1
+    var candidatePartitionNum = (dominantSideCount/2).intValue()
+    if (dominantSidePartNum*2 > dominantSideCount)
+    {
+      log.warn(s"[GeoSparkSQL] Join dominant side partition number $dominantSidePartNum is larger than 1/2 of the dominant side count $dominantSideCount")
+      log.warn(s"[GeoSparkSQL] Try to use follower side partition number $followerSidePartNum")
+      if (followerSidePartNum*2 > dominantSideCount){
+        log.warn(s"[GeoSparkSQL] Join follower side partition number is also larger than 1/2 of the dominant side count $dominantSideCount")
+        log.warn(s"[GeoSparkSQL] Try to use 1/2 of the dominant side count $candidatePartitionNum as the partition number of both sides")
+        if (candidatePartitionNum==0)
+        {
+          log.warn(s"[GeoSparkSQL] 1/2 of $candidatePartitionNum is equal to 0. Use 1 as the partition number of both sides instead.")
+          numPartition = 1
+        }
+        else numPartition = candidatePartitionNum
+      }
+      else numPartition = followerSidePartNum
+    }
+    else numPartition = dominantSidePartNum
+    return  numPartition
   }
 }

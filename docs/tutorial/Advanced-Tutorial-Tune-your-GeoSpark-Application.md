@@ -1,4 +1,4 @@
-# Advanced tutorial: Tune your GeoSpark application
+# Advanced tutorial: Tune your GeoSpark RDD application
 Before getting into this advanced tutorial, please make sure that you have tried several GeoSpark functions on your local machine.
 
 ## Pick a proper GeoSpark version
@@ -14,25 +14,20 @@ The third level (i.e., 0.8.1) tells that this version only contains bug fixes, s
 GeoSpark provides a number of constructors for each SpatialRDD (PointRDD, PolygonRDD and LineStringRDD). In general, you have two options to start with.
 
 1. Initialize a SpatialRDD from your data source such as HDFS and S3. A typical example is as follows:
-	
-	```
-	public PointRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset, 
-	FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel)
-	```
+```Java
+public PointRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel)
+```
 2. Initialize a SpatialRDD from an existing RDD. A typical example is as follows:
-
-	```
-	public PointRDD(JavaRDD<Point> rawSpatialRDD, StorageLevel newLevel)
-	```
+```Java
+public PointRDD(JavaRDD<Point> rawSpatialRDD, StorageLevel newLevel)
+```
 	
 You may notice that these constructors all take as input a "StorageLevel" parameter. This is to tell Apache Spark cache the "rawSpatialRDD", one attribute of SpatialRDD. The reason why GeoSpark does this is that GeoSpark wants to calculate the dataset boundary and approximate total count using several Apache Spark "Action"s. These information are useful when doing Spatial Join Query and Distance Join Query.
 
 However, in some cases, you may know well about your datasets. If so, you can manually provide these information by calling this kind of Spatial RDD constructors:
 
-```
-    public PointRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset,
-    FileDataSplitter splitter, boolean carryInputData, Integer partitions,
-    Envelope datasetBoundary, Integer approximateTotalCount) {
+```Java
+public PointRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter, boolean carryInputData, Integer partitions, Envelope datasetBoundary, Integer approximateTotalCount) {
 ```
 Manually providing the dataset boundary and approxmiate total count helps GeoSpark avoiding several slow "Action"s during initialization.
 

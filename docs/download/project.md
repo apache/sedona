@@ -4,7 +4,7 @@ A self-contained project allows you to create multiple Scala / Java files and wr
 
 ## Quick start
 
-1. To add GeoSpark as dependencies, please read [GeoSpark Maven Central coordinates](../news/GeoSpark-All-Modules-Maven-Central-Coordinates.md)
+1. To add GeoSpark as dependencies, please read [GeoSpark Maven Central coordinates](GeoSpark-All-Modules-Maven-Central-Coordinates.md)
 2. Use GeoSpark Template project to start: [GeoSpark Template Project](https://github.com/jiayuasu/GeoSparkTemplateProject)
 3. Compile your project using SBT or Maven. Make sure you obtain the fat jar which packages all dependencies.
 4. Submit your compiled fat jar to Spark cluster. Make sure you are in the root folder of Spark distribution. Then run the following command:
@@ -12,7 +12,8 @@ A self-contained project allows you to create multiple Scala / Java files and wr
 ./bin/spark-submit --master spark://YOUR-IP:7077 /Path/To/YourJar.jar
 ```
 
-The detailed explanation of spark-submit is available on [Spark website](https://spark.apache.org/docs/latest/submitting-applications.html).
+!!!note
+	The detailed explanation of spark-submit is available on [Spark website](https://spark.apache.org/docs/latest/submitting-applications.html).
 
 ## How to use GeoSpark in an IDE
 
@@ -37,8 +38,8 @@ To run this project in cluster mode, you have to package this project to a JAR a
 Before packaging this project, you always need to check two places:
 
 * Remove the hardcoded Master IP `master("local[*]")`. This hardcoded IP is only needed when you run this project in an IDE.
-```
-	var sparkSession:SparkSession = SparkSession.builder()
+```scala
+var sparkSession:SparkSession = SparkSession.builder()
 	.config("spark.serializer",classOf[KryoSerializer].getName)
 	.config("spark.kryo.registrator",classOf[GeoSparkKryoRegistrator].getName)
 	.master("local[*]")
@@ -50,7 +51,9 @@ Before packaging this project, you always need to check two places:
 org.apache.spark" %% "spark-core" % SparkVersion % "compile,
 org.apache.spark" %% "spark-sql" % SparkVersion % "compile
 ```
-Forgetting to change this scope will lead to a very big fat JAR and dependency conflicts when call `spark-submit`. For more details, please visit [Maven Dependency Scope](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope).
+
+!!!warning
+	Forgetting to change the package scope will lead to a very big fat JAR and dependency conflicts when call `spark-submit`. For more details, please visit [Maven Dependency Scope](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope).
 
 * Make sure your downloaded Spark binary distribution is the same version with the Spark used in your `build.sbt` or `POM.xml`.
 
