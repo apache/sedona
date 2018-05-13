@@ -1,5 +1,5 @@
 /*
- * FILE: GeoSparkTestBase
+ * FILE: TreeDRtreePartitioningTest
  * Copyright (c) 2015 - 2018 GeoSpark Development Team
  *
  * MIT License
@@ -24,30 +24,39 @@
  *
  */
 
-package org.datasyslab.geospark;
+package org.datasyslab.geospark.spatioTemporal.Partitioning;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.serializer.KryoSerializer;
-import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator;
+import java.util.ArrayList;
+import java.util.List;
 
-public class GeoSparkTestBase
-{
-    protected static SparkConf conf;
-    protected static JavaSparkContext sc;
+import org.datasyslab.geospark.SpatioTemporalObjects.Cube;
+import org.datasyslab.geospark.spatioTemporalPartitioning.OctreePartitioning;
+import org.junit.Assert;
+import org.junit.Test;
 
-    protected static void initialize(final String testSuiteName)
+public class TreeDRtreePartitioningTest {
+
+    /**
+     * Verifies that data skew doesn't cause java.lang.StackOverflowError
+     * in 3DStandardQuadTree.insert
+     */
+    @Test
+    public void testDatSkew()
+            throws Exception
     {
-        conf = new SparkConf().setAppName(testSuiteName).setMaster("local[2]");
-        conf.set("spark.serializer", KryoSerializer.class.getName());
-        conf.set("spark.kryo.registrator", GeoSparkKryoRegistrator.class.getName());
-        conf.set("spark.kryoserializer.buffer.max.mb", "1024");
 
-        sc = new JavaSparkContext(conf);
-        Logger.getLogger("org").setLevel(Level.WARN);
-        Logger.getLogger("akka").setLevel(Level.WARN);
+        final List<Cube> samples = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            samples.add(new Cube(0, 0, 0, 0, 0, 0));
+        }
+
+        final Cube extent = new Cube(0, 1, 0, 1, 0, 1);
+
+        // Make sure 3DQuad-tree is built successfully without throwing
+        // java.lang.StackOverflowError
+        OctreePartitioning partitioning = new OctreePartitioning(samples, extent, 10);
+        Assert.assertNotNull(partitioning.getPartitionTree());
     }
-}
 
+
+}

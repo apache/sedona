@@ -37,14 +37,20 @@ public enum IndexType
 {
 
     /**
-     * The quadtree.
+     * The octree.
      */
     QUADTREE,
 
     /**
      * The rtree.
      */
-    RTREE;
+    RTREE,
+
+    /**
+     * The str tree.
+     */
+    STRTREE;
+
 
     /**
      * Gets the index type.

@@ -1,5 +1,5 @@
 /*
- * FILE: GeoSparkTestBase
+ * FILE: SpatioTemporalDedupParams
  * Copyright (c) 2015 - 2018 GeoSpark Development Team
  *
  * MIT License
@@ -23,31 +23,33 @@
  * SOFTWARE.
  *
  */
+package org.datasyslab.geospark.joinJudgement;
 
-package org.datasyslab.geospark;
+import java.io.Serializable;
+import java.util.List;
+import java.util.Objects;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.serializer.KryoSerializer;
-import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator;
+import org.datasyslab.geospark.SpatioTemporalObjects.Cube;
 
-public class GeoSparkTestBase
+/**
+ * Contains information necessary to activate de-dup logic in sub-classes of {@link JudgementBase}.
+ */
+public final class SpatioTemporalDedupParams
+        implements Serializable
 {
-    protected static SparkConf conf;
-    protected static JavaSparkContext sc;
+    private final List<Cube> partitionExtents;
 
-    protected static void initialize(final String testSuiteName)
+    /**
+     * @param partitionExtents A list of partition extents in such an order that
+     * an index of an element in this list matches partition ID.
+     */
+    public SpatioTemporalDedupParams(List<Cube> partitionExtents)
     {
-        conf = new SparkConf().setAppName(testSuiteName).setMaster("local[2]");
-        conf.set("spark.serializer", KryoSerializer.class.getName());
-        conf.set("spark.kryo.registrator", GeoSparkKryoRegistrator.class.getName());
-        conf.set("spark.kryoserializer.buffer.max.mb", "1024");
+        this.partitionExtents = Objects.requireNonNull(partitionExtents, "partitionExtents");
+    }
 
-        sc = new JavaSparkContext(conf);
-        Logger.getLogger("org").setLevel(Level.WARN);
-        Logger.getLogger("akka").setLevel(Level.WARN);
+    public List<Cube> getPartitionExtents()
+    {
+        return partitionExtents;
     }
 }
-

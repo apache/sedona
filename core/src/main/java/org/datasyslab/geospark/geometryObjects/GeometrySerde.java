@@ -26,6 +26,10 @@
 
 package org.datasyslab.geospark.geometryObjects;
 
+import org.apache.log4j.Logger;
+import org.datasyslab.geospark.SpatioTemporalObjects.Point3D;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeSerde;
+
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Registration;
 import com.esotericsoftware.kryo.Serializer;
@@ -41,8 +45,6 @@ import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
-import org.apache.log4j.Logger;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeSerde;
 
 /**
  * Provides methods to efficiently serialize and deserialize geometry types.
@@ -65,7 +67,8 @@ public class GeometrySerde
         SHAPE(0),
         CIRCLE(1),
         GEOMETRYCOLLECTION(2),
-        ENVELOPE(3);
+        ENVELOPE(3),
+        POINT3D(4);
 
         private final int id;
 
@@ -118,6 +121,12 @@ public class GeometrySerde
             out.writeDouble(envelope.getMaxX());
             out.writeDouble(envelope.getMinY());
             out.writeDouble(envelope.getMaxY());
+        }
+        else if (object instanceof Point3D) {
+            writeType(out, Type.POINT3D);
+            out.writeDouble(((Point3D) object).z);
+            Geometry geometry = ((Point3D) object).point;
+            writeGeometry(kryo, out, geometry);
         }
         else {
             throw new UnsupportedOperationException("Cannot serialize object of type " +
@@ -179,6 +188,12 @@ public class GeometrySerde
                 double yMin = input.readDouble();
                 double yMax = input.readDouble();
                 return new Envelope(xMin, xMax, yMin, yMax);
+            }
+            case POINT3D: {
+                double z = input.readDouble();
+                Geometry centerGeometry = readGeometry(kryo, input);
+                Point3D point3D = new Point3D((Point) centerGeometry, z);
+                return point3D;
             }
             default:
                 throw new UnsupportedOperationException(

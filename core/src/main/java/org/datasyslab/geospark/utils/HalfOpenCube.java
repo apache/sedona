@@ -1,5 +1,5 @@
 /*
- * FILE: GeoSparkTestBase
+ * FILE: HalfOpenRectangle
  * Copyright (c) 2015 - 2018 GeoSpark Development Team
  *
  * MIT License
@@ -23,31 +23,34 @@
  * SOFTWARE.
  *
  */
+package org.datasyslab.geospark.utils;
 
-package org.datasyslab.geospark;
+import org.datasyslab.geospark.SpatioTemporalObjects.Cube;
+import org.datasyslab.geospark.SpatioTemporalObjects.Point3D;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.serializer.KryoSerializer;
-import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator;
-
-public class GeoSparkTestBase
+public class HalfOpenCube
 {
-    protected static SparkConf conf;
-    protected static JavaSparkContext sc;
+    private final Cube envelope;
 
-    protected static void initialize(final String testSuiteName)
+    public HalfOpenCube(Cube envelope)
     {
-        conf = new SparkConf().setAppName(testSuiteName).setMaster("local[2]");
-        conf.set("spark.serializer", KryoSerializer.class.getName());
-        conf.set("spark.kryo.registrator", GeoSparkKryoRegistrator.class.getName());
-        conf.set("spark.kryoserializer.buffer.max.mb", "1024");
+        this.envelope = envelope;
+    }
 
-        sc = new JavaSparkContext(conf);
-        Logger.getLogger("org").setLevel(Level.WARN);
-        Logger.getLogger("akka").setLevel(Level.WARN);
+    public boolean contains(Point3D point)
+    {
+        return contains(point.getX(), point.getY(), point.getZ());
+    }
+
+    public boolean contains(double x, double y, double z)
+    {
+        return x >= envelope.getMinX() && x < envelope.getMaxX()
+                && y >= envelope.getMinY() && y < envelope.getMaxY()
+                && z >= envelope.getMinZ() && z < envelope.getMaxZ();
+    }
+
+    public Cube getEnvelope()
+    {
+        return envelope;
     }
 }
-

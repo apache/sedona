@@ -1,5 +1,5 @@
 /*
- * FILE: GeoSparkTestBase
+ * FILE: OctreeNode
  * Copyright (c) 2015 - 2018 GeoSpark Development Team
  *
  * MIT License
@@ -23,31 +23,25 @@
  * SOFTWARE.
  *
  */
+package org.datasyslab.geospark.spatioTemporalPartitioning.octree;
 
-package org.datasyslab.geospark;
+import java.io.Serializable;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.serializer.KryoSerializer;
-import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator;
-
-public class GeoSparkTestBase
+public class OctreeNode<T>
+        implements Serializable
 {
-    protected static SparkConf conf;
-    protected static JavaSparkContext sc;
+    OctreeRectangle r;
+    T element;
 
-    protected static void initialize(final String testSuiteName)
+    OctreeNode(OctreeRectangle r, T element)
     {
-        conf = new SparkConf().setAppName(testSuiteName).setMaster("local[2]");
-        conf.set("spark.serializer", KryoSerializer.class.getName());
-        conf.set("spark.kryo.registrator", GeoSparkKryoRegistrator.class.getName());
-        conf.set("spark.kryoserializer.buffer.max.mb", "1024");
+        this.r = r;
+        this.element = element;
+    }
 
-        sc = new JavaSparkContext(conf);
-        Logger.getLogger("org").setLevel(Level.WARN);
-        Logger.getLogger("akka").setLevel(Level.WARN);
+    @Override
+    public String toString()
+    {
+        return r.toString();
     }
 }
-

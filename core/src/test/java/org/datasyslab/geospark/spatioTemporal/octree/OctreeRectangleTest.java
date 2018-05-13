@@ -1,5 +1,5 @@
 /*
- * FILE: GeoSparkTestBase
+ * FILE: QuadRectangleTest
  * Copyright (c) 2015 - 2018 GeoSpark Development Team
  *
  * MIT License
@@ -23,31 +23,41 @@
  * SOFTWARE.
  *
  */
+package org.datasyslab.geospark.spatioTemporal.octree;
 
-package org.datasyslab.geospark;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.serializer.KryoSerializer;
-import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator;
+import org.datasyslab.geospark.spatioTemporalPartitioning.octree.OctreeRectangle;
+import org.junit.Test;
 
-public class GeoSparkTestBase
+public class OctreeRectangleTest
 {
-    protected static SparkConf conf;
-    protected static JavaSparkContext sc;
 
-    protected static void initialize(final String testSuiteName)
+    @Test
+    public void testContains()
     {
-        conf = new SparkConf().setAppName(testSuiteName).setMaster("local[2]");
-        conf.set("spark.serializer", KryoSerializer.class.getName());
-        conf.set("spark.kryo.registrator", GeoSparkKryoRegistrator.class.getName());
-        conf.set("spark.kryoserializer.buffer.max.mb", "1024");
+        OctreeRectangle r1 = makeRect(0, 0, 1, 10, 10, 1);
+        OctreeRectangle r2 = makeRect(0, 0, 1, 10, 10, 1);
 
-        sc = new JavaSparkContext(conf);
-        Logger.getLogger("org").setLevel(Level.WARN);
-        Logger.getLogger("akka").setLevel(Level.WARN);
+        // contains rectange
+        assertTrue(r1.contains(r2));
+
+        // contains point
+        assertTrue(r1.contains(makeRect(5, 5, 1, 0, 0, 1)));
+
+        // doesn't contain rectangle
+        OctreeRectangle r3 = makeRect(0, 0, 1, 11, 10, 1);
+        assertFalse(r1.contains(r3));
+
+        // doesn't contain point
+        assertFalse(r1.contains(makeRect(5, 12, 1, 0, 0, 1)));
     }
-}
 
+    private OctreeRectangle makeRect(double x, double y, double z, double width, double length,
+                                     double height)
+    {
+        return new OctreeRectangle(x, y, z, width, length, height);
+    }
+
+}
