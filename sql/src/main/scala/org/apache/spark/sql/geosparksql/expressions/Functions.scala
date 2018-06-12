@@ -232,7 +232,7 @@ case class ST_Intersection(inputExpressions: Seq[Expression])
   */
 case class ST_IsValid(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
-  override def nullable: Boolean = true
+  override def nullable: Boolean = false
 
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length == 1)
