@@ -15,6 +15,10 @@ SELECT ST_GeomFromWKT(polygontable._c0) AS polygonshape
 FROM polygontable
 ```
 
+```SQL
+SELECT ST_GeomFromWKT('POINT(40.7128,-74.0060)') AS geometry
+```
+
 ## ST_GeomFromWKB
 
 Introduction: Construct a Geometry from WKB string. Unlimited UUID strings can be appended.
@@ -88,7 +92,7 @@ spatialDf.printSchema()
 	```
 
 !!!warning
-	Please make sure you use ==ST_GeomFromWKT== to create Geometry type column otherwise that column cannot be used in GeoSparkSQL. 
+	Please make sure you use ==ST_GeomFromWKT== to create Geometry type column otherwise that column cannot be used in GeoSparkSQL.
 ## ST_Point
 
 Introduction: Construct a Point from X and Y. Unlimited UUID strings can be appended.
@@ -118,9 +122,13 @@ SELECT ST_PointFromText(pointtable._c0,',') AS pointshape
 FROM pointtable
 ```
 
+```SQL
+SELECT ST_PointFromText('40.7128,-74.0060', ',') AS pointshape
+```
+
 ## ST_PolygonFromText
 
-Introduction: Construct a Polygon from Text, delimited by Delimiter. Unlimited UUID strings can be appended.
+Introduction: Construct a Polygon from Text, delimited by Delimiter. Path must be closed. Unlimited UUID strings can be appended.
 
 Format: `ST_PolygonFromText (Text:string, Delimiter:char, UUID1, UUID2, ...)`
 
@@ -130,6 +138,10 @@ Spark SQL example:
 ```SQL
 SELECT ST_PolygonFromText(polygontable._c0,',') AS polygonshape
 FROM polygontable
+```
+
+```SQL
+SELECT ST_PolygonFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794,-74.0428197,40.6867969', ',') AS polygonshape
 ```
 
 ## ST_LineStringFromText
@@ -144,6 +156,10 @@ Spark SQL example:
 ```SQL
 SELECT ST_LineStringFromText(linestringtable._c0,',') AS linestringshape
 FROM linestringtable
+```
+
+```SQL
+SELECT ST_LineStringFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794', ',') AS linestringshape
 ```
 
 ## ST_PolygonFromEnvelope
@@ -173,9 +189,8 @@ Spark SQL example:
 
 ```SQL
 SELECT ST_Circle(pointdf.pointshape, 1.0)
-FROM pointdf)
+FROM pointdf
 ```
 
 !!!note
 	GeoSpark doesn't control the radius's unit (degree or meter). It is same with the geometry. To change the geometry's unit, please transform the coordinate reference system. See [ST_Transform](GeoSparkSQL-Function.md#st_transform).
-	
