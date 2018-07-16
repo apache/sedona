@@ -32,7 +32,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.spark.api.java.function.FlatMapFunction2;
 
 import javax.annotation.Nullable;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -43,12 +42,20 @@ public class LeftIndexLookupJudgement<T extends Geometry, U extends Geometry>
         implements FlatMapFunction2<Iterator<SpatialIndex>, Iterator<U>, Pair<T, U>>, Serializable
 {
 
+    private final boolean outer;
+    private final T emptyElement;
+
     /**
      * @see JudgementBase
      */
-    public LeftIndexLookupJudgement(boolean considerBoundaryIntersection, @Nullable DedupParams dedupParams)
+    public LeftIndexLookupJudgement(boolean considerBoundaryIntersection,
+                                    boolean swapLeftRight,
+                                    @Nullable DedupParams dedupParams,
+                                    boolean outer, T emptyElement)
     {
-        super(considerBoundaryIntersection, dedupParams);
+        super(considerBoundaryIntersection, swapLeftRight, dedupParams);
+        this.outer = outer;
+        this.emptyElement = emptyElement;
     }
 
     @Override
@@ -72,6 +79,9 @@ public class LeftIndexLookupJudgement<T extends Geometry, U extends Geometry>
                 if (match(candidate, streamShape)) {
                     result.add(Pair.of((T) candidate, streamShape));
                 }
+            }
+            if (outer && candidates.isEmpty()) {
+                result.add(Pair.of(emptyElement, streamShape));
             }
         }
         return result.iterator();

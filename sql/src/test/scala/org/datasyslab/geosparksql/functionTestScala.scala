@@ -34,24 +34,9 @@ import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
 import org.datasyslab.geosparksql.utils.GeoSparkSQLRegistrator
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
-class functionTestScala extends FunSpec with BeforeAndAfterAll {
-
-  var sparkSession: SparkSession = _
-
-  override def afterAll(): Unit = {
-    //GeoSparkSQLRegistrator.dropAll(sparkSession)
-    //sparkSession.stop
-  }
+class functionTestScala extends SparkTestSpec {
 
   describe("GeoSpark-SQL Function Test") {
-    sparkSession = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
-      config("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName).
-      master("local[*]").appName("readTestScala").getOrCreate()
-    Logger.getLogger("org").setLevel(Level.WARN)
-    Logger.getLogger("akka").setLevel(Level.WARN)
-
-    GeoSparkSQLRegistrator.registerAll(sparkSession.sqlContext)
-
     val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
 
     val mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv"
@@ -138,7 +123,6 @@ class functionTestScala extends FunSpec with BeforeAndAfterAll {
     }
 
     it("Passed ST_Intersection") {
-
       var testtable=sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
       testtable.createOrReplaceTempView("testtable")
       var intersec=sparkSession.sql("select ST_Intersection(a,b) from testtable")

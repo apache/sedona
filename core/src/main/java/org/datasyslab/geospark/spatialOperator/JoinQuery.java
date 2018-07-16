@@ -37,11 +37,7 @@ import org.apache.spark.api.java.function.PairFunction;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.enums.JoinBuildSide;
 import org.datasyslab.geospark.geometryObjects.Circle;
-import org.datasyslab.geospark.joinJudgement.DedupParams;
-import org.datasyslab.geospark.joinJudgement.DynamicIndexLookupJudgement;
-import org.datasyslab.geospark.joinJudgement.LeftIndexLookupJudgement;
-import org.datasyslab.geospark.joinJudgement.NestedLoopJudgement;
-import org.datasyslab.geospark.joinJudgement.RightIndexLookupJudgement;
+import org.datasyslab.geospark.joinJudgement.*;
 import org.datasyslab.geospark.monitoring.GeoSparkMetric;
 import org.datasyslab.geospark.monitoring.GeoSparkMetrics;
 import org.datasyslab.geospark.spatialPartitioning.SpatialPartitioner;
@@ -143,30 +139,58 @@ public class JoinQuery
                 });
     }
 
+    public enum JoinType {
+        INNER,
+        LEFT_OUTER,
+        RIGHT_OUTER
+    }
+
     public static final class JoinParams
     {
         public final boolean useIndex;
         public final boolean considerBoundaryIntersection;
+        public final boolean swapLeftRight;
         public final boolean allowDuplicates;
         public final IndexType indexType;
         public final JoinBuildSide joinBuildSide;
+        public final JoinType joinType;
 
         public JoinParams(boolean useIndex, boolean considerBoundaryIntersection, boolean allowDuplicates)
         {
             this.useIndex = useIndex;
             this.considerBoundaryIntersection = considerBoundaryIntersection;
+            this.swapLeftRight = false;
             this.allowDuplicates = allowDuplicates;
             this.indexType = IndexType.RTREE;
             this.joinBuildSide = JoinBuildSide.RIGHT;
+            this.joinType = JoinType.INNER;
         }
 
         public JoinParams(boolean considerBoundaryIntersection, IndexType polygonIndexType, JoinBuildSide joinBuildSide)
         {
             this.useIndex = false;
             this.considerBoundaryIntersection = considerBoundaryIntersection;
+            this.swapLeftRight = false;
             this.allowDuplicates = false;
             this.indexType = polygonIndexType;
             this.joinBuildSide = joinBuildSide;
+            this.joinType = JoinType.INNER;
+        }
+
+        public JoinParams(boolean useIndex, boolean considerBoundaryIntersection, boolean swapLeftRight,
+                          IndexType polygonIndexType, JoinBuildSide joinBuildSide, JoinType joinType)
+        {
+            this.useIndex = useIndex;
+            this.considerBoundaryIntersection = considerBoundaryIntersection;
+            this.swapLeftRight = swapLeftRight;
+            this.allowDuplicates = false;
+            this.indexType = polygonIndexType;
+            this.joinBuildSide = joinBuildSide;
+            this.joinType = joinType;
+        }
+
+        public boolean isOuter() {
+            return joinType == JoinType.LEFT_OUTER || joinType == JoinType.RIGHT_OUTER;
         }
     }
 
@@ -470,28 +494,45 @@ public class JoinQuery
         final SpatialPartitioner partitioner =
                 (SpatialPartitioner) rightRDD.spatialPartitionedRDD.partitioner().get();
         final DedupParams dedupParams = partitioner.getDedupParams();
+        final boolean outer = joinParams.isOuter();
 
         final JavaRDD<Pair<U, T>> resultWithDuplicates;
         if (joinParams.useIndex) {
             if (rightRDD.indexedRDD != null) {
+                if (outer && joinParams.joinType != JoinType.LEFT_OUTER) {
+                    throw new IllegalArgumentException(
+                            joinParams.joinType.toString() + " join is not supported with indexed right side.");
+                }
                 final RightIndexLookupJudgement judgement =
-                        new RightIndexLookupJudgement(joinParams.considerBoundaryIntersection, dedupParams);
+                        new RightIndexLookupJudgement(joinParams.considerBoundaryIntersection, joinParams.swapLeftRight,
+                                dedupParams, outer, rightRDD.getEmptyElement());
                 resultWithDuplicates = leftRDD.spatialPartitionedRDD.zipPartitions(rightRDD.indexedRDD, judgement);
             }
             else if (leftRDD.indexedRDD != null) {
+                if (outer && joinParams.joinType != JoinType.RIGHT_OUTER) {
+                    throw new IllegalArgumentException(
+                            joinParams.joinType.toString() + " join is not supported with indexed left side.");
+                }
                 final LeftIndexLookupJudgement judgement =
-                        new LeftIndexLookupJudgement(joinParams.considerBoundaryIntersection, dedupParams);
+                        new LeftIndexLookupJudgement(joinParams.considerBoundaryIntersection, joinParams.swapLeftRight,
+                                dedupParams, outer, leftRDD.getEmptyElement());
                 resultWithDuplicates = leftRDD.indexedRDD.zipPartitions(rightRDD.spatialPartitionedRDD, judgement);
             }
             else {
                 log.warn("UseIndex is true, but no index exists. Will build index on the fly.");
+                if (outer) {
+                    if ((joinParams.joinBuildSide == JoinBuildSide.RIGHT && joinParams.joinType != JoinType.LEFT_OUTER)
+                         || (joinParams.joinBuildSide == JoinBuildSide.LEFT && joinParams.joinType != JoinType.RIGHT_OUTER)) {
+                        throw new IllegalArgumentException(
+                                joinParams.joinBuildSide.toString() + " side index can't be built when performing a " +
+                                joinParams.joinType.toString() + " join.");
+                    }
+                }
                 DynamicIndexLookupJudgement judgement =
-                        new DynamicIndexLookupJudgement(
-                                joinParams.considerBoundaryIntersection,
-                                joinParams.indexType,
-                                joinParams.joinBuildSide,
-                                dedupParams,
-                                buildCount, streamCount, resultCount, candidateCount);
+                        new DynamicIndexLookupJudgement(joinParams.considerBoundaryIntersection,
+                                joinParams.swapLeftRight, joinParams.indexType, joinParams.joinBuildSide,
+                                dedupParams, buildCount, streamCount, resultCount, candidateCount, outer,
+                                leftRDD.getEmptyElement(), rightRDD.getEmptyElement());
                 resultWithDuplicates = leftRDD.spatialPartitionedRDD.zipPartitions(rightRDD.spatialPartitionedRDD, judgement);
             }
         }/*
@@ -506,8 +547,15 @@ public class JoinQuery
             resultWithDuplicates = leftRDD.spatialPartitionedRDD.zipPartitions(rightRDD.spatialPartitionedRDD, judgement);
         }*/
         else {
-            NestedLoopJudgement judgement = new NestedLoopJudgement(joinParams.considerBoundaryIntersection, dedupParams);
-            resultWithDuplicates = rightRDD.spatialPartitionedRDD.zipPartitions(leftRDD.spatialPartitionedRDD, judgement);
+            if (outer && joinParams.joinType == JoinType.RIGHT_OUTER) {
+                RightNestedLoopJudgement judgement = new RightNestedLoopJudgement(joinParams.considerBoundaryIntersection,
+                        joinParams.swapLeftRight, dedupParams, outer, leftRDD.getEmptyElement());
+                resultWithDuplicates = rightRDD.spatialPartitionedRDD.zipPartitions(leftRDD.spatialPartitionedRDD, judgement);
+            } else {
+                LeftNestedLoopJudgement judgement = new LeftNestedLoopJudgement(joinParams.considerBoundaryIntersection,
+                        joinParams.swapLeftRight, dedupParams, outer, rightRDD.getEmptyElement());
+                resultWithDuplicates = rightRDD.spatialPartitionedRDD.zipPartitions(leftRDD.spatialPartitionedRDD, judgement);
+            }
         }
 
         final boolean uniqueResults = dedupParams != null;

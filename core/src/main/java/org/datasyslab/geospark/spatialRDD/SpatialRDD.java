@@ -126,6 +126,8 @@ public class SpatialRDD<T extends Geometry>
 
     private SpatialPartitioner partitioner;
 
+    private T emptyElement;
+
     /**
      * The sample number.
      */
@@ -145,6 +147,16 @@ public class SpatialRDD<T extends Geometry>
     {
         this.sampleNumber = sampleNumber;
     }
+
+    /**
+     * What's considered to be an empty element in such RDD (for outer joins)
+     */
+    public T getEmptyElement() { return emptyElement; }
+
+    /**
+     * Set what's considered to be an empty element in such RDD (for outer joins)
+     */
+    public void setEmptyElement(T emptyElement) { this.emptyElement = emptyElement; }
 
     /**
      * The CR stransformation.

@@ -27,10 +27,11 @@ package org.apache.spark.sql.geosparksql.strategy.join
 
 import org.apache.spark.sql.Strategy
 import org.apache.spark.sql.catalyst.expressions.{Expression, LessThan, LessThanOrEqual}
-import org.apache.spark.sql.catalyst.plans.Inner
 import org.apache.spark.sql.catalyst.plans.logical.{Join, LogicalPlan}
+import org.apache.spark.sql.catalyst.plans.{Inner, JoinType, LeftOuter, RightOuter}
 import org.apache.spark.sql.execution.SparkPlan
 import org.apache.spark.sql.geosparksql.expressions.{ST_Contains, ST_Distance, ST_Intersects, ST_Within}
+import org.datasyslab.geospark.spatialOperator.JoinQuery
 
 /**
   * Plans `RangeJoinExec` for inner joins on spatial relationships ST_Contains(a, b)
@@ -45,8 +46,8 @@ object JoinQueryDetector extends Strategy {
     * map to the output of the specified plan.
     */
   private def matches(expr: Expression, plan: LogicalPlan): Boolean =
-    expr.references.find(plan.outputSet.contains(_)).isDefined &&
-      expr.references.find(!plan.outputSet.contains(_)).isEmpty
+    expr.references.exists(plan.outputSet.contains(_)) &&
+      expr.references.forall(plan.outputSet.contains(_))
 
   private def matchExpressionsToPlans(exprA: Expression,
                                       exprB: Expression,
@@ -64,79 +65,114 @@ object JoinQueryDetector extends Strategy {
   def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
 
     // ST_Contains(a, b) - a contains b
-    case Join(left, right, Inner, Some(ST_Contains(Seq(leftShape, rightShape)))) =>
-      planSpatialJoin(left, right, Seq(leftShape, rightShape), false)
+    case Join(left, right, joinType, Some(ST_Contains(Seq(leftShape, rightShape)))) =>
+      planSpatialJoin(left, right, joinType, Seq(leftShape, rightShape),
+        intersects = false, swapLeftRight = false)
 
     // ST_Intersects(a, b) - a intersects b
-    case Join(left, right, Inner, Some(ST_Intersects(Seq(leftShape, rightShape)))) =>
-      planSpatialJoin(left, right, Seq(leftShape, rightShape), true)
+    case Join(left, right, joinType, Some(ST_Intersects(Seq(leftShape, rightShape)))) =>
+      planSpatialJoin(left, right, joinType, Seq(leftShape, rightShape),
+        intersects = true, swapLeftRight = false)
 
     // ST_WITHIN(a, b) - a is within b
-    case Join(left, right, Inner, Some(ST_Within(Seq(leftShape, rightShape)))) =>
-      planSpatialJoin(right, left, Seq(rightShape, leftShape), false)
+    case Join(left, right, joinType, Some(ST_Within(Seq(leftShape, rightShape)))) =>
+      planSpatialJoin(left, right, joinType, Seq(leftShape, rightShape),
+        intersects = false, swapLeftRight = true)
 
     // ST_Distance(a, b) <= radius consider boundary intersection
-    case Join(left, right, Inner, Some(LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), radius))) =>
-      planDistanceJoin(left, right, Seq(leftShape, rightShape), radius, true)
+    case Join(left, right, joinType, Some(LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), radius))) =>
+      planDistanceJoin(left, right, joinType, Seq(leftShape, rightShape), radius,
+        intersects = true, swapLeftRight = false)
 
     // ST_Distance(a, b) < radius don't consider boundary intersection
-    case Join(left, right, Inner, Some(LessThan(ST_Distance(Seq(leftShape, rightShape)), radius))) =>
-      planDistanceJoin(left, right, Seq(leftShape, rightShape), radius, false)
+    case Join(left, right, joinType, Some(LessThan(ST_Distance(Seq(leftShape, rightShape)), radius))) =>
+      planDistanceJoin(left, right, joinType, Seq(leftShape, rightShape), radius,
+        intersects = false, swapLeftRight = false)
+
     case _ =>
       Nil
   }
 
+  private def getSupportedJoinType(joinType: JoinType): Option[JoinQuery.JoinType] = {
+    joinType match {
+      case Inner => Some(JoinQuery.JoinType.INNER)
+      case LeftOuter => Some(JoinQuery.JoinType.LEFT_OUTER)
+      case RightOuter => Some(JoinQuery.JoinType.RIGHT_OUTER)
+      case _ => None
+    }
+  }
+
   private def planSpatialJoin(left: LogicalPlan,
                               right: LogicalPlan,
+                              joinType: JoinType,
                               children: Seq[Expression],
                               intersects: Boolean,
+                              swapLeftRight: Boolean,
                               extraCondition: Option[Expression] = None): Seq[SparkPlan] = {
     val a = children.head
     val b = children.tail.head
 
-    val relationship = if (intersects) "ST_Intersects" else "ST_Contains";
+    val relationship = if (intersects) "ST_Intersects" else "ST_Contains"
 
-    matchExpressionsToPlans(a, b, left, right) match {
-      case Some((planA, planB)) =>
-        logInfo(s"Planning spatial join for $relationship relationship")
-        RangeJoinExec(planLater(planA), planLater(planB), a, b, intersects, extraCondition) :: Nil
-      case None =>
-        logInfo(
-          s"Spatial join for $relationship with arguments not aligned " +
-            "with join relations is not supported")
+    getSupportedJoinType(joinType) match {
+      case Some(queryJoinType) => matchExpressionsToPlans(a, b, left, right) match {
+        case Some((planA, planB)) =>
+          logInfo(s"Planning spatial join for $relationship relationship")
+          RangeJoinExec(planLater(planA), planLater(planB), a, b, queryJoinType, intersects,
+            swapLeftRight, extraCondition) :: Nil
+        case None =>
+          logInfo(
+            s"Spatial join for $relationship with arguments not aligned " +
+              "with join relations is not supported")
+          Nil
+      }
+      case _ =>
+        logWarning(
+          s"Spatial join of type $joinType is not supported")
         Nil
     }
   }
 
   private def planDistanceJoin(left: LogicalPlan,
                                right: LogicalPlan,
+                               joinType: JoinType,
                                children: Seq[Expression],
                                radius: Expression,
                                intersects: Boolean,
+                               swapLeftRight: Boolean,
                                extraCondition: Option[Expression] = None): Seq[SparkPlan] = {
     val a = children.head
     val b = children.tail.head
 
-    val relationship = if (intersects) "ST_Distance <=" else "ST_Distance <";
+    val relationship = if (intersects) "ST_Distance <=" else "ST_Distance <"
 
-    matchExpressionsToPlans(a, b, left, right) match {
-      case Some((planA, planB)) =>
-        if (radius.references.isEmpty || matches(radius, planA)) {
-          logInfo("Planning spatial distance join")
-          DistanceJoinExec(planLater(planA), planLater(planB), a, b, radius, intersects, extraCondition) :: Nil
-        } else if (matches(radius, planB)) {
-          logInfo("Planning spatial distance join")
-          DistanceJoinExec(planLater(planB), planLater(planA), b, a, radius, intersects, extraCondition) :: Nil
-        } else {
-          logInfo(
-            "Spatial distance join for ST_Distance with non-scalar radius " +
-              "that is not a computation over just one side of the join is not supported")
-          Nil
+    getSupportedJoinType(joinType) match {
+      case Some(queryJoinType) =>
+        matchExpressionsToPlans(a, b, left, right) match {
+          case Some((planA, planB)) =>
+            if (radius.references.isEmpty || matches(radius, planA)) {
+              logInfo(s"Planning spatial distance join for $relationship relationship")
+              DistanceJoinExec(planLater(planA), planLater(planB), a, b, queryJoinType, radius, intersects,
+                swapLeftRight, extraCondition) :: Nil
+            } else if (matches(radius, planB)) {
+              logInfo(s"Planning spatial distance join for $relationship relationship")
+              DistanceJoinExec(planLater(planB), planLater(planA), b, a, queryJoinType, radius, intersects,
+                swapLeftRight, extraCondition) :: Nil
+            } else {
+              logInfo(
+                "Spatial distance join for ST_Distance with non-scalar radius " +
+                  "that is not a computation over just one side of the join is not supported")
+              Nil
+            }
+          case None =>
+            logInfo(
+              "Spatial distance join for ST_Distance with arguments not " +
+                "aligned with join relations is not supported")
+            Nil
         }
-      case None =>
-        logInfo(
-          "Spatial distance join for ST_Distance with arguments not " +
-            "aligned with join relations is not supported")
+      case _ =>
+        logWarning(
+          s"Spatial join of type $joinType is not supported")
         Nil
     }
   }

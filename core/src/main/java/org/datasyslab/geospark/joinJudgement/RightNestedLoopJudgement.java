@@ -1,5 +1,5 @@
 /*
- * FILE: NestedLoopJudgement
+ * FILE: LeftNestedLoopJudgement
  * Copyright (c) 2015 - 2018 GeoSpark Development Team
  *
  * MIT License
@@ -32,45 +32,56 @@ import org.apache.log4j.Logger;
 import org.apache.spark.api.java.function.FlatMapFunction2;
 
 import javax.annotation.Nullable;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class NestedLoopJudgement<T extends Geometry, U extends Geometry>
+public class RightNestedLoopJudgement<T extends Geometry, U extends Geometry>
         extends JudgementBase
         implements FlatMapFunction2<Iterator<T>, Iterator<U>, Pair<U, T>>, Serializable
 {
-    private static final Logger log = LogManager.getLogger(NestedLoopJudgement.class);
+    private static final Logger log = LogManager.getLogger(RightNestedLoopJudgement.class);
+    private final boolean outer;
+    private final U emptyElement;
 
     /**
      * @see JudgementBase
      */
-    public NestedLoopJudgement(boolean considerBoundaryIntersection, @Nullable DedupParams dedupParams)
+    public RightNestedLoopJudgement(boolean considerBoundaryIntersection,
+                                    boolean swapLeftRight,
+                                    @Nullable DedupParams dedupParams,
+                                    boolean outer, U emptyElement)
     {
-        super(considerBoundaryIntersection, dedupParams);
+        super(considerBoundaryIntersection, swapLeftRight, dedupParams);
+        this.outer = outer;
+        this.emptyElement = emptyElement;
     }
 
     @Override
-    public Iterator<Pair<U, T>> call(Iterator<T> iteratorObject, Iterator<U> iteratorWindow)
+    public Iterator<Pair<U, T>> call(Iterator<T> iteratorWindow, Iterator<U> iteratorObject)
             throws Exception
     {
         initPartition();
 
         List<Pair<U, T>> result = new ArrayList<>();
-        List<T> queryObjects = new ArrayList<>();
+        List<U> queryObjects = new ArrayList<>();
         while (iteratorObject.hasNext()) {
             queryObjects.add(iteratorObject.next());
         }
         while (iteratorWindow.hasNext()) {
-            U window = iteratorWindow.next();
+            T window = iteratorWindow.next();
+            boolean found = false;
             for (int i = 0; i < queryObjects.size(); i++) {
-                T object = queryObjects.get(i);
+                U object = queryObjects.get(i);
                 //log.warn("Check "+window.toText()+" with "+object.toText());
-                if (match(window, object)) {
-                    result.add(Pair.of(window, object));
+                if (match(object, window)) {
+                    result.add(Pair.of(object, window));
+                    found = true;
                 }
+            }
+            if (outer && !found) {
+                result.add(Pair.of(emptyElement, window));
             }
         }
         return result.iterator();

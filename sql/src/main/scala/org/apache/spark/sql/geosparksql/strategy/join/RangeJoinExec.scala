@@ -28,6 +28,7 @@ package org.apache.spark.sql.geosparksql.strategy.join
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.execution.{BinaryExecNode, SparkPlan}
+import org.datasyslab.geospark.spatialOperator.JoinQuery
 
 /**
   * ST_Contains(left, right) - left contains right
@@ -38,14 +39,18 @@ import org.apache.spark.sql.execution.{BinaryExecNode, SparkPlan}
   * @param right      right side of the join
   * @param leftShape  expression for the first argument of ST_Contains or ST_Intersects
   * @param rightShape expression for the second argument of ST_Contains or ST_Intersects
+  * @param joinType join type (Left outer, right outer, inner, etc.)
   * @param intersects boolean indicating whether spatial relationship is 'intersects' (true)
   *                   or 'contains' (false)
+  * @param swapLeftRight Whether left and right arguments must be swapped before matching
   */
 case class RangeJoinExec(left: SparkPlan,
                          right: SparkPlan,
                          leftShape: Expression,
                          rightShape: Expression,
+                         joinType: JoinQuery.JoinType,
                          intersects: Boolean,
+                         swapLeftRight: Boolean,
                          extraCondition: Option[Expression] = None)
   extends BinaryExecNode
     with TraitJoinQueryExec

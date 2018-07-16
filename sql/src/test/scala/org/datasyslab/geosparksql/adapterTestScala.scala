@@ -38,24 +38,9 @@ import org.datasyslab.geospark.spatialRDD.{CircleRDD, SpatialRDD}
 import org.datasyslab.geosparksql.utils.{Adapter, GeoSparkSQLRegistrator}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
-class adapterTestScala extends FunSpec with BeforeAndAfterAll {
-
-  var sparkSession: SparkSession = _
-
-  override def afterAll(): Unit = {
-    //UdfRegistrator.dropAll(sparkSession)
-    //sparkSession.stop
-  }
+class adapterTestScala extends SparkTestSpec {
 
   describe("GeoSpark-SQL Scala Adapter Test") {
-    sparkSession = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
-      config("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName).
-      master("local[*]").appName("readTestScala").getOrCreate()
-    Logger.getLogger("org").setLevel(Level.WARN)
-    Logger.getLogger("akka").setLevel(Level.WARN)
-
-    GeoSparkSQLRegistrator.registerAll(sparkSession.sqlContext)
-
     val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
 
     val mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv"

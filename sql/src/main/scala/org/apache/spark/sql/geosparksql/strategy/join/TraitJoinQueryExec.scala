@@ -25,11 +25,11 @@
  */
 package org.apache.spark.sql.geosparksql.strategy.join
 
-import com.vividsolutions.jts.geom.Geometry
+import com.vividsolutions.jts.geom.{Coordinate, Geometry, GeometryFactory}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeRowJoiner
-import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, UnsafeRow}
+import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, UnsafeProjection, UnsafeRow}
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.execution.SparkPlan
 import org.datasyslab.geospark.enums.JoinSparitionDominantSide
@@ -46,19 +46,16 @@ trait TraitJoinQueryExec {
   val right: SparkPlan
   val leftShape: Expression
   val rightShape: Expression
+  val joinType: JoinQuery.JoinType
   val intersects: Boolean
+  val swapLeftRight: Boolean
   val extraCondition: Option[Expression]
 
-  // Using lazy val to avoid serialization
-  @transient private lazy val boundCondition: (InternalRow => Boolean) = {
-    if (extraCondition.isDefined) {
-      newPredicate(extraCondition.get, left.output ++ right.output).eval _
-    } else { (r: InternalRow) =>
-      true
-    }
+  override def output: Seq[Attribute] = joinType match {
+    case JoinQuery.JoinType.LEFT_OUTER => left.output ++ right.output.map(_.withNullability(true))
+    case JoinQuery.JoinType.RIGHT_OUTER => left.output.map(_.withNullability(true)) ++ right.output
+    case _ => left.output ++ right.output
   }
-
-  override def output: Seq[Attribute] = left.output ++ right.output
 
   override protected def doExecute(): RDD[InternalRow] = {
     val boundLeftShape = BindReferences.bindReference(leftShape, left.output)
@@ -67,9 +64,9 @@ trait TraitJoinQueryExec {
     val leftResultsRaw = left.execute().asInstanceOf[RDD[UnsafeRow]]
     val rightResultsRaw = right.execute().asInstanceOf[RDD[UnsafeRow]]
 
-    var geosparkConf = new GeoSparkConf(sparkContext.conf)
+    val geosparkConf = new GeoSparkConf(sparkContext.conf)
     val (leftShapes, rightShapes) =
-      toSpatialRddPair(leftResultsRaw, boundLeftShape, rightResultsRaw, boundRightShape)
+      toSpatialRddPair(leftResultsRaw, boundLeftShape, left.output, rightResultsRaw, boundRightShape, right.output)
 
     // Only do SpatialRDD analyze when the user doesn't know approximate total count of the spatial partitioning
     // dominant side rdd
@@ -85,8 +82,8 @@ trait TraitJoinQueryExec {
         geosparkConf.setDatasetBoundary(rightShapes.boundaryEnvelope)
       }
     }
-    log.info("[GeoSparkSQL] Number of partitions on the left: " + leftResultsRaw.partitions.size)
-    log.info("[GeoSparkSQL] Number of partitions on the right: " + rightResultsRaw.partitions.size)
+    log.info("[GeoSparkSQL] Number of partitions on the left: " + leftResultsRaw.partitions.length)
+    log.info("[GeoSparkSQL] Number of partitions on the right: " + rightResultsRaw.partitions.length)
 
     var numPartitions = -1
     try {
@@ -113,7 +110,7 @@ trait TraitJoinQueryExec {
       }
     }
     catch {
-      case e: IllegalArgumentException => {
+      case e: IllegalArgumentException =>
         print(e.getMessage)
         // Partition number are not qualified
         // Use fallback num partitions specified in GeoSparkConf
@@ -125,11 +122,11 @@ trait TraitJoinQueryExec {
           numPartitions = geosparkConf.getFallbackPartitionNum
           doSpatialPartitioning(rightShapes, leftShapes, numPartitions, geosparkConf)
         }
-      }
     }
 
 
-    val joinParams = new JoinParams(intersects, geosparkConf.getIndexType, geosparkConf.getJoinBuildSide)
+    val joinParams = new JoinParams(geosparkConf.getUseIndex, intersects, swapLeftRight, geosparkConf.getIndexType,
+      geosparkConf.getJoinBuildSide, joinType)
 
     //logInfo(s"leftShape count ${leftShapes.spatialPartitionedRDD.count()}")
     //logInfo(s"rightShape count ${rightShapes.spatialPartitionedRDD.count()}")
@@ -139,6 +136,8 @@ trait TraitJoinQueryExec {
     logDebug(s"Join result has ${matches.count()} rows")
 
     matches.rdd.mapPartitions { iter =>
+      val joiner = GenerateUnsafeRowJoiner.create(left.schema, right.schema)
+
       val filtered =
         if (extraCondition.isDefined) {
           val boundCondition = newPredicate(extraCondition.get, left.output ++ right.output)
@@ -146,7 +145,6 @@ trait TraitJoinQueryExec {
             case (l, r) =>
               val leftRow = l.getUserData.asInstanceOf[UnsafeRow]
               val rightRow = r.getUserData.asInstanceOf[UnsafeRow]
-              var joiner = GenerateUnsafeRowJoiner.create(left.schema, right.schema)
               boundCondition.eval(joiner.join(leftRow, rightRow))
           }
         } else {
@@ -157,14 +155,23 @@ trait TraitJoinQueryExec {
         case (l, r) =>
           val leftRow = l.getUserData.asInstanceOf[UnsafeRow]
           val rightRow = r.getUserData.asInstanceOf[UnsafeRow]
-          var joiner = GenerateUnsafeRowJoiner.create(left.schema, right.schema)
           joiner.join(leftRow, rightRow)
       }
     }
   }
 
+  protected def createEmptyElement(attrs: Seq[Attribute]): Geometry = {
+    val emptyElement: Geometry = new GeometryFactory().createPoint(new Coordinate())
+    val nullRow: UnsafeRow =
+      UnsafeProjection.create(attrs.map(_.dataType.asNullable).toArray)
+        .apply(InternalRow.apply(attrs.map(_ => null) : _*))
+    emptyElement.setUserData(nullRow)
+    emptyElement
+  }
+
   protected def toSpatialRdd(rdd: RDD[UnsafeRow],
-                             shapeExpression: Expression): SpatialRDD[Geometry] = {
+                             shapeExpression: Expression,
+                             attrs: Seq[Attribute]): SpatialRDD[Geometry] = {
 
     val spatialRdd = new SpatialRDD[Geometry]
     spatialRdd.setRawSpatialRDD(
@@ -177,14 +184,17 @@ trait TraitJoinQueryExec {
         }
         }
         .toJavaRDD())
+    spatialRdd.setEmptyElement(createEmptyElement(attrs))
     spatialRdd
   }
 
   def toSpatialRddPair(buildRdd: RDD[UnsafeRow],
                        buildExpr: Expression,
+                       buildAttrs: Seq[Attribute],
                        streamedRdd: RDD[UnsafeRow],
-                       streamedExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) =
-    (toSpatialRdd(buildRdd, buildExpr), toSpatialRdd(streamedRdd, streamedExpr))
+                       streamedExpr: Expression,
+                       streamedAttrs: Seq[Attribute]): (SpatialRDD[Geometry], SpatialRDD[Geometry]) =
+    (toSpatialRdd(buildRdd, buildExpr, buildAttrs), toSpatialRdd(streamedRdd, streamedExpr, streamedAttrs))
 
   def doSpatialPartitioning(dominantShapes: SpatialRDD[Geometry], followerShapes: SpatialRDD[Geometry],
                             numPartitions: Integer, geosparkConf: GeoSparkConf): Unit = {
@@ -192,20 +202,17 @@ trait TraitJoinQueryExec {
     followerShapes.spatialPartitioning(dominantShapes.getPartitioner)
   }
 
-  def joinPartitionNumOptimizer(dominantSidePartNum:Int, followerSidePartNum:Int, dominantSideCount:Long): Int =
-  {
+  def joinPartitionNumOptimizer(dominantSidePartNum: Int, followerSidePartNum: Int, dominantSideCount: Long): Int = {
     log.info("[GeoSparkSQL] Dominant side count: " + dominantSideCount)
     var numPartition = -1
-    var candidatePartitionNum = (dominantSideCount/2).intValue()
-    if (dominantSidePartNum*2 > dominantSideCount)
-    {
+    val candidatePartitionNum = (dominantSideCount / 2).intValue()
+    if (dominantSidePartNum * 2 > dominantSideCount) {
       log.warn(s"[GeoSparkSQL] Join dominant side partition number $dominantSidePartNum is larger than 1/2 of the dominant side count $dominantSideCount")
       log.warn(s"[GeoSparkSQL] Try to use follower side partition number $followerSidePartNum")
-      if (followerSidePartNum*2 > dominantSideCount){
+      if (followerSidePartNum * 2 > dominantSideCount) {
         log.warn(s"[GeoSparkSQL] Join follower side partition number is also larger than 1/2 of the dominant side count $dominantSideCount")
         log.warn(s"[GeoSparkSQL] Try to use 1/2 of the dominant side count $candidatePartitionNum as the partition number of both sides")
-        if (candidatePartitionNum==0)
-        {
+        if (candidatePartitionNum == 0) {
           log.warn(s"[GeoSparkSQL] 1/2 of $candidatePartitionNum is equal to 0. Use 1 as the partition number of both sides instead.")
           numPartition = 1
         }
@@ -214,6 +221,6 @@ trait TraitJoinQueryExec {
       else numPartition = followerSidePartNum
     }
     else numPartition = dominantSidePartNum
-    return  numPartition
+    numPartition
   }
 }

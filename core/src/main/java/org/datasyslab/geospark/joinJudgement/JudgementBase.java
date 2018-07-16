@@ -66,17 +66,21 @@ abstract class JudgementBase
     private static final Logger log = LogManager.getLogger(JudgementBase.class);
 
     private final boolean considerBoundaryIntersection;
+    private final boolean swapLeftRight;
     private final DedupParams dedupParams;
 
     transient private HalfOpenRectangle extent;
 
     /**
      * @param considerBoundaryIntersection true for 'intersects', false for 'contains' join condition
+     * @param swapLeftRight Whether left and right arguments must be swapped before matching
      * @param dedupParams Optional information to activate de-dup logic
      */
-    protected JudgementBase(boolean considerBoundaryIntersection, @Nullable DedupParams dedupParams)
+    protected JudgementBase(boolean considerBoundaryIntersection, boolean swapLeftRight,
+                            @Nullable DedupParams dedupParams)
     {
         this.considerBoundaryIntersection = considerBoundaryIntersection;
+        this.swapLeftRight = swapLeftRight;
         this.dedupParams = dedupParams;
     }
 
@@ -105,6 +109,11 @@ abstract class JudgementBase
     }
 
     protected boolean match(Geometry left, Geometry right)
+    {
+        return swapLeftRight ? doMatch(right, left) : doMatch(left, right);
+    }
+
+    private boolean doMatch(Geometry left, Geometry right)
     {
         if (extent != null) {
             // Handle easy case: points. Since each point is assigned to exactly one partition,

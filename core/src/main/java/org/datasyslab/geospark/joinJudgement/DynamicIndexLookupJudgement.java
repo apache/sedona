@@ -25,8 +25,10 @@
  */
 package org.datasyslab.geospark.joinJudgement;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.index.SpatialIndex;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
 import com.vividsolutions.jts.index.strtree.STRtree;
@@ -39,6 +41,7 @@ import org.apache.spark.api.java.function.FlatMapFunction2;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.enums.JoinBuildSide;
 import org.datasyslab.geospark.monitoring.GeoSparkMetric;
+import org.datasyslab.geospark.spatialOperator.JoinQuery;
 
 import javax.annotation.Nullable;
 
@@ -64,26 +67,36 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
     private final GeoSparkMetric streamCount;
     private final GeoSparkMetric resultCount;
     private final GeoSparkMetric candidateCount;
+    private final boolean outer;
+    private final U leftEmptyElement;
+    private final T rightEmptyElement;
 
     /**
      * @see JudgementBase
      */
     public DynamicIndexLookupJudgement(boolean considerBoundaryIntersection,
+            boolean swapLeftRight,
             IndexType indexType,
             JoinBuildSide joinBuildSide,
             @Nullable DedupParams dedupParams,
             GeoSparkMetric buildCount,
             GeoSparkMetric streamCount,
             GeoSparkMetric resultCount,
-            GeoSparkMetric candidateCount)
+            GeoSparkMetric candidateCount,
+            boolean outer,
+            U leftEmptyElement,
+            T rightEmptyElement)
     {
-        super(considerBoundaryIntersection, dedupParams);
+        super(considerBoundaryIntersection, swapLeftRight, dedupParams);
         this.indexType = indexType;
         this.joinBuildSide = joinBuildSide;
         this.buildCount = buildCount;
         this.streamCount = streamCount;
         this.resultCount = resultCount;
         this.candidateCount = candidateCount;
+        this.outer = outer;
+        this.leftEmptyElement = leftEmptyElement;
+        this.rightEmptyElement = rightEmptyElement;
     }
 
     @Override
@@ -186,6 +199,13 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
                                 batch.add(Pair.of((U) streamShape, (T) buildShape));
                                 resultCount.add(1);
                             }
+                        }
+                    }
+                    if (outer && candidates.isEmpty()) {
+                        if (buildLeft) {
+                            batch.add(Pair.of(leftEmptyElement, (T) streamShape));
+                        } else {
+                            batch.add(Pair.of((U) streamShape, rightEmptyElement));
                         }
                     }
                     logMilestone(shapeCnt, 100 * 1000, "Streaming shapes");

@@ -1,5 +1,5 @@
 /*
- * FILE: RightIndexLookupJudgement
+ * FILE: LeftNestedLoopJudgement
  * Copyright (c) 2015 - 2018 GeoSpark Development Team
  *
  * MIT License
@@ -23,12 +23,12 @@
  * SOFTWARE.
  *
  */
-
 package org.datasyslab.geospark.joinJudgement;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.index.SpatialIndex;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.apache.spark.api.java.function.FlatMapFunction2;
 
 import javax.annotation.Nullable;
@@ -37,21 +37,21 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class RightIndexLookupJudgement<T extends Geometry, U extends Geometry>
+public class LeftNestedLoopJudgement<T extends Geometry, U extends Geometry>
         extends JudgementBase
-        implements FlatMapFunction2<Iterator<T>, Iterator<SpatialIndex>, Pair<T, U>>, Serializable
+        implements FlatMapFunction2<Iterator<T>, Iterator<U>, Pair<U, T>>, Serializable
 {
-
+    private static final Logger log = LogManager.getLogger(LeftNestedLoopJudgement.class);
     private final boolean outer;
-    private final U emptyElement;
+    private final T emptyElement;
 
     /**
      * @see JudgementBase
      */
-    public RightIndexLookupJudgement(boolean considerBoundaryIntersection,
-                                     boolean swapLeftRight,
-                                     @Nullable DedupParams dedupParams,
-                                     boolean outer, U emptyElement)
+    public LeftNestedLoopJudgement(boolean considerBoundaryIntersection,
+                                   boolean swapLeftRight,
+                                   @Nullable DedupParams dedupParams,
+                                   boolean outer, T emptyElement)
     {
         super(considerBoundaryIntersection, swapLeftRight, dedupParams);
         this.outer = outer;
@@ -59,29 +59,29 @@ public class RightIndexLookupJudgement<T extends Geometry, U extends Geometry>
     }
 
     @Override
-    public Iterator<Pair<T, U>> call(Iterator<T> streamShapes, Iterator<SpatialIndex> indexIterator)
+    public Iterator<Pair<U, T>> call(Iterator<T> iteratorObject, Iterator<U> iteratorWindow)
             throws Exception
     {
-        List<Pair<T, U>> result = new ArrayList<>();
-
-        if (!indexIterator.hasNext() || !streamShapes.hasNext()) {
-            return result.iterator();
-        }
-
         initPartition();
 
-        SpatialIndex treeIndex = indexIterator.next();
-        while (streamShapes.hasNext()) {
-            T streamShape = streamShapes.next();
-            List<Geometry> candidates = treeIndex.query(streamShape.getEnvelopeInternal());
-            for (Geometry candidate : candidates) {
-                // Refine phase. Use the real polygon (instead of its MBR) to recheck the spatial relation.
-                if (match(streamShape, candidate)) {
-                    result.add(Pair.of(streamShape, (U) candidate));
+        List<Pair<U, T>> result = new ArrayList<>();
+        List<T> queryObjects = new ArrayList<>();
+        while (iteratorObject.hasNext()) {
+            queryObjects.add(iteratorObject.next());
+        }
+        while (iteratorWindow.hasNext()) {
+            U window = iteratorWindow.next();
+            boolean found = false;
+            for (int i = 0; i < queryObjects.size(); i++) {
+                T object = queryObjects.get(i);
+                //log.warn("Check "+window.toText()+" with "+object.toText());
+                if (match(window, object)) {
+                    result.add(Pair.of(window, object));
+                    found = true;
                 }
             }
-            if(outer && candidates.isEmpty()) {
-                result.add(Pair.of(streamShape, emptyElement));
+            if (outer && !found) {
+                result.add(Pair.of(window, emptyElement));
             }
         }
         return result.iterator();

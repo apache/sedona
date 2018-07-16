@@ -28,10 +28,11 @@ package org.apache.spark.sql.geosparksql.strategy.join
 import com.vividsolutions.jts.geom.Geometry
 import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.catalyst.expressions.{BindReferences, Expression, UnsafeRow}
+import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, UnsafeRow}
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.execution.{BinaryExecNode, SparkPlan}
 import org.datasyslab.geospark.geometryObjects.Circle
+import org.datasyslab.geospark.spatialOperator.JoinQuery
 import org.datasyslab.geospark.spatialRDD.SpatialRDD
 import org.datasyslab.geosparksql.utils.GeometrySerializer
 
@@ -41,8 +42,10 @@ case class DistanceJoinExec(left: SparkPlan,
                             right: SparkPlan,
                             leftShape: Expression,
                             rightShape: Expression,
+                            joinType: JoinQuery.JoinType,
                             radius: Expression,
                             intersects: Boolean,
+                            swapLeftRight: Boolean,
                             extraCondition: Option[Expression] = None)
   extends BinaryExecNode
     with TraitJoinQueryExec
@@ -53,11 +56,13 @@ case class DistanceJoinExec(left: SparkPlan,
   override def toSpatialRddPair(
                                  buildRdd: RDD[UnsafeRow],
                                  buildExpr: Expression,
+                                 buildAttrs: Seq[Attribute],
                                  streamedRdd: RDD[UnsafeRow],
-                                 streamedExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) =
-    (toCircleRDD(buildRdd, buildExpr), toSpatialRdd(streamedRdd, streamedExpr))
+                                 streamedExpr: Expression,
+                                 streamedAttrs: Seq[Attribute]): (SpatialRDD[Geometry], SpatialRDD[Geometry]) =
+    (toCircleRDD(buildRdd, buildExpr, buildAttrs), toSpatialRdd(streamedRdd, streamedExpr, streamedAttrs))
 
-  private def toCircleRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression): SpatialRDD[Geometry] = {
+  private def toCircleRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression, attrs: Seq[Attribute]): SpatialRDD[Geometry] = {
     val spatialRdd = new SpatialRDD[Geometry]
     spatialRdd.setRawSpatialRDD(
       rdd
@@ -69,6 +74,7 @@ case class DistanceJoinExec(left: SparkPlan,
         }
         }
         .toJavaRDD())
+    spatialRdd.setEmptyElement(createEmptyElement(attrs))
     spatialRdd
   }
 

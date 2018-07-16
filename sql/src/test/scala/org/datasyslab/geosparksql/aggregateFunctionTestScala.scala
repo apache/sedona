@@ -27,31 +27,10 @@
 package org.datasyslab.geosparksql
 
 import com.vividsolutions.jts.geom.{Coordinate, GeometryFactory, Polygon}
-import org.apache.log4j.{Level, Logger}
-import org.apache.spark.serializer.KryoSerializer
-import org.apache.spark.sql.SparkSession
-import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
-import org.datasyslab.geosparksql.utils.GeoSparkSQLRegistrator
-import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
-class aggregateFunctionTestScala extends FunSpec with BeforeAndAfterAll {
-
-  var sparkSession: SparkSession = _
-
-  override def afterAll(): Unit = {
-    //GeoSparkSQLRegistrator.dropAll(sparkSession)
-    //sparkSession.stop
-  }
+class aggregateFunctionTestScala extends SparkTestSpec {
 
   describe("GeoSpark-SQL Aggregate Function Test") {
-    sparkSession = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
-      config("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName).
-      master("local[*]").appName("readTestScala").getOrCreate()
-    Logger.getLogger("org").setLevel(Level.WARN)
-    Logger.getLogger("akka").setLevel(Level.WARN)
-
-    GeoSparkSQLRegistrator.registerAll(sparkSession.sqlContext)
-
     val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
 
     val csvPolygonInputLocation = resourceFolder + "testunion.csv"
@@ -75,7 +54,6 @@ class aggregateFunctionTestScala extends FunSpec with BeforeAndAfterAll {
     }
 
     it("Passed ST_Union_aggr") {
-
       var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygonInputLocation)
       polygonCsvDf.createOrReplaceTempView("polygontable")
       polygonCsvDf.show()

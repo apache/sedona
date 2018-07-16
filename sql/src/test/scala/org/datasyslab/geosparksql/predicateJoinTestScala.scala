@@ -26,34 +26,14 @@
 
 package org.datasyslab.geosparksql
 
-import org.apache.log4j.{Level, Logger}
-import org.apache.spark.serializer.KryoSerializer
-import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.geosparksql.strategy.join.JoinQueryDetector
 import org.apache.spark.sql.types._
-import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
 import org.datasyslab.geospark.utils.GeoSparkConf
-import org.datasyslab.geosparksql.utils.GeoSparkSQLRegistrator
-import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
-class predicateJoinTestScala extends FunSpec with BeforeAndAfterAll {
-
-  var sparkSession: SparkSession = _
-
-  override def afterAll(): Unit = {
-    //GeoSparkSQLRegistrator.dropAll(sparkSession)
-    //sparkSession.stop
-  }
+class predicateJoinTestScala extends SparkTestSpec {
 
   describe("GeoSpark-SQL Predicate Join Test") {
-    sparkSession = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
-      config("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName).
-      master("local[*]").appName("readTestScala").getOrCreate()
-    Logger.getLogger("org").setLevel(Level.WARN)
-    Logger.getLogger("akka").setLevel(Level.WARN)
-
-    GeoSparkSQLRegistrator.registerAll(sparkSession.sqlContext)
-
     val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
 
     val csvPolygonInputLocation = resourceFolder + "testenvelope.csv"

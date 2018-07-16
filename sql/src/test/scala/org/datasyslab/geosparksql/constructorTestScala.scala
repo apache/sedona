@@ -27,32 +27,11 @@
 package org.datasyslab.geosparksql
 
 import com.vividsolutions.jts.geom.Geometry
-import org.apache.log4j.{Level, Logger}
-import org.apache.spark.serializer.KryoSerializer
-import org.apache.spark.sql.SparkSession
-import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
-import org.datasyslab.geosparksql.utils.{DataFrameFactory, GeoSparkSQLRegistrator}
-import org.scalatest.{BeforeAndAfterAll, FunSpec}
+import org.datasyslab.geosparksql.utils.DataFrameFactory
 
-class constructorTestScala extends FunSpec with BeforeAndAfterAll {
-
-  var sparkSession: SparkSession = _
-
-
-  override def afterAll(): Unit = {
-    //GeoSparkSQLRegistrator.dropAll(sparkSession)
-    //sparkSession.stop
-  }
+class constructorTestScala extends SparkTestSpec {
 
   describe("GeoSpark-SQL Constructor Test") {
-    sparkSession = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
-      config("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName).
-      master("local[*]").appName("readTestScala").getOrCreate()
-    Logger.getLogger("org").setLevel(Level.WARN)
-    Logger.getLogger("akka").setLevel(Level.WARN)
-
-    GeoSparkSQLRegistrator.registerAll(sparkSession.sqlContext)
-
     val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
 
     val mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv"
@@ -119,6 +98,5 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll {
       circleDf.show()
       assert(circleDf.count() == 1000)
     }
-
   }
 }
