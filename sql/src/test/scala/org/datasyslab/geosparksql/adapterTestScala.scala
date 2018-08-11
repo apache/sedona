@@ -142,11 +142,13 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
     }
 
     it("Read GeoJSON to DataFrame") {
+      import org.apache.spark.sql.functions.callUDF
+      import org.apache.spark.sql.functions.col
       var spatialRDD = new PolygonRDD(sparkSession.sparkContext, geojsonInputLocation, FileDataSplitter.GEOJSON, true)
       spatialRDD.analyze()
-      var df = Adapter.toDf(spatialRDD, sparkSession)
-      assert (df.columns(1) == "STATEFP")
+      var df = Adapter.toDf(spatialRDD, sparkSession).withColumn("geometry", callUDF("ST_GeomFromWKT", col("geometry")))
       df.show()
+      assert (df.columns(1) == "STATEFP")
     }
 
     it("Convert spatial join result to DataFrame") {
