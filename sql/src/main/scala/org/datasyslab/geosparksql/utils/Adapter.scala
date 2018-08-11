@@ -39,48 +39,66 @@ object Adapter {
   def toJavaRdd(dataFrame: DataFrame): JavaRDD[Geometry] = {
     return toRdd(dataFrame).toJavaRDD()
   }
-
   def toRdd(dataFrame: DataFrame): RDD[Geometry] = {
-    return dataFrame.rdd.map[Geometry](f => f.get(0).asInstanceOf[Geometry])
+    return dataFrame.rdd.map[Geometry](f =>
+      {
+        var geometry = f.get(0).asInstanceOf[Geometry]
+        var userData = ""
+        // Add all attributes into geometry user data
+        for (i <- 1 to f.size-1) if (i==1) {userData+=f.get(i)} else {userData+="\t"+f.get(i)}
+        geometry.setUserData(userData)
+        geometry
+      })
   }
 
+  @deprecated( "use toSpatialRdd and append geometry column's name", "1.2" )
   def toSpatialRdd(dataFrame: DataFrame): SpatialRDD[Geometry] =
   {
-    var spatialRDD = new SpatialRDD[Geometry]
-    spatialRDD.rawSpatialRDD = toRdd(dataFrame).toJavaRDD()
-    spatialRDD
+    toSpatialRdd(dataFrame, "geometry")
+  }
+
+  def toSpatialRdd(dataFrame: DataFrame, geometryFieldName:String): SpatialRDD[Geometry] =
+  {
+    // Delete the field that have geometry name
+    if (dataFrame.schema.size==1) {
+      toSpatialRdd(dataFrame, List[String]())
+    }
+    else toSpatialRdd(dataFrame, dataFrame.schema.toList.map(f=>f.name.toString()).filter(p => !p.equalsIgnoreCase(geometryFieldName)))
   }
 
   def toSpatialRdd(dataFrame: DataFrame, fieldNames: List[String]): SpatialRDD[Geometry] =
   {
-    var spatialRDD = toSpatialRdd(dataFrame)
+    var spatialRDD = new SpatialRDD[Geometry]
+    spatialRDD.rawSpatialRDD = toRdd(dataFrame).toJavaRDD()
     import scala.collection.JavaConversions._
-    spatialRDD.fieldNames = fieldNames
+    if (fieldNames.size!=0) spatialRDD.fieldNames = fieldNames
+    else spatialRDD.fieldNames = null
     spatialRDD
   }
 
-  def toDf(spatialRDD: SpatialRDD[Geometry], fieldNames: List[String], sparkSession: SparkSession): DataFrame = {
+  def toDf[T <:Geometry](spatialRDD: SpatialRDD[T], fieldNames: List[String], sparkSession: SparkSession): DataFrame = {
     val rowRdd = spatialRDD.rawSpatialRDD.rdd.map[Row](f => Row.fromSeq(f.toString.split("\t").toSeq))
-    var fieldArray = new Array[StructField](fieldNames.size+1)
-    fieldArray(0) = StructField("geometry", StringType)
-    for (i <- 1 to fieldArray.length - 1) fieldArray(i) = StructField(fieldNames(i-1), StringType)
-    val schema = StructType(fieldArray)
-    return sparkSession.createDataFrame(rowRdd, schema)
-  }
-
-  def toDf(spatialRDD: SpatialRDD[Geometry], sparkSession: SparkSession): DataFrame = {
-    val rowRdd = spatialRDD.rawSpatialRDD.rdd.map[Row](f => Row.fromSeq(f.toString.split("\t").toSeq))
-    var fieldArray = new Array[StructField](rowRdd.take(1)(0).size)
-    fieldArray(0) = StructField("geometry", StringType)
-    if (spatialRDD.fieldNames!=null)
+    if (fieldNames!=null && fieldNames.nonEmpty)
     {
-      for (i <- 1 to fieldArray.length - 1) fieldArray(i) = StructField(spatialRDD.fieldNames.get(i-1), StringType)
+      var fieldArray = new Array[StructField](fieldNames.size+1)
+      fieldArray(0) = StructField("geometry", StringType)
+      for (i <- 1 to fieldArray.length - 1) fieldArray(i) = StructField(fieldNames(i-1), StringType)
+      val schema = StructType(fieldArray)
+      return sparkSession.createDataFrame(rowRdd, schema)
     }
     else {
+      var fieldArray = new Array[StructField](rowRdd.take(1)(0).size)
+      fieldArray(0) = StructField("geometry", StringType)
       for (i <- 1 to fieldArray.length - 1) fieldArray(i) = StructField("_c" + i, StringType)
+      val schema = StructType(fieldArray)
+      return sparkSession.createDataFrame(rowRdd, schema)
     }
-    val schema = StructType(fieldArray)
-    return sparkSession.createDataFrame(rowRdd, schema)
+  }
+
+  def toDf[T <:Geometry](spatialRDD: SpatialRDD[T], sparkSession: SparkSession): DataFrame = {
+    import scala.collection.JavaConverters._
+    if (spatialRDD.fieldNames!=null) return toDf(spatialRDD, spatialRDD.fieldNames.asScala.toList, sparkSession)
+    return toDf(spatialRDD, null, sparkSession);
   }
 
   def toDf(spatialPairRDD: JavaPairRDD[Geometry, Geometry], sparkSession: SparkSession): DataFrame = {

@@ -37,7 +37,6 @@ object Catalog {
     ST_LineStringFromText,
     ST_GeomFromWKT,
     ST_GeomFromWKB,
-    ST_GeomFromGeoJSON,
     ST_Circle,
     ST_Point,
     ST_PolygonFromEnvelope,

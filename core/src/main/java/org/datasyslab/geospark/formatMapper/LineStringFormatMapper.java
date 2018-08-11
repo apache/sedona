@@ -25,21 +25,11 @@
  */
 package org.datasyslab.geospark.formatMapper;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.MultiLineString;
-import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GeometryType;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 public class LineStringFormatMapper
         extends FormatMapper
-        implements FlatMapFunction<Iterator<String>, LineString>
 {
 
     /**
@@ -65,27 +55,5 @@ public class LineStringFormatMapper
             boolean carryInputData)
     {
         super(startOffset, endOffset, Splitter, carryInputData, GeometryType.LINESTRING);
-    }
-
-    @Override
-    public Iterator<LineString> call(Iterator<String> stringIterator)
-            throws Exception
-    {
-        List<LineString> result = new ArrayList<>();
-        while (stringIterator.hasNext()) {
-            String line = stringIterator.next();
-            addGeometry(readGeometry(line), result);
-        }
-        return result.iterator();
-    }
-
-    private void addGeometry(Geometry geometry, List<LineString> result)
-    {
-        if (geometry instanceof MultiLineString) {
-            addMultiGeometry((MultiLineString) geometry, result);
-        }
-        else {
-            result.add((LineString) geometry);
-        }
     }
 }

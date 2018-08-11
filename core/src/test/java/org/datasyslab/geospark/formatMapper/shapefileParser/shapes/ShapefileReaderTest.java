@@ -30,7 +30,6 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiPolygon;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.LocatedFileStatus;
@@ -41,8 +40,8 @@ import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.datasyslab.geospark.GeoSparkTestBase;
 import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader;
 import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundBox;
 import org.datasyslab.geospark.spatialOperator.RangeQuery;
@@ -56,9 +55,7 @@ import org.geotools.data.FeatureSource;
 import org.geotools.data.shapefile.files.ShpFiles;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opengis.feature.Property;
@@ -68,7 +65,6 @@ import org.opengis.filter.Filter;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -78,13 +74,8 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 public class ShapefileReaderTest
-        implements Serializable
+        extends GeoSparkTestBase
 {
-
-    /**
-     * The sc.
-     */
-    public static JavaSparkContext sc;
 
     public static FileSystem fs;
 
@@ -96,11 +87,7 @@ public class ShapefileReaderTest
     public static void onceExecutedBeforeAll()
             throws IOException
     {
-        SparkConf conf = new SparkConf().setAppName("ShapefileRDDTest").setMaster("local[2]").set("spark.executor.cores", "2").set("spark.executor.memory", "4g");
-        sc = new JavaSparkContext(conf);
-        Logger.getLogger("org").setLevel(Level.WARN);
-        Logger.getLogger("akka").setLevel(Level.WARN);
-
+        initialize(ShapefileReaderTest.class.getName());
         // Set up HDFS minicluster
         File baseDir = new File("./target/hdfs/shapefile").getAbsoluteFile();
         FileUtil.fullyDelete(baseDir);
@@ -109,7 +96,16 @@ public class ShapefileReaderTest
         MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(hdfsConf);
         hdfsCluster = builder.build();
         fs = FileSystem.get(hdfsConf);
-        hdfsURI = "hdfs://localhost:"+ hdfsCluster.getNameNodePort() + "/";
+        hdfsURI = "hdfs://localhost:" + hdfsCluster.getNameNodePort() + "/";
+    }
+
+    @AfterClass
+    public static void tearDown()
+            throws Exception
+    {
+        sc.stop();
+        hdfsCluster.shutdown();
+        fs.close();
     }
 
     /**
@@ -366,23 +362,13 @@ public class ShapefileReaderTest
     public void testLoadFromHDFS()
             throws IOException
     {
-        String shapefileHDFSpath = hdfsURI+"dbf";
+        String shapefileHDFSpath = hdfsURI + "dbf";
         fs.copyFromLocalFile(new Path(getShapeFilePath("dbf")), new Path(shapefileHDFSpath));
         RemoteIterator<LocatedFileStatus> hdfsFileIterator = fs.listFiles(new Path(shapefileHDFSpath), false);
-        while (hdfsFileIterator.hasNext())
-        {
+        while (hdfsFileIterator.hasNext()) {
             assertEquals(hdfsFileIterator.next().getPath().getParent().toString(), shapefileHDFSpath);
         }
         SpatialRDD<Geometry> spatialRDD = ShapefileReader.readToGeometryRDD(sc, shapefileHDFSpath);
         assertEquals("[STATEFP, COUNTYFP, COUNTYNS, AFFGEOID, GEOID, NAME, LSAD, ALAND, AWATER]", spatialRDD.fieldNames.toString());
-    }
-
-    @AfterClass
-    public static void tearDown()
-            throws Exception
-    {
-        sc.stop();
-        hdfsCluster.shutdown();
-        fs.close();
     }
 }

@@ -182,11 +182,17 @@ public class ShapefileReader
                 return descripter1 + " "+ descripter2;
             }
         });
-        // if there is a result assign it to variable : boundBox
-        if (fieldDescriptors.count() > 0) {
-            return Arrays.asList(fieldDescriptors.collect().get(0)._2().split("\t"));
+        // if there is a result assign it to variable : fieldNames
+        List<String> result = Arrays.asList(fieldDescriptors.collect().get(0)._2().split("\t"));
+        if (result.size()>1) {
+            return result;
         }
-        else { return null; }
+        else if (result.size()==1) {
+            // Sometimes the result has an empty string, we need to remove it
+            if (result.get(0).equalsIgnoreCase("")) return null;
+            return result;
+        }
+        else return null;
     }
     /**
      *

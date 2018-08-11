@@ -104,6 +104,7 @@ public class PolygonRDDTest
         assert spatialRDD.boundaryEnvelope != null;
         assertEquals(spatialRDD.rawSpatialRDD.take(1).get(0).getUserData(), "01\t077\t011501\t5\t1500000US010770115015\t010770115015\t5\tBG\t6844991\t32636");
         assertEquals(spatialRDD.rawSpatialRDD.take(2).get(1).getUserData(), "01\t045\t021102\t4\t1500000US010450211024\t010450211024\t4\tBG\t11360854\t0");
+        assertEquals(spatialRDD.fieldNames.toString(), "[STATEFP, COUNTYFP, TRACTCE, BLKGRPCE, AFFGEOID, GEOID, NAME, LSAD, ALAND, AWATER]");
     }
 
     @Test

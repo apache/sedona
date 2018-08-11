@@ -39,7 +39,7 @@ import org.datasyslab.geospark.formatMapper.RectangleFormatMapper;
 /**
  * The Class RectangleRDD.
  */
-
+@Deprecated
 public class RectangleRDD
         extends SpatialRDD<Polygon>
 {
