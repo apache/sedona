@@ -25,21 +25,11 @@
  */
 package org.datasyslab.geospark.formatMapper;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.MultiPoint;
-import com.vividsolutions.jts.geom.Point;
-import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GeometryType;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 public class PointFormatMapper
         extends FormatMapper
-        implements FlatMapFunction<Iterator<String>, Point>
 {
 
     /**
@@ -66,25 +56,4 @@ public class PointFormatMapper
         super(startOffset, startOffset+1, Splitter, carryInputData, GeometryType.POINT);
     }
 
-    @Override
-    public Iterator<Point> call(final Iterator<String> stringIterator)
-            throws Exception
-    {
-        List<Point> result = new ArrayList<>();
-        while (stringIterator.hasNext()) {
-            String line = stringIterator.next();
-            addGeometry(readGeometry(line), result);
-        }
-        return result.iterator();
-    }
-
-    private void addGeometry(Geometry geometry, List<Point> result)
-    {
-        if (geometry instanceof MultiPoint) {
-            addMultiGeometry((MultiPoint) geometry, result);
-        }
-        else {
-            result.add((Point) geometry);
-        }
-    }
 }

@@ -60,7 +60,7 @@ class aggregateFunctionTestScala extends FunSpec with BeforeAndAfterAll {
     it("Passed ST_Envelope_aggr") {
       var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(plainPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")
-      var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20)), \"myPointId\") as arealandmark from pointtable")
+      var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
       pointDf.createOrReplaceTempView("pointdf")
       var boundary = sparkSession.sql("select ST_Envelope_Aggr(pointdf.arealandmark) from pointdf")
       val coordinates: Array[Coordinate] = new Array[Coordinate](5)
@@ -79,7 +79,7 @@ class aggregateFunctionTestScala extends FunSpec with BeforeAndAfterAll {
       var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygonInputLocation)
       polygonCsvDf.createOrReplaceTempView("polygontable")
       polygonCsvDf.show()
-      var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20)), \"mypolygonid\") as polygonshape from polygontable")
+      var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
       polygonDf.show()
       var union = sparkSession.sql("select ST_Union_Aggr(polygondf.polygonshape) from polygondf")

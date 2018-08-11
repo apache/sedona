@@ -136,6 +136,8 @@ public class SpatialRDD<T extends Geometry>
         return sampleNumber;
     }
 
+    public List<String> fieldNames;
+
     /**
      * Sets the sample number.
      *

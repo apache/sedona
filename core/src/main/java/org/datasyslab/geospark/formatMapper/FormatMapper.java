@@ -29,10 +29,13 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKTReader;
 import com.vividsolutions.jts.io.WKBReader;
+import com.vividsolutions.jts.io.WKTReader;
+import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GeometryType;
 import org.wololo.geojson.Feature;
@@ -42,10 +45,13 @@ import org.wololo.jts2geojson.GeoJSONReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
-public class FormatMapper
-        implements Serializable
+public class FormatMapper<T extends Geometry>
+        implements Serializable, FlatMapFunction<Iterator<String>, T>
 {
 
     /**
@@ -75,6 +81,7 @@ public class FormatMapper
     protected String otherAttributes = "";
 
     protected GeometryType geometryType = null;
+
 
     /**
      * The factory.
@@ -146,20 +153,29 @@ public class FormatMapper
             Feature feature = (Feature) GeoJSONFactory.create(geoJson);
             geometry = geoJSONReader.read(feature.getGeometry());
             if (carryInputData) {
-                boolean hasIdFlag = false;
+                boolean firstColumnFlag = true;
                 otherAttributes = "";
+                Map<String, Object> featurePropertiesproperties = feature.getProperties();
                 if (feature.getId()!=null)
                 {
                     this.otherAttributes += feature.getId();
-                    hasIdFlag = true;
+                    firstColumnFlag = false;
                 }
-                if (feature.getProperties()!=null)
+                if (featurePropertiesproperties!=null)
                 {
-                    if (hasIdFlag)
+                    Iterator<Map.Entry<String, Object>> propertiesIterator = featurePropertiesproperties.entrySet().iterator();
+                    while (propertiesIterator.hasNext())
                     {
-                        this.otherAttributes +="\t" + feature.getProperties();
+                        Map.Entry<String, Object> curProperty = propertiesIterator.next();
+                        if (firstColumnFlag)
+                        {
+                            this.otherAttributes+=curProperty.getValue().toString();
+                            firstColumnFlag = false;
+                        }
+                        else {
+                            this.otherAttributes+="\t"+curProperty.getValue().toString();
+                        }
                     }
-                    else this.otherAttributes +=feature.getProperties();
                 }
                 geometry.setUserData(otherAttributes);
             }
@@ -169,6 +185,13 @@ public class FormatMapper
             // No input data needs to be carried.
         }
         return geometry;
+    }
+
+    public static List<String> readGeoJsonPropertyNames(String geoJson){
+        assert (geoJson.contains("Feature"));
+        Feature feature = (Feature) GeoJSONFactory.create(geoJson);
+        return new ArrayList(feature.getProperties().keySet());
+
     }
 
     public Geometry readWkt(String line)
@@ -233,7 +256,7 @@ public class FormatMapper
     public Coordinate[] readCoordinates(String line)
     {
         final String[] columns = line.split(splitter.getDelimiter());
-        final int actualEndOffset = this.endOffset >= 0 ? this.endOffset : (columns.length - 1);
+        final int actualEndOffset = this.endOffset >= 0 ? this.endOffset : (this.geometryType == GeometryType.POINT? startOffset+1:columns.length - 1);
         final Coordinate[] coordinates = new Coordinate[(actualEndOffset - startOffset + 1) / 2];
         for (int i = this.startOffset; i <= actualEndOffset; i += 2) {
             coordinates[i / 2] = new Coordinate(Double.parseDouble(columns[i]), Double.parseDouble(columns[i + 1]));
@@ -328,5 +351,33 @@ public class FormatMapper
             geometry.setUserData(otherAttributes);
         }
         return geometry;
+    }
+
+    @Override
+    public Iterator<T> call(Iterator<String> stringIterator)
+            throws Exception
+    {
+        List<T> result = new ArrayList<>();
+        while (stringIterator.hasNext()) {
+            String line = stringIterator.next();
+            addGeometry(readGeometry(line), result);
+        }
+        return result.iterator();
+    }
+
+    private void addGeometry(Geometry geometry, List<T> result)
+    {
+        if (geometry instanceof MultiPoint) {
+            addMultiGeometry((MultiPoint) geometry, result);
+        }
+        else if (geometry instanceof MultiLineString) {
+            addMultiGeometry((MultiLineString) geometry, result);
+        }
+        else if (geometry instanceof MultiPolygon) {
+            addMultiGeometry((MultiPolygon) geometry, result);
+        }
+        else {
+            result.add((T) geometry);
+        }
     }
 }

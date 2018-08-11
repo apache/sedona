@@ -32,6 +32,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
+import org.datasyslab.geospark.formatMapper.FormatMapper;
 import org.datasyslab.geospark.formatMapper.LineStringFormatMapper;
 
 // TODO: Auto-generated Javadoc
@@ -74,7 +75,7 @@ public class LineStringRDD
     /**
      * Instantiates a new line string RDD.
      *
-     * @param SparkContext the spark context
+     * @param sparkContext the spark context
      * @param InputLocation the input location
      * @param startOffset the start offset
      * @param endOffset the end offset
@@ -82,51 +83,51 @@ public class LineStringRDD
      * @param carryInputData the carry input data
      * @param partitions the partitions
      */
-    public LineStringRDD(JavaSparkContext SparkContext, String InputLocation, Integer startOffset, Integer endOffset, FileDataSplitter splitter, boolean carryInputData, Integer partitions)
+    public LineStringRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset, FileDataSplitter splitter, boolean carryInputData, Integer partitions)
     {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation, partitions).mapPartitions(new LineStringFormatMapper(startOffset, endOffset, splitter, carryInputData)));
+        this(sparkContext, InputLocation, startOffset, endOffset, splitter, carryInputData, partitions, null, null, null);
     }
 
     /**
      * Instantiates a new line string RDD.
      *
-     * @param SparkContext the spark context
+     * @param sparkContext the spark context
      * @param InputLocation the input location
      * @param startOffset the start offset
      * @param endOffset the end offset
      * @param splitter the splitter
      * @param carryInputData the carry input data
      */
-    public LineStringRDD(JavaSparkContext SparkContext, String InputLocation, Integer startOffset, Integer endOffset, FileDataSplitter splitter, boolean carryInputData)
+    public LineStringRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset, FileDataSplitter splitter, boolean carryInputData)
     {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation).mapPartitions(new LineStringFormatMapper(startOffset, endOffset, splitter, carryInputData)));
+        this(sparkContext, InputLocation, startOffset, endOffset, splitter, carryInputData, null, null, null, null);
     }
 
     /**
      * Instantiates a new line string RDD.
      *
-     * @param SparkContext the spark context
+     * @param sparkContext the spark context
      * @param InputLocation the input location
      * @param splitter the splitter
      * @param carryInputData the carry input data
      * @param partitions the partitions
      */
-    public LineStringRDD(JavaSparkContext SparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Integer partitions)
+    public LineStringRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Integer partitions)
     {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation, partitions).mapPartitions(new LineStringFormatMapper(splitter, carryInputData)));
+        this(sparkContext, InputLocation, null, null, splitter, carryInputData, partitions, null, null, null);
     }
 
     /**
      * Instantiates a new line string RDD.
      *
-     * @param SparkContext the spark context
+     * @param sparkContext the spark context
      * @param InputLocation the input location
      * @param splitter the splitter
      * @param carryInputData the carry input data
      */
-    public LineStringRDD(JavaSparkContext SparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData)
+    public LineStringRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData)
     {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation).mapPartitions(new LineStringFormatMapper(splitter, carryInputData)));
+        this(sparkContext, InputLocation, null, null, splitter, carryInputData, null, null, null, null);
     }
 
     /**
@@ -188,7 +189,7 @@ public class LineStringRDD
     /**
      * Instantiates a new line string RDD.
      *
-     * @param SparkContext the spark context
+     * @param sparkContext the spark context
      * @param InputLocation the input location
      * @param startOffset the start offset
      * @param endOffset the end offset
@@ -198,9 +199,9 @@ public class LineStringRDD
      * @param datasetBoundary the dataset boundary
      * @param approximateTotalCount the approximate total count
      */
-    public LineStringRDD(JavaSparkContext SparkContext, String InputLocation, Integer startOffset, Integer endOffset, FileDataSplitter splitter, boolean carryInputData, Integer partitions, Envelope datasetBoundary, Integer approximateTotalCount)
+    public LineStringRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset, FileDataSplitter splitter, boolean carryInputData, Integer partitions, Envelope datasetBoundary, Integer approximateTotalCount)
     {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation, partitions).mapPartitions(new LineStringFormatMapper(startOffset, endOffset, splitter, carryInputData)));
+        this(sparkContext, InputLocation, startOffset, endOffset, splitter, carryInputData, partitions, null, null, null);
         this.boundaryEnvelope = datasetBoundary;
         this.approximateTotalCount = approximateTotalCount;
     }
@@ -208,7 +209,7 @@ public class LineStringRDD
     /**
      * Instantiates a new line string RDD.
      *
-     * @param SparkContext the spark context
+     * @param sparkContext the spark context
      * @param InputLocation the input location
      * @param startOffset the start offset
      * @param endOffset the end offset
@@ -217,9 +218,9 @@ public class LineStringRDD
      * @param datasetBoundary the dataset boundary
      * @param approximateTotalCount the approximate total count
      */
-    public LineStringRDD(JavaSparkContext SparkContext, String InputLocation, Integer startOffset, Integer endOffset, FileDataSplitter splitter, boolean carryInputData, Envelope datasetBoundary, Integer approximateTotalCount)
+    public LineStringRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset, FileDataSplitter splitter, boolean carryInputData, Envelope datasetBoundary, Integer approximateTotalCount)
     {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation).mapPartitions(new LineStringFormatMapper(startOffset, endOffset, splitter, carryInputData)));
+        this(sparkContext, InputLocation, startOffset, endOffset, splitter, carryInputData, null, null, null, null);
         this.boundaryEnvelope = datasetBoundary;
         this.approximateTotalCount = approximateTotalCount;
     }
@@ -227,7 +228,7 @@ public class LineStringRDD
     /**
      * Instantiates a new line string RDD.
      *
-     * @param SparkContext the spark context
+     * @param sparkContext the spark context
      * @param InputLocation the input location
      * @param splitter the splitter
      * @param carryInputData the carry input data
@@ -235,9 +236,9 @@ public class LineStringRDD
      * @param datasetBoundary the dataset boundary
      * @param approximateTotalCount the approximate total count
      */
-    public LineStringRDD(JavaSparkContext SparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Integer partitions, Envelope datasetBoundary, Integer approximateTotalCount)
+    public LineStringRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Integer partitions, Envelope datasetBoundary, Integer approximateTotalCount)
     {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation, partitions).mapPartitions(new LineStringFormatMapper(splitter, carryInputData)));
+        this(sparkContext, InputLocation, null, null, splitter, carryInputData, partitions, null, null, null);
         this.boundaryEnvelope = datasetBoundary;
         this.approximateTotalCount = approximateTotalCount;
     }
@@ -245,16 +246,16 @@ public class LineStringRDD
     /**
      * Instantiates a new line string RDD.
      *
-     * @param SparkContext the spark context
+     * @param sparkContext the spark context
      * @param InputLocation the input location
      * @param splitter the splitter
      * @param carryInputData the carry input data
      * @param datasetBoundary the dataset boundary
      * @param approximateTotalCount the approximate total count
      */
-    public LineStringRDD(JavaSparkContext SparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Envelope datasetBoundary, Integer approximateTotalCount)
+    public LineStringRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Envelope datasetBoundary, Integer approximateTotalCount)
     {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation).mapPartitions(new LineStringFormatMapper(splitter, carryInputData)));
+        this(sparkContext, InputLocation, null, null, splitter, carryInputData, null, null, null, null);
         this.boundaryEnvelope = datasetBoundary;
         this.approximateTotalCount = approximateTotalCount;
     }
@@ -307,7 +308,7 @@ public class LineStringRDD
     /**
      * Instantiates a new line string RDD.
      *
-     * @param SparkContext the spark context
+     * @param sparkContext the spark context
      * @param InputLocation the input location
      * @param startOffset the start offset
      * @param endOffset the end offset
@@ -316,17 +317,16 @@ public class LineStringRDD
      * @param partitions the partitions
      * @param newLevel the new level
      */
-    public LineStringRDD(JavaSparkContext SparkContext, String InputLocation, Integer startOffset, Integer endOffset,
+    public LineStringRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset,
             FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel)
     {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation, partitions).mapPartitions(new LineStringFormatMapper(startOffset, endOffset, splitter, carryInputData)));
-        this.analyze(newLevel);
+        this(sparkContext, InputLocation, startOffset, endOffset, splitter, carryInputData, partitions, newLevel, null, null);
     }
 
     /**
      * Instantiates a new line string RDD.
      *
-     * @param SparkContext the spark context
+     * @param sparkContext the spark context
      * @param InputLocation the input location
      * @param startOffset the start offset
      * @param endOffset the end offset
@@ -334,43 +334,40 @@ public class LineStringRDD
      * @param carryInputData the carry input data
      * @param newLevel the new level
      */
-    public LineStringRDD(JavaSparkContext SparkContext, String InputLocation, Integer startOffset, Integer endOffset,
+    public LineStringRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset,
             FileDataSplitter splitter, boolean carryInputData, StorageLevel newLevel)
     {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation).mapPartitions(new LineStringFormatMapper(startOffset, endOffset, splitter, carryInputData)));
-        this.analyze(newLevel);
+        this(sparkContext, InputLocation, startOffset, endOffset, splitter, carryInputData, null, newLevel, null, null);
     }
 
     /**
      * Instantiates a new line string RDD.
      *
-     * @param SparkContext the spark context
+     * @param sparkContext the spark context
      * @param InputLocation the input location
      * @param splitter the splitter
      * @param carryInputData the carry input data
      * @param partitions the partitions
      * @param newLevel the new level
      */
-    public LineStringRDD(JavaSparkContext SparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel)
+    public LineStringRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel)
     {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation, partitions).mapPartitions(new LineStringFormatMapper(splitter, carryInputData)));
-        this.analyze(newLevel);
+        this(sparkContext, InputLocation, null, null, splitter, carryInputData, partitions, newLevel, null, null);
     }
 
     /**
      * Instantiates a new line string RDD.
      *
-     * @param SparkContext the spark context
+     * @param sparkContext the spark context
      * @param InputLocation the input location
      * @param splitter the splitter
      * @param carryInputData the carry input data
      * @param newLevel the new level
      */
-    public LineStringRDD(JavaSparkContext SparkContext, String InputLocation,
+    public LineStringRDD(JavaSparkContext sparkContext, String InputLocation,
             FileDataSplitter splitter, boolean carryInputData, StorageLevel newLevel)
     {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation).mapPartitions(new LineStringFormatMapper(splitter, carryInputData)));
-        this.analyze(newLevel);
+        this(sparkContext, InputLocation, null, null, splitter, carryInputData, null, newLevel, null, null);
     }
 
     /**
@@ -420,7 +417,7 @@ public class LineStringRDD
     /**
      * Instantiates a new line string RDD.
      *
-     * @param SparkContext the spark context
+     * @param sparkContext the spark context
      * @param InputLocation the input location
      * @param startOffset the start offset
      * @param endOffset the end offset
@@ -431,18 +428,25 @@ public class LineStringRDD
      * @param sourceEpsgCRSCode the source epsg CRS code
      * @param targetEpsgCode the target epsg code
      */
-    public LineStringRDD(JavaSparkContext SparkContext, String InputLocation, Integer startOffset, Integer endOffset,
+    public LineStringRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset,
             FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
     {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation, partitions).mapPartitions(new LineStringFormatMapper(startOffset, endOffset, splitter, carryInputData)));
-        this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
-        this.analyze(newLevel);
+        JavaRDD rawTextRDD = partitions != null ? sparkContext.textFile(InputLocation, partitions) : sparkContext.textFile(InputLocation);
+        if (startOffset != null && endOffset != null) {
+            this.setRawSpatialRDD(rawTextRDD.mapPartitions(new LineStringFormatMapper(startOffset, endOffset, splitter, carryInputData)));
+        }
+        else {
+            this.setRawSpatialRDD(rawTextRDD.mapPartitions(new LineStringFormatMapper(splitter, carryInputData)));
+        }
+        if (sourceEpsgCRSCode != null && targetEpsgCode != null) { this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);}
+        if (newLevel != null) { this.analyze(newLevel);}
+        if (splitter.equals(FileDataSplitter.GEOJSON)) { this.fieldNames = FormatMapper.readGeoJsonPropertyNames(rawTextRDD.take(1).get(0).toString()); }
     }
 
     /**
      * Instantiates a new line string RDD.
      *
-     * @param SparkContext the spark context
+     * @param sparkContext the spark context
      * @param InputLocation the input location
      * @param startOffset the start offset
      * @param endOffset the end offset
@@ -452,18 +456,16 @@ public class LineStringRDD
      * @param sourceEpsgCRSCode the source epsg CRS code
      * @param targetEpsgCode the target epsg code
      */
-    public LineStringRDD(JavaSparkContext SparkContext, String InputLocation, Integer startOffset, Integer endOffset,
+    public LineStringRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset,
             FileDataSplitter splitter, boolean carryInputData, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
     {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation).mapPartitions(new LineStringFormatMapper(startOffset, endOffset, splitter, carryInputData)));
-        this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
-        this.analyze(newLevel);
+        this(sparkContext, InputLocation, startOffset, endOffset, splitter, carryInputData, null, newLevel, sourceEpsgCRSCode, targetEpsgCode);
     }
 
     /**
      * Instantiates a new line string RDD.
      *
-     * @param SparkContext the spark context
+     * @param sparkContext the spark context
      * @param InputLocation the input location
      * @param splitter the splitter
      * @param carryInputData the carry input data
@@ -472,17 +474,15 @@ public class LineStringRDD
      * @param sourceEpsgCRSCode the source epsg CRS code
      * @param targetEpsgCode the target epsg code
      */
-    public LineStringRDD(JavaSparkContext SparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
+    public LineStringRDD(JavaSparkContext sparkContext, String InputLocation, FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
     {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation, partitions).mapPartitions(new LineStringFormatMapper(splitter, carryInputData)));
-        this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
-        this.analyze(newLevel);
+        this(sparkContext, InputLocation, null, null, splitter, carryInputData, partitions, newLevel, sourceEpsgCRSCode, targetEpsgCode);
     }
 
     /**
      * Instantiates a new line string RDD.
      *
-     * @param SparkContext the spark context
+     * @param sparkContext the spark context
      * @param InputLocation the input location
      * @param splitter the splitter
      * @param carryInputData the carry input data
@@ -490,12 +490,10 @@ public class LineStringRDD
      * @param sourceEpsgCRSCode the source epsg CRS code
      * @param targetEpsgCode the target epsg code
      */
-    public LineStringRDD(JavaSparkContext SparkContext, String InputLocation,
+    public LineStringRDD(JavaSparkContext sparkContext, String InputLocation,
             FileDataSplitter splitter, boolean carryInputData, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
     {
-        this.setRawSpatialRDD(SparkContext.textFile(InputLocation).mapPartitions(new LineStringFormatMapper(splitter, carryInputData)));
-        this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
-        this.analyze(newLevel);
+        this(sparkContext, InputLocation, null, null, splitter, carryInputData, null, newLevel, sourceEpsgCRSCode, targetEpsgCode);
     }
 
     /**

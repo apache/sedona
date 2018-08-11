@@ -30,11 +30,11 @@ import com.vividsolutions.jts.geom.Geometry
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.sql.SparkSession
-import org.datasyslab.geospark.enums.{GridType, IndexType}
+import org.datasyslab.geospark.enums.{FileDataSplitter, GridType, IndexType}
 import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader
 import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
 import org.datasyslab.geospark.spatialOperator.JoinQuery
-import org.datasyslab.geospark.spatialRDD.{CircleRDD, SpatialRDD}
+import org.datasyslab.geospark.spatialRDD.{CircleRDD, PolygonRDD, SpatialRDD}
 import org.datasyslab.geosparksql.utils.{Adapter, GeoSparkSQLRegistrator}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
@@ -61,12 +61,13 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
     val mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv"
     val csvPointInputLocation = resourceFolder + "arealm.csv"
     val shapefileInputLocation = resourceFolder + "shapefiles/polygon"
+    val geojsonInputLocation = resourceFolder + "testPolygon.json"
 
     it("Read CSV point into a SpatialRDD") {
       var df = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(csvPointInputLocation)
       df.show()
       df.createOrReplaceTempView("inputtable")
-      var spatialDf = sparkSession.sql("select ST_PointFromText(inputtable._c0,\",\",\"mypoint\") as arealandmark from inputtable")
+      var spatialDf = sparkSession.sql("select ST_PointFromText(inputtable._c0,\",\") as arealandmark from inputtable")
       spatialDf.show()
       spatialDf.printSchema()
       var spatialRDD = new SpatialRDD[Geometry]
@@ -94,15 +95,16 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
       df.show()
       df.createOrReplaceTempView("inputtable")
       // Use Column _c0 as the unique Id but the id can be anything in the same row
-      var spatialDf = sparkSession.sql("select ST_Point(cast(inputtable._c0 as Decimal(24,20)),cast(inputtable._c1 as Decimal(24,20)), 'myPointId') as arealandmark from inputtable")
+      var spatialDf = sparkSession.sql("select ST_Point(cast(inputtable._c0 as Decimal(24,20)),cast(inputtable._c1 as Decimal(24,20))) as arealandmark from inputtable")
       spatialDf.show()
       spatialDf.printSchema()
       var spatialRDD = new SpatialRDD[Geometry]
       spatialRDD.rawSpatialRDD = Adapter.toRdd(spatialDf)
       spatialRDD.analyze()
-      assert(Adapter.toDf(spatialRDD, sparkSession).columns.length==2)
+      assert(Adapter.toDf(spatialRDD, sparkSession).columns.length==1)
       Adapter.toDf(spatialRDD, sparkSession).show()
     }
+
 
     it("Read mixed WKT geometries into a SpatialRDD") {
       var df = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
@@ -111,8 +113,7 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
       var spatialDf = sparkSession.sql("select ST_GeomFromWKT(inputtable._c0) as usacounty from inputtable")
       spatialDf.show()
       spatialDf.printSchema()
-      var spatialRDD = new SpatialRDD[Geometry]
-      spatialRDD.rawSpatialRDD = Adapter.toRdd(spatialDf)
+      var spatialRDD = Adapter.toSpatialRdd(spatialDf)
       spatialRDD.analyze()
       Adapter.toDf(spatialRDD, sparkSession).show()
       assert(Adapter.toDf(spatialRDD, sparkSession).columns.length==1)
@@ -123,27 +124,37 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
       var df = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       df.show()
       df.createOrReplaceTempView("inputtable")
-      var spatialDf = sparkSession.sql("select ST_GeomFromWKT(inputtable._c0, inputtable._c3, inputtable._c5) as usacounty from inputtable")
+      var spatialDf = sparkSession.sql("select ST_GeomFromWKT(inputtable._c0) as usacounty, inputtable._c3, inputtable._c5 from inputtable")
       spatialDf.show()
       spatialDf.printSchema()
-      var spatialRDD = new SpatialRDD[Geometry]
-      spatialRDD.rawSpatialRDD = Adapter.toRdd(spatialDf)
+      var spatialRDD = Adapter.toSpatialRdd(spatialDf, "usacounty")
       spatialRDD.analyze()
       assert(Adapter.toDf(spatialRDD, sparkSession).columns.length==3)
       Adapter.toDf(spatialRDD, sparkSession).show()
     }
 
-    it("Read shapefile to DataFrame") {
-      var spatialRDD = new SpatialRDD[Geometry]
-      spatialRDD.rawSpatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileInputLocation)
+    it("Read shapefile -> DataFrame") {
+      var spatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileInputLocation)
       spatialRDD.analyze()
-      Adapter.toDf(spatialRDD, sparkSession).show()
+      println(spatialRDD.fieldNames)
+      var df = Adapter.toDf(spatialRDD, sparkSession)
+      df.show()
+    }
+
+    it("Read GeoJSON to DataFrame") {
+      import org.apache.spark.sql.functions.callUDF
+      import org.apache.spark.sql.functions.col
+      var spatialRDD = new PolygonRDD(sparkSession.sparkContext, geojsonInputLocation, FileDataSplitter.GEOJSON, true)
+      spatialRDD.analyze()
+      var df = Adapter.toDf(spatialRDD, sparkSession).withColumn("geometry", callUDF("ST_GeomFromWKT", col("geometry")))
+      df.show()
+      assert (df.columns(1) == "STATEFP")
     }
 
     it("Convert spatial join result to DataFrame") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
-      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0, polygontable._c3, polygontable._c5) as usacounty from polygontable")
+      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as usacounty from polygontable")
       var polygonRDD = new SpatialRDD[Geometry]
       polygonRDD.rawSpatialRDD = Adapter.toRdd(polygonDf)
       polygonRDD.analyze()
@@ -164,6 +175,9 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
 
       var joinResultDf = Adapter.toDf(joinResultPairRDD, sparkSession)
       joinResultDf.show()
+
+      var joinResultDf2 = Adapter.toDf(joinResultPairRDD, List("abc","def"), List(), sparkSession)
+      joinResultDf2.show()
     }
 
     it("Convert distance join result to DataFrame") {
@@ -176,7 +190,7 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
 
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
-      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0, polygontable._c3, polygontable._c5) as usacounty from polygontable")
+      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as usacounty from polygontable")
       var polygonRDD = new SpatialRDD[Geometry]
       polygonRDD.rawSpatialRDD = Adapter.toRdd(polygonDf)
       polygonRDD.analyze()

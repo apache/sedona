@@ -25,22 +25,11 @@
  */
 package org.datasyslab.geospark.formatMapper;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Polygon;
-import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GeometryType;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 public class PolygonFormatMapper
         extends FormatMapper
-        implements FlatMapFunction<Iterator<String>, Polygon>
 {
 
     /**
@@ -66,27 +55,5 @@ public class PolygonFormatMapper
             boolean carryInputData)
     {
         super(startOffset, endOffset, Splitter, carryInputData, GeometryType.POLYGON);
-    }
-
-    @Override
-    public Iterator<Polygon> call(Iterator<String> stringIterator)
-            throws Exception
-    {
-        List<Polygon> result = new ArrayList<>();
-        while (stringIterator.hasNext()) {
-            String line = stringIterator.next();
-            addGeometry(readGeometry(line), result);
-        }
-        return result.iterator();
-    }
-
-    private void addGeometry(Geometry geometry, List<Polygon> result)
-    {
-        if (geometry instanceof MultiPolygon) {
-            addMultiGeometry((MultiPolygon) geometry, result);
-        }
-        else {
-            result.add((Polygon) geometry);
-        }
     }
 }

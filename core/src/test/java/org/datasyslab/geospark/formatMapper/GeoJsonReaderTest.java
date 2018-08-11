@@ -1,5 +1,5 @@
 /*
- * FILE: RectangleFormatMapper
+ * FILE: GeoJsonReaderTest
  * Copyright (c) 2015 - 2018 GeoSpark Development Team
  *
  * MIT License
@@ -23,36 +23,53 @@
  * SOFTWARE.
  *
  */
+
 package org.datasyslab.geospark.formatMapper;
 
-import org.datasyslab.geospark.enums.FileDataSplitter;
-import org.datasyslab.geospark.enums.GeometryType;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.datasyslab.geospark.GeoSparkTestBase;
+import org.datasyslab.geospark.spatialRDD.SpatialRDD;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-public class RectangleFormatMapper
-        extends FormatMapper
+import java.io.IOException;
+
+import static org.junit.Assert.assertEquals;
+
+public class GeoJsonReaderTest
+        extends GeoSparkTestBase
 {
 
-    /**
-     * Instantiates a new rectangle format mapper.
-     *
-     * @param Splitter the splitter
-     * @param carryInputData the carry input data
-     */
-    public RectangleFormatMapper(FileDataSplitter Splitter, boolean carryInputData)
+    public static String geoJsonGeomInputLocation = null;
+
+    @BeforeClass
+    public static void onceExecutedBeforeAll()
+            throws IOException
     {
-        super(0, 3, Splitter, carryInputData, GeometryType.RECTANGLE);
+        initialize(GeoJsonReaderTest.class.getName());
+        geoJsonGeomInputLocation = GeoJsonReaderTest.class.getClassLoader().getResource("testPolygon.json").getPath();
+    }
+
+    @AfterClass
+    public static void tearDown()
+            throws Exception
+    {
+        sc.stop();
     }
 
     /**
-     * Instantiates a new rectangle format mapper.
+     * Test correctness of parsing geojson file
      *
-     * @param startOffset the start offset
-     * @param Splitter the splitter
-     * @param carryInputData the carry input data
+     * @throws IOException
      */
-    public RectangleFormatMapper(Integer startOffset, FileDataSplitter Splitter,
-            boolean carryInputData)
+    @Test
+    public void testReadToGeometryRDD()
+            throws IOException
     {
-        super(startOffset, startOffset+3, Splitter, carryInputData, GeometryType.RECTANGLE);
+        // load geojson with our tool
+        SpatialRDD geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomInputLocation);
+        assertEquals(geojsonRDD.rawSpatialRDD.count(), 1001);
     }
 }

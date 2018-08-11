@@ -50,19 +50,12 @@ case class ST_PointFromText(inputExpressions: Seq[Expression])
 
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes two input expressions.
-    val minInputLength = 2
-    assert(inputExpressions.length >= minInputLength)
+    assert(inputExpressions.length == 2)
     val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
     val geomFormat = inputExpressions(1).eval(inputRow).asInstanceOf[UTF8String].toString
-
     var fileDataSplitter = FileDataSplitter.getFileDataSplitter(geomFormat)
     var formatMapper = new FormatMapper(fileDataSplitter, false, GeometryType.POINT)
     var geometry = formatMapper.readGeometry(geomString)
-    // If the user specify a bunch of attributes to go with each geometry, we need to store all of them in this geometry
-    if (inputExpressions.length > minInputLength) {
-      geometry.setUserData(generateUserData(minInputLength, inputExpressions, inputRow))
-    }
-
     return new GenericArrayData(GeometrySerializer.serialize(geometry))
   }
 
@@ -82,19 +75,13 @@ case class ST_PolygonFromText(inputExpressions: Seq[Expression])
 
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes two input expressions.
-    val minInputLength = 2
-    assert(inputExpressions.length >= minInputLength)
+    assert(inputExpressions.length == 2)
     val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
     val geomFormat = inputExpressions(1).eval(inputRow).asInstanceOf[UTF8String].toString
 
     var fileDataSplitter = FileDataSplitter.getFileDataSplitter(geomFormat)
     var formatMapper = new FormatMapper(fileDataSplitter, false, GeometryType.POLYGON)
     var geometry = formatMapper.readGeometry(geomString)
-    // If the user specify a bunch of attributes to go with each geometry, we need to store all of them in this geometry
-    if (inputExpressions.length > minInputLength) {
-      geometry.setUserData(generateUserData(minInputLength, inputExpressions, inputRow))
-    }
-
     return new GenericArrayData(GeometrySerializer.serialize(geometry))
   }
 
@@ -114,18 +101,14 @@ case class ST_LineStringFromText(inputExpressions: Seq[Expression])
 
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes two input expressions.
-    val minInputLength = 2
-    assert(inputExpressions.length >= minInputLength)
+    assert(inputExpressions.length == 2)
+
     val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
     val geomFormat = inputExpressions(1).eval(inputRow).asInstanceOf[UTF8String].toString
 
     var fileDataSplitter = FileDataSplitter.getFileDataSplitter(geomFormat)
     var formatMapper = new FormatMapper(fileDataSplitter, false, GeometryType.LINESTRING)
     var geometry = formatMapper.readGeometry(geomString)
-    // If the user specify a bunch of attributes to go with each geometry, we need to store all of them in this geometry
-    if (inputExpressions.length > minInputLength) {
-      geometry.setUserData(generateUserData(minInputLength, inputExpressions, inputRow))
-    }
 
     return new GenericArrayData(GeometrySerializer.serialize(geometry))
   }
@@ -147,18 +130,11 @@ case class ST_GeomFromWKT(inputExpressions: Seq[Expression])
 
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
-    val minInputLength = 1
-    assert(inputExpressions.length >= minInputLength)
-
+    assert(inputExpressions.length == 1)
     val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
-
     var fileDataSplitter = FileDataSplitter.WKT
     var formatMapper = new FormatMapper(fileDataSplitter, false)
     var geometry = formatMapper.readGeometry(geomString)
-    // If the user specify a bunch of attributes to go with each geometry, we need to store all of them in this geometry
-    if (inputExpressions.length > minInputLength) {
-      geometry.setUserData(generateUserData(minInputLength, inputExpressions, inputRow))
-    }
     return new GenericArrayData(GeometrySerializer.serialize(geometry))
   }
 
@@ -179,49 +155,11 @@ case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
 
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
-    val minInputLength = 1
-    assert(inputExpressions.length >= minInputLength)
-
+    assert(inputExpressions.length == 1)
     val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
-
     var fileDataSplitter = FileDataSplitter.WKB
     var formatMapper = new FormatMapper(fileDataSplitter, false)
     var geometry = formatMapper.readGeometry(geomString)
-    // If the user specify a bunch of attributes to go with each geometry, we need to store all of them in this geometry
-    if (inputExpressions.length > minInputLength) {
-      geometry.setUserData(generateUserData(minInputLength, inputExpressions, inputRow))
-    }
-    return new GenericArrayData(GeometrySerializer.serialize(geometry))
-  }
-
-  override def dataType: DataType = new GeometryUDT()
-
-  override def children: Seq[Expression] = inputExpressions
-}
-
-/**
-  * Return a Geometry from a GeoJSON string
-  *
-  * @param inputExpressions This function takes 1 parameter which is the geometry string. The string format must be GeoJson.
-  */
-case class ST_GeomFromGeoJSON(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    // This is an expression which takes one input expressions
-    val minInputLength = 1
-    assert(inputExpressions.length >= minInputLength)
-
-    val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
-
-    var fileDataSplitter = FileDataSplitter.GEOJSON
-    var formatMapper = new FormatMapper(fileDataSplitter, false)
-    var geometry = formatMapper.readGeometry(geomString)
-    // If the user specify a bunch of attributes to go with each geometry, we need to store all of them in this geometry
-    if (inputExpressions.length > 1) {
-      geometry.setUserData(generateUserData(minInputLength, inputExpressions, inputRow))
-    }
     return new GenericArrayData(GeometrySerializer.serialize(geometry))
   }
 
@@ -240,17 +178,11 @@ case class ST_Point(inputExpressions: Seq[Expression])
   override def nullable: Boolean = false
 
   override def eval(inputRow: InternalRow): Any = {
-    val minInputLength = 2
-    assert(inputExpressions.length >= minInputLength)
-
+    assert(inputExpressions.length == 2)
     val x = inputExpressions(0).eval(inputRow).asInstanceOf[Decimal].toDouble
     val y = inputExpressions(1).eval(inputRow).asInstanceOf[Decimal].toDouble
     var geometryFactory = new GeometryFactory()
     var geometry = geometryFactory.createPoint(new Coordinate(x, y))
-    // If the user specify a bunch of attributes to go with each geometry, we need to store all of them in this geometry
-    if (inputExpressions.length > minInputLength) {
-      geometry.setUserData(generateUserData(minInputLength, inputExpressions, inputRow))
-    }
     return new GenericArrayData(GeometrySerializer.serialize(geometry))
   }
 
@@ -290,8 +222,7 @@ case class ST_PolygonFromEnvelope(inputExpressions: Seq[Expression]) extends Exp
   override def nullable: Boolean = false
 
   override def eval(input: InternalRow): Any = {
-    val minInputLength = 4
-    assert(inputExpressions.length >= minInputLength)
+    assert(inputExpressions.length == 4)
     val minX = inputExpressions(0).eval(input).asInstanceOf[Decimal].toDouble
     val minY = inputExpressions(1).eval(input).asInstanceOf[Decimal].toDouble
     val maxX = inputExpressions(2).eval(input).asInstanceOf[Decimal].toDouble
@@ -304,9 +235,6 @@ case class ST_PolygonFromEnvelope(inputExpressions: Seq[Expression]) extends Exp
     coordinates(4) = coordinates(0)
     val geometryFactory = new GeometryFactory()
     val polygon = geometryFactory.createPolygon(coordinates)
-    if (inputExpressions.length > minInputLength) {
-      polygon.setUserData(generateUserData(minInputLength, inputExpressions, input))
-    }
     new GenericArrayData(GeometrySerializer.serialize(polygon))
   }
 

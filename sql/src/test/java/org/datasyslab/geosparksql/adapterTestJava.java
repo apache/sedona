@@ -85,7 +85,7 @@ public class adapterTestJava
         Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", "\t").option("header", "false").load(csvPointInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
-        Dataset<Row> spatialDf = sparkSession.sql("select ST_PointFromText(inputtable._c0,\",\",\"mypoint\") as arealandmark from inputtable");
+        Dataset<Row> spatialDf = sparkSession.sql("select ST_PointFromText(inputtable._c0,\",\") as arealandmark from inputtable");
         spatialDf.show();
         spatialDf.printSchema();
         SpatialRDD spatialRDD = new SpatialRDD<Geometry>();
@@ -145,7 +145,7 @@ public class adapterTestJava
         Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
-        Dataset<Row> spatialDf = sparkSession.sql("select ST_GeomFromWKT(inputtable._c0, inputtable._c3, inputtable._c5) as usacounty from inputtable");
+        Dataset<Row> spatialDf = sparkSession.sql("select ST_GeomFromWKT(inputtable._c0) as usacounty from inputtable");
         spatialDf.show();
         spatialDf.printSchema();
         SpatialRDD spatialRDD = new SpatialRDD<Geometry>();
@@ -175,7 +175,7 @@ public class adapterTestJava
         Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", "\t").option("header", "false").load(mixedWkbGeometryInputLocation);
         df.show();
         df.createOrReplaceTempView("inputtable");
-        Dataset<Row> spatialDf = sparkSession.sql("select ST_GeomFromWKB(inputtable._c0, inputtable._c3, inputtable._c5) as usacounty from inputtable");
+        Dataset<Row> spatialDf = sparkSession.sql("select ST_GeomFromWKB(inputtable._c0) as usacounty from inputtable");
         spatialDf.show();
         spatialDf.printSchema();
         SpatialRDD spatialRDD = new SpatialRDD<Geometry>();
@@ -187,8 +187,7 @@ public class adapterTestJava
     @Test
     public void testReadShapefileToDF()
     {
-        SpatialRDD spatialRDD = new SpatialRDD<Geometry>();
-        spatialRDD.rawSpatialRDD = ShapefileReader.readToGeometryRDD(JavaSparkContext.fromSparkContext(sparkSession.sparkContext()), shapefileInputLocation);
+        SpatialRDD spatialRDD = ShapefileReader.readToGeometryRDD(JavaSparkContext.fromSparkContext(sparkSession.sparkContext()), shapefileInputLocation);
         spatialRDD.analyze();
         Adapter.toDf(spatialRDD, sparkSession).show();
     }
@@ -206,7 +205,7 @@ public class adapterTestJava
 
         Dataset<Row> polygonWktDf = sparkSession.read().format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation);
         polygonWktDf.createOrReplaceTempView("polygontable");
-        Dataset<Row> polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0, polygontable._c3, polygontable._c5) as usacounty from polygontable");
+        Dataset<Row> polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as usacounty from polygontable");
         SpatialRDD polygonRDD = new SpatialRDD<Geometry>();
         polygonRDD.rawSpatialRDD = Adapter.toJavaRdd(polygonDf);
         polygonRDD.analyze();
@@ -236,7 +235,7 @@ public class adapterTestJava
 
         Dataset<Row> polygonWktDf = sparkSession.read().format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation);
         polygonWktDf.createOrReplaceTempView("polygontable");
-        Dataset<Row> polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0, polygontable._c3, polygontable._c5) as usacounty from polygontable");
+        Dataset<Row> polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as usacounty from polygontable");
         SpatialRDD polygonRDD = new SpatialRDD<Geometry>();
         polygonRDD.rawSpatialRDD = Adapter.toJavaRdd(polygonDf);
         polygonRDD.analyze();

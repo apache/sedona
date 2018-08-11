@@ -26,9 +26,6 @@
 package org.datasyslab.geospark.formatMapper.shapefileParser;
 
 import com.vividsolutions.jts.geom.*;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -37,14 +34,14 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundBox;
 import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundaryInputFormat;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.DbfParseUtil;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.FieldDescriptor;
+import org.datasyslab.geospark.formatMapper.shapefileParser.fieldname.FieldnameInputFormat;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.PrimitiveShape;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapeInputFormat;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapeKey;
 import org.datasyslab.geospark.spatialRDD.LineStringRDD;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
+import org.datasyslab.geospark.spatialRDD.SpatialRDD;
 import scala.Tuple2;
 
 import java.io.IOException;
@@ -63,9 +60,9 @@ public class ShapefileReader
      * @param inputPath
      * @return
      */
-    public static JavaRDD<Geometry> readToGeometryRDD(JavaSparkContext sc, String inputPath)
+    public static SpatialRDD<Geometry> readToGeometryRDD(JavaSparkContext sc, String inputPath)
     {
-        return readShapefile(sc, inputPath, new GeometryFactory());
+        return readToGeometryRDD(sc, inputPath, new GeometryFactory());
     }
 
     /**
@@ -76,9 +73,17 @@ public class ShapefileReader
      * @param geometryFactory
      * @return
      */
-    public static JavaRDD<Geometry> readToGeometryRDD(JavaSparkContext sc, String inputPath, final GeometryFactory geometryFactory)
+    public static SpatialRDD<Geometry> readToGeometryRDD(JavaSparkContext sc, String inputPath, final GeometryFactory geometryFactory)
     {
-        return readShapefile(sc, inputPath, geometryFactory);
+        SpatialRDD<Geometry> spatialRDD = new SpatialRDD();
+        spatialRDD.rawSpatialRDD = readShapefile(sc, inputPath, geometryFactory);
+        try {
+            spatialRDD.fieldNames = readFieldNames(sc, inputPath);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        return spatialRDD;
     }
 
     /**
@@ -159,31 +164,35 @@ public class ShapefileReader
      */
 
     public static List<String> readFieldNames(JavaSparkContext sc, String inputPath) throws IOException {
-        Path path = new Path(inputPath);
-        FileSystem fileSys = FileSystem.get(sc.hadoopConfiguration());
-        FileStatus dbfFile = null;
-        if(!fileSys.exists(path)) throw new IOException("Specified path "+ inputPath + "does not exist");
-        FileStatus[] files =  fileSys.listStatus(path);
-        //find dbf file in the folder
-        for(int i=0;i<files.length;i++) {
-            if(files[i].getPath().getName().toLowerCase().contains("dbf")){
-                dbfFile = files[i];
-                break;
+        // read bound boxes into memory
+        JavaPairRDD<Long, String> fieldDescriptors = sc.newAPIHadoopFile(
+                inputPath,
+                FieldnameInputFormat.class,
+                Long.class,
+                String.class,
+                sc.hadoopConfiguration()
+        );
+        // merge all into one
+        fieldDescriptors = fieldDescriptors.reduceByKey(new Function2<String, String, String>()
+        {
+            @Override
+            public String call(String descripter1, String descripter2)
+                    throws Exception
+            {
+                return descripter1 + " "+ descripter2;
             }
+        });
+        // if there is a result assign it to variable : fieldNames
+        List<String> result = Arrays.asList(fieldDescriptors.collect().get(0)._2().split("\t"));
+        if (result.size()>1) {
+            return result;
         }
-        //parse dbf file if present
-        if(dbfFile != null) {
-            DbfParseUtil dbfParser = new DbfParseUtil();
-            dbfParser.parseFileHead(fileSys.open(dbfFile.getPath()));
-            List<FieldDescriptor> descriptors = dbfParser.getFieldDescriptors();
-            List<String> fieldNames = new ArrayList<String>();
-            fieldNames.add("rddshape");
-            for(int i=0;i<descriptors.size();i++){
-                fieldNames.add(descriptors.get(i).getFieldName());
-            }
-            return fieldNames;
-        } else
-            return null;
+        else if (result.size()==1) {
+            // Sometimes the result has an empty string, we need to remove it
+            if (result.get(0).equalsIgnoreCase("")) return null;
+            return result;
+        }
+        else return null;
     }
     /**
      *
@@ -222,9 +231,9 @@ public class ShapefileReader
      * @param geometryRDD
      * @return
      */
-    public static PolygonRDD geometryToPolygon(JavaRDD<Geometry> geometryRDD)
+    public static PolygonRDD geometryToPolygon(SpatialRDD geometryRDD)
     {
-        return new PolygonRDD(geometryRDD.flatMap(new FlatMapFunction<Geometry, Polygon>()
+        PolygonRDD polygonRDD = new PolygonRDD(geometryRDD.rawSpatialRDD.flatMap(new FlatMapFunction<Geometry, Polygon>()
         {
             @Override
             public Iterator<Polygon> call(Geometry spatialObject)
@@ -248,6 +257,8 @@ public class ShapefileReader
                 return result.iterator();
             }
         }));
+        polygonRDD.fieldNames = geometryRDD.fieldNames;
+        return polygonRDD;
     }
 
     /**
@@ -281,10 +292,10 @@ public class ShapefileReader
      * @param geometryRDD
      * @return
      */
-    public static PointRDD geometryToPoint(JavaRDD<Geometry> geometryRDD)
+    public static PointRDD geometryToPoint(SpatialRDD geometryRDD)
     {
-        return new PointRDD(
-                geometryRDD.flatMap(new FlatMapFunction<Geometry, Point>()
+        PointRDD pointRDD = new PointRDD(
+                geometryRDD.rawSpatialRDD.flatMap(new FlatMapFunction<Geometry, Point>()
                 {
                     @Override
                     public Iterator<Point> call(Geometry spatialObject)
@@ -309,6 +320,8 @@ public class ShapefileReader
                     }
                 })
         );
+        pointRDD.fieldNames = geometryRDD.fieldNames;
+        return pointRDD;
     }
 
     /**
@@ -342,10 +355,10 @@ public class ShapefileReader
      * @param geometryRDD
      * @return
      */
-    public static LineStringRDD geometryToLineString(JavaRDD<Geometry> geometryRDD)
+    public static LineStringRDD geometryToLineString(SpatialRDD geometryRDD)
     {
-        return new LineStringRDD(
-                geometryRDD.flatMap(new FlatMapFunction<Geometry, LineString>()
+        LineStringRDD lineStringRDD = new LineStringRDD(
+                geometryRDD.rawSpatialRDD.flatMap(new FlatMapFunction<Geometry, LineString>()
                 {
                     @Override
                     public Iterator<LineString> call(Geometry spatialObject)
@@ -370,5 +383,7 @@ public class ShapefileReader
                     }
                 })
         );
+        lineStringRDD.fieldNames = geometryRDD.fieldNames;
+        return lineStringRDD;
     }
 }

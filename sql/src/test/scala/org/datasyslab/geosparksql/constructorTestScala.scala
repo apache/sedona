@@ -26,12 +26,13 @@
 
 package org.datasyslab.geosparksql
 
-import com.vividsolutions.jts.geom.Geometry
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.sql.SparkSession
+import org.datasyslab.geospark.formatMapper.GeoJsonReader
+import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader
 import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
-import org.datasyslab.geosparksql.utils.{DataFrameFactory, GeoSparkSQLRegistrator}
+import org.datasyslab.geosparksql.utils.{Adapter, GeoSparkSQLRegistrator}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
 class constructorTestScala extends FunSpec with BeforeAndAfterAll {
@@ -65,7 +66,7 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll {
     it("Passed ST_Point") {
       var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(plainPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")
-      var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20)), \"myPointId\") as arealandmark from pointtable")
+      var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
       assert(pointDf.count() == 1000)
     }
 
@@ -74,8 +75,7 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll {
       pointCsvDF.createOrReplaceTempView("pointtable")
       pointCsvDF.show(false)
 
-      var pointDf = sparkSession.sql("select ST_PointFromText(concat(_c0,',',_c1),',', \"myPointId\") as arealandmark from pointtable")
-      assert(pointDf.take(1)(0).get(0).asInstanceOf[Geometry].getUserData.asInstanceOf[String].equalsIgnoreCase("myPointId"))
+      var pointDf = sparkSession.sql("select ST_PointFromText(concat(_c0,',',_c1),',') as arealandmark from pointtable")
       assert(pointDf.count() == 121960)
     }
 
@@ -97,19 +97,24 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll {
       assert(polygonDf.count() == 100)
     }
 
-    it("Passed ST_GeomFromGeoJSON") {
-      var polygonJsonDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(geoJsonGeomInputLocation)
-      polygonJsonDf.createOrReplaceTempView("polygontable")
-      polygonJsonDf.show()
-      var polygonDf = sparkSession.sql("select ST_GeomFromGeoJSON(polygontable._c0) as countyshape from polygontable")
-      polygonDf.show()
-      assert(polygonDf.count() == 1000)
+    it("Passed GeoJsonReader to DataFrame") {
+      var spatialRDD = GeoJsonReader.readToGeometryRDD(sparkSession.sparkContext, geoJsonGeomInputLocation)
+      var spatialDf = Adapter.toDf(spatialRDD, sparkSession)
+      spatialDf.show()
     }
 
-    it("Read shapefile to DataFrame") {
-      val df = DataFrameFactory.geometryDFFromShapeFile(sparkSession,shapefileInputLocation)
+    it("Read shapefile -> DataFrame > RDD -> DataFrame") {
+      var spatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileInputLocation)
+      spatialRDD.analyze()
+      var df = Adapter.toDf(spatialRDD, sparkSession)
       df.show
       assert (df.columns(1) == "STATEFP")
+      import org.apache.spark.sql.functions.{callUDF, col}
+      df = df.withColumn("geometry", callUDF("ST_GeomFromWKT", col("geometry")))
+      df.show()
+      var spatialRDD2 = Adapter.toSpatialRdd(df, "geometry")
+      println(spatialRDD2.rawSpatialRDD.take(1).get(0).getUserData)
+      Adapter.toDf(spatialRDD2, sparkSession).show()
     }
 
     it("Passed ST_Circle") {

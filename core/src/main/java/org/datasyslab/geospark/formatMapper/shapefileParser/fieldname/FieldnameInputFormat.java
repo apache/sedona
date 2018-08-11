@@ -1,5 +1,5 @@
 /*
- * FILE: BoundaryInputFormat
+ * FILE: FieldnameInputFormat
  * Copyright (c) 2015 - 2018 GeoSpark Development Team
  *
  * MIT License
@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  */
-package org.datasyslab.geospark.formatMapper.shapefileParser.boundary;
+package org.datasyslab.geospark.formatMapper.shapefileParser.fieldname;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.hadoop.fs.Path;
@@ -38,14 +38,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BoundaryInputFormat
-        extends CombineFileInputFormat<Long, BoundBox>
+public class FieldnameInputFormat
+        extends CombineFileInputFormat<Long, String>
 {
     @Override
-    public RecordReader<Long, BoundBox> createRecordReader(InputSplit inputSplit, TaskAttemptContext taskAttemptContext)
+    public RecordReader<Long, String> createRecordReader(InputSplit inputSplit, TaskAttemptContext taskAttemptContext)
             throws IOException
     {
-        return new BoundaryRecordReader();
+        return new FieldnameRecordReader();
     }
 
     /**
@@ -79,7 +79,7 @@ public class BoundaryInputFormat
         // get indexes of all .shp file
         List<Integer> shpIds = new ArrayList<>();
         for (int i = 0; i < paths.length; ++i) {
-            if (FilenameUtils.getExtension(paths[i].toString()).equalsIgnoreCase("shp")) {
+            if (FilenameUtils.getExtension(paths[i].toString()).equalsIgnoreCase("dbf")) {
                 shpIds.add(i);
             }
         }

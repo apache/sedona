@@ -87,6 +87,13 @@ public class ShapefileRDDTest
         //Hard code to a file in resource folder. But you can replace it later in the try-catch field in your hdfs system.
     }
 
+    @AfterClass
+    public static void tearDown()
+            throws Exception
+    {
+        sc.stop();
+    }
+
     /**
      * Test if shapeRDD get correct number of shapes from .shp file
      *
@@ -365,12 +372,5 @@ public class ShapefileRDDTest
                         bounds.getYMax();
         Assert.assertEquals(gtlbounds, myBounds);
         gtlReader.close();
-    }
-
-    @AfterClass
-    public static void tearDown()
-            throws Exception
-    {
-        sc.stop();
     }
 }

@@ -30,26 +30,32 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiPolygon;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
+import org.apache.hadoop.fs.LocatedFileStatus;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.RemoteIterator;
+import org.apache.hadoop.hdfs.HdfsConfiguration;
+import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.datasyslab.geospark.GeoSparkTestBase;
 import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader;
 import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundBox;
 import org.datasyslab.geospark.spatialOperator.RangeQuery;
 import org.datasyslab.geospark.spatialRDD.LineStringRDD;
 import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.PolygonRDD;
+import org.datasyslab.geospark.spatialRDD.SpatialRDD;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.shapefile.files.ShpFiles;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opengis.feature.Property;
@@ -59,29 +65,47 @@ import org.opengis.filter.Filter;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+
 public class ShapefileReaderTest
-        implements Serializable
+        extends GeoSparkTestBase
 {
 
-    /**
-     * The sc.
-     */
-    public static JavaSparkContext sc;
+    public static FileSystem fs;
+
+    public static MiniDFSCluster hdfsCluster;
+
+    public static String hdfsURI;
 
     @BeforeClass
     public static void onceExecutedBeforeAll()
+            throws IOException
     {
-        SparkConf conf = new SparkConf().setAppName("ShapefileRDDTest").setMaster("local[2]").set("spark.executor.cores", "2").set("spark.executor.memory", "4g");
-        sc = new JavaSparkContext(conf);
-        Logger.getLogger("org").setLevel(Level.WARN);
-        Logger.getLogger("akka").setLevel(Level.WARN);
-        //Hard code to a file in resource folder. But you can replace it later in the try-catch field in your hdfs system.
+        initialize(ShapefileReaderTest.class.getName());
+        // Set up HDFS minicluster
+        File baseDir = new File("./target/hdfs/shapefile").getAbsoluteFile();
+        FileUtil.fullyDelete(baseDir);
+        HdfsConfiguration hdfsConf = new HdfsConfiguration();
+        hdfsConf.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, baseDir.getAbsolutePath());
+        MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(hdfsConf);
+        hdfsCluster = builder.build();
+        fs = FileSystem.get(hdfsConf);
+        hdfsURI = "hdfs://localhost:" + hdfsCluster.getNameNodePort() + "/";
+    }
+
+    @AfterClass
+    public static void tearDown()
+            throws Exception
+    {
+        sc.stop();
+        hdfsCluster.shutdown();
+        fs.close();
     }
 
     /**
@@ -97,8 +121,8 @@ public class ShapefileReaderTest
         String inputLocation = getShapeFilePath("polygon");
         FeatureCollection<SimpleFeatureType, SimpleFeature> collection = loadFeatures(inputLocation);
         // load shapes with our tool
-        JavaRDD<Geometry> shapeRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
-        Assert.assertEquals(shapeRDD.collect().size(), collection.size());
+        SpatialRDD shapeRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
+        assertEquals(shapeRDD.rawSpatialRDD.collect().size(), collection.size());
     }
 
     /**
@@ -129,14 +153,14 @@ public class ShapefileReaderTest
         features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
 
-        JavaRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
-        PolygonRDD spatialRDD = ShapefileReader.geometryToPolygon(geometryRDD);
+        PolygonRDD spatialRDD = ShapefileReader.readToPolygonRDD(sc, inputLocation);
+        SpatialRDD<Geometry> geomeryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
 
         long count = RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180, 180, -90, 90), false, false).count();
-        Assert.assertEquals(spatialRDD.rawSpatialRDD.count(), count);
+        assertEquals(spatialRDD.rawSpatialRDD.count(), count);
 
-        for (Geometry geometry : geometryRDD.collect()) {
-            Assert.assertEquals(featureIterator.next(), geometry.toText());
+        for (Geometry geometry : geomeryRDD.rawSpatialRDD.collect()) {
+            assertEquals(featureIterator.next(), geometry.toText());
         }
     }
 
@@ -160,14 +184,13 @@ public class ShapefileReaderTest
         }
         features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
-        JavaRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
-        LineStringRDD spatialRDD = ShapefileReader.geometryToLineString(geometryRDD);
-
+        LineStringRDD spatialRDD = ShapefileReader.readToLineStringRDD(sc, inputLocation);
+        SpatialRDD<Geometry> geomeryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
         long count = RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180, 180, -90, 90), false, false).count();
-        Assert.assertEquals(spatialRDD.rawSpatialRDD.count(), count);
+        assertEquals(spatialRDD.rawSpatialRDD.count(), count);
 
-        for (Geometry geometry : geometryRDD.collect()) {
-            Assert.assertEquals(featureIterator.next(), geometry.toText());
+        for (Geometry geometry : geomeryRDD.rawSpatialRDD.collect()) {
+            assertEquals(featureIterator.next(), geometry.toText());
         }
     }
 
@@ -191,14 +214,13 @@ public class ShapefileReaderTest
         }
         features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
-        JavaRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
-        PointRDD spatialRDD = ShapefileReader.geometryToPoint(geometryRDD);
+        PointRDD spatialRDD = ShapefileReader.readToPointRDD(sc, inputLocation);
 
         long count = RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180, 180, -90, 90), false, false).count();
-        Assert.assertEquals(spatialRDD.rawSpatialRDD.count(), count);
+        assertEquals(spatialRDD.rawSpatialRDD.count(), count);
 
-        for (Geometry geometry : geometryRDD.collect()) {
-            Assert.assertEquals(featureIterator.next(), geometry.toText());
+        for (Geometry geometry : spatialRDD.rawSpatialRDD.collect()) {
+            assertEquals(featureIterator.next(), geometry.toText());
         }
     }
 
@@ -222,10 +244,10 @@ public class ShapefileReaderTest
         }
         features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
-        JavaRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
-        PointRDD spatialRDD = ShapefileReader.geometryToPoint(geometryRDD);
-        for (Geometry geometry : geometryRDD.collect()) {
-            Assert.assertEquals(featureIterator.next(), geometry.toText());
+        PointRDD spatialRDD = ShapefileReader.readToPointRDD(sc, inputLocation);
+        SpatialRDD<Geometry> geomeryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
+        for (Geometry geometry : geomeryRDD.rawSpatialRDD.collect()) {
+            assertEquals(featureIterator.next(), geometry.toText());
         }
     }
 
@@ -261,8 +283,8 @@ public class ShapefileReaderTest
         features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
 
-        for (Geometry geometry : ShapefileReader.readToGeometryRDD(sc, inputLocation).collect()) {
-            Assert.assertEquals(featureIterator.next(), geometry.getUserData());
+        for (Geometry geometry : ShapefileReader.readToGeometryRDD(sc, inputLocation).rawSpatialRDD.collect()) {
+            assertEquals(featureIterator.next(), geometry.getUserData());
         }
     }
 
@@ -292,8 +314,23 @@ public class ShapefileReaderTest
                         bounds.getYMin() + ":" +
                         bounds.getXMax() + ":" +
                         bounds.getYMax();
-        Assert.assertEquals(gtlbounds, myBounds);
+        assertEquals(gtlbounds, myBounds);
         gtlReader.close();
+    }
+
+    /**
+     * Test if parse the field names in header correctly
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testReadFieldNames()
+            throws IOException
+    {
+        String inputLocation = getShapeFilePath("dbf");
+        // read shapefile by our reader
+        List<String> fieldName = ShapefileReader.readFieldNames(sc, inputLocation);
+        assertEquals("[STATEFP, COUNTYFP, COUNTYNS, AFFGEOID, GEOID, NAME, LSAD, ALAND, AWATER]", fieldName.toString());
     }
 
     private String getShapeFilePath(String fileName)
@@ -316,10 +353,22 @@ public class ShapefileReaderTest
         return source.getFeatures(filter);
     }
 
-    @AfterClass
-    public static void tearDown()
-            throws Exception
+    /**
+     * Test whether the shapefile can be loaded from hdfs
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testLoadFromHDFS()
+            throws IOException
     {
-        sc.stop();
+        String shapefileHDFSpath = hdfsURI + "dbf";
+        fs.copyFromLocalFile(new Path(getShapeFilePath("dbf")), new Path(shapefileHDFSpath));
+        RemoteIterator<LocatedFileStatus> hdfsFileIterator = fs.listFiles(new Path(shapefileHDFSpath), false);
+        while (hdfsFileIterator.hasNext()) {
+            assertEquals(hdfsFileIterator.next().getPath().getParent().toString(), shapefileHDFSpath);
+        }
+        SpatialRDD<Geometry> spatialRDD = ShapefileReader.readToGeometryRDD(sc, shapefileHDFSpath);
+        assertEquals("[STATEFP, COUNTYFP, COUNTYNS, AFFGEOID, GEOID, NAME, LSAD, ALAND, AWATER]", spatialRDD.fieldNames.toString());
     }
 }
