@@ -144,5 +144,15 @@ class functionTestScala extends FunSpec with BeforeAndAfterAll {
       var intersec=sparkSession.sql("select ST_Intersection(a,b) from testtable")
       assert(intersec.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON ((2 8, 8 8, 8 2, 2 2, 2 8))"))
     }
+
+    it("Passed ST_IsValid") {
+
+      var testtable=sparkSession.sql(
+        "SELECT ST_IsValid(ST_GeomFromWKT('POLYGON((0 0, 10 0, 10 10, 0 10, 0 0), (15 15, 15 20, 20 20, 20 15, 15 15))')) AS a, " +
+        "ST_IsValid(ST_GeomFromWKT('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))')) as b"
+      )
+      assert(!testtable.take(1)(0).get(0).asInstanceOf[Boolean])
+      assert(testtable.take(1)(0).get(1).asInstanceOf[Boolean])
+    }
   }
 }

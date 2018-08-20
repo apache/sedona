@@ -50,7 +50,8 @@ object Catalog {
     ST_Area,
     ST_Centroid,
     ST_Transform,
-    ST_Intersection
+    ST_Intersection,
+    ST_IsValid
   )
 
   val aggregateExpressions:Seq[UserDefinedAggregateFunction] = Seq(

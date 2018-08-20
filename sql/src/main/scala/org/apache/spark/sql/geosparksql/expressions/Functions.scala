@@ -25,12 +25,13 @@
  */
 package org.apache.spark.sql.geosparksql.expressions
 
+import com.vividsolutions.jts.operation.valid.IsValidOp
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.geosparksql.UDT.GeometryUDT
-import org.apache.spark.sql.types.{DataType, DoubleType}
+import org.apache.spark.sql.types.{BooleanType, DataType, DoubleType}
 import org.apache.spark.unsafe.types.UTF8String
 import org.datasyslab.geosparksql.utils.GeometrySerializer
 import org.geotools.geometry.jts.JTS
@@ -220,6 +221,27 @@ case class ST_Intersection(inputExpressions: Seq[Expression])
   }
 
   override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+  * Test if Geometry is valid.
+  *
+  * @param inputExpressions
+  */
+case class ST_IsValid(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 1)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val isvalidop = new IsValidOp(geometry)
+    isvalidop.isValid
+  }
+
+  override def dataType: DataType = BooleanType
 
   override def children: Seq[Expression] = inputExpressions
 }
