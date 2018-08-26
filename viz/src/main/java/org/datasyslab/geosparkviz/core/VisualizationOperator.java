@@ -188,11 +188,7 @@ public abstract class VisualizationOperator
      * The generate vector image.
      */
     protected boolean generateVectorImage = false;
-
-    /**
-     * The count matrix.
-     */
-    protected List<Tuple2<Integer, Double>> countMatrix;
+    
 
     /**
      * The distributed raster count matrix.
@@ -335,20 +331,12 @@ public abstract class VisualizationOperator
         /*
          * Variables below control how to initialize a raster image
          */
-        this.countMatrix = new ArrayList<Tuple2<Integer, Double>>();
         this.colorizeOption = colorizeOption;
         this.partitionX = partitionX;
         this.partitionY = partitionY;
         this.partitionIntervalX = this.resolutionX / this.partitionX;
         this.partitionIntervalY = this.resolutionY / this.partitionY;
         this.parallelPhotoFilter = parallelPhotoFilter;
-        int serialId = 0;
-        for (int j = 0; j < resolutionY; j++) {
-            for (int i = 0; i < resolutionX; i++) {
-                countMatrix.add(new Tuple2<Integer, Double>(serialId, new Double(0.0)));
-                serialId++;
-            }
-        }
         logger.info("[GeoSparkViz][Constructor][Stop]");
     }
 
