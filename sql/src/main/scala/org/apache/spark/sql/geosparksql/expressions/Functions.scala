@@ -25,7 +25,9 @@
  */
 package org.apache.spark.sql.geosparksql.expressions
 
+import com.vividsolutions.jts.geom.PrecisionModel
 import com.vividsolutions.jts.operation.valid.IsValidOp
+import com.vividsolutions.jts.precision.GeometryPrecisionReducer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
@@ -242,6 +244,28 @@ case class ST_IsValid(inputExpressions: Seq[Expression])
   }
 
   override def dataType: DataType = BooleanType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+  * Reduce the precision of the given geometry to the given number of decimal places
+  * @param inputExpressions The first arg is a geom and the second arg is an integer scale, specifying the number of decimal places of the new coordinate. The last decimal place will
+  *                         be rounded to the nearest number.
+  */
+case class ST_PrecisionReduce(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 2)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val precisionScale = inputExpressions(1).eval(input).asInstanceOf[Int]
+    val precisionReduce = new GeometryPrecisionReducer(new PrecisionModel(Math.pow(10, precisionScale)))
+    new GenericArrayData(GeometrySerializer.serialize(precisionReduce.reduce(geometry)))
+  }
+
+  override def dataType: DataType = new GeometryUDT()
 
   override def children: Seq[Expression] = inputExpressions
 }
