@@ -129,3 +129,34 @@ Spark SQL example:
 SELECT ST_Intersection(polygondf.countyshape, polygondf.countyshape)
 FROM polygondf
 ```
+
+## ST_IsValid
+
+Introduction: Test if a geometry is well formed
+
+Format: `ST_IsValid (A:geometry)`
+
+Since: `v1.2.0`
+
+Spark SQL example:
+
+```SQL
+SELECT ST_IsValid(polygondf.countyshape)
+FROM polygondf
+```
+
+## ST_PrecisionReduce
+
+Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded.
+
+Format: `ST_PrecisionReduce (A:geometry, B:int)`
+
+Since: `v1.2.0`
+
+Spark SQL example:
+
+```SQL
+SELECT ST_PrecisionReduce(polygondf.countyshape, 9)
+FROM polygondf
+```
+The new coordinates will only have 9 decimal places.

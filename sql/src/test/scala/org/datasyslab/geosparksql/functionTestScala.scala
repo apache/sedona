@@ -154,5 +154,21 @@ class functionTestScala extends FunSpec with BeforeAndAfterAll {
       assert(!testtable.take(1)(0).get(0).asInstanceOf[Boolean])
       assert(testtable.take(1)(0).get(1).asInstanceOf[Boolean])
     }
+
+    it("Passed ST_PrecisionReduce") {
+      var testtable = sparkSession.sql(
+        """
+          |SELECT ST_PrecisionReduce(ST_GeomFromWKT('Point(0.1234567890123456789 0.1234567890123456789)'), 8)
+        """.stripMargin)
+      testtable.show(false)
+      assert(testtable.take(1)(0).get(0).asInstanceOf[Geometry].getCoordinates()(0).x == 0.12345679)
+      testtable = sparkSession.sql(
+        """
+          |SELECT ST_PrecisionReduce(ST_GeomFromWKT('Point(0.1234567890123456789 0.1234567890123456789)'), 11)
+        """.stripMargin)
+      testtable.show(false)
+      assert(testtable.take(1)(0).get(0).asInstanceOf[Geometry].getCoordinates()(0).x == 0.12345678901)
+
+    }
   }
 }
