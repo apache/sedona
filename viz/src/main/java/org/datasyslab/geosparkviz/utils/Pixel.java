@@ -178,15 +178,7 @@ public class Pixel
     @Override
     public boolean equals(Object o)
     {
-
-        /*
-        Pixel anotherObject = (Pixel) o;
-        if(this.hashCode()==anotherObject.hashCode()&&this.getCurrentPartitionId()==anotherObject.getCurrentPartitionId()&&this.isDuplicate()==anotherObject.isDuplicate())
-        {
-            return true;
-        }
-        else return false;
-        */
+        if (o == null || !(o instanceof Pixel)) return false;
         return this.hashCode() == o.hashCode();
     }
 
@@ -209,13 +201,6 @@ public class Pixel
     @Override
     public int hashCode()
     {
-        /*
-        int result = 17;
-        result = 31 * result + this.getX();
-        result = 31 * result + this.getY();
-        //result = 31 * result + this.getCurrentPartitionId();
-        return result;
-        */
         int id = -1;
         try {
             id = RasterizationUtils.Encode2DTo1DId(resolutionX, resolutionY, x, y);
