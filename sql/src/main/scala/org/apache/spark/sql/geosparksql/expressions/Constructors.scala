@@ -29,13 +29,12 @@ import com.vividsolutions.jts.geom.{Coordinate, GeometryFactory}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
+import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.geosparksql.UDT.GeometryUDT
 import org.apache.spark.sql.types.{DataType, Decimal}
 import org.apache.spark.unsafe.types.UTF8String
 import org.datasyslab.geospark.enums.{FileDataSplitter, GeometryType}
 import org.datasyslab.geospark.formatMapper.FormatMapper
-import org.datasyslab.geospark.geometryObjects.Circle
 import org.datasyslab.geosparksql.utils.GeometrySerializer
 
 /**
@@ -191,27 +190,6 @@ case class ST_Point(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
-
-/**
-  * Return a Circle from a Geometry and a radius
-  *
-  * @param inputExpressions This function takes two parameters, a geometry column and a radius, and outputs a circle type
-  */
-case class ST_Circle(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    assert(inputExpressions.length == 2)
-    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData])
-    val circle = new Circle(geometry, inputExpressions(1).eval(inputRow).asInstanceOf[Decimal].toDouble)
-    return new GenericArrayData(GeometrySerializer.serialize(circle))
-  }
-
-  override def dataType: DataType = new GeometryUDT()
-
-  override def children: Seq[Expression] = inputExpressions
-}
 
 /**
   * Return a polygon given minX,minY,maxX,maxY

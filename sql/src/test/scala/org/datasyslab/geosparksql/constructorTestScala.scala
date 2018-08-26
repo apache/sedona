@@ -116,14 +116,5 @@ class constructorTestScala extends FunSpec with BeforeAndAfterAll {
       println(spatialRDD2.rawSpatialRDD.take(1).get(0).getUserData)
       Adapter.toDf(spatialRDD2, sparkSession).show()
     }
-
-    it("Passed ST_Circle") {
-      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(plainPointInputLocation)
-      pointCsvDF.createOrReplaceTempView("pointtable")
-      var circleDf = sparkSession.sql("select ST_Circle(ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))), 1.5) as arealandmark from pointtable")
-      circleDf.show()
-      assert(circleDf.count() == 1000)
-    }
-
   }
 }

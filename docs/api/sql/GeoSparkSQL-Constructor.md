@@ -183,7 +183,7 @@ Introduction: Construct a Circle from A with a Radius.
 
 Format: `ST_Circle (A:Geometry, Radius:decimal)`
 
-Since: `v1.0.0`
+Since: `v1.0.0` - `v1.1.3`
 
 Spark SQL example:
 
