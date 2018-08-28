@@ -42,14 +42,16 @@ public class GeoJsonReaderTest
         extends GeoSparkTestBase
 {
 
-    public static String geoJsonGeomInputLocation = null;
+    public static String geoJsonGeomWithFeatureProperty = null;
+    public static String geoJsonGeomWithoutFeatureProperty = null;
 
     @BeforeClass
     public static void onceExecutedBeforeAll()
             throws IOException
     {
         initialize(GeoJsonReaderTest.class.getName());
-        geoJsonGeomInputLocation = GeoJsonReaderTest.class.getClassLoader().getResource("testPolygon.json").getPath();
+        geoJsonGeomWithFeatureProperty = GeoJsonReaderTest.class.getClassLoader().getResource("testPolygon.json").getPath();
+        geoJsonGeomWithoutFeatureProperty = GeoJsonReaderTest.class.getClassLoader().getResource("testpolygon-no-property.json").getPath();
     }
 
     @AfterClass
@@ -69,7 +71,9 @@ public class GeoJsonReaderTest
             throws IOException
     {
         // load geojson with our tool
-        SpatialRDD geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomInputLocation);
+        SpatialRDD geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithFeatureProperty);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 1001);
+        geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithoutFeatureProperty);
+        assertEquals(geojsonRDD.rawSpatialRDD.count(), 10);
     }
 }

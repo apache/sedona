@@ -35,6 +35,7 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKTReader;
+import org.apache.log4j.Logger;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GeometryType;
@@ -93,6 +94,7 @@ public class FormatMapper<T extends Geometry>
     transient protected WKTReader wktReader = new WKTReader();
     // For some unknown reasons, the wkb reader cannot be used in transient variable like the wkt reader.
 
+    final static Logger logger = Logger.getLogger(FormatMapper.class);
     /**
      * Instantiates a new format mapper.
      *
@@ -188,10 +190,14 @@ public class FormatMapper<T extends Geometry>
     }
 
     public static List<String> readGeoJsonPropertyNames(String geoJson){
-        assert (geoJson.contains("Feature"));
-        Feature feature = (Feature) GeoJSONFactory.create(geoJson);
-        return new ArrayList(feature.getProperties().keySet());
-
+        if (geoJson.contains("Feature") || geoJson.contains("feature") || geoJson.contains("FEATURE")) {
+            if (geoJson.contains("properties")) {
+                Feature feature = (Feature) GeoJSONFactory.create(geoJson);
+                return new ArrayList(feature.getProperties().keySet());
+            }
+        }
+        logger.warn("[GeoSpark] The GeoJSON file doesn't have feature properties");
+        return null;
     }
 
     public Geometry readWkt(String line)
