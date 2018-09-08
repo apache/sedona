@@ -109,6 +109,30 @@ public class ShapefileReaderTest
     }
 
     /**
+     * Test correctness of parsing file with UNDEFINED type shape
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testShapefileEndWithUndefinedType()
+            throws IOException
+    {
+        // load shape with geotool.shapefile
+        String inputLocation = getShapeFilePath("undefined");
+        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = loadFeatures(inputLocation);
+        // load shapes with our tool
+        SpatialRDD shapeRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
+        FeatureIterator<SimpleFeature> features = collection.features();
+        int nullNum = 0;
+        while(features.hasNext()){
+            SimpleFeature feature = features.next();
+            Geometry g = (Geometry) feature.getDefaultGeometry();
+            if(g == null) nullNum++;
+        }
+        assertEquals(shapeRDD.getRawSpatialRDD().count(), collection.size() - nullNum);
+    }
+
+    /**
      * Test correctness of parsing shapefile
      *
      * @throws IOException
