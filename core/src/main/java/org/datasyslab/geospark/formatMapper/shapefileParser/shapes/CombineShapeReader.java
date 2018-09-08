@@ -159,10 +159,11 @@ public class CombineShapeReader
 
         boolean hasNextShp = shapeFileReader.nextKeyValue();
         if (hasDbf) { hasNextDbf = dbfFileReader.nextKeyValue(); }
+
         int curShapeType = shapeFileReader.getCurrentValue().getTypeID();
-        while (curShapeType == ShapeType.UNDEFINED.getId()) {
-            hasNextShp = shapeFileReader.nextKeyValue();
+        while (hasNextShp && ShapeType.getType(curShapeType) == ShapeType.UNDEFINED) {
             if (hasDbf) { hasNextDbf = dbfFileReader.nextKeyValue(); }
+            hasNextShp = shapeFileReader.nextKeyValue();
             curShapeType = shapeFileReader.getCurrentValue().getTypeID();
         }
         // check if records match in .shp and .dbf
