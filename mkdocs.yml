@@ -36,7 +36,9 @@ pages:
     - Contact:
       - Questions: contact/contact.md
       - Publications: contact/publication.md
-    - License: license/License.md
+    - License: 
+      - License-before-1.2.0: license/License-before-1-2-0.md
+      - License: license/License.md
 repo_url: https://github.com/DataSystemsLab/GeoSpark
 theme: 
   name: 'material'
