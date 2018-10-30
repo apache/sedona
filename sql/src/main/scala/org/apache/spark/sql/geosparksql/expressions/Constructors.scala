@@ -144,6 +144,31 @@ case class ST_GeomFromWKT(inputExpressions: Seq[Expression])
 
 
 /**
+  * Return a Geometry from a WKT string
+  *
+  * @param inputExpressions This function takes 1 parameter which is the geometry string. The string format must be WKT.
+  */
+case class ST_GeomFromText(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 1)
+    val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
+    var fileDataSplitter = FileDataSplitter.WKT
+    var formatMapper = new FormatMapper(fileDataSplitter, false)
+    var geometry = formatMapper.readGeometry(geomString)
+    return new GenericArrayData(GeometrySerializer.serialize(geometry))
+  }
+
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+
+/**
   * Return a Geometry from a WKB string
   *
   * @param inputExpressions This function takes 1 parameter which is the geometry string. The string format must be WKB.

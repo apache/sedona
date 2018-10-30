@@ -25,7 +25,7 @@
  */
 package org.apache.spark.sql.geosparksql.expressions
 
-import com.vividsolutions.jts.geom.{Coordinate, Geometry, GeometryFactory, Polygon}
+import com.vividsolutions.jts.geom.{Coordinate, Geometry, GeometryFactory}
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.expressions.{MutableAggregationBuffer, UserDefinedAggregateFunction}
 import org.apache.spark.sql.geosparksql.UDT.GeometryUDT
@@ -58,15 +58,15 @@ class ST_Union_Aggr extends UserDefinedAggregateFunction {
   }
 
   override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
-    val accumulateUnion = buffer.getAs[Polygon](0)
-    val newPolygon = input.getAs[Polygon](0)
+    val accumulateUnion = buffer.getAs[Geometry](0)
+    val newPolygon = input.getAs[Geometry](0)
     if (accumulateUnion.getArea == 0) buffer(0) = newPolygon
     else buffer(0) = accumulateUnion.union(newPolygon)
   }
 
   override def merge(buffer1: MutableAggregationBuffer, buffer2: Row): Unit = {
-    val leftPolygon = buffer1.getAs[Polygon](0)
-    val rightPolygon = buffer2.getAs[Polygon](0)
+    val leftPolygon = buffer1.getAs[Geometry](0)
+    val rightPolygon = buffer2.getAs[Geometry](0)
     if (leftPolygon.getCoordinates()(0).x == -999999999) buffer1(0) = rightPolygon
     else if (rightPolygon.getCoordinates()(0).x == -999999999) buffer1(0) = leftPolygon
     else buffer1(0) = leftPolygon.union(rightPolygon)

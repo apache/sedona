@@ -27,44 +27,18 @@
 package org.datasyslab.geosparksql
 
 import com.vividsolutions.jts.geom.Geometry
-import org.apache.log4j.{Level, Logger}
-import org.apache.spark.serializer.KryoSerializer
-import org.apache.spark.sql.SparkSession
 import org.datasyslab.geospark.enums.{FileDataSplitter, GridType, IndexType}
 import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader
-import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
 import org.datasyslab.geospark.spatialOperator.JoinQuery
 import org.datasyslab.geospark.spatialRDD.{CircleRDD, PolygonRDD, SpatialRDD}
-import org.datasyslab.geosparksql.utils.{Adapter, GeoSparkSQLRegistrator}
-import org.scalatest.{BeforeAndAfterAll, FunSpec}
+import org.datasyslab.geosparksql.utils.Adapter
 
-class adapterTestScala extends FunSpec with BeforeAndAfterAll {
-
-  var sparkSession: SparkSession = _
-
-  override def afterAll(): Unit = {
-    //UdfRegistrator.dropAll(sparkSession)
-    //sparkSession.stop
-  }
+class adapterTestScala extends TestBaseScala {
 
   describe("GeoSpark-SQL Scala Adapter Test") {
-    sparkSession = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
-      config("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName).
-      master("local[*]").appName("readTestScala").getOrCreate()
-    Logger.getLogger("org").setLevel(Level.WARN)
-    Logger.getLogger("akka").setLevel(Level.WARN)
-
-    GeoSparkSQLRegistrator.registerAll(sparkSession.sqlContext)
-
-    val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
-
-    val mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv"
-    val csvPointInputLocation = resourceFolder + "arealm.csv"
-    val shapefileInputLocation = resourceFolder + "shapefiles/polygon"
-    val geojsonInputLocation = resourceFolder + "testPolygon.json"
 
     it("Read CSV point into a SpatialRDD") {
-      var df = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(csvPointInputLocation)
+      var df = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(arealmPointInputLocation)
       df.show()
       df.createOrReplaceTempView("inputtable")
       var spatialDf = sparkSession.sql("select ST_PointFromText(inputtable._c0,\",\") as arealandmark from inputtable")
@@ -77,7 +51,7 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
     }
 
     it("Read CSV point into a SpatialRDD by passing coordinates") {
-      var df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
+      var df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(arealmPointInputLocation)
       df.show()
       df.createOrReplaceTempView("inputtable")
       var spatialDf = sparkSession.sql("select ST_Point(cast(inputtable._c0 as Decimal(24,20)),cast(inputtable._c1 as Decimal(24,20))) as arealandmark from inputtable")
@@ -91,7 +65,7 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
     }
 
     it("Read CSV point into a SpatialRDD with unique Id by passing coordinates") {
-      var df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
+      var df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(arealmPointInputLocation)
       df.show()
       df.createOrReplaceTempView("inputtable")
       // Use Column _c0 as the unique Id but the id can be anything in the same row
@@ -142,8 +116,7 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
     }
 
     it("Read GeoJSON to DataFrame") {
-      import org.apache.spark.sql.functions.callUDF
-      import org.apache.spark.sql.functions.col
+      import org.apache.spark.sql.functions.{callUDF, col}
       var spatialRDD = new PolygonRDD(sparkSession.sparkContext, geojsonInputLocation, FileDataSplitter.GEOJSON, true)
       spatialRDD.analyze()
       var df = Adapter.toDf(spatialRDD, sparkSession).withColumn("geometry", callUDF("ST_GeomFromWKT", col("geometry")))
@@ -159,7 +132,7 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
       polygonRDD.rawSpatialRDD = Adapter.toRdd(polygonDf)
       polygonRDD.analyze()
 
-      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
+      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(arealmPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")
       var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
       var pointRDD = new SpatialRDD[Geometry]
@@ -181,7 +154,7 @@ class adapterTestScala extends FunSpec with BeforeAndAfterAll {
     }
 
     it("Convert distance join result to DataFrame") {
-      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
+      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(arealmPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")
       var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
       var pointRDD = new SpatialRDD[Geometry]

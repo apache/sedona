@@ -27,38 +27,10 @@
 package org.datasyslab.geosparksql
 
 import com.vividsolutions.jts.geom.Geometry
-import org.apache.log4j.{Level, Logger}
-import org.apache.spark.serializer.KryoSerializer
-import org.apache.spark.sql.SparkSession
-import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
-import org.datasyslab.geosparksql.utils.GeoSparkSQLRegistrator
-import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
-class functionTestScala extends FunSpec with BeforeAndAfterAll {
-
-  var sparkSession: SparkSession = _
-
-  override def afterAll(): Unit = {
-    //GeoSparkSQLRegistrator.dropAll(sparkSession)
-    //sparkSession.stop
-  }
+class functionTestScala extends TestBaseScala {
 
   describe("GeoSpark-SQL Function Test") {
-    sparkSession = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
-      config("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName).
-      master("local[*]").appName("readTestScala").getOrCreate()
-    Logger.getLogger("org").setLevel(Level.WARN)
-    Logger.getLogger("akka").setLevel(Level.WARN)
-
-    GeoSparkSQLRegistrator.registerAll(sparkSession.sqlContext)
-
-    val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
-
-    val mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv"
-    val plainPointInputLocation = resourceFolder + "testpoint.csv"
-    val shapefileInputLocation = resourceFolder + "shapefiles/polygon"
-    val csvPointInputLocation = resourceFolder + "arealm.csv"
-    val geoJsonGeomInputLocation = resourceFolder + "testPolygon.json"
 
     it("Passed ST_ConvexHull") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)

@@ -8,3 +8,5 @@
 *.iml
 /latest/
 /spark-warehouse/
+/metastore_db/
+*.log

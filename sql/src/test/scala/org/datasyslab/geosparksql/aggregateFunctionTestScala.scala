@@ -26,39 +26,14 @@
 
 package org.datasyslab.geosparksql
 
-import com.vividsolutions.jts.geom.{Coordinate, GeometryFactory, Polygon}
-import org.apache.log4j.{Level, Logger}
-import org.apache.spark.serializer.KryoSerializer
-import org.apache.spark.sql.SparkSession
-import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
-import org.datasyslab.geosparksql.utils.GeoSparkSQLRegistrator
-import org.scalatest.{BeforeAndAfterAll, FunSpec}
+import com.vividsolutions.jts.geom.{Coordinate, Geometry, GeometryFactory}
 
-class aggregateFunctionTestScala extends FunSpec with BeforeAndAfterAll {
-
-  var sparkSession: SparkSession = _
-
-  override def afterAll(): Unit = {
-    //GeoSparkSQLRegistrator.dropAll(sparkSession)
-    //sparkSession.stop
-  }
+class aggregateFunctionTestScala extends TestBaseScala {
 
   describe("GeoSpark-SQL Aggregate Function Test") {
-    sparkSession = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
-      config("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName).
-      master("local[*]").appName("readTestScala").getOrCreate()
-    Logger.getLogger("org").setLevel(Level.WARN)
-    Logger.getLogger("akka").setLevel(Level.WARN)
-
-    GeoSparkSQLRegistrator.registerAll(sparkSession.sqlContext)
-
-    val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
-
-    val csvPolygonInputLocation = resourceFolder + "testunion.csv"
-    val plainPointInputLocation = resourceFolder + "testpoint.csv"
 
     it("Passed ST_Envelope_aggr") {
-      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(plainPointInputLocation)
+      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")
       var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
       pointDf.createOrReplaceTempView("pointdf")
@@ -76,14 +51,14 @@ class aggregateFunctionTestScala extends FunSpec with BeforeAndAfterAll {
 
     it("Passed ST_Union_aggr") {
 
-      var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygonInputLocation)
+      var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(unionPolygonInputLocation)
       polygonCsvDf.createOrReplaceTempView("polygontable")
       polygonCsvDf.show()
       var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
       polygonDf.show()
       var union = sparkSession.sql("select ST_Union_Aggr(polygondf.polygonshape) from polygondf")
-      assert(union.take(1)(0).get(0).asInstanceOf[Polygon].getArea == 10100)
+      assert(union.take(1)(0).get(0).asInstanceOf[Geometry].getArea == 10100)
     }
   }
 }
