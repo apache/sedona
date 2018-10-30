@@ -28,13 +28,12 @@ import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
 import org.apache.spark.sql.geosparksql.expressions._
 
-import scala.reflect.runtime.{universe => ru}
-
 object Catalog {
   val expressions:Seq[FunctionBuilder] = Seq(
     ST_PointFromText,
     ST_PolygonFromText,
     ST_LineStringFromText,
+    ST_GeomFromText,
     ST_GeomFromWKT,
     ST_GeomFromWKB,
     ST_Point,
