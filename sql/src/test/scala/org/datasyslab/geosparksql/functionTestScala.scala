@@ -127,6 +127,14 @@ class functionTestScala extends TestBaseScala {
       assert(testtable.take(1)(0).get(1).asInstanceOf[Boolean])
     }
 
+    it("Fixed nullPointerException in ST_IsValid") {
+
+      var testtable=sparkSession.sql(
+        "SELECT ST_IsValid(null)"
+      )
+      assert(testtable.take(1).head.get(0) == null)
+    }
+
     it("Passed ST_PrecisionReduce") {
       var testtable = sparkSession.sql(
         """
