@@ -30,13 +30,23 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.spatialRDD.SpatialRDD;
 
-public class GeoJsonReader
-{
+public class GeoJsonReader {
+
+    private static SpatialRDD<Geometry> readToGeometryRDDfromFile(JavaSparkContext sc, String inputPath, boolean allowInvalidGeometries) {
+        JavaRDD rawTextRDD = sc.textFile(inputPath);
+        SpatialRDD spatialRDD = new SpatialRDD<Geometry>();
+        FormatMapper<Geometry> formatMapper = new FormatMapper<Geometry>(FileDataSplitter.GEOJSON, true);
+        formatMapper.allowInvalidGeometries = allowInvalidGeometries;
+        spatialRDD.rawSpatialRDD = rawTextRDD.mapPartitions(formatMapper);
+        spatialRDD.fieldNames = FormatMapper.readGeoJsonPropertyNames(rawTextRDD.take(1).get(0).toString());
+        return spatialRDD;
+    }
+
     public static SpatialRDD<Geometry> readToGeometryRDD(JavaSparkContext sc, String inputPath) {
-    JavaRDD rawTextRDD = sc.textFile(inputPath);
-    SpatialRDD spatialRDD = new SpatialRDD<Geometry>();
-    spatialRDD.rawSpatialRDD = rawTextRDD.mapPartitions(new FormatMapper<Geometry>(FileDataSplitter.GEOJSON, true));
-    spatialRDD.fieldNames = FormatMapper.readGeoJsonPropertyNames(rawTextRDD.take(1).get(0).toString());
-    return spatialRDD;
-}
+        return readToGeometryRDDfromFile(sc, inputPath, true);
+    }
+
+    public static SpatialRDD<Geometry> readToGeometryRDD(JavaSparkContext sc, String inputPath, boolean allowInvalidGeometries) {
+        return readToGeometryRDDfromFile(sc, inputPath, allowInvalidGeometries);
+    }
 }

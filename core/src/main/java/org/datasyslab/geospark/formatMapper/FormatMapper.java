@@ -35,6 +35,7 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKTReader;
+import com.vividsolutions.jts.operation.valid.IsValidOp;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
@@ -83,6 +84,10 @@ public class FormatMapper<T extends Geometry>
 
     protected GeometryType geometryType = null;
 
+    /**
+     *  Allow mapping of invalid geometries.
+     */
+    boolean allowInvalidGeometries;
 
     /**
      * The factory.
@@ -110,6 +115,7 @@ public class FormatMapper<T extends Geometry>
         this.splitter = splitter;
         this.carryInputData = carryInputData;
         this.geometryType = geometryType;
+        this.allowInvalidGeometries = true;
         // Only the following formats are allowed to use this format mapper because each input has the geometry type definition
         if (geometryType == null)
         {
@@ -305,22 +311,34 @@ public class FormatMapper<T extends Geometry>
     public Geometry readGeometry(String line)
             throws ParseException
     {
+        Geometry geometry;
         switch (this.splitter) {
             case WKT:
-                return readWkt(line);
+                geometry = readWkt(line);
+                break;
             case WKB:
-                return readWkb(line);
+                geometry = readWkb(line);
+                break;
             case GEOJSON:
-                return readGeoJSON(line);
+                geometry = readGeoJSON(line);
+                break;
             default: {
                 if (this.geometryType == null) {
                     throw new IllegalArgumentException("[GeoSpark][FormatMapper] You must specify GeometryType when you use delimiter rather than WKB, WKT or GeoJSON");
                 }
                 else {
-                    return createGeometry(readCoordinates(line), geometryType);
+                    geometry = createGeometry(readCoordinates(line), geometryType);
                 }
             }
         }
+        if (allowInvalidGeometries == false) {
+            IsValidOp isvalidop = new IsValidOp(geometry);
+            if (isvalidop.isValid() == false) {
+                geometry = null;
+            }
+        }
+
+        return geometry;
     }
 
     private Geometry createGeometry(Coordinate[] coordinates, GeometryType geometryType)
@@ -373,6 +391,9 @@ public class FormatMapper<T extends Geometry>
 
     private void addGeometry(Geometry geometry, List<T> result)
     {
+        if (geometry == null) {
+            return;
+        }
         if (geometry instanceof MultiPoint) {
             addMultiGeometry((MultiPoint) geometry, result);
         }
