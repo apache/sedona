@@ -42,3 +42,19 @@ SELECT *
 FROM pointdf 
 WHERE ST_Within(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
 ```
+
+## ST_Overlaps
+
+Introduction: Return true if A "spatially overlap" B, which means they intersect,
+but one does not completely contain another
+
+Format: `ST_Overlaps (A:geometry, B:geometry)`
+
+Since: `v1.2.0`
+
+Spark SQL example:
+```SQL
+SELECT *
+FROM geometries
+WHERE ST_Overlaps(geom_a, geom_b)
+```

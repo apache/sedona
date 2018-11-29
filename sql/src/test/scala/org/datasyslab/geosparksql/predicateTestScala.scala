@@ -60,5 +60,27 @@ class predicateTestScala extends TestBaseScala {
       resultDf.show()
       assert(resultDf.count() == 999)
     }
+    it("Passed ST_Overlaps") {
+      val dataDf = sparkSession.sql(
+        """
+          |select ST_GeomFromWKT('POLYGON (( 10 10, 100 10, 100 100, 10 100, 10 10 ))') as a,
+          |       ST_GeomFromWKT('POLYGON (( 0 0, 90 0, 90 90, 0 90, 0 0 ))') as b,
+          |       ST_GeomFromWKT('POLYGON (( 0 0, 100 0, 100 100, 0 100, 0 0 ))') as c,
+          |       ST_GeomFromWKT('POLYGON (( 10 10, 90 10, 90 90, 10 90, 10 10 ))') as d
+        """.stripMargin)
+      dataDf.createOrReplaceTempView("geometries")
+
+      val overlapsDf = sparkSession.sql(
+        """| select ST_Overlaps(a, b)
+           | from geometries
+        """.stripMargin)
+      val notOverlapsDf = sparkSession.sql(
+        """| select ST_Overlaps(c, d)
+           | from geometries
+        """.stripMargin)
+
+      assert(overlapsDf.take(1).head.getBoolean(0))
+      assert(! notOverlapsDf.take(1).head.getBoolean(0))
+    }
   }
 }

@@ -26,7 +26,7 @@ package org.datasyslab.geosparksql.UDF
 
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
-import org.apache.spark.sql.geosparksql.expressions._
+import org.apache.spark.sql.geosparksql.expressions.{ST_Overlaps, _}
 
 object Catalog {
   val expressions:Seq[FunctionBuilder] = Seq(
@@ -40,6 +40,7 @@ object Catalog {
     ST_PolygonFromEnvelope,
     ST_Contains,
     ST_Intersects,
+    ST_Overlaps,
     ST_Within,
     ST_Distance,
     ST_ConvexHull,
