@@ -109,13 +109,38 @@ class functionTestScala extends TestBaseScala {
       functionDf.show()
     }
 
-    it("Passed ST_Intersection") {
+    it("Passed ST_Intersection - intersects but not contains") {
 
-      var testtable=sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
+      val testtable=sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
       testtable.createOrReplaceTempView("testtable")
-      var intersec=sparkSession.sql("select ST_Intersection(a,b) from testtable")
+      val intersec=sparkSession.sql("select ST_Intersection(a,b) from testtable")
       assert(intersec.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON ((2 8, 8 8, 8 2, 2 2, 2 8))"))
     }
+
+    it("Passed ST_Intersection - intersects but left contains right") {
+
+      val testtable=sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 1 5, 5 5, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 2 3, 3 3, 2 2))') as b")
+      testtable.createOrReplaceTempView("testtable")
+      val intersec=sparkSession.sql("select ST_Intersection(a,b) from testtable")
+      assert(intersec.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON ((2 2, 2 3, 3 3, 2 2))"))
+    }
+
+    it("Passed ST_Intersection - intersects but right contains left") {
+
+      val testtable=sparkSession.sql("select ST_GeomFromWKT('POLYGON((2 2, 2 3, 3 3, 2 2))') as a,ST_GeomFromWKT('POLYGON((1 1, 1 5, 5 5, 1 1))') as b")
+      testtable.createOrReplaceTempView("testtable")
+      val intersec=sparkSession.sql("select ST_Intersection(a,b) from testtable")
+      assert(intersec.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON ((2 2, 2 3, 3 3, 2 2))"))
+    }
+
+    it("Passed ST_Intersection - not intersects") {
+
+      var testtable=sparkSession.sql("select ST_GeomFromWKT('POLYGON((40 21, 40 22, 40 23, 40 21))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
+      testtable.createOrReplaceTempView("testtable")
+      var intersec=sparkSession.sql("select ST_Intersection(a,b) from testtable")
+      assert(intersec.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("MULTIPOLYGON EMPTY"))
+    }
+
 
     it("Passed ST_IsValid") {
 
