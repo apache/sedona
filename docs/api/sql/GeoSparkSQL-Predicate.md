@@ -49,7 +49,7 @@ Introduction: Return true if A touches B
 
 Format: `ST_Touches (A:geometry, B:geometry)`
 
-Since: `v1.0.0`
+Since: `v1.2.0`
 
 Spark SQL example:
 ```SQL
