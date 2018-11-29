@@ -206,6 +206,7 @@ case class ST_Transform(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
+
 /**
   * Return the intersection shape of two geometries. The return type is a geometry
   *
@@ -215,13 +216,27 @@ case class ST_Intersection(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   override def nullable: Boolean = false
 
-  override def eval(input: InternalRow): Any = {
-    assert(inputExpressions.length == 2)
-    val leftgeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
-    val rightgeometry = GeometrySerializer.deserialize(inputExpressions(1).eval(input).asInstanceOf[ArrayData])
-    new GenericArrayData(GeometrySerializer.serialize(leftgeometry.intersection(rightgeometry)))
-  }
 
+  override def eval(inputRow: InternalRow): Any = {
+    assert(inputExpressions.length == 2)
+    val leftgeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData])
+    val rightgeometry = GeometrySerializer.deserialize(inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData])
+
+    val isIntersects = leftgeometry.intersects(rightgeometry)
+    val isLeftContainsRight = leftgeometry.contains(rightgeometry)
+    val isRightContainsLeft = rightgeometry.contains(leftgeometry)
+
+
+    if (isIntersects && isLeftContainsRight) {
+      return new GenericArrayData(rightgeometry)
+    }
+
+    if (isIntersects && isRightContainsLeft) {
+      return new GenericArrayData(leftgeometry)
+    }
+
+    return new GenericArrayData(GeometrySerializer.serialize(leftgeometry.intersection(rightgeometry)))
+  }
   override def dataType: DataType = new GeometryUDT()
 
   override def children: Seq[Expression] = inputExpressions
