@@ -1,0 +1,29 @@
+1. ST_NumPoints
+Output - the count of this Geometrys vertices
+Apporch - Used getNumPoints
+
+2. ST_NumInteriorRings
+Output - Returns the number of interior rings of a polygon geometry
+Apporch - Used getNumInteriorRing if instance of polygon
+
+3. ST_NumGeometries
+Output - Returns the number of Geometries in a GeometryCollection
+Apporch - Used getNumGeometries
+
+4. ST_GeometryN
+Output - Returns an element Geometry from a GeometryCollection for a index specifying geometry element.
+Apporch - Used getGeometryN
+
+5. ST_IsRing
+Output - Test if Geometry is ring
+Apporch - Checked if Geometry is multiline or line and used isSimple and isClosed which represents the ring
+
+6. ST_Difference
+Output - Points contained in one Geometry that are not contained in the other Geometry. The return type is a geometry 
+Apporch - Used difference
+
+7. ST_SymmetricDifference 
+Output - points in one Geometry which are not contained in the other Geometry, with the points in the other Geometry not contained in this Geometry 
+Apporch - Used symDifference
+
+
