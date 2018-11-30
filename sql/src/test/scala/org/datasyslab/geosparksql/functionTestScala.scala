@@ -175,5 +175,71 @@ class functionTestScala extends TestBaseScala {
       assert(testtable.take(1)(0).get(0).asInstanceOf[Geometry].getCoordinates()(0).x == 0.12345678901)
 
     }
+
+    it("Passed ST_NumPoints") {
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      polygonWktDf.show()
+      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      polygonDf.show()
+      var functionDf = sparkSession.sql("select ST_NumPoints(polygondf.countyshape) from polygondf")
+      functionDf.show()
+    }
+
+    it("Passed ST_NumInteriorRings") {
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      polygonWktDf.show()
+      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      polygonDf.show()
+      var functionDf = sparkSession.sql("select ST_NumInteriorRings(polygondf.countyshape) from polygondf")
+      functionDf.show()
+    }
+
+    it("Passed ST_NumGeometries") {
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      polygonWktDf.show()
+      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      polygonDf.show()
+      var functionDf = sparkSession.sql("select ST_NumGeometries(polygondf.countyshape) from polygondf")
+      functionDf.show()
+    }
+
+    it("Passed ST_IsRing") {
+
+      var testtable=sparkSession.sql("SELECT ST_IsRing(ST_GeomFromWKT('LINESTRING(0 0, 0 1, 1 1, 1 0, 0 0)')) AS a")
+      assert(testtable.take(1)(0).get(0).asInstanceOf[Boolean])
+    }
+
+    it("Passed ST_GeometryN") {
+
+      var testtable=sparkSession.sql("select ST_GeomFromWKT('MULTIPOINT(1 2 7, 3 4 7, 5 6 7, 8 9 10)') as a")
+      testtable.createOrReplaceTempView("testtable")
+      var symdiff=sparkSession.sql("select ST_GeometryN(a,1) from testtable")
+      symdiff.show(false)
+
+    }
+
+    it("Passed ST_Difference") {
+
+      var testtable=sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
+      testtable.createOrReplaceTempView("testtable")
+      var diff=sparkSession.sql("select ST_Difference(a,b) from testtable")
+      diff.show(false)
+      assert(diff.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON ((8 2, 8 1, 1 1, 1 8, 2 8, 2 2, 8 2))"))
+    }
+
+    it("Passed ST_SymmetricDifference") {
+
+      var testtable=sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
+      testtable.createOrReplaceTempView("testtable")
+      var symdiff=sparkSession.sql("select ST_SymmetricDifference(a,b) from testtable")
+      symdiff.show(false)
+      assert(symdiff.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("MULTIPOLYGON (((8 2, 8 1, 1 1, 1 8, 2 8, 2 2, 8 2)), ((8 2, 8 8, 2 8, 2 9, 9 9, 9 2, 8 2)))"))
+    }
   }
 }

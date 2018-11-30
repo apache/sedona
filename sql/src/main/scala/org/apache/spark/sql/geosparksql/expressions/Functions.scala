@@ -26,6 +26,9 @@
 package org.apache.spark.sql.geosparksql.expressions
 
 import com.vividsolutions.jts.geom.PrecisionModel
+import com.vividsolutions.jts.geom.MultiLineString
+import com.vividsolutions.jts.geom.LineString
+import com.vividsolutions.jts.geom.Polygon
 import com.vividsolutions.jts.operation.valid.IsValidOp
 import com.vividsolutions.jts.precision.GeometryPrecisionReducer
 import org.apache.spark.sql.catalyst.InternalRow
@@ -33,7 +36,7 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.geosparksql.UDT.GeometryUDT
-import org.apache.spark.sql.types.{BooleanType, DataType, DoubleType}
+import org.apache.spark.sql.types.{BooleanType, DataType, DoubleType, IntegerType}
 import org.apache.spark.unsafe.types.UTF8String
 import org.datasyslab.geosparksql.utils.GeometrySerializer
 import org.geotools.geometry.jts.JTS
@@ -286,6 +289,160 @@ case class ST_PrecisionReduce(inputExpressions: Seq[Expression])
     val precisionScale = inputExpressions(1).eval(input).asInstanceOf[Int]
     val precisionReduce = new GeometryPrecisionReducer(new PrecisionModel(Math.pow(10, precisionScale)))
     new GenericArrayData(GeometrySerializer.serialize(precisionReduce.reduce(geometry)))
+  }
+
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+  * Returns the count of this Geometrys vertices
+  *
+  * @param inputExpressions
+  */
+case class ST_NumPoints(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 1)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    return geometry.getNumPoints
+  }
+
+  override def dataType: DataType = IntegerType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+  * Returns the number of interior rings of a polygon geometry.
+  *
+  * @param inputExpressions
+  */
+case class ST_NumInteriorRings(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 1)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    if(geometry.isInstanceOf[Polygon]){
+      return geometry.asInstanceOf[Polygon].getNumInteriorRing
+    }
+  }
+
+  override def dataType: DataType = IntegerType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+  * Returns the number of Geometries in a GeometryCollection
+  *
+  * @param inputExpressions
+  */
+case class ST_NumGeometries(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 1)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    return geometry.getNumGeometries
+  }
+
+  override def dataType: DataType = IntegerType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+  * Returns an element Geometry from a GeometryCollection
+  * @param inputExpressions The first arg is a geom and the second arg is an index, specifying the index of the
+  * geometry element.
+  */
+case class ST_GeometryN(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 2)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val index = inputExpressions(1).eval(input).asInstanceOf[Int]
+    new GenericArrayData(GeometrySerializer.serialize(geometry.getGeometryN(index)))
+  }
+
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+  * Test if Geometry is ring.
+  *
+  * @param inputExpressions
+  */
+case class ST_IsRing(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 1)
+    if (inputExpressions(0).eval(input).asInstanceOf[ArrayData] == null) {
+      return null
+    }
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    if(geometry.isInstanceOf[MultiLineString]){
+      return geometry.isSimple && geometry.asInstanceOf[MultiLineString].isClosed
+    }
+    if(geometry.isInstanceOf[LineString]){
+      return geometry.isSimple && geometry.asInstanceOf[LineString].isClosed
+    }
+  }
+
+  override def dataType: DataType = BooleanType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+  * Points contained in one Geometry that are not contained in the other Geometry. The return type is a geometry
+  *
+  * @param inputExpressions
+  */
+case class ST_Difference(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 2)
+    val leftgeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val rightgeometry = GeometrySerializer.deserialize(inputExpressions(1).eval(input).asInstanceOf[ArrayData])
+    new GenericArrayData(GeometrySerializer.serialize(leftgeometry.difference(rightgeometry)))
+  }
+
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+  * points in one Geometry which are not contained in the other Geometry, with the points
+  * in the other Geometry not contained in this Geometry. The return type is a geometry
+  *
+  * @param inputExpressions
+  */
+case class ST_SymmetricDifference(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 2)
+    val leftgeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val rightgeometry = GeometrySerializer.deserialize(inputExpressions(1).eval(input).asInstanceOf[ArrayData])
+    new GenericArrayData(GeometrySerializer.serialize(leftgeometry.symDifference(rightgeometry)))
   }
 
   override def dataType: DataType = new GeometryUDT()
