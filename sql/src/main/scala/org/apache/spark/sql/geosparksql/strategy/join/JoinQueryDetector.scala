@@ -30,7 +30,7 @@ import org.apache.spark.sql.catalyst.expressions.{Expression, LessThan, LessThan
 import org.apache.spark.sql.catalyst.plans.Inner
 import org.apache.spark.sql.catalyst.plans.logical.{Join, LogicalPlan}
 import org.apache.spark.sql.execution.SparkPlan
-import org.apache.spark.sql.geosparksql.expressions.{ST_Contains, ST_Distance, ST_Intersects, ST_Within}
+import org.apache.spark.sql.geosparksql.expressions.{ST_Contains, ST_Distance, ST_Intersects, ST_Within, ST_Overlaps}
 
 /**
   * Plans `RangeJoinExec` for inner joins on spatial relationships ST_Contains(a, b)
@@ -73,6 +73,10 @@ object JoinQueryDetector extends Strategy {
 
     // ST_WITHIN(a, b) - a is within b
     case Join(left, right, Inner, Some(ST_Within(Seq(leftShape, rightShape)))) =>
+      planSpatialJoin(right, left, Seq(rightShape, leftShape), false)
+      
+     // ST_Overlaps(a, b) - a overlaps b
+    case Join(left, right, Inner, Some(ST_Overlaps(Seq(leftShape, rightShape)))) =>
       planSpatialJoin(right, left, Seq(rightShape, leftShape), false)
 
     // ST_Distance(a, b) <= radius consider boundary intersection

@@ -53,6 +53,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll{
   val arealmPointInputLocation = resourceFolder + "arealm.csv"
   val csvPointInputLocation = resourceFolder + "testpoint.csv"
   val csvPolygonInputLocation = resourceFolder + "testenvelope.csv"
+  val overlapPolygonInputLocation = resourceFolder + "testenvelope_overlap.csv"
   val unionPolygonInputLocation = resourceFolder + "testunion.csv"
 
   override def beforeAll(): Unit = {
