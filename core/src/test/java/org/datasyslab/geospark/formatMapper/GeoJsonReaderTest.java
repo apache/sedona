@@ -44,6 +44,7 @@ public class GeoJsonReaderTest
 
     public static String geoJsonGeomWithFeatureProperty = null;
     public static String geoJsonGeomWithoutFeatureProperty = null;
+    public static String geoJsonWithInvalidGeometries = null;
 
     @BeforeClass
     public static void onceExecutedBeforeAll()
@@ -52,6 +53,7 @@ public class GeoJsonReaderTest
         initialize(GeoJsonReaderTest.class.getName());
         geoJsonGeomWithFeatureProperty = GeoJsonReaderTest.class.getClassLoader().getResource("testPolygon.json").getPath();
         geoJsonGeomWithoutFeatureProperty = GeoJsonReaderTest.class.getClassLoader().getResource("testpolygon-no-property.json").getPath();
+        geoJsonWithInvalidGeometries = GeoJsonReaderTest.class.getClassLoader().getResource("testInvalidPolygon.json").getPath();
     }
 
     @AfterClass
@@ -75,5 +77,27 @@ public class GeoJsonReaderTest
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 1001);
         geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithoutFeatureProperty);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 10);
+    }
+
+    /**
+     * Test correctness of parsing geojson file
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testReadToValidGeometryRDD()
+            throws IOException
+    {
+        //ensure that flag does not affect valid geometries
+        SpatialRDD geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithFeatureProperty, false);
+        assertEquals(geojsonRDD.rawSpatialRDD.count(), 1001);
+        geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithoutFeatureProperty, false);
+        assertEquals(geojsonRDD.rawSpatialRDD.count(), 10);
+        //2 valid and 1 invalid geometries
+        geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonWithInvalidGeometries, false);
+        assertEquals(geojsonRDD.rawSpatialRDD.count(), 2);
+
+        geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonWithInvalidGeometries);
+        assertEquals(geojsonRDD.rawSpatialRDD.count(), 3);
     }
 }
