@@ -85,6 +85,31 @@ class predicateJoinTestScala extends TestBaseScala {
       assert(rangeJoinDf.count() == 1000)
     }
 
+    it("Passed ST_Touches in a join") {
+      val geosparkConf = new GeoSparkConf(sparkSession.sparkContext.getConf)
+      println(geosparkConf)
+
+      var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygonInputLocation)
+      polygonCsvDf.createOrReplaceTempView("polygontable")
+      polygonCsvDf.show()
+      var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      polygonDf.show()
+
+      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
+      pointCsvDF.createOrReplaceTempView("pointtable")
+      pointCsvDF.show()
+      var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape from pointtable")
+      pointDf.createOrReplaceTempView("pointdf")
+      pointDf.show()
+
+      var rangeJoinDf = sparkSession.sql("select * from polygondf, pointdf where ST_Touches(polygondf.polygonshape,pointdf.pointshape) ")
+
+      rangeJoinDf.explain()
+      rangeJoinDf.show(3)
+      assert(rangeJoinDf.count() == 1000)
+    }
+
     it("Passed ST_Within in a join") {
       val geosparkConf = new GeoSparkConf(sparkSession.sparkContext.getConf)
       println(geosparkConf)
