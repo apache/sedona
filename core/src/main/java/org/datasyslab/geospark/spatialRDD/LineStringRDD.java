@@ -440,7 +440,7 @@ public class LineStringRDD
         }
         if (sourceEpsgCRSCode != null && targetEpsgCode != null) { this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);}
         if (newLevel != null) { this.analyze(newLevel);}
-        if (splitter.equals(FileDataSplitter.GEOJSON)) { this.fieldNames = FormatMapper.readGeoJsonPropertyNames(rawTextRDD.take(1).get(0).toString()); }
+        if (splitter.equals(FileDataSplitter.GEOJSON)) { this.fieldNames = FormatMapper.readPropertyNames(rawTextRDD.take(1).get(0).toString(), FileDataSplitter.GEOJSON); }
     }
 
     /**

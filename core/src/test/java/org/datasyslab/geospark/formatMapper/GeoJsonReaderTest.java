@@ -29,6 +29,7 @@ package org.datasyslab.geospark.formatMapper;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.datasyslab.geospark.GeoSparkTestBase;
+import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.spatialRDD.SpatialRDD;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -73,9 +74,9 @@ public class GeoJsonReaderTest
             throws IOException
     {
         // load geojson with our tool
-        SpatialRDD geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithFeatureProperty);
+        SpatialRDD geojsonRDD = GeometryReader.readToGeometryRDD(sc, geoJsonGeomWithFeatureProperty, FileDataSplitter.GEOJSON);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 1001);
-        geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithoutFeatureProperty);
+        geojsonRDD = GeometryReader.readToGeometryRDD(sc, geoJsonGeomWithoutFeatureProperty, FileDataSplitter.GEOJSON);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 10);
     }
 
@@ -89,15 +90,15 @@ public class GeoJsonReaderTest
             throws IOException
     {
         //ensure that flag does not affect valid geometries
-        SpatialRDD geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithFeatureProperty, false);
+        SpatialRDD geojsonRDD = GeometryReader.readToGeometryRDD(sc, geoJsonGeomWithFeatureProperty, FileDataSplitter.GEOJSON, false);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 1001);
-        geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithoutFeatureProperty, false);
+        geojsonRDD = GeometryReader.readToGeometryRDD(sc, geoJsonGeomWithoutFeatureProperty, FileDataSplitter.GEOJSON, false);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 10);
         //2 valid and 1 invalid geometries
-        geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonWithInvalidGeometries, false);
+        geojsonRDD = GeometryReader.readToGeometryRDD(sc, geoJsonWithInvalidGeometries, FileDataSplitter.GEOJSON,false);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 2);
 
-        geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonWithInvalidGeometries);
+        geojsonRDD = GeometryReader.readToGeometryRDD(sc, geoJsonWithInvalidGeometries, FileDataSplitter.GEOJSON);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 3);
     }
 }
