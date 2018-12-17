@@ -26,7 +26,8 @@
 
 package org.datasyslab.geosparksql
 
-import org.datasyslab.geospark.formatMapper.GeoJsonReader
+import org.datasyslab.geospark.enums.FileDataSplitter
+import org.datasyslab.geospark.formatMapper.{GeoJsonReader, GeometryReader}
 import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader
 import org.datasyslab.geosparksql.utils.Adapter
 
@@ -78,7 +79,7 @@ class constructorTestScala extends TestBaseScala {
     }
 
     it("Passed GeoJsonReader to DataFrame") {
-      var spatialRDD = GeoJsonReader.readToGeometryRDD(sparkSession.sparkContext, geojsonInputLocation)
+      var spatialRDD = GeometryReader.readToGeometryRDD(sparkSession.sparkContext, geojsonInputLocation, FileDataSplitter.GEOJSON)
       var spatialDf = Adapter.toDf(spatialRDD, sparkSession)
       spatialDf.show()
     }
