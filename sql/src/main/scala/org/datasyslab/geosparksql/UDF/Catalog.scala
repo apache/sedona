@@ -52,7 +52,7 @@ object Catalog {
     ST_IsValid,
     ST_PrecisionReduce,
     ST_Touches,
-	ST_Crosses,
+	  ST_Crosses,
     ST_IsSimple
   )
 
