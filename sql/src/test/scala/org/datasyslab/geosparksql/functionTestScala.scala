@@ -175,5 +175,15 @@ class functionTestScala extends TestBaseScala {
       assert(testtable.take(1)(0).get(0).asInstanceOf[Geometry].getCoordinates()(0).x == 0.12345678901)
 
     }
+
+    it("Passed ST_IsSimple") {
+
+      var testtable=sparkSession.sql(
+        "SELECT ST_IsSimple(ST_GeomFromText('POLYGON((1 1, 3 1, 3 3, 1 3, 1 1))')) AS a, " +
+                "ST_IsSimple(ST_GeomFromText('POLYGON((1 1,3 1,3 3,2 0,1 1))')) as b"
+      )
+      assert(testtable.take(1)(0).get(0).asInstanceOf[Boolean])
+      assert(!testtable.take(1)(0).get(1).asInstanceOf[Boolean])
+    }
   }
 }
