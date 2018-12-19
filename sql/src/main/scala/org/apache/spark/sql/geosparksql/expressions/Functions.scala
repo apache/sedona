@@ -40,6 +40,7 @@ import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.CRS
 import org.opengis.referencing.operation.MathTransform
 import com.vividsolutions.jts.geom._
+import com.vividsolutions.jts.operation.IsSimpleOp
 
 /**
   * Return the distance between two geometries.
@@ -264,6 +265,30 @@ case class ST_IsValid(inputExpressions: Seq[Expression])
     val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     val isvalidop = new IsValidOp(geometry)
     isvalidop.isValid
+  }
+
+  override def dataType: DataType = BooleanType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+  * Test if Geometry is simple.
+  *
+  * @param inputExpressions
+  */
+case class ST_IsSimple(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 1)
+
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+
+    val isSimpleop = new IsSimpleOp(geometry)
+
+    return isSimpleop.isSimple
   }
 
   override def dataType: DataType = BooleanType
