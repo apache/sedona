@@ -84,5 +84,18 @@ class predicateTestScala extends TestBaseScala {
       resultDf.show()
       assert(resultDf.count() == 1)
     }
+
+    it("Passed ST_IsDisjoint") {
+      var disjointTesttable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 4 1, 4 4, 1 4, 1 1))') as a,ST_GeomFromWKT('LINESTRING(1 5, 1 6)') as b")
+      disjointTesttable.createOrReplaceTempView("disjointTesttable")
+      var disjoint = sparkSession.sql("select(ST_IsDisjoint(a, b)) from disjointTesttable")
+
+      var notDisjointTesttable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 4 1, 4 4, 1 4, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 5 2, 5 5, 2 5, 2 2))') as b")
+      notDisjointTesttable.createOrReplaceTempView("notDisjointTesttable")
+      var notDisjoint = sparkSession.sql("select(ST_IsDisjoint(a, b)) from notDisjointTesttable")
+
+      assert(disjoint.take(1)(0).get(0).asInstanceOf[Boolean])
+      assert(!notDisjoint.take(1)(0).get(0).asInstanceOf[Boolean])
+    }
   }
 }

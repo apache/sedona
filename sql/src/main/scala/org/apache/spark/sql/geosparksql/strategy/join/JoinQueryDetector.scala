@@ -89,6 +89,9 @@ object JoinQueryDetector extends Strategy {
     // ST_Crosses(a, b) - a crosses b
     case Join(left, right, Inner, Some(ST_Crosses(Seq(leftShape, rightShape)))) =>
       planSpatialJoin(right, left, Seq(rightShape, leftShape), false)
+    // ST_IsDisjoint(a, b) - a is disjoint to b
+    case Join(left, right, Inner, Some(ST_IsDisjoint(Seq(leftShape, rightShape)))) =>
+      planSpatialJoin(left, right, Seq(leftShape, rightShape), false)
     case _ =>
       Nil
   }

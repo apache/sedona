@@ -53,7 +53,8 @@ object Catalog {
     ST_PrecisionReduce,
     ST_Touches,
 	  ST_Crosses,
-    ST_IsSimple
+    ST_IsSimple,
+    ST_IsDisjoint
   )
 
   val aggregateExpressions:Seq[UserDefinedAggregateFunction] = Seq(

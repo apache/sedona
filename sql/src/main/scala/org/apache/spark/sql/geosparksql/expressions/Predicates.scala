@@ -29,7 +29,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.ArrayData
-import org.apache.spark.sql.types.BooleanType
+import org.apache.spark.sql.types.{BooleanType, DataType}
 import org.datasyslab.geosparksql.utils.GeometrySerializer
 
 /**
@@ -181,4 +181,30 @@ case class ST_Touches(inputExpressions: Seq[Expression])
   }
 
   override def dataType = BooleanType
+}
+
+/**
+  * Test if the left Geometry is disjoint to the right geometry
+  *
+  * @param inputExpressions
+  */
+case class ST_IsDisjoint(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  // This is a binary expression
+  assert(inputExpressions.length == 2)
+
+  override def toString: String = s" **${ST_IsDisjoint.getClass.getName}**  "
+
+  override def children: Seq[Expression] = inputExpressions
+
+  override def eval(input: InternalRow): Any = {
+    val leftgeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val rightgeometry = GeometrySerializer.deserialize(inputExpressions(1).eval(input).asInstanceOf[ArrayData])
+
+    return leftgeometry.disjoint(rightgeometry)
+  }
+
+  override def dataType: DataType = BooleanType
 }

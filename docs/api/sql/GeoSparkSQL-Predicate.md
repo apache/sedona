@@ -57,7 +57,6 @@ FROM pointdf
 WHERE ST_Crosses(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
 ```
 
-```
 
 ## ST_Touches
 
@@ -72,4 +71,19 @@ Spark SQL example:
 SELECT * 
 FROM pointdf 
 WHERE ST_Touches(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
+```
+
+## ST_IsDisjoint
+
+Introduction: Return true if A disjoint B
+
+Format: `ST_IsDisjoint (A:geometry, B:geometry)`
+
+Since: `v1.2.0`
+
+Spark SQL example:
+```SQL
+SELECT * 
+FROM pointdf 
+WHERE ST_IsDisjoint(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
 ```
