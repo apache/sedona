@@ -61,6 +61,125 @@ class predicateTestScala extends TestBaseScala {
       assert(resultDf.count() == 999)
     }
 
+    it("Passed ST_Equals for ST_Point") {
+      // Select a point from the table and check if any point in the table is equal to the selected point.
+
+      // Read csv to get the points table
+      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPoint1InputLocation)
+      pointCsvDF.createOrReplaceTempView("pointtable")
+
+      // Convert the pointtable to pointdf using ST_Point
+      var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as point from pointtable")
+      pointDf.createOrReplaceTempView("pointdf")
+
+      var equaldf = sparkSession.sql("select * from pointdf where ST_Equals(pointdf.point, ST_Point(100.1, 200.1)) ")
+      equaldf.show()
+
+      assert(equaldf.count() == 5, s"Expected 5 value but got ${equaldf.count()}")
+
+    }
+
+    it("Passed ST_Equals for ST_Polygon") {
+
+      // Select a polygon from the table and check if any polygon in the table is equal to the selected polygon.
+
+      // Read csv to get the polygon table
+      var polygonCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygon1InputLocation)
+      polygonCsvDF.createOrReplaceTempView("polygontable")
+
+      // Convert the polygontable to polygons using ST_PolygonFromEnvelope
+      var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      polygonDf.show()
+
+      // Selected polygon is Polygon (100.01,200.01,100.5,200.5)
+      var equaldf1 = sparkSession.sql("select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_PolygonFromEnvelope(100.01,200.01,100.5,200.5)) ")
+      equaldf1.show()
+
+      assert(equaldf1.count() == 5, s"Expected 5 value but got ${equaldf1.count()}")
+
+      // Change the order of the polygon points (100.5,200.5,100.01,200.01)
+      var equaldf2 = sparkSession.sql("select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_PolygonFromEnvelope(100.5,200.5,100.01,200.01)) ")
+      equaldf2.show()
+
+      assert(equaldf2.count() == 5, s"Expected 5 value but got ${equaldf2.count()}")
+
+    }
+
+    it("Passed ST_Equals for ST_Point and ST_Polygon") {
+
+      // Test a Point against any polygon in the table for equality.
+
+      // Read csv to get the polygon table
+      var polygonCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygon1InputLocation)
+      polygonCsvDF.createOrReplaceTempView("polygontable")
+
+      // Convert the polygontable to polygons using ST_PolygonFromEnvelope and cast
+      var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      polygonDf.show()
+
+      // Selected point is Point (91.01,191.01)
+      var equaldf = sparkSession.sql("select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_Point(91.01,191.01)) ")
+      equaldf.show()
+
+      assert(equaldf.count() == 0, s"Expected 0 value but got ${equaldf.count()}")
+
+    }
+
+    it("Passed ST_Equals for ST_LineString and ST_Polygon") {
+
+      // Test a LineString against any polygon in the table for equality.
+
+      // Read csv to get the polygon table
+      var polygonCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygon1InputLocation)
+      polygonCsvDF.createOrReplaceTempView("polygontable")
+
+      // Convert the polygontable to polygons using ST_PolygonFromEnvelope and cast
+      var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      polygonDf.show()
+
+      /* Selected LineString is ST_LineStringFromText - (100.01,200.01,100.5,200.01,100.5,200.5,100.01,200.5,100.01,200.01)
+       * It forms the boundary of the polygon Polygon(100.01,200.01,100.5,200.5)
+       * x1 = 100.01, y1 = 200.01, x2 = 100.5, y2 = 200.5
+       * LineString(P1, P2, P3, P4) -
+       * P1->100.01,200.01
+       * P2->100.5,200.01
+       * P3->100.5,200.5
+       * P4->100.01,200.5
+       * P5->100.01,200.01
+       */
+      val string = "100.01,200.01,100.5,200.01,100.5,200.5,100.01,200.5,100.01,200.01"
+
+      var equaldf = sparkSession.sql(s"select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_LineStringFromText(\'$string\', \',\')) ")
+      equaldf.show()
+
+      assert(equaldf.count() == 0, s"Expected 0 value but got ${equaldf.count()}")
+
+    }
+    it("Passed ST_Equals for ST_PolygonFromEnvelope and ST_PolygonFromText") {
+
+      // Test a Polygon formed using ST_PolygonFromText against any polygon in the table formed using ST_PolygonFromEnvelope for equality.
+
+      // Read csv to get the polygon table
+      var polygonCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygon1InputLocation)
+      polygonCsvDF.createOrReplaceTempView("polygontable")
+
+      // Convert the polygontable to polygons using ST_PolygonFromEnvelope and cast
+      var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      polygonDf.show()
+
+      // Selected Polygon is ST_PolygonFromText - Polygon(100.01,200.01,100.5,200.5) formed using ST_PolygonFromText.
+      val string = "100.01,200.01,100.5,200.01,100.5,200.5,100.01,200.5,100.01,200.01"
+
+      var equaldf = sparkSession.sql(s"select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_PolygonFromText(\'$string\', \',\')) ")
+      equaldf.show()
+
+      assert(equaldf.count() == 5, s"Expected 5 value but got ${equaldf.count()}")
+    }
+
     it("Passed ST_Crosses") {
       var crossesTesttable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 4 1, 4 4, 1 4, 1 1))') as a,ST_GeomFromWKT('LINESTRING(1 5, 5 1)') as b")
       crossesTesttable.createOrReplaceTempView("crossesTesttable")

@@ -51,6 +51,7 @@ object Catalog {
     ST_Intersection,
     ST_IsValid,
     ST_PrecisionReduce,
+    ST_Equals,
     ST_Touches,
     ST_Overlaps,
 	  ST_Crosses,

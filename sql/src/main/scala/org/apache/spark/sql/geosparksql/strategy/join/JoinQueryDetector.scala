@@ -90,9 +90,15 @@ object JoinQueryDetector extends Strategy {
     // ST_Distance(a, b) < radius don't consider boundary intersection
     case Join(left, right, Inner, Some(LessThan(ST_Distance(Seq(leftShape, rightShape)), radius))) =>
       planDistanceJoin(left, right, Seq(leftShape, rightShape), radius, false)
+    
+    // ST_Equals(a, b) - a is equal to b
+    case Join(left, right, Inner, Some(ST_Equals(Seq(leftShape, rightShape)))) =>
+      planSpatialJoin(left, right, Seq(leftShape, rightShape), false)
+    
     // ST_Crosses(a, b) - a crosses b
     case Join(left, right, Inner, Some(ST_Crosses(Seq(leftShape, rightShape)))) =>
       planSpatialJoin(right, left, Seq(rightShape, leftShape), false)
+
     case _ =>
       Nil
   }

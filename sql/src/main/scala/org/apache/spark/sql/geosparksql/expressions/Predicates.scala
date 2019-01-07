@@ -212,3 +212,39 @@ case class ST_Touches(inputExpressions: Seq[Expression])
 
   override def dataType = BooleanType
 }
+
+/**
+  * Test if leftGeometry is equal to rightGeometry
+  *
+  * @param inputExpressions
+  */
+case class ST_Equals(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  // This is a binary expression
+  assert(inputExpressions.length == 2)
+
+  override def toString: String = s" **${ST_Equals.getClass.getName}**  "
+
+  override def children: Seq[Expression] = inputExpressions
+
+  override def eval(inputRow: InternalRow): Any = {
+    val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
+
+    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
+
+    val leftGeometry = GeometrySerializer.deserialize(leftArray)
+
+    val rightGeometry = GeometrySerializer.deserialize(rightArray)
+
+    // Returns GeometryCollection object
+    val symDifference = leftGeometry.symDifference(rightGeometry)
+
+    val isEqual = symDifference.isEmpty
+
+    return isEqual
+  }
+
+  override def dataType = BooleanType
+}
