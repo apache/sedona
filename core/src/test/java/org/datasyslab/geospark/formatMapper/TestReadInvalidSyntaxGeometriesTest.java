@@ -20,7 +20,7 @@ public class TestReadInvalidSyntaxGeometriesTest extends GeoSparkTestBase {
             throws IOException
     {
         initialize(GeoJsonReaderTest.class.getName());
-        invalidSyntaxGeoJsonGeomWithFeatureProperty = GeoJsonReaderTest.class.getClassLoader().getResource("invalidSyntaxGeometriesJson.json").getPath();
+        invalidSyntaxGeoJsonGeomWithFeatureProperty = TestReadInvalidSyntaxGeometriesTest.class.getClassLoader().getResource("invalidSyntaxGeometriesJson.json").getPath();
     }
 
     @AfterClass
@@ -40,8 +40,7 @@ public class TestReadInvalidSyntaxGeometriesTest extends GeoSparkTestBase {
             throws IOException
     {
         // would crash with java.lang.IllegalArgumentException: Points of LinearRing do not form a closed linestring if Invalid syntax is not skipped
-        SpatialRDD geojsonRDD = GeometryReader.readToGeometryRDD(sc, invalidSyntaxGeoJsonGeomWithFeatureProperty,
-                FileDataSplitter.GEOJSON, false, true);
+        SpatialRDD geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, invalidSyntaxGeoJsonGeomWithFeatureProperty, false, true);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 1);
     }
 
