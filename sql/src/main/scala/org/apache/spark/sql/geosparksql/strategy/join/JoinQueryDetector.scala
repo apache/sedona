@@ -30,7 +30,7 @@ import org.apache.spark.sql.catalyst.expressions.{Expression, LessThan, LessThan
 import org.apache.spark.sql.catalyst.plans.Inner
 import org.apache.spark.sql.catalyst.plans.logical.{Join, LogicalPlan}
 import org.apache.spark.sql.execution.SparkPlan
-import org.apache.spark.sql.geosparksql.expressions.{ST_Contains, ST_Distance, ST_Intersects, ST_Within, ST_Overlaps}
+import org.apache.spark.sql.geosparksql.expressions._
 
 /**
   * Plans `RangeJoinExec` for inner joins on spatial relationships ST_Contains(a, b)
