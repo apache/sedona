@@ -93,6 +93,10 @@ val polygonRDDSplitter = FileDataSplitter.TSV
 
 The way to create a LineStringRDD is the same as PolygonRDD.
 
+### Create a generic SpatialRDD (behavoir changed in v1.2.0)
+
+A generic SpatialRDD is not typed to a certain geometry type and open to more scenarios. It allows an input data file contains mixed types of geometries. For instace, a WKT file contains three types gemetries ==LineString==, ==Polygon== and ==MultiPolygon==.
+
 #### From WKT/WKB
 Geometries in a WKT and WKB file always occucpy a single column no matter how many coordinates they have. Therefore, creating a typed SpatialRDD is easy.
 
@@ -105,23 +109,14 @@ POINT (-88.221102,32.35078)	restaurant
 ```
 This file has two columns and corresponding ==offsets==(Column IDs) are 0, 1. Column 0 is the WKT string and Column 1 is the checkin business type.
 
-Use the following code to create a PointRDD
+Use the following code to create a SpatialRDD
 
 ```Scala
-val pointRDDInputLocation = "/Download/checkin.csv"
-val pointRDDOffset = 0 // The WKT string starts from Column 0
-val pointRDDSplitter = FileDataSplitter.WKT
-val carryOtherAttributes = true // Carry Column 1 (hotel, gas, bar...)
-var objectRDD = new PointRDD(sc, pointRDDInputLocation, pointRDDOffset, pointRDDSplitter, carryOtherAttributes)
-```
-Use the following code to create a PolygonRDD/LineStringRDD
-```Scala
-val polygonRDDInputLocation = "/Download/checkin.csv"
-val polygonRDDStartOffset = 0 // The coordinates start from Column 0
-val polygonRDDEndOffset = 0 // The coordinates end at Column 0
-val polygonRDDSplitter = FileDataSplitter.WKT
-val carryOtherAttributes = true // Carry Column 1 (hotel, gas, bar...)
-var objectRDD = new PolygonRDD(sc, polygonRDDInputLocation, polygonRDDStartOffset, polygonRDDEndOffset, polygonRDDSplitter, carryOtherAttributes)
+val inputLocation = "/Download/checkin.csv"
+val wktColumn = 0 // The WKT string starts from Column 0
+val allowTopologyInvalidGeometris = true // Optional
+val skipSyntaxInvalidGeometries = false // Optional
+val spatialRDD = WktReader.readToGeometryRDD(sparkSession.sparkContext, inputLocation, wktColumn, allowTopologyInvalidGeometris, skipSyntaxInvalidGeometries)
 ```
 
 #### From GeoJSON
@@ -138,24 +133,40 @@ Suppose we have a `polygon.json` GeoJSON file at Path `/Download/polygon.json` a
 
 ```
 
-Use the following code to create a typed SpatialRDD (PointRDD/PolygonRDD/LineStringRDD):
+Use the following code to create a generic SpatialRDD:
 ```Scala
-val pointRDDInputLocation = "/Download/polygon.json"
-val pointRDDSplitter = FileDataSplitter.GEOJSON
-val carryOtherAttributes = true // Carry Column 1 (hotel, gas, bar...)
-var objectRDD = new PointRDD(sc, pointRDDInputLocation, pointRDDSplitter, carryOtherAttributes)
+val inputLocation = "/Download/polygon.json"
+val allowTopologyInvalidGeometris = true // Optional
+val skipSyntaxInvalidGeometries = false // Optional
+val spatialRDD = GeoJsonReader.readToGeometryRDD(sparkSession.sparkContext, inputLocation, allowTopologyInvalidGeometris, skipSyntaxInvalidGeometries)
 ```
 
 !!!warning
-	The way that GeoSpark reads GeoJSON is different from that in SparkSQL
+	The way that GeoSpark reads JSON file is different from SparkSQL
+	
+#### From Shapefile
 
-### Create a generic SpatialRDD
+```Scala
+val shapefileInputLocation="/Download/myshapefile"
+val spatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileInputLocation)
+```
 
-A generic SpatialRDD is not typed to a certain geometry type and open to more scenarios. It allows an input data file contains mixed types of geometries. For instace, a WKT file contains three types gemetries ==LineString==, ==Polygon== and ==MultiPolygon==.
+!!!note
+	The file extensions of .shp, .shx, .dbf must be in lowercase. Assume you have a shape file called ==myShapefile==, the file structure should be like this:
+	```
+	- shapefile1
+	- shapefile2
+	- myshapefile
+		- myshapefile.shp
+		- myshapefile.shx
+		- myshapefile.dbf
+		- myshapefile...
+		- ...
+	```
+		
+#### From SparkSQL DataFrame
 
-#### From all formats
-
-To create a generic SpatialRDD from CSV, TSV, WKT, WKB and GeoJSON input formats, you have to use GeoSparkSQL. Make sure you include ==the full dependencies== of GeoSpark. Read [GeoSparkSQL API](../api/sql/GeoSparkSQL-Overview).
+To create a generic SpatialRDD from CSV, TSV, WKT, WKB and GeoJSON input formats, you can use GeoSparkSQL. Make sure you include ==the full dependencies== of GeoSpark. Read [GeoSparkSQL API](../api/sql/GeoSparkSQL-Overview).
 
 We use [checkin.csv CSV file](#pointrdd-from-csvtsv) as the example. You can create a generic SpatialRDD using the following steps:
 
@@ -179,26 +190,6 @@ spatialRDD.rawSpatialRDD = Adapter.toRdd(spatialDf)
 ```
 
 For WKT/WKB/GeoJSON data, please use ==ST_GeomFromWKT / ST_GeomFromWKB / ST_GeomFromGeoJSON== instead.
-#### From Shapefile
-
-```Scala
-val shapefileInputLocation="/Download/myshapefile"
-var spatialRDD = new SpatialRDD[Geometry]
-spatialRDD.rawSpatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileInputLocation)
-```
-
-!!!note
-	The file extensions of .shp, .shx, .dbf must be in lowercase. Assume you have a shape file called ==myShapefile==, the file structure should be like this:
-	```
-	- shapefile1
-	- shapefile2
-	- myshapefile
-		- myshapefile.shp
-		- myshapefile.shx
-		- myshapefile.dbf
-		- myshapefile...
-		- ...
-	```
 	
 ## Transform the Coordinate Reference System
 

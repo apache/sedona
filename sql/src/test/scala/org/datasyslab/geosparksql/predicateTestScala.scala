@@ -60,6 +60,20 @@ class predicateTestScala extends TestBaseScala {
       resultDf.show()
       assert(resultDf.count() == 999)
     }
+
+    it("Passed ST_Crosses") {
+      var crossesTesttable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 4 1, 4 4, 1 4, 1 1))') as a,ST_GeomFromWKT('LINESTRING(1 5, 5 1)') as b")
+      crossesTesttable.createOrReplaceTempView("crossesTesttable")
+      var crosses = sparkSession.sql("select(ST_Crosses(a, b)) from crossesTesttable")
+
+      var notCrossesTesttable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 4 1, 4 4, 1 4, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 5 2, 5 5, 2 5, 2 2))') as b")
+      notCrossesTesttable.createOrReplaceTempView("notCrossesTesttable")
+      var notCrosses = sparkSession.sql("select(ST_Crosses(a, b)) from notCrossesTesttable")
+
+      assert(crosses.take(1)(0).get(0).asInstanceOf[Boolean])
+      assert(!notCrosses.take(1)(0).get(0).asInstanceOf[Boolean])
+    }
+
     it("Passed ST_Touches") {
       var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")

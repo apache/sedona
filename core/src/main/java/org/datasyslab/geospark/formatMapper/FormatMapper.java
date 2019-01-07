@@ -35,6 +35,7 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKTReader;
+import com.vividsolutions.jts.operation.valid.IsValidOp;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.enums.FileDataSplitter;
@@ -47,7 +48,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -83,7 +86,15 @@ public class FormatMapper<T extends Geometry>
 
     protected GeometryType geometryType = null;
 
+    /**
+     *  Allow mapping of invalid geometries.
+     */
+    boolean allowTopologicallyInvalidGeometries;
 
+    /**
+     *  Crash on syntactically invalid geometries or skip them.
+     */
+    boolean skipSyntacticallyInvalidGeometries;
     /**
      * The factory.
      */
@@ -110,6 +121,8 @@ public class FormatMapper<T extends Geometry>
         this.splitter = splitter;
         this.carryInputData = carryInputData;
         this.geometryType = geometryType;
+        this.allowTopologicallyInvalidGeometries = true;
+        this.skipSyntacticallyInvalidGeometries = false;
         // Only the following formats are allowed to use this format mapper because each input has the geometry type definition
         if (geometryType == null)
         {
@@ -148,43 +161,41 @@ public class FormatMapper<T extends Geometry>
         geoJSONReader = new GeoJSONReader();
     }
 
+    private void handleNonSpatialDataToGeometry(Geometry geometry, List<String> splitedGeometryData)
+    {
+        LinkedList<String> splitedGeometryDataList = new LinkedList<String>(splitedGeometryData);
+        if (carryInputData) {
+            if (this.splitter != FileDataSplitter.GEOJSON){
+                //remove spatial data position
+                splitedGeometryDataList.remove(this.startOffset);
+            }
+            geometry.setUserData(String.join("\t", splitedGeometryDataList));
+        }
+    }
+
     public Geometry readGeoJSON(String geoJson)
     {
         final Geometry geometry;
         if (geoJson.contains("Feature")) {
             Feature feature = (Feature) GeoJSONFactory.create(geoJson);
-            geometry = geoJSONReader.read(feature.getGeometry());
-            if (carryInputData) {
-                boolean firstColumnFlag = true;
-                otherAttributes = "";
-                Map<String, Object> featurePropertiesproperties = feature.getProperties();
-                if (feature.getId()!=null)
-                {
-                    this.otherAttributes += feature.getId();
-                    firstColumnFlag = false;
-                }
-                if (featurePropertiesproperties!=null)
-                {
-                    Iterator<Map.Entry<String, Object>> propertiesIterator = featurePropertiesproperties.entrySet().iterator();
-                    while (propertiesIterator.hasNext())
-                    {
-                        Map.Entry<String, Object> curProperty = propertiesIterator.next();
-                        if (firstColumnFlag)
-                        {
-                            this.otherAttributes+=curProperty.getValue().toString();
-                            firstColumnFlag = false;
-                        }
-                        else {
-                            this.otherAttributes+="\t"+curProperty.getValue().toString();
-                        }
-                    }
-                }
-                geometry.setUserData(otherAttributes);
+            ArrayList<String> nonSpatialData = new ArrayList<>();
+            Map<String, Object> featurePropertiesproperties = feature.getProperties();
+            if (feature.getId()!=null)
+            {
+                nonSpatialData.add(feature.getId().toString());
             }
+            if (featurePropertiesproperties!=null)
+            {
+                for (Object property:featurePropertiesproperties.values()
+                ) {
+                    nonSpatialData.add(property.toString());
+                }
+            }
+            geometry = geoJSONReader.read(feature.getGeometry());
+            handleNonSpatialDataToGeometry(geometry, nonSpatialData);
         }
         else {
             geometry = geoJSONReader.read(geoJson);
-            // No input data needs to be carried.
         }
         return geometry;
     }
@@ -200,31 +211,31 @@ public class FormatMapper<T extends Geometry>
         return null;
     }
 
+    public List<String> readPropertyNames(String geoString) {
+        switch (splitter){
+            case GEOJSON:
+              return readGeoJsonPropertyNames(geoString);
+              default:
+                  return null;
+        }
+    }
+
     public Geometry readWkt(String line)
             throws ParseException
     {
         final String[] columns = line.split(splitter.getDelimiter());
-        final Geometry geometry = wktReader.read(columns[this.startOffset]);
-        if (carryInputData) {
-            boolean firstColumnFlag = true;
-            otherAttributes = "";
-            for (int i=0; i<columns.length;i++)
-            {
-                if (i!=this.startOffset )
-                {
-                    if (firstColumnFlag)
-                    {
-                        otherAttributes +=columns[i];
-                        firstColumnFlag = false;
-                    }
-                    else
-                    {
-                        otherAttributes += "\t"+columns[i];
-                    }
-                }
-            }
-            geometry.setUserData(otherAttributes);
+        Geometry geometry = null;
+
+        try {
+            geometry = wktReader.read(columns[this.startOffset]);
         }
+        catch (Exception e){
+            logger.error("[GeoSpark] " + e.getMessage());
+        }
+        if (geometry == null){
+            return null;
+        }
+        handleNonSpatialDataToGeometry(geometry, Arrays.asList(columns));
         return geometry;
     }
 
@@ -236,26 +247,8 @@ public class FormatMapper<T extends Geometry>
         // For some unknown reasons, the wkb reader cannot be used in transient variable like the wkt reader.
         WKBReader wkbReader = new WKBReader();
         final Geometry geometry = wkbReader.read(aux);
-        if (carryInputData) {
-            boolean firstColumnFlag = true;
-            otherAttributes = "";
-            for (int i=0; i<columns.length;i++)
-            {
-                if (i!=this.startOffset )
-                {
-                    if (firstColumnFlag)
-                    {
-                        otherAttributes +=columns[i];
-                        firstColumnFlag = false;
-                    }
-                    else
-                    {
-                        otherAttributes += "\t"+columns[i];
-                    }
-                }
-            }
-            geometry.setUserData(otherAttributes);
-        }
+        handleNonSpatialDataToGeometry(geometry, Arrays.asList(columns));
+
         return geometry;
     }
 
@@ -305,22 +298,45 @@ public class FormatMapper<T extends Geometry>
     public Geometry readGeometry(String line)
             throws ParseException
     {
-        switch (this.splitter) {
-            case WKT:
-                return readWkt(line);
-            case WKB:
-                return readWkb(line);
-            case GEOJSON:
-                return readGeoJSON(line);
-            default: {
-                if (this.geometryType == null) {
-                    throw new IllegalArgumentException("[GeoSpark][FormatMapper] You must specify GeometryType when you use delimiter rather than WKB, WKT or GeoJSON");
-                }
-                else {
-                    return createGeometry(readCoordinates(line), geometryType);
+        Geometry geometry = null;
+        try {
+            switch (this.splitter) {
+                case WKT:
+                    geometry = readWkt(line);
+                    break;
+                case WKB:
+                    geometry = readWkb(line);
+                    break;
+                case GEOJSON:
+                    geometry = readGeoJSON(line);
+                    break;
+                default: {
+                    if (this.geometryType == null) {
+                        throw new IllegalArgumentException("[GeoSpark][FormatMapper] You must specify GeometryType when you use delimiter rather than WKB, WKT or GeoJSON");
+                    } else {
+                        geometry = createGeometry(readCoordinates(line), geometryType);
+                    }
                 }
             }
+
         }
+        catch (Exception e){
+            logger.error("[GeoSpark] " + e.getMessage());
+            if (skipSyntacticallyInvalidGeometries == false){
+                throw e;
+            }
+        }
+        if (geometry == null){
+            return null;
+        }
+        if (allowTopologicallyInvalidGeometries == false) {
+            IsValidOp isvalidop = new IsValidOp(geometry);
+            if (isvalidop.isValid() == false) {
+                geometry = null;
+            }
+        }
+
+        return geometry;
     }
 
     private Geometry createGeometry(Coordinate[] coordinates, GeometryType geometryType)
@@ -373,6 +389,9 @@ public class FormatMapper<T extends Geometry>
 
     private void addGeometry(Geometry geometry, List<T> result)
     {
+        if (geometry == null) {
+            return;
+        }
         if (geometry instanceof MultiPoint) {
             addMultiGeometry((MultiPoint) geometry, result);
         }

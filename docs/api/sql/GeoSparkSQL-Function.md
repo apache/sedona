@@ -160,3 +160,18 @@ SELECT ST_PrecisionReduce(polygondf.countyshape, 9)
 FROM polygondf
 ```
 The new coordinates will only have 9 decimal places.
+
+## ST_IsSimple
+
+Introduction: Test if geometry's only self-intersections are at boundary points.
+
+Format: `ST_IsSimple (A:geometry)`
+
+Since: `v1.2.0`
+
+Spark SQL example:
+
+```SQL
+SELECT ST_IsSimple(polygondf.countyshape)
+FROM polygondf
+```
