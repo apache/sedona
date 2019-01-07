@@ -47,10 +47,12 @@ import org.wololo.jts2geojson.GeoJSONReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.util.*;
-
-import static loci.formats.LogTools.print;
-import static org.datasyslab.geospark.enums.FileDataSplitter.GEOJSON;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class FormatMapper<T extends Geometry>
         implements Serializable, FlatMapFunction<Iterator<String>, T>
@@ -124,7 +126,7 @@ public class FormatMapper<T extends Geometry>
         // Only the following formats are allowed to use this format mapper because each input has the geometry type definition
         if (geometryType == null)
         {
-            assert splitter == FileDataSplitter.WKB || splitter == FileDataSplitter.WKT || splitter == GEOJSON;
+            assert splitter == FileDataSplitter.WKB || splitter == FileDataSplitter.WKT || splitter == FileDataSplitter.GEOJSON;
         }
     }
 
@@ -163,7 +165,7 @@ public class FormatMapper<T extends Geometry>
     {
         LinkedList<String> splitedGeometryDataList = new LinkedList<String>(splitedGeometryData);
         if (carryInputData) {
-            if (this.splitter != GEOJSON){
+            if (this.splitter != FileDataSplitter.GEOJSON){
                 //remove spatial data position
                 splitedGeometryDataList.remove(this.startOffset);
             }
@@ -198,7 +200,7 @@ public class FormatMapper<T extends Geometry>
         return geometry;
     }
 
-    private static List<String> readGeoJsonPropertyNames(String geoJson){
+    public static List<String> readGeoJsonPropertyNames(String geoJson){
         if (geoJson.contains("Feature") || geoJson.contains("feature") || geoJson.contains("FEATURE")) {
             if (geoJson.contains("properties")) {
                 Feature feature = (Feature) GeoJSONFactory.create(geoJson);
@@ -209,8 +211,8 @@ public class FormatMapper<T extends Geometry>
         return null;
     }
 
-    public static List<String> readPropertyNames(String geoString, FileDataSplitter fileType) {
-        switch (fileType){
+    public List<String> readPropertyNames(String geoString) {
+        switch (splitter){
             case GEOJSON:
               return readGeoJsonPropertyNames(geoString);
               default:
@@ -228,7 +230,7 @@ public class FormatMapper<T extends Geometry>
             geometry = wktReader.read(columns[this.startOffset]);
         }
         catch (Exception e){
-            print("[GeoSpark] " + e.getMessage());
+            logger.error("[GeoSpark] " + e.getMessage());
         }
         if (geometry == null){
             return null;
@@ -319,7 +321,7 @@ public class FormatMapper<T extends Geometry>
 
         }
         catch (Exception e){
-            print("[GeoSpark] " + e.getMessage());
+            logger.error("[GeoSpark] " + e.getMessage());
             if (skipSyntacticallyInvalidGeometries == false){
                 throw e;
             }

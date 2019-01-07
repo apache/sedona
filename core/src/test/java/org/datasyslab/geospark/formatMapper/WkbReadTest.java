@@ -39,7 +39,7 @@ public class WkbReadTest extends GeoSparkTestBase {
             throws IOException
     {
         // load geojson with our tool
-        SpatialRDD wkbRDD = GeometryReader.readToGeometryRDD(sc, wkbGeometries, FileDataSplitter.WKB, false);
+        SpatialRDD wkbRDD = WkbReader.readToGeometryRDD(sc, wkbGeometries, 0, true, false);
         assertEquals(wkbRDD.rawSpatialRDD.count(), 103);
     }
 }

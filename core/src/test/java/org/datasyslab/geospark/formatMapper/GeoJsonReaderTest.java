@@ -74,9 +74,9 @@ public class GeoJsonReaderTest
             throws IOException
     {
         // load geojson with our tool
-        SpatialRDD geojsonRDD = GeometryReader.readToGeometryRDD(sc, geoJsonGeomWithFeatureProperty, FileDataSplitter.GEOJSON);
+        SpatialRDD geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithFeatureProperty);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 1001);
-        geojsonRDD = GeometryReader.readToGeometryRDD(sc, geoJsonGeomWithoutFeatureProperty, FileDataSplitter.GEOJSON);
+        geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithoutFeatureProperty);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 10);
     }
 
@@ -90,15 +90,15 @@ public class GeoJsonReaderTest
             throws IOException
     {
         //ensure that flag does not affect valid geometries
-        SpatialRDD geojsonRDD = GeometryReader.readToGeometryRDD(sc, geoJsonGeomWithFeatureProperty, FileDataSplitter.GEOJSON, false);
+        SpatialRDD geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithFeatureProperty, true, false);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 1001);
-        geojsonRDD = GeometryReader.readToGeometryRDD(sc, geoJsonGeomWithoutFeatureProperty, FileDataSplitter.GEOJSON, false);
+        geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithoutFeatureProperty, true, false);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 10);
         //2 valid and 1 invalid geometries
-        geojsonRDD = GeometryReader.readToGeometryRDD(sc, geoJsonWithInvalidGeometries, FileDataSplitter.GEOJSON,false);
+        geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonWithInvalidGeometries, false,false);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 2);
 
-        geojsonRDD = GeometryReader.readToGeometryRDD(sc, geoJsonWithInvalidGeometries, FileDataSplitter.GEOJSON);
+        geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonWithInvalidGeometries);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 3);
     }
 }
