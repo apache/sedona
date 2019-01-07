@@ -60,8 +60,8 @@ class predicateTestScala extends TestBaseScala {
       resultDf.show()
       assert(resultDf.count() == 999)
     }
-    
-     it("Passed ST_Equals for ST_Point") {
+
+    it("Passed ST_Equals for ST_Point") {
       // Select a point from the table and check if any point in the table is equal to the selected point.
 
       // Read csv to get the points table
@@ -78,7 +78,7 @@ class predicateTestScala extends TestBaseScala {
       assert(equaldf.count() == 5, s"Expected 5 value but got ${equaldf.count()}")
 
     }
-    
+
     it("Passed ST_Equals for ST_Polygon") {
 
       // Select a polygon from the table and check if any polygon in the table is equal to the selected polygon.
@@ -105,7 +105,7 @@ class predicateTestScala extends TestBaseScala {
       assert(equaldf2.count() == 5, s"Expected 5 value but got ${equaldf2.count()}")
 
     }
-    
+
     it("Passed ST_Equals for ST_Point and ST_Polygon") {
 
       // Test a Point against any polygon in the table for equality.
@@ -126,7 +126,7 @@ class predicateTestScala extends TestBaseScala {
       assert(equaldf.count() == 0, s"Expected 0 value but got ${equaldf.count()}")
 
     }
-    
+
     it("Passed ST_Equals for ST_LineString and ST_Polygon") {
 
       // Test a LineString against any polygon in the table for equality.
@@ -178,6 +178,7 @@ class predicateTestScala extends TestBaseScala {
       equaldf.show()
 
       assert(equaldf.count() == 5, s"Expected 5 value but got ${equaldf.count()}")
+    }
 
     it("Passed ST_Crosses") {
       var crossesTesttable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 4 1, 4 4, 1 4, 1 1))') as a,ST_GeomFromWKT('LINESTRING(1 5, 5 1)') as b")
