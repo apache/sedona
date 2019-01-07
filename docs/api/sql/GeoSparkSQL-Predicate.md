@@ -57,3 +57,47 @@ SELECT *
 FROM pointdf 
 WHERE ST_Equals(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
 ```
+
+## ST_Crosses
+
+Introduction: Return true if A crosses B
+
+Format: `ST_Crosses (A:geometry, B:geometry)`
+
+Since: `v1.2.0`
+
+Spark SQL example:
+```SQL
+SELECT * 
+FROM pointdf 
+WHERE ST_Crosses(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
+```
+
+## ST_Touches
+
+Introduction: Return true if A touches B
+
+Format: `ST_Touches (A:geometry, B:geometry)`
+
+Since: `v1.2.0`
+
+```SQL
+SELECT * 
+FROM pointdf 
+WHERE ST_Touches(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
+```
+
+## ST_Overlaps
+
+Introduction: Return true if A overlaps B
+
+Format: `ST_Overlaps (A:geometry, B:geometry)`
+
+Since: `v1.2.0`
+
+Spark SQL example:
+```SQL
+SELECT *
+FROM geom
+WHERE ST_Overlaps(geom.geom_a, geom.geom_b)
+```

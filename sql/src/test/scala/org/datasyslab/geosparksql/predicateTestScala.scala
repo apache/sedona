@@ -60,8 +60,8 @@ class predicateTestScala extends TestBaseScala {
       resultDf.show()
       assert(resultDf.count() == 999)
     }
-    it("Passed ST_Equals for ST_Point") {
-
+    
+     it("Passed ST_Equals for ST_Point") {
       // Select a point from the table and check if any point in the table is equal to the selected point.
 
       // Read csv to get the points table
@@ -78,6 +78,7 @@ class predicateTestScala extends TestBaseScala {
       assert(equaldf.count() == 5, s"Expected 5 value but got ${equaldf.count()}")
 
     }
+    
     it("Passed ST_Equals for ST_Polygon") {
 
       // Select a polygon from the table and check if any polygon in the table is equal to the selected polygon.
@@ -104,6 +105,7 @@ class predicateTestScala extends TestBaseScala {
       assert(equaldf2.count() == 5, s"Expected 5 value but got ${equaldf2.count()}")
 
     }
+    
     it("Passed ST_Equals for ST_Point and ST_Polygon") {
 
       // Test a Point against any polygon in the table for equality.
@@ -124,9 +126,7 @@ class predicateTestScala extends TestBaseScala {
       assert(equaldf.count() == 0, s"Expected 0 value but got ${equaldf.count()}")
 
     }
-
-
-
+    
     it("Passed ST_Equals for ST_LineString and ST_Polygon") {
 
       // Test a LineString against any polygon in the table for equality.
@@ -179,6 +179,36 @@ class predicateTestScala extends TestBaseScala {
 
       assert(equaldf.count() == 5, s"Expected 5 value but got ${equaldf.count()}")
 
+    it("Passed ST_Crosses") {
+      var crossesTesttable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 4 1, 4 4, 1 4, 1 1))') as a,ST_GeomFromWKT('LINESTRING(1 5, 5 1)') as b")
+      crossesTesttable.createOrReplaceTempView("crossesTesttable")
+      var crosses = sparkSession.sql("select(ST_Crosses(a, b)) from crossesTesttable")
+
+      var notCrossesTesttable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 4 1, 4 4, 1 4, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 5 2, 5 5, 2 5, 2 2))') as b")
+      notCrossesTesttable.createOrReplaceTempView("notCrossesTesttable")
+      var notCrosses = sparkSession.sql("select(ST_Crosses(a, b)) from notCrossesTesttable")
+
+      assert(crosses.take(1)(0).get(0).asInstanceOf[Boolean])
+      assert(!notCrosses.take(1)(0).get(0).asInstanceOf[Boolean])
+    }
+
+    it("Passed ST_Touches") {
+      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
+      pointCsvDF.createOrReplaceTempView("pointtable")
+      var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
+      pointDf.createOrReplaceTempView("pointdf")
+
+      var resultDf = sparkSession.sql("select * from pointdf where ST_Touches(pointdf.arealandmark, ST_PolygonFromEnvelope(0.0,99.0,1.1,101.1))")
+      resultDf.show()
+      assert(resultDf.count() == 1)
+    }
+    it("Passed ST_Overlaps") {
+      var testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((2.5 2.5, 2.5 4.5, 4.5 4.5, 4.5 2.5, 2.5 2.5))') as a,ST_GeomFromWKT('POLYGON((4 4, 4 6, 6 6, 6 4, 4 4))') as b, ST_GeomFromWKT('POLYGON((5 5, 4 6, 6 6, 6 4, 5 5))') as c, ST_GeomFromWKT('POLYGON((5 5, 4 6, 6 6, 6 4, 5 5))') as d")
+      testtable.createOrReplaceTempView("testtable")
+      var overlaps = sparkSession.sql("select ST_Overlaps(a,b) from testtable")
+      var notoverlaps = sparkSession.sql("select ST_Overlaps(c,d) from testtable")
+      assert(overlaps.take(1)(0).get(0) == true)
+      assert(notoverlaps.take(1)(0).get(0) == false)
     }
   }
 }

@@ -30,7 +30,7 @@ import org.apache.spark.sql.catalyst.expressions.{Expression, LessThan, LessThan
 import org.apache.spark.sql.catalyst.plans.Inner
 import org.apache.spark.sql.catalyst.plans.logical.{Join, LogicalPlan}
 import org.apache.spark.sql.execution.SparkPlan
-import org.apache.spark.sql.geosparksql.expressions.{ST_Contains, ST_Distance, ST_Intersects, ST_Within, ST_Equals}
+import org.apache.spark.sql.geosparksql.expressions._
 
 /**
   * Plans `RangeJoinExec` for inner joins on spatial relationships ST_Contains(a, b)
@@ -74,6 +74,14 @@ object JoinQueryDetector extends Strategy {
     // ST_WITHIN(a, b) - a is within b
     case Join(left, right, Inner, Some(ST_Within(Seq(leftShape, rightShape)))) =>
       planSpatialJoin(right, left, Seq(rightShape, leftShape), false)
+      
+     // ST_Overlaps(a, b) - a overlaps b
+    case Join(left, right, Inner, Some(ST_Overlaps(Seq(leftShape, rightShape)))) =>
+      planSpatialJoin(right, left, Seq(rightShape, leftShape), false)
+
+    // ST_Touches(a, b) - a touches b
+    case Join(left, right, Inner, Some(ST_Touches(Seq(leftShape, rightShape)))) =>
+      planSpatialJoin(left, right, Seq(leftShape, rightShape), true)
 
     // ST_Distance(a, b) <= radius consider boundary intersection
     case Join(left, right, Inner, Some(LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), radius))) =>
@@ -82,10 +90,15 @@ object JoinQueryDetector extends Strategy {
     // ST_Distance(a, b) < radius don't consider boundary intersection
     case Join(left, right, Inner, Some(LessThan(ST_Distance(Seq(leftShape, rightShape)), radius))) =>
       planDistanceJoin(left, right, Seq(leftShape, rightShape), radius, false)
-
+    
     // ST_Equals(a, b) - a is equal to b
     case Join(left, right, Inner, Some(ST_Equals(Seq(leftShape, rightShape)))) =>
       planSpatialJoin(left, right, Seq(leftShape, rightShape), false)
+    
+    // ST_Crosses(a, b) - a crosses b
+    case Join(left, right, Inner, Some(ST_Crosses(Seq(leftShape, rightShape)))) =>
+      planSpatialJoin(right, left, Seq(rightShape, leftShape), false)
+
     case _ =>
       Nil
   }
