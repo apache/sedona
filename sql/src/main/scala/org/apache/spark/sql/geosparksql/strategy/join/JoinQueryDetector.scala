@@ -74,6 +74,10 @@ object JoinQueryDetector extends Strategy {
     // ST_WITHIN(a, b) - a is within b
     case Join(left, right, Inner, Some(ST_Within(Seq(leftShape, rightShape)))) =>
       planSpatialJoin(right, left, Seq(rightShape, leftShape), false)
+      
+     // ST_Overlaps(a, b) - a overlaps b
+    case Join(left, right, Inner, Some(ST_Overlaps(Seq(leftShape, rightShape)))) =>
+      planSpatialJoin(right, left, Seq(rightShape, leftShape), false)
 
     // ST_Touches(a, b) - a touches b
     case Join(left, right, Inner, Some(ST_Touches(Seq(leftShape, rightShape)))) =>

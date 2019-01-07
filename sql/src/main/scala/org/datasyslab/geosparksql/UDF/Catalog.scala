@@ -52,6 +52,7 @@ object Catalog {
     ST_IsValid,
     ST_PrecisionReduce,
     ST_Touches,
+    ST_Overlaps,
 	  ST_Crosses,
     ST_IsSimple
   )

@@ -154,6 +154,36 @@ case class ST_Crosses(inputExpressions: Seq[Expression])
 
 
 /**
+  * Test if leftGeometry overlaps rightGeometry
+  *
+  * @param inputExpressions
+  */
+case class ST_Overlaps(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  // This is a binary expression
+  assert(inputExpressions.length == 2)
+
+  override def toString: String = s" **${ST_Overlaps.getClass.getName}**  "
+
+  override def children: Seq[Expression] = inputExpressions
+
+  override def eval(inputRow: InternalRow): Any = {
+    val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
+    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
+
+    val leftGeometry = GeometrySerializer.deserialize(leftArray)
+
+    val rightGeometry = GeometrySerializer.deserialize(rightArray)
+
+    return leftGeometry.overlaps(rightGeometry)
+  }
+
+  override def dataType = BooleanType
+}
+
+/**
   * Test if leftGeometry touches rightGeometry
   *
   * @param inputExpressions

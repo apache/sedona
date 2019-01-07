@@ -134,6 +134,26 @@ class predicateJoinTestScala extends TestBaseScala {
       rangeJoinDf.show(3)
       assert(rangeJoinDf.count() == 1000)
     }
+    
+    it("Passed ST_Overlaps in a join") {
+      val geosparkConf = new GeoSparkConf(sparkSession.sparkContext.getConf)
+      
+      var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygonInputLocation)
+      polygonCsvDf.createOrReplaceTempView("polygontable")
+      var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+
+      var polygonCsvOverlapDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(overlapPolygonInputLocation)
+      polygonCsvOverlapDf.createOrReplaceTempView("polygonoverlaptable")
+      var polygonOverlapDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygonoverlaptable._c0 as Decimal(24,20)),cast(polygonoverlaptable._c1 as Decimal(24,20)), cast(polygonoverlaptable._c2 as Decimal(24,20)), cast(polygonoverlaptable._c3 as Decimal(24,20))) as polygonshape from polygonoverlaptable")
+      polygonOverlapDf.createOrReplaceTempView("polygonodf")
+
+      var rangeJoinDf = sparkSession.sql("select * from polygondf, polygonodf where ST_Overlaps(polygondf.polygonshape, polygonodf.polygonshape)")
+
+      rangeJoinDf.explain()
+      rangeJoinDf.show(3)
+      assert(rangeJoinDf.count() == 57)
+    }
 
     it("Passed ST_Crosses in a join") {
       val geosparkConf = new GeoSparkConf(sparkSession.sparkContext.getConf)
