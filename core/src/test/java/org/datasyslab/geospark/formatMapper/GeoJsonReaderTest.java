@@ -26,6 +26,7 @@
 
 package org.datasyslab.geospark.formatMapper;
 
+import com.vividsolutions.jts.geom.Polygon;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.datasyslab.geospark.GeoSparkTestBase;
@@ -36,6 +37,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -100,5 +102,23 @@ public class GeoJsonReaderTest
 
         geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonWithInvalidGeometries);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 3);
+    }
+
+    /**
+     * Test correctness of parsing geojson file
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testUserData()
+            throws IOException
+    {
+        //ensure that flag does not affect valid geometries
+        SpatialRDD geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithFeatureProperty, true, false);
+        //2 valid and 1 invalid geometries
+        geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonWithInvalidGeometries, false,true);
+        assertEquals(geojsonRDD.rawSpatialRDD.count(), 2);
+        List s = geojsonRDD.rawSpatialRDD.take(1);
+        assertEquals("NAME=VALID\tSTATEFP=01\tCOUNTYFP=077\tTRACTCE=011501\tBLKGRPCE=5", ((Polygon) s.get(0)).getUserData());
     }
 }

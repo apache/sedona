@@ -186,9 +186,9 @@ public class FormatMapper<T extends Geometry>
             }
             if (featurePropertiesproperties!=null)
             {
-                for (Object property:featurePropertiesproperties.values()
+                for (Object propertyEntry:featurePropertiesproperties.entrySet()
                 ) {
-                    nonSpatialData.add(property.toString());
+                    nonSpatialData.add(propertyEntry.toString());
                 }
             }
             geometry = geoJSONReader.read(feature.getGeometry());
