@@ -102,8 +102,8 @@ public class PolygonRDDTest
         PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocationGeojson, FileDataSplitter.GEOJSON, true, 4, StorageLevel.MEMORY_ONLY());
         assert spatialRDD.approximateTotalCount == 1001;
         assert spatialRDD.boundaryEnvelope != null;
-        assertEquals(spatialRDD.rawSpatialRDD.take(1).get(0).getUserData(), "01\t077\t011501\t5\t1500000US010770115015\t010770115015\t5\tBG\t6844991\t32636");
-        assertEquals(spatialRDD.rawSpatialRDD.take(2).get(1).getUserData(), "01\t045\t021102\t4\t1500000US010450211024\t010450211024\t4\tBG\t11360854\t0");
+        assertEquals("STATEFP=01\tCOUNTYFP=077\tTRACTCE=011501\tBLKGRPCE=5\tAFFGEOID=1500000US010770115015\tGEOID=010770115015\tNAME=5\tLSAD=BG\tALAND=6844991\tAWATER=32636", spatialRDD.rawSpatialRDD.take(1).get(0).getUserData());
+        assertEquals("STATEFP=01\tCOUNTYFP=045\tTRACTCE=021102\tBLKGRPCE=4\tAFFGEOID=1500000US010450211024\tGEOID=010450211024\tNAME=4\tLSAD=BG\tALAND=11360854\tAWATER=0", spatialRDD.rawSpatialRDD.take(2).get(1).getUserData());
         assertEquals(spatialRDD.fieldNames.toString(), "[STATEFP, COUNTYFP, TRACTCE, BLKGRPCE, AFFGEOID, GEOID, NAME, LSAD, ALAND, AWATER]");
     }
 
