@@ -163,7 +163,16 @@ val spatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, sh
 		- myshapefile...
 		- ...
 	```
-		
+
+If the file you are reading contains non-ASCII characters you'll need to explicitly set the encoding
+via `geospark.global.charset` system property before the call to `ShapefileReader.readToGeometryRDD`.
+
+Example:
+
+```Scala
+System.setProperty("geospark.global.charset", "utf8")
+```
+
 #### From SparkSQL DataFrame
 
 To create a generic SpatialRDD from CSV, TSV, WKT, WKB and GeoJSON input formats, you can use GeoSparkSQL. Make sure you include ==the full dependencies== of GeoSpark. Read [GeoSparkSQL API](../api/sql/GeoSparkSQL-Overview).

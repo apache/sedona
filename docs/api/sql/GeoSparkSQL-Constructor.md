@@ -93,6 +93,17 @@ spatialDf.printSchema()
 
 !!!warning
 	Please make sure you use ==ST_GeomFromWKT== to create Geometry type column otherwise that column cannot be used in GeoSparkSQL.
+
+If the file you are reading contains non-ASCII characters you'll need to explicitly set the encoding
+via `geospark.global.charset` system property before the call to `ShapefileReader.readToGeometryRDD`.
+
+Example:
+
+```Scala
+System.setProperty("geospark.global.charset", "utf8")
+```
+
+
 ## ST_Point
 
 Introduction: Construct a Point from X and Y. Unlimited UUID strings can be appended.
