@@ -13,6 +13,14 @@
 * GeoSpark 1.1.3 is released. This release contains a critical bug fix for GeoSpark-core RDD API. [Release notes](./download/GeoSpark-All-Modules-Release-notes.md) || [Maven Coordinate](./download/GeoSpark-All-Modules-Maven-Central-Coordinates.md).
 * GeoSpark 1.1.2 is released. This release contains several bug fixes. Thanks for the patch from Lucas C.! [Release notes](./download/GeoSpark-All-Modules-Release-notes.md) || [Maven Coordinate](./download/GeoSpark-All-Modules-Maven-Central-Coordinates.md).
 
+## Companies are using GeoSpark 
+
+(incomplete list)
+
+[<img src="https://www.bluedme.com/wp-content/uploads/2015/10/cropped-LOGO-Blue-DME-PNG-3.png" width="150">](https://www.bluedme.com/) [<img src="https://retailrecharged.com/wp-content/uploads/2017/10/logo.png" width="150">](https://www.gyana.co.uk/)[<img src="https://mobike.com/global/public/invitation__footer__logo.png" width="150">](https://mobike.com)
+
+Please make a Pull Request to add yourself!
+
 ## Introduction
 
 GeoSpark is a cluster computing system for processing large-scale spatial data. GeoSpark extends Apache Spark / SparkSQL with a set of out-of-the-box Spatial Resilient Distributed Datasets (SRDDs)/ SpatialSQL that efficiently load, process, and analyze large-scale spatial data across machines.
@@ -51,14 +59,6 @@ AND city.name = 'Gotham';
 * ==Spatial partitioning==: KDB-Tree, Quad-Tree, R-Tree, Voronoi diagram, Hilbert curve, Uniform grids
 * ==Coordinate Reference System / Spatial Reference System Transformation==: for exmaple, from WGS84 (EPSG:4326, degree-based), to EPSG:3857 (meter-based)
 * ==High resolution map==: Scatter plot, heat map, choropleth map
-
-## Companies are using GeoSpark 
-
-(incomplete list)
-
-[<img src="https://www.bluedme.com/wp-content/uploads/2015/10/cropped-LOGO-Blue-DME-PNG-3.png" width="150">](https://www.bluedme.com/) [<img src="https://retailrecharged.com/wp-content/uploads/2017/10/logo.png" width="150">](https://www.gyana.co.uk/)
-
-Please make a Pull Request to add yourself!
 
 
 
