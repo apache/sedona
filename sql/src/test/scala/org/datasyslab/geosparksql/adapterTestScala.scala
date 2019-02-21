@@ -115,6 +115,14 @@ class adapterTestScala extends TestBaseScala {
       df.show()
     }
 
+    it("Read shapefileWithMissing -> DataFrame") {
+      var spatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileWithMissingsTrailingInputLocation)
+      spatialRDD.analyze()
+      println(spatialRDD.fieldNames)
+      var df = Adapter.toDf(spatialRDD, sparkSession)
+      df.show()
+    }
+
     it("Read GeoJSON to DataFrame") {
       import org.apache.spark.sql.functions.{callUDF, col}
       var spatialRDD = new PolygonRDD(sparkSession.sparkContext, geojsonInputLocation, FileDataSplitter.GEOJSON, true)
