@@ -49,6 +49,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll{
   val mixedWkbGeometryInputLocation = resourceFolder + "county_small_wkb.tsv"
   val mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv"
   val shapefileInputLocation = resourceFolder + "shapefiles/dbf"
+  val shapefileWithMissingsTrailingInputLocation = resourceFolder + "shapefiles/missing"
   val geojsonInputLocation = resourceFolder + "testPolygon.json"
   val arealmPointInputLocation = resourceFolder + "arealm.csv"
   val csvPointInputLocation = resourceFolder + "testpoint.csv"
