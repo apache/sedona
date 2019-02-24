@@ -58,6 +58,14 @@ public class ImageWrapperSerializer
         }
     }
 
+    public byte[] writeImage(ImageSerializableWrapper object)
+    {
+        Kryo kryo = new Kryo();
+        Output output = new Output();
+        write(kryo, output, object);
+        return output.toBytes();
+    }
+
     @Override
     public ImageSerializableWrapper read(Kryo kryo, Input input, Class<ImageSerializableWrapper> type)
     {
@@ -72,5 +80,12 @@ public class ImageWrapperSerializer
             e.printStackTrace();
         }
         return null;
+    }
+
+    public ImageSerializableWrapper readImage(byte[] inputArray)
+    {
+        Kryo kryo = new Kryo();
+        Input input = new Input(inputArray);
+        return read(kryo, input, ImageSerializableWrapper.class);
     }
 }

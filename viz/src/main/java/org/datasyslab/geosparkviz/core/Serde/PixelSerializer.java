@@ -66,4 +66,11 @@ public class PixelSerializer
         Pixel pixel = new Pixel(X, Y, ResolutionX, ResolutionY, isDuplicate, currentPartitionId);
         return pixel;
     }
+
+    public Pixel readPixel(byte[] inputArray)
+    {
+        Kryo kryo = new Kryo();
+        Input input = new Input(inputArray);
+        return read(kryo, input, Pixel.class);
+    }
 }

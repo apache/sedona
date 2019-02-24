@@ -15,12 +15,24 @@
 	<packaging>jar</packaging>
 	
 	<dependencies>
-		<dependency>
-			<groupId>org.datasyslab</groupId>
-			<artifactId>geospark</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.datasyslab</groupId>
+            <artifactId>geospark</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.datasyslab</groupId>
+            <artifactId>geospark-sql_2.3</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql_${scala.compat.version}</artifactId>
+            <version>${spark.version}</version>
+            <scope>provided</scope>
+        </dependency>
 		<dependency>
   			<groupId>org.datasyslab</groupId>
   			<artifactId>JFreeSVGplus</artifactId>

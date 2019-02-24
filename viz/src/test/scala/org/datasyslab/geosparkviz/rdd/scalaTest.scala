@@ -24,7 +24,7 @@
  *
  */
 
-package org.datasyslab.geosparkviz
+package org.datasyslab.geosparkviz.rdd
 
 import java.awt.Color
 import java.io.FileInputStream
