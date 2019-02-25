@@ -35,7 +35,7 @@ import org.datasyslab.geosparkviz.core.ImageSerializableWrapper
 import org.datasyslab.geosparkviz.extension.coloringRule.GenericColoringRule
 import org.datasyslab.geosparkviz.utils.Pixel
 
-case class ST_Render() extends UserDefinedAggregateFunction with Logging{
+case class ST_Render_v2() extends UserDefinedAggregateFunction with Logging{
   // This is the input fields for your aggregate function.
   override def inputSchema: org.apache.spark.sql.types.StructType = new StructType()
     .add("Pixel", new PixelUDT).add("Weight", DoubleType).add("Max", DoubleType)
@@ -43,7 +43,7 @@ case class ST_Render() extends UserDefinedAggregateFunction with Logging{
     .add("WeightArray", ArrayType(DoubleType, containsNull = true))
     .add("ResolutionX", IntegerType)
     .add("ResolutionY", IntegerType)
-  override def toString: String = s" **${ST_Render.getClass.getName}**  "
+  override def toString: String = s" **${ST_Render_v2.getClass.getName}**  "
   override def dataType: DataType = new ImageWrapperUDT
 
   override def deterministic: Boolean = true
@@ -134,7 +134,7 @@ case class ST_Render() extends UserDefinedAggregateFunction with Logging{
   }
 }
 
-case class ST_RenderImage() extends UserDefinedAggregateFunction with Logging{
+case class ST_Render() extends UserDefinedAggregateFunction with Logging{
   // This is the input fields for your aggregate function.
   override def inputSchema: org.apache.spark.sql.types.StructType = new StructType()
     .add("Pixel", new PixelUDT).add("Weight", DoubleType).add("Max", DoubleType)

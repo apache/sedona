@@ -15,8 +15,6 @@ class standardVizOperatorTest extends FunSpec with BeforeAndAfterAll {
 
 
   override def afterAll(): Unit = {
-    //BabylonRegistrator.dropAll(sparkSession)
-    //sparkSession.stop
   }
 
   describe("GeoSparkViz SQL function Test") {
@@ -37,7 +35,6 @@ class standardVizOperatorTest extends FunSpec with BeforeAndAfterAll {
 
     it("Passed the pipeline on points") {
       var pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation) //.createOrReplaceTempView("polygontable")
-      pointDf.show()
       pointDf.createOrReplaceTempView("pointtable")
       spark.sql(
         """
@@ -61,7 +58,6 @@ class standardVizOperatorTest extends FunSpec with BeforeAndAfterAll {
         """.stripMargin)
       println(spark.table("pixels").count())
       val pixels = spark.table("pixels")
-      pixels.show()
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW pixelaggregates AS
@@ -76,7 +72,6 @@ class standardVizOperatorTest extends FunSpec with BeforeAndAfterAll {
 
     it("Passed the pipeline on polygons") {
       var polygonDf = spark.read.format("csv").option("delimiter", "\t").option("header", "false").load(polygonInputLocationWkt)
-      polygonDf.show()
       polygonDf.createOrReplaceTempView("polygontable")
       spark.sql(
         """
@@ -110,38 +105,70 @@ class standardVizOperatorTest extends FunSpec with BeforeAndAfterAll {
           |CREATE OR REPLACE TEMP VIEW images AS
           |SELECT ST_Render(pixel, weight, (SELECT max(weight) FROM pixelaggregates)) AS image
           |FROM pixelaggregates
-        """.stripMargin).explain()
+        """.stripMargin)
+      var imageDf = spark.sql(
+        """
+          |SELECT image
+          |FROM images
+        """.stripMargin)
+      var image = imageDf.take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage
+      var imageGenerator = new ImageGenerator
+      imageGenerator.SaveRasterImageAsLocalFile(image, System.getProperty("user.dir")+"/polygons", ImageType.PNG)
+    }
+    it("Passed cache pixel aggregate") {
+      var polygonDf = spark.read.format("csv").option("delimiter", "\t").option("header", "false").load(polygonInputLocationWkt)
+      polygonDf.createOrReplaceTempView("polygontable")
+      spark.sql(
+        """
+          |CREATE OR REPLACE TEMP VIEW polygontable AS
+          |SELECT ST_GeomFromWKT(polygontable._c0) as shape, _c1 as rate, _c2, _c3
+          |FROM polygontable
+        """.stripMargin)
+      spark.sql(
+        """
+          |CREATE OR REPLACE TEMP VIEW usdata AS
+          |SELECT *
+          |FROM polygontable
+          |WHERE ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)
+        """.stripMargin)
+      spark.sql(
+        """
+          |CREATE OR REPLACE TEMP VIEW pixels AS
+          |SELECT pixel, rate, shape FROM usdata
+          |LATERAL VIEW ST_Pixelize(shape, 1000, 800, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000)) AS pixel
+        """.stripMargin)
+      spark.sql(
+        """
+          |CREATE OR REPLACE TEMP VIEW pixelaggregates AS
+          |SELECT pixel, count(*) as weight
+          |FROM pixels
+          |GROUP BY pixel
+        """.stripMargin).cache()
+      spark.sql(
+        """
+          |CREATE OR REPLACE TEMP VIEW images AS
+          |SELECT ST_Render(pixel, weight, (SELECT max(weight) FROM pixelaggregates)) AS image
+          |FROM pixelaggregates
+        """.stripMargin)
       var imageDf = spark.sql(
         """
           |SELECT image
           |FROM images
         """.stripMargin)
       imageDf.show()
-      var image = imageDf.take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage
-      var imageGenerator = new ImageGenerator
-      imageGenerator.SaveRasterImageAsLocalFile(image, "/Users/jiayu/Downloads/testimage1", ImageType.PNG)
-
-      spark.sql(
-        """
-          |CREATE OR REPLACE TEMP VIEW pixelaggregates AS
-          |SELECT pixel, 1.0 as weight
-          |FROM pixels
-          |GROUP BY pixel
-        """.stripMargin).explain()
 
       imageDf = spark.sql(
         """
-          |SELECT image
-          |FROM images
+          |CREATE OR REPLACE TEMP VIEW images AS
+          |SELECT ST_Render(pixel, weight, (SELECT max(weight) FROM pixelaggregates)) AS image
+          |FROM pixelaggregates
         """.stripMargin)
-      imageDf.show()
-      imageGenerator.SaveRasterImageAsLocalFile(image, "/Users/jiayu/Downloads/testimage2", ImageType.PNG)
+      imageDf.explain()
     }
 
     it("Passed ST_UniPartitioner") {
       var pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation) //.createOrReplaceTempView("polygontable")
-      pointDf.show()
-      pointDf.createOrReplaceTempView("pointtable")
+      pointDf.sample(0.01).createOrReplaceTempView("pointtable")
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW pointtable AS
@@ -155,15 +182,12 @@ class standardVizOperatorTest extends FunSpec with BeforeAndAfterAll {
           |FROM pointtable
           |WHERE ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)
         """.stripMargin)
-//      println(spark.table("pointtable").count())
-
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW pixels AS
           |SELECT pixel, shape FROM pointtable
           |LATERAL VIEW ST_Pixelize(shape, 1000, 1000, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000)) AS pixel
         """.stripMargin)
-
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW pixelaggregates AS
@@ -171,33 +195,22 @@ class standardVizOperatorTest extends FunSpec with BeforeAndAfterAll {
           |FROM pixels
           |GROUP BY pixel
         """.stripMargin)
-      val pixelaggregates = spark.table("pixelaggregates")
-      pixelaggregates.show()
-
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW pixelaggregates AS
           |SELECT pixel, weight, ST_UniPartition(pixel, 10, 10) AS pid
           |FROM pixelaggregates
         """.stripMargin)
-
-      spark.sql(
-        """
-          |SELECT pid, count(*) as count
-          |FROM pixelaggregates
-          |GROUP BY pid
-          |ORDER BY count DESC
-        """.stripMargin).show()
-
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW images AS
-          |SELECT ST_RenderImage(pixel, weight, (SELECT max(weight) FROM pixelaggregates)) AS image
+          |SELECT ST_Render(pixel, weight, (SELECT max(weight) FROM pixelaggregates)) AS image
           |FROM pixelaggregates
           |GROUP BY pid
         """.stripMargin).explain()
       var imageDf = spark.table("images")
       imageDf.show()
     }
+
   }
 }

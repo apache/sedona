@@ -26,7 +26,7 @@ package org.datasyslab.geosparkviz.UDF
 
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
-import org.apache.spark.sql.geosparkviz.expressions.{ST_Pixelize, ST_Render, ST_RenderImage, ST_UniPartition}
+import org.apache.spark.sql.geosparkviz.expressions._
 
 object Catalog {
   val expressions:Seq[FunctionBuilder] = Seq(
@@ -36,6 +36,6 @@ object Catalog {
 
   val aggregateExpressions:Seq[UserDefinedAggregateFunction] = Seq(
     new ST_Render,
-    new ST_RenderImage
+    new ST_Render_v2
   )
 }
