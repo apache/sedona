@@ -77,6 +77,15 @@ class constructorTestScala extends TestBaseScala {
       assert(polygonDf.count() == 100)
     }
 
+    it("Passed ST_GeomFromGeoJSON") {
+      val polygonJsonDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(geojsonInputLocation)
+      polygonJsonDf.createOrReplaceTempView("polygontable")
+      polygonJsonDf.show()
+      val polygonDf = sparkSession.sql("select ST_GeomFromGeoJSON(polygontable._c0) as countyshape from polygontable")
+      polygonDf.show()
+      assert(polygonDf.count() == 1000)
+    }
+
     it("Passed GeoJsonReader to DataFrame") {
       var spatialRDD = GeoJsonReader.readToGeometryRDD(sparkSession.sparkContext, geojsonInputLocation)
       var spatialDf = Adapter.toDf(spatialRDD, sparkSession)
