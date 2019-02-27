@@ -32,7 +32,28 @@ import org.datasyslab.geosparkviz.utils.Pixel
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
+
 object AggregateWithinPartitons {
+  /**
+    * Run aggregation within each partition without incurring a data shuffle. Currently support three aggregates, sum, count, avg.
+    * If the aggregate func is count, this function doesn't require a value column. If the aggregate func is sum and avg, it will require
+    * a value column. They are same as the regular aggregation SQL
+    *
+    * SELECT pixel, COUNT(*)
+    * FROM t GROUP BY pixel
+    *
+    * SELECT pixel, AVG(weight)
+    * FROM t GROUP BY pixel
+    *
+    * SELECT pixel, AVG(weight)
+    * FROM t GROUP BY pixel
+    *
+    * @param dataFrame
+    * @param keyCol GroupBy key
+    * @param valueCol Aggregate value
+    * @param aggFunc Aggregate function
+    * @return
+    */
   def apply(dataFrame: DataFrame, keyCol:String, valueCol:String, aggFunc:String): DataFrame = {
     // Keep keycol, valuecol, primary partition id, secondary partition id
     var formattedDf:DataFrame = null

@@ -25,6 +25,6 @@
 package org.datasyslab.geosparkviz.sql.utils
 
 object Conf {
-  var PrimaryPID = "primarypid"
+  var PrimaryPID = "tileid"
   var SecondaryPID = "secondarypid"
 }
