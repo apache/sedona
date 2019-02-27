@@ -32,18 +32,17 @@ import org.apache.spark.sql.expressions.{MutableAggregationBuffer, UserDefinedAg
 import org.apache.spark.sql.geosparkviz.UDT.{ImageWrapperUDT, PixelUDT}
 import org.apache.spark.sql.types._
 import org.datasyslab.geosparkviz.core.ImageSerializableWrapper
-import org.datasyslab.geosparkviz.extension.coloringRule.GenericColoringRule
 import org.datasyslab.geosparkviz.utils.Pixel
 
-case class ST_Render_v2() extends UserDefinedAggregateFunction with Logging{
+case class ST_Render() extends UserDefinedAggregateFunction with Logging{
   // This is the input fields for your aggregate function.
   override def inputSchema: org.apache.spark.sql.types.StructType = new StructType()
-    .add("Pixel", new PixelUDT).add("Weight", DoubleType).add("Max", DoubleType)
+    .add("Pixel", new PixelUDT).add("Color", IntegerType)
   override def bufferSchema: StructType = new StructType()
-    .add("WeightArray", ArrayType(DoubleType, containsNull = true))
+    .add("WeightArray", ArrayType(IntegerType, containsNull = true))
     .add("ResolutionX", IntegerType)
     .add("ResolutionY", IntegerType)
-  override def toString: String = s" **${ST_Render_v2.getClass.getName}**  "
+  override def toString: String = s" **${ST_Render.getClass.getName}**  "
   override def dataType: DataType = new ImageWrapperUDT
 
   override def deterministic: Boolean = true
@@ -60,28 +59,25 @@ case class ST_Render_v2() extends UserDefinedAggregateFunction with Logging{
 
   override def update(buffer: MutableAggregationBuffer, input: Row): Unit =
   {
-    var colorArray = buffer.getAs[Seq[Double]](0)
+    var colorArray = buffer.getAs[Seq[Int]](0)
     val inputPixel = input.getAs[Pixel](0)
     val reversedY = inputPixel.getResolutionY - inputPixel.getY -1
-    var weight = input.getDouble(1)
-    val max = input.getDouble(2)
-    var currentColorArray: Array[Double] = null
+    var color = input.getInt(1)
+    var currentColorArray: Array[Int] = null
     if(colorArray.length==1)
     {
       // We got an empty image array which just left the initialize function
-      currentColorArray = new Array[Double](inputPixel.getResolutionX*inputPixel.getResolutionY)
+      currentColorArray = new Array[Int](inputPixel.getResolutionX*inputPixel.getResolutionY)
     }
     else
     {
       currentColorArray = colorArray.toArray
     }
-
-    weight = (weight - 0) * 255 / (max - 0)
-    if(inputPixel.getX<0 || inputPixel.getX>=inputPixel.getResolutionX || inputPixel.getY<0 || inputPixel.getY>=inputPixel.getResolutionY )
-    {
-      log.warn(s"$inputPixel")
-    }
-    currentColorArray(inputPixel.getX+reversedY*inputPixel.getResolutionX) = weight//GenericColoringRule.EncodeToRGB(weight)
+//    if(inputPixel.getX<0 || inputPixel.getX>=inputPixel.getResolutionX || inputPixel.getY<0 || inputPixel.getY>=inputPixel.getResolutionY )
+//    {
+//      log.warn(s"$inputPixel")
+//    }
+    currentColorArray(inputPixel.getX.intValue()+reversedY.intValue()*inputPixel.getResolutionX) = color//GenericColoringRule.EncodeToRGB(weight)
     //var image = new BufferedImage(inputPixel.getResolutionX, inputPixel.getResolutionY)
     //image.setData().setRGB(inputPixel.getX, inputPixel.getY, GenericColoringRule.EncodeToRGB(weight))
     buffer(0) = currentColorArray
@@ -91,8 +87,8 @@ case class ST_Render_v2() extends UserDefinedAggregateFunction with Logging{
 
   override def merge(buffer1: MutableAggregationBuffer, buffer2: Row): Unit =
   {
-    val leftColorArray = buffer1.getAs[Seq[Double]](0)
-    val rightColorArray = buffer2.getAs[Seq[Double]](0)
+    val leftColorArray = buffer1.getAs[Seq[Int]](0)
+    val rightColorArray = buffer2.getAs[Seq[Int]](0)
     if (leftColorArray.length==1)
     {
       buffer1(0) = buffer2(0)
@@ -106,7 +102,7 @@ case class ST_Render_v2() extends UserDefinedAggregateFunction with Logging{
     }
     val w = buffer1.getAs[Int](1) // This can be rightColorArray. The left and right are expected to have the same resolutions
     val h = buffer1.getAs[Int](2)
-    var combinedColorArray = new Array[Double](w*h)
+    var combinedColorArray = new Array[Int](w*h)
     for (i <- 0 to (w*h-1))
     {
       // We expect that for each i, only one of leftColorArray and RightColorArray has non-zero value.
@@ -119,7 +115,7 @@ case class ST_Render_v2() extends UserDefinedAggregateFunction with Logging{
 
   override def evaluate(buffer: Row): Any =
   {
-    val colorArray = buffer.getAs[Seq[Double]](0)
+    val colorArray = buffer.getAs[Seq[Int]](0)
     val w = buffer.getAs[Int](1)
     val h = buffer.getAs[Int](2)
     var bufferedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
@@ -127,22 +123,22 @@ case class ST_Render_v2() extends UserDefinedAggregateFunction with Logging{
     {
       for(i <- 0 to w-1)
       {
-        bufferedImage.setRGB(i, j, GenericColoringRule.EncodeToRGB(colorArray(i+j*w)))
+        bufferedImage.setRGB(i, j, colorArray(i+j*w))
       }
     }
     return new ImageSerializableWrapper(bufferedImage)
   }
 }
 
-case class ST_Render() extends UserDefinedAggregateFunction with Logging{
+case class ST_Render_v2() extends UserDefinedAggregateFunction with Logging{
   // This is the input fields for your aggregate function.
   override def inputSchema: org.apache.spark.sql.types.StructType = new StructType()
-    .add("Pixel", new PixelUDT).add("Weight", DoubleType).add("Max", DoubleType)
+    .add("Pixel", new PixelUDT).add("Weight", IntegerType)
   override def bufferSchema: StructType = new StructType()
     .add("WeightArray", new ImageWrapperUDT)
 //    .add("ResolutionX", IntegerType)
 //    .add("ResolutionY", IntegerType)
-  override def toString: String = s" **${ST_Render.getClass.getName}**  "
+  override def toString: String = s" **${ST_Render_v2.getClass.getName}**  "
   override def dataType: DataType = new ImageWrapperUDT
 
   override def deterministic: Boolean = true
@@ -169,28 +165,25 @@ case class ST_Render() extends UserDefinedAggregateFunction with Logging{
     }
 
     val reversedY = inputPixel.getResolutionY - inputPixel.getY -1
-    var weight = input.getDouble(1)
-    val max = input.getDouble(2)
-
-    weight = (weight - 0) * 255 / (max - 0)
+    var color = input.getInt(1)
     if(inputPixel.getX<0 || inputPixel.getX>=inputPixel.getResolutionX || inputPixel.getY<0 || inputPixel.getY>=inputPixel.getResolutionY )
     {
       log.warn(s"$inputPixel")
     }
-    image.setRGB(inputPixel.getX, reversedY, GenericColoringRule.EncodeToRGB(weight))
+    image.setRGB(inputPixel.getX.intValue(), reversedY.intValue(), color.intValue())
     buffer(0) = new ImageSerializableWrapper(image)
   }
 
   override def merge(buffer1: MutableAggregationBuffer, buffer2: Row): Unit =
   {
-    val leftImage = buffer1.getAs[ImageSerializableWrapper](0)
-    val rightImage = buffer2.getAs[ImageSerializableWrapper](0)
-    val w = leftImage.getImage.getWidth
-    val h = rightImage.getImage.getHeight
+    val leftImage = buffer1.getAs[ImageSerializableWrapper](0).getImage
+    val rightImage = buffer2.getAs[ImageSerializableWrapper](0).getImage
+    val w = Math.max(leftImage.getWidth, rightImage.getWidth)
+    val h = Math.max(leftImage.getHeight, rightImage.getHeight)
     var combinedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
     var graphics = combinedImage.getGraphics
-    graphics.drawImage(leftImage.getImage, 0, 0, null)
-    graphics.drawImage(rightImage.getImage, 0, 0, null)
+    graphics.drawImage(leftImage, 0, 0, null)
+    graphics.drawImage(rightImage, 0, 0, null)
     buffer1(0) = new ImageSerializableWrapper(combinedImage)
   }
 

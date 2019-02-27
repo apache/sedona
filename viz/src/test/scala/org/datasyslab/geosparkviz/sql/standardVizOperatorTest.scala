@@ -3,10 +3,12 @@ package org.datasyslab.geosparkviz.sql
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions._
 import org.datasyslab.geosparksql.utils.GeoSparkSQLRegistrator
 import org.datasyslab.geosparkviz.core.Serde.GeoSparkVizKryoRegistrator
 import org.datasyslab.geosparkviz.core.{ImageGenerator, ImageSerializableWrapper}
-import org.datasyslab.geosparkviz.utils.{GeoSparkVizRegistrator, ImageType}
+import org.datasyslab.geosparkviz.sql.utils.GeoSparkVizRegistrator
+import org.datasyslab.geosparkviz.utils.ImageType
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
 class standardVizOperatorTest extends FunSpec with BeforeAndAfterAll {
@@ -90,7 +92,7 @@ class standardVizOperatorTest extends FunSpec with BeforeAndAfterAll {
         """
           |CREATE OR REPLACE TEMP VIEW pixels AS
           |SELECT pixel, rate, shape FROM usdata
-          |LATERAL VIEW ST_Pixelize(shape, 1000, 800, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000)) AS pixel
+          |LATERAL VIEW ST_Pixelize(shape, 1000, 1000, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000)) AS pixel
         """.stripMargin)
       spark.sql(
         """
@@ -99,11 +101,12 @@ class standardVizOperatorTest extends FunSpec with BeforeAndAfterAll {
           |FROM pixels
           |GROUP BY pixel
         """.stripMargin)
-      println(spark.table("pixelaggregates").count())
+      println(spark.table("pixelaggregates").agg(max("weight")))
+      spark.table("pixelaggregates").orderBy("weight").show()
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW images AS
-          |SELECT ST_Render(pixel, weight, (SELECT max(weight) FROM pixelaggregates)) AS image
+          |SELECT ST_Render(pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates))) AS image
           |FROM pixelaggregates
         """.stripMargin)
       var imageDf = spark.sql(
@@ -113,8 +116,9 @@ class standardVizOperatorTest extends FunSpec with BeforeAndAfterAll {
         """.stripMargin)
       var image = imageDf.take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage
       var imageGenerator = new ImageGenerator
-      imageGenerator.SaveRasterImageAsLocalFile(image, System.getProperty("user.dir")+"/polygons", ImageType.PNG)
+      imageGenerator.SaveRasterImageAsLocalFile(image, System.getProperty("user.dir")+"/target/polygons", ImageType.PNG)
     }
+
     it("Passed cache pixel aggregate") {
       var polygonDf = spark.read.format("csv").option("delimiter", "\t").option("header", "false").load(polygonInputLocationWkt)
       polygonDf.createOrReplaceTempView("polygontable")
@@ -147,7 +151,7 @@ class standardVizOperatorTest extends FunSpec with BeforeAndAfterAll {
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW images AS
-          |SELECT ST_Render(pixel, weight, (SELECT max(weight) FROM pixelaggregates)) AS image
+          |SELECT ST_Render(pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates))) AS image
           |FROM pixelaggregates
         """.stripMargin)
       var imageDf = spark.sql(
@@ -160,7 +164,7 @@ class standardVizOperatorTest extends FunSpec with BeforeAndAfterAll {
       imageDf = spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW images AS
-          |SELECT ST_Render(pixel, weight, (SELECT max(weight) FROM pixelaggregates)) AS image
+          |SELECT ST_Render(pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates))) AS image
           |FROM pixelaggregates
         """.stripMargin)
       imageDf.explain()
@@ -204,13 +208,12 @@ class standardVizOperatorTest extends FunSpec with BeforeAndAfterAll {
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW images AS
-          |SELECT ST_Render(pixel, weight, (SELECT max(weight) FROM pixelaggregates)) AS image
+          |SELECT ST_Render(pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates))) AS image
           |FROM pixelaggregates
           |GROUP BY pid
         """.stripMargin).explain()
       var imageDf = spark.table("images")
       imageDf.show()
     }
-
   }
 }

@@ -1,7 +1,6 @@
 /**
-  * FILE: UdtRegistrator
-  * PATH: org.datasyslab.geosparksql.UDT.UdtRegistrator
-  * Copyright (c) GeoSpark Development Team
+  * FILE: Catalog
+  * Copyright (c) 2015 - 2018 GeoSpark Development Team
   *
   * MIT License
   *
@@ -23,15 +22,21 @@
   * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   * SOFTWARE.
   */
-package org.datasyslab.geosparkviz.UDT
+package org.datasyslab.geosparkviz.sql.UDF
 
-import org.apache.spark.sql.geosparkviz.UDT.UdtRegistratorWrapper
+import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
+import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
+import org.apache.spark.sql.geosparkviz.expressions._
 
-object UdtRegistrator {
+object Catalog {
+  val expressions:Seq[FunctionBuilder] = Seq(
+    ST_Pixelize,
+    ST_UniPartition,
+    ST_Colorize
+  )
 
-  def registerAll(): Unit =
-  {
-    UdtRegistratorWrapper.registerAll()
-  }
-
+  val aggregateExpressions:Seq[UserDefinedAggregateFunction] = Seq(
+    new ST_Render,
+    new ST_Render_v2
+  )
 }

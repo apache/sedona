@@ -1,5 +1,5 @@
 /*
- * FILE: UdfRegistrator.scala
+ * FILE: GeoSparkVizRegistrator.scala
  * Copyright (c) 2015 - 2018 GeoSpark Development Team
  *
  * MIT License
@@ -23,24 +23,24 @@
  * SOFTWARE.
  *
  */
-package org.datasyslab.geosparkviz.UDF
+package org.datasyslab.geosparkviz.sql.utils
 
-import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.{SQLContext, SparkSession}
+import org.datasyslab.geosparkviz.sql.UDF.UdfRegistrator
+import org.datasyslab.geosparkviz.sql.UDT.UdtRegistrator
 
-object UdfRegistrator {
-
+object GeoSparkVizRegistrator {
   def registerAll(sqlContext: SQLContext): Unit = {
-    registerAll(sqlContext.sparkSession)
+    UdtRegistrator.registerAll()
+    UdfRegistrator.registerAll(sqlContext)
   }
 
   def registerAll(sparkSession: SparkSession): Unit = {
-    Catalog.expressions.foreach(f=>sparkSession.sessionState.functionRegistry.createOrReplaceTempFunction(f.getClass.getSimpleName.dropRight(1),f))
-    Catalog.aggregateExpressions.foreach(f=>sparkSession.udf.register(f.getClass.getSimpleName,f))
+    UdtRegistrator.registerAll()
+    UdfRegistrator.registerAll(sparkSession)
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
-    Catalog.expressions.foreach(f=>sparkSession.sessionState.functionRegistry.dropFunction(FunctionIdentifier(f.getClass.getSimpleName.dropRight(1))))
-    Catalog.aggregateExpressions.foreach(f=>sparkSession.sessionState.functionRegistry.dropFunction(FunctionIdentifier(f.getClass.getSimpleName)))
+    UdfRegistrator.dropAll(sparkSession)
   }
 }

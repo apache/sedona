@@ -45,8 +45,8 @@ public class PixelSerializer
     public void write(Kryo kryo, Output output, Pixel object)
     {
         log.debug("Serializing Pixel...");
-        output.writeInt(object.getX());
-        output.writeInt(object.getY());
+        output.writeInt((int)object.getX());
+        output.writeInt((int)object.getY());
         output.writeInt(object.getResolutionX());
         output.writeInt(object.getResolutionY());
         output.writeBoolean(object.isDuplicate());

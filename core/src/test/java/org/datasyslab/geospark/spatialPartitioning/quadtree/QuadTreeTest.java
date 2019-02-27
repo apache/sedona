@@ -178,4 +178,37 @@ public class QuadTreeTest
             }
         }
     }
+
+    @Test
+    public void testQuadTreePartitionLineage()
+    {
+        int resolutionX = 100000;
+        int resolutionY = 100000;
+
+        StandardQuadTree<QuadRectangle> quadTree = new StandardQuadTree<>(new QuadRectangle(0, 0, resolutionX, resolutionY), 0, 4, 10);
+        quadTree.forceGrowUp(4);
+        int leafPartitionNum = quadTree.getTotalNumLeafNode();
+        assertEquals(256, leafPartitionNum);
+
+        for (int i = 0; i < 100000; i++) {
+            int x = ThreadLocalRandom.current().nextInt(0, resolutionX);
+            int y = ThreadLocalRandom.current().nextInt(0, resolutionY);
+            QuadRectangle newR = new QuadRectangle(x, y, 1, 1);
+            quadTree.insert(newR, newR);
+        }
+
+        quadTree.assignPartitionLineage();
+
+        for (int i = 0; i < 100000; i++) {
+            int x = ThreadLocalRandom.current().nextInt(0, resolutionX);
+            int y = ThreadLocalRandom.current().nextInt(0, resolutionY);
+            QuadRectangle newR = new QuadRectangle(x, y, 1, 1);
+
+            final List<QuadRectangle> zones = quadTree.findZones(newR);
+            assertFalse(zones.isEmpty());
+            for (QuadRectangle zone : zones) {
+                assertTrue(zone.lineage!=null);
+            }
+        }
+    }
 }

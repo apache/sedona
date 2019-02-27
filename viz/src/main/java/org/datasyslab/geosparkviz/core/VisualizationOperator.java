@@ -370,7 +370,7 @@ public abstract class VisualizationOperator
             {
                 Pixel newPixel = new Pixel(pixelDoubleTuple2._1().getX(), pixelDoubleTuple2._1().getY(), resolutionX, resolutionY);
                 newPixel.setDuplicate(false);
-                newPixel.setCurrentPartitionId(VisualizationPartitioner.CalculatePartitionId(resolutionX, resolutionY, partitionX, partitionY, pixelDoubleTuple2._1.getX(), pixelDoubleTuple2._1.getY()));
+                newPixel.setCurrentPartitionId(VisualizationPartitioner.CalculatePartitionId(resolutionX, resolutionY, partitionX, partitionY, (int)pixelDoubleTuple2._1.getX(), (int)pixelDoubleTuple2._1.getY()));
                 Tuple2<Pixel, Integer> newPixelDoubleTuple2 = new Tuple2<Pixel, Integer>(newPixel, pixelDoubleTuple2._2());
                 return newPixelDoubleTuple2;
             }
@@ -431,7 +431,7 @@ public abstract class VisualizationOperator
                     HashMap<Pixel, Double> pixelCountHashMap = new HashMap<Pixel, Double>();
                     while (currentPartition.hasNext()) {
                         Tuple2<Pixel, Double> currentPixelCount = currentPartition.next();
-                        Tuple2<Integer, Integer> centerPixelCoordinate = new Tuple2<Integer, Integer>(currentPixelCount._1().getX(), currentPixelCount._1().getY());
+                        Tuple2<Integer, Integer> centerPixelCoordinate = new Tuple2<Integer, Integer>((int)currentPixelCount._1().getX(), (int)currentPixelCount._1().getY());
                         if (centerPixelCoordinate._1() < 0 || centerPixelCoordinate._1() >= resolutionX || centerPixelCoordinate._2() < 0 || centerPixelCoordinate._2() >= resolutionY) {
                             // This center pixel is out of boundary so that we don't record its sum. We don't plot this pixel on the final sub image.
                             continue;
@@ -523,7 +523,7 @@ public abstract class VisualizationOperator
                 public Iterator<Tuple2<Pixel, Double>> call(Tuple2<Pixel, Double> pixelCount)
                         throws Exception
                 {
-                    Tuple2<Integer, Integer> centerPixelCoordinate = new Tuple2<Integer, Integer>(pixelCount._1().getX(), pixelCount._1().getY());
+                    Tuple2<Integer, Integer> centerPixelCoordinate = new Tuple2<Integer, Integer>((int)pixelCount._1().getX(), (int)pixelCount._1().getY());
                     List<Tuple2<Pixel, Double>> result = new ArrayList<Tuple2<Pixel, Double>>();
                     for (int x = -photoFilterRadius; x <= photoFilterRadius; x++) {
                         for (int y = -photoFilterRadius; y <= photoFilterRadius; y++) {
@@ -726,7 +726,7 @@ public abstract class VisualizationOperator
                                     pixelColor = null;
                                     continue;
                                 }
-                                imagePartition.setRGB(pixelColor._1().getX() % partitionIntervalX, (partitionIntervalY - 1) - pixelColor._1().getY() % partitionIntervalY, pixelColor._2);
+                                imagePartition.setRGB((int)pixelColor._1().getX() % partitionIntervalX, (partitionIntervalY - 1) - (int)pixelColor._1().getY() % partitionIntervalY, pixelColor._2);
                             }
                             List<Tuple2<Integer, ImageSerializableWrapper>> result = new ArrayList<Tuple2<Integer, ImageSerializableWrapper>>();
                             if (pixelColor == null) {
@@ -758,7 +758,7 @@ public abstract class VisualizationOperator
                                     pixelColor = null;
                                     continue;
                                 }
-                                imagePartition.setRGB(pixelColor._1().getX(), (resolutionY - 1) - pixelColor._1().getY(), pixelColor._2);
+                                imagePartition.setRGB((int)pixelColor._1().getX(), (resolutionY - 1) - (int)pixelColor._1().getY(), pixelColor._2);
                             }
                             List<Tuple2<Integer, ImageSerializableWrapper>> result = new ArrayList<Tuple2<Integer, ImageSerializableWrapper>>();
                             if (pixelColor == null) {

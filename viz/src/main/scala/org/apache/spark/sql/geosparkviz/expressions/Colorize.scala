@@ -1,5 +1,5 @@
 /**
-  * FILE: Partitioner
+  * FILE: Colorize
   * Copyright (c) 2015 - 2019 GeoSpark Development Team
   *
   * MIT License
@@ -24,26 +24,35 @@
   */
 package org.apache.spark.sql.geosparkviz.expressions
 
+import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.types.{DataType, IntegerType}
-import org.datasyslab.geosparkviz.core.Serde.PixelSerializer
-import org.datasyslab.geosparkviz.core.VisualizationPartitioner
+import org.datasyslab.geosparkviz.extension.coloringRule.GenericColoringRule
 
-case class ST_UniPartition(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
+case class ST_Colorize(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with Logging{
   override def nullable: Boolean = false
 
   override def eval(input: InternalRow): Any = {
-    assert(inputExpressions.length == 3)
-    val inputArray = inputExpressions(0).eval(input).asInstanceOf[ArrayData]
-    val partX = inputExpressions(1).eval(input).asInstanceOf[Int]
-    val partY = inputExpressions(2).eval(input).asInstanceOf[Int]
-    val serializer = new PixelSerializer
-    val pixel = serializer.readPixel(inputArray.toByteArray())
-    VisualizationPartitioner.CalculatePartitionId(pixel.getResolutionX, pixel.getResolutionY, partX, partY, pixel.getX.intValue(), pixel.getY.intValue())
+    assert(inputExpressions.length == 2)
+    var weight = 0.0
+    try {
+      weight = inputExpressions(0).eval(input).asInstanceOf[Double]
+    }
+    catch {
+      case e:java.lang.ClassCastException => weight = inputExpressions(0).eval(input).asInstanceOf[Long]
+    }
+    var max = 0.0
+    try {
+      max = inputExpressions(1).eval(input).asInstanceOf[Double]
+    }
+    catch {
+      case e:java.lang.ClassCastException => max = inputExpressions(1).eval(input).asInstanceOf[Long]
+    }
+    val normalizedWeight:Double = weight * 255.0 / max
+    GenericColoringRule.EncodeToRGB(weight)
   }
 
   override def dataType: DataType = IntegerType

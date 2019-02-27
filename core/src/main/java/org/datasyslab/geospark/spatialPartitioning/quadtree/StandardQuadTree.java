@@ -169,6 +169,7 @@ public class StandardQuadTree<T>
         split();
         nodeNum = maxItemsPerZone;
         if (level + 1 >= minLevel) {
+
             return;
         }
 
@@ -245,6 +246,17 @@ public class StandardQuadTree<T>
         boolean visit(StandardQuadTree<T> tree);
     }
 
+    private interface VisitorWithLineage<T>
+    {
+        /**
+         * Visits a single node of the tree, with the traversal trace
+         *
+         * @param tree Node to visit
+         * @return true to continue traversing the tree; false to stop
+         */
+        boolean visit(StandardQuadTree<T> tree, String lineage);
+    }
+
     /**
      * Traverses the tree top-down breadth-first and calls the visitor
      * for each node. Stops traversing if a call to Visitor.visit returns false.
@@ -260,6 +272,25 @@ public class StandardQuadTree<T>
             regions[REGION_NE].traverse(visitor);
             regions[REGION_SW].traverse(visitor);
             regions[REGION_SE].traverse(visitor);
+        }
+    }
+
+    /**
+     * Traverses the tree top-down breadth-first and calls the visitor
+     * for each node. Stops traversing if a call to Visitor.visit returns false.
+     * lineage will memorize the traversal path for each nodes
+     */
+    private void traverseWithTrace(VisitorWithLineage<T> visitor, String lineage)
+    {
+        if (!visitor.visit(this, lineage)) {
+            return;
+        }
+
+        if (regions != null) {
+            regions[REGION_NW].traverseWithTrace(visitor, lineage+REGION_NW);
+            regions[REGION_NE].traverseWithTrace(visitor, lineage+REGION_NE);
+            regions[REGION_SW].traverseWithTrace(visitor, lineage+REGION_SW);
+            regions[REGION_SE].traverseWithTrace(visitor, lineage+REGION_SE);
         }
     }
 
@@ -424,7 +455,6 @@ public class StandardQuadTree<T>
         traverse(new Visitor<T>()
         {
             private int partitionId = 0;
-
             @Override
             public boolean visit(StandardQuadTree<T> tree)
             {
@@ -435,5 +465,20 @@ public class StandardQuadTree<T>
                 return true;
             }
         });
+    }
+
+    public void assignPartitionLineage()
+    {
+        traverseWithTrace(new VisitorWithLineage<T>()
+        {
+            @Override
+            public boolean visit(StandardQuadTree<T> tree, String lineage)
+            {
+                if (tree.isLeaf()) {
+                    tree.getZone().lineage = lineage;
+                }
+                return true;
+            }
+        }, "");
     }
 }

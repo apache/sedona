@@ -25,6 +25,10 @@
  */
 package org.datasyslab.geosparkviz.utils;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.PrecisionModel;
+
 import java.io.Serializable;
 
 // TODO: Auto-generated Javadoc
@@ -32,19 +36,8 @@ import java.io.Serializable;
 /**
  * The Class Pixel.
  */
-public class Pixel
-        implements Serializable
+public class Pixel extends Point
 {
-
-    /**
-     * The x.
-     */
-    private int x;
-
-    /**
-     * The y.
-     */
-    private int y;
 
     /**
      * The resolution X.
@@ -76,10 +69,9 @@ public class Pixel
      * @param isDuplicate the is duplicate
      * @param currentPartitionId the current partition id
      */
-    public Pixel(int x, int y, int resolutionX, int resolutionY, boolean isDuplicate, int currentPartitionId)
+    public Pixel(double x, double y, int resolutionX, int resolutionY, boolean isDuplicate, int currentPartitionId)
     {
-        this.x = x;
-        this.y = y;
+        super(new Coordinate(x, y), new PrecisionModel(), Integer.parseInt("0"));
         this.resolutionX = resolutionX;
         this.resolutionY = resolutionY;
         this.isDuplicate = isDuplicate;
@@ -94,10 +86,9 @@ public class Pixel
      * @param resolutionX the resolution X
      * @param resolutionY the resolution Y
      */
-    public Pixel(int x, int y, int resolutionX, int resolutionY)
+    public Pixel(double x, double y, int resolutionX, int resolutionY)
     {
-        this.x = x;
-        this.y = y;
+        super(new Coordinate(x, y), new PrecisionModel(), Integer.parseInt("0"));
         this.resolutionX = resolutionX;
         this.resolutionY = resolutionY;
     }
@@ -142,26 +133,6 @@ public class Pixel
         this.currentPartitionId = currentPartitionId;
     }
 
-    /**
-     * Gets the x.
-     *
-     * @return the x
-     */
-    public int getX()
-    {
-        return x;
-    }
-
-    /**
-     * Gets the y.
-     *
-     * @return the y
-     */
-    public int getY()
-    {
-        return y;
-    }
-
     public int getResolutionX()
     {
         return resolutionX;
@@ -186,8 +157,8 @@ public class Pixel
     public String toString()
     {
         return "Pixel(" +
-                "x=" + x +
-                ", y=" + y +
+                "x=" + getX() +
+                ", y=" + getY() +
                 ", width=" + resolutionX +
                 ", height=" + resolutionY +
                 ", isDuplicate=" + isDuplicate +
@@ -203,7 +174,7 @@ public class Pixel
     {
         int id = -1;
         try {
-            id = RasterizationUtils.Encode2DTo1DId(resolutionX, resolutionY, x, y);
+            id = RasterizationUtils.Encode2DTo1DId(resolutionX, resolutionY, (int)getX(), (int)getY());
         }
         catch (Exception e) {
             e.printStackTrace();

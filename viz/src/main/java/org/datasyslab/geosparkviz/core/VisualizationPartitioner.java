@@ -102,7 +102,7 @@ public class VisualizationPartitioner
         List<Tuple2<Pixel, Double>> duplicatePixelList = new ArrayList<Tuple2<Pixel, Double>>();
         //ArrayList<Integer> existingPartitionIds = new ArrayList<Integer>();
         // First, calculate the correct partition that the pixel belongs to
-        int partitionId = CalculatePartitionId(this.resolutionX, this.resolutionY, this.partitionX, this.partitionY, pixelDoubleTuple2._1.getX(), pixelDoubleTuple2._1.getY());
+        int partitionId = CalculatePartitionId(this.resolutionX, this.resolutionY, this.partitionX, this.partitionY, (int)pixelDoubleTuple2._1.getX(), (int)pixelDoubleTuple2._1.getY());
         Pixel newPixel = new Pixel(pixelDoubleTuple2._1().getX(), pixelDoubleTuple2._1().getY(), resolutionX, resolutionY);
         newPixel.setCurrentPartitionId(partitionId);
         newPixel.setDuplicate(false);
@@ -115,7 +115,7 @@ public class VisualizationPartitioner
         for (int x : boundaryCondition) {
             for (int y : boundaryCondition) {
                 int duplicatePartitionId = CalculatePartitionId(resolutionX, resolutionY, partitionX, partitionY,
-                        pixelDoubleTuple2._1().getX() + x * photoFilterRadius, pixelDoubleTuple2._1().getY() + y * photoFilterRadius);
+                        (int)pixelDoubleTuple2._1().getX() + x * photoFilterRadius, (int)pixelDoubleTuple2._1().getY() + y * photoFilterRadius);
                 if (duplicatePartitionId != partitionId && duplicatePartitionId >= 0) {
                     Pixel newPixelDuplicate = new Pixel(pixelDoubleTuple2._1().getX(), pixelDoubleTuple2._1().getY(), resolutionX, resolutionY);
                     newPixelDuplicate.setCurrentPartitionId(duplicatePartitionId);
@@ -167,7 +167,7 @@ public class VisualizationPartitioner
      */
     public Tuple2<Pixel, Double> assignPartitionID(Tuple2<Pixel, Double> pixelDoubleTuple2)
     {
-        int partitionId = CalculatePartitionId(this.resolutionX, this.resolutionY, this.partitionX, this.partitionY, pixelDoubleTuple2._1.getX(), pixelDoubleTuple2._1.getY());
+        int partitionId = CalculatePartitionId(this.resolutionX, this.resolutionY, this.partitionX, this.partitionY, (int)pixelDoubleTuple2._1.getX(), (int)pixelDoubleTuple2._1.getY());
         Pixel newPixel = pixelDoubleTuple2._1();
         newPixel.setCurrentPartitionId(partitionId);
         newPixel.setDuplicate(false);
