@@ -175,3 +175,17 @@ Spark SQL example:
 SELECT ST_IsSimple(polygondf.countyshape)
 FROM polygondf
 ```
+
+## ST_Buffer
+
+Introduction: Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance.
+
+Format: `ST_Buffer (A:geometry, buffer: Double)`
+
+Since: `v1.2.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_Buffer(polygondf.countyshape, 1)
+FROM polygondf
+````

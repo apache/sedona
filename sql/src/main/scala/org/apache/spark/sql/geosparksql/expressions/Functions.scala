@@ -33,7 +33,7 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.geosparksql.UDT.GeometryUDT
-import org.apache.spark.sql.types.{BooleanType, DataType, DoubleType}
+import org.apache.spark.sql.types.{BooleanType, DataType, Decimal, DoubleType}
 import org.apache.spark.unsafe.types.UTF8String
 import org.datasyslab.geosparksql.utils.GeometrySerializer
 import org.geotools.geometry.jts.JTS
@@ -94,6 +94,32 @@ case class ST_ConvexHull(inputExpressions: Seq[Expression])
 
   override def children: Seq[Expression] = inputExpressions
 }
+
+/**
+  * Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance.
+  *
+  * @param inputExpressions
+  */
+case class ST_Buffer(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 2)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val buffer: Double = inputExpressions(1).eval(input) match {
+      case a: Decimal => a.toDouble
+      case a: Double => a
+      case a: Int => a
+    }
+    new GenericArrayData(GeometrySerializer.serialize(geometry.buffer(buffer)))
+  }
+
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
 
 /**
   * Return the bounding rectangle for a Geometry
@@ -226,8 +252,8 @@ case class ST_Intersection(inputExpressions: Seq[Expression])
     val rightgeometry = GeometrySerializer.deserialize(inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData])
 
     val isIntersects = leftgeometry.intersects(rightgeometry)
-    val isLeftContainsRight = leftgeometry.contains(rightgeometry)
-    val isRightContainsLeft = rightgeometry.contains(leftgeometry)
+    lazy val isLeftContainsRight = leftgeometry.contains(rightgeometry)
+    lazy val isRightContainsLeft = rightgeometry.contains(leftgeometry)
 
     if(!isIntersects) {
       return new GenericArrayData(GeometrySerializer.serialize(emptyPolygon))
