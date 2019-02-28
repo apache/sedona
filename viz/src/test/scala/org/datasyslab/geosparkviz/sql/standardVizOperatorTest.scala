@@ -35,6 +35,59 @@ class standardVizOperatorTest extends FunSpec with BeforeAndAfterAll {
     val polygonInputLocation = resourceFolder + "primaryroads-polygon.csv"
     val csvPointInputLocation = resourceFolder + "arealm.csv"
 
+
+    it("Generate a single image") {
+      var pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation) //.createOrReplaceTempView("polygontable")
+      pointDf.sample(1).createOrReplaceTempView("pointtable")
+      spark.sql(
+        """
+          |CREATE OR REPLACE TEMP VIEW pointtable AS
+          |SELECT ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as shape
+          |FROM pointtable
+        """.stripMargin)
+      spark.sql(
+        """
+          |CREATE OR REPLACE TEMP VIEW pointtable AS
+          |SELECT *
+          |FROM pointtable
+          |WHERE ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)
+        """.stripMargin)
+      println(spark.table("pointtable").count())
+      spark.sql(
+        """
+          |CREATE OR REPLACE TEMP VIEW pixels AS
+          |SELECT pixel, shape FROM pointtable
+          |LATERAL VIEW ST_Pixelize(shape, 256, 256, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000)) AS pixel
+        """.stripMargin)
+      println(spark.table("pixels").count())
+      val pixels = spark.table("pixels")
+      spark.sql(
+        """
+          |CREATE OR REPLACE TEMP VIEW pixelaggregates AS
+          |SELECT pixel, count(*) as weight
+          |FROM pixels
+          |GROUP BY pixel
+        """.stripMargin)
+      println(spark.table("pixelaggregates").count())
+      val pixelaggregates = spark.table("pixelaggregates")
+      pixelaggregates.show()
+      spark.sql(
+        """
+          |CREATE OR REPLACE TEMP VIEW images AS
+          |SELECT ST_Render(pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates), 'red')) AS image
+          |FROM pixelaggregates
+        """.stripMargin)
+      spark.table("images").show()
+      var image = spark.table("images").take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage
+      var imageGenerator = new ImageGenerator
+      imageGenerator.SaveRasterImageAsLocalFile(image, System.getProperty("user.dir")+"/target/points", ImageType.PNG)
+      spark.sql(
+        """
+          |SELECT ST_EncodeImage(image)
+          |FROM images
+        """.stripMargin).show(false)
+    }
+
     it("Passed the pipeline on points") {
       var pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation) //.createOrReplaceTempView("polygontable")
       pointDf.createOrReplaceTempView("pointtable")
@@ -105,7 +158,7 @@ class standardVizOperatorTest extends FunSpec with BeforeAndAfterAll {
       spark.table("pixelaggregates").orderBy("weight").show()
       spark.sql(
         """
-          |CREATE OR REPLACE TEMP VIEW images AS
+          |CREATE OR REPLACE TEMP VIEW image AS
           |SELECT ST_Render(pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates))) AS image
           |FROM pixelaggregates
         """.stripMargin)

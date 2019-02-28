@@ -43,16 +43,19 @@ import org.datasyslab.geosparkviz.core.Serde.GeoSparkVizKryoRegistrator
 import org.datasyslab.geosparkviz.core.{ImageGenerator, RasterOverlayOperator}
 import org.datasyslab.geosparkviz.extension.visualizationEffect.{ChoroplethMap, HeatMap, ScatterPlot}
 import org.datasyslab.geosparkviz.utils.{ColorizeOption, ImageType}
-import org.scalatest.FunSpec
+import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
-class scalaTest extends FunSpec {
-
+class scalaTest extends FunSpec with BeforeAndAfterAll{
+  val sparkConf = new SparkConf().setAppName("scalaTest").setMaster("local[*]")
+  sparkConf.set("spark.serializer", classOf[KryoSerializer].getName)
+  sparkConf.set("spark.kryo.registrator", classOf[GeoSparkVizKryoRegistrator].getName)
+  val sparkContext = new SparkContext(sparkConf)
+  override def afterAll(): Unit = {
+    sparkContext.stop()
+  }
   describe("GeoSparkViz in Scala") {
 
-    val sparkConf = new SparkConf().setAppName("scalaTest").setMaster("local[*]")
-    sparkConf.set("spark.serializer", classOf[KryoSerializer].getName)
-    sparkConf.set("spark.kryo.registrator", classOf[GeoSparkVizKryoRegistrator].getName)
-    val sparkContext = new SparkContext(sparkConf)
+
     Logger.getLogger("org").setLevel(Level.WARN)
     Logger.getLogger("akka").setLevel(Level.WARN)
     val prop = new Properties()

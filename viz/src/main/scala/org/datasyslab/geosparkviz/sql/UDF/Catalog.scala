@@ -32,7 +32,8 @@ object Catalog {
   val expressions:Seq[FunctionBuilder] = Seq(
     ST_Pixelize,
     ST_UniPartition,
-    ST_Colorize
+    ST_Colorize,
+    ST_EncodeImage
   )
 
   val aggregateExpressions:Seq[UserDefinedAggregateFunction] = Seq(

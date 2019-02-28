@@ -50,8 +50,6 @@ public class ImageWrapperSerializer
             log.debug("Serializing ImageSerializableWrapper...");
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             ImageIO.write(object.getImage(), "png", byteArrayOutputStream);
-            output.writeInt(byteArrayOutputStream.size());
-            output.write(byteArrayOutputStream.toByteArray());
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -71,10 +69,7 @@ public class ImageWrapperSerializer
     {
         try {
             log.debug("De-serializing ImageSerializableWrapper...");
-            int length = input.readInt();
-            byte[] inputData = new byte[length];
-            input.read(inputData);
-            return new ImageSerializableWrapper(ImageIO.read(new ByteArrayInputStream(inputData)));
+            return new ImageSerializableWrapper(ImageIO.read(new ByteArrayInputStream(input.getBuffer())));
         }
         catch (IOException e) {
             e.printStackTrace();
