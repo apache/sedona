@@ -196,5 +196,14 @@ class functionTestScala extends TestBaseScala {
       assert(testtable.take(1)(0).get(0).asInstanceOf[Boolean])
       assert(!testtable.take(1)(0).get(1).asInstanceOf[Boolean])
     }
+
+    it("Passed ST_AsText") {
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      var wktDf = sparkSession.sql("select ST_AsText(countyshape) as wkt from polygondf")
+      assert(polygonDf.take(1)(0).getAs[Geometry]("countyshape").toText.equals(wktDf.take(1)(0).getAs[String]("wkt")))
+    }
   }
 }
