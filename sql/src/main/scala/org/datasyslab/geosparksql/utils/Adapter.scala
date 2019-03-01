@@ -77,7 +77,7 @@ object Adapter {
   }
 
   def toDf[T <:Geometry](spatialRDD: SpatialRDD[T], fieldNames: List[String], sparkSession: SparkSession): DataFrame = {
-    val rowRdd = spatialRDD.rawSpatialRDD.rdd.map[Row](f => Row.fromSeq(f.toString.split("\t").toSeq))
+    val rowRdd = spatialRDD.rawSpatialRDD.rdd.map[Row](f => Row.fromSeq(f.toString.split("\t",-1).toSeq))
     if (fieldNames!=null && fieldNames.nonEmpty)
     {
       var fieldArray = new Array[StructField](fieldNames.size+1)

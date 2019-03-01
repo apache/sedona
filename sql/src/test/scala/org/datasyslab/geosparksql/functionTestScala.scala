@@ -43,6 +43,17 @@ class functionTestScala extends TestBaseScala {
       functionDf.show()
     }
 
+    it("Passed ST_Buffer") {
+      val polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      polygonWktDf.show()
+      val polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      polygonDf.show()
+      val functionDf = sparkSession.sql("select ST_Buffer(polygondf.countyshape, 1) from polygondf")
+      functionDf.show()
+    }
+
     it("Passed ST_Envelope") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
