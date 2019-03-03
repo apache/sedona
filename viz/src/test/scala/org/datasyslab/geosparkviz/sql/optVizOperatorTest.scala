@@ -1,45 +1,16 @@
 package org.datasyslab.geosparkviz.sql
 
 import com.vividsolutions.jts.geom.Envelope
-import org.apache.log4j.{Level, Logger}
-import org.apache.spark.serializer.KryoSerializer
-import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
-import org.datasyslab.geosparksql.utils.GeoSparkSQLRegistrator
-import org.datasyslab.geosparkviz.core.Serde.GeoSparkVizKryoRegistrator
 import org.datasyslab.geosparkviz.sql.operator.{AggregateWithinPartitons, VizPartitioner}
-import org.datasyslab.geosparkviz.sql.utils.{Conf, GeoSparkVizRegistrator}
-import org.scalatest.{BeforeAndAfterAll, FunSpec}
+import org.datasyslab.geosparkviz.sql.utils.{Conf, LineageDecoder}
 
-class optVizOperatorTest extends FunSpec with BeforeAndAfterAll{
-
-  var spark: SparkSession = _
-
-
-  override def afterAll(): Unit = {
-    //BabylonRegistrator.dropAll(sparkSession)
-    //sparkSession.stop
-  }
+class optVizOperatorTest extends TestBaseScala {
 
   describe("GeoSparkViz SQL function Test") {
-    spark = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
-      config("spark.kryo.registrator", classOf[GeoSparkVizKryoRegistrator].getName).
-      master("local[*]").appName("readTestScala").getOrCreate()
-    Logger.getLogger("org").setLevel(Level.WARN)
-    Logger.getLogger("akka").setLevel(Level.WARN)
-
-    GeoSparkSQLRegistrator.registerAll(spark)
-    GeoSparkVizRegistrator.registerAll(spark)
-
-    val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
-
-    val polygonInputLocationWkt = resourceFolder + "county_small.tsv"
-    val polygonInputLocation = resourceFolder + "primaryroads-polygon.csv"
-    val csvPointInputLocation = resourceFolder + "arealm.csv"
 
     it("Passed full pipeline using optimized operator") {
       var pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation) //.createOrReplaceTempView("polygontable")
-      pointDf.show()
       pointDf.createOrReplaceTempView("pointtable")
       spark.sql(
         """
@@ -54,14 +25,12 @@ class optVizOperatorTest extends FunSpec with BeforeAndAfterAll{
           |FROM pointtable
           |WHERE ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)
         """.stripMargin)
-      println(spark.table("pointtable").count())
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW pixels AS
           |SELECT pixel, shape FROM pointtable
           |LATERAL VIEW ST_Pixelize(shape, 1000, 1000, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000)) AS pixel
         """.stripMargin)
-      println(spark.table("pixels").count())
 
       // Test visualization partitioner
       val zoomLevel = 2
@@ -72,8 +41,7 @@ class optVizOperatorTest extends FunSpec with BeforeAndAfterAll{
       assert(newDf.rdd.getNumPartitions == secondaryPID)
 
       // Test aggregation within partitions
-      val result = AggregateWithinPartitons(newDf.withColumn("weight", lit(100.0)), "pixel", "weight", "sum")
-      result.show()
+      val result = AggregateWithinPartitons(newDf.withColumn("weight", lit(100.0)), "pixel", "weight", "avg")
       assert(result.rdd.getNumPartitions == secondaryPID)
 
       // Test the colorize operator
@@ -87,9 +55,8 @@ class optVizOperatorTest extends FunSpec with BeforeAndAfterAll{
       spark.table("colors").show()
     }
 
-    it("Passed full pipeline - aggregate:count - color:uniform") {
+    it("Passed full pipeline - aggregate:avg - color:uniform") {
       var pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation) //.createOrReplaceTempView("polygontable")
-      pointDf.show()
       pointDf.createOrReplaceTempView("pointtable")
       spark.sql(
         """
@@ -104,14 +71,12 @@ class optVizOperatorTest extends FunSpec with BeforeAndAfterAll{
           |FROM pointtable
           |WHERE ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)
         """.stripMargin)
-      println(spark.table("pointtable").count())
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW pixels AS
           |SELECT pixel, shape FROM pointtable
           |LATERAL VIEW ST_Pixelize(shape, 1000, 1000, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000)) AS pixel
         """.stripMargin)
-      println(spark.table("pixels").count())
 
       // Test visualization partitioner
       val zoomLevel = 2
@@ -123,7 +88,6 @@ class optVizOperatorTest extends FunSpec with BeforeAndAfterAll{
 
       // Test aggregation within partitions
       val result = AggregateWithinPartitons(newDf, "pixel", "weight", "count")
-      result.show()
       assert(result.rdd.getNumPartitions == secondaryPID)
 
       // Test the colorize operator
@@ -135,6 +99,13 @@ class optVizOperatorTest extends FunSpec with BeforeAndAfterAll{
            |FROM pixelaggregates
         """.stripMargin)
       spark.table("colors").show()
+    }
+
+    it("Passed lineage decoder"){
+      assert(LineageDecoder("01") == "2-1-0")
+      assert(LineageDecoder("12") == "2-2-1")
+      assert(LineageDecoder("333") == "3-7-7")
+      assert(LineageDecoder("012") == "3-2-1")
     }
   }
 }

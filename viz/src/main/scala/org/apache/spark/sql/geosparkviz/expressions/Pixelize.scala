@@ -31,8 +31,8 @@ import com.esotericsoftware.kryo.io.Output
 import com.vividsolutions.jts.geom._
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{Expression, Generator}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
+import org.apache.spark.sql.catalyst.expressions.{Expression, Generator}
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.geosparkviz.UDT.PixelUDT
 import org.apache.spark.sql.types.StructType

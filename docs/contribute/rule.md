@@ -11,7 +11,7 @@ It is important to confirm that your contribution is acceptable. Hence, you have
 
 * Pick an issue from the Issues tagged by ==Help Wanted== on [GeoSpark Issues](https://github.com/DataSystemsLab/GeoSpark/issues).
 
-* Announce what you are going to work on in advance if no GitHub issues match your scenario. To do this, contact [GeoSpark project committer](../contact/contact.md#committer).
+* Announce what you are going to work on in advance if no GitHub issues match your scenario. To do this, contact [GeoSpark project committer](../contact.md#committer).
 
 
 

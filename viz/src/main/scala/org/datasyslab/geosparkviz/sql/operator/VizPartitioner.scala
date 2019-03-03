@@ -29,7 +29,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Row}
 import org.datasyslab.geospark.spatialPartitioning.QuadtreePartitioning
 import org.datasyslab.geospark.spatialPartitioning.quadtree.QuadRectangle
-import org.datasyslab.geosparkviz.sql.utils.Conf
+import org.datasyslab.geosparkviz.sql.utils.{Conf, LineageDecoder}
 import org.datasyslab.geosparkviz.utils.Pixel
 
 import scala.collection.JavaConverters._
@@ -77,16 +77,14 @@ object VizPartitioner {
         matchedZones.foreach(secondaryZone=>{
           var currentValues = cursorRow.toSeq.toBuffer
           // Assign secondary id
-          currentValues(secondIdPos) = secondaryZone.lineage
+          currentValues(secondIdPos) = LineageDecoder(secondaryZone.lineage)
           // Assign primary id
-          currentValues(primaryIdPos) = secondaryZone.lineage.take(zoomLevel)
+          currentValues(primaryIdPos) = LineageDecoder(secondaryZone.lineage.take(zoomLevel))
           list+=Row.fromSeq(currentValues)
         })
       }
       list.iterator
     })
-//    val maxPossibleNumPartition = secondaryPartitionTree.getLeafZones.size()
-//    println("max possible num partition = "+maxPossibleNumPartition)
     val dfWithPID = partitionedDf.sparkSession.createDataFrame(rddWithPID, partitionedDf.schema)
     dfWithPID.repartition(dfWithPID.select(Conf.SecondaryPID).distinct().count().toInt, expr(Conf.SecondaryPID))
 //      .sortWithinPartitions(Conf.SecondaryPID)

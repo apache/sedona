@@ -31,8 +31,8 @@ import java.util.Properties
 
 import com.vividsolutions.jts.geom.Envelope
 import org.apache.log4j.{Level, Logger}
-import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.storage.StorageLevel
+import org.apache.spark.{SparkConf, SparkContext}
 import org.datasyslab.geospark.enums.{FileDataSplitter, GridType, IndexType}
 import org.datasyslab.geospark.formatMapper.EarthdataHDFPointMapper
 import org.datasyslab.geospark.spatialOperator.JoinQuery

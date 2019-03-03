@@ -1,3 +1,1 @@
-Coming soon...
-
-For now, please read [GeoSparkViz JavaDoc](http://www.public.asu.edu/~jiayu2/geosparkviz/javadoc/) and [GeoSparkViz Template Project](https://github.com/jiayuasu/GeoSparkTemplateProject/tree/master/geospark-viz).
+The page outlines the steps to manage spatial data using GeoSparkSQL. ==The example code is written in Scala but also works for Java==.

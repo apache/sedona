@@ -1,6 +1,6 @@
 /**
-  * FILE: Catalog
-  * Copyright (c) 2015 - 2018 GeoSpark Development Team
+  * FILE: LineageDecoder
+  * Copyright (c) 2015 - 2019 GeoSpark Development Team
   *
   * MIT License
   *
@@ -22,22 +22,30 @@
   * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   * SOFTWARE.
   */
-package org.datasyslab.geosparkviz.sql.UDF
+package org.datasyslab.geosparkviz.sql.utils
 
-import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
-import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
-import org.apache.spark.sql.geosparkviz.expressions._
+object LineageDecoder {
 
-object Catalog {
-  val expressions:Seq[FunctionBuilder] = Seq(
-    ST_Pixelize,
-    ST_TileName,
-    ST_Colorize,
-    ST_EncodeImage
-  )
+  def apply(lineage:String): String = {
+    var lineageIterator = lineage
+    var partitionX = 0
+    var partitionY = 0
+    for (i <- 1 to lineage.length){
+      val offset = relativeOffset(lineageIterator.take(1).toInt)
+      partitionX = partitionX*2 + offset._1
+      partitionY = partitionY*2 + offset._2
+      lineageIterator = lineageIterator.drop(1)
+    }
+    lineage.length+"-"+partitionX+"-"+partitionY
+  }
 
-  val aggregateExpressions:Seq[UserDefinedAggregateFunction] = Seq(
-    new ST_Render,
-    new ST_Render_v2
-  )
+  def relativeOffset(id:Int): (Int, Int) = {
+    id match {
+      case 0 => (0,0)
+      case 1 => (1,0)
+      case 2 => (0,1)
+      case 3 => (1,1)
+    }
+  }
+
 }

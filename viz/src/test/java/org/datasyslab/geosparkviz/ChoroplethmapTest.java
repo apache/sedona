@@ -54,31 +54,6 @@ import java.awt.Color;
 public class ChoroplethmapTest
         extends GeoSparkVizTestBase
 {
-
-    /**
-     * Sets the up before class.
-     *
-     * @throws Exception the exception
-     */
-    @BeforeClass
-    public static void setUpBeforeClass()
-            throws Exception
-    {
-        initialize(ChoroplethmapTest.class.getSimpleName());
-    }
-
-    /**
-     * Tear down.
-     *
-     * @throws Exception the exception
-     */
-    @AfterClass
-    public static void tearDown()
-            throws Exception
-    {
-        sparkContext.stop();
-    }
-
     /**
      * Test rectangle RDD visualization.
      *

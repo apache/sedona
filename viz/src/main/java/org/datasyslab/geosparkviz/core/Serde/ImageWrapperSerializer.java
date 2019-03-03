@@ -50,6 +50,8 @@ public class ImageWrapperSerializer
             log.debug("Serializing ImageSerializableWrapper...");
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             ImageIO.write(object.getImage(), "png", byteArrayOutputStream);
+            output.writeInt(byteArrayOutputStream.size());
+            output.write(byteArrayOutputStream.toByteArray());
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -58,9 +60,17 @@ public class ImageWrapperSerializer
 
     public byte[] writeImage(ImageSerializableWrapper object)
     {
-        Kryo kryo = new Kryo();
-        Output output = new Output();
-        write(kryo, output, object);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(object.getImage(), "png", byteArrayOutputStream);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        int arraySize = byteArrayOutputStream.size();
+        Output output = new Output(arraySize+4);
+        output.writeInt(arraySize);
+        output.write(byteArrayOutputStream.toByteArray());
         return output.toBytes();
     }
 
@@ -69,7 +79,11 @@ public class ImageWrapperSerializer
     {
         try {
             log.debug("De-serializing ImageSerializableWrapper...");
-            return new ImageSerializableWrapper(ImageIO.read(new ByteArrayInputStream(input.getBuffer())));
+            int length = input.readInt();
+            byte[] inputData = new byte[length];
+            input.read(inputData);
+            return new ImageSerializableWrapper(ImageIO.read(new ByteArrayInputStream(inputData)));
+
         }
         catch (IOException e) {
             e.printStackTrace();

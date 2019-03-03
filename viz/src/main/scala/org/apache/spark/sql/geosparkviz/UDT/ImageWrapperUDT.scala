@@ -25,21 +25,19 @@
   */
 package org.apache.spark.sql.geosparkviz.UDT
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-
-import javax.imageio.ImageIO
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.types.{ArrayType, ByteType, DataType, UserDefinedType}
 import org.datasyslab.geosparkviz.core.ImageSerializableWrapper
+import org.datasyslab.geosparkviz.core.Serde.ImageWrapperSerializer
 
 private[sql] class ImageWrapperUDT extends UserDefinedType[ImageSerializableWrapper]{
   override def sqlType: DataType = ArrayType(ByteType, containsNull = false)
 
   override def serialize(obj: ImageSerializableWrapper): GenericArrayData =
   {
-    val byteArrayOutputStream = new ByteArrayOutputStream
-    ImageIO.write(obj.getImage,"png",byteArrayOutputStream)
-    new GenericArrayData(byteArrayOutputStream.toByteArray)
+
+    val serializer = new ImageWrapperSerializer
+    new GenericArrayData(serializer.writeImage(obj))
   }
 
   override def deserialize(datum: Any): ImageSerializableWrapper =
@@ -47,7 +45,8 @@ private[sql] class ImageWrapperUDT extends UserDefinedType[ImageSerializableWrap
     datum match
     {
       case values: ArrayData => {
-        return new ImageSerializableWrapper(ImageIO.read(new ByteArrayInputStream(values.toByteArray())))
+        val serializer = new ImageWrapperSerializer
+        serializer.readImage(values.toByteArray())
       }
     }
   }

@@ -51,31 +51,6 @@ import java.awt.Color;
 public class ScatterplotTest
         extends GeoSparkVizTestBase
 {
-
-    /**
-     * Sets the up before class.
-     *
-     * @throws Exception the exception
-     */
-    @BeforeClass
-    public static void setUpBeforeClass()
-            throws Exception
-    {
-        initialize(ScatterplotTest.class.getSimpleName());
-    }
-
-    /**
-     * Tear down.
-     *
-     * @throws Exception the exception
-     */
-    @AfterClass
-    public static void tearDown()
-            throws Exception
-    {
-        sparkContext.stop();
-    }
-
     /**
      * Test encode decode id.
      *
