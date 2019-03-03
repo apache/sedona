@@ -32,10 +32,10 @@ GeoSpark 1.2.0+: GeoSpark-core, GeoSpark-SQL, GeoSpark-Viz
 ![Settings](https://cloud.githubusercontent.com/assets/28304007/25633526/69752486-2f45-11e7-9963-358d5ff29165.gif)
 
 5. Visualize GeoSparkSQL results
-![sql-zeppelin](docs/api/image/sql-zeppelin.png)
+![sql-zeppelin](https://github.com/DataSystemsLab/GeoSpark/blob/master/docs/image/sql-zeppelin.png)
 
 6. Display GeoSparkViz results
-![viz-zeppelin](docs/api/image/sql-zeppelin.png)
+![viz-zeppelin](https://github.com/DataSystemsLab/GeoSpark/blob/master/docs/image/viz-zeppelin.png)
 
 ## Acknowledgement
 
