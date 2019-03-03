@@ -8,17 +8,19 @@
 
 GeoSpark is a cluster computing system for processing large-scale spatial data. GeoSpark extends Apache Spark / SparkSQL with a set of out-of-the-box Spatial Resilient Distributed Datasets (SRDDs)/ SpatialSQL that efficiently load, process, and analyze large-scale spatial data across machines.
 
-GeoSpark contains three modules:
+GeoSpark contains several modules:
 
 | Name  |  API |  Spark compatibility|Dependency|
 |---|---|---|---|
 | GeoSpark-core  | RDD  | Spark 2.X/1.X  | Spark-core|
 | GeoSpark-SQL  | SQL/DataFrame  | SparkSQL 2.1 and later | Spark-core, Spark-SQL, GeoSpark-core|
 |  GeoSpark-Viz |  RDD, SQL/DataFrame | RDD - Spark 2.X/1.X, SQL - Spark 2.1 and later|Spark-core, Spark-SQL, GeoSpark-core, GeoSpark-SQL|
+|  GeoSpark-Zeppelin |  Apache Zeppelin | Spark 2.1+, Zeppelin 0.8.1+|Spark-core, Spark-SQL, GeoSpark-core, GeoSpark-SQL, GeoSpark-Viz|
 
 * Core: GeoSpark SpatialRDDs and Query Operators. 
 * SQL: SQL interfaces for GeoSpark core.
 * Viz: Visualization extension of GeoSpark Spatial RDD and DataFrame.
+* GeoSpark-Zeppelin: GeoSpark visualization plugin for Apache Zeppelin
 
 GeoSpark development team has published four papers about GeoSpark. Please read [Publications](http://datasystemslab.github.io/GeoSpark/contact/publication/). 
 
