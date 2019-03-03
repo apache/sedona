@@ -13,7 +13,7 @@ Apache Zeppelin 0.8.1
 GeoSpark 1.2.0+: GeoSpark-core, GeoSpark-SQL, GeoSpark-Viz
 
 # Installation
-1. [Optional] Create a folder in Zeppelin installation root folder called **helium**
+1. [Optional] Create a folder called **helium** in Zeppelin installation root folder.
 2. [Optional] Create a file called **geospark-zeppelin.json** in this folder and put the following content in this file. You need to change the artifact path!
 ```
 {
