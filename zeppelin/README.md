@@ -15,16 +15,17 @@ GeoSpark 1.2.0+: GeoSpark-core, GeoSpark-SQL, GeoSpark-Viz
 # Installation
 1. [Optional] Create a folder in Zeppelin installation root folder called **helium**
 2. [Optional] Create a file called **geospark-zeppelin.json** in this folder and put the following content in this file. You need to change the artifact path!
-	```
-	{
+```
+{
   "type": "VISUALIZATION",
   "name": "geospark-zeppelin",
   "description": "Zeppelin visualization support for GeoSpark",
   "artifact": "/Absolute/Path/GeoSpark/geospark-zeppelin",
   "license": "BSD-2-Clause",
   "icon": "<i class='fa fa-globe'></i>"
-	}
-	```
+}
+```
+	
 3. Open Zeppelin Helium interface and enable GeoSpark-Zeppelin
 ![Enable Package](https://cloud.githubusercontent.com/assets/28304007/25633533/6c508d9e-2f45-11e7-99a7-505d94c382ba.gif)
 
