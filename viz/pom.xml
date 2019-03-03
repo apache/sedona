@@ -15,18 +15,34 @@
 	<packaging>jar</packaging>
 	
 	<dependencies>
-		<dependency>
-			<groupId>org.datasyslab</groupId>
-			<artifactId>geospark</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.datasyslab</groupId>
+            <artifactId>geospark</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.datasyslab</groupId>
+            <artifactId>geospark-sql_2.3</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql_${scala.compat.version}</artifactId>
+            <version>${spark.version}</version>
+            <scope>provided</scope>
+        </dependency>
 		<dependency>
   			<groupId>org.datasyslab</groupId>
   			<artifactId>JFreeSVGplus</artifactId>
   			<version>0.1.0</version>
 		</dependency>
-
+        <dependency>
+            <groupId>org.beryx</groupId>
+            <artifactId>awt-color-factory</artifactId>
+            <version>1.0.0</version>
+        </dependency>
         <dependency>
             <groupId>org.datasyslab</groupId>
             <artifactId>sernetcdf</artifactId>
@@ -41,6 +57,31 @@
 	</dependencies>
 	<build>
         <sourceDirectory>src/main/java</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.scalastyle</groupId>
+                <artifactId>scalastyle-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <configuration>
+                    <verbose>false</verbose>
+                    <failOnViolation>true</failOnViolation>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <failOnWarning>false</failOnWarning>
+                    <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
+                    <testSourceDirectory>${project.basedir}/src/test/scala</testSourceDirectory>
+                    <configLocation>${project.basedir}/src/test/resources/scalastyle_config.xml</configLocation>
+                    <outputFile>${project.basedir}/target/scalastyle-output.xml</outputFile>
+                    <outputEncoding>UTF-8</outputEncoding>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
 	</build>
 </project>
   

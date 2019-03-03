@@ -189,3 +189,17 @@ Spark SQL example:
 SELECT ST_Buffer(polygondf.countyshape, 1)
 FROM polygondf
 ````
+
+## ST_AsText
+
+Introduction: Return the Well-Known Text string representation of a geometry
+
+Format: `ST_AsText (A:geometry)`
+
+Since: `v1.2.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_AsText(polygondf.countyshape)
+FROM polygondf
+````

@@ -50,53 +50,22 @@ public class ParallelVisualizationTest
     /**
      * The resolution X.
      */
-    static int resolutionX;
+    static int resolutionX = 1000;
 
     /**
      * The resolution Y.
      */
-    static int resolutionY;
+    static int resolutionY = 600;
 
     /**
      * The partition X.
      */
-    static int partitionX;
+    static int partitionX = 2;
 
     /**
      * The partition Y.
      */
-    static int partitionY;
-
-    /**
-     * Sets the up before class.
-     *
-     * @throws Exception the exception
-     */
-    @BeforeClass
-    public static void setUpBeforeClass()
-            throws Exception
-    {
-        initialize(ParallelVisualizationTest.class.getSimpleName());
-        resolutionX = 1000;
-
-        resolutionY = 600;
-
-        partitionX = 2;
-
-        partitionY = 2;
-    }
-
-    /**
-     * Tear down.
-     *
-     * @throws Exception the exception
-     */
-    @AfterClass
-    public static void tearDown()
-            throws Exception
-    {
-        sparkContext.stop();
-    }
+    static int partitionY = 2;
 
     /**
      * Test point RDD visualization.

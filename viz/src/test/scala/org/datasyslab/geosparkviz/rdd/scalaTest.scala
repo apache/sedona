@@ -24,7 +24,7 @@
  *
  */
 
-package org.datasyslab.geosparkviz
+package org.datasyslab.geosparkviz.rdd
 
 import java.awt.Color
 import java.io.FileInputStream
@@ -43,60 +43,65 @@ import org.datasyslab.geosparkviz.core.Serde.GeoSparkVizKryoRegistrator
 import org.datasyslab.geosparkviz.core.{ImageGenerator, RasterOverlayOperator}
 import org.datasyslab.geosparkviz.extension.visualizationEffect.{ChoroplethMap, HeatMap, ScatterPlot}
 import org.datasyslab.geosparkviz.utils.{ColorizeOption, ImageType}
-import org.scalatest.FunSpec
+import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
-class scalaTest extends FunSpec {
+class scalaTest extends FunSpec with BeforeAndAfterAll{
+  val sparkConf = new SparkConf().setAppName("scalaTest").setMaster("local[*]")
+  sparkConf.set("spark.serializer", classOf[KryoSerializer].getName)
+  sparkConf.set("spark.kryo.registrator", classOf[GeoSparkVizKryoRegistrator].getName)
+  var sparkContext:SparkContext = _
+  Logger.getLogger("org").setLevel(Level.WARN)
+  Logger.getLogger("akka").setLevel(Level.WARN)
+  val prop = new Properties()
+  val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
+  val demoOutputPath = "target/scala/demo"
+  var ConfFile = new FileInputStream(resourceFolder + "babylon.point.properties")
+  prop.load(ConfFile)
+  val scatterPlotOutputPath = System.getProperty("user.dir") + "/" + demoOutputPath + "/scatterplot"
+  val heatMapOutputPath = System.getProperty("user.dir") + "/" + demoOutputPath + "/heatmap"
+  val choroplethMapOutputPath = System.getProperty("user.dir") + "/" + demoOutputPath + "/choroplethmap"
+  val parallelFilterRenderStitchOutputPath = System.getProperty("user.dir") + "/" + demoOutputPath + "/parallelfilterrenderstitchheatmap"
+  val earthdataScatterPlotOutputPath = System.getProperty("user.dir") + "/" + demoOutputPath + "/earthdatascatterplot"
+  val PointInputLocation = resourceFolder + prop.getProperty("inputLocation")
+  val PointOffset = prop.getProperty("offset").toInt
+  val PointSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"))
+  val PointNumPartitions = prop.getProperty("numPartitions").toInt
+  ConfFile = new FileInputStream(resourceFolder + "babylon.rectangle.properties")
+  prop.load(ConfFile)
+  val RectangleInputLocation = resourceFolder + prop.getProperty("inputLocation")
+  val RectangleOffset = prop.getProperty("offset").toInt
+  val RectangleSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"))
+  val RectangleNumPartitions = prop.getProperty("numPartitions").toInt
+  ConfFile = new FileInputStream(resourceFolder + "babylon.polygon.properties")
+  prop.load(ConfFile)
+  val PolygonInputLocation = resourceFolder + prop.getProperty("inputLocation")
+  val PolygonOffset = prop.getProperty("offset").toInt
+  val PolygonSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"))
+  val PolygonNumPartitions = prop.getProperty("numPartitions").toInt
+  ConfFile = new FileInputStream(resourceFolder + "babylon.linestring.properties")
+  prop.load(ConfFile)
+  val LineStringInputLocation = resourceFolder + prop.getProperty("inputLocation")
+  val LineStringOffset = prop.getProperty("offset").toInt
+  val LineStringSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"))
+  val LineStringNumPartitions = prop.getProperty("numPartitions").toInt
+  val USMainLandBoundary = new Envelope(-126.790180, -64.630926, 24.863836, 50.000)
+  val earthdataInputLocation = System.getProperty("user.dir") + "/src/test/resources/modis/modis.csv"
+  val earthdataNumPartitions = 5
+  val HDFIncrement = 5
+  val HDFOffset = 2
+  val HDFRootGroupName = "MOD_Swath_LST"
+  val HDFDataVariableName = "LST"
+  val HDFDataVariableList = Array("LST", "QC", "Error_LST", "Emis_31", "Emis_32")
+  val HDFswitchXY = true
+  val urlPrefix = System.getProperty("user.dir") + "/src/test/resources/modis/"
 
+  override def beforeAll(): Unit = {
+    sparkContext = new SparkContext(sparkConf)
+  }
+  override def afterAll(): Unit = {
+    sparkContext.stop()
+  }
   describe("GeoSparkViz in Scala") {
-
-    val sparkConf = new SparkConf().setAppName("scalaTest").setMaster("local[*]")
-    sparkConf.set("spark.serializer", classOf[KryoSerializer].getName)
-    sparkConf.set("spark.kryo.registrator", classOf[GeoSparkVizKryoRegistrator].getName)
-    val sparkContext = new SparkContext(sparkConf)
-    Logger.getLogger("org").setLevel(Level.WARN)
-    Logger.getLogger("akka").setLevel(Level.WARN)
-    val prop = new Properties()
-    val resourcePath = "src/test/resources/"
-    val demoOutputPath = "target/scala/demo"
-    var ConfFile = new FileInputStream(resourcePath + "babylon.point.properties")
-    prop.load(ConfFile)
-    val scatterPlotOutputPath = System.getProperty("user.dir") + "/" + demoOutputPath + "/scatterplot"
-    val heatMapOutputPath = System.getProperty("user.dir") + "/" + demoOutputPath + "/heatmap"
-    val choroplethMapOutputPath = System.getProperty("user.dir") + "/" + demoOutputPath + "/choroplethmap"
-    val parallelFilterRenderStitchOutputPath = System.getProperty("user.dir") + "/" + demoOutputPath + "/parallelfilterrenderstitchheatmap"
-    val earthdataScatterPlotOutputPath = System.getProperty("user.dir") + "/" + demoOutputPath + "/earthdatascatterplot"
-    val PointInputLocation = "file://" + System.getProperty("user.dir") + "/" + resourcePath + prop.getProperty("inputLocation")
-    val PointOffset = prop.getProperty("offset").toInt
-    val PointSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"))
-    val PointNumPartitions = prop.getProperty("numPartitions").toInt
-    ConfFile = new FileInputStream(resourcePath + "babylon.rectangle.properties")
-    prop.load(ConfFile)
-    val RectangleInputLocation = "file://" + System.getProperty("user.dir") + "/" + resourcePath + prop.getProperty("inputLocation")
-    val RectangleOffset = prop.getProperty("offset").toInt
-    val RectangleSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"))
-    val RectangleNumPartitions = prop.getProperty("numPartitions").toInt
-    ConfFile = new FileInputStream(resourcePath + "babylon.polygon.properties")
-    prop.load(ConfFile)
-    val PolygonInputLocation = "file://" + System.getProperty("user.dir") + "/" + resourcePath + prop.getProperty("inputLocation")
-    val PolygonOffset = prop.getProperty("offset").toInt
-    val PolygonSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"))
-    val PolygonNumPartitions = prop.getProperty("numPartitions").toInt
-    ConfFile = new FileInputStream(resourcePath + "babylon.linestring.properties")
-    prop.load(ConfFile)
-    val LineStringInputLocation = "file://" + System.getProperty("user.dir") + "/" + resourcePath + prop.getProperty("inputLocation")
-    val LineStringOffset = prop.getProperty("offset").toInt
-    val LineStringSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"))
-    val LineStringNumPartitions = prop.getProperty("numPartitions").toInt
-    val USMainLandBoundary = new Envelope(-126.790180, -64.630926, 24.863836, 50.000)
-    val earthdataInputLocation = System.getProperty("user.dir") + "/src/test/resources/modis/modis.csv"
-    val earthdataNumPartitions = 5
-    val HDFIncrement = 5
-    val HDFOffset = 2
-    val HDFRootGroupName = "MOD_Swath_LST"
-    val HDFDataVariableName = "LST"
-    val HDFDataVariableList = Array("LST", "QC", "Error_LST", "Emis_31", "Emis_32")
-    val HDFswitchXY = true
-    val urlPrefix = System.getProperty("user.dir") + "/src/test/resources/modis/"
 
     it("should pass scatter plot") {
       val spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions, StorageLevel.MEMORY_ONLY)

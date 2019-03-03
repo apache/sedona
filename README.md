@@ -14,11 +14,11 @@ GeoSpark contains three modules:
 |---|---|---|---|
 | GeoSpark-core  | RDD  | Spark 2.X/1.X  | Spark-core|
 | GeoSpark-SQL  | SQL/DataFrame  | SparkSQL 2.1 and later | Spark-core, Spark-SQL, GeoSpark-core|
-|  GeoSpark-Viz |  RDD | Spark 2.X/1.X |Spark-core, GeoSpark-core|
+|  GeoSpark-Viz |  RDD, SQL/DataFrame | RDD - Spark 2.X/1.X, SQL - Spark 2.1 and later|Spark-core, Spark-SQL, GeoSpark-core, GeoSpark-SQL|
 
 * Core: GeoSpark SpatialRDDs and Query Operators. 
 * SQL: SQL interfaces for GeoSpark core.
-* Viz: Visualization extension of GeoSpark core.
+* Viz: Visualization extension of GeoSpark Spatial RDD and DataFrame.
 
 GeoSpark development team has published four papers about GeoSpark. Please read [Publications](http://datasystemslab.github.io/GeoSpark/contact/publication/). 
 

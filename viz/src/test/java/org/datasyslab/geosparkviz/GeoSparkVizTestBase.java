@@ -33,6 +33,8 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.serializer.KryoSerializer;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geosparkviz.core.Serde.GeoSparkVizKryoRegistrator;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
 import java.io.InputStream;
 import java.util.Properties;
@@ -183,5 +185,29 @@ public class GeoSparkVizTestBase
         LineStringNumPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
 
         USMainLandBoundary = new Envelope(-126.790180, -64.630926, 24.863836, 50.000);
+    }
+
+    /**
+     * Sets the up before class.
+     *
+     * @throws Exception the exception
+     */
+    @BeforeClass
+    public static void setUpBeforeClass()
+            throws Exception
+    {
+        initialize(GeoSparkVizTestBase.class.getSimpleName());
+    }
+
+    /**
+     * Tear down.
+     *
+     * @throws Exception the exception
+     */
+    @AfterClass
+    public static void tearDown()
+            throws Exception
+    {
+        sparkContext.stop();
     }
 }

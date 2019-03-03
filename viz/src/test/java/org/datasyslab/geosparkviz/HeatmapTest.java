@@ -48,30 +48,6 @@ public class HeatmapTest
 {
 
     /**
-     * Sets the up before class.
-     *
-     * @throws Exception the exception
-     */
-    @BeforeClass
-    public static void setUpBeforeClass()
-            throws Exception
-    {
-        initialize(HeatmapTest.class.getSimpleName());
-    }
-
-    /**
-     * Tear down.
-     *
-     * @throws Exception the exception
-     */
-    @AfterClass
-    public static void tearDown()
-            throws Exception
-    {
-        sparkContext.stop();
-    }
-
-    /**
      * Test point RDD visualization.
      *
      * @throws Exception the exception

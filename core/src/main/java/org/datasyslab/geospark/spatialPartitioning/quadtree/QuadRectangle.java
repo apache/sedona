@@ -33,7 +33,8 @@ public class QuadRectangle
         implements Serializable
 {
     public final double x, y, width, height;
-    public Integer partitionId = -1;
+    public Integer partitionId = null;
+    public String lineage = null;
 
     public QuadRectangle(Envelope envelope)
     {
@@ -100,7 +101,7 @@ public class QuadRectangle
     @Override
     public String toString()
     {
-        return "x: " + x + " y: " + y + " w: " + width + " h: " + height + " PartitionId: " + partitionId;
+        return "x: " + x + " y: " + y + " w: " + width + " h: " + height + " PartitionId: " + partitionId + " Lineage: " +lineage;
     }
 
     @Override

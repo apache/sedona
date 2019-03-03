@@ -58,6 +58,22 @@ public class ImageWrapperSerializer
         }
     }
 
+    public byte[] writeImage(ImageSerializableWrapper object)
+    {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(object.getImage(), "png", byteArrayOutputStream);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        int arraySize = byteArrayOutputStream.size();
+        Output output = new Output(arraySize+4);
+        output.writeInt(arraySize);
+        output.write(byteArrayOutputStream.toByteArray());
+        return output.toBytes();
+    }
+
     @Override
     public ImageSerializableWrapper read(Kryo kryo, Input input, Class<ImageSerializableWrapper> type)
     {
@@ -67,10 +83,18 @@ public class ImageWrapperSerializer
             byte[] inputData = new byte[length];
             input.read(inputData);
             return new ImageSerializableWrapper(ImageIO.read(new ByteArrayInputStream(inputData)));
+
         }
         catch (IOException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public ImageSerializableWrapper readImage(byte[] inputArray)
+    {
+        Kryo kryo = new Kryo();
+        Input input = new Input(inputArray);
+        return read(kryo, input, ImageSerializableWrapper.class);
     }
 }

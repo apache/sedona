@@ -12,9 +12,9 @@ pages:
     - Tutorial:
       - Write an Spatial RDD application: tutorial/rdd.md
       - Write an Spatial SQL/DataFrame application: tutorial/sql.md
-      - Visualize an Spatial RDD: tutorial/viz.md
-      - Template project: tutorial/GeoSpark-Runnable-DEMO.md
-      - Frequently Asked Questions (FAQ): tutorial/faq.md
+      - Visualize Spatial DataFrame/RDD: tutorial/viz.md
+      - GeoSpark template project: tutorial/GeoSpark-Runnable-DEMO.md
+      - Frequently Asked Questions: tutorial/faq.md
       - Tune GeoSpark RDD application: tutorial/Advanced-Tutorial-Tune-your-GeoSpark-Application.md
       - Benchmark: tutorial/benchmark.md            
     - API:
@@ -28,14 +28,14 @@ pages:
         - Aggregate function: api/sql/GeoSparkSQL-AggregateFunction.md
         - Join query (optimizer): api/sql/GeoSparkSQL-Optimizer.md
         - Parameter: api/sql/GeoSparkSQL-Parameter.md
-      - GeoSpark viz:
-        - Scala/Java doc:  api/Babylon-Scala-and-Java-API.md
+      - GeoSpark Viz:
+        - DataFrame/SQL: api/viz/sql.md
+        - RDD: api/viz/Babylon-Scala-and-Java-API.md
     - Contributing:
       - Contributing rule: contribute/rule.md
       - Contributor: contribute/contributor.md 
-    - Contact:
-      - Questions: contact/contact.md
-      - Publications: contact/publication.md
+    - Contact: contact.md
+    - Publications: publication.md
     - License: 
       - License-before-1.2.0: license/License-before-1-2-0.md
       - License: license/License.md
