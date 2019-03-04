@@ -258,7 +258,7 @@ public class FormatMapper<T extends Geometry>
         final int actualEndOffset = this.endOffset >= 0 ? this.endOffset : (this.geometryType == GeometryType.POINT? startOffset+1:columns.length - 1);
         final Coordinate[] coordinates = new Coordinate[(actualEndOffset - startOffset + 1) / 2];
         for (int i = this.startOffset; i <= actualEndOffset; i += 2) {
-            coordinates[i / 2] = new Coordinate(Double.parseDouble(columns[i]), Double.parseDouble(columns[i + 1]));
+            coordinates[(i - startOffset) / 2 ] = new Coordinate(Double.parseDouble(columns[i]), Double.parseDouble(columns[i + 1]));
         }
         if (carryInputData)
         {
