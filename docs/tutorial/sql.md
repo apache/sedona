@@ -129,6 +129,11 @@ root
 
 !!!note
 	GeoSparkSQL provides more than 10 different functions to create a Geometry column, please read [GeoSparkSQL constructor API](../api/sql/GeoSparkSQL-Constructor.md).
+	
+## Load Shapefile and GeoJSON
+
+Shapefile and GeoJSON must be loaded by SpatialRDD and converted to DataFrame using Adapter. Please read [Load SpatialRDD](rdd/#create-a-generic-spatialrdd-behavoir-changed-in-v120) and [DataFrame <-> RDD](sql/#convert-between-dataframe-and-spatialrdd).
+
 
 ## Transform the Coordinate Reference System
 
@@ -241,17 +246,28 @@ To load the DataFrame back, you first use the regular method to load the saved s
 ### DataFrame to SpatialRDD
 
 Use GeoSparkSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD
+
+**GeoSpark 1.2.0+**
+```Scala
+var spatialRDD = Adapter.toSpatialRdd(spatialDf, "usacounty")
+```
+
+"usacounty" is the name of the geometry column
+
+**Before GeoSpark 1.2.0**
 ```Scala
 var spatialRDD = new SpatialRDD[Geometry]
 spatialRDD.rawSpatialRDD = Adapter.toRdd(spatialDf)
 ```
 
+Geometry must be the first column in the DataFrame
+
 !!!warning
-	Geometry must be the first column in the DataFrame and only one Geometry type column is allowed per DataFrame.
+	Only one Geometry type column is allowed per DataFrame.
 
 !!!note
-	Other non-spatial columns can also be brought to SpatialRDD using the UUIDs. Please read [GeoSparkSQL constructor API](../api/sql/GeoSparkSQL-Constructor.md).
-
+	Before GeoSpark 1.2.0, other non-spatial columns need be brought to SpatialRDD using the UUIDs. Please read [GeoSparkSQL constructor API](../api/sql/GeoSparkSQL-Constructor.md). In GeoSpark 1.2.0+, all other non-spatial columns are automatically kept in SpatialRDD.
+	
 ### SpatialRDD to DataFrame
 
 Use GeoSparkSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD

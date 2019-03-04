@@ -22,15 +22,21 @@ GeoSpark contains several modules:
 * Viz: Visualization extension of GeoSpark Spatial RDD and DataFrame.
 * GeoSpark-Zeppelin: GeoSpark visualization plugin for Apache Zeppelin
 
+**Please visit [GeoSpark website](http://datasystemslab.github.io/GeoSpark/) for details and documentations.**
+
+## News!
+
+* GeoSpark 1.2.0 is released.
+	* Tons of bug fixes and new functions! Please read [GeoSpark release note](http://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Release-notes/).
+	* GeoSparkViz now supports DataFrame API. Please read [Visualize Spatial DataFrame/RDD](http://datasystemslab.github.io/GeoSpark/tutorial/viz/).
+	* GeoSpark-Zeppelin can connect GeoSpark to [Apache Zeppelin](https://zeppelin.apache.org/). Please read [Interact with GeoSpark via Zeppelin](http://datasystemslab.github.io/GeoSpark/tutorial/zeppelin/)
+	* GeoSparkViz Maven coordinate change. Please read [Maven coordinate](http://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Maven-Central-Coordinates/#geospark-viz-120-and-later).
+	* This release includes the PR from 13 contributors. Please read [GeoSpark release note](download/GeoSpark-All-Modules-Release-notes/) to learn their names.
+* The full [research paper](http://www.public.asu.edu/~jiayu2/geospark/publication/GeoSpark_Geoinformatica_2018.pdf) of GeoSpark has been accepted by Geoinformatica Journal. This paper has over 40 pages to dissect GeoSpark in details and compare it with many other existing systems such as Magellan, Simba, and SpatialHadoop.
+
+## Social impact
+
 GeoSpark development team has published four papers about GeoSpark. Please read [Publications](http://datasystemslab.github.io/GeoSpark/contact/publication/). 
 
 GeoSpark received an evaluation from PVLDB 2018 paper ["How Good Are Modern Spatial Analytics Systems?"](http://www.vldb.org/pvldb/vol11/p1661-pandey.pdf) Varun Pandey, Andreas Kipf, Thomas Neumann, Alfons Kemper (Technical University of Munich), quoted as follows: 
 > GeoSpark comes close to a complete spatial analytics system. It also exhibits the best performance in most cases.
-
-
-**Please visit [GeoSpark website](http://datasystemslab.github.io/GeoSpark/) for details and documentations.**
-
-## News!
-* The full [research paper](http://www.public.asu.edu/~jiayu2/geospark/publication/GeoSpark_Geoinformatica_2018.pdf) of GeoSpark has been accepted by Geoinformatica Journal. This paper has over 40 pages to dissect GeoSpark in details and compare it with many other existing systems such as Magellan, Simba, and SpatialHadoop.
-* GeoSpark 1.1.3 is released. This release contains a critical bug fix for GeoSpark-core RDD API. [Release notes](http://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Release-notes/) || [Maven Coordinate](http://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Maven-Central-Coordinates/).
-* GeoSpark 1.1.2 is released. This release contains several bug fixes. Thanks for the patch from Lucas C.! [Release notes](http://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Release-notes/) || [Maven Coordinate](http://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Maven-Central-Coordinates/).

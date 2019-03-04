@@ -1,3 +1,81 @@
+## v1.2.0
+
+This version contains numerous bug fixes, new functions, and new GeoSpark module.
+
+**License change**
+
+From MIT to Apache License 2.0
+
+**GeoSpark Core**
+
+Bug fix:
+
+* Issue #[224](https://github.com/DataSystemsLab/GeoSpark/issues/224) load GeoJSON non-spatial attributes.
+* Issue #[228](https://github.com/DataSystemsLab/GeoSpark/issues/228) Shapefiel Reader fails to handle UNDEFINED type.
+* Issue #[320](https://github.com/DataSystemsLab/GeoSpark/issues/320) Read CSV ArrayIndexOutOfBoundsException
+
+New functions:
+
+* PR #[270](https://github.com/DataSystemsLab/GeoSpark/pull/270) #[298](https://github.com/DataSystemsLab/GeoSpark/pull/298) Add GeoJSON Reader to load GeoJSON with all attributes. See [GeoSpark doc](../tutorial/rdd/#from-geojson) for an example.
+* PR #[314](https://github.com/DataSystemsLab/GeoSpark/pull/314) Add WktReader and WkbReader. Their usage is simialr to GeoJSON reader.
+
+**GeoSpark SQL**
+
+Bug fix:
+
+* Issue #[244](https://github.com/DataSystemsLab/GeoSpark/issues/244) JTS side location conflict
+* Issue #[245](https://github.com/DataSystemsLab/GeoSpark/issues/245) Drop ST_Circle in 1.2.0
+* Issue #[288](https://github.com/DataSystemsLab/GeoSpark/issues/288) ST_isValid fails
+* Issue #[321](https://github.com/DataSystemsLab/GeoSpark/issues/321) ST_Point doesn't accept null user data
+* PR #[284](https://github.com/DataSystemsLab/GeoSpark/pull/284) ST_Union_Aggr bug
+* PR #[331](https://github.com/DataSystemsLab/GeoSpark/pull/331) Adapter doesn't handle null values
+
+New SQL functions:
+
+* ST_IsValid
+* ST_PrecisionReduce
+* ST_Touches
+* ST_Overlaps
+* ST_Equals
+* ST_Crosses
+* ST_IsSimple
+* ST_AsText
+
+Behavior / API change:
+
+* GeoSpark Adapter will automatically carry all attributes between DataFrame and RDD. No need to use UUID in SQL ST functions to pass values. Please read [GeoSpark doc](../tutorial/sql/#dataframe-to-spatialrdd).
+
+**GeoSpark Viz**
+
+Bug fix:
+
+* Issue #[231](https://github.com/DataSystemsLab/GeoSpark/issues/231) Pixel NullPointException
+* Issue #[234](https://github.com/DataSystemsLab/GeoSpark/issues/234) OutOfMemory for large images
+
+New functions
+
+* Add the DataFrame support. Please read [GeoSpark doc](../tutorial/viz)
+* ST_Pixelize
+* ST_TileName
+* ST_Colorize
+* ST_EncodeImage
+* ST_Render
+
+Behavior / API change
+
+* GeoSparkViz Maven coordinate changed. You need to specify Spark version. Please read [GeoSpark Maven coordinate](GeoSpark-All-Modules-Maven-Central-Coordinates/#geospark-viz-120-and-later)
+
+**GeoSpark-Zeppelin**
+
+New functions
+
+* Add the support of connecting GeoSpark and Zeppelin
+* Add the support of connecting GeoSparkViz and Zeppelin
+
+**Contributors (13)**
+
+Anton Peniaziev, Avshalom Orenstein, Jia Yu, Jordan Perr-Sauer, JulienPeloton, Sergii Mikhtoniuk, Netanel Malka, Rishabh Mishra, sagar1993, Shi-Hao Liu, Serhuela, tociek, Wrussia
+
 ## v1.1.3
 
 This version contains a critical bug fix for GeoSpark-core RDD API.

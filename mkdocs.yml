@@ -8,11 +8,13 @@ pages:
       - Set up Spark cluser: download/cluster.md
       - Spark Scala shell: download/scalashell.md
       - Self-contained project: download/project.md
+      - Install GeoSpark-Zeppelin: download/zeppelin.md
       - Compile the source code: download/compile.md
     - Tutorial:
       - Write an Spatial RDD application: tutorial/rdd.md
       - Write an Spatial SQL/DataFrame application: tutorial/sql.md
       - Visualize Spatial DataFrame/RDD: tutorial/viz.md
+      - Interact with GeoSpark via Zeppelin: tutorial/zeppelin.md
       - GeoSpark template project: tutorial/GeoSpark-Runnable-DEMO.md
       - Frequently Asked Questions: tutorial/faq.md
       - Tune GeoSpark RDD application: tutorial/Advanced-Tutorial-Tune-your-GeoSpark-Application.md

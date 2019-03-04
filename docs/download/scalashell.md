@@ -1,9 +1,7 @@
 # Spark Scala shell
 Spark distribution provides an interactive Scala shell that allows a user to execute Scala code in a terminal.
 
-This mode currently works with GeoSpark-core and GeoSparkViz. 
-!!!warning
-	GeoSparkSQL cannot run in this mode. We are still working on this issue.
+This mode currently works with GeoSpark-core and GeoSparkViz.
 
 ## Download GeoSpark jar automatically
 

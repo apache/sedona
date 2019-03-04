@@ -31,4 +31,10 @@ The source code of GeoSpark documentation website is written in Markdown and the
 
 In GeoSpark repository, MkDocs configuration file ==mkdocs.yml== is in the root folder and all documentation source code is in docs folder.
 
-To compile the source code and test the website on your local machine, please read [MkDocs Tutorial](http://www.mkdocs.org/#installation) and [Materials for MkDocs Tutorial](https://squidfunk.github.io/mkdocs-material/getting-started/) .
+To compile the source code and test the website on your local machine, please read [MkDocs Tutorial](http://www.mkdocs.org/#installation) and [Materials for MkDocs Tutorial](https://squidfunk.github.io/mkdocs-material/getting-started/).
+
+After installing MkDocs and MkDocs-Material, run the command in GeoSpark root folder:
+
+```
+mkdocs serve
+```

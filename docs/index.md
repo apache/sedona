@@ -8,10 +8,15 @@
 
 [GeoSpark@Twitter](https://twitter.com/GeoSpark_ASU) || [GeoSpark Discussion Board](https://groups.google.com/forum/#!forum/geospark-discussion-board) || [![Join the chat at https://gitter.im/geospark-datasys/Lobby](https://badges.gitter.im/geospark-datasys/Lobby.svg)](https://gitter.im/geospark-datasys/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) || [![HitCount](http://hits.dwyl.io/DataSystemsLab/GeoSpark.svg)](http://hits.dwyl.io/DataSystemsLab/GeoSpark)(since Jan. 2018)
 
-#### News
+## News!
+
+* GeoSpark 1.2.0 is released.
+	* Tons of bug fixes and new functions! Please read [GeoSpark release note](download/GeoSpark-All-Modules-Release-notes/).
+	* GeoSparkViz now supports DataFrame API. Please read [Visualize Spatial DataFrame/RDD](tutorial/viz/).
+	* GeoSpark-Zeppelin can connect GeoSpark to [Apache Zeppelin](https://zeppelin.apache.org/). Please read [Interact with GeoSpark via Zeppelin](tutorial/zeppelin/)
+	* GeoSparkViz Maven coordinate change. Please read [Maven coordinate](download/GeoSpark-All-Modules-Maven-Central-Coordinates/#geospark-viz-120-and-later).
+	* This release includes the PR from 13 contributors. Please read [GeoSpark release note](download/GeoSpark-All-Modules-Release-notes/) to learn their names.
 * The full [research paper](http://www.public.asu.edu/~jiayu2/geospark/publication/GeoSpark_Geoinformatica_2018.pdf) of GeoSpark has been accepted by Geoinformatica Journal. This paper has over 40 pages to dissect GeoSpark in details and compare it with many other existing systems such as Magellan, Simba, and SpatialHadoop.
-* GeoSpark 1.1.3 is released. This release contains a critical bug fix for GeoSpark-core RDD API. [Release notes](./download/GeoSpark-All-Modules-Release-notes.md) || [Maven Coordinate](./download/GeoSpark-All-Modules-Maven-Central-Coordinates.md).
-* GeoSpark 1.1.2 is released. This release contains several bug fixes. Thanks for the patch from Lucas C.! [Release notes](./download/GeoSpark-All-Modules-Release-notes.md) || [Maven Coordinate](./download/GeoSpark-All-Modules-Maven-Central-Coordinates.md).
 
 ## Companies are using GeoSpark 
 
@@ -38,6 +43,8 @@ GeoSpark contains several modules:
 * SQL: SQL interfaces for GeoSpark core.
 * Viz: Visualization extension of GeoSpark Spatial RDD and DataFrame.
 * GeoSpark-Zeppelin: GeoSpark visualization plugin for Apache Zeppelin
+
+## Social impact
 
 GeoSpark development team has published four papers about GeoSpark. Please read [Publications](http://datasystemslab.github.io/GeoSpark/contact/publication/). 
 
@@ -69,7 +76,7 @@ GeoSparkViz is a large-scale in-memory geospatial visualization system.
 
 GeoSparkViz provides native support for general cartographic design by extending GeoSpark to process large-scale spatial data. It can visulize Spatial RDD and Spatial Queries and render super high resolution image in parallel.
 
-More details are available here: [GeoSpark Visualization Extension](https://github.com/DataSystemsLab/GeoSpark/tree/master/viz) 
+More details are available here: [Visualize Spatial DataFrame/RDD](tutorial/viz)
 
 **GeoSparkViz Gallery**
 
