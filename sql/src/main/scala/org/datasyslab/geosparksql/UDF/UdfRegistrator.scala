@@ -16,6 +16,7 @@
  */
 package org.datasyslab.geosparksql.UDF
 
+import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
 import org.apache.spark.sql.{SQLContext, SparkSession}
 
 object UdfRegistrator {
@@ -25,12 +26,12 @@ object UdfRegistrator {
   }
 
   def registerAll(sparkSession: SparkSession): Unit = {
-    Catalog.expressions.foreach(f=>sparkSession.sessionState.functionRegistry.registerFunction(f.getClass.getSimpleName.dropRight(1),f))
+    Catalog.expressions.foreach(f=>FunctionRegistry.builtin.registerFunction(f.getClass.getSimpleName.dropRight(1),f))
     Catalog.aggregateExpressions.foreach(f=>sparkSession.udf.register(f.getClass.getSimpleName,f))
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
-    Catalog.expressions.foreach(f=>sparkSession.sessionState.functionRegistry.dropFunction(f.getClass.getSimpleName.dropRight(1)))
-    Catalog.aggregateExpressions.foreach(f=>sparkSession.sessionState.functionRegistry.dropFunction(f.getClass.getSimpleName))
+    Catalog.expressions.foreach(f=>FunctionRegistry.builtin.dropFunction(f.getClass.getSimpleName.dropRight(1)))
+    Catalog.aggregateExpressions.foreach(f=>FunctionRegistry.builtin.dropFunction((f.getClass.getSimpleName)))
   }
 }
