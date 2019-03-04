@@ -40,7 +40,7 @@
         </dependency>
         <dependency>
             <groupId>org.datasyslab</groupId>
-            <artifactId>geospark-sql_2.3</artifactId>
+            <artifactId>geospark-sql_2.1</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
