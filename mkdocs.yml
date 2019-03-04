@@ -23,6 +23,7 @@ pages:
       - GeoSpark core (RDD):
         - Scala/Java doc: api/GeoSpark-Scala-and-Java-API.md
       - GeoSpark SQL:
+        - JavaDoc: api/sql/GeoSparkSQL-javadoc.md
         - Quick start: api/sql/GeoSparkSQL-Overview.md
         - Constructor: api/sql/GeoSparkSQL-Constructor.md
         - Function: api/sql/GeoSparkSQL-Function.md
