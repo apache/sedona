@@ -24,7 +24,7 @@
         <version>1.2.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-	<artifactId>geospark-sql_2.3</artifactId>
+	<artifactId>geospark-sql_2.2</artifactId>
 
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>SQL Extension of GeoSpark</description>

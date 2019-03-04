@@ -24,7 +24,7 @@
         <version>1.2.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-	<artifactId>geospark-viz_2.3</artifactId>
+	<artifactId>geospark-viz_2.2</artifactId>
 
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>Geospatial visualization extension of GeoSpark</description>
