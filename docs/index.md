@@ -22,7 +22,7 @@
 
 (incomplete list)
 
-[<img src="https://www.bluedme.com/wp-content/uploads/2015/10/cropped-LOGO-Blue-DME-PNG-3.png" width="150">](https://www.bluedme.com/) [<img src="https://retailrecharged.com/wp-content/uploads/2017/10/logo.png" width="150">](https://www.gyana.co.uk/)[<img src="https://mobike.com/global/public/invitation__footer__logo.png" width="150">](https://mobike.com)
+[<img src="https://www.dataiku.com/static/img/partners/LOGO-Blue-DME-PNG-3.png" width="200">](https://www.bluedme.com/) [<img src="https://retailrecharged.com/wp-content/uploads/2017/10/logo.png" width="150">](https://www.gyana.co.uk/)[<img src="https://mobike.com/global/public/invitation__footer__logo.png" width="150">](https://mobike.com)
 
 Please make a Pull Request to add yourself!
 
