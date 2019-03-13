@@ -4,45 +4,45 @@ Please add the following dependencies into your POM.xml or build.sbt
 ```
 groupId: org.datasyslab
 artifactId: geospark
-version: 1.1.3
+version: 1.2.0
 ```
 ## GeoSpark-SQL
 ### For SparkSQL-2.3
 ```
 groupId: org.datasyslab
 artifactId: geospark-sql_2.3
-version: 1.1.3
+version: 1.2.0
 ```
 ### For SparkSQL-2.2
 ```
 groupId: org.datasyslab
 artifactId: geospark-sql_2.2
-version: 1.1.3
+version: 1.2.0
 ```
 ### For SparkSQL-2.1
 ```
 groupId: org.datasyslab
 artifactId: geospark-sql_2.1
-version: 1.1.3
+version: 1.2.0
 ```
 ## GeoSpark-Viz 1.2.0 and later
 ### For SparkSQL-2.3
 ```
 groupId: org.datasyslab
 artifactId: geospark-viz_2.3
-version: 1.1.3
+version: 1.2.0
 ```
 ### For SparkSQL-2.2
 ```
 groupId: org.datasyslab
 artifactId: geospark-viz_2.2
-version: 1.1.3
+version: 1.2.0
 ```
 ### For SparkSQL-2.1
 ```
 groupId: org.datasyslab
 artifactId: geospark-viz_2.1
-version: 1.1.3
+version: 1.2.0
 ```
 
 ## GeoSpark-Viz 1.1.3 and earlier
