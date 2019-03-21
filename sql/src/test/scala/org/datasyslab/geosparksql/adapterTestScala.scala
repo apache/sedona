@@ -133,18 +133,17 @@ class adapterTestScala extends TestBaseScala {
     }
 
     it("Convert spatial join result to DataFrame") {
-      var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      val polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
-      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as usacounty from polygontable")
-      var polygonRDD = new SpatialRDD[Geometry]
+      val polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as usacounty, 'abc' as abc, 'def' as def from polygontable")
+      val polygonRDD = new SpatialRDD[Geometry]
       polygonRDD.rawSpatialRDD = Adapter.toRdd(polygonDf)
       polygonRDD.analyze()
 
-      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(arealmPointInputLocation)
+      val pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(arealmPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")
-      var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
-      var pointRDD = new SpatialRDD[Geometry]
-      pointRDD.rawSpatialRDD = Adapter.toRdd(pointDf)
+      val pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
+      val pointRDD = Adapter.toSpatialRdd(pointDf, "arealandmark")
       pointRDD.analyze()
 
       pointRDD.spatialPartitioning(GridType.QUADTREE)
@@ -152,12 +151,12 @@ class adapterTestScala extends TestBaseScala {
 
       pointRDD.buildIndex(IndexType.QUADTREE, true)
 
-      var joinResultPairRDD = JoinQuery.SpatialJoinQueryFlat(pointRDD, polygonRDD, true, true)
+      val joinResultPairRDD = JoinQuery.SpatialJoinQueryFlat(pointRDD, polygonRDD, true, true)
 
-      var joinResultDf = Adapter.toDf(joinResultPairRDD, sparkSession)
+      val joinResultDf = Adapter.toDf(joinResultPairRDD, sparkSession)
       joinResultDf.show()
 
-      var joinResultDf2 = Adapter.toDf(joinResultPairRDD, List("abc","def"), List(), sparkSession)
+      val joinResultDf2 = Adapter.toDf(joinResultPairRDD, List("abc","def"), List(), sparkSession)
       joinResultDf2.show()
     }
 
