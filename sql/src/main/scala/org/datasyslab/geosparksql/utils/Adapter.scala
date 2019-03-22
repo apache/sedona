@@ -116,16 +116,10 @@ object Adapter {
       val result = seq1 ++ seq2
       Row.fromSeq(result)
     })
-    val leftgeomlength = spatialPairRDD.rdd.take(1)(0)._1.toString.split("\t").length
-    val rightgeomlength = spatialPairRDD.rdd.take(1)(0)._2.toString.split("\t").length
     val leftgeometryName = List("leftgeometry")
     val rightgeometryName = List("rightgeometry")
-    var fullFieldNames = leftgeometryName ++ leftFieldnames
-    fullFieldNames = fullFieldNames ++ rightgeometryName
-    fullFieldNames = fullFieldNames ++ rightFieldNames
-    var fieldArray = new Array[StructField](rowRdd.take(1)(0).size)
-    for (i <- 0 to fieldArray.length - 1) fieldArray(i) = StructField(fullFieldNames(i), StringType)
-    val schema = StructType(fieldArray)
+    val fullFieldNames = leftgeometryName ++ leftFieldnames ++ rightgeometryName ++ rightFieldNames
+    val schema = StructType(fullFieldNames.map(fieldName => StructField(fieldName, StringType)))
     return sparkSession.createDataFrame(rowRdd, schema)
   }
 
