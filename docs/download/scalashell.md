@@ -14,12 +14,12 @@ This mode currently works with GeoSpark-core and GeoSparkViz.
 
 * Local mode: test GeoSpark without setting up a cluster
 ```
-./bin/spark-shell --packages org.datasyslab:geospark:1.1.0,org.datasyslab:geospark-viz:1.1.0
+./bin/spark-shell --packages org.datasyslab:geospark:1.2.0,org.datasyslab:geospark-sql_2.3:1.2.0,org.datasyslab:geospark-viz_2.3:1.2.0
 ```
   
 * Cluster mode: you need to specify Spark Master IP
 ```
-./bin/spark-shell --master spark://localhost:7077 --packages org.datasyslab:geospark:1.1.0,org.datasyslab:geospark-viz:1.1.0
+./bin/spark-shell --master spark://localhost:7077 --packages org.datasyslab:geospark:1.2.0,org.datasyslab:geospark-sql_2.3:1.2.0,org.datasyslab:geospark-viz_2.3:1.2.0
 ```
   
 ## Download GeoSpark jar manually
