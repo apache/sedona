@@ -203,3 +203,15 @@ Spark SQL example:
 SELECT ST_AsText(polygondf.countyshape)
 FROM polygondf
 ````
+
+## ST_NPoints
+
+Introduction: Return points of the geometry
+
+Format: `ST_NPoints (A:geometry)`
+
+```SQL
+SELECT ST_NPoints(polygondf.countyshape)
+FROM polygondf
+```
+

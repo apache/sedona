@@ -205,5 +205,11 @@ class functionTestScala extends TestBaseScala {
       var wktDf = sparkSession.sql("select ST_AsText(countyshape) as wkt from polygondf")
       assert(polygonDf.take(1)(0).getAs[Geometry]("countyshape").toText.equals(wktDf.take(1)(0).getAs[String]("wkt")))
     }
+
+    it("Passed ST_NPoints"){
+      var test = sparkSession.sql("SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
+      assert(test.take(1)(0).get(0).asInstanceOf[Int] == 4)
+
+    }
   }
 }
