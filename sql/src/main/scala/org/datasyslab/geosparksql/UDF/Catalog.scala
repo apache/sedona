@@ -36,6 +36,7 @@ object Catalog {
     ST_Within,
     ST_Distance,
     ST_ConvexHull,
+    ST_NPoints,
     ST_Buffer,
     ST_Envelope,
     ST_Length,
