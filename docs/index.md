@@ -10,13 +10,14 @@
 
 ## News!
 
+* A research paper about ["GeoSparkSim: A Microscopic Road Network Traffic Simulator in Apache Spark"](http://www.public.asu.edu/~jiayu2/geospark/publication/geosparksim-mdm-2019.pdf) is accepted to MDM 2019, Hong Kong China. The next release of GeoSpark will come with a built-in scalable traffic simulator. Please stay tuned!
+* A 1.5-hour tutorial about "Geospatial Data Management in Apache Spark" was presented by Jia Yu and Mohamed Sarwat in ICDE 2019, Macau, China. Visit [our tutorial website](https://jiayuasu.github.io/geospatial-tutorial/) to learn how to craft your **"GeoSpark"** from scratch.
 * GeoSpark 1.2.0 is released.
-	* Tons of bug fixes and new functions! Please read [GeoSpark release note](download/GeoSpark-All-Modules-Release-notes/).
-	* GeoSparkViz now supports DataFrame API. Please read [Visualize Spatial DataFrame/RDD](tutorial/viz/).
-	* GeoSpark-Zeppelin can connect GeoSpark to [Apache Zeppelin](https://zeppelin.apache.org/). Please read [Interact with GeoSpark via Zeppelin](tutorial/zeppelin/)
-	* GeoSparkViz Maven coordinate change. Please read [Maven coordinate](download/GeoSpark-All-Modules-Maven-Central-Coordinates/#geospark-viz-120-and-later).
+	* Tons of bug fixes and new functions! Please read [GeoSpark release note](http://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Release-notes/).
+	* GeoSparkViz now supports DataFrame API. Please read [Visualize Spatial DataFrame/RDD](http://datasystemslab.github.io/GeoSpark/tutorial/viz/).
+	* GeoSpark-Zeppelin can connect GeoSpark to [Apache Zeppelin](https://zeppelin.apache.org/). Please read [Interact with GeoSpark via Zeppelin](http://datasystemslab.github.io/GeoSpark/tutorial/zeppelin/)
+	* GeoSparkViz Maven coordinate change. Please read [Maven coordinate](http://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Maven-Central-Coordinates/#geospark-viz-120-and-later).
 	* This release includes the PR from 13 contributors. Please read [GeoSpark release note](download/GeoSpark-All-Modules-Release-notes/) to learn their names.
-* The full [research paper](http://www.public.asu.edu/~jiayu2/geospark/publication/GeoSpark_Geoinformatica_2018.pdf) of GeoSpark has been accepted by Geoinformatica Journal. This paper has over 40 pages to dissect GeoSpark in details and compare it with many other existing systems such as Magellan, Simba, and SpatialHadoop.
 
 ## Companies are using GeoSpark 
 
@@ -30,19 +31,16 @@ Please make a Pull Request to add yourself!
 
 GeoSpark is a cluster computing system for processing large-scale spatial data. GeoSpark extends Apache Spark / SparkSQL with a set of out-of-the-box Spatial Resilient Distributed Datasets (SRDDs)/ SpatialSQL that efficiently load, process, and analyze large-scale spatial data across machines.
 
-GeoSpark contains several modules:
+### GeoSpark contains several modules:
 
-| Name  |  API |  Spark compatibility|Dependency|
+| Name  |  API |  Spark compatibility|Introduction|
 |---|---|---|---|
-| GeoSpark-core  | RDD  | Spark 2.X/1.X  | Spark-core|
-| GeoSpark-SQL  | SQL/DataFrame  | SparkSQL 2.1 and later | Spark-core, Spark-SQL, GeoSpark-core|
-|  GeoSpark-Viz |  RDD, SQL/DataFrame | RDD - Spark 2.X/1.X, SQL - Spark 2.1 and later|Spark-core, Spark-SQL, GeoSpark-core, GeoSpark-SQL|
-|  GeoSpark-Zeppelin |  Apache Zeppelin | Spark 2.1+, Zeppelin 0.8.1+|Spark-core, Spark-SQL, GeoSpark-core, GeoSpark-SQL, GeoSpark-Viz|
+|Core  | RDD  | Spark 2.X/1.X  |SpatialRDDs and Query Operators. |
+|SQL  | SQL/DataFrame  | SparkSQL 2.1+ |SQL interfaces for GeoSpark core.|
+|Viz |  RDD, SQL/DataFrame | RDD - Spark 2.X/1.X, SQL - Spark 2.1+|Visualization for Spatial RDD and DataFrame.|
+|Zeppelin |  Apache Zeppelin | Spark 2.1+, Zeppelin 0.8.1+|GeoSpark plugin for Apache Zeppelin|
 
-* Core: GeoSpark SpatialRDDs and Query Operators. 
-* SQL: SQL interfaces for GeoSpark core.
-* Viz: Visualization extension of GeoSpark Spatial RDD and DataFrame.
-* GeoSpark-Zeppelin: GeoSpark visualization plugin for Apache Zeppelin
+### GeoSpark supports several programming languages: Scala, Java, and R.
 
 ## Social impact
 
