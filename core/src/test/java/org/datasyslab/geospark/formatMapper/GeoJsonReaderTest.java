@@ -101,4 +101,11 @@ public class GeoJsonReaderTest
         geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonWithInvalidGeometries);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 3);
     }
+
+    @Test
+    public void bugPatternTest() throws Exception{
+        String pathd = GeoJsonReaderTest.class.getClassLoader().getResource("idContainsGeoJson.json").getPath();
+        SpatialRDD geojsonRDD = GeoJsonReader.readToGeometryRDD(sc,pathd);
+
+    }
 }

@@ -202,10 +202,28 @@ public class FormatMapper<T extends Geometry>
         return null;
     }
 
-    public List<String> readPropertyNames(String geoString) {
+    public boolean containsId(String geoJson){
+        if (geoJson.contains("id")){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+
+    public List<String> readColumnNames(String geoString) {
+        List<String> columns = new ArrayList<>();
         switch (splitter){
             case GEOJSON:
-              return readGeoJsonPropertyNames(geoString);
+                if(containsId(geoString)){
+                    columns.add("id");
+                    columns.addAll(readGeoJsonPropertyNames(geoString));
+                    return columns;
+                }
+                else{
+                    return readGeoJsonPropertyNames(geoString);
+                }
               default:
                   return null;
         }
