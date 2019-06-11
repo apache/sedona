@@ -103,7 +103,7 @@ public class GeoJsonReaderTest
     }
 
     @Test
-    public void bugPatternTest() throws Exception{
+    public void setGeoJsonIdHandleTest() throws Exception{
         String pathd = GeoJsonReaderTest.class.getClassLoader().getResource("idContainsGeoJson.json").getPath();
         SpatialRDD geojsonRDD = GeoJsonReader.readToGeometryRDD(sc,pathd);
 
