@@ -207,33 +207,6 @@ public class FormatMapper<T extends Geometry>
         return null;
     }
 
-    public boolean containsId(String geoJson){
-        if (geoJson.contains("id")){
-            return true;
-        }
-        else{
-            return false;
-        }
-    }
-
-
-    public List<String> readColumnNames(String geoString) {
-        List<String> columns = new ArrayList<>();
-        switch (splitter){
-            case GEOJSON:
-                if(containsId(geoString)){
-                    columns.add("id");
-                    columns.addAll(readGeoJsonPropertyNames(geoString));
-                    return columns;
-                }
-                else{
-                    return readGeoJsonPropertyNames(geoString);
-                }
-              default:
-                  return null;
-        }
-    }
-
 
     public Geometry readWkt(String line)
             throws ParseException
