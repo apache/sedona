@@ -186,6 +186,16 @@ public class FormatMapper<T extends Geometry>
         return geometry;
     }
 
+    public List<String> readPropertyNames(String geoString) {
+        switch (splitter){
+            case GEOJSON:
+                return readGeoJsonPropertyNames(geoString);
+            default:
+                return null;
+        }
+    }
+
+
     public static List<String> readGeoJsonPropertyNames(String geoJson){
         if (geoJson.contains("Feature") || geoJson.contains("feature") || geoJson.contains("FEATURE")) {
             if (geoJson.contains("properties") ) {
