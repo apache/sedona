@@ -186,14 +186,6 @@ public class FormatMapper<T extends Geometry>
         return geometry;
     }
 
-    public List<String> readPropertyNames(String geoString) {
-        switch (splitter){
-            case GEOJSON:
-                return readGeoJsonPropertyNames(geoString);
-            default:
-                return null;
-        }
-    }
 
 
     public static List<String> readGeoJsonPropertyNames(String geoJson){
@@ -217,7 +209,15 @@ public class FormatMapper<T extends Geometry>
         return null;
     }
 
-
+    public List<String> readPropertyNames(String geoString) {
+        switch (splitter){
+            case GEOJSON:
+                return readGeoJsonPropertyNames(geoString);
+            default:
+                return null;
+        }
+    }
+    
     public Geometry readWkt(String line)
             throws ParseException
     {
