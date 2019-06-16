@@ -36,9 +36,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-
 public class GeoJsonReaderTest
         extends GeoSparkTestBase
 {
@@ -46,6 +47,7 @@ public class GeoJsonReaderTest
     public static String geoJsonGeomWithFeatureProperty = null;
     public static String geoJsonGeomWithoutFeatureProperty = null;
     public static String geoJsonWithInvalidGeometries = null;
+    public static String geoJsonContainsId = null;
 
     @BeforeClass
     public static void onceExecutedBeforeAll()
@@ -55,6 +57,7 @@ public class GeoJsonReaderTest
         geoJsonGeomWithFeatureProperty = GeoJsonReaderTest.class.getClassLoader().getResource("testPolygon.json").getPath();
         geoJsonGeomWithoutFeatureProperty = GeoJsonReaderTest.class.getClassLoader().getResource("testpolygon-no-property.json").getPath();
         geoJsonWithInvalidGeometries = GeoJsonReaderTest.class.getClassLoader().getResource("testInvalidPolygon.json").getPath();
+        geoJsonContainsId = GeoJsonReaderTest.class.getClassLoader().getResource("testContainsId.json").getPath();
     }
 
     @AfterClass
@@ -100,5 +103,16 @@ public class GeoJsonReaderTest
 
         geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonWithInvalidGeometries);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 3);
+    }
+
+    /**
+     * Test correctness of parsing geojson file including id
+     */
+    @Test
+    public void testReadToIncludIdRDD() throws IOException
+    {
+        SpatialRDD geojsonRDD = GeoJsonReader.readToGeometryRDD(sc,geoJsonContainsId,true,false);
+        assertEquals(geojsonRDD.rawSpatialRDD.count(),2);
+        assertEquals(geojsonRDD.fieldNames.size(), 3);
     }
 }

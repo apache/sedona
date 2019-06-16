@@ -186,5 +186,15 @@ class adapterTestScala extends TestBaseScala {
       var joinResultDf = Adapter.toDf(joinResultPairRDD, sparkSession)
       joinResultDf.show()
     }
+
+    it("load id column Data check"){
+      var spatialRDD = new PolygonRDD(sparkSession.sparkContext, geojsonIdInputLocation, FileDataSplitter.GEOJSON, true)
+      //spatialRDD.analyze()
+      val df = Adapter.toDf(spatialRDD, sparkSession)
+      assert(df.columns.length == 4)
+      assert(df.count() == 2)
+
+    }
+
   }
 }
