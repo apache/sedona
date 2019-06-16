@@ -196,7 +196,7 @@ class adapterTestScala extends TestBaseScala {
 
     it("load id column Data check"){
       var spatialRDD = new PolygonRDD(sparkSession.sparkContext, geojsonIdInputLocation, FileDataSplitter.GEOJSON, true)
-      //spatialRDD.analyze()
+      spatialRDD.analyze()
       val df = Adapter.toDf(spatialRDD, sparkSession)
       assert(df.columns.length == 4)
       assert(df.count() == 2)
