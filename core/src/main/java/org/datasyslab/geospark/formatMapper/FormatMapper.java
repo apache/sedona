@@ -217,7 +217,7 @@ public class FormatMapper<T extends Geometry>
                 return null;
         }
     }
-    
+
     public Geometry readWkt(String line)
             throws ParseException
     {
