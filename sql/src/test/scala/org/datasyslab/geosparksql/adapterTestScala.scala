@@ -28,6 +28,7 @@ package org.datasyslab.geosparksql
 
 import com.vividsolutions.jts.geom.Geometry
 import org.datasyslab.geospark.enums.{FileDataSplitter, GridType, IndexType}
+import org.datasyslab.geospark.formatMapper.GeoJsonReader
 import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader
 import org.datasyslab.geospark.spatialOperator.JoinQuery
 import org.datasyslab.geospark.spatialRDD.{CircleRDD, PolygonRDD, SpatialRDD}
@@ -130,6 +131,12 @@ class adapterTestScala extends TestBaseScala {
       var df = Adapter.toDf(spatialRDD, sparkSession).withColumn("geometry", callUDF("ST_GeomFromWKT", col("geometry")))
       df.show()
       assert (df.columns(1) == "STATEFP")
+    }
+
+    it("Read GeoJson that contains id"){
+      val rdd = GeoJsonReader.readToGeometryRDD(sparkSession.sparkContext, "sql/src/test/resources/idContainsGeoJson.json", false, false)
+      val df = Adapter.toDf(rdd, sparkSession)
+      df.show(false)
     }
 
     it("Convert spatial join result to DataFrame") {

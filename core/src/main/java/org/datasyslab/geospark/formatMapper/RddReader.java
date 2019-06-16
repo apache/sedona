@@ -26,7 +26,7 @@ class RddReader
     {
         SpatialRDD spatialRDD = new SpatialRDD<Geometry>();
         spatialRDD.rawSpatialRDD = rawTextRDD.mapPartitions(formatMapper);
-        spatialRDD.fieldNames = formatMapper.readPropertyNames(rawTextRDD.take(1).get(0).toString());
+        spatialRDD.fieldNames = formatMapper.readColumnNames(rawTextRDD.take(1).get(0).toString());
         return spatialRDD;
     }
 }
