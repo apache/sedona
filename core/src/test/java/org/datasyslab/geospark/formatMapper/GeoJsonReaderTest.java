@@ -57,7 +57,7 @@ public class GeoJsonReaderTest
         geoJsonGeomWithFeatureProperty = GeoJsonReaderTest.class.getClassLoader().getResource("testPolygon.json").getPath();
         geoJsonGeomWithoutFeatureProperty = GeoJsonReaderTest.class.getClassLoader().getResource("testpolygon-no-property.json").getPath();
         geoJsonWithInvalidGeometries = GeoJsonReaderTest.class.getClassLoader().getResource("testInvalidPolygon.json").getPath();
-        geoJsonContainsId = GeoJsonReaderTest.class.getClassLoader().getResource("testContainsId.json").getPath();
+        geoJsonContainsId = GeoJsonReaderTest.class.getClassLoader().getResource("idContainsGeoJson.json").getPath();
     }
 
     @AfterClass
@@ -112,7 +112,7 @@ public class GeoJsonReaderTest
     public void testReadToIncludIdRDD() throws IOException
     {
         SpatialRDD geojsonRDD = GeoJsonReader.readToGeometryRDD(sc,geoJsonContainsId,true,false);
-        assertEquals(geojsonRDD.rawSpatialRDD.count(),2);
+        assertEquals(geojsonRDD.rawSpatialRDD.count(),1);
         assertEquals(geojsonRDD.fieldNames.size(), 3);
     }
 }

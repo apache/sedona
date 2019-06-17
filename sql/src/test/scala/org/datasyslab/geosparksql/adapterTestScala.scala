@@ -133,12 +133,6 @@ class adapterTestScala extends TestBaseScala {
       assert (df.columns(1) == "STATEFP")
     }
 
-    it("Read GeoJson that contains id"){
-      val rdd = GeoJsonReader.readToGeometryRDD(sparkSession.sparkContext, "sql/src/test/resources/idContainsGeoJson.json", false, false)
-      val df = Adapter.toDf(rdd, sparkSession)
-      df.show(false)
-    }
-
     it("Convert spatial join result to DataFrame") {
       val polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
@@ -199,7 +193,7 @@ class adapterTestScala extends TestBaseScala {
       spatialRDD.analyze()
       val df = Adapter.toDf(spatialRDD, sparkSession)
       assert(df.columns.length == 4)
-      assert(df.count() == 2)
+      assert(df.count() == 1)
 
     }
 
