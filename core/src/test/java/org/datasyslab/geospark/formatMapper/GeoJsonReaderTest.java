@@ -57,7 +57,7 @@ public class GeoJsonReaderTest
         geoJsonGeomWithFeatureProperty = GeoJsonReaderTest.class.getClassLoader().getResource("testPolygon.json").getPath();
         geoJsonGeomWithoutFeatureProperty = GeoJsonReaderTest.class.getClassLoader().getResource("testpolygon-no-property.json").getPath();
         geoJsonWithInvalidGeometries = GeoJsonReaderTest.class.getClassLoader().getResource("testInvalidPolygon.json").getPath();
-        geoJsonContainsId = GeoJsonReaderTest.class.getClassLoader().getResource("idContainsGeoJson.json").getPath();
+        geoJsonContainsId = GeoJsonReaderTest.class.getClassLoader().getResource("testContainsId.json").getPath();
     }
 
     @AfterClass
