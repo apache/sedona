@@ -28,6 +28,7 @@ package org.datasyslab.geosparksql
 
 import com.vividsolutions.jts.geom.Geometry
 import org.datasyslab.geospark.enums.{FileDataSplitter, GridType, IndexType}
+import org.datasyslab.geospark.formatMapper.GeoJsonReader
 import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader
 import org.datasyslab.geospark.spatialOperator.JoinQuery
 import org.datasyslab.geospark.spatialRDD.{CircleRDD, PolygonRDD, SpatialRDD}
@@ -186,5 +187,15 @@ class adapterTestScala extends TestBaseScala {
       var joinResultDf = Adapter.toDf(joinResultPairRDD, sparkSession)
       joinResultDf.show()
     }
+
+    it("load id column Data check"){
+      var spatialRDD = new PolygonRDD(sparkSession.sparkContext, geojsonIdInputLocation, FileDataSplitter.GEOJSON, true)
+      spatialRDD.analyze()
+      val df = Adapter.toDf(spatialRDD, sparkSession)
+      assert(df.columns.length == 4)
+      assert(df.count() == 1)
+
+    }
+
   }
 }
