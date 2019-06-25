@@ -373,3 +373,18 @@ case class ST_AsText(inputExpressions: Seq[Expression])
 
   override def children: Seq[Expression] = inputExpressions
 }
+
+case class ST_GeometryType(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback{
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 1)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    UTF8String.fromString(geometry.getGeometryType)
+  }
+
+  override def dataType: DataType = StringType
+
+  override def children: Seq[Expression] = inputExpressions
+}
