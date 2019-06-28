@@ -51,7 +51,8 @@ object Catalog {
     ST_Overlaps,
 	  ST_Crosses,
     ST_IsSimple,
-    ST_AsText
+    ST_AsText,
+    ST_GeometryType
   )
 
   val aggregateExpressions:Seq[UserDefinedAggregateFunction] = Seq(
