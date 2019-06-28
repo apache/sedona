@@ -381,7 +381,7 @@ case class ST_GeometryType(inputExpressions: Seq[Expression])
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length == 1)
     val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
-    UTF8String.fromString(geometry.getGeometryType)
+    UTF8String.fromString("ST_" + geometry.getGeometryType)
   }
 
   override def dataType: DataType = StringType
