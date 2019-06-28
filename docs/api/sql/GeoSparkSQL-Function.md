@@ -215,3 +215,16 @@ SELECT ST_NPoints(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_GeometryType
+
+Introduction: Returns the type of the geometry as a string. EG: 'ST_Linestring', 'ST_Polygon' etc.
+
+Format: `ST_GeometryType (A:geometry)`
+
+Since: `v1.2.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_GeometryType(polygondf.countyshape)
+FROM polygondf
+````
