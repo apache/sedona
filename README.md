@@ -32,7 +32,7 @@ GeoSpark is a cluster computing system for processing large-scale spatial data. 
 	* GeoSparkViz Maven coordinate change. Please read [Maven coordinate](http://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Maven-Central-Coordinates/#geospark-viz-120-and-later).
 	* This release includes the PR from 13 contributors. Please read [GeoSpark release note](download/GeoSpark-All-Modules-Release-notes/) to learn their names.
 
-## Social impact
+## Impact
 
 GeoSpark development team has published many papers about GeoSpark. Please read [Publications](http://datasystemslab.github.io/GeoSpark/contact/publication/). 
 
