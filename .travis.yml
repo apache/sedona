@@ -3,8 +3,8 @@ os:
 
 language: java
 jdk:
-  - oraclejdk8
-sudo: required
+  - openjdk8
+sudo: false
 git:
   submodules: false
 
