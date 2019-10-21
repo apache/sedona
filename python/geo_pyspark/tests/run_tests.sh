@@ -1,0 +1,1 @@
+pipenv run python -m unittest discover geo_pyspark/tests
