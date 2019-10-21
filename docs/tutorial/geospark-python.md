@@ -1,21 +1,13 @@
-# geo_pyspark
+GeoSpark Python is a Python wrapper on scala library <b>GeoSparkSQL</b>.
 
-GeoSpark python bindings.
-Documentation in sphinx will be ready soon.
-
-## Introduction
-
-Package is a Python wrapper on scala library <b>GeoSparkSQL</b>. Official repository for GeoSpark can be found at
-https://github.com/DataSystemsLab/GeoSpark. 
-
-Package allow to use all GeoSparkSQL functions and transform it to Python Shapely geometry objects. Also
+This package allow to use all GeoSparkSQL functions and transform it to Python Shapely geometry objects. Also
 it allows to create Spark DataFrame with GeoSpark UDT from Shapely geometry objects. Spark DataFrame can
 be converted to GeoPandas easily, in addition all fiona drivers for shape file are available to load
 data from files and convert them to Spark DataFrame. Please look at examples.
 
 ## Instalation
 
-Package assumes that Spark is already installed. 
+This package assumes that Spark is already installed. 
 ### pipenv
 
 clone repository
@@ -94,12 +86,14 @@ df = spark.sql("""SELECT st_GeomFromWKT('POINT(6.0 52.0)') as geom""")
 
 df.show()
 
-```
     +------------+
     |        geom|
     +------------+
     |POINT (6 52)|
     +------------+
+
+```
+
 
 ### Converting GeoPandas to Spark DataFrame with GeoSpark Geometry UDT.
 
@@ -171,4 +165,4 @@ gdf = gpd.GeoDataFrame(df, geometry="geometry")
 gdf.plot()
 
 ```
-<img src="https://github.com/Imbruced/geo_pyspark/blob/master/geo_pyspark/data/geopandas_plot.PNG" width="250">
+<img src="../../image/geopandas_plot.PNG" width="250">

@@ -1,3 +1,0 @@
-.. include installation.rst
-.. include supported_versions.rst
-.. include examples.rst
