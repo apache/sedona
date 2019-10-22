@@ -24,7 +24,7 @@ pipenv shell
 
 Install package from wheel file
 ```python
-pipenv run python -m pip install dist/geo_pyspark-0.1.0-py3-none-any.whl
+pipenv run python -m pip install dist/geo_pyspark-0.2.0-py3-none-any.whl
 ```
 Or using setup.py file
 ```python
