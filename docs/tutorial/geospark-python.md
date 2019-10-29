@@ -1,168 +1,105 @@
-GeoSpark Python is a Python wrapper on scala library <b>GeoSparkSQL</b>.
 
-This package allow to use all GeoSparkSQL functions and transform it to Python Shapely geometry objects. Also
-it allows to create Spark DataFrame with GeoSpark UDT from Shapely geometry objects. Spark DataFrame can
-be converted to GeoPandas easily, in addition all fiona drivers for shape file are available to load
-data from files and convert them to Spark DataFrame. Please look at examples.
 
-## Instalation
+# Introduction
 
-This package assumes that Spark is already installed. 
-### pipenv
+Package is a Python wrapper on scala library GeoSparkSQL. Official repository for GeoSpark can be found at https://github.com/DataSystemsLab/GeoSpark.
 
-clone repository
+Package allow to use all GeoSparkSQL functions and transform it to Python Shapely geometry objects. Also it allows to create Spark DataFrame with GeoSpark UDT from Shapely geometry objects. Spark DataFrame can be converted to GeoPandas easily, in addition all fiona drivers for shape file are available to load data from files and convert them to Spark DataFrame. Please look at examples.
+
+
+
+# Installation
+
+
+geo_pyspark depnds on Python packages and Scala libraries. To see all dependencies
+please look at Dependencies section.
+https://pypi.org/project/pyspark/.
+
+Package needs 3 jar files to work properly:
+
+- geospark-sql_2.2-1.2.0.jar
+- geospark-1.2.0.jar
+- geo_wrapper.jar
+
+Where 2.2 is a Spark version and 1.2.0 is GeoSpark version. Jar files are placed in geo_pyspark/jars. For newest GeoSpark release jar files are places in subdirectories named as Spark version. Example, jar files for SPARK 2.4 can be found in directory geo_pyspark/jars/2_4.
+
+For older version please find appropriate jar files in directory geo_pyspark/jars/previous.
+
+It is possible to automatically add jar files for newest GeoSpark version. Please use code as follows:
+
+
+```python
+
+  from pyspark.sql import SparkSession
+
+  from geo_pyspark.register import upload_jars
+  from geo_pyspark.register import GeoSparkRegistrator
+
+  upload_jars()
+
+  spark = SparkSession.builder.\
+        getOrCreate()
+
+  GeoSparkRegistrator.registerAll(spark)
+
+```
+
+Function
+
+```python
+
+  upload_jars()
+
+
+```
+
+uses findspark Python package to upload jar files to executor and nodes. To avoid copying all the time, jar files can be put in directory SPARK_HOME/jars or any other path specified in Spark config files.
+
+
+
+## Installing from wheel file
+
 
 ```bash
-git clone https://github.com/Imbruced/geo_pyspark.git
-```
-Go into directory and run to install all dependencies if you want to create env from
-scratch
-```python
-pipenv install 
-pipenv shell
-```
 
-Install package from wheel file
-```python
 pipenv run python -m pip install dist/geo_pyspark-0.2.0-py3-none-any.whl
-```
-Or using setup.py file
-```python
-pipenv run python setup.py install
+
 ```
 
-### pip
-
-clone repository
+or
 
 ```bash
-git clone https://github.com/Imbruced/geo_pyspark.git
-```
 
-And install package from wheel file
+  pip install dist/geo_pyspark-0.2.0-py3-none-any.whl
 
-```python
-pip install dist/geo_pyspark-0.1.0-py3-none-any.whl
-```
-
-## Example usage
-
-It is possible to add automatically jar files. 
-Use the following code
-
-```python
-from pyspark.sql import SparkSession
-
-from geo_pyspark.register import upload_jars
-from geo_pyspark.register import GeoSparkRegistrator
-
-upload_jars()
-
-spark = SparkSession.builder.\
-        getOrCreate()
-
-GeoSparkRegistrator.registerAll(spark)
 
 ```
 
-This code will add GeoSpark jars to spark driver and executor.
-
-By default package will not upload jars.
+## Installing from source
 
 
-### Basic Usage
+```bash
 
-```python
-from pyspark.sql import SparkSession
-from geo_pyspark.register import GeoSparkRegistrator
-
-
-spark = SparkSession.builder.\
-        getOrCreate()
-
-GeoSparkRegistrator.registerAll(spark)
-
-df = spark.sql("""SELECT st_GeomFromWKT('POINT(6.0 52.0)') as geom""")
-
-df.show()
-
-    +------------+
-    |        geom|
-    +------------+
-    |POINT (6 52)|
-    +------------+
+  python3 setup.py install
 
 ```
 
-
-### Converting GeoPandas to Spark DataFrame with GeoSpark Geometry UDT.
-
-```python
-import os
-
-import geopandas as gpd
-from pyspark.sql import SparkSession
-
-from geo_pyspark.data import data_path
-from geo_pyspark.register import GeoSparkRegistrator
-
-spark = SparkSession.builder.\
-        getOrCreate()
-
-GeoSparkRegistrator.registerAll(spark)
-
-gdf = gpd.read_file(os.path.join(data_path, "gis_osm_pois_free_1.shp"))
-
-spark.createDataFrame(
-    gdf
-).show()
-
-```
-
-    +---------+----+-----------+--------------------+--------------------+
-    |   osm_id|code|     fclass|                name|            geometry|
-    +---------+----+-----------+--------------------+--------------------+
-    | 26860257|2422|  camp_site|            de Kroon|POINT (15.3393145...|
-    | 26860294|2406|     chalet|      Leśne Ustronie|POINT (14.8709625...|
-    | 29947493|2402|      motel|                null|POINT (15.0946636...|
-    | 29947498|2602|        atm|                null|POINT (15.0732014...|
-    | 29947499|2401|      hotel|                null|POINT (15.0696777...|
-    | 29947505|2401|      hotel|                null|POINT (15.0155749...|
-    +---------+----+-----------+--------------------+--------------------+
-    
-    
-### Converting Spark DataFrame with GeoSpark Geometry UDT to Geopandas.
+# Core Classes and methods.
 
 
-```python
-import os
+`GeoSparkRegistrator.registerAll(spark: pyspark.sql.SparkSession) -> bool`
 
-import geopandas as gpd
-from pyspark.sql import SparkSession
+This is the core of whole package. Class method registers all GeoSparkSQL functions (available for used GeoSparkSQL version).
+To check available functions please look at GeoSparkSQL section.
+:param spark: pyspark.sql.SparkSession, spark session instance
 
-from geo_pyspark.data import data_path
-from geo_pyspark.register import GeoSparkRegistrator
 
-spark = SparkSession.builder.\
-        getOrCreate()
+`upload_jars() -> NoReturn`
 
-GeoSparkRegistrator.registerAll(spark)
+Function uses `findspark` Python module to upload newest GeoSpark jars to Spark executor and nodes.
 
-counties = spark.\
-    read.\
-    option("delimiter", "|").\
-    option("header", "true").\
-    csv(os.path.join(data_path, "counties.csv"))
-    
-counties.createOrReplaceTempView("county")
+`GeometryType()`
 
-counties_geom = spark.sql(
-        "SELECT *, st_geomFromWKT(geom) as geometry from county"
-)
+Class which handle serialization and deserialization between GeoSpark geometries and Shapely BaseGeometry types.
 
-df = counties_geom.toPandas()
-gdf = gpd.GeoDataFrame(df, geometry="geometry")
-gdf.plot()
 
-```
-<img src="../../image/geopandas_plot.PNG" width="250">
