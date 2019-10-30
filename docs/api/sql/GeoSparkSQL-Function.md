@@ -188,7 +188,7 @@ Spark SQL example:
 ```SQL
 SELECT ST_Buffer(polygondf.countyshape, 1)
 FROM polygondf
-````
+```
 
 ## ST_AsText
 
@@ -202,11 +202,13 @@ Spark SQL example:
 ```SQL
 SELECT ST_AsText(polygondf.countyshape)
 FROM polygondf
-````
+```
 
 ## ST_NPoints
 
 Introduction: Return points of the geometry
+
+Since: `v1.2.1`
 
 Format: `ST_NPoints (A:geometry)`
 
