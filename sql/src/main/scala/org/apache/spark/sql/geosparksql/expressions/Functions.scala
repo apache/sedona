@@ -87,6 +87,30 @@ case class ST_ConvexHull(inputExpressions: Seq[Expression])
 }
 
 /**
+  * Return the number of Points in geometry.
+  *
+  * @param inputExpressions
+  */
+case class ST_NPoints(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.length match {
+      case 1 =>
+        val geometry = GeometrySerializer.deserialize (inputExpressions (0).eval (input).asInstanceOf[ArrayData] )
+        geometry.getCoordinates.length
+      case _ => None
+    }
+  }
+
+  override def dataType: DataType = IntegerType
+
+  override def children: Seq[Expression] = inputExpressions
+
+}
+
+/**
   * Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance.
   *
   * @param inputExpressions
@@ -343,6 +367,21 @@ case class ST_AsText(inputExpressions: Seq[Expression])
     assert(inputExpressions.length == 1)
     val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     UTF8String.fromString(geometry.toText)
+  }
+
+  override def dataType: DataType = StringType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class ST_GeometryType(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback{
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 1)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    UTF8String.fromString("ST_" + geometry.getGeometryType)
   }
 
   override def dataType: DataType = StringType

@@ -36,6 +36,7 @@ object Catalog {
     ST_Within,
     ST_Distance,
     ST_ConvexHull,
+    ST_NPoints,
     ST_Buffer,
     ST_Envelope,
     ST_Length,
@@ -50,7 +51,8 @@ object Catalog {
     ST_Overlaps,
 	  ST_Crosses,
     ST_IsSimple,
-    ST_AsText
+    ST_AsText,
+    ST_GeometryType
   )
 
   val aggregateExpressions:Seq[UserDefinedAggregateFunction] = Seq(

@@ -188,7 +188,7 @@ Spark SQL example:
 ```SQL
 SELECT ST_Buffer(polygondf.countyshape, 1)
 FROM polygondf
-````
+```
 
 ## ST_AsText
 
@@ -201,5 +201,32 @@ Since: `v1.2.0`
 Spark SQL example:
 ```SQL
 SELECT ST_AsText(polygondf.countyshape)
+FROM polygondf
+```
+
+## ST_NPoints
+
+Introduction: Return points of the geometry
+
+Since: `v1.2.1`
+
+Format: `ST_NPoints (A:geometry)`
+
+```SQL
+SELECT ST_NPoints(polygondf.countyshape)
+FROM polygondf
+```
+
+## ST_GeometryType
+
+Introduction: Returns the type of the geometry as a string. EG: 'ST_Linestring', 'ST_Polygon' etc.
+
+Format: `ST_GeometryType (A:geometry)`
+
+Since: `v1.2.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_GeometryType(polygondf.countyshape)
 FROM polygondf
 ````
