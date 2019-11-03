@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.datasyslab</groupId>
         <artifactId>geospark-parent</artifactId>
-        <version>1.2.0</version>
+        <version>1.2.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 	<artifactId>geospark-sql_2.2</artifactId>
