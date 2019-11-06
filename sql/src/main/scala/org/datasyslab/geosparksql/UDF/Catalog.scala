@@ -52,7 +52,8 @@ object Catalog {
 	  ST_Crosses,
     ST_IsSimple,
     ST_SimplifyPreserveTopology,
-    ST_AsText
+    ST_AsText,
+    ST_GeometryType
   )
 
   val aggregateExpressions:Seq[UserDefinedAggregateFunction] = Seq(

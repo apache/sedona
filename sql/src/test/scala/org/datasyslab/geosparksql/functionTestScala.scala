@@ -219,5 +219,10 @@ class functionTestScala extends TestBaseScala {
       assert(test.take(1)(0).get(0).asInstanceOf[Int] == 4)
 
     }
+
+    it("Passed ST_GeometryType"){
+      var test = sparkSession.sql("SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
+      assert(test.take(1)(0).get(0).asInstanceOf[String].toUpperCase() == "ST_LINESTRING")
+    }
   }
 }
