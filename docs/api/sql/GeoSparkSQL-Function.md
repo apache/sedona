@@ -215,3 +215,14 @@ SELECT ST_NPoints(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_SimplifyPreserveTopology
+
+Introduction: Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input,
+              and with the components having the same topological relationship.
+
+Format: `ST_SimplifyPreserveTopology (A:geometry, distanceTolerance: Double)`
+
+```SQL
+SELECT ST_SimplifyPreserveTopology(polygondf.countyshape, 10.0)
+FROM polygondf
+```

@@ -353,7 +353,11 @@ case class ST_SimplifyPreserveTopology(inputExpressions: Seq[Expression])
     assert(inputExpressions.length == 2)
     
     val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
-    val distanceTolerance = inputExpressions(1).eval(input).asInstanceOf[Decimal].toDouble
+    val distanceTolerance = inputExpressions(1).eval(input) match {
+      case number: Decimal => number.toDouble
+      case number: Double => number
+      case number: Int => number.toDouble
+    }
     val simplifiedGeometry = TopologyPreservingSimplifier.simplify(geometry, distanceTolerance)
 
     new GenericArrayData(GeometrySerializer.serialize(simplifiedGeometry))
