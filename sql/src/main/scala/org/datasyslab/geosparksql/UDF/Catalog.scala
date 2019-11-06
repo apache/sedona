@@ -51,6 +51,7 @@ object Catalog {
     ST_Overlaps,
 	  ST_Crosses,
     ST_IsSimple,
+    ST_SimplifyPreserveTopology,
     ST_AsText
   )
 
