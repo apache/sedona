@@ -16,9 +16,11 @@
  */
 package org.apache.spark.sql.geosparksql.expressions
 
-import com.vividsolutions.jts.geom.PrecisionModel
+import com.vividsolutions.jts.geom.{PrecisionModel, _}
+import com.vividsolutions.jts.operation.IsSimpleOp
 import com.vividsolutions.jts.operation.valid.IsValidOp
 import com.vividsolutions.jts.precision.GeometryPrecisionReducer
+import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
@@ -30,8 +32,6 @@ import org.datasyslab.geosparksql.utils.GeometrySerializer
 import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.CRS
 import org.opengis.referencing.operation.MathTransform
-import com.vividsolutions.jts.geom._
-import com.vividsolutions.jts.operation.IsSimpleOp
 
 /**
   * Return the distance between two geometries.
@@ -333,6 +333,37 @@ case class ST_IsSimple(inputExpressions: Seq[Expression])
   }
 
   override def dataType: DataType = BooleanType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+  * Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input,
+  * and with the components having the same topological relationship.  
+  * The simplification uses a maximum-distance difference algorithm similar to the Douglas-Peucker algorithm.
+  *
+  * @param inputExpressions first arg is geometry 
+  *                         second arg is distance tolerance for the simplification(all vertices in the simplified geometry will be within this distance of the original geometry)
+  */
+case class ST_SimplifyPreserveTopology(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 2)
+    
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val distanceTolerance = inputExpressions(1).eval(input) match {
+      case number: Decimal => number.toDouble
+      case number: Double => number
+      case number: Int => number.toDouble
+    }
+    val simplifiedGeometry = TopologyPreservingSimplifier.simplify(geometry, distanceTolerance)
+
+    new GenericArrayData(GeometrySerializer.serialize(simplifiedGeometry))
+  }
+
+  override def dataType: DataType = new GeometryUDT()
 
   override def children: Seq[Expression] = inputExpressions
 }
