@@ -507,6 +507,14 @@ Use the following code to save an SpatialRDD as a distributed WKT text file:
 objectRDD.rawSpatialRDD.saveAsTextFile("hdfs://PATH")
 ```
 
+#### Save to distributed WKB text file
+
+Use the following code to save an SpatialRDD as a distributed WKB text file:
+
+```Scala
+objectRDD.saveAsWKB("hdfs://PATH")
+```
+
 #### Save to distributed GeoJSON text file
 
 Use the following code to save an SpatialRDD as a distributed GeoJSON text file:
