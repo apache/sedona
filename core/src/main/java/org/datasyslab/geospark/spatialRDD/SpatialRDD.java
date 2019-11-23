@@ -24,6 +24,7 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.index.SpatialIndex;
 import com.vividsolutions.jts.io.WKBWriter;
+import com.vividsolutions.jts.io.WKTWriter;
 import org.apache.commons.lang.NullArgumentException;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
@@ -554,7 +555,41 @@ public class SpatialRDD<T extends Geometry>
             }
         }).saveAsTextFile(outputLocation);
     }
-    
+
+    /**
+     * Save as WKT
+     *
+     */
+    public void saveAsWKT(String outputLocation)
+    {
+        if (this.rawSpatialRDD == null){
+            throw new NullArgumentException("save as WKT cannot operate on null RDD");
+        }
+        this.rawSpatialRDD.mapPartitions(new FlatMapFunction<Iterator<T>, String>()
+        {
+            @Override
+            public Iterator<String> call(Iterator<T> iterator)
+                    throws Exception
+            {
+                WKTWriter writer = new WKTWriter(3);
+                ArrayList<String> wkts = new ArrayList<>();
+
+                while (iterator.hasNext()) {
+                    Geometry spatialObject = iterator.next();
+                    String wkt = writer.write(spatialObject);
+
+                    if (spatialObject.getUserData() != null) {
+                        wkts.add(wkt + "\t" + spatialObject.getUserData());
+                    }
+                    else {
+                        wkts.add(wkt);
+                    }
+                }
+                return wkts.iterator();
+            }
+        }).saveAsTextFile(outputLocation);
+    }
+
     /**
      * Save as geo JSON.
      *
