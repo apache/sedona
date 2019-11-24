@@ -505,6 +505,7 @@ Use the following code to save an SpatialRDD as a distributed WKT text file:
 
 ```Scala
 objectRDD.rawSpatialRDD.saveAsTextFile("hdfs://PATH")
+objectRDD.rawSpatialRDD.saveAsWKT("hdfs://PATH")
 ```
 
 #### Save to distributed WKB text file
