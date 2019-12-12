@@ -27,6 +27,7 @@
 package org.datasyslab.geosparksql
 
 import com.vividsolutions.jts.geom.Geometry
+import org.geotools.geometry.jts.WKTReader2
 
 class functionTestScala extends TestBaseScala {
 
@@ -122,42 +123,42 @@ class functionTestScala extends TestBaseScala {
 
     it("Passed ST_Intersection - intersects but not contains") {
 
-      val testtable=sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
+      val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
       testtable.createOrReplaceTempView("testtable")
-      val intersec=sparkSession.sql("select ST_Intersection(a,b) from testtable")
+      val intersec = sparkSession.sql("select ST_Intersection(a,b) from testtable")
       assert(intersec.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON ((2 8, 8 8, 8 2, 2 2, 2 8))"))
     }
 
     it("Passed ST_Intersection - intersects but left contains right") {
 
-      val testtable=sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 1 5, 5 5, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 2 3, 3 3, 2 2))') as b")
+      val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 1 5, 5 5, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 2 3, 3 3, 2 2))') as b")
       testtable.createOrReplaceTempView("testtable")
-      val intersec=sparkSession.sql("select ST_Intersection(a,b) from testtable")
+      val intersec = sparkSession.sql("select ST_Intersection(a,b) from testtable")
       assert(intersec.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON ((2 2, 2 3, 3 3, 2 2))"))
     }
 
     it("Passed ST_Intersection - intersects but right contains left") {
 
-      val testtable=sparkSession.sql("select ST_GeomFromWKT('POLYGON((2 2, 2 3, 3 3, 2 2))') as a,ST_GeomFromWKT('POLYGON((1 1, 1 5, 5 5, 1 1))') as b")
+      val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((2 2, 2 3, 3 3, 2 2))') as a,ST_GeomFromWKT('POLYGON((1 1, 1 5, 5 5, 1 1))') as b")
       testtable.createOrReplaceTempView("testtable")
-      val intersec=sparkSession.sql("select ST_Intersection(a,b) from testtable")
+      val intersec = sparkSession.sql("select ST_Intersection(a,b) from testtable")
       assert(intersec.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON ((2 2, 2 3, 3 3, 2 2))"))
     }
 
     it("Passed ST_Intersection - not intersects") {
 
-      var testtable=sparkSession.sql("select ST_GeomFromWKT('POLYGON((40 21, 40 22, 40 23, 40 21))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
+      var testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((40 21, 40 22, 40 23, 40 21))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
       testtable.createOrReplaceTempView("testtable")
-      var intersec=sparkSession.sql("select ST_Intersection(a,b) from testtable")
+      var intersec = sparkSession.sql("select ST_Intersection(a,b) from testtable")
       assert(intersec.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("MULTIPOLYGON EMPTY"))
     }
 
 
     it("Passed ST_IsValid") {
 
-      var testtable=sparkSession.sql(
+      var testtable = sparkSession.sql(
         "SELECT ST_IsValid(ST_GeomFromWKT('POLYGON((0 0, 10 0, 10 10, 0 10, 0 0), (15 15, 15 20, 20 20, 20 15, 15 15))')) AS a, " +
-        "ST_IsValid(ST_GeomFromWKT('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))')) as b"
+          "ST_IsValid(ST_GeomFromWKT('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))')) as b"
       )
       assert(!testtable.take(1)(0).get(0).asInstanceOf[Boolean])
       assert(testtable.take(1)(0).get(1).asInstanceOf[Boolean])
@@ -165,7 +166,7 @@ class functionTestScala extends TestBaseScala {
 
     it("Fixed nullPointerException in ST_IsValid") {
 
-      var testtable=sparkSession.sql(
+      var testtable = sparkSession.sql(
         "SELECT ST_IsValid(null)"
       )
       assert(testtable.take(1).head.get(0) == null)
@@ -189,12 +190,73 @@ class functionTestScala extends TestBaseScala {
 
     it("Passed ST_IsSimple") {
 
-      var testtable=sparkSession.sql(
+      var testtable = sparkSession.sql(
         "SELECT ST_IsSimple(ST_GeomFromText('POLYGON((1 1, 3 1, 3 3, 1 3, 1 1))')) AS a, " +
-                "ST_IsSimple(ST_GeomFromText('POLYGON((1 1,3 1,3 3,2 0,1 1))')) as b"
+          "ST_IsSimple(ST_GeomFromText('POLYGON((1 1,3 1,3 3,2 0,1 1))')) as b"
       )
       assert(testtable.take(1)(0).get(0).asInstanceOf[Boolean])
       assert(!testtable.take(1)(0).get(1).asInstanceOf[Boolean])
+    }
+
+    it("Passed ST_MakeValid On Invalid Polygon") {
+
+      val df = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((1 5, 1 1, 3 3, 5 3, 7 1, 7 5, 5 3, 3 3, 1 5))') AS polygon")
+      df.createOrReplaceTempView("table")
+
+      val result = sparkSession.sql(
+        """
+          |SELECT geometryValid.polygon
+          |FROM table
+          |LATERAL VIEW ST_MakeValid(polygon, false) geometryValid AS polygon
+          |""".stripMargin
+      ).collect()
+
+      val wktReader = new WKTReader2()
+      val firstValidGeometry = wktReader.read("POLYGON ((1 5, 3 3, 1 1, 1 5))")
+      val secondValidGeometry = wktReader.read("POLYGON ((5 3, 7 5, 7 1, 5 3))")
+
+      assert(result.exists(row => row.getAs[Geometry](0).equals(firstValidGeometry)))
+      assert(result.exists(row => row.getAs[Geometry](0).equals(secondValidGeometry)))
+    }
+
+    it("Passed ST_MakeValid On Invalid MultiPolygon") {
+
+      val df = sparkSession.sql("SELECT ST_GeomFromWKT('MULTIPOLYGON(((0 0, 3 0, 3 3, 0 3, 0 0)), ((3 0, 6 0, 6 3, 3 3, 3 0)))') AS multipolygon")
+      df.createOrReplaceTempView("table")
+
+      val result = sparkSession.sql(
+        """
+          |SELECT geometryValid.multipolygon
+          |FROM table
+          |LATERAL VIEW ST_MakeValid(multipolygon, false) geometryValid AS multipolygon
+          |""".stripMargin
+      ).collect()
+
+      val wktReader = new WKTReader2()
+      val firstValidGeometry = wktReader.read("POLYGON ((0 3, 3 3, 3 0, 0 0, 0 3))")
+      val secondValidGeometry = wktReader.read("POLYGON ((3 3, 6 3, 6 0, 3 0, 3 3))")
+
+      assert(result.exists(row => row.getAs[Geometry](0).equals(firstValidGeometry)))
+      assert(result.exists(row => row.getAs[Geometry](0).equals(secondValidGeometry)))
+    }
+
+    it("Passed ST_MakeValid On Valid Polygon") {
+
+      val df = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') AS polygon")
+      df.createOrReplaceTempView("table")
+
+      val result = sparkSession.sql(
+        """
+          |SELECT geometryValid.polygon
+          |FROM table
+          |LATERAL VIEW ST_MakeValid(polygon, false) geometryValid AS polygon
+          |""".stripMargin
+      ).collect()
+
+      val wktReader = new WKTReader2()
+      val validGeometry = wktReader.read("POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))")
+
+      assert(result.exists(row => row.getAs[Geometry](0).equals(validGeometry)))
     }
 
     it("Passed ST_AsText") {
@@ -206,7 +268,7 @@ class functionTestScala extends TestBaseScala {
       assert(polygonDf.take(1)(0).getAs[Geometry]("countyshape").toText.equals(wktDf.take(1)(0).getAs[String]("wkt")))
     }
 
-    it("Passed ST_NPoints"){
+    it("Passed ST_NPoints") {
       var test = sparkSession.sql("SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
       assert(test.take(1)(0).get(0).asInstanceOf[Int] == 4)
 
