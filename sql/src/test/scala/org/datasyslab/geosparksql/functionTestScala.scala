@@ -259,6 +259,14 @@ class functionTestScala extends TestBaseScala {
       assert(result.exists(row => row.getAs[Geometry](0).equals(validGeometry)))
     }
 
+    it("Passed ST_SimplifyPreserveTopology") {
+
+      val testtable=sparkSession.sql(
+        "SELECT ST_SimplifyPreserveTopology(ST_GeomFromText('POLYGON((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33,46 34, 47 44, 35 36, 45 33, 43 19, 29 21, 29 22,35 26, 24 39, 8 25))'), 10) AS b"
+      )
+      assert(testtable.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))"))
+    }
+
     it("Passed ST_AsText") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
@@ -272,6 +280,11 @@ class functionTestScala extends TestBaseScala {
       var test = sparkSession.sql("SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
       assert(test.take(1)(0).get(0).asInstanceOf[Int] == 4)
 
+    }
+
+    it("Passed ST_GeometryType"){
+      var test = sparkSession.sql("SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
+      assert(test.take(1)(0).get(0).asInstanceOf[String].toUpperCase() == "ST_LINESTRING")
     }
   }
 }

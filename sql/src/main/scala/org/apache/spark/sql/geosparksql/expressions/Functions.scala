@@ -22,6 +22,7 @@ import com.vividsolutions.jts.geom.{PrecisionModel, _}
 import com.vividsolutions.jts.operation.IsSimpleOp
 import com.vividsolutions.jts.operation.valid.IsValidOp
 import com.vividsolutions.jts.precision.GeometryPrecisionReducer
+import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{Expression, Generator}
@@ -390,6 +391,37 @@ case class ST_IsSimple(inputExpressions: Seq[Expression])
 }
 
 /**
+  * Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input,
+  * and with the components having the same topological relationship.  
+  * The simplification uses a maximum-distance difference algorithm similar to the Douglas-Peucker algorithm.
+  *
+  * @param inputExpressions first arg is geometry 
+  *                         second arg is distance tolerance for the simplification(all vertices in the simplified geometry will be within this distance of the original geometry)
+  */
+case class ST_SimplifyPreserveTopology(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 2)
+    
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val distanceTolerance = inputExpressions(1).eval(input) match {
+      case number: Decimal => number.toDouble
+      case number: Double => number
+      case number: Int => number.toDouble
+    }
+    val simplifiedGeometry = TopologyPreservingSimplifier.simplify(geometry, distanceTolerance)
+
+    new GenericArrayData(GeometrySerializer.serialize(simplifiedGeometry))
+  }
+
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
   * Reduce the precision of the given geometry to the given number of decimal places
   *
   * @param inputExpressions The first arg is a geom and the second arg is an integer scale, specifying the number of decimal places of the new coordinate. The last decimal place will
@@ -420,6 +452,21 @@ case class ST_AsText(inputExpressions: Seq[Expression])
     assert(inputExpressions.length == 1)
     val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     UTF8String.fromString(geometry.toText)
+  }
+
+  override def dataType: DataType = StringType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class ST_GeometryType(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback{
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 1)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    UTF8String.fromString("ST_" + geometry.getGeometryType)
   }
 
   override def dataType: DataType = StringType
