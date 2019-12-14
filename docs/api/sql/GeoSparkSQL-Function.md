@@ -145,6 +145,30 @@ SELECT ST_IsValid(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_MakeValid
+
+Introduction: Given an invalid polygon or multipolygon and removeHoles boolean flag,
+ create a valid representation of the geometry.
+
+Format: `ST_MakeValid (A:geometry, removeHoles:Boolean)`
+
+Since: `v1.2.0`
+
+Spark SQL example:
+
+```SQL
+SELECT geometryValid.polygon
+FROM table
+LATERAL VIEW ST_MakeValid(polygon, false) geometryValid AS polygon
+```
+
+!!!note
+    Might return multiple polygons from a only one invalid polygon
+    That's the reason why we need to use the LATERAL VIEW expression
+    
+!!!note
+    Throws an exception if the geometry isn't polygon or multipolygon
+
 ## ST_PrecisionReduce
 
 Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded.
