@@ -24,9 +24,4 @@ class GeoSparkRegistrator:
 
     @classmethod
     def register(cls, spark: SparkSession):
-        spark._jvm. \
-            org. \
-            imbruced. \
-            geo_pyspark. \
-            GeoSparkWrapper. \
-            registerAll()
+        spark._jvm.org.datasyslab.geosparksql.utils.GeoSparkSQLRegistrator.registerAll(spark._jsparkSession)
