@@ -58,7 +58,7 @@ AND city.name = 'Gotham';
 * ==Spatial query==: range query, range join query, distance join query, K Nearest Neighbor query
 * ==Spatial index==: R-Tree, Quad-Tree
 * ==Spatial partitioning==: KDB-Tree, Quad-Tree, R-Tree, Voronoi diagram, Hilbert curve, Uniform grids
-* ==Coordinate Reference System / Spatial Reference System Transformation==: for exmaple, from WGS84 (EPSG:4326, degree-based), to EPSG:3857 (meter-based)
+* ==Coordinate Reference System / Spatial Reference System Transformation==: for example, from WGS84 (EPSG:4326, degree-based), to EPSG:3857 (meter-based)
 * ==High resolution map==: Scatter plot, heat map, choropleth map
 
 ## GeoSpark language support
