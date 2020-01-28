@@ -164,7 +164,6 @@ class MultipleMeta(type):
     """
 
     def __new__(cls, clsname, bases, clsdict):
-        print(clsname)
         return type.__new__(cls, clsname, bases, dict(clsdict))
 
     @classmethod
