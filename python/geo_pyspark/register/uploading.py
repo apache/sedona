@@ -25,7 +25,6 @@ def create_jars_path(module_path: str, spark_version: str) -> str:
 def upload_jars_based_on_spark_version(module_path: str) -> bool:
     spark_version = find_spark_version()
     jars_path = create_jars_path(module_path, spark_version)
-    print(jars_path)
     if spark_version == "2_2":
         findspark.add_jars([os.path.join(jars_path, file) for file in os.listdir(jars_path)])
     else:

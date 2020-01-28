@@ -20,3 +20,4 @@ class GeometryParser(ABC):
     @classmethod
     def deserialize(cls, bin_parser: BinaryParser) -> BaseGeometry:
         raise NotImplementedError("Parser has to implement deserialize method")
+

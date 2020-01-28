@@ -1,4 +1,6 @@
-# Introduction
+# GeoSparkSQL Python
+
+## Introduction
 
 Package is a Python wrapper on scala library GeoSparkSQL. Official repository for GeoSpark can be found at https://github.com/DataSystemsLab/GeoSpark.
 
@@ -6,25 +8,25 @@ Package allow to use all GeoSparkSQL functions and transform it to Python Shapel
 
 
 
-# Installation
+## Installation
 
-
-geo_pyspark depnds on Python packages and Scala libraries. To see all dependencies
+geo_pyspark extends pyspark functions which depends on Python packages and Scala libraries. To see all dependencies
 please look at Dependencies section.
 https://pypi.org/project/pyspark/.
 
-Package needs 3 jar files to work properly:
+Package needs 2 jar files to work properly:
 
-- geospark-sql_2.2-1.2.0.jar
-- geospark-1.2.0.jar
+- geospark.jar
+- geospark-sql.jar
 - geo_wrapper.jar
 
-Where 2.2 is a Spark version and 1.2.0 is GeoSpark version. Jar files are placed in geo_pyspark/jars. For newest GeoSpark release jar files are places in subdirectories named as Spark version. Example, jar files for SPARK 2.4 can be found in directory geo_pyspark/jars/2_4.
+!!!note
+    Since GeoSpark 1.3.0 it is possible also to use maven jars for GeoSparkSQL instead of geo_pyspark/jars/../geospark-sql jars files.
 
-For older version please find appropriate jar files in directory geo_pyspark/jars/previous.
 
-It is possible to automatically add jar files for newest GeoSpark version. Please use code as follows:
+Package allows to automatically copy newest GeoSpark jar files using function, please follow the example below.
 
+<li> upload_jars </li>
 
 ```python
 
@@ -54,13 +56,20 @@ Function
 uses findspark Python package to upload jar files to executor and nodes. To avoid copying all the time, jar files can be put in directory SPARK_HOME/jars or any other path specified in Spark config files.
 
 
+### Installing from PyPi repositories
 
-## Installing from wheel file
+Please use command below
+ 
+```bash
+pip install geo_pyspark
+```
+
+### Installing from wheel file
 
 
 ```bash
 
-pipenv run python -m pip install dist/geo_pyspark-0.2.0-py3-none-any.whl
+pipenv run python -m pip install dist/geo_pyspark-0.3.0-py3-none-any.whl
 
 ```
 
@@ -68,12 +77,12 @@ or
 
 ```bash
 
-  pip install dist/geo_pyspark-0.2.0-py3-none-any.whl
+  pip install dist/geo_pyspark-0.3.0-py3-none-any.whl
 
 
 ```
 
-## Installing from source
+### Installing from source
 
 
 ```bash
@@ -82,7 +91,8 @@ or
 
 ```
 
-# Core Classes and methods.
+
+## Core Classes and methods.
 
 
 `GeoSparkRegistrator.registerAll(spark: pyspark.sql.SparkSession) -> bool`
@@ -108,7 +118,7 @@ Class property which returns org.datasyslab.geospark.serde.GeoSparkKryoRegistrat
 
 
 
-# Writing Application
+## Writing Application
 
 Use KryoSerializer.getName and GeoSparkKryoRegistrator.getName class properties to reduce memory impact, reffering to  <a href="https://datasystemslab.github.io/GeoSpark/tutorial/sql/"> GeoSpark docs </a>. To do that use spark config as follows:
 
@@ -129,9 +139,9 @@ After that all the functions from GeoSparkSQL will be available, moreover using 
 
 
 
-# Examples
+### Examples
 
-## GeoSparkSQL
+### GeoSparkSQL
 
 
 All GeoSparkSQL functions (list depends on GeoSparkSQL version) are available in Python API. For documentation please look at <a href="https://datasystemslab.github.io/GeoSpark/api/sql/GeoSparkSQL-Overview/"> GeoSpark website</a>
@@ -355,9 +365,9 @@ schema = StructType(
 
 Also Spark DataFrame with geometry type can be converted to list of shapely objects with <b> collect </b> method.
 
-### Example usage for Shapely objects
+## Example usage for Shapely objects
 
-#### Point
+### Point
 
 ```python
 from shapely.geometry import Point
@@ -398,7 +408,7 @@ root
  |-- geom: geometry (nullable = false)
 ```
 
-#### MultiPoint
+### MultiPoint
 
 ```python3
 
@@ -424,7 +434,7 @@ gdf = spark.createDataFrame(
 
 ```
 
-#### LineString
+### LineString
 
 ```python3
 
@@ -455,7 +465,7 @@ gdf.show(1, False)
 
 ````
 
-#### MultiLineString
+### MultiLineString
 
 ```python3
 
@@ -487,7 +497,7 @@ gdf.show(1, False)
 
 ```
 
-#### Polygon
+### Polygon
 
 ```python3
 
@@ -527,7 +537,7 @@ gdf.show(1, False)
 
 ```
 
-#### MultiPolygon
+### MultiPolygon
 
 ```python3
 

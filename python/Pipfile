@@ -9,12 +9,17 @@ descartes="*"
 sphinx="*"
 ipykernel="*"
 jupyter="*"
+toree="*"
+pytest="*"
+mypy="*"
+pytest-json-report="*"
 
 [packages]
 findspark="*"
 pandas="*"
-geopandas="==0.5.0"
-pyspark="==2.3.2"
+geopandas="==0.6.0"
+pyspark="==2.4.4"
+pytest-json-report = "*"
 
 [requires]
 python_version = "3.6"

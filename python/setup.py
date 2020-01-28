@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 from os import path
+from geo_pyspark import version
 
 here = path.abspath(path.dirname(__file__))
 jars_relative_path = "geo_pyspark/jars"
@@ -7,14 +8,14 @@ jars_relative_path = "geo_pyspark/jars"
 
 setup(
     name='geo_pyspark',
-    version='0.2.0',
+    version=version,
     description='GeoSpark Python Wrapper',
     url='https://github.com/Imbruced/geo_pyspark',
     author='Pawel Kocinski',
     author_email='pawel93kocinski@gmail.com',
-    packages=find_packages(exclude=['geo_pyspark.data', 'geo_pyspark.tests']),
+    packages=find_packages(exclude=['tests']),
     python_requires='>=3.6',
-    install_requires=['pyspark', 'findspark', 'pandas', 'geopandas'],
+    install_requires=['pyspark', 'findspark', 'pandas', 'geopandas', 'attrs'],
     project_urls={
         'Bug Reports': 'https://github.com/Imbruced/geo_pyspark'
     },

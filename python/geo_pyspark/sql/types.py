@@ -1,7 +1,5 @@
 from pyspark.sql.types import UserDefinedType, ArrayType, ByteType
 
-from geo_pyspark.sql.geometry import GeometryFactory
-
 
 class GeometryType(UserDefinedType):
 
@@ -16,16 +14,21 @@ class GeometryType(UserDefinedType):
         return self.serialize(obj)
 
     def serialize(self, obj):
+        from geo_pyspark.sql.geometry import GeometryFactory
         return GeometryFactory.to_bytes(obj)
 
     def deserialize(self, datum):
-        geom = GeometryFactory.geometry_from_bytes(datum)
+        from geo_pyspark.sql.geometry import GeometryFactory
+        from geo_pyspark.utils.binary_parser import BinaryParser
+
+        bin_parser = BinaryParser(datum)
+        geom = GeometryFactory.geometry_from_bytes(bin_parser)
 
         return geom
 
     @classmethod
     def module(cls):
-        pass
+        return "geo_pyspark.sql.types"
 
     def needConversion(self):
         return True
