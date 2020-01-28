@@ -1,12 +1,9 @@
 import attr
-from shapely.geometry import Point
 from shapely.geometry.base import BaseGeometry
 
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
-from geo_pyspark.core.geom_types import JvmCoordinate, JvmPoint
 from geo_pyspark.core.utils import require
 from geo_pyspark.register.java_libs import GeoSparkLib
-from geo_pyspark.sql.geometry import GeometryFactory
 from geo_pyspark.utils.binary_parser import BinaryParser
 from geo_pyspark.utils.geometry_adapter import GeometryAdapter
 from geo_pyspark.utils.spatial_rdd_parser import SpatialRDDParserData

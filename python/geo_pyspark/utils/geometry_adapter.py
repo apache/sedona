@@ -1,7 +1,7 @@
 from shapely.geometry.base import BaseGeometry
 
 from geo_pyspark.core import Envelope
-from geo_pyspark.sql.geometry import GeometryFactory
+from geo_pyspark.sql.types import GeometryFactory
 
 
 class GeometryAdapter:

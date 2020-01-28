@@ -10,9 +10,8 @@ from shapely.geometry import MultiPoint
 from shapely.geometry.base import BaseGeometry
 
 from geo_pyspark.core.geom_types import Circle
-from geo_pyspark.sql.enums import ShapeEnum
+from geo_pyspark.sql.enums import ShapeEnum, GeomEnum
 from geo_pyspark.sql.exceptions import InvalidGeometryException
-from geo_pyspark.sql.geometry import GeomEnum
 from geo_pyspark.utils.abstract_parser import GeometryParser
 from geo_pyspark.utils.binary_parser import BinaryParser, BinaryBuffer
 from geo_pyspark.utils.types import numeric
