@@ -14,8 +14,6 @@ logging.basicConfig(format=FORMAT)
 def compare_versions(version_a: str, version_b: str) -> bool:
     if all([version_b, version_a]):
         version_numbers = version_a.split("."), version_b.split(".")
-    else:
-
     if any([version[0] == "" for version in version_numbers]):
         return False
 
