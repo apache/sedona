@@ -14,12 +14,14 @@ logging.basicConfig(format=FORMAT)
 def compare_versions(version_a: str, version_b: str) -> bool:
     if all([version_b, version_a]):
         version_numbers = version_a.split("."), version_b.split(".")
-    if any([version[0] == "" for version in version_numbers]):
-        return False
-
-    for ver_a, ver_b in zip(*version_numbers):
-        if int(ver_a) < int(ver_b):
+        if any([version[0] == "" for version in version_numbers]):
             return False
+
+        for ver_a, ver_b in zip(*version_numbers):
+            if int(ver_a) < int(ver_b):
+                return False
+    else:
+        return False
     return True
 
 
