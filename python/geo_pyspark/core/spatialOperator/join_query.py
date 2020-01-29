@@ -2,15 +2,14 @@ from pyspark import RDD
 
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.spatialOperator.join_params import JoinParams
-from geo_pyspark.core.utils import require
-from geo_pyspark.register.java_libs import GeoSparkLib
+from geo_pyspark.utils.decorators import require
 from geo_pyspark.utils.rdd_pickling import GeoSparkPickler
 
 
 class JoinQuery:
 
     @classmethod
-    @require([GeoSparkLib.JoinQuery])
+    @require(["JoinQuery"])
     def SpatialJoinQuery(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool, considerBoundaryIntersection: bool) -> RDD:
         """
 
@@ -35,7 +34,7 @@ class JoinQuery:
         return RDD(serlialized, sc, GeoSparkPickler())
 
     @classmethod
-    @require([GeoSparkLib.JoinQuery])
+    @require(["JoinQuery"])
     def DistanceJoinQuery(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool, considerBoundaryIntersection: bool) -> RDD:
         """
 
@@ -59,7 +58,7 @@ class JoinQuery:
         return RDD(serlialized, sc, GeoSparkPickler())
 
     @classmethod
-    @require([GeoSparkLib.JoinQuery])
+    @require(["JoinQuery"])
     def spatialJoin(cls, queryWindowRDD: SpatialRDD, objectRDD: SpatialRDD, joinParams: JoinParams) -> RDD:
         """
 
@@ -81,7 +80,7 @@ class JoinQuery:
         return RDD(serlialized, sc, GeoSparkPickler())
 
     @classmethod
-    @require([GeoSparkLib.JoinQuery])
+    @require(["JoinQuery"])
     def DistanceJoinQueryFlat(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool, considerBoundaryIntersection: bool) -> RDD:
         """
 
@@ -114,7 +113,7 @@ class JoinQuery:
         return RDD(serlialized, sc, GeoSparkPickler())
 
     @classmethod
-    @require([GeoSparkLib.JoinQuery])
+    @require(["JoinQuery"])
     def SpatialJoinQueryFlat(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool,
                               considerBoundaryIntersection: bool) -> RDD:
         """

@@ -5,11 +5,11 @@ from pyspark.sql import DataFrame
 from pyspark.sql.functions import expr
 from pyspark.sql.functions import col
 
-from geo_pyspark.core import Envelope
 from geo_pyspark.core.SpatialRDD import PolygonRDD, CircleRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.enums import FileDataSplitter, GridType, IndexType
 from geo_pyspark.core.formatMapper.shapefileParser.shape_file_reader import ShapefileReader
+from geo_pyspark.core.geom.envelope import Envelope
 from geo_pyspark.core.spatialOperator import JoinQuery
 from geo_pyspark.utils.adapter import Adapter
 from tests.data import geojson_input_location, shape_file_with_missing_trailing_input_location, \

@@ -70,7 +70,7 @@ class TestSpatialRDDToDataFrame(TestBase):
         )
 
         spatial_rdd_with_schema = self.spark.createDataFrame(
-            raw_spatial_rdd, schema
+            raw_spatial_rdd, schema, verifySchema=False
         )
 
         spatial_rdd_with_schema.show()

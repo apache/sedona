@@ -3,7 +3,7 @@ from pyspark import StorageLevel
 from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.enums import IndexType, GridType
-from geo_pyspark.core.geom_types import Envelope
+from geo_pyspark.core.geom.envelope import Envelope
 from tests.properties.point_properties import input_location, offset, splitter, num_partitions, input_count, input_boundary, \
     transformed_envelope, crs_point_test, crs_envelope, crs_envelope_transformed
 from tests.test_base import TestBase

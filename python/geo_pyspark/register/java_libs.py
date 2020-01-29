@@ -31,3 +31,11 @@ class GeoSparkLib(Enum):
     RawJvmIndexRDDSetter = "org.imbruced.geo_pyspark.RawJvmIndexRDDSetter"
     ObjectSpatialRDDLoader = "org.imbruced.geo_pyspark.ObjectSpatialRDDLoader"
     WkbReader = "org.datasyslab.geospark.formatMapper.WkbReader"
+
+    @classmethod
+    def from_str(cls, geo_lib: str) -> 'GeoSparkLib':
+        try:
+            lib = getattr(cls, geo_lib.upper())
+        except AttributeError:
+            raise AttributeError(f"{cls.__class__.__name__} has no {geo_lib} attribute")
+        return lib

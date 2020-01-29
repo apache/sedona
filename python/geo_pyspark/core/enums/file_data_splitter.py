@@ -3,8 +3,7 @@ from enum import Enum
 import attr
 
 from geo_pyspark.core.jvm.abstract import JvmObject
-from geo_pyspark.core.utils import require
-from geo_pyspark.register.java_libs import GeoSparkLib
+from geo_pyspark.utils.decorators import require
 
 
 class FileDataSplitter(Enum):
@@ -36,6 +35,6 @@ class FileSplitterJvm(JvmObject):
         return self.jvm_splitter(self.splitter.value) if self.splitter.value is not None else None
 
     @property
-    @require([GeoSparkLib.FileDataSplitter])
+    @require(["FileDataSplitter"])
     def jvm_splitter(self):
         return self.jvm.FileDataSplitter.getFileDataSplitter

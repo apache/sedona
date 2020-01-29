@@ -8,7 +8,7 @@ from shapely.geometry import Point
 from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.enums import FileDataSplitter, GridType, IndexType
 from geo_pyspark.core.formatMapper.geo_json_reader import GeoJsonReader
-from geo_pyspark.core.geom_types import Envelope
+from geo_pyspark.core.geom.envelope import Envelope
 from tests.test_base import TestBase
 from tests.tools import tests_path
 

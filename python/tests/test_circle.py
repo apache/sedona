@@ -2,7 +2,8 @@ import pytest
 from shapely import wkt
 from shapely.geometry import Point
 
-from geo_pyspark.core.geom_types import Circle, Envelope
+from geo_pyspark.core.geom.circle import Circle
+from geo_pyspark.core.geom.envelope import Envelope
 
 
 class TestCircle:

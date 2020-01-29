@@ -3,8 +3,7 @@ from enum import Enum
 import attr
 
 from geo_pyspark.core.jvm.abstract import JvmObject
-from geo_pyspark.core.utils import require
-from geo_pyspark.register.java_libs import GeoSparkLib
+from geo_pyspark.utils.decorators import require
 
 
 class IndexType(Enum):
@@ -30,6 +29,6 @@ class IndexTypeJvm(JvmObject):
         return self.jvm_index(self.index_type.value) if self.index_type.value is not None else None
 
     @property
-    @require([GeoSparkLib.FileDataSplitter])
+    @require(["FileDataSplitter"])
     def jvm_index(self):
         return self.jvm.IndexType.getIndexType

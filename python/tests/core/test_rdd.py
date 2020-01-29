@@ -6,7 +6,7 @@ from shapely.geometry import Point
 from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
 from geo_pyspark.core.enums import GridType, FileDataSplitter, IndexType
 from geo_pyspark.core.enums.join_build_side import JoinBuildSide
-from geo_pyspark.core.geom_types import Envelope
+from geo_pyspark.core.geom.envelope import Envelope
 from geo_pyspark.core.spatialOperator import RangeQuery, KNNQuery, JoinQuery
 from geo_pyspark.core.spatialOperator.join_params import JoinParams
 import os

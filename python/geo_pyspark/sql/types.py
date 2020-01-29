@@ -6,13 +6,17 @@ from pyspark.sql.types import UserDefinedType, ArrayType, ByteType
 
 from geo_pyspark.sql.enums import GeomEnum, ShapeEnum
 from geo_pyspark.sql.exceptions import GeometryUnavailableException
-from geo_pyspark.utils.abstract_parser import GeometryParser
 from geo_pyspark.utils.binary_parser import BinaryParser, BinaryBuffer
 from geo_pyspark.utils.parsers import CircleParser, PARSERS
 
 
 @attr.s
 class GeometryFactory:
+
+    @classmethod
+    def geom_from_bytes_data(cls, bin_data: List):
+        bin_parser = BinaryParser(bin_data)
+        return cls.geometry_from_bytes(bin_parser)
 
     @classmethod
     def geometry_from_bytes(cls, bin_parser: BinaryParser) -> BaseGeometry:
@@ -26,7 +30,7 @@ class GeometryFactory:
             gm_type = bin_parser.read_byte()
             if GeomEnum.has_value(gm_type):
                 name = GeomEnum.get_name(gm_type)
-                parser: GeometryParser = PARSERS[name]
+                parser = PARSERS[name]
                 geom = parser.deserialize(bin_parser)
                 return geom
             else:

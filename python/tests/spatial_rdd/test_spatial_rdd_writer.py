@@ -6,7 +6,7 @@ from pyspark import StorageLevel
 
 from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.enums import FileDataSplitter
-from geo_pyspark.core.geom_types import Envelope
+from geo_pyspark.core.geom.envelope import Envelope
 from tests.test_base import TestBase
 from tests.tools import tests_path
 

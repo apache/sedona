@@ -6,7 +6,6 @@ from pyspark.sql import SparkSession
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.formatMapper.geo_reader import GeoDataReader
 from geo_pyspark.core.jvm.config import since
-from geo_pyspark.register.java_libs import GeoSparkLib
 from geo_pyspark.utils.decorators import require
 from geo_pyspark.utils.meta import MultipleMeta
 from tests.tools import tests_path
@@ -56,7 +55,7 @@ class WktReader(GeoDataReader, metaclass=MultipleMeta):
 
     @classmethod
     @since("1.2.0")
-    @require([GeoSparkLib.WktReader])
+    @require(["WktReader"])
     def validate_imports(cls) -> bool:
         return True
 

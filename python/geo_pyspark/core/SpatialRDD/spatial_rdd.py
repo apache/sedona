@@ -2,7 +2,6 @@ import pickle
 from typing import Optional, List, Union
 
 import attr
-from geo_pyspark.register.java_libs import GeoSparkLib
 from py4j.java_gateway import get_field
 from pyspark import SparkContext, RDD
 from pyspark.sql import SparkSession
@@ -11,10 +10,9 @@ from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from geo_pyspark.core.enums.grid_type import GridTypeJvm, GridType
 from geo_pyspark.core.enums.index_type import IndexTypeJvm, IndexType
 from geo_pyspark.core.enums.spatial import SpatialType
-from geo_pyspark.core.geom_types import Envelope
+from geo_pyspark.core.geom.envelope import Envelope
 from geo_pyspark.core.jvm.config import since
 from geo_pyspark.core.jvm.partitioner import JvmPartitioner
-from geo_pyspark.register.java_libs import GeoSparkLib
 from geo_pyspark.utils.decorators import require
 from geo_pyspark.utils.rdd_pickling import GeoSparkPickler
 from geo_pyspark.utils.types import crs
@@ -197,7 +195,7 @@ class SpatialRDD:
         """
         return SpatialPartitioner.from_java_class_name(self._srdd.getPartitioner())
 
-    @require([GeoSparkLib.GeoSerializerData])
+    @require(["GeoSerializerData"])
     def getRawSpatialRDD(self):
         """
 
@@ -290,7 +288,7 @@ class SpatialRDD:
         return get_field(self._srdd, "indexedRawRDD")
 
     @indexedRawRDD.setter
-    @require([GeoSparkLib.RawJvmIndexRDDSetter])
+    @require(["RawJvmIndexRDDSetter"])
     def indexedRawRDD(self, value):
         self._jvm.RawJvmIndexRDDSetter.setRawIndexRDD(self._srdd, value)
 

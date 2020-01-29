@@ -1,6 +1,6 @@
 import os
 
-from geo_pyspark.core import Envelope
+from geo_pyspark.core.geom.envelope import Envelope
 from geo_pyspark.core.jvm.config import GeoSparkMeta, compare_versions
 from geo_pyspark.core.spatialOperator import RangeQuery
 from tests.tools import tests_path

@@ -2,9 +2,8 @@ import attr
 from shapely.geometry.base import BaseGeometry
 
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
-from geo_pyspark.core.utils import require
-from geo_pyspark.register.java_libs import GeoSparkLib
 from geo_pyspark.utils.binary_parser import BinaryParser
+from geo_pyspark.utils.decorators import require
 from geo_pyspark.utils.geometry_adapter import GeometryAdapter
 from geo_pyspark.utils.spatial_rdd_parser import SpatialRDDParserData
 
@@ -13,7 +12,7 @@ from geo_pyspark.utils.spatial_rdd_parser import SpatialRDDParserData
 class KNNQuery:
 
     @classmethod
-    @require([GeoSparkLib.KNNQuery, GeoSparkLib.GeometryAdapter])
+    @require(["KNNQuery", "GeometryAdapter"])
     def SpatialKnnQuery(self, spatialRDD: SpatialRDD, originalQueryPoint: BaseGeometry, k: int,  useIndex: bool):
         """
 

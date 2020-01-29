@@ -1,4 +1,5 @@
-from geo_pyspark.core.geom_types import JvmCoordinate, JvmPoint, Envelope
+from geo_pyspark.core.geom.envelope import Envelope
+from geo_pyspark.core.geom_types import JvmCoordinate, JvmPoint
 from tests.test_base import TestBase
 
 

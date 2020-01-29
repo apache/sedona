@@ -1,7 +1,7 @@
 from pyspark import StorageLevel
 
 from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
-from geo_pyspark.core.geom_types import Circle
+from geo_pyspark.core.geom.circle import Circle
 from geo_pyspark.core.spatialOperator import RangeQuery, KNNQuery, JoinQuery
 from tests.properties.crs_transform import *
 from tests.test_base import TestBase

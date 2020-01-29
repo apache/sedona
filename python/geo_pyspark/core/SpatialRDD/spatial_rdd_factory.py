@@ -3,8 +3,7 @@ from abc import ABC
 import attr
 from pyspark import SparkContext
 
-from geo_pyspark.core.utils import require
-from geo_pyspark.register.java_libs import GeoSparkLib
+from geo_pyspark.utils.decorators import require
 
 
 @attr.s
@@ -15,26 +14,26 @@ class SpatialRDDFactory(ABC):
     def __attrs_post_init__(self):
         self._jvm = self.sparkContext._jvm
 
-    @require([GeoSparkLib.PointRDD])
+    @require(["PointRDD"])
     def create_point_rdd(self):
         return self._jvm.PointRDD
 
-    @require([GeoSparkLib.PolygonRDD])
+    @require(["PolygonRDD"])
     def create_polygon_rdd(self):
         return self._jvm.PolygonRDD
 
-    @require([GeoSparkLib.LineStringRDD])
+    @require(["LineStringRDD"])
     def create_linestring_rdd(self):
         return self._jvm.LineStringRDD
 
-    @require([GeoSparkLib.RectangleRDD])
+    @require(["RectangleRDD"])
     def create_rectangle_rdd(self):
         return self._jvm.RectangleRDD
 
-    @require([GeoSparkLib.CircleRDD])
+    @require(["CircleRDD"])
     def create_circle_rdd(self):
         return self._jvm.CircleRDD
 
-    @require([GeoSparkLib.SpatialRDD])
+    @require(["SpatialRDD"])
     def create_spatial_rdd(self):
         return self._jvm.SpatialRDD

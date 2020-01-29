@@ -1,7 +1,5 @@
 from typing import List, Iterable, Callable, TypeVar
 
-from geo_pyspark.register.java_libs import GeoSparkLib
-
 T = TypeVar('T')
 
 
@@ -24,7 +22,7 @@ def get_first_meet_criteria_element_from_iterable(iterable: Iterable[T], criteri
     return -1
 
 
-def require(library_names: List[GeoSparkLib]):
+def require(library_names: List[str]):
     def wrapper(func):
         def run_function(*args, **kwargs):
             from geo_pyspark.core.utils import ImportedJvmLib

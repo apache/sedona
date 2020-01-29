@@ -3,8 +3,7 @@ from enum import Enum
 import attr
 
 from geo_pyspark.core.jvm.abstract import JvmObject
-from geo_pyspark.core.utils import require
-from geo_pyspark.register.java_libs import GeoSparkLib
+from geo_pyspark.utils.decorators import require
 
 
 class GridType(Enum):
@@ -34,6 +33,6 @@ class GridTypeJvm(JvmObject):
         return self.jvm_grid(self.grid.value) if self.grid.value is not None else None
 
     @property
-    @require([GeoSparkLib.GridType])
+    @require(["GridType"])
     def jvm_grid(self):
         return self.jvm.GridType.getGridType

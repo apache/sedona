@@ -2,8 +2,7 @@ from pyspark import RDD
 from shapely.geometry.base import BaseGeometry
 
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
-from geo_pyspark.core.utils import require
-from geo_pyspark.register.java_libs import GeoSparkLib
+from geo_pyspark.utils.decorators import require
 from geo_pyspark.utils.geometry_adapter import GeometryAdapter
 from geo_pyspark.utils.rdd_pickling import GeoSparkPickler
 
@@ -11,7 +10,7 @@ from geo_pyspark.utils.rdd_pickling import GeoSparkPickler
 class RangeQuery:
 
     @classmethod
-    @require([GeoSparkLib.RangeQuery, GeoSparkLib.GeometryAdapter])
+    @require(["RangeQuery", "GeometryAdapter"])
     def SpatialRangeQuery(self, spatialRDD: SpatialRDD, rangeQueryWindow: BaseGeometry, considerBoundaryIntersection: bool, usingIndex: bool):
         """
 

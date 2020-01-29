@@ -3,7 +3,6 @@ from pyspark import SparkContext, RDD
 from geo_pyspark.core.SpatialRDD import SpatialRDD
 from geo_pyspark.core.formatMapper.geo_reader import GeoDataReader
 from geo_pyspark.core.jvm.config import since
-from geo_pyspark.register.java_libs import GeoSparkLib
 from geo_pyspark.utils.decorators import require
 from geo_pyspark.utils.meta import MultipleMeta
 
@@ -12,7 +11,7 @@ class WkbReader(GeoDataReader, metaclass=MultipleMeta):
 
     @classmethod
     @since("1.2.0")
-    @require([GeoSparkLib.WkbReader])
+    @require(["WkbReader"])
     def validate_imports(cls):
         pass
 

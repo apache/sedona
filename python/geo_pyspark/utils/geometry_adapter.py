@@ -1,6 +1,6 @@
 from shapely.geometry.base import BaseGeometry
 
-from geo_pyspark.core import Envelope
+from geo_pyspark.core.geom.envelope import Envelope
 from geo_pyspark.sql.types import GeometryFactory
 
 

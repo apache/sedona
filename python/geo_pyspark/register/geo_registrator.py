@@ -43,6 +43,6 @@ class PackageImporter:
         """
         for lib in GeoSparkLib:
             java_import(jvm, lib.value)
-            ImportedJvmLib.import_lib(lib)
+            ImportedJvmLib.import_lib(lib.name)
 
         return True

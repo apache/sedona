@@ -3,7 +3,6 @@ import os
 
 from geo_pyspark.core.enums import FileDataSplitter, GridType, IndexType
 from geo_pyspark.core.enums.join_build_side import JoinBuildSide
-from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.core.spatialOperator import JoinQuery
 from geo_pyspark.core.spatialOperator.join_params import JoinParams
 from tests.spatial_operator.test_join_base import TestJoinBase
