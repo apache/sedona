@@ -3,7 +3,7 @@ from typing import List
 from pyspark import RDD
 from pyspark.sql import DataFrame, SparkSession
 
-from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmSpatialRDD
+from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.enums.spatial import SpatialType
 from geo_pyspark.utils.meta import MultipleMeta
 
@@ -14,7 +14,8 @@ class Adapter(metaclass=MultipleMeta):
     """
 
     @classmethod
-    def toRdd(cls, dataFrame: DataFrame) -> JvmSpatialRDD:
+    def toRdd(cls, dataFrame: DataFrame) -> 'JvmSpatialRDD':
+        from geo_pyspark.core.SpatialRDD.spatial_rdd import JvmSpatialRDD
         sc = dataFrame._sc
         jvm = sc._jvm
 

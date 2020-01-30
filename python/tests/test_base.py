@@ -1,5 +1,3 @@
-import sys
-
 from pyspark.sql import SparkSession
 
 from geo_pyspark.register import upload_jars, GeoSparkRegistrator
@@ -12,8 +10,6 @@ class TestBase:
     @classproperty
     def spark(self):
         if not hasattr(self, "__spark"):
-            sys.path.append("/home/pawel/Desktop/spark-2.4.4-bin-hadoop2.7/python")
-            sys.path.append("/home/pawel/Desktop/spark-2.4.4-bin-hadoop2.7/python/py4j-0.10.7")
             upload_jars()
 
             spark = SparkSession. \

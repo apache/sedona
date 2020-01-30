@@ -4,7 +4,7 @@ from shapely.geometry.base import BaseGeometry
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.utils.decorators import require
 from geo_pyspark.utils.geometry_adapter import GeometryAdapter
-from geo_pyspark.utils.rdd_pickling import GeoSparkPickler
+from geo_pyspark.utils.spatial_rdd_parser import GeoSparkPickler
 
 
 class RangeQuery:
