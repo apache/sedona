@@ -8,7 +8,6 @@ from geo_pyspark.core.formatMapper.geo_reader import GeoDataReader
 from geo_pyspark.core.jvm.config import since
 from geo_pyspark.utils.decorators import require
 from geo_pyspark.utils.meta import MultipleMeta
-from tests.tools import tests_path
 
 
 class WktReader(GeoDataReader, metaclass=MultipleMeta):
@@ -58,19 +57,3 @@ class WktReader(GeoDataReader, metaclass=MultipleMeta):
     @require(["WktReader"])
     def validate_imports(cls) -> bool:
         return True
-
-
-if __name__ == "__main__":
-    from geo_pyspark.register import upload_jars, GeoSparkRegistrator
-
-    upload_jars()
-    spark = SparkSession. \
-        builder. \
-        master("local[*]"). \
-        getOrCreate()
-
-    GeoSparkRegistrator.registerAll(spark)
-
-    spatial_rdd = WktReader.readToGeometryRDD(spark.sparkContext, os.path.join(tests_path, "resources/county_small.tsv"), 0, True, True)
-    print(spatial_rdd.rawSpatialRDD.map(lambda x: x.geom).collect())
-
