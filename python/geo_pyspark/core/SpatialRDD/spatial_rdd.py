@@ -5,6 +5,7 @@ import attr
 from py4j.java_gateway import get_field
 from pyspark import SparkContext, RDD
 from pyspark.sql import SparkSession
+from pyspark import StorageLevel
 
 from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from geo_pyspark.core.enums.grid_type import GridTypeJvm, GridType
@@ -14,6 +15,7 @@ from geo_pyspark.core.geom.envelope import Envelope
 from geo_pyspark.core.jvm.config import since
 from geo_pyspark.core.jvm.partitioner import JvmPartitioner
 from geo_pyspark.utils.decorators import require
+from geo_pyspark.utils.jvm import JvmStorageLevel
 from geo_pyspark.utils.spatial_rdd_parser import GeoSparkPickler
 from geo_pyspark.utils.types import crs
 
@@ -44,6 +46,10 @@ class JvmSpatialRDD:
     def saveAsObjectFile(self, location: str):
         self.jsrdd.saveAsObjectFile(location)
 
+    def persist(self, storage_level: StorageLevel):
+        self.jsrdd.persist(JvmStorageLevel(self.sc._jvm, storage_level).jvm_instance)
+
+
 @attr.s
 class JvmGrids:
     jgrid = attr.ib()
@@ -60,6 +66,9 @@ class JvmIndexedRDD:
 class JvmIndexedRawRDD:
     j_indexed_raw_rdd = attr.ib()
     sc = attr.ib(type=SparkContext)
+
+    def persist(self, storage_level: StorageLevel):
+        self.j_indexed_raw_rdd.persist(JvmStorageLevel(self.sc._jvm, storage_level).jvm_instance)
 
 
 class SpatialRDD:
@@ -357,12 +366,16 @@ class SpatialRDD:
         """
         return self._srdd.setSampleNumber(sampleNumber)
 
+    @property
     def spatialPartitionedRDD(self):
         """
 
         :return:
         """
-        return self._srdd.spatialPartitionedRDD()
+        serialized_spatial_rdd = self._jvm.GeoSerializerData.serializeToPython(
+            get_field(self._srdd, "spatialPartitionedRDD"))
+
+        return RDD(serialized_spatial_rdd, self._sc, GeoSparkPickler())
 
     def spatialPartitioning(self, partitioning: Union[str, GridType, SpatialPartitioner, List[Envelope], JvmPartitioner]) -> bool:
         """
