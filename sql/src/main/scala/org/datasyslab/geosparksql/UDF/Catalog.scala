@@ -58,6 +58,7 @@ object Catalog {
 
   val aggregateExpressions:Seq[UserDefinedAggregateFunction] = Seq(
     new ST_Union_Aggr,
-    new ST_Envelope_Aggr
+    new ST_Envelope_Aggr,
+    new ST_Intersection_Aggr
   )
 }

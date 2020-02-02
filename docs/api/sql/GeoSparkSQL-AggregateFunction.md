@@ -25,3 +25,17 @@ Spark SQL example:
 SELECT ST_Union_Aggr(polygondf.polygonshape)
 FROM polygondf
 ```
+
+## ST_Intersection_Aggr
+
+Introduction: Return the polygon intersection of all polygons in A
+
+Format: `ST_Intersection_Aggr (A:geometryColumn)`
+
+Since: `v1.2.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_Intersection_Aggr(polygondf.polygonshape)
+FROM polygondf
+```

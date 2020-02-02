@@ -60,6 +60,8 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll{
   val csvPolygon2RandomInputLocation = resourceFolder + "equalitycheckfiles/testequals_envelope2_random.csv"
   val overlapPolygonInputLocation = resourceFolder + "testenvelope_overlap.csv"
   val unionPolygonInputLocation = resourceFolder + "testunion.csv"
+  val intersectionPolygonInputLocation = resourceFolder + "test_intersection_aggregate.tsv"
+  val intersectionPolygonNoIntersectionInputLocation = resourceFolder + "test_intersection_aggregate_no_intersection.tsv"
   val csvPoint1InputLocation = resourceFolder + "equalitycheckfiles/testequals_point1.csv"
   val csvPoint2InputLocation = resourceFolder + "equalitycheckfiles/testequals_point2.csv"
   val geojsonIdInputLocation = resourceFolder + "testContainsId.json"

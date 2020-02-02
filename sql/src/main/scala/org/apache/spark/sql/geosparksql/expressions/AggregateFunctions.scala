@@ -173,3 +173,48 @@ class ST_Envelope_Aggr extends UserDefinedAggregateFunction {
     return buffer.getAs[Geometry](0)
   }
 }
+
+/**
+ * Return the polygon intersection of all Polygon in the given column
+ */
+class ST_Intersection_Aggr extends UserDefinedAggregateFunction {
+  override def inputSchema: StructType = StructType(StructField("Intersection", new GeometryUDT) :: Nil)
+
+  override def bufferSchema: StructType = StructType(
+    StructField("Intersection", new GeometryUDT) :: Nil
+  )
+
+  override def dataType: DataType = new GeometryUDT
+
+  override def deterministic: Boolean = true
+
+  override def initialize(buffer: MutableAggregationBuffer): Unit = {
+    val coordinates: Array[Coordinate] = new Array[Coordinate](5)
+    coordinates(0) = new Coordinate(-999999999, -999999999)
+    coordinates(1) = new Coordinate(-999999999, -999999999)
+    coordinates(2) = new Coordinate(-999999999, -999999999)
+    coordinates(3) = new Coordinate(-999999999, -999999999)
+    coordinates(4) = new Coordinate(-999999999, -999999999)
+    val geometryFactory = new GeometryFactory()
+    buffer(0) = geometryFactory.createPolygon(coordinates)
+  }
+
+  override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
+    val accumulateUnion = buffer.getAs[Geometry](0)
+    val newPolygon = input.getAs[Geometry](0)
+    if (accumulateUnion.getArea == 0) buffer(0) = newPolygon
+    else buffer(0) = accumulateUnion.intersection(newPolygon)
+  }
+
+  override def merge(buffer1: MutableAggregationBuffer, buffer2: Row): Unit = {
+    val leftPolygon = buffer1.getAs[Geometry](0)
+    val rightPolygon = buffer2.getAs[Geometry](0)
+    if (leftPolygon.getCoordinates()(0).x == -999999999) buffer1(0) = rightPolygon
+    else if (rightPolygon.getCoordinates()(0).x == -999999999) buffer1(0) = leftPolygon
+    else buffer1(0) = leftPolygon.intersection(rightPolygon)
+  }
+
+  override def evaluate(buffer: Row): Any = {
+    buffer.getAs[Geometry](0)
+  }
+}
