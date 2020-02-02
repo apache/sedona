@@ -200,10 +200,10 @@ class ST_Intersection_Aggr extends UserDefinedAggregateFunction {
   }
 
   override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
-    val accumulateUnion = buffer.getAs[Geometry](0)
+    val accumulateIntersection = buffer.getAs[Geometry](0)
     val newPolygon = input.getAs[Geometry](0)
-    if (accumulateUnion.getArea == 0) buffer(0) = newPolygon
-    else buffer(0) = accumulateUnion.intersection(newPolygon)
+    if (accumulateIntersection.getArea == 0) buffer(0) = newPolygon
+    else buffer(0) = accumulateIntersection.intersection(newPolygon)
   }
 
   override def merge(buffer1: MutableAggregationBuffer, buffer2: Row): Unit = {
