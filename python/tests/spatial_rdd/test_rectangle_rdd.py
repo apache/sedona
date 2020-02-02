@@ -145,10 +145,3 @@ class TestRectangleRDD(TestBase):
 
         spatial_rdd.buildIndex(IndexType.RTREE, False)
 
-    def test_build_rtree_index(self):
-        pass
-        # TODO write this test
-
-    def test_build_quad_tree_index(self):
-        pass
-        # TODO write this test

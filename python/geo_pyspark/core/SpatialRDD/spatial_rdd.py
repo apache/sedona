@@ -54,6 +54,12 @@ class JvmSpatialRDD:
     def count(self):
         return self.jsrdd.count()
 
+    def cache(self):
+        return self.persist(StorageLevel.MEMORY_ONLY)
+
+    def unpersist(self):
+        return self.jsrdd.unpersist()
+
 
 @attr.s
 class JvmGrids:
@@ -251,14 +257,6 @@ class SpatialRDD:
         else:
             return None
 
-    @grids.setter
-    def grids(self, grids: List[Envelope]):
-        jvm_envelopes = [
-            GeometryAdapter.create_jvm_geometry_from_base_geometry(self._jvm, envelope) for envelope in grids
-        ]
-        self._srdd.grids = jvm_envelopes
-
-
     @property
     def jvm_grids(self) -> JvmGrids:
         jvm_grids = get_field(self._srdd, "grids")
@@ -330,8 +328,9 @@ class SpatialRDD:
             self._sc = spatial_rdd._sc
             self._jvm = spatial_rdd._jvm
             self._spatial_partitioned = spatial_rdd._spatial_partitioned
-        if isinstance(spatial_rdd, RDD):
-            self._srdd.setRawSpatialRDD(spatial_rdd._jrdd)
+        elif isinstance(spatial_rdd, RDD):
+            jrdd = self._jvm.GeoSerializerData.getFromPythonRawGeometryRDD(spatial_rdd._jrdd)
+            self._srdd.setRawSpatialRDD(jrdd)
         else:
             self._srdd.setRawSpatialRDD(spatial_rdd)
 
@@ -439,6 +438,25 @@ class SpatialRDD:
         self._jvm = self._sc._jvm
         self._jsc = self._sc._jsc
         self.setRawSpatialRDD(jsrdd_p.jsrdd)
+
+    def getJvmSpatialPartitionedRDD(self) -> JvmSpatialRDD:
+        return JvmSpatialRDD(jsrdd=get_field(
+            self._srdd, "spatialPartitionedRDD"), sc=self._sc, tp=SpatialType.from_str(self.name)
+        )
+
+    @property
+    def jvmSpatialPartitionedRDD(self) -> JvmSpatialRDD:
+        return self.getJvmSpatialPartitionedRDD()
+
+    @jvmSpatialPartitionedRDD.setter
+    def jvmSpatialPartitionedRDD(self, jsrdd_p: JvmSpatialRDD):
+        if jsrdd_p.tp.value.lower() != self.name:
+            raise TypeError(f"value should be type {self.name} but {jsrdd_p.tp} was found")
+
+        self._sc = jsrdd_p.sc
+        self._jvm = self._sc._jvm
+        self._jsc = self._sc._jsc
+        self._srdd.jvmSpatialPartitionedRDD = jsrdd_p.jsrdd
 
     @property
     def name(self):

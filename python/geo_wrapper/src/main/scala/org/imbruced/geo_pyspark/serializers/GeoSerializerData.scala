@@ -1,17 +1,22 @@
 package org.imbruced.geo_pyspark.serializers
 
+import java.io.{ByteArrayInputStream, DataInputStream}
 import java.nio.ByteBuffer
 
-import com.vividsolutions.jts.geom.{Envelope, Geometry, LineString, Point, Polygon}
+import com.vividsolutions.jts.geom.{Envelope, Geometry, GeometryFactory, LineString, Point, Polygon}
 import net.razorvine.pickle.objects.{ArrayConstructor, ByteArrayConstructor, ClassDict}
 import org.apache.spark.api.java.{JavaPairRDD, JavaRDD}
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.datasyslab.geosparksql.utils.GeometrySerializer
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
-import scala.collection.JavaConverters._
 
+import com.esotericsoftware.kryo.io.Input
+
+import scala.collection.JavaConverters._
 import net.razorvine.pickle.Unpickler
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeSerde
+import org.datasyslab.geospark.geometryObjects.GeometrySerde.Type
 
 
 object GeoSerializerData {
@@ -49,18 +54,18 @@ object GeoSerializerData {
       iter.flatMap { row =>
         val unpickler = new Unpickler
         val obj = unpickler.loads(row)
-          obj match {
-            case _ => obj.asInstanceOf[java.util.ArrayList[_]].toArray.map(
-              classDict => {
-                val geoData = classDict.asInstanceOf[ClassDict]
-                val geom = geoData.asInstanceOf[ClassDict].get("geom")
-                val userData = geoData.asInstanceOf[ClassDict].get("userData")
-                val geometryInstance = GeometrySerializer.deserialize(ArrayData.toArrayData(geom))
-                geometryInstance.setUserData(userData)
-                geometryInstance.asInstanceOf[Geometry]
-              }
-            )
-          }
+        obj match {
+          case _ => obj.asInstanceOf[java.util.ArrayList[_]].toArray.map(
+            classDict => {
+              val geoData = classDict.asInstanceOf[ClassDict]
+              val geom = geoData.asInstanceOf[ClassDict].get("geom")
+              val userData = geoData.asInstanceOf[ClassDict].get("userData")
+              val geometryInstance = GeometrySerializer.deserialize(ArrayData.toArrayData(geom))
+              geometryInstance.setUserData(userData)
+              geometryInstance.asInstanceOf[Geometry]
+            }
+          )
+        }
       }
     }.toJavaRDD())
   }
@@ -103,14 +108,14 @@ object GeoSerializerData {
   }
 
   def serializeGeomToPython(geom: Geometry): Array[Byte] = {
-      val userData = geom.getUserData
-      geom.setUserData("")
-      val serializedGeom = GeometrySerializer.serialize(geom)
-      val userDataBinary = userData.asInstanceOf[String].getBytes(StandardCharsets.UTF_8)
-      val userDataLengthArray = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
-      userDataLengthArray.putInt(userDataBinary.length)
+    val userData = geom.getUserData
+    geom.setUserData("")
+    val serializedGeom = GeometrySerializer.serialize(geom)
+    val userDataBinary = userData.asInstanceOf[String].getBytes(StandardCharsets.UTF_8)
+    val userDataLengthArray = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
+    userDataLengthArray.putInt(userDataBinary.length)
 
-      userDataLengthArray.array() ++ serializedGeom ++ userDataBinary
+    userDataLengthArray.array() ++ serializedGeom ++ userDataBinary
 
   }
 
@@ -145,6 +150,26 @@ object GeoSerializerData {
       typeBuffer.array() ++ serializeGeomToPython(leftGeometry) ++ sizeBuffer.array() ++ serializeGeomToPython(rightGeometry)
     }
     ).toJavaRDD()
+  }
+
+  def getFromPythonRawGeometryRDD(javaRDD: JavaRDD[Array[Byte]]): JavaRDD[Geometry] = {
+    javaRDD.rdd.map[Geometry](serializedGeoData =>
+    {
+      val byteDataLength = serializedGeoData.length
+
+      val geoDataBytes = new ByteArrayInputStream(serializedGeoData)
+      val geoDataInputBytes = new DataInputStream(geoDataBytes)
+      val rddType = geoDataInputBytes.readInt()
+      val userDataLength = java.lang.Integer.reverseBytes(geoDataInputBytes.readInt())
+
+      val toReadGeometry = serializedGeoData.slice(8, byteDataLength-4)
+      val geom = GeometrySerializer.deserialize(ArrayData.toArrayData(toReadGeometry))
+
+      geom.setUserData(serializedGeoData.slice(byteDataLength-(4+userDataLength), byteDataLength-4).map(_.toChar).mkString)
+      geom
+    }
+
+    )
   }
 
 }
