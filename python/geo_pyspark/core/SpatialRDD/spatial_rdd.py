@@ -15,6 +15,7 @@ from geo_pyspark.core.geom.envelope import Envelope
 from geo_pyspark.core.jvm.config import since
 from geo_pyspark.core.jvm.partitioner import JvmPartitioner
 from geo_pyspark.utils.decorators import require
+from geo_pyspark.utils.geometry_adapter import GeometryAdapter
 from geo_pyspark.utils.jvm import JvmStorageLevel
 from geo_pyspark.utils.spatial_rdd_parser import GeoSparkPickler
 from geo_pyspark.utils.types import crs
@@ -47,28 +48,17 @@ class JvmSpatialRDD:
         self.jsrdd.saveAsObjectFile(location)
 
     def persist(self, storage_level: StorageLevel):
-        self.jsrdd.persist(JvmStorageLevel(self.sc._jvm, storage_level).jvm_instance)
+        new_jsrdd = self.jsrdd.persist(JvmStorageLevel(self.sc._jvm, storage_level).jvm_instance)
+        self.jsrdd = new_jsrdd
+
+    def count(self):
+        return self.jsrdd.count()
 
 
 @attr.s
 class JvmGrids:
     jgrid = attr.ib()
     sc = attr.ib(type=SparkContext)
-
-
-@attr.s
-class JvmIndexedRDD:
-    j_indexed_rdd = attr.ib()
-    sc = attr.ib(type=SparkContext)
-
-
-@attr.s
-class JvmIndexedRawRDD:
-    j_indexed_raw_rdd = attr.ib()
-    sc = attr.ib(type=SparkContext)
-
-    def persist(self, storage_level: StorageLevel):
-        self.j_indexed_raw_rdd.persist(JvmStorageLevel(self.sc._jvm, storage_level).jvm_instance)
 
 
 class SpatialRDD:
@@ -210,8 +200,16 @@ class SpatialRDD:
 
         :return:
         """
+
         serialized_spatial_rdd = self._jvm.GeoSerializerData.serializeToPython(self._srdd.getRawSpatialRDD())
-        return RDD(serialized_spatial_rdd, self._sc, GeoSparkPickler())
+
+        if not hasattr(self, "_raw_spatial_rdd"):
+            RDD.saveAsObjectFile = lambda x, path: x._jrdd.saveAsObjectFile(path)
+            setattr(self, "_raw_spatial_rdd", RDD(serialized_spatial_rdd, self._sc, GeoSparkPickler()))
+        else:
+            self._raw_spatial_rdd._jrdd = serialized_spatial_rdd
+
+        return getattr(self, "_raw_spatial_rdd")
 
     def getSampleNumber(self) -> int:
         """
@@ -253,6 +251,14 @@ class SpatialRDD:
         else:
             return None
 
+    @grids.setter
+    def grids(self, grids: List[Envelope]):
+        jvm_envelopes = [
+            GeometryAdapter.create_jvm_geometry_from_base_geometry(self._jvm, envelope) for envelope in grids
+        ]
+        self._srdd.grids = jvm_envelopes
+
+
     @property
     def jvm_grids(self) -> JvmGrids:
         jvm_grids = get_field(self._srdd, "grids")
@@ -263,43 +269,42 @@ class SpatialRDD:
         self._srdd.grids = jvm_grid.jgrid
 
     @property
-    def jvm_indexed_rdd(self):
-        jindexed_rdd = get_field(self._srdd, "indexedRDD")
-        return JvmIndexedRDD(j_indexed_rdd=jindexed_rdd, sc=self._sc)
-
-    @jvm_indexed_rdd.setter
-    def jvm_indexed_rdd(self, indexed_rdd: JvmIndexedRDD):
-        self._srdd.indexedRDD = indexed_rdd.j_indexed_rdd
-
-    @property
-    def jvm_indexed_raw_rdd(self):
-        j_indexed_raw_rdd = get_field(self._srdd, "indexedRawRDD")
-        return JvmIndexedRawRDD(j_indexed_raw_rdd=j_indexed_raw_rdd, sc=self._sc)
-
-    @jvm_indexed_raw_rdd.setter
-    def jvm_indexed_raw_rdd(self, indexed_rdd: JvmIndexedRawRDD):
-        self._srdd.indexedRawRDD = indexed_rdd.j_indexed_raw_rdd
-
-    @property
     def indexedRDD(self):
         """
 
         :return:
         """
-        return self._srdd.indexedRDD()
+        jrdd = get_field(self._srdd, "indexedRDD")
+        if not hasattr(self, "_indexed_rdd"):
+            RDD.saveAsObjectFile = lambda x, path: x._jrdd.saveAsObjectFile(path)
+            RDD.count = lambda x: x._jrdd.count()
+            setattr(self, "_indexed_rdd", RDD(jrdd, self._sc))
+        else:
+            self._indexed_rdd._jrdd = jrdd
+        return getattr(self, "_indexed_rdd")
 
-    @property
-    def indexedRawRDD(self):
+    @indexedRDD.setter
+    def indexedRDD(self, indexed_rdd: RDD):
         """
 
         :return:
         """
-        return get_field(self._srdd, "indexedRawRDD")
+        self._indexed_rdd = indexed_rdd
+
+    @property
+    def indexedRawRDD(self):
+        jrdd = get_field(self._srdd, "indexedRawRDD")
+        if not hasattr(self, "_indexed_raw_rdd"):
+            RDD.saveAsObjectFile = lambda x, path: x._jrdd.saveAsObjectFile(path)
+            RDD.count = lambda x: x._jrdd.count()
+            setattr(self, "_indexed_raw_rdd", RDD(jrdd, self._sc))
+        else:
+            self._indexed_raw_rdd._jrdd = jrdd
+        return getattr(self, "_indexed_raw_rdd")
 
     @indexedRawRDD.setter
-    @require(["RawJvmIndexRDDSetter"])
-    def indexedRawRDD(self, value):
-        self._jvm.RawJvmIndexRDDSetter.setRawIndexRDD(self._srdd, value)
+    def indexedRawRDD(self, indexed_raw_rdd: RDD):
+        self._indexed_raw_rdd = indexed_raw_rdd
 
     @property
     def partitionTree(self) -> JvmPartitioner:
@@ -319,12 +324,14 @@ class SpatialRDD:
         return self.getRawSpatialRDD()
 
     @rawSpatialRDD.setter
-    def rawSpatialRDD(self, spatial_rdd: 'SpatialRDD'):
+    def rawSpatialRDD(self, spatial_rdd):
         if isinstance(spatial_rdd, SpatialRDD):
             self._srdd = spatial_rdd._srdd
             self._sc = spatial_rdd._sc
             self._jvm = spatial_rdd._jvm
             self._spatial_partitioned = spatial_rdd._spatial_partitioned
+        if isinstance(spatial_rdd, RDD):
+            self._srdd.setRawSpatialRDD(spatial_rdd._jrdd)
         else:
             self._srdd.setRawSpatialRDD(spatial_rdd)
 
@@ -375,7 +382,12 @@ class SpatialRDD:
         serialized_spatial_rdd = self._jvm.GeoSerializerData.serializeToPython(
             get_field(self._srdd, "spatialPartitionedRDD"))
 
-        return RDD(serialized_spatial_rdd, self._sc, GeoSparkPickler())
+        if not hasattr(self, "_spatial_partitioned_rdd"):
+            setattr(self, "_spatial_partitioned_rdd", RDD(serialized_spatial_rdd, self._sc, GeoSparkPickler()))
+        else:
+            self._spatial_partitioned_rdd._jrdd = serialized_spatial_rdd
+
+        return getattr(self, "_spatial_partitioned_rdd")
 
     def spatialPartitioning(self, partitioning: Union[str, GridType, SpatialPartitioner, List[Envelope], JvmPartitioner]) -> bool:
         """

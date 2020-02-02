@@ -231,7 +231,7 @@ class TestPolygonRDD(TestBase):
         spatial_rdd.spatialPartitioning(grid_type)
         spatial_rdd.buildIndex(IndexType.RTREE, True)
         spatial_rdd_copy = PolygonRDD()
-        spatial_rdd_copy.rawSpatialRDD = spatial_rdd
+        spatial_rdd_copy.rawJvmSpatialRDD = spatial_rdd.rawJvmSpatialRDD
         spatial_rdd_copy.analyze()
 
     def test_geojson_constructor(self):

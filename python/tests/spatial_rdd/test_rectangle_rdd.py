@@ -72,7 +72,7 @@ class TestRectangleRDD(TestBase):
         spatial_rdd.buildIndex(IndexType.RTREE, False)
 
         spatial_rdd_copy = RectangleRDD()
-        spatial_rdd_copy.rawSpatialRDD = spatial_rdd
+        spatial_rdd_copy.rawJvmSpatialRDD = spatial_rdd.rawJvmSpatialRDD
         spatial_rdd_copy.analyze()
 
     def test_hilbert_curve_spatial_partitioning(self):
