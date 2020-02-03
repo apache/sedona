@@ -15,7 +15,6 @@ from geo_pyspark.core.geom.envelope import Envelope
 from geo_pyspark.core.jvm.config import since
 from geo_pyspark.core.jvm.partitioner import JvmPartitioner
 from geo_pyspark.utils.decorators import require
-from geo_pyspark.utils.geometry_adapter import GeometryAdapter
 from geo_pyspark.utils.jvm import JvmStorageLevel
 from geo_pyspark.utils.spatial_rdd_parser import GeoSparkPickler
 from geo_pyspark.utils.types import crs

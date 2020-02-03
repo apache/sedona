@@ -61,7 +61,7 @@ uses findspark Python package to upload jar files to executor and nodes. To avoi
 Please use command below
  
 ```bash
-pip install geo_pyspark
+pip install geo-pyspark
 ```
 
 ### Installing from wheel file
@@ -69,7 +69,7 @@ pip install geo_pyspark
 
 ```bash
 
-pipenv run python -m pip install dist/geo_pyspark-0.3.0-py3-none-any.whl
+pipenv run python -m pip install dist/geo_pyspark-1.3.0-py3-none-any.whl
 
 ```
 
@@ -77,7 +77,7 @@ or
 
 ```bash
 
-  pip install dist/geo_pyspark-0.3.0-py3-none-any.whl
+  pip install dist/geo_pyspark-1.3.0-py3-none-any.whl
 
 
 ```
