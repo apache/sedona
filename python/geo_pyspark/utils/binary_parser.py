@@ -2,15 +2,20 @@ import struct
 from typing import List, Union
 
 import attr
+from pyspark import SparkContext
 
 DOUBLE_SIZE = 8
 INT_SIZE = 4
 BYTE_SIZE = 1
+CHAR_SIZE = 1
+BOOLEAN_SIZE = 1
 
 size_dict = {
     "d": DOUBLE_SIZE,
     "i": INT_SIZE,
-    "b": BYTE_SIZE
+    "b": BYTE_SIZE,
+    "s": CHAR_SIZE,
+    "?": BOOLEAN_SIZE
 }
 
 
@@ -28,6 +33,11 @@ class BinaryParser:
         self.current_index = self.current_index + DOUBLE_SIZE
         return data
 
+    def read_double_reverse(self):
+        data = self.unpack_reverse("d", self.bytes)
+        self.current_index = self.current_index + DOUBLE_SIZE
+        return data
+
     def read_int(self):
         data = self.unpack("i", self.bytes)
         self.current_index = self.current_index + INT_SIZE
@@ -38,9 +48,46 @@ class BinaryParser:
         self.current_index = self.current_index + BYTE_SIZE
         return data
 
+    def read_char(self):
+        data = self.unpack("c", self.bytes)
+        self.current_index = self.current_index + CHAR_SIZE
+        return data
+
+    def read_boolean(self):
+        data = self.unpack("?", self.bytes)
+        self.current_index = self.current_index + BOOLEAN_SIZE
+        return data
+
+    def read_string(self, length: int, encoding: str = "utf8"):
+        string = self.bytes[self.current_index: self.current_index+length]
+        self.current_index += length
+
+        try:
+            encoded_string = string.decode(encoding, "ignore")
+        except UnicodeEncodeError:
+            raise UnicodeEncodeError
+        return encoded_string
+
+    def read_kryo_string(self, length: int, sc: SparkContext) -> str:
+        array_length = length - self.current_index
+        byte_array = sc._gateway.new_array(sc._jvm.Byte, array_length)
+
+        for index, bt in enumerate(self.bytes[self.current_index: length]):
+            byte_array[index] = self.bytes[self.current_index+index]
+        decoded_string = sc._jvm.org.imbruced.geo_pyspark.serializers.GeoSerializerData.deserializeUserData(
+            byte_array
+        )
+        self.current_index = length
+        return decoded_string
+
     def unpack(self, tp: str, bytes: bytearray):
         max_index = self.current_index + size_dict[tp]
         bytes = self._convert_to_binary_array(bytes[self.current_index: max_index])
+        return struct.unpack(tp, bytes)[0]
+
+    def unpack_reverse(self, tp: str, bytes: bytearray):
+        max_index = self.current_index + size_dict[tp]
+        bytes = bytearray(reversed(self._convert_to_binary_array(bytes[self.current_index: max_index])))
         return struct.unpack(tp, bytes)[0]
 
     @classmethod
@@ -75,6 +122,9 @@ class BinaryBuffer:
     def put_byte(self, value):
         bytes = self.__pack("b", value)
         self.__extend_buffer(bytes)
+
+    def put(self, value):
+        self.__extend_buffer(value)
 
     def __pack(self, type, value):
         return struct.pack(type, value)

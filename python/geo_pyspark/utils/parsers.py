@@ -9,28 +9,27 @@ from shapely.geometry import MultiLineString
 from shapely.geometry import MultiPoint
 from shapely.geometry.base import BaseGeometry
 
-from geo_pyspark.sql.enums import ShapeEnum
+from geo_pyspark.core.geom.circle import Circle
+from geo_pyspark.sql.enums import ShapeEnum, GeomEnum
 from geo_pyspark.sql.exceptions import InvalidGeometryException
-from geo_pyspark.sql.geometry import GeomEnum
 from geo_pyspark.utils.abstract_parser import GeometryParser
-from geo_pyspark.utils.binary_parser import BinaryParser, BinaryBuffer
 from geo_pyspark.utils.types import numeric
 
 
-def read_coordinates(parser: BinaryParser, read_scale: int):
+def read_coordinates(parser: 'BinaryParser', read_scale: int):
     coordinates = []
     for i in range(read_scale):
         coordinates.append((parser.read_double(), parser.read_double()))
     return coordinates
 
 
-def put_coordinates(coordinates: Iterable[Iterable[numeric]], binary_buffer: BinaryBuffer):
+def put_coordinates(coordinates: Iterable[Iterable[numeric]], binary_buffer: 'BinaryBuffer'):
     for coordinate in coordinates:
         binary_buffer.put_double(Point(coordinate).x)
         binary_buffer.put_double(Point(coordinate).y)
 
 
-def add_shape_geometry_metadata(geom_type: int, binary_buffer: BinaryBuffer):
+def add_shape_geometry_metadata(geom_type: int, binary_buffer: 'BinaryBuffer'):
     binary_buffer.put_byte(ShapeEnum.shape.value)
     binary_buffer.put_byte(geom_type)
 
@@ -52,7 +51,7 @@ def get_number_of_rings(geom: Polygon) -> int:
     return geom.interiors.__len__() + 1
 
 
-def add_offsets_to_polygon(geom: Polygon, binary_buffer: BinaryBuffer, initial_offset: int) -> int:
+def add_offsets_to_polygon(geom: Polygon, binary_buffer: 'BinaryBuffer', initial_offset: int) -> int:
     offset = initial_offset
     num_rings = get_number_of_rings(geom)
     binary_buffer.put_int(offset)
@@ -62,7 +61,6 @@ def add_offsets_to_polygon(geom: Polygon, binary_buffer: BinaryBuffer, initial_o
         offset = offset + geom.interiors[_].coords.__len__()
 
     return offset
-
 
 
 @attr.s
@@ -82,20 +80,25 @@ class PointParser(GeometryParser):
     name = "Point"
 
     @classmethod
-    def serialize(cls, obj: Point, binary_buffer: BinaryBuffer):
+    def serialize(cls, obj: Point, binary_buffer: 'BinaryBuffer'):
         if isinstance(obj, Point):
             add_shape_geometry_metadata(GeomEnum.point.value, binary_buffer)
             binary_buffer.put_double(obj.x)
             binary_buffer.put_double(obj.y)
-            binary_buffer.put_byte(-127)
+            binary_buffer.put_int(-2130640127)
         else:
             raise TypeError(f"Need a {cls.name} instance")
         return binary_buffer.byte_array
 
     @classmethod
-    def deserialize(cls, parser: BinaryParser) -> Point:
+    def deserialize(cls, parser: 'BinaryParser') -> Point:
         x = parser.read_double()
         y = parser.read_double()
+        has_user_data = parser.read_boolean()
+        if has_user_data:
+            for _ in range(3):
+                parser.read_byte()
+
         return Point(x, y)
 
 
@@ -104,11 +107,11 @@ class UndefinedParser(GeometryParser):
     name = "Undefined"
 
     @classmethod
-    def serialize(cls, obj: BaseGeometry, binary_buffer: BinaryBuffer):
+    def serialize(cls, obj: BaseGeometry, binary_buffer: 'BinaryBuffer'):
         raise NotImplementedError()
 
     @classmethod
-    def deserialize(cls, parser: BinaryParser) -> BaseGeometry:
+    def deserialize(cls, parser: 'BinaryParser') -> BaseGeometry:
         raise NotImplementedError()
 
 
@@ -117,7 +120,7 @@ class LineStringParser(GeometryParser):
     name = "LineString"
 
     @classmethod
-    def serialize(cls, obj: LineString, binary_buffer: BinaryBuffer):
+    def serialize(cls, obj: LineString, binary_buffer: 'BinaryBuffer'):
         if isinstance(obj, LineString):
             add_shape_geometry_metadata(GeomEnum.polyline.value, binary_buffer)
             binary_buffer.add_empty_bytes("double", 4)
@@ -128,13 +131,13 @@ class LineStringParser(GeometryParser):
 
             put_coordinates(obj.coords, binary_buffer)
 
-            binary_buffer.put_byte(-127)
+            binary_buffer.put_int(-2130640127)
         else:
             raise TypeError(f"Need a {cls.name} instance")
         return binary_buffer.byte_array
 
     @classmethod
-    def deserialize(cls, parser: BinaryParser) -> Union[LineString, MultiLineString]:
+    def deserialize(cls, parser: 'BinaryParser') -> Union[LineString, MultiLineString]:
         raise NotImplemented()
 
 
@@ -143,7 +146,7 @@ class MultiLineStringParser(GeometryParser):
     name = "MultiLineString"
 
     @classmethod
-    def serialize(cls, obj: MultiLineString, binary_buffer: BinaryBuffer):
+    def serialize(cls, obj: MultiLineString, binary_buffer: 'BinaryBuffer'):
         if isinstance(obj, MultiLineString):
             add_shape_geometry_metadata(GeomEnum.polyline.value, binary_buffer)
             binary_buffer.add_empty_bytes("double", 4)
@@ -162,13 +165,13 @@ class MultiLineStringParser(GeometryParser):
             for geom in obj.geoms:
                 put_coordinates(geom.coords, binary_buffer)
 
-            binary_buffer.put_byte(-127)
+            binary_buffer.put_int(-2130640127)
         else:
             raise TypeError(f"Need a {cls.name} instance")
         return binary_buffer.byte_array
 
     @classmethod
-    def deserialize(cls, parser: BinaryParser) -> Union[LineString, MultiLineString]:
+    def deserialize(cls, parser: 'BinaryParser') -> Union[LineString, MultiLineString]:
         raise NotImplemented()
 
 
@@ -177,11 +180,11 @@ class PolyLineParser(GeometryParser):
     name = "Polyline"
 
     @classmethod
-    def serialize(cls, obj: Union[MultiLineString, LineString], binary_buffer: BinaryBuffer):
+    def serialize(cls, obj: Union[MultiLineString, LineString], binary_buffer: 'BinaryBuffer'):
         raise NotImplementedError("")
 
     @classmethod
-    def deserialize(cls, parser: BinaryParser) -> Union[LineString, MultiLineString]:
+    def deserialize(cls, parser: 'BinaryParser') -> Union[LineString, MultiLineString]:
         for _ in range(4):
             parser.read_double()
 
@@ -201,6 +204,11 @@ class PolyLineParser(GeometryParser):
             line = MultiLineString(lines)
         else:
             raise InvalidGeometryException("Invalid geometry")
+        has_user_data = parser.read_boolean()
+        if has_user_data:
+            parser.read_byte()
+            parser.read_byte()
+            parser.read_byte()
 
         return line
 
@@ -210,7 +218,7 @@ class PolygonParser(GeometryParser):
     name = "Polygon"
 
     @classmethod
-    def serialize(cls, obj: Polygon, binary_buffer: BinaryBuffer):
+    def serialize(cls, obj: Polygon, binary_buffer: 'BinaryBuffer'):
         if isinstance(obj, Polygon):
             add_shape_geometry_metadata(GeomEnum.polygon.value, binary_buffer)
 
@@ -232,14 +240,14 @@ class PolygonParser(GeometryParser):
                 coordinates = reverse_linear_ring(ring)
                 put_coordinates(coordinates, binary_buffer)
 
-            binary_buffer.put_byte(-127)
+            binary_buffer.put_int(-2130640127)
 
         else:
             raise TypeError(f"Need a {cls.name} instance")
         return binary_buffer.byte_array
 
     @classmethod
-    def deserialize(cls, parser: BinaryParser) -> Union[Polygon, MultiPolygon]:
+    def deserialize(cls, parser: 'BinaryParser') -> Union[Polygon, MultiPolygon]:
         for _ in range(4):
             parser.read_double()
         num_rings = parser.read_int()
@@ -273,6 +281,12 @@ class PolygonParser(GeometryParser):
             geometry = Polygon(shell, holes)
             polygons.append(geometry)
 
+        has_user_data = parser.read_boolean()
+        if has_user_data:
+            parser.read_byte()
+            parser.read_byte()
+            parser.read_byte()
+
         if polygons.__len__() == 1:
             return polygons[0]
 
@@ -284,7 +298,7 @@ class MultiPolygonParser(GeometryParser):
     name = "MultiPolygon"
 
     @classmethod
-    def serialize(cls, obj: MultiPolygon, binary_buffer: BinaryBuffer):
+    def serialize(cls, obj: MultiPolygon, binary_buffer: 'BinaryBuffer'):
         if isinstance(obj, MultiPolygon):
             num_polygons = len(obj.geoms)
             num_points = sum([get_number_of_polygon_points(polygon) for polygon in obj.geoms])
@@ -307,16 +321,13 @@ class MultiPolygonParser(GeometryParser):
                     coordinates = reverse_linear_ring(ring)
                     put_coordinates(coordinates, binary_buffer)
 
-            binary_buffer.put_byte(1)
-            binary_buffer.put_byte(3)
-            binary_buffer.put_byte(1)
-            binary_buffer.put_byte(-127)
+            binary_buffer.put_int(-2130640127)
         else:
             raise TypeError(f"Need a {cls.name} instance")
         return binary_buffer.byte_array
 
     @classmethod
-    def deserialize(cls, parser: BinaryParser) -> MultiPolygon:
+    def deserialize(cls, parser: 'BinaryParser') -> MultiPolygon:
         raise NotImplementedError("For multipolygon, PolygonParser class is used.")
 
 
@@ -325,7 +336,7 @@ class MultiPointParser(GeometryParser):
     name = "MultiPoint"
 
     @classmethod
-    def serialize(cls, obj: MultiPoint, binary_buffer: BinaryBuffer):
+    def serialize(cls, obj: MultiPoint, binary_buffer: 'BinaryBuffer'):
         if isinstance(obj, MultiPoint):
             add_shape_geometry_metadata(GeomEnum.multipoint.value, binary_buffer)
             binary_buffer.add_empty_bytes("double", 4)
@@ -333,17 +344,46 @@ class MultiPointParser(GeometryParser):
             for point in obj.geoms:
                 binary_buffer.put_double(point.x)
                 binary_buffer.put_double(point.y)
-            binary_buffer.put_byte(-127)
+            binary_buffer.put_int(-2130640127)
         else:
             raise TypeError(f"Need a {cls.name} instance")
         return binary_buffer.byte_array
 
     @classmethod
-    def deserialize(cls, parser: BinaryParser) -> MultiPoint:
+    def deserialize(cls, parser: 'BinaryParser') -> MultiPoint:
         for _ in range(4):
             parser.read_double()
         number_of_points = parser.read_int()
 
         coordinates = read_coordinates(parser, number_of_points)
-
+        has_user_data = parser.read_boolean()
         return MultiPoint(coordinates)
+
+
+@attr.s
+class CircleParser(GeometryParser):
+    name = "Circle"
+
+    @classmethod
+    def serialize(cls, obj: BaseGeometry, binary_buffer: 'BinaryBuffer'):
+        pass
+
+    @classmethod
+    def deserialize(cls, bin_parser: 'BinaryParser'):
+        radius = bin_parser.read_double_reverse()
+        primitive_geom_type = bin_parser.read_byte()
+        parser = GeomEnum.get_name(primitive_geom_type)
+        geom = PARSERS[parser].deserialize(bin_parser)
+        return Circle(geom, radius)
+
+
+PARSERS = dict(
+    undefined=UndefinedParser,
+    point=PointParser,
+    polyline=PolyLineParser,
+    multilinestring=MultiLineStringParser,
+    linestring=LineStringParser,
+    polygon=PolygonParser,
+    multipoint=MultiPointParser,
+    multipolygon=MultiPolygonParser
+)

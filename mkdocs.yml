@@ -15,6 +15,8 @@ pages:
       - Write an Spatial SQL/DataFrame application: tutorial/sql.md
       - Visualize Spatial DataFrame/RDD: tutorial/viz.md
       - Interact with GeoSpark via Zeppelin: tutorial/zeppelin.md
+      - Write an GeoSparkSQL Python application: tutorial/geospark-python.md
+      - Write an Spatial RDD Python application: tutorial/geo_spark_core_python.md
       - GeoSpark template project: tutorial/GeoSpark-Runnable-DEMO.md
       - Frequently Asked Questions: tutorial/faq.md
       - Tune GeoSpark RDD application: tutorial/Advanced-Tutorial-Tune-your-GeoSpark-Application.md
@@ -22,6 +24,7 @@ pages:
     - API:
       - GeoSpark core (RDD):
         - Scala/Java doc: api/GeoSpark-Scala-and-Java-API.md
+        - Python doc: api/GeoSpark-Python-API.md
       - GeoSpark SQL:
         - Quick start: api/sql/GeoSparkSQL-Overview.md
         - Constructor: api/sql/GeoSparkSQL-Constructor.md
