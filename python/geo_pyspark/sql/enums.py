@@ -20,3 +20,8 @@ class GeomEnum(Enum):
 class ShapeEnum(Enum):
 
     shape = 0
+    circle = 1
+
+    @classmethod
+    def get_name(cls, value):
+        return cls._value2member_map_[value].name

@@ -7,7 +7,7 @@ class Serializer(ABC):
 
     @classproperty
     def getName(self):
-        raise NotImplemented()
+        raise NotImplementedError
 
 
 class KryoSerializer(Serializer):
