@@ -1,7 +1,10 @@
 import pyspark
+import pytest
 from shapely.wkt import loads
 
-from tests.data import mixed_wkt_geometry_input_location
+from geospark import version
+from geospark.core.jvm.config import compare_versions
+from tests.data import mixed_wkt_geometry_input_location, mixed_wkt_geometry_input_location_1
 from tests.test_base import TestBase
 
 
@@ -114,7 +117,7 @@ class TestPredicateJoin(TestBase):
         polygon_wkt_df = self.spark.read.format("csv").\
             option("delimiter", "\t").\
             option("header", "false").\
-            load(mixed_wkt_geometry_input_location)
+            load(mixed_wkt_geometry_input_location_1)
 
         polygon_wkt_df.createOrReplaceTempView("polygontable")
         polygon_wkt_df.show()
@@ -196,13 +199,12 @@ class TestPredicateJoin(TestBase):
         wkt_df = self.spark.sql("select ST_AsText(countyshape) as wkt from polygondf")
         assert polygon_df.take(1)[0]["countyshape"].wkt == loads(wkt_df.take(1)[0]["wkt"]).wkt
 
+    @pytest.mark.skipif(compare_versions("1.2.0", version), reason="requires Geospark version above 1.2.0")
     def test_st_n_points(self):
-        if pyspark.version.__version__[:3] == "2.2":
-            pass
-        else:
-            test = self.spark.sql("SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
-            assert test.take(1)[0][0] == 4
+        test = self.spark.sql("SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
+        assert test.take(1)[0][0] == 4
 
+    @pytest.mark.skipif(compare_versions("1.2.0", version), reason="requires Geospark version above 1.2.0")
     def test_st_geometry_type(self):
         if pyspark.version.__version__[:3] == "2.2":
             pass

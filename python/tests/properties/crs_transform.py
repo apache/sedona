@@ -2,8 +2,8 @@ import os
 
 from shapely.geometry import Point
 
-from geo_pyspark.core.enums import FileDataSplitter, GridType, IndexType
-from geo_pyspark.core.geom.envelope import Envelope
+from geospark.core.enums import FileDataSplitter, GridType, IndexType
+from geospark.core.geom.envelope import Envelope
 from tests.tools import tests_path
 
 input_location = os.path.join(tests_path, "resources/crs-test-point.csv")

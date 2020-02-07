@@ -1,10 +1,10 @@
 import os
 
-from geo_pyspark.core.geom.envelope import Envelope
-from geo_pyspark.core.jvm.config import GeoSparkMeta, compare_versions
-from geo_pyspark.core.spatialOperator import RangeQuery
+from geospark.core.geom.envelope import Envelope
+from geospark.core.jvm.config import GeoSparkMeta, compare_versions
+from geospark.core.spatialOperator import RangeQuery
 from tests.tools import tests_path
-from geo_pyspark.core.formatMapper.shapefileParser import ShapefileReader
+from geospark.core.formatMapper.shapefileParser import ShapefileReader
 from tests.test_base import TestBase
 
 undefined_type_shape_location = os.path.join(tests_path, "resources/shapefiles/undefined")

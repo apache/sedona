@@ -1,15 +1,15 @@
 from setuptools import setup, find_packages
 from os import path
-from geo_pyspark import version
+from geospark import version
 
 here = path.abspath(path.dirname(__file__))
-jars_relative_path = "geo_pyspark/jars"
+jars_relative_path = "geospark/jars"
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='geo_pyspark',
+    name='geospark',
     version=version,
     description='GeoSpark Python',
     url='https://github.com/DataSystemsLab/GeoSpark/tree/master/python',
@@ -28,9 +28,9 @@ setup(
         "License :: OSI Approved :: Apache Software License"
     ],
     package_data={
-        'geo_pyspark.jars.2_3': ["*.jar"],
-        'geo_pyspark.jars.2_4': ["*.jar"],
-        'geo_pyspark.jars.2_2': ["*.jar"]
+        'geospark.jars.2_3': ["*.jar"],
+        'geospark.jars.2_4': ["*.jar"],
+        'geospark.jars.2_2': ["*.jar"]
     }
 )
 

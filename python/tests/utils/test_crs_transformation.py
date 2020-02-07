@@ -1,8 +1,8 @@
 from pyspark import StorageLevel
 
-from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
-from geo_pyspark.core.geom.circle import Circle
-from geo_pyspark.core.spatialOperator import RangeQuery, KNNQuery, JoinQuery
+from geospark.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
+from geospark.core.geom.circle import Circle
+from geospark.core.spatialOperator import RangeQuery, KNNQuery, JoinQuery
 from tests.properties.crs_transform import *
 from tests.test_base import TestBase
 from tests.tools import distance_sorting_functions

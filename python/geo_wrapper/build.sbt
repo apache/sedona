@@ -1,12 +1,12 @@
-name := "geo_wrapper"
+name := "geospark"
 
 version := "0.3.0"
 
 scalaVersion := "2.11.8"
 
-val SparkVersion = "2.2.0"
+val SparkVersion = "2.4.0"
 
-val SparkCompatibleVersion = "2.2"
+val SparkCompatibleVersion = "2.3"
 
 val GeoSparkVersion = "1.2.0"
 

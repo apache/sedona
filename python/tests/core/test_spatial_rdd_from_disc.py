@@ -4,11 +4,11 @@ import shutil
 import pytest
 from pyspark import StorageLevel
 
-from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD, LineStringRDD
-from geo_pyspark.core.enums import IndexType, GridType
-from geo_pyspark.core.formatMapper.disc_utils import load_spatial_rdd_from_disc, \
+from geospark.core.SpatialRDD import PointRDD, PolygonRDD, LineStringRDD
+from geospark.core.enums import IndexType, GridType
+from geospark.core.formatMapper.disc_utils import load_spatial_rdd_from_disc, \
     load_spatial_index_rdd_from_disc, GeoType
-from geo_pyspark.core.spatialOperator import JoinQuery
+from geospark.core.spatialOperator import JoinQuery
 from tests.test_base import TestBase
 from tests.tools import tests_path
 

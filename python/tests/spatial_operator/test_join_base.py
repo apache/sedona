@@ -1,9 +1,9 @@
 import pytest
 from pyspark import StorageLevel
 
-from geo_pyspark.core.SpatialRDD import RectangleRDD, PolygonRDD, LineStringRDD, PointRDD
-from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
-from geo_pyspark.core.enums import GridType
+from geospark.core.SpatialRDD import RectangleRDD, PolygonRDD, LineStringRDD, PointRDD
+from geospark.core.SpatialRDD.spatial_rdd import SpatialRDD
+from geospark.core.enums import GridType
 from tests.test_base import TestBase
 
 
