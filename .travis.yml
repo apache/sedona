@@ -31,7 +31,7 @@ script:
   - (cd python;pipenv install --dev) 
   - export SPARK_HOME=$PWD/spark-2.4.4-bin-hadoop2.7
   - export PYTHONPATH=$SPARK_HOME/python
-  - mvn -q clean install -DskipTests
+  - mvn clean install
   - find core/target/ -iregex "core\/target\/geospark-[0-9]\.[0-9]\.[0-9]\.jar" -exec cp {} $SPARK_HOME/jars \;
   - find sql/target/ -iregex "sql\/target\/geospark-sql_[0-9]\.[0-9]-[0-9]\.[0-9]\.[0-9]\.jar" -exec cp {} $SPARK_HOME/jars \;
   - find python/geo_wrapper/target/scala-2.11 -iregex "python\/geo_wrapper\/target\/scala-2\.11\/geo_wrapper_2\.11-[0-9]\.[0-9]\.[0-9]\.jar" -exec cp {} $SPARK_HOME/jars \;
