@@ -201,8 +201,11 @@ class TestPredicateJoin(TestBase):
 
     @pytest.mark.skipif(compare_versions("1.2.0", version), reason="requires Geospark version above 1.2.0")
     def test_st_n_points(self):
-        test = self.spark.sql("SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
-        assert test.take(1)[0][0] == 4
+        if pyspark.version.__version__[:3] == "2.2":
+            pass
+        else:
+            test = self.spark.sql("SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
+            assert test.take(1)[0][0] == 4
 
     @pytest.mark.skipif(compare_versions("1.2.0", version), reason="requires Geospark version above 1.2.0")
     def test_st_geometry_type(self):

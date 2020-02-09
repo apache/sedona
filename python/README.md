@@ -1,4 +1,4 @@
-# geo-pyspark
+# geospark
 
 This library is Python wrapper on GeoSpark library.
 

@@ -9,9 +9,6 @@ import org.datasyslab.geosparksql.utils.Adapter
 import scala.collection.JavaConversions._
 
 object AdapterWrapper {
-  def toSpatialRdd(dataFrame: DataFrame, fieldNames: java.util.ArrayList[String]): SpatialRDD[Geometry] = {
-    Adapter.toSpatialRdd(dataFrame, fieldNames.toList)
-  }
 
   def toDf[T <:Geometry](spatialRDD: SpatialRDD[T], fieldNames: java.util.ArrayList[String], sparkSession: SparkSession): DataFrame = {
     Adapter.toDf(spatialRDD, fieldNames.toList, sparkSession)

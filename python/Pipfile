@@ -13,13 +13,14 @@ toree="*"
 pytest="*"
 mypy="*"
 pytest-json-report="*"
+twine = "*"
 
 [packages]
 findspark="*"
 pandas="*"
 geopandas="==0.6.0"
-pyspark="==2.4.4"
-pytest-json-report = "*"
+pyspark="*"
+attrs="*"
 
 [requires]
 python_version = "3.7"
