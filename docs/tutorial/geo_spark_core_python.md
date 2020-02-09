@@ -3,7 +3,7 @@
 ## Introduction
 <div style="text-align: justify">
 GeoSpark Core is Python wrapper on GeoSpark core Java/Scala library.
-geo_pyspark SpatialRDDs (and other classes when it was necessary) have implemented meta classes which allow 
+geospark SpatialRDDs (and other classes when it was necessary) have implemented meta classes which allow 
 to use overloaded functions, methods and constructors to be the most similar to Java/Scala API as possible. 
 </div>
 
@@ -16,9 +16,9 @@ GeoSpark-core provides five special SpatialRDDs:
 <li> RectangleRDD </li>
 <div style="text-align: justify">
 <p>
-All of them can be imported from <b> geo_pyspark.core.SpatialRDD </b> module
+All of them can be imported from <b> geospark.core.SpatialRDD </b> module
 
-<b> geo_pyspark </b> has written serializers which allow to convert GeoSpark SpatialRDD to Python objects.
+<b> geospark </b> has written serializers which allow to convert GeoSpark SpatialRDD to Python objects.
 Converting will produce GeoData objects which holds 2 attributes:
 </p>
 </div>
@@ -34,7 +34,7 @@ GeoData has one method to get user data.
 
 ## Installing package
 
-geo_pyspark extends pyspark functions which depends on Python packages and Scala libraries. To see all dependencies
+geospark extends pyspark functions which depends on Python packages and Scala libraries. To see all dependencies
 please look at Dependencies section.
 https://pypi.org/project/pyspark/.
 
@@ -44,9 +44,9 @@ Package needs 2 jar files to work properly:
 - geo_wrapper.jar
 
 !!!note
-    To enable GeoSpark Core functionality without GeoSparkSQL there is no need to copy jar files from geo_pyspark/jars
+    To enable GeoSpark Core functionality without GeoSparkSQL there is no need to copy jar files from geospark/jars
     location. You can use jar files from Maven repositories. Since GeoSpark 1.3.0 it is possible also to use maven 
-    jars for GeoSparkSQL instead of geo_pyspark/jars/../geospark-sql jars files.
+    jars for GeoSparkSQL instead of geospark/jars/../geospark-sql jars files.
 
 
 Package allows to automatically copy newest GeoSpark jar files using function, please follow the example below.
@@ -57,8 +57,8 @@ Package allows to automatically copy newest GeoSpark jar files using function, p
 
   from pyspark.sql import SparkSession
 
-  from geo_pyspark.register import upload_jars
-  from geo_pyspark.register import GeoSparkRegistrator
+  from geospark.register import upload_jars
+  from geospark.register import GeoSparkRegistrator
 
   upload_jars()
 
@@ -86,7 +86,7 @@ uses findspark Python package to upload jar files to executor and nodes. To avoi
 Please use command below
  
 ```bash
-pip install geo-pyspark
+pip install geospark
 ```
 
 ### Installing from wheel file
@@ -94,7 +94,7 @@ pip install geo-pyspark
 
 ```bash
 
-pipenv run python -m pip install dist/geo_pyspark-1.3.0-py3-none-any.whl
+pipenv run python -m pip install dist/geospark-1.3.0-py3-none-any.whl
 
 ```
 
@@ -102,7 +102,7 @@ or
 
 ```bash
 
-  pip install dist/geo_pyspark-1.3.0-py3-none-any.whl
+  pip install dist/geospark-1.3.0-py3-none-any.whl
 
 
 ```
@@ -139,13 +139,13 @@ GeoSpark-core provides three special SpatialRDDs:
 They can be loaded from CSV, TSV, WKT, WKB, Shapefiles, GeoJSON formats.
 To pass the format to SpatialRDD constructor please use <b> FileDataSplitter </b> enumeration. 
 
-geo_pyspark SpatialRDDs (and other classes when it was necessary) have implemented meta classes which allow 
+geospark SpatialRDDs (and other classes when it was necessary) have implemented meta classes which allow 
 to use overloaded functions how Scala/Java GeoSpark API allows. ex. 
 
 
 ```python
-from geo_pyspark.core.SpatialRDD import PointRDD
-from geo_pyspark.core.enums import FileDataSplitter
+from geospark.core.SpatialRDD import PointRDD
+from geospark.core.enums import FileDataSplitter
 
 input_location = "checkin.csv"
 offset = 0  # The point long/lat starts from Column 0
@@ -208,14 +208,14 @@ root
 <li> Use GeoSparkSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD </li>
 
 ```python
-from geo_pyspark.utils.adapter import Adapter
+from geospark.utils.adapter import Adapter
 
 spatial_rdd = Adapter.toSpatialRdd(spatial_df)
 spatial_rdd.analyze()
 
 spatial_rdd.boundaryEnvelope
 
-<geo_pyspark.core.geom_types.Envelope object at 0x7f1e5f29fe10>
+<geospark.core.geom_types.Envelope object at 0x7f1e5f29fe10>
 ```
 
 For WKT/WKB/GeoJSON data, please use ==ST_GeomFromWKT / ST_GeomFromWKB / ST_GeomFromGeoJSON== instead.
@@ -234,8 +234,8 @@ rdd_with_other_attributes = object_rdd.rawSpatialRDD.map(lambda x: x.getUserData
 ## Write a Spatial Range Query
 
 ```python
-from geo_pyspark.core import Envelope
-from geo_pyspark.core.spatialOperator import RangeQuery
+from geospark.core import Envelope
+from geospark.core.spatialOperator import RangeQuery
 
 range_query_window = Envelope(-90.01, -80.01, 30.01, 40.01)
 consider_boundary_intersection = False  ## Only return gemeotries fully covered by the window
@@ -267,9 +267,9 @@ GeoSpark will build a local tree index on each of the SpatialRDD partition.
 To utilize a spatial index in a spatial range query, use the following code:
 
 ```python
-from geo_pyspark.core import Envelope
-from geo_pyspark.core.enums import IndexType
-from geo_pyspark.core.spatialOperator import RangeQuery
+from geospark.core import Envelope
+from geospark.core.enums import IndexType
+from geospark.core.spatialOperator import RangeQuery
 
 range_query_window = Envelope(-90.01, -80.01, 30.01, 40.01)
 consider_boundary_intersection = False ## Only return gemeotries fully covered by the window
@@ -329,7 +329,7 @@ A spatial K Nearnest Neighbor query takes as input a K, a query point and an Spa
 Assume you now have an SpatialRDD (typed or generic). You can use the following code to issue an Spatial KNN Query on it.
 
 ```python
-from geo_pyspark.core.spatialOperator import KNNQuery
+from geospark.core.spatialOperator import KNNQuery
 from shapely.geometry import Point
 
 point = Point(-84.01, 34.01)
@@ -351,8 +351,8 @@ To create Polygon or Linestring object please follow Shapely official <a href="h
 To utilize a spatial index in a spatial KNN query, use the following code:
 
 ```python
-from geo_pyspark.core.spatialOperator import KNNQuery
-from geo_pyspark.core.enums import IndexType
+from geospark.core.spatialOperator import KNNQuery
+from geospark.core.enums import IndexType
 from shapely.geometry import Point
 
 point = Point(-84.01, 34.01)
@@ -388,8 +388,8 @@ A spatial join query takes as input two Spatial RDD A and B. For each geometry i
 Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue an Spatial Join Query on them.
 
 ```python
-from geo_pyspark.core.enums import GridType
-from geo_pyspark.core.spatialOperator import JoinQuery
+from geospark.core.enums import GridType
+from geospark.core.spatialOperator import JoinQuery
 
 consider_boundary_intersection = False ## Only return geometries fully covered by each query window in queryWindowRDD
 using_index = False
@@ -442,9 +442,9 @@ object_rdd.spatialPartitioning(query_window_rdd.getPartitioner())
 To utilize a spatial index in a spatial join query, use the following code:
 
 ```python
-from geo_pyspark.core.enums import GridType
-from geo_pyspark.core.enums import IndexType
-from geo_pyspark.core.spatialOperator import JoinQuery
+from geospark.core.enums import GridType
+from geospark.core.enums import IndexType
+from geospark.core.spatialOperator import JoinQuery
 
 object_rdd.spatialPartitioning(GridType.KDBTREE)
 query_window_rdd.spatialPartitioning(object_rdd.getPartitioner())
@@ -501,9 +501,9 @@ can be any geometry type (point, line, polygon) and are not necessary to have th
 You can use the following code to issue an Distance Join Query on them.
 
 ```python
-from geo_pyspark.core.SpatialRDD import CircleRDD
-from geo_pyspark.core.enums import GridType
-from geo_pyspark.core.spatialOperator import JoinQuery
+from geospark.core.SpatialRDD import CircleRDD
+from geospark.core.enums import GridType
+from geospark.core.spatialOperator import JoinQuery
 
 object_rdd.analyze()
 
@@ -612,7 +612,7 @@ You can easily reload an SpatialRDD that has been saved to ==a distributed objec
 Use the following code to reload the PointRDD/PolygonRDD/LineStringRDD:
 
 ```python
-from geo_pyspark.core.formatMapper.disc_utils import GeoType
+from geospark.core.formatMapper.disc_utils import GeoType
 
 polygon_rdd = load_spatial_rdd_from_disc(sc, "hdfs://PATH", GeoType.POLYGON)
 point_rdd = load_spatial_rdd_from_disc(sc, "hdfs://PATH", GeoType.POINT)
@@ -639,34 +639,34 @@ All below methods will return SpatialRDD object which can be used with Spatial f
 
 ### Read from WKT file
 ```python
-from geo_pyspark.core.formatMapper import WktReader
+from geospark.core.formatMapper import WktReader
 
 WktReader.readToGeometryRDD(sc, wkt_geometries_location, 0, True, False)
-<geo_pyspark.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2fbf250>
+<geospark.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2fbf250>
 ```
 
 ### Read from WKB file
 ```python
-from geo_pyspark.core.formatMapper import WkbReader
+from geospark.core.formatMapper import WkbReader
 
 WkbReader.readToGeometryRDD(sc, wkb_geometries, 0, True, False)
-<geo_pyspark.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2eece50>
+<geospark.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2eece50>
 ```
 ### Read from GeoJson file
 
 ```python
-from geo_pyspark.core.formatMapper import GeoJsonReader
+from geospark.core.formatMapper import GeoJsonReader
 
 GeoJsonReader.readToGeometryRDD(sc, geo_json_file_location)
-<geo_pyspark.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2eecb90>
+<geospark.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2eecb90>
 ```
 ### Read from Shapefile
 
 ```python
-from geo_pyspark.core.formatMapper.shapefileParser import ShapefileReader
+from geospark.core.formatMapper.shapefileParser import ShapefileReader
 
 ShapefileReader.readToGeometryRDD(sc, shape_file_location)
-<geo_pyspark.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2ee0710>
+<geospark.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2ee0710>
 ```
 
 ## Supported versions
@@ -676,7 +676,6 @@ ShapefileReader.readToGeometryRDD(sc, shape_file_location)
 
 Currently package supports spark versions
 
-<li> 2.2 </li>
 <li> 2.3 </li>
 <li> 2.4 </li>
 
