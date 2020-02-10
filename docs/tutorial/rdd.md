@@ -34,7 +34,7 @@ conf.set("spark.kryo.registrator", classOf[GeoSparkVizKryoRegistrator].getName)
 ## Create a SpatialRDD
 
 ### Create a typed SpatialRDD
-GeoSpark-core provdies three special SpatialRDDs: ==PointRDD, PolygonRDD, and LineStringRDD==. They can be loaded from CSV, TSV, WKT, WKB, Shapefiles, GeoJSON and NetCDF/HDF format.
+GeoSpark-core provides three special SpatialRDDs: ==PointRDD, PolygonRDD, and LineStringRDD==. They can be loaded from CSV, TSV, WKT, WKB, Shapefiles, GeoJSON and NetCDF/HDF format.
 
 #### PointRDD from CSV/TSV
 Suppose we have a `checkin.csv` CSV file at Path `/Download/checkin.csv` as follows:
@@ -61,7 +61,7 @@ val pointRDDSplitter = FileDataSplitter.TSV
 ```
 
 #### PolygonRDD/LineStringRDD from CSV/TSV
-In genereal, polygon and line string data is stored in WKT, WKB, GeoJSON and Shapefile formats instead of CSV/TSV because the geometris in a file may have different lengths. However, if all polygons / line strings in your CSV/TSV possess the same length, you can create PolygonRDD and LineStringRDD from these files.
+In general, polygon and line string data is stored in WKT, WKB, GeoJSON and Shapefile formats instead of CSV/TSV because the geometries in a file may have different lengths. However, if all polygons / line strings in your CSV/TSV possess the same length, you can create PolygonRDD and LineStringRDD from these files.
 
 Suppose we have a `checkinshape.csv` CSV file at Path `/Download/checkinshape.csv ` as follows:
 ```
@@ -95,10 +95,10 @@ The way to create a LineStringRDD is the same as PolygonRDD.
 
 ### Create a generic SpatialRDD (behavoir changed in v1.2.0)
 
-A generic SpatialRDD is not typed to a certain geometry type and open to more scenarios. It allows an input data file contains mixed types of geometries. For instace, a WKT file contains three types gemetries ==LineString==, ==Polygon== and ==MultiPolygon==.
+A generic SpatialRDD is not typed to a certain geometry type and open to more scenarios. It allows an input data file contains mixed types of geometries. For instance, a WKT file contains three types gemetries ==LineString==, ==Polygon== and ==MultiPolygon==.
 
 #### From WKT/WKB
-Geometries in a WKT and WKB file always occucpy a single column no matter how many coordinates they have. Therefore, creating a typed SpatialRDD is easy.
+Geometries in a WKT and WKB file always occupy a single column no matter how many coordinates they have. Therefore, creating a typed SpatialRDD is easy.
 
 Suppose we have a `checkin.tsv` WKT TSV file at Path `/Download/checkin.tsv` as follows:
 ```
@@ -114,9 +114,9 @@ Use the following code to create a SpatialRDD
 ```Scala
 val inputLocation = "/Download/checkin.csv"
 val wktColumn = 0 // The WKT string starts from Column 0
-val allowTopologyInvalidGeometris = true // Optional
+val allowTopologyInvalidGeometries = true // Optional
 val skipSyntaxInvalidGeometries = false // Optional
-val spatialRDD = WktReader.readToGeometryRDD(sparkSession.sparkContext, inputLocation, wktColumn, allowTopologyInvalidGeometris, skipSyntaxInvalidGeometries)
+val spatialRDD = WktReader.readToGeometryRDD(sparkSession.sparkContext, inputLocation, wktColumn, allowTopologyInvalidGeometries, skipSyntaxInvalidGeometries)
 ```
 
 #### From GeoJSON
@@ -136,9 +136,9 @@ Suppose we have a `polygon.json` GeoJSON file at Path `/Download/polygon.json` a
 Use the following code to create a generic SpatialRDD:
 ```Scala
 val inputLocation = "/Download/polygon.json"
-val allowTopologyInvalidGeometris = true // Optional
+val allowTopologyInvalidGeometries = true // Optional
 val skipSyntaxInvalidGeometries = false // Optional
-val spatialRDD = GeoJsonReader.readToGeometryRDD(sparkSession.sparkContext, inputLocation, allowTopologyInvalidGeometris, skipSyntaxInvalidGeometries)
+val spatialRDD = GeoJsonReader.readToGeometryRDD(sparkSession.sparkContext, inputLocation, allowTopologyInvalidGeometries, skipSyntaxInvalidGeometries)
 ```
 
 !!!warning
@@ -505,6 +505,15 @@ Use the following code to save an SpatialRDD as a distributed WKT text file:
 
 ```Scala
 objectRDD.rawSpatialRDD.saveAsTextFile("hdfs://PATH")
+objectRDD.rawSpatialRDD.saveAsWKT("hdfs://PATH")
+```
+
+#### Save to distributed WKB text file
+
+Use the following code to save an SpatialRDD as a distributed WKB text file:
+
+```Scala
+objectRDD.saveAsWKB("hdfs://PATH")
 ```
 
 #### Save to distributed GeoJSON text file

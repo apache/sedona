@@ -16,12 +16,16 @@
  */
 package org.apache.spark.sql.geosparksql.expressions
 
-import com.vividsolutions.jts.geom.PrecisionModel
+import java.util
+
+import com.vividsolutions.jts.geom.{PrecisionModel, _}
+import com.vividsolutions.jts.operation.IsSimpleOp
 import com.vividsolutions.jts.operation.valid.IsValidOp
 import com.vividsolutions.jts.precision.GeometryPrecisionReducer
+import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
+import org.apache.spark.sql.catalyst.expressions.{Expression, Generator}
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.geosparksql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
@@ -30,8 +34,6 @@ import org.datasyslab.geosparksql.utils.GeometrySerializer
 import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.CRS
 import org.opengis.referencing.operation.MathTransform
-import com.vividsolutions.jts.geom._
-import com.vividsolutions.jts.operation.IsSimpleOp
 
 /**
   * Return the distance between two geometries.
@@ -98,7 +100,7 @@ case class ST_NPoints(inputExpressions: Seq[Expression])
   override def eval(input: InternalRow): Any = {
     inputExpressions.length match {
       case 1 =>
-        val geometry = GeometrySerializer.deserialize (inputExpressions (0).eval (input).asInstanceOf[ArrayData] )
+        val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
         geometry.getCoordinates.length
       case _ => None
     }
@@ -258,6 +260,7 @@ case class ST_Transform(inputExpressions: Seq[Expression])
 case class ST_Intersection(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   override def nullable: Boolean = false
+
   lazy val GeometryFactory = new GeometryFactory()
   lazy val emptyPolygon = GeometryFactory.createPolygon(null, null)
 
@@ -270,7 +273,7 @@ case class ST_Intersection(inputExpressions: Seq[Expression])
     lazy val isLeftContainsRight = leftgeometry.contains(rightgeometry)
     lazy val isRightContainsLeft = rightgeometry.contains(leftgeometry)
 
-    if(!isIntersects) {
+    if (!isIntersects) {
       return new GenericArrayData(GeometrySerializer.serialize(emptyPolygon))
     }
 
@@ -284,7 +287,57 @@ case class ST_Intersection(inputExpressions: Seq[Expression])
 
     return new GenericArrayData(GeometrySerializer.serialize(leftgeometry.intersection(rightgeometry)))
   }
+
   override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+  * Given an invalid polygon or multipolygon and removeHoles boolean flag, create a valid representation of the geometry
+  *
+  * @param inputExpressions
+  */
+case class ST_MakeValid(inputExpressions: Seq[Expression])
+  extends Generator with CodegenFallback with UserDataGeneratator {
+
+  override def elementSchema: StructType = new StructType().add("Geometry", new GeometryUDT)
+
+  override def toString: String = s" **${ST_MakeValid.getClass.getName}** "
+
+  override def eval(input: InternalRow): TraversableOnce[InternalRow] = {
+    assert(inputExpressions.length == 2)
+
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val removeHoles = inputExpressions(1).eval(input).asInstanceOf[Boolean]
+
+    // in order to do flatMap on java collections(util.List[Polygon])
+    import scala.collection.JavaConversions._
+
+    // makeValid works only on polygon or multipolygon
+    if (!geometry.getGeometryType.equalsIgnoreCase("POLYGON") && !geometry.getGeometryType.equalsIgnoreCase("MULTIPOLYGON")) {
+      throw new IllegalArgumentException("ST_MakeValid works only on Polygons and MultiPolygons")
+    }
+    
+    val validGeometry: util.List[Polygon] = geometry match {
+      case g: MultiPolygon =>
+        (0 until g.getNumGeometries).flatMap(i => {
+          val polygon = g.getGeometryN(i).asInstanceOf[Polygon]
+          val fixedPolygons = JTS.makeValid(polygon, removeHoles)
+          fixedPolygons
+        })
+      case g: Polygon =>
+        JTS.makeValid(g, removeHoles)
+      case _ => Nil
+    }
+
+    val result = validGeometry.toArray.map(g => {
+      val serializedGeometry = GeometrySerializer.serialize(g.asInstanceOf[Geometry])
+      InternalRow(new GenericArrayData(serializedGeometry))
+    })
+
+    result
+  }
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -338,7 +391,39 @@ case class ST_IsSimple(inputExpressions: Seq[Expression])
 }
 
 /**
+  * Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input,
+  * and with the components having the same topological relationship.  
+  * The simplification uses a maximum-distance difference algorithm similar to the Douglas-Peucker algorithm.
+  *
+  * @param inputExpressions first arg is geometry 
+  *                         second arg is distance tolerance for the simplification(all vertices in the simplified geometry will be within this distance of the original geometry)
+  */
+case class ST_SimplifyPreserveTopology(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 2)
+    
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val distanceTolerance = inputExpressions(1).eval(input) match {
+      case number: Decimal => number.toDouble
+      case number: Double => number
+      case number: Int => number.toDouble
+    }
+    val simplifiedGeometry = TopologyPreservingSimplifier.simplify(geometry, distanceTolerance)
+
+    new GenericArrayData(GeometrySerializer.serialize(simplifiedGeometry))
+  }
+
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
   * Reduce the precision of the given geometry to the given number of decimal places
+  *
   * @param inputExpressions The first arg is a geom and the second arg is an integer scale, specifying the number of decimal places of the new coordinate. The last decimal place will
   *                         be rounded to the nearest number.
   */
@@ -367,6 +452,21 @@ case class ST_AsText(inputExpressions: Seq[Expression])
     assert(inputExpressions.length == 1)
     val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     UTF8String.fromString(geometry.toText)
+  }
+
+  override def dataType: DataType = StringType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class ST_GeometryType(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback{
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 1)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    UTF8String.fromString("ST_" + geometry.getGeometryType)
   }
 
   override def dataType: DataType = StringType

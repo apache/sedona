@@ -38,12 +38,7 @@ import org.wololo.jts2geojson.GeoJSONReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class FormatMapper<T extends Geometry>
         implements Serializable, FlatMapFunction<Iterator<String>, T>
@@ -196,11 +191,23 @@ public class FormatMapper<T extends Geometry>
         return geometry;
     }
 
+
+
     public static List<String> readGeoJsonPropertyNames(String geoJson){
         if (geoJson.contains("Feature") || geoJson.contains("feature") || geoJson.contains("FEATURE")) {
-            if (geoJson.contains("properties")) {
+            if (geoJson.contains("properties") ) {
                 Feature feature = (Feature) GeoJSONFactory.create(geoJson);
-                return new ArrayList(feature.getProperties().keySet());
+                if (Objects.isNull(feature.getId())){
+                    return new ArrayList(feature.getProperties().keySet());
+                }
+                else{
+                    List<String> propertyList = new ArrayList<>(Arrays.asList("id"));
+                    for (String geoJsonProperty: feature.getProperties().keySet()){
+                        propertyList.add(geoJsonProperty);
+                    }
+                    return propertyList;
+                }
+
             }
         }
         logger.warn("[GeoSpark] The GeoJSON file doesn't have feature properties");
@@ -210,9 +217,9 @@ public class FormatMapper<T extends Geometry>
     public List<String> readPropertyNames(String geoString) {
         switch (splitter){
             case GEOJSON:
-              return readGeoJsonPropertyNames(geoString);
-              default:
-                  return null;
+                return readGeoJsonPropertyNames(geoString);
+            default:
+                return null;
         }
     }
 

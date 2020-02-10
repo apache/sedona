@@ -7,8 +7,8 @@
 * Chat with us! [![Join the chat at https://gitter.im/geospark-datasys/Lobby](https://badges.gitter.im/geospark-datasys/Lobby.svg)](https://gitter.im/geospark-datasys/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 * Email us!
 
-## Committer
-* [Jia Yu](http://www.public.asu.edu/~jiayu2/) (Email: jiayu2 at asu.edu)
+## Project leaders
+* [Jia Yu](https://jiayuasu.github.io/) (Email: jiayu2 at asu.edu)
 
 * [Mohamed Sarwat](http://faculty.engineering.asu.edu/sarwat/) (Email: msarwat at asu.edu)
 
