@@ -179,7 +179,12 @@ public class FormatMapper<T extends Geometry>
             {
                 for (Object property:featurePropertiesproperties.values()
                 ) {
-                    nonSpatialData.add(property.toString());
+                    if (property == null) {
+                        nonSpatialData.add("null");
+                    }
+                    else {
+                        nonSpatialData.add(property.toString());    
+                    }
                 }
             }
             geometry = geoJSONReader.read(feature.getGeometry());
