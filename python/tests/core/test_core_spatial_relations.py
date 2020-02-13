@@ -1,8 +1,8 @@
 import os
 
-from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD
-from geo_pyspark.core.enums import FileDataSplitter, GridType
-from geo_pyspark.core.spatialOperator import JoinQuery
+from geospark.core.SpatialRDD import PointRDD, PolygonRDD
+from geospark.core.enums import FileDataSplitter, GridType
+from geospark.core.spatialOperator import JoinQuery
 from tests.test_base import TestBase
 from tests.tools import tests_path
 

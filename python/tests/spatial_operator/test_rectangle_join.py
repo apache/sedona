@@ -1,10 +1,10 @@
 import os
 
-from geo_pyspark.core.enums import FileDataSplitter, GridType, IndexType
-from geo_pyspark.core.enums.join_build_side import JoinBuildSide
-from geo_pyspark.core.geom.envelope import Envelope
-from geo_pyspark.core.spatialOperator import JoinQuery
-from geo_pyspark.core.spatialOperator.join_params import JoinParams
+from geospark.core.enums import FileDataSplitter, GridType, IndexType
+from geospark.core.enums.join_build_side import JoinBuildSide
+from geospark.core.geom.envelope import Envelope
+from geospark.core.spatialOperator import JoinQuery
+from geospark.core.spatialOperator.join_params import JoinParams
 from tests.spatial_operator.test_join_base import TestJoinBase
 from tests.tools import tests_path
 

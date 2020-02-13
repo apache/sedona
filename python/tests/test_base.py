@@ -1,8 +1,8 @@
 from pyspark.sql import SparkSession
 
-from geo_pyspark.register import upload_jars, GeoSparkRegistrator
-from geo_pyspark.utils import KryoSerializer, GeoSparkKryoRegistrator
-from geo_pyspark.utils.decorators import classproperty
+from geospark.register import GeoSparkRegistrator
+from geospark.utils import KryoSerializer, GeoSparkKryoRegistrator
+from geospark.utils.decorators import classproperty
 
 
 class TestBase:
@@ -10,8 +10,6 @@ class TestBase:
     @classproperty
     def spark(self):
         if not hasattr(self, "__spark"):
-            upload_jars()
-
             spark = SparkSession. \
                 builder. \
                 config("spark.serializer", KryoSerializer.getName).\

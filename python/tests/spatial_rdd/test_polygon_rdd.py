@@ -1,9 +1,9 @@
 from pyspark import StorageLevel
 
-from geo_pyspark.core.SpatialRDD import PolygonRDD
-from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
-from geo_pyspark.core.enums import IndexType, FileDataSplitter, GridType
-from geo_pyspark.core.geom.envelope import Envelope
+from geospark.core.SpatialRDD import PolygonRDD
+from geospark.core.SpatialRDD.spatial_rdd import SpatialRDD
+from geospark.core.enums import IndexType, FileDataSplitter, GridType
+from geospark.core.geom.envelope import Envelope
 from tests.properties.polygon_properties import input_location, splitter, num_partitions, input_count, input_boundary, grid_type, \
     input_location_geo_json, input_location_wkt, input_location_wkb, query_envelope, polygon_rdd_input_location, \
     polygon_rdd_start_offset, polygon_rdd_end_offset, polygon_rdd_splitter

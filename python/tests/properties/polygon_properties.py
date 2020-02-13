@@ -1,7 +1,7 @@
 import os
 
-from geo_pyspark.core.enums import FileDataSplitter, IndexType
-from geo_pyspark.core.geom.envelope import Envelope
+from geospark.core.enums import FileDataSplitter, IndexType
+from geospark.core.geom.envelope import Envelope
 from tests.tools import tests_path
 
 input_location = os.path.join(tests_path, "resources/primaryroads-polygon.csv")

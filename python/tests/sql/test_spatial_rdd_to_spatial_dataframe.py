@@ -3,9 +3,9 @@ import os
 from pyspark import StorageLevel
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
-from geo_pyspark.core.SpatialRDD import PointRDD
-from geo_pyspark.core.enums import FileDataSplitter
-from geo_pyspark.sql.types import GeometryType
+from geospark.core.SpatialRDD import PointRDD
+from geospark.core.enums import FileDataSplitter
+from geospark.sql.types import GeometryType
 from tests.test_base import TestBase
 from shapely.geometry import Point
 

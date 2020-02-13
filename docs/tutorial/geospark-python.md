@@ -10,7 +10,7 @@ Package allow to use all GeoSparkSQL functions and transform it to Python Shapel
 
 ## Installation
 
-geo_pyspark extends pyspark functions which depends on Python packages and Scala libraries. To see all dependencies
+geospark extends pyspark functions which depends on Python packages and Scala libraries. To see all dependencies
 please look at Dependencies section.
 https://pypi.org/project/pyspark/.
 
@@ -21,7 +21,7 @@ Package needs 2 jar files to work properly:
 - geo_wrapper.jar
 
 !!!note
-    Since GeoSpark 1.3.0 it is possible also to use maven jars for GeoSparkSQL instead of geo_pyspark/jars/../geospark-sql jars files.
+    Since GeoSpark 1.3.0 it is possible also to use maven jars for GeoSparkSQL instead of geospark/jars/../geospark-sql jars files.
 
 
 Package allows to automatically copy newest GeoSpark jar files using function, please follow the example below.
@@ -32,8 +32,8 @@ Package allows to automatically copy newest GeoSpark jar files using function, p
 
   from pyspark.sql import SparkSession
 
-  from geo_pyspark.register import upload_jars
-  from geo_pyspark.register import GeoSparkRegistrator
+  from geospark.register import upload_jars
+  from geospark.register import GeoSparkRegistrator
 
   upload_jars()
 
@@ -61,7 +61,7 @@ uses findspark Python package to upload jar files to executor and nodes. To avoi
 Please use command below
  
 ```bash
-pip install geo_pyspark
+pip install geospark
 ```
 
 ### Installing from wheel file
@@ -69,7 +69,7 @@ pip install geo_pyspark
 
 ```bash
 
-pipenv run python -m pip install dist/geo_pyspark-0.3.0-py3-none-any.whl
+pipenv run python -m pip install dist/geospark-1.3.0-py3-none-any.whl
 
 ```
 
@@ -77,7 +77,7 @@ or
 
 ```bash
 
-  pip install dist/geo_pyspark-0.3.0-py3-none-any.whl
+  pip install dist/geospark-1.3.0-py3-none-any.whl
 
 
 ```
@@ -219,7 +219,7 @@ spatial_join_result.explain()
 +- RangeJoin geometry#240: geometry, geometry#236: geometry, true
    :- Scan ExistingRDD[fclass#239,geometry#240]
    +- Project [county_code#230, st_geomfromwkt(geom#232) AS geometry#236]
-      +- *(1) FileScan csv [county_code#230,geom#232] Batched: false, Format: CSV, Location: InMemoryFileIndex[file:/home/pkocinski001/Desktop/projects/geo_pyspark_installed/counties.csv], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<county_code:string,geom:string>
+      +- *(1) FileScan csv [county_code#230,geom#232] Batched: false, Format: CSV, Location: InMemoryFileIndex[file:/projects/geospark/counties.csv], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<county_code:string,geom:string>
 ```
 Calculating Number of Pois within counties per fclass.
 
@@ -245,7 +245,7 @@ pois_per_county.show(5, False)
 ## Integration with GeoPandas and Shapely
 
 
-geo_pyspark has implemented serializers and deserializers which allows to convert GeoSpark Geometry objects into Shapely BaseGeometry objects. Based on that it is possible to load the data with geopandas from file (look at Fiona possible drivers) and create Spark DataFrame based on GeoDataFrame object.
+geospark has implemented serializers and deserializers which allows to convert GeoSpark Geometry objects into Shapely BaseGeometry objects. Based on that it is possible to load the data with geopandas from file (look at Fiona possible drivers) and create Spark DataFrame based on GeoDataFrame object.
 
 Example, loading the data from shapefile using geopandas read_file method and create Spark DataFrame based on GeoDataFrame:
 
@@ -254,7 +254,7 @@ Example, loading the data from shapefile using geopandas read_file method and cr
   import geopandas as gpd
   from pyspark.sql import SparkSession
 
-  from geo_pyspark.register import GeoSparkRegistrator
+  from geospark.register import GeoSparkRegistrator
 
   spark = SparkSession.builder.\
         getOrCreate()
@@ -291,7 +291,7 @@ Reading data with Spark and converting to GeoPandas
     import geopandas as gpd
     from pyspark.sql import SparkSession
 
-    from geo_pyspark.register import GeoSparkRegistrator
+    from geospark.register import GeoSparkRegistrator
 
     spark = SparkSession.builder.\
         getOrCreate()
@@ -344,7 +344,7 @@ Reading data with Spark and converting to GeoPandas
 | Polygon         | :heavy_check_mark: |
 | MultiPolygon    | :heavy_check_mark: |
 
-To create Spark DataFrame based on mentioned Geometry types, please use <b> GeometryType </b> from  <b> geo_pyspark.sql.types </b> module. Converting works for list or tuple with shapely objects.
+To create Spark DataFrame based on mentioned Geometry types, please use <b> GeometryType </b> from  <b> geospark.sql.types </b> module. Converting works for list or tuple with shapely objects.
 
 Schema for target table with integer id and geometry type can be defined as follow:
 
@@ -352,7 +352,7 @@ Schema for target table with integer id and geometry type can be defined as foll
 
 from pyspark.sql.types import IntegerType, StructField, StructType
 
-from geo_pyspark.sql.types import GeometryType
+from geospark.sql.types import GeometryType
 
 schema = StructType(
     [
