@@ -1,9 +1,9 @@
 import os
 
-from geo_pyspark.core.SpatialRDD import PointRDD
-from geo_pyspark.core.enums import IndexType, FileDataSplitter
-from geo_pyspark.core.geom.envelope import Envelope
-from geo_pyspark.core.spatialOperator import RangeQuery
+from geospark.core.SpatialRDD import PointRDD
+from geospark.core.enums import IndexType, FileDataSplitter
+from geospark.core.geom.envelope import Envelope
+from geospark.core.spatialOperator import RangeQuery
 from tests.test_base import TestBase
 from tests.tools import tests_path
 

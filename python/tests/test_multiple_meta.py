@@ -1,4 +1,4 @@
-from geo_pyspark.utils.meta import MultipleMeta
+from geospark.utils.meta import MultipleMeta
 
 
 class TestMultipleMeta:

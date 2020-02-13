@@ -1,8 +1,8 @@
 from shapely.geometry import Point, LineString, Polygon
 from shapely.wkt import loads
 
-from geo_pyspark.core.SpatialRDD import PointRDD, LineStringRDD, PolygonRDD
-from geo_pyspark.utils.spatial_rdd_parser import GeoData
+from geospark.core.SpatialRDD import PointRDD, LineStringRDD, PolygonRDD
+from geospark.utils.spatial_rdd_parser import GeoData
 from tests.test_base import TestBase
 
 

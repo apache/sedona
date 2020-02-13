@@ -12,6 +12,7 @@ def create_data_path(relative_path: str) -> str:
 
 mixed_wkb_geometry_input_location = create_data_path("county_small_wkb.tsv")
 mixed_wkt_geometry_input_location = os.path.join(tests_path, "data/county_small.tsv")
+mixed_wkt_geometry_input_location_1 = os.path.join(tests_path, "data/county_small_1.tsv")
 shape_file_input_location = create_data_path("shapefiles/dbf")
 shape_file_with_missing_trailing_input_location = create_data_path("shapefiles/missing")
 geojson_input_location = create_data_path("testPolygon.json")

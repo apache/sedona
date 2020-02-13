@@ -3,9 +3,9 @@ import os
 import pytest
 from pyspark import StorageLevel
 
-from geo_pyspark.core.SpatialRDD import RectangleRDD
-from geo_pyspark.core.enums import IndexType, GridType, FileDataSplitter
-from geo_pyspark.core.geom.envelope import Envelope
+from geospark.core.SpatialRDD import RectangleRDD
+from geospark.core.enums import IndexType, GridType, FileDataSplitter
+from geospark.core.geom.envelope import Envelope
 from tests.test_base import TestBase
 from tests.tools import tests_path
 

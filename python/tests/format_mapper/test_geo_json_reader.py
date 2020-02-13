@@ -2,9 +2,9 @@ import os
 
 import pyspark
 
-from geo_pyspark.core.jvm.config import compare_versions, GeoSparkMeta
+from geospark.core.jvm.config import compare_versions, GeoSparkMeta
 
-from geo_pyspark.core.formatMapper.geo_json_reader import GeoJsonReader
+from geospark.core.formatMapper.geo_json_reader import GeoJsonReader
 from tests.test_base import TestBase
 from tests.tools import tests_path
 

@@ -2,10 +2,10 @@ import os
 
 from shapely.geometry import Point, Polygon, LineString
 
-from geo_pyspark.core.SpatialRDD import RectangleRDD
-from geo_pyspark.core.enums import IndexType, FileDataSplitter
-from geo_pyspark.core.geom.envelope import Envelope
-from geo_pyspark.core.spatialOperator import KNNQuery
+from geospark.core.SpatialRDD import RectangleRDD
+from geospark.core.enums import IndexType, FileDataSplitter
+from geospark.core.geom.envelope import Envelope
+from geospark.core.spatialOperator import KNNQuery
 from tests.test_base import TestBase
 from tests.tools import tests_path, distance_sorting_functions
 

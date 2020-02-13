@@ -3,10 +3,10 @@ import os
 from shapely.geometry import Point
 from pyspark import StorageLevel
 
-from geo_pyspark.core.SpatialRDD import PointRDD, CircleRDD, PolygonRDD
-from geo_pyspark.core.enums import FileDataSplitter, IndexType, GridType
-from geo_pyspark.core.geom.envelope import Envelope
-from geo_pyspark.core.spatialOperator import RangeQuery, JoinQuery, KNNQuery
+from geospark.core.SpatialRDD import PointRDD, CircleRDD, PolygonRDD
+from geospark.core.enums import FileDataSplitter, IndexType, GridType
+from geospark.core.geom.envelope import Envelope
+from geospark.core.spatialOperator import RangeQuery, JoinQuery, KNNQuery
 from tests.test_base import TestBase
 from tests.tools import tests_path
 

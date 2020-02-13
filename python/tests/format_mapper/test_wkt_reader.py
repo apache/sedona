@@ -1,6 +1,6 @@
 import os
 
-from geo_pyspark.core.formatMapper import WktReader
+from geospark.core.formatMapper import WktReader
 from tests.test_base import TestBase
 from tests.tools import tests_path
 

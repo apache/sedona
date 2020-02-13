@@ -1,8 +1,8 @@
 from pyspark import StorageLevel
 
-from geo_pyspark.core.SpatialRDD import LineStringRDD
-from geo_pyspark.core.enums import IndexType, GridType
-from geo_pyspark.core.geom.envelope import Envelope
+from geospark.core.SpatialRDD import LineStringRDD
+from geospark.core.enums import IndexType, GridType
+from geospark.core.geom.envelope import Envelope
 from tests.properties.linestring_properties import input_count, input_boundary, input_location, splitter, num_partitions, \
     grid_type, transformed_envelope, input_boundary_2, transformed_envelope_2
 from tests.test_base import TestBase
