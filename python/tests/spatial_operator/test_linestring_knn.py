@@ -2,9 +2,9 @@ import os
 
 from shapely.geometry import Point
 
-from geo_pyspark.core.SpatialRDD import LineStringRDD
-from geo_pyspark.core.enums import IndexType, FileDataSplitter
-from geo_pyspark.core.spatialOperator import KNNQuery
+from geospark.core.SpatialRDD import LineStringRDD
+from geospark.core.enums import IndexType, FileDataSplitter
+from geospark.core.spatialOperator import KNNQuery
 from tests.test_base import TestBase
 from tests.tools import tests_path
 

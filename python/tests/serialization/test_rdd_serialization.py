@@ -1,7 +1,7 @@
 import os
 
-from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD, LineStringRDD
-from geo_pyspark.core.enums import FileDataSplitter, IndexType
+from geospark.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD, LineStringRDD
+from geospark.core.enums import FileDataSplitter, IndexType
 from tests.test_base import TestBase
 from tests.tools import tests_path
 

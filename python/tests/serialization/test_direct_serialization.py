@@ -1,7 +1,7 @@
 from shapely.geometry import Polygon
 from shapely.wkt import loads
 
-from geo_pyspark.utils.geometry_adapter import GeometryAdapter
+from geospark.utils.geometry_adapter import GeometryAdapter
 from tests.test_base import TestBase
 
 

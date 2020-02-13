@@ -1,4 +1,4 @@
-from geo_pyspark.core.jvm.config import compare_versions, GeoSparkMeta
+from geospark.core.jvm.config import compare_versions, GeoSparkMeta
 from tests.test_base import TestBase
 
 
