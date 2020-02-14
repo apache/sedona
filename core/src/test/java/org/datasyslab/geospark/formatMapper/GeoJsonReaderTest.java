@@ -47,6 +47,7 @@ public class GeoJsonReaderTest
     public static String geoJsonGeomWithFeatureProperty = null;
     public static String geoJsonGeomWithoutFeatureProperty = null;
     public static String geoJsonWithInvalidGeometries = null;
+    public static String geoJsonWithNullProperty = null;
     public static String geoJsonContainsId = null;
 
     @BeforeClass
@@ -57,7 +58,9 @@ public class GeoJsonReaderTest
         geoJsonGeomWithFeatureProperty = GeoJsonReaderTest.class.getClassLoader().getResource("testPolygon.json").getPath();
         geoJsonGeomWithoutFeatureProperty = GeoJsonReaderTest.class.getClassLoader().getResource("testpolygon-no-property.json").getPath();
         geoJsonWithInvalidGeometries = GeoJsonReaderTest.class.getClassLoader().getResource("testInvalidPolygon.json").getPath();
+        geoJsonWithNullProperty = GeoJsonReaderTest.class.getClassLoader().getResource("testpolygon-with-null-property-value.json").getPath();
         geoJsonContainsId = GeoJsonReaderTest.class.getClassLoader().getResource("testContainsId.json").getPath();
+
     }
 
     @AfterClass
@@ -81,6 +84,19 @@ public class GeoJsonReaderTest
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 1001);
         geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithoutFeatureProperty);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 10);
+    }
+
+    /**
+     * Test geojson with null values in the properties
+     * @throws IOException
+     */
+    @Test
+    public void testReadToGeometryRDDWithNullValue()
+            throws IOException
+    {
+        SpatialRDD geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonWithNullProperty);
+        assertEquals(geojsonRDD.rawSpatialRDD.count(), 3);
+
     }
 
     /**
