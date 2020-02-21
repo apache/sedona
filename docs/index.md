@@ -10,15 +10,13 @@
 
 ## News!
 
-* A research paper about ["GeoSparkSim: A Microscopic Road Network Traffic Simulator in Apache Spark"](http://www.public.asu.edu/~jiayu2/geospark/publication/geosparksim-mdm-2019.pdf) is accepted to MDM 2019, Hong Kong China. The next release of GeoSpark will come with a built-in scalable traffic simulator. Please stay tuned!
-* A 1.5-hour tutorial about "Geospatial Data Management in Apache Spark" was presented by Jia Yu and Mohamed Sarwat in ICDE 2019, Macau, China. Visit [our tutorial website](https://jiayuasu.github.io/geospatial-tutorial/) to learn how to craft your **"GeoSpark"** from scratch.
-* GeoSpark 1.2.0 is released.
+* GeoSpark 1.3.1 is released. This version provides a complete Python wrapper to GeoSpark RDD and SQL API. It also contains a number of bug fixes and new functions. See [Python tutorial: RDD](./tutorial/geospark-core-python/), [Python tutorial: SQL](./tutorial/geospark-sql-python/), [Release note](./download/GeoSpark-All-Modules-Release-notes/)
 
 ## Companies are using GeoSpark 
 
 (incomplete list)
 
-[<img src="https://www.dataiku.com/static/img/partners/LOGO-Blue-DME-PNG-3.png" width="200">](https://www.bluedme.com/) &nbsp;&nbsp; [<img src="https://www.gyana.co.uk/images/logo@4x.png" width="200">](https://www.gyana.co.uk/) &nbsp;&nbsp; [<img src="https://mobike.com/global/public/invitation__footer__logo.png" width="150">](https://mobike.com)
+[<img src="https://www.dataiku.com/static/img/partners/LOGO-Blue-DME-PNG-3.png" width="200">](https://www.bluedme.com/) &nbsp;&nbsp; [<img src="https://images.ukfast.co.uk/comms/news/businesscloud/photos/14-08-2018/gyana.jpg" width="150">](https://www.gyana.co.uk/) &nbsp;&nbsp; [<img src="https://mobike.com/global/public/invitation__footer__logo.png" width="150">](https://mobike.com)
 
 Please make a Pull Request to add yourself!
 
@@ -68,8 +66,8 @@ AND city.name = 'Gotham';
 |   Scala  |   RDD, SQL, Viz, Zeppelin   | [RDD](./tutorial/rdd), [SQL](./tutorial/sql), [Viz](./tutorial/viz), [Zeppelin](./tutorial/zeppelin)|
 |   Java   |        RDD, SQL, Viz       |[RDD](./tutorial/rdd), [SQL](./tutorial/sql), [Viz](./tutorial/viz)|
 |    SQL   |          SQL, Viz, Zeppelin          |[SQL](./tutorial/sql), [Viz](./tutorial/viz), [Zeppelin](./tutorial/zeppelin)|
-|  Python  |             SQL            |[SQL](./tutorial/geospark-python)|
-|     R    |             SQL            |[]()|
+|  Python  |             RDD, SQL            |[RDD](./tutorial/geospark-core-python), [SQL](./tutorial/geospark-sql-python)|
+|     R    |             SQL            ||
 
 ## GeoSpark Visualization Extension (GeoSparkViz)
 GeoSparkViz is a large-scale in-memory geospatial visualization system.

@@ -1,9 +1,9 @@
-# GeoSpark Core
+# Spatial RDD Applications in Python
 
 ## Introduction
 <div style="text-align: justify">
-GeoSpark Core is Python wrapper on GeoSpark core Java/Scala library.
-geospark SpatialRDDs (and other classes when it was necessary) have implemented meta classes which allow 
+GeoSpark provides a Python wrapper on GeoSpark core Java/Scala library.
+GeoSpark SpatialRDDs (and other classes when it was necessary) have implemented meta classes which allow 
 to use overloaded functions, methods and constructors to be the most similar to Java/Scala API as possible. 
 </div>
 
@@ -18,8 +18,8 @@ GeoSpark-core provides five special SpatialRDDs:
 <p>
 All of them can be imported from <b> geospark.core.SpatialRDD </b> module
 
-<b> geospark </b> has written serializers which allow to convert GeoSpark SpatialRDD to Python objects.
-Converting will produce GeoData objects which holds 2 attributes:
+<b> geospark </b> has written serializers which convert GeoSpark SpatialRDD to Python objects.
+Converting will produce GeoData objects which have 2 attributes:
 </p>
 </div>
 <li> geom: shapely.geometry.BaseGeometry </li>
@@ -32,13 +32,13 @@ userData is string representation of other attributes separated by "\t"
 GeoData has one method to get user data.
 <li> getUserData() -> str </li>
 
-## Installing package
+## Installing the package
 
-geospark extends pyspark functions which depends on Python packages and Scala libraries. To see all dependencies
-please look at Dependencies section.
+GeoSpark extends pyspark functions which depend on Python packages and Scala libraries. To see all dependencies
+please look at the dependencies section.
 https://pypi.org/project/pyspark/.
 
-Package needs 2 jar files to work properly:
+This package needs 2 jar files to work properly:
 
 - geospark.jar
 - geo_wrapper.jar
@@ -49,7 +49,7 @@ Package needs 2 jar files to work properly:
     jars for GeoSparkSQL instead of geospark/jars/../geospark-sql jars files.
 
 
-Package allows to automatically copy newest GeoSpark jar files using function, please follow the example below.
+This package automatically copies the newest GeoSpark jar files using upload_jars function, please follow the example below.
 
 <li> upload_jars </li>
 
@@ -94,7 +94,7 @@ pip install geospark
 
 ```bash
 
-pipenv run python -m pip install dist/geospark-1.3.0-py3-none-any.whl
+pipenv run python -m pip install dist/geospark-1.3.1-py3-none-any.whl
 
 ```
 
@@ -102,7 +102,7 @@ or
 
 ```bash
 
-  pip install dist/geospark-1.3.0-py3-none-any.whl
+  pip install dist/geospark-1.3.1-py3-none-any.whl
 
 
 ```
@@ -671,18 +671,18 @@ ShapefileReader.readToGeometryRDD(sc, shape_file_location)
 
 ## Supported versions
 
+Currently this python wrapper supports the following Spark, GeoSpark and Python versions
 
 ### Apache Spark
 
-Currently package supports spark versions
-
+<li> 2.2 </li>
 <li> 2.3 </li>
 <li> 2.4 </li>
 
 
 ### GeoSpark
 
-<li> 1.3.0 </li>
+<li> 1.3.1 </li>
 <li> 1.2.0 </li>
 
 ### Python

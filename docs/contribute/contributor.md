@@ -7,7 +7,7 @@ A committer has the write access to GeoSpark main repository and is in charge at
 
 |       Name      |        Affiliation       | Role |
 |:---------------:|:------------------------:|:------------------------:|
-| Paweł Kociński |						| GeoSpark Python
+| Paweł Kociński |	Accenture	| GeoSpark Python API
 |  Mohamed Sarwat | Arizona State University | All modules |
 |      Jia Yu     | Arizona State University | All modules
 |   Zongsi Zhang  | GrabTaxi | GeoSpark Shapefile and RDD API |
@@ -21,14 +21,14 @@ A contributor contributed at least a function to GeoSpark main repository.
 |     Lucas C     |          Brazil          |
 | Masha Basmanova |         Facebook         |
 |   Omkar Kaptan  |         Quantcast        |
-| Paweł Kociński |						|
+| Paweł Kociński |		Accenture		|
 |Netanel Malka||
 |Sergii Mikhtoniuk||
 |Avshalom Orenstein||
 |Anton Peniaziev||
 |  Mohamed Sarwat | Arizona State University |
 |Sachio Wakai||
-| Hui Wang ||
+| Hui Wang |Guangzhou Urban Planning & Design Survey Research Institute|
 |    Jinxuan Wu   | Bloomberg |
 |      Jia Yu     | Arizona State University |
 |   Zongsi Zhang  | GrabTaxi |
