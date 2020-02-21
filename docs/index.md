@@ -10,7 +10,7 @@
 
 ## News!
 
-* GeoSpark 1.3.1 is released. This version provides a complete Python wrapper to GeoSpark RDD and SQL API. It also contains a number of bug fixes and new functions. See [Python tutorial: RDD](./tutorial/geospark-core-python/), [Python tutorial: SQL](./tutorial/geospark-sql-python/), [Release note](./download/GeoSpark-All-Modules-Release-notes/)
+* GeoSpark 1.3.1 is released. This version provides a complete Python wrapper to GeoSpark RDD and SQL API. It also contains a number of bug fixes and new functions from 12 contributors. See [Python tutorial: RDD](./tutorial/geospark-core-python/), [Python tutorial: SQL](./tutorial/geospark-sql-python/), [Release note](./download/GeoSpark-All-Modules-Release-notes/)
 
 ## Companies are using GeoSpark 
 
