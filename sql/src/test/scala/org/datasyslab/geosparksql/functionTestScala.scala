@@ -27,7 +27,9 @@
 package org.datasyslab.geosparksql
 
 import com.vividsolutions.jts.geom.Geometry
+import org.apache.spark.sql.geosparksql.functions.ST_GeomFromText
 import org.geotools.geometry.jts.WKTReader2
+import org.apache.spark.sql.functions.col
 
 class functionTestScala extends TestBaseScala {
 
@@ -285,6 +287,16 @@ class functionTestScala extends TestBaseScala {
     it("Passed ST_GeometryType"){
       var test = sparkSession.sql("SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
       assert(test.take(1)(0).get(0).asInstanceOf[String].toUpperCase() == "ST_LINESTRING")
+    }
+
+    it("Passed St_GeomFromWKT") {
+      val polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.filter("_c0 is null").show()
+      polygonWktDf.selectExpr("St_GeomFromText(_c0)").show()
+      val withGeom = polygonWktDf.withColumn("geom", ST_GeomFromText(col("_c0")))
+      withGeom.createOrReplaceTempView("dt")
+      sparkSession.sql("select * from dt as a, dt as b where st_intersects(a.geom, b.geom)").show()
+      sparkSession.sql("select * from dt as a, dt as b where st_intersects(a.geom, b.geom)").explain()
     }
   }
 }
