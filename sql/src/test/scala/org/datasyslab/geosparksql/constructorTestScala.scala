@@ -39,6 +39,18 @@ class constructorTestScala extends TestBaseScala {
       pointCsvDF.createOrReplaceTempView("pointtable")
       var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
       assert(pointDf.count() == 1000)
+
+    }
+
+    it ("Passed ST_Point by double") {
+      val pointDf = sparkSession.sql("SELECT ST_Point(double(1.2345), 2.3456)")
+      assert(pointDf.count() == 1)
+    }
+
+    it ("Passed ST_PolygonFromEnvelope") {
+      val polygonDF = sparkSession.sql("select ST_PolygonFromEnvelope(double(1.234),double(2.234),double(3.345),double(3.345))")
+      polygonDF.show(false)
+      assert(polygonDF.count() == 1)
     }
 
     it("Passed ST_PointFromText") {
