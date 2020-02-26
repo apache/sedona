@@ -225,8 +225,15 @@ case class ST_Point(inputExpressions: Seq[Expression])
 
   override def eval(inputRow: InternalRow): Any = {
     assert(inputExpressions.length == 2)
-    val x = inputExpressions(0).eval(inputRow).asInstanceOf[Decimal].toDouble
-    val y = inputExpressions(1).eval(inputRow).asInstanceOf[Decimal].toDouble
+    val x = inputExpressions(0).eval(inputRow) match {
+      case a:Double => a
+      case b:Decimal => b.toDouble
+    }
+    val y = inputExpressions(1).eval(inputRow) match {
+      case a:Double => a
+      case b:Decimal => b.toDouble
+    }
+
     var geometryFactory = new GeometryFactory()
     var geometry = geometryFactory.createPoint(new Coordinate(x, y))
     return new GenericArrayData(GeometrySerializer.serialize(geometry))
@@ -248,10 +255,27 @@ case class ST_PolygonFromEnvelope(inputExpressions: Seq[Expression]) extends Exp
 
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length == 4)
-    val minX = inputExpressions(0).eval(input).asInstanceOf[Decimal].toDouble
-    val minY = inputExpressions(1).eval(input).asInstanceOf[Decimal].toDouble
-    val maxX = inputExpressions(2).eval(input).asInstanceOf[Decimal].toDouble
-    val maxY = inputExpressions(3).eval(input).asInstanceOf[Decimal].toDouble
+
+    val minX = inputExpressions(0).eval(input) match {
+      case a:Double => a
+      case b:Decimal => b.toDouble
+    }
+
+    val minY = inputExpressions(1).eval(input) match {
+      case a:Double => a
+      case b:Decimal => b.toDouble
+    }
+
+    val maxX = inputExpressions(2).eval(input) match {
+      case a:Double => a
+      case b:Decimal => b.toDouble
+    }
+
+    val maxY = inputExpressions(3).eval(input) match {
+      case a:Double => a
+      case b:Decimal => b.toDouble
+    }
+
     var coordinates = new Array[Coordinate](5)
     coordinates(0) = new Coordinate(minX, minY)
     coordinates(1) = new Coordinate(minX, maxY)
