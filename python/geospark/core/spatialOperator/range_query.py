@@ -2,6 +2,7 @@ from pyspark import RDD
 from shapely.geometry.base import BaseGeometry
 
 from geospark.core.SpatialRDD.spatial_rdd import SpatialRDD
+from geospark.core.jvm.translate import JvmGeoSparkPythonConverter
 from geospark.utils.decorators import require
 from geospark.utils.geometry_adapter import GeometryAdapter
 from geospark.utils.spatial_rdd_parser import GeoSparkPickler
@@ -34,6 +35,6 @@ class RangeQuery:
             usingIndex
         )
 
-        serlialized = jvm.GeoSerializerData.serializeToPython(srdd)
+        serialized = JvmGeoSparkPythonConverter(jvm).translate_spatial_rdd_to_python(srdd)
 
-        return RDD(serlialized, sc, GeoSparkPickler())
+        return RDD(serialized, sc, GeoSparkPickler())

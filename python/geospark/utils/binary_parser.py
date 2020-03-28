@@ -3,6 +3,7 @@ from typing import List, Union
 
 import attr
 from pyspark import SparkContext
+from shapely.wkb import loads
 
 DOUBLE_SIZE = 8
 INT_SIZE = 4
@@ -27,6 +28,12 @@ class BinaryParser:
     def __attrs_post_init__(self):
         no_negatives = self.remove_negatives(self.bytes)
         self.bytes = self._convert_to_binary_array(no_negatives)
+
+    def read_geometry(self, length: int):
+        geom_bytes = b"".join([struct.pack("b", el) if el < 128 else struct.pack("b", el-256) for el in self.bytes[self.current_index: self.current_index + length]])
+        geom = loads(geom_bytes)
+        self.current_index += length
+        return geom
 
     def read_double(self):
         data = self.unpack("d", self.bytes)

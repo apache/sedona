@@ -3,6 +3,7 @@ from enum import Enum
 from pyspark import SparkContext
 
 from geospark.core.SpatialRDD import SpatialRDD, PolygonRDD, LineStringRDD, PointRDD
+from geospark.core.jvm.translate import SpatialObjectLoaderAdapter
 from geospark.utils.decorators import require
 
 
@@ -18,18 +19,18 @@ class IndexDiscLoader:
     @classmethod
     def load(cls, sc: SparkContext, path: str):
         jvm = sc._jvm
-        index_rdd = jvm.ObjectSpatialRDDLoader.loadIndexRDD(sc._jsc, path)
+        index_rdd = SpatialObjectLoaderAdapter(jvm).load_index_rdd(sc._jsc, path)
         return index_rdd
 
 
 class PolygonRDDDiscLoader(DiscLoader):
 
     @classmethod
-    @require(["ObjectSpatialRDDLoader"])
+    @require(["SpatialObjectLoaderAdapter"])
     def load(cls, sc: SparkContext, path: str) -> SpatialRDD:
         jvm = sc._jvm
         polygon_rdd = PolygonRDD()
-        srdd = jvm.ObjectSpatialRDDLoader.loadPointSpatialRDD(sc._jsc, path)
+        srdd = SpatialObjectLoaderAdapter(jvm).load_polygon_spatial_rdd(sc._jsc, path)
         polygon_rdd.set_srdd(srdd)
         return polygon_rdd
 
@@ -37,11 +38,11 @@ class PolygonRDDDiscLoader(DiscLoader):
 class PointRDDDiscLoader(DiscLoader):
 
     @classmethod
-    @require(["ObjectSpatialRDDLoader"])
+    @require(["SpatialObjectLoaderAdapter"])
     def load(cls, sc: SparkContext, path: str) -> SpatialRDD:
         jvm = sc._jvm
         polygon_rdd = PointRDD()
-        srdd = jvm.ObjectSpatialRDDLoader.loadPointSpatialRDD(sc._jsc, path)
+        srdd = SpatialObjectLoaderAdapter(jvm).load_point_spatial_rdd(sc._jsc, path)
         polygon_rdd.set_srdd(srdd)
         return polygon_rdd
 
@@ -49,11 +50,11 @@ class PointRDDDiscLoader(DiscLoader):
 class LineStringRDDDiscLoader(DiscLoader):
 
     @classmethod
-    @require(["ObjectSpatialRDDLoader"])
+    @require(["SpatialObjectLoaderAdapter"])
     def load(cls, sc: SparkContext, path: str) -> SpatialRDD:
         jvm = sc._jvm
         line_string_rdd = LineStringRDD()
-        srdd = jvm.ObjectSpatialRDDLoader.loadLineStringSpatialRDD(sc._jsc, path)
+        srdd = SpatialObjectLoaderAdapter(jvm).load_line_string_spatial_rdd(sc._jsc, path)
         line_string_rdd.set_srdd(srdd)
         return line_string_rdd
 
@@ -61,11 +62,11 @@ class LineStringRDDDiscLoader(DiscLoader):
 class SpatialRDDDiscLoader(DiscLoader):
 
     @classmethod
-    @require(["ObjectSpatialRDDLoader"])
+    @require(["SpatialObjectLoaderAdapter"])
     def load(cls, sc: SparkContext, path: str) -> SpatialRDD:
         jvm = sc._jvm
         spatial_rdd = SpatialRDD()
-        srdd = jvm.ObjectSpatialRDDLoader.loadSpatialRDD(sc._jsc, path)
+        srdd = SpatialObjectLoaderAdapter(jvm).load_spatial_rdd(sc._jsc, path)
         spatial_rdd.set_srdd(srdd)
         return spatial_rdd
 

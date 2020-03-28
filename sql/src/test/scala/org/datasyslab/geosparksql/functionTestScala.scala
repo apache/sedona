@@ -27,9 +27,7 @@
 package org.datasyslab.geosparksql
 
 import com.vividsolutions.jts.geom.Geometry
-import org.apache.spark.sql.geosparksql.functions.ST_GeomFromText
 import org.geotools.geometry.jts.WKTReader2
-import org.apache.spark.sql.functions.col
 
 class functionTestScala extends TestBaseScala {
 
@@ -149,12 +147,11 @@ class functionTestScala extends TestBaseScala {
 
     it("Passed ST_Intersection - not intersects") {
 
-      var testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((40 21, 40 22, 40 23, 40 21))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
+      val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((40 21, 40 22, 40 23, 40 21))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
       testtable.createOrReplaceTempView("testtable")
-      var intersec = sparkSession.sql("select ST_Intersection(a,b) from testtable")
-      assert(intersec.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("MULTIPOLYGON EMPTY"))
+      val intersect = sparkSession.sql("select ST_Intersection(a,b) from testtable")
+      assert(intersect.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON EMPTY"))
     }
-
 
     it("Passed ST_IsValid") {
 
@@ -293,8 +290,6 @@ class functionTestScala extends TestBaseScala {
       val polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.filter("_c0 is null").show()
       polygonWktDf.selectExpr("St_GeomFromText(_c0)").show()
-      val withGeom = polygonWktDf.withColumn("geom", ST_GeomFromText(col("_c0")))
-      withGeom.createOrReplaceTempView("dt")
       sparkSession.sql("select * from dt as a, dt as b where st_intersects(a.geom, b.geom)").show()
       sparkSession.sql("select * from dt as a, dt as b where st_intersects(a.geom, b.geom)").explain()
     }

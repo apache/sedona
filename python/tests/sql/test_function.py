@@ -153,7 +153,7 @@ class TestPredicateJoin(TestBase):
         test_table = self.spark.sql("select ST_GeomFromWKT('POLYGON((40 21, 40 22, 40 23, 40 21))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
         test_table.createOrReplaceTempView("testtable")
         intersects = self.spark.sql("select ST_Intersection(a,b) from testtable")
-        assert intersects.take(1)[0][0].wkt == "GEOMETRYCOLLECTION EMPTY"
+        assert intersects.take(1)[0][0].wkt == "POLYGON EMPTY"
 
     def test_st_is_valid(self):
         test_table = self.spark.sql(

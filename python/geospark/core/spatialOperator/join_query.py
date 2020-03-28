@@ -1,6 +1,7 @@
 from pyspark import RDD
 
 from geospark.core.SpatialRDD.spatial_rdd import SpatialRDD
+from geospark.core.jvm.translate import JvmGeoSparkPythonConverter
 from geospark.core.spatialOperator.join_params import JoinParams
 from geospark.utils.decorators import require
 from geospark.utils.spatial_rdd_parser import GeoSparkPickler
@@ -29,9 +30,10 @@ class JoinQuery:
             useIndex,
             considerBoundaryIntersection
         )
-        serlialized = jvm.GeoSerializerData.serializeToPythonHashSet(srdd)
+        serialized = JvmGeoSparkPythonConverter(jvm)\
+            .translate_spatial_pair_rdd_with_hashset_to_python(srdd)
 
-        return RDD(serlialized, sc, GeoSparkPickler())
+        return RDD(serialized, sc, GeoSparkPickler())
 
     @classmethod
     @require(["JoinQuery"])
@@ -53,9 +55,10 @@ class JoinQuery:
             useIndex,
             considerBoundaryIntersection
         )
-        serlialized = jvm.GeoSerializerData.serializeToPythonHashSet(srdd)
+        serialized = JvmGeoSparkPythonConverter(jvm).\
+            translate_spatial_pair_rdd_with_hashset_to_python(srdd)
 
-        return RDD(serlialized, sc, GeoSparkPickler())
+        return RDD(serialized, sc, GeoSparkPickler())
 
     @classmethod
     @require(["JoinQuery"])
@@ -74,10 +77,10 @@ class JoinQuery:
         jvm_join_params = joinParams.jvm_instance(jvm)
 
         srdd = jvm.JoinQuery.spatialJoin(queryWindowRDD._srdd, objectRDD._srdd, jvm_join_params)
+        serialized = JvmGeoSparkPythonConverter(jvm).\
+            translate_spatial_pair_rdd_to_python(srdd)
 
-        serlialized = jvm.GeoSerializerData.serializeToPython(srdd)
-
-        return RDD(serlialized, sc, GeoSparkPickler())
+        return RDD(serialized, sc, GeoSparkPickler())
 
     @classmethod
     @require(["JoinQuery"])
@@ -108,9 +111,10 @@ class JoinQuery:
             considerBoundaryIntersection
         )
 
-        serlialized = jvm.GeoSerializerData.serializeToPython(srdd)
+        serialized = JvmGeoSparkPythonConverter(jvm).\
+            translate_spatial_pair_rdd_to_python(srdd)
 
-        return RDD(serlialized, sc, GeoSparkPickler())
+        return RDD(serialized, sc, GeoSparkPickler())
 
     @classmethod
     @require(["JoinQuery"])
@@ -146,6 +150,7 @@ class JoinQuery:
             considerBoundaryIntersection
         )
 
-        serlialized = jvm.GeoSerializerData.serializeToPython(srdd)
+        serialized = JvmGeoSparkPythonConverter(jvm).\
+            translate_spatial_pair_rdd_to_python(srdd)
 
-        return RDD(serlialized, sc, GeoSparkPickler())
+        return RDD(serialized, sc, GeoSparkPickler())

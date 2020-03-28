@@ -3,6 +3,7 @@ from pyspark import SparkContext, StorageLevel, RDD
 from geospark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmSpatialRDD
 from geospark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from geospark.core.enums.file_data_splitter import FileSplitterJvm, FileDataSplitter
+from geospark.core.jvm.translate import PythonRddToJavaRDDAdapter
 from geospark.utils.jvm import JvmStorageLevel
 from geospark.utils.meta import MultipleMeta
 
@@ -17,7 +18,7 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
         """
         super().__init__(rdd.ctx)
 
-        spatial_rdd = self._jvm.GeoSerializerData.deserializeToPointRawRDD(rdd._jrdd)
+        spatial_rdd = PythonRddToJavaRDDAdapter(self._jvm).deserialize_to_point_raw_rdd(rdd._jrdd)
 
         new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
         srdd = self._jvm_spatial_rdd(spatial_rdd, new_level_jvm)
@@ -30,7 +31,7 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
         """
         super().__init__(rdd.ctx)
 
-        spatial_rdd = self._jvm.GeoSerializerData.deserializeToPointRawRDD(rdd._jrdd)
+        spatial_rdd = PythonRddToJavaRDDAdapter(self._jvm).deserialize_to_point_raw_rdd(rdd._jrdd)
 
         srdd = self._jvm_spatial_rdd(spatial_rdd)
         self._srdd = srdd
