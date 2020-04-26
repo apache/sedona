@@ -17,19 +17,30 @@
 package org.datasyslab.geosparksql.utils
 
 import com.vividsolutions.jts.geom.Geometry
-import org.apache.spark.sql.catalyst.util.ArrayData
 import com.vividsolutions.jts.io.{WKBReader, WKBWriter}
+import org.apache.spark.sql.catalyst.util.ArrayData
+
 
 /**
- * SerDe using the WKB reader and writer objects
- */
+  * SerDe using the WKB reader and writer objects
+  */
 object GeometrySerializer {
-
+  
+  /**
+    *  Given a geometry returns array of bytes
+    * @param geometry JTS geometry
+    * @return Array of bites represents this geometry
+    */
   def serialize(geometry: Geometry): Array[Byte] = {
     val writer = new WKBWriter(2, 2)
     writer.write(geometry)
   }
 
+  /**
+    * Given ArrayData returns Geometry
+    * @param values ArrayData 
+    * @return JTS geometry
+    */
   def deserialize(values: ArrayData): Geometry = {
     val reader = new WKBReader()
     reader.read(values.toByteArray())

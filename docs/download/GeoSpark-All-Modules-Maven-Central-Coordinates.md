@@ -4,45 +4,45 @@ Please add the following dependencies into your POM.xml or build.sbt
 ```
 groupId: org.datasyslab
 artifactId: geospark
-version: 1.2.0
+version: 1.3.1
 ```
 ## GeoSpark-SQL
 ### For SparkSQL-2.3
 ```
 groupId: org.datasyslab
 artifactId: geospark-sql_2.3
-version: 1.2.0
+version: 1.3.1
 ```
 ### For SparkSQL-2.2
 ```
 groupId: org.datasyslab
 artifactId: geospark-sql_2.2
-version: 1.2.0
+version: 1.3.1
 ```
 ### For SparkSQL-2.1
 ```
 groupId: org.datasyslab
 artifactId: geospark-sql_2.1
-version: 1.2.0
+version: 1.3.1
 ```
 ## GeoSpark-Viz 1.2.0 and later
 ### For SparkSQL-2.3
 ```
 groupId: org.datasyslab
 artifactId: geospark-viz_2.3
-version: 1.2.0
+version: 1.3.1
 ```
 ### For SparkSQL-2.2
 ```
 groupId: org.datasyslab
 artifactId: geospark-viz_2.2
-version: 1.2.0
+version: 1.3.1
 ```
 ### For SparkSQL-2.1
 ```
 groupId: org.datasyslab
 artifactId: geospark-viz_2.1
-version: 1.2.0
+version: 1.3.1
 ```
 
 ## GeoSpark-Viz 1.1.3 and earlier
@@ -75,19 +75,19 @@ Sometimes GeoSpark has a SNAPSHOT version for the upcoming release. "SNAPSHOT" i
 ```
 groupId: org.datasyslab
 artifactId: geospark
-version: 1.2.0-SNAPSHOT
+version: 1.3.2-SNAPSHOT
 ```
 
 ```
 groupId: org.datasyslab
 artifactId: geospark-sql_2.3
-version: 1.2.0-SNAPSHOT
+version: 1.3.2-SNAPSHOT
 ```
 
 ```
 groupId: org.datasyslab
 artifactId: geospark-viz
-version: 1.2.0-SNAPSHOT
+version: 1.3.2-SNAPSHOT
 ```
 
 In order to download SNAPSHOTs, you need to add the following repositories in your POM.XML or build.sbt

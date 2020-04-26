@@ -1,16 +1,16 @@
-# GeoSparkSQL Python
+# Spatial SQL Application in Python
 
 ## Introduction
 
-Package is a Python wrapper on scala library GeoSparkSQL. Official repository for GeoSpark can be found at https://github.com/DataSystemsLab/GeoSpark.
+GeoSPark provides a Python wrapper for its Spatial SQL / DataFrame interface. The official repository for GeoSpark can be found at https://github.com/DataSystemsLab/GeoSpark.
 
-Package allow to use all GeoSparkSQL functions and transform it to Python Shapely geometry objects. Also it allows to create Spark DataFrame with GeoSpark UDT from Shapely geometry objects. Spark DataFrame can be converted to GeoPandas easily, in addition all fiona drivers for shape file are available to load data from files and convert them to Spark DataFrame. Please look at examples.
+This package allows users to use all GeoSparkSQL functions and transform it to Python Shapely geometry objects. Also it allows to create Spark DataFrame with GeoSpark UDT from Shapely geometry objects. Spark DataFrame can be converted to GeoPandas easily, in addition all fiona drivers for shape file are available to load data from files and convert them to Spark DataFrame. Please look at examples.
 
 
 
 ## Installation
 
-geospark extends pyspark functions which depends on Python packages and Scala libraries. To see all dependencies
+GeoSpark extends pyspark functions which depends on Python packages and Scala libraries. To see all dependencies
 please look at Dependencies section.
 https://pypi.org/project/pyspark/.
 
@@ -24,7 +24,7 @@ Package needs 2 jar files to work properly:
     Since GeoSpark 1.3.0 it is possible also to use maven jars for GeoSparkSQL instead of geospark/jars/../geospark-sql jars files.
 
 
-Package allows to automatically copy newest GeoSpark jar files using function, please follow the example below.
+This package automatically copies the newest GeoSpark jar files using function, please follow the example below.
 
 <li> upload_jars </li>
 
@@ -69,7 +69,7 @@ pip install geospark
 
 ```bash
 
-pipenv run python -m pip install dist/geospark-1.3.0-py3-none-any.whl
+pipenv run python -m pip install dist/geospark-1.3.1-py3-none-any.whl
 
 ```
 
@@ -77,7 +77,7 @@ or
 
 ```bash
 
-  pip install dist/geospark-1.3.0-py3-none-any.whl
+  pip install dist/geospark-1.3.1-py3-none-any.whl
 
 
 ```
@@ -578,17 +578,22 @@ gdf.show(1, False)
 
 ## Supported versions
 
+Currently this python wrapper supports the following Spark, GeoSpark and Python versions:
 
 ### Apache Spark
-
-Currently package supports spark versions
 
 <li> 2.2 </li>
 <li> 2.3 </li>
 <li> 2.4 </li>
 
 
-### GeoSpark
+### GeoSparkSQL
 
+<li> 1.3.1 </li>
 <li> 1.2.0 </li>
 <li> 1.1.3 </li>
+
+### Python
+
+<li> 3.6 </li>
+<li> 3.7 </li>
