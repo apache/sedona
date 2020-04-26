@@ -21,6 +21,7 @@ pandas="*"
 geopandas="==0.6.0"
 pyspark="*"
 attrs="*"
+twine = "*"
 
 [requires]
 python_version = "3.7"

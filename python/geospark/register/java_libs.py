@@ -2,16 +2,14 @@ from enum import Enum
 
 
 class GeoSparkLib(Enum):
-    JoinParams = "org.imbruced.geospark.JoinParams"
+    JoinParams = "org.datasyslab.geospark.python.adapters.JoinParamsAdapter"
     Adapter = "org.datasyslab.geosparksql.utils.Adapter"
-    GeoSparkWrapper = "org.imbruced.geospark.GeoSparkWrapper"
     JoinQuery = "org.datasyslab.geospark.spatialOperator.JoinQuery"
     KNNQuery = "org.datasyslab.geospark.spatialOperator.KNNQuery"
-    CoordinateFactory = "org.imbruced.geospark.CoordinateFactory"
     RangeQuery = "org.datasyslab.geospark.spatialOperator.RangeQuery"
-    GeomFactory = "org.imbruced.geospark.GeomFactory"
     Envelope = "com.vividsolutions.jts.geom.Envelope"
-    GeoSerializerData = "org.imbruced.geospark.serializers.GeoSerializerData"
+    GeoSerializerData = "org.datasyslab.geospark.python.adapters.GeoSparkPythonConverter"
+    GeometryAdapter = "org.datasyslab.geospark.python.adapters.GeometryAdapter"
     PointRDD = "org.datasyslab.geospark.spatialRDD.PointRDD"
     PolygonRDD = "org.datasyslab.geospark.spatialRDD.PolygonRDD"
     CircleRDD = "org.datasyslab.geospark.spatialRDD.CircleRDD"
@@ -25,12 +23,14 @@ class GeoSparkLib(Enum):
     StorageLevel = "org.apache.spark.storage.StorageLevel"
     GridType = "org.datasyslab.geospark.enums.GridType"
     IndexType = "org.datasyslab.geospark.enums.IndexType"
-    AdapterWrapper = "org.imbruced.geospark.AdapterWrapper"
+    AdapterWrapper = "org.datasyslab.geosparksql.utils.PythonAdapterWrapper"
     WktReader = "org.datasyslab.geospark.formatMapper.WktReader"
-    GeometryAdapter = "org.imbruced.geospark.serializers.GeometryAdapter"
-    RawJvmIndexRDDSetter = "org.imbruced.geospark.RawJvmIndexRDDSetter"
-    ObjectSpatialRDDLoader = "org.imbruced.geospark.ObjectSpatialRDDLoader"
+    RawJvmIndexRDDSetter = "org.datasyslab.geospark.python.adapters.RawJvmIndexRDDSetter"
+    SpatialObjectLoaderAdapter = "org.datasyslab.geospark.python.adapters.SpatialObjectLoaderAdapter"
     WkbReader = "org.datasyslab.geospark.formatMapper.WkbReader"
+    EnvelopeAdapter = "org.datasyslab.geospark.python.adapters.EnvelopeAdapter"
+    GeoSparkPythonConverter = "org.datasyslab.geospark.python.adapters.GeoSparkPythonConverter"
+    PythonRddToJavaRDDAdapter = "org.datasyslab.geospark.python.adapters.PythonRddToJavaRDDAdapter"
 
     @classmethod
     def from_str(cls, geo_lib: str) -> 'GeoSparkLib':

@@ -1,7 +1,8 @@
 from shapely.geometry.base import BaseGeometry
 
 from geospark.core.geom.envelope import Envelope
-from geospark.sql.types import GeometryFactory
+from geospark.core.jvm.translate import JvmGeometryAdapter
+from geospark.utils.spatial_rdd_parser import GeometryFactory
 
 
 class GeometryAdapter:
@@ -17,6 +18,6 @@ class GeometryAdapter:
             jvm_geom = geom.create_jvm_instance(jvm)
         else:
             decoded_geom = GeometryFactory.to_bytes(geom)
-            jvm_geom = jvm.GeometryAdapter.deserializeToGeometry(decoded_geom)
+            jvm_geom = JvmGeometryAdapter(jvm).translate_to_java(decoded_geom)
 
         return jvm_geom

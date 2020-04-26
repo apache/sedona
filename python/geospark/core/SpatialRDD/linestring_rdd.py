@@ -4,6 +4,7 @@ from geospark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmSpatialRDD
 from geospark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from geospark.core.enums import FileDataSplitter
 from geospark.core.enums.file_data_splitter import FileSplitterJvm
+from geospark.core.jvm.translate import PythonRddToJavaRDDAdapter
 from geospark.utils.jvm import JvmStorageLevel
 from geospark.utils.meta import MultipleMeta
 
@@ -13,7 +14,7 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
     def __init__(self, rdd: RDD):
         super().__init__(rdd.ctx)
 
-        spatial_rdd = self._jvm.GeoSerializerData.deserializeToLineStringRawRDD(rdd._jrdd)
+        spatial_rdd = PythonRddToJavaRDDAdapter(self._jvm).deserialize_to_linestring_raw_rdd(rdd._jrdd)
 
         srdd = self._jvm_spatial_rdd(spatial_rdd)
         self._srdd = srdd
@@ -22,7 +23,7 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
         self._sc = rdd.ctx
         self._jvm = self._sc._jvm
 
-        spatial_rdd = self._jvm.GeoSerializerData.deserializeToLineStringRawRDD(rdd._jrdd)
+        spatial_rdd = PythonRddToJavaRDDAdapter(self._jvm).deserialize_to_linestring_raw_rdd(rdd._jrdd)
 
         new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
         srdd = self._jvm_spatial_rdd(spatial_rdd, new_level_jvm)

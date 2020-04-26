@@ -153,7 +153,6 @@ class functionTestScala extends TestBaseScala {
       assert(intersect.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON EMPTY"))
     }
 
-
     it("Passed ST_IsValid") {
 
       var testtable = sparkSession.sql(
@@ -285,6 +284,14 @@ class functionTestScala extends TestBaseScala {
     it("Passed ST_GeometryType"){
       var test = sparkSession.sql("SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
       assert(test.take(1)(0).get(0).asInstanceOf[String].toUpperCase() == "ST_LINESTRING")
+    }
+
+    it("Passed St_GeomFromWKT") {
+      val polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.filter("_c0 is null").show()
+      polygonWktDf.selectExpr("St_GeomFromText(_c0)").show()
+      sparkSession.sql("select * from dt as a, dt as b where st_intersects(a.geom, b.geom)").show()
+      sparkSession.sql("select * from dt as a, dt as b where st_intersects(a.geom, b.geom)").explain()
     }
   }
 }
