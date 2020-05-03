@@ -2,8 +2,8 @@ package org.datasyslab.geospark.python
 
 import org.apache.spark.api.java.JavaPairRDD
 import org.datasyslab.geospark.python.translation.{FlatPairRddConverter, GeometryRddConverter, HashSetPairRddConverter}
-import org.scalatest.{BeforeAndAfterAll, FunSuite, Matchers}
-import utils.implicits._
+import org.datasyslab.geospark.python.utils.implicits._
+import org.scalatest.Matchers
 
 class TestToPythonSerialization extends SparkUtil with GeometrySample with Matchers{
 
@@ -32,13 +32,6 @@ class TestToPythonSerialization extends SparkUtil with GeometrySample with Match
       case a: Array[Byte] => a.toList
     }
     existingValues should contain theSameElementsAs expectedPairRDDWithHashSetPythonArray
-  }
-
-  test("test serializing with user Data"){
-
-    samplePoint.setUserData(sampleUserData)
-    pythonGeometrySerializer.serialize(samplePoint) shouldBe expectedEncodedArray
-
   }
 
   private val pointSpatialRDD = sc.parallelize(
