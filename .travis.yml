@@ -18,8 +18,6 @@ install:
 - rm spark-2.4.4-bin-hadoop2.7.tgz
 
 script:
-  - cat python/geo_wrapper/spark_2_4 > python/geo_wrapper/build.sbt
-  - (cd python/geo_wrapper; sbt package)
   - (cd python;pipenv install --dev) 
   - export SPARK_HOME=$PWD/spark-2.4.4-bin-hadoop2.7
   - export PYTHONPATH=$SPARK_HOME/python
