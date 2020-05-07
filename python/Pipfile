@@ -4,16 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-matplotlib="*"
-descartes="*"
-sphinx="*"
-ipykernel="*"
-jupyter="*"
-toree="*"
 pytest="*"
-mypy="*"
-pytest-json-report="*"
-twine = "*"
 
 [packages]
 findspark="*"
@@ -21,7 +12,6 @@ pandas="*"
 geopandas="==0.6.0"
 pyspark="*"
 attrs="*"
-twine = "*"
 
 [requires]
 python_version = "3.7"
