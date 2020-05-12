@@ -26,7 +26,7 @@ GeoSpark is a cluster computing system for processing large-scale spatial data. 
 * GeoSpark 1.3.1 is released. This version provides a complete Python wrapper to GeoSpark RDD and SQL API. It also contains a number of bug fixes and new functions from 12 contributors. See [Python tutorial: RDD](https://datasystemslab.github.io/GeoSpark/tutorial/geospark-core-python/), [Python tutorial: SQL](https://datasystemslab.github.io/GeoSpark/tutorial/geospark-sql-python/), [Release note](https://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Release-notes/)
 
 ## Orignial Contributors
-* Mohamed Sarwat (Twitter: [@MoSarwat](https://twitter.com/MoSarwat))
+* (Mo)hamed Sarwat (Twitter: [@MoSarwat](https://twitter.com/MoSarwat))
 * Jia Yu
 
 ## Impact
