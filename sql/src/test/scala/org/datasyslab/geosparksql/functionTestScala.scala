@@ -147,12 +147,11 @@ class functionTestScala extends TestBaseScala {
 
     it("Passed ST_Intersection - not intersects") {
 
-      var testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((40 21, 40 22, 40 23, 40 21))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
+      val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((40 21, 40 22, 40 23, 40 21))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
       testtable.createOrReplaceTempView("testtable")
-      var intersec = sparkSession.sql("select ST_Intersection(a,b) from testtable")
-      assert(intersec.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("MULTIPOLYGON EMPTY"))
+      val intersect = sparkSession.sql("select ST_Intersection(a,b) from testtable")
+      assert(intersect.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON EMPTY"))
     }
-
 
     it("Passed ST_IsValid") {
 

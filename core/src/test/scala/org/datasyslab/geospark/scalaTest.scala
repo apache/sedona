@@ -27,38 +27,15 @@
 package org.datasyslab.geospark
 
 import com.vividsolutions.jts.geom.{Coordinate, Envelope, GeometryFactory}
-import org.apache.log4j.{Level, Logger}
-import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.storage.StorageLevel
-import org.apache.spark.{SparkConf, SparkContext}
 import org.datasyslab.geospark.enums.{FileDataSplitter, GridType, IndexType, JoinBuildSide}
 import org.datasyslab.geospark.formatMapper.EarthdataHDFPointMapper
-import org.datasyslab.geospark.monitoring.GeoSparkListener
-import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
+import org.datasyslab.geospark.python.SparkUtil
 import org.datasyslab.geospark.spatialOperator.JoinQuery.JoinParams
 import org.datasyslab.geospark.spatialOperator.{JoinQuery, KNNQuery, RangeQuery}
 import org.datasyslab.geospark.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}
-import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
-class scalaTest extends FunSpec with BeforeAndAfterAll {
-
-  implicit lazy val sc = {
-    val conf = new SparkConf().setAppName("scalaTest").setMaster("local[2]")
-    conf.set("spark.serializer", classOf[KryoSerializer].getName)
-    conf.set("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName)
-
-    val sc = new SparkContext(conf)
-    sc.addSparkListener(new GeoSparkListener)
-    Logger.getLogger("org").setLevel(Level.WARN)
-    Logger.getLogger("akka").setLevel(Level.WARN)
-    sc
-  }
-
-  override def afterAll(): Unit = {
-    sc.stop
-  }
-
-  describe("GeoSpark in Scala") {
+class scalaTest extends SparkUtil{
 
     val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
 
@@ -81,21 +58,21 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
     val joinQueryPartitioningType = GridType.QUADTREE
     val eachQueryLoopTimes = 1
 
-    it("should pass the empty constructor test") {
+  test("should pass the empty constructor test") {
       val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
       val objectRDDcopy = new PointRDD()
       objectRDDcopy.rawSpatialRDD = objectRDD.rawSpatialRDD
       objectRDDcopy.analyze()
     }
 
-    it("should pass spatial range query") {
+  test("should pass spatial range query") {
       val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
       for (i <- 1 to eachQueryLoopTimes) {
         val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false, false).count
       }
     }
 
-    it("should pass spatial range query using index") {
+  test("should pass spatial range query using index") {
       val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
       objectRDD.buildIndex(PointRDDIndexType, false)
       for (i <- 1 to eachQueryLoopTimes) {
@@ -103,14 +80,14 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
       }
     }
 
-    it("should pass spatial knn query") {
+  test("should pass spatial knn query") {
       val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
       for (i <- 1 to eachQueryLoopTimes) {
         val result = KNNQuery.SpatialKnnQuery(objectRDD, kNNQueryPoint, 1000, false)
       }
     }
 
-    it("should pass spatial knn query using index") {
+  test("should pass spatial knn query using index") {
       val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
       objectRDD.buildIndex(PointRDDIndexType, false)
       for (i <- 1 to eachQueryLoopTimes) {
@@ -118,7 +95,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
       }
     }
 
-    it("should pass spatial join query") {
+  test("should pass spatial join query") {
       val queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true)
       val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
       objectRDD.analyze()
@@ -130,7 +107,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
       }
     }
 
-    it("should pass spatial join query using index on points") {
+  test("should pass spatial join query using index on points") {
       val queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true)
       val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
       objectRDD.analyze()
@@ -144,7 +121,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
       }
     }
 
-    it("should pass spatial join query using index on polygons") {
+  test("should pass spatial join query using index on polygons") {
       val queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true)
       val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
       objectRDD.analyze()
@@ -158,7 +135,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
       }
     }
 
-    it("should pass spatial join query and build index on points the fly") {
+  test("should pass spatial join query and build index on points the fly") {
       val queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true)
       val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
       objectRDD.analyze()
@@ -170,7 +147,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
       }
     }
 
-    it("should pass spatial join query and build index on polygons on the fly") {
+  test("should pass spatial join query and build index on polygons on the fly") {
       val queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true)
       val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
       objectRDD.analyze()
@@ -183,7 +160,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
       }
     }
 
-    it("should pass distance join query") {
+  test("should pass distance join query") {
       val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
       val queryWindowRDD = new CircleRDD(objectRDD, 0.1)
       objectRDD.analyze()
@@ -195,7 +172,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
       }
     }
 
-    it("should pass distance join query using index") {
+  test("should pass distance join query using index") {
       val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
       val queryWindowRDD = new CircleRDD(objectRDD, 0.1)
       objectRDD.analyze()
@@ -209,7 +186,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
       }
     }
 
-    it("should pass earthdata format mapper test") {
+  test("should pass earthdata format mapper test") {
       val InputLocation = System.getProperty("user.dir") + "/src/test/resources/modis/modis.csv"
       val splitter = FileDataSplitter.CSV
       val indexType = IndexType.RTREE
@@ -233,19 +210,18 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
       }
     }
 
-    it("should pass CRS transformed spatial range query") {
+  test("should pass CRS transformed spatial range query") {
       val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false, StorageLevel.NONE, "epsg:4326", "epsg:3005")
       for (i <- 1 to eachQueryLoopTimes) {
         val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false, false).count
       }
     }
 
-    it("should pass CRS transformed spatial range query using index") {
+    test("should pass CRS transformed spatial range query using index") {
       val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false, StorageLevel.NONE, "epsg:4326", "epsg:3005")
       objectRDD.buildIndex(PointRDDIndexType, false)
       for (i <- 1 to eachQueryLoopTimes) {
         val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false, true).count
       }
     }
-  }
 }

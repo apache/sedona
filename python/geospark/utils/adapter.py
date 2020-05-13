@@ -70,7 +70,7 @@ class Adapter(metaclass=MultipleMeta):
         sc = dataFrame._sc
         jvm = sc._jvm
 
-        srdd = jvm.AdapterWrapper.toSpatialRdd(dataFrame._jdf, fieldNames)
+        srdd = jvm.PythonAdapterWrapper.toSpatialRdd(dataFrame._jdf, fieldNames)
 
         spatial_rdd = SpatialRDD(sc)
         spatial_rdd.set_srdd(srdd)
@@ -89,7 +89,7 @@ class Adapter(metaclass=MultipleMeta):
         sc = spatialRDD._sc
         jvm = sc._jvm
 
-        jdf = jvm.AdapterWrapper.toDf(spatialRDD._srdd, fieldNames, sparkSession._jsparkSession)
+        jdf = jvm.PythonAdapterWrapper.toDf(spatialRDD._srdd, fieldNames, sparkSession._jsparkSession)
 
         df = DataFrame(jdf, sparkSession._wrapped)
 

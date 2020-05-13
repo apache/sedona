@@ -2,6 +2,7 @@ import attr
 from shapely.geometry.base import BaseGeometry
 
 from geospark.core.SpatialRDD.spatial_rdd import SpatialRDD
+from geospark.core.jvm.translate import JvmGeoSparkPythonConverter
 from geospark.utils.binary_parser import BinaryParser
 from geospark.utils.decorators import require
 from geospark.utils.geometry_adapter import GeometryAdapter
@@ -27,7 +28,7 @@ class KNNQuery:
 
         knn_neighbours = jvm.KNNQuery.SpatialKnnQuery(spatialRDD._srdd, jvm_geom, k, useIndex)
 
-        srdd = jvm.GeoSerializerData.serializeToPython(knn_neighbours)
+        srdd = JvmGeoSparkPythonConverter(jvm).translate_geometry_seq_to_python(knn_neighbours)
 
         geoms_data = []
         for arr in srdd:
