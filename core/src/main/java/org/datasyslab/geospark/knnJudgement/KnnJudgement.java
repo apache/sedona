@@ -79,7 +79,13 @@ public class KnnJudgement<U extends Geometry, T extends Geometry>
         }
         ArrayList<T> res = new ArrayList<T>();
         for (int i = 0; i < k; i++) {
-            res.add(pq.poll());
+            T e = pq.poll();
+            if(e == null){
+                break;
+            }else{
+                res.add(e);
+            }
+
         }
         return res.iterator();
     }
