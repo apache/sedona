@@ -16,16 +16,18 @@
  */
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
+import com.google.common.primitives.Longs;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.CombineFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ShapeInputFormat
         extends CombineFileInputFormat<ShapeKey, PrimitiveShape>
@@ -54,12 +56,39 @@ public class ShapeInputFormat
             throws IOException
     {
         // get input paths and assign a split for every single path
-        String path = job.getConfiguration().get("mapred.input.dir");
-        String[] paths = path.split(",");
+        String parentpath = job.getConfiguration().get("mapred.input.dir");
+        String[] childpaths = parentpath.split(",");
         List<InputSplit> splits = new ArrayList<>();
-        for (int i = 0; i < paths.length; ++i) {
-            job.getConfiguration().set("mapred.input.dir", paths[i]);
-            splits.add(super.getSplits(job).get(0));
+        for (String childPath : childpaths) {
+            job.getConfiguration().set("mapred.input.dir", childPath);
+            // get all files in input file path and sort for filename order
+            CombineFileSplit childPathFileSplits = (CombineFileSplit) super.getSplits(job).get(0);
+            Path[] filePaths = childPathFileSplits.getPaths();
+            long[] fileSizes = childPathFileSplits.getLengths();
+
+            List<Path> fileSplitPathParts = new ArrayList<>();
+            List<Long> fileSplitSizeParts = new ArrayList<>();
+            String prevfilename = "";
+            int j = 0;
+
+            while (j < filePaths.length) {
+                String filename = FilenameUtils.removeExtension(filePaths[j].toString()).toLowerCase();
+                if (fileSplitPathParts.size() == 0 || prevfilename.equals(filename)) {
+                    fileSplitPathParts.add(filePaths[j]);
+                    fileSplitSizeParts.add(fileSizes[j]);
+                }
+                // compare file name and if it is different then all same filename is into CombileFileSplit
+                else {
+                    splits.add(new CombineFileSplit(fileSplitPathParts.toArray(new Path[0]), Longs.toArray(fileSplitSizeParts)));
+                    fileSplitPathParts.clear();
+                    fileSplitSizeParts.clear();
+                }
+                if (j == filePaths.length - 1 & fileSplitPathParts.size() != 0) {
+                    splits.add(new CombineFileSplit(fileSplitPathParts.toArray(new Path[0]), Longs.toArray(fileSplitSizeParts)));
+                }
+                prevfilename = filename;
+                j++;
+            }
         }
         return splits;
     }

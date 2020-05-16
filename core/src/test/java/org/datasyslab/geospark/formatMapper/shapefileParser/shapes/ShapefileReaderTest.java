@@ -395,4 +395,22 @@ public class ShapefileReaderTest
         SpatialRDD<Geometry> spatialRDD = ShapefileReader.readToGeometryRDD(sc, shapefileHDFSpath);
         assertEquals("[STATEFP, COUNTYFP, COUNTYNS, AFFGEOID, GEOID, NAME, LSAD, ALAND, AWATER]", spatialRDD.fieldNames.toString());
     }
+
+    /**
+     * Test read Multiple Shape Files by MultiPartitions
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testReadMultipleShapeFilesByMultiPartitions()
+            throws IOException
+    {
+        // load shape with geotool.shapefile
+        String inputLocation = getShapeFilePath("multipleshapefiles");
+        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = loadFeatures(inputLocation);
+        // load shapes with our tool
+        SpatialRDD shapeRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
+        assert(shapeRDD.rawSpatialRDD.getNumPartitions() == 2);
+    }
+
 }
