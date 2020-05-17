@@ -62,32 +62,38 @@ public class ShapeInputFormat
         for (String childPath : childpaths) {
             job.getConfiguration().set("mapred.input.dir", childPath);
             // get all files in input file path and sort for filename order
-            CombineFileSplit childPathFileSplits = (CombineFileSplit) super.getSplits(job).get(0);
-            Path[] filePaths = childPathFileSplits.getPaths();
-            long[] fileSizes = childPathFileSplits.getLengths();
+            CombineFileSplit combineChildPathFileSplit = (CombineFileSplit) super.getSplits(job).get(0);
+            Path[] filePaths = combineChildPathFileSplit.getPaths();
+            long[] fileSizes = combineChildPathFileSplit.getLengths();
+
+            // sort by Path name and size using TreeMap
+            Map<Path,Long> filePathSizePair = new TreeMap<Path,Long>();
+            int i = 0;
+            while(i < filePaths.length){
+                filePathSizePair.put(filePaths[i],fileSizes[i]);
+                i++;
+            }
 
             List<Path> fileSplitPathParts = new ArrayList<>();
             List<Long> fileSplitSizeParts = new ArrayList<>();
             String prevfilename = "";
-            int j = 0;
 
-            while (j < filePaths.length) {
-                String filename = FilenameUtils.removeExtension(filePaths[j].toString()).toLowerCase();
-                if (fileSplitPathParts.size() == 0 || prevfilename.equals(filename)) {
-                    fileSplitPathParts.add(filePaths[j]);
-                    fileSplitSizeParts.add(fileSizes[j]);
-                }
+            for (Path filePath:filePathSizePair.keySet()) {
+                String filename = FilenameUtils.removeExtension(filePath.getName()).toLowerCase();
+                fileSplitPathParts.add(filePath);
+                fileSplitSizeParts.add(filePathSizePair.get(filePath));
+
+                if (prevfilename != "" && !prevfilename.equals(filename)) {
                 // compare file name and if it is different then all same filename is into CombileFileSplit
-                else {
                     splits.add(new CombineFileSplit(fileSplitPathParts.toArray(new Path[0]), Longs.toArray(fileSplitSizeParts)));
                     fileSplitPathParts.clear();
                     fileSplitSizeParts.clear();
                 }
-                if (j == filePaths.length - 1 & fileSplitPathParts.size() != 0) {
-                    splits.add(new CombineFileSplit(fileSplitPathParts.toArray(new Path[0]), Longs.toArray(fileSplitSizeParts)));
-                }
                 prevfilename = filename;
-                j++;
+            }
+
+            if (fileSplitPathParts.size() != 0) {
+                splits.add(new CombineFileSplit(fileSplitPathParts.toArray(new Path[0]), Longs.toArray(fileSplitSizeParts)));
             }
         }
         return splits;

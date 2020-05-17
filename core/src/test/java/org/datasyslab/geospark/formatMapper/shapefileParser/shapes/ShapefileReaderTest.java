@@ -411,6 +411,7 @@ public class ShapefileReaderTest
         // load shapes with our tool
         SpatialRDD shapeRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
         assert(shapeRDD.rawSpatialRDD.getNumPartitions() == 2);
+        System.out.println(shapeRDD.rawSpatialRDD.count());
     }
 
 }
