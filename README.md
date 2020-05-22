@@ -22,7 +22,6 @@ GeoSpark is a cluster computing system for processing large-scale spatial data. 
 # Please visit [GeoSpark website](http://datasystemslab.github.io/GeoSpark/) for detailed documentations
 
 ## News!
-* GeoSpark main developer Jia Yu will be a Tenure-Track Assistant Professor of Computer Science at Washington State University. He is looking for PhD students to join his lab! ([read this](https://jiayuasu.github.io/students/))
 * GeoSpark 1.3.1 is released. This version provides a complete Python wrapper to GeoSpark RDD and SQL API. It also contains a number of bug fixes and new functions from 12 contributors. See [Python tutorial: RDD](https://datasystemslab.github.io/GeoSpark/tutorial/geospark-core-python/), [Python tutorial: SQL](https://datasystemslab.github.io/GeoSpark/tutorial/geospark-sql-python/), [Release note](https://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Release-notes/)
 
 ## Orignial Contributors
