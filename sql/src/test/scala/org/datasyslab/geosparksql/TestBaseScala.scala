@@ -38,11 +38,13 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll{
   Logger.getLogger("org.datasyslab.geospark").setLevel(Level.WARN)
 
   val warehouseLocation = System.getProperty("user.dir") + "/target/"
-  var sparkSession = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
+  val sparkSession = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
     config("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName).
     master("local[*]").appName("geosparksqlScalaTest")
     .config("spark.sql.warehouse.dir", warehouseLocation)
     .enableHiveSupport().getOrCreate()
+
+  import sparkSession.implicits._
 
   val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
 
@@ -60,6 +62,8 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll{
   val csvPolygon2RandomInputLocation = resourceFolder + "equalitycheckfiles/testequals_envelope2_random.csv"
   val overlapPolygonInputLocation = resourceFolder + "testenvelope_overlap.csv"
   val unionPolygonInputLocation = resourceFolder + "testunion.csv"
+  val intersectionPolygonInputLocation = resourceFolder + "test_intersection_aggregate.tsv"
+  val intersectionPolygonNoIntersectionInputLocation = resourceFolder + "test_intersection_aggregate_no_intersection.tsv"
   val csvPoint1InputLocation = resourceFolder + "equalitycheckfiles/testequals_point1.csv"
   val csvPoint2InputLocation = resourceFolder + "equalitycheckfiles/testequals_point2.csv"
   val geojsonIdInputLocation = resourceFolder + "testContainsId.json"

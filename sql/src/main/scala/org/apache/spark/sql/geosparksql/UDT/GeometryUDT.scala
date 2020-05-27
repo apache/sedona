@@ -24,6 +24,7 @@ import org.datasyslab.geosparksql.utils.GeometrySerializer
 
 private[sql] class GeometryUDT extends UserDefinedType[Geometry] {
   override def sqlType: DataType = ArrayType(ByteType, containsNull = false)
+  override def pyUDT: String = "geospark.sql.types.GeometryType"
 
   override def userClass: Class[Geometry] = classOf[Geometry]
 

@@ -49,13 +49,17 @@ object Catalog {
     ST_Equals,
     ST_Touches,
     ST_Overlaps,
-	  ST_Crosses,
+    ST_Crosses,
     ST_IsSimple,
-    ST_AsText
+    ST_MakeValid,
+    ST_SimplifyPreserveTopology,
+    ST_AsText,
+    ST_GeometryType
   )
 
   val aggregateExpressions:Seq[UserDefinedAggregateFunction] = Seq(
     new ST_Union_Aggr,
-    new ST_Envelope_Aggr
+    new ST_Envelope_Aggr,
+    new ST_Intersection_Aggr
   )
 }

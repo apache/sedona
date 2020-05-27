@@ -11,10 +11,12 @@ pages:
       - Install GeoSpark-Zeppelin: download/zeppelin.md
       - Compile the source code: download/compile.md
     - Tutorial:
-      - Write an Spatial RDD application: tutorial/rdd.md
-      - Write an Spatial SQL/DataFrame application: tutorial/sql.md
-      - Visualize Spatial DataFrame/RDD: tutorial/viz.md
-      - Interact with GeoSpark via Zeppelin: tutorial/zeppelin.md
+      - Spatial RDD application: tutorial/rdd.md
+      - Spatial SQL application: tutorial/sql.md
+      - Visualize Spatial DataFrame: tutorial/viz.md
+      - Run GeoSpark via Zeppelin: tutorial/zeppelin.md
+      - Spatial RDD in Python: tutorial/geospark-core-python.md
+      - Spatial SQL in Python: tutorial/geospark-sql-python.md
       - GeoSpark template project: tutorial/GeoSpark-Runnable-DEMO.md
       - Frequently Asked Questions: tutorial/faq.md
       - Tune GeoSpark RDD application: tutorial/Advanced-Tutorial-Tune-your-GeoSpark-Application.md
@@ -22,6 +24,7 @@ pages:
     - API:
       - GeoSpark core (RDD):
         - Scala/Java doc: api/GeoSpark-Scala-and-Java-API.md
+        - Python doc: api/GeoSpark-Python-API.md
       - GeoSpark SQL:
         - JavaDoc: api/sql/GeoSparkSQL-javadoc.md
         - Quick start: api/sql/GeoSparkSQL-Overview.md
@@ -36,7 +39,7 @@ pages:
         - RDD: api/viz/Babylon-Scala-and-Java-API.md
     - Contributing:
       - Contributing rule: contribute/rule.md
-      - Contributor: contribute/contributor.md 
+      - Contributors and committers: contribute/contributor.md 
     - Contact: contact.md
     - Publications: publication.md
     - License: 

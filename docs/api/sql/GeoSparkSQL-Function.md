@@ -145,6 +145,30 @@ SELECT ST_IsValid(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_MakeValid
+
+Introduction: Given an invalid polygon or multipolygon and removeHoles boolean flag,
+ create a valid representation of the geometry.
+
+Format: `ST_MakeValid (A:geometry, removeHoles:Boolean)`
+
+Since: `v1.2.0`
+
+Spark SQL example:
+
+```SQL
+SELECT geometryValid.polygon
+FROM table
+LATERAL VIEW ST_MakeValid(polygon, false) geometryValid AS polygon
+```
+
+!!!note
+    Might return multiple polygons from a only one invalid polygon
+    That's the reason why we need to use the LATERAL VIEW expression
+    
+!!!note
+    Throws an exception if the geometry isn't polygon or multipolygon
+
 ## ST_PrecisionReduce
 
 Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded.
@@ -188,7 +212,7 @@ Spark SQL example:
 ```SQL
 SELECT ST_Buffer(polygondf.countyshape, 1)
 FROM polygondf
-````
+```
 
 ## ST_AsText
 
@@ -202,11 +226,13 @@ Spark SQL example:
 ```SQL
 SELECT ST_AsText(polygondf.countyshape)
 FROM polygondf
-````
+```
 
 ## ST_NPoints
 
 Introduction: Return points of the geometry
+
+Since: `v1.2.1`
 
 Format: `ST_NPoints (A:geometry)`
 
@@ -215,3 +241,30 @@ SELECT ST_NPoints(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_SimplifyPreserveTopology
+
+Introduction: Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input,
+              and with the components having the same topological relationship.
+
+Since: `v1.2.1`
+
+Format: `ST_SimplifyPreserveTopology (A:geometry, distanceTolerance: Double)`
+
+```SQL
+SELECT ST_SimplifyPreserveTopology(polygondf.countyshape, 10.0)
+FROM polygondf
+```
+
+## ST_GeometryType
+
+Introduction: Returns the type of the geometry as a string. EG: 'ST_Linestring', 'ST_Polygon' etc.
+
+Format: `ST_GeometryType (A:geometry)`
+
+Since: `v1.2.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_GeometryType(polygondf.countyshape)
+FROM polygondf
+````

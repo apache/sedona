@@ -1,3 +1,68 @@
+## v1.3.1
+
+This version includes the official release of GeoSpark Python wrapper. It also contains a number of bug fixes and new functions. The tutorial section provides some articles to explain the usage of GeoSpark Python wrapper.
+
+**GeoSpark Core**
+
+Bug fix:
+
+* Issue #[344](https://github.com/DataSystemsLab/GeoSpark/issues/344) and PR #[365](https://github.com/DataSystemsLab/GeoSpark/pull/365): GeoJSON reader cannot handle "id"
+* Issue #[420](https://github.com/DataSystemsLab/GeoSpark/issues/420) and PR #[421](https://github.com/DataSystemsLab/GeoSpark/pull/421): Cannot handle null value in geojson properties
+* PR #[422](https://github.com/DataSystemsLab/GeoSpark/pull/422): Use HTTPS to resolve dependencies in Maven Build
+
+New functions:
+
+* Issue #[399](https://github.com/DataSystemsLab/GeoSpark/issues/399) and PR #[401](https://github.com/DataSystemsLab/GeoSpark/pull/401): saveAsWKB
+* PR #[402](https://github.com/DataSystemsLab/GeoSpark/pull/402): saveAsWKT
+
+**GeoSpark SQL**
+
+New functions:
+
+* PR #[359](https://github.com/DataSystemsLab/GeoSpark/pull/359): ST_NPoints
+* PR #[373](https://github.com/DataSystemsLab/GeoSpark/pull/373): ST_GeometryType
+* PR #[398](https://github.com/DataSystemsLab/GeoSpark/pull/398): ST_SimplifyPreserveTopology
+* PR #[406](https://github.com/DataSystemsLab/GeoSpark/pull/406): ST_MakeValid
+* PR #[416](https://github.com/DataSystemsLab/GeoSpark/pull/416): ST\_Intersection\_aggr
+
+Performance:
+
+* Issue #[345](https://github.com/DataSystemsLab/GeoSpark/issues/345) and PR #[346](https://github.com/DataSystemsLab/GeoSpark/pull/346): the performance issue of Adapter.toDF() function
+
+Bug fix:
+
+* Issue #[395](https://github.com/DataSystemsLab/GeoSpark/issues/395) and PR #[396](https://github.com/DataSystemsLab/GeoSpark/pull/396): Fix the geometry col bug in Adapter
+
+**GeoSpark Viz**
+
+Bug fix:
+
+* Issue #[378](https://github.com/DataSystemsLab/GeoSpark/issues/378) and PR #[379](https://github.com/DataSystemsLab/GeoSpark/pull/379): Classpath issue when integrating GeoSparkViz with s3
+
+**GeoSpark Python**
+
+Add new GeoSpark python wrapper for RDD and SQL APIs
+
+**Contributors (12)**
+
+* Mariano Gonzalez
+* Paweł Kociński
+* Semen Komissarov
+* Jonathan Leitschuh
+* Netanel Malka
+* Keivan Shahida
+* Sachio Wakai
+* Hui Wang
+* Wrussia
+* Jia Yu
+* Harry Zhu
+* Ilya Zverev
+
+
+## v1.3.0
+
+This release has been skipped due to a bug in GeoSpark Python wrapper.
+
 ## v1.2.0
 
 This version contains numerous bug fixes, new functions, and new GeoSpark module.
