@@ -11,12 +11,12 @@ pages:
       - Install GeoSpark-Zeppelin: download/zeppelin.md
       - Compile the source code: download/compile.md
     - Tutorial:
-      - Write an Spatial RDD application: tutorial/rdd.md
-      - Write an Spatial SQL/DataFrame application: tutorial/sql.md
-      - Visualize Spatial DataFrame/RDD: tutorial/viz.md
-      - Interact with GeoSpark via Zeppelin: tutorial/zeppelin.md
-      - Write an GeoSparkSQL Python application: tutorial/geospark-python.md
-      - Write an Spatial RDD Python application: tutorial/geo_spark_core_python.md
+      - Spatial RDD application: tutorial/rdd.md
+      - Spatial SQL application: tutorial/sql.md
+      - Visualize Spatial DataFrame: tutorial/viz.md
+      - Run GeoSpark via Zeppelin: tutorial/zeppelin.md
+      - Spatial RDD in Python: tutorial/geospark-core-python.md
+      - Spatial SQL in Python: tutorial/geospark-sql-python.md
       - GeoSpark template project: tutorial/GeoSpark-Runnable-DEMO.md
       - Frequently Asked Questions: tutorial/faq.md
       - Tune GeoSpark RDD application: tutorial/Advanced-Tutorial-Tune-your-GeoSpark-Application.md

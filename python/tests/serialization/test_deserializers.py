@@ -105,6 +105,3 @@ class TestGeometryConvert(TestBase):
 
         gdf = counties_geom.toPandas()
         print(gpd.GeoDataFrame(gdf, geometry="geometry"))
-
-    def test_circle_deserialization(self):
-        pass

@@ -1,3 +1,4 @@
+import struct
 from abc import ABC
 from copy import copy
 from typing import List, Any
@@ -5,8 +6,9 @@ from typing import List, Any
 import attr
 from shapely.geometry.base import BaseGeometry
 from pyspark import PickleSerializer
+from shapely.wkb import dumps, loads
 
-from geospark.sql.types import GeometryFactory
+from geospark.core.geom.circle import Circle
 from geospark.utils.binary_parser import BinaryParser
 
 
@@ -27,13 +29,29 @@ class GeoData:
     def __getstate__(self):
         attributes = copy(self.__slots__)
         geom = getattr(self, attributes[0])
+
+        if isinstance(geom, Circle):
+            geom_bytes = CircleGeometryFactory.to_bytes(geom)
+        else:
+            geom_bytes = GeometryFactory.to_bytes(geom)
+
         return dict(
-            geom=bytearray([el if el >= 0 else el + 256 for el in GeometryFactory.to_bytes(geom)]),
+            geom=bytearray([el if el >= 0 else el + 256 for el in geom_bytes]),
             userData=getattr(self, attributes[1])
         )
 
     def __setstate__(self, attributes):
-        self._geom = GeometryFactory.geom_from_bytes_data(attributes["geom"])
+        bin_parser = BinaryParser(attributes["geom"])
+        is_circle = bin_parser.read_byte()
+        geom_bytes = attributes["geom"]
+
+        if is_circle:
+            radius = bin_parser.read_double()
+            geom = bin_parser.read_geometry(geom_bytes.__len__()-9)
+            self._geom = Circle(geom, radius)
+        else:
+            self._geom = bin_parser.read_geometry(geom_bytes.__len__()-1)
+
         self._userData = attributes["userData"]
 
     @property
@@ -69,15 +87,8 @@ class AbstractSpatialRDDParser(ABC):
 
     @classmethod
     def _deserialize_geom(cls, bin_parser: 'BinaryParser') -> GeoData:
-        user_data_length = bin_parser.read_int()
-        geom = GeometryFactory.geometry_from_bytes(bin_parser)
-        if user_data_length > 0:
-            user_data = bin_parser.read_string(user_data_length)
-            geo_data = GeoData(geom=geom, userData=user_data)
-
-        else:
-            geo_data = GeoData(geom=geom, userData="")
-        return geo_data
+        is_circle = bin_parser.read_byte()
+        return geom_deserializers[is_circle].geometry_from_bytes(bin_parser)
 
 
 @attr.s
@@ -167,3 +178,47 @@ class GeoSparkPickler(PickleSerializer):
 
     def get_parser(self, number: int):
         return PARSERS[number]
+
+
+def read_geometry_from_bytes(bin_parser: BinaryParser):
+    geom_data_length = bin_parser.read_int()
+    user_data_length = bin_parser.read_int()
+    geom = bin_parser.read_geometry(geom_data_length)
+    user_data = bin_parser.read_string(user_data_length)
+
+    return (geom, user_data)
+
+
+@attr.s
+class GeometryFactory:
+
+    @classmethod
+    def geometry_from_bytes(cls, bin_parser: BinaryParser) -> GeoData:
+        geom, user_data = read_geometry_from_bytes(bin_parser)
+        geo_data = GeoData(geom=geom, userData=user_data)
+        return geo_data
+
+    @classmethod
+    def to_bytes(cls, geom: BaseGeometry) -> List[int]:
+        return struct.pack("b", 0) + dumps(geom)
+
+
+@attr.s
+class CircleGeometryFactory:
+
+    @classmethod
+    def geometry_from_bytes(cls, bin_parser: BinaryParser) -> GeoData:
+        geom, user_data = read_geometry_from_bytes(bin_parser)
+        radius = bin_parser.read_double()
+        geo_data = GeoData(geom=Circle(geom, radius), userData=user_data)
+        return geo_data
+
+    @classmethod
+    def to_bytes(cls, geom: Circle) -> List[int]:
+        return struct.pack("b", 1) + struct.pack("d", geom.radius) + dumps(geom.centerGeometry)
+
+
+geom_deserializers = {
+    1: CircleGeometryFactory,
+    0: GeometryFactory
+}

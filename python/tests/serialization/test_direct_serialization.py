@@ -19,7 +19,7 @@ class TestDirectSerialization(TestBase):
         polygon = Polygon(ext, [int])
         jvm_geom = GeometryAdapter.create_jvm_geometry_from_base_geometry(self.sc._jvm, polygon)
 
-        assert jvm_geom.toString() == "POLYGON ((0 0, 0 2, 2 2, 2 0, 0 0), (1 1, 1.5 1, 1.5 1.5, 1 1.5, 1 1))"
+        assert jvm_geom.toString() == "POLYGON ((0 0, 0 2, 2 2, 2 0, 0 0), (1 1, 1 1.5, 1.5 1.5, 1.5 1, 1 1))"
 
         wkt = "POLYGON ((-71.1776585052917 42.3902909739571, -71.1776820268866 42.3903701743239, -71.1776063012595 42.3903825660754, -71.1775826583081 42.3903033653531, -71.1776585052917 42.3902909739571))"
         polygon = loads(wkt)

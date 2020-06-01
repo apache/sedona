@@ -22,10 +22,11 @@ GeoSpark is a cluster computing system for processing large-scale spatial data. 
 # Please visit [GeoSpark website](http://datasystemslab.github.io/GeoSpark/) for detailed documentations
 
 ## News!
+* GeoSpark 1.3.1 is released. This version provides a complete Python wrapper to GeoSpark RDD and SQL API. It also contains a number of bug fixes and new functions from 12 contributors. See [Python tutorial: RDD](https://datasystemslab.github.io/GeoSpark/tutorial/geospark-core-python/), [Python tutorial: SQL](https://datasystemslab.github.io/GeoSpark/tutorial/geospark-sql-python/), [Release note](https://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Release-notes/)
 
-* A research paper about ["GeoSparkSim: A Microscopic Road Network Traffic Simulator in Apache Spark"](http://www.public.asu.edu/~jiayu2/geospark/publication/geosparksim-mdm-2019.pdf) is accepted to MDM 2019, Hong Kong China. The next release of GeoSpark will come with a built-in scalable traffic simulator. Please stay tuned!
-* A 1.5-hour tutorial about "Geospatial Data Management in Apache Spark" was presented by Jia Yu and Mohamed Sarwat in ICDE 2019, Macau, China. Visit [our tutorial website](https://jiayuasu.github.io/geospatial-tutorial/) to learn how to craft your **"GeoSpark"** from scratch.
-* GeoSpark 1.2.0 is released.
+## Orignial Contributors
+* (Mo)hamed Sarwat (Twitter: [@MoSarwat](https://twitter.com/MoSarwat))
+* Jia Yu
 
 ## Impact
 
