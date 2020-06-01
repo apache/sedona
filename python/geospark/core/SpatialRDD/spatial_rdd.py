@@ -388,10 +388,12 @@ class SpatialRDD:
 
         return getattr(self, "_spatial_partitioned_rdd")
 
-    def spatialPartitioning(self, partitioning: Union[str, GridType, SpatialPartitioner, List[Envelope], JvmPartitioner]) -> bool:
+    def spatialPartitioning(self, partitioning: Union[str, GridType, SpatialPartitioner, List[Envelope], JvmPartitioner],
+                            num_partitions: Optional[int] = None) -> bool:
         """
 
-        :param partitioning:
+        :param partitioning: partitioning type
+        :param num_partitions: number of partitions
         :return:
         """
         if type(partitioning) == str:
@@ -411,10 +413,13 @@ class SpatialRDD:
                 raise AttributeError("List should consists of Envelopes")
         else:
             raise TypeError("Grid does not have correct type")
+
         self._spatial_partitioned = True
-        return self._srdd.spatialPartitioning(
-            grid
-        )
+
+        if num_partitions:
+            return self._srdd.spatialPartitioning(grid, num_partitions)
+        else:
+            return self._srdd.spatialPartitioning(grid)
 
     def set_srdd(self, srdd):
         self._srdd = srdd
