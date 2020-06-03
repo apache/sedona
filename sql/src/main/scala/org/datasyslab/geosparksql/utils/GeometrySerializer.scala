@@ -19,7 +19,7 @@ package org.datasyslab.geosparksql.utils
 import com.vividsolutions.jts.geom.Geometry
 import com.vividsolutions.jts.io.{WKBReader, WKBWriter}
 import org.apache.spark.sql.catalyst.util.ArrayData
-
+import com.vividsolutions.jts.io.{WKBReader, WKBWriter}
 
 /**
   * SerDe using the WKB reader and writer objects
@@ -32,7 +32,7 @@ object GeometrySerializer {
     * @return Array of bites represents this geometry
     */
   def serialize(geometry: Geometry): Array[Byte] = {
-    val writer = new WKBWriter(2, 2)
+    val writer = new WKBWriter(2, 2, true)
     writer.write(geometry)
   }
 
