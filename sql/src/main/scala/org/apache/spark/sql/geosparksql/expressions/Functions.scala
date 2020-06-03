@@ -488,29 +488,6 @@ case class ST_GeometryType(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
-
-case class ST_AsEWKT(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    assert(inputExpressions.length == 1)
-    val geometry: Geometry = inputExpressions.head.toGeometry(input)
-    geomToEWKT(geometry)
-  }
-
-  override def dataType: DataType = StringType
-
-  override def children: Seq[Expression] = inputExpressions
-
-  private def geomToEWKT(geometry: Geometry): UTF8String =
-    geometry match {
-      case geom: Geometry => UTF8String.fromString(s"SRID=${geom.getSRID};${geom.toText}")
-      case _ => null
-    }
-
-}
-
 case class ST_Azimuth(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   override def nullable: Boolean = false

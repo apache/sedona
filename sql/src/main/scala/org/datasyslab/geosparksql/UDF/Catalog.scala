@@ -55,7 +55,6 @@ object Catalog {
     ST_SimplifyPreserveTopology,
     ST_AsText,
     ST_GeometryType,
-    ST_AsEWKT,
     ST_Azimuth,
     ST_X,
     ST_Y,

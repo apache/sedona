@@ -245,20 +245,6 @@ class TestPredicateJoin(TestBase):
             assert test.take(1)[0][0].upper() == "ST_LINESTRING"
 
     @pytest.mark.skipif(compare_versions("1.3.1", version), reason="requires Geospark version above 1.3.1")
-    def test_st_asewkt(self):
-        # given
-        sample_df = create_simple_polygons_df(self.spark, 1)
-
-        # when using st_AsEWKT
-        transformed_polygon_as_ewkt = sample_df.selectExpr("""ST_Transform(geom, 'epsg:4326', 'epsg:5070') as geom""")
-        polygon_geom_as_ewkt = transformed_polygon_as_ewkt.selectExpr("ST_AsEWKT(geom) as geom")
-
-        # then
-
-        assert polygon_geom_as_ewkt.collect()[0][0] == "SRID=5070;POLYGON ((10407017.312142534 3395226.166561097, 10326082.784450678 3446038.3046466564, 10393727.04" + \
-               "7061553 3555052.8437221176, 10475191.761907605 3505095.1477726307, 10407017.312142534 3395226.166561097))"
-
-    @pytest.mark.skipif(compare_versions("1.3.1", version), reason="requires Geospark version above 1.3.1")
     def test_st_azimuth(self):
         sample_points = create_sample_points(20)
         sample_pair_points = [[el, sample_points[1]] for el in sample_points]
@@ -386,7 +372,7 @@ class TestPredicateJoin(TestBase):
             "POLYGON((1 1,0 0, -1 1, 1 1))"
         ]
 
-        geometries = [[wkt.loads(wkt)] for wkt in wkt_list]
+        geometries = [[wkt.loads(wkt_data)] for wkt_data in wkt_list]
 
         schema = StructType(
             [StructField("geom", GeometryType(), False)]
@@ -396,7 +382,7 @@ class TestPredicateJoin(TestBase):
 
         geometry_table.show()
 
-        boundary_table = geometry_table.selectExpr("ST_AsText(ST_Boundary(geom)) as geom")
+        boundary_table = geometry_table.selectExpr("ST_Boundary(geom) as geom")
 
         boundary_wkt = [wkt_row[0] for wkt_row in boundary_table.selectExpr("ST_AsText(geom)").collect()]
         assert(boundary_wkt == [

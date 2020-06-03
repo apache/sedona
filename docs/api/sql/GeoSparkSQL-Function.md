@@ -269,24 +269,6 @@ SELECT ST_GeometryType(polygondf.countyshape)
 FROM polygondf
 ````
 
-
-## ST_AsEWKT
-
-Introduction: Returns the WKT representation of the geometry with SRID as prefix.
-
-Format: `ST_AsEWKT(A:geometry)`
-
-Since: `v1.3.2`
-
-Spark SQL example:
-```SQL
-SELECT ST_AsEWKT(ST_Transform(ST_GeomFromText('POLYGON((0 0,0 5,5 5,5 0,0 0))'),
- 'epsg:4326', 'epsg:4326')))
-
-SRID=4326;POLYGON((0 0,0 5,5 5,5 0,0 0))
-```
-
-
 ## ST_Azimuth
 
 Introduction: Returns Azimuth for two given points in radians null otherwise.

@@ -292,36 +292,6 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(test.take(1)(0).get(0).asInstanceOf[String].toUpperCase() == "ST_LINESTRING")
     }
 
-
-    it("Passed ST_AsEWKT"){
-      val sampleDF = createSimplePolygons(1, "geom")
-        .union(Seq(Tuple1(null)).toDF("geom"))
-
-      val polygonGeomAsEWKT = sampleDF
-        .selectExpr("ST_AsEWKT(geom) as geom")
-
-      val polygonGeomAsEWKTNonNull = sampleDF
-        .filter("geom is not null")
-        .selectExpr("ST_AsEWKT(geom) as geom")
-
-      an [NullPointerException] should be thrownBy polygonGeomAsEWKT.show()
-
-      val transformedPolygonGeomAsEWKT = sampleDF
-        .filter("geom is not null")
-        .selectExpr("""ST_Transform(geom, 'epsg:4326', 'epsg:5070') as geom""")
-
-      val transformedEWKT = transformedPolygonGeomAsEWKT.selectExpr("ST_AsEWKT(geom)")
-
-      polygonGeomAsEWKTNonNull.toSeq[String] should contain theSameElementsAs Seq(
-        "SRID=0;POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"
-      )
-
-      transformedEWKT.toSeq[String] should contain theSameElementsAs Seq(
-        "SRID=5070;POLYGON ((10407017.312142534 3395226.166561097, 10326082.784450678 3446038.3046466564, 10393727.04" +
-          "7061553 3555052.8437221176, 10475191.761907605 3505095.1477726307, 10407017.312142534 3395226.166561097))"
-      )
-    }
-
     it("Passed ST_Azimuth"){
 
       val pointDataFrame = samplePoints
