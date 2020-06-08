@@ -87,6 +87,11 @@ class TestSpatialRDD(TestBase):
             spatial_rdd.buildIndex(IndexType.RTREE, True)
             spatial_rdd.buildIndex(IndexType.RTREE, False)
 
+    def test_spatial_partitioning_with_number_of_partitions(self):
+        for grid_type in GridType:
+            spatial_rdd = self.create_spatial_rdd()
+            spatial_rdd.spatialPartitioning(grid_type, 5)
+
     def test_count_without_duplicates(self):
         spatial_rdd = self.create_spatial_rdd()
         assert spatial_rdd.countWithoutDuplicates() == 2996
