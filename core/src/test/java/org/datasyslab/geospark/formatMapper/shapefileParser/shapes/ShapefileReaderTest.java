@@ -104,10 +104,8 @@ public class ShapefileReaderTest
             throws Exception
     {
         sc.stop();
-        if(hdfsCluster != null)
-            hdfsCluster.shutdown();
-        if(fs != null)
-            fs.close();
+        hdfsCluster.shutdown();
+        fs.close();
     }
 
     /**
