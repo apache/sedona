@@ -206,6 +206,7 @@ root
 ```
 
 <li> Use GeoSparkSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD </li>
+Note that, you have to name your column geometry
 
 ```python
 from geospark.utils.adapter import Adapter
@@ -216,6 +217,12 @@ spatial_rdd.analyze()
 spatial_rdd.boundaryEnvelope
 
 <geospark.core.geom_types.Envelope object at 0x7f1e5f29fe10>
+```
+
+or pass Geometry column name as a second argument
+
+```python
+spatial_rdd = Adapter.toSpatialRdd(spatial_df, "geom")
 ```
 
 For WKT/WKB/GeoJSON data, please use ==ST_GeomFromWKT / ST_GeomFromWKB / ST_GeomFromGeoJSON== instead.
@@ -234,7 +241,7 @@ rdd_with_other_attributes = object_rdd.rawSpatialRDD.map(lambda x: x.getUserData
 ## Write a Spatial Range Query
 
 ```python
-from geospark.core import Envelope
+from geospark.core.geom.envelope import Envelope
 from geospark.core.spatialOperator import RangeQuery
 
 range_query_window = Envelope(-90.01, -80.01, 30.01, 40.01)
@@ -267,7 +274,7 @@ GeoSpark will build a local tree index on each of the SpatialRDD partition.
 To utilize a spatial index in a spatial range query, use the following code:
 
 ```python
-from geospark.core import Envelope
+from geospark.core.geom.envelope import Envelope
 from geospark.core.enums import IndexType
 from geospark.core.spatialOperator import RangeQuery
 
