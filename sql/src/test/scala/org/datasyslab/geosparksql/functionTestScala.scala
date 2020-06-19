@@ -285,5 +285,18 @@ class functionTestScala extends TestBaseScala {
       var test = sparkSession.sql("SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
       assert(test.take(1)(0).get(0).asInstanceOf[String].toUpperCase() == "ST_LINESTRING")
     }
+
+    it("Passed ST_StartPoint"){
+      // Check one line and one polygon
+      var testData = sparkSession.sql("SELECT ST_GeomFromText('LINESTRING(77.29 29.07, 77.42 29.26)') as geom1, " +
+        "ST_GeomFromText('POLYGON ((8 25, 28 22, 15 11, 8 25))') as geom2")
+      testData.createOrReplaceTempView("testData")
+      var startPointDF = sparkSession.sql("SELECT ST_StartPoint(geom1), ST_StartPoint(geom2)  from testData")
+
+      // The line should return the first point
+      assert(startPointDF.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POINT (77.29 29.07)"))
+      // The polygon should be null
+      assert(startPointDF.take(1)(0).get(1) == null)
+    }
   }
 }
