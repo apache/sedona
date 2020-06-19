@@ -285,5 +285,31 @@ class functionTestScala extends TestBaseScala {
       var test = sparkSession.sql("SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
       assert(test.take(1)(0).get(0).asInstanceOf[String].toUpperCase() == "ST_LINESTRING")
     }
+
+    it("Passed ST_LineMerge"){
+
+      import sparkSession.implicits._
+
+      // Test data
+      val m1 = "MULTILINESTRING ((-29 -27, -30 -29.7, -45 -33), (-45 -33, -46 -32))"
+      val m2 = "MULTILINESTRING ((-29 -27, -30 -29.7, -36 -31, -45 -33), (-45.2 -33.2, -46 -32))"
+      val p1 = "POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))"
+
+      val testData = Seq((m1), (m2), (p1)).toDF("Geometry")
+
+      // Call transformation
+      var testDF = testData.selectExpr("ST_LineMerge(ST_GeomFromText(Geometry)) as geom")
+      testDF.show(false)
+
+      // Check results
+      val firstGeometry = "LINESTRING (-29 -27, -30 -29.7, -45 -33, -46 -32)"
+      val secondGeometry = m2
+      val thirdGeometry = "GEOMETRYCOLLECTION EMPTY"
+
+      val result = testDF.take(3)
+      assert(result(0).getAs[Geometry](0).toText.equals(firstGeometry))
+      assert(result(1).getAs[Geometry](0).toText.equals(secondGeometry))
+      assert(result(2).getAs[Geometry](0).toText.equals(thirdGeometry))
+    }
   }
 }
