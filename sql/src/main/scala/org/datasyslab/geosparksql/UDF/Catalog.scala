@@ -54,7 +54,8 @@ object Catalog {
     ST_MakeValid,
     ST_SimplifyPreserveTopology,
     ST_AsText,
-    ST_GeometryType
+    ST_GeometryType,
+    ST_LineMerge
   )
 
   val aggregateExpressions:Seq[UserDefinedAggregateFunction] = Seq(
