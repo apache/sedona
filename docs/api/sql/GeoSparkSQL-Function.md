@@ -268,3 +268,17 @@ Spark SQL example:
 SELECT ST_GeometryType(polygondf.countyshape)
 FROM polygondf
 ````
+
+## ST_EndPoint
+
+Introduction: Returns the last point of a LineString. Otherwise, it returns null.
+
+Format: `ST_EndPoint (A:geometry)`
+
+Since: `v1.3.2`
+
+Spark SQL example:
+```SQL
+SELECT ST_EndPoint(linesdf.line)
+FROM linesdf
+````
