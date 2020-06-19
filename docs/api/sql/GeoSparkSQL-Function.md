@@ -268,3 +268,19 @@ Spark SQL example:
 SELECT ST_GeometryType(polygondf.countyshape)
 FROM polygondf
 ````
+
+## ST_LineMerge
+
+Introduction: Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.
+
+Note: Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If the MultiLineString can't be merged, the original MULTILINESTRING is returned.
+
+Format: `ST_LineMerge (A:geometry)`
+
+Since: `v1.3.2`
+
+Spark SQL example:
+```SQL
+SELECT ST_LineMerge(geometru)
+FROM df
+````
