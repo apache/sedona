@@ -473,3 +473,29 @@ case class ST_GeometryType(inputExpressions: Seq[Expression])
 
   override def children: Seq[Expression] = inputExpressions
 }
+
+/**
+ * Returns the last point of a LINESTRING geometry as a POINT or NULL if the input parameter is not a LINESTRING.
+ * This method implements the SQL/MM specification. SQL-MM 3: 7.1.4
+ *
+ * @param inputExpressions A geometry
+ */
+case class ST_EndPoint(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 1)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+
+    if (geometry.getGeometryType.equalsIgnoreCase("LINESTRING")) {
+      new GenericArrayData(GeometrySerializer.serialize(geometry.asInstanceOf[LineString].getEndPoint()))
+    } else {
+      null
+    }
+  }
+
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+}
