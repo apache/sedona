@@ -268,3 +268,17 @@ Spark SQL example:
 SELECT ST_GeometryType(polygondf.countyshape)
 FROM polygondf
 ````
+
+## ST_StartPoint
+
+Introduction: Returns the first point of a LineString. Otherwise, it returns null.
+
+Format: `ST_StartPoint (A:geometry)`
+
+Since: `v1.3.2`
+
+Spark SQL example:
+```SQL
+SELECT ST_StartPoint(linesdf.line)
+FROM linesdf
+````
