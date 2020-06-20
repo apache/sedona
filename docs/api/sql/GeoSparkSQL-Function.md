@@ -268,3 +268,17 @@ Spark SQL example:
 SELECT ST_GeometryType(polygondf.countyshape)
 FROM polygondf
 ````
+
+## ST_NumGeometries
+
+Introduction: Returns the number of Geometries. If geometry is a GEOMETRYCOLLECTION (or MULTI*) return the number of geometries, for single geometries will return 1.
+
+Format: `ST_NumGeometries (A:geometry)`
+
+Since: `v1.3.2`
+
+Spark SQL example:
+```SQL
+SELECT ST_NumGeometries(df.geometry)
+FROM df
+````
