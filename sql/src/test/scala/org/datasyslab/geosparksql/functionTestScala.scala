@@ -28,8 +28,11 @@ package org.datasyslab.geosparksql
 
 import com.vividsolutions.jts.geom.Geometry
 import org.geotools.geometry.jts.WKTReader2
+import org.scalatest.{GivenWhenThen, Matchers}
 
-class functionTestScala extends TestBaseScala {
+class functionTestScala extends TestBaseScala with Matchers with GivenWhenThen {
+
+  import sparkSession.implicits._
 
   describe("GeoSpark-SQL Function Test") {
 
@@ -287,28 +290,22 @@ class functionTestScala extends TestBaseScala {
     }
 
     it("Passed ST_NumGeometries"){
-      import sparkSession.implicits._
-
+      Given("Some different types of geometries in a DF")
       // Test data
-      val m1 = "LINESTRING (-29 -27, -30 -29.7, -45 -33)"
-      val m2 = "MULTILINESTRING ((-29 -27, -30 -29.7, -36 -31, -45 -33), (-45.2 -33.2, -46 -32))"
-      val p1 = "POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))"
-      val p2 = "MULTIPOLYGON(((0 0, 3 0, 3 3, 0 3, 0 0)), ((3 0, 6 0, 6 3, 3 3, 3 0)))"
-      val g1 = "GEOMETRYCOLLECTION(MULTIPOINT(-2 3 , -2 2), LINESTRING(5 5 ,10 10), POLYGON((-7 4.2,-7.1 5,-7.1 4.3,-7 4.2)))"
+      val testData = Seq(
+        ("LINESTRING (-29 -27, -30 -29.7, -45 -33)"),
+        ("MULTILINESTRING ((-29 -27, -30 -29.7, -36 -31, -45 -33), (-45.2 -33.2, -46 -32))"),
+        ("POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))"),
+        ("MULTIPOLYGON(((0 0, 3 0, 3 3, 0 3, 0 0)), ((3 0, 6 0, 6 3, 3 3, 3 0)))"),
+        ("GEOMETRYCOLLECTION(MULTIPOINT(-2 3 , -2 2), LINESTRING(5 5 ,10 10), POLYGON((-7 4.2,-7.1 5,-7.1 4.3,-7 4.2)))"))
+        .toDF("Geometry")
 
+      When("Using ST_NumGeometries")
+      val testDF = testData.selectExpr("Geometry", "ST_NumGeometries(ST_GeomFromText(Geometry)) as ngeom")
 
-      val testData = Seq((m1), (m2), (p1), (p2), (g1)).toDF("Geometry")
-
-      // Call transformation
-      var testDF = testData.selectExpr("Geometry", "ST_NumGeometries(ST_GeomFromText(Geometry)) as geom")
-      testDF.show(false)
-
-      val result = testDF.take(5)
-      assert(result(0).getAs[Int](1).equals(1))
-      assert(result(1).getAs[Int](1).equals(2))
-      assert(result(2).getAs[Int](1).equals(1))
-      assert(result(3).getAs[Int](1).equals(2))
-      assert(result(4).getAs[Int](1).equals(3))
+      Then("Result should match")
+      testDF.selectExpr("ngeom")
+        .as[Int].collect() should contain theSameElementsAs List(1, 2, 1, 2, 3)
     }
   }
 }
