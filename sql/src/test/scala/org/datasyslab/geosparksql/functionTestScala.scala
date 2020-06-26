@@ -28,8 +28,11 @@ package org.datasyslab.geosparksql
 
 import com.vividsolutions.jts.geom.Geometry
 import org.geotools.geometry.jts.WKTReader2
+import org.scalatest.{GivenWhenThen, Matchers}
 
-class functionTestScala extends TestBaseScala {
+class functionTestScala extends TestBaseScala with Matchers with GivenWhenThen {
+
+  import sparkSession.implicits._
 
   describe("GeoSpark-SQL Function Test") {
 
@@ -287,29 +290,22 @@ class functionTestScala extends TestBaseScala {
     }
 
     it("Passed ST_LineMerge"){
+      Given("Some different types of geometries in a DF")
+      val testData = Seq(
+        ("MULTILINESTRING ((-29 -27, -30 -29.7, -45 -33), (-45 -33, -46 -32))"),
+        ("MULTILINESTRING ((-29 -27, -30 -29.7, -36 -31, -45 -33), (-45.2 -33.2, -46 -32))"),
+        ("POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))")
+      ).toDF("Geometry")
 
-      import sparkSession.implicits._
+      When("Using ST_LineMerge")
+      val testDF = testData.selectExpr("ST_LineMerge(ST_GeomFromText(Geometry)) as geom")
 
-      // Test data
-      val m1 = "MULTILINESTRING ((-29 -27, -30 -29.7, -45 -33), (-45 -33, -46 -32))"
-      val m2 = "MULTILINESTRING ((-29 -27, -30 -29.7, -36 -31, -45 -33), (-45.2 -33.2, -46 -32))"
-      val p1 = "POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))"
-
-      val testData = Seq((m1), (m2), (p1)).toDF("Geometry")
-
-      // Call transformation
-      var testDF = testData.selectExpr("ST_LineMerge(ST_GeomFromText(Geometry)) as geom")
-      testDF.show(false)
-
-      // Check results
-      val firstGeometry = "LINESTRING (-29 -27, -30 -29.7, -45 -33, -46 -32)"
-      val secondGeometry = m2
-      val thirdGeometry = "GEOMETRYCOLLECTION EMPTY"
-
-      val result = testDF.take(3)
-      assert(result(0).getAs[Geometry](0).toText.equals(firstGeometry))
-      assert(result(1).getAs[Geometry](0).toText.equals(secondGeometry))
-      assert(result(2).getAs[Geometry](0).toText.equals(thirdGeometry))
+      Then("Result should match")
+      testDF.selectExpr("ST_AsText(geom)")
+        .as[String].collect() should contain theSameElementsAs
+        List("LINESTRING (-29 -27, -30 -29.7, -45 -33, -46 -32)",
+          "MULTILINESTRING ((-29 -27, -30 -29.7, -36 -31, -45 -33), (-45.2 -33.2, -46 -32))",
+          "GEOMETRYCOLLECTION EMPTY")
     }
   }
 }
