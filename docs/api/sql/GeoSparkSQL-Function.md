@@ -281,6 +281,6 @@ Since: `v1.3.2`
 
 Spark SQL example:
 ```SQL
-SELECT ST_LineMerge(geometru)
+SELECT ST_LineMerge(geometry)
 FROM df
 ````
