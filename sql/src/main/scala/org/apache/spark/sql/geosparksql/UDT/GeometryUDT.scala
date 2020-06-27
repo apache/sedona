@@ -28,15 +28,13 @@ private[sql] class GeometryUDT extends UserDefinedType[Geometry] {
 
   override def userClass: Class[Geometry] = classOf[Geometry]
 
-  override def serialize(obj: Geometry): GenericArrayData = {
+  override def serialize(obj: Geometry): GenericArrayData =
     new GenericArrayData(GeometrySerializer.serialize(obj))
-  }
 
   override def deserialize(datum: Any): Geometry = {
     datum match {
-      case values: ArrayData => {
-        return GeometrySerializer.deserialize(values)
-      }
+      case values: ArrayData =>
+        GeometrySerializer.deserialize(values)
     }
   }
 
