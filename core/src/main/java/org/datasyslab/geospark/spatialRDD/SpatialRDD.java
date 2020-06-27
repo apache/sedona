@@ -163,14 +163,17 @@ public class SpatialRDD<T extends Geometry>
      *
      * @param sourceEpsgCRSCode the source epsg CRS code
      * @param targetEpsgCRSCode the target epsg CRS code
+     * @param lenient consider the difference of the geodetic datum between the two coordinate systems,
+     *                if {@code true}, never throw an exception "Bursa-Wolf Parameters Required", but not
+     *                recommended for careful analysis work
+     *
      * @return true, if successful
      */
-    public boolean CRSTransform(String sourceEpsgCRSCode, String targetEpsgCRSCode)
-    {
+    public boolean CRSTransform(String sourceEpsgCRSCode, String targetEpsgCRSCode, boolean lenient){
         try {
             CoordinateReferenceSystem sourceCRS = CRS.decode(sourceEpsgCRSCode);
             CoordinateReferenceSystem targetCRS = CRS.decode(targetEpsgCRSCode);
-            final MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS, false);
+            final MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS, lenient);
             this.CRStransformation = true;
             this.sourceEpsgCode = sourceEpsgCRSCode;
             this.targetEpgsgCode = targetEpsgCRSCode;
@@ -190,6 +193,18 @@ public class SpatialRDD<T extends Geometry>
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * CRS transform.
+     *
+     * @param sourceEpsgCRSCode the source epsg CRS code
+     * @param targetEpsgCRSCode the target epsg CRS code
+     * @return true, if successful
+     */
+    public boolean CRSTransform(String sourceEpsgCRSCode, String targetEpsgCRSCode)
+    {
+        return CRSTransform(sourceEpsgCRSCode, targetEpsgCRSCode, false);
     }
 
     public boolean spatialPartitioning(GridType gridType)
