@@ -276,6 +276,9 @@ Introduction: Returns a LineString formed by sewing together the constituent lin
 Note: Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If the MultiLineString can't be merged, the original MULTILINESTRING is returned.
 
 Format: `ST_LineMerge (A:geometry)`
+
+Since: `v1.3.2`
+
 ````
 SELECT ST_LineMerge(geometry)
 FROM df
