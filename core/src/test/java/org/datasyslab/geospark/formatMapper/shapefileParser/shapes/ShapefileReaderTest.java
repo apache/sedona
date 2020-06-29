@@ -96,7 +96,7 @@ public class ShapefileReaderTest
         MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(hdfsConf);
         hdfsCluster = builder.build();
         fs = FileSystem.get(hdfsConf);
-        hdfsURI = "hdfs://localhost:" + hdfsCluster.getNameNodePort() + "/";
+        hdfsURI = "hdfs://127.0.0.1:" + hdfsCluster.getNameNodePort() + "/";
     }
 
     @AfterClass
