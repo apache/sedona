@@ -266,7 +266,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
     it("Passed ST_SimplifyPreserveTopology") {
 
-      val testtable=sparkSession.sql(
+      val testtable = sparkSession.sql(
         "SELECT ST_SimplifyPreserveTopology(ST_GeomFromText('POLYGON((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33,46 34, 47 44, 35 36, 45 33, 43 19, 29 21, 29 22,35 26, 24 39, 8 25))'), 10) AS b"
       )
       assert(testtable.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))"))
@@ -287,39 +287,21 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
     }
 
-    it("Passed ST_GeometryType"){
+    it("Passed ST_GeometryType") {
       var test = sparkSession.sql("SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
       assert(test.take(1)(0).get(0).asInstanceOf[String].toUpperCase() == "ST_LINESTRING")
     }
 
-    it("Passed ST_LineMerge"){
-      Given("Some different types of geometries in a DF")
-      val testData = Seq(
-        ("MULTILINESTRING ((-29 -27, -30 -29.7, -45 -33), (-45 -33, -46 -32))"),
-        ("MULTILINESTRING ((-29 -27, -30 -29.7, -36 -31, -45 -33), (-45.2 -33.2, -46 -32))"),
-        ("POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))")
-      ).toDF("Geometry")
 
-      When("Using ST_LineMerge")
-      val testDF = testData.selectExpr("ST_LineMerge(ST_GeomFromText(Geometry)) as geom")
-
-      Then("Result should match")
-      testDF.selectExpr("ST_AsText(geom)")
-        .as[String].collect() should contain theSameElementsAs
-        List("LINESTRING (-29 -27, -30 -29.7, -45 -33, -46 -32)",
-          "MULTILINESTRING ((-29 -27, -30 -29.7, -36 -31, -45 -33), (-45.2 -33.2, -46 -32))",
-          "GEOMETRYCOLLECTION EMPTY")
-    }
-    
-    it("Passed ST_Azimuth"){
+    it("Passed ST_Azimuth") {
 
       val pointDataFrame = samplePoints
-        .map(point=> (point, samplePoints.tail.head))
+        .map(point => (point, samplePoints.tail.head))
         .toDF("geomA", "geomB")
 
       pointDataFrame.selectExpr("ST_Azimuth(geomA, geomB)")
         .as[Double]
-        .map(180/math.Pi * _)
+        .map(180 / math.Pi * _)
         .collect() should contain theSameElementsAs List(
         240.0133139011053, 0.0, 270.0, 286.8042682202057, 315.0, 314.9543472191815, 315.0058223408927,
         245.14762725688198, 314.84984546897755, 314.8868529256147, 314.9510567053395, 314.95443984912936,
@@ -335,7 +317,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         ("POINT(25.0 0.0)", "POINT(0.0 0.0)"),
         ("POINT(0.0 25.0)", "POINT(0.0 0.0)"),
         ("POINT(0.0 0.0)", "POINT(0.0 25.0)")
-      ).map({case (wktA, wktB) => (wktReader.read(wktA), wktReader.read(wktB))})
+      ).map({ case (wktA, wktB) => (wktReader.read(wktA), wktReader.read(wktB)) })
         .toDF("geomA", "geomB")
 
       geometries
@@ -344,14 +326,14 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       geometries
         .selectExpr("ST_Azimuth(geomA, geomB)")
         .as[Double]
-        .map(180/math.Pi * _)
+        .map(180 / math.Pi * _)
         .collect()
         .toList should contain theSameElementsAs List(
         42.27368900609374, 222.27368900609375,
         270.00, 90.0, 180.0, 0.0)
     }
 
-    it("Should pass ST_X"){
+    it("Should pass ST_X") {
 
       Given("Given polygon, point and linestring dataframe")
       val pointDF = createSamplePointDf(5, "geom")
@@ -391,7 +373,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       polygons.length shouldBe 0
     }
 
-    it("Should pass ST_Y"){
+    it("Should pass ST_Y") {
 
 
       Given("Given polygon, point and linestring dataframe")
@@ -432,7 +414,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       polygons.length shouldBe 0
 
     }
-    it("Should pass ST_StartPoint function"){
+    it("Should pass ST_StartPoint function") {
       Given("Polygon Data Frame, Point DataFrame, LineString Data Frame")
 
       val pointDF = createSamplePointDf(5, "geom")
@@ -463,6 +445,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
       And("Polygon DataFrame should result with empty list ")
       polygons.isEmpty shouldBe true
+    }
   }
 
   it("Should pass ST_Boundary"){
@@ -828,4 +811,24 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     "POINT (-112.519856 45.987772)",
     "POINT (-112.442664 42.912313)"
   )
+
+  it("Passed ST_LineMerge"){
+    Given("Some different types of geometries in a DF")
+    val testData = Seq(
+      ("MULTILINESTRING ((-29 -27, -30 -29.7, -45 -33), (-45 -33, -46 -32))"),
+      ("MULTILINESTRING ((-29 -27, -30 -29.7, -36 -31, -45 -33), (-45.2 -33.2, -46 -32))"),
+      ("POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))")
+    ).toDF("Geometry")
+
+    When("Using ST_LineMerge")
+    val testDF = testData.selectExpr("ST_LineMerge(ST_GeomFromText(Geometry)) as geom")
+
+    Then("Result should match")
+    testDF.selectExpr("ST_AsText(geom)")
+      .as[String].collect() should contain theSameElementsAs
+      List("LINESTRING (-29 -27, -30 -29.7, -45 -33, -46 -32)",
+        "MULTILINESTRING ((-29 -27, -30 -29.7, -36 -31, -45 -33), (-45.2 -33.2, -46 -32))",
+        "GEOMETRYCOLLECTION EMPTY")
+  }
+
 }
