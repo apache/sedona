@@ -55,7 +55,23 @@ object Catalog {
     ST_SimplifyPreserveTopology,
     ST_AsText,
     ST_GeometryType,
-    ST_LineMerge
+    ST_LineMerge,
+    ST_Azimuth,
+    ST_X,
+    ST_Y,
+    ST_StartPoint,
+    ST_Boundary,
+    ST_EndPoint,
+    ST_ExteriorRing,
+    ST_GeometryN,
+    ST_InteriorRingN,
+    ST_Dump,
+    ST_DumpPoints,
+    ST_IsClosed,
+    ST_NumInteriorRings,
+    ST_AddPoint,
+    ST_RemovePoint,
+    ST_IsRing
   )
 
   val aggregateExpressions:Seq[UserDefinedAggregateFunction] = Seq(

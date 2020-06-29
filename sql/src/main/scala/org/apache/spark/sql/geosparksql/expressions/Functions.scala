@@ -28,13 +28,21 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{Expression, Generator}
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
-import org.apache.spark.sql.geosparksql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
+import org.datasyslab.geospark.geometryObjects.Circle
 import org.datasyslab.geosparksql.utils.GeometrySerializer
 import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.CRS
 import org.opengis.referencing.operation.MathTransform
+import org.apache.spark.sql.geosparksql.UDT.GeometryUDT
+
+import scala.collection.mutable.ArrayBuffer
+import org.apache.spark.internal.Logging
+import org.apache.spark.sql.types.ArrayType
+import implicits._
+
+import scala.util.{Failure, Success, Try}
 
 /**
   * Return the distance between two geometries.
@@ -234,9 +242,13 @@ case class ST_Transform(inputExpressions: Seq[Expression])
     if (inputExpressions.length >= 4) {
       System.setProperty("org.geotools.referencing.forceXY", inputExpressions(3).eval(input).asInstanceOf[Boolean].toString)
     }
+
+    val originalTargetCode = inputExpressions(2).eval(input).asInstanceOf[UTF8String].toString
+    val targetCode = originalTargetCode.split(":")(1).toInt
     val originalGeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     val sourceCRScode = CRS.decode(inputExpressions(1).eval(input).asInstanceOf[UTF8String].toString)
     val targetCRScode = CRS.decode(inputExpressions(2).eval(input).asInstanceOf[UTF8String].toString)
+
     var transform: MathTransform = null
     if (inputExpressions.length == 5) {
       transform = CRS.findMathTransform(sourceCRScode, targetCRScode, inputExpressions(4).eval(input).asInstanceOf[Boolean])
@@ -244,7 +256,9 @@ case class ST_Transform(inputExpressions: Seq[Expression])
     else {
       transform = CRS.findMathTransform(sourceCRScode, targetCRScode, false)
     }
-    new GenericArrayData(GeometrySerializer.serialize(JTS.transform(originalGeometry, transform)))
+    val geom = JTS.transform(originalGeometry, transform)
+    geom.setSRID(targetCode)
+    new GenericArrayData(GeometrySerializer.serialize(geom))
   }
 
   override def dataType: DataType = new GeometryUDT()
@@ -522,9 +536,364 @@ case class ST_LineMerge(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
+case class ST_Azimuth(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(2)
+
+    val geometries = inputExpressions match {
+      case ArrayBuffer(point1, point2) =>
+        (point1.toGeometry(input), point2.toGeometry(input))
+    }
+
+    geometries match {
+      case (pointA: Point, pointB: Point) => calculateAzimuth(pointA, pointB)
+    }
+  }
+
+  override def dataType: DataType = DoubleType
+
+  override def children: Seq[Expression] = inputExpressions
+
+  private def calculateAzimuth(pointA: Point, pointB: Point): Double = {
+    val deltaX = pointB.getX - pointA.getX
+    val deltaY = pointB.getY - pointA.getY
+    val azimuth = math.atan2(deltaX, deltaY)
+    if (azimuth < 0) azimuth + (2 * math.Pi) else azimuth
+  }
+}
+
+case class ST_X(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(1)
+    val geometry = inputExpressions.head.toGeometry(input)
+
+    geometry match {
+      case point: Point => point.getX
+      case _ => null
+    }
+  }
+
+  override def dataType: DataType = DoubleType
+
+  override def children: Seq[Expression] = inputExpressions
+
+}
 
 
+case class ST_Y(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(1)
+    val geometry = inputExpressions.head.toGeometry(input)
+
+    geometry match {
+      case point: Point => point.getY
+      case _ => null
+    }
+  }
+
+  override def dataType: DataType = DoubleType
+
+  override def children: Seq[Expression] = inputExpressions
+
+}
+
+case class ST_StartPoint(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(1)
+    val geometry = inputExpressions.head.toGeometry(input)
+    geometry match {
+      case line: LineString => line.getPointN(0).toGenericArrayData
+      case _ => null
+    }
+  }
+
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+
+}
 
 
+case class ST_Boundary(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(1)
+    val geometry = inputExpressions.head.toGeometry(input)
+    val geometryBoundary = geometry.getBoundary
+    geometryBoundary.toGenericArrayData
+
+  }
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+
+}
+
+case class ST_EndPoint(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(1)
+    val geometry = inputExpressions.head.toGeometry(input)
+    geometry match {
+      case string: LineString => string.getEndPoint.toGenericArrayData
+      case _ => null
+    }
+
+  }
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+
+}
+
+case class ST_ExteriorRing(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(1)
+    val geometry = inputExpressions.head.toGeometry(input)
+    geometry match {
+      case polygon: Polygon => polygon.getExteriorRing.toGenericArrayData
+      case _ => null
+    }
+
+  }
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+
+}
 
 
+case class ST_GeometryN(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with Logging{
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(2)
+    val geometry = inputExpressions.head.toGeometry(input)
+    val n = inputExpressions.tail.head.toInt(input)
+    geometry match {
+      case geom: Geometry => getNthGeom(geom, n)
+      case _ => null
+    }
+  }
+
+  private def getNthGeom(geom: Geometry, index: Int): GenericArrayData = {
+    val nthGeom = Try(geom.getGeometryN(index))
+    nthGeom match {
+      case Failure(exception) =>
+        logWarning(s"Geometry ${geom.toString}, Out Of index")
+        null
+      case Success(geom) => geom.toGenericArrayData
+    }
+  }
+
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+
+}
+
+case class ST_InteriorRingN(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(2)
+    val geometry = inputExpressions.head.toGeometry(input)
+    val n = inputExpressions.tail.head.toInt(input)
+    geometry match {
+      case geom: Polygon => geom.getInteriorRingN(n)
+        .toGenericArrayData
+      case _ => null
+    }
+  }
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class ST_Dump(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(1)
+    val geometry = inputExpressions.head.toGeometry(input)
+    val geometryCollection = geometry match {
+      case collection: GeometryCollection => {
+        val numberOfGeometries = collection.getNumGeometries
+        (0 until numberOfGeometries).map(
+          index => collection.getGeometryN(index).toGenericArrayData
+        ).toArray
+      }
+      case geom: Geometry => Array(geom.toGenericArrayData)
+    }
+    ArrayData.toArrayData(geometryCollection)
+  }
+  override def dataType: DataType = ArrayType(new GeometryUDT())
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class ST_DumpPoints (inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(1)
+    val geometry = inputExpressions.head.toGeometry(input)
+    ArrayData.toArrayData(geometry.getPoints.map(geom => geom.toGenericArrayData))
+  }
+  override def dataType: DataType = ArrayType(new GeometryUDT())
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+
+case class ST_IsClosed(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = true
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(1)
+    val geometry = inputExpressions.head.toGeometry(input)
+    geometry match {
+      case circle: Circle => true
+      case point: MultiPoint => true
+      case multilinestring: MultiLineString => multilinestring.isClosed
+      case multipolygon: MultiPolygon => true
+      case collection: GeometryCollection => false
+      case string: LineString => string.isClosed
+      case point: Point => true
+      case polygon: Polygon => true
+      case _ => null
+    }
+  }
+  override def dataType: DataType = BooleanType
+
+  override def children: Seq[Expression] = inputExpressions
+
+}
+
+case class ST_NumInteriorRings(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = true
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(1)
+    val geometry = inputExpressions.head.toGeometry(input)
+    geometry match {
+      case polygon: Polygon => polygon.getNumInteriorRing
+      case _: Geometry => null
+    }
+  }
+  override def dataType: DataType = IntegerType
+
+  override def children: Seq[Expression] = inputExpressions
+
+}
+
+case class ST_AddPoint(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  private val geometryFactory = new GeometryFactory()
+  override def nullable: Boolean = true
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.betweenLength(2, 3)
+    val geometry = inputExpressions.head.toGeometry(input)
+    val point = inputExpressions(1).toGeometry(input)
+    if (inputExpressions.length == 2) addPointToGeometry(geometry, point, -1) else {
+      val index = inputExpressions(2).toInt(input)
+      addPointToGeometry(geometry, point, index)
+    }
+  }
+
+  private def addPointToGeometry(geometry: Geometry, pointGeom: Geometry, index: Int): GenericArrayData = {
+    geometry match {
+      case string: LineString => pointGeom match {
+        case point: Point => addPointToLineString(string, point, index) match {
+          case None => null
+          case Some(geom) =>geom.toGenericArrayData
+        }
+        case _ => null
+      }
+      case _ => null
+    }
+  }
+
+  private def addPointToLineString(lineString: LineString, point: Point, index: Int): Option[LineString] = {
+    val coordinates = lineString.getCoordinates
+    val length = coordinates.length
+    if (index == -1) Some(lineStringFromCoordinates(coordinates ++ Array(point.getCoordinate)))
+    else if (index >= 0 && index <= length) Some(lineStringFromCoordinates(
+      coordinates.slice(0, index) ++ Array(point.getCoordinate) ++ coordinates.slice(index, length)))
+    else None
+  }
+
+  private def lineStringFromCoordinates(coordinates: Array[Coordinate]): LineString =
+    geometryFactory.createLineString(coordinates)
+
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+
+}
+
+case class ST_RemovePoint(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = true
+  private val geometryFactory = new GeometryFactory()
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(2)
+    val linesString = inputExpressions.head.toGeometry(input)
+    val pointToRemove = inputExpressions(1).eval(input).asInstanceOf[Int]
+    linesString match {
+      case string: LineString =>
+        val coordinates = string.getCoordinates
+        val length = coordinates.length
+        if (coordinates.length <= pointToRemove | coordinates.length <= 2) null
+        else{
+          val coordinatesWithPointRemoved = coordinates.slice(0, pointToRemove) ++ coordinates.slice(pointToRemove + 1, length)
+          geometryFactory.createLineString(coordinatesWithPointRemoved).toGenericArrayData
+        }
+      case _ => null
+    }
+  }
+  override def dataType: DataType = new GeometryUDT()
+
+  override def children: Seq[Expression] = inputExpressions
+
+}
+
+case class ST_IsRing(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = true
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(1)
+    val geometry = inputExpressions.head.toGeometry(input)
+    geometry match {
+      case string: LineString => string.isSimple & string.isClosed
+      case _ => null
+    }
+  }
+  override def dataType: DataType = BooleanType
+
+  override def children: Seq[Expression] = inputExpressions
+
+}
