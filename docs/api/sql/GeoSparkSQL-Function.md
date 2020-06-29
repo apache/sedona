@@ -294,6 +294,7 @@ Since: `v1.3.2`
 
 Spark SQL example:
 ```SQL
+
 SELECT ST_Azimuth(ST_POINT(0.0 25.0), ST_POINT(0.0 0.0))
 
 3.141592653589793
@@ -534,4 +535,17 @@ Spark SQL example:
 SELECT ST_IsRing(ST_GeomFromText("LINESTRING(0 0, 0 1, 1 1, 1 0, 0 0)"))
 
 true
+```
+
+## ST_NumGeometries
+
+Introduction: Returns the number of Geometries. If geometry is a GEOMETRYCOLLECTION (or MULTI*) return the number of geometries, for single geometries will return 1.
+
+Format: `ST_NumGeometries (A:geometry)`
+
+Since: `v1.3.2`
+
+```SQL
+SELECT ST_NumGeometries(df.geometry)
+FROM df
 ```

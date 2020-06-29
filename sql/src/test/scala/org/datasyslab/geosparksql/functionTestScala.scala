@@ -811,6 +811,25 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     "POINT (-112.519856 45.987772)",
     "POINT (-112.442664 42.912313)"
   )
+  
+   it("Passed ST_NumGeometries"){
+    Given("Some different types of geometries in a DF")
+    // Test data
+    val testData = Seq(
+      ("LINESTRING (-29 -27, -30 -29.7, -45 -33)"),
+      ("MULTILINESTRING ((-29 -27, -30 -29.7, -36 -31, -45 -33), (-45.2 -33.2, -46 -32))"),
+      ("POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))"),
+      ("MULTIPOLYGON(((0 0, 3 0, 3 3, 0 3, 0 0)), ((3 0, 6 0, 6 3, 3 3, 3 0)))"),
+      ("GEOMETRYCOLLECTION(MULTIPOINT(-2 3 , -2 2), LINESTRING(5 5 ,10 10), POLYGON((-7 4.2,-7.1 5,-7.1 4.3,-7 4.2)))"))
+      .toDF("Geometry")
+
+    When("Using ST_NumGeometries")
+    val testDF = testData.selectExpr("Geometry", "ST_NumGeometries(ST_GeomFromText(Geometry)) as ngeom")
+
+    Then("Result should match")
+    testDF.selectExpr("ngeom")
+      .as[Int].collect() should contain theSameElementsAs List(1, 2, 1, 2, 3)
+   }
 
   it("Passed ST_LineMerge"){
     Given("Some different types of geometries in a DF")

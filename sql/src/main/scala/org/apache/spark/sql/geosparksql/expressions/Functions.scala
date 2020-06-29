@@ -895,5 +895,27 @@ case class ST_IsRing(inputExpressions: Seq[Expression])
   override def dataType: DataType = BooleanType
 
   override def children: Seq[Expression] = inputExpressions
+}
 
+/**
+ * Returns the number of Geometries. If geometry is a GEOMETRYCOLLECTION (or MULTI*) return the number of geometries,
+ * for single geometries will return 1
+ *
+ * This method implements the SQL/MM specification. SQL-MM 3: 9.1.4
+ *
+ * @param inputExpressions Geometry
+ */
+case class ST_NumGeometries(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 1)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    geometry.getNumGeometries()
+  }
+
+  override def dataType: DataType = IntegerType
+
+  override def children: Seq[Expression] = inputExpressions
 }
