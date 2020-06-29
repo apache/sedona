@@ -269,6 +269,21 @@ SELECT ST_GeometryType(polygondf.countyshape)
 FROM polygondf
 ````
 
+## ST_LineMerge
+
+Introduction: Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.
+
+Note: Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If the MultiLineString can't be merged, the original MULTILINESTRING is returned.
+
+Format: `ST_LineMerge (A:geometry)`
+
+Since: `v1.3.2`
+
+````
+SELECT ST_LineMerge(geometry)
+FROM df
+````
+
 ## ST_Azimuth
 
 Introduction: Returns Azimuth for two given points in radians null otherwise.
@@ -432,6 +447,7 @@ Since: `v1.3.2`
 
 Spark SQL example:
 ```SQL
+
 SELECT ST_DumpPoints(ST_GeomFromText('LINESTRING (0 0, 1 1, 1 0)'))
 
 [POINT (0 0), POINT (0 1), POINT (1 1), POINT (1 0), POINT (0 0)] 
