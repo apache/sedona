@@ -20,6 +20,7 @@ import java.util
 
 import com.vividsolutions.jts.geom.{PrecisionModel, _}
 import com.vividsolutions.jts.operation.IsSimpleOp
+import com.vividsolutions.jts.operation.linemerge.LineMerger
 import com.vividsolutions.jts.operation.valid.IsValidOp
 import com.vividsolutions.jts.precision.GeometryPrecisionReducer
 import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier
@@ -484,6 +485,53 @@ case class ST_GeometryType(inputExpressions: Seq[Expression])
   }
 
   override def dataType: DataType = StringType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+ * Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.
+ * Only works for MultiLineString. Using other geometry will return GEOMETRYCOLLECTION EMPTY
+ * If the MultiLineString is can't be merged, the original multilinestring is returned
+ *
+ * @param inputExpressions Geometry
+ */
+case class ST_LineMerge(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+
+  override def nullable: Boolean = false
+
+  // Definition of the Geometry Collection Empty
+  lazy val GeometryFactory = new GeometryFactory()
+  lazy val emptyGeometry = GeometryFactory.createGeometryCollection(null)
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 1)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+
+    val merger = new LineMerger()
+
+    val output:Geometry = geometry match {
+      case g: MultiLineString => {
+        // Add the components of the multilinestring to the merger
+        (0 until g.getNumGeometries).map(i => {
+          val line = g.getGeometryN(i).asInstanceOf[LineString]
+          merger.add(line)
+        })
+        if (merger.getMergedLineStrings().size() == 1) {
+          // If the merger was able to join the lines, there will be only one element
+          merger.getMergedLineStrings().iterator().next().asInstanceOf[Geometry]
+        } else {
+          // if the merger couldn't join the lines, it will contain the individual lines, so return the input
+          geometry
+        }
+      }
+      case _ => emptyGeometry
+    }
+    new GenericArrayData(GeometrySerializer.serialize(output))
+  }
+
+  override def dataType: DataType = new GeometryUDT()
 
   override def children: Seq[Expression] = inputExpressions
 }

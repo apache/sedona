@@ -56,6 +56,7 @@ object Catalog {
     ST_AsText,
     ST_GeometryType,
     ST_NumGeometries,
+    ST_LineMerge,
     ST_Azimuth,
     ST_X,
     ST_Y,
