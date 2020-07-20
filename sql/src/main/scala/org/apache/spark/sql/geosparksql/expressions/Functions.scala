@@ -33,7 +33,7 @@ import org.apache.spark.unsafe.types.UTF8String
 import org.datasyslab.geospark.geometryObjects.Circle
 import org.datasyslab.geosparksql.utils.GeometrySerializer
 import org.geotools.geometry.jts.JTS
-import org.geotools.referencing.CRS
+import org.geotools.referencing.{CRS, ReferencingFactoryFinder}
 import org.opengis.referencing.operation.MathTransform
 import org.apache.spark.sql.geosparksql.UDT.GeometryUDT
 
@@ -41,6 +41,8 @@ import scala.collection.mutable.ArrayBuffer
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.types.ArrayType
 import implicits._
+import org.geotools.factory.Hints
+import org.opengis.referencing.crs.CoordinateReferenceSystem
 
 import scala.util.{Failure, Success, Try}
 
@@ -238,16 +240,27 @@ case class ST_Transform(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length >= 3 && inputExpressions.length <= 5)
-    System.setProperty("org.geotools.referencing.forceXY", "true")
-    if (inputExpressions.length >= 4) {
-      System.setProperty("org.geotools.referencing.forceXY", inputExpressions(3).eval(input).asInstanceOf[Boolean].toString)
+
+    val hints = if (inputExpressions.length >= 4) {
+      new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER,inputExpressions(3).eval(input).asInstanceOf[Boolean])
+    }
+    else{
+      new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER,true)
+    }
+
+    def getCRSFromCodeString(codeString:String,hints: Hints):CoordinateReferenceSystem = {
+      val targetAuthority = codeString.split(":")(0)
+      val targetFactory = ReferencingFactoryFinder.getCRSAuthorityFactory(targetAuthority, hints)
+      targetFactory.createCoordinateReferenceSystem(codeString)
     }
 
     val originalTargetCode = inputExpressions(2).eval(input).asInstanceOf[UTF8String].toString
+    val originalSourceCode = inputExpressions(1).eval(input).asInstanceOf[UTF8String].toString
     val targetCode = originalTargetCode.split(":")(1).toInt
+
     val originalGeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
-    val sourceCRScode = CRS.decode(inputExpressions(1).eval(input).asInstanceOf[UTF8String].toString)
-    val targetCRScode = CRS.decode(inputExpressions(2).eval(input).asInstanceOf[UTF8String].toString)
+    val sourceCRScode = getCRSFromCodeString(originalSourceCode,hints)
+    val targetCRScode = getCRSFromCodeString(originalTargetCode,hints)
 
     var transform: MathTransform = null
     if (inputExpressions.length == 5) {
