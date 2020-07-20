@@ -1,5 +1,7 @@
 #
 
+## On 07/19/2020, GeoSpark has been accepted to the Apache Software Foundation under the new name Apache Sedona (incubating). This website will be moved to the ASF domain. Old contributors please read [this GitHub issue](https://github.com/DataSystemsLab/GeoSpark/issues/391#issuecomment-660855207) and submit your CLA at your earliest convenience.
+
 ![GeoSpark Logo](https://github.com/DataSystemsLab/GeoSpark/raw/master/GeoSpark_logo.png)
 
 |     Stable    | Latest | Source code|
