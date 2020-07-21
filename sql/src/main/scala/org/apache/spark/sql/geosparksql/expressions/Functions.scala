@@ -238,6 +238,12 @@ case class ST_Transform(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   override def nullable: Boolean = false
 
+  private def getCRSFromCodeString(codeString:String,hints: Hints):CoordinateReferenceSystem = {
+    val targetAuthority = codeString.split(":")(0)
+    val targetFactory = ReferencingFactoryFinder.getCRSAuthorityFactory(targetAuthority, hints)
+    targetFactory.createCoordinateReferenceSystem(codeString)
+  }
+
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length >= 3 && inputExpressions.length <= 5)
 
@@ -246,12 +252,6 @@ case class ST_Transform(inputExpressions: Seq[Expression])
     }
     else{
       new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER,true)
-    }
-
-    def getCRSFromCodeString(codeString:String,hints: Hints):CoordinateReferenceSystem = {
-      val targetAuthority = codeString.split(":")(0)
-      val targetFactory = ReferencingFactoryFinder.getCRSAuthorityFactory(targetAuthority, hints)
-      targetFactory.createCoordinateReferenceSystem(codeString)
     }
 
     val originalTargetCode = inputExpressions(2).eval(input).asInstanceOf[UTF8String].toString
