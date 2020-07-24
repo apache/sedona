@@ -125,6 +125,23 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       polygonDf.show()
       var functionDf = sparkSession.sql("select ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857',true, false) from polygondf")
       functionDf.show()
+
+      val polygon = "POLYGON ((110.54671 55.818002, 110.54671 55.143743, 110.940494 55.143743, 110.940494 55.818002, 110.54671 55.818002))"
+      val forceXYExpect = "POLYGON ((471596.69167460164 6185916.951191288, 471107.5623640998 6110880.974228167, 496207.109151055 6110788.804712435, 496271.31937046186 6185825.60569904, 471596.69167460164 6185916.951191288))"
+
+      sparkSession.createDataset(Seq(polygon))
+        .withColumn("geom", expr("ST_GeomFromWKT(value)"))
+        .createOrReplaceTempView("df")
+
+      sparkSession.sql("select ST_Transform(geom, 'EPSG:4326', 'EPSG:32649', false, false)  from df")
+        .show(false)
+
+      sparkSession.sql("select ST_Transform(geom, 'EPSG:4326', 'EPSG:32649', true, false)  from df")
+        .show(false)
+
+      val forceXYResult = sparkSession.sql(s"""select ST_Transform(ST_geomFromWKT('$polygon'),'EPSG:4326', 'EPSG:32649', true, false)""").rdd.map(row => row.getAs[Geometry](0).toString).collect()(0)
+      assert(forceXYResult == forceXYExpect)
+
     }
 
     it("Passed ST_Intersection - intersects but not contains") {
