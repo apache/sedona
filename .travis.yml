@@ -8,7 +8,7 @@ python:
   - "3.7"
 before_install:
   - sudo apt-get -y install python3-pip python-dev
-  - sudo pip3 install -U setuptools
+  - sudo pip3 install -U setuptools<50.0.0
   - sudo pip3 install -U wheel
   - sudo pip3 install -U virtualenvwrapper
 install:
@@ -26,12 +26,12 @@ script:
   - find sql/target/ -iregex "sql\/target\/geospark-sql_[0-9]\.[0-9]-[0-9]\.[0-9]\.[0-9]\(-SNAPSHOT\)?\.jar" -exec cp {} $SPARK_HOME/jars \;
   - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=com.googlecode.efficient-java-matrix-library:core:0.26
   - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=net.java.dev.jsr-275:jsr-275:1.0-beta-2
-  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-epsg-extension:17.0
-  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-epsg-hsql:17.0
-  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-main:17.0
-  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-metadata:17.0
-  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-opengis:17.0
-  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-referencing:17.0
-  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-shapefile:17.0
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-epsg-extension:23.2
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-epsg-hsql:23.2
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-main:23.2
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-metadata:23.2
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-opengis:23.2
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-referencing:23.2
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-shapefile:23.2
   - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.hsqldb:hsqldb:2.3.0
   - (cd python;pipenv run pytest tests)
