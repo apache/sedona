@@ -68,7 +68,7 @@ public class KnnJudgementUsingIndex<U extends Geometry, T extends Geometry>
         SpatialIndex treeIndex = treeIndexes.next();
         final Object[] localK;
         if (treeIndex instanceof STRtree) {
-            localK = ((STRtree) treeIndex).kNearestNeighbour(queryCenter.getEnvelopeInternal(), queryCenter, new GeometryItemDistance(), k);
+            localK = ((STRtree) treeIndex).nearestNeighbour(queryCenter.getEnvelopeInternal(), queryCenter, new GeometryItemDistance(), k);
         }
         else {
             throw new Exception("[KnnJudgementUsingIndex][Call] QuadTree index doesn't support KNN search.");
