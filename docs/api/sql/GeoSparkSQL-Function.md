@@ -228,6 +228,20 @@ SELECT ST_AsText(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_AsGeoJSON
+
+Introduction: Return the [GeoJSON](https://geojson.org/) string representation of a geometry
+
+Format: `ST_AsGeoJSON (A:geometry)`
+
+Since: `v1.3.2`
+
+Spark SQL example:
+```SQL
+SELECT ST_AsGeoJSON(polygondf.countyshape)
+FROM polygondf
+```
+
 ## ST_NPoints
 
 Introduction: Return points of the geometry

@@ -54,6 +54,7 @@ object Catalog {
     ST_MakeValid,
     ST_SimplifyPreserveTopology,
     ST_AsText,
+    ST_AsGeoJSON,
     ST_GeometryType,
     ST_NumGeometries,
     ST_LineMerge,
