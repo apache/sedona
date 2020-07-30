@@ -298,6 +298,18 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(polygonDf.take(1)(0).getAs[Geometry]("countyshape").toText.equals(wktDf.take(1)(0).getAs[String]("wkt")))
     }
 
+    it("Passed ST_AsGeoJSON") {
+      val df = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') AS polygon")
+      df.createOrReplaceTempView("table")
+
+      val geojsonDf = sparkSession.sql(
+        """select ST_AsGeoJSON(polygon) as geojson
+          |from table""".stripMargin)
+
+      val expectedGeoJson = """{"type":"Polygon","coordinates":[[[1.0,1.0],[8.0,1.0],[8.0,8.0],[1.0,8.0],[1.0,1.0]]]}"""
+      assert(geojsonDf.first().getString(0) === expectedGeoJson)
+    }
+
     it("Passed ST_NPoints") {
       var test = sparkSession.sql("SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
       assert(test.take(1)(0).get(0).asInstanceOf[Int] == 4)

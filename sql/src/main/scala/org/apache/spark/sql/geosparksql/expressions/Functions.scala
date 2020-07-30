@@ -36,6 +36,7 @@ import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.{CRS, ReferencingFactoryFinder}
 import org.opengis.referencing.operation.MathTransform
 import org.apache.spark.sql.geosparksql.UDT.GeometryUDT
+import org.wololo.jts2geojson.GeoJSONWriter
 
 import scala.collection.mutable.ArrayBuffer
 import org.apache.spark.internal.Logging
@@ -480,6 +481,23 @@ case class ST_AsText(inputExpressions: Seq[Expression])
     assert(inputExpressions.length == 1)
     val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     UTF8String.fromString(geometry.toText)
+  }
+
+  override def dataType: DataType = StringType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class ST_AsGeoJSON(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(1)
+    val geometry = inputExpressions.head.toGeometry(input)
+
+    val writer = new GeoJSONWriter()
+    UTF8String.fromString(writer.write(geometry).toString)
   }
 
   override def dataType: DataType = StringType
