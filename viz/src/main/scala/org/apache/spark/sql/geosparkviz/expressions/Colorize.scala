@@ -54,7 +54,7 @@ case class ST_Colorize(inputExpressions: Seq[Expression])
       case e:java.lang.ClassCastException => max = inputExpressions(1).eval(input).asInstanceOf[Long]
     }
     val normalizedWeight:Double = weight * 255.0 / max
-    GenericColoringRule.EncodeToRGB(weight)
+    GenericColoringRule.EncodeToRGB(normalizedWeight)
   }
 
   override def dataType: DataType = IntegerType
