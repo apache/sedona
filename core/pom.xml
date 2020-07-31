@@ -77,21 +77,29 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!--The following GeoTools dependencies use GNU Lesser General Public License and thus are excluded from the binary distribution-->
+        <!-- Users have to include them by themselves manually -->
+        <!-- See https://www.apache.org/legal/resolved.html#category-x -->
+        <!-- See https://github.com/geotools/geotools#license -->
+        <!--for CRS transformation-->
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-referencing</artifactId>
             <version>${geotools.version}</version>
         </dependency>
+        <!--for CRS transformation-->
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-epsg-hsql</artifactId>
             <version>${geotools.version}</version>
         </dependency>
+        <!--for CRS transformation-->
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-epsg-extension</artifactId>
             <version>${geotools.version}</version>
         </dependency>
+        <!--for Shapefile reader-->
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-shapefile</artifactId>
