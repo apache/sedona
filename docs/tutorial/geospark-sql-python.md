@@ -30,17 +30,17 @@ This package automatically copies the newest GeoSpark jar files using function, 
 
 ```python
 
-  from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession
 
-  from geospark.register import upload_jars
-  from geospark.register import GeoSparkRegistrator
+from geospark.register import upload_jars
+from geospark.register import GeoSparkRegistrator
 
-  upload_jars()
+upload_jars()
 
-  spark = SparkSession.builder.\
-        getOrCreate()
+spark = SparkSession.builder.\
+      getOrCreate()
 
-  GeoSparkRegistrator.registerAll(spark)
+GeoSparkRegistrator.registerAll(spark)
 
 ```
 
@@ -48,7 +48,7 @@ Function
 
 ```python
 
-  upload_jars()
+upload_jars()
 
 
 ```
@@ -77,7 +77,7 @@ or
 
 ```bash
 
-  pip install dist/geospark-1.3.1-py3-none-any.whl
+pip install dist/geospark-1.3.1-py3-none-any.whl
 
 
 ```
@@ -87,7 +87,7 @@ or
 
 ```bash
 
-  python3 setup.py install
+python3 setup.py install
 
 ```
 
@@ -162,13 +162,7 @@ counties_geom = spark.sql(
       "SELECT county_code, st_geomFromWKT(geom) as geometry from county"
 )
 
-points = gpd.read_file("gis_osm_pois_free_1.shp")
-
-points_geom = spark.createDataFrame(
-    points[["fclass", "geometry"]]
-)
-
-counties_geom.show(5, False)
+counties_geom.show(5)
 
 ```
 ```
@@ -183,6 +177,14 @@ counties_geom.show(5, False)
 +-----------+--------------------+
 ```
 ```python3
+import geopandas as gpd
+
+points = gpd.read_file("gis_osm_pois_free_1.shp")
+
+points_geom = spark.createDataFrame(
+    points[["fclass", "geometry"]]
+)
+
 points_geom.show(5, False)
 ```
 ```
@@ -251,36 +253,36 @@ Example, loading the data from shapefile using geopandas read_file method and cr
 
 ```python
 
-  import geopandas as gpd
-  from pyspark.sql import SparkSession
+import geopandas as gpd
+from pyspark.sql import SparkSession
 
-  from geospark.register import GeoSparkRegistrator
+from geospark.register import GeoSparkRegistrator
 
-  spark = SparkSession.builder.\
-        getOrCreate()
+spark = SparkSession.builder.\
+      getOrCreate()
 
-  GeoSparkRegistrator.registerAll(spark)
+GeoSparkRegistrator.registerAll(spark)
 
-  gdf = gpd.read_file("gis_osm_pois_free_1.shp")
+gdf = gpd.read_file("gis_osm_pois_free_1.shp")
 
-  spark.createDataFrame(
-    gdf
-  ).show()
-
-```
+spark.createDataFrame(
+  gdf
+).show()
 
 ```
 
-      +---------+----+-----------+--------------------+--------------------+
-      |   osm_id|code|     fclass|                name|            geometry|
-      +---------+----+-----------+--------------------+--------------------+
-      | 26860257|2422|  camp_site|            de Kroon|POINT (15.3393145...|
-      | 26860294|2406|     chalet|      Leśne Ustronie|POINT (14.8709625...|
-      | 29947493|2402|      motel|                null|POINT (15.0946636...|
-      | 29947498|2602|        atm|                null|POINT (15.0732014...|
-      | 29947499|2401|      hotel|                null|POINT (15.0696777...|
-      | 29947505|2401|      hotel|                null|POINT (15.0155749...|
-      +---------+----+-----------+--------------------+--------------------+
+```
+
++---------+----+-----------+--------------------+--------------------+
+|   osm_id|code|     fclass|                name|            geometry|
++---------+----+-----------+--------------------+--------------------+
+| 26860257|2422|  camp_site|            de Kroon|POINT (15.3393145...|
+| 26860294|2406|     chalet|      Leśne Ustronie|POINT (14.8709625...|
+| 29947493|2402|      motel|                null|POINT (15.0946636...|
+| 29947498|2602|        atm|                null|POINT (15.0732014...|
+| 29947499|2401|      hotel|                null|POINT (15.0696777...|
+| 29947505|2401|      hotel|                null|POINT (15.0155749...|
++---------+----+-----------+--------------------+--------------------+
 
 ```
 
@@ -288,39 +290,39 @@ Reading data with Spark and converting to GeoPandas
 
 ```python
 
-    import geopandas as gpd
-    from pyspark.sql import SparkSession
+import geopandas as gpd
+from pyspark.sql import SparkSession
 
-    from geospark.register import GeoSparkRegistrator
+from geospark.register import GeoSparkRegistrator
 
-    spark = SparkSession.builder.\
-        getOrCreate()
+spark = SparkSession.builder.\
+    getOrCreate()
 
-    GeoSparkRegistrator.registerAll(spark)
+GeoSparkRegistrator.registerAll(spark)
 
-    counties = spark.\
+counties = spark.\
     read.\
     option("delimiter", "|").\
     option("header", "true").\
     csv("counties.csv")
 
-    counties.createOrReplaceTempView("county")
+counties.createOrReplaceTempView("county")
 
-    counties_geom = spark.sql(
-          "SELECT *, st_geomFromWKT(geom) as geometry from county"
-    )
+counties_geom = spark.sql(
+    "SELECT *, st_geomFromWKT(geom) as geometry from county"
+)
 
-    df = counties_geom.toPandas()
-    gdf = gpd.GeoDataFrame(df, geometry="geometry")
+df = counties_geom.toPandas()
+gdf = gpd.GeoDataFrame(df, geometry="geometry")
 
-    gdf.plot(
-        figsize=(10, 8),
-        column="value",
-        legend=True,
-        cmap='YlOrBr',
-        scheme='quantiles',
-        edgecolor='lightgray'
-    )
+gdf.plot(
+    figsize=(10, 8),
+    column="value",
+    legend=True,
+    cmap='YlOrBr',
+    scheme='quantiles',
+    edgecolor='lightgray'
+)
 
 ```
 <br>
@@ -412,6 +414,8 @@ root
 
 ```python3
 
+from shapely.geometry import MultiPoint
+
 data = [
     [1, MultiPoint([[19.511463, 51.765158], [19.446408, 51.779752]])]
 ]
@@ -443,7 +447,7 @@ from shapely.geometry import LineString
 line = [(40, 40), (30, 30), (40, 20), (30, 10)]
 
 data = [
-    [1, LineString(line1)]
+    [1, LineString(line)]
 ]
 
 gdf = spark.createDataFrame(
@@ -463,7 +467,7 @@ gdf.show(1, False)
 |1  |LINESTRING (10 10, 20 20, 10 40)|
 +---+--------------------------------+
 
-````
+```
 
 ### MultiLineString
 
