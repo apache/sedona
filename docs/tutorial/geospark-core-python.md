@@ -55,17 +55,17 @@ This package automatically copies the newest GeoSpark jar files using upload_jar
 
 ```python
 
-  from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession
 
-  from geospark.register import upload_jars
-  from geospark.register import GeoSparkRegistrator
+from geospark.register import upload_jars
+from geospark.register import GeoSparkRegistrator
 
-  upload_jars()
+upload_jars()
 
-  spark = SparkSession.builder.\
-        getOrCreate()
+spark = SparkSession.builder.\
+      getOrCreate()
 
-  GeoSparkRegistrator.registerAll(spark)
+GeoSparkRegistrator.registerAll(spark)
 
 ```
 
@@ -73,7 +73,7 @@ Function
 
 ```python
 
-  upload_jars()
+upload_jars()
 
 
 ```
@@ -102,7 +102,7 @@ or
 
 ```bash
 
-  pip install dist/geospark-1.3.1-py3-none-any.whl
+pip install dist/geospark-1.3.1-py3-none-any.whl
 
 
 ```
@@ -112,7 +112,7 @@ or
 
 ```bash
 
-  python3 setup.py install
+python3 setup.py install
 
 ```
 
@@ -144,6 +144,7 @@ to use overloaded functions how Scala/Java GeoSpark API allows. ex.
 
 
 ```python
+from pyspark import StorageLevel
 from geospark.core.SpatialRDD import PointRDD
 from geospark.core.enums import FileDataSplitter
 
@@ -193,7 +194,7 @@ df.createOrReplaceTempView("counties")
 spatial_df = spark.sql(
     """
         SELECT ST_GeomFromWKT(_c0) as geom, _c6 as county_name
-        FROM inputtable
+        FROM counties
     """
 )
 spatial_df.printSchema()
@@ -215,7 +216,9 @@ spatial_rdd = Adapter.toSpatialRdd(spatial_df)
 spatial_rdd.analyze()
 
 spatial_rdd.boundaryEnvelope
+```
 
+```
 <geospark.core.geom_types.Envelope object at 0x7f1e5f29fe10>
 ```
 
@@ -304,7 +307,9 @@ Example:
 
 ```python
 query_result.map(lambda x: x.geom.length).collect()
+```
 
+```
 [
  1.5900840000000045,
  1.5906639999999896,
@@ -322,6 +327,7 @@ query_result.map(lambda x: x.geom.length).collect()
 Or transformed to GeoPandas GeoDataFrame
 
 ```python
+import geopandas as gpd
 gpd.GeoDataFrame(
     query_result.map(lambda x: [x.geom, x.userData]).collect(),
     columns=["geom", "user_data"],
@@ -414,6 +420,9 @@ are covered by GeoData.
 
 ```python
 result.collect())
+```
+
+```
 [
     [GeoData, [GeoData, GeoData, GeoData, GeoData]],
     [GeoData, [GeoData, GeoData, GeoData]],
@@ -483,6 +492,9 @@ Polygon,LineString
 example 
 ```python
 result.collect()
+```
+
+```
 [
  [GeoData, GeoData],
  [GeoData, GeoData],
@@ -531,12 +543,18 @@ Result for this query is RDD which holds two GeoData objects within list of list
 Example:
 ```python
 result.collect()
+```
+
+```
 [[GeoData, GeoData], [GeoData, GeoData] ...]
 ```
 
 It is possible to do some RDD operation on result data ex. Getting polygon centroid.
 ```python
 result.map(lambda x: x[0].geom.centroid).collect()
+```
+
+```
 [
  <shapely.geometry.point.Point at 0x7efee2d28128>,
  <shapely.geometry.point.Point at 0x7efee2d280b8>,
@@ -562,7 +580,7 @@ Typed SpatialRDD and generic SpatialRDD can be saved to permanent storage.
 Use the following code to save an SpatialRDD as a distributed WKT text file:
 
 ```python
-object_rdd.rawJvmSpatialRDD.saveAsTextFile("hdfs://PATH")
+object_rdd.rawSpatialRDD.saveAsTextFile("hdfs://PATH")
 object_rdd.saveAsWKT("hdfs://PATH")
 ```
 
@@ -619,7 +637,7 @@ You can easily reload an SpatialRDD that has been saved to ==a distributed objec
 Use the following code to reload the PointRDD/PolygonRDD/LineStringRDD:
 
 ```python
-from geospark.core.formatMapper.disc_utils import GeoType
+from geospark.core.formatMapper.disc_utils import load_spatial_rdd_from_disc, GeoType
 
 polygon_rdd = load_spatial_rdd_from_disc(sc, "hdfs://PATH", GeoType.POLYGON)
 point_rdd = load_spatial_rdd_from_disc(sc, "hdfs://PATH", GeoType.POINT)
@@ -649,6 +667,8 @@ All below methods will return SpatialRDD object which can be used with Spatial f
 from geospark.core.formatMapper import WktReader
 
 WktReader.readToGeometryRDD(sc, wkt_geometries_location, 0, True, False)
+```
+```
 <geospark.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2fbf250>
 ```
 
@@ -656,7 +676,9 @@ WktReader.readToGeometryRDD(sc, wkt_geometries_location, 0, True, False)
 ```python
 from geospark.core.formatMapper import WkbReader
 
-WkbReader.readToGeometryRDD(sc, wkb_geometries, 0, True, False)
+WkbReader.readToGeometryRDD(sc, wkb_geometries_location, 0, True, False)
+```
+```
 <geospark.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2eece50>
 ```
 ### Read from GeoJson file
@@ -665,6 +687,8 @@ WkbReader.readToGeometryRDD(sc, wkb_geometries, 0, True, False)
 from geospark.core.formatMapper import GeoJsonReader
 
 GeoJsonReader.readToGeometryRDD(sc, geo_json_file_location)
+```
+```
 <geospark.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2eecb90>
 ```
 ### Read from Shapefile
@@ -673,6 +697,8 @@ GeoJsonReader.readToGeometryRDD(sc, geo_json_file_location)
 from geospark.core.formatMapper.shapefileParser import ShapefileReader
 
 ShapefileReader.readToGeometryRDD(sc, shape_file_location)
+```
+```
 <geospark.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2ee0710>
 ```
 
