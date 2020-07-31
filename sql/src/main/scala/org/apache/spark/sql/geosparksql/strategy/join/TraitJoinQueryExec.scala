@@ -20,7 +20,7 @@ import com.vividsolutions.jts.geom.Geometry
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeRowJoiner
-import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, UnsafeRow}
+import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, UnsafeRow, Predicate}
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.execution.SparkPlan
 import org.datasyslab.geospark.enums.JoinSparitionDominantSide
@@ -43,7 +43,7 @@ trait TraitJoinQueryExec {
   // Using lazy val to avoid serialization
   @transient private lazy val boundCondition: (InternalRow => Boolean) = {
     if (extraCondition.isDefined) {
-      newPredicate(extraCondition.get, left.output ++ right.output).eval _
+      Predicate.create(extraCondition.get, left.output ++ right.output).eval _
     } else { (r: InternalRow) =>
       true
     }
@@ -132,7 +132,7 @@ trait TraitJoinQueryExec {
     matches.rdd.mapPartitions { iter =>
       val filtered =
         if (extraCondition.isDefined) {
-          val boundCondition = newPredicate(extraCondition.get, left.output ++ right.output)
+          val boundCondition = Predicate.create(extraCondition.get, left.output ++ right.output)
           iter.filter {
             case (l, r) =>
               val leftRow = l.getUserData.asInstanceOf[UnsafeRow]
