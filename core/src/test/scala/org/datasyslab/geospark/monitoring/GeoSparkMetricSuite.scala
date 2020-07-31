@@ -26,23 +26,11 @@
 
 package org.datasyslab.geospark.monitoring
 
-import org.apache.log4j.{Level, Logger}
-import org.apache.spark.{SparkConf, SparkContext, TaskContext}
-import org.scalatest.{BeforeAndAfterAll, FunSuite, FunSuiteLike}
+import org.apache.spark.TaskContext
+import org.datasyslab.geospark.python.SparkUtil
+import org.scalatest.{FunSuite, FunSuiteLike}
 
-class GeoSparkMetricSuite extends FunSuite with FunSuiteLike with BeforeAndAfterAll {
-
-  implicit lazy val sc = {
-    val conf = new SparkConf().setAppName(classOf[GeoSparkMetricSuite].getName).setMaster("local[2]")
-    val sc = new SparkContext(conf)
-    Logger.getLogger("org").setLevel(Level.WARN)
-    Logger.getLogger("akka").setLevel(Level.WARN)
-    sc
-  }
-
-  override def afterAll(): Unit = {
-    sc.stop
-  }
+class GeoSparkMetricSuite extends SparkUtil with FunSuiteLike {
 
   test("simple count") {
 

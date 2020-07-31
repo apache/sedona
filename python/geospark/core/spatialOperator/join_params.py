@@ -26,4 +26,4 @@ class JvmJoinParams(JvmObject):
 
     @property
     def jvm_reference(self):
-        return self.jvm.JoinParams.createJoinParams
+        return self.jvm.JoinParamsAdapter.createJoinParams

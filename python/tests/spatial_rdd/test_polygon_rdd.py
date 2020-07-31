@@ -335,14 +335,6 @@ class TestPolygonRDD(TestBase):
         spatial_rdd.analyze()
         spatial_rdd.buildIndex(IndexType.RTREE, False)
 
-    def test_build_rtree_index(self):
-        pass
-        # TODO add test
-
-    def test_build_quad_tree_index(self):
-        pass
-        # TODO add test
-
     def test_mbr(self):
         polygon_rdd = PolygonRDD(
             sparkContext=self.sc,

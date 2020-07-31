@@ -7,7 +7,7 @@ A committer has the write access to GeoSpark main repository and is in charge at
 
 |       Name      |        Affiliation       | Role |
 |:---------------:|:------------------------:|:------------------------:|
-| Paweł Kociński |	Accenture	| GeoSpark Python API
+| Paweł Kociński |	Allegro.pl	| GeoSpark Python API
 |  Mohamed Sarwat | Arizona State University | All modules |
 |      Jia Yu     | Arizona State University | All modules
 |   Zongsi Zhang  | GrabTaxi | GeoSpark Shapefile and RDD API |

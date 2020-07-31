@@ -38,11 +38,13 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll{
   Logger.getLogger("org.datasyslab.geospark").setLevel(Level.WARN)
 
   val warehouseLocation = System.getProperty("user.dir") + "/target/"
-  var sparkSession = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
+  val sparkSession = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
     config("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName).
     master("local[*]").appName("geosparksqlScalaTest")
     .config("spark.sql.warehouse.dir", warehouseLocation)
     .enableHiveSupport().getOrCreate()
+
+  import sparkSession.implicits._
 
   val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
 

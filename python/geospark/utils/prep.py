@@ -1,11 +1,11 @@
 from typing import List
 
-from shapely.geometry import Point, MultiPoint, Polygon, MultiPolygon, LineString, MultiLineString
+from shapely.geometry import Point, MultiPoint, Polygon, MultiPolygon, LineString, MultiLineString, GeometryCollection
 from shapely.geometry.base import BaseGeometry
 
 
 def assign_all() -> bool:
-    geoms = [Point, MultiPoint, Polygon, MultiPolygon, LineString, MultiLineString]
+    geoms = [Point, MultiPoint, Polygon, MultiPolygon, LineString, MultiLineString, GeometryCollection]
     assign_udt_shapely_objects(geoms=geoms)
     assign_user_data_to_shapely_objects(geoms=geoms)
     return True

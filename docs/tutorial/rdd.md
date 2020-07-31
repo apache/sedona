@@ -78,9 +78,9 @@ This file has 11 columns and corresponding offsets (Column IDs) are 0 - 10. Colu
 	
 Use the following code to create a PolygonRDD.
 ```Scala
-val polygonRDDInputLocation = "/Download/checkin.csv"
+val polygonRDDInputLocation = "/Download/checkinshape.csv"
 val polygonRDDStartOffset = 0 // The coordinates start from Column 0
-val polygonRDDEndOffset = 8 // The coordinates end at Column 8
+val polygonRDDEndOffset = 9 // The coordinates end at Column 9
 val polygonRDDSplitter = FileDataSplitter.CSV
 val carryOtherAttributes = true // Carry Column 10 (hotel, gas, bar...)
 var objectRDD = new PolygonRDD(sc, polygonRDDInputLocation, polygonRDDStartOffset, polygonRDDEndOffset, polygonRDDSplitter, carryOtherAttributes)
@@ -102,17 +102,17 @@ Geometries in a WKT and WKB file always occupy a single column no matter how man
 
 Suppose we have a `checkin.tsv` WKT TSV file at Path `/Download/checkin.tsv` as follows:
 ```
-POINT (-88.331492,32.324142)	hotel
-POINT (-88.175933,32.360763)	gas
-POINT (-88.388954,32.357073)	bar
-POINT (-88.221102,32.35078)	restaurant
+POINT (-88.331492 32.324142)	hotel
+POINT (-88.175933 32.360763)	gas
+POINT (-88.388954 32.357073)	bar
+POINT (-88.221102 32.35078)	restaurant
 ```
 This file has two columns and corresponding ==offsets==(Column IDs) are 0, 1. Column 0 is the WKT string and Column 1 is the checkin business type.
 
 Use the following code to create a SpatialRDD
 
 ```Scala
-val inputLocation = "/Download/checkin.csv"
+val inputLocation = "/Download/checkin.tsv"
 val wktColumn = 0 // The WKT string starts from Column 0
 val allowTopologyInvalidGeometries = true // Optional
 val skipSyntaxInvalidGeometries = false // Optional
@@ -181,7 +181,7 @@ We use [checkin.csv CSV file](#pointrdd-from-csvtsv) as the example. You can cre
 
 1. Load data in GeoSparkSQL.
 ```Scala
-var df = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(csvPointInputLocation)
+var df = sparkSession.read.format("csv").option("header", "false").load(csvPointInputLocation)
 df.createOrReplaceTempView("inputtable")
 ```
 2. Create a Geometry type column in GeoSparkSQL
@@ -284,7 +284,7 @@ The code to create a line string (with 4 vertexes) is as follows:
 
 ```Scala
 val geometryFactory = new GeometryFactory()
-val coordinates = new Array[Coordinate](5)
+val coordinates = new Array[Coordinate](4)
 coordinates(0) = new Coordinate(0,0)
 coordinates(1) = new Coordinate(0,4)
 coordinates(2) = new Coordinate(4,4)
@@ -359,7 +359,7 @@ val K = 1000 // K Nearest Neighbors
 
 
 val buildOnSpatialPartitionedRDD = false // Set to TRUE only if run join query
-spatialRDD.buildIndex(IndexType.RTREE, buildOnSpatialPartitionedRDD)
+objectRDD.buildIndex(IndexType.RTREE, buildOnSpatialPartitionedRDD)
 
 val usingIndex = true
 val result = KNNQuery.SpatialKnnQuery(objectRDD, pointObject, K, usingIndex)
@@ -505,7 +505,7 @@ Use the following code to save an SpatialRDD as a distributed WKT text file:
 
 ```Scala
 objectRDD.rawSpatialRDD.saveAsTextFile("hdfs://PATH")
-objectRDD.rawSpatialRDD.saveAsWKT("hdfs://PATH")
+objectRDD.saveAsWKT("hdfs://PATH")
 ```
 
 #### Save to distributed WKB text file

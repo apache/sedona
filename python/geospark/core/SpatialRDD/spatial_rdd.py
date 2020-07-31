@@ -14,6 +14,7 @@ from geospark.core.enums.spatial import SpatialType
 from geospark.core.geom.envelope import Envelope
 from geospark.core.jvm.config import since
 from geospark.core.jvm.partitioner import JvmPartitioner
+from geospark.core.jvm.translate import GeoSparkPythonConverter, JvmGeoSparkPythonConverter
 from geospark.utils.decorators import require
 from geospark.utils.jvm import JvmStorageLevel
 from geospark.utils.spatial_rdd_parser import GeoSparkPickler
@@ -206,7 +207,7 @@ class SpatialRDD:
         :return:
         """
 
-        serialized_spatial_rdd = self._jvm.GeoSerializerData.serializeToPython(self._srdd.getRawSpatialRDD())
+        serialized_spatial_rdd = GeoSparkPythonConverter(self._jvm).translate_spatial_rdd_to_python(self._srdd.getRawSpatialRDD())
 
         if not hasattr(self, "_raw_spatial_rdd"):
             RDD.saveAsObjectFile = lambda x, path: x._jrdd.saveAsObjectFile(path)
@@ -328,7 +329,7 @@ class SpatialRDD:
             self._jvm = spatial_rdd._jvm
             self._spatial_partitioned = spatial_rdd._spatial_partitioned
         elif isinstance(spatial_rdd, RDD):
-            jrdd = self._jvm.GeoSerializerData.getFromPythonRawGeometryRDD(spatial_rdd._jrdd)
+            jrdd = JvmGeoSparkPythonConverter(self._jvm).translate_python_rdd_to_java(spatial_rdd._jrdd)
             self._srdd.setRawSpatialRDD(jrdd)
         else:
             self._srdd.setRawSpatialRDD(spatial_rdd)
@@ -377,7 +378,7 @@ class SpatialRDD:
 
         :return:
         """
-        serialized_spatial_rdd = self._jvm.GeoSerializerData.serializeToPython(
+        serialized_spatial_rdd = GeoSparkPythonConverter(self._jvm).translate_spatial_rdd_to_python(
             get_field(self._srdd, "spatialPartitionedRDD"))
 
         if not hasattr(self, "_spatial_partitioned_rdd"):
@@ -387,10 +388,12 @@ class SpatialRDD:
 
         return getattr(self, "_spatial_partitioned_rdd")
 
-    def spatialPartitioning(self, partitioning: Union[str, GridType, SpatialPartitioner, List[Envelope], JvmPartitioner]) -> bool:
+    def spatialPartitioning(self, partitioning: Union[str, GridType, SpatialPartitioner, List[Envelope], JvmPartitioner],
+                            num_partitions: Optional[int] = None) -> bool:
         """
 
-        :param partitioning:
+        :param partitioning: partitioning type
+        :param num_partitions: number of partitions
         :return:
         """
         if type(partitioning) == str:
@@ -404,16 +407,19 @@ class SpatialRDD:
         elif type(partitioning) == list:
             if isinstance(partitioning[0], Envelope):
                 bytes_data = pickle.dumps(partitioning)
-                jvm_envelopes = self._jvm.GeoSerializerData.createEnvelopes(bytes_data)
+                jvm_envelopes = self._jvm.EnvelopeAdapter.getFromPython(bytes_data)
                 grid = jvm_envelopes
             else:
                 raise AttributeError("List should consists of Envelopes")
         else:
             raise TypeError("Grid does not have correct type")
+
         self._spatial_partitioned = True
-        return self._srdd.spatialPartitioning(
-            grid
-        )
+
+        if num_partitions:
+            return self._srdd.spatialPartitioning(grid, num_partitions)
+        else:
+            return self._srdd.spatialPartitioning(grid)
 
     def set_srdd(self, srdd):
         self._srdd = srdd

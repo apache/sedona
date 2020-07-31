@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.datasyslab</groupId>
 	<artifactId>geospark-parent</artifactId>
-	<version>1.4.0</version>
+	<version>1.3.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>geospark-parent</name>
 	<url>http://maven.apache.org</url>
@@ -150,8 +150,10 @@
         </repository>
         <repository>
             <id>osgeo</id>
-            <name>Open Source Geospatial Foundation Repository</name>
-            <url>https://download.osgeo.org/webdav/geotools/</url>
+            <name>OSGeo Release Repository</name>
+            <url>https://repo.osgeo.org/repository/release/</url>
+            <snapshots><enabled>false</enabled></snapshots>
+            <releases><enabled>true</enabled></releases>
         </repository>
 	<repository>
 	    <id>osgeo-alt</id>

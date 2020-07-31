@@ -16,34 +16,33 @@
  */
 package org.datasyslab.geosparksql.utils
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-
-import com.esotericsoftware.kryo.Kryo
-import com.esotericsoftware.kryo.io.{Input, Output}
 import com.vividsolutions.jts.geom.Geometry
+import com.vividsolutions.jts.io.{WKBReader, WKBWriter}
 import org.apache.spark.sql.catalyst.util.ArrayData
-import org.datasyslab.geospark.geometryObjects.GeometrySerde
+import com.vividsolutions.jts.io.{WKBReader, WKBWriter}
 
-// This is a wrapper of GeoSpark core kryo serializer
+/**
+  * SerDe using the WKB reader and writer objects
+  */
 object GeometrySerializer {
-
+  
+  /**
+    *  Given a geometry returns array of bytes
+    * @param geometry JTS geometry
+    * @return Array of bites represents this geometry
+    */
   def serialize(geometry: Geometry): Array[Byte] = {
-    val out = new ByteArrayOutputStream()
-    val kryo = new Kryo()
-    val geometrySerde = new GeometrySerde()
-    val output = new Output(out)
-    geometrySerde.write(kryo, output, geometry)
-    output.close()
-    return out.toByteArray
+    val writer = new WKBWriter(2, 2, true)
+    writer.write(geometry)
   }
 
+  /**
+    * Given ArrayData returns Geometry
+    * @param values ArrayData 
+    * @return JTS geometry
+    */
   def deserialize(values: ArrayData): Geometry = {
-    val in = new ByteArrayInputStream(values.toByteArray())
-    val kryo = new Kryo()
-    val geometrySerde = new GeometrySerde()
-    val input = new Input(in)
-    val geometry = geometrySerde.read(kryo, input, classOf[Geometry])
-    input.close()
-    return geometry.asInstanceOf[Geometry]
+    val reader = new WKBReader()
+    reader.read(values.toByteArray())
   }
 }

@@ -9,7 +9,7 @@ class standardVizOperatorTest extends TestBaseScala {
 
     it("Generate a single image") {
       var pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation) //.createOrReplaceTempView("polygontable")
-      pointDf.sample(1).createOrReplaceTempView("pointtable")
+      pointDf.sample(false, 1).createOrReplaceTempView("pointtable")
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW pointtable AS
@@ -56,7 +56,7 @@ class standardVizOperatorTest extends TestBaseScala {
 
     it("Generate a single image using a fat query") {
       var pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation) //.createOrReplaceTempView("polygontable")
-      pointDf.sample(1).createOrReplaceTempView("pointtable")
+      pointDf.sample(false, 1).createOrReplaceTempView("pointtable")
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW pointtable AS
@@ -178,7 +178,7 @@ class standardVizOperatorTest extends TestBaseScala {
     it("Passed ST_TileName") {
       var pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       var zoomLevel = 2
-      pointDf.sample(0.01).createOrReplaceTempView("pointtable")
+      pointDf.sample(false, 0.01).createOrReplaceTempView("pointtable")
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW pointtable AS

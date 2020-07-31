@@ -1,3 +1,5 @@
+## On 07/19/2020, GeoSpark has been accepted to the Apache Software Foundation under the new name Apache Sedona (incubating). The code in this repository will be imported to the ASF Git repository. Old contributors please read [this GitHub issue](https://github.com/DataSystemsLab/GeoSpark/issues/391#issuecomment-660855207) and submit your CLA at your earliest convenience.
+
 ![GeoSpark Logo](https://github.com/DataSystemsLab/GeoSpark/blob/master/GeoSpark_logo.png?raw=true)
 
 |     Stable    | Latest | Source code|
@@ -22,8 +24,11 @@ GeoSpark is a cluster computing system for processing large-scale spatial data. 
 # Please visit [GeoSpark website](http://datasystemslab.github.io/GeoSpark/) for detailed documentations
 
 ## News!
-
 * GeoSpark 1.3.1 is released. This version provides a complete Python wrapper to GeoSpark RDD and SQL API. It also contains a number of bug fixes and new functions from 12 contributors. See [Python tutorial: RDD](https://datasystemslab.github.io/GeoSpark/tutorial/geospark-core-python/), [Python tutorial: SQL](https://datasystemslab.github.io/GeoSpark/tutorial/geospark-sql-python/), [Release note](https://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Release-notes/)
+
+## Orignial Contributors
+* (Mo)hamed Sarwat (Twitter: [@MoSarwat](https://twitter.com/MoSarwat))
+* Jia Yu
 
 ## Impact
 
