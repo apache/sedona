@@ -16,9 +16,7 @@
  */
 package org.datasyslab.geosparkviz.core;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -34,12 +32,10 @@ import org.datasyslab.geospark.spatialRDD.SpatialRDD;
 import org.datasyslab.geosparkviz.utils.ColorizeOption;
 import org.datasyslab.geosparkviz.utils.Pixel;
 import org.datasyslab.geosparkviz.utils.RasterizationUtils;
-import org.jfree.graphics2d.svg.SVGGraphics2D;
 import scala.Tuple2;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -174,11 +170,6 @@ public abstract class VisualizationOperator
     /*
      * Parameters determine raster image
      */
-
-    /**
-     * The generate vector image.
-     */
-    protected boolean generateVectorImage = false;
     
 
     /**
@@ -315,10 +306,7 @@ public abstract class VisualizationOperator
         this.resolutionY = resolutionY;
         this.datasetBoundary = datasetBoundary;
         this.reverseSpatialCoordinate = reverseSpatialCoordinate;
-        this.generateVectorImage = generateVectorImage;
         this.parallelRenderImage = parallelRenderImage;
-
-        if (this.generateVectorImage) { return; }
         /*
          * Variables below control how to initialize a raster image
          */
@@ -553,53 +541,29 @@ public abstract class VisualizationOperator
     protected boolean Colorize()
     {
         logger.info("[GeoSparkViz][Colorize][Start]");
-
-        if (this.generateVectorImage) {
-            if (this.maxPixelCount < 0) {
-                this.maxPixelCount = this.distributedVectorObjects.max(new VectorObjectCountComparator())._2;
-            }
-            final Double maxWeight = this.maxPixelCount;
-            final Double minWeight = 0.0;
-            this.distributedVectorColors = this.distributedVectorObjects.mapValues(new Function<Double, Color>()
-            {
-
-                @Override
-                public Color call(Double objectCount)
-                        throws Exception
-                {
-
-                    Long normalizedObjectCount = new Double((objectCount - minWeight) * 255 / (maxWeight - minWeight)).longValue();
-                    Color objectColor = EncodeToColor(normalizedObjectCount.intValue());
-                    return objectColor;
-                }
-            });
+        if (this.maxPixelCount < 0) {
+            this.maxPixelCount = this.distributedRasterCountMatrix.max(new RasterPixelCountComparator())._2;
         }
-        else {
-            if (this.maxPixelCount < 0) {
-                this.maxPixelCount = this.distributedRasterCountMatrix.max(new RasterPixelCountComparator())._2;
-            }
-            final Double maxWeight = this.maxPixelCount;
-            logger.info("[GeoSparkViz][Colorize]maxCount is " + maxWeight);
-            final Double minWeight = 0.0;
-            this.distributedRasterColorMatrix = this.distributedRasterCountMatrix.mapValues(new Function<Double, Integer>()
+        final Double maxWeight = this.maxPixelCount;
+        logger.info("[GeoSparkViz][Colorize]maxCount is " + maxWeight);
+        final Double minWeight = 0.0;
+        this.distributedRasterColorMatrix = this.distributedRasterCountMatrix.mapValues(new Function<Double, Integer>()
+        {
+
+            @Override
+            public Integer call(Double pixelCount)
+                    throws Exception
             {
-
-                @Override
-                public Integer call(Double pixelCount)
-                        throws Exception
-                {
-                    Double currentPixelCount = pixelCount;
-                    if (currentPixelCount > maxWeight) {
-                        currentPixelCount = maxWeight;
-                    }
-                    Double normalizedPixelCount = (currentPixelCount - minWeight) * 255 / (maxWeight - minWeight);
-                    Integer pixelColor = EncodeToRGB(normalizedPixelCount.intValue());
-                    return pixelColor;
+                Double currentPixelCount = pixelCount;
+                if (currentPixelCount > maxWeight) {
+                    currentPixelCount = maxWeight;
                 }
-            });
-            //logger.debug("[GeoSparkViz][Colorize]output count "+this.distributedRasterColorMatrix.count());
-        }
-
+                Double normalizedPixelCount = (currentPixelCount - minWeight) * 255 / (maxWeight - minWeight);
+                Integer pixelColor = EncodeToRGB(normalizedPixelCount.intValue());
+                return pixelColor;
+            }
+        });
+        //logger.debug("[GeoSparkViz][Colorize]output count "+this.distributedRasterColorMatrix.count());
         logger.info("[GeoSparkViz][Colorize][Stop]");
         return true;
     }
@@ -615,87 +579,7 @@ public abstract class VisualizationOperator
             throws Exception
     {
         logger.info("[GeoSparkViz][RenderImage][Start]");
-        if (this.generateVectorImage) {
-            this.distributedVectorImage = this.distributedVectorColors.mapToPair(new PairFunction<Tuple2<Object, Color>, Integer, String>()
-            {
-
-                @Override
-                public Tuple2<Integer, String> call(Tuple2<Object, Color> color)
-                        throws Exception
-                {
-                    SVGGraphics2D g2 = new SVGGraphics2D(resolutionX, resolutionY);
-                    if (color._1() instanceof Point) {
-                        g2.setPaint(color._2());
-                        Ellipse2D circle = new Ellipse2D.Double(((Point) color._1()).getCoordinate().x, ((Point) color._1()).getCoordinate().y, 1, 1);
-                        g2.fill(circle);
-                        String svgBody = g2.getSVGBody();
-                        return new Tuple2<Integer, String>(1, svgBody);
-                    }
-                    else if (color._1() instanceof Polygon) {
-                        g2.setPaint(color._2());
-                        Coordinate[] coordinates = ((Polygon) color._1()).getCoordinates();
-                        /*
-                         * JTS polygon has one extra coordinate at the end. This coordinate is same with the first coordinate.
-                         * But AWT.polygon does not need this extra coordinate.
-                         */
-                        int[] xPoints = new int[coordinates.length - 1];
-                        int[] yPoints = new int[coordinates.length - 1];
-                        for (int i = 0; i < coordinates.length - 1; i++) {
-                            xPoints[i] = (int) coordinates[i].x;
-                            yPoints[i] = (int) coordinates[i].y;
-                        }
-                        if (onlyDrawOutline) {
-                            g2.drawPolygon(xPoints, yPoints, coordinates.length - 1);
-                        }
-                        else {
-                            g2.fillPolygon(xPoints, yPoints, coordinates.length - 1);
-                        }
-                        return new Tuple2<Integer, String>(1, g2.getSVGBody());
-                    }
-                    else if (color._1() instanceof LineString) {
-                        g2.setPaint(color._2());
-                        Coordinate[] coordinates = ((LineString) color._1()).getCoordinates();
-                        int[] xPoints = new int[coordinates.length];
-                        int[] yPoints = new int[coordinates.length];
-                        for (int i = 0; i < coordinates.length; i++) {
-                            xPoints[i] = (int) coordinates[i].x;
-                            yPoints[i] = (int) coordinates[i].y;
-                        }
-                        g2.drawPolyline(xPoints, yPoints, coordinates.length);
-                        return new Tuple2<Integer, String>(1, g2.getSVGBody());
-                    }
-                    else {
-                        throw new Exception("[GeoSparkViz][RenderImage] Unsupported spatial object types. GeoSparkViz only supports Point, Polygon, LineString");
-                    }
-                }
-            });
-            /*
-             * Add SVG xml file header and footer to the distributed svg file
-             */
-            List<Tuple2<Integer, String>> svgHeaderFooter = new ArrayList<Tuple2<Integer, String>>();
-            SVGGraphics2D g2 = new SVGGraphics2D(resolutionX, resolutionY);
-            svgHeaderFooter.add(new Tuple2<Integer, String>(0, g2.getSVGHeader()));
-            svgHeaderFooter.add(new Tuple2<Integer, String>(2, g2.getSVGFooter()));
-            JavaPairRDD<Integer, String> distributedSVGHeaderFooter = sparkContext.parallelizePairs(svgHeaderFooter);
-            this.distributedVectorImage = this.distributedVectorImage.union(distributedSVGHeaderFooter);
-            this.distributedVectorImage = this.distributedVectorImage.sortByKey();
-            if (this.parallelRenderImage == true) {
-                return true;
-            }
-
-            JavaRDD<String> distributedVectorImageNoKey = this.distributedVectorImage.map(new Function<Tuple2<Integer, String>, String>()
-            {
-
-                @Override
-                public String call(Tuple2<Integer, String> vectorObject)
-                        throws Exception
-                {
-                    return vectorObject._2();
-                }
-            });
-            this.vectorImage = distributedVectorImageNoKey.collect();
-        }
-        else if (this.parallelRenderImage == true && this.generateVectorImage == false) {
+        if (this.parallelRenderImage == true) {
             if (this.hasBeenSpatialPartitioned == false) {
                 this.spatialPartitioningWithoutDuplicates();
                 this.hasBeenSpatialPartitioned = true;
@@ -731,7 +615,7 @@ public abstract class VisualizationOperator
                     });
             //logger.debug("[GeoSparkViz][Render]output count "+this.distributedRasterImage.count());
         }
-        else if (this.parallelRenderImage == false && this.generateVectorImage == false) {
+        else if (this.parallelRenderImage == false) {
             // Draw full size image in parallel
             this.distributedRasterImage = this.distributedRasterColorMatrix.mapPartitionsToPair(
                     new PairFlatMapFunction<Iterator<Tuple2<Pixel, Integer>>, Integer, ImageSerializableWrapper>()
@@ -931,83 +815,43 @@ public abstract class VisualizationOperator
     {
         logger.info("[GeoSparkViz][Rasterize][Start]");
         JavaRDD<Object> rawSpatialRDD = spatialRDD.rawSpatialRDD;
-        if (generateVectorImage) {
-            this.distributedVectorObjects = rawSpatialRDD.flatMapToPair(new PairFlatMapFunction<Object, Object, Double>()
+        JavaPairRDD<Pixel, Double> spatialRDDwithPixelId = rawSpatialRDD.flatMapToPair(new PairFlatMapFunction<Object, Pixel, Double>()
+        {
+            @Override
+            public Iterator<Tuple2<Pixel, Double>> call(Object spatialObject)
+                    throws Exception
             {
-                @Override
-                public Iterator<Tuple2<Object, Double>> call(Object spatialObject)
-                        throws Exception
-                {
-                    GeometryFactory geometryFactory = new GeometryFactory();
-                    List<Tuple2<Object, Double>> result = new ArrayList<Tuple2<Object, Double>>();
-                    if (spatialObject instanceof Point) {
-                        if (!datasetBoundary.covers(((Point) spatialObject).getEnvelopeInternal())) { return result.iterator(); }
-                        Coordinate coordinate = RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, ((Point) spatialObject).getCoordinate(), reverseSpatialCoordinate, false, true);
-                        Point rasterizedObject = geometryFactory.createPoint(coordinate);
-                        if (colorizeOption == ColorizeOption.EARTHOBSERVATION) {
-                            result.add(new Tuple2<Object, Double>(rasterizedObject, ((Point) spatialObject).getCoordinate().z));
-                        }
-                        else {
-                            result.add(new Tuple2<Object, Double>(rasterizedObject, new Double(1.0)));
-                        }
-                        return result.iterator();
-                    }
-                    else if (spatialObject instanceof Polygon) {
-                        if (!datasetBoundary.covers(((Polygon) spatialObject).getEnvelopeInternal())) { return result.iterator(); }
-                        Coordinate[] spatialCoordinates = RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, ((Polygon) spatialObject).getCoordinates(), reverseSpatialCoordinate, false, true);
-                        result.add(new Tuple2<Object, Double>(geometryFactory.createPolygon(spatialCoordinates), new Double(1.0)));
-                        return result.iterator();
-                    }
-                    else if (spatialObject instanceof LineString) {
-                        if (!datasetBoundary.covers(((LineString) spatialObject).getEnvelopeInternal())) { return result.iterator(); }
-                        Coordinate[] spatialCoordinates = RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, ((LineString) spatialObject).getCoordinates(), reverseSpatialCoordinate, false, true);
-                        result.add(new Tuple2<Object, Double>(geometryFactory.createLineString(spatialCoordinates), new Double(1.0)));
-                        return result.iterator();
-                    }
-                    else {
-                        throw new Exception("[GeoSparkViz][Rasterize] Unsupported spatial object types. GeoSparkViz only supports Point, Polygon, LineString");
-                    }
-                }
-            });
-        }
-        else {
-            JavaPairRDD<Pixel, Double> spatialRDDwithPixelId = rawSpatialRDD.flatMapToPair(new PairFlatMapFunction<Object, Pixel, Double>()
-            {
-                @Override
-                public Iterator<Tuple2<Pixel, Double>> call(Object spatialObject)
-                        throws Exception
-                {
 
-                    if (spatialObject instanceof Point) {
-                        return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (Point) spatialObject, colorizeOption, reverseSpatialCoordinate).iterator();
-                    }
-                    else if (spatialObject instanceof Polygon) {
-                        return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (Polygon) spatialObject, reverseSpatialCoordinate).iterator();
-                    }
-                    else if (spatialObject instanceof LineString) {
-                        return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (LineString) spatialObject, reverseSpatialCoordinate).iterator();
-                    }
-                    else {
-                        throw new Exception("[GeoSparkViz][Rasterize] Unsupported spatial object types. GeoSparkViz only supports Point, Polygon, LineString");
-                    }
+                if (spatialObject instanceof Point) {
+                    return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (Point) spatialObject, colorizeOption, reverseSpatialCoordinate).iterator();
                 }
-            });
-            //JavaPairRDD<Integer, Double> originalImage = sparkContext.parallelizePairs(this.countMatrix);
-            //spatialRDDwithPixelId = spatialRDDwithPixelId.union(originalImage);
-            spatialRDDwithPixelId = spatialRDDwithPixelId.filter(new Function<Tuple2<Pixel, Double>, Boolean>()
+                else if (spatialObject instanceof Polygon) {
+                    return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (Polygon) spatialObject, reverseSpatialCoordinate).iterator();
+                }
+                else if (spatialObject instanceof LineString) {
+                    return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (LineString) spatialObject, reverseSpatialCoordinate).iterator();
+                }
+                else {
+                    throw new Exception("[GeoSparkViz][Rasterize] Unsupported spatial object types. GeoSparkViz only supports Point, Polygon, LineString");
+                }
+            }
+        });
+        //JavaPairRDD<Integer, Double> originalImage = sparkContext.parallelizePairs(this.countMatrix);
+        //spatialRDDwithPixelId = spatialRDDwithPixelId.union(originalImage);
+        spatialRDDwithPixelId = spatialRDDwithPixelId.filter(new Function<Tuple2<Pixel, Double>, Boolean>()
+        {
+            @Override
+            public Boolean call(Tuple2<Pixel, Double> pixelCount)
+                    throws Exception
             {
-                @Override
-                public Boolean call(Tuple2<Pixel, Double> pixelCount)
-                        throws Exception
-                {
-                    if (pixelCount._1().getX() < 0 || pixelCount._1().getX() > resolutionX || pixelCount._1().getY() < 0 || pixelCount._1().getY() > resolutionY) {
-                        return false;
-                    }
-                    else {
-                        return true;
-                    }
+                if (pixelCount._1().getX() < 0 || pixelCount._1().getX() > resolutionX || pixelCount._1().getY() < 0 || pixelCount._1().getY() > resolutionY) {
+                    return false;
                 }
-            });
+                else {
+                    return true;
+                }
+            }
+        });
 
 		/*
         spatialRDDwithPixelId = spatialRDDwithPixelId.reduceByKey(new Function2<Double,Double,Double>()
@@ -1027,9 +871,8 @@ public abstract class VisualizationOperator
 			}
 		});
 		*/
-            this.distributedRasterCountMatrix = spatialRDDwithPixelId;
-            //logger.debug("[GeoSparkViz][Rasterize]output count "+this.distributedRasterCountMatrix.count());
-        }
+        this.distributedRasterCountMatrix = spatialRDDwithPixelId;
+        //logger.debug("[GeoSparkViz][Rasterize]output count "+this.distributedRasterCountMatrix.count());
         logger.info("[GeoSparkViz][Rasterize][Stop]");
         return this.distributedRasterCountMatrix;
     }
@@ -1046,50 +889,32 @@ public abstract class VisualizationOperator
             JavaPairRDD<Polygon, Long> spatialPairRDD, boolean useSparkDefaultPartition)
     {
         logger.info("[GeoSparkViz][Rasterize][Start]");
-        if (generateVectorImage) {
-            this.onlyDrawOutline = false;
-            this.distributedVectorObjects = spatialPairRDD.flatMapToPair(new PairFlatMapFunction<Tuple2<Polygon, Long>, Object, Double>()
+        JavaPairRDD<Pixel, Double> spatialRDDwithPixelId = spatialPairRDD.flatMapToPair(new PairFlatMapFunction<Tuple2<Polygon, Long>, Pixel, Double>()
+        {
+            @Override
+            public Iterator<Tuple2<Pixel, Double>> call(Tuple2<Polygon, Long> spatialObject)
+                    throws Exception
             {
-                @Override
-                public Iterator<Tuple2<Object, Double>> call(Tuple2<Polygon, Long> spatialObject)
-                        throws Exception
-                {
-                    GeometryFactory geometryFactory = new GeometryFactory();
-                    List<Tuple2<Object, Double>> result = new ArrayList<Tuple2<Object, Double>>();
-                    if (!datasetBoundary.covers(((Polygon) spatialObject._1()).getEnvelopeInternal())) { return result.iterator(); }
-                    Coordinate[] spatialCoordinates = RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, ((Polygon) spatialObject._1()).getCoordinates(), reverseSpatialCoordinate, false, true);
-                    result.add(new Tuple2<Object, Double>(geometryFactory.createPolygon(spatialCoordinates), new Double(spatialObject._2())));
-                    return result.iterator();
-                }
-            });
-        }
-        else {
-            JavaPairRDD<Pixel, Double> spatialRDDwithPixelId = spatialPairRDD.flatMapToPair(new PairFlatMapFunction<Tuple2<Polygon, Long>, Pixel, Double>()
-            {
-                @Override
-                public Iterator<Tuple2<Pixel, Double>> call(Tuple2<Polygon, Long> spatialObject)
-                        throws Exception
-                {
-                    return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (Polygon) spatialObject._1(), reverseSpatialCoordinate, new Double(spatialObject._2())).iterator();
-                }
-            });
-            //JavaPairRDD<Pixel, Double> originalImage = sparkContext.parallelizePairs(this.countMatrix);
-            //JavaPairRDD<Integer,Double> completeSpatialRDDwithPixelId = spatialRDDwithPixelId.union(originalImage);
+                return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (Polygon) spatialObject._1(), reverseSpatialCoordinate, new Double(spatialObject._2())).iterator();
+            }
+        });
+        //JavaPairRDD<Pixel, Double> originalImage = sparkContext.parallelizePairs(this.countMatrix);
+        //JavaPairRDD<Integer,Double> completeSpatialRDDwithPixelId = spatialRDDwithPixelId.union(originalImage);
 
-            spatialRDDwithPixelId = spatialRDDwithPixelId.filter(new Function<Tuple2<Pixel, Double>, Boolean>()
+        spatialRDDwithPixelId = spatialRDDwithPixelId.filter(new Function<Tuple2<Pixel, Double>, Boolean>()
+        {
+            @Override
+            public Boolean call(Tuple2<Pixel, Double> pixelCount)
+                    throws Exception
             {
-                @Override
-                public Boolean call(Tuple2<Pixel, Double> pixelCount)
-                        throws Exception
-                {
-                    if (pixelCount._1().getX() < 0 || pixelCount._1().getX() >= resolutionX || pixelCount._1().getY() < 0 || pixelCount._1().getY() >= resolutionY) {
-                        return false;
-                    }
-                    else {
-                        return true;
-                    }
+                if (pixelCount._1().getX() < 0 || pixelCount._1().getX() >= resolutionX || pixelCount._1().getY() < 0 || pixelCount._1().getY() >= resolutionY) {
+                    return false;
                 }
-            });
+                else {
+                    return true;
+                }
+            }
+        });
 
             /*
 			spatialRDDwithPixelId = spatialRDDwithPixelId.reduceByKey(new Function2<Double,Double,Double>()
@@ -1107,9 +932,8 @@ public abstract class VisualizationOperator
 			});
 			*/
 
-            this.distributedRasterCountMatrix = spatialRDDwithPixelId;
-            //logger.debug("[GeoSparkViz][Rasterize]output count "+this.distributedRasterCountMatrix.count());
-        }
+        this.distributedRasterCountMatrix = spatialRDDwithPixelId;
+        //logger.debug("[GeoSparkViz][Rasterize]output count "+this.distributedRasterCountMatrix.count());
         logger.info("[GeoSparkViz][Rasterize][Stop]");
         return this.distributedRasterCountMatrix;
     }
