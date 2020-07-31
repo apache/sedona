@@ -39,7 +39,7 @@ object VizPartitioner {
     * @return
     */
   def apply(dataFrame: DataFrame, zoomLevel:Int, spatialColName: String, boundary: Envelope): DataFrame = {
-    val samples = dataFrame.sample(0.01).select(spatialColName).collect().map(f => f.getAs[Pixel](0).getEnvelopeInternal).toList.asJava
+    val samples = dataFrame.sample(false, 0.01).select(spatialColName).collect().map(f => f.getAs[Pixel](0).getEnvelopeInternal).toList.asJava
     val numberParts = Math.pow(4, zoomLevel*1.0).intValue()
 
     // Prepare the secondary partitioner
