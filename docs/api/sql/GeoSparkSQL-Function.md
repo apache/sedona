@@ -35,7 +35,8 @@ Format: `ST_Envelope (A:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```
+
+```SQL
 SELECT ST_Envelope(polygondf.countyshape)
 FROM polygondf
 ```
@@ -281,22 +282,23 @@ Spark SQL example:
 ```SQL
 SELECT ST_GeometryType(polygondf.countyshape)
 FROM polygondf
-````
+```
 
 ## ST_LineMerge
 
 Introduction: Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.
 
-Note: Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If the MultiLineString can't be merged, the original MULTILINESTRING is returned.
+!!!note
+    Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If the MultiLineString can't be merged, the original MULTILINESTRING is returned.
 
 Format: `ST_LineMerge (A:geometry)`
 
 Since: `v1.3.2`
 
-````
+```SQL
 SELECT ST_LineMerge(geometry)
 FROM df
-````
+```
 
 ## ST_Azimuth
 
@@ -308,11 +310,10 @@ Since: `v1.3.2`
 
 Spark SQL example:
 ```SQL
-
 SELECT ST_Azimuth(ST_POINT(0.0 25.0), ST_POINT(0.0 0.0))
-
-3.141592653589793
 ```
+
+Output: `3.141592653589793`
 
 ## ST_X
 
@@ -325,9 +326,8 @@ Since: `v1.3.2`
 Spark SQL example:
 ```SQL
 SELECT ST_X(ST_POINT(0.0 25.0))
-
-0.0
 ```
+Output: `0.0`
 
 ## ST_Y
 
@@ -340,9 +340,9 @@ Since: `v1.3.2`
 Spark SQL example:
 ```SQL
 SELECT ST_Y(ST_POINT(0.0 25.0))
-
-25.0
 ```
+
+Output: `25.0`
 
 ## ST_StartPoint
 
@@ -355,9 +355,9 @@ Since: `v1.3.2`
 Spark SQL example:
 ```SQL
 SELECT ST_StartPoint(ST_GeomFromText('LINESTRING(100 150,50 60, 70 80, 160 170)'))
-
-POINT(100 150)
 ```
+
+Output: `POINT(100 150)`
 
 ## ST_EndPoint
 
@@ -370,10 +370,9 @@ Since: `v1.3.2`
 Spark SQL example:
 ```SQL
 SELECT ST_EndPoint(ST_GeomFromText('LINESTRING(100 150,50 60, 70 80, 160 170)'))
-
-POINT(160 170)
 ```
 
+Output: `POINT(160 170)`
 
 ## ST_Boundary
 
@@ -386,9 +385,9 @@ Since: `v1.3.2`
 Spark SQL example:
 ```SQL
 SELECT ST_Boundary(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
-
-LINESTRING (1 1, 0 0, -1 1, 1 1)
 ```
+
+Output: `LINESTRING (1 1, 0 0, -1 1, 1 1)`
 
 ## ST_ExteriorRing
 
@@ -401,9 +400,9 @@ Since: `v1.3.2`
 Spark SQL example:
 ```SQL
 SELECT ST_ExteriorRing(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
-
-LINESTRING (0 0, 1 1, 1 2, 1 1, 0 0)
 ```
+
+Output: `LINESTRING (0 0, 1 1, 1 2, 1 1, 0 0)`
 
 ## ST_GeometryN
 
@@ -416,10 +415,9 @@ Since: `v1.3.2`
 Spark SQL example:
 ```SQL
 SELECT ST_GeometryN(ST_GeomFromText('MULTIPOINT((1 2), (3 4), (5 6), (8 9))'), 1)
-
-POINT (3 4)
 ```
 
+Output: `POINT (3 4)`
 
 ## ST_InteriorRingN
 
@@ -432,9 +430,9 @@ Since: `v1.3.2`
 Spark SQL example:
 ```SQL
 SELECT ST_InteriorRingN(ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1), (1 3, 2 3, 2 4, 1 4, 1 3), (3 3, 4 3, 4 4, 3 4, 3 3))'), 0)
-
-LINESTRING (1 1, 2 1, 2 2, 1 2, 1 1)
 ```
+
+Output: `LINESTRING (1 1, 2 1, 2 2, 1 2, 1 1)`
 
 ## ST_Dump
 
@@ -448,9 +446,9 @@ Since: `v1.3.2`
 Spark SQL example:
 ```SQL
 SELECT ST_Dump(ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))'))
-
-[POINT (10 40), POINT (40 30), POINT (20 20), POINT (30 10)]
 ```
+
+Output: [POINT (10 40), POINT (40 30), POINT (20 20), POINT (30 10)]
 
 ## ST_DumpPoints
 
@@ -462,11 +460,11 @@ Since: `v1.3.2`
 
 Spark SQL example:
 ```SQL
-
-SELECT ST_DumpPoints(ST_GeomFromText('LINESTRING (0 0, 1 1, 1 0)'))
-
-[POINT (0 0), POINT (0 1), POINT (1 1), POINT (1 0), POINT (0 0)] 
+SELECT ST_DumpPoints(ST_GeomFromText('LINESTRING (0 0, 1 1, 1 0)')) 
 ```
+
+Output: `[POINT (0 0), POINT (0 1), POINT (1 1), POINT (1 0), POINT (0 0)]`
+
 
 ## ST_IsClosed
 
@@ -479,9 +477,9 @@ Since: `v1.3.2`
 Spark SQL example:
 ```SQL
 SELECT ST_IsClosed(ST_GeomFromText('LINESTRING(0 0, 1 1, 1 0)'))
-
-false
 ```
+
+Output: `false`
 
 ## ST_NumInteriorRings
 
@@ -494,9 +492,9 @@ Since: `v1.3.2`
 Spark SQL example:
 ```SQL
 SELECT ST_NumInteriorRings(ST_GeomFromText('POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))'))
-
-1
 ```
+
+Output: `1`
 
 ## ST_AddPoint
 
@@ -512,12 +510,15 @@ Spark SQL example:
 ```SQL
 SELECT ST_AddPoint(ST_GeomFromText("LINESTRING(0 0, 1 1, 1 0)"), ST_GeomFromText("Point(21 52)"), 1)
 
-LINESTRING(0 0, 21 52, 1 1, 1 0)
-
 SELECT ST_AddPoint(ST_GeomFromText("Linestring(0 0, 1 1, 1 0)"), ST_GeomFromText("Point(21 52)"))
+```
 
+Output:
+```
+LINESTRING(0 0, 21 52, 1 1, 1 0)
 LINESTRING(0 0, 1 1, 1 0, 21 52)
 ```
+
 
 ## ST_RemovePoint
 
@@ -532,9 +533,9 @@ Since: `v1.3.2`
 Spark SQL example:
 ```SQL
 SELECT ST_RemovePoint(ST_GeomFromText("LINESTRING(0 0, 1 1, 1 0)"), 1)
-
-LINESTRING(0 0, 1 0)
 ```
+
+Output: `LINESTRING(0 0, 1 0)`
 
 ## ST_IsRing
 
@@ -547,9 +548,9 @@ Since: `v1.3.2`
 Spark SQL example:
 ```SQL
 SELECT ST_IsRing(ST_GeomFromText("LINESTRING(0 0, 0 1, 1 1, 1 0, 0 0)"))
-
-true
 ```
+
+Output: `true`
 
 ## ST_NumGeometries
 
