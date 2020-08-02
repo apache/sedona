@@ -115,7 +115,7 @@ Run the following command to assign colors for pixels based on their weights.
 
 ```sql
 CREATE OR REPLACE TEMP VIEW pixelaggregates AS
-SELECT ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates)) as color
+SELECT pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates)) as color
 FROM pixelaggregates
 ```
 
@@ -139,7 +139,7 @@ This DataFrame will contain a Image type column which has only one image.
 Fetch the image from the previous DataFrame
 
 ```
-var image = spark.table("images").take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage
+var image = sparkSession.table("images").take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage
 ```
 
 Use GeoSparkViz ImageGenerator to store this image on disk.
