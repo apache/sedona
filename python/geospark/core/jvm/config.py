@@ -65,8 +65,9 @@ class SparkJars:
         java_spark_conf = spark_conf._jconf
         try:
             used_jar_files = java_spark_conf.get("spark.jars")
-        except Exception as e:
-            used_jar_files = ",".join(os.listdir(os.path.join(os.environ["SPARK_HOME"], "jars")))
+        finally:
+            if not used_jar_files:
+                used_jar_files = ",".join(os.listdir(os.path.join(os.environ["SPARK_HOME"], "jars")))
         return used_jar_files
 
     @property

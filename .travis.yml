@@ -12,16 +12,26 @@ before_install:
   - sudo pip3 install -U wheel
   - sudo pip3 install -U virtualenvwrapper
 install:
-- python3 -m pip install pipenv
-- wget https://archive.apache.org/dist/spark/spark-2.4.4/spark-2.4.4-bin-hadoop2.7.tgz
-- tar -xzf spark-2.4.4-bin-hadoop2.7.tgz
-- rm spark-2.4.4-bin-hadoop2.7.tgz
+  - python3 -m pip install pipenv
+  - wget https://archive.apache.org/dist/spark/spark-3.0.0/spark-3.0.0-bin-hadoop2.7.tgz
+  - tar -xzf spark-3.0.0-bin-hadoop2.7.tgz
+  - rm spark-3.0.0-bin-hadoop2.7.tgz
 
 script:
   - (cd python;pipenv install --dev) 
-  - export SPARK_HOME=$PWD/spark-2.4.4-bin-hadoop2.7
+  - export SPARK_HOME=$PWD/spark-3.0.0-bin-hadoop2.7
   - export PYTHONPATH=$SPARK_HOME/python
   - mvn -q clean install
-  - find core/target/ -iregex "core\/target\/geospark-[0-9]\.[0-9]\.[0-9]\.jar" -exec cp {} $SPARK_HOME/jars \;
-  - find sql/target/ -iregex "sql\/target\/geospark-sql_[0-9]\.[0-9]-[0-9]\.[0-9]\.[0-9]\.jar" -exec cp {} $SPARK_HOME/jars \;
+  - find core/target/ -iregex "core\/target\/geospark-[0-9]\.[0-9]\.[0-9]\(-SNAPSHOT\)?\.jar" -exec cp {} $SPARK_HOME/jars \;
+  - find sql/target/ -iregex "sql\/target\/geospark-sql_[0-9]\.[0-9]-[0-9]\.[0-9]\.[0-9]\(-SNAPSHOT\)?\.jar" -exec cp {} $SPARK_HOME/jars \;
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=com.googlecode.efficient-java-matrix-library:core:0.26
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=net.java.dev.jsr-275:jsr-275:1.0-beta-2
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-epsg-extension:17.0
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-epsg-hsql:17.0
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-main:17.0
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-metadata:17.0
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-opengis:17.0
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-referencing:17.0
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-shapefile:17.0
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.hsqldb:hsqldb:2.3.0
   - (cd python;pipenv run pytest tests)
