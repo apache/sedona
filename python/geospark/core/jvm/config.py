@@ -18,7 +18,9 @@ def compare_versions(version_a: str, version_b: str) -> bool:
             return False
 
         for ver_a, ver_b in zip(*version_numbers):
-            if int(ver_a) < int(ver_b):
+            if int(ver_a) > int(ver_b):
+                return True
+            elif int(ver_a) < int(ver_b):
                 return False
     else:
         return False
@@ -96,7 +98,8 @@ class GeoSparkMeta:
 
 
 if __name__ == "__main__":
-    assert not compare_versions("1.2.0", "1.1.5")
+    assert not compare_versions("1.1.5", "1.2.0")
+    assert compare_versions("1.2.0", "1.1.5")
     assert compare_versions("1.3.5", "1.2.0")
     assert not compare_versions("", "1.2.0")
     assert not compare_versions("1.3.5", "")

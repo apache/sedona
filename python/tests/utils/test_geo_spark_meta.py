@@ -5,7 +5,8 @@ from tests.test_base import TestBase
 class TestGeoSparkMeta(TestBase):
 
     def test_meta(self):
-        assert not compare_versions("1.2.0", "1.1.5")
+        assert not compare_versions("1.1.5", "1.2.0")
+        assert compare_versions("1.2.0", "1.1.5")
         assert compare_versions("1.3.5", "1.2.0")
         assert not compare_versions("", "1.2.0")
         assert not compare_versions("1.3.5", "")
