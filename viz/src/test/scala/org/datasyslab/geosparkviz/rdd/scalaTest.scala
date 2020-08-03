@@ -110,6 +110,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll{
       visualizationOperator.Visualize(sparkContext, spatialRDD)
       var imageGenerator = new ImageGenerator
       imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, scatterPlotOutputPath, ImageType.PNG)
+      /*
       visualizationOperator = new ScatterPlot(1000, 600, USMainLandBoundary, false, -1, -1, false, true)
       visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true)
       visualizationOperator.Visualize(sparkContext, spatialRDD)
@@ -120,6 +121,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll{
       visualizationOperator.Visualize(sparkContext, spatialRDD)
       imageGenerator = new ImageGenerator
       imageGenerator.SaveVectorImageAsLocalFile(visualizationOperator.distributedVectorImage, scatterPlotOutputPath + "-distributed", ImageType.SVG)
+      */
       true
     }
 

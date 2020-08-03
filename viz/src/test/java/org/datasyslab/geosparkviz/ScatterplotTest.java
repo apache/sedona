@@ -95,11 +95,13 @@ public class ScatterplotTest
         ImageGenerator imageGenerator = new ImageGenerator();
         imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/scatterplot/PointRDD", ImageType.PNG);
 
+        /*
         visualizationOperator = new ScatterPlot(1000, 600, USMainLandBoundary, false, true);
         visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
         visualizationOperator.Visualize(sparkContext, spatialRDD);
         imageGenerator = new ImageGenerator();
         imageGenerator.SaveVectorImageAsLocalFile(visualizationOperator.vectorImage, "./target/scatterplot/PointRDD", ImageType.SVG);
+        */
     }
 
     /**
@@ -141,11 +143,13 @@ public class ScatterplotTest
 
         imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.distributedRasterImage, scatterPlotOutputPath + "PointRDD-parallel-raster", ImageType.PNG);
 
+        /*
         visualizationOperator = new ScatterPlot(1000, 600, USMainLandBoundary, false, -1, -1, true, true);
         visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
         visualizationOperator.Visualize(sparkContext, spatialRDD);
         imageGenerator = new ImageGenerator();
         imageGenerator.SaveVectorImageAsLocalFile(visualizationOperator.distributedVectorImage, scatterPlotOutputPath + "PointRDD-parallel-vector", ImageType.SVG);
+        */
     }
 
     /**
@@ -164,11 +168,13 @@ public class ScatterplotTest
         ImageGenerator imageGenerator = new ImageGenerator();
         imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/scatterplot/RectangleRDD", ImageType.GIF);
 
+        /*
         visualizationOperator = new ScatterPlot(1000, 600, USMainLandBoundary, false, true);
         visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.RED, true);
         visualizationOperator.Visualize(sparkContext, spatialRDD);
         imageGenerator = new ImageGenerator();
         imageGenerator.SaveVectorImageAsLocalFile(visualizationOperator.vectorImage, "./target/scatterplot/RectangleRDD", ImageType.SVG);
+        */
     }
 
     /**
@@ -188,11 +194,13 @@ public class ScatterplotTest
         ImageGenerator imageGenerator = new ImageGenerator();
         imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/scatterplot/PolygonRDD", ImageType.GIF);
 
+        /*
         visualizationOperator = new ScatterPlot(1000, 600, USMainLandBoundary, false, true);
         visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
         visualizationOperator.Visualize(sparkContext, spatialRDD);
         imageGenerator = new ImageGenerator();
         imageGenerator.SaveVectorImageAsLocalFile(visualizationOperator.vectorImage, "./target/scatterplot/PolygonRDD", ImageType.SVG);
+        */
     }
 
     /**
@@ -214,10 +222,12 @@ public class ScatterplotTest
         ImageGenerator imageGenerator = new ImageGenerator();
         imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, "./target/scatterplot/LineStringRDD", ImageType.GIF);
 
+        /*
         visualizationOperator = new ScatterPlot(resolutionX, resolutionY, USMainLandBoundary, false, true);
         visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
         visualizationOperator.Visualize(sparkContext, spatialRDD);
         imageGenerator = new ImageGenerator();
         imageGenerator.SaveVectorImageAsLocalFile(visualizationOperator.vectorImage, "./target/scatterplot/LineStringRDD", ImageType.SVG);
+        */
     }
 }
