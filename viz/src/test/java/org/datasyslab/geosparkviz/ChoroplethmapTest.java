@@ -116,6 +116,7 @@ public class ChoroplethmapTest
         ImageGenerator imageGenerator = new ImageGenerator();
         imageGenerator.SaveRasterImageAsLocalFile(rasterOverlayOperator.backRasterImage, "./target/choroplethmap/PolygonRDD-combined", ImageType.GIF);
 
+        /*
         visualizationOperator = new ChoroplethMap(1000, 600, USMainLandBoundary, false, true);
         visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.RED, true);
         visualizationOperator.Visualize(sparkContext, joinResult);
@@ -133,5 +134,6 @@ public class ChoroplethmapTest
 
         imageGenerator = new ImageGenerator();
         imageGenerator.SaveVectorImageAsLocalFile(vectorOverlayOperator.backVectorImage, "./target/choroplethmap/PolygonRDD-combined", ImageType.SVG);
+        */
     }
 }
