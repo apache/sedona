@@ -2,7 +2,7 @@ import os
 
 import pyspark
 
-from geospark.core.jvm.config import compare_versions, GeoSparkMeta
+from geospark.core.jvm.config import is_greater_or_equal_version, GeoSparkMeta
 
 from geospark.core.formatMapper.geo_json_reader import GeoJsonReader
 from tests.test_base import TestBase
@@ -18,7 +18,7 @@ geo_json_with_invalid_geom_with_feature_property = os.path.join(tests_path, "res
 class TestGeoJsonReader(TestBase):
 
     def test_read_to_geometry_rdd(self):
-        if compare_versions(GeoSparkMeta.version, "1.2.0"):
+        if is_greater_or_equal_version(GeoSparkMeta.version, "1.2.0"):
             geo_json_rdd = GeoJsonReader.readToGeometryRDD(
                 self.sc,
                 geo_json_geom_with_feature_property
@@ -34,7 +34,7 @@ class TestGeoJsonReader(TestBase):
             assert geo_json_rdd.rawSpatialRDD.count() == 10
 
     def test_read_to_valid_geometry_rdd(self):
-        if compare_versions(GeoSparkMeta.version, "1.2.0"):
+        if is_greater_or_equal_version(GeoSparkMeta.version, "1.2.0"):
             geo_json_rdd = GeoJsonReader.readToGeometryRDD(
                 self.sc,
                 geo_json_geom_with_feature_property,
@@ -69,7 +69,7 @@ class TestGeoJsonReader(TestBase):
             assert geo_json_rdd.rawSpatialRDD.count() == 3
 
     def test_read_to_include_id_rdd(self):
-        if compare_versions(GeoSparkMeta.version, "1.2.0"):
+        if is_greater_or_equal_version(GeoSparkMeta.version, "1.2.0"):
             geo_json_rdd = GeoJsonReader.readToGeometryRDD(
                 self.sc,
                 geo_json_contains_id,
@@ -90,7 +90,7 @@ class TestGeoJsonReader(TestBase):
                 assert geo_json_rdd.fieldNames.__len__() == 3
 
     def test_read_to_geometry_rdd_invalid_syntax(self):
-        if compare_versions(GeoSparkMeta.version, "1.2.0"):
+        if is_greater_or_equal_version(GeoSparkMeta.version, "1.2.0"):
             geojson_rdd = GeoJsonReader.readToGeometryRDD(
                 self.sc,
                 geo_json_with_invalid_geom_with_feature_property,

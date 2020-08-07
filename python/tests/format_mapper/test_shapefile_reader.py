@@ -1,7 +1,7 @@
 import os
 
 from geospark.core.geom.envelope import Envelope
-from geospark.core.jvm.config import GeoSparkMeta, compare_versions
+from geospark.core.jvm.config import GeoSparkMeta, is_greater_or_equal_version
 from geospark.core.spatialOperator import RangeQuery
 from tests.tools import tests_path
 from geospark.core.formatMapper.shapefileParser import ShapefileReader
@@ -18,7 +18,7 @@ class TestShapeFileReader(TestBase):
             sc=self.sc, inputPath=undefined_type_shape_location
         )
 
-        if compare_versions(GeoSparkMeta.version, "1.2.0"):
+        if is_greater_or_equal_version(GeoSparkMeta.version, "1.2.0"):
             assert shape_rdd.fieldNames == ['LGA_CODE16', 'LGA_NAME16', 'STE_CODE16', 'STE_NAME16', 'AREASQKM16']
         assert shape_rdd.getRawSpatialRDD().count() == 545
 

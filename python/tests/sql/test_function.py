@@ -11,7 +11,7 @@ from shapely import wkt
 from shapely.wkt import loads
 
 from geospark import version
-from geospark.core.jvm.config import compare_versions
+from geospark.core.jvm.config import is_greater_or_equal_version
 from geospark.sql.types import GeometryType
 from tests.data import mixed_wkt_geometry_input_location, mixed_wkt_geometry_input_location_1
 from tests.sql.resource.sample_data import create_simple_polygons, create_sample_points, create_simple_polygons_df, \
@@ -228,7 +228,7 @@ class TestPredicateJoin(TestBase):
         wkt_df = self.spark.sql("select ST_AsText(countyshape) as wkt from polygondf")
         assert polygon_df.take(1)[0]["countyshape"].wkt == loads(wkt_df.take(1)[0]["wkt"]).wkt
 
-    @pytest.mark.skipif(compare_versions("1.2.0", version), reason="requires Geospark version above 1.2.0")
+    @pytest.mark.skipif(is_greater_or_equal_version("1.2.0", version), reason="requires Geospark version above 1.2.0")
     def test_st_n_points(self):
         if pyspark.version.__version__[:3] == "2.2":
             pass
@@ -236,7 +236,7 @@ class TestPredicateJoin(TestBase):
             test = self.spark.sql("SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
             assert test.take(1)[0][0] == 4
 
-    @pytest.mark.skipif(compare_versions("1.2.0", version), reason="requires Geospark version above 1.2.0")
+    @pytest.mark.skipif(is_greater_or_equal_version("1.2.0", version), reason="requires Geospark version above 1.2.0")
     def test_st_geometry_type(self):
         if pyspark.version.__version__[:3] == "2.2":
             pass
@@ -244,7 +244,7 @@ class TestPredicateJoin(TestBase):
             test = self.spark.sql("SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
             assert test.take(1)[0][0].upper() == "ST_LINESTRING"
 
-    @pytest.mark.skipif(compare_versions("1.3.1", version), reason="requires Geospark version above 1.3.1")
+    @pytest.mark.skipif(is_greater_or_equal_version("1.3.1", version), reason="requires Geospark version above 1.3.1")
     def test_st_azimuth(self):
         sample_points = create_sample_points(20)
         sample_pair_points = [[el, sample_points[1]] for el in sample_points]
@@ -274,7 +274,7 @@ class TestPredicateJoin(TestBase):
         azimuths = [[azimuth1 * 180 / math.pi, azimuth2 * 180 / math.pi] for azimuth1, azimuth2 in azimuth]
         assert azimuths[0] == [42.27368900609373, 222.27368900609372]
 
-    @pytest.mark.skipif(compare_versions("1.3.1", version), reason="requires Geospark version above 1.3.1")
+    @pytest.mark.skipif(is_greater_or_equal_version("1.3.1", version), reason="requires Geospark version above 1.3.1")
     def test_st_x(self):
         point_df = create_sample_points_df(self.spark, 5)
         polygon_df = create_sample_polygons_df(self.spark, 5)
@@ -293,7 +293,7 @@ class TestPredicateJoin(TestBase):
 
         assert(not polygons.count())
 
-    @pytest.mark.skipif(compare_versions("1.3.1", version), reason="requires Geospark version above 1.3.1")
+    @pytest.mark.skipif(is_greater_or_equal_version("1.3.1", version), reason="requires Geospark version above 1.3.1")
     def test_st_y(self):
         point_df = create_sample_points_df(self.spark, 5)
         polygon_df = create_sample_polygons_df(self.spark, 5)
@@ -312,7 +312,7 @@ class TestPredicateJoin(TestBase):
 
         assert(not polygons.count())
 
-    @pytest.mark.skipif(compare_versions("1.3.1", version), reason="requires Geospark version above 1.3.1")
+    @pytest.mark.skipif(is_greater_or_equal_version("1.3.1", version), reason="requires Geospark version above 1.3.1")
     def test_st_start_point(self):
 
         point_df = create_sample_points_df(self.spark, 5)
@@ -339,7 +339,7 @@ class TestPredicateJoin(TestBase):
 
         assert(not polygons.count())
 
-    @pytest.mark.skipif(compare_versions("1.3.1", version), reason="requires Geospark version above 1.3.1")
+    @pytest.mark.skipif(is_greater_or_equal_version("1.3.1", version), reason="requires Geospark version above 1.3.1")
     def test_st_end_point(self):
         linestring_dataframe = create_sample_lines_df(self.spark, 5)
         other_geometry_dataframe = create_sample_points_df(self.spark, 5). \
@@ -363,7 +363,7 @@ class TestPredicateJoin(TestBase):
 
         assert(empty_dataframe.count() == 0)
 
-    @pytest.mark.skipif(compare_versions("1.3.1", version), reason="requires Geospark version above 1.3.1")
+    @pytest.mark.skipif(is_greater_or_equal_version("1.3.1", version), reason="requires Geospark version above 1.3.1")
     def test_st_boundary(self):
         wkt_list = [
             "LINESTRING(1 1,0 0, -1 1)",
@@ -392,7 +392,7 @@ class TestPredicateJoin(TestBase):
             "LINESTRING (1 1, 0 0, -1 1, 1 1)"
         ])
 
-    @pytest.mark.skipif(compare_versions("1.3.1", version), reason="requires Geospark version above 1.3.1")
+    @pytest.mark.skipif(is_greater_or_equal_version("1.3.1", version), reason="requires Geospark version above 1.3.1")
     def test_st_exterior_ring(self):
         polygon_df = create_simple_polygons_df(self.spark, 5)
         additional_wkt = "POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))"
@@ -413,7 +413,7 @@ class TestPredicateJoin(TestBase):
 
         assert(not empty_df.count())
 
-    @pytest.mark.skipif(compare_versions("1.3.1", version), reason="requires Geospark version above 1.3.1")
+    @pytest.mark.skipif(is_greater_or_equal_version("1.3.1", version), reason="requires Geospark version above 1.3.1")
     def test_st_geometry_n(self):
         data_frame = self.__wkt_list_to_data_frame(["MULTIPOINT((1 2), (3 4), (5 6), (8 9))"])
         wkts = [data_frame.selectExpr(f"ST_GeometryN(geom, {i}) as geom").selectExpr("st_asText(geom)").collect()[0][0]
@@ -421,7 +421,7 @@ class TestPredicateJoin(TestBase):
 
         assert(wkts == ["POINT (1 2)", "POINT (3 4)", "POINT (5 6)", "POINT (8 9)"])
 
-    @pytest.mark.skipif(compare_versions("1.3.1", version), reason="requires Geospark version above 1.3.1")
+    @pytest.mark.skipif(is_greater_or_equal_version("1.3.1", version), reason="requires Geospark version above 1.3.1")
     def test_st_interior_ring_n(self):
         polygon_df = self.__wkt_list_to_data_frame(
             ["POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1), (1 3, 2 3, 2 4, 1 4, 1 3), (3 3, 4 3, 4 4, 3 4, 3 3))"]
@@ -439,7 +439,7 @@ class TestPredicateJoin(TestBase):
                           "LINESTRING (1 3, 2 3, 2 4, 1 4, 1 3)",
                           "LINESTRING (3 3, 4 3, 4 4, 3 4, 3 3)"])
 
-    @pytest.mark.skipif(compare_versions("1.3.1", version), reason="requires Geospark version above 1.3.1")
+    @pytest.mark.skipif(is_greater_or_equal_version("1.3.1", version), reason="requires Geospark version above 1.3.1")
     def test_st_dumps(self):
         expected_geometries = [
             "POINT (21 52)", "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))",
@@ -477,7 +477,7 @@ class TestPredicateJoin(TestBase):
 
         assert([geom_row[0] for geom_row in collected_geometries] == expected_geometries)
 
-    @pytest.mark.skipif(compare_versions("1.3.1", version), reason="requires Geospark version above 1.3.1")
+    @pytest.mark.skipif(is_greater_or_equal_version("1.3.1", version), reason="requires Geospark version above 1.3.1")
     def test_st_dump_points(self):
         expected_points = [
             "POINT (-112.506968 45.98186)",
@@ -501,7 +501,7 @@ class TestPredicateJoin(TestBase):
         collected_points = [geom_row[0] for geom_row in dumped_points.selectExpr("ST_AsText(geom)").collect()]
         assert(collected_points == expected_points)
 
-    @pytest.mark.skipif(compare_versions("1.3.1", version), reason="requires Geospark version above 1.3.1")
+    @pytest.mark.skipif(is_greater_or_equal_version("1.3.1", version), reason="requires Geospark version above 1.3.1")
     def test_st_is_closed(self):
         expected_result = [
             [1, True],
@@ -533,7 +533,7 @@ class TestPredicateJoin(TestBase):
         is_closed_collected = [[*row] for row in is_closed]
         assert(is_closed_collected == expected_result)
 
-    @pytest.mark.skipif(compare_versions("1.3.1", version), reason="requires Geospark version above 1.3.1")
+    @pytest.mark.skipif(is_greater_or_equal_version("1.3.1", version), reason="requires Geospark version above 1.3.1")
     def test_num_interior_ring(self):
         geometries = [
             (1, "Point(21 52)"),
@@ -554,7 +554,7 @@ class TestPredicateJoin(TestBase):
         collected_interior_rings = [[*row] for row in number_of_interior_rings.filter("num is not null").collect()]
         assert(collected_interior_rings == [[2, 0], [11, 1]])
 
-    @pytest.mark.skipif(compare_versions("1.3.1", version), reason="requires Geospark version above 1.3.1")
+    @pytest.mark.skipif(is_greater_or_equal_version("1.3.1", version), reason="requires Geospark version above 1.3.1")
     def test_st_add_point(self):
         geometry = [
             ("Point(21 52)", "Point(21 52)"),
@@ -576,7 +576,7 @@ class TestPredicateJoin(TestBase):
         ]
         assert(collected_geometries[0] == "LINESTRING (0 0, 1 1, 1 0, 21 52)")
 
-    @pytest.mark.skipif(compare_versions("1.3.1", version), reason="requires Geospark version above 1.3.1")
+    @pytest.mark.skipif(is_greater_or_equal_version("1.3.1", version), reason="requires Geospark version above 1.3.1")
     def test_st_remove_point(self):
         result_and_expected = [
             [self.calculate_st_remove("Linestring(0 0, 1 1, 1 0, 0 0)", 0), "LINESTRING (1 1, 1 0, 0 0)"],
@@ -592,7 +592,7 @@ class TestPredicateJoin(TestBase):
         for actual, expected in result_and_expected:
             assert(actual == expected)
 
-    @pytest.mark.skipif(compare_versions("1.3.1", version), reason="requires Geospark version above 1.3.1")
+    @pytest.mark.skipif(is_greater_or_equal_version("1.3.1", version), reason="requires Geospark version above 1.3.1")
     def test_st_is_ring(self):
         result_and_expected = [
             [self.calculate_st_is_ring("LINESTRING(0 0, 0 1, 1 0, 1 1, 0 0)"), False],

@@ -11,14 +11,16 @@ FORMAT = '%(asctime) %(message)s'
 logging.basicConfig(format=FORMAT)
 
 
-def compare_versions(version_a: str, version_b: str) -> bool:
+def is_greater_or_equal_version(version_a: str, version_b: str) -> bool:
     if all([version_b, version_a]):
         version_numbers = version_a.split("."), version_b.split(".")
         if any([version[0] == "" for version in version_numbers]):
             return False
 
         for ver_a, ver_b in zip(*version_numbers):
-            if int(ver_a) < int(ver_b):
+            if int(ver_a) > int(ver_b):
+                return True
+            elif int(ver_a) < int(ver_b):
                 return False
     else:
         return False
@@ -29,7 +31,7 @@ def since(version: str):
     def wrapper(function):
         def applier(*args, **kwargs):
             geo_spark_version = GeoSparkMeta.version
-            if not compare_versions(geo_spark_version, version):
+            if not is_greater_or_equal_version(geo_spark_version, version):
                 logging.warning(f"This function is not available for {geo_spark_version}, "
                                 f"please use version higher than {version}")
                 raise AttributeError(f"Not available before {version} geospark version")
@@ -96,7 +98,8 @@ class GeoSparkMeta:
 
 
 if __name__ == "__main__":
-    assert not compare_versions("1.2.0", "1.1.5")
-    assert compare_versions("1.3.5", "1.2.0")
-    assert not compare_versions("", "1.2.0")
-    assert not compare_versions("1.3.5", "")
+    assert not is_greater_or_equal_version("1.1.5", "1.2.0")
+    assert is_greater_or_equal_version("1.2.0", "1.1.5")
+    assert is_greater_or_equal_version("1.3.5", "1.2.0")
+    assert not is_greater_or_equal_version("", "1.2.0")
+    assert not is_greater_or_equal_version("1.3.5", "")

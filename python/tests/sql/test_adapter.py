@@ -12,7 +12,7 @@ from geospark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geospark.core.enums import FileDataSplitter, GridType, IndexType
 from geospark.core.formatMapper.shapefileParser.shape_file_reader import ShapefileReader
 from geospark.core.geom.envelope import Envelope
-from geospark.core.jvm.config import compare_versions
+from geospark.core.jvm.config import is_greater_or_equal_version
 from geospark.core.spatialOperator import JoinQuery
 from geospark.utils.adapter import Adapter
 from tests.data import geojson_input_location, shape_file_with_missing_trailing_input_location, \
@@ -42,7 +42,7 @@ class TestAdapter(TestBase):
         spatial_rdd.analyze()
         Adapter.toDf(spatial_rdd, self.spark).show()
 
-    @pytest.mark.skipif(compare_versions(version, "1.3.0"), reason="Depreciated after spark 1.2.0")
+    @pytest.mark.skipif(is_greater_or_equal_version(version, "1.3.0"), reason="Depreciated after spark 1.2.0")
     def test_read_csv_point_into_spatial_rdd_by_passing_coordinates(self):
         df = self.spark.read.format("csv").\
             option("delimiter", ",").\
@@ -64,7 +64,7 @@ class TestAdapter(TestBase):
         assert (Adapter.toDf(spatial_rdd, self.spark).columns.__len__() == 1)
         Adapter.toDf(spatial_rdd, self.spark).show()
 
-    @pytest.mark.skipif(compare_versions(version, "1.3.0"), reason="Depreciated after spark 1.2.0")
+    @pytest.mark.skipif(is_greater_or_equal_version(version, "1.3.0"), reason="Depreciated after spark 1.2.0")
     def test_read_csv_point_into_spatial_rdd_with_unique_id_by_passing_coordinates(self):
         df = self.spark.read.format("csv").\
             option("delimiter", ",").\
@@ -252,7 +252,7 @@ class TestAdapter(TestBase):
 
         return spatial_df
 
-    @pytest.mark.skipif(compare_versions(version, "1.3.0"), reason="Depreciated after spark 1.2.0")
+    @pytest.mark.skipif(is_greater_or_equal_version(version, "1.3.0"), reason="Depreciated after spark 1.2.0")
     def test_to_rdd_from_dataframe(self):
         spatial_df = self._create_spatial_point_table()
 
@@ -287,7 +287,7 @@ class TestAdapter(TestBase):
         assert spatial_rdd.approximateTotalCount == 121960
         assert spatial_rdd.boundaryEnvelope == Envelope(-179.147236, 179.475569, -14.548699, 71.35513400000001)
 
-    @pytest.mark.skipif(compare_versions(version, "1.3.0"), reason="Depreciated after spark 1.2.0")
+    @pytest.mark.skipif(is_greater_or_equal_version(version, "1.3.0"), reason="Depreciated after spark 1.2.0")
     def test_to_spatial_rdd_df_geom_column_id(self):
         df = self.spark.read.\
             format("csv").\
