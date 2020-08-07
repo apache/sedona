@@ -68,7 +68,11 @@ class SparkJars:
         try:
             used_jar_files = java_spark_conf.get("spark.jars")
         except Exception as e:
-            used_jar_files = ",".join(os.listdir(os.path.join(os.environ["SPARK_HOME"], "jars")))
+            logging.warning(f"Failed to get the value of spark.jars from SparkConf: {e}")
+        finally:
+            if not used_jar_files:
+                logging.info("Trying to get filenames from the $SPARK_HOME/jars directory")
+                used_jar_files = ",".join(os.listdir(os.path.join(os.environ["SPARK_HOME"], "jars")))
         return used_jar_files
 
     @property
