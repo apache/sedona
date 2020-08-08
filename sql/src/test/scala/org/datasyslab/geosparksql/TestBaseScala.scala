@@ -42,7 +42,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll{
     config("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName).
     master("local[*]").appName("geosparksqlScalaTest")
     .config("spark.sql.warehouse.dir", warehouseLocation)
-    //.enableHiveSupport()
+    .enableHiveSupport()
     .getOrCreate()
 
   import sparkSession.implicits._
