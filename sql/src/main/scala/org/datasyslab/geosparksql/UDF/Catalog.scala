@@ -16,8 +16,9 @@
  */
 package org.datasyslab.geosparksql.UDF
 
+import com.vividsolutions.jts.geom.Geometry
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
-import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
+import org.apache.spark.sql.expressions.{Aggregator}
 import org.apache.spark.sql.geosparksql.expressions._
 
 object Catalog {
@@ -76,7 +77,7 @@ object Catalog {
     ST_IsRing
   )
 
-  val aggregateExpressions:Seq[UserDefinedAggregateFunction] = Seq(
+  val aggregateExpressions:Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(
     new ST_Union_Aggr,
     new ST_Envelope_Aggr,
     new ST_Intersection_Aggr
