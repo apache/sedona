@@ -27,6 +27,9 @@
 package org.datasyslab.geosparksql
 
 import com.vividsolutions.jts.geom.{Coordinate, Geometry, GeometryFactory}
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+import org.apache.spark.sql.expressions.UserDefinedAggregator
+import org.apache.spark.sql.functions
 
 class aggregateFunctionTestScala extends TestBaseScala {
 
@@ -60,37 +63,37 @@ class aggregateFunctionTestScala extends TestBaseScala {
       var union = sparkSession.sql("select ST_Union_Aggr(polygondf.polygonshape) from polygondf")
       assert(union.take(1)(0).get(0).asInstanceOf[Geometry].getArea == 10100)
     }
-  }
 
-  it("Passed ST_Intersection_aggr") {
+    it("Passed ST_Intersection_aggr") {
 
-    val twoPolygonsAsWktDf = sparkSession.read.textFile(intersectionPolygonInputLocation).toDF("polygon_wkt")
-    twoPolygonsAsWktDf.createOrReplaceTempView("two_polygons_wkt")
-    twoPolygonsAsWktDf.show()
+      val twoPolygonsAsWktDf = sparkSession.read.textFile(intersectionPolygonInputLocation).toDF("polygon_wkt")
+      twoPolygonsAsWktDf.createOrReplaceTempView("two_polygons_wkt")
+      twoPolygonsAsWktDf.show()
 
-    sparkSession
-      .sql("select ST_GeomFromWKT(polygon_wkt) as polygon from two_polygons_wkt")
-      .createOrReplaceTempView("two_polygons")
+      sparkSession
+        .sql("select ST_GeomFromWKT(polygon_wkt) as polygon from two_polygons_wkt")
+        .createOrReplaceTempView("two_polygons")
 
-    val intersectionDF = sparkSession.sql("select ST_Intersection_Aggr(polygon) from two_polygons")
-    intersectionDF.show(false)
+      val intersectionDF = sparkSession.sql("select ST_Intersection_Aggr(polygon) from two_polygons")
+      intersectionDF.show(false)
 
-    assertResult(0.0034700160226227607)(intersectionDF.take(1)(0).get(0).asInstanceOf[Geometry].getArea)
-  }
+      assertResult(0.0034700160226227607)(intersectionDF.take(1)(0).get(0).asInstanceOf[Geometry].getArea)
+    }
 
-  it("Passed ST_Intersection_aggr no intersection gives empty polygon") {
+    it("Passed ST_Intersection_aggr no intersection gives empty polygon") {
 
-    val twoPolygonsAsWktDf = sparkSession.read.textFile(intersectionPolygonNoIntersectionInputLocation).toDF("polygon_wkt")
-    twoPolygonsAsWktDf.createOrReplaceTempView("two_polygons_no_intersection_wkt")
-    twoPolygonsAsWktDf.show()
+      val twoPolygonsAsWktDf = sparkSession.read.textFile(intersectionPolygonNoIntersectionInputLocation).toDF("polygon_wkt")
+      twoPolygonsAsWktDf.createOrReplaceTempView("two_polygons_no_intersection_wkt")
+      twoPolygonsAsWktDf.show()
 
-    sparkSession
-      .sql("select ST_GeomFromWKT(polygon_wkt) as polygon from two_polygons_no_intersection_wkt")
-      .createOrReplaceTempView("two_polygons_no_intersection")
+      sparkSession
+        .sql("select ST_GeomFromWKT(polygon_wkt) as polygon from two_polygons_no_intersection_wkt")
+        .createOrReplaceTempView("two_polygons_no_intersection")
 
-    val intersectionDF = sparkSession.sql("select ST_Intersection_Aggr(polygon) from two_polygons_no_intersection")
-    intersectionDF.show(false)
+      val intersectionDF = sparkSession.sql("select ST_Intersection_Aggr(polygon) from two_polygons_no_intersection")
+      intersectionDF.show(false)
 
-    assertResult(0.0)(intersectionDF.take(1)(0).get(0).asInstanceOf[Geometry].getArea)
+      assertResult(0.0)(intersectionDF.take(1)(0).get(0).asInstanceOf[Geometry].getArea)
+    }
   }
 }
