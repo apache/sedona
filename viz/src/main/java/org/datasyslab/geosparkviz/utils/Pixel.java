@@ -17,8 +17,8 @@
 package org.datasyslab.geosparkviz.utils;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
+import org.datasyslab.geospark.jts.geom.Point;
 
 import java.io.Serializable;
 

@@ -26,10 +26,10 @@
 package org.datasyslab.geospark.spatialRDD;
 
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
 import com.vividsolutions.jts.index.strtree.STRtree;
 import org.apache.spark.storage.StorageLevel;
+import org.datasyslab.geospark.jts.geom.Point;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
 import org.junit.AfterClass;

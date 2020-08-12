@@ -20,10 +20,10 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.TaskContext;
+import org.datasyslab.geospark.jts.geom.Point;
 import org.datasyslab.geospark.utils.HalfOpenRectangle;
 
 import javax.annotation.Nullable;

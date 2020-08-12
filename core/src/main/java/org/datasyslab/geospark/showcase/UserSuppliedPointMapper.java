@@ -18,7 +18,7 @@ package org.datasyslab.geospark.showcase;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
+import org.datasyslab.geospark.jts.geom.Point;
 import org.apache.spark.api.java.function.FlatMapFunction;
 
 import java.util.ArrayList;

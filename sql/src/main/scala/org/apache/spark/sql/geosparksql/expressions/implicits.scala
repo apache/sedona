@@ -1,6 +1,7 @@
 package org.apache.spark.sql.geosparksql.expressions
 
-import com.vividsolutions.jts.geom.{Geometry, GeometryFactory, Point}
+import com.vividsolutions.jts.geom.{Geometry, GeometryFactory}
+import org.datasyslab.geospark.jts.geom.Point
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
