@@ -86,14 +86,13 @@ public class CircleRDD
      */
     public PointRDD getCenterPointAsSpatialRDD()
     {
-        return new PointRDD(this.rawSpatialRDD.map(new Function<Circle, Point>()
-        {
+        PointRDD pointRDD = new PointRDD(this.rawSpatialRDD.map(new Function<Circle, Point>() {
 
-            public Point call(Circle circle)
-            {
+            public Point call(Circle circle) {
                 return (Point) circle.getCenterGeometry();
             }
         }));
+        return pointRDD;
     }
 
     /**
