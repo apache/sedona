@@ -23,7 +23,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.WKTReader;
 import org.datasyslab.geospark.jts.geom.LinearRing;
 import org.datasyslab.geospark.jts.geom.MultiPolygon;
-import .jts.geom.Polygon;
+import org.datasyslab.geospark.jts.geom.Polygon;
 import org.apache.spark.api.java.function.FlatMapFunction;
 
 import java.util.ArrayList;
