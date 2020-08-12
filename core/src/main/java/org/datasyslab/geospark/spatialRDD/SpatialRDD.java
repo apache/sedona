@@ -20,8 +20,9 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.Polygon;
+import org.datasyslab.geospark.jts.geom.LineString;
+import org.datasyslab.geospark.jts.geom.LinearRing;
+import org.datasyslab.geospark.jts.geom.Polygon;
 import com.vividsolutions.jts.index.SpatialIndex;
 import com.vividsolutions.jts.io.WKBWriter;
 import com.vividsolutions.jts.io.WKTWriter;
@@ -665,7 +666,7 @@ public class SpatialRDD<T extends Geometry>
                 coordinates[2] = new Coordinate(x2, y2);
                 coordinates[3] = new Coordinate(x2, y1);
                 coordinates[4] = coordinates[0];
-                linear = fact.createLinearRing(coordinates);
+                linear = (LinearRing) fact.createLinearRing(coordinates);
                 Polygon polygonObject = new Polygon(linear, null, fact);
                 return polygonObject;
             }
