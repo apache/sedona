@@ -17,7 +17,7 @@
 package org.datasyslab.geospark.spatialPartitioning;
 
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.index.strtree.STRtree;
+import org.datasyslab.geospark.jts.QueryableSTRtree;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ public class RtreePartitioning
     public RtreePartitioning(List<Envelope> samples, int partitions)
             throws Exception
     {
-        STRtree strtree = new STRtree(samples.size() / partitions);
+        QueryableSTRtree strtree = new QueryableSTRtree(samples.size() / partitions);
         for (Envelope sample : samples) {
             strtree.insert(sample, sample);
         }
