@@ -18,7 +18,6 @@ package org.datasyslab.geospark.jts.geom;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import org.datasyslab.geospark.jts.geom.LineString;
 
 import java.util.Objects;
 
@@ -28,7 +27,7 @@ import java.util.Objects;
 public class MultiLineString extends com.vividsolutions.jts.geom.MultiLineString {
 
     /**
-     * {@link com.vividsolutions.jts.geom.MultiLineString#MultiLineString(LineString[], GeometryFactory)}
+     * {@link com.vividsolutions.jts.geom.MultiLineString#MultiLineString(com.vividsolutions.jts.geom.LineString[], GeometryFactory)}
      */
     public MultiLineString(LineString[] lineStrings, GeometryFactory factory) {
         super(lineStrings, factory);

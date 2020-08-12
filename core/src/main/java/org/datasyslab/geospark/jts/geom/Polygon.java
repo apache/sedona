@@ -18,7 +18,6 @@ package org.datasyslab.geospark.jts.geom;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LinearRing;
 
 import java.util.Objects;
 
@@ -28,7 +27,7 @@ import java.util.Objects;
 public class Polygon extends com.vividsolutions.jts.geom.Polygon {
 
     /**
-     * {@link com.vividsolutions.jts.geom.Polygon#Polygon(LinearRing, LinearRing[], GeometryFactory)}
+     * {@link com.vividsolutions.jts.geom.Polygon#Polygon(com.vividsolutions.jts.geom.LinearRing, LinearRing[], GeometryFactory)}
      */
     public Polygon(LinearRing shell, LinearRing[] holes, GeometryFactory factory) {
         super(shell,  holes, factory);

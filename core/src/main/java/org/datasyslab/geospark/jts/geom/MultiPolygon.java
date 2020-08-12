@@ -18,7 +18,6 @@ package org.datasyslab.geospark.jts.geom;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Polygon;
 
 import java.util.Objects;
 
@@ -28,7 +27,7 @@ import java.util.Objects;
 public class MultiPolygon extends com.vividsolutions.jts.geom.MultiPolygon {
 
     /**
-     * {@link com.vividsolutions.jts.geom.MultiPolygon#MultiPolygon(Polygon[], GeometryFactory)}
+     * {@link com.vividsolutions.jts.geom.MultiPolygon#MultiPolygon(com.vividsolutions.jts.geom.Polygon[], GeometryFactory)}
      */
     public MultiPolygon(Polygon[] polygons, GeometryFactory factory) {
         super(polygons, factory);
