@@ -20,10 +20,10 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.WKTReader;
+import org.datasyslab.geospark.jts.geom.LinearRing;
+import org.datasyslab.geospark.jts.geom.MultiPolygon;
+import .jts.geom.Polygon;
 import org.apache.spark.api.java.function.FlatMapFunction;
 
 import java.util.ArrayList;

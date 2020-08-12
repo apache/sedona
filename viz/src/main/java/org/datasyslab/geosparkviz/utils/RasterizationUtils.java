@@ -19,10 +19,10 @@ package org.datasyslab.geosparkviz.utils;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
+import org.datasyslab.geospark.jts.geom.LineString;
+import org.datasyslab.geospark.jts.geom.LinearRing;
+import org.datasyslab.geospark.jts.geom.Point;
+import org.datasyslab.geospark.jts.geom.Polygon;
 import org.apache.log4j.Logger;
 import scala.Tuple2;
 
