@@ -1,5 +1,5 @@
 /*
- * FILE: Point
+ * FILE: LineString
  * Copyright (c) 2015 - 2019 GeoSpark Development Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,20 +23,20 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import java.util.Objects;
 
 /**
- * Wraps {@link com.vividsolutions.jts.geom.Point}
+ * Wraps {@link com.vividsolutions.jts.geom.LineString}
  */
-public class Point extends com.vividsolutions.jts.geom.Point {
+public class LineString extends com.vividsolutions.jts.geom.LineString {
 
     /**
-     * {@link com.vividsolutions.jts.geom.Point#Point(CoordinateSequence, GeometryFactory)}
+     * {@link com.vividsolutions.jts.geom.LineString#LineString(CoordinateSequence, GeometryFactory)}
      */
-    public Point(CoordinateSequence coordinates, GeometryFactory factory) {
-        super(coordinates, factory);
+    public LineString(CoordinateSequence points, GeometryFactory factory) {
+        super(points, factory);
         setUserData("");
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.Point#equals(Geometry)}
+     * Compares to given geometry using {@link com.vividsolutions.jts.geom.LineString#equals(Geometry)}
      * Also compares userData
      */
     @Override
@@ -45,7 +45,7 @@ public class Point extends com.vividsolutions.jts.geom.Point {
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.Point#equals(Object)}
+     * Compares to given geometry using {@link com.vividsolutions.jts.geom.LineString#equals(Object)}
      * Also compares userData
      */
     @Override
@@ -54,7 +54,7 @@ public class Point extends com.vividsolutions.jts.geom.Point {
     }
 
     /**
-     * Produces {@link Point#toString()} (a WKT representation of the geometry)
+     * Produces {@link LineString#toString()} (a WKT representation of the geometry)
      * , concatenated with the userData string (if exists) as a TSV
      */
     @Override

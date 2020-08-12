@@ -1,5 +1,5 @@
 /*
- * FILE: Point
+ * FILE: Polygon
  * Copyright (c) 2015 - 2019 GeoSpark Development Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,24 +19,25 @@ package org.datasyslab.geospark.jts.geom;
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
 
 import java.util.Objects;
 
 /**
- * Wraps {@link com.vividsolutions.jts.geom.Point}
+ * Wraps {@link com.vividsolutions.jts.geom.Polygon}
  */
-public class Point extends com.vividsolutions.jts.geom.Point {
+public class Polygon extends com.vividsolutions.jts.geom.Polygon {
 
     /**
-     * {@link com.vividsolutions.jts.geom.Point#Point(CoordinateSequence, GeometryFactory)}
+     * {@link com.vividsolutions.jts.geom.Polygon#Polygon(LinearRing, LinearRing[], GeometryFactory)}
      */
-    public Point(CoordinateSequence coordinates, GeometryFactory factory) {
-        super(coordinates, factory);
+    public Polygon(LinearRing shell, LinearRing[] holes, GeometryFactory factory) {
+        super(shell,  holes, factory);
         setUserData("");
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.Point#equals(Geometry)}
+     * Compares to given geometry using {@link com.vividsolutions.jts.geom.Polygon#equals(Geometry)}
      * Also compares userData
      */
     @Override
@@ -45,7 +46,7 @@ public class Point extends com.vividsolutions.jts.geom.Point {
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.Point#equals(Object)}
+     * Compares to given geometry using {@link com.vividsolutions.jts.geom.Polygon#equals(Object)}
      * Also compares userData
      */
     @Override
@@ -54,7 +55,7 @@ public class Point extends com.vividsolutions.jts.geom.Point {
     }
 
     /**
-     * Produces {@link Point#toString()} (a WKT representation of the geometry)
+     * Produces {@link Polygon#toString()} (a WKT representation of the geometry)
      * , concatenated with the userData string (if exists) as a TSV
      */
     @Override

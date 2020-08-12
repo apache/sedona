@@ -1,5 +1,5 @@
 /*
- * FILE: Point
+ * FILE: MultiPoint
  * Copyright (c) 2015 - 2019 GeoSpark Development Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,27 +16,27 @@
  */
 package org.datasyslab.geospark.jts.geom;
 
-import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 
 import java.util.Objects;
 
 /**
- * Wraps {@link com.vividsolutions.jts.geom.Point}
+ * Wraps {@link com.vividsolutions.jts.geom.MultiPoint}
  */
-public class Point extends com.vividsolutions.jts.geom.Point {
+public class MultiPoint extends com.vividsolutions.jts.geom.MultiPoint {
 
     /**
-     * {@link com.vividsolutions.jts.geom.Point#Point(CoordinateSequence, GeometryFactory)}
+     * {@link com.vividsolutions.jts.geom.MultiPoint#MultiPoint(Point[], GeometryFactory)}
      */
-    public Point(CoordinateSequence coordinates, GeometryFactory factory) {
-        super(coordinates, factory);
+    public MultiPoint(Point[] points, GeometryFactory factory) {
+        super(points, factory);
         setUserData("");
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.Point#equals(Geometry)}
+     * Compares to given geometry using {@link com.vividsolutions.jts.geom.MultiPoint#equals(Geometry)}
      * Also compares userData
      */
     @Override
@@ -45,17 +45,17 @@ public class Point extends com.vividsolutions.jts.geom.Point {
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.Point#equals(Object)}
+     * Compares to given geometry using {@link com.vividsolutions.jts.geom.MultiPoint#equals(Object)}
      * Also compares userData
      */
     @Override
     public boolean equals(Object o) {
-        return super.equals(o) && Objects.equals(getUserData(), ((Geometry) o).getUserData());
+        return super.equals(o) && Objects.equals(getUserData(), ((Geometry)o).getUserData());
     }
 
     /**
-     * Produces {@link Point#toString()} (a WKT representation of the geometry)
-     * , concatenated with the userData string (if exists) as a TSV
+     * Produces {@link MultiPoint#toString()} (a WKT representation of the geometry)
+     *  , concatenated with the userData string (if exists) as a TSV
      */
     @Override
     public String toString() {

@@ -1,5 +1,5 @@
 /*
- * FILE: Point
+ * FILE: MultiLineString
  * Copyright (c) 2015 - 2019 GeoSpark Development Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,27 +16,27 @@
  */
 package org.datasyslab.geospark.jts.geom;
 
-import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
 
 import java.util.Objects;
 
 /**
- * Wraps {@link com.vividsolutions.jts.geom.Point}
+ * Wraps {@link com.vividsolutions.jts.geom.MultiLineString}
  */
-public class Point extends com.vividsolutions.jts.geom.Point {
+public class MultiLineString extends com.vividsolutions.jts.geom.MultiLineString {
 
     /**
-     * {@link com.vividsolutions.jts.geom.Point#Point(CoordinateSequence, GeometryFactory)}
+     * {@link com.vividsolutions.jts.geom.MultiLineString#MultiLineString(LineString[], GeometryFactory)}
      */
-    public Point(CoordinateSequence coordinates, GeometryFactory factory) {
-        super(coordinates, factory);
+    public MultiLineString(LineString[] lineStrings, GeometryFactory factory) {
+        super(lineStrings, factory);
         setUserData("");
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.Point#equals(Geometry)}
+     * Compares to given geometry using {@link com.vividsolutions.jts.geom.MultiLineString#equals(Geometry)}
      * Also compares userData
      */
     @Override
@@ -45,7 +45,7 @@ public class Point extends com.vividsolutions.jts.geom.Point {
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.Point#equals(Object)}
+     * Compares to given geometry using {@link com.vividsolutions.jts.geom.MultiLineString#equals(Object)}
      * Also compares userData
      */
     @Override
@@ -54,7 +54,7 @@ public class Point extends com.vividsolutions.jts.geom.Point {
     }
 
     /**
-     * Produces {@link Point#toString()} (a WKT representation of the geometry)
+     * Produces {@link MultiLineString#toString()} (a WKT representation of the geometry)
      * , concatenated with the userData string (if exists) as a TSV
      */
     @Override
