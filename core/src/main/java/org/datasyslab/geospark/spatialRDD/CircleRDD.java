@@ -17,12 +17,12 @@
 package org.datasyslab.geospark.spatialRDD;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
+import org.datasyslab.geospark.jts.geom.LineString;
+import org.datasyslab.geospark.jts.geom.Point;
+import org.datasyslab.geospark.jts.geom.Polygon;
+import org.datasyslab.geospark.jts.geom.Circle;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
-import org.datasyslab.geospark.geometryObjects.Circle;
 
 // TODO: Auto-generated Javadoc
 

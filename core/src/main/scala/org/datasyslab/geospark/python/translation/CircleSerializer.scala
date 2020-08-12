@@ -1,7 +1,7 @@
 package org.datasyslab.geospark.python.translation
 
 import com.vividsolutions.jts.io.WKBWriter
-import org.datasyslab.geospark.geometryObjects.Circle
+import org.datasyslab.geospark.jts.geom.Circle
 import org.datasyslab.geospark.python.utils.implicits._
 
 

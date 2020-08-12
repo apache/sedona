@@ -4,7 +4,7 @@ import java.io.{ByteArrayInputStream, DataInputStream}
 
 import com.vividsolutions.jts.geom.Geometry
 import org.apache.spark.api.java.JavaRDD
-import org.datasyslab.geospark.geometryObjects.Circle
+import org.datasyslab.geospark.jts.geom.Circle
 import org.datasyslab.geospark.python.SerializationException
 
 case class PythonRDDToJavaConverter(javaRDD: JavaRDD[Array[Byte]], geometrySerializer: PythonGeometrySerializer) {

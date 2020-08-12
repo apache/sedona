@@ -30,7 +30,7 @@ import org.apache.spark.sql.catalyst.expressions.{Expression, Generator}
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
-import org.datasyslab.geospark.geometryObjects.Circle
+import org.datasyslab.geospark.jts.geom.Circle
 import org.datasyslab.geosparksql.utils.GeometrySerializer
 import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.{CRS, ReferencingFactoryFinder}

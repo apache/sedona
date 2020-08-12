@@ -30,7 +30,7 @@ import com.vividsolutions.jts.index.quadtree.Quadtree;
 import com.vividsolutions.jts.index.strtree.STRtree;
 import org.apache.log4j.Logger;
 import org.apache.spark.serializer.KryoRegistrator;
-import org.datasyslab.geospark.geometryObjects.Circle;
+import org.datasyslab.geospark.jts.geom.Circle;
 import org.datasyslab.geospark.geometryObjects.GeometrySerde;
 import org.datasyslab.geospark.geometryObjects.SpatialIndexSerde;
 

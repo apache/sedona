@@ -27,7 +27,7 @@ import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.enums.JoinBuildSide;
-import org.datasyslab.geospark.geometryObjects.Circle;
+import org.datasyslab.geospark.jts.geom.Circle;
 import org.datasyslab.geospark.joinJudgement.DedupParams;
 import org.datasyslab.geospark.joinJudgement.DynamicIndexLookupJudgement;
 import org.datasyslab.geospark.joinJudgement.LeftIndexLookupJudgement;

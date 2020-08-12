@@ -2,7 +2,7 @@ package org.datasyslab.geospark.python.translation
 
 import com.vividsolutions.jts.geom.Geometry
 import com.vividsolutions.jts.io.WKBReader
-import org.datasyslab.geospark.geometryObjects.Circle
+import org.datasyslab.geospark.jts.geom.Circle
 import org.datasyslab.geospark.python.SerializationException
 import java.nio.ByteBuffer
 

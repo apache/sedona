@@ -22,7 +22,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.expressions.{BindReferences, Expression, UnsafeRow}
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.execution.{BinaryExecNode, SparkPlan}
-import org.datasyslab.geospark.geometryObjects.Circle
+import org.datasyslab.geospark.jts.geom.Circle
 import org.datasyslab.geospark.spatialRDD.SpatialRDD
 import org.datasyslab.geosparksql.utils.GeometrySerializer
 

@@ -39,7 +39,7 @@ import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
-import org.datasyslab.geospark.geometryObjects.Circle;
+import org.datasyslab.geospark.jts.geom.Circle;
 import org.datasyslab.geospark.knnJudgement.GeometryDistanceComparator;
 import org.datasyslab.geospark.spatialOperator.JoinQuery;
 import org.datasyslab.geospark.spatialOperator.KNNQuery;

@@ -32,6 +32,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
+import org.datasyslab.geospark.jts.geom.Circle;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

@@ -33,7 +33,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
-import org.datasyslab.geospark.geometryObjects.Circle;
+import org.datasyslab.geospark.jts.geom.Circle;
 import org.datasyslab.geospark.geometryObjects.GeometrySerde;
 import org.junit.Assert;
 import org.junit.Test;
