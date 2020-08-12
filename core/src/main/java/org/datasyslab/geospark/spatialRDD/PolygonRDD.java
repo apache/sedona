@@ -550,7 +550,7 @@ public class PolygonRDD
                 Coordinate[] coordinatesClosed = new Coordinate[coordinateList.size()];
                 coordinatesClosed = coordinateList.toArray(coordinatesClosed);
                 GeometryFactory fact = new GeometryFactory();
-                LinearRing linear = new GeometryFactory().createLinearRing(coordinatesClosed);
+                LinearRing linear = (LinearRing) new GeometryFactory().createLinearRing(coordinatesClosed);
                 Polygon polygon = new Polygon(linear, null, fact);
                 //Return the two polygon union result
                 return polygon;
