@@ -32,7 +32,7 @@ public class MultiPolygon extends com.vividsolutions.jts.geom.MultiPolygon {
      */
     public MultiPolygon(Polygon[] polygons, GeometryFactory factory) {
         super(polygons, factory);
-        setUserData("");
+        if (getUserData() == null) setUserData("");
     }
 
     /**

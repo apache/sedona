@@ -32,7 +32,7 @@ public class MultiPoint extends com.vividsolutions.jts.geom.MultiPoint {
      */
     public MultiPoint(Point[] points, GeometryFactory factory) {
         super(points, factory);
-        setUserData("");
+        if (getUserData() == null) setUserData("");
     }
 
     /**

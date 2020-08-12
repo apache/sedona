@@ -32,7 +32,7 @@ public class LinearRing extends com.vividsolutions.jts.geom.LinearRing {
      */
     public LinearRing(CoordinateSequence points, GeometryFactory factory) {
         super(points, factory);
-        setUserData("");
+        if (getUserData() == null) setUserData("");
     }
 
     /**

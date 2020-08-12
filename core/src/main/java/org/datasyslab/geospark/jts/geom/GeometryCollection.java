@@ -31,7 +31,7 @@ public class GeometryCollection extends com.vividsolutions.jts.geom.GeometryColl
      */
     public GeometryCollection(Geometry[] geometries, GeometryFactory factory) {
         super(geometries, factory);
-        setUserData("");
+        if (getUserData() == null) setUserData("");
     }
 
     /**

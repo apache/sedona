@@ -1,5 +1,5 @@
 /*
- * FILE: MultiLineString
+ * FILE: Point
  * Copyright (c) 2015 - 2019 GeoSpark Development Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,26 +17,24 @@
 package org.datasyslab.geospark.jts.geom;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
 
 import java.util.Objects;
 
 /**
- * Wraps {@link com.vividsolutions.jts.geom.MultiLineString}
+ * Wraps {@link org.datasyslab.geospark.geometryObjects.Circle}
  */
-public class MultiLineString extends com.vividsolutions.jts.geom.MultiLineString {
+public class Circle extends org.datasyslab.geospark.geometryObjects.Circle {
 
     /**
-     * {@link com.vividsolutions.jts.geom.MultiLineString#MultiLineString(LineString[], GeometryFactory)}
+     * {@link org.datasyslab.geospark.geometryObjects.Circle#Circle(Geometry, Double)}
      */
-    public MultiLineString(LineString[] lineStrings, GeometryFactory factory) {
-        super(lineStrings, factory);
+    public Circle(Geometry centerGeometry, Double givenRadius) {
+        super(centerGeometry, givenRadius);
         if (getUserData() == null) setUserData("");
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.MultiLineString#equals(Geometry)}
+     * Compares to given geometry using {@link org.datasyslab.geospark.geometryObjects.Circle#equals(Geometry)}
      * Also compares userData
      */
     @Override
@@ -45,7 +43,7 @@ public class MultiLineString extends com.vividsolutions.jts.geom.MultiLineString
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.MultiLineString#equals(Object)}
+     * Compares to given geometry using {@link org.datasyslab.geospark.geometryObjects.Circle#equals(Object)}
      * Also compares userData
      */
     @Override
@@ -54,7 +52,7 @@ public class MultiLineString extends com.vividsolutions.jts.geom.MultiLineString
     }
 
     /**
-     * Produces {@link MultiLineString#toString()} (a WKT representation of the geometry)
+     * Produces {@link Circle#toString()} (a WKT representation of the geometry)
      * , concatenated with the userData string (if exists) as a TSV
      */
     @Override

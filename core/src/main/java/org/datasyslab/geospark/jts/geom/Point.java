@@ -32,7 +32,7 @@ public class Point extends com.vividsolutions.jts.geom.Point {
      */
     public Point(CoordinateSequence coordinates, GeometryFactory factory) {
         super(coordinates, factory);
-        setUserData("");
+        if (getUserData() == null) setUserData("");
     }
 
     /**

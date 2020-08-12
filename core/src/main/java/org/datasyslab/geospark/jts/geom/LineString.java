@@ -32,7 +32,7 @@ public class LineString extends com.vividsolutions.jts.geom.LineString {
      */
     public LineString(CoordinateSequence points, GeometryFactory factory) {
         super(points, factory);
-        setUserData("");
+        if (getUserData() == null) setUserData("");
     }
 
     /**

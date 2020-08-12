@@ -33,7 +33,7 @@ public class Polygon extends com.vividsolutions.jts.geom.Polygon {
      */
     public Polygon(LinearRing shell, LinearRing[] holes, GeometryFactory factory) {
         super(shell,  holes, factory);
-        setUserData("");
+        if (getUserData() == null) setUserData("");
     }
 
     /**
