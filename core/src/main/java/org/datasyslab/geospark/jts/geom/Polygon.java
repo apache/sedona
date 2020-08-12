@@ -27,7 +27,7 @@ import java.util.Objects;
 public class Polygon extends com.vividsolutions.jts.geom.Polygon {
 
     /**
-     * {@link com.vividsolutions.jts.geom.Polygon#Polygon(com.vividsolutions.jts.geom.LinearRing, LinearRing[], GeometryFactory)}
+     * {@link com.vividsolutions.jts.geom.Polygon#Polygon(com.vividsolutions.jts.geom.LinearRing, com.vividsolutions.jts.geom.LinearRing[], GeometryFactory)}
      */
     public Polygon(LinearRing shell, LinearRing[] holes, GeometryFactory factory) {
         super(shell,  holes, factory);

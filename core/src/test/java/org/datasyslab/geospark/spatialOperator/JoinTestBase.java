@@ -26,8 +26,8 @@
 package org.datasyslab.geospark.spatialOperator;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
 import org.apache.spark.storage.StorageLevel;
+import org.datasyslab.geospark.jts.geom.Polygon;
 import org.datasyslab.geospark.GeoSparkTestBase;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;

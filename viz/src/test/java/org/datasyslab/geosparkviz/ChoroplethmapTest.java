@@ -25,9 +25,9 @@
  */
 package org.datasyslab.geosparkviz;
 
-import com.vividsolutions.jts.geom.Polygon;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.storage.StorageLevel;
+import org.datasyslab.geospark.jts.geom.Polygon;
 import org.datasyslab.geospark.enums.GridType;
 import org.datasyslab.geospark.enums.IndexType;
 import org.datasyslab.geospark.spatialOperator.JoinQuery;
