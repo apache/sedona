@@ -17,9 +17,9 @@
 package org.datasyslab.geosparkviz.core;
 
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
+import org.datasyslab.geospark.jts.geom.LineString;
+import org.datasyslab.geospark.jts.geom.Point;
+import org.datasyslab.geospark.jts.geom.Polygon;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;

@@ -18,7 +18,8 @@ package org.apache.spark.sql.geosparksql.expressions
 
 import java.util
 
-import com.vividsolutions.jts.geom.{PrecisionModel, _}
+import com.vividsolutions.jts.geom.{PrecisionModel, Geometry, GeometryFactory}
+import org.datasyslab.geospark.jts.geom._
 import com.vividsolutions.jts.operation.IsSimpleOp
 import com.vividsolutions.jts.operation.linemerge.LineMerger
 import com.vividsolutions.jts.operation.valid.IsValidOp

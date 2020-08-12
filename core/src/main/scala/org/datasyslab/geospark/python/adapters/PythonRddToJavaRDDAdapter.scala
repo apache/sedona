@@ -1,6 +1,7 @@
 package org.datasyslab.geospark.python.adapters
 
-import com.vividsolutions.jts.geom.{Geometry, LineString, Point, Polygon}
+import com.vividsolutions.jts.geom.{Geometry}
+import org.datasyslab.geospark.jts.geom.{LineString, Point, Polygon}
 import net.razorvine.pickle.Unpickler
 import net.razorvine.pickle.objects.ClassDict
 import org.apache.spark.api.java.JavaRDD

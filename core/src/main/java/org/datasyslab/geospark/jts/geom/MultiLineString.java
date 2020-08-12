@@ -18,7 +18,7 @@ package org.datasyslab.geospark.jts.geom;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
+import org.datasyslab.geospark.jts.geom.LineString;
 
 import java.util.Objects;
 
