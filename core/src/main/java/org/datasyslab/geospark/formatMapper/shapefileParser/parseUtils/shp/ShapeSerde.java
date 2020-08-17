@@ -248,11 +248,11 @@ public class ShapeSerde
         }
     }
 
-    private static void putPoints(ByteBuffer buffer, LineString geometry)
+    private static void putPoints(ByteBuffer buffer, com.vividsolutions.jts.geom.LineString geometry)
     {
         int numPoints = geometry.getNumPoints();
         for (int i = 0; i < numPoints; i++) {
-            Point point = geometry.getPointN(i);
+            com.vividsolutions.jts.geom.Point point = geometry.getPointN(i);
             buffer.putDouble(point.getX());
             buffer.putDouble(point.getY());
         }

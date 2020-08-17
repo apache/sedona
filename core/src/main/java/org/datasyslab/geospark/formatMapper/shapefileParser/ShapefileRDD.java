@@ -150,7 +150,7 @@ public class ShapefileRDD
                     throws Exception
             {
                 List<Point> result = new ArrayList<Point>();
-                if (spatialObject instanceof MultiPoint) {
+                if (spatialObject instanceof com.vividsolutions.jts.geom.MultiPoint) {
                     MultiPoint multiObjects = (MultiPoint) spatialObject;
                     for (int i = 0; i < multiObjects.getNumGeometries(); i++) {
                         Point oneObject = (Point) multiObjects.getGeometryN(i);
@@ -158,7 +158,7 @@ public class ShapefileRDD
                         result.add(oneObject);
                     }
                 }
-                else if (spatialObject instanceof Point) {
+                else if (spatialObject instanceof com.vividsolutions.jts.geom.Point) {
                     result.add((Point) spatialObject);
                 }
                 else {
@@ -183,15 +183,15 @@ public class ShapefileRDD
                     throws Exception
             {
                 List<Polygon> result = new ArrayList<Polygon>();
-                if (spatialObject instanceof MultiPolygon) {
-                    MultiPolygon multiObjects = (MultiPolygon) spatialObject;
+                if (spatialObject instanceof com.vividsolutions.jts.geom.MultiPolygon) {
+                    MultiPolygon multiObjects = new MultiPolygon((com.vividsolutions.jts.geom.MultiPolygon) spatialObject);
                     for (int i = 0; i < multiObjects.getNumGeometries(); i++) {
-                        Polygon oneObject = (Polygon) multiObjects.getGeometryN(i);
+                        Polygon oneObject = new Polygon((com.vividsolutions.jts.geom.Polygon) multiObjects.getGeometryN(i));
                         oneObject.setUserData(multiObjects.getUserData());
                         result.add(oneObject);
                     }
                 }
-                else if (spatialObject instanceof Polygon) {
+                else if (spatialObject instanceof com.vividsolutions.jts.geom.Polygon) {
                     result.add((Polygon) spatialObject);
                 }
                 else {
@@ -216,7 +216,7 @@ public class ShapefileRDD
                     throws Exception
             {
                 List<LineString> result = new ArrayList<LineString>();
-                if (spatialObject instanceof MultiLineString) {
+                if (spatialObject instanceof com.vividsolutions.jts.geom.MultiLineString) {
                     MultiLineString multiObjects = (MultiLineString) spatialObject;
                     for (int i = 0; i < multiObjects.getNumGeometries(); i++) {
                         LineString oneObject = (LineString) multiObjects.getGeometryN(i);
@@ -224,7 +224,7 @@ public class ShapefileRDD
                         result.add(oneObject);
                     }
                 }
-                else if (spatialObject instanceof LineString) {
+                else if (spatialObject instanceof com.vividsolutions.jts.geom.LineString) {
                     result.add((LineString) spatialObject);
                 }
                 else {

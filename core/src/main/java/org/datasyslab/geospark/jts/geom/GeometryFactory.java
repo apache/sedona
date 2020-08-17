@@ -1,6 +1,11 @@
 package org.datasyslab.geospark.jts.geom;
 
-import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateSequence;
+import com.vividsolutions.jts.geom.CoordinateSequences;
+import com.vividsolutions.jts.geom.CoordinateSequenceFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.geom.Geometry;
 
 public class GeometryFactory extends com.vividsolutions.jts.geom.GeometryFactory {
 

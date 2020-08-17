@@ -257,7 +257,7 @@ public class Circle
     /**
      * @return true if a line from `start` to `end` intersects this circle
      */
-    private boolean intersects(Point start, Point end)
+    private boolean intersects(com.vividsolutions.jts.geom.Point start, com.vividsolutions.jts.geom.Point end)
     {
         double deltaX = end.getX() - start.getX();
         double deltaY = end.getY() - start.getY();

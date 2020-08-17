@@ -228,7 +228,7 @@ public class JoinQueryCorrectnessChecker
         coordinates[1] = new Coordinate(minX + side, minY);
         coordinates[2] = new Coordinate(minX + side, minY + side);
 
-        return geometryFactory.createLineString(coordinates);
+        return (LineString) geometryFactory.createLineString(coordinates);
     }
 
     private static Point makePoint(double x, double y)
