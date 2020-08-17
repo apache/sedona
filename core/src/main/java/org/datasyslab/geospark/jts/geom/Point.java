@@ -18,7 +18,6 @@ package org.datasyslab.geospark.jts.geom;
 
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
 import java.util.Objects;
 
@@ -27,11 +26,16 @@ import java.util.Objects;
  */
 public class Point extends com.vividsolutions.jts.geom.Point {
 
+
+    public Point(com.vividsolutions.jts.geom.Point original) {
+        this(original.getCoordinateSequence(), original.getFactory());
+    }
+
     /**
-     * {@link com.vividsolutions.jts.geom.Point#Point(CoordinateSequence, GeometryFactory)}
+     * {@link com.vividsolutions.jts.geom.Point#Point(CoordinateSequence, com.vividsolutions.jts.geom.GeometryFactory)}
      */
-    public Point(CoordinateSequence coordinates, GeometryFactory factory) {
-        super(coordinates, factory);
+    public Point(CoordinateSequence coordinates, com.vividsolutions.jts.geom.GeometryFactory factory) {
+        super(coordinates, new GeometryFactory(factory));
         if (getUserData() == null) setUserData("");
     }
 

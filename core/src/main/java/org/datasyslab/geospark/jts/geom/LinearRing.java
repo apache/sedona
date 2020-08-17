@@ -18,7 +18,6 @@ package org.datasyslab.geospark.jts.geom;
 
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
 import java.util.Objects;
 
@@ -27,11 +26,15 @@ import java.util.Objects;
  */
 public class LinearRing extends com.vividsolutions.jts.geom.LinearRing {
 
+    public LinearRing(com.vividsolutions.jts.geom.LinearRing original) {
+        this(original.getCoordinateSequence(), original.getFactory());
+    }
+
     /**
-     * {@link com.vividsolutions.jts.geom.LinearRing#LinearRing(CoordinateSequence, GeometryFactory)}
+     * {@link com.vividsolutions.jts.geom.LinearRing#LinearRing(CoordinateSequence, com.vividsolutions.jts.geom.GeometryFactory)}
      */
-    public LinearRing(CoordinateSequence points, GeometryFactory factory) {
-        super(points, factory);
+    public LinearRing(CoordinateSequence points, com.vividsolutions.jts.geom.GeometryFactory factory) {
+        super(points, new GeometryFactory(factory));
         if (getUserData() == null) setUserData("");
     }
 

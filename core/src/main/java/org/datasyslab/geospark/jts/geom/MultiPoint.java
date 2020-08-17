@@ -17,7 +17,6 @@
 package org.datasyslab.geospark.jts.geom;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
 import java.util.Objects;
 
@@ -26,11 +25,22 @@ import java.util.Objects;
  */
 public class MultiPoint extends com.vividsolutions.jts.geom.MultiPoint {
 
+    public static Point[] getPoints(com.vividsolutions.jts.geom.GeometryCollection geometry) {
+        Point[] res = new Point[geometry.getNumGeometries()];
+        for (int i = 0; i < res.length; i++)
+            res[i] = (Point) geometry.getGeometryN(i);
+        return res;
+    }
+
+    public MultiPoint(com.vividsolutions.jts.geom.MultiPoint original) {
+        this(MultiPoint.getPoints(original), original.getFactory());
+    }
+
     /**
-     * {@link com.vividsolutions.jts.geom.MultiPoint#MultiPoint(com.vividsolutions.jts.geom.Point[], GeometryFactory)}
+     * {@link com.vividsolutions.jts.geom.MultiPoint#MultiPoint(com.vividsolutions.jts.geom.Point[], com.vividsolutions.jts.geom.GeometryFactory)}
      */
-    public MultiPoint(Point[] points, GeometryFactory factory) {
-        super(points, factory);
+    public MultiPoint(com.vividsolutions.jts.geom.Point[] points, com.vividsolutions.jts.geom.GeometryFactory factory) {
+        super(points, new GeometryFactory(factory));
         if (getUserData() == null) setUserData("");
     }
 

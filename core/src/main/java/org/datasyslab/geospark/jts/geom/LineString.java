@@ -18,7 +18,6 @@ package org.datasyslab.geospark.jts.geom;
 
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
 import java.util.Objects;
 
@@ -27,11 +26,15 @@ import java.util.Objects;
  */
 public class LineString extends com.vividsolutions.jts.geom.LineString {
 
+    public LineString(com.vividsolutions.jts.geom.LineString original) {
+        this(original.getCoordinateSequence(), original.getFactory());
+    }
+
     /**
-     * {@link com.vividsolutions.jts.geom.LineString#LineString(CoordinateSequence, GeometryFactory)}
+     * {@link com.vividsolutions.jts.geom.LineString#LineString(CoordinateSequence, com.vividsolutions.jts.geom.GeometryFactory)}
      */
-    public LineString(CoordinateSequence points, GeometryFactory factory) {
-        super(points, factory);
+    public LineString(CoordinateSequence points, com.vividsolutions.jts.geom.GeometryFactory factory) {
+        super(points, new GeometryFactory(factory));
         if (getUserData() == null) setUserData("");
     }
 

@@ -17,7 +17,6 @@
 package org.datasyslab.geospark.jts.geom;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
 import java.util.Objects;
 
@@ -26,11 +25,22 @@ import java.util.Objects;
  */
 public class MultiLineString extends com.vividsolutions.jts.geom.MultiLineString {
 
+    public static LineString[] getLineStrings(com.vividsolutions.jts.geom.GeometryCollection geometry) {
+        LineString[] res = new LineString[geometry.getNumGeometries()];
+        for (int i = 0; i < res.length; i++)
+            res[i] = (LineString) geometry.getGeometryN(i);
+        return res;
+    }
+
+    public MultiLineString(com.vividsolutions.jts.geom.MultiLineString original) {
+        this(MultiLineString.getLineStrings(original), original.getFactory());
+    }
+
     /**
-     * {@link com.vividsolutions.jts.geom.MultiLineString#MultiLineString(com.vividsolutions.jts.geom.LineString[], GeometryFactory)}
+     * {@link com.vividsolutions.jts.geom.MultiLineString#MultiLineString(com.vividsolutions.jts.geom.LineString[], com.vividsolutions.jts.geom.GeometryFactory)}
      */
-    public MultiLineString(LineString[] lineStrings, GeometryFactory factory) {
-        super(lineStrings, factory);
+    public MultiLineString(com.vividsolutions.jts.geom.LineString[] lineStrings, com.vividsolutions.jts.geom.GeometryFactory factory) {
+        super(lineStrings, new GeometryFactory(factory));
         if (getUserData() == null) setUserData("");
     }
 

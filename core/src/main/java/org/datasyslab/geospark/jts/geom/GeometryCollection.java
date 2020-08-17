@@ -17,7 +17,6 @@
 package org.datasyslab.geospark.jts.geom;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
 import java.util.Objects;
 
@@ -26,11 +25,22 @@ import java.util.Objects;
  */
 public class GeometryCollection extends com.vividsolutions.jts.geom.GeometryCollection {
 
+    public static Geometry[] getGeometries(com.vividsolutions.jts.geom.GeometryCollection geometry) {
+        Geometry[] res = new Geometry[geometry.getNumGeometries()];
+        for (int i = 0; i < res.length; i++)
+            res[i] = geometry.getGeometryN(i);
+        return res;
+    }
+
+    public GeometryCollection(com.vividsolutions.jts.geom.GeometryCollection original) {
+        this(GeometryCollection.getGeometries(original), original.getFactory());
+    }
+
     /**
-     * {@link com.vividsolutions.jts.geom.GeometryCollection#GeometryCollection(Geometry[], GeometryFactory)}
+     * {@link com.vividsolutions.jts.geom.GeometryCollection#GeometryCollection(Geometry[], com.vividsolutions.jts.geom.GeometryFactory)}
      */
-    public GeometryCollection(Geometry[] geometries, GeometryFactory factory) {
-        super(geometries, factory);
+    public GeometryCollection(Geometry[] geometries, com.vividsolutions.jts.geom.GeometryFactory factory) {
+        super(geometries, new GeometryFactory(factory));
         if (getUserData() == null) setUserData("");
     }
 

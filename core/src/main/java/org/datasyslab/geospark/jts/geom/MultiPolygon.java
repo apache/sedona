@@ -17,7 +17,6 @@
 package org.datasyslab.geospark.jts.geom;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
 import java.util.Objects;
 
@@ -26,11 +25,22 @@ import java.util.Objects;
  */
 public class MultiPolygon extends com.vividsolutions.jts.geom.MultiPolygon {
 
+    public static Polygon[] getPolygons(com.vividsolutions.jts.geom.GeometryCollection geometry) {
+        Polygon[] res = new Polygon[geometry.getNumGeometries()];
+        for (int i = 0; i < res.length; i++)
+            res[i] = (Polygon) geometry.getGeometryN(i);
+        return res;
+    }
+
+    public MultiPolygon(com.vividsolutions.jts.geom.MultiPolygon original) {
+        this(MultiPolygon.getPolygons(original), original.getFactory());
+    }
+
     /**
-     * {@link com.vividsolutions.jts.geom.MultiPolygon#MultiPolygon(com.vividsolutions.jts.geom.Polygon[], GeometryFactory)}
+     * {@link com.vividsolutions.jts.geom.MultiPolygon#MultiPolygon(com.vividsolutions.jts.geom.Polygon[], com.vividsolutions.jts.geom.GeometryFactory)}
      */
-    public MultiPolygon(Polygon[] polygons, GeometryFactory factory) {
-        super(polygons, factory);
+    public MultiPolygon(com.vividsolutions.jts.geom.Polygon[] polygons, com.vividsolutions.jts.geom.GeometryFactory factory) {
+        super(polygons, new GeometryFactory(factory));
         if (getUserData() == null) setUserData("");
     }
 

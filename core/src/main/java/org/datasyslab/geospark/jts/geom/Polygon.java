@@ -17,7 +17,7 @@
 package org.datasyslab.geospark.jts.geom;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
 
 import java.util.Objects;
 
@@ -26,11 +26,22 @@ import java.util.Objects;
  */
 public class Polygon extends com.vividsolutions.jts.geom.Polygon {
 
+    private static LinearRing[] getHoles(com.vividsolutions.jts.geom.Polygon polygon) {
+        LinearRing[] res = new LinearRing[polygon.getNumInteriorRing()];
+        for (int i = 0; i < res.length; i++)
+            res[i] = (LinearRing)polygon.getInteriorRingN(i);
+        return res;
+    }
+
+    public Polygon(com.vividsolutions.jts.geom.Polygon original) {
+        this((LinearRing)original.getExteriorRing(), Polygon.getHoles(original), original.getFactory());
+    }
+
     /**
-     * {@link com.vividsolutions.jts.geom.Polygon#Polygon(com.vividsolutions.jts.geom.LinearRing, com.vividsolutions.jts.geom.LinearRing[], GeometryFactory)}
+     * {@link com.vividsolutions.jts.geom.Polygon#Polygon(LinearRing, LinearRing[], com.vividsolutions.jts.geom.GeometryFactory)}
      */
-    public Polygon(LinearRing shell, LinearRing[] holes, GeometryFactory factory) {
-        super(shell,  holes, factory);
+    public Polygon(LinearRing shell, LinearRing[] holes, com.vividsolutions.jts.geom.GeometryFactory factory) {
+        super(shell,  holes, new GeometryFactory(factory));
         if (getUserData() == null) setUserData("");
     }
 
