@@ -32,12 +32,21 @@ public class MultiPolygon extends com.vividsolutions.jts.geom.MultiPolygon {
         return res;
     }
 
+    private static Polygon[] convertPolygons(com.vividsolutions.jts.geom.Polygon[] polygons) {
+        GeometryFactory factory = new GeometryFactory();
+        Polygon[] res = new Polygon[polygons.length];
+        for (int i = 0; i < res.length; i++) {
+            res[i] = (Polygon)factory.fromJTS(polygons[i]);
+        }
+        return res;
+    }
+
     public MultiPolygon(Object original) {
         this((com.vividsolutions.jts.geom.MultiPolygon) original);
     }
 
     public MultiPolygon(com.vividsolutions.jts.geom.MultiPolygon original) {
-        super(MultiPolygon.getPolygons(original), original.getFactory());
+        this(getPolygons(original), original.getFactory());
         setUserData(original.getUserData());
     }
 
@@ -45,7 +54,7 @@ public class MultiPolygon extends com.vividsolutions.jts.geom.MultiPolygon {
      * {@link com.vividsolutions.jts.geom.MultiPolygon#MultiPolygon(com.vividsolutions.jts.geom.Polygon[], com.vividsolutions.jts.geom.GeometryFactory)}
      */
     public MultiPolygon(com.vividsolutions.jts.geom.Polygon[] polygons, com.vividsolutions.jts.geom.GeometryFactory factory) {
-        super(polygons, new GeometryFactory(factory));
+        super(convertPolygons(polygons), new GeometryFactory(factory));
         if (getUserData() == null) setUserData("");
     }
 

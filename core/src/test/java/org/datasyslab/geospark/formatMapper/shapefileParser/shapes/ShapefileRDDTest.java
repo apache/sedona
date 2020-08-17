@@ -145,8 +145,8 @@ public class ShapefileRDDTest
         while (features.hasNext()) {
             SimpleFeature feature = features.next();
             Object geometry = feature.getDefaultGeometry();
-            if (geometry instanceof MultiPolygon) {
-                MultiPolygon multiPolygon = (MultiPolygon) geometry;
+            if (geometry instanceof com.vividsolutions.jts.geom.MultiPolygon) {
+                com.vividsolutions.jts.geom.MultiPolygon multiPolygon = (com.vividsolutions.jts.geom.MultiPolygon) geometry;
                 if (multiPolygon.getNumGeometries() == 1) {
                     geometry = multiPolygon.getGeometryN(0);
                 }
@@ -316,8 +316,8 @@ public class ShapefileRDDTest
         while (features.hasNext()) {
             SimpleFeature feature = features.next();
             Object geometry = feature.getDefaultGeometry();
-            if (geometry instanceof MultiPolygon) {
-                MultiPolygon multiPolygon = (MultiPolygon) geometry;
+            if (geometry instanceof com.vividsolutions.jts.geom.MultiPolygon) {
+                MultiPolygon multiPolygon = new MultiPolygon(geometry);
                 if (multiPolygon.getNumGeometries() == 1) {
                     geometry = multiPolygon.getGeometryN(0);
                 }
@@ -335,7 +335,7 @@ public class ShapefileRDDTest
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        assert ((Polygon) spatialRDD.rawSpatialRDD.take(1).get(0)).getUserData().equals("20\t175\t00485050\t0500000US20175\t20175\tSeward\t06\t1655865960\t2777350");
+        assert spatialRDD.rawSpatialRDD.take(1).get(0).getUserData().equals("20\t175\t00485050\t0500000US20175\t20175\tSeward\t06\t1655865960\t2777350");
         for (Geometry geometry : shapefileRDD.getShapeRDD().collect()) {
             Assert.assertEquals(featureIterator.next(), geometry.toText());
         }

@@ -60,7 +60,7 @@ object SpatialJoinShp extends App {
   //val query = JoinQuery.SpatialJoinQuery(wdpa, species, false, false)
 
   println("polygon is " + shp2.getPolygonRDD.take(100).get(55))
-  println("userdata is " + wdpa.rawSpatialRDD.take(100).get(55).asInstanceOf[Polygon].getUserData)
+  println("userdata is " + wdpa.rawSpatialRDD.take(100).get(55).asInstanceOf[com.vividsolutions.jts.geom.Polygon].getUserData)
   println(species.rawSpatialRDD.count())
 
 

@@ -1,11 +1,6 @@
 package org.datasyslab.geospark.jts.geom;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.CoordinateSequence;
-import com.vividsolutions.jts.geom.CoordinateSequences;
-import com.vividsolutions.jts.geom.CoordinateSequenceFactory;
-import com.vividsolutions.jts.geom.PrecisionModel;
-import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.*;
 
 public class GeometryFactory extends com.vividsolutions.jts.geom.GeometryFactory {
 
@@ -27,6 +22,52 @@ public class GeometryFactory extends com.vividsolutions.jts.geom.GeometryFactory
 
     public GeometryFactory() {
         super();
+    }
+
+    public Geometry fromJTS(Geometry original) {
+        if (original instanceof Point || original instanceof LinearRing || original instanceof LineString ||
+                original instanceof Polygon || original instanceof Circle || original instanceof MultiLineString ||
+                original instanceof MultiPolygon || original instanceof MultiPoint || original instanceof GeometryCollection) {
+            return original;
+        }
+
+        if (original instanceof com.vividsolutions.jts.geom.Point) {
+            return new Point(original);
+        }
+
+        if (original instanceof com.vividsolutions.jts.geom.LinearRing) {
+            return new LinearRing(original);
+        }
+
+        if (original instanceof com.vividsolutions.jts.geom.LineString) {
+            return new LineString(original);
+        }
+
+        if (original instanceof com.vividsolutions.jts.geom.Polygon) {
+            return new Polygon(original);
+        }
+
+        if (original instanceof org.datasyslab.geospark.geometryObjects.Circle) {
+            return new Circle(original);
+        }
+
+        if (original instanceof com.vividsolutions.jts.geom.MultiLineString) {
+            return new MultiLineString(original);
+        }
+
+        if (original instanceof com.vividsolutions.jts.geom.MultiPolygon) {
+            return new MultiPolygon(original);
+        }
+
+        if (original instanceof com.vividsolutions.jts.geom.MultiPoint) {
+            return new MultiPoint(original);
+        }
+
+        if (original instanceof com.vividsolutions.jts.geom.GeometryCollection) {
+            return new GeometryCollection(original);
+        }
+
+        return original;
     }
 
 
@@ -98,4 +139,11 @@ public class GeometryFactory extends com.vividsolutions.jts.geom.GeometryFactory
         return this.createPolygon(shell, (LinearRing[])null);
     }
 
+    public LineString createLineString(Coordinate[] coordinates) {
+        return this.createLineString(coordinates != null ? this.getCoordinateSequenceFactory().create(coordinates) : null);
+    }
+
+    public LineString createLineString(CoordinateSequence coordinates) {
+        return new LineString(coordinates, this);
+    }
 }

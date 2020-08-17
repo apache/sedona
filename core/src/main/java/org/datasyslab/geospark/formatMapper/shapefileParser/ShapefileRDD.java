@@ -186,7 +186,7 @@ public class ShapefileRDD
                 if (spatialObject instanceof com.vividsolutions.jts.geom.MultiPolygon) {
                     MultiPolygon multiObjects = new MultiPolygon((com.vividsolutions.jts.geom.MultiPolygon) spatialObject);
                     for (int i = 0; i < multiObjects.getNumGeometries(); i++) {
-                        Polygon oneObject = new Polygon((com.vividsolutions.jts.geom.Polygon) multiObjects.getGeometryN(i));
+                        Polygon oneObject = new Polygon(multiObjects.getGeometryN(i));
                         oneObject.setUserData(multiObjects.getUserData());
                         result.add(oneObject);
                     }

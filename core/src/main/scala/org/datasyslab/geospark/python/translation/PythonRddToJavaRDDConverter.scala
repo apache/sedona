@@ -8,16 +8,16 @@ import org.apache.spark.api.java.JavaRDD
 
 private[python] case class PythonRddToJavaRDDConverter(geometrySerializer: PythonGeometrySerializer){
 
-  def deserializeToPointRawRDD(javaRDD: JavaRDD[Array[Byte]]): JavaRDD[Point] = {
-    translateToJava(javaRDD).asInstanceOf[JavaRDD[Point]]
+  def deserializeToPointRawRDD(javaRDD: JavaRDD[Array[Byte]]): JavaRDD[com.vividsolutions.jts.geom.Point] = {
+    translateToJava(javaRDD).asInstanceOf[JavaRDD[com.vividsolutions.jts.geom.Point]]
   }
 
-  def deserializeToPolygonRawRDD(javaRDD: JavaRDD[Array[Byte]]): JavaRDD[Polygon] = {
-    translateToJava(javaRDD).asInstanceOf[JavaRDD[Polygon]]
+  def deserializeToPolygonRawRDD(javaRDD: JavaRDD[Array[Byte]]): JavaRDD[com.vividsolutions.jts.geom.Polygon] = {
+    translateToJava(javaRDD).asInstanceOf[JavaRDD[com.vividsolutions.jts.geom.Polygon]]
   }
 
-  def deserializeToLineStringRawRDD(javaRDD: JavaRDD[Array[Byte]]): JavaRDD[LineString] = {
-    translateToJava(javaRDD).asInstanceOf[JavaRDD[LineString]]
+  def deserializeToLineStringRawRDD(javaRDD: JavaRDD[Array[Byte]]): JavaRDD[com.vividsolutions.jts.geom.LineString] = {
+    translateToJava(javaRDD).asInstanceOf[JavaRDD[com.vividsolutions.jts.geom.LineString]]
   }
 
   private def translateToJava(pythonRDD: JavaRDD[Array[Byte]]): JavaRDD[Geometry] = {

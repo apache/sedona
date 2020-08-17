@@ -92,21 +92,21 @@ public class UserSuppliedPolygonMapper
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
             Geometry spatialObject = null;
-            MultiPolygon multiSpatialObjects = null;
+            com.vividsolutions.jts.geom.MultiPolygon multiSpatialObjects = null;
             List<String> lineSplitList;
             lineSplitList = Arrays.asList(line.split("\t"));
             String newLine = lineSplitList.get(0).replace("\"", "");
             WKTReader wktreader = new WKTReader();
             spatialObject = wktreader.read(newLine);
-            if (spatialObject instanceof MultiPolygon) {
-                multiSpatialObjects = (MultiPolygon) spatialObject;
+            if (spatialObject instanceof com.vividsolutions.jts.geom.MultiPolygon) {
+                multiSpatialObjects = (com.vividsolutions.jts.geom.MultiPolygon) spatialObject;
                 for (int i = 0; i < multiSpatialObjects.getNumGeometries(); i++) {
                     spatialObject = multiSpatialObjects.getGeometryN(i);
-                    result.add((Polygon) spatialObject);
+                    result.add(new Polygon(spatialObject));
                 }
             }
             else {
-                result.add((Polygon) spatialObject);
+                result.add(new Polygon(spatialObject));
             }
         }
         return result.iterator();

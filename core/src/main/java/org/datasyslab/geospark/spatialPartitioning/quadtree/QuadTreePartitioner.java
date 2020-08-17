@@ -59,7 +59,7 @@ public class QuadTreePartitioner
 
         final List<QuadRectangle> matchedPartitions = quadTree.findZones(new QuadRectangle(envelope));
 
-        final Point point = spatialObject instanceof Point ? (Point) spatialObject : null;
+        final com.vividsolutions.jts.geom.Point point = spatialObject instanceof com.vividsolutions.jts.geom.Point ? (com.vividsolutions.jts.geom.Point) spatialObject : null;
 
         final Set<Tuple2<Integer, T>> result = new HashSet<>();
         for (QuadRectangle rectangle : matchedPartitions) {

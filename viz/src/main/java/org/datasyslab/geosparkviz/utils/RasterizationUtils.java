@@ -209,7 +209,7 @@ public class RasterizationUtils
      * @param reverseSpatialCoordinate the reverse spatial coordinate
      * @return the list
      */
-    public static List<Tuple2<Pixel, Double>> FindPixelCoordinates(int resolutionX, int resolutionY, Envelope datasetBoundary, Point spatialObject, ColorizeOption colorizeOption, boolean reverseSpatialCoordinate)
+    public static List<Tuple2<Pixel, Double>> FindPixelCoordinates(int resolutionX, int resolutionY, Envelope datasetBoundary, com.vividsolutions.jts.geom.Point spatialObject, ColorizeOption colorizeOption, boolean reverseSpatialCoordinate)
     {
         List<Tuple2<Pixel, Double>> result = new ArrayList<Tuple2<Pixel, Double>>();
         Tuple2<Integer, Integer> pixelCoordinate = null;
@@ -288,7 +288,7 @@ public class RasterizationUtils
      * @param reverseSpatialCoordinate the reverse spatial coordinate
      * @return the list
      */
-    public static List<Tuple2<Pixel, Double>> FindPixelCoordinates(int resolutionX, int resolutionY, Envelope datasetBoundary, Polygon spatialObject, boolean reverseSpatialCoordinate)
+    public static List<Tuple2<Pixel, Double>> FindPixelCoordinates(int resolutionX, int resolutionY, Envelope datasetBoundary, com.vividsolutions.jts.geom.Polygon spatialObject, boolean reverseSpatialCoordinate)
     {
         List<Tuple2<Pixel, Double>> result = new ArrayList<Tuple2<Pixel, Double>>();
         for (int i = 0; i < spatialObject.getCoordinates().length - 1; i++) {
@@ -433,7 +433,7 @@ public class RasterizationUtils
      * @param reverseSpatialCoordinate the reverse spatial coordinate
      * @return the list
      */
-    public static List<Tuple2<Pixel, Double>> FindPixelCoordinates(int resolutionX, int resolutionY, Envelope datasetBoundary, LineString spatialObject, boolean reverseSpatialCoordinate)
+    public static List<Tuple2<Pixel, Double>> FindPixelCoordinates(int resolutionX, int resolutionY, Envelope datasetBoundary, com.vividsolutions.jts.geom.LineString spatialObject, boolean reverseSpatialCoordinate)
     {
         List<Tuple2<Pixel, Double>> result = new ArrayList<Tuple2<Pixel, Double>>();
         for (int i = 0; i < spatialObject.getCoordinates().length - 1; i++) {

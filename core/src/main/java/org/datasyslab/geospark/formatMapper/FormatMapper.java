@@ -26,9 +26,6 @@ import com.vividsolutions.jts.operation.valid.IsValidOp;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.jts.geom.GeometryFactory;
-import org.datasyslab.geospark.jts.geom.MultiLineString;
-import org.datasyslab.geospark.jts.geom.MultiPoint;
-import org.datasyslab.geospark.jts.geom.MultiPolygon;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GeometryType;
 import org.wololo.geojson.Feature;
@@ -188,7 +185,7 @@ public class FormatMapper<T extends Geometry>
         else {
             geometry = geoJSONReader.read(geoJson);
         }
-        return geometry;
+        return factory.fromJTS(geometry);
     }
 
 
@@ -239,7 +236,8 @@ public class FormatMapper<T extends Geometry>
             return null;
         }
         handleNonSpatialDataToGeometry(geometry, Arrays.asList(columns));
-        return geometry;
+
+        return factory.fromJTS(geometry);
     }
 
     public Geometry readWkb(String line)
@@ -252,7 +250,7 @@ public class FormatMapper<T extends Geometry>
         final Geometry geometry = wkbReader.read(aux);
         handleNonSpatialDataToGeometry(geometry, Arrays.asList(columns));
 
-        return geometry;
+        return factory.fromJTS(geometry);
     }
 
     public Coordinate[] readCoordinates(String line)
@@ -395,14 +393,14 @@ public class FormatMapper<T extends Geometry>
         if (geometry == null) {
             return;
         }
-        if (geometry instanceof MultiPoint) {
-            addMultiGeometry((MultiPoint) geometry, result);
+        if (geometry instanceof com.vividsolutions.jts.geom.MultiPoint) {
+            addMultiGeometry((com.vividsolutions.jts.geom.MultiPoint) geometry, result);
         }
-        else if (geometry instanceof MultiLineString) {
-            addMultiGeometry((MultiLineString) geometry, result);
+        else if (geometry instanceof com.vividsolutions.jts.geom.MultiLineString) {
+            addMultiGeometry((com.vividsolutions.jts.geom.MultiLineString) geometry, result);
         }
-        else if (geometry instanceof MultiPolygon) {
-            addMultiGeometry((MultiPolygon) geometry, result);
+        else if (geometry instanceof com.vividsolutions.jts.geom.MultiPolygon) {
+            addMultiGeometry((com.vividsolutions.jts.geom.MultiPolygon) geometry, result);
         }
         else {
             result.add((T) geometry);

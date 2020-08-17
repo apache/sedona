@@ -32,9 +32,9 @@ import com.esotericsoftware.kryo.io.Output;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
-import org.datasyslab.geospark.jts.geom.GeometryCollection;
 import org.datasyslab.geospark.jts.geom.Circle;
 import org.datasyslab.geospark.geometryObjects.GeometrySerde;
+import org.datasyslab.geospark.jts.geom.GeometryFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -44,6 +44,7 @@ public class GeometrySerdeTest
 {
     private final Kryo kryo = new Kryo();
     private final WKTReader wktReader = new WKTReader();
+    private final GeometryFactory geometryFactory = new GeometryFactory();
 
     @Test
     public void test()
@@ -69,7 +70,7 @@ public class GeometrySerdeTest
         geometry.setUserData("This is a test");
         Assert.assertEquals(geometry, serde(geometry));
 
-        if (geometry instanceof GeometryCollection) {
+        if (geometry instanceof com.vividsolutions.jts.geom.GeometryCollection) {
             return;
         }
 
@@ -80,7 +81,7 @@ public class GeometrySerdeTest
     private Geometry parseWkt(String wkt)
             throws ParseException
     {
-        return wktReader.read(wkt);
+        return geometryFactory.fromJTS(wktReader.read(wkt));
     }
 
     private Geometry serde(Geometry input)

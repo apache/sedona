@@ -100,7 +100,7 @@ abstract class JudgementBase
         if (extent != null) {
             // Handle easy case: points. Since each point is assigned to exactly one partition,
             // different partitions cannot emit duplicate results.
-            if (left instanceof Point || right instanceof Point) {
+            if (left instanceof com.vividsolutions.jts.geom.Point || right instanceof com.vividsolutions.jts.geom.Point) {
                 return geoMatch(left, right);
             }
 

@@ -166,8 +166,8 @@ public class ShapefileReaderTest
         while (features.hasNext()) {
             SimpleFeature feature = features.next();
             Object geometry = feature.getDefaultGeometry();
-            if (geometry instanceof MultiPolygon) {
-                MultiPolygon multiPolygon = (MultiPolygon) geometry;
+            if (geometry instanceof com.vividsolutions.jts.geom.MultiPolygon) {
+                com.vividsolutions.jts.geom.MultiPolygon multiPolygon = (com.vividsolutions.jts.geom.MultiPolygon) geometry;
                 if (multiPolygon.getNumGeometries() == 1) {
                     geometry = multiPolygon.getGeometryN(0);
                 }

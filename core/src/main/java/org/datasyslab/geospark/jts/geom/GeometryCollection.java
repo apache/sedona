@@ -32,12 +32,21 @@ public class GeometryCollection extends com.vividsolutions.jts.geom.GeometryColl
         return res;
     }
 
+    private static Geometry[] convertGeometries(com.vividsolutions.jts.geom.Geometry[] geometries) {
+        GeometryFactory factory = new GeometryFactory();
+        Geometry[] res = new Geometry[geometries.length];
+        for (int i = 0; i < res.length; i++) {
+            res[i] = factory.fromJTS(geometries[i]);
+        }
+        return res;
+    }
+
     public GeometryCollection(Object original) {
         this((com.vividsolutions.jts.geom.GeometryCollection) original);
     }
 
     public GeometryCollection(com.vividsolutions.jts.geom.GeometryCollection original) {
-        super(GeometryCollection.getGeometries(original), original.getFactory());
+        this(getGeometries(original), original.getFactory());
         setUserData(original.getUserData());
     }
 
@@ -45,7 +54,7 @@ public class GeometryCollection extends com.vividsolutions.jts.geom.GeometryColl
      * {@link com.vividsolutions.jts.geom.GeometryCollection#GeometryCollection(Geometry[], com.vividsolutions.jts.geom.GeometryFactory)}
      */
     public GeometryCollection(Geometry[] geometries, com.vividsolutions.jts.geom.GeometryFactory factory) {
-        super(geometries, new GeometryFactory(factory));
+        super(convertGeometries(geometries), new GeometryFactory(factory));
         if (getUserData() == null) setUserData("");
     }
 

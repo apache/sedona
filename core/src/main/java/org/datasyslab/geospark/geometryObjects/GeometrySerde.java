@@ -26,12 +26,6 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import org.datasyslab.geospark.jts.geom.GeometryFactory;
 import org.datasyslab.geospark.jts.geom.GeometryCollection;
-import org.datasyslab.geospark.jts.geom.LineString;
-import org.datasyslab.geospark.jts.geom.MultiLineString;
-import org.datasyslab.geospark.jts.geom.MultiPoint;
-import org.datasyslab.geospark.jts.geom.MultiPolygon;
-import org.datasyslab.geospark.jts.geom.Point;
-import org.datasyslab.geospark.jts.geom.Polygon;
 import org.datasyslab.geospark.jts.geom.Circle;
 import org.apache.log4j.Logger;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeSerde;
@@ -81,21 +75,21 @@ public class GeometrySerde
     @Override
     public void write(Kryo kryo, Output out, Object object)
     {
-        if (object instanceof Circle) {
-            Circle circle = (Circle) object;
+        if (object instanceof org.datasyslab.geospark.geometryObjects.Circle) {
+            org.datasyslab.geospark.geometryObjects.Circle circle = (org.datasyslab.geospark.geometryObjects.Circle) object;
             writeType(out, Type.CIRCLE);
             out.writeDouble(circle.getRadius());
             writeGeometry(kryo, out, circle.getCenterGeometry());
             writeUserData(kryo, out, circle);
         }
-        else if (object instanceof Point || object instanceof LineString
-                || object instanceof Polygon || object instanceof MultiPoint
-                || object instanceof MultiLineString || object instanceof MultiPolygon) {
+        else if (object instanceof com.vividsolutions.jts.geom.Point || object instanceof com.vividsolutions.jts.geom.LineString
+                || object instanceof com.vividsolutions.jts.geom.Polygon || object instanceof com.vividsolutions.jts.geom.MultiPoint
+                || object instanceof com.vividsolutions.jts.geom.MultiLineString || object instanceof com.vividsolutions.jts.geom.MultiPolygon) {
             writeType(out, Type.SHAPE);
             writeGeometry(kryo, out, (Geometry) object);
         }
-        else if (object instanceof GeometryCollection) {
-            GeometryCollection collection = (GeometryCollection) object;
+        else if (object instanceof com.vividsolutions.jts.geom.GeometryCollection) {
+            com.vividsolutions.jts.geom.GeometryCollection collection = (com.vividsolutions.jts.geom.GeometryCollection) object;
             writeType(out, Type.GEOMETRYCOLLECTION);
             out.writeInt(collection.getNumGeometries());
             for (int i = 0; i < collection.getNumGeometries(); i++) {

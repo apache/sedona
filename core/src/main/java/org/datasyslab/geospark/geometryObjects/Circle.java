@@ -139,20 +139,20 @@ public class Circle
             return false;
         }
 
-        if (other instanceof Point) {
-            return covers((Point) other);
+        if (other instanceof com.vividsolutions.jts.geom.Point) {
+            return covers((com.vividsolutions.jts.geom.Point) other);
         }
 
-        if (other instanceof LineString) {
-            return covers((LineString) other);
+        if (other instanceof com.vividsolutions.jts.geom.LineString) {
+            return covers((com.vividsolutions.jts.geom.LineString) other);
         }
 
-        if (other instanceof Polygon) {
-            return covers(((Polygon) other).getExteriorRing());
+        if (other instanceof com.vividsolutions.jts.geom.Polygon) {
+            return covers(((com.vividsolutions.jts.geom.Polygon) other).getExteriorRing());
         }
 
-        if (other instanceof GeometryCollection) {
-            GeometryCollection collection = (GeometryCollection) other;
+        if (other instanceof com.vividsolutions.jts.geom.GeometryCollection) {
+            com.vividsolutions.jts.geom.GeometryCollection collection = (com.vividsolutions.jts.geom.GeometryCollection) other;
             for (int i = 0; i < collection.getNumGeometries(); i++) {
                 if (!covers(collection.getGeometryN(i))) {
                     return false;
@@ -165,7 +165,7 @@ public class Circle
                 other.getGeometryType());
     }
 
-    private boolean covers(LineString lineString)
+    private boolean covers(com.vividsolutions.jts.geom.LineString lineString)
     {
         for (int i = 0; i < lineString.getNumPoints(); i++) {
             if (!covers(lineString.getPointN(i))) {
@@ -175,7 +175,7 @@ public class Circle
         return true;
     }
 
-    private boolean covers(Point point)
+    private boolean covers(com.vividsolutions.jts.geom.Point point)
     {
         double deltaX = point.getX() - centerPoint.x;
         double deltaY = point.getY() - centerPoint.y;
@@ -195,20 +195,20 @@ public class Circle
             return false;
         }
 
-        if (other instanceof Point) {
-            return covers((Point) other);
+        if (other instanceof com.vividsolutions.jts.geom.Point) {
+            return covers((com.vividsolutions.jts.geom.Point) other);
         }
 
-        if (other instanceof LineString) {
-            return intersects((LineString) other);
+        if (other instanceof com.vividsolutions.jts.geom.LineString) {
+            return intersects((com.vividsolutions.jts.geom.LineString) other);
         }
 
-        if (other instanceof Polygon) {
-            return intersects((Polygon) other);
+        if (other instanceof com.vividsolutions.jts.geom.Polygon) {
+            return intersects((com.vividsolutions.jts.geom.Polygon) other);
         }
 
-        if (other instanceof GeometryCollection) {
-            GeometryCollection collection = (GeometryCollection) other;
+        if (other instanceof com.vividsolutions.jts.geom.GeometryCollection) {
+            com.vividsolutions.jts.geom.GeometryCollection collection = (com.vividsolutions.jts.geom.GeometryCollection) other;
             for (int i = 0; i < collection.getNumGeometries(); i++) {
                 if (intersects(collection.getGeometryN(i))) {
                     return true;
@@ -221,7 +221,7 @@ public class Circle
                 other.getGeometryType());
     }
 
-    private boolean intersects(Polygon polygon)
+    private boolean intersects(com.vividsolutions.jts.geom.Polygon polygon)
     {
         if (intersects(polygon.getExteriorRing())) {
             return true;
@@ -244,7 +244,7 @@ public class Circle
         return false;
     }
 
-    private boolean intersects(LineString lineString)
+    private boolean intersects(com.vividsolutions.jts.geom.LineString lineString)
     {
         for (int i = 0; i < lineString.getNumPoints() - 1; i++) {
             if (intersects(lineString.getPointN(i), lineString.getPointN(i + 1))) {

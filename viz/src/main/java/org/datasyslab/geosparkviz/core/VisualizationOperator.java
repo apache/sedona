@@ -822,14 +822,14 @@ public abstract class VisualizationOperator
                     throws Exception
             {
 
-                if (spatialObject instanceof Point) {
-                    return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (Point) spatialObject, colorizeOption, reverseSpatialCoordinate).iterator();
+                if (spatialObject instanceof com.vividsolutions.jts.geom.Point) {
+                    return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (com.vividsolutions.jts.geom.Point) spatialObject, colorizeOption, reverseSpatialCoordinate).iterator();
                 }
-                else if (spatialObject instanceof Polygon) {
-                    return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (Polygon) spatialObject, reverseSpatialCoordinate).iterator();
+                else if (spatialObject instanceof com.vividsolutions.jts.geom.Polygon) {
+                    return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (com.vividsolutions.jts.geom.Polygon) spatialObject, reverseSpatialCoordinate).iterator();
                 }
-                else if (spatialObject instanceof LineString) {
-                    return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (LineString) spatialObject, reverseSpatialCoordinate).iterator();
+                else if (spatialObject instanceof com.vividsolutions.jts.geom.LineString) {
+                    return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (com.vividsolutions.jts.geom.LineString) spatialObject, reverseSpatialCoordinate).iterator();
                 }
                 else {
                     throw new Exception("[GeoSparkViz][Rasterize] Unsupported spatial object types. GeoSparkViz only supports Point, Polygon, LineString");

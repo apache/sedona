@@ -84,25 +84,25 @@ public class UserSuppliedLineStringMapper
     public Iterator<Object> call(Iterator<String> stringIterator)
             throws Exception
     {
-        List result = new ArrayList<LineString>();
+        List<Object> result = new ArrayList<>();
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
             Geometry spatialObject = null;
-            MultiLineString multiSpatialObjects = null;
+            com.vividsolutions.jts.geom.MultiLineString multiSpatialObjects = null;
             List<String> lineSplitList;
             lineSplitList = Arrays.asList(line.split("\t"));
             String newLine = lineSplitList.get(0).replace("\"", "");
             WKTReader wktreader = new WKTReader();
             spatialObject = wktreader.read(newLine);
-            if (spatialObject instanceof MultiLineString) {
-                multiSpatialObjects = (MultiLineString) spatialObject;
+            if (spatialObject instanceof com.vividsolutions.jts.geom.MultiLineString) {
+                multiSpatialObjects = (com.vividsolutions.jts.geom.MultiLineString) spatialObject;
                 for (int i = 0; i < multiSpatialObjects.getNumGeometries(); i++) {
                     spatialObject = multiSpatialObjects.getGeometryN(i);
-                    result.add((LineString) spatialObject);
+                    result.add(new LineString(spatialObject));
                 }
             }
             else {
-                result.add((LineString) spatialObject);
+                result.add(new LineString(spatialObject));
             }
         }
         return result.iterator();

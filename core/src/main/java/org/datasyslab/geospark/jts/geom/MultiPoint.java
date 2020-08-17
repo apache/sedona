@@ -32,12 +32,21 @@ public class MultiPoint extends com.vividsolutions.jts.geom.MultiPoint {
         return res;
     }
 
+    private static Point[] convertPoints(com.vividsolutions.jts.geom.Point[] points) {
+        GeometryFactory factory = new GeometryFactory();
+        Point[] res = new Point[points.length];
+        for (int i = 0; i < res.length; i++) {
+            res[i] = (Point)factory.fromJTS(points[i]);
+        }
+        return res;
+    }
+
     public MultiPoint(Object original) {
         this((com.vividsolutions.jts.geom.MultiPoint) original);
     }
 
     public MultiPoint(com.vividsolutions.jts.geom.MultiPoint original) {
-        super(MultiPoint.getPoints(original), original.getFactory());
+        this(getPoints(original), original.getFactory());
         setUserData(original.getUserData());
     }
 
@@ -45,7 +54,7 @@ public class MultiPoint extends com.vividsolutions.jts.geom.MultiPoint {
      * {@link com.vividsolutions.jts.geom.MultiPoint#MultiPoint(com.vividsolutions.jts.geom.Point[], com.vividsolutions.jts.geom.GeometryFactory)}
      */
     public MultiPoint(com.vividsolutions.jts.geom.Point[] points, com.vividsolutions.jts.geom.GeometryFactory factory) {
-        super(points, new GeometryFactory(factory));
+        super(convertPoints(points), new GeometryFactory(factory));
         if (getUserData() == null) setUserData("");
     }
 

@@ -32,12 +32,21 @@ public class MultiLineString extends com.vividsolutions.jts.geom.MultiLineString
         return res;
     }
 
+    private static LineString[] convertLineStrings(com.vividsolutions.jts.geom.LineString[] lineStrings) {
+        GeometryFactory factory = new GeometryFactory();
+        LineString[] res = new LineString[lineStrings.length];
+        for (int i = 0; i < res.length; i++) {
+            res[i] = (LineString)factory.fromJTS(lineStrings[i]);
+        }
+        return res;
+    }
+
     public MultiLineString(Object original) {
         this((com.vividsolutions.jts.geom.MultiLineString) original);
     }
 
     public MultiLineString(com.vividsolutions.jts.geom.MultiLineString original) {
-        super(MultiLineString.getLineStrings(original), original.getFactory());
+        this(getLineStrings(original), original.getFactory());
         setUserData(original.getUserData());
     }
 
@@ -45,7 +54,7 @@ public class MultiLineString extends com.vividsolutions.jts.geom.MultiLineString
      * {@link com.vividsolutions.jts.geom.MultiLineString#MultiLineString(com.vividsolutions.jts.geom.LineString[], com.vividsolutions.jts.geom.GeometryFactory)}
      */
     public MultiLineString(com.vividsolutions.jts.geom.LineString[] lineStrings, com.vividsolutions.jts.geom.GeometryFactory factory) {
-        super(lineStrings, new GeometryFactory(factory));
+        super(convertLineStrings(lineStrings), new GeometryFactory(factory));
         if (getUserData() == null) setUserData("");
     }
 

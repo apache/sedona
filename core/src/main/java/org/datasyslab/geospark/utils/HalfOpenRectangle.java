@@ -28,7 +28,7 @@ public class HalfOpenRectangle
         this.envelope = envelope;
     }
 
-    public boolean contains(Point point)
+    public boolean contains(com.vividsolutions.jts.geom.Point point)
     {
         return contains(point.getX(), point.getY());
     }

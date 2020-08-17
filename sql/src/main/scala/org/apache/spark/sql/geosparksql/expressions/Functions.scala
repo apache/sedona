@@ -18,8 +18,8 @@ package org.apache.spark.sql.geosparksql.expressions
 
 import java.util
 
-import com.vividsolutions.jts.geom.{PrecisionModel, Geometry, GeometryFactory}
 import org.datasyslab.geospark.jts.geom._
+import com.vividsolutions.jts.geom.{PrecisionModel, Geometry, GeometryFactory, Coordinate}
 import com.vividsolutions.jts.operation.IsSimpleOp
 import com.vividsolutions.jts.operation.linemerge.LineMerger
 import com.vividsolutions.jts.operation.valid.IsValidOp
@@ -349,7 +349,7 @@ case class ST_MakeValid(inputExpressions: Seq[Expression])
       throw new IllegalArgumentException("ST_MakeValid works only on Polygons and MultiPolygons")
     }
     
-    val validGeometry: util.List[Polygon] = geometry match {
+    val validGeometry: util.List[com.vividsolutions.jts.geom.Polygon] = geometry match {
       case g: MultiPolygon =>
         (0 until g.getNumGeometries).flatMap(i => {
           val polygon = g.getGeometryN(i).asInstanceOf[Polygon]
@@ -878,7 +878,7 @@ case class ST_AddPoint(inputExpressions: Seq[Expression])
     else None
   }
 
-  private def lineStringFromCoordinates(coordinates: Array[Coordinate]): LineString =
+  private def lineStringFromCoordinates(coordinates: Array[Coordinate]): com.vividsolutions.jts.geom.LineString =
     geometryFactory.createLineString(coordinates)
 
   override def dataType: DataType = new GeometryUDT()
