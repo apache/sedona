@@ -24,7 +24,7 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
+import org.datasyslab.geospark.jts.geom.GeometryFactory;
 import org.datasyslab.geospark.jts.geom.GeometryCollection;
 import org.datasyslab.geospark.jts.geom.LineString;
 import org.datasyslab.geospark.jts.geom.MultiLineString;

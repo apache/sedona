@@ -1,6 +1,6 @@
 package org.datasyslab.geospark.python
 
-import com.vividsolutions.jts.geom.GeometryFactory
+import org.datasyslab.geospark.jts.geom.GeometryFactory
 import com.vividsolutions.jts.io.WKTReader
 import org.datasyslab.geospark.python.translation.PythonGeometrySerializer
 

@@ -19,11 +19,11 @@ package org.datasyslab.geospark.joinJudgement;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.TaskContext;
 import org.datasyslab.geospark.jts.geom.Point;
+import org.datasyslab.geospark.jts.geom.GeometryFactory;
 import org.datasyslab.geospark.utils.HalfOpenRectangle;
 
 import javax.annotation.Nullable;
@@ -123,9 +123,14 @@ abstract class JudgementBase
         return geoMatch(left, right);
     }
 
-    private Point makePoint(double x, double y, GeometryFactory factory)
+    private Point makePoint(double x, double y, com.vividsolutions.jts.geom.GeometryFactory factory)
     {
-        return factory.createPoint(new Coordinate(x, y));
+        GeometryFactory wrappedFactory = null;
+        if (factory instanceof GeometryFactory)
+            wrappedFactory = (GeometryFactory) factory;
+        else
+            wrappedFactory = new GeometryFactory(factory);
+        return (Point) wrappedFactory.createPoint(new Coordinate(x, y));
     }
 
     private boolean geoMatch(Geometry left, Geometry right)

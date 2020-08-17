@@ -50,7 +50,7 @@ public class CRSTransformation
             CoordinateReferenceSystem sourceCRS = CRS.decode(sourceEpsgCRSCode);
             CoordinateReferenceSystem targetCRS = CRS.decode(targetEpsgCRSCode);
             final MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS, false);
-            return (Point) JTS.transform(sourceObject, transform);
+            return new Point((Point) JTS.transform(sourceObject, transform));
         }
         catch (FactoryException e) {
             // TODO Auto-generated catch block

@@ -18,7 +18,7 @@ package org.datasyslab.geosparkviz.utils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.GeometryFactory;
+import org.datasyslab.geospark.jts.geom.GeometryFactory;
 import org.datasyslab.geospark.jts.geom.LineString;
 import org.datasyslab.geospark.jts.geom.LinearRing;
 import org.datasyslab.geospark.jts.geom.Point;

@@ -17,7 +17,6 @@
 package org.datasyslab.geospark.formatMapper.shapefileParser;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -31,6 +30,7 @@ import org.datasyslab.geospark.jts.geom.MultiPoint;
 import org.datasyslab.geospark.jts.geom.MultiPolygon;
 import org.datasyslab.geospark.jts.geom.Point;
 import org.datasyslab.geospark.jts.geom.Polygon;
+import org.datasyslab.geospark.jts.geom.GeometryFactory;
 import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundBox;
 import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundaryInputFormat;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.TypeUnknownException;

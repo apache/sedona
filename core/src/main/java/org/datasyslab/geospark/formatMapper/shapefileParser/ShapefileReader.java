@@ -17,7 +17,7 @@
 package org.datasyslab.geospark.formatMapper.shapefileParser;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
+import org.datasyslab.geospark.jts.geom.GeometryFactory;
 import org.datasyslab.geospark.jts.geom.LineString;
 import org.datasyslab.geospark.jts.geom.MultiLineString;
 import org.datasyslab.geospark.jts.geom.MultiPoint;

@@ -26,11 +26,11 @@
 package org.datasyslab.geospark.spatialOperator;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.datasyslab.geospark.jts.geom.GeometryFactory;
 import org.datasyslab.geospark.jts.geom.LineString;
 import org.datasyslab.geospark.jts.geom.Point;
 import org.datasyslab.geospark.enums.FileDataSplitter;

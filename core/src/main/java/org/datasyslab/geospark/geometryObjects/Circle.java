@@ -23,12 +23,12 @@ import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryComponentFilter;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.GeometryFilter;
 import org.datasyslab.geospark.jts.geom.GeometryCollection;
 import org.datasyslab.geospark.jts.geom.LineString;
 import org.datasyslab.geospark.jts.geom.Point;
 import org.datasyslab.geospark.jts.geom.Polygon;
+import org.datasyslab.geospark.jts.geom.GeometryFactory;
 
 // TODO: Auto-generated Javadoc
 
