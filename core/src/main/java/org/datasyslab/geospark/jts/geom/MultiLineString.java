@@ -25,11 +25,15 @@ import java.util.Objects;
  */
 public class MultiLineString extends com.vividsolutions.jts.geom.MultiLineString {
 
-    public static LineString[] getLineStrings(com.vividsolutions.jts.geom.GeometryCollection geometry) {
-        LineString[] res = new LineString[geometry.getNumGeometries()];
+    public static com.vividsolutions.jts.geom.LineString[] getLineStrings(com.vividsolutions.jts.geom.GeometryCollection geometry) {
+        com.vividsolutions.jts.geom.LineString[] res = new com.vividsolutions.jts.geom.LineString[geometry.getNumGeometries()];
         for (int i = 0; i < res.length; i++)
-            res[i] = (LineString) geometry.getGeometryN(i);
+            res[i] = (com.vividsolutions.jts.geom.LineString) geometry.getGeometryN(i);
         return res;
+    }
+
+    public MultiLineString(Object original) {
+        this((com.vividsolutions.jts.geom.MultiLineString) original);
     }
 
     public MultiLineString(com.vividsolutions.jts.geom.MultiLineString original) {

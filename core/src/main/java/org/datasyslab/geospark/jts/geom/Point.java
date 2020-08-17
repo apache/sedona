@@ -26,6 +26,9 @@ import java.util.Objects;
  */
 public class Point extends com.vividsolutions.jts.geom.Point {
 
+    public Point(Object original) {
+        this((com.vividsolutions.jts.geom.Point) original);
+    }
 
     public Point(com.vividsolutions.jts.geom.Point original) {
         super(original.getCoordinateSequence(), original.getFactory());

@@ -33,6 +33,10 @@ public class Polygon extends com.vividsolutions.jts.geom.Polygon {
         return res;
     }
 
+    public Polygon(Object original) {
+        this((com.vividsolutions.jts.geom.Polygon) original);
+    }
+
     public Polygon(com.vividsolutions.jts.geom.Polygon original) {
         super((LinearRing)original.getExteriorRing(), Polygon.getHoles(original), original.getFactory());
         setUserData(original.getUserData());

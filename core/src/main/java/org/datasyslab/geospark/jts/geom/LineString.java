@@ -26,6 +26,10 @@ import java.util.Objects;
  */
 public class LineString extends com.vividsolutions.jts.geom.LineString {
 
+    public LineString(Object original) {
+        this((com.vividsolutions.jts.geom.LineString) original);
+    }
+
     public LineString(com.vividsolutions.jts.geom.LineString original) {
         super(original.getCoordinateSequence(), original.getFactory());
         setUserData(original.getUserData());

@@ -25,11 +25,15 @@ import java.util.Objects;
  */
 public class MultiPoint extends com.vividsolutions.jts.geom.MultiPoint {
 
-    public static Point[] getPoints(com.vividsolutions.jts.geom.GeometryCollection geometry) {
-        Point[] res = new Point[geometry.getNumGeometries()];
+    public static com.vividsolutions.jts.geom.Point[] getPoints(com.vividsolutions.jts.geom.GeometryCollection geometry) {
+        com.vividsolutions.jts.geom.Point[] res = new com.vividsolutions.jts.geom.Point[geometry.getNumGeometries()];
         for (int i = 0; i < res.length; i++)
-            res[i] = (Point) geometry.getGeometryN(i);
+            res[i] = (com.vividsolutions.jts.geom.Point) geometry.getGeometryN(i);
         return res;
+    }
+
+    public MultiPoint(Object original) {
+        this((com.vividsolutions.jts.geom.MultiPoint) original);
     }
 
     public MultiPoint(com.vividsolutions.jts.geom.MultiPoint original) {

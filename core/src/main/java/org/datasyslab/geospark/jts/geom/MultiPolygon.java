@@ -25,11 +25,15 @@ import java.util.Objects;
  */
 public class MultiPolygon extends com.vividsolutions.jts.geom.MultiPolygon {
 
-    public static Polygon[] getPolygons(com.vividsolutions.jts.geom.GeometryCollection geometry) {
-        Polygon[] res = new Polygon[geometry.getNumGeometries()];
+    public static com.vividsolutions.jts.geom.Polygon[] getPolygons(com.vividsolutions.jts.geom.GeometryCollection geometry) {
+        com.vividsolutions.jts.geom.Polygon[] res = new com.vividsolutions.jts.geom.Polygon[geometry.getNumGeometries()];
         for (int i = 0; i < res.length; i++)
-            res[i] = (Polygon) geometry.getGeometryN(i);
+            res[i] = (com.vividsolutions.jts.geom.Polygon) geometry.getGeometryN(i);
         return res;
+    }
+
+    public MultiPolygon(Object original) {
+        this((com.vividsolutions.jts.geom.MultiPolygon) original);
     }
 
     public MultiPolygon(com.vividsolutions.jts.geom.MultiPolygon original) {
