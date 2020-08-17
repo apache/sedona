@@ -27,7 +27,8 @@ import java.util.Objects;
 public class LinearRing extends com.vividsolutions.jts.geom.LinearRing {
 
     public LinearRing(com.vividsolutions.jts.geom.LinearRing original) {
-        this(original.getCoordinateSequence(), original.getFactory());
+        super(original.getCoordinateSequence(), original.getFactory());
+        setUserData(original.getUserData());
     }
 
     /**

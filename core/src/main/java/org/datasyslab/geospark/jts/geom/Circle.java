@@ -26,7 +26,8 @@ import java.util.Objects;
 public class Circle extends org.datasyslab.geospark.geometryObjects.Circle {
 
     public Circle(org.datasyslab.geospark.geometryObjects.Circle original) {
-        this(original.getCenterGeometry(), original.getRadius());
+        super(original.getCenterGeometry(), original.getRadius());
+        setUserData(original.getUserData());
     }
 
     /**

@@ -33,7 +33,8 @@ public class MultiPolygon extends com.vividsolutions.jts.geom.MultiPolygon {
     }
 
     public MultiPolygon(com.vividsolutions.jts.geom.MultiPolygon original) {
-        this(MultiPolygon.getPolygons(original), original.getFactory());
+        super(MultiPolygon.getPolygons(original), original.getFactory());
+        setUserData(original.getUserData());
     }
 
     /**

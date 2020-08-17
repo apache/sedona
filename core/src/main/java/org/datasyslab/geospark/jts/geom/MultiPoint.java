@@ -33,7 +33,8 @@ public class MultiPoint extends com.vividsolutions.jts.geom.MultiPoint {
     }
 
     public MultiPoint(com.vividsolutions.jts.geom.MultiPoint original) {
-        this(MultiPoint.getPoints(original), original.getFactory());
+        super(MultiPoint.getPoints(original), original.getFactory());
+        setUserData(original.getUserData());
     }
 
     /**

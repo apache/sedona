@@ -28,7 +28,8 @@ public class Point extends com.vividsolutions.jts.geom.Point {
 
 
     public Point(com.vividsolutions.jts.geom.Point original) {
-        this(original.getCoordinateSequence(), original.getFactory());
+        super(original.getCoordinateSequence(), original.getFactory());
+        setUserData(original.getUserData());
     }
 
     /**

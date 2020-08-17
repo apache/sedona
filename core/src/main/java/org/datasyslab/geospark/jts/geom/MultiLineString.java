@@ -33,7 +33,8 @@ public class MultiLineString extends com.vividsolutions.jts.geom.MultiLineString
     }
 
     public MultiLineString(com.vividsolutions.jts.geom.MultiLineString original) {
-        this(MultiLineString.getLineStrings(original), original.getFactory());
+        super(MultiLineString.getLineStrings(original), original.getFactory());
+        setUserData(original.getUserData());
     }
 
     /**

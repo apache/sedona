@@ -27,7 +27,8 @@ import java.util.Objects;
 public class LineString extends com.vividsolutions.jts.geom.LineString {
 
     public LineString(com.vividsolutions.jts.geom.LineString original) {
-        this(original.getCoordinateSequence(), original.getFactory());
+        super(original.getCoordinateSequence(), original.getFactory());
+        setUserData(original.getUserData());
     }
 
     /**

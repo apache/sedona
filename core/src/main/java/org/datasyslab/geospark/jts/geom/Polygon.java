@@ -34,7 +34,8 @@ public class Polygon extends com.vividsolutions.jts.geom.Polygon {
     }
 
     public Polygon(com.vividsolutions.jts.geom.Polygon original) {
-        this((LinearRing)original.getExteriorRing(), Polygon.getHoles(original), original.getFactory());
+        super((LinearRing)original.getExteriorRing(), Polygon.getHoles(original), original.getFactory());
+        setUserData(original.getUserData());
     }
 
     /**

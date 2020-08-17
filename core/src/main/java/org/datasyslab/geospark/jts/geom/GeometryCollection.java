@@ -33,7 +33,8 @@ public class GeometryCollection extends com.vividsolutions.jts.geom.GeometryColl
     }
 
     public GeometryCollection(com.vividsolutions.jts.geom.GeometryCollection original) {
-        this(GeometryCollection.getGeometries(original), original.getFactory());
+        super(GeometryCollection.getGeometries(original), original.getFactory());
+        setUserData(original.getUserData());
     }
 
     /**
