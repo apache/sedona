@@ -57,26 +57,25 @@ def remove_wkb_directory():
 class TestSpatialRDDWriter(TestBase):
 
     def test_save_as_geo_json_with_data(self, remove_wkb_directory):
-        None
-        # spatial_rdd = PointRDD(
-        #     sparkContext=self.sc,
-        #     InputLocation=inputLocation,
-        #     Offset=offset,
-        #     splitter=splitter,
-        #     carryInputData=True,
-        #     partitions=numPartitions,
-        #     newLevel=StorageLevel.MEMORY_ONLY
-        # )
-        #
-        # spatial_rdd.saveAsGeoJSON(test_save_as_wkb_with_data)
-        #
-        # result_wkb = PointRDD(
-        #     sparkContext=self.sc,
-        #     InputLocation=test_save_as_wkb_with_data,
-        #     splitter=FileDataSplitter.GEOJSON,
-        #     carryInputData=True,
-        #     partitions=numPartitions,
-        #     newLevel=StorageLevel.MEMORY_ONLY
-        # )
-        #
-        # assert result_wkb.rawSpatialRDD.count() == spatial_rdd.rawSpatialRDD.count()
+        spatial_rdd = PointRDD(
+            sparkContext=self.sc,
+            InputLocation=inputLocation,
+            Offset=offset,
+            splitter=splitter,
+            carryInputData=True,
+            partitions=numPartitions,
+            newLevel=StorageLevel.MEMORY_ONLY
+        )
+
+        spatial_rdd.saveAsGeoJSON(test_save_as_wkb_with_data)
+
+        result_wkb = PointRDD(
+            sparkContext=self.sc,
+            InputLocation=test_save_as_wkb_with_data,
+            splitter=FileDataSplitter.GEOJSON,
+            carryInputData=True,
+            partitions=numPartitions,
+            newLevel=StorageLevel.MEMORY_ONLY
+        )
+
+        assert result_wkb.rawSpatialRDD.count() == spatial_rdd.rawSpatialRDD.count()

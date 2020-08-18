@@ -76,18 +76,17 @@ public class testGeoJSON
     @Test
     public void jts2geonjson()
     {
-//        ToDo BRING THIS TEST BACK ONCE JTS IS UPDATED
-//        GeometryFactory geometryFactory = new GeometryFactory();
-//        Coordinate coordinate = new Coordinate(1.0, 2.0);
-//        Geometry point = geometryFactory.createPoint(coordinate);
-//
-//        GeoJSONWriter writer = new GeoJSONWriter();
-//        Map<String, Object> userData = new HashMap<String, Object>();
-//        userData.put("UserData", "Payload");
-//        Feature jsonFeature = new Feature(writer.write(point), userData);
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Coordinate coordinate = new Coordinate(1.0, 2.0);
+        Geometry point = geometryFactory.createPoint(coordinate);
 
-//        String jsonstring = jsonFeature.toString();
-//        assert jsonstring.equals("{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[1.0,2.0]},\"properties\":{\"UserData\":\"Payload\"}}");
+        GeoJSONWriter writer = new GeoJSONWriter();
+        Map<String, Object> userData = new HashMap<String, Object>();
+        userData.put("UserData", "Payload");
+        Feature jsonFeature = new Feature(writer.write(point), userData);
+
+        String jsonstring = jsonFeature.toString();
+        assert jsonstring.equals("{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[1.0,2.0]},\"properties\":{\"UserData\":\"Payload\"}}");
     }
 
     /**
