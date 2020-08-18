@@ -18,6 +18,7 @@ package org.datasyslab.geosparkviz.utils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.PrecisionModel;
+import org.datasyslab.geospark.jts.geom.GeometryFactory;
 import org.datasyslab.geospark.jts.geom.Point;
 
 import java.io.Serializable;
@@ -29,6 +30,7 @@ import java.io.Serializable;
  */
 public class Pixel extends Point
 {
+    private static GeometryFactory factory = new GeometryFactory(new PrecisionModel(), Integer.parseInt("0"));
 
     /**
      * The resolution X.
@@ -62,9 +64,7 @@ public class Pixel extends Point
      */
     public Pixel(double x, double y, int resolutionX, int resolutionY, boolean isDuplicate, int currentPartitionId)
     {
-        super(new Coordinate(x, y), new PrecisionModel(), Integer.parseInt("0"));
-        this.resolutionX = resolutionX;
-        this.resolutionY = resolutionY;
+        this(x, y, resolutionX, resolutionY);
         this.isDuplicate = isDuplicate;
         this.currentPartitionId = currentPartitionId;
     }
@@ -79,7 +79,7 @@ public class Pixel extends Point
      */
     public Pixel(double x, double y, int resolutionX, int resolutionY)
     {
-        super(new Coordinate(x, y), new PrecisionModel(), Integer.parseInt("0"));
+        super(factory.getCoordinateSequenceFactory().create(new Coordinate[]{new Coordinate(x, y)}), factory);
         this.resolutionX = resolutionX;
         this.resolutionY = resolutionY;
     }
