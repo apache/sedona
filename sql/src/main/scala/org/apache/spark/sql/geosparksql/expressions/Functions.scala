@@ -18,8 +18,7 @@ package org.apache.spark.sql.geosparksql.expressions
 
 import java.util
 
-import org.datasyslab.geospark.jts.geom._
-import com.vividsolutions.jts.geom.{PrecisionModel, Geometry, GeometryFactory, Coordinate}
+import com.vividsolutions.jts.geom._
 import com.vividsolutions.jts.operation.IsSimpleOp
 import com.vividsolutions.jts.operation.linemerge.LineMerger
 import com.vividsolutions.jts.operation.valid.IsValidOp
@@ -31,7 +30,6 @@ import org.apache.spark.sql.catalyst.expressions.{Expression, Generator}
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
-import org.datasyslab.geospark.jts.geom.Circle
 import org.datasyslab.geosparksql.utils.GeometrySerializer
 import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.{CRS, ReferencingFactoryFinder}
@@ -43,6 +41,7 @@ import scala.collection.mutable.ArrayBuffer
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.types.ArrayType
 import implicits._
+import org.datasyslab.geospark.geometryObjects.Circle
 import org.geotools.factory.Hints
 import org.opengis.referencing.crs.CoordinateReferenceSystem
 
@@ -349,7 +348,7 @@ case class ST_MakeValid(inputExpressions: Seq[Expression])
       throw new IllegalArgumentException("ST_MakeValid works only on Polygons and MultiPolygons")
     }
     
-    val validGeometry: util.List[com.vividsolutions.jts.geom.Polygon] = geometry match {
+    val validGeometry: util.List[Polygon] = geometry match {
       case g: MultiPolygon =>
         (0 until g.getNumGeometries).flatMap(i => {
           val polygon = g.getGeometryN(i).asInstanceOf[Polygon]
@@ -878,7 +877,7 @@ case class ST_AddPoint(inputExpressions: Seq[Expression])
     else None
   }
 
-  private def lineStringFromCoordinates(coordinates: Array[Coordinate]): com.vividsolutions.jts.geom.LineString =
+  private def lineStringFromCoordinates(coordinates: Array[Coordinate]): LineString =
     geometryFactory.createLineString(coordinates)
 
   override def dataType: DataType = new GeometryUDT()

@@ -220,7 +220,7 @@ public class ShapeSerde
 
         int numRings = 0;
         for (int i = 0; i < numPolygons; i++) {
-            Polygon polygon = (Polygon) multiPolygon.getGeometryN(i);
+            com.vividsolutions.jts.geom.Polygon polygon = (com.vividsolutions.jts.geom.Polygon) multiPolygon.getGeometryN(i);
             numRings += polygon.getNumInteriorRing() + 1;
         }
 
@@ -229,12 +229,12 @@ public class ShapeSerde
 
         int offset = 0;
         for (int i = 0; i < numPolygons; i++) {
-            Polygon polygon = (Polygon) multiPolygon.getGeometryN(i);
+            com.vividsolutions.jts.geom.Polygon polygon = (com.vividsolutions.jts.geom.Polygon) multiPolygon.getGeometryN(i);
             offset = putRingOffsets(buffer, polygon, offset);
         }
 
         for (int i = 0; i < numPolygons; i++) {
-            Polygon polygon = (Polygon) multiPolygon.getGeometryN(i);
+            com.vividsolutions.jts.geom.Polygon polygon = (com.vividsolutions.jts.geom.Polygon) multiPolygon.getGeometryN(i);
             putPolygonPoints(buffer, polygon);
         }
         return buffer.array();
