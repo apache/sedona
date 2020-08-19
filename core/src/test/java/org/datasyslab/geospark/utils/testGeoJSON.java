@@ -27,16 +27,16 @@ package org.datasyslab.geospark.utils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import org.datasyslab.geospark.jts.GeoJsonFeatureWriter;
 import org.datasyslab.geospark.jts.geom.GeometryFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.datasyslab.geospark.jts.geom.GeometryFactory;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.wololo.geojson.Feature;
-import org.wololo.jts2geojson.GeoJSONWriter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -79,15 +79,21 @@ public class testGeoJSON
         GeometryFactory geometryFactory = new GeometryFactory();
         Coordinate coordinate = new Coordinate(1.0, 2.0);
         Geometry point = geometryFactory.createPoint(coordinate);
+        point.setUserData("Payload");
 
-        GeoJSONWriter writer = new GeoJSONWriter();
-        Map<String, Object> userData = new HashMap<String, Object>();
-        userData.put("UserData", "Payload");
-        Feature jsonFeature = new Feature(writer.write(point), userData);
+        String pointFeatureParts = "\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[1.0,2.0]}";
+        String pointFeature = "{" + pointFeatureParts + "}";
+        String pointFeatureWithUserData = "{" + pointFeatureParts + ",\"properties\":{\"UserData\":\"Payload\"}}";
 
-        String jsonstring = jsonFeature.toString();
-        assert jsonstring.equals("{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[1.0,2.0]},\"properties\":{\"UserData\":\"Payload\"}}");
+        assert compareGeoJson(new GeoJsonFeatureWriter(), pointFeatureWithUserData, point);
+        assert compareGeoJson(new GeoJsonFeatureWriter(true), pointFeatureWithUserData, point);
+        assert compareGeoJson(new GeoJsonFeatureWriter(false), pointFeature, point);
     }
+
+    private boolean compareGeoJson(GeoJsonFeatureWriter writer, String expected, Geometry geometry) {
+        return writer.write(geometry).equals(expected);
+    }
+
 
     /**
      * Tear down.

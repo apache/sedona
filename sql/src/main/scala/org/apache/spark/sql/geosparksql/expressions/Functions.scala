@@ -35,13 +35,13 @@ import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.{CRS, ReferencingFactoryFinder}
 import org.opengis.referencing.operation.MathTransform
 import org.apache.spark.sql.geosparksql.UDT.GeometryUDT
-import org.wololo.jts2geojson.GeoJSONWriter
 
 import scala.collection.mutable.ArrayBuffer
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.types.ArrayType
 import implicits._
 import org.datasyslab.geospark.geometryObjects.Circle
+import org.datasyslab.geospark.jts.GeoJsonFeatureWriter
 import org.geotools.factory.Hints
 import org.opengis.referencing.crs.CoordinateReferenceSystem
 
@@ -496,8 +496,8 @@ case class ST_AsGeoJSON(inputExpressions: Seq[Expression])
     inputExpressions.validateLength(1)
     val geometry = inputExpressions.head.toGeometry(input)
 
-    val writer = new GeoJSONWriter()
-    UTF8String.fromString(writer.write(geometry).toString)
+    val writer = new GeoJsonFeatureWriter(false)
+    UTF8String.fromString(writer.write(geometry))
   }
 
   override def dataType: DataType = StringType

@@ -19,6 +19,7 @@ package org.datasyslab.geospark.spatialRDD;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import org.datasyslab.geospark.jts.GeoJsonFeatureWriter;
 import org.datasyslab.geospark.jts.geom.GeometryFactory;
 import org.datasyslab.geospark.jts.geom.LineString;
 import org.datasyslab.geospark.jts.geom.LinearRing;
@@ -56,8 +57,6 @@ import org.geotools.referencing.CRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
-import org.wololo.geojson.Feature;
-import org.wololo.jts2geojson.GeoJSONWriter;
 import scala.Tuple2;
 
 import java.io.Serializable;
@@ -619,21 +618,10 @@ public class SpatialRDD<T extends Geometry>
             public Iterator<String> call(Iterator<T> iterator)
                     throws Exception
             {
-                ArrayList<String> result = new ArrayList();
-                GeoJSONWriter writer = new GeoJSONWriter();
+                ArrayList<String> result = new ArrayList<>();
+                GeoJsonFeatureWriter writer = new GeoJsonFeatureWriter();
                 while (iterator.hasNext()) {
-                    Geometry spatialObject = (Geometry) iterator.next();
-                    Feature jsonFeature;
-                    if (spatialObject.getUserData() != null) {
-                        Map<String, Object> userData = new HashMap<String, Object>();
-                        userData.put("UserData", spatialObject.getUserData());
-                        jsonFeature = new Feature(writer.write(spatialObject), userData);
-                    }
-                    else {
-                        jsonFeature = new Feature(writer.write(spatialObject), null);
-                    }
-                    String jsonstring = jsonFeature.toString();
-                    result.add(jsonstring);
+                    result.add(writer.write(iterator.next()));
                 }
                 return result.iterator();
             }
