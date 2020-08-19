@@ -33,9 +33,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.datasyslab</groupId>
-            <artifactId>JTSplus</artifactId>
-            <version>0.1.4</version>
+            <groupId>com.vividsolutions</groupId>
+            <artifactId>jts-core</artifactId>
+            <version>${jts.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vividsolutions</groupId>
+            <artifactId>jts-io</artifactId>
+            <version>${jts.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wololo</groupId>
