@@ -31,7 +31,7 @@ public class Circle extends org.datasyslab.geospark.geometryObjects.Circle {
 
     public Circle(org.datasyslab.geospark.geometryObjects.Circle original) {
         super(original.getCenterGeometry(), original.getRadius());
-        setUserData(original.getUserData());
+        GeometryCommonUtils.initUserDataFrom(this, original);
     }
 
     /**
@@ -39,7 +39,7 @@ public class Circle extends org.datasyslab.geospark.geometryObjects.Circle {
      */
     public Circle(Geometry centerGeometry, Double givenRadius) {
         super(centerGeometry, givenRadius);
-        if (getUserData() == null) setUserData("");
+        GeometryCommonUtils.initUserDataFrom(this, this);
     }
 
     /**
@@ -48,7 +48,7 @@ public class Circle extends org.datasyslab.geospark.geometryObjects.Circle {
      */
     @Override
     public boolean equals(Geometry g) {
-        return super.equals(g) && Objects.equals(getUserData(), g.getUserData());
+        return super.equals(g) && GeometryCommonUtils.userDataEquals(this, g);
     }
 
     /**
@@ -57,7 +57,7 @@ public class Circle extends org.datasyslab.geospark.geometryObjects.Circle {
      */
     @Override
     public boolean equals(Object o) {
-        return super.equals(o) && Objects.equals(getUserData(), ((Geometry) o).getUserData());
+        return super.equals(o) && GeometryCommonUtils.userDataEquals(this, o);
     }
 
     /**
@@ -66,8 +66,6 @@ public class Circle extends org.datasyslab.geospark.geometryObjects.Circle {
      */
     @Override
     public String toString() {
-        if (!Objects.equals(getUserData(), ""))
-            return super.toString() + "\t" + getUserData();
-        return super.toString();
+        return GeometryCommonUtils.makeString(super.toString(), getUserData());
     }
 }

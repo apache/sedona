@@ -77,17 +77,16 @@ public class testGeoJSON
     public void jts2geonjson()
     {
         GeometryFactory geometryFactory = new GeometryFactory();
-        Coordinate coordinate = new Coordinate(1.0, 2.0);
+        Coordinate coordinate = new Coordinate(1.1, 2.1);
         Geometry point = geometryFactory.createPoint(coordinate);
         point.setUserData("Payload");
 
-        String pointFeatureParts = "\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[1.0,2.0]}";
-        String pointFeature = "{" + pointFeatureParts + "}";
-        String pointFeatureWithUserData = "{" + pointFeatureParts + ",\"properties\":{\"UserData\":\"Payload\"}}";
+        String pointGeoJson = "{\"type\":\"Point\",\"coordinates\":[1.1,2.1]}";
+        String pointFeature = "{\"type\":\"Feature\",\"geometry\":" + pointGeoJson + ",\"properties\":{\"UserData\":\"Payload\"}}}";
 
-        assert compareGeoJson(new GeoJsonFeatureWriter(), pointFeatureWithUserData, point);
-        assert compareGeoJson(new GeoJsonFeatureWriter(true), pointFeatureWithUserData, point);
-        assert compareGeoJson(new GeoJsonFeatureWriter(false), pointFeature, point);
+        assert compareGeoJson(new GeoJsonFeatureWriter(), pointFeature, point);
+        assert compareGeoJson(new GeoJsonFeatureWriter(true), pointFeature, point);
+        assert compareGeoJson(new GeoJsonFeatureWriter(false), pointGeoJson, point);
     }
 
     private boolean compareGeoJson(GeoJsonFeatureWriter writer, String expected, Geometry geometry) {

@@ -7,6 +7,7 @@ import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -16,35 +17,46 @@ public class GeoJsonFeatureWriter extends GeoJsonWriter {
     final static String NAME_FEATURE = "Feature";
     final static String NAME_USER_DATA = "UserData";
 
-    private boolean parseUserData = true;
+    private boolean feature = true;
 
     public GeoJsonFeatureWriter() {
         super();
+        setEncodeCRS(false);
     }
 
-    public GeoJsonFeatureWriter(boolean parseUserData) {
+    public GeoJsonFeatureWriter(boolean feature) {
         this();
-        this.parseUserData = parseUserData;
+        this.feature = feature;
     }
 
-    @Override
-    public void write(Geometry geometry, Writer writer) throws IOException {
-        Map<String, Object> properties = new LinkedHashMap<>();
-        if(parseUserData) {
-            properties.put(NAME_USER_DATA, geometry.getUserData());
-        }
+    private void writeFeature(Geometry geometry, Writer writer) throws IOException {
+        // Get original geometry string, containing the geometry part of the GeoJSON Feature
+        StringWriter geometryWriter = new StringWriter();
+        super.write(geometry, geometryWriter);
 
         Map<String, Object> map = new LinkedHashMap<String, Object>() {{
             put(GeoJsonConstants.NAME_TYPE, NAME_FEATURE);
             put(NAME_GEOMETRY, new JSONAware() {
                 public String toJSONString() {
-                    return write(geometry);
+                    return geometryWriter.toString();
                 }
             });
-            put(GeoJsonConstants.NAME_PROPERTIES, properties);
+            put(GeoJsonConstants.NAME_PROPERTIES, new LinkedHashMap<String, Object>() {{
+                put(NAME_USER_DATA, geometry.getUserData());
+            }});
         }};
 
         JSONObject.writeJSONString(map, writer);
+    }
+
+    @Override
+    public void write(Geometry geometry, Writer writer) throws IOException {
+        if (feature) {
+            writeFeature(geometry, writer);
+        } else {
+            super.write(geometry, writer);
+        }
+
         writer.flush();
     }
 }

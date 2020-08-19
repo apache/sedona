@@ -39,7 +39,7 @@ public class Polygon extends com.vividsolutions.jts.geom.Polygon {
 
     public Polygon(com.vividsolutions.jts.geom.Polygon original) {
         super((LinearRing)original.getExteriorRing(), Polygon.getHoles(original), original.getFactory());
-        setUserData(original.getUserData());
+        GeometryCommonUtils.initUserDataFrom(this, original);
     }
 
     /**
@@ -47,7 +47,7 @@ public class Polygon extends com.vividsolutions.jts.geom.Polygon {
      */
     public Polygon(LinearRing shell, LinearRing[] holes, com.vividsolutions.jts.geom.GeometryFactory factory) {
         super(shell,  holes, new GeometryFactory(factory));
-        if (getUserData() == null) setUserData("");
+        GeometryCommonUtils.initUserDataFrom(this, this);
     }
 
     /**
@@ -56,7 +56,7 @@ public class Polygon extends com.vividsolutions.jts.geom.Polygon {
      */
     @Override
     public boolean equals(Geometry g) {
-        return super.equals(g) && Objects.equals(getUserData(), g.getUserData());
+        return super.equals(g) && GeometryCommonUtils.userDataEquals(this, g);
     }
 
     /**
@@ -65,7 +65,7 @@ public class Polygon extends com.vividsolutions.jts.geom.Polygon {
      */
     @Override
     public boolean equals(Object o) {
-        return super.equals(o) && Objects.equals(getUserData(), ((Geometry) o).getUserData());
+        return super.equals(o) && GeometryCommonUtils.userDataEquals(this, o);
     }
 
     /**
@@ -74,8 +74,6 @@ public class Polygon extends com.vividsolutions.jts.geom.Polygon {
      */
     @Override
     public String toString() {
-        if (!Objects.equals(getUserData(), ""))
-            return super.toString() + "\t" + getUserData();
-        return super.toString();
+        return GeometryCommonUtils.makeString(super.toString(), getUserData());
     }
 }
