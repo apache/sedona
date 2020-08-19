@@ -32,7 +32,7 @@ import org.datasyslab.geospark.jts.geom.Point;
 import org.datasyslab.geospark.jts.geom.Polygon;
 import org.datasyslab.geospark.jts.geom.Circle;
 import org.datasyslab.geospark.geometryObjects.GeometrySerde;
-import org.datasyslab.geospark.geometryObjects.SpatialIndexSerde;
+import org.objenesis.strategy.StdInstantiatorStrategy;
 
 public class GeoSparkKryoRegistrator
         implements KryoRegistrator
@@ -44,10 +44,9 @@ public class GeoSparkKryoRegistrator
     public void registerClasses(Kryo kryo)
     {
         GeometrySerde serializer = new GeometrySerde();
-        SpatialIndexSerde indexSerializer = new SpatialIndexSerde(serializer);
 
         log.info("Registering custom serializers for geometry types");
-
+        kryo.setInstantiatorStrategy(new Kryo.DefaultInstantiatorStrategy(new StdInstantiatorStrategy()));
         kryo.register(Point.class, serializer);
         kryo.register(LineString.class, serializer);
         kryo.register(Polygon.class, serializer);
@@ -58,7 +57,7 @@ public class GeoSparkKryoRegistrator
         kryo.register(Circle.class, serializer);
         kryo.register(Envelope.class, serializer);
         // TODO: Replace the default serializer with default spatial index serializer
-        kryo.register(Quadtree.class, indexSerializer);
-        kryo.register(STRtree.class, indexSerializer);
+        kryo.register(Quadtree.class);
+        kryo.register(STRtree.class);
     }
 }
