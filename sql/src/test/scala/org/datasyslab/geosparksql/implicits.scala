@@ -3,6 +3,7 @@ package org.datasyslab.geosparksql
 import com.vividsolutions.jts.geom.Geometry
 import com.vividsolutions.jts.io.WKTReader
 import org.apache.spark.sql.DataFrame
+import org.datasyslab.geospark.jts.geom.GeometryFactory
 
 object implicits {
   implicit class DataFrameEnhancer(df: DataFrame){
@@ -15,9 +16,11 @@ object implicits {
   }
 
   implicit class GeometryFromString(wkt: String){
+    val factory = new GeometryFactory()
+
     def toGeom: Geometry = {
       val wkbReader = new WKTReader()
-      wkbReader.read(wkt)
+      factory.fromJTS(wkbReader.read(wkt))
     }
 
   }

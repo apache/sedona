@@ -26,10 +26,11 @@
 
 package org.datasyslab.geosparksql
 
-import com.vividsolutions.jts.geom.{Coordinate, Geometry, GeometryFactory}
+import com.vividsolutions.jts.geom.{Coordinate, Geometry}
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.expressions.UserDefinedAggregator
 import org.apache.spark.sql.functions
+import org.datasyslab.geospark.jts.geom.GeometryFactory
 
 class aggregateFunctionTestScala extends TestBaseScala {
 

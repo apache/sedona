@@ -26,14 +26,18 @@
 
 package org.datasyslab.geosparksql
 
-import com.vividsolutions.jts.geom.{Geometry}
+import com.vividsolutions.jts.geom.Geometry
 import org.geotools.geometry.jts.WKTReader2
 import org.scalatest.{GivenWhenThen, Matchers}
 import implicits._
 import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.functions._
+import org.datasyslab.geospark.jts.geom.GeometryFactory
 
 class functionTestScala extends TestBaseScala with Matchers with GeometrySample with GivenWhenThen{
+
+  val wktReader2 = new WKTReader2()
+  val factory = new GeometryFactory()
 
   import sparkSession.implicits._
 
@@ -233,9 +237,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
           |""".stripMargin
       ).collect()
 
-      val wktReader = new WKTReader2()
-      val firstValidGeometry = wktReader.read("POLYGON ((1 5, 3 3, 1 1, 1 5))")
-      val secondValidGeometry = wktReader.read("POLYGON ((5 3, 7 5, 7 1, 5 3))")
+      val firstValidGeometry = factory.fromJTS(wktReader2.read("POLYGON ((1 5, 3 3, 1 1, 1 5))"))
+      val secondValidGeometry = factory.fromJTS(wktReader2.read("POLYGON ((5 3, 7 5, 7 1, 5 3))"))
 
       assert(result.exists(row => row.getAs[Geometry](0).equals(firstValidGeometry)))
       assert(result.exists(row => row.getAs[Geometry](0).equals(secondValidGeometry)))
@@ -254,9 +257,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
           |""".stripMargin
       ).collect()
 
-      val wktReader = new WKTReader2()
-      val firstValidGeometry = wktReader.read("POLYGON ((0 3, 3 3, 3 0, 0 0, 0 3))")
-      val secondValidGeometry = wktReader.read("POLYGON ((3 3, 6 3, 6 0, 3 0, 3 3))")
+      val firstValidGeometry = factory.fromJTS(wktReader2.read("POLYGON ((0 3, 3 3, 3 0, 0 0, 0 3))"))
+      val secondValidGeometry = factory.fromJTS(wktReader2.read("POLYGON ((3 3, 6 3, 6 0, 3 0, 3 3))"))
 
       assert(result.exists(row => row.getAs[Geometry](0).equals(firstValidGeometry)))
       assert(result.exists(row => row.getAs[Geometry](0).equals(secondValidGeometry)))
@@ -275,8 +277,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
           |""".stripMargin
       ).collect()
 
-      val wktReader = new WKTReader2()
-      val validGeometry = wktReader.read("POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))")
+      val validGeometry = factory.fromJTS(wktReader2.read("POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))"))
 
       assert(result.exists(row => row.getAs[Geometry](0).equals(validGeometry)))
     }
