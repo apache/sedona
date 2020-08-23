@@ -261,51 +261,51 @@ public class CRSTransformationTest
         }
     }
 
-    /**
-     * Test spatial knn query using index.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testSpatialKnnQueryUsingIndex()
-            throws Exception
-    {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3005");
-        pointRDD.buildIndex(IndexType.RTREE, false);
-        for (int i = 0; i < loopTimes; i++) {
-            List<Point> result = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, true);
-            assert result.size() > 0;
-            assert result.get(0).getUserData().toString() != null;
-            //System.out.println(result.get(0).getUserData().toString());
-        }
-    }
+//    /**
+//     * Test spatial knn query using index.
+//     *
+//     * @throws Exception the exception
+//     */
+//    @Test
+//    public void testSpatialKnnQueryUsingIndex()
+//            throws Exception
+//    {
+//        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3005");
+//        pointRDD.buildIndex(IndexType.RTREE, false);
+//        for (int i = 0; i < loopTimes; i++) {
+//            List<Point> result = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, true);
+//            assert result.size() > 0;
+//            assert result.get(0).getUserData().toString() != null;
+//            //System.out.println(result.get(0).getUserData().toString());
+//        }
+//    }
 
-    /**
-     * Test spatial KNN correctness.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testSpatialKNNCorrectness()
-            throws Exception
-    {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3005");
-        List<Point> resultNoIndex = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, false);
-        pointRDD.buildIndex(IndexType.RTREE, false);
-        List<Point> resultWithIndex = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, true);
-        GeometryDistanceComparator geometryDistanceComparator = new GeometryDistanceComparator(this.queryPoint, true);
-        List<Point> resultNoIndexModifiable = new ArrayList<>(resultNoIndex);
-        List<Point> resultWithIndexModifiable = new ArrayList<>(resultWithIndex);
-        Collections.sort(resultNoIndexModifiable, geometryDistanceComparator);
-        Collections.sort(resultWithIndexModifiable, geometryDistanceComparator);
-        int difference = 0;
-        for (int i = 0; i < topK; i++) {
-            if (geometryDistanceComparator.compare(resultNoIndex.get(i), resultWithIndex.get(i)) != 0) {
-                difference++;
-            }
-        }
-        assert difference == 0;
-    }
+//    /**
+//     * Test spatial KNN correctness.
+//     *
+//     * @throws Exception the exception
+//     */
+//    @Test
+//    public void testSpatialKNNCorrectness()
+//            throws Exception
+//    {
+//        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3005");
+//        List<Point> resultNoIndex = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, false);
+//        pointRDD.buildIndex(IndexType.RTREE, false);
+//        List<Point> resultWithIndex = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, true);
+//        GeometryDistanceComparator geometryDistanceComparator = new GeometryDistanceComparator(this.queryPoint, true);
+//        List<Point> resultNoIndexModifiable = new ArrayList<>(resultNoIndex);
+//        List<Point> resultWithIndexModifiable = new ArrayList<>(resultWithIndex);
+//        Collections.sort(resultNoIndexModifiable, geometryDistanceComparator);
+//        Collections.sort(resultWithIndexModifiable, geometryDistanceComparator);
+//        int difference = 0;
+//        for (int i = 0; i < topK; i++) {
+//            if (geometryDistanceComparator.compare(resultNoIndex.get(i), resultWithIndex.get(i)) != 0) {
+//                difference++;
+//            }
+//        }
+//        assert difference == 0;
+//    }
 
     /**
      * Test spatial join query with polygon RDD.

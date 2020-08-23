@@ -189,51 +189,51 @@ public class RectangleKnnTest
         }
     }
 
-    /**
-     * Test spatial knn query using index.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testSpatialKnnQueryUsingIndex()
-            throws Exception
-    {
-        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true);
-        rectangleRDD.buildIndex(IndexType.RTREE, false);
-        for (int i = 0; i < loopTimes; i++) {
-            List<Polygon> result = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, topK, true);
-            assert result.size() > -1;
-            assert result.get(0).getUserData().toString() != null;
-            //System.out.println(result.get(0).getUserData().toString());
-        }
-    }
+//    /**
+//     * Test spatial knn query using index.
+//     *
+//     * @throws Exception the exception
+//     */
+//    @Test
+//    public void testSpatialKnnQueryUsingIndex()
+//            throws Exception
+//    {
+//        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true);
+//        rectangleRDD.buildIndex(IndexType.RTREE, false);
+//        for (int i = 0; i < loopTimes; i++) {
+//            List<Polygon> result = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, topK, true);
+//            assert result.size() > -1;
+//            assert result.get(0).getUserData().toString() != null;
+//            //System.out.println(result.get(0).getUserData().toString());
+//        }
+//    }
 
-    /**
-     * Test spatial KNN correctness.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testSpatialKNNCorrectness()
-            throws Exception
-    {
-        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true);
-        List<Polygon> resultNoIndex = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, topK, false);
-        rectangleRDD.buildIndex(IndexType.RTREE, false);
-        List<Polygon> resultWithIndex = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, topK, true);
-
-        List<Polygon> resultNoIndexModifiable = new ArrayList<Polygon>(resultNoIndex);
-        List<Polygon> resultWithIndexModifiable = new ArrayList<Polygon>(resultWithIndex);
-
-        GeometryDistanceComparator rectangleDistanceComparator = new GeometryDistanceComparator(this.queryPoint, true);
-        Collections.sort(resultNoIndexModifiable, rectangleDistanceComparator);
-        Collections.sort(resultWithIndexModifiable, rectangleDistanceComparator);
-        int difference = 0;
-        for (int i = 0; i < topK; i++) {
-            if (rectangleDistanceComparator.compare(resultNoIndexModifiable.get(i), resultWithIndexModifiable.get(i)) != 0) {
-                difference++;
-            }
-        }
-        assert difference == 0;
-    }
+//    /**
+//     * Test spatial KNN correctness.
+//     *
+//     * @throws Exception the exception
+//     */
+//    @Test
+//    public void testSpatialKNNCorrectness()
+//            throws Exception
+//    {
+//        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true);
+//        List<Polygon> resultNoIndex = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, topK, false);
+//        rectangleRDD.buildIndex(IndexType.RTREE, false);
+//        List<Polygon> resultWithIndex = KNNQuery.SpatialKnnQuery(rectangleRDD, queryPoint, topK, true);
+//
+//        List<Polygon> resultNoIndexModifiable = new ArrayList<Polygon>(resultNoIndex);
+//        List<Polygon> resultWithIndexModifiable = new ArrayList<Polygon>(resultWithIndex);
+//
+//        GeometryDistanceComparator rectangleDistanceComparator = new GeometryDistanceComparator(this.queryPoint, true);
+//        Collections.sort(resultNoIndexModifiable, rectangleDistanceComparator);
+//        Collections.sort(resultWithIndexModifiable, rectangleDistanceComparator);
+//        int difference = 0;
+//        for (int i = 0; i < topK; i++) {
+//            if (rectangleDistanceComparator.compare(resultNoIndexModifiable.get(i), resultWithIndexModifiable.get(i)) != 0) {
+//                difference++;
+//            }
+//        }
+//        assert difference == 0;
+//    }
 }
