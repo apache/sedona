@@ -299,15 +299,15 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
 
     it("Passed ST_AsGeoJSON") {
-      val df = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') AS polygon")
+      val df = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((1 1, 8.1 1.0, 8.1 8.1, 1.0 8.0, 1 1))') AS polygon")
       df.createOrReplaceTempView("table")
 
       val geojsonDf = sparkSession.sql(
         """select ST_AsGeoJSON(polygon) as geojson
           |from table""".stripMargin)
 
-      val expectedGeoJson = """{"type":"Polygon","coordinates":[[[1.0,1.0],[8.0,1.0],[8.0,8.0],[1.0,8.0],[1.0,1.0]]]}"""
-      assert(geojsonDf.first().getString(0) === expectedGeoJson)
+      val expectedGeoJson = """{"type":"Polygon","coordinates":[[[1,1],[8.1,1],[8.1,8.1],[1,8],[1,1]]]}"""
+      assert(geojsonDf.first().getString(0) == expectedGeoJson)
     }
 
     it("Passed ST_NPoints") {

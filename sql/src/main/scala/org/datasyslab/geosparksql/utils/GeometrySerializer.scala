@@ -20,11 +20,14 @@ import com.vividsolutions.jts.geom.Geometry
 import com.vividsolutions.jts.io.{WKBReader, WKBWriter}
 import org.apache.spark.sql.catalyst.util.ArrayData
 import com.vividsolutions.jts.io.{WKBReader, WKBWriter}
+import org.datasyslab.geospark.jts.geom.GeometryFactory
 
 /**
   * SerDe using the WKB reader and writer objects
   */
 object GeometrySerializer {
+
+  private val factory = new GeometryFactory();
   
   /**
     *  Given a geometry returns array of bytes
@@ -43,6 +46,6 @@ object GeometrySerializer {
     */
   def deserialize(values: ArrayData): Geometry = {
     val reader = new WKBReader()
-    reader.read(values.toByteArray())
+    factory.fromJTS(reader.read(values.toByteArray()))
   }
 }

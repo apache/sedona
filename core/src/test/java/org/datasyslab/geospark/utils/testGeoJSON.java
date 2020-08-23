@@ -82,7 +82,7 @@ public class testGeoJSON
         point.setUserData("Payload");
 
         String pointGeoJson = "{\"type\":\"Point\",\"coordinates\":[1.1,2.1]}";
-        String pointFeature = "{\"type\":\"Feature\",\"geometry\":" + pointGeoJson + ",\"properties\":{\"UserData\":\"Payload\"}}}";
+        String pointFeature = "{\"type\":\"Feature\",\"geometry\":" + pointGeoJson + ",\"properties\":{\"UserData\":\"Payload\"}}";
 
         assert compareGeoJson(new GeoJsonFeatureWriter(), pointFeature, point);
         assert compareGeoJson(new GeoJsonFeatureWriter(true), pointFeature, point);
