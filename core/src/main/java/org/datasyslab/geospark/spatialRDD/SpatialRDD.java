@@ -81,6 +81,8 @@ public class SpatialRDD<T extends Geometry>
      */
     final static Logger logger = Logger.getLogger(SpatialRDD.class);
 
+    final private static GeometryFactory geometryFactory = new GeometryFactory();
+
     /**
      * The total number of records.
      */
@@ -183,7 +185,7 @@ public class SpatialRDD<T extends Geometry>
                 public T call(T originalObject)
                         throws Exception
                 {
-                    return (T) JTS.transform(originalObject, transform);
+                    return (T) geometryFactory.fromJTS(JTS.transform(originalObject, transform));
                 }
             });
             return true;
@@ -473,7 +475,12 @@ public class SpatialRDD<T extends Geometry>
      */
     public void setRawSpatialRDD(JavaRDD<T> rawSpatialRDD)
     {
-        this.rawSpatialRDD = rawSpatialRDD;
+        this.rawSpatialRDD = rawSpatialRDD.map(new Function<T, T>() {
+            @Override
+            public T call(T originalObject) throws Exception {
+                return (T)geometryFactory.fromJTS(originalObject);
+            }
+        });
     }
 
     /**
@@ -643,7 +650,6 @@ public class SpatialRDD<T extends Geometry>
                 Double x1, x2, y1, y2;
                 LinearRing linear;
                 Coordinate[] coordinates = new Coordinate[5];
-                GeometryFactory fact = new GeometryFactory();
                 final Envelope envelope = spatialObject.getEnvelopeInternal();
                 x1 = envelope.getMinX();
                 x2 = envelope.getMaxX();
@@ -654,9 +660,8 @@ public class SpatialRDD<T extends Geometry>
                 coordinates[2] = new Coordinate(x2, y2);
                 coordinates[3] = new Coordinate(x2, y1);
                 coordinates[4] = coordinates[0];
-                linear = (LinearRing) fact.createLinearRing(coordinates);
-                Polygon polygonObject = new Polygon(linear, null, fact);
-                return polygonObject;
+                linear = geometryFactory.createLinearRing(coordinates);
+                return new Polygon(linear, null, geometryFactory);
             }
         });
         return new RectangleRDD(rectangleRDD);
