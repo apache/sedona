@@ -180,22 +180,22 @@ public class LineStringKnnTest
         }
     }
 
-//    /**
-//     * Test spatial knn query using index.
-//     *
-//     * @throws Exception the exception
-//     */
-//    @Test
-//    public void testSpatialKnnQueryUsingIndex()
-//            throws Exception
-//    {
-//        LineStringRDD lineStringRDD = new LineStringRDD(sc, InputLocation, splitter, true);
-//        lineStringRDD.buildIndex(IndexType.RTREE, false);
-//        for (int i = 0; i < loopTimes; i++) {
-//            List<LineString> result = KNNQuery.SpatialKnnQuery(lineStringRDD, queryPoint, 5, true);
-//            assert result.size() > -1;
-//            assert result.get(0).getUserData().toString() != null;
-//            //System.out.println(result.get(0).getUserData().toString());
-//        }
-//    }
+    /**
+     * Test spatial knn query using index.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void testSpatialKnnQueryUsingIndex()
+            throws Exception
+    {
+        LineStringRDD lineStringRDD = new LineStringRDD(sc, InputLocation, splitter, true);
+        lineStringRDD.buildIndex(IndexType.RTREE, false);
+        for (int i = 0; i < loopTimes; i++) {
+            List<LineString> result = KNNQuery.SpatialKnnQuery(lineStringRDD, queryPoint, 5, true);
+            assert result.size() > -1;
+            assert result.get(0).getUserData().toString() != null;
+            //System.out.println(result.get(0).getUserData().toString());
+        }
+    }
 }

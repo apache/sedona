@@ -65,18 +65,18 @@ public class KnnJudgementUsingIndex<U extends Geometry, T extends Geometry>
     public Iterator<T> call(Iterator<SpatialIndex> treeIndexes)
             throws Exception
     {
-//        SpatialIndex treeIndex = treeIndexes.next();
-//        final Object[] localK;
-//        if (treeIndex instanceof STRtree) {
-//            localK = ((STRtree) treeIndex).nearestNeighbour(queryCenter.getEnvelopeInternal(), queryCenter, new GeometryItemDistance(), k);
-//        }
-//        else {
-//            throw new Exception("[KnnJudgementUsingIndex][Call] QuadTree index doesn't support KNN search.");
-//        }
+        SpatialIndex treeIndex = treeIndexes.next();
+        final Object[] localK;
+        if (treeIndex instanceof STRtree) {
+            localK = ((STRtree) treeIndex).kNearestNeighbour(queryCenter.getEnvelopeInternal(), queryCenter, new GeometryItemDistance(), k);
+        }
+        else {
+            throw new Exception("[KnnJudgementUsingIndex][Call] QuadTree index doesn't support KNN search.");
+        }
         List<T> result = new ArrayList();
-//        for (int i = 0; i < localK.length; i++) {
-//            result.add((T) localK[i]);
-//        }
+        for (int i = 0; i < localK.length; i++) {
+            result.add((T) localK[i]);
+        }
         return result.iterator();
     }
 }

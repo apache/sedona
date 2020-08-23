@@ -188,49 +188,49 @@ public class PointKnnTest
         }
     }
 
-//    /**
-//     * Test spatial knn query using index.
-//     *
-//     * @throws Exception the exception
-//     */
-//    @Test
-//    public void testSpatialKnnQueryUsingIndex()
-//            throws Exception
-//    {
-//        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, false);
-//        pointRDD.buildIndex(IndexType.RTREE, false);
-//        for (int i = 0; i < loopTimes; i++) {
-//            List<Point> result = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, true);
-//            assert result.size() > -1;
-//            assert result.get(0).getUserData().toString() != null;
-//            //System.out.println(result.get(0).getUserData().toString());
-//        }
-//    }
+    /**
+     * Test spatial knn query using index.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void testSpatialKnnQueryUsingIndex()
+            throws Exception
+    {
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, false);
+        pointRDD.buildIndex(IndexType.RTREE, false);
+        for (int i = 0; i < loopTimes; i++) {
+            List<Point> result = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, true);
+            assert result.size() > -1;
+            assert result.get(0).getUserData().toString() != null;
+            //System.out.println(result.get(0).getUserData().toString());
+        }
+    }
 
-//    /**
-//     * Test spatial KNN correctness.
-//     *
-//     * @throws Exception the exception
-//     */
-//    @Test
-//    public void testSpatialKNNCorrectness()
-//            throws Exception
-//    {
-//        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, false);
-//        List<Point> resultNoIndex = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, false);
-//        pointRDD.buildIndex(IndexType.RTREE, false);
-//        List<Point> resultWithIndex = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, true);
-//        GeometryDistanceComparator geometryDistanceComparator = new GeometryDistanceComparator(this.queryPoint, true);
-//        List<Point> mResultNoIndex = new ArrayList<>(resultNoIndex);
-//        List<Point> mResultWithIndex = new ArrayList<>(resultNoIndex);
-//        Collections.sort(mResultNoIndex, geometryDistanceComparator);
-//        Collections.sort(mResultWithIndex, geometryDistanceComparator);
-//        int difference = 0;
-//        for (int i = 0; i < topK; i++) {
-//            if (geometryDistanceComparator.compare(resultNoIndex.get(i), resultWithIndex.get(i)) != 0) {
-//                difference++;
-//            }
-//        }
-//        assert difference == 0;
-//    }
+    /**
+     * Test spatial KNN correctness.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void testSpatialKNNCorrectness()
+            throws Exception
+    {
+        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, false);
+        List<Point> resultNoIndex = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, false);
+        pointRDD.buildIndex(IndexType.RTREE, false);
+        List<Point> resultWithIndex = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, true);
+        GeometryDistanceComparator geometryDistanceComparator = new GeometryDistanceComparator(this.queryPoint, true);
+        List<Point> mResultNoIndex = new ArrayList<>(resultNoIndex);
+        List<Point> mResultWithIndex = new ArrayList<>(resultNoIndex);
+        Collections.sort(mResultNoIndex, geometryDistanceComparator);
+        Collections.sort(mResultWithIndex, geometryDistanceComparator);
+        int difference = 0;
+        for (int i = 0; i < topK; i++) {
+            if (geometryDistanceComparator.compare(resultNoIndex.get(i), resultWithIndex.get(i)) != 0) {
+                difference++;
+            }
+        }
+        assert difference == 0;
+    }
 }
