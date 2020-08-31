@@ -16,19 +16,8 @@
  */
 package org.datasyslab.geospark.geometryObjects;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.CoordinateFilter;
-import org.locationtech.jts.geom.CoordinateSequenceComparator;
-import org.locationtech.jts.geom.CoordinateSequenceFilter;
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryComponentFilter;
-import org.locationtech.jts.geom.GeometryFilter;
-import org.datasyslab.geospark.jts.geom.GeometryCollection;
-import org.datasyslab.geospark.jts.geom.LineString;
-import org.datasyslab.geospark.jts.geom.Point;
-import org.datasyslab.geospark.jts.geom.Polygon;
 import org.datasyslab.geospark.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.*;
 
 // TODO: Auto-generated Javadoc
 
@@ -383,6 +372,11 @@ public class Circle
         return cloneCircle;// return the clone
     }
 
+    @Override
+    protected Geometry copyInternal() {
+        return new Circle(this.centerGeometry, this.radius);
+    }
+
     /* (non-Javadoc)
      * @see org.locationtech.jts.geom.Geometry#equalsExact(org.locationtech.jts.geom.Geometry, double)
      */
@@ -493,6 +487,11 @@ public class Circle
         if (mbr.getMaxX() > env.getMaxX()) { return 1; }
         if (mbr.getMaxY() < env.getMaxY()) { return -1; }
         if (mbr.getMaxY() > env.getMaxY()) { return 1; }
+        return 0;
+    }
+
+    @Override
+    protected int getSortIndex() {
         return 0;
     }
 
