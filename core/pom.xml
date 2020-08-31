@@ -33,13 +33,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.locationtech</groupId>
+            <groupId>org.locationtech.jts</groupId>
             <artifactId>jts-core</artifactId>
             <version>${jts.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.locationtech</groupId>
-            <artifactId>jts-io</artifactId>
+            <groupId>org.locationtech.jts.io</groupId>
+            <artifactId>jts-io-common</artifactId>
             <version>${jts.version}</version>
         </dependency>
         <dependency>
