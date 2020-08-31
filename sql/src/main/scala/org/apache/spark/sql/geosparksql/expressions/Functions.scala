@@ -42,7 +42,7 @@ import org.apache.spark.sql.types.ArrayType
 import implicits._
 import org.datasyslab.geospark.geometryObjects.Circle
 import org.datasyslab.geospark.jts.GeoJsonFeatureWriter
-import org.geotools.factory.Hints
+import org.geotools.util.factory.Hints
 import org.opengis.referencing.crs.CoordinateReferenceSystem
 
 import scala.util.{Failure, Success, Try}
