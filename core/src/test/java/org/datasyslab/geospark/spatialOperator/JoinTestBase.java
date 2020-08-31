@@ -25,7 +25,7 @@
  */
 package org.datasyslab.geospark.spatialOperator;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.jts.geom.Polygon;
 import org.datasyslab.geospark.GeoSparkTestBase;

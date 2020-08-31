@@ -16,7 +16,7 @@
  */
 package org.datasyslab.geosparkviz.core;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 import org.apache.log4j.Logger;
 import org.datasyslab.geosparkviz.extension.coloringRule.ColoringRuleFactory;
 import org.datasyslab.geosparkviz.extension.coloringRule.LinearFunction;

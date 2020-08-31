@@ -16,23 +16,23 @@
  */
 package org.datasyslab.geospark.jts.geom;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 import java.util.Objects;
 
 /**
- * Wraps {@link com.vividsolutions.jts.geom.MultiPolygon}
+ * Wraps {@link org.locationtech.jts.geom.MultiPolygon}
  */
-public class MultiPolygon extends com.vividsolutions.jts.geom.MultiPolygon {
+public class MultiPolygon extends org.locationtech.jts.geom.MultiPolygon {
 
-    public static com.vividsolutions.jts.geom.Polygon[] getPolygons(com.vividsolutions.jts.geom.GeometryCollection geometry) {
-        com.vividsolutions.jts.geom.Polygon[] res = new com.vividsolutions.jts.geom.Polygon[geometry.getNumGeometries()];
+    public static org.locationtech.jts.geom.Polygon[] getPolygons(org.locationtech.jts.geom.GeometryCollection geometry) {
+        org.locationtech.jts.geom.Polygon[] res = new org.locationtech.jts.geom.Polygon[geometry.getNumGeometries()];
         for (int i = 0; i < res.length; i++)
-            res[i] = (com.vividsolutions.jts.geom.Polygon) geometry.getGeometryN(i);
+            res[i] = (org.locationtech.jts.geom.Polygon) geometry.getGeometryN(i);
         return res;
     }
 
-    private static Polygon[] convertPolygons(com.vividsolutions.jts.geom.Polygon[] polygons) {
+    private static Polygon[] convertPolygons(org.locationtech.jts.geom.Polygon[] polygons) {
         GeometryFactory factory = new GeometryFactory();
         Polygon[] res = new Polygon[polygons.length];
         for (int i = 0; i < res.length; i++) {
@@ -42,24 +42,24 @@ public class MultiPolygon extends com.vividsolutions.jts.geom.MultiPolygon {
     }
 
     public MultiPolygon(Object original) {
-        this((com.vividsolutions.jts.geom.MultiPolygon) original);
+        this((org.locationtech.jts.geom.MultiPolygon) original);
     }
 
-    public MultiPolygon(com.vividsolutions.jts.geom.MultiPolygon original) {
+    public MultiPolygon(org.locationtech.jts.geom.MultiPolygon original) {
         this(getPolygons(original), original.getFactory());
         GeometryCommonUtils.initUserDataFrom(this, original);
     }
 
     /**
-     * {@link com.vividsolutions.jts.geom.MultiPolygon#MultiPolygon(com.vividsolutions.jts.geom.Polygon[], com.vividsolutions.jts.geom.GeometryFactory)}
+     * {@link org.locationtech.jts.geom.MultiPolygon#MultiPolygon(org.locationtech.jts.geom.Polygon[], org.locationtech.jts.geom.GeometryFactory)}
      */
-    public MultiPolygon(com.vividsolutions.jts.geom.Polygon[] polygons, com.vividsolutions.jts.geom.GeometryFactory factory) {
+    public MultiPolygon(org.locationtech.jts.geom.Polygon[] polygons, org.locationtech.jts.geom.GeometryFactory factory) {
         super(convertPolygons(polygons), new GeometryFactory(factory));
         GeometryCommonUtils.initUserDataFrom(this, this);
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.MultiPolygon#equals(Geometry)}
+     * Compares to given geometry using {@link org.locationtech.jts.geom.MultiPolygon#equals(Geometry)}
      * Also compares userData
      */
     @Override
@@ -68,7 +68,7 @@ public class MultiPolygon extends com.vividsolutions.jts.geom.MultiPolygon {
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.MultiPolygon#equals(Object)}
+     * Compares to given geometry using {@link org.locationtech.jts.geom.MultiPolygon#equals(Object)}
      * Also compares userData
      */
     @Override

@@ -16,10 +16,10 @@
  */
 package org.datasyslab.geospark.showcase;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.WKTReader;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.WKTReader;
 import org.datasyslab.geospark.jts.geom.LinearRing;
 import org.datasyslab.geospark.jts.geom.MultiPolygon;
 import org.datasyslab.geospark.jts.geom.Polygon;
@@ -88,14 +88,14 @@ public class UserSuppliedRectangleMapper
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
             Geometry spatialObject = null;
-            com.vividsolutions.jts.geom.MultiPolygon multiSpatialObjects = null;
+            org.locationtech.jts.geom.MultiPolygon multiSpatialObjects = null;
             List<String> lineSplitList;
             lineSplitList = Arrays.asList(line.split("\t"));
             String newLine = lineSplitList.get(0).replace("\"", "");
             WKTReader wktreader = new WKTReader();
             spatialObject = wktreader.read(newLine);
-            if (spatialObject instanceof com.vividsolutions.jts.geom.MultiPolygon) {
-                multiSpatialObjects = (com.vividsolutions.jts.geom.MultiPolygon) spatialObject;
+            if (spatialObject instanceof org.locationtech.jts.geom.MultiPolygon) {
+                multiSpatialObjects = (org.locationtech.jts.geom.MultiPolygon) spatialObject;
                 for (int i = 0; i < multiSpatialObjects.getNumGeometries(); i++) {
                     spatialObject = multiSpatialObjects.getGeometryN(i);
                     result.add((new Polygon(spatialObject)).getEnvelopeInternal());

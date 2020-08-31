@@ -16,10 +16,10 @@
  */
 package org.datasyslab.geospark.knnJudgement;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.index.SpatialIndex;
-import com.vividsolutions.jts.index.strtree.GeometryItemDistance;
-import com.vividsolutions.jts.index.strtree.STRtree;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.index.SpatialIndex;
+import org.locationtech.jts.index.strtree.GeometryItemDistance;
+import org.locationtech.jts.index.strtree.STRtree;
 import org.apache.spark.api.java.function.FlatMapFunction;
 
 import java.io.Serializable;

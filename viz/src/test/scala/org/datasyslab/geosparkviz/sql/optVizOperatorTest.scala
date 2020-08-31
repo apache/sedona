@@ -1,6 +1,6 @@
 package org.datasyslab.geosparkviz.sql
 
-import com.vividsolutions.jts.geom.Envelope
+import org.locationtech.jts.geom.Envelope
 import org.apache.spark.sql.functions._
 import org.datasyslab.geosparkviz.sql.operator.{AggregateWithinPartitons, VizPartitioner}
 import org.datasyslab.geosparkviz.sql.utils.{Conf, LineageDecoder}

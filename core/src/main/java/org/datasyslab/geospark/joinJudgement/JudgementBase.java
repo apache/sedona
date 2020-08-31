@@ -16,9 +16,9 @@
  */
 package org.datasyslab.geospark.joinJudgement;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.TaskContext;
@@ -100,7 +100,7 @@ abstract class JudgementBase
         if (extent != null) {
             // Handle easy case: points. Since each point is assigned to exactly one partition,
             // different partitions cannot emit duplicate results.
-            if (left instanceof com.vividsolutions.jts.geom.Point || right instanceof com.vividsolutions.jts.geom.Point) {
+            if (left instanceof org.locationtech.jts.geom.Point || right instanceof org.locationtech.jts.geom.Point) {
                 return geoMatch(left, right);
             }
 
@@ -123,7 +123,7 @@ abstract class JudgementBase
         return geoMatch(left, right);
     }
 
-    private Point makePoint(double x, double y, com.vividsolutions.jts.geom.GeometryFactory factory)
+    private Point makePoint(double x, double y, org.locationtech.jts.geom.GeometryFactory factory)
     {
         GeometryFactory wrappedFactory = null;
         if (factory instanceof GeometryFactory)

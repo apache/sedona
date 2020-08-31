@@ -26,7 +26,7 @@
 
 package org.datasyslab.geosparksql
 
-import com.vividsolutions.jts.geom.Geometry
+import org.locationtech.jts.geom.Geometry
 import org.geotools.geometry.jts.WKTReader2
 import org.scalatest.{GivenWhenThen, Matchers}
 import implicits._

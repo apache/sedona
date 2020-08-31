@@ -16,17 +16,17 @@
  */
 package org.datasyslab.geospark.jts.geom;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LinearRing;
 
 import java.util.Objects;
 
 /**
- * Wraps {@link com.vividsolutions.jts.geom.Polygon}
+ * Wraps {@link org.locationtech.jts.geom.Polygon}
  */
-public class Polygon extends com.vividsolutions.jts.geom.Polygon {
+public class Polygon extends org.locationtech.jts.geom.Polygon {
 
-    private static LinearRing[] getHoles(com.vividsolutions.jts.geom.Polygon polygon) {
+    private static LinearRing[] getHoles(org.locationtech.jts.geom.Polygon polygon) {
         LinearRing[] res = new LinearRing[polygon.getNumInteriorRing()];
         for (int i = 0; i < res.length; i++)
             res[i] = (LinearRing)polygon.getInteriorRingN(i);
@@ -34,24 +34,24 @@ public class Polygon extends com.vividsolutions.jts.geom.Polygon {
     }
 
     public Polygon(Object original) {
-        this((com.vividsolutions.jts.geom.Polygon) original);
+        this((org.locationtech.jts.geom.Polygon) original);
     }
 
-    public Polygon(com.vividsolutions.jts.geom.Polygon original) {
+    public Polygon(org.locationtech.jts.geom.Polygon original) {
         super((LinearRing)original.getExteriorRing(), Polygon.getHoles(original), original.getFactory());
         GeometryCommonUtils.initUserDataFrom(this, original);
     }
 
     /**
-     * {@link com.vividsolutions.jts.geom.Polygon#Polygon(LinearRing, LinearRing[], com.vividsolutions.jts.geom.GeometryFactory)}
+     * {@link org.locationtech.jts.geom.Polygon#Polygon(LinearRing, LinearRing[], org.locationtech.jts.geom.GeometryFactory)}
      */
-    public Polygon(LinearRing shell, LinearRing[] holes, com.vividsolutions.jts.geom.GeometryFactory factory) {
+    public Polygon(LinearRing shell, LinearRing[] holes, org.locationtech.jts.geom.GeometryFactory factory) {
         super(shell,  holes, new GeometryFactory(factory));
         GeometryCommonUtils.initUserDataFrom(this, this);
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.Polygon#equals(Geometry)}
+     * Compares to given geometry using {@link org.locationtech.jts.geom.Polygon#equals(Geometry)}
      * Also compares userData
      */
     @Override
@@ -60,7 +60,7 @@ public class Polygon extends com.vividsolutions.jts.geom.Polygon {
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.Polygon#equals(Object)}
+     * Compares to given geometry using {@link org.locationtech.jts.geom.Polygon#equals(Object)}
      * Also compares userData
      */
     @Override

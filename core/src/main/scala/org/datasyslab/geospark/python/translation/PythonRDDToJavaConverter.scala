@@ -2,7 +2,7 @@ package org.datasyslab.geospark.python.translation
 
 import java.io.{ByteArrayInputStream, DataInputStream}
 
-import com.vividsolutions.jts.geom.Geometry
+import org.locationtech.jts.geom.Geometry
 import org.apache.spark.api.java.JavaRDD
 import org.datasyslab.geospark.jts.geom.Circle
 import org.datasyslab.geospark.python.SerializationException

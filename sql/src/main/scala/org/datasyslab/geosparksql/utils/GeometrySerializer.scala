@@ -16,10 +16,10 @@
  */
 package org.datasyslab.geosparksql.utils
 
-import com.vividsolutions.jts.geom.Geometry
-import com.vividsolutions.jts.io.{WKBReader, WKBWriter}
+import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.io.{WKBReader, WKBWriter}
 import org.apache.spark.sql.catalyst.util.ArrayData
-import com.vividsolutions.jts.io.{WKBReader, WKBWriter}
+import org.locationtech.jts.io.{WKBReader, WKBWriter}
 import org.datasyslab.geospark.jts.geom.GeometryFactory
 
 /**

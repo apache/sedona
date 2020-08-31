@@ -33,12 +33,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.vividsolutions</groupId>
+            <groupId>org.locationtech</groupId>
             <artifactId>jts-core</artifactId>
             <version>${jts.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.vividsolutions</groupId>
+            <groupId>org.locationtech</groupId>
             <artifactId>jts-io</artifactId>
             <version>${jts.version}</version>
         </dependency>
@@ -63,7 +63,7 @@
             <version>${geotools.version}</version>
             <exclusions>
                 <exclusion>
-                    <groupId>com.vividsolutions</groupId>
+                    <groupId>org.locationtech</groupId>
                     <artifactId>jts</artifactId>
                 </exclusion>
                 <exclusion>
@@ -123,7 +123,7 @@
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
-                    <groupId>com.vividsolutions</groupId>
+                    <groupId>org.locationtech</groupId>
                     <artifactId>jts</artifactId>
                 </exclusion>
                 <exclusion>

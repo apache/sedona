@@ -16,8 +16,8 @@
  */
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
-import com.vividsolutions.jts.geom.CoordinateSequence;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.Geometry;
 import org.datasyslab.geospark.jts.geom.GeometryFactory;
 import org.datasyslab.geospark.jts.geom.LinearRing;
 import org.datasyslab.geospark.jts.geom.Polygon;

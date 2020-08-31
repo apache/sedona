@@ -16,23 +16,23 @@
  */
 package org.datasyslab.geospark.jts.geom;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 import java.util.Objects;
 
 /**
- * Wraps {@link com.vividsolutions.jts.geom.MultiPoint}
+ * Wraps {@link org.locationtech.jts.geom.MultiPoint}
  */
-public class MultiPoint extends com.vividsolutions.jts.geom.MultiPoint {
+public class MultiPoint extends org.locationtech.jts.geom.MultiPoint {
 
-    public static com.vividsolutions.jts.geom.Point[] getPoints(com.vividsolutions.jts.geom.GeometryCollection geometry) {
-        com.vividsolutions.jts.geom.Point[] res = new com.vividsolutions.jts.geom.Point[geometry.getNumGeometries()];
+    public static org.locationtech.jts.geom.Point[] getPoints(org.locationtech.jts.geom.GeometryCollection geometry) {
+        org.locationtech.jts.geom.Point[] res = new org.locationtech.jts.geom.Point[geometry.getNumGeometries()];
         for (int i = 0; i < res.length; i++)
-            res[i] = (com.vividsolutions.jts.geom.Point) geometry.getGeometryN(i);
+            res[i] = (org.locationtech.jts.geom.Point) geometry.getGeometryN(i);
         return res;
     }
 
-    private static Point[] convertPoints(com.vividsolutions.jts.geom.Point[] points) {
+    private static Point[] convertPoints(org.locationtech.jts.geom.Point[] points) {
         GeometryFactory factory = new GeometryFactory();
         Point[] res = new Point[points.length];
         for (int i = 0; i < res.length; i++) {
@@ -42,24 +42,24 @@ public class MultiPoint extends com.vividsolutions.jts.geom.MultiPoint {
     }
 
     public MultiPoint(Object original) {
-        this((com.vividsolutions.jts.geom.MultiPoint) original);
+        this((org.locationtech.jts.geom.MultiPoint) original);
     }
 
-    public MultiPoint(com.vividsolutions.jts.geom.MultiPoint original) {
+    public MultiPoint(org.locationtech.jts.geom.MultiPoint original) {
         this(getPoints(original), original.getFactory());
         GeometryCommonUtils.initUserDataFrom(this, original);
     }
 
     /**
-     * {@link com.vividsolutions.jts.geom.MultiPoint#MultiPoint(com.vividsolutions.jts.geom.Point[], com.vividsolutions.jts.geom.GeometryFactory)}
+     * {@link org.locationtech.jts.geom.MultiPoint#MultiPoint(org.locationtech.jts.geom.Point[], org.locationtech.jts.geom.GeometryFactory)}
      */
-    public MultiPoint(com.vividsolutions.jts.geom.Point[] points, com.vividsolutions.jts.geom.GeometryFactory factory) {
+    public MultiPoint(org.locationtech.jts.geom.Point[] points, org.locationtech.jts.geom.GeometryFactory factory) {
         super(convertPoints(points), new GeometryFactory(factory));
         GeometryCommonUtils.initUserDataFrom(this, this);
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.MultiPoint#equals(Geometry)}
+     * Compares to given geometry using {@link org.locationtech.jts.geom.MultiPoint#equals(Geometry)}
      * Also compares userData
      */
     @Override
@@ -68,7 +68,7 @@ public class MultiPoint extends com.vividsolutions.jts.geom.MultiPoint {
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.MultiPoint#equals(Object)}
+     * Compares to given geometry using {@link org.locationtech.jts.geom.MultiPoint#equals(Object)}
      * Also compares userData
      */
     @Override

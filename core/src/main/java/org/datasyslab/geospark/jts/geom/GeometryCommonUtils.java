@@ -1,7 +1,7 @@
 package org.datasyslab.geospark.jts.geom;
 
 import java.util.Objects;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 public class GeometryCommonUtils {
     public static boolean userDataEquals(Geometry a, Object b) {

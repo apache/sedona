@@ -16,7 +16,7 @@
  */
 package org.datasyslab.geospark.formatMapper.shapefileParser;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -150,7 +150,7 @@ public class ShapefileRDD
                     throws Exception
             {
                 List<Point> result = new ArrayList<Point>();
-                if (spatialObject instanceof com.vividsolutions.jts.geom.MultiPoint) {
+                if (spatialObject instanceof org.locationtech.jts.geom.MultiPoint) {
                     MultiPoint multiObjects = (MultiPoint) spatialObject;
                     for (int i = 0; i < multiObjects.getNumGeometries(); i++) {
                         Point oneObject = (Point) multiObjects.getGeometryN(i);
@@ -158,7 +158,7 @@ public class ShapefileRDD
                         result.add(oneObject);
                     }
                 }
-                else if (spatialObject instanceof com.vividsolutions.jts.geom.Point) {
+                else if (spatialObject instanceof org.locationtech.jts.geom.Point) {
                     result.add((Point) spatialObject);
                 }
                 else {
@@ -183,15 +183,15 @@ public class ShapefileRDD
                     throws Exception
             {
                 List<Polygon> result = new ArrayList<Polygon>();
-                if (spatialObject instanceof com.vividsolutions.jts.geom.MultiPolygon) {
-                    MultiPolygon multiObjects = new MultiPolygon((com.vividsolutions.jts.geom.MultiPolygon) spatialObject);
+                if (spatialObject instanceof org.locationtech.jts.geom.MultiPolygon) {
+                    MultiPolygon multiObjects = new MultiPolygon((org.locationtech.jts.geom.MultiPolygon) spatialObject);
                     for (int i = 0; i < multiObjects.getNumGeometries(); i++) {
                         Polygon oneObject = new Polygon(multiObjects.getGeometryN(i));
                         oneObject.setUserData(multiObjects.getUserData());
                         result.add(oneObject);
                     }
                 }
-                else if (spatialObject instanceof com.vividsolutions.jts.geom.Polygon) {
+                else if (spatialObject instanceof org.locationtech.jts.geom.Polygon) {
                     result.add((Polygon) spatialObject);
                 }
                 else {
@@ -216,7 +216,7 @@ public class ShapefileRDD
                     throws Exception
             {
                 List<LineString> result = new ArrayList<LineString>();
-                if (spatialObject instanceof com.vividsolutions.jts.geom.MultiLineString) {
+                if (spatialObject instanceof org.locationtech.jts.geom.MultiLineString) {
                     MultiLineString multiObjects = (MultiLineString) spatialObject;
                     for (int i = 0; i < multiObjects.getNumGeometries(); i++) {
                         LineString oneObject = (LineString) multiObjects.getGeometryN(i);
@@ -224,7 +224,7 @@ public class ShapefileRDD
                         result.add(oneObject);
                     }
                 }
-                else if (spatialObject instanceof com.vividsolutions.jts.geom.LineString) {
+                else if (spatialObject instanceof org.locationtech.jts.geom.LineString) {
                     result.add((LineString) spatialObject);
                 }
                 else {

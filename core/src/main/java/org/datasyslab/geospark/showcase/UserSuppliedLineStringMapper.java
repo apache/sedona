@@ -16,9 +16,9 @@
  */
 package org.datasyslab.geospark.showcase;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.WKTReader;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.WKTReader;
 import org.datasyslab.geospark.jts.geom.LineString;
 import org.datasyslab.geospark.jts.geom.LinearRing;
 import org.datasyslab.geospark.jts.geom.MultiLineString;
@@ -88,14 +88,14 @@ public class UserSuppliedLineStringMapper
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
             Geometry spatialObject = null;
-            com.vividsolutions.jts.geom.MultiLineString multiSpatialObjects = null;
+            org.locationtech.jts.geom.MultiLineString multiSpatialObjects = null;
             List<String> lineSplitList;
             lineSplitList = Arrays.asList(line.split("\t"));
             String newLine = lineSplitList.get(0).replace("\"", "");
             WKTReader wktreader = new WKTReader();
             spatialObject = wktreader.read(newLine);
-            if (spatialObject instanceof com.vividsolutions.jts.geom.MultiLineString) {
-                multiSpatialObjects = (com.vividsolutions.jts.geom.MultiLineString) spatialObject;
+            if (spatialObject instanceof org.locationtech.jts.geom.MultiLineString) {
+                multiSpatialObjects = (org.locationtech.jts.geom.MultiLineString) spatialObject;
                 for (int i = 0; i < multiSpatialObjects.getNumGeometries(); i++) {
                     spatialObject = multiSpatialObjects.getGeometryN(i);
                     result.add(new LineString(spatialObject));

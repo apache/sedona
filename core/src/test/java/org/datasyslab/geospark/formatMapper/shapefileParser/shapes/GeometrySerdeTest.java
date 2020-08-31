@@ -29,9 +29,9 @@ package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKTReader;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 import org.datasyslab.geospark.jts.geom.Circle;
 import org.datasyslab.geospark.geometryObjects.GeometrySerde;
 import org.datasyslab.geospark.jts.geom.GeometryFactory;
@@ -70,7 +70,7 @@ public class GeometrySerdeTest
         geometry.setUserData("This is a test");
         Assert.assertEquals(geometry, serde(geometry));
 
-        if (geometry instanceof com.vividsolutions.jts.geom.GeometryCollection) {
+        if (geometry instanceof org.locationtech.jts.geom.GeometryCollection) {
             return;
         }
 

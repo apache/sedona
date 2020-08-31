@@ -16,23 +16,23 @@
  */
 package org.datasyslab.geospark.jts.geom;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 import java.util.Objects;
 
 /**
- * Wraps {@link com.vividsolutions.jts.geom.MultiLineString}
+ * Wraps {@link org.locationtech.jts.geom.MultiLineString}
  */
-public class MultiLineString extends com.vividsolutions.jts.geom.MultiLineString {
+public class MultiLineString extends org.locationtech.jts.geom.MultiLineString {
 
-    public static com.vividsolutions.jts.geom.LineString[] getLineStrings(com.vividsolutions.jts.geom.GeometryCollection geometry) {
-        com.vividsolutions.jts.geom.LineString[] res = new com.vividsolutions.jts.geom.LineString[geometry.getNumGeometries()];
+    public static org.locationtech.jts.geom.LineString[] getLineStrings(org.locationtech.jts.geom.GeometryCollection geometry) {
+        org.locationtech.jts.geom.LineString[] res = new org.locationtech.jts.geom.LineString[geometry.getNumGeometries()];
         for (int i = 0; i < res.length; i++)
-            res[i] = (com.vividsolutions.jts.geom.LineString) geometry.getGeometryN(i);
+            res[i] = (org.locationtech.jts.geom.LineString) geometry.getGeometryN(i);
         return res;
     }
 
-    private static LineString[] convertLineStrings(com.vividsolutions.jts.geom.LineString[] lineStrings) {
+    private static LineString[] convertLineStrings(org.locationtech.jts.geom.LineString[] lineStrings) {
         GeometryFactory factory = new GeometryFactory();
         LineString[] res = new LineString[lineStrings.length];
         for (int i = 0; i < res.length; i++) {
@@ -42,24 +42,24 @@ public class MultiLineString extends com.vividsolutions.jts.geom.MultiLineString
     }
 
     public MultiLineString(Object original) {
-        this((com.vividsolutions.jts.geom.MultiLineString) original);
+        this((org.locationtech.jts.geom.MultiLineString) original);
     }
 
-    public MultiLineString(com.vividsolutions.jts.geom.MultiLineString original) {
+    public MultiLineString(org.locationtech.jts.geom.MultiLineString original) {
         this(getLineStrings(original), original.getFactory());
         GeometryCommonUtils.initUserDataFrom(this, original);
     }
 
     /**
-     * {@link com.vividsolutions.jts.geom.MultiLineString#MultiLineString(com.vividsolutions.jts.geom.LineString[], com.vividsolutions.jts.geom.GeometryFactory)}
+     * {@link org.locationtech.jts.geom.MultiLineString#MultiLineString(org.locationtech.jts.geom.LineString[], org.locationtech.jts.geom.GeometryFactory)}
      */
-    public MultiLineString(com.vividsolutions.jts.geom.LineString[] lineStrings, com.vividsolutions.jts.geom.GeometryFactory factory) {
+    public MultiLineString(org.locationtech.jts.geom.LineString[] lineStrings, org.locationtech.jts.geom.GeometryFactory factory) {
         super(convertLineStrings(lineStrings), new GeometryFactory(factory));
         GeometryCommonUtils.initUserDataFrom(this, this);
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.MultiLineString#equals(Geometry)}
+     * Compares to given geometry using {@link org.locationtech.jts.geom.MultiLineString#equals(Geometry)}
      * Also compares userData
      */
     @Override
@@ -68,7 +68,7 @@ public class MultiLineString extends com.vividsolutions.jts.geom.MultiLineString
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.MultiLineString#equals(Object)}
+     * Compares to given geometry using {@link org.locationtech.jts.geom.MultiLineString#equals(Object)}
      * Also compares userData
      */
     @Override

@@ -16,7 +16,7 @@
  */
 package org.datasyslab.geosparkviz.extension.visualizationEffect;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.geospark.spatialRDD.SpatialRDD;

@@ -16,8 +16,8 @@
  */
 package org.datasyslab.geospark.utils;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 import org.datasyslab.geospark.jts.geom.Point;
 import org.datasyslab.geospark.jts.geom.Polygon;
 import org.geotools.geometry.jts.JTS;

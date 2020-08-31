@@ -1,7 +1,7 @@
 package org.datasyslab.geospark.python.adapters
 
-import com.vividsolutions.jts.geom.Geometry
-import com.vividsolutions.jts.index.SpatialIndex
+import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.index.SpatialIndex
 import org.apache.spark.api.java.JavaRDD
 import org.datasyslab.geospark.spatialRDD.SpatialRDD
 

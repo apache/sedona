@@ -16,35 +16,35 @@
  */
 package org.datasyslab.geospark.jts.geom;
 
-import com.vividsolutions.jts.geom.CoordinateSequence;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.Geometry;
 
 import java.util.Objects;
 
 /**
- * Wraps {@link com.vividsolutions.jts.geom.LineString}
+ * Wraps {@link org.locationtech.jts.geom.LineString}
  */
-public class LineString extends com.vividsolutions.jts.geom.LineString {
+public class LineString extends org.locationtech.jts.geom.LineString {
 
     public LineString(Object original) {
-        this((com.vividsolutions.jts.geom.LineString) original);
+        this((org.locationtech.jts.geom.LineString) original);
     }
 
-    public LineString(com.vividsolutions.jts.geom.LineString original) {
+    public LineString(org.locationtech.jts.geom.LineString original) {
         super(original.getCoordinateSequence(), original.getFactory());
         GeometryCommonUtils.initUserDataFrom(this, original);
     }
 
     /**
-     * {@link com.vividsolutions.jts.geom.LineString#LineString(CoordinateSequence, com.vividsolutions.jts.geom.GeometryFactory)}
+     * {@link org.locationtech.jts.geom.LineString#LineString(CoordinateSequence, org.locationtech.jts.geom.GeometryFactory)}
      */
-    public LineString(CoordinateSequence points, com.vividsolutions.jts.geom.GeometryFactory factory) {
+    public LineString(CoordinateSequence points, org.locationtech.jts.geom.GeometryFactory factory) {
         super(points, new GeometryFactory(factory));
         GeometryCommonUtils.initUserDataFrom(this, this);
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.LineString#equals(Geometry)}
+     * Compares to given geometry using {@link org.locationtech.jts.geom.LineString#equals(Geometry)}
      * Also compares userData
      */
     @Override
@@ -53,7 +53,7 @@ public class LineString extends com.vividsolutions.jts.geom.LineString {
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.LineString#equals(Object)}
+     * Compares to given geometry using {@link org.locationtech.jts.geom.LineString#equals(Object)}
      * Also compares userData
      */
     @Override

@@ -18,9 +18,9 @@
 package org.datasyslab.geospark.serde;
 
 import com.esotericsoftware.kryo.Kryo;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.index.quadtree.Quadtree;
-import com.vividsolutions.jts.index.strtree.STRtree;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.index.quadtree.Quadtree;
+import org.locationtech.jts.index.strtree.STRtree;
 import org.apache.log4j.Logger;
 import org.apache.spark.serializer.KryoRegistrator;
 import org.datasyslab.geospark.jts.geom.GeometryCollection;

@@ -16,7 +16,7 @@
  */
 package org.datasyslab.geosparkviz.sql.operator
 
-import com.vividsolutions.jts.geom.{Envelope, Geometry}
+import org.locationtech.jts.geom.{Envelope, Geometry}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Row}
 import org.datasyslab.geospark.spatialPartitioning.QuadtreePartitioning

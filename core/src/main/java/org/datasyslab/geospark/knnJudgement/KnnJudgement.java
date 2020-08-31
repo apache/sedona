@@ -16,7 +16,7 @@
  */
 package org.datasyslab.geospark.knnJudgement;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 import org.apache.spark.api.java.function.FlatMapFunction;
 
 import java.io.Serializable;

@@ -1,6 +1,6 @@
 package org.datasyslab.geospark.python.adapters
 
-import com.vividsolutions.jts.geom.{Geometry}
+import org.locationtech.jts.geom.{Geometry}
 import org.datasyslab.geospark.jts.geom.{LineString, Point, Polygon}
 import net.razorvine.pickle.Unpickler
 import net.razorvine.pickle.objects.ClassDict
@@ -8,16 +8,16 @@ import org.apache.spark.api.java.JavaRDD
 
 object PythonRddToJavaRDDAdapter extends GeomSerializer{
 
-  def deserializeToPointRawRDD(javaRDD: JavaRDD[Array[Byte]]): JavaRDD[com.vividsolutions.jts.geom.Point] = {
-    translateToJava(javaRDD).asInstanceOf[JavaRDD[com.vividsolutions.jts.geom.Point]]
+  def deserializeToPointRawRDD(javaRDD: JavaRDD[Array[Byte]]): JavaRDD[org.locationtech.jts.geom.Point] = {
+    translateToJava(javaRDD).asInstanceOf[JavaRDD[org.locationtech.jts.geom.Point]]
   }
 
-  def deserializeToPolygonRawRDD(javaRDD: JavaRDD[Array[Byte]]): JavaRDD[com.vividsolutions.jts.geom.Polygon] = {
-    translateToJava(javaRDD).asInstanceOf[JavaRDD[com.vividsolutions.jts.geom.Polygon]]
+  def deserializeToPolygonRawRDD(javaRDD: JavaRDD[Array[Byte]]): JavaRDD[org.locationtech.jts.geom.Polygon] = {
+    translateToJava(javaRDD).asInstanceOf[JavaRDD[org.locationtech.jts.geom.Polygon]]
   }
 
-  def deserializeToLineStringRawRDD(javaRDD: JavaRDD[Array[Byte]]): JavaRDD[com.vividsolutions.jts.geom.LineString] = {
-    translateToJava(javaRDD).asInstanceOf[JavaRDD[com.vividsolutions.jts.geom.LineString]]
+  def deserializeToLineStringRawRDD(javaRDD: JavaRDD[Array[Byte]]): JavaRDD[org.locationtech.jts.geom.LineString] = {
+    translateToJava(javaRDD).asInstanceOf[JavaRDD[org.locationtech.jts.geom.LineString]]
   }
 
   private def translateToJava(pythonRDD: JavaRDD[Array[Byte]]): JavaRDD[Geometry] = {

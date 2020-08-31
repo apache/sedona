@@ -16,7 +16,7 @@
  */
 package org.apache.spark.sql.geosparksql.expressions
 
-import com.vividsolutions.jts.geom.{Coordinate, Geometry, GeometryFactory}
+import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory}
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.expressions.Aggregator
 

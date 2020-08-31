@@ -16,35 +16,35 @@
  */
 package org.datasyslab.geospark.jts.geom;
 
-import com.vividsolutions.jts.geom.CoordinateSequence;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.Geometry;
 
 import java.util.Objects;
 
 /**
- * Wraps {@link com.vividsolutions.jts.geom.LinearRing}
+ * Wraps {@link org.locationtech.jts.geom.LinearRing}
  */
-public class LinearRing extends com.vividsolutions.jts.geom.LinearRing {
+public class LinearRing extends org.locationtech.jts.geom.LinearRing {
 
     public LinearRing(Object original) {
-        this((com.vividsolutions.jts.geom.LinearRing) original);
+        this((org.locationtech.jts.geom.LinearRing) original);
     }
 
-    public LinearRing(com.vividsolutions.jts.geom.LinearRing original) {
+    public LinearRing(org.locationtech.jts.geom.LinearRing original) {
         super(original.getCoordinateSequence(), original.getFactory());
         GeometryCommonUtils.initUserDataFrom(this, original);
     }
 
     /**
-     * {@link com.vividsolutions.jts.geom.LinearRing#LinearRing(CoordinateSequence, com.vividsolutions.jts.geom.GeometryFactory)}
+     * {@link org.locationtech.jts.geom.LinearRing#LinearRing(CoordinateSequence, org.locationtech.jts.geom.GeometryFactory)}
      */
-    public LinearRing(CoordinateSequence points, com.vividsolutions.jts.geom.GeometryFactory factory) {
+    public LinearRing(CoordinateSequence points, org.locationtech.jts.geom.GeometryFactory factory) {
         super(points, new GeometryFactory(factory));
         GeometryCommonUtils.initUserDataFrom(this, this);
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.LinearRing#equals(Geometry)}
+     * Compares to given geometry using {@link org.locationtech.jts.geom.LinearRing#equals(Geometry)}
      * Also compares userData
      */
     @Override
@@ -53,7 +53,7 @@ public class LinearRing extends com.vividsolutions.jts.geom.LinearRing {
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.LinearRing#equals(Object)}
+     * Compares to given geometry using {@link org.locationtech.jts.geom.LinearRing#equals(Object)}
      * Also compares userData
      */
     @Override

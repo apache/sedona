@@ -16,7 +16,7 @@
  */
 package org.datasyslab.geosparkviz.core;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 import org.datasyslab.geospark.jts.geom.LineString;
 import org.datasyslab.geospark.jts.geom.Point;
 import org.datasyslab.geospark.jts.geom.Polygon;
@@ -822,14 +822,14 @@ public abstract class VisualizationOperator
                     throws Exception
             {
 
-                if (spatialObject instanceof com.vividsolutions.jts.geom.Point) {
-                    return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (com.vividsolutions.jts.geom.Point) spatialObject, colorizeOption, reverseSpatialCoordinate).iterator();
+                if (spatialObject instanceof org.locationtech.jts.geom.Point) {
+                    return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (org.locationtech.jts.geom.Point) spatialObject, colorizeOption, reverseSpatialCoordinate).iterator();
                 }
-                else if (spatialObject instanceof com.vividsolutions.jts.geom.Polygon) {
-                    return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (com.vividsolutions.jts.geom.Polygon) spatialObject, reverseSpatialCoordinate).iterator();
+                else if (spatialObject instanceof org.locationtech.jts.geom.Polygon) {
+                    return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (org.locationtech.jts.geom.Polygon) spatialObject, reverseSpatialCoordinate).iterator();
                 }
-                else if (spatialObject instanceof com.vividsolutions.jts.geom.LineString) {
-                    return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (com.vividsolutions.jts.geom.LineString) spatialObject, reverseSpatialCoordinate).iterator();
+                else if (spatialObject instanceof org.locationtech.jts.geom.LineString) {
+                    return RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, datasetBoundary, (org.locationtech.jts.geom.LineString) spatialObject, reverseSpatialCoordinate).iterator();
                 }
                 else {
                     throw new Exception("[GeoSparkViz][Rasterize] Unsupported spatial object types. GeoSparkViz only supports Point, Polygon, LineString");

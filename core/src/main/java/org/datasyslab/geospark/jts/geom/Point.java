@@ -16,35 +16,35 @@
  */
 package org.datasyslab.geospark.jts.geom;
 
-import com.vividsolutions.jts.geom.CoordinateSequence;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.Geometry;
 
 import java.util.Objects;
 
 /**
- * Wraps {@link com.vividsolutions.jts.geom.Point}
+ * Wraps {@link org.locationtech.jts.geom.Point}
  */
-public class Point extends com.vividsolutions.jts.geom.Point {
+public class Point extends org.locationtech.jts.geom.Point {
 
     public Point(Object original) {
-        this((com.vividsolutions.jts.geom.Point) original);
+        this((org.locationtech.jts.geom.Point) original);
     }
 
-    public Point(com.vividsolutions.jts.geom.Point original) {
+    public Point(org.locationtech.jts.geom.Point original) {
         super(original.getCoordinateSequence(), original.getFactory());
         GeometryCommonUtils.initUserDataFrom(this, original);
     }
 
     /**
-     * {@link com.vividsolutions.jts.geom.Point#Point(CoordinateSequence, com.vividsolutions.jts.geom.GeometryFactory)}
+     * {@link org.locationtech.jts.geom.Point#Point(CoordinateSequence, org.locationtech.jts.geom.GeometryFactory)}
      */
-    public Point(CoordinateSequence coordinates, com.vividsolutions.jts.geom.GeometryFactory factory) {
+    public Point(CoordinateSequence coordinates, org.locationtech.jts.geom.GeometryFactory factory) {
         super(coordinates, new GeometryFactory(factory));
         GeometryCommonUtils.initUserDataFrom(this, this);
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.Point#equals(Geometry)}
+     * Compares to given geometry using {@link org.locationtech.jts.geom.Point#equals(Geometry)}
      * Also compares userData
      */
     @Override
@@ -53,7 +53,7 @@ public class Point extends com.vividsolutions.jts.geom.Point {
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.Point#equals(Object)}
+     * Compares to given geometry using {@link org.locationtech.jts.geom.Point#equals(Object)}
      * Also compares userData
      */
     @Override

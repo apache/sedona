@@ -16,13 +16,13 @@
  */
 package org.datasyslab.geospark.formatMapper;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryCollection;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKBReader;
-import com.vividsolutions.jts.io.WKTReader;
-import com.vividsolutions.jts.operation.valid.IsValidOp;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKBReader;
+import org.locationtech.jts.io.WKTReader;
+import org.locationtech.jts.operation.valid.IsValidOp;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.datasyslab.geospark.jts.geom.GeometryFactory;
@@ -393,14 +393,14 @@ public class FormatMapper<T extends Geometry>
         if (geometry == null) {
             return;
         }
-        if (geometry instanceof com.vividsolutions.jts.geom.MultiPoint) {
-            addMultiGeometry((com.vividsolutions.jts.geom.MultiPoint) geometry, result);
+        if (geometry instanceof org.locationtech.jts.geom.MultiPoint) {
+            addMultiGeometry((org.locationtech.jts.geom.MultiPoint) geometry, result);
         }
-        else if (geometry instanceof com.vividsolutions.jts.geom.MultiLineString) {
-            addMultiGeometry((com.vividsolutions.jts.geom.MultiLineString) geometry, result);
+        else if (geometry instanceof org.locationtech.jts.geom.MultiLineString) {
+            addMultiGeometry((org.locationtech.jts.geom.MultiLineString) geometry, result);
         }
-        else if (geometry instanceof com.vividsolutions.jts.geom.MultiPolygon) {
-            addMultiGeometry((com.vividsolutions.jts.geom.MultiPolygon) geometry, result);
+        else if (geometry instanceof org.locationtech.jts.geom.MultiPolygon) {
+            addMultiGeometry((org.locationtech.jts.geom.MultiPolygon) geometry, result);
         }
         else {
             result.add((T) geometry);

@@ -22,8 +22,8 @@ import com.esotericsoftware.kryo.Registration;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 import org.datasyslab.geospark.jts.geom.GeometryFactory;
 import org.datasyslab.geospark.jts.geom.GeometryCollection;
 import org.datasyslab.geospark.jts.geom.Circle;
@@ -82,14 +82,14 @@ public class GeometrySerde
             writeGeometry(kryo, out, circle.getCenterGeometry());
             writeUserData(kryo, out, circle);
         }
-        else if (object instanceof com.vividsolutions.jts.geom.Point || object instanceof com.vividsolutions.jts.geom.LineString
-                || object instanceof com.vividsolutions.jts.geom.Polygon || object instanceof com.vividsolutions.jts.geom.MultiPoint
-                || object instanceof com.vividsolutions.jts.geom.MultiLineString || object instanceof com.vividsolutions.jts.geom.MultiPolygon) {
+        else if (object instanceof org.locationtech.jts.geom.Point || object instanceof org.locationtech.jts.geom.LineString
+                || object instanceof org.locationtech.jts.geom.Polygon || object instanceof org.locationtech.jts.geom.MultiPoint
+                || object instanceof org.locationtech.jts.geom.MultiLineString || object instanceof org.locationtech.jts.geom.MultiPolygon) {
             writeType(out, Type.SHAPE);
             writeGeometry(kryo, out, (Geometry) object);
         }
-        else if (object instanceof com.vividsolutions.jts.geom.GeometryCollection) {
-            com.vividsolutions.jts.geom.GeometryCollection collection = (com.vividsolutions.jts.geom.GeometryCollection) object;
+        else if (object instanceof org.locationtech.jts.geom.GeometryCollection) {
+            org.locationtech.jts.geom.GeometryCollection collection = (org.locationtech.jts.geom.GeometryCollection) object;
             writeType(out, Type.GEOMETRYCOLLECTION);
             out.writeInt(collection.getNumGeometries());
             for (int i = 0; i < collection.getNumGeometries(); i++) {

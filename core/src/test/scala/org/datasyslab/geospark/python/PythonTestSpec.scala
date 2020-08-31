@@ -1,7 +1,7 @@
 package org.datasyslab.geospark.python
 
 import org.datasyslab.geospark.jts.geom.GeometryFactory
-import com.vividsolutions.jts.io.WKTReader
+import org.locationtech.jts.io.WKTReader
 import org.datasyslab.geospark.python.translation.PythonGeometrySerializer
 
 trait PythonTestSpec {

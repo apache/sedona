@@ -16,7 +16,7 @@
  */
 package org.datasyslab.geospark.spatialPartitioning;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 import org.datasyslab.geospark.jts.QueryableSTRtree;
 
 import java.io.Serializable;

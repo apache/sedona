@@ -18,7 +18,7 @@
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
 import com.esotericsoftware.kryo.io.Input;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 import org.datasyslab.geospark.jts.geom.GeometryFactory;
 import org.datasyslab.geospark.jts.geom.LineString;
 import org.datasyslab.geospark.jts.geom.MultiLineString;
@@ -60,28 +60,28 @@ public class ShapeSerde
 {
     public static byte[] serialize(Geometry geometry)
     {
-        if (geometry instanceof com.vividsolutions.jts.geom.Point) {
-            return serialize((com.vividsolutions.jts.geom.Point) geometry);
+        if (geometry instanceof org.locationtech.jts.geom.Point) {
+            return serialize((org.locationtech.jts.geom.Point) geometry);
         }
 
-        if (geometry instanceof com.vividsolutions.jts.geom.MultiPoint) {
-            return serialize((com.vividsolutions.jts.geom.MultiPoint) geometry);
+        if (geometry instanceof org.locationtech.jts.geom.MultiPoint) {
+            return serialize((org.locationtech.jts.geom.MultiPoint) geometry);
         }
 
-        if (geometry instanceof com.vividsolutions.jts.geom.LineString) {
-            return serialize((com.vividsolutions.jts.geom.LineString) geometry);
+        if (geometry instanceof org.locationtech.jts.geom.LineString) {
+            return serialize((org.locationtech.jts.geom.LineString) geometry);
         }
 
-        if (geometry instanceof com.vividsolutions.jts.geom.MultiLineString) {
-            return serialize((com.vividsolutions.jts.geom.MultiLineString) geometry);
+        if (geometry instanceof org.locationtech.jts.geom.MultiLineString) {
+            return serialize((org.locationtech.jts.geom.MultiLineString) geometry);
         }
 
-        if (geometry instanceof com.vividsolutions.jts.geom.Polygon) {
-            return serialize((com.vividsolutions.jts.geom.Polygon) geometry);
+        if (geometry instanceof org.locationtech.jts.geom.Polygon) {
+            return serialize((org.locationtech.jts.geom.Polygon) geometry);
         }
 
-        if (geometry instanceof com.vividsolutions.jts.geom.MultiPolygon) {
-            return serialize((com.vividsolutions.jts.geom.MultiPolygon) geometry);
+        if (geometry instanceof org.locationtech.jts.geom.MultiPolygon) {
+            return serialize((org.locationtech.jts.geom.MultiPolygon) geometry);
         }
 
         throw new UnsupportedOperationException("Geometry type is not supported: " +
@@ -106,7 +106,7 @@ public class ShapeSerde
 
     private static final int POINT_LENGTH = 1 + 2 * DOUBLE_LENGTH;
 
-    private static byte[] serialize(com.vividsolutions.jts.geom.Point point)
+    private static byte[] serialize(org.locationtech.jts.geom.Point point)
     {
         ByteBuffer buffer = newBuffer(POINT_LENGTH);
         putType(buffer, ShapeType.POINT);
@@ -121,7 +121,7 @@ public class ShapeSerde
         buffer.put((byte) type.getId());
     }
 
-    private static byte[] serialize(com.vividsolutions.jts.geom.MultiPoint multiPoint)
+    private static byte[] serialize(org.locationtech.jts.geom.MultiPoint multiPoint)
     {
         int numPoints = multiPoint.getNumPoints();
 
@@ -130,19 +130,19 @@ public class ShapeSerde
         buffer.position(buffer.position() + 4 * DOUBLE_LENGTH);
         buffer.putInt(numPoints);
         for (int i = 0; i < numPoints; i++) {
-            com.vividsolutions.jts.geom.Point point = (com.vividsolutions.jts.geom.Point) multiPoint.getGeometryN(i);
+            org.locationtech.jts.geom.Point point = (org.locationtech.jts.geom.Point) multiPoint.getGeometryN(i);
             buffer.putDouble(point.getX());
             buffer.putDouble(point.getY());
         }
         return buffer.array();
     }
 
-    private static int calculateBufferSize(com.vividsolutions.jts.geom.MultiPoint multiPoint)
+    private static int calculateBufferSize(org.locationtech.jts.geom.MultiPoint multiPoint)
     {
         return 1 + 4 * DOUBLE_LENGTH + INT_LENGTH + multiPoint.getNumPoints() * 2 * DOUBLE_LENGTH;
     }
 
-    private static byte[] serialize(com.vividsolutions.jts.geom.LineString lineString)
+    private static byte[] serialize(org.locationtech.jts.geom.LineString lineString)
     {
         int numPoints = lineString.getNumPoints();
 
@@ -166,7 +166,7 @@ public class ShapeSerde
         buffer.putInt(numPoints);
     }
 
-    private static byte[] serialize(com.vividsolutions.jts.geom.MultiLineString multiLineString)
+    private static byte[] serialize(org.locationtech.jts.geom.MultiLineString multiLineString)
     {
         int numPoints = multiLineString.getNumPoints();
         int numParts = multiLineString.getNumGeometries();
@@ -181,12 +181,12 @@ public class ShapeSerde
         }
 
         for (int i = 0; i < numParts; i++) {
-            putPoints(buffer, (com.vividsolutions.jts.geom.LineString) multiLineString.getGeometryN(i));
+            putPoints(buffer, (org.locationtech.jts.geom.LineString) multiLineString.getGeometryN(i));
         }
         return buffer.array();
     }
 
-    private static byte[] serialize(com.vividsolutions.jts.geom.Polygon polygon)
+    private static byte[] serialize(org.locationtech.jts.geom.Polygon polygon)
     {
         int numRings = polygon.getNumInteriorRing() + 1;
         int numPoints = polygon.getNumPoints();
@@ -198,7 +198,7 @@ public class ShapeSerde
         return buffer.array();
     }
 
-    private static int putRingOffsets(ByteBuffer buffer, com.vividsolutions.jts.geom.Polygon polygon, int initialOffset)
+    private static int putRingOffsets(ByteBuffer buffer, org.locationtech.jts.geom.Polygon polygon, int initialOffset)
     {
         int offset = initialOffset;
         int numRings = polygon.getNumInteriorRing() + 1;
@@ -213,14 +213,14 @@ public class ShapeSerde
         return offset;
     }
 
-    private static byte[] serialize(com.vividsolutions.jts.geom.MultiPolygon multiPolygon)
+    private static byte[] serialize(org.locationtech.jts.geom.MultiPolygon multiPolygon)
     {
         int numPolygons = multiPolygon.getNumGeometries();
         int numPoints = multiPolygon.getNumPoints();
 
         int numRings = 0;
         for (int i = 0; i < numPolygons; i++) {
-            com.vividsolutions.jts.geom.Polygon polygon = (com.vividsolutions.jts.geom.Polygon) multiPolygon.getGeometryN(i);
+            org.locationtech.jts.geom.Polygon polygon = (org.locationtech.jts.geom.Polygon) multiPolygon.getGeometryN(i);
             numRings += polygon.getNumInteriorRing() + 1;
         }
 
@@ -229,18 +229,18 @@ public class ShapeSerde
 
         int offset = 0;
         for (int i = 0; i < numPolygons; i++) {
-            com.vividsolutions.jts.geom.Polygon polygon = (com.vividsolutions.jts.geom.Polygon) multiPolygon.getGeometryN(i);
+            org.locationtech.jts.geom.Polygon polygon = (org.locationtech.jts.geom.Polygon) multiPolygon.getGeometryN(i);
             offset = putRingOffsets(buffer, polygon, offset);
         }
 
         for (int i = 0; i < numPolygons; i++) {
-            com.vividsolutions.jts.geom.Polygon polygon = (com.vividsolutions.jts.geom.Polygon) multiPolygon.getGeometryN(i);
+            org.locationtech.jts.geom.Polygon polygon = (org.locationtech.jts.geom.Polygon) multiPolygon.getGeometryN(i);
             putPolygonPoints(buffer, polygon);
         }
         return buffer.array();
     }
 
-    private static void putPolygonPoints(ByteBuffer buffer, com.vividsolutions.jts.geom.Polygon polygon)
+    private static void putPolygonPoints(ByteBuffer buffer, org.locationtech.jts.geom.Polygon polygon)
     {
         putPoints(buffer, polygon.getExteriorRing());
         for (int i = 0; i < polygon.getNumInteriorRing(); i++) {
@@ -248,11 +248,11 @@ public class ShapeSerde
         }
     }
 
-    private static void putPoints(ByteBuffer buffer, com.vividsolutions.jts.geom.LineString geometry)
+    private static void putPoints(ByteBuffer buffer, org.locationtech.jts.geom.LineString geometry)
     {
         int numPoints = geometry.getNumPoints();
         for (int i = 0; i < numPoints; i++) {
-            com.vividsolutions.jts.geom.Point point = geometry.getPointN(i);
+            org.locationtech.jts.geom.Point point = geometry.getPointN(i);
             buffer.putDouble(point.getX());
             buffer.putDouble(point.getY());
         }

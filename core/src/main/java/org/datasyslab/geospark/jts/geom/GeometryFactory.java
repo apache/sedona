@@ -1,10 +1,10 @@
 package org.datasyslab.geospark.jts.geom;
 
-import com.vividsolutions.jts.geom.*;
+import org.locationtech.jts.geom.*;
 
-public class GeometryFactory extends com.vividsolutions.jts.geom.GeometryFactory {
+public class GeometryFactory extends org.locationtech.jts.geom.GeometryFactory {
 
-    public GeometryFactory(com.vividsolutions.jts.geom.GeometryFactory original) {
+    public GeometryFactory(org.locationtech.jts.geom.GeometryFactory original) {
         super(original.getPrecisionModel(), original.getSRID(), original.getCoordinateSequenceFactory());
     }
 
@@ -31,19 +31,19 @@ public class GeometryFactory extends com.vividsolutions.jts.geom.GeometryFactory
             return original;
         }
 
-        if (original instanceof com.vividsolutions.jts.geom.Point) {
+        if (original instanceof org.locationtech.jts.geom.Point) {
             return new Point(original);
         }
 
-        if (original instanceof com.vividsolutions.jts.geom.LinearRing) {
+        if (original instanceof org.locationtech.jts.geom.LinearRing) {
             return new LinearRing(original);
         }
 
-        if (original instanceof com.vividsolutions.jts.geom.LineString) {
+        if (original instanceof org.locationtech.jts.geom.LineString) {
             return new LineString(original);
         }
 
-        if (original instanceof com.vividsolutions.jts.geom.Polygon) {
+        if (original instanceof org.locationtech.jts.geom.Polygon) {
             return new Polygon(original);
         }
 
@@ -51,19 +51,19 @@ public class GeometryFactory extends com.vividsolutions.jts.geom.GeometryFactory
             return new Circle(original);
         }
 
-        if (original instanceof com.vividsolutions.jts.geom.MultiLineString) {
+        if (original instanceof org.locationtech.jts.geom.MultiLineString) {
             return new MultiLineString(original);
         }
 
-        if (original instanceof com.vividsolutions.jts.geom.MultiPolygon) {
+        if (original instanceof org.locationtech.jts.geom.MultiPolygon) {
             return new MultiPolygon(original);
         }
 
-        if (original instanceof com.vividsolutions.jts.geom.MultiPoint) {
+        if (original instanceof org.locationtech.jts.geom.MultiPoint) {
             return new MultiPoint(original);
         }
 
-        if (original instanceof com.vividsolutions.jts.geom.GeometryCollection) {
+        if (original instanceof org.locationtech.jts.geom.GeometryCollection) {
             return new GeometryCollection(original);
         }
 
@@ -79,7 +79,7 @@ public class GeometryFactory extends com.vividsolutions.jts.geom.GeometryFactory
         return new Point(coordinates, this);
     }
 
-    public MultiLineString createMultiLineString(com.vividsolutions.jts.geom.LineString[] lineStrings) {
+    public MultiLineString createMultiLineString(org.locationtech.jts.geom.LineString[] lineStrings) {
         return new MultiLineString(lineStrings, this);
     }
 
@@ -87,7 +87,7 @@ public class GeometryFactory extends com.vividsolutions.jts.geom.GeometryFactory
         return new GeometryCollection(geometries, this);
     }
 
-    public MultiPolygon createMultiPolygon(com.vividsolutions.jts.geom.Polygon[] polygons) {
+    public MultiPolygon createMultiPolygon(org.locationtech.jts.geom.Polygon[] polygons) {
         return new MultiPolygon(polygons, this);
     }
 
@@ -99,7 +99,7 @@ public class GeometryFactory extends com.vividsolutions.jts.geom.GeometryFactory
         return new LinearRing(coordinates, this);
     }
 
-    public MultiPoint createMultiPoint(com.vividsolutions.jts.geom.Point[] point) {
+    public MultiPoint createMultiPoint(org.locationtech.jts.geom.Point[] point) {
         return new MultiPoint(point, this);
     }
 
@@ -123,7 +123,7 @@ public class GeometryFactory extends com.vividsolutions.jts.geom.GeometryFactory
         }
     }
 
-    public Polygon createPolygon(com.vividsolutions.jts.geom.LinearRing shell, com.vividsolutions.jts.geom.LinearRing[] holes) {
+    public Polygon createPolygon(org.locationtech.jts.geom.LinearRing shell, org.locationtech.jts.geom.LinearRing[] holes) {
         return new Polygon(shell, holes, this);
     }
 
@@ -135,7 +135,7 @@ public class GeometryFactory extends com.vividsolutions.jts.geom.GeometryFactory
         return this.createPolygon(this.createLinearRing(coordinates));
     }
 
-    public Polygon createPolygon(com.vividsolutions.jts.geom.LinearRing shell) {
+    public Polygon createPolygon(org.locationtech.jts.geom.LinearRing shell) {
         return this.createPolygon(shell, (LinearRing[])null);
     }
 

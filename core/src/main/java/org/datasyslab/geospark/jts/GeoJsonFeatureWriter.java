@@ -1,8 +1,8 @@
 package org.datasyslab.geospark.jts;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.geojson.GeoJsonConstants;
-import com.vividsolutions.jts.io.geojson.GeoJsonWriter;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.geojson.GeoJsonConstants;
+import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 

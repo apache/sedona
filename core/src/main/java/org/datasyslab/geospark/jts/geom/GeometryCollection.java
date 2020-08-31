@@ -16,23 +16,23 @@
  */
 package org.datasyslab.geospark.jts.geom;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 import java.util.Objects;
 
 /**
- * Wraps {@link com.vividsolutions.jts.geom.GeometryCollection}
+ * Wraps {@link org.locationtech.jts.geom.GeometryCollection}
  */
-public class GeometryCollection extends com.vividsolutions.jts.geom.GeometryCollection {
+public class GeometryCollection extends org.locationtech.jts.geom.GeometryCollection {
 
-    public static Geometry[] getGeometries(com.vividsolutions.jts.geom.GeometryCollection geometry) {
+    public static Geometry[] getGeometries(org.locationtech.jts.geom.GeometryCollection geometry) {
         Geometry[] res = new Geometry[geometry.getNumGeometries()];
         for (int i = 0; i < res.length; i++)
             res[i] = geometry.getGeometryN(i);
         return res;
     }
 
-    private static Geometry[] convertGeometries(com.vividsolutions.jts.geom.Geometry[] geometries) {
+    private static Geometry[] convertGeometries(org.locationtech.jts.geom.Geometry[] geometries) {
         GeometryFactory factory = new GeometryFactory();
         Geometry[] res = new Geometry[geometries.length];
         for (int i = 0; i < res.length; i++) {
@@ -42,24 +42,24 @@ public class GeometryCollection extends com.vividsolutions.jts.geom.GeometryColl
     }
 
     public GeometryCollection(Object original) {
-        this((com.vividsolutions.jts.geom.GeometryCollection) original);
+        this((org.locationtech.jts.geom.GeometryCollection) original);
     }
 
-    public GeometryCollection(com.vividsolutions.jts.geom.GeometryCollection original) {
+    public GeometryCollection(org.locationtech.jts.geom.GeometryCollection original) {
         this(getGeometries(original), original.getFactory());
         GeometryCommonUtils.initUserDataFrom(this, original);
     }
 
     /**
-     * {@link com.vividsolutions.jts.geom.GeometryCollection#GeometryCollection(Geometry[], com.vividsolutions.jts.geom.GeometryFactory)}
+     * {@link org.locationtech.jts.geom.GeometryCollection#GeometryCollection(Geometry[], org.locationtech.jts.geom.GeometryFactory)}
      */
-    public GeometryCollection(Geometry[] geometries, com.vividsolutions.jts.geom.GeometryFactory factory) {
+    public GeometryCollection(Geometry[] geometries, org.locationtech.jts.geom.GeometryFactory factory) {
         super(convertGeometries(geometries), new GeometryFactory(factory));
         GeometryCommonUtils.initUserDataFrom(this, this);
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.GeometryCollection#equals(Geometry)}
+     * Compares to given geometry using {@link org.locationtech.jts.geom.GeometryCollection#equals(Geometry)}
      * Also compares userData
      */
     @Override
@@ -68,7 +68,7 @@ public class GeometryCollection extends com.vividsolutions.jts.geom.GeometryColl
     }
 
     /**
-     * Compares to given geometry using {@link com.vividsolutions.jts.geom.GeometryCollection#equals(Object)}
+     * Compares to given geometry using {@link org.locationtech.jts.geom.GeometryCollection#equals(Object)}
      * Also compares userData
      */
     @Override

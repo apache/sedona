@@ -25,8 +25,8 @@
  */
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 import org.datasyslab.geospark.jts.geom.GeometryFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -145,8 +145,8 @@ public class ShapefileRDDTest
         while (features.hasNext()) {
             SimpleFeature feature = features.next();
             Object geometry = feature.getDefaultGeometry();
-            if (geometry instanceof com.vividsolutions.jts.geom.MultiPolygon) {
-                com.vividsolutions.jts.geom.MultiPolygon multiPolygon = (com.vividsolutions.jts.geom.MultiPolygon) geometry;
+            if (geometry instanceof org.locationtech.jts.geom.MultiPolygon) {
+                org.locationtech.jts.geom.MultiPolygon multiPolygon = (org.locationtech.jts.geom.MultiPolygon) geometry;
                 if (multiPolygon.getNumGeometries() == 1) {
                     geometry = multiPolygon.getGeometryN(0);
                 }
@@ -316,7 +316,7 @@ public class ShapefileRDDTest
         while (features.hasNext()) {
             SimpleFeature feature = features.next();
             Object geometry = feature.getDefaultGeometry();
-            if (geometry instanceof com.vividsolutions.jts.geom.MultiPolygon) {
+            if (geometry instanceof org.locationtech.jts.geom.MultiPolygon) {
                 MultiPolygon multiPolygon = new MultiPolygon(geometry);
                 if (multiPolygon.getNumGeometries() == 1) {
                     geometry = multiPolygon.getGeometryN(0);

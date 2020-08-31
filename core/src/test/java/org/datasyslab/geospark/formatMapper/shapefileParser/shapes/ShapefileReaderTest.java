@@ -26,8 +26,8 @@
 
 package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.LocatedFileStatus;
@@ -166,8 +166,8 @@ public class ShapefileReaderTest
         while (features.hasNext()) {
             SimpleFeature feature = features.next();
             Object geometry = feature.getDefaultGeometry();
-            if (geometry instanceof com.vividsolutions.jts.geom.MultiPolygon) {
-                com.vividsolutions.jts.geom.MultiPolygon multiPolygon = (com.vividsolutions.jts.geom.MultiPolygon) geometry;
+            if (geometry instanceof org.locationtech.jts.geom.MultiPolygon) {
+                org.locationtech.jts.geom.MultiPolygon multiPolygon = (org.locationtech.jts.geom.MultiPolygon) geometry;
                 if (multiPolygon.getNumGeometries() == 1) {
                     geometry = multiPolygon.getGeometryN(0);
                 }

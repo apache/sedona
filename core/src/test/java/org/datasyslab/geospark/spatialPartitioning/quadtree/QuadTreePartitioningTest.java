@@ -26,8 +26,8 @@
 
 package org.datasyslab.geospark.spatialPartitioning.quadtree;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
 import org.datasyslab.geospark.jts.geom.GeometryFactory;
 import org.datasyslab.geospark.jts.geom.Point;
 import org.datasyslab.geospark.spatialPartitioning.QuadtreePartitioning;
