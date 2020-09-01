@@ -34,5 +34,5 @@ script:
   - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-opengis:23.2
   - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-referencing:23.2
   - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-shapefile:23.2
-  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.hsqldb:hsqldb:2.3.0
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.hsqldb:hsqldb:2.4.1
   - (cd python;pipenv run pytest tests)
