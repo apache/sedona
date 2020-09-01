@@ -35,4 +35,13 @@ script:
   - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-referencing:23.2
   - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.geotools:gt-shapefile:23.2
   - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.hsqldb:hsqldb:2.4.1
+
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=si.uom:si-units-java8:0.7.1
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=tec.uom:uom-se:1.0.8
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=si.uom:si-quantity:0.7.1
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=systems.uom:systems-common-java8:0.7.2
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=tec.uom.lib:uom-lib-common:1.0.2
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.ejml:ejml-ddense:0.34
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.ejml:ejml-core:0.34
+
   - (cd python;pipenv run pytest tests)
