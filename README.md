@@ -22,7 +22,7 @@ Apache Sedona (incubating) is a cluster computing system for processing large-sc
 
 ### Sedona supports several programming languages: Scala, Java, SQL, Python and R.
 
-# Please visit [Apache Sedona website](https://jiayuasu.github.io/sedona/) for detailed documentations
+# Please visit [Apache Sedona website](https://apache.github.io/incubator-sedona/) for detailed documentations
 
 ## News!
 * GeoSpark 1.3.1 is released. This version provides a complete Python wrapper to GeoSpark RDD and SQL API. It also contains a number of bug fixes and new functions from 12 contributors. See [Python tutorial: RDD](https://datasystemslab.github.io/GeoSpark/tutorial/geospark-core-python/), [Python tutorial: SQL](https://datasystemslab.github.io/GeoSpark/tutorial/geospark-sql-python/), [Release note](https://datasystemslab.github.io/GeoSpark/download/GeoSpark-All-Modules-Release-notes/)
