@@ -22,3 +22,4 @@ github:
     issues: false
     # Enable projects for project management boards
     projects: false
+  ghp_branch:
