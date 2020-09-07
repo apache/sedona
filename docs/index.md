@@ -1,19 +1,15 @@
 #
 
-## On 07/19/2020, GeoSpark has been accepted to the Apache Software Foundation under the new name Apache Sedona (incubating). This website will be moved to the ASF domain. Old contributors please read [this GitHub issue](https://github.com/DataSystemsLab/GeoSpark/issues/391#issuecomment-660855207) and submit your CLA at your earliest convenience.
+## On 07/19/2020, GeoSpark has been accepted to the Apache Software Foundation under the new name Apache Sedona (incubating). This website will be refactored in the weeks to come.
 
-![GeoSpark Logo](https://github.com/DataSystemsLab/GeoSpark/raw/master/GeoSpark_logo.png)
+<img src="https://raw.githubusercontent.com/apache/incubator-sedona/master/sedona_logo.png" width="400">
 
-|     Stable    | Latest | Source code|
-|:-------------:|:------|:------:|
-|[![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/org.datasyslab/geospark.svg)](./download/GeoSpark-All-Modules-Maven-Central-Coordinates.md) | [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.datasyslab/geospark.svg)](./download/GeoSpark-All-Modules-Maven-Central-Coordinates.md) | [![Build Status](https://travis-ci.org/DataSystemsLab/GeoSpark.svg?branch=master)](https://travis-ci.org/DataSystemsLab/GeoSpark)|
-
-[GeoSpark@Twitter](https://twitter.com/GeoSpark_ASU) || [GeoSpark Discussion Board](https://groups.google.com/forum/#!forum/geospark-discussion-board) || [![Join the chat at https://gitter.im/geospark-datasys/Lobby](https://badges.gitter.im/geospark-datasys/Lobby.svg)](https://gitter.im/geospark-datasys/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/apache/incubator-sedona.svg?branch=master)](https://travis-ci.org/apache/incubator-sedona) || [Sedona@Twitter](https://twitter.com/ApacheSedona) || [Sedona Mailling Lists](https://lists.apache.org/list.html?sedona.apache.org) || [![Gitter](https://badges.gitter.im/apache/sedona.svg)](https://gitter.im/apache/sedona?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 ## News!
 * GeoSpark 1.3.1 is released. This version provides a complete Python wrapper to GeoSpark RDD and SQL API. It also contains a number of bug fixes and new functions from 12 contributors. See [Python tutorial: RDD](./tutorial/geospark-core-python/), [Python tutorial: SQL](./tutorial/geospark-sql-python/), [Release note](./download/GeoSpark-All-Modules-Release-notes/)
 
-## Companies are using GeoSpark 
+## Companies are using Sedona 
 
 (incomplete list)
 
@@ -23,24 +19,22 @@ Please make a Pull Request to add yourself!
 
 ## Introduction
 
-GeoSpark is a cluster computing system for processing large-scale spatial data. GeoSpark extends Apache Spark / SparkSQL with a set of out-of-the-box Spatial Resilient Distributed Datasets (SRDDs)/ SpatialSQL that efficiently load, process, and analyze large-scale spatial data across machines.
+Apache Sedona (incubating) is a cluster computing system for processing large-scale spatial data. Sedona extends Apache Spark / SparkSQL with a set of out-of-the-box Spatial Resilient Distributed Datasets (SRDDs)/ SpatialSQL that efficiently load, process, and analyze large-scale spatial data across machines.
 
-### GeoSpark contains several modules:
+### Sedona contains several modules:
 
 | Name  |  API |  Spark compatibility|Introduction|
 |---|---|---|---|
 |Core  | RDD  | Spark 2.X/1.X  |SpatialRDDs and Query Operators. |
-|SQL  | SQL/DataFrame  | SparkSQL 2.1+ |SQL interfaces for GeoSpark core.|
+|SQL  | SQL/DataFrame  | SparkSQL 2.1+ |SQL interfaces for Sedona core.|
 |Viz |  RDD, SQL/DataFrame | RDD - Spark 2.X/1.X, SQL - Spark 2.1+|Visualization for Spatial RDD and DataFrame.|
-|Zeppelin |  Apache Zeppelin | Spark 2.1+, Zeppelin 0.8.1+|GeoSpark plugin for Apache Zeppelin|
+|Zeppelin |  Apache Zeppelin | Spark 2.1+, Zeppelin 0.8.1+| Plugin for Apache Zeppelin|
 
 ## Impact
 
-### GeoSpark Downloads on Maven Central
+### GeoSpark Downloads
 
-GeoSpark ecosystem has around 8K - 10K downloads per month.
-
-<img src="image/geospark-stat.png" width="500"/>
+GeoSpark ecosystem has around 200K downloads per month.
 
 ## Features
 
@@ -93,3 +87,7 @@ GeoSpark development team has published many papers about GeoSpark. Please read 
 
 GeoSpark received an evaluation from PVLDB 2018 paper ["How Good Are Modern Spatial Analytics Systems?"](http://www.vldb.org/pvldb/vol11/p1661-pandey.pdf) Varun Pandey, Andreas Kipf, Thomas Neumann, Alfons Kemper (Technical University of Munich), quoted as follows: 
 > GeoSpark comes close to a complete spatial analytics system. It also exhibits the best performance in most cases.
+
+## Powered by
+
+<img src="https://raw.githubusercontent.com/apache/incubator-sedona/master/incubator_logo.png" width="400">

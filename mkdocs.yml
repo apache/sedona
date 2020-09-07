@@ -1,4 +1,4 @@
-site_name: GeoSpark
+site_name: Apache Sedona
 pages:
     - Home: index.md
     - Download:
@@ -45,7 +45,7 @@ pages:
     - License: 
       - License-before-1.2.0: license/License-before-1-2-0.md
       - License: license/License.md
-repo_url: https://github.com/DataSystemsLab/GeoSpark
+repo_url: https://github.com/apache/incubator-sedona
 theme: 
   name: 'material'
   palette:
@@ -55,9 +55,9 @@ google_analytics: ['UA-64886725-1', 'www.public.asu.edu/~jiayu2/geospark/index.h
 extra:
   social:
     - type: 'github'
-      link: 'https://github.com/DataSystemsLab/GeoSpark'
+      link: 'https://github.com/apache/incubator-sedona'
     - type: 'twitter'
-      link: 'https://twitter.com/GeoSpark_ASU'
+      link: 'https://twitter.com/ApacheSedona'
 markdown_extensions:
   - admonition
   - codehilite
