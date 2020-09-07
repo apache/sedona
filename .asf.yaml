@@ -4,7 +4,7 @@ notifications:
     pullrequests: dev@sedona.apache.org
     jira_options: link label comment
 github:
-  description: "JSONP module for Apache Foobar"
+  description: "A cluster computing framework for processing large-scale geospatial data"
   homepage: http://sedona.apache.org/
   labels:
     - geospatial
