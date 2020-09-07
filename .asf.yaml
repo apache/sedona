@@ -1,0 +1,24 @@
+notifications:
+    commits:      commits@sedona.apache.org
+    issues:       issues@sedona.apache.org
+    pullrequests: dev@sedona.apache.org
+    jira_options: link label comment
+github:
+  description: "JSONP module for Apache Foobar"
+  homepage: http://sedona.apache.org/
+  labels:
+    - geospatial
+    - cluster-computing
+    - spatial-query
+    - spatial-analysis
+    - spatial-sql
+    - scala
+    - java
+    - python
+  features:
+    # Enable wiki for documentation
+    wiki: false
+    # Enable issue management
+    issues: false
+    # Enable projects for project management boards
+    projects: false
