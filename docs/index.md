@@ -4,7 +4,7 @@
 
 <img src="https://raw.githubusercontent.com/apache/incubator-sedona/master/sedona_logo.png" width="400">
 
-[![Build Status](https://travis-ci.org/apache/incubator-sedona.svg?branch=master)](https://travis-ci.org/apache/incubator-sedona) || [Sedona@Twitter](https://twitter.com/ApacheSedona) || [Sedona Mailling Lists](https://lists.apache.org/list.html?sedona.apache.org) || [![Gitter](https://badges.gitter.im/apache/sedona.svg)](https://gitter.im/apache/sedona?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Build Status](https://travis-ci.org/apache/incubator-sedona.svg?branch=master)](https://travis-ci.org/apache/incubator-sedona) || [Contact us](./contact)
 
 ## News!
 * GeoSpark 1.3.1 is released. This version provides a complete Python wrapper to GeoSpark RDD and SQL API. It also contains a number of bug fixes and new functions from 12 contributors. See [Python tutorial: RDD](./tutorial/geospark-core-python/), [Python tutorial: SQL](./tutorial/geospark-sql-python/), [Release note](./download/GeoSpark-All-Modules-Release-notes/)
