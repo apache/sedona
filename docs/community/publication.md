@@ -1,5 +1,7 @@
 # Publication
 
+
+## Key publications
 **"Spatial Data Management in Apache Spark: The
 GeoSpark Perspective and Beyond"** is the full research paper that talks about the entire GeoSpark ecosystem. Please cite this paper if your work mentions GeoSpark core system.
 
@@ -7,8 +9,7 @@ GeoSpark Perspective and Beyond"** is the full research paper that talks about t
 
 **"Building A Microscopic Road Network Traffic Simulator in Apache Spark"** is the full research paper that talks about the traffic simulator in GeoSpark. Please cite this paper if your work mentions GeoSparkSim traffic simulator.
 
---
-
+## Full publications
 ### GeoSpark Ecosystem
 
 ["Spatial Data Management in Apache Spark: The
@@ -30,3 +31,8 @@ GeoSpark Perspective and Beyond"](https://link.springer.com/epdf/10.1007/s10707-
 ### A Tutorial about Geospatial Data Management in Spark
 
 ["Geospatial Data Management in Apache Spark: A Tutorial"](http://www.public.asu.edu/~jiayu2/geospark/publication/geospatial-icde-2019.pdf) (Tutorial) Jia Yu and Mohamed Sarwat.  In Proceedings of the International Conference on Data Engineering, ICDE, 2019
+
+## Third-party research papers
+
+GeoSpark received an evaluation from PVLDB 2018 paper ["How Good Are Modern Spatial Analytics Systems?"](http://www.vldb.org/pvldb/vol11/p1661-pandey.pdf) Varun Pandey, Andreas Kipf, Thomas Neumann, Alfons Kemper (Technical University of Munich), quoted as follows: 
+> GeoSpark comes close to a complete spatial analytics system. It also exhibits the best performance in most cases.

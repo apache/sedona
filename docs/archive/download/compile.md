@@ -1,7 +1,4 @@
 # Compile GeoSpark
-
-Current source code status: [![Build Status](https://travis-ci.org/apache/incubator-sedona.svg?branch=master)](https://travis-ci.org/apache/incubator-sedona)
-
 Some GeoSpark hackers may want to change some source code to fit in their own scenarios. To compile GeoSpark source code, you first need to download GeoSpark source code:
 
 * Download / Git clone GeoSpark source code from [GeoSpark Github repo](https://github.com/DataSystemsLab/GeoSpark).

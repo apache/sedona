@@ -1,0 +1,87 @@
+{#-
+  This file was automatically generated - do not edit
+-#}
+{% extends "base.html" %}
+{% block announce %}
+  GeoSpark 1.3.2-SNAPSHOT (Java and Scala API) supports Spark 3.0. Please <a href="/download/GeoSpark-All-Modules-Maven-Central-Coordinates/">learn it here</a>! The first release of Apache Sedona will be out soon. For now, please still use "GeoSpark" in your code. 
+{% endblock %}
+{% block content %}
+  {% if page.is_homepage %}
+  <!-- {{ super() }} -->
+  <style>.md-header{position:initial}.md-main__inner{margin-left:20%}@media screen and (min-width:0em){.md-sidebar--secondary{display:none}}@media screen and (min-width:0em){.md-sidebar--primary{display:none}}</style>
+    <section class="tx-container">
+      <div class="md-grid md-typeset">
+        <div class="tx-hero">
+          <div class="tx-hero__image">
+            <img src="https://raw.githubusercontent.com/apache/incubator-sedona/master/docs/image/sedona_logo.png" width="300">
+          </div>
+          <div class="tx-hero__content">
+            <h1>Big Geospatial Data Processing Made Easy</h1>
+            <p>{{ config.site_description }}</p>
+            <p>Set up in 5 minutes with Maven and SBT. No installation required.</p>
+            <p>Python API is also available on PyPi.</p>
+            <a href="{{ page.next_page.url | url }}" title="{{ page.next_page.title | striptags }}" class="md-button md-button--primary">
+              Get started
+            </a>
+            <a href="{{ config.repo_url }}" title="{{ lang.t('source.link.title') }}" class="md-button">
+              Go to GitHub
+            </a>
+          </div>
+          <br><br><br>
+
+          <div class="tx-hero__content">
+            <div style="width: 120%;">
+              <div style="width: 45%; height: 160px; float: left;">
+               <h1>High Speed</h1>
+                According our benchmark and third-party research papers, Sedona runs 2X - 10X faster than other Spark-based geospatial data systems on computation-intensive query workloads.
+              </div>
+              <div style="margin-left: 45%; height: 160px;"> 
+                <figure>
+                    <img src="image/jointime.png" width="350">
+                    <figcaption>Execution time of spatial join with polygons</figcaption>                   
+                </figure>                 
+              </div>
+            </div>            
+          </div>
+
+          <br><br><br><br><br>
+
+          <div class="tx-hero__content">
+            <div style="width: 120%;">
+              <div style="width: 45%; height: 160px; float: left;">
+               <h1>Low Memory Consumption</h1>
+                According our benchmark and third-party research papers, Sedona has 50% less peak memory consumption than other Spark-based geospatial data systems for large-scale in-memory query processing.
+              </div>
+              <div style="margin-left: 45%; height: 160px;"> 
+                <figure>
+                    <img src="image/joinmem.png" width="350">
+                    <figcaption>Peak memory consumption of spatial join with polygons</figcaption>           
+                </figure>                 
+              </div>
+            </div>            
+          </div>
+
+          <br><br><br><br><br>
+
+          <div class="tx-hero__content">
+            <h1>Ease of Use</h1>
+            <div style="width: 120%;">
+              <div style="width: 45%; height: 160px; float: left;"> 
+                Sedona offers Scala, Java, Python and Spatial SQL APIs and integrates them into Apache Spark with care. You can simply create spatial analytics and data mining applications and run them in any Spark environments.
+              </div>
+              <div style="margin-left: 45%; height: 160px;"> 
+<pre class="hljs" style="display: block; overflow-x: auto; background: rgb(235, 248, 255); color: rgb(81, 109, 123); padding: 0.5em;"><span class="hljs-keyword" style="color: rgb(107, 107, 184);">SELECT</span> superhero.name
+<span class="hljs-keyword" style="color: rgb(107, 107, 184);">FROM</span> city, superhero
+<span class="hljs-keyword" style="color: rgb(107, 107, 184);">WHERE</span> ST_Contains(city.geom, superhero.geom)
+<span class="hljs-keyword" style="color: rgb(107, 107, 184);">AND</span> city.name = <span class="hljs-string" style="color: rgb(86, 140, 59);">'Gotham'</span></pre>
+              </div>
+            </div>            
+          </div>
+
+        </div>
+      </div>
+    </section>
+  {% else %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}

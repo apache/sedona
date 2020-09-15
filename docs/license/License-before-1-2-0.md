@@ -1,4 +1,4 @@
-# License before v1.2.0
+# License before GeoSpark v1.2.0
 
 **MIT License (MIT)**
 

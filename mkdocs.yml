@@ -1,7 +1,9 @@
-site_name: Apache Sedona
-pages:
+site_name: Apache Sedona (incubating)
+site_description: Apache Sedona (incubating) is a cluster computing system for processing large-scale spatial data. Sedona extends Apache Spark / SparkSQL with a set of out-of-the-box Spatial Resilient Distributed Datasets / SpatialSQL that efficiently load, process, and analyze large-scale spatial data across machines.
+nav:
     - Home: index.md
     - Download:
+      - Features: download/features.md
       - Quick start: download/overview.md
       - Release notes: download/GeoSpark-All-Modules-Release-notes.md      
       - Maven Central coordinate: download/GeoSpark-All-Modules-Maven-Central-Coordinates.md
@@ -37,27 +39,76 @@ pages:
       - GeoSpark Viz:
         - DataFrame/SQL: api/viz/sql.md
         - RDD: api/viz/Babylon-Scala-and-Java-API.md
-    - Contributing:
-      - Contributing rule: contribute/rule.md
-      - Contributors and committers: contribute/contributor.md 
-    - Contact: contact.md
-    - Publications: publication.md
+    - Community:
+      - Community info: community/contact.md 
+      - Contributing rule: community/rule.md
+      - Contributors and committers: community/contributor.md
+      - Publications: community/publication.md
     - License: 
-      - License-before-1.2.0: license/License-before-1-2-0.md
+      - License-before-GeoSpark-1.2.0: license/License-before-1-2-0.md
       - License: license/License.md
+    - Archive for GeoSpark:
+      - Download:
+        - Quick start: archive/download/overview.md
+        - Release notes: archive/download/GeoSpark-All-Modules-Release-notes.md      
+        - Maven Central coordinate: archive/download/GeoSpark-All-Modules-Maven-Central-Coordinates.md
+        - Set up Spark cluser: archive/download/cluster.md
+        - Spark Scala shell: archive/download/scalashell.md
+        - Self-contained project: archive/download/project.md
+        - Install GeoSpark-Zeppelin: archive/download/zeppelin.md
+        - Compile the source code: archive/download/compile.md
+      - Tutorial:
+        - Spatial RDD application: archive/tutorial/rdd.md
+        - Spatial SQL application: archive/tutorial/sql.md
+        - Visualize Spatial DataFrame: archive/tutorial/viz.md
+        - Run GeoSpark via Zeppelin: archive/tutorial/zeppelin.md
+        - Spatial RDD in Python: archive/tutorial/geospark-core-python.md
+        - Spatial SQL in Python: archive/tutorial/geospark-sql-python.md
+        - GeoSpark template project: archive/tutorial/GeoSpark-Runnable-DEMO.md
+        - Frequently Asked Questions: archive/tutorial/faq.md
+        - Tune GeoSpark RDD application: archive/tutorial/Advanced-Tutorial-Tune-your-GeoSpark-Application.md
+        - Benchmark: archive/tutorial/benchmark.md
+      - API:
+        - GeoSpark core (RDD):
+          - Scala/Java doc: archive/api/GeoSpark-Scala-and-Java-API.md
+          - Python doc: archive/api/GeoSpark-Python-API.md
+        - GeoSpark SQL:
+          - JavaDoc: archive/api/sql/GeoSparkSQL-javadoc.md
+          - Quick start: archive/api/sql/GeoSparkSQL-Overview.md
+          - Constructor: archive/api/sql/GeoSparkSQL-Constructor.md
+          - Function: archive/api/sql/GeoSparkSQL-Function.md
+          - Predicate: archive/api/sql/GeoSparkSQL-Predicate.md
+          - Aggregate function: archive/api/sql/GeoSparkSQL-AggregateFunction.md
+          - Join query (optimizer): archive/api/sql/GeoSparkSQL-Optimizer.md
+          - Parameter: archive/api/sql/GeoSparkSQL-Parameter.md
+        - GeoSpark Viz:
+          - DataFrame/SQL: archive/api/viz/sql.md
+          - RDD: archive/api/viz/Babylon-Scala-and-Java-API.md
+    - Apache Software Foundation: https://www.apache.org/
 repo_url: https://github.com/apache/incubator-sedona
+repo_name: apache/incubator-sedona
 theme: 
   name: 'material'
+  custom_dir: docs-overrides
   palette:
-    primary: 'Cyan'
-    accent: 'Pink'
+    primary: 'deep orange'
+    accent: 'green'
+  favicon: image/sedona_logo.png
+  icon:
+    logo: fontawesome/solid/globe-americas
+    repo: fontawesome/brands/github
+  font:
+    text: Lato
+  features:
+    - tabs
 google_analytics: ['UA-64886725-1', 'www.public.asu.edu/~jiayu2/geospark/index.html']
 extra:
   social:
-    - type: 'github'
+    - icon: fontawesome/brands/github-alt
       link: 'https://github.com/apache/incubator-sedona'
-    - type: 'twitter'
+    - icon: fontawesome/brands/twitter
       link: 'https://twitter.com/ApacheSedona'
+copyright: Apache Sedona, Apache Incubator, Apache, the Apache feather logo, and the Apache Incubator project logo are trademarks or registered trademarks of The Apache Software Foundation.
 markdown_extensions:
   - admonition
   - codehilite
