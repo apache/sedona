@@ -42,7 +42,7 @@ nav:
     - Community:
       - Community info: community/contact.md 
       - Contributing rule: community/rule.md
-      - Contributors and committers: community/contributor.md
+      - Committers: community/contributor.md
       - Publications: community/publication.md
     - License: 
       - License-before-GeoSpark-1.2.0: license/License-before-1-2-0.md
