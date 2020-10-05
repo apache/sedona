@@ -372,15 +372,25 @@ public class Circle
         return newCircle;
     }
 
-    /* (non-Javadoc)
-     * @see org.locationtech.jts.geom.Geometry#clone()
-     */
     @Override
-    public Object clone()
+    protected Geometry reverseInternal()
     {
-        Geometry g = (Geometry) this.centerGeometry.clone();
-        Circle cloneCircle = new Circle(g, this.radius);
+        Geometry g = this.centerGeometry.reverse();
+        Circle newCircle = new Circle(this.centerGeometry.reverse(), this.radius);
+        return new Circle(this.centerGeometry.reverse(), this.radius);
+    }
+
+    public Geometry copy()
+    {
+        Circle cloneCircle = new Circle(this.centerGeometry.copy(), this.radius);
         return cloneCircle;// return the clone
+    }
+
+    @Override
+    protected Geometry copyInternal()
+    {
+        Circle cloneCircle = new Circle(this.centerGeometry.copy(), this.radius);
+        return cloneCircle;
     }
 
     /* (non-Javadoc)
@@ -494,6 +504,16 @@ public class Circle
         if (mbr.getMaxY() < env.getMaxY()) { return -1; }
         if (mbr.getMaxY() > env.getMaxY()) { return 1; }
         return 0;
+    }
+
+    /**
+     * TypeCode 0 - 7 have been reserved for other geometry types
+     * @return
+     */
+    @Override
+    protected int getTypeCode()
+    {
+        return 8;
     }
 
     @Override
