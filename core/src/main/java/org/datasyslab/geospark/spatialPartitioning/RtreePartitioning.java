@@ -52,7 +52,7 @@ public class RtreePartitioning
             strtree.insert(sample, sample);
         }
 
-        List<Envelope> envelopes = strtree.itemsTree().queryBoundary();
+        List<Envelope> envelopes = strtree.findLeafBounds();
         for (Envelope envelope : envelopes) {
             grids.add(envelope);
         }

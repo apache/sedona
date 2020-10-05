@@ -51,14 +51,12 @@ class constructorTestScala extends TestBaseScala {
 
     it ("Passed ST_PolygonFromEnvelope") {
       val polygonDF = sparkSession.sql("select ST_PolygonFromEnvelope(double(1.234),double(2.234),double(3.345),double(3.345))")
-      polygonDF.show(false)
       assert(polygonDF.count() == 1)
     }
 
     it("Passed ST_PointFromText") {
       var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(arealmPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")
-      pointCsvDF.show(false)
 
       var pointDf = sparkSession.sql("select ST_PointFromText(concat(_c0,',',_c1),',') as arealandmark from pointtable")
       assert(pointDf.count() == 121960)
@@ -67,18 +65,14 @@ class constructorTestScala extends TestBaseScala {
     it("Passed ST_GeomFromWKT") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
-      polygonWktDf.show()
       var polygonDf = sparkSession.sql("select ST_GeomFromWkt(polygontable._c0) as countyshape from polygontable")
-      polygonDf.show(10)
       assert(polygonDf.count() == 100)
     }
 
     it("Passed ST_GeomFromText") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
-      polygonWktDf.show()
       var polygonDf = sparkSession.sql("select ST_GeomFromText(polygontable._c0) as countyshape from polygontable")
-      polygonDf.show(10)
       assert(polygonDf.count() == 100)
     }
     
@@ -98,39 +92,32 @@ class constructorTestScala extends TestBaseScala {
     it("Passed ST_GeomFromWKB") {
       var polygonWkbDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWkbGeometryInputLocation)
       polygonWkbDf.createOrReplaceTempView("polygontable")
-      polygonWkbDf.show()
       var polygonDf = sparkSession.sql("select ST_GeomFromWKB(polygontable._c0) as countyshape from polygontable")
-      polygonDf.show(10)
       assert(polygonDf.count() == 100)
     }
 
     it("Passed ST_GeomFromGeoJSON") {
       val polygonJsonDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(geojsonInputLocation)
       polygonJsonDf.createOrReplaceTempView("polygontable")
-      polygonJsonDf.show()
       val polygonDf = sparkSession.sql("select ST_GeomFromGeoJSON(polygontable._c0) as countyshape from polygontable")
-      polygonDf.show()
       assert(polygonDf.count() == 1000)
     }
 
     it("Passed GeoJsonReader to DataFrame") {
       var spatialRDD = GeoJsonReader.readToGeometryRDD(sparkSession.sparkContext, geojsonInputLocation)
       var spatialDf = Adapter.toDf(spatialRDD, sparkSession)
-      spatialDf.show()
+      assert(spatialDf.count()>0)
     }
 
     it("Read shapefile -> DataFrame > RDD -> DataFrame") {
       var spatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileInputLocation)
       spatialRDD.analyze()
       var df = Adapter.toDf(spatialRDD, sparkSession)
-      df.show
       assert (df.columns(1) == "STATEFP")
       import org.apache.spark.sql.functions.{callUDF, col}
       df = df.withColumn("geometry", callUDF("ST_GeomFromWKT", col("geometry")))
-      df.show()
       var spatialRDD2 = Adapter.toSpatialRdd(df, "geometry")
-      println(spatialRDD2.rawSpatialRDD.take(1).get(0).getUserData)
-      Adapter.toDf(spatialRDD2, sparkSession).show()
+      Adapter.toDf(spatialRDD2, sparkSession).show(1)
     }
   }
 }

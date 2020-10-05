@@ -52,7 +52,7 @@ class optVizOperatorTest extends TestBaseScala {
           |SELECT pixel, ${Conf.PrimaryPID}, ${Conf.SecondaryPID}, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates))
           |FROM pixelaggregates
         """.stripMargin)
-      spark.table("colors").show()
+      spark.table("colors").show(1)
     }
 
     it("Passed full pipeline - aggregate:avg - color:uniform") {
@@ -98,7 +98,7 @@ class optVizOperatorTest extends TestBaseScala {
            |SELECT pixel, ${Conf.PrimaryPID}, ${Conf.SecondaryPID}, ST_Colorize(weight, 0, 'red')
            |FROM pixelaggregates
         """.stripMargin)
-      spark.table("colors").show()
+      spark.table("colors").show(1)
     }
 
     it("Passed lineage decoder"){

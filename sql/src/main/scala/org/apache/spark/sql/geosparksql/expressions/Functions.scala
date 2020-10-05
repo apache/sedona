@@ -42,7 +42,7 @@ import scala.collection.mutable.ArrayBuffer
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.types.ArrayType
 import implicits._
-import org.geotools.factory.Hints
+import org.geotools.util.factory.Hints
 import org.opengis.referencing.crs.CoordinateReferenceSystem
 
 import scala.util.{Failure, Success, Try}
