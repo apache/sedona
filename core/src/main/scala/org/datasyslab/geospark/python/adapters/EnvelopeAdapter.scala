@@ -1,6 +1,6 @@
 package org.datasyslab.geospark.python.adapters
 
-import com.vividsolutions.jts.geom.Envelope
+import org.locationtech.jts.geom.Envelope
 import net.razorvine.pickle.Unpickler
 import net.razorvine.pickle.objects.ClassDict
 import scala.collection.JavaConverters._

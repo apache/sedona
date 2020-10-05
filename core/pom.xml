@@ -33,11 +33,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.datasyslab</groupId>
-            <artifactId>JTSplus</artifactId>
-            <version>0.1.4</version>
-        </dependency>
-        <dependency>
             <groupId>org.wololo</groupId>
             <artifactId>jts2geojson</artifactId>
             <version>0.10.0</version>
@@ -143,6 +138,12 @@
                     <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.locationtech.jts</groupId>
+            <artifactId>jts-core</artifactId>
+            <version>1.18.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
     <build>

@@ -16,7 +16,7 @@
  */
 package org.datasyslab.geospark.showcase
 
-import com.vividsolutions.jts.geom.{Coordinate, Envelope, GeometryFactory}
+import org.locationtech.jts.geom.{Coordinate, Envelope, GeometryFactory}
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.storage.StorageLevel

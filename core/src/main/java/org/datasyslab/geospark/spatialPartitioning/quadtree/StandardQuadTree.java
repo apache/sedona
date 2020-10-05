@@ -16,7 +16,7 @@
  */
 package org.datasyslab.geospark.spatialPartitioning.quadtree;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.io.Serializable;

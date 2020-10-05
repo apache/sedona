@@ -18,12 +18,12 @@ package org.apache.spark.sql.geosparksql.expressions
 
 import java.util
 
-import com.vividsolutions.jts.geom.{PrecisionModel, _}
-import com.vividsolutions.jts.operation.IsSimpleOp
-import com.vividsolutions.jts.operation.linemerge.LineMerger
-import com.vividsolutions.jts.operation.valid.IsValidOp
-import com.vividsolutions.jts.precision.GeometryPrecisionReducer
-import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier
+import org.locationtech.jts.geom.{PrecisionModel, _}
+import org.locationtech.jts.operation.IsSimpleOp
+import org.locationtech.jts.operation.linemerge.LineMerger
+import org.locationtech.jts.operation.valid.IsValidOp
+import org.locationtech.jts.precision.GeometryPrecisionReducer
+import org.locationtech.jts.simplify.TopologyPreservingSimplifier
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{Expression, Generator}

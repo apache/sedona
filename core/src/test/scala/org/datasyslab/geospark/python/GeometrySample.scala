@@ -1,6 +1,6 @@
 package org.datasyslab.geospark.python
 
-import com.vividsolutions.jts.geom.Geometry
+import org.locationtech.jts.geom.Geometry
 
 import scala.tools.nsc.interpreter.InputStream
 

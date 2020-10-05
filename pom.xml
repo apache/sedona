@@ -9,6 +9,7 @@
 	<url>http://maven.apache.org</url>
     <description>Apache Spark geospatial extention: SpatialRDD, SpatialSQL and map visualization</description>
   <modules>
+    <module>jts/modules/core</module>
     <module>core</module>
     <module>sql</module>    
     <module>viz</module>

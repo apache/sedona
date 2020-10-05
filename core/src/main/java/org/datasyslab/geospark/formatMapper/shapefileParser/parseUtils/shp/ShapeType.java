@@ -16,7 +16,7 @@
  */
 package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
 
-import com.vividsolutions.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.GeometryFactory;
 
 import java.io.Serializable;
 

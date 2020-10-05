@@ -1,6 +1,6 @@
 package org.datasyslab.geospark.python.adapters
 
-import com.vividsolutions.jts.geom.Geometry
+import org.locationtech.jts.geom.Geometry
 import org.datasyslab.geospark.python.translation.PythonGeometrySerializer
 
 object GeometryAdapter extends GeomSerializer{

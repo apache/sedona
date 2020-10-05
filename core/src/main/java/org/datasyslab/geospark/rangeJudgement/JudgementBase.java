@@ -17,7 +17,7 @@
 
 package org.datasyslab.geospark.rangeJudgement;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 

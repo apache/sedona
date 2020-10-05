@@ -17,7 +17,7 @@
 package org.datasyslab.geosparksql.utils
 
 
-import com.vividsolutions.jts.geom.Geometry
+import org.locationtech.jts.geom.Geometry
 import org.apache.spark.api.java.{JavaPairRDD, JavaRDD}
 import org.apache.spark.rdd.RDD
 //import org.apache.spark.sql.geosparksql.GeometryWrapper
