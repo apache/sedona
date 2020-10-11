@@ -6,6 +6,7 @@ jdk:
   - openjdk8
 python:
   - "3.7"
+
 before_install:
   - sudo apt-get -y install python3-pip python-dev
   - sudo pip3 install -U setuptools
