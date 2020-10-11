@@ -19,7 +19,7 @@ install:
   - rm spark-3.0.0-bin-hadoop2.7.tgz
 
 script:
-  - (cd python;pipenv install --dev) 
+  - (cd python;pipenv install --dev)
   - export SPARK_HOME=$PWD/spark-3.0.0-bin-hadoop2.7
   - export PYTHONPATH=$SPARK_HOME/python
   - mvn -q clean install -DskipTests
@@ -41,6 +41,7 @@ script:
   - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=tec.uom:uom-se:1.0.8
   - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=tec.uom.lib:uom-lib-common:1.0.2
   - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=si.uom:si-quantity:0.7.1
+  - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=si.uom:si-units-java8:0.7.1
   - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=systems.uom:systems-common-java8:0.7.2
   - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.ejml:ejml-core:0.34
   - mvn dependency:get -Ddest=${SPARK_HOME}/jars -Dartifact=org.ejml:ejml-ddense:0.34
