@@ -11,6 +11,7 @@ before_install:
   - sudo pip3 install -U setuptools
   - sudo pip3 install -U wheel
   - sudo pip3 install -U virtualenvwrapper
+
 install:
   - python3 -m pip install pipenv
   - wget https://archive.apache.org/dist/spark/spark-3.0.0/spark-3.0.0-bin-hadoop2.7.tgz
