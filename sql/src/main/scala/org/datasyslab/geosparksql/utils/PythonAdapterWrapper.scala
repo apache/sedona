@@ -1,6 +1,6 @@
 package org.datasyslab.geosparksql.utils
 
-import com.vividsolutions.jts.geom.Geometry
+import org.locationtech.jts.geom.Geometry
 import org.apache.spark.api.java.JavaPairRDD
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.datasyslab.geospark.spatialRDD.SpatialRDD

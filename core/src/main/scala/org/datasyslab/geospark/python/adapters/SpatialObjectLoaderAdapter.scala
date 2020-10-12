@@ -1,7 +1,7 @@
 package org.datasyslab.geospark.python.adapters
 
-import com.vividsolutions.jts.geom.{Geometry, LineString, Point, Polygon}
-import com.vividsolutions.jts.index.SpatialIndex
+import org.locationtech.jts.geom.{Geometry, LineString, Point, Polygon}
+import org.locationtech.jts.index.SpatialIndex
 import org.apache.spark.api.java.{JavaRDD, JavaSparkContext}
 import org.datasyslab.geospark.spatialRDD.{LineStringRDD, PointRDD, PolygonRDD, SpatialRDD}
 

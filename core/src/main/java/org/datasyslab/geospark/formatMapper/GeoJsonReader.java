@@ -16,7 +16,7 @@
  */
 package org.datasyslab.geospark.formatMapper;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.datasyslab.geospark.enums.FileDataSplitter;

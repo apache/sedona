@@ -16,19 +16,19 @@
  */
 package org.datasyslab.geospark.geometryObjects;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.CoordinateFilter;
-import com.vividsolutions.jts.geom.CoordinateSequenceComparator;
-import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryCollection;
-import com.vividsolutions.jts.geom.GeometryComponentFilter;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.GeometryFilter;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateFilter;
+import org.locationtech.jts.geom.CoordinateSequenceComparator;
+import org.locationtech.jts.geom.CoordinateSequenceFilter;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
+import org.locationtech.jts.geom.GeometryComponentFilter;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.GeometryFilter;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 
 // TODO: Auto-generated Javadoc
 
@@ -128,7 +128,7 @@ public class Circle
     }
 
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#covers(com.vividsolutions.jts.geom.Geometry)
+     * @see org.locationtech.jts.geom.Geometry#covers(org.locationtech.jts.geom.Geometry)
      */
     @Override
     public boolean covers(Geometry other)
@@ -184,7 +184,7 @@ public class Circle
     }
 
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#intersects(com.vividsolutions.jts.geom.Geometry)
+     * @see org.locationtech.jts.geom.Geometry#intersects(org.locationtech.jts.geom.Geometry)
      */
     @Override
     public boolean intersects(Geometry other)
@@ -290,7 +290,7 @@ public class Circle
     }
 
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#getGeometryType()
+     * @see org.locationtech.jts.geom.Geometry#getGeometryType()
      */
     @Override
     public String getGeometryType()
@@ -299,7 +299,7 @@ public class Circle
     }
 
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#getCoordinate()
+     * @see org.locationtech.jts.geom.Geometry#getCoordinate()
      */
     @Override
     public Coordinate getCoordinate()
@@ -308,7 +308,7 @@ public class Circle
     }
 
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#getCoordinates()
+     * @see org.locationtech.jts.geom.Geometry#getCoordinates()
      */
     @Override
     public Coordinate[] getCoordinates()
@@ -317,7 +317,7 @@ public class Circle
     }
 
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#getNumPoints()
+     * @see org.locationtech.jts.geom.Geometry#getNumPoints()
      */
     @Override
     public int getNumPoints()
@@ -326,7 +326,7 @@ public class Circle
     }
 
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#isEmpty()
+     * @see org.locationtech.jts.geom.Geometry#isEmpty()
      */
     @Override
     public boolean isEmpty()
@@ -335,7 +335,7 @@ public class Circle
     }
 
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#getDimension()
+     * @see org.locationtech.jts.geom.Geometry#getDimension()
      */
     @Override
     public int getDimension()
@@ -344,7 +344,7 @@ public class Circle
     }
 
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#getBoundary()
+     * @see org.locationtech.jts.geom.Geometry#getBoundary()
      */
     @Override
     public Geometry getBoundary()
@@ -353,7 +353,7 @@ public class Circle
     }
 
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#getBoundaryDimension()
+     * @see org.locationtech.jts.geom.Geometry#getBoundaryDimension()
      */
     @Override
     public int getBoundaryDimension()
@@ -362,7 +362,7 @@ public class Circle
     }
 
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#reverse()
+     * @see org.locationtech.jts.geom.Geometry#reverse()
      */
     @Override
     public Geometry reverse()
@@ -372,19 +372,21 @@ public class Circle
         return newCircle;
     }
 
-    /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#clone()
-     */
-    @Override
-    public Object clone()
+    public Geometry copy()
     {
-        Geometry g = (Geometry) this.centerGeometry.clone();
-        Circle cloneCircle = new Circle(g, this.radius);
+        Circle cloneCircle = new Circle(this.centerGeometry.copy(), this.radius);
         return cloneCircle;// return the clone
     }
 
+    @Override
+    protected Geometry copyInternal()
+    {
+        Circle cloneCircle = new Circle(this.centerGeometry.copy(), this.radius);
+        return cloneCircle;
+    }
+
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#equalsExact(com.vividsolutions.jts.geom.Geometry, double)
+     * @see org.locationtech.jts.geom.Geometry#equalsExact(org.locationtech.jts.geom.Geometry, double)
      */
     @Override
     public boolean equalsExact(Geometry g, double tolerance)
@@ -400,7 +402,7 @@ public class Circle
     }
 
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#apply(com.vividsolutions.jts.geom.CoordinateFilter)
+     * @see org.locationtech.jts.geom.Geometry#apply(org.locationtech.jts.geom.CoordinateFilter)
      */
     @Override
     public void apply(CoordinateFilter filter)
@@ -409,7 +411,7 @@ public class Circle
     }
 
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#apply(com.vividsolutions.jts.geom.CoordinateSequenceFilter)
+     * @see org.locationtech.jts.geom.Geometry#apply(org.locationtech.jts.geom.CoordinateSequenceFilter)
      */
     @Override
     public void apply(CoordinateSequenceFilter filter)
@@ -418,7 +420,7 @@ public class Circle
     }
 
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#apply(com.vividsolutions.jts.geom.GeometryFilter)
+     * @see org.locationtech.jts.geom.Geometry#apply(org.locationtech.jts.geom.GeometryFilter)
      */
     @Override
     public void apply(GeometryFilter filter)
@@ -427,7 +429,7 @@ public class Circle
     }
 
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#apply(com.vividsolutions.jts.geom.GeometryComponentFilter)
+     * @see org.locationtech.jts.geom.Geometry#apply(org.locationtech.jts.geom.GeometryComponentFilter)
      */
     @Override
     public void apply(GeometryComponentFilter filter)
@@ -436,7 +438,7 @@ public class Circle
     }
 
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#normalize()
+     * @see org.locationtech.jts.geom.Geometry#normalize()
      */
     @Override
     public void normalize()
@@ -445,7 +447,7 @@ public class Circle
     }
 
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#computeEnvelopeInternal()
+     * @see org.locationtech.jts.geom.Geometry#computeEnvelopeInternal()
      */
     @Override
     protected Envelope computeEnvelopeInternal()
@@ -457,7 +459,7 @@ public class Circle
     }
 
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#compareToSameClass(java.lang.Object)
+     * @see org.locationtech.jts.geom.Geometry#compareToSameClass(java.lang.Object)
      */
     @Override
     protected int compareToSameClass(Object other)
@@ -477,7 +479,7 @@ public class Circle
     }
 
     /* (non-Javadoc)
-     * @see com.vividsolutions.jts.geom.Geometry#compareToSameClass(java.lang.Object, com.vividsolutions.jts.geom.CoordinateSequenceComparator)
+     * @see org.locationtech.jts.geom.Geometry#compareToSameClass(java.lang.Object, org.locationtech.jts.geom.CoordinateSequenceComparator)
      */
     @Override
     protected int compareToSameClass(Object other, CoordinateSequenceComparator comp)
@@ -493,6 +495,12 @@ public class Circle
         if (mbr.getMaxX() > env.getMaxX()) { return 1; }
         if (mbr.getMaxY() < env.getMaxY()) { return -1; }
         if (mbr.getMaxY() > env.getMaxY()) { return 1; }
+        return 0;
+    }
+
+    @Override
+    protected int getSortIndex()
+    {
         return 0;
     }
 

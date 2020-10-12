@@ -16,7 +16,7 @@
  */
 package org.datasyslab.geosparksql.UDF
 
-import com.vividsolutions.jts.geom.Geometry
+import org.locationtech.jts.geom.Geometry
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.expressions.{Aggregator}
 import org.apache.spark.sql.geosparksql.expressions._

@@ -1,6 +1,6 @@
 package org.datasyslab.geospark.python.translation
 
-import com.vividsolutions.jts.geom.Geometry
+import org.locationtech.jts.geom.Geometry
 import org.apache.spark.api.java.{JavaPairRDD, JavaRDD}
 import org.datasyslab.geospark.python.utils.implicits._
 

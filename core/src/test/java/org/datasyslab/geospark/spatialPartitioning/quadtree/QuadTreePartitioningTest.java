@@ -26,10 +26,10 @@
 
 package org.datasyslab.geospark.spatialPartitioning.quadtree;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.datasyslab.geospark.spatialPartitioning.QuadtreePartitioning;
 import org.junit.Assert;
 import org.junit.Test;

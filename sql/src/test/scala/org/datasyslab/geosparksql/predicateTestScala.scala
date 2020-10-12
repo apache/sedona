@@ -37,7 +37,6 @@ class predicateTestScala extends TestBaseScala {
       pointDf.createOrReplaceTempView("pointdf")
 
       var resultDf = sparkSession.sql("select * from pointdf where ST_Contains(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)")
-      resultDf.show()
       assert(resultDf.count() == 999)
     }
     it("Passed ST_Intersects") {
@@ -47,7 +46,6 @@ class predicateTestScala extends TestBaseScala {
       pointDf.createOrReplaceTempView("pointdf")
 
       var resultDf = sparkSession.sql("select * from pointdf where ST_Intersects(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)")
-      resultDf.show()
       assert(resultDf.count() == 999)
     }
     it("Passed ST_Within") {
@@ -57,7 +55,6 @@ class predicateTestScala extends TestBaseScala {
       pointDf.createOrReplaceTempView("pointdf")
 
       var resultDf = sparkSession.sql("select * from pointdf where ST_Within(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))")
-      resultDf.show()
       assert(resultDf.count() == 999)
     }
 
@@ -73,7 +70,6 @@ class predicateTestScala extends TestBaseScala {
       pointDf.createOrReplaceTempView("pointdf")
 
       var equaldf = sparkSession.sql("select * from pointdf where ST_Equals(pointdf.point, ST_Point(100.1, 200.1)) ")
-      equaldf.show()
 
       assert(equaldf.count() == 5, s"Expected 5 value but got ${equaldf.count()}")
 
@@ -90,17 +86,14 @@ class predicateTestScala extends TestBaseScala {
       // Convert the polygontable to polygons using ST_PolygonFromEnvelope
       var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
 
       // Selected polygon is Polygon (100.01,200.01,100.5,200.5)
       var equaldf1 = sparkSession.sql("select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_PolygonFromEnvelope(100.01,200.01,100.5,200.5)) ")
-      equaldf1.show()
 
       assert(equaldf1.count() == 5, s"Expected 5 value but got ${equaldf1.count()}")
 
       // Change the order of the polygon points (100.5,200.5,100.01,200.01)
       var equaldf2 = sparkSession.sql("select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_PolygonFromEnvelope(100.5,200.5,100.01,200.01)) ")
-      equaldf2.show()
 
       assert(equaldf2.count() == 5, s"Expected 5 value but got ${equaldf2.count()}")
 
@@ -117,11 +110,9 @@ class predicateTestScala extends TestBaseScala {
       // Convert the polygontable to polygons using ST_PolygonFromEnvelope and cast
       var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
 
       // Selected point is Point (91.01,191.01)
       var equaldf = sparkSession.sql("select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_Point(91.01,191.01)) ")
-      equaldf.show()
 
       assert(equaldf.count() == 0, s"Expected 0 value but got ${equaldf.count()}")
 
@@ -138,7 +129,6 @@ class predicateTestScala extends TestBaseScala {
       // Convert the polygontable to polygons using ST_PolygonFromEnvelope and cast
       var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
 
       /* Selected LineString is ST_LineStringFromText - (100.01,200.01,100.5,200.01,100.5,200.5,100.01,200.5,100.01,200.01)
        * It forms the boundary of the polygon Polygon(100.01,200.01,100.5,200.5)
@@ -153,7 +143,6 @@ class predicateTestScala extends TestBaseScala {
       val string = "100.01,200.01,100.5,200.01,100.5,200.5,100.01,200.5,100.01,200.01"
 
       var equaldf = sparkSession.sql(s"select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_LineStringFromText(\'$string\', \',\')) ")
-      equaldf.show()
 
       assert(equaldf.count() == 0, s"Expected 0 value but got ${equaldf.count()}")
 
@@ -169,13 +158,11 @@ class predicateTestScala extends TestBaseScala {
       // Convert the polygontable to polygons using ST_PolygonFromEnvelope and cast
       var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
 
       // Selected Polygon is ST_PolygonFromText - Polygon(100.01,200.01,100.5,200.5) formed using ST_PolygonFromText.
       val string = "100.01,200.01,100.5,200.01,100.5,200.5,100.01,200.5,100.01,200.01"
 
       var equaldf = sparkSession.sql(s"select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_PolygonFromText(\'$string\', \',\')) ")
-      equaldf.show()
 
       assert(equaldf.count() == 5, s"Expected 5 value but got ${equaldf.count()}")
     }
@@ -200,7 +187,6 @@ class predicateTestScala extends TestBaseScala {
       pointDf.createOrReplaceTempView("pointdf")
 
       var resultDf = sparkSession.sql("select * from pointdf where ST_Touches(pointdf.arealandmark, ST_PolygonFromEnvelope(0.0,99.0,1.1,101.1))")
-      resultDf.show()
       assert(resultDf.count() == 1)
     }
     it("Passed ST_Overlaps") {

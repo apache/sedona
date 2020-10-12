@@ -26,7 +26,7 @@
 
 package org.datasyslab.geosparksql
 
-import com.vividsolutions.jts.geom.{Geometry}
+import org.locationtech.jts.geom.{Geometry}
 import org.geotools.geometry.jts.WKTReader2
 import org.scalatest.{GivenWhenThen, Matchers}
 import implicits._
@@ -42,89 +42,72 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     it("Passed ST_ConvexHull") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
-      polygonWktDf.show()
       var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
       var functionDf = sparkSession.sql("select ST_ConvexHull(polygondf.countyshape) from polygondf")
-      functionDf.show()
+      assert(functionDf.count()>0);
     }
 
     it("Passed ST_Buffer") {
       val polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
-      polygonWktDf.show()
       val polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
       val functionDf = sparkSession.sql("select ST_Buffer(polygondf.countyshape, 1) from polygondf")
-      functionDf.show()
+      assert(functionDf.count()>0);
     }
 
     it("Passed ST_Envelope") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
-      polygonWktDf.show()
       var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
       var functionDf = sparkSession.sql("select ST_Envelope(polygondf.countyshape) from polygondf")
-      functionDf.show()
+      assert(functionDf.count()>0);
     }
 
     it("Passed ST_Centroid") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
-      polygonWktDf.show()
       var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
       var functionDf = sparkSession.sql("select ST_Centroid(polygondf.countyshape) from polygondf")
-      functionDf.show()
+      assert(functionDf.count()>0);
     }
 
     it("Passed ST_Length") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
-      polygonWktDf.show()
       var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
       var functionDf = sparkSession.sql("select ST_Length(polygondf.countyshape) from polygondf")
-      functionDf.show()
+      assert(functionDf.count()>0);
     }
 
     it("Passed ST_Area") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
-      polygonWktDf.show()
       var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
       var functionDf = sparkSession.sql("select ST_Area(polygondf.countyshape) from polygondf")
-      functionDf.show()
+      assert(functionDf.count()>0);
     }
 
     it("Passed ST_Distance") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
-      polygonWktDf.show()
       var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
       var functionDf = sparkSession.sql("select ST_Distance(polygondf.countyshape, polygondf.countyshape) from polygondf")
-      functionDf.show()
+      assert(functionDf.count()>0);
     }
 
     it("Passed ST_Transform") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
-      polygonWktDf.show()
       var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
       var functionDf = sparkSession.sql("select ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857',true, false) from polygondf")
-      functionDf.show()
 
       val polygon = "POLYGON ((110.54671 55.818002, 110.54671 55.143743, 110.940494 55.143743, 110.940494 55.818002, 110.54671 55.818002))"
       val forceXYExpect = "POLYGON ((471596.69167460164 6185916.951191288, 471107.5623640998 6110880.974228167, 496207.109151055 6110788.804712435, 496271.31937046186 6185825.60569904, 471596.69167460164 6185916.951191288))"
@@ -134,10 +117,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         .createOrReplaceTempView("df")
 
       sparkSession.sql("select ST_Transform(geom, 'EPSG:4326', 'EPSG:32649', false, false)  from df")
-        .show(false)
 
       sparkSession.sql("select ST_Transform(geom, 'EPSG:4326', 'EPSG:32649', true, false)  from df")
-        .show(false)
 
       val forceXYResult = sparkSession.sql(s"""select ST_Transform(ST_geomFromWKT('$polygon'),'EPSG:4326', 'EPSG:32649', true, false)""").rdd.map(row => row.getAs[Geometry](0).toString).collect()(0)
       assert(forceXYResult == forceXYExpect)
@@ -199,13 +180,11 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         """
           |SELECT ST_PrecisionReduce(ST_GeomFromWKT('Point(0.1234567890123456789 0.1234567890123456789)'), 8)
         """.stripMargin)
-      testtable.show(false)
       assert(testtable.take(1)(0).get(0).asInstanceOf[Geometry].getCoordinates()(0).x == 0.12345679)
       testtable = sparkSession.sql(
         """
           |SELECT ST_PrecisionReduce(ST_GeomFromWKT('Point(0.1234567890123456789 0.1234567890123456789)'), 11)
         """.stripMargin)
-      testtable.show(false)
       assert(testtable.take(1)(0).get(0).asInstanceOf[Geometry].getCoordinates()(0).x == 0.12345678901)
 
     }
@@ -349,9 +328,6 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       ).map({ case (wktA, wktB) => (wktReader.read(wktA), wktReader.read(wktB)) })
         .toDF("geomA", "geomB")
 
-      geometries
-        .selectExpr("ST_Azimuth(geomA, geomB)")
-        .show
       geometries
         .selectExpr("ST_Azimuth(geomA, geomB)")
         .as[Double]
@@ -604,7 +580,6 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
     When("Using ST_Dumps")
     val dumpedGeometries = geometryDf.selectExpr("ST_Dump(geom) as geom")
-    dumpedGeometries.show(10, false)
     Then("Should return geometries list")
 
     dumpedGeometries.select(explode($"geom")).count shouldBe 14

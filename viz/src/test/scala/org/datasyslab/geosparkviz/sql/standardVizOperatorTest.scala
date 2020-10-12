@@ -51,7 +51,7 @@ class standardVizOperatorTest extends TestBaseScala {
           |SELECT ST_EncodeImage(image)
           |FROM images
         """.stripMargin)
-      spark.table("imagestring").show()
+      spark.table("imagestring").show(1)
     }
 
     it("Generate a single image using a fat query") {
@@ -94,7 +94,7 @@ class standardVizOperatorTest extends TestBaseScala {
           |SELECT ST_EncodeImage(ST_Render(pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates)))) AS image, (SELECT ST_AsText(bound) FROM boundtable) AS boundary
           |FROM pixelaggregates
         """.stripMargin)
-      spark.table("images").show()
+      spark.table("images").show(1)
     }
 
     it("Passed the pipeline on points") {
@@ -127,7 +127,7 @@ class standardVizOperatorTest extends TestBaseScala {
           |GROUP BY pixel
         """.stripMargin)
       val pixelaggregates = spark.table("pixelaggregates")
-      pixelaggregates.show()
+      pixelaggregates.show(1)
     }
 
     it("Passed the pipeline on polygons") {
@@ -218,7 +218,7 @@ class standardVizOperatorTest extends TestBaseScala {
           |FROM pixelaggregates
           |GROUP BY pid
         """.stripMargin).explain()
-      spark.table("images").show()
+      spark.table("images").show(1)
     }
   }
 }

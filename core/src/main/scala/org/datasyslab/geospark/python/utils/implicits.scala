@@ -4,7 +4,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.{ByteBuffer, ByteOrder}
 import java.util
 
-import com.vividsolutions.jts.geom.Geometry
+import org.locationtech.jts.geom.Geometry
 
 object implicits {
 

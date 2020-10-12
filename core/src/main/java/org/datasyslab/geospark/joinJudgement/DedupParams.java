@@ -16,7 +16,7 @@
  */
 package org.datasyslab.geospark.joinJudgement;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 
 import java.io.Serializable;
 import java.util.List;

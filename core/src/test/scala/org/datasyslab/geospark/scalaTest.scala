@@ -26,7 +26,7 @@
 
 package org.datasyslab.geospark
 
-import com.vividsolutions.jts.geom.{Coordinate, Envelope, GeometryFactory}
+import org.locationtech.jts.geom.{Coordinate, Envelope, GeometryFactory}
 import org.apache.spark.storage.StorageLevel
 import org.datasyslab.geospark.enums.{FileDataSplitter, GridType, IndexType, JoinBuildSide}
 import org.datasyslab.geospark.formatMapper.EarthdataHDFPointMapper

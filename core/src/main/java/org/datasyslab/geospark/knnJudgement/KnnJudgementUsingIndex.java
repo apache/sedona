@@ -16,10 +16,10 @@
  */
 package org.datasyslab.geospark.knnJudgement;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.index.SpatialIndex;
-import com.vividsolutions.jts.index.strtree.GeometryItemDistance;
-import com.vividsolutions.jts.index.strtree.STRtree;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.index.SpatialIndex;
+import org.locationtech.jts.index.strtree.GeometryItemDistance;
+import org.locationtech.jts.index.strtree.STRtree;
 import org.apache.spark.api.java.function.FlatMapFunction;
 
 import java.io.Serializable;
@@ -68,7 +68,7 @@ public class KnnJudgementUsingIndex<U extends Geometry, T extends Geometry>
         SpatialIndex treeIndex = treeIndexes.next();
         final Object[] localK;
         if (treeIndex instanceof STRtree) {
-            localK = ((STRtree) treeIndex).kNearestNeighbour(queryCenter.getEnvelopeInternal(), queryCenter, new GeometryItemDistance(), k);
+            localK = ((STRtree) treeIndex).nearestNeighbour(queryCenter.getEnvelopeInternal(), queryCenter, new GeometryItemDistance(), k);
         }
         else {
             throw new Exception("[KnnJudgementUsingIndex][Call] QuadTree index doesn't support KNN search.");

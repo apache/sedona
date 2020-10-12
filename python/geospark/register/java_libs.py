@@ -7,7 +7,7 @@ class GeoSparkLib(Enum):
     JoinQuery = "org.datasyslab.geospark.spatialOperator.JoinQuery"
     KNNQuery = "org.datasyslab.geospark.spatialOperator.KNNQuery"
     RangeQuery = "org.datasyslab.geospark.spatialOperator.RangeQuery"
-    Envelope = "com.vividsolutions.jts.geom.Envelope"
+    Envelope = "org.locationtech.jts.geom.Envelope"
     GeoSerializerData = "org.datasyslab.geospark.python.adapters.GeoSparkPythonConverter"
     GeometryAdapter = "org.datasyslab.geospark.python.adapters.GeometryAdapter"
     PointRDD = "org.datasyslab.geospark.spatialRDD.PointRDD"

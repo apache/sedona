@@ -16,7 +16,7 @@
  */
 package org.datasyslab.geospark.spatialOperator;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 import org.apache.spark.api.java.JavaRDD;
 import org.datasyslab.geospark.knnJudgement.GeometryDistanceComparator;
 import org.datasyslab.geospark.knnJudgement.KnnJudgement;

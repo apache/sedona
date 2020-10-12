@@ -41,103 +41,67 @@ class predicateJoinTestScala extends TestBaseScala {
 
       var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygonInputLocation)
       polygonCsvDf.createOrReplaceTempView("polygontable")
-      polygonCsvDf.show()
       var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
 
       var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")
-      pointCsvDF.show()
       var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape from pointtable")
       pointDf.createOrReplaceTempView("pointdf")
-      pointDf.show()
 
       var rangeJoinDf = sparkSession.sql("select * from polygondf, pointdf where ST_Contains(polygondf.polygonshape,pointdf.pointshape) ")
 
-      rangeJoinDf.explain()
-      rangeJoinDf.show(3)
       assert(rangeJoinDf.count() == 1000)
     }
 
     it("Passed ST_Intersects in a join") {
-      val geosparkConf = new GeoSparkConf(sparkSession.sparkContext.getConf)
-      println(geosparkConf)
-
       var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygonInputLocation)
       polygonCsvDf.createOrReplaceTempView("polygontable")
-      polygonCsvDf.show()
       var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
 
       var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")
-      pointCsvDF.show()
       var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape from pointtable")
       pointDf.createOrReplaceTempView("pointdf")
-      pointDf.show()
 
       var rangeJoinDf = sparkSession.sql("select * from polygondf, pointdf where ST_Intersects(polygondf.polygonshape,pointdf.pointshape) ")
-
-      rangeJoinDf.explain()
-      rangeJoinDf.show(3)
       assert(rangeJoinDf.count() == 1000)
     }
 
     it("Passed ST_Touches in a join") {
-      val geosparkConf = new GeoSparkConf(sparkSession.sparkContext.getConf)
-      println(geosparkConf)
-
       var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygonInputLocation)
       polygonCsvDf.createOrReplaceTempView("polygontable")
-      polygonCsvDf.show()
       var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
 
       var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")
-      pointCsvDF.show()
       var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape from pointtable")
       pointDf.createOrReplaceTempView("pointdf")
-      pointDf.show()
 
       var rangeJoinDf = sparkSession.sql("select * from polygondf, pointdf where ST_Touches(polygondf.polygonshape,pointdf.pointshape) ")
 
-      rangeJoinDf.explain()
-      rangeJoinDf.show(3)
       assert(rangeJoinDf.count() == 1000)
     }
 
     it("Passed ST_Within in a join") {
-      val geosparkConf = new GeoSparkConf(sparkSession.sparkContext.getConf)
-      println(geosparkConf)
-
       var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygonInputLocation)
       polygonCsvDf.createOrReplaceTempView("polygontable")
-      polygonCsvDf.show()
       var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
 
       var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")
-      pointCsvDF.show()
       var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape from pointtable")
       pointDf.createOrReplaceTempView("pointdf")
-      pointDf.show()
 
       var rangeJoinDf = sparkSession.sql("select * from polygondf, pointdf where ST_Within(pointdf.pointshape, polygondf.polygonshape) ")
 
-      rangeJoinDf.explain()
-      rangeJoinDf.show(3)
       assert(rangeJoinDf.count() == 1000)
     }
     
     it("Passed ST_Overlaps in a join") {
-      val geosparkConf = new GeoSparkConf(sparkSession.sparkContext.getConf)
-      
       var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygonInputLocation)
       polygonCsvDf.createOrReplaceTempView("polygontable")
       var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
@@ -150,33 +114,22 @@ class predicateJoinTestScala extends TestBaseScala {
 
       var rangeJoinDf = sparkSession.sql("select * from polygondf, polygonodf where ST_Overlaps(polygondf.polygonshape, polygonodf.polygonshape)")
 
-      rangeJoinDf.explain()
-      rangeJoinDf.show(3)
       assert(rangeJoinDf.count() == 57)
     }
 
     it("Passed ST_Crosses in a join") {
-      val geosparkConf = new GeoSparkConf(sparkSession.sparkContext.getConf)
-      println(geosparkConf)
-
       var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygonInputLocation)
       polygonCsvDf.createOrReplaceTempView("polygontable")
-      polygonCsvDf.show()
       var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
 
       var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")
-      pointCsvDF.show()
       var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape from pointtable")
       pointDf.createOrReplaceTempView("pointdf")
-      pointDf.show()
 
       var rangeJoinDf = sparkSession.sql("select * from polygondf, pointdf where ST_Crosses(pointdf.pointshape, polygondf.polygonshape) ")
 
-      rangeJoinDf.explain()
-      rangeJoinDf.show(3)
       assert(rangeJoinDf.count() == 1000)
     }
 
@@ -185,21 +138,16 @@ class predicateJoinTestScala extends TestBaseScala {
 
       var pointCsvDF1 = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF1.createOrReplaceTempView("pointtable")
-      pointCsvDF1.show()
       var pointDf1 = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape1 from pointtable")
       pointDf1.createOrReplaceTempView("pointdf1")
-      pointDf1.show()
 
       var pointCsvDF2 = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF2.createOrReplaceTempView("pointtable")
-      pointCsvDF2.show()
       var pointDf2 = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape2 from pointtable")
       pointDf2.createOrReplaceTempView("pointdf2")
-      pointDf2.show()
 
       var distanceJoinDf = sparkSession.sql("select * from pointdf1, pointdf2 where ST_Distance(pointdf1.pointshape1,pointdf2.pointshape2) <= 2")
-      distanceJoinDf.explain()
-      distanceJoinDf.show(10)
+
       assert(distanceJoinDf.count() == 2998)
     }
 
@@ -208,47 +156,33 @@ class predicateJoinTestScala extends TestBaseScala {
 
       var pointCsvDF1 = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF1.createOrReplaceTempView("pointtable")
-      pointCsvDF1.show()
       var pointDf1 = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape1 from pointtable")
       pointDf1.createOrReplaceTempView("pointdf1")
-      pointDf1.show()
 
       var pointCsvDF2 = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF2.createOrReplaceTempView("pointtable")
-      pointCsvDF2.show()
       var pointDf2 = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape2 from pointtable")
       pointDf2.createOrReplaceTempView("pointdf2")
-      pointDf2.show()
 
       var distanceJoinDf = sparkSession.sql("select * from pointdf1, pointdf2 where ST_Distance(pointdf1.pointshape1,pointdf2.pointshape2) < 2")
-      distanceJoinDf.explain()
-      distanceJoinDf.show(10)
+
       assert(distanceJoinDf.count() == 2998)
     }
 
     it("Passed ST_Contains in a range and join") {
-      val geosparkConf = new GeoSparkConf(sparkSession.sparkContext.getConf)
-      println(geosparkConf)
-
       var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygonInputLocation)
       polygonCsvDf.createOrReplaceTempView("polygontable")
-      polygonCsvDf.show()
       var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
 
       var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")
-      pointCsvDF.show()
       var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape from pointtable")
       pointDf.createOrReplaceTempView("pointdf")
-      pointDf.show()
 
       var rangeJoinDf = sparkSession.sql("select * from polygondf, pointdf where ST_Contains(polygondf.polygonshape,pointdf.pointshape) " +
         "and ST_Contains(ST_PolygonFromEnvelope(1.0,101.0,501.0,601.0), polygondf.polygonshape)")
 
-      rangeJoinDf.explain()
-      rangeJoinDf.show(3)
       assert(rangeJoinDf.count() == 500)
     }
 
@@ -263,7 +197,6 @@ class predicateJoinTestScala extends TestBaseScala {
 
       val pointDF = sparkSession.sql("select id, ST_Point(cast(lat as Decimal(24,20)), cast(lon as Decimal(24,20))) AS latlon_point FROM rawPointDf")
       pointDF.createOrReplaceTempView("pointDf")
-      pointDF.show(false)
 
       val rawPolygonDf = sparkSession.createDataFrame(
         sparkSession.sparkContext.parallelize(
@@ -284,101 +217,65 @@ class predicateJoinTestScala extends TestBaseScala {
       assert(withinEnvelopeDF.count() == 1)
     }
     it("Passed ST_Equals in a join for ST_Point") {
-      val geosparkConf = new GeoSparkConf(sparkSession.sparkContext.getConf)
-      println(geosparkConf)
-
       var pointCsvDf1 = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPoint1InputLocation)
       pointCsvDf1.createOrReplaceTempView("pointtable1")
-      pointCsvDf1.show()
       var pointDf1 = sparkSession.sql("select ST_Point(cast(pointtable1._c0 as Decimal(24,20)),cast(pointtable1._c1 as Decimal(24,20)) ) as pointshape1 from pointtable1")
       pointDf1.createOrReplaceTempView("pointdf1")
-      pointDf1.show()
 
       var pointCsvDF2 = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPoint2InputLocation)
       pointCsvDF2.createOrReplaceTempView("pointtable2")
-      pointCsvDF2.show()
       var pointDf2 = sparkSession.sql("select ST_Point(cast(pointtable2._c0 as Decimal(24,20)),cast(pointtable2._c1 as Decimal(24,20))) as pointshape2 from pointtable2")
       pointDf2.createOrReplaceTempView("pointdf2")
-      pointDf2.show()
 
       var equalJoinDf = sparkSession.sql("select * from pointdf1, pointdf2 where ST_Equals(pointdf1.pointshape1,pointdf2.pointshape2) ")
 
-      equalJoinDf.explain()
-      equalJoinDf.show(3)
       assert(equalJoinDf.count() == 100, s"Expected 100 but got ${equalJoinDf.count()}")
     }
     it("Passed ST_Equals in a join for ST_Polygon") {
-      val geosparkConf = new GeoSparkConf(sparkSession.sparkContext.getConf)
-      println(geosparkConf)
-
       var polygonCsvDf1 = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygon1InputLocation)
       polygonCsvDf1.createOrReplaceTempView("polygontable1")
-      polygonCsvDf1.show()
       var polygonDf1 = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable1._c0 as Decimal(24,20)),cast(polygontable1._c1 as Decimal(24,20)), cast(polygontable1._c2 as Decimal(24,20)), cast(polygontable1._c3 as Decimal(24,20))) as polygonshape1 from polygontable1")
       polygonDf1.createOrReplaceTempView("polygondf1")
-      polygonDf1.show()
 
 
       var polygonCsvDf2 = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygon2InputLocation)
       polygonCsvDf2.createOrReplaceTempView("polygontable2")
-      polygonCsvDf2.show()
       var polygonDf2 = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable2._c0 as Decimal(24,20)),cast(polygontable2._c1 as Decimal(24,20)), cast(polygontable2._c2 as Decimal(24,20)), cast(polygontable2._c3 as Decimal(24,20))) as polygonshape2 from polygontable2")
       polygonDf2.createOrReplaceTempView("polygondf2")
-      polygonDf2.show()
 
       var equalJoinDf = sparkSession.sql("select * from polygondf1, polygondf2 where ST_Equals(polygondf1.polygonshape1,polygondf2.polygonshape2) ")
 
-      equalJoinDf.explain()
-      equalJoinDf.show(3)
       assert(equalJoinDf.count() == 100, s"Expected 100 but got ${equalJoinDf.count()}")
     }
     it("Passed ST_Equals in a join for ST_Polygon Random Shuffle") {
-      val geosparkConf = new GeoSparkConf(sparkSession.sparkContext.getConf)
-      println(geosparkConf)
-
       var polygonCsvDf1 = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygon1RandomInputLocation)
       polygonCsvDf1.createOrReplaceTempView("polygontable1")
-      polygonCsvDf1.show()
       var polygonDf1 = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable1._c0 as Decimal(24,20)),cast(polygontable1._c1 as Decimal(24,20)), cast(polygontable1._c2 as Decimal(24,20)), cast(polygontable1._c3 as Decimal(24,20))) as polygonshape1 from polygontable1")
       polygonDf1.createOrReplaceTempView("polygondf1")
-      polygonDf1.show()
 
 
       var polygonCsvDf2 = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygon2RandomInputLocation)
       polygonCsvDf2.createOrReplaceTempView("polygontable2")
-      polygonCsvDf2.show()
       var polygonDf2 = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable2._c0 as Decimal(24,20)),cast(polygontable2._c1 as Decimal(24,20)), cast(polygontable2._c2 as Decimal(24,20)), cast(polygontable2._c3 as Decimal(24,20))) as polygonshape2 from polygontable2")
       polygonDf2.createOrReplaceTempView("polygondf2")
-      polygonDf2.show()
 
       var equalJoinDf = sparkSession.sql("select * from polygondf1, polygondf2 where ST_Equals(polygondf1.polygonshape1,polygondf2.polygonshape2) ")
 
-      equalJoinDf.explain()
-      equalJoinDf.show(3)
       assert(equalJoinDf.count() == 100, s"Expected 100 but got ${equalJoinDf.count()}")
     }
     it("Passed ST_Equals in a join for ST_Point and ST_Polygon") {
-      val geosparkConf = new GeoSparkConf(sparkSession.sparkContext.getConf)
-      println(geosparkConf)
-
       var pointCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPoint1InputLocation)
       pointCsvDf.createOrReplaceTempView("pointtable")
-      pointCsvDf.show()
       var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20)) ) as pointshape from pointtable")
       pointDf.createOrReplaceTempView("pointdf")
-      pointDf.show()
 
       var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygon1InputLocation)
       polygonCsvDf.createOrReplaceTempView("polygontable")
-      polygonCsvDf.show()
       var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      polygonDf.show()
 
       var equalJoinDf = sparkSession.sql("select * from pointdf, polygondf where ST_Equals(pointdf.pointshape,polygondf.polygonshape) ")
 
-      equalJoinDf.explain()
-      equalJoinDf.show(3)
       assert(equalJoinDf.count() == 0, s"Expected 0 but got ${equalJoinDf.count()}")
     }
   }

@@ -16,8 +16,8 @@
  */
 package org.datasyslab.geospark.spatialPartitioning;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.index.strtree.STRtree;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.index.strtree.STRtree;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -52,7 +52,7 @@ public class RtreePartitioning
             strtree.insert(sample, sample);
         }
 
-        List<Envelope> envelopes = strtree.queryBoundary();
+        List<Envelope> envelopes = strtree.findLeafBounds();
         for (Envelope envelope : envelopes) {
             grids.add(envelope);
         }

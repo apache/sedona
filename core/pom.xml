@@ -33,14 +33,15 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.datasyslab</groupId>
-            <artifactId>JTSplus</artifactId>
-            <version>0.1.4</version>
+            <groupId>org.locationtech.jts</groupId>
+            <artifactId>jts-core</artifactId>
+            <version>1.16.2-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.wololo</groupId>
             <artifactId>jts2geojson</artifactId>
-            <version>0.10.0</version>
+            <version>0.13.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>

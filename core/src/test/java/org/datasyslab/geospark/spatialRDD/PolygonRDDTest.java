@@ -25,11 +25,11 @@
  */
 package org.datasyslab.geospark.spatialRDD;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.index.quadtree.Quadtree;
-import com.vividsolutions.jts.index.strtree.STRtree;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.index.quadtree.Quadtree;
+import org.locationtech.jts.index.strtree.STRtree;
 import org.apache.spark.storage.StorageLevel;
 import org.datasyslab.geospark.enums.FileDataSplitter;
 import org.datasyslab.geospark.enums.GridType;
