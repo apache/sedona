@@ -61,7 +61,7 @@ public enum FileDataSplitter
 
     QUESTIONMARK("?"),
 
-    SINGLEQUOTE("'"),
+    SINGLEQUOTE("\'"),
 
     QUOTE("\""),
 
