@@ -91,7 +91,7 @@ Spark SQL Physical plan:
 == Physical Plan ==
 RangeJoin polygonshape#20: geometry, pointshape#43: geometry, false
 :- Project [st_polygonfromenvelope(cast(_c0#0 as decimal(24,20)), cast(_c1#1 as decimal(24,20)), cast(_c2#2 as decimal(24,20)), cast(_c3#3 as decimal(24,20)), mypolygonid) AS polygonshape#20]
-:  +- Filter  **org.apache.spark.sql.sedona_sql.expressions.ST_Contains$**
+:  +- Filter  **org.apache.spark.sql.geosparksql.expressions.ST_Contains$**
 :     +- *FileScan csv
 +- Project [st_point(cast(_c0#31 as decimal(24,20)), cast(_c1#32 as decimal(24,20)), myPointId) AS pointshape#43]
    +- *FileScan csv
