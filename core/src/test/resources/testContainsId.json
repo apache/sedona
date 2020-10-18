@@ -1,1 +1,35 @@
-{"type":"Feature","id":0,"properties":{"zipcode":"00101","name":"A"},"geometry":{"type":"Polygon","coordinates":[[[0.0,0.0],[10.0,0.0],[10.0,10.0],[0.0,10.0],[0.0,0.0]]]}}
+{
+  "type": "Feature",
+  "id": 0,
+  "properties": {
+    "zipcode": "00101",
+    "name": "A"
+  },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0
+        ],
+        [
+          10.0,
+          10.0
+        ],
+        [
+          0.0,
+          10.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ]
+    ]
+  }
+}

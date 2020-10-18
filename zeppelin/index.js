@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 GeoSpark Development Team
+ * Copyright 2019-2020 Apache Sedona
  * Copyright 2017 Volume Integration
  * Copyright 2017 Tom Grant
  *
@@ -114,7 +114,7 @@ export default class LeafletMap extends Visualization {
 					const {image, boundary, info} = row;
 					// throw new Error(image);
 					var jsts = require("jsts");
-					// Read WKT string from GeoSpark
+					// Read WKT string from Sedona
 					var reader = new jsts.io.WKTReader();
 					var obj = reader.read(boundary)
 					// Collect the centroid point of the input geometry
