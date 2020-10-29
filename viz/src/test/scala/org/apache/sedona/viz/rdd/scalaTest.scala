@@ -16,40 +16,41 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.viz.rdd
 
 import java.awt.Color
 import java.io.FileInputStream
 import java.util.Properties
 
+import org.locationtech.jts.geom.Envelope
 import org.apache.log4j.{Level, Logger}
 import org.apache.sedona.core.enums.{FileDataSplitter, GridType, IndexType}
 import org.apache.sedona.core.formatMapper.EarthdataHDFPointMapper
 import org.apache.sedona.core.spatialOperator.JoinQuery
 import org.apache.sedona.core.spatialRDD.{PointRDD, PolygonRDD, RectangleRDD}
 import org.apache.sedona.viz.`extension`.visualizationEffect.{ChoroplethMap, HeatMap, ScatterPlot}
-import org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
 import org.apache.sedona.viz.core.{ImageGenerator, RasterOverlayOperator}
+import org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
 import org.apache.sedona.viz.utils.{ColorizeOption, ImageType}
 import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{SparkConf, SparkContext}
-import org.locationtech.jts.geom.Envelope
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
-class scalaTest extends FunSpec with BeforeAndAfterAll {
+class scalaTest extends FunSpec with BeforeAndAfterAll{
   val sparkConf = new SparkConf().setAppName("scalaTest").setMaster("local[*]")
   sparkConf.set("spark.serializer", classOf[KryoSerializer].getName)
   sparkConf.set("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName)
-  val prop = new Properties()
+  var sparkContext:SparkContext = _
   Logger.getLogger("org").setLevel(Level.WARN)
   Logger.getLogger("akka").setLevel(Level.WARN)
+  val prop = new Properties()
   val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
   val demoOutputPath = "target/scala/demo"
+  var ConfFile = new FileInputStream(resourceFolder + "babylon.point.properties")
+  prop.load(ConfFile)
   val scatterPlotOutputPath = System.getProperty("user.dir") + "/" + demoOutputPath + "/scatterplot"
   val heatMapOutputPath = System.getProperty("user.dir") + "/" + demoOutputPath + "/heatmap"
-  prop.load(ConfFile)
   val choroplethMapOutputPath = System.getProperty("user.dir") + "/" + demoOutputPath + "/choroplethmap"
   val parallelFilterRenderStitchOutputPath = System.getProperty("user.dir") + "/" + demoOutputPath + "/parallelfilterrenderstitchheatmap"
   val earthdataScatterPlotOutputPath = System.getProperty("user.dir") + "/" + demoOutputPath + "/earthdatascatterplot"
@@ -57,22 +58,22 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
   val PointOffset = prop.getProperty("offset").toInt
   val PointSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"))
   val PointNumPartitions = prop.getProperty("numPartitions").toInt
-  val RectangleInputLocation = resourceFolder + prop.getProperty("inputLocation")
-  val RectangleOffset = prop.getProperty("offset").toInt
   ConfFile = new FileInputStream(resourceFolder + "babylon.rectangle.properties")
   prop.load(ConfFile)
+  val RectangleInputLocation = resourceFolder + prop.getProperty("inputLocation")
+  val RectangleOffset = prop.getProperty("offset").toInt
   val RectangleSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"))
   val RectangleNumPartitions = prop.getProperty("numPartitions").toInt
-  val PolygonInputLocation = resourceFolder + prop.getProperty("inputLocation")
-  val PolygonOffset = prop.getProperty("offset").toInt
   ConfFile = new FileInputStream(resourceFolder + "babylon.polygon.properties")
   prop.load(ConfFile)
+  val PolygonInputLocation = resourceFolder + prop.getProperty("inputLocation")
+  val PolygonOffset = prop.getProperty("offset").toInt
   val PolygonSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"))
   val PolygonNumPartitions = prop.getProperty("numPartitions").toInt
-  val LineStringInputLocation = resourceFolder + prop.getProperty("inputLocation")
-  val LineStringOffset = prop.getProperty("offset").toInt
   ConfFile = new FileInputStream(resourceFolder + "babylon.linestring.properties")
   prop.load(ConfFile)
+  val LineStringInputLocation = resourceFolder + prop.getProperty("inputLocation")
+  val LineStringOffset = prop.getProperty("offset").toInt
   val LineStringSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"))
   val LineStringNumPartitions = prop.getProperty("numPartitions").toInt
   val USMainLandBoundary = new Envelope(-126.790180, -64.630926, 24.863836, 50.000)
@@ -85,17 +86,13 @@ class scalaTest extends FunSpec with BeforeAndAfterAll {
   val HDFDataVariableList = Array("LST", "QC", "Error_LST", "Emis_31", "Emis_32")
   val HDFswitchXY = true
   val urlPrefix = System.getProperty("user.dir") + "/src/test/resources/modis/"
-  var sparkContext: SparkContext = _
-  var ConfFile = new FileInputStream(resourceFolder + "babylon.point.properties")
 
   override def beforeAll(): Unit = {
     sparkContext = new SparkContext(sparkConf)
   }
-
   override def afterAll(): Unit = {
     sparkContext.stop()
   }
-
   describe("SedonaViz in Scala") {
 
     it("should pass scatter plot") {

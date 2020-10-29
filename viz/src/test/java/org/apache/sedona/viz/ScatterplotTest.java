@@ -40,7 +40,7 @@ import java.awt.Color;
  * The Class ScatterplotTest.
  */
 public class ScatterplotTest
-        extends SedonaVizTestBase
+        extends VizTestBase
 {
     /**
      * Test encode decode id.

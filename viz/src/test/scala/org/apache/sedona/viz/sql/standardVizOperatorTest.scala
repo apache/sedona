@@ -24,7 +24,7 @@ import org.apache.sedona.viz.utils.ImageType
 
 class standardVizOperatorTest extends TestBaseScala {
 
-  describe("Sedona-Viz SQL function Test") {
+  describe("SedonaViz SQL function Test") {
 
     it("Generate a single image") {
       var pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation) //.createOrReplaceTempView("polygontable")
@@ -63,7 +63,7 @@ class standardVizOperatorTest extends TestBaseScala {
         """.stripMargin)
       var image = spark.table("images").take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage
       var imageGenerator = new ImageGenerator
-      imageGenerator.SaveRasterImageAsLocalFile(image, System.getProperty("user.dir") + "/target/points", ImageType.PNG)
+      imageGenerator.SaveRasterImageAsLocalFile(image, System.getProperty("user.dir")+"/target/points", ImageType.PNG)
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW imagestring AS
@@ -191,7 +191,7 @@ class standardVizOperatorTest extends TestBaseScala {
         """.stripMargin)
       var image = imageDf.take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage
       var imageGenerator = new ImageGenerator
-      imageGenerator.SaveRasterImageAsLocalFile(image, System.getProperty("user.dir") + "/target/polygons", ImageType.PNG)
+      imageGenerator.SaveRasterImageAsLocalFile(image, System.getProperty("user.dir")+"/target/polygons", ImageType.PNG)
     }
 
     it("Passed ST_TileName") {
@@ -226,9 +226,9 @@ class standardVizOperatorTest extends TestBaseScala {
         """.stripMargin)
       spark.sql(
         s"""
-           |CREATE OR REPLACE TEMP VIEW pixelaggregates AS
-           |SELECT pixel, weight, ST_TileName(pixel, $zoomLevel) AS pid
-           |FROM pixelaggregates
+          |CREATE OR REPLACE TEMP VIEW pixelaggregates AS
+          |SELECT pixel, weight, ST_TileName(pixel, $zoomLevel) AS pid
+          |FROM pixelaggregates
         """.stripMargin)
       spark.sql(
         """

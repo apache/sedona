@@ -35,7 +35,7 @@ import org.junit.Test;
  * The Class ParallelVisualizationTest.
  */
 public class ParallelVisualizationTest
-        extends SedonaVizTestBase
+        extends VizTestBase
 {
 
     /**

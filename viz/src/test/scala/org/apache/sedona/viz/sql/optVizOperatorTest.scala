@@ -21,12 +21,12 @@ package org.apache.sedona.viz.sql
 
 import org.apache.sedona.viz.sql.operator.{AggregateWithinPartitons, VizPartitioner}
 import org.apache.sedona.viz.sql.utils.{Conf, LineageDecoder}
-import org.apache.spark.sql.functions._
 import org.locationtech.jts.geom.Envelope
+import org.apache.spark.sql.functions._
 
 class optVizOperatorTest extends TestBaseScala {
 
-  describe("Sedona-Viz SQL function Test") {
+  describe("SedonaViz SQL function Test") {
 
     it("Passed full pipeline using optimized operator") {
       var pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation) //.createOrReplaceTempView("polygontable")
@@ -67,9 +67,9 @@ class optVizOperatorTest extends TestBaseScala {
       result.createOrReplaceTempView("pixelaggregates")
       spark.sql(
         s"""
-           |CREATE OR REPLACE TEMP VIEW colors AS
-           |SELECT pixel, ${Conf.PrimaryPID}, ${Conf.SecondaryPID}, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates))
-           |FROM pixelaggregates
+          |CREATE OR REPLACE TEMP VIEW colors AS
+          |SELECT pixel, ${Conf.PrimaryPID}, ${Conf.SecondaryPID}, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates))
+          |FROM pixelaggregates
         """.stripMargin)
       spark.table("colors").show(1)
     }
@@ -120,7 +120,7 @@ class optVizOperatorTest extends TestBaseScala {
       spark.table("colors").show(1)
     }
 
-    it("Passed lineage decoder") {
+    it("Passed lineage decoder"){
       assert(LineageDecoder("01") == "2-1-0")
       assert(LineageDecoder("12") == "2-2-1")
       assert(LineageDecoder("333") == "3-7-7")

@@ -42,7 +42,7 @@ import java.awt.Color;
  * The Class ChoroplethmapTest.
  */
 public class ChoroplethmapTest
-        extends SedonaVizTestBase
+        extends VizTestBase
 {
     /**
      * Test rectangle RDD visualization.

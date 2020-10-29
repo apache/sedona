@@ -26,17 +26,18 @@ import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.sql.SparkSession
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
-trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
+trait TestBaseScala extends FunSpec with BeforeAndAfterAll{
   Logger.getLogger("org.apache").setLevel(Level.WARN)
   Logger.getLogger("com").setLevel(Level.WARN)
   Logger.getLogger("akka").setLevel(Level.WARN)
   Logger.getLogger("org.datasyslab").setLevel(Level.WARN)
 
+  var spark:SparkSession = _
   val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
+
   val polygonInputLocationWkt = resourceFolder + "county_small.tsv"
   val polygonInputLocation = resourceFolder + "primaryroads-polygon.csv"
   val csvPointInputLocation = resourceFolder + "arealm.csv"
-  var spark: SparkSession = _
 
   override def beforeAll(): Unit = {
     spark = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
@@ -47,7 +48,6 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   }
 
   override def afterAll(): Unit = {
-    //SedonaSQLRegistrator.dropAll(spark)
     spark.stop
   }
 

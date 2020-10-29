@@ -18,21 +18,21 @@
  */
 package org.apache.sedona.viz;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.apache.sedona.core.enums.FileDataSplitter;
 import org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator;
+import org.locationtech.jts.geom.Envelope;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.serializer.KryoSerializer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.locationtech.jts.geom.Envelope;
 
 import java.io.InputStream;
 import java.util.Properties;
 
-public class SedonaVizTestBase
+public class VizTestBase
 {
     protected static SparkConf conf;
     /**
@@ -148,30 +148,31 @@ public class SedonaVizTestBase
 
         prop = new Properties();
 
-        inputProp = SedonaVizTestBase.class.getClassLoader().getResourceAsStream("babylon.point.properties");
+        inputProp = VizTestBase.class.getClassLoader().getResourceAsStream("babylon.point.properties");
         prop.load(inputProp);
-        PointInputLocation = "file://" + SedonaVizTestBase.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
+        PointInputLocation = "file://" + VizTestBase.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
         PointOffset = Integer.parseInt(prop.getProperty("offset"));
+        ;
         PointSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
         PointNumPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
 
-        inputProp = SedonaVizTestBase.class.getClassLoader().getResourceAsStream("babylon.rectangle.properties");
+        inputProp = VizTestBase.class.getClassLoader().getResourceAsStream("babylon.rectangle.properties");
         prop.load(inputProp);
-        RectangleInputLocation = "file://" + SedonaVizTestBase.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
+        RectangleInputLocation = "file://" + VizTestBase.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
         RectangleOffset = Integer.parseInt(prop.getProperty("offset"));
         RectangleSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
         RectangleNumPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
 
-        inputProp = SedonaVizTestBase.class.getClassLoader().getResourceAsStream("babylon.polygon.properties");
+        inputProp = VizTestBase.class.getClassLoader().getResourceAsStream("babylon.polygon.properties");
         prop.load(inputProp);
-        PolygonInputLocation = "file://" + SedonaVizTestBase.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
+        PolygonInputLocation = "file://" + VizTestBase.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
         PolygonOffset = Integer.parseInt(prop.getProperty("offset"));
         PolygonSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
         PolygonNumPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
 
-        inputProp = SedonaVizTestBase.class.getClassLoader().getResourceAsStream("babylon.linestring.properties");
+        inputProp = VizTestBase.class.getClassLoader().getResourceAsStream("babylon.linestring.properties");
         prop.load(inputProp);
-        LineStringInputLocation = "file://" + SedonaVizTestBase.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
+        LineStringInputLocation = "file://" + VizTestBase.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
         LineStringOffset = Integer.parseInt(prop.getProperty("offset"));
         LineStringSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
         LineStringNumPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
@@ -188,7 +189,7 @@ public class SedonaVizTestBase
     public static void setUpBeforeClass()
             throws Exception
     {
-        initialize(SedonaVizTestBase.class.getSimpleName());
+        initialize(VizTestBase.class.getSimpleName());
     }
 
     /**

@@ -35,7 +35,7 @@ import org.junit.Test;
  * The Class HeatmapTest.
  */
 public class HeatmapTest
-        extends SedonaVizTestBase
+        extends VizTestBase
 {
 
     /**
