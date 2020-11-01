@@ -17,8 +17,8 @@
 
 import os
 
-from geospark.core.enums import FileDataSplitter
-from geospark.core.geom.envelope import Envelope
+from sedona.core.enums import FileDataSplitter
+from sedona.core.geom.envelope import Envelope
 from tests.tools import tests_path
 
 input_location = os.path.join(tests_path, "resources/primaryroads-linestring.csv")
@@ -36,5 +36,5 @@ input_boundary_2 = Envelope(minx=-123.393766, maxx=-65.649956, miny=17.982169, m
 match_count = 535
 match_with_origin_with_duplicates_count = 875
 
-transformed_envelope = Envelope(14313844.294334238, 16791709.853587367, 942450.5989896103, 8474779.278028358)
-transformed_envelope_2 = Envelope(14313844.294334238, 16791709.853587367, 942450.5989896103, 8474645.488977432)
+transformed_envelope = Envelope(14313844.294334238, 16791709.853587367, 942450.5989896103, 8474779.278028361)
+transformed_envelope_2 = Envelope(14313844.294334238, 16791709.853587367, 942450.5989896103, 8474645.488977436)

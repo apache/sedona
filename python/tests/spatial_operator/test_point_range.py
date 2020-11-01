@@ -17,10 +17,10 @@
 
 import os
 
-from geospark.core.SpatialRDD import PointRDD
-from geospark.core.enums import IndexType, FileDataSplitter
-from geospark.core.geom.envelope import Envelope
-from geospark.core.spatialOperator import RangeQuery
+from sedona.core.SpatialRDD import PointRDD
+from sedona.core.enums import IndexType, FileDataSplitter
+from sedona.core.geom.envelope import Envelope
+from sedona.core.spatialOperator import RangeQuery
 from tests.test_base import TestBase
 from tests.tools import tests_path
 

@@ -17,10 +17,10 @@
 
 from pyspark.sql import SparkSession
 
-from geospark.register import GeoSparkRegistrator
-from geospark.utils import KryoSerializer, GeoSparkKryoRegistrator
-from geospark.utils.decorators import classproperty
-from geospark.register import upload_jars
+from sedona.register import GeoSparkRegistrator
+from sedona.utils import KryoSerializer, SedonaKryoRegistrator
+from sedona.utils.decorators import classproperty
+from sedona.register import upload_jars
 
 
 class TestBase:
@@ -32,7 +32,7 @@ class TestBase:
             spark = SparkSession. \
                 builder. \
                 config("spark.serializer", KryoSerializer.getName).\
-                config("spark.kryo.registrator", GeoSparkKryoRegistrator.getName) .\
+                config("spark.kryo.registrator", SedonaKryoRegistrator.getName) .\
                 master("local[*]").\
                 getOrCreate()
 

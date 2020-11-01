@@ -23,15 +23,15 @@ from pyspark.sql import DataFrame
 from pyspark.sql.functions import expr
 from pyspark.sql.functions import col
 
-from geospark import version
-from geospark.core.SpatialRDD import PolygonRDD, CircleRDD
-from geospark.core.SpatialRDD.spatial_rdd import SpatialRDD
-from geospark.core.enums import FileDataSplitter, GridType, IndexType
-from geospark.core.formatMapper.shapefileParser.shape_file_reader import ShapefileReader
-from geospark.core.geom.envelope import Envelope
-from geospark.core.jvm.config import is_greater_or_equal_version
-from geospark.core.spatialOperator import JoinQuery
-from geospark.utils.adapter import Adapter
+from sedona import version
+from sedona.core.SpatialRDD import PolygonRDD, CircleRDD
+from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
+from sedona.core.enums import FileDataSplitter, GridType, IndexType
+from sedona.core.formatMapper.shapefileParser.shape_file_reader import ShapefileReader
+from sedona.core.geom.envelope import Envelope
+from sedona.core.jvm.config import is_greater_or_equal_version
+from sedona.core.spatialOperator import JoinQuery
+from sedona.utils.adapter import Adapter
 from tests.data import geojson_input_location, shape_file_with_missing_trailing_input_location, \
     geojson_id_input_location
 from tests.data import shape_file_input_location, area_lm_point_input_location

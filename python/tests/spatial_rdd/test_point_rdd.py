@@ -17,10 +17,10 @@
 
 from pyspark import StorageLevel
 
-from geospark.core.SpatialRDD import PointRDD
-from geospark.core.SpatialRDD.spatial_rdd import SpatialRDD
-from geospark.core.enums import IndexType, GridType
-from geospark.core.geom.envelope import Envelope
+from sedona.core.SpatialRDD import PointRDD
+from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
+from sedona.core.enums import IndexType, GridType
+from sedona.core.geom.envelope import Envelope
 from tests.properties.point_properties import input_location, offset, splitter, num_partitions, input_count, input_boundary, \
     transformed_envelope, crs_point_test, crs_envelope, crs_envelope_transformed
 from tests.test_base import TestBase

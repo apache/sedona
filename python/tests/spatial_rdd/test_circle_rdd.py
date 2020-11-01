@@ -17,7 +17,7 @@
 
 from pyspark import StorageLevel
 
-from geospark.core.SpatialRDD import PointRDD, CircleRDD
+from sedona.core.SpatialRDD import PointRDD, CircleRDD
 from tests.test_base import TestBase
 from tests.properties.point_properties import input_location, offset, splitter, num_partitions
 

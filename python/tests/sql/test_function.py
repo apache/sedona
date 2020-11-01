@@ -27,9 +27,9 @@ from pyspark.sql.types import StructType, StructField, IntegerType
 from shapely import wkt
 from shapely.wkt import loads
 
-from geospark import version
-from geospark.core.jvm.config import is_greater_or_equal_version
-from geospark.sql.types import GeometryType
+from sedona import version
+from sedona.core.jvm.config import is_greater_or_equal_version
+from sedona.sql.types import GeometryType
 from tests.data import mixed_wkt_geometry_input_location, mixed_wkt_geometry_input_location_1
 from tests.sql.resource.sample_data import create_simple_polygons, create_sample_points, create_simple_polygons_df, \
     create_sample_points_df, create_sample_polygons_df, create_sample_lines_df

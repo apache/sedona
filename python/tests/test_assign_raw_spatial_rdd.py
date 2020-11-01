@@ -15,7 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from geospark.core.SpatialRDD import PointRDD
+from sedona.core.SpatialRDD import PointRDD
 from tests.properties.point_properties import input_location, offset, splitter, num_partitions
 from tests.test_base import TestBase
 from pyspark import StorageLevel

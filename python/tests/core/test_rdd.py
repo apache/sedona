@@ -20,12 +20,12 @@ import logging
 from pyspark import StorageLevel
 from shapely.geometry import Point
 
-from geospark.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
-from geospark.core.enums import GridType, FileDataSplitter, IndexType
-from geospark.core.enums.join_build_side import JoinBuildSide
-from geospark.core.geom.envelope import Envelope
-from geospark.core.spatialOperator import RangeQuery, KNNQuery, JoinQuery
-from geospark.core.spatialOperator.join_params import JoinParams
+from sedona.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
+from sedona.core.enums import GridType, FileDataSplitter, IndexType
+from sedona.core.enums.join_build_side import JoinBuildSide
+from sedona.core.geom.envelope import Envelope
+from sedona.core.spatialOperator import RangeQuery, KNNQuery, JoinQuery
+from sedona.core.spatialOperator.join_params import JoinParams
 import os
 
 from tests.properties.polygon_properties import polygon_rdd_input_location, polygon_rdd_start_offset, polygon_rdd_end_offset, \

@@ -17,8 +17,8 @@
 
 import os
 
-from geospark.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD, LineStringRDD
-from geospark.core.enums import FileDataSplitter, IndexType
+from sedona.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD, LineStringRDD
+from sedona.core.enums import FileDataSplitter, IndexType
 from tests.test_base import TestBase
 from tests.tools import tests_path
 

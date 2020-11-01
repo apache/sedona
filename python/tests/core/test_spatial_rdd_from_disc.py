@@ -21,11 +21,11 @@ import shutil
 import pytest
 from pyspark import StorageLevel
 
-from geospark.core.SpatialRDD import PointRDD, PolygonRDD, LineStringRDD
-from geospark.core.enums import IndexType, GridType
-from geospark.core.formatMapper.disc_utils import load_spatial_rdd_from_disc, \
+from sedona.core.SpatialRDD import PointRDD, PolygonRDD, LineStringRDD
+from sedona.core.enums import IndexType, GridType
+from sedona.core.formatMapper.disc_utils import load_spatial_rdd_from_disc, \
     load_spatial_index_rdd_from_disc, GeoType
-from geospark.core.spatialOperator import JoinQuery
+from sedona.core.spatialOperator import JoinQuery
 from tests.test_base import TestBase
 from tests.tools import tests_path
 

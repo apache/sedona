@@ -15,7 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from geospark.core.geom.envelope import Envelope
+from sedona.core.geom.envelope import Envelope
 from tests.test_base import TestBase
 
 

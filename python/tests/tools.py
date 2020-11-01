@@ -19,7 +19,7 @@ from os import path
 
 from shapely.geometry import Point
 
-from geospark.utils.spatial_rdd_parser import GeoData
+from sedona.utils.spatial_rdd_parser import GeoData
 
 tests_path = path.abspath(path.dirname(__file__))
 

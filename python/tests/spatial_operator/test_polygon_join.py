@@ -18,10 +18,10 @@
 import pytest
 import os
 
-from geospark.core.enums import FileDataSplitter, GridType, IndexType
-from geospark.core.enums.join_build_side import JoinBuildSide
-from geospark.core.spatialOperator import JoinQuery
-from geospark.core.spatialOperator.join_params import JoinParams
+from sedona.core.enums import FileDataSplitter, GridType, IndexType
+from sedona.core.enums.join_build_side import JoinBuildSide
+from sedona.core.spatialOperator import JoinQuery
+from sedona.core.spatialOperator.join_params import JoinParams
 from tests.spatial_operator.test_join_base import TestJoinBase
 from tests.tools import tests_path
 
