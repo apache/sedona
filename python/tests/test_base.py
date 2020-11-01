@@ -20,7 +20,6 @@ from pyspark.sql import SparkSession
 from sedona.register import GeoSparkRegistrator
 from sedona.utils import KryoSerializer, SedonaKryoRegistrator
 from sedona.utils.decorators import classproperty
-from sedona.register import upload_jars
 
 
 class TestBase:
@@ -28,7 +27,6 @@ class TestBase:
     @classproperty
     def spark(self):
         if not hasattr(self, "__spark"):
-            upload_jars()
             spark = SparkSession. \
                 builder. \
                 config("spark.serializer", KryoSerializer.getName).\

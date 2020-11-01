@@ -3,7 +3,6 @@ from os import path
 from sedona import version
 
 here = path.abspath(path.dirname(__file__))
-jars_relative_path = "sedona/jars"
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -26,11 +25,6 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License"
-    ],
-    package_data={
-        'sedona.jars.2_3': ["*.jar"],
-        'sedona.jars.2_4': ["*.jar"],
-        'sedona.jars.2_2': ["*.jar"]
-    }
+    ]
 )
 
