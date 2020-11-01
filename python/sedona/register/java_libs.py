@@ -19,14 +19,14 @@ from enum import Enum
 
 
 class GeoSparkLib(Enum):
-    JoinParams = "org.apache.sedona.core.python.adapters.JoinParamsAdapter"
+    JoinParams = "org.apache.sedona.python.wrapper.adapters.JoinParamsAdapter"
     Adapter = "org.apache.sedona.sql.utils.Adapter"
     JoinQuery = "org.apache.sedona.core.spatialOperator.JoinQuery"
     KNNQuery = "org.apache.sedona.core.spatialOperator.KNNQuery"
     RangeQuery = "org.apache.sedona.core.spatialOperator.RangeQuery"
     Envelope = "org.locationtech.jts.geom.Envelope"
-    GeoSerializerData = "org.apache.sedona.core.python.adapters.GeoSparkPythonConverter"
-    GeometryAdapter = "org.apache.sedona.core.python.adapters.GeometryAdapter"
+    GeoSerializerData = "org.apache.sedona.python.wrapper.adapters.GeoSparkPythonConverter"
+    GeometryAdapter = "org.apache.sedona.python.wrapper.adapters.GeometryAdapter"
     PointRDD = "org.apache.sedona.core.spatialRDD.PointRDD"
     PolygonRDD = "org.apache.sedona.core.spatialRDD.PolygonRDD"
     CircleRDD = "org.apache.sedona.core.spatialRDD.CircleRDD"
@@ -40,14 +40,14 @@ class GeoSparkLib(Enum):
     StorageLevel = "org.apache.spark.storage.StorageLevel"
     GridType = "org.apache.sedona.core.enums.GridType"
     IndexType = "org.apache.sedona.core.enums.IndexType"
-    AdapterWrapper = "org.apache.sedona.sql.utils.PythonAdapterWrapper"
+    AdapterWrapper = "org.apache.sedona.python.wrapper.utils.PythonAdapterWrapper"
     WktReader = "org.apache.sedona.core.formatMapper.WktReader"
-    RawJvmIndexRDDSetter = "org.apache.sedona.core.python.adapters.RawJvmIndexRDDSetter"
-    SpatialObjectLoaderAdapter = "org.apache.sedona.core.python.adapters.SpatialObjectLoaderAdapter"
+    RawJvmIndexRDDSetter = "org.apache.sedona.python.wrapper.adapters.RawJvmIndexRDDSetter"
+    SpatialObjectLoaderAdapter = "org.apache.sedona.python.wrapper.adapters.SpatialObjectLoaderAdapter"
     WkbReader = "org.apache.sedona.core.formatMapper.WkbReader"
-    EnvelopeAdapter = "org.apache.sedona.core.python.adapters.EnvelopeAdapter"
-    PythonConverter = "org.apache.sedona.core.python.adapters.PythonConverter"
-    PythonRddToJavaRDDAdapter = "org.apache.sedona.core.python.adapters.PythonRddToJavaRDDAdapter"
+    EnvelopeAdapter = "org.apache.sedona.python.wrapper.adapters.EnvelopeAdapter"
+    PythonConverter = "org.apache.sedona.python.wrapper.adapters.PythonConverter"
+    PythonRddToJavaRDDAdapter = "org.apache.sedona.python.wrapper.adapters.PythonRddToJavaRDDAdapter"
 
     @classmethod
     def from_str(cls, geo_lib: str) -> 'GeoSparkLib':

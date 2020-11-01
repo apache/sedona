@@ -85,6 +85,7 @@ class SparkJars:
         try:
             used_jar_files = java_spark_conf.get("spark.jars")
         except Exception as e:
+            used_jar_files = None
             logging.warning(f"Failed to get the value of spark.jars from SparkConf: {e}")
         finally:
             if not used_jar_files:
@@ -103,7 +104,7 @@ class SedonaMeta:
 
     @classmethod
     def get_version(cls, spark_jars: str) -> Optional[str]:
-        sedona_version = findall(r"sedona-core-(\d{1}\.\d{1}\.\d{1}).*?jar", spark_jars)
+        sedona_version = findall(r"sedona-python-adapter-(\d{1}\.\d{1}\.\d{1}).*?jar", spark_jars)
         try:
             version = sedona_version[0]
         except IndexError:

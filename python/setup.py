@@ -18,7 +18,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     python_requires='>=3.6',
-    install_requires=['pyspark', 'findspark', 'attrs', "shapely"],
+    install_requires=['pyspark', 'attrs', "shapely"],
     project_urls={
         'Bug Reports': 'https://github.com/apache/incubator-sedona'
     },

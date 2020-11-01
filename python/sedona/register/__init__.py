@@ -16,6 +16,5 @@
 #  under the License.
 
 from sedona.register.geo_registrator import GeoSparkRegistrator
-from sedona.register.uploading import upload_jars
 
-__all__ = ["GeoSparkRegistrator", "upload_jars"]
+__all__ = ["GeoSparkRegistrator"]

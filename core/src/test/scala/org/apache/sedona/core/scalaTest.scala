@@ -21,7 +21,6 @@ package org.apache.sedona.core
 
 import org.apache.sedona.core.enums.{FileDataSplitter, GridType, IndexType, JoinBuildSide}
 import org.apache.sedona.core.formatMapper.EarthdataHDFPointMapper
-import org.apache.sedona.core.python.SparkUtil
 import org.apache.sedona.core.spatialOperator.JoinQuery.JoinParams
 import org.apache.sedona.core.spatialOperator.{JoinQuery, KNNQuery, RangeQuery}
 import org.apache.sedona.core.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}

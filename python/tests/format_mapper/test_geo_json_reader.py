@@ -35,6 +35,7 @@ geo_json_with_invalid_geom_with_feature_property = os.path.join(tests_path, "res
 class TestGeoJsonReader(TestBase):
 
     def test_read_to_geometry_rdd(self):
+        print(SedonaMeta.version)
         if is_greater_or_equal_version(SedonaMeta.version, "1.2.0"):
             geo_json_rdd = GeoJsonReader.readToGeometryRDD(
                 self.sc,
