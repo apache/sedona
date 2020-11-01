@@ -21,8 +21,3 @@ install:
 
 script:
   - (cd python;pipenv install --dev)
-  - export SPARK_HOME=$PWD/spark-3.0.0-bin-hadoop2.7
-  - export PYTHONPATH=$SPARK_HOME/python
-  - mvn -q clean install -DskipTests
-  - find core/target/ -iregex "core\/target\/sedona-core-[0-9]\.[0-9]\.[0-9]\(-SNAPSHOT\)?\.jar" -exec cp {} $SPARK_HOME/jars \;
-  - find sql/target/ -iregex "sql\/target\/sedona-sql-[0-9]\.[0-9]-[0-9]\.[0-9]\.[0-9]\(-SNAPSHOT\)?\.jar" -exec cp {} $SPARK_HOME/jars \;
