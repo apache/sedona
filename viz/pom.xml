@@ -36,13 +36,13 @@
 	<dependencies>
         <dependency>
             <groupId>org.apache.sedona</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>sedona-core</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.sedona</groupId>
-            <artifactId>sql</artifactId>
+            <artifactId>sedona-sql</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
