@@ -43,7 +43,7 @@ class GeometryType(UserDefinedType):
 
     @classmethod
     def module(cls):
-        return "geospark.sql.types"
+        return "sedona.sql.types"
 
     def needConversion(self):
         return True

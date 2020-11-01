@@ -30,7 +30,6 @@ class TestBase:
             spark = SparkSession. \
                 builder. \
                 config("spark.serializer", KryoSerializer.getName).\
-                config("spark.kryo.registrator", SedonaKryoRegistrator.getName) .\
                 master("local[*]").\
                 getOrCreate()
 
