@@ -109,3 +109,6 @@ class Envelope(Polygon):
     @property
     def coords(self):
         raise NotImplementedError()
+
+    def __repr__(self):
+        return f"Envelope({self.minx}, {self.maxx}, {self.miny}, {self.maxy})"
