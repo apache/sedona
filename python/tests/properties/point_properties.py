@@ -45,4 +45,4 @@ polygon_match_with_original_duplicates_count = 562
 transformed_envelope = Envelope(14313844.294334238, 16587207.463797076, 942450.5989896103, 6697987.652517772)
 crs_point_test = os.path.join(tests_path, "resources/crs-test-point.csv")
 crs_envelope = Envelope(26.992172, 71.35513400000001, -179.147236, 179.475569)
-crs_envelope_transformed = Envelope(-5446655.086752234, 1983668.3828524577, 534241.8622328975, 6143259.025545621)
+crs_envelope_transformed = Envelope(-5446655.086752236, 1983668.3828524568, 534241.8622328975, 6143259.025545624)
