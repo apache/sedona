@@ -15,6 +15,6 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from sedona.register.geo_registrator import GeoSparkRegistrator
+from sedona.register.geo_registrator import SedonaRegistrator
 
-__all__ = ["GeoSparkRegistrator"]
+__all__ = ["SedonaRegistrator"]

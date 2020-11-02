@@ -177,7 +177,7 @@ PARSERS = {
 }
 
 
-class GeoSparkPickler(PickleSerializer):
+class SedonaPickler(PickleSerializer):
 
     def __init__(self):
         super().__init__()

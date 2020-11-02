@@ -17,7 +17,7 @@
 
 from pyspark.sql import SparkSession
 
-from sedona.register import GeoSparkRegistrator
+from sedona.register import SedonaRegistrator
 from sedona.utils import KryoSerializer, SedonaKryoRegistrator
 from sedona.utils.decorators import classproperty
 
@@ -30,10 +30,11 @@ class TestBase:
             spark = SparkSession. \
                 builder. \
                 config("spark.serializer", KryoSerializer.getName).\
+                config("spark.kryo.registrator", SedonaKryoRegistrator.getName) .\
                 master("local[*]").\
                 getOrCreate()
 
-            GeoSparkRegistrator.registerAll(spark)
+            SedonaRegistrator.registerAll(spark)
 
             setattr(self, "__spark", spark)
         return getattr(self, "__spark")

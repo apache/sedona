@@ -82,10 +82,10 @@ class SparkJars:
         else:
             raise TypeError("SparkSession is not initiated")
         java_spark_conf = spark_conf._jconf
+        used_jar_files = None
         try:
             used_jar_files = java_spark_conf.get("spark.jars")
         except Exception as e:
-            used_jar_files = None
             logging.warning(f"Failed to get the value of spark.jars from SparkConf: {e}")
         finally:
             if not used_jar_files:

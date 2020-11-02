@@ -31,10 +31,10 @@ from sedona.core.enums.spatial import SpatialType
 from sedona.core.geom.envelope import Envelope
 from sedona.core.jvm.config import since
 from sedona.core.jvm.partitioner import JvmPartitioner
-from sedona.core.jvm.translate import GeoSparkPythonConverter, JvmGeoSparkPythonConverter
+from sedona.core.jvm.translate import SedonaPythonConverter, JvmSedonaPythonConverter
 from sedona.utils.decorators import require
 from sedona.utils.jvm import JvmStorageLevel
-from sedona.utils.spatial_rdd_parser import GeoSparkPickler
+from sedona.utils.spatial_rdd_parser import SedonaPickler
 from sedona.utils.types import crs
 
 
@@ -224,11 +224,11 @@ class SpatialRDD:
         :return:
         """
 
-        serialized_spatial_rdd = GeoSparkPythonConverter(self._jvm).translate_spatial_rdd_to_python(self._srdd.getRawSpatialRDD())
+        serialized_spatial_rdd = SedonaPythonConverter(self._jvm).translate_spatial_rdd_to_python(self._srdd.getRawSpatialRDD())
 
         if not hasattr(self, "_raw_spatial_rdd"):
             RDD.saveAsObjectFile = lambda x, path: x._jrdd.saveAsObjectFile(path)
-            setattr(self, "_raw_spatial_rdd", RDD(serialized_spatial_rdd, self._sc, GeoSparkPickler()))
+            setattr(self, "_raw_spatial_rdd", RDD(serialized_spatial_rdd, self._sc, SedonaPickler()))
         else:
             self._raw_spatial_rdd._jrdd = serialized_spatial_rdd
 
@@ -346,7 +346,7 @@ class SpatialRDD:
             self._jvm = spatial_rdd._jvm
             self._spatial_partitioned = spatial_rdd._spatial_partitioned
         elif isinstance(spatial_rdd, RDD):
-            jrdd = JvmGeoSparkPythonConverter(self._jvm).translate_python_rdd_to_java(spatial_rdd._jrdd)
+            jrdd = JvmSedonaPythonConverter(self._jvm).translate_python_rdd_to_java(spatial_rdd._jrdd)
             self._srdd.setRawSpatialRDD(jrdd)
         else:
             self._srdd.setRawSpatialRDD(spatial_rdd)
@@ -395,11 +395,11 @@ class SpatialRDD:
 
         :return:
         """
-        serialized_spatial_rdd = GeoSparkPythonConverter(self._jvm).translate_spatial_rdd_to_python(
+        serialized_spatial_rdd = SedonaPythonConverter(self._jvm).translate_spatial_rdd_to_python(
             get_field(self._srdd, "spatialPartitionedRDD"))
 
         if not hasattr(self, "_spatial_partitioned_rdd"):
-            setattr(self, "_spatial_partitioned_rdd", RDD(serialized_spatial_rdd, self._sc, GeoSparkPickler()))
+            setattr(self, "_spatial_partitioned_rdd", RDD(serialized_spatial_rdd, self._sc, SedonaPickler()))
         else:
             self._spatial_partitioned_rdd._jrdd = serialized_spatial_rdd
 

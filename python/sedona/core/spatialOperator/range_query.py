@@ -19,10 +19,10 @@ from pyspark import RDD
 from shapely.geometry.base import BaseGeometry
 
 from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
-from sedona.core.jvm.translate import JvmGeoSparkPythonConverter
+from sedona.core.jvm.translate import JvmSedonaPythonConverter
 from sedona.utils.decorators import require
 from sedona.utils.geometry_adapter import GeometryAdapter
-from sedona.utils.spatial_rdd_parser import GeoSparkPickler
+from sedona.utils.spatial_rdd_parser import SedonaPickler
 
 
 class RangeQuery:
@@ -52,6 +52,6 @@ class RangeQuery:
             usingIndex
         )
 
-        serialized = JvmGeoSparkPythonConverter(jvm).translate_spatial_rdd_to_python(srdd)
+        serialized = JvmSedonaPythonConverter(jvm).translate_spatial_rdd_to_python(srdd)
 
-        return RDD(serialized, sc, GeoSparkPickler())
+        return RDD(serialized, sc, SedonaPickler())

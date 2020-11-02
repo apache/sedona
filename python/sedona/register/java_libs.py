@@ -18,7 +18,7 @@
 from enum import Enum
 
 
-class GeoSparkLib(Enum):
+class SedonaJvmLib(Enum):
     JoinParams = "org.apache.sedona.python.wrapper.adapters.JoinParamsAdapter"
     Adapter = "org.apache.sedona.sql.utils.Adapter"
     JoinQuery = "org.apache.sedona.core.spatialOperator.JoinQuery"
@@ -50,7 +50,7 @@ class GeoSparkLib(Enum):
     PythonRddToJavaRDDAdapter = "org.apache.sedona.python.wrapper.adapters.PythonRddToJavaRDDAdapter"
 
     @classmethod
-    def from_str(cls, geo_lib: str) -> 'GeoSparkLib':
+    def from_str(cls, geo_lib: str) -> 'SedonaJvmLib':
         try:
             lib = getattr(cls, geo_lib.upper())
         except AttributeError:

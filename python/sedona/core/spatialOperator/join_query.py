@@ -18,10 +18,10 @@
 from pyspark import RDD
 
 from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
-from sedona.core.jvm.translate import JvmGeoSparkPythonConverter
+from sedona.core.jvm.translate import JvmSedonaPythonConverter
 from sedona.core.spatialOperator.join_params import JoinParams
 from sedona.utils.decorators import require
-from sedona.utils.spatial_rdd_parser import GeoSparkPickler
+from sedona.utils.spatial_rdd_parser import SedonaPickler
 
 
 class JoinQuery:
@@ -47,10 +47,10 @@ class JoinQuery:
             useIndex,
             considerBoundaryIntersection
         )
-        serialized = JvmGeoSparkPythonConverter(jvm)\
+        serialized = JvmSedonaPythonConverter(jvm)\
             .translate_spatial_pair_rdd_with_hashset_to_python(srdd)
 
-        return RDD(serialized, sc, GeoSparkPickler())
+        return RDD(serialized, sc, SedonaPickler())
 
     @classmethod
     @require(["JoinQuery"])
@@ -72,10 +72,10 @@ class JoinQuery:
             useIndex,
             considerBoundaryIntersection
         )
-        serialized = JvmGeoSparkPythonConverter(jvm).\
+        serialized = JvmSedonaPythonConverter(jvm).\
             translate_spatial_pair_rdd_with_hashset_to_python(srdd)
 
-        return RDD(serialized, sc, GeoSparkPickler())
+        return RDD(serialized, sc, SedonaPickler())
 
     @classmethod
     @require(["JoinQuery"])
@@ -94,10 +94,10 @@ class JoinQuery:
         jvm_join_params = joinParams.jvm_instance(jvm)
 
         srdd = jvm.JoinQuery.spatialJoin(queryWindowRDD._srdd, objectRDD._srdd, jvm_join_params)
-        serialized = JvmGeoSparkPythonConverter(jvm).\
+        serialized = JvmSedonaPythonConverter(jvm).\
             translate_spatial_pair_rdd_to_python(srdd)
 
-        return RDD(serialized, sc, GeoSparkPickler())
+        return RDD(serialized, sc, SedonaPickler())
 
     @classmethod
     @require(["JoinQuery"])
@@ -128,10 +128,10 @@ class JoinQuery:
             considerBoundaryIntersection
         )
 
-        serialized = JvmGeoSparkPythonConverter(jvm).\
+        serialized = JvmSedonaPythonConverter(jvm).\
             translate_spatial_pair_rdd_to_python(srdd)
 
-        return RDD(serialized, sc, GeoSparkPickler())
+        return RDD(serialized, sc, SedonaPickler())
 
     @classmethod
     @require(["JoinQuery"])
@@ -167,7 +167,7 @@ class JoinQuery:
             considerBoundaryIntersection
         )
 
-        serialized = JvmGeoSparkPythonConverter(jvm).\
+        serialized = JvmSedonaPythonConverter(jvm).\
             translate_spatial_pair_rdd_to_python(srdd)
 
-        return RDD(serialized, sc, GeoSparkPickler())
+        return RDD(serialized, sc, SedonaPickler())

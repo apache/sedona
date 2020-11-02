@@ -31,7 +31,6 @@ class GeoJsonReader(GeoDataReader, metaclass=MultipleMeta):
         :param inputPath: str, file input location
         :return: SpatialRDD
         """
-        GeoJsonReader.validate_imports()
         jvm = sc._jvm
         srdd = jvm.GeoJsonReader.readToGeometryRDD(
             sc._jsc, inputPath

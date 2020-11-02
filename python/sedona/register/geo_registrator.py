@@ -19,7 +19,7 @@ import attr
 from pyspark.sql import SparkSession
 from py4j.java_gateway import java_import
 
-from sedona.register.java_libs import GeoSparkLib
+from sedona.register.java_libs import SedonaJvmLib
 from sedona.utils.prep import assign_all
 
 assign_all()
@@ -27,13 +27,13 @@ jvm_import = str
 
 
 @attr.s
-class GeoSparkRegistrator:
+class SedonaRegistrator:
 
     @classmethod
     def registerAll(cls, spark: SparkSession) -> bool:
         """
         This is the core of whole package, It uses py4j to run wrapper which takes existing SparkSession
-        and register all User Defined Functions by GeoSpark developers, for this SparkSession.
+        and register all User Defined Functions by Apache Sedona developers, for this SparkSession.
 
         :param spark: pyspark.sql.SparkSession, spark session instance
         :return: bool, True if registration was correct.
@@ -58,7 +58,7 @@ class PackageImporter:
         :param jvm: Jvm gateway from py4j
         :return:
         """
-        for lib in GeoSparkLib:
+        for lib in SedonaJvmLib:
             java_import(jvm, lib.value)
             ImportedJvmLib.import_lib(lib.name)
 

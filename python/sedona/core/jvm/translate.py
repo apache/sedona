@@ -18,7 +18,7 @@
 from typing import List
 
 
-class JvmGeoSparkPythonConverter:
+class JvmSedonaPythonConverter:
 
     def __init__(self, jvm):
         self._jvm = jvm
@@ -88,7 +88,7 @@ class JvmGeometryAdapter:
         return self._jvm.GeometryAdapter.translateToJava(bytes_data)
 
 
-class GeoSparkPythonConverter:
+class SedonaPythonConverter:
 
     def __init__(self, jvm):
         self.jvm = jvm

@@ -5,6 +5,8 @@ verify_ssl = true
 
 [dev-packages]
 pytest="*"
+notebook="==6.0.0"
+jupyter="*"
 
 [packages]
 pandas="*"

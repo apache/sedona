@@ -19,7 +19,7 @@ import attr
 from shapely.geometry.base import BaseGeometry
 
 from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
-from sedona.core.jvm.translate import JvmGeoSparkPythonConverter
+from sedona.core.jvm.translate import JvmSedonaPythonConverter
 from sedona.utils.binary_parser import BinaryParser
 from sedona.utils.decorators import require
 from sedona.utils.geometry_adapter import GeometryAdapter
@@ -45,7 +45,7 @@ class KNNQuery:
 
         knn_neighbours = jvm.KNNQuery.SpatialKnnQuery(spatialRDD._srdd, jvm_geom, k, useIndex)
 
-        srdd = JvmGeoSparkPythonConverter(jvm).translate_geometry_seq_to_python(knn_neighbours)
+        srdd = JvmSedonaPythonConverter(jvm).translate_geometry_seq_to_python(knn_neighbours)
 
         geoms_data = []
         for arr in srdd:

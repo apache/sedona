@@ -14,6 +14,8 @@ before_install:
   - wget https://archive.apache.org/dist/spark/spark-3.0.0/spark-3.0.0-bin-hadoop2.7.tgz
   - tar -xzf spark-3.0.0-bin-hadoop2.7.tgz
   - rm spark-3.0.0-bin-hadoop2.7.tgz
+  - export SPARK_HOME=$PWD/spark-3.0.0-bin-hadoop2.7
+  - export PYTHONPATH=$SPARK_HOME/python
 
 install:
   - sudo apt-get -y install python3-pip python-dev
@@ -24,6 +26,6 @@ install:
   - (cd python;pipenv install --dev)
 
 script:
-  - mvn -q clean install
+  - mvn -q clean install -DskipTests
   - find python-adapter/target/ -iregex "python-adapter\/target\/sedona-python-adapter-[0-9]\.[0-9]\.[0-9]-incubator\(-SNAPSHOT\)?\.jar" -exec cp {} $SPARK_HOME/jars \;
   - (cd python;pipenv run pytest tests)
