@@ -20,9 +20,9 @@ import os
 from pyspark import StorageLevel
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
-from geospark.core.SpatialRDD import PointRDD
-from geospark.core.enums import FileDataSplitter
-from geospark.sql.types import GeometryType
+from sedona.core.SpatialRDD import PointRDD
+from sedona.core.enums import FileDataSplitter
+from sedona.sql.types import GeometryType
 from tests.test_base import TestBase
 from shapely.geometry import Point
 

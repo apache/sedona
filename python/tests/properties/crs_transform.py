@@ -19,8 +19,8 @@ import os
 
 from shapely.geometry import Point
 
-from geospark.core.enums import FileDataSplitter, GridType, IndexType
-from geospark.core.geom.envelope import Envelope
+from sedona.core.enums import FileDataSplitter, GridType, IndexType
+from sedona.core.geom.envelope import Envelope
 from tests.tools import tests_path
 
 input_location = os.path.join(tests_path, "resources/crs-test-point.csv")

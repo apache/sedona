@@ -18,8 +18,8 @@
 from shapely.geometry import Point, LineString, Polygon
 from shapely.wkt import loads
 
-from geospark.core.SpatialRDD import PointRDD, LineStringRDD, PolygonRDD
-from geospark.utils.spatial_rdd_parser import GeoData
+from sedona.core.SpatialRDD import PointRDD, LineStringRDD, PolygonRDD
+from sedona.utils.spatial_rdd_parser import GeoData
 from tests.test_base import TestBase
 
 

@@ -20,10 +20,10 @@ import os
 from shapely.geometry import Point
 from pyspark import StorageLevel
 
-from geospark.core.SpatialRDD import PointRDD, CircleRDD, PolygonRDD
-from geospark.core.enums import FileDataSplitter, IndexType, GridType
-from geospark.core.geom.envelope import Envelope
-from geospark.core.spatialOperator import RangeQuery, JoinQuery, KNNQuery
+from sedona.core.SpatialRDD import PointRDD, CircleRDD, PolygonRDD
+from sedona.core.enums import FileDataSplitter, IndexType, GridType
+from sedona.core.geom.envelope import Envelope
+from sedona.core.spatialOperator import RangeQuery, JoinQuery, KNNQuery
 from tests.test_base import TestBase
 from tests.tools import tests_path
 

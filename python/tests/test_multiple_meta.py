@@ -15,7 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from geospark.utils.meta import MultipleMeta
+from sedona.utils.meta import MultipleMeta
 
 
 class TestMultipleMeta:

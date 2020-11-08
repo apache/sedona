@@ -17,8 +17,8 @@
 
 import os
 
-from geospark.core.enums import FileDataSplitter
-from geospark.core.geom.envelope import Envelope
+from sedona.core.enums import FileDataSplitter
+from sedona.core.geom.envelope import Envelope
 from tests.tools import tests_path
 
 input_location = os.path.join(tests_path, "resources/arealm-small.csv")

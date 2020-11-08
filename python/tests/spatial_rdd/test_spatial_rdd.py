@@ -22,10 +22,10 @@ import pytest
 from pyspark import StorageLevel, RDD
 from shapely.geometry import Point
 
-from geospark.core.SpatialRDD import PointRDD
-from geospark.core.enums import FileDataSplitter, GridType, IndexType
-from geospark.core.formatMapper.geo_json_reader import GeoJsonReader
-from geospark.core.geom.envelope import Envelope
+from sedona.core.SpatialRDD import PointRDD
+from sedona.core.enums import FileDataSplitter, GridType, IndexType
+from sedona.core.formatMapper.geo_json_reader import GeoJsonReader
+from sedona.core.geom.envelope import Envelope
 from tests.test_base import TestBase
 from tests.tools import tests_path
 

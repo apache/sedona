@@ -19,9 +19,9 @@ import os
 
 from shapely.geometry import Point
 
-from geospark.core.SpatialRDD import PolygonRDD
-from geospark.core.enums import IndexType, FileDataSplitter
-from geospark.core.spatialOperator import KNNQuery
+from sedona.core.SpatialRDD import PolygonRDD
+from sedona.core.enums import IndexType, FileDataSplitter
+from sedona.core.spatialOperator import KNNQuery
 from tests.test_base import TestBase
 from tests.tools import tests_path, distance_sorting_functions
 

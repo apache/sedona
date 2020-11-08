@@ -21,7 +21,7 @@ from pyspark.sql.types import IntegerType
 import geopandas as gpd
 
 from tests.data import data_path
-from geospark.sql.types import GeometryType
+from sedona.sql.types import GeometryType
 from shapely.geometry import Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon
 from pyspark.sql import types as t
 

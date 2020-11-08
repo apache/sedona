@@ -17,9 +17,9 @@
 
 import os
 
-from geospark.core.SpatialRDD import PointRDD, PolygonRDD
-from geospark.core.enums import FileDataSplitter, GridType
-from geospark.core.spatialOperator import JoinQuery
+from sedona.core.SpatialRDD import PointRDD, PolygonRDD
+from sedona.core.enums import FileDataSplitter, GridType
+from sedona.core.spatialOperator import JoinQuery
 from tests.test_base import TestBase
 from tests.tools import tests_path
 

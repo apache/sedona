@@ -13,6 +13,7 @@
         <module>core</module>
         <module>sql</module>
         <module>viz</module>
+        <module>python-adapter</module>
     </modules>
     <licenses>
         <license>

@@ -23,15 +23,14 @@ from pyspark.sql import DataFrame
 from pyspark.sql.functions import expr
 from pyspark.sql.functions import col
 
-from geospark import version
-from geospark.core.SpatialRDD import PolygonRDD, CircleRDD
-from geospark.core.SpatialRDD.spatial_rdd import SpatialRDD
-from geospark.core.enums import FileDataSplitter, GridType, IndexType
-from geospark.core.formatMapper.shapefileParser.shape_file_reader import ShapefileReader
-from geospark.core.geom.envelope import Envelope
-from geospark.core.jvm.config import is_greater_or_equal_version
-from geospark.core.spatialOperator import JoinQuery
-from geospark.utils.adapter import Adapter
+from sedona import version
+from sedona.core.SpatialRDD import PolygonRDD, CircleRDD
+from sedona.core.enums import FileDataSplitter, GridType, IndexType
+from sedona.core.formatMapper.shapefileParser.shape_file_reader import ShapefileReader
+from sedona.core.geom.envelope import Envelope
+from sedona.core.jvm.config import is_greater_or_equal_version
+from sedona.core.spatialOperator import JoinQuery
+from sedona.utils.adapter import Adapter
 from tests.data import geojson_input_location, shape_file_with_missing_trailing_input_location, \
     geojson_id_input_location
 from tests.data import shape_file_input_location, area_lm_point_input_location
@@ -59,7 +58,6 @@ class TestAdapter(TestBase):
         spatial_rdd.analyze()
         Adapter.toDf(spatial_rdd, self.spark).show()
 
-    @pytest.mark.skipif(is_greater_or_equal_version(version, "1.3.0"), reason="Depreciated after spark 1.2.0")
     def test_read_csv_point_into_spatial_rdd_by_passing_coordinates(self):
         df = self.spark.read.format("csv").\
             option("delimiter", ",").\
@@ -75,13 +73,7 @@ class TestAdapter(TestBase):
 
         spatial_df.show()
         spatial_df.printSchema()
-        spatial_rdd = SpatialRDD(self.spark.sparkContext)
-        spatial_rdd.rawJvmSpatialRDD = Adapter.toRdd(spatial_df)
-        spatial_rdd.analyze()
-        assert (Adapter.toDf(spatial_rdd, self.spark).columns.__len__() == 1)
-        Adapter.toDf(spatial_rdd, self.spark).show()
 
-    @pytest.mark.skipif(is_greater_or_equal_version(version, "1.3.0"), reason="Depreciated after spark 1.2.0")
     def test_read_csv_point_into_spatial_rdd_with_unique_id_by_passing_coordinates(self):
         df = self.spark.read.format("csv").\
             option("delimiter", ",").\
@@ -96,12 +88,6 @@ class TestAdapter(TestBase):
 
         spatial_df.show()
         spatial_df.printSchema()
-
-        spatial_rdd = SpatialRDD(self.spark.sparkContext)
-        spatial_rdd.rawJvmSpatialRDD = Adapter.toRdd(spatial_df)
-        spatial_rdd.analyze()
-        assert (Adapter.toDf(spatial_rdd, self.spark).columns.__len__() == 1)
-        Adapter.toDf(spatial_rdd, self.spark).show()
 
     def test_read_mixed_wkt_geometries_into_spatial_rdd(self):
         df = self.spark.read.format("csv").\
@@ -269,21 +255,6 @@ class TestAdapter(TestBase):
 
         return spatial_df
 
-    @pytest.mark.skipif(is_greater_or_equal_version(version, "1.3.0"), reason="Depreciated after spark 1.2.0")
-    def test_to_rdd_from_dataframe(self):
-        spatial_df = self._create_spatial_point_table()
-
-        spatial_df.show()
-
-        jsrdd = Adapter.toRdd(spatial_df)
-
-        spatial_rdd = SpatialRDD(self.sc)
-        spatial_rdd.rawJvmSpatialRDD = jsrdd
-        spatial_rdd.analyze()
-
-        assert spatial_rdd.approximateTotalCount == 121960
-        assert spatial_rdd.boundaryEnvelope == Envelope(-179.147236, 179.475569, -14.548699, 71.35513400000001)
-
     def test_to_spatial_rdd_df_and_geom_field_name(self):
         spatial_df = self._create_spatial_point_table()
 
@@ -317,10 +288,6 @@ class TestAdapter(TestBase):
 
         spatial_df = self.spark.sql("SELECT ST_GeomFromWKT(geom) as geom, county_name FROM county_data")
         spatial_df.show()
-
-        spatial_rdd = Adapter.toSpatialRdd(spatial_df, ["geom", "county_name"])
-        spatial_rdd.analyze()
-        assert spatial_rdd.approximateTotalCount == 100
 
     def test_to_df_srdd_fn_spark(self):
         spatial_rdd = PolygonRDD(

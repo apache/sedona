@@ -17,9 +17,10 @@
 
 from pyspark import StorageLevel
 
-from geospark.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
-from geospark.core.geom.circle import Circle
-from geospark.core.spatialOperator import RangeQuery, KNNQuery, JoinQuery
+from sedona.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
+from sedona.core.geom.circle import Circle
+from sedona.core.spatialOperator import RangeQuery, KNNQuery, JoinQuery
+from sedona.utils.adapter import Adapter
 from tests.properties.crs_transform import *
 from tests.test_base import TestBase
 from tests.tools import distance_sorting_functions
@@ -174,7 +175,6 @@ class TestCrsTransformation(TestBase):
         window_rdd.spatialPartitioning(object_rdd.grids)
 
         results = JoinQuery.DistanceJoinQuery(object_rdd, window_rdd, True, False).collect()
-
         assert results.__len__() == 5467
 
         for data in results:

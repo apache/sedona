@@ -5,12 +5,13 @@ verify_ssl = true
 
 [dev-packages]
 pytest="*"
+notebook="==6.0.0"
+jupyter="*"
 
 [packages]
-findspark="*"
 pandas="*"
 geopandas="==0.6.0"
-pyspark="*"
+pyspark="==3.0.0"
 attrs="*"
 
 [requires]

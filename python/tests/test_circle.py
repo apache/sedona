@@ -19,8 +19,8 @@ import pytest
 from shapely import wkt
 from shapely.geometry import Point
 
-from geospark.core.geom.circle import Circle
-from geospark.core.geom.envelope import Envelope
+from sedona.core.geom.circle import Circle
+from sedona.core.geom.envelope import Envelope
 
 
 class TestCircle:

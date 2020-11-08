@@ -26,7 +26,7 @@
         <version>1.0.0-incubator-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-	<artifactId>viz</artifactId>
+	<artifactId>sedona-viz</artifactId>
 
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>A cluster computing system for processing large-scale spatial data: RDD and SQL for Viz</description>
@@ -36,13 +36,13 @@
 	<dependencies>
         <dependency>
             <groupId>org.apache.sedona</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>sedona-core</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.sedona</groupId>
-            <artifactId>sql</artifactId>
+            <artifactId>sedona-sql</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

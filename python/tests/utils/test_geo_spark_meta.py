@@ -15,7 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from geospark.core.jvm.config import is_greater_or_equal_version, GeoSparkMeta
+from sedona.core.jvm.config import is_greater_or_equal_version, SedonaMeta
 from tests.test_base import TestBase
 
 
@@ -27,7 +27,7 @@ class TestGeoSparkMeta(TestBase):
         assert is_greater_or_equal_version("1.3.5", "1.2.0")
         assert not is_greater_or_equal_version("", "1.2.0")
         assert not is_greater_or_equal_version("1.3.5", "")
-        GeoSparkMeta.version = "1.2.0"
-        assert GeoSparkMeta.version == "1.2.0"
-        GeoSparkMeta.version = "1.3.0"
-        assert GeoSparkMeta.version == "1.3.0"
+        SedonaMeta.version = "1.2.0"
+        assert SedonaMeta.version == "1.2.0"
+        SedonaMeta.version = "1.3.0"
+        assert SedonaMeta.version == "1.3.0"

@@ -21,9 +21,9 @@ import shutil
 import pytest
 from pyspark import StorageLevel
 
-from geospark.core.SpatialRDD import PointRDD
-from geospark.core.enums import FileDataSplitter
-from geospark.core.geom.envelope import Envelope
+from sedona.core.SpatialRDD import PointRDD
+from sedona.core.enums import FileDataSplitter
+from sedona.core.geom.envelope import Envelope
 from tests.test_base import TestBase
 from tests.tools import tests_path
 

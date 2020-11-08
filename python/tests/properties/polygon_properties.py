@@ -17,8 +17,8 @@
 
 import os
 
-from geospark.core.enums import FileDataSplitter, IndexType
-from geospark.core.geom.envelope import Envelope
+from sedona.core.enums import FileDataSplitter, IndexType
+from sedona.core.geom.envelope import Envelope
 from tests.tools import tests_path
 
 input_location = os.path.join(tests_path, "resources/primaryroads-polygon.csv")

@@ -19,7 +19,7 @@
 
 package org.apache.sedona.core.monitoring
 
-import org.apache.sedona.core.python.SparkUtil
+import org.apache.sedona.core.SparkUtil
 import org.apache.spark.TaskContext
 import org.scalatest.FunSuiteLike
 

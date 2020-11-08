@@ -2,84 +2,26 @@
 
 ## Introduction
 
-GeoSPark provides a Python wrapper for its Spatial SQL / DataFrame interface. The official repository for GeoSpark can be found at https://github.com/DataSystemsLab/GeoSpark.
-
-This package allows users to use all GeoSparkSQL functions and transform it to Python Shapely geometry objects. Also it allows to create Spark DataFrame with GeoSpark UDT from Shapely geometry objects. Spark DataFrame can be converted to GeoPandas easily, in addition all fiona drivers for shape file are available to load data from files and convert them to Spark DataFrame. Please look at examples.
+This package allows users to use all SedonaSQL functions and transform it to Python Shapely geometry objects. Also it allows to create Spark DataFrame with Apache Sedona UDT from Shapely geometry objects. Spark DataFrame can be converted to GeoPandas easily, in addition all fiona drivers for shape file are available to load data from files and convert them to Spark DataFrame. Please look at examples.
 
 
 
 ## Installation
 
-GeoSpark extends pyspark functions which depends on Python packages and Scala libraries. To see all dependencies
+Apache Sedona extends pyspark functions which depends on Python packages and Scala libraries. To see all dependencies
 please look at Dependencies section.
 https://pypi.org/project/pyspark/.
 
-Package needs 2 jar files to work properly:
+Package needs 1 jar files to work properly:
 
-- geospark.jar
-- geospark-sql.jar
-- geo_wrapper.jar
-
-!!!note
-    Since GeoSpark 1.3.0 it is possible also to use maven jars for GeoSparkSQL instead of geospark/jars/../geospark-sql jars files.
-
-
-This package automatically copies the newest GeoSpark jar files using function, please follow the example below.
-
-<li> upload_jars </li>
-
-```python
-
-from pyspark.sql import SparkSession
-
-from geospark.register import upload_jars
-from geospark.register import GeoSparkRegistrator
-
-upload_jars()
-
-spark = SparkSession.builder.\
-      getOrCreate()
-
-GeoSparkRegistrator.registerAll(spark)
-
-```
-
-Function
-
-```python
-
-upload_jars()
-
-
-```
-
-uses findspark Python package to upload jar files to executor and nodes. To avoid copying all the time, jar files can be put in directory SPARK_HOME/jars or any other path specified in Spark config files.
-
+- sedona-python-adapter.jar
 
 ### Installing from PyPi repositories
 
 Please use command below
  
 ```bash
-pip install geospark
-```
-
-### Installing from wheel file
-
-
-```bash
-
-pipenv run python -m pip install dist/geospark-1.3.1-py3-none-any.whl
-
-```
-
-or
-
-```bash
-
-pip install dist/geospark-1.3.1-py3-none-any.whl
-
-
+pip install sedona
 ```
 
 ### Installing from source
@@ -91,62 +33,36 @@ python3 setup.py install
 
 ```
 
-
-## Core Classes and methods.
-
-
-`GeoSparkRegistrator.registerAll(spark: pyspark.sql.SparkSession) -> bool`
-
-This is the core of whole package. Class method registers all GeoSparkSQL functions (available for used GeoSparkSQL version).
-To check available functions please look at GeoSparkSQL section.
-:param spark: pyspark.sql.SparkSession, spark session instance
-
-
-`upload_jars() -> NoReturn`
-
-Function uses `findspark` Python module to upload newest GeoSpark jars to Spark executor and nodes.
-
-`GeometryType()`
-
-Class which handle serialization and deserialization between GeoSpark geometries and Shapely BaseGeometry types.
-
-`KryoSerializer.getName -> str`
-Class property which returns org.apache.spark.serializer.KryoSerializer string, which simplify using GeoSpark Serializers.
-
-`GeoSparkKryoRegistrator.getName -> str`
-Class property which returns org.datasyslab.geospark.serde.GeoSparkKryoRegistrator string, which simplify using GeoSpark Serializers.
-
-
-
 ## Writing Application
 
-Use KryoSerializer.getName and GeoSparkKryoRegistrator.getName class properties to reduce memory impact, reffering to  <a href="https://datasystemslab.github.io/GeoSpark/tutorial/sql/"> GeoSpark docs </a>. To do that use spark config as follows:
+Use KryoSerializer.getName and SedonaKryoRegistrator.getName class properties to reduce memory impact.
 
 ```python
 
 .config("spark.serializer", KryoSerializer.getName)
-.config("spark.kryo.registrator", GeoSparkKryoRegistrator.getName)
+.config("spark.kryo.registrator", SedonaKryoRegistrator.getName)
 
 ```
 
 If jars was not uploaded manually please use function `upload_jars()`
 
-To turn on GeoSparkSQL function inside pyspark code use GeoSparkRegistrator.registerAll method on existing pyspark.sql.SparkSession instance ex.
+To turn on SedonaSQL function inside pyspark code use SedonaRegistrator.registerAll method on existing pyspark.sql.SparkSession instance ex.
 
-`GeoSparkRegistrator.registerAll(spark)`
+`SedonaRegistrator.registerAll(spark)`
 
-After that all the functions from GeoSparkSQL will be available, moreover using collect or toPandas methods on Spark DataFrame will return Shapely BaseGeometry objects. Based on GeoPandas DataFrame, Pandas DataFrame with shapely objects or Sequence with shapely objects, Spark DataFrame can be created using spark.createDataFrame method. To specify Schema with geometry inside please use `GeometryType()` instance (look at examples section to see that in practice).
+After that all the functions from SedonaSQL will be available, moreover using collect or toPandas methods on Spark DataFrame will return Shapely BaseGeometry objects. Based on GeoPandas DataFrame, Pandas DataFrame with shapely objects or Sequence with shapely objects, Spark DataFrame can be created using spark.createDataFrame method. To specify Schema with geometry inside please use `GeometryType()` instance (look at examples section to see that in practice).
 
 
 
 ### Examples
 
-### GeoSparkSQL
+### SedonaSQL
 
 
-All GeoSparkSQL functions (list depends on GeoSparkSQL version) are available in Python API. For documentation please look at <a href="https://datasystemslab.github.io/GeoSpark/api/sql/GeoSparkSQL-Overview/"> GeoSpark website</a>
+All SedonaSQL functions (list depends on SedonaSQL version) are available in Python API.
+For details please refer to API/SedonaSQL page.
 
-For example use GeoSparkSQL for Spatial Join.
+For example use SedonaSQL for Spatial Join.
 
 ```python3
 
@@ -221,7 +137,7 @@ spatial_join_result.explain()
 +- RangeJoin geometry#240: geometry, geometry#236: geometry, true
    :- Scan ExistingRDD[fclass#239,geometry#240]
    +- Project [county_code#230, st_geomfromwkt(geom#232) AS geometry#236]
-      +- *(1) FileScan csv [county_code#230,geom#232] Batched: false, Format: CSV, Location: InMemoryFileIndex[file:/projects/geospark/counties.csv], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<county_code:string,geom:string>
+      +- *(1) FileScan csv [county_code#230,geom#232] Batched: false, Format: CSV, Location: InMemoryFileIndex[file:/projects/sedona/counties.csv], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<county_code:string,geom:string>
 ```
 Calculating Number of Pois within counties per fclass.
 
@@ -247,7 +163,7 @@ pois_per_county.show(5, False)
 ## Integration with GeoPandas and Shapely
 
 
-geospark has implemented serializers and deserializers which allows to convert GeoSpark Geometry objects into Shapely BaseGeometry objects. Based on that it is possible to load the data with geopandas from file (look at Fiona possible drivers) and create Spark DataFrame based on GeoDataFrame object.
+sedona has implemented serializers and deserializers which allows to convert Sedona Geometry objects into Shapely BaseGeometry objects. Based on that it is possible to load the data with geopandas from file (look at Fiona possible drivers) and create Spark DataFrame based on GeoDataFrame object.
 
 Example, loading the data from shapefile using geopandas read_file method and create Spark DataFrame based on GeoDataFrame:
 
@@ -256,12 +172,12 @@ Example, loading the data from shapefile using geopandas read_file method and cr
 import geopandas as gpd
 from pyspark.sql import SparkSession
 
-from geospark.register import GeoSparkRegistrator
+from sedona.register import SedonaRegistrator
 
 spark = SparkSession.builder.\
       getOrCreate()
 
-GeoSparkRegistrator.registerAll(spark)
+SedonaRegistrator.registerAll(spark)
 
 gdf = gpd.read_file("gis_osm_pois_free_1.shp")
 
@@ -293,12 +209,12 @@ Reading data with Spark and converting to GeoPandas
 import geopandas as gpd
 from pyspark.sql import SparkSession
 
-from geospark.register import GeoSparkRegistrator
+from sedona.register import SedonaRegistrator
 
 spark = SparkSession.builder.\
     getOrCreate()
 
-GeoSparkRegistrator.registerAll(spark)
+SedonaRegistrator.registerAll(spark)
 
 counties = spark.\
     read.\
@@ -346,7 +262,7 @@ gdf.plot(
 | Polygon         | :heavy_check_mark: |
 | MultiPolygon    | :heavy_check_mark: |
 
-To create Spark DataFrame based on mentioned Geometry types, please use <b> GeometryType </b> from  <b> geospark.sql.types </b> module. Converting works for list or tuple with shapely objects.
+To create Spark DataFrame based on mentioned Geometry types, please use <b> GeometryType </b> from  <b> sedona.sql.types </b> module. Converting works for list or tuple with shapely objects.
 
 Schema for target table with integer id and geometry type can be defined as follow:
 
@@ -354,7 +270,7 @@ Schema for target table with integer id and geometry type can be defined as foll
 
 from pyspark.sql.types import IntegerType, StructField, StructType
 
-from geospark.sql.types import GeometryType
+from sedona.sql.types import GeometryType
 
 schema = StructType(
     [
@@ -579,25 +495,3 @@ gdf.show(1, False)
 +---+----------------------------------------------------------------------------------------------------------+
 
 ```
-
-## Supported versions
-
-Currently this python wrapper supports the following Spark, GeoSpark and Python versions:
-
-### Apache Spark
-
-<li> 2.2 </li>
-<li> 2.3 </li>
-<li> 2.4 </li>
-
-
-### GeoSparkSQL
-
-<li> 1.3.1 </li>
-<li> 1.2.0 </li>
-<li> 1.1.3 </li>
-
-### Python
-
-<li> 3.6 </li>
-<li> 3.7 </li>
