@@ -1,10 +1,27 @@
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
 import os
 
 import pyspark
 
-from geospark.core.jvm.config import is_greater_or_equal_version, GeoSparkMeta
+from sedona.core.jvm.config import is_greater_or_equal_version, SedonaMeta
 
-from geospark.core.formatMapper.geo_json_reader import GeoJsonReader
+from sedona.core.formatMapper.geo_json_reader import GeoJsonReader
 from tests.test_base import TestBase
 from tests.tools import tests_path
 
@@ -18,7 +35,8 @@ geo_json_with_invalid_geom_with_feature_property = os.path.join(tests_path, "res
 class TestGeoJsonReader(TestBase):
 
     def test_read_to_geometry_rdd(self):
-        if is_greater_or_equal_version(GeoSparkMeta.version, "1.2.0"):
+        print(SedonaMeta.version)
+        if is_greater_or_equal_version(SedonaMeta.version, "1.2.0"):
             geo_json_rdd = GeoJsonReader.readToGeometryRDD(
                 self.sc,
                 geo_json_geom_with_feature_property
@@ -34,7 +52,7 @@ class TestGeoJsonReader(TestBase):
             assert geo_json_rdd.rawSpatialRDD.count() == 10
 
     def test_read_to_valid_geometry_rdd(self):
-        if is_greater_or_equal_version(GeoSparkMeta.version, "1.2.0"):
+        if is_greater_or_equal_version(SedonaMeta.version, "1.2.0"):
             geo_json_rdd = GeoJsonReader.readToGeometryRDD(
                 self.sc,
                 geo_json_geom_with_feature_property,
@@ -69,7 +87,7 @@ class TestGeoJsonReader(TestBase):
             assert geo_json_rdd.rawSpatialRDD.count() == 3
 
     def test_read_to_include_id_rdd(self):
-        if is_greater_or_equal_version(GeoSparkMeta.version, "1.2.0"):
+        if is_greater_or_equal_version(SedonaMeta.version, "1.2.0"):
             geo_json_rdd = GeoJsonReader.readToGeometryRDD(
                 self.sc,
                 geo_json_contains_id,
@@ -90,7 +108,7 @@ class TestGeoJsonReader(TestBase):
                 assert geo_json_rdd.fieldNames.__len__() == 3
 
     def test_read_to_geometry_rdd_invalid_syntax(self):
-        if is_greater_or_equal_version(GeoSparkMeta.version, "1.2.0"):
+        if is_greater_or_equal_version(SedonaMeta.version, "1.2.0"):
             geojson_rdd = GeoJsonReader.readToGeometryRDD(
                 self.sc,
                 geo_json_with_invalid_geom_with_feature_property,

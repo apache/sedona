@@ -2,12 +2,12 @@
 
 ## Introduction
 <div style="text-align: justify">
-GeoSpark provides a Python wrapper on GeoSpark core Java/Scala library.
-GeoSpark SpatialRDDs (and other classes when it was necessary) have implemented meta classes which allow 
+Sedona provides a Python wrapper on Sedona core Java/Scala library.
+Sedona SpatialRDDs (and other classes when it was necessary) have implemented meta classes which allow 
 to use overloaded functions, methods and constructors to be the most similar to Java/Scala API as possible. 
 </div>
 
-GeoSpark-core provides five special SpatialRDDs:
+Apache Sedona core provides five special SpatialRDDs:
 
 <li> PointRDD </li>
 <li> PolygonRDD </li>
@@ -16,9 +16,9 @@ GeoSpark-core provides five special SpatialRDDs:
 <li> RectangleRDD </li>
 <div style="text-align: justify">
 <p>
-All of them can be imported from <b> geospark.core.SpatialRDD </b> module
+All of them can be imported from <b> sedona.core.SpatialRDD </b> module
 
-<b> geospark </b> has written serializers which convert GeoSpark SpatialRDD to Python objects.
+<b> sedona </b> has written serializers which convert Sedona SpatialRDD to Python objects.
 Converting will produce GeoData objects which have 2 attributes:
 </p>
 </div>
@@ -34,51 +34,13 @@ GeoData has one method to get user data.
 
 ## Installing the package
 
-GeoSpark extends pyspark functions which depend on Python packages and Scala libraries. To see all dependencies
+Sedona extends pyspark functions which depend on Python packages and Scala libraries. To see all dependencies
 please look at the dependencies section.
 https://pypi.org/project/pyspark/.
 
-This package needs 2 jar files to work properly:
+This package needs 1 jar files to work properly:
 
-- geospark.jar
-- geo_wrapper.jar
-
-!!!note
-    To enable GeoSpark Core functionality without GeoSparkSQL there is no need to copy jar files from geospark/jars
-    location. You can use jar files from Maven repositories. Since GeoSpark 1.3.0 it is possible also to use maven 
-    jars for GeoSparkSQL instead of geospark/jars/../geospark-sql jars files.
-
-
-This package automatically copies the newest GeoSpark jar files using upload_jars function, please follow the example below.
-
-<li> upload_jars </li>
-
-```python
-
-from pyspark.sql import SparkSession
-
-from geospark.register import upload_jars
-from geospark.register import GeoSparkRegistrator
-
-upload_jars()
-
-spark = SparkSession.builder.\
-      getOrCreate()
-
-GeoSparkRegistrator.registerAll(spark)
-
-```
-
-Function
-
-```python
-
-upload_jars()
-
-
-```
-
-uses findspark Python package to upload jar files to executor and nodes. To avoid copying all the time, jar files can be put in directory SPARK_HOME/jars or any other path specified in Spark config files.
+- sedona-python-adapter.jar
 
 
 ### Installing from PyPi repositories
@@ -86,26 +48,9 @@ uses findspark Python package to upload jar files to executor and nodes. To avoi
 Please use command below
  
 ```bash
-pip install geospark
+pip install sedona
 ```
 
-### Installing from wheel file
-
-
-```bash
-
-pipenv run python -m pip install dist/geospark-1.3.1-py3-none-any.whl
-
-```
-
-or
-
-```bash
-
-pip install dist/geospark-1.3.1-py3-none-any.whl
-
-
-```
 
 ### Installing from source
 
@@ -117,18 +62,18 @@ python3 setup.py install
 ```
 
 
-## GeoSpark Serializers
-GeoSpark has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption.
+## Apache Sedona Serializers
+Sedona has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption.
 
 ```python
 conf.set("spark.serializer", KryoSerializer.getName)
-conf.set("spark.kryo.registrator", GeoSparkKryoRegistrator.getName)
+conf.set("spark.kryo.registrator", SedonaKryoRegistrator.getName)
 ```
 
 ## Create a SpatialRDD
 
 ### Create a typed SpatialRDD
-GeoSpark-core provides three special SpatialRDDs:
+Apache Sedona core provides three special SpatialRDDs:
 <li> PointRDD </li>
 <li> PolygonRDD </li> 
 <li> LineStringRDD </li>
@@ -139,14 +84,14 @@ GeoSpark-core provides three special SpatialRDDs:
 They can be loaded from CSV, TSV, WKT, WKB, Shapefiles, GeoJSON formats.
 To pass the format to SpatialRDD constructor please use <b> FileDataSplitter </b> enumeration. 
 
-geospark SpatialRDDs (and other classes when it was necessary) have implemented meta classes which allow 
-to use overloaded functions how Scala/Java GeoSpark API allows. ex. 
+sedona SpatialRDDs (and other classes when it was necessary) have implemented meta classes which allow 
+to use overloaded functions how Scala/Java Apache Sedona API allows. ex. 
 
 
 ```python
 from pyspark import StorageLevel
-from geospark.core.SpatialRDD import PointRDD
-from geospark.core.enums import FileDataSplitter
+from sedona.core.SpatialRDD import PointRDD
+from sedona.core.enums import FileDataSplitter
 
 input_location = "checkin.csv"
 offset = 0  # The point long/lat starts from Column 0
@@ -173,7 +118,7 @@ point_rdd = PointRDD(
 #### From SparkSQL DataFrame
 To create spatialRDD from other formats you can use adapter between Spark DataFrame and SpatialRDD
 
-<li> Load data in GeoSparkSQL. </li>
+<li> Load data in SedonaSQL. </li>
 
 ```python
 csv_point_input_location= "/tests/resources/county_small.tsv"
@@ -188,7 +133,7 @@ df.createOrReplaceTempView("counties")
 
 ```
 
-<li> Create a Geometry type column in GeoSparkSQL </li>
+<li> Create a Geometry type column in SedonaSQL </li>
 
 ```python
 spatial_df = spark.sql(
@@ -206,11 +151,11 @@ root
  |-- county_name: string (nullable = true)
 ```
 
-<li> Use GeoSparkSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD </li>
+<li> Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD </li>
 Note that, you have to name your column geometry
 
 ```python
-from geospark.utils.adapter import Adapter
+from sedona.utils.adapter import Adapter
 
 spatial_rdd = Adapter.toSpatialRdd(spatial_df)
 spatial_rdd.analyze()
@@ -219,7 +164,7 @@ spatial_rdd.boundaryEnvelope
 ```
 
 ```
-<geospark.core.geom_types.Envelope object at 0x7f1e5f29fe10>
+<sedona.core.geom_types.Envelope object at 0x7f1e5f29fe10>
 ```
 
 or pass Geometry column name as a second argument
@@ -244,8 +189,8 @@ rdd_with_other_attributes = object_rdd.rawSpatialRDD.map(lambda x: x.getUserData
 ## Write a Spatial Range Query
 
 ```python
-from geospark.core.geom.envelope import Envelope
-from geospark.core.spatialOperator import RangeQuery
+from sedona.core.geom.envelope import Envelope
+from sedona.core.spatialOperator import RangeQuery
 
 range_query_window = Envelope(-90.01, -80.01, 30.01, 40.01)
 consider_boundary_intersection = False  ## Only return gemeotries fully covered by the window
@@ -255,7 +200,7 @@ query_result = RangeQuery.SpatialRangeQuery(spatial_rdd, range_query_window, con
 
 ### Range query window
 
-Besides the rectangle (Envelope) type range query window, GeoSpark range query window can be 
+Besides the rectangle (Envelope) type range query window, Apache Sedona range query window can be 
 <li> Point </li> 
 <li> Polygon </li>
 <li> LineString </li>
@@ -268,18 +213,18 @@ To create shapely geometries please follow official shapely <a href=""> document
 
 ### Use spatial indexes
 
-GeoSpark provides two types of spatial indexes,
+Sedona provides two types of spatial indexes,
 <li> Quad-Tree </li>
 <li> R-Tree </li>
 Once you specify an index type, 
-GeoSpark will build a local tree index on each of the SpatialRDD partition.
+Sedona will build a local tree index on each of the SpatialRDD partition.
 
 To utilize a spatial index in a spatial range query, use the following code:
 
 ```python
-from geospark.core.geom.envelope import Envelope
-from geospark.core.enums import IndexType
-from geospark.core.spatialOperator import RangeQuery
+from sedona.core.geom.envelope import Envelope
+from sedona.core.enums import IndexType
+from sedona.core.spatialOperator import RangeQuery
 
 range_query_window = Envelope(-90.01, -80.01, 30.01, 40.01)
 consider_boundary_intersection = False ## Only return gemeotries fully covered by the window
@@ -342,7 +287,7 @@ A spatial K Nearnest Neighbor query takes as input a K, a query point and an Spa
 Assume you now have an SpatialRDD (typed or generic). You can use the following code to issue an Spatial KNN Query on it.
 
 ```python
-from geospark.core.spatialOperator import KNNQuery
+from sedona.core.spatialOperator import KNNQuery
 from shapely.geometry import Point
 
 point = Point(-84.01, 34.01)
@@ -353,7 +298,7 @@ result = KNNQuery.SpatialKnnQuery(object_rdd, point, k, using_index)
 
 ### Query center geometry
 
-Besides the Point type, GeoSpark KNN query center can be 
+Besides the Point type, Apache Sedona KNN query center can be 
 <li> Polygon </li>
 <li> LineString </li>
 
@@ -364,8 +309,8 @@ To create Polygon or Linestring object please follow Shapely official <a href="h
 To utilize a spatial index in a spatial KNN query, use the following code:
 
 ```python
-from geospark.core.spatialOperator import KNNQuery
-from geospark.core.enums import IndexType
+from sedona.core.spatialOperator import KNNQuery
+from sedona.core.enums import IndexType
 from shapely.geometry import Point
 
 point = Point(-84.01, 34.01)
@@ -401,8 +346,8 @@ A spatial join query takes as input two Spatial RDD A and B. For each geometry i
 Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue an Spatial Join Query on them.
 
 ```python
-from geospark.core.enums import GridType
-from geospark.core.spatialOperator import JoinQuery
+from sedona.core.enums import GridType
+from sedona.core.spatialOperator import JoinQuery
 
 consider_boundary_intersection = False ## Only return geometries fully covered by each query window in queryWindowRDD
 using_index = False
@@ -436,7 +381,7 @@ result.collect())
 
 ### Use spatial partitioning
 
-GeoSpark spatial partitioning method can significantly speed up the join query. Three spatial partitioning methods are available: KDB-Tree, Quad-Tree and R-Tree. Two SpatialRDD must be partitioned by the same way.
+Apache Sedona spatial partitioning method can significantly speed up the join query. Three spatial partitioning methods are available: KDB-Tree, Quad-Tree and R-Tree. Two SpatialRDD must be partitioned by the same way.
 
 If you first partition SpatialRDD A, then you must use the partitioner of A to partition B.
 
@@ -458,9 +403,9 @@ object_rdd.spatialPartitioning(query_window_rdd.getPartitioner())
 To utilize a spatial index in a spatial join query, use the following code:
 
 ```python
-from geospark.core.enums import GridType
-from geospark.core.enums import IndexType
-from geospark.core.spatialOperator import JoinQuery
+from sedona.core.enums import GridType
+from sedona.core.enums import IndexType
+from sedona.core.spatialOperator import JoinQuery
 
 object_rdd.spatialPartitioning(GridType.KDBTREE)
 query_window_rdd.spatialPartitioning(object_rdd.getPartitioner())
@@ -520,9 +465,9 @@ can be any geometry type (point, line, polygon) and are not necessary to have th
 You can use the following code to issue an Distance Join Query on them.
 
 ```python
-from geospark.core.SpatialRDD import CircleRDD
-from geospark.core.enums import GridType
-from geospark.core.spatialOperator import JoinQuery
+from sedona.core.SpatialRDD import CircleRDD
+from sedona.core.enums import GridType
+from sedona.core.spatialOperator import JoinQuery
 
 object_rdd.analyze()
 
@@ -637,7 +582,7 @@ You can easily reload an SpatialRDD that has been saved to ==a distributed objec
 Use the following code to reload the PointRDD/PolygonRDD/LineStringRDD:
 
 ```python
-from geospark.core.formatMapper.disc_utils import load_spatial_rdd_from_disc, GeoType
+from sedona.core.formatMapper.disc_utils import load_spatial_rdd_from_disc, GeoType
 
 polygon_rdd = load_spatial_rdd_from_disc(sc, "hdfs://PATH", GeoType.POLYGON)
 point_rdd = load_spatial_rdd_from_disc(sc, "hdfs://PATH", GeoType.POINT)
@@ -664,64 +609,40 @@ All below methods will return SpatialRDD object which can be used with Spatial f
 
 ### Read from WKT file
 ```python
-from geospark.core.formatMapper import WktReader
+from sedona.core.formatMapper import WktReader
 
 WktReader.readToGeometryRDD(sc, wkt_geometries_location, 0, True, False)
 ```
 ```
-<geospark.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2fbf250>
+<sedona.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2fbf250>
 ```
 
 ### Read from WKB file
 ```python
-from geospark.core.formatMapper import WkbReader
+from sedona.core.formatMapper import WkbReader
 
 WkbReader.readToGeometryRDD(sc, wkb_geometries_location, 0, True, False)
 ```
 ```
-<geospark.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2eece50>
+<sedona.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2eece50>
 ```
 ### Read from GeoJson file
 
 ```python
-from geospark.core.formatMapper import GeoJsonReader
+from sedona.core.formatMapper import GeoJsonReader
 
 GeoJsonReader.readToGeometryRDD(sc, geo_json_file_location)
 ```
 ```
-<geospark.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2eecb90>
+<sedona.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2eecb90>
 ```
 ### Read from Shapefile
 
 ```python
-from geospark.core.formatMapper.shapefileParser import ShapefileReader
+from sedona.core.formatMapper.shapefileParser import ShapefileReader
 
 ShapefileReader.readToGeometryRDD(sc, shape_file_location)
 ```
 ```
-<geospark.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2ee0710>
+<sedona.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2ee0710>
 ```
-
-## Supported versions
-
-Currently this python wrapper supports the following Spark, GeoSpark and Python versions
-
-### Apache Spark
-
-<li> 2.2 </li>
-<li> 2.3 </li>
-<li> 2.4 </li>
-
-
-### GeoSpark
-
-<li> 1.3.1 </li>
-<li> 1.2.0 </li>
-
-### Python
-
-<li> 3.6 </li>
-<li> 3.7 </li>
-
-!!!note
-    Other versions may also work (or partially) but were not tested yet
