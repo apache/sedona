@@ -400,7 +400,6 @@ public class Circle
         if (type1 != type2) { return false; }
         if (radius1 != radius2) { return false; }
         return GeomUtils.equalsTopoGeom(this.centerGeometry, ((Circle) g).centerGeometry);
-//        return this.centerGeometry.equals(((Circle) g).centerGeometry);
     }
 
     /* (non-Javadoc)

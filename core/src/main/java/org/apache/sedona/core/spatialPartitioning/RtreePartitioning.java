@@ -73,6 +73,12 @@ public class RtreePartitioning
         return this.grids;
     }
 
+    /**
+     * This function traverses the boundaries of all leaf nodes.
+     * This function should be called after all insertions.
+     * @param stRtree
+     * @return The list of leaf nodes boundaries
+     */
     private List findLeafBounds(STRtree stRtree){
         stRtree.build();
         List boundaries = new ArrayList();
