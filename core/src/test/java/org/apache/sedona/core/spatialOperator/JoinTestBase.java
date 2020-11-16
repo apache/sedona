@@ -192,10 +192,8 @@ class JoinTestBase
     protected <T extends Geometry> void sanityCheckJoinResults(List<Tuple2<Polygon, HashSet<T>>> results)
     {
         for (final Tuple2<Polygon, HashSet<T>> tuple : results) {
-            assertNotNull(tuple._1().getUserData());
             assertFalse(tuple._2().isEmpty());
             for (final T shape : tuple._2()) {
-                assertNotNull(shape.getUserData());
                 assertTrue(tuple._1().intersects(shape));
             }
         }
@@ -204,8 +202,6 @@ class JoinTestBase
     protected <T extends Geometry> void sanityCheckFlatJoinResults(List<Tuple2<Polygon, T>> results)
     {
         for (final Tuple2<Polygon, T> tuple : results) {
-            assertNotNull(tuple._1().getUserData());
-            assertNotNull(tuple._2().getUserData());
             assertTrue(tuple._1().intersects(tuple._2()));
         }
     }

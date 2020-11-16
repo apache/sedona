@@ -26,6 +26,7 @@ import org.apache.sedona.core.spatialOperator.RangeQuery;
 import org.apache.sedona.core.spatialRDD.LineStringRDD;
 import org.apache.sedona.core.spatialRDD.PointRDD;
 import org.apache.sedona.core.spatialRDD.PolygonRDD;
+import org.apache.sedona.core.utils.GeomUtils;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.geotools.data.DataStore;
@@ -143,7 +144,7 @@ public class ShapefileRDDTest
                     geometry = multiPolygon.getGeometryN(0);
                 }
             }
-            featureTexts.add(String.valueOf(geometry));
+            featureTexts.add(GeomUtils.printGeom(geometry));
         }
         features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
@@ -186,7 +187,7 @@ public class ShapefileRDDTest
         ArrayList<String> featureTexts = new ArrayList<String>();
         while (features.hasNext()) {
             SimpleFeature feature = features.next();
-            featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
+            featureTexts.add(GeomUtils.printGeom(feature.getDefaultGeometry()));
         }
         features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
@@ -229,7 +230,7 @@ public class ShapefileRDDTest
         ArrayList<String> featureTexts = new ArrayList<String>();
         while (features.hasNext()) {
             SimpleFeature feature = features.next();
-            featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
+            featureTexts.add(GeomUtils.printGeom(feature.getDefaultGeometry()));
         }
         features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
@@ -264,7 +265,7 @@ public class ShapefileRDDTest
         ArrayList<String> featureTexts = new ArrayList<String>();
         while (features.hasNext()) {
             SimpleFeature feature = features.next();
-            featureTexts.add(String.valueOf(feature.getDefaultGeometry()));
+            featureTexts.add(GeomUtils.printGeom(feature.getDefaultGeometry()));
         }
         features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
@@ -314,7 +315,7 @@ public class ShapefileRDDTest
                     geometry = multiPolygon.getGeometryN(0);
                 }
             }
-            featureTexts.add(String.valueOf(geometry));
+            featureTexts.add(GeomUtils.printGeom(geometry));
         }
         features.close();
         final Iterator<String> featureIterator = featureTexts.iterator();
