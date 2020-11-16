@@ -20,6 +20,8 @@
 package org.apache.sedona.core.spatialPartitioning;
 
 import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.index.strtree.AbstractNode;
+import org.locationtech.jts.index.strtree.Boundable;
 import org.locationtech.jts.index.strtree.STRtree;
 
 import java.io.Serializable;
@@ -54,8 +56,7 @@ public class RtreePartitioning
         for (Envelope sample : samples) {
             strtree.insert(sample, sample);
         }
-
-        List<Envelope> envelopes = strtree.findLeafBounds();
+        List<Envelope> envelopes = findLeafBounds(strtree);
         for (Envelope envelope : envelopes) {
             grids.add(envelope);
         }
@@ -70,5 +71,43 @@ public class RtreePartitioning
     {
 
         return this.grids;
+    }
+
+    private List findLeafBounds(STRtree stRtree){
+        stRtree.build();
+        List boundaries = new ArrayList();
+        if (stRtree.isEmpty()) {
+            //Assert.isTrue(root.getBounds() == null);
+            //If the root is empty, we stop traversing. This should not happen.
+            return boundaries;
+        }
+        findLeafBounds(stRtree.getRoot(), boundaries);
+        return boundaries;
+    }
+
+    private void findLeafBounds(AbstractNode node, List boundaries) {
+        List childBoundables = node.getChildBoundables();
+        boolean flagLeafnode=true;
+        for (Object boundable : childBoundables) {
+            Boundable childBoundable = (Boundable) boundable;
+            if (childBoundable instanceof AbstractNode) {
+                //We find this is not a leaf node.
+                flagLeafnode = false;
+                break;
+            }
+        }
+        if(flagLeafnode)
+        {
+            boundaries.add(node.getBounds());
+        }
+        else
+        {
+            for (Object boundable : childBoundables) {
+                Boundable childBoundable = (Boundable) boundable;
+                if (childBoundable instanceof AbstractNode) {
+                    findLeafBounds((AbstractNode) childBoundable, boundaries);
+                }
+            }
+        }
     }
 }
