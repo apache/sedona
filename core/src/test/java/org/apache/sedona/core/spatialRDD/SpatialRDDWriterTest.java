@@ -22,15 +22,19 @@ package org.apache.sedona.core.spatialRDD;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.NullArgumentException;
 import org.apache.sedona.core.enums.FileDataSplitter;
+import org.apache.sedona.core.utils.GeomUtils;
 import org.apache.spark.storage.StorageLevel;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.locationtech.jts.geom.Point;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class SpatialRDDWriterTest
         extends SpatialRDDTestBase
@@ -85,7 +89,7 @@ public class SpatialRDDWriterTest
         PointRDD resultWKB = new PointRDD(sc, testSaveAsWKBWithData, 0, FileDataSplitter.WKB, true, numPartitions, StorageLevel.MEMORY_ONLY());
 
         assertEquals(resultWKB.rawSpatialRDD.count(), spatialRDD.rawSpatialRDD.count());
-        assertEquals(resultWKB.rawSpatialRDD.takeOrdered(5), spatialRDD.rawSpatialRDD.takeOrdered(5));
+        verifyResult(resultWKB.rawSpatialRDD.takeOrdered(5), spatialRDD.rawSpatialRDD.takeOrdered(5));
     }
 
     /**
@@ -105,7 +109,7 @@ public class SpatialRDDWriterTest
         PointRDD resultWKT = new PointRDD(sc, testSaveAsWKTWithData, 0, FileDataSplitter.WKT, true, numPartitions, StorageLevel.MEMORY_ONLY());
 
         assertEquals(resultWKT.rawSpatialRDD.count(), spatialRDD.rawSpatialRDD.count());
-        assertEquals(resultWKT.rawSpatialRDD.takeOrdered(5), spatialRDD.rawSpatialRDD.takeOrdered(5));
+        verifyResult(resultWKT.rawSpatialRDD.takeOrdered(5), spatialRDD.rawSpatialRDD.takeOrdered(5));
     }
 
     /**
@@ -125,7 +129,7 @@ public class SpatialRDDWriterTest
         PointRDD resultWKB = new PointRDD(sc, testSaveAsWKB, 0, FileDataSplitter.WKB, false, numPartitions, StorageLevel.MEMORY_ONLY());
 
         assertEquals(resultWKB.rawSpatialRDD.count(), spatialRDD.rawSpatialRDD.count());
-        assertEquals(resultWKB.rawSpatialRDD.takeOrdered(5), spatialRDD.rawSpatialRDD.takeOrdered(5));
+        verifyResult(resultWKB.rawSpatialRDD.takeOrdered(5), spatialRDD.rawSpatialRDD.takeOrdered(5));
     }
 
     /**
@@ -145,7 +149,7 @@ public class SpatialRDDWriterTest
         PointRDD resultWKT = new PointRDD(sc, testSaveAsWKT, 0, FileDataSplitter.WKT, false, numPartitions, StorageLevel.MEMORY_ONLY());
 
         assertEquals(resultWKT.rawSpatialRDD.count(), spatialRDD.rawSpatialRDD.count());
-        assertEquals(resultWKT.rawSpatialRDD.takeOrdered(5), spatialRDD.rawSpatialRDD.takeOrdered(5));
+        verifyResult(resultWKT.rawSpatialRDD.takeOrdered(5), spatialRDD.rawSpatialRDD.takeOrdered(5));
     }
 
     /**
@@ -157,5 +161,12 @@ public class SpatialRDDWriterTest
 
         PointRDD emptySpatialRDD = new PointRDD();
         emptySpatialRDD.saveAsWKB(testSaveAsEmptyWKB);
+    }
+
+    private void verifyResult(List<Point> left, List<Point> right){
+        assertEquals(left.size(), right.size());
+        for (int i = 0; i < left.size(); i++) {
+            assertTrue(GeomUtils.equalsExactGeom(left.get(i), right.get(i)));
+        }
     }
 }

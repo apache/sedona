@@ -34,12 +34,10 @@ import scala.Tuple2;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 class JoinTestBase
@@ -88,12 +86,9 @@ class JoinTestBase
 
     protected final GridType gridType;
 
-    protected final boolean useLegacyPartitionAPIs;
-
-    protected JoinTestBase(GridType gridType, boolean useLegacyPartitionAPIs, int numPartitions)
+    protected JoinTestBase(GridType gridType, int numPartitions)
     {
         this.gridType = gridType;
-        this.useLegacyPartitionAPIs = useLegacyPartitionAPIs;
         JoinTestBase.numPartitions = numPartitions;
     }
 
@@ -162,17 +157,7 @@ class JoinTestBase
             throws Exception
     {
         spatialRDD.spatialPartitioning(gridType);
-        if (useLegacyPartitionAPIs) {
-            if (gridType != GridType.QUADTREE) {
-                queryRDD.spatialPartitioning(spatialRDD.grids);
-            }
-            else {
-                queryRDD.spatialPartitioning(spatialRDD.partitionTree);
-            }
-        }
-        else {
-            queryRDD.spatialPartitioning(spatialRDD.getPartitioner());
-        }
+        queryRDD.spatialPartitioning(spatialRDD.getPartitioner());
     }
 
     protected boolean expectToPreserveOriginalDuplicates()
@@ -180,18 +165,18 @@ class JoinTestBase
         return gridType == GridType.QUADTREE || gridType == GridType.KDBTREE;
     }
 
-    protected <T extends Geometry> long countJoinResults(List<Tuple2<Polygon, HashSet<T>>> results)
+    protected <T extends Geometry> long countJoinResults(List<Tuple2<Polygon, List<T>>> results)
     {
         int count = 0;
-        for (final Tuple2<Polygon, HashSet<T>> tuple : results) {
+        for (final Tuple2<Polygon, List<T>> tuple : results) {
             count += tuple._2().size();
         }
         return count;
     }
 
-    protected <T extends Geometry> void sanityCheckJoinResults(List<Tuple2<Polygon, HashSet<T>>> results)
+    protected <T extends Geometry> void sanityCheckJoinResults(List<Tuple2<Polygon, List<T>>> results)
     {
-        for (final Tuple2<Polygon, HashSet<T>> tuple : results) {
+        for (final Tuple2<Polygon, List<T>> tuple : results) {
             assertFalse(tuple._2().isEmpty());
             for (final T shape : tuple._2()) {
                 assertTrue(tuple._1().intersects(shape));

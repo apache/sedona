@@ -32,7 +32,6 @@ import scala.Tuple2;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -47,20 +46,17 @@ public class PolygonJoinTest
     private static long expectedContainsWithOriginalDuplicatesCount;
     private static long expectedIntersectsWithOriginalDuplicatesCount;
 
-    public PolygonJoinTest(GridType gridType, boolean useLegacyPartitionAPIs, int numPartitions)
+    public PolygonJoinTest(GridType gridType, int numPartitions)
     {
-        super(gridType, useLegacyPartitionAPIs, numPartitions);
+        super(gridType, numPartitions);
     }
 
     @Parameterized.Parameters
     public static Collection testParams()
     {
         return Arrays.asList(new Object[][] {
-                {GridType.RTREE, true, 11},
-                {GridType.RTREE, false, 11},
-                {GridType.QUADTREE, true, 11},
-                {GridType.QUADTREE, false, 11},
-                {GridType.KDBTREE, false, 11},
+                {GridType.QUADTREE, 11},
+                {GridType.KDBTREE, 11},
         });
     }
 
@@ -160,9 +156,9 @@ public class PolygonJoinTest
 
         partitionRdds(queryRDD, spatialRDD);
 
-        List<Tuple2<Polygon, HashSet<Polygon>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, false, intersects).collect();
+        List<Tuple2<Polygon, List<Polygon>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, false, intersects).collect();
         sanityCheckJoinResults(result);
-        assertEquals(getExpectedCount(intersects), countJoinResults(result));
+        assertEquals(getExpectedWithOriginalDuplicatesCount(intersects), countJoinResults(result));
     }
 
     /**
@@ -207,9 +203,9 @@ public class PolygonJoinTest
         partitionRdds(queryRDD, spatialRDD);
         spatialRDD.buildIndex(indexType, true);
 
-        List<Tuple2<Polygon, HashSet<Polygon>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, true, intersects).collect();
+        List<Tuple2<Polygon, List<Polygon>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, true, intersects).collect();
         sanityCheckJoinResults(result);
-        assertEquals(getExpectedCount(intersects), countJoinResults(result));
+        assertEquals(getExpectedWithOriginalDuplicatesCount(intersects), countJoinResults(result));
     }
 
     private long getExpectedCount(boolean intersects)

@@ -19,6 +19,9 @@
 
 package org.apache.sedona.core.enums;
 
+import org.apache.log4j.Logger;
+import org.apache.sedona.core.formatMapper.FormatMapper;
+
 import java.io.Serializable;
 
 // TODO: Auto-generated Javadoc
@@ -29,33 +32,13 @@ import java.io.Serializable;
 public enum GridType
         implements Serializable
 {
-
     /**
-     * The equalgrid.
-     */
-    EQUALGRID,
-
-    /**
-     * The hilbert.
-     */
-    HILBERT,
-
-    /**
-     * The rtree.
-     */
-    RTREE,
-
-    /**
-     * The voronoi.
-     */
-    VORONOI,
-    /**
-     * The voronoi.
+     * The Quad-Tree partitioning.
      */
     QUADTREE,
 
     /**
-     * K-D-B-tree (k-dimensional B-tree)
+     * K-D-B-tree partitioning (k-dimensional B-tree)
      */
     KDBTREE;
 
@@ -67,9 +50,11 @@ public enum GridType
      */
     public static GridType getGridType(String str)
     {
+        final Logger logger = Logger.getLogger(GridType.class);
         for (GridType me : GridType.values()) {
             if (me.name().equalsIgnoreCase(str)) { return me; }
         }
+        logger.error("[Sedona] Choose quadtree or kdbtree instead. This grid type is not supported: " + str);
         return null;
     }
 }

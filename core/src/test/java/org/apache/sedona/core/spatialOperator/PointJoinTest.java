@@ -36,7 +36,6 @@ import scala.Tuple2;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -51,20 +50,17 @@ public class PointJoinTest
     private static long expectedPolygonMatchCount;
     private static long expectedPolygonMatchWithOriginalDuplicatesCount;
 
-    public PointJoinTest(GridType gridType, boolean useLegacyPartitionAPIs, int numPartitions)
+    public PointJoinTest(GridType gridType, int numPartitions)
     {
-        super(gridType, useLegacyPartitionAPIs, numPartitions);
+        super(gridType, numPartitions);
     }
 
     @Parameterized.Parameters
     public static Collection testParams()
     {
         return Arrays.asList(new Object[][] {
-                {GridType.RTREE, true, 11},
-                {GridType.RTREE, false, 11},
-                {GridType.QUADTREE, true, 11},
-                {GridType.QUADTREE, false, 11},
-                {GridType.KDBTREE, false, 11},
+                {GridType.QUADTREE, 11},
+                {GridType.KDBTREE, 11},
         });
     }
 
@@ -115,7 +111,9 @@ public class PointJoinTest
             throws Exception
     {
         PolygonRDD queryRDD = createPolygonRDD();
-        testNestedLoopInt(queryRDD, expectedPolygonMatchCount);
+        final long expectedCount = expectToPreserveOriginalDuplicates()
+                ? expectedPolygonMatchWithOriginalDuplicatesCount : expectedPolygonMatchCount;
+        testNestedLoopInt(queryRDD, expectedCount);
     }
 
     private void testNestedLoopInt(SpatialRDD<Polygon> queryRDD, long expectedCount)
@@ -125,7 +123,7 @@ public class PointJoinTest
 
         partitionRdds(queryRDD, spatialRDD);
 
-        List<Tuple2<Polygon, HashSet<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, false, true).collect();
+        List<Tuple2<Polygon, List<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, false, true).collect();
 
         sanityCheckJoinResults(result);
         assertEquals(expectedCount, countJoinResults(result));
@@ -154,7 +152,9 @@ public class PointJoinTest
             throws Exception
     {
         PolygonRDD queryRDD = createPolygonRDD();
-        testIndexInt(queryRDD, IndexType.RTREE, expectedPolygonMatchCount);
+        final long expectedCount = expectToPreserveOriginalDuplicates()
+                ? expectedPolygonMatchWithOriginalDuplicatesCount : expectedPolygonMatchCount;
+        testIndexInt(queryRDD, IndexType.RTREE, expectedCount);
     }
 
     /**
@@ -180,7 +180,9 @@ public class PointJoinTest
             throws Exception
     {
         PolygonRDD queryRDD = createPolygonRDD();
-        testIndexInt(queryRDD, IndexType.QUADTREE, expectedPolygonMatchCount);
+        final long expectedCount = expectToPreserveOriginalDuplicates()
+                ? expectedPolygonMatchWithOriginalDuplicatesCount : expectedPolygonMatchCount;
+        testIndexInt(queryRDD, IndexType.QUADTREE, expectedCount);
     }
 
     private void testIndexInt(SpatialRDD<Polygon> queryRDD, IndexType indexType, long expectedCount)
@@ -191,7 +193,7 @@ public class PointJoinTest
         partitionRdds(queryRDD, spatialRDD);
         spatialRDD.buildIndex(indexType, true);
 
-        List<Tuple2<Polygon, HashSet<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, false, true).collect();
+        List<Tuple2<Polygon, List<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, false, true).collect();
 
         sanityCheckJoinResults(result);
         assertEquals(expectedCount, countJoinResults(result));

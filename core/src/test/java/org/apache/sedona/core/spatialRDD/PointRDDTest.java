@@ -18,13 +18,11 @@
  */
 package org.apache.sedona.core.spatialRDD;
 
-import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.spark.storage.StorageLevel;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.index.strtree.STRtree;
 
@@ -86,74 +84,6 @@ public class PointRDDTest
         spatialRDDcopy.rawSpatialRDD = spatialRDD.rawSpatialRDD;
         spatialRDDcopy.indexedRawRDD = spatialRDD.indexedRawRDD;
         spatialRDDcopy.analyze();
-    }
-
-    /**
-     * Test equal partitioning.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testEqualPartitioning()
-            throws Exception
-    {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, false, 10, StorageLevel.MEMORY_ONLY());
-        spatialRDD.spatialPartitioning(GridType.EQUALGRID);
-        for (Envelope d : spatialRDD.grids) {
-            //System.out.println("PointRDD spatial partitioning grids: "+d);
-        }
-        assert spatialRDD.countWithoutDuplicates() == spatialRDD.countWithoutDuplicatesSPRDD();
-    }
-
-    /**
-     * Test hilbert curve spatial partitioing.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testHilbertCurveSpatialPartitioing()
-            throws Exception
-    {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, false, 10, StorageLevel.MEMORY_ONLY());
-        spatialRDD.spatialPartitioning(GridType.HILBERT);
-        for (Envelope d : spatialRDD.grids) {
-            //System.out.println("PointRDD spatial partitioning grids: "+d.grid);
-        }
-        assert spatialRDD.countWithoutDuplicates() == spatialRDD.countWithoutDuplicatesSPRDD();
-    }
-
-    /**
-     * Test R tree spatial partitioing.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testRTreeSpatialPartitioing()
-            throws Exception
-    {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, 10, StorageLevel.MEMORY_ONLY());
-        spatialRDD.spatialPartitioning(GridType.RTREE);
-        for (Envelope d : spatialRDD.grids) {
-            //System.out.println("PointRDD spatial partitioning grids: "+d);
-        }
-        assert spatialRDD.countWithoutDuplicates() == spatialRDD.countWithoutDuplicatesSPRDD();
-    }
-
-    /**
-     * Test voronoi spatial partitioing.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testVoronoiSpatialPartitioing()
-            throws Exception
-    {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, false, 10, StorageLevel.MEMORY_ONLY());
-        spatialRDD.spatialPartitioning(GridType.VORONOI);
-        for (Envelope d : spatialRDD.grids) {
-            //System.out.println("PointRDD spatial partitioning grids: "+d.grid);
-        }
-        assert spatialRDD.countWithoutDuplicates() == spatialRDD.countWithoutDuplicatesSPRDD();
     }
 
     /**

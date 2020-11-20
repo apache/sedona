@@ -24,7 +24,7 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import org.apache.sedona.core.geometryObjects.Circle;
 import org.apache.sedona.core.geometryObjects.GeometrySerde;
-import org.junit.Assert;
+import org.apache.sedona.core.utils.GeomUtils;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -32,6 +32,8 @@ import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 
 import java.io.ByteArrayOutputStream;
+
+import static org.junit.Assert.assertTrue;
 
 public class GeometrySerdeTest
 {
@@ -57,17 +59,17 @@ public class GeometrySerdeTest
             throws Exception
     {
         Geometry geometry = parseWkt(wkt);
-        Assert.assertEquals(geometry, serde(geometry));
+        assertTrue(GeomUtils.equalsExactGeom(geometry, serde(geometry)));
 
         geometry.setUserData("This is a test");
-        Assert.assertEquals(geometry, serde(geometry));
+        assertTrue(GeomUtils.equalsExactGeom(geometry, serde(geometry)));
 
         if (geometry instanceof GeometryCollection) {
             return;
         }
 
         Circle circle = new Circle(geometry, 1.2);
-        Assert.assertEquals(circle, serde(circle));
+        assertTrue(GeomUtils.equalsExactGeom(circle, serde(circle)));
     }
 
     private Geometry parseWkt(String wkt)

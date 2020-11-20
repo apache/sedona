@@ -114,12 +114,6 @@ public class SpatialRDD<T extends Geometry>
      */
     public JavaRDD<T> rawSpatialRDD;
 
-    /**
-     * The grids.
-     */
-    public List<Envelope> grids;
-
-    public StandardQuadTree partitionTree;
     public List<String> fieldNames;
     /**
      * The CR stransformation.
@@ -262,34 +256,9 @@ public class SpatialRDD<T extends Geometry>
                 boundaryEnvelope.getMinY(), boundaryEnvelope.getMaxY() + 0.01);
 
         switch (gridType) {
-            case EQUALGRID: {
-                EqualPartitioning EqualPartitioning = new EqualPartitioning(paddedBoundary, numPartitions);
-                grids = EqualPartitioning.getGrids();
-                partitioner = new FlatGridPartitioner(grids);
-                break;
-            }
-            case HILBERT: {
-                HilbertPartitioning hilbertPartitioning = new HilbertPartitioning(samples, paddedBoundary, numPartitions);
-                grids = hilbertPartitioning.getGrids();
-                partitioner = new FlatGridPartitioner(grids);
-                break;
-            }
-            case RTREE: {
-                RtreePartitioning rtreePartitioning = new RtreePartitioning(samples, numPartitions);
-                grids = rtreePartitioning.getGrids();
-                partitioner = new FlatGridPartitioner(grids);
-                break;
-            }
-            case VORONOI: {
-                VoronoiPartitioning voronoiPartitioning = new VoronoiPartitioning(samples, numPartitions);
-                grids = voronoiPartitioning.getGrids();
-                partitioner = new FlatGridPartitioner(grids);
-                break;
-            }
             case QUADTREE: {
                 QuadtreePartitioning quadtreePartitioning = new QuadtreePartitioning(samples, paddedBoundary, numPartitions);
-                partitionTree = quadtreePartitioning.getPartitionTree();
-                partitioner = new QuadTreePartitioner(partitionTree);
+                partitioner = new QuadTreePartitioner(quadtreePartitioning.getPartitionTree());
                 break;
             }
             case KDBTREE: {
@@ -302,7 +271,8 @@ public class SpatialRDD<T extends Geometry>
                 break;
             }
             default:
-                throw new Exception("[AbstractSpatialRDD][spatialPartitioning] Unsupported spatial partitioning method.");
+                throw new Exception("[AbstractSpatialRDD][spatialPartitioning] Unsupported spatial partitioning method. " +
+                        "The following partitioning methods are not longer supported: R-Tree, Hilbert curve, Voronoi, Equal-Grids");
         }
 
         this.spatialPartitionedRDD = partition(partitioner);
@@ -327,7 +297,6 @@ public class SpatialRDD<T extends Geometry>
     {
         this.partitioner = new FlatGridPartitioner(otherGrids);
         this.spatialPartitionedRDD = partition(partitioner);
-        this.grids = otherGrids;
         return true;
     }
 
@@ -339,7 +308,6 @@ public class SpatialRDD<T extends Geometry>
     {
         this.partitioner = new QuadTreePartitioner(partitionTree);
         this.spatialPartitionedRDD = partition(partitioner);
-        this.partitionTree = partitionTree;
         return true;
     }
 
