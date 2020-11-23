@@ -373,6 +373,14 @@ public class Circle
         return newCircle;
     }
 
+    @Override
+    protected Geometry reverseInternal()
+    {
+        Geometry g = this.centerGeometry.reverse();
+        Circle newCircle = new Circle(g, this.radius);
+        return newCircle;
+    }
+
     public Geometry copy()
     {
         Circle cloneCircle = new Circle(this.centerGeometry.copy(), this.radius);
@@ -500,7 +508,7 @@ public class Circle
     }
 
     @Override
-    protected int getSortIndex()
+    protected int getTypeCode()
     {
         return 0;
     }
