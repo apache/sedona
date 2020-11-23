@@ -42,9 +42,9 @@ public class IndexSerde
             boolean built = (input.readByte() & 0x01) == 1;
             if (built) {
                 // if built, root is not null, set itemBoundables to null
-                index.setBuilt(true);
-                index.setItemBoundables(null);
-                index.setRoot(readSTRtreeNode(kryo, input));
+                index.built = true;
+                index.itemBoundables = null;
+                index.root = readSTRtreeNode(kryo, input);
             }
             else {
                 // if not built, just read itemBoundables
@@ -53,7 +53,7 @@ public class IndexSerde
                 for (int i = 0; i < itemSize; ++i) {
                     itemBoundables.add(readItemBoundable(kryo, input));
                 }
-                index.setItemBoundables(itemBoundables);
+                index.itemBoundables = itemBoundables;
             }
             return index;
         }
@@ -68,10 +68,10 @@ public class IndexSerde
         else {
             output.writeByte(1);
             // write head
-            output.writeByte(tree.isBuilt() ? 1 : 0);
-            if (!tree.isBuilt()) {
+            output.writeByte(tree.built ? 1 : 0);
+            if (!tree.built) {
                 // if not built, itemBoundables will not be null, record it
-                ArrayList itemBoundables = tree.getItemBoundables();
+                ArrayList itemBoundables = tree.itemBoundables;
                 output.writeInt(itemBoundables.size());
                 for (Object obj : itemBoundables) {
                     if (!(obj instanceof ItemBoundable)) { throw new UnsupportedOperationException(" itemBoundables should only contain ItemBoundable objects "); }
@@ -136,7 +136,7 @@ public class IndexSerde
                 children.add(readSTRtreeNode(kryo, input));
             }
         }
-        node.setChildBoundables(children);
+        node.childBoundables = children;
         return node;
     }
 

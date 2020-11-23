@@ -43,9 +43,9 @@ public class IndexSerde
         for (int i = 0; i < itemSize; ++i) {
             items.add(geometrySerde.read(kryo, input, Geometry.class));
         }
-        index.getRoot().setItems(items);
+        index.root.items = items;
         for (int i = 0; i < 4; ++i) {
-            index.getRoot().getSubnode()[i] = readQuadTreeNode(kryo, input);
+            index.root.subnode[i] = readQuadTreeNode(kryo, input);
         }
         return index;
     }
@@ -58,12 +58,12 @@ public class IndexSerde
         else {
             output.writeByte(1);
             // write root
-            List items = tree.getRoot().getItems();
+            List items = tree.root.getItems();
             output.writeInt(items.size());
             for (Object item : items) {
                 geometrySerde.write(kryo, output, item);
             }
-            Node[] subNodes = tree.getRoot().getSubnode();
+            Node[] subNodes = tree.root.subnode;
             for (int i = 0; i < 4; ++i) {
                 writeQuadTreeNode(kryo, output, subNodes[i]);
             }
@@ -80,13 +80,13 @@ public class IndexSerde
             output.writeByte(1);
             // write node information, envelope and level
             geometrySerde.write(kryo, output, node.getEnvelope());
-            output.writeInt(node.getLevel());
+            output.writeInt(node.level);
             List items = node.getItems();
             output.writeInt(items.size());
             for (Object obj : items) {
                 geometrySerde.write(kryo, output, obj);
             }
-            Node[] subNodes = node.getSubnode();
+            Node[] subNodes = node.subnode;
             for (int i = 0; i < 4; ++i) {
                 writeQuadTreeNode(kryo, output, subNodes[i]);
             }
@@ -105,10 +105,10 @@ public class IndexSerde
         for (int i = 0; i < itemSize; ++i) {
             items.add(geometrySerde.read(kryo, input, Geometry.class));
         }
-        node.setItems(items);
+        node.items = items;
         // read children
         for (int i = 0; i < 4; ++i) {
-            node.getSubnode()[i] = readQuadTreeNode(kryo, input);
+            node.subnode[i] = readQuadTreeNode(kryo, input);
         }
         return node;
     }
