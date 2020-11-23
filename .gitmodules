@@ -4,4 +4,4 @@
 [submodule "jts"]
 	path = jts
 	url = https://github.com/jiayuasu/jts.git
-	branch = 1.16.x
+	branch = add-getter-setter
