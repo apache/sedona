@@ -38,13 +38,11 @@ public class IndexSerde
         int nodeCapacity = input.readInt();
         boolean notEmpty = (input.readByte() & 0x01) == 1;
         if (notEmpty) {
-            STRtree index = new STRtree(nodeCapacity);
             boolean built = (input.readByte() & 0x01) == 1;
             if (built) {
                 // if built, root is not null, set itemBoundables to null
-                index.built = true;
-                index.itemBoundables = null;
-                index.root = readSTRtreeNode(kryo, input);
+                STRtree index = new STRtree(nodeCapacity, readSTRtreeNode(kryo, input));
+                return index;
             }
             else {
                 // if not built, just read itemBoundables
@@ -53,9 +51,9 @@ public class IndexSerde
                 for (int i = 0; i < itemSize; ++i) {
                     itemBoundables.add(readItemBoundable(kryo, input));
                 }
-                index.itemBoundables = itemBoundables;
+                STRtree index = new STRtree(nodeCapacity, itemBoundables);
+                return index;
             }
-            return index;
         }
         else { return new STRtree(nodeCapacity); }
     }
@@ -68,10 +66,11 @@ public class IndexSerde
         else {
             output.writeByte(1);
             // write head
-            output.writeByte(tree.built ? 1 : 0);
-            if (!tree.built) {
+            boolean isBuilt = tree.getItemBoundables() == null;
+            output.writeByte(isBuilt ? 1 : 0);
+            if (!isBuilt) {
                 // if not built, itemBoundables will not be null, record it
-                ArrayList itemBoundables = tree.itemBoundables;
+                ArrayList itemBoundables = tree.getItemBoundables();
                 output.writeInt(itemBoundables.size());
                 for (Object obj : itemBoundables) {
                     if (!(obj instanceof ItemBoundable)) { throw new UnsupportedOperationException(" itemBoundables should only contain ItemBoundable objects "); }
@@ -136,7 +135,7 @@ public class IndexSerde
                 children.add(readSTRtreeNode(kryo, input));
             }
         }
-        node.childBoundables = children;
+        node.setChildBoundables(children);
         return node;
     }
 

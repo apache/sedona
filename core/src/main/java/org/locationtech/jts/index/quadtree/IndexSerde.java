@@ -43,9 +43,9 @@ public class IndexSerde
         for (int i = 0; i < itemSize; ++i) {
             items.add(geometrySerde.read(kryo, input, Geometry.class));
         }
-        index.root.items = items;
+        index.getRoot().items = items;
         for (int i = 0; i < 4; ++i) {
-            index.root.subnode[i] = readQuadTreeNode(kryo, input);
+            index.getRoot().subnode[i] = readQuadTreeNode(kryo, input);
         }
         return index;
     }
@@ -58,12 +58,12 @@ public class IndexSerde
         else {
             output.writeByte(1);
             // write root
-            List items = tree.root.getItems();
+            List items = tree.getRoot().getItems();
             output.writeInt(items.size());
             for (Object item : items) {
                 geometrySerde.write(kryo, output, item);
             }
-            Node[] subNodes = tree.root.subnode;
+            Node[] subNodes = tree.getRoot().subnode;
             for (int i = 0; i < 4; ++i) {
                 writeQuadTreeNode(kryo, output, subNodes[i]);
             }
@@ -80,7 +80,7 @@ public class IndexSerde
             output.writeByte(1);
             // write node information, envelope and level
             geometrySerde.write(kryo, output, node.getEnvelope());
-            output.writeInt(node.level);
+            output.writeInt(node.getLevel());
             List items = node.getItems();
             output.writeInt(items.size());
             for (Object obj : items) {
