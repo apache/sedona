@@ -69,6 +69,23 @@
         <!--for CRS transformation-->
         <dependency>
             <groupId>org.geotools</groupId>
+            <artifactId>gt-main</artifactId>
+            <version>${geotools.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vividsolutions</groupId>
+                    <artifactId>jts</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!--for CRS transformation-->
+        <dependency>
+            <groupId>org.geotools</groupId>
             <artifactId>gt-referencing</artifactId>
             <version>${geotools.version}</version>
             <scope>provided</scope>
