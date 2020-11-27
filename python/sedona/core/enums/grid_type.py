@@ -25,10 +25,6 @@ from sedona.utils.decorators import require
 
 class GridType(Enum):
 
-    EQUALGRID = "EQUALGRID"
-    HILBERT = "HILBERT"
-    RTREE = "RTREE"
-    VORONOI = "VORONOI"
     QUADTREE = "QUADTREE"
     KDBTREE = "KDBTREE"
 

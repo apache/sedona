@@ -20,10 +20,11 @@
 package org.apache.sedona.python.wrapper
 
 import org.apache.sedona.python.wrapper.translation.{FlatPairRddConverter, GeometryRddConverter, HashSetPairRddConverter}
-import org.apache.sedona.python.wrapper.utils.implicits.ListConverter
 import org.apache.spark.api.java.JavaPairRDD
 import org.scalatest.Matchers
 import org.apache.sedona.python.wrapper.utils.implicits._
+import scala.collection.JavaConverters._
+
 
 class TestToPythonSerialization extends SparkUtil with GeometrySample with Matchers {
 
@@ -45,7 +46,7 @@ class TestToPythonSerialization extends SparkUtil with GeometrySample with Match
     }) should contain theSameElementsAs expectedPairRDDPythonArray
   }
 
-  test("Should serialize to Python JavaRDD[Geometry, HashSet[Geometry]]") {
+  test("Should serialize to Python JavaRDD[Geometry, List[Geometry]]") {
     val translatedToPythonHashSet = HashSetPairRddConverter(
       JavaPairRDD.fromRDD(spatialPairRDDWithHashSet), pythonGeometrySerializer).translateToPython
     val existingValues = translatedToPythonHashSet.collect().toArray().toList.map {
@@ -66,7 +67,7 @@ class TestToPythonSerialization extends SparkUtil with GeometrySample with Match
 
   private val spatialPairRDDWithHashSet = sc.parallelize(
     samplePolygons.map(
-      polygon => (polygon, samplePoints.slice(0, 2).toJavaHashSet)
+      polygon => (polygon, samplePoints.slice(0, 2).asJava)
     )
   )
 

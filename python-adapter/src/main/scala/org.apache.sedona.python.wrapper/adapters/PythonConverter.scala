@@ -33,7 +33,7 @@ object PythonConverter extends GeomSerializer {
   def translateSpatialPairRDDToPython(spatialRDD: JavaPairRDD[Geometry, Geometry]): JavaRDD[Array[Byte]] =
     FlatPairRddConverter(spatialRDD, geometrySerializer).translateToPython
 
-  def translateSpatialPairRDDWithHashSetToPython(spatialRDD: JavaPairRDD[Geometry, java.util.HashSet[Geometry]]): JavaRDD[Array[Byte]] =
+  def translateSpatialPairRDDWithHashSetToPython(spatialRDD: JavaPairRDD[Geometry, java.util.List[Geometry]]): JavaRDD[Array[Byte]] =
     HashSetPairRddConverter(spatialRDD, geometrySerializer).translateToPython
 
   def translatePythonRDDToJava(pythonRDD: JavaRDD[Array[Byte]]): JavaRDD[Geometry] =

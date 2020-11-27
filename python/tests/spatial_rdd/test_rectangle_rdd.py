@@ -92,62 +92,6 @@ class TestRectangleRDD(TestBase):
         spatial_rdd_copy.rawJvmSpatialRDD = spatial_rdd.rawJvmSpatialRDD
         spatial_rdd_copy.analyze()
 
-    def test_hilbert_curve_spatial_partitioning(self):
-        spatial_rdd = RectangleRDD(
-            sparkContext=self.sc,
-            InputLocation=inputLocation,
-            Offset=offset,
-            splitter=splitter,
-            carryInputData=True,
-            partitions=10,
-            newLevel=StorageLevel.MEMORY_ONLY
-        )
-        spatial_rdd.analyze()
-
-        spatial_rdd.spatialPartitioning(GridType.HILBERT)
-
-        for envelope in spatial_rdd.grids:
-            print(envelope)
-
-        assert spatial_rdd.countWithoutDuplicates() == spatial_rdd.countWithoutDuplicatesSPRDD()
-
-    def test_rtree_spatial_partitioning(self):
-        spatial_rdd = RectangleRDD(
-            sparkContext=self.sc,
-            InputLocation=inputLocation,
-            Offset=offset,
-            splitter=splitter,
-            carryInputData=True,
-            partitions=10,
-            newLevel=StorageLevel.MEMORY_ONLY
-        )
-
-        spatial_rdd.analyze()
-
-        spatial_rdd.spatialPartitioning(GridType.RTREE)
-
-        for envelope in spatial_rdd.grids:
-            print(spatial_rdd)
-
-        assert spatial_rdd.countWithoutDuplicates() == spatial_rdd.countWithoutDuplicatesSPRDD()
-
-    def test_voronoi_spatial_partitioning(self):
-        spatial_rdd = RectangleRDD(
-            sparkContext=self.sc,
-            InputLocation=inputLocation,
-            Offset=offset,
-            splitter=splitter,
-            carryInputData=True,
-            partitions=10,
-            newLevel=StorageLevel.MEMORY_ONLY
-        )
-        spatial_rdd.analyze()
-        spatial_rdd.spatialPartitioning(GridType.VORONOI)
-        for envelope in spatial_rdd.grids:
-            print(envelope)
-
-        assert spatial_rdd.countWithoutDuplicates() == spatial_rdd.countWithoutDuplicatesSPRDD()
-
     def test_build_index_without_set_grid(self):
         spatial_rdd = RectangleRDD(
             sparkContext=self.sc,

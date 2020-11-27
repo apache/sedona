@@ -57,9 +57,6 @@ class TestPointRange(TestBase):
                 SpatialRangeQuery(spatial_rdd, self.query_envelope, False, False)\
                 .count()
             assert result_size == 2830
-        assert RangeQuery.SpatialRangeQuery(
-            spatial_rdd, self.query_envelope, False, False).take(10)[1].\
-                   getUserData() is not None
 
     def test_spatial_range_query_using_index(self):
         spatial_rdd = PointRDD(self.sc, input_location, offset, splitter, False)
@@ -71,6 +68,3 @@ class TestPointRange(TestBase):
                 SpatialRangeQuery(spatial_rdd, self.query_envelope, False, False)\
                 .count()
             assert result_size == 2830
-        assert RangeQuery.SpatialRangeQuery(
-            spatial_rdd, self.query_envelope, False, False).take(10)[1].\
-                   getUserData() is not None

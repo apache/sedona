@@ -19,14 +19,13 @@ import os
 
 from shapely.geometry import Point
 
-from sedona.core.enums import FileDataSplitter, GridType, IndexType
+from sedona.core.enums import FileDataSplitter, IndexType
 from sedona.core.geom.envelope import Envelope
 from tests.tools import tests_path
 
 input_location = os.path.join(tests_path, "resources/crs-test-point.csv")
 offset = 0
 splitter = FileDataSplitter.CSV
-grid_type = GridType.RTREE
 index_type = IndexType.RTREE
 num_partitions = 11
 distance = 0.01

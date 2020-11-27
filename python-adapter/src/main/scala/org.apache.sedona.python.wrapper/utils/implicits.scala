@@ -48,9 +48,14 @@ object implicits {
   }
 
   implicit class GeometryEnhancer(geometry: Geometry) {
-    def userDataToUtf8ByteArray: Array[Byte] =
-      geometry.getUserData.asInstanceOf[String]
-        .getBytes(StandardCharsets.UTF_8)
+    private val EMPTY_STRING = ""
+
+    def userDataToUtf8ByteArray: Array[Byte] = {
+      geometry.getUserData match {
+        case null => EMPTY_STRING.getBytes(StandardCharsets.UTF_8)
+        case data: String => data.getBytes(StandardCharsets.UTF_8)
+      }
+    }
   }
 
   implicit class ListConverter[T](elements: List[T]) {

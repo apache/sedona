@@ -185,7 +185,7 @@ class TestJoinQueryCorrectness(TestBase):
 
     @classmethod
     def verify_join_result(cls, result):
-        assert 200 == result.__len__()
+        assert 100 == result.__len__()
 
     @classmethod
     def make_square(cls, minx: float, miny: float, side: float) -> Polygon:

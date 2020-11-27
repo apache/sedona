@@ -152,8 +152,8 @@ class TestDiscUtils(TestBase):
         linestring_rdd.analyze()
         print(linestring_rdd.boundaryEnvelope)
 
-        linestring_rdd.spatialPartitioning(GridType.RTREE)
-        polygon_rdd.spatialPartitioning(linestring_rdd.grids)
+        linestring_rdd.spatialPartitioning(GridType.KDBTREE)
+        polygon_rdd.spatialPartitioning(linestring_rdd.getPartitioner())
         polygon_rdd.buildIndex(IndexType.RTREE, True)
         linestring_rdd.buildIndex(IndexType.RTREE, True)
 

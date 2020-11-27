@@ -23,7 +23,7 @@ import org.apache.sedona.python.wrapper.utils.implicits._
 import org.apache.spark.api.java.{JavaPairRDD, JavaRDD}
 import org.locationtech.jts.geom.Geometry
 
-private[python] case class HashSetPairRddConverter(spatialRDD: JavaPairRDD[Geometry, java.util.HashSet[Geometry]],
+private[python] case class HashSetPairRddConverter(spatialRDD: JavaPairRDD[Geometry, java.util.List[Geometry]],
                                                    geometrySerializer: PythonGeometrySerializer) extends RDDToPythonConverter {
   override def translateToPython: JavaRDD[Array[Byte]] = {
     spatialRDD.rdd.map[Array[Byte]](
