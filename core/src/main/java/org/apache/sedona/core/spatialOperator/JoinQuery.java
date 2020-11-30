@@ -34,6 +34,7 @@ import org.apache.sedona.core.monitoring.Metric;
 import org.apache.sedona.core.spatialPartitioning.SpatialPartitioner;
 import org.apache.sedona.core.spatialRDD.CircleRDD;
 import org.apache.sedona.core.spatialRDD.SpatialRDD;
+import org.apache.sedona.core.utils.GeomUtils;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -44,6 +45,7 @@ import org.locationtech.jts.geom.Geometry;
 import scala.Tuple2;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -88,16 +90,15 @@ public class JoinQuery
 
     private static <U extends Geometry, T extends Geometry> JavaPairRDD<U, List<T>> collectGeometriesByKey(JavaPairRDD<U, T> input)
     {
-        return input.aggregateByKey(
-                new ArrayList<>(),
-                (Function2<List<T>, T, List<T>>) (ts, t) -> {
-                    ts.add(t);
-                    return ts;
-                },
-                (Function2<List<T>, List<T>, List<T>>) (ts, ts2) -> {
-                    ts.addAll(ts2);
-                    return ts;
-                });
+        return input.groupBy(t -> GeomUtils.printGeom(t._1).hashCode()).<U, List<T>>mapToPair(t -> {
+            List<T> values = new ArrayList<T>();
+            Iterator<Tuple2<U, T>> it = t._2.iterator();
+            Tuple2<U, T> firstTpl = it.next();
+            U key = firstTpl._1;
+            values.add(firstTpl._2);
+            while (it.hasNext()) { values.add(it.next()._2); }
+            return new Tuple2<U, List<T>>(key, values);
+        });
     }
 
     private static <U extends Geometry, T extends Geometry> JavaPairRDD<U, Long> countGeometriesByKey(JavaPairRDD<U, T> input)

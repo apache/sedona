@@ -395,7 +395,7 @@ public class JoinQueryCorrectnessChecker
 
     private <U extends Geometry, T extends Geometry> void verifyJoinResults(List<Tuple2<U, List<T>>> result)
     {
-        assertEquals(100, result.size());
+        assertEquals(200, result.size());
         for (Tuple2<U, List<T>> tuple : result) {
             U window = tuple._1;
             List<T> objects = tuple._2;
@@ -406,7 +406,7 @@ public class JoinQueryCorrectnessChecker
             String id = tokens[1];
 
             assertTrue(prefix.equals("a") || prefix.equals("b"));
-            assertEquals(4, objects.size());
+            assertEquals(2, objects.size());
 
             final Set<String> objectIds = new HashSet<>();
             for (T object : objects) {
