@@ -22,7 +22,6 @@ import attr
 
 @attr.s
 class JvmObject(ABC):
-
     jvm = attr.ib()
 
     def _create_jvm_instance(self):

@@ -145,7 +145,8 @@ class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
             partitions
         )
 
-    def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter, carryInputData: bool):
+    def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter,
+                 carryInputData: bool):
         """
 
         :param sparkContext: SparkContext, the spark context
@@ -165,7 +166,7 @@ class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
         )
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, Offset: int,
-            splitter: FileDataSplitter, carryInputData: bool, partitions: int, newLevel: StorageLevel):
+                 splitter: FileDataSplitter, carryInputData: bool, partitions: int, newLevel: StorageLevel):
         """
 
         :param sparkContext: SparkContext, the spark context
@@ -191,7 +192,7 @@ class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
         )
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, Offset: int,
-            splitter: FileDataSplitter, carryInputData: bool, newLevel: StorageLevel):
+                 splitter: FileDataSplitter, carryInputData: bool, newLevel: StorageLevel):
         """
 
         :param sparkContext: SparkContext, the spark context
@@ -216,7 +217,7 @@ class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
         )
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str,
-            splitter: FileDataSplitter, carryInputData: bool, partitions: int, newLevel: StorageLevel):
+                 splitter: FileDataSplitter, carryInputData: bool, partitions: int, newLevel: StorageLevel):
         """
 
         :param sparkContext: SparkContext, the spark context
@@ -241,7 +242,7 @@ class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
         )
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str,
-            splitter: FileDataSplitter, carryInputData: bool, newLevel: StorageLevel):
+                 splitter: FileDataSplitter, carryInputData: bool, newLevel: StorageLevel):
         """
 
         :param sparkContext: SparkContext, the spark context
@@ -278,7 +279,7 @@ class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
         self._srdd = self._jvm_spatial_rdd(jsrdd, new_level_jvm, sourceEpsgCRSCode, targetEpsgCode)
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, Offset: int,
-            splitter: FileDataSplitter, carryInputData: bool, partitions: int, newLevel: StorageLevel,
+                 splitter: FileDataSplitter, carryInputData: bool, partitions: int, newLevel: StorageLevel,
                  sourceEpsgCRSCode: str, targetEpsgCode: str):
         """
 
@@ -310,8 +311,8 @@ class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
         )
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, Offset: int,
-            splitter: FileDataSplitter, carryInputData: bool, newLevel: StorageLevel, sourceEpsgCRSCode: str,
-            targetEpsgCode: str):
+                 splitter: FileDataSplitter, carryInputData: bool, newLevel: StorageLevel, sourceEpsgCRSCode: str,
+                 targetEpsgCode: str):
         """
 
         :param sparkContext: SparkContext, the spark context
@@ -339,7 +340,7 @@ class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
         )
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter, carryInputData: bool,
-                 partitions: int, newLevel: StorageLevel, sourceEpsgCRSCode: str,  targetEpsgCode: str):
+                 partitions: int, newLevel: StorageLevel, sourceEpsgCRSCode: str, targetEpsgCode: str):
         """
 
         :param sparkContext: SparkContext, the spark context

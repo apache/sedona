@@ -25,7 +25,8 @@ from sedona.utils.meta import MultipleMeta
 class WkbReader(GeoDataReader, metaclass=MultipleMeta):
 
     @classmethod
-    def readToGeometryRDD(cls, sc: SparkContext, inputPath: str, wkbColumn: int, allowInvalidGeometries: bool, skipSyntacticallyInvalidGeometries: bool) -> SpatialRDD:
+    def readToGeometryRDD(cls, sc: SparkContext, inputPath: str, wkbColumn: int, allowInvalidGeometries: bool,
+                          skipSyntacticallyInvalidGeometries: bool) -> SpatialRDD:
         """
 
         :param sc:
@@ -37,12 +38,14 @@ class WkbReader(GeoDataReader, metaclass=MultipleMeta):
         """
         jvm = sc._jvm
         spatial_rdd = SpatialRDD(sc)
-        srdd = jvm.WkbReader.readToGeometryRDD(sc._jsc, inputPath, wkbColumn, allowInvalidGeometries, skipSyntacticallyInvalidGeometries)
+        srdd = jvm.WkbReader.readToGeometryRDD(sc._jsc, inputPath, wkbColumn, allowInvalidGeometries,
+                                               skipSyntacticallyInvalidGeometries)
         spatial_rdd.set_srdd(srdd)
         return spatial_rdd
 
     @classmethod
-    def readToGeometryRDD(cls, rawTextRDD: RDD, wkbColumn: int, allowInvalidGeometries: bool, skipSyntacticallyInvalidGeometries: bool) -> SpatialRDD:
+    def readToGeometryRDD(cls, rawTextRDD: RDD, wkbColumn: int, allowInvalidGeometries: bool,
+                          skipSyntacticallyInvalidGeometries: bool) -> SpatialRDD:
         """
 
         :param rawTextRDD:
@@ -51,12 +54,12 @@ class WkbReader(GeoDataReader, metaclass=MultipleMeta):
         :param skipSyntacticallyInvalidGeometries:
         :return:
         """
-        WkbReader.validate_imports()
         sc = rawTextRDD.ctx
         jvm = sc._jvm
 
         spatial_rdd = SpatialRDD(sc)
-        srdd = jvm.WkbReader.readToGeometryRDD(rawTextRDD._jrdd, wkbColumn, allowInvalidGeometries, skipSyntacticallyInvalidGeometries)
+        srdd = jvm.WkbReader.readToGeometryRDD(rawTextRDD._jrdd, wkbColumn, allowInvalidGeometries,
+                                               skipSyntacticallyInvalidGeometries)
         spatial_rdd.set_srdd(srdd)
 
         return spatial_rdd

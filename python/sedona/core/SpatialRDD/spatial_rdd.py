@@ -223,7 +223,8 @@ class SpatialRDD:
         :return:
         """
 
-        serialized_spatial_rdd = SedonaPythonConverter(self._jvm).translate_spatial_rdd_to_python(self._srdd.getRawSpatialRDD())
+        serialized_spatial_rdd = SedonaPythonConverter(self._jvm).translate_spatial_rdd_to_python(
+            self._srdd.getRawSpatialRDD())
 
         if not hasattr(self, "_raw_spatial_rdd"):
             RDD.saveAsObjectFile = lambda x, path: x._jrdd.saveAsObjectFile(path)

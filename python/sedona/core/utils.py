@@ -29,4 +29,3 @@ class ImportedJvmLib:
         else:
             return False
         return True
-

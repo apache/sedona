@@ -54,7 +54,9 @@ def since(version: str):
                 raise AttributeError(f"Not available before {version} sedona version")
             result = function(*args, **kwargs)
             return result
+
         return applier
+
     return wrapper
 
 
@@ -68,7 +70,9 @@ def depreciated(version: str, substitute: str):
                 if substitute:
                     logging.warning(f"Please use {substitute} instead")
             return result
+
         return applier
+
     return wrapper
 
 

@@ -64,10 +64,10 @@ class GeoData:
 
         if is_circle:
             radius = bin_parser.read_double()
-            geom = bin_parser.read_geometry(geom_bytes.__len__()-9)
+            geom = bin_parser.read_geometry(geom_bytes.__len__() - 9)
             self._geom = Circle(geom, radius)
         else:
-            self._geom = bin_parser.read_geometry(geom_bytes.__len__()-1)
+            self._geom = bin_parser.read_geometry(geom_bytes.__len__() - 1)
 
         self._userData = attributes["userData"]
 
