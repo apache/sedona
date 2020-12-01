@@ -19,7 +19,7 @@
 
 package org.apache.sedona.python.wrapper
 
-import org.apache.sedona.python.wrapper.translation.{FlatPairRddConverter, GeometryRddConverter, HashSetPairRddConverter}
+import org.apache.sedona.python.wrapper.translation.{FlatPairRddConverter, GeometryRddConverter, ListPairRddConverter}
 import org.apache.spark.api.java.JavaPairRDD
 import org.scalatest.Matchers
 import org.apache.sedona.python.wrapper.utils.implicits._
@@ -47,12 +47,12 @@ class TestToPythonSerialization extends SparkUtil with GeometrySample with Match
   }
 
   test("Should serialize to Python JavaRDD[Geometry, List[Geometry]]") {
-    val translatedToPythonHashSet = HashSetPairRddConverter(
-      JavaPairRDD.fromRDD(spatialPairRDDWithHashSet), pythonGeometrySerializer).translateToPython
-    val existingValues = translatedToPythonHashSet.collect().toArray().toList.map {
+    val translatedToPythonList = ListPairRddConverter(
+      JavaPairRDD.fromRDD(spatialPairRDDWithList), pythonGeometrySerializer).translateToPython
+    val existingValues = translatedToPythonList.collect().toArray().toList.map {
       case a: Array[Byte] => a.toList
     }
-    existingValues should contain theSameElementsAs expectedPairRDDWithHashSetPythonArray
+    existingValues should contain theSameElementsAs expectedPairRDDWithListPythonArray
   }
 
   private val pointSpatialRDD = sc.parallelize(
@@ -65,7 +65,7 @@ class TestToPythonSerialization extends SparkUtil with GeometrySample with Match
     )
   )
 
-  private val spatialPairRDDWithHashSet = sc.parallelize(
+  private val spatialPairRDDWithList = sc.parallelize(
     samplePolygons.map(
       polygon => (polygon, samplePoints.slice(0, 2).asJava)
     )
@@ -80,7 +80,7 @@ class TestToPythonSerialization extends SparkUtil with GeometrySample with Match
       ++ 1.toByteArray().toList ++ pythonGeometrySerializer.serialize(geometries._2).toList
   )
 
-  private val expectedPairRDDWithHashSetPythonArray: List[List[Byte]] = samplePolygons.map(
+  private val expectedPairRDDWithListPythonArray: List[List[Byte]] = samplePolygons.map(
     samplePolygon => 1.toByteArray().toList ++ pythonGeometrySerializer.serialize(samplePolygon).toList ++ 2.toByteArray() ++
       samplePoints.slice(0, 2).flatMap(samplePoint => pythonGeometrySerializer.serialize(samplePoint)))
 

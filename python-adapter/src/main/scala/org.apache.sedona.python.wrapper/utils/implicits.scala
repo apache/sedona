@@ -21,7 +21,6 @@ package org.apache.sedona.python.wrapper.utils
 
 import java.nio.charset.StandardCharsets
 import java.nio.{ByteBuffer, ByteOrder}
-import java.util
 
 import org.locationtech.jts.geom.Geometry
 
@@ -55,14 +54,6 @@ object implicits {
         case null => EMPTY_STRING.getBytes(StandardCharsets.UTF_8)
         case data: String => data.getBytes(StandardCharsets.UTF_8)
       }
-    }
-  }
-
-  implicit class ListConverter[T](elements: List[T]) {
-    def toJavaHashSet: java.util.HashSet[T] = {
-      val javaHashSet = new util.HashSet[T]()
-      elements.foreach(javaHashSet.add)
-      javaHashSet
     }
   }
 

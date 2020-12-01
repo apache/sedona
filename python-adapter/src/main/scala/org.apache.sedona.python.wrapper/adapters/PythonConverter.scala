@@ -19,7 +19,7 @@
 
 package org.apache.sedona.python.wrapper.adapters
 
-import org.apache.sedona.python.wrapper.translation.{FlatPairRddConverter, GeometryRddConverter, GeometrySeqToPythonConverter, HashSetPairRddConverter, PythonRDDToJavaConverter}
+import org.apache.sedona.python.wrapper.translation.{FlatPairRddConverter, GeometryRddConverter, GeometrySeqToPythonConverter, ListPairRddConverter, PythonRDDToJavaConverter}
 import org.apache.spark.api.java.{JavaPairRDD, JavaRDD}
 import org.locationtech.jts.geom.Geometry
 
@@ -33,8 +33,8 @@ object PythonConverter extends GeomSerializer {
   def translateSpatialPairRDDToPython(spatialRDD: JavaPairRDD[Geometry, Geometry]): JavaRDD[Array[Byte]] =
     FlatPairRddConverter(spatialRDD, geometrySerializer).translateToPython
 
-  def translateSpatialPairRDDWithHashSetToPython(spatialRDD: JavaPairRDD[Geometry, java.util.List[Geometry]]): JavaRDD[Array[Byte]] =
-    HashSetPairRddConverter(spatialRDD, geometrySerializer).translateToPython
+  def translateSpatialPairRDDWithListToPython(spatialRDD: JavaPairRDD[Geometry, java.util.List[Geometry]]): JavaRDD[Array[Byte]] =
+    ListPairRddConverter(spatialRDD, geometrySerializer).translateToPython
 
   def translatePythonRDDToJava(pythonRDD: JavaRDD[Array[Byte]]): JavaRDD[Geometry] =
     PythonRDDToJavaConverter(pythonRDD, geometrySerializer).translateToJava

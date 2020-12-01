@@ -49,7 +49,7 @@ class JoinQuery:
             considerBoundaryIntersection
         )
         serialized = JvmSedonaPythonConverter(jvm) \
-            .translate_spatial_pair_rdd_with_hashset_to_python(srdd)
+            .translate_spatial_pair_rdd_with_list_to_python(srdd)
 
         return RDD(serialized, sc, SedonaPickler())
 
@@ -75,7 +75,7 @@ class JoinQuery:
             considerBoundaryIntersection
         )
         serialized = JvmSedonaPythonConverter(jvm). \
-            translate_spatial_pair_rdd_with_hashset_to_python(srdd)
+            translate_spatial_pair_rdd_with_list_to_python(srdd)
 
         return RDD(serialized, sc, SedonaPickler())
 
