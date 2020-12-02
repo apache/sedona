@@ -29,6 +29,9 @@ public class GeomUtils
         return printGeom(g);
     }
 
+    public static int hashCode(Geometry geom) {
+        return geom.getUserData()==null? geom.hashCode():geom.hashCode()*31 + geom.getUserData().hashCode();
+    }
     public static boolean equalsTopoGeom(Geometry geom1, Geometry geom2) {
         if (Objects.equals(geom1.getUserData(), geom2.getUserData())) return geom1.equals(geom2);
         return false;

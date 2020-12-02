@@ -90,7 +90,7 @@ public class JoinQuery
 
     private static <U extends Geometry, T extends Geometry> JavaPairRDD<U, List<T>> collectGeometriesByKey(JavaPairRDD<U, T> input)
     {
-        return input.groupBy(t -> t._1.hashCode() * 31 + t._1.getUserData().hashCode()).values().<U, List<T>>mapToPair(t -> {
+        return input.groupBy(t -> GeomUtils.hashCode(t._1)).values().<U, List<T>>mapToPair(t -> {
             List<T> values = new ArrayList<T>();
             Iterator<Tuple2<U, T>> it = t.iterator();
             Tuple2<U, T> firstTpl = it.next();
