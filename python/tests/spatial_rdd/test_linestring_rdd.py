@@ -146,51 +146,6 @@ class TestLineStringRDD(TestBase):
         spatial_rdd_copy.rawJvmSpatialRDD = spatial_rdd.rawJvmSpatialRDD
         spatial_rdd_copy.analyze()
 
-    def test_hilbert_curve_spatial_partitioning(self):
-        spatial_rdd = LineStringRDD(
-            sparkContext=self.sc,
-            InputLocation=input_location,
-            splitter=splitter,
-            carryInputData=True,
-            partitions=10,
-            newLevel=StorageLevel.MEMORY_ONLY
-        )
-
-        spatial_rdd.analyze()
-        spatial_rdd.spatialPartitioning(GridType.HILBERT)
-        for envelope in spatial_rdd.grids:
-            print(envelope)
-
-    def test_rtree_spatial_partitioning(self):
-        spatial_rdd = LineStringRDD(
-            sparkContext=self.sc,
-            InputLocation=input_location,
-            splitter=splitter,
-            carryInputData=True,
-            partitions=10,
-            newLevel=StorageLevel.MEMORY_ONLY
-        )
-
-        spatial_rdd.analyze()
-        spatial_rdd.spatialPartitioning(GridType.RTREE)
-        for envelope in spatial_rdd.grids:
-            print(envelope)
-
-    def test_voronoi_spatial_partitioning(self):
-        spatial_rdd = LineStringRDD(
-            sparkContext=self.sc,
-            InputLocation=input_location,
-            splitter=splitter,
-            carryInputData=True,
-            partitions=10,
-            newLevel=StorageLevel.MEMORY_ONLY
-        )
-
-        spatial_rdd.analyze()
-        spatial_rdd.spatialPartitioning(GridType.VORONOI)
-        for envelope in spatial_rdd.grids:
-            print(envelope)
-
     def test_build_index_without_set_grid(self):
         spatial_rdd = LineStringRDD(
             sparkContext=self.sc,

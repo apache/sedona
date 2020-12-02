@@ -24,7 +24,6 @@ from sedona.utils.decorators import require
 
 
 class FileDataSplitter(Enum):
-
     CSV = "CSV"
     TSV = "TSV"
     GEOJSON = "GEOJSON"
@@ -45,7 +44,6 @@ class FileDataSplitter(Enum):
 
 @attr.s
 class FileSplitterJvm(JvmObject):
-
     splitter = attr.ib(type=FileDataSplitter)
 
     def _create_jvm_instance(self):

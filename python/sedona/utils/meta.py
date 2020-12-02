@@ -21,6 +21,7 @@ import types
 from sedona.exceptions import InvalidParametersException
 
 from typing import Any
+
 try:
     from typing import GenericMeta
 except ImportError:
@@ -155,6 +156,7 @@ class MultiDict(dict):
     """
     Special dictionary to build multimethods in a metaclass
     """
+
     def __setitem__(self, key, value):
         if key in self:
             # If key already exists, it must be a multimethod or callable

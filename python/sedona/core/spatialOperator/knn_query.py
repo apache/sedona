@@ -31,7 +31,7 @@ class KNNQuery:
 
     @classmethod
     @require(["KNNQuery", "GeometryAdapter"])
-    def SpatialKnnQuery(self, spatialRDD: SpatialRDD, originalQueryPoint: BaseGeometry, k: int,  useIndex: bool):
+    def SpatialKnnQuery(self, spatialRDD: SpatialRDD, originalQueryPoint: BaseGeometry, k: int, useIndex: bool):
         """
 
         :param spatialRDD: spatialRDD

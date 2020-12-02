@@ -29,7 +29,8 @@ class RangeQuery:
 
     @classmethod
     @require(["RangeQuery", "GeometryAdapter", "GeoSerializerData"])
-    def SpatialRangeQuery(self, spatialRDD: SpatialRDD, rangeQueryWindow: BaseGeometry, considerBoundaryIntersection: bool, usingIndex: bool):
+    def SpatialRangeQuery(self, spatialRDD: SpatialRDD, rangeQueryWindow: BaseGeometry,
+                          considerBoundaryIntersection: bool, usingIndex: bool):
         """
 
         :param spatialRDD:
@@ -44,7 +45,7 @@ class RangeQuery:
 
         jvm_geom = GeometryAdapter.create_jvm_geometry_from_base_geometry(jvm, rangeQueryWindow)
 
-        srdd = jvm.\
+        srdd = jvm. \
             RangeQuery.SpatialRangeQuery(
             spatialRDD._srdd,
             jvm_geom,

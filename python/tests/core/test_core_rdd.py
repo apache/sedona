@@ -40,7 +40,7 @@ class TestSpatialRDD(TestBase):
 
         point_rdd.analyze()
         cnt = point_rdd.countWithoutDuplicates()
-        assert cnt == 12872, f"Point RDD should have 12872 but found {cnt}"
+        assert cnt == 12796, f"Point RDD should have 12796 but found {cnt}"
 
     def test_creating_polygon_rdd(self):
         polygon_rdd = PolygonRDD(

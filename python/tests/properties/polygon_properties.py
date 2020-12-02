@@ -25,12 +25,13 @@ input_location = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
 query_window_set = os.path.join(tests_path, "resources/zcta510-small.csv")
 offset = 0
 splitter = FileDataSplitter.CSV
-grid_type = "rtree"
+grid_type = "kdbtree"
 index_type = "rtree"
 num_partitions = 5
 distance = 0.01
 input_location_query_polygon = os.path.join(tests_path, "resources/crs-test-polygon.csv")
 query_polygon_count = 13361
+
 query_envelope = Envelope(14313844.294334238, 16802290.853830762, 942450.5989896103, 8631908.270651892)
 query_polygon_set = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
 input_location_geo_json = os.path.join(tests_path, "resources/testPolygon.json")

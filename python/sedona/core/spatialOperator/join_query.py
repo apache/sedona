@@ -28,7 +28,8 @@ class JoinQuery:
 
     @classmethod
     @require(["JoinQuery"])
-    def SpatialJoinQuery(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool, considerBoundaryIntersection: bool) -> RDD:
+    def SpatialJoinQuery(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool,
+                         considerBoundaryIntersection: bool) -> RDD:
         """
 
         :param spatialRDD: SpatialRDD
@@ -47,14 +48,15 @@ class JoinQuery:
             useIndex,
             considerBoundaryIntersection
         )
-        serialized = JvmSedonaPythonConverter(jvm)\
-            .translate_spatial_pair_rdd_with_hashset_to_python(srdd)
+        serialized = JvmSedonaPythonConverter(jvm) \
+            .translate_spatial_pair_rdd_with_list_to_python(srdd)
 
         return RDD(serialized, sc, SedonaPickler())
 
     @classmethod
     @require(["JoinQuery"])
-    def DistanceJoinQuery(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool, considerBoundaryIntersection: bool) -> RDD:
+    def DistanceJoinQuery(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool,
+                          considerBoundaryIntersection: bool) -> RDD:
         """
 
         :param spatialRDD: SpatialRDD
@@ -72,8 +74,8 @@ class JoinQuery:
             useIndex,
             considerBoundaryIntersection
         )
-        serialized = JvmSedonaPythonConverter(jvm).\
-            translate_spatial_pair_rdd_with_hashset_to_python(srdd)
+        serialized = JvmSedonaPythonConverter(jvm). \
+            translate_spatial_pair_rdd_with_list_to_python(srdd)
 
         return RDD(serialized, sc, SedonaPickler())
 
@@ -94,14 +96,15 @@ class JoinQuery:
         jvm_join_params = joinParams.jvm_instance(jvm)
 
         srdd = jvm.JoinQuery.spatialJoin(queryWindowRDD._srdd, objectRDD._srdd, jvm_join_params)
-        serialized = JvmSedonaPythonConverter(jvm).\
+        serialized = JvmSedonaPythonConverter(jvm). \
             translate_spatial_pair_rdd_to_python(srdd)
 
         return RDD(serialized, sc, SedonaPickler())
 
     @classmethod
     @require(["JoinQuery"])
-    def DistanceJoinQueryFlat(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool, considerBoundaryIntersection: bool) -> RDD:
+    def DistanceJoinQueryFlat(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool,
+                              considerBoundaryIntersection: bool) -> RDD:
         """
 
         :param spatialRDD: SpatialRDD
@@ -128,7 +131,7 @@ class JoinQuery:
             considerBoundaryIntersection
         )
 
-        serialized = JvmSedonaPythonConverter(jvm).\
+        serialized = JvmSedonaPythonConverter(jvm). \
             translate_spatial_pair_rdd_to_python(srdd)
 
         return RDD(serialized, sc, SedonaPickler())
@@ -136,7 +139,7 @@ class JoinQuery:
     @classmethod
     @require(["JoinQuery"])
     def SpatialJoinQueryFlat(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool,
-                              considerBoundaryIntersection: bool) -> RDD:
+                             considerBoundaryIntersection: bool) -> RDD:
         """
         Function takes SpatialRDD and other SpatialRDD and based on two parameters
         - useIndex
@@ -167,7 +170,7 @@ class JoinQuery:
             considerBoundaryIntersection
         )
 
-        serialized = JvmSedonaPythonConverter(jvm).\
+        serialized = JvmSedonaPythonConverter(jvm). \
             translate_spatial_pair_rdd_to_python(srdd)
 
         return RDD(serialized, sc, SedonaPickler())

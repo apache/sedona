@@ -44,7 +44,6 @@ class TestPointKnn(TestBase):
         for i in range(self.loop_times):
             result = KNNQuery.SpatialKnnQuery(point_rdd, self.query_point, self.top_k, False)
             assert result.__len__() > -1
-            assert result[0].getUserData() is not None
 
     def test_spatial_knn_query_using_index(self):
         point_rdd = PointRDD(self.sc, input_location, offset, splitter, False)
@@ -53,7 +52,6 @@ class TestPointKnn(TestBase):
         for i in range(self.loop_times):
             result = KNNQuery.SpatialKnnQuery(point_rdd, self.query_point, self.top_k, False)
             assert result.__len__() > -1
-            assert result[0].getUserData() is not None
 
     def test_spatial_knn_correctness(self):
         point_rdd = PointRDD(self.sc, input_location, offset, splitter, False)

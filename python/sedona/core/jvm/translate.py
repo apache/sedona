@@ -29,8 +29,8 @@ class JvmSedonaPythonConverter:
     def translate_spatial_pair_rdd_to_python(self, spatial_rdd):
         return self._jvm.PythonConverter.translateSpatialPairRDDToPython(spatial_rdd)
 
-    def translate_spatial_pair_rdd_with_hashset_to_python(self, spatial_rdd):
-        return self._jvm.PythonConverter.translateSpatialPairRDDWithHashSetToPython(spatial_rdd)
+    def translate_spatial_pair_rdd_with_list_to_python(self, spatial_rdd):
+        return self._jvm.PythonConverter.translateSpatialPairRDDWithListToPython(spatial_rdd)
 
     def translate_python_rdd_to_java(self, java_rdd):
         return self._jvm.PythonConverter.translatePythonRDDToJava(java_rdd)
