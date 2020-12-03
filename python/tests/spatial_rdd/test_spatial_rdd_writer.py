@@ -57,7 +57,7 @@ rectangleMatchWithOriginalDuplicatesCount = 103
 polygonMatchCount = 472
 polygonMatchWithOriginalDuplicatesCount = 562
 
-
+## todo add missing tests
 def remove_directory(path: str) -> bool:
     try:
         shutil.rmtree(path)

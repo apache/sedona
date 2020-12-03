@@ -24,11 +24,6 @@ from sedona.utils.decorators import require
 
 
 class GridType(Enum):
-
-    EQUALGRID = "EQUALGRID"
-    HILBERT = "HILBERT"
-    RTREE = "RTREE"
-    VORONOI = "VORONOI"
     QUADTREE = "QUADTREE"
     KDBTREE = "KDBTREE"
 
@@ -43,7 +38,6 @@ class GridType(Enum):
 
 @attr.s
 class GridTypeJvm(JvmObject):
-
     grid = attr.ib(type=GridType)
 
     def _create_jvm_instance(self):

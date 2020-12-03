@@ -21,7 +21,6 @@ package org.apache.sedona.python.wrapper.utils
 
 import java.nio.charset.StandardCharsets
 import java.nio.{ByteBuffer, ByteOrder}
-import java.util
 
 import org.locationtech.jts.geom.Geometry
 
@@ -48,16 +47,13 @@ object implicits {
   }
 
   implicit class GeometryEnhancer(geometry: Geometry) {
-    def userDataToUtf8ByteArray: Array[Byte] =
-      geometry.getUserData.asInstanceOf[String]
-        .getBytes(StandardCharsets.UTF_8)
-  }
+    private val EMPTY_STRING = ""
 
-  implicit class ListConverter[T](elements: List[T]) {
-    def toJavaHashSet: java.util.HashSet[T] = {
-      val javaHashSet = new util.HashSet[T]()
-      elements.foreach(javaHashSet.add)
-      javaHashSet
+    def userDataToUtf8ByteArray: Array[Byte] = {
+      geometry.getUserData match {
+        case null => EMPTY_STRING.getBytes(StandardCharsets.UTF_8)
+        case data: String => data.getBytes(StandardCharsets.UTF_8)
+      }
     }
   }
 

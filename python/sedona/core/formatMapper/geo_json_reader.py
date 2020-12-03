@@ -79,7 +79,8 @@ class GeoJsonReader(GeoDataReader, metaclass=MultipleMeta):
         return spatial_rdd
 
     @classmethod
-    def readToGeometryRDD(cls, rawTextRDD: RDD, allowInvalidGeometries: bool, skipSyntacticallyInvalidGeometries: bool) -> SpatialRDD:
+    def readToGeometryRDD(cls, rawTextRDD: RDD, allowInvalidGeometries: bool,
+                          skipSyntacticallyInvalidGeometries: bool) -> SpatialRDD:
         """
 
         :param rawTextRDD: RDD

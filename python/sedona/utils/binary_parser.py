@@ -47,7 +47,8 @@ class BinaryParser:
         self.bytes = self._convert_to_binary_array(no_negatives)
 
     def read_geometry(self, length: int):
-        geom_bytes = b"".join([struct.pack("b", el) if el < 128 else struct.pack("b", el-256) for el in self.bytes[self.current_index: self.current_index + length]])
+        geom_bytes = b"".join([struct.pack("b", el) if el < 128 else struct.pack("b", el - 256) for el in
+                               self.bytes[self.current_index: self.current_index + length]])
         geom = loads(geom_bytes)
         self.current_index += length
         return geom
@@ -83,7 +84,7 @@ class BinaryParser:
         return data
 
     def read_string(self, length: int, encoding: str = "utf8"):
-        string = self.bytes[self.current_index: self.current_index+length]
+        string = self.bytes[self.current_index: self.current_index + length]
         self.current_index += length
 
         try:
@@ -97,7 +98,7 @@ class BinaryParser:
         byte_array = sc._gateway.new_array(sc._jvm.Byte, array_length)
 
         for index, bt in enumerate(self.bytes[self.current_index: length]):
-            byte_array[index] = self.bytes[self.current_index+index]
+            byte_array[index] = self.bytes[self.current_index + index]
         decoded_string = sc._jvm.org.imbruced.geo_pyspark.serializers.GeoSerializerData.deserializeUserData(
             byte_array
         )

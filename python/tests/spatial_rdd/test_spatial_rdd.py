@@ -210,19 +210,6 @@ class TestSpatialRDD(TestBase):
         for grid_type in GridType:
             spatial_rdd = self.create_spatial_rdd()
             spatial_rdd.spatialPartitioning(grid_type)
-            grids = spatial_rdd.grids
-            if grid_type != GridType.QUADTREE and grid_type != GridType.KDBTREE:
-                assert grids is not None
-                assert isinstance(grids, list)
-                assert isinstance(grids[0], Envelope)
-            else:
-                assert grids is None
-
-    def test_indexed_rdd(self):
-        pass
-
-    def test_indexed_raw_rdd(self):
-        pass
 
     def test_partition_tree(self):
         spatial_rdd = self.create_spatial_rdd()
@@ -231,4 +218,4 @@ class TestSpatialRDD(TestBase):
 
         spatial_rdd.spatialPartitioning(GridType.QUADTREE)
 
-        print(spatial_rdd.partitionTree)
+        print(spatial_rdd.getPartitioner())

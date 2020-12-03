@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.core.geometryObjects;
 
+import org.apache.sedona.core.utils.GeomUtils;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
@@ -29,7 +30,6 @@ import org.locationtech.jts.io.WKTReader;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 // TODO: Auto-generated Javadoc
@@ -206,13 +206,13 @@ public class CircleTest
     @Test
     public void testEquality()
     {
-        assertEquals(
+        assertTrue(GeomUtils.equalsExactGeom(
                 new Circle(makePoint(-112.574945, 45.987772), 0.01),
-                new Circle(makePoint(-112.574945, 45.987772), 0.01));
+                new Circle(makePoint(-112.574945, 45.987772), 0.01)));
 
-        assertNotEquals(
+        assertFalse(GeomUtils.equalsExactGeom(
                 new Circle(makePoint(-112.574945, 45.987772), 0.01),
-                new Circle(makePoint(-112.574942, 45.987772), 0.01));
+                new Circle(makePoint(-112.574942, 45.987772), 0.01)));
     }
 
     private Point makePoint(double x, double y)

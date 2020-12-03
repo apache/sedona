@@ -25,7 +25,6 @@ from sedona.core.spatialOperator.join_params import JoinParams
 from tests.spatial_operator.test_join_base import TestJoinBase
 from tests.tools import tests_path
 
-
 input_location = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
 query_window_set = os.path.join(tests_path, "resources/zcta510-small.csv")
 query_polygon_set = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
@@ -45,16 +44,11 @@ def pytest_generate_tests(metafunc):
 
 
 parameters = [
-    dict(num_partitions=11, use_legacy_apis=True, grid_type=GridType.RTREE, intersects=False),
-    dict(num_partitions=11, use_legacy_apis=False, grid_type=GridType.RTREE, intersects=False),
-    dict(num_partitions=11, use_legacy_apis=True, grid_type=GridType.QUADTREE, intersects=False),
-    dict(num_partitions=11, use_legacy_apis=False, grid_type=GridType.QUADTREE, intersects=False),
-    dict(num_partitions=11, use_legacy_apis=False, grid_type=GridType.KDBTREE, intersects=False),
-    dict(num_partitions=11, use_legacy_apis=True, grid_type=GridType.RTREE, intersects=True),
-    dict(num_partitions=11, use_legacy_apis=False, grid_type=GridType.RTREE, intersects=True),
-    dict(num_partitions=11, use_legacy_apis=True, grid_type=GridType.QUADTREE, intersects=True),
-    dict(num_partitions=11, use_legacy_apis=False, grid_type=GridType.QUADTREE, intersects=True),
-    dict(num_partitions=11, use_legacy_apis=False, grid_type=GridType.KDBTREE, intersects=True)
+    dict(num_partitions=11, grid_type=GridType.QUADTREE, intersects=False),
+    dict(num_partitions=11, grid_type=GridType.QUADTREE, intersects=False),
+    dict(num_partitions=11, grid_type=GridType.QUADTREE, intersects=True),
+    dict(num_partitions=11, grid_type=GridType.QUADTREE, intersects=True),
+    dict(num_partitions=11, grid_type=GridType.KDBTREE, intersects=True)
 ]
 params_dyn = [{**param, **{"index_type": IndexType.QUADTREE}} for param in parameters]
 params_dyn.extend([{**param, **{"index_type": IndexType.RTREE}} for param in parameters])
@@ -67,23 +61,23 @@ class TestRectangleJoin(TestJoinBase):
         "test_index_int": params_dyn
     }
 
-    def test_nested_loop(self, num_partitions, use_legacy_apis, grid_type, intersects):
+    def test_nested_loop(self, num_partitions, grid_type, intersects):
         query_rdd = self.create_polygon_rdd(query_polygon_set, splitter, num_partitions)
         spatial_rdd = self.create_polygon_rdd(input_location, splitter, num_partitions)
 
-        self.partition_rdds(query_rdd, spatial_rdd, grid_type, use_legacy_apis)
+        self.partition_rdds(query_rdd, spatial_rdd, grid_type)
 
         result = JoinQuery.SpatialJoinQuery(
             spatial_rdd, query_rdd, False, intersects).collect()
 
         self.sanity_check_join_results(result)
-        assert self.get_expected_count(intersects) == self.count_join_results(result)
+        assert self.get_expected_with_original_duplicates_count(intersects) == self.count_join_results(result)
 
-    def test_dynamic_index_int(self, num_partitions, use_legacy_apis, grid_type, index_type, intersects):
+    def test_dynamic_index_int(self, num_partitions, grid_type, index_type, intersects):
         query_rdd = self.create_polygon_rdd(query_polygon_set, splitter, num_partitions)
         spatial_rdd = self.create_polygon_rdd(input_location, splitter, num_partitions)
 
-        self.partition_rdds(query_rdd, spatial_rdd, grid_type, use_legacy_apis)
+        self.partition_rdds(query_rdd, spatial_rdd, grid_type)
 
         join_params = JoinParams(intersects, index_type, JoinBuildSide.LEFT)
         result = JoinQuery.spatialJoin(query_rdd, spatial_rdd, join_params).collect()
@@ -94,18 +88,18 @@ class TestRectangleJoin(TestJoinBase):
             if self.expect_to_preserve_original_duplicates(grid_type) else self.get_expected_count(intersects)
         assert expected_count == result.__len__()
 
-    def test_index_int(self, num_partitions, use_legacy_apis, grid_type, index_type, intersects):
+    def test_index_int(self, num_partitions, grid_type, index_type, intersects):
         query_rdd = self.create_polygon_rdd(query_polygon_set, splitter, num_partitions)
         spatial_rdd = self.create_polygon_rdd(input_location, splitter, num_partitions)
 
-        self.partition_rdds(query_rdd, spatial_rdd, grid_type, use_legacy_apis)
+        self.partition_rdds(query_rdd, spatial_rdd, grid_type)
         spatial_rdd.buildIndex(index_type, True)
 
         result = JoinQuery.SpatialJoinQuery(
             spatial_rdd, query_rdd, True, intersects).collect()
 
         self.sanity_check_join_results(result)
-        assert self.get_expected_count(intersects) == self.count_join_results(result)
+        assert self.get_expected_with_original_duplicates_count(intersects) == self.count_join_results(result)
 
     def get_expected_count(self, intersects):
         return intersects_match_count if intersects else contains_match_count

@@ -25,7 +25,8 @@ from sedona.utils.meta import MultipleMeta
 class WktReader(GeoDataReader, metaclass=MultipleMeta):
 
     @classmethod
-    def readToGeometryRDD(cls, sc: SparkContext, inputPath: str, wktColumn: int, allowInvalidGeometries: bool, skipSyntacticallyInvalidGeometries: bool) -> SpatialRDD:
+    def readToGeometryRDD(cls, sc: SparkContext, inputPath: str, wktColumn: int, allowInvalidGeometries: bool,
+                          skipSyntacticallyInvalidGeometries: bool) -> SpatialRDD:
         """
 
         :param sc: SparkContext
@@ -37,14 +38,15 @@ class WktReader(GeoDataReader, metaclass=MultipleMeta):
         """
         jvm = sc._jvm
         srdd = jvm.WktReader.readToGeometryRDD(sc._jsc, inputPath, wktColumn, allowInvalidGeometries,
-                                        skipSyntacticallyInvalidGeometries)
+                                               skipSyntacticallyInvalidGeometries)
 
         spatial_rdd = SpatialRDD(sc)
         spatial_rdd.set_srdd(srdd)
         return spatial_rdd
 
     @classmethod
-    def readToGeometryRDD(cls, rawTextRDD: RDD, wktColumn: int, allowInvalidGeometries: bool, skipSyntacticallyInvalidGeometries: bool) -> SpatialRDD:
+    def readToGeometryRDD(cls, rawTextRDD: RDD, wktColumn: int, allowInvalidGeometries: bool,
+                          skipSyntacticallyInvalidGeometries: bool) -> SpatialRDD:
         """
 
         :param rawTextRDD: RDD

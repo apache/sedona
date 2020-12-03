@@ -115,5 +115,4 @@ def load_spatial_rdd_from_disc(sc: SparkContext, path: str, geometry_type: GeoTy
 
 
 def load_spatial_index_rdd_from_disc(sc: SparkContext, path: str):
-
     return IndexDiscLoader.load(sc, path)

@@ -18,10 +18,11 @@
 from pyspark import StorageLevel
 
 from sedona.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
+from sedona.core.enums import GridType
 from sedona.core.geom.circle import Circle
 from sedona.core.spatialOperator import RangeQuery, KNNQuery, JoinQuery
-from sedona.utils.adapter import Adapter
 from tests.properties.crs_transform import *
+from tests.properties.polygon_properties import grid_type
 from tests.test_base import TestBase
 from tests.tools import distance_sorting_functions
 
@@ -119,8 +120,7 @@ class TestCrsTransformation(TestBase):
             StorageLevel.MEMORY_ONLY, "epsg:4326", "epsg:3005"
         )
         spatial_rdd.spatialPartitioning(grid_type)
-
-        query_rdd.spatialPartitioning(spatial_rdd.grids)
+        query_rdd.spatialPartitioning(spatial_rdd.getPartitioner())
 
         result = JoinQuery.SpatialJoinQuery(spatial_rdd, query_rdd, False, True).collect()
         assert result[1][0].getUserData() is not None
@@ -142,11 +142,14 @@ class TestCrsTransformation(TestBase):
             StorageLevel.MEMORY_ONLY, "epsg:4326", "epsg:3005"
         )
 
+        query_rdd.analyze()
+        spatial_rdd.analyze()
+
         spatial_rdd.spatialPartitioning(grid_type)
 
         spatial_rdd.buildIndex(IndexType.RTREE, True)
 
-        query_rdd.spatialPartitioning(spatial_rdd.grids)
+        query_rdd.spatialPartitioning(spatial_rdd.getPartitioner())
 
         result = JoinQuery.SpatialJoinQuery(spatial_rdd, query_rdd, False, True).collect()
 
@@ -170,12 +173,12 @@ class TestCrsTransformation(TestBase):
             "epsg:4326", "epsg:3857")
 
         object_rdd.rawJvmSpatialRDD.jsrdd.repartition(4)
-        object_rdd.spatialPartitioning(GridType.RTREE)
+        object_rdd.spatialPartitioning(GridType.KDBTREE)
         object_rdd.buildIndex(IndexType.RTREE, True)
-        window_rdd.spatialPartitioning(object_rdd.grids)
+        window_rdd.spatialPartitioning(object_rdd.getPartitioner())
 
         results = JoinQuery.DistanceJoinQuery(object_rdd, window_rdd, True, False).collect()
-        assert results.__len__() == 5467
+        assert 5467 == results.__len__()
 
         for data in results:
             for polygon_data in data[1]:

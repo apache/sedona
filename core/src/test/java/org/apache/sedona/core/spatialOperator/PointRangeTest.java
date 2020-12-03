@@ -166,7 +166,6 @@ public class PointRangeTest
             long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).count();
             assertEquals(resultSize, 2830);
         }
-        assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).take(10).get(1).getUserData().toString() != null;
     }
 
     /**
@@ -184,6 +183,5 @@ public class PointRangeTest
             long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, true).count();
             assertEquals(resultSize, 2830);
         }
-        assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, true).take(10).get(1).getUserData().toString() != null;
     }
 }

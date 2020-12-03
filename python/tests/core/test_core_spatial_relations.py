@@ -48,7 +48,7 @@ class TestJoinQuery(TestBase):
         )
 
         point_rdd.analyze()
-        point_rdd.spatialPartitioning(GridType.KDBTREE)
+        point_rdd.spatialPartitioning(GridType.KDBTREE, num_partitions=10)
         polygon_rdd.spatialPartitioning(point_rdd.getPartitioner())
         result = JoinQuery.SpatialJoinQuery(
             point_rdd,
@@ -57,4 +57,4 @@ class TestJoinQuery(TestBase):
             False
         )
 
-        print(result.count())
+        assert result.count() == 26

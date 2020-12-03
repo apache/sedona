@@ -19,6 +19,7 @@
 
 package org.apache.sedona.core.geometryObjects;
 
+import org.apache.sedona.core.utils.GeomUtils;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateFilter;
 import org.locationtech.jts.geom.CoordinateSequenceComparator;
@@ -372,6 +373,14 @@ public class Circle
         return newCircle;
     }
 
+    @Override
+    protected Geometry reverseInternal()
+    {
+        Geometry g = this.centerGeometry.reverse();
+        Circle newCircle = new Circle(g, this.radius);
+        return newCircle;
+    }
+
     public Geometry copy()
     {
         Circle cloneCircle = new Circle(this.centerGeometry.copy(), this.radius);
@@ -398,7 +407,7 @@ public class Circle
 
         if (type1 != type2) { return false; }
         if (radius1 != radius2) { return false; }
-        return this.centerGeometry.equals(((Circle) g).centerGeometry);
+        return GeomUtils.equalsTopoGeom(this.centerGeometry, ((Circle) g).centerGeometry);
     }
 
     /* (non-Javadoc)
@@ -499,7 +508,7 @@ public class Circle
     }
 
     @Override
-    protected int getSortIndex()
+    protected int getTypeCode()
     {
         return 0;
     }
