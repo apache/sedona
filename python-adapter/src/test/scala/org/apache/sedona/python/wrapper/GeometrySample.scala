@@ -3,6 +3,7 @@ package org.apache.sedona.python.wrapper
 import org.locationtech.jts.geom.Geometry
 
 import scala.tools.nsc.interpreter.InputStream
+import scala.io.Source
 
 trait GeometrySample extends PythonTestSpec {
   self: TestToPythonSerialization =>
@@ -29,7 +30,6 @@ trait GeometrySample extends PythonTestSpec {
 
   private def loadResourceFile(fileName: String): List[String] = {
     val stream: InputStream = getClass.getResourceAsStream(fileName)
-    val lines: Iterator[String] = scala.io.Source.fromInputStream(stream).getLines
-    lines.toList
+    Source.fromInputStream(stream).getLines.toList
   }
 }

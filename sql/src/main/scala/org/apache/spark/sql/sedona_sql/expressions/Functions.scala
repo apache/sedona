@@ -20,7 +20,7 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import java.util
 
-import org.apache.sedona.core.geometryObjects.Circle
+import org.apache.sedona.core.geometryObjects.{Circle, GeoJSONWriterNew}
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
@@ -42,7 +42,6 @@ import org.locationtech.jts.precision.GeometryPrecisionReducer
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier
 import org.opengis.referencing.crs.CoordinateReferenceSystem
 import org.opengis.referencing.operation.MathTransform
-import org.wololo.jts2geojson.GeoJSONWriter
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
@@ -496,7 +495,7 @@ case class ST_AsGeoJSON(inputExpressions: Seq[Expression])
     inputExpressions.validateLength(1)
     val geometry = inputExpressions.head.toGeometry(input)
 
-    val writer = new GeoJSONWriter()
+    val writer = new GeoJSONWriterNew()
     UTF8String.fromString(writer.write(geometry).toString)
   }
 

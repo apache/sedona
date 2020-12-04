@@ -19,13 +19,11 @@
 package org.apache.sedona.core.spatialRDD;
 
 import org.apache.sedona.core.enums.FileDataSplitter;
-import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.spark.storage.StorageLevel;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.index.strtree.STRtree;
 
@@ -123,54 +121,6 @@ public class PolygonRDDTest
         assert spatialRDD.approximateTotalCount == 103;
         assert spatialRDD.boundaryEnvelope != null;
         assert spatialRDD.rawSpatialRDD.take(1).get(0).getUserData().equals("31\t039\t00835841\t31039\tCuming\tCuming County\t06\tH1\tG4020\t\t\t\tA\t1477895811\t10447360\t+41.9158651\t-096.7885168");
-    }
-
-    /**
-     * Test hilbert curve spatial partitioing.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testHilbertCurveSpatialPartitioing()
-            throws Exception
-    {
-        PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, 10, StorageLevel.MEMORY_ONLY());
-        spatialRDD.spatialPartitioning(GridType.HILBERT);
-        for (Envelope d : spatialRDD.grids) {
-            //System.out.println("PointRDD spatial partitioning grids: "+d.grid);
-        }
-    }
-
-    /**
-     * Test R tree spatial partitioing.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testRTreeSpatialPartitioing()
-            throws Exception
-    {
-        PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, 10, StorageLevel.MEMORY_ONLY());
-        spatialRDD.spatialPartitioning(GridType.RTREE);
-        for (Envelope d : spatialRDD.grids) {
-            //System.out.println("PointRDD spatial partitioning grids: "+d.grid);
-        }
-    }
-
-    /**
-     * Test voronoi spatial partitioing.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testVoronoiSpatialPartitioing()
-            throws Exception
-    {
-        PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, 10, StorageLevel.MEMORY_ONLY());
-        spatialRDD.spatialPartitioning(GridType.VORONOI);
-        for (Envelope d : spatialRDD.grids) {
-            //System.out.println("PointRDD spatial partitioning grids: "+d.grid);
-        }
     }
 
     /**

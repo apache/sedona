@@ -78,7 +78,6 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
         jsrdd = rawSpatialRDD.jsrdd
         self._srdd = self._jvm_spatial_rdd(jsrdd, sourceEpsgCode, targetEpsgCode)
 
-
     def __init__(self, sparkContext: SparkContext, InputLocation: str, Offset: int, splitter: FileDataSplitter,
                  carryInputData: bool, partitions: int):
         """
@@ -142,7 +141,8 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
             partitions
         )
 
-    def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter, carryInputData: bool):
+    def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter,
+                 carryInputData: bool):
         """
 
         :param sparkContext: SparkContext instance
@@ -268,7 +268,8 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
             new_level_jvm
         )
 
-    def __init__(self, rawSpatialRDD: JvmSpatialRDD, newLevel: StorageLevel, sourceEpsgCRSCode: str, targetEpsgCode: str):
+    def __init__(self, rawSpatialRDD: JvmSpatialRDD, newLevel: StorageLevel, sourceEpsgCRSCode: str,
+                 targetEpsgCode: str):
         """
 
         :param rawSpatialRDD: JvmSpatialRDD, jvm representation of spatial rdd
@@ -285,7 +286,6 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
     def __init__(self, sparkContext: SparkContext, InputLocation: str, Offset: int, splitter: FileDataSplitter,
                  carryInputData: bool, partitions: int, newLevel: StorageLevel, sourceEpsgCRSCode: str,
                  targetEpsgCode: str):
-
         """
 
         :param sparkContext: SparkContext instance

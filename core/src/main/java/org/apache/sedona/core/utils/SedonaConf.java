@@ -51,7 +51,7 @@ public class SedonaConf
 
     private Integer fallbackPartitionNum = -1;
 
-    private GridType joinGridType = GridType.QUADTREE;
+    private GridType joinGridType = GridType.KDBTREE;
 
     public SedonaConf(SparkConf sparkConf)
     {

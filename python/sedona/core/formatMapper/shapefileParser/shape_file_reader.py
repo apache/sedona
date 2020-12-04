@@ -21,19 +21,11 @@ from pyspark import SparkContext
 from sedona.core.SpatialRDD import PolygonRDD, PointRDD, LineStringRDD
 from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.core.formatMapper.geo_reader import GeoDataReader
-from sedona.core.jvm.config import since
-from sedona.utils.decorators import require
 from sedona.utils.meta import MultipleMeta
 
 
 @attr.s
 class ShapefileReader(GeoDataReader, metaclass=MultipleMeta):
-
-    @classmethod
-    @require(["ShapeFileReader"])
-    @since("1.0.0")
-    def validate_imports(cls):
-        return True
 
     @classmethod
     def readToGeometryRDD(cls, sc: SparkContext, inputPath: str) -> SpatialRDD:
@@ -43,7 +35,6 @@ class ShapefileReader(GeoDataReader, metaclass=MultipleMeta):
         :param inputPath:
         :return:
         """
-        ShapefileReader.validate_imports()
         jvm = sc._jvm
         jsc = sc._jsc
         srdd = jvm.ShapefileReader.readToGeometryRDD(
@@ -63,7 +54,6 @@ class ShapefileReader(GeoDataReader, metaclass=MultipleMeta):
         :param inputPath:
         :return:
         """
-        ShapefileReader.validate_imports()
         jvm = sc._jvm
         jsc = sc._jsc
         srdd = jvm.ShapefileReader.readToPolygonRDD(
@@ -82,7 +72,6 @@ class ShapefileReader(GeoDataReader, metaclass=MultipleMeta):
         :param inputPath:
         :return:
         """
-        ShapefileReader.validate_imports()
         jvm = sc._jvm
         jsc = sc._jsc
         srdd = jvm.ShapefileReader.readToPointRDD(
@@ -101,7 +90,6 @@ class ShapefileReader(GeoDataReader, metaclass=MultipleMeta):
         :param inputPath:
         :return:
         """
-        ShapefileReader.validate_imports()
         jvm = sc._jvm
         jsc = sc._jsc
         srdd = jvm.ShapefileReader.readToLineStringRDD(

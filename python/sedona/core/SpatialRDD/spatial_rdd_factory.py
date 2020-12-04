@@ -25,7 +25,6 @@ from sedona.utils.decorators import require
 
 @attr.s
 class SpatialRDDFactory(ABC):
-
     sparkContext = attr.ib(type=SparkContext)
 
     def __attrs_post_init__(self):

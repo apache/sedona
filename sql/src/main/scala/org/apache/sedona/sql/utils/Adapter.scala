@@ -19,6 +19,7 @@
 package org.apache.sedona.sql.utils
 
 import org.apache.sedona.core.spatialRDD.SpatialRDD
+import org.apache.sedona.core.utils.GeomUtils
 import org.apache.spark.api.java.{JavaPairRDD, JavaRDD}
 import org.apache.spark.rdd.RDD
 import org.locationtech.jts.geom.Geometry
@@ -118,7 +119,7 @@ object Adapter {
   }
 
   def toDf[T <: Geometry](spatialRDD: SpatialRDD[T], fieldNames: List[String], sparkSession: SparkSession): DataFrame = {
-    val rowRdd = spatialRDD.rawSpatialRDD.rdd.map[Row](f => Row.fromSeq(f.toString.split("\t", -1).toSeq))
+    val rowRdd = spatialRDD.rawSpatialRDD.rdd.map[Row](f => Row.fromSeq(GeomUtils.printGeom(f).split("\t", -1).toSeq))
     if (fieldNames != null && fieldNames.nonEmpty) {
       var fieldArray = new Array[StructField](fieldNames.size + 1)
       fieldArray(0) = StructField("geometry", StringType)
@@ -137,8 +138,8 @@ object Adapter {
 
   def toDf(spatialPairRDD: JavaPairRDD[Geometry, Geometry], sparkSession: SparkSession): DataFrame = {
     val rowRdd = spatialPairRDD.rdd.map[Row](f => {
-      val seq1 = f._1.toString.split("\t").toSeq
-      val seq2 = f._2.toString.split("\t").toSeq
+      val seq1 = GeomUtils.printGeom(f._1).split("\t").toSeq
+      val seq2 = GeomUtils.printGeom(f._2).split("\t").toSeq
       val result = seq1 ++ seq2
       Row.fromSeq(result)
     })
@@ -154,8 +155,8 @@ object Adapter {
 
   def toDf(spatialPairRDD: JavaPairRDD[Geometry, Geometry], leftFieldnames: List[String], rightFieldNames: List[String], sparkSession: SparkSession): DataFrame = {
     val rowRdd = spatialPairRDD.rdd.map[Row](f => {
-      val seq1 = f._1.toString.split("\t").toSeq
-      val seq2 = f._2.toString.split("\t").toSeq
+      val seq1 = GeomUtils.printGeom(f._1).split("\t").toSeq
+      val seq2 = GeomUtils.printGeom(f._2).split("\t").toSeq
       val result = seq1 ++ seq2
       Row.fromSeq(result)
     })
@@ -174,8 +175,9 @@ object Adapter {
     dataFrame.rdd.map[Geometry](f => {
       var geometry = f.get(geometryColId).asInstanceOf[Geometry]
       var fieldSize = f.size
-      var userData = ""
+      var userData:String = null
       if (fieldSize > 1) {
+        userData = ""
         // Add all attributes into geometry user data
         for (i <- 0 until geometryColId) userData += f.get(i) + "\t"
         for (i <- geometryColId + 1 until f.size) userData += f.get(i) + "\t"
@@ -194,8 +196,9 @@ object Adapter {
     dataFrame.rdd.map[Geometry](f => {
       var geometry = f.get(0).asInstanceOf[Geometry]
       var fieldSize = f.size
-      var userData = ""
+      var userData:String = null
       if (fieldSize > 1) {
+        userData = ""
         // Add all attributes into geometry user data
         for (i <- 1 until f.size) userData += f.get(i) + "\t"
         userData = userData.dropRight(1)

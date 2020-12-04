@@ -49,7 +49,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
@@ -316,9 +315,9 @@ public class CRSTransformationTest
 
         spatialRDD.spatialPartitioning(gridType);
 
-        queryRDD.spatialPartitioning(spatialRDD.grids);
+        queryRDD.spatialPartitioning(spatialRDD.getPartitioner());
 
-        List<Tuple2<Polygon, HashSet<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, false, true).collect();
+        List<Tuple2<Polygon, List<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, false, true).collect();
 
         assert result.get(1)._1().getUserData() != null;
         for (int i = 0; i < result.size(); i++) {
@@ -344,9 +343,9 @@ public class CRSTransformationTest
 
         spatialRDD.buildIndex(IndexType.RTREE, true);
 
-        queryRDD.spatialPartitioning(spatialRDD.grids);
+        queryRDD.spatialPartitioning(spatialRDD.getPartitioner());
 
-        List<Tuple2<Polygon, HashSet<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, false, true).collect();
+        List<Tuple2<Polygon, List<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, false, true).collect();
 
         assert result.get(1)._1().getUserData() != null;
         for (int i = 0; i < result.size(); i++) {
@@ -367,14 +366,14 @@ public class CRSTransformationTest
         CircleRDD windowRDD = new CircleRDD(queryRDD, 0.1);
         PolygonRDD objectRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3857");
         objectRDD.rawSpatialRDD.repartition(4);
-        objectRDD.spatialPartitioning(GridType.RTREE);
+        objectRDD.spatialPartitioning(GridType.KDBTREE);
         objectRDD.buildIndex(IndexType.RTREE, true);
-        windowRDD.spatialPartitioning(objectRDD.grids);
+        windowRDD.spatialPartitioning(objectRDD.getPartitioner());
 
-        List<Tuple2<Geometry, HashSet<Polygon>>> results = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true, false).collect();
+        List<Tuple2<Geometry, List<Polygon>>> results = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true, false).collect();
         assertEquals(5467, results.size());
 
-        for (Tuple2<Geometry, HashSet<Polygon>> tuple : results) {
+        for (Tuple2<Geometry, List<Polygon>> tuple : results) {
             for (Polygon polygon : tuple._2()) {
                 assertTrue(new Circle(tuple._1(), 0.1).covers(polygon));
             }

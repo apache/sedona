@@ -51,8 +51,10 @@ def require(library_names: List[str]):
             if first_not_fulfill_value == -1:
                 return func(*args, **kwargs)
             else:
-                raise ModuleNotFoundError(f"Did not found {has_all_libs[first_not_fulfill_value]}, make sure that was correctly imported via py4j"
-                                          f"Did you use SedonaRegistrator.registerAll, Your jars were properly copied to $SPARK_HOME/jars ? ")
-        return run_function
-    return wrapper
+                raise ModuleNotFoundError(
+                    f"Did not found {has_all_libs[first_not_fulfill_value]}, make sure that was correctly imported via py4j"
+                    f"Did you use SedonaRegistrator.registerAll, Your jars were properly copied to $SPARK_HOME/jars ? ")
 
+        return run_function
+
+    return wrapper

@@ -24,7 +24,6 @@ from sedona.utils.decorators import require
 
 
 class IndexType(Enum):
-
     QUADTREE = "QUADTREE"
     RTREE = "RTREE"
 
@@ -39,7 +38,6 @@ class IndexType(Enum):
 
 @attr.s
 class IndexTypeJvm(JvmObject):
-
     index_type = attr.ib(type=IndexType)
 
     def _create_jvm_instance(self):

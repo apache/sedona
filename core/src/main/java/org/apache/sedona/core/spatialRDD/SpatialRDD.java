@@ -23,15 +23,12 @@ import org.apache.commons.lang.NullArgumentException;
 import org.apache.log4j.Logger;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
-import org.apache.sedona.core.spatialPartitioning.EqualPartitioning;
+import org.apache.sedona.core.geometryObjects.GeoJSONWriterNew;
 import org.apache.sedona.core.spatialPartitioning.FlatGridPartitioner;
-import org.apache.sedona.core.spatialPartitioning.HilbertPartitioning;
 import org.apache.sedona.core.spatialPartitioning.KDBTree;
 import org.apache.sedona.core.spatialPartitioning.KDBTreePartitioner;
 import org.apache.sedona.core.spatialPartitioning.QuadtreePartitioning;
-import org.apache.sedona.core.spatialPartitioning.RtreePartitioning;
 import org.apache.sedona.core.spatialPartitioning.SpatialPartitioner;
-import org.apache.sedona.core.spatialPartitioning.VoronoiPartitioning;
 import org.apache.sedona.core.spatialPartitioning.quadtree.QuadTreePartitioner;
 import org.apache.sedona.core.spatialPartitioning.quadtree.StandardQuadTree;
 import org.apache.sedona.core.spatialRddTool.IndexBuilder;
@@ -59,7 +56,6 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wololo.geojson.Feature;
-import org.wololo.jts2geojson.GeoJSONWriter;
 import scala.Tuple2;
 
 import java.io.Serializable;
@@ -114,12 +110,6 @@ public class SpatialRDD<T extends Geometry>
      */
     public JavaRDD<T> rawSpatialRDD;
 
-    /**
-     * The grids.
-     */
-    public List<Envelope> grids;
-
-    public StandardQuadTree partitionTree;
     public List<String> fieldNames;
     /**
      * The CR stransformation.
@@ -262,34 +252,9 @@ public class SpatialRDD<T extends Geometry>
                 boundaryEnvelope.getMinY(), boundaryEnvelope.getMaxY() + 0.01);
 
         switch (gridType) {
-            case EQUALGRID: {
-                EqualPartitioning EqualPartitioning = new EqualPartitioning(paddedBoundary, numPartitions);
-                grids = EqualPartitioning.getGrids();
-                partitioner = new FlatGridPartitioner(grids);
-                break;
-            }
-            case HILBERT: {
-                HilbertPartitioning hilbertPartitioning = new HilbertPartitioning(samples, paddedBoundary, numPartitions);
-                grids = hilbertPartitioning.getGrids();
-                partitioner = new FlatGridPartitioner(grids);
-                break;
-            }
-            case RTREE: {
-                RtreePartitioning rtreePartitioning = new RtreePartitioning(samples, numPartitions);
-                grids = rtreePartitioning.getGrids();
-                partitioner = new FlatGridPartitioner(grids);
-                break;
-            }
-            case VORONOI: {
-                VoronoiPartitioning voronoiPartitioning = new VoronoiPartitioning(samples, numPartitions);
-                grids = voronoiPartitioning.getGrids();
-                partitioner = new FlatGridPartitioner(grids);
-                break;
-            }
             case QUADTREE: {
                 QuadtreePartitioning quadtreePartitioning = new QuadtreePartitioning(samples, paddedBoundary, numPartitions);
-                partitionTree = quadtreePartitioning.getPartitionTree();
-                partitioner = new QuadTreePartitioner(partitionTree);
+                partitioner = new QuadTreePartitioner(quadtreePartitioning.getPartitionTree());
                 break;
             }
             case KDBTREE: {
@@ -302,7 +267,8 @@ public class SpatialRDD<T extends Geometry>
                 break;
             }
             default:
-                throw new Exception("[AbstractSpatialRDD][spatialPartitioning] Unsupported spatial partitioning method.");
+                throw new Exception("[AbstractSpatialRDD][spatialPartitioning] Unsupported spatial partitioning method. " +
+                        "The following partitioning methods are not longer supported: R-Tree, Hilbert curve, Voronoi, Equal-Grids");
         }
 
         this.spatialPartitionedRDD = partition(partitioner);
@@ -327,7 +293,6 @@ public class SpatialRDD<T extends Geometry>
     {
         this.partitioner = new FlatGridPartitioner(otherGrids);
         this.spatialPartitionedRDD = partition(partitioner);
-        this.grids = otherGrids;
         return true;
     }
 
@@ -339,7 +304,6 @@ public class SpatialRDD<T extends Geometry>
     {
         this.partitioner = new QuadTreePartitioner(partitionTree);
         this.spatialPartitionedRDD = partition(partitioner);
-        this.partitionTree = partitionTree;
         return true;
     }
 
@@ -614,7 +578,7 @@ public class SpatialRDD<T extends Geometry>
                     throws Exception
             {
                 ArrayList<String> result = new ArrayList();
-                GeoJSONWriter writer = new GeoJSONWriter();
+                GeoJSONWriterNew writer = new GeoJSONWriterNew();
                 while (iterator.hasNext()) {
                     Geometry spatialObject = iterator.next();
                     Feature jsonFeature;

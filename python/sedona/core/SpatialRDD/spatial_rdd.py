@@ -30,7 +30,6 @@ from sedona.core.enums.index_type import IndexTypeJvm, IndexType
 from sedona.core.enums.spatial import SpatialType
 from sedona.core.geom.envelope import Envelope
 from sedona.core.jvm.config import since
-from sedona.core.jvm.partitioner import JvmPartitioner
 from sedona.core.jvm.translate import SedonaPythonConverter, JvmSedonaPythonConverter
 from sedona.utils.decorators import require
 from sedona.utils.jvm import JvmStorageLevel
@@ -224,7 +223,8 @@ class SpatialRDD:
         :return:
         """
 
-        serialized_spatial_rdd = SedonaPythonConverter(self._jvm).translate_spatial_rdd_to_python(self._srdd.getRawSpatialRDD())
+        serialized_spatial_rdd = SedonaPythonConverter(self._jvm).translate_spatial_rdd_to_python(
+            self._srdd.getRawSpatialRDD())
 
         if not hasattr(self, "_raw_spatial_rdd"):
             RDD.saveAsObjectFile = lambda x, path: x._jrdd.saveAsObjectFile(path)
@@ -322,15 +322,6 @@ class SpatialRDD:
         self._indexed_raw_rdd = indexed_raw_rdd
 
     @property
-    def partitionTree(self) -> JvmPartitioner:
-        """
-
-        :return:
-        """
-
-        return JvmPartitioner(get_field(self._srdd, "partitionTree"))
-
-    @property
     def rawSpatialRDD(self):
         """
 
@@ -405,7 +396,7 @@ class SpatialRDD:
 
         return getattr(self, "_spatial_partitioned_rdd")
 
-    def spatialPartitioning(self, partitioning: Union[str, GridType, SpatialPartitioner, List[Envelope], JvmPartitioner],
+    def spatialPartitioning(self, partitioning: Union[str, GridType, SpatialPartitioner, List[Envelope]],
                             num_partitions: Optional[int] = None) -> bool:
         """
 
@@ -415,8 +406,6 @@ class SpatialRDD:
         """
         if type(partitioning) == str:
             grid = GridTypeJvm(self._jvm, GridType.from_str(partitioning)).jvm_instance
-        elif type(partitioning) == JvmPartitioner:
-            grid = partitioning.jpart
         elif type(partitioning) == GridType:
             grid = GridTypeJvm(self._jvm, partitioning).jvm_instance
         elif type(partitioning) == SpatialPartitioner:

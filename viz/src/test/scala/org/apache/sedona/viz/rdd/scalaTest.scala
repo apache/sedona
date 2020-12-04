@@ -129,8 +129,8 @@ class scalaTest extends FunSpec with BeforeAndAfterAll{
     it("should pass choropleth map") {
       val spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY)
       val queryRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions, StorageLevel.MEMORY_ONLY)
-      spatialRDD.spatialPartitioning(GridType.RTREE)
-      queryRDD.spatialPartitioning(spatialRDD.grids)
+      spatialRDD.spatialPartitioning(GridType.KDBTREE)
+      queryRDD.spatialPartitioning(spatialRDD.getPartitioner)
       spatialRDD.buildIndex(IndexType.RTREE, true)
       val joinResult = JoinQuery.SpatialJoinQueryCountByKey(spatialRDD, queryRDD, true, false)
       val visualizationOperator = new ChoroplethMap(1000, 600, USMainLandBoundary, false)

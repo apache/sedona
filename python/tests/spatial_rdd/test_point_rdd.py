@@ -110,64 +110,7 @@ class TestPointRDD(TestBase):
             newLevel=StorageLevel.MEMORY_ONLY
         )
         spatial_rdd.analyze()
-        spatial_rdd.spatialPartitioning(GridType.EQUALGRID)
-
-        for envelope in spatial_rdd.grids:
-            print("PointRDD spatial partitioning grids: " + str(envelope))
-        assert spatial_rdd.countWithoutDuplicates() == spatial_rdd.countWithoutDuplicatesSPRDD()
-
-    def test_hilbert_curve_spatial_partitioning(self):
-        spatial_rdd = PointRDD(
-            sparkContext=self.sc,
-            InputLocation=input_location,
-            Offset=offset,
-            splitter=splitter,
-            carryInputData=False,
-            partitions=10,
-            newLevel=StorageLevel.MEMORY_ONLY
-        )
-
-        spatial_rdd.analyze()
-        spatial_rdd.spatialPartitioning(GridType.HILBERT)
-
-        for envelope in spatial_rdd.grids:
-            print(envelope)
-        assert spatial_rdd.countWithoutDuplicates() == spatial_rdd.countWithoutDuplicatesSPRDD()
-
-    def test_r_tree_spatial_partitioning(self):
-        spatial_rdd = PointRDD(
-            sparkContext=self.sc,
-            InputLocation=input_location,
-            Offset=offset,
-            splitter=splitter,
-            carryInputData=True,
-            partitions=10,
-            newLevel=StorageLevel.MEMORY_ONLY
-        )
-        spatial_rdd.analyze()
-        spatial_rdd.spatialPartitioning(GridType.RTREE)
-
-        for envelope in spatial_rdd.grids:
-            print(envelope)
-
-        assert spatial_rdd.countWithoutDuplicates() == spatial_rdd.countWithoutDuplicatesSPRDD()
-
-    def test_voronoi_spatial_partitioning(self):
-        spatial_rdd = PointRDD(
-            sparkContext=self.sc,
-            InputLocation=input_location,
-            Offset=offset,
-            splitter=splitter,
-            carryInputData=False,
-            partitions=10,
-            newLevel=StorageLevel.MEMORY_ONLY
-        )
-
-        spatial_rdd.analyze()
-        spatial_rdd.spatialPartitioning(GridType.VORONOI)
-
-        for envelope in spatial_rdd.grids:
-            print(envelope)
+        spatial_rdd.spatialPartitioning(GridType.QUADTREE)
 
         assert spatial_rdd.countWithoutDuplicates() == spatial_rdd.countWithoutDuplicatesSPRDD()
 

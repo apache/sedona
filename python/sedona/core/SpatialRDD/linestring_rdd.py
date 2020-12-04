@@ -71,7 +71,7 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
         self._srdd = self._jvm_spatial_rdd(jsrdd, sourceEpsgCode, targetEpsgCode)
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: int,
-                 splitter: FileDataSplitter,  carryInputData: bool, partitions: int):
+                 splitter: FileDataSplitter, carryInputData: bool, partitions: int):
         """
 
         :param sparkContext: SparkContext instance
@@ -139,7 +139,8 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
             partitions
         )
 
-    def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter, carryInputData: bool):
+    def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter,
+                 carryInputData: bool):
         """
 
         :param sparkContext: SparkContext instance
@@ -243,7 +244,7 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
         )
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter, carryInputData: bool,
-                newLevel: StorageLevel):
+                 newLevel: StorageLevel):
         """
 
         :param sparkContext: SparkContext instance
