@@ -16,14 +16,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - run: git submodule update --init --recursive # Checkout Git submodule if necessary
-    - uses: actions/setup-python@v2
-      with:
-        python-version: '3.7'
     - uses: actions/setup-java@v1
       with:
         java-version: '8'
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    - run: git submodule update --init --recursive # Checkout Git submodule if necessary
     - run: mvn -q clean install
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.7'
     - uses: vemonet/setup-spark@v1
       with:
         spark-version: '3.0.1' # Exact version
