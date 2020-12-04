@@ -1,13 +1,6 @@
-# This workflow will build a Java project with Maven
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+name: Python build
 
-name: Continuous integration
-
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -26,7 +19,7 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
     - run: git submodule update --init --recursive # Checkout Git submodule if necessary
-    - run: mvn -q clean install
+    - run: mvn -q clean install -DskipTests
     - uses: actions/setup-python@v2
       with:
         python-version: '3.7'
