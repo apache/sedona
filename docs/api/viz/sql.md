@@ -2,18 +2,18 @@
 
 The detailed explanation is here: [Visualize Spatial DataFrame/RDD](../../tutorial/viz.md).
 
-1. Add GeoSpark-core, GeoSparkSQL, GeoSparkViz into your project POM.xml or build.sbt
+1. Add Sedona-core, Sedona-SQL,Sedona-Viz into your project POM.xml or build.sbt
 2. Declare your Spark Session
 ```Scala
 sparkSession = SparkSession.builder().
-config("spark.serializer",classOf[KryoSerializer].getName).
-config("spark.kryo.registrator", classOf[GeoSparkVizKryoRegistrator].getName).
-master("local[*]").appName("myGeoSparkVizDemo").getOrCreate()
+config("spark.serializer","org.apache.spark.serializer.KryoSerializer").
+config("spark.kryo.registrator", "org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator").
+master("local[*]").appName("mySedonaVizDemo").getOrCreate()
 ```
 3. Add the following lines after your SparkSession declaration:
 ```Scala
-GeoSparkSQLRegistrator.registerAll(sparkSession)
-GeoSparkVizRegistrator.registerAll(sparkSession)
+SedonaSQLRegistrator.registerAll(sparkSession)
+SedonaVizRegistrator.registerAll(sparkSession)
 ```
 
 ## Regular functions
@@ -24,7 +24,7 @@ Introduction: Return a pixel for a given resolution
 
 Format: `ST_Pixelize (A:geometry, ResolutionX:int, ResolutionY:int, Boundary:geometry)`
 
-Since: `v1.2.0`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -41,7 +41,7 @@ Introduction: Return the map tile name for a given zoom level. Please refer to [
 
 Format: `ST_TileName (A:pixel, ZoomLevel:int)`
 
-Since: `v1.2.0`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -58,7 +58,7 @@ Introduction: Given the weight of a pixel, return the corresponding color. The w
 
 Format: `ST_Colorize (weight:Double, maxWeight:Double, mandatory color: string (Optional))`
 
-Since: `v1.2.0`
+Since: `v1.0.0`
 
 #### Produce various colors - heat map
 
@@ -96,7 +96,7 @@ Introduction: Return the base64 string representation of a Java PNG BufferedImag
 
 Format: `ST_EncodeImage (A:image)`
 
-Since: `v1.2.0`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -112,7 +112,7 @@ Introduction: Given a group of pixels and their colors, return a single Java PNG
 
 Format: `ST_Render (A:pixel, B:color)`
 
-Since: `v1.2.0`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL

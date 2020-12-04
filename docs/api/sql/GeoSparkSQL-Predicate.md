@@ -49,7 +49,7 @@ Introduction: Return true if A equals to B
 
 Format: `ST_Equals (A:geometry, B:geometry)`
 
-Since: `v1.2.0`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -64,7 +64,7 @@ Introduction: Return true if A crosses B
 
 Format: `ST_Crosses (A:geometry, B:geometry)`
 
-Since: `v1.2.0`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -79,7 +79,7 @@ Introduction: Return true if A touches B
 
 Format: `ST_Touches (A:geometry, B:geometry)`
 
-Since: `v1.2.0`
+Since: `v1.0.0`
 
 ```SQL
 SELECT * 
@@ -93,7 +93,7 @@ Introduction: Return true if A overlaps B
 
 Format: `ST_Overlaps (A:geometry, B:geometry)`
 
-Since: `v1.2.0`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
