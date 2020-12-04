@@ -13,16 +13,19 @@ nav:
       - Install GeoSpark-Zeppelin: download/zeppelin.md
       - Compile the source code: download/compile.md
     - Tutorial:
-      - Spatial RDD application: tutorial/rdd.md
-      - Spatial SQL application: tutorial/sql.md
-      - Visualize Spatial DataFrame: tutorial/viz.md
-      - Run GeoSpark via Zeppelin: tutorial/zeppelin.md
-      - Spatial RDD in Python: tutorial/geospark-core-python.md
-      - Spatial SQL in Python: tutorial/geospark-sql-python.md
-      - GeoSpark template project: tutorial/GeoSpark-Runnable-DEMO.md
-      - Frequently Asked Questions: tutorial/faq.md
-      - Tune GeoSpark RDD application: tutorial/Advanced-Tutorial-Tune-your-GeoSpark-Application.md
-      - Benchmark: tutorial/benchmark.md            
+      - Spatial RDD app:
+        - Scala/Java: tutorial/rdd.md
+        - Python: tutorial/geospark-core-python.md
+      - Spatial SQL app:  
+        - Scala/Java: tutorial/sql.md
+        - Python: tutorial/geospark-sql-python.md
+      - Map visualization SQL app:
+        - Scala/Java: tutorial/viz.md
+        - Use Apache Zeppelin: tutorial/zeppelin.md
+      - Examples: tutorial/GeoSpark-Runnable-DEMO.md
+      - Performance tuning:
+        - Benchmark: tutorial/benchmark.md            
+        - Tune RDD application: tutorial/Advanced-Tutorial-Tune-your-GeoSpark-Application.md
     - API:
       - RDD (core):
         - Scala/Java doc: api/GeoSpark-Scala-and-Java-API.md
@@ -39,12 +42,10 @@ nav:
         - DataFrame/SQL: api/viz/sql.md
         - RDD: api/viz/Babylon-Scala-and-Java-API.md
     - Community:
-      - Community info: community/contact.md 
+      - Community: community/contact.md 
       - Contributing rule: community/rule.md
       - Committers: community/contributor.md
       - Publications: community/publication.md
-    - License: 
-      - License-before-GeoSpark-1.2.0: license/License-before-1-2-0.md
       - License: license/License.md
     - Archive for GeoSpark:
       - Download:

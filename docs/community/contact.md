@@ -1,4 +1,4 @@
-# Community info
+# Community
 
 Every volunteer project obtains its strength from the people involved in it. We invite you to participate as much or as little as you choose.
 

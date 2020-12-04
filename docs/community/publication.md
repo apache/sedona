@@ -1,6 +1,6 @@
 # Publication
 
-Apache Sedona was formerly called GeoSpark, initiated by Arizona State University [Data Systems Lab](https://www.datasyslab.net/). The initial contributors were [Jia Yu](https://jiayuasu.github.io/students/) and [Mohamed Sarwat](https://mosarwat.org/)
+Apache Sedona was formerly called GeoSpark, initiated by Arizona State University [Data Systems Lab](https://www.datasyslab.net/).
 
 ## Key publications
 **"Spatial Data Management in Apache Spark: The
