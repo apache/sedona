@@ -19,7 +19,7 @@
 package org.apache.sedona.sql.UDF
 
 import org.apache.spark.sql.catalyst.FunctionIdentifier
-import org.apache.spark.sql.{SQLContext, SparkSession}
+import org.apache.spark.sql.{SQLContext, SparkSession, functions}
 
 object UdfRegistrator {
 
