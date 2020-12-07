@@ -12,7 +12,7 @@ def switch_version(line):
         print(line[2:], end='')  # enable code
         return 'enabled'
     else:
-        print('//    ' + line, end='')  # disable code
+        print('//' + line, end='')  # disable code
         return 'disabled'
 
 def parse_file(filepath):
