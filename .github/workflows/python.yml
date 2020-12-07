@@ -57,6 +57,5 @@ jobs:
     - run: sudo pip3 install -U virtualenvwrapper
     - run: python3 -m pip install pipenv
     - run: (cd python;pipenv install --dev)
-    - run: mkdir $SPARK_HOME/jars
-    - run: find python-adapter/target -name sedona-* -exec cp {} $SPARK_HOME/jars \;
+    - run: find python-adapter/target -name sedona-* -exec cp {} $SPARK_HOME/jars/ \;
     - run: (cd python;pipenv run pytest tests)
