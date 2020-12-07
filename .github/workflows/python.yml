@@ -6,12 +6,27 @@ jobs:
   build:
 
     runs-on: ubuntu-18.04
-
+    strategy:
+      matrix:
+        python: [3.7, 3.8, 3.9]
+        include:
+          - spark: 3.0.1
+            scala: 2.12.8
+            hadoop: 3.2
+          - spark: 2.4.7
+            scala: 2.11.8
+            hadoop: 2.7
     steps:
+    - env:
+        SPARK_VERSION: ${{ matrix.spark }}
+        SCALA_VERSION: ${{ matrix.scala }}
     - uses: actions/checkout@v2
     - uses: actions/setup-java@v1
       with:
         java-version: '8'
+    - uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python }}
     - name: Cache Maven packages
       uses: actions/cache@v2
       with:
@@ -19,13 +34,12 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
     - run: git submodule update --init --recursive # Checkout Git submodule if necessary
-    - run: mvn -q clean install -DskipTests
-    - uses: actions/setup-python@v2
-      with:
-        python-version: '3.7'
+    - run: python3 spark-version-converter.py spark${SPARK_VERSION:0:1}
+    - run: mvn -q clean install -DskipTests -Dscala.compat.version=${SCALA_VERSION:0:3} -Dscala.version=$SCALA_VERSION -Dspark.compat.version=${SPARK_VERSION:0:2} -Dspark.version=$SPARK_VERSION
     - uses: vemonet/setup-spark@v1
       with:
-        spark-version: '3.0.1' # Exact version
+        spark-version: ${{ matrix.spark }}
+        hadoop-version: ${{ matrix.hadoop }}
     - run: export PYTHONPATH=$SPARK_HOME/python
     - run: sudo apt-get -y install python3-pip python-dev
     - run: sudo pip3 install -U setuptools
@@ -33,5 +47,5 @@ jobs:
     - run: sudo pip3 install -U virtualenvwrapper
     - run: python3 -m pip install pipenv
     - run: (cd python;pipenv install --dev)
-    - run: find python-adapter/target/ -iregex "python-adapter\/target\/sedona-python-adapter-[0-9]\.[0-9]\.[0-9]-incubator\(-SNAPSHOT\)?\.jar" -exec cp {} $SPARK_HOME/jars \;
+    - run: find python-adapter/target/ -iregex "python-adapter\/target\/sedona-python-adapter-*" -exec cp {} $SPARK_HOME/jars \;
     - run: (cd python;pipenv run pytest tests)

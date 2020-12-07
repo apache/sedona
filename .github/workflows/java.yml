@@ -6,12 +6,24 @@ jobs:
   build:
 
     runs-on: ubuntu-18.04
-
+    strategy:
+      matrix:
+        spark: [2.4.7, 3.0.1]
+        scala: [2.11.8, 2.12.8]
+        exclude:
+          - spark: 3.0.1
+            scala: 2.11.8
     steps:
+    - env:
+        SPARK_VERSION: ${{ matrix.spark }}
+        SCALA_VERSION: ${{ matrix.scala }}
     - uses: actions/checkout@v2
     - uses: actions/setup-java@v1
       with:
         java-version: '8'
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.7'
     - name: Cache Maven packages
       uses: actions/cache@v2
       with:
@@ -19,7 +31,8 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
     - run: git submodule update --init --recursive # Checkout Git submodule if necessary
-    - run: mvn -q clean install
+    - run: python3 spark-version-converter.py spark${SPARK_VERSION:0:1}
+    - run: mvn -q clean install -Dscala.compat.version=${SCALA_VERSION:0:3} -Dscala.version=$SCALA_VERSION -Dspark.compat.version=${SPARK_VERSION:0:2} -Dspark.version=$SPARK_VERSION
     - run: mkdir staging
     - run: cp core/target/sedona-*.jar staging
     - run: cp sql/target/sedona-*.jar staging
@@ -27,5 +40,5 @@ jobs:
     - run: cp python-adapter/target/sedona-*.jar staging
     - uses: actions/upload-artifact@v2
       with:
-        name: Package
+        name: generated-jars
         path: staging
