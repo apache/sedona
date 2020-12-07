@@ -1,20 +1,24 @@
 # Python 3
 import fileinput
 
-spark2_anchor='SPARK2'
-spark3_anchor='SPARK3'
+spark2_anchor = 'SPARK2 anchor'
+spark3_anchor = 'SPARK3 anchor'
+files = ['sql/src/main/scala/org/apache/sedona/sql/UDF/UdfRegistrator.scala',
+         'sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryExec.scala',
+         'sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/JoinQueryDetector.scala']
 
 def switch_version(line):
-    if '//Catalog' in line:
-        print(line.replace('//Catalog', 'Catalog'), end='')  # enable code
+    if line[:2] == '//':
+        print(line[2:], end='')  # enable code
         return 'enabled'
     else:
-        print(line.replace('Catalog', '//Catalog'), end='')  # disable code
+        print('//    ' + line, end='')  # disable code
         return 'disabled'
-def parse_file():
+
+def parse_file(filepath):
     conversion_result_spark2 = ''
     conversion_result_spark3 = ''
-    with fileinput.FileInput("sql/src/main/scala/org/apache/sedona/sql/UDF/UdfRegistrator.scala", inplace=True) as file:
+    with fileinput.FileInput(filepath, inplace=True) as file:
         for line in file:
             if spark2_anchor in line:
                 conversion_result_spark2 = switch_version(line) + ' ' + spark2_anchor
@@ -24,4 +28,5 @@ def parse_file():
                 print(line, end='')
         return conversion_result_spark2 + ' and ' + conversion_result_spark3
 
-print(parse_file())
+for filepath in files:
+    print(filepath + ': ' + parse_file(filepath))
