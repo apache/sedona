@@ -19,7 +19,7 @@
 package org.apache.sedona.sql.UDF
 
 import org.apache.spark.sql.catalyst.FunctionIdentifier
-import org.apache.spark.sql.{SQLContext, SparkSession, functions}
+import org.apache.spark.sql.{SQLContext, SparkSession}
 
 object UdfRegistrator {
 
@@ -29,11 +29,17 @@ object UdfRegistrator {
 
   def registerAll(sparkSession: SparkSession): Unit = {
     Catalog.expressions.foreach(f => sparkSession.sessionState.functionRegistry.createOrReplaceTempFunction(f.getClass.getSimpleName.dropRight(1), f))
-    Catalog.aggregateExpressions.foreach(f => sparkSession.udf.register(f.getClass.getSimpleName, functions.udaf(f)))
+    // Register Aggregator to Spark 3.X. Manually comment out the following line when compile with Spark < 3.0
+     Catalog.aggregateExpressions.foreach(f => sparkSession.udf.register(f.getClass.getSimpleName, functions.udaf(f))) // SPARK3 anchor
+    // Register UDAF to Spark 2.X. Manually comment out the following line when compile with Spark >= 3.0
+    //Catalog.aggregateExpressions_UDAF.foreach(f => sparkSession.udf.register(f.getClass.getSimpleName, f)) // SPARK2 anchor
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
     Catalog.expressions.foreach(f => sparkSession.sessionState.functionRegistry.dropFunction(FunctionIdentifier(f.getClass.getSimpleName.dropRight(1))))
-    Catalog.aggregateExpressions.foreach(f => sparkSession.sessionState.functionRegistry.dropFunction(FunctionIdentifier(f.getClass.getSimpleName)))
+    // Drop Aggregator from Spark 3.X. Manually comment out the following line when compile with Spark < 3.0
+     Catalog.aggregateExpressions.foreach(f => sparkSession.sessionState.functionRegistry.dropFunction(FunctionIdentifier(f.getClass.getSimpleName))) // SPARK3 anchor
+    // Drop UDAF from Spark 2.X. Manually comment out the following line when compile with Spark >= 3.0
+    //Catalog.aggregateExpressions_UDAF.foreach(f => sparkSession.sessionState.functionRegistry.dropFunction(FunctionIdentifier(f.getClass.getSimpleName))) // SPARK2 anchor
   }
 }
