@@ -16,10 +16,12 @@ jobs:
           - spark: 2.4.7
             scala: 2.11.8
             hadoop: 2.7
+
     steps:
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         SCALA_VERSION: ${{ matrix.scala }}
+      run: echo $SPARK_VERSION ${SPARK_VERSION:0:3} $SCALA_VERSION ${SCALA_VERSION:0:4}
     - uses: actions/checkout@v2
     - uses: actions/setup-java@v1
       with:
@@ -35,7 +37,7 @@ jobs:
         restore-keys: ${{ runner.os }}-m2
     - run: git submodule update --init --recursive # Checkout Git submodule if necessary
     - run: python3 spark-version-converter.py spark${SPARK_VERSION:0:1}
-    - run: mvn -q clean install -DskipTests -Dscala.compat.version=${SCALA_VERSION:0:3} -Dscala.version=$SCALA_VERSION -Dspark.compat.version=${SPARK_VERSION:0:2} -Dspark.version=$SPARK_VERSION
+    - run: mvn -q clean install -DskipTests -Dscala.compat.version=${SCALA_VERSION:0:4} -Dscala.version=$SCALA_VERSION -Dspark.compat.version=${SPARK_VERSION:0:3} -Dspark.version=$SPARK_VERSION
     - uses: vemonet/setup-spark@v1
       with:
         spark-version: ${{ matrix.spark }}
