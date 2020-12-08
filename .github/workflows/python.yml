@@ -14,15 +14,18 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        python: [3.7]
+        python: [3.7] #[3.7, 3.8, 3.9]
         spark: [2.4.7, 3.0.1]
         include:
           - spark: 3.0.1
             scala: 2.12.8
-            hadoop: 3.2
           - spark: 2.4.7
             scala: 2.11.8
-            hadoop: 2.7
+#        exlcude:
+#          - spark: 2.4.7
+#            python: 3.8
+#          - spark: 2.4.7
+#            python: 3.9
 
     steps:
     - uses: actions/checkout@v2
@@ -46,16 +49,21 @@ jobs:
         SPARK_VERSION: ${{ matrix.spark }}
         SCALA_VERSION: ${{ matrix.scala }}
       run: mvn -q clean install -DskipTests -Dscala.compat.version=${SCALA_VERSION:0:4} -Dscala.version=$SCALA_VERSION -Dspark.compat.version=${SPARK_VERSION:0:3} -Dspark.version=$SPARK_VERSION
-    - uses: vemonet/setup-spark@v1
-      with:
-        spark-version: ${{ matrix.spark }}
-        hadoop-version: ${{ matrix.hadoop }}
-    - run: export PYTHONPATH=/usr/local/spark/python
+    - env:
+        SPARK_VERSION: ${{ matrix.spark }}
+      run: wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz
+    - env:
+        SPARK_VERSION: ${{ matrix.spark }}
+      run: tar -xzf spark-${SPARK_VERSION}-bin-hadoop2.7.tgz
     - run: sudo apt-get -y install python3-pip python-dev
     - run: sudo pip3 install -U setuptools
     - run: sudo pip3 install -U wheel
     - run: sudo pip3 install -U virtualenvwrapper
     - run: python3 -m pip install pipenv
     - run: (cd python;pipenv install --dev)
-    - run: find python-adapter/target -name sedona-* -exec cp {} /usr/local/spark/jars/ \;
-    - run: (cd python;pipenv run pytest tests)
+    - env:
+        SPARK_VERSION: ${{ matrix.spark }}
+      run: find python-adapter/target -name sedona-* -exec cp {} spark-${SPARK_VERSION}-bin-hadoop2.7/jars/ \;
+    - env:
+        SPARK_VERSION: ${{ matrix.spark }}
+      run: (export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop2.7;export PYTHONPATH=$SPARK_HOME/python;cd python;pipenv run pytest tests)
