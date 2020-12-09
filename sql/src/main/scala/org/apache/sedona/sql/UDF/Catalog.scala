@@ -19,7 +19,7 @@
 package org.apache.sedona.sql.UDF
 
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
-import org.apache.spark.sql.expressions.Aggregator
+import org.apache.spark.sql.expressions.{Aggregator, UserDefinedAggregateFunction}
 import org.apache.spark.sql.sedona_sql.expressions._
 import org.locationtech.jts.geom.Geometry
 
@@ -83,5 +83,12 @@ object Catalog {
     new ST_Union_Aggr,
     new ST_Envelope_Aggr,
     new ST_Intersection_Aggr
+  )
+
+  import org.apache.spark.sql.sedona_sql.expressions_udaf
+  val aggregateExpressions_UDAF: Seq[UserDefinedAggregateFunction] = Seq(
+    new expressions_udaf.ST_Union_Aggr,
+    new expressions_udaf.ST_Envelope_Aggr,
+    new expressions_udaf.ST_Intersection_Aggr
   )
 }
