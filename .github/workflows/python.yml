@@ -14,18 +14,16 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        python: [3.7, 3.8]
-        spark: [2.4.7, 3.0.1]
         include:
           - spark: 3.0.1
             scala: 2.12.8
+            python: 3.7
+          - spark: 3.0.1
+            scala: 2.12.8
+            python: 3.8
           - spark: 2.4.7
             scala: 2.11.8
-        exlcude:
-          - spark: 2.4.7
-            python: 3.8
-#          - spark: 2.4.7
-#            python: 3.9
+            python: 3.7
 
     steps:
     - uses: actions/checkout@v2
