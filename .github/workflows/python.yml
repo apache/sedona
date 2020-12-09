@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        python: [3.7] #[3.7, 3.8, 3.9]
+        python: [3.7, 3.8]
         spark: [3.0.1] #[2.4.7, 3.0.1]
         include:
           - spark: 3.0.1
@@ -60,7 +60,9 @@ jobs:
     - run: sudo pip3 install -U wheel
     - run: sudo pip3 install -U virtualenvwrapper
     - run: python3 -m pip install pipenv
-    - run: (cd python;pipenv install --dev)
+    - env:
+        PYTHON_VERSION: ${{ matrix.python }}
+      run: (cd python;pipenv --python ${PYTHON_VERSION};pipenv install --dev)
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
       run: find python-adapter/target -name sedona-* -exec cp {} spark-${SPARK_VERSION}-bin-hadoop2.7/jars/ \;
