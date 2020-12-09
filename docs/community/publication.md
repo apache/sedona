@@ -1,5 +1,6 @@
 # Publication
 
+Apache Sedona was formerly called GeoSpark, initiated by Arizona State University [Data Systems Lab](https://www.datasyslab.net/).
 
 ## Key publications
 **"Spatial Data Management in Apache Spark: The
@@ -8,6 +9,15 @@ GeoSpark Perspective and Beyond"** is the full research paper that talks about t
 **"GeoSparkViz: A Scalable Geospatial Data Visualization Framework in the Apache Spark Ecosystem"** is the full research paper that talks about map visualization system in GeoSpark. Please cite this paper if your work mentions GeoSpark visualization system.
 
 **"Building A Microscopic Road Network Traffic Simulator in Apache Spark"** is the full research paper that talks about the traffic simulator in GeoSpark. Please cite this paper if your work mentions GeoSparkSim traffic simulator.
+
+## Third-party evaluation
+
+GeoSpark were evaluated by papers published on database top venues. It is worth noting that we do not have any collaboration with the authors.
+
+* SIGMOD 2020 paper ["Architecting a Query Compiler for Spatial Workloads"](https://dl.acm.org/doi/abs/10.1145/3318464.3389701) Ruby Y. Tahboub, Tiark  Rompf (Purdue University).
+> In Figure 16a, GeoSpark distance join query runs around 7x - 9x faster than Simba, a spatial extension on Spark, on 1 - 24 core machines.
+* PVLDB 2018 paper ["How Good Are Modern Spatial Analytics Systems?"](http://www.vldb.org/pvldb/vol11/p1661-pandey.pdf) Varun Pandey, Andreas Kipf, Thomas Neumann, Alfons Kemper (Technical University of Munich), quoted as follows: 
+> GeoSpark comes close to a complete spatial analytics system. It also exhibits the best performance in most cases.
 
 ## Full publications
 ### GeoSpark Ecosystem
@@ -26,13 +36,13 @@ GeoSpark Perspective and Beyond"](https://link.springer.com/epdf/10.1007/s10707-
 ["GeoSparkViz: A Scalable Geospatial Data Visualization Framework in the Apache Spark Ecosystem"](http://www.public.asu.edu/~jiayu2/geospark/publication/geosparkviz-ssdbm-2018.pdf) (research paper). Jia Yu, Zongsi Zhang, Mohamed Sarwat. In Proceedings of the International Conference on Scientific and Statistical Database Management, SSDBM 2018, Bolzano-Bozen, Italy July 2018
 
 ### GeoSparkSim Traffic Simulator
+
+Dissecting GeoSparkSim: a scalable microscopic road network traffic simulator in Apache Spark (journal paper) Jia Yu, Zishan Fu, Mohamed Sarwat. Distributed Parallel Databases 38(4): 963-994 (2020)
+
+Demonstrating GeoSparkSim: A Scalable Microscopic Road Network Traffic Simulator Based on Apache Spark. Zishan Fu, Jia Yu, Mohamed Sarwat. International Symposium on Spatial and Temporal Databases, SSTD, 2019
+
 ["Building A Microscopic Road Network Traffic Simulator in Apache Spark"](http://www.public.asu.edu/~jiayu2/geospark/publication/geosparksim-mdm-2019.pdf) (research paper) Zishan Fu, Jia Yu, and Mohamed Sarwat. In Proceedings of the International Conference on Mobile Data Management, MDM, 2019
 
 ### A Tutorial about Geospatial Data Management in Spark
 
 ["Geospatial Data Management in Apache Spark: A Tutorial"](http://www.public.asu.edu/~jiayu2/geospark/publication/geospatial-icde-2019.pdf) (Tutorial) Jia Yu and Mohamed Sarwat.  In Proceedings of the International Conference on Data Engineering, ICDE, 2019
-
-## Third-party research papers
-
-GeoSpark received an evaluation from PVLDB 2018 paper ["How Good Are Modern Spatial Analytics Systems?"](http://www.vldb.org/pvldb/vol11/p1661-pandey.pdf) Varun Pandey, Andreas Kipf, Thomas Neumann, Alfons Kemper (Technical University of Munich), quoted as follows: 
-> GeoSpark comes close to a complete spatial analytics system. It also exhibits the best performance in most cases.

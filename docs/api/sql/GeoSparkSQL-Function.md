@@ -122,7 +122,7 @@ Introduction: Return the intersection geometry of A and B
 
 Format: `ST_Intersection (A:geometry, B:geometry)`
 
-Since: `v1.1.0`
+Since: `v1.0.0`
 
 Spark SQL example:
 
@@ -137,7 +137,7 @@ Introduction: Test if a geometry is well formed
 
 Format: `ST_IsValid (A:geometry)`
 
-Since: `v1.2.0`
+Since: `v1.0.0`
 
 Spark SQL example:
 
@@ -153,7 +153,7 @@ Introduction: Given an invalid polygon or multipolygon and removeHoles boolean f
 
 Format: `ST_MakeValid (A:geometry, removeHoles:Boolean)`
 
-Since: `v1.2.0`
+Since: `v1.0.0`
 
 Spark SQL example:
 
@@ -176,7 +176,7 @@ Introduction: Reduce the decimals places in the coordinates of the geometry to t
 
 Format: `ST_PrecisionReduce (A:geometry, B:int)`
 
-Since: `v1.2.0`
+Since: `v1.0.0`
 
 Spark SQL example:
 
@@ -192,7 +192,7 @@ Introduction: Test if geometry's only self-intersections are at boundary points.
 
 Format: `ST_IsSimple (A:geometry)`
 
-Since: `v1.2.0`
+Since: `v1.0.0`
 
 Spark SQL example:
 
@@ -207,7 +207,7 @@ Introduction: Returns a geometry/geography that represents all points whose dist
 
 Format: `ST_Buffer (A:geometry, buffer: Double)`
 
-Since: `v1.2.0`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -221,7 +221,7 @@ Introduction: Return the Well-Known Text string representation of a geometry
 
 Format: `ST_AsText (A:geometry)`
 
-Since: `v1.2.0`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -235,7 +235,7 @@ Introduction: Return the [GeoJSON](https://geojson.org/) string representation o
 
 Format: `ST_AsGeoJSON (A:geometry)`
 
-Since: `v1.3.2`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -247,7 +247,7 @@ FROM polygondf
 
 Introduction: Return points of the geometry
 
-Since: `v1.2.1`
+Since: `v1.0.0`
 
 Format: `ST_NPoints (A:geometry)`
 
@@ -261,7 +261,7 @@ FROM polygondf
 Introduction: Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input,
               and with the components having the same topological relationship.
 
-Since: `v1.2.1`
+Since: `v1.0.0`
 
 Format: `ST_SimplifyPreserveTopology (A:geometry, distanceTolerance: Double)`
 
@@ -276,7 +276,7 @@ Introduction: Returns the type of the geometry as a string. EG: 'ST_Linestring',
 
 Format: `ST_GeometryType (A:geometry)`
 
-Since: `v1.2.1`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -293,7 +293,7 @@ Introduction: Returns a LineString formed by sewing together the constituent lin
 
 Format: `ST_LineMerge (A:geometry)`
 
-Since: `v1.3.2`
+Since: `v1.0.0`
 
 ```SQL
 SELECT ST_LineMerge(geometry)
@@ -306,7 +306,7 @@ Introduction: Returns Azimuth for two given points in radians null otherwise.
 
 Format: `ST_Azimuth(pointA: Point, pointB: Point)`
 
-Since: `v1.3.2`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -321,12 +321,13 @@ Introduction: Returns X Coordinate of given Point null otherwise.
 
 Format: `ST_X(pointA: Point)`
 
-Since: `v1.3.2`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
 SELECT ST_X(ST_POINT(0.0 25.0))
 ```
+
 Output: `0.0`
 
 ## ST_Y
@@ -335,7 +336,7 @@ Introduction: Returns Y Coordinate of given Point, null otherwise.
 
 Format: `ST_Y(pointA: Point)`
 
-Since: `v1.3.2`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -350,7 +351,7 @@ Introduction: Returns first point of given linestring.
 
 Format: `ST_StartPoint(geom: geometry)`
 
-Since: `v1.3.2`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -365,7 +366,7 @@ Introduction: Returns last point of given linestring.
 
 Format: `ST_EndPoint(geom: geometry)`
 
-Since: `v1.3.2`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -380,7 +381,7 @@ Introduction: Returns the closure of the combinatorial boundary of this Geometry
 
 Format: `ST_Boundary(geom: geometry)`
 
-Since: `v1.3.2`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -395,7 +396,7 @@ Introduction: Returns a line string representing the exterior ring of the POLYGO
 
 Format: `ST_ExteriorRing(geom: geometry)`
 
-Since: `v1.3.2`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -410,7 +411,7 @@ Introduction: Return the 1-based Nth geometry if the geometry is a GEOMETRYCOLLE
 
 Format: `ST_GeometryN(geom: geometry, n: Int)`
 
-Since: `v1.3.2`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -425,7 +426,7 @@ Introduction: Returns the Nth interior linestring ring of the polygon geometry. 
 
 Format: `ST_InteriorRingN(geom: geometry, n: Int)`
 
-Since: `v1.3.2`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -441,14 +442,14 @@ itself, if the geometry is collection or multi it returns record for each of col
  
 Format: `ST_Dump(geom: geometry)`
 
-Since: `v1.3.2`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
 SELECT ST_Dump(ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))'))
 ```
 
-Output: [POINT (10 40), POINT (40 30), POINT (20 20), POINT (30 10)]
+Output: `[POINT (10 40), POINT (40 30), POINT (20 20), POINT (30 10)]`
 
 ## ST_DumpPoints
 
@@ -456,7 +457,7 @@ Introduction: Returns list of Points which geometry consists of.
  
 Format: `ST_DumpPoints(geom: geometry)`
 
-Since: `v1.3.2`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -472,7 +473,7 @@ Introduction: RETURNS true if the LINESTRING start and end point are the same.
  
 Format: `ST_IsClosed(geom: geometry)`
 
-Since: `v1.3.2`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -487,7 +488,7 @@ Introduction: RETURNS number of interior rings of polygon geometries.
  
 Format: `ST_NumInteriorRings(geom: geometry)`
 
-Since: `v1.3.2`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -504,7 +505,7 @@ Format: `ST_AddPoint(geom: geometry, point: geometry, position: integer)`
 
 Format: `ST_AddPoint(geom: geometry, point: geometry)`
 
-Since: `v1.3.2`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -528,7 +529,7 @@ Format: `ST_RemovePoint(geom: geometry, position: integer)`
 
 Format: `ST_RemovePoint(geom: geometry)`
 
-Since: `v1.3.2`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -543,7 +544,7 @@ Introduction: RETURN true if LINESTRING is ST_IsClosed and ST_IsSimple.
  
 Format: `ST_IsRing(geom: geometry)`
 
-Since: `v1.3.2`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -558,7 +559,7 @@ Introduction: Returns the number of Geometries. If geometry is a GEOMETRYCOLLECT
 
 Format: `ST_NumGeometries (A:geometry)`
 
-Since: `v1.3.2`
+Since: `v1.0.0`
 
 ```SQL
 SELECT ST_NumGeometries(df.geometry)
