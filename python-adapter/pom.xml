@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>sedona-python-adapter_${scala.compat.version}</artifactId>
+    <artifactId>sedona-python-adapter-${spark.compat.version}_${scala.compat.version}</artifactId>
     <dependencies>
         <dependency>
             <groupId>org.apache.sedona</groupId>

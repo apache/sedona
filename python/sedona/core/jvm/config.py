@@ -108,10 +108,10 @@ class SedonaMeta:
 
     @classmethod
     def get_version(cls, spark_jars: str) -> Optional[str]:
-        # Find Scala version and Sedona version.
-        versions = findall(r"sedona-python-adapter_([^,\n]+)-([^,\n]+)-incubator", spark_jars)
+        # Find Spark version, Scala version and Sedona version.
+        versions = findall(r"sedona-python-adapter-([^,\n]+)_([^,\n]+)-([^,\n]+)-incubator", spark_jars)
         try:
-            sedona_version = versions[0][1]
+            sedona_version = versions[0][2]
         except IndexError:
             sedona_version = None
         return sedona_version
