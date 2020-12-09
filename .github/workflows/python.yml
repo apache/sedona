@@ -61,7 +61,7 @@ jobs:
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         PYTHON_VERSION: ${{ matrix.python }}
-      run: (cd python;pipenv --python ${PYTHON_VERSION};pipenv install pyspark==${SPARK_VERSION} --dev;pipenv graph)
+      run: (cd python;pipenv --python ${PYTHON_VERSION};pipenv install pyspark==${SPARK_VERSION};pipenv install --dev;pipenv graph)
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
       run: find python-adapter/target -name sedona-* -exec cp {} spark-${SPARK_VERSION}-bin-hadoop2.7/jars/ \;
