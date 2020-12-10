@@ -276,7 +276,7 @@
                                     </excludes>
                                 </filter>
                                 <filter>
-                                    <artifact>org.locationtech:jts</artifact>
+                                    <artifact>org.locationtech.jts:jts-core</artifact>
                                     <excludes>
                                         <exclude>org/locationtech/jts/index/quadtree/Node.class</exclude>
                                         <exclude>org/locationtech/jts/index/quadtree/Quadtree.class</exclude>
