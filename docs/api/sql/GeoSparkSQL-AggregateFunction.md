@@ -32,7 +32,7 @@ Introduction: Return the polygon intersection of all polygons in A
 
 Format: `ST_Intersection_Aggr (A:geometryColumn)`
 
-Since: `v1.2.1`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL

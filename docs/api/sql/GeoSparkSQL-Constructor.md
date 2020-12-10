@@ -1,11 +1,9 @@
-!!! note
-	UUIDs ensure the shape uniqueness of a geometry. It can be any strings. This is only needed when you want to convert an Spatial DataFrame to an Spatial RDD and let each geometry carry some non-spatial attributes (e.g., price, age, ...).
 ## ST_GeomFromWKT
 
-Introduction: Construct a Geometry from Wkt. Unlimited UUID strings can be appended.
+Introduction: Construct a Geometry from Wkt
 
 Format:
-`ST_GeomFromWKT (Wkt:string, UUID1, UUID2, ...)`
+`ST_GeomFromWKT (Wkt:string)`
 
 Since: `v1.0.0`
 
@@ -21,12 +19,12 @@ SELECT ST_GeomFromWKT('POINT(40.7128,-74.0060)') AS geometry
 
 ## ST_GeomFromWKB
 
-Introduction: Construct a Geometry from WKB string. Unlimited UUID strings can be appended.
+Introduction: Construct a Geometry from WKB string
 
 Format:
-`ST_GeomFromWKB (Wkb:string, UUID1, UUID2, ...)`
+`ST_GeomFromWKB (Wkb:string)`
 
-Since: `v1.2.0`
+Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
@@ -36,9 +34,9 @@ FROM polygontable
 
 ## ST_GeomFromGeoJSON
 
-Introduction: Construct a Geometry from GeoJson. Unlimited UUID strings can be appended.
+Introduction: Construct a Geometry from GeoJson
 
-Format: `ST_GeomFromGeoJSON (GeoJson:string, UUID1, UUID2, ...)`
+Format: `ST_GeomFromGeoJSON (GeoJson:string)`
 
 Since: `v1.0.0`
 
@@ -56,7 +54,7 @@ polygonDf.show()
 ```
 
 !!!warning
-	The way that GeoSparkSQL reads GeoJSON is different from that in SparkSQL
+	The way that SedonaSQL reads GeoJSON is different from that in SparkSQL
 
 ## Read ESRI Shapefile
 Introduction: Construct a DataFrame from a Shapefile
@@ -92,23 +90,23 @@ spatialDf.printSchema()
 	```
 
 !!!warning
-	Please make sure you use ==ST_GeomFromWKT== to create Geometry type column otherwise that column cannot be used in GeoSparkSQL.
+	Please make sure you use ==ST_GeomFromWKT== to create Geometry type column otherwise that column cannot be used in SedonaSQL.
 
 If the file you are reading contains non-ASCII characters you'll need to explicitly set the encoding
-via `geospark.global.charset` system property before the call to `ShapefileReader.readToGeometryRDD`.
+via `sedona.global.charset` system property before the call to `ShapefileReader.readToGeometryRDD`.
 
 Example:
 
 ```Scala
-System.setProperty("geospark.global.charset", "utf8")
+System.setProperty("sedona.global.charset", "utf8")
 ```
 
 
 ## ST_Point
 
-Introduction: Construct a Point from X and Y. Unlimited UUID strings can be appended.
+Introduction: Construct a Point from X and Y
 
-Format: `ST_Point (X:decimal, Y:decimal, UUID1, UUID2, ...)`
+Format: `ST_Point (X:decimal, Y:decimal)`
 
 Since: `v1.0.0`
 
@@ -121,9 +119,9 @@ FROM pointtable
 
 ## ST_PointFromText
 
-Introduction: Construct a Point from Text, delimited by Delimiter. Unlimited UUID strings can be appended.
+Introduction: Construct a Point from Text, delimited by Delimiter
 
-Format: `ST_PointFromText (Text:string, Delimiter:char, UUID1, UUID2, ...)`
+Format: `ST_PointFromText (Text:string, Delimiter:char)`
 
 Since: `v1.0.0`
 
@@ -139,9 +137,9 @@ SELECT ST_PointFromText('40.7128,-74.0060', ',') AS pointshape
 
 ## ST_PolygonFromText
 
-Introduction: Construct a Polygon from Text, delimited by Delimiter. Path must be closed. Unlimited UUID strings can be appended.
+Introduction: Construct a Polygon from Text, delimited by Delimiter. Path must be closed
 
-Format: `ST_PolygonFromText (Text:string, Delimiter:char, UUID1, UUID2, ...)`
+Format: `ST_PolygonFromText (Text:string, Delimiter:char)`
 
 Since: `v1.0.0`
 
@@ -157,9 +155,9 @@ SELECT ST_PolygonFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.050
 
 ## ST_LineStringFromText
 
-Introduction: Construct a LineString from Text, delimited by Delimiter. Unlimited UUID strings can be appended.
+Introduction: Construct a LineString from Text, delimited by Delimiter
 
-Format: `ST_LineStringFromText (Text:string, Delimiter:char, UUID1, UUID2, ...)`
+Format: `ST_LineStringFromText (Text:string, Delimiter:char)`
 
 Since: `v1.0.0`
 
@@ -175,9 +173,9 @@ SELECT ST_LineStringFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.
 
 ## ST_PolygonFromEnvelope
 
-Introduction: Construct a Polygon from MinX, MinY, MaxX, MaxY. Unlimited UUID strings can be appended.
+Introduction: Construct a Polygon from MinX, MinY, MaxX, MaxY.
 
-Format: `ST_PolygonFromEnvelope (MinX:decimal, MinY:decimal, MaxX:decimal, MaxY:decimal, UUID1, UUID2, ...)`
+Format: `ST_PolygonFromEnvelope (MinX:decimal, MinY:decimal, MaxX:decimal, MaxY:decimal)`
 
 Since: `v1.0.0`
 
@@ -187,21 +185,3 @@ SELECT *
 FROM pointdf
 WHERE ST_Contains(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.pointshape)
 ```
-
-## ST_Circle
-
-Introduction: Construct a Circle from A with a Radius.
-
-Format: `ST_Circle (A:Geometry, Radius:decimal)`
-
-Since: `v1.0.0` - `v1.1.3`
-
-Spark SQL example:
-
-```SQL
-SELECT ST_Circle(pointdf.pointshape, 1.0)
-FROM pointdf
-```
-
-!!!note
-	GeoSpark doesn't control the radius's unit (degree or meter). It is same with the geometry. To change the geometry's unit, please transform the coordinate reference system. See [ST_Transform](GeoSparkSQL-Function.md#st_transform).

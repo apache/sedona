@@ -36,7 +36,6 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     config("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName).
     master("local[*]").appName("sedonasqlScalaTest")
     .config("spark.sql.warehouse.dir", warehouseLocation)
-    .enableHiveSupport()
     .getOrCreate()
 
   val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"

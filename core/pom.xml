@@ -26,7 +26,7 @@
         <version>1.0.0-incubator-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>sedona-core</artifactId>
+    <artifactId>sedona-core_${scala.compat.version}</artifactId>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>A cluster computing system for processing large-scale spatial data: RDD API</description>
