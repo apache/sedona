@@ -1,4 +1,4 @@
-# Community info
+# Community
 
 Every volunteer project obtains its strength from the people involved in it. We invite you to participate as much or as little as you choose.
 
@@ -23,8 +23,7 @@ Get help using Sedona or contribute to the project on our mailing lists
 
 [Sedona Mailing Lists](https://lists.apache.org/list.html?sedona.apache.org): 
 
-* [issues@sedona.apache.org](https://lists.apache.org/list.html?issues@sedona.apache.org): general questions or tutorials
-* [dev@sedona.apache.org](https://lists.apache.org/list.html?dev@sedona.apache.org): project development
+* [dev@sedona.apache.org](https://lists.apache.org/list.html?dev@sedona.apache.org): project development and general questions
 
 ## Issue tracker
 

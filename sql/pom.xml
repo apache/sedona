@@ -26,7 +26,7 @@
         <version>1.0.0-incubator-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-	<artifactId>sedona-sql</artifactId>
+	<artifactId>sedona-sql-${spark.compat.version}_${scala.compat.version}</artifactId>
 
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>A cluster computing system for processing large-scale spatial data: SQL API</description>
@@ -36,31 +36,9 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.sedona</groupId>
-            <artifactId>sedona-core</artifactId>
+            <artifactId>sedona-core_${scala.compat.version}</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-sql_${scala.compat.version}</artifactId>
-            <version>${spark.version}</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.module</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-hive_${scala.compat.version}</artifactId>
-            <version>${spark.version}</version>
-            <scope>test</scope>
         </dependency>
         <!--The following GeoTools dependencies use GNU Lesser General Public License and thus are excluded from the binary distribution-->
         <!-- Users have to include them by themselves manually -->
