@@ -100,7 +100,7 @@ theme:
   font:
     text: Lato
   features:
-    - tabs
+    - navigation.tabs
 google_analytics: ['UA-64886725-1', 'www.public.asu.edu/~jiayu2/geospark/index.html']
 extra:
   social:
@@ -130,3 +130,6 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.tilde
+plugins:
+  - search:
+      prebuild_index: true
