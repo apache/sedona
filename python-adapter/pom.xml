@@ -111,5 +111,7 @@
             </exclusions>
         </dependency>
     </dependencies>
-
+    <build>
+        <sourceDirectory>src/main/scala</sourceDirectory>
+    </build>
 </project>
