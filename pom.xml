@@ -329,29 +329,6 @@
                     <additionalparam>-Xdoclint:none</additionalparam>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.scalastyle</groupId>
-                <artifactId>scalastyle-maven-plugin</artifactId>
-                <version>1.0.0</version>
-                <configuration>
-                    <verbose>false</verbose>
-                    <failOnViolation>true</failOnViolation>
-                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                    <failOnWarning>false</failOnWarning>
-                    <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
-                    <testSourceDirectory>${project.basedir}/src/test/scala</testSourceDirectory>
-                    <configLocation>${project.basedir}/scalastyle_config.xml</configLocation>
-                    <outputFile>${project.basedir}/target/scalastyle-output.xml</outputFile>
-                    <outputEncoding>UTF-8</outputEncoding>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
     <profiles>
