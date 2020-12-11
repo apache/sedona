@@ -85,6 +85,12 @@
             <groupId>org.wololo</groupId>
             <artifactId>jts2geojson</artifactId>
             <version>${jts2geojson.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
             <scope>${dependency.scope}</scope>
         </dependency>
         <dependency>
