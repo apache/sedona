@@ -10,7 +10,7 @@
  *
  * http://www.eclipse.org/org/documents/edl-v10.php.
  */
-package org.locationtech.jts.index.quadtree;
+package org.apache.sedona.jts.index.quadtree;
 
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -33,6 +33,16 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.locationtech.jts</groupId>
+            <artifactId>jts-core</artifactId>
+            <version>${jts.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wololo</groupId>
+            <artifactId>jts2geojson</artifactId>
+            <version>${jts2geojson.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.sedona</groupId>
             <artifactId>sedona-core_${scala.compat.version}</artifactId>
             <version>${project.version}</version>
@@ -49,8 +59,8 @@
             <version>${geotools.version}</version>
             <exclusions>
                 <exclusion>
-                    <groupId>com.vividsolutions</groupId>
-                    <artifactId>jts</artifactId>
+                    <groupId>org.locationtech.jts</groupId>
+                    <artifactId>jts-core</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>
