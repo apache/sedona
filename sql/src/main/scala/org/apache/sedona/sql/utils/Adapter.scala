@@ -22,10 +22,10 @@ import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.sedona.core.utils.GeomUtils
 import org.apache.spark.api.java.{JavaPairRDD, JavaRDD}
 import org.apache.spark.rdd.RDD
-import org.locationtech.jts.geom.Geometry
-//import org.apache.spark.sql.sedona_sql.GeometryWrapper
-import org.apache.spark.sql.types._
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
+import org.locationtech.jts.geom.Geometry
 
 object Adapter {
 
@@ -136,6 +136,44 @@ object Adapter {
     }
   }
 
+  def toGeometryDf[T <: Geometry](spatialRDD: SpatialRDD[T], sparkSession: SparkSession): DataFrame = {
+    val rowRdd = spatialRDD.rawSpatialRDD.rdd.map[Row] {
+      geom =>
+        val userData = geom.getUserData
+        geom.setUserData(null)
+
+        Row.fromSeq(Seq(geom, userData))
+    }
+    var fieldArray = new Array[StructField](2)
+    fieldArray(0) = StructField("_c0", GeometryUDT)
+    fieldArray(1) = StructField("_c1", StringType)
+
+    val schema = StructType(fieldArray)
+    sparkSession.createDataFrame(rowRdd, schema)
+  }
+
+  def toGeometryDf(spatialPairRDD: JavaPairRDD[Geometry, Geometry], sparkSession: SparkSession): DataFrame = {
+    val rowRdd = spatialPairRDD.rdd.map[Row] {
+      case (geomLeft, geomRight) =>
+        val userDataLeft = geomLeft.getUserData
+        val userDataRight = geomRight.getUserData
+        geomLeft.setUserData(null)
+        geomRight.setUserData(null)
+
+        Row.fromSeq(Seq(geomLeft, userDataLeft, geomRight, userDataRight))
+    }
+
+    var fieldArray = new Array[StructField](4)
+
+    fieldArray(0) = StructField("_c0", GeometryUDT)
+    fieldArray(1) = StructField("_c1", StringType)
+    fieldArray(2) = StructField("_c2", GeometryUDT)
+    fieldArray(3) = StructField("_c3", StringType)
+
+    val schema = StructType(fieldArray)
+    sparkSession.createDataFrame(rowRdd, schema)
+  }
+
   def toDf(spatialPairRDD: JavaPairRDD[Geometry, Geometry], sparkSession: SparkSession): DataFrame = {
     val rowRdd = spatialPairRDD.rdd.map[Row](f => {
       val seq1 = GeomUtils.printGeom(f._1).split("\t").toSeq
@@ -143,12 +181,15 @@ object Adapter {
       val result = seq1 ++ seq2
       Row.fromSeq(result)
     })
-    val leftgeomlength = spatialPairRDD.rdd.take(1)(0)._1.toString.split("\t").length
+    val leftgeomlength = spatialPairRDD.rdd.take(1)
+      .map(geometryPair => GeomUtils.printGeom(geometryPair._1))
+      .head.split("\t").length
 
     var fieldArray = new Array[StructField](rowRdd.take(1)(0).size)
     for (i <- fieldArray.indices) fieldArray(i) = StructField("_c" + i, StringType)
     fieldArray(0) = StructField("leftgeometry", StringType)
     fieldArray(leftgeomlength) = StructField("rightgeometry", StringType)
+
     val schema = StructType(fieldArray)
     sparkSession.createDataFrame(rowRdd, schema)
   }
@@ -175,7 +216,7 @@ object Adapter {
     dataFrame.rdd.map[Geometry](f => {
       var geometry = f.get(geometryColId).asInstanceOf[Geometry]
       var fieldSize = f.size
-      var userData:String = null
+      var userData: String = null
       if (fieldSize > 1) {
         userData = ""
         // Add all attributes into geometry user data
@@ -196,7 +237,7 @@ object Adapter {
     dataFrame.rdd.map[Geometry](f => {
       var geometry = f.get(0).asInstanceOf[Geometry]
       var fieldSize = f.size
-      var userData:String = null
+      var userData: String = null
       if (fieldSize > 1) {
         userData = ""
         // Add all attributes into geometry user data
