@@ -14,6 +14,7 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
+from pyspark.sql.types import StructField, StructType
 
 from sedona.core.SpatialRDD import CircleRDD
 from sedona.core.enums import GridType, IndexType
@@ -21,6 +22,7 @@ from sedona.core.formatMapper import WktReader
 from sedona.core.spatialOperator.join_params import JoinParams
 from sedona.core.spatialOperator.join_query_raw import JoinQueryRaw
 from sedona.core.spatialOperator.range_query_raw import RangeQueryRaw
+from sedona.sql.types import GeometryType
 from tests.test_base import TestBase
 
 import os
@@ -46,11 +48,11 @@ class TestOmitPythonJvmSerdeToDf(TestBase):
 
         jvm_sedona_rdd = JoinQueryRaw.spatialJoin(poi_point_rdd, areas_polygon_rdd, JoinParams())
         sedona_df = jvm_sedona_rdd.to_df(spark=self.spark,
-                                         left_field_names=["area_geom", "area_id", "area_name"],
-                                         right_field_names=["poi_geom", "poi_id", "poi_name"])
+                                         left_field_names=["area_id", "area_name"],
+                                         right_field_names=["poi_id", "poi_name"])
 
         assert sedona_df.count() == 5
-        assert sedona_df.columns == ["area_geom", "area_id", "area_name", "poi_geom",
+        assert sedona_df.columns == ["leftgeometry", "area_id", "area_name", "rightgeometry",
                                      "poi_id", "poi_name"]
 
     def test_distance_join_query_flat_to_df(self):
@@ -67,16 +69,16 @@ class TestOmitPythonJvmSerdeToDf(TestBase):
 
         df_sedona_rdd = jvm_sedona_rdd.to_df(
             self.spark,
-            left_field_names=["poi_from_geom", "poi_from_id", "poi_from_name"],
-            right_field_names=["poi_to_geom", "poi_to_id", "poi_to_name"]
+            left_field_names=["poi_from_id", "poi_from_name"],
+            right_field_names=["poi_to_id", "poi_to_name"]
         )
 
         assert df_sedona_rdd.count() == 10
         assert df_sedona_rdd.columns == [
-            "poi_from_geom",
+            "leftgeometry",
             "poi_from_id",
             "poi_from_name",
-            "poi_to_geom",
+            "rightgeometry",
             "poi_to_id",
             "poi_to_name"
         ]
@@ -99,30 +101,47 @@ class TestOmitPythonJvmSerdeToDf(TestBase):
 
         pois_within_areas_with_passed_column_names = jvm_sedona_rdd.to_df(
             spark=self.spark,
-            left_field_names=["area_geom", "area_id", "area_name"],
-            right_field_names=["poi_geom", "poi_id", "poi_name"]
+            left_field_names=["area_id", "area_name"],
+            right_field_names=["poi_id", "poi_name"]
         )
 
         assert pois_within_areas_with_passed_column_names.count() == 5
 
-        assert pois_within_areas_with_passed_column_names.columns == ["area_geom", "area_id", "area_name", "poi_geom",
+        assert pois_within_areas_with_passed_column_names.columns == ["leftgeometry", "area_id", "area_name",
+                                                                      "rightgeometry",
                                                                       "poi_id", "poi_name"]
 
-        pois_within_areas_with_default_column_names.show()
-
-        pois_within_area_default_column_names_ids = self.__row_to_list(
-            pois_within_areas_with_default_column_names. \
-                select("_c1", "_c4"). \
-                collect()
-        )
-        pois_within_area_passed_column_names_ids = self.__row_to_list(
-            pois_within_areas_with_passed_column_names. \
-                select("area_id", "poi_id"). \
-                collect()
+        assert pois_within_areas_with_default_column_names.schema == StructType(
+            [
+                StructField("leftgeometry", GeometryType()),
+                StructField("rightgeometry", GeometryType()),
+            ]
         )
 
-        assert pois_within_area_default_column_names_ids == self.expected_pois_within_areas_ids
-        assert pois_within_area_passed_column_names_ids == self.expected_pois_within_areas_ids
+        left_geometries_raw = pois_within_areas_with_default_column_names. \
+            selectExpr("ST_AsText(leftgeometry)"). \
+            collect()
+
+        left_geometries = self.__row_to_list(left_geometries_raw)
+
+        right_geometries_raw = pois_within_areas_with_default_column_names. \
+            selectExpr("ST_AsText(rightgeometry)"). \
+            collect()
+
+        right_geometries = self.__row_to_list(right_geometries_raw)
+
+        assert left_geometries == [
+            ['POLYGON ((0 4, -3 3, -8 6, -6 8, -2 9, 0 4))'],
+            ['POLYGON ((2 2, 2 4, 3 5, 7 5, 9 3, 8 1, 4 1, 2 2))'],
+            ['POLYGON ((10 3, 10 6, 14 6, 14 3, 10 3))'],
+            ['POLYGON ((-1 -1, -1 -3, -2 -5, -6 -8, -5 -2, -3 -2, -1 -1))'],
+            ['POLYGON ((-1 -1, -1 -3, -2 -5, -6 -8, -5 -2, -3 -2, -1 -1))']
+        ]
+        assert right_geometries == [['POINT (-3 5)'],
+                                    ['POINT (4 3)'],
+                                    ['POINT (11 5)'],
+                                    ['POINT (-1 -1)'],
+                                    ['POINT (-4 -5)']]
 
     def test_range_query_flat_to_df(self):
         poi_point_rdd = WktReader.readToGeometryRDD(self.sc, bank_csv_path, 1, False, False)
@@ -142,13 +161,20 @@ class TestOmitPythonJvmSerdeToDf(TestBase):
 
         df_without_column_names = result.to_df(self.spark)
 
-        assert df_without_column_names.count() == 4
-        assert df_without_column_names.columns == ["geometry", "_c1", "_c2"]
+        raw_geometries = self.__row_to_list(
+            df_without_column_names.collect()
+        )
 
-        df = result.to_df(self.spark, field_names=["poi_geom", "poi_id", "poi_name"])
+        assert [point[0].wkt for point in raw_geometries] == [
+            'POINT (9 8)', 'POINT (4 3)', 'POINT (12 1)', 'POINT (11 5)'
+        ]
+        assert df_without_column_names.count() == 4
+        assert df_without_column_names.schema == StructType([StructField("geometry", GeometryType())])
+
+        df = result.to_df(self.spark, field_names=["poi_id", "poi_name"])
 
         assert df.count() == 4
-        assert df.columns == ["poi_geom", "poi_id", "poi_name"]
+        assert df.columns == ["geometry", "poi_id", "poi_name"]
 
     def __row_to_list(self, row_list):
         return [[*element] for element in row_list]
