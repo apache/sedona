@@ -99,7 +99,7 @@ class TestAdapter(TestBase):
         spatial_df = self.spark.sql("select ST_GeomFromWKT(inputtable._c0) as usacounty from inputtable")
         spatial_df.show()
         spatial_df.printSchema()
-        spatial_rdd = Adapter.toSpatialRdd(spatial_df)
+        spatial_rdd = Adapter.toSpatialRdd(spatial_df, "usacounty")
         spatial_rdd.analyze()
         Adapter.toDf(spatial_rdd, self.spark).show()
         assert (Adapter.toDf(spatial_rdd, self.spark).columns.__len__() == 1)
@@ -148,10 +148,9 @@ class TestAdapter(TestBase):
         )
 
         spatial_rdd.analyze()
+        Adapter.toDf(spatial_rdd, self.spark).show()
+        df = Adapter.toDf(spatial_rdd, self.spark)
 
-        df = Adapter.toDf(spatial_rdd, self.spark).\
-            withColumn("geometry", expr("ST_GeomFromWKT(geometry)"))
-        df.show()
         assert (df.columns[1] == "STATEFP")
 
     def test_convert_spatial_join_result_to_dataframe(self):
@@ -268,7 +267,7 @@ class TestAdapter(TestBase):
     def test_to_spatial_rdd_df(self):
         spatial_df = self._create_spatial_point_table()
 
-        spatial_rdd = Adapter.toSpatialRdd(spatial_df)
+        spatial_rdd = Adapter.toSpatialRdd(spatial_df, "geometry")
 
         spatial_rdd.analyze()
 

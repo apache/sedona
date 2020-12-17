@@ -51,7 +51,7 @@ case class ST_PointFromText(inputExpressions: Seq[Expression])
     return new GenericArrayData(GeometrySerializer.serialize(geometry))
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -77,7 +77,7 @@ case class ST_PolygonFromText(inputExpressions: Seq[Expression])
     return new GenericArrayData(GeometrySerializer.serialize(geometry))
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -105,7 +105,7 @@ case class ST_LineStringFromText(inputExpressions: Seq[Expression])
     return new GenericArrayData(GeometrySerializer.serialize(geometry))
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -130,7 +130,7 @@ case class ST_GeomFromWKT(inputExpressions: Seq[Expression])
     return new GenericArrayData(GeometrySerializer.serialize(geometry))
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -155,7 +155,7 @@ case class ST_GeomFromText(inputExpressions: Seq[Expression])
     return new GenericArrayData(GeometrySerializer.serialize(geometry))
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -180,7 +180,7 @@ case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
     return new GenericArrayData(GeometrySerializer.serialize(geometry))
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -211,7 +211,7 @@ case class ST_GeomFromGeoJSON(inputExpressions: Seq[Expression])
     return new GenericArrayData(GeometrySerializer.serialize(geometry))
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -241,7 +241,7 @@ case class ST_Point(inputExpressions: Seq[Expression])
     return new GenericArrayData(GeometrySerializer.serialize(geometry))
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -289,7 +289,7 @@ case class ST_PolygonFromEnvelope(inputExpressions: Seq[Expression]) extends Exp
     new GenericArrayData(GeometrySerializer.serialize(polygon))
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }

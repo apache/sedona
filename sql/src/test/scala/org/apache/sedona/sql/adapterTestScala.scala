@@ -24,8 +24,11 @@ import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader
 import org.apache.sedona.core.spatialOperator.JoinQuery
 import org.apache.sedona.core.spatialRDD.{CircleRDD, PolygonRDD}
 import org.apache.sedona.sql.utils.Adapter
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.scalatest.GivenWhenThen
+import org.scalatest.matchers.should.Matchers
 
-class adapterTestScala extends TestBaseScala {
+class adapterTestScala extends TestBaseScala with Matchers with GivenWhenThen{
 
   describe("Sedona-SQL Scala Adapter Test") {
 
@@ -35,7 +38,8 @@ class adapterTestScala extends TestBaseScala {
       var spatialDf = sparkSession.sql("select ST_PointFromText(inputtable._c0,\",\") as arealandmark from inputtable")
       var spatialRDD = Adapter.toSpatialRdd(spatialDf, "arealandmark")
       spatialRDD.analyze()
-      Adapter.toDf(spatialRDD, sparkSession).show(1)
+      val resultDf = Adapter.toDf(spatialRDD, sparkSession)
+      assert(resultDf.schema(0).dataType == GeometryUDT)
     }
 
     it("Read CSV point at a different column id into a SpatialRDD") {
@@ -64,20 +68,7 @@ class adapterTestScala extends TestBaseScala {
       var spatialDf = sparkSession.sql("select ST_Point(cast(inputtable._c0 as Decimal(24,20)),cast(inputtable._c1 as Decimal(24,20))) as arealandmark from inputtable")
       var spatialRDD = Adapter.toSpatialRdd(spatialDf, "arealandmark")
       assert(Adapter.toDf(spatialRDD, sparkSession).columns.length == 1)
-      //      Adapter.toDf(spatialRDD, sparkSession).show(1)
     }
-
-    it("Read CSV point into a SpatialRDD with unique Id by passing coordinates") {
-      var df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(arealmPointInputLocation)
-      df.createOrReplaceTempView("inputtable")
-      // Use Column _c0 as the unique Id but the id can be anything in the same row
-      var spatialDf = sparkSession.sql("select ST_Point(cast(inputtable._c0 as Decimal(24,20)),cast(inputtable._c1 as Decimal(24,20))) as arealandmark from inputtable")
-      var spatialRDD = Adapter.toSpatialRdd(spatialDf, "arealandmark")
-      spatialRDD.analyze()
-      assert(Adapter.toDf(spatialRDD, sparkSession).columns.length == 1)
-      //      Adapter.toDf(spatialRDD, sparkSession).show(1)
-    }
-
 
     it("Read mixed WKT geometries into a SpatialRDD") {
       var df = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
@@ -101,21 +92,21 @@ class adapterTestScala extends TestBaseScala {
       var spatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileInputLocation)
       spatialRDD.analyze()
       var df = Adapter.toDf(spatialRDD, sparkSession)
-      df.show(1)
+      assert(df.schema.toList.map(f => f.name).mkString("\t").equals("geometry\tSTATEFP\tCOUNTYFP\tCOUNTYNS\tAFFGEOID\tGEOID\tNAME\tLSAD\tALAND\tAWATER"))
+      assert(df.count() == 3220)
     }
 
     it("Read shapefileWithMissing -> DataFrame") {
       var spatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileWithMissingsTrailingInputLocation)
       spatialRDD.analyze()
       var df = Adapter.toDf(spatialRDD, sparkSession)
-      df.show(1)
+      assert(df.count() == 3)
     }
 
     it("Read GeoJSON to DataFrame") {
-      import org.apache.spark.sql.functions.{callUDF, col}
       var spatialRDD = new PolygonRDD(sparkSession.sparkContext, geojsonInputLocation, FileDataSplitter.GEOJSON, true)
       spatialRDD.analyze()
-      var df = Adapter.toDf(spatialRDD, sparkSession).withColumn("geometry", callUDF("ST_GeomFromWKT", col("geometry")))
+      var df = Adapter.toDf(spatialRDD, sparkSession)//.withColumn("geometry", callUDF("ST_GeomFromWKT", col("geometry")))
       assert(df.columns(1) == "STATEFP")
     }
 
@@ -138,12 +129,19 @@ class adapterTestScala extends TestBaseScala {
       pointRDD.buildIndex(IndexType.QUADTREE, true)
 
       val joinResultPairRDD = JoinQuery.SpatialJoinQueryFlat(pointRDD, polygonRDD, true, true)
-
       val joinResultDf = Adapter.toDf(joinResultPairRDD, sparkSession)
-      joinResultDf.show(1)
-
-      val joinResultDf2 = Adapter.toDf(joinResultPairRDD, List("abc", "def"), List(), sparkSession)
-      joinResultDf2.show(1)
+      assert(joinResultDf.schema(0).dataType == GeometryUDT)
+      assert(joinResultDf.schema(1).dataType == GeometryUDT)
+      assert(joinResultDf.schema(0).name == "leftgeometry")
+      assert(joinResultDf.schema(1).name == "rightgeometry")
+      import scala.collection.JavaConversions._
+      val joinResultDf2 = Adapter.toDf(joinResultPairRDD, polygonRDD.fieldNames, List(), sparkSession)
+      assert(joinResultDf2.schema(0).dataType == GeometryUDT)
+      assert(joinResultDf2.schema(0).name == "leftgeometry")
+      assert(joinResultDf2.schema(1).name == "abc")
+      assert(joinResultDf2.schema(2).name == "def")
+      assert(joinResultDf2.schema(3).dataType == GeometryUDT)
+      assert(joinResultDf2.schema(3).name == "rightgeometry")
     }
 
     it("Convert distance join result to DataFrame") {
@@ -168,7 +166,10 @@ class adapterTestScala extends TestBaseScala {
       var joinResultPairRDD = JoinQuery.DistanceJoinQueryFlat(pointRDD, circleRDD, true, true)
 
       var joinResultDf = Adapter.toDf(joinResultPairRDD, sparkSession)
-      joinResultDf.show(1)
+      assert(joinResultDf.schema(0).dataType == GeometryUDT)
+      assert(joinResultDf.schema(1).dataType == GeometryUDT)
+      assert(joinResultDf.schema(0).name == "leftgeometry")
+      assert(joinResultDf.schema(1).name == "rightgeometry")
     }
 
     it("load id column Data check") {
@@ -179,6 +180,5 @@ class adapterTestScala extends TestBaseScala {
       assert(df.count() == 1)
 
     }
-
   }
 }
