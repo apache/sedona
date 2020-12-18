@@ -94,7 +94,7 @@ case class ST_ConvexHull(inputExpressions: Seq[Expression])
     new GenericArrayData(GeometrySerializer.serialize(geometry.convexHull()))
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -143,7 +143,7 @@ case class ST_Buffer(inputExpressions: Seq[Expression])
     new GenericArrayData(GeometrySerializer.serialize(geometry.buffer(buffer)))
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -164,7 +164,7 @@ case class ST_Envelope(inputExpressions: Seq[Expression])
     new GenericArrayData(GeometrySerializer.serialize(geometry.getEnvelope()))
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -224,7 +224,7 @@ case class ST_Centroid(inputExpressions: Seq[Expression])
     new GenericArrayData(GeometrySerializer.serialize(geometry.getCentroid()))
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -274,7 +274,7 @@ case class ST_Transform(inputExpressions: Seq[Expression])
     targetFactory.createCoordinateReferenceSystem(codeString)
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -316,7 +316,7 @@ case class ST_Intersection(inputExpressions: Seq[Expression])
     return new GenericArrayData(GeometrySerializer.serialize(leftgeometry.intersection(rightgeometry)))
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -444,7 +444,7 @@ case class ST_SimplifyPreserveTopology(inputExpressions: Seq[Expression])
     new GenericArrayData(GeometrySerializer.serialize(simplifiedGeometry))
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -467,7 +467,7 @@ case class ST_PrecisionReduce(inputExpressions: Seq[Expression])
     new GenericArrayData(GeometrySerializer.serialize(precisionReduce.reduce(geometry)))
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -561,7 +561,7 @@ case class ST_LineMerge(inputExpressions: Seq[Expression])
     new GenericArrayData(GeometrySerializer.serialize(output))
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -649,7 +649,7 @@ case class ST_StartPoint(inputExpressions: Seq[Expression])
     }
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 
@@ -668,7 +668,7 @@ case class ST_Boundary(inputExpressions: Seq[Expression])
 
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 
@@ -688,7 +688,7 @@ case class ST_EndPoint(inputExpressions: Seq[Expression])
 
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 
@@ -708,7 +708,7 @@ case class ST_ExteriorRing(inputExpressions: Seq[Expression])
 
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 
@@ -739,7 +739,7 @@ case class ST_GeometryN(inputExpressions: Seq[Expression])
     }
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 
@@ -760,7 +760,7 @@ case class ST_InteriorRingN(inputExpressions: Seq[Expression])
     }
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -784,7 +784,7 @@ case class ST_Dump(inputExpressions: Seq[Expression])
     ArrayData.toArrayData(geometryCollection)
   }
 
-  override def dataType: DataType = ArrayType(new GeometryUDT())
+  override def dataType: DataType = ArrayType(GeometryUDT)
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -799,7 +799,7 @@ case class ST_DumpPoints(inputExpressions: Seq[Expression])
     ArrayData.toArrayData(geometry.getPoints.map(geom => geom.toGenericArrayData))
   }
 
-  override def dataType: DataType = ArrayType(new GeometryUDT())
+  override def dataType: DataType = ArrayType(GeometryUDT)
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -891,7 +891,7 @@ case class ST_AddPoint(inputExpressions: Seq[Expression])
   private def lineStringFromCoordinates(coordinates: Array[Coordinate]): LineString =
     geometryFactory.createLineString(coordinates)
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 
@@ -920,7 +920,7 @@ case class ST_RemovePoint(inputExpressions: Seq[Expression])
     }
   }
 
-  override def dataType: DataType = new GeometryUDT()
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 

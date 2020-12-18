@@ -24,7 +24,7 @@ import org.apache.spark.sql.types._
 import org.locationtech.jts.geom.Geometry
 
 
-private[sql] class GeometryUDT extends UserDefinedType[Geometry] {
+class GeometryUDT extends UserDefinedType[Geometry] {
   override def sqlType: DataType = ArrayType(ByteType, containsNull = false)
 
   override def pyUDT: String = "sedona.sql.types.GeometryType"
@@ -40,7 +40,7 @@ private[sql] class GeometryUDT extends UserDefinedType[Geometry] {
         GeometrySerializer.deserialize(values)
     }
   }
-
-  case object GeometryUDT extends GeometryUDT
-
 }
+
+case object GeometryUDT extends org.apache.spark.sql.sedona_sql.UDT.GeometryUDT with scala.Serializable
+
