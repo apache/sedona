@@ -76,7 +76,8 @@ object Catalog {
     ST_NumInteriorRings,
     ST_AddPoint,
     ST_RemovePoint,
-    ST_IsRing
+    ST_IsRing,
+    ST_FlipCoordinates
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(
