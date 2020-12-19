@@ -24,17 +24,17 @@ import org.apache.spark.api.java.JavaPairRDD
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.locationtech.jts.geom.Geometry
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object PythonAdapterWrapper {
   def toDf[T <: Geometry](spatialRDD: SpatialRDD[T], fieldNames: java.util.ArrayList[String], sparkSession: SparkSession): DataFrame = {
-    Adapter.toDf(spatialRDD, fieldNames.toList, sparkSession)
+    Adapter.toDf(spatialRDD, fieldNames.asScala, sparkSession)
   }
 
   def toDf(spatialPairRDD: JavaPairRDD[Geometry, Geometry],
            leftFieldnames: java.util.ArrayList[String],
            rightFieldNames: java.util.ArrayList[String],
            sparkSession: SparkSession): DataFrame = {
-    Adapter.toDf(spatialPairRDD, leftFieldnames.toList, rightFieldNames.toList, sparkSession)
+    Adapter.toDf(spatialPairRDD, leftFieldnames.asScala, rightFieldNames.asScala, sparkSession)
   }
 }

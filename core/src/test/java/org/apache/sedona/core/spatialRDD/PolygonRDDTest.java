@@ -20,12 +20,12 @@ package org.apache.sedona.core.spatialRDD;
 
 import org.apache.sedona.core.enums.FileDataSplitter;
 import org.apache.sedona.core.enums.IndexType;
+import org.apache.sedona.jts.index.strtree.STRtree;
 import org.apache.spark.storage.StorageLevel;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.index.strtree.STRtree;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

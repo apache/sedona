@@ -10,10 +10,10 @@ with open("README.md", "r") as fh:
 setup(
     name='sedona',
     version=version,
-    description='Apache Sedona Python',
+    description='Apache Sedona is a cluster computing system for processing large-scale spatial data. Apache Sedona is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Apache Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.',
     url='https://github.com/apache/incubator-sedona',
-    author='Pawel Kocinski',
-    author_email='pawel93kocinski@gmail.com',
+    author='Apache Sedona',
+    author_email='dev@sedona.apache.org',
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     long_description=long_description,
     long_description_content_type="text/markdown",

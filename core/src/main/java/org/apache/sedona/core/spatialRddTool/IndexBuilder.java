@@ -20,12 +20,12 @@
 package org.apache.sedona.core.spatialRddTool;
 
 import org.apache.sedona.core.enums.IndexType;
+import org.apache.sedona.jts.index.quadtree.Quadtree;
+import org.apache.sedona.jts.index.strtree.STRtree;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.index.SpatialIndex;
-import org.locationtech.jts.index.quadtree.Quadtree;
-import org.locationtech.jts.index.strtree.STRtree;
 
 import java.util.HashSet;
 import java.util.Iterator;
