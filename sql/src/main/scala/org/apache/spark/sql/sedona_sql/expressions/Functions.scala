@@ -21,6 +21,7 @@ package org.apache.spark.sql.sedona_sql.expressions
 import java.util
 
 import org.apache.sedona.core.geometryObjects.{Circle, GeoJSONWriterNew}
+import org.apache.sedona.core.utils.GeomUtils
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
@@ -239,39 +240,21 @@ case class ST_Transform(inputExpressions: Seq[Expression])
   override def nullable: Boolean = false
 
   override def eval(input: InternalRow): Any = {
-    assert(inputExpressions.length >= 3 && inputExpressions.length <= 5)
-
-    val hints = if (inputExpressions.length >= 4) {
-      new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, inputExpressions(3).eval(input).asInstanceOf[Boolean])
-    }
-    else {
-      new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, true)
-    }
-
-    val originalTargetCode = inputExpressions(2).eval(input).asInstanceOf[UTF8String].toString
-    val originalSourceCode = inputExpressions(1).eval(input).asInstanceOf[UTF8String].toString
-    val targetCode = originalTargetCode.split(":")(1).toInt
+    assert(inputExpressions.length >= 3 && inputExpressions.length <= 4)
 
     val originalGeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
-    val sourceCRScode = getCRSFromCodeString(originalSourceCode, hints)
-    val targetCRScode = getCRSFromCodeString(originalTargetCode, hints)
+    val sourceCRScode = CRS.decode(inputExpressions(1).eval(input).asInstanceOf[UTF8String].toString)
+    val targetCRScode = CRS.decode(inputExpressions(2).eval(input).asInstanceOf[UTF8String].toString)
 
     var transform: MathTransform = null
-    if (inputExpressions.length == 5) {
-      transform = CRS.findMathTransform(sourceCRScode, targetCRScode, inputExpressions(4).eval(input).asInstanceOf[Boolean])
+    if (inputExpressions.length == 4) {
+      transform = CRS.findMathTransform(sourceCRScode, targetCRScode, inputExpressions(3).eval(input).asInstanceOf[Boolean])
     }
     else {
       transform = CRS.findMathTransform(sourceCRScode, targetCRScode, false)
     }
     val geom = JTS.transform(originalGeometry, transform)
-    geom.setSRID(targetCode)
     new GenericArrayData(GeometrySerializer.serialize(geom))
-  }
-
-  private def getCRSFromCodeString(codeString: String, hints: Hints): CoordinateReferenceSystem = {
-    val targetAuthority = codeString.split(":")(0)
-    val targetFactory = ReferencingFactoryFinder.getCRSAuthorityFactory(targetAuthority, hints)
-    targetFactory.createCoordinateReferenceSystem(codeString)
   }
 
   override def dataType: DataType = GeometryUDT
@@ -963,6 +946,27 @@ case class ST_NumGeometries(inputExpressions: Seq[Expression])
   }
 
   override def dataType: DataType = IntegerType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+  * Returns a version of the given geometry with X and Y axis flipped.
+  *
+  * @param inputExpressions Geometry
+  */
+case class ST_FlipCoordinates(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    assert(inputExpressions.length == 1)
+    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    GeomUtils.flipCoordinates(geometry)
+    geometry.toGenericArrayData
+  }
+
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }

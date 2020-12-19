@@ -100,8 +100,6 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       polygonWktDf.createOrReplaceTempView("polygontable")
       var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      var functionDf = sparkSession.sql("select ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857',true, false) from polygondf")
-
       val polygon = "POLYGON ((110.54671 55.818002, 110.54671 55.143743, 110.940494 55.143743, 110.940494 55.818002, 110.54671 55.818002))"
       val forceXYExpect = "POLYGON ((471596.69167460164 6185916.951191288, 471107.5623640998 6110880.974228167, 496207.109151055 6110788.804712435, 496271.31937046186 6185825.60569904, 471596.69167460164 6185916.951191288))"
 
@@ -109,13 +107,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         .withColumn("geom", expr("ST_GeomFromWKT(value)"))
         .createOrReplaceTempView("df")
 
-      sparkSession.sql("select ST_Transform(geom, 'EPSG:4326', 'EPSG:32649', false, false)  from df")
-
-      sparkSession.sql("select ST_Transform(geom, 'EPSG:4326', 'EPSG:32649', true, false)  from df")
-
-      val forceXYResult = sparkSession.sql(s"""select ST_Transform(ST_geomFromWKT('$polygon'),'EPSG:4326', 'EPSG:32649', true, false)""").rdd.map(row => row.getAs[Geometry](0).toString).collect()(0)
+      val forceXYResult = sparkSession.sql(s"""select ST_Transform(ST_FlipCoordinates(ST_geomFromWKT('$polygon')),'EPSG:4326', 'EPSG:32649', false)""").rdd.map(row => row.getAs[Geometry](0).toString).collect()(0)
       assert(forceXYResult == forceXYExpect)
-
     }
 
     it("Passed ST_Intersection - intersects but not contains") {
@@ -844,6 +837,17 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       List("LINESTRING (-29 -27, -30 -29.7, -45 -33, -46 -32)",
         "MULTILINESTRING ((-29 -27, -30 -29.7, -36 -31, -45 -33), (-45.2 -33.2, -46 -32))",
         "GEOMETRYCOLLECTION EMPTY")
+  }
+
+  it("Should pass ST_FlipCoordinates") {
+    val pointDF = createSamplePointDf(5, "geom")
+    val oldX = pointDF.take(1)(0).get(0).asInstanceOf[Geometry].getCoordinate.x
+    val oldY = pointDF.take(1)(0).get(0).asInstanceOf[Geometry].getCoordinate.y
+    val newDf = pointDF.withColumn("geom", callUDF("ST_FlipCoordinates", col("geom")))
+    val newX = newDf.take(1)(0).get(0).asInstanceOf[Geometry].getCoordinate.x
+    val newY = newDf.take(1)(0).get(0).asInstanceOf[Geometry].getCoordinate.y
+    assert(newX == oldY)
+    assert(newY == oldX)
   }
 
 }
