@@ -25,13 +25,13 @@ import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory}
   */
 
 class ST_Union_Aggr extends UserDefinedAggregateFunction {
-  override def inputSchema: StructType = StructType(StructField("Union", new GeometryUDT) :: Nil)
+  override def inputSchema: StructType = StructType(StructField("Union", GeometryUDT) :: Nil)
 
   override def bufferSchema: StructType = StructType(
-    StructField("Union", new GeometryUDT) :: Nil
+    StructField("Union", GeometryUDT) :: Nil
   )
 
-  override def dataType: DataType = new GeometryUDT
+  override def dataType: DataType = GeometryUDT
 
   override def deterministic: Boolean = true
 
@@ -72,15 +72,15 @@ class ST_Union_Aggr extends UserDefinedAggregateFunction {
 class ST_Envelope_Aggr extends UserDefinedAggregateFunction {
   // This is the input fields for your aggregate function.
   override def inputSchema: org.apache.spark.sql.types.StructType =
-    StructType(StructField("Envelope", new GeometryUDT) :: Nil)
+    StructType(StructField("Envelope", GeometryUDT) :: Nil)
 
   // This is the internal fields you keep for computing your aggregate.
   override def bufferSchema: StructType = StructType(
-    StructField("Envelope", new GeometryUDT) :: Nil
+    StructField("Envelope", GeometryUDT) :: Nil
   )
 
   // This is the output type of your aggregatation function.
-  override def dataType: DataType = new GeometryUDT
+  override def dataType: DataType = GeometryUDT
 
   override def deterministic: Boolean = true
 
@@ -176,13 +176,13 @@ class ST_Envelope_Aggr extends UserDefinedAggregateFunction {
   * Return the polygon intersection of all Polygon in the given column
   */
 class ST_Intersection_Aggr extends UserDefinedAggregateFunction {
-  override def inputSchema: StructType = StructType(StructField("Intersection", new GeometryUDT) :: Nil)
+  override def inputSchema: StructType = StructType(StructField("Intersection", GeometryUDT) :: Nil)
 
   override def bufferSchema: StructType = StructType(
-    StructField("Intersection", new GeometryUDT) :: Nil
+    StructField("Intersection", GeometryUDT) :: Nil
   )
 
-  override def dataType: DataType = new GeometryUDT
+  override def dataType: DataType = GeometryUDT
 
   override def deterministic: Boolean = true
 

@@ -98,7 +98,7 @@ class standardVizOperatorTest extends TestBaseScala {
         """
           |CREATE OR REPLACE TEMP VIEW pixels AS
           |SELECT pixel, shape FROM pointtable
-          |LATERAL VIEW ST_Pixelize(ST_Transform(shape, 'epsg:4326','epsg:3857'), 256, 256, (SELECT ST_Transform(bound, 'epsg:4326','epsg:3857') FROM boundtable)) AS pixel
+          |LATERAL VIEW ST_Pixelize(ST_Transform(ST_FlipCoordinates(shape), 'epsg:4326','epsg:3857'), 256, 256, (SELECT ST_Transform(ST_FlipCoordinates(bound), 'epsg:4326','epsg:3857') FROM boundtable)) AS pixel
         """.stripMargin)
       spark.sql(
         """

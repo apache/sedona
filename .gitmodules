@@ -1,7 +1,3 @@
 [submodule "contrib/R"]
 	path = contrib/R
-	url = https://github.com/harryprince/geospark
-[submodule "jts"]
-	path = jts
-	url = https://github.com/jiayuasu/jts.git
-	branch = add-getter-setter
+  url = https://github.com/harryprince/geospark

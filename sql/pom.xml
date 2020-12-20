@@ -17,8 +17,7 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache.sedona</groupId>
@@ -29,7 +28,7 @@
 	<artifactId>sedona-sql-${spark.compat.version}_${scala.compat.version}</artifactId>
 
 	<name>${project.groupId}:${project.artifactId}</name>
-	<description>A cluster computing system for processing large-scale spatial data: SQL API</description>
+	<description>A cluster computing system for processing large-scale spatial data: SQL API. Apache Sedona is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Apache Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</description>
     <url>http://sedona.apache.org/</url>
 	<packaging>jar</packaging>
 
@@ -40,57 +39,10 @@
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!--The following GeoTools dependencies use GNU Lesser General Public License and thus are excluded from the binary distribution-->
-        <!-- Users have to include them by themselves manually -->
-        <!-- See https://www.apache.org/legal/resolved.html#category-x -->
-        <!-- See https://github.com/geotools/geotools#license -->
-        <!--for CRS transformation-->
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-main</artifactId>
-            <version>${geotools.version}</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.vividsolutions</groupId>
-                    <artifactId>jts</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!--for CRS transformation-->
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-referencing</artifactId>
-            <version>${geotools.version}</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!--for CRS transformation-->
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-epsg-hsql</artifactId>
-            <version>${geotools.version}</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
     </dependencies>
 	<build>
         <sourceDirectory>src/main/scala</sourceDirectory>
-		<plugins>
+        <plugins>
             <plugin>
                 <groupId>org.scalastyle</groupId>
                 <artifactId>scalastyle-maven-plugin</artifactId>
@@ -102,7 +54,7 @@
                     <failOnWarning>false</failOnWarning>
                     <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
                     <testSourceDirectory>${project.basedir}/src/test/scala</testSourceDirectory>
-                    <configLocation>${project.basedir}/src/test/resources/scalastyle_config.xml</configLocation>
+                    <configLocation>${project.basedir}/../scalastyle_config.xml</configLocation>
                     <outputFile>${project.basedir}/target/scalastyle-output.xml</outputFile>
                     <outputEncoding>UTF-8</outputEncoding>
                 </configuration>
@@ -114,7 +66,7 @@
                     </execution>
                 </executions>
             </plugin>
-		</plugins>
+        </plugins>
 	</build>
 </project>
   
