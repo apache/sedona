@@ -7,13 +7,14 @@ verify_ssl = true
 pytest="*"
 notebook="==6.0.0"
 jupyter="*"
+mkdocs="*"
+pytest-cov = "*"
 
 [packages]
 pandas="*"
 geopandas="==0.6.0"
 pyspark=">=2.4.0"
 attrs="*"
-pytest-cov = "*"
 
 [requires]
 python_version = "3.7"
