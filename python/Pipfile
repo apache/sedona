@@ -7,6 +7,8 @@ verify_ssl = true
 pytest="*"
 notebook="==6.0.0"
 jupyter="*"
+mkdocs="*"
+pytest-cov = "*"
 
 [packages]
 pandas="*"

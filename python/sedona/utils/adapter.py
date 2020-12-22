@@ -22,7 +22,7 @@ from pyspark.sql import DataFrame, SparkSession
 
 from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.core.enums.spatial import SpatialType
-from sedona.core.spatialOperator.rdd import SedonaPairRDD
+from sedona.core.spatialOperator.rdd import SedonaPairRDD, SedonaRDD
 from sedona.utils.meta import MultipleMeta
 
 
@@ -160,3 +160,12 @@ class Adapter(metaclass=MultipleMeta):
             rawPairRDD.jsrdd, leftFieldnames, rightFieldNames, sparkSession._jsparkSession)
         df = DataFrame(jdf, sparkSession._wrapped)
         return df
+
+    @classmethod
+    def toDf(cls, spatialRDD: SedonaRDD, spark: SparkSession, fieldNames: List = None) -> DataFrame:
+        srdd = SpatialRDD(spatialRDD.sc)
+        srdd.setRawSpatialRDD(spatialRDD.jsrdd)
+        if fieldNames:
+            return Adapter.toDf(srdd, fieldNames, spark)
+        else:
+            return Adapter.toDf(srdd, spark)
