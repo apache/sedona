@@ -84,6 +84,17 @@ from sedona.register import SedonaRegistrator
 SedonaRegistrator.registerAll(spark)
 ```
 
+!!!note
+    before running the command please copy jar file produced by python-adapter project
+    to $SPARK_HOME/jars directory or add it while defining spark session.
+    ```python
+    spark = SparkSession.\
+        builder.\
+        appName('appName').\
+        config('spark.jars.packages', 'path to jar or coordinates from maven').\
+        getOrCreate()
+    ```
+    
 ## Create a SpatialRDD
 
 ### Create a typed SpatialRDD
