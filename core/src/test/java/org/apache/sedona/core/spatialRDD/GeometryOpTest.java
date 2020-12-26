@@ -32,10 +32,10 @@ public class GeometryOpTest extends SpatialRDDTestBase
     @BeforeClass
     public static void onceExecutedBeforeAll()
     {
-        initialize(PolygonRDDTest.class.getSimpleName(), "polygon.test.properties");
-        InputLocationGeojson = "file://" + PolygonRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocationGeojson")).getPath();
-        InputLocationWkt = "file://" + PolygonRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocationWkt")).getPath();
-        InputLocationWkb = "file://" + PolygonRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocationWkb")).getPath();
+        initialize(GeometryOpTest.class.getSimpleName(), "polygon.test.properties");
+        InputLocationGeojson = "file://" + GeometryOpTest.class.getClassLoader().getResource(prop.getProperty("inputLocationGeojson")).getPath();
+        InputLocationWkt = "file://" + GeometryOpTest.class.getClassLoader().getResource(prop.getProperty("inputLocationWkt")).getPath();
+        InputLocationWkb = "file://" + GeometryOpTest.class.getClassLoader().getResource(prop.getProperty("inputLocationWkb")).getPath();
     }
 
     /**
