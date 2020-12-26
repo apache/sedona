@@ -33,6 +33,7 @@ import org.apache.sedona.core.spatialPartitioning.quadtree.QuadTreePartitioner;
 import org.apache.sedona.core.spatialPartitioning.quadtree.StandardQuadTree;
 import org.apache.sedona.core.spatialRddTool.IndexBuilder;
 import org.apache.sedona.core.spatialRddTool.StatCalculator;
+import org.apache.sedona.core.utils.GeomUtils;
 import org.apache.sedona.core.utils.RDDSampleUtils;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.FlatMapFunction;
@@ -660,5 +661,12 @@ public class SpatialRDD<T extends Geometry>
     public String getTargetEpgsgCode()
     {
         return targetEpgsgCode;
+    }
+
+    public void flipCoordinates() {
+        this.rawSpatialRDD = this.rawSpatialRDD.map(f -> {
+            GeomUtils.flipCoordinates(f);
+            return f;
+        });
     }
 }

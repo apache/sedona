@@ -92,12 +92,12 @@ Introduction:
 Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS
 
 !!!note
-	By default, ==ST_Transform== assumes Longitude/Latitude is your coordinate X/Y. If this is not the case, set UseLongitudeLatitudeOrder as "false".
+	By default, ==ST_Transform== assumes Longitude/Latitude is your coordinate X/Y. If this is not the case, set ==ST_FlipCoordinates== to swap X and Y.
 
 !!!note
 	If ==ST_Transform== throws an Exception called "Bursa wolf parameters required", you need to disable the error notification in ST_Transform. You can append a boolean value at the end.
 
-Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string, [Optional] UseLongitudeLatitudeOrder:Boolean, [Optional] DisableError)`
+Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional] DisableError)`
 
 Since: `v1.0.0`
 
@@ -109,7 +109,7 @@ FROM polygondf
 
 Spark SQL example (with optional parameters):
 ```SQL
-SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857',true, false)
+SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857', false)
 FROM polygondf
 ```
 
@@ -565,3 +565,22 @@ Since: `v1.0.0`
 SELECT ST_NumGeometries(df.geometry)
 FROM df
 ```
+
+
+## ST_FlipCoordinates
+
+Introduction: Returns a version of the given geometry with X and Y axis flipped.
+
+Format: `ST_FlipCoordinates(A:geometry)`
+
+Since: `v1.0.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_FlipCoordinates(df.geometry)
+FROM df
+```
+
+Input: `POINT (1 2)`
+
+Output: `POINT (2 1)`

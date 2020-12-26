@@ -41,7 +41,7 @@ jobs:
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         SCALA_VERSION: ${{ matrix.scala }}
-      run: mvn -q clean install -Dscala.compat.version=${SCALA_VERSION:0:4} -Dscala.version=$SCALA_VERSION -Dspark.compat.version=${SPARK_VERSION:0:3} -Dspark.version=$SPARK_VERSION
+      run: mvn -q clean install -Dscala=${SCALA_VERSION:0:4} -Dspark=${SPARK_VERSION:0:3}
     - run: mkdir staging
     - run: cp core/target/sedona-*.jar staging
     - run: cp sql/target/sedona-*.jar staging

@@ -167,10 +167,10 @@ class TestPredicateJoin(TestBase):
         polygon_df.createOrReplaceTempView("polygondf")
         polygon_df.show()
         try:
-            function_df = self.spark.sql("select ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857',true, false) from polygondf")
+            function_df = self.spark.sql("select ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857', false) from polygondf")
             function_df.show()
         except Exception:
-            function_df = self.spark.sql("select ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857',true, false) from polygondf")
+            function_df = self.spark.sql("select ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857', false) from polygondf")
             function_df.show()
 
     def test_st_intersection_intersects_but_not_contains(self):

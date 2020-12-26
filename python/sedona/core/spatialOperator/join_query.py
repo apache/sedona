@@ -18,10 +18,9 @@
 from pyspark import RDD
 
 from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
-from sedona.core.jvm.translate import JvmSedonaPythonConverter
 from sedona.core.spatialOperator.join_params import JoinParams
+from sedona.core.spatialOperator.join_query_raw import JoinQueryRaw
 from sedona.utils.decorators import require
-from sedona.utils.spatial_rdd_parser import SedonaPickler
 
 
 class JoinQuery:
@@ -39,19 +38,8 @@ class JoinQuery:
         :return:
         """
 
-        jvm = spatialRDD._jvm
-        sc = spatialRDD._sc
-
-        srdd = jvm.JoinQuery.SpatialJoinQuery(
-            spatialRDD._srdd,
-            queryRDD._srdd,
-            useIndex,
-            considerBoundaryIntersection
-        )
-        serialized = JvmSedonaPythonConverter(jvm) \
-            .translate_spatial_pair_rdd_with_list_to_python(srdd)
-
-        return RDD(serialized, sc, SedonaPickler())
+        pair_rdd = JoinQueryRaw.SpatialJoinQuery(spatialRDD, queryRDD, useIndex, considerBoundaryIntersection)
+        return pair_rdd.to_rdd()
 
     @classmethod
     @require(["JoinQuery"])
@@ -66,18 +54,8 @@ class JoinQuery:
         :return:
         """
 
-        jvm = spatialRDD._jvm
-        sc = spatialRDD._sc
-        srdd = jvm.JoinQuery.DistanceJoinQuery(
-            spatialRDD._srdd,
-            queryRDD._srdd,
-            useIndex,
-            considerBoundaryIntersection
-        )
-        serialized = JvmSedonaPythonConverter(jvm). \
-            translate_spatial_pair_rdd_with_list_to_python(srdd)
-
-        return RDD(serialized, sc, SedonaPickler())
+        pair_rdd = JoinQueryRaw.DistanceJoinQuery(spatialRDD, queryRDD, useIndex, considerBoundaryIntersection)
+        return pair_rdd.to_rdd()
 
     @classmethod
     @require(["JoinQuery"])
@@ -90,16 +68,8 @@ class JoinQuery:
         :return:
         """
 
-        jvm = queryWindowRDD._jvm
-        sc = queryWindowRDD._sc
-
-        jvm_join_params = joinParams.jvm_instance(jvm)
-
-        srdd = jvm.JoinQuery.spatialJoin(queryWindowRDD._srdd, objectRDD._srdd, jvm_join_params)
-        serialized = JvmSedonaPythonConverter(jvm). \
-            translate_spatial_pair_rdd_to_python(srdd)
-
-        return RDD(serialized, sc, SedonaPickler())
+        pair_rdd = JoinQueryRaw.spatialJoin(queryWindowRDD, objectRDD, joinParams)
+        return pair_rdd.to_rdd()
 
     @classmethod
     @require(["JoinQuery"])
@@ -120,21 +90,9 @@ class JoinQuery:
         :return:
         """
 
-        jvm = spatialRDD._jvm
-        sc = spatialRDD._sc
-
-        spatial_join = jvm.JoinQuery.DistanceJoinQueryFlat
-        srdd = spatial_join(
-            spatialRDD._srdd,
-            queryRDD._srdd,
-            useIndex,
-            considerBoundaryIntersection
-        )
-
-        serialized = JvmSedonaPythonConverter(jvm). \
-            translate_spatial_pair_rdd_to_python(srdd)
-
-        return RDD(serialized, sc, SedonaPickler())
+        pair_rdd = JoinQueryRaw.DistanceJoinQueryFlat(spatialRDD, queryRDD, useIndex,
+                                                      considerBoundaryIntersection)
+        return pair_rdd.to_rdd()
 
     @classmethod
     @require(["JoinQuery"])
@@ -159,18 +117,6 @@ class JoinQuery:
         [[GeoData(Polygon, ), GeoData()], [GeoData(), GeoData()], [GeoData(), GeoData()]]
         """
 
-        jvm = spatialRDD._jvm
-        sc = spatialRDD._sc
-
-        spatial_join = jvm.JoinQuery.SpatialJoinQueryFlat
-        srdd = spatial_join(
-            spatialRDD._srdd,
-            queryRDD._srdd,
-            useIndex,
-            considerBoundaryIntersection
-        )
-
-        serialized = JvmSedonaPythonConverter(jvm). \
-            translate_spatial_pair_rdd_to_python(srdd)
-
-        return RDD(serialized, sc, SedonaPickler())
+        pair_rdd = JoinQueryRaw.SpatialJoinQueryFlat(spatialRDD, queryRDD, useIndex,
+                                                     considerBoundaryIntersection)
+        return pair_rdd.to_rdd()

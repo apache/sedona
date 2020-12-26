@@ -15,14 +15,11 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from pyspark import RDD
 from shapely.geometry.base import BaseGeometry
 
 from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
-from sedona.core.jvm.translate import JvmSedonaPythonConverter
+from sedona.core.spatialOperator.range_query_raw import RangeQueryRaw
 from sedona.utils.decorators import require
-from sedona.utils.geometry_adapter import GeometryAdapter
-from sedona.utils.spatial_rdd_parser import SedonaPickler
 
 
 class RangeQuery:
@@ -39,20 +36,5 @@ class RangeQuery:
         :param usingIndex:
         :return:
         """
-
-        jvm = spatialRDD._jvm
-        sc = spatialRDD._sc
-
-        jvm_geom = GeometryAdapter.create_jvm_geometry_from_base_geometry(jvm, rangeQueryWindow)
-
-        srdd = jvm. \
-            RangeQuery.SpatialRangeQuery(
-            spatialRDD._srdd,
-            jvm_geom,
-            considerBoundaryIntersection,
-            usingIndex
-        )
-
-        serialized = JvmSedonaPythonConverter(jvm).translate_spatial_rdd_to_python(srdd)
-
-        return RDD(serialized, sc, SedonaPickler())
+        j_srdd = RangeQueryRaw.SpatialRangeQuery(spatialRDD, rangeQueryWindow, considerBoundaryIntersection, usingIndex)
+        return j_srdd.to_rdd()

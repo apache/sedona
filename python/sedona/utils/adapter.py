@@ -22,6 +22,7 @@ from pyspark.sql import DataFrame, SparkSession
 
 from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.core.enums.spatial import SpatialType
+from sedona.core.spatialOperator.rdd import SedonaPairRDD, SedonaRDD
 from sedona.utils.meta import MultipleMeta
 
 
@@ -52,23 +53,6 @@ class Adapter(metaclass=MultipleMeta):
         jvm = sc._jvm
 
         srdd = jvm.Adapter.toSpatialRdd(dataFrame._jdf, geometryFieldName)
-
-        spatial_rdd = SpatialRDD(sc)
-        spatial_rdd.set_srdd(srdd)
-
-        return spatial_rdd
-
-    @classmethod
-    def toSpatialRdd(cls, dataFrame: DataFrame):
-        """
-
-        :param dataFrame:
-        :return:
-        """
-        sc = dataFrame._sc
-        jvm = sc._jvm
-
-        srdd = jvm.Adapter.toSpatialRdd(dataFrame._jdf)
 
         spatial_rdd = SpatialRDD(sc)
         spatial_rdd.set_srdd(srdd)
@@ -161,3 +145,27 @@ class Adapter(metaclass=MultipleMeta):
             return df.toDF(*combined_columns)
         else:
             raise TypeError("Column length does not match")
+
+    @classmethod
+    def toDf(cls, rawPairRDD: SedonaPairRDD, sparkSession: SparkSession):
+        jvm = sparkSession._jvm
+        jdf = jvm.Adapter.toDf(rawPairRDD.jsrdd, sparkSession._jsparkSession)
+        df = DataFrame(jdf, sparkSession._wrapped)
+        return df
+
+    @classmethod
+    def toDf(cls, rawPairRDD: SedonaPairRDD, leftFieldnames: List, rightFieldNames: List, sparkSession: SparkSession):
+        jvm = sparkSession._jvm
+        jdf = jvm.PythonAdapterWrapper.toDf(
+            rawPairRDD.jsrdd, leftFieldnames, rightFieldNames, sparkSession._jsparkSession)
+        df = DataFrame(jdf, sparkSession._wrapped)
+        return df
+
+    @classmethod
+    def toDf(cls, spatialRDD: SedonaRDD, spark: SparkSession, fieldNames: List = None) -> DataFrame:
+        srdd = SpatialRDD(spatialRDD.sc)
+        srdd.setRawSpatialRDD(spatialRDD.jsrdd)
+        if fieldNames:
+            return Adapter.toDf(srdd, fieldNames, spark)
+        else:
+            return Adapter.toDf(srdd, spark)

@@ -49,7 +49,7 @@ jobs:
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         SCALA_VERSION: ${{ matrix.scala }}
-      run: mvn -q clean install -DskipTests -Dscala.compat.version=${SCALA_VERSION:0:4} -Dscala.version=$SCALA_VERSION -Dspark.compat.version=${SPARK_VERSION:0:3} -Dspark.version=$SPARK_VERSION
+      run: mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=${SPARK_VERSION:0:3}
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
       run: wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz
