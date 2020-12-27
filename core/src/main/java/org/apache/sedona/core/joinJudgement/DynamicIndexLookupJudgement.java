@@ -27,13 +27,13 @@ import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.enums.JoinBuildSide;
 import org.apache.sedona.core.monitoring.Metric;
 import org.apache.sedona.core.utils.TimeUtils;
-import org.apache.sedona.jts.index.quadtree.Quadtree;
-import org.apache.sedona.jts.index.strtree.STRtree;
 import org.apache.spark.TaskContext;
 import org.apache.spark.api.java.function.FlatMapFunction2;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.index.SpatialIndex;
+import org.locationtech.jts.index.quadtree.Quadtree;
+import org.locationtech.jts.index.strtree.STRtree;
 
 import javax.annotation.Nullable;
 

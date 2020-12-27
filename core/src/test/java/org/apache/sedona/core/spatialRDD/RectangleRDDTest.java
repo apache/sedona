@@ -19,12 +19,12 @@
 package org.apache.sedona.core.spatialRDD;
 
 import org.apache.sedona.core.enums.IndexType;
-import org.apache.sedona.jts.index.strtree.STRtree;
 import org.apache.spark.storage.StorageLevel;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.index.strtree.STRtree;
 
 import java.util.List;
 

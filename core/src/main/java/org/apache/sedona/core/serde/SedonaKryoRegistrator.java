@@ -24,8 +24,6 @@ import org.apache.log4j.Logger;
 import org.apache.sedona.core.geometryObjects.Circle;
 import org.apache.sedona.core.geometryObjects.GeometrySerde;
 import org.apache.sedona.core.geometryObjects.SpatialIndexSerde;
-import org.apache.sedona.jts.index.quadtree.Quadtree;
-import org.apache.sedona.jts.index.strtree.STRtree;
 import org.apache.spark.serializer.KryoRegistrator;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -35,6 +33,8 @@ import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.index.quadtree.Quadtree;
+import org.locationtech.jts.index.strtree.STRtree;
 
 public class SedonaKryoRegistrator
         implements KryoRegistrator
