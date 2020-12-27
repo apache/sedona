@@ -24,9 +24,9 @@ import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import org.apache.log4j.Logger;
-import org.apache.sedona.jts.index.quadtree.IndexSerde;
-import org.apache.sedona.jts.index.quadtree.Quadtree;
-import org.apache.sedona.jts.index.strtree.STRtree;
+import org.locationtech.jts.index.quadtree.IndexSerde;
+import org.locationtech.jts.index.quadtree.Quadtree;
+import org.locationtech.jts.index.strtree.STRtree;
 
 /**
  * Provides methods to efficiently serialize and deserialize spatialIndex types.
@@ -69,8 +69,8 @@ public class SpatialIndexSerde
             //serialize rtree index
             writeType(output, Type.RTREE);
             STRtree tree = (STRtree) o;
-            org.apache.sedona.jts.index.strtree.IndexSerde indexSerde
-                    = new org.apache.sedona.jts.index.strtree.IndexSerde();
+            org.locationtech.jts.index.strtree.IndexSerde indexSerde
+                    = new org.locationtech.jts.index.strtree.IndexSerde();
             indexSerde.write(kryo, output, tree);
         }
         else {
@@ -89,8 +89,8 @@ public class SpatialIndexSerde
                 return indexSerde.read(kryo, input);
             }
             case RTREE: {
-                org.apache.sedona.jts.index.strtree.IndexSerde indexSerde =
-                        new org.apache.sedona.jts.index.strtree.IndexSerde();
+                org.locationtech.jts.index.strtree.IndexSerde indexSerde =
+                        new org.locationtech.jts.index.strtree.IndexSerde();
                 return indexSerde.read(kryo, input);
             }
             default: {

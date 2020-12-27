@@ -19,11 +19,11 @@
 
 package org.apache.sedona.core.knnJudgement;
 
-import org.apache.sedona.jts.index.strtree.GeometryItemDistance;
-import org.apache.sedona.jts.index.strtree.STRtree;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.index.SpatialIndex;
+import org.locationtech.jts.index.strtree.GeometryItemDistance;
+import org.locationtech.jts.index.strtree.STRtree;
 
 import java.io.Serializable;
 import java.util.ArrayList;
