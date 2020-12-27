@@ -23,6 +23,7 @@ from sedona.core.spatialOperator.join_params import JoinParams
 from sedona.core.spatialOperator.join_query_raw import JoinQueryRaw
 from sedona.core.spatialOperator.range_query_raw import RangeQueryRaw
 from sedona.sql.types import GeometryType
+from sedona.utils.adapter import Adapter
 from tests.test_base import TestBase
 
 import os
@@ -47,9 +48,7 @@ class TestOmitPythonJvmSerdeToDf(TestBase):
         areas_polygon_rdd.spatialPartitioning(poi_point_rdd.getPartitioner())
 
         jvm_sedona_rdd = JoinQueryRaw.spatialJoin(poi_point_rdd, areas_polygon_rdd, JoinParams())
-        sedona_df = jvm_sedona_rdd.to_df(spark=self.spark,
-                                         left_field_names=["area_id", "area_name"],
-                                         right_field_names=["poi_id", "poi_name"])
+        sedona_df = Adapter.toDf(jvm_sedona_rdd, ["area_id", "area_name"], ["poi_id", "poi_name"], self.spark)
 
         assert sedona_df.count() == 5
         assert sedona_df.columns == ["leftgeometry", "area_id", "area_name", "rightgeometry",
@@ -66,11 +65,11 @@ class TestOmitPythonJvmSerdeToDf(TestBase):
         circle_rdd.spatialPartitioning(poi_point_rdd.getPartitioner())
 
         jvm_sedona_rdd = JoinQueryRaw.DistanceJoinQueryFlat(poi_point_rdd, circle_rdd, False, True)
-
-        df_sedona_rdd = jvm_sedona_rdd.to_df(
-            self.spark,
-            left_field_names=["poi_from_id", "poi_from_name"],
-            right_field_names=["poi_to_id", "poi_to_name"]
+        df_sedona_rdd = Adapter.toDf(
+            jvm_sedona_rdd,
+            ["poi_from_id", "poi_from_name"],
+            ["poi_to_id", "poi_to_name"],
+            self.spark
         )
 
         assert df_sedona_rdd.count() == 10
@@ -95,14 +94,15 @@ class TestOmitPythonJvmSerdeToDf(TestBase):
         jvm_sedona_rdd = JoinQueryRaw.SpatialJoinQueryFlat(
             poi_point_rdd, areas_polygon_rdd, False, True)
 
-        pois_within_areas_with_default_column_names = jvm_sedona_rdd.to_df(self.spark)
+        pois_within_areas_with_default_column_names = Adapter.toDf(jvm_sedona_rdd, self.spark)
 
         assert pois_within_areas_with_default_column_names.count() == 5
 
-        pois_within_areas_with_passed_column_names = jvm_sedona_rdd.to_df(
-            spark=self.spark,
-            left_field_names=["area_id", "area_name"],
-            right_field_names=["poi_id", "poi_name"]
+        pois_within_areas_with_passed_column_names = Adapter.toDf(
+            jvm_sedona_rdd,
+            ["area_id", "area_name"],
+            ["poi_id", "poi_name"],
+            self.spark
         )
 
         assert pois_within_areas_with_passed_column_names.count() == 5
@@ -159,7 +159,7 @@ class TestOmitPythonJvmSerdeToDf(TestBase):
 
         assert rdd.collect().__len__() == 4
 
-        df_without_column_names = result.to_df(self.spark)
+        df_without_column_names = Adapter.toDf(result, self.spark)
 
         raw_geometries = self.__row_to_list(
             df_without_column_names.collect()
@@ -171,7 +171,7 @@ class TestOmitPythonJvmSerdeToDf(TestBase):
         assert df_without_column_names.count() == 4
         assert df_without_column_names.schema == StructType([StructField("geometry", GeometryType())])
 
-        df = result.to_df(self.spark, field_names=["poi_id", "poi_name"])
+        df = Adapter.toDf(result, self.spark, ["poi_id", "poi_name"])
 
         assert df.count() == 4
         assert df.columns == ["geometry", "poi_id", "poi_name"]

@@ -22,14 +22,14 @@ package org.apache.sedona.core.geometryObjects;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import org.apache.sedona.jts.index.quadtree.Quadtree;
-import org.apache.sedona.jts.index.strtree.STRtree;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.index.SpatialIndex;
+import org.locationtech.jts.index.quadtree.Quadtree;
+import org.locationtech.jts.index.strtree.STRtree;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

@@ -19,10 +19,10 @@
 
 package org.apache.sedona.core.spatialPartitioning;
 
-import org.apache.sedona.jts.index.strtree.AbstractNode;
-import org.apache.sedona.jts.index.strtree.Boundable;
-import org.apache.sedona.jts.index.strtree.STRtree;
 import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.index.strtree.AbstractNode;
+import org.locationtech.jts.index.strtree.Boundable;
+import org.locationtech.jts.index.strtree.STRtree;
 
 import java.io.Serializable;
 import java.util.ArrayList;
