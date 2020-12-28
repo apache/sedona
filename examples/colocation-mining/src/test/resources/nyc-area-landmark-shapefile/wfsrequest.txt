@@ -1,0 +1,1 @@
+https://maps-public.geo.nyu.edu:443/geoserver/sdr/wfs?outputformat=SHAPE-ZIP&request=GetFeature&service=wfs&srsName=EPSG%3A4326&typeName=sdr%3Anyu_2451_34514&version=2.0.0
