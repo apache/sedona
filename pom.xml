@@ -331,7 +331,7 @@
                                 </transformer>
                             </transformers>
                             <filters>
-                                <!--  filter to address "Invalid signature file" issue - see http://stackoverflow.com/a/6743609/589215-->
+                                <!--  filter to address "Invalid signature file" issue - see http://stackoverflow.com/a/6743609/589215 -->
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
@@ -389,6 +389,19 @@
                 <configuration>
                     <additionalparam>-Xdoclint:none</additionalparam>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.sap.prd.mobile.ios.maven.plugins</groupId>
+                <artifactId>resolve-pom-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <id>resolve-pom-props</id>
+                        <goals>
+                            <goal>resolve-pom-props</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
