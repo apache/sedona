@@ -391,14 +391,21 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.sap.prd.mobile.ios.maven.plugins</groupId>
-                <artifactId>resolve-pom-maven-plugin</artifactId>
+                <groupId>io.paradoxical</groupId>
+                <artifactId>resolved-pom-maven-plugin</artifactId>
                 <version>1.0</version>
+                <configuration>
+                    <properties>
+                        <spark.compat.version>${spark.compat.version}</spark.compat.version>
+                        <scala.compat.version>${scala.compat.version}</scala.compat.version>
+                    </properties>
+                </configuration>
                 <executions>
                     <execution>
-                        <id>resolve-pom-props</id>
+                        <id>resolve-my-pom</id>
+                        <phase>initialize</phase>
                         <goals>
-                            <goal>resolve-pom-props</goal>
+                            <goal>resolve-pom</goal>
                         </goals>
                     </execution>
                 </executions>
