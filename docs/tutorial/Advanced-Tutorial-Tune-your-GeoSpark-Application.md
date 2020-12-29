@@ -1,17 +1,17 @@
-# Advanced tutorial: Tune your GeoSpark RDD application
-Before getting into this advanced tutorial, please make sure that you have tried several GeoSpark functions on your local machine.
+# Advanced tutorial: Tune your Sedona RDD application
+Before getting into this advanced tutorial, please make sure that you have tried several Sedona functions on your local machine.
 
-## Pick a proper GeoSpark version
-The versions of GeoSpark have three levels: X.X.X (i.e., 0.8.1). In addition, GeoSpark also supports Spark 1.X in Spark1.X version.
+## Pick a proper Sedona version
+The versions of Sedona have three levels: X.X.X (i.e., 0.8.1)
 
-The first level means that this verion contains big structure redesign which may bring big changes in APIs and performance. Hopefully, we can see these big changes in GeoSpark 1.X version.
+The first level means that this version contains big structure redesign which may bring big changes in APIs and performance.
 
-The second level (i.e., 0.8) indicates that this version contains significant performance enhancement, big new features and API changes. An old GeoSpark user who wants to pick this version needs to be careful about the API changes. Before you move to this version, please read [GeoSpark version release notes](https://github.com/DataSystemsLab/GeoSpark/wiki/GeoSpark-Full-Version-Release-notes) and make sure you are ready to accept the API changes.
+The second level (i.e., 0.8) indicates that this version contains significant performance enhancement, big new features and API changes. An old Sedona user who wants to pick this version needs to be careful about the API changes. Before you move to this version, please read [Sedona version release notes](/download/GeoSpark-All-Modules-Release-notes/) and make sure you are ready to accept the API changes.
 
-The third level (i.e., 0.8.1) tells that this version only contains bug fixes, some small new features and slight performance enhancement. This version will not contain any API changes. Moving to this version is safe. We highly suggest all GeoSpark users that stay at the same level move to the latest version in this level.
+The third level (i.e., 0.8.1) tells that this version only contains bug fixes, some small new features and slight performance enhancement. This version will not contain any API changes. Moving to this version is safe. We highly suggest all Sedona users that stay at the same level move to the latest version in this level.
 
 ## Choose a proper Spatial RDD constructor
-GeoSpark provides a number of constructors for each SpatialRDD (PointRDD, PolygonRDD and LineStringRDD). In general, you have two options to start with.
+Sedona provides a number of constructors for each SpatialRDD (PointRDD, PolygonRDD and LineStringRDD). In general, you have two options to start with.
 
 1. Initialize a SpatialRDD from your data source such as HDFS and S3. A typical example is as follows:
 ```Java
@@ -22,14 +22,14 @@ public PointRDD(JavaSparkContext sparkContext, String InputLocation, Integer Off
 public PointRDD(JavaRDD<Point> rawSpatialRDD, StorageLevel newLevel)
 ```
 	
-You may notice that these constructors all take as input a "StorageLevel" parameter. This is to tell Apache Spark cache the "rawSpatialRDD", one attribute of SpatialRDD. The reason why GeoSpark does this is that GeoSpark wants to calculate the dataset boundary and approximate total count using several Apache Spark "Action"s. These information are useful when doing Spatial Join Query and Distance Join Query.
+You may notice that these constructors all take as input a "StorageLevel" parameter. This is to tell Apache Spark cache the "rawSpatialRDD", one attribute of SpatialRDD. The reason why Sedona does this is that Sedona wants to calculate the dataset boundary and approximate total count using several Apache Spark "Action"s. These information are useful when doing Spatial Join Query and Distance Join Query.
 
 However, in some cases, you may know well about your datasets. If so, you can manually provide these information by calling this kind of Spatial RDD constructors:
 
 ```Java
 public PointRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter, boolean carryInputData, Integer partitions, Envelope datasetBoundary, Integer approximateTotalCount) {
 ```
-Manually providing the dataset boundary and approxmiate total count helps GeoSpark avoiding several slow "Action"s during initialization.
+Manually providing the dataset boundary and approximate total count helps Sedona avoiding several slow "Action"s during initialization.
 
 ## Cache the Spatial RDD that is repeatedly used
 Each SpatialRDD (PointRDD, PolygonRDD and LineStringRDD) possesses four RDD attributes. They are:

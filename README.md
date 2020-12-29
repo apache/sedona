@@ -25,8 +25,7 @@ Gitter chat: [![Gitter](https://badges.gitter.im/apache/sedona.svg)](https://git
 
 [Sedona Mailing Lists](https://lists.apache.org/list.html?sedona.apache.org): 
 
-* [issues@sedona.apache.org](https://lists.apache.org/list.html?issues@sedona.apache.org): general questions or tutorials
-* [dev@sedona.apache.org](https://lists.apache.org/list.html?dev@sedona.apache.org): project development 
+* [dev@sedona.apache.org](https://lists.apache.org/list.html?dev@sedona.apache.org): project development, general questions or tutorials
 
 # Please visit [Apache Sedona website](http://sedona.apache.org/) for detailed information
 

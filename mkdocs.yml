@@ -2,17 +2,16 @@ site_name: Apache Sedona (incubating)
 site_description: Apache Sedona (incubating) is a cluster computing system for processing large-scale spatial data. Sedona extends Apache Spark / SparkSQL with a set of out-of-the-box Spatial Resilient Distributed Datasets / SpatialSQL that efficiently load, process, and analyze large-scale spatial data across machines.
 nav:
     - Home: index.md
-    - Download:
+    - Setup:
       - Features: download/features.md
       - Quick start: download/overview.md
       - Release notes: download/GeoSpark-All-Modules-Release-notes.md      
       - Maven Central coordinate: download/GeoSpark-All-Modules-Maven-Central-Coordinates.md
       - Set up Spark cluser: download/cluster.md
-      - Spark Scala shell: download/scalashell.md
       - Self-contained project: download/project.md
-      - Install GeoSpark-Zeppelin: download/zeppelin.md
-      - Compile the source code: download/compile.md
-    - Tutorial:
+      - Install Sedona-Zeppelin: download/zeppelin.md
+      - Compile and publish the code: download/compile.md
+    - Programming Guides:
       - Spatial RDD app:
         - Scala/Java: tutorial/rdd.md
         - Python: tutorial/geospark-core-python.md
@@ -26,7 +25,7 @@ nav:
       - Performance tuning:
         - Benchmark: tutorial/benchmark.md            
         - Tune RDD application: tutorial/Advanced-Tutorial-Tune-your-GeoSpark-Application.md
-    - API:
+    - API Docs:
       - RDD (core):
         - Scala/Java doc: api/GeoSpark-Scala-and-Java-API.md
         - Python doc: api/GeoSpark-Python-API.md
@@ -47,7 +46,7 @@ nav:
       - Committers: community/contributor.md
       - Publications: community/publication.md
       - License: license/License.md
-    - Archive for GeoSpark:
+    - GeoSpark Legacy Docs:
       - Download:
         - Quick start: archive/download/overview.md
         - Release notes: archive/download/GeoSpark-All-Modules-Release-notes.md      
