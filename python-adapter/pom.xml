@@ -22,7 +22,7 @@
     <parent>
         <artifactId>sedona-parent</artifactId>
         <groupId>org.apache.sedona</groupId>
-        <version>1.0.0-incubator</version>
+        <version>1.0.0-incubator-SNAPSHOT</version>
     </parent>
     <artifactId>sedona-python-adapter-${spark.compat.version}_${scala.compat.version}</artifactId>
 
@@ -44,7 +44,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.sedona</groupId>
-            <artifactId>sedona-core_${scala.compat.version}</artifactId>
+            <artifactId>sedona-core-${spark.compat.version}_${scala.compat.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -26,7 +26,7 @@
     </parent>
     <groupId>org.apache.sedona</groupId>
     <artifactId>sedona-parent</artifactId>
-    <version>1.0.0-incubator</version>
+    <version>1.0.0-incubator-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>sedona-parent</name>
     <url>http://sedona.apache.org/</url>
@@ -69,6 +69,7 @@
         <dependency.scope>provided</dependency.scope>
         <jts.version>1.18.0</jts.version>
         <jts2geojson.version>0.14.3</jts2geojson.version>
+        <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
     <dependencies>
