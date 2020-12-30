@@ -38,8 +38,8 @@ trait TraitJoinQueryExec {
   // Using lazy val to avoid serialization
   @transient private lazy val boundCondition: (InternalRow => Boolean) = {
     if (extraCondition.isDefined) {
-Predicate.create(extraCondition.get, left.output ++ right.output).eval _ // SPARK3 anchor
-//newPredicate(extraCondition.get, left.output ++ right.output).eval _ // SPARK2 anchor
+//Predicate.create(extraCondition.get, left.output ++ right.output).eval _ // SPARK3 anchor
+newPredicate(extraCondition.get, left.output ++ right.output).eval _ // SPARK2 anchor
     } else { (r: InternalRow) =>
       true
     }
@@ -134,8 +134,8 @@ Predicate.create(extraCondition.get, left.output ++ right.output).eval _ // SPAR
     matches.rdd.mapPartitions { iter =>
       val filtered =
         if (extraCondition.isDefined) {
-val boundCondition = Predicate.create(extraCondition.get, left.output ++ right.output) // SPARK3 anchor
-//val boundCondition = newPredicate(extraCondition.get, left.output ++ right.output) // SPARK2 anchor
+//val boundCondition = Predicate.create(extraCondition.get, left.output ++ right.output) // SPARK3 anchor
+val boundCondition = newPredicate(extraCondition.get, left.output ++ right.output) // SPARK2 anchor
           iter.filter {
             case (l, r) =>
               val leftRow = l.getUserData.asInstanceOf[UnsafeRow]
