@@ -110,8 +110,9 @@ mkdocs serve
 #### Deploy to ASF domain
 
 1. Run `mkdocs build` in Sedona root directory. Copy all content in the `site` folder.
-2. Check out [GitHub incubator-sedona-website asf-site branch](https://github.com/apache/incubator-sedona-website/tree/asf-site)
-3. Use the copied content to replace all content in asf-site branch and upload
+2. Check out GitHub incubator-sedona-website [asf-site branch](https://github.com/apache/incubator-sedona-website/tree/asf-site)
+3. Use the copied content to replace all content in `asf-site` branch and upload to GitHub. Then [sedona.apache.org](https:/sedona.apache.org) wil be automatically updated.
+4. You can also push the content to `asf-staging` branch. The staging website will be then updated: [sedona.staged.apache.org](https:/sedona.staged.apache.org)
 
 ### Javadoc and Scaladoc
 
