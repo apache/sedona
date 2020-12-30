@@ -16,17 +16,17 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
         <version>23</version>
-        <relativePath></relativePath>
+        <relativePath />
     </parent>
     <groupId>org.apache.sedona</groupId>
     <artifactId>sedona-parent</artifactId>
-    <version>1.0.0-incubator-SNAPSHOT</version>
+    <version>1.0.0-incubator</version>
     <packaging>pom</packaging>
     <name>sedona-parent</name>
     <url>http://sedona.apache.org/</url>
@@ -60,7 +60,7 @@
         <connection>scm:git:https://github.com/apache/incubator-sedona.git</connection>
         <developerConnection>scm:git:https://github.com/apache/incubator-sedona.git</developerConnection>
         <url>https://github.com/apache/incubator-sedona</url>
-        <tag>HEAD</tag>
+        <tag>sedona-1.0.0-incubator</tag>
     </scm>
 
     <properties>
@@ -323,15 +323,13 @@
                         <configuration>
                             <transformers>
                                 <!--  use transformer to handle merge of META-INF/services - see http://java.net/jira/browse/JERSEY-440?focusedCommentId=14822&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#action_14822 -->
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                     <resource>reference.conf</resource>
                                 </transformer>
                             </transformers>
                             <filters>
-                                <!--  filter to address "Invalid signature file" issue - see http://stackoverflow.com/a/6743609/589215-->
+                                <!--  filter to address "Invalid signature file" issue - see http://stackoverflow.com/a/6743609/589215 -->
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
@@ -389,6 +387,26 @@
                 <configuration>
                     <additionalparam>-Xdoclint:none</additionalparam>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>io.paradoxical</groupId>
+                <artifactId>resolved-pom-maven-plugin</artifactId>
+                <version>1.0</version>
+                <configuration>
+                    <properties>
+                        <spark.compat.version>${spark.compat.version}</spark.compat.version>
+                        <scala.compat.version>${scala.compat.version}</scala.compat.version>
+                    </properties>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>resolve-my-pom</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>resolve-pom</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
