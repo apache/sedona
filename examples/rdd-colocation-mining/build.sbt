@@ -29,6 +29,8 @@ val dependencyScope = "compile"
 
 val geotoolsVersion = "24.0"
 
+val jacksonVersion = "2.10.0"
+
 logLevel := Level.Warn
 
 logLevel in assembly := Level.Error
@@ -39,7 +41,9 @@ libraryDependencies ++= Seq(
   "org.apache.hadoop" % "hadoop-mapreduce-client-core" % HadoopVersion % dependencyScope,
   "org.apache.hadoop" % "hadoop-common" % HadoopVersion % dependencyScope,
   "org.apache.hadoop" % "hadoop-hdfs" % HadoopVersion % dependencyScope,
-  "org.apache.sedona" % "sedona-core".concat("_").concat(ScalaCompatibleVersion) % SedonaVersion,
+  "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion % dependencyScope,
+  "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion % dependencyScope,
+  "org.apache.sedona" % "sedona-core-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion,
   "org.apache.sedona" % "sedona-sql-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion ,
   "org.apache.sedona" % "sedona-viz-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion,
   "org.locationtech.jts"% "jts-core"% "1.18.0" % "compile",

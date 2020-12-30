@@ -30,22 +30,26 @@ val dependencyScope = "compile"
 
 val geotoolsVersion = "24.0"
 
+val jacksonVersion = "2.10.0"
+
 logLevel := Level.Warn
 
 logLevel in assembly := Level.Error
 
 libraryDependencies ++= Seq(
+  "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion % dependencyScope,
+  "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion % dependencyScope,
   "org.apache.spark" %% "spark-core" % SparkVersion % dependencyScope exclude("org.apache.hadoop", "*"),
   "org.apache.spark" %% "spark-sql" % SparkVersion % dependencyScope exclude("org.apache.hadoop", "*"),
   "org.apache.hadoop" % "hadoop-mapreduce-client-core" % HadoopVersion % dependencyScope,
   "org.apache.hadoop" % "hadoop-common" % HadoopVersion % dependencyScope,
   "org.apache.hadoop" % "hadoop-hdfs" % HadoopVersion % dependencyScope,
-  "org.apache.sedona" % "sedona-core".concat("_").concat(ScalaCompatibleVersion) % SedonaVersion,
+  "org.apache.sedona" % "sedona-core-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion,
   "org.apache.sedona" % "sedona-sql-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion ,
   "org.apache.sedona" % "sedona-viz-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion,
   "org.locationtech.jts"% "jts-core"% "1.18.0" % "compile",
   "org.wololo" % "jts2geojson" % "0.14.3" % "compile", // Only needed if you read GeoJSON files. Under MIT License
-//  The following GeoTools packages are only required if you need CRS transformation. Under GNU Lesser General Public License (LGPL) license
+  //  The following GeoTools packages are only required if you need CRS transformation. Under GNU Lesser General Public License (LGPL) license
   "org.geotools" % "gt-main" % geotoolsVersion % "compile",
   "org.geotools" % "gt-referencing" % geotoolsVersion % "compile",
   "org.geotools" % "gt-epsg-hsql" % geotoolsVersion % "compile",
