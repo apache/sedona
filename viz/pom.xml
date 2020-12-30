@@ -31,7 +31,11 @@
 	<description>A cluster computing system for processing large-scale spatial data: RDD and SQL for Viz. Apache Sedona is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Apache Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</description>
     <url>http://sedona.apache.org/</url>
 	<packaging>jar</packaging>
-	
+
+    <properties>
+        <maven.deploy.skip>false</maven.deploy.skip>
+    </properties>
+
 	<dependencies>
         <dependency>
             <groupId>org.apache.sedona</groupId>
