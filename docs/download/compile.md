@@ -82,7 +82,12 @@ pipenv install --dev
 cd python
 pipenv run pytest tests
 ```
-## Compile the documentation website
+## Compile the documentation
+
+### Website
+
+#### Compile
+
 The source code of the documentation website is written in Markdown and then compiled by MkDocs. The website is built upon [Material for MkDocs template](https://squidfunk.github.io/mkdocs-material/).
 
 In the Sedona repository, MkDocs configuration file ==mkdocs.yml== is in the root folder and all documentation source code is in docs folder.
@@ -101,6 +106,25 @@ After installing MkDocs and MkDocs-Material, run the command in Sedona root fold
 ```
 mkdocs serve
 ```
+
+#### Deploy to ASF domain
+
+1. Run `mkdocs build` in Sedona root directory. Copy all content in the `site` folder.
+2. Check out [GitHub incubator-sedona-website asf-site branch](https://github.com/apache/incubator-sedona-website/tree/asf-site)
+3. Use the copied content to replace all content in asf-site branch and upload
+
+### Javadoc and Scaladoc
+
+#### Compile 
+
+* Javadoc: Use Intelij IDEA to generate Javadoc for `core` and `viz` module
+* Scaladoc: Run `scaladoc -d docs/api/javadoc/sql/ sql/src/main/scala/org/apache/sedona/sql/utils/*.scala`
+
+#### Deploy to ASF domain
+
+1. Copy the generated Javadoc and Scaladoc to the correct location in `docs/api/javadoc`
+
+2. Then deploy Javadoc and Scaladoc with the project website
 
 ## Publish SNAPSHOTs
 

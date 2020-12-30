@@ -9,6 +9,7 @@ nav:
       - Maven Central coordinate: download/GeoSpark-All-Modules-Maven-Central-Coordinates.md
       - Set up Spark cluser: download/cluster.md
       - Self-contained project: download/project.md
+      - Interactive scala shell: download/scalashell.md
       - Install Sedona-Zeppelin: download/zeppelin.md
       - Compile and publish the code: download/compile.md
     - Programming Guides:

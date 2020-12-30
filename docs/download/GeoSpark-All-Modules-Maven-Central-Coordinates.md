@@ -145,7 +145,6 @@ This is only needed if you want to do CRS transformation. Under GNU Lesser Gener
     <groupId>org.geotools</groupId>
     <artifactId>gt-epsg-hsql</artifactId>
     <version>24.0</version>
-    <scope>test</scope>
 </dependency>
 ```
 
@@ -204,17 +203,14 @@ In order to download SNAPSHOTs, you need to add the following repositories in yo
 resolvers +=
   "Apache Software Foundation Snapshots" at "https://repository.apache.org/content/groups/snapshots"
 ### POM.XML
-    <profiles>
-        <profile>
-            <id>allow-snapshots</id>
-            <activation><activeByDefault>true</activeByDefault></activation>
-            <repositories>
-                <repository>
-                    <id>snapshots-repo</id>
-                    <url>https://repository.apache.org/content/groups/snapshots</url>
-                    <releases><enabled>false</enabled></releases>
-                    <snapshots><enabled>true</enabled></snapshots>
-                </repository>
-            </repositories>
-        </profile>
-    </profiles>
+
+```xml
+<repositories>
+    <repository>
+        <id>snapshots-repo</id>
+        <url>https://repository.apache.org/content/groups/snapshots</url>
+        <releases><enabled>false</enabled></releases>
+        <snapshots><enabled>true</enabled></snapshots>
+    </repository>
+</repositories>
+```

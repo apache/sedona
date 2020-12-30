@@ -31,6 +31,10 @@ New function:
 
 * [SEDONA-8](https://issues.apache.org/jira/browse/SEDONA-8): spatialRDD.flipCoordinates()
 
+API / behavior change:
+
+* PR [488](https://github.com/apache/incubator-sedona/pull/488): JoinQuery.SpatialJoinQuery/DistanceJoinQuery now returns `<Geometry, List>` instead of `<Geometry, HashSet>` because we can no longer use HashSet in Sedona for duplicates removal. All original duplicates in both input RDDs will be preserved in the output.
+
 ### Sedona-sql
 
 Bug fix:

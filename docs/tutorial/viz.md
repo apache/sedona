@@ -1,48 +1,48 @@
-The page outlines the steps to visualize spatial data using GeoSparkViz. ==The example code is written in Scala but also works for Java==.
+The page outlines the steps to visualize spatial data using SedonaViz. ==The example code is written in Scala but also works for Java==.
 
-Starting from 1.2.0, GeoSparkViz provides the DataFrame support. This offers users a more flexible way to design beautiful map visualization effects including scatter plots and heat maps. In the meantime, GeoSparkViz RDD API remains the same.
+SedonaViz provides the DataFrame support. This offers users a more flexible way to design beautiful map visualization effects including scatter plots and heat maps. In the meantime, SedonaViz RDD API remains the same.
 
 !!!note
-	All GeoSparkViz SQL/DataFrame APIs are explained in [GeoSparkViz API](../api/viz/sql).
+	All SedonaViz SQL/DataFrame APIs are explained in [SedonaViz API](../api/viz/sql). Please see [Viz exmaple project](https://github.com/apache/incubator-sedona/tree/master/examples/viz)
 
 ## Why scalable map visualization?
 
 Data visualization allows users to summarize, analyze and reason about data. Guaranteeing detailed and accurate geospatial map visualization (e.g., at multiple zoom levels) requires extremely high-resolution maps. Classic visualization solutions such as Google Maps, MapBox and ArcGIS suffer from limited computation resources and hence take a tremendous amount of time to generate maps for large-scale geospatial data. In big spatial data scenarios, these tools just crash or run forever.
 
-GeoSparkViz encapsulates the main steps of map visualization process, e.g., pixelize, aggregate, and render, into a set of massively parallelized GeoViz operators and the user can assemble any customized styles.
+SedonaViz encapsulates the main steps of map visualization process, e.g., pixelize, aggregate, and render, into a set of massively parallelized GeoViz operators and the user can assemble any customized styles.
 
 ## Visualize SpatialRDD
-This tutorial mainly focuses on explaining SQL/DataFrame API. GeoSparkViz RDD example can be found in [GeoSpark template project](https://github.com/jiayuasu/GeoSparkTemplateProject/tree/master/geospark-viz).
+This tutorial mainly focuses on explaining SQL/DataFrame API. SedonaViz RDD example can be found in Please see [Viz exmaple project](https://github.com/apache/incubator-sedona/tree/master/examples/viz)
 
 ## Set up dependencies
-1. Read [GeoSpark Maven Central coordinates](../download/GeoSpark-All-Modules-Maven-Central-Coordinates.md)
-2. Add [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), [GeoSpark core](../download/GeoSpark-All-Modules-Maven-Central-Coordinates.md), [GeoSparkSQL](../download/GeoSpark-All-Modules-Maven-Central-Coordinates.md), [GeoSparkViz](../download/GeoSpark-All-Modules-Maven-Central-Coordinates.md)
+1. Read [Sedona Maven Central coordinates](../download/GeoSpark-All-Modules-Maven-Central-Coordinates.md)
+2. Add [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core, Sedona-SQL, Sedona-Viz
 
 ## Initiate SparkSession
 
 Use the following code to initiate your SparkSession at the beginning:
-This will register GeoSparkVizKryo serializer.
+This will register SedonaViz Kryo serializer.
 
 ```scala
 var sparkSession = SparkSession.builder()
 .master("local[*]") // Delete this if run in cluster mode
-.appName("readTestScala") // Change this to a proper name
-// Enable GeoSpark custom Kryo serializer
-.config("spark.serializer", classOf[KryoSerializer].getName)
-.config("spark.kryo.registrator", classOf[GeoSparkVizKryoRegistrator].getName)
+.appName("Sedona Viz") // Change this to a proper name
+// Enable Sedona custom Kryo serializer
+.config("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
+.config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
 .getOrCreate()
 ```
 
-## Register GeoSparkSQL and GeoSparkViz
+## Register SedonaSQL and SedonaViz
 
 Add the following line after your SparkSession declaration
 
 ```scala
-GeoSparkSQLRegistrator.registerAll(sparkSession)
-GeoSparkVizRegistrator.registerAll(sparkSession)
+SedonaSQLRegistrator.registerAll(sparkSession)
+SedonaVizRegistrator.registerAll(sparkSession)
 ```
 
-This will register all User Defined Tyeps, functions and optimizations in GeoSparkSQL and GeoSparkViz.
+This will register all User Defined Tyeps, functions and optimizations in SedonaSQL and SedonaViz.
 
 ## Create Spatial DataFrame
 
@@ -66,7 +66,7 @@ SELECT ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as De
 FROM pointtable
 ```
 
-As you know, GeoSpark provides many different methods to load various spatial data formats. Please read [Write an Spatial DataFrame application](sql).
+As you know, Sedona provides many different methods to load various spatial data formats. Please read [Write an Spatial DataFrame application](sql).
 
 ## Generate a single image
 
@@ -142,7 +142,7 @@ Fetch the image from the previous DataFrame
 var image = sparkSession.table("images").take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage
 ```
 
-Use GeoSparkViz ImageGenerator to store this image on disk.
+Use Sedona Viz ImageGenerator to store this image on disk.
 
 ```scala
 var imageGenerator = new ImageGenerator

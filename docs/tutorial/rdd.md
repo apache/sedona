@@ -1,40 +1,40 @@
 
-The page outlines the steps to create Spatial RDDs and run spatial queries using GeoSpark-core. ==The example code is written in Scala but also works for Java==.
+The page outlines the steps to create Spatial RDDs and run spatial queries using Sedona-core. ==The example code is written in Scala but also works for Java==.
 
 ## Set up dependencies
 
-1. Read [GeoSpark Maven Central coordinates](../download/GeoSpark-All-Modules-Maven-Central-Coordinates.md)
-2. Select ==the minimum dependencies==: Add Apache Spark (only the Spark core) and GeoSpark (core).
+1. Read [Sedona Maven Central coordinates](../download/GeoSpark-All-Modules-Maven-Central-Coordinates.md)
+2. Select ==the minimum dependencies==: Add Apache Spark (only the Spark core) and Sedona (core).
 3. Add the dependencies in build.sbt or pom.xml.
 
 !!!note
-	To enjoy the full functions of GeoSpark, we suggest you include ==the full dependencies==: [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), [GeoSpark core](../download/GeoSpark-All-Modules-Maven-Central-Coordinates.md#geospark-core), [GeoSparkSQL](../download/GeoSpark-All-Modules-Maven-Central-Coordinates.md#geospark-sql), [GeoSparkViz](../download/GeoSpark-All-Modules-Maven-Central-Coordinates.md#geospark-viz)
+	To enjoy the full functions of Sedona, we suggest you include ==the full dependencies==: [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core, Sedona-SQL, Sedona-Viz. Please see [RDD example project](https://github.com/apache/incubator-sedona/tree/master/examples/rdd-colocation-mining)
 
 ## Initiate SparkContext
 
 ```Scala
 val conf = new SparkConf()
-conf.setAppName("GeoSparkRunnableExample") // Change this to a proper name
+conf.setAppName("SedonaRunnableExample") // Change this to a proper name
 conf.setMaster("local[*]") // Delete this if run in cluster mode
-// Enable GeoSpark custom Kryo serializer
-conf.set("spark.serializer", classOf[KryoSerializer].getName)
-conf.set("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName)
+// Enable Sedona custom Kryo serializer
+conf.set("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
+conf.set("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName) // org.apache.sedona.core.serde.SedonaKryoRegistrator
 val sc = new SparkContext(conf)
 ```
 
 !!!warning
-	GeoSpark has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption.
+	Sedona has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption.
 
-If you add ==the GeoSpark full dependencies== as suggested above, please use the following two lines to enable GeoSpark Kryo serializer instead:
+If you add ==the Sedona full dependencies== as suggested above, please use the following two lines to enable Sedona Kryo serializer instead:
 ```Scala
-conf.set("spark.serializer", classOf[KryoSerializer].getName)
-conf.set("spark.kryo.registrator", classOf[GeoSparkVizKryoRegistrator].getName)
+conf.set("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
+conf.set("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
 ```
 
 ## Create a SpatialRDD
 
 ### Create a typed SpatialRDD
-GeoSpark-core provides three special SpatialRDDs: ==PointRDD, PolygonRDD, and LineStringRDD==. They can be loaded from CSV, TSV, WKT, WKB, Shapefiles, GeoJSON and NetCDF/HDF format.
+Sedona-core provides three special SpatialRDDs: ==PointRDD, PolygonRDD, and LineStringRDD==. They can be loaded from CSV, TSV, WKT, WKB, Shapefiles, GeoJSON and NetCDF/HDF format.
 
 #### PointRDD from CSV/TSV
 Suppose we have a `checkin.csv` CSV file at Path `/Download/checkin.csv` as follows:
@@ -93,7 +93,7 @@ val polygonRDDSplitter = FileDataSplitter.TSV
 
 The way to create a LineStringRDD is the same as PolygonRDD.
 
-### Create a generic SpatialRDD (behavoir changed in v1.2.0)
+### Create a generic SpatialRDD
 
 A generic SpatialRDD is not typed to a certain geometry type and open to more scenarios. It allows an input data file contains mixed types of geometries. For instance, a WKT file contains three types gemetries ==LineString==, ==Polygon== and ==MultiPolygon==.
 
@@ -142,7 +142,7 @@ val spatialRDD = GeoJsonReader.readToGeometryRDD(sparkSession.sparkContext, inpu
 ```
 
 !!!warning
-	The way that GeoSpark reads JSON file is different from SparkSQL
+	The way that Sedona reads JSON file is different from SparkSQL
 	
 #### From Shapefile
 
@@ -165,26 +165,26 @@ val spatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, sh
 	```
 
 If the file you are reading contains non-ASCII characters you'll need to explicitly set the encoding
-via `geospark.global.charset` system property before the call to `ShapefileReader.readToGeometryRDD`.
+via `sedona.global.charset` system property before the call to `ShapefileReader.readToGeometryRDD`.
 
 Example:
 
 ```Scala
-System.setProperty("geospark.global.charset", "utf8")
+System.setProperty("sedona.global.charset", "utf8")
 ```
 
 #### From SparkSQL DataFrame
 
-To create a generic SpatialRDD from CSV, TSV, WKT, WKB and GeoJSON input formats, you can use GeoSparkSQL. Make sure you include ==the full dependencies== of GeoSpark. Read [GeoSparkSQL API](../api/sql/GeoSparkSQL-Overview).
+To create a generic SpatialRDD from CSV, TSV, WKT, WKB and GeoJSON input formats, you can use SedonaSQL. Make sure you include ==the full dependencies== of Sedona. Read [SedonaSQL API](../api/sql/GeoSparkSQL-Overview).
 
 We use [checkin.csv CSV file](#pointrdd-from-csvtsv) as the example. You can create a generic SpatialRDD using the following steps:
 
-1. Load data in GeoSparkSQL.
+1. Load data in SedonaSQL.
 ```Scala
 var df = sparkSession.read.format("csv").option("header", "false").load(csvPointInputLocation)
 df.createOrReplaceTempView("inputtable")
 ```
-2. Create a Geometry type column in GeoSparkSQL
+2. Create a Geometry type column in SedonaSQL
 ```Scala
 var spatialDf = sparkSession.sql(
 	"""
@@ -192,31 +192,32 @@ var spatialDf = sparkSession.sql(
    		|FROM inputtable
    	""".stripMargin)
 ```
-3. Use GeoSparkSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD
+3. Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD
 ```Scala
-var spatialRDD = new SpatialRDD[Geometry]
-spatialRDD.rawSpatialRDD = Adapter.toRdd(spatialDf)
+var spatialRDD = Adapter.toRdd(spatialDf, "checkin")
 ```
 
 For WKT/WKB/GeoJSON data, please use ==ST_GeomFromWKT / ST_GeomFromWKB / ST_GeomFromGeoJSON== instead.
 	
 ## Transform the Coordinate Reference System
 
-GeoSpark doesn't control the coordinate unit (degree-based or meter-based) of all geometries in an SpatialRDD. The unit of all related distances in GeoSpark is same as the unit of all geometries in an SpatialRDD.
+Sedona doesn't control the coordinate unit (degree-based or meter-based) of all geometries in an SpatialRDD. The unit of all related distances in Sedona is same as the unit of all geometries in an SpatialRDD.
 
 To convert Coordinate Reference System of an SpatialRDD, use the following code:
 
 ```Scala
 val sourceCrsCode = "epsg:4326" // WGS84, the most common degree-based CRS
 val targetCrsCode = "epsg:3857" // The most common meter-based CRS
-objectRDD.CRSTransform(sourceCrsCode, targetCrsCode)
+objectRDD.CRSTransform(sourceCrsCode, targetCrsCode, false)
 ```
+
+`false` in CRSTransform(sourceCrsCode, targetCrsCode, false) means that it will not tolerate Datum shift. If you want it to be lenient, use `true` instead.
 
 !!!warning
 	CRS transformation should be done right after creating each SpatialRDD, otherwise it will lead to wrong query results. For instace, use something like this:
 	```Scala
 	var objectRDD = new PointRDD(sc, pointRDDInputLocation, pointRDDOffset, pointRDDSplitter, carryOtherAttributes)
-	objectRDD.CRSTransform("epsg:4326", "epsg:3857")
+	objectRDD.CRSTransform("epsg:4326", "epsg:3857", false)
 	```
 
 The details CRS information can be found on [EPSG.io](https://epsg.io/.)
@@ -258,7 +259,7 @@ var queryResult = RangeQuery.SpatialRangeQuery(spatialRDD, rangeQueryWindow, con
 
 ### Range query window
 
-Besides the rectangle (Envelope) type range query window, GeoSpark range query window can be Point/Polygon/LineString.
+Besides the rectangle (Envelope) type range query window, Sedona range query window can be Point/Polygon/LineString.
 
 The code to create a point is as follows:
 
@@ -294,7 +295,7 @@ val linestringObject = geometryFactory.createLineString(coordinates)
 
 ### Use spatial indexes
 
-GeoSpark provides two types of spatial indexes, Quad-Tree and R-Tree. Once you specify an index type, GeoSpark will build a local tree index on each of the SpatialRDD partition.
+Sedona provides two types of spatial indexes, Quad-Tree and R-Tree. Once you specify an index type, Sedona will build a local tree index on each of the SpatialRDD partition.
 
 To utilize a spatial index in a spatial range query, use the following code:
 
@@ -341,7 +342,7 @@ val result = KNNQuery.SpatialKnnQuery(objectRDD, pointObject, K, usingIndex)
 
 ### Query center geometry
 
-Besides the Point type, GeoSpark KNN query center can be Polygon and LineString.
+Besides the Point type, Sedona KNN query center can be Polygon and LineString.
 
 To learn how to create Polygon and LineString object, see [Range query window](#range-query-window).
 
@@ -401,7 +402,7 @@ val result = JoinQuery.SpatialJoinQuery(objectRDD, queryWindowRDD, usingIndex, c
 
 ### Use spatial partitioning
 
-GeoSpark spatial partitioning method can significantly speed up the join query. Three spatial partitioning methods are available: KDB-Tree, Quad-Tree and R-Tree. Two SpatialRDD must be partitioned by the same way.
+Sedona spatial partitioning method can significantly speed up the join query. Three spatial partitioning methods are available: KDB-Tree, Quad-Tree and R-Tree. Two SpatialRDD must be partitioned by the same way.
 
 If you first partition SpatialRDD A, then you must use the partitioner of A to partition B.
 

@@ -32,6 +32,9 @@ userData is string representation of other attributes separated by "\t"
 GeoData has one method to get user data.
 <li> getUserData() -> str </li>
 
+!!!note
+	This tutorial is based on [Sedona Core Jupyter Notebook example](https://github.com/apache/incubator-sedona/blob/master/python/ApacheSedonaCore.ipynb)
+
 ## Installation
 
 Please read [Quick start](/download/overview/#install-sedona-python) to install Sedona Python.

@@ -13,6 +13,9 @@ All these operators can be directly called through:
 spark.sql("YOUR_SQL")
 ```
 
+!!!note
+	This tutorial is based on [Sedona SQL Jupyter Notebook example](https://github.com/apache/incubator-sedona/blob/master/python/ApacheSedonaSQL.ipynb)
+	
 ## Installation
 
 Please read [Quick start](/download/overview/#install-sedona-python) to install Sedona Python.
@@ -31,10 +34,13 @@ SedonaRegistrator.registerAll(spark)
 Use KryoSerializer.getName and SedonaKryoRegistrator.getName class properties to reduce memory impact.
 
 ```python
-
-.config("spark.serializer", KryoSerializer.getName)
-.config("spark.kryo.registrator", SedonaKryoRegistrator.getName)
-
+spark = SparkSession.\
+    builder.\
+    master("local[*]").\
+    appName("Sedona App").\
+    config("spark.serializer", KryoSerializer.getName).\
+    config("spark.kryo.registrator", SedonaKryoRegistrator.getName) .\
+    getOrCreate()
 ```
 
 To turn on SedonaSQL function inside pyspark code use SedonaRegistrator.registerAll method on existing pyspark.sql.SparkSession instance ex.

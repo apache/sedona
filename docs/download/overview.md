@@ -30,13 +30,13 @@ Sedona automatically staged JARs (per each Master branch commit) are hosted by [
 
 Sedona release notes are here [Release notes](../GeoSpark-All-Modules-Release-notes).
 
-## Install Sedona Scala/Java
+## Use Sedona Scala/Java
 
 Before starting the Sedona journey, you need to make sure your Apache Spark cluster is ready.
 
 There are two ways to use a Scala or Java library with Apache Spark. You can user either one to run Sedona.
 
-* Spark interactive Scala shell: easy to start, good for new learners to try simple functions
+* [Spark interactive Scala shell](../scalashell): easy to start, good for new learners to try simple functions
 * [Self-contained Scala / Java project](../project): a steep learning curve of package management, but good for large projects
 
 ## Install Sedona Python
@@ -56,6 +56,7 @@ pip install sedona
 ```
 
 * Installing from source
+
 Clone Sedona GitHub source code and run the following command
 
 ```bash
@@ -70,10 +71,6 @@ Sedona Python needs one additional jar file call `sedona-python-adapter-3.0_2.12
 You can get it using the following methods:
 
 * Compile from the source within main project directory and copy it (in `target` folder) to SPARK_HOME/jars/ folder ([more details](/download/compile/#compile-scala-and-java-source-code))
-```bash
-cd python-adapter
-mvn clean install -DskipTests
-```
 
 * Download from [GitHub release](https://github.com/apache/incubator-sedona/releases) and copy it to SPARK_HOME/jars/ folder
 * Call the [Maven Central coordinate](../GeoSpark-All-Modules-Maven-Central-Coordinates) in your python program. For example, in PySparkSQL
@@ -81,6 +78,8 @@ mvn clean install -DskipTests
     spark = SparkSession.\
         builder.\
         appName('appName').\
+        config("spark.serializer", KryoSerializer.getName).\
+        config("spark.kryo.registrator", SedonaKryoRegistrator.getName) .\
         config('spark.jars.packages', 'org.apache.sedona:sedona-python-adapter-3.0_2.12:1.0.0-incubator').\
         getOrCreate()
 ```
