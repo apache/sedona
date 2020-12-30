@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.apache.sedona</groupId>
         <artifactId>sedona-parent</artifactId>
-        <version>1.0.0-incubator</version>
+        <version>1.0.0-incubator-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 	<artifactId>sedona-sql-${spark.compat.version}_${scala.compat.version}</artifactId>
@@ -32,10 +32,14 @@
     <url>http://sedona.apache.org/</url>
 	<packaging>jar</packaging>
 
+    <properties>
+        <maven.deploy.skip>false</maven.deploy.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.sedona</groupId>
-            <artifactId>sedona-core_${scala.compat.version}</artifactId>
+            <artifactId>sedona-core-${spark.compat.version}_${scala.compat.version}</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

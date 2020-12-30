@@ -12,12 +12,12 @@ Spark distribution provides an interactive Scala shell that allows a user to exe
 
 * Local mode: test Sedona without setting up a cluster
 ```
-./bin/spark-shell --packages org.apache.sedona:sedona-core_2.12:1.0.0-incubator,org.apache.sedona:sedona-sql-3.0_2.12:1.0.0-incubator,org.apache.sedona:sedona-viz-3.0_2.12:1.0.0-incubator
+./bin/spark-shell --packages org.apache.sedona:sedona-core-3.0_2.12:1.0.0-incubator,org.apache.sedona:sedona-sql-3.0_2.12:1.0.0-incubator,org.apache.sedona:sedona-viz-3.0_2.12:1.0.0-incubator
 ```
   
 * Cluster mode: you need to specify Spark Master IP
 ```
-./bin/spark-shell --master spark://localhost:7077 --packages org.apache.sedona:sedona-core_2.12:1.0.0-incubator,org.apache.sedona:sedona-sql-3.0_2.12:1.0.0-incubator,org.apache.sedona:sedona-viz-3.0_2.12:1.0.0-incubator
+./bin/spark-shell --master spark://localhost:7077 --packages org.apache.sedona:sedona-core-3.0_2.12:1.0.0-incubator,org.apache.sedona:sedona-sql-3.0_2.12:1.0.0-incubator,org.apache.sedona:sedona-viz-3.0_2.12:1.0.0-incubator
 ```
   
 ## Download Sedona jar manually
@@ -33,10 +33,10 @@ Spark distribution provides an interactive Scala shell that allows a user to exe
  
 * Local mode: test Sedona without setting up a cluster
 ```
-./bin/spark-shell --jars sedona-core_2.12-1.0.0-incubator.jar,sedona-sql-3.0_2.12-1.0.0-incubator.jar,sedona-viz-3.0_2.12-1.0.0-incubator.jar
+./bin/spark-shell --jars sedona-core-3.0_2.12-1.0.0-incubator.jar,sedona-sql-3.0_2.12-1.0.0-incubator.jar,sedona-viz-3.0_2.12-1.0.0-incubator.jar
 ```
   
 * Cluster mode: you need to specify Spark Master IP  
 ```
-./bin/spark-shell --master spark://localhost:7077 --jars sedona-core_2.12-1.0.0-incubator.jar,sedona-sql-3.0_2.12-1.0.0-incubator.jar,sedona-viz-3.0_2.12-1.0.0-incubator.jar
+./bin/spark-shell --master spark://localhost:7077 --jars sedona-core-3.0_2.12-1.0.0-incubator.jar,sedona-sql-3.0_2.12-1.0.0-incubator.jar,sedona-viz-3.0_2.12-1.0.0-incubator.jar
 ```
