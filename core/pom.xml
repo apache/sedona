@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.apache.sedona</groupId>
         <artifactId>sedona-parent</artifactId>
-        <version>1.0.0-incubator-SNAPSHOT</version>
+        <version>1.0.0-incubator</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>sedona-core-${spark.compat.version}_${scala.compat.version}</artifactId>
