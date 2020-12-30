@@ -11,7 +11,7 @@ Scala and Java API only
 ```xml
 <dependency>
   <groupId>org.apache.sedona</groupId>
-  <artifactId>sedona-core_2.12</artifactId>
+  <artifactId>sedona-core-3.0_2.12</artifactId>
   <version>1.0.0-incubator</version>
 </dependency>
 <dependency>
@@ -41,7 +41,7 @@ Scala and Java API only
 ```xml
 <dependency>
   <groupId>org.apache.sedona</groupId>
-  <artifactId>sedona-core_2.11</artifactId>
+  <artifactId>sedona-core-3.0_2.11</artifactId>
   <version>1.0.0-incubator</version>
 </dependency>
 <dependency>
@@ -71,7 +71,7 @@ Scala and Java API only
 ```xml
 <dependency>
   <groupId>org.apache.sedona</groupId>
-  <artifactId>sedona-core_2.12</artifactId>
+  <artifactId>sedona-core-3.0_2.12</artifactId>
   <version>1.0.0-incubator</version>
 </dependency>
 <dependency>
