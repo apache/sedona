@@ -1,20 +1,20 @@
-The page outlines the steps to manage spatial data using GeoSparkSQL. ==The example code is written in Scala but also works for Java==.
+The page outlines the steps to manage spatial data using SedonaSQL. ==The example code is written in Scala but also works for Java==.
 
-GeoSparkSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows. All these operators can be directly called through:
+SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows. All these operators can be directly called through:
 ```Scala
 var myDataFrame = sparkSession.sql("YOUR_SQL")
 ```
 
-Detailed GeoSparkSQL APIs are available here: [GeoSparkSQL API](../api/sql/GeoSparkSQL-Overview.md)
+Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/GeoSparkSQL-Overview.md)
 
 ## Set up dependencies
 
-1. Read [GeoSpark Maven Central coordinates](../download/GeoSpark-All-Modules-Maven-Central-Coordinates.md)
-2. Select ==the minimum dependencies==: Add [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), [GeoSpark core](../download/GeoSpark-All-Modules-Maven-Central-Coordinates.md#geospark-core), [GeoSparkSQL](../download/GeoSpark-All-Modules-Maven-Central-Coordinates.md#geospark-sql)
+1. Read [Sedona Maven Central coordinates](../download/GeoSpark-All-Modules-Maven-Central-Coordinates.md)
+2. Select ==the minimum dependencies==: Add [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core and Sedona-SQL
 3. Add the dependencies in build.sbt or pom.xml.
 
 !!!note
-	To enjoy the full functions of GeoSpark, we suggest you include ==the full dependencies==: [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), [GeoSpark core](../download/GeoSpark-All-Modules-Maven-Central-Coordinates.md#geospark-core), [GeoSparkSQL](../download/GeoSpark-All-Modules-Maven-Central-Coordinates.md#geospark-sql), [GeoSparkViz](../download/GeoSpark-All-Modules-Maven-Central-Coordinates.md#geospark-viz)
+	To enjoy the full functions of Sedona, we suggest you include ==the full dependencies==: [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core, Sedona-SQL, Sedona-Viz. Please see [SQL example project](https://github.com/apache/incubator-sedona/tree/master/examples/sql)
 
 
 ## Initiate SparkSession
@@ -23,30 +23,30 @@ Use the following code to initiate your SparkSession at the beginning:
 var sparkSession = SparkSession.builder()
 .master("local[*]") // Delete this if run in cluster mode
 .appName("readTestScala") // Change this to a proper name
-// Enable GeoSpark custom Kryo serializer
-.config("spark.serializer", classOf[KryoSerializer].getName)
-.config("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName)
-.getOrCreate()
+// Enable Sedona custom Kryo serializer
+.config("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
+.config("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName)
+.getOrCreate() // org.apache.sedona.core.serde.SedonaKryoRegistrator
 ```
 
 !!!warning
-	GeoSpark has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption.
+	Sedona has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption.
 
-If you add ==the GeoSpark full dependencies== as suggested above, please use the following two lines to enable GeoSpark Kryo serializer instead:
+If you add ==the Sedona full dependencies== as suggested above, please use the following two lines to enable Sedona Kryo serializer instead:
 ```Scala
-.config("spark.serializer", classOf[KryoSerializer].getName)
-.config("spark.kryo.registrator", classOf[GeoSparkVizKryoRegistrator].getName)
+.config("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
+.config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
 ```
 
-## Register GeoSparkSQL
+## Register SedonaSQL
 
 Add the following line after your SparkSession declaration
 
 ```Scala
-GeoSparkSQLRegistrator.registerAll(sparkSession)
+SedonaSQLRegistrator.registerAll(sparkSession)
 ```
 
-This function will register GeoSpark User Defined Type, User Defined Function and optimized join query strategy.
+This function will register Sedona User Defined Type, User Defined Function and optimized join query strategy.
 
 ## Load data from files
 
@@ -81,7 +81,7 @@ The output will be like this:
 
 ## Create a Geometry type column
 
-All geometrical operations in GeoSparkSQL are on Geometry type objects. Therefore, before any kind of queries, you need to create a Geometry type column on a DataFrame.
+All geometrical operations in SedonaSQL are on Geometry type objects. Therefore, before any kind of queries, you need to create a Geometry type column on a DataFrame.
 
 
 ```Scala
@@ -128,16 +128,16 @@ root
 ```
 
 !!!note
-	GeoSparkSQL provides more than 10 different functions to create a Geometry column, please read [GeoSparkSQL constructor API](../api/sql/GeoSparkSQL-Constructor.md).
+	SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL constructor API](../api/sql/GeoSparkSQL-Constructor.md).
 	
 ## Load Shapefile and GeoJSON
 
-Shapefile and GeoJSON must be loaded by SpatialRDD and converted to DataFrame using Adapter. Please read [Load SpatialRDD](rdd/#create-a-generic-spatialrdd-behavoir-changed-in-v120) and [DataFrame <-> RDD](sql/#convert-between-dataframe-and-spatialrdd).
+Shapefile and GeoJSON must be loaded by SpatialRDD and converted to DataFrame using Adapter. Please read [Load SpatialRDD](rdd/#create-a-generic-spatialrdd) and [DataFrame <-> RDD](sql/#convert-between-dataframe-and-spatialrdd).
 
 
 ## Transform the Coordinate Reference System
 
-GeoSpark doesn't control the coordinate unit (degree-based or meter-based) of all geometries in a Geometry column. The unit of all related distances in GeoSparkSQL is same as the unit of all geometries in a Geometry column.
+Sedona doesn't control the coordinate unit (degree-based or meter-based) of all geometries in a Geometry column. The unit of all related distances in SedonaSQL is same as the unit of all geometries in a Geometry column.
 
 To convert Coordinate Reference System of the Geometry column created before, use the following code:
 
@@ -193,7 +193,7 @@ spatialDf.show()
 ```
 
 !!!note
-	Read [GeoSparkSQL constructor API](../api/sql/GeoSparkSQL-Constructor.md) to learn how to create a Geometry type query window
+	Read [SedonaSQL constructor API](../api/sql/GeoSparkSQL-Constructor.md) to learn how to create a Geometry type query window
 ### KNN query
 
 Use ==ST_Distance== to calculate the distance and rank the distance.
@@ -218,7 +218,7 @@ The details of a join query is available here [Join query](../api/sql/GeoSparkSQ
 
 ### Other queries
 
-There are lots of other functions can be combined with these queries. Please read [GeoSparkSQL functions](../api/sql/GeoSparkSQL-Function.md) and [GeoSparkSQL aggregate functions](../api/sql/GeoSparkSQL-AggregateFunction.md).
+There are lots of other functions can be combined with these queries. Please read [SedonaSQL functions](../api/sql/GeoSparkSQL-Function.md) and [SedonaSQL aggregate functions](../api/sql/GeoSparkSQL-AggregateFunction.md).
 
 ## Save to permanent storage
 
@@ -227,50 +227,36 @@ To save a Spatial DataFrame to some permanent storage such as Hive tables and HD
 
 Use the following code to convert the Geometry column in a DataFrame back to a WKT string column:
 ```Scala
-sparkSession.udf.register("ST_SaveAsWKT", (geometry: Geometry) => (geometry.toText))
 var stringDf = sparkSession.sql(
   """
-    |SELECT ST_SaveAsWKT(countyshape)
+    |SELECT ST_AsText(countyshape)
     |FROM polygondf
   """.stripMargin)
 ```
 
 !!!note
-	We are working on providing more user-friendly output functions such as ==ST_SaveAsWKT== and ==ST_SaveAsWKB==. Stay tuned!
-
-To load the DataFrame back, you first use the regular method to load the saved string DataFrame from the permanent storage and use ==ST_GeomFromWKT== to re-build the Geometry type column.
+	ST_AsGeoJSON is also available. We would like to invite you to contribute more functions
 
 
 ## Convert between DataFrame and SpatialRDD
 
 ### DataFrame to SpatialRDD
 
-Use GeoSparkSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD
+Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read [Adapter Scaladoc](/api/javadoc/sql/org/apache/sedona/sql/utils/index.html)
 
-**GeoSpark 1.2.0+**
 ```Scala
 var spatialRDD = Adapter.toSpatialRdd(spatialDf, "usacounty")
 ```
 
 "usacounty" is the name of the geometry column
 
-**Before GeoSpark 1.2.0**
-```Scala
-var spatialRDD = new SpatialRDD[Geometry]
-spatialRDD.rawSpatialRDD = Adapter.toRdd(spatialDf)
-```
-
-Geometry must be the first column in the DataFrame
-
 !!!warning
 	Only one Geometry type column is allowed per DataFrame.
-
-!!!note
-	Before GeoSpark 1.2.0, other non-spatial columns need be brought to SpatialRDD using the UUIDs. Please read [GeoSparkSQL constructor API](../api/sql/GeoSparkSQL-Constructor.md). In GeoSpark 1.2.0+, all other non-spatial columns are automatically kept in SpatialRDD.
 	
 ### SpatialRDD to DataFrame
 
-Use GeoSparkSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD
+Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read [Adapter Scaladoc](/api/javadoc/sql/org/apache/sedona/sql/utils/index.html)
+
 ```Scala
 var spatialDf = Adapter.toDf(spatialRDD, sparkSession)
 ```
@@ -279,7 +265,7 @@ All other attributes such as price and age will be also brought to the DataFrame
 
 ### SpatialPairRDD to DataFrame
 
-PairRDD is the result of a spatial join query or distance join query. GeoSparkSQL DataFrame-RDD Adapter can convert the result to a DataFrame:
+PairRDD is the result of a spatial join query or distance join query. SedonaSQL DataFrame-RDD Adapter can convert the result to a DataFrame:
 
 ```Scala
 var joinResultDf = Adapter.toDf(joinResultPairRDD, sparkSession)

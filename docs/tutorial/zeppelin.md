@@ -1,11 +1,11 @@
-Starting from 1.2.0, GeoSpark provides a Helium visualization plugin tailored for [Apache Zeppelin](). This finally bridges the gap between GeoSpark and Zeppelin.  Please read [Install GeoSpark-Zeppelin](../download/zeppelin/) to learn how to install this plugin in Zeppelin.
+Sedona provides a Helium visualization plugin tailored for [Apache Zeppelin](). This finally bridges the gap between Sedona and Zeppelin.  Please read [Install Sedona-Zeppelin](../download/zeppelin/) to learn how to install this plugin in Zeppelin.
 
-GeoSpark-Zeppelin equips two approaches to visualize spatial data in Zeppelin. The first approach uses Zeppelin to plot all spatial objects on the map. The second one leverages GeoSparkViz to generate map images and overlay them on maps.
+Sedona-Zeppelin equips two approaches to visualize spatial data in Zeppelin. The first approach uses Zeppelin to plot all spatial objects on the map. The second one leverages SedonaViz to generate map images and overlay them on maps.
 
-## Small-scale without GeoSparkViz
+## Small-scale without SedonaViz
 
 !!! danger
-	Zeppelin is just a front-end visualization framework. This approach is not scalable and will fail at large-scale geospatial data. Please scroll down to read GeoSparkViz solution.
+	Zeppelin is just a front-end visualization framework. This approach is not scalable and will fail at large-scale geospatial data. Please scroll down to read SedonaViz solution.
 
 You can use Apache Zeppelin to plot a small number of spatial objects, such as 1000 points. Assume you already have a Spatial DataFrame, you need to convert the geometry column to WKT string column use the following command in your Zeppelin Spark notebook Scala paragraph:
 
@@ -29,13 +29,13 @@ Select the geometry column to visualize:
 
 ![](../image/sql-zeppelin.gif)
 
-## Large-scale with GeoSparkViz
+## Large-scale with SedonaViz
 
-GeoSparkViz is a distributed visualization system that allows you to visualize big spatial data at scale. Please read [How to use GeoSparkViz](viz).
+SedonaViz is a distributed visualization system that allows you to visualize big spatial data at scale. Please read [How to use SedonaViz](viz).
 
-You can use GeoSpark-Zeppelin to ask Zeppelin to overlay GeoSparkViz images on a map background. This way, you can easily visualize 1 billion spatial objects or more (depends on your cluster size).
+You can use Sedona-Zeppelin to ask Zeppelin to overlay SedonaViz images on a map background. This way, you can easily visualize 1 billion spatial objects or more (depends on your cluster size).
 
-First, encode images of GeoSparkViz DataFrame in Zeppelin Spark notebook Scala paragraph,
+First, encode images of SedonaViz DataFrame in Zeppelin Spark notebook Scala paragraph,
 
 ```
 spark.sql(
@@ -59,6 +59,6 @@ Select the image and its geospatial boundary:
 
 ## Zeppelin Spark notebook demo
 
-We provide a full Zeppelin Spark notebook which demonstrates al functions. Please download [GeoSpark-Zeppelin notebook template](../image/geospark-zeppelin-demo.json) and [test data - arealm.csv](../image/arealm.csv).
+We provide a full Zeppelin Spark notebook which demonstrates al functions. Please download [Sedona-Zeppelin notebook template](../image/geospark-zeppelin-demo.json) and [test data - arealm.csv](../image/arealm.csv).
 
 You need to use Zeppelin to import this notebook JSON file and modify the input data path in the notebook.

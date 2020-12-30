@@ -10,9 +10,9 @@ Please make a Pull Request to add yourself!
 
 | Name  |  API |  Spark compatibility|Introduction|
 |---|---|---|---|
-|Core  | RDD  | Spark 3.X/2.X/1.X  |SpatialRDDs and Query Operators. |
-|SQL  | SQL/DataFrame  | SparkSQL 3.X/2.1+ |SQL interfaces for Sedona core.|
-|Viz |  RDD, SQL/DataFrame | RDD - Spark 3.X/2.X/1.X, SQL - Spark 3.X/2.1+|Visualization for Spatial RDD and DataFrame.|
+|Core  | RDD  | Spark 3.X/2.X |SpatialRDDs and Query Operators. |
+|SQL  | SQL/DataFrame  | SparkSQL 3.X/2.3+ |SQL interfaces for Sedona core.|
+|Viz |  RDD, SQL/DataFrame | RDD - Spark 3.X/2.X, SQL - Spark 3.X/2.3+|Visualization for Spatial RDD and DataFrame.|
 |Zeppelin |  Apache Zeppelin | Spark 2.1+, Zeppelin 0.8.1+| Plugin for Apache Zeppelin|
 
 ## Features
@@ -41,16 +41,15 @@ AND city.name = 'Gotham';
 |   Java   |        RDD, SQL, Viz       |[RDD](../../tutorial/rdd), [SQL](../../tutorial/sql), [Viz](../../tutorial/viz)|
 |    SQL   |          SQL, Viz, Zeppelin          |[SQL](../../tutorial/sql), [Viz](../../tutorial/viz), [Zeppelin](../../tutorial/zeppelin)|
 |  Python  |             RDD, SQL            |[RDD](../../tutorial/geospark-core-python), [SQL](../../tutorial/geospark-sql-python)|
-|     R    |             SQL            ||
 
-## Sedona Visualization Extension (GeoSparkViz)
-GeoSparkViz is a large-scale in-memory geospatial visualization system.
+## Sedona Visualization Extension (SedonaViz)
+SedonaViz is a large-scale in-memory geospatial visualization system.
 
-GeoSparkViz provides native support for general cartographic design by extending GeoSpark to process large-scale spatial data. It can visulize Spatial RDD and Spatial Queries and render super high resolution image in parallel.
+SedonaViz provides native support for general cartographic design by extending Sedona to process large-scale spatial data. It can visulize Spatial RDD and Spatial Queries and render super high resolution image in parallel.
 
 More details are available here: [Visualize Spatial DataFrame/RDD](../../tutorial/viz)
 
-**GeoSparkViz Gallery**
+**SedonaViz Gallery**
 
 
 <img style="float: left;" src="http://www.public.asu.edu/~jiayu2/geospark/picture/usrail.png" width="250">

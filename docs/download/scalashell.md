@@ -1,47 +1,42 @@
 # Spark Scala shell
 Spark distribution provides an interactive Scala shell that allows a user to execute Scala code in a terminal.
 
-This mode currently works with GeoSpark-core and GeoSparkViz.
-
-## Download GeoSpark jar automatically
+## Download Sedona jar automatically
 
 1. Have your Spark cluster ready.
 
-2. Run Spark shell with `--packages` option. This command will automatically download GeoSpark jars from Maven Central.
+2. Run Spark shell with `--packages` option. This command will automatically download Sedona jars from Maven Central.
 ```
-./bin/spark-shell --packages org.datasyslab:geospark:GEOSPARK_VERSION
+./bin/spark-shell --packages MavenCoordiantes
 ```
 
-* Local mode: test GeoSpark without setting up a cluster
+* Local mode: test Sedona without setting up a cluster
 ```
-./bin/spark-shell --packages org.datasyslab:geospark:1.2.0,org.datasyslab:geospark-sql_2.3:1.2.0,org.datasyslab:geospark-viz_2.3:1.2.0
+./bin/spark-shell --packages org.apache.sedona:sedona-core_2.12:1.0.0-incubator,org.apache.sedona:sedona-sql-3.0_2.12:1.0.0-incubator,org.apache.sedona:sedona-viz-3.0_2.12:1.0.0-incubator
 ```
   
 * Cluster mode: you need to specify Spark Master IP
 ```
-./bin/spark-shell --master spark://localhost:7077 --packages org.datasyslab:geospark:1.2.0,org.datasyslab:geospark-sql_2.3:1.2.0,org.datasyslab:geospark-viz_2.3:1.2.0
+./bin/spark-shell --master spark://localhost:7077 --packages org.apache.sedona:sedona-core_2.12:1.0.0-incubator,org.apache.sedona:sedona-sql-3.0_2.12:1.0.0-incubator,org.apache.sedona:sedona-viz-3.0_2.12:1.0.0-incubator
 ```
   
-## Download GeoSpark jar manually
+## Download Sedona jar manually
 1. Have your Spark cluster ready.
 
-2. Download GeoSpark jars:
-	* Download the pre-compiled jars from [GeoSpark Releases on GitHub](https://github.com/DataSystemsLab/GeoSpark/releases)
-	* Download / Git clone GeoSpark source code and compile the code by yourself:
-```
-mvn clean install -DskipTests
-```
+2. Download Sedona jars:
+	* Download the pre-compiled jars from [Sedona Releases on GitHub](https://github.com/apache/incubator-sedona/releases)
+	* Download / Git clone Sedona source code and compile the code by yourself (see [Compile Sedona](/download/compile))
 3. Run Spark shell with `--jars` option.
 ```
-./bin/spark-shell --jars /Path/To/GeoSparkJars.jar
+./bin/spark-shell --jars /Path/To/SedonaJars.jar
 ```
  
-* Local mode: test GeoSpark without setting up a cluster
+* Local mode: test Sedona without setting up a cluster
 ```
-./bin/spark-shell --jars geospark-1.0.1.jar,geospark-viz-1.0.1.jar
+./bin/spark-shell --jars sedona-core_2.12-1.0.0-incubator.jar,sedona-sql-3.0_2.12-1.0.0-incubator.jar,sedona-viz-3.0_2.12-1.0.0-incubator.jar
 ```
   
 * Cluster mode: you need to specify Spark Master IP  
 ```
-./bin/spark-shell --master spark://localhost:7077 --jars geospark-1.0.1.jar,geospark-viz-1.0.1.jar
+./bin/spark-shell --master spark://localhost:7077 --jars sedona-core_2.12-1.0.0-incubator.jar,sedona-sql-3.0_2.12-1.0.0-incubator.jar,sedona-viz-3.0_2.12-1.0.0-incubator.jar
 ```
