@@ -204,9 +204,7 @@ Besides the rectangle (Envelope) type range query window, Apache Sedona range qu
 <li> LineString </li>
 </br>
 
-The code to create a point is as follows:
-To create shapely geometries please follow official shapely <a href=""> documentation </a>  
-
+To create shapely geometries please follow [Shapely official docs](https://shapely.readthedocs.io/en/stable/manual.html)
 
 
 ### Use spatial indexes
@@ -300,8 +298,7 @@ Besides the Point type, Apache Sedona KNN query center can be
 <li> Polygon </li>
 <li> LineString </li>
 
-To create Polygon or Linestring object please follow Shapely official <a href="https://shapely.readthedocs.io/en/stable/manual.html"> documentation </a>
-
+To create Polygon or Linestring object please follow [Shapely official docs](https://shapely.readthedocs.io/en/stable/manual.html)
 ### Use spatial indexes
 
 To utilize a spatial index in a spatial KNN query, use the following code:

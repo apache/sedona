@@ -132,7 +132,7 @@ root
 	
 ## Load Shapefile and GeoJSON
 
-Shapefile and GeoJSON must be loaded by SpatialRDD and converted to DataFrame using Adapter. Please read [Load SpatialRDD](rdd/#create-a-generic-spatialrdd) and [DataFrame <-> RDD](sql/#convert-between-dataframe-and-spatialrdd).
+Shapefile and GeoJSON must be loaded by SpatialRDD and converted to DataFrame using Adapter. Please read [Load SpatialRDD](../rdd/#create-a-generic-spatialrdd) and [DataFrame <-> RDD](#convert-between-dataframe-and-spatialrdd).
 
 
 ## Transform the Coordinate Reference System
@@ -261,7 +261,7 @@ Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Ple
 var spatialDf = Adapter.toDf(spatialRDD, sparkSession)
 ```
 
-All other attributes such as price and age will be also brought to the DataFrame as long as you specify ==carryOtherAttributes== (see [Read other attributes in an SpatialRDD](./rdd#read-other-attributes-in-an-spatialrdd)).
+All other attributes such as price and age will be also brought to the DataFrame as long as you specify ==carryOtherAttributes== (see [Read other attributes in an SpatialRDD](../rdd#read-other-attributes-in-an-spatialrdd)).
 
 ### SpatialPairRDD to DataFrame
 
@@ -271,4 +271,4 @@ PairRDD is the result of a spatial join query or distance join query. SedonaSQL 
 var joinResultDf = Adapter.toDf(joinResultPairRDD, sparkSession)
 ```
 
-All other attributes such as price and age will be also brought to the DataFrame as long as you specify ==carryOtherAttributes== (see [Read other attributes in an SpatialRDD](./rdd#read-other-attributes-in-an-spatialrdd)).
+All other attributes such as price and age will be also brought to the DataFrame as long as you specify ==carryOtherAttributes== (see [Read other attributes in an SpatialRDD](../rdd#read-other-attributes-in-an-spatialrdd)).
