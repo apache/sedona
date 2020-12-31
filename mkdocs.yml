@@ -1,4 +1,4 @@
-site_name: Apache Sedona (incubating)
+site_name: Apache Sedona™ (incubating) 
 site_description: Apache Sedona (incubating) is a cluster computing system for processing large-scale spatial data. Sedona extends Apache Spark / SparkSQL with a set of out-of-the-box Spatial Resilient Distributed Datasets / SpatialSQL that efficiently load, process, and analyze large-scale spatial data across machines.
 nav:
     - Home: index.md
@@ -46,7 +46,6 @@ nav:
       - Contributing rule: community/rule.md
       - Committers: community/contributor.md
       - Publications: community/publication.md
-      - License: license/License.md
     - GeoSpark Legacy Docs:
       - Download:
         - Quick start: archive/download/overview.md
@@ -84,7 +83,13 @@ nav:
         - GeoSpark Viz:
           - DataFrame/SQL: archive/api/viz/sql.md
           - RDD: archive/api/viz/Babylon-Scala-and-Java-API.md
-    - Apache Software Foundation: https://www.apache.org/
+    - Apache Software Foundation:
+      - Foundation: asf/asf.md
+      - License: https://www.apache.org/licenses/" target="_blank
+      - Events: https://www.apache.org/events/current-event" target="_blank
+      - Sponsorship: https://www.apache.org/foundation/sponsorship.html" target="_blank
+      - Thanks: https://www.apache.org/foundation/thanks.html" target="_blank
+      - Security: https://www.apache.org/security/" target="_blank
 repo_url: https://github.com/apache/incubator-sedona
 repo_name: apache/incubator-sedona
 theme: 
@@ -111,9 +116,11 @@ extra:
 copyright: Apache Sedona, Apache Incubator, Apache, the Apache feather logo, and the Apache Incubator project logo are trademarks or registered trademarks of The Apache Software Foundation.
 markdown_extensions:
   - admonition
+  - attr_list
   - codehilite
   - toc:
       permalink: true
+      toc_depth: 3
   - pymdownx.arithmatex
   - pymdownx.betterem:
       smart_enable: all

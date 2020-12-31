@@ -2,7 +2,7 @@
 
 Sedona supports Spark 2.4 and 3.0. Sedona Scala/Java/Python also work with Spark 2.3 but we have no plan to officially support it.
 
-Sedona is compiled with Java 1.8 and Scala 2.11/2.12:
+Sedona is compiled and tested on Java 1.8 and Scala 2.11/2.12:
 
 |             | Spark 2.4 | Spark 3.0 |
 |:-----------:| :---------:|:---------:|

@@ -1,19 +1,23 @@
 <img src="./sedona_logo.png" width="400">
 
-[![Build Status](https://travis-ci.org/apache/incubator-sedona.svg?branch=master)](https://travis-ci.org/apache/incubator-sedona)
+[![Scala and Java build](https://github.com/apache/incubator-sedona/workflows/Scala%20and%20Java%20build/badge.svg)](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Scala+and+Java+build%22) [![Python build](https://github.com/apache/incubator-sedona/workflows/Python%20build/badge.svg)](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Python+build%22)
 
-Apache Sedona (incubating) is a cluster computing system for processing large-scale spatial data. Sedona extends Apache Spark / SparkSQL with a set of out-of-the-box Spatial Resilient Distributed Datasets (SRDDs)/ SpatialSQL that efficiently load, process, and analyze large-scale spatial data across machines.
+Apache Sedona™(incubating) is a cluster computing system for processing large-scale spatial data. Sedona extends Apache Spark / SparkSQL with a set of out-of-the-box Spatial Resilient Distributed Datasets (SRDDs)/ SpatialSQL that efficiently load, process, and analyze large-scale spatial data across machines.
 
 ### Sedona contains several modules:
 
-| Name  |  API |  Spark compatibility|Introduction|
-|---|---|---|---|
-|Core  | RDD  | Spark 2.X/1.X  |SpatialRDDs and Query Operators. |
-|SQL  | SQL/DataFrame  | SparkSQL 2.1+ |SQL interfaces for Sedona core.|
-|Viz |  RDD, SQL/DataFrame | RDD - Spark 2.X/1.X, SQL - Spark 2.1+|Visualization for Spatial RDD and DataFrame.|
-|Zeppelin |  Apache Zeppelin | Spark 2.1+, Zeppelin 0.8.1+| Plugin for Apache Zeppelin|
+| Name  |  API |  Introduction|
+|---|---|---|
+|Core  | RDD  | SpatialRDDs and Query Operators. |
+|SQL  | SQL/DataFrame  |SQL interfaces for Sedona core.|
+|Viz |  RDD, SQL/DataFrame | Visualization for Spatial RDD and DataFrame|
+|Zeppelin |  Apache Zeppelin | Plugin for Apache Zeppelin 0.8.1+|
 
 ### Sedona supports several programming languages: Scala, Java, SQL, Python and R.
+
+## Compile the source code
+
+Please refer to [Sedona website](http://sedona.apache.org/download/compile/)
 
 ## Contact
 

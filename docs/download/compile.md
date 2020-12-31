@@ -116,10 +116,16 @@ mkdocs serve
 
 ### Javadoc and Scaladoc
 
-#### Compile 
+#### Compile
+
+You should first compile the entire docs using `mkdocs build` to get the `site` folder.
 
 * Javadoc: Use Intelij IDEA to generate Javadoc for `core` and `viz` module
-* Scaladoc: Run `scaladoc -d docs/api/javadoc/sql/ sql/src/main/scala/org/apache/sedona/sql/utils/*.scala`
+* Scaladoc: Run `scaladoc -d site/api/javadoc/sql/ sql/src/main/scala/org/apache/sedona/sql/utils/*.scala`
+
+#### Copy
+
+Copy the generated Javadoc (Scaladoc should already be there) to the corresponding folders in `site/api/javadoc`
 
 #### Deploy to ASF domain
 
