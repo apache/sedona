@@ -64,12 +64,11 @@ assemblyMergeStrategy in assembly := {
   case path if path.endsWith(".RSA") => MergeStrategy.discard
   case _ => MergeStrategy.first
 }
+resolvers +=
+  "Open Source Geospatial Foundation Repository" at "https://repo.osgeo.org/repository/release/"
 
 resolvers +=
   "Apache Software Foundation Snapshots" at "https://repository.apache.org/content/groups/snapshots"
-
-resolvers +=
-  "Open Source Geospatial Foundation Repository" at "https://repo.osgeo.org/repository/release/"
 
 resolvers +=
   "Java.net repository" at "https://download.java.net/maven/2"
