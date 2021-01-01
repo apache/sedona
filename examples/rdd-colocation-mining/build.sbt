@@ -64,7 +64,7 @@ assemblyMergeStrategy in assembly := {
   case path if path.endsWith(".RSA") => MergeStrategy.discard
   case _ => MergeStrategy.first
 }
-resolvers +=
+resolvers in ThisBuild +=
   "Open Source Geospatial Foundation Repository" at "https://repo.osgeo.org/repository/release/"
 
 resolvers +=
