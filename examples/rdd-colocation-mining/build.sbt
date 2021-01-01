@@ -36,13 +36,13 @@ logLevel := Level.Warn
 logLevel in assembly := Level.Error
 
 libraryDependencies ++= Seq(
+  "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion % dependencyScope,
+  "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion % dependencyScope,
   "org.apache.spark" %% "spark-core" % SparkVersion % dependencyScope exclude("org.apache.hadoop", "*"),
   "org.apache.spark" %% "spark-sql" % SparkVersion % dependencyScope exclude("org.apache.hadoop", "*"),
   "org.apache.hadoop" % "hadoop-mapreduce-client-core" % HadoopVersion % dependencyScope,
   "org.apache.hadoop" % "hadoop-common" % HadoopVersion % dependencyScope,
   "org.apache.hadoop" % "hadoop-hdfs" % HadoopVersion % dependencyScope,
-  "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion % dependencyScope,
-  "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion % dependencyScope,
   "org.apache.sedona" % "sedona-core-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion,
   "org.apache.sedona" % "sedona-sql-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion ,
   "org.apache.sedona" % "sedona-viz-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion,
@@ -52,8 +52,8 @@ libraryDependencies ++= Seq(
   "org.geotools" % "gt-main" % geotoolsVersion % "compile",
   "org.geotools" % "gt-referencing" % geotoolsVersion % "compile",
   "org.geotools" % "gt-epsg-hsql" % geotoolsVersion % "compile",
-  "org.datasyslab" % "sernetcdf" % "0.1.0" % "compile", // Only needed if you read HDF files. Under Apache License 2.0
-  "javax.media" % "jai_core" % "1.1.3" from "https://repo.osgeo.org/repository/release/javax/media/jai_core/1.1.3/jai_core-1.1.3.jar"
+  "javax.media" % "jai_core" % "1.1.3" % "compile" from "https://repo.osgeo.org/repository/release/javax/media/jai_core/1.1.3/jai_core-1.1.3.jar",
+  "org.datasyslab" % "sernetcdf" % "0.1.0" % "compile" // Only needed if you read HDF files. Under Apache License 2.0
 )
 
 assemblyMergeStrategy in assembly := {
@@ -71,9 +71,3 @@ resolvers ++= Seq(
   "Apache Software Foundation Snapshots" at "https://repository.apache.org/content/groups/snapshots",
   "Java.net repository" at "https://download.java.net/maven/2"
 )
-
-//
-//fullResolvers := {
-//  val previous = fullResolvers.value
-//  previous.sortWith { (lhs, rhs) =>  ??? /* You define something here */ }
-//}

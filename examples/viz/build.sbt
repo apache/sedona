@@ -53,23 +53,22 @@ libraryDependencies ++= Seq(
   "org.geotools" % "gt-main" % geotoolsVersion % "compile",
   "org.geotools" % "gt-referencing" % geotoolsVersion % "compile",
   "org.geotools" % "gt-epsg-hsql" % geotoolsVersion % "compile",
+  "javax.media" % "jai_core" % "1.1.3" % "compile" from "https://repo.osgeo.org/repository/release/javax/media/jai_core/1.1.3/jai_core-1.1.3.jar",
   "org.datasyslab" % "sernetcdf" % "0.1.0" % "compile" // Only needed if you read HDF files. Under Apache License 2.0
 )
 
 assemblyMergeStrategy in assembly := {
   case PathList("org.apache.sedona", "sedona-core", xs@_*) => MergeStrategy.first
   case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
+  case "META-INF/services" => MergeStrategy.last
   case path if path.endsWith(".SF") => MergeStrategy.discard
   case path if path.endsWith(".DSA") => MergeStrategy.discard
   case path if path.endsWith(".RSA") => MergeStrategy.discard
   case _ => MergeStrategy.first
 }
 
-resolvers +=
-  "Apache Software Foundation Snapshots" at "https://repository.apache.org/content/groups/snapshots"
-
-resolvers +=
-  "Open Source Geospatial Foundation Repository" at "https://repo.osgeo.org/repository/release/"
-
-resolvers +=
+resolvers ++= Seq(
+  "Open Source Geospatial Foundation Repository" at "https://repo.osgeo.org/repository/release/",
+  "Apache Software Foundation Snapshots" at "https://repository.apache.org/content/groups/snapshots",
   "Java.net repository" at "https://download.java.net/maven/2"
+)
