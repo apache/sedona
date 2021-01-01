@@ -52,7 +52,8 @@ libraryDependencies ++= Seq(
   "org.geotools" % "gt-main" % geotoolsVersion % "compile",
   "org.geotools" % "gt-referencing" % geotoolsVersion % "compile",
   "org.geotools" % "gt-epsg-hsql" % geotoolsVersion % "compile",
-  "org.datasyslab" % "sernetcdf" % "0.1.0" % "compile" // Only needed if you read HDF files. Under Apache License 2.0
+  "org.datasyslab" % "sernetcdf" % "0.1.0" % "compile", // Only needed if you read HDF files. Under Apache License 2.0
+  "javax.media" % "jai_core" % "1.1.3" from "https://repo.osgeo.org/repository/release/javax/media/jai_core/1.1.3/jai_core-1.1.3.jar"
 )
 
 assemblyMergeStrategy in assembly := {
@@ -66,8 +67,13 @@ assemblyMergeStrategy in assembly := {
 }
 
 resolvers ++= Seq(
-  "GeoToolkit" at "https://maven.geotoolkit.org",
   "Open Source Geospatial Foundation Repository" at "https://repo.osgeo.org/repository/release/",
   "Apache Software Foundation Snapshots" at "https://repository.apache.org/content/groups/snapshots",
   "Java.net repository" at "https://download.java.net/maven/2"
 )
+
+//
+//fullResolvers := {
+//  val previous = fullResolvers.value
+//  previous.sortWith { (lhs, rhs) =>  ??? /* You define something here */ }
+//}
