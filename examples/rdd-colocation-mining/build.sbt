@@ -58,6 +58,7 @@ libraryDependencies ++= Seq(
 assemblyMergeStrategy in assembly := {
   case PathList("org.apache.sedona", "sedona-core", xs@_*) => MergeStrategy.first
   case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
+  case "META-INF/services" => MergeStrategy.last
   case path if path.endsWith(".SF") => MergeStrategy.discard
   case path if path.endsWith(".DSA") => MergeStrategy.discard
   case path if path.endsWith(".RSA") => MergeStrategy.discard
