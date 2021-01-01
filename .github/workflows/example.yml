@@ -1,0 +1,27 @@
+name: Example project build
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '*'
+      
+jobs:
+  build:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: olafurpg/setup-scala@v10
+    - name: Cache SBT
+      uses: actions/cache@v2
+      with:
+        path: | 
+          ~/.ivy2/cache
+          ~/.sbt
+        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+    - run: (cd examples/rdd-colocation-mining;sbt clean assembly;java -jar target/scala-2.12/*.jar)
+    - run: (cd examples/sql;sbt clean assembly;java -jar target/scala-2.12/*.jar)
+    - run: (cd examples/viz;sbt clean assembly;java -jar target/scala-2.12/*.jar)
