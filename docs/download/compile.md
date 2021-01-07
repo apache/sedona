@@ -193,7 +193,7 @@ mvn deploy -DskipTests -Dscala=2.12 -Dspark=2.4
 ```bash
 python3 spark-version-converter.py spark3
 ```
-2. Prepare a release. Manually enter the following variables in the terminal: release id: ==1.0.0-incubator==, scm tag id: ==sedona-3.0_2.12-1.0.0-incubator== (this is just an example. Please use the correct version number). You also need to provide GitHub username and password
+2. Prepare a release. Manually enter the following variables in the terminal: release id: ==1.0.0-incubator==, scm tag id: ==sedona-1.0.0-incubator== (this is just an example. Please use the correct version number). You also need to provide GitHub username and password three times.
 ```bash
 mvn clean release:prepare -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests" 
 ```
@@ -202,6 +202,7 @@ mvn clean release:prepare -DautoVersionSubmodules=true -Dresume=false -Dargument
 mvn clean release:perform -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests" 
 ```
 4. Now the releases are staged. A tag and two commits will be created on Sedona GitHub repo.
+5. Delete the scm tag on GitHub and we will only keep the tag created by the last compilation target.
 
 Now let's repeat the process to other Sedona modules.
 
@@ -212,7 +213,7 @@ Now let's repeat the process to other Sedona modules.
 python3 spark-version-converter.py spark2
 ```
 2. Manuallly commit the changes of the three scala files to GitHub
-3. Prepare a release. Note that: release id: ==1.0.0-incubator==, scm tag id: ==sedona-2.4_2.11-1.0.0-incubator== (this is just an example. Please use the correct version number)
+3. Prepare a release. Note that: release id: ==1.0.0-incubator==, scm tag id: ==sedona-1.0.0-incubator== (this is just an example. Please use the correct version number)
 ```bash
 mvn clean release:prepare -DautoVersionSubmodules=true -Dresume=false -DcheckModificationExcludeList=sql/src/main/scala/org/apache/sedona/sql/UDF/UdfRegistrator.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/JoinQueryDetector.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryExec.scala -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
 ```
@@ -220,6 +221,7 @@ mvn clean release:prepare -DautoVersionSubmodules=true -Dresume=false -DcheckMod
 ```bash
 mvn clean release:perform -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
 ```
+5. Delete the scm tag on GitHub and we will only keep the tag created by the last compilation target.
 
 #### For Spark 2.4 and Scala 2.12
 
@@ -230,7 +232,7 @@ Step 1 and 2 are only needed if you didn't run the previous step before
 python3 spark-version-converter.py spark2
 ```
 2. ==Manuallly commit the changes of the three scala files to GitHub==
-3. Prepare a release: release id: ==1.0.0-incubator==, scm tag id: ==sedona-2.4_2.12-1.0.0-incubator==  (this is just an example. Please use the correct version number)
+3. Prepare a release: release id: ==1.0.0-incubator==, scm tag id: ==sedona-1.0.0-incubator== (this is just an example. Please use the correct version number)
 ```bash
 mvn clean release:prepare -DautoVersionSubmodules=true -Dresume=false -DcheckModificationExcludeList=sql/src/main/scala/org/apache/sedona/sql/UDF/UdfRegistrator.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/JoinQueryDetector.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryExec.scala -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
 ```
@@ -240,7 +242,7 @@ mvn clean release:perform -DautoVersionSubmodules=true -Dresume=false -Dargument
 ```
 
 !!!warning
-	After staged the three releases, you need to manually revert the commited three scala files. You will see 6 [maven-release-plugin] commits and 3 more tags in Sedona GitHub repo.
+	After staged the three releases, you need to manually revert the commited three scala files. You will see 6 [maven-release-plugin] commits and 1 more tag in Sedona GitHub repo.
 
 ### Close the staging repo
 1. Check the status of the staging repo: [Locate and Examine Your Staging Repository
