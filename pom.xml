@@ -26,7 +26,7 @@
     </parent>
     <groupId>org.apache.sedona</groupId>
     <artifactId>sedona-parent</artifactId>
-    <version>1.0.1-incubator-SNAPSHOT</version>
+    <version>1.0.0-incubator</version>
     <packaging>pom</packaging>
     <name>sedona-parent</name>
     <url>http://sedona.apache.org/</url>
@@ -503,7 +503,7 @@
             <properties>
                 <scala.version>2.11.8</scala.version>
                 <scala.compat.version>2.11</scala.compat.version>
-                <scaladoc.arg></scaladoc.arg>
+                <scaladoc.arg />
             </properties>
         </profile>
     </profiles>
