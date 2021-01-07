@@ -212,16 +212,15 @@ Now let's repeat the process to other Sedona modules.
 ```bash
 python3 spark-version-converter.py spark2
 ```
-2. Manuallly commit the changes of the three scala files to GitHub
-3. Prepare a release. Note that: release id: ==1.0.0-incubator==, scm tag id: ==sedona-1.0.0-incubator== (this is just an example. Please use the correct version number)
+2. Prepare a release. Note that: release id: ==1.0.0-incubator==, scm tag id: ==sedona-1.0.0-incubator== (this is just an example. Please use the correct version number)
 ```bash
 mvn clean release:prepare -DautoVersionSubmodules=true -Dresume=false -DcheckModificationExcludeList=sql/src/main/scala/org/apache/sedona/sql/UDF/UdfRegistrator.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/JoinQueryDetector.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryExec.scala -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
 ```
-4. Stage a release
+3. Stage a release
 ```bash
 mvn clean release:perform -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
 ```
-5. Delete the scm tag on GitHub and we will only keep the tag created by the last compilation target.
+4. Delete the scm tag on GitHub and we will only keep the tag created by the last compilation target.
 
 #### For Spark 2.4 and Scala 2.12
 
@@ -231,18 +230,17 @@ Step 1 and 2 are only needed if you didn't run the previous step before
 ```bash
 python3 spark-version-converter.py spark2
 ```
-2. ==Manuallly commit the changes of the three scala files to GitHub==
-3. Prepare a release: release id: ==1.0.0-incubator==, scm tag id: ==sedona-1.0.0-incubator== (this is just an example. Please use the correct version number)
+2. Prepare a release: release id: ==1.0.0-incubator==, scm tag id: ==sedona-1.0.0-incubator== (this is just an example. Please use the correct version number)
 ```bash
 mvn clean release:prepare -DautoVersionSubmodules=true -Dresume=false -DcheckModificationExcludeList=sql/src/main/scala/org/apache/sedona/sql/UDF/UdfRegistrator.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/JoinQueryDetector.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryExec.scala -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
 ```
-4. Stage a release
+3. Stage a release
 ```bash
 mvn clean release:perform -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
 ```
 
 !!!warning
-	After staged the three releases, you need to manually revert the commited three scala files. You will see 6 [maven-release-plugin] commits and 1 more tag in Sedona GitHub repo.
+	After staged the three releases, you will see 6 [maven-release-plugin] commits and 1 more tag in Sedona GitHub repo.
 
 ### Close the staging repo
 1. Check the status of the staging repo: [Locate and Examine Your Staging Repository
