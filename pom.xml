@@ -279,6 +279,17 @@
                                 </args>
                             </configuration>
                         </execution>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>doc-jar</goal>
+                            </goals>
+                            <configuration>
+                                <args>
+                                    <arg>-no-java-comments</arg>
+                                </args>
+                            </configuration>
+                        </execution>
                     </executions>
                 </plugin>
                 <plugin>
