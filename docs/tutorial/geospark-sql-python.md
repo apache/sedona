@@ -14,7 +14,7 @@ spark.sql("YOUR_SQL")
 ```
 
 !!!note
-	This tutorial is based on [Sedona SQL Jupyter Notebook example](https://github.com/apache/incubator-sedona/blob/master/python/ApacheSedonaSQL.ipynb)
+	This tutorial is based on [Sedona SQL Jupyter Notebook example](../jupyter-notebook)
 	
 ## Installation
 

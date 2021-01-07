@@ -47,6 +47,8 @@ Apache Sedona extends pyspark functions which depends on libraries:
 * shapely
 * attrs
 
+You need to install necessary packages if your system does not have them installed. See ["packages" in our Pipfile](https://github.com/apache/incubator-sedona/blob/master/python/Pipfile).
+
 ### Install sedona
 
 * Installing from PyPi repositories
@@ -55,12 +57,12 @@ Apache Sedona extends pyspark functions which depends on libraries:
 pip install sedona
 ```
 
-* Installing from source
+* Installing from Sedona Python source
 
 Clone Sedona GitHub source code and run the following command
 
 ```bash
-cd python-adapter
+cd python
 python3 setup.py install
 ```
 
@@ -68,7 +70,7 @@ python3 setup.py install
 
 Sedona Python needs one additional jar file call `sedona-python-adapter-3.0_2.12-1.0.0-incubator.jar` to work properly. Please make sure you use the correct version for Spark and Scala.
 
-You can get it using the following methods:
+You can get it using one of the following methods:
 
 * Compile from the source within main project directory and copy it (in `target` folder) to SPARK_HOME/jars/ folder ([more details](/download/compile/#compile-scala-and-java-source-code))
 
@@ -83,3 +85,19 @@ You can get it using the following methods:
         config('spark.jars.packages', 'org.apache.sedona:sedona-python-adapter-3.0_2.12:1.0.0-incubator').\
         getOrCreate()
 ```
+
+### Setup environment variables
+
+If you manually copy the python-adapter jar to `SPARK_HOME/jars/` folder, you need to setup two environment variables
+
+* SPARK_HOME. For example, run the command in your terminal
+
+```bash
+export SPARK_HOME=~/Downloads/spark-3.0.1-bin-hadoop2.7
+```
+
+* PYTHONPATH. For example, run the command in your terminal
+
+```bash
+export PYTHONPATH=$SPARK_HOME/python
+``` 

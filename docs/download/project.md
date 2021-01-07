@@ -6,7 +6,7 @@ A self-contained project allows you to create multiple Scala / Java files and wr
 
 1. To add Sedona as dependencies, please read [Sedona Maven Central coordinates](GeoSpark-All-Modules-Maven-Central-Coordinates.md)
 2. Use Sedona Template project to start: [Sedona Template Project](/tutorial/GeoSpark-Runnable-DEMO/)
-3. Compile your project using SBT or Maven. Make sure you obtain the fat jar which packages all dependencies.
+3. Compile your project using SBT. Make sure you obtain the fat jar which packages all dependencies.
 4. Submit your compiled fat jar to Spark cluster. Make sure you are in the root folder of Spark distribution. Then run the following command:
 ```
 ./bin/spark-submit --master spark://YOUR-IP:7077 /Path/To/YourJar.jar
@@ -14,55 +14,3 @@ A self-contained project allows you to create multiple Scala / Java files and wr
 
 !!!note
 	The detailed explanation of spark-submit is available on [Spark website](https://spark.apache.org/docs/latest/submitting-applications.html).
-
-## How to use Sedona in an IDE
-
-### Select an IDE
-To develop a complex project, we suggest you use IntelliJ IDEA. It supports JVM languages, Scala and Java, and many dependency management systems, Maven and SBT.
-
-Eclipse is also fine if you just want to use Java and Maven.
-
-### Open Sedona template project
-Select a proper project you want from [Sedona Template Project](/tutorial/GeoSpark-Runnable-DEMO/). In this tutorial, we use Sedona SQL Scala project as an example.
-
-Open the folder that contains `build.sbt` file in your IDE. The IDE may take a while to index dependencies and source code.
-
-### Try Sedona SQL functions
-In your IDE, run ScalaExample.scala file.
-
-You don't need to change anything in this file. The IDE will run all SQL queries in this example in local mode.
-
-### Package the project
-To run this project in cluster mode, you have to package this project to a JAR and then run it using `spark-submit` command.
-
-Before packaging this project, you always need to check two places:
-
-* Remove the hardcoded Master IP `master("local[*]")`. This hardcoded IP is only needed when you run this project in an IDE.
-```scala
-var sparkSession:SparkSession = SparkSession.builder()
-	.config("spark.serializer",classOf[KryoSerializer].getName)
-	.config("spark.kryo.registrator",classOf[SedonaVizKryoRegistrator].getName)
-	.master("local[*]")
-	.appName("SedonaSQL-demo").getOrCreate()
-```
-
-* In build.sbt (or POM.xml), set Spark dependency scope to `provided` instead of `compile`. `compile` is only needed when you run this project in an IDE.
-
-!!!warning
-	Forgetting to change the package scope will lead to a very big fat JAR and dependency conflicts when call `spark-submit`. For more details, please visit [Maven Dependency Scope](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope).
-
-* Make sure your downloaded Spark binary distribution is the same version with the Spark used in your `build.sbt` or `POM.xml`.
-
-### Submit the compiled jar
-1. Go to `./target/scala-2.11` folder and find a jar called `SedonaSQLTemplate-0.1.0.jar`. Note that, this JAR normally is larger than 1MB. (If you use POM.xml, the jar is under `./target` folder)
-2. Submit this JAR using `spark-submit`.
-
-* Local mode:
-```
-./bin/spark-submit /Path/To/YourJar.jar
-```
-
-* Cluster mode:
-```
-./bin/spark-submit --master spark://YOUR-IP:7077 /Path/To/YourJar.jar
-```

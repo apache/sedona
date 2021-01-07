@@ -1,6 +1,6 @@
 # Compile and Publish Sedona
 
-[![Scala and Java build](https://github.com/apache/incubator-sedona/workflows/Scala%20and%20Java%20build/badge.svg)](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Scala+and+Java+build%22) [![Python build](https://github.com/apache/incubator-sedona/workflows/Python%20build/badge.svg)](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Python+build%22)
+[![Scala and Java build](https://github.com/apache/incubator-sedona/workflows/Scala%20and%20Java%20build/badge.svg)](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Scala+and+Java+build%22) [![Python build](https://github.com/apache/incubator-sedona/workflows/Python%20build/badge.svg)](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Python+build%22) ![Example project build](https://github.com/apache/incubator-sedona/workflows/Example%20project%20build/badge.svg)
 
 
 ## Compile Scala and Java source code
@@ -125,13 +125,8 @@ You should first compile the entire docs using `mkdocs build` to get the `site` 
 
 #### Copy
 
-Copy the generated Javadoc (Scaladoc should already be there) to the corresponding folders in `site/api/javadoc`
-
-#### Deploy to ASF domain
-
-1. Copy the generated Javadoc and Scaladoc to the correct location in `docs/api/javadoc`
-
-2. Then deploy Javadoc and Scaladoc with the project website
+1. Copy the generated Javadoc (Scaladoc should already be there) to the corresponding folders in `site/api/javadoc`
+2. Deploy Javadoc and Scaladoc with the project website
 
 ## Publish SNAPSHOTs
 

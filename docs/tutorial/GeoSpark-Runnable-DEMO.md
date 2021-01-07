@@ -1,36 +1,30 @@
-## Python Jupyter Notebook Examples
-
-[Sedona core](https://github.com/apache/incubator-sedona/blob/master/python/ApacheSedonaCore.ipynb)
-
-[Sedona SQL](https://github.com/apache/incubator-sedona/blob/master/python/ApacheSedonaSQL.ipynb)
-
-## Scala and Java Examples
+# Scala and Java Examples
 
 [Scala and Java Examples](https://github.com/apache/incubator-sedona/tree/master/examples) contains template projects for RDD, SQL and Viz. The template projects have been configured properly.
 
 Note that, although the template projects are written in Scala, the same APIs can be  used in Java as well.
 
-### Folder structure
+## Folder structure
 The folder structure of this repository is as follows.
 
 * rdd-colocation-mining: a scala template shows how to use Sedona RDD API in Spatial Data Mining
 * sql: a scala template shows how to use Sedona DataFrame and SQL API
 * viz: a scala template shows how to use Sedona Viz RDD and SQL API
 
-### Compile and package
+## Compile and package
 
-#### Prerequisites
+### Prerequisites
 Please make sure you have the following software installed on your local machine:
 
 * For Scala: Scala 2.12, SBT
 * For Java: JDK 1.8, Apache Maven 3
 
-#### Compile
+### Compile
 
 Run a terminal command `sbt assembly` within the folder of each template
 
 
-#### Submit your fat jar to Spark
+### Submit your fat jar to Spark
 After running the command mentioned above, you are able to see a fat jar in `./target` folder. Please take it and use `./bin/spark-submit` to submit this jar.
 
 To run the jar in this way, you need to:
@@ -41,8 +35,8 @@ To run the jar in this way, you need to:
 
 * Make sure the dependency versions in build.sbt are consistent with your Spark version.
 
-### Run template projects locally
+## Run template projects locally
 We highly suggest you use IDEs to run template projects on your local machine. For Scala, we recommend IntelliJ IDEA with Scala plug-in. For Java, we recommend IntelliJ IDEA and Eclipse. With the help of IDEs, **you don't have to prepare anything** (even don't need to download and set up Spark!). As long as you have Scala and Java, everything works properly!
 
-#### Scala
+### Scala
 Import the Scala template project as SBT project. Then run the Main file in this project.

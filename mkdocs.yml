@@ -22,7 +22,9 @@ nav:
       - Map visualization SQL app:
         - Scala/Java: tutorial/viz.md
         - Use Apache Zeppelin: tutorial/zeppelin.md
-      - Examples: tutorial/GeoSpark-Runnable-DEMO.md
+      - Examples:
+        - Scala/Java: tutorial/GeoSpark-Runnable-DEMO.md
+        - Python: tutorial/jupyter-notebook.md
       - Performance tuning:
         - Benchmark: tutorial/benchmark.md            
         - Tune RDD application: tutorial/Advanced-Tutorial-Tune-your-GeoSpark-Application.md

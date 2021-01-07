@@ -14,7 +14,7 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/GeoSparkS
 3. Add the dependencies in build.sbt or pom.xml.
 
 !!!note
-	To enjoy the full functions of Sedona, we suggest you include ==the full dependencies==: [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core, Sedona-SQL, Sedona-Viz. Please see [SQL example project](https://github.com/apache/incubator-sedona/tree/master/examples/sql)
+	To enjoy the full functions of Sedona, we suggest you include ==the full dependencies==: [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core, Sedona-SQL, Sedona-Viz. Please see [SQL example project](/tutorial/GeoSpark-Runnable-DEMO/)
 
 
 ## Initiate SparkSession
