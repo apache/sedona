@@ -21,7 +21,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache.sedona</groupId>
-        <artifactId>sedona-parent</artifactId>
+        <artifactId>sedona-parent-${spark.compat.version}_${scala.compat.version}</artifactId>
         <version>1.0.0-incubating-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
