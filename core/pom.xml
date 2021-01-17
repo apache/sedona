@@ -32,10 +32,6 @@
     <url>http://sedona.apache.org/</url>
     <packaging>jar</packaging>
 
-    <properties>
-        <maven.deploy.skip>false</maven.deploy.skip>
-    </properties>
-
     <dependencies>
         <!-- Test -->
         <dependency>
