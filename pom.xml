@@ -25,7 +25,7 @@
         <relativePath />
     </parent>
     <groupId>org.apache.sedona</groupId>
-    <artifactId>sedona-parent-${spark.compat.version}_${scala.compat.version}</artifactId>
+    <artifactId>sedona-parent</artifactId>
     <version>1.0.0-incubating-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>sedona-parent</name>
@@ -498,6 +498,7 @@
                 <spark.compat.version>3.0</spark.compat.version>
                 <spark.converter.version>spark3</spark.converter.version>
                 <jackson.version>2.10.0</jackson.version>
+                <maven.deploy.skip>false</maven.deploy.skip>
             </properties>
         </profile>
         <profile>
@@ -514,6 +515,7 @@
                 <spark.compat.version>2.4</spark.compat.version>
                 <spark.converter.version>spark2</spark.converter.version>
                 <jackson.version>2.6.7</jackson.version>
+                <maven.deploy.skip>true</maven.deploy.skip>
             </properties>
         </profile>
         <profile>
