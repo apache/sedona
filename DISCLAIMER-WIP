@@ -3,6 +3,5 @@ Apache Sedona is an effort undergoing incubation at The Apache Software Foundati
 Some of the incubating project’s releases may not be fully compliant with ASF policy. For example, releases may have incomplete or un-reviewed licensing conditions. What follows is a list of known issues the project is currently aware of (note that this list, by definition, is likely to be incomplete):
 
 1. The content of GeoJSONWriterNew is directly copied from jts2geojson library (MIT License). This is to fix the incompatibility between jts2geojson 1.4.3 and JTS 1.17+. GeoJSONWriterNew will be removed in the future if the developer of jts2geojson fixes this issue.
-2. To use Sedona Python, users have to use the Sedona Python Adapter jar which uses GeoTools binaries under LGPL license.
 
 If you are planning to incorporate this work into your product/project, please be aware that you will need to conduct a thorough licensing review to determine the overall implications of including this work. For the current status of this project through the Apache Incubator visit: https://incubator.apache.org/projects/sedona.html
