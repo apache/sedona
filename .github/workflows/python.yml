@@ -49,7 +49,7 @@ jobs:
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         SCALA_VERSION: ${{ matrix.scala }}
-      run: mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=${SPARK_VERSION:0:3}
+      run: mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=${SPARK_VERSION:0:3} -Dgeotools
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
       run: wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz
@@ -68,18 +68,6 @@ jobs:
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
       run: find python-adapter/target -name sedona-* -exec cp {} spark-${SPARK_VERSION}-bin-hadoop2.7/jars/ \;
-    - env:
-        SPARK_VERSION: ${{ matrix.spark }}
-      run: (cd spark-${SPARK_VERSION}-bin-hadoop2.7/jars/;wget https://repo.osgeo.org/repository/release/org/geotools/gt-main/24.0/gt-main-24.0.jar)
-    - env:
-        SPARK_VERSION: ${{ matrix.spark }}
-      run: (cd spark-${SPARK_VERSION}-bin-hadoop2.7/jars/;wget https://repo.osgeo.org/repository/release/org/geotools/gt-referencing/24.0/gt-referencing-24.0.jar)
-    - env:
-        SPARK_VERSION: ${{ matrix.spark }}
-      run: (cd spark-${SPARK_VERSION}-bin-hadoop2.7/jars/;wget https://repo.osgeo.org/repository/release/org/geotools/gt-epsg-hsql/24.0/gt-epsg-hsql-24.0.jar)
-    - env:
-        SPARK_VERSION: ${{ matrix.spark }}
-      run: (cd spark-${SPARK_VERSION}-bin-hadoop2.7/jars/;wget https://repo.osgeo.org/repository/release/org/geotools/gt-epsg-extension/24.0/gt-epsg-extension-24.0.jar)
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
       run: (export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop2.7;export PYTHONPATH=$SPARK_HOME/python;cd python;pipenv run pytest tests)

@@ -31,11 +31,6 @@ class TestBase:
                 builder. \
                 config("spark.serializer", KryoSerializer.getName).\
                 config("spark.kryo.registrator", SedonaKryoRegistrator.getName) .\
-                config("spark.jars.packages", "org.geotools:gt-main:24.0,"
-                                              "org.geotools:gt-referencing:24.0,"
-                                              "org.geotools:gt-epsg-hsql:24.0,"
-                                              "org.geotools:gt-epsg-extension:24.0").\
-                config("spark.jars.repositories", "https://repo.osgeo.org/repository/release/").\
                 master("local[*]").\
                 getOrCreate()
 

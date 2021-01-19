@@ -33,6 +33,7 @@
 
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
+        <geotools.scope>provided</geotools.scope>
     </properties>
 
     <dependencies>
@@ -61,7 +62,7 @@
             <groupId>org.geotools</groupId>
             <artifactId>gt-main</artifactId>
             <version>${geotools.version}</version>
-            <scope>provided</scope>
+            <scope>${geotools.scope}</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.locationtech.jts</groupId>
@@ -78,7 +79,7 @@
             <groupId>org.geotools</groupId>
             <artifactId>gt-referencing</artifactId>
             <version>${geotools.version}</version>
-            <scope>provided</scope>
+            <scope>${geotools.scope}</scope>
             <exclusions>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>
@@ -91,7 +92,7 @@
             <groupId>org.geotools</groupId>
             <artifactId>gt-epsg-hsql</artifactId>
             <version>${geotools.version}</version>
-            <scope>provided</scope>
+            <scope>${geotools.scope}</scope>
             <exclusions>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>
@@ -104,7 +105,7 @@
             <groupId>org.geotools</groupId>
             <artifactId>gt-epsg-extension</artifactId>
             <version>${geotools.version}</version>
-            <scope>provided</scope>
+            <scope>${geotools.scope}</scope>
             <exclusions>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>
@@ -141,4 +142,18 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>geotools</id>
+            <activation>
+                <property>
+                    <name>geotools</name>
+                </property>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <geotools.scope>compile</geotools.scope>
+            </properties>
+        </profile>
+    </profiles>
 </project>
