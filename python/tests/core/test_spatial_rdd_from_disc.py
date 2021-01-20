@@ -27,7 +27,7 @@ from sedona.core.formatMapper.disc_utils import load_spatial_rdd_from_disc, \
     load_spatial_index_rdd_from_disc, GeoType
 from sedona.core.spatialOperator import JoinQuery
 from tests.test_base import TestBase
-from tests.tools import tests_path
+from tests.tools import tests_resource
 
 
 def remove_directory(path: str) -> bool:
@@ -37,28 +37,20 @@ def remove_directory(path: str) -> bool:
         return False
     return True
 
-
-disc_object_location = os.path.join(tests_path, "resources/spatial_objects/temp")
-disc_location = os.path.join(tests_path, "resources/spatial_objects")
-
-
-@pytest.fixture
-def remove_spatial_rdd_disc_dir():
-    remove_directory(disc_object_location)
-
+disc_location = os.path.join(tests_resource, "spatial_objects/temp")
 
 class TestDiscUtils(TestBase):
 
-    def test_saving_to_disc_spatial_rdd_point(self, remove_spatial_rdd_disc_dir):
+    def test_saving_to_disc_spatial_rdd_point(self):
         from tests.properties.point_properties import input_location, offset, splitter, num_partitions
 
         point_rdd = PointRDD(
             self.sc, input_location, offset, splitter, True, num_partitions, StorageLevel.MEMORY_ONLY
         )
 
-        point_rdd.rawJvmSpatialRDD.saveAsObjectFile(os.path.join(disc_object_location, "point"))
+        point_rdd.rawJvmSpatialRDD.saveAsObjectFile(os.path.join(disc_location, "point"))
 
-    def test_saving_to_disc_spatial_rdd_polygon(self, remove_spatial_rdd_disc_dir):
+    def test_saving_to_disc_spatial_rdd_polygon(self):
         from tests.properties.polygon_properties import input_location, splitter, num_partitions
         polygon_rdd = PolygonRDD(
             self.sc,
@@ -68,9 +60,9 @@ class TestDiscUtils(TestBase):
             num_partitions,
             StorageLevel.MEMORY_ONLY
         )
-        polygon_rdd.rawJvmSpatialRDD.saveAsObjectFile(os.path.join(disc_object_location, "polygon"))
+        polygon_rdd.rawJvmSpatialRDD.saveAsObjectFile(os.path.join(disc_location, "polygon"))
 
-    def test_saving_to_disc_spatial_rdd_linestring(self, remove_spatial_rdd_disc_dir):
+    def test_saving_to_disc_spatial_rdd_linestring(self):
         from tests.properties.linestring_properties import input_location, splitter, num_partitions
         linestring_rdd = LineStringRDD(
             self.sc,
@@ -80,9 +72,9 @@ class TestDiscUtils(TestBase):
             num_partitions,
             StorageLevel.MEMORY_ONLY
         )
-        linestring_rdd.rawJvmSpatialRDD.saveAsObjectFile(os.path.join(disc_object_location, "line_string"))
+        linestring_rdd.rawJvmSpatialRDD.saveAsObjectFile(os.path.join(disc_location, "line_string"))
 
-    def test_saving_to_disc_index_point(self, remove_spatial_rdd_disc_dir):
+    def test_saving_to_disc_index_linestring(self):
         from tests.properties.linestring_properties import input_location, splitter, num_partitions
         linestring_rdd = LineStringRDD(
             self.sc,
@@ -93,9 +85,9 @@ class TestDiscUtils(TestBase):
             StorageLevel.MEMORY_ONLY
         )
         linestring_rdd.buildIndex(IndexType.RTREE, False)
-        linestring_rdd.indexedRawRDD.saveAsObjectFile(os.path.join(disc_object_location, "line_string_index"))
+        linestring_rdd.indexedRawRDD.saveAsObjectFile(os.path.join(disc_location, "line_string_index"))
 
-    def test_saving_to_disc_index_polygon(self, remove_spatial_rdd_disc_dir):
+    def test_saving_to_disc_index_polygon(self):
         from tests.properties.polygon_properties import input_location, splitter, num_partitions
         polygon_rdd = PolygonRDD(
             self.sc,
@@ -106,15 +98,15 @@ class TestDiscUtils(TestBase):
             StorageLevel.MEMORY_ONLY
         )
         polygon_rdd.buildIndex(IndexType.RTREE, False)
-        polygon_rdd.indexedRawRDD.saveAsObjectFile(os.path.join(disc_object_location, "polygon_index"))
+        polygon_rdd.indexedRawRDD.saveAsObjectFile(os.path.join(disc_location, "polygon_index"))
 
-    def test_saving_to_disc_index_linestring(self, remove_spatial_rdd_disc_dir):
+    def test_saving_to_disc_index_point(self):
         from tests.properties.point_properties import input_location, offset, splitter, num_partitions
         point_rdd = PointRDD(
             self.sc, input_location, offset, splitter, True, num_partitions, StorageLevel.MEMORY_ONLY
         )
         point_rdd.buildIndex(IndexType.RTREE, False)
-        point_rdd.indexedRawRDD.saveAsObjectFile(os.path.join(disc_object_location, "point_index"))
+        point_rdd.indexedRawRDD.saveAsObjectFile(os.path.join(disc_location, "point_index"))
 
     def test_loading_spatial_rdd_from_disc(self):
         point_rdd = load_spatial_rdd_from_disc(
@@ -161,3 +153,4 @@ class TestDiscUtils(TestBase):
             linestring_rdd, polygon_rdd, True, True).collect()
 
         print(result)
+        remove_directory(disc_location)

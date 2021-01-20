@@ -15,7 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from tests.data import csv_point_input_location, csv_point1_input_location, csv_polygon1_input_location
+from tests import csv_point_input_location, csv_point1_input_location, csv_polygon1_input_location
 from tests.test_base import TestBase
 
 

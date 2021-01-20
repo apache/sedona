@@ -28,11 +28,11 @@ from tests.test_base import TestBase
 
 import os
 
-from tests.tools import tests_path
+from tests.tools import tests_resource
 from shapely.wkt import loads
 
-bank_csv_path = os.path.join(tests_path, "resources/small/points.csv")
-areas_csv_path = os.path.join(tests_path, "resources/small/areas.csv")
+bank_csv_path = os.path.join(tests_resource, "small/points.csv")
+areas_csv_path = os.path.join(tests_resource, "small/areas.csv")
 
 
 class TestOmitPythonJvmSerdeToDf(TestBase):

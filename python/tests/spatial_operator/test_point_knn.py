@@ -23,10 +23,10 @@ from sedona.core.SpatialRDD import PointRDD
 from sedona.core.enums import IndexType, FileDataSplitter
 from sedona.core.spatialOperator import KNNQuery
 from tests.test_base import TestBase
-from tests.tools import tests_path, distance_sorting_functions
+from tests.tools import tests_resource, distance_sorting_functions
 
-input_location = os.path.join(tests_path, "resources/arealm-small.csv")
-queryWindowSet = os.path.join("zcta510-small.csv")
+input_location = os.path.join(tests_resource, "arealm-small.csv")
+queryWindowSet = os.path.join(tests_resource, "zcta510-small.csv")
 offset = 1
 splitter = FileDataSplitter.CSV
 gridType = "rtree"

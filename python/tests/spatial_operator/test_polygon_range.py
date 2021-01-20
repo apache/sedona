@@ -24,9 +24,9 @@ from sedona.core.enums import IndexType, FileDataSplitter
 from sedona.core.geom.envelope import Envelope
 from sedona.core.spatialOperator import RangeQuery
 from tests.test_base import TestBase
-from tests.tools import tests_path
+from tests.tools import tests_resource
 
-input_location = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
+input_location = os.path.join(tests_resource, "primaryroads-polygon.csv")
 splitter = FileDataSplitter.CSV
 gridType = "rtree"
 indexType = "rtree"

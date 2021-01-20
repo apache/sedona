@@ -18,7 +18,7 @@
 from pyspark import Row
 from pyspark.sql.types import StructType, StringType, IntegerType, StructField, DoubleType
 
-from tests.data import csv_polygon_input_location, csv_point_input_location, overlap_polygon_input_location, \
+from tests import csv_polygon_input_location, csv_point_input_location, overlap_polygon_input_location, \
     csv_point1_input_location, csv_point2_input_location, csv_polygon1_input_location, csv_polygon2_input_location, \
     csv_polygon1_random_input_location, csv_polygon2_random_input_location
 from tests.test_base import TestBase

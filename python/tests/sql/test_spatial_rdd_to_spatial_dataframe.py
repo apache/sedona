@@ -26,11 +26,11 @@ from sedona.sql.types import GeometryType
 from tests.test_base import TestBase
 from shapely.geometry import Point
 
-from tests.tools import tests_path
+from tests.tools import tests_resource
 
-point_input_path = os.path.join(tests_path, "resources/arealm-small.csv")
+point_input_path = os.path.join(tests_resource, "arealm-small.csv")
 
-crs_test_point = os.path.join(tests_path, "resources/crs-test-point.csv")
+crs_test_point = os.path.join(tests_resource, "crs-test-point.csv")
 
 offset = 1
 splitter = FileDataSplitter.CSV

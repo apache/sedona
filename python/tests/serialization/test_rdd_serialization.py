@@ -20,12 +20,11 @@ import os
 from sedona.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD, LineStringRDD
 from sedona.core.enums import FileDataSplitter, IndexType
 from tests.test_base import TestBase
-from tests.tools import tests_path
+from tests.tools import tests_resource
 
-resource_folder = "resources"
-point_rdd_input_location = os.path.join(tests_path, resource_folder, "arealm-small.csv")
-polygon_rdd_input_location = os.path.join(tests_path, resource_folder, "primaryroads-polygon.csv")
-linestring_rdd_input_location = os.path.join(tests_path, resource_folder, "primaryroads-linestring.csv")
+point_rdd_input_location = os.path.join(tests_resource, "arealm-small.csv")
+polygon_rdd_input_location = os.path.join(tests_resource, "primaryroads-polygon.csv")
+linestring_rdd_input_location = os.path.join(tests_resource, "primaryroads-linestring.csv")
 linestring_rdd_splittter = FileDataSplitter.CSV
 
 polygon_rdd_splitter = FileDataSplitter.CSV

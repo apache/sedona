@@ -17,7 +17,7 @@
 
 from shapely.geometry import Polygon
 
-from tests.data import csv_point_input_location, union_polygon_input_location
+from tests import csv_point_input_location, union_polygon_input_location
 from tests.test_base import TestBase
 
 

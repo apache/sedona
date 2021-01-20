@@ -25,19 +25,19 @@ from sedona.core.SpatialRDD import PointRDD
 from sedona.core.enums import FileDataSplitter
 from sedona.core.geom.envelope import Envelope
 from tests.test_base import TestBase
-from tests.tools import tests_path
+from tests.tools import tests_resource
 
 wkb_folder = "wkb"
 wkt_folder = "wkt"
 
-test_save_as_wkb_with_data = os.path.join(tests_path, wkb_folder, "testSaveAsWKBWithData")
-test_save_as_wkb = os.path.join(tests_path, wkb_folder, "testSaveAsWKB")
-test_save_as_empty_wkb = os.path.join(tests_path, wkb_folder, "testSaveAsEmptyWKB")
-test_save_as_wkt = os.path.join(tests_path, wkt_folder, "testSaveAsWKT")
-test_save_as_wkt_with_data = os.path.join(tests_path, wkt_folder, "testSaveAsWKTWithData")
+test_save_as_wkb_with_data = os.path.join(tests_resource, wkb_folder, "testSaveAsWKBWithData")
+test_save_as_wkb = os.path.join(tests_resource, wkb_folder, "testSaveAsWKB")
+test_save_as_empty_wkb = os.path.join(tests_resource, wkb_folder, "testSaveAsEmptyWKB")
+test_save_as_wkt = os.path.join(tests_resource, wkt_folder, "testSaveAsWKT")
+test_save_as_wkt_with_data = os.path.join(tests_resource, wkt_folder, "testSaveAsWKTWithData")
 
-inputLocation = os.path.join(tests_path, "resources/arealm-small.csv")
-queryWindowSet = os.path.join(tests_path, "zcta510-small.csv")
+inputLocation = os.path.join(tests_resource, "arealm-small.csv")
+queryWindowSet = os.path.join(tests_resource, "zcta510-small.csv")
 offset = 1
 splitter = FileDataSplitter.CSV
 gridType = "rtree"

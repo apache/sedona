@@ -19,24 +19,24 @@ import os
 
 from sedona.core.enums import FileDataSplitter, IndexType
 from sedona.core.geom.envelope import Envelope
-from tests.tools import tests_path
+from tests.tools import tests_resource
 
-input_location = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
-query_window_set = os.path.join(tests_path, "resources/zcta510-small.csv")
+input_location = os.path.join(tests_resource, "primaryroads-polygon.csv")
+query_window_set = os.path.join(tests_resource, "zcta510-small.csv")
 offset = 0
 splitter = FileDataSplitter.CSV
 grid_type = "kdbtree"
 index_type = "rtree"
 num_partitions = 5
 distance = 0.01
-input_location_query_polygon = os.path.join(tests_path, "resources/crs-test-polygon.csv")
+input_location_query_polygon = os.path.join(tests_resource, "crs-test-polygon.csv")
 query_polygon_count = 13361
 
 query_envelope = Envelope(14313844.294334238, 16802290.853830762, 942450.5989896103, 8631908.270651892)
-query_polygon_set = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
-input_location_geo_json = os.path.join(tests_path, "resources/testPolygon.json")
-input_location_wkt = os.path.join(tests_path, "resources/county_small.tsv")
-input_location_wkb = os.path.join(tests_path, "resources/county_small_wkb.tsv")
+query_polygon_set = os.path.join(tests_resource, "primaryroads-polygon.csv")
+input_location_geo_json = os.path.join(tests_resource, "testPolygon.json")
+input_location_wkt = os.path.join(tests_resource, "county_small.tsv")
+input_location_wkb = os.path.join(tests_resource, "county_small_wkb.tsv")
 input_count = 3000
 input_boundary = Envelope(minx=-158.104182, maxx=-66.03575, miny=17.986328, maxy=48.645133)
 contains_match_count = 6941
@@ -44,7 +44,7 @@ contains_match_with_original_duplicates_count = 9334
 intersects_match_count = 24323
 intersects_match_with_original_duplicates_count = 32726
 
-polygon_rdd_input_location = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
+polygon_rdd_input_location = os.path.join(tests_resource, "primaryroads-polygon.csv")
 polygon_rdd_splitter = FileDataSplitter.CSV
 polygon_rdd_index_type = IndexType.RTREE
 polygon_rdd_num_partitions = 5

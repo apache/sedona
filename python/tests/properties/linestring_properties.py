@@ -19,17 +19,17 @@ import os
 
 from sedona.core.enums import FileDataSplitter
 from sedona.core.geom.envelope import Envelope
-from tests.tools import tests_path
+from tests.tools import tests_resource
 
-input_location = os.path.join(tests_path, "resources/primaryroads-linestring.csv")
-query_window_set = os.path.join(tests_path, "resources/zcta510-small.csv")
+input_location = os.path.join(tests_resource, "primaryroads-linestring.csv")
+query_window_set = os.path.join(tests_resource, "zcta510-small.csv")
 offset = 0
 splitter = FileDataSplitter.CSV
 grid_type = "kdbtree"
 index_type = "rtree"
 num_partitions = 5
 distance = 0.01
-query_polygon_set = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
+query_polygon_set = os.path.join(tests_resource, "primaryroads-polygon.csv")
 input_count = 3000
 input_boundary = Envelope(minx=-123.393766, maxx=-65.648659, miny=17.982169, maxy=49.002374)
 input_boundary_2 = Envelope(minx=-123.393766, maxx=-65.649956, miny=17.982169, maxy=49.002374)

@@ -23,15 +23,15 @@ from sedona.core.enums.join_build_side import JoinBuildSide
 from sedona.core.spatialOperator import JoinQuery
 from sedona.core.spatialOperator.join_params import JoinParams
 from tests.spatial_operator.test_join_base import TestJoinBase
-from tests.tools import tests_path
+from tests.tools import tests_resource
 
-input_location = os.path.join(tests_path, "resources/arealm-small.csv")
-input_location_query_window = os.path.join(tests_path, "resources/zcta510-small.csv")
+input_location = os.path.join(tests_resource, "arealm-small.csv")
+input_location_query_window = os.path.join(tests_resource, "zcta510-small.csv")
 offset = 1
 splitter = FileDataSplitter.CSV
 numPartitions = 11
 distance = 0.01
-query_polygon_set = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
+query_polygon_set = os.path.join(tests_resource, "primaryroads-polygon.csv")
 inputCount = 3000
 inputBoundary = -173.120769, -84.965961, 30.244859, 71.355134
 rectangle_match_count = 103

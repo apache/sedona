@@ -15,3 +15,32 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+import os
+from os import path
+
+from tests.tools import tests_resource
+
+# data_path = path.abspath(path.dirname(__file__))
+#
+#
+# def create_data_path(relative_path: str) -> str:
+#     return os.path.join(data_path, relative_path)
+
+
+mixed_wkb_geometry_input_location = os.path.join(tests_resource, "county_small_wkb.tsv")
+mixed_wkt_geometry_input_location = os.path.join(tests_resource, "county_small.tsv")
+shape_file_input_location = os.path.join(tests_resource, "shapefiles/dbf")
+shape_file_with_missing_trailing_input_location = os.path.join(tests_resource, "shapefiles/missing")
+geojson_input_location = os.path.join(tests_resource, "testPolygon.json")
+area_lm_point_input_location = os.path.join(tests_resource, "arealm.csv")
+csv_point_input_location = os.path.join(tests_resource, "testpoint.csv")
+csv_polygon_input_location = os.path.join(tests_resource, "testenvelope.csv")
+csv_polygon1_input_location = os.path.join(tests_resource, "equalitycheckfiles/testequals_envelope1.csv")
+csv_polygon2_input_location = os.path.join(tests_resource, "equalitycheckfiles/testequals_envelope2.csv")
+csv_polygon1_random_input_location = os.path.join(tests_resource, "equalitycheckfiles/testequals_envelope1_random.csv")
+csv_polygon2_random_input_location = os.path.join(tests_resource, "equalitycheckfiles/testequals_envelope2_random.csv")
+overlap_polygon_input_location = os.path.join(tests_resource, "testenvelope_overlap.csv")
+union_polygon_input_location = os.path.join(tests_resource, "testunion.csv")
+csv_point1_input_location = os.path.join(tests_resource, "equalitycheckfiles/testequals_point1.csv")
+csv_point2_input_location = os.path.join(tests_resource, "equalitycheckfiles/testequals_point2.csv")
+geojson_id_input_location = os.path.join(tests_resource, "testContainsId.json")

@@ -20,7 +20,7 @@ import os
 from pyspark.sql.types import IntegerType
 import geopandas as gpd
 
-from tests.data import data_path
+from tests import tests_resource
 from sedona.sql.types import GeometryType
 from shapely.geometry import Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon
 from pyspark.sql import types as t
@@ -144,7 +144,7 @@ class TestsSerializers(TestBase):
         assert length == 3.75
 
     def test_geopandas_convertion(self):
-        gdf = gpd.read_file(os.path.join(data_path, "gis_osm_pois_free_1.shp"))
+        gdf = gpd.read_file(os.path.join(tests_resource, "shapefiles/gis_osm_pois_free_1/"))
         print(self.spark.createDataFrame(
             gdf
         ).toPandas())
