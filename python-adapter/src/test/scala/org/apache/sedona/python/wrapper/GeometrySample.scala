@@ -21,20 +21,22 @@ package org.apache.sedona.python.wrapper
 
 import org.locationtech.jts.geom.Geometry
 
+import java.io.FileInputStream
 import scala.tools.nsc.interpreter.InputStream
 import scala.io.Source
 
 trait GeometrySample extends PythonTestSpec {
   self: TestToPythonSerialization =>
 
+  val resourceFolder = System.getProperty("user.dir") + "/../core/src/test/resources/"
   private[python] val samplePoints: List[Geometry] =
-    loadGeometriesFromResources("/python/samplePoints")
+    loadGeometriesFromResources(resourceFolder + "python/samplePoints")
 
   private[python] val sampleLines: List[Geometry] =
-    loadGeometriesFromResources("/python/sampleLines")
+    loadGeometriesFromResources(resourceFolder + "python/sampleLines")
 
   private[python] val samplePolygons: List[Geometry] =
-    loadGeometriesFromResources("/python/samplePolygons")
+    loadGeometriesFromResources(resourceFolder + "python/samplePolygons")
 
   private def loadGeometriesFromResources(fileName: String): List[Geometry] = {
     val resourceFileText = loadResourceFile(fileName)
@@ -48,7 +50,7 @@ trait GeometrySample extends PythonTestSpec {
   }
 
   private def loadResourceFile(fileName: String): List[String] = {
-    val stream: InputStream = getClass.getResourceAsStream(fileName)
+    val stream: InputStream = new FileInputStream(fileName)
     Source.fromInputStream(stream).getLines.toList
   }
 }

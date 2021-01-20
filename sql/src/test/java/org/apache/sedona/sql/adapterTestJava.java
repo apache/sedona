@@ -45,7 +45,7 @@ import java.io.Serializable;
 public class adapterTestJava
         implements Serializable
 {
-    public static String resourceFolder = System.getProperty("user.dir") + "/src/test/resources/";
+    public static String resourceFolder = System.getProperty("user.dir") + "/../core/src/test/resources/";
     public static String mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv";
     public static String mixedWkbGeometryInputLocation = resourceFolder + "county_small_wkb.tsv";
     public static String csvPointInputLocation = resourceFolder + "arealm.csv";
