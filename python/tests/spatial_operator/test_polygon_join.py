@@ -23,11 +23,11 @@ from sedona.core.enums.join_build_side import JoinBuildSide
 from sedona.core.spatialOperator import JoinQuery
 from sedona.core.spatialOperator.join_params import JoinParams
 from tests.spatial_operator.test_join_base import TestJoinBase
-from tests.tools import tests_path
+from tests.tools import tests_resource
 
-input_location = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
-query_window_set = os.path.join(tests_path, "resources/zcta510-small.csv")
-query_polygon_set = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
+input_location = os.path.join(tests_resource, "primaryroads-polygon.csv")
+query_window_set = os.path.join(tests_resource, "zcta510-small.csv")
+query_polygon_set = os.path.join(tests_resource, "primaryroads-polygon.csv")
 splitter = FileDataSplitter.CSV
 contains_match_count = 6941
 contains_match_with_original_duplicates = 9334

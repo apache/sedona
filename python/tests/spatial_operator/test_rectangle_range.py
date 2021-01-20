@@ -24,17 +24,17 @@ from sedona.core.enums import IndexType, FileDataSplitter
 from sedona.core.geom.envelope import Envelope
 from sedona.core.spatialOperator import RangeQuery
 from tests.test_base import TestBase
-from tests.tools import tests_path
+from tests.tools import tests_resource
 
-inputLocation = os.path.join(tests_path, "resources/zcta510-small.csv")
-queryWindowSet = os.path.join(tests_path, "resources/zcta510-small.csv")
+inputLocation = os.path.join(tests_resource, "zcta510-small.csv")
+queryWindowSet = os.path.join(tests_resource, "zcta510-small.csv")
 offset = 0
 splitter = FileDataSplitter.CSV
 gridType = "rtree"
 indexType = "rtree"
 numPartitions = 11
 distance = 0.001
-queryPolygonSet = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
+queryPolygonSet = os.path.join(tests_resource, "primaryroads-polygon.csv")
 inputCount = 3000
 inputBoundary = Envelope(-171.090042, 145.830505, -14.373765, 49.00127)
 matchCount = 17599

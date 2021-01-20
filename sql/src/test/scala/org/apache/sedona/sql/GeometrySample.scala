@@ -23,6 +23,7 @@ import org.apache.spark.sql.{Dataset, Row}
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKTReader
 
+import java.io.FileInputStream
 import scala.tools.nsc.interpreter.InputStream
 
 
@@ -33,13 +34,13 @@ trait GeometrySample {
   import sparkSession.implicits._
 
   val samplePoints: List[Geometry] =
-    loadGeometriesFromResources("/python/samplePoints")
+    loadGeometriesFromResources(resourceFolder + "python/samplePoints")
   private val sampleSimplePolygons: List[Geometry] =
-    loadGeometriesFromResources("/python/simplePolygons")
+    loadGeometriesFromResources(resourceFolder + "python/simplePolygons")
   private val sampleLines: List[Geometry] =
-    loadGeometriesFromResources("/python/sampleLines")
+    loadGeometriesFromResources(resourceFolder + "python/sampleLines")
   private val samplePolygons: List[Geometry] =
-    loadGeometriesFromResources("/python/samplePolygons")
+    loadGeometriesFromResources(resourceFolder + "python/samplePolygons")
 
   def createSimplePolygons(polygonCount: Int, columnNames: String*): Dataset[Row] =
     sampleSimplePolygons.take(polygonCount).map(mapToSpark).toDF(columnNames: _*)
@@ -68,7 +69,7 @@ trait GeometrySample {
   }
 
   private def loadResourceFile(fileName: String): List[String] = {
-    val stream: InputStream = getClass.getResourceAsStream(fileName)
+    val stream: InputStream = new FileInputStream(fileName)
     val lines: Iterator[String] = scala.io.Source.fromInputStream(stream).getLines
     lines.toList
   }

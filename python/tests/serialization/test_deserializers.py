@@ -20,7 +20,7 @@ import os
 from shapely.geometry import MultiPoint, Point, MultiLineString, LineString, Polygon, MultiPolygon
 import geopandas as gpd
 
-from tests.data import data_path
+from tests import tests_resource
 from tests.test_base import TestBase
 
 
@@ -36,14 +36,14 @@ class TestGeometryConvert(TestBase):
         df.collect()
 
     def test_loading_from_file_deserialization(self):
-        geom = self.spark.read.\
-            options(delimiter="|", header=True).\
-            csv(os.path.join(data_path, "counties.csv")).\
+        self.spark.read.\
+            options(delimiter="\t", header=False).\
+            csv(os.path.join(tests_resource, "county_small.tsv")).\
             limit(1).\
             createOrReplaceTempView("counties")
 
-        geom_area = self.spark.sql("SELECT st_area(st_geomFromWKT(geom)) as area from counties").collect()[0][0]
-        polygon_shapely = self.spark.sql("SELECT st_geomFromWKT(geom) from counties").collect()[0][0]
+        geom_area = self.spark.sql("SELECT st_area(st_geomFromWKT(_c0)) as area from counties").collect()[0][0]
+        polygon_shapely = self.spark.sql("SELECT st_geomFromWKT(_c0) from counties").collect()[0][0]
         assert geom_area == polygon_shapely.area
 
     def test_polygon_with_holes_deserialization(self):
@@ -101,23 +101,22 @@ class TestGeometryConvert(TestBase):
             ]).wkt
 
     def test_from_geopandas_convert(self):
-        gdf = gpd.read_file(os.path.join(data_path, "gis_osm_pois_free_1.shp"))
+        gdf = gpd.read_file(os.path.join(tests_resource, "shapefiles/gis_osm_pois_free_1/"))
 
         self.spark.createDataFrame(
             gdf
         ).show()
 
     def test_to_geopandas(self):
-        counties = self.spark. \
-            read. \
-            option("delimiter", "|"). \
-            option("header", "true"). \
-            csv(os.path.join(data_path, "counties.csv")).limit(1)
+        counties = self.spark.read.\
+            options(delimiter="\t", header=False).\
+            csv(os.path.join(tests_resource, "county_small.tsv")).\
+            limit(1)
 
         counties.createOrReplaceTempView("county")
 
         counties_geom = self.spark.sql(
-            "SELECT *, st_geomFromWKT(geom) as geometry from county"
+            "SELECT *, st_geomFromWKT(_c0) as geometry from county"
         )
 
         gdf = counties_geom.toPandas()

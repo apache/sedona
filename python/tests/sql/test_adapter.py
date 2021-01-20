@@ -31,10 +31,10 @@ from sedona.core.geom.envelope import Envelope
 from sedona.core.jvm.config import is_greater_or_equal_version
 from sedona.core.spatialOperator import JoinQuery
 from sedona.utils.adapter import Adapter
-from tests.data import geojson_input_location, shape_file_with_missing_trailing_input_location, \
+from tests import geojson_input_location, shape_file_with_missing_trailing_input_location, \
     geojson_id_input_location
-from tests.data import shape_file_input_location, area_lm_point_input_location
-from tests.data import mixed_wkt_geometry_input_location
+from tests import shape_file_input_location, area_lm_point_input_location
+from tests import mixed_wkt_geometry_input_location
 from tests.test_base import TestBase
 
 

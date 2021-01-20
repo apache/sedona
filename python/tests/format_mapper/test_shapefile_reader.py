@@ -17,19 +17,22 @@
 
 import os
 
+import pytest
+
 from sedona.core.geom.envelope import Envelope
 from sedona.core.jvm.config import SedonaMeta, is_greater_or_equal_version
 from sedona.core.spatialOperator import RangeQuery
-from tests.tools import tests_path
+from tests.tools import tests_resource
 from sedona.core.formatMapper.shapefileParser import ShapefileReader
 from tests.test_base import TestBase
 
-undefined_type_shape_location = os.path.join(tests_path, "resources/shapefiles/undefined")
-polygon_shape_location = os.path.join(tests_path, "resources/shapefiles/polygon")
+undefined_type_shape_location = os.path.join(tests_resource, "shapefiles/undefined")
+polygon_shape_location = os.path.join(tests_resource, "shapefiles/polygon")
 
 
 class TestShapeFileReader(TestBase):
 
+    @pytest.mark.skip(reason="test data is too large")
     def test_shape_file_end_with_undefined_type(self):
         shape_rdd = ShapefileReader.readToGeometryRDD(
             sc=self.sc, inputPath=undefined_type_shape_location
@@ -46,7 +49,7 @@ class TestShapeFileReader(TestBase):
         assert shape_rdd.rawSpatialRDD.collect().__len__() == 10000
 
     def test_read_to_polygon_rdd(self):
-        input_location = os.path.join(tests_path, "resources/shapefiles/polygon")
+        input_location = os.path.join(tests_resource, "shapefiles/polygon")
         spatial_rdd = ShapefileReader.readToPolygonRDD(self.sc, input_location)
         geometry_rdd = ShapefileReader.readToGeometryRDD(self.sc, input_location)
         window = Envelope(-180.0, 180.0, -90.0, 90.0)
@@ -57,7 +60,7 @@ class TestShapeFileReader(TestBase):
         assert 'org.apache.sedona.core.spatialRDD.PolygonRDD' in spatial_rdd._srdd.toString()
 
     def test_read_to_linestring_rdd(self):
-        input_location = os.path.join(tests_path, "resources/shapefiles/polyline")
+        input_location = os.path.join(tests_resource, "shapefiles/polyline")
         spatial_rdd = ShapefileReader.readToLineStringRDD(self.sc, input_location)
         geometry_rdd = ShapefileReader.readToGeometryRDD(self.sc, input_location)
         window = Envelope(-180.0, 180.0, -90.0, 90.0)
@@ -67,7 +70,7 @@ class TestShapeFileReader(TestBase):
         assert 'org.apache.sedona.core.spatialRDD.LineStringRDD' in spatial_rdd._srdd.toString()
 
     def test_read_to_point_rdd(self):
-        input_location = os.path.join(tests_path, "resources/shapefiles/point")
+        input_location = os.path.join(tests_resource, "shapefiles/point")
         spatial_rdd = ShapefileReader.readToPointRDD(self.sc, input_location)
         geometry_rdd = ShapefileReader.readToGeometryRDD(self.sc, input_location)
         window = Envelope(-180.0, 180.0, -90.0, 90.0)
@@ -77,7 +80,7 @@ class TestShapeFileReader(TestBase):
         assert 'org.apache.sedona.core.spatialRDD.PointRDD' in spatial_rdd._srdd.toString()
 
     def test_read_to_point_rdd_multipoint(self):
-        input_location = os.path.join(tests_path, "resources/shapefiles/multipoint")
+        input_location = os.path.join(tests_resource, "shapefiles/multipoint")
         spatial_rdd = ShapefileReader.readToPointRDD(self.sc, input_location)
         geometry_rdd = ShapefileReader.readToGeometryRDD(self.sc, input_location)
         window = Envelope(-180.0, 180.0, -90.0, 90.0)

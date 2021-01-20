@@ -23,13 +23,13 @@ from sedona.core.jvm.config import is_greater_or_equal_version, SedonaMeta
 
 from sedona.core.formatMapper.geo_json_reader import GeoJsonReader
 from tests.test_base import TestBase
-from tests.tools import tests_path
+from tests.tools import tests_resource
 
-geo_json_contains_id = os.path.join(tests_path, "resources/testContainsId.json")
-geo_json_geom_with_feature_property = os.path.join(tests_path, "resources/testPolygon.json")
-geo_json_geom_without_feature_property = os.path.join(tests_path, "resources/testpolygon-no-property.json")
-geo_json_with_invalid_geometries = os.path.join(tests_path, "resources/testInvalidPolygon.json")
-geo_json_with_invalid_geom_with_feature_property = os.path.join(tests_path, "resources/invalidSyntaxGeometriesJson.json")
+geo_json_contains_id = os.path.join(tests_resource, "testContainsId.json")
+geo_json_geom_with_feature_property = os.path.join(tests_resource, "testPolygon.json")
+geo_json_geom_without_feature_property = os.path.join(tests_resource, "testpolygon-no-property.json")
+geo_json_with_invalid_geometries = os.path.join(tests_resource, "testInvalidPolygon.json")
+geo_json_with_invalid_geom_with_feature_property = os.path.join(tests_resource, "invalidSyntaxGeometriesJson.json")
 
 
 class TestGeoJsonReader(TestBase):

@@ -29,6 +29,7 @@ import org.apache.spark.serializer.KryoSerializer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -146,33 +147,35 @@ public class VizTestBase
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
 
+        String resourceFolder = System.getProperty("user.dir") + "/../core/src/test/resources/";
+
         prop = new Properties();
 
-        inputProp = VizTestBase.class.getClassLoader().getResourceAsStream("babylon.point.properties");
+        inputProp = new FileInputStream(resourceFolder + "babylon.point.properties");
         prop.load(inputProp);
-        PointInputLocation = "file://" + VizTestBase.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
+        PointInputLocation = resourceFolder + prop.getProperty("inputLocation");
         PointOffset = Integer.parseInt(prop.getProperty("offset"));
-        ;
+
         PointSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
         PointNumPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
 
-        inputProp = VizTestBase.class.getClassLoader().getResourceAsStream("babylon.rectangle.properties");
+        inputProp = new FileInputStream(resourceFolder + "babylon.rectangle.properties");
         prop.load(inputProp);
-        RectangleInputLocation = "file://" + VizTestBase.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
+        RectangleInputLocation = resourceFolder + prop.getProperty("inputLocation");
         RectangleOffset = Integer.parseInt(prop.getProperty("offset"));
         RectangleSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
         RectangleNumPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
 
-        inputProp = VizTestBase.class.getClassLoader().getResourceAsStream("babylon.polygon.properties");
+        inputProp = new FileInputStream(resourceFolder + "babylon.polygon.properties");
         prop.load(inputProp);
-        PolygonInputLocation = "file://" + VizTestBase.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
+        PolygonInputLocation = resourceFolder + prop.getProperty("inputLocation");
         PolygonOffset = Integer.parseInt(prop.getProperty("offset"));
         PolygonSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
         PolygonNumPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
 
-        inputProp = VizTestBase.class.getClassLoader().getResourceAsStream("babylon.linestring.properties");
+        inputProp = new FileInputStream(resourceFolder + "babylon.linestring.properties");
         prop.load(inputProp);
-        LineStringInputLocation = "file://" + VizTestBase.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
+        LineStringInputLocation = resourceFolder + prop.getProperty("inputLocation");
         LineStringOffset = Integer.parseInt(prop.getProperty("offset"));
         LineStringSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
         LineStringNumPartitions = Integer.parseInt(prop.getProperty("numPartitions"));

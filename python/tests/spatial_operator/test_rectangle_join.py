@@ -23,14 +23,14 @@ from sedona.core.geom.envelope import Envelope
 from sedona.core.spatialOperator import JoinQuery
 from sedona.core.spatialOperator.join_params import JoinParams
 from tests.spatial_operator.test_join_base import TestJoinBase
-from tests.tools import tests_path
+from tests.tools import tests_resource
 
-input_location = os.path.join(tests_path, "resources/zcta510-small.csv")
-query_window_set = os.path.join(tests_path, "resources/zcta510-small.csv")
+input_location = os.path.join(tests_resource, "zcta510-small.csv")
+query_window_set = os.path.join(tests_resource, "zcta510-small.csv")
 offset = 0
 splitter = FileDataSplitter.CSV
 distance = 0.001
-queryPolygonSet = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
+queryPolygonSet = os.path.join(tests_resource, "primaryroads-polygon.csv")
 inputCount = 3000
 inputBoundary = Envelope(-171.090042, 145.830505, -14.373765, 49.00127)
 match_count = 17599

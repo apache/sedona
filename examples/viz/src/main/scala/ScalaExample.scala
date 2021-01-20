@@ -76,12 +76,6 @@ object ScalaExample extends App{
 	val PolygonOffset = prop.getProperty("offset").toInt
 	val PolygonSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"))
 	val PolygonNumPartitions = prop.getProperty("numPartitions").toInt
-	ConfFile = new FileInputStream(resourcePath + "babylon.linestring.properties")
-	prop.load(ConfFile)
-	val LineStringInputLocation = "file://" + System.getProperty("user.dir") + "/" + resourcePath + prop.getProperty("inputLocation")
-	val LineStringOffset = prop.getProperty("offset").toInt
-	val LineStringSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"))
-	val LineStringNumPartitions = prop.getProperty("numPartitions").toInt
 	val USMainLandBoundary = new Envelope(-126.790180, -64.630926, 24.863836, 50.000)
 	val earthdataInputLocation = System.getProperty("user.dir") + "/src/test/resources/modis/modis.csv"
 	val earthdataNumPartitions = 5

@@ -21,10 +21,10 @@ from sedona.core.enums import FileDataSplitter
 from sedona.core.SpatialRDD import PointRDD
 from sedona.core.SpatialRDD import PolygonRDD
 from tests.test_base import TestBase
-from tests.tools import tests_path
+from tests.tools import tests_resource
 
-point_path = os.path.join(tests_path, "resources/points.csv")
-counties_path = os.path.join(tests_path, "resources/counties_tsv.csv")
+point_path = os.path.join(tests_resource, "points.csv")
+counties_path = os.path.join(tests_resource, "county_small.tsv")
 
 
 class TestSpatialRDD(TestBase):
@@ -46,8 +46,8 @@ class TestSpatialRDD(TestBase):
         polygon_rdd = PolygonRDD(
             self.spark._sc,
             counties_path,
-            2,
-            3,
+            0,
+            1,
             FileDataSplitter.WKT,
             True
         )
@@ -56,4 +56,4 @@ class TestSpatialRDD(TestBase):
 
         cnt = polygon_rdd.countWithoutDuplicates()
 
-        assert cnt == 407, f"Polygon RDD should have 407 but found {cnt}"
+        assert cnt == 103, f"Polygon RDD should have 103 but found {cnt}"

@@ -21,15 +21,15 @@ from shapely.geometry import Point
 
 from sedona.core.enums import FileDataSplitter, IndexType
 from sedona.core.geom.envelope import Envelope
-from tests.tools import tests_path
+from tests.tools import tests_resource
 
-input_location = os.path.join(tests_path, "resources/crs-test-point.csv")
+input_location = os.path.join(tests_resource, "crs-test-point.csv")
 offset = 0
 splitter = FileDataSplitter.CSV
 index_type = IndexType.RTREE
 num_partitions = 11
 distance = 0.01
-input_location_query_polygon = os.path.join(tests_path, "resources/crs-test-polygon.csv")
+input_location_query_polygon = os.path.join(tests_resource, "crs-test-polygon.csv")
 loop_times = 5
 query_envelope = Envelope(30.01, 40.01, -90.01, -80.01)
 query_point = Point(34.01, -84.01)

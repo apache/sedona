@@ -25,16 +25,16 @@ from sedona.core.enums import FileDataSplitter, IndexType, GridType
 from sedona.core.geom.envelope import Envelope
 from sedona.core.spatialOperator import RangeQuery, JoinQuery, KNNQuery
 from tests.test_base import TestBase
-from tests.tools import tests_path
+from tests.tools import tests_resource
 
-point_rdd_input_location = os.path.join(tests_path, "resources/arealm-small.csv")
+point_rdd_input_location = os.path.join(tests_resource, "arealm-small.csv")
 
 point_rdd_splitter = FileDataSplitter.CSV
 point_rdd_index_type = IndexType.RTREE
 point_rdd_num_partitions = 5
 point_rdd_offset = 1
 
-polygon_rdd_input_location = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
+polygon_rdd_input_location = os.path.join(tests_resource, "primaryroads-polygon.csv")
 polygon_rdd_splitter = FileDataSplitter.CSV
 polygon_rdd_num_partitions = 5
 polygon_rdd_start_offset = 0
@@ -45,7 +45,7 @@ range_query_window = Envelope(-90.01, -80.01, 30.01, 40.01)
 join_query_partitioning_type = GridType.QUADTREE
 each_query_loop_times = 20
 
-shape_file_input_location = os.path.join(tests_path, "resources/shapefiles/polygon")
+shape_file_input_location = os.path.join(tests_resource, "shapefiles/polygon")
 
 
 class TestScalaExample(TestBase):

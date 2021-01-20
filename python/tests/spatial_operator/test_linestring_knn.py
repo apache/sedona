@@ -23,9 +23,9 @@ from sedona.core.SpatialRDD import LineStringRDD
 from sedona.core.enums import IndexType, FileDataSplitter
 from sedona.core.spatialOperator import KNNQuery
 from tests.test_base import TestBase
-from tests.tools import tests_path
+from tests.tools import tests_resource
 
-input_location = os.path.join(tests_path, "resources/primaryroads-linestring.csv")
+input_location = os.path.join(tests_resource, "primaryroads-linestring.csv")
 offset = 0
 splitter = FileDataSplitter.CSV
 gridType = "rtree"
