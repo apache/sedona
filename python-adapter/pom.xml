@@ -22,7 +22,7 @@
     <parent>
         <artifactId>sedona-parent</artifactId>
         <groupId>org.apache.sedona</groupId>
-        <version>1.0.1-incubator-SNAPSHOT</version>
+        <version>1.0.0-incubating-SNAPSHOT</version>
     </parent>
     <artifactId>sedona-python-adapter-${spark.compat.version}_${scala.compat.version}</artifactId>
 
@@ -33,6 +33,7 @@
 
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
+        <geotools.scope>provided</geotools.scope>
     </properties>
 
     <dependencies>
@@ -61,6 +62,7 @@
             <groupId>org.geotools</groupId>
             <artifactId>gt-main</artifactId>
             <version>${geotools.version}</version>
+            <scope>${geotools.scope}</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.locationtech.jts</groupId>
@@ -77,6 +79,7 @@
             <groupId>org.geotools</groupId>
             <artifactId>gt-referencing</artifactId>
             <version>${geotools.version}</version>
+            <scope>${geotools.scope}</scope>
             <exclusions>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>
@@ -89,6 +92,7 @@
             <groupId>org.geotools</groupId>
             <artifactId>gt-epsg-hsql</artifactId>
             <version>${geotools.version}</version>
+            <scope>${geotools.scope}</scope>
             <exclusions>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>
@@ -101,6 +105,7 @@
             <groupId>org.geotools</groupId>
             <artifactId>gt-epsg-extension</artifactId>
             <version>${geotools.version}</version>
+            <scope>${geotools.scope}</scope>
             <exclusions>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>
@@ -137,4 +142,18 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>geotools</id>
+            <activation>
+                <property>
+                    <name>geotools</name>
+                </property>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <geotools.scope>compile</geotools.scope>
+            </properties>
+        </profile>
+    </profiles>
 </project>

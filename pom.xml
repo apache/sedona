@@ -26,7 +26,7 @@
     </parent>
     <groupId>org.apache.sedona</groupId>
     <artifactId>sedona-parent</artifactId>
-    <version>1.0.1-incubator-SNAPSHOT</version>
+    <version>1.0.0-incubating-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>sedona-parent</name>
     <url>http://sedona.apache.org/</url>
@@ -69,7 +69,6 @@
         <dependency.scope>provided</dependency.scope>
         <jts.version>1.18.0</jts.version>
         <jts2geojson.version>0.14.3</jts2geojson.version>
-        <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
     <dependencies>
@@ -305,6 +304,23 @@
         </pluginManagement>
         <plugins>
             <plugin>
+                <groupId>net.nicoulaj.maven.plugins</groupId>
+                <artifactId>checksum-maven-plugin</artifactId>
+                <version>1.9</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>artifacts</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <algorithms>
+                        <algorithm>SHA-512</algorithm>
+                    </algorithms>
+                </configuration>
+            </plugin>
+            <plugin>
                 <!-- see http://davidb.github.com/scala-maven-plugin -->
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
@@ -482,6 +498,7 @@
                 <spark.compat.version>3.0</spark.compat.version>
                 <spark.converter.version>spark3</spark.converter.version>
                 <jackson.version>2.10.0</jackson.version>
+                <maven.deploy.skip>false</maven.deploy.skip>
             </properties>
         </profile>
         <profile>
@@ -498,6 +515,7 @@
                 <spark.compat.version>2.4</spark.compat.version>
                 <spark.converter.version>spark2</spark.converter.version>
                 <jackson.version>2.6.7</jackson.version>
+                <maven.deploy.skip>true</maven.deploy.skip>
             </properties>
         </profile>
         <profile>

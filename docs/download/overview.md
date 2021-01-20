@@ -68,23 +68,26 @@ python3 setup.py install
 
 ### Prepare python-adapter jar
 
-Sedona Python needs one additional jar file call `sedona-python-adapter-3.0_2.12-1.0.0-incubator.jar` to work properly. Please make sure you use the correct version for Spark and Scala.
+Sedona Python needs one additional jar file called `sedona-python-adapter` to work properly. Please make sure you use the correct version for Spark and Scala. For Spark 3.0 + Scala 2.12, it is called `sedona-python-adapter-3.0_2.12-1.0.0-incubating.jar`
 
 You can get it using one of the following methods:
 
-* Compile from the source within main project directory and copy it (in `target` folder) to SPARK_HOME/jars/ folder ([more details](/download/compile/#compile-scala-and-java-source-code))
+1. Compile from the source within main project directory and copy it (in `python-adapter/target` folder) to SPARK_HOME/jars/ folder ([more details](/download/compile/#compile-scala-and-java-source-code))
 
-* Download from [GitHub release](https://github.com/apache/incubator-sedona/releases) and copy it to SPARK_HOME/jars/ folder
-* Call the [Maven Central coordinate](../GeoSpark-All-Modules-Maven-Central-Coordinates) in your python program. For example, in PySparkSQL
+2. Download from [GitHub release](https://github.com/apache/incubator-sedona/releases) and copy it to SPARK_HOME/jars/ folder
+3. Call the [Maven Central coordinate](../GeoSpark-All-Modules-Maven-Central-Coordinates) in your python program. For example, in PySparkSQL
 ```python
     spark = SparkSession.\
         builder.\
         appName('appName').\
         config("spark.serializer", KryoSerializer.getName).\
         config("spark.kryo.registrator", SedonaKryoRegistrator.getName) .\
-        config('spark.jars.packages', 'org.apache.sedona:sedona-python-adapter-3.0_2.12:1.0.0-incubator').\
+        config('spark.jars.packages', 'org.apache.sedona:sedona-python-adapter-3.0_2.12:1.0.0-incubating').\
         getOrCreate()
 ```
+
+!!!warning
+	If you are going to use Sedona CRS transformation and ShapefileReader functions, you have to use Method 1. Because these functions internally use GeoTools libraries which are under LGPL license, Apache Sedona binary release cannot include them.
 
 ### Setup environment variables
 
@@ -101,3 +104,5 @@ export SPARK_HOME=~/Downloads/spark-3.0.1-bin-hadoop2.7
 ```bash
 export PYTHONPATH=$SPARK_HOME/python
 ``` 
+
+You can then play with [Sedona Python Jupyter notebook](/tutorial/jupyter-notebook/)

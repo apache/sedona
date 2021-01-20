@@ -21,7 +21,7 @@ val SparkCompatibleVersion = "3.0"
 
 val HadoopVersion = "2.7.2"
 
-val SedonaVersion = "1.0.0-incubator-SNAPSHOT"
+val SedonaVersion = "1.0.0-incubating-SNAPSHOT"
 
 val ScalaCompatibleVersion = "2.12"
 

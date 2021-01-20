@@ -15,8 +15,12 @@ mvn clean install -DskipTests
 ```
 This command will first delete the old binary files and compile all modules. This compilation will skip the unit tests. To compile a single module, please make sure you are in the folder of that module. Then enter the same command.
 
-!!!note
+!!!warning
 	By default, this command will compile Sedona with Spark 3.0 and Scala 2.12
+
+!!!tip
+	To get the Sedona Python-adapter jar with all GeoTools jars included, simply append `-Dgeotools` option. The command is like this:`mvn clean install -DskipTests -Dgeotools`
+
 
 To run unit tests, just simply remove `-DskipTests` option. The command is like this:
 ```
@@ -41,6 +45,9 @@ mvn clean install -DskipTests -Dscala=2.11 -Dspark=2.4
 mvn clean install -DskipTests -Dscala=2.12 -Dspark=2.4
 ```
 
+!!!tip
+	To get the Sedona Python-adapter jar with all GeoTools jars included, simply append `-Dgeotools` option. The command is like this:`mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.0 -Dgeotools`
+
 ### Download staged jars
 
 Sedona uses GitHub action to automatically generate jars per commit. You can go [here](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Scala+and+Java+build%22) and download the jars by clicking the commit's ==Artifacts== tag.
@@ -54,7 +61,7 @@ For example,
 export SPARK_HOME=$PWD/spark-3.0.1-bin-hadoop2.7
 export PYTHONPATH=$SPARK_HOME/python
 ```
-2. Compile the Sedona Scala and Java code and then copy the ==sedona-python-adapter-xxx.jar== to ==SPARK_HOME/jars/== folder
+2. Compile the Sedona Scala and Java code with `-Dgeotools` and then copy the ==sedona-python-adapter-xxx.jar== to ==SPARK_HOME/jars/== folder.
 ```
 cp python-adapter/target/sedona-python-adapter-xxx.jar SPARK_HOME/jars/
 ```

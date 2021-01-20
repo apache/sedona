@@ -1,9 +1,9 @@
 # Maven Coordinates
 
-Sedona has four modules: `sedona-core, sedona-sql, sedona-viz, sedona-python-adapter`. If you use Scala and Java API, you only need to use `sedona-core, sedona-sql, sedona-viz`. If you use Python API, you only need to use `sedona-python-adapter`
+Sedona has four modules: `sedona-core, sedona-sql, sedona-viz, sedona-python-adapter`. If you use Scala and Java API, you only need to use `sedona-core, sedona-sql, sedona-viz`. If you use Python API, you only need to use `sedona-python-adapter`.
 
 !!!note
-	Sedona Scala and Java API also requires additional dependencies to work (see below). Python API does not need them.
+	Sedona Scala, Java and Python API also requires additional dependencies to work (see below).
 
 ## Spark 3.0 + Scala 2.12
 
@@ -12,17 +12,17 @@ Scala and Java API only
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-core-3.0_2.12</artifactId>
-  <version>1.0.0-incubator</version>
+  <version>1.0.0-incubating</version>
 </dependency>
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-sql-3.0_2.12</artifactId>
-  <version>1.0.0-incubator</version>
+  <version>1.0.0-incubating</version>
 </dependency>
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-viz-3.0_2.12</artifactId>
-  <version>1.0.0-incubator</version>
+  <version>1.0.0-incubating</version>
 </dependency>
 ```
 
@@ -31,7 +31,7 @@ Python API only
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-python-adapter-3.0_2.12</artifactId>
-  <version>1.0.0-incubator</version>
+  <version>1.0.0-incubating</version>
 </dependency>
 ```
 
@@ -42,17 +42,17 @@ Scala and Java API only
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-core-2.4_2.11</artifactId>
-  <version>1.0.0-incubator</version>
+  <version>1.0.0-incubating</version>
 </dependency>
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-sql-2.4_2.11</artifactId>
-  <version>1.0.0-incubator</version>
+  <version>1.0.0-incubating</version>
 </dependency>
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-viz-2.4_2.11</artifactId>
-  <version>1.0.0-incubator</version>
+  <version>1.0.0-incubating</version>
 </dependency>
 ```
 
@@ -61,7 +61,7 @@ Python API only
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-python-adapter-2.4_2.11</artifactId>
-  <version>1.0.0-incubator</version>
+  <version>1.0.0-incubating</version>
 </dependency>
 ```
 
@@ -72,17 +72,17 @@ Scala and Java API only
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-core-2.4_2.12</artifactId>
-  <version>1.0.0-incubator</version>
+  <version>1.0.0-incubating</version>
 </dependency>
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-sql-2.4_2.12</artifactId>
-  <version>1.0.0-incubator</version>
+  <version>1.0.0-incubating</version>
 </dependency>
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-viz-2.4_2.12</artifactId>
-  <version>1.0.0-incubator</version>
+  <version>1.0.0-incubating</version>
 </dependency>
 ```
 
@@ -91,15 +91,19 @@ Python API only
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-python-adapter-2.4_2.12</artifactId>
-  <version>1.0.0-incubator</version>
+  <version>1.0.0-incubating</version>
 </dependency>
 ```
 
 ## Additional dependencies
 
-To avoid conflicts in downstream projects and solve the copyright issue, Sedona almost does not package any dependencies in the release jars. Therefore, you need to add the following jars in your `build.sbt` or `pom.xml` if you use Sedona Scala and Java API.
+To avoid conflicts in downstream projects and solve the copyright issue, Sedona almost does not package any dependencies in the release jars. Therefore, you need to add the following jars in your `build.sbt` or `pom.xml` if you use Sedona Scala and Java API. You may need to compile Sedona source code to get GeoTools jars if you use Sedona Python.
 
 ### LocationTech JTS-core 1.18.0+
+
+For Scala / Java API: `required` under Eclipse Public License 2.0 ("EPL") or the Eclipse Distribution License 1.0 (a BSD Style License)
+
+For Python API: `not required, already included`
 
 ```xml
 <!-- https://mvnrepository.com/artifact/org.locationtech.jts/jts-core -->
@@ -112,7 +116,9 @@ To avoid conflicts in downstream projects and solve the copyright issue, Sedona 
 
 ### jts2geojson 0.14.3+
 
-This is only needed if you read GeoJSON files. Under MIT License
+For Scala / Java API: `required` if you read GeoJSON files. Under MIT License
+
+For Python API: `not required, already included`
 
 ```xml
 <!-- https://mvnrepository.com/artifact/org.wololo/jts2geojson -->
@@ -125,7 +131,11 @@ This is only needed if you read GeoJSON files. Under MIT License
 
 ### GeoTools 24.0+
 
-This is only needed if you want to do CRS transformation. Under GNU Lesser General Public License (LGPL) license.
+For Scala / Java API: `required` if you want to use CRS transformation and ShapefileReader.
+
+For Python API: `required` if you want to use CRS transformation and ShapefileReader. You have to compile the Sedona source code by yourself. See [Install Sedona Python](/download/overview/#install-sedona-python)
+
+Under GNU Lesser General Public License (LGPL) license
 
 ```xml
 <!-- https://mvnrepository.com/artifact/org.geotools/gt-main -->
@@ -183,7 +193,9 @@ resolvers +=
 
 ### SernetCDF 0.1.0
 
-This is only needed if you want to read HDF files. Under Apache License 2.0.
+For Scala / Java API: `required` if you want to read HDF files.
+
+Under Apache License 2.0.
 
 ```xml
 <!-- https://mvnrepository.com/artifact/org.datasyslab/sernetcdf -->
@@ -196,7 +208,7 @@ This is only needed if you want to read HDF files. Under Apache License 2.0.
 ```
 
 ## SNAPSHOT versions
-Sometimes Sedona has a SNAPSHOT version for the upcoming release. It follows the same naming conversion but has "SNAPSHOT" as suffix in the version. For example, `1.0.0-incubator-SNAPSHOT`
+Sometimes Sedona has a SNAPSHOT version for the upcoming release. It follows the same naming conversion but has "SNAPSHOT" as suffix in the version. For example, `1.0.0-incubating-SNAPSHOT`
 
 In order to download SNAPSHOTs, you need to add the following repositories in your POM.XML or build.sbt
 ### build.sbt
