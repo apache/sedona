@@ -43,6 +43,7 @@ import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
@@ -103,7 +104,7 @@ public class ShapefileReaderTest
      *
      * @throws IOException
      */
-    @Test
+    @Ignore
     public void testShapefileEndWithUndefinedType()
             throws IOException
     {
