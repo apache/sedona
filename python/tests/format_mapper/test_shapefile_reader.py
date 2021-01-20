@@ -30,6 +30,7 @@ polygon_shape_location = os.path.join(tests_resource, "shapefiles/polygon")
 
 class TestShapeFileReader(TestBase):
 
+    @pytest.mark.skip(reason="test data is too large")
     def test_shape_file_end_with_undefined_type(self):
         shape_rdd = ShapefileReader.readToGeometryRDD(
             sc=self.sc, inputPath=undefined_type_shape_location
