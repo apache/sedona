@@ -17,6 +17,8 @@
 
 import os
 
+import pytest
+
 from sedona.core.geom.envelope import Envelope
 from sedona.core.jvm.config import SedonaMeta, is_greater_or_equal_version
 from sedona.core.spatialOperator import RangeQuery
