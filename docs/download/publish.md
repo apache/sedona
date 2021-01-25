@@ -1,0 +1,158 @@
+# Publish Sedona
+
+## Publish the doc website
+
+1. Run `mkdocs build` in Sedona root directory. Copy all content in the `site` folder.
+2. Check out GitHub incubator-sedona-website [asf-site branch](https://github.com/apache/incubator-sedona-website/tree/asf-site)
+3. Use the copied content to replace all content in `asf-site` branch and upload to GitHub. Then `sedona.apache.org` will be automatically updated.
+4. You can also push the content to `asf-staging` branch. The staging website will be then updated: `sedona.staged.apache.org`
+
+### Javadoc and Scaladoc
+
+#### Compile
+
+You should first compile the entire docs using `mkdocs build` to get the `site` folder.
+
+* Javadoc: Use Intelij IDEA to generate Javadoc for `core` and `viz` module
+* Scaladoc: Run `scaladoc -d site/api/javadoc/sql/ sql/src/main/scala/org/apache/sedona/sql/utils/*.scala`
+
+#### Copy
+
+1. Copy the generated Javadoc (Scaladoc should already be there) to the corresponding folders in `site/api/javadoc`
+2. Deploy Javadoc and Scaladoc with the project website
+
+!!!note
+	Please read the following guidelines first: 1. ASF Incubator Distribution Guidelines: https://incubator.apache.org/guides/distribution.html 2. ASF Release Guidelines: https://infra.apache.org/release-publishing.html 3. ASF Incubator Release Votes Guidelines: https://issues.apache.org/jira/browse/LEGAL-469
+
+## Publish SNAPSHOTs
+
+### Publish Maven SNAPSHOTs
+
+The detailed requirement is on [ASF Infra website](https://infra.apache.org/publishing-maven-artifacts.html)
+
+#### Prepare for Spark 3.0 and Scala 2.12
+
+1. Prepare the SNAPSHOTs
+```
+mvn clean -Darguments="-DskipTests" release:prepare -DdryRun=true -DautoVersionSubmodules=true -Dresume=false
+```
+2. Deploy the SNAPSHOTs
+```
+mvn deploy -DskipTests
+```
+
+#### Prepare for Spark 2.4 and Scala 2.11
+
+1. Prepare the SNAPSHOTs
+```
+mvn clean release:prepare -DdryRun=true -DautoVersionSubmodules=true -Dresume=false -DcheckModificationExcludeList=sql/src/main/scala/org/apache/sedona/sql/UDF/UdfRegistrator.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/JoinQueryDetector.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryExec.scala -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
+```
+2. Deploy the SNAPSHOTs
+```
+mvn deploy -DskipTests -Dscala=2.11 -Dspark=2.4
+```
+
+#### Prepare for Spark 2.4 and Scala 2.12
+
+1. Prepare the SNAPSHOTs
+```
+mvn clean release:prepare -DdryRun=true -DautoVersionSubmodules=true -Dresume=false -DcheckModificationExcludeList=sql/src/main/scala/org/apache/sedona/sql/UDF/UdfRegistrator.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/JoinQueryDetector.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryExec.scala -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
+```
+2. Deploy the SNAPSHOTs
+```
+mvn deploy -DskipTests -Dscala=2.12 -Dspark=2.4
+```
+
+### Publish Python project to PyPi
+
+## Publish releases
+
+### Stage the Release Candidate
+
+#### For Spark 3.0 and Scala 2.12
+
+1. Prepare a release. Manually enter the following variables in the terminal: release id: ==1.0.0-incubating==, scm tag id: ==sedona-1.0.0-incubating-rc1== (this is just an example. Please use the correct version number). You also need to provide GitHub username and password three times.
+```bash
+mvn clean release:prepare -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests" 
+```
+2. Stage a release
+```bash
+mvn clean release:perform -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests" 
+```
+3. Now the releases are staged. A tag and two commits will be created on Sedona GitHub repo.
+4. Delete the scm tag on GitHub and we will only keep the tag created by the last compilation target.
+
+Now let's repeat the process to other Sedona modules.
+
+#### For Spark 2.4 and Scala 2.11
+
+1. Prepare a release. Note that: release id: ==1.0.0-incubating==, scm tag id: ==sedona-1.0.0-incubating-rc1== (this is just an example. Please use the correct version number)
+```bash
+mvn clean release:prepare -DautoVersionSubmodules=true -Dresume=false -DcheckModificationExcludeList=sql/src/main/scala/org/apache/sedona/sql/UDF/UdfRegistrator.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/JoinQueryDetector.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryExec.scala -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
+```
+2. Stage a release
+```bash
+mvn clean release:perform -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
+```
+3. Delete the scm tag on GitHub and we will only keep the tag created by the last compilation target.
+
+#### For Spark 2.4 and Scala 2.12
+
+1. Prepare a release: release id: ==1.0.0-incubating==, scm tag id: ==sedona-1.0.0-incubating-rc1== (this is just an example. Please use the correct version number)
+```bash
+mvn clean release:prepare -DautoVersionSubmodules=true -Dresume=false -DcheckModificationExcludeList=sql/src/main/scala/org/apache/sedona/sql/UDF/UdfRegistrator.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/JoinQueryDetector.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryExec.scala -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
+```
+2. Stage a release
+```bash
+mvn clean release:perform -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
+```
+
+!!!warning
+	After staged the three releases, you will see 6 [maven-release-plugin] commits and 1 more tag in Sedona GitHub repo.
+
+#### Use Maven Release Plugin directly from an existing tag
+
+In some cases (i.e., the staging repo on repository.apache.org is closed by mistake), if you need to do `mvn release:perform` from an existing tag, you should use the following command. Note that: you have to use `org.apache.maven.plugins:maven-release-plugin:2.3.2:perform` due to a bug in maven release plugin from v2.4 (https://issues.apache.org/jira/browse/SCM-729). Make sure you use the correct scm tag (i.e.,  `sedona-1.0.0-incubating-rc1`).
+
+##### For Spark 3.0 and Scala 2.12
+
+```
+mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag=sedona-1.0.0-incubating-rc1 -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests"
+```
+
+##### For Spark 2.4 and Scala 2.11
+
+```
+mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag=sedona-1.0.0-incubating-rc1 -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
+```
+
+##### For Spark 2.4 and Scala 2.12
+
+```
+mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag=sedona-1.0.0-incubating-rc1 -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
+```
+
+### Upload Release Candidate
+
+All release candidates must be first placed in ASF Dist Dev SVN before vote: https://dist.apache.org/repos/dist/dev/incubator/sedona
+
+1. Make sure your armored PGP public key (must be encrypted by RSA-4096) is included in the `KEYS` file: https://dist.apache.org/repos/dist/dev/incubator/sedona/KEYS, and publish in major key servers: https://pgp.mit.edu/, https://keyserver.ubuntu.com/, http://keys.gnupg.net/
+2. Create a folder on SVN, such as `1.0.0-incubating-rc1`
+3. Find the tag on GitHub accordingly (i.e., `sedona-1.0.0-incubating-rc1`)
+4. Create the tarball for source code. For example, `tar czf apache-sedona-1.0.0-incubating-src.tar.gz apache-sedona-1.0.0-incubating-src`. The unpacked directory should be `apache-sedona-incubating-1.0.0-src`.
+5. Create the tarball for binary. For examples, `tar czf apache-sedona-1.0.0-incubating-bin.tar.gz apache-sedona-1.0.0-incubating-bin`. The unpacked directory should be `apache-sedona-1.0.0-incubating-bin`.It should contain 12 jars.
+6. Generate sha512 checksum for source code: `shasum -a 512 apache-sedona-1.0.0-incubating-src.tar.gz > apache-sedona-1.0.0-incubating-src.tar.gz.sha512`
+7. Generate sha512 checksum for binary: `shasum -a 512 apache-sedona-1.0.0-incubating-bin.tar.gz > apache-sedona-1.0.0-incubating-bin.tar.gz.sha512`
+8. Sign the tarball for source: `gpg -ab apache-sedona-1.0.0-incubating-src.tar.gz`
+9. Sign the tarball for binary: `gpg -ab apache-sedona-1.0.0-incubating-bin.tar.gz`
+10. Upload six files to `dist/dev/incubator/sedona`: for both src and bin, upload `tar.gz`, `asc` and `sha512`
+
+### Call for a vote
+1. Check the status of the staging repo: [Locate and Examine Your Staging Repository
+](https://central.sonatype.org/pages/releasing-the-deployment.html#locate-and-examine-your-staging-repository). You should see 12 Sedona modules in total.
+2. Call for a vote in Sedona community and Apache incubator. Then close the staging repo.
+
+#### Failed vote
+If a vote failed, please first drop the staging repo on `repository.apache.org`. Then redo all the steps above. Make sure you use a new scm tag for the new release candidate when use maven-release-plugin (i.e., `sedona-1.0.0-incubating-rc2`)
+ 
+### Close the staging repo

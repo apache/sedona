@@ -11,7 +11,8 @@ nav:
       - Self-contained project: download/project.md
       - Interactive scala shell: download/scalashell.md
       - Install Sedona-Zeppelin: download/zeppelin.md
-      - Compile and publish the code: download/compile.md
+      - Compile the code: download/compile.md
+      - Publish the code: download/publish.md
     - Programming Guides:
       - Spatial RDD app:
         - Scala/Java: tutorial/rdd.md
