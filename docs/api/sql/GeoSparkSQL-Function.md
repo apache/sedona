@@ -584,3 +584,31 @@ FROM df
 Input: `POINT (1 2)`
 
 Output: `POINT (2 1)`
+
+
+## ST_MinimumBoundingRadius
+
+Introduction: Returns a struct containing the center point and radius of the smallest circle that contains a geometry.
+
+Format: `ST_MinimumBoundingRadius(geom: geometry)`
+
+Since: `v1.?.?`
+
+Spark SQL example:
+```SQL
+SELECT ST_MinimumBoundingRadius(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
+```
+
+
+## ST_MinimumBoundingCircle
+
+Introduction: Returns the smallest circle polygon that contains a geometry.
+
+Format: `ST_MinimumBoundingCircle(geom: geometry, [Optional] quadrantSegments:int)`
+
+Since: `v1.?.?`
+
+Spark SQL example:
+```SQL
+SELECT ST_MinimumBoundingCircle(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
+```
