@@ -66,6 +66,8 @@ object Catalog {
     ST_Y,
     ST_StartPoint,
     ST_Boundary,
+    ST_MinimumBoundingRadius,
+    ST_MinimumBoundingCircle,
     ST_EndPoint,
     ST_ExteriorRing,
     ST_GeometryN,
