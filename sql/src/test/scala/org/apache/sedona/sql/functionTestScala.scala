@@ -854,7 +854,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     Given("Sample geometry data frame")
     val geometryTable = Seq(
       "POINT(0 2)",
-      "LINESTRING(0 0,0 1)",
+      "LINESTRING(0 0,0 1)"
     ).map(geom => Tuple1(wktReader.read(geom))).toDF("geom")
 
     When("Using ST_MinimumBoundingCircle function")
