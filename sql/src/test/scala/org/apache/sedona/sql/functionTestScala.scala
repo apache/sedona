@@ -850,4 +850,68 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     assert(newY == oldX)
   }
 
+  it("Should pass ST_MinimumBoundingCircle") {
+    Given("Sample geometry data frame")
+    val geometryTable = Seq(
+      "POINT(0 2)",
+      "LINESTRING(0 0,0 1)",
+    ).map(geom => Tuple1(wktReader.read(geom))).toDF("geom")
+
+    When("Using ST_MinimumBoundingCircle function")
+
+    val circleTable = geometryTable.selectExpr("ST_MinimumBoundingCircle(geom) as geom")
+    val circleTableWithSeg = geometryTable.selectExpr("ST_MinimumBoundingCircle(geom, 1) as geom")
+
+    Then("Result should match List of circles")
+
+    circleTable.selectExpr("ST_AsText(geom)")
+      .as[String].collect().toList should contain theSameElementsAs List(
+      "POINT (0 2)",
+      "POLYGON ((" +
+        "0.5 0.5, 0.4903926402016152 0.4024548389919359, 0.4619397662556434 0.3086582838174551, 0.4157348061512726 " +
+        "0.2222148834901989, 0.3535533905932738 0.1464466094067263, 0.2777851165098011 0.0842651938487274, " +
+        "0.1913417161825449 0.0380602337443566, 0.0975451610080642 0.0096073597983848, 0 0, -0.0975451610080641 " +
+        "0.0096073597983848, -0.1913417161825449 0.0380602337443566, -0.277785116509801 0.0842651938487273, " +
+        "-0.3535533905932737 0.1464466094067262, -0.4157348061512727 0.2222148834901989, -0.4619397662556434 " +
+        "0.3086582838174551, -0.4903926402016152 0.4024548389919357, -0.5 0.4999999999999999, -0.4903926402016152 " +
+        "0.5975451610080642, -0.4619397662556434 0.6913417161825448, -0.4157348061512727 0.777785116509801, " +
+        "-0.3535533905932738 0.8535533905932737, -0.2777851165098011 0.9157348061512727, -0.1913417161825452 " +
+        "0.9619397662556433, -0.0975451610080643 0.9903926402016152, -0.0000000000000001 1, 0.0975451610080642 " +
+        "0.9903926402016152, 0.191341716182545 0.9619397662556433, 0.2777851165098009 0.9157348061512727, " +
+        "0.3535533905932737 0.8535533905932738, 0.4157348061512726 0.7777851165098011, 0.4619397662556433 " +
+        "0.6913417161825453, 0.4903926402016152 0.5975451610080643, 0.5 0.5))"
+    )
+
+    circleTableWithSeg.selectExpr("ST_AsText(geom)")
+      .as[String].collect().toList should contain theSameElementsAs List(
+      "POINT (0 2)",
+      "POLYGON ((0.5 0.5, 0 0, -0.5 0.4999999999999999, -0.0000000000000001 1, 0.5 0.5))"
+    )
+  }
+
+  it("Should pass ST_MinimumBoundingRadius") {
+    Given("Sample geometry data frame")
+    val geometryTable = Seq(
+      "POINT (0 1)",
+      "LINESTRING(1 1,0 0, -1 1)",
+      "POLYGON((1 1,0 0, -1 1, 1 1))"
+    ).map(geom => Tuple1(wktReader.read(geom))).toDF("geom")
+
+    When("Using ST_MinimumBoundingRadius function")
+
+    val radiusTable = geometryTable.selectExpr("ST_MinimumBoundingRadius(geom) as tmp").select("tmp.*")
+
+    Then("Result should match List of centers and radius")
+
+    radiusTable.selectExpr("ST_AsText(center)")
+      .as[String].collect().toList should contain theSameElementsAs List(
+      "POINT (0 1)",
+      "POINT (0 1)",
+      "POINT (0 1)"
+    )
+
+    radiusTable.selectExpr("radius")
+      .as[Double].collect().toList should contain theSameElementsAs List(0, 1, 1)
+  }
+
 }
