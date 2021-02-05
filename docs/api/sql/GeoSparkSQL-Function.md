@@ -592,7 +592,7 @@ Introduction: Returns a struct containing the center point and radius of the sma
 
 Format: `ST_MinimumBoundingRadius(geom: geometry)`
 
-Since: `v1.?.?`
+Since: `v1.0.1`
 
 Spark SQL example:
 ```SQL
@@ -606,7 +606,7 @@ Introduction: Returns the smallest circle polygon that contains a geometry.
 
 Format: `ST_MinimumBoundingCircle(geom: geometry, [Optional] quadrantSegments:int)`
 
-Since: `v1.?.?`
+Since: `v1.0.1`
 
 Spark SQL example:
 ```SQL
