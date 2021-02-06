@@ -26,7 +26,7 @@
     </parent>
     <groupId>org.apache.sedona</groupId>
     <artifactId>sedona-parent</artifactId>
-    <version>1.0.0-incubating</version>
+    <version>1.0.1-incubating-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>sedona-parent</name>
     <url>http://sedona.apache.org/</url>
@@ -416,6 +416,7 @@
                     <additionalparam>-Xdoclint:none</additionalparam>
                 </configuration>
             </plugin>
+            <!-- This plugin is to replace property values in artifact names when publish -->
             <plugin>
                 <groupId>io.paradoxical</groupId>
                 <artifactId>resolved-pom-maven-plugin</artifactId>
@@ -429,7 +430,7 @@
                 <executions>
                     <execution>
                         <id>resolve-my-pom</id>
-                        <phase>prepare-package</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>resolve-pom</goal>
                         </goals>
