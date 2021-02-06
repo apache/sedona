@@ -20,15 +20,13 @@ Sedona Python is tested on the following Python and Spark verisons:
 
 ## Direct download
 
-Sedona source code is hosted on [GitHub repository](https://github.com/apache/incubator-sedona/).
+[Release notes](../GeoSpark-All-Modules-Release-notes)
 
-Sedona pre-compiled JARs are hosted on [GitHub Releases](https://github.com/apache/incubator-sedona/releases).
+Latest source code: [GitHub repository](https://github.com/apache/incubator-sedona/).
 
-Sedona pre-compiled JARs are hosted on [Maven Central](../GeoSpark-All-Modules-Maven-Central-Coordinates).
+Release source code and binary jars: [GitHub releases](https://github.com/apache/incubator-sedona/releases), [Maven Central](../GeoSpark-All-Modules-Maven-Central-Coordinates).
 
-Sedona automatically staged JARs (per each Master branch commit) are hosted by [GitHub Action](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Scala+and+Java+build%22).
-
-Sedona release notes are here [Release notes](../GeoSpark-All-Modules-Release-notes).
+Automatically generated binary JARs (per each Master branch commit): [GitHub Action](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Scala+and+Java+build%22).
 
 ## Use Sedona Scala/Java
 
@@ -54,7 +52,7 @@ You need to install necessary packages if your system does not have them install
 * Installing from PyPi repositories
 
 ```bash
-pip install sedona
+pip install apache-sedona
 ```
 
 * Installing from Sedona Python source
