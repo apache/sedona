@@ -18,8 +18,6 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-import java.util
-
 import org.apache.sedona.core.geometryObjects.{Circle, GeoJSONWriterNew}
 import org.apache.sedona.core.utils.GeomUtils
 import org.apache.sedona.sql.utils.GeometrySerializer
@@ -33,17 +31,19 @@ import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.types.{ArrayType, _}
 import org.apache.spark.unsafe.types.UTF8String
 import org.geotools.geometry.jts.JTS
-import org.geotools.referencing.{CRS, ReferencingFactoryFinder}
-import org.geotools.util.factory.Hints
+import org.geotools.referencing.CRS
+import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom.{PrecisionModel, _}
+import org.locationtech.jts.io.WKBWriter
 import org.locationtech.jts.operation.IsSimpleOp
+import org.locationtech.jts.operation.buffer.BufferParameters
 import org.locationtech.jts.operation.linemerge.LineMerger
 import org.locationtech.jts.operation.valid.IsValidOp
 import org.locationtech.jts.precision.GeometryPrecisionReducer
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier
-import org.opengis.referencing.crs.CoordinateReferenceSystem
 import org.opengis.referencing.operation.MathTransform
 
+import java.util
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
@@ -403,10 +403,10 @@ case class ST_IsSimple(inputExpressions: Seq[Expression])
 
 /**
   * Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input,
-  * and with the components having the same topological relationship.  
+  * and with the components having the same topological relationship.
   * The simplification uses a maximum-distance difference algorithm similar to the Douglas-Peucker algorithm.
   *
-  * @param inputExpressions first arg is geometry 
+  * @param inputExpressions first arg is geometry
   *                         second arg is distance tolerance for the simplification(all vertices in the simplified geometry will be within this distance of the original geometry)
   */
 case class ST_SimplifyPreserveTopology(inputExpressions: Seq[Expression])
@@ -656,6 +656,76 @@ case class ST_Boundary(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 
 }
+
+
+case class ST_MinimumBoundingRadius(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  private val geometryFactory = new GeometryFactory()
+
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(1)
+    val geometry = inputExpressions.head.toGeometry(input)
+    geometry match {
+      case geom: Geometry => getMinimumBoundingRadius(geom)
+      case _ => null
+    }
+  }
+
+  private def getMinimumBoundingRadius(geom: Geometry): InternalRow = {
+    val minimumBoundingCircle = new MinimumBoundingCircle(geom)
+    val centerPoint = geometryFactory.createPoint(minimumBoundingCircle.getCentre)
+    InternalRow(centerPoint.toGenericArrayData, minimumBoundingCircle.getRadius)
+  }
+
+  override def dataType: DataType = DataTypes.createStructType(
+    Array(
+      DataTypes.createStructField("center", GeometryUDT, false),
+      DataTypes.createStructField("radius", DataTypes.DoubleType, false)
+    )
+  )
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+
+case class ST_MinimumBoundingCircle(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.betweenLength(1, 2)
+    val geometry = inputExpressions.head.toGeometry(input)
+    val quadrantSegments = if (inputExpressions.length == 2)
+      inputExpressions(1).toInt(input) else BufferParameters.DEFAULT_QUADRANT_SEGMENTS
+    geometry match {
+      case geom: Geometry => getMinimumBoundingCircle(geom, quadrantSegments).toGenericArrayData
+      case _ => null
+    }
+  }
+
+  private def getMinimumBoundingCircle(geom: Geometry, quadrantSegments: Int): Geometry = {
+    val minimumBoundingCircle = new MinimumBoundingCircle(geom)
+    val centre = minimumBoundingCircle.getCentre
+    val radius = minimumBoundingCircle.getRadius
+    var circle: Geometry = null
+    if (centre == null) {
+      circle = geom.getFactory.createPolygon
+    } else {
+      circle = geom.getFactory.createPoint(centre)
+      if (radius != 0D)
+        circle = circle.buffer(radius, quadrantSegments)
+    }
+    circle
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
 
 case class ST_EndPoint(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {

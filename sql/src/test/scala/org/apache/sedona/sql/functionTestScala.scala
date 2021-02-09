@@ -23,6 +23,7 @@ import org.apache.sedona.sql.implicits._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Row}
 import org.geotools.geometry.jts.WKTReader2
+import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom.Geometry
 import org.scalatest.{GivenWhenThen, Matchers}
 
@@ -848,6 +849,62 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     val newY = newDf.take(1)(0).get(0).asInstanceOf[Geometry].getCoordinate.y
     assert(newX == oldY)
     assert(newY == oldX)
+  }
+
+  it("Should pass ST_MinimumBoundingCircle") {
+    Given("Sample geometry data frame")
+    val geometryTable = Seq(
+      "POINT(0 2)",
+      "LINESTRING(0 0,0 1)"
+    ).map(geom => Tuple1(wktReader.read(geom))).toDF("geom")
+
+    When("Using ST_MinimumBoundingCircle function")
+
+    val circleTable = geometryTable.selectExpr("ST_MinimumBoundingCircle(geom) as geom")
+    val circleTableWithSeg = geometryTable.selectExpr("ST_MinimumBoundingCircle(geom, 1) as geom")
+
+    Then("Result should match List of circles")
+
+    val lineString = geometryTable.collect()(1)(0).asInstanceOf[Geometry]
+    val mbcLineString = new MinimumBoundingCircle(lineString)
+    val mbcCentre = lineString.getFactory.createPoint(mbcLineString.getCentre)
+
+    circleTable.selectExpr("ST_AsText(geom)")
+      .as[String].collect().toList should contain theSameElementsAs List(
+      "POINT (0 2)",
+      mbcCentre.buffer(mbcLineString.getRadius, 8).toText
+    )
+
+    circleTableWithSeg.selectExpr("ST_AsText(geom)")
+      .as[String].collect().toList should contain theSameElementsAs List(
+      "POINT (0 2)",
+      mbcCentre.buffer(mbcLineString.getRadius, 1).toText
+    )
+  }
+
+  it("Should pass ST_MinimumBoundingRadius") {
+    Given("Sample geometry data frame")
+    val geometryTable = Seq(
+      "POINT (0 1)",
+      "LINESTRING(1 1,0 0, -1 1)",
+      "POLYGON((1 1,0 0, -1 1, 1 1))"
+    ).map(geom => Tuple1(wktReader.read(geom))).toDF("geom")
+
+    When("Using ST_MinimumBoundingRadius function")
+
+    val radiusTable = geometryTable.selectExpr("ST_MinimumBoundingRadius(geom) as tmp").select("tmp.*")
+
+    Then("Result should match List of centers and radius")
+
+    radiusTable.selectExpr("ST_AsText(center)")
+      .as[String].collect().toList should contain theSameElementsAs List(
+      "POINT (0 1)",
+      "POINT (0 1)",
+      "POINT (0 1)"
+    )
+
+    radiusTable.selectExpr("radius")
+      .as[Double].collect().toList should contain theSameElementsAs List(0, 1, 1)
   }
 
 }
