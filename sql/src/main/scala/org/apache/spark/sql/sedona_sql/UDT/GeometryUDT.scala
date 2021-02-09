@@ -21,6 +21,8 @@ package org.apache.spark.sql.sedona_sql.UDT
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.types._
+import org.json4s.JsonDSL._
+import org.json4s.JsonAST.JValue
 import org.locationtech.jts.geom.Geometry
 
 
@@ -38,6 +40,13 @@ class GeometryUDT extends UserDefinedType[Geometry] {
     datum match {
       case values: ArrayData =>
         GeometrySerializer.deserialize(values)
+    }
+  }
+
+  override private[sql] def jsonValue: JValue = {
+    super.jsonValue mapField {
+      case ("class", _) => "class" -> this.getClass.getName.stripSuffix("$")
+      case other: Any => other
     }
   }
 }
