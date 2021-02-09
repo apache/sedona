@@ -16,17 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.spark.sql.sedona_sql.UDT
 
-package org.apache.sedona.sql
-
+import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.expr
+import org.apache.spark.sql.types.{DataType, StructType}
 import org.junit.rules.TemporaryFolder
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKTReader
 import org.scalatest.BeforeAndAfter
 
-class WriteDataFrameTestScala extends TestBaseScala with BeforeAndAfter {
+class GeometryUdtTestScala extends TestBaseScala with BeforeAndAfter {
 
   import sparkSession.implicits._
 
@@ -34,20 +35,26 @@ class WriteDataFrameTestScala extends TestBaseScala with BeforeAndAfter {
   var dataFrame: DataFrame = _
 
   before {
-    tempFolder.create()
     dataFrame = Seq(Tuple2(47.636, 9.389))
       .toDF("latitude", "longitude")
       .withColumn("point", expr("ST_Point(longitude, latitude)"))
   }
 
-  describe("Write Data Frame Test") {
-    it("Should write Parquet") {
+  describe("GeometryUDT Test") {
+    it("Should write dataframe with geometry in Parquet format") {
+      tempFolder.create()
+
       dataFrame.write.parquet(tempFolder.getRoot.getPath + "/parquet")
+
       val readDataFrame = sparkSession.read.parquet(tempFolder.getRoot.getPath + "/parquet")
       val row = readDataFrame.collect()(0)
       assert(row.getAs[Double]("latitude") == 47.636)
       assert(row.getAs[Double]("longitude") == 9.389)
       assert(row.getAs[Geometry]("point").equals(new WKTReader().read("POINT (9.389 47.636)")))
+    }
+
+    it("Should be able to render and parse JSON schema") {
+     assert(DataType.fromJson(dataFrame.schema.json).asInstanceOf[StructType].equals(dataFrame.schema))
     }
   }
 
