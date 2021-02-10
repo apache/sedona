@@ -75,17 +75,23 @@ You can get it using one of the following methods:
 2. Download from [GitHub release](https://github.com/apache/incubator-sedona/releases) and copy it to SPARK_HOME/jars/ folder
 3. Call the [Maven Central coordinate](../GeoSpark-All-Modules-Maven-Central-Coordinates) in your python program. For example, in PySparkSQL
 ```python
-    spark = SparkSession.\
-        builder.\
-        appName('appName').\
-        config("spark.serializer", KryoSerializer.getName).\
-        config("spark.kryo.registrator", SedonaKryoRegistrator.getName) .\
-        config('spark.jars.packages', 'org.apache.sedona:sedona-python-adapter-3.0_2.12:1.0.0-incubating').\
-        getOrCreate()
+spark = SparkSession. \
+    builder. \
+    appName('appName'). \
+    config("spark.serializer", KryoSerializer.getName). \
+    config("spark.kryo.registrator", SedonaKryoRegistrator.getName). \
+    config("spark.jars.repositories", 'https://repo.osgeo.org/repository/release,'
+                                      'https://download.java.net/maven/2'). \
+    config('spark.jars.packages',
+           'org.apache.sedona:sedona-python-adapter-3.0_2.12:1.0.0-incubating,'
+           'org.geotools:gt-main:24.0,'
+           'org.geotools:gt-referencing:24.0,'
+           'org.geotools:gt-epsg-hsql:24.0'). \
+    getOrCreate()
 ```
 
 !!!warning
-	If you are going to use Sedona CRS transformation and ShapefileReader functions, you have to use Method 1. Because these functions internally use GeoTools libraries which are under LGPL license, Apache Sedona binary release cannot include them.
+	If you are going to use Sedona CRS transformation and ShapefileReader functions, you have to use Method 1 or 3. Because these functions internally use GeoTools libraries which are under LGPL license, Apache Sedona binary release cannot include them.
 
 ### Setup environment variables
 
