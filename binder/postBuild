@@ -4,9 +4,3 @@ tar -xzf spark-3.0.1-bin-hadoop2.7.tgz
 
 #Tidy up
 rm spark-3.0.1-bin-hadoop2.7.tgz
-
-export SPARK_HOME=$HOME/spark-3.0.1-bin-hadoop2.7
-export PATH=$SPARK_HOME/bin:$PATH
-export PYTHONPATH=$SPARK_HOME/python:$PYTHONPATH
-export PYSPARK_SUBMIT_ARGS="--master local[*] pyspark-shell"
-jupyter serverextension enable --py nbserverproxy
