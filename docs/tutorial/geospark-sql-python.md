@@ -14,7 +14,7 @@ spark.sql("YOUR_SQL")
 ```
 
 !!!note
-	This tutorial is based on [Sedona SQL Jupyter Notebook example](../jupyter-notebook)
+	This tutorial is based on [Sedona SQL Jupyter Notebook example](../jupyter-notebook). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder) and wait for a few minutes. Then select a notebook and enjoy!
 	
 ## Installation
 

@@ -39,6 +39,8 @@ There are two ways to use a Scala or Java library with Apache Spark. You can use
 
 ## Install Sedona Python
 
+Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder) and play the interactive Sedona Python Jupyter Notebook immediately!
+
 Apache Sedona extends pyspark functions which depends on libraries:
 
 * pyspark
@@ -105,4 +107,4 @@ export SPARK_HOME=~/Downloads/spark-3.0.1-bin-hadoop2.7
 export PYTHONPATH=$SPARK_HOME/python
 ``` 
 
-You can then play with [Sedona Python Jupyter notebook](/tutorial/jupyter-notebook/)
+You can then play with [Sedona Python Jupyter notebook](/tutorial/jupyter-notebook/).

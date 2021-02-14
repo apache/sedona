@@ -1,5 +1,7 @@
 # Don't have time? Read [Quick Start](/download/overview)
 
+Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder) and play the interactive Sedona Python Jupyter Notebook immediately!
+
 ## Companies are using Sedona 
 
 [<img src="https://www.dataiku.com/static/img/partners/LOGO-Blue-DME-PNG-3.png" width="200">](https://www.bluedme.com/) &nbsp;&nbsp; [<img src="https://images.ukfast.co.uk/comms/news/businesscloud/photos/14-08-2018/gyana.jpg" width="150">](https://www.gyana.co.uk/) &nbsp;&nbsp; [<img src="https://mobike.com/global/public/invitation__footer__logo.png" width="150">](https://mobike.com) and more!
