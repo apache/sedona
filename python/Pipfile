@@ -15,6 +15,7 @@ pandas="*"
 geopandas="==0.6.0"
 pyspark=">=2.4.0"
 attrs="*"
+ipykernel = "*"
 
 [requires]
 python_version = "3.7"
