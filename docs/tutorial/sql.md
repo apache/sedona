@@ -265,10 +265,17 @@ All other attributes such as price and age will be also brought to the DataFrame
 
 ### SpatialPairRDD to DataFrame
 
-PairRDD is the result of a spatial join query or distance join query. SedonaSQL DataFrame-RDD Adapter can convert the result to a DataFrame:
+PairRDD is the result of a spatial join query or distance join query. SedonaSQL DataFrame-RDD Adapter can convert the result to a DataFrame. But you need to provide the name of other attributes.
 
 ```Scala
-var joinResultDf = Adapter.toDf(joinResultPairRDD, sparkSession)
+var joinResultDf = Adapter.toDf(joinResultPairRDD, Seq("left_attribute1", "left_attribute2"), Seq("right_attribute1", "right_attribute2"), sparkSession)
+```
+
+or you can use the attribute names directly from the input RDD
+
+```Scala
+import scala.collection.JavaConversions._
+var joinResultDf = Adapter.toDf(joinResultPairRDD, leftRdd.fieldNames, rightRdd.fieldNames, sparkSession)
 ```
 
 All other attributes such as price and age will be also brought to the DataFrame as long as you specify ==carryOtherAttributes== (see [Read other attributes in an SpatialRDD](../rdd#read-other-attributes-in-an-spatialrdd)).

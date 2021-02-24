@@ -1,11 +1,87 @@
 # Maven Coordinates
 
-Sedona has four modules: `sedona-core, sedona-sql, sedona-viz, sedona-python-adapter`. If you use Scala and Java API, you only need to use `sedona-core, sedona-sql, sedona-viz`. If you use Python API, you only need to use `sedona-python-adapter`.
-
-!!!note
-	Sedona Scala, Java and Python API also requires additional dependencies to work (see below).
+Sedona has four modules: `sedona-core, sedona-sql, sedona-viz, sedona-python-adapter`. They have different packing policies. You will need to use `sedona-python-adapter` for Scala, Java and Python API.  ==You may also need geotools-wrapper (see below)==. If you want to use SedonaViz, you will include one more jar: `sedona-viz`.
 
 ## Spark 3.0 + Scala 2.12
+
+```xml
+<dependency>
+  <groupId>org.apache.sedona</groupId>
+  <artifactId>sedona-python-adapter-3.0_2.12</artifactId>
+  <version>1.0.0-incubating</version>
+</dependency>
+<dependency>
+  <groupId>org.apache.sedona</groupId>
+  <artifactId>sedona-viz-3.0_2.12</artifactId>
+  <version>1.0.0-incubating</version>
+</dependency>
+```
+
+## Spark 2.4 + Scala 2.11
+
+```xml
+<dependency>
+  <groupId>org.apache.sedona</groupId>
+  <artifactId>sedona-python-adapter-2.4_2.11</artifactId>
+  <version>1.0.0-incubating</version>
+</dependency>
+<dependency>
+  <groupId>org.apache.sedona</groupId>
+  <artifactId>sedona-viz-2.4_2.11</artifactId>
+  <version>1.0.0-incubating</version>
+</dependency>
+```
+
+## Spark 2.4 + Scala 2.12
+
+```xml
+<dependency>
+  <groupId>org.apache.sedona</groupId>
+  <artifactId>sedona-python-adapter-2.4_2.12</artifactId>
+  <version>1.0.0-incubating</version>
+</dependency>
+<dependency>
+  <groupId>org.apache.sedona</groupId>
+  <artifactId>sedona-viz-2.4_2.12</artifactId>
+  <version>1.0.0-incubating</version>
+</dependency>
+```
+
+## GeoTools 24.0
+
+GeoTools library is required only if you want to use CRS transformation and ShapefileReader. This wrapper library is a re-distriution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This libary is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
+
+```xml
+<!-- https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
+<dependency>
+    <groupId>org.datasyslab</groupId>
+    <artifactId>geotools-wrapper</artifactId>
+    <version>geotools-24.0</version>
+</dependency>
+```
+
+## SernetCDF 0.1.0
+
+For Scala / Java API, it is required only if you want to read HDF/NetCDF files.
+
+HDF/NetCDF function is currently not supported in Sedona Python.
+
+Under Apache License 2.0.
+
+```xml
+<!-- https://mvnrepository.com/artifact/org.datasyslab/sernetcdf -->
+<dependency>
+    <groupId>org.datasyslab</groupId>
+    <artifactId>sernetcdf</artifactId>
+    <version>0.1.0</version>
+</dependency>
+```
+
+## Use Sedona and third-party jars separately
+
+==For Scala and Java users==, if by any chance you don't want to use an uber jar that includes every dependency, you can use the following jars instead. ==Otherwise, please do not continue reading this section.==
+
+### Spark 3.0 + Scala 2.12
 
 Scala and Java API only
 ```xml
@@ -26,16 +102,7 @@ Scala and Java API only
 </dependency>
 ```
 
-Python API only
-```xml
-<dependency>
-  <groupId>org.apache.sedona</groupId>
-  <artifactId>sedona-python-adapter-3.0_2.12</artifactId>
-  <version>1.0.0-incubating</version>
-</dependency>
-```
-
-## Spark 2.4 + Scala 2.11
+### Spark 2.4 + Scala 2.11
 
 Scala and Java API only
 ```xml
@@ -56,16 +123,7 @@ Scala and Java API only
 </dependency>
 ```
 
-Python API only
-```xml
-<dependency>
-  <groupId>org.apache.sedona</groupId>
-  <artifactId>sedona-python-adapter-2.4_2.11</artifactId>
-  <version>1.0.0-incubating</version>
-</dependency>
-```
-
-## Spark 2.4 + Scala 2.12
+### Spark 2.4 + Scala 2.12
 
 Scala and Java API only
 ```xml
@@ -86,24 +144,9 @@ Scala and Java API only
 </dependency>
 ```
 
-Python API only
-```xml
-<dependency>
-  <groupId>org.apache.sedona</groupId>
-  <artifactId>sedona-python-adapter-2.4_2.12</artifactId>
-  <version>1.0.0-incubating</version>
-</dependency>
-```
-
-## Additional dependencies
-
-To avoid conflicts in downstream projects and solve the copyright issue, Sedona almost does not package any dependencies in the release jars. Therefore, you need to add the following jars in your `build.sbt` or `pom.xml` if you use Sedona Scala and Java API. You may need to compile Sedona source code to get GeoTools jars if you use Sedona Python.
-
 ### LocationTech JTS-core 1.18.0+
 
-For Scala / Java API: `required` under Eclipse Public License 2.0 ("EPL") or the Eclipse Distribution License 1.0 (a BSD Style License)
-
-For Python API: `not required, already included`
+Under Eclipse Public License 2.0 ("EPL") or the Eclipse Distribution License 1.0 (a BSD Style License)
 
 ```xml
 <!-- https://mvnrepository.com/artifact/org.locationtech.jts/jts-core -->
@@ -116,9 +159,7 @@ For Python API: `not required, already included`
 
 ### jts2geojson 0.14.3+
 
-For Scala / Java API: `required` if you read GeoJSON files. Under MIT License
-
-For Python API: `not required, already included`
+Under MIT License. Please make sure you exclude jts and jackson from this library.
 
 ```xml
 <!-- https://mvnrepository.com/artifact/org.wololo/jts2geojson -->
@@ -126,69 +167,30 @@ For Python API: `not required, already included`
     <groupId>org.wololo</groupId>
     <artifactId>jts2geojson</artifactId>
     <version>0.14.3</version>
+    <exclusions>
+        <exclusion>
+            <groupId>org.locationtech.jts</groupId>
+            <artifactId>jts-core</artifactId>
+        </exclusion>
+        <exclusion>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>*</artifactId>
+        </exclusion>
+    </exclusions>
 </dependency>
 ```
 
-### GeoTools 24.0+
+### GeoTools 24.0
 
-For Scala / Java API: `required` if you want to use CRS transformation and ShapefileReader.
-
-For Python API: `required` if you want to use CRS transformation and ShapefileReader. You have to compile the Sedona source code by yourself. See [Install Sedona Python](/download/overview/#install-sedona-python)
-
-Under GNU Lesser General Public License (LGPL) license
+GeoTools library is required only if you want to use CRS transformation and ShapefileReader. This wrapper library is a re-distriution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This libary is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
 
 ```xml
-<!-- https://mvnrepository.com/artifact/org.geotools/gt-main -->
+<!-- https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
 <dependency>
-    <groupId>org.geotools</groupId>
-    <artifactId>gt-main</artifactId>
-    <version>24.0</version>
+    <groupId>org.datasyslab</groupId>
+    <artifactId>geotools-wrapper</artifactId>
+    <version>geotools-24.0</version>
 </dependency>
-<!-- https://mvnrepository.com/artifact/org.geotools/gt-referencing -->
-<dependency>
-    <groupId>org.geotools</groupId>
-    <artifactId>gt-referencing</artifactId>
-    <version>24.0</version>
-</dependency>
-<!-- https://mvnrepository.com/artifact/org.geotools/gt-epsg-hsql -->
-<dependency>
-    <groupId>org.geotools</groupId>
-    <artifactId>gt-epsg-hsql</artifactId>
-    <version>24.0</version>
-</dependency>
-```
-
-GeoTools libraries are in OSGeo repository instead of Maven Central. You need to add the repo in `build.sbt` or `pom.xml`
-
-#### pom.xml
-```xml
-<repositories>
-    <repository>
-        <id>maven2-repository.dev.java.net</id>
-        <name>Java.net repository</name>
-        <url>https://download.java.net/maven/2</url>
-    </repository>
-    <repository>
-        <id>osgeo</id>
-        <name>OSGeo Release Repository</name>
-        <url>https://repo.osgeo.org/repository/release/</url>
-        <snapshots>
-            <enabled>false</enabled>
-        </snapshots>
-        <releases>
-            <enabled>true</enabled>
-        </releases>
-    </repository>
-</repositories>
-```
-
-#### Build.sbt
-```scala
-resolvers +=
-  "Open Source Geospatial Foundation Repository" at "https://repo.osgeo.org/repository/release/"
-
-resolvers +=
-  "Java.net repository" at "https://download.java.net/maven/2"
 ```
 
 ### SernetCDF 0.1.0
@@ -204,7 +206,6 @@ Under Apache License 2.0.
     <artifactId>sernetcdf</artifactId>
     <version>0.1.0</version>
 </dependency>
-
 ```
 
 ## SNAPSHOT versions
