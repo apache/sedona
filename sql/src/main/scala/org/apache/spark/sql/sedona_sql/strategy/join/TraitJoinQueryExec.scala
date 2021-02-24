@@ -19,11 +19,11 @@
 package org.apache.spark.sql.sedona_sql.strategy.join
 
 import org.apache.sedona.core.enums.JoinSparitionDominantSide
+import org.apache.sedona.core.serde.GeometrySerde
 import org.apache.sedona.core.spatialOperator.JoinQuery
 import org.apache.sedona.core.spatialOperator.JoinQuery.JoinParams
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.sedona.core.utils.SedonaConf
-import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeRowJoiner
@@ -170,7 +170,7 @@ val boundCondition = Predicate.create(extraCondition.get, left.output ++ right.o
     spatialRdd.setRawSpatialRDD(
       rdd
         .map { x => {
-          val shape = GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[ArrayData])
+          val shape = GeometrySerde.deserialize(shapeExpression.eval(x).asInstanceOf[ArrayData])
           //logInfo(shape.toString)
           shape.setUserData(x.copy)
           shape

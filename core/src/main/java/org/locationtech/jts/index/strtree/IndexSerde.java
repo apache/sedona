@@ -16,7 +16,7 @@ package org.locationtech.jts.index.strtree;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import org.apache.sedona.core.geometryObjects.GeometrySerde;
+import org.apache.sedona.core.serde.KryoGeometrySerde;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 
@@ -29,9 +29,9 @@ import java.util.List;
  */
 public class IndexSerde
 {
-    GeometrySerde geometrySerde;
+    KryoGeometrySerde kryoGeometrySerde;
     public IndexSerde() {
-        geometrySerde = new GeometrySerde();
+        kryoGeometrySerde = new KryoGeometrySerde();
     }
 
     public Object read(Kryo kryo, Input input){
@@ -141,15 +141,15 @@ public class IndexSerde
 
     private void writeItemBoundable(Kryo kryo, Output output, ItemBoundable itemBoundable)
     {
-        geometrySerde.write(kryo, output, itemBoundable.getBounds());
-        geometrySerde.write(kryo, output, itemBoundable.getItem());
+        kryoGeometrySerde.write(kryo, output, itemBoundable.getBounds());
+        kryoGeometrySerde.write(kryo, output, itemBoundable.getItem());
     }
 
     private ItemBoundable readItemBoundable(Kryo kryo, Input input)
     {
         return new ItemBoundable(
-                geometrySerde.read(kryo, input, Envelope.class),
-                geometrySerde.read(kryo, input, Geometry.class)
+                kryoGeometrySerde.read(kryo, input, Envelope.class),
+                kryoGeometrySerde.read(kryo, input, Geometry.class)
         );
     }
 }

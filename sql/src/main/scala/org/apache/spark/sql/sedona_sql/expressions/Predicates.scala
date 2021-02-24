@@ -18,7 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-import org.apache.sedona.sql.utils.GeometrySerializer
+import org.apache.sedona.core.serde.GeometrySerde
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
@@ -46,9 +46,9 @@ case class ST_Contains(inputExpressions: Seq[Expression])
     val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
     val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
 
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
+    val leftGeometry = GeometrySerde.deserialize(leftArray)
 
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
+    val rightGeometry = GeometrySerde.deserialize(rightArray)
 
     return leftGeometry.covers(rightGeometry)
   }
@@ -76,9 +76,9 @@ case class ST_Intersects(inputExpressions: Seq[Expression])
     val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
     val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
 
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
+    val leftGeometry = GeometrySerde.deserialize(leftArray)
 
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
+    val rightGeometry = GeometrySerde.deserialize(rightArray)
 
     return leftGeometry.intersects(rightGeometry)
   }
@@ -106,9 +106,9 @@ case class ST_Within(inputExpressions: Seq[Expression])
     val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
     val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
 
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
+    val leftGeometry = GeometrySerde.deserialize(leftArray)
 
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
+    val rightGeometry = GeometrySerde.deserialize(rightArray)
 
     return leftGeometry.coveredBy(rightGeometry)
   }
@@ -136,9 +136,9 @@ case class ST_Crosses(inputExpressions: Seq[Expression])
     val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
     val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
 
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
+    val leftGeometry = GeometrySerde.deserialize(leftArray)
 
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
+    val rightGeometry = GeometrySerde.deserialize(rightArray)
 
     return leftGeometry.crosses(rightGeometry)
   }
@@ -167,9 +167,9 @@ case class ST_Overlaps(inputExpressions: Seq[Expression])
     val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
     val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
 
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
+    val leftGeometry = GeometrySerde.deserialize(leftArray)
 
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
+    val rightGeometry = GeometrySerde.deserialize(rightArray)
 
     return leftGeometry.overlaps(rightGeometry)
   }
@@ -197,9 +197,9 @@ case class ST_Touches(inputExpressions: Seq[Expression])
     val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
     val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
 
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
+    val leftGeometry = GeometrySerde.deserialize(leftArray)
 
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
+    val rightGeometry = GeometrySerde.deserialize(rightArray)
 
     return leftGeometry.touches(rightGeometry)
   }
@@ -228,9 +228,9 @@ case class ST_Equals(inputExpressions: Seq[Expression])
 
     val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
 
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
+    val leftGeometry = GeometrySerde.deserialize(leftArray)
 
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
+    val rightGeometry = GeometrySerde.deserialize(rightArray)
 
     // Returns GeometryCollection object
     val symDifference = leftGeometry.symDifference(rightGeometry)

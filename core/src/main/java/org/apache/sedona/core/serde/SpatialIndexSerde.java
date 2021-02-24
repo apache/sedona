@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.sedona.core.geometryObjects;
+package org.apache.sedona.core.serde;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
@@ -41,18 +41,18 @@ public class SpatialIndexSerde
 
     private static final Logger log = Logger.getLogger(SpatialIndexSerde.class);
 
-    private final GeometrySerde geometrySerde;
+    private final KryoGeometrySerde kryoGeometrySerde;
 
     public SpatialIndexSerde()
     {
         super();
-        geometrySerde = new GeometrySerde();
+        kryoGeometrySerde = new KryoGeometrySerde();
     }
 
-    public SpatialIndexSerde(GeometrySerde geometrySerde)
+    public SpatialIndexSerde(KryoGeometrySerde kryoGeometrySerde)
     {
         super();
-        this.geometrySerde = geometrySerde;
+        this.kryoGeometrySerde = kryoGeometrySerde;
     }
 
     @Override

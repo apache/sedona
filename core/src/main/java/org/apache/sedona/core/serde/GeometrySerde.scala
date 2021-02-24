@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql.utils
+package org.apache.sedona.core.serde
 
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.locationtech.jts.geom.Geometry
@@ -25,7 +25,7 @@ import org.locationtech.jts.io.{WKBReader, WKBWriter}
 /**
   * SerDe using the WKB reader and writer objects
   */
-object GeometrySerializer {
+object GeometrySerde {
 
   /**
     * Given a geometry returns array of bytes
@@ -47,5 +47,16 @@ object GeometrySerializer {
   def deserialize(values: ArrayData): Geometry = {
     val reader = new WKBReader()
     reader.read(values.toByteArray())
+  }
+
+  /**
+   * Given Byte Array returns Geometry
+   *
+   * @param values Array[Byte]
+   * @return JTS geometry
+   */
+  def deserialize(values: Array[Byte]): Geometry = {
+    val reader = new WKBReader()
+    reader.read(values)
   }
 }

@@ -16,7 +16,7 @@ package org.locationtech.jts.index.quadtree;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import org.apache.sedona.core.geometryObjects.GeometrySerde;
+import org.apache.sedona.core.serde.KryoGeometrySerde;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 
@@ -29,9 +29,9 @@ import java.util.List;
  */
 public class IndexSerde
 {
-    GeometrySerde geometrySerde;
+    KryoGeometrySerde kryoGeometrySerde;
     public IndexSerde() {
-        geometrySerde = new GeometrySerde();
+        kryoGeometrySerde = new KryoGeometrySerde();
     }
 
     public Object read(Kryo kryo, Input input){
@@ -41,7 +41,7 @@ public class IndexSerde
         int itemSize = input.readInt();
         List items = new ArrayList();
         for (int i = 0; i < itemSize; ++i) {
-            items.add(geometrySerde.read(kryo, input, Geometry.class));
+            items.add(kryoGeometrySerde.read(kryo, input, Geometry.class));
         }
         index.getRoot().items = items;
         for (int i = 0; i < 4; ++i) {
@@ -61,7 +61,7 @@ public class IndexSerde
             List items = tree.getRoot().getItems();
             output.writeInt(items.size());
             for (Object item : items) {
-                geometrySerde.write(kryo, output, item);
+                kryoGeometrySerde.write(kryo, output, item);
             }
             Node[] subNodes = tree.getRoot().subnode;
             for (int i = 0; i < 4; ++i) {
@@ -79,12 +79,12 @@ public class IndexSerde
         else { // not empty
             output.writeByte(1);
             // write node information, envelope and level
-            geometrySerde.write(kryo, output, node.getEnvelope());
+            kryoGeometrySerde.write(kryo, output, node.getEnvelope());
             output.writeInt(node.getLevel());
             List items = node.getItems();
             output.writeInt(items.size());
             for (Object obj : items) {
-                geometrySerde.write(kryo, output, obj);
+                kryoGeometrySerde.write(kryo, output, obj);
             }
             Node[] subNodes = node.subnode;
             for (int i = 0; i < 4; ++i) {
@@ -97,13 +97,13 @@ public class IndexSerde
     {
         boolean notEmpty = (input.readByte() & 0x01) == 1;
         if (!notEmpty) { return null; }
-        Envelope envelope = (Envelope) geometrySerde.read(kryo, input, Envelope.class);
+        Envelope envelope = (Envelope) kryoGeometrySerde.read(kryo, input, Envelope.class);
         int level = input.readInt();
         Node node = new Node(envelope, level);
         int itemSize = input.readInt();
         List items = new ArrayList();
         for (int i = 0; i < itemSize; ++i) {
-            items.add(geometrySerde.read(kryo, input, Geometry.class));
+            items.add(kryoGeometrySerde.read(kryo, input, Geometry.class));
         }
         node.items = items;
         // read children

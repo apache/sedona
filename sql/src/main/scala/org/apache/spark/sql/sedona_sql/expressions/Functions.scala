@@ -19,8 +19,8 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.core.geometryObjects.{Circle, GeoJSONWriterNew}
+import org.apache.sedona.core.serde.GeometrySerde
 import org.apache.sedona.core.utils.GeomUtils
-import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
@@ -70,9 +70,9 @@ case class ST_Distance(inputExpressions: Seq[Expression])
     val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
     val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
 
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
+    val leftGeometry = GeometrySerde.deserialize(leftArray)
 
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
+    val rightGeometry = GeometrySerde.deserialize(rightArray)
 
     return leftGeometry.distance(rightGeometry)
   }
@@ -91,8 +91,8 @@ case class ST_ConvexHull(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length == 1)
-    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
-    new GenericArrayData(GeometrySerializer.serialize(geometry.convexHull()))
+    val geometry = GeometrySerde.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    new GenericArrayData(GeometrySerde.serialize(geometry.convexHull()))
   }
 
   override def dataType: DataType = GeometryUDT
@@ -112,7 +112,7 @@ case class ST_NPoints(inputExpressions: Seq[Expression])
   override def eval(input: InternalRow): Any = {
     inputExpressions.length match {
       case 1 =>
-        val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+        val geometry = GeometrySerde.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
         geometry.getCoordinates.length
       case _ => None
     }
@@ -135,13 +135,13 @@ case class ST_Buffer(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length == 2)
-    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val geometry = GeometrySerde.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     val buffer: Double = inputExpressions(1).eval(input) match {
       case a: Decimal => a.toDouble
       case a: Double => a
       case a: Int => a
     }
-    new GenericArrayData(GeometrySerializer.serialize(geometry.buffer(buffer)))
+    new GenericArrayData(GeometrySerde.serialize(geometry.buffer(buffer)))
   }
 
   override def dataType: DataType = GeometryUDT
@@ -161,8 +161,8 @@ case class ST_Envelope(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length == 1)
-    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
-    new GenericArrayData(GeometrySerializer.serialize(geometry.getEnvelope()))
+    val geometry = GeometrySerde.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    new GenericArrayData(GeometrySerde.serialize(geometry.getEnvelope()))
   }
 
   override def dataType: DataType = GeometryUDT
@@ -181,7 +181,7 @@ case class ST_Length(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length == 1)
-    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val geometry = GeometrySerde.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     return geometry.getLength
   }
 
@@ -201,7 +201,7 @@ case class ST_Area(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length == 1)
-    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val geometry = GeometrySerde.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     return geometry.getArea
   }
 
@@ -221,8 +221,8 @@ case class ST_Centroid(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length == 1)
-    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
-    new GenericArrayData(GeometrySerializer.serialize(geometry.getCentroid()))
+    val geometry = GeometrySerde.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    new GenericArrayData(GeometrySerde.serialize(geometry.getCentroid()))
   }
 
   override def dataType: DataType = GeometryUDT
@@ -242,7 +242,7 @@ case class ST_Transform(inputExpressions: Seq[Expression])
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length >= 3 && inputExpressions.length <= 4)
 
-    val originalGeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val originalGeometry = GeometrySerde.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     val sourceCRScode = CRS.decode(inputExpressions(1).eval(input).asInstanceOf[UTF8String].toString)
     val targetCRScode = CRS.decode(inputExpressions(2).eval(input).asInstanceOf[UTF8String].toString)
 
@@ -254,7 +254,7 @@ case class ST_Transform(inputExpressions: Seq[Expression])
       transform = CRS.findMathTransform(sourceCRScode, targetCRScode, false)
     }
     val geom = JTS.transform(originalGeometry, transform)
-    new GenericArrayData(GeometrySerializer.serialize(geom))
+    new GenericArrayData(GeometrySerde.serialize(geom))
   }
 
   override def dataType: DataType = GeometryUDT
@@ -277,26 +277,26 @@ case class ST_Intersection(inputExpressions: Seq[Expression])
 
   override def eval(inputRow: InternalRow): Any = {
     assert(inputExpressions.length == 2)
-    val leftgeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData])
-    val rightgeometry = GeometrySerializer.deserialize(inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData])
+    val leftgeometry = GeometrySerde.deserialize(inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData])
+    val rightgeometry = GeometrySerde.deserialize(inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData])
 
     val isIntersects = leftgeometry.intersects(rightgeometry)
     lazy val isLeftContainsRight = leftgeometry.contains(rightgeometry)
     lazy val isRightContainsLeft = rightgeometry.contains(leftgeometry)
 
     if (!isIntersects) {
-      return new GenericArrayData(GeometrySerializer.serialize(emptyPolygon))
+      return new GenericArrayData(GeometrySerde.serialize(emptyPolygon))
     }
 
     if (isIntersects && isLeftContainsRight) {
-      return new GenericArrayData(GeometrySerializer.serialize(rightgeometry))
+      return new GenericArrayData(GeometrySerde.serialize(rightgeometry))
     }
 
     if (isIntersects && isRightContainsLeft) {
-      return new GenericArrayData(GeometrySerializer.serialize(leftgeometry))
+      return new GenericArrayData(GeometrySerde.serialize(leftgeometry))
     }
 
-    return new GenericArrayData(GeometrySerializer.serialize(leftgeometry.intersection(rightgeometry)))
+    return new GenericArrayData(GeometrySerde.serialize(leftgeometry.intersection(rightgeometry)))
   }
 
   override def dataType: DataType = GeometryUDT
@@ -319,7 +319,7 @@ case class ST_MakeValid(inputExpressions: Seq[Expression])
   override def eval(input: InternalRow): TraversableOnce[InternalRow] = {
     assert(inputExpressions.length == 2)
 
-    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val geometry = GeometrySerde.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     val removeHoles = inputExpressions(1).eval(input).asInstanceOf[Boolean]
 
     // in order to do flatMap on java collections(util.List[Polygon])
@@ -343,7 +343,7 @@ case class ST_MakeValid(inputExpressions: Seq[Expression])
     }
 
     val result = validGeometry.toArray.map(g => {
-      val serializedGeometry = GeometrySerializer.serialize(g.asInstanceOf[Geometry])
+      val serializedGeometry = GeometrySerde.serialize(g.asInstanceOf[Geometry])
       InternalRow(new GenericArrayData(serializedGeometry))
     })
 
@@ -367,7 +367,7 @@ case class ST_IsValid(inputExpressions: Seq[Expression])
     if (inputExpressions(0).eval(input).asInstanceOf[ArrayData] == null) {
       return null
     }
-    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val geometry = GeometrySerde.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     val isvalidop = new IsValidOp(geometry)
     isvalidop.isValid
   }
@@ -389,7 +389,7 @@ case class ST_IsSimple(inputExpressions: Seq[Expression])
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length == 1)
 
-    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val geometry = GeometrySerde.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
 
     val isSimpleop = new IsSimpleOp(geometry)
 
@@ -416,7 +416,7 @@ case class ST_SimplifyPreserveTopology(inputExpressions: Seq[Expression])
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length == 2)
 
-    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val geometry = GeometrySerde.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     val distanceTolerance = inputExpressions(1).eval(input) match {
       case number: Decimal => number.toDouble
       case number: Double => number
@@ -424,7 +424,7 @@ case class ST_SimplifyPreserveTopology(inputExpressions: Seq[Expression])
     }
     val simplifiedGeometry = TopologyPreservingSimplifier.simplify(geometry, distanceTolerance)
 
-    new GenericArrayData(GeometrySerializer.serialize(simplifiedGeometry))
+    new GenericArrayData(GeometrySerde.serialize(simplifiedGeometry))
   }
 
   override def dataType: DataType = GeometryUDT
@@ -444,10 +444,10 @@ case class ST_PrecisionReduce(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length == 2)
-    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val geometry = GeometrySerde.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     val precisionScale = inputExpressions(1).eval(input).asInstanceOf[Int]
     val precisionReduce = new GeometryPrecisionReducer(new PrecisionModel(Math.pow(10, precisionScale)))
-    new GenericArrayData(GeometrySerializer.serialize(precisionReduce.reduce(geometry)))
+    new GenericArrayData(GeometrySerde.serialize(precisionReduce.reduce(geometry)))
   }
 
   override def dataType: DataType = GeometryUDT
@@ -461,7 +461,7 @@ case class ST_AsText(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length == 1)
-    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val geometry = GeometrySerde.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     UTF8String.fromString(geometry.toText)
   }
 
@@ -493,7 +493,7 @@ case class ST_GeometryType(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length == 1)
-    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val geometry = GeometrySerde.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     UTF8String.fromString("ST_" + geometry.getGeometryType)
   }
 
@@ -520,7 +520,7 @@ case class ST_LineMerge(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length == 1)
-    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val geometry = GeometrySerde.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
 
     val merger = new LineMerger()
 
@@ -541,7 +541,7 @@ case class ST_LineMerge(inputExpressions: Seq[Expression])
       }
       case _ => emptyGeometry
     }
-    new GenericArrayData(GeometrySerializer.serialize(output))
+    new GenericArrayData(GeometrySerde.serialize(output))
   }
 
   override def dataType: DataType = GeometryUDT
@@ -1011,7 +1011,7 @@ case class ST_NumGeometries(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length == 1)
-    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val geometry = GeometrySerde.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     geometry.getNumGeometries()
   }
 
@@ -1031,7 +1031,7 @@ case class ST_FlipCoordinates(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length == 1)
-    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val geometry = GeometrySerde.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     GeomUtils.flipCoordinates(geometry)
     geometry.toGenericArrayData
   }

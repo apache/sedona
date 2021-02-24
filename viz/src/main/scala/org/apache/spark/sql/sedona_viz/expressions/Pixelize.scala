@@ -19,10 +19,9 @@
 package org.apache.spark.sql.sedona_viz.expressions
 
 import java.io.ByteArrayOutputStream
-
 import com.esotericsoftware.kryo.Kryo
 import com.esotericsoftware.kryo.io.Output
-import org.apache.sedona.sql.utils.GeometrySerializer
+import org.apache.sedona.core.serde.GeometrySerde
 import org.apache.sedona.viz.core.Serde.PixelSerializer
 import org.apache.sedona.viz.utils.{ColorizeOption, RasterizationUtils}
 import org.apache.spark.internal.Logging
@@ -42,10 +41,10 @@ case class ST_Pixelize(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): TraversableOnce[InternalRow] = {
     assert(inputExpressions.length <= 5)
-    val inputGeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val inputGeometry = GeometrySerde.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     val resolutionX = inputExpressions(1).eval(input).asInstanceOf[Integer]
     val resolutionY = inputExpressions(2).eval(input).asInstanceOf[Integer]
-    val boundary = GeometrySerializer.deserialize(inputExpressions(3).eval(input).asInstanceOf[ArrayData]).getEnvelopeInternal
+    val boundary = GeometrySerde.deserialize(inputExpressions(3).eval(input).asInstanceOf[ArrayData]).getEnvelopeInternal
     val reverseCoordinate = false
     val pixels = inputGeometry match {
       case geometry: LineString => {

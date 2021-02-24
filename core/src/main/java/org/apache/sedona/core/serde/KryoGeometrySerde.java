@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.sedona.core.geometryObjects;
+package org.apache.sedona.core.serde;
 
 import java.util.Objects;
 
@@ -27,6 +27,7 @@ import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import org.apache.log4j.Logger;
+import org.apache.sedona.core.geometryObjects.Circle;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -50,11 +51,11 @@ import org.locationtech.jts.io.WKBWriter;
  * First byte contains {@link Type#id}. Then go type-specific bytes, followed by
  * user-data attached to the geometry.
  */
-public class GeometrySerde
+public class KryoGeometrySerde
         extends Serializer
 {
 
-    private static final Logger log = Logger.getLogger(GeometrySerde.class);
+    private static final Logger log = Logger.getLogger(KryoGeometrySerde.class);
     private static final GeometryFactory geometryFactory = new GeometryFactory();
 
     @Override
@@ -103,8 +104,7 @@ public class GeometrySerde
 
     private void writeGeometry(Kryo kryo, Output out, Geometry geometry)
     {
-        WKBWriter writer = new WKBWriter(2, 2, true);
-        byte[] data = writer.write(geometry);
+        byte[] data = GeometrySerde.serialize(geometry);
 
         // write geometry length size to read bytes until userData
         out.writeInt(data.length, true);
@@ -170,19 +170,13 @@ public class GeometrySerde
     }
 
     private Geometry readGeometry(Kryo kryo, Input input) {
-        WKBReader reader = new WKBReader();
-        Geometry geometry;
 
+        // find how much bytes to read
         int geometryBytesLength = input.readInt(true);
         byte[] bytes = input.readBytes(geometryBytesLength);
 
-        try {
-            geometry = reader.read(bytes);
-            geometry.setUserData(readUserData(kryo, input));
-        } catch (ParseException e) {
-            log.error("Cannot parse geometry bytes", e);
-            return null;
-        }
+        Geometry geometry = GeometrySerde.deserialize(bytes);
+        geometry.setUserData(readUserData(kryo, input));
 
         return geometry;
     }
