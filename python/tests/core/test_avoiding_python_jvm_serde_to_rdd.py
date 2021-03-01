@@ -44,7 +44,7 @@ class TestOmitPythonJvmSerdeToRDD(TestBase):
         poi_point_rdd.spatialPartitioning(GridType.QUADTREE)
         areas_polygon_rdd.spatialPartitioning(poi_point_rdd.getPartitioner())
 
-        jvm_sedona_rdd = JoinQueryRaw.spatialJoin(poi_point_rdd, areas_polygon_rdd, JoinParams())
+        jvm_sedona_rdd = JoinQueryRaw.spatialJoin(poi_point_rdd, areas_polygon_rdd, JoinParams(considerBoundaryIntersection=True))
         sedona_rdd = jvm_sedona_rdd.to_rdd().collect()
         assert sedona_rdd.__len__() == 5
 

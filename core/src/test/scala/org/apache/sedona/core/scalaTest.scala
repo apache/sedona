@@ -147,7 +147,7 @@ class scalaTest extends SparkUtil {
     queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
 
     for (i <- 1 to eachQueryLoopTimes) {
-      val joinParams = new JoinParams(false, PolygonRDDIndexType, JoinBuildSide.LEFT)
+      val joinParams = new JoinParams(true, false, PolygonRDDIndexType, JoinBuildSide.LEFT)
       val resultSize = JoinQuery.spatialJoin(queryWindowRDD, objectRDD, joinParams).count()
     }
   }

@@ -423,15 +423,12 @@ public class JoinQuery
 
         public JoinParams(boolean useIndex, boolean considerBoundaryIntersection)
         {
-            this.useIndex = useIndex;
-            this.considerBoundaryIntersection = considerBoundaryIntersection;
-            this.indexType = IndexType.RTREE;
-            this.joinBuildSide = JoinBuildSide.RIGHT;
+            this(useIndex, considerBoundaryIntersection, IndexType.RTREE, JoinBuildSide.RIGHT);
         }
 
-        public JoinParams(boolean considerBoundaryIntersection, IndexType polygonIndexType, JoinBuildSide joinBuildSide)
+        public JoinParams(boolean useIndex, boolean considerBoundaryIntersection, IndexType polygonIndexType, JoinBuildSide joinBuildSide)
         {
-            this.useIndex = false;
+            this.useIndex = useIndex;
             this.considerBoundaryIntersection = considerBoundaryIntersection;
             this.indexType = polygonIndexType;
             this.joinBuildSide = joinBuildSide;

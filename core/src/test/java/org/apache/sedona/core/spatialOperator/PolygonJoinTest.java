@@ -120,7 +120,7 @@ public class PolygonJoinTest
         final PolygonRDD spatialRDD = createPolygonRDD(InputLocation);
         partitionRdds(queryRDD, spatialRDD);
 
-        final JoinQuery.JoinParams joinParams = new JoinQuery.JoinParams(intersects, indexType, JoinBuildSide.LEFT);
+        final JoinQuery.JoinParams joinParams = new JoinQuery.JoinParams(true, intersects, indexType, JoinBuildSide.LEFT);
         final List<Tuple2<Polygon, Polygon>> results = JoinQuery.spatialJoin(queryRDD, spatialRDD, joinParams).collect();
         sanityCheckFlatJoinResults(results);
 

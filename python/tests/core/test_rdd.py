@@ -269,7 +269,7 @@ class TestSpatialRDD(TestBase):
         query_window_rdd.spatialPartitioning(object_rdd.getPartitioner())
 
         for i in range(each_query_loop_times):
-            join_params = JoinParams(False, polygon_rdd_index_type, JoinBuildSide.LEFT)
+            join_params = JoinParams(True, False, polygon_rdd_index_type, JoinBuildSide.LEFT)
             resultSize = JoinQuery.spatialJoin(
                 query_window_rdd,
                 object_rdd,

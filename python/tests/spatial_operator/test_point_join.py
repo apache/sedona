@@ -152,7 +152,7 @@ class TestRectangleJoin(TestJoinBase):
         spatial_rdd = self.create_point_rdd(input_location, splitter, num_partitions)
 
         self.partition_rdds(query_rdd, spatial_rdd, grid_type)
-        join_params = JoinParams(True, index_type, JoinBuildSide.LEFT)
+        join_params = JoinParams(True, True, index_type, JoinBuildSide.LEFT)
         results = JoinQuery.spatialJoin(query_rdd, spatial_rdd, join_params).collect()
 
         self.sanity_check_flat_join_results(results)

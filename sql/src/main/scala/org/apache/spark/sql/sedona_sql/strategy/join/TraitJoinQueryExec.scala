@@ -122,7 +122,7 @@ Predicate.create(extraCondition.get, left.output ++ right.output).eval _ // SPAR
     }
 
 
-    val joinParams = new JoinParams(intersects, sedonaConf.getIndexType, sedonaConf.getJoinBuildSide)
+    val joinParams = new JoinParams(sedonaConf.getUseIndex, intersects, sedonaConf.getIndexType, sedonaConf.getJoinBuildSide)
 
     //logInfo(s"leftShape count ${leftShapes.spatialPartitionedRDD.count()}")
     //logInfo(s"rightShape count ${rightShapes.spatialPartitionedRDD.count()}")
