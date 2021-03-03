@@ -164,7 +164,7 @@ public class RectangleJoinTest
 
         partitionRdds(queryRDD, spatialRDD);
 
-        JoinQuery.JoinParams joinParams = new JoinQuery.JoinParams(true, indexType, JoinBuildSide.LEFT);
+        JoinQuery.JoinParams joinParams = new JoinQuery.JoinParams(true, true, indexType, JoinBuildSide.LEFT);
         List<Tuple2<Polygon, Polygon>> result = JoinQuery.spatialJoin(queryRDD, spatialRDD, joinParams).collect();
 
         sanityCheckFlatJoinResults(result);

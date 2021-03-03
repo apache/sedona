@@ -484,7 +484,7 @@ class TestPredicateJoin(TestBase):
         dumped_points = geometry_df.selectExpr("ST_DumpPoints(geom) as geom") \
             .select(explode(col("geom")).alias("geom"))
 
-        assert(dumped_points.count(), 10)
+        assert(dumped_points.count() == 10)
 
         collected_points = [geom_row[0] for geom_row in dumped_points.selectExpr("ST_AsText(geom)").collect()]
         assert(collected_points == expected_points)
