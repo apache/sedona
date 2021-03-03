@@ -20,6 +20,7 @@ package org.apache.sedona.sql
 
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.expr
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types.{DataType, StructType}
 import org.junit.rules.TemporaryFolder
 import org.locationtech.jts.geom.Geometry
@@ -53,7 +54,11 @@ class GeometryUdtTestScala extends TestBaseScala with BeforeAndAfter {
     }
 
     it("Should be able to render and parse JSON schema") {
-     assert(DataType.fromJson(dataFrame.schema.json).asInstanceOf[StructType].equals(dataFrame.schema))
+      assert(DataType.fromJson(dataFrame.schema.json).asInstanceOf[StructType].equals(dataFrame.schema))
+    }
+
+    it("Case object and new instance should be equals") {
+      assert(GeometryUDT.equals(new GeometryUDT))
     }
   }
 

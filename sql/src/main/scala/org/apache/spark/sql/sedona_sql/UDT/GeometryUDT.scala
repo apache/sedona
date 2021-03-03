@@ -49,6 +49,13 @@ class GeometryUDT extends UserDefinedType[Geometry] {
       case other: Any => other
     }
   }
+
+  override def equals(other: Any): Boolean = other match {
+    case _: UserDefinedType[_] => isInstanceOf[GeometryUDT]
+    case _ => false
+  }
+
+  override def hashCode(): Int = super.hashCode()
 }
 
 case object GeometryUDT extends org.apache.spark.sql.sedona_sql.UDT.GeometryUDT with scala.Serializable
