@@ -46,6 +46,8 @@ SedonaVizRegistrator.registerAll(sparkSession)
 
 This will register all User Defined Tyeps, functions and optimizations in SedonaSQL and SedonaViz.
 
+You can also register everything by passing `--conf spark.sql.extensions=org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions` to `spark-submit` or `spark-shell`.
+
 ## Create Spatial DataFrame
 
 There is a DataFrame as follows:

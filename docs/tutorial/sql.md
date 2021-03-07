@@ -48,6 +48,8 @@ SedonaSQLRegistrator.registerAll(sparkSession)
 
 This function will register Sedona User Defined Type, User Defined Function and optimized join query strategy.
 
+You can also register everything by passing `--conf spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions` to `spark-submit` or `spark-shell`.
+
 ## Load data from files
 
 Assume we have a WKT file, namely `usa-county.tsv`, at Path `/Download/usa-county.tsv` as follows:
