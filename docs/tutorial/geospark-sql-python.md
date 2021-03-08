@@ -29,6 +29,8 @@ from sedona.register import SedonaRegistrator
 SedonaRegistrator.registerAll(spark)
 ```
 
+You can also register functions by passing `--conf spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions` to `spark-submit` or `spark-shell`.
+
 ## Writing Application
 
 Use KryoSerializer.getName and SedonaKryoRegistrator.getName class properties to reduce memory impact.
