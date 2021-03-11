@@ -632,7 +632,7 @@ FROM df
 
 Returns a point interpolated along a line. First argument must be a LINESTRING. Second argument is a Double between 0 and 1 representing fraction of total linestring length the point has to be located.
 
-Format: `ST_LineInterpolatePoint(geom: LineString, Fraction: Double) `
+Format: `ST_LineInterpolatePoint(geom: LineString, fraction: Double) `
 
 Since: `v1.0.1`
 
