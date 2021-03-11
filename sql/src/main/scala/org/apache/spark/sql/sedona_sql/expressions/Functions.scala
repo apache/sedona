@@ -41,6 +41,7 @@ import org.locationtech.jts.operation.linemerge.LineMerger
 import org.locationtech.jts.operation.valid.IsValidOp
 import org.locationtech.jts.precision.GeometryPrecisionReducer
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier
+import org.locationtech.jts.linearref.LengthIndexedLine
 import org.opengis.referencing.operation.MathTransform
 
 import java.util
@@ -719,6 +720,88 @@ case class ST_MinimumBoundingCircle(inputExpressions: Seq[Expression])
         circle = circle.buffer(radius, quadrantSegments)
     }
     circle
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+
+/**
+ * Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length.
+ * Second and third arguments are Double values between 0 and 1. This only works with LINESTRINGs.
+ *
+ * @param inputExpressions
+ */
+case class ST_LineSubString(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(3)
+
+    val geometry = inputExpressions.head.toGeometry(input)
+    val fractions = inputExpressions.slice(1, 3).map{
+      x => x.eval(input) match {
+        case a: Decimal => a.toDouble
+        case a: Double => a
+        case a: Int => a
+      }
+    }
+
+    (geometry, fractions) match {
+      case (g:LineString, r:Seq[Double]) if r.head >= 0 && r.last <= 1 && r.last >= r.head => getLineSubString(g, r)
+      case _ => null
+    }
+  }
+
+  private def getLineSubString(geom: Geometry, fractions: Seq[Double]): Any = {
+    val length = geom.getLength()
+    val indexedLine = new LengthIndexedLine(geom)
+    val subLine = indexedLine.extractLine(length * fractions.head, length * fractions.last)
+    subLine.toGenericArrayData
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+/**
+ * Returns a point interpolated along a line. First argument must be a LINESTRING.
+ * Second argument is a Double between 0 and 1 representing fraction of
+ * total linestring length the point has to be located.
+ *
+ * @param inputExpressions
+ */
+case class ST_LineInterpolatePoint(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(2)
+
+    val geometry = inputExpressions.head.toGeometry(input)
+    val fraction: Double = inputExpressions.last.eval(input) match {
+      case a: Decimal => a.toDouble
+      case a: Double => a
+      case a: Int => a
+    }
+
+    (geometry, fraction) match {
+      case (g:LineString, f:Double) if f >= 0 && f <= 1 => getLineInterpolatePoint(g, f)
+      case _ => null
+    }
+  }
+
+  private def getLineInterpolatePoint(geom: Geometry, fraction: Double): Any = {
+    val length = geom.getLength()
+    val indexedLine = new LengthIndexedLine(geom)
+    val interPoint = indexedLine.extractPoint(length * fraction)
+    new GeometryFactory().createPoint(interPoint).toGenericArrayData
   }
 
   override def dataType: DataType = GeometryUDT

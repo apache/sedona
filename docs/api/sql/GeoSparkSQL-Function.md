@@ -612,3 +612,32 @@ Spark SQL example:
 ```SQL
 SELECT ST_MinimumBoundingCircle(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
 ```
+
+## ST_LineSubString
+
+Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length. Second and third arguments are Double values between 0 and 1. This only works with LINESTRINGs.
+
+Format: `ST_LineSubString(geom: LineString, startFraction: Double, endFraction: Double) `
+
+Since: `v1.0.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_LineSubString(df.geometry, 0.333, 0.666)
+FROM df
+```
+
+
+## ST_LineInterpolatePoint
+
+Returns a point interpolated along a line. First argument must be a LINESTRING. Second argument is a Double between 0 and 1 representing fraction of total linestring length the point has to be located.
+
+Format: `ST_LineInterpolatePoint(geom: LineString, Fraction: Double) `
+
+Since: `v1.0.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_LineInterpolatePoint(df.geometry, 0.5)
+FROM df
+```

@@ -25,6 +25,7 @@ import org.apache.spark.sql.{DataFrame, Row}
 import org.geotools.geometry.jts.WKTReader2
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.linearref.LengthIndexedLine
 import org.scalatest.{GivenWhenThen, Matchers}
 
 class functionTestScala extends TestBaseScala with Matchers with GeometrySample with GivenWhenThen {
@@ -905,6 +906,56 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
     radiusTable.selectExpr("radius")
       .as[Double].collect().toList should contain theSameElementsAs List(0, 1, 1)
+  }
+
+  it ("Should pass ST_LineSubString") {
+    Given("Sample geometry dataframe")
+    val geometryTable = Seq(
+      "LINESTRING(25 50, 100 125, 150 190)"
+    ).map(geom => Tuple1(wktReader.read(geom))).toDF("geom")
+
+    When("Using ST_LineSubString")
+
+    val subStringTable = geometryTable.selectExpr("ST_LineSubString(geom, 0.333, 0.666) as subgeom")
+
+    Then("Result should match")
+
+    val lineString = geometryTable.collect()(0)(0).asInstanceOf[Geometry]
+    val indexedLineString = new LengthIndexedLine(lineString)
+    val subString = indexedLineString.extractLine(lineString.getLength() * 0.333, lineString.getLength() * 0.666)
+
+    subStringTable.selectExpr("ST_AsText(subgeom)")
+      .as[String].collect() should contain theSameElementsAs
+      List(
+        subString.toText
+      )
+  }
+
+  it ("Should pass ST_LineInterpolatePoint") {
+    Given("Sample geometry dataframe")
+    val geometryTable = Seq(
+      "LINESTRING(25 50, 100 125, 150 190)",
+      "LINESTRING(1 2 3, 4 5 6, 6 7 8)"
+    ).map(geom => Tuple1(wktReader.read(geom))).toDF("geom")
+
+    When("Using ST_LineInterpolatePoint")
+
+    val interpolatedPointTable = geometryTable.selectExpr("ST_LineInterpolatePoint(geom, 0.50) as interpts")
+
+    Then("Result should match")
+
+    val lineString2D = geometryTable.collect()(0)(0).asInstanceOf[Geometry]
+    val lineString3D = geometryTable.collect()(1)(0).asInstanceOf[Geometry]
+
+    val interPoint2D = new LengthIndexedLine(lineString2D).extractPoint(lineString2D.getLength() * 0.5)
+    val interPoint3D = new LengthIndexedLine(lineString3D).extractPoint(lineString3D.getLength() * 0.5)
+
+    interpolatedPointTable.selectExpr("ST_AsText(interpts)")
+      .as[String].collect() should contain theSameElementsAs
+      List(
+        lineString2D.getFactory.createPoint(interPoint2D).toText,
+        lineString2D.getFactory.createPoint(interPoint3D).toText
+      )
   }
 
 }
