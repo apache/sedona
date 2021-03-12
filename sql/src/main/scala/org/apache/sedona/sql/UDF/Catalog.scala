@@ -80,7 +80,7 @@ object Catalog {
     ST_RemovePoint,
     ST_IsRing,
     ST_FlipCoordinates,
-    ST_LineSubString,
+    ST_LineSubstring,
     ST_LineInterpolatePoint
   )
 

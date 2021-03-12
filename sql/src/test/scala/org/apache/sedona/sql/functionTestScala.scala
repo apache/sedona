@@ -908,26 +908,26 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       .as[Double].collect().toList should contain theSameElementsAs List(0, 1, 1)
   }
 
-  it ("Should pass ST_LineSubString") {
+  it ("Should pass ST_LineSubstring") {
     Given("Sample geometry dataframe")
     val geometryTable = Seq(
       "LINESTRING(25 50, 100 125, 150 190)"
     ).map(geom => Tuple1(wktReader.read(geom))).toDF("geom")
 
-    When("Using ST_LineSubString")
+    When("Using ST_LineSubstring")
 
-    val subStringTable = geometryTable.selectExpr("ST_LineSubString(geom, 0.333, 0.666) as subgeom")
+    val substringTable = geometryTable.selectExpr("ST_LineSubstring(geom, 0.333, 0.666) as subgeom")
 
     Then("Result should match")
 
     val lineString = geometryTable.collect()(0)(0).asInstanceOf[Geometry]
     val indexedLineString = new LengthIndexedLine(lineString)
-    val subString = indexedLineString.extractLine(lineString.getLength() * 0.333, lineString.getLength() * 0.666)
+    val substring = indexedLineString.extractLine(lineString.getLength() * 0.333, lineString.getLength() * 0.666)
 
-    subStringTable.selectExpr("ST_AsText(subgeom)")
+    substringTable.selectExpr("ST_AsText(subgeom)")
       .as[String].collect() should contain theSameElementsAs
       List(
-        subString.toText
+        substring.toText
       )
   }
 

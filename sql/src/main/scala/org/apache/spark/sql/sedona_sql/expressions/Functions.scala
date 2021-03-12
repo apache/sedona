@@ -734,7 +734,7 @@ case class ST_MinimumBoundingCircle(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-case class ST_LineSubString(inputExpressions: Seq[Expression])
+case class ST_LineSubstring(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
 
   override def nullable: Boolean = true
@@ -752,12 +752,12 @@ case class ST_LineSubString(inputExpressions: Seq[Expression])
     }
 
     (geometry, fractions) match {
-      case (g:LineString, r:Seq[Double]) if r.head >= 0 && r.last <= 1 && r.last >= r.head => getLineSubString(g, r)
+      case (g:LineString, r:Seq[Double]) if r.head >= 0 && r.last <= 1 && r.last >= r.head => getLineSubstring(g, r)
       case _ => null
     }
   }
 
-  private def getLineSubString(geom: Geometry, fractions: Seq[Double]): Any = {
+  private def getLineSubstring(geom: Geometry, fractions: Seq[Double]): Any = {
     val length = geom.getLength()
     val indexedLine = new LengthIndexedLine(geom)
     val subLine = indexedLine.extractLine(length * fractions.head, length * fractions.last)
