@@ -92,7 +92,7 @@ Introduction:
 Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS
 
 !!!note
-	You can use ==ST_FlipCoordinates== to swap X and Y.
+	By default, this function uses lat/lon order. You can use ==ST_FlipCoordinates== to swap X and Y.
 
 !!!note
 	If ==ST_Transform== throws an Exception called "Bursa wolf parameters required", you need to disable the error notification in ST_Transform. You can append a boolean value at the end.
@@ -611,33 +611,4 @@ Since: `v1.0.1`
 Spark SQL example:
 ```SQL
 SELECT ST_MinimumBoundingCircle(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
-```
-
-## ST_LineSubstring
-
-Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length. Second and third arguments are Double values between 0 and 1. This only works with LINESTRINGs.
-
-Format: `ST_LineSubstring(geom: LineString, startFraction: Double, endFraction: Double) `
-
-Since: `v1.0.1`
-
-Spark SQL example:
-```SQL
-SELECT ST_LineSubstring(df.geometry, 0.333, 0.666)
-FROM df
-```
-
-
-## ST_LineInterpolatePoint
-
-Returns a point interpolated along a line. First argument must be a LINESTRING. Second argument is a Double between 0 and 1 representing fraction of total linestring length the point has to be located.
-
-Format: `ST_LineInterpolatePoint(geom: LineString, fraction: Double) `
-
-Since: `v1.0.1`
-
-Spark SQL example:
-```SQL
-SELECT ST_LineInterpolatePoint(df.geometry, 0.5)
-FROM df
 ```
