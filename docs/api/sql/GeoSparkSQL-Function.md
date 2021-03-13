@@ -92,7 +92,7 @@ Introduction:
 Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS
 
 !!!note
-	By default, ==ST_Transform== assumes Longitude/Latitude is your coordinate X/Y. If this is not the case, set ==ST_FlipCoordinates== to swap X and Y.
+	You can use ==ST_FlipCoordinates== to swap X and Y.
 
 !!!note
 	If ==ST_Transform== throws an Exception called "Bursa wolf parameters required", you need to disable the error notification in ST_Transform. You can append a boolean value at the end.
