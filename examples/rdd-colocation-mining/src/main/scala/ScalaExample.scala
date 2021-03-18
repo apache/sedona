@@ -131,7 +131,7 @@ object ScalaExample extends App{
     tripDf.show() // Optional
     // Convert from DataFrame to RDD. This can also be done directly through Sedona RDD API.
     tripDf.createOrReplaceTempView("tripdf")
-    var tripRDD = Adapter.toSpatialRdd(sparkSession.sql("select ST_Point(cast(tripdf._c0 as Decimal(24, 14)), cast(tripdf._c1 as Decimal(24, 14))) as point from tripdf")
+    var tripRDD = Adapter.toSpatialRdd(sparkSession.sql("select ST_Point(cast(tripdf._c0 as Decimal(24, 14)), cast(tripdf._c1 as Decimal(24, 14))) as point, 'def' as trip_attr from tripdf")
       , "point")
 
     // Convert the Coordinate Reference System from degree-based to meter-based. This returns the accurate distance calculate.
@@ -167,7 +167,8 @@ object ScalaExample extends App{
       var adjacentMatrix = JoinQuery.DistanceJoinQueryFlat(tripRDD, bufferedArealmRDD,true,true)
 
 //      Uncomment the following two lines if you want to see what the join result looks like in SparkSQL
-//      var adjacentMatrixDf = Adapter.toDf(adjacentMatrix, sparkSession)
+//      import scala.collection.JavaConversions._
+//      var adjacentMatrixDf = Adapter.toDf(adjacentMatrix, arealmRDD.fieldNames, tripRDD.fieldNames, sparkSession)
 //      adjacentMatrixDf.show()
 
       var observedK = adjacentMatrix.count()*area*1.0/(arealmRDD.approximateTotalCount*tripRDD.approximateTotalCount)
