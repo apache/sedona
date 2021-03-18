@@ -17,6 +17,8 @@ pyspark="==3.0.1"
 attrs="*"
 ipykernel = "*"
 apache-sedona="==1.0.0"
+matplotlib = "*"
+descartes = "*"
 
 [requires]
 python_version = "3.7"
