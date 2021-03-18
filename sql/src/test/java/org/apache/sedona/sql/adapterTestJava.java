@@ -39,7 +39,6 @@ import org.apache.spark.sql.SparkSession;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import scala.collection.JavaConverters;
 
 import java.io.Serializable;
 
@@ -190,7 +189,7 @@ public class adapterTestJava
 
         JavaPairRDD joinResultPairRDD = JoinQuery.SpatialJoinQueryFlat(pointRDD, polygonRDD, true, true);
 
-        Dataset joinResultDf = Adapter.toDf(joinResultPairRDD, JavaConverters.asScalaBuffer(pointRDD.fieldNames), JavaConverters.asScalaBuffer(polygonRDD.fieldNames), sparkSession);
+        Dataset joinResultDf = Adapter.toDf(joinResultPairRDD, sparkSession);
 
         joinResultDf.show(1);
     }
