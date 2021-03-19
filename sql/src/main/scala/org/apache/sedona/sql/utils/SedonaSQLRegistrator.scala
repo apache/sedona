@@ -20,18 +20,16 @@ package org.apache.sedona.sql.utils
 
 import org.apache.sedona.sql.UDF.UdfRegistrator
 import org.apache.sedona.sql.UDT.UdtRegistrator
-import org.apache.spark.sql.sedona_sql.strategy.join.JoinQueryDetector
 import org.apache.spark.sql.{SQLContext, SparkSession}
+import org.apache.spark.sql.sedona_sql.strategy.join.JoinQueryDetector
 
 object SedonaSQLRegistrator {
   def registerAll(sqlContext: SQLContext): Unit = {
-    sqlContext.experimental.extraStrategies = JoinQueryDetector :: Nil
-    UdtRegistrator.registerAll()
-    UdfRegistrator.registerAll(sqlContext)
+    registerAll(sqlContext.sparkSession)
   }
 
   def registerAll(sparkSession: SparkSession): Unit = {
-    sparkSession.experimental.extraStrategies = JoinQueryDetector :: Nil
+    sparkSession.experimental.extraStrategies = new JoinQueryDetector(sparkSession) :: Nil
     UdtRegistrator.registerAll()
     UdfRegistrator.registerAll(sparkSession)
   }

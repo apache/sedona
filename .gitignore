@@ -10,3 +10,6 @@
 /conf/
 /log/
 /site/
+/.bloop/
+/.metals/
+/.vscode/

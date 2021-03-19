@@ -18,68 +18,90 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
-import org.apache.spark.sql.Strategy
+import org.apache.sedona.core.enums.IndexType
+import org.apache.sedona.core.utils.SedonaConf
+import org.apache.spark.sql.{SparkSession, Strategy}
 import org.apache.spark.sql.catalyst.expressions.{Expression, LessThan, LessThanOrEqual}
 import org.apache.spark.sql.catalyst.plans.Inner
-import org.apache.spark.sql.catalyst.plans.logical.{Join, LogicalPlan}
+import org.apache.spark.sql.catalyst.plans.logical._
 import org.apache.spark.sql.execution.SparkPlan
+import org.apache.spark.sql.execution.joins.{BuildLeft, BuildRight}
 import org.apache.spark.sql.sedona_sql.expressions._
+
+
+case class JoinQueryDetection(
+  left: LogicalPlan,
+  right: LogicalPlan,
+  leftShape: Expression,
+  rightShape: Expression,
+  intersects: Boolean,
+  radius: Option[Expression] = None
+)
 
 /**
   * Plans `RangeJoinExec` for inner joins on spatial relationships ST_Contains(a, b)
   * and ST_Intersects(a, b).
   *
   * Plans `DistanceJoinExec` for inner joins on spatial relationship ST_Distance(a, b) < r.
+  * 
+  * Plans `BroadcastIndexJoinExec for inner joins on spatial relationships with a broadcast hint.
   */
-object JoinQueryDetector extends Strategy {
+class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
+
+//  val leftHint: Option[HintInfo] = None // SPARK2 anchor
+//  val rightHint: Option[HintInfo] = None // SPARK2 anchor
 
   def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
+    case Join(left, right, Inner, condition, JoinHint(leftHint, rightHint)) => { // SPARK3 anchor
+//    case Join(left, right, Inner, condition) => { // SPARK2 anchor
+      val broadcastLeft = leftHint.exists(_.strategy.contains(BROADCAST)) // SPARK3 anchor
+      val broadcastRight = rightHint.exists(_.strategy.contains(BROADCAST)) // SPARK3 anchor
+//      val broadcastLeft = leftHint.exists(_.broadcast) // SPARK2 anchor
+//      val broadcastRight = rightHint.exists(_.broadcast) // SPARK2 anchor
 
-    // ST_Contains(a, b) - a contains b
-case Join(left, right, Inner, Some(ST_Contains(Seq(leftShape, rightShape))), _) => // SPARK3 anchor
-//case Join(left, right, Inner, Some(ST_Contains(Seq(leftShape, rightShape)))) => // SPARK2 anchor
-      planSpatialJoin(left, right, Seq(leftShape, rightShape), false)
+      val queryDetection: Option[JoinQueryDetection] = condition match {
+        case Some(ST_Contains(Seq(leftShape, rightShape))) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, false))
+        case Some(ST_Intersects(Seq(leftShape, rightShape))) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, true))
+        case Some(ST_Within(Seq(leftShape, rightShape))) =>
+          Some(JoinQueryDetection(right, left, rightShape, leftShape, false))
+        case Some(ST_Overlaps(Seq(leftShape, rightShape))) =>
+          Some(JoinQueryDetection(right, left, rightShape, leftShape, false))
+        case Some(ST_Touches(Seq(leftShape, rightShape))) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, true))
+        case  Some(ST_Equals(Seq(leftShape, rightShape))) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, false))
+        case Some(ST_Crosses(Seq(leftShape, rightShape))) =>
+          Some(JoinQueryDetection(right, left, rightShape, leftShape, false))
+        case Some(LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), radius)) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, true, Some(radius)))
+        case Some(LessThan(ST_Distance(Seq(leftShape, rightShape)), radius)) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, false, Some(radius)))
+        case _ =>
+          None
+      }
 
-    // ST_Intersects(a, b) - a intersects b
-case Join(left, right, Inner, Some(ST_Intersects(Seq(leftShape, rightShape))), _) => // SPARK3 anchor
-//case Join(left, right, Inner, Some(ST_Intersects(Seq(leftShape, rightShape)))) => // SPARK2 anchor
-      planSpatialJoin(left, right, Seq(leftShape, rightShape), true)
+      val sedonaConf = new SedonaConf(sparkSession.sparkContext.conf)
 
-    // ST_WITHIN(a, b) - a is within b
-case Join(left, right, Inner, Some(ST_Within(Seq(leftShape, rightShape))), _) => // SPARK3 anchor
-//case Join(left, right, Inner, Some(ST_Within(Seq(leftShape, rightShape)))) => // SPARK2 anchor
-      planSpatialJoin(right, left, Seq(rightShape, leftShape), false)
-
-    // ST_Overlaps(a, b) - a overlaps b
-case Join(left, right, Inner, Some(ST_Overlaps(Seq(leftShape, rightShape))), _) => // SPARK3 anchor
-//case Join(left, right, Inner, Some(ST_Overlaps(Seq(leftShape, rightShape)))) => // SPARK2 anchor
-      planSpatialJoin(right, left, Seq(rightShape, leftShape), false)
-
-    // ST_Touches(a, b) - a touches b
-case Join(left, right, Inner, Some(ST_Touches(Seq(leftShape, rightShape))), _) => // SPARK3 anchor
-//case Join(left, right, Inner, Some(ST_Touches(Seq(leftShape, rightShape)))) => // SPARK2 anchor
-      planSpatialJoin(left, right, Seq(leftShape, rightShape), true)
-
-    // ST_Distance(a, b) <= radius consider boundary intersection
-case Join(left, right, Inner, Some(LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), radius)), _) => // SPARK3 anchor
-//case Join(left, right, Inner, Some(LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), radius))) => // SPARK2 anchor
-      planDistanceJoin(left, right, Seq(leftShape, rightShape), radius, true)
-
-    // ST_Distance(a, b) < radius don't consider boundary intersection
-case Join(left, right, Inner, Some(LessThan(ST_Distance(Seq(leftShape, rightShape)), radius)), _) => // SPARK3 anchor
-//case Join(left, right, Inner, Some(LessThan(ST_Distance(Seq(leftShape, rightShape)), radius))) => // SPARK2 anchor
-      planDistanceJoin(left, right, Seq(leftShape, rightShape), radius, false)
-
-    // ST_Equals(a, b) - a is equal to b
-case Join(left, right, Inner, Some(ST_Equals(Seq(leftShape, rightShape))), _) => // SPARK3 anchor
-//case Join(left, right, Inner, Some(ST_Equals(Seq(leftShape, rightShape)))) => // SPARK2 anchor
-      planSpatialJoin(left, right, Seq(leftShape, rightShape), false)
-
-    // ST_Crosses(a, b) - a crosses b
-case Join(left, right, Inner, Some(ST_Crosses(Seq(leftShape, rightShape))), _) => // SPARK3 anchor
-//case Join(left, right, Inner, Some(ST_Crosses(Seq(leftShape, rightShape)))) => // SPARK2 anchor
-      planSpatialJoin(right, left, Seq(rightShape, leftShape), false)
-
+      if ((broadcastLeft || broadcastRight) && sedonaConf.getUseIndex) {
+        queryDetection match {
+          case Some(JoinQueryDetection(left, right, leftShape, rightShape, intersects, None)) =>
+            planBroadcastJoin(left, right, Seq(leftShape, rightShape), intersects, sedonaConf.getIndexType, broadcastLeft)
+          case _ =>
+            Nil
+        }
+      } else {
+        queryDetection match {
+          case Some(JoinQueryDetection(left, right, leftShape, rightShape, intersects, None)) =>
+            planSpatialJoin(left, right, Seq(leftShape, rightShape), intersects)
+          case Some(JoinQueryDetection(left, right, leftShape, rightShape, intersects, Some(radius))) =>
+            planDistanceJoin(left, right, Seq(leftShape, rightShape), radius, intersects)
+          case None => 
+            Nil
+        }
+      }
+    }
     case _ =>
       Nil
   }
@@ -95,11 +117,11 @@ case Join(left, right, Inner, Some(ST_Crosses(Seq(leftShape, rightShape))), _) =
   private def matchExpressionsToPlans(exprA: Expression,
                                       exprB: Expression,
                                       planA: LogicalPlan,
-                                      planB: LogicalPlan): Option[(LogicalPlan, LogicalPlan)] =
+                                      planB: LogicalPlan): Option[(LogicalPlan, LogicalPlan, Boolean)] =
     if (matches(exprA, planA) && matches(exprB, planB)) {
-      Some((planA, planB))
+      Some((planA, planB, false))
     } else if (matches(exprA, planB) && matches(exprB, planA)) {
-      Some((planB, planA))
+      Some((planB, planA, true))
     } else {
       None
     }
@@ -107,17 +129,16 @@ case Join(left, right, Inner, Some(ST_Crosses(Seq(leftShape, rightShape))), _) =
   private def planSpatialJoin(left: LogicalPlan,
                               right: LogicalPlan,
                               children: Seq[Expression],
-                              intersects: Boolean,
-                              extraCondition: Option[Expression] = None): Seq[SparkPlan] = {
+                              intersects: Boolean): Seq[SparkPlan] = {
     val a = children.head
     val b = children.tail.head
 
     val relationship = if (intersects) "ST_Intersects" else "ST_Contains";
 
     matchExpressionsToPlans(a, b, left, right) match {
-      case Some((planA, planB)) =>
+      case Some((planA, planB, _)) =>
         logInfo(s"Planning spatial join for $relationship relationship")
-        RangeJoinExec(planLater(planA), planLater(planB), a, b, intersects, extraCondition) :: Nil
+        RangeJoinExec(planLater(planA), planLater(planB), a, b, intersects) :: Nil
       case None =>
         logInfo(
           s"Spatial join for $relationship with arguments not aligned " +
@@ -130,21 +151,20 @@ case Join(left, right, Inner, Some(ST_Crosses(Seq(leftShape, rightShape))), _) =
                                right: LogicalPlan,
                                children: Seq[Expression],
                                radius: Expression,
-                               intersects: Boolean,
-                               extraCondition: Option[Expression] = None): Seq[SparkPlan] = {
+                               intersects: Boolean): Seq[SparkPlan] = {
     val a = children.head
     val b = children.tail.head
 
     val relationship = if (intersects) "ST_Distance <=" else "ST_Distance <";
 
     matchExpressionsToPlans(a, b, left, right) match {
-      case Some((planA, planB)) =>
+      case Some((planA, planB, _)) =>
         if (radius.references.isEmpty || matches(radius, planA)) {
           logInfo("Planning spatial distance join")
-          DistanceJoinExec(planLater(planA), planLater(planB), a, b, radius, intersects, extraCondition) :: Nil
+          DistanceJoinExec(planLater(planA), planLater(planB), a, b, radius, intersects) :: Nil
         } else if (matches(radius, planB)) {
           logInfo("Planning spatial distance join")
-          DistanceJoinExec(planLater(planB), planLater(planA), b, a, radius, intersects, extraCondition) :: Nil
+          DistanceJoinExec(planLater(planB), planLater(planA), b, a, radius, intersects) :: Nil
         } else {
           logInfo(
             "Spatial distance join for ST_Distance with non-scalar radius " +
@@ -155,6 +175,40 @@ case Join(left, right, Inner, Some(ST_Crosses(Seq(leftShape, rightShape))), _) =
         logInfo(
           "Spatial distance join for ST_Distance with arguments not " +
             "aligned with join relations is not supported")
+        Nil
+    }
+  }
+
+  private def planBroadcastJoin(left: LogicalPlan,
+                                right: LogicalPlan,
+                                children: Seq[Expression],
+                                intersects: Boolean,
+                                indexType: IndexType,
+                                broadcastLeft: Boolean): Seq[SparkPlan] = {
+    val a = children.head
+    val b = children.tail.head
+
+    val relationship = if (intersects) "ST_Intersects" else "ST_Contains";
+
+    matchExpressionsToPlans(a, b, left, right) match {
+      case Some((_, _, swapped)) =>
+        logInfo(s"Planning spatial join for $relationship relationship")
+        val broadcastSide = if (broadcastLeft) BuildLeft else BuildRight
+        val (leftPlan, rightPlan, streamShape, windowSide) = (broadcastSide, swapped) match {
+          case (BuildLeft, false) => // Broadcast the left side, windows on the left
+            (SpatialIndexExec(planLater(left), a, indexType), planLater(right), b, BuildLeft)
+          case (BuildLeft, true) => // Broadcast the left side, objects on the left
+            (SpatialIndexExec(planLater(left), b, indexType), planLater(right), a, BuildRight)
+          case (BuildRight, false) => // Broadcast the right side, windows on the left
+            (planLater(left), SpatialIndexExec(planLater(right), b, indexType), a, BuildLeft)
+          case (BuildRight, true) => // Broadcast the right side, objects on the left
+            (planLater(left), SpatialIndexExec(planLater(right), a, indexType), b, BuildRight)
+        }
+        BroadcastIndexJoinExec(leftPlan, rightPlan, streamShape, broadcastSide, windowSide, intersects) :: Nil
+      case None =>
+        logInfo(
+          s"Spatial join for $relationship with arguments not aligned " +
+            "with join relations is not supported")
         Nil
     }
   }
