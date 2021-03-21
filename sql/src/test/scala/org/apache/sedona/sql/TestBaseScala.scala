@@ -73,4 +73,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   def loadCsv(path: String): DataFrame = {
     sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(path)
   }
+
+  lazy val buildPointDf = loadCsv(csvPointInputLocation).selectExpr("ST_Point(cast(_c0 as Decimal(24,20)),cast(_c1 as Decimal(24,20))) as pointshape")
+  lazy val buildPolygonDf = loadCsv(csvPolygonInputLocation).selectExpr("ST_PolygonFromEnvelope(cast(_c0 as Decimal(24,20)),cast(_c1 as Decimal(24,20)), cast(_c2 as Decimal(24,20)), cast(_c3 as Decimal(24,20))) as polygonshape")
 }

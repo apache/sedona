@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
+import org.apache.sedona.core.geometryObjects.Circle
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.sedona.sql.utils.GeometrySerializer
@@ -34,11 +35,9 @@ trait TraitJoinQueryBase {
                        buildExpr: Expression,
                        streamedRdd: RDD[UnsafeRow],
                        streamedExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) =
-    (toSpatialRdd(buildRdd, buildExpr), toSpatialRdd(streamedRdd, streamedExpr))
+    (toSpatialRDD(buildRdd, buildExpr), toSpatialRDD(streamedRdd, streamedExpr))
 
-  protected def toSpatialRdd(rdd: RDD[UnsafeRow],
-                             shapeExpression: Expression): SpatialRDD[Geometry] = {
-
+  def toSpatialRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression): SpatialRDD[Geometry] = {
     val spatialRdd = new SpatialRDD[Geometry]
     spatialRdd.setRawSpatialRDD(
       rdd
@@ -47,6 +46,21 @@ trait TraitJoinQueryBase {
           //logInfo(shape.toString)
           shape.setUserData(x.copy)
           shape
+        }
+        }
+        .toJavaRDD())
+    spatialRdd
+  }
+
+  def toCircleRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression, boundRadius: Expression): SpatialRDD[Geometry] = {
+    val spatialRdd = new SpatialRDD[Geometry]
+    spatialRdd.setRawSpatialRDD(
+      rdd
+        .map { x => {
+          val shape = GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[ArrayData])
+          val circle = new Circle(shape, boundRadius.eval(x).asInstanceOf[Double])
+          circle.setUserData(x.copy)
+          circle.asInstanceOf[Geometry]
         }
         }
         .toJavaRDD())

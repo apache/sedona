@@ -32,7 +32,8 @@ import org.apache.spark.sql.execution.{SparkPlan, UnaryExecNode}
 
 case class SpatialIndexExec(child: SparkPlan,
                             shape: Expression,
-                            indexType: IndexType)
+                            indexType: IndexType,
+                            radius: Option[Expression] = None)
   extends UnaryExecNode
     with TraitJoinQueryBase
     with Logging {
@@ -47,9 +48,12 @@ case class SpatialIndexExec(child: SparkPlan,
   override protected[sql] def doExecuteBroadcast[T](): Broadcast[T] = {
     val boundShape = BindReferences.bindReference(shape, child.output)
 
-    val resultRaw = child.execute().asInstanceOf[RDD[UnsafeRow]]
+    val resultRaw = child.execute().asInstanceOf[RDD[UnsafeRow]].coalesce(1)
 
-    val spatialRDD = toSpatialRdd(resultRaw.coalesce(1), boundShape)
+    val spatialRDD = radius match {
+      case Some(radiusExpression) => toCircleRDD(resultRaw, boundShape, BindReferences.bindReference(radiusExpression, child.output))
+      case None => toSpatialRDD(resultRaw, boundShape)
+    }
 
     spatialRDD.buildIndex(indexType, false)
     sparkContext.broadcast(spatialRDD.indexedRawRDD.take(1).asScala.head).asInstanceOf[Broadcast[T]]

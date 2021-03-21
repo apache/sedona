@@ -18,12 +18,14 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
+import collection.JavaConverters._
+
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, UnsafeRow}
+import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, Predicate, UnsafeRow}
 import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeRowJoiner
 import org.apache.spark.sql.catalyst.plans.physical.Partitioning
 import org.apache.spark.sql.execution.{BinaryExecNode, SparkPlan}
@@ -31,21 +33,28 @@ import org.apache.spark.sql.execution.joins.{BuildLeft, BuildRight, BuildSide}
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.index.SpatialIndex
 
-import collection.JavaConverters._
-
-
 case class BroadcastIndexJoinExec(left: SparkPlan,
                                   right: SparkPlan,
                                   streamShape: Expression,
                                   indexBuildSide: BuildSide,
                                   windowJoinSide: BuildSide,
                                   intersects: Boolean,
-                                  extraCondition: Option[Expression] = None)
+                                  extraCondition: Option[Expression] = None,
+                                  radius: Option[Expression] = None)
   extends BinaryExecNode
     with TraitJoinQueryBase
     with Logging {
 
   override def output: Seq[Attribute] = left.output ++ right.output
+
+  // Using lazy val to avoid serialization
+  @transient private lazy val boundCondition: (InternalRow => Boolean) = extraCondition match {
+    case Some(condition) =>
+      Predicate.create(extraCondition.get, output).eval _ // SPARK3 anchor
+//      newPredicate(extraCondition.get, output).eval _ // SPARK2 anchor
+    case None =>
+      (r: InternalRow) => true
+  }
 
   private val (streamed, broadcast) = indexBuildSide match {
     case BuildLeft => (right, left.asInstanceOf[SpatialIndexExec])
@@ -53,6 +62,22 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
   }
 
   override def outputPartitioning: Partitioning = streamed.outputPartitioning
+
+  private val (windowExpression, objectExpression) = if (indexBuildSide == windowJoinSide) {
+    (broadcast.shape, streamShape)
+  } else {
+    (streamShape, broadcast.shape)
+  }
+
+  private val spatialExpression = radius match {
+      case Some(r) if intersects => s"ST_Distance($windowExpression, $objectExpression) <= $r"
+      case Some(r) if !intersects => s"ST_Distance($windowExpression, $objectExpression) < $r"
+      case None if intersects => s"ST_Intersects($windowExpression, $objectExpression)"
+      case None if !intersects => s"ST_Contains($windowExpression, $objectExpression)"
+    }
+
+  override def simpleString(maxFields: Int): String = super.simpleString(maxFields) + s" $spatialExpression" // SPARK3 anchor
+//  override def simpleString: String = super.simpleString + s" $spatialExpression" // SPARK2 anchor
 
   private def windowBroadcastJoin(index: Broadcast[SpatialIndex], spatialRdd: SpatialRDD[Geometry]): RDD[(Geometry, Geometry)] = {
     spatialRdd.getRawSpatialRDD.rdd.flatMap { row =>
@@ -75,7 +100,14 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
   override protected def doExecute(): RDD[InternalRow] = {
     val boundStreamShape = BindReferences.bindReference(streamShape, streamed.output)
     val streamResultsRaw = streamed.execute().asInstanceOf[RDD[UnsafeRow]]
-    val streamShapes = toSpatialRdd(streamResultsRaw, boundStreamShape)
+
+    // If there's a radius and the objects are being broadcast, we need to build the CircleRDD on the window stream side
+    val streamShapes = radius match {
+      case Some(radiusExpression) if indexBuildSide != windowJoinSide =>
+        toCircleRDD(streamResultsRaw, boundStreamShape, BindReferences.bindReference(radiusExpression, streamed.output))
+      case _ =>
+        toSpatialRDD(streamResultsRaw, boundStreamShape)
+    }
 
     val broadcastIndex = broadcast.executeBroadcast[SpatialIndex]()
 
@@ -93,7 +125,7 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
           val leftRow = l.getUserData.asInstanceOf[UnsafeRow]
           val rightRow = r.getUserData.asInstanceOf[UnsafeRow]
           joiner.join(leftRow, rightRow)
-      }
+      }.filter(boundCondition(_))
     }
   }
 }
