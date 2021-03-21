@@ -30,22 +30,32 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       val polygonDf = buildPolygonDf.repartition(3)
       val pointDf = buildPointDf.repartition(5)
 
-      var broadcastJoinDf = pointDf.alias("pointDf").join(polygonDf.alias("polygonDf").hint("broadcast"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
+      var broadcastJoinDf = pointDf.alias("pointDf").join(broadcast(polygonDf).alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(broadcastJoinDf.rdd.getNumPartitions == pointDf.rdd.getNumPartitions)
       assert(broadcastJoinDf.count() == 1000)
 
-      broadcastJoinDf = polygonDf.alias("polygonDf").hint("broadcast").join(pointDf.alias("pointDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
+      broadcastJoinDf = broadcast(polygonDf).alias("polygonDf").join(pointDf.alias("pointDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(broadcastJoinDf.rdd.getNumPartitions == pointDf.rdd.getNumPartitions)
       assert(broadcastJoinDf.count() == 1000)
 
-      broadcastJoinDf = pointDf.alias("pointDf").hint("broadcast").join(polygonDf.alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
+      broadcastJoinDf = broadcast(pointDf).alias("pointDf").join(polygonDf.alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(broadcastJoinDf.rdd.getNumPartitions == polygonDf.rdd.getNumPartitions)
       assert(broadcastJoinDf.count() == 1000)
 
-      broadcastJoinDf = polygonDf.alias("polygonDf").join(pointDf.alias("pointDf").hint("broadcast"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
+      broadcastJoinDf = polygonDf.alias("polygonDf").join(broadcast(pointDf).alias("pointDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(broadcastJoinDf.rdd.getNumPartitions == polygonDf.rdd.getNumPartitions)
+      assert(broadcastJoinDf.count() == 1000)
+    }
+
+    it("Passed Broadcasts the left side if both sides have a broadcast hint") {
+      val polygonDf = buildPolygonDf.repartition(3)
+      val pointDf = buildPointDf.repartition(5)
+
+      var broadcastJoinDf = broadcast(pointDf).alias("pointDf").join(broadcast(polygonDf).alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(broadcastJoinDf.rdd.getNumPartitions == polygonDf.rdd.getNumPartitions)
       assert(broadcastJoinDf.count() == 1000)
@@ -79,12 +89,22 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       var broadcastJoinDf = pointDf
         .alias("pointDf")
         .join(
-          polygonDf.alias("polygonDf").hint("broadcast"),
+          broadcast(polygonDf.alias("polygonDf")),
           expr("ST_Contains(polygonshape, pointshape) AND window_extra <= object_extra")
         )
 
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(broadcastJoinDf.count() == 1000)
+
+      broadcastJoinDf = pointDf
+        .alias("pointDf")
+        .join(
+          broadcast(polygonDf.alias("polygonDf")),
+          expr("ST_Contains(polygonshape, pointshape) AND window_extra > object_extra")
+        )
+
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(broadcastJoinDf.count() == 0)
     }
 
     it("Passed ST_Distance <= radius in a broadcast join") {

@@ -6,6 +6,11 @@ SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of 
 var myDataFrame = sparkSession.sql("YOUR_SQL")
 ```
 
+Alternatively, `expr` and `selectExpr` can be used:
+```Scala
+myDataFrame.withColumn("geometry", expr("ST_*")).selectExpr("ST_*")
+```
+
 * Constructor: Construct a Geometry given an input string or coordinates
 	* Example: ST_GeomFromWKT (string). Create a Geometry from a WKT String.
 	* Documentation: [Here](../GeoSparkSQL-Constructor)

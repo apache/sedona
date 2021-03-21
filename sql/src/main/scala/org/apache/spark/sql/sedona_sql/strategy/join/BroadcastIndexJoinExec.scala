@@ -50,8 +50,8 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
   // Using lazy val to avoid serialization
   @transient private lazy val boundCondition: (InternalRow => Boolean) = extraCondition match {
     case Some(condition) =>
-      Predicate.create(extraCondition.get, output).eval _ // SPARK3 anchor
-//      newPredicate(extraCondition.get, output).eval _ // SPARK2 anchor
+      Predicate.create(condition, output).eval _ // SPARK3 anchor
+//      newPredicate(condition, output).eval _ // SPARK2 anchor
     case None =>
       (r: InternalRow) => true
   }
