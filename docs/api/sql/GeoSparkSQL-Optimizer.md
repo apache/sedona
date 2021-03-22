@@ -107,6 +107,8 @@ BroadcastIndexJoin pointshape#52: geometry, BuildRight, BuildLeft, true, 2.0 ST_
       +- FileScan csv
 ```
 
+Note: Ff the distance is an expression, it is only evaluated on the first argument to ST_Distance (`pointDf1` above).
+
 ## Predicate pushdown
 
 Introduction: Given a join query and a predicate in the same WHERE clause, first executes the Predicate as a filter, then executes the join query*

@@ -222,11 +222,11 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
           case (BuildLeft, false) => // Broadcast the left side, windows on the left
             (SpatialIndexExec(planLater(left), a, indexType, radius), planLater(right), b, BuildLeft)
           case (BuildLeft, true) => // Broadcast the left side, objects on the left
-            (SpatialIndexExec(planLater(left), b, indexType, radius), planLater(right), a, BuildRight)
+            (SpatialIndexExec(planLater(left), b, indexType), planLater(right), a, BuildRight)
           case (BuildRight, false) => // Broadcast the right side, windows on the left
             (planLater(left), SpatialIndexExec(planLater(right), b, indexType), a, BuildLeft)
           case (BuildRight, true) => // Broadcast the right side, objects on the left
-            (planLater(left), SpatialIndexExec(planLater(right), a, indexType), b, BuildRight)
+            (planLater(left), SpatialIndexExec(planLater(right), a, indexType, radius), b, BuildRight)
         }
         BroadcastIndexJoinExec(leftPlan, rightPlan, streamShape, broadcastSide, windowSide, intersects, extraCondition, radius) :: Nil
       case None =>

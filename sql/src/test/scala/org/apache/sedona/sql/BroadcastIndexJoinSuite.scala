@@ -132,5 +132,27 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       assert(distanceJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(distanceJoinDf.count() == 2998)
     }
+
+    it("Passed ST_Distance radius is bound to first expression") {
+      val f = udf(() => 2)
+      var pointDf1 = buildPointDf.withColumn("radius", f())
+      var pointDf2 = buildPointDf
+
+      var distanceJoinDf = pointDf1.alias("pointDf1").join(broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < radius"))
+      assert(distanceJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(distanceJoinDf.count() == 2998)
+
+      distanceJoinDf = broadcast(pointDf1).alias("pointDf1").join(pointDf2.alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < radius"))
+      assert(distanceJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(distanceJoinDf.count() == 2998)
+
+      distanceJoinDf = pointDf2.alias("pointDf2").join(broadcast(pointDf1).alias("pointDf1"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < radius"))
+      assert(distanceJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(distanceJoinDf.count() == 2998)
+
+      distanceJoinDf = broadcast(pointDf2).alias("pointDf2").join(pointDf1.alias("pointDf1"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < radius"))
+      assert(distanceJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(distanceJoinDf.count() == 2998)
+    }
   }
 }
