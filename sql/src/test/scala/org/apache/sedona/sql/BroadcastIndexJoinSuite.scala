@@ -26,6 +26,10 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
 
   describe("Sedona-SQL Broadcast Index Join Test") {
 
+    // Using UDFs rather than lit prevents optimizations that would circumvent the checks we want to test
+    val one = udf(() => 1)
+    val two = udf(() => 2)
+
     it("Passed Correct partitioning for broadcast join for ST_Polygon and ST_Point") {
       val polygonDf = buildPolygonDf.repartition(3)
       val pointDf = buildPointDf.repartition(5)
@@ -62,8 +66,8 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     }
 
     it("Passed Can access attributes of both sides of broadcast join") {
-      val polygonDf = buildPolygonDf.withColumn("window_extra", lit(1))
-      val pointDf = buildPointDf.withColumn("object_extra", lit(1))
+      val polygonDf = buildPolygonDf.withColumn("window_extra", one())
+      val pointDf = buildPointDf.withColumn("object_extra", one())
       
       var broadcastJoinDf = polygonDf.alias("polygonDf").join(broadcast(pointDf).alias("pointDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
       assert(broadcastJoinDf.select(sum("object_extra")).collect().head(0) == 1000)
@@ -83,8 +87,8 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     }
 
     it("Passed Handles extra conditions on a broadcast join") {
-      val polygonDf = buildPolygonDf.withColumn("window_extra", expr("ST_X(element_at(ST_DumpPoints(polygonshape), 1))"))
-      val pointDf = buildPointDf.withColumn("object_extra", expr("ST_X(pointshape)"))
+      val polygonDf = buildPolygonDf.withColumn("window_extra", one())
+      val pointDf = buildPointDf.withColumn("object_extra", two())
 
       var broadcastJoinDf = pointDf
         .alias("pointDf")
@@ -134,8 +138,7 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     }
 
     it("Passed ST_Distance radius is bound to first expression") {
-      val f = udf(() => 2)
-      var pointDf1 = buildPointDf.withColumn("radius", f())
+      var pointDf1 = buildPointDf.withColumn("radius", two())
       var pointDf2 = buildPointDf
 
       var distanceJoinDf = pointDf1.alias("pointDf1").join(broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < radius"))
