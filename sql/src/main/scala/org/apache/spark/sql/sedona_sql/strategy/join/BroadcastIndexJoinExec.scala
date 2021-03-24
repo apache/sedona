@@ -29,15 +29,14 @@ import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Exp
 import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeRowJoiner
 import org.apache.spark.sql.catalyst.plans.physical.Partitioning
 import org.apache.spark.sql.execution.{BinaryExecNode, SparkPlan}
-import org.apache.spark.sql.execution.joins.{BuildLeft, BuildRight, BuildSide}
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.index.SpatialIndex
 
 case class BroadcastIndexJoinExec(left: SparkPlan,
                                   right: SparkPlan,
                                   streamShape: Expression,
-                                  indexBuildSide: BuildSide,
-                                  windowJoinSide: BuildSide,
+                                  indexBuildSide: JoinSide,
+                                  windowJoinSide: JoinSide,
                                   intersects: Boolean,
                                   extraCondition: Option[Expression] = None,
                                   radius: Option[Expression] = None)
@@ -57,8 +56,8 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
   }
 
   private val (streamed, broadcast) = indexBuildSide match {
-    case BuildLeft => (right, left.asInstanceOf[SpatialIndexExec])
-    case BuildRight => (left, right.asInstanceOf[SpatialIndexExec])
+    case LeftSide => (right, left.asInstanceOf[SpatialIndexExec])
+    case RightSide => (left, right.asInstanceOf[SpatialIndexExec])
   }
 
   override def outputPartitioning: Partitioning = streamed.outputPartitioning
@@ -112,10 +111,10 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
     val broadcastIndex = broadcast.executeBroadcast[SpatialIndex]()
 
     val pairs = (indexBuildSide, windowJoinSide) match {
-      case (BuildLeft, BuildLeft) => windowBroadcastJoin(broadcastIndex, streamShapes)
-      case (BuildLeft, BuildRight) => objectBroadcastJoin(broadcastIndex, streamShapes).map { case (left, right) => (right, left) }
-      case (BuildRight, BuildLeft) => objectBroadcastJoin(broadcastIndex, streamShapes)
-      case (BuildRight, BuildRight) => windowBroadcastJoin(broadcastIndex, streamShapes).map { case (left, right) => (right, left) }
+      case (LeftSide, LeftSide) => windowBroadcastJoin(broadcastIndex, streamShapes)
+      case (LeftSide, RightSide) => objectBroadcastJoin(broadcastIndex, streamShapes).map { case (left, right) => (right, left) }
+      case (RightSide, LeftSide) => objectBroadcastJoin(broadcastIndex, streamShapes)
+      case (RightSide, RightSide) => windowBroadcastJoin(broadcastIndex, streamShapes).map { case (left, right) => (right, left) }
     }
 
     pairs.mapPartitions { iter =>

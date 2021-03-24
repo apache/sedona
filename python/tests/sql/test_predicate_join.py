@@ -16,6 +16,7 @@
 #  under the License.
 
 from pyspark import Row
+from pyspark.sql.functions import broadcast, expr
 from pyspark.sql.types import StructType, StringType, IntegerType, StructField, DoubleType
 
 from tests import csv_polygon_input_location, csv_point_input_location, overlap_polygon_input_location, \
@@ -449,3 +450,49 @@ class TestPredicateJoin(TestBase):
         equal_join_df.explain()
         equal_join_df.show(3)
         assert equal_join_df.count() == 0, f"Expected 0 but got {equal_join_df.count()}"
+
+    def test_st_contains_in_broadcast_join(self):
+        polygon_csv_df = self.spark.read.format("csv").\
+                option("delimiter", ",").\
+                option("header", "false").load(
+            csv_polygon_input_location
+        )
+        polygon_csv_df.createOrReplaceTempView("polygontable")
+        polygon_csv_df.show()
+
+        polygon_df = self.spark.sql(
+            "select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
+        polygon_df = polygon_df.repartition(7)
+        polygon_df.createOrReplaceTempView("polygondf")
+        polygon_df.show()
+
+        point_csv_df = self.spark.read.format("csv").\
+            option("delimiter", ",").\
+            option("header", "false").load(
+            csv_point_input_location
+        )
+        point_csv_df.createOrReplaceTempView("pointtable")
+        point_csv_df.show()
+
+        point_df = self.spark.sql(
+            "select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape from pointtable")
+        point_df = point_df.repartition(9)
+        point_df.createOrReplaceTempView("pointdf")
+        point_df.show()
+
+        range_join_df = self.spark.sql(
+            "select /*+ BROADCAST(polygondf) */ * from polygondf, pointdf where ST_Contains(polygondf.polygonshape,pointdf.pointshape) ")
+
+        range_join_df.explain()
+        range_join_df.show(3)
+        assert range_join_df.rdd.getNumPartitions() == 9
+        assert range_join_df.count() == 1000
+
+        range_join_df = point_df.alias("pointdf").join(broadcast(polygon_df).alias("polygondf"), on=expr("ST_Contains(polygondf.polygonshape, pointdf.pointshape)"))
+
+        range_join_df.explain()
+        range_join_df.show(3)
+        assert range_join_df.rdd.getNumPartitions() == 9
+        assert range_join_df.count() == 1000
+
+        

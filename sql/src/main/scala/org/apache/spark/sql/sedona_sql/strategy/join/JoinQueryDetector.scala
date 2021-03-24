@@ -25,7 +25,6 @@ import org.apache.spark.sql.catalyst.expressions.{And, Expression, LessThan, Les
 import org.apache.spark.sql.catalyst.plans.Inner
 import org.apache.spark.sql.catalyst.plans.logical._
 import org.apache.spark.sql.execution.SparkPlan
-import org.apache.spark.sql.execution.joins.{BuildLeft, BuildRight}
 import org.apache.spark.sql.sedona_sql.expressions._
 
 
@@ -110,10 +109,10 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
         }
       } else {
         queryDetection match {
-          case Some(JoinQueryDetection(left, right, leftShape, rightShape, intersects, _, None)) =>
-            planSpatialJoin(left, right, Seq(leftShape, rightShape), intersects)
-          case Some(JoinQueryDetection(left, right, leftShape, rightShape, intersects, _, Some(radius))) =>
-            planDistanceJoin(left, right, Seq(leftShape, rightShape), radius, intersects)
+          case Some(JoinQueryDetection(left, right, leftShape, rightShape, intersects, extraCondition, None)) =>
+            planSpatialJoin(left, right, Seq(leftShape, rightShape), intersects, extraCondition)
+          case Some(JoinQueryDetection(left, right, leftShape, rightShape, intersects, extraCondition, Some(radius))) =>
+            planDistanceJoin(left, right, Seq(leftShape, rightShape), radius, intersects, extraCondition)
           case None => 
             Nil
         }
@@ -146,7 +145,8 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
   private def planSpatialJoin(left: LogicalPlan,
                               right: LogicalPlan,
                               children: Seq[Expression],
-                              intersects: Boolean): Seq[SparkPlan] = {
+                              intersects: Boolean,
+                              extraCondition: Option[Expression] = None): Seq[SparkPlan] = {
     val a = children.head
     val b = children.tail.head
 
@@ -155,7 +155,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     matchExpressionsToPlans(a, b, left, right) match {
       case Some((planA, planB, _)) =>
         logInfo(s"Planning spatial join for $relationship relationship")
-        RangeJoinExec(planLater(planA), planLater(planB), a, b, intersects) :: Nil
+        RangeJoinExec(planLater(planA), planLater(planB), a, b, intersects, extraCondition) :: Nil
       case None =>
         logInfo(
           s"Spatial join for $relationship with arguments not aligned " +
@@ -168,7 +168,8 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
                                right: LogicalPlan,
                                children: Seq[Expression],
                                radius: Expression,
-                               intersects: Boolean): Seq[SparkPlan] = {
+                               intersects: Boolean,
+                               extraCondition: Option[Expression] = None): Seq[SparkPlan] = {
     val a = children.head
     val b = children.tail.head
 
@@ -178,10 +179,10 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
       case Some((planA, planB, _)) =>
         if (radius.references.isEmpty || matches(radius, planA)) {
           logInfo("Planning spatial distance join")
-          DistanceJoinExec(planLater(planA), planLater(planB), a, b, radius, intersects) :: Nil
+          DistanceJoinExec(planLater(planA), planLater(planB), a, b, radius, intersects, extraCondition) :: Nil
         } else if (matches(radius, planB)) {
           logInfo("Planning spatial distance join")
-          DistanceJoinExec(planLater(planB), planLater(planA), b, a, radius, intersects) :: Nil
+          DistanceJoinExec(planLater(planB), planLater(planA), b, a, radius, intersects, extraCondition) :: Nil
         } else {
           logInfo(
             "Spatial distance join for ST_Distance with non-scalar radius " +
@@ -217,16 +218,16 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     matchExpressionsToPlans(a, b, left, right) match {
       case Some((_, _, swapped)) =>
         logInfo(s"Planning spatial join for $relationship relationship")
-        val broadcastSide = if (broadcastLeft) BuildLeft else BuildRight
+        val broadcastSide = if (broadcastLeft) LeftSide else RightSide
         val (leftPlan, rightPlan, streamShape, windowSide) = (broadcastSide, swapped) match {
-          case (BuildLeft, false) => // Broadcast the left side, windows on the left
-            (SpatialIndexExec(planLater(left), a, indexType, radius), planLater(right), b, BuildLeft)
-          case (BuildLeft, true) => // Broadcast the left side, objects on the left
-            (SpatialIndexExec(planLater(left), b, indexType), planLater(right), a, BuildRight)
-          case (BuildRight, false) => // Broadcast the right side, windows on the left
-            (planLater(left), SpatialIndexExec(planLater(right), b, indexType), a, BuildLeft)
-          case (BuildRight, true) => // Broadcast the right side, objects on the left
-            (planLater(left), SpatialIndexExec(planLater(right), a, indexType, radius), b, BuildRight)
+          case (LeftSide, false) => // Broadcast the left side, windows on the left
+            (SpatialIndexExec(planLater(left), a, indexType, radius), planLater(right), b, LeftSide)
+          case (LeftSide, true) => // Broadcast the left side, objects on the left
+            (SpatialIndexExec(planLater(left), b, indexType), planLater(right), a, RightSide)
+          case (RightSide, false) => // Broadcast the right side, windows on the left
+            (planLater(left), SpatialIndexExec(planLater(right), b, indexType), a, LeftSide)
+          case (RightSide, true) => // Broadcast the right side, objects on the left
+            (planLater(left), SpatialIndexExec(planLater(right), a, indexType, radius), b, RightSide)
         }
         BroadcastIndexJoinExec(leftPlan, rightPlan, streamShape, broadcastSide, windowSide, intersects, extraCondition, radius) :: Nil
       case None =>
