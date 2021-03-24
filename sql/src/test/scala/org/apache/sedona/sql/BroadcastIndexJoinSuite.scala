@@ -109,6 +109,51 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
 
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(broadcastJoinDf.count() == 0)
+
+      broadcastJoinDf = pointDf
+        .alias("pointDf")
+        .join(
+          broadcast(polygonDf.alias("polygonDf")),
+          expr("window_extra <= object_extra AND ST_Contains(polygonshape, pointshape)")
+        )
+
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(broadcastJoinDf.count() == 1000)
+
+      broadcastJoinDf = pointDf
+        .alias("pointDf")
+        .join(
+          broadcast(polygonDf.alias("polygonDf")),
+          expr("window_extra > object_extra AND ST_Contains(polygonshape, pointshape)")
+        )
+
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(broadcastJoinDf.count() == 0)
+    }
+
+    it("Passed Handles multiple extra conditions on a broadcast join with the ST predicate last") {
+      val polygonDf = buildPolygonDf.withColumn("window_extra", one()).withColumn("window_extra2", one())
+      val pointDf = buildPointDf.withColumn("object_extra", two()).withColumn("object_extra2", two())
+
+      var broadcastJoinDf = pointDf
+        .alias("pointDf")
+        .join(
+          broadcast(polygonDf.alias("polygonDf")),
+          expr("window_extra <= object_extra AND window_extra2 <= object_extra2 AND ST_Contains(polygonshape, pointshape)")
+        )
+
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(broadcastJoinDf.count() == 1000)
+
+      broadcastJoinDf = pointDf
+        .alias("pointDf")
+        .join(
+          broadcast(polygonDf.alias("polygonDf")),
+          expr("window_extra > object_extra AND window_extra2 > object_extra2 AND ST_Contains(polygonshape, pointshape)")
+        )
+
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(broadcastJoinDf.count() == 0)
     }
 
     it("Passed ST_Distance <= radius in a broadcast join") {

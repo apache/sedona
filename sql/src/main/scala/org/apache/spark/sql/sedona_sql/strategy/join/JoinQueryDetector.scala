@@ -49,6 +49,30 @@ case class JoinQueryDetection(
   */
 class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
 
+  private def getJoinDetection(
+    left: LogicalPlan,
+    right: LogicalPlan,
+    predicate: ST_Predicate,
+    extraCondition: Option[Expression] = None): Option[JoinQueryDetection] = {
+      predicate match {
+        case ST_Contains(Seq(leftShape, rightShape)) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, false, extraCondition))
+        case ST_Intersects(Seq(leftShape, rightShape)) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, true, extraCondition))
+        case ST_Within(Seq(leftShape, rightShape)) =>
+          Some(JoinQueryDetection(right, left, rightShape, leftShape, false, extraCondition))
+        case ST_Overlaps(Seq(leftShape, rightShape)) =>
+          Some(JoinQueryDetection(right, left, rightShape, leftShape, false, extraCondition))
+        case ST_Touches(Seq(leftShape, rightShape)) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, true, extraCondition))
+        case ST_Equals(Seq(leftShape, rightShape)) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, false, extraCondition))
+        case ST_Crosses(Seq(leftShape, rightShape)) =>
+          Some(JoinQueryDetection(right, left, rightShape, leftShape, false, extraCondition))
+        case _ => None
+      }
+    }
+
   def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
     case Join(left, right, Inner, condition, JoinHint(leftHint, rightHint)) => { // SPARK3 anchor
 //    case Join(left, right, Inner, condition) => { // SPARK2 anchor
@@ -58,41 +82,23 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
 //      val broadcastRight = right.isInstanceOf[ResolvedHint] && right.asInstanceOf[ResolvedHint].hints.broadcast // SPARK2 anchor
 
       val queryDetection: Option[JoinQueryDetection] = condition match {
-        case Some(ST_Contains(Seq(leftShape, rightShape))) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, false))
-        case Some(And(ST_Contains(Seq(leftShape, rightShape)), extraCondition)) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, false, Some(extraCondition)))
-        case Some(ST_Intersects(Seq(leftShape, rightShape))) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, true))
-        case Some(And(ST_Intersects(Seq(leftShape, rightShape)), extraCondition)) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, true, Some(extraCondition)))
-        case Some(ST_Within(Seq(leftShape, rightShape))) =>
-          Some(JoinQueryDetection(right, left, rightShape, leftShape, false))
-        case Some(And(ST_Within(Seq(leftShape, rightShape)), extraCondition)) =>
-          Some(JoinQueryDetection(right, left, rightShape, leftShape, false, Some(extraCondition)))
-        case Some(ST_Overlaps(Seq(leftShape, rightShape))) =>
-          Some(JoinQueryDetection(right, left, rightShape, leftShape, false))
-        case Some(And(ST_Overlaps(Seq(leftShape, rightShape)), extraCondition)) =>
-          Some(JoinQueryDetection(right, left, rightShape, leftShape, false, Some(extraCondition)))
-        case Some(ST_Touches(Seq(leftShape, rightShape))) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, true))
-        case Some(And(ST_Touches(Seq(leftShape, rightShape)), extraCondition)) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, true, Some(extraCondition)))
-        case Some(ST_Equals(Seq(leftShape, rightShape))) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, false))
-        case Some(And(ST_Equals(Seq(leftShape, rightShape)), extraCondition)) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, false, Some(extraCondition)))
-        case Some(ST_Crosses(Seq(leftShape, rightShape))) =>
-          Some(JoinQueryDetection(right, left, rightShape, leftShape, false))
-        case Some(And(ST_Crosses(Seq(leftShape, rightShape)), extraCondition)) =>
-          Some(JoinQueryDetection(right, left, rightShape, leftShape, false, Some(extraCondition)))
+        case Some(predicate: ST_Predicate) =>
+          getJoinDetection(left, right, predicate)
+        case Some(And(predicate: ST_Predicate, extraCondition)) =>
+          getJoinDetection(left, right, predicate, Some(extraCondition))
+        case Some(And(extraCondition, predicate: ST_Predicate)) =>
+          getJoinDetection(left, right, predicate, Some(extraCondition))
         case Some(LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), radius)) =>
           Some(JoinQueryDetection(left, right, leftShape, rightShape, true, None, Some(radius)))
         case Some(And(LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), radius), extraCondition)) =>
           Some(JoinQueryDetection(left, right, leftShape, rightShape, true, Some(extraCondition), Some(radius)))
+        case Some(And(extraCondition, LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), radius))) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, true, Some(extraCondition), Some(radius)))
         case Some(LessThan(ST_Distance(Seq(leftShape, rightShape)), radius)) =>
           Some(JoinQueryDetection(left, right, leftShape, rightShape, false, None, Some(radius)))
         case Some(And(LessThan(ST_Distance(Seq(leftShape, rightShape)), radius), extraCondition)) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, false, Some(extraCondition), Some(radius)))
+        case Some(And(extraCondition, LessThan(ST_Distance(Seq(leftShape, rightShape)), radius))) =>
           Some(JoinQueryDetection(left, right, leftShape, rightShape, false, Some(extraCondition), Some(radius)))
         case _ =>
           None
