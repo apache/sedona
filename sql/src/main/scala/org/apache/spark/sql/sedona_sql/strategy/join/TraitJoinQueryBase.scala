@@ -20,37 +20,39 @@ package org.apache.spark.sql.sedona_sql.strategy.join
 
 import org.apache.sedona.core.geometryObjects.Circle
 import org.apache.sedona.core.spatialRDD.SpatialRDD
+import org.apache.sedona.core.utils.SedonaConf
 import org.apache.sedona.sql.utils.GeometrySerializer
-import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.catalyst.expressions.{BindReferences, Expression, UnsafeRow}
+import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeRow}
 import org.apache.spark.sql.catalyst.util.ArrayData
-import org.apache.spark.sql.execution.{BinaryExecNode, SparkPlan}
+import org.apache.spark.sql.execution.SparkPlan
 import org.locationtech.jts.geom.Geometry
 
-// ST_Distance(left, right) <= radius
-// radius can be literal or a computation over 'left'
-case class DistanceJoinExec(left: SparkPlan,
-                            right: SparkPlan,
-                            leftShape: Expression,
-                            rightShape: Expression,
-                            radius: Expression,
-                            intersects: Boolean,
-                            extraCondition: Option[Expression] = None)
-  extends BinaryExecNode
-    with TraitJoinQueryExec
-    with Logging {
+trait TraitJoinQueryBase {
+  self: SparkPlan =>
 
-  private val boundRadius = BindReferences.bindReference(radius, left.output)
+  def toSpatialRddPair(buildRdd: RDD[UnsafeRow],
+                       buildExpr: Expression,
+                       streamedRdd: RDD[UnsafeRow],
+                       streamedExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) =
+    (toSpatialRDD(buildRdd, buildExpr), toSpatialRDD(streamedRdd, streamedExpr))
 
-  override def toSpatialRddPair(
-                                 buildRdd: RDD[UnsafeRow],
-                                 buildExpr: Expression,
-                                 streamedRdd: RDD[UnsafeRow],
-                                 streamedExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) =
-    (toCircleRDD(buildRdd, buildExpr), toSpatialRDD(streamedRdd, streamedExpr))
+  def toSpatialRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression): SpatialRDD[Geometry] = {
+    val spatialRdd = new SpatialRDD[Geometry]
+    spatialRdd.setRawSpatialRDD(
+      rdd
+        .map { x => {
+          val shape = GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[ArrayData])
+          //logInfo(shape.toString)
+          shape.setUserData(x.copy)
+          shape
+        }
+        }
+        .toJavaRDD())
+    spatialRdd
+  }
 
-  private def toCircleRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression): SpatialRDD[Geometry] = {
+  def toCircleRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression, boundRadius: Expression): SpatialRDD[Geometry] = {
     val spatialRdd = new SpatialRDD[Geometry]
     spatialRdd.setRawSpatialRDD(
       rdd
@@ -65,4 +67,9 @@ case class DistanceJoinExec(left: SparkPlan,
     spatialRdd
   }
 
+  def doSpatialPartitioning(dominantShapes: SpatialRDD[Geometry], followerShapes: SpatialRDD[Geometry],
+                            numPartitions: Integer, sedonaConf: SedonaConf): Unit = {
+    dominantShapes.spatialPartitioning(sedonaConf.getJoinGridType, numPartitions)
+    followerShapes.spatialPartitioning(dominantShapes.getPartitioner)
+  }
 }

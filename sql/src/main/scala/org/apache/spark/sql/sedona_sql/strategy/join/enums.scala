@@ -16,25 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql.utils
+package org.apache.spark.sql.sedona_sql.strategy.join
 
-import org.apache.sedona.sql.UDF.UdfRegistrator
-import org.apache.sedona.sql.UDT.UdtRegistrator
-import org.apache.spark.sql.{SQLContext, SparkSession}
-import org.apache.spark.sql.sedona_sql.strategy.join.JoinQueryDetector
+sealed trait JoinSide
 
-object SedonaSQLRegistrator {
-  def registerAll(sqlContext: SQLContext): Unit = {
-    registerAll(sqlContext.sparkSession)
-  }
-
-  def registerAll(sparkSession: SparkSession): Unit = {
-    sparkSession.experimental.extraStrategies = new JoinQueryDetector(sparkSession) :: Nil
-    UdtRegistrator.registerAll()
-    UdfRegistrator.registerAll(sparkSession)
-  }
-
-  def dropAll(sparkSession: SparkSession): Unit = {
-    UdfRegistrator.dropAll(sparkSession)
-  }
-}
+case object LeftSide extends JoinSide
+case object RightSide extends JoinSide

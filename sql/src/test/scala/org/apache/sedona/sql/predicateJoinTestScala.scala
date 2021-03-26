@@ -21,7 +21,6 @@ package org.apache.sedona.sql
 
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.spark.sql.Row
-import org.apache.spark.sql.sedona_sql.strategy.join.JoinQueryDetector
 import org.apache.spark.sql.types._
 
 class predicateJoinTestScala extends TestBaseScala {
@@ -127,8 +126,6 @@ class predicateJoinTestScala extends TestBaseScala {
     }
 
     it("Passed ST_Distance <= radius in a join") {
-      sparkSession.experimental.extraStrategies = JoinQueryDetector :: Nil
-
       var pointCsvDF1 = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF1.createOrReplaceTempView("pointtable")
       var pointDf1 = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape1 from pointtable")
@@ -145,8 +142,6 @@ class predicateJoinTestScala extends TestBaseScala {
     }
 
     it("Passed ST_Distance < radius in a join") {
-      sparkSession.experimental.extraStrategies = JoinQueryDetector :: Nil
-
       var pointCsvDF1 = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF1.createOrReplaceTempView("pointtable")
       var pointDf1 = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape1 from pointtable")

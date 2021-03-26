@@ -23,7 +23,8 @@ spark2_anchor = 'SPARK2 anchor'
 spark3_anchor = 'SPARK3 anchor'
 files = ['sql/src/main/scala/org/apache/sedona/sql/UDF/UdfRegistrator.scala',
          'sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryExec.scala',
-         'sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/JoinQueryDetector.scala']
+         'sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/JoinQueryDetector.scala',
+         'sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/BroadcastIndexJoinExec.scala']
 
 def switch_version(line):
     if line[:2] == '//':

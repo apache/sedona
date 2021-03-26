@@ -72,6 +72,43 @@ DistanceJoin pointshape1#12: geometry, pointshape2#33: geometry, 2.0, true
 !!!warning
 	Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. To change the geometry's unit, please transform the coordinate reference system. See [ST_Transform](GeoSparkSQL-Function.md#st_transform).
 
+## Broadcast join
+Introduction: Perform a range join or distance join but broadcast one of the sides of the join. This maintains the partitioning of the non-broadcast side and doesn't require a shuffle.
+
+```Scala
+pointDf.alias("pointDf").join(broadcast(polygonDf).alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
+```
+
+Spark SQL Physical plan:
+```
+== Physical Plan ==
+BroadcastIndexJoin pointshape#52: geometry, BuildRight, BuildRight, false ST_Contains(polygonshape#30, pointshape#52)
+:- Project [st_point(cast(_c0#48 as decimal(24,20)), cast(_c1#49 as decimal(24,20))) AS pointshape#52]
+:  +- FileScan csv
++- SpatialIndex polygonshape#30: geometry, QUADTREE, [id=#62]
+   +- Project [st_polygonfromenvelope(cast(_c0#22 as decimal(24,20)), cast(_c1#23 as decimal(24,20)), cast(_c2#24 as decimal(24,20)), cast(_c3#25 as decimal(24,20))) AS polygonshape#30]
+      +- FileScan csv
+```
+
+This also works for distance joins:
+
+```Scala
+pointDf1.alias("pointDf1").join(broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) <= 2"))
+```
+
+Spark SQL Physical plan:
+```
+== Physical Plan ==
+BroadcastIndexJoin pointshape#52: geometry, BuildRight, BuildLeft, true, 2.0 ST_Distance(pointshape#52, pointshape#415) <= 2.0
+:- Project [st_point(cast(_c0#48 as decimal(24,20)), cast(_c1#49 as decimal(24,20))) AS pointshape#52]
+:  +- FileScan csv
++- SpatialIndex pointshape#415: geometry, QUADTREE, [id=#1068]
+   +- Project [st_point(cast(_c0#48 as decimal(24,20)), cast(_c1#49 as decimal(24,20))) AS pointshape#415]
+      +- FileScan csv
+```
+
+Note: Ff the distance is an expression, it is only evaluated on the first argument to ST_Distance (`pointDf1` above).
+
 ## Predicate pushdown
 
 Introduction: Given a join query and a predicate in the same WHERE clause, first executes the Predicate as a filter, then executes the join query*

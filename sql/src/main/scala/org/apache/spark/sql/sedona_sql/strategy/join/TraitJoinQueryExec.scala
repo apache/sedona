@@ -21,25 +21,21 @@ package org.apache.spark.sql.sedona_sql.strategy.join
 import org.apache.sedona.core.enums.JoinSparitionDominantSide
 import org.apache.sedona.core.spatialOperator.JoinQuery
 import org.apache.sedona.core.spatialOperator.JoinQuery.JoinParams
-import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.sedona.core.utils.SedonaConf
-import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeRowJoiner
 import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, Predicate, UnsafeRow}
-import org.apache.spark.sql.catalyst.util.ArrayData
+import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeRowJoiner
 import org.apache.spark.sql.execution.SparkPlan
-import org.locationtech.jts.geom.Geometry
 
-trait TraitJoinQueryExec {
+trait TraitJoinQueryExec extends TraitJoinQueryBase {
   self: SparkPlan =>
 
   // Using lazy val to avoid serialization
   @transient private lazy val boundCondition: (InternalRow => Boolean) = {
     if (extraCondition.isDefined) {
-Predicate.create(extraCondition.get, left.output ++ right.output).eval _ // SPARK3 anchor
-//newPredicate(extraCondition.get, left.output ++ right.output).eval _ // SPARK2 anchor
+      Predicate.create(extraCondition.get, left.output ++ right.output).eval _ // SPARK3 anchor
+//      newPredicate(extraCondition.get, left.output ++ right.output).eval _ // SPARK2 anchor
     } else { (r: InternalRow) =>
       true
     }
@@ -134,8 +130,8 @@ Predicate.create(extraCondition.get, left.output ++ right.output).eval _ // SPAR
     matches.rdd.mapPartitions { iter =>
       val filtered =
         if (extraCondition.isDefined) {
-val boundCondition = Predicate.create(extraCondition.get, left.output ++ right.output) // SPARK3 anchor
-//val boundCondition = newPredicate(extraCondition.get, left.output ++ right.output) // SPARK2 anchor
+          val boundCondition = Predicate.create(extraCondition.get, left.output ++ right.output) // SPARK3 anchor
+//          val boundCondition = newPredicate(extraCondition.get, left.output ++ right.output) // SPARK2 anchor
           iter.filter {
             case (l, r) =>
               val leftRow = l.getUserData.asInstanceOf[UnsafeRow]
@@ -155,35 +151,6 @@ val boundCondition = Predicate.create(extraCondition.get, left.output ++ right.o
           joiner.join(leftRow, rightRow)
       }
     }
-  }
-
-  def toSpatialRddPair(buildRdd: RDD[UnsafeRow],
-                       buildExpr: Expression,
-                       streamedRdd: RDD[UnsafeRow],
-                       streamedExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) =
-    (toSpatialRdd(buildRdd, buildExpr), toSpatialRdd(streamedRdd, streamedExpr))
-
-  protected def toSpatialRdd(rdd: RDD[UnsafeRow],
-                             shapeExpression: Expression): SpatialRDD[Geometry] = {
-
-    val spatialRdd = new SpatialRDD[Geometry]
-    spatialRdd.setRawSpatialRDD(
-      rdd
-        .map { x => {
-          val shape = GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[ArrayData])
-          //logInfo(shape.toString)
-          shape.setUserData(x.copy)
-          shape
-        }
-        }
-        .toJavaRDD())
-    spatialRdd
-  }
-
-  def doSpatialPartitioning(dominantShapes: SpatialRDD[Geometry], followerShapes: SpatialRDD[Geometry],
-                            numPartitions: Integer, sedonaConf: SedonaConf): Unit = {
-    dominantShapes.spatialPartitioning(sedonaConf.getJoinGridType, numPartitions)
-    followerShapes.spatialPartitioning(dominantShapes.getPartitioner)
   }
 
   def joinPartitionNumOptimizer(dominantSidePartNum: Int, followerSidePartNum: Int, dominantSideCount: Long): Int = {
