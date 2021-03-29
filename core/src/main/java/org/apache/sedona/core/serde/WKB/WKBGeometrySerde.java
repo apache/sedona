@@ -17,7 +17,9 @@
  * under the License.
  */
 
-package org.apache.sedona.core.geometryObjects;
+package org.apache.sedona.core.serde.WKB;
+
+import java.util.Objects;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Registration;
@@ -25,7 +27,8 @@ import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import org.apache.log4j.Logger;
-import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeSerde;
+import org.apache.sedona.core.geometryObjects.Circle;
+import org.apache.sedona.core.serde.shape.ShapeGeometrySerde;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -36,21 +39,26 @@ import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKBReader;
+import org.locationtech.jts.io.WKBWriter;
 
 /**
- * Provides methods to efficiently serialize and deserialize geometry types.
+ * Provides methods to efficiently serialize and deserialize geometry types using the WKB format
  * <p>
- * Supports Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon,
- * GeometryCollection, Circle and Envelope types.
+ * Supports Point, LineString, Polygon, MultiPoint, MultiLineString,
+ * MultiPolygon, GeometryCollection, Circle and Envelope types.
  * <p>
- * First byte contains {@link Type#id}. Then go type-specific bytes, followed
- * by user-data attached to the geometry.
+ * First byte contains {@link Type#id}. Then go type-specific bytes, followed by
+ * user-data attached to the geometry.
  */
-public class GeometrySerde
+public class WKBGeometrySerde
         extends Serializer
 {
 
-    private static final Logger log = Logger.getLogger(GeometrySerde.class);
+    // TODO - Add tests for WKB serialization
+    // TODO - Consolidate GeometrySerde to eliminate code repetition
+    private static final Logger log = Logger.getLogger(ShapeGeometrySerde.class);
     private static final GeometryFactory geometryFactory = new GeometryFactory();
 
     @Override
@@ -99,13 +107,16 @@ public class GeometrySerde
 
     private void writeGeometry(Kryo kryo, Output out, Geometry geometry)
     {
-        byte[] data = ShapeSerde.serialize(geometry);
+        WKBWriter writer = new WKBWriter(2, 2, true);
+        byte[] data = writer.write(geometry);
+
+        // write geometry length size to read bytes until userData
+        out.writeInt(data.length, true);
         out.write(data, 0, data.length);
         writeUserData(kryo, out, geometry);
     }
 
-    private void writeUserData(Kryo kryo, Output out, Geometry geometry)
-    {
+    private void writeUserData(Kryo kryo, Output out, Geometry geometry) {
         out.writeBoolean(geometry.getUserData() != null);
         if (geometry.getUserData() != null) {
             kryo.writeClass(out, geometry.getUserData().getClass());
@@ -118,7 +129,7 @@ public class GeometrySerde
     {
         byte typeId = input.readByte();
         Type geometryType = Type.fromId(typeId);
-        switch (geometryType) {
+        switch (Objects.requireNonNull(geometryType)) {
             case SHAPE:
                 return readGeometry(kryo, input);
             case CIRCLE: {
@@ -153,8 +164,7 @@ public class GeometrySerde
         }
     }
 
-    private Object readUserData(Kryo kryo, Input input)
-    {
+    private Object readUserData(Kryo kryo, Input input) {
         Object userData = null;
         if (input.readBoolean()) {
             Registration clazz = kryo.readClass(input);
@@ -163,10 +173,21 @@ public class GeometrySerde
         return userData;
     }
 
-    private Geometry readGeometry(Kryo kryo, Input input)
-    {
-        Geometry geometry = ShapeSerde.deserialize(input, geometryFactory);
-        geometry.setUserData(readUserData(kryo, input));
+    private Geometry readGeometry(Kryo kryo, Input input) {
+        WKBReader reader = new WKBReader();
+        Geometry geometry;
+
+        int geometryBytesLength = input.readInt(true);
+        byte[] bytes = input.readBytes(geometryBytesLength);
+
+        try {
+            geometry = reader.read(bytes);
+            geometry.setUserData(readUserData(kryo, input));
+        } catch (ParseException e) {
+            log.error("Cannot parse geometry bytes", e);
+            return null;
+        }
+
         return geometry;
     }
 

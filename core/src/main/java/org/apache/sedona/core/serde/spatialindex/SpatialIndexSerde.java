@@ -24,8 +24,6 @@ import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import org.apache.log4j.Logger;
-import org.apache.sedona.core.geometryObjects.GeometrySerde;
-import org.apache.sedona.core.geometryObjects.WKBGeometrySerde;
 import org.locationtech.jts.index.quadtree.IndexSerde;
 import org.locationtech.jts.index.quadtree.Quadtree;
 import org.locationtech.jts.index.strtree.STRtree;

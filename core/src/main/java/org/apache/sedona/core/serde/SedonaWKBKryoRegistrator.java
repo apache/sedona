@@ -20,14 +20,9 @@
 package org.apache.sedona.core.serde;
 
 import com.esotericsoftware.kryo.Kryo;
-import org.apache.log4j.Logger;
-import org.apache.sedona.core.geometryObjects.Circle;
 import org.apache.sedona.core.serde.spatialindex.SpatialIndexSerde;
-import org.apache.sedona.core.geometryObjects.WKBGeometrySerde;
+import org.apache.sedona.core.serde.WKB.WKBGeometrySerde;
 import org.apache.spark.serializer.KryoRegistrator;
-import org.locationtech.jts.geom.*;
-import org.locationtech.jts.index.quadtree.Quadtree;
-import org.locationtech.jts.index.strtree.STRtree;
 
 /**
  * Register Kryo classes using the WKB Geometry Serde and SpatialIndexSerde for index objects

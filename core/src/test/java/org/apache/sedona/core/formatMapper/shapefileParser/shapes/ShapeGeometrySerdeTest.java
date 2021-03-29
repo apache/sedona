@@ -23,7 +23,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import org.apache.sedona.core.geometryObjects.Circle;
-import org.apache.sedona.core.geometryObjects.GeometrySerde;
+import org.apache.sedona.core.serde.shape.ShapeGeometrySerde;
 import org.apache.sedona.core.utils.GeomUtils;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
@@ -35,7 +35,7 @@ import java.io.ByteArrayOutputStream;
 
 import static org.junit.Assert.assertTrue;
 
-public class GeometrySerdeTest
+public class ShapeGeometrySerdeTest
 {
     private final Kryo kryo = new Kryo();
     private final WKTReader wktReader = new WKTReader();
@@ -86,7 +86,7 @@ public class GeometrySerdeTest
 
     private byte[] serialize(Geometry input)
     {
-        kryo.register(input.getClass(), new GeometrySerde());
+        kryo.register(input.getClass(), new ShapeGeometrySerde());
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         Output output = new Output(bos);

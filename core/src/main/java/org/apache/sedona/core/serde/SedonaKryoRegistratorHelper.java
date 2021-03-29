@@ -23,8 +23,8 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import org.apache.log4j.Logger;
 import org.apache.sedona.core.geometryObjects.Circle;
-import org.apache.sedona.core.geometryObjects.GeometrySerde;
-import org.apache.sedona.core.geometryObjects.WKBGeometrySerde;
+import org.apache.sedona.core.serde.shape.ShapeGeometrySerde;
+import org.apache.sedona.core.serde.WKB.WKBGeometrySerde;
 import org.apache.sedona.core.serde.spatialindex.SpatialIndexSerde;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.index.quadtree.Quadtree;
@@ -43,8 +43,8 @@ public class SedonaKryoRegistratorHelper {
         Serializer serializer;
         if (geometrySerdeType instanceof WKBGeometrySerde) {
             serializer = new WKBGeometrySerde();
-        } else if (geometrySerdeType instanceof GeometrySerde) {
-            serializer = new GeometrySerde();
+        } else if (geometrySerdeType instanceof ShapeGeometrySerde) {
+            serializer = new ShapeGeometrySerde();
         } else
             throw new UnsupportedOperationException(String.format("Geometry Serde: %s is not supported",
                     geometrySerdeType.getClass().getName())
