@@ -17,16 +17,20 @@
  * under the License.
  */
 
-package org.apache.sedona.core.geometryObjects;
+package org.apache.sedona.core.serde.spatialindex;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import org.apache.log4j.Logger;
+import org.apache.sedona.core.geometryObjects.GeometrySerde;
+import org.apache.sedona.core.geometryObjects.WKBGeometrySerde;
 import org.locationtech.jts.index.quadtree.IndexSerde;
 import org.locationtech.jts.index.quadtree.Quadtree;
 import org.locationtech.jts.index.strtree.STRtree;
+
+import java.util.Objects;
 
 /**
  * Provides methods to efficiently serialize and deserialize spatialIndex types.
@@ -41,18 +45,9 @@ public class SpatialIndexSerde
 
     private static final Logger log = Logger.getLogger(SpatialIndexSerde.class);
 
-    private final GeometrySerde geometrySerde;
-
     public SpatialIndexSerde()
     {
         super();
-        geometrySerde = new GeometrySerde();
-    }
-
-    public SpatialIndexSerde(GeometrySerde geometrySerde)
-    {
-        super();
-        this.geometrySerde = geometrySerde;
     }
 
     @Override
@@ -83,7 +78,7 @@ public class SpatialIndexSerde
     {
         byte typeID = input.readByte();
         Type indexType = Type.fromId(typeID);
-        switch (indexType) {
+        switch (Objects.requireNonNull(indexType, "indexType cannot be null")) {
             case QUADTREE: {
                 IndexSerde indexSerde = new IndexSerde();
                 return indexSerde.read(kryo, input);
