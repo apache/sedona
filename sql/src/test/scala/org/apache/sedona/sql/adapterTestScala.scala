@@ -20,11 +20,13 @@
 package org.apache.sedona.sql
 
 import org.apache.sedona.core.enums.{FileDataSplitter, GridType, IndexType}
+import org.apache.sedona.core.formatMapper.EarthdataHDFPointMapper
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader
 import org.apache.sedona.core.spatialOperator.JoinQuery
-import org.apache.sedona.core.spatialRDD.{CircleRDD, PolygonRDD}
+import org.apache.sedona.core.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}
 import org.apache.sedona.sql.utils.Adapter
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.storage.StorageLevel
 import org.scalatest.GivenWhenThen
 import org.scalatest.matchers.should.Matchers
 
@@ -178,7 +180,23 @@ class adapterTestScala extends TestBaseScala with Matchers with GivenWhenThen{
       val df = Adapter.toDf(spatialRDD, sparkSession)
       assert(df.columns.length == 4)
       assert(df.count() == 1)
+    }
 
+    it("load HDF data from RDD to a DataFrame") {
+      val InputLocation = "file://" + resourceFolder + "modis/modis.csv"
+      val numPartitions = 5
+      val HDFincrement = 5
+      val HDFoffset = 2
+      val HDFrootGroupName = "MOD_Swath_LST"
+      val HDFDataVariableName = "LST"
+      val urlPrefix = resourceFolder + "modis/"
+      val HDFDataVariableList:Array[String] = Array("LST", "QC", "Error_LST", "Emis_31", "Emis_32")
+      val earthdataHDFPoint = new EarthdataHDFPointMapper(HDFincrement, HDFoffset, HDFrootGroupName, HDFDataVariableList, HDFDataVariableName, urlPrefix)
+      val spatialRDD = new PointRDD(sparkSession.sparkContext, InputLocation, numPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY)
+      import scala.collection.JavaConverters._
+      spatialRDD.fieldNames = HDFDataVariableList.dropRight(4).toList.asJava
+      val spatialDf = Adapter.toDf(spatialRDD, sparkSession)
+      assert(spatialDf.schema.fields(1).name == "LST")
     }
   }
 }
