@@ -22,30 +22,22 @@ package org.apache.sedona.core.serde;
 import com.esotericsoftware.kryo.Kryo;
 import org.apache.log4j.Logger;
 import org.apache.sedona.core.geometryObjects.Circle;
-import org.apache.sedona.core.geometryObjects.GeometrySerde;
 import org.apache.sedona.core.serde.spatialindex.SpatialIndexSerde;
+import org.apache.sedona.core.geometryObjects.WKBGeometrySerde;
 import org.apache.spark.serializer.KryoRegistrator;
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.GeometryCollection;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.MultiLineString;
-import org.locationtech.jts.geom.MultiPoint;
-import org.locationtech.jts.geom.MultiPolygon;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.index.quadtree.Quadtree;
 import org.locationtech.jts.index.strtree.STRtree;
 
 /**
- * Register Kryo classes using the Geometry Serde(using the ShapeFile serialization)
- * and SpatialIndexSerde for index objects
+ * Register Kryo classes using the WKB Geometry Serde and SpatialIndexSerde for index objects
  */
-public class SedonaKryoRegistrator
+public class SedonaWKBKryoRegistrator
         implements KryoRegistrator {
 
     @Override
     public void registerClasses(Kryo kryo) {
-        GeometrySerde serializer = new GeometrySerde();
+        WKBGeometrySerde serializer = new WKBGeometrySerde();
         SpatialIndexSerde indexSerializer = new SpatialIndexSerde();
 
         SedonaKryoRegistratorHelper.registerClasses(kryo, serializer, indexSerializer);
