@@ -26,6 +26,7 @@ import org.locationtech.jts.io.{WKBReader, WKBWriter}
   * SerDe using the WKB reader and writer objects
   */
 object GeometrySerializer {
+  // TODO - add serialiazer of shape file also
 
   /**
     * Given a geometry returns array of bytes
