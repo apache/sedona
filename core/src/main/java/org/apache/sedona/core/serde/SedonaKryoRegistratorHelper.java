@@ -39,26 +39,16 @@ public class SedonaKryoRegistratorHelper {
 
     public static void registerClasses(Kryo kryo, Serializer geometrySerdeType, SpatialIndexSerde indexSerializer) {
         log.info("Registering custom serializers for geometry types");
-
-        Serializer serializer;
-        if (geometrySerdeType instanceof WKBGeometrySerde) {
-            serializer = new WKBGeometrySerde();
-        } else if (geometrySerdeType instanceof ShapeGeometrySerde) {
-            serializer = new ShapeGeometrySerde();
-        } else
-            throw new UnsupportedOperationException(String.format("Geometry Serde: %s is not supported",
-                    geometrySerdeType.getClass().getName())
-            );
-
-        kryo.register(Point.class, serializer);
-        kryo.register(LineString.class, serializer);
-        kryo.register(Polygon.class, serializer);
-        kryo.register(MultiPoint.class, serializer);
-        kryo.register(MultiLineString.class, serializer);
-        kryo.register(MultiPolygon.class, serializer);
-        kryo.register(GeometryCollection.class, serializer);
-        kryo.register(Circle.class, serializer);
-        kryo.register(Envelope.class, serializer);
+        
+        kryo.register(Point.class, geometrySerdeType);
+        kryo.register(LineString.class, geometrySerdeType);
+        kryo.register(Polygon.class, geometrySerdeType);
+        kryo.register(MultiPoint.class, geometrySerdeType);
+        kryo.register(MultiLineString.class, geometrySerdeType);
+        kryo.register(MultiPolygon.class, geometrySerdeType);
+        kryo.register(GeometryCollection.class, geometrySerdeType);
+        kryo.register(Circle.class, geometrySerdeType);
+        kryo.register(Envelope.class, geometrySerdeType);
 
         kryo.register(Quadtree.class, indexSerializer);
         kryo.register(STRtree.class, indexSerializer);
