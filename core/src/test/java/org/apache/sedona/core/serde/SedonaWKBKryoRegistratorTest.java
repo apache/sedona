@@ -9,7 +9,7 @@ import org.apache.sedona.core.serde.spatialindex.SpatialIndexSerde;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.serializer.KryoSerializer;
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.locationtech.jts.geom.Point;
@@ -34,8 +34,8 @@ public class SedonaWKBKryoRegistratorTest extends TestBase {
         Logger.getLogger("akka").setLevel(Level.WARN);
     }
 
-    @After
-    public void tearDown()
+    @AfterClass
+    public static void tearDown()
             throws Exception
     {
         sc.stop();
