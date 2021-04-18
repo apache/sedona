@@ -43,7 +43,6 @@ import static org.junit.Assert.assertTrue;
  * 2. private testUsingWKBSerde
  * 3. wkbSerde
  */
-@Ignore
 public class GeometrySerdeTest
 {
     private final Kryo kryo = new Kryo();

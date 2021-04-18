@@ -14,7 +14,6 @@ import org.locationtech.jts.geom.Point;
 
 import static org.junit.Assert.assertEquals;
 
-@Ignore
 public class SedonaKryoRegistratorTest extends TestBase {
 
     public static JavaSparkContext sc;
