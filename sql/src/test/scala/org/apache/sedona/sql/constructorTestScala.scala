@@ -110,5 +110,14 @@ class constructorTestScala extends TestBaseScala {
       var spatialRDD2 = Adapter.toSpatialRdd(df, "geometry")
       Adapter.toDf(spatialRDD2, sparkSession).show(1)
     }
+
+    it("Passed ST_GeomFromRaster") {
+      val polygonRasterDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(csvRasterLocation)
+      polygonRasterDf.createOrReplaceTempView("rastertable")
+      val polygonDf = sparkSession.sql("select ST_GeomFromRaster(rastertable._c0) as rastershape from rastertable")
+      polygonDf.show(5, truncate = true)
+      assert(polygonDf.count() == 17 && polygonDf.first().getAs[Geometry](0).getGeometryType === "Polygon")
+    }
+
   }
 }

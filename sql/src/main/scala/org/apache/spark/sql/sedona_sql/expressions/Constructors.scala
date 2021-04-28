@@ -305,3 +305,22 @@ trait UserDataGeneratator {
   }
 }
 
+case class ST_GeomFromRaster(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 1)
+    val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
+    var fileDataSplitter = FileDataSplitter.RASTER
+    var formatMapper = new FormatMapper(fileDataSplitter, false)
+    var geometry = formatMapper.readGeometry(geomString)
+    return new GenericArrayData(GeometrySerializer.serialize(geometry))
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+}
+

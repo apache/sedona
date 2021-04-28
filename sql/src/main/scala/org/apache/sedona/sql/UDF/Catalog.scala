@@ -24,6 +24,8 @@ import org.apache.spark.sql.sedona_sql.expressions._
 import org.locationtech.jts.geom.Geometry
 
 object Catalog {
+
+
   val expressions: Seq[FunctionBuilder] = Seq(
     ST_PointFromText,
     ST_PolygonFromText,
@@ -81,7 +83,8 @@ object Catalog {
     ST_IsRing,
     ST_FlipCoordinates,
     ST_LineSubstring,
-    ST_LineInterpolatePoint
+    ST_LineInterpolatePoint,
+    ST_GeomFromRaster
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(
