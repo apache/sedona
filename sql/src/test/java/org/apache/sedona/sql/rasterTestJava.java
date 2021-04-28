@@ -28,17 +28,19 @@ import org.apache.hadoop.hdfs.MiniDFSCluster;
 import java.nio.file.Files;
 
 public class rasterTestJava   {
+
+    public static String resourcefolder =  System.getProperty("user.dir") + "/../core/src/test/resources/";
+    public static String rasterdatalocation = resourcefolder + "raster/image.tif";
     protected static SparkConf conf;
     protected static JavaSparkContext sc;
     protected static SparkSession sparkSession;
-    protected static String filePath;
     protected static String hdfsURI;
     protected static String rasterfileHDFSpath;
     private static  FileSystem fs;
     private static MiniDFSCluster hdfsCluster;
-    private static String csvPath;
-    public static String resourcefolder =  System.getProperty("user.dir") + "/../core/src/test/resources/";
-    public static String rasterdatalocation = resourcefolder + "raster/image.tif";
+    private static String localcsvPath;
+    private static String hdfscsvpath;
+
 
     @BeforeClass
     public static void onceExecutedBeforeAll() throws IOException {
@@ -52,7 +54,7 @@ public class rasterTestJava   {
         Logger.getLogger("akka").setLevel(Level.WARN);
         SedonaSQLRegistrator.registerAll(sparkSession.sqlContext());
 
-
+        // Set up HDFS mini-cluster configurations
         File baseDir = new File("target/hdfs").getAbsoluteFile();
         FileUtil.fullyDelete(baseDir);
         HdfsConfiguration hdfsConf = new HdfsConfiguration();
@@ -61,10 +63,12 @@ public class rasterTestJava   {
         hdfsCluster = builder.build();
         fs = FileSystem.get(hdfsConf);
         hdfsURI = "hdfs://127.0.0.1:" + hdfsCluster.getNameNodePort() + "/";
-        csvPath = baseDir.getAbsolutePath() + "/train.csv";
-        System.out.println(csvPath);
+        localcsvPath = baseDir.getAbsolutePath() + "/train.csv";
+        hdfscsvpath = hdfsURI + "train.csv";
+
 
     }
+
     @AfterClass
     public static void TearDown() throws IOException {
 
@@ -75,14 +79,16 @@ public class rasterTestJava   {
 
 
     }
+
+    // Testing Sedona dataframe for CSV file on local
     @Test
-    public void readImagesFromHDFS() throws IOException {
+    public void readFileFromLocal() throws IOException {
 
 
         rasterfileHDFSpath = hdfsURI + "image.tif";
         fs.copyFromLocalFile(new Path(rasterdatalocation), new Path(rasterfileHDFSpath));
-        createFileHDFS();
-        Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", ",").option("header", "false").load(csvPath);
+        createFileLocal();
+        Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", ",").option("header", "false").load(localcsvPath);
         df.createOrReplaceTempView("inputtable");
         Dataset<Row> spatialDf = sparkSession.sql("select ST_GeomFromRaster(inputtable._c0) as countyshape from inputtable");
         spatialDf.show();
@@ -90,21 +96,14 @@ public class rasterTestJava   {
 
     }
 
-    @Test
-    public void readImagesFromLocal() throws IOException {
-
-        
-
-    }
-
-
-    private void createFileHDFS() throws IllegalArgumentException, IOException {
+    // Create a CSV file on local with image URL containing HDFS paths(paths can either be on HDFS or S3 bucket)
+    private void createFileLocal() throws IllegalArgumentException, IOException {
         List<List<String>> rows = Arrays.asList(
                 Arrays.asList(hdfsURI + "image.tif"),
                 Arrays.asList(hdfsURI + "image.tif")
         );
 
-        FileWriter csvWriter = new FileWriter(csvPath);
+        FileWriter csvWriter = new FileWriter(localcsvPath);
         for (List<String> rowData : rows) {
             csvWriter.append(String.join(",", rowData));
             csvWriter.append("\n");
@@ -113,7 +112,5 @@ public class rasterTestJava   {
         csvWriter.close();
 
     }
-
-
 
 }
