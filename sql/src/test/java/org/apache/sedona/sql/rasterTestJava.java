@@ -1,5 +1,6 @@
 package org.apache.sedona.sql;
 
+
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -14,18 +15,12 @@ import org.apache.spark.sql.Dataset;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
-import java.nio.file.Files;
 
 public class rasterTestJava   {
 
@@ -76,8 +71,6 @@ public class rasterTestJava   {
         sparkSession.stop();
         hdfsCluster.shutdown();
         fs.close();
-
-
     }
 
     // Testing Sedona dataframe for CSV file on local
