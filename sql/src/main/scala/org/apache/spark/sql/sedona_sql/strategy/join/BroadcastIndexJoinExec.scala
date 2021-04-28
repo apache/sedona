@@ -49,8 +49,8 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
   // Using lazy val to avoid serialization
   @transient private lazy val boundCondition: (InternalRow => Boolean) = extraCondition match {
     case Some(condition) =>
-//      Predicate.create(condition, output).eval _ // SPARK3 anchor
-      newPredicate(condition, output).eval _ // SPARK2 anchor
+      Predicate.create(condition, output).eval _ // SPARK3 anchor
+//      newPredicate(condition, output).eval _ // SPARK2 anchor
     case None =>
       (r: InternalRow) => true
   }
@@ -75,8 +75,8 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
       case None if !intersects => s"ST_Contains($windowExpression, $objectExpression)"
     }
 
-//  override def simpleString(maxFields: Int): String = super.simpleString(maxFields) + s" $spatialExpression" // SPARK3 anchor
-  override def simpleString: String = super.simpleString + s" $spatialExpression" // SPARK2 anchor
+  override def simpleString(maxFields: Int): String = super.simpleString(maxFields) + s" $spatialExpression" // SPARK3 anchor
+//  override def simpleString: String = super.simpleString + s" $spatialExpression" // SPARK2 anchor
 
   private def windowBroadcastJoin(index: Broadcast[SpatialIndex], spatialRdd: SpatialRDD[Geometry]): RDD[(Geometry, Geometry)] = {
     spatialRdd.getRawSpatialRDD.rdd.flatMap { row =>

@@ -46,6 +46,7 @@ import org.wololo.geojson.Feature;
 import org.wololo.geojson.GeoJSONFactory;
 import org.wololo.jts2geojson.GeoJSONReader;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -110,7 +111,7 @@ public class FormatMapper<T extends Geometry>
         this.allowTopologicallyInvalidGeometries = true;
         this.skipSyntacticallyInvalidGeometries = false;
         // Only the following formats are allowed to use this format mapper because each input has the geometry type definition
-        assert geometryType != null || splitter == FileDataSplitter.WKB || splitter == FileDataSplitter.WKT || splitter == FileDataSplitter.GEOJSON;
+        assert geometryType != null || splitter == FileDataSplitter.WKB || splitter == FileDataSplitter.WKT || splitter == FileDataSplitter.GEOJSON || splitter == FileDataSplitter.RASTER;
     }
 
     /**
