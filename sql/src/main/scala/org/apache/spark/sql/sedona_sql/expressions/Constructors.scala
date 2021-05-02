@@ -18,18 +18,20 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
+
 import org.apache.sedona.core.enums.{FileDataSplitter, GeometryType}
 import org.apache.sedona.core.formatMapper.FormatMapper
+import org.apache.sedona.sql.raster.Construction
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.types.{DataType, Decimal}
+import org.apache.spark.sql.types.{DataType, Decimal, StringType}
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.geom.{Coordinate, GeometryFactory}
-
+import org.apache.spark.sql.types.DataTypes
 /**
   * Return a point from a string. The string must be plain string and each coordinate must be separated by a delimiter.
   *
@@ -320,6 +322,28 @@ case class ST_GeomFromRaster(inputExpressions: Seq[Expression])
   }
 
   override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+
+case class ST_BandFromRaster(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 1)
+    val imageString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
+    val constructor = new Construction()
+    val bands = constructor.getBands(imageString)
+
+    return UTF8String.fromString(bands)
+
+  }
+
+  override def dataType: DataType = StringType
 
   override def children: Seq[Expression] = inputExpressions
 }

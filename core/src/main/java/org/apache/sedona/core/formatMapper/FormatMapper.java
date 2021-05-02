@@ -46,7 +46,6 @@ import org.wololo.geojson.Feature;
 import org.wololo.geojson.GeoJSONFactory;
 import org.wololo.jts2geojson.GeoJSONReader;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -94,6 +93,7 @@ public class FormatMapper<T extends Geometry>
      */
     boolean skipSyntacticallyInvalidGeometries;
 
+
     /**
      * Instantiates a new format mapper.
      *
@@ -134,6 +134,8 @@ public class FormatMapper<T extends Geometry>
     public FormatMapper(FileDataSplitter splitter, boolean carryInputData, GeometryType geometryType) {
         this(0, -1, splitter, carryInputData, geometryType);
     }
+
+
 
     public static List<String> readGeoJsonPropertyNames(String geoJson) {
         if (geoJson.contains("Feature") || geoJson.contains("feature") || geoJson.contains("FEATURE")) {
@@ -430,7 +432,5 @@ public class FormatMapper<T extends Geometry>
         }
     }
 
-    private ArrayList<Integer> getBands(String line) {
-        return new ArrayList<Integer>();
-    }
+
 }

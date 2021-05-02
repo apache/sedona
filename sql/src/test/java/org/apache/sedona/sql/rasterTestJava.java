@@ -22,6 +22,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 
+
 public class rasterTestJava   {
 
     public static String resourcefolder =  System.getProperty("user.dir") + "/../core/src/test/resources/";
@@ -86,6 +87,21 @@ public class rasterTestJava   {
         Dataset<Row> spatialDf = sparkSession.sql("select ST_GeomFromRaster(inputtable._c0) as countyshape from inputtable");
         spatialDf.show();
         assert(spatialDf.count()==2);
+
+    }
+
+    @Test
+    public void bandsFromRaster() throws IOException {
+
+        rasterfileHDFSpath = hdfsURI + "image.tif";
+        fs.copyFromLocalFile(new Path(rasterdatalocation), new Path(rasterfileHDFSpath));
+        createFileLocal();
+        Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", ",").option("header", "false").load(localcsvPath);
+        df.createOrReplaceTempView("inputtable");
+        Dataset<Row> spatialDf = sparkSession.sql("select ST_BandFromRaster(inputtable._c0) as bands from inputtable");
+        spatialDf.show();
+        assert(spatialDf.count()==2);
+
 
     }
 

@@ -84,7 +84,8 @@ object Catalog {
     ST_FlipCoordinates,
     ST_LineSubstring,
     ST_LineInterpolatePoint,
-    ST_GeomFromRaster
+    ST_GeomFromRaster,
+    ST_BandFromRaster
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(

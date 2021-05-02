@@ -10,6 +10,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="scala-sdk-2.12.8" level="application" />
     <orderEntry type="library" name="Maven: org.locationtech.jts:jts-core:1.18.0" level="project" />
     <orderEntry type="library" name="Maven: org.wololo:jts2geojson:0.14.3" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.10.0.pr1" level="project" />
@@ -266,6 +267,5 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.scalatest:scalatest_2.12:3.1.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.scalactic:scalactic_2.12:3.1.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.scala-lang:scala-compiler:2.12.8" level="project" />
-    <orderEntry type="library" name="scala-sdk-2.12.8" level="application" />
   </component>
 </module>
