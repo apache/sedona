@@ -28,10 +28,9 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.types.{DataType, Decimal, StringType}
+import org.apache.spark.sql.types.{ArrayType, DataType, DataTypes, Decimal, DoubleType, StringType}
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.geom.{Coordinate, GeometryFactory}
-import org.apache.spark.sql.types.DataTypes
 /**
   * Return a point from a string. The string must be plain string and each coordinate must be separated by a delimiter.
   *
@@ -338,12 +337,17 @@ case class ST_BandFromRaster(inputExpressions: Seq[Expression])
     val imageString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
     val constructor = new Construction()
     val bands = constructor.getBands(imageString)
+    val regex = ":"
+    val limit = -1
+    val splitbands = UTF8String.fromString(bands).asInstanceOf[UTF8String].split(
+    UTF8String.fromString(regex).asInstanceOf[UTF8String], limit.asInstanceOf[Int])
 
-    return UTF8String.fromString(bands)
+    new GenericArrayData(splitbands)
+//    return UTF8String.fromString(bands)
 
   }
 
-  override def dataType: DataType = StringType
+  override def dataType: DataType = ArrayType(StringType)
 
   override def children: Seq[Expression] = inputExpressions
 }

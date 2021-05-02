@@ -89,7 +89,7 @@ public class Construction {
 
         for(List<Double> l:input)
         {
-            String tempList = l.stream().map(i->i.toString()).collect(Collectors.joining(", "));
+            String tempList = l.stream().map(i->i.toString()).collect(Collectors.joining(" "));
 
             sb.append(tempList + ":");
 
