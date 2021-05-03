@@ -26,10 +26,18 @@ import java.util.stream.Collectors;
 
 public class Construction {
 
+
+    public static List<List<Double>> bands = null;
+    public static Boolean flag = false;
     public Construction() {}
 
-    public String getBands(String line) throws IOException, TransformException {
+    public List<List<Double>> getBands(String line) throws IOException, TransformException {
 
+        System.out.println(flag);
+        if(flag)
+            return bands;
+
+        flag = true;
         ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
         policy.setValue(OverviewPolicy.IGNORE);
 
@@ -78,26 +86,27 @@ public class Construction {
 
             }
         }
-        return toString(bandValues);
+        bands = bandValues;
+        return bandValues;
 
     }
 
-    private String toString(List<List<Double>> input)
-    {
-
-        StringBuilder sb = new StringBuilder();
-
-        for(List<Double> l:input)
-        {
-            String tempList = l.stream().map(i->i.toString()).collect(Collectors.joining(" "));
-
-            sb.append(tempList + ":");
-
-        }
-        String result = sb.toString();
-        return result.substring(0,result.length()-1);
-
-    }
+//    private String toString(List<List<Double>> input)
+//    {
+//
+//        StringBuilder sb = new StringBuilder();
+//
+//        for(List<Double> l:input)
+//        {
+//            String tempList = l.stream().map(i->i.toString()).collect(Collectors.joining(" "));
+//
+//            sb.append(tempList + ":");
+//
+//        }
+//        String result = sb.toString();
+//        return result.substring(0,result.length()-1);
+//
+//    }
 
 
 }

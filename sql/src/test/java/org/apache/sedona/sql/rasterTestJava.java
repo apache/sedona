@@ -60,6 +60,7 @@ public class rasterTestJava   {
         fs = FileSystem.get(hdfsConf);
         hdfsURI = "hdfs://127.0.0.1:" + hdfsCluster.getNameNodePort() + "/";
         localcsvPath = baseDir.getAbsolutePath() + "/train.csv";
+        System.out.println(localcsvPath);
         hdfscsvpath = hdfsURI + "train.csv";
 
 
@@ -98,9 +99,10 @@ public class rasterTestJava   {
         createFileLocal();
         Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", ",").option("header", "false").load(localcsvPath);
         df.createOrReplaceTempView("inputtable");
-        Dataset<Row> spatialDf = sparkSession.sql("select ST_BandFromRaster(inputtable._c0) as bands from inputtable");
+        Dataset<Row> spatialDf = sparkSession.sql("select ST_BandFromRaster(inputtable._c0, 0) as bands from inputtable");
         spatialDf.show();
-        assert(spatialDf.count()==2);
+        Dataset<Row> spatialDf1 = sparkSession.sql("select ST_BandFromRaster(inputtable._c0, 1) as bands from inputtable");
+        assert(spatialDf1.count()==2);
 
 
     }

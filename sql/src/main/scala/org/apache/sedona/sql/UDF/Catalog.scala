@@ -85,7 +85,8 @@ object Catalog {
     ST_LineSubstring,
     ST_LineInterpolatePoint,
     ST_GeomFromRaster,
-    ST_BandFromRaster
+    ST_BandFromRaster,
+    ST_NDVI
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(

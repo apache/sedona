@@ -26,11 +26,14 @@ import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.util.GenericArrayData
+import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types.{ArrayType, DataType, DataTypes, Decimal, DoubleType, StringType}
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.geom.{Coordinate, GeometryFactory}
+
+import scala.collection.JavaConverters.asScalaBufferConverter
+import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 /**
   * Return a point from a string. The string must be plain string and each coordinate must be separated by a delimiter.
   *
@@ -317,6 +320,7 @@ case class ST_GeomFromRaster(inputExpressions: Seq[Expression])
     var fileDataSplitter = FileDataSplitter.RASTER
     var formatMapper = new FormatMapper(fileDataSplitter, false)
     var geometry = formatMapper.readGeometry(geomString)
+    val ser =GeometrySerializer.serialize(geometry)
     return new GenericArrayData(GeometrySerializer.serialize(geometry))
   }
 
@@ -333,21 +337,17 @@ case class ST_BandFromRaster(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
 
     // This is an expression which takes one input expressions
-    assert(inputExpressions.length == 1)
+    assert(inputExpressions.length == 2)
     val imageString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
-    val constructor = new Construction()
-    val bands = constructor.getBands(imageString)
-    val regex = ":"
-    val limit = -1
-    val splitbands = UTF8String.fromString(bands).asInstanceOf[UTF8String].split(
-    UTF8String.fromString(regex).asInstanceOf[UTF8String], limit.asInstanceOf[Int])
-
-    new GenericArrayData(splitbands)
-//    return UTF8String.fromString(bands)
+    val bandNumber =  inputExpressions(1).eval(inputRow).asInstanceOf[Int]
+    val const = new Construction();
+    val bands = const.getBands(imageString)
+    val outbands = bands.map(e=>e.map(t=>Double2double(t))).map(arr=>arr.toArray).toArray
+    new GenericArrayData(outbands(bandNumber))
 
   }
 
-  override def dataType: DataType = ArrayType(StringType)
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }

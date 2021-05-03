@@ -244,6 +244,7 @@ public class FormatMapper<T extends Geometry>
     public Geometry readRaster(String line)
             throws FactoryException, TransformException {
         AbstractGridFormat format = GridFormatFinder.findFormat(line);
+        System.out.println(format);
         Hints hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE);
         AbstractGridCoverage2DReader reader = format.getReader(line, hints);
 
