@@ -75,9 +75,8 @@ public class rasterTestJava   {
         fs.close();
     }
 
-    // Testing Sedona dataframe for CSV file on local
-    @Test
-    public void readFileFromLocal() throws IOException {
+    // Testing constructor ST_GeomFromRaster which fetches geometrical extent for an image
+    public void geomfromRaster() throws IOException {
 
 
         rasterfileHDFSpath = hdfsURI + "image.tif";
@@ -91,18 +90,22 @@ public class rasterTestJava   {
 
     }
 
+    // Testing ST_DataframeFromRaster constructor which converts spark dataframe into geotiff dataframe in Apache Sedona
     @Test
-    public void bandsFromRaster() throws IOException {
+    public void sedonadataframeLoader() throws IOException {
 
         rasterfileHDFSpath = hdfsURI + "image.tif";
         fs.copyFromLocalFile(new Path(rasterdatalocation), new Path(rasterfileHDFSpath));
         createFileLocal();
         Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", ",").option("header", "false").load(localcsvPath);
         df.createOrReplaceTempView("inputtable");
-        Dataset<Row> spatialDf = sparkSession.sql("select ST_DataframeFromRaster(inputtable._c0, 4) as bands from inputtable");
+        Dataset<Row> spatialDf = sparkSession.sql("select ST_DataframeFromRaster(inputtable._c0, 4) as rasterstruct from inputtable");
         spatialDf.show(false);
-
-
+        spatialDf.printSchema();
+        spatialDf.createOrReplaceTempView("sedonaframe");
+        Dataset<Row> sedonaDF = sparkSession.sql("select rasterstruct.Polygon as geom, rasterstruct.band1 as Band_1, rasterstruct.band2 as Band_2, rasterstruct.band3 as Band_3, rasterstruct.band4 as Band_4 from sedonaframe");
+        sedonaDF.show();
+        assert(sedonaDF.count()==2 && sedonaDF.columns().length==5);
 
     }
 

@@ -24,10 +24,12 @@ public class Construction {
 
     private int bands = 0;
 
+    // Default constructor for getting the number of bands for raster image
     public Construction(int bands) {
         this.bands = bands;
     }
 
+    // Returning the pixel values for raster image
     public List<List<Double>> getBands(String line) throws IOException, TransformException {
 
 
@@ -52,9 +54,6 @@ public class Construction {
         GridCoordinates maxDimensions = dimensions.getHigh();
         int w = maxDimensions.getCoordinateValue(0)+1;
         int h = maxDimensions.getCoordinateValue(1)+1;
-//        int numBands = reader.getGridCoverageCount();
-////        System.out.println(numBands);
-//        numBands = 4;
         int numBands = bands;
 
         List<List<Double>> bandValues = new ArrayList<>(numBands);
@@ -85,22 +84,6 @@ public class Construction {
 
     }
 
-//    private String toString(List<List<Double>> input)
-//    {
-//
-//        StringBuilder sb = new StringBuilder();
-//
-//        for(List<Double> l:input)
-//        {
-//            String tempList = l.stream().map(i->i.toString()).collect(Collectors.joining(" "));
-//
-//            sb.append(tempList + ":");
-//
-//        }
-//        String result = sb.toString();
-//        return result.substring(0,result.length()-1);
-//
-//    }
 
 
 }

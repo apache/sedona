@@ -30,10 +30,11 @@ import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.functions.udf
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.implicits.GeometryEnhancer
-import org.apache.spark.sql.types.{ArrayType, DataType, DataTypes, Decimal, DoubleType, StringType}
+import org.apache.spark.sql.types.{ArrayType, DataType, DataTypes, Decimal, DoubleType, StringType, StructField, StructType}
 import org.apache.spark.unsafe.types.UTF8String
-import org.locationtech.jts.geom.{Coordinate, GeometryFactory}
+import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Polygon}
 
+import java.util
 import scala.collection.JavaConverters.asScalaBufferConverter
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 /**
@@ -332,55 +333,59 @@ case class ST_GeomFromRaster(inputExpressions: Seq[Expression])
 }
 
 
-//case class ST_BandFromRaster(inputExpressions: Seq[Expression])
-//  extends Expression with CodegenFallback with UserDataGeneratator {
-//  override def nullable: Boolean = false
-//
-//  override def eval(inputRow: InternalRow): Any = {
-//
-//    // This is an expression which takes one input expressions
-//    assert(inputExpressions.length == 2)
-//    val imageString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
-//    val bandNumber =  inputExpressions(1).eval(inputRow).asInstanceOf[Int]
-//    val const = new Construction()
-//    val bands = const.getBands(imageString)
-//    val outbands = bands.map(e=>e.map(t=>Double2double(t))).map(arr=>arr.toArray).toArray
-//    new GenericArrayData(outbands)
-//
-//  }
-//
-//  override def dataType: DataType = ArrayType(ArrayType(DoubleType))
-//
-//  override def children: Seq[Expression] = inputExpressions
 
-
-
+/***
+ * Converting a spark dataframe into GeoTiff Dataframe which involves fetching geometrical extent and band values for an image(Geotiff)
+ *
+ * @param inputExpressions Image URL(String), Number of Bands(Integer)
+ */
 case class ST_DataframeFromRaster(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
 
+  private var bandInfo = 0
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
     val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
     val totalBands = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
+    bandInfo = totalBands
     val fileDataSplitter = FileDataSplitter.RASTER
     val formatMapper = new FormatMapper(fileDataSplitter, false)
     val const = new Construction(totalBands)
     val geometry = formatMapper.readGeometry(geomString)
     val bandvalues = const.getBands(geomString).map(e=>e.map(t=>Double2double(t))).map(arr=>arr.toArray).toArray
 
-    InternalRow(geometry.toGenericArrayData,new GenericArrayData(bandvalues(0)) )
+    returnValue(geometry.toGenericArrayData,bandvalues, totalBands)
 
   }
 
+  // Dynamic results based on number of columns and type of structure
+  private def returnValue(geometry:GenericArrayData, bands:Array[Array[Double]], count:Int): InternalRow = {
 
-  override def dataType: DataType = DataTypes.createStructType(
-    Array(
-      DataTypes.createStructField("Polygon", GeometryUDT, false),
-      DataTypes.createStructField("bands", ArrayType(DoubleType), false)
-    )
-  )
+    val genData = new Array[GenericArrayData](count + 1)
+    genData(0) = geometry
+    var i = 1
+    for(i <- 1 until count + 1 ) {
+      genData(i) = new GenericArrayData(bands(i-1))
+    }
+    val result = InternalRow(genData.toList : _*)
+    result
+  }
+
+  // Dynamic Schema generation using Number of Bands
+  private def getSchema(count:Int):DataType = {
+    var schema = Seq[String]()
+    schema = schema :+ "Polygon"
+    var i = 1
+    for(i <- 1 until 5 ) {
+     schema = schema :+ "band".concat(i.toString)
+    }
+    val mySchema = StructType(schema.map(n => if (n == "Polygon") StructField("Polygon", GeometryUDT, false) else StructField(n, ArrayType(DoubleType), false)))
+    mySchema
+  }
+
+  override def dataType: DataType = getSchema(bandInfo)
 
   override def children: Seq[Expression] = inputExpressions
 }

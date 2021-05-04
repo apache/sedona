@@ -43,7 +43,6 @@ import org.locationtech.jts.precision.GeometryPrecisionReducer
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.opengis.referencing.operation.MathTransform
-import org.apache.sedona.sql.raster.Operations
 
 import java.util
 import scala.collection.mutable.ArrayBuffer
@@ -1125,26 +1124,3 @@ case class ST_FlipCoordinates(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
-/**
- * Returns normalized density vegetation index for the given raster image
- *
- * @param inputExpressions Band 3 of Raster image, Band 4 of Raster Image
- **/
-//case class ST_NDVI(inputExpressions: Seq[Expression])
-//  extends Expression with CodegenFallback {
-//  override def nullable: Boolean = false
-//
-//  override def eval(input: InternalRow): Any = {
-//    assert(inputExpressions.length == 2)
-//    val band3 = inputExpressions(0).eval(input).asInstanceOf[ArrayData]
-//    val band4 = inputExpressions(1).eval(input).asInstanceOf[ArrayData]
-//    val operations = new Operations()
-//    val ndvi = operations.NDVI(band3.toDoubleArray(), band4.toDoubleArray())
-//    new GenericArrayData(ndvi)
-//
-//  }
-//
-//  override def dataType: DataType = ArrayType(DoubleType)
-//
-//  override def children: Seq[Expression] = inputExpressions
-//}
