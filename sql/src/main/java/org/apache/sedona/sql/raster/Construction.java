@@ -22,18 +22,16 @@ import java.util.List;
 
 public class Construction {
 
+    private int bands = 0;
 
-    public static List<List<Double>> bands = null;
-    public static Boolean flag = false;
-    public Construction() {}
+    public Construction(int bands) {
+        this.bands = bands;
+    }
 
     public List<List<Double>> getBands(String line) throws IOException, TransformException {
 
-        System.out.println(flag);
-        if(flag)
-            return bands;
 
-        flag = true;
+
         ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
         policy.setValue(OverviewPolicy.IGNORE);
 
@@ -54,9 +52,10 @@ public class Construction {
         GridCoordinates maxDimensions = dimensions.getHigh();
         int w = maxDimensions.getCoordinateValue(0)+1;
         int h = maxDimensions.getCoordinateValue(1)+1;
-        int numBands = reader.getGridCoverageCount();
-        System.out.println(numBands);
-        numBands = 4;
+//        int numBands = reader.getGridCoverageCount();
+////        System.out.println(numBands);
+//        numBands = 4;
+        int numBands = bands;
 
         List<List<Double>> bandValues = new ArrayList<>(numBands);
 
@@ -82,7 +81,6 @@ public class Construction {
 
             }
         }
-        bands = bandValues;
         return bandValues;
 
     }

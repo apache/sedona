@@ -99,10 +99,9 @@ public class rasterTestJava   {
         createFileLocal();
         Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", ",").option("header", "false").load(localcsvPath);
         df.createOrReplaceTempView("inputtable");
-        Dataset<Row> spatialDf = sparkSession.sql("select ST_BandFromRaster(inputtable._c0, 0) as bands from inputtable");
-        spatialDf.show();
-        Dataset<Row> spatialDf1 = sparkSession.sql("select ST_BandFromRaster(inputtable._c0, 1) as bands from inputtable");
-        assert(spatialDf1.count()==2);
+        Dataset<Row> spatialDf = sparkSession.sql("select ST_DataframeFromRaster(inputtable._c0, 4) as bands from inputtable");
+        spatialDf.show(false);
+
 
 
     }

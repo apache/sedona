@@ -1130,21 +1130,21 @@ case class ST_FlipCoordinates(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions Band 3 of Raster image, Band 4 of Raster Image
  **/
-case class ST_NDVI(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
-  override def nullable: Boolean = false
-
-  override def eval(input: InternalRow): Any = {
-    assert(inputExpressions.length == 2)
-    val band3 = inputExpressions(0).eval(input).asInstanceOf[ArrayData]
-    val band4 = inputExpressions(1).eval(input).asInstanceOf[ArrayData]
-    val operations = new Operations()
-    val ndvi = operations.NDVI(band3.toDoubleArray(), band4.toDoubleArray())
-    new GenericArrayData(ndvi)
-
-  }
-
-  override def dataType: DataType = ArrayType(DoubleType)
-
-  override def children: Seq[Expression] = inputExpressions
-}
+//case class ST_NDVI(inputExpressions: Seq[Expression])
+//  extends Expression with CodegenFallback {
+//  override def nullable: Boolean = false
+//
+//  override def eval(input: InternalRow): Any = {
+//    assert(inputExpressions.length == 2)
+//    val band3 = inputExpressions(0).eval(input).asInstanceOf[ArrayData]
+//    val band4 = inputExpressions(1).eval(input).asInstanceOf[ArrayData]
+//    val operations = new Operations()
+//    val ndvi = operations.NDVI(band3.toDoubleArray(), band4.toDoubleArray())
+//    new GenericArrayData(ndvi)
+//
+//  }
+//
+//  override def dataType: DataType = ArrayType(DoubleType)
+//
+//  override def children: Seq[Expression] = inputExpressions
+//}
