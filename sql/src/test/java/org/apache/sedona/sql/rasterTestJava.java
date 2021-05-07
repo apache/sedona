@@ -76,6 +76,7 @@ public class rasterTestJava   {
     }
 
     // Testing constructor ST_GeomFromRaster which fetches geometrical extent for an image
+    @Test
     public void geomfromRaster() throws IOException {
 
 
