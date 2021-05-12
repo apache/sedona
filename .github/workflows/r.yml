@@ -1,0 +1,136 @@
+name: R build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-18.04
+    strategy:
+      fail-fast: false
+      matrix:
+        spark: [2.4.7, 3.0.2, 3.1.1]
+        scala: [2.11.8, 2.12.8]
+        r: [oldrel, release]
+        exclude:
+          - spark: 3.1.1
+            scala: 2.11.8
+            r: oldrel
+          - spark: 3.1.1
+            scala: 2.11.8
+            r: release
+          - spark: 3.0.2
+            scala: 2.11.8
+            r: oldrel
+          - spark: 3.0.2
+            scala: 2.11.8
+            r: release
+          - spark: 2.4.7
+            scala: 2.12.8
+            r: oldrel
+          - spark: 2.4.7
+            scala: 2.12.8
+            r: release
+    env:
+      SPARK_VERSION: ${{ matrix.spark }}
+      SCALA_VERSION: ${{ matrix.scala }}
+    steps:
+      - name: Delete existing R binaries
+        run: |
+          for b in R Rscript
+          do
+            while [ -n "$(which "$b")" ]
+            do
+              sudo rm -v "$(which "$b")"
+            done
+          done
+        shell: bash
+      - name: Delete existing JDK installation(s)
+        run: |
+          sudo apt-get -y remove --purge default-jdk adoptopenjdk-11-hotspot || :
+        shell: bash
+      - uses: actions/checkout@v2
+      - uses: r-lib/actions/setup-r@master
+        with:
+          r-version: ${{ matrix.r }}
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '8'
+      - name: Query R dependencies
+        run: |
+          print(R.version)
+          install.packages("remotes")
+          saveRDS(remotes::dev_package_deps("./R/sparklyr.sedona/", dependencies = TRUE), ".github/deps.Rds", version = 2)
+          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
+        shell: Rscript {0}
+      - name: Get OS name
+        id: os-name
+        run: |
+          # `os_name` will be like "Ubuntu-20.04.1-LTS"
+          OS_NAME=$(lsb_release -ds | sed 's/\s/-/g')
+          echo "::set-output name=os-name::$OS_NAME"
+      - name: Cache R packages
+        if: runner.os != 'Windows'
+        uses: actions/cache@master
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: sparklyr.sedona-${{ steps.os-name.outputs.os-name }}-${{ hashFiles('.github/R-version') }}-${{ hashFiles('.github/deps.Rds') }}
+          restore-keys: sparklyr.sedona-${{ steps.os-name.outputs.os-name }}-${{ hashFiles('.github/R-version') }}
+      - name: Cache Spark installations
+        if: runner.os != 'Windows'
+        uses: actions/cache@master
+        with:
+          path: ~/spark
+          key: sparklyr.sedona-apache-spark-${{ steps.os-name.outputs.os-name }}-${{ env.SPARK_VERSION }}
+      - name: Install system dependencies
+        run: source ./.github/workflows/scripts/install_system_deps_for_r_build.sh
+      - name: Install R dependencies
+        run: source ./.github/workflows/scripts/install_r_deps.sh
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build Sedona libraries
+        run: |
+          if [ ${SPARK_VERSION:0:1} == "3" ]; then
+            mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=3.0 -Dgeotools
+          else
+            mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=2.4 -Dgeotools
+          fi
+      - name: Build R package
+        env:
+          WARNINGS_ARE_ERRORS: 1
+        run: R CMD build --no-build-vignettes ./R/sparklyr.sedona
+      - name: Check
+        env:
+          _R_CHECK_FORCE_SUGGESTS_: false
+          WARNINGS_ARE_ERRORS: 1
+        run: |
+          R CMD check --no-build-vignettes --no-manual --no-tests sparklyr.sedona*.tar.gz
+          rm -f sparklyr.sedona*.tar.gz
+      - name: Install sparklyr.sedona from source
+        run: Rscript -e 'install.packages("./R/sparklyr.sedona/", repos = NULL, type = "source")'
+      - name: Run tests
+        run: |
+          export SPARKLYR_LOG_FILE='/tmp/sparklyr.log'
+          source ./.github/workflows/scripts/prepare_sparklyr_sedona_test_env.sh
+          echo "Apache Sedona jar files: ${SEDONA_JAR_FILES}"
+          cd ./R/sparklyr.sedona/tests
+          NOT_CRAN='true' Rscript testthat.R
+        shell: bash
+      - uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: Worker logs
+          path: /tmp/sparklyr.log
+      - name: Dump worker logs on failure
+        if: failure()
+        run: cat /tmp/sparklyr.log

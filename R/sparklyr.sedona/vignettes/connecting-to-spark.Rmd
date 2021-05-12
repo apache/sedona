@@ -1,0 +1,69 @@
+---
+title: "Connecting to Spark"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Connecting to Spark}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+To ensure Sedona serialization routines, UDTs, and UDFs are properly registered when creating a Spark session, one simply needs to attach `sparklyr.sedona` before
+instantiating a Spark conneciton. Sparklyr.sedona will take care of the rest. For example,
+
+``` r
+library(sparklyr)
+library(sparklyr.sedona)
+
+spark_home <- "/usr/lib/spark"  # NOTE: replace this with your $SPARK_HOME directory
+sc <- spark_connect(master = "yarn", spark_home = spark_home)
+```
+
+will create a Sedona-capable Spark connection in YARN client mode, and
+
+``` r
+library(sparklyr)
+library(sparklyr.sedona)
+
+sc <- spark_connect(master = "local")
+```
+
+will create a Sedona-capable Spark connection to an Apache Spark instance running locally.
+
+In `sparklyr`, one can easily inspect the Spark connection object to sanity-check it has been properly initialized with all Sedona-related dependencies, e.g.,
+
+``` r
+print(sc$extensions$packages)
+```
+
+```
+## [1] "org.apache.sedona:sedona-core-3.0_2.12:1.0.0-incubating"
+## [2] "org.apache.sedona:sedona-sql-3.0_2.12:1.0.0-incubating"
+## [3] "org.apache.sedona:sedona-viz-3.0_2.12:1.0.0-incubating"
+## [4] "org.datasyslab:geotools-wrapper:geotools-24.0"
+## [5] "org.datasyslab:sernetcdf:0.1.0"
+## [6] "org.locationtech.jts:jts-core:1.18.0"
+## [7] "org.wololo:jts2geojson:0.14.3"
+```
+
+and
+
+``` r
+spark_session(sc) %>%
+  invoke("%>%", list("conf"), list("get", "spark.kryo.registrator")) %>%
+  print()
+```
+
+```
+## [1] "org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator"
+```
+.
+
+For more information about connecting to Spark with `sparklyr`, see https://therinspark.com/connections.html and `?sparklyr::spark_connect`.
+Also see https://sedona.apache.org/tutorial/rdd/#initiate-sparkcontext for minimum and recommended dependencies for Apache Sedona.

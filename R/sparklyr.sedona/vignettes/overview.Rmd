@@ -1,0 +1,38 @@
+---
+title: "Overview of sparklyr.sedona"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Overview of sparklyr.sedona}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+[sparklyr.sedona](https://github.com/r-spark/sparklyr.sedona) is a [sparklyr](https://github.com/sparklyr/sparklyr)-based R interface for [Apache Sedona](https://sedona.apache.org).
+It presents what Apache Sedona has to offer through idiomatic frameworks and constructs in R (e.g., one can build spatial Spark SQL queries using Sedona UDFs in conjunction with a wide range of dplyr expressions), hence making Apache Sedona highly friendly for R users.
+
+Generally speaking, when working with Apache Sedona, one choose between the following two modes:
+
+* Manipulating Sedona [spatial Resilient Distributed Datasets](https://sedona.apache.org/api/javadoc/core/org/apache/sedona/core/spatialRDD/SpatialRDD.html) with spatial-RDD-related routines
+* Querying geometric columns within Spark dataframes with Sedona spatial UDFs
+
+While the former option enables more fine-grained control over low-level implementation details (e.g., which index to build for spatial queries, which data structure to use for spatial partitioning, etc), the latter is simpler and leads to a straightforward integration with `dplyr`, `sparklyr`, and other `sparklyr` extensions (e.g., one can build ML feature extractors with Sedona UDFs and connect them with ML pipelines using `ml_*()` family of functions in `sparklyr`, hence creating ML workflows capable of understanding spatial data).
+
+Because data from spatial RDDs can be imported into Spark dataframes as geometry columns and vice versa, one can switch between the abovementioned two modes fairly easily.
+
+At the moment `sparklyr.sedona` consists of the following components:
+
+* R interface for Spatial-RDD-related functionalities
+    * Reading/writing spatial data in WKT, WKB, and GeoJSON formats
+    * Shapefile reader
+    * Spatial partition, index, join, KNN query, and range query operations
+    * Visualization routines
+* `dplyr`-integration for Sedona spatial UDTs and UDFs
+    * See https://sedona.apache.org/api/sql/Overview for the list of available UDFs
+* Functions importing data from spatial RDDs to Spark dataframes and vice versa
