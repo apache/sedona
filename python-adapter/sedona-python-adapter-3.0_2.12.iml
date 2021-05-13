@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
+<<<<<<< HEAD
     <output url="file://$MODULE_DIR$/../target/classes" />
     <output-test url="file://$MODULE_DIR$/../target/test-classes" />
+=======
+    <output url="file://$MODULE_DIR$/target/classes" />
+    <output-test url="file://$MODULE_DIR$/target/test-classes" />
+>>>>>>> parent of 28fd86ec... .iml deletion
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src/main/scala" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/scala" isTestSource="true" />
@@ -14,7 +19,11 @@
     <orderEntry type="library" name="Maven: org.locationtech.jts:jts-core:1.18.0" level="project" />
     <orderEntry type="library" name="Maven: org.wololo:jts2geojson:0.14.3" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.10.0.pr1" level="project" />
+<<<<<<< HEAD
     <orderEntry type="library" name="Maven: org.apache.sedona:sedona-core-3.0_2.12:1.0.1-incubating-SNAPSHOT" level="project" />
+=======
+    <orderEntry type="module" module-name="sedona-core-3.0_2.12" />
+>>>>>>> parent of 28fd86ec... .iml deletion
     <orderEntry type="library" name="Maven: org.geotools:gt-coverage:24.0" level="project" />
     <orderEntry type="library" name="Maven: org.jaitools:jt-zonalstats:1.6.0" level="project" />
     <orderEntry type="library" name="Maven: org.jaitools:jt-utils:1.6.0" level="project" />
@@ -51,7 +60,11 @@
     <orderEntry type="library" name="Maven: it.geosolutions.jaiext.rlookup:jt-rlookup:1.1.17" level="project" />
     <orderEntry type="library" name="Maven: it.geosolutions.jaiext.vectorbin:jt-vectorbin:1.1.17" level="project" />
     <orderEntry type="library" name="Maven: it.geosolutions.jaiext.shadedrelief:jt-shadedrelief:1.1.17" level="project" />
+<<<<<<< HEAD
     <orderEntry type="library" name="Maven: org.apache.sedona:sedona-sql-3.0_2.12:1.0.1-incubating-SNAPSHOT" level="project" />
+=======
+    <orderEntry type="module" module-name="sedona-sql-3.0_2.12" />
+>>>>>>> parent of 28fd86ec... .iml deletion
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.geotools:gt-main:24.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.apache.commons:commons-text:1.6" level="project" />
     <orderEntry type="library" name="Maven: javax.media:jai_core:1.1.3" level="project" />
