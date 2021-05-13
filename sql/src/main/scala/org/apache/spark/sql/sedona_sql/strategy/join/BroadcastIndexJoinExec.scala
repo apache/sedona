@@ -18,7 +18,6 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
-
 import collection.JavaConverters._
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.spark.broadcast.Broadcast
