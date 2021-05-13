@@ -49,10 +49,10 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
 /**
-  * Return the distance between two geometries.
-  *
-  * @param inputExpressions This function takes two geometries and calculates the distance between two objects.
-  */
+ * Return the distance between two geometries.
+ *
+ * @param inputExpressions This function takes two geometries and calculates the distance between two objects.
+ */
 case class ST_Distance(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
 
@@ -82,10 +82,10 @@ case class ST_Distance(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Return the convex hull of a Geometry.
-  *
-  * @param inputExpressions
-  */
+ * Return the convex hull of a Geometry.
+ *
+ * @param inputExpressions
+ */
 case class ST_ConvexHull(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   override def nullable: Boolean = false
@@ -102,10 +102,10 @@ case class ST_ConvexHull(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Return the number of Points in geometry.
-  *
-  * @param inputExpressions
-  */
+ * Return the number of Points in geometry.
+ *
+ * @param inputExpressions
+ */
 case class ST_NPoints(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   override def nullable: Boolean = false
@@ -126,10 +126,10 @@ case class ST_NPoints(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance.
-  *
-  * @param inputExpressions
-  */
+ * Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance.
+ *
+ * @param inputExpressions
+ */
 case class ST_Buffer(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   override def nullable: Boolean = false
@@ -152,10 +152,10 @@ case class ST_Buffer(inputExpressions: Seq[Expression])
 
 
 /**
-  * Return the bounding rectangle for a Geometry
-  *
-  * @param inputExpressions
-  */
+ * Return the bounding rectangle for a Geometry
+ *
+ * @param inputExpressions
+ */
 case class ST_Envelope(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   override def nullable: Boolean = false
@@ -172,10 +172,10 @@ case class ST_Envelope(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Return the length measurement of a Geometry
-  *
-  * @param inputExpressions
-  */
+ * Return the length measurement of a Geometry
+ *
+ * @param inputExpressions
+ */
 case class ST_Length(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   override def nullable: Boolean = false
@@ -192,10 +192,10 @@ case class ST_Length(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Return the area measurement of a Geometry.
-  *
-  * @param inputExpressions
-  */
+ * Return the area measurement of a Geometry.
+ *
+ * @param inputExpressions
+ */
 case class ST_Area(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   override def nullable: Boolean = false
@@ -212,10 +212,10 @@ case class ST_Area(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Return mathematical centroid of a geometry.
-  *
-  * @param inputExpressions
-  */
+ * Return mathematical centroid of a geometry.
+ *
+ * @param inputExpressions
+ */
 case class ST_Centroid(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   override def nullable: Boolean = false
@@ -232,10 +232,10 @@ case class ST_Centroid(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Given a geometry, sourceEPSGcode, and targetEPSGcode, convert the geometry's Spatial Reference System / Coordinate Reference System.
-  *
-  * @param inputExpressions
-  */
+ * Given a geometry, sourceEPSGcode, and targetEPSGcode, convert the geometry's Spatial Reference System / Coordinate Reference System.
+ *
+ * @param inputExpressions
+ */
 case class ST_Transform(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   override def nullable: Boolean = false
@@ -265,10 +265,10 @@ case class ST_Transform(inputExpressions: Seq[Expression])
 
 
 /**
-  * Return the intersection shape of two geometries. The return type is a geometry
-  *
-  * @param inputExpressions
-  */
+ * Return the intersection shape of two geometries. The return type is a geometry
+ *
+ * @param inputExpressions
+ */
 case class ST_Intersection(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   lazy val GeometryFactory = new GeometryFactory()
@@ -306,10 +306,10 @@ case class ST_Intersection(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Given an invalid polygon or multipolygon and removeHoles boolean flag, create a valid representation of the geometry
-  *
-  * @param inputExpressions
-  */
+ * Given an invalid polygon or multipolygon and removeHoles boolean flag, create a valid representation of the geometry
+ *
+ * @param inputExpressions
+ */
 case class ST_MakeValid(inputExpressions: Seq[Expression])
   extends Generator with CodegenFallback with UserDataGeneratator {
 
@@ -355,10 +355,10 @@ case class ST_MakeValid(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Test if Geometry is valid.
-  *
-  * @param inputExpressions
-  */
+ * Test if Geometry is valid.
+ *
+ * @param inputExpressions
+ */
 case class ST_IsValid(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   override def nullable: Boolean = true
@@ -379,10 +379,10 @@ case class ST_IsValid(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Test if Geometry is simple.
-  *
-  * @param inputExpressions
-  */
+ * Test if Geometry is simple.
+ *
+ * @param inputExpressions
+ */
 case class ST_IsSimple(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   override def nullable: Boolean = false
@@ -403,13 +403,13 @@ case class ST_IsSimple(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input,
-  * and with the components having the same topological relationship.
-  * The simplification uses a maximum-distance difference algorithm similar to the Douglas-Peucker algorithm.
-  *
-  * @param inputExpressions first arg is geometry
-  *                         second arg is distance tolerance for the simplification(all vertices in the simplified geometry will be within this distance of the original geometry)
-  */
+ * Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input,
+ * and with the components having the same topological relationship.
+ * The simplification uses a maximum-distance difference algorithm similar to the Douglas-Peucker algorithm.
+ *
+ * @param inputExpressions first arg is geometry
+ *                         second arg is distance tolerance for the simplification(all vertices in the simplified geometry will be within this distance of the original geometry)
+ */
 case class ST_SimplifyPreserveTopology(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   override def nullable: Boolean = false
@@ -434,11 +434,11 @@ case class ST_SimplifyPreserveTopology(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Reduce the precision of the given geometry to the given number of decimal places
-  *
-  * @param inputExpressions The first arg is a geom and the second arg is an integer scale, specifying the number of decimal places of the new coordinate. The last decimal place will
-  *                         be rounded to the nearest number.
-  */
+ * Reduce the precision of the given geometry to the given number of decimal places
+ *
+ * @param inputExpressions The first arg is a geom and the second arg is an integer scale, specifying the number of decimal places of the new coordinate. The last decimal place will
+ *                         be rounded to the nearest number.
+ */
 case class ST_PrecisionReduce(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   override def nullable: Boolean = false
@@ -504,12 +504,12 @@ case class ST_GeometryType(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.
-  * Only works for MultiLineString. Using other geometry will return GEOMETRYCOLLECTION EMPTY
-  * If the MultiLineString is can't be merged, the original multilinestring is returned
-  *
-  * @param inputExpressions Geometry
-  */
+ * Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.
+ * Only works for MultiLineString. Using other geometry will return GEOMETRYCOLLECTION EMPTY
+ * If the MultiLineString is can't be merged, the original multilinestring is returned
+ *
+ * @param inputExpressions Geometry
+ */
 case class ST_LineMerge(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
 
@@ -1081,13 +1081,13 @@ case class ST_IsRing(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Returns the number of Geometries. If geometry is a GEOMETRYCOLLECTION (or MULTI*) return the number of geometries,
-  * for single geometries will return 1
-  *
-  * This method implements the SQL/MM specification. SQL-MM 3: 9.1.4
-  *
-  * @param inputExpressions Geometry
-  */
+ * Returns the number of Geometries. If geometry is a GEOMETRYCOLLECTION (or MULTI*) return the number of geometries,
+ * for single geometries will return 1
+ *
+ * This method implements the SQL/MM specification. SQL-MM 3: 9.1.4
+ *
+ * @param inputExpressions Geometry
+ */
 case class ST_NumGeometries(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   override def nullable: Boolean = false
@@ -1104,10 +1104,10 @@ case class ST_NumGeometries(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Returns a version of the given geometry with X and Y axis flipped.
-  *
-  * @param inputExpressions Geometry
-  */
+ * Returns a version of the given geometry with X and Y axis flipped.
+ *
+ * @param inputExpressions Geometry
+ */
 case class ST_FlipCoordinates(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   override def nullable: Boolean = false
