@@ -21,21 +21,15 @@
 
 package org.apache.raster
 
-import org.geotools.coverage.grid.GridCoordinates2D
-import org.geotools.coverage.grid.GridCoverage2D
-import org.geotools.coverage.grid.io.{AbstractGridCoverage2DReader, AbstractGridFormat, GridCoverage2DReader, GridFormatFinder, OverviewPolicy}
+import org.geotools.coverage.grid.{GridCoordinates2D, GridCoverage2D}
+import org.geotools.coverage.grid.io.{AbstractGridFormat, GridCoverage2DReader, GridFormatFinder, OverviewPolicy}
 import org.geotools.gce.geotiff.GeoTiffReader
 import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.CRS
 import org.geotools.util.factory.Hints
 import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory}
-import org.opengis.coverage.grid.GridCoordinates
-import org.opengis.coverage.grid.GridEnvelope
-import org.opengis.geometry.DirectPosition
-import org.opengis.parameter.GeneralParameterValue
-import org.opengis.parameter.ParameterValue
-import org.opengis.referencing.crs.CoordinateReferenceSystem
-import org.opengis.referencing.operation.MathTransform
+import org.opengis.coverage.grid.{GridCoordinates, GridEnvelope}
+import org.opengis.parameter.{GeneralParameterValue, ParameterValue}
 
 import java.io.IOException
 import java.util
