@@ -21,22 +21,19 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.core.enums.{FileDataSplitter, GeometryType}
 import org.apache.sedona.core.formatMapper.FormatMapper
-import org.apache.sedona.sql.raster.Construction
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
-import org.apache.spark.sql.functions.udf
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.implicits.GeometryEnhancer
 import org.apache.spark.sql.types.{ArrayType, DataType, DataTypes, Decimal, DoubleType, StringType, StructField, StructType}
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Polygon}
-
-import java.util
-import scala.collection.JavaConverters.asScalaBufferConverter
+import org.apache.raster.Construction
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
+
 /**
   * Return a point from a string. The string must be plain string and each coordinate must be separated by a delimiter.
   *
@@ -320,11 +317,10 @@ case class ST_GeomFromRaster(inputExpressions: Seq[Expression])
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 1)
     val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
-    var fileDataSplitter = FileDataSplitter.RASTER
-    var formatMapper = new FormatMapper(fileDataSplitter, false)
-    var geometry = formatMapper.readGeometry(geomString)
-    val ser =GeometrySerializer.serialize(geometry)
-    return new GenericArrayData(GeometrySerializer.serialize(geometry))
+    val fileDataSplitter = FileDataSplitter.RASTER
+    val formatMapper = new FormatMapper(fileDataSplitter, false)
+    val geometry = formatMapper.readGeometry(geomString)
+    new GenericArrayData(GeometrySerializer.serialize(geometry))
   }
 
   override def dataType: DataType = GeometryUDT
@@ -334,8 +330,8 @@ case class ST_GeomFromRaster(inputExpressions: Seq[Expression])
 
 
 
-/***
- * Converting a spark dataframe into GeoTiff Dataframe which involves fetching geometrical extent and band values for an image(Geotiff)
+/**
+ *  Converting a spark dataframe into GeoTiff Dataframe which involves fetching geometrical extent and band values for an image(Geotiff)
  *
  * @param inputExpressions Image URL(String), Number of Bands(Integer)
  */
