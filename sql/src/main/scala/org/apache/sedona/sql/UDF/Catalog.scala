@@ -24,8 +24,6 @@ import org.apache.spark.sql.sedona_sql.expressions._
 import org.locationtech.jts.geom.Geometry
 
 object Catalog {
-
-
   val expressions: Seq[FunctionBuilder] = Seq(
     ST_PointFromText,
     ST_PolygonFromText,
