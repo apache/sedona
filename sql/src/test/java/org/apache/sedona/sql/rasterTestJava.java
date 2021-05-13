@@ -60,7 +60,6 @@ public class rasterTestJava   {
         fs = FileSystem.get(hdfsConf);
         hdfsURI = "hdfs://127.0.0.1:" + hdfsCluster.getNameNodePort() + "/";
         localcsvPath = baseDir.getAbsolutePath() + "/train.csv";
-        System.out.println(localcsvPath);
         hdfscsvpath = hdfsURI + "train.csv";
 
 
@@ -102,7 +101,6 @@ public class rasterTestJava   {
         df.createOrReplaceTempView("inputtable");
         Dataset<Row> spatialDf = sparkSession.sql("select ST_DataframeFromRaster(inputtable._c0, 4) as rasterstruct from inputtable");
         spatialDf.show(false);
-        spatialDf.printSchema();
         spatialDf.createOrReplaceTempView("sedonaframe");
         Dataset<Row> sedonaDF = sparkSession.sql("select rasterstruct.Polygon as geom, rasterstruct.band1 as Band_1, rasterstruct.band2 as Band_2, rasterstruct.band3 as Band_3, rasterstruct.band4 as Band_4 from sedonaframe");
         sedonaDF.show();

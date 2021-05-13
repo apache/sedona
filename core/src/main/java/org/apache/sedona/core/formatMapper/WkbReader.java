@@ -26,20 +26,18 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.locationtech.jts.geom.Geometry;
 
 public class WkbReader
-        extends RddReader
-{
+        extends RddReader {
     /**
      * Read a SpatialRDD from a file.
      *
      * @param sc
      * @param inputPath
-     * @param wkbColumn The column which contains the wkt string. Start from 0.
-     * @param allowInvalidGeometries whether allows topology-invalid geometries exist in the generated RDD
+     * @param wkbColumn                          The column which contains the wkt string. Start from 0.
+     * @param allowInvalidGeometries             whether allows topology-invalid geometries exist in the generated RDD
      * @param skipSyntacticallyInvalidGeometries whether allows Sedona to automatically skip syntax-invalid geometries, rather than throw errors
      * @return
      */
-    public static SpatialRDD<Geometry> readToGeometryRDD(JavaSparkContext sc, String inputPath, int wkbColumn, boolean allowInvalidGeometries, boolean skipSyntacticallyInvalidGeometries)
-    {
+    public static SpatialRDD<Geometry> readToGeometryRDD(JavaSparkContext sc, String inputPath, int wkbColumn, boolean allowInvalidGeometries, boolean skipSyntacticallyInvalidGeometries) {
         JavaRDD rawTextRDD = sc.textFile(inputPath);
         FormatMapper<Geometry> formatMapper = new FormatMapper<Geometry>(wkbColumn, -1, FileDataSplitter.WKB, true, null);
         formatMapper.allowTopologicallyInvalidGeometries = allowInvalidGeometries;
@@ -50,14 +48,13 @@ public class WkbReader
     /**
      * Read a SpatialRDD from a string type rdd.
      *
-     * @param rawTextRDD a string type RDD
-     * @param wkbColumn The column which contains the wkt string. Start from 0.
-     * @param allowInvalidGeometries whether allows topology-invalid geometries exist in the generated RDD
+     * @param rawTextRDD                         a string type RDD
+     * @param wkbColumn                          The column which contains the wkt string. Start from 0.
+     * @param allowInvalidGeometries             whether allows topology-invalid geometries exist in the generated RDD
      * @param skipSyntacticallyInvalidGeometries whether allows Sedona to automatically skip syntax-invalid geometries, rather than throw errors
      * @return
      */
-    public static SpatialRDD<Geometry> readToGeometryRDD(JavaRDD rawTextRDD, int wkbColumn, boolean allowInvalidGeometries, boolean skipSyntacticallyInvalidGeometries)
-    {
+    public static SpatialRDD<Geometry> readToGeometryRDD(JavaRDD rawTextRDD, int wkbColumn, boolean allowInvalidGeometries, boolean skipSyntacticallyInvalidGeometries) {
         FormatMapper<Geometry> formatMapper = new FormatMapper<Geometry>(wkbColumn, -1, FileDataSplitter.WKB, true, null);
         formatMapper.allowTopologicallyInvalidGeometries = allowInvalidGeometries;
         formatMapper.skipSyntacticallyInvalidGeometries = skipSyntacticallyInvalidGeometries;
