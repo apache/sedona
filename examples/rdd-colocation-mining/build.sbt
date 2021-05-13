@@ -14,7 +14,7 @@ lazy val root = (project in file(".")).
     publishMavenStyle := true
   )
 
-val SparkVersion = "3.0.1"
+val SparkVersion = "3.1.1"
 
 val SparkCompatibleVersion = "3.0"
 
