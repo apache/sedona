@@ -1123,4 +1123,3 @@ case class ST_FlipCoordinates(inputExpressions: Seq[Expression])
 
   override def children: Seq[Expression] = inputExpressions
 }
-
