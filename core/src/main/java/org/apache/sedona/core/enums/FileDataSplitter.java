@@ -75,9 +75,7 @@ public enum FileDataSplitter
 
     PIPE("|"),
 
-    SEMICOLON(";"),
-
-    RASTER("#");
+    SEMICOLON(";");
 
     /**
      * The splitter.

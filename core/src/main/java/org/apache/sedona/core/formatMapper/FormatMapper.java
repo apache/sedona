@@ -23,25 +23,17 @@ import org.apache.log4j.Logger;
 import org.apache.sedona.core.enums.FileDataSplitter;
 import org.apache.sedona.core.enums.GeometryType;
 import org.apache.spark.api.java.function.FlatMapFunction;
-import org.geotools.coverage.grid.GridCoordinates2D;
-import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
-import org.geotools.coverage.grid.io.AbstractGridFormat;
-import org.geotools.coverage.grid.io.GridFormatFinder;
-import org.geotools.geometry.jts.JTS;
-import org.geotools.referencing.CRS;
-import org.geotools.util.factory.Hints;
-import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPoint;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.operation.valid.IsValidOp;
-import org.opengis.coverage.grid.GridEnvelope;
-import org.opengis.geometry.DirectPosition;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
-import org.opengis.referencing.operation.TransformException;
 import org.wololo.geojson.Feature;
 import org.wololo.geojson.GeoJSONFactory;
 import org.wololo.jts2geojson.GeoJSONReader;
@@ -49,10 +41,17 @@ import org.wololo.jts2geojson.GeoJSONReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class FormatMapper<T extends Geometry>
-        implements Serializable, FlatMapFunction<Iterator<String>, T> {
+        implements Serializable, FlatMapFunction<Iterator<String>, T>
+{
 
     final static Logger logger = Logger.getLogger(FormatMapper.class);
     /**
@@ -93,16 +92,16 @@ public class FormatMapper<T extends Geometry>
      */
     boolean skipSyntacticallyInvalidGeometries;
 
-
     /**
      * Instantiates a new format mapper.
      *
-     * @param startOffset    the start offset
-     * @param endOffset      the end offset
-     * @param splitter       the splitter
+     * @param startOffset the start offset
+     * @param endOffset the end offset
+     * @param splitter the splitter
      * @param carryInputData the carry input data
      */
-    public FormatMapper(int startOffset, int endOffset, FileDataSplitter splitter, boolean carryInputData, GeometryType geometryType) {
+    public FormatMapper(int startOffset, int endOffset, FileDataSplitter splitter, boolean carryInputData, GeometryType geometryType)
+    {
         this.startOffset = startOffset;
         this.endOffset = endOffset;
         this.splitter = splitter;
@@ -111,7 +110,7 @@ public class FormatMapper<T extends Geometry>
         this.allowTopologicallyInvalidGeometries = true;
         this.skipSyntacticallyInvalidGeometries = false;
         // Only the following formats are allowed to use this format mapper because each input has the geometry type definition
-        assert geometryType != null || splitter == FileDataSplitter.WKB || splitter == FileDataSplitter.WKT || splitter == FileDataSplitter.GEOJSON || splitter == FileDataSplitter.RASTER;
+        assert geometryType != null || splitter == FileDataSplitter.WKB || splitter == FileDataSplitter.WKT || splitter == FileDataSplitter.GEOJSON;
     }
 
     /**
@@ -120,7 +119,8 @@ public class FormatMapper<T extends Geometry>
      * @param splitter
      * @param carryInputData
      */
-    public FormatMapper(FileDataSplitter splitter, boolean carryInputData) {
+    public FormatMapper(FileDataSplitter splitter, boolean carryInputData)
+    {
         this(0, -1, splitter, carryInputData, null);
     }
 
@@ -131,19 +131,20 @@ public class FormatMapper<T extends Geometry>
      * @param carryInputData
      * @param geometryType
      */
-    public FormatMapper(FileDataSplitter splitter, boolean carryInputData, GeometryType geometryType) {
+    public FormatMapper(FileDataSplitter splitter, boolean carryInputData, GeometryType geometryType)
+    {
         this(0, -1, splitter, carryInputData, geometryType);
     }
 
-
-
-    public static List<String> readGeoJsonPropertyNames(String geoJson) {
+    public static List<String> readGeoJsonPropertyNames(String geoJson)
+    {
         if (geoJson.contains("Feature") || geoJson.contains("feature") || geoJson.contains("FEATURE")) {
             if (geoJson.contains("properties")) {
                 Feature feature = (Feature) GeoJSONFactory.create(geoJson);
                 if (Objects.isNull(feature.getId())) {
                     return new ArrayList(feature.getProperties().keySet());
-                } else {
+                }
+                else {
                     List<String> propertyList = new ArrayList<>(Arrays.asList("id"));
                     for (String geoJsonProperty : feature.getProperties().keySet()) {
                         propertyList.add(geoJsonProperty);
@@ -157,14 +158,16 @@ public class FormatMapper<T extends Geometry>
     }
 
     private void readObject(ObjectInputStream inputStream)
-            throws IOException, ClassNotFoundException {
+            throws IOException, ClassNotFoundException
+    {
         inputStream.defaultReadObject();
         factory = new GeometryFactory();
         wktReader = new WKTReader();
         geoJSONReader = new GeoJSONReader();
     }
 
-    private void handleNonSpatialDataToGeometry(Geometry geometry, List<String> splitedGeometryData) {
+    private void handleNonSpatialDataToGeometry(Geometry geometry, List<String> splitedGeometryData)
+    {
         LinkedList<String> splitedGeometryDataList = new LinkedList<String>(splitedGeometryData);
         if (carryInputData) {
             if (this.splitter != FileDataSplitter.GEOJSON) {
@@ -175,7 +178,8 @@ public class FormatMapper<T extends Geometry>
         }
     }
 
-    public Geometry readGeoJSON(String geoJson) {
+    public Geometry readGeoJSON(String geoJson)
+    {
         final Geometry geometry;
         if (geoJson.contains("Feature")) {
             Feature feature = (Feature) GeoJSONFactory.create(geoJson);
@@ -189,20 +193,23 @@ public class FormatMapper<T extends Geometry>
                 ) {
                     if (property == null) {
                         nonSpatialData.add("null");
-                    } else {
+                    }
+                    else {
                         nonSpatialData.add(property.toString());
                     }
                 }
             }
             geometry = geoJSONReader.read(feature.getGeometry());
             handleNonSpatialDataToGeometry(geometry, nonSpatialData);
-        } else {
+        }
+        else {
             geometry = geoJSONReader.read(geoJson);
         }
         return geometry;
     }
 
-    public List<String> readPropertyNames(String geoString) {
+    public List<String> readPropertyNames(String geoString)
+    {
         switch (splitter) {
             case GEOJSON:
                 return readGeoJsonPropertyNames(geoString);
@@ -212,13 +219,15 @@ public class FormatMapper<T extends Geometry>
     }
 
     public Geometry readWkt(String line)
-            throws ParseException {
+            throws ParseException
+    {
         final String[] columns = line.split(splitter.getDelimiter());
         Geometry geometry = null;
 
         try {
             geometry = wktReader.read(columns[this.startOffset]);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             logger.error("[Sedona] " + e.getMessage());
         }
         if (geometry == null) {
@@ -229,7 +238,8 @@ public class FormatMapper<T extends Geometry>
     }
 
     public Geometry readWkb(String line)
-            throws ParseException {
+            throws ParseException
+    {
         final String[] columns = line.split(splitter.getDelimiter());
         final byte[] aux = WKBReader.hexToBytes(columns[this.startOffset]);
         // For some unknown reasons, the wkb reader cannot be used in transient variable like the wkt reader.
@@ -240,58 +250,8 @@ public class FormatMapper<T extends Geometry>
         return geometry;
     }
 
-    // Fetch geometry coordinates from raster image
-    public Geometry readRaster(String line)
-            throws FactoryException, TransformException {
-        AbstractGridFormat format = GridFormatFinder.findFormat(line);
-        System.out.println(format);
-        Hints hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE);
-        AbstractGridCoverage2DReader reader = format.getReader(line, hints);
-
-
-        GridCoverage2D coverage = null;
-
-        try {
-            coverage = reader.read(null);
-        } catch (IOException giveUp) {
-            throw new RuntimeException(giveUp);
-        }
-
-        reader.dispose();
-
-        CoordinateReferenceSystem source = coverage.getCoordinateReferenceSystem();
-        CoordinateReferenceSystem target = CRS.decode("EPSG:4326", true);
-
-        MathTransform targetCRS = CRS.findMathTransform(source, target);
-
-        GridEnvelope gridRange2D = coverage.getGridGeometry().getGridRange();
-
-        Integer[][] cords = {{gridRange2D.getLow(0), gridRange2D.getLow(1)},
-                {gridRange2D.getLow(0), gridRange2D.getHigh(1)},
-                {gridRange2D.getHigh(0), gridRange2D.getHigh(1)},
-                {gridRange2D.getHigh(0), gridRange2D.getLow(1)}
-        };
-
-        Coordinate[] polyCoordinates = new Coordinate[5];
-        int index = 0;
-
-        for (Integer[] point : cords) {
-            GridCoordinates2D coordinate2D = new GridCoordinates2D(point[0], point[1]);
-
-            DirectPosition result = coverage.getGridGeometry().gridToWorld(coordinate2D);
-            polyCoordinates[index++] = new Coordinate(result.getOrdinate(0), result.getOrdinate(1));
-
-        }
-
-        polyCoordinates[index] = polyCoordinates[0];
-        GeometryFactory factory = new GeometryFactory();
-        Geometry polygon = JTS.transform(factory.createPolygon(polyCoordinates), targetCRS);
-
-        return polygon;
-
-    }
-
-    public Coordinate[] readCoordinates(String line) {
+    public Coordinate[] readCoordinates(String line)
+    {
         final String[] columns = line.split(splitter.getDelimiter());
         final int actualEndOffset = this.endOffset >= 0 ? this.endOffset : (this.geometryType == GeometryType.POINT ? startOffset + 1 : columns.length - 1);
         final Coordinate[] coordinates = new Coordinate[(actualEndOffset - startOffset + 1) / 2];
@@ -305,23 +265,22 @@ public class FormatMapper<T extends Geometry>
                 if (firstColumnFlag) {
                     otherAttributes += columns[i];
                     firstColumnFlag = false;
-                } else {
-                    otherAttributes += "\t" + columns[i];
                 }
+                else { otherAttributes += "\t" + columns[i]; }
             }
             for (int i = actualEndOffset + 1; i < columns.length; i++) {
                 if (firstColumnFlag) {
                     otherAttributes += columns[i];
                     firstColumnFlag = false;
-                } else {
-                    otherAttributes += "\t" + columns[i];
                 }
+                else { otherAttributes += "\t" + columns[i]; }
             }
         }
         return coordinates;
     }
 
-    public <T extends Geometry> void addMultiGeometry(GeometryCollection multiGeometry, List<T> result) {
+    public <T extends Geometry> void addMultiGeometry(GeometryCollection multiGeometry, List<T> result)
+    {
         for (int i = 0; i < multiGeometry.getNumGeometries(); i++) {
             T geometry = (T) multiGeometry.getGeometryN(i);
             geometry.setUserData(multiGeometry.getUserData());
@@ -330,7 +289,8 @@ public class FormatMapper<T extends Geometry>
     }
 
     public Geometry readGeometry(String line)
-            throws ParseException, FactoryException, TransformException {
+            throws ParseException
+    {
         Geometry geometry = null;
         try {
             switch (this.splitter) {
@@ -343,18 +303,17 @@ public class FormatMapper<T extends Geometry>
                 case GEOJSON:
                     geometry = readGeoJSON(line);
                     break;
-                case RASTER:
-                    geometry = readRaster(line);
-                    break;
                 default: {
                     if (this.geometryType == null) {
                         throw new IllegalArgumentException("[Sedona][FormatMapper] You must specify GeometryType when you use delimiter rather than WKB, WKT or GeoJSON");
-                    } else {
+                    }
+                    else {
                         geometry = createGeometry(readCoordinates(line), geometryType);
                     }
                 }
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             logger.error("[Sedona] " + e.getMessage());
             if (skipSyntacticallyInvalidGeometries == false) {
                 throw e;
@@ -373,7 +332,8 @@ public class FormatMapper<T extends Geometry>
         return geometry;
     }
 
-    private Geometry createGeometry(Coordinate[] coordinates, GeometryType geometryType) {
+    private Geometry createGeometry(Coordinate[] coordinates, GeometryType geometryType)
+    {
         GeometryFactory geometryFactory = new GeometryFactory();
         Geometry geometry = null;
         switch (geometryType) {
@@ -409,7 +369,8 @@ public class FormatMapper<T extends Geometry>
 
     @Override
     public Iterator<T> call(Iterator<String> stringIterator)
-            throws Exception {
+            throws Exception
+    {
         List<T> result = new ArrayList<>();
         while (stringIterator.hasNext()) {
             String line = stringIterator.next();
@@ -418,20 +379,22 @@ public class FormatMapper<T extends Geometry>
         return result.iterator();
     }
 
-    private void addGeometry(Geometry geometry, List<T> result) {
+    private void addGeometry(Geometry geometry, List<T> result)
+    {
         if (geometry == null) {
             return;
         }
         if (geometry instanceof MultiPoint) {
             addMultiGeometry((MultiPoint) geometry, result);
-        } else if (geometry instanceof MultiLineString) {
+        }
+        else if (geometry instanceof MultiLineString) {
             addMultiGeometry((MultiLineString) geometry, result);
-        } else if (geometry instanceof MultiPolygon) {
+        }
+        else if (geometry instanceof MultiPolygon) {
             addMultiGeometry((MultiPolygon) geometry, result);
-        } else {
+        }
+        else {
             result.add((T) geometry);
         }
     }
-
-
 }

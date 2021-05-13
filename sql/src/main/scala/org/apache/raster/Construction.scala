@@ -23,14 +23,18 @@ package org.apache.raster
 
 import org.geotools.coverage.grid.GridCoordinates2D
 import org.geotools.coverage.grid.GridCoverage2D
-import org.geotools.coverage.grid.io.AbstractGridFormat
-import org.geotools.coverage.grid.io.GridCoverage2DReader
-import org.geotools.coverage.grid.io.OverviewPolicy
+import org.geotools.coverage.grid.io.{AbstractGridFormat, GridCoverage2DReader, GridFormatFinder, OverviewPolicy}
 import org.geotools.gce.geotiff.GeoTiffReader
+import org.geotools.geometry.jts.JTS
+import org.geotools.referencing.CRS
+import org.geotools.util.factory.Hints
+import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory}
 import org.opengis.coverage.grid.GridCoordinates
 import org.opengis.coverage.grid.GridEnvelope
 import org.opengis.parameter.GeneralParameterValue
 import org.opengis.parameter.ParameterValue
+
+import java.io.IOException
 import java.util
 
  class Construction(var bands:Int) {
@@ -77,8 +81,48 @@ import java.util
 
   }
 
+  // get Polygonal coordinates from the given raster image
+
+  def readGeometry(url: String): Geometry = {
+
+   val format = GridFormatFinder.findFormat(url)
+   val hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, true)
+   val reader = format.getReader(url, hints)
+   var coverage:GridCoverage2D = null
+
+   try coverage = reader.read(null)
+   catch {
+    case giveUp: IOException =>
+     throw new RuntimeException(giveUp)
+   }
+   reader.dispose()
+   val source = coverage.getCoordinateReferenceSystem
+   val target = CRS.decode("EPSG:4326", true)
+   val targetCRS = CRS.findMathTransform(source, target)
+   val gridRange2D = coverage.getGridGeometry.getGridRange
+   val cords = Array(Array(gridRange2D.getLow(0), gridRange2D.getLow(1)), Array(gridRange2D.getLow(0), gridRange2D.getHigh(1)), Array(gridRange2D.getHigh(0), gridRange2D.getHigh(1)), Array(gridRange2D.getHigh(0), gridRange2D.getLow(1)))
+   val polyCoordinates = new Array[Coordinate](5)
+   var index = 0
+
+   for (point <- cords) {
+    val coordinate2D = new GridCoordinates2D(point(0), point(1))
+    val result = coverage.getGridGeometry.gridToWorld(coordinate2D)
+    polyCoordinates({
+     index += 1; index - 1
+    }) = new Coordinate(result.getOrdinate(0), result.getOrdinate(1))
+   }
+
+   polyCoordinates(index) = polyCoordinates(0)
+   val factory = new GeometryFactory
+   val polygon = JTS.transform(factory.createPolygon(polyCoordinates), targetCRS)
+
+   polygon
+
+  }
 
 
 
 
-}
+
+
+ }
