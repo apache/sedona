@@ -430,7 +430,7 @@
                 <executions>
                     <execution>
                         <id>resolve-my-pom</id>
-                        <phase>prepare-package</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>resolve-pom</goal>
                         </goals>

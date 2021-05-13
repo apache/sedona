@@ -126,7 +126,7 @@ public class EarthdataHDFTest
         HDFoffset = 2;
         HDFrootGroupName = "MOD_Swath_LST";
         HDFDataVariableName = "LST";
-        urlPrefix = System.getProperty("user.dir") + "/src/test/resources/modis/";
+        urlPrefix = System.getProperty("user.dir") + "/../src/test/resources/modis/";
     }
 
     /**
