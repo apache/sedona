@@ -317,9 +317,10 @@ case class ST_GeomFromRaster(inputExpressions: Seq[Expression])
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 1)
     val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
-    val fileDataSplitter = FileDataSplitter.RASTER
-    val formatMapper = new FormatMapper(fileDataSplitter, false)
-    val geometry = formatMapper.readGeometry(geomString)
+//    val fileDataSplitter = FileDataSplitter.RASTER
+//    val formatMapper = new FormatMapper(fileDataSplitter, false)
+    val const = new Construction(0)
+    val geometry = const.readGeometry(geomString)
     new GenericArrayData(GeometrySerializer.serialize(geometry))
   }
 
@@ -346,10 +347,10 @@ case class ST_DataframeFromRaster(inputExpressions: Seq[Expression])
     val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
     val totalBands = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
     bandInfo = totalBands
-    val fileDataSplitter = FileDataSplitter.RASTER
-    val formatMapper = new FormatMapper(fileDataSplitter, false)
+//    val fileDataSplitter = FileDataSplitter.RASTER
+//    val formatMapper = new FormatMapper(fileDataSplitter, false)
     val const = new Construction(totalBands)
-    val geometry = formatMapper.readGeometry(geomString)
+    val geometry = const.readGeometry(geomString)
     val bandvalues = const.getBands(geomString).map(e=>e.map(t=>Double2double(t))).map(arr=>arr.toArray).toArray
 
     returnValue(geometry.toGenericArrayData,bandvalues, totalBands)

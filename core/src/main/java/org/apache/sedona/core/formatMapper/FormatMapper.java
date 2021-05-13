@@ -111,7 +111,7 @@ public class FormatMapper<T extends Geometry>
         this.allowTopologicallyInvalidGeometries = true;
         this.skipSyntacticallyInvalidGeometries = false;
         // Only the following formats are allowed to use this format mapper because each input has the geometry type definition
-        assert geometryType != null || splitter == FileDataSplitter.WKB || splitter == FileDataSplitter.WKT || splitter == FileDataSplitter.GEOJSON || splitter == FileDataSplitter.RASTER;
+        assert geometryType != null || splitter == FileDataSplitter.WKB || splitter == FileDataSplitter.WKT || splitter == FileDataSplitter.GEOJSON;
     }
 
     /**
@@ -240,56 +240,6 @@ public class FormatMapper<T extends Geometry>
         return geometry;
     }
 
-    // Fetch geometry coordinates from raster image
-    public Geometry readRaster(String line)
-            throws FactoryException, TransformException {
-        AbstractGridFormat format = GridFormatFinder.findFormat(line);
-        System.out.println(format);
-        Hints hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE);
-        AbstractGridCoverage2DReader reader = format.getReader(line, hints);
-
-
-        GridCoverage2D coverage = null;
-
-        try {
-            coverage = reader.read(null);
-        } catch (IOException giveUp) {
-            throw new RuntimeException(giveUp);
-        }
-
-        reader.dispose();
-
-        CoordinateReferenceSystem source = coverage.getCoordinateReferenceSystem();
-        CoordinateReferenceSystem target = CRS.decode("EPSG:4326", true);
-
-        MathTransform targetCRS = CRS.findMathTransform(source, target);
-
-        GridEnvelope gridRange2D = coverage.getGridGeometry().getGridRange();
-
-        Integer[][] cords = {{gridRange2D.getLow(0), gridRange2D.getLow(1)},
-                {gridRange2D.getLow(0), gridRange2D.getHigh(1)},
-                {gridRange2D.getHigh(0), gridRange2D.getHigh(1)},
-                {gridRange2D.getHigh(0), gridRange2D.getLow(1)}
-        };
-
-        Coordinate[] polyCoordinates = new Coordinate[5];
-        int index = 0;
-
-        for (Integer[] point : cords) {
-            GridCoordinates2D coordinate2D = new GridCoordinates2D(point[0], point[1]);
-
-            DirectPosition result = coverage.getGridGeometry().gridToWorld(coordinate2D);
-            polyCoordinates[index++] = new Coordinate(result.getOrdinate(0), result.getOrdinate(1));
-
-        }
-
-        polyCoordinates[index] = polyCoordinates[0];
-        GeometryFactory factory = new GeometryFactory();
-        Geometry polygon = JTS.transform(factory.createPolygon(polyCoordinates), targetCRS);
-
-        return polygon;
-
-    }
 
     public Coordinate[] readCoordinates(String line) {
         final String[] columns = line.split(splitter.getDelimiter());
@@ -342,9 +292,6 @@ public class FormatMapper<T extends Geometry>
                     break;
                 case GEOJSON:
                     geometry = readGeoJSON(line);
-                    break;
-                case RASTER:
-                    geometry = readRaster(line);
                     break;
                 default: {
                     if (this.geometryType == null) {
