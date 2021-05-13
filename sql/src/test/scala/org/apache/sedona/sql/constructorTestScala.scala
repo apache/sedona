@@ -110,8 +110,5 @@ class constructorTestScala extends TestBaseScala {
       var spatialRDD2 = Adapter.toSpatialRdd(df, "geometry")
       Adapter.toDf(spatialRDD2, sparkSession).show(1)
     }
-
-
-
   }
 }
