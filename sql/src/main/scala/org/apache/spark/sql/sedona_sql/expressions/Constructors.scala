@@ -19,19 +19,20 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 
-import org.apache.sedona.core.enums.{FileDataSplitter, GeometryType}
+import org.apache.raster.Construction
+import org.apache.sedona.core.enums.FileDataSplitter
 import org.apache.sedona.core.formatMapper.FormatMapper
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
+import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.implicits.GeometryEnhancer
-import org.apache.spark.sql.types.{ArrayType, DataType, DataTypes, Decimal, DoubleType, StringType, StructField, StructType}
+import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
-import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Polygon}
-import org.apache.raster.Construction
+import org.locationtech.jts.geom.{Coordinate, GeometryFactory}
+
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 
 /**
@@ -345,6 +346,10 @@ case class ST_DataframeFromRaster(inputExpressions: Seq[Expression])
     val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
     val totalBands = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
     bandInfo = totalBands
+<<<<<<< HEAD
+=======
+
+>>>>>>> debugMaster
     val const = new Construction(totalBands)
     val geometry = const.readGeometry(geomString)
     val bandvalues = const.getBands(geomString).map(e=>e.map(t=>Double2double(t))).map(arr=>arr.toArray).toArray

@@ -21,6 +21,7 @@
 
 package org.apache.raster
 
+
 import org.geotools.coverage.grid.{GridCoordinates2D, GridCoverage2D}
 import org.geotools.coverage.grid.io.{AbstractGridFormat, GridCoverage2DReader, GridFormatFinder, OverviewPolicy}
 import org.geotools.gce.geotiff.GeoTiffReader
@@ -117,8 +118,4 @@ import java.util
    polygon
 
   }
-
-
-
-
-}
+ }
