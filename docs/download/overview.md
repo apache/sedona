@@ -4,18 +4,18 @@ Sedona supports Spark 2.4 and 3.0, Python 3.7 - 3.9. Sedona Scala/Java/Python al
 
 Sedona is compiled and tested on Java 1.8 and Scala 2.11/2.12:
 
-|             | Spark 2.4 | Spark 3.0 | Spark 3.1 |
-|:-----------:| :---------:|:---------:|:---------:|
-| Scala 2.11  |  ✅  |  not tested  | not tested |
-| Scala 2.12 | ✅  |  ✅  |  ✅  |
+|             | Spark 2.4 | Spark 3.0+ |
+|:-----------:| :---------:|:---------:|
+| Scala 2.11  |  ✅  |  not tested  |
+| Scala 2.12 | ✅  |  ✅  |
 
 Sedona Python is tested on the following Python and Spark verisons:
 
-|             | Spark 2.4 (Scala 2.11) | Spark 3.0 (Scala 2.12)|Spark 3.1 (Scala 2.12)|
-|:-----------:|:---------:|:---------:|:---------:|
-| Python 3.7  |  ✅  |  ✅  |✅  |
-| Python 3.8 | not tested  |  not tested  |  ✅  |
-| Python 3.9 | not tested  |  not tested  |  ✅  |
+|             | Spark 2.4 (Scala 2.11) | Spark 3.0+ (Scala 2.12)|
+|:-----------:|:---------:|:---------:|
+| Python 3.7  |  ✅  |  ✅  |
+| Python 3.8 | not tested  |  ✅  |
+| Python 3.9 | not tested  |  ✅  |
 
 
 ## Direct download
