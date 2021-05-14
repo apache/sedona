@@ -42,21 +42,9 @@ import java.io.IOException
 import java.util
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 
-// Fetches polygonal coordinates from a raster image
+class GeometryOperations {
 
-case class ST_GeomFromRaster(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    // This is an expression which takes one input expressions
-    assert(inputExpressions.length == 1)
-    val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
-    val geometry = readGeometry(geomString)
-    new GenericArrayData(GeometrySerializer.serialize(geometry))
-  }
-
-  private def readGeometry(url: String): Geometry = {
+   def readGeometry(url: String): Geometry = {
 
     val format = GridFormatFinder.findFormat(url)
     val hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, true)
@@ -92,6 +80,24 @@ case class ST_GeomFromRaster(inputExpressions: Seq[Expression])
     polygon
 
   }
+}
+
+
+// Fetches polygonal coordinates from a raster image
+case class ST_GeomFromRaster(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 1)
+    val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
+    val geomConstruction = new GeometryOperations
+    val geometry = geomConstruction.readGeometry(geomString)
+    new GenericArrayData(GeometrySerializer.serialize(geometry))
+  }
+
+
   override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
@@ -99,7 +105,7 @@ case class ST_GeomFromRaster(inputExpressions: Seq[Expression])
 
 
 // Constructs a raster dataframe from a raster image which contains multiple columns such as Geometry, Band values etc
-case class ST_DataframeFromRaster(inputExpressions: Seq[Expression])
+case class ST_GeomWithBandsFromGeoTiff(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
 
@@ -108,46 +114,10 @@ case class ST_DataframeFromRaster(inputExpressions: Seq[Expression])
     assert(inputExpressions.length == 2)
     val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
     val totalBands = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
-    val geometry = readGeometry(geomString)
+    val geomConstruction = new GeometryOperations
+    val geometry = geomConstruction.readGeometry(geomString)
     val bandvalues = getBands(geomString, totalBands).toArray
     returnValue(geometry.toGenericArrayData,bandvalues, 2)
-  }
-
-  private def readGeometry(url: String): Geometry = {
-
-    val format = GridFormatFinder.findFormat(url)
-    val hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, true)
-    val reader = format.getReader(url, hints)
-    var coverage: GridCoverage2D = null
-
-    try coverage = reader.read(null)
-    catch {
-      case giveUp: IOException =>
-        throw new RuntimeException(giveUp)
-    }
-    reader.dispose()
-    val source = coverage.getCoordinateReferenceSystem
-    val target = CRS.decode("EPSG:4326", true)
-    val targetCRS = CRS.findMathTransform(source, target)
-    val gridRange2D = coverage.getGridGeometry.getGridRange
-    val cords = Array(Array(gridRange2D.getLow(0), gridRange2D.getLow(1)), Array(gridRange2D.getLow(0), gridRange2D.getHigh(1)), Array(gridRange2D.getHigh(0), gridRange2D.getHigh(1)), Array(gridRange2D.getHigh(0), gridRange2D.getLow(1)))
-    val polyCoordinates = new Array[Coordinate](5)
-    var index = 0
-
-    for (point <- cords) {
-      val coordinate2D = new GridCoordinates2D(point(0), point(1))
-      val result = coverage.getGridGeometry.gridToWorld(coordinate2D)
-      polyCoordinates({
-        index += 1;
-        index - 1
-      }) = new Coordinate(result.getOrdinate(0), result.getOrdinate(1))
-    }
-
-    polyCoordinates(index) = polyCoordinates(0)
-    val factory = new GeometryFactory
-    val polygon = JTS.transform(factory.createPolygon(polyCoordinates), targetCRS)
-
-    polygon
   }
 
   private  def getBands(url: String, bands:Int): List[Double] = {
@@ -214,7 +184,7 @@ case class ST_DataframeFromRaster(inputExpressions: Seq[Expression])
 }
 
 //  get a particular band from a raster dataframe
-case class ST_getBand(inputExpressions: Seq[Expression])
+case class ST_GetBand(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
 

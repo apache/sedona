@@ -100,14 +100,14 @@ public class rasterTestJava   {
         createFileLocal();
         Dataset<Row> df = sparkSession.read().format("csv").option("delimiter", ",").option("header", "false").load(localcsvPath);
         df.createOrReplaceTempView("inputtable");
-        Dataset<Row> spatialDf = sparkSession.sql("select ST_DataframeFromRaster(inputtable._c0, 4) as rasterstruct from inputtable");
+        Dataset<Row> spatialDf = sparkSession.sql("select ST_GeomWithBandsFromGeoTiff(inputtable._c0, 4) as rasterstruct from inputtable");
         spatialDf.show();
         spatialDf.printSchema();
         spatialDf.createOrReplaceTempView("sedonaframe");
         Dataset<Row> sedonaDF = sparkSession.sql("select rasterstruct.Polygon as geom, rasterstruct.bands as rasterBand from sedonaframe");
         sedonaDF.show();
         sedonaDF.createOrReplaceTempView("sedonaDF");
-        Dataset<Row> bandDF = sparkSession.sql("select ST_getBand(rasterBand, 2, 4) as band2 from sedonaDF");
+        Dataset<Row> bandDF = sparkSession.sql("select ST_GetBand(rasterBand, 2, 4) as band2 from sedonaDF");
         bandDF.show();
         assert(bandDF.count()==2);
 
