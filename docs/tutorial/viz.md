@@ -87,12 +87,22 @@ CREATE OR REPLACE TEMP VIEW boundtable AS
 SELECT ST_Envelope_Aggr(shape) as bound FROM pointtable
 ```
 
-Then use ST_Pixelize to conver them to pixels.
+Then use ST_Pixelize to convert them to pixels.
+
+This example is for Sedona before v1.0.1. ST_Pixelize extends Generator so it can directly flatten the array without the **explode** function.
 
 ```sql
 CREATE OR REPLACE TEMP VIEW pixels AS
 SELECT pixel, shape FROM pointtable
 LATERAL VIEW ST_Pixelize(ST_Transform(shape, 'epsg:4326','epsg:3857'), 256, 256, (SELECT ST_Transform(bound, 'epsg:4326','epsg:3857') FROM boundtable)) AS pixel
+```
+
+This example is for Sedona on and after v1.0.1. ST_Pixelize returns an array of pixels. You need to use **explode** to flatten it.
+
+```sql
+CREATE OR REPLACE TEMP VIEW pixels AS
+SELECT pixel, shape FROM pointtable
+LATERAL VIEW explode(ST_Pixelize(ST_Transform(shape, 'epsg:4326','epsg:3857'), 256, 256, (SELECT ST_Transform(bound, 'epsg:4326','epsg:3857') FROM boundtable))) AS pixel
 ```
 
 This will give you a 256*256 resolution image after you run ST_Render at the end of this tutorial.

@@ -20,7 +20,7 @@ SedonaVizRegistrator.registerAll(sparkSession)
 
 ### ST_Pixelize
 
-Introduction: Return a pixel for a given resolution
+Introduction: Convert a geometry to an array of pixels given a resolution
 
 Format: `ST_Pixelize (A:geometry, ResolutionX:int, ResolutionY:int, Boundary:geometry)`
 

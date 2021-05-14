@@ -495,7 +495,7 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <spark.version>3.0.1</spark.version>
+                <spark.version>3.1.1</spark.version>
                 <spark.compat.version>3.0</spark.compat.version>
                 <spark.converter.version>spark3</spark.converter.version>
                 <jackson.version>2.10.0</jackson.version>
