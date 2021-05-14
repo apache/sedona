@@ -156,9 +156,9 @@ class standardVizOperatorTest extends TestBaseScala {
           |FROM pixelaggregates
         """.stripMargin)
       spark.sql(
-        """
+        s"""
           |CREATE OR REPLACE TEMP VIEW images AS
-          |SELECT ST_Render(pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates))) AS image
+          |SELECT ST_Render(pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates)), $zoomLevel) AS image
           |FROM pixel_weights
           |GROUP BY pid
         """.stripMargin).explain()
