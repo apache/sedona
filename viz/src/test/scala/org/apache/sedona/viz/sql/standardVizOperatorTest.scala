@@ -27,21 +27,6 @@ class standardVizOperatorTest extends TestBaseScala {
   describe("SedonaViz SQL function Test") {
 
     it("Generate a single image") {
-      var pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation) //.createOrReplaceTempView("polygontable")
-      pointDf.sample(false, 1).createOrReplaceTempView("pointtable")
-      spark.sql(
-        """
-          |CREATE OR REPLACE TEMP VIEW pointtable AS
-          |SELECT ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as shape
-          |FROM pointtable
-        """.stripMargin)
-      spark.sql(
-        """
-          |CREATE OR REPLACE TEMP VIEW pointtable AS
-          |SELECT *
-          |FROM pointtable
-          |WHERE ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)
-        """.stripMargin)
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW pixels AS
@@ -74,21 +59,6 @@ class standardVizOperatorTest extends TestBaseScala {
     }
 
     it("Generate a single image using a fat query") {
-      var pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation) //.createOrReplaceTempView("polygontable")
-      pointDf.sample(false, 1).createOrReplaceTempView("pointtable")
-      spark.sql(
-        """
-          |CREATE OR REPLACE TEMP VIEW pointtable AS
-          |SELECT ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as shape
-          |FROM pointtable
-        """.stripMargin)
-      spark.sql(
-        """
-          |CREATE OR REPLACE TEMP VIEW pointtable AS
-          |SELECT *
-          |FROM pointtable
-          |WHERE ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)
-        """.stripMargin)
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW boundtable AS
@@ -117,21 +87,6 @@ class standardVizOperatorTest extends TestBaseScala {
     }
 
     it("Passed the pipeline on points") {
-      var pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation) //.createOrReplaceTempView("polygontable")
-      pointDf.createOrReplaceTempView("pointtable")
-      spark.sql(
-        """
-          |CREATE OR REPLACE TEMP VIEW pointtable AS
-          |SELECT ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as shape
-          |FROM pointtable
-        """.stripMargin)
-      spark.sql(
-        """
-          |CREATE OR REPLACE TEMP VIEW pointtable AS
-          |SELECT *
-          |FROM pointtable
-          |WHERE ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)
-        """.stripMargin)
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW pixels AS
@@ -150,21 +105,6 @@ class standardVizOperatorTest extends TestBaseScala {
     }
 
     it("Passed the pipeline on polygons") {
-      var polygonDf = spark.read.format("csv").option("delimiter", "\t").option("header", "false").load(polygonInputLocationWkt)
-      polygonDf.createOrReplaceTempView("polygontable")
-      spark.sql(
-        """
-          |CREATE OR REPLACE TEMP VIEW polygontable AS
-          |SELECT ST_GeomFromWKT(polygontable._c0) as shape, _c1 as rate, _c2, _c3
-          |FROM polygontable
-        """.stripMargin)
-      spark.sql(
-        """
-          |CREATE OR REPLACE TEMP VIEW usdata AS
-          |SELECT *
-          |FROM polygontable
-          |WHERE ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)
-        """.stripMargin)
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW pixels AS
@@ -195,22 +135,7 @@ class standardVizOperatorTest extends TestBaseScala {
     }
 
     it("Passed ST_TileName") {
-      var pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       var zoomLevel = 2
-      pointDf.sample(false, 0.01).createOrReplaceTempView("pointtable")
-      spark.sql(
-        """
-          |CREATE OR REPLACE TEMP VIEW pointtable AS
-          |SELECT ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as shape
-          |FROM pointtable
-        """.stripMargin)
-      spark.sql(
-        """
-          |CREATE OR REPLACE TEMP VIEW pointtable AS
-          |SELECT *
-          |FROM pointtable
-          |WHERE ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)
-        """.stripMargin)
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW pixels AS
