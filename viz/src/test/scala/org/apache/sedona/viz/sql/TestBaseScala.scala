@@ -42,7 +42,6 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll{
   override def beforeAll(): Unit = {
     spark = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
       config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName).
-      config("spark.sql.view.maxNestedViewDepth", "300").
       master("local[*]").appName("SedonaVizSQL").getOrCreate()
     SedonaSQLRegistrator.registerAll(spark)
     SedonaVizRegistrator.registerAll(spark)
