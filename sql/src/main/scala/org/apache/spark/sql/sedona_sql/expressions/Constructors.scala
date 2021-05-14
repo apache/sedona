@@ -18,7 +18,6 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-
 import org.apache.sedona.core.enums.{FileDataSplitter, GeometryType}
 import org.apache.sedona.core.formatMapper.FormatMapper
 import org.apache.sedona.sql.utils.GeometrySerializer
