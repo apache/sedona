@@ -45,6 +45,7 @@ object ScalaExample extends App{
 
 	val sparkConf = new SparkConf().setAppName("SedonaVizDemo").set("spark.serializer", classOf[KryoSerializer].getName)
 		.set("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName)
+		.set("spark.sql.view.maxNestedViewDepth", "300")
 		.setMaster("local[*]")
 	val sparkContext = new SparkContext(sparkConf)
 
