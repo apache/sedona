@@ -165,12 +165,12 @@ imageGenerator.SaveRasterImageAsLocalFile(image, System.getProperty("user.dir")+
 
 ## Generate map tiles
 
-If you are a map tile professional, you may need to generate map tiles for different zoom levels and eventually create the map tile layer.
+If you are a map professional, you may need to generate map tiles for different zoom levels and eventually create the map tile layer.
 
 
 ### Pixelization and pixel aggregation
 
-Please first do pixelization and pixel aggregation using the same commands in single image generation. In ST_Pixelize, you need specify a very high resolution.
+Please first do pixelization and pixel aggregation using the same commands in single image generation. In ST_Pixelize, you need specify a very high resolution, such as 1000*1000. Note that, each dimension should be divisible by 2^zoom-level 
 
 ### Create tile name
 
@@ -194,10 +194,12 @@ You now need to group pixels by tiles and then render map tile images in paralle
 
 ```sql
 CREATE OR REPLACE TEMP VIEW images AS
-SELECT ST_Render(pixel, color) AS image
+SELECT ST_Render(pixel, color, 3) AS image
 FROM pixelaggregates
 GROUP BY pid
 ```
+
+"3" is the zoom level for these map tiles.
 
 ### Store map tiles on disk
 
