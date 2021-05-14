@@ -97,26 +97,20 @@ case class ST_GeomFromRaster(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
-// Constructs a raster dataframe from a raster image which contains multiple columns such as Geometry, Band values etc
 
+// Constructs a raster dataframe from a raster image which contains multiple columns such as Geometry, Band values etc
 case class ST_DataframeFromRaster(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
 
-  private var bandInfo = 0
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
     val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
     val totalBands = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
-    bandInfo = totalBands
-
-//    val const = new Construction(totalBands)
     val geometry = readGeometry(geomString)
-    val bandvalues = getBands(geomString, totalBands).map(e=>e.map(t=>Double2double(t))).map(arr=>arr.toArray).toArray
-
-    returnValue(geometry.toGenericArrayData,bandvalues, totalBands)
-
+    val bandvalues = getBands(geomString, totalBands).toArray
+    returnValue(geometry.toGenericArrayData,bandvalues, 2)
   }
 
   private def readGeometry(url: String): Geometry = {
@@ -156,7 +150,7 @@ case class ST_DataframeFromRaster(inputExpressions: Seq[Expression])
     polygon
   }
 
-  private  def getBands(url: String, bands:Int): util.List[util.List[Double]] = {
+  private  def getBands(url: String, bands:Int): List[Double] = {
     val policy: ParameterValue[OverviewPolicy] = AbstractGridFormat.OVERVIEW_POLICY.createValue
     policy.setValue(OverviewPolicy.IGNORE)
 
@@ -193,39 +187,59 @@ case class ST_DataframeFromRaster(inputExpressions: Seq[Expression])
         }
       }
     }
-    bandValues
 
+    bandValues.flatten.toList
 
   }
 
   // Dynamic results based on number of columns and type of structure
-  private def returnValue(geometry:GenericArrayData, bands:Array[Array[Double]], count:Int): InternalRow = {
+  private def returnValue(geometry:GenericArrayData, bands:Array[Double], count:Int): InternalRow = {
 
-    val genData = new Array[GenericArrayData](count + 1)
+    val genData = new Array[GenericArrayData](count)
     genData(0) = geometry
-    var i = 1
-    for(i <- 1 until count + 1 ) {
-      genData(i) = new GenericArrayData(bands(i-1))
-    }
+    genData(1) = new GenericArrayData(bands)
     val result = InternalRow(genData.toList : _*)
     result
   }
 
   // Dynamic Schema generation using Number of Bands
-  private def getSchema(count:Int):DataType = {
-    var schema = Seq[String]()
-    schema = schema :+ "Polygon"
-    var i = 1
-    for(i <- 1 until 5 ) {
-      schema = schema :+ "band".concat(i.toString)
-    }
-    val mySchema = StructType(schema.map(n => if (n == "Polygon") StructField("Polygon", GeometryUDT, false) else StructField(n, ArrayType(DoubleType), false)))
+  private def getSchema():DataType = {
+    val mySchema = StructType(Array(StructField("Polygon", GeometryUDT, false),StructField("bands", ArrayType(DoubleType))))
     mySchema
   }
 
-  override def dataType: DataType = getSchema(bandInfo)
+  override def dataType: DataType = getSchema()
 
   override def children: Seq[Expression] = inputExpressions
 }
 
+//  get a particular band from a raster dataframe
+case class ST_getBand(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 3)
+    val bandInfo = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    val targetBand = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
+    val totalBands = inputExpressions(2).eval(inputRow).asInstanceOf[Int]
+    val result = gettargetband(bandInfo, targetBand, totalBands)
+    new GenericArrayData(result)
+  }
+
+  // fetch target band from the given array of bands
+  private def gettargetband(bandinfo: Array[Double], targetband:Int, totalbands:Int): Array[Double] = {
+    val sizeOfBand = bandinfo.length/totalbands
+    val lowerBound = (targetband - 1)*sizeOfBand
+    val upperBound = targetband*sizeOfBand-1
+    assert(bandinfo.slice(lowerBound,upperBound).length + 1==sizeOfBand)
+    bandinfo.slice(lowerBound, upperBound)
+
+  }
+
+  override def dataType: DataType = ArrayType(DoubleType)
+
+  override def children: Seq[Expression] = inputExpressions
+}
 
