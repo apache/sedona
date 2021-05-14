@@ -42,6 +42,8 @@ import java.io.IOException
 import java.util
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 
+// Fetches polygonal coordinates from a raster image
+
 case class ST_GeomFromRaster(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
@@ -94,6 +96,8 @@ case class ST_GeomFromRaster(inputExpressions: Seq[Expression])
 
   override def children: Seq[Expression] = inputExpressions
 }
+
+// Constructs a raster dataframe from a raster image which contains multiple columns such as Geometry, Band values etc
 
 case class ST_DataframeFromRaster(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
