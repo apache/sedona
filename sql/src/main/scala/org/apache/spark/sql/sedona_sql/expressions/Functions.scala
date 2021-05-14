@@ -34,14 +34,13 @@ import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.CRS
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom.{PrecisionModel, _}
-import org.locationtech.jts.io.WKBWriter
+import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.IsSimpleOp
 import org.locationtech.jts.operation.buffer.BufferParameters
 import org.locationtech.jts.operation.linemerge.LineMerger
 import org.locationtech.jts.operation.valid.IsValidOp
 import org.locationtech.jts.precision.GeometryPrecisionReducer
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier
-import org.locationtech.jts.linearref.LengthIndexedLine
 import org.opengis.referencing.operation.MathTransform
 
 import java.util
@@ -1123,4 +1122,3 @@ case class ST_FlipCoordinates(inputExpressions: Seq[Expression])
 
   override def children: Seq[Expression] = inputExpressions
 }
-
