@@ -82,7 +82,7 @@ object Catalog {
     ST_FlipCoordinates,
     ST_LineSubstring,
     ST_LineInterpolatePoint,
-    ST_GeomFromRaster,
+    ST_GeomFromGeotiff,
     ST_GeomWithBandsFromGeoTiff,
     ST_GetBand
   )

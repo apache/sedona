@@ -21,7 +21,7 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeArrayData}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
@@ -83,7 +83,7 @@ class GeometryOperations {
 
 
 // Fetches polygonal coordinates from a raster image
-case class ST_GeomFromRaster(inputExpressions: Seq[Expression])
+case class ST_GeomFromGeotiff(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
 
@@ -191,7 +191,7 @@ case class ST_GeomWithBandsFromGeoTiff(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
-//  get a particular band from a raster dataframe
+// get a particular band from a results of ST_GeomWithBandsFromGeoTiff
 case class ST_GetBand(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
@@ -199,7 +199,15 @@ case class ST_GetBand(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 3)
-    val bandInfo = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    var bandInfo:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass().toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData") {
+      bandInfo = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+
+    }
+    else {
+      bandInfo = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+
+    }
     val targetBand = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
     val totalBands = inputExpressions(2).eval(inputRow).asInstanceOf[Int]
     val result = gettargetband(bandInfo, targetBand, totalBands)
@@ -210,8 +218,8 @@ case class ST_GetBand(inputExpressions: Seq[Expression])
   private def gettargetband(bandinfo: Array[Double], targetband:Int, totalbands:Int): Array[Double] = {
     val sizeOfBand = bandinfo.length/totalbands
     val lowerBound = (targetband - 1)*sizeOfBand
-    val upperBound = targetband*sizeOfBand-1
-    assert(bandinfo.slice(lowerBound,upperBound).length + 1==sizeOfBand)
+    val upperBound = targetband*sizeOfBand
+    assert(bandinfo.slice(lowerBound,upperBound).length == sizeOfBand)
     bandinfo.slice(lowerBound, upperBound)
 
   }
