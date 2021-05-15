@@ -186,20 +186,8 @@ object ScalaExample extends App{
 		SedonaSQLRegistrator.registerAll(spark)
 		SedonaVizRegistrator.registerAll(spark)
 		var pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(PointInputLocation)
-		pointDf.createOrReplaceTempView("pointtable")
-		spark.sql(
-			"""
-				|CREATE OR REPLACE TEMP VIEW pointtable AS
-				|SELECT ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as shape
-				|FROM pointtable
-			""".stripMargin)
-		spark.sql(
-			"""
-				|CREATE OR REPLACE TEMP VIEW pointtable AS
-				|SELECT *
-				|FROM pointtable
-				|WHERE ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)
-			""".stripMargin)
+		pointDf.selectExpr("ST_Point(cast(_c0 as Decimal(24,20)),cast(_c1 as Decimal(24,20))) as shape")
+			.filter("ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)").createOrReplaceTempView("pointtable")
 		spark.sql(
 			"""
 				|CREATE OR REPLACE TEMP VIEW pixels AS

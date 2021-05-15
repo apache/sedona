@@ -29,26 +29,11 @@ class optVizOperatorTest extends TestBaseScala {
   describe("SedonaViz SQL function Test") {
 
     it("Passed full pipeline using optimized operator") {
-      var pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation) //.createOrReplaceTempView("polygontable")
-      pointDf.createOrReplaceTempView("pointtable")
-      spark.sql(
-        """
-          |CREATE OR REPLACE TEMP VIEW pointtable AS
-          |SELECT ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as shape
-          |FROM pointtable
-        """.stripMargin)
-      spark.sql(
-        """
-          |CREATE OR REPLACE TEMP VIEW pointtable AS
-          |SELECT *
-          |FROM pointtable
-          |WHERE ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)
-        """.stripMargin)
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW pixels AS
           |SELECT pixel, shape FROM pointtable
-          |LATERAL VIEW ST_Pixelize(shape, 1000, 1000, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000)) AS pixel
+          |LATERAL VIEW EXPLODE(ST_Pixelize(shape, 1000, 1000, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000))) AS pixel
         """.stripMargin)
 
       // Test visualization partitioner
@@ -75,26 +60,11 @@ class optVizOperatorTest extends TestBaseScala {
     }
 
     it("Passed full pipeline - aggregate:avg - color:uniform") {
-      var pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation) //.createOrReplaceTempView("polygontable")
-      pointDf.createOrReplaceTempView("pointtable")
-      spark.sql(
-        """
-          |CREATE OR REPLACE TEMP VIEW pointtable AS
-          |SELECT ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as shape
-          |FROM pointtable
-        """.stripMargin)
-      spark.sql(
-        """
-          |CREATE OR REPLACE TEMP VIEW pointtable AS
-          |SELECT *
-          |FROM pointtable
-          |WHERE ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)
-        """.stripMargin)
       spark.sql(
         """
           |CREATE OR REPLACE TEMP VIEW pixels AS
           |SELECT pixel, shape FROM pointtable
-          |LATERAL VIEW ST_Pixelize(shape, 1000, 1000, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000)) AS pixel
+          |LATERAL VIEW EXPLODE(ST_Pixelize(shape, 1000, 1000, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000))) AS pixel
         """.stripMargin)
 
       // Test visualization partitioner

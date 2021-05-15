@@ -31,7 +31,6 @@ object Catalog {
   )
 
   val aggregateExpressions: Seq[UserDefinedAggregateFunction] = Seq(
-    new ST_Render,
-    new ST_Render_v2
+    new ST_Render
   )
 }
