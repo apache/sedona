@@ -18,29 +18,27 @@
  */
 package org.apache.spark.sql.sedona_viz.expressions
 
-import java.io.ByteArrayOutputStream
-
 import com.esotericsoftware.kryo.Kryo
 import com.esotericsoftware.kryo.io.Output
+import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.sedona.viz.core.Serde.PixelSerializer
 import org.apache.sedona.viz.utils.{ColorizeOption, RasterizationUtils}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.expressions.{Expression, Generator}
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_viz.UDT.PixelUDT
-import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.types.{ArrayType, DataType}
 import org.locationtech.jts.geom._
 
 case class ST_Pixelize(inputExpressions: Seq[Expression])
-  extends Generator with CodegenFallback with Logging {
-  override def elementSchema: StructType = new StructType().add("Pixel", new PixelUDT)
+  extends Expression with CodegenFallback with Logging {
 
   override def toString: String = s" **${ST_Pixelize.getClass.getName}**  "
 
-  override def eval(input: InternalRow): TraversableOnce[InternalRow] = {
+  override def eval(input: InternalRow): Any = {
     assert(inputExpressions.length <= 5)
     val inputGeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     val resolutionX = inputExpressions(1).eval(input).asInstanceOf[Integer]
@@ -80,19 +78,19 @@ case class ST_Pixelize(inputExpressions: Seq[Expression])
       }
     }
     assert(pixels.size() > 0)
-    val resultRows = new Array[InternalRow](pixels.size())
-    val pixelSerializer = new PixelSerializer()
-    for (i <- 0 to pixels.size() - 1) {
+    import scala.collection.JavaConverters._
+    return new GenericArrayData(pixels.asScala.map(f=> {
       val out = new ByteArrayOutputStream()
       val kryo = new Kryo()
       val pixelSerializer = new PixelSerializer()
       val output = new Output(out)
-      pixelSerializer.write(kryo, output, pixels.get(i)._1)
+      pixelSerializer.write(kryo, output, f._1)
       output.close()
-      resultRows(i) = InternalRow(new GenericArrayData(out.toByteArray))
-    }
-    return resultRows
+      new GenericArrayData(out.toByteArray)
+    }).toArray)
   }
-
+  override def dataType: DataType = ArrayType(new PixelUDT)
   override def children: Seq[Expression] = inputExpressions
+
+  override def nullable: Boolean = false
 }

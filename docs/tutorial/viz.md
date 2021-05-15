@@ -87,12 +87,22 @@ CREATE OR REPLACE TEMP VIEW boundtable AS
 SELECT ST_Envelope_Aggr(shape) as bound FROM pointtable
 ```
 
-Then use ST_Pixelize to conver them to pixels.
+Then use ST_Pixelize to convert them to pixels.
+
+This example is for Sedona before v1.0.1. ST_Pixelize extends Generator so it can directly flatten the array without the **explode** function.
 
 ```sql
 CREATE OR REPLACE TEMP VIEW pixels AS
 SELECT pixel, shape FROM pointtable
 LATERAL VIEW ST_Pixelize(ST_Transform(shape, 'epsg:4326','epsg:3857'), 256, 256, (SELECT ST_Transform(bound, 'epsg:4326','epsg:3857') FROM boundtable)) AS pixel
+```
+
+This example is for Sedona on and after v1.0.1. ST_Pixelize returns an array of pixels. You need to use **explode** to flatten it.
+
+```sql
+CREATE OR REPLACE TEMP VIEW pixels AS
+SELECT pixel, shape FROM pointtable
+LATERAL VIEW explode(ST_Pixelize(ST_Transform(shape, 'epsg:4326','epsg:3857'), 256, 256, (SELECT ST_Transform(bound, 'epsg:4326','epsg:3857') FROM boundtable))) AS pixel
 ```
 
 This will give you a 256*256 resolution image after you run ST_Render at the end of this tutorial.
@@ -155,12 +165,12 @@ imageGenerator.SaveRasterImageAsLocalFile(image, System.getProperty("user.dir")+
 
 ## Generate map tiles
 
-If you are a map tile professional, you may need to generate map tiles for different zoom levels and eventually create the map tile layer.
+If you are a map professional, you may need to generate map tiles for different zoom levels and eventually create the map tile layer.
 
 
 ### Pixelization and pixel aggregation
 
-Please first do pixelization and pixel aggregation using the same commands in single image generation. In ST_Pixelize, you need specify a very high resolution.
+Please first do pixelization and pixel aggregation using the same commands in single image generation. In ST_Pixelize, you need specify a very high resolution, such as 1000*1000. Note that, each dimension should be divisible by 2^zoom-level 
 
 ### Create tile name
 
@@ -184,10 +194,12 @@ You now need to group pixels by tiles and then render map tile images in paralle
 
 ```sql
 CREATE OR REPLACE TEMP VIEW images AS
-SELECT ST_Render(pixel, color) AS image
+SELECT ST_Render(pixel, color, 3) AS image
 FROM pixelaggregates
 GROUP BY pid
 ```
+
+"3" is the zoom level for these map tiles.
 
 ### Store map tiles on disk
 

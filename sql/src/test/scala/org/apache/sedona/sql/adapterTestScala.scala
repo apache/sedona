@@ -28,9 +28,8 @@ import org.apache.sedona.sql.utils.Adapter
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.storage.StorageLevel
 import org.scalatest.GivenWhenThen
-import org.scalatest.matchers.should.Matchers
 
-class adapterTestScala extends TestBaseScala with Matchers with GivenWhenThen{
+class adapterTestScala extends TestBaseScala with GivenWhenThen{
 
   describe("Sedona-SQL Scala Adapter Test") {
 

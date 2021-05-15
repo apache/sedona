@@ -20,7 +20,9 @@ SedonaVizRegistrator.registerAll(sparkSession)
 
 ### ST_Pixelize
 
-Introduction: Return a pixel for a given resolution
+Introduction: Convert a geometry to an array of pixels given a resolution
+
+You should use it together with `Lateral View` and `Explode`
 
 Format: `ST_Pixelize (A:geometry, ResolutionX:int, ResolutionY:int, Boundary:geometry)`
 
@@ -108,9 +110,9 @@ FROM images
 
 ### ST_Render
 
-Introduction: Given a group of pixels and their colors, return a single Java PNG BufferedImage
+Introduction: Given a group of pixels and their colors, return a single Java PNG BufferedImage. The 3rd parameter is optional and it is the zoom level. You should use zoom level when you want to render tiles, instead of a single image.
 
-Format: `ST_Render (A:pixel, B:color)`
+Format: `ST_Render (A:pixel, B:color, C:Integer - optional zoom level)`
 
 Since: `v1.0.0`
 
