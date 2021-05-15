@@ -15,13 +15,13 @@ lazy val root = (project in file(".")).
     publishMavenStyle := true
   )
 
-val SparkVersion = "3.0.1"
+val SparkVersion = "3.1.1"
 
 val SparkCompatibleVersion = "3.0"
 
 val HadoopVersion = "2.7.2"
 
-val SedonaVersion = "1.0.0-incubating"
+val SedonaVersion = "1.0.1-incubating-SNAPSHOT"
 
 val ScalaCompatibleVersion = "2.12"
 
