@@ -60,7 +60,6 @@ public class rasterTestJava   {
         fs = FileSystem.get(hdfsConf);
         hdfsURI = "hdfs://127.0.0.1:" + hdfsCluster.getNameNodePort() + "/";
         localcsvPath = baseDir.getAbsolutePath() + "/train.csv";
-        System.out.println(localcsvPath);
         hdfscsvpath = hdfsURI + "train.csv";
 
 
