@@ -40,7 +40,6 @@ import org.opengis.parameter.{GeneralParameterValue, ParameterValue}
 
 import java.io.IOException
 import java.util
-import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 
 class GeometryOperations {
 
@@ -116,11 +115,11 @@ case class ST_GeomWithBandsFromGeoTiff(inputExpressions: Seq[Expression])
     val totalBands = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
     val geomConstruction = new GeometryOperations
     val geometry = geomConstruction.readGeometry(geomString)
-    val bandvalues = getBands(geomString, totalBands).toArray
+    val bandvalues = getBands(geomString, totalBands)
     returnValue(geometry.toGenericArrayData,bandvalues, 2)
   }
 
-  private  def getBands(url: String, bands:Int): List[Double] = {
+  private  def getBands(url: String, bands:Int): Array[Double] = {
     val policy: ParameterValue[OverviewPolicy] = AbstractGridFormat.OVERVIEW_POLICY.createValue
     policy.setValue(OverviewPolicy.IGNORE)
 
@@ -158,8 +157,17 @@ case class ST_GeomWithBandsFromGeoTiff(inputExpressions: Seq[Expression])
       }
     }
 
-    bandValues.flatten.toList
+    val totalPixels = numBands * bandValues.get(0).size()
+    val result: Array[Double]  = new Array[Double](totalPixels)
+    var k = 0
+    for (i<-0 until numBands) {
+      for(j<-0 until bandValues.get(i).size() ) {
 
+        result(k) = (bandValues.get(i).get(j))
+        k +=1
+      }
+    }
+    result
   }
 
   // Dynamic results based on number of columns and type of structure
