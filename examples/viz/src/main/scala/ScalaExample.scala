@@ -192,7 +192,7 @@ object ScalaExample extends App{
 			"""
 				|CREATE OR REPLACE TEMP VIEW pixels AS
 				|SELECT pixel, shape FROM pointtable
-				|LATERAL VIEW ST_Pixelize(shape, 256, 256, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000)) AS pixel
+				|LATERAL VIEW Explode(ST_Pixelize(shape, 256, 256, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000))) AS pixel
 			""".stripMargin)
 		spark.sql(
 			"""
