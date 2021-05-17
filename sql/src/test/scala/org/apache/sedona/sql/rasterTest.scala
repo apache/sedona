@@ -91,8 +91,6 @@ class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
       sedonaDF.createOrReplaceTempView("sedonaDF")
       assert(sedonaDF.count()==2 && sedonaDF.first().getAs[mutable.WrappedArray[Double]](1).toArray.length==4096)
 
-
-
     }
 
     it("should fetch a particular band from result of ST_GeomWithBandsFromGeoTiff") {
