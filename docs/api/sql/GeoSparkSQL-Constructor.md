@@ -266,7 +266,7 @@ initialDF.show()
 initialDF.createOrReplaceTempView("resultOfST_GeomWithBandsFromGeoTiff")
 
 +------------------------------------------+
-|TotalBand                                 |
+|rasterBand                                |
 +------------------------------------------+
 |[200.0, 400.0, 600.0, 800.0, 900.0, 100.0]|
 |[200.0, 500.0, 800.0, 300.0, 200.0, 100.0]|
