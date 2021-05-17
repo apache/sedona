@@ -113,11 +113,14 @@ object Adapter {
   }
 
   def toDf[T <: Geometry](spatialRDD: SpatialRDD[T], fieldNames: Seq[String], sparkSession: SparkSession): DataFrame = {
-    val rowRdd = spatialRDD.rawSpatialRDD.rdd.map[Row](f => {
-      var userData = f.getUserData
-      f.setUserData(null)
-      if (userData != null) Row.fromSeq(f +: userData.asInstanceOf[String].split("\t", -1))
-      else Row.fromSeq(Seq(f))
+    val rowRdd = spatialRDD.rawSpatialRDD.rdd.map[Row](geom => {
+      val userData = geom.getUserData
+      val geomWithoutUserData = geom.copy
+      geomWithoutUserData.setUserData(null)
+      if (userData != null)
+        Row.fromSeq(geomWithoutUserData +: userData.asInstanceOf[String].split("\t", -1))
+      else
+        Row.fromSeq(Seq(geom))
     })
     var cols:Seq[StructField] = Seq(StructField("geometry", GeometryUDT))
     if (fieldNames != null && fieldNames.nonEmpty) {
