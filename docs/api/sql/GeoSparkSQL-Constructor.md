@@ -238,9 +238,9 @@ root
  |    |    |-- element: double (containsNull = true)
 
 
-val allBandsDF = spark.sql("Select geotiffStruct.Polygon as geom, geotiffStruct.bands as geotiffBands from geotiffStructDF")
-allBandsDF.show()
-allBandsDF.createOrReplaceTempView("")
+val geomwithallBandsDF = spark.sql("Select geotiffStruct.Polygon as geom, geotiffStruct.bands as geotiffBands from geotiffStructDF")
+geomwithallBandsDF.show()
+geomwithallBandsDF.createOrReplaceTempView("initDF")
 
 +--------------------+--------------------+
 |                geom|          rasterBand|
@@ -261,7 +261,7 @@ Since: `v1.0.0`
 Spark SQL example:
 ```SQL
 
-val initialDF = spark.sql("Select * from initDF")
+val initialDF = spark.sql("Select rasterBand from initDF")
 initialDF.show()
 initialDF.createOrReplaceTempView("resultOfST_GeomWithBandsFromGeoTiff")
 
