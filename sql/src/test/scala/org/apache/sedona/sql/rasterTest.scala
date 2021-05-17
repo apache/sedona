@@ -69,6 +69,7 @@ class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
       fs.copyFromLocalFile(new Path(rasterdatalocation), new Path(rasterfileHDFSpath))
       createLocalFile()
       val df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(localcsvPath)
+      df.show(false)
       df.createOrReplaceTempView("inputtable")
       val spatialDf = sparkSession.sql("select ST_GeomFromGeotiff(inputtable._c0) as countyshape from inputtable")
       spatialDf.show()
@@ -83,7 +84,7 @@ class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
       val df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(localcsvPath)
       df.createOrReplaceTempView("inputtable")
       val spatialDf = sparkSession.sql("select ST_GeomWithBandsFromGeoTiff(inputtable._c0, 4) as rasterstruct from inputtable")
-      spatialDf.show()
+      spatialDf.show(false)
       spatialDf.printSchema()
       spatialDf.createOrReplaceTempView("sedonaframe")
       val sedonaDF = sparkSession.sql("select rasterstruct.Polygon as geom, rasterstruct.bands as rasterBand from sedonaframe")
@@ -99,6 +100,8 @@ class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
       val resultDF = Seq((Seq(600.0,800.0)), (Seq(800.0, 300.0))).toDF("band2")
       data.createOrReplaceTempView("allBandsDF")
       val targetbandDF = sparkSession.sql("Select ST_GetBand(TotalBand,2,3) as band2 from allBandsDF")
+      data.show(false)
+      targetbandDF.show(false)
       assert(resultDF.first().getAs[mutable.WrappedArray[Double]](0) == targetbandDF.first().getAs[mutable.WrappedArray[Double]](0))
 
     }

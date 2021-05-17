@@ -196,8 +196,26 @@ Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
-Select ST_GeomFromGeotiff(imageURL) as Geometry
-FROM geotiffDF
+val imageDF = spark.sql("Select * from images")
+imageDF.show()
+image.createOrReplaceTempView("geotiffDF")
+
++--------------------------------+
+|_c0                             |
++--------------------------------+
+|hdfs://127.0.0.1:42951/image.tif|
+|hdfs://127.0.0.1:42951/image.tif|
++--------------------------------+
+
+val geomDF = spark.sql("select ST_GeomFromGeotiff(_c0) as Geometry from geotiffDF")
+geomDF.show()
+
++--------------------+
+|         countyshape|
++--------------------+
+|POLYGON ((-64.807...|
+|POLYGON ((-64.807...|
++--------------------+
 ```
 
 ## ST_GeomWithBandsFromGeoTiff
@@ -210,11 +228,26 @@ Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
-Select ST_GeomWithBandsFromGeoTiff(rasterDF.imageURL, 4) as geotiffStruct 
-from geotiffDF
+val structDF = spark.sql("Select ST_GeomWithBandsFromGeoTiff(rasterDF.imageURL, 4) as geotiffStruct from geotiffDF")
+structDF.printSchema()
 
-Select geotiffStruct.Polygon as geom, geotiffStruct.bands as geotiffBands 
-from geotiffStructDF
+root
+ |-- rasterstruct: struct (nullable = false)
+ |    |-- Polygon: geometry (nullable = false)
+ |    |-- bands: array (nullable = true)
+ |    |    |-- element: double (containsNull = true)
+
+
+val allBandsDF = spark.sql("Select geotiffStruct.Polygon as geom, geotiffStruct.bands as geotiffBands from geotiffStructDF")
+allBandsDF.show()
+allBandsDF.createOrReplaceTempView("")
+
++--------------------+--------------------+
+|                geom|          rasterBand|
++--------------------+--------------------+
+|POLYGON ((-64.807...|[0.0, 0.0, 0.0, 0...|
+|POLYGON ((-64.807...|[0.0, 0.0, 0.0, 0...|
++--------------------+--------------------+
 ```
 
 ## ST_GetBand
@@ -227,6 +260,25 @@ Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
-SELECT ST_GetBand(geotiffBands, 2, 4) as band
-FROM resultOfST_GeomWithBandsFromGeoTiff
+
+val initialDF = spark.sql("Select * from initDF")
+initialDF.show()
+initialDF.createOrReplaceTempView("resultOfST_GeomWithBandsFromGeoTiff")
+
++------------------------------------------+
+|TotalBand                                 |
++------------------------------------------+
+|[200.0, 400.0, 600.0, 800.0, 900.0, 100.0]|
+|[200.0, 500.0, 800.0, 300.0, 200.0, 100.0]|
++------------------------------------------+
+
+val finalDF = spark.sql("select ST_GetBand(geotiffBands, 2, 3) as band2 from resultOfST_GeomWithBandsFromGeoTiff")
+finalDF.show()
+
++--------------+
+|band2         |
++--------------+
+|[600.0, 800.0]|
+|[800.0, 300.0]|
++--------------+
 ```
