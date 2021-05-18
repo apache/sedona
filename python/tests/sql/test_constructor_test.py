@@ -15,7 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from tests import csv_point_input_location, area_lm_point_input_location, mixed_wkt_geometry_input_location, \
+from tests import csv_point_input_location, mixed_wkt_geometry_input_location, \
     mixed_wkb_geometry_input_location, geojson_input_location
 from tests.test_base import TestBase
 
@@ -36,13 +36,13 @@ class TestConstructors(TestBase):
     def test_st_point_from_text(self):
         point_csv_df = self.spark.read.format("csv").\
             option("delimiter", ",").\
-            option("header", "false").load(area_lm_point_input_location)
+            option("header", "false").load(csv_point_input_location)
 
         point_csv_df.createOrReplaceTempView("pointtable")
         point_csv_df.show(truncate=False)
 
         point_df = self.spark.sql("select ST_PointFromText(concat(_c0,',',_c1),',') as arealandmark from pointtable")
-        assert point_df.count() == 121960
+        assert point_df.count() == 1000
 
     def test_st_geom_from_wkt(self):
         polygon_wkt_df = self.spark.read.format("csv").\

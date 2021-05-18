@@ -33,7 +33,7 @@ from sedona.core.spatialOperator import JoinQuery
 from sedona.utils.adapter import Adapter
 from tests import geojson_input_location, shape_file_with_missing_trailing_input_location, \
     geojson_id_input_location
-from tests import shape_file_input_location, area_lm_point_input_location
+from tests import shape_file_input_location, csv_point_input_location
 from tests import mixed_wkt_geometry_input_location
 from tests.test_base import TestBase
 
@@ -45,7 +45,7 @@ class TestAdapter(TestBase):
             format("csv").\
             option("delimiter", "\t").\
             option("header", "false").\
-            load(area_lm_point_input_location)
+            load(csv_point_input_location)
 
         df.show()
         df.createOrReplaceTempView("inputtable")
@@ -62,7 +62,7 @@ class TestAdapter(TestBase):
         df = self.spark.read.format("csv").\
             option("delimiter", ",").\
             option("header", "false").\
-            load(area_lm_point_input_location)
+            load(csv_point_input_location)
 
         df.show()
         df.createOrReplaceTempView("inputtable")
@@ -78,7 +78,7 @@ class TestAdapter(TestBase):
         df = self.spark.read.format("csv").\
             option("delimiter", ",").\
             option("header", "false").\
-            load(area_lm_point_input_location)
+            load(csv_point_input_location)
 
         df.show()
         df.createOrReplaceTempView("inputtable")
@@ -165,7 +165,7 @@ class TestAdapter(TestBase):
         polygon_rdd.analyze()
 
         point_csv_df = self.spark.read.format("csv").option("delimiter", ",").option("header", "false").load(
-            area_lm_point_input_location)
+            csv_point_input_location)
         point_csv_df.createOrReplaceTempView("pointtable")
 
         point_df = self.spark.sql(
@@ -194,7 +194,7 @@ class TestAdapter(TestBase):
             format("csv").\
             option("delimiter", ",").\
             option("header", "false").load(
-                area_lm_point_input_location
+            csv_point_input_location
         )
         point_csv_df.createOrReplaceTempView("pointtable")
         point_df = self.spark.sql(
@@ -246,7 +246,7 @@ class TestAdapter(TestBase):
             format("csv").\
             option("delimiter", "\t").\
             option("header", "false").\
-            load(area_lm_point_input_location)
+            load(csv_point_input_location)
 
         df.createOrReplaceTempView("inputtable")
 

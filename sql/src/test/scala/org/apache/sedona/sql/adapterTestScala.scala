@@ -34,7 +34,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
   describe("Sedona-SQL Scala Adapter Test") {
 
     it("Read CSV point into a SpatialRDD") {
-      var df = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(arealmPointInputLocation)
+      var df = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(csvPointInputLocation)
       df.createOrReplaceTempView("inputtable")
       var spatialDf = sparkSession.sql("select ST_PointFromText(inputtable._c0,\",\") as arealandmark from inputtable")
       var spatialRDD = Adapter.toSpatialRdd(spatialDf, "arealandmark")
@@ -44,7 +44,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
     }
 
     it("Read CSV point at a different column id into a SpatialRDD") {
-      var df = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(arealmPointInputLocation)
+      var df = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(csvPointInputLocation)
       df.createOrReplaceTempView("inputtable")
       var spatialDf = sparkSession.sql("select \'123\', \'456\', ST_PointFromText(inputtable._c0,\",\") as arealandmark, \'789\' from inputtable")
       var spatialRDD = Adapter.toSpatialRdd(spatialDf, 2)
@@ -54,7 +54,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
     }
 
     it("Read CSV point at a different column col name into a SpatialRDD") {
-      var df = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(arealmPointInputLocation)
+      var df = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(csvPointInputLocation)
       df.createOrReplaceTempView("inputtable")
       var spatialDf = sparkSession.sql("select \'123\', \'456\', ST_PointFromText(inputtable._c0,\",\") as arealandmark, \'789\' from inputtable")
       var spatialRDD = Adapter.toSpatialRdd(spatialDf, "arealandmark")
@@ -64,7 +64,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
     }
 
     it("Read CSV point into a SpatialRDD by passing coordinates") {
-      var df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(arealmPointInputLocation)
+      var df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       df.createOrReplaceTempView("inputtable")
       var spatialDf = sparkSession.sql("select ST_Point(cast(inputtable._c0 as Decimal(24,20)),cast(inputtable._c1 as Decimal(24,20))) as arealandmark from inputtable")
       var spatialRDD = Adapter.toSpatialRdd(spatialDf, "arealandmark")
@@ -118,7 +118,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
       val polygonRDD = Adapter.toSpatialRdd(polygonDf, "usacounty")
       polygonRDD.analyze()
 
-      val pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(arealmPointInputLocation)
+      val pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")
       val pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
       val pointRDD = Adapter.toSpatialRdd(pointDf, "arealandmark")
@@ -146,7 +146,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
     }
 
     it("Convert distance join result to DataFrame") {
-      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(arealmPointInputLocation)
+      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")
       var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
       var pointRDD = Adapter.toSpatialRdd(pointDf, "arealandmark")

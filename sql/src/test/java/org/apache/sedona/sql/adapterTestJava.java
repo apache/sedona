@@ -48,7 +48,7 @@ public class adapterTestJava
     public static String resourceFolder = System.getProperty("user.dir") + "/../core/src/test/resources/";
     public static String mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv";
     public static String mixedWkbGeometryInputLocation = resourceFolder + "county_small_wkb.tsv";
-    public static String csvPointInputLocation = resourceFolder + "arealm.csv";
+    public static String csvPointInputLocation = resourceFolder + "testpoint.csv";
     public static String shapefileInputLocation = resourceFolder + "shapefiles/polygon";
     protected static SparkConf conf;
     protected static JavaSparkContext sc;

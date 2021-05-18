@@ -44,7 +44,6 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   val shapefileInputLocation = resourceFolder + "shapefiles/dbf"
   val shapefileWithMissingsTrailingInputLocation = resourceFolder + "shapefiles/missing"
   val geojsonInputLocation = resourceFolder + "testPolygon.json"
-  val arealmPointInputLocation = resourceFolder + "arealm.csv"
   val csvPointInputLocation = resourceFolder + "testpoint.csv"
   val csvPolygonInputLocation = resourceFolder + "testenvelope.csv"
   val csvPolygon1InputLocation = resourceFolder + "equalitycheckfiles/testequals_envelope1.csv"

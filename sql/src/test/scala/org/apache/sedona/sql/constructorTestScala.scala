@@ -48,11 +48,11 @@ class constructorTestScala extends TestBaseScala {
     }
 
     it("Passed ST_PointFromText") {
-      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(arealmPointInputLocation)
+      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")
 
       var pointDf = sparkSession.sql("select ST_PointFromText(concat(_c0,',',_c1),',') as arealandmark from pointtable")
-      assert(pointDf.count() == 121960)
+      assert(pointDf.count() == 1000)
     }
 
     it("Passed ST_GeomFromWKT") {

@@ -387,7 +387,7 @@ public class GlobalParameter
             this.overwriteExistingImages = Boolean.parseBoolean(value);
         }
         else {
-            logger.error(new Exception("[Babylon][set] No such parameter: " + key));
+            logger.error(new Exception("[Sedona][set] No such parameter: " + key));
         }
         return true;
     }

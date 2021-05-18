@@ -36,8 +36,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll{
   val resourceFolder = System.getProperty("user.dir") + "/../core/src/test/resources/"
 
   val polygonInputLocationWkt = resourceFolder + "county_small.tsv"
-  val polygonInputLocation = resourceFolder + "primaryroads-polygon.csv"
-  val csvPointInputLocation = resourceFolder + "arealm.csv"
+  val csvPointInputLocation = resourceFolder + "arealm-small.csv"
 
   override def beforeAll(): Unit = {
     spark = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
@@ -51,7 +50,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll{
 
   def getPoint(): DataFrame = {
     val pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation).sample(false, 1)
-    pointDf.selectExpr("ST_Point(cast(_c0 as Decimal(24,20)),cast(_c1 as Decimal(24,20))) as shape")
+    pointDf.selectExpr("ST_Point(cast(_c1 as Decimal(24,20)),cast(_c2 as Decimal(24,20))) as shape")
       .filter("ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)")
   }
 

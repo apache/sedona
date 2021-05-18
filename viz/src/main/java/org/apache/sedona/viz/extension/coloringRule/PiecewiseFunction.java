@@ -31,9 +31,11 @@ import java.awt.Color;
 public class PiecewiseFunction
         extends ColoringRule
 {
-
-    /* (non-Javadoc)
-     * @see org.datasyslab.babylon.core.internalobject.ColoringRule#EncodeToRGB(java.lang.Double, org.datasyslab.babylon.core.parameters.GlobalParameter)
+    /**
+     *
+     * @param normailizedCount the normailized count
+     * @param globalParameter the global parameter
+     * @return
      */
     @Override
     public Integer EncodeToRGB(Double normailizedCount, GlobalParameter globalParameter)

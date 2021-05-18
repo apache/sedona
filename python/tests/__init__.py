@@ -32,7 +32,6 @@ mixed_wkt_geometry_input_location = os.path.join(tests_resource, "county_small.t
 shape_file_input_location = os.path.join(tests_resource, "shapefiles/dbf")
 shape_file_with_missing_trailing_input_location = os.path.join(tests_resource, "shapefiles/missing")
 geojson_input_location = os.path.join(tests_resource, "testPolygon.json")
-area_lm_point_input_location = os.path.join(tests_resource, "arealm.csv")
 csv_point_input_location = os.path.join(tests_resource, "testpoint.csv")
 csv_polygon_input_location = os.path.join(tests_resource, "testenvelope.csv")
 csv_polygon1_input_location = os.path.join(tests_resource, "equalitycheckfiles/testequals_envelope1.csv")

@@ -49,7 +49,7 @@ public class ColoringRuleFactory
             return new PiecewiseFunction();
         }
         else {
-            logger.error("[Babylon][getColoringRule] No such coloring rule: " + ruleName);
+            logger.error("[Sedona][getColoringRule] No such coloring rule: " + ruleName);
             return null;
         }
     }
