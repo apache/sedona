@@ -27,6 +27,7 @@ import org.apache.sedona.core.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}
 import org.apache.sedona.sql.utils.Adapter
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.storage.StorageLevel
+import org.locationtech.jts.geom.Point
 import org.scalatest.GivenWhenThen
 import org.scalatest.matchers.should.Matchers
 
@@ -197,6 +198,52 @@ class adapterTestScala extends TestBaseScala with Matchers with GivenWhenThen{
       spatialRDD.fieldNames = HDFDataVariableList.dropRight(4).toList.asJava
       val spatialDf = Adapter.toDf(spatialRDD, sparkSession)
       assert(spatialDf.schema.fields(1).name == "LST")
+    }
+
+    it("can convert spatial RDD with user data to a valid Dataframe") {
+      val srcDF = sparkSession.sql("select ST_PointFromText('40.7128,-74.0060', ',') as geom, \"attr1\" as attr1, \"attr2\" as attr2")
+      val rdd = Adapter.toSpatialRdd(srcDF, "geom")
+      val df = Adapter.toDf(rdd, Seq("attr1", "attr2"), sparkSession)
+      df.unpersist(true)
+      // verify the resulting Spark dataframe can be successfully evaluated repeatedly
+      for (_ <- 1 to 5) {
+        val rows = df.collect
+        assert(rows.length == 1)
+        val geom = rows(0).get(0).asInstanceOf[Point]
+        assert(geom.getX == 40.7128)
+        assert(geom.getY == -74.006)
+        assert(rows(0).get(1).asInstanceOf[String] == "attr1")
+        assert(rows(0).get(2).asInstanceOf[String] == "attr2")
+      }
+    }
+
+    it("can convert spatial pair RDD with user data to a valid Dataframe") {
+      var srcDF = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      srcDF.createOrReplaceTempView("inputtable")
+      var leftDF = sparkSession.sql("select ST_GeomFromWKT(inputtable._c0) as leftGeom, \"attr1\" as attr1, \"attr2\" as attr2 from inputtable")
+      val rightDF = sparkSession.sql("select ST_PointFromText('40.7128,-74.0060', ',') as rightGeom, \"attr3\" as attr3, \"attr4\" as attr4")
+      val leftRDD = Adapter.toSpatialRdd(leftDF, "leftGeom")
+      leftRDD.analyze()
+      val rightRDD = Adapter.toSpatialRdd(rightDF, "rightGeom")
+      rightRDD.analyze()
+      leftRDD.spatialPartitioning(GridType.QUADTREE)
+      rightRDD.spatialPartitioning(leftRDD.getPartitioner)
+      val pairRDD = JoinQuery.SpatialJoinQueryFlat(leftRDD, rightRDD, true, true)
+      val pairDF = Adapter.toDf(pairRDD, Seq("attr1", "attr2"), Seq("attr3", "attr4"), sparkSession)
+      pairDF.unpersist(true)
+      // verify the resulting Spark dataframe can be successfully evaluated repeatedly
+      for (_ <- 1 to 5) {
+        val rows = pairDF.collect
+        for (row <- rows) {
+          assert(row.get(1).asInstanceOf[String] == "attr1")
+          assert(row.get(2).asInstanceOf[String] == "attr2")
+          val pt = row.get(3).asInstanceOf[Point]
+          assert(pt.getX == 40.7128)
+          assert(pt.getY == -74.006)
+          assert(row.get(4).asInstanceOf[String] == "attr1")
+          assert(row.get(5).asInstanceOf[String] == "attr2")
+        }
+      }
     }
   }
 }

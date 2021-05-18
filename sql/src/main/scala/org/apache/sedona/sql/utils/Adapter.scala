@@ -169,8 +169,9 @@ object Adapter {
     if (fieldNames != null && fieldNames.nonEmpty) {
       val userData = "" + geom.getUserData.asInstanceOf[String]
       val fields = userData.split("\t")
-//      geom.setUserData(null) // Set to null will lead to the null pointer exception of the previous line. Not sure why.
-      (Seq(geom), fields)
+      val geomWithoutUserData = geom.copy
+      geomWithoutUserData.setUserData(null)
+      (Seq(geomWithoutUserData), fields)
     }
     else (Seq(geom), Seq())
   }
