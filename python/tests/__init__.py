@@ -27,7 +27,7 @@ from tests.tools import tests_resource
 #     return os.path.join(data_path, relative_path)
 
 
-mixed_wkb_geometry_input_location = os.path.join(tests_resource, "county_small_wkb.tsv")
+mixed_wkb_geometry_input_location = os.path.join(tests_resource, "wkb_data.tsv")
 mixed_wkt_geometry_input_location = os.path.join(tests_resource, "county_small.tsv")
 shape_file_input_location = os.path.join(tests_resource, "shapefiles/dbf")
 shape_file_with_missing_trailing_input_location = os.path.join(tests_resource, "shapefiles/missing")

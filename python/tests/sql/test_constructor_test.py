@@ -78,7 +78,7 @@ class TestConstructors(TestBase):
         polygon_wkb_df.show()
         polygon_df = self.spark.sql("select ST_GeomFromWKB(polygontable._c0) as countyshape from polygontable")
         polygon_df.show(10)
-        assert polygon_df.count() == 100
+        assert polygon_df.count() == 10
 
     def test_st_geom_from_geojson(self):
         polygon_json_df = self.spark.read.format("csv").\

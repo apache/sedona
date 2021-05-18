@@ -25,7 +25,7 @@ from tests.tools import tests_resource
 class TestWkbReader(TestBase):
 
     def test_read_to_geometry_rdd(self):
-        wkb_geometries = os.path.join(tests_resource, "county_small_wkb.tsv")
+        wkb_geometries = os.path.join(tests_resource, "wkb_data.tsv")
 
         wkb_rdd = WkbReader.readToGeometryRDD(self.sc, wkb_geometries, 0, True, False)
-        assert wkb_rdd.rawSpatialRDD.count() == 103
+        assert wkb_rdd.rawSpatialRDD.count() == 10
