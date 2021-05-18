@@ -1,4 +1,4 @@
-<img src="./sedona_logo.png" width="400">
+<img src="https://www.apache.org/logos/res/sedona/sedona.png" width="400">
 
 [![Scala and Java build](https://github.com/apache/incubator-sedona/workflows/Scala%20and%20Java%20build/badge.svg)](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Scala+and+Java+build%22) [![Python build](https://github.com/apache/incubator-sedona/workflows/Python%20build/badge.svg)](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Python+build%22) ![Example project build](https://github.com/apache/incubator-sedona/workflows/Example%20project%20build/badge.svg)
 
@@ -38,4 +38,4 @@ Gitter chat: [![Gitter](https://badges.gitter.im/apache/sedona.svg)](https://git
 
 ## Powered by
 
-<img src="./incubator_logo.png" width="400">
+<img src="http://apache.org/logos/res/incubator/incubator.png" width="400">

@@ -101,7 +101,7 @@ theme:
   palette:
     primary: 'deep orange'
     accent: 'green'
-  favicon: image/sedona_logo.png
+  favicon: https://www.apache.org/logos/res/sedona/sedona.png
   icon:
     logo: fontawesome/solid/globe-americas
     repo: fontawesome/brands/github
@@ -116,7 +116,7 @@ extra:
       link: 'https://github.com/apache/incubator-sedona'
     - icon: fontawesome/brands/twitter
       link: 'https://twitter.com/ApacheSedona'
-copyright: Apache Sedona, Apache Incubator, Apache, the Apache feather logo, and the Apache Incubator project logo are trademarks or registered trademarks of The Apache Software Foundation.
+copyright: Apache Sedona, Apache Incubator, Apache, the Apache feather logo, and the Apache Incubator project logo are trademarks or registered trademarks of The Apache Software Foundation. Copyright © 2021 The Apache Software Foundation
 markdown_extensions:
   - admonition
   - attr_list
