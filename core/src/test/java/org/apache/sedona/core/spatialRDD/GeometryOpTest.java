@@ -23,9 +23,6 @@ import static org.junit.Assert.assertEquals;
 
 public class GeometryOpTest extends SpatialRDDTestBase
 {
-    private static String InputLocationGeojson;
-    private static String InputLocationWkt;
-    private static String InputLocationWkb;
     /**
      * Once executed before all.
      */
@@ -33,9 +30,6 @@ public class GeometryOpTest extends SpatialRDDTestBase
     public static void onceExecutedBeforeAll()
     {
         initialize(GeometryOpTest.class.getSimpleName(), "polygon.test.properties");
-        InputLocationGeojson = "file://" + GeometryOpTest.class.getClassLoader().getResource(prop.getProperty("inputLocationGeojson")).getPath();
-        InputLocationWkt = "file://" + GeometryOpTest.class.getClassLoader().getResource(prop.getProperty("inputLocationWkt")).getPath();
-        InputLocationWkb = "file://" + GeometryOpTest.class.getClassLoader().getResource(prop.getProperty("inputLocationWkb")).getPath();
     }
 
     /**

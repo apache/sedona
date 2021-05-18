@@ -44,7 +44,6 @@ public class PolygonRDDTest
 {
     private static String InputLocationGeojson;
     private static String InputLocationWkt;
-    private static String InputLocationWkb;
 
     /**
      * Once executed before all.
@@ -53,9 +52,6 @@ public class PolygonRDDTest
     public static void onceExecutedBeforeAll()
     {
         initialize(PolygonRDDTest.class.getSimpleName(), "polygon.test.properties");
-        InputLocationGeojson = "file://" + PolygonRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocationGeojson")).getPath();
-        InputLocationWkt = "file://" + PolygonRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocationWkt")).getPath();
-        InputLocationWkb = "file://" + PolygonRDDTest.class.getClassLoader().getResource(prop.getProperty("inputLocationWkb")).getPath();
     }
 
     /**
@@ -109,15 +105,6 @@ public class PolygonRDDTest
     public void testWktConstructor()
     {
         PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocationWkt, FileDataSplitter.WKT, true, StorageLevel.MEMORY_ONLY());
-        assert spatialRDD.approximateTotalCount == 103;
-        assert spatialRDD.boundaryEnvelope != null;
-        assert spatialRDD.rawSpatialRDD.take(1).get(0).getUserData().equals("31\t039\t00835841\t31039\tCuming\tCuming County\t06\tH1\tG4020\t\t\t\tA\t1477895811\t10447360\t+41.9158651\t-096.7885168");
-    }
-
-    @Test
-    public void testWkbConstructor()
-    {
-        PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocationWkb, FileDataSplitter.WKB, true, StorageLevel.MEMORY_ONLY());
         assert spatialRDD.approximateTotalCount == 103;
         assert spatialRDD.boundaryEnvelope != null;
         assert spatialRDD.rawSpatialRDD.take(1).get(0).getUserData().equals("31\t039\t00835841\t31039\tCuming\tCuming County\t06\tH1\tG4020\t\t\t\tA\t1477895811\t10447360\t+41.9158651\t-096.7885168");
