@@ -261,7 +261,7 @@ class TestAdapter(TestBase):
         spatial_rdd = Adapter.toSpatialRdd(spatial_df, "s")
         spatial_rdd.analyze()
 
-        assert spatial_rdd.approximateTotalCount == 121960
+        assert spatial_rdd.approximateTotalCount == 1000
         assert spatial_rdd.boundaryEnvelope == Envelope(-179.147236, 179.475569, -14.548699, 71.35513400000001)
 
     def test_to_spatial_rdd_df(self):
@@ -271,7 +271,7 @@ class TestAdapter(TestBase):
 
         spatial_rdd.analyze()
 
-        assert spatial_rdd.approximateTotalCount == 121960
+        assert spatial_rdd.approximateTotalCount == 1000
         assert spatial_rdd.boundaryEnvelope == Envelope(-179.147236, 179.475569, -14.548699, 71.35513400000001)
 
     @pytest.mark.skipif(is_greater_or_equal_version(version, "1.0.0"), reason="Deprecated in Sedona")
