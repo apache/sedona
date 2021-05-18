@@ -39,7 +39,7 @@ public class WkbReadTest
             throws IOException
     {
         initialize(WktReaderTest.class.getName());
-        wkbGeometries = WktReaderTest.class.getClassLoader().getResource("county_small_wkb.tsv").getPath();
+        wkbGeometries = WktReaderTest.class.getClassLoader().getResource("wkb_data.tsv").getPath();
     }
 
     @AfterClass
@@ -50,7 +50,7 @@ public class WkbReadTest
     }
 
     /**
-     * Test correctness of parsing geojson file
+     * Test correctness of parsing wkb file
      *
      * @throws IOException
      */
@@ -58,8 +58,8 @@ public class WkbReadTest
     public void testReadToGeometryRDD()
             throws IOException
     {
-        // load geojson with our tool
-        SpatialRDD wkbRDD = WkbReader.readToGeometryRDD(sc, wkbGeometries, 0, true, false);
-        assertEquals(wkbRDD.rawSpatialRDD.count(), 103);
+        // load wkb with our tool
+        SpatialRDD wkbRDD = WkbReader.readToGeometryRDD(sc, wkbGeometries, 0, false, false);
+        assertEquals(wkbRDD.rawSpatialRDD.count(), 10);
     }
 }
