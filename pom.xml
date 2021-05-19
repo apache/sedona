@@ -68,7 +68,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.scope>provided</dependency.scope>
         <jts.version>1.18.0</jts.version>
-        <jts2geojson.version>0.14.3</jts2geojson.version>
+        <jts2geojson.version>0.16.1</jts2geojson.version>
     </properties>
 
     <dependencies>

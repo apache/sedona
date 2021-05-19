@@ -1,0 +1,41 @@
+Original documentation: https://www2.census.gov/geo/pdfs/maps-data/data/tiger/tgrshp2020/TGRSHP2020_TechDoc.pdf
+
+1. Legal Disclaimer, Citation Information and Contact
+1.1 TIGER/Line Shapefile Legal Disclaimers
+
+No warranty, expressed or implied, is made with regard to the accuracy of the data in the TIGER/Line
+Shapefiles, and no liability is assumed by the United States Government in general, or the Census
+Bureau specifically, as to the positional or attribute accuracy of the data. The boundary information in the
+TIGER/Line Shapefiles is for statistical data collection and tabulation purposes only. Their depiction and
+designation for statistical purposes does not constitute a determination of jurisdictional authority or rights
+of ownership or entitlement and are not legal land descriptions.
+
+TIGER/Line® is a registered trademark of the Census Bureau. TIGER/Line cannot be used as or within
+the proprietary product names of any commercial product including or otherwise relevant to Census
+Bureau data and may only be used to refer to the nature of such a product. The Census Bureau requests
+that any repackaging of the TIGER/Line Shapefile data, documentation, and other files accompanying it
+for distribution include a conspicuously placed statement to this effect on the product's cover, the first
+page of the website, or elsewhere of comparable visibility. Further, Census Bureau trademarks, when
+used in reference to the nature of the product, should be accompanied by the ® (registered) symbol or ™
+symbol, where convenient.
+
+1.2 Citation Information
+
+Copyright protection is not available for any work of the United States Government (Title 17 U.S.C.,
+Section 105). Thus, you are free to reproduce census materials as you see fit. We would ask, however,
+that you cite the Census Bureau as the source.
+
+1.3 Contact Information
+
+Members of the public can obtain the TIGER/Line Shapefiles free of charge through the Census Bureau’s
+website and should direct questions about these files to the Spatial Data Collection and Products Branch,
+Geography Division, U.S. Census Bureau. If you obtain the TIGER/Line Shapefiles from a third party, we
+recommend you contact that vendor for assistance.
+
+Spatial Data Collection and Products Branch
+Geography Division,
+U.S. Census Bureau
+4600 Silver Hill Road
+Washington, DC 20233-7400
+Office: (301) 763-1128
+E-mail: geo.geography@census.gov
