@@ -84,7 +84,12 @@ object Catalog {
     ST_LineInterpolatePoint,
     ST_GeomFromGeotiff,
     ST_GeomWithBandsFromGeoTiff,
-    ST_GetBand
+    ST_GetBand,
+    rs_NormalizedDifference,
+    rs_Mean,
+    rs_Mode,
+    rs_EucledianDistance,
+    rs_FetchRegion
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(
