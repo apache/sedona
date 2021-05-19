@@ -7,7 +7,11 @@ Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/g
 
 Apache Sedona™(incubating) is a cluster computing system for processing large-scale spatial data. Sedona extends Apache Spark / SparkSQL with a set of out-of-the-box Spatial Resilient Distributed Datasets (SRDDs)/ SpatialSQL that efficiently load, process, and analyze large-scale spatial data across machines.
 
-### Sedona contains several modules:
+## System architecture
+
+<img src="docs/image/architecture.jpeg" width="600">
+
+### Modules in the source code
 
 | Name  |  API |  Introduction|
 |---|---|---|
@@ -23,6 +27,8 @@ Apache Sedona™(incubating) is a cluster computing system for processing large-
 Please refer to [Sedona website](http://sedona.apache.org/download/compile/)
 
 ## Contact
+
+Feedback to improve Apache Sedona: [Google Form](https://docs.google.com/forms/d/e/1FAIpQLSeYHlc4cX5Pw0bIx2dQbhHDeWF2G2Wf7BgN_n29IzXsSzwptA/viewform)
 
 Twitter: [Sedona@Twitter](https://twitter.com/ApacheSedona)
 

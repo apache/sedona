@@ -4,8 +4,8 @@ A self-contained project allows you to create multiple Scala / Java files and wr
 
 ## Quick start
 
-1. To add Sedona as dependencies, please read [Sedona Maven Central coordinates](GeoSpark-All-Modules-Maven-Central-Coordinates.md)
-2. Use Sedona Template project to start: [Sedona Template Project](/tutorial/GeoSpark-Runnable-DEMO/)
+1. To add Sedona as dependencies, please read [Sedona Maven Central coordinates](maven-coordinates.md)
+2. Use Sedona Template project to start: [Sedona Template Project](/tutorial/demo/)
 3. Compile your project using SBT. Make sure you obtain the fat jar which packages all dependencies.
 4. Submit your compiled fat jar to Spark cluster. Make sure you are in the root folder of Spark distribution. Then run the following command:
 ```

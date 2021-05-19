@@ -3,12 +3,12 @@ The page outlines the steps to create Spatial RDDs and run spatial queries using
 
 ## Set up dependencies
 
-1. Read [Sedona Maven Central coordinates](../download/GeoSpark-All-Modules-Maven-Central-Coordinates.md)
+1. Read [Sedona Maven Central coordinates](../download/maven-coordinates.md)
 2. Select ==the minimum dependencies==: Add Apache Spark (only the Spark core) and Sedona (core).
 3. Add the dependencies in build.sbt or pom.xml.
 
 !!!note
-	To enjoy the full functions of Sedona, we suggest you include ==the full dependencies==: [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core, Sedona-SQL, Sedona-Viz. Please see [RDD example project](/tutorial/GeoSpark-Runnable-DEMO/)
+	To enjoy the full functions of Sedona, we suggest you include ==the full dependencies==: [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core, Sedona-SQL, Sedona-Viz. Please see [RDD example project](/tutorial/demo/)
 
 ## Initiate SparkContext
 
@@ -175,7 +175,7 @@ System.setProperty("sedona.global.charset", "utf8")
 
 #### From SparkSQL DataFrame
 
-To create a generic SpatialRDD from CSV, TSV, WKT, WKB and GeoJSON input formats, you can use SedonaSQL. Make sure you include ==the full dependencies== of Sedona. Read [SedonaSQL API](../api/sql/GeoSparkSQL-Overview).
+To create a generic SpatialRDD from CSV, TSV, WKT, WKB and GeoJSON input formats, you can use SedonaSQL. Make sure you include ==the full dependencies== of Sedona. Read [SedonaSQL API](../api/sql/Overview).
 
 We use [checkin.csv CSV file](#pointrdd-from-csvtsv) as the example. You can create a generic SpatialRDD using the following steps:
 

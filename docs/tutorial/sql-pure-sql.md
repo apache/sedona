@@ -1,6 +1,6 @@
-The page outlines the steps to manage spatial data using SedonaSQL. ==The example code is written in SQL==.
+Starting from ==Sedona v1.0.1==, you can use Sedona in a pure Spark SQL environment. The example code is written in SQL.
 
-SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/GeoSparkSQL-Overview.md)
+SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.md)
 
 
 ## Initiate Session
@@ -8,7 +8,7 @@ SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. Detailed SedonaSQL APIs ar
 Start `spark-sql` as following (replace `<VERSION>` with actual version, like, `1.0.1-incubating`):
 
 ```sh
-park-sql --packages org.apache.sedona:sedona-python-adapter-3.0_2.12:<VERSION>,org.apache.sedona:sedona-viz-3.0_2.12:<VERSION>,org.datasyslab:geotools-wrapper:geotools-24.0 \
+spark-sql --packages org.apache.sedona:sedona-python-adapter-3.0_2.12:<VERSION>,org.apache.sedona:sedona-viz-3.0_2.12:<VERSION>,org.datasyslab:geotools-wrapper:geotools-24.0 \
   --conf spark.kryo.registrator=org.apache.spark.serializer.KryoSerializer \
   --conf spark.kryo.registrator=org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator \
   --conf spark.sql.extensions=org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions
