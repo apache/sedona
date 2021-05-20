@@ -215,6 +215,7 @@ case class rs_FetchRegion(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
+// Fetch all the band values greater than a particular value
 case class rs_GreaterThan(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
@@ -247,6 +248,7 @@ case class rs_GreaterThan(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
+// fetch all the band values greater than equal to particular value
 case class rs_GreaterThanEqual(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
@@ -279,6 +281,7 @@ case class rs_GreaterThanEqual(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
+// Fetch band values less than particular value
 case class rs_LessThan(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
@@ -311,6 +314,7 @@ case class rs_LessThan(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
+// Fetch band values less than equal to particular value
 case class rs_LessThanEqual(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
@@ -343,6 +347,7 @@ case class rs_LessThanEqual(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
+// Count number of occurences of a particular value in a band
 case class rs_Count(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
@@ -373,6 +378,7 @@ case class rs_Count(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
+// Multiply a factor to all values of a band
 case class rs_Multiply(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
@@ -403,6 +409,7 @@ case class rs_Multiply(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
+// Add two bands
 case class rs_AddBands(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
@@ -433,3 +440,245 @@ case class rs_AddBands(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
+// Subtract two bands
+case class rs_SubtractBands(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 2)
+    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    assert(band1.length == band2.length)
+
+    subtractBands(band1, band2)
+
+  }
+
+  private def subtractBands(band1: Array[Double], band2: Array[Double]):Array[Double] = {
+
+    val result = new Array[Double](band1.length)
+    for(i<-0 until band1.length) {
+      result(i) = band2(i) - band1(i)
+    }
+    result
+
+  }
+
+  override def dataType: DataType = ArrayType(DoubleType)
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+// Multiple two bands
+case class rs_MultiplyBands(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 2)
+    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    assert(band1.length == band2.length)
+
+    multiplyBands(band1, band2)
+
+  }
+
+  private def multiplyBands(band1: Array[Double], band2: Array[Double]):Array[Double] = {
+
+    val result = new Array[Double](band1.length)
+    for(i<-0 until band1.length) {
+      result(i) = band1(i) * band2(i)
+    }
+    result
+
+  }
+
+  override def dataType: DataType = ArrayType(DoubleType)
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+// Divide two bands
+case class rs_DivideBands(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 2)
+    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    assert(band1.length == band2.length)
+
+    divideBands(band1, band2)
+
+  }
+
+  private def divideBands(band1: Array[Double], band2: Array[Double]):Array[Double] = {
+
+    val result = new Array[Double](band1.length)
+    for(i<-0 until band1.length) {
+      result(i) = band1(i) / band2(i)
+    }
+    result
+
+  }
+
+  override def dataType: DataType = ArrayType(DoubleType)
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+// Modulo of a band
+case class rs_Modulo(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 2)
+    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    val dividend = inputExpressions(1).eval(inputRow).asInstanceOf[Double]
+
+
+    modulo(band1, dividend)
+
+  }
+
+  private def modulo(band: Array[Double], dividend:Double):Array[Double] = {
+
+    val result = new Array[Double](band.length)
+    for(i<-0 until band.length) {
+      result(i) = band(i) % dividend
+    }
+    result
+
+  }
+
+  override def dataType: DataType = ArrayType(DoubleType)
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+// Square root of values in a band
+case class rs_SquareRoot(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 2)
+    val band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    squareRoot(band)
+
+  }
+
+  private def squareRoot(band: Array[Double]):Array[Double] = {
+
+    val result = new Array[Double](band.length)
+    for(i<-0 until band.length) {
+      result(i) = Math.sqrt(band(i))
+    }
+    result
+
+  }
+
+  override def dataType: DataType = ArrayType(DoubleType)
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+// Bitwise AND between two bands
+case class rs_BitwiseAnd(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 2)
+    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    assert(band1.length == band2.length)
+
+    bitwiseAnd(band1, band2)
+
+  }
+
+  private def bitwiseAnd(band1: Array[Double], band2: Array[Double]):Array[Double] = {
+
+    val result = new Array[Double](band1.length)
+    for(i<-0 until band1.length) {
+      result(i) = band1(i).toInt & band2(i).toInt
+    }
+    result
+
+  }
+
+  override def dataType: DataType = ArrayType(DoubleType)
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+// Bitwise OR between two bands
+case class rs_BitwiseOr(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 2)
+    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    assert(band1.length == band2.length)
+
+    bitwiseOr(band1, band2)
+
+  }
+
+  private def bitwiseOr(band1: Array[Double], band2: Array[Double]):Array[Double] = {
+
+    val result = new Array[Double](band1.length)
+    for(i<-0 until band1.length) {
+      result(i) = band1(i).toInt | band2(i).toInt
+    }
+    result
+
+  }
+
+  override def dataType: DataType = ArrayType(DoubleType)
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+// Negate operator on a band
+case class rs_Negate(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 2)
+    val band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+
+    negate(band)
+
+  }
+
+  private def negate(band: Array[Double]):Array[Double] = {
+
+    val result = new Array[Double](band.length)
+    for(i<-0 until band.length) {
+      result(i) = ~band(i).toInt
+    }
+    result
+
+  }
+
+  override def dataType: DataType = ArrayType(DoubleType)
+
+  override def children: Seq[Expression] = inputExpressions
+}
