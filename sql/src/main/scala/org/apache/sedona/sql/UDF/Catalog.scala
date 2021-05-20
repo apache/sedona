@@ -89,7 +89,21 @@ object Catalog {
     rs_Mean,
     rs_Mode,
     rs_EucledianDistance,
-    rs_FetchRegion
+    rs_FetchRegion,
+    rs_GreaterThan,
+    rs_GreaterThanEqual,
+    rs_LessThan,
+    rs_LessThanEqual,
+    rs_AddBands,
+    rs_SubtractBands,
+    rs_DivideBands,
+    rs_Multiply,
+    rs_MultiplyBands,
+    rs_BitwiseAnd,
+    rs_BitwiseOr,
+    rs_Negate,
+    rs_Count,
+    rs_Modulo
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(

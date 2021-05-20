@@ -20,7 +20,7 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeArrayData}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.types.{ArrayType, DataType, DoubleType, IntegerType}
@@ -417,8 +417,8 @@ case class rs_AddBands(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
-    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
-    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
     assert(band1.length == band2.length)
 
     addBands(band1, band2)
