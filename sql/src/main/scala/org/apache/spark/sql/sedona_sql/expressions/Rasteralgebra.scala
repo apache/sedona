@@ -23,7 +23,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.GenericArrayData
-import org.apache.spark.sql.types.{ArrayType, DataType, DoubleType}
+import org.apache.spark.sql.types.{ArrayType, DataType, DoubleType, IntegerType}
 import org.apache.spark.unsafe.types.UTF8String
 import org.geotools.coverage.grid.io.GridFormatFinder
 import org.geotools.coverage.grid.{GridCoordinates2D, GridCoverage2D}
@@ -120,7 +120,6 @@ case class rs_Mode(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
-
 // Calculate a eucledian distance between two pixels
 case class rs_EucledianDistance(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
@@ -175,7 +174,7 @@ case class rs_FetchRegion(inputExpressions: Seq[Expression])
 
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
-    assert(inputExpressions.length > 1 && inputExpressions.length <=5)
+    assert(inputExpressions.length == 5)
     val band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
     val lowX = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
     val lowY = inputExpressions(2).eval(inputRow).asInstanceOf[Int]
@@ -211,10 +210,226 @@ case class rs_FetchRegion(inputExpressions: Seq[Expression])
 
   }
 
-
-
-
   override def dataType: DataType = DoubleType
 
   override def children: Seq[Expression] = inputExpressions
 }
+
+case class rs_GreaterThan(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 2)
+    val band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    val target = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
+    findGreaterThan(band, target)
+
+  }
+
+ private def findGreaterThan(band: Array[Double], target: Int):Array[Double] = {
+
+   val result = new Array[Double](band.length)
+   for(i<-0 until band.length) {
+     if(band(i)>target) {
+       result(i) = 1
+     }
+     else {
+       result(i) = 0
+     }
+   }
+   result
+ }
+
+  override def dataType: DataType = ArrayType(DoubleType)
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class rs_GreaterThanEqual(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 2)
+    val band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    val target = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
+    findGreaterThanEqual(band, target)
+
+  }
+
+  private def findGreaterThanEqual(band: Array[Double], target: Int):Array[Double] = {
+
+    val result = new Array[Double](band.length)
+    for(i<-0 until band.length) {
+      if(band(i)>=target) {
+        result(i) = 1
+      }
+      else {
+        result(i) = 0
+      }
+    }
+    result
+  }
+
+  override def dataType: DataType = ArrayType(DoubleType)
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class rs_LessThan(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 2)
+    val band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    val target = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
+    findLessThan(band, target)
+
+  }
+
+  private def findLessThan(band: Array[Double], target: Int):Array[Double] = {
+
+    val result = new Array[Double](band.length)
+    for(i<-0 until band.length) {
+      if(band(i)<target) {
+        result(i) = 1
+      }
+      else {
+        result(i) = 0
+      }
+    }
+    result
+  }
+
+  override def dataType: DataType = ArrayType(DoubleType)
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class rs_LessThanEqual(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 2)
+    val band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    val target = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
+    findLessThanEqual(band, target)
+
+  }
+
+  private def findLessThanEqual(band: Array[Double], target: Int):Array[Double] = {
+
+    val result = new Array[Double](band.length)
+    for(i<-0 until band.length) {
+      if(band(i)<=target) {
+        result(i) = 1
+      }
+      else {
+        result(i) = 0
+      }
+    }
+    result
+  }
+
+  override def dataType: DataType = ArrayType(DoubleType)
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class rs_Count(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 2)
+    val band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    val target = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
+    findCount(band, target)
+
+  }
+
+  private def findCount(band: Array[Double], target: Int):Int = {
+
+    var result = 0
+    for(i<-0 until band.length) {
+      if(band(i)==target) {
+        result+=1
+      }
+
+    }
+    result
+  }
+
+  override def dataType: DataType = IntegerType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class rs_Multiply(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 2)
+    val band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    val target = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
+    multiply(band, target)
+
+  }
+
+  private def multiply(band: Array[Double], target: Int):Array[Double] = {
+
+    var result = new Array[Double](band.length)
+    for(i<-0 until band.length) {
+
+      result(i) = band(i)*target
+
+      }
+    result
+
+    }
+
+  override def dataType: DataType = ArrayType(DoubleType)
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class rs_AddBands(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 2)
+    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    assert(band1.length == band2.length)
+
+    addBands(band1, band2)
+
+  }
+
+  private def addBands(band1: Array[Double], band2: Array[Double]):Array[Double] = {
+
+    val result = new Array[Double](band1.length)
+    for(i<-0 until band1.length) {
+      result(i) = band1(i) + band2(i)
+    }
+    result
+
+  }
+
+  override def dataType: DataType = ArrayType(DoubleType)
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
