@@ -22,7 +22,7 @@ package org.apache.spark.sql.sedona_sql.expressions.subdivide
 import org.apache.spark.sql.sedona_sql.expressions.simplify.GeometrySimplifier
 import org.geotools.geometry.jts.JTS
 import org.locationtech.jts.geom.{Envelope, Geometry, GeometryCollection, GeometryFactory, Point}
-import implicits._
+import org.apache.spark.sql.sedona_sql.expressions.implicits.GeometryEnhancer
 
 object GeometrySubDivider {
 
