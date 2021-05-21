@@ -70,7 +70,7 @@ DistanceJoin pointshape1#12: geometry, pointshape2#33: geometry, 2.0, true
 ```
 
 !!!warning
-	Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. To change the geometry's unit, please transform the coordinate reference system. See [ST_Transform](GeoSparkSQL-Function.md#st_transform).
+	Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. To change the geometry's unit, please transform the coordinate reference system. See [ST_Transform](Function.md#st_transform).
 
 ## Broadcast join
 Introduction: Perform a range join or distance join but broadcast one of the sides of the join. This maintains the partitioning of the non-broadcast side and doesn't require a shuffle.

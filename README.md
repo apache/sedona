@@ -1,4 +1,4 @@
-<img src="./sedona_logo.png" width="400">
+<img src="https://www.apache.org/logos/res/sedona/sedona.png" width="400">
 
 [![Scala and Java build](https://github.com/apache/incubator-sedona/workflows/Scala%20and%20Java%20build/badge.svg)](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Scala+and+Java+build%22) [![Python build](https://github.com/apache/incubator-sedona/workflows/Python%20build/badge.svg)](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Python+build%22) ![Example project build](https://github.com/apache/incubator-sedona/workflows/Example%20project%20build/badge.svg)
 
@@ -7,7 +7,11 @@ Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/g
 
 Apache Sedona™(incubating) is a cluster computing system for processing large-scale spatial data. Sedona extends Apache Spark / SparkSQL with a set of out-of-the-box Spatial Resilient Distributed Datasets (SRDDs)/ SpatialSQL that efficiently load, process, and analyze large-scale spatial data across machines.
 
-### Sedona contains several modules:
+## System architecture
+
+<img src="docs/image/architecture.jpeg" width="600">
+
+### Modules in the source code
 
 | Name  |  API |  Introduction|
 |---|---|---|
@@ -24,6 +28,8 @@ Please refer to [Sedona website](http://sedona.apache.org/download/compile/)
 
 ## Contact
 
+Feedback to improve Apache Sedona: [Google Form](https://docs.google.com/forms/d/e/1FAIpQLSeYHlc4cX5Pw0bIx2dQbhHDeWF2G2Wf7BgN_n29IzXsSzwptA/viewform)
+
 Twitter: [Sedona@Twitter](https://twitter.com/ApacheSedona)
 
 Gitter chat: [![Gitter](https://badges.gitter.im/apache/sedona.svg)](https://gitter.im/apache/sedona?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
@@ -38,4 +44,4 @@ Gitter chat: [![Gitter](https://badges.gitter.im/apache/sedona.svg)](https://git
 
 ## Powered by
 
-<img src="./incubator_logo.png" width="400">
+<img src="http://apache.org/logos/res/incubator/incubator.png" width="400">

@@ -5,8 +5,8 @@ nav:
     - Setup:
       - Features: download/features.md
       - Quick start: download/overview.md
-      - Release notes: download/GeoSpark-All-Modules-Release-notes.md      
-      - Maven Central coordinate: download/GeoSpark-All-Modules-Maven-Central-Coordinates.md
+      - Release notes: download/release-notes.md      
+      - Maven Central coordinate: download/maven-coordinates.md
       - Set up Spark cluser: download/cluster.md
       - Self-contained project: download/project.md
       - Interactive scala shell: download/scalashell.md
@@ -16,34 +16,35 @@ nav:
     - Programming Guides:
       - Spatial RDD app:
         - Scala/Java: tutorial/rdd.md
-        - Python: tutorial/geospark-core-python.md
+        - Python: tutorial/core-python.md
       - Spatial SQL app:  
         - Scala/Java: tutorial/sql.md
-        - Python: tutorial/geospark-sql-python.md
+        - Pure SQL: tutorial/sql-pure-sql.md
+        - Python: tutorial/sql-python.md
       - Map visualization SQL app:
         - Scala/Java: tutorial/viz.md
         - Use Apache Zeppelin: tutorial/zeppelin.md
       - Examples:
-        - Scala/Java: tutorial/GeoSpark-Runnable-DEMO.md
+        - Scala/Java: tutorial/demo.md
         - Python: tutorial/jupyter-notebook.md
       - Performance tuning:
         - Benchmark: tutorial/benchmark.md            
-        - Tune RDD application: tutorial/Advanced-Tutorial-Tune-your-GeoSpark-Application.md
+        - Tune RDD application: tutorial/Advanced-Tutorial-Tune-your-Application.md
     - API Docs:
       - RDD (core):
-        - Scala/Java doc: api/GeoSpark-Scala-and-Java-API.md
-        - Python doc: api/GeoSpark-Python-API.md
+        - Scala/Java doc: api/java-api.md
+        - Python doc: api/python-api.md
       - SQL:
-        - Quick start: api/sql/GeoSparkSQL-Overview.md
-        - Constructor: api/sql/GeoSparkSQL-Constructor.md
-        - Function: api/sql/GeoSparkSQL-Function.md
-        - Predicate: api/sql/GeoSparkSQL-Predicate.md
-        - Aggregate function: api/sql/GeoSparkSQL-AggregateFunction.md
-        - Join query (optimizer): api/sql/GeoSparkSQL-Optimizer.md
-        - Parameter: api/sql/GeoSparkSQL-Parameter.md
+        - Quick start: api/sql/Overview.md
+        - Constructor: api/sql/Constructor.md
+        - Function: api/sql/Function.md
+        - Predicate: api/sql/Predicate.md
+        - Aggregate function: api/sql/AggregateFunction.md
+        - Join query (optimizer): api/sql/Optimizer.md
+        - Parameter: api/sql/Parameter.md
       - Viz:
         - DataFrame/SQL: api/viz/sql.md
-        - RDD: api/viz/Babylon-Scala-and-Java-API.md
+        - RDD: api/viz/java-api.md
     - Community:
       - Community: community/contact.md 
       - Contributing rule: community/rule.md
@@ -101,7 +102,7 @@ theme:
   palette:
     primary: 'deep orange'
     accent: 'green'
-  favicon: image/sedona_logo.png
+  favicon: https://www.apache.org/logos/res/sedona/sedona.png
   icon:
     logo: fontawesome/solid/globe-americas
     repo: fontawesome/brands/github
@@ -116,7 +117,7 @@ extra:
       link: 'https://github.com/apache/incubator-sedona'
     - icon: fontawesome/brands/twitter
       link: 'https://twitter.com/ApacheSedona'
-copyright: Apache Sedona, Apache Incubator, Apache, the Apache feather logo, and the Apache Incubator project logo are trademarks or registered trademarks of The Apache Software Foundation.
+copyright: Apache Sedona, Apache Incubator, Apache, the Apache feather logo, and the Apache Incubator project logo are trademarks or registered trademarks of The Apache Software Foundation. Copyright © 2021 The Apache Software Foundation
 markdown_extensions:
   - admonition
   - attr_list

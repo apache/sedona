@@ -5,16 +5,16 @@ SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of 
 var myDataFrame = sparkSession.sql("YOUR_SQL")
 ```
 
-Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/GeoSparkSQL-Overview.md)
+Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.md)
 
 ## Set up dependencies
 
-1. Read [Sedona Maven Central coordinates](../download/GeoSpark-All-Modules-Maven-Central-Coordinates.md)
+1. Read [Sedona Maven Central coordinates](../download/maven-coordinates.md)
 2. Select ==the minimum dependencies==: Add [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core and Sedona-SQL
 3. Add the dependencies in build.sbt or pom.xml.
 
 !!!note
-	To enjoy the full functions of Sedona, we suggest you include ==the full dependencies==: [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core, Sedona-SQL, Sedona-Viz. Please see [SQL example project](/tutorial/GeoSpark-Runnable-DEMO/)
+	To enjoy the full functions of Sedona, we suggest you include ==the full dependencies==: [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core, Sedona-SQL, Sedona-Viz. Please see [SQL example project](/tutorial/demo/)
 
 
 ## Initiate SparkSession
@@ -130,7 +130,7 @@ root
 ```
 
 !!!note
-	SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL constructor API](../api/sql/GeoSparkSQL-Constructor.md).
+	SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL constructor API](../api/sql/Constructor.md).
 	
 ## Load Shapefile and GeoJSON
 
@@ -195,7 +195,7 @@ spatialDf.show()
 ```
 
 !!!note
-	Read [SedonaSQL constructor API](../api/sql/GeoSparkSQL-Constructor.md) to learn how to create a Geometry type query window
+	Read [SedonaSQL constructor API](../api/sql/Constructor.md) to learn how to create a Geometry type query window
 ### KNN query
 
 Use ==ST_Distance== to calculate the distance and rank the distance.
@@ -216,11 +216,11 @@ spatialDf.show()
 
 ### Join query
 
-The details of a join query is available here [Join query](../api/sql/GeoSparkSQL-Optimizer.md).
+The details of a join query is available here [Join query](../api/sql/Optimizer.md).
 
 ### Other queries
 
-There are lots of other functions can be combined with these queries. Please read [SedonaSQL functions](../api/sql/GeoSparkSQL-Function.md) and [SedonaSQL aggregate functions](../api/sql/GeoSparkSQL-AggregateFunction.md).
+There are lots of other functions can be combined with these queries. Please read [SedonaSQL functions](../api/sql/Function.md) and [SedonaSQL aggregate functions](../api/sql/AggregateFunction.md).
 
 ## Save to permanent storage
 
