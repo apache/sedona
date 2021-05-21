@@ -845,6 +845,31 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       .select("id").as[Long].collect() should contain theSameElementsAs nonNullGeometries.map(_._1)
   }
 
+  it("should allow to use lateral view with st sub divide explode"){
+    Given("geometry dataframe")
+    val geometryDf = Seq(
+      (1, "LINESTRING (0 0, 1 1, 2 2)"),
+      (2, "POINT (0 0)"),
+      (3, "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"),
+      (4, "POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10), (20 30, 35 35, 30 20, 20 30))")
+    ).map{
+      case (id, geomWkt) => (id, wktReader.read(geomWkt))
+    }.toDF("id", "geometry")
+    geometryDf.createOrReplaceTempView("geometries")
+
+    When("using lateral view on data")
+    val lateralViewResult = sparkSession.sql(
+      """
+        |select id, geom from geometries
+        |LATERAL VIEW ST_SubdivideExplode(geometry, 5) AS geom
+        |""".stripMargin)
+
+
+    Then("result should include exploded geometries")
+    lateralViewResult.count() shouldBe 17
+
+  }
+
   private val expectedStartingPoints = List(
     "POINT (-112.506968 45.98186)",
     "POINT (-112.519856 45.983586)",
