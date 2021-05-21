@@ -192,7 +192,7 @@ Introduction: Return a polygon geometry from a given raster image
 
 Format: `ST_GeomFromGeotiff (imageURL:String)`
 
-Since: `v1.0.0`
+Since: `v1.1.0`
 
 Spark SQL example:
 ```SQL
@@ -207,11 +207,11 @@ image.createOrReplaceTempView("geotiffDF")
 |hdfs://127.0.0.1:42951/image.tif|
 +--------------------------------+
 
-val geomDF = spark.sql("select ST_GeomFromGeotiff(_c0) as Geometry from geotiffDF")
+val geomDF = spark.sql("select ST_GeomFromGeotiff(_c0) as geometry from geotiffDF")
 geomDF.show()
 
 +--------------------+
-|         countyshape|
+|         geometry |
 +--------------------+
 |POLYGON ((-64.807...|
 |POLYGON ((-64.807...|
@@ -224,7 +224,7 @@ Introduction: Return a polygon geometry and values for all the bands in form of 
 
 Format: `ST_GeomWithBandsFromGeoTiff (imageURL:String, numBands:Int)`
 
-Since: `v1.0.0`
+Since: `v1.1.0`
 
 Spark SQL example:
 ```SQL
@@ -250,13 +250,13 @@ geomwithallBandsDF.createOrReplaceTempView("initDF")
 +--------------------+--------------------+
 ```
 
-## ST_GetBand
+## RS_GetBand
 
 Introduction: Return a particular band from result of ST_GeomWithBandsFromGeoTiff
 
-Format: `ST_GetBand (allBandValues: Array[Array[Double]], targetBand:Int, totalBands:Int)`
+Format: `RS_GetBand (allBandValues: Array[Double], targetBand:Int, totalBands:Int)`
 
-Since: `v1.0.0`
+Since: `v1.1.0`
 
 Spark SQL example:
 ```SQL
@@ -272,7 +272,7 @@ initialDF.createOrReplaceTempView("resultOfST_GeomWithBandsFromGeoTiff")
 |[200.0, 500.0, 800.0, 300.0, 200.0, 100.0]|
 +------------------------------------------+
 
-val finalDF = spark.sql("select ST_GetBand(geotiffBands, 2, 3) as band2 from resultOfST_GeomWithBandsFromGeoTiff")
+val finalDF = spark.sql("select RS_GetBand(geotiffBands, 2, 3) as band2 from resultOfST_GeomWithBandsFromGeoTiff")
 finalDF.show()
 
 +--------------+

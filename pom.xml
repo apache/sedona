@@ -112,18 +112,6 @@
             <version>0.1.0</version>
             <scope>${dependency.scope}</scope>
         </dependency>
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-geotiff</artifactId>
-            <version>${geotools.version}</version>
-            <scope>${dependency.scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-coverage</artifactId>
-            <version>${geotools.version}</version>
-            <scope>${dependency.scope}</scope>
-        </dependency>
         <!--The following GeoTools dependencies use GNU Lesser General Public License and thus are excluded from the binary distribution-->
         <!-- Users have to include them by themselves manually -->
         <!-- See https://www.apache.org/legal/resolved.html#category-x -->
@@ -170,6 +158,19 @@
                     <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <!--for GeoTiff Reader-->
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-geotiff</artifactId>
+            <version>${geotools.version}</version>
+            <scope>${dependency.scope}</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-coverage</artifactId>
+            <version>${geotools.version}</version>
+            <scope>${dependency.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
