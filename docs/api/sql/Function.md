@@ -673,3 +673,57 @@ Introduction: It works the same as ST_SubDivide but returns new rows with geomet
 Format: `ST_SubDivideExplode(geom: geometry, maxVertices: int)`
 
 Since: `v1.0.2`
+
+Example: 
+
+Query:
+```SQL
+SELECT ST_SubDivideExplode(ST_GeomFromText("LINESTRING(0 0, 85 85, 100 100, 120 120, 21 21, 10 10, 5 5)"), 5)
+```
+
+Result:
+
+```
++-----------------------------+
+|geom                         |
++-----------------------------+
+|LINESTRING(0 0, 5 5)         |
+|LINESTRING(5 5, 10 10)       |
+|LINESTRING(10 10, 21 21)     |
+|LINESTRING(21 21, 60 60)     |
+|LINESTRING(60 60, 85 85)     |
+|LINESTRING(85 85, 100 100)   |
+|LINESTRING(100 100, 120 120) |
++-----------------------------+
+```
+
+Using Lateral View
+
+Table:
+```
+  +-------------------------------------------------------------+
+  |geometry                                                     |
+  +-------------------------------------------------------------+
+  |LINESTRING(0 0, 85 85, 100 100, 120 120, 21 21, 10 10, 5 5)  |  
+  +-------------------------------------------------------------+
+```
+
+Query
+```SQL 
+select geom from geometries LATERAL VIEW ST_SubdivideExplode(geometry, 5) AS geom
+```
+
+Result: 
+```
++-----------------------------+
+|geom                         |
++-----------------------------+
+|LINESTRING(0 0, 5 5)         |
+|LINESTRING(5 5, 10 10)       |
+|LINESTRING(10 10, 21 21)     |
+|LINESTRING(21 21, 60 60)     |
+|LINESTRING(60 60, 85 85)     |
+|LINESTRING(85 85, 100 100)   |
+|LINESTRING(100 100, 120 120) |
++-----------------------------+
+```
