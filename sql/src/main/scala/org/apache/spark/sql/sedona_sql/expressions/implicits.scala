@@ -72,6 +72,7 @@ object implicits {
 
     def getPoints: Array[Point] =
       geom.getCoordinates.map(coordinate => geometryFactory.createPoint(coordinate))
-  }
 
+    def isNonEmpty: Boolean = geom != null && !geom.isEmpty
+  }
 }
