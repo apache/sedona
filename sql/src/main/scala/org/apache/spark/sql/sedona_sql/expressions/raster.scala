@@ -21,8 +21,8 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeArrayData}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
+import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeArrayData}
 import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.implicits.GeometryEnhancer
@@ -39,7 +39,6 @@ import org.opengis.coverage.grid.{GridCoordinates, GridEnvelope}
 import org.opengis.parameter.{GeneralParameterValue, ParameterValue}
 
 import java.io.IOException
-import java.util
 
 class GeometryOperations {
 
@@ -83,7 +82,7 @@ class GeometryOperations {
 
 
 // Fetches polygonal coordinates from a raster image
-case class ST_GeomFromGeotiff(inputExpressions: Seq[Expression])
+case class ST_GeomFromGeoTiff(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
 
@@ -136,38 +135,26 @@ case class ST_GeomWithBandsFromGeoTiff(inputExpressions: Seq[Expression])
     val maxDimensions: GridCoordinates = dimensions.getHigh
     val w: Int = maxDimensions.getCoordinateValue(0) + 1
     val h: Int = maxDimensions.getCoordinateValue(1) + 1
+    val numCoordinates= w * h
     val numBands: Int = bands
 
-    val bandValues: util.List[util.List[Double]] = new util.ArrayList[util.List[Double]](numBands)
+    val bandValues = new Array[Double](w * h * numBands)
 
-    for (i <- 0 until numBands) {
-      bandValues.add(new util.ArrayList[Double])
-    }
-
-    for (i <- 0 until w) {
-      for (j <- 0 until h) {
+    // Put pixels band by band in the array. The first block will be band1, second block will be band2, ...
+    // For each band, store pixels row by row (not column by column)
+    for (i <- 0 until h) {
+      for (j <- 0 until w) {
         val vals: Array[Double] = new Array[Double](numBands)
-        coverage.evaluate(new GridCoordinates2D(i, j), vals)
-        var band: Int = 0
-        for (pixel <- vals) {
-          bandValues.get({
-            band += 1; band - 1
-          }).add(pixel)
+        coverage.evaluate(new GridCoordinates2D(j, i), vals)
+        // bands of a pixel will be put in [b0...b1...b2...]
+        // Each "..." represent w * h pixels
+        for (bandId <- 0 until numBands) {
+          val offset = i * w + j + numCoordinates * bandId
+          bandValues(offset) = vals(bandId)
         }
       }
     }
-
-    val totalPixels = numBands * bandValues.get(0).size()
-    val result: Array[Double]  = new Array[Double](totalPixels)
-    var k = 0
-    for (i<-0 until numBands) {
-      for(j<-0 until bandValues.get(i).size() ) {
-
-        result(k) = (bandValues.get(i).get(j))
-        k +=1
-      }
-    }
-    result
+    bandValues
   }
 
   // Dynamic results based on number of columns and type of structure
@@ -182,7 +169,7 @@ case class ST_GeomWithBandsFromGeoTiff(inputExpressions: Seq[Expression])
 
   // Dynamic Schema generation using Number of Bands
   private def getSchema():DataType = {
-    val mySchema = StructType(Array(StructField("Polygon", GeometryUDT, false),StructField("bands", ArrayType(DoubleType))))
+    val mySchema = StructType(Array(StructField("Geometry", GeometryUDT, false),StructField("Bands", ArrayType(DoubleType))))
     mySchema
   }
 
@@ -192,7 +179,7 @@ case class ST_GeomWithBandsFromGeoTiff(inputExpressions: Seq[Expression])
 }
 
 // get a particular band from a results of ST_GeomWithBandsFromGeoTiff
-case class ST_GetBand(inputExpressions: Seq[Expression])
+case class RS_GetBand(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
 
@@ -202,7 +189,6 @@ case class ST_GetBand(inputExpressions: Seq[Expression])
     var bandInfo:Array[Double] = null
     if(inputExpressions(0).eval(inputRow).getClass().toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData") {
       bandInfo = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
-
     }
     else {
       bandInfo = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()

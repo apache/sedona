@@ -31,8 +31,8 @@ import java.util
 import scala.collection.mutable
 
 class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
-  var resourcefolder: String = System.getProperty("user.dir") + "/../core/src/test/resources/"
-  var rasterdatalocation: String = resourcefolder + "raster/image.tif"
+  val rasterDataName = "test.tif"
+  var rasterdatalocation: String = resourceFolder + "raster/" + rasterDataName
   var conf: SparkConf = null
   var sc: JavaSparkContext = null
   var hdfsURI: String = null
@@ -58,57 +58,51 @@ class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
     fs = FileSystem.get(hdfsConf)
     hdfsURI = "hdfs://127.0.0.1:" + hdfsCluster.getNameNodePort + "/"
     localcsvPath = baseDir.getAbsolutePath + "/train.csv"
-    print(localcsvPath)
     hdfscsvpath = hdfsURI + "train.csv"
   }
 
   describe("Geotiff loader test") {
 
     it("should fetch polygonal coordinates from geotiff image") {
-      rasterfileHDFSpath = hdfsURI + "image.tif"
+      rasterfileHDFSpath = hdfsURI + rasterDataName
       fs.copyFromLocalFile(new Path(rasterdatalocation), new Path(rasterfileHDFSpath))
       createLocalFile()
-      val df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(localcsvPath)
-      df.show(false)
-      df.createOrReplaceTempView("inputtable")
-      val spatialDf = sparkSession.sql("select ST_GeomFromGeotiff(inputtable._c0) as countyshape from inputtable")
-      spatialDf.show()
-      assert(spatialDf.count == 2 && spatialDf.first().getAs[Geometry](0).getGeometryType === "Polygon")
+      var df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(localcsvPath)
+      df = df.selectExpr(" ST_GeomFromGeotiff(_c0) as geom")
+      assert(df.count == 2 && df.first().getAs[Geometry](0).getGeometryType === "Polygon")
     }
 
     // Testing ST_DataframeFromRaster constructor which converts spark dataframe into geotiff dataframe in Apache Sedona
     it("should fetch polygonal coordinates and band values as a single array from geotiff image") {
-      rasterfileHDFSpath = hdfsURI + "image.tif"
+      rasterfileHDFSpath = hdfsURI + rasterDataName
       fs.copyFromLocalFile(new Path(rasterdatalocation), new Path(rasterfileHDFSpath))
       createLocalFile()
-      val df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(localcsvPath)
-      df.createOrReplaceTempView("inputtable")
-      val spatialDf = sparkSession.sql("select ST_GeomWithBandsFromGeoTiff(inputtable._c0, 4) as rasterstruct from inputtable")
-      spatialDf.show(false)
-      spatialDf.printSchema()
-      spatialDf.createOrReplaceTempView("sedonaframe")
-      val sedonaDF = sparkSession.sql("select rasterstruct.Polygon as geom, rasterstruct.bands as rasterBand from sedonaframe")
-      sedonaDF.show()
-      sedonaDF.createOrReplaceTempView("sedonaDF")
-      assert(sedonaDF.count()==2 && sedonaDF.first().getAs[mutable.WrappedArray[Double]](1).toArray.length==4096)
-
+      var df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(localcsvPath)
+      df = df.selectExpr("ST_GeomWithBandsFromGeoTiff(_c0, 4) as rasterstruct")
+      df.printSchema()
+      df.selectExpr()
+      df = df.selectExpr("rasterstruct.geometry as geom", "rasterstruct.bands as rasterBand")
+      assert(df.count()==2 && df.first().getAs[mutable.WrappedArray[Double]](1).toArray.length == (512 * 517 * 4))
+      df = df.selectExpr("RS_GetBand(rasterBand, 1, 4)") // Get the black band from RGBA
+      val blackBand = df.first().getAs[mutable.WrappedArray[Double]](0)
+      val line1 = blackBand.slice(0, 512)
+      val line2 = blackBand.slice(512, 1024)
+      assert(line1(0) == 0.0) // The first value at line 1 is black
+      assert(line2(159) == 0.0 && line2(160) == 123.0) // In the second line, value at 159 is black and at 160 is not black
     }
 
     it("should fetch a particular band from result of ST_GeomWithBandsFromGeoTiff") {
 
-      val data = Seq((Seq(200.0,400.0,600.0,800.0,900.0,100.0)), (Seq(200.0,500.0,800.0,300.0,200.0,100.0))).toDF("TotalBand")
-      val resultDF = Seq((Seq(600.0,800.0)), (Seq(800.0, 300.0))).toDF("band2")
-      data.createOrReplaceTempView("allBandsDF")
-      val targetbandDF = sparkSession.sql("Select ST_GetBand(TotalBand,2,3) as band2 from allBandsDF")
-      data.show(false)
-      targetbandDF.show(false)
-      assert(resultDF.first().getAs[mutable.WrappedArray[Double]](0) == targetbandDF.first().getAs[mutable.WrappedArray[Double]](0))
+      var inputDf = Seq((Seq(200.0,400.0,600.0,800.0,900.0,100.0)), (Seq(200.0,500.0,800.0,300.0,200.0,100.0))).toDF("GeoTiff")
+      val resultDf = Seq((Seq(600.0,800.0)), (Seq(800.0, 300.0))).toDF("GeoTiff")
+      inputDf = inputDf.selectExpr("RS_GetBand(GeoTiff,2,3) as GeoTiff")
+      assert(resultDf.first().getAs[mutable.WrappedArray[Double]](0) == inputDf.first().getAs[mutable.WrappedArray[Double]](0))
 
     }
 
     def createLocalFile():Unit = {
 
-      val rows = util.Arrays.asList(util.Arrays.asList(hdfsURI + "image.tif"), util.Arrays.asList(hdfsURI + "image.tif"))
+      val rows = util.Arrays.asList(util.Arrays.asList(hdfsURI + rasterDataName), util.Arrays.asList(hdfsURI + rasterDataName))
       val csvWriter = new FileWriter(localcsvPath)
       for (i <- 0 until rows.size()) {
         csvWriter.append(String.join(",", rows.get(i)))

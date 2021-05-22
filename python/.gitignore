@@ -1,2 +1,7 @@
 /.idea/
 /venv/
+/.ipynb_checkpoints/
+/.pytest_cache/
+/apache_sedona.egg-info/
+/build/
+/dist/

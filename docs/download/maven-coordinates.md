@@ -8,12 +8,12 @@ Sedona has four modules: `sedona-core, sedona-sql, sedona-viz, sedona-python-ada
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-python-adapter-3.0_2.12</artifactId>
-  <version>1.0.0-incubating</version>
+  <version>1.0.1-incubating</version>
 </dependency>
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-viz-3.0_2.12</artifactId>
-  <version>1.0.0-incubating</version>
+  <version>1.0.1-incubating</version>
 </dependency>
 ```
 
@@ -23,12 +23,12 @@ Sedona has four modules: `sedona-core, sedona-sql, sedona-viz, sedona-python-ada
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-python-adapter-2.4_2.11</artifactId>
-  <version>1.0.0-incubating</version>
+  <version>1.0.1-incubating</version>
 </dependency>
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-viz-2.4_2.11</artifactId>
-  <version>1.0.0-incubating</version>
+  <version>1.0.1-incubating</version>
 </dependency>
 ```
 
@@ -38,12 +38,12 @@ Sedona has four modules: `sedona-core, sedona-sql, sedona-viz, sedona-python-ada
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-python-adapter-2.4_2.12</artifactId>
-  <version>1.0.0-incubating</version>
+  <version>1.0.1-incubating</version>
 </dependency>
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-viz-2.4_2.12</artifactId>
-  <version>1.0.0-incubating</version>
+  <version>1.0.1-incubating</version>
 </dependency>
 ```
 
@@ -88,17 +88,17 @@ Scala and Java API only
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-core-3.0_2.12</artifactId>
-  <version>1.0.0-incubating</version>
+  <version>1.0.1-incubating</version>
 </dependency>
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-sql-3.0_2.12</artifactId>
-  <version>1.0.0-incubating</version>
+  <version>1.0.1-incubating</version>
 </dependency>
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-viz-3.0_2.12</artifactId>
-  <version>1.0.0-incubating</version>
+  <version>1.0.1-incubating</version>
 </dependency>
 ```
 
@@ -109,17 +109,17 @@ Scala and Java API only
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-core-2.4_2.11</artifactId>
-  <version>1.0.0-incubating</version>
+  <version>1.0.1-incubating</version>
 </dependency>
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-sql-2.4_2.11</artifactId>
-  <version>1.0.0-incubating</version>
+  <version>1.0.1-incubating</version>
 </dependency>
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-viz-2.4_2.11</artifactId>
-  <version>1.0.0-incubating</version>
+  <version>1.0.1-incubating</version>
 </dependency>
 ```
 
@@ -130,17 +130,17 @@ Scala and Java API only
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-core-2.4_2.12</artifactId>
-  <version>1.0.0-incubating</version>
+  <version>1.0.1-incubating</version>
 </dependency>
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-sql-2.4_2.12</artifactId>
-  <version>1.0.0-incubating</version>
+  <version>1.0.1-incubating</version>
 </dependency>
 <dependency>
   <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-viz-2.4_2.12</artifactId>
-  <version>1.0.0-incubating</version>
+  <version>1.0.1-incubating</version>
 </dependency>
 ```
 
@@ -157,7 +157,7 @@ Under Eclipse Public License 2.0 ("EPL") or the Eclipse Distribution License 1.0
 </dependency>
 ```
 
-### jts2geojson 0.14.3+
+### jts2geojson 0.16.1+
 
 Under MIT License. Please make sure you exclude jts and jackson from this library.
 
@@ -166,7 +166,7 @@ Under MIT License. Please make sure you exclude jts and jackson from this librar
 <dependency>
     <groupId>org.wololo</groupId>
     <artifactId>jts2geojson</artifactId>
-    <version>0.14.3</version>
+    <version>0.16.1</version>
     <exclusions>
         <exclusion>
             <groupId>org.locationtech.jts</groupId>
@@ -209,7 +209,7 @@ Under Apache License 2.0.
 ```
 
 ## SNAPSHOT versions
-Sometimes Sedona has a SNAPSHOT version for the upcoming release. It follows the same naming conversion but has "SNAPSHOT" as suffix in the version. For example, `1.0.0-incubating-SNAPSHOT`
+Sometimes Sedona has a SNAPSHOT version for the upcoming release. It follows the same naming conversion but has "SNAPSHOT" as suffix in the version. For example, `1.1.0-incubating-SNAPSHOT`
 
 In order to download SNAPSHOTs, you need to add the following repositories in your POM.XML or build.sbt
 ### build.sbt

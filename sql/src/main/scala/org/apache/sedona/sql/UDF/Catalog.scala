@@ -82,9 +82,8 @@ object Catalog {
     ST_FlipCoordinates,
     ST_LineSubstring,
     ST_LineInterpolatePoint,
-    ST_GeomFromGeotiff,
+    ST_GeomFromGeoTiff,
     ST_GeomWithBandsFromGeoTiff,
-    ST_GetBand,
     rs_NormalizedDifference,
     rs_Mean,
     rs_Mode,
@@ -103,7 +102,8 @@ object Catalog {
     rs_BitwiseOr,
     rs_Negate,
     rs_Count,
-    rs_Modulo
+    rs_Modulo,
+    RS_GetBand
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(

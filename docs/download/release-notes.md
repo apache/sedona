@@ -1,3 +1,53 @@
+## Sedona 1.0.1
+
+This version is a maintenance release on Sedona 1.0.0 line. It includes bug fixes, some new features, one ==API change==
+
+### Global
+
+Dependency upgrade:
+
+* [SEDONA-16](https://issues.apache.org/jira/browse/SEDONA-16): Use a GeoTools Maven Central wrapper to fix failed Jupyter notebook examples
+* [SEDONA-29](https://issues.apache.org/jira/browse/SEDONA-29): upgrade to Spark 3.1.1
+* [SEDONA-33](https://issues.apache.org/jira/browse/SEDONA-33): jts2geojson version from 0.14.3 to 0.16.1
+
+### Core
+
+Bug fix:
+
+* [SEDONA-35](https://issues.apache.org/jira/browse/SEDONA-35): Address user-data mutability issue with Adapter.toDF()
+
+### SQL
+
+Bug fix:
+
+* [SEDONA-14](https://issues.apache.org/jira/browse/SEDONA-14): Saving dataframe to CSV or Parquet fails due to unknown type
+* [SEDONA-15](https://issues.apache.org/jira/browse/SEDONA-15): Add ST_MinimumBoundingRadius and ST_MinimumBoundingCircle functions
+* [SEDONA-19](https://issues.apache.org/jira/browse/SEDONA-19): Global indexing does not work with SQL joins
+* [SEDONA-20](https://issues.apache.org/jira/browse/SEDONA-20): Case object GeometryUDT and GeometryUDT instance not equal in Spark 3.0.2
+
+New function:
+
+* [SEDONA-21](https://issues.apache.org/jira/browse/SEDONA-21): allows Sedona to be used in pure SQL environment
+* [SEDONA-24](https://issues.apache.org/jira/browse/SEDONA-24): Add ST_LineSubString and ST_LineInterpolatePoint
+* [SEDONA-26](https://issues.apache.org/jira/browse/SEDONA-26): Add broadcast join support
+
+
+### Viz
+
+Improvement:
+
+* [SEDONA-32](https://issues.apache.org/jira/browse/SEDONA-32): Speed up ST_Render
+
+API change:
+
+* [SEDONA-29](https://issues.apache.org/jira/browse/SEDONA-29): Upgrade to Spark 3.1.1 and fix ST_Pixelize
+
+### Python
+
+Bug fix:
+
+* [SEDONA-19](https://issues.apache.org/jira/browse/SEDONA-19): Global indexing does not work with SQL joins
+
 ## Sedona 1.0.0
 
 This version is the first Sedona release since it joins the Apache Incubator. It includes new functions, bug fixes, and ==API changes==.
