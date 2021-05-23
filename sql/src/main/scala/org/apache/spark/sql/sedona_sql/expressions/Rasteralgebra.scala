@@ -94,7 +94,7 @@ case class RS_Mean(inputExpressions: Seq[Expression])
 
   private def calculateMean(band:Array[Double]):Double = {
 
-    band.toList.sum/band.length
+    (band.toList.sum*100).round/(band.length*100.toDouble)
   }
 
 
@@ -172,7 +172,6 @@ case class RS_Mode(inputExpressions: Seq[Expression])
 //    val factory = new GeometryFactory
 //    val point1 = factory.createPoint((new Coordinate(result_source.getOrdinate(0), result_source.getOrdinate(1))))
 //    val point2 = factory.createPoint((new Coordinate(result_target.getOrdinate(0), result_target.getOrdinate(1))))
-//
 //    point1.distance(point2)
 //
 //  }
@@ -842,11 +841,11 @@ case class RS_LogicalOver(inputExpressions: Seq[Expression])
     }
     assert(band1.length == band2.length)
 
-    new GenericArrayData(logicalOR(band1, band2))
+    new GenericArrayData(logicalOver(band1, band2))
 
   }
 
-  private def logicalOR(band1: Array[Double], band2: Array[Double]):Array[Double] = {
+  private def logicalOver(band1: Array[Double], band2: Array[Double]):Array[Double] = {
 
     val result = new Array[Double](band1.length)
     for(i<-0 until band1.length) {
@@ -861,6 +860,95 @@ case class RS_LogicalOver(inputExpressions: Seq[Expression])
     }
     result
 
+  }
+
+  override def dataType: DataType = ArrayType(DoubleType)
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class RS_LogicalAND(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 2)
+    var band1:Array[Double] = null
+    var band2:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData" &&
+      inputExpressions(1).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData"
+    ) {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
+    assert(band1.length == band2.length)
+
+    new GenericArrayData(logicalAND(band1, band2))
+
+  }
+
+  private def logicalAND(band1: Array[Double], band2: Array[Double]):Array[Double] = {
+
+    val result = new Array[Double](band1.length)
+    for(i<-0 until band1.length) {
+      if(band1(i) == 1.0 && band2(i) == 1.0) {
+        result(i) = 1.0
+      }
+      else {
+        result(i) = 0.0
+      }
+    }
+      result
+  }
+
+  override def dataType: DataType = ArrayType(DoubleType)
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+
+case class RS_LogicalOR(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 2)
+    var band1:Array[Double] = null
+    var band2:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData" &&
+      inputExpressions(1).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData"
+    ) {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
+    assert(band1.length == band2.length)
+
+    new GenericArrayData(logicalOR(band1, band2))
+
+  }
+
+  private def logicalOR(band1: Array[Double], band2: Array[Double]):Array[Double] = {
+
+    val result = new Array[Double](band1.length)
+    for(i<-0 until band1.length) {
+      if(band1(i) == 0.0 && band2(i) == 0.0) {
+        result(i) = 0.0
+      }
+      else {
+        result(i) = 1.0
+      }
+    }
+    result
   }
 
   override def dataType: DataType = ArrayType(DoubleType)

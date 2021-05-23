@@ -18,12 +18,15 @@
  */
 package org.apache.sedona.sql
 
+import org.scalatest.matchers.must.Matchers.contain
+import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
 import scala.collection.mutable
 
 
 class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen{
+
   import sparkSession.implicits._
 
   describe("should pass all the arithmetic operations on bands") {
@@ -70,16 +73,15 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
   describe("Should pass basic statistical tests") {
     it("Passed RS_Mode") {
-      var inputDf = Seq((Seq(200.0, 400.0, 600.0, 200.0)), (Seq(200.0, 400.0, 600.0, 700.0))).toDF("Band")
-      val expectedDF = Seq(Seq(200.0),Seq(200.0, 400.0, 600.0)).toDF("mode")
-      inputDf = inputDf.selectExpr("RS_Mode(Band) as mode")
-      assert(inputDf.first().getAs[mutable.WrappedArray[Double]](0) == expectedDF.first().getAs[mutable.WrappedArray[Double]](0))
+      val inputDf = Seq((Seq(200.0, 400.0, 600.0, 200.0)), (Seq(200.0, 400.0, 600.0, 700.0))).toDF("Band")
+      inputDf.selectExpr("RS_Mode(Band) as mode").as[Array[Double]].collect().toList should contain theSameElementsAs List(Array(200.0),Array(200.0, 400.0, 600.0, 700.0))
+
     }
 
     it("Passed RS_Mean") {
       var inputDf = Seq((Seq(200.0, 400.0, 600.0, 200.0)), (Seq(200.0, 400.0, 600.0, 700.0))).toDF("Band")
       val expectedDF = Seq((350.0),(475.0)).toDF("mean")
-      inputDf = inputDf.selectExpr("RS_Mean(Band) as mean")
+      print(inputDf.as[Double].collect().toList)
       assert(inputDf.first().getAs[Double](0) == expectedDF.first().getAs[Double](0))
     }
 
@@ -177,7 +179,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     it("Passed RS_LogicalOver") {
       var inputDf = Seq((Seq(0.0, 0.0, 30.0), Seq(40.0, 20.0, 50.0))).toDF("Band1", "Band2")
       val expectedDF = Seq((Seq(40.0, 20.0, 30.0))).toDF("LogicalOR")
-      inputDf = inputDf.selectExpr("RS_LogicalOR(Band1, Band2) as LogicalOR")
+      inputDf = inputDf.selectExpr("RS_LogicalOver(Band1, Band2) as LogicalOR")
       assert(inputDf.first().getAs[mutable.WrappedArray[Double]](0) == expectedDF.first().getAs[mutable.WrappedArray[Double]](0))
 
     }
@@ -190,7 +192,21 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
     }
 
+    it("Passed RS_LogicalOR") {
+      var inputDf = Seq((Seq(1.0, 1.0, 0.0), Seq(0.0, 1.0, 0.0))).toDF("Band1", "Band2")
+      val expectedDF = Seq((Seq(1.0, 1.0, 0.0))).toDF("LogicalOR")
+      inputDf = inputDf.selectExpr("RS_LogicalOR(Band1, Band2) as LogicalOR")
+      assert(inputDf.first().getAs[mutable.WrappedArray[Double]](0) == expectedDF.first().getAs[mutable.WrappedArray[Double]](0))
 
+    }
+
+    it("Passed RS_LogicalAND") {
+      var inputDf = Seq((Seq(1.0, 1.0, 0.0), Seq(0.0, 1.0, 0.0))).toDF("Band1", "Band2")
+      val expectedDF = Seq((Seq(0.0, 1.0, 0.0))).toDF("LogicalAND")
+      inputDf = inputDf.selectExpr("RS_LogicalAND(Band1, Band2) as LogicalAND")
+      assert(inputDf.first().getAs[mutable.WrappedArray[Double]](0) == expectedDF.first().getAs[mutable.WrappedArray[Double]](0))
+
+    }
 
   }
 }
