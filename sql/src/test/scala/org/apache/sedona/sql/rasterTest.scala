@@ -118,19 +118,6 @@ class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
     }
 
   }
-
-  describe("Map algebra tests") {
-    it("Should pass add two bands") {
-      val data = Seq(((200.0,400.0,600.0),(Seq(200.0, 400.0, 600.0))), (Seq(200.0,500.0,800.0), Seq(100.0, 500.0, 800.0))).toDF("Band1", "Band2")
-      data.createOrReplaceTempView("givenDataframe")
-      data.show()
-      val resultDF = sparkSession.sql("Select rs_AddBands(Band1, Band2) as sumOfBands from givenDataframe")
-      resultDF.show()
-      assert(resultDF.first().getAs[mutable.WrappedArray[Double]](0).toArray.deep == Array(400.0, 800.0, 1200.0))
-
-    }
-  }
-
 }
 
 
