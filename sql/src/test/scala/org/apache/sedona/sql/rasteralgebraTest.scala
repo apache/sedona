@@ -81,7 +81,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     it("Passed RS_Mean") {
       var inputDf = Seq((Seq(200.0, 400.0, 600.0, 200.0)), (Seq(200.0, 400.0, 600.0, 700.0))).toDF("Band")
       val expectedDF = Seq((350.0),(475.0)).toDF("mean")
-      print(inputDf.as[Double].collect().toList)
+      inputDf = inputDf.selectExpr("RS_Mean(Band) as mean")
       assert(inputDf.first().getAs[Double](0) == expectedDF.first().getAs[Double](0))
     }
 
@@ -163,7 +163,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
     it("Passed RS_SquareRoot") {
       var inputDf = Seq((Seq(8.0, 16.0, 24.0))).toDF("Band")
-      val expectedDF = Seq((Seq(2.83, 4.0, 4.9))).toDF("SquareRoot")
+      val expectedDF = Seq((Seq(2.83, 4.0, 4.90))).toDF("SquareRoot")
       inputDf = inputDf.selectExpr("RS_SquareRoot(Band) as SquareRoot")
       assert(inputDf.first().getAs[mutable.WrappedArray[Double]](0) == expectedDF.first().getAs[mutable.WrappedArray[Double]](0))
     }

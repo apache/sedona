@@ -135,53 +135,7 @@ case class RS_Mode(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
-//// Calculate a eucledian distance between two pixels
-//case class RS_EucledianDistance(inputExpressions: Seq[Expression])
-//  extends Expression with CodegenFallback with UserDataGeneratator {
-//  override def nullable: Boolean = false
-//
-//  override def eval(inputRow: InternalRow): Any = {
-//    // This is an expression which takes one input expressions
-//    assert(inputExpressions.length > 1 && inputExpressions.length <=5)
-//    val imageURL = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
-//    val x1 = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
-//    val y1 = inputExpressions(2).eval(inputRow).asInstanceOf[Int]
-//    val x2 = inputExpressions(3).eval(inputRow).asInstanceOf[Int]
-//    val y2 = inputExpressions(4).eval(inputRow).asInstanceOf[Int]
-//    findDistanceBetweenTwo(imageURL, x1, y1, x2, y2)
-//
-//  }
-//
-//  private def findDistanceBetweenTwo(url: String, x1: Int, y1: Int, x2: Int, y2: Int):Double = {
-//
-//    val format = GridFormatFinder.findFormat(url)
-//    val hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, true)
-//    val reader = format.getReader(url, hints)
-//    var coverage:GridCoverage2D = null
-//
-//    try coverage = reader.read(null)
-//    catch {
-//      case giveUp: IOException =>
-//        throw new RuntimeException(giveUp)
-//    }
-//    reader.dispose()
-//    val coordinate2D_source = new GridCoordinates2D(x1, y1)
-//    val coordinates2D_target = new GridCoordinates2D(x2, y2)
-//    val result_source = coverage.getGridGeometry.gridToWorld(coordinate2D_source)
-//    val result_target = coverage.getGridGeometry.gridToWorld(coordinates2D_target)
-//    val factory = new GeometryFactory
-//    val point1 = factory.createPoint((new Coordinate(result_source.getOrdinate(0), result_source.getOrdinate(1))))
-//    val point2 = factory.createPoint((new Coordinate(result_target.getOrdinate(0), result_target.getOrdinate(1))))
-//    point1.distance(point2)
-//
-//  }
-//
-//  override def dataType: DataType = DoubleType
-//
-//  override def children: Seq[Expression] = inputExpressions
-//}
-
-// fetch a particular region from a raster image given particular indexes(minX, minY, maxX, maxY)
+// fetch a particular region from a raster image given particular indexes(Array[minx...maxX][minY...maxY])
 case class RS_FetchRegion(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
