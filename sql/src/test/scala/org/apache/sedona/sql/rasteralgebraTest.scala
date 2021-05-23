@@ -174,7 +174,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
     }
 
-    it("Passed RS_LogicalOR") {
+    it("Passed RS_LogicalOver") {
       var inputDf = Seq((Seq(0.0, 0.0, 30.0), Seq(40.0, 20.0, 50.0))).toDF("Band1", "Band2")
       val expectedDF = Seq((Seq(40.0, 20.0, 30.0))).toDF("LogicalOR")
       inputDf = inputDf.selectExpr("RS_LogicalOR(Band1, Band2) as LogicalOR")
@@ -189,6 +189,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(inputDf.first().getAs[mutable.WrappedArray[Double]](0) == expectedDF.first().getAs[mutable.WrappedArray[Double]](0))
 
     }
+
 
 
   }

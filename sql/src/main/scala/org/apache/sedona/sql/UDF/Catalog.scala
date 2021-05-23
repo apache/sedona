@@ -87,7 +87,6 @@ object Catalog {
     RS_NormalizedDifference,
     RS_Mean,
     RS_Mode,
-    RS_EucledianDistance,
     RS_FetchRegion,
     RS_GreaterThan,
     RS_GreaterThanEqual,
@@ -105,7 +104,7 @@ object Catalog {
     RS_GetBand,
     RS_SquareRoot,
     RS_LogicalDifference,
-    RS_LogicalOR
+    RS_LogicalOver
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(
