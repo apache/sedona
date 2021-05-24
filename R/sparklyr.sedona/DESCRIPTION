@@ -1,0 +1,31 @@
+Type: Package
+Package: sparklyr.sedona
+Title: Sparklyr Extension for Apache Sedona
+Version: 0.1.0
+Authors@R:
+    c(person(family = "Apache Sedona",
+             role = c("aut", "cre"),
+             email = "private@sedona.apache.org"),
+      person(family = "The Apache Software Foundation",
+             role = "cph"),
+      person(family = "RStudio",
+             role = "cph"))
+Maintainer: Apache Sedona <private@sedona.apache.org>
+Description: This sparklyr extension is an R interface for Apache Sedona
+    (<https://sedona.apache.org>).
+License: Apache License 2.0
+Depends:
+    R (>= 3.2)
+Imports:
+    rlang,
+    sparklyr (>= 1.3),
+    DBI (>= 0.6-1),
+    dplyr (>= 0.7.2),
+    dbplyr (>= 1.1.0)
+Suggests:
+    knitr,
+    rmarkdown
+Encoding: UTF-8
+RoxygenNote: 7.1.1
+SystemRequirements: Spark: 2.4.x or 3.x
+VignetteBuilder: knitr
