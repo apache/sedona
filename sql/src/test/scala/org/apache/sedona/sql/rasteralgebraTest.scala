@@ -52,18 +52,20 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
 
     it("Passed RS_DivideBands") {
-      var inputDf = Seq((Seq(200.0, 400.0, 600.0), Seq(200.0, 200.0, 500.0))).toDF("Band1", "Band2")
-      val expectedDF = Seq((Seq(1.0, 2.0, 1.2))).toDF("divisionOfBands")
-      inputDf = inputDf.selectExpr("RS_DivideBands(Band1,Band2) as divisionOfBands")
-      expectedDF.show()
-      inputDf.show()
-      assert(inputDf.first().getAs[mutable.WrappedArray[Double]](0) == expectedDF.first().getAs[mutable.WrappedArray[Double]](0))
+      var inputDf = Seq((Seq(200.0, 400.0, 600.0), Seq(200.0, 200.0, 500.0)), ((Seq(0.4, 0.26, 0.27), Seq(0.3, 0.32, 0.43)))).toDF("Band1", "Band2")
+      val expectedList = List(List(1.0, 2.0, 1.2), List(1.33, 0.81, 0.63))
+      val inputList = inputDf.selectExpr("RS_DivideBands(Band1,Band2) as divisionOfBands").as[List[Double]].collect().toList
+      val resultList = inputList zip expectedList
+      for((actual, expected) <- resultList) {
+        assert(actual == expected)
+      }
+
     }
 
-    it("Passed RS_Multiply") {
+    it("Passed RS_MultiplyFactor") {
       var inputDf = Seq((Seq(200.0, 400.0, 600.0))).toDF("Band")
       val expectedDF = Seq((Seq(600.0, 1200.0, 1800.0))).toDF("multiply")
-      inputDf = inputDf.selectExpr("RS_Multiply(Band, 3) as multiply")
+      inputDf = inputDf.selectExpr("RS_MultiplyFactor(Band, 3) as multiply")
       expectedDF.show()
       inputDf.show()
       assert(inputDf.first().getAs[mutable.WrappedArray[Double]](0) == expectedDF.first().getAs[mutable.WrappedArray[Double]](0))
@@ -74,15 +76,23 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
   describe("Should pass basic statistical tests") {
     it("Passed RS_Mode") {
       val inputDf = Seq((Seq(200.0, 400.0, 600.0, 200.0)), (Seq(200.0, 400.0, 600.0, 700.0))).toDF("Band")
-      inputDf.selectExpr("RS_Mode(Band) as mode").as[Array[Double]].collect().toList should contain theSameElementsAs List(Array(200.0),Array(200.0, 400.0, 600.0, 700.0))
+      val expectedResult = List(List(200.0), List(200.0, 400.0, 600.0, 700.0))
+      val actualResult = inputDf.selectExpr("RS_Mode(Band) as mode").as[List[Double]].collect().toList
+      val resultList = actualResult zip expectedResult
+      for((actual, expected) <- resultList) {
+        assert(actual == expected)
+      }
 
     }
 
     it("Passed RS_Mean") {
-      var inputDf = Seq((Seq(200.0, 400.0, 600.0, 200.0)), (Seq(200.0, 400.0, 600.0, 700.0))).toDF("Band")
-      val expectedDF = Seq((350.0),(475.0)).toDF("mean")
-      inputDf = inputDf.selectExpr("RS_Mean(Band) as mean")
-      assert(inputDf.first().getAs[Double](0) == expectedDF.first().getAs[Double](0))
+      var inputDf = Seq((Seq(200.0, 400.0, 600.0, 200.0)), (Seq(200.0, 400.0, 600.0, 700.0)), (Seq(0.43, 0.36, 0.73, 0.56)) ).toDF("Band")
+      val expectedList = List(350.0,475.0,0.52)
+      val actualList = inputDf.selectExpr("RS_Mean(Band) as mean").as[Double].collect().toList
+      val resultList = actualList zip expectedList
+      for((actual, expected) <- resultList) {
+        assert(actual == expected)
+      }
     }
 
     it("Passed RS_NormalizedDifference") {

@@ -95,7 +95,7 @@ object Catalog {
     RS_AddBands,
     RS_SubtractBands,
     RS_DivideBands,
-    RS_Multiply,
+    RS_MultiplyFactor,
     RS_MultiplyBands,
     RS_BitwiseAnd,
     RS_BitwiseOr,

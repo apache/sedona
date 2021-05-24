@@ -94,7 +94,7 @@ case class RS_Mean(inputExpressions: Seq[Expression])
 
   private def calculateMean(band:Array[Double]):Double = {
 
-    (band.toList.sum*100).round/(band.length*100.toDouble)
+    ((band.toList.sum/band.length)*100).round/100.toDouble
   }
 
 
@@ -371,7 +371,7 @@ case class RS_Count(inputExpressions: Seq[Expression])
 }
 
 // Multiply a factor to all values of a band
-case class RS_Multiply(inputExpressions: Seq[Expression])
+case class RS_MultiplyFactor(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
 
@@ -560,7 +560,7 @@ case class RS_DivideBands(inputExpressions: Seq[Expression])
 
     val result = new Array[Double](band1.length)
     for(i<-0 until band1.length) {
-      result(i) = band1(i) / band2(i)
+      result(i) = ((band1(i)/band2(i))*100).round/(100.toDouble)
     }
     result
 
@@ -821,6 +821,7 @@ case class RS_LogicalOver(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
+// Calculate logical AND between two bands where values for two bands can be either 1.0 or 0.0
 case class RS_LogicalAND(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
@@ -865,7 +866,7 @@ case class RS_LogicalAND(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
-
+// Calculate logical OR between two bands where values for two bands can be either 1.0 or 0.0
 case class RS_LogicalOR(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
