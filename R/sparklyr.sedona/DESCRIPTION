@@ -5,12 +5,12 @@ Version: 0.1.0
 Authors@R:
     c(person(family = "Apache Sedona",
              role = c("aut", "cre"),
-             email = "dev@sedona.apache.org"),
+             email = "private@sedona.apache.org"),
       person(family = "The Apache Software Foundation",
              role = "cph"),
       person(family = "RStudio",
              role = "cph"))
-Maintainer: Apache Sedona <dev@sedona.apache.org>
+Maintainer: Apache Sedona <private@sedona.apache.org>
 Description: This sparklyr extension is an R interface for Apache Sedona
     (<https://sedona.apache.org>).
 License: Apache License 2.0

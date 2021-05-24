@@ -34,5 +34,5 @@ At the moment `sparklyr.sedona` consists of the following components:
     * Spatial partition, index, join, KNN query, and range query operations
     * Visualization routines
 * `dplyr`-integration for Sedona spatial UDTs and UDFs
-    * See https://sedona.apache.org/api/sql/Overview for the list of available UDFs
+    * See https://sedona.apache.org/api/sql/Overview/ for the list of available UDFs
 * Functions importing data from spatial RDDs to Spark dataframes and vice versa
