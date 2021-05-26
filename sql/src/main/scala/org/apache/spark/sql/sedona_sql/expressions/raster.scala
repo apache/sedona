@@ -54,6 +54,7 @@ class GeometryOperations {
     val hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, true)
     val reader = format.getReader(url, hints)
 
+
     try coverage = reader.read(null)
     catch {
       case giveUp: IOException =>
@@ -65,7 +66,6 @@ class GeometryOperations {
     targetCRS = CRS.findMathTransform(source, target)
     val gridRange2D = coverage.getGridGeometry.getGridRange
     gridRange2D
-    //Array(gridRange2D.getHigh(0), gridRange2D.getHigh(1))
 
   }
    def readGeometry(url: String): Geometry = {
