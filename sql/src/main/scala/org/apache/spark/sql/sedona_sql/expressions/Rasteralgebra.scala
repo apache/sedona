@@ -24,6 +24,8 @@ import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeArrayData}
 import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.types._
+import org.apache.spark.unsafe.types.UTF8String
+
 
 
 // Calculate Normalized Difference between two bands
@@ -910,4 +912,47 @@ case class RS_LogicalOR(inputExpressions: Seq[Expression])
 
   override def children: Seq[Expression] = inputExpressions
 }
+
+case class RS_Height(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator  {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 1)
+    val geotiff = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
+    val construction = new GeometryOperations
+    val gridRange2D = construction.getDimensions(geotiff)
+    gridRange2D.getHigh(1) + 1
+
+
+
+  }
+
+  override def dataType: DataType = IntegerType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class RS_Width(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    assert(inputExpressions.length == 1)
+    val geotiff = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
+    val construction = new GeometryOperations
+    val gridRange2D = construction.getDimensions(geotiff)
+    gridRange2D.getHigh(0) + 1
+
+
+  }
+
+  override def dataType: DataType = IntegerType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+
 

@@ -69,6 +69,7 @@ class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
       createLocalFile()
       var df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(localcsvPath)
       df = df.selectExpr(" ST_GeomFromGeotiff(_c0) as geom")
+      df.show()
       assert(df.count == 2 && df.first().getAs[Geometry](0).getGeometryType === "Polygon")
     }
 
@@ -97,6 +98,28 @@ class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
       val resultDf = Seq((Seq(600.0,800.0)), (Seq(800.0, 300.0))).toDF("GeoTiff")
       inputDf = inputDf.selectExpr("RS_GetBand(GeoTiff,2,3) as GeoTiff")
       assert(resultDf.first().getAs[mutable.WrappedArray[Double]](0) == inputDf.first().getAs[mutable.WrappedArray[Double]](0))
+
+    }
+
+    it("should pass RS_Height") {
+
+      rasterfileHDFSpath = hdfsURI + rasterDataName
+      fs.copyFromLocalFile(new Path(rasterdatalocation), new Path(rasterfileHDFSpath))
+      createLocalFile()
+      var df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(localcsvPath)
+      df = df.selectExpr(" RS_Height(_c0) as height")
+      assert(df.first().getAs[Int](0)==517)
+
+    }
+
+    it("should pass RS_Width") {
+
+      rasterfileHDFSpath = hdfsURI + rasterDataName
+      fs.copyFromLocalFile(new Path(rasterdatalocation), new Path(rasterfileHDFSpath))
+      createLocalFile()
+      var df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(localcsvPath)
+      df = df.selectExpr(" RS_Width(_c0) as width")
+      assert(df.first().getAs[Int](0)==512)
 
     }
 

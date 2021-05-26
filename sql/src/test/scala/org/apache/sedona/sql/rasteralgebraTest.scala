@@ -18,8 +18,6 @@
  */
 package org.apache.sedona.sql
 
-import org.scalatest.matchers.must.Matchers.contain
-import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
 import scala.collection.mutable
@@ -217,6 +215,6 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(inputDf.first().getAs[mutable.WrappedArray[Double]](0) == expectedDF.first().getAs[mutable.WrappedArray[Double]](0))
 
     }
-
+    
   }
 }

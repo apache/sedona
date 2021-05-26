@@ -108,7 +108,9 @@ object Catalog {
     RS_LogicalDifference,
     RS_LogicalOver,
     RS_LogicalAND,
-    RS_LogicalOR
+    RS_LogicalOR,
+    RS_Height,
+    RS_Width
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(

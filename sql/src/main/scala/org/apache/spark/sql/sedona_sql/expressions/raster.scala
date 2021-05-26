@@ -37,17 +37,22 @@ import org.geotools.util.factory.Hints
 import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory}
 import org.opengis.coverage.grid.{GridCoordinates, GridEnvelope}
 import org.opengis.parameter.{GeneralParameterValue, ParameterValue}
+import org.opengis.referencing.crs.CoordinateReferenceSystem
+import org.opengis.referencing.operation.MathTransform
 
 import java.io.IOException
 
 class GeometryOperations {
 
-   def readGeometry(url: String): Geometry = {
+  var coverage:GridCoverage2D = null
+  var source:CoordinateReferenceSystem = null
+  var target:CoordinateReferenceSystem = null
+  var targetCRS:MathTransform =  null
 
+  def getDimensions(url:String):GridEnvelope = {
     val format = GridFormatFinder.findFormat(url)
     val hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, true)
     val reader = format.getReader(url, hints)
-    var coverage:GridCoverage2D = null
 
     try coverage = reader.read(null)
     catch {
@@ -55,10 +60,16 @@ class GeometryOperations {
         throw new RuntimeException(giveUp)
     }
     reader.dispose()
-    val source = coverage.getCoordinateReferenceSystem
-    val target = CRS.decode("EPSG:4326", true)
-    val targetCRS = CRS.findMathTransform(source, target)
+    source = coverage.getCoordinateReferenceSystem
+    target = CRS.decode("EPSG:4326", true)
+    targetCRS = CRS.findMathTransform(source, target)
     val gridRange2D = coverage.getGridGeometry.getGridRange
+    gridRange2D
+    //Array(gridRange2D.getHigh(0), gridRange2D.getHigh(1))
+
+  }
+   def readGeometry(url: String): Geometry = {
+    val gridRange2D = getDimensions(url)
     val cords = Array(Array(gridRange2D.getLow(0), gridRange2D.getLow(1)), Array(gridRange2D.getLow(0), gridRange2D.getHigh(1)), Array(gridRange2D.getHigh(0), gridRange2D.getHigh(1)), Array(gridRange2D.getHigh(0), gridRange2D.getLow(1)))
     val polyCoordinates = new Array[Coordinate](5)
     var index = 0
@@ -137,7 +148,6 @@ case class ST_GeomWithBandsFromGeoTiff(inputExpressions: Seq[Expression])
     val h: Int = maxDimensions.getCoordinateValue(1) + 1
     val numCoordinates= w * h
     val numBands: Int = bands
-
     val bandValues = new Array[Double](w * h * numBands)
 
     // Put pixels band by band in the array. The first block will be band1, second block will be band2, ...
