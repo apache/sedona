@@ -1,0 +1,7 @@
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-88.1234,32.8888]},"properties":{"FIELD1":"testattribute0","FIELD4":"testattribute1","FIELD5":"testattribute2"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-86.1111,32.1428]},"properties":{"FIELD1":"testattribute0","FIELD4":"testattribute1","FIELD5":"testattribute2"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-86.1428,34.4321]},"properties":{"FIELD1":"testattribute0","FIELD4":"testattribute1","FIELD5":"testattribute2"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-85.3333,34.7654]},"properties":{"FIELD1":"testattribute0","FIELD4":"testattribute1","FIELD5":"testattribute2"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-86.9876,34.9876]},"properties":{"FIELD1":"testattribute0","FIELD4":"testattribute1","FIELD5":"testattribute2"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-87.1234,32.1111]},"properties":{"FIELD1":"testattribute0","FIELD4":"testattribute1","FIELD5":"testattribute2"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-86.4567,31.3699]},"properties":{"FIELD1":"testattribute0","FIELD4":"testattribute1","FIELD5":"testattribute2"}},

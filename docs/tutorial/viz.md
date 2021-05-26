@@ -5,7 +5,7 @@ SedonaViz provides native support for general cartographic design by extending S
 SedonaViz offers Map Visualization SQL. This gives users a more flexible way to design beautiful map visualization effects including scatter plots and heat maps. SedonaViz RDD API is also available.
 
 !!!note
-	All SedonaViz SQL/DataFrame APIs are explained in [SedonaViz API](../api/viz/sql). Please see [Viz exmaple project](https://github.com/apache/incubator-sedona/tree/master/examples/viz)
+	All SedonaViz SQL/DataFrame APIs are explained in [SedonaViz API](../../api/viz/sql). Please see [Viz exmaple project](https://github.com/apache/incubator-sedona/tree/master/examples/viz)
 
 ## Why scalable map visualization?
 
@@ -70,7 +70,7 @@ SELECT ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as De
 FROM pointtable
 ```
 
-As you know, Sedona provides many different methods to load various spatial data formats. Please read [Write an Spatial DataFrame application](sql).
+As you know, Sedona provides many different methods to load various spatial data formats. Please read [Write an Spatial DataFrame application](../sql).
 
 ## Generate a single image
 
@@ -133,7 +133,7 @@ SELECT pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates)) as 
 FROM pixelaggregates
 ```
 
-Please read [ST_Colorize](../api/viz/sql/#st_colorize) for a detailed API description.
+Please read [ST_Colorize](../../api/viz/sql/#st_colorize) for a detailed API description.
 
 ### Render the image
 

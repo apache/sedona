@@ -82,6 +82,8 @@ object Catalog {
     ST_FlipCoordinates,
     ST_LineSubstring,
     ST_LineInterpolatePoint,
+    ST_SubDivideExplode,
+    ST_SubDivide,
     ST_GeomFromGeoTiff,
     ST_GeomWithBandsFromGeoTiff,
     RS_NormalizedDifference,

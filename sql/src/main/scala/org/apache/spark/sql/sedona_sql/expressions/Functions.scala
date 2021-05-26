@@ -23,11 +23,12 @@ import org.apache.sedona.core.utils.GeomUtils
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
+import org.apache.spark.sql.catalyst.expressions.codegen.{CodegenContext, CodegenFallback, ExprCode}
 import org.apache.spark.sql.catalyst.expressions.{Expression, Generator}
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
+import org.apache.spark.sql.sedona_sql.expressions.subdivide.GeometrySubDivider
 import org.apache.spark.sql.types.{ArrayType, _}
 import org.apache.spark.unsafe.types.UTF8String
 import org.geotools.geometry.jts.JTS
@@ -1122,4 +1123,47 @@ case class ST_FlipCoordinates(inputExpressions: Seq[Expression])
   override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
+}
+
+case class ST_SubDivide(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(2)
+    val geometryRaw = inputExpressions.head
+    val maxVerticesRaw = inputExpressions(1)
+    geometryRaw.toGeometry(input) match {
+      case geom: Geometry => ArrayData.toArrayData(
+        GeometrySubDivider.subDivide(geom, maxVerticesRaw.toInt(input)).map(_.toGenericArrayData)
+      )
+      case null => null
+    }
+
+  }
+
+  override def dataType: DataType = ArrayType(GeometryUDT)
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class ST_SubDivideExplode(children: Seq[Expression]) extends Generator {
+  override def eval(input: InternalRow): TraversableOnce[InternalRow] = {
+    children.validateLength(2)
+    val geometryRaw = children.head
+    val maxVerticesRaw = children(1)
+    geometryRaw.toGeometry(input) match {
+      case geom: Geometry => ArrayData.toArrayData(
+        GeometrySubDivider.subDivide(geom, maxVerticesRaw.toInt(input)).map(_.toGenericArrayData)
+      )
+        GeometrySubDivider.subDivide(geom, maxVerticesRaw.toInt(input)).map(_.toGenericArrayData).map(InternalRow(_))
+      case _ => new Array[InternalRow](0)
+    }
+  }
+  override def elementSchema: StructType = {
+    new StructType()
+      .add("geom", GeometryUDT, true)
+  }
+
+  override protected def doGenCode(ctx: CodegenContext, ev: ExprCode): ExprCode = ev
 }

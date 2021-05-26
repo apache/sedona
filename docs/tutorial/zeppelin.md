@@ -1,4 +1,4 @@
-Sedona provides a Helium visualization plugin tailored for [Apache Zeppelin](). This finally bridges the gap between Sedona and Zeppelin.  Please read [Install Sedona-Zeppelin](../download/zeppelin/) to learn how to install this plugin in Zeppelin.
+Sedona provides a Helium visualization plugin tailored for [Apache Zeppelin](). This finally bridges the gap between Sedona and Zeppelin.  Please read [Install Sedona-Zeppelin](../../download/zeppelin/) to learn how to install this plugin in Zeppelin.
 
 Sedona-Zeppelin equips two approaches to visualize spatial data in Zeppelin. The first approach uses Zeppelin to plot all spatial objects on the map. The second one leverages SedonaViz to generate map images and overlay them on maps.
 
@@ -31,7 +31,7 @@ Select the geometry column to visualize:
 
 ## Large-scale with SedonaViz
 
-SedonaViz is a distributed visualization system that allows you to visualize big spatial data at scale. Please read [How to use SedonaViz](viz).
+SedonaViz is a distributed visualization system that allows you to visualize big spatial data at scale. Please read [How to use SedonaViz](../viz).
 
 You can use Sedona-Zeppelin to ask Zeppelin to overlay SedonaViz images on a map background. This way, you can easily visualize 1 billion spatial objects or more (depends on your cluster size).
 

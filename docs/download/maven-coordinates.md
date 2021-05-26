@@ -47,7 +47,7 @@ Sedona has four modules: `sedona-core, sedona-sql, sedona-viz, sedona-python-ada
 </dependency>
 ```
 
-## GeoTools 24.0
+## GeoTools 24.1
 
 GeoTools library is required only if you want to use CRS transformation and ShapefileReader. This wrapper library is a re-distriution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This libary is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
 
@@ -56,7 +56,7 @@ GeoTools library is required only if you want to use CRS transformation and Shap
 <dependency>
     <groupId>org.datasyslab</groupId>
     <artifactId>geotools-wrapper</artifactId>
-    <version>geotools-24.0</version>
+    <version>geotools-24.1</version>
 </dependency>
 ```
 
