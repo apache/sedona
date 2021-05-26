@@ -20,11 +20,11 @@ Sedona Python is tested on the following Python and Spark verisons:
 
 ## Direct download
 
-[Release notes](../GeoSpark-All-Modules-Release-notes)
+[Release notes](../release-notes)
 
 Latest source code: [GitHub repository](https://github.com/apache/incubator-sedona/).
 
-Release source code and binary jars: [GitHub releases](https://github.com/apache/incubator-sedona/releases), [Maven Central](../GeoSpark-All-Modules-Maven-Central-Coordinates).
+Release source code and binary jars: [GitHub releases](https://github.com/apache/incubator-sedona/releases), [Maven Central](../maven-coordinates).
 
 Automatically generated binary JARs (per each Master branch commit): [GitHub Action](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Scala+and+Java+build%22).
 

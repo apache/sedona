@@ -175,7 +175,7 @@ System.setProperty("sedona.global.charset", "utf8")
 
 #### From SparkSQL DataFrame
 
-To create a generic SpatialRDD from CSV, TSV, WKT, WKB and GeoJSON input formats, you can use SedonaSQL. Make sure you include ==the full dependencies== of Sedona. Read [SedonaSQL API](../api/sql/Overview).
+To create a generic SpatialRDD from CSV, TSV, WKT, WKB and GeoJSON input formats, you can use SedonaSQL. Make sure you include ==the full dependencies== of Sedona. Read [SedonaSQL API](../../api/sql/Overview).
 
 We use [checkin.csv CSV file](#pointrdd-from-csvtsv) as the example. You can create a generic SpatialRDD using the following steps:
 

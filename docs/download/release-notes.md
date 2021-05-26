@@ -62,7 +62,7 @@ Key dependency upgrade:
 
 Key dependency packaging strategy change:
 
-* JTS, GeoTools, jts2geojson are no longer packaged in Sedona jars. End users need to add them manually. See [here](../GeoSpark-All-Modules-Maven-Central-Coordinates).
+* JTS, GeoTools, jts2geojson are no longer packaged in Sedona jars. End users need to add them manually. See [here](../maven-coordinates).
 
 Key compilation target change:
 
