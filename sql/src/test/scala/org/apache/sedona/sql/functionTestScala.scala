@@ -765,6 +765,111 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     calculateStIsRing("POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))") shouldBe None
   }
 
+
+  it("should handle subdivision on huge amount of data"){
+    Given("dataframe with 100 huge polygons")
+    val expectedCount = 55880
+    val polygonWktDf = sparkSession
+      .read
+      .format("csv")
+      .option("delimiter", "\t")
+      .option("header", "false").load(mixedWktGeometryInputLocation)
+      .selectExpr("ST_GeomFromText(_c0) AS geom", "_c3 as id")
+
+    When("running st subdivide")
+    val subDivisionExplode = polygonWktDf.selectExpr("id", "ST_SubDivideExplode(geom, 10) as divided")
+    val subDivision = polygonWktDf.selectExpr("id", "ST_SubDivide(geom, 10) as divided")
+
+    Then("result should be appropriate")
+    subDivision.count shouldBe polygonWktDf.count
+    subDivision.select(explode(col("divided"))).count shouldBe expectedCount
+    subDivisionExplode.count shouldBe expectedCount
+  }
+
+  it("should return empty data when the input geometry is null"){
+    Given("dataframe with null geometries")
+    val geodataframe = Seq((1, null)).toDF("id", "geom")
+
+    When("calculating sub divide")
+    val subDivisionExplode = geodataframe.selectExpr("id", "ST_SubDivideExplode(geom, 10)")
+    val subDivision = geodataframe.selectExpr("id", "ST_SubDivide(geom, 10)")
+
+    Then("dataframe exploded should be empty")
+    subDivisionExplode.count shouldBe 0
+
+    And(s"dataframe based on subdivide should be as ${geodataframe.count}")
+    subDivision.count shouldBe 1
+  }
+
+  it("it should return appropriate default column names for st_subdivide"){
+    Given("Sample geometry dataframe with different geometry types")
+    val polygonWktDf = sparkSession
+      .read
+      .format("csv")
+      .option("delimiter", "\t")
+      .option("header", "false").load(mixedWktGeometryInputLocation)
+      .selectExpr("ST_GeomFromText(_c0) AS geom", "_c3 as id")
+
+    When("using ST_SubDivide function")
+    val subDivisionExplode = polygonWktDf.selectExpr("id", "ST_SubDivideExplode(geom, 10)")
+    val subDivision = polygonWktDf.selectExpr("id", "ST_SubDivide(geom, 10)")
+
+    Then("column names should be as expected")
+    subDivisionExplode.columns shouldBe Seq("id", "geom")
+    subDivision.columns shouldBe Seq("id", "st_subdivide(geom, 10)")
+
+  }
+
+  it("should return null values from st subdivide when input row has null value"){
+    Given("Sample dataframe with null values and geometries")
+    val nonNullGeometries = Seq(
+      (1, "LINESTRING (0 0, 1 1, 2 2)"),
+      (2, "POINT (0 0)"),
+      (3, "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))")
+    ).map{
+      case (id, geomWkt) => (id, wktReader.read(geomWkt))
+    }
+    val nullGeometries: Tuple2[Int, Geometry] = (4, null)
+
+    val geometryTable = (nullGeometries +: nonNullGeometries).toDF("id", "geom")
+
+    When("running ST_SubDivide on dataframe")
+    val subDivision = geometryTable.selectExpr("id", "ST_SubDivide(geom, 10) as divided")
+
+    Then("for null values return value should be null also")
+    subDivision.filter("divided is null")
+      .select("id").as[Long].collect().headOption shouldBe Some(nullGeometries._1)
+
+    And("for geometry type value should be appropriate")
+    subDivision.filter("divided is not null")
+      .select("id").as[Long].collect() should contain theSameElementsAs nonNullGeometries.map(_._1)
+  }
+
+  it("should allow to use lateral view with st sub divide explode"){
+    Given("geometry dataframe")
+    val geometryDf = Seq(
+      (1, "LINESTRING (0 0, 1 1, 2 2)"),
+      (2, "POINT (0 0)"),
+      (3, "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"),
+      (4, "POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10), (20 30, 35 35, 30 20, 20 30))")
+    ).map{
+      case (id, geomWkt) => (id, wktReader.read(geomWkt))
+    }.toDF("id", "geometry")
+    geometryDf.createOrReplaceTempView("geometries")
+
+    When("using lateral view on data")
+    val lateralViewResult = sparkSession.sql(
+      """
+        |select id, geom from geometries
+        |LATERAL VIEW ST_SubdivideExplode(geometry, 5) AS geom
+        |""".stripMargin)
+
+
+    Then("result should include exploded geometries")
+    lateralViewResult.count() shouldBe 17
+
+  }
+
   private val expectedStartingPoints = List(
     "POINT (-112.506968 45.98186)",
     "POINT (-112.519856 45.983586)",

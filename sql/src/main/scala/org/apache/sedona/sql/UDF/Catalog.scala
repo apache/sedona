@@ -81,7 +81,9 @@ object Catalog {
     ST_IsRing,
     ST_FlipCoordinates,
     ST_LineSubstring,
-    ST_LineInterpolatePoint
+    ST_LineInterpolatePoint,
+    ST_SubDivideExplode,
+    ST_SubDivide
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(

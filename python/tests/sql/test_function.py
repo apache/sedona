@@ -19,7 +19,7 @@ import math
 from typing import List
 
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import explode
+from pyspark.sql.functions import explode, expr
 from pyspark.sql.functions import col
 from pyspark.sql.types import StructType, StructField, IntegerType
 from shapely import wkt
@@ -586,6 +586,61 @@ class TestPredicateJoin(TestBase):
         ]
         for actual, expected in result_and_expected:
             assert(actual == expected)
+
+    def test_st_subdivide(self):
+        # Given
+        geometry_df = self.__wkt_list_to_data_frame(
+            [
+                "POINT(21 52)",
+                "POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10), (20 30, 35 35, 30 20, 20 30))",
+                "LINESTRING (0 0, 1 1, 2 2)"
+            ]
+        )
+        geometry_df.createOrReplaceTempView("geometry")
+
+        # When
+        subdivided = geometry_df.select(expr("st_SubDivide(geom, 5)"))
+
+        # Then
+        assert subdivided.count() == 3
+
+        assert sum([geometries[0].__len__() for geometries in subdivided.collect()]) == 16
+
+    def test_st_subdivide_explode(self):
+        # Given
+        geometry_df = self.__wkt_list_to_data_frame(
+            [
+                "POINT(21 52)",
+                "POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10), (20 30, 35 35, 30 20, 20 30))",
+                "LINESTRING (0 0, 1 1, 2 2)"
+            ]
+        )
+        geometry_df.createOrReplaceTempView("geometry")
+
+        # When
+        subdivided = geometry_df.select(expr("st_SubDivideExplode(geom, 5)"))
+
+        # Then
+        assert subdivided.count() == 16
+
+    def test_st_subdivide_explode_lateral(self):
+        # Given
+        geometry_df = self.__wkt_list_to_data_frame(
+            [
+                "POINT(21 52)",
+                "POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10), (20 30, 35 35, 30 20, 20 30))",
+                "LINESTRING (0 0, 1 1, 2 2)"
+            ]
+        )
+
+        geometry_df.selectExpr("geom as geometry").createOrReplaceTempView("geometries")
+
+        # When
+        lateral_view_result = self.spark. \
+            sql("""select geom from geometries LATERAL VIEW ST_SubdivideExplode(geometry, 5) AS geom""")
+
+        # Then
+        assert lateral_view_result.count() == 16
 
     def calculate_st_is_ring(self, wkt):
         geometry_collected = self.__wkt_list_to_data_frame([wkt]). \
