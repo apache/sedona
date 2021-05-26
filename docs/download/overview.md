@@ -51,7 +51,7 @@ You need to install necessary packages if your system does not have them install
 
 ### Install sedona
 
-* Installing from PyPi repositories
+* Installing from PyPi repositories. You can find the latest Sedona Python on [PyPi](https://pypi.org/project/apache-sedona/)
 
 ```bash
 pip install apache-sedona
@@ -68,14 +68,14 @@ python3 setup.py install
 
 ### Prepare python-adapter jar
 
-Sedona Python needs one additional jar file called `sedona-python-adapter` to work properly. Please make sure you use the correct version for Spark and Scala. For Spark 3.0 + Scala 2.12, it is called `sedona-python-adapter-3.0_2.12-1.0.0-incubating.jar`
+Sedona Python needs one additional jar file called `sedona-python-adapter` to work properly. Please make sure you use the correct version for Spark and Scala. For Spark 3.0 + Scala 2.12, it is called `sedona-python-adapter-3.0_2.12-1.0.1-incubating.jar`
 
 You can get it using one of the following methods:
 
 1. Compile from the source within main project directory and copy it (in `python-adapter/target` folder) to SPARK_HOME/jars/ folder ([more details](/download/compile/#compile-scala-and-java-source-code))
 
 2. Download from [GitHub release](https://github.com/apache/incubator-sedona/releases) and copy it to SPARK_HOME/jars/ folder
-3. Call the [Maven Central coordinate](../GeoSpark-All-Modules-Maven-Central-Coordinates) in your python program. For example, in PySparkSQL
+3. Call the [Maven Central coordinate](../maven-coordiantes) in your python program. For example, in PySparkSQL
 ```python
 spark = SparkSession. \
     builder. \
@@ -83,8 +83,8 @@ spark = SparkSession. \
     config("spark.serializer", KryoSerializer.getName). \
     config("spark.kryo.registrator", SedonaKryoRegistrator.getName). \
     config('spark.jars.packages',
-           'org.apache.sedona:sedona-python-adapter-3.0_2.12:1.0.0-incubating,'
-           'org.datasyslab:geotools-wrapper:geotools-24.0'). \
+           'org.apache.sedona:sedona-python-adapter-3.0_2.12:1.0.1-incubating,'
+           'org.datasyslab:geotools-wrapper:geotools-24.1'). \
     getOrCreate()
 ```
 

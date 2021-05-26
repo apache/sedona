@@ -12,12 +12,12 @@ Spark distribution provides an interactive Scala shell that allows a user to exe
 
 * Local mode: test Sedona without setting up a cluster
 ```
-./bin/spark-shell --packages org.apache.sedona:sedona-core-3.0_2.12:1.0.0-incubating,org.apache.sedona:sedona-sql-3.0_2.12:1.0.0-incubating,org.apache.sedona:sedona-viz-3.0_2.12:1.0.0-incubating
+./bin/spark-shell --packages org.apache.sedona:sedona-core-3.0_2.12:1.0.1-incubating,org.apache.sedona:sedona-sql-3.0_2.12:1.0.1-incubating,org.apache.sedona:sedona-viz-3.0_2.12:1.0.1-incubating
 ```
   
-* Cluster mode: you 1.0.0-incubatingneed to specify Spark Master IP
+* Cluster mode: you need to specify Spark Master IP
 ```
-./bin/spark-shell --master spark://localhost:7077 --packages org.apache.sedona:sedona-core-3.0_2.12:1.0.0-incubating,org.apache.sedona:sedona-sql-3.0_2.12:1.0.0-incubating,org.apache.sedona:sedona-viz-3.0_2.12:1.0.0-incubating
+./bin/spark-shell --master spark://localhost:7077 --packages org.apache.sedona:sedona-core-3.0_2.12:1.0.1-incubating,org.apache.sedona:sedona-sql-3.0_2.12:1.0.1-incubating,org.apache.sedona:sedona-viz-3.0_2.12:1.0.1-incubating
 ```
   
 ## Download Sedona jar manually
@@ -33,10 +33,10 @@ Spark distribution provides an interactive Scala shell that allows a user to exe
  
 * Local mode: test Sedona without setting up a cluster
 ```
-./bin/spark-shell --jars sedona-core-3.0_2.12-1.0.0-incubating.jar,sedona-sql-3.0_2.12-1.0.0-incubating.jar,sedona-viz-3.0_2.12-1.0.0-incubating.jar
+./bin/spark-shell --jars sedona-core-3.0_2.12-1.0.1-incubating.jar,sedona-sql-3.0_2.12-1.0.1-incubating.jar,sedona-viz-3.0_2.12-1.0.1-incubating.jar
 ```
   
 * Cluster mode: you need to specify Spark Master IP  
 ```
-./bin/spark-shell --master spark://localhost:7077 --jars sedona-core-3.0_2.12-1.0.0-incubating.jar,sedona-sql-3.0_2.12-1.0.0-incubating.jar,sedona-viz-3.0_2.12-1.0.0-incubating.jar
+./bin/spark-shell --master spark://localhost:7077 --jars sedona-core-3.0_2.12-1.0.1-incubating.jar,sedona-sql-3.0_2.12-1.0.1-incubating.jar,sedona-viz-3.0_2.12-1.0.1-incubating.jar
 ```
