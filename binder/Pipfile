@@ -16,7 +16,7 @@ geopandas="==0.6.0"
 pyspark="==3.0.1"
 attrs="*"
 ipykernel = "*"
-apache-sedona="==1.0.0"
+apache-sedona="==1.0.1"
 matplotlib = "*"
 descartes = "*"
 
