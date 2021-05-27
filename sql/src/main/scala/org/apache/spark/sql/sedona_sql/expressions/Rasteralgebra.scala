@@ -35,42 +35,31 @@ case class RS_NormalizedDifference(inputExpressions: Seq[Expression])
 
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
-    assert(inputExpressions.length == 2)
-    var band1:Array[Double] = null
-    var band2:Array[Double] = null
-    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData" &&
-      inputExpressions(1).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData"
-    ) {
-      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
-      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
-    }
-    else {
-      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
-      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
-    }
-    val ndvi = normalizeddifference(band1, band2)
+    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
+    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[Array[Byte]]
+    val ndvi = normalizeddifference(band1,band2)
 
     new GenericArrayData(ndvi)
   }
-  private def normalizeddifference(band1: Array[Double], band2: Array[Double]): Array[Double] = {
+  private def normalizeddifference(band1: Array[Byte], band2: Array[Byte]): Array[Byte] = {
 
-    val result = new Array[Double](band1.length)
+    val result = new Array[Byte](band1.length)
     for (i <- 0 until band1.length) {
-      if (band1(i) == 0) {
+      if (band1(i).toDouble ==  0) {
         band1(i) = -1
       }
-      if (band2(i) == 0) {
+      if (band2(i).toDouble == 0) {
         band2(i) = -1
       }
 
-      result(i) = ((band2(i) - band1(i)) / (band2(i) + band1(i))*100).round/100.toDouble
+      result(i) =(((band2(i) - band1(i)) / (band2(i) + band1(i))*100).round/100.toDouble).toByte
     }
 
     result
 
   }
 
-  override def dataType: DataType = ArrayType(DoubleType)
+  override def dataType: DataType = BinaryType
 
   override def children: Seq[Expression] = inputExpressions
 }

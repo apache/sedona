@@ -19,23 +19,11 @@
 
 package org.apache.sedona.sql
 
-import org.apache.hadoop.fs.FileSystem
-import org.apache.hadoop.hdfs.MiniDFSCluster
-import org.apache.spark.SparkConf
-import org.apache.spark.api.java.JavaSparkContext
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
 class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
   val rasterDataName = "test.tif"
   var rasterdatalocation: String = resourceFolder + "raster/" + rasterDataName
-  var conf: SparkConf = null
-  var sc: JavaSparkContext = null
-  var hdfsURI: String = null
-  var rasterfileHDFSpath: String = null
-  var fs: FileSystem = null
-  var hdfsCluster: MiniDFSCluster = null
-  var localcsvPath: String = null
-  var hdfscsvpath: String = null
 
 
     it("Should Pass geotiff loading") {
@@ -45,19 +33,12 @@ class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
 
     }
 
-    it("should fetch a particular band from result of ST_GeomWithBandsFromGeoTiff") {
+    it("should pass RS_GetBand") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/")
       df = df.selectExpr(" image.data as data", "image.nChannels as bands")
       df = df.selectExpr("RS_GetBand(data, 1, bands) as targetBand")
-      df.show()
-
-
-
+      assert(df.first().getAs[Array[Byte]](0).length == 512*517)
     }
-
-
-
-
 
 }
 
