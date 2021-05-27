@@ -2,7 +2,7 @@ package org.apache.sedona.sql.io
 
 import org.apache.spark.sql.catalyst.util.CaseInsensitiveMap
 
-private[image] class ImageOptions(
+private[io] class ImageOptions(
 
                                    @transient private val parameters: CaseInsensitiveMap[String]) extends Serializable {
 

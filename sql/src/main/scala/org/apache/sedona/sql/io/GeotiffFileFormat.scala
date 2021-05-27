@@ -53,7 +53,6 @@ private[image] class ImageFileFormat extends FileFormat with DataSourceRegister 
 
   override protected def buildReader(
                                       sparkSession: SparkSession,
-                                      nChannels:Int,
                                       dataSchema: StructType,
                                       partitionSchema: StructType,
                                       requiredSchema: StructType,
@@ -83,7 +82,11 @@ private[image] class ImageFileFormat extends FileFormat with DataSourceRegister 
         } finally {
           Closeables.close(stream, true)
         }
-        val resultOpt = GeoImageSchema.decode(origin, bytes, nChannels)
+        var nChannels = 1
+        if(!options.contains("numOfBands")) {
+          nChannels = options("numOfBands").toInt
+        }
+        val resultOpt = GeoImageSchema.decode(origin, bytes,nChannels)
         val filteredResult = if (imageSourceOptions.dropInvalid) {
           resultOpt.toIterator
         } else {
