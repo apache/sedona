@@ -19,16 +19,11 @@
 
 package org.apache.sedona.sql
 
-import org.apache.hadoop.fs.{FileSystem, FileUtil, Path}
-import org.apache.hadoop.hdfs.{HdfsConfiguration, MiniDFSCluster}
+import org.apache.hadoop.fs.FileSystem
+import org.apache.hadoop.hdfs.MiniDFSCluster
 import org.apache.spark.SparkConf
 import org.apache.spark.api.java.JavaSparkContext
-import org.locationtech.jts.geom.Geometry
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
-
-import java.io.{File, FileWriter}
-import java.util
-import scala.collection.mutable
 
 class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
   val rasterDataName = "test.tif"
@@ -42,105 +37,28 @@ class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
   var localcsvPath: String = null
   var hdfscsvpath: String = null
 
-  import sparkSession.implicits._
 
+    it("Should Pass geotiff loading") {
+    var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/")
+    df = df.selectExpr("image.Geometry as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nChannels as bands")
+    assert(df.count()==3)
 
-
-  before {
-
-    // Set up HDFS mini-cluster configurations
-    val baseDir = new File("target/hdfs").getAbsoluteFile
-    FileUtil.fullyDelete(baseDir)
-    val hdfsConf = new HdfsConfiguration
-    hdfsConf.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, baseDir.getAbsolutePath)
-    val builder = new MiniDFSCluster.Builder(hdfsConf)
-    hdfsCluster = builder.build
-    fs = FileSystem.get(hdfsConf)
-    hdfsURI = "hdfs://127.0.0.1:" + hdfsCluster.getNameNodePort + "/"
-    localcsvPath = baseDir.getAbsolutePath + "/train.csv"
-    hdfscsvpath = hdfsURI + "train.csv"
-  }
-
-  describe("Geotiff loader test") {
-
-    it("should fetch polygonal coordinates from geotiff image") {
-      rasterfileHDFSpath = hdfsURI + rasterDataName
-      fs.copyFromLocalFile(new Path(rasterdatalocation), new Path(rasterfileHDFSpath))
-      createLocalFile()
-      var df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(localcsvPath)
-      df = df.selectExpr(" ST_GeomFromGeotiff(_c0) as geom")
-      df.show()
-      assert(df.count == 2 && df.first().getAs[Geometry](0).getGeometryType === "Polygon")
-    }
-
-    // Testing ST_DataframeFromRaster constructor which converts spark dataframe into geotiff dataframe in Apache Sedona
-    it("should fetch polygonal coordinates and band values as a single array from geotiff image") {
-      rasterfileHDFSpath = hdfsURI + rasterDataName
-      fs.copyFromLocalFile(new Path(rasterdatalocation), new Path(rasterfileHDFSpath))
-      createLocalFile()
-      var df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(localcsvPath)
-      df = df.selectExpr("ST_GeomWithBandsFromGeoTiff(_c0, 4) as rasterstruct")
-      df.printSchema()
-      df.selectExpr()
-      df = df.selectExpr("rasterstruct.geometry as geom", "rasterstruct.bands as rasterBand")
-      assert(df.count()==2 && df.first().getAs[mutable.WrappedArray[Double]](1).toArray.length == (512 * 517 * 4))
-      df = df.selectExpr("RS_GetBand(rasterBand, 1, 4)") // Get the black band from RGBA
-      val blackBand = df.first().getAs[mutable.WrappedArray[Double]](0)
-      val line1 = blackBand.slice(0, 512)
-      val line2 = blackBand.slice(512, 1024)
-      assert(line1(0) == 0.0) // The first value at line 1 is black
-      assert(line2(159) == 0.0 && line2(160) == 123.0) // In the second line, value at 159 is black and at 160 is not black
     }
 
     it("should fetch a particular band from result of ST_GeomWithBandsFromGeoTiff") {
+      var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/")
+      df = df.selectExpr(" image.data as data", "image.nChannels as bands")
+      df = df.selectExpr("RS_GetBand(data, 1, bands) as targetBand")
+      df.show()
 
-      var inputDf = Seq((Seq(200.0,400.0,600.0,800.0,900.0,100.0)), (Seq(200.0,500.0,800.0,300.0,200.0,100.0))).toDF("GeoTiff")
-      val resultDf = Seq((Seq(600.0,800.0)), (Seq(800.0, 300.0))).toDF("GeoTiff")
-      inputDf = inputDf.selectExpr("RS_GetBand(GeoTiff,2,3) as GeoTiff")
-      assert(resultDf.first().getAs[mutable.WrappedArray[Double]](0) == inputDf.first().getAs[mutable.WrappedArray[Double]](0))
 
-    }
-
-    it("should pass RS_Height") {
-
-      rasterfileHDFSpath = hdfsURI + rasterDataName
-      fs.copyFromLocalFile(new Path(rasterdatalocation), new Path(rasterfileHDFSpath))
-      createLocalFile()
-      var df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(localcsvPath)
-      df = df.selectExpr(" RS_Height(_c0) as height")
-      assert(df.first().getAs[Int](0)==517)
 
     }
 
-    it("should pass RS_Width") {
 
-      rasterfileHDFSpath = hdfsURI + rasterDataName
-      fs.copyFromLocalFile(new Path(rasterdatalocation), new Path(rasterfileHDFSpath))
-      createLocalFile()
-      var df = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(localcsvPath)
-      df = df.selectExpr(" RS_Width(_c0) as width")
-      assert(df.first().getAs[Int](0)==512)
 
-    }
 
-    def createLocalFile():Unit = {
 
-      val rows = util.Arrays.asList(util.Arrays.asList(hdfsURI + rasterDataName), util.Arrays.asList(hdfsURI + rasterDataName))
-      val csvWriter = new FileWriter(localcsvPath)
-      for (i <- 0 until rows.size()) {
-        csvWriter.append(String.join(",", rows.get(i)))
-        csvWriter.append("\n")
-      }
-      csvWriter.flush()
-      csvWriter.close()
-    }
-
-    after {
-      hdfsCluster.shutdown()
-      fs.close()
-    }
-
-  }
 }
 
 

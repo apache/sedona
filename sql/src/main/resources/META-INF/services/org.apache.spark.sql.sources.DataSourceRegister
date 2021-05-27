@@ -1,1 +1,1 @@
-org.apache.sedona.sql.io.GeoImageFileFormat
+org.apache.sedona.sql.io.GeotiffImageFileFormat

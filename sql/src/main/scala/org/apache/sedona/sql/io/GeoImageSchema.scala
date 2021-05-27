@@ -131,7 +131,7 @@ object GeoImageSchema {
    *
    */
 
-  private[io] def decode(origin: String, bytes: Array[Byte], nChannels: Int): Option[Row] = {
+  private[io] def decode(origin: String, bytes: Array[Byte]): Option[Row] = {
 
     val policy: ParameterValue[OverviewPolicy] = AbstractGridFormat.OVERVIEW_POLICY.createValue
     policy.setValue(OverviewPolicy.IGNORE)
@@ -177,6 +177,7 @@ object GeoImageSchema {
     val polygon = JTS.transform(factory.createPolygon(polyCoordinates), targetCRS)
 
     // Fetch band values from given image
+    val nChannels: Int = coverage.getNumSampleDimensions
     val dimensions: GridEnvelope = reader.getOriginalGridRange
     val maxDimensions: GridCoordinates = dimensions.getHigh
     val width: Int = maxDimensions.getCoordinateValue(0) + 1

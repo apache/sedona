@@ -21,8 +21,8 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeArrayData}
 import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.implicits.GeometryEnhancer
@@ -195,23 +195,16 @@ case class RS_GetBand(inputExpressions: Seq[Expression])
 
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
-    assert(inputExpressions.length == 3)
-    var bandInfo:Array[Double] = null
-    if(inputExpressions(0).eval(inputRow).getClass().toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData") {
-      bandInfo = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
-    }
-    else {
-      bandInfo = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
-
-    }
+    val totalBands = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
     val targetBand = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
-    val totalBands = inputExpressions(2).eval(inputRow).asInstanceOf[Int]
-    val result = gettargetband(bandInfo, targetBand, totalBands)
-    new GenericArrayData(result)
+    val numBands = inputExpressions(2).eval(inputRow).asInstanceOf[Int]
+    val result = gettargetband(totalBands, targetBand, numBands)
+    result
+//    new GenericArrayData(result)
   }
 
   // fetch target band from the given array of bands
-  private def gettargetband(bandinfo: Array[Double], targetband:Int, totalbands:Int): Array[Double] = {
+  private def gettargetband(bandinfo: Array[Byte], targetband:Int, totalbands:Int): Array[Byte] = {
     val sizeOfBand = bandinfo.length/totalbands
     val lowerBound = (targetband - 1)*sizeOfBand
     val upperBound = targetband*sizeOfBand
@@ -220,7 +213,7 @@ case class RS_GetBand(inputExpressions: Seq[Expression])
 
   }
 
-  override def dataType: DataType = ArrayType(DoubleType)
+  override def dataType: DataType = BinaryType
 
   override def children: Seq[Expression] = inputExpressions
 }

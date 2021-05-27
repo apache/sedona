@@ -34,7 +34,7 @@ import org.apache.spark.sql.sources.{DataSourceRegister, Filter}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.util.SerializableConfiguration
 
-private[image] class GeoImageFileFormat extends FileFormat with DataSourceRegister {
+private[sql] class GeotiffImageFileFormat extends FileFormat with DataSourceRegister {
 
   override def inferSchema(
                             sparkSession: SparkSession,
@@ -49,7 +49,7 @@ private[image] class GeoImageFileFormat extends FileFormat with DataSourceRegist
     throw new UnsupportedOperationException("Write is not supported for image data source")
   }
 
-  override def shortName(): String = "image"
+  override def shortName(): String = "geotiff"
 
   override protected def buildReader(
                                       sparkSession: SparkSession,
@@ -82,11 +82,8 @@ private[image] class GeoImageFileFormat extends FileFormat with DataSourceRegist
         } finally {
           Closeables.close(stream, true)
         }
-        var nChannels = 1
-        if(!options.contains("numOfBands")) {
-          nChannels = options("numOfBands").toInt
-        }
-        val resultOpt = GeoImageSchema.decode(origin, bytes,nChannels)
+
+        val resultOpt = GeoImageSchema.decode(origin, bytes)
         val filteredResult = if (imageSourceOptions.dropInvalid) {
           resultOpt.toIterator
         } else {
