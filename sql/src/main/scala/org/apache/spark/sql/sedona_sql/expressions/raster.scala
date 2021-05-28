@@ -24,6 +24,7 @@ import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeArrayData}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.types._
+import org.apache.spark.unsafe.types.UTF8String
 import org.geotools.coverage.grid.io.GridFormatFinder
 import org.geotools.coverage.grid.{GridCoordinates2D, GridCoverage2D}
 import org.geotools.geometry.jts.JTS
@@ -34,7 +35,9 @@ import org.opengis.coverage.grid.GridEnvelope
 import org.opengis.referencing.crs.CoordinateReferenceSystem
 import org.opengis.referencing.operation.MathTransform
 
+import java.nio.ByteBuffer
 import java.io.IOException
+import java.util.Base64
 
 class GeometryOperations {
 
@@ -115,4 +118,59 @@ case class RS_GetBand(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
+case class RS_Base64(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    val bandInfo =inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    val result = convertToBase64(bandInfo)
+    UTF8String.fromString(result)
+  }
+
+  // fetch target band from the given array of bands
+  private def convertToBase64(bandinfo: Array[Double]): String = {
+
+   Base64.getEncoder().encodeToString(doubleToByteArray(bandinfo))
+  }
+
+  private def doubleToByteArray(doubleArray: Array[Double]) = {
+    val buf = ByteBuffer.allocate(8 * doubleArray.length)
+    buf.asDoubleBuffer.put(doubleArray)
+    buf.array
+  }
+
+  override def dataType: DataType = StringType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class RS_HTML(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    // This is an expression which takes one input expressions
+    val bandInfo =inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    val result = convertToBase64(bandInfo)
+    UTF8String.fromString(result)
+  }
+
+  // fetch target band from the given array of bands
+  private def convertToBase64(bandinfo: Array[Double]): String = {
+
+    Base64.getEncoder().encodeToString(doubleToByteArray(bandinfo))
+  }
+
+  private def doubleToByteArray(doubleArray: Array[Double]) = {
+    val buf = ByteBuffer.allocate(8 * doubleArray.length)
+    buf.asDoubleBuffer.put(doubleArray)
+    buf.array
+  }
+
+  override def dataType: DataType = StringType
+
+  override def children: Seq[Expression] = inputExpressions
+}
 

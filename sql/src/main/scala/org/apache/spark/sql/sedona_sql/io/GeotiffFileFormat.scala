@@ -18,8 +18,8 @@
  */
 
 
+package org.apache.spark.sql.sedona_sql.io
 
-package org.apache.sedona.sql.io
 
 import com.google.common.io.{ByteStreams, Closeables}
 import org.apache.hadoop.conf.Configuration
@@ -34,7 +34,7 @@ import org.apache.spark.sql.sources.{DataSourceRegister, Filter}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.util.SerializableConfiguration
 
-private[sql] class GeotiffImageFileFormat extends FileFormat with DataSourceRegister {
+private[spark] class GeotiffImageFileFormat extends FileFormat with DataSourceRegister {
 
   override def inferSchema(
                             sparkSession: SparkSession,
@@ -93,8 +93,10 @@ private[sql] class GeotiffImageFileFormat extends FileFormat with DataSourceRegi
         if (requiredSchema.isEmpty) {
           filteredResult.map(_ => emptyUnsafeRow)
         } else {
-          val toRow = RowEncoder(requiredSchema).createSerializer()
-          filteredResult.map(row => toRow(row))
+          val converter = RowEncoder(requiredSchema).createSerializer() // SPARK3 anchor
+           filteredResult.map(row => converter(row)) // SPARK3 anchor
+//          val converter = RowEncoder(requiredSchema) // SPARK2 anchor
+//          filteredResult.map(row => converter.toRow(row)) // SPARK2 anchor
         }
       }
     }

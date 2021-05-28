@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql.io
+package org.apache.spark.sql.sedona_sql.io
 
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT

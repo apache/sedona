@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql.io
+package org.apache.spark.sql.sedona_sql.io
 
 import org.apache.commons.io.FilenameUtils
 import org.apache.hadoop.conf.{Configuration, Configured}

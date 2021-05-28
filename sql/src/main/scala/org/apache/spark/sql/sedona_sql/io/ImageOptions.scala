@@ -1,4 +1,4 @@
-package org.apache.sedona.sql.io
+package org.apache.spark.sql.sedona_sql.io
 
 import org.apache.spark.sql.catalyst.util.CaseInsensitiveMap
 

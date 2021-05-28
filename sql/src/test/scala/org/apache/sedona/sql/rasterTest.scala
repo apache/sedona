@@ -44,6 +44,14 @@ class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
       assert(df.first().getAs[mutable.WrappedArray[Double]](0).length == 32*32)
     }
 
+  it("should pass RS_Base64") {
+    var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/")
+    df = df.selectExpr(" image.data as data", "image.nChannels as bands")
+    df = df.selectExpr("RS_GetBand(data, 1, bands) as targetBand")
+    df = df.selectExpr("RS_Base64(targetBand) as baseString")
+    df.show(false)
+  }
+
 }
 
 
