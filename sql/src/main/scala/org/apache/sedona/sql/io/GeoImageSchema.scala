@@ -194,6 +194,8 @@ object GeoImageSchema {
         // Each "..." represent w * h pixels
         for (bandId <- 0 until nChannels) {
           val offset = i * width + j + nChannels * bandId
+//          print("The value in Double" + vals(bandId))
+//          print("The value afeter double to bytes and double is" + vals(bandId).toByte.toInt)
           decoded(offset) = vals(bandId).toByte
         }
       }
