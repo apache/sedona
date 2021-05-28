@@ -20,44 +20,56 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
+import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeArrayData}
 import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.types._
 
 
 
-// Calculate Normalized Difference between two bands
+/// Calculate Normalized Difference between two bands
 case class RS_NormalizedDifference(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
 
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
-    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
-    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[Array[Byte]]
-    val ndvi = normalizeddifference(band1,band2)
-    ndvi
-  }
-  private def normalizeddifference(band1: Array[Byte], band2: Array[Byte]): Array[Byte] = {
+    assert(inputExpressions.length == 2)
+    var band1:Array[Double] = null
+    var band2:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData" &&
+      inputExpressions(1).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData"
+    ) {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
+    val ndvi = normalizeddifference(band1, band2)
 
-    val result = new Array[Byte](band1.length)
+    new GenericArrayData(ndvi)
+  }
+  private def normalizeddifference(band1: Array[Double], band2: Array[Double]): Array[Double] = {
+
+    val result = new Array[Double](band1.length)
     for (i <- 0 until band1.length) {
-      if (band1(i).toDouble ==  0) {
+      if (band1(i) == 0) {
         band1(i) = -1
       }
-      if (band2(i).toDouble == 0) {
+      if (band2(i) == 0) {
         band2(i) = -1
       }
 
-      result(i) =(((band2(i).toDouble - band1(i).toDouble) / (band2(i).toDouble + band1(i).toDouble)*100).round/100.toDouble).toByte
+      result(i) = ((band2(i) - band1(i)) / (band2(i) + band1(i))*100).round/100.toDouble
     }
 
     result
 
   }
 
-  override def dataType: DataType = BinaryType
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -70,14 +82,20 @@ case class RS_Mean(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 1)
-    val band = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
+    var band:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData") {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
     val mean = calculateMean(band)
     mean
   }
 
-  private def calculateMean(band:Array[Byte]):Double = {
+  private def calculateMean(band:Array[Double]):Double = {
 
-    ((band.map(x => x.toDouble).toList.sum/band.length)*100).round/100.toDouble
+    ((band.toList.sum/band.length)*100).round/100.toDouble
   }
 
 
@@ -94,12 +112,18 @@ case class RS_Mode(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 1)
-   val band = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
+    var band:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData") {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
     val mode = calculateMode(band)
-    mode
+    new GenericArrayData(mode)
   }
 
-  private def calculateMode(band:Array[Byte]):Array[Byte] = {
+  private def calculateMode(band:Array[Double]):Array[Double] = {
 
     val grouped = band.toList.groupBy(x => x).mapValues(_.size)
     val modeValue = grouped.maxBy(_._2)._2
@@ -107,11 +131,11 @@ case class RS_Mode(inputExpressions: Seq[Expression])
     modes.toArray
 
   }
-  override def dataType: DataType = BinaryType
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }
-//
+
 // fetch a particular region from a raster image given particular indexes(Array[minx...maxX][minY...maxY])
 case class RS_FetchRegion(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
@@ -120,16 +144,22 @@ case class RS_FetchRegion(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 3)
-   val band = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
+    var band:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData") {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
     val coordinates =  inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toIntArray()
     val dim = inputExpressions(2).eval(inputRow).asInstanceOf[GenericArrayData].toIntArray()
-    regionEnclosed(band, coordinates,dim)
+    new GenericArrayData(regionEnclosed(band, coordinates,dim))
 
   }
 
-  private def regionEnclosed(Band: Array[Byte], coordinates: Array[Int], dim: Array[Int]):Array[Byte] = {
+  private def regionEnclosed(Band: Array[Double], coordinates: Array[Int], dim: Array[Int]):Array[Double] = {
 
-    val result1D = new Array[Byte]((coordinates(2) - coordinates(0) + 1) * (coordinates(3) - coordinates(1) + 1))
+    val result1D = new Array[Double]((coordinates(2) - coordinates(0) + 1) * (coordinates(3) - coordinates(1) + 1))
 
     var k = 0
     for(i<-coordinates(0) until coordinates(2) + 1) {
@@ -142,11 +172,11 @@ case class RS_FetchRegion(inputExpressions: Seq[Expression])
 
   }
 
-  override def dataType: DataType = BinaryType
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }
-//
+
 // Mark all the band values with 1 which are greater than a particular threshold
 case class RS_GreaterThan(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
@@ -155,31 +185,37 @@ case class RS_GreaterThan(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
-    val band = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
+    var band:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData") {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
     val target = inputExpressions(1).eval(inputRow).asInstanceOf[Decimal].toDouble
-    findGreaterThan(band, target)
+    new GenericArrayData(findGreaterThan(band, target))
 
   }
 
- private def findGreaterThan(band: Array[Byte], target: Double):Array[Byte] = {
+  private def findGreaterThan(band: Array[Double], target: Double):Array[Double] = {
 
-   val result = new Array[Byte](band.length)
-   for(i<-0 until band.length) {
-     if(band(i).toDouble>target) {
-       result(i) = 1.toByte
-     }
-     else {
-       result(i) = 0.toByte
-     }
-   }
-   result
- }
+    val result = new Array[Double](band.length)
+    for(i<-0 until band.length) {
+      if(band(i)>target) {
+        result(i) = 1
+      }
+      else {
+        result(i) = 0
+      }
+    }
+    result
+  }
 
-  override def dataType: DataType = BinaryType
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }
-//
+
 // Mark all the band values with 1 which are greater than or equal to a particular threshold
 case class RS_GreaterThanEqual(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
@@ -188,27 +224,33 @@ case class RS_GreaterThanEqual(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
-    val band = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
+    var band:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData") {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
     val target = inputExpressions(1).eval(inputRow).asInstanceOf[Decimal].toDouble
-    findGreaterThanEqual(band, target)
+    new GenericArrayData(findGreaterThanEqual(band, target))
 
   }
 
-  private def findGreaterThanEqual(band: Array[Byte], target: Double):Array[Byte] = {
+  private def findGreaterThanEqual(band: Array[Double], target: Double):Array[Double] = {
 
-    val result = new Array[Byte](band.length)
+    val result = new Array[Double](band.length)
     for(i<-0 until band.length) {
-      if(band(i).toDouble>=target) {
-        result(i) = 1.toByte
+      if(band(i)>=target) {
+        result(i) = 1
       }
       else {
-        result(i) = 0.toByte
+        result(i) = 0
       }
     }
     result
   }
 
-  override def dataType: DataType = BinaryType
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -221,27 +263,33 @@ case class RS_LessThan(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
-    val band = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
+    var band:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData") {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
     val target = inputExpressions(1).eval(inputRow).asInstanceOf[Decimal].toDouble
-    findLessThan(band, target)
+    new GenericArrayData(findLessThan(band, target))
 
   }
 
-  private def findLessThan(band: Array[Byte], target: Double):Array[Byte] = {
+  private def findLessThan(band: Array[Double], target: Double):Array[Double] = {
 
-    val result = new Array[Byte](band.length)
+    val result = new Array[Double](band.length)
     for(i<-0 until band.length) {
-      if(band(i).toDouble<target) {
-        result(i) = 1.toByte
+      if(band(i)<target) {
+        result(i) = 1
       }
       else {
-        result(i) = 0.toByte
+        result(i) = 0
       }
     }
     result
   }
 
-  override def dataType: DataType = BinaryType
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -254,21 +302,27 @@ case class RS_LessThanEqual(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
-    val band = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
+    var band:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData") {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
     val target = inputExpressions(1).eval(inputRow).asInstanceOf[Decimal].toDouble
-    findLessThanEqual(band, target)
+    new GenericArrayData(findLessThanEqual(band, target))
 
   }
 
-  private def findLessThanEqual(band: Array[Byte], target: Double):Array[Byte] = {
+  private def findLessThanEqual(band: Array[Double], target: Double):Array[Double] = {
 
-    val result = new Array[Byte](band.length)
+    val result = new Array[Double](band.length)
     for(i<-0 until band.length) {
-      if(band(i).toDouble<=target) {
-        result(i) = 1.toByte
+      if(band(i)<=target) {
+        result(i) = 1
       }
       else {
-        result(i) = 0.toByte
+        result(i) = 0
       }
     }
     result
@@ -287,17 +341,24 @@ case class RS_Count(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
-    val band = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
+    var band:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData") {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
+
     val target = inputExpressions(1).eval(inputRow).asInstanceOf[Decimal].toDouble
     findCount(band, target)
 
   }
 
-  private def findCount(band: Array[Byte], target: Double):Int = {
+  private def findCount(band: Array[Double], target: Double):Int = {
 
     var result = 0
     for(i<-0 until band.length) {
-      if(band(i).toDouble==target) {
+      if(band(i)==target) {
         result+=1
       }
 
@@ -318,29 +379,35 @@ case class RS_MultiplyFactor(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
-    val band = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
+    var band:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData") {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
     val target = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
-   multiply(band, target)
+    new GenericArrayData(multiply(band, target))
 
   }
 
-  private def multiply(band: Array[Byte], target: Int):Array[Byte] = {
+  private def multiply(band: Array[Double], target: Int):Array[Double] = {
 
-    var result = new Array[Byte](band.length)
+    var result = new Array[Double](band.length)
     for(i<-0 until band.length) {
 
-      result(i) = (band(i).toDouble*target).toByte
-
-      }
-    result
+      result(i) = band(i)*target
 
     }
+    result
 
-  override def dataType: DataType = BinaryType
+  }
+
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }
-//
+
 // Add two bands
 case class RS_AddBands(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
@@ -349,25 +416,36 @@ case class RS_AddBands(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
-    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
-    val band2 = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
+    var band1:Array[Double] = null
+    var band2:Array[Double] = null
+
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData" &&
+      inputExpressions(1).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData"
+    ) {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
     assert(band1.length == band2.length)
 
-    addBands(band1, band2)
+    new GenericArrayData(addBands(band1, band2))
 
   }
 
-  private def addBands(band1: Array[Byte], band2: Array[Byte]):Array[Byte] = {
+  private def addBands(band1: Array[Double], band2: Array[Double]):Array[Double] = {
 
-    val result = new Array[Byte](band1.length)
+    val result = new Array[Double](band1.length)
     for(i<-0 until band1.length) {
-      result(i) = (band1(i).toDouble + band2(i).toDouble).toByte
+      result(i) = band1(i) + band2(i)
     }
     result
 
   }
 
-  override def dataType: DataType = BinaryType
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -380,25 +458,35 @@ case class RS_SubtractBands(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
-    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
-    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[Array[Byte]]
+    var band1:Array[Double] = null
+    var band2:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData" &&
+      inputExpressions(1).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData"
+    ) {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
     assert(band1.length == band2.length)
 
-    subtractBands(band1, band2)
+    new GenericArrayData(subtractBands(band1, band2))
 
   }
 
-  private def subtractBands(band1: Array[Byte], band2: Array[Byte]):Array[Byte] = {
+  private def subtractBands(band1: Array[Double], band2: Array[Double]):Array[Double] = {
 
-    val result = new Array[Byte](band1.length)
+    val result = new Array[Double](band1.length)
     for(i<-0 until band1.length) {
-      result(i) = (band2(i).toDouble - band1(i).toDouble).toByte
+      result(i) = band2(i) - band1(i)
     }
     result
 
   }
 
-  override def dataType: DataType = BinaryType
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -411,25 +499,35 @@ case class RS_MultiplyBands(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
-    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
-    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[Array[Byte]]
+    var band1:Array[Double] = null
+    var band2:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData" &&
+      inputExpressions(1).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData"
+    ) {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
     assert(band1.length == band2.length)
 
-    multiplyBands(band1, band2)
+    new GenericArrayData(multiplyBands(band1, band2))
 
   }
 
-  private def multiplyBands(band1: Array[Byte], band2: Array[Byte]):Array[Byte] = {
+  private def multiplyBands(band1: Array[Double], band2: Array[Double]):Array[Double] = {
 
-    val result = new Array[Byte](band1.length)
+    val result = new Array[Double](band1.length)
     for(i<-0 until band1.length) {
-      result(i) = (band1(i).toDouble * band2(i).toDouble).toByte
+      result(i) = band1(i) * band2(i)
     }
     result
 
   }
 
-  override def dataType: DataType = BinaryType
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -442,29 +540,39 @@ case class RS_DivideBands(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
-    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
-    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[Array[Byte]]
+    var band1:Array[Double] = null
+    var band2:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData" &&
+      inputExpressions(1).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData"
+    ) {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
     assert(band1.length == band2.length)
 
-    divideBands(band1, band2)
+    new GenericArrayData(divideBands(band1, band2))
 
   }
 
-  private def divideBands(band1: Array[Byte], band2: Array[Byte]):Array[Byte] = {
+  private def divideBands(band1: Array[Double], band2: Array[Double]):Array[Double] = {
 
-    val result = new Array[Byte](band1.length)
+    val result = new Array[Double](band1.length)
     for(i<-0 until band1.length) {
-      result(i) = (((band1(i).toDouble/band2(i).toDouble)*100).round/(100.toDouble)).toByte
+      result(i) = ((band1(i)/band2(i))*100).round/(100.toDouble)
     }
     result
 
   }
 
-  override def dataType: DataType = BinaryType
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }
-//
+
 // Modulo of a band
 case class RS_Modulo(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
@@ -473,27 +581,31 @@ case class RS_Modulo(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
-    val band = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
-
-
+    var band:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData") {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
     val dividend = inputExpressions(1).eval(inputRow).asInstanceOf[Decimal].toDouble
 
 
-    modulo(band, dividend)
+    new GenericArrayData(modulo(band, dividend))
 
   }
 
-  private def modulo(band: Array[Byte], dividend:Double):Array[Byte] = {
+  private def modulo(band: Array[Double], dividend:Double):Array[Double] = {
 
-    val result = new Array[Byte](band.length)
+    val result = new Array[Double](band.length)
     for(i<-0 until band.length) {
-      result(i) = (band(i).toDouble % dividend).toByte
+      result(i) = band(i) % dividend
     }
     result
 
   }
 
-  override def dataType: DataType = BinaryType
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -506,22 +618,28 @@ case class RS_SquareRoot(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 1)
-    val band = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
-
-   squareRoot(band)
+    var band:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData") {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
+    new GenericArrayData(squareRoot(band))
 
   }
 
-  private def squareRoot(band: Array[Byte]):Array[Byte] = {
+  private def squareRoot(band: Array[Double]):Array[Double] = {
 
-    var result = new Array[Byte](band.length)
-
-    result = band.map(x=>((Math.sqrt(x)*100).round/100.toDouble).toByte)
+    val result = new Array[Double](band.length)
+    for(i<-0 until band.length) {
+      result(i) = (Math.sqrt(band(i))*100).round/100.toDouble
+    }
     result
 
   }
 
-  override def dataType: DataType = BinaryType
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -534,26 +652,36 @@ case class RS_BitwiseAnd(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
-    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
-    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[Array[Byte]]
 
+    var band1:Array[Double] = null
+    var band2:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData" &&
+      inputExpressions(1).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData"
+    ) {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
     assert(band1.length == band2.length)
 
-    bitwiseAnd(band1, band2)
+    new GenericArrayData(bitwiseAnd(band1, band2))
 
   }
 
-  private def bitwiseAnd(band1: Array[Byte], band2: Array[Byte]):Array[Byte] = {
+  private def bitwiseAnd(band1: Array[Double], band2: Array[Double]):Array[Double] = {
 
-    val result = new Array[Byte](band1.length)
+    val result = new Array[Double](band1.length)
     for(i<-0 until band1.length) {
-      result(i) = (band1(i).toInt & band2(i).toInt).toByte
+      result(i) = band1(i).toInt & band2(i).toInt
     }
     result
 
   }
 
-  override def dataType: DataType = BinaryType
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -566,25 +694,35 @@ case class RS_BitwiseOr(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
-    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
-    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[Array[Byte]]
+    var band1:Array[Double] = null
+    var band2:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData" &&
+      inputExpressions(1).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData"
+    ) {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
     assert(band1.length == band2.length)
 
-    bitwiseOr(band1, band2)
+    new GenericArrayData(bitwiseOr(band1, band2))
 
   }
 
-  private def bitwiseOr(band1: Array[Byte], band2: Array[Byte]):Array[Double] = {
+  private def bitwiseOr(band1: Array[Double], band2: Array[Double]):Array[Double] = {
 
     val result = new Array[Double](band1.length)
     for(i<-0 until band1.length) {
-      result(i) = (band1(i).toInt | band2(i).toInt).toByte
+      result(i) = band1(i).toInt | band2(i).toInt
     }
     result
 
   }
 
-  override def dataType: DataType = BinaryType
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -597,32 +735,42 @@ case class RS_LogicalDifference(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
-    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
-    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[Array[Byte]]
+    var band1:Array[Double] = null
+    var band2:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData" &&
+      inputExpressions(1).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData"
+    ) {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
     assert(band1.length == band2.length)
 
-    logicalDifference(band1, band2)
+    new GenericArrayData(logicalDifference(band1, band2))
 
   }
 
-  private def logicalDifference(band1: Array[Byte], band2: Array[Byte]):Array[Byte] = {
+  private def logicalDifference(band1: Array[Double], band2: Array[Double]):Array[Double] = {
 
-    val result = new Array[Byte](band1.length)
+    val result = new Array[Double](band1.length)
     for(i<-0 until band1.length) {
-      if(band1(i).toDouble != band2(i).toDouble)
-        {
-          result(i) = band1(i)
-        }
+      if(band1(i) != band2(i))
+      {
+        result(i) = band1(i)
+      }
       else
-        {
-          result(i) = 0.toByte
-        }
+      {
+        result(i) = 0.0
+      }
     }
     result
 
   }
 
-  override def dataType: DataType = BinaryType
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -635,19 +783,29 @@ case class RS_LogicalOver(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
-    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
-    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[Array[Byte]]
+    var band1:Array[Double] = null
+    var band2:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData" &&
+      inputExpressions(1).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData"
+    ) {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
     assert(band1.length == band2.length)
 
-    logicalOver(band1, band2)
+    new GenericArrayData(logicalOver(band1, band2))
 
   }
 
-  private def logicalOver(band1: Array[Byte], band2: Array[Byte]):Array[Byte] = {
+  private def logicalOver(band1: Array[Double], band2: Array[Double]):Array[Double] = {
 
-    val result = new Array[Byte](band1.length)
+    val result = new Array[Double](band1.length)
     for(i<-0 until band1.length) {
-      if(band1(i).toDouble != 0.0)
+      if(band1(i) != 0.0)
       {
         result(i) = band1(i)
       }
@@ -660,7 +818,7 @@ case class RS_LogicalOver(inputExpressions: Seq[Expression])
 
   }
 
-  override def dataType: DataType = BinaryType
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -673,29 +831,39 @@ case class RS_LogicalAND(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
-    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
-    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[Array[Byte]]
+    var band1:Array[Double] = null
+    var band2:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData" &&
+      inputExpressions(1).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData"
+    ) {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
     assert(band1.length == band2.length)
 
     new GenericArrayData(logicalAND(band1, band2))
 
   }
 
-  private def logicalAND(band1: Array[Byte], band2: Array[Byte]):Array[Byte] = {
+  private def logicalAND(band1: Array[Double], band2: Array[Double]):Array[Double] = {
 
-    val result = new Array[Byte](band1.length)
+    val result = new Array[Double](band1.length)
     for(i<-0 until band1.length) {
-      if(band1(i).toDouble == 1.0 && band2(i).toDouble == 1.0) {
-        result(i) = 1.toByte
+      if(band1(i) == 1.0 && band2(i) == 1.0) {
+        result(i) = 1.0
       }
       else {
-        result(i) = 0.toByte
+        result(i) = 0.0
       }
     }
-      result
+    result
   }
 
-  override def dataType: DataType = BinaryType
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -708,29 +876,39 @@ case class RS_LogicalOR(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
-    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
-    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[Array[Byte]]
+    var band1:Array[Double] = null
+    var band2:Array[Double] = null
+    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData" &&
+      inputExpressions(1).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData"
+    ) {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    }
+    else {
+      band1 = inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+      band2 = inputExpressions(1).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+    }
     assert(band1.length == band2.length)
 
     new GenericArrayData(logicalOR(band1, band2))
 
   }
 
-  private def logicalOR(band1: Array[Byte], band2: Array[Byte]):Array[Byte] = {
+  private def logicalOR(band1: Array[Double], band2: Array[Double]):Array[Double] = {
 
-    val result = new Array[Byte](band1.length)
+    val result = new Array[Double](band1.length)
     for(i<-0 until band1.length) {
-      if(band1(i).toDouble == 0.0 && band2(i).toDouble == 0.0) {
-        result(i) = 0.toByte
+      if(band1(i) == 0.0 && band2(i) == 0.0) {
+        result(i) = 0.0
       }
       else {
-        result(i) = 1.toByte
+        result(i) = 1.0
       }
     }
     result
   }
 
-  override def dataType: DataType = BinaryType
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }

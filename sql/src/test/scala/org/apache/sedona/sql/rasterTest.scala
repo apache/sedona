@@ -21,16 +21,19 @@ package org.apache.sedona.sql
 
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
+import scala.collection.mutable
+
 class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
   val rasterDataName = "test.tif"
   var rasterdatalocation: String = resourceFolder + "raster/" + rasterDataName
 
 
     it("Should Pass geotiff loading") {
+
     var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/")
-    df = df.selectExpr("image.Geometry as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nChannels as bands")
+      df = df.selectExpr("image.Geometry as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nChannels as bands")
       df.show()
-    assert(df.count()==2)
+      assert(df.count()==2)
 
     }
 
@@ -38,7 +41,7 @@ class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/")
       df = df.selectExpr(" image.data as data", "image.nChannels as bands")
       df = df.selectExpr("RS_GetBand(data, 1, bands) as targetBand")
-      assert(df.first().getAs[Array[Byte]](0).length == 32*32)
+      assert(df.first().getAs[mutable.WrappedArray[Double]](0).length == 32*32)
     }
 
 }

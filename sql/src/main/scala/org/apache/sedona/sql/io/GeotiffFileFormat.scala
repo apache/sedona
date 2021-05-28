@@ -39,7 +39,7 @@ private[sql] class GeotiffImageFileFormat extends FileFormat with DataSourceRegi
   override def inferSchema(
                             sparkSession: SparkSession,
                             options: Map[String, String],
-                            files: Seq[FileStatus]): Option[StructType] = Some(GeoImageSchema.imageSchema)
+                            files: Seq[FileStatus]): Option[StructType] = Some(GeotiffImageSchema.imageSchema)
 
   override def prepareWrite(
                              sparkSession: SparkSession,
@@ -83,11 +83,11 @@ private[sql] class GeotiffImageFileFormat extends FileFormat with DataSourceRegi
           Closeables.close(stream, true)
         }
 
-        val resultOpt = GeoImageSchema.decode(origin, bytes)
+        val resultOpt = GeotiffImageSchema.decode(origin, bytes)
         val filteredResult = if (imageSourceOptions.dropInvalid) {
           resultOpt.toIterator
         } else {
-          Iterator(resultOpt.getOrElse(GeoImageSchema.invalidImageRow(origin)))
+          Iterator(resultOpt.getOrElse(GeotiffImageSchema.invalidImageRow(origin)))
         }
 
         if (requiredSchema.isEmpty) {

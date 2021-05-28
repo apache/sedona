@@ -32,24 +32,11 @@ import org.opengis.parameter.{GeneralParameterValue, ParameterValue}
 
 import java.io.ByteArrayInputStream
 
-object GeoImageSchema {
+object GeotiffImageSchema {
   val undefinedImageType = "Undefined"
 
   /**
-   * (Scala-specific) OpenCV type mapping supported
-   */
-  //  val ocvTypes: Map[String, Int] = Map(
-  //    undefinedImageType -> -1,
-  //    "CV_8U" -> 0, "CV_8UC1" -> 0, "CV_8UC3" -> 16, "CV_8UC4" -> 24
-  //  )
-
-  /**
-   * (Java-specific) OpenCV type mapping supported
-   */
-  //  val javaOcvTypes: java.util.Map[String, Int] = ocvTypes.asJava
-
-  /**
-   * Schema for the image column: Row(String, Int, Int, Int, Int, Array[Byte])
+   * Schema for the image column: Row(String,Geometry, Int, Int, Int, Array[Double])
    */
   val columnSchema = StructType(
     StructField("origin", StringType, true) ::
@@ -57,10 +44,7 @@ object GeoImageSchema {
       StructField("height", IntegerType, false) ::
       StructField("width", IntegerType, false) ::
       StructField("nChannels", IntegerType, false) ::
-      // OpenCV-compatible type: CV_8UC3 in most cases
-      //        StructField("mode", IntegerType, false) ::
-      // Bytes in OpenCV-compatible order: row-wise BGR in most cases
-      StructField("data", BinaryType, false) :: Nil)
+      StructField("data", ArrayType(DoubleType), false) :: Nil)
 
   val imageFields: Array[String] = columnSchema.fieldNames
 
@@ -77,39 +61,41 @@ object GeoImageSchema {
   def getOrigin(row: Row): String = row.getString(0)
 
   /**
+   * Gets the origin of the image
+   *
+   * @return The origin of the image
+   */
+  def getGeometry(row: Row): GeometryUDT = row.getAs[GeometryUDT](1)
+
+
+  /**
    * Gets the height of the image
    *
    * @return The height of the image
    */
-  def getHeight(row: Row): Int = row.getInt(1)
+  def getHeight(row: Row): Int = row.getInt(2)
 
   /**
    * Gets the width of the image
    *
    * @return The width of the image
    */
-  def getWidth(row: Row): Int = row.getInt(2)
+  def getWidth(row: Row): Int = row.getInt(3)
 
   /**
    * Gets the number of channels in the image
    *
    * @return The number of channels in the image
    */
-  def getNChannels(row: Row): Int = row.getInt(3)
+  def getNChannels(row: Row): Int = row.getInt(4)
 
-  /**
-   * Gets the OpenCV representation as an int
-   *
-   * @return The OpenCV representation as an int
-   */
-  //  def getMode(row: Row): Int = row.getInt(4)
 
   /**
    * Gets the image data
    *
    * @return The image data
    */
-  def getData(row: Row): Array[Byte] = row.getAs[Array[Byte]](5)
+  def getData(row: Row): Array[Double] = row.getAs[Array[Double]](5)
 
   /**
    * Default values for the invalid image
@@ -122,8 +108,8 @@ object GeoImageSchema {
 
   /**
    *
-   * Convert the compressed image (jpeg, png, etc.) into OpenCV
-   * representation and store it in DataFrame Row
+   * Convert a GeoTiff image into a dataframe row
+   *
    *
    * @param origin Arbitrary string that identifies the image
    * @param bytes  Image bytes (for example, jpeg)
@@ -184,7 +170,7 @@ object GeoImageSchema {
     val height: Int = maxDimensions.getCoordinateValue(1) + 1
     val imageSize = height * width * nChannels
     assert(imageSize < 1e9, "image is too large")
-    val decoded = Array.ofDim[Byte](imageSize)
+    val decoded = Array.ofDim[Double](imageSize)
 
     for (i <- 0 until height) {
       for (j <- 0 until width) {
@@ -194,9 +180,7 @@ object GeoImageSchema {
         // Each "..." represent w * h pixels
         for (bandId <- 0 until nChannels) {
           val offset = i * width + j + nChannels * bandId
-//          print("The value in Double" + vals(bandId))
-//          print("The value afeter double to bytes and double is" + vals(bandId).toByte.toInt)
-          decoded(offset) = vals(bandId).toByte
+          decoded(offset) = vals(bandId)
         }
       }
     }

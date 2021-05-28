@@ -20,8 +20,9 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeArrayData}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
+import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.types._
 import org.geotools.coverage.grid.io.GridFormatFinder
 import org.geotools.coverage.grid.{GridCoordinates2D, GridCoverage2D}
@@ -91,15 +92,16 @@ case class RS_GetBand(inputExpressions: Seq[Expression])
 
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
-    val totalBands = inputExpressions(0).eval(inputRow).asInstanceOf[Array[Byte]]
+    assert(inputExpressions.length == 3)
+    val bandInfo =inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
     val targetBand = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
-    val numBands = inputExpressions(2).eval(inputRow).asInstanceOf[Int]
-    val result = gettargetband(totalBands, targetBand, numBands)
-    result
+    val totalBands = inputExpressions(2).eval(inputRow).asInstanceOf[Int]
+    val result = gettargetband(bandInfo, targetBand, totalBands)
+    new GenericArrayData(result)
   }
 
   // fetch target band from the given array of bands
-  private def gettargetband(bandinfo: Array[Byte], targetband:Int, totalbands:Int): Array[Byte] = {
+  private def gettargetband(bandinfo: Array[Double], targetband:Int, totalbands:Int): Array[Double] = {
     val sizeOfBand = bandinfo.length/totalbands
     val lowerBound = (targetband - 1)*sizeOfBand
     val upperBound = targetband*sizeOfBand
@@ -108,8 +110,9 @@ case class RS_GetBand(inputExpressions: Seq[Expression])
 
   }
 
-  override def dataType: DataType = BinaryType
+  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }
+
 
