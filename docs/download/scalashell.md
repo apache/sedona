@@ -40,3 +40,7 @@ Spark distribution provides an interactive Scala shell that allows a user to exe
 ```
 ./bin/spark-shell --master spark://localhost:7077 --jars sedona-core-3.0_2.12-1.0.1-incubating.jar,sedona-sql-3.0_2.12-1.0.1-incubating.jar,sedona-viz-3.0_2.12-1.0.1-incubating.jar
 ```
+
+## Spark SQL shell
+
+Please see [Use Sedona in a pure SQL environment](../../tutorial/sql-pure-sql/)

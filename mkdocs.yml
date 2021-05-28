@@ -7,9 +7,10 @@ nav:
       - Quick start: download/overview.md
       - Release notes: download/release-notes.md      
       - Maven Central coordinate: download/maven-coordinates.md
+      - Installation on Databricks: download/databricks.md
       - Set up Spark cluser: download/cluster.md
       - Self-contained project: download/project.md
-      - Interactive scala shell: download/scalashell.md
+      - Interactive Scala and SQL shell: download/scalashell.md
       - Install Sedona-Zeppelin: download/zeppelin.md
       - Compile the code: download/compile.md
       - Publish the code: download/publish.md

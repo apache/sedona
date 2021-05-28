@@ -9,7 +9,7 @@ Start `spark-sql` as following (replace `<VERSION>` with actual version, like, `
 
 ```sh
 spark-sql --packages org.apache.sedona:sedona-python-adapter-3.0_2.12:<VERSION>,org.apache.sedona:sedona-viz-3.0_2.12:<VERSION>,org.datasyslab:geotools-wrapper:geotools-24.0 \
-  --conf spark.kryo.registrator=org.apache.spark.serializer.KryoSerializer \
+  --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
   --conf spark.kryo.registrator=org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator \
   --conf spark.sql.extensions=org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions
 ```

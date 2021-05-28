@@ -14,7 +14,7 @@ Sedona 1.0.0+: Sedona-core, Sedona-SQL, Sedona-Viz
 ## Installation
 
 !!!note
-	You only need to do Step 1 and 2 only if you cannot see Sedona-Zeppelin in Zeppelin Helium package list.
+	You only need to do Step 1 and 2 only if you cannot see [Apache-sedona](https://www.npmjs.com/package/apache-sedona) or [GeoSpark Zeppelin](https://www.npmjs.com/package/geospark-zeppelin) in Zeppelin Helium package list.
 
 ### Create Helium folder (optional)
 Create a folder called **helium** in Zeppelin root folder.
