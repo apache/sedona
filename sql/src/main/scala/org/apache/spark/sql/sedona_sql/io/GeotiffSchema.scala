@@ -43,7 +43,7 @@ object GeotiffSchema {
       StructField("Geometry", GeometryUDT, true) ::
       StructField("height", IntegerType, false) ::
       StructField("width", IntegerType, false) ::
-      StructField("nChannels", IntegerType, false) ::
+      StructField("nBands", IntegerType, false) ::
       StructField("data", ArrayType(DoubleType), false) :: Nil)
 
   val imageFields: Array[String] = columnSchema.fieldNames
@@ -85,9 +85,9 @@ object GeotiffSchema {
   /**
    * Gets the number of channels in the image
    *
-   * @return The number of channels in the image
+   * @return The number of bands in the image
    */
-  def getNChannels(row: Row): Int = row.getInt(4)
+  def getNBands(row: Row): Int = row.getInt(4)
 
 
   /**
@@ -163,29 +163,29 @@ object GeotiffSchema {
     val polygon = JTS.transform(factory.createPolygon(polyCoordinates), targetCRS)
 
     // Fetch band values from given image
-    val nChannels: Int = coverage.getNumSampleDimensions
+    val nBands: Int = coverage.getNumSampleDimensions
     val dimensions: GridEnvelope = reader.getOriginalGridRange
     val maxDimensions: GridCoordinates = dimensions.getHigh
     val width: Int = maxDimensions.getCoordinateValue(0) + 1
     val height: Int = maxDimensions.getCoordinateValue(1) + 1
-    val imageSize = height * width * nChannels
+    val imageSize = height * width * nBands
     assert(imageSize < 1e9, "image is too large")
     val decoded = Array.ofDim[Double](imageSize)
 
     for (i <- 0 until height) {
       for (j <- 0 until width) {
-        val vals: Array[Double] = new Array[Double](nChannels)
+        val vals: Array[Double] = new Array[Double](nBands)
         coverage.evaluate(new GridCoordinates2D(j, i), vals)
         // bands of a pixel will be put in [b0...b1...b2...]
         // Each "..." represent w * h pixels
-        for (bandId <- 0 until nChannels) {
-          val offset = i * width + j + nChannels * bandId
+        for (bandId <- 0 until nBands) {
+          val offset = i * width + j + nBands * bandId
           decoded(offset) = vals(bandId)
         }
       }
     }
     // the internal "Row" is needed, because the image is a single DataFrame column
-    Some(Row(Row(origin, polygon, height, width, nChannels, decoded)))
+    Some(Row(Row(origin, polygon, height, width, nBands, decoded)))
   }
 }
 

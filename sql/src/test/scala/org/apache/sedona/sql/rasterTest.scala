@@ -29,23 +29,23 @@ class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
 
 
     it("Should Pass geotiff loading") {
-
-    var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
-      df = df.selectExpr("image.origin as origin","image.Geometry as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nChannels as bands")
+      var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
+      df.printSchema()
+      df = df.selectExpr("image.origin as origin","image.Geometry as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
       assert(df.count()==2)
 
     }
 
     it("should pass RS_GetBand") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/")
-      df = df.selectExpr(" image.data as data", "image.nChannels as bands")
+      df = df.selectExpr(" image.data as data", "image.nBands as bands")
       df = df.selectExpr("RS_GetBand(data, 1, bands) as targetBand")
       assert(df.first().getAs[mutable.WrappedArray[Double]](0).length == 32*32)
     }
 
   it("should pass RS_Base64") {
     var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/")
-    df = df.selectExpr(" image.data as data", "image.nChannels as bands")
+    df = df.selectExpr(" image.data as data", "image.nBands as bands")
     df = df.selectExpr("RS_GetBand(data, 1, bands) as targetBand")
     df = df.selectExpr("RS_Base64(targetBand) as baseString")
     df.show()
