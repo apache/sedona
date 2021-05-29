@@ -93,21 +93,6 @@ val sumDF = spark.sql("select RS_Add(band1, band2) as sumOfBands from dataframe"
 
 ```
 
-## RS_AddBand
-
-Introduction: Add two spectral bands in a Geotiff image
-
-Format: `RS_AddBand (Band1: Array[Double], Band2: Array[Double])`
-
-Since: `v1.1.0`
-
-Spark SQL example:
-```SQL
-
-val sumDF = spark.sql("select RS_Add(band1, band2) as sumOfBands from dataframe")
-
-```
-
 ## RS_SubtractBands
 
 Introduction: Subtract two spectral bands in a Geotiff image(band2 - band1)
@@ -157,7 +142,7 @@ val multiplyDF = spark.sql("select RS_DivideBands(band1, band2) as divideBands f
 
 Introduction: Multiply a factor to a spectral band in a geotiff image
 
-Format: `RS_MultiplyBand (Band1: Array[Double], Factor: Int)`
+Format: `RS_MultiplyFactor (Band1: Array[Double], Factor: Int)`
 
 Since: `v1.1.0`
 
@@ -284,7 +269,7 @@ Since: `v1.1.0`
 Spark SQL example:
 ```SQL
 
-val lessEqualDF = spark.sql("select RS_LessThan(band, target) as maskedvalues from dataframe")
+val lessEqualDF = spark.sql("select RS_LessThanEqual(band, target) as maskedvalues from dataframe")
 
 ```
 
