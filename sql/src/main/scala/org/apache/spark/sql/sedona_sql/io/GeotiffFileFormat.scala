@@ -34,12 +34,12 @@ import org.apache.spark.sql.sources.{DataSourceRegister, Filter}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.util.SerializableConfiguration
 
-private[spark] class GeotiffImageFileFormat extends FileFormat with DataSourceRegister {
+private[spark] class GeotiffFileFormat extends FileFormat with DataSourceRegister {
 
   override def inferSchema(
                             sparkSession: SparkSession,
                             options: Map[String, String],
-                            files: Seq[FileStatus]): Option[StructType] = Some(GeotiffImageSchema.imageSchema)
+                            files: Seq[FileStatus]): Option[StructType] = Some(GeotiffSchema.imageSchema)
 
   override def prepareWrite(
                              sparkSession: SparkSession,
@@ -83,11 +83,11 @@ private[spark] class GeotiffImageFileFormat extends FileFormat with DataSourceRe
           Closeables.close(stream, true)
         }
 
-        val resultOpt = GeotiffImageSchema.decode(origin, bytes)
+        val resultOpt = GeotiffSchema.decode(origin, bytes)
         val filteredResult = if (imageSourceOptions.dropInvalid) {
           resultOpt.toIterator
         } else {
-          Iterator(resultOpt.getOrElse(GeotiffImageSchema.invalidImageRow(origin)))
+          Iterator(resultOpt.getOrElse(GeotiffSchema.invalidImageRow(origin)))
         }
 
         if (requiredSchema.isEmpty) {

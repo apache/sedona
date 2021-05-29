@@ -17,12 +17,13 @@
  * under the License.
  */
 
-package org.apache.spark.sql.sedona_sql.expressions
+package org.apache.spark.sql.sedona_sql.expressions.raster
 
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeArrayData}
 import org.apache.spark.sql.catalyst.util.GenericArrayData
+import org.apache.spark.sql.sedona_sql.expressions.UserDataGeneratator
 import org.apache.spark.sql.types._
 
 

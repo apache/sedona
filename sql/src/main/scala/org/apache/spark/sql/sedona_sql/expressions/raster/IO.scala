@@ -17,12 +17,13 @@
  * under the License.
  */
 
-package org.apache.spark.sql.sedona_sql.expressions
+package org.apache.spark.sql.sedona_sql.expressions.raster
 
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeArrayData}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
+import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeArrayData}
 import org.apache.spark.sql.catalyst.util.GenericArrayData
+import org.apache.spark.sql.sedona_sql.expressions.UserDataGeneratator
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 import org.geotools.coverage.grid.io.GridFormatFinder
@@ -35,8 +36,8 @@ import org.opengis.coverage.grid.GridEnvelope
 import org.opengis.referencing.crs.CoordinateReferenceSystem
 import org.opengis.referencing.operation.MathTransform
 
-import java.nio.ByteBuffer
 import java.io.IOException
+import java.nio.ByteBuffer
 import java.util.Base64
 
 class GeometryOperations {

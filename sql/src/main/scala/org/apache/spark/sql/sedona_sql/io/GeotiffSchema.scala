@@ -32,7 +32,7 @@ import org.opengis.parameter.{GeneralParameterValue, ParameterValue}
 
 import java.io.ByteArrayInputStream
 
-object GeotiffImageSchema {
+object GeotiffSchema {
   val undefinedImageType = "Undefined"
 
   /**
