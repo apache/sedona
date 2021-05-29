@@ -105,8 +105,6 @@ object Catalog {
     RS_SquareRoot,
     RS_LogicalDifference,
     RS_LogicalOver,
-    RS_LogicalAND,
-    RS_LogicalOR,
     RS_Base64
   )
 
