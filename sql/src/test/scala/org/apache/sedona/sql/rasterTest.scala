@@ -32,6 +32,7 @@ class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
     it("Should Pass geotiff loading") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
       df = df.selectExpr("image.origin as origin","image.Geometry as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+      df.show()
       assert(df.first().getAs[Geometry](1).toText == "POLYGON ((-117.64141128097314 33.94356351407699, -117.64141128097314 33.664978146501284, -117.30939395196258 33.664978146501284," +
         " -117.30939395196258 33.94356351407699, -117.64141128097314 33.94356351407699))")
       assert(df.first().getInt(2) == 517)
@@ -53,10 +54,21 @@ class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
 
   it("should pass RS_Base64") {
     var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/")
-    df = df.selectExpr(" image.data as data", "image.nBands as bands")
-    df = df.selectExpr("RS_GetBand(data, 1, bands) as targetBand")
-    df = df.selectExpr("RS_Base64(targetBand) as baseString")
-    println(df.first().getString(0))
+    df = df.selectExpr("image.origin as origin","image.Geometry as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+    df = df.selectExpr("RS_GetBand(data, 1, bands) as targetBand", "width","height")
+    df.createOrReplaceTempView("geotiff")
+    df = sparkSession.sql("Select RS_base64(height, width, targetBand, RS_Array(height*width, 0), RS_Array(height*width, 0)) as encodedstring from geotiff")
+//    printf(df.first().getAs[String](0))
+  }
+
+  it("should pass RS_HTML") {
+    var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/")
+    df = df.selectExpr("image.origin as origin","image.Geometry as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+    df = df.selectExpr("RS_GetBand(data, 1, bands) as targetBand", "width","height")
+    df.createOrReplaceTempView("geotiff")
+    df = sparkSession.sql("Select RS_base64(height, width, targetBand, RS_Array(height*width, 0), RS_Array(height*width, 0)) as encodedstring from geotiff")
+    df = df.selectExpr("RS_HTML(encodedstring) as htmlstring" )
+    printf(df.first().getAs[String](0))
   }
 
 }

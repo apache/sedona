@@ -294,6 +294,6 @@ Since: `v1.1.0`
 Spark SQL example:
 ```SQL
 
-val logicalOver = spark.sql("select RS_FetchRegion(Band,Array(0, 0, 1, 2),Array(3, 3)) as Region from dataframe")
+val region = spark.sql("select RS_FetchRegion(Band,Array(0, 0, 1, 2),Array(3, 3)) as Region from dataframe")
 
 ```

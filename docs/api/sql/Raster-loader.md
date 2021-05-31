@@ -1,4 +1,4 @@
-## Geotiff Dataframe Loader
+### Geotiff Dataframe Loader
 
 Introduction: The GeoTiff loader of Sedona is a Spark built-in data source. It can read a single geotiff image or 
 a number of geotiff images into a DataFrame.
