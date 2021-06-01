@@ -19,11 +19,13 @@
 
 package org.apache.sedona.core.formatMapper;
 
+import org.apache.avro.generic.GenericRecord;
+import org.apache.sedona.core.formatMapper.parquet.ParquetFormatMapper;
 import org.apache.sedona.core.spatialRDD.SpatialRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.locationtech.jts.geom.Geometry;
 
-class RddReader
+public class RddReader
 {
     public static SpatialRDD<Geometry> createSpatialRDD(JavaRDD rawTextRDD, FormatMapper<Geometry> formatMapper)
     {

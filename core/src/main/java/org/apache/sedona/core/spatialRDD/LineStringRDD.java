@@ -20,6 +20,7 @@
 package org.apache.sedona.core.spatialRDD;
 
 import org.apache.sedona.core.enums.FileDataSplitter;
+import org.apache.sedona.core.enums.GeometryType;
 import org.apache.sedona.core.formatMapper.FormatMapper;
 import org.apache.sedona.core.formatMapper.LineStringFormatMapper;
 import org.apache.spark.api.java.JavaRDD;
@@ -40,15 +41,17 @@ public class LineStringRDD
     /**
      * Instantiates a new line string RDD.
      */
-    public LineStringRDD() {}
+    public LineStringRDD() {
+        this(null);
+    }
 
     /**
      * Instantiates a new line string RDD.
      *
      * @param rawSpatialRDD the raw spatial RDD
      */
-    public LineStringRDD(JavaRDD<LineString> rawSpatialRDD)
-    {
+    public LineStringRDD(JavaRDD<LineString> rawSpatialRDD) {
+        super(GeometryType.LINESTRING);
         this.rawSpatialRDD = rawSpatialRDD;
     }
 
@@ -61,6 +64,7 @@ public class LineStringRDD
      */
     public LineStringRDD(JavaRDD<LineString> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode)
     {
+        super(GeometryType.LINESTRING);
         this.rawSpatialRDD = rawSpatialRDD;
         this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
     }
@@ -424,6 +428,7 @@ public class LineStringRDD
     public LineStringRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset,
             FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
     {
+        super(GeometryType.LINESTRING);
         JavaRDD rawTextRDD = partitions != null ? sparkContext.textFile(InputLocation, partitions) : sparkContext.textFile(InputLocation);
         if (startOffset != null && endOffset != null) {
             this.setRawSpatialRDD(rawTextRDD.mapPartitions(new LineStringFormatMapper(startOffset, endOffset, splitter, carryInputData)));
@@ -502,6 +507,7 @@ public class LineStringRDD
      */
     public LineStringRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
     {
+        super(GeometryType.LINESTRING);
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(userSuppliedMapper));
         this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.analyze(newLevel);
@@ -519,8 +525,14 @@ public class LineStringRDD
      */
     public LineStringRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
     {
+        super(GeometryType.LINESTRING);
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(userSuppliedMapper));
         this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.analyze(newLevel);
+    }
+    
+    @Override
+    public GeometryType getGeometryType() {
+        return GeometryType.LINESTRING;
     }
 }

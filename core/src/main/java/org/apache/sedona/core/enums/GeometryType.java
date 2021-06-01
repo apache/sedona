@@ -53,4 +53,8 @@ public enum GeometryType
         }
         throw new IllegalArgumentException("[" + GeometryType.class + "] Unsupported geometry type:" + str);
     }
+    
+    public String getName(){
+        return this.name().toLowerCase();
+    }
 }

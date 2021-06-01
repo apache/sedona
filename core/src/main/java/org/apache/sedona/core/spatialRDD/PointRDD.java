@@ -20,6 +20,7 @@
 package org.apache.sedona.core.spatialRDD;
 
 import org.apache.sedona.core.enums.FileDataSplitter;
+import org.apache.sedona.core.enums.GeometryType;
 import org.apache.sedona.core.formatMapper.FormatMapper;
 import org.apache.sedona.core.formatMapper.PointFormatMapper;
 import org.apache.spark.api.java.JavaRDD;
@@ -42,7 +43,9 @@ public class PointRDD
     /**
      * Instantiates a new point RDD.
      */
-    public PointRDD() {}
+    public PointRDD() {
+        super(GeometryType.POINT);
+    }
 
     /**
      * Instantiates a new point RDD.
@@ -51,6 +54,7 @@ public class PointRDD
      */
     public PointRDD(JavaRDD<Point> rawSpatialRDD)
     {
+        super(GeometryType.POINT);
         this.rawSpatialRDD = rawSpatialRDD;
     }
 
@@ -63,6 +67,7 @@ public class PointRDD
      */
     public PointRDD(JavaRDD<Point> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode)
     {
+        super(GeometryType.POINT);
         this.rawSpatialRDD = rawSpatialRDD;
         this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
     }
@@ -416,6 +421,7 @@ public class PointRDD
     public PointRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter,
             boolean carryInputData, Integer partitions, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
     {
+        super(GeometryType.POINT);
         JavaRDD rawTextRDD = partitions != null ? sparkContext.textFile(InputLocation, partitions) : sparkContext.textFile(InputLocation);
         if (Offset != null) {this.setRawSpatialRDD(rawTextRDD.mapPartitions(new PointFormatMapper(Offset, splitter, carryInputData)));}
         else {this.setRawSpatialRDD(rawTextRDD.mapPartitions(new PointFormatMapper(splitter, carryInputData)));}
@@ -507,5 +513,10 @@ public class PointRDD
     public PointRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
     {
         this(sparkContext, InputLocation, null, null, false, null, newLevel, sourceEpsgCRSCode, targetEpsgCode);
+    }
+    
+    @Override
+    public GeometryType getGeometryType() {
+        return GeometryType.POINT;
     }
 }
