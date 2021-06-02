@@ -72,10 +72,10 @@ class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
     printf(df.first().getAs[String](0))
   }
 
-  it("should pass RS_ImageNormalize") {
+  it("should pass RS_Normalize") {
 
     var df = Seq((Seq(800.0, 900.0, 0.0, 255.0)), (Seq(100.0, 200.0, 700.0, 900.0))).toDF("Band")
-    df = df.selectExpr("RS_ImageNormalize(Band) as normalizedBand")
+    df = df.selectExpr("RS_Normalize(Band) as normalizedBand")
     df.show(false)
   }
 

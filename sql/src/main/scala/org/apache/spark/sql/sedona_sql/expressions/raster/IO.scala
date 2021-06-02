@@ -167,7 +167,13 @@ case class RS_Base64(inputExpressions: Seq[Expression])
         bufferedimage = getBufferedimage(band1, band2, band3, null , height, width)
       }
     else {
-      val band4 = inputExpressions(3).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+      var band4:Array[Double] = null
+      if(inputExpressions(5).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData") {
+        band4 = inputExpressions(5).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+      }
+      else {
+        band4 = inputExpressions(5).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
+      }
       bufferedimage = getBufferedimage(band1, band2, band3, band4, height, width)
     }
 
@@ -258,7 +264,7 @@ case class RS_HTML(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
-case class RS_ImageNormalize(inputExpressions: Seq[Expression])
+case class RS_Normalize(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
 
