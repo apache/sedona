@@ -15,17 +15,13 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+import logging
 import os
 from re import findall
 from typing import Optional
-import logging
 
 from pyspark.sql import SparkSession
-
 from sedona.utils.decorators import classproperty
-
-FORMAT = '%(asctime) %(message)s'
-logging.basicConfig(format=FORMAT)
 
 
 def is_greater_or_equal_version(version_a: str, version_b: str) -> bool:
@@ -49,8 +45,10 @@ def since(version: str):
         def applier(*args, **kwargs):
             sedona_version = SedonaMeta.version
             if not is_greater_or_equal_version(sedona_version, version):
-                logging.warning(f"This function is not available for {sedona_version}, "
-                                f"please use version higher than {version}")
+                logging.warning(
+                    f"This function is not available for {sedona_version}, "
+                    f"please use version higher than {version}"
+                )
                 raise AttributeError(f"Not available before {version} sedona version")
             result = function(*args, **kwargs)
             return result
@@ -77,7 +75,6 @@ def depreciated(version: str, substitute: str):
 
 
 class SparkJars:
-
     @staticmethod
     def get_used_jars():
         spark = SparkSession._instantiatedSession
@@ -90,11 +87,17 @@ class SparkJars:
         try:
             used_jar_files = java_spark_conf.get("spark.jars")
         except Exception as e:
-            logging.warning(f"Failed to get the value of spark.jars from SparkConf: {e}")
+            logging.warning(
+                f"Failed to get the value of spark.jars from SparkConf: {e}"
+            )
         finally:
             if not used_jar_files:
-                logging.info("Trying to get filenames from the $SPARK_HOME/jars directory")
-                used_jar_files = ",".join(os.listdir(os.path.join(os.environ["SPARK_HOME"], "jars")))
+                logging.info(
+                    "Trying to get filenames from the $SPARK_HOME/jars directory"
+                )
+                used_jar_files = ",".join(
+                    os.listdir(os.path.join(os.environ["SPARK_HOME"], "jars"))
+                )
         return used_jar_files
 
     @property
@@ -105,11 +108,13 @@ class SparkJars:
 
 
 class SedonaMeta:
-
     @classmethod
     def get_version(cls, spark_jars: str) -> Optional[str]:
         # Find Spark version, Scala version and Sedona version.
-        versions = findall(r"sedona-python-adapter-([^,\n]+)_([^,\n]+)-([^,\n]+)-incubating", spark_jars)
+        versions = findall(
+            r"sedona-python-adapter-([^,\n]+)_([^,\n]+)-([^,\n]+)-incubating",
+            spark_jars,
+        )
         try:
             sedona_version = versions[0][2]
         except IndexError:
