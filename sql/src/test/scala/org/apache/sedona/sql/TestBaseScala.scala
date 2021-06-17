@@ -26,6 +26,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
 trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
+  Logger.getRootLogger().setLevel(Level.WARN)
   Logger.getLogger("org.apache").setLevel(Level.WARN)
   Logger.getLogger("com").setLevel(Level.WARN)
   Logger.getLogger("akka").setLevel(Level.WARN)

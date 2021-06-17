@@ -1125,7 +1125,6 @@ case class ST_FlipCoordinates(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
-
 case class ST_SubDivide(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   override def nullable: Boolean = true
