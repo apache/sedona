@@ -197,9 +197,12 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val expectedDF = Seq(Seq(100.0, 260.0, 189.0, 106.0, 230.0, 169.0)).toDF("Region")
       inputDf = inputDf.selectExpr("RS_FetchRegion(Band,Array(0, 0, 1, 2),Array(3, 3)) as Region")
       assert(inputDf.first().getAs[mutable.WrappedArray[Double]](0) == expectedDF.first().getAs[mutable.WrappedArray[Double]](0))
-
     }
 
-
+    it("should pass RS_Normalize") {
+      var df = Seq((Seq(800.0, 900.0, 0.0, 255.0)), (Seq(100.0, 200.0, 700.0, 900.0))).toDF("Band")
+      df = df.selectExpr("RS_Normalize(Band) as normalizedBand")
+      assert(df.first().getAs[mutable.WrappedArray[Double]](0)(1) == 255)
+    }
   }
 }

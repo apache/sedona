@@ -11,12 +11,12 @@ The input path could be a path to a single GeoTiff image or a directory of GeoTi
  You can optionally append an option to drop invalid images. The geometry bound of each image is automatically loaded
 as a Sedona geometry and is transformed to WGS84 (EPSG:4326) reference system.
 
-```SQL 
+```Scala
 var geotiffDF = sparkSession.read.format("geotiff").option("dropInvalid", true).load("YOUR_PATH")
 geotiffDF.printSchema()
 ```
 
-Output
+Output:
 
 ```html
  |-- image: struct (nullable = true)
@@ -31,13 +31,13 @@ Output
 
 You can also select sub-attributes individually to construct a new DataFrame
 
-```SQL
+```Scala
 geotiffDF = geotiffDF.selectExpr("image.origin as origin","image.Geometry as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
 geotiffDF.createOrReplaceTempView("GeotiffDataframe")
 geotiffDF.show()
 ```
 
-Output
+Output:
 
 ```html
 +--------------------+--------------------+------+-----+--------------------+-----+
@@ -59,11 +59,15 @@ Format: `RS_GetBand (allBandValues: Array[Double], targetBand:Int, totalBands:In
 Since: `v1.1.0`
 
 Spark SQL example:
-```SQL
 
+```Scala
 val BandDF = spark.sql("select RS_GetBand(data, 2, Band) as targetBand from GeotiffDataframe")
 BandDF.show()
+```
 
+Output:
+
+```html
 +--------------------+
 |          targetBand|
 +--------------------+
@@ -72,25 +76,69 @@ BandDF.show()
 +--------------------+
 ```
 
-## RS_Base64
+## RS_Array
 
-Introduction: Return a Base64 String from a geotiff image
+Introduction: Create an array that is filled by the given value
 
-Format: `RS_Base64 (Band: Array[Double])`
+Format: `RS_Array(length:Int, value: Decimal)`
 
 Since: `v1.1.0`
 
 Spark SQL example:
-```SQL
 
-val BandDF = spark.sql("select RS_Base64(band) as baseString from dataframe")
+```Scala
+SELECT RS_Array(height * width, 0.0)
+```
+
+## RS_Base64
+
+Introduction: Return a Base64 String from a geotiff image
+
+Format: `RS_Base64 (height:Int, width:Int, redBand: Array[Double], greenBand: Array[Double], blackBand: Array[Double], 
+optional: alphaBand: Array[Double])`
+
+Since: `v1.1.0`
+
+Spark SQL example:
+```Scala
+val BandDF = spark.sql("select RS_Base64(h, w, band1, band2, RS_Array(h*w, 0)) as baseString from dataframe")
 BandDF.show()
+```
 
+Output:
+
+```html
 +--------------------+
 |          baseString|
 +--------------------+
 |QJCIAAAAAABAkDwAA...|
 |QJOoAAAAAABAlEgAA...|
 +--------------------+
-
 ```
+
+!!!note
+	Although the 3 RGB bands are mandatory, you can use [RS_Array(h*w, 0.0)](#rs_array) to create an array (zeroed out, size = h * w) as input.
+
+## RS_HTML
+
+Introduction: Return a html img tag with the base64 string embedded
+
+Format: `RS_HTML(base64:String, optional: width_in_px:String)`
+
+Spark SQL example:
+
+```Scala
+df.selectExpr("RS_HTML(encodedstring, '300') as htmlstring" ).show()
+```
+
+Output:
+
+```html
++--------------------+
+|          htmlstring|
++--------------------+
+|<img src="data:im...|
+|<img src="data:im...|
++--------------------+
+```
+

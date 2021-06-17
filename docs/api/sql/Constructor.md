@@ -185,36 +185,3 @@ SELECT *
 FROM pointdf
 WHERE ST_Contains(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.pointshape)
 ```
-
-## RS_GetBand
-
-Introduction: Return a particular band from result of ST_GeomWithBandsFromGeoTiff
-
-Format: `RS_GetBand (allBandValues: Array[Double], targetBand:Int, totalBands:Int)`
-
-Since: `v1.1.0`
-
-Spark SQL example:
-```SQL
-
-val initialDF = spark.sql("Select rasterBand from initDF")
-initialDF.show()
-initialDF.createOrReplaceTempView("resultOfST_GeomWithBandsFromGeoTiff")
-
-+------------------------------------------+
-|rasterBand                                |
-+------------------------------------------+
-|[200.0, 400.0, 600.0, 800.0, 900.0, 100.0]|
-|[200.0, 500.0, 800.0, 300.0, 200.0, 100.0]|
-+------------------------------------------+
-
-val finalDF = spark.sql("select RS_GetBand(geotiffBands, 2, 3) as band2 from resultOfST_GeomWithBandsFromGeoTiff")
-finalDF.show()
-
-+--------------+
-|band2         |
-+--------------+
-|[600.0, 800.0]|
-|[800.0, 300.0]|
-+--------------+
-```

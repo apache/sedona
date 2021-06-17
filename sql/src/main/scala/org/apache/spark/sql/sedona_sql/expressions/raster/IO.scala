@@ -129,13 +129,13 @@ case class RS_Array(inputExpressions: Seq[Expression])
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
     val len =inputExpressions(0).eval(inputRow).asInstanceOf[Int]
-    val num = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
+    val num = inputExpressions(1).eval(inputRow).asInstanceOf[Decimal].toDouble
     val result = createarray(len, num)
     new GenericArrayData(result)
   }
 
   // Generate an empty band for the given spectral band in ageotiff image
-  private def createarray(len:Int, num:Int):Array[Double] = {
+  private def createarray(len:Int, num:Double):Array[Double] = {
 
     val result = new Array[Double](len)
     for(i<-0 until len) {
@@ -188,21 +188,16 @@ case class RS_Base64(inputExpressions: Seq[Expression])
     band4 match {
       case null => {
         for (i <- 0 until (height * width)) {
-
           if(i>0 && i%height==0) {
             h+=1
           }
           w = i%width
           image.setRGB(w, h, new Color(band1(i).toInt, band2(i).toInt, band3(i).toInt, 255).getRGB())
-
         }
         image
-
       }
-
       case _ => {
         for (i <- 0 until (height * width)) {
-
           if(i>0 && i%height==0) {
             h+=1
           }
@@ -211,10 +206,7 @@ case class RS_Base64(inputExpressions: Seq[Expression])
 
         }
         image
-
       }
-
-
 
     }
   }
@@ -240,15 +232,16 @@ case class RS_HTML(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     val encodedstring =inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
-    val result = htmlstring(encodedstring)
+    // Add image width if needed
+    var imageWidth = "200"
+    if (inputExpressions.length == 2) imageWidth = inputExpressions(1).eval(inputRow).asInstanceOf[UTF8String].toString
+    val result = htmlstring(encodedstring, imageWidth)
     UTF8String.fromString(result)
   }
 
   // create HTML string from Base64 string
-  private def htmlstring(encodestring: String): String = {
-
-    val result = "<img src=\"" + createmainstring(encodestring) + "\""  + " " + "width=\"200\"" + "/>"
-    result
+  private def htmlstring(encodestring: String, imageWidth: String): String = {
+    "<img src=\"" + createmainstring(encodestring) + "\" width=\"" + imageWidth + "\" />"
   }
 
   private def createmainstring(encodestring:String): String = {
@@ -256,48 +249,7 @@ case class RS_HTML(inputExpressions: Seq[Expression])
     val result = s"data:image/png;base64,$encodestring"
     result
   }
-
-
-
   override def dataType: DataType = StringType
-
-  override def children: Seq[Expression] = inputExpressions
-}
-
-case class RS_Normalize(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    // This is an expression which takes one input expressions
-    var band:Array[Double] = null
-
-    if(inputExpressions(0).eval(inputRow).getClass.toString() == "class org.apache.spark.sql.catalyst.expressions.UnsafeArrayData") {
-      band =inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
-    }
-    else {
-      band =inputExpressions(0).eval(inputRow).asInstanceOf[GenericArrayData].toDoubleArray()
-
-    }
-    val result = normalize(band)
-    new GenericArrayData(result)
-  }
-
-  // Normalize between 0 and 255
-  private def normalize(band: Array[Double]): Array[Double] = {
-
-    val result = new Array[Double](band.length)
-    val maxVal = band.toList.max
-
-    for(i<-0 until band.length) {
-      result(i) = (band(i)/(maxVal/255.0)).toInt
-    }
-
-    result
-
-  }
-
-  override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
 }

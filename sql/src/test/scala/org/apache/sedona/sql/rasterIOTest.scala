@@ -24,16 +24,14 @@ import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
 import scala.collection.mutable
 
-class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
+class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
 
   var rasterdatalocation: String = resourceFolder + "raster/"
-  import sparkSession.implicits._
 
-
+  describe("Raster IO test") {
     it("Should Pass geotiff loading") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
       df = df.selectExpr("image.origin as origin","image.Geometry as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
-      df.show()
       assert(df.first().getAs[Geometry](1).toText == "POLYGON ((-117.64141128097314 33.94356351407699, -117.64141128097314 33.664978146501284, -117.30939395196258 33.664978146501284," +
         " -117.30939395196258 33.94356351407699, -117.64141128097314 33.94356351407699))")
       assert(df.first().getInt(2) == 517)
@@ -53,34 +51,26 @@ class rasterTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
       assert(df.first().getAs[mutable.WrappedArray[Double]](0).length == 512 * 517)
     }
 
-  it("should pass RS_Base64") {
-    var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/")
-    df = df.selectExpr("image.origin as origin","image.Geometry as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
-    df = df.selectExpr("RS_GetBand(data, 1, bands) as targetBand", "width","height")
-    df.createOrReplaceTempView("geotiff")
-    df = sparkSession.sql("Select RS_base64(height, width, targetBand, RS_Array(height*width, 0), RS_Array(height*width, 0)) as encodedstring from geotiff")
-//    printf(df.first().getAs[String](0))
+    it("should pass RS_Base64") {
+      var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/")
+      df = df.selectExpr("image.origin as origin","image.Geometry as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+      df = df.selectExpr("RS_GetBand(data, 1, bands) as targetBand", "width","height")
+      df.createOrReplaceTempView("geotiff")
+      df = sparkSession.sql("Select RS_base64(height, width, targetBand, RS_Array(height*width, 0), RS_Array(height*width, 0)) as encodedstring from geotiff")
+//      printf(df.first().getAs[String](0))
+    }
+
+    it("should pass RS_HTML") {
+      var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/")
+      df = df.selectExpr("image.origin as origin","image.Geometry as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+      df = df.selectExpr("RS_GetBand(data, 1, bands) as targetBand", "width","height")
+      df.createOrReplaceTempView("geotiff")
+      df = sparkSession.sql("Select RS_base64(height, width, targetBand, RS_Array(height*width, 0.0), RS_Array(height*width, 0.0)) as encodedstring from geotiff")
+      df = df.selectExpr("RS_HTML(encodedstring, '300') as htmlstring" )
+      assert(df.first().getAs[String](0).contains("img"))
+//      printf(df.first().getAs[String](0))
+    }
   }
-
-  it("should pass RS_HTML") {
-    var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/")
-    df = df.selectExpr("image.origin as origin","image.Geometry as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
-    df = df.selectExpr("RS_GetBand(data, 1, bands) as targetBand", "width","height")
-    df.createOrReplaceTempView("geotiff")
-    df = sparkSession.sql("Select RS_base64(height, width, targetBand, RS_Array(height*width, 0), RS_Array(height*width, 0)) as encodedstring from geotiff")
-    df = df.selectExpr("RS_HTML(encodedstring) as htmlstring" )
-    printf(df.first().getAs[String](0))
-  }
-
-  it("should pass RS_Normalize") {
-
-    var df = Seq((Seq(800.0, 900.0, 0.0, 255.0)), (Seq(100.0, 200.0, 700.0, 900.0))).toDF("Band")
-    df = df.selectExpr("RS_Normalize(Band) as normalizedBand")
-    df.show(false)
-  }
-
-
-
 }
 
 
