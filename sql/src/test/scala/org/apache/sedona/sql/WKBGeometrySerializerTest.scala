@@ -18,33 +18,41 @@
  */
 package org.apache.sedona.sql
 
-import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.BeforeAndAfterAll
 import org.apache.log4j.{Level, Logger}
+import org.apache.sedona.core.serde.SedonaWKBKryoRegistrator
 import org.apache.sedona.sql.utils.SedonaSQLRegistrator
 import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.sql.SparkSession
 import org.locationtech.jts.geom.Geometry
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import org.scalatest.funspec.AnyFunSpec
 
-class WKBGeometrySerializerTest extends AnyFunSpec with BeforeAndAfterAll {
+class WKBGeometrySerializerTest extends AnyFunSpec
+  with BeforeAndAfterEach {
 
   Logger.getLogger("org.apache").setLevel(Level.WARN)
   Logger.getLogger("com").setLevel(Level.WARN)
   Logger.getLogger("akka").setLevel(Level.WARN)
   Logger.getLogger("org.apache.sedona.core").setLevel(Level.WARN)
 
+  var sparkSession : SparkSession = _
   // TODO - add docs for sedona.serializer.type
-  val warehouseLocation = System.getProperty("user.dir") + "/target/"
-  val sparkSession = SparkSession.builder()
-    .config("spark.serializer", classOf[KryoSerializer].getName)
-    .config("sedona.serializer.type", "wkb")
-    .master("local[*]")
-    .appName("WKBGeometrySerializerTest")
-    .config("spark.sql.warehouse.dir", warehouseLocation)
-    .getOrCreate()
+  override def beforeEach(): Unit = {
 
-  override def beforeAll(): Unit = {
+    sparkSession = SparkSession.builder()
+      .config("spark.serializer", classOf[KryoSerializer].getName)
+      .config("spark.kryo.registrator", classOf[SedonaWKBKryoRegistrator].getName)
+      .config("sedona.serializer.type", "wkb")
+      .master("local[*]")
+      .appName("WKBGeometrySerializerTest")
+      .getOrCreate()
+
     SedonaSQLRegistrator.registerAll(sparkSession)
+  }
+
+  override def afterEach(): Unit = {
+    SedonaSQLRegistrator.dropAll(sparkSession)
+    SparkSession.getActiveSession.foreach(ss =>ss.close())
   }
 
   it("Passed simple ST_Point test using the wkb serializer") {
