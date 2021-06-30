@@ -44,7 +44,7 @@ public class RangeFilter<U extends Geometry, T extends Geometry>
             return match(geometry, queryGeometry);
         }
         else {
-            return match(queryGeometry, queryGeometry);
+            return match(queryGeometry, geometry);
         }
     }
 }

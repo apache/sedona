@@ -2,7 +2,7 @@
 
 Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder) and play the interactive Sedona Python Jupyter Notebook immediately!
 
-Sedona Python provides two Jupyter Notebook examples: [Sedona core](https://github.com/apache/incubator-sedona/blob/master/binder/ApacheSedonaCore.ipynb) and [Sedona SQL](https://github.com/apache/incubator-sedona/blob/master/binder/ApacheSedonaSQL.ipynb)
+Sedona Python provides a number of [Jupyter Notebook examples](https://github.com/apache/incubator-sedona/blob/master/binder/).
 
 
 Please use the following steps to run Jupyter notebook with Pipenv on your machine

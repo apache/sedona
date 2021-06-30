@@ -22,6 +22,8 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.sedona.core.enums.FileDataSplitter;
 import org.apache.sedona.core.enums.IndexType;
+import org.apache.sedona.core.rangeJudgement.RangeFilter;
+import org.apache.sedona.core.rangeJudgement.RangeFilterUsingIndex;
 import org.apache.sedona.core.spatialRDD.RectangleRDD;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -29,7 +31,10 @@ import org.apache.spark.storage.StorageLevel;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Polygon;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -186,5 +191,30 @@ public class RectangleRangeTest
             assertEquals(resultSize, 193);
         }
         assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, true).take(10).get(1).getUserData().toString() != null;
+    }
+
+    /**
+     * Test spatial range query not using index and leftCoveredByRight is false.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void testSpatialRangeQueryLeftCoveredByRightFalse()
+            throws Exception {
+        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY());
+        Coordinate[] coordinates = new Coordinate[5];
+        coordinates[0] = new Coordinate(queryEnvelope.getMinX(), queryEnvelope.getMinY());
+        coordinates[1] = new Coordinate(queryEnvelope.getMinX(), queryEnvelope.getMaxY());
+        coordinates[2] = new Coordinate(queryEnvelope.getMaxX(), queryEnvelope.getMaxY());
+        coordinates[3] = new Coordinate(queryEnvelope.getMaxX(), queryEnvelope.getMinY());
+        coordinates[4] = coordinates[0];
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Polygon queryGeometry = geometryFactory.createPolygon(coordinates);
+        spatialRDD.buildIndex(IndexType.RTREE, false);
+        long useIndexResultSize = spatialRDD.indexedRawRDD.mapPartitions(new RangeFilterUsingIndex(queryGeometry, false, false)).count();
+        for (int i = 0; i < loopTimes; i++) {
+            long notUseIndexResultSize = spatialRDD.getRawSpatialRDD().filter(new RangeFilter(queryGeometry, false, false)).count();
+            assertEquals(useIndexResultSize, notUseIndexResultSize);
+        }
     }
 }
