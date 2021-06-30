@@ -40,7 +40,7 @@ object GeotiffSchema {
    */
   val columnSchema = StructType(
     StructField("origin", StringType, true) ::
-      StructField("Geometry", GeometryUDT, true) ::
+      StructField("wkt", StringType, true) ::
       StructField("height", IntegerType, false) ::
       StructField("width", IntegerType, false) ::
       StructField("nBands", IntegerType, false) ::
@@ -185,7 +185,7 @@ object GeotiffSchema {
       }
     }
     // the internal "Row" is needed, because the image is a single DataFrame column
-    Some(Row(Row(origin, polygon, height, width, nBands, decoded)))
+    Some(Row(Row(origin, polygon.toText, height, width, nBands, decoded)))
   }
 }
 
