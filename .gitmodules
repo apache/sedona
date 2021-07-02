@@ -1,3 +1,0 @@
-[submodule "contrib/R"]
-	path = contrib/R
-  url = https://github.com/harryprince/geospark

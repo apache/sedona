@@ -22,6 +22,7 @@ nav:
         - Scala/Java: tutorial/sql.md
         - Pure SQL: tutorial/sql-pure-sql.md
         - Python: tutorial/sql-python.md
+        - Raster data: tutorial/raster.md
       - Map visualization SQL app:
         - Scala/Java: tutorial/viz.md
         - Use Apache Zeppelin: tutorial/zeppelin.md
@@ -37,11 +38,15 @@ nav:
         - Python doc: api/python-api.md
       - SQL:
         - Quick start: api/sql/Overview.md
-        - Constructor: api/sql/Constructor.md
-        - Function: api/sql/Function.md
-        - Predicate: api/sql/Predicate.md
-        - Aggregate function: api/sql/AggregateFunction.md
-        - Join query (optimizer): api/sql/Optimizer.md
+        - Vector data:
+            - Constructor: api/sql/Constructor.md
+            - Function: api/sql/Function.md
+            - Predicate: api/sql/Predicate.md
+            - Aggregate function: api/sql/AggregateFunction.md
+            - Join query (optimizer): api/sql/Optimizer.md
+        - Raster data:
+            - Raster input and output: api/sql/Raster-loader.md
+            - Raster operators: api/sql/Raster-operators.md
         - Parameter: api/sql/Parameter.md
       - Viz:
         - DataFrame/SQL: api/viz/sql.md
