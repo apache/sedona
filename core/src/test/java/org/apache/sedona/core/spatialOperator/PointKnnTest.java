@@ -224,4 +224,23 @@ public class PointKnnTest
         }
         assert difference == 0;
     }
+
+    /**
+     * Test spatial knn query without useIndex and k is larger than spatialRDD's approximateTotalCount
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void testSpatialKnnQueryTopKlargerThanRowNumber()
+            throws Exception
+    {
+        String inputPath = "file://" + PointKnnTest.class.getClassLoader().getResource("small/onepoint.csv").getPath();
+        PointRDD pointRDD = new PointRDD(sc, inputPath, 0, splitter, false);
+        //this pointRDD only one row of data
+//        System.out.println(pointRDD.getRawSpatialRDD().count());
+        for (int i = 0; i < loopTimes; i++) {
+            List<Point> result = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, 5, false);
+            assert result.size() == 1;
+        }
+    }
 }
