@@ -32,7 +32,7 @@ Output:
 You can also select sub-attributes individually to construct a new DataFrame
 
 ```Scala
-geotiffDF = geotiffDF.selectExpr("image.origin as origin","image.Geometry as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+geotiffDF = geotiffDF.selectExpr("image.origin as origin","ST_GeomFromWkt(image.wkt) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
 geotiffDF.createOrReplaceTempView("GeotiffDataframe")
 geotiffDF.show()
 ```
