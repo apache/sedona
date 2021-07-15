@@ -580,7 +580,7 @@ public class PolygonRDD
     
     @Override
     public GeometryType getGeometryType() {
-        return GeometryType.CIRCLE;
+        return GeometryType.POLYGON;
     }
 }
 

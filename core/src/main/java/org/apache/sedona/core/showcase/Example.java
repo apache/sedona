@@ -52,99 +52,99 @@ import java.util.List;
 public class Example
         implements Serializable
 {
-
+    
     /**
      * The sc.
      */
     public static JavaSparkContext sc;
-
+    
     /**
      * The geometry factory.
      */
     static GeometryFactory geometryFactory;
-
+    
     /**
      * The Point RDD input location.
      */
     static String PointRDDInputLocation;
-
+    
     /**
      * The Point RDD offset.
      */
     static Integer PointRDDOffset;
-
+    
     /**
      * The Point RDD num partitions.
      */
     static Integer PointRDDNumPartitions;
-
+    
     /**
      * The Point RDD splitter.
      */
     static FileDataSplitter PointRDDSplitter;
-
+    
     /**
      * The Point RDD index type.
      */
     static IndexType PointRDDIndexType;
-
+    
     /**
      * The object RDD.
      */
     static PointRDD objectRDD;
-
+    
     /**
      * The Polygon RDD input location.
      */
     static String PolygonRDDInputLocation;
-
+    
     /**
      * The Polygon RDD start offset.
      */
     static Integer PolygonRDDStartOffset;
-
+    
     /**
      * The Polygon RDD end offset.
      */
     static Integer PolygonRDDEndOffset;
-
+    
     /**
      * The Polygon RDD num partitions.
      */
     static Integer PolygonRDDNumPartitions;
-
+    
     /**
      * The Polygon RDD splitter.
      */
     static FileDataSplitter PolygonRDDSplitter;
-
+    
     /**
      * The query window RDD.
      */
     static PolygonRDD queryWindowRDD;
-
+    
     /**
      * The join query partitioning type.
      */
     static GridType joinQueryPartitioningType;
-
+    
     /**
      * The each query loop times.
      */
     static int eachQueryLoopTimes;
-
+    
     /**
      * The k NN query point.
      */
     static Point kNNQueryPoint;
-
+    
     /**
      * The range query window.
      */
     static Envelope rangeQueryWindow;
-
+    
     static String ShapeFileInputLocation;
-
+    
     /**
      * The main method.
      *
@@ -155,33 +155,33 @@ public class Example
         SparkConf conf = new SparkConf().setAppName("SedonaRunnableExample").setMaster("local[2]");
         conf.set("spark.serializer", KryoSerializer.class.getName());
         conf.set("spark.kryo.registrator", SedonaKryoRegistrator.class.getName());
-
+        
         sc = new JavaSparkContext(conf);
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
-
+        
         String resourceFolder = System.getProperty("user.dir") + "/src/test/resources/";
-
+        
         PointRDDInputLocation = resourceFolder + "arealm-small.csv";
         PointRDDSplitter = FileDataSplitter.CSV;
         PointRDDIndexType = IndexType.RTREE;
         PointRDDNumPartitions = 5;
         PointRDDOffset = 0;
-
+        
         PolygonRDDInputLocation = resourceFolder + "primaryroads-polygon.csv";
         PolygonRDDSplitter = FileDataSplitter.CSV;
         PolygonRDDNumPartitions = 5;
         PolygonRDDStartOffset = 0;
         PolygonRDDEndOffset = 8;
-
+        
         geometryFactory = new GeometryFactory();
         kNNQueryPoint = geometryFactory.createPoint(new Coordinate(-84.01, 34.01));
         rangeQueryWindow = new Envelope(-90.01, -80.01, 30.01, 40.01);
         joinQueryPartitioningType = GridType.QUADTREE;
         eachQueryLoopTimes = 5;
-
+        
         ShapeFileInputLocation = resourceFolder + "shapefiles/polygon";
-
+        
         try {
             testSpatialRangeQuery();
             testSpatialRangeQueryUsingIndex();
@@ -203,7 +203,7 @@ public class Example
         sc.stop();
         System.out.println("All DEMOs passed!");
     }
-
+    
     /**
      * Test spatial range query.
      *
@@ -219,7 +219,7 @@ public class Example
             assert resultSize > -1;
         }
     }
-
+    
     /**
      * Test spatial range query using index.
      *
@@ -236,7 +236,7 @@ public class Example
             assert resultSize > -1;
         }
     }
-
+    
     /**
      * Test spatial knn query.
      *
@@ -252,7 +252,7 @@ public class Example
             assert result.size() > -1;
         }
     }
-
+    
     /**
      * Test spatial knn query using index.
      *
@@ -269,7 +269,7 @@ public class Example
             assert result.size() > -1;
         }
     }
-
+    
     /**
      * Test spatial join query.
      *
@@ -280,10 +280,10 @@ public class Example
     {
         queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true);
         objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
-
+        
         objectRDD.spatialPartitioning(joinQueryPartitioningType);
         queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner());
-
+        
         objectRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY());
         queryWindowRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY());
         for (int i = 0; i < eachQueryLoopTimes; i++) {
@@ -291,7 +291,7 @@ public class Example
             assert resultSize > 0;
         }
     }
-
+    
     /**
      * Test spatial join query using index.
      *
@@ -302,21 +302,21 @@ public class Example
     {
         queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true);
         objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
-
+        
         objectRDD.spatialPartitioning(joinQueryPartitioningType);
         queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner());
-
+        
         objectRDD.buildIndex(PointRDDIndexType, true);
-
+        
         objectRDD.indexedRDD.persist(StorageLevel.MEMORY_ONLY());
         queryWindowRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY());
-
+        
         for (int i = 0; i < eachQueryLoopTimes; i++) {
             long resultSize = JoinQuery.SpatialJoinQuery(objectRDD, queryWindowRDD, true, false).count();
             assert resultSize > 0;
         }
     }
-
+    
     /**
      * Test spatial join query.
      *
@@ -327,20 +327,20 @@ public class Example
     {
         objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
         CircleRDD queryWindowRDD = new CircleRDD(objectRDD, 0.1);
-
+        
         objectRDD.spatialPartitioning(GridType.QUADTREE);
         queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner());
-
+        
         objectRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY());
         queryWindowRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY());
-
+        
         for (int i = 0; i < eachQueryLoopTimes; i++) {
-
+            
             long resultSize = JoinQuery.DistanceJoinQuery(objectRDD, queryWindowRDD, false, true).count();
             assert resultSize > 0;
         }
     }
-
+    
     /**
      * Test spatial join query using index.
      *
@@ -351,21 +351,21 @@ public class Example
     {
         objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
         CircleRDD queryWindowRDD = new CircleRDD(objectRDD, 0.1);
-
+        
         objectRDD.spatialPartitioning(GridType.QUADTREE);
         queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner());
-
+        
         objectRDD.buildIndex(IndexType.RTREE, true);
-
+        
         objectRDD.indexedRDD.persist(StorageLevel.MEMORY_ONLY());
         queryWindowRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY());
-
+        
         for (int i = 0; i < eachQueryLoopTimes; i++) {
             long resultSize = JoinQuery.DistanceJoinQuery(objectRDD, queryWindowRDD, true, true).count();
             assert resultSize > 0;
         }
     }
-
+    
     /**
      * Test CRS transformation spatial range query.
      *
@@ -381,7 +381,7 @@ public class Example
             assert resultSize > -1;
         }
     }
-
+    
     /**
      * Test CRS transformation spatial range query using index.
      *
@@ -398,7 +398,7 @@ public class Example
             assert resultSize > -1;
         }
     }
-
+    
     public static void testLoadShapefileIntoPolygonRDD()
             throws Exception
     {

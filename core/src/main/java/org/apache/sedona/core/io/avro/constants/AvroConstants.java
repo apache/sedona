@@ -1,5 +1,8 @@
 package org.apache.sedona.core.io.avro.constants;
 
+import org.apache.sedona.core.io.avro.schema.ArraySchema;
+import org.apache.sedona.core.io.avro.schema.RecordSchema;
+
 public class AvroConstants {
     public static final String NAME = "name";
     public static final String TYPE = "type";
@@ -52,6 +55,28 @@ public class AvroConstants {
         @Override
         public String getType() {
             return type;
+        }
+    }
+    
+    public enum SchemaType{
+        RECORD(1),ARRAY(2),SIMPLE(3);
+        private int id;
+        
+        SchemaType(int id) {
+            this.id = id;
+        }
+    
+        public int getId() {
+            return id;
+        }
+    
+        public static SchemaType getSchema(int id){
+            for(SchemaType schema: SchemaType.values()){
+                if(id==schema.getId()){
+                    return schema;
+                }
+            }
+            return null;
         }
     }
     

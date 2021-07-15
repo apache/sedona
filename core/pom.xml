@@ -226,8 +226,6 @@
             <groupId>org.apache.sedona</groupId>
             <artifactId>sedona-parquet-${spark.compat.version}_${scala.compat.version}</artifactId>
             <version>${project.version}</version>
-<!--            <scope>system</scope>-->
-<!--            <systemPath>/Users/swamirishi/incubator-sedona/parquet/target/sedona-parquet-3.0_2.12-1.1.0-incubating-SNAPSHOT.jar</systemPath>-->
         </dependency>
     </dependencies>
     <build>

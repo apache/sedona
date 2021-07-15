@@ -47,9 +47,7 @@ public class SedonaKryoRegistrator
     {
         GeometrySerde serializer = new GeometrySerde();
         SpatialIndexSerde indexSerializer = new SpatialIndexSerde(serializer);
-
         log.info("Registering custom serializers for geometry types");
-
         kryo.register(Point.class, serializer);
         kryo.register(LineString.class, serializer);
         kryo.register(Polygon.class, serializer);

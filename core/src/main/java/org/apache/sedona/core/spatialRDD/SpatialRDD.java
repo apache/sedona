@@ -31,6 +31,8 @@ import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.exceptions.SedonaException;
 import org.apache.sedona.core.exceptions.SedonaRuntimeException;
+import org.apache.sedona.core.geometryObjects.Circle;
+import org.apache.sedona.core.io.avro.schema.Field;
 import org.apache.sedona.core.io.avro.utils.AvroUtils;
 import org.apache.sedona.core.spatialPartitioning.FlatGridPartitioner;
 import org.apache.sedona.core.spatialPartitioning.KDBTree;
@@ -53,12 +55,7 @@ import org.apache.spark.storage.StorageLevel;
 import org.apache.spark.util.random.SamplingUtils;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LinearRing;
-import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.index.SpatialIndex;
 import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTWriter;
@@ -594,20 +591,22 @@ public class SpatialRDD<T extends Geometry>
     
     public void saveAsParquet(JavaSparkContext sc,
                               String geometryColumn,
-                              List<String> userColumns,
-                              String outputLocation) throws SedonaException, IOException {
+                              List<Field> userColumns,
+                              String outputLocation,
+                              String namespace,
+                              String name) throws SedonaException, IOException {
         sc.hadoopConfiguration().setBoolean("parquet.enable.summary-metadata", false);
         final Job job = Job.getInstance(sc.hadoopConfiguration());
         GeometryType geometryType = this.getGeometryType();
-        Schema schema = AvroUtils.getSchema(geometryType, geometryColumn, userColumns,
-                                            geometryType.getName() + "_record");
+        Schema schema = AvroUtils.getSchema(geometryType, geometryColumn, userColumns,namespace,
+                                            name);
 //        ParquetOutputFormat.setWriteSupportClass(job, AvroWriteSupport.class);
         AvroParquetOutputFormat.setSchema(job, schema);
         this.rawSpatialRDD.mapPartitionsToPair(new PairFlatMapFunction<Iterator<T>, Void, GenericRecord>() {
             @Override
             public Iterator<Tuple2<Void, GenericRecord>> call(Iterator<T> iterator) throws Exception {
-                Schema schema = AvroUtils.getSchema(geometryType, geometryColumn, userColumns,
-                                                    geometryType.getName() + "_record");
+                Schema schema = AvroUtils.getSchema(geometryType, geometryColumn, userColumns, namespace,
+                                                    name);
                 Iterable<T> recordIterable = () -> iterator;
                 try {
                     return StreamSupport.stream(recordIterable.spliterator(), false).map(geometry -> {

@@ -527,6 +527,6 @@ public class RectangleRDD
     
     @Override
     public GeometryType getGeometryType() {
-        return GeometryType.CIRCLE;
+        return GeometryType.POLYGON;
     }
 }

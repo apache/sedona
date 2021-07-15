@@ -67,14 +67,14 @@ public class ParquetFormatMapper<T extends Geometry> implements Serializable, Fl
     }
     
     private Polygon getPolygon(GenericRecord record) {
-        LinearRing exteriorRing = factory.createLinearRing(
-                getCoordinates((GenericArray) record.get(PolygonSchema.EXTERIOR_RING)));
+        LinearRing exteriorRing =
+                factory.createLinearRing(getCoordinates((GenericArray) record.get(PolygonSchema.EXTERIOR_RING)));
         GenericArray holes = (GenericArray) record.get(PolygonSchema.HOLES);
         List<LinearRing> interiorRings = IntStream.range(0, holes.size())
-                .mapToObj(holes::get)
-                .map(hole -> getCoordinates((GenericArray) ((GenericRecord) hole).get(PolygonSchema.HOLE)))
-                .map(c -> factory.createLinearRing(c))
-                .collect(Collectors.toList());
+                                                  .mapToObj(holes::get)
+                                                  .map(hole -> getCoordinates((GenericArray) (hole)))
+                                                  .map(c -> factory.createLinearRing(c))
+                                                  .collect(Collectors.toList());
         
         return factory.createPolygon(exteriorRing, (LinearRing[]) interiorRings.toArray());
     }
@@ -128,9 +128,10 @@ public class ParquetFormatMapper<T extends Geometry> implements Serializable, Fl
     }
     
     private void setUserData(Geometry geometry, GenericRecord genericRecord) {
-        geometry.setUserData(this.userColumns.stream()
-                                     .collect(Collectors.toMap(col -> col, col -> Optional.ofNullable(
-                                             genericRecord.get(col)).map(Object::toString))));
+        geometry.setUserData(IntStream.range(0, userColumns.size())
+                                      .mapToObj(i -> i)
+                                      .collect(Collectors.toMap(userColumns::get,
+                                                                i -> genericRecord.get(i + 1))));
     }
     
     @Override
