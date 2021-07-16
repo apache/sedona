@@ -21,10 +21,10 @@ jobs:
     - run: sudo wget www.scala-lang.org/files/archive/scala-2.12.11.deb
     - run: sudo dpkg -i scala-2.12.11.deb
     - run: scala -version
-    - run: echo "deb https://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
+    - run: echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
     - run: sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823
     - run: sudo apt-get update
-    - run: sudo apt-get install sbt        
+    - run: sudo apt-get install sbt
     - name: Cache SBT
       uses: actions/cache@v2
       with:
