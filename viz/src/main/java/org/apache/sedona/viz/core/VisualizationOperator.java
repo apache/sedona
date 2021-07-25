@@ -783,7 +783,7 @@ public abstract class VisualizationOperator
      * @return the java pair RDD
      */
     protected JavaPairRDD<Pixel, Double> Rasterize(JavaSparkContext sparkContext,
-            SpatialRDD spatialRDD, boolean useSparkDefaultPartition)
+                                                   SpatialRDD spatialRDD, boolean useSparkDefaultPartition)
     {
         logger.info("[Sedona-VizViz][Rasterize][Start]");
         JavaRDD<Object> rawSpatialRDD = spatialRDD.rawSpatialRDD;
