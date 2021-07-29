@@ -2,9 +2,7 @@ package org.apache.sedona.core.geometryObjects.schema;
 
 import com.google.common.collect.Lists;
 import org.apache.sedona.core.io.avro.constants.AvroConstants;
-import org.apache.sedona.core.io.avro.schema.ArraySchema;
-import org.apache.sedona.core.io.avro.schema.Field;
-import org.apache.sedona.core.io.avro.schema.RecordSchema;
+import org.apache.sedona.core.io.avro.schema.*;
 import org.apache.sedona.core.io.avro.utils.AvroUtils;
 import org.apache.sedona.core.utils.SedonaUtils;
 
@@ -16,7 +14,9 @@ public class PolygonSchema extends RecordSchema {
     private PolygonSchema() {
         super(AvroConstants.SEDONA_NAMESPACE,POLYGON,
               Lists.newArrayList(new Field(EXTERIOR_RING, CoordinateArraySchema.getSchema()),
-                                 new Field(HOLES, new ArraySchema(CoordinateArraySchema.getSchema()))));
+                                 new Field(HOLES, new UnionSchema(
+                                         new ArraySchema(CoordinateArraySchema.getSchema()),
+                                         new SimpleSchema(AvroConstants.PrimitiveDataType.NULL)))));
     }
     
     private static PolygonSchema schema;

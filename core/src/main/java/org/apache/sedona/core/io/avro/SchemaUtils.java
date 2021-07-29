@@ -26,10 +26,7 @@ import org.apache.sedona.core.io.avro.utils.AvroUtils;
 import org.apache.sedona.core.utils.SedonaUtils;
 import org.json.simple.JSONObject;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class SchemaUtils {
     public static class SchemaParser {
@@ -42,6 +39,7 @@ public class SchemaUtils {
                     if (SedonaUtils.isNull(parser)) {
                         parser = new Schema.Parser();
                         dataTypes = new HashMap<>();
+                        return parser;
                     }
                 }
             }
@@ -66,8 +64,8 @@ public class SchemaUtils {
         }
         
         public static Schema getSchema(String dataType) throws SedonaException {
-            if(!dataTypes.containsKey(dataType)){
-                throw new SedonaException(dataType+ "not defined");
+            if(Optional.ofNullable(dataTypes).map(dataTypes->!dataTypes.containsKey(dataType)).orElse(true)){
+                throw new SedonaException(dataType+ " not defined");
             }
             return getParser().getTypes().get(dataType);
         }

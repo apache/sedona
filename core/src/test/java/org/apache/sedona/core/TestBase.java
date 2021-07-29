@@ -26,10 +26,13 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.serializer.KryoSerializer;
 
+import java.io.File;
+
 public class TestBase
 {
     protected static SparkConf conf;
     protected static JavaSparkContext sc;
+    protected static File testOutputPathDir = new File("testDir");
 
     protected static void initialize(final String testSuiteName)
     {

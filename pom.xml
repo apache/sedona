@@ -411,6 +411,7 @@
                                     <artifact>org.datasyslab:sernetcdf</artifact>
                                     <excludes>
                                         <exclude>com/fasterxml/**</exclude>
+                                        <exclude>com/google/common/**</exclude>
                                     </excludes>
                                 </filter>
                             </filters>

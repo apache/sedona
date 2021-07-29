@@ -11,45 +11,27 @@ import org.json.simple.JSONObject;
 
 public class SimpleSchema extends Schema {
     private String dataType;
-    private Boolean nullable;
     
-    public SimpleSchema(AvroConstants.PrimitiveDataType dataType, Boolean nullable) {
+    public SimpleSchema(AvroConstants.PrimitiveDataType dataType) {
         this.dataType = dataType.getType();
-        this.nullable = nullable;
     }
     
     public SimpleSchema() {
     }
     
-    public SimpleSchema(AvroConstants.PrimitiveDataType dataType) {
-        this(dataType, false);
-    }
-    
-    public SimpleSchema(String type, Boolean nullable) throws SedonaException {
+    public SimpleSchema(String type) throws SedonaException {
         SchemaUtils.SchemaParser.getSchema(type);
         this.dataType = type;
-        this.nullable = nullable;
-    }
-    
-    public SimpleSchema(String dataType) throws SedonaException {
-        this(dataType, false);
     }
     
     @Override
     public String getDataType() {
-        if (nullable && !AvroConstants.PrimitiveDataType.NULL.getType().equals(dataType)) {
-            JSONArray type = new JSONArray();
-            type.add(dataType);
-            type.add(AvroConstants.PrimitiveDataType.NULL.getType());
-            return type.toJSONString();
-        }
         return dataType;
     }
     
     @Override
     public void write(Kryo kryo, Output output) {
         output.writeString(dataType);
-        output.writeBoolean(nullable);
     }
     
     @Override
@@ -60,6 +42,5 @@ public class SimpleSchema extends Schema {
     @Override
     public void read(Kryo kryo, Input input) {
         this.dataType = input.readString();
-        this.nullable = input.readBoolean();
     }
 }

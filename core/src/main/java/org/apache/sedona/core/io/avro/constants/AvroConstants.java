@@ -59,7 +59,7 @@ public class AvroConstants {
     }
     
     public enum SchemaType{
-        RECORD(1),ARRAY(2),SIMPLE(3);
+        RECORD(1),ARRAY(2),SIMPLE(3),UNION(4);
         private int id;
         
         SchemaType(int id) {

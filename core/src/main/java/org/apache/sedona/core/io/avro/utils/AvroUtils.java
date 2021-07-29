@@ -17,14 +17,10 @@ import org.apache.sedona.core.geometryObjects.schema.PolygonSchema;
 import org.apache.sedona.core.io.avro.SchemaUtils;
 import org.apache.sedona.core.io.avro.constants.AvroConstants;
 import org.apache.sedona.core.io.avro.schema.Field;
-import org.apache.sedona.core.io.avro.schema.SimpleSchema;
 import org.apache.sedona.core.io.avro.schema.RecordSchema;
 import org.locationtech.jts.geom.*;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -52,24 +48,74 @@ public class AvroUtils {
         return new GenericData.Array<>(avroSchema, vals);
     }
     
+    public static Object getUnion(Schema avroSchema, Object value) throws SedonaException{
+        for(Schema typeSchema:avroSchema.getTypes()){
+            try{
+                return getRecord(typeSchema,value);
+            }catch (SedonaException e){
+            
+            }
+        }
+        throw new SedonaException(String.format("Error while forming Record Given Schema: %s, Given Record: %s",avroSchema.toString(),value==null?null:value.toString()));
+    }
+    
+    public static int getInteger(Object value){
+        return Integer.parseInt(value.toString());
+    }
+    
+    public static long getLong(Object value){
+        return Long.parseLong(value.toString());
+    }
+    
+    public static double getDouble(Object value){
+        return Double.parseDouble(value.toString());
+    }
+    
+    public static float getFloat(Object value){
+        return Float.parseFloat(value.toString());
+    }
+    
+    
+    
     public static Object getRecord(Schema avroSchema, Object value) throws SedonaException {
-        if (value == null) {
-            return null;
-        }
-        if(value instanceof GenericContainer){
-            return value;
-        }
-        
-        if (avroSchema == null) {
-            throw new SedonaException("Null Schema Provided");
-        }
-        switch (avroSchema.getType()) {
-            case RECORD:
-                return getRecord(avroSchema, (Map<String, Object>) value);
-            case ARRAY:
-                return getArray(avroSchema, (Collection<Object>) value);
-            default:
+        try {
+            if (value == null) {
+                if(Schema.Type.NULL.equals(avroSchema.getType())){
+                    return null;
+                }
+                if(!Schema.Type.UNION.equals(avroSchema.getType())){
+                    throw new SedonaException(String.format("Error while forming Record Given Schema: %s, Given Record: %s",avroSchema.toString(),value==null?null:value.toString()));
+                }
+            }
+            if(value instanceof GenericContainer){
                 return value;
+            }
+        
+            if (avroSchema == null) {
+                throw new SedonaException("Null Schema Provided");
+            }
+            switch (avroSchema.getType()) {
+                case RECORD:
+                    return getRecord(avroSchema, (Map<String, Object>) value);
+                case ARRAY:
+                    return getArray(avroSchema, (Collection<Object>) value);
+                case UNION:
+                    return getUnion(avroSchema, value);
+                case INT:
+                    return getInteger(value);
+                case LONG:
+                    return getLong(value);
+                case FLOAT:
+                    return getFloat(value);
+                case DOUBLE:
+                    return getDouble(value);
+                default:
+                    return value;
+            }
+        }catch (SedonaException e){
+            throw e;
+        } catch (Exception e) {
+            throw new SedonaException(String.format("Error while forming Record Given Schema: %s, Given Record: %s",avroSchema.toString(),value==null?null:value.toString()),e);
         }
     }
     
@@ -116,7 +162,7 @@ public class AvroUtils {
         return SchemaUtils.SchemaParser.getSchema(schema.getDataType());
     }
     
-    public static Map<String, Object> getMapRecordFromCircle(Circle circle) {
+    public static Map<String, Object> getMapFromCircle(Circle circle) {
         Coordinate center = circle.getCoordinate();
         Double radius = circle.getRadius();
         return ImmutableMap.of(CircleSchema.CENTER, getMapFromCoordinate(center), CircleSchema.RADIUS, radius);
@@ -164,9 +210,9 @@ public class AvroUtils {
     public static GenericRecord getRecordFromGeometry(Schema schema,
                                                       String geometryColumnName,
                                                       Object geometryData,
-                                                      Map<String, Object> userData) throws SedonaException {
+                                                      Optional<Map<String, Object>> userData) throws SedonaException {
         return (GenericRecord) getRecord(schema,
-                                         (Object) new ImmutableMap.Builder<>().putAll(userData)
+                                         (Object) new ImmutableMap.Builder<>().putAll(userData.orElse(Collections.EMPTY_MAP))
                                                                               .put(geometryColumnName, geometryData)
                                                                               .build());
     }
@@ -187,7 +233,7 @@ public class AvroUtils {
         Object geometryData;
         switch (type) {
             case CIRCLE: {
-                geometryData = getMapRecordFromCircle((Circle) geometry);
+                geometryData = getMapFromCircle((Circle) geometry);
                 break;
             }
             case LINESTRING: {
@@ -195,7 +241,7 @@ public class AvroUtils {
                 break;
             }
             case POINT: {
-                geometryData = getMapFromCoordinate(((Point) geometry).getCoordinate());
+                geometryData = getMapFromPoint((Point) geometry);
                 break;
             }
             case POLYGON:
@@ -209,7 +255,7 @@ public class AvroUtils {
         return getRecordFromGeometry(avroSchema,
                                      geometryColumnName,
                                      geometryData,
-                                     (Map<String, Object>) geometry.getUserData());
+                                     Optional.ofNullable((Map<String,Object>)geometry.getUserData()));
         
     }
     

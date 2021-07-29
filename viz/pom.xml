@@ -206,7 +206,6 @@
             <groupId>org.apache.sedona</groupId>
             <artifactId>sedona-core-${spark.compat.version}_${scala.compat.version}</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 	<build>

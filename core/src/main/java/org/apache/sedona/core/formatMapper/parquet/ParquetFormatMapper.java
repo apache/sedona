@@ -2,6 +2,7 @@ package org.apache.sedona.core.formatMapper.parquet;
 
 import org.apache.avro.generic.GenericArray;
 import org.apache.avro.generic.GenericContainer;
+import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.log4j.Logger;
 import org.apache.sedona.core.enums.GeometryType;
@@ -11,13 +12,11 @@ import org.apache.sedona.core.geometryObjects.schema.CircleSchema;
 import org.apache.sedona.core.geometryObjects.schema.CoordinateSchema;
 import org.apache.sedona.core.geometryObjects.schema.PolygonSchema;
 import org.apache.spark.api.java.function.FlatMapFunction;
+import org.apache.zookeeper.Op;
 import org.locationtech.jts.geom.*;
 
 import java.io.Serializable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
@@ -53,7 +52,11 @@ public class ParquetFormatMapper<T extends Geometry> implements Serializable, Fl
     }
     
     private static Coordinate[] getCoordinates(GenericArray array) {
-        return (Coordinate[]) array.stream().map(record -> getCoordinate((GenericRecord) record)).toArray();
+        Coordinate[] coordinates = new Coordinate[array.size()];
+        for(int i=0;i<array.size();i++){
+            coordinates[i] = getCoordinate((GenericRecord) array.get(i));
+        }
+        return coordinates;
     }
     
     private Point getPoint(Coordinate coordinate) {
@@ -69,14 +72,14 @@ public class ParquetFormatMapper<T extends Geometry> implements Serializable, Fl
     private Polygon getPolygon(GenericRecord record) {
         LinearRing exteriorRing =
                 factory.createLinearRing(getCoordinates((GenericArray) record.get(PolygonSchema.EXTERIOR_RING)));
-        GenericArray holes = (GenericArray) record.get(PolygonSchema.HOLES);
-        List<LinearRing> interiorRings = IntStream.range(0, holes.size())
-                                                  .mapToObj(holes::get)
-                                                  .map(hole -> getCoordinates((GenericArray) (hole)))
-                                                  .map(c -> factory.createLinearRing(c))
-                                                  .collect(Collectors.toList());
+        Optional<GenericArray> holes =  Optional.ofNullable((GenericArray) record.get(PolygonSchema.HOLES));
+        List<LinearRing> interiorRings = holes.map(arr->IntStream.range(0, arr.size())
+                                                            .mapToObj(arr::get)
+                                                            .map(hole -> getCoordinates((GenericArray) (hole)))
+                                                            .map(c -> factory.createLinearRing(c))
+                                                            .collect(Collectors.toList())).orElse(Collections.EMPTY_LIST);
         
-        return factory.createPolygon(exteriorRing, (LinearRing[]) interiorRings.toArray());
+        return factory.createPolygon(exteriorRing, (LinearRing[]) interiorRings.toArray(new LinearRing[interiorRings.size()]));
     }
     
     private Geometry getGeometry(Coordinate[] coordinates, GeometryType type) {

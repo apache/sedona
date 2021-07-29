@@ -109,6 +109,7 @@
                                 </relocation>
 
                             </relocations>
+                            <shadeTestJar>true</shadeTestJar>
                         </configuration>
 
 
