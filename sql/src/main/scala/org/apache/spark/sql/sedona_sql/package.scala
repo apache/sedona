@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql
 
+import org.apache.sedona.core.serde.GeometrySerde
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.sedona.sql.serde.SedonaSerializer
 import org.apache.spark.{SparkContext, SparkException}
@@ -31,6 +32,6 @@ package object sedona_sql {
   }
 
   private val userSerializerType = sedonaConf.getSerializerType
-  val sedonaSerializer: SedonaSerializer = SedonaSerializer.apply(userSerializerType)
+  val sedonaSerializer: SedonaSerializer = SedonaSerializer(userSerializerType)
 
 }

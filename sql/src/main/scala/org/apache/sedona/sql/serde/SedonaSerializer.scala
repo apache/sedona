@@ -18,15 +18,36 @@
  */
 package org.apache.sedona.sql.serde
 
+import com.esotericsoftware.kryo.Kryo
+import com.esotericsoftware.kryo.io.{Input, Output}
 import org.apache.sedona.core.enums.SerializerType
+import org.apache.sedona.core.serde.GeometrySerde
+import org.apache.sedona.core.serde.WKB.WKBGeometrySerde
+import org.apache.sedona.core.serde.shape.ShapeGeometrySerde
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.locationtech.jts.geom.Geometry
 
-trait SedonaSerializer {
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-  def serialize(geometry: Geometry): Array[Byte]
+class SedonaSerializer(geometrySerde: GeometrySerde) {
 
-  def deserialize(values: ArrayData): Geometry
+  def serialize(geometry: Geometry): Array[Byte] = {
+    val out = new ByteArrayOutputStream()
+    val kryo = new Kryo()
+    val output = new Output(out)
+    geometrySerde.write(kryo, output, geometry)
+    output.close()
+    out.toByteArray
+  }
+
+  def deserialize(values: ArrayData): Geometry = {
+    val in = new ByteArrayInputStream(values.toByteArray())
+    val kryo = new Kryo()
+    val input = new Input(in)
+    val geometry = geometrySerde.read(kryo, input, classOf[Geometry])
+    input.close()
+    geometry.asInstanceOf[Geometry]
+  }
 
 }
 
@@ -34,9 +55,9 @@ object SedonaSerializer {
 
   def apply(serializerType: SerializerType): SedonaSerializer = {
     serializerType match {
-      case SerializerType.SHAPE => ShapeGeometrySerializer
-      case SerializerType.WKB => WKBGeometrySerializer
-      case _ => ShapeGeometrySerializer
+      case SerializerType.SHAPE => new SedonaSerializer(new ShapeGeometrySerde())
+      case SerializerType.WKB => new SedonaSerializer(new WKBGeometrySerde())
+      case _ => new SedonaSerializer(new ShapeGeometrySerde())
     }
   }
 }
