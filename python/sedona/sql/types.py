@@ -34,10 +34,10 @@ class GeometryType(UserDefinedType):
         return [el - 256 if el >= 128 else el for el in self.serialize(obj)]
 
     def serialize(self, obj):
-        return dumps(obj)
+        return [*[0, 0, 0, 1], *dumps(obj)]
 
     def deserialize(self, datum):
-        bytes_data = b''.join([struct.pack('b', el) for el in datum])
+        bytes_data = b''.join([struct.pack('b', el) for el in datum][9:])
         geom = loads(bytes_data)
         return geom
 

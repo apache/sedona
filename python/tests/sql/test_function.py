@@ -665,3 +665,5 @@ class TestPredicateJoin(TestBase):
 
     def __wkt_pair_list_with_index_to_data_frame(self, wkt_list: List) -> DataFrame:
         return self.spark.createDataFrame([[index, wkt.loads(given_wkt)] for index, given_wkt in wkt_list], self.geo_schema_with_index)
+
+

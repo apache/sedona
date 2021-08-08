@@ -29,6 +29,7 @@ class TestBase:
         if not hasattr(self, "__spark"):
             spark = SparkSession. \
                 builder. \
+                config("sedona.serializer.type", "wkb").\
                 config("spark.serializer", KryoSerializer.getName).\
                 config("spark.kryo.registrator", SedonaKryoRegistrator.getName) .\
                 master("local[*]").\
