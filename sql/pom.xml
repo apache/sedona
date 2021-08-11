@@ -179,6 +179,16 @@
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-geotiff</artifactId>
+            <scope>${dependency.scope}</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-coverage</artifactId>
+            <scope>${dependency.scope}</scope>
+        </dependency>
     </dependencies>
 	<build>
         <sourceDirectory>src/main/scala</sourceDirectory>
