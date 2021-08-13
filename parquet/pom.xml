@@ -109,7 +109,11 @@
                                 </relocation>
 
                             </relocations>
-                            <shadeTestJar>true</shadeTestJar>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>org.datasyslab:*</exclude>
+                                </excludes>
+                            </artifactSet>
                         </configuration>
 
 

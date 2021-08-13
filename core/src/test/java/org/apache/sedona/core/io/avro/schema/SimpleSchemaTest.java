@@ -1,6 +1,6 @@
 package org.apache.sedona.core.io.avro.schema;
 
-import avro.shaded.com.google.common.collect.Lists;
+import com.google.common.collect.Lists;
 import org.apache.sedona.core.exceptions.SedonaException;
 import org.apache.sedona.core.io.avro.SchemaUtils;
 import org.apache.sedona.core.io.avro.constants.AvroConstants;
@@ -35,7 +35,7 @@ public class SimpleSchemaTest extends BaseSchemaTest {
     @Test
     public void testValidComplexSchema() throws SedonaException {
         synchronized (SchemaUtils.SchemaParser.class) {
-            Schema schema = new RecordSchema(TEST_NAMESPACE, TEST_NAME, Lists.newArrayList(new Field("col",new SimpleSchema(
+            Schema schema = new RecordSchema(TEST_NAMESPACE, TEST_NAME, Lists.newArrayList(new Field("col", new SimpleSchema(
                     AvroConstants.PrimitiveDataType.INT))));
             String type = (String)schema.getDataType();
             schema = new SimpleSchema(String.join(".",TEST_NAMESPACE,TEST_NAME));

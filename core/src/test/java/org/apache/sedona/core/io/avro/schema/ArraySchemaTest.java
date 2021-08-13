@@ -1,6 +1,6 @@
 package org.apache.sedona.core.io.avro.schema;
 
-import avro.shaded.com.google.common.collect.Lists;
+import com.google.common.collect.Lists;
 import org.apache.sedona.core.exceptions.SedonaException;
 import org.apache.sedona.core.io.avro.SchemaUtils;
 import org.apache.sedona.core.io.avro.constants.AvroConstants;
