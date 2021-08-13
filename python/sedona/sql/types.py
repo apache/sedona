@@ -14,14 +14,29 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
-
-import struct
+from enum import Enum
 
 from pyspark.sql.types import UserDefinedType, ArrayType, ByteType
-from shapely.wkb import dumps, loads
+
+from sedona.sql.geometry import GeometryFactory, ShapeSerde, WkbSerde
+from sedona.utils.binary_parser import BinaryParser, ByteOrderType, BinaryBuffer
+
+geometry_serializers = {
+    0: ShapeSerde,
+    1: WkbSerde
+}
+
+serializers = {
+    "shp": 0,
+    "wkb": 1
+}
 
 
 class GeometryType(UserDefinedType):
+
+    def __init__(self, serializer="shp"):
+        self.serializer = serializer
+        self.serializer_number = serializers[self.serializer]
 
     @classmethod
     def sqlType(cls):
@@ -34,12 +49,17 @@ class GeometryType(UserDefinedType):
         return [el - 256 if el >= 128 else el for el in self.serialize(obj)]
 
     def serialize(self, obj):
-        return [*[0, 0, 0, 1], *dumps(obj)]
+        buffer = BinaryBuffer()
+        serde = geometry_serializers[self.serializer_number]()
+        return serde.to_bytes(obj, buffer)
 
     def deserialize(self, datum):
-        bytes_data = b''.join([struct.pack('b', el) for el in datum][9:])
-        geom = loads(bytes_data)
-        return geom
+        binary_parser = BinaryParser(datum)
+        binary_parser.read_byte()
+        parser_type = binary_parser.read_int(ByteOrderType.BIG_ENDIAN)
+        geometry_factory = GeometryFactory(geometry_serializers[parser_type]())
+
+        return geometry_factory.deserialize(binary_parser)
 
     @classmethod
     def module(cls):

@@ -23,6 +23,7 @@ import org.apache.sedona.core.enums.{FileDataSplitter, GridType, IndexType}
 import org.apache.sedona.core.formatMapper.EarthdataHDFPointMapper
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader
 import org.apache.sedona.core.serde.WKB.WKBGeometrySerde
+import org.apache.sedona.core.serde.shape.ShapeGeometrySerde
 import org.apache.sedona.core.spatialOperator.JoinQuery
 import org.apache.sedona.core.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}
 import org.apache.sedona.sql.serde.SedonaSerializer
@@ -31,7 +32,7 @@ import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.storage.StorageLevel
 import org.locationtech.jts.geom.Point
-import org.locationtech.jts.io.WKTReader
+import org.locationtech.jts.io.{WKBWriter, WKTReader}
 import org.scalatest.GivenWhenThen
 
 class adapterTestScala extends TestBaseScala with GivenWhenThen{
@@ -39,11 +40,17 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
   describe("Sedona-SQL Scala Adapter Test") {
 
     it("should test"){
-      val point = new WKTReader().read("POINT(-6 52)")
-      val serde = new SedonaSerializer(new WKBGeometrySerde())
+      val point = new WKTReader().read("POINT(21.0 52.0)")
+//      val serializer = new WKBWriter(2, 2)
+//      println(serializer.write(point).length)
+//[0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 53, 64, 0, 0, 0, 0, 0, 0, 74, 64, -127]
+// 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 53, 64, 0, 0, 0, 0, 0, 0, 74, 64, 0
+//[0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 53, 64, 0, 0, 0, 0, 0, 0, 74, 64, -127]
+      val serde = new SedonaSerializer(new ShapeGeometrySerde())
 
       val serialized = serde.serialize(point)
-      serde.deserialize(new GenericArrayData(serialized))
+      println(serialized.mkString(", "))
+//      serde.deserialize(new GenericArrayData(serialized))
       print("S")
 
     }

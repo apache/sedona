@@ -16,6 +16,7 @@
 #  under the License.
 
 import struct
+from enum import Enum
 from typing import List, Union
 
 import attr
@@ -36,6 +37,16 @@ size_dict = {
     "?": BOOLEAN_SIZE
 }
 
+order_type = {
+    "little_endian": "<",
+    "big_endian": ">"
+}
+
+
+class ByteOrderType(Enum):
+    LITTLE_ENDIAN = "<"
+    BIG_ENDIAN = ">"
+
 
 @attr.s
 class BinaryParser:
@@ -53,33 +64,28 @@ class BinaryParser:
         self.current_index += length
         return geom
 
-    def read_double(self):
-        data = self.unpack("d", self.bytes)
+    def read_double(self, byte_order=ByteOrderType.LITTLE_ENDIAN):
+        data = self.unpack("d", self.bytes, byte_order)
         self.current_index = self.current_index + DOUBLE_SIZE
         return data
 
-    def read_double_reverse(self):
-        data = self.unpack_reverse("d", self.bytes)
-        self.current_index = self.current_index + DOUBLE_SIZE
-        return data
-
-    def read_int(self):
-        data = self.unpack("i", self.bytes)
+    def read_int(self, byte_order=ByteOrderType.LITTLE_ENDIAN):
+        data = self.unpack('i', self.bytes, byte_order)
         self.current_index = self.current_index + INT_SIZE
         return data
 
-    def read_byte(self):
-        data = self.unpack("b", self.bytes)
+    def read_byte(self, byte_order=ByteOrderType.LITTLE_ENDIAN):
+        data = self.unpack("b", self.bytes, byte_order)
         self.current_index = self.current_index + BYTE_SIZE
         return data
 
-    def read_char(self):
-        data = self.unpack("c", self.bytes)
+    def read_char(self, byte_order=ByteOrderType.LITTLE_ENDIAN):
+        data = self.unpack("c", self.bytes, byte_order)
         self.current_index = self.current_index + CHAR_SIZE
         return data
 
-    def read_boolean(self):
-        data = self.unpack("?", self.bytes)
+    def read_boolean(self, byte_order=ByteOrderType.BIG_ENDIAN):
+        data = self.unpack("?", self.bytes, byte_order)
         self.current_index = self.current_index + BOOLEAN_SIZE
         return data
 
@@ -105,15 +111,10 @@ class BinaryParser:
         self.current_index = length
         return decoded_string
 
-    def unpack(self, tp: str, bytes: bytearray):
+    def unpack(self, tp: str, bytes: bytearray, byte_order=ByteOrderType.LITTLE_ENDIAN):
         max_index = self.current_index + size_dict[tp]
         bytes = self._convert_to_binary_array(bytes[self.current_index: max_index])
-        return struct.unpack(tp, bytes)[0]
-
-    def unpack_reverse(self, tp: str, bytes: bytearray):
-        max_index = self.current_index + size_dict[tp]
-        bytes = bytearray(reversed(self._convert_to_binary_array(bytes[self.current_index: max_index])))
-        return struct.unpack(tp, bytes)[0]
+        return struct.unpack(byte_order.value + tp, bytes)[0]
 
     @classmethod
     def remove_negatives(cls, bytes):
@@ -136,23 +137,23 @@ class BinaryBuffer:
     def __init__(self):
         self.array = []
 
-    def put_double(self, value):
-        bytes = self.__pack("d", value)
+    def put_double(self, value, byte_order=ByteOrderType.BIG_ENDIAN):
+        bytes = self.__pack("d", value, byte_order)
         self.__extend_buffer(bytes)
 
-    def put_int(self, value):
-        bytes = self.__pack("i", value)
+    def put_int(self, value, byte_order=ByteOrderType.BIG_ENDIAN):
+        bytes = self.__pack("i", value, byte_order)
         self.__extend_buffer(bytes)
 
-    def put_byte(self, value):
-        bytes = self.__pack("b", value)
+    def put_byte(self, value, byte_order=ByteOrderType.BIG_ENDIAN):
+        bytes = self.__pack("b", value, byte_order)
         self.__extend_buffer(bytes)
 
-    def put(self, value):
+    def put(self, value, byte_order=ByteOrderType.BIG_ENDIAN):
         self.__extend_buffer(value)
 
-    def __pack(self, type, value):
-        return struct.pack(type, value)
+    def __pack(self, type, value, byte_order=ByteOrderType.BIG_ENDIAN):
+        return struct.pack(byte_order.value + type, value)
 
     def __extend_buffer(self, bytes):
         self.array.extend(list(bytes))
@@ -160,7 +161,7 @@ class BinaryBuffer:
     def __translate_values(self, values):
         return [el if el < 128 else el - 256 for el in values]
 
-    def add_empty_bytes(self, tp: str, number_of_empty):
+    def add_empty_bytes(self, tp: str, number_of_empty, byte_order=ByteOrderType.BIG_ENDIAN):
         if tp == "double":
             for _ in range(number_of_empty):
                 self.put_double(0.0)

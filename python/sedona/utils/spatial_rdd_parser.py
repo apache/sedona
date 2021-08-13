@@ -26,7 +26,7 @@ from pyspark import PickleSerializer
 from shapely.wkb import dumps
 
 from sedona.core.geom.circle import Circle
-from sedona.utils.binary_parser import BinaryParser
+from sedona.utils.binary_parser import BinaryParser, ByteOrderType
 
 
 class GeoData:
@@ -63,7 +63,7 @@ class GeoData:
         geom_bytes = attributes["geom"]
 
         if is_circle:
-            radius = bin_parser.read_double()
+            radius = bin_parser.read_double(ByteOrderType.LITTLE_ENDIAN)
             geom = bin_parser.read_geometry(geom_bytes.__len__() - 9)
             self._geom = Circle(geom, radius)
         else:
@@ -116,7 +116,7 @@ class SpatialPairRDDParserData(AbstractSpatialRDDParser):
     def deserialize(cls, bin_parser: 'BinaryParser'):
         left_geom_data = cls._deserialize_geom(bin_parser)
 
-        _ = bin_parser.read_int()
+        _ = bin_parser.read_int(ByteOrderType.LITTLE_ENDIAN)
 
         right_geom_data = cls._deserialize_geom(bin_parser)
 
@@ -136,7 +136,7 @@ class SpatialRDDParserData(AbstractSpatialRDDParser):
     @classmethod
     def deserialize(cls, bin_parser: 'BinaryParser'):
         left_geom_data = cls._deserialize_geom(bin_parser)
-        _ = bin_parser.read_int()
+        _ = bin_parser.read_int(ByteOrderType.LITTLE_ENDIAN)
 
         return left_geom_data
 
@@ -153,7 +153,7 @@ class SpatialRDDParserDataMultipleRightGeom(AbstractSpatialRDDParser):
     def deserialize(cls, bin_parser: 'BinaryParser'):
         left_geom_data = cls._deserialize_geom(bin_parser)
 
-        geometry_numbers = bin_parser.read_int()
+        geometry_numbers = bin_parser.read_int(ByteOrderType.LITTLE_ENDIAN)
 
         right_geoms = []
 
@@ -184,7 +184,7 @@ class SedonaPickler(PickleSerializer):
 
     def loads(self, obj, encoding="bytes"):
         binary_parser = BinaryParser(obj)
-        spatial_parser_number = binary_parser.read_int()
+        spatial_parser_number = binary_parser.read_int(ByteOrderType.LITTLE_ENDIAN)
         spatial_parser = self.get_parser(spatial_parser_number)
         parsed_row = spatial_parser.deserialize(binary_parser)
 
@@ -198,8 +198,8 @@ class SedonaPickler(PickleSerializer):
 
 
 def read_geometry_from_bytes(bin_parser: BinaryParser):
-    geom_data_length = bin_parser.read_int()
-    user_data_length = bin_parser.read_int()
+    geom_data_length = bin_parser.read_int(ByteOrderType.LITTLE_ENDIAN)
+    user_data_length = bin_parser.read_int(ByteOrderType.LITTLE_ENDIAN)
     geom = bin_parser.read_geometry(geom_data_length)
     user_data = bin_parser.read_string(user_data_length)
 
@@ -226,7 +226,7 @@ class CircleGeometryFactory:
     @classmethod
     def geometry_from_bytes(cls, bin_parser: BinaryParser) -> GeoData:
         geom, user_data = read_geometry_from_bytes(bin_parser)
-        radius = bin_parser.read_double()
+        radius = bin_parser.read_double(ByteOrderType.LITTLE_ENDIAN)
         geo_data = GeoData(geom=Circle(geom, radius), userData=user_data)
         return geo_data
 

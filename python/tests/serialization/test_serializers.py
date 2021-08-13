@@ -39,10 +39,16 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom_from", GeometryType(), True),
-                t.StructField("geom_to", GeometryType(), True)
+                t.StructField("geom_from", GeometryType(self.serializer_type), True),
+                t.StructField("geom_to", GeometryType(self.serializer_type), True)
             ]
         )
+        self.spark.createDataFrame(
+            data,
+            schema
+        )\
+        .show()
+
         self.spark.createDataFrame(
             data,
             schema
@@ -66,7 +72,7 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(), True)
+                t.StructField("geom", GeometryType(self.serializer_type), True)
             ]
         )
         m_point_out = self.spark.createDataFrame(
@@ -85,7 +91,7 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(), True)
+                t.StructField("geom", GeometryType(self.serializer_type), True)
             ]
         )
 
@@ -106,7 +112,7 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(), True)
+                t.StructField("geom", GeometryType(self.serializer_type), True)
             ]
         )
 
@@ -131,7 +137,7 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(), True)
+                t.StructField("geom", GeometryType(self.serializer_type), True)
             ]
         )
 
@@ -166,7 +172,7 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(), True)
+                t.StructField("geom", GeometryType(self.serializer_type), True)
             ]
         )
         self.spark.createDataFrame(

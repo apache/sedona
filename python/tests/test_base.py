@@ -25,11 +25,17 @@ from sedona.utils.decorators import classproperty
 class TestBase:
 
     @classproperty
+    def serializer_type(self):
+        with open("serializer_type.txt") as file:
+            lines = file.readlines()
+        return "".join(lines).strip()
+
+    @classproperty
     def spark(self):
         if not hasattr(self, "__spark"):
             spark = SparkSession. \
                 builder. \
-                config("sedona.serializer.type", "wkb").\
+                config("sedona.serializer.type", self.serializer_type).\
                 config("spark.serializer", KryoSerializer.getName).\
                 config("spark.kryo.registrator", SedonaKryoRegistrator.getName) .\
                 master("local[*]").\

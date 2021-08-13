@@ -28,20 +28,20 @@ from sedona.sql.types import GeometryType
 data_path = path.abspath(path.dirname(__file__))
 
 
-def create_sample_polygons_df(spark: SparkSession, number_of_polygons: int) -> DataFrame:
-    return resource_file_to_dataframe(spark, "sample_polygons").limit(number_of_polygons)
+def create_sample_polygons_df(spark: SparkSession, number_of_polygons: int, serializer_type: str) -> DataFrame:
+    return resource_file_to_dataframe(spark, "sample_polygons", serializer_type).limit(number_of_polygons)
 
 
-def create_sample_points_df(spark: SparkSession, number_of_points: int) -> DataFrame:
-    return resource_file_to_dataframe(spark, "sample_points").limit(number_of_points)
+def create_sample_points_df(spark: SparkSession, number_of_points: int, serializer_type: str) -> DataFrame:
+    return resource_file_to_dataframe(spark, "sample_points", serializer_type).limit(number_of_points)
 
 
-def create_simple_polygons_df(spark: SparkSession, number_of_polygons: int) -> DataFrame:
-    return resource_file_to_dataframe(spark, "simple_polygons").limit(number_of_polygons)
+def create_simple_polygons_df(spark: SparkSession, number_of_polygons: int, serializer_type: str) -> DataFrame:
+    return resource_file_to_dataframe(spark, "simple_polygons", serializer_type).limit(number_of_polygons)
 
 
-def create_sample_lines_df(spark: SparkSession, number_of_lines: int) -> DataFrame:
-    return resource_file_to_dataframe(spark, "sample_lines").limit(number_of_lines)
+def create_sample_lines_df(spark: SparkSession, number_of_lines: int, serializer_type: str) -> DataFrame:
+    return resource_file_to_dataframe(spark, "sample_lines", serializer_type).limit(number_of_lines)
 
 
 def create_sample_polygons(number_of_polygons: int) -> List:
@@ -60,10 +60,10 @@ def create_sample_lines(number_of_lines: int) -> List:
     return load_from_resources(data_path, "sample_lines")[: number_of_lines]
 
 
-def resource_file_to_dataframe(spark: SparkSession, file_path: str) -> DataFrame:
+def resource_file_to_dataframe(spark: SparkSession, file_path: str, serialization_type: str) -> DataFrame:
     geometries = load_from_resources(data_path, file_path)
     schema = StructType([
-        StructField("geom", GeometryType(), True)
+        StructField("geom", GeometryType(serialization_type), True)
     ])
     return spark.createDataFrame([[el] for el in geometries], schema=schema)
 

@@ -51,7 +51,7 @@ class TestSpatialRDDToDataFrame(TestBase):
         ]
         schema = StructType(
             [
-                StructField("geom", GeometryType(), False),
+                StructField("geom", GeometryType(self.serializer_type), False),
                 StructField("id_1", StringType(), False),
                 StructField("id_2", IntegerType(), False),
             ]
@@ -81,7 +81,7 @@ class TestSpatialRDDToDataFrame(TestBase):
 
         schema = StructType(
             [
-                StructField("geom", GeometryType()),
+                StructField("geom", GeometryType(self.serializer_type)),
                 StructField("name", StringType())
             ]
         )

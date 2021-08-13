@@ -32,7 +32,7 @@ distance = 0.01
 input_location_query_polygon = os.path.join(tests_resource, "crs-test-polygon.csv")
 query_polygon_count = 13361
 
-query_envelope = Envelope(14313844.294334238, 16802290.853830762, 942450.5989896103, 8631908.270651892)
+query_envelope = Envelope(14313844.29433424, 16802290.85383074, 942450.5989896542, 8631908.270651951)
 query_polygon_set = os.path.join(tests_resource, "primaryroads-polygon.csv")
 input_location_geo_json = os.path.join(tests_resource, "testPolygon.json")
 input_location_wkt = os.path.join(tests_resource, "county_small.tsv")
