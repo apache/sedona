@@ -16,8 +16,11 @@ import org.locationtech.jts.geom.Polygon;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Parquet Reader Class
+ */
 public class ParquetReader extends RddReader {
-    public static <T extends Geometry> SpatialRDD<T> createSpatialRDD(JavaRDD rawRDD,
+    private static <T extends Geometry> SpatialRDD<T> createSpatialRDD(JavaRDD rawRDD,
                                                                       ParquetFormatMapper<T> formatMapper,
                                                                       GeometryType geometryType) {
         SpatialRDD spatialRDD = new SpatialRDD<T>(geometryType);
@@ -25,6 +28,17 @@ public class ParquetReader extends RddReader {
         return spatialRDD;
     }
     
+    /**
+     * Converts a Parquet File into Geometry RDD
+     * @param sc Spark Context
+     * @param inputPath Parquet files input
+     * @param geometryType Geometry Type to be Deserialized
+     * @param geometryColumn Geometry Column in the Parquet File
+     * @param userColumns Relevant User Columns to be Read from the Parquet File
+     * @param <T>
+     * @return Geometry RDD
+     * @throws IOException
+     */
     public static <T extends Geometry> SpatialRDD<T> readToGeometryRDD(JavaSparkContext sc,
                                                                        List<String> inputPath,
                                                                        GeometryType geometryType,

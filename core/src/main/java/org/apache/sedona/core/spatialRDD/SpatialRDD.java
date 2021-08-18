@@ -589,6 +589,18 @@ public class SpatialRDD<T extends Geometry>
         }).saveAsTextFile(outputLocation);
     }
     
+    /**
+     *
+     * @param sc SparkConnectionContext
+     * @param geometryColumn Geometry Column name for Parquet Schema
+     * @param userColumns User Columns with Schema.
+     *                    UserData in Geometry which should be present as hashMap would be converted into parquet record of a given schema
+     * @param outputLocation Output Location of the Parquet File
+     * @param namespace Namespace in Parquet Schema
+     * @param name Name in Parquet Schema
+     * @throws SedonaException
+     * @throws IOException
+     */
     public void saveAsParquet(JavaSparkContext sc,
                               String geometryColumn,
                               List<Field> userColumns,

@@ -24,6 +24,15 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 public class ParquetFileReader {
+    /**
+     * Reads Parquet File with given geometry Column and the relevant User columns
+     * @param sc
+     * @param geometryColumn
+     * @param userColumns
+     * @param inputPaths
+     * @return Avro Record RDD which needs to be deserialized into a GeometryRDD
+     * @throws IOException
+     */
     public static JavaRDD<GenericRecord> readFile(JavaSparkContext sc,
                                                   String geometryColumn,
                                                   List<String> userColumns,

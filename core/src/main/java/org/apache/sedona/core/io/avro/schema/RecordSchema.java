@@ -22,6 +22,12 @@ public class RecordSchema extends Schema {
     private String namespace;
     private List<Field> fields;
     
+    /**
+     * Creates a Avro Record Schema
+     * @param namespace
+     * @param name
+     * @param fields
+     */
     public RecordSchema(String namespace, String name, List<Field> fields) {
         this.name = name;
         this.namespace = namespace;

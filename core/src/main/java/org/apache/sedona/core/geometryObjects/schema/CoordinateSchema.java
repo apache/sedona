@@ -7,6 +7,9 @@ import org.apache.sedona.core.io.avro.schema.SimpleSchema;
 import org.apache.sedona.core.io.avro.schema.RecordSchema;
 import org.apache.sedona.core.utils.SedonaUtils;
 
+/**
+ * Coordinate Schema class representing AvroSchema of a Coordinate point
+ */
 public class CoordinateSchema extends RecordSchema {
     public static final String X_COORDINATE = "x";
     public static final String Y_COORDINATE = "y";

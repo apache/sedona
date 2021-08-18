@@ -25,12 +25,24 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class AvroUtils {
+    /**
+     * Joins Namespace & name
+     * @param namespace
+     * @param name
+     * @return Joined String
+     */
     public static String getNestedNamespace(String namespace, String... name) {
         
         return String.join(AvroConstants.DOT, namespace, String.join(AvroConstants.DOT, name));
     }
     
-    
+    /**
+     * Creates Avro Record from a Map of a given Schema
+     * @param avroSchema AvroSchema of RecordType
+     * @param value
+     * @return Avro Record
+     * @throws SedonaException
+     */
     public static GenericRecord getRecord(Schema avroSchema, Map<String, Object> value) throws SedonaException {
         GenericRecord record = new GenericData.Record(avroSchema);
         for (Schema.Field field : avroSchema.getFields()) {
@@ -39,6 +51,13 @@ public class AvroUtils {
         return record;
     }
     
+    /**
+     * Creates Avro Array from a Collection of a given Schema
+     * @param avroSchema Avro Schema of Array Type
+     * @param values
+     * @return Avro Array
+     * @throws SedonaException
+     */
     public static GenericArray getArray(Schema avroSchema, Collection<Object> values) throws SedonaException {
         
         List<Object> vals = Lists.newArrayList();
@@ -48,6 +67,13 @@ public class AvroUtils {
         return new GenericData.Array<>(avroSchema, vals);
     }
     
+    /**
+     * Gets an Avro Value from Avro Union Schema
+     * @param avroSchema Avro Schema of Union Type
+     * @param value
+     * @return
+     * @throws SedonaException
+     */
     public static Object getUnion(Schema avroSchema, Object value) throws SedonaException{
         for(Schema typeSchema:avroSchema.getTypes()){
             try{
@@ -75,8 +101,13 @@ public class AvroUtils {
         return Float.parseFloat(value.toString());
     }
     
-    
-    
+    /**
+     * Gets a Avro Value from a Java POJO
+     * @param avroSchema
+     * @param value
+     * @return Avro Value
+     * @throws SedonaException
+     */
     public static Object getRecord(Schema avroSchema, Object value) throws SedonaException {
         try {
             if (value == null) {
@@ -119,6 +150,13 @@ public class AvroUtils {
         }
     }
     
+    /**
+     * Gets Field of a Particular Geometry type
+     * @param columnName
+     * @param geometryType
+     * @return Geometry Field for Output Schema
+     * @throws SedonaException
+     */
     public static Field getField(String columnName, GeometryType geometryType) throws SedonaException {
         org.apache.sedona.core.io.avro.schema.Schema schema;
         switch (geometryType) {
@@ -145,6 +183,15 @@ public class AvroUtils {
         return new Field(columnName, schema);
     }
     
+    /**
+     * Gets Output Schema for Geoemtry
+     * @param namespace
+     * @param name
+     * @param geometryField
+     * @param userColumn
+     * @return Avro Parquet Schema
+     * @throws SedonaException
+     */
     public static Schema getGeometryRecordSchema(String namespace,
                                                  String name,
                                                  Field geometryField,
@@ -152,6 +199,15 @@ public class AvroUtils {
         return getGeometryRecordSchema(namespace, name, geometryField, Lists.newArrayList(userColumn));
     }
     
+    /**
+     * Gets Output Avro Schema from Geometry Field & User Columns
+     * @param namespace
+     * @param name
+     * @param geometryField
+     * @param userColumns
+     * @return
+     * @throws SedonaException
+     */
     public static Schema getGeometryRecordSchema(String namespace,
                                                  String name,
                                                  Field geometryField,
@@ -162,6 +218,11 @@ public class AvroUtils {
         return SchemaUtils.SchemaParser.getSchema(schema.getDataType());
     }
     
+    /**
+     * Creates Map from Circle Geometry Object
+     * @param circle
+     * @return Map representing Circle Geometry {c:{x:xValue,y:Value},r:radius}
+     */
     public static Map<String, Object> getMapFromCircle(Circle circle) {
         Coordinate center = circle.getCoordinate();
         Double radius = circle.getRadius();
@@ -169,6 +230,11 @@ public class AvroUtils {
         
     }
     
+    /**
+     * Creates a Map from Coordinate Object
+     * @param coordinate Coordinate Object
+     * @return Map representing a Coordinate {x:xValue,y:yValue}
+     */
     public static Map<String, Double> getMapFromCoordinate(Coordinate coordinate) {
         return ImmutableMap.of(CoordinateSchema.X_COORDINATE,
                                coordinate.x,
@@ -176,18 +242,38 @@ public class AvroUtils {
                                coordinate.y);
     }
     
+    /**
+     * Gets a List of Maps from Coordinate Array
+     * @param coordinates
+     * @return List representing a Coordinate Array [{x:xValue,y:yValue}....]
+     */
     public static Collection<Map<String, Double>> getCollectionFromCoordinates(Coordinate[] coordinates) {
         return Arrays.stream(coordinates).map(AvroUtils::getMapFromCoordinate).collect(Collectors.toList());
     }
     
+    /**
+     * Gets a List of Maps from LineString Geometry
+     * @param lineString
+     * @return List of Maps representing LineString
+     */
     public static Collection<Map<String, Double>> getCollectionFromLineString(LineString lineString) {
         return getCollectionFromCoordinates(lineString.getCoordinates());
     }
     
+    /**
+     * Gets a Map from Point Geometry
+     * @param point
+     * @return Map represent Point Geometry
+     */
     public static Map<String, Double> getMapFromPoint(Point point) {
         return getMapFromCoordinate(point.getCoordinate());
     }
     
+    /**
+     * Gets a Map from Polygon Geometry
+     * @param polygon
+     * @return Map representing PolygonGeometry {"ex":[{x:xVal,y:yVal},..],h:[[{x:xVal,y:yVal},..],...]}
+     */
     public static Map<String, Object> getMapFromPolygon(Polygon polygon) {
         return ImmutableMap.of(PolygonSchema.EXTERIOR_RING,
                                getCollectionFromCoordinates(polygon.getExteriorRing().getCoordinates()),
@@ -198,6 +284,16 @@ public class AvroUtils {
                                         .collect(Collectors.toList()));
     }
     
+    /**
+     * Avro Record from Geometry from POJO representation of Geometry Object & User Data
+     * @param schema
+     * @param geometryColumnName
+     * @param userColumn
+     * @param geometryData
+     * @param userData
+     * @return Avro record
+     * @throws SedonaException
+     */
     public static GenericRecord getRecordFromGeometry(Schema schema,
                                                       String geometryColumnName,
                                                       String userColumn,
@@ -207,6 +303,15 @@ public class AvroUtils {
                                          ImmutableMap.of(geometryColumnName, geometryData, userColumn, userData));
     }
     
+    /**
+     * Avro Record from Geometry from POJO representation of Geometry Object & User Data
+     * @param schema
+     * @param geometryColumnName
+     * @param geometryData
+     * @param userData
+     * @return Avro Record
+     * @throws SedonaException
+     */
     public static GenericRecord getRecordFromGeometry(Schema schema,
                                                       String geometryColumnName,
                                                       Object geometryData,
@@ -217,6 +322,16 @@ public class AvroUtils {
                                                                               .build());
     }
     
+    /**
+     * Creates an Avro Schema for given a geometry Type & User Columns
+     * @param geometryType
+     * @param geometryColumnName
+     * @param userColumns
+     * @param namespace
+     * @param name
+     * @return Geometry Avro Schema
+     * @throws SedonaException
+     */
     public static Schema getSchema(GeometryType geometryType,
                                    String geometryColumnName,
                                    List<Field> userColumns,
@@ -226,6 +341,15 @@ public class AvroUtils {
         return getGeometryRecordSchema(namespace, name, geometryField, userColumns);
     }
     
+    /**
+     * Avro Record for a given Geometry Object
+     * @param geometry
+     * @param type
+     * @param geometryColumnName
+     * @param avroSchema
+     * @return Geometry Avro Record representing Geometry Object with Userdata of given Schema
+     * @throws SedonaException
+     */
     public static GenericRecord getRecord(Geometry geometry,
                                           GeometryType type,
                                           String geometryColumnName,

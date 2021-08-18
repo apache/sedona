@@ -21,6 +21,11 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
+/**
+ * ParquetFormatMapper class
+ * Responsible for converting Avro-Parquet Records into Geometry Objects
+ * @param <T> Geometry Class Type
+ */
 public class ParquetFormatMapper<T extends Geometry> implements Serializable, FlatMapFunction<Iterator<GenericRecord>, T> {
     final static Logger logger = Logger.getLogger(FormatMapper.class);
     protected GeometryFactory factory = new GeometryFactory();
@@ -28,29 +33,54 @@ public class ParquetFormatMapper<T extends Geometry> implements Serializable, Fl
     private final String geometryColumn;
     private final List<String> userColumns;
     
+    /**
+     *
+     * @param geometryType
+     * @param geometryColumn
+     * @param userColumns
+     */
     public ParquetFormatMapper(GeometryType geometryType, String geometryColumn, List<String> userColumns) {
         this.geometryType = geometryType;
         this.geometryColumn = geometryColumn;
         this.userColumns = userColumns;
     }
     
+    /**
+     * Gets Coordinate from Avro Record
+     * @param record Avro Record
+     * @return Coordinate
+     */
     private static Coordinate getCoordinate(GenericRecord record) {
         Double x = (Double) record.get(CoordinateSchema.X_COORDINATE);
         Double y = (Double) record.get(CoordinateSchema.Y_COORDINATE);
         return new Coordinate(x, y);
     }
     
+    /**
+     * Gets Coordinate from Avro based Record
+     * @param val
+     * @return Coordinate
+     */
     private static Coordinate getCoordinate(GenericContainer val) {
         if (val instanceof GenericRecord) {
             return getCoordinate((GenericRecord) val);
         }
         return getCoordinate((GenericArray) val);
     }
-    
+    /**
+     * Gets Coordinate from Avro based Array based on the first index
+     * @param array
+     * @return Coordinate
+     */
     private static Coordinate getCoordinate(GenericArray array) {
         return getCoordinate((GenericRecord) array.get(0));
     }
     
+    /**
+     * Gets Coordinate Array from Avro Record Array
+     * @param array
+     * @return Coordinate Array
+     */
     private static Coordinate[] getCoordinates(GenericArray array) {
         Coordinate[] coordinates = new Coordinate[array.size()];
         for(int i=0;i<array.size();i++){
@@ -59,16 +89,30 @@ public class ParquetFormatMapper<T extends Geometry> implements Serializable, Fl
         return coordinates;
     }
     
+    /**
+     * Gets Point Geometry from Coordinate
+     * @param coordinate
+     * @return Point
+     */
     private Point getPoint(Coordinate coordinate) {
         return factory.createPoint(coordinate);
     }
     
+    /**
+     * Gets Circle Geometry Object from Avro Record
+     * @param record
+     * @return Circle
+     */
     private Circle getCircle(GenericRecord record) {
         Coordinate center = getCoordinate((GenericRecord) record.get(CircleSchema.CENTER));
         Double radius = (Double) record.get(CircleSchema.RADIUS);
         return new Circle(getPoint(center), radius);
     }
-    
+    /**
+     * Gets Polygon Geometry Object from Avro Record
+     * @param record
+     * @return Polygon
+     */
     private Polygon getPolygon(GenericRecord record) {
         LinearRing exteriorRing =
                 factory.createLinearRing(getCoordinates((GenericArray) record.get(PolygonSchema.EXTERIOR_RING)));
@@ -82,6 +126,12 @@ public class ParquetFormatMapper<T extends Geometry> implements Serializable, Fl
         return factory.createPolygon(exteriorRing, (LinearRing[]) interiorRings.toArray(new LinearRing[interiorRings.size()]));
     }
     
+    /**
+     * Gets Geometry Object of Geometry Type from Coordinate Array
+     * @param coordinates CoordinateArray
+     * @param type geometryType
+     * @return Geometry Object
+     */
     private Geometry getGeometry(Coordinate[] coordinates, GeometryType type) {
         Geometry geometry = null;
         switch (type) {
@@ -112,6 +162,11 @@ public class ParquetFormatMapper<T extends Geometry> implements Serializable, Fl
         return geometry;
     }
     
+    /**
+     * Gets Geometry Object of Geometry Type from Avro Record
+     * @param record
+     * @return Geometry
+     */
     private Geometry getGeometry(GenericRecord record) {
         Object geometryColumn = record.get(this.geometryColumn);
         switch (this.geometryType) {
@@ -130,6 +185,11 @@ public class ParquetFormatMapper<T extends Geometry> implements Serializable, Fl
         }
     }
     
+    /**
+     * Sets User Data in a geometry Object based on the Parquet Read Schema Index(Geometry Column+<List of User Columns to be read>)
+     * @param geometry Geomery Object
+     * @param genericRecord Avro Record
+     */
     private void setUserData(Geometry geometry, GenericRecord genericRecord) {
         geometry.setUserData(IntStream.range(0, userColumns.size())
                                       .mapToObj(i -> i)
@@ -137,6 +197,12 @@ public class ParquetFormatMapper<T extends Geometry> implements Serializable, Fl
                                                                 i -> genericRecord.get(i + 1))));
     }
     
+    /**
+     * Maps Avro Records to their Geometry Object
+     * @param genericRecordIterator
+     * @return
+     * @throws Exception
+     */
     @Override
     public Iterator<T> call(Iterator<GenericRecord> genericRecordIterator) throws Exception {
         Iterable<GenericRecord> recordIterable = () -> genericRecordIterator;

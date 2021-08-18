@@ -16,6 +16,10 @@ import java.util.stream.Collectors;
 public class UnionSchema extends Schema{
     List<Schema> typeSchemas;
     
+    /**
+     * Creates Union Schema
+     * @param typeSchemas
+     */
     public UnionSchema(List<Schema> typeSchemas) {
         this.typeSchemas = typeSchemas;
     }

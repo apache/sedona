@@ -6,6 +6,9 @@ import org.apache.sedona.core.io.avro.schema.*;
 import org.apache.sedona.core.io.avro.utils.AvroUtils;
 import org.apache.sedona.core.utils.SedonaUtils;
 
+/**
+ * Polygon Schema class representing AvroSchema of Polygon Geometry
+ */
 public class PolygonSchema extends RecordSchema {
     public static final String POLYGON = "polygon";
     public static final String EXTERIOR_RING = "ex";

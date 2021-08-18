@@ -12,8 +12,16 @@ import org.json.simple.JSONObject;
 import java.io.Serializable;
 
 public abstract class Schema implements KryoSerializable, Serializable {
+    /**
+     * @return Type of a given Schema
+     * @throws SedonaException
+     */
     public abstract Object getDataType() throws SedonaException;
     
+    /**
+     *
+     * @return Returns a Schemas Type
+     */
     public abstract AvroConstants.SchemaType getSchemaType();
     
     public static Schema readSchema(Kryo kryo, Input input){

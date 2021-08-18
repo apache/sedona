@@ -7,9 +7,16 @@ import org.apache.sedona.core.exceptions.SedonaException;
 import org.apache.sedona.core.io.avro.constants.AvroConstants;
 import org.json.simple.JSONObject;
 
+/**
+ * Array Schema Class
+ */
 public class ArraySchema extends Schema{
     private Schema items;
     
+    /**
+     * Creates an Avro Array of a given Schema
+     * @param items
+     */
     public ArraySchema(Schema items) {
         this.items = items;
     }

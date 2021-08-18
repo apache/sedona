@@ -3,6 +3,9 @@ package org.apache.sedona.core.geometryObjects.schema;
 import org.apache.sedona.core.io.avro.schema.ArraySchema;
 import org.apache.sedona.core.utils.SedonaUtils;
 
+/**
+ * CoordinateArray Schema class representing AvroSchema of Coordinate Array
+ */
 public class CoordinateArraySchema extends ArraySchema {
     private CoordinateArraySchema() {
         super(CoordinateSchema.getSchema());

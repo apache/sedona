@@ -29,6 +29,9 @@ import org.json.simple.JSONObject;
 import java.util.*;
 
 public class SchemaUtils {
+    /**
+     * Avro Schema Parser Class
+     */
     public static class SchemaParser {
         private static Schema.Parser parser = null;
         private static Map<String, String> dataTypes = null;
@@ -45,7 +48,15 @@ public class SchemaUtils {
             }
             return parser;
         }
-        
+    
+        /**
+         * Gets Avro Schema from it's corresponding Json Representation
+         * @param namespace
+         * @param name
+         * @param json
+         * @return Data Type of the Avro Schema
+         * @throws SedonaException
+         */
         public static String parseJson(String namespace, String name, JSONObject json) throws SedonaException {
             Schema.Parser parser = getParser();
             String dataType = AvroUtils.getNestedNamespace(namespace, name);
@@ -58,7 +69,14 @@ public class SchemaUtils {
             dataTypes.put(dataType,json.toJSONString());
             return dataType;
         }
-        
+    
+        /**
+         * Gets Avro Schema of a predefined data Type
+         * @param namespace
+         * @param name
+         * @return Avro Schema
+         * @throws SedonaException
+         */
         public static Schema getSchema(String namespace, String name) throws SedonaException {
             return getSchema(AvroUtils.getNestedNamespace(namespace,name));
         }

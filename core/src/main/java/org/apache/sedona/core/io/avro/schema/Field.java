@@ -15,6 +15,11 @@ public class Field implements KryoSerializable, Serializable {
     private String name;
     private Schema schema;
     
+    /**
+     * Field of a Avro Record of given Schema
+     * @param name
+     * @param schema
+     */
     public Field(String name, Schema schema) {
         this.name = name;
         this.schema = schema;

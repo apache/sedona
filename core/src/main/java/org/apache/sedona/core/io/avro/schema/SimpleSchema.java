@@ -12,6 +12,10 @@ import org.json.simple.JSONObject;
 public class SimpleSchema extends Schema {
     private String dataType;
     
+    /**
+     * Gets Schema of given Primitive Data type
+     * @param dataType
+     */
     public SimpleSchema(AvroConstants.PrimitiveDataType dataType) {
         this.dataType = dataType.getType();
     }
@@ -19,6 +23,11 @@ public class SimpleSchema extends Schema {
     public SimpleSchema() {
     }
     
+    /**
+     * Gets Schema of a predefined Datatype
+     * @param type
+     * @throws SedonaException
+     */
     public SimpleSchema(String type) throws SedonaException {
         SchemaUtils.SchemaParser.getSchema(type);
         this.dataType = type;

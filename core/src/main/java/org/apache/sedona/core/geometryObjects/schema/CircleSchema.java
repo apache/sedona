@@ -7,6 +7,9 @@ import org.apache.sedona.core.io.avro.schema.RecordSchema;
 import org.apache.sedona.core.io.avro.constants.AvroConstants;
 import org.apache.sedona.core.utils.SedonaUtils;
 
+/**
+ * Circle Schema class representing AvroSchema of Circle Geometry
+ */
 public class CircleSchema extends RecordSchema {
     public static final String CENTER = "c";
     public static final String RADIUS = "r";

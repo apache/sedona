@@ -1,5 +1,8 @@
 package org.apache.sedona.core.exceptions;
 
+/**
+ * Base Class for Exception Handling
+ */
 public class SedonaException extends Exception{
     public SedonaException() {
     }
