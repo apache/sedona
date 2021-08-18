@@ -20,13 +20,14 @@ from pyspark.sql import SparkSession
 from sedona.register import SedonaRegistrator
 from sedona.utils import KryoSerializer, SedonaKryoRegistrator
 from sedona.utils.decorators import classproperty
+from tests.tools import serializer_path
 
 
 class TestBase:
 
     @classproperty
     def serializer_type(self):
-        with open("serializer_type.txt") as file:
+        with open(serializer_path) as file:
             lines = file.readlines()
         return "".join(lines).strip()
 

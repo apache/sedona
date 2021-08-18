@@ -19,10 +19,11 @@
 
 package org.apache.sedona.python.wrapper
 
-import org.apache.sedona.python.wrapper.translation.{FlatPairRddConverter, GeometryRddConverter, ListPairRddConverter}
+import org.apache.sedona.python.wrapper.translation.{FlatPairRddConverter, GeometryRddConverter, GeometrySerializer, ListPairRddConverter}
 import org.apache.spark.api.java.JavaPairRDD
 import org.scalatest.Matchers
 import org.apache.sedona.python.wrapper.utils.implicits._
+
 import scala.collection.JavaConverters._
 
 
@@ -35,6 +36,12 @@ class TestToPythonSerialization extends SparkUtil with GeometrySample with Match
     })
     convertedToPythonArrays should contain theSameElementsAs expectedPointArray
 
+  }
+
+  test("sth"){
+    println(GeometrySerializer(wktReader.read("POINT(21 52)")).serialize.mkString(","))
+//    0,0,17,0,0,0,0,0,0,0,1,0,0,0,0,0,0,53,64,0,0,0,0,0,0,74,64
+//    0,17,0,0,0,0,0,0,0,1,0,0,0,0,0,0,53,64,0,0,0,0,0,0,74,64
   }
 
   test("Should serialize to Python JavaRDD[Geometry, Geometry]") {

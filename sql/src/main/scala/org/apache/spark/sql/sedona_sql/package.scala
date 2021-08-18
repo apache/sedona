@@ -31,7 +31,7 @@ package object sedona_sql {
     case None => throw new SparkException("There is no active SparkContext. Hence, cannot create SedonaSerializer")
   }
 
-  private val userSerializerType = sedonaConf.getSerializerType
+  val userSerializerType = sedonaConf.getSerializerType
   val sedonaSerializer: SedonaSerializer = SedonaSerializer(userSerializerType)
 
 }

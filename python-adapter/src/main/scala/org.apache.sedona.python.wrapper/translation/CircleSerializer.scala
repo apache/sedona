@@ -21,20 +21,20 @@ package org.apache.sedona.python.wrapper.translation
 
 import org.apache.sedona.core.geometryObjects.Circle
 import org.apache.sedona.python.wrapper.utils.implicits._
-import org.locationtech.jts.io.WKBWriter
+import org.apache.spark.sql.sedona_sql.userSerializerType
 
 
 case class CircleSerializer(geometry: Circle) {
   private val isCircle = Array(1.toByte)
+  private val serializer = GeomSerdeUtil.getSerializer(userSerializerType)
+  val serializationTypeBytes: Array[Byte] = GeomSerdeUtil.getSerializationBytes(userSerializerType)
 
   def serialize: Array[Byte] = {
-    val wkbWriter = new WKBWriter(2, 2)
-    val serializedGeom = wkbWriter.write(geometry.getCenterGeometry)
+    val serializedGeometry = serializer.serialize(geom = geometry)
     val userDataBinary = geometry.userDataToUtf8ByteArray
     val userDataLengthArray = userDataBinary.length.toByteArray()
-    val serializedGeomLength = serializedGeom.length.toByteArray()
     val radius = geometry.getRadius.toDouble
-    isCircle ++ serializedGeomLength ++ userDataLengthArray ++ serializedGeom ++ userDataBinary ++ radius.toByteArray()
+    serializationTypeBytes ++ isCircle ++ userDataLengthArray ++ serializedGeometry ++ userDataBinary ++ radius.toByteArray()
   }
 
 }

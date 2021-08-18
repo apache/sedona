@@ -14,7 +14,7 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
-
+import pytest
 from pyspark import StorageLevel
 
 from sedona.core.SpatialRDD import PointRDD, CircleRDD
@@ -24,6 +24,7 @@ from tests.properties.point_properties import input_location, offset, splitter, 
 
 class TestCircleRDD(TestBase):
 
+    @pytest.mark.skipif(TestBase.serializer_type == "shape", reason="circle is not supported")
     def test_circle_rdd(self):
         spatial_rdd = PointRDD(
             self.sc,

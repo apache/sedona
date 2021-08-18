@@ -39,8 +39,8 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom_from", GeometryType(self.serializer_type), True),
-                t.StructField("geom_to", GeometryType(self.serializer_type), True)
+                t.StructField("geom_from", GeometryType(), True),
+                t.StructField("geom_to", GeometryType(), True)
             ]
         )
         self.spark.createDataFrame(
@@ -72,13 +72,16 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(self.serializer_type), True)
+                t.StructField("geom", GeometryType(), True)
             ]
         )
+
         m_point_out = self.spark.createDataFrame(
             data,
             schema
         ).collect()[0][1]
+
+        print(m_point_out)
 
         assert m_point_out == multipoint
 
@@ -91,7 +94,7 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(self.serializer_type), True)
+                t.StructField("geom", GeometryType(), True)
             ]
         )
 
@@ -112,7 +115,7 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(self.serializer_type), True)
+                t.StructField("geom", GeometryType(), True)
             ]
         )
 
@@ -137,7 +140,7 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(self.serializer_type), True)
+                t.StructField("geom", GeometryType(), True)
             ]
         )
 
@@ -151,6 +154,9 @@ class TestsSerializers(TestBase):
 
     def test_geopandas_convertion(self):
         gdf = gpd.read_file(os.path.join(tests_resource, "shapefiles/gis_osm_pois_free_1/"))
+        self.spark.createDataFrame(
+            gdf
+        ).show()
         print(self.spark.createDataFrame(
             gdf
         ).toPandas())
@@ -172,7 +178,7 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(self.serializer_type), True)
+                t.StructField("geom", GeometryType(), True)
             ]
         )
         self.spark.createDataFrame(
