@@ -26,14 +26,17 @@ import org.locationtech.jts.geom.Geometry
 case class GeometrySerializer(geometry: Geometry) {
 
   private val notCircle = Array(0.toByte)
-  val serializer: PythonGeometrySerde = GeomSerdeUtil.getSerializer(userSerializerType)
-  val serializationTypeBytes: Array[Byte] = GeomSerdeUtil.getSerializationBytes(userSerializerType)
 
   def serialize: Array[Byte] = {
-    val serializedGeometry = serializer.serialize(geom = geometry)
+    val serializedGeometry = GeometrySerializer.serializer.serialize(geom = geometry)
     val serializedGeom = serializedGeometry
     val userDataBinary = geometry.userDataToUtf8ByteArray
     val userDataLengthArray = userDataBinary.length.toByteArray()
-    serializationTypeBytes ++ notCircle ++ userDataLengthArray ++ serializedGeom ++ userDataBinary
+    GeometrySerializer.serializationTypeBytes ++ notCircle ++ userDataLengthArray ++ serializedGeom ++ userDataBinary
   }
+}
+
+object GeometrySerializer{
+  val serializer: PythonGeometrySerde = GeomSerdeUtil.getSerializer(userSerializerType)
+  val serializationTypeBytes: Array[Byte] = GeomSerdeUtil.getSerializationBytes(userSerializerType)
 }

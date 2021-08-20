@@ -19,6 +19,8 @@ from shapely.geometry.base import BaseGeometry
 
 from sedona.core.geom.envelope import Envelope
 from sedona.core.jvm.translate import JvmGeometryAdapter
+from sedona.sql.types import SparkConfGetter, spark_conf_getter, geometry_serializers, geometry_serializers_instances
+from sedona.utils.binary_parser import BinaryBuffer
 from sedona.utils.spatial_rdd_parser import GeometryFactory
 
 
@@ -34,7 +36,9 @@ class GeometryAdapter:
         if isinstance(geom, Envelope):
             jvm_geom = geom.create_jvm_instance(jvm)
         else:
-            decoded_geom = GeometryFactory.to_bytes(geom)
+            byte_buffer = BinaryBuffer()
+            decoded_geom = GeometryFactory.to_bytes(geom, geometry_serializers_instances[spark_conf_getter.serialization],
+                                                    byte_buffer)
             jvm_geom = JvmGeometryAdapter(jvm).translate_to_java(decoded_geom)
 
         return jvm_geom

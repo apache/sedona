@@ -185,8 +185,8 @@ class TestAdapter(TestBase):
         join_result_df = Adapter.toDf(join_result_point_rdd, self.spark)
         join_result_df.show()
 
-        join_result_df2 = Adapter.toDf(join_result_point_rdd, ["abc", "def"], list(), self.spark)
-        join_result_df2.show()
+        # join_result_df2 = Adapter.toDf(join_result_point_rdd, ["abc", "def"], list(), self.spark)
+        # join_result_df2.show()
 
     def test_distance_join_result_to_dataframe(self):
         point_csv_df = self.spark.\

@@ -39,6 +39,7 @@ class TestBase:
                 config("sedona.serializer.type", self.serializer_type).\
                 config("spark.serializer", KryoSerializer.getName).\
                 config("spark.kryo.registrator", SedonaKryoRegistrator.getName) .\
+                config("spark.kryoserializer.buffer.max.mb", "512") .\
                 master("local[*]").\
                 getOrCreate()
 

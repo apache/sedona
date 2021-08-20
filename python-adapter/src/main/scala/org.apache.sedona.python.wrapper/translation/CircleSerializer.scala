@@ -30,7 +30,7 @@ case class CircleSerializer(geometry: Circle) {
   val serializationTypeBytes: Array[Byte] = GeomSerdeUtil.getSerializationBytes(userSerializerType)
 
   def serialize: Array[Byte] = {
-    val serializedGeometry = serializer.serialize(geom = geometry)
+    val serializedGeometry = serializer.serialize(geom = geometry.getCenterGeometry)
     val userDataBinary = geometry.userDataToUtf8ByteArray
     val userDataLengthArray = userDataBinary.length.toByteArray()
     val radius = geometry.getRadius.toDouble

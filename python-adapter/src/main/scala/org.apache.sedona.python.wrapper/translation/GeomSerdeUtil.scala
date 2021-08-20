@@ -20,25 +20,39 @@ package org.apache.sedona.python.wrapper.translation
 
 import org.apache.sedona.core.enums.SerializerType
 import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeSerde
-import org.locationtech.jts.geom.Geometry
-import org.locationtech.jts.io.WKBWriter
+import org.locationtech.jts.geom.{Geometry, GeometryFactory}
+import org.locationtech.jts.io.{WKBReader, WKBWriter}
 
 
-abstract class PythonGeometrySerde{
+abstract class PythonGeometrySerde extends Serializable {
   def serialize(geom: Geometry): Array[Byte]
+  def deserialize: Array[Byte] => Geometry
 }
 
-class PythonShapeSerde extends PythonGeometrySerde {
+case class PythonShapeSerde() extends PythonGeometrySerde with Serializable {
   override def serialize(geom: Geometry): Array[Byte] =
     ShapeSerde.serialize(geom)
+
+  override def deserialize: Array[Byte] => Geometry = (array: Array[Byte]) =>
+    ShapeSerde.deserialize(array, new GeometryFactory())
 }
 
-class PythonWkbSerde extends PythonGeometrySerde {
-  private val wkbWriter = new WKBWriter(2, 2, true)
+case class PythonWkbSerde() extends PythonGeometrySerde with Serializable {
+
   override def serialize(geom: Geometry): Array[Byte] = {
-    val serializedGeom = wkbWriter.write(geom)
+    val serializedGeom = PythonWkbSerde.wkbWriter.write(geom)
     GeomSerdeUtil.intToByteArray(serializedGeom.length) ++ serializedGeom
   }
+
+  override def deserialize: Array[Byte] => Geometry = (array: Array[Byte]) => {
+
+    PythonWkbSerde.wkbReader.read(array.slice(4, array.length))
+  }
+}
+
+object PythonWkbSerde{
+  val wkbWriter = new WKBWriter(2, 2, true)
+  val wkbReader = new WKBReader()
 }
 
 object GeomSerdeUtil {
@@ -58,7 +72,7 @@ object GeomSerdeUtil {
   }
   def getSerializer(userSerializerType: SerializerType): PythonGeometrySerde =
     userSerializerType match {
-      case SerializerType.SHAPE => new PythonShapeSerde()
-      case SerializerType.WKB => new PythonWkbSerde()
+      case SerializerType.SHAPE => PythonShapeSerde()
+      case SerializerType.WKB => PythonWkbSerde()
     }
 }
