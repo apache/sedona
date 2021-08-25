@@ -33,10 +33,4 @@ public class CoordinateSchema extends RecordSchema {
         }
         return schema;
     }
-
-//    public CoordinateSchema(String name, String namespace) {
-//        super(name, namespace, Arrays.asList(
-//                new Field(X_COORDINATE, new SimpleSchema(AvroConstants.PrimitiveDataType.DOUBLE)),
-//                new Field(Y_COORDINATE, new SimpleSchema(AvroConstants.PrimitiveDataType.DOUBLE))));
-//    }
 }

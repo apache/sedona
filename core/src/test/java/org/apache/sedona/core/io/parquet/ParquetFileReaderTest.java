@@ -68,10 +68,7 @@ public class ParquetFileReaderTest extends TestBase {
         });
         
         SpatialRDD<Point> pointRDD1 = ParquetReader.readToGeometryRDD(sc,
-                                                                        Arrays.stream(testOutputPathDir.listFiles())
-                                                                              .filter(file -> file.getAbsolutePath().endsWith(".parquet"))
-                                                                              .map(file->file.getAbsolutePath())
-                                                                              .collect(Collectors.toList()),
+                                                                      Arrays.asList(testOutputPathDir.getAbsolutePath()+"/*.parquet"),
                                                                         GeometryType.POINT,
                                                                         "p",
                                                                         Collections.EMPTY_LIST);
