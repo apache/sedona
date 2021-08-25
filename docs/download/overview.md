@@ -56,6 +56,11 @@ You need to install necessary packages if your system does not have them install
 ```bash
 pip install apache-sedona
 ```
+* Since version 1.1.0 pyspark is an optional dependency since spark comes pre-installed on many spark platforms.
+  To install pyspark along with Sedona Python in one go, use the `spark` extra:
+```bash
+pip install apache-sedona[spark]
+```
 
 * Installing from Sedona Python source
 
