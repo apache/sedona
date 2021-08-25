@@ -13,7 +13,7 @@ pytest-cov = "*"
 [packages]
 pandas="*"
 geopandas="==0.6.0"
-pyspark=">=2.4.0"
+pyspark=">=2.3.0"
 attrs="*"
 
 [requires]

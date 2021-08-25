@@ -37,7 +37,7 @@ setup(
     long_description_content_type="text/markdown",
     python_requires='>=3.6',
     install_requires=['attrs', "shapely"],
-    extras_require={"spark": ['pyspark>=2.4.0']},
+    extras_require={"spark": ['pyspark>=2.3.0']},
     project_urls={
         'Documentation': 'https://sedona.apache.org',
         'Source code': 'https://github.com/apache/incubator-sedona',
