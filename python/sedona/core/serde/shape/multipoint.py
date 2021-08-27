@@ -16,9 +16,8 @@ class MultiPointParser(GeometryParser):
     @classmethod
     def serialize(cls, obj: MultiPoint, binary_buffer: BinaryBuffer):
         if isinstance(obj, MultiPoint):
-            binary_buffer.put_int(0, ByteOrderType.LITTLE_ENDIAN)
             add_shape_geometry_metadata(GeomEnum.multipoint.value, binary_buffer)
-            binary_buffer.add_empty_bytes("double", 4, ByteOrderType.LITTLE_ENDIAN)
+            binary_buffer.add_empty_bytes("double", 4)
             binary_buffer.put_int(len(obj.geoms), ByteOrderType.LITTLE_ENDIAN)
             for point in obj.geoms:
                 binary_buffer.put_double(point.x, ByteOrderType.LITTLE_ENDIAN)

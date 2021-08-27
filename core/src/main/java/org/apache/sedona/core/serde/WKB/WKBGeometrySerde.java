@@ -35,17 +35,16 @@ import org.locationtech.jts.io.WKBWriter;
 public class WKBGeometrySerde
         extends GeometrySerde
 {
+
     @Override
     protected void writeGeometry(Kryo kryo, Output out, Geometry geometry)
     {
         WKBWriter writer = new WKBWriter(2, 2, true);
         byte[] data = writer.write(geometry);
 
-        // Mainly used by the python binding to know in which serde to use
-        writeSerializedType(out, SerializerType.WKB);
-
         // write geometry length size to read bytes until userData
         out.writeInt(data.length);
+
         out.write(data, 0, data.length);
         writeUserData(kryo, out, geometry);
     }
@@ -54,9 +53,6 @@ public class WKBGeometrySerde
     protected Geometry readGeometry(Kryo kryo, Input input) {
         WKBReader reader = new WKBReader();
         Geometry geometry;
-
-        // Skip the unneeded Serialized Type
-        input.readInt();
 
         int geometryBytesLength = input.readInt();
         byte[] bytes = input.readBytes(geometryBytesLength);

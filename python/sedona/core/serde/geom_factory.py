@@ -23,10 +23,7 @@ serializers = {
 }
 
 
-class GeoSerializer:
-    pass
-
-class GeometryFactory:
+class SerializationFactory:
 
     def __init__(self, geometry_serde: 'GeometrySerde'):
         self.geometry_serde = geometry_serde
@@ -36,10 +33,3 @@ class GeometryFactory:
 
     def deserialize(self, bytes: BinaryParser) -> BaseGeometry:
         return self.geometry_serde.geometry_from_bytes(bytes)
-
-    @classmethod
-    def from_spark_config(cls):
-        pass
-
-class GeomFactoryWithUserData:
-    pass

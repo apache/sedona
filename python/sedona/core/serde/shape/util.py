@@ -23,7 +23,6 @@ def put_coordinates(coordinates: Iterable[Iterable[numeric]], binary_buffer: 'Bi
 
 
 def add_shape_geometry_metadata(geom_type: int, binary_buffer: 'BinaryBuffer'):
-    binary_buffer.put_byte(ShapeEnum.shape.value)
     binary_buffer.put_byte(geom_type)
 
 

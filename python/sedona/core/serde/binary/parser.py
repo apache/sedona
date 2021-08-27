@@ -6,7 +6,7 @@ from pyspark import SparkContext
 from shapely.wkb import loads
 
 from sedona.core.serde.binary.order import ByteOrderType
-from sedona.core.serde.binary.size import BYTE_SIZE, INT_SIZE
+from sedona.core.serde.binary.size import BYTE_SIZE, INT_SIZE, size_dict, DOUBLE_SIZE, CHAR_SIZE, BOOLEAN_SIZE
 
 
 @attr.s
@@ -21,6 +21,7 @@ class BinaryParser:
     def read_geometry(self, length: int):
         geom_bytes = b"".join([struct.pack("b", el) if el < 128 else struct.pack("b", el - 256) for el in
                                self.bytes[self.current_index: self.current_index + length]])
+
         geom = loads(geom_bytes)
         self.current_index += length
         return geom

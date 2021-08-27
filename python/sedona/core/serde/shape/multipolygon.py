@@ -20,9 +20,8 @@ class MultiPolygonParser(GeometryParser):
             num_polygons = len(obj.geoms)
             num_points = sum([get_number_of_polygon_points(polygon) for polygon in obj.geoms])
             num_rings = sum([get_number_of_rings(polygon) for polygon in obj.geoms])
-            binary_buffer.put_int(0, ByteOrderType.LITTLE_ENDIAN)
             add_shape_geometry_metadata(GeomEnum.polygon.value, binary_buffer)
-            binary_buffer.add_empty_bytes("double", 4, ByteOrderType.LITTLE_ENDIAN)
+            binary_buffer.add_empty_bytes("double", 4)
             binary_buffer.put_int(num_rings, ByteOrderType.LITTLE_ENDIAN)
             binary_buffer.put_int(num_points, ByteOrderType.LITTLE_ENDIAN)
 

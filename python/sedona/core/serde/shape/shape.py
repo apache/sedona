@@ -21,7 +21,7 @@ from sedona.utils.decorators import classproperty
 
 class ShapeSerde(GeometrySerde):
 
-    def geometry_from_bytes(self, bin_parser: BinaryParser) -> BaseGeometry:
+    def deserialize(self, bin_parser: BinaryParser) -> BaseGeometry:
         gm_type = bin_parser.read_byte()
         if GeomEnum.has_value(gm_type):
             name = GeomEnum.get_name(gm_type)
@@ -31,7 +31,7 @@ class ShapeSerde(GeometrySerde):
         else:
             raise GeometryUnavailableException(f"Can not deserialize object")
 
-    def to_bytes(self, geom: BaseGeometry, buffer: BinaryBuffer) -> List[int]:
+    def serialize(self, geom: BaseGeometry, buffer: BinaryBuffer) -> List[int]:
         geom_name = str(geom.__class__.__name__).lower()
         try:
             appr_parser = self.parsers[geom_name]

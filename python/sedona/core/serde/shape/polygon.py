@@ -20,14 +20,13 @@ class PolygonParser(GeometryParser):
     @classmethod
     def serialize(cls, obj: Polygon, binary_buffer: BinaryBuffer):
         if isinstance(obj, Polygon):
-            binary_buffer.put_int(0, ByteOrderType.LITTLE_ENDIAN)
             add_shape_geometry_metadata(GeomEnum.polygon.value, binary_buffer)
 
             num_rings = get_number_of_rings(obj)
 
             num_points = get_number_of_polygon_points(obj)
 
-            binary_buffer.add_empty_bytes("double", 4, ByteOrderType.LITTLE_ENDIAN)
+            binary_buffer.add_empty_bytes("double", 4)
 
             binary_buffer.put_int(num_rings, ByteOrderType.LITTLE_ENDIAN)
             binary_buffer.put_int(num_points, ByteOrderType.LITTLE_ENDIAN)

@@ -16,7 +16,6 @@ class PointParser(GeometryParser):
     @classmethod
     def serialize(cls, obj: Point, binary_buffer: BinaryBuffer):
         if isinstance(obj, Point):
-            binary_buffer.put_int(0, ByteOrderType.LITTLE_ENDIAN)
             add_shape_geometry_metadata(GeomEnum.point.value, binary_buffer)
             binary_buffer.put_double(obj.x, ByteOrderType.LITTLE_ENDIAN)
             binary_buffer.put_double(obj.y, ByteOrderType.LITTLE_ENDIAN)

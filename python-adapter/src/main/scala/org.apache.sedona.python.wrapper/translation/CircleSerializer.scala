@@ -20,21 +20,20 @@
 package org.apache.sedona.python.wrapper.translation
 
 import org.apache.sedona.core.geometryObjects.Circle
+import org.apache.sedona.python.wrapper.translation.serde.PythonGeometrySerialization
 import org.apache.sedona.python.wrapper.utils.implicits._
-import org.apache.spark.sql.sedona_sql.userSerializerType
+import org.apache.spark.sql.sedona_sql.{sedonaSerializer, userSerializerType}
 
 
 case class CircleSerializer(geometry: Circle) {
   private val isCircle = Array(1.toByte)
-  private val serializer = GeomSerdeUtil.getSerializer(userSerializerType)
-  val serializationTypeBytes: Array[Byte] = GeomSerdeUtil.getSerializationBytes(userSerializerType)
 
   def serialize: Array[Byte] = {
-    val serializedGeometry = serializer.serialize(geom = geometry.getCenterGeometry)
+    val serializedGeometry = PythonGeometrySerialization.serialize(geometry.getCenterGeometry)
     val userDataBinary = geometry.userDataToUtf8ByteArray
     val userDataLengthArray = userDataBinary.length.toByteArray()
     val radius = geometry.getRadius.toDouble
-    serializationTypeBytes ++ isCircle ++ userDataLengthArray ++ serializedGeometry ++ userDataBinary ++ radius.toByteArray()
+    isCircle ++ userDataLengthArray ++ serializedGeometry ++ userDataBinary ++ radius.toByteArray()
   }
 
 }

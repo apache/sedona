@@ -20,10 +20,13 @@
 package org.apache.sedona.python.wrapper.translation
 
 import java.nio.ByteBuffer
+
+import com.esotericsoftware.kryo.io.Output
 import org.apache.sedona.core.geometryObjects.Circle
 import org.apache.sedona.python.wrapper.SerializationException
-import org.apache.spark.sql.sedona_sql.userSerializerType
-import org.locationtech.jts.geom.Geometry
+import org.apache.sedona.python.wrapper.translation.serde.PythonGeometrySerialization
+import org.apache.spark.sql.sedona_sql.{sedonaSerializer, userSerializerType}
+import org.locationtech.jts.geom.{Geometry, GeometryCollection, LineString, Point, Polygon}
 import org.locationtech.jts.io.WKBReader
 
 
@@ -35,12 +38,13 @@ private[python] case class PythonGeometrySerializer() extends Serializable {
       - Translate user attributes using UTF-8 encoding
    */
 
-  val serializer: PythonGeometrySerde = GeomSerdeUtil.getSerializer(userSerializerType)
-  val serializationTypeBytes: Array[Byte] = GeomSerdeUtil.getSerializationBytes(userSerializerType)
 
-  def serialize: (Geometry => Array[Byte]) = {
-    case geometry: Circle => CircleSerializer(geometry).serialize
-    case geometry: Geometry => GeometrySerializer(geometry).serialize
+  def serialize(geom: Geometry): Array[Byte] = {
+    geom match {
+      case geometry: Circle => CircleSerializer(geometry).serialize
+      case geometry: Geometry => GeometrySerializer(geometry).serialize
+    }
+
 
   }
 
@@ -49,12 +53,12 @@ private[python] case class PythonGeometrySerializer() extends Serializable {
     val valuesLength = values.length
 
     if (isCircle == 1) {
-      val geom = serializer.deserialize(values.slice(13, valuesLength))
-      val radius = ByteBuffer.wrap(values.slice(5, 13)).getDouble()
+      val geom =  PythonGeometrySerialization.deserialize(values.slice(9, valuesLength))
+      val radius = ByteBuffer.wrap(values.slice(1, 9)).getDouble()
       new Circle(geom, radius)
     }
     else if (isCircle == 0) {
-      serializer.deserialize(values.slice(5, valuesLength))
+      PythonGeometrySerialization.deserialize(values.slice(1, valuesLength))
     }
     else throw SerializationException("Can not deserialize object")
 

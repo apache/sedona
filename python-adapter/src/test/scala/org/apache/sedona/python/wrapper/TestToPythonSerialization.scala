@@ -23,6 +23,9 @@ import org.apache.sedona.python.wrapper.translation.{FlatPairRddConverter, Geome
 import org.apache.spark.api.java.JavaPairRDD
 import org.scalatest.Matchers
 import org.apache.sedona.python.wrapper.utils.implicits._
+import org.apache.sedona.sql.serde.SedonaSerializer
+import org.apache.spark.sql.catalyst.util.GenericArrayData
+import org.apache.spark.sql.sedona_sql.userSerializerType
 
 import scala.collection.JavaConverters._
 
@@ -39,7 +42,10 @@ class TestToPythonSerialization extends SparkUtil with GeometrySample with Match
   }
 
   test("sth"){
-    println(GeometrySerializer(wktReader.read("POINT(21 52)")).serialize.mkString(","))
+//    println(SedonaSerializer(userSerializerType).serialize(wktReader.read("POINT(21 52)")).mkString(","))
+    val ser = SedonaSerializer(userSerializerType).serialize(wktReader.read("POINT(21 52)"))
+
+//    println(SedonaSerializer(userSerializerType).deserialize(new GenericArrayData(ser)))
 //    0,0,17,0,0,0,0,0,0,0,1,0,0,0,0,0,0,53,64,0,0,0,0,0,0,74,64
 //    0,17,0,0,0,0,0,0,0,1,0,0,0,0,0,0,53,64,0,0,0,0,0,0,74,64
   }

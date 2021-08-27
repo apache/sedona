@@ -18,7 +18,6 @@ class LineStringParser(GeometryParser):
     @classmethod
     def serialize(cls, obj: LineString, binary_buffer: BinaryBuffer):
         if isinstance(obj, LineString):
-            binary_buffer.put_int(0, ByteOrderType.LITTLE_ENDIAN)
             add_shape_geometry_metadata(GeomEnum.polyline.value, binary_buffer)
             binary_buffer.add_empty_bytes("double", 4)
             num_points = obj.coords.__len__()

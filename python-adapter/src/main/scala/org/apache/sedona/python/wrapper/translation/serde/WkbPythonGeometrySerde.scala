@@ -17,23 +17,26 @@
  * under the License.
  */
 
-package org.apache.sedona.python.wrapper.translation
 
-import org.apache.sedona.python.wrapper.translation.serde.PythonGeometrySerialization
-import org.apache.sedona.python.wrapper.utils.implicits._
-import org.apache.spark.sql.sedona_sql.{sedonaSerializer, userSerializerType}
+package org.apache.sedona.python.wrapper.translation.serde
+
+import java.nio.ByteOrder
+
+import org.apache.sedona.python.wrapper.utils.implicits.IntImplicit
 import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.io.{WKBReader, WKBWriter}
 
-case class GeometrySerializer(geometry: Geometry) {
+object WkbPythonGeometrySerde extends PythonGeometrySerde {
 
-  private val notCircle = Array(0.toByte)
-
-  def serialize: Array[Byte] = {
-    val serializedGeometry = PythonGeometrySerialization.serialize(geometry)
-    val serializedGeom = serializedGeometry
-    val userDataBinary = geometry.userDataToUtf8ByteArray
-    val userDataLengthArray = userDataBinary.length.toByteArray()
-    notCircle ++ userDataLengthArray ++ serializedGeom ++ userDataBinary
+  def serialize(geometry: Geometry): Array[Byte] = {
+    val writer: WKBWriter = new WKBWriter(2, 2)
+    val data = writer.write(geometry)
+    data.length.toByteArray(ByteOrder.BIG_ENDIAN) ++ data
   }
-}
 
+  def deserialize(array: Array[Byte]): Geometry = {
+    val wkbReader = new WKBReader()
+    wkbReader.read(array.slice(4, array.length))
+  }
+
+}

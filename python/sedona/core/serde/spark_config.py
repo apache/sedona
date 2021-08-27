@@ -1,21 +1,25 @@
-from pyspark.sql import SparkSession
+from sedona.utils.decorators import classproperty
 
 
-class SparkConfGetter:
+class Singleton(type):
+    _instances = {}
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
 
-    def _get_serialization_type(self):
-        current_spark = SparkSession.getActiveSession()
-        if current_spark:
-            spark_context = current_spark.sparkContext
-            conf = spark_context.getConf()
-            serializer_type = conf.get("sedona.serializer.type")
-        else:
-            serializer_type = "shape"
 
-        return serializer_type
+class SparkConfGetter(metaclass=Singleton):
 
     @property
     def serialization(self):
         if not hasattr(self, "__serialization"):
-            setattr(self, "__serialization", self._get_serialization_type())
+            return "wkb"
         return getattr(self, "__serialization")
+
+    @serialization.setter
+    def serialization(self, value):
+        setattr(self, "__serialization", value)
+
+
+spark_conf_getter = SparkConfGetter()

@@ -17,23 +17,13 @@
  * under the License.
  */
 
-package org.apache.sedona.python.wrapper.translation
 
-import org.apache.sedona.python.wrapper.translation.serde.PythonGeometrySerialization
-import org.apache.sedona.python.wrapper.utils.implicits._
-import org.apache.spark.sql.sedona_sql.{sedonaSerializer, userSerializerType}
+package org.apache.sedona.python.wrapper.translation.serde
+
+import com.esotericsoftware.kryo.io.Output
 import org.locationtech.jts.geom.Geometry
 
-case class GeometrySerializer(geometry: Geometry) {
+trait PythonGeometrySerde {
 
-  private val notCircle = Array(0.toByte)
-
-  def serialize: Array[Byte] = {
-    val serializedGeometry = PythonGeometrySerialization.serialize(geometry)
-    val serializedGeom = serializedGeometry
-    val userDataBinary = geometry.userDataToUtf8ByteArray
-    val userDataLengthArray = userDataBinary.length.toByteArray()
-    notCircle ++ userDataLengthArray ++ serializedGeom ++ userDataBinary
-  }
+  def serialize(geometry: Geometry): Array[Byte]
 }
-

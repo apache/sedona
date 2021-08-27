@@ -18,7 +18,6 @@ class MultiLineStringParser(GeometryParser):
     @classmethod
     def serialize(cls, obj: MultiLineString, binary_buffer: BinaryBuffer):
         if isinstance(obj, MultiLineString):
-            binary_buffer.put_int(0, ByteOrderType.LITTLE_ENDIAN)
             add_shape_geometry_metadata(GeomEnum.polyline.value, binary_buffer)
             binary_buffer.add_empty_bytes("double", 4)
 

@@ -22,5 +22,5 @@ package org.apache.sedona.python.wrapper.adapters
 import org.apache.sedona.python.wrapper.translation.PythonGeometrySerializer
 
 trait GeomSerializer {
-  val geometrySerializer = new PythonGeometrySerializer()
+  val geometrySerializer = PythonGeometrySerializer()
 }

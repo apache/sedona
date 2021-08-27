@@ -1,7 +1,15 @@
+from typing import List
+
+from shapely.geometry.base import BaseGeometry
+
+from sedona.core.serde.binary.buffer import BinaryBuffer
+from sedona.core.serde.binary.parser import BinaryParser
+
+
 class GeometrySerde:
 
-    def geometry_from_bytes(self, bin_parser: BinaryParser) -> BaseGeometry:
+    def deserialize(self, bin_parser: BinaryParser) -> BaseGeometry:
         raise NotImplementedError("child class should implement method geometry from bytes")
 
-    def to_bytes(self, geom: BaseGeometry, buffer: BinaryBuffer) -> List[int]:
+    def serialize(self, geom: BaseGeometry, buffer: BinaryBuffer) -> List[int]:
         raise NotImplementedError("child class should implement method to bytes")

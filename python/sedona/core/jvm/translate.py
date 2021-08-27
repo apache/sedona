@@ -32,9 +32,6 @@ class JvmSedonaPythonConverter:
     def translate_spatial_pair_rdd_with_list_to_python(self, spatial_rdd):
         return self._jvm.PythonConverter.translateSpatialPairRDDWithListToPython(spatial_rdd)
 
-    def translate_python_rdd_to_java(self, java_rdd):
-        return self._jvm.PythonConverter.translatePythonRDDToJava(java_rdd)
-
     def translate_geometry_seq_to_python(self, geometry_seq) -> List:
         return self._jvm.PythonConverter.translateGeometrySeqToPython(geometry_seq)
 

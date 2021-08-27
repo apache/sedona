@@ -17,23 +17,26 @@
  * under the License.
  */
 
-package org.apache.sedona.python.wrapper.translation
+package org.apache.sedona.python.wrapper.translation.serde
 
-import org.apache.sedona.python.wrapper.translation.serde.PythonGeometrySerialization
-import org.apache.sedona.python.wrapper.utils.implicits._
-import org.apache.spark.sql.sedona_sql.{sedonaSerializer, userSerializerType}
+import org.apache.sedona.core.enums.SerializerType
+import org.apache.spark.sql.sedona_sql.userSerializerType
 import org.locationtech.jts.geom.Geometry
 
-case class GeometrySerializer(geometry: Geometry) {
+object PythonGeometrySerialization {
+  def serialize(geometry: Geometry): Array[Byte] = {
+    userSerializerType match {
+      case SerializerType.SHAPE => ShapePythonGeometrySerde.serialize(geometry)
+      case SerializerType.WKB => WkbPythonGeometrySerde.serialize(geometry)
+      case _ => ShapePythonGeometrySerde.serialize(geometry)
+    }
+  }
 
-  private val notCircle = Array(0.toByte)
-
-  def serialize: Array[Byte] = {
-    val serializedGeometry = PythonGeometrySerialization.serialize(geometry)
-    val serializedGeom = serializedGeometry
-    val userDataBinary = geometry.userDataToUtf8ByteArray
-    val userDataLengthArray = userDataBinary.length.toByteArray()
-    notCircle ++ userDataLengthArray ++ serializedGeom ++ userDataBinary
+  def deserialize(array: Array[Byte]): Geometry = {
+    userSerializerType match {
+      case SerializerType.SHAPE => ShapePythonGeometrySerde.deserialize(array)
+      case SerializerType.WKB => WkbPythonGeometrySerde.deserialize(array)
+      case _ => ShapePythonGeometrySerde.deserialize(array)
+    }
   }
 }
-

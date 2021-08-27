@@ -22,6 +22,7 @@ import pytest
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import expr
 from pyspark.sql.functions import col
+from shapely.geometry import Point
 
 from sedona import version
 from sedona.core.SpatialRDD import PolygonRDD, CircleRDD
@@ -154,6 +155,7 @@ class TestAdapter(TestBase):
         assert (df.columns[1] == "STATEFP")
 
     def test_convert_spatial_join_result_to_dataframe(self):
+        print(self.sc)
         polygon_wkt_df = self.spark.read.format("csv").option("delimiter", "\t").option("header", "false").load(
             mixed_wkt_geometry_input_location)
         polygon_wkt_df.createOrReplaceTempView("polygontable")
@@ -185,8 +187,8 @@ class TestAdapter(TestBase):
         join_result_df = Adapter.toDf(join_result_point_rdd, self.spark)
         join_result_df.show()
 
-        # join_result_df2 = Adapter.toDf(join_result_point_rdd, ["abc", "def"], list(), self.spark)
-        # join_result_df2.show()
+        join_result_df2 = Adapter.toDf(join_result_point_rdd, ["abc", "def"], list(), self.spark)
+        join_result_df2.show()
 
     def test_distance_join_result_to_dataframe(self):
         point_csv_df = self.spark.\
@@ -309,3 +311,12 @@ class TestAdapter(TestBase):
 
         assert spatial_df.columns == ["geometry", *spatial_columns]
         assert spatial_df.count() == 1001
+
+    def test_serialization(self):
+        data = [[1, Point(21, 52)]]
+        df = self.spark.createDataFrame(data)
+        df.show()
+        df.collect()
+
+#         0,1,0,0,0,0,0,0,53,64,0,0,0,0,0,0,74,64,0
+# ['0', '1', '0', '0', '0', '0', '0', '0', '53', '64', '0', '0', '0', '0', '0', '0', '74', '64', '0']

@@ -36,9 +36,6 @@ object PythonConverter extends GeomSerializer {
   def translateSpatialPairRDDWithListToPython(spatialRDD: JavaPairRDD[Geometry, java.util.List[Geometry]]): JavaRDD[Array[Byte]] =
     ListPairRddConverter(spatialRDD, geometrySerializer).translateToPython
 
-  def translatePythonRDDToJava(pythonRDD: JavaRDD[Array[Byte]]): JavaRDD[Geometry] =
-    PythonRDDToJavaConverter(pythonRDD, geometrySerializer).translateToJava
-
   def translateGeometrySeqToPython(spatialData: SeqWrapper[Geometry]): Array[Array[Byte]] =
     GeometrySeqToPythonConverter(spatialData, geometrySerializer).translateToPython
 }
