@@ -41,15 +41,6 @@ class TestToPythonSerialization extends SparkUtil with GeometrySample with Match
 
   }
 
-  test("sth"){
-//    println(SedonaSerializer(userSerializerType).serialize(wktReader.read("POINT(21 52)")).mkString(","))
-    val ser = SedonaSerializer(userSerializerType).serialize(wktReader.read("POINT(21 52)"))
-
-//    println(SedonaSerializer(userSerializerType).deserialize(new GenericArrayData(ser)))
-//    0,0,17,0,0,0,0,0,0,0,1,0,0,0,0,0,0,53,64,0,0,0,0,0,0,74,64
-//    0,17,0,0,0,0,0,0,0,1,0,0,0,0,0,0,53,64,0,0,0,0,0,0,74,64
-  }
-
   test("Should serialize to Python JavaRDD[Geometry, Geometry]") {
     val translatedToPythonSpatialPairRdd = FlatPairRddConverter(
       JavaPairRDD.fromRDD(spatialPairRDD), pythonGeometrySerializer).translateToPython
