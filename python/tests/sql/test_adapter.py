@@ -317,6 +317,3 @@ class TestAdapter(TestBase):
         df = self.spark.createDataFrame(data)
         df.show()
         df.collect()
-
-#         0,1,0,0,0,0,0,0,53,64,0,0,0,0,0,0,74,64,0
-# ['0', '1', '0', '0', '0', '0', '0', '0', '53', '64', '0', '0', '0', '0', '0', '0', '74', '64', '0']

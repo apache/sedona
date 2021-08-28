@@ -43,11 +43,6 @@ class TestsSerializers(TestBase):
                 t.StructField("geom_to", GeometryType(), True)
             ]
         )
-        self.spark.createDataFrame(
-            data,
-            schema
-        )\
-        .show()
 
         self.spark.createDataFrame(
             data,
@@ -80,8 +75,6 @@ class TestsSerializers(TestBase):
             data,
             schema
         ).collect()[0][1]
-
-        print(m_point_out)
 
         assert m_point_out == multipoint
 
@@ -154,9 +147,6 @@ class TestsSerializers(TestBase):
 
     def test_geopandas_convertion(self):
         gdf = gpd.read_file(os.path.join(tests_resource, "shapefiles/gis_osm_pois_free_1/"))
-        self.spark.createDataFrame(
-            gdf
-        ).show()
         print(self.spark.createDataFrame(
             gdf
         ).toPandas())

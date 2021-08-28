@@ -26,10 +26,9 @@ from sedona.core.geom.envelope import Envelope
 from sedona.core.serde.spark_config import spark_conf_getter
 from sedona.core.spatialOperator import RangeQuery, JoinQuery, KNNQuery
 from tests.test_base import TestBase
-from tests.tools import tests_resource, serializer_path
+from tests.tools import tests_resource
 
 point_rdd_input_location = os.path.join(tests_resource, "arealm-small.csv")
-point_rdd_input_location_small_test = os.path.join(tests_resource, "arealm-small_test.csv")
 
 point_rdd_splitter = FileDataSplitter.CSV
 point_rdd_index_type = IndexType.RTREE

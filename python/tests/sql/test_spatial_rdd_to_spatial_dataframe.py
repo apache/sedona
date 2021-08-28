@@ -84,8 +84,6 @@ class TestSpatialRDDToDataFrame(TestBase):
             ]
         )
 
-        print("s")
-
         spatial_rdd_with_schema = self.spark.createDataFrame(
             raw_spatial_rdd, schema, verifySchema=False
         )

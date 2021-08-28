@@ -105,17 +105,8 @@ class TestGeometryConvert(TestBase):
     def test_from_geopandas_convert(self):
         gdf = gpd.read_file(os.path.join(tests_resource, "shapefiles/gis_osm_pois_free_1/"))
 
-        schema = StructType(
-            [
-                StructField("osm_id", StringType()),
-                StructField("code", StringType()),
-                StructField("fclass", StringType()),
-                StructField("name", StringType()),
-                StructField("geometry", GeometryType()),
-            ]
-        )
         self.spark.createDataFrame(
-            gdf, schema
+            gdf
         ).show()
 
     def test_to_geopandas(self):

@@ -158,28 +158,28 @@ class TestOmitPythonJvmSerdeToDf(TestBase):
             poi_point_rdd, loads("POLYGON((0 0, 0 20, 20 20, 20 0, 0 0))"), True, True
         )
 
-        # rdd = result.to_rdd()
-        #
-        # assert rdd.collect().__len__() == 4
-        #
-        # df_without_column_names = Adapter.toDf(result, self.spark)
-        #
-        # df_without_column_names.show()
-        #
-        # raw_geometries = self.__row_to_list(
-        #     df_without_column_names.collect()
-        # )
-        #
-        # assert [point[0].wkt for point in raw_geometries] == [
-        #     'POINT (9 8)', 'POINT (4 3)', 'POINT (12 1)', 'POINT (11 5)'
-        # ]
-        # assert df_without_column_names.count() == 4
-        # assert df_without_column_names.schema == StructType([StructField("geometry", GeometryType())])
-        #
-        # df = Adapter.toDf(result, self.spark, ["poi_id", "poi_name"])
-        #
-        # assert df.count() == 4
-        # assert df.columns == ["geometry", "poi_id", "poi_name"]
+        rdd = result.to_rdd()
+
+        assert rdd.collect().__len__() == 4
+
+        df_without_column_names = Adapter.toDf(result, self.spark)
+
+        df_without_column_names.show()
+
+        raw_geometries = self.__row_to_list(
+            df_without_column_names.collect()
+        )
+
+        assert [point[0].wkt for point in raw_geometries] == [
+            'POINT (9 8)', 'POINT (4 3)', 'POINT (12 1)', 'POINT (11 5)'
+        ]
+        assert df_without_column_names.count() == 4
+        assert df_without_column_names.schema == StructType([StructField("geometry", GeometryType())])
+
+        df = Adapter.toDf(result, self.spark, ["poi_id", "poi_name"])
+
+        assert df.count() == 4
+        assert df.columns == ["geometry", "poi_id", "poi_name"]
 
     def __row_to_list(self, row_list):
         return [[*element] for element in row_list]

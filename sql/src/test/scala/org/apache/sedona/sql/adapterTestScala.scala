@@ -39,22 +39,6 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
 
   describe("Sedona-SQL Scala Adapter Test") {
 
-    it("should test"){
-      val point = new WKTReader().read("POINT(21.0 52.0)")
-//      val serializer = new WKBWriter(2, 2)
-//      println(serializer.write(point).length)
-//[0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 53, 64, 0, 0, 0, 0, 0, 0, 74, 64, -127]
-// 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 53, 64, 0, 0, 0, 0, 0, 0, 74, 64, 0
-//[0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 53, 64, 0, 0, 0, 0, 0, 0, 74, 64, -127]
-      val serde = new SedonaSerializer(new ShapeGeometrySerde())
-
-      val serialized = serde.serialize(point)
-      println(serialized.mkString(", "))
-//      serde.deserialize(new GenericArrayData(serialized))
-      print("S")
-
-    }
-
     it("Read CSV point into a SpatialRDD") {
       var df = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(arealmPointInputLocation)
       df.createOrReplaceTempView("inputtable")
