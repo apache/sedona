@@ -19,6 +19,7 @@ from shapely.geometry import Point, LineString, Polygon
 from shapely.wkt import loads
 
 from sedona.core.SpatialRDD import PointRDD, LineStringRDD, PolygonRDD
+from sedona.core.serde.geom_factory import serializers
 from sedona.utils.spatial_rdd_parser import GeoData
 from tests.test_base import TestBase
 
@@ -27,9 +28,9 @@ class TestWithScParallelize(TestBase):
 
     def test_geo_data_convert_to_point_rdd(self):
         points = [
-            GeoData(geom=Point(52.0, -21.0), userData="a"),
-            GeoData(geom=Point(-152.4546, -23.1423), userData="b"),
-            GeoData(geom=Point(62.253456, 221.2145), userData="c")
+            GeoData(geom=Point(52.0, -21.0), userData="a", serde=serializers[self.serializer_type]),
+            GeoData(geom=Point(-152.4546, -23.1423), userData="b", serde=serializers[self.serializer_type]),
+            GeoData(geom=Point(62.253456, 221.2145), userData="c", serde=serializers[self.serializer_type])
         ]
 
         rdd_data = self.sc.parallelize(points)
@@ -45,8 +46,8 @@ class TestWithScParallelize(TestBase):
         linestring2 = loads(wkt)
 
         linestrings = [
-            GeoData(geom=linestring, userData="a"),
-            GeoData(geom=linestring2, userData="b"),
+            GeoData(geom=linestring, userData="a", serde=serializers[self.serializer_type]),
+            GeoData(geom=linestring2, userData="b", serde=serializers[self.serializer_type]),
         ]
 
         rdd_data = self.sc.parallelize(linestrings)
@@ -68,9 +69,9 @@ class TestWithScParallelize(TestBase):
         polygon3 = loads(wkt)
 
         polygons = [
-                GeoData(geom=polygon, userData="a"),
-                GeoData(geom=polygon2, userData="b"),
-                GeoData(geom=polygon3, userData="c"),
+            GeoData(geom=polygon, userData="a", serde=serializers[self.serializer_type]),
+            GeoData(geom=polygon2, userData="b", serde=serializers[self.serializer_type]),
+            GeoData(geom=polygon3, userData="c", serde=serializers[self.serializer_type]),
         ]
 
         rdd_data = self.sc.parallelize(polygons)

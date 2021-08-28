@@ -22,6 +22,7 @@ import pytest
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import expr
 from pyspark.sql.functions import col
+from pyspark.sql.types import StructType, StructField, IntegerType
 from shapely.geometry import Point
 
 from sedona import version
@@ -31,6 +32,7 @@ from sedona.core.formatMapper.shapefileParser.shape_file_reader import Shapefile
 from sedona.core.geom.envelope import Envelope
 from sedona.core.jvm.config import is_greater_or_equal_version
 from sedona.core.spatialOperator import JoinQuery
+from sedona.sql.types import GeometryType
 from sedona.utils.adapter import Adapter
 from tests import geojson_input_location, shape_file_with_missing_trailing_input_location, \
     geojson_id_input_location
@@ -155,7 +157,6 @@ class TestAdapter(TestBase):
         assert (df.columns[1] == "STATEFP")
 
     def test_convert_spatial_join_result_to_dataframe(self):
-        print(self.sc)
         polygon_wkt_df = self.spark.read.format("csv").option("delimiter", "\t").option("header", "false").load(
             mixed_wkt_geometry_input_location)
         polygon_wkt_df.createOrReplaceTempView("polygontable")
@@ -314,6 +315,12 @@ class TestAdapter(TestBase):
 
     def test_serialization(self):
         data = [[1, Point(21, 52)]]
-        df = self.spark.createDataFrame(data)
+        schema = StructType(
+            [
+                StructField("id", IntegerType()),
+                StructField("geom", GeometryType(self.serializer_type))
+            ]
+        )
+        df = self.spark.createDataFrame(data, schema=schema)
         df.show()
         df.collect()

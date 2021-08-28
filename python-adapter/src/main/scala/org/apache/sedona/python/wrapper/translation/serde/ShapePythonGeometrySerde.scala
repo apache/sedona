@@ -26,8 +26,8 @@ import org.locationtech.jts.geom.{Geometry, GeometryFactory}
 
 object ShapePythonGeometrySerde extends PythonGeometrySerde {
   def serialize(geometry: Geometry): Array[Byte] =
-    ShapeSerde.serialize(geometry)
+    Array(0.toByte) ++ ShapeSerde.serialize(geometry)
 
   def deserialize(array: Array[Byte]): Geometry =
-    ShapeSerde.deserialize(array, new GeometryFactory())
+    ShapeSerde.deserialize(array.slice(1, array.length), new GeometryFactory())
 }

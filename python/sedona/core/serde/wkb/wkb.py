@@ -11,6 +11,8 @@ from sedona.core.serde.serializer import GeometrySerde
 
 class WkbSerde(GeometrySerde):
 
+    byte_number = 1
+
     def deserialize(self, bin_parser: BinaryParser) -> BaseGeometry:
         geom_length = bin_parser.read_int(ByteOrderType.BIG_ENDIAN)
         geom = bin_parser.read_geometry(geom_length)
@@ -18,5 +20,6 @@ class WkbSerde(GeometrySerde):
 
     def serialize(self, geom: BaseGeometry, buffer: BinaryBuffer) -> List[int]:
         geom_bytes = dumps(geom, srid=4326)
+        buffer.put_byte(self.byte_number)
         buffer.put_int(len(geom_bytes), ByteOrderType.BIG_ENDIAN)
         return [*buffer.byte_array, *geom_bytes, *[0]]

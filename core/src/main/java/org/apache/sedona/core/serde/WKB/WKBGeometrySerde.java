@@ -42,6 +42,7 @@ public class WKBGeometrySerde
         WKBWriter writer = new WKBWriter(2, 2, true);
         byte[] data = writer.write(geometry);
 
+        out.writeByte(1);
         // write geometry length size to read bytes until userData
         out.writeInt(data.length);
 
@@ -53,7 +54,7 @@ public class WKBGeometrySerde
     protected Geometry readGeometry(Kryo kryo, Input input) {
         WKBReader reader = new WKBReader();
         Geometry geometry;
-
+        input.readByte();
         int geometryBytesLength = input.readInt();
         byte[] bytes = input.readBytes(geometryBytesLength);
 

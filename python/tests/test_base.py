@@ -14,14 +14,12 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
-import pytest
 from pyspark.sql import SparkSession
 
 from sedona.register import SedonaRegistrator
 from sedona.utils import KryoSerializer, SedonaKryoRegistrator
 from sedona.utils.decorators import classproperty
 from tests.tools import serializer_path
-from sedona.core.serde.spark_config import spark_conf_getter
 
 
 class TestBase:

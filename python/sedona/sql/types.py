@@ -19,11 +19,13 @@ from pyspark.sql.types import UserDefinedType, ArrayType, ByteType
 
 from sedona.core.serde.binary.buffer import BinaryBuffer
 from sedona.core.serde.binary.parser import BinaryParser
-from sedona.core.serde.geom_factory import SerializationFactory, geometry_serializers_instances
-from sedona.core.serde.spark_config import spark_conf_getter
+from sedona.core.serde.geom_factory import geometry_serializers_instances, geometry_serializers
 
 
 class GeometryType(UserDefinedType):
+
+    def __init__(self, serde: str = "shape"):
+        self.serde = serde
 
     @classmethod
     def sqlType(cls):
@@ -38,12 +40,13 @@ class GeometryType(UserDefinedType):
     def serialize(self, obj):
         binary_buffer = BinaryBuffer()
         binary_buffer.put_byte(0)
-        return self.factory.serialize(obj, binary_buffer)
+        return geometry_serializers_instances[self.serde].serialize(obj, binary_buffer)
 
     def deserialize(self, datum):
         parser = BinaryParser(list(datum))
         _ = parser.read_byte()
-        return self.factory.deserialize(parser)
+        serde = parser.read_byte()
+        return geometry_serializers[serde].deserialize(parser)
 
     @classmethod
     def module(cls):
@@ -56,8 +59,3 @@ class GeometryType(UserDefinedType):
     def scalaUDT(cls):
         return "org.apache.spark.sql.sedona_sql.UDT.GeometryUDT"
 
-    @property
-    def factory(self) -> SerializationFactory:
-        if not hasattr(self, "__factory"):
-            setattr(self, "__factory", geometry_serializers_instances[spark_conf_getter.serialization])
-        return getattr(self, "__factory")

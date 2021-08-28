@@ -8,6 +8,8 @@ from sedona.core.serde.binary.parser import BinaryParser
 
 class GeometrySerde:
 
+    byte_number = None
+
     def deserialize(self, bin_parser: BinaryParser) -> BaseGeometry:
         raise NotImplementedError("child class should implement method geometry from bytes")
 

@@ -23,7 +23,6 @@ from pyspark import StorageLevel
 from sedona.core.SpatialRDD import PointRDD, CircleRDD, PolygonRDD
 from sedona.core.enums import FileDataSplitter, IndexType, GridType
 from sedona.core.geom.envelope import Envelope
-from sedona.core.serde.spark_config import spark_conf_getter
 from sedona.core.spatialOperator import RangeQuery, JoinQuery, KNNQuery
 from tests.test_base import TestBase
 from tests.tools import tests_resource

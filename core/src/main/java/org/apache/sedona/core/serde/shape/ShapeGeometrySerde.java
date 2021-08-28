@@ -39,6 +39,7 @@ public class ShapeGeometrySerde
     protected void writeGeometry(Kryo kryo, Output out, Geometry geometry)
     {
         byte[] data = ShapeSerde.serialize(geometry);
+        out.writeByte(0);
         out.write(data, 0, data.length);
         writeUserData(kryo, out, geometry);
     }
@@ -46,6 +47,7 @@ public class ShapeGeometrySerde
     @Override
     protected Geometry readGeometry(Kryo kryo, Input input)
     {
+        input.readByte();
         Geometry geometry = ShapeSerde.deserialize(input, geometryFactory);
         geometry.setUserData(readUserData(kryo, input));
         return geometry;

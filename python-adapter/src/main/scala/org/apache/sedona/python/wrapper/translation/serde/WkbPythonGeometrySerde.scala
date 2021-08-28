@@ -31,12 +31,12 @@ object WkbPythonGeometrySerde extends PythonGeometrySerde {
   def serialize(geometry: Geometry): Array[Byte] = {
     val writer: WKBWriter = new WKBWriter(2, 2)
     val data = writer.write(geometry)
-    data.length.toByteArray(ByteOrder.BIG_ENDIAN) ++ data
+    Array(1.toByte) ++ data.length.toByteArray(ByteOrder.BIG_ENDIAN) ++ data
   }
 
   def deserialize(array: Array[Byte]): Geometry = {
     val wkbReader = new WKBReader()
-    wkbReader.read(array.slice(4, array.length))
+    wkbReader.read(array.slice(5, array.length))
   }
 
 }
