@@ -21,6 +21,7 @@ public class SimpleSchema extends Schema {
     }
     
     public SimpleSchema() {
+        this(AvroConstants.PrimitiveDataType.NULL);
     }
     
     /**

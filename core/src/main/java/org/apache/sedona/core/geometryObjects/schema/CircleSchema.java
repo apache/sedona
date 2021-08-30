@@ -13,7 +13,7 @@ import org.apache.sedona.core.utils.SedonaUtils;
 public class CircleSchema extends RecordSchema {
     public static final String CENTER = "c";
     public static final String RADIUS = "r";
-    public static final String CIRCLE = "circle";
+    public static final String CIRCLE = "Circle";
     
     private CircleSchema() {
         super(AvroConstants.SEDONA_NAMESPACE,CIRCLE,

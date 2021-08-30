@@ -61,7 +61,6 @@ public class PolygonRDD
      * @param rawSpatialRDD the raw spatial RDD
      */
     public PolygonRDD(JavaRDD<Polygon> rawSpatialRDD) {
-        super(GeometryType.POLYGON);
         this.rawSpatialRDD = rawSpatialRDD;
     }
 
@@ -73,7 +72,6 @@ public class PolygonRDD
      * @param targetEpsgCode the target epsg code
      */
     public PolygonRDD(JavaRDD<Polygon> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode) {
-        super(GeometryType.POLYGON);
         this.rawSpatialRDD = rawSpatialRDD;
         this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
     }
@@ -146,7 +144,6 @@ public class PolygonRDD
      */
     public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper)
     {
-        super(GeometryType.POLYGON);
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(userSuppliedMapper));
     }
 
@@ -159,7 +156,6 @@ public class PolygonRDD
      */
     public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper)
     {
-        super(GeometryType.POLYGON);
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(userSuppliedMapper));
     }
 
@@ -172,7 +168,6 @@ public class PolygonRDD
      */
     public PolygonRDD(JavaRDD<Polygon> rawSpatialRDD, Envelope datasetBoundary, Integer approximateTotalCount)
     {
-        super(GeometryType.POLYGON);
         this.rawSpatialRDD = rawSpatialRDD;
         this.boundaryEnvelope = datasetBoundary;
         this.approximateTotalCount = approximateTotalCount;
@@ -189,7 +184,6 @@ public class PolygonRDD
      */
     public PolygonRDD(JavaRDD<Polygon> rawSpatialRDD, String sourceEpsgCRSCode, String targetEpsgCode, Envelope datasetBoundary, Integer approximateTotalCount)
     {
-        super(GeometryType.POLYGON);
         this.rawSpatialRDD = rawSpatialRDD;
         this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.boundaryEnvelope = datasetBoundary;
@@ -274,7 +268,6 @@ public class PolygonRDD
      */
     public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper, Envelope datasetBoundary, Integer approximateTotalCount)
     {
-        super(GeometryType.POLYGON);
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(userSuppliedMapper));
         this.boundaryEnvelope = datasetBoundary;
         this.approximateTotalCount = approximateTotalCount;
@@ -291,7 +284,6 @@ public class PolygonRDD
      */
     public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper, Envelope datasetBoundary, Integer approximateTotalCount)
     {
-        super(GeometryType.POLYGON);
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(userSuppliedMapper));
         this.boundaryEnvelope = datasetBoundary;
         this.approximateTotalCount = approximateTotalCount;
@@ -305,7 +297,6 @@ public class PolygonRDD
      */
     public PolygonRDD(JavaRDD<Polygon> rawSpatialRDD, StorageLevel newLevel)
     {
-        super(GeometryType.POLYGON);
         this.rawSpatialRDD = rawSpatialRDD;
         this.analyze(newLevel);
     }
@@ -387,7 +378,6 @@ public class PolygonRDD
      */
     public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper, StorageLevel newLevel)
     {
-        super(GeometryType.POLYGON);
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(userSuppliedMapper));
         this.analyze(newLevel);
     }
@@ -402,7 +392,6 @@ public class PolygonRDD
      */
     public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper, StorageLevel newLevel)
     {
-        super(GeometryType.POLYGON);
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(userSuppliedMapper));
         this.analyze(newLevel);
     }
@@ -417,7 +406,6 @@ public class PolygonRDD
      */
     public PolygonRDD(JavaRDD<Polygon> rawSpatialRDD, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
     {
-        super(GeometryType.POLYGON);
         this.rawSpatialRDD = rawSpatialRDD;
         this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.analyze(newLevel);
@@ -440,7 +428,6 @@ public class PolygonRDD
     public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset,
             FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
     {
-        super(GeometryType.POLYGON);
         JavaRDD rawTextRDD = partitions != null ? sparkContext.textFile(InputLocation, partitions) : sparkContext.textFile(InputLocation);
         if (startOffset != null && endOffset != null) {
             this.setRawSpatialRDD(rawTextRDD.mapPartitions(new PolygonFormatMapper(startOffset, endOffset, splitter, carryInputData)));
@@ -520,7 +507,6 @@ public class PolygonRDD
      */
     public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer partitions, FlatMapFunction userSuppliedMapper, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
     {
-        super(GeometryType.POLYGON);
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(userSuppliedMapper));
         this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.analyze(newLevel);
@@ -538,7 +524,6 @@ public class PolygonRDD
      */
     public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, FlatMapFunction userSuppliedMapper, StorageLevel newLevel, String sourceEpsgCRSCode, String targetEpsgCode)
     {
-        super(GeometryType.POLYGON);
         this.setRawSpatialRDD(sparkContext.textFile(InputLocation).mapPartitions(userSuppliedMapper));
         this.CRSTransform(sourceEpsgCRSCode, targetEpsgCode);
         this.analyze(newLevel);
@@ -576,11 +561,6 @@ public class PolygonRDD
             }
         });
         return result;
-    }
-    
-    @Override
-    public GeometryType getGeometryType() {
-        return GeometryType.POLYGON;
     }
 }
 

@@ -44,7 +44,6 @@ public class CircleRDD
      */
     public CircleRDD(JavaRDD<Circle> circleRDD)
     {
-        super(GeometryType.CIRCLE);
         this.rawSpatialRDD = circleRDD;
     }
 
@@ -57,7 +56,6 @@ public class CircleRDD
      */
     public CircleRDD(JavaRDD<Circle> circleRDD, String sourceEpsgCRSCode, String targetEpsgCRSCode)
     {
-        super(GeometryType.CIRCLE);
         this.rawSpatialRDD = circleRDD;
         this.CRSTransform(sourceEpsgCRSCode, targetEpsgCRSCode);
     }
@@ -70,7 +68,6 @@ public class CircleRDD
      */
     public CircleRDD(SpatialRDD spatialRDD, Double Radius)
     {
-        super(GeometryType.CIRCLE);
         final Double radius = Radius;
         this.rawSpatialRDD = spatialRDD.rawSpatialRDD.map(new Function<Object, Object>()
         {
@@ -155,10 +152,5 @@ public class CircleRDD
                 return (Polygon) circle.getCenterGeometry();
             }
         }));
-    }
-    
-    @Override
-    public GeometryType getGeometryType() {
-        return GeometryType.CIRCLE;
     }
 }

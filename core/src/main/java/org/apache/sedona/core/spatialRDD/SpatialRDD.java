@@ -138,21 +138,8 @@ public class SpatialRDD<T extends Geometry>
      * The sample number.
      */
     private int sampleNumber = -1;
-    /**
-     * Geometry Type Defaults to Geometry Collection
-     */
-    private GeometryType geometryType;
     
     public SpatialRDD() {
-        this(GeometryType.GEOMETRYCOLLECTION);
-    }
-    
-    public SpatialRDD(GeometryType geometryType) {
-        this.geometryType = geometryType;
-    }
-    
-    public GeometryType getGeometryType() {
-        return geometryType;
     }
     
     public int getSampleNumber() {
@@ -609,22 +596,20 @@ public class SpatialRDD<T extends Geometry>
                               String name) throws SedonaException, IOException {
         sc.hadoopConfiguration().setBoolean("parquet.enable.summary-metadata", false);
         final Job job = Job.getInstance(sc.hadoopConfiguration());
-        GeometryType geometryType = this.getGeometryType();
-        Schema schema = AvroUtils.getSchema(geometryType, geometryColumn, userColumns,namespace,
+        Schema schema = AvroUtils.getSchema(geometryColumn, userColumns,namespace,
                                             name);
-//        ParquetOutputFormat.setWriteSupportClass(job, AvroWriteSupport.class);
         AvroParquetOutputFormat.setSchema(job, schema);
         this.rawSpatialRDD.mapPartitionsToPair(new PairFlatMapFunction<Iterator<T>, Void, GenericRecord>() {
             @Override
             public Iterator<Tuple2<Void, GenericRecord>> call(Iterator<T> iterator) throws Exception {
-                Schema schema = AvroUtils.getSchema(geometryType, geometryColumn, userColumns, namespace,
+                Schema schema = AvroUtils.getSchema(geometryColumn, userColumns, namespace,
                                                     name);
                 Iterable<T> recordIterable = () -> iterator;
                 try {
                     return StreamSupport.stream(recordIterable.spliterator(), false).map(geometry -> {
                         try {
                             GenericRecord genericRecord =
-                                    AvroUtils.getRecord(geometry, geometryType, geometryColumn, schema);
+                                    AvroUtils.getRecord(geometry, geometryColumn, schema);
                             return new Tuple2<Void, GenericRecord>(null, genericRecord);
                         } catch (SedonaException e) {
                             throw new SedonaRuntimeException(e);

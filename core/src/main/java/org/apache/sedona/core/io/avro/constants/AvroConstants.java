@@ -20,6 +20,9 @@ public class AvroConstants {
     public static final String EMPTY_STRING = "";
     public static final String SEDONA_NAMESPACE = "org.apache.sedona.core";
     public static final String DOT = ".";
+    public static final String GEOMETRY_SHAPE = "s";
+    public static final String GEOMETRY_OBJECT = "go";
+    public static final String GEOMETRY = "geometry";
     
     public interface DataType {
         public String getType();

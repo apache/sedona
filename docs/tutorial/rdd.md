@@ -1,5 +1,5 @@
 
-The page outlines the steps to create Spatial RDDs and run spatial queries using Sedona-core. ==The example code is written in Scala but also works for Java==.
+The page outlines the steps to create Spatial RDDs and run spatial queries using Sedona-core. ==The example code is written in Scala but also works for Java and vice versa==.
 
 ## Set up dependencies
 
@@ -93,6 +93,24 @@ val polygonRDDSplitter = FileDataSplitter.TSV
 
 The way to create a LineStringRDD is the same as PolygonRDD.
 
+#### Typed Spatial RDD from a Geo Spatial Parquet File
+A Parquet File containing an array of Points for a Column can be converted into a SpatialRDD along the same lines of TSV/CSV.
+The parquet File should have a Geometry Column containing Array of Points which can be represented as Nested Parquet Records.
+(Array of {"x":<Number containing X coordinate>,"y":<Number signifying Y Coordinate>}).
+
+```Java
+String geometryColumn = "example.geometryColumn"; //Column Path of the Geometry Column in the Parquet File Schema
+List<String> userDataColumns = Arrays.asList("userData.a","userData.b","userData.c"); 
+//Column Paths containing User Data in the Parquet File Schema. Users can choose the projection columns
+List<String> inputLocations = Arrays.asList(
+        "/Download/a/*.parquet","/Download/b/*.parquet"); 
+// List of Input locations having parquet files Regex supported
+SpatialRDD spatialRDD = ParquetReader.readToGeometryRDD(sc, inputLocations,
+		geometryColumn,
+		userDataColumns,
+		GeometryType.POINT);//GeometryType to desrialize into.
+//Supported Types LINESTRING,POINT,POLYGON,RECTANGLE
+```
 ### Create a generic SpatialRDD
 
 A generic SpatialRDD is not typed to a certain geometry type and open to more scenarios. It allows an input data file contains mixed types of geometries. For instance, a WKT file contains three types gemetries ==LineString==, ==Polygon== and ==MultiPolygon==.
@@ -196,9 +214,23 @@ var spatialDf = sparkSession.sql(
 ```Scala
 var spatialRDD = Adapter.toRdd(spatialDf, "checkin")
 ```
+#### From Geospatial Parquet File
+SpatialRDD can be formed from a GeoSpatialParquet file 
+```Java
+String geometryColumn = "example.geometryColumn"; //Column Path of the Geometry Column in the Parquet File Schema
+List<String> userDataColumns = Arrays.asList("userData.a","userData.b","userData.c"); 
+//Column Paths containing User Data in the Parquet File Schema. Users can choose the projection columns
+List<String> inputLocations = Arrays.asList(
+        "/Download/a/*.parquet","/Download/b/*.parquet"); 
+// List of Input locations having parquet files Regex supported
+SpatialRDD<Geometry> spatialRDD = ParquetReader.readToGeometryRDD(sc, inputLocations,
+		geometryColumn,
+		userDataColumns);//GeometryType to desrialize into.
+//Supported Types LINESTRING,POINT,POLYGON,RECTANGLE,MULTILINESTRING,MULTIPOINT,MULTIPOLYGON,GEOMETRYCOLLECTION
+```
 
 For WKT/WKB/GeoJSON data, please use ==ST_GeomFromWKT / ST_GeomFromWKB / ST_GeomFromGeoJSON== instead.
-	
+
 ## Transform the Coordinate Reference System
 
 Sedona doesn't control the coordinate unit (degree-based or meter-based) of all geometries in an SpatialRDD. The unit of all related distances in Sedona is same as the unit of all geometries in an SpatialRDD.
@@ -537,6 +569,53 @@ objectRDD.rawSpatialRDD.saveAsObjectFile("hdfs://PATH")
 !!!note
 	Each object in a distributed object file is a byte array (not human-readable). This byte array is the serialized format of a Geometry or a SpatialIndex.
 
+#### Save to Distributed Parquet file
+1) Creating a Schema for the output Parquet Files(Functionalities exposed to create Complex Avro-Parquet Schema for UserData Columns)
+```Java
+//Creating a Primitive DataType Schema
+Schema primitiveDataTypeSchema = new SimpleSchema(AvroConstants.PrimitiveDataType.INT);
+Schema primitiveDataTypeSchema1 = new SimpleSchema(AvroConstants.PrimitiveDataType.NULL);
+Schema primitiveDataTypeSchema2 = new SimpleSchema(AvroConstants.PrimitiveDataType.DOUBLE);
+//Supported values: INT,DOUBLE,FLOAT,STRING,NULL
+
+//Creating a Union DataType Schema
+Schema unionDataTypeSchema = new UnionSchema(primitiveDataTypeSchema,
+		primitiveDataTypeSchema1,primitiveDataTypeSchema2);
+
+//Creating a Array DataType Schema
+Schema arrayTypeSchema = new ArraySchema(unionDataTypeSchema);
+
+//Creating a Nested Type Schema 
+Field field1 = new Field("field1",primitiveDataTypeSchema);
+Field field2 = new Field("field2",unionDataTypeSchema);
+Field field3 = new Field("field3",arrayTypeSchema);
+List<Field> fields = Arrays.asList(field1,field2,field3);
+Schema recordSchema = new RecordSchema("namespace","name",fields);
+```
+
+2) Saving a spatial RDD into a Parquet File
+```Java
+String namespace = "org.apache.dummy"; //Namespace for Parquet Schema
+String name = "dummyName"; //Name of Schema for the Parquet Schema
+Field field1 = new Field("a",
+		new SimpleSchema(AvroConstants.PrimitiveDataType.STRING));
+Field field2 = new Field("b", new SimpleSchema(AvroConstants.PrimitiveDataType.INT));
+
+List<Field> userColumns = Arrays.asList(field1,field2);
+String geometryColumn = "geoColumnName";
+String outputLocation = "/path/to/emptyDirectory";
+//Here the output file would have the Schema containing the following Fields:
+//{"geoColumnName":"Sedona produced Geo Schema","a":"String Value",
+// "b":"Integer Value"}
+// Expectation is each object in Geometry Object contains UserData as Map<String,Object> with key being the user column name can also be nested based on the required schema.
+// E.g. ImmutableMap.of("a":"dummyString","b":123456)		
+spatialRDD.saveAsParquet(sc,
+		geometryColumn,
+		userColumns,
+		outputLocation,
+		namespace,
+		name);
+```
 ### Save an SpatialRDD (indexed)
 
 Indexed typed SpatialRDD and generic SpatialRDD can be saved to permanent storage. However, the indexed SpatialRDD has to be stored as a distributed object file.

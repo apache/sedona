@@ -10,10 +10,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.sedona.core.enums.GeometryType;
 import org.apache.sedona.core.exceptions.SedonaException;
 import org.apache.sedona.core.geometryObjects.Circle;
-import org.apache.sedona.core.geometryObjects.schema.CircleSchema;
-import org.apache.sedona.core.geometryObjects.schema.CoordinateArraySchema;
-import org.apache.sedona.core.geometryObjects.schema.CoordinateSchema;
-import org.apache.sedona.core.geometryObjects.schema.PolygonSchema;
+import org.apache.sedona.core.geometryObjects.schema.*;
 import org.apache.sedona.core.io.avro.SchemaUtils;
 import org.apache.sedona.core.io.avro.constants.AvroConstants;
 import org.apache.sedona.core.io.avro.schema.Field;
@@ -79,7 +76,6 @@ public class AvroUtils {
             try{
                 return getRecord(typeSchema,value);
             }catch (SedonaException e){
-            
             }
         }
         throw new SedonaException(String.format("Error while forming Record Given Schema: %s, Given Record: %s",avroSchema.toString(),value==null?null:value.toString()));
@@ -324,7 +320,6 @@ public class AvroUtils {
     
     /**
      * Creates an Avro Schema for given a geometry Type & User Columns
-     * @param geometryType
      * @param geometryColumnName
      * @param userColumns
      * @param namespace
@@ -332,29 +327,20 @@ public class AvroUtils {
      * @return Geometry Avro Schema
      * @throws SedonaException
      */
-    public static Schema getSchema(GeometryType geometryType,
-                                   String geometryColumnName,
+    public static Schema getSchema(String geometryColumnName,
                                    List<Field> userColumns,
                                    String namespace,
                                    String name) throws SedonaException {
-        Field geometryField = getField(geometryColumnName, geometryType);
+        Field geometryField = new Field(geometryColumnName, SedonaParquetFileGeometrySchema.getSchema());
         return getGeometryRecordSchema(namespace, name, geometryField, userColumns);
     }
     
     /**
-     * Avro Record for a given Geometry Object
-     * @param geometry
-     * @param type
-     * @param geometryColumnName
-     * @param avroSchema
-     * @return Geometry Avro Record representing Geometry Object with Userdata of given Schema
-     * @throws SedonaException
+     * Gets Map representation for a given Geometry Object
      */
-    public static GenericRecord getRecord(Geometry geometry,
-                                          GeometryType type,
-                                          String geometryColumnName,
-                                          Schema avroSchema) throws SedonaException {
+    public static Map<String,Object> getGeometryData(Geometry geometry, boolean parquetSerialization) throws SedonaException{
         Object geometryData;
+        GeometryType type = GeometryType.getGeometryType(geometry.getGeometryType());
         switch (type) {
             case CIRCLE: {
                 geometryData = getMapFromCircle((Circle) geometry);
@@ -373,12 +359,66 @@ public class AvroUtils {
                 geometryData = getMapFromPolygon((Polygon) geometry);
                 break;
             }
+            case GEOMETRYCOLLECTION:{
+                List<Object> geometryDataList = new ArrayList<>();
+                for(int i=0;i<geometry.getNumGeometries();i++){
+                    if(geometry.getGeometryN(i) instanceof GeometryCollection && parquetSerialization){
+                        throw new SedonaException("Recursive Geometry Collection not Supported for parquet");
+                    }
+                    geometryDataList.add(getGeometryData(geometry.getGeometryN(i),parquetSerialization));
+                }
+                geometryData = geometryDataList;
+                break;
+            }
+        
+            case MULTIPOINT:{
+                List<Object> pointDataList = new ArrayList<>();
+                for(int i=0;i<geometry.getNumGeometries();i++){
+                    pointDataList.add(getMapFromPoint((Point) geometry.getGeometryN(i)));
+                }
+                geometryData = pointDataList;
+                break;
+            }
+            case MULTILINESTRING:{
+                List<Object> lineStringDataList = new ArrayList<>();
+                for(int i=0;i<geometry.getNumGeometries();i++){
+                    lineStringDataList.add(getCollectionFromLineString((
+                            LineString) geometry.getGeometryN(i)));
+                }
+                geometryData = lineStringDataList;
+                break;
+            }
+            case MULTIPOLYGON:{
+                List<Object> polygonDataList = new ArrayList<>();
+                for(int i=0;i<geometry.getNumGeometries();i++){
+                    polygonDataList.add(getMapFromPolygon(
+                            (Polygon) geometry.getGeometryN(i)));
+                }
+                geometryData = polygonDataList;
+                break;
+            }
             default:
                 throw new SedonaException("Geometry Type not Supported");
         }
+        return ImmutableMap.of(AvroConstants.GEOMETRY_OBJECT,geometryData,
+                               AvroConstants.GEOMETRY_SHAPE,type.getName());
+    }
+    
+    /**
+     * Avro Record for a given Geometry Object
+     * @param geometry
+     * @param geometryColumnName
+     * @param avroSchema
+     * @return Geometry Avro Record representing Geometry Object with Userdata of given Schema
+     * @throws SedonaException
+     */
+    public static GenericRecord getRecord(Geometry geometry,
+                                          String geometryColumnName,
+                                          Schema avroSchema) throws SedonaException {
+        
         return getRecordFromGeometry(avroSchema,
                                      geometryColumnName,
-                                     geometryData,
+                                     getGeometryData(geometry,true),
                                      Optional.ofNullable((Map<String,Object>)geometry.getUserData()));
         
     }

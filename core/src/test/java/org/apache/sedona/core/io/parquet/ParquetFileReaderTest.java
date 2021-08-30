@@ -59,26 +59,23 @@ public class ParquetFileReaderTest extends TestBase {
                                testOutputPathDir.getAbsolutePath(),
                                "test.namespace",
                                "name");
-        List<Point> l1 = pointRDD.getRawSpatialRDD().collect().stream().collect(Collectors.toList());
-        Collections.sort(l1, new Comparator<Point>() {
+        List<Point> l1 = pointRDD.getRawSpatialRDD().collect().stream().sorted(new Comparator<Point>() {
             @Override
             public int compare(Point o1, Point o2) {
                 return o1.compareTo(o2);
             }
-        });
-        
+        }).collect(Collectors.toList());
+    
         SpatialRDD<Point> pointRDD1 = ParquetReader.readToGeometryRDD(sc,
                                                                       Arrays.asList(testOutputPathDir.getAbsolutePath()+"/*.parquet"),
-                                                                        GeometryType.POINT,
                                                                         "p",
                                                                         Collections.EMPTY_LIST);
-        List<Point> l2 = pointRDD1.getRawSpatialRDD().collect().stream().collect(Collectors.toList());
-        Collections.sort(l2, new Comparator<Point>() {
+        List<Point> l2 = pointRDD1.getRawSpatialRDD().collect().stream().sorted(new Comparator<Point>() {
             @Override
             public int compare(Point o1, Point o2) {
                 return o1.compareTo(o2);
             }
-        });
+        }).collect(Collectors.toList());
         Assert.equals(l1,l2);
     }
 }

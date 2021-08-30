@@ -13,7 +13,7 @@ import org.apache.sedona.core.utils.SedonaUtils;
 public class CoordinateSchema extends RecordSchema {
     public static final String X_COORDINATE = "x";
     public static final String Y_COORDINATE = "y";
-    public static final String COORDINATE = "coordinate";
+    public static final String COORDINATE = "Coordinate";
     
     private CoordinateSchema() {
         super(AvroConstants.SEDONA_NAMESPACE,COORDINATE,

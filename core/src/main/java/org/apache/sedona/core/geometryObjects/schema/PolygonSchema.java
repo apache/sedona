@@ -10,7 +10,7 @@ import org.apache.sedona.core.utils.SedonaUtils;
  * Polygon Schema class representing AvroSchema of Polygon Geometry
  */
 public class PolygonSchema extends RecordSchema {
-    public static final String POLYGON = "polygon";
+    public static final String POLYGON = "Polygon";
     public static final String EXTERIOR_RING = "ex";
     public static final String HOLES = "holes";
     

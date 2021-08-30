@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.apache.avro.generic.GenericArray;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.sedona.core.enums.GeometryType;
 import org.apache.sedona.core.exceptions.SedonaException;
 import org.apache.sedona.core.geometryObjects.Circle;
 import org.apache.sedona.core.geometryObjects.schema.CircleSchema;
@@ -12,16 +13,48 @@ import org.apache.sedona.core.geometryObjects.schema.PolygonSchema;
 import org.apache.sedona.core.io.avro.SchemaUtils;
 import org.apache.sedona.core.io.avro.constants.AvroConstants;
 import org.apache.sedona.core.io.avro.schema.*;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.util.Assert;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class AvroUtilsTest extends BaseSchemaTest {
-    GeometryFactory geometryFactory = new GeometryFactory();
+    private static GeometryFactory geometryFactory = new GeometryFactory();
+    private static Polygon polygon;
+    private static LineString lineString;
+    private static Point point;
+    private static Circle circle;
+    
+    @BeforeClass
+    public static void init(){
+        polygon = geometryFactory.createPolygon(geometryFactory.createLinearRing(new Coordinate[]{
+                new Coordinate(0,0),
+                new Coordinate(10,0),
+                new Coordinate(10,10),
+                new Coordinate(0,10),
+                new Coordinate(0,0)
+        }),new LinearRing[]{geometryFactory.createLinearRing(new Coordinate[]{
+                new Coordinate(0,5),
+                new Coordinate(5,5),
+                new Coordinate(5, 0),
+                new Coordinate(0,5)
+        }), geometryFactory.createLinearRing(new Coordinate[]{
+                new Coordinate(0,0),
+                new Coordinate(5, 0),
+                new Coordinate(0,5),
+                new Coordinate(0,0)
+        })});
+        lineString = geometryFactory.createLineString(new Coordinate[]{
+                new Coordinate(1.0,2.1),
+                new Coordinate(1.1,2.2),
+                new Coordinate(1.3,2.3)
+        });
+        point = geometryFactory.createPoint(new Coordinate(1.0, 2.1));
+        circle = new Circle(geometryFactory.createPoint(new Coordinate(1.0,2.1)),1.0);
+    }
+    
     @Test
     public void testGetNestedNameSpace(){
         Assert.equals(AvroUtils.getNestedNamespace("org.namespace","name1","name2"),"org.namespace.name1.name2");
@@ -94,20 +127,28 @@ public class AvroUtilsTest extends BaseSchemaTest {
     }
     
     @Test
-    public void testGetMapFromPoint(){
-        Point p = geometryFactory.createPoint(new Coordinate(1.0,2.1));
-        Map<String,Double> map =  AvroUtils.getMapFromPoint(p);
+    public void testGetMapFromPoint() throws SedonaException {
+        
+        Map<String,Double> map =  AvroUtils.getMapFromPoint(point);
         Assert.equals(map.get(CoordinateSchema.X_COORDINATE),1.0);
         Assert.equals(map.get(CoordinateSchema.Y_COORDINATE),2.1);
+        Map<String,Object> geometryData = AvroUtils.getGeometryData(point,true);
+        Assert.equals(geometryData.get(AvroConstants.GEOMETRY_OBJECT),map);
+        Assert.equals(GeometryType.getGeometryType(geometryData.get(AvroConstants.GEOMETRY_SHAPE).toString()),
+                      GeometryType.POINT);
     }
     
     @Test
-    public void testGetMapFromCircle(){
-        Circle circle = new Circle(geometryFactory.createPoint(new Coordinate(1.0,2.1)),1.0);
+    public void testGetMapFromCircle() throws SedonaException {
         Map<String,Object> map =  AvroUtils.getMapFromCircle(circle);
         Assert.equals(((Map<String,Double>)map.get(CircleSchema.CENTER)).get(CoordinateSchema.X_COORDINATE), 1.0);
         Assert.equals(((Map<String,Double>)map.get(CircleSchema.CENTER)).get(CoordinateSchema.Y_COORDINATE),2.1);
         Assert.equals(map.get(CircleSchema.RADIUS),1.0);
+        Map<String,Object> geometryData = AvroUtils.getGeometryData(circle,true);
+        Assert.equals(geometryData.get(AvroConstants.GEOMETRY_OBJECT),map);
+        Assert.equals(GeometryType.getGeometryType(geometryData.get(AvroConstants.GEOMETRY_SHAPE).toString()),
+                      GeometryType.CIRCLE);
+        
     }
     
     @Test
@@ -133,38 +174,21 @@ public class AvroUtilsTest extends BaseSchemaTest {
     }
     
     @Test
-    public void testGetCollectionFromLineString(){
-        LineString coordinates = geometryFactory.createLineString(new Coordinate[]{
-                new Coordinate(1.0,2.1),
-                new Coordinate(1.1,2.2),
-                new Coordinate(1.3,2.3)
-        });
+    public void testGetCollectionFromLineString() throws SedonaException {
         int i = 0;
-        for(Map<String,Double> cMap:AvroUtils.getCollectionFromLineString(coordinates)){
-            Assert.equals(cMap,AvroUtils.getMapFromCoordinate(coordinates.getCoordinateN(i)));
+        Collection<Map<String,Double>> pointList = AvroUtils.getCollectionFromLineString(lineString);
+        for(Map<String,Double> cMap:pointList){
+            Assert.equals(cMap,AvroUtils.getMapFromCoordinate(lineString.getCoordinateN(i)));
             i++;
         }
+        Map<String,Object> geometryData = AvroUtils.getGeometryData(lineString, true);
+        Assert.equals(geometryData.get(AvroConstants.GEOMETRY_OBJECT),pointList);
+        Assert.equals(GeometryType.getGeometryType(geometryData.get(AvroConstants.GEOMETRY_SHAPE).toString()),
+                      GeometryType.LINESTRING);
     }
     
     @Test
-    public void testGetMapFromPolygon(){
-        Polygon polygon = geometryFactory.createPolygon(geometryFactory.createLinearRing(new Coordinate[]{
-                new Coordinate(0,0),
-                new Coordinate(10,0),
-                new Coordinate(10,10),
-                new Coordinate(0,10),
-                new Coordinate(0,0)
-        }),new LinearRing[]{geometryFactory.createLinearRing(new Coordinate[]{
-                new Coordinate(0,5),
-                new Coordinate(5,5),
-                new Coordinate(5, 0),
-                new Coordinate(0,5)
-        }), geometryFactory.createLinearRing(new Coordinate[]{
-                new Coordinate(0,0),
-                new Coordinate(5, 0),
-                new Coordinate(0,5),
-                new Coordinate(0,0)
-        })});
+    public void testGetMapFromPolygon() throws SedonaException {
         Map<String,Object> map = AvroUtils.getMapFromPolygon(polygon);
         Assert.equals(map.get(PolygonSchema.EXTERIOR_RING), Arrays.asList(ImmutableMap.of(CoordinateSchema.X_COORDINATE,0.0,CoordinateSchema.Y_COORDINATE,0.0),
                                                                           ImmutableMap.of(CoordinateSchema.X_COORDINATE,10.0,CoordinateSchema.Y_COORDINATE,0.0),
@@ -180,5 +204,68 @@ public class AvroUtilsTest extends BaseSchemaTest {
                                                                                  ImmutableMap.of(CoordinateSchema.X_COORDINATE,0.0,CoordinateSchema.Y_COORDINATE,5.0),
                                                                                  ImmutableMap.of(CoordinateSchema.X_COORDINATE,0.0,CoordinateSchema.Y_COORDINATE,0.0)));
     
+        Map<String,Object> geometryData = AvroUtils.getGeometryData(polygon,true);
+        Assert.equals(geometryData.get(AvroConstants.GEOMETRY_OBJECT),map);
+        Assert.equals(GeometryType.getGeometryType(geometryData.get(AvroConstants.GEOMETRY_SHAPE).toString()),
+                      GeometryType.POLYGON);
     }
+    
+    @Test
+    public void testGetUnnestedGeometryDataForGeometryCollection() throws SedonaException {
+        GeometryCollection geometryCollection = geometryFactory.createGeometryCollection(new Geometry[]{
+                polygon,circle,point,lineString
+        });
+        Map<String,Object> geometryData = AvroUtils.getGeometryData(geometryCollection,true);
+        Assert.equals(geometryData.get(AvroConstants.GEOMETRY_OBJECT),Arrays.asList(
+                AvroUtils.getGeometryData(polygon,true),
+                AvroUtils.getGeometryData(circle,true),
+                AvroUtils.getGeometryData(point,true),
+                AvroUtils.getGeometryData(lineString,true)
+                                                                                   ));
+        Assert.equals(GeometryType.getGeometryType(geometryData.get(AvroConstants.GEOMETRY_SHAPE).toString()),
+                      GeometryType.GEOMETRYCOLLECTION);
+        
+    }
+    
+    @Test(expected = SedonaException.class)
+    public void testGetNestedGeometryDataForGeometryCollection() throws SedonaException{
+        GeometryCollection geometryCollection = geometryFactory.createGeometryCollection(new Geometry[]{
+                geometryFactory.createGeometryCollection(new Geometry[]{polygon,circle,point,lineString})
+        });
+        Map<String,Object> geometryData = AvroUtils.getGeometryData(geometryCollection,true);
+    }
+    
+    @Test
+    public void testGetGeometryDataForMultiPolygon() throws SedonaException {
+        MultiPolygon multiPolygon = geometryFactory.createMultiPolygon(new Polygon[]{polygon});
+        Map<String,Object> geometryData = AvroUtils.getGeometryData(multiPolygon,true);
+        Assert.equals(geometryData.get(AvroConstants.GEOMETRY_OBJECT),Arrays.asList(
+                AvroUtils.getMapFromPolygon(polygon)));
+        Assert.equals(GeometryType.getGeometryType(geometryData.get(AvroConstants.GEOMETRY_SHAPE).toString()),
+                      GeometryType.MULTIPOLYGON);
+    }
+    
+    @Test
+    public void testGetGeometryDataForMultiPoint() throws SedonaException {
+        MultiPoint multiPoint = geometryFactory.createMultiPoint(new Point[]{point});
+        Map<String,Object> geometryData = AvroUtils.getGeometryData(multiPoint,true);
+        Assert.equals(geometryData.get(AvroConstants.GEOMETRY_OBJECT),Arrays.asList(
+                AvroUtils.getMapFromPoint(point)));
+        Assert.equals(GeometryType.getGeometryType(geometryData.get(AvroConstants.GEOMETRY_SHAPE).toString()),
+                      GeometryType.MULTIPOINT);
+    }
+    
+    @Test
+    public void testGetGeometryDataForMultiLineString() throws SedonaException {
+        MultiLineString multiLineString = geometryFactory.createMultiLineString(new LineString[]{lineString});
+        Map<String,Object> geometryData = AvroUtils.getGeometryData(multiLineString,true);
+        Assert.equals(geometryData.get(AvroConstants.GEOMETRY_OBJECT),Arrays.asList(
+                AvroUtils.getCollectionFromLineString(lineString)));
+        Assert.equals(GeometryType.getGeometryType(geometryData.get(AvroConstants.GEOMETRY_SHAPE).toString()),
+                      GeometryType.MULTILINESTRING);
+    }
+    
+    
+    
+    
 }

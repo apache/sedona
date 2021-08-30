@@ -20,12 +20,14 @@
 package org.apache.sedona.core.io.avro;
 
 import com.google.common.collect.ImmutableMap;
+import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
 import org.apache.sedona.core.exceptions.SedonaException;
 import org.apache.sedona.core.io.avro.utils.AvroUtils;
 import org.apache.sedona.core.utils.SedonaUtils;
 import org.json.simple.JSONObject;
 
+import java.awt.*;
 import java.util.*;
 
 public class SchemaUtils {
@@ -66,6 +68,7 @@ public class SchemaUtils {
                 return dataType;
             }
             parser.parse(json.toJSONString());
+            
             dataTypes.put(dataType,json.toJSONString());
             return dataType;
         }

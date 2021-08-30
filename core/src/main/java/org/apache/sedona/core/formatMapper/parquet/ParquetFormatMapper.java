@@ -2,17 +2,16 @@ package org.apache.sedona.core.formatMapper.parquet;
 
 import org.apache.avro.generic.GenericArray;
 import org.apache.avro.generic.GenericContainer;
-import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.log4j.Logger;
 import org.apache.sedona.core.enums.GeometryType;
+import org.apache.sedona.core.exceptions.SedonaException;
+import org.apache.sedona.core.exceptions.SedonaRuntimeException;
 import org.apache.sedona.core.formatMapper.FormatMapper;
 import org.apache.sedona.core.geometryObjects.Circle;
-import org.apache.sedona.core.geometryObjects.schema.CircleSchema;
-import org.apache.sedona.core.geometryObjects.schema.CoordinateSchema;
-import org.apache.sedona.core.geometryObjects.schema.PolygonSchema;
+import org.apache.sedona.core.geometryObjects.schema.*;
+import org.apache.sedona.core.io.avro.constants.AvroConstants;
 import org.apache.spark.api.java.function.FlatMapFunction;
-import org.apache.zookeeper.Op;
 import org.locationtech.jts.geom.*;
 
 import java.io.Serializable;
@@ -29,20 +28,27 @@ import java.util.stream.StreamSupport;
 public class ParquetFormatMapper<T extends Geometry> implements Serializable, FlatMapFunction<Iterator<GenericRecord>, T> {
     final static Logger logger = Logger.getLogger(FormatMapper.class);
     protected GeometryFactory factory = new GeometryFactory();
-    private GeometryType geometryType;
     private final String geometryColumn;
     private final List<String> userColumns;
+    private final GeometryType defaultGeometryType;
     
     /**
-     *
-     * @param geometryType
+     * @param geometryColumn
+     * @param userColumns
+     * @param defaultGeometryType
+     */
+    public ParquetFormatMapper(String geometryColumn, List<String> userColumns, GeometryType defaultGeometryType) {
+        this.geometryColumn = geometryColumn;
+        this.userColumns = userColumns;
+        this.defaultGeometryType = defaultGeometryType;
+    }
+    
+    /**
      * @param geometryColumn
      * @param userColumns
      */
-    public ParquetFormatMapper(GeometryType geometryType, String geometryColumn, List<String> userColumns) {
-        this.geometryType = geometryType;
-        this.geometryColumn = geometryColumn;
-        this.userColumns = userColumns;
+    public ParquetFormatMapper(String geometryColumn, List<String> userColumns) {
+        this(geometryColumn,userColumns,null);
     }
     
     /**
@@ -163,26 +169,105 @@ public class ParquetFormatMapper<T extends Geometry> implements Serializable, Fl
     }
     
     /**
+     * Gets GeometrCollection from Array of Avro Records
+     * @param array
+     * @return GeometryCollection POJO
+     */
+    private GeometryCollection getGeometryCollection(GenericArray array){
+        Geometry[] geometries = new Geometry[array.size()];
+        for(int i=0;i<geometries.length;i++){
+            geometries[i] = getGeometry((GenericRecord) array.get(i));
+        }
+        return factory.createGeometryCollection(geometries);
+    }
+    
+    /**
+     * Gets MultiLineString from Array of Avro LineString Records
+     * @param array
+     * @return MultiLineString POJO
+     */
+    private MultiLineString getMultiLineString(GenericArray array){
+        LineString[] lineStrings = new LineString[array.size()];
+        for(int i=0;i<lineStrings.length;i++){
+            lineStrings[i] = (LineString) getGeometry(getCoordinates((GenericArray) array.get(i)),
+                                                      GeometryType.LINESTRING);
+        }
+        return factory.createMultiLineString(lineStrings);
+    }
+    
+    /**
+     * Gets MultiPolygon from Array of Avro Polygon Records
+     * @param array
+     * @return MultiPolygon
+     */
+    private MultiPolygon getMultiPolygon(GenericArray array){
+        Polygon[] polygons = new Polygon[array.size()];
+        for(int i=0;i<polygons.length;i++){
+            polygons[i] = getPolygon((GenericRecord) array.get(i));
+        }
+        return factory.createMultiPolygon(polygons);
+    }
+    
+    /**
+     * Gets MultiPoint from Array of Avro Point Records
+     * @param array
+     * @return MultiPoint POJO
+     */
+    private MultiPoint getMultiPoint(GenericArray array){
+        Point[] points = new Point[array.size()];
+        for(int i=0;i<points.length;i++){
+            points[i] = getPoint(getCoordinate((GenericContainer) array.get(i)));
+        }
+        return factory.createMultiPoint(points);
+    }
+    
+    
+    /**
      * Gets Geometry Object of Geometry Type from Avro Record
-     * @param record
+     * @param geometryColumn
      * @return Geometry
      */
-    private Geometry getGeometry(GenericRecord record) {
-        Object geometryColumn = record.get(this.geometryColumn);
-        switch (this.geometryType) {
+    private Geometry getGeometry(Object geometryColumn) {
+        if(geometryColumn instanceof GenericArray){
+            try{
+                if(this.defaultGeometryType!=null){
+                    return getGeometry(getCoordinates((GenericArray) geometryColumn),defaultGeometryType);
+                }
+            }catch (Exception e){
+            
+            }
+            return getGeometryCollection((GenericArray) geometryColumn);
+        }
+        GenericContainer geometryObject =
+                (GenericContainer) ((GenericRecord)geometryColumn).get(AvroConstants.GEOMETRY_OBJECT);
+        GeometryType geometryType = GeometryType.getGeometryType(((GenericRecord)geometryColumn)
+                                                                         .get(AvroConstants.GEOMETRY_SHAPE)
+                                                                         .toString());
+        switch (geometryType) {
             case CIRCLE:
-                return getCircle((GenericRecord) geometryColumn);
+                return getCircle((GenericRecord) geometryObject);
             case POINT:
-                return getPoint(getCoordinate((GenericContainer) geometryColumn));
+                return getPoint(getCoordinate(geometryObject));
+            case LINESTRING:
+                return getGeometry(getCoordinates((GenericArray) geometryObject),GeometryType.LINESTRING);
             case POLYGON:
             case RECTANGLE: {
-                if (geometryColumn instanceof GenericRecord) {
-                    return getPolygon((GenericRecord) geometryColumn);
-                }
+                return getPolygon((GenericRecord) geometryObject);
             }
-            default:
-                return getGeometry(getCoordinates((GenericArray) geometryColumn), this.geometryType);
+            case GEOMETRYCOLLECTION:{
+                return getGeometryCollection((GenericArray) geometryObject);
+            }
+            case MULTIPOINT:{
+                return getMultiPoint((GenericArray) geometryObject);
+            }
+            case MULTILINESTRING:{
+                return getMultiLineString((GenericArray) geometryObject);
+            }
+            case MULTIPOLYGON:{
+                return getMultiPolygon((GenericArray) geometryObject);
+            }
         }
+        throw new SedonaRuntimeException("Invalid Avro Geometry Record :"+geometryColumn.toString());
     }
     
     /**
@@ -207,7 +292,7 @@ public class ParquetFormatMapper<T extends Geometry> implements Serializable, Fl
     public Iterator<T> call(Iterator<GenericRecord> genericRecordIterator) throws Exception {
         Iterable<GenericRecord> recordIterable = () -> genericRecordIterator;
         return StreamSupport.stream(recordIterable.spliterator(), false).map(record -> {
-            T geometry = (T) getGeometry(record);
+            T geometry = (T) getGeometry(record.get(this.geometryColumn));
             setUserData(geometry, record);
             return geometry;
         }).iterator();
