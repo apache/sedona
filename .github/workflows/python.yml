@@ -70,5 +70,4 @@ jobs:
       run: find python-adapter/target -name sedona-* -exec cp {} spark-${SPARK_VERSION}-bin-hadoop2.7/jars/ \;
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
-      run: (cd python;shape>>tests/serializer_type.txt;export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop2.7;export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop2.7;
-      export PYTHONPATH=$SPARK_HOME/python;pipenv run pytest tests;wkb>>tests/serializer_type.txt;pipenv run pytest tests)
+      run: (cd python;shape>>tests/serializer_type.txt;export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop2.7;export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop2.7)
