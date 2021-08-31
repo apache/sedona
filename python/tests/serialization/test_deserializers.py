@@ -110,7 +110,7 @@ class TestGeometryConvert(TestBase):
              StructField("code", StringType()),
              StructField("fclass", StringType()),
              StructField("name", StringType()),
-             StructField("geometry", GeometryType(self.serializer_type)),
+             StructField("geometry", GeometryType()),
             ]
         )
         self.spark.createDataFrame(

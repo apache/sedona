@@ -174,7 +174,7 @@ class TestOmitPythonJvmSerdeToDf(TestBase):
             'POINT (9 8)', 'POINT (4 3)', 'POINT (12 1)', 'POINT (11 5)'
         ]
         assert df_without_column_names.count() == 4
-        assert df_without_column_names.schema == StructType([StructField("geometry", GeometryType(self.serializer_type))])
+        assert df_without_column_names.schema == StructType([StructField("geometry", GeometryType())])
 
         df = Adapter.toDf(result, self.spark, ["poi_id", "poi_name"])
 

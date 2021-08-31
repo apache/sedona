@@ -38,8 +38,10 @@ public class ShapeGeometrySerde
     @Override
     protected void writeGeometry(Kryo kryo, Output out, Geometry geometry)
     {
+        // Mainly used by the python binding to know in which serde to use
+        writeSerializedType(out, SerializerType.SHAPE);
+
         byte[] data = ShapeSerde.serialize(geometry);
-        out.writeByte(0);
         out.write(data, 0, data.length);
         writeUserData(kryo, out, geometry);
     }
@@ -47,6 +49,7 @@ public class ShapeGeometrySerde
     @Override
     protected Geometry readGeometry(Kryo kryo, Input input)
     {
+        // Skip the unneeded Serialized Type
         input.readByte();
         Geometry geometry = ShapeSerde.deserialize(input, geometryFactory);
         geometry.setUserData(readUserData(kryo, input));

@@ -53,7 +53,9 @@ abstract public class GeometrySerde extends Serializer {
      * @param out kryo output stream
      * @param type SerializerType
      */
-
+    protected void writeSerializedType(Output out, SerializerType type){
+        out.writeByte(type.getId());
+    }
 
     @Override
     public void write(Kryo kryo, Output out, Object object)

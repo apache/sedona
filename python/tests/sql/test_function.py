@@ -35,34 +35,34 @@ from tests.test_base import TestBase
 
 class TestPredicateJoin(TestBase):
     geo_schema = StructType(
-        [StructField("geom", GeometryType(TestBase.serializer_type), False)]
+        [StructField("geom", GeometryType(), False)]
     )
 
     geo_schema_with_index = StructType(
         [
             StructField("index", IntegerType(), False),
-            StructField("geom", GeometryType(TestBase.serializer_type), False)
+            StructField("geom", GeometryType(), False)
         ]
     )
 
     geo_pair_schema = StructType(
         [
-            StructField("geomA", GeometryType(TestBase.serializer_type), False),
-            StructField("geomB", GeometryType(TestBase.serializer_type), False)
+            StructField("geomA", GeometryType(), False),
+            StructField("geomB", GeometryType(), False)
         ]
     )
 
-    def create_sample_points_df(self, spark: SparkSession, num_of_points: int, serializer_type: str):
-        return create_sample_points_df(spark, num_of_points, serializer_type)
+    def create_sample_points_df(self, spark: SparkSession, num_of_points: int):
+        return create_sample_points_df(spark, num_of_points)
 
-    def create_sample_polygons_df(self, spark: SparkSession, num_of_points: int, serializer_type: str):
-        return create_sample_polygons_df(spark, num_of_points, serializer_type)
+    def create_sample_polygons_df(self, spark: SparkSession, num_of_points: int):
+        return create_sample_polygons_df(spark, num_of_points)
 
-    def create_sample_lines_df(self, spark: SparkSession, num_of_points: int, serializer_type: str):
-        return create_sample_lines_df(spark, num_of_points, serializer_type)
+    def create_sample_lines_df(self, spark: SparkSession, num_of_points: int):
+        return create_sample_lines_df(spark, num_of_points)
 
-    def create_simple_polygons_df(self, spark: SparkSession, num_of_points: int, serializer_type: str):
-        return create_simple_polygons_df(spark, num_of_points, serializer_type)
+    def create_simple_polygons_df(self, spark: SparkSession, num_of_points: int):
+        return create_simple_polygons_df(spark, num_of_points)
 
     def test_st_convex_hull(self):
         polygon_wkt_df = self.spark.read.format("csv"). \
@@ -276,8 +276,8 @@ class TestPredicateJoin(TestBase):
         sample_points = create_sample_points(20)
         sample_pair_points = [[el, sample_points[1]] for el in sample_points]
         schema = StructType([
-            StructField("geomA", GeometryType(self.serializer_type), True),
-            StructField("geomB", GeometryType(self.serializer_type), True)
+            StructField("geomA", GeometryType(), True),
+            StructField("geomB", GeometryType(), True)
         ])
         df = self.spark.createDataFrame(sample_pair_points, schema)
 
@@ -302,9 +302,9 @@ class TestPredicateJoin(TestBase):
         assert azimuths[0] == [42.27368900609373, 222.27368900609372]
 
     def test_st_x(self):
-        point_df = self.create_sample_points_df(self.spark, 5, serializer_type=self.serializer_type)
-        polygon_df = self.create_sample_polygons_df(self.spark, 5, serializer_type=self.serializer_type)
-        linestring_df = self.create_sample_lines_df(self.spark, 5, serializer_type=self.serializer_type)
+        point_df = self.create_sample_points_df(self.spark, 5)
+        polygon_df = self.create_sample_polygons_df(self.spark, 5)
+        linestring_df = self.create_sample_lines_df(self.spark, 5)
 
         points = point_df \
             .selectExpr("ST_X(geom)").collect()
@@ -320,9 +320,9 @@ class TestPredicateJoin(TestBase):
         assert (not polygons.count())
 
     def test_st_y(self):
-        point_df = self.create_sample_points_df(self.spark, 5, serializer_type=self.serializer_type)
-        polygon_df = self.create_sample_polygons_df(self.spark, 5, serializer_type=self.serializer_type)
-        linestring_df = self.create_sample_lines_df(self.spark, 5, serializer_type=self.serializer_type)
+        point_df = self.create_sample_points_df(self.spark, 5)
+        polygon_df = self.create_sample_polygons_df(self.spark, 5)
+        linestring_df = self.create_sample_lines_df(self.spark, 5)
 
         points = point_df \
             .selectExpr("ST_Y(geom)").collect()
@@ -339,9 +339,9 @@ class TestPredicateJoin(TestBase):
 
     def test_st_start_point(self):
 
-        point_df = self.create_sample_points_df(self.spark, 5, serializer_type=self.serializer_type)
-        polygon_df = self.create_sample_polygons_df(self.spark, 5, serializer_type=self.serializer_type)
-        linestring_df = self.create_sample_lines_df(self.spark, 5, serializer_type=self.serializer_type)
+        point_df = self.create_sample_points_df(self.spark, 5)
+        polygon_df = self.create_sample_polygons_df(self.spark, 5)
+        linestring_df = self.create_sample_lines_df(self.spark, 5)
 
         expected_points = [
             "POINT (-112.506968 45.98186)",
@@ -364,9 +364,9 @@ class TestPredicateJoin(TestBase):
         assert (not polygons.count())
 
     def test_st_end_point(self):
-        linestring_dataframe = self.create_sample_lines_df(self.spark, 5, serializer_type=self.serializer_type)
-        other_geometry_dataframe = self.create_sample_points_df(self.spark, 5, serializer_type=self.serializer_type). \
-            union(self.create_sample_points_df(self.spark, 5, serializer_type=self.serializer_type))
+        linestring_dataframe = self.create_sample_lines_df(self.spark, 5)
+        other_geometry_dataframe = self.create_sample_points_df(self.spark, 5). \
+            union(self.create_sample_points_df(self.spark, 5))
 
         point_data_frame = linestring_dataframe.selectExpr("ST_EndPoint(geom) as geom"). \
             filter("geom IS NOT NULL")
@@ -397,7 +397,7 @@ class TestPredicateJoin(TestBase):
         geometries = [[wkt.loads(wkt_data)] for wkt_data in wkt_list]
 
         schema = StructType(
-            [StructField("geom", GeometryType(self.serializer_type), False)]
+            [StructField("geom", GeometryType(), False)]
         )
 
         geometry_table = self.spark.createDataFrame(geometries, schema)
@@ -415,14 +415,14 @@ class TestPredicateJoin(TestBase):
         ])
 
     def test_st_exterior_ring(self):
-        polygon_df = self.create_simple_polygons_df(self.spark, 5, serializer_type=self.serializer_type)
+        polygon_df = self.create_simple_polygons_df(self.spark, 5,)
         additional_wkt = "POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))"
         additional_wkt_df = self.spark.createDataFrame([[wkt.loads(additional_wkt)]], self.geo_schema)
 
         polygons_df = polygon_df.union(additional_wkt_df)
 
-        other_geometry_df = self.create_sample_lines_df(self.spark, 5, serializer_type=self.serializer_type).union(
-            self.create_sample_points_df(self.spark, 5, serializer_type=self.serializer_type))
+        other_geometry_df = self.create_sample_lines_df(self.spark, 5).union(
+            self.create_sample_points_df(self.spark, 5))
 
         linestring_df = polygons_df.selectExpr("ST_ExteriorRing(geom) as geom").filter("geom IS NOT NULL")
 
@@ -447,9 +447,8 @@ class TestPredicateJoin(TestBase):
                 "POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1), (1 3, 2 3, 2 4, 1 4, 1 3), (3 3, 4 3, 4 4, 3 4, 3 3))"]
         )
 
-        other_geometry = self.create_sample_points_df(self.spark, 5, serializer_type=self.serializer_type).union(
-            self.create_sample_lines_df(self.spark, 5,
-                                        serializer_type=self.serializer_type))
+        other_geometry = self.create_sample_points_df(self.spark, 5).union(
+            self.create_sample_lines_df(self.spark, 5))
         wholes = [polygon_df.selectExpr(f"ST_InteriorRingN(geom, {i}) as geom").
                       selectExpr("ST_AsText(geom)").collect()[0][0]
                   for i in range(3)]
@@ -558,9 +557,9 @@ class TestPredicateJoin(TestBase):
             "POINT (1 1)", "POINT (1 0)",
             "POINT (0 0)"
         ]
-        geometry_df = self.create_sample_lines_df(self.spark, 1, serializer_type=self.serializer_type) \
-            .union(self.create_sample_points_df(self.spark, 1, serializer_type=self.serializer_type)) \
-            .union(self.create_simple_polygons_df(self.spark, 1, serializer_type=self.serializer_type))
+        geometry_df = self.create_sample_lines_df(self.spark, 1) \
+            .union(self.create_sample_points_df(self.spark, 1)) \
+            .union(self.create_simple_polygons_df(self.spark, 1))
 
         dumped_points = geometry_df.selectExpr("ST_DumpPoints(geom) as geom") \
             .select(explode(col("geom")).alias("geom"))

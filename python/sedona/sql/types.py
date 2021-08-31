@@ -20,12 +20,13 @@ from pyspark.sql.types import UserDefinedType, ArrayType, ByteType
 from sedona.core.serde.binary.buffer import BinaryBuffer
 from sedona.core.serde.binary.parser import BinaryParser
 from sedona.core.serde.geom_factory import geometry_serializers_instances, geometry_serializers
+from sedona.core.serde.spark_config import spark_conf_getter
 
 
 class GeometryType(UserDefinedType):
 
-    def __init__(self, serde: str = "shape"):
-        self.serde = serde
+    def __init__(self):
+        self.serde = spark_conf_getter.serialization
 
     @classmethod
     def sqlType(cls):
@@ -58,4 +59,3 @@ class GeometryType(UserDefinedType):
     @classmethod
     def scalaUDT(cls):
         return "org.apache.spark.sql.sedona_sql.UDT.GeometryUDT"
-

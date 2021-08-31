@@ -318,7 +318,7 @@ class TestAdapter(TestBase):
         schema = StructType(
             [
                 StructField("id", IntegerType()),
-                StructField("geom", GeometryType(self.serializer_type))
+                StructField("geom", GeometryType())
             ]
         )
         df = self.spark.createDataFrame(data, schema=schema)

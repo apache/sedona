@@ -39,8 +39,8 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom_from", GeometryType(self.serializer_type), True),
-                t.StructField("geom_to", GeometryType(self.serializer_type), True)
+                t.StructField("geom_from", GeometryType(), True),
+                t.StructField("geom_to", GeometryType(), True)
             ]
         )
 
@@ -67,7 +67,7 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(self.serializer_type), True)
+                t.StructField("geom", GeometryType(), True)
             ]
         )
 
@@ -87,7 +87,7 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(self.serializer_type), True)
+                t.StructField("geom", GeometryType(), True)
             ]
         )
 
@@ -108,7 +108,7 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(self.serializer_type), True)
+                t.StructField("geom", GeometryType(), True)
             ]
         )
 
@@ -133,7 +133,7 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(self.serializer_type), True)
+                t.StructField("geom", GeometryType(), True)
             ]
         )
 
@@ -168,7 +168,7 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(self.serializer_type), True)
+                t.StructField("geom", GeometryType(), True)
             ]
         )
         self.spark.createDataFrame(

@@ -19,13 +19,10 @@ from typing import List
 
 from pyspark import RDD
 from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.types import StructType, StructField, StringType
 
 from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.core.enums.spatial import SpatialType
-from sedona.core.serde.spark_config import spark_conf_getter
 from sedona.core.spatialOperator.rdd import SedonaPairRDD, SedonaRDD
-from sedona.sql.types import GeometryType
 from sedona.utils.meta import MultipleMeta
 
 
@@ -124,20 +121,10 @@ class Adapter(metaclass=MultipleMeta):
         :param sparkSession:
         :return:
         """
-        left_fields_length = spatialPairRDD.take(1)[0][0].getUserData().split("\t").__len__()
-        right_fields_length = spatialPairRDD.take(1)[0][1].getUserData().split("\t").__len__()
         spatial_pair_rdd_mapped = spatialPairRDD.map(
             lambda x: [x[0].geom, *x[0].getUserData().split("\t"), x[1].geom, *x[1].getUserData().split("\t")]
         )
-        schema = StructType(
-            [
-                StructField("geom_1", GeometryType(spark_conf_getter.serialization)),
-                *[StructField(f"_right_{field_name}", StringType()) for field_name in range(left_fields_length)],
-                StructField("geom_2", GeometryType(spark_conf_getter.serialization)),
-                *[StructField(f"_left_{field_name}", StringType()) for field_name in range(right_fields_length)],
-            ]
-        )
-        df = sparkSession.createDataFrame(spatial_pair_rdd_mapped, schema=schema, verifySchema=False)
+        df = sparkSession.createDataFrame(spatial_pair_rdd_mapped, verifySchema=False)
         return df
 
     @classmethod
