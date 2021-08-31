@@ -49,13 +49,13 @@ jobs:
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         SCALA_VERSION: ${{ matrix.scala }}
-#      run: if [ ${SPARK_VERSION:0:1} == "3" ]; then mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=3.0 -Dgeotools ; else mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=2.4 -Dgeotools ; fi
+      run: if [ ${SPARK_VERSION:0:1} == "3" ]; then mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=3.0 -Dgeotools ; else mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=2.4 -Dgeotools ; fi
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
-#      run: wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz
+      run: wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
-#      run: tar -xzf spark-${SPARK_VERSION}-bin-hadoop2.7.tgz
+      run: tar -xzf spark-${SPARK_VERSION}-bin-hadoop2.7.tgz
 #    - run: sudo apt-get -y install python3-pip python-dev libgeos-dev
 #    - run: sudo pip3 install -U setuptools
 #    - run: sudo pip3 install -U wheel
