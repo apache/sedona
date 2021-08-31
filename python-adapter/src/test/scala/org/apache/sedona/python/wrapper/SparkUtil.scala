@@ -35,7 +35,6 @@ object SparkUtil {
     val conf = new SparkConf().setAppName("scalaTest").setMaster("local[2]")
     conf.set("spark.serializer", classOf[KryoSerializer].getName)
     conf.set("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName)
-    conf.set("sedona.serializer.type", "wkb")
 
     val sc = new SparkContext(conf)
     sc.addSparkListener(new Listener)
