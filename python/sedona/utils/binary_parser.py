@@ -15,13 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-import struct
 from enum import Enum
-from typing import List, Union
-
-import attr
-from pyspark import SparkContext
-from shapely.wkb import loads
 
 DOUBLE_SIZE = 8
 INT_SIZE = 4
@@ -35,11 +29,6 @@ size_dict = {
     "b": BYTE_SIZE,
     "s": CHAR_SIZE,
     "?": BOOLEAN_SIZE
-}
-
-order_type = {
-    "little_endian": "<",
-    "big_endian": ">"
 }
 
 
