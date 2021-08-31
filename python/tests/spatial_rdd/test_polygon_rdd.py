@@ -255,18 +255,8 @@ class TestPolygonRDD(TestBase):
         spatial_rdd_copy.analyze()
 
     def test_geojson_constructor(self):
-        spark = SparkSession. \
-            builder. \
-            config("sedona.serializer.type", "wkb"). \
-            config("spark.serializer", KryoSerializer.getName). \
-            config("spark.kryo.registrator", SedonaKryoRegistrator.getName) . \
-            config("spark.kryoserializer.buffer.max.mb", "512") . \
-            master("local[*]"). \
-            getOrCreate()
-
-        SedonaRegistrator.registerAll(spark)
         spatial_rdd = PolygonRDD(
-            sparkContext=spark.sparkContext,
+            sparkContext=self.sc,
             InputLocation=input_location_geo_json,
             splitter=FileDataSplitter.GEOJSON,
             carryInputData=True,
