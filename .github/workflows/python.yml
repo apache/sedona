@@ -75,8 +75,5 @@ jobs:
     - run: export PYTHONPATH=$SPARK_HOME/python
     - run: cd python
     - run: pipenv run pytest tests
-    - run: wkb>>tests/serializer_type.txt
-    - run: export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop2.7
-    - run: export PYTHONPATH=$SPARK_HOME/python
-    - run: cd python
+    - run: wkb>>serializer_type.txt
     - run: pipenv run pytest tests
