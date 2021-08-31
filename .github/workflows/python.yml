@@ -45,4 +45,30 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
+    - run: git submodule update --init --recursive # Checkout Git submodule if necessary
+    - env:
+        SPARK_VERSION: ${{ matrix.spark }}
+        SCALA_VERSION: ${{ matrix.scala }}
+#      run: if [ ${SPARK_VERSION:0:1} == "3" ]; then mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=3.0 -Dgeotools ; else mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=2.4 -Dgeotools ; fi
+    - env:
+        SPARK_VERSION: ${{ matrix.spark }}
+#      run: wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz
+    - env:
+        SPARK_VERSION: ${{ matrix.spark }}
+#      run: tar -xzf spark-${SPARK_VERSION}-bin-hadoop2.7.tgz
+#    - run: sudo apt-get -y install python3-pip python-dev libgeos-dev
+#    - run: sudo pip3 install -U setuptools
+#    - run: sudo pip3 install -U wheel
+#    - run: sudo pip3 install -U virtualenvwrapper
+#    - run: python3 -m pip install pipenv
+    - env:
+        SPARK_VERSION: ${{ matrix.spark }}
+        PYTHON_VERSION: ${{ matrix.python }}
+      run: (cd python;pipenv --python ${PYTHON_VERSION};pipenv install pyspark==${SPARK_VERSION};pipenv install --dev;pipenv graph)
+    - env:
+        SPARK_VERSION: ${{ matrix.spark }}
+      run: find python-adapter/target -name sedona-* -exec cp {} spark-${SPARK_VERSION}-bin-hadoop2.7/jars/ \;
+    - env:
+        SPARK_VERSION: ${{ matrix.spark }}
       run: (cd python;shape>>tests/serializer_type.txt)
+#  ;export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop2.7;export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop2.7;pipenv run pytest tests;wkb>>tests/serializer_type.txt;pipenv run pytest tests
