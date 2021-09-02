@@ -18,7 +18,9 @@
 import attr
 from pyspark.sql import SparkSession
 from py4j.java_gateway import java_import
+from pyspark import SparkContext
 
+from sedona.core.serde.spark_config import spark_conf_getter
 from sedona.register.java_libs import SedonaJvmLib
 from sedona.utils.prep import assign_all
 
@@ -41,6 +43,15 @@ class SedonaRegistrator:
         spark.sql("SELECT 1 as geom").count()
         PackageImporter.import_jvm_lib(spark._jvm)
         cls.register(spark)
+        current_sc = SparkContext._active_spark_context
+
+        if current_sc:
+            conf = current_sc.getConf()
+            serializer_type = conf.get("sedona.serializer.type")
+            spark_conf_getter.serialization = serializer_type
+        else:
+            spark_conf_getter.serialization = "shape"
+
         return True
 
     @classmethod

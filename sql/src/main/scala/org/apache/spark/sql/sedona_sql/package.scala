@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql
 
+import org.apache.sedona.core.serde.GeometrySerde
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.sedona.sql.serde.SedonaSerializer
 import org.apache.spark.{SparkContext, SparkException}
@@ -30,7 +31,7 @@ package object sedona_sql {
     case None => throw new SparkException("There is no active SparkContext. Hence, cannot create SedonaSerializer")
   }
 
-  private val userSerializerType = sedonaConf.getSerializerType
-  val sedonaSerializer: SedonaSerializer = SedonaSerializer.apply(userSerializerType)
+  val userSerializerType = sedonaConf.getSerializerType
+  val sedonaSerializer: SedonaSerializer = SedonaSerializer(userSerializerType)
 
 }

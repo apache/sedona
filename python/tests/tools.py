@@ -23,6 +23,10 @@ from sedona.utils.spatial_rdd_parser import GeoData
 
 tests_path = path.abspath(path.join(__file__ ,"../../../core/src/test/"))
 tests_resource = path.abspath(path.join(__file__ ,"../../../core/src/test/resources/"))
+serializer_absolute_path = path.abspath(path.join(__file__, "../"))
+
+serializer_path = path.join(serializer_absolute_path, "serializer_type.txt")
+
 
 def distance_sorting_functions(geo_data: GeoData, query_point: Point):
     return geo_data.geom.distance(query_point)

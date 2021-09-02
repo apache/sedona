@@ -22,6 +22,7 @@ from shapely.geometry.base import BaseGeometry
 from sedona.core.SpatialRDD import LineStringRDD, PolygonRDD, CircleRDD, PointRDD
 from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.core.enums import IndexType, GridType
+from sedona.core.serde.geom_factory import serializers
 from sedona.core.spatialOperator import JoinQuery
 from sedona.utils.spatial_rdd_parser import GeoData
 from tests.test_base import TestBase
@@ -197,7 +198,7 @@ class TestJoinQueryCorrectness(TestBase):
 
     @classmethod
     def make_square_line(cls, minx: float, miny: float, side: float):
-        coordinates = [(minx, miny), (minx+side, miny), (minx + side, miny+side)]
+        coordinates = [(minx, miny), (minx + side, miny), (minx + side, miny + side)]
         return LineString(coordinates)
 
     @classmethod
@@ -206,7 +207,7 @@ class TestJoinQueryCorrectness(TestBase):
 
     @classmethod
     def wrap(cls, geom: BaseGeometry, user_data: str):
-        return GeoData(geom=geom, userData=user_data)
+        return GeoData(geom=geom, userData=user_data, serde=serializers[cls.serializer_type])
 
     @classmethod
     def once_before_all(cls):

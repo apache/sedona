@@ -77,8 +77,6 @@ class TestSpatialRDDToDataFrame(TestBase):
             lambda x: [x.geom, *x.getUserData().split("\t")]
         )
 
-        self.spark.createDataFrame(raw_spatial_rdd).show()
-
         schema = StructType(
             [
                 StructField("geom", GeometryType()),

@@ -50,8 +50,7 @@ public class ShapeGeometrySerde
     protected Geometry readGeometry(Kryo kryo, Input input)
     {
         // Skip the unneeded Serialized Type
-        input.readInt(true);
-
+        input.readByte();
         Geometry geometry = ShapeSerde.deserialize(input, geometryFactory);
         geometry.setUserData(readUserData(kryo, input));
         return geometry;

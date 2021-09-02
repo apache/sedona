@@ -20,7 +20,7 @@ from pyspark import StorageLevel
 from sedona.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
 from sedona.core.enums import GridType
 from sedona.core.geom.circle import Circle
-from sedona.core.spatialOperator import RangeQuery, KNNQuery, JoinQuery
+from sedona.core.spatialOperator import RangeQuery, KNNQuery, JoinQuery, RangeQueryRaw
 from tests.properties.crs_transform import *
 from tests.properties.polygon_properties import grid_type
 from tests.test_base import TestBase

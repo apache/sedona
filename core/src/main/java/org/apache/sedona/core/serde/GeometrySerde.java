@@ -54,7 +54,7 @@ abstract public class GeometrySerde extends Serializer {
      * @param type SerializerType
      */
     protected void writeSerializedType(Output out, SerializerType type){
-        out.writeInt(type.getId(), true);
+        out.writeByte(type.getId());
     }
 
     @Override

@@ -51,7 +51,7 @@ class Envelope(Polygon):
         )
 
     def to_bytes(self):
-        from sedona.utils.binary_parser import BinaryBuffer
+        from sedona.core.serde.binary.buffer import BinaryBuffer
         bin_buffer = BinaryBuffer()
         bin_buffer.put_double(self.minx)
         bin_buffer.put_double(self.maxx)

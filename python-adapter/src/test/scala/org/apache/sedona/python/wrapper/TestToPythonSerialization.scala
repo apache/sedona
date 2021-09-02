@@ -19,10 +19,14 @@
 
 package org.apache.sedona.python.wrapper
 
-import org.apache.sedona.python.wrapper.translation.{FlatPairRddConverter, GeometryRddConverter, ListPairRddConverter}
+import org.apache.sedona.python.wrapper.translation.{FlatPairRddConverter, GeometryRddConverter, GeometrySerializer, ListPairRddConverter}
 import org.apache.spark.api.java.JavaPairRDD
 import org.scalatest.Matchers
 import org.apache.sedona.python.wrapper.utils.implicits._
+import org.apache.sedona.sql.serde.SedonaSerializer
+import org.apache.spark.sql.catalyst.util.GenericArrayData
+import org.apache.spark.sql.sedona_sql.userSerializerType
+
 import scala.collection.JavaConverters._
 
 

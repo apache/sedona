@@ -21,39 +21,44 @@ package org.apache.sedona.python.wrapper.translation
 
 import java.nio.ByteBuffer
 
+import com.esotericsoftware.kryo.io.Output
 import org.apache.sedona.core.geometryObjects.Circle
 import org.apache.sedona.python.wrapper.SerializationException
-import org.locationtech.jts.geom.Geometry
+import org.apache.sedona.python.wrapper.translation.serde.PythonGeometrySerialization
+import org.apache.spark.sql.sedona_sql.{sedonaSerializer, userSerializerType}
+import org.locationtech.jts.geom.{Geometry, GeometryCollection, LineString, Point, Polygon}
 import org.locationtech.jts.io.WKBReader
 
 
-private[python] class PythonGeometrySerializer extends Serializable {
+private[python] case class PythonGeometrySerializer() extends Serializable {
 
   /*
       Translates JTS geometry to byte array which then will be decoded to Python shapely geometry objects
       Process needs two steps:
-      - Translate JTS Geometry to Byte array using WKBWriter
       - Translate user attributes using UTF-8 encoding
    */
 
-  def serialize: (Geometry => Array[Byte]) = {
-    case geometry: Circle => CircleSerializer(geometry).serialize
-    case geometry: Geometry => GeometrySerializer(geometry).serialize
+
+  def serialize(geom: Geometry): Array[Byte] = {
+    geom match {
+      case geometry: Circle => CircleSerializer(geometry).serialize
+      case geometry: Geometry => GeometrySerializer(geometry).serialize
+    }
+
 
   }
 
   def deserialize: Array[Byte] => Geometry = (values: Array[Byte]) => {
-    val reader = new WKBReader()
     val isCircle = values.head.toInt
     val valuesLength = values.length
 
     if (isCircle == 1) {
-      val geom = reader.read(values.slice(9, valuesLength))
+      val geom =  PythonGeometrySerialization.deserialize(values.slice(9, valuesLength))
       val radius = ByteBuffer.wrap(values.slice(1, 9)).getDouble()
       new Circle(geom, radius)
     }
     else if (isCircle == 0) {
-      reader.read(values.slice(1, valuesLength))
+      PythonGeometrySerialization.deserialize(values.slice(1, valuesLength))
     }
     else throw SerializationException("Can not deserialize object")
 

@@ -35,6 +35,7 @@ import org.locationtech.jts.io.WKBWriter;
 public class WKBGeometrySerde
         extends GeometrySerde
 {
+
     @Override
     protected void writeGeometry(Kryo kryo, Output out, Geometry geometry)
     {
@@ -45,7 +46,8 @@ public class WKBGeometrySerde
         writeSerializedType(out, SerializerType.WKB);
 
         // write geometry length size to read bytes until userData
-        out.writeInt(data.length, true);
+        out.writeInt(data.length);
+
         out.write(data, 0, data.length);
         writeUserData(kryo, out, geometry);
     }
@@ -56,9 +58,8 @@ public class WKBGeometrySerde
         Geometry geometry;
 
         // Skip the unneeded Serialized Type
-        input.readInt(true);
-
-        int geometryBytesLength = input.readInt(true);
+        input.readByte();
+        int geometryBytesLength = input.readInt();
         byte[] bytes = input.readBytes(geometryBytesLength);
 
         try {

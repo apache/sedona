@@ -16,36 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql.serde
 
-import org.apache.spark.sql.catalyst.util.ArrayData
+package org.apache.sedona.python.wrapper.translation.serde
+
+import org.apache.sedona.core.enums.SerializerType
+import org.apache.spark.sql.sedona_sql.userSerializerType
 import org.locationtech.jts.geom.Geometry
-import org.locationtech.jts.io.{WKBReader, WKBWriter}
 
-/**
-  * SerDe using the WKB reader and writer objects
-  */
-object WKBGeometrySerializer extends SedonaSerializer{
-
-  /**
-    * Given a geometry returns array of bytes
-    *
-    * @param geometry JTS geometry
-    * @return Array of bites represents this geometry
-    */
-  override def serialize(geometry: Geometry): Array[Byte] = {
-    val writer = new WKBWriter(2, 2, true)
-    writer.write(geometry)
+object PythonGeometrySerialization {
+  def serialize(geometry: Geometry): Array[Byte] = {
+    userSerializerType match {
+      case SerializerType.SHAPE => ShapePythonGeometrySerde.serialize(geometry)
+      case SerializerType.WKB => WkbPythonGeometrySerde.serialize(geometry)
+      case _ => ShapePythonGeometrySerde.serialize(geometry)
+    }
   }
 
-  /**
-    * Given ArrayData returns Geometry
-    *
-    * @param values ArrayData
-    * @return JTS geometry
-    */
-  override def deserialize(values: ArrayData): Geometry = {
-    val reader = new WKBReader()
-    reader.read(values.toByteArray())
+  def deserialize(array: Array[Byte]): Geometry = {
+    userSerializerType match {
+      case SerializerType.SHAPE => ShapePythonGeometrySerde.deserialize(array)
+      case SerializerType.WKB => WkbPythonGeometrySerde.deserialize(array)
+      case _ => ShapePythonGeometrySerde.deserialize(array)
+    }
   }
 }
