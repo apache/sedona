@@ -202,5 +202,32 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       assert(distanceJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(distanceJoinDf.count() == 2998)
     }
+
+    it("Passed Correct partitioning for broadcast join for ST_Polygon and ST_Point with AQE enabled") {
+      sparkSession.conf.set("spark.sql.adaptive.enabled", true)
+      val polygonDf = buildPolygonDf.repartition(3)
+      val pointDf = buildPointDf.repartition(5)
+
+      var broadcastJoinDf = pointDf.alias("pointDf").join(broadcast(polygonDf).alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(broadcastJoinDf.rdd.getNumPartitions == pointDf.rdd.getNumPartitions)
+      assert(broadcastJoinDf.count() == 1000)
+
+      broadcastJoinDf = broadcast(polygonDf).alias("polygonDf").join(pointDf.alias("pointDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(broadcastJoinDf.rdd.getNumPartitions == pointDf.rdd.getNumPartitions)
+      assert(broadcastJoinDf.count() == 1000)
+
+      broadcastJoinDf = broadcast(pointDf).alias("pointDf").join(polygonDf.alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(broadcastJoinDf.rdd.getNumPartitions == polygonDf.rdd.getNumPartitions)
+      assert(broadcastJoinDf.count() == 1000)
+
+      broadcastJoinDf = polygonDf.alias("polygonDf").join(broadcast(pointDf).alias("pointDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(broadcastJoinDf.rdd.getNumPartitions == polygonDf.rdd.getNumPartitions)
+      assert(broadcastJoinDf.count() == 1000)
+      sparkSession.conf.set("spark.sql.adaptive.enabled", false)
+    }
   }
 }
