@@ -15,22 +15,23 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-import attr
-from shapely.geometry.base import BaseGeometry
+from shapely.geometry import Point
 
-from sedona.core.serde.binary.buffer import BinaryBuffer
-from sedona.core.serde.binary.parser import BinaryParser
-from sedona.utils.abstract_parser import GeometryParser
+from sedona.utils.spatial_rdd_parser import GeoData
+from tests.test_base import TestBase
 
 
-@attr.s
-class UndefinedParser(GeometryParser):
-    name = "Undefined"
+class TestGeoData(TestBase):
 
-    @classmethod
-    def serialize(cls, obj: BaseGeometry, binary_buffer: BinaryBuffer):
-        raise NotImplementedError()
+    def test_geo_data_with_current_serialization(self):
+        # given geo data from used serialization type
+        geo_data = GeoData.with_current_serialization(Point(21, 52), "user")
 
-    @classmethod
-    def deserialize(cls, parser: BinaryParser) -> BaseGeometry:
-        raise NotImplementedError()
+        # when creating rdd
+        rdd = self.sc.parallelize([geo_data])
+
+        # then rdd should be created
+        assert rdd.count() == 1
+
+        # and it should be possible to collect the result
+        assert rdd.collect()[0] == geo_data
