@@ -205,10 +205,13 @@ This product bundles various third-party components under other open source lice
 This section summarizes those components and their licenses. See licenses/
 for text of these licenses.
 
+Apache 2.0 License
+--------------------------------------
+scalastyle_config.xml (copied from https://github.com/scalastyle/scalastyle/blob/master/lib/scalastyle_config.xml)
+
 BSD 2-Clause License
 --------------------------------------
 zeppelin/index.js (modified based on volume-leaflet: https://github.com/volumeint/helium-volume-leaflet)
-
 
 No-copyright data used in unit tests
 --------------------------------------
@@ -224,11 +227,3 @@ core/src/test/resources/primaryroads-polygon.csv
 core/src/test/resources/primaryroads.csv
 core/src/test/resources/zcta510-small.csv
 core/src/test/resources/zcta510.csv
-
-
-MODIS Land Surface Temperature and Emissivity MYD11_L2 from United States National Aeronautics and Space Administration
----------------
-core/src/test/resources/MYD11_L2.A2017091.0140.006.2017094143804.hdf
-core/src/test/resources/MYD11_L2.A2017091.0145.006.2017094151110.hdf
-core/src/test/resources/MYD11_L2.A2017091.0150.006.2017094151114.hdf
-core/src/test/resources/MYD11_L2.A2017091.0155.006.2017094143610.hdf

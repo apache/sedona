@@ -182,7 +182,8 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
       assert(df.count() == 1)
     }
 
-    it("load HDF data from RDD to a DataFrame") {
+    // Tests here have been ignored. A new feature that reads HDF will be added.
+    ignore("load HDF data from RDD to a DataFrame") {
       val InputLocation = "file://" + resourceFolder + "modis/modis.csv"
       val numPartitions = 5
       val HDFincrement = 5
