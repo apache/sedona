@@ -24,8 +24,13 @@ Converting will produce GeoData objects which have 2 attributes:
 </div>
 <li> geom: shapely.geometry.BaseGeometry </li>
 <li> userData: str </li>
+<li> serde: int which currently takes one of the two values </li>
+    shape: 0
+    wkb: 1
+But you can create GeoData with used spark conf serialization type just using 
+GeoData.with_current_serialization(geom=Point(21, 52), userData="user_data")
 
-geom attribute holds geometry representation as shapely objects. 
+geom attribute holds geometry representation as shapely objects.
 userData is string representation of other attributes separated by "\t"
 </br>
 
@@ -33,7 +38,7 @@ GeoData has one method to get user data.
 <li> getUserData() -> str </li>
 
 !!!note
-	This tutorial is based on [Sedona Core Jupyter Notebook example](../jupyter-notebook). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder) and wait for a few minutes. Then select a notebook and enjoy!
+This tutorial is based on [Sedona Core Jupyter Notebook example](../jupyter-notebook). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder) and wait for a few minutes. Then select a notebook and enjoy!
 
 ## Installation
 
@@ -45,9 +50,16 @@ Sedona has a suite of well-written geometry and index serializers. Forgetting to
 ```python
 conf.set("spark.serializer", KryoSerializer.getName)
 conf.set("spark.kryo.registrator", SedonaKryoRegistrator.getName)
+conf.set("sedona.serializer.type", "shape")
 sc = SparkContext(conf=conf)
 ```
-    
+
+!!!note
+You can use multiple serialization type by changing spark conf option ```sedona.serializer.type```. Currently two options are available
+<li> shape </li>
+<li> wkb </li>
+
+
 ## Create a SpatialRDD
 
 ### Create a typed SpatialRDD
@@ -60,10 +72,10 @@ Apache Sedona core provides three special SpatialRDDs:
 <br>
 
 They can be loaded from CSV, TSV, WKT, WKB, Shapefiles, GeoJSON formats.
-To pass the format to SpatialRDD constructor please use <b> FileDataSplitter </b> enumeration. 
+To pass the format to SpatialRDD constructor please use <b> FileDataSplitter </b> enumeration.
 
-sedona SpatialRDDs (and other classes when it was necessary) have implemented meta classes which allow 
-to use overloaded functions how Scala/Java Apache Sedona API allows. ex. 
+sedona SpatialRDDs (and other classes when it was necessary) have implemented meta classes which allow
+to use overloaded functions how Scala/Java Apache Sedona API allows. ex.
 
 
 ```python
@@ -152,7 +164,7 @@ spatial_rdd = Adapter.toSpatialRdd(spatial_df, "geom")
 ```
 
 For WKT/WKB/GeoJSON data, please use ==ST_GeomFromWKT / ST_GeomFromWKB / ST_GeomFromGeoJSON== instead.
-    
+
 ## Read other attributes in an SpatialRDD
 
 Each SpatialRDD can carry non-spatial attributes such as price, age and name as long as the user sets ==carryOtherAttributes== as [TRUE](#create-a-spatialrdd).
@@ -177,11 +189,11 @@ query_result = RangeQuery.SpatialRangeQuery(spatial_rdd, range_query_window, con
 ```
 
 !!!note
-    Please use RangeQueryRaw from the same module
-    if you want to avoid jvm python serde while converting to Spatial DataFrame
-    It takes the same parameters as RangeQuery but returns reference to jvm rdd which
-    can be converted to dataframe without python - jvm serde using Adapter.
-    
+Please use RangeQueryRaw from the same module
+if you want to avoid jvm python serde while converting to Spatial DataFrame
+It takes the same parameters as RangeQuery but returns reference to jvm rdd which
+can be converted to dataframe without python - jvm serde using Adapter.
+
     Example:
     ```python
     from sedona.core.geom.envelope import Envelope
@@ -198,7 +210,7 @@ query_result = RangeQuery.SpatialRangeQuery(spatial_rdd, range_query_window, con
 
 ### Range query window
 
-Besides the rectangle (Envelope) type range query window, Apache Sedona range query window can be 
+Besides the rectangle (Envelope) type range query window, Apache Sedona range query window can be
 <li> Point </li> 
 <li> Polygon </li>
 <li> LineString </li>
@@ -242,7 +254,7 @@ query_result = RangeQuery.SpatialRangeQuery(
 
 The output format of the spatial range query is another RDD which consists of GeoData objects.
 
-SpatialRangeQuery result can be used as RDD with map or other spark RDD funtions. Also it can be used as 
+SpatialRangeQuery result can be used as RDD with map or other spark RDD funtions. Also it can be used as
 Python objects when using collect method.
 Example:
 
@@ -294,7 +306,7 @@ result = KNNQuery.SpatialKnnQuery(object_rdd, point, k, using_index)
 
 ### Query center geometry
 
-Besides the Point type, Apache Sedona KNN query center can be 
+Besides the Point type, Apache Sedona KNN query center can be
 <li> Polygon </li>
 <li> LineString </li>
 
@@ -319,11 +331,11 @@ result = KNNQuery.SpatialKnnQuery(spatial_rdd, point, k, using_index)
 ```
 
 !!!warning
-    Only R-Tree index supports Spatial KNN query
+Only R-Tree index supports Spatial KNN query
 
 ### Output format
 
-The output format of the spatial KNN query is a list of GeoData objects. 
+The output format of the spatial KNN query is a list of GeoData objects.
 The list has K GeoData objects.
 
 Example:
@@ -355,8 +367,8 @@ query_window_rdd.spatialPartitioning(object_rdd.getPartitioner())
 result = JoinQuery.SpatialJoinQuery(object_rdd, query_window_rdd, using_index, consider_boundary_intersection)
 ```
 
-Result of SpatialJoinQuery is RDD which consists of GeoData instance and list of GeoData instances which spatially intersects or 
-are covered by GeoData. 
+Result of SpatialJoinQuery is RDD which consists of GeoData instance and list of GeoData instances which spatially intersects or
+are covered by GeoData.
 
 ```python
 result.collect())
@@ -385,7 +397,7 @@ object_rdd.spatialPartitioning(GridType.KDBTREE)
 query_window_rdd.spatialPartitioning(object_rdd.getPartitioner())
 ```
 
-Or 
+Or
 
 ```python
 query_window_rdd.spatialPartitioning(GridType.KDBTREE)
@@ -429,7 +441,7 @@ Polygon,LineString
 ...
 ```
 
-example 
+example
 ```python
 result.collect()
 ```
@@ -456,7 +468,7 @@ A distance join query takes two spatial RDD assuming that we have two SpatialRDD
 
 And finds the geometries (from spatial_rdd) are within given distance to it. spatial_rdd and object_rdd
 can be any geometry type (point, line, polygon) and are not necessary to have the same geometry type
- 
+
 You can use the following code to issue an Distance Join Query on them.
 
 ```python
@@ -479,8 +491,8 @@ result = JoinQuery.DistanceJoinQueryFlat(spatial_rdd, circle_rdd, using_index, c
 ```
 
 !!!note
-    Please use JoinQueryRaw from the same module for methods 
-    
+Please use JoinQueryRaw from the same module for methods
+
     - spatialJoin
     
     - DistanceJoinQueryFlat
@@ -539,13 +551,13 @@ result.map(lambda x: x[0].geom.centroid).collect()
  ...
 ]
 ```
-    
+
 ## Save to permanent storage
 
 You can always save an SpatialRDD back to some permanent storage such as HDFS and Amazon S3. You can save distributed SpatialRDD to WKT, GeoJSON and object files.
 
 !!!note
-    Non-spatial attributes such as price, age and name will also be stored to permanent storage.
+Non-spatial attributes such as price, age and name will also be stored to permanent storage.
 
 ### Save an SpatialRDD (not indexed)
 
@@ -586,7 +598,7 @@ object_rdd.rawJvmSpatialRDD.saveAsObjectFile("hdfs://PATH")
 ```
 
 !!!note
-    Each object in a distributed object file is a byte array (not human-readable). This byte array is the serialized format of a Geometry or a SpatialIndex.
+Each object in a distributed object file is a byte array (not human-readable). This byte array is the serialized format of a Geometry or a SpatialIndex.
 
 ### Save an SpatialRDD (indexed)
 
@@ -690,8 +702,8 @@ When you use Sedona functions such as
 - RangeQuery.SpatialRangeQuery
 
 For better performance when converting to dataframe you can use
-JoinQueryRaw and RangeQueryRaw from the same module and adapter to convert 
-to Spatial DataFrame. 
+JoinQueryRaw and RangeQueryRaw from the same module and adapter to convert
+to Spatial DataFrame.
 
 Example, JoinQueryRaw:
 
@@ -728,4 +740,3 @@ consider_boundary_intersection = False  ## Only return gemeotries fully covered 
 using_index = False
 query_result = RangeQueryRaw.SpatialRangeQuery(spatial_rdd, range_query_window, consider_boundary_intersection, using_index)
 gdf = Adapter.toDf(query_result, spark, ["col1", ..., "coln"])
-```

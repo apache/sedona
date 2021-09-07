@@ -28,6 +28,7 @@ from sedona.core.serde.binary.buffer import BinaryBuffer
 from sedona.core.serde.binary.parser import BinaryParser
 from sedona.core.serde.geom_factory import geometry_serializers
 from sedona.core.serde.serializer import GeometrySerde
+from sedona.core.serde.spark_config import spark_conf_getter
 from sedona.utils.binary_parser import ByteOrderType
 
 
@@ -102,6 +103,10 @@ class GeoData:
 
     def __ne__(self, other):
         return self.geom != other.geom or self.userData != other.userData
+
+    @classmethod
+    def with_current_serialization(cls, geom: BaseGeometry, userData: str):
+        return GeoData(geom, userData, spark_conf_getter.serialization_number)
 
 
 @attr.s

@@ -2,10 +2,10 @@
 
 ## Introduction
 
-This package is an extension to Apache Spark SQL package. It allow to use 
+This package is an extension to Apache Spark SQL package. It allow to use
 spatial functions on dataframes.
 
-SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. 
+SedonaSQL supports SQL/MM Part3 Spatial SQL Standard.
 It includes four kinds of SQL operators as follows.
 All these operators can be directly called through:
 
@@ -14,8 +14,8 @@ spark.sql("YOUR_SQL")
 ```
 
 !!!note
-	This tutorial is based on [Sedona SQL Jupyter Notebook example](../jupyter-notebook). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder) and wait for a few minutes. Then select a notebook and enjoy!
-	
+This tutorial is based on [Sedona SQL Jupyter Notebook example](../jupyter-notebook). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder) and wait for a few minutes. Then select a notebook and enjoy!
+
 ## Installation
 
 Please read [Quick start](/download/overview/#install-sedona-python) to install Sedona Python.
@@ -36,28 +36,33 @@ You can also register functions by passing `--conf spark.sql.extensions=org.apac
 Use KryoSerializer.getName and SedonaKryoRegistrator.getName class properties to reduce memory impact.
 
 ```python
-spark = SparkSession.\
-    builder.\
-    master("local[*]").\
-    appName("Sedona App").\
-    config("spark.serializer", KryoSerializer.getName).\
-    config("spark.kryo.registrator", SedonaKryoRegistrator.getName) .\
-    getOrCreate()
+spark = SparkSession.
+	builder.
+	master("local[*]").
+	appName("Sedona App").
+	config("spark.serializer", KryoSerializer.getName).
+	config("spark.kryo.registrator", SedonaKryoRegistrator.getName) .
+	config("sedona.serializer.type", "shape") .
+	getOrCreate()
 ```
+!!!note
+You can use multiple serialization type by changing spark conf option ```sedona.serializer.type```. Currently two options are available
+<li> shape </li>
+<li> wkb </li>
 
 To turn on SedonaSQL function inside pyspark code use SedonaRegistrator.registerAll method on existing pyspark.sql.SparkSession instance ex.
 
 `SedonaRegistrator.registerAll(spark)`
 
 After that all the functions from SedonaSQL are available,
-moreover using collect or toPandas methods on Spark DataFrame 
-returns Shapely BaseGeometry objects. 
+moreover using collect or toPandas methods on Spark DataFrame
+returns Shapely BaseGeometry objects.
 
 Based on GeoPandas DataFrame,
-Pandas DataFrame with shapely objects or Sequence with 
-shapely objects, Spark DataFrame can be created using 
-spark.createDataFrame method. To specify Schema with 
-geometry inside please use `GeometryType()` instance 
+Pandas DataFrame with shapely objects or Sequence with
+shapely objects, Spark DataFrame can be created using
+spark.createDataFrame method. To specify Schema with
+geometry inside please use `GeometryType()` instance
 (look at examples section to see that in practice).
 
 
