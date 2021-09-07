@@ -164,7 +164,8 @@ class scalaTest extends FunSpec with BeforeAndAfterAll{
       true
     }
 
-    it("should pass earth data hdf scatter plot") {
+    // Tests here have been ignored. A new feature that reads HDF will be added.
+    ignore("should pass earth data hdf scatter plot") {
       val earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName,
         HDFDataVariableList, HDFDataVariableName, HDFswitchXY, urlPrefix)
       val spatialRDD = new PointRDD(sparkContext, earthdataInputLocation, earthdataNumPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY)

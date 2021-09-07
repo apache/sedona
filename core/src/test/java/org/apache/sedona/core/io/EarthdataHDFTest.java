@@ -30,6 +30,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.locationtech.jts.geom.Envelope;
 
@@ -37,6 +38,7 @@ import org.locationtech.jts.geom.Envelope;
 
 /**
  * The Class EarthdataHDFTest.
+ * All tests here have been ignored. A new feature that reads HDF will be added.
  */
 public class EarthdataHDFTest
 {
@@ -143,7 +145,7 @@ public class EarthdataHDFTest
      *
      * @throws Exception the exception
      */
-    @Test
+    @Ignore
     public void testSpatialRangeQuery()
             throws Exception
     {
@@ -161,7 +163,7 @@ public class EarthdataHDFTest
      *
      * @throws Exception the exception
      */
-    @Test
+    @Ignore
     public void testSpatialRangeQueryUsingIndex()
             throws Exception
     {
