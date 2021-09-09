@@ -22,6 +22,15 @@ conf.set("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName) // or
 val sc = new SparkContext(conf)
 ```
 
+!!!note
+	Sedona have two types of serializers:
+   1. **SedonaKryoRegistrator** - uses the Shapefile format (default serde)
+   2. **SedonaWKBKryoRegistrator** - uses the WKB format
+   The former is more performant while the latter solved a bug that you can find here:
+   [ST_GeomFromWkt and ST_GeomFromText converts multipolygon to polygon](https://docs.google.com/spreadsheets/d/e/2PACX-1vQ4G8zwdfVhvoJAMWmBAGWNDTtE32Oh0dk95BF5HL996k0YCRDyU0cXry1xwuTGcQ4sixB0NTc4K4-0/pubhtml)
+   The performance comparison can be found here:
+   [WKB and Shape Serde Performance Comparison](https://gist.github.com/netanel246/f85777761ebfc0a5ddef54170ea62f11)
+
 !!!warning
 	Sedona has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption.
 
