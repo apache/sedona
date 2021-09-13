@@ -15,13 +15,18 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-import struct
-
 from pyspark.sql.types import UserDefinedType, ArrayType, ByteType
-from shapely.wkb import dumps, loads
+
+from sedona.core.serde.binary.buffer import BinaryBuffer
+from sedona.core.serde.binary.parser import BinaryParser
+from sedona.core.serde.geom_factory import geometry_serializers_instances, geometry_serializers
+from sedona.core.serde.spark_config import spark_conf_getter
 
 
 class GeometryType(UserDefinedType):
+
+    def __init__(self):
+        self.serde = spark_conf_getter.serialization
 
     @classmethod
     def sqlType(cls):
@@ -34,12 +39,15 @@ class GeometryType(UserDefinedType):
         return [el - 256 if el >= 128 else el for el in self.serialize(obj)]
 
     def serialize(self, obj):
-        return dumps(obj)
+        binary_buffer = BinaryBuffer()
+        binary_buffer.put_byte(0)
+        return geometry_serializers_instances[self.serde].serialize(obj, binary_buffer)
 
     def deserialize(self, datum):
-        bytes_data = b''.join([struct.pack('b', el) for el in datum])
-        geom = loads(bytes_data)
-        return geom
+        parser = BinaryParser(list(datum))
+        _ = parser.read_byte()
+        serde = parser.read_byte()
+        return geometry_serializers[serde].deserialize(parser)
 
     @classmethod
     def module(cls):

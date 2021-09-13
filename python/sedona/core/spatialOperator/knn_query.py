@@ -20,7 +20,7 @@ from shapely.geometry.base import BaseGeometry
 
 from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.core.jvm.translate import JvmSedonaPythonConverter
-from sedona.utils.binary_parser import BinaryParser
+from sedona.core.serde.binary.parser import BinaryParser
 from sedona.utils.decorators import require
 from sedona.utils.geometry_adapter import GeometryAdapter
 from sedona.utils.spatial_rdd_parser import SpatialRDDParserData

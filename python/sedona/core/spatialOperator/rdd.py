@@ -31,7 +31,6 @@ class SedonaRDD:
         jvm = self.sc._jvm
         serialized = JvmSedonaPythonConverter(jvm). \
             translate_spatial_rdd_to_python(self.jsrdd)
-
         return RDD(serialized, self.sc, SedonaPickler())
 
 

@@ -124,7 +124,7 @@ class Adapter(metaclass=MultipleMeta):
         spatial_pair_rdd_mapped = spatialPairRDD.map(
             lambda x: [x[0].geom, *x[0].getUserData().split("\t"), x[1].geom, *x[1].getUserData().split("\t")]
         )
-        df = sparkSession.createDataFrame(spatial_pair_rdd_mapped)
+        df = sparkSession.createDataFrame(spatial_pair_rdd_mapped, verifySchema=False)
         return df
 
     @classmethod
@@ -139,6 +139,8 @@ class Adapter(metaclass=MultipleMeta):
         """
 
         df = Adapter.toDf(spatialPairRDD, sparkSession)
+        df.show()
+
         columns_length = df.columns.__len__()
         combined_columns = ["geom_1", *leftFieldnames, "geom_2", *rightFieldNames]
         if columns_length == combined_columns.__len__():

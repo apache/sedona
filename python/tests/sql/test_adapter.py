@@ -22,6 +22,8 @@ import pytest
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import expr
 from pyspark.sql.functions import col
+from pyspark.sql.types import StructType, StructField, IntegerType
+from shapely.geometry import Point
 
 from sedona import version
 from sedona.core.SpatialRDD import PolygonRDD, CircleRDD
@@ -30,6 +32,7 @@ from sedona.core.formatMapper.shapefileParser.shape_file_reader import Shapefile
 from sedona.core.geom.envelope import Envelope
 from sedona.core.jvm.config import is_greater_or_equal_version
 from sedona.core.spatialOperator import JoinQuery
+from sedona.sql.types import GeometryType
 from sedona.utils.adapter import Adapter
 from tests import geojson_input_location, shape_file_with_missing_trailing_input_location, \
     geojson_id_input_location
@@ -309,3 +312,15 @@ class TestAdapter(TestBase):
 
         assert spatial_df.columns == ["geometry", *spatial_columns]
         assert spatial_df.count() == 1001
+
+    def test_serialization(self):
+        data = [[1, Point(21, 52)]]
+        schema = StructType(
+            [
+                StructField("id", IntegerType()),
+                StructField("geom", GeometryType())
+            ]
+        )
+        df = self.spark.createDataFrame(data, schema=schema)
+        df.show()
+        df.collect()
