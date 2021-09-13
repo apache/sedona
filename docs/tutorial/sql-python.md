@@ -14,7 +14,7 @@ spark.sql("YOUR_SQL")
 ```
 
 !!!note
-This tutorial is based on [Sedona SQL Jupyter Notebook example](../jupyter-notebook). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder) and wait for a few minutes. Then select a notebook and enjoy!
+	This tutorial is based on [Sedona SQL Jupyter Notebook example](../jupyter-notebook). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder) and wait for a few minutes. Then select a notebook and enjoy!
 
 ## Installation
 
@@ -42,39 +42,21 @@ spark = SparkSession.
 	appName("Sedona App").
 	config("spark.serializer", KryoSerializer.getName).
 	config("spark.kryo.registrator", SedonaKryoRegistrator.getName) .
-	config("sedona.serializer.type", "shape") .
+	config("sedona.serializer.type", "shape") . # Optional: default value = shape
 	getOrCreate()
 ```
+
 !!!note
-You can use multiple serialization type by changing spark conf option ```sedona.serializer.type```. Currently two options are available
-<li> shape </li>
-<li> wkb </li>
-
-To turn on SedonaSQL function inside pyspark code use SedonaRegistrator.registerAll method on existing pyspark.sql.SparkSession instance ex.
-
-`SedonaRegistrator.registerAll(spark)`
-
-After that all the functions from SedonaSQL are available,
-moreover using collect or toPandas methods on Spark DataFrame
-returns Shapely BaseGeometry objects.
-
-Based on GeoPandas DataFrame,
-Pandas DataFrame with shapely objects or Sequence with
-shapely objects, Spark DataFrame can be created using
-spark.createDataFrame method. To specify Schema with
-geometry inside please use `GeometryType()` instance
-(look at examples section to see that in practice).
+	You can use multiple serialization type by changing spark conf option ```sedona.serializer.type```. Currently two options are available `shape`, `wkb`. The former is more performant while the latter solved a bug that you can find here: [ST_GeomFromWkt and ST_GeomFromText converts multipolygon to polygon](https://docs.google.com/spreadsheets/d/e/2PACX-1vQ4G8zwdfVhvoJAMWmBAGWNDTtE32Oh0dk95BF5HL996k0YCRDyU0cXry1xwuTGcQ4sixB0NTc4K4-0/pubhtml). The performance comparison can be found here: [WKB and Shape Serde Performance Comparison](https://gist.github.com/netanel246/f85777761ebfc0a5ddef54170ea62f11)
 
 
-### Examples
-
-### SedonaSQL
+### Create Spatial DataFrame
 
 
 All SedonaSQL functions (list depends on SedonaSQL version) are available in Python API.
 For details please refer to API/SedonaSQL page.
 
-For example use SedonaSQL for Spatial Join.
+#### Read CSV/TSV
 
 ```python3
 
@@ -93,6 +75,7 @@ counties_geom = spark.sql(
 counties_geom.show(5)
 
 ```
+
 ```
 +-----------+--------------------+
 |county_code|            geometry|
@@ -104,6 +87,9 @@ counties_geom.show(5)
 |       1427|POLYGON ((19.5087...|
 +-----------+--------------------+
 ```
+
+#### Read Shapefile
+
 ```python3
 import geopandas as gpd
 
@@ -127,6 +113,8 @@ points_geom.show(5, False)
 +---------+-----------------------------+
 ```
 
+### Run spatial Join
+
 ```python3
 
 points_geom.createOrReplaceTempView("pois")
@@ -143,6 +131,7 @@ spatial_join_result = spark.sql(
 spatial_join_result.explain()
 
 ```
+
 ```
 == Physical Plan ==
 *(2) Project [county_code#230, fclass#239]
@@ -151,6 +140,9 @@ spatial_join_result.explain()
    +- Project [county_code#230, st_geomfromwkt(geom#232) AS geometry#236]
       +- *(1) FileScan csv [county_code#230,geom#232] Batched: false, Format: CSV, Location: InMemoryFileIndex[file:/projects/sedona/counties.csv], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<county_code:string,geom:string>
 ```
+
+### Aggregate results
+
 Calculating Number of Pois within counties per fclass.
 
 ```python3
@@ -261,9 +253,9 @@ gdf.plot(
 <br>
 <br>
 
-## Creating Spark DataFrame based on shapely objects
+## Interact shapely objects in Spatial DataFrame
 
-### Supported Shapely objects
+### Create DataFrame using Shapely objects
 
 | shapely object  | Available          |
 |-----------------|--------------------|
@@ -294,8 +286,6 @@ schema = StructType(
 ```
 
 Also Spark DataFrame with geometry type can be converted to list of shapely objects with <b> collect </b> method.
-
-## Example usage for Shapely objects
 
 ### Point
 

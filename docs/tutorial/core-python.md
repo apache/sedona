@@ -1,44 +1,12 @@
 # Spatial RDD Applications in Python
 
 ## Introduction
-<div style="text-align: justify">
+
 Sedona provides a Python wrapper on Sedona core Java/Scala library.
-Sedona SpatialRDDs (and other classes when it was necessary) have implemented meta classes which allow 
-to use overloaded functions, methods and constructors to be the most similar to Java/Scala API as possible. 
-</div>
-
-Apache Sedona core provides five special SpatialRDDs:
-
-<li> PointRDD </li>
-<li> PolygonRDD </li>
-<li> LineStringRDD </li>
-<li> CircleRDD </li>
-<li> RectangleRDD </li>
-<div style="text-align: justify">
-<p>
-All of them can be imported from <b> sedona.core.SpatialRDD </b> module
-
-<b> sedona </b> has written serializers which convert Sedona SpatialRDD to Python objects.
-Converting will produce GeoData objects which have 2 attributes:
-</p>
-</div>
-<li> geom: shapely.geometry.BaseGeometry </li>
-<li> userData: str </li>
-<li> serde: int which currently takes one of the two values </li>
-    shape: 0
-    wkb: 1
-But you can create GeoData with used spark conf serialization type just using 
-GeoData.with_current_serialization(geom=Point(21, 52), userData="user_data")
-
-geom attribute holds geometry representation as shapely objects.
-userData is string representation of other attributes separated by "\t"
-</br>
-
-GeoData has one method to get user data.
-<li> getUserData() -> str </li>
+Sedona SpatialRDDs (and other classes when it was necessary) have implemented meta classes which allow  to use overloaded functions, methods and constructors to be the most similar to Java/Scala API as possible. 
 
 !!!note
-This tutorial is based on [Sedona Core Jupyter Notebook example](../jupyter-notebook). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder) and wait for a few minutes. Then select a notebook and enjoy!
+	This tutorial is based on [Sedona Core Jupyter Notebook example](../jupyter-notebook). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder) and wait for a few minutes. Then select a notebook and enjoy!
 
 ## Installation
 
@@ -50,32 +18,43 @@ Sedona has a suite of well-written geometry and index serializers. Forgetting to
 ```python
 conf.set("spark.serializer", KryoSerializer.getName)
 conf.set("spark.kryo.registrator", SedonaKryoRegistrator.getName)
-conf.set("sedona.serializer.type", "shape")
+conf.set("sedona.serializer.type", "shape") # Optional: default value = shape
 sc = SparkContext(conf=conf)
 ```
 
 !!!note
-You can use multiple serialization type by changing spark conf option ```sedona.serializer.type```. Currently two options are available
-<li> shape </li>
-<li> wkb </li>
+	You can use multiple serialization type by changing spark conf option ```sedona.serializer.type```. Currently two options are available `shape`, `wkb`. The former is more performant while the latter solved a bug that you can find here: [ST_GeomFromWkt and ST_GeomFromText converts multipolygon to polygon](https://docs.google.com/spreadsheets/d/e/2PACX-1vQ4G8zwdfVhvoJAMWmBAGWNDTtE32Oh0dk95BF5HL996k0YCRDyU0cXry1xwuTGcQ4sixB0NTc4K4-0/pubhtml). The performance comparison can be found here: [WKB and Shape Serde Performance Comparison](https://gist.github.com/netanel246/f85777761ebfc0a5ddef54170ea62f11)
+
+## Geometry object in Sedona Python
+
+JVM Geometry in Sedona is binded to a Python GeoData object. It has the following attribtues:
+
+* geom: shapely.geometry.BaseGeometry. It holds geometry representation as shapely objects.
+* userData: string. It is a string representation of other attributes separated by "\t". You can call GeoData.getUserData() to obtain the string.
+* serde: int. It has two possible values takes one of the two values: 0 (Shapefile serializer) or 1 (WKB serialzer)
+
+
+You can create a Python GeoData object by using
+
+```python
+GeoData.with_current_serialization(geom=Point(21, 52), userData="user_data")
+```
 
 
 ## Create a SpatialRDD
 
 ### Create a typed SpatialRDD
 Apache Sedona core provides three special SpatialRDDs:
-<li> PointRDD </li>
-<li> PolygonRDD </li> 
-<li> LineStringRDD </li>
-<li> CircleRDD </li>
-<li> RectangleRDD </li>
-<br>
+
+* PointRDD
+* PolygonRDD
+* LineStringRDD
 
 They can be loaded from CSV, TSV, WKT, WKB, Shapefiles, GeoJSON formats.
 To pass the format to SpatialRDD constructor please use <b> FileDataSplitter </b> enumeration.
 
-sedona SpatialRDDs (and other classes when it was necessary) have implemented meta classes which allow
-to use overloaded functions how Scala/Java Apache Sedona API allows. ex.
+Sedona SpatialRDDs (and other classes when it was necessary) have implemented meta classes which allow
+to use overloaded functions how Scala/Java Apache Sedona API allows. For example:
 
 
 ```python
@@ -106,7 +85,7 @@ point_rdd = PointRDD(
 
 
 #### From SparkSQL DataFrame
-To create spatialRDD from other formats you can use adapter between Spark DataFrame and SpatialRDD
+To create spatialRDD from other formats, you can use adapter between Spark DataFrame and SpatialRDD
 
 <li> Load data in SedonaSQL. </li>
 
@@ -189,10 +168,7 @@ query_result = RangeQuery.SpatialRangeQuery(spatial_rdd, range_query_window, con
 ```
 
 !!!note
-Please use RangeQueryRaw from the same module
-if you want to avoid jvm python serde while converting to Spatial DataFrame
-It takes the same parameters as RangeQuery but returns reference to jvm rdd which
-can be converted to dataframe without python - jvm serde using Adapter.
+	Please use RangeQueryRaw from the same module if you want to avoid jvm python serde while converting to Spatial DataFrame. It takes the same parameters as RangeQuery but returns reference to jvm rdd which can be converted to dataframe without python - jvm serde using Adapter.
 
     Example:
     ```python
@@ -331,7 +307,7 @@ result = KNNQuery.SpatialKnnQuery(spatial_rdd, point, k, using_index)
 ```
 
 !!!warning
-Only R-Tree index supports Spatial KNN query
+	Only R-Tree index supports Spatial KNN query
 
 ### Output format
 
@@ -491,39 +467,7 @@ result = JoinQuery.DistanceJoinQueryFlat(spatial_rdd, circle_rdd, using_index, c
 ```
 
 !!!note
-Please use JoinQueryRaw from the same module for methods
-
-    - spatialJoin
-    
-    - DistanceJoinQueryFlat
-
-    - SpatialJoinQueryFlat
-
-    For better performance while converting to dataframe with adapter. 
-    That approach allows to avoid costly serialization between Python 
-    and jvm and in result operating on python object instead of native geometries.
-    
-    Example:
-    ```python
-    from sedona.core.SpatialRDD import CircleRDD
-    from sedona.core.enums import GridType
-    from sedona.core.spatialOperator import JoinQueryRaw
-    
-    object_rdd.analyze()
-    
-    circle_rdd = CircleRDD(object_rdd, 0.1) ## Create a CircleRDD using the given distance
-    circle_rdd.analyze()
-    
-    circle_rdd.spatialPartitioning(GridType.KDBTREE)
-    spatial_rdd.spatialPartitioning(circle_rdd.getPartitioner())
-    
-    consider_boundary_intersection = False ## Only return gemeotries fully covered by each query window in queryWindowRDD
-    using_index = False
-    
-    result = JoinQueryRaw.DistanceJoinQueryFlat(spatial_rdd, circle_rdd, using_index, consider_boundary_intersection)
-    
-    gdf = Adapter.toDf(result, ["left_col1", ..., "lefcoln"], ["rightcol1", ..., "rightcol2"], spark)
-    ```
+	Please use JoinQueryRaw from the same module for methods if you want to convert the results to DataFrame using Adapter.
 
 ### Output format
 
@@ -557,7 +501,7 @@ result.map(lambda x: x[0].geom.centroid).collect()
 You can always save an SpatialRDD back to some permanent storage such as HDFS and Amazon S3. You can save distributed SpatialRDD to WKT, GeoJSON and object files.
 
 !!!note
-Non-spatial attributes such as price, age and name will also be stored to permanent storage.
+	Non-spatial attributes such as price, age and name will also be stored to permanent storage.
 
 ### Save an SpatialRDD (not indexed)
 
@@ -598,7 +542,7 @@ object_rdd.rawJvmSpatialRDD.saveAsObjectFile("hdfs://PATH")
 ```
 
 !!!note
-Each object in a distributed object file is a byte array (not human-readable). This byte array is the serialized format of a Geometry or a SpatialIndex.
+	Each object in a distributed object file is a byte array (not human-readable). This byte array is the serialized format of a Geometry or a SpatialIndex.
 
 ### Save an SpatialRDD (indexed)
 
@@ -656,6 +600,7 @@ from sedona.core.formatMapper import WktReader
 
 WktReader.readToGeometryRDD(sc, wkt_geometries_location, 0, True, False)
 ```
+
 ```
 <sedona.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2fbf250>
 ```
@@ -666,6 +611,7 @@ from sedona.core.formatMapper import WkbReader
 
 WkbReader.readToGeometryRDD(sc, wkb_geometries_location, 0, True, False)
 ```
+
 ```
 <sedona.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2eece50>
 ```
@@ -676,6 +622,7 @@ from sedona.core.formatMapper import GeoJsonReader
 
 GeoJsonReader.readToGeometryRDD(sc, geo_json_file_location)
 ```
+
 ```
 <sedona.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2eecb90>
 ```
@@ -686,6 +633,7 @@ from sedona.core.formatMapper.shapefileParser import ShapefileReader
 
 ShapefileReader.readToGeometryRDD(sc, shape_file_location)
 ```
+
 ```
 <sedona.core.SpatialRDD.spatial_rdd.SpatialRDD at 0x7f8fd2ee0710>
 ```
@@ -740,3 +688,4 @@ consider_boundary_intersection = False  ## Only return gemeotries fully covered 
 using_index = False
 query_result = RangeQueryRaw.SpatialRangeQuery(spatial_rdd, range_query_window, consider_boundary_intersection, using_index)
 gdf = Adapter.toDf(query_result, spark, ["col1", ..., "coln"])
+```
