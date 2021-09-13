@@ -68,7 +68,7 @@ test_that("sedona_render_choropleth_map() works as expected", {
     TRUE,
     TRUE
   ) %>%
-    sparklyr.sedona:::new_spatial_rdd("pair_rdd")
+    apache.sedona:::new_spatial_rdd("pair_rdd")
 
   sedona_render_choropleth_map(
     pair_rdd,

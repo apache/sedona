@@ -14,12 +14,12 @@ knitr::opts_chunk$set(
 )
 ```
 
-To ensure Sedona serialization routines, UDTs, and UDFs are properly registered when creating a Spark session, one simply needs to attach `sparklyr.sedona` before
-instantiating a Spark conneciton. Sparklyr.sedona will take care of the rest. For example,
+To ensure Sedona serialization routines, UDTs, and UDFs are properly registered when creating a Spark session, one simply needs to attach `apache.sedona` before
+instantiating a Spark conneciton. apache.sedona will take care of the rest. For example,
 
 ``` r
 library(sparklyr)
-library(sparklyr.sedona)
+library(apache.sedona)
 
 spark_home <- "/usr/lib/spark"  # NOTE: replace this with your $SPARK_HOME directory
 sc <- spark_connect(master = "yarn", spark_home = spark_home)
@@ -29,7 +29,7 @@ will create a Sedona-capable Spark connection in YARN client mode, and
 
 ``` r
 library(sparklyr)
-library(sparklyr.sedona)
+library(apache.sedona)
 
 sc <- spark_connect(master = "local")
 ```

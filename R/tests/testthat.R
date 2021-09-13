@@ -1,5 +1,5 @@
 library(sparklyr)
-library(sparklyr.sedona)
+library(apache.sedona)
 library(testthat)
 
 # increase timeout for downloading Apache Spark tgz files
@@ -18,5 +18,5 @@ if (identical(Sys.getenv("NOT_CRAN"), "true")) {
     CheckReporter$new(),
     SummaryReporter$new(show_praise = FALSE)
   ))
-  test_check("sparklyr.sedona", filter = filter, reporter = reporter)
+  test_check("apache.sedona", filter = filter, reporter = reporter)
 }

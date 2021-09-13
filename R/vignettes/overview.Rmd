@@ -1,8 +1,8 @@
 ---
-title: "Overview of sparklyr.sedona"
+title: "Overview of apache.sedona"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Overview of sparklyr.sedona}
+  %\VignetteIndexEntry{Overview of apache.sedona}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-[sparklyr.sedona](https://github.com/r-spark/sparklyr.sedona) is a [sparklyr](https://github.com/sparklyr/sparklyr)-based R interface for [Apache Sedona](https://sedona.apache.org).
+[apache.sedona](https://github.com/r-spark/apache.sedona) is a [sparklyr](https://github.com/sparklyr/sparklyr)-based R interface for [Apache Sedona](https://sedona.apache.org).
 It presents what Apache Sedona has to offer through idiomatic frameworks and constructs in R (e.g., one can build spatial Spark SQL queries using Sedona UDFs in conjunction with a wide range of dplyr expressions), hence making Apache Sedona highly friendly for R users.
 
 Generally speaking, when working with Apache Sedona, one choose between the following two modes:
@@ -26,7 +26,7 @@ While the former option enables more fine-grained control over low-level impleme
 
 Because data from spatial RDDs can be imported into Spark dataframes as geometry columns and vice versa, one can switch between the abovementioned two modes fairly easily.
 
-At the moment `sparklyr.sedona` consists of the following components:
+At the moment `apache.sedona` consists of the following components:
 
 * R interface for Spatial-RDD-related functionalities
     * Reading/writing spatial data in WKT, WKB, and GeoJSON formats

@@ -14,12 +14,12 @@ knitr::opts_chunk$set(
 )
 ```
 
-In `sparklyr.sedona` , `sdf_register()`, a S3 generic from `sparklyr` converting a lower-level object to a Spark dataframe,
+In `apache.sedona` , `sdf_register()`, a S3 generic from `sparklyr` converting a lower-level object to a Spark dataframe,
 can be applied to a `SpatialRDD` objects:
 
 ``` r
 library(sparklyr)
-library(sparklyr.sedona)
+library(apache.sedona)
 
 sc <- spark_connect(master = "local")
 polygon_rdd <- sedona_read_geojson(sc, location = "/tmp/polygon.json")
@@ -68,4 +68,4 @@ modified_polygon_sdf <- polygon_sdf %>%
 Notice all of the above can open up many interesting possiblities. For example, one can extract ML features from geospatial
 data in Spark dataframes, build a ML pipeline using `ml_*` family of functions in `sparklyr` to work with such features, and if
 the output of a ML model happens to be a geospatial object as well, one can even apply visualization routines in
-`sparklyr.sedona` to visualize the difference between any predicted geometry and the corresponding ground truth.
+`apache.sedona` to visualize the difference between any predicted geometry and the corresponding ground truth.

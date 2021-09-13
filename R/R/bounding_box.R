@@ -27,7 +27,7 @@
 #'
 #' @examples
 #' library(sparklyr)
-#' library(sparklyr.sedona)
+#' library(apache.sedona)
 #'
 #' sc <- spark_connect(master = "spark://HOST:PORT")
 #' bb <- new_bounding_box(sc, -1, 1, -1, 1)
