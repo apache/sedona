@@ -4,7 +4,10 @@ Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/g
 
 ## Companies are using Sedona 
 
-[<img src="https://www.dataiku.com/static/img/partners/LOGO-Blue-DME-PNG-3.png" width="200">](https://www.bluedme.com/) &nbsp;&nbsp; [<img src="https://images.ukfast.co.uk/comms/news/businesscloud/photos/14-08-2018/gyana.jpg" width="150">](https://www.gyana.co.uk/) &nbsp;&nbsp; [<img src="https://mobike.com/global/public/invitation__footer__logo.png" width="150">](https://mobike.com) and more!
+[<img src="https://www.dataiku.com/static/img/partners/LOGO-Blue-DME-PNG-3.png" width="200">](https://www.bluedme.com/) &nbsp;&nbsp; 
+[<img src="https://images.ukfast.co.uk/comms/news/businesscloud/photos/14-08-2018/gyana.jpg" width="150">](https://www.gyana.co.uk/) &nbsp;&nbsp; 
+[<img src="https://149448277.v2.pressablecdn.com/wp-content/uploads/2021/03/guy-carpenter-logo-1.png" width="200">](https://guycarp.com/) &nbsp;&nbsp; 
+[<img src="https://mobike.com/global/public/invitation__footer__logo.png" width="150">](https://mobike.com) and more!
 
 Please make a Pull Request to add yourself
 
