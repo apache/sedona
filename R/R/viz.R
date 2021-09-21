@@ -59,7 +59,7 @@ NULL
 #' @examples
 #'
 #' library(sparklyr)
-#' library(sparklyr.sedona)
+#' library(apache.sedona)
 #'
 #' sc <- spark_connect(master = "spark://HOST:PORT")
 #'
@@ -129,7 +129,7 @@ sedona_render_heatmap <- function(rdd,
 #'
 #' @examples
 #' library(sparklyr)
-#' library(sparklyr.sedona)
+#' library(apache.sedona)
 #'
 #' sc <- spark_connect(master = "spark://HOST:PORT")
 #'
@@ -196,7 +196,7 @@ sedona_render_scatter_plot <- function(rdd,
 #'
 #' @examples
 #' library(sparklyr)
-#' library(sparklyr.sedona)
+#' library(apache.sedona)
 #'
 #' sc <- spark_connect(master = "spark://HOST:PORT")
 #'

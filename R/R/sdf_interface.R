@@ -32,7 +32,7 @@ NULL
 #'
 #' @examples
 #' library(sparklyr)
-#' library(sparklyr.sedona)
+#' library(apache.sedona)
 #'
 #' sc <- spark_connect(master = "spark://HOST:PORT")
 #'
@@ -61,7 +61,7 @@ sdf_register.spatial_rdd <- function(x, name = NULL) {
 #'
 #' @examples
 #' library(sparklyr)
-#' library(sparklyr.sedona)
+#' library(apache.sedona)
 #'
 #' sc <- spark_connect(master = "spark://HOST:PORT")
 #'

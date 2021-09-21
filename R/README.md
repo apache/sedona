@@ -1,20 +1,20 @@
-# sparklyr.sedona
+# apache.sedona
 
 ## Overview
 
-Sparklyr.sedona is a [sparklyr](https://github.com/sparklyr/sparklyr)-based R interface for [Apache Sedona](https://sedona.apache.org).
+apache.sedona is a [sparklyr](https://github.com/sparklyr/sparklyr)-based R interface for [Apache Sedona](https://sedona.apache.org).
 It presents what Apache Sedona has to offer through idiomatic frameworks and constructs in R
 (e.g., one can build spatial Spark SQL queries using Sedona UDFs in conjunction with a wide range of `dplyr` expressions),
 hence making Apache Sedona highly friendly for R users.
 
 ## Connecting to Spark
 
-To ensure Sedona serialization routines, UDTs, and UDFs are properly registered when creating a Spark session, one simply needs to attach `sparklyr.sedona` before
-instantiating a Spark conneciton. Sparklyr.sedona will take care of the rest. For example,
+To ensure Sedona serialization routines, UDTs, and UDFs are properly registered when creating a Spark session, one simply needs to attach `apache.sedona` before
+instantiating a Spark conneciton. apache.sedona will take care of the rest. For example,
 
 ``` r
 library(sparklyr)
-library(sparklyr.sedona)
+library(apache.sedona)
 
 spark_home <- "/usr/lib/spark"  # NOTE: replace this with your $SPARK_HOME directory
 sc <- spark_connect(master = "yarn", spark_home = spark_home)
@@ -24,7 +24,7 @@ will create a Sedona-capable Spark connection in YARN client mode, and
 
 ``` r
 library(sparklyr)
-library(sparklyr.sedona)
+library(apache.sedona)
 
 sc <- spark_connect(master = "local")
 ```
@@ -73,9 +73,9 @@ Spark SQL and through the `dplyr` interface of `sparklyr` (more on that later).
 ## Creating a SpatialRDD
 
 NOTE: this section is largely based on https://sedona.apache.org/tutorial/rdd/#create-a-spatialrdd, except for examples have been
-written in R instead of Scala to reflect usages of `sparklyr.sedona`.
+written in R instead of Scala to reflect usages of `apache.sedona`.
 
-Currently `SpatialRDD`s can be created in `sparklyr.sedona` by reading a file in a supported geospatial format, or by extracting data from a
+Currently `SpatialRDD`s can be created in `apache.sedona` by reading a file in a supported geospatial format, or by extracting data from a
 Spark SQL query.
 
 For example, the following code will import data from [arealm-small.csv](https://github.com/apache/incubator-sedona/blob/master/binder/data/arealm-small.csv) into a `SpatialRDD`:
@@ -105,14 +105,14 @@ As one can see from the above, each record is comma-separated and consists of a 
 All other columns contain non-spatial attributes. Because column indexes are 0-based, we need to specify `first_spatial_col_index = 1` in the example above to
 ensure each record is parsed correctly.
 
-In addition to formats such as CSV and TSV, currently `sparklyr.sedona` also supports reading files in WKT (Well-Known Text), WKB (Well-Known Binary), and GeoJSON formats.
-See `?sparklyr.sedona::sedona_read_wkt`, `?sparklyr.sedona::sedona_read_wkb`, and `?sparklyr.sedona::sedona_read_geojson` for details.
+In addition to formats such as CSV and TSV, currently `apache.sedona` also supports reading files in WKT (Well-Known Text), WKB (Well-Known Binary), and GeoJSON formats.
+See `?apache.sedona::sedona_read_wkt`, `?apache.sedona::sedona_read_wkb`, and `?apache.sedona::sedona_read_geojson` for details.
 
 One can also run `to_spatial_rdd()` to extract a SpatailRDD from a Spark SQL query, e.g.,
 
 ``` r
 library(sparklyr)
-library(sparklyr.sedona)
+library(apache.sedona)
 library(dplyr)
 
 sc <- spark_connect(master = "local")
@@ -141,11 +141,11 @@ will extract a spatial column named `"geom"` from the Sedona spatial SQL query a
 
 As mentioned previously, data from `SpatialRDD` can be exported into a Spark dataframe and be queried and modified through
 the `dplyr` interface of `sparklyr`. The example below shows how `sdf_register()`, a S3 generic that converts a lower-level
-object into a Spark dataframe object in `sparklyr`, can be applied to a `SpatialRDD` object created by `sparklyr.sedona`.
+object into a Spark dataframe object in `sparklyr`, can be applied to a `SpatialRDD` object created by `apache.sedona`.
 
 ``` r
 library(sparklyr)
-library(sparklyr.sedona)
+library(apache.sedona)
 
 sc <- spark_connect(master = "local")
 polygon_rdd <- sedona_read_geojson(sc, location = "/tmp/polygon.json")
@@ -193,18 +193,18 @@ modified_polygon_sdf <- polygon_sdf %>%
 Notice all of the above can open up many interesting possiblities. For example, one can extract ML features from geospatial
 data in Spark dataframes, build a ML pipeline using `ml_*` family of functions in `sparklyr` to work with such features, and if
 the output of a ML model happens to be a geospatial object as well, one can even apply visualization routines in
-`sparklyr.sedona` to visualize the difference between any predicted geometry and the corresponding ground truth
+`apache.sedona` to visualize the difference between any predicted geometry and the corresponding ground truth
 (more on visualization later).
 
 ## Visualization
 
-It is worth mentioning an important part of `sparklyr.sedona` is its collection of R interfaces to Sedona visualization routines.
+It is worth mentioning an important part of `apache.sedona` is its collection of R interfaces to Sedona visualization routines.
 For example, the following
 is essentially the R equivalent of [this example in Scala](https://github.com/apache/incubator-sedona/blob/f6b1c5e24bdb67d2c8d701a9b2af1fb5658fdc4d/viz/src/main/scala/org/apache/sedona/viz/showcase/ScalaExample.scala#L142-L160).
 
 ``` r
 library(sparklyr)
-library(sparklyr.sedona)
+library(apache.sedona)
 
 sc <- spark_connect(master = "local")
 
@@ -256,6 +256,6 @@ It will create a scatter plot, and then overlay it on top of a choropleth map, a
 
 <img src="docs/choropleth-map.png" width=800 />
 
-See `?sparklyr.sedona::sedona_render_scatter_plot`, `?sparklyr.sedona::sedona_render_heatmap`,
-and `?sparklyr.sedona::sedona_render_choropleth_map` for more details on R interfaces of
-Sedona visualization routines currently implemented by `sparklyr.sedona`.
+See `?apache.sedona::sedona_render_scatter_plot`, `?apache.sedona::sedona_render_heatmap`,
+and `?apache.sedona::sedona_render_choropleth_map` for more details on R interfaces of
+Sedona visualization routines currently implemented by `apache.sedona`.

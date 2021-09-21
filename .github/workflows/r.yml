@@ -13,7 +13,7 @@ jobs:
 
     runs-on: ubuntu-18.04
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         spark: [2.4.7, 3.0.2, 3.1.1]
         scala: [2.11.8, 2.12.8]
@@ -70,7 +70,7 @@ jobs:
         run: |
           print(R.version)
           install.packages("remotes")
-          saveRDS(remotes::dev_package_deps("./R/sparklyr.sedona/", dependencies = TRUE), ".github/deps.Rds", version = 2)
+          saveRDS(remotes::dev_package_deps("./R/", dependencies = TRUE), ".github/deps.Rds", version = 2)
           writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
         shell: Rscript {0}
       - name: Get OS name
@@ -84,14 +84,14 @@ jobs:
         uses: actions/cache@master
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: sparklyr.sedona-${{ steps.os-name.outputs.os-name }}-${{ hashFiles('.github/R-version') }}-${{ hashFiles('.github/deps.Rds') }}
-          restore-keys: sparklyr.sedona-${{ steps.os-name.outputs.os-name }}-${{ hashFiles('.github/R-version') }}
+          key: apache.sedona-${{ steps.os-name.outputs.os-name }}-${{ hashFiles('.github/R-version') }}-${{ hashFiles('.github/deps.Rds') }}
+          restore-keys: apache.sedona-${{ steps.os-name.outputs.os-name }}-${{ hashFiles('.github/R-version') }}
       - name: Cache Spark installations
         if: runner.os != 'Windows'
         uses: actions/cache@master
         with:
           path: ~/spark
-          key: sparklyr.sedona-apache-spark-${{ steps.os-name.outputs.os-name }}-${{ env.SPARK_VERSION }}
+          key: apache.sedona-apache-spark-${{ steps.os-name.outputs.os-name }}-${{ env.SPARK_VERSION }}
       - name: Install system dependencies
         run: source ./.github/workflows/scripts/install_system_deps_for_r_build.sh
       - name: Install R dependencies
@@ -112,22 +112,22 @@ jobs:
       - name: Build R package
         env:
           WARNINGS_ARE_ERRORS: 1
-        run: R CMD build --no-build-vignettes ./R/sparklyr.sedona
+        run: R CMD build --no-build-vignettes ./R
       - name: Check
         env:
           _R_CHECK_FORCE_SUGGESTS_: false
           WARNINGS_ARE_ERRORS: 1
         run: |
-          R CMD check --no-build-vignettes --no-manual --no-tests sparklyr.sedona*.tar.gz
-          rm -f sparklyr.sedona*.tar.gz
-      - name: Install sparklyr.sedona from source
-        run: Rscript -e 'install.packages("./R/sparklyr.sedona/", repos = NULL, type = "source")'
+          R CMD check --no-build-vignettes --no-manual --no-tests apache.sedona*.tar.gz
+          rm -f apache.sedona*.tar.gz
+      - name: Install apache.sedona from source
+        run: Rscript -e 'install.packages("./R/", repos = NULL, type = "source")'
       - name: Run tests
         run: |
           export SPARKLYR_LOG_FILE='/tmp/sparklyr.log'
           source ./.github/workflows/scripts/prepare_sparklyr_sedona_test_env.sh
           echo "Apache Sedona jar files: ${SEDONA_JAR_FILES}"
-          cd ./R/sparklyr.sedona/tests
+          cd ./R/tests
           NOT_CRAN='true' Rscript testthat.R
         shell: bash
       - uses: actions/upload-artifact@v1

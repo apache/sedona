@@ -32,7 +32,7 @@
 #'
 #' @examples
 #' library(sparklyr)
-#' library(sparklyr.sedona)
+#' library(apache.sedona)
 #'
 #' sc <- spark_connect(master = "spark://HOST:PORT")
 #'

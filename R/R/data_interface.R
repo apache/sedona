@@ -54,7 +54,7 @@ NULL
 #'
 #' @examples
 #' library(sparklyr)
-#' library(sparklyr.sedona)
+#' library(apache.sedona)
 #'
 #' sc <- spark_connect(master = "spark://HOST:PORT")
 #'
@@ -151,7 +151,7 @@ sedona_read_dsv_to_typed_rdd <- function(sc,
 #'
 #' @examples
 #' library(sparklyr)
-#' library(sparklyr.sedona)
+#' library(apache.sedona)
 #'
 #' sc <- spark_connect(master = "spark://HOST:PORT")
 #'
@@ -187,7 +187,7 @@ sedona_read_shapefile_to_typed_rdd <- function(sc,
 #'
 #' @examples
 #' library(sparklyr)
-#' library(sparklyr.sedona)
+#' library(apache.sedona)
 #'
 #' sc <- spark_connect(master = "spark://HOST:PORT")
 #'
@@ -232,7 +232,7 @@ sedona_read_geojson_to_typed_rdd <- function(sc,
 #'
 #' @examples
 #' library(sparklyr)
-#' library(sparklyr.sedona)
+#' library(apache.sedona)
 #'
 #' sc <- spark_connect(master = "spark://HOST:PORT")
 #'
@@ -282,7 +282,7 @@ sedona_read_geojson <- function(sc,
 #'
 #' @examples
 #' library(sparklyr)
-#' library(sparklyr.sedona)
+#' library(apache.sedona)
 #'
 #' sc <- spark_connect(master = "spark://HOST:PORT")
 #'
@@ -337,7 +337,7 @@ sedona_read_wkb <- function(sc,
 #'
 #' @examples
 #' library(sparklyr)
-#' library(sparklyr.sedona)
+#' library(apache.sedona)
 #'
 #' sc <- spark_connect("spark://HOST:PORT")
 #'
@@ -386,7 +386,7 @@ sedona_read_wkt <- function(sc,
 #'
 #' @examples
 #' library(sparklyr)
-#' library(sparklyr.sedona)
+#' library(apache.sedona)
 #'
 #' sc <- spark_connect(master = "spark://HOST:PORT")
 #'
@@ -428,7 +428,7 @@ NULL
 #'
 #' @examples
 #' library(sparklyr)
-#' library(sparklyr.sedona)
+#' library(apache.sedona)
 #'
 #' sc <- spark_connect(master = "spark://HOST:PORT")
 #'
@@ -455,7 +455,7 @@ sedona_write_wkb <- function(x, output_location) {
 #'
 #' @examples
 #' library(sparklyr)
-#' library(sparklyr.sedona)
+#' library(apache.sedona)
 #'
 #' sc <- spark_connect("spark://HOST:PORT")
 #'
@@ -482,7 +482,7 @@ sedona_write_wkt <- function(x, output_location) {
 #'
 #' @examples
 #' library(sparklyr)
-#' library(sparklyr.sedona)
+#' library(apache.sedona)
 #'
 #' sc <- spark_connect(master = "spark://HOST:PORT")
 #'
@@ -513,7 +513,7 @@ sedona_write_geojson <- function(x, output_location) {
 #'
 #' @examples
 #' library(sparklyr)
-#' library(sparklyr.sedona)
+#' library(apache.sedona)
 #'
 #' sc <- spark_connect(master = "spark://HOST:PORT")
 #'

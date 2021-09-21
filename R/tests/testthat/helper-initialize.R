@@ -43,7 +43,6 @@ test_data <- function(file_name) {
     "..",
     "..",
     "..",
-    "..",
     "core",
     "src",
     "test",

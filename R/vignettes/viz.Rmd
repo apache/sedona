@@ -14,13 +14,13 @@ knitr::opts_chunk$set(
 )
 ```
 
-An important part of `sparklyr.sedona` is its collection of R interfaces to Sedona visualization routines.
+An important part of `apache.sedona` is its collection of R interfaces to Sedona visualization routines.
 For example, the following
 is essentially the R equivalent of [this example in Scala](https://github.com/apache/incubator-sedona/blob/f6b1c5e24bdb67d2c8d701a9b2af1fb5658fdc4d/viz/src/main/scala/org/apache/sedona/viz/showcase/ScalaExample.scala#L142-L160).
 
 ``` r
 library(sparklyr)
-library(sparklyr.sedona)
+library(apache.sedona)
 
 sc <- spark_connect(master = "local")
 
@@ -72,6 +72,6 @@ It will create a scatter plot, and then overlay it on top of a choropleth map, a
 
 <img src="images/choropleth-map.png" width=800 />
 
-See `?sparklyr.sedona::sedona_render_scatter_plot`, `?sparklyr.sedona::sedona_render_heatmap`,
-and `?sparklyr.sedona::sedona_render_choropleth_map` for more details on visualization-related
-R interfaces currently implemented by `sparklyr.sedona`.
+See `?apache.sedona::sedona_render_scatter_plot`, `?apache.sedona::sedona_render_heatmap`,
+and `?apache.sedona::sedona_render_choropleth_map` for more details on visualization-related
+R interfaces currently implemented by `apache.sedona`.

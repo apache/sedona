@@ -17,7 +17,7 @@ test_rdd_with_non_spatial_attrs <- invoke_new(
   1L, # numPartitions
   sc$state$object_cache$storage_levels$memory_only
 ) %>%
-  sparklyr.sedona:::new_spatial_rdd("point")
+  apache.sedona:::new_spatial_rdd("point")
 
 expect_result_matches_original <- function(pt_rdd) {
   expect_equal(
