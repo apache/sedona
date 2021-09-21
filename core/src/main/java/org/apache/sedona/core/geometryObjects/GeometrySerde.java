@@ -17,52 +17,48 @@
  * under the License.
  */
 
-package org.apache.sedona.core.serde;
+package org.apache.sedona.core.geometryObjects;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Registration;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.apache.sedona.core.enums.SerializerType;
-import org.apache.sedona.core.geometryObjects.Circle;
-import org.locationtech.jts.geom.*;
+import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeSerde;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPoint;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 
 /**
  * Provides methods to efficiently serialize and deserialize geometry types.
  * <p>
- * Supports Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPoly
+ * Supports Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon,
  * GeometryCollection, Circle and Envelope types.
  * <p>
  * First byte contains {@link Type#id}. Then go type-specific bytes, followed
  * by user-data attached to the geometry.
- *
- * User need to implement readGeometry and writeGeometry using a specific SerDe format
- * for example: {@link org.apache.sedona.core.serde.shape.ShapeGeometrySerde}
  */
-abstract public class GeometrySerde extends Serializer {
+public class GeometrySerde
+        extends Serializer
+{
 
-    protected static final Logger log = Logger.getLogger(GeometrySerde.class.getName());
-    protected static final GeometryFactory geometryFactory = new GeometryFactory();
-
-    /**
-     * Write the serialized type as Int from {@link org.apache.sedona.core.enums.SerializerType}
-     * Used mainly by the python binding to know which serde to use
-     * @param out kryo output stream
-     * @param type SerializerType
-     */
-    protected void writeSerializedType(Output out, SerializerType type){
-        out.writeByte(type.getId());
-    }
+    private static final Logger log = Logger.getLogger(GeometrySerde.class);
+    private static final GeometryFactory geometryFactory = new GeometryFactory();
 
     @Override
     public void write(Kryo kryo, Output out, Object object)
     {
         if (object instanceof Circle) {
             Circle circle = (Circle) object;
-            writeType(out, GeometrySerde.Type.CIRCLE);
+            writeType(out, Type.CIRCLE);
             out.writeDouble(circle.getRadius());
             writeGeometry(kryo, out, circle.getCenterGeometry());
             writeUserData(kryo, out, circle);
@@ -70,12 +66,12 @@ abstract public class GeometrySerde extends Serializer {
         else if (object instanceof Point || object instanceof LineString
                 || object instanceof Polygon || object instanceof MultiPoint
                 || object instanceof MultiLineString || object instanceof MultiPolygon) {
-            writeType(out, GeometrySerde.Type.SHAPE);
+            writeType(out, Type.SHAPE);
             writeGeometry(kryo, out, (Geometry) object);
         }
         else if (object instanceof GeometryCollection) {
             GeometryCollection collection = (GeometryCollection) object;
-            writeType(out, GeometrySerde.Type.GEOMETRYCOLLECTION);
+            writeType(out, Type.GEOMETRYCOLLECTION);
             out.writeInt(collection.getNumGeometries());
             for (int i = 0; i < collection.getNumGeometries(); i++) {
                 writeGeometry(kryo, out, collection.getGeometryN(i));
@@ -84,7 +80,7 @@ abstract public class GeometrySerde extends Serializer {
         }
         else if (object instanceof Envelope) {
             Envelope envelope = (Envelope) object;
-            writeType(out, GeometrySerde.Type.ENVELOPE);
+            writeType(out, Type.ENVELOPE);
             out.writeDouble(envelope.getMinX());
             out.writeDouble(envelope.getMaxX());
             out.writeDouble(envelope.getMinY());
@@ -96,14 +92,19 @@ abstract public class GeometrySerde extends Serializer {
         }
     }
 
-    private void writeType(Output out, GeometrySerde.Type type)
+    private void writeType(Output out, Type type)
     {
         out.writeByte((byte) type.id);
     }
 
-    protected abstract void writeGeometry(Kryo kryo, Output out, Geometry geometry);
+    private void writeGeometry(Kryo kryo, Output out, Geometry geometry)
+    {
+        byte[] data = ShapeSerde.serialize(geometry);
+        out.write(data, 0, data.length);
+        writeUserData(kryo, out, geometry);
+    }
 
-    protected void writeUserData(Kryo kryo, Output out, Geometry geometry)
+    private void writeUserData(Kryo kryo, Output out, Geometry geometry)
     {
         out.writeBoolean(geometry.getUserData() != null);
         if (geometry.getUserData() != null) {
@@ -116,7 +117,7 @@ abstract public class GeometrySerde extends Serializer {
     public Object read(Kryo kryo, Input input, Class aClass)
     {
         byte typeId = input.readByte();
-        GeometrySerde.Type geometryType = GeometrySerde.Type.fromId(typeId);
+        Type geometryType = Type.fromId(typeId);
         switch (geometryType) {
             case SHAPE:
                 return readGeometry(kryo, input);
@@ -152,7 +153,7 @@ abstract public class GeometrySerde extends Serializer {
         }
     }
 
-    protected Object readUserData(Kryo kryo, Input input)
+    private Object readUserData(Kryo kryo, Input input)
     {
         Object userData = null;
         if (input.readBoolean()) {
@@ -162,7 +163,12 @@ abstract public class GeometrySerde extends Serializer {
         return userData;
     }
 
-    protected abstract Geometry readGeometry(Kryo kryo, Input input);
+    private Geometry readGeometry(Kryo kryo, Input input)
+    {
+        Geometry geometry = ShapeSerde.deserialize(input, geometryFactory);
+        geometry.setUserData(readUserData(kryo, input));
+        return geometry;
+    }
 
     private enum Type
     {
@@ -178,9 +184,9 @@ abstract public class GeometrySerde extends Serializer {
             this.id = id;
         }
 
-        public static GeometrySerde.Type fromId(int id)
+        public static Type fromId(int id)
         {
-            for (GeometrySerde.Type type : values()) {
+            for (Type type : values()) {
                 if (type.id == id) {
                     return type;
                 }

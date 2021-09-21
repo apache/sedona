@@ -22,17 +22,12 @@ package org.apache.sedona.sql
 import org.apache.sedona.core.enums.{FileDataSplitter, GridType, IndexType}
 import org.apache.sedona.core.formatMapper.EarthdataHDFPointMapper
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader
-import org.apache.sedona.core.serde.WKB.WKBGeometrySerde
-import org.apache.sedona.core.serde.shape.ShapeGeometrySerde
 import org.apache.sedona.core.spatialOperator.JoinQuery
 import org.apache.sedona.core.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}
-import org.apache.sedona.sql.serde.SedonaSerializer
 import org.apache.sedona.sql.utils.Adapter
-import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.storage.StorageLevel
 import org.locationtech.jts.geom.Point
-import org.locationtech.jts.io.{WKBWriter, WKTReader}
 import org.scalatest.GivenWhenThen
 
 class adapterTestScala extends TestBaseScala with GivenWhenThen{

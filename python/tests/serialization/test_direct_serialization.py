@@ -14,7 +14,7 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
-import pytest
+
 from shapely.geometry import Polygon
 from shapely.wkt import loads
 
@@ -24,7 +24,6 @@ from tests.test_base import TestBase
 
 class TestDirectSerialization(TestBase):
 
-    @pytest.mark.skipif(TestBase.serializer_type == "shape", reason="shp parser does not handle geometry collection")
     def test_polygon(self):
         polygon = Polygon([(0, 0), (0, 1), (1, 1), (1, 0), (0, 0)])
         jvm_geom = GeometryAdapter.create_jvm_geometry_from_base_geometry(self.sc._jvm, polygon)
@@ -38,27 +37,6 @@ class TestDirectSerialization(TestBase):
         jvm_geom = GeometryAdapter.create_jvm_geometry_from_base_geometry(self.sc._jvm, polygon)
 
         assert jvm_geom.toString() == "POLYGON ((0 0, 0 2, 2 2, 2 0, 0 0), (1 1, 1 1.5, 1.5 1.5, 1.5 1, 1 1))"
-
-        wkt = "POLYGON ((-71.1776585052917 42.3902909739571, -71.1776820268866 42.3903701743239, -71.1776063012595 42.3903825660754, -71.1775826583081 42.3903033653531, -71.1776585052917 42.3902909739571))"
-        polygon = loads(wkt)
-        jvm_geom = GeometryAdapter.create_jvm_geometry_from_base_geometry(self.sc._jvm, polygon)
-
-        assert jvm_geom.toString() == wkt
-
-    @pytest.mark.skipif(TestBase.serializer_type == "wkb", reason="shp parser does not handle geometry collection")
-    def test_polygon(self):
-        polygon = Polygon([(0, 0), (0, 1), (1, 1), (1, 0), (0, 0)])
-        jvm_geom = GeometryAdapter.create_jvm_geometry_from_base_geometry(self.sc._jvm, polygon)
-
-        assert jvm_geom.toString() == "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"
-
-        ext = [(0, 0), (0, 2), (2, 2), (2, 0), (0, 0)]
-        int = [(1, 1), (1, 1.5), (1.5, 1.5), (1.5, 1), (1, 1)]
-
-        polygon = Polygon(ext, [int])
-        jvm_geom = GeometryAdapter.create_jvm_geometry_from_base_geometry(self.sc._jvm, polygon)
-
-        assert jvm_geom.toString() == "POLYGON ((0 0, 0 2, 2 2, 2 0, 0 0), (1 1, 1.5 1, 1.5 1.5, 1 1.5, 1 1))"
 
         wkt = "POLYGON ((-71.1776585052917 42.3902909739571, -71.1776820268866 42.3903701743239, -71.1776063012595 42.3903825660754, -71.1775826583081 42.3903033653531, -71.1776585052917 42.3902909739571))"
         polygon = loads(wkt)

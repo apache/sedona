@@ -19,8 +19,6 @@ import os
 
 from shapely.geometry import MultiPoint, Point, MultiLineString, LineString, Polygon, MultiPolygon
 import geopandas as gpd
-from pyspark.sql.types import StructType, StructField, StringType
-from sedona.sql.types import GeometryType
 
 from tests import tests_resource
 from tests.test_base import TestBase
@@ -104,17 +102,9 @@ class TestGeometryConvert(TestBase):
 
     def test_from_geopandas_convert(self):
         gdf = gpd.read_file(os.path.join(tests_resource, "shapefiles/gis_osm_pois_free_1/"))
-        schema = StructType(
-            [
-             StructField("osm_id", StringType()),
-             StructField("code", StringType()),
-             StructField("fclass", StringType()),
-             StructField("name", StringType()),
-             StructField("geometry", GeometryType()),
-            ]
-        )
+
         self.spark.createDataFrame(
-            gdf, schema=schema
+            gdf
         ).show()
 
     def test_to_geopandas(self):

@@ -16,7 +16,7 @@ package org.locationtech.jts.index.quadtree;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import org.apache.sedona.core.serde.shape.ShapeGeometrySerde;
+import org.apache.sedona.core.geometryObjects.GeometrySerde;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 
@@ -29,9 +29,9 @@ import java.util.List;
  */
 public class IndexSerde
 {
-    ShapeGeometrySerde geometrySerde;
+    GeometrySerde geometrySerde;
     public IndexSerde() {
-        geometrySerde = new ShapeGeometrySerde();
+        geometrySerde = new GeometrySerde();
     }
 
     public Object read(Kryo kryo, Input input){

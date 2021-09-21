@@ -17,8 +17,6 @@
 
 import os
 
-import pytest
-
 from sedona.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD, LineStringRDD
 from sedona.core.enums import FileDataSplitter, IndexType
 from tests.test_base import TestBase
@@ -79,18 +77,17 @@ class TestRDDSerialization(TestBase):
 
         assert [geo_data.geom.wkt for geo_data in collected_polygon_rdd][:3] == input_wkt_polygons
 
-    @pytest.mark.skipif(TestBase.serializer_type == "shape", reason="circle is not supported")
-    def test_circle_rdd(self):
-        object_rdd = PointRDD(
-            sparkContext=self.sc,
-            InputLocation=point_rdd_input_location,
-            Offset=point_rdd_offset,
-            splitter=point_rdd_splitter,
-            carryInputData=False
-        )
-        circle_rdd = CircleRDD(object_rdd, 0.1)
-        collected_data = circle_rdd.getRawSpatialRDD().collect()
-        print([geo_data.geom.wkt for geo_data in collected_data])
+    # def test_circle_rdd(self):
+    #     object_rdd = PointRDD(
+    #         sparkContext=self.sc,
+    #         InputLocation=point_rdd_input_location,
+    #         Offset=point_rdd_offset,
+    #         splitter=point_rdd_splitter,
+    #         carryInputData=False
+    #     )
+    #     circle_rdd = CircleRDD(object_rdd, 0.1)
+    #     collected_data = circle_rdd.getRawSpatialRDD().collect()
+    #     print([geo_data.geom.wkt for geo_data in collected_data])
 
     def test_linestring_rdd(self):
         linestring_rdd = LineStringRDD(

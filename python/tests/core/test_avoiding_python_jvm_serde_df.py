@@ -164,8 +164,6 @@ class TestOmitPythonJvmSerdeToDf(TestBase):
 
         df_without_column_names = Adapter.toDf(result, self.spark)
 
-        df_without_column_names.show()
-
         raw_geometries = self.__row_to_list(
             df_without_column_names.collect()
         )

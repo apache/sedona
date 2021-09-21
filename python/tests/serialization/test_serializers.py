@@ -43,7 +43,6 @@ class TestsSerializers(TestBase):
                 t.StructField("geom_to", GeometryType(), True)
             ]
         )
-
         self.spark.createDataFrame(
             data,
             schema
@@ -70,7 +69,6 @@ class TestsSerializers(TestBase):
                 t.StructField("geom", GeometryType(), True)
             ]
         )
-
         m_point_out = self.spark.createDataFrame(
             data,
             schema

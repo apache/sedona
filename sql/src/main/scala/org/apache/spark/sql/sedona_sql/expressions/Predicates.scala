@@ -18,11 +18,11 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
+import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.ArrayData
-import org.apache.spark.sql.sedona_sql.sedonaSerializer
 import org.apache.spark.sql.types.BooleanType
 
 abstract class ST_Predicate extends Expression
@@ -48,11 +48,11 @@ case class ST_Contains(inputExpressions: Seq[Expression])
     val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
     val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
 
-    val leftGeometry = sedonaSerializer.deserialize(leftArray)
+    val leftGeometry = GeometrySerializer.deserialize(leftArray)
 
-    val rightGeometry = sedonaSerializer.deserialize(rightArray)
+    val rightGeometry = GeometrySerializer.deserialize(rightArray)
 
-    leftGeometry.covers(rightGeometry)
+    return leftGeometry.covers(rightGeometry)
   }
 
   override def dataType = BooleanType
@@ -78,11 +78,11 @@ case class ST_Intersects(inputExpressions: Seq[Expression])
     val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
     val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
 
-    val leftGeometry = sedonaSerializer.deserialize(leftArray)
+    val leftGeometry = GeometrySerializer.deserialize(leftArray)
 
-    val rightGeometry = sedonaSerializer.deserialize(rightArray)
+    val rightGeometry = GeometrySerializer.deserialize(rightArray)
 
-    leftGeometry.intersects(rightGeometry)
+    return leftGeometry.intersects(rightGeometry)
   }
 
   override def dataType = BooleanType
@@ -108,11 +108,11 @@ case class ST_Within(inputExpressions: Seq[Expression])
     val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
     val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
 
-    val leftGeometry = sedonaSerializer.deserialize(leftArray)
+    val leftGeometry = GeometrySerializer.deserialize(leftArray)
 
-    val rightGeometry = sedonaSerializer.deserialize(rightArray)
+    val rightGeometry = GeometrySerializer.deserialize(rightArray)
 
-    leftGeometry.coveredBy(rightGeometry)
+    return leftGeometry.coveredBy(rightGeometry)
   }
 
   override def dataType = BooleanType
@@ -138,11 +138,11 @@ case class ST_Crosses(inputExpressions: Seq[Expression])
     val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
     val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
 
-    val leftGeometry = sedonaSerializer.deserialize(leftArray)
+    val leftGeometry = GeometrySerializer.deserialize(leftArray)
 
-    val rightGeometry = sedonaSerializer.deserialize(rightArray)
+    val rightGeometry = GeometrySerializer.deserialize(rightArray)
 
-    leftGeometry.crosses(rightGeometry)
+    return leftGeometry.crosses(rightGeometry)
   }
 
   override def dataType = BooleanType
@@ -169,11 +169,11 @@ case class ST_Overlaps(inputExpressions: Seq[Expression])
     val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
     val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
 
-    val leftGeometry = sedonaSerializer.deserialize(leftArray)
+    val leftGeometry = GeometrySerializer.deserialize(leftArray)
 
-    val rightGeometry = sedonaSerializer.deserialize(rightArray)
+    val rightGeometry = GeometrySerializer.deserialize(rightArray)
 
-    leftGeometry.overlaps(rightGeometry)
+    return leftGeometry.overlaps(rightGeometry)
   }
 
   override def dataType = BooleanType
@@ -199,11 +199,11 @@ case class ST_Touches(inputExpressions: Seq[Expression])
     val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
     val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
 
-    val leftGeometry = sedonaSerializer.deserialize(leftArray)
+    val leftGeometry = GeometrySerializer.deserialize(leftArray)
 
-    val rightGeometry = sedonaSerializer.deserialize(rightArray)
+    val rightGeometry = GeometrySerializer.deserialize(rightArray)
 
-    leftGeometry.touches(rightGeometry)
+    return leftGeometry.touches(rightGeometry)
   }
 
   override def dataType = BooleanType
@@ -230,16 +230,16 @@ case class ST_Equals(inputExpressions: Seq[Expression])
 
     val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
 
-    val leftGeometry = sedonaSerializer.deserialize(leftArray)
+    val leftGeometry = GeometrySerializer.deserialize(leftArray)
 
-    val rightGeometry = sedonaSerializer.deserialize(rightArray)
+    val rightGeometry = GeometrySerializer.deserialize(rightArray)
 
     // Returns GeometryCollection object
     val symDifference = leftGeometry.symDifference(rightGeometry)
 
     val isEqual = symDifference.isEmpty
 
-    isEqual
+    return isEqual
   }
 
   override def dataType = BooleanType
