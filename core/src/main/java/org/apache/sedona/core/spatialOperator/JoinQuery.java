@@ -373,17 +373,20 @@ public class JoinQuery
         final SpatialPartitioner partitioner =
                 (SpatialPartitioner) rightRDD.spatialPartitionedRDD.partitioner().get();
         final DedupParams dedupParams = partitioner.getDedupParams();
+        final SparkContext cxt = leftRDD.rawSpatialRDD.context();
 
         final JavaRDD<Pair<U, T>> joinResult;
         if (joinParams.useIndex) {
             if (rightRDD.indexedRDD != null) {
                 final RightIndexLookupJudgement judgement =
                         new RightIndexLookupJudgement(joinParams.considerBoundaryIntersection, dedupParams);
+                judgement.broadcastDedupParams(cxt);
                 joinResult = leftRDD.spatialPartitionedRDD.zipPartitions(rightRDD.indexedRDD, judgement);
             }
             else if (leftRDD.indexedRDD != null) {
                 final LeftIndexLookupJudgement judgement =
                         new LeftIndexLookupJudgement(joinParams.considerBoundaryIntersection, dedupParams);
+                judgement.broadcastDedupParams(cxt);
                 joinResult = leftRDD.indexedRDD.zipPartitions(rightRDD.spatialPartitionedRDD, judgement);
             }
             else {
@@ -395,11 +398,13 @@ public class JoinQuery
                                 joinParams.joinBuildSide,
                                 dedupParams,
                                 buildCount, streamCount, resultCount, candidateCount);
+                judgement.broadcastDedupParams(cxt);
                 joinResult = leftRDD.spatialPartitionedRDD.zipPartitions(rightRDD.spatialPartitionedRDD, judgement);
             }
         }
         else {
             NestedLoopJudgement judgement = new NestedLoopJudgement(joinParams.considerBoundaryIntersection, dedupParams);
+            judgement.broadcastDedupParams(cxt);
             joinResult = rightRDD.spatialPartitionedRDD.zipPartitions(leftRDD.spatialPartitionedRDD, judgement);
         }
 
