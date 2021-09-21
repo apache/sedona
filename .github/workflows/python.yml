@@ -18,27 +18,18 @@ jobs:
           - spark: 3.1.1
             scala: 2.12.8
             python: 3.7
-            serializer: wkb
           - spark: 3.1.1
             scala: 2.12.8
             python: 3.8
-            serializer: wkb
           - spark: 3.1.1
             scala: 2.12.8
             python: 3.9
-            serializer: wkb
           - spark: 3.0.2
             scala: 2.12.8
             python: 3.7
-            serializer: wkb
           - spark: 2.4.7
             scala: 2.11.8
             python: 3.7
-            serializer: wkb
-          - spark: 3.1.1
-            scala: 2.12.8
-            python: 3.8
-            serializer: shape
 
     steps:
     - uses: actions/checkout@v2
@@ -79,4 +70,4 @@ jobs:
       run: find python-adapter/target -name sedona-* -exec cp {} spark-${SPARK_VERSION}-bin-hadoop2.7/jars/ \;
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
-      run: (export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop2.7;export PYTHONPATH=$SPARK_HOME/python;cd python;echo ${{ matrix.serializer }} > tests/serializer_type.txt;pipenv run pytest tests)
+      run: (export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop2.7;export PYTHONPATH=$SPARK_HOME/python;cd python;pipenv run pytest tests)

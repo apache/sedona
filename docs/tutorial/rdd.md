@@ -4,11 +4,11 @@ The page outlines the steps to create Spatial RDDs and run spatial queries using
 ## Set up dependencies
 
 1. Read [Sedona Maven Central coordinates](../download/maven-coordinates.md)
-2. Select ==the minimum dependencies==: Add Apache Spark (only the Spark core) and `sedona-python-adapter`.
+2. Select ==the minimum dependencies==: Add Apache Spark (only the Spark core) and Sedona (core).
 3. Add the dependencies in build.sbt or pom.xml.
 
 !!!note
-	To enjoy the full functions of Sedona, we suggest you include ==the full dependencies==: [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), `sedona-python-adapter`, `sedona-viz`. Please see [RDD example project](/tutorial/demo/)
+	To enjoy the full functions of Sedona, we suggest you include ==the full dependencies==: [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core, Sedona-SQL, Sedona-Viz. Please see [RDD example project](/tutorial/demo/)
 
 ## Initiate SparkContext
 
@@ -23,7 +23,7 @@ val sc = new SparkContext(conf)
 ```
 
 !!!warning
-	Sedona equips customized geometry and index serializers to reduce memory consumption. Two sets of serializers are available: (1) **SedonaKryoRegistrator** - uses the Shapefile format (default serde) (2) **SedonaWKBKryoRegistrator** - uses the WKB format. The former is more performant while the latter solved a bug that you can find here: [ST_GeomFromWkt and ST_GeomFromText converts multipolygon to polygon](https://docs.google.com/spreadsheets/d/e/2PACX-1vQ4G8zwdfVhvoJAMWmBAGWNDTtE32Oh0dk95BF5HL996k0YCRDyU0cXry1xwuTGcQ4sixB0NTc4K4-0/pubhtml). The performance comparison can be found here: [WKB and Shape Serde Performance Comparison](https://gist.github.com/netanel246/f85777761ebfc0a5ddef54170ea62f11)
+	Sedona has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption.
 
 If you add ==the Sedona full dependencies== as suggested above, please use the following two lines to enable Sedona Kryo serializer instead:
 ```Scala

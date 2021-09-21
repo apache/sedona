@@ -15,6 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+import struct
 from abc import ABC
 from copy import copy
 from typing import List, Any
@@ -22,19 +23,15 @@ from typing import List, Any
 import attr
 from shapely.geometry.base import BaseGeometry
 from pyspark import PickleSerializer
+from shapely.wkb import dumps
 
 from sedona.core.geom.circle import Circle
-from sedona.core.serde.binary.buffer import BinaryBuffer
-from sedona.core.serde.binary.parser import BinaryParser
-from sedona.core.serde.geom_factory import geometry_serializers
-from sedona.core.serde.serializer import GeometrySerde
-from sedona.core.serde.spark_config import spark_conf_getter
-from sedona.utils.binary_parser import ByteOrderType
+from sedona.utils.binary_parser import BinaryParser
 
 
 class GeoData:
 
-    def __init__(self, geom: BaseGeometry, userData: str, serde):
+    def __init__(self, geom: BaseGeometry, userData: str):
         """
 
         :param geom:
@@ -42,7 +39,6 @@ class GeoData:
         """
         self._geom = geom
         self._userData = userData
-        self._serde = serde
 
     def getUserData(self):
         return self.userData
@@ -50,36 +46,30 @@ class GeoData:
     def __getstate__(self):
         attributes = copy(self.__slots__)
         geom = getattr(self, attributes[0])
-        serde = getattr(self, attributes[2])
-        binary_buffer = BinaryBuffer()
 
         if isinstance(geom, Circle):
-            geom_bytes = CircleGeometryFactory.to_bytes(geom,
-                                                        geometry_serializers[serde],
-                                                        binary_buffer)
+            geom_bytes = CircleGeometryFactory.to_bytes(geom)
         else:
-            geom_bytes = GeometryFactory.to_bytes(geom, geometry_serializers[serde],
-                                                  binary_buffer)
+            geom_bytes = GeometryFactory.to_bytes(geom)
 
         return dict(
             geom=bytearray([el if el >= 0 else el + 256 for el in geom_bytes]),
-            userData=getattr(self, attributes[1]),
-            serde=bytearray([serde])
+            userData=getattr(self, attributes[1])
         )
 
     def __setstate__(self, attributes):
         bin_parser = BinaryParser(attributes["geom"])
         is_circle = bin_parser.read_byte()
+        geom_bytes = attributes["geom"]
+
         if is_circle:
-            radius = bin_parser.read_double(ByteOrderType.LITTLE_ENDIAN)
-            serde = bin_parser.read_byte()
-            geom = geometry_serializers[serde].deserialize(bin_parser)
+            radius = bin_parser.read_double()
+            geom = bin_parser.read_geometry(geom_bytes.__len__() - 9)
             self._geom = Circle(geom, radius)
         else:
-            self._geom = geometry_serializers[bin_parser.read_byte()].deserialize(bin_parser)
+            self._geom = bin_parser.read_geometry(geom_bytes.__len__() - 1)
 
         self._userData = attributes["userData"]
-        self._serde = attributes["serde"]
 
     @property
     def geom(self):
@@ -89,11 +79,7 @@ class GeoData:
     def userData(self):
         return self._userData
 
-    @property
-    def serde(self):
-        return self._serde
-
-    __slots__ = ("_geom", "_userData", "_serde")
+    __slots__ = ("_geom", "_userData")
 
     def __repr__(self):
         return f"Geometry: {str(self.geom.__class__.__name__)} userData: {self.userData}"
@@ -103,10 +89,6 @@ class GeoData:
 
     def __ne__(self, other):
         return self.geom != other.geom or self.userData != other.userData
-
-    @classmethod
-    def with_current_serialization(cls, geom: BaseGeometry, userData: str):
-        return GeoData(geom, userData, spark_conf_getter.serialization_number)
 
 
 @attr.s
@@ -134,7 +116,7 @@ class SpatialPairRDDParserData(AbstractSpatialRDDParser):
     def deserialize(cls, bin_parser: 'BinaryParser'):
         left_geom_data = cls._deserialize_geom(bin_parser)
 
-        _ = bin_parser.read_int(ByteOrderType.LITTLE_ENDIAN)
+        _ = bin_parser.read_int()
 
         right_geom_data = cls._deserialize_geom(bin_parser)
 
@@ -154,7 +136,7 @@ class SpatialRDDParserData(AbstractSpatialRDDParser):
     @classmethod
     def deserialize(cls, bin_parser: 'BinaryParser'):
         left_geom_data = cls._deserialize_geom(bin_parser)
-        _ = bin_parser.read_int(ByteOrderType.LITTLE_ENDIAN)
+        _ = bin_parser.read_int()
 
         return left_geom_data
 
@@ -171,7 +153,8 @@ class SpatialRDDParserDataMultipleRightGeom(AbstractSpatialRDDParser):
     def deserialize(cls, bin_parser: 'BinaryParser'):
         left_geom_data = cls._deserialize_geom(bin_parser)
 
-        geometry_numbers = bin_parser.read_int(ByteOrderType.LITTLE_ENDIAN)
+        geometry_numbers = bin_parser.read_int()
+
         right_geoms = []
 
         for right_geometry_number in range(geometry_numbers):
@@ -201,7 +184,7 @@ class SedonaPickler(PickleSerializer):
 
     def loads(self, obj, encoding="bytes"):
         binary_parser = BinaryParser(obj)
-        spatial_parser_number = binary_parser.read_int(ByteOrderType.LITTLE_ENDIAN)
+        spatial_parser_number = binary_parser.read_int()
         spatial_parser = self.get_parser(spatial_parser_number)
         parsed_row = spatial_parser.deserialize(binary_parser)
 
@@ -214,16 +197,13 @@ class SedonaPickler(PickleSerializer):
         return PARSERS[number]
 
 
-class GeometryReader:
+def read_geometry_from_bytes(bin_parser: BinaryParser):
+    geom_data_length = bin_parser.read_int()
+    user_data_length = bin_parser.read_int()
+    geom = bin_parser.read_geometry(geom_data_length)
+    user_data = bin_parser.read_string(user_data_length)
 
-    def read_geometry_from_bytes(self, bin_parser: BinaryParser):
-        user_data_length = bin_parser.read_int(ByteOrderType.LITTLE_ENDIAN)
-        serde = bin_parser.read_byte()
-        parser = geometry_serializers[serde]
-        geom = parser.deserialize(bin_parser)
-        user_data = bin_parser.read_string(user_data_length)
-
-        return (geom, user_data, serde)
+    return (geom, user_data)
 
 
 @attr.s
@@ -231,15 +211,13 @@ class GeometryFactory:
 
     @classmethod
     def geometry_from_bytes(cls, bin_parser: BinaryParser) -> GeoData:
-        geom, user_data, serde = GeometryReader().read_geometry_from_bytes(bin_parser)
-        geo_data = GeoData(geom=geom, userData=user_data, serde=serde)
+        geom, user_data = read_geometry_from_bytes(bin_parser)
+        geo_data = GeoData(geom=geom, userData=user_data)
         return geo_data
 
     @classmethod
-    def to_bytes(cls, geom: BaseGeometry, geom_serde: GeometrySerde, byte_buffer: BinaryBuffer) -> List[int]:
-        additional_bytes = BinaryBuffer()
-        additional_bytes.put_byte(0)
-        return additional_bytes.byte_array + geom_serde.serialize(geom, byte_buffer)
+    def to_bytes(cls, geom: BaseGeometry) -> List[int]:
+        return struct.pack("b", 0) + dumps(geom)
 
 
 @attr.s
@@ -247,17 +225,14 @@ class CircleGeometryFactory:
 
     @classmethod
     def geometry_from_bytes(cls, bin_parser: BinaryParser) -> GeoData:
-        geom, user_data, serde = GeometryReader().read_geometry_from_bytes(bin_parser)
-        radius = bin_parser.read_double(ByteOrderType.LITTLE_ENDIAN)
-        geo_data = GeoData(geom=Circle(geom, radius), userData=user_data, serde=serde)
+        geom, user_data = read_geometry_from_bytes(bin_parser)
+        radius = bin_parser.read_double()
+        geo_data = GeoData(geom=Circle(geom, radius), userData=user_data)
         return geo_data
 
     @classmethod
-    def to_bytes(cls, geom: Circle, geom_serde: GeometrySerde, byte_buffer: BinaryBuffer) -> List[int]:
-        additional_bytes = BinaryBuffer()
-        additional_bytes.put_byte(1)
-        additional_bytes.put_double(geom.radius)
-        return additional_bytes.byte_array + geom_serde.serialize(geom.centerGeometry, byte_buffer)
+    def to_bytes(cls, geom: Circle) -> List[int]:
+        return struct.pack("b", 1) + struct.pack("d", geom.radius) + dumps(geom.centerGeometry)
 
 
 geom_deserializers = {

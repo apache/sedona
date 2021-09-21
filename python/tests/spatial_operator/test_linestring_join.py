@@ -51,7 +51,6 @@ params_dyn.extend([{**param, **{"index_type": IndexType.RTREE}} for param in par
 
 
 class TestRectangleJoin(TestJoinBase):
-
     params = {
         "test_nested_loop": parameters,
         "test_dynamic_index_int": params_dyn,

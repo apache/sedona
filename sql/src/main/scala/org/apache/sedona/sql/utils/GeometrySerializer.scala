@@ -16,14 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.sedona.sql.utils
 
-
-package org.apache.sedona.python.wrapper.translation.serde
-
-import com.esotericsoftware.kryo.io.Output
+import org.apache.spark.sql.catalyst.util.ArrayData
 import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.io.{WKBReader, WKBWriter}
 
-trait PythonGeometrySerde {
+/**
+  * SerDe using the WKB reader and writer objects
+  */
+object GeometrySerializer {
 
-  def serialize(geometry: Geometry): Array[Byte]
+  /**
+    * Given a geometry returns array of bytes
+    *
+    * @param geometry JTS geometry
+    * @return Array of bites represents this geometry
+    */
+  def serialize(geometry: Geometry): Array[Byte] = {
+    val writer = new WKBWriter(2, 2, true)
+    writer.write(geometry)
+  }
+
+  /**
+    * Given ArrayData returns Geometry
+    *
+    * @param values ArrayData 
+    * @return JTS geometry
+    */
+  def deserialize(values: ArrayData): Geometry = {
+    val reader = new WKBReader()
+    reader.read(values.toByteArray())
+  }
 }

@@ -15,16 +15,15 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+from sedona.core.SpatialRDD import PointRDD
+from tests.properties.point_properties import input_location, offset, splitter, num_partitions
+from tests.test_base import TestBase
 from pyspark import StorageLevel
 
-from sedona.core.SpatialRDD import PointRDD, CircleRDD
-from tests.test_base import TestBase
-from tests.properties.point_properties import input_location, offset, splitter, num_partitions
 
+class TestSpatialRddAssignment(TestBase):
 
-class TestCircleRDD(TestBase):
-
-    def test_circle_rdd(self):
+    def test_raw_spatial_rdd_assignment(self):
         spatial_rdd = PointRDD(
             self.sc,
             input_location,
@@ -34,12 +33,13 @@ class TestCircleRDD(TestBase):
             num_partitions,
             StorageLevel.MEMORY_ONLY
         )
+        spatial_rdd.analyze()
 
-        circle_rdd = CircleRDD(spatial_rdd, 0.5)
+        empty_point_rdd = PointRDD()
+        empty_point_rdd.rawSpatialRDD = spatial_rdd.rawSpatialRDD
+        empty_point_rdd.analyze()
+        assert empty_point_rdd.countWithoutDuplicates() == spatial_rdd.countWithoutDuplicates()
+        assert empty_point_rdd.boundaryEnvelope == spatial_rdd.boundaryEnvelope
 
-        circle_rdd.analyze()
-
-        assert circle_rdd.approximateTotalCount == 3000
-
-        assert circle_rdd.rawSpatialRDD.take(1)[0].getUserData() == "testattribute0\ttestattribute1\ttestattribute2"
-        assert circle_rdd.rawSpatialRDD.take(1)[0].geom.radius == 0.5
+        assert empty_point_rdd.rawSpatialRDD.map(lambda x: x.geom.area).collect()[0] == 0.0
+        assert empty_point_rdd.rawSpatialRDD.take(9)[4].getUserData() == "testattribute0\ttestattribute1\ttestattribute2"
