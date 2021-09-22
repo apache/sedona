@@ -1,6 +1,6 @@
 # Compile Sedona source code
 
-[![Scala and Java build](https://github.com/apache/incubator-sedona/workflows/Scala%20and%20Java%20build/badge.svg)](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Scala+and+Java+build%22) [![Python build](https://github.com/apache/incubator-sedona/workflows/Python%20build/badge.svg)](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Python+build%22) ![Example project build](https://github.com/apache/incubator-sedona/workflows/Example%20project%20build/badge.svg) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder)
+[![Scala and Java build](https://github.com/apache/incubator-sedona/actions/workflows/java.yml/badge.svg)](https://github.com/apache/incubator-sedona/actions/workflows/java.yml) [![Python build](https://github.com/apache/incubator-sedona/actions/workflows/python.yml/badge.svg)](https://github.com/apache/incubator-sedona/actions/workflows/python.yml) [![R build](https://github.com/apache/incubator-sedona/actions/workflows/r.yml/badge.svg)](https://github.com/apache/incubator-sedona/actions/workflows/r.yml) [![Example project build](https://github.com/apache/incubator-sedona/actions/workflows/example.yml/badge.svg)](https://github.com/apache/incubator-sedona/actions/workflows/example.yml) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder)
 
 
 ## Compile Scala / Java source code
@@ -8,7 +8,7 @@ Sedona Scala/Java code is a project with four modules, core, sql, viz and python
 
 * Make sure your Linux/Mac machine has Java 1.8, Apache Maven 3.3.1+, and Python3. The compilation of Sedona is not tested on Windows machine.
 
-To compile all modules, please make sure you are in the root folder of three modules. Then enter the following command in the terminal:
+To compile all modules, please make sure you are in the root folder of all modules. Then enter the following command in the terminal:
 
 ```
 mvn clean install -DskipTests
@@ -28,7 +28,7 @@ mvn clean install
 ```
 
 !!!warning
-	The unit tests of all three modules may take up to 30 minutes. 
+	The maven unit tests of all modules may take up to 30 minutes. 
 
 ### Compile with different targets
 
