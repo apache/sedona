@@ -27,6 +27,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, Predicate, UnsafeRow}
 import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeRowJoiner
 import org.apache.spark.sql.execution.SparkPlan
+import org.locationtech.jts.geom.Geometry
 
 trait TraitJoinQueryExec extends TraitJoinQueryBase {
   self: SparkPlan =>
@@ -123,11 +124,16 @@ trait TraitJoinQueryExec extends TraitJoinQueryBase {
     //logInfo(s"leftShape count ${leftShapes.spatialPartitionedRDD.count()}")
     //logInfo(s"rightShape count ${rightShapes.spatialPartitionedRDD.count()}")
 
-    val matches = JoinQuery.spatialJoin(leftShapes, rightShapes, joinParams)
+    val matchesRDD: RDD[(Geometry, Geometry)] = (leftShapes.spatialPartitionedRDD, rightShapes.spatialPartitionedRDD) match {
+      case (null, null) =>
+        // Dominant side is empty, skipped creating partitioned RDDs. Result of join should also be empty.
+        sparkContext.parallelize(Seq[(Geometry, Geometry)]())
+      case _ => JoinQuery.spatialJoin(leftShapes, rightShapes, joinParams).rdd
+    }
 
-    logDebug(s"Join result has ${matches.count()} rows")
+    logDebug(s"Join result has ${matchesRDD.count()} rows")
 
-    matches.rdd.mapPartitions { iter =>
+    matchesRDD.mapPartitions { iter =>
       val filtered =
         if (extraCondition.isDefined) {
           val boundCondition = Predicate.create(extraCondition.get, left.output ++ right.output) // SPARK3 anchor
