@@ -22,6 +22,7 @@ import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.enums.JoinBuildSide;
 import org.apache.sedona.core.spatialRDD.PolygonRDD;
+import org.apache.spark.storage.StorageLevel;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -32,6 +33,7 @@ import scala.Tuple2;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -216,5 +218,41 @@ public class PolygonJoinTest
     private long getExpectedWithOriginalDuplicatesCount(boolean intersects)
     {
         return intersects ? expectedIntersectsWithOriginalDuplicatesCount : expectedContainsWithOriginalDuplicatesCount;
+    }
+
+    @Test
+    public void testJoinWithSingletonRDD() throws Exception
+    {
+        PolygonRDD queryRDD = createPolygonRDD(InputLocationQueryPolygon);
+        PolygonRDD spatialRDD = createPolygonRDD(InputLocation);
+        PolygonRDD singletonRDD = new PolygonRDD();
+        Polygon queryPolygon = queryRDD.rawSpatialRDD.first();
+        singletonRDD.rawSpatialRDD = sc.parallelize(Collections.singletonList(queryPolygon), 1);
+        singletonRDD.analyze(StorageLevel.MEMORY_ONLY());
+
+        // Joining with a singleton RDD is essentially the same with a range query
+        long expectedResultCount = RangeQuery.SpatialRangeQuery(spatialRDD, queryPolygon, true, false).count();
+
+        partitionRdds(singletonRDD, spatialRDD);
+        List<Tuple2<Polygon, Polygon>> result = JoinQuery.SpatialJoinQueryFlat(spatialRDD, singletonRDD, false, true).collect();
+        sanityCheckFlatJoinResults(result);
+        assertEquals(expectedResultCount, result.size());
+
+        partitionRdds(spatialRDD, singletonRDD);
+        result = JoinQuery.SpatialJoinQueryFlat(singletonRDD, spatialRDD, false, true).collect();
+        sanityCheckFlatJoinResults(result);
+        assertEquals(expectedResultCount, result.size());
+
+        partitionRdds(singletonRDD, spatialRDD);
+        spatialRDD.buildIndex(indexType, true);
+        result = JoinQuery.SpatialJoinQueryFlat(spatialRDD, singletonRDD, true, true).collect();
+        sanityCheckFlatJoinResults(result);
+        assertEquals(expectedResultCount, result.size());
+
+        partitionRdds(spatialRDD, singletonRDD);
+        singletonRDD.buildIndex(indexType, true);
+        result = JoinQuery.SpatialJoinQueryFlat(singletonRDD, spatialRDD, true, true).collect();
+        sanityCheckFlatJoinResults(result);
+        assertEquals(expectedResultCount, result.size());
     }
 }

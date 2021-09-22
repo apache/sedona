@@ -41,6 +41,7 @@ public class RDDSampleUtilsTest
         assertEquals(99, RDDSampleUtils.getSampleNumbers(6, 100011, 99));
         assertEquals(999, RDDSampleUtils.getSampleNumbers(20, 999, -1));
         assertEquals(40, RDDSampleUtils.getSampleNumbers(20, 1000, -1));
+        assertEquals(1, RDDSampleUtils.getSampleNumbers(1, 1, -1));
     }
 
     /**
@@ -52,6 +53,7 @@ public class RDDSampleUtilsTest
         assertFailure(505, 999);
         assertFailure(505, 1000);
         assertFailure(10, 1000, 2100);
+        assertFailure(2, 1, -1);
     }
 
     private void assertFailure(int numPartitions, long totalNumberOfRecords)
