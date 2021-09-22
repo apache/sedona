@@ -1,6 +1,6 @@
 <img src="https://www.apache.org/logos/res/sedona/sedona.png" width="400">
 
-[![Scala and Java build](https://github.com/apache/incubator-sedona/workflows/Scala%20and%20Java%20build/badge.svg)](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Scala+and+Java+build%22) [![Python build](https://github.com/apache/incubator-sedona/workflows/Python%20build/badge.svg)](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Python+build%22) ![Example project build](https://github.com/apache/incubator-sedona/workflows/Example%20project%20build/badge.svg)
+[![Scala and Java build](https://github.com/apache/incubator-sedona/actions/workflows/java.yml/badge.svg)](https://github.com/apache/incubator-sedona/actions/workflows/java.yml) [![Python build](https://github.com/apache/incubator-sedona/actions/workflows/python.yml/badge.svg)](https://github.com/apache/incubator-sedona/actions/workflows/python.yml) [![R build](https://github.com/apache/incubator-sedona/actions/workflows/r.yml/badge.svg)](https://github.com/apache/incubator-sedona/actions/workflows/r.yml) [![Example project build](https://github.com/apache/incubator-sedona/actions/workflows/example.yml/badge.svg)](https://github.com/apache/incubator-sedona/actions/workflows/example.yml)
 
 Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder) and play the interactive Sedona Python Jupyter Notebook immediately!
 
