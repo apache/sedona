@@ -42,5 +42,6 @@ sparkSession = SparkSession.builder().
 ```
 3. Add the following line after your SparkSession declaration:
 ```Scala
+import org.apache.sedona.sql.utils.SedonaSQLRegistrator
 SedonaSQLRegistrator.registerAll(sparkSession)
 ```
