@@ -9,7 +9,7 @@ If you are not using the free version of Databricks, there is an issue with the 
 Two steps to fix this:
 
 1. Upload the jars in /dbfs/FileStore/jars/
-2. Add this line to the config `.config("spark.jars", "/dbfs/FileStore/jars/sedona-python-adapter-3.0_2.12-1.0.1-incubating.jar") \`
+2. Add this line to the config `.config("spark.jars", "/dbfs/FileStore/jars/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.jar") \`
 
 ## Pure SQL environment
 

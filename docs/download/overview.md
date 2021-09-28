@@ -20,14 +20,14 @@ Please make a Pull Request to add yourself!
 
 ## Features
 
-* Spatial RDD
-* Spatial DataFrame/SQL
-* Vector geometries / trajectories
-* Raster images with Map Algebra
-* Various input formats: CSV, TSV, WKT, WKB, GeoJSON, Shapefile, GeoTIFF, NetCDF/HDF
-* Spatial query: range query, range join query, distance join query, K Nearest Neighbor query
-* Spatial index: R-Tree, Quad-Tree
-* Coordinate Reference System / Spatial Reference System Transformation
-* High resolution map generation: [Visualize Spatial DataFrame/RDD](../../tutorial/viz)
-* Apache Zeppelin integration
-* Support Scala, Java, Python, R
+- [x] Spatial RDD
+- [x] Spatial DataFrame/SQL
+- [x] Vector geometries / trajectories
+- [x] Raster images with Map Algebra
+- [x] Various input formats: CSV, TSV, WKT, WKB, GeoJSON, Shapefile, GeoTIFF, NetCDF/HDF
+- [x] Spatial query: range query, range join query, distance join query, K Nearest Neighbor query
+- [x] Spatial index: R-Tree, Quad-Tree
+- [x] Coordinate Reference System / Spatial Reference System Transformation
+- [x] High resolution map generation: [Visualize Spatial DataFrame/RDD](../../tutorial/viz)
+- [x] Apache Zeppelin integration
+- [x] Support Scala, Java, Python, R

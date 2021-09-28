@@ -10,40 +10,41 @@ Sedona Scala/Java code is a project with four modules, core, sql, viz and python
 
 To compile all modules, please make sure you are in the root folder of all modules. Then enter the following command in the terminal:
 
-```
-mvn clean install -DskipTests
-```
-This command will first delete the old binary files and compile all modules. This compilation will skip the unit tests. To compile a single module, please make sure you are in the folder of that module. Then enter the same command.
+=== "Without unit tests"
+	```bash
+	mvn clean install -DskipTests
+	```
+	This command will first delete the old binary files and compile all modules. This compilation will skip the unit tests. To compile a single module, please make sure you are in the folder of that module. Then enter the same command.
+	
+=== "With unit tests"
+	```bash
+	mvn clean install
+	```
+	The maven unit tests of all modules may take up to 30 minutes. 	
+=== "With Geotools jars packaged"
+	```bash
+	mvn clean install -DskipTests -Dgeotools
+	```
+	Geotools jars will be packaged into the produced fat jars.	
 
-!!!warning
+!!!note
 	By default, this command will compile Sedona with Spark 3.0 and Scala 2.12
-
-!!!tip
-	To get the Sedona Python-adapter jar with all GeoTools jars included, simply append `-Dgeotools` option. The command is like this:`mvn clean install -DskipTests -Dgeotools`
-
-
-To run unit tests, just simply remove `-DskipTests` option. The command is like this:
-```
-mvn clean install
-```
-
-!!!warning
-	The maven unit tests of all modules may take up to 30 minutes. 
+	
 
 ### Compile with different targets
 
-* Spark 3.0 + Scala 2.12
-```
-mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.0
-```
-* Spark 2.4 + Scala 2.11
-```
-mvn clean install -DskipTests -Dscala=2.11 -Dspark=2.4
-```
-* Spark 2.4 + Scala 2.12
-```
-mvn clean install -DskipTests -Dscala=2.12 -Dspark=2.4
-```
+=== "Spark 3.0 + Scala 2.12"
+	```
+	mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.0
+	```
+=== "Spark 2.4 + Scala 2.11"
+	```
+	mvn clean install -DskipTests -Dscala=2.11 -Dspark=2.4
+	```
+=== "Spark 2.4 + Scala 2.12"
+	```
+	mvn clean install -DskipTests -Dscala=2.12 -Dspark=2.4
+	```
 
 !!!tip
 	To get the Sedona Python-adapter jar with all GeoTools jars included, simply append `-Dgeotools` option. The command is like this:`mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.0 -Dgeotools`
@@ -61,7 +62,7 @@ For example,
 export SPARK_HOME=$PWD/spark-3.0.1-bin-hadoop2.7
 export PYTHONPATH=$SPARK_HOME/python
 ```
-2. Compile the Sedona Scala and Java code with `-Dgeotools` and then copy the ==sedona-python-adapter-xxx.jar== to ==SPARK_HOME/jars/== folder.
+2. Compile the Sedona Scala and Java code with `-Dgeotools` and then copy the ==sedona-python-adapter-{{ sedona.current_version }}.jar== to ==SPARK_HOME/jars/== folder.
 ```
 cp python-adapter/target/sedona-python-adapter-xxx.jar SPARK_HOME/jars/
 ```
@@ -102,6 +103,8 @@ In short, you need to run:
 ```
 pip install mkdocs
 pip install mkdocs-material
+pip install mkdocs-macros-plugin
+pip install mkdocs-git-revision-date-localized-plugin
 ```
 
 After installing MkDocs and MkDocs-Material, run the command in Sedona root folder:

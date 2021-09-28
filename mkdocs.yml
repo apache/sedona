@@ -132,6 +132,10 @@ extra:
       link: 'https://github.com/apache/incubator-sedona'
     - icon: fontawesome/brands/twitter
       link: 'https://twitter.com/ApacheSedona'
+  sedona:
+    current_version: 1.1.0-incubating
+    current_snapshot: 1.1.1-incubating-SNAPSHOT
+    current_geotools: 1.1.0-24.1
 copyright: Apache Sedona, Apache Incubator, Apache, the Apache feather logo, and the Apache Incubator project logo are trademarks or registered trademarks of The Apache Software Foundation. Copyright © 2021 The Apache Software Foundation
 markdown_extensions:
   - admonition
@@ -160,3 +164,6 @@ markdown_extensions:
 plugins:
   - search:
       prebuild_index: true
+  - macros
+  - git-revision-date-localized:
+      type: datetime  

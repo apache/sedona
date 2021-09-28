@@ -16,7 +16,7 @@ You need to install necessary packages if your system does not have them install
 pip install apache-sedona
 ```
 
-* Since version 1.1.0 pyspark is an optional dependency since spark comes pre-installed on many spark platforms. To install pyspark along with Sedona Python in one go, use the `spark` extra:
+* Since Sedona v1.1.0, pyspark is an optional dependency of Sedona Python because spark comes pre-installed on many spark platforms. To install pyspark along with Sedona Python in one go, use the `spark` extra:
   
 ```bash
 pip install apache-sedona[spark]
@@ -48,8 +48,8 @@ spark = SparkSession. \
     config("spark.serializer", KryoSerializer.getName). \
     config("spark.kryo.registrator", SedonaKryoRegistrator.getName). \
     config('spark.jars.packages',
-           'org.apache.sedona:sedona-python-adapter-3.0_2.12:1.0.1-incubating,'
-           'org.datasyslab:geotools-wrapper:geotools-24.1'). \
+           'org.apache.sedona:sedona-python-adapter-3.0_2.12:{{ sedona.current_version }},'
+           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
     getOrCreate()
 ```
 
