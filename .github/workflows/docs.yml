@@ -6,7 +6,7 @@ on:
   pull_request:
     branches:
       - '*'
-      
+
 jobs:
   deploy:
     runs-on: ubuntu-18.04
@@ -21,3 +21,4 @@ jobs:
         path: .cache
     - run: pip install mkdocs-material
     - run: pip install mkdocs-macros-plugin
+    - run: mkdocs build
