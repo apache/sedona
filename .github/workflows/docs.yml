@@ -40,7 +40,7 @@ jobs:
     - run: (cd docs/api/rdocs/; sudo tree -H '.' -L 1 --noreport --charset utf-8 -o index.html)
     - run: mkdocs build
     - run: mkdir staging
-    - run: cp site/* staging/
+    - run: cp -r site/* staging/
     - uses: actions/upload-artifact@v2
       with:
         name: generated-docs
