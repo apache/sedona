@@ -17,17 +17,17 @@ jobs:
     - uses: actions/setup-python@v2
       with:
         python-version: 3.x
-    - uses: actions/cache@v2
-      with:
-        key: ${{ github.ref }}
-        path: .cache
     - run: pip install mkdocs-material
     - run: pip install mkdocs-macros-plugin
     - run: pip install mkdocs-git-revision-date-localized-plugin
     - run: sudo apt update
     - run: sudo apt install littler tree libcurl4-openssl-dev
     - run: (cd R;sudo Rscript generate-docs.R)
-    - run: (cd docs/api/rdocs/; tree -H '.' -L 1 --noreport --charset utf-8 -o index.html)
+    - uses: actions/cache@v2
+      with:
+        key: ${{ github.ref }}
+        path: .cache    
+    - run: (cd docs/api/rdocs/; tree -H '.' -L 1 --noreport --charset utf-8 -o abc.html)
     - run: mkdocs build
     - run: mkdir staging
     - run: cp site/* staging/
