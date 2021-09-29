@@ -23,11 +23,21 @@ jobs:
     - run: sudo apt update
     - run: sudo apt install littler tree libcurl4-openssl-dev
     - run: (cd R;sudo Rscript generate-docs.R)
+
     - uses: actions/cache@v2
       with:
-        key: ${{ github.ref }}
-        path: .cache    
-    - run: (cd docs/api/rdocs/; ls -la; tree -H '.' -L 1 --noreport --charset utf-8 -o index.html)
+        path: ~/.local/share/renv
+        key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-renv-
+    - uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - run: (cd docs/api/rdocs/; ls -la; tree -H '.' -L 1 --noreport --charset utf-8 > index.html)
     - run: mkdocs build
     - run: mkdir staging
     - run: cp site/* staging/
