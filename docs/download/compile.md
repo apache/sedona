@@ -90,7 +90,11 @@ pipenv install --dev
 cd python
 pipenv run pytest tests
 ```
-## Compile the doc website
+## Compile the documentation
+
+The website is automatically built after each commit. The built website can be downloaded here: 
+
+### MkDocs website
 
 The source code of the documentation website is written in Markdown and then compiled by MkDocs. The website is built upon [Material for MkDocs template](https://squidfunk.github.io/mkdocs-material/).
 
@@ -112,3 +116,14 @@ After installing MkDocs and MkDocs-Material, run the command in Sedona root fold
 ```
 mkdocs serve
 ```
+
+### Compile R html docs
+
+1. Make sure you install R, tree and curl on your Ubuntu machine
+```
+sudo apt install littler tree libcurl4-openssl-dev
+```
+2. In the `R` directory, run `Rscript generate-docs.R`. This will create `rdocs` folder in `/docs/api/rdocs`
+
+3. In `/docs/api/rdocs`, run `tree -H '.' -L 1 --noreport --charset utf-8 -o index.html` to generate `index.html`
+
