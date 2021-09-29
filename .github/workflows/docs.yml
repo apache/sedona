@@ -24,8 +24,7 @@ jobs:
     - run: pip install mkdocs-material
     - run: pip install mkdocs-macros-plugin
     - run: pip install mkdocs-git-revision-date-localized-plugin
-    - run: sudo apt install littler
-    - run: sudo apt install tree
+    - run: sudo apt install littler tree libcurl4-openssl-dev
     - run: (cd R;sudo Rscript generate-docs.R)
     - run: (cd docs/api/rdocs/; tree -H '.' -L 1 --noreport --charset utf-8 -o index.html)
     - run: mkdocs build
