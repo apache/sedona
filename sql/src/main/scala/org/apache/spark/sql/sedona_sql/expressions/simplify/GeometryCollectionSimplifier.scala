@@ -35,8 +35,8 @@ object GeometryCollectionSimplifier {
       case string: LineString => LinestringSimplifier.simplify(string, epsilon, preserveCollapsed)
       case point: Point => point
       case polygon: Polygon => PolygonSimplifier.simplify(polygon, preserveCollapsed, epsilon)
-      case _ => null
       case collection: GeometryCollection => simplify(collection, preserveCollapsed, epsilon)
+      case _ => null      
     }.filter(_!=null).toArray
 
     val distinctGeometries = geometries.map(_.getGeometryType).distinct
