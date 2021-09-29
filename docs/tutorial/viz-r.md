@@ -1,22 +1,10 @@
----
-title: "Visualizations"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Visualizations}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
+# Map Visualization applications in R language
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
 
-An important part of `apache.sedona` is its collection of R interfaces to Sedona visualization routines.
-For example, the following
-is essentially the R equivalent of [this example in Scala](https://github.com/apache/incubator-sedona/blob/f6b1c5e24bdb67d2c8d701a9b2af1fb5658fdc4d/viz/src/main/scala/org/apache/sedona/viz/showcase/ScalaExample.scala#L142-L160).
+An important part of `apache.sedona` is its collection of R interfaces
+to Sedona visualization routines. For example, the following is
+essentially the R equivalent of [this example in
+Scala](https://github.com/apache/incubator-sedona/blob/f6b1c5e24bdb67d2c8d701a9b2af1fb5658fdc4d/viz/src/main/scala/org/apache/sedona/viz/showcase/ScalaExample.scala#L142-L160).
 
 ``` r
 library(sparklyr)
@@ -68,10 +56,13 @@ sedona_render_choropleth_map(
 )
 ```
 
-It will create a scatter plot, and then overlay it on top of a choropleth map, as shown below:
+It will create a scatter plot, and then overlay it on top of a
+choropleth map, as shown below:
 
-<img src="images/choropleth-map.png" width=800 />
+<img src="/image/choropleth-map.png" width=800 />
 
-See `?apache.sedona::sedona_render_scatter_plot`, `?apache.sedona::sedona_render_heatmap`,
-and `?apache.sedona::sedona_render_choropleth_map` for more details on visualization-related
-R interfaces currently implemented by `apache.sedona`.
+See `?apache.sedona::sedona_render_scatter_plot`,
+`?apache.sedona::sedona_render_heatmap`, and
+`?apache.sedona::sedona_render_choropleth_map` for more details on
+visualization-related R interfaces currently implemented by
+`apache.sedona`.
