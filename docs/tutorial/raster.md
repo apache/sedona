@@ -1,5 +1,3 @@
-# Raster data processing
-
 Starting from `v1.1.0`, Sedona SQL supports raster data sources and raster operators in DataFrame and SQL. Raster support is available in all Sedona language bindings including ==Scala, Java, Python and R==.
 
 ## Initial setup

@@ -21,14 +21,17 @@ nav:
       - Spatial RDD app:
         - Scala/Java: tutorial/rdd.md
         - Python: tutorial/core-python.md
-      - Spatial SQL app:  
+        - R: tutorial/rdd-r.md
+      - Spatial SQL app:
         - Scala/Java: tutorial/sql.md
         - Pure SQL: tutorial/sql-pure-sql.md
         - Python: tutorial/sql-python.md
-        - Raster data: tutorial/raster.md
+        - R: tutorial/sql-r.md
+        - Raster data - Map Algebra: tutorial/raster.md
       - Map visualization SQL app:
         - Scala/Java: tutorial/viz.md
         - Use Apache Zeppelin: tutorial/zeppelin.md
+        - R: tutorial/viz-r.md
         - Gallery: tutorial/viz-gallery.md
       - Examples:
         - Scala/Java: tutorial/demo.md
@@ -40,6 +43,7 @@ nav:
       - RDD (core):
         - Scala/Java doc: api/java-api.md
         - Python doc: api/python-api.md
+        - R doc: api/r-api.md
       - SQL:
         - Quick start: api/sql/Overview.md
         - Vector data:

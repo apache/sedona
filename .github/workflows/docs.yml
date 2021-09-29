@@ -8,10 +8,12 @@ on:
       - '*'
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     - uses: actions/setup-python@v2
       with:
         python-version: 3.x
@@ -22,4 +24,14 @@ jobs:
     - run: pip install mkdocs-material
     - run: pip install mkdocs-macros-plugin
     - run: pip install mkdocs-git-revision-date-localized-plugin
+    - run: sudo apt install littler
+    - run: sudo apt install tree
+    - run: (cd R;Rscript generate-docs.R)
+    - run: (cd docs/api/rdocs/; tree -H '.' -L 1 --noreport --charset utf-8 -o index.html)
     - run: mkdocs build
+    - run: mkdir staging
+    - run: cp site/* staging/
+    - uses: actions/upload-artifact@v2
+      with:
+        name: generated-docs
+        path: staging

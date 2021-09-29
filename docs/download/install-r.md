@@ -1,85 +1,105 @@
-## Use Sedona Scala/Java
+## Introduction
 
-Before starting the Sedona journey, you need to make sure your Apache Spark cluster is ready.
+[apache.sedona](https://github.com/r-spark/apache.sedona) is a
+[sparklyr](https://github.com/sparklyr/sparklyr)-based R interface for
+[Apache Sedona](https://sedona.apache.org). It presents what Apache
+Sedona has to offer through idiomatic frameworks and constructs in R
+(e.g., one can build spatial Spark SQL queries using Sedona UDFs in
+conjunction with a wide range of dplyr expressions), hence making Apache
+Sedona highly friendly for R users.
 
-There are two ways to use a Scala or Java library with Apache Spark. You can user either one to run Sedona.
+Generally speaking, when working with Apache Sedona, one choose between
+the following two modes:
 
-* [Spark interactive Scala shell](../scalashell): easy to start, good for new learners to try simple functions
-* [Self-contained Scala / Java project](../project): a steep learning curve of package management, but good for large projects
+-   Manipulating Sedona [Spatial Resilient Distributed
+    Datasets](/tutorial/rdd)
+    with spatial-RDD-related routines
+-   Querying geometric columns within [Spatial dataframes](/tutorial/sql) with Sedona
+    spatial UDFs
 
-## Install Sedona Python
+While the former option enables more fine-grained control over low-level
+implementation details (e.g., which index to build for spatial queries,
+which data structure to use for spatial partitioning, etc), the latter
+is simpler and leads to a straightforward integration with `dplyr`,
+`sparklyr`, and other `sparklyr` extensions (e.g., one can build ML
+feature extractors with Sedona UDFs and connect them with ML pipelines
+using `ml_*()` family of functions in `sparklyr`, hence creating ML
+workflows capable of understanding spatial data).
 
-Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder) and play the interactive Sedona Python Jupyter Notebook immediately!
+Because data from spatial RDDs can be imported into Spark dataframes as
+geometry columns and vice versa, one can switch between the
+abovementioned two modes fairly easily.
 
-Apache Sedona extends pyspark functions which depends on libraries:
+At the moment `apache.sedona` consists of the following components:
 
-* pyspark
-* shapely
-* attrs
+-   R interface for Spatial-RDD-related functionalities
+    -   Reading/writing spatial data in WKT, WKB, and GeoJSON formats
+    -   Shapefile reader
+    -   Spatial partition, index, join, KNN query, and range query
+        operations
+    -   Visualization routines
+-   `dplyr`-integration for Sedona spatial UDTs and UDFs
+    -   See [SQL APIs](/api/sql/Overview/) for the list
+        of available UDFs
+-   Functions importing data from spatial RDDs to Spark dataframes and
+    vice versa
 
-You need to install necessary packages if your system does not have them installed. See ["packages" in our Pipfile](https://github.com/apache/incubator-sedona/blob/master/python/Pipfile).
+## Connect to Spark
 
-### Install sedona
+To ensure Sedona serialization routines, UDTs, and UDFs are properly
+registered when creating a Spark session, one simply needs to attach
+`apache.sedona` before instantiating a Spark conneciton. apache.sedona
+will take care of the rest. For example,
 
-* Installing from PyPi repositories. You can find the latest Sedona Python on [PyPi](https://pypi.org/project/apache-sedona/). [There is an known issue in Sedona v1.0.1 and earlier versions](../release-notes/#known-issue).
+``` r
+library(sparklyr)
+library(apache.sedona)
 
-```bash
-pip install apache-sedona
-```
-* Since version 1.1.0 pyspark is an optional dependency since spark comes pre-installed on many spark platforms.
-  To install pyspark along with Sedona Python in one go, use the `spark` extra:
-```bash
-pip install apache-sedona[spark]
-```
-
-* Installing from Sedona Python source
-
-Clone Sedona GitHub source code and run the following command
-
-```bash
-cd python
-python3 setup.py install
-```
-
-### Prepare python-adapter jar
-
-Sedona Python needs one additional jar file called `sedona-python-adapter` to work properly. Please make sure you use the correct version for Spark and Scala. For Spark 3.0 + Scala 2.12, it is called `sedona-python-adapter-3.0_2.12-1.0.1-incubating.jar`
-
-You can get it using one of the following methods:
-
-1. Compile from the source within main project directory and copy it (in `python-adapter/target` folder) to SPARK_HOME/jars/ folder ([more details](/download/compile/#compile-scala-and-java-source-code))
-
-2. Download from [GitHub release](https://github.com/apache/incubator-sedona/releases) and copy it to SPARK_HOME/jars/ folder
-3. Call the [Maven Central coordinate](../maven-coordiantes) in your python program. For example, in PySparkSQL
-```python
-spark = SparkSession. \
-    builder. \
-    appName('appName'). \
-    config("spark.serializer", KryoSerializer.getName). \
-    config("spark.kryo.registrator", SedonaKryoRegistrator.getName). \
-    config('spark.jars.packages',
-           'org.apache.sedona:sedona-python-adapter-3.0_2.12:1.0.1-incubating,'
-           'org.datasyslab:geotools-wrapper:geotools-24.1'). \
-    getOrCreate()
+spark_home <- "/usr/lib/spark"  # NOTE: replace this with your $SPARK_HOME directory
+sc <- spark_connect(master = "yarn", spark_home = spark_home)
 ```
 
-!!!warning
-	If you are going to use Sedona CRS transformation and ShapefileReader functions, you have to use Method 1 or 3. Because these functions internally use GeoTools libraries which are under LGPL license, Apache Sedona binary release cannot include them.
+will create a Sedona-capable Spark connection in YARN client mode, and
 
-### Setup environment variables
+``` r
+library(sparklyr)
+library(apache.sedona)
 
-If you manually copy the python-adapter jar to `SPARK_HOME/jars/` folder, you need to setup two environment variables
-
-* SPARK_HOME. For example, run the command in your terminal
-
-```bash
-export SPARK_HOME=~/Downloads/spark-3.0.1-bin-hadoop2.7
+sc <- spark_connect(master = "local")
 ```
 
-* PYTHONPATH. For example, run the command in your terminal
+will create a Sedona-capable Spark connection to an Apache Spark
+instance running locally.
 
-```bash
-export PYTHONPATH=$SPARK_HOME/python
-``` 
+In `sparklyr`, one can easily inspect the Spark connection object to
+sanity-check it has been properly initialized with all Sedona-related
+dependencies, e.g.,
 
-You can then play with [Sedona Python Jupyter notebook](/tutorial/jupyter-notebook/).
+``` r
+print(sc$extensions$packages)
+```
+
+    ## [1] "org.apache.sedona:sedona-core-3.0_2.12:{{ sedona.current_version }}"
+    ## [2] "org.apache.sedona:sedona-sql-3.0_2.12:{{ sedona.current_version }}"
+    ## [3] "org.apache.sedona:sedona-viz-3.0_2.12:{{ sedona.current_version }}"
+    ## [4] "org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}"
+    ## [5] "org.datasyslab:sernetcdf:0.1.0"
+    ## [6] "org.locationtech.jts:jts-core:1.18.0"
+    ## [7] "org.wololo:jts2geojson:0.14.3"
+
+and
+
+``` r
+spark_session(sc) %>%
+  invoke("%>%", list("conf"), list("get", "spark.kryo.registrator")) %>%
+  print()
+```
+
+    ## [1] "org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator"
+
+
+For more information about connecting to Spark with `sparklyr`, see
+<https://therinspark.com/connections.html> and
+`?sparklyr::spark_connect`. Also see
+[Initiate Spark Context](/tutorial/rdd/#initiate-sparkcontext) and [Initiate Spark Session](/tutorial/sql/#initiate-sparksession) for
+minimum and recommended dependencies for Apache Sedona.

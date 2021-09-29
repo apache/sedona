@@ -33,7 +33,7 @@ python3 setup.py install
 
 ### Prepare python-adapter jar
 
-Sedona Python needs one additional jar file called `sedona-python-adapter` to work properly. Please make sure you use the correct version for Spark and Scala. For Spark 3.0 + Scala 2.12, it is called `sedona-python-adapter-3.0_2.12-1.0.1-incubating.jar`
+Sedona Python needs one additional jar file called `sedona-python-adapter` to work properly. Please make sure you use the correct version for Spark and Scala. For Spark 3.0 + Scala 2.12, it is called `sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.jar`
 
 You can get it using one of the following methods:
 
