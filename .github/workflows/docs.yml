@@ -27,7 +27,7 @@ jobs:
       with:
         key: ${{ github.ref }}
         path: .cache    
-    - run: (cd docs/api/rdocs/; tree -H '.' -L 1 --noreport --charset utf-8 -o abc.html)
+    - run: (cd docs/api/rdocs/; ls -la; tree -H '.' -L 1 --noreport --charset utf-8 -o index.html)
     - run: mkdocs build
     - run: mkdir staging
     - run: cp site/* staging/
