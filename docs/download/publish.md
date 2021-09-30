@@ -138,7 +138,7 @@ All release candidates must be first placed in ASF Dist Dev SVN before vote: htt
 1. Make sure your armored PGP public key (must be encrypted by RSA-4096) is included in the `KEYS` file: https://dist.apache.org/repos/dist/dev/incubator/sedona/KEYS, and publish in major key servers: https://pgp.mit.edu/, https://keyserver.ubuntu.com/, http://keys.gnupg.net/
 2. Create a folder on SVN, such as `{{ sedona.current_git_tag }}`
 ```
-svn mkdir https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}
+svn mkdir -m "Adding folder" https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}
 ```
 3. In a folder other than the Sedona git repo, run the following script to create six files and two folders.
 ```
