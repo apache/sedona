@@ -137,39 +137,41 @@ All release candidates must be first placed in ASF Dist Dev SVN before vote: htt
 
 1. Make sure your armored PGP public key (must be encrypted by RSA-4096) is included in the `KEYS` file: https://dist.apache.org/repos/dist/dev/incubator/sedona/KEYS, and publish in major key servers: https://pgp.mit.edu/, https://keyserver.ubuntu.com/, http://keys.gnupg.net/
 2. Create a folder on SVN, such as `{{ sedona.current_git_tag }}`
-```
+```bash
+#!/bin/bash
 svn mkdir -m "Adding folder" https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}
 ```
 3. In a folder other than the Sedona git repo, run the following script to create six files and two folders.
-```
-mkdir apache-sedona-{{ sedona.current_version }}-src
-git clone --shared --branch {{ sedona.current_git_tag}} https://github.com/apache/incubator-sedona.git apache-sedona-{{ sedona.current_version }}
+```bash
+#!/bin/bash
+git clone --shared --branch {{ sedona.current_git_tag}} https://github.com/apache/incubator-sedona.git apache-sedona-{{ sedona.current_version }}-src
 rm -rf apache-sedona-{{ sedona.current_version }}-src/.git
 tar czf apache-sedona-{{ sedona.current_version }}-src.tar.gz apache-sedona-{{ sedona.current_version }}-src
 mkdir apache-sedona-{{ sedona.current_version }}-bin
-cd apache-sedona-{{ sedona.current_version }}-src && mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.0
-cp apache-sedona-{{ sedona.current_version }}-src/core/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/sql/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/viz/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/python-adapter/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
-cd apache-sedona-{{ sedona.current_version }}-src && mvn clean install -DskipTests -Dscala=2.11 -Dspark=2.4
-cp apache-sedona-{{ sedona.current_version }}-src/core/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/sql/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/viz/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/python-adapter/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
-cd apache-sedona-{{ sedona.current_version }}-src && mvn clean install -DskipTests -Dscala=2.12 -Dspark=2.4
-cp apache-sedona-{{ sedona.current_version }}-src/core/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/sql/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/viz/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/python-adapter/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
+cd apache-sedona-{{ sedona.current_version }}-src && mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.0 && cd ..
+cp apache-sedona-{{ sedona.current_version }}-src/core/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/sql/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/viz/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/python-adapter/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
+cd apache-sedona-{{ sedona.current_version }}-src && mvn clean install -DskipTests -Dscala=2.11 -Dspark=2.4 && cd ..
+cp apache-sedona-{{ sedona.current_version }}-src/core/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/sql/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/viz/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/python-adapter/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
+cd apache-sedona-{{ sedona.current_version }}-src && mvn clean install -DskipTests -Dscala=2.12 -Dspark=2.4 && cd ..
+cp apache-sedona-{{ sedona.current_version }}-src/core/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/sql/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/viz/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/python-adapter/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
 tar czf apache-sedona-{{ sedona.current_version }}-bin.tar.gz apache-sedona-{{ sedona.current_version }}-bin
 shasum -a 512 apache-sedona-{{ sedona.current_version }}-src.tar.gz > apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512
 shasum -a 512 apache-sedona-{{ sedona.current_version }}-bin.tar.gz > apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512
 gpg -ab apache-sedona-{{ sedona.current_version }}-src.tar.gz
 gpg -ab apache-sedona-{{ sedona.current_version }}-bin.tar.gz
 ```
-4. Upload six files to SVN and delete all created files
-```
+4. Upload six files to SVN and delete all created files using the following script
+```bash
+#!/bin/bash
 svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-src.tar.gz https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz
 svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-src.tar.gz.asc https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz.asc
 svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512
@@ -191,7 +193,120 @@ rm -rf apache-sedona-{{ sedona.current_version }}-bin
 ](https://central.sonatype.org/pages/releasing-the-deployment.html#locate-and-examine-your-staging-repository). You should see 12 Sedona modules in total.
 2. Call for a vote in Sedona community and Apache incubator. Then close the staging repo.
 
-#### Failed vote
+Here is a generated vote email. Please add changes at the end if needed:
+
+```
+Subject: [VOTE] Release Apache Sedona {{ sedona.current_rc }}
+
+Hi all,
+
+This is a call for vote on Apache Sedona {{ sedona.current_rc }}. Please refer to the changes listed at the bottom of this email.
+
+Release notes:
+https://github.com/apache/incubator-sedona/blob/{{ sedona.current_git_tag }}/docs/download/release-notes.md
+
+Build instructions:
+https://github.com/apache/incubator-sedona/blob/{{ sedona.current_git_tag }}/docs/download/compile.md
+
+GitHub tag:
+https://github.com/apache/incubator-sedona/releases/tag/{{ sedona.current_git_tag }}
+
+GPG public key to verify the Release:
+https://dist.apache.org/repos/dist/dev/incubator/sedona/KEYS
+
+Source code and binaries:
+https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/
+
+The vote will be open for at least 72 hours or until a majority of at least 3 "approve" PMC votes are cast
+
+Please vote accordingly:
+
+[ ] +1 approve
+
+[ ] +0 no opinion
+
+[ ] -1 disapprove with the reason
+
+Checklist for reference (because of DISCLAIMER-WIP, other checklist items are not blockers):
+
+[ ] Download links are valid.
+
+[ ] Checksums and PGP signatures are valid.
+
+[ ] DISCLAIMER is included.
+
+[ ] Source code artifacts have correct names matching the current release.
+
+For a detailed checklist  please refer to:
+https://cwiki.apache.org/confluence/display/INCUBATOR/Incubator+Release+Checklist
+
+------------
+
+Changes according to the comments on the previous release
+Original comment (Permalink from https://lists.apache.org/list.html): 
+
+
+```
+
+Here is a generated "pass" email:
+
+```
+Subject: [RESULT][VOTE] Release Apache Sedona {{ sedona.current_rc }}
+
+Dear all,
+
+The vote closes now as 72hr have passed. The vote PASSES with
+ 
++? (PPMC): NAME1, NAME2, NAME3
++? (non-binding): NAME4
+No -1 votes
+
+The vote thread (Permalink from https://lists.apache.org/list.html):
+
+I will now bring the vote to general@incubator.apache.org to get
+approval by the IPMC. If this vote passes too, the release is accepted and will be published.
+
+```
+
+Here is a generated "announce" email:
+
+```
+Subject: [ANNOUNCE] Apache Sedona {{ sedona.current_version }} released
+
+Dear all,
+
+We are happy to report that we have released Apache Sedona (incubating) {{ sedona.current_version }}. Thank you again for your help.
+
+Apache Sedona (incubating) is a cluster computing system for processing large-scale spatial data. 
+
+Vote thread (Permalink from https://lists.apache.org/list.html):
+
+
+Vote result thread (Permalink from https://lists.apache.org/list.html):
+
+
+Website:
+http://sedona.apache.org/
+
+Release notes:
+https://github.com/apache/incubator-sedona/blob/sedona-{{ sedona.current_version }}/docs/download/release-notes.md
+
+Download links:
+https://github.com/apache/incubator-sedona/releases/tag/sedona-{{ sedona.current_version }}
+
+Additional resources:
+Get started: http://sedona.apache.org/download/overview/
+Tutorials: http://sedona.apache.org/tutorial/rdd/
+Mailing list: dev@sedona.apache.org
+Twitter: https://twitter.com/ApacheSedona
+Gitter: https://gitter.im/apache/sedona
+
+Regards,
+Apache Sedona (incubating) Team
+```
+
+### Failed vote
+
 If a vote failed, please first drop the staging repo on `repository.apache.org`. Then redo all the steps above. Make sure you use a new scm tag for the new release candidate when use maven-release-plugin (i.e., `{{ sedona.current_version}}-rc2`). You can change the `sedona.current_rc` and `sedona.current_git_tag` in `mkdocs.yml` to generate the script listed on this webpage.
  
 ### Release the package
