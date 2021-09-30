@@ -21,6 +21,18 @@ You should first compile the entire docs using `mkdocs build` to get the `site` 
 1. Copy the generated Javadoc (Scaladoc should already be there) to the corresponding folders in `site/api/javadoc`
 2. Deploy Javadoc and Scaladoc with the project website
 
+
+### Compile R html docs
+
+1. Make sure you install R, tree and curl on your Ubuntu machine
+```
+sudo apt install littler tree libcurl4-openssl-dev
+```
+2. In the `R` directory, run `Rscript generate-docs.R`. This will create `rdocs` folder in Sedona `/docs/api/rdocs`
+
+3. In `/docs/api/rdocs`, run `tree -H '.' -L 1 --noreport --charset utf-8 -o index.html` to generate `index.html`
+
+
 !!!note
 	Please read the following guidelines first: 1. ASF Incubator Distribution Guidelines: https://incubator.apache.org/guides/distribution.html 2. ASF Release Guidelines: https://infra.apache.org/release-publishing.html 3. ASF Incubator Release Votes Guidelines: https://issues.apache.org/jira/browse/LEGAL-469
 
@@ -73,9 +85,9 @@ This step is to stage the release to https://repository.apache.org
 
 #### For Spark 3.0 and Scala 2.12
 
-1. Prepare a release. Manually enter the following variables in the terminal: release id: ==1.0.0-incubating==, scm tag id: ==sedona-1.0.0-incubating-rc1== (this is just an example. Please use the correct version number). You also need to provide GitHub username and password three times.
+1. Prepare a release. Manually enter the following variables in the terminal: release id: `{{ sedona.current_version }}`, scm tag id: `{{ sedona.current_git_tag }}`. You also need to provide GitHub username and password three times.
 ```bash
-mvn clean release:prepare -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests" 
+mvn clean release:prepare -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests"
 ```
 2. Stage a release
 ```bash
@@ -83,40 +95,40 @@ mvn clean release:perform -DautoVersionSubmodules=true -Dresume=false -Dargument
 ```
 3. Now the releases are staged. A tag and two commits will be created on Sedona GitHub repo.
 
-Now let's repeat the process to other Sedona modules. Make sure you use the correct SCM Git tag id. For example, ==sedona-1.0.0-incubating-rc1== (see below).
+Now let's repeat the process to other Sedona modules. Make sure you use the correct SCM Git tag id `{{ sedona.current_git_tag }}` (see below).
 
 #### For Spark 2.4 and Scala 2.11
 
 ```
-mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag=sedona-1.0.0-incubating-rc1 -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
+mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
 ```
 
 #### For Spark 2.4 and Scala 2.12
 
 ```
-mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag=sedona-1.0.0-incubating-rc1 -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
+mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
 ```
 
 #### Use Maven Release Plugin directly from an existing tag
 
-In some cases (i.e., the staging repo on repository.apache.org is closed by mistake), if you need to do `mvn release:perform` from an existing tag, you should use the following command. Note that: you have to use `org.apache.maven.plugins:maven-release-plugin:2.3.2:perform` due to a bug in maven release plugin from v2.4 (https://issues.apache.org/jira/browse/SCM-729). Make sure you use the correct scm tag (i.e.,  `sedona-1.0.0-incubating-rc1`).
+In some cases (i.e., the staging repo on repository.apache.org is closed by mistake), if you need to do `mvn release:perform` from an existing tag, you should use the following command. Note that: you have to use `org.apache.maven.plugins:maven-release-plugin:2.3.2:perform` due to a bug in maven release plugin from v2.4 (https://issues.apache.org/jira/browse/SCM-729). Make sure you use the correct scm tag (i.e.,  `{{ sedona.current_git_tag }}`).
 
 ##### For Spark 3.0 and Scala 2.12
 
 ```
-mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag=sedona-1.0.0-incubating-rc1 -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests"
+mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests"
 ```
 
 ##### For Spark 2.4 and Scala 2.11
 
 ```
-mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag=sedona-1.0.0-incubating-rc1 -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
+mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
 ```
 
 ##### For Spark 2.4 and Scala 2.12
 
 ```
-mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag=sedona-1.0.0-incubating-rc1 -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
+mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
 ```
 
 ### Upload Release Candidate
@@ -124,15 +136,55 @@ mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=
 All release candidates must be first placed in ASF Dist Dev SVN before vote: https://dist.apache.org/repos/dist/dev/incubator/sedona
 
 1. Make sure your armored PGP public key (must be encrypted by RSA-4096) is included in the `KEYS` file: https://dist.apache.org/repos/dist/dev/incubator/sedona/KEYS, and publish in major key servers: https://pgp.mit.edu/, https://keyserver.ubuntu.com/, http://keys.gnupg.net/
-2. Create a folder on SVN, such as `1.0.0-incubating-rc1`
-3. Find the tag on GitHub accordingly (i.e., `sedona-1.0.0-incubating-rc1`)
-4. Create the tarball for source code. For example, `tar czf apache-sedona-1.0.0-incubating-src.tar.gz apache-sedona-1.0.0-incubating-src`. The unpacked directory should be `apache-sedona-incubating-1.0.0-src`.
-5. Create the tarball for binary. For examples, `tar czf apache-sedona-1.0.0-incubating-bin.tar.gz apache-sedona-1.0.0-incubating-bin`. The unpacked directory should be `apache-sedona-1.0.0-incubating-bin`.It should contain 12 jars.
-6. Generate sha512 checksum for source code: `shasum -a 512 apache-sedona-1.0.0-incubating-src.tar.gz > apache-sedona-1.0.0-incubating-src.tar.gz.sha512`
-7. Generate sha512 checksum for binary: `shasum -a 512 apache-sedona-1.0.0-incubating-bin.tar.gz > apache-sedona-1.0.0-incubating-bin.tar.gz.sha512`
-8. Sign the tarball for source: `gpg -ab apache-sedona-1.0.0-incubating-src.tar.gz`
-9. Sign the tarball for binary: `gpg -ab apache-sedona-1.0.0-incubating-bin.tar.gz`
-10. Upload six files to `dist/dev/incubator/sedona`: for both src and bin, upload `tar.gz`, `asc` and `sha512`
+2. Create a folder on SVN, such as `{{ sedona.current_git_tag }}`
+```
+svn mkdir https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}
+```
+3. In a folder other than the Sedona git repo, run the following script to create six files and two folders.
+```
+mkdir apache-sedona-{{ sedona.current_version }}-src
+git clone --shared --branch {{ sedona.current_git_tag}} https://github.com/apache/incubator-sedona.git apache-sedona-{{ sedona.current_version }}
+rm -rf apache-sedona-{{ sedona.current_version }}-src/.git
+tar czf apache-sedona-{{ sedona.current_version }}-src.tar.gz apache-sedona-{{ sedona.current_version }}-src
+mkdir apache-sedona-{{ sedona.current_version }}-bin
+cd apache-sedona-{{ sedona.current_version }}-src && mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.0
+cp apache-sedona-{{ sedona.current_version }}-src/core/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/sql/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/viz/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/python-adapter/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
+cd apache-sedona-{{ sedona.current_version }}-src && mvn clean install -DskipTests -Dscala=2.11 -Dspark=2.4
+cp apache-sedona-{{ sedona.current_version }}-src/core/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/sql/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/viz/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/python-adapter/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
+cd apache-sedona-{{ sedona.current_version }}-src && mvn clean install -DskipTests -Dscala=2.12 -Dspark=2.4
+cp apache-sedona-{{ sedona.current_version }}-src/core/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/sql/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/viz/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/python-adapter/target/sedona-*.jar apache-sedona-{{ sedona.current_version }}-bin/
+tar czf apache-sedona-{{ sedona.current_version }}-bin.tar.gz apache-sedona-{{ sedona.current_version }}-bin
+shasum -a 512 apache-sedona-{{ sedona.current_version }}-src.tar.gz > apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512
+shasum -a 512 apache-sedona-{{ sedona.current_version }}-bin.tar.gz > apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512
+gpg -ab apache-sedona-{{ sedona.current_version }}-src.tar.gz
+gpg -ab apache-sedona-{{ sedona.current_version }}-bin.tar.gz
+```
+4. Upload six files to SVN and delete all created files
+```
+svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-src.tar.gz https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz
+svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-src.tar.gz.asc https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz.asc
+svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512
+svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-bin.tar.gz https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz
+svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-bin.tar.gz.asc https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz.asc
+svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512
+rm apache-sedona-{{ sedona.current_version }}-src.tar.gz
+rm apache-sedona-{{ sedona.current_version }}-src.tar.gz.asc
+rm apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512
+rm apache-sedona-{{ sedona.current_version }}-bin.tar.gz
+rm apache-sedona-{{ sedona.current_version }}-bin.tar.gz.asc
+rm apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512
+rm -rf apache-sedona-{{ sedona.current_version }}-src
+rm -rf apache-sedona-{{ sedona.current_version }}-bin
+```
 
 ### Call for a vote
 1. Check the status of the staging repo: [Locate and Examine Your Staging Repository
@@ -140,7 +192,7 @@ All release candidates must be first placed in ASF Dist Dev SVN before vote: htt
 2. Call for a vote in Sedona community and Apache incubator. Then close the staging repo.
 
 #### Failed vote
-If a vote failed, please first drop the staging repo on `repository.apache.org`. Then redo all the steps above. Make sure you use a new scm tag for the new release candidate when use maven-release-plugin (i.e., `sedona-1.0.0-incubating-rc2`)
+If a vote failed, please first drop the staging repo on `repository.apache.org`. Then redo all the steps above. Make sure you use a new scm tag for the new release candidate when use maven-release-plugin (i.e., `{{ sedona.current_version}}-rc2`). You can change the `sedona.current_rc` and `sedona.current_git_tag` in `mkdocs.yml` to generate the script listed on this webpage.
  
 ### Release the package
 
