@@ -93,9 +93,9 @@ class StMakePolygonSpec extends TestBaseScala with Matchers with GeometrySample 
 
       Then("valid polygon with holes should be created")
       transformedGeometriesWithHoles should contain theSameElementsAs Seq(
-        "POLYGON ((0 5, 1 7, 2 9, 2 5, 5 7, 4 6, 3 2, 1 3, 0 5))",
-        "POLYGON ((7 -1, 7 6, 9 6, 9 1, 7 -1))",
-        "POLYGON ((2 -2, 6 -2, 6 -7, 2 -7, 2 -2))"
+        "POLYGON ((0 5, 1 7, 2 9, 2 5, 5 7, 4 6, 3 2, 1 3, 0 5), (2 3, 1 4, 2 4, 2 3), (2 4, 3 5, 3 4, 2 4))",
+        "POLYGON ((7 -1, 7 6, 9 6, 9 1, 7 -1), (6 2, 8 2, 8 1, 6 1, 6 2))",
+        "POLYGON ((2 -2, 6 -2, 6 -7, 2 -7, 2 -2), (6 2, 8 2, 8 1, 6 1, 6 2))"
       )
     }
 
