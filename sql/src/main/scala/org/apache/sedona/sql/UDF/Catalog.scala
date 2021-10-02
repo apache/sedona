@@ -86,6 +86,7 @@ object Catalog {
     ST_LineInterpolatePoint,
     ST_SubDivideExplode,
     ST_SubDivide,
+    ST_MakePolygon,
 
     // Expression for rasters
     RS_NormalizedDifference,

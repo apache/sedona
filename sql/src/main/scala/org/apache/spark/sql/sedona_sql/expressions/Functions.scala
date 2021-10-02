@@ -1167,3 +1167,43 @@ case class ST_SubDivideExplode(children: Seq[Expression]) extends Generator {
 
   override protected def doGenCode(ctx: CodegenContext, ev: ExprCode): ExprCode = ev
 }
+
+
+case class ST_MakePolygon(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = true
+  private val geometryFactory = new GeometryFactory()
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.betweenLength(1, 2)
+    val exteriorRing = inputExpressions.head
+    val holes = inputExpressions.tail.headOption.getOrElse(Seq())
+
+    val validHoles = holes match {
+      case geometries: Seq[LineString] => geometries.filter(_ != null)
+        .map(line => geometryFactory.createLinearRing(line.getCoordinates))
+      case null => Seq()
+      case _ => Seq()
+    }
+
+    exteriorRing.toGeometry(input) match {
+      case geom: LineString =>
+        try {
+          val poly = new Polygon(geometryFactory.createLinearRing(geom.getCoordinates), validHoles.toArray, geometryFactory)
+
+          poly.getCoordinates.foreach(println)
+          poly.toGenericArrayData
+        }
+        catch {
+          case e: Exception => null
+        }
+
+      case null => null
+    }
+
+  }
+
+  override def dataType: DataType = ArrayType(GeometryUDT)
+
+  override def children: Seq[Expression] = inputExpressions
+}
