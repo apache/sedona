@@ -1201,12 +1201,12 @@ case class ST_MakePolygon(inputExpressions: Seq[Expression])
           case e: Exception => null
         }
 
-      case null => null
+      case _ => null
     }
 
   }
 
-  override def dataType: DataType = ArrayType(GeometryUDT)
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }

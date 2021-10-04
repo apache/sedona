@@ -102,7 +102,8 @@ class StMakePolygonSpec extends TestBaseScala with Matchers with GeometrySample 
     it("should return null values when calling ST_MakePolygon on given geometries which are not valid"){
       Given("line strings which can not be valid polygon")
       val geometryDataFrame = Seq(
-        "LINESTRING(2 1,3 4,4 6)"
+        "LINESTRING(2 1,3 4,4 6)",
+        "POINT(21 52)"
       ).map(geom => Tuple1(wktReader.read(geom))).toDF("geom")
 
       When("calling ST_MakePolygon")
@@ -118,6 +119,23 @@ class StMakePolygonSpec extends TestBaseScala with Matchers with GeometrySample 
       result.size shouldBe 1
 
       result.head shouldBe null
+    }
+
+    it("should allow to use function with use of sql"){
+      Given("sql query with ST_MakePolygon")
+      val mkPolygon = sparkSession.sql(
+        """
+            SELECT
+              ST_MakePolygon(
+              ST_GeomFromText('LINESTRING(7 -1, 7 6, 9 6, 9 1, 7 -1)'),
+              ARRAY(ST_GeomFromText('LINESTRING(6 2, 8 2, 8 1, 6 1, 6 2)'))
+              ) AS polygon
+            """
+      )
+
+      Then("after evaluating count should be appropriate")
+      mkPolygon.show(1, false)
+      mkPolygon.count() shouldBe 1
     }
   }
 }

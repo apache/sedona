@@ -727,3 +727,33 @@ Result:
 |LINESTRING(100 100, 120 120) |
 +-----------------------------+
 ```
+
+## ST_MakePolygon
+
+Introduction: Function to convert closed linestring to polygon including holes
+
+Format: `ST_MakePolygon(geom: geometry, holes: array<geometry>)`
+
+Since: `v1.1.0`
+
+Example:
+
+Query:
+```SQL
+SELECT
+    ST_MakePolygon(
+        ST_GeomFromText('LINESTRING(7 -1, 7 6, 9 6, 9 1, 7 -1)'),
+        ARRAY(ST_GeomFromText('LINESTRING(6 2, 8 2, 8 1, 6 1, 6 2)'))
+    ) AS polygon
+```
+
+Result:
+
+```
++----------------------------------------------------------------+
+|polygon                                                         |
++----------------------------------------------------------------+
+|POLYGON ((7 -1, 7 6, 9 6, 9 1, 7 -1), (6 2, 8 2, 8 1, 6 1, 6 2))|
++----------------------------------------------------------------+
+
+```
