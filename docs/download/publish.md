@@ -1,5 +1,21 @@
 # Publish Sedona
 
+## Check ASF copyright in all file headers
+
+1. Download [Apache Rat binary (.jar file)](https://creadur.apache.org/rat/download_rat.cgi).
+2. Run the following terminal script:
+```bash
+#!/bin/bash
+git clone --shared --branch master https://github.com/apache/incubator-sedona.git sedona-src
+java -jar apache-rat-0.13.jar -d sedona-src > report.txt
+```
+3. Read the generated report.txt file and make sure all source code files have ASF header.
+4. Delete the generated report and cloned files
+```
+rm -rf sedona-src
+rm report.txt
+```
+
 ## Publish the doc website
 
 1. Run `mkdocs build` in Sedona root directory. Copy all content in the `site` folder.
