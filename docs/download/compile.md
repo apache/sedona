@@ -117,13 +117,3 @@ After installing MkDocs and MkDocs-Material, run the command in Sedona root fold
 mkdocs serve
 ```
 
-### Compile R html docs
-
-1. Make sure you install R, tree and curl on your Ubuntu machine
-```
-sudo apt install littler tree libcurl4-openssl-dev
-```
-2. In the `R` directory, run `Rscript generate-docs.R`. This will create `rdocs` folder in `/docs/api/rdocs`
-
-3. In `/docs/api/rdocs`, run `tree -H '.' -L 1 --noreport --charset utf-8 -o index.html` to generate `index.html`
-

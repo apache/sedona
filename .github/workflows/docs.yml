@@ -22,7 +22,7 @@ jobs:
     - run: pip install mkdocs-git-revision-date-localized-plugin
     - run: sudo apt update
     - run: sudo apt install littler tree libcurl4-openssl-dev
-    - run: (cd R;sudo Rscript generate-docs.R)
+    - run: (sudo Rscript generate-docs.R)
 
     - uses: actions/cache@v2
       with:
