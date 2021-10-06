@@ -95,6 +95,14 @@ mvn deploy -DskipTests -Dscala=2.12 -Dspark=2.4
 
 ## Publish releases
 
+### Update Sedona Python, R and Zeppelin versions
+
+Make sure the Sedona version in the following files are {{ sedona.current_version }}. Note that: Python and R versions cannot have "incubating" postfix.
+
+1. https://github.com/apache/incubator-sedona/blob/master/python/sedona/version.py
+2. https://github.com/apache/incubator-sedona/blob/master/R/DESCRIPTION
+3. https://github.com/apache/incubator-sedona/blob/master/zeppelin/package.json
+
 ### Stage the Release Candidate
 
 This step is to stage the release to https://repository.apache.org
@@ -125,27 +133,6 @@ mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=
 mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
 ```
 
-#### Use Maven Release Plugin directly from an existing tag
-
-In some cases (i.e., the staging repo on repository.apache.org is closed by mistake), if you need to do `mvn release:perform` from an existing tag, you should use the following command. Note that: you have to use `org.apache.maven.plugins:maven-release-plugin:2.3.2:perform` due to a bug in maven release plugin from v2.4 (https://issues.apache.org/jira/browse/SCM-729). Make sure you use the correct scm tag (i.e.,  `{{ sedona.current_git_tag }}`).
-
-##### For Spark 3.0 and Scala 2.12
-
-```
-mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests"
-```
-
-##### For Spark 2.4 and Scala 2.11
-
-```
-mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
-```
-
-##### For Spark 2.4 and Scala 2.12
-
-```
-mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
-```
 
 ### Upload Release Candidate
 
@@ -328,22 +315,73 @@ If a vote failed, please first drop the staging repo on `repository.apache.org`.
 ### Release the package
 
 1. Move all files in https://dist.apache.org/repos/dist/dev/incubator/sedona to https://dist.apache.org/repos/dist/release/incubator/sedona, using svn
-2. Create a GitHub release. Please follow the template: https://github.com/apache/incubator-sedona/releases/tag/sedona-1.0.0-incubating
-3. Publish Python project to PyPi using twine. You must have the maintainer priviledge of https://pypi.org/project/apache-sedona/. Then please setup your token and run `python3 setup.py sdist bdist_wheel` and `twine upload dist/*` in the `incubator-sedona/python` directory.
-4. Publish Sedona-Zeppelin (a node.js package) on NPM. Run `npm publish` in the `zeppelin` directory.
-5. Close the staging repo on https://repository.apache.org. If the staging repo has been automatically closed by the system, please read ==Use Maven Release Plugin directly from an existing tag== above.
+```bash
+#!/bin/bash
+svn mkdir -m "Adding folder" https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona.current_version }}
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz.asc
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz.asc
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512
+svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-src.tar.gz https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona.current_version }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz
+svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-src.tar.gz.asc https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona.current_version }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz.asc
+svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512 https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona.current_version }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512
+svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-bin.tar.gz https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona.current_version }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz
+svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-bin.tar.gz.asc https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona.current_version }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz.asc
+svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512 https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona.current_version }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512
+rm apache-sedona-{{ sedona.current_version }}-src.tar.gz
+rm apache-sedona-{{ sedona.current_version }}-src.tar.gz.asc
+rm apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512
+rm apache-sedona-{{ sedona.current_version }}-bin.tar.gz
+rm apache-sedona-{{ sedona.current_version }}-bin.tar.gz.asc
+rm apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512
+```
+2. Add the download link to [Download page](/download/download#versions) and create a GitHub release.
+3. (1) Publish Python project to PyPi using twine. You must have the maintainer priviledge of https://pypi.org/project/apache-sedona/. (2) Publish Zeppelin plugin to NPM
+```bash
+#!/bin/bash
+git clone --shared --branch {{ sedona.current_git_tag}} https://github.com/apache/incubator-sedona.git apache-sedona-{{ sedona.current_version }}-src
+cd apache-sedona-{{ sedona.current_version }}-src/python && python3 setup.py sdist bdist_wheel && twine upload dist/* && cd ..
+cd zeppelin && npm publish && cd ..
+rm -rf apache-sedona-{{ sedona.current_version }}-src
+```
+4. Publish Sedona R to CRAN. More details to be added.
+5. Close the staging repo on https://repository.apache.org. If the staging repo has been automatically closed by the system, please read ==Use Maven Release Plugin directly from an existing tag==.
+
+#### Use Maven Release Plugin directly from an existing tag
+
+The staging repo on repository.apache.org is usually automatically closed before the voting is closed. If so, you need to do `mvn release:perform` from an existing tag. Note that: you have to use `org.apache.maven.plugins:maven-release-plugin:2.3.2:perform` due to a bug in maven release plugin from v2.4 (https://issues.apache.org/jira/browse/SCM-729). Make sure you use the correct scm tag (i.e.,  `{{ sedona.current_git_tag }}`).
+
+##### For Spark 3.0 and Scala 2.12
+
+```
+mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests"
+```
+
+##### For Spark 2.4 and Scala 2.11
+
+```
+mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
+```
+
+##### For Spark 2.4 and Scala 2.12
+
+```
+mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
+```
 
 #### Fix the error when close the staged repo
 
 In the last step, you may see 6 errors similar to the following:
 ```
 typeId	signature-staging
-failureMessage	Invalid Signature: '/org/apache/sedona/sedona-python-adapter-2.4_2.12/1.0.1-incubating/sedona-python-adapter-2.4_2.12-1.0.1-incubating.pom.asc' is not a valid signature for 'sedona-python-adapter-2.4_2.12-1.0.1-incubating.pom'.
-failureMessage	Invalid Signature: '/org/apache/sedona/sedona-python-adapter-2.4_2.11/1.0.1-incubating/sedona-python-adapter-2.4_2.11-1.0.1-incubating.pom.asc' is not a valid signature for 'sedona-python-adapter-2.4_2.11-1.0.1-incubating.pom'.
-failureMessage	Invalid Signature: '/org/apache/sedona/sedona-python-adapter-3.0_2.12/1.0.1-incubating/sedona-python-adapter-3.0_2.12-1.0.1-incubating.pom.asc' is not a valid signature for 'sedona-python-adapter-3.0_2.12-1.0.1-incubating.pom'.
-failureMessage	Invalid Signature: '/org/apache/sedona/sedona-viz-2.4_2.12/1.0.1-incubating/sedona-viz-2.4_2.12-1.0.1-incubating.pom.asc' is not a valid signature for 'sedona-viz-2.4_2.12-1.0.1-incubating.pom'.
-failureMessage	Invalid Signature: '/org/apache/sedona/sedona-viz-3.0_2.12/1.0.1-incubating/sedona-viz-3.0_2.12-1.0.1-incubating.pom.asc' is not a valid signature for 'sedona-viz-3.0_2.12-1.0.1-incubating.pom'.
-failureMessage	Invalid Signature: '/org/apache/sedona/sedona-viz-2.4_2.11/1.0.1-incubating/sedona-viz-2.4_2.11-1.0.1-incubating.pom.asc' is not a valid signature for 'sedona-viz-2.4_2.11-1.0.1-incubating.pom'.
+failureMessage	Invalid Signature: '/org/apache/sedona/sedona-python-adapter-2.4_2.12/{{ sedona.current_version }}/sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom.asc' is not a valid signature for 'sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom'.
+failureMessage	Invalid Signature: '/org/apache/sedona/sedona-python-adapter-2.4_2.11/{{ sedona.current_version }}/sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom.asc' is not a valid signature for 'sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom'.
+failureMessage	Invalid Signature: '/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom.asc' is not a valid signature for 'sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom'.
+failureMessage	Invalid Signature: '/org/apache/sedona/sedona-viz-2.4_2.12/{{ sedona.current_version }}/sedona-viz-2.4_2.12-{{ sedona.current_version }}.pom.asc' is not a valid signature for 'sedona-viz-2.4_2.12-{{ sedona.current_version }}.pom'.
+failureMessage	Invalid Signature: '/org/apache/sedona/sedona-viz-3.0_2.12/{{ sedona.current_version }}/sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom.asc' is not a valid signature for 'sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom'.
+failureMessage	Invalid Signature: '/org/apache/sedona/sedona-viz-2.4_2.11/{{ sedona.current_version }}/sedona-viz-2.4_2.11-{{ sedona.current_version }}.pom.asc' is not a valid signature for 'sedona-viz-2.4_2.11-{{ sedona.current_version }}.pom'.
 ```
 
 This is caused by a bug in the resolved-pom-maven-plugin in POM.xml. You will have to upload the signatures of the 6 POM files mannualy. Please follow the steps below.
