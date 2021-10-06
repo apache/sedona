@@ -22,20 +22,20 @@ new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"
 if(length(new.packages)) install.packages(new.packages, repos = "http://cran.us.r-project.org")
 
 # Generate Rd files in man/
-roxygen2::roxygenize()
+roxygen2::roxygenize("R")
 
 # Script to convert .Rd and .Rmd files from man/ and vignettes to docs/*.md for use by MkDocs
 library("tools")
 
 # Create two dir if not exist
-dir.create(file.path("../docs/api/", "rdocs"), showWarnings = FALSE)
+dir.create(file.path("docs/api/", "rdocs"), showWarnings = FALSE)
 
 # Convert Rd files to markdown
 
-files = dir("man/")
+files = dir("R/man/")
 for(file in files){
-  infile = file.path("man/", file)
-  outfile = file.path("../docs/api/rdocs", gsub(".Rd", ".html", file))
+  infile = file.path("R/man/", file)
+  outfile = file.path("docs/api/rdocs", gsub(".Rd", ".html", file))
   Rd2HTML(infile, outfile, package = "apache.sedona", stages = c("install", "render"))
 }
 
