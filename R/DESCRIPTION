@@ -26,6 +26,5 @@ Suggests:
     knitr,
     rmarkdown
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 SystemRequirements: Spark: 2.4.x or 3.x
-VignetteBuilder: knitr

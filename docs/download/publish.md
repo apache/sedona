@@ -40,14 +40,16 @@ You should first compile the entire docs using `mkdocs build` to get the `site` 
 
 ### Compile R html docs
 
-1. Make sure you install R, tree and curl on your Ubuntu machine
+1. Make sure you install R, tree and curl on your Ubuntu machine. On Mac, just do `brew install tree`
 ```
 sudo apt install littler tree libcurl4-openssl-dev
 ```
-2. In the `R` directory, run `Rscript generate-docs.R`. This will create `rdocs` folder in Sedona `/docs/api/rdocs`
-
-3. In `/docs/api/rdocs`, run `tree -H '.' -L 1 --noreport --charset utf-8 -o index.html` to generate `index.html`
-
+2. In the Sedona root directory, run the script below. This will create `rdocs` folder in Sedona `/docs/api/rdocs`
+```bash
+#!/bin/bash
+Rscript generate-docs.R
+cd ./docs/api/rdocs && tree -H '.' -L 1 --noreport --charset utf-8 -o index.html && cd ../../../
+```
 
 !!!note
 	Please read the following guidelines first: 1. ASF Incubator Distribution Guidelines: https://incubator.apache.org/guides/distribution.html 2. ASF Release Guidelines: https://infra.apache.org/release-publishing.html 3. ASF Incubator Release Votes Guidelines: https://issues.apache.org/jira/browse/LEGAL-469
@@ -347,7 +349,13 @@ cd zeppelin && npm publish && cd ..
 rm -rf apache-sedona-{{ sedona.current_version }}-src
 ```
 4. Publish Sedona R to CRAN. More details to be added.
-5. Close the staging repo on https://repository.apache.org. If the staging repo has been automatically closed by the system, please read ==Use Maven Release Plugin directly from an existing tag==.
+```bash
+#!/bin/bash
+R CMD build .
+R CMD check --as-cran apache.sedona_*.tar.gz
+```
+5. Instructions on how to submit a R package to CRAN are at the bottom of the [CRAN front page](https://cran.r-project.org/), “Submitting to CRAN.” Submission is now via [a web form](https://xmpalantir.wu.ac.at/cransubmit/).
+6. Close the staging repo on https://repository.apache.org. If the staging repo has been automatically closed by the system, please read ==Use Maven Release Plugin directly from an existing tag==.
 
 #### Use Maven Release Plugin directly from an existing tag
 
