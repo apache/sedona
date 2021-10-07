@@ -6,12 +6,21 @@ Authors@R:
     c(person(family = "Apache Sedona",
              role = c("aut", "cre"),
              email = "private@sedona.apache.org"),
+      person(given = "Jia",
+             family = "Yu",
+             role = c("ctb", "cph"),
+             email = "jiayu@apache.org"),
+      person(given = "Yitao",
+             family = "Li",
+             role = c("aut", "cph"),
+             email = "yitao@rstudio.com",
+             comment = c(ORCID = "0000-0002-1261-905X")),
       person(family = "The Apache Software Foundation",
              role = "cph"),
       person(family = "RStudio",
              role = "cph"))
 Maintainer: Apache Sedona <private@sedona.apache.org>
-Description: This extension is an R interface for Apache Sedona built on sparklyr
+Description: R interface for 'Apache Sedona' based on 'sparklyr'
     (<https://sedona.apache.org>).
 License: Apache License 2.0
 Depends:
@@ -27,4 +36,4 @@ Suggests:
     rmarkdown
 Encoding: UTF-8
 RoxygenNote: 7.1.2
-SystemRequirements: Spark: 2.4.x or 3.x
+SystemRequirements: 'Apache Spark' 2.4.x or 3.x

@@ -30,6 +30,8 @@
 #'   Notice this option is irrelevant if the input RDD has not been partitioned
 #'   using with a spatial partitioner yet.
 #'
+#' @return A spatial index object.
+#'
 #' @examples
 #' library(sparklyr)
 #' library(apache.sedona)
@@ -45,6 +47,7 @@
 #'   )
 #'   sedona_build_index(rdd, type = "rtree")
 #' }
+#'
 #' @export
 sedona_build_index <- function(rdd,
                                type = c("quadtree", "rtree"),

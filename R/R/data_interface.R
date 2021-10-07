@@ -52,6 +52,8 @@ NULL
 #'   For all other types of RDDs, if last_spatial_col_index is unspecified, then
 #'   it will assume the value of -1 (i.e., the last of all input columns).
 #'
+#' @return A typed SpatialRDD.
+#'
 #' @examples
 #' library(sparklyr)
 #' library(apache.sedona)
@@ -68,7 +70,9 @@ NULL
 #'     first_spatial_col_index = 1L
 #'   )
 #' }
+#'
 #' @family Sedona data inferface functions
+#'
 #' @export
 sedona_read_dsv_to_typed_rdd <- function(sc,
                                          location,
@@ -149,6 +153,8 @@ sedona_read_dsv_to_typed_rdd <- function(sc,
 #'
 #' @inheritParams sedona_spatial_rdd_data_source
 #'
+#' @return A typed SpatialRDD.
+#'
 #' @examples
 #' library(sparklyr)
 #' library(apache.sedona)
@@ -162,6 +168,9 @@ sedona_read_dsv_to_typed_rdd <- function(sc,
 #'     location = input_location, type = "polygon"
 #'   )
 #' }
+#'
+#' @family Sedona data inferface functions
+#'
 #' @export
 sedona_read_shapefile_to_typed_rdd <- function(sc,
                                                location,
@@ -185,6 +194,8 @@ sedona_read_shapefile_to_typed_rdd <- function(sc,
 #'
 #' @inheritParams sedona_spatial_rdd_data_source
 #'
+#' @return A typed SpatialRDD.
+#'
 #' @examples
 #' library(sparklyr)
 #' library(apache.sedona)
@@ -198,7 +209,9 @@ sedona_read_shapefile_to_typed_rdd <- function(sc,
 #'     location = input_location, type = "polygon"
 #'   )
 #' }
+#'
 #' @family Sedona data inferface functions
+#'
 #' @export
 sedona_read_geojson_to_typed_rdd <- function(sc,
                                              location,
@@ -230,6 +243,8 @@ sedona_read_geojson_to_typed_rdd <- function(sc,
 #'   automatically skip syntax-invalid geometries, rather than throwing
 #'   errorings.
 #'
+#' @return A SpatialRDD.
+#'
 #' @examples
 #' library(sparklyr)
 #' library(apache.sedona)
@@ -240,7 +255,9 @@ sedona_read_geojson_to_typed_rdd <- function(sc,
 #'   input_location <- "/dev/null" # replace it with the path to your input file
 #'   rdd <- sedona_read_geojson(sc, location = input_location)
 #' }
+#'
 #' @family Sedona data inferface functions
+#'
 #' @export
 sedona_read_geojson <- function(sc,
                                 location,
@@ -280,6 +297,8 @@ sedona_read_geojson <- function(sc,
 #'   automatically skip syntax-invalid geometries, rather than throwing
 #'   errorings.
 #'
+#' @return A SpatialRDD.
+#'
 #' @examples
 #' library(sparklyr)
 #' library(apache.sedona)
@@ -293,7 +312,9 @@ sedona_read_geojson <- function(sc,
 #'     location = input_location, wkb_col_idx = 0L
 #'   )
 #' }
+#'
 #' @family Sedona data inferface functions
+#'
 #' @export
 sedona_read_wkb <- function(sc,
                             location,
@@ -335,6 +356,8 @@ sedona_read_wkb <- function(sc,
 #'   automatically skip syntax-invalid geometries, rather than throwing
 #'   errorings.
 #'
+#' @return A SpatialRDD.
+#'
 #' @examples
 #' library(sparklyr)
 #' library(apache.sedona)
@@ -349,7 +372,9 @@ sedona_read_wkb <- function(sc,
 #'     wkt_col_idx = 0L
 #'   )
 #' }
+#'
 #' @family Sedona data inferface functions
+#'
 #' @export
 sedona_read_wkt <- function(sc,
                             location,
@@ -384,6 +409,8 @@ sedona_read_wkt <- function(sc,
 #'
 #' @inheritParams sedona_spatial_rdd_data_source
 #'
+#' @return A SpatialRDD.
+#'
 #' @examples
 #' library(sparklyr)
 #' library(apache.sedona)
@@ -394,7 +421,9 @@ sedona_read_wkt <- function(sc,
 #'   input_location <- "/dev/null" # replace it with the path to your input file
 #'   rdd <- sedona_read_shapefile(sc, location = input_location)
 #' }
+#'
 #' @family Sedona data inferface functions
+#'
 #' @export
 sedona_read_shapefile <- function(sc,
                                   location,
@@ -426,6 +455,8 @@ NULL
 #'
 #' @inheritParams sedona_spatial_rdd_serialization_routine
 #'
+#' @return No return value.
+#'
 #' @examples
 #' library(sparklyr)
 #' library(apache.sedona)
@@ -441,7 +472,9 @@ NULL
 #'   )
 #'   sedona_write_wkb(rdd, "/tmp/wkb_output.tsv")
 #' }
+#'
 #' @family Sedona data inferface functions
+#'
 #' @export
 sedona_write_wkb <- function(x, output_location) {
   invoke(x$.jobj, "saveAsWKB", output_location)
@@ -452,6 +485,8 @@ sedona_write_wkb <- function(x, output_location) {
 #' Export serialized data from a Sedona SpatialRDD into a WKT file.
 #'
 #' @inheritParams sedona_spatial_rdd_serialization_routine
+#'
+#' @return No return value.
 #'
 #' @examples
 #' library(sparklyr)
@@ -468,7 +503,9 @@ sedona_write_wkb <- function(x, output_location) {
 #'   )
 #'   sedona_write_wkt(rdd, "/tmp/wkt_output.tsv")
 #' }
+#'
 #' @family Sedona data inferface functions
+#'
 #' @export
 sedona_write_wkt <- function(x, output_location) {
   invoke(x$.jobj, "saveAsWKT", output_location)
@@ -479,6 +516,8 @@ sedona_write_wkt <- function(x, output_location) {
 #' Export serialized data from a Sedona SpatialRDD into a GeoJSON file.
 #'
 #' @inheritParams sedona_spatial_rdd_serialization_routine
+#'
+#' @return No return value.
 #'
 #' @examples
 #' library(sparklyr)
@@ -494,7 +533,9 @@ sedona_write_wkt <- function(x, output_location) {
 #'   )
 #'   sedona_write_geojson(rdd, "/tmp/example.json")
 #' }
+#'
 #' @family Sedona data inferface functions
+#'
 #' @export
 sedona_write_geojson <- function(x, output_location) {
   invoke(x$.jobj, "saveAsGeoJSON", output_location)
@@ -510,6 +551,8 @@ sedona_write_geojson <- function(x, output_location) {
 #' @param spatial_col The name of the spatial column.
 #' @param output_location Location of the output file.
 #' @param output_format Format of the output.
+#'
+#' @return No return value.
 #'
 #' @examples
 #' library(sparklyr)
@@ -529,7 +572,9 @@ sedona_write_geojson <- function(x, output_location) {
 #'     output_format = "wkb"
 #'   )
 #' }
+#'
 #' @family Sedona data inferface functions
+#'
 #' @export
 sedona_save_spatial_rdd <- function(x,
                                     spatial_col,
