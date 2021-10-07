@@ -22,6 +22,8 @@ package org.apache.sedona.sql
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types._
+import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.io.WKTWriter
 
 class predicateJoinTestScala extends TestBaseScala {
 
@@ -123,6 +125,46 @@ class predicateJoinTestScala extends TestBaseScala {
       var rangeJoinDf = sparkSession.sql("select * from polygondf, pointdf where ST_Crosses(pointdf.pointshape, polygondf.polygonshape) ")
 
       assert(rangeJoinDf.count() == 1000)
+    }
+
+    it("Passed ST_Intersects in a join with singleton dataframe") {
+      var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygonInputLocation).limit(1).repartition(1)
+      polygonCsvDf.createOrReplaceTempView("polygontable")
+      var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+
+      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
+      pointCsvDF.createOrReplaceTempView("pointtable")
+      var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape from pointtable")
+      pointDf.createOrReplaceTempView("pointdf")
+
+      // Join with a singleton dataframe is essentially a range query
+      val polygon = polygonDf.first().getAs[Geometry]("polygonshape")
+      val rangeQueryDf = sparkSession.sql(s"select * from pointdf where ST_Intersects(pointdf.pointshape, ST_GeomFromWKT('${polygon.toString}'))")
+      val rangeQueryCount = rangeQueryDf.count()
+
+      // Perform spatial join and compare results
+      val rangeJoinDf1 = sparkSession.sql("select * from polygondf, pointdf where ST_Intersects(pointdf.pointshape, polygondf.polygonshape)")
+      val rangeJoinDf2 = sparkSession.sql("select * from pointdf, polygondf where ST_Intersects(polygondf.polygonshape, pointdf.pointshape)")
+      assert(rangeJoinDf1.count() == rangeQueryCount)
+      assert(rangeJoinDf2.count() == rangeQueryCount)
+    }
+
+    it("Passed ST_Intersects in a join with empty dataframe") {
+      var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygonInputLocation)
+      polygonCsvDf.createOrReplaceTempView("polygontable")
+      var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+
+      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
+      pointCsvDF.createOrReplaceTempView("pointtable")
+      var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape from pointtable where pointtable._c0 > 10000").repartition(1)
+      pointDf.createOrReplaceTempView("pointdf")
+
+      val rangeJoinDf1 = sparkSession.sql("select * from polygondf, pointdf where ST_Intersects(pointdf.pointshape, polygondf.polygonshape)")
+      val rangeJoinDf2 = sparkSession.sql("select * from pointdf, polygondf where ST_Intersects(polygondf.polygonshape, pointdf.pointshape)")
+      assert(rangeJoinDf1.count() == 0)
+      assert(rangeJoinDf2.count() == 0)
     }
 
     it("Passed ST_Distance <= radius in a join") {

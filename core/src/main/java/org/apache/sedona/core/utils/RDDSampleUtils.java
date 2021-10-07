@@ -56,7 +56,7 @@ public class RDDSampleUtils
         }
 
         // Make sure that number of records >= 2 * number of partitions
-        if (totalNumberOfRecords < 2 * numPartitions) {
+        if (numPartitions > (totalNumberOfRecords + 1) / 2) {
             throw new IllegalArgumentException("[Sedona] Number of partitions " + numPartitions + " cannot be larger than half of total records num " + totalNumberOfRecords);
         }
 
@@ -64,7 +64,7 @@ public class RDDSampleUtils
             return (int) totalNumberOfRecords;
         }
 
-        final int minSampleCnt = numPartitions * 2;
+        final long minSampleCnt = Math.min(numPartitions * 2L, totalNumberOfRecords);
         return (int) Math.max(minSampleCnt, Math.min(totalNumberOfRecords / 100, Integer.MAX_VALUE));
     }
 }

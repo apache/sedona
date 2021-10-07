@@ -29,6 +29,7 @@ import javax.annotation.Nullable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -50,6 +51,10 @@ public class NestedLoopJudgement<T extends Geometry, U extends Geometry>
     public Iterator<Pair<U, T>> call(Iterator<T> iteratorObject, Iterator<U> iteratorWindow)
             throws Exception
     {
+        if (!iteratorObject.hasNext() || !iteratorWindow.hasNext()) {
+            return Collections.emptyIterator();
+        }
+
         initPartition();
 
         List<Pair<U, T>> result = new ArrayList<>();

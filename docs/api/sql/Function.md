@@ -619,7 +619,7 @@ Introduction: Returns list of geometries divided based of given maximum number o
 
 Format: `ST_SubDivide(geom: geometry, maxVertices: int)`
 
-Since: `v1.0.2`
+Since: `v1.1.0`
 
 Spark SQL example:
 ```SQL
@@ -672,7 +672,7 @@ Introduction: It works the same as ST_SubDivide but returns new rows with geomet
 
 Format: `ST_SubDivideExplode(geom: geometry, maxVertices: int)`
 
-Since: `v1.0.2`
+Since: `v1.1.0`
 
 Example: 
 

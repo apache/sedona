@@ -8,7 +8,7 @@ SEP='"\\s+"'
 R_REMOTES_NO_ERRORS_FROM_WARNINGS=true Rscript - <<_RSCRIPT_EOF_
   if (!require(remotes))
     install.packages("remotes")
-  remotes::install_deps(pkgdir = "./R/sparklyr.sedona", dependencies = c("Imports"), upgrade = "always")
+  remotes::install_deps(pkgdir = "./R", dependencies = c("Imports"), upgrade = "always")
 
   test_deps <- strsplit("$TEST_DEPS", $SEP)[[1]]
   for (pkg in test_deps)
