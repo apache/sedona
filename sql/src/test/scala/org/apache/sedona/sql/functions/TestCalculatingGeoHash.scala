@@ -18,8 +18,8 @@
  */
 package org.apache.sedona.sql.functions
 
-import org.apache.spark.sql.sedona_sql.expressions.geohash.PointGeoHashCalculator
-import org.locationtech.jts.geom.{Geometry, Point}
+import org.apache.spark.sql.sedona_sql.expressions.geohash.GeometryGeoHashCalculator
+import org.locationtech.jts.geom.Geometry
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.{TableDrivenPropertyChecks, TableFor4}
@@ -42,11 +42,15 @@ class TestCalculatingGeoHash extends AnyFunSuite with Matchers with TableDrivenP
       ("Complex Point with precision of 1", "POINT(-100.022131 -21.12314242)", 1, Some("3")),
       ("Complex Point with precision of 5", "POINT(-100.022131 -21.12314242)", 5, Some("3u0zg")),
       ("Complex Point with precision of 10", "POINT(-100.022131 -21.12314242)", 10, Some("3u0zgfwhg2")),
-      ("Complex Point with precision of 21", "POINT(-100.022131 -21.12314242)", 20, Some("3u0zgfwhg2v7rs3d3ykz"))
+      ("Complex Point with precision of 21", "POINT(-100.022131 -21.12314242)", 20, Some("3u0zgfwhg2v7rs3d3ykz")),
+      ("Polygon with precision of 10", "POLYGON((0.5 0.5,5 0,5 5,0 5,0.5 0.5), (1.5 1,4 3,4 1,1.5 1))", 10, Some("s03y0zh7w1")),
+      ("Polygon with precision of 20", "POLYGON((0.5 0.5,5 0,5 5,0 5,0.5 0.5), (1.5 1,4 3,4 1,1.5 1))", 20, Some("s03y0zh7w1z0gs3y0zh7")),
+      ("MultiPolygon with precision of 20", "MULTIPOLYGON (((40 40, 20 45, 45 30, 40 40)),((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20)))", 20, Some("ss7w1z0gs3y0zh7w1z0g")),
+      ("Linestring with precision of 20", "LINESTRING (30 10, 10 30, 40 40)", 20, Some("ss3y0zh7w1z0gs3y0zh7")),
     )
 
     def calculateGeoHash(geom: Geometry, precision: Int): Option[String] = {
-      PointGeoHashCalculator.calculateGeoHash(geom.asInstanceOf[Point], precision)
+      GeometryGeoHashCalculator.calculate(geom, precision)
     }
   }
 

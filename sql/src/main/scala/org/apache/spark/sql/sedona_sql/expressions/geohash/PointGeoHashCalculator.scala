@@ -25,19 +25,19 @@ object PointGeoHashCalculator {
   private val base32 = "0123456789bcdefghjkmnpqrstuvwxyz"
   private val bits = Seq(16, 8, 4, 2, 1)
 
-  def calculateGeoHash(geom: Point, precision: Long): Option[String] = {
+  def calculateGeoHash(geom: Point, precision: Long): String = {
     val bbox = BBox(-180, 180, -90, 90)
+    val precisionUpdated = math.min(precision, 20)
     geoHashAggregate(
-      geom, precision, 0, "", true, bbox, 0, 0
+      geom, precisionUpdated, 0, "", true, bbox, 0, 0
     )
 
   }
 
   @tailrec
   private def geoHashAggregate(point: Point, precision: Long, currentPrecision: Long,
-                               geoHash: String, isEven: Boolean, bbox: BBox, bit: Int, ch: Int): Option[String] = {
-    if (currentPrecision >= precision) Some(geoHash)
-    else if (precision > 20) None
+                               geoHash: String, isEven: Boolean, bbox: BBox, bit: Int, ch: Int): String = {
+    if (currentPrecision >= precision) geoHash
     else {
       val geoHashUpdate = if (isEven){
         val mid = (bbox.startLon + bbox.endLon) / 2.0
@@ -78,8 +78,6 @@ object PointGeoHashCalculator {
   }
 }
 
-private[geohash] sealed case class BBox(startLon: BigDecimal, endLon: BigDecimal, startLat: BigDecimal, endLat: BigDecimal){
-  override def toString: String = s"lon1: $startLon lon2: $endLon lat1: $startLat lat2: $endLat"
-}
+private[geohash] sealed case class BBox(startLon: BigDecimal, endLon: BigDecimal, startLat: BigDecimal, endLat: BigDecimal)
 
 private[geohash] sealed case class GeoHashUpdate(bbox: BBox, ch: Int)
