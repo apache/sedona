@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.sql.functions.geohash
 
-import org.apache.spark.sql.sedona_sql.expressions.geohash.{GeoHashDecoder, GeometryGeoHashCalculator}
+import org.apache.spark.sql.sedona_sql.expressions.geohash.GeometryGeoHashCalculator
 import org.locationtech.jts.geom.Geometry
 import org.scalatest.prop.{TableDrivenPropertyChecks, TableFor4}
 
@@ -49,7 +49,4 @@ object Fixtures extends TableDrivenPropertyChecks {
     GeometryGeoHashCalculator.calculate(geom, precision)
   }
 
-  def decodeGeoHash(geohash: String, precision: Int): Geometry = {
-    GeoHashDecoder.decode(geohash, precision)
-  }
 }
