@@ -757,3 +757,30 @@ Result:
 +----------------------------------------------------------------+
 
 ```
+
+
+## ST_GeoHash
+
+Introduction: Returns GeoHash of the geometry with given precision
+
+Format: `ST_GeoHash(geom: geometry, precision: int)`
+
+Since: `v1.1.0`
+
+Example: 
+
+Query:
+
+```SQL
+SELECT ST_GeoHash(ST_GeomFromText('POINT(21.427834 52.042576573)'), 5) AS geohash
+```
+
+Result:
+
+```
++-----------------------------+
+|geohash                      |
++-----------------------------+
+|u3r0p                        |
++-----------------------------+
+```

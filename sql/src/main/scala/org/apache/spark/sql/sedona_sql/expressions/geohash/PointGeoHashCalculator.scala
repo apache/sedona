@@ -17,9 +17,8 @@
  * under the License.
  */
 package org.apache.spark.sql.sedona_sql.expressions.geohash
-import org.locationtech.jts.geom.{Geometry, Point}
+import org.locationtech.jts.geom.Point
 
-import scala.annotation.tailrec
 
 object PointGeoHashCalculator {
   private val base32 = "0123456789bcdefghjkmnpqrstuvwxyz"
@@ -28,13 +27,13 @@ object PointGeoHashCalculator {
   def calculateGeoHash(geom: Point, precision: Long): String = {
     val bbox = BBox(-180, 180, -90, 90)
     val precisionUpdated = math.min(precision, 20)
-    geoHashAggregate(
+    if (precision <= 0) ""
+    else geoHashAggregate(
       geom, precisionUpdated, 0, "", true, bbox, 0, 0
     )
 
   }
 
-  @tailrec
   private def geoHashAggregate(point: Point, precision: Long, currentPrecision: Long,
                                geoHash: String, isEven: Boolean, bbox: BBox, bit: Int, ch: Int): String = {
     if (currentPrecision >= precision) geoHash

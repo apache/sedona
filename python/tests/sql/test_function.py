@@ -667,6 +667,26 @@ class TestPredicateJoin(TestBase):
         for actual, expected in result:
             assert actual == expected
 
+    def test_st_geohash(self):
+        # Given
+        geometry_df = self.spark.createDataFrame(
+            [
+                ["POINT(21 52)", "u3nzvf79zq"],
+                ["POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10), (20 30, 35 35, 30 20, 20 30))", "ssgs3y0zh7"],
+                ["LINESTRING (0 0, 1 1, 2 2)", "s00twy01mt"]
+            ]
+        ).select(expr("St_GeomFromText(_1)").alias("geom"), col("_2").alias("expected_hash"))
+
+        # When
+        geohash_df = geometry_df.withColumn("geohash", expr("ST_GeoHash(geom, 10)")).\
+            select("geohash", "expected_hash")
+
+        # Then
+        geohash = geohash_df.collect()
+
+        for calculated_geohash, expected_geohash in geohash:
+            assert calculated_geohash == expected_geohash
+
     def calculate_st_is_ring(self, wkt):
         geometry_collected = self.__wkt_list_to_data_frame([wkt]). \
             selectExpr("ST_IsRing(geom) as is_ring") \

@@ -87,6 +87,7 @@ object Catalog {
     ST_SubDivideExplode,
     ST_SubDivide,
     ST_MakePolygon,
+    ST_GeoHash,
 
     // Expression for rasters
     RS_NormalizedDifference,

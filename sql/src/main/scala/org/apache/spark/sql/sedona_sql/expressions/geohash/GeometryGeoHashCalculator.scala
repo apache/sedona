@@ -25,10 +25,11 @@ object GeometryGeoHashCalculator {
   def calculate(geom: Geometry, precision: Int): Option[String] = {
     val gbox = geom.getEnvelope.getEnvelopeInternal
     if (gbox.getMinX < -180 || gbox.getMinY < -90 || gbox.getMaxX > 180 || gbox.getMaxX > 90) None
+    else {
+      val lon = gbox.getMinX + (gbox.getMaxX - gbox.getMinX) / 2
+      val lat = gbox.getMinY + (gbox.getMaxY - gbox.getMinY) / 2
 
-    val lon = gbox.getMinX + (gbox.getMaxX - gbox.getMinX) / 2
-    val lat = gbox.getMinY + (gbox.getMaxY - gbox.getMinY) / 2
-
-    PointGeoHashCalculator.calculateGeoHash(geometryFactory.createPoint(new Coordinate(lon, lat)), precision)
+      Some(PointGeoHashCalculator.calculateGeoHash(geometryFactory.createPoint(new Coordinate(lon, lat)), precision))
+    }
   }
 }
