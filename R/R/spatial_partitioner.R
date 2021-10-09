@@ -35,6 +35,8 @@
 #'   well-defined way to override this existing setting in the partitioning
 #'   data structure.
 #'
+#' @return A spatially partitioned SpatialRDD.
+#'
 #' @examples
 #' library(sparklyr)
 #' library(apache.sedona)
@@ -52,6 +54,7 @@
 #'   )
 #'   sedona_apply_spatial_partitioner(rdd, partitioner = "kdbtree")
 #' }
+#'
 #' @export
 sedona_apply_spatial_partitioner <- function(rdd,
                                              partitioner = c("quadtree", "kdbtree"),
@@ -61,6 +64,8 @@ sedona_apply_spatial_partitioner <- function(rdd,
     rdd = rdd,
     max_levels = max_levels
   )
+
+  rdd
 }
 
 apply_spatial_partitioner_impl <- function(partitioner = c("quadtree", "kdbtree"),

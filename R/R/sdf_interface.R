@@ -30,6 +30,8 @@ NULL
 #'
 #' @importFrom sparklyr sdf_register
 #'
+#' @return A Spark Dataframe containing the imported spatial data.
+#'
 #' @examples
 #' library(sparklyr)
 #' library(apache.sedona)
@@ -45,6 +47,7 @@ NULL
 #'   )
 #'   sdf <- sdf_register(rdd)
 #' }
+#'
 #' @export
 sdf_register.spatial_rdd <- function(x, name = NULL) {
   as.spark.dataframe(x, name = name)
@@ -58,6 +61,8 @@ sdf_register.spatial_rdd <- function(x, name = NULL) {
 #' @inheritParams as_spark_dataframe
 #' @param non_spatial_cols Column names for non-spatial attributes in the
 #'   resulting Spark Dataframe.
+#'
+#' @return A Spark Dataframe containing the imported spatial data.
 #'
 #' @examples
 #' library(sparklyr)
@@ -77,6 +82,7 @@ sdf_register.spatial_rdd <- function(x, name = NULL) {
 #'   )
 #'   sdf <- as.spark.dataframe(rdd, non_spatial_cols = c("attr1", "attr2"))
 #' }
+#'
 #' @export
 as.spark.dataframe <- function(x, non_spatial_cols = NULL, name = NULL) {
   sc <- spark_connection(x$.jobj)

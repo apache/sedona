@@ -27,6 +27,8 @@
 #'   representing a Spark SQL query.
 #' @param spatial_col The name of the spatial column.
 #'
+#' @return A SpatialRDD encapsulating the query.
+#'
 #' @examples
 #' library(sparklyr)
 #' library(apache.sedona)
@@ -40,6 +42,7 @@
 #'   )
 #'   rdd <- to_spatial_rdd(tbl, "pt")
 #' }
+#'
 #' @export
 to_spatial_rdd <- function(x, spatial_col) {
   sdf <- x %>% spark_dataframe()
@@ -70,6 +73,8 @@ NULL
 #'
 #' @inheritParams sedona_spatial_rdd_aggregation_routine
 #'
+#' @return A minimum bounding box object.
+#'
 #' @examples
 #' library(sparklyr)
 #' library(apache.sedona)
@@ -84,7 +89,9 @@ NULL
 #'   )
 #'   boundary <- minimum_bounding_box(rdd)
 #' }
+#'
 #' @family Spatial RDD aggregation routine
+#'
 #' @export
 minimum_bounding_box <- function(x) {
   x$.jobj %>%
@@ -98,6 +105,8 @@ minimum_bounding_box <- function(x) {
 #' records within it.
 #'
 #' @inheritParams sedona_spatial_rdd_aggregation_routine
+#'
+#' @return Approximate number of records within the SpatialRDD.
 #'
 #' @examples
 #' library(sparklyr)
@@ -113,7 +122,9 @@ minimum_bounding_box <- function(x) {
 #'   )
 #'   approx_cnt <- approx_count(rdd)
 #' }
+#'
 #' @family Spatial RDD aggregation routine
+#'
 #' @export
 approx_count <- function(x) {
   x$.jobj %>%
@@ -133,6 +144,8 @@ approx_count <- function(x) {
 #' @param strict If FALSE (default), then ignore the "Bursa-Wolf Parameters
 #'   Required" error.
 #'
+#' @return The transformed SpatialRDD.
+#'
 #' @examples
 #' library(sparklyr)
 #' library(apache.sedona)
@@ -150,6 +163,7 @@ approx_count <- function(x) {
 #'     src_epsg_crs_code = "epsg:4326", dst_epsg_crs_code = "epsg:3857"
 #'   )
 #' }
+#'
 #' @export
 crs_transform <- function(x,
                           src_epsg_crs_code,
