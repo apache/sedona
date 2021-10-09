@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql.functions
+package org.apache.sedona.sql.functions.geohash
 
 import org.apache.sedona.sql.{GeometrySample, TestBaseScala}
 import org.apache.spark.sql.functions.{col, expr}
