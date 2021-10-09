@@ -24,7 +24,7 @@ import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.{CodegenContext, CodegenFallback, ExprCode}
-import org.apache.spark.sql.catalyst.expressions.{Expression, Generator}
+import org.apache.spark.sql.catalyst.expressions.{BoundReference, Expression, Generator}
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
@@ -1166,4 +1166,47 @@ case class ST_SubDivideExplode(children: Seq[Expression]) extends Generator {
   }
 
   override protected def doGenCode(ctx: CodegenContext, ev: ExprCode): ExprCode = ev
+}
+
+
+case class ST_MakePolygon(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = true
+  private val geometryFactory = new GeometryFactory()
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.betweenLength(1, 2)
+    val exteriorRing = inputExpressions.head
+    val possibleHolesRaw = inputExpressions.tail.headOption.map(_.eval(input).asInstanceOf[ArrayData])
+    val numOfElements = possibleHolesRaw.map(_.numElements()).getOrElse(0)
+
+    val holes = (0 until numOfElements).map(el => possibleHolesRaw match {
+      case Some(value) => Some(value.getArray(el))
+      case None => None
+    }).filter(_.nonEmpty)
+      .map(el => el.map(_.toGeometry))
+      .flatMap{
+        case maybeLine: Option[LineString] =>
+          maybeLine.map(line => geometryFactory.createLinearRing(line.getCoordinates))
+        case _ => None
+      }
+
+    exteriorRing.toGeometry(input) match {
+      case geom: LineString =>
+        try {
+          val poly = new Polygon(geometryFactory.createLinearRing(geom.getCoordinates), holes.toArray, geometryFactory)
+          poly.toGenericArrayData
+        }
+        catch {
+          case e: Exception => null
+        }
+
+      case _ => null
+    }
+
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
 }

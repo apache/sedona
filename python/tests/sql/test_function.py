@@ -642,6 +642,31 @@ class TestPredicateJoin(TestBase):
         # Then
         assert lateral_view_result.count() == 16
 
+    def test_st_make_polygon(self):
+        # Given
+        geometry_df = self.spark.createDataFrame(
+            [
+                ["POINT(21 52)", None],
+                ["POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10), (20 30, 35 35, 30 20, 20 30))", None],
+                ["LINESTRING (0 0, 0 1, 1 0, 0 0)", "POLYGON ((0 0, 0 1, 1 0, 0 0))"]
+            ]
+        ).selectExpr("ST_GeomFromText(_1) AS geom", "_2 AS expected")
+
+        # When calling st_MakePolygon
+        geom_poly = geometry_df.withColumn("polygon", expr("ST_MakePolygon(geom)"))
+
+        # Then only based on closed linestring geom is created
+        geom_poly.filter("polygon IS NOT NULL").selectExpr("ST_AsText(polygon)", "expected").\
+            show()
+        result = geom_poly.filter("polygon IS NOT NULL").selectExpr("ST_AsText(polygon)", "expected").\
+            collect()
+
+
+        assert result.__len__() == 1
+
+        for actual, expected in result:
+            assert actual == expected
+
     def calculate_st_is_ring(self, wkt):
         geometry_collected = self.__wkt_list_to_data_frame([wkt]). \
             selectExpr("ST_IsRing(geom) as is_ring") \

@@ -1062,5 +1062,4 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         lineString2D.getFactory.createPoint(interPoint3D).toText
       )
   }
-
 }
