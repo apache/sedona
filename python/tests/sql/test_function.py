@@ -721,14 +721,13 @@ class TestPredicateJoin(TestBase):
                 ["POLYGON ((22.5 22.5, 22.5 28.125, 33.75 28.125, 33.75 22.5, 22.5 22.5))", "ssgs3y0zh7"],
                 ["POLYGON ((0 0, 0 5.625, 11.25 5.625, 11.25 0, 0 0))", "s00twy01mt"]
             ]
-        ).select(expr("ST_GeomFromGeoHash(_2, 4)").alias("geom"), col("_1").alias("expected_polygon"))
+        ).select(expr("ST_GeomFromGeoHash(_2, 2)").alias("geom"), col("_1").alias("expected_polygon"))
 
         # When
         wkt_df = geometry_df.withColumn("wkt", expr("ST_ASText(geom)")). \
             select("wkt", "expected_polygon")
 
         # Then
-        wkt_df.show(10, False)
         geohash = wkt_df.collect()
 
         for wkt, expected_wkt in geohash:
