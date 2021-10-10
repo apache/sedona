@@ -18,9 +18,9 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions.geohash
 
-import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Point}
+import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory}
 
-object GeometryGeoHashCalculator {
+object GeometryGeoHashEncoder {
   private val geometryFactory = new GeometryFactory()
   def calculate(geom: Geometry, precision: Int): Option[String] = {
     val gbox = geom.getEnvelope.getEnvelopeInternal
@@ -29,7 +29,7 @@ object GeometryGeoHashCalculator {
       val lon = gbox.getMinX + (gbox.getMaxX - gbox.getMinX) / 2
       val lat = gbox.getMinY + (gbox.getMaxY - gbox.getMinY) / 2
 
-      Some(PointGeoHashCalculator.calculateGeoHash(geometryFactory.createPoint(new Coordinate(lon, lat)), precision))
+      Some(PointGeoHashEncoder.calculateGeoHash(geometryFactory.createPoint(new Coordinate(lon, lat)), precision))
     }
   }
 }

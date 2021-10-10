@@ -17,10 +17,10 @@
  * under the License.
  */
 package org.apache.spark.sql.sedona_sql.expressions.geohash
-import org.locationtech.jts.geom.Point
+import org.locationtech.jts.geom.{Coordinate, GeometryFactory, Point, Polygon}
 
 
-object PointGeoHashCalculator {
+object PointGeoHashEncoder {
   private val base32 = "0123456789bcdefghjkmnpqrstuvwxyz"
   private val bits = Seq(16, 8, 4, 2, 1)
 
@@ -77,6 +77,25 @@ object PointGeoHashCalculator {
   }
 }
 
-private[geohash] sealed case class BBox(startLon: BigDecimal, endLon: BigDecimal, startLat: BigDecimal, endLat: BigDecimal)
+private[geohash] sealed case class BBox(startLon: Double, endLon: Double, startLat: Double, endLat: Double){
+  private val geometryFactory = new GeometryFactory()
+  def getCentroid(): Point = {
+    val lon = startLon + ((startLon + endLon)/2)
+    val lat = startLat + ((startLat + endLat)/2)
+    geometryFactory.createPoint(new Coordinate(lon, lat))
+  }
+
+  def toPolygon(): Polygon = {
+    geometryFactory.createPolygon(
+      Array(
+        new Coordinate(startLon, startLat),
+        new Coordinate(startLon, endLat),
+        new Coordinate(endLon, endLat),
+        new Coordinate(endLon, startLat),
+        new Coordinate(startLon, startLat)
+      )
+    )
+  }
+}
 
 private[geohash] sealed case class GeoHashUpdate(bbox: BBox, ch: Int)

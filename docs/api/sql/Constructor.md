@@ -185,3 +185,26 @@ SELECT *
 FROM pointdf
 WHERE ST_Contains(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.pointshape)
 ```
+
+## ST_GeomFromGeoHash
+
+Introduction: Create Geometry from geohash string and optional precision
+
+Format: `ST_GeomFromGeoHash(geohash: string, precision: int)`
+
+Since: `v1.1.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_GeomFromGeoHash('s00twy01mt', 4) AS geom
+```
+
+result:
+
+```
++--------------------------------------------------------------------------------------------------------------------+
+|geom                                                                                                                |
++--------------------------------------------------------------------------------------------------------------------+
+|POLYGON ((0.703125 0.87890625, 0.703125 1.0546875, 1.0546875 1.0546875, 1.0546875 0.87890625, 0.703125 0.87890625)) |
++--------------------------------------------------------------------------------------------------------------------+
+```

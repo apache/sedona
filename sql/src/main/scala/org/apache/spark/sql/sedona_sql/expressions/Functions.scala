@@ -27,7 +27,7 @@ import org.apache.spark.sql.catalyst.expressions.codegen.{CodegenContext, Codege
 import org.apache.spark.sql.catalyst.expressions.{BoundReference, Expression, Generator}
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.sedona_sql.expressions.geohash.GeometryGeoHashCalculator
+import org.apache.spark.sql.sedona_sql.expressions.geohash.{GeoHashDecoder, GeometryGeoHashEncoder, InvalidGeoHashException}
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.sedona_sql.expressions.subdivide.GeometrySubDivider
 import org.apache.spark.sql.types.{ArrayType, _}
@@ -1224,7 +1224,7 @@ case class ST_GeoHash(inputExpressions: Seq[Expression]) extends Expression with
 
     geometry match {
       case geom: Geometry =>
-        val geoHash = GeometryGeoHashCalculator.calculate(geom, precision)
+        val geoHash = GeometryGeoHashEncoder.calculate(geom, precision)
         geoHash match {
           case Some(value) => UTF8String.fromString(value)
           case None => null
