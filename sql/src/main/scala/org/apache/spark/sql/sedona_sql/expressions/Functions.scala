@@ -27,6 +27,7 @@ import org.apache.spark.sql.catalyst.expressions.codegen.{CodegenContext, Codege
 import org.apache.spark.sql.catalyst.expressions.{BoundReference, Expression, Generator}
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.expressions.geohash.{GeoHashDecoder, GeometryGeoHashEncoder, InvalidGeoHashException}
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.sedona_sql.expressions.subdivide.GeometrySubDivider
 import org.apache.spark.sql.types.{ArrayType, _}
@@ -1207,6 +1208,34 @@ case class ST_MakePolygon(inputExpressions: Seq[Expression])
   }
 
   override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class ST_GeoHash(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback{
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(2, Some("Please pass geometry as first argument and geohash precision"))
+
+    val geometry = inputExpressions.head.toGeometry(input)
+
+    val precision = inputExpressions(1).toInt(input)
+
+    geometry match {
+      case geom: Geometry =>
+        val geoHash = GeometryGeoHashEncoder.calculate(geom, precision)
+        geoHash match {
+          case Some(value) => UTF8String.fromString(value)
+          case None => null
+        }
+
+      case _ => null
+    }
+
+  }
+
+  override def dataType: DataType = StringType
 
   override def children: Seq[Expression] = inputExpressions
 }

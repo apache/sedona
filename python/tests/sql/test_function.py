@@ -667,6 +667,73 @@ class TestPredicateJoin(TestBase):
         for actual, expected in result:
             assert actual == expected
 
+    def test_st_geohash(self):
+        # Given
+        geometry_df = self.spark.createDataFrame(
+            [
+                ["POINT(21 52)", "u3nzvf79zq"],
+                ["POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10), (20 30, 35 35, 30 20, 20 30))", "ssgs3y0zh7"],
+                ["LINESTRING (0 0, 1 1, 2 2)", "s00twy01mt"]
+            ]
+        ).select(expr("St_GeomFromText(_1)").alias("geom"), col("_2").alias("expected_hash"))
+
+        # When
+        geohash_df = geometry_df.withColumn("geohash", expr("ST_GeoHash(geom, 10)")).\
+            select("geohash", "expected_hash")
+
+        # Then
+        geohash = geohash_df.collect()
+
+        for calculated_geohash, expected_geohash in geohash:
+            assert calculated_geohash == expected_geohash
+
+    def test_geom_from_geohash(self):
+        # Given
+        geometry_df = self.spark.createDataFrame(
+            [
+                [
+                    "POLYGON ((20.999990701675415 51.99999690055847, 20.999990701675415 52.0000022649765, 21.000001430511475 52.0000022649765, 21.000001430511475 51.99999690055847, 20.999990701675415 51.99999690055847))",
+                    "u3nzvf79zq"
+                ],
+                [
+                    "POLYGON ((26.71875 26.71875, 26.71875 28.125, 28.125 28.125, 28.125 26.71875, 26.71875 26.71875))",
+                    "ssg"
+                ],
+                [
+                    "POLYGON ((0.9999918937683105 0.9999972581863403, 0.9999918937683105 1.0000026226043701, 1.0000026226043701 1.0000026226043701, 1.0000026226043701 0.9999972581863403, 0.9999918937683105 0.9999972581863403))",
+                    "s00twy01mt"
+                ]
+            ]
+        ).select(expr("ST_GeomFromGeoHash(_2)").alias("geom"), col("_1").alias("expected_polygon"))
+
+        # When
+        wkt_df = geometry_df.withColumn("wkt", expr("ST_AsText(geom)")). \
+            select("wkt", "expected_polygon").collect()
+
+        for wkt, expected_polygon in wkt_df:
+            assert wkt == expected_polygon
+
+    def test_geom_from_geohash_precision(self):
+        # Given
+        geometry_df = self.spark.createDataFrame(
+            [
+                ["POLYGON ((11.25 50.625, 11.25 56.25, 22.5 56.25, 22.5 50.625, 11.25 50.625))", "u3nzvf79zq"],
+                ["POLYGON ((22.5 22.5, 22.5 28.125, 33.75 28.125, 33.75 22.5, 22.5 22.5))", "ssgs3y0zh7"],
+                ["POLYGON ((0 0, 0 5.625, 11.25 5.625, 11.25 0, 0 0))", "s00twy01mt"]
+            ]
+        ).select(expr("ST_GeomFromGeoHash(_2, 2)").alias("geom"), col("_1").alias("expected_polygon"))
+
+        # When
+        wkt_df = geometry_df.withColumn("wkt", expr("ST_ASText(geom)")). \
+            select("wkt", "expected_polygon")
+
+        # Then
+        geohash = wkt_df.collect()
+
+        for wkt, expected_wkt in geohash:
+            assert wkt == expected_wkt
+
+
     def calculate_st_is_ring(self, wkt):
         geometry_collected = self.__wkt_list_to_data_frame([wkt]). \
             selectExpr("ST_IsRing(geom) as is_ring") \
