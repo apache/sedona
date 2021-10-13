@@ -1,6 +1,6 @@
 ## Introduction
 
-[apache.sedona](https://github.com/r-spark/apache.sedona) is a
+apache.sedona ([cran.r-project.org/package=apache.sedona](https://cran.r-project.org/package=apache.sedona)) is a
 [sparklyr](https://github.com/sparklyr/sparklyr)-based R interface for
 [Apache Sedona](https://sedona.apache.org). It presents what Apache
 Sedona has to offer through idiomatic frameworks and constructs in R
