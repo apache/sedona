@@ -36,6 +36,7 @@ import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.CRS
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom.{PrecisionModel, _}
+import org.locationtech.jts.io.{ByteOrderValues, WKBWriter}
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.IsSimpleOp
 import org.locationtech.jts.operation.buffer.BufferParameters
@@ -46,6 +47,7 @@ import org.locationtech.jts.simplify.TopologyPreservingSimplifier
 import org.opengis.referencing.operation.MathTransform
 import org.wololo.jts2geojson.GeoJSONWriter
 
+import java.nio.ByteOrder
 import java.util
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
@@ -486,6 +488,74 @@ case class ST_AsGeoJSON(inputExpressions: Seq[Expression])
   }
 
   override def dataType: DataType = StringType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class ST_AsBinary(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(1)
+    val geometry = inputExpressions.head.toGeometry(input)
+    val dimensions = if (java.lang.Double.isNaN(geometry.getCoordinate.getZ)) 2 else 3
+    val endian = if (ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN) ByteOrderValues.BIG_ENDIAN else ByteOrderValues.LITTLE_ENDIAN
+    val writer = new WKBWriter(dimensions, endian)
+    writer.write(geometry)
+  }
+
+  override def dataType: DataType = BinaryType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class ST_AsEWKB(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(1)
+    val geometry = inputExpressions.head.toGeometry(input)
+    val dimensions = if (java.lang.Double.isNaN(geometry.getCoordinate.getZ)) 2 else 3
+    val endian = if (ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN) ByteOrderValues.BIG_ENDIAN else ByteOrderValues.LITTLE_ENDIAN
+    val writer = new WKBWriter(dimensions, endian, geometry.getSRID != 0)
+    writer.write(geometry)
+  }
+
+  override def dataType: DataType = BinaryType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class ST_SRID(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(1)
+    val geometry = inputExpressions.head.toGeometry(input)
+    geometry.getSRID
+  }
+
+  override def dataType: DataType = IntegerType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class ST_SetSRID(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(2)
+    val geometry = inputExpressions.head.toGeometry(input)
+    val srid = inputExpressions(1).eval(input).asInstanceOf[Integer]
+    val factory = new GeometryFactory(geometry.getPrecisionModel, srid, geometry.getFactory.getCoordinateSequenceFactory)
+    new GenericArrayData(GeometrySerializer.serialize(factory.createGeometry(geometry)))
+  }
+
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
