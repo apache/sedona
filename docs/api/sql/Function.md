@@ -243,6 +243,66 @@ SELECT ST_AsGeoJSON(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_AsBinary
+
+Introduction: Return the Well-Known Binary representation of a geometry
+
+Format: `ST_AsBinary (A:geometry)`
+
+Since: `v1.2.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_AsBinary(polygondf.countyshape)
+FROM polygondf
+```
+
+## ST_AsEWKB
+
+Introduction: Return the Extended Well-Known Binary representation of a geometry.
+EWKB is an extended version of WKB which includes the SRID of the geometry.
+The format originated in PostGIS but is supported by many GIS tools.
+If the geometry is lacking SRID a WKB format is produced.
+[Se ST_SetSRID](#ST_SetSRID)
+
+Format: `ST_AsEWKB (A:geometry)`
+
+Since: `v1.2.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_AsEWKB(polygondf.countyshape)
+FROM polygondf
+```
+
+## ST_SRID
+
+Introduction: Return the spatial refence system identifier (SRID) of the geometry.
+
+Format: `ST_SRID (A:geometry)`
+
+Since: `v1.2.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_SRID(polygondf.countyshape)
+FROM polygondf
+```
+
+## ST_SetSRID
+
+Introduction: Sets the spatial refence system identifier (SRID) of the geometry.
+
+Format: `ST_SetSRID (A:geometry, srid: Integer)`
+
+Since: `v1.2.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_SetSRID(polygondf.countyshape, 3021)
+FROM polygondf
+```
+
 ## ST_NPoints
 
 Introduction: Return points of the geometry
