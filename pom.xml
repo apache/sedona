@@ -513,7 +513,7 @@
             </repositories>
         </profile>
         <profile>
-            <id>spark3.0</id>
+            <id>spark3.2</id>
             <activation>
                 <property>
                     <name>spark</name>
@@ -522,7 +522,24 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <spark.version>3.1.1</spark.version>
+                <spark.version>3.2.0</spark.version>
+                <spark.compat.version>3.0</spark.compat.version>
+                <spark.converter.version>spark3</spark.converter.version>
+                <jackson.version>2.12.5</jackson.version>
+                <maven.deploy.skip>true</maven.deploy.skip>
+            </properties>
+        </profile>
+        <profile>
+            <id>spark3.0</id>
+            <activation>
+                <property>
+                    <name>spark</name>
+                    <value>3.0</value>
+                </property>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <spark.version>3.1.2</spark.version>
                 <spark.compat.version>3.0</spark.compat.version>
                 <spark.converter.version>spark3</spark.converter.version>
                 <jackson.version>2.10.0</jackson.version>
@@ -556,7 +573,7 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <scala.version>2.12.8</scala.version>
+                <scala.version>2.12.15</scala.version>
                 <scala.compat.version>2.12</scala.compat.version>
                 <scaladoc.arg>-no-java-comments</scaladoc.arg>
             </properties>

@@ -42,4 +42,9 @@ case class RangeJoinExec(left: SparkPlan,
                          extraCondition: Option[Expression] = None)
   extends BinaryExecNode
     with TraitJoinQueryExec
-    with Logging {}
+    with Logging {
+
+  protected def withNewChildrenInternal(newLeft: SparkPlan, newRight: SparkPlan): SparkPlan = {
+    copy(left = newLeft, right = newRight)
+  }
+}

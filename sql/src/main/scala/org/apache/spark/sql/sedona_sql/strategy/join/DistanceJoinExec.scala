@@ -65,4 +65,8 @@ case class DistanceJoinExec(left: SparkPlan,
     spatialRdd
   }
 
+  protected def withNewChildrenInternal(newLeft: SparkPlan, newRight: SparkPlan): SparkPlan = {
+    copy(left = newLeft, right = newRight)
+  }
+
 }

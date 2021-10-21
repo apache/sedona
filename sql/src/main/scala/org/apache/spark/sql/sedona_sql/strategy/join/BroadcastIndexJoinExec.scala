@@ -127,4 +127,8 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
       }.filter(boundCondition(_))
     }
   }
+
+  protected def withNewChildrenInternal(newLeft: SparkPlan, newRight: SparkPlan): SparkPlan = {
+    copy(left = newLeft, right = newRight)
+  }
 }

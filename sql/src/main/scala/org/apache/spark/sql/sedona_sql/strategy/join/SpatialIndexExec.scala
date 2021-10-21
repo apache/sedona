@@ -58,4 +58,8 @@ case class SpatialIndexExec(child: SparkPlan,
     spatialRDD.buildIndex(indexType, false)
     sparkContext.broadcast(spatialRDD.indexedRawRDD.take(1).asScala.head).asInstanceOf[Broadcast[T]]
   }
+
+  protected def withNewChildInternal(newChild: SparkPlan): SparkPlan = {
+    copy(child = newChild)
+  }
 }
