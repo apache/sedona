@@ -26,6 +26,8 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.expressions.geohash.GeoHashDecoder
+import org.apache.spark.sql.sedona_sql.expressions.implicits.{GeometryEnhancer, InputExpressionEnhancer}
 import org.apache.spark.sql.types.{DataType, Decimal}
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.geom.{Coordinate, GeometryFactory}
@@ -298,10 +300,36 @@ trait UserDataGeneratator {
   def generateUserData(minInputLength: Integer, inputExpressions: Seq[Expression], inputRow: InternalRow): String = {
     var userData = inputExpressions(minInputLength).eval(inputRow).asInstanceOf[UTF8String].toString
 
-    for (i <- minInputLength + 1 to inputExpressions.length - 1) {
+    for (i <- minInputLength + 1 until inputExpressions.length) {
       userData = userData + "\t" + inputExpressions(i).eval(inputRow).asInstanceOf[UTF8String].toString
     }
-    return userData
+    userData
   }
 }
 
+
+case class ST_GeomFromGeoHash(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback{
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+
+    val geoHash = Option(inputExpressions.head.eval(input))
+      .map(_.asInstanceOf[UTF8String].toString)
+    val precision = inputExpressions.tail.headOption.map(_.toInt(input))
+
+    try{
+      geoHash match {
+        case Some(value) => GeoHashDecoder.decode(value, precision).toGenericArrayData
+        case None => null
+      }
+
+    }
+    catch {
+      case e: Exception => null
+    }
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+}

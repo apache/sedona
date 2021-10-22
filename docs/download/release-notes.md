@@ -1,3 +1,65 @@
+## Sedona 1.1.0
+
+This version is a major release on Sedona 1.1.0 line. It includes bug fixes and new features: R language API, Raster data and Map algebra support
+
+### Global
+
+Dependency upgrade: 
+
+* [SEDONA-30](https://issues.apache.org/jira/browse/SEDONA-30): Use Geotools-wrapper 1.1.0-24.1 to include geotools GeoTiff libraries.
+
+Improvement on join queries in core and SQL:
+
+* [SEDONA-63](https://issues.apache.org/jira/browse/SEDONA-63): Skip empty partitions in NestedLoopJudgement
+* [SEDONA-64](https://issues.apache.org/jira/browse/SEDONA-64): Broadcast dedupParams to improve performance
+
+Behavior change:
+
+* [SEDONA-62](https://issues.apache.org/jira/browse/SEDONA-62): Ignore HDF test in order to avoid NASA copyright issue
+
+### Core
+
+Bug fix:
+
+* [SEDONA-41](https://issues.apache.org/jira/browse/SEDONA-41): Fix rangeFilter bug when the leftCoveredByRight para is false
+* [SEDONA-53](https://issues.apache.org/jira/browse/SEDONA-53): Fix SpatialKnnQuery NullPointerException
+
+### SQL
+
+Major update:
+
+* [SEDONA-30](https://issues.apache.org/jira/browse/SEDONA-30): Add GeoTiff raster I/O and Map Algebra function
+
+New function:
+
+* [SEDONA-27](https://issues.apache.org/jira/browse/SEDONA-27): Add ST_Subdivide and ST_SubdivideExplode functions
+
+Bug fix:
+
+* [SEDONA-56](https://issues.apache.org/jira/browse/SEDONA-56): Fix broadcast join with Adapter Query Engine enabled
+* [SEDONA-22](https://issues.apache.org/jira/browse/SEDONA-22), [SEDONA-60](https://issues.apache.org/jira/browse/SEDONA-60): Fix join queries in SparkSQL when one side has no rows or only one row
+
+### Viz
+
+N/A
+
+### Python
+
+Improvement:
+
+* [SEDONA-59](https://issues.apache.org/jira/browse/SEDONA-59): Make pyspark dependency of Sedona Python optional
+
+Bug fix:
+
+* [SEDONA-50](https://issues.apache.org/jira/browse/SEDONA-50): Remove problematic logging conf that leads to errors on Databricks
+* Fix the issue: Spark dependency in setup.py was configured to be < v3.1.0 by mistake.
+
+### R
+
+Major update:
+
+* [SEDONA-31](https://issues.apache.org/jira/browse/SEDONA-31): Add R interface for Sedona
+ 
 ## Sedona 1.0.1
 
 This version is a maintenance release on Sedona 1.0.0 line. It includes bug fixes, some new features, one ==API change==

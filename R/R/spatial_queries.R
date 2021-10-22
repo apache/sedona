@@ -48,6 +48,8 @@ NULL
 #' @inheritParams spatial_query
 #' @param k Number of nearest spatail objects to return.
 #'
+#' @return The KNN query result.
+#'
 #' @examples
 #' library(sparklyr)
 #' library(apache.sedona)
@@ -77,7 +79,9 @@ NULL
 #'     x = knn_query_pt, k = 3, index_type = "rtree", result_type = "sdf"
 #'   )
 #' }
+#'
 #' @family Sedona spatial query
+#'
 #' @export
 sedona_knn_query <- function(rdd,
                              x,
@@ -133,6 +137,8 @@ sedona_knn_query <- function(rdd,
 #' @param query_type Type of spatial relationship involved in the query.
 #'   Currently "cover" and "intersect" are supported.
 #'
+#' @return The range query result.
+#'
 #' @examples
 #' library(sparklyr)
 #' library(apache.sedona)
@@ -171,7 +177,9 @@ sedona_knn_query <- function(rdd,
 #'     result_type = "sdf"
 #'   )
 #' }
+#'
 #' @family Sedona spatial query
+#'
 #' @export
 sedona_range_query <- function(rdd,
                                x,

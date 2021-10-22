@@ -24,9 +24,10 @@ import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.{CodegenContext, CodegenFallback, ExprCode}
-import org.apache.spark.sql.catalyst.expressions.{Expression, Generator}
+import org.apache.spark.sql.catalyst.expressions.{BoundReference, Expression, Generator}
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.expressions.geohash.{GeoHashDecoder, GeometryGeoHashEncoder, InvalidGeoHashException}
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.sedona_sql.expressions.subdivide.GeometrySubDivider
 import org.apache.spark.sql.types.{ArrayType, _}
@@ -35,6 +36,7 @@ import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.CRS
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom.{PrecisionModel, _}
+import org.locationtech.jts.io.{ByteOrderValues, WKBWriter}
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.IsSimpleOp
 import org.locationtech.jts.operation.buffer.BufferParameters
@@ -45,6 +47,7 @@ import org.locationtech.jts.simplify.TopologyPreservingSimplifier
 import org.opengis.referencing.operation.MathTransform
 import org.wololo.jts2geojson.GeoJSONWriter
 
+import java.nio.ByteOrder
 import java.util
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
@@ -485,6 +488,74 @@ case class ST_AsGeoJSON(inputExpressions: Seq[Expression])
   }
 
   override def dataType: DataType = StringType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class ST_AsBinary(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(1)
+    val geometry = inputExpressions.head.toGeometry(input)
+    val dimensions = if (java.lang.Double.isNaN(geometry.getCoordinate.getZ)) 2 else 3
+    val endian = if (ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN) ByteOrderValues.BIG_ENDIAN else ByteOrderValues.LITTLE_ENDIAN
+    val writer = new WKBWriter(dimensions, endian)
+    writer.write(geometry)
+  }
+
+  override def dataType: DataType = BinaryType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class ST_AsEWKB(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(1)
+    val geometry = inputExpressions.head.toGeometry(input)
+    val dimensions = if (java.lang.Double.isNaN(geometry.getCoordinate.getZ)) 2 else 3
+    val endian = if (ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN) ByteOrderValues.BIG_ENDIAN else ByteOrderValues.LITTLE_ENDIAN
+    val writer = new WKBWriter(dimensions, endian, geometry.getSRID != 0)
+    writer.write(geometry)
+  }
+
+  override def dataType: DataType = BinaryType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class ST_SRID(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(1)
+    val geometry = inputExpressions.head.toGeometry(input)
+    geometry.getSRID
+  }
+
+  override def dataType: DataType = IntegerType
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class ST_SetSRID(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = false
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(2)
+    val geometry = inputExpressions.head.toGeometry(input)
+    val srid = inputExpressions(1).eval(input).asInstanceOf[Integer]
+    val factory = new GeometryFactory(geometry.getPrecisionModel, srid, geometry.getFactory.getCoordinateSequenceFactory)
+    new GenericArrayData(GeometrySerializer.serialize(factory.createGeometry(geometry)))
+  }
+
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 }
@@ -1166,4 +1237,75 @@ case class ST_SubDivideExplode(children: Seq[Expression]) extends Generator {
   }
 
   override protected def doGenCode(ctx: CodegenContext, ev: ExprCode): ExprCode = ev
+}
+
+
+case class ST_MakePolygon(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  override def nullable: Boolean = true
+  private val geometryFactory = new GeometryFactory()
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.betweenLength(1, 2)
+    val exteriorRing = inputExpressions.head
+    val possibleHolesRaw = inputExpressions.tail.headOption.map(_.eval(input).asInstanceOf[ArrayData])
+    val numOfElements = possibleHolesRaw.map(_.numElements()).getOrElse(0)
+
+    val holes = (0 until numOfElements).map(el => possibleHolesRaw match {
+      case Some(value) => Some(value.getArray(el))
+      case None => None
+    }).filter(_.nonEmpty)
+      .map(el => el.map(_.toGeometry))
+      .flatMap{
+        case maybeLine: Option[LineString] =>
+          maybeLine.map(line => geometryFactory.createLinearRing(line.getCoordinates))
+        case _ => None
+      }
+
+    exteriorRing.toGeometry(input) match {
+      case geom: LineString =>
+        try {
+          val poly = new Polygon(geometryFactory.createLinearRing(geom.getCoordinates), holes.toArray, geometryFactory)
+          poly.toGenericArrayData
+        }
+        catch {
+          case e: Exception => null
+        }
+
+      case _ => null
+    }
+
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+}
+
+case class ST_GeoHash(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback{
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    inputExpressions.validateLength(2, Some("Please pass geometry as first argument and geohash precision"))
+
+    val geometry = inputExpressions.head.toGeometry(input)
+
+    val precision = inputExpressions(1).toInt(input)
+
+    geometry match {
+      case geom: Geometry =>
+        val geoHash = GeometryGeoHashEncoder.calculate(geom, precision)
+        geoHash match {
+          case Some(value) => UTF8String.fromString(value)
+          case None => null
+        }
+
+      case _ => null
+    }
+
+  }
+
+  override def dataType: DataType = StringType
+
+  override def children: Seq[Expression] = inputExpressions
 }

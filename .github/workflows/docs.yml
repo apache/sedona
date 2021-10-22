@@ -1,0 +1,47 @@
+name: Docs build
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+    - run: pip install mkdocs-material
+    - run: pip install mkdocs-macros-plugin
+    - run: pip install mkdocs-git-revision-date-localized-plugin
+    - run: sudo apt update
+    - run: sudo apt install littler tree libcurl4-openssl-dev
+    - run: (sudo Rscript generate-docs.R)
+
+    - uses: actions/cache@v2
+      with:
+        path: ~/.local/share/renv
+        key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-renv-
+    - uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - run: (cd docs/api/rdocs/; sudo tree -H '.' -L 1 --noreport --charset utf-8 -o index.html)
+    - run: mkdocs build
+    - run: mkdir staging
+    - run: cp -r site/* staging/
+    - uses: actions/upload-artifact@v2
+      with:
+        name: generated-docs
+        path: staging

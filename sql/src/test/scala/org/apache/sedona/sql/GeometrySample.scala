@@ -28,7 +28,7 @@ import scala.tools.nsc.interpreter.InputStream
 
 
 trait GeometrySample {
-  self: functionTestScala =>
+  self: TestBaseScala =>
   val wktReader = new WKTReader()
 
   import sparkSession.implicits._

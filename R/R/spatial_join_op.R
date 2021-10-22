@@ -55,6 +55,8 @@ NULL
 #' @inheritParams spatial_join_op
 #' @family Sedona spatial join operator
 #'
+#' @return A spatial RDD containing the join result.
+#'
 #' @examples
 #' library(sparklyr)
 #' library(apache.sedona)
@@ -119,6 +121,8 @@ sedona_spatial_join <- function(spatial_rdd,
 #'
 #' @inheritParams spatial_join_op
 #' @family Sedona spatial join operator
+#'
+#' @return A spatial RDD containing the join-count-by-key results.
 #'
 #' @examples
 #' library(sparklyr)
