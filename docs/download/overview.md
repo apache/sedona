@@ -82,6 +82,8 @@ You can get it using one of the following methods:
 2. Download from [GitHub release](https://github.com/apache/incubator-sedona/releases) and copy it to SPARK_HOME/jars/ folder
 3. Call the [Maven Central coordinate](../maven-coordiantes) in your python program. For example, in PySparkSQL
 ```python
+from sedona.utils import SedonaKryoRegistrator
+
 spark = SparkSession. \
     builder. \
     appName('appName'). \

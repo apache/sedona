@@ -43,6 +43,8 @@ Please read [Quick start](/download/overview/#install-sedona-python) to install 
 Sedona has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption.
 
 ```python
+from sedona.utils import SedonaKryoRegistrator
+
 conf.set("spark.serializer", KryoSerializer.getName)
 conf.set("spark.kryo.registrator", SedonaKryoRegistrator.getName)
 sc = SparkContext(conf=conf)
