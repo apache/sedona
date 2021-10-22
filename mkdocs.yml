@@ -3,29 +3,36 @@ site_description: Apache Sedona (incubating) is a cluster computing system for p
 nav:
     - Home: index.md
     - Setup:
-      - Features: download/features.md
-      - Quick start: download/overview.md
+      - Overview: download/overview.md
+      - Supported platforms: download/platform.md
+      - Maven Central coordinate: download/maven-coordinates.md      
+      - Download: download/download.md
+      - Installation:
+        - Install Sedona Scala/Java: download/install-scala.md
+        - Install Sedona Python: download/install-python.md
+        - Install Sedona R: download/install-r.md
+        - Install Sedona-Zeppelin: download/zeppelin.md
+        - Install on Databricks: download/databricks.md
       - Release notes: download/release-notes.md      
-      - Maven Central coordinate: download/maven-coordinates.md
-      - Installation on Databricks: download/databricks.md
       - Set up Spark cluser: download/cluster.md
-      - Self-contained project: download/project.md
-      - Interactive Scala and SQL shell: download/scalashell.md
-      - Install Sedona-Zeppelin: download/zeppelin.md
       - Compile the code: download/compile.md
       - Publish the code: download/publish.md
     - Programming Guides:
       - Spatial RDD app:
         - Scala/Java: tutorial/rdd.md
         - Python: tutorial/core-python.md
-      - Spatial SQL app:  
+        - R: tutorial/rdd-r.md
+      - Spatial SQL app:
         - Scala/Java: tutorial/sql.md
         - Pure SQL: tutorial/sql-pure-sql.md
         - Python: tutorial/sql-python.md
-        - Raster data: tutorial/raster.md
+        - R: tutorial/sql-r.md
+        - Raster data - Map Algebra: tutorial/raster.md
       - Map visualization SQL app:
         - Scala/Java: tutorial/viz.md
         - Use Apache Zeppelin: tutorial/zeppelin.md
+        - R: tutorial/viz-r.md
+        - Gallery: tutorial/viz-gallery.md
       - Examples:
         - Scala/Java: tutorial/demo.md
         - Python: tutorial/jupyter-notebook.md
@@ -36,6 +43,7 @@ nav:
       - RDD (core):
         - Scala/Java doc: api/java-api.md
         - Python doc: api/python-api.md
+        - R doc: api/r-api.md
       - SQL:
         - Quick start: api/sql/Overview.md
         - Vector data:
@@ -115,7 +123,12 @@ theme:
   font:
     text: Lato
   features:
+    - navigation.instant
     - navigation.tabs
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - search.share
 google_analytics: ['UA-64886725-1', 'www.public.asu.edu/~jiayu2/geospark/index.html']
 extra:
   social:
@@ -123,6 +136,13 @@ extra:
       link: 'https://github.com/apache/incubator-sedona'
     - icon: fontawesome/brands/twitter
       link: 'https://twitter.com/ApacheSedona'
+  sedona:
+    current_version: 1.1.0-incubating
+    current_git_tag: sedona-1.1.0-incubating-rc1
+    current_rc: 1.1.0-incubating-rc1
+    current_snapshot: 1.1.1-incubating-SNAPSHOT
+    next_version: 1.1.1-incubating
+    current_geotools: 1.1.0-25.2
 copyright: Apache Sedona, Apache Incubator, Apache, the Apache feather logo, and the Apache Incubator project logo are trademarks or registered trademarks of The Apache Software Foundation. Copyright © 2021 The Apache Software Foundation
 markdown_extensions:
   - admonition
@@ -144,9 +164,13 @@ markdown_extensions:
   - pymdownx.mark
   - pymdownx.smartsymbols
   - pymdownx.superfences
+  - pymdownx.tabbed
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.tilde
 plugins:
   - search:
       prebuild_index: true
+  - macros
+  - git-revision-date-localized:
+      type: datetime  

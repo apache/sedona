@@ -56,6 +56,8 @@ NULL
 #' @param blur_radius Controls the radius of a Gaussian blur in the resulting
 #'   heatmap.
 #'
+#' @return No return value.
+#'
 #' @examples
 #'
 #' library(sparklyr)
@@ -81,7 +83,9 @@ NULL
 #'     blur_radius = 10
 #'   )
 #' }
+#'
 #' @family Sedona visualization routines
+#'
 #' @export
 sedona_render_heatmap <- function(rdd,
                                   resolution_x,
@@ -127,6 +131,8 @@ sedona_render_heatmap <- function(rdd,
 #' @param reverse_coords Whether to reverse spatial coordinates in the plot
 #'   (default: FALSE).
 #'
+#' @return No return value.
+#'
 #' @examples
 #' library(sparklyr)
 #' library(apache.sedona)
@@ -150,7 +156,9 @@ sedona_render_heatmap <- function(rdd,
 #'     boundary = c(-91, -84, 30, 35)
 #'   )
 #' }
+#'
 #' @family Sedona visualization routines
+#'
 #' @export
 sedona_render_scatter_plot <- function(rdd,
                                        resolution_x,
@@ -194,6 +202,8 @@ sedona_render_scatter_plot <- function(rdd,
 #' @param reverse_coords Whether to reverse spatial coordinates in the plot
 #'   (default: FALSE).
 #'
+#' @return No return value.
+#'
 #' @examples
 #' library(sparklyr)
 #' library(apache.sedona)
@@ -229,7 +239,9 @@ sedona_render_scatter_plot <- function(rdd,
 #'     base_color = c(255, 255, 255)
 #'   )
 #' }
+#'
 #' @family Sedona visualization routines
+#'
 #' @export
 sedona_render_choropleth_map <- function(pair_rdd,
                                          resolution_x,

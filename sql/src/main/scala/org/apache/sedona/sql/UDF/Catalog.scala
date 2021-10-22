@@ -60,6 +60,10 @@ object Catalog {
     ST_SimplifyPreserveTopology,
     ST_AsText,
     ST_AsGeoJSON,
+    ST_AsBinary,
+    ST_AsEWKB,
+    ST_SRID,
+    ST_SetSRID,
     ST_GeometryType,
     ST_NumGeometries,
     ST_LineMerge,
@@ -86,6 +90,9 @@ object Catalog {
     ST_LineInterpolatePoint,
     ST_SubDivideExplode,
     ST_SubDivide,
+    ST_MakePolygon,
+    ST_GeoHash,
+    ST_GeomFromGeoHash,
 
     // Expression for rasters
     RS_NormalizedDifference,

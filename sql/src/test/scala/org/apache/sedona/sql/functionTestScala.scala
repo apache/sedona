@@ -19,12 +19,13 @@
 
 package org.apache.sedona.sql
 
+import org.apache.commons.codec.binary.Hex
 import org.apache.sedona.sql.implicits._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Row}
 import org.geotools.geometry.jts.WKTReader2
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
-import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.geom.{Geometry, Polygon}
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.scalatest.{GivenWhenThen, Matchers}
 
@@ -275,6 +276,32 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
       val expectedGeoJson = """{"type":"Polygon","coordinates":[[[1.0,1.0],[8.0,1.0],[8.0,8.0],[1.0,8.0],[1.0,1.0]]]}"""
       assert(geojsonDf.first().getString(0) === expectedGeoJson)
+    }
+
+    it("Passed ST_AsBinary") {
+      val df = sparkSession.sql("SELECT ST_AsBinary(ST_GeomFromWKT('POINT (1 1)'))")
+      val s = "0101000000000000000000f03f000000000000f03f"
+      assert(Hex.encodeHexString(df.first().get(0).asInstanceOf[Array[Byte]]) == s)
+    }
+
+    it("Passed ST_SRID") {
+      val df = sparkSession.sql("SELECT ST_SRID(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))")
+      assert(df.first().getInt(0) == 0)
+    }
+
+    it("Passed ST_SetSRID") {
+      var df = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') as polygon")
+      df.createOrReplaceTempView("table")
+      df = sparkSession.sql("SELECT ST_SetSRID(polygon, 3021) from table")
+      assert(df.first().get(0).asInstanceOf[Polygon].getSRID == 3021)
+    }
+
+    it("Passed ST_AsEWKB") {
+      var df = sparkSession.sql("SELECT ST_SetSrid(ST_GeomFromWKT('POINT (1 1)'), 3021) as point")
+      df.createOrReplaceTempView("table")
+      df = sparkSession.sql("SELECT ST_AsEWKB(point) from table")
+      val s = "0101000020cd0b0000000000000000f03f000000000000f03f"
+      assert(Hex.encodeHexString(df.first().get(0).asInstanceOf[Array[Byte]]) == s)
     }
 
     it("Passed ST_NPoints") {
@@ -1062,5 +1089,4 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         lineString2D.getFactory.createPoint(interPoint3D).toText
       )
   }
-
 }

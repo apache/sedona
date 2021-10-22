@@ -17,11 +17,11 @@ Sedona 1.0.0+: Sedona-core, Sedona-SQL, Sedona-Viz
 	You only need to do Step 1 and 2 only if you cannot see [Apache-sedona](https://www.npmjs.com/package/apache-sedona) or [GeoSpark Zeppelin](https://www.npmjs.com/package/geospark-zeppelin) in Zeppelin Helium package list.
 
 ### Create Helium folder (optional)
-Create a folder called **helium** in Zeppelin root folder.
+Create a folder called `helium` in Zeppelin root folder.
 
 ### Add Sedona-Zeppelin description (optional)
 
-Create a file called ** sedona-zeppelin.json** in this folder and put the following content in this file. You need to change the artifact path!
+Create a file called `sedona-zeppelin.json` in this folder and put the following content in this file. You need to change the artifact path!
 
 ```
 {
