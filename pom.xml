@@ -527,7 +527,7 @@
                 <spark.compat.version>3.0</spark.compat.version>
                 <spark.converter.version>spark3</spark.converter.version>
                 <jackson.version>2.12.5</jackson.version>
-                <maven.deploy.skip>true</maven.deploy.skip>
+                <maven.deploy.skip>false</maven.deploy.skip>
             </properties>
         </profile>
         <profile>
