@@ -356,6 +356,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
                 <executions>
                     <execution>
                         <phase>compile</phase>
@@ -513,7 +514,7 @@
             </repositories>
         </profile>
         <profile>
-            <id>spark3.2</id>
+            <id>spark3.0</id>
             <activation>
                 <property>
                     <name>spark</name>
@@ -527,23 +528,6 @@
                 <spark.converter.version>spark3</spark.converter.version>
                 <jackson.version>2.12.5</jackson.version>
                 <maven.deploy.skip>true</maven.deploy.skip>
-            </properties>
-        </profile>
-        <profile>
-            <id>spark3.0</id>
-            <activation>
-                <property>
-                    <name>spark</name>
-                    <value>3.0</value>
-                </property>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <properties>
-                <spark.version>3.1.2</spark.version>
-                <spark.compat.version>3.0</spark.compat.version>
-                <spark.converter.version>spark3</spark.converter.version>
-                <jackson.version>2.10.0</jackson.version>
-                <maven.deploy.skip>false</maven.deploy.skip>
             </properties>
         </profile>
         <profile>
