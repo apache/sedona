@@ -29,7 +29,8 @@ object UdfRegistrator {
   }
 
   def registerAll(sparkSession: SparkSession): Unit = {
-    Catalog.expressions.foreach(f => {
+    val catalog = org.apache.sedona.sql.UDF.Catalog.expressions ++ Catalog.expressions
+    catalog.foreach(f => {
       val functionIdentifier = FunctionIdentifier(f.getClass.getSimpleName.dropRight(1))
       val expressionInfo = new ExpressionInfo(
         f.getClass.getCanonicalName,
