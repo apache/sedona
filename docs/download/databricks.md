@@ -1,5 +1,17 @@
+## Community edition (free-tier)
 
-In order to use Sedona on a Databricks clister you need to install the Sedona jars (and Sedona Python if you are using python) on Databricks using Databricks default web UI.
+You just need to install the Sedona jars and Sedona Python on Databricks using Databricks default web UI. Then everything will work.
+
+## Advanced editions
+
+### Databricks DBR 7.x (Recommended)
+
+If you are using the commercial version of Databricks up to version 7.x you can install the Sedona jars and Sedona Python using the Databricks default web UI and everything should work.
+
+### Databricks DBR 8.x, 9.x, 10.x
+
+If you are not using the free version of Databricks, there are currently some compatibility issues with DBR 8.x+. Specifically, the `ST_intersect` join query will throw a `java.lang.NoSuchMethodError` exception.
+
 
 ## Install Sedona from the web UI
 
@@ -14,14 +26,14 @@ In order to use Sedona on a Databricks clister you need to install the Sedona ja
     apache-sedona
     ```
 
-3) (Optional) If you are using an older version of Databricks Runtime (DBR <= 7.3) you can also speed up the serialization of geometry types by adding to your spark configurations (`Cluster` -> `Edit` -> `Configuration` -> `Advanced options`) the following lines:
+3) (Optional) You can speed up the serialization of geometry types by adding to your spark configurations (`Cluster` -> `Edit` -> `Configuration` -> `Advanced options`) the following lines:
 
     ```
     spark.serializer org.apache.spark.serializer.KryoSerializer
     spark.kryo.registrator org.apache.sedona.core.serde.SedonaKryoRegistrator
     ```
 
-    *This options are not compatible with newer DBR versions (8+).*
+    *This options are not compatible with the commercial Databricks DBR versions (8.x+).*
 
 ## Initialise
 
