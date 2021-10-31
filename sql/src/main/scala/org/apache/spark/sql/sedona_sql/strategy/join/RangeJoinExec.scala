@@ -20,7 +20,8 @@ package org.apache.spark.sql.sedona_sql.strategy.join
 
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.expressions.Expression
-import org.apache.spark.sql.execution.{BinaryExecNode, SparkPlan}
+import org.apache.spark.sql.execution.SparkPlan
+import org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode
 
 /**
   * ST_Contains(left, right) - left contains right
@@ -40,7 +41,7 @@ case class RangeJoinExec(left: SparkPlan,
                          rightShape: Expression,
                          intersects: Boolean,
                          extraCondition: Option[Expression] = None)
-  extends BinaryExecNode
+  extends SedonaBinaryExecNode
     with TraitJoinQueryExec
     with Logging {
 
