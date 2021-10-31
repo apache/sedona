@@ -1402,7 +1402,8 @@ case class ST_SubDivide(inputExpressions: Seq[Expression])
   }
 }
 
-case class ST_SubDivideExplode(children: Seq[Expression]) extends Generator {
+case class ST_SubDivideExplode(children: Seq[Expression])
+  extends Generator with CodegenFallback {
   children.validateLength(2)
 
   override def eval(input: InternalRow): TraversableOnce[InternalRow] = {
@@ -1420,8 +1421,6 @@ case class ST_SubDivideExplode(children: Seq[Expression]) extends Generator {
     new StructType()
       .add("geom", GeometryUDT, true)
   }
-
-  override protected def doGenCode(ctx: CodegenContext, ev: ExprCode): ExprCode = ev
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(children = newChildren)
