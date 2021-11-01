@@ -10,7 +10,7 @@ If you are using the commercial version of Databricks up to version 7.x you can 
 
 ### Databricks DBR 8.x, 9.x, 10.x
 
-If you are not using the free version of Databricks, there are currently some compatibility issues with DBR 8.x+. Specifically, the `ST_intersect` join query will throw a `java.lang.NoSuchMethodError` exception.
+If you are not using the free version of Databricks, there are currently some compatibility issues with DBR 8.x+. Specifically, the `ST_intersect` join query with the DataFrame API will throw a `java.lang.NoSuchMethodError` exception. As a temporary solution you can mix your DataFrame API with RDD API to perform spatial join queries (See [example](https://github.com/apache/incubator-sedona/blob/master/binder/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb)).
 
 
 ## Install Sedona from the web UI
@@ -53,17 +53,56 @@ SedonaRegistrator.registerAll(spark)
 
 ## Pure SQL environment
  
-In order to use the Sedona `ST_*` functions from SQL, you need to register the Sedona bindings. There are two ways to do that:
+In order to use the Sedona `ST_*` functions from SQL without having to register the Sedona functions from a python/scala cell, you need to install the sedona libraries from the [cluster init-scripts](https://docs.databricks.com/clusters/init-scripts.html) as follows.
 
-1) Insert a python (or scala) cell at the beginning of your SQL notebook to activate the bindings
+Download the Sedona jars to a DBFS location. You can do that manually via UI or from a notebook with
 
-    ```Python
-    %python
-    from sedona.register.geo_registrator import SedonaRegistrator
-    SedonaRegistrator.registerAll(spark)
-    ```
+```bash
+%sh 
+# Create JAR directory for Sedona
+mkdir -p /dbfs/jars/sedona
 
-2) Install the sedona libraries from the [cluster init-scripts](https://docs.databricks.com/clusters/init-scripts.html) and activate the bindings by adding `spark.sql.extensions org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions` to your cluster's spark configuration. This way you can activate the Sedona bindings without typing any python or scala code. 
+# Download the dependencies from Maven into DBFS
+curl -o /dbfs/jars/sedona/geotools-wrapper-geotools-{{ sedona.current_geotools }}.jar "https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/geotools-{{ sedona.current_geotools }}/geotools-wrapper-geotools-{{ sedona.current_geotools }}.jar"
 
-    Note: You need to install the sedona libraries via init script because the libraries installed via UI are installed after the cluster has already started, and therefore the classes specified by the config `spark.sql.extensions` are not available at startup time.
+curl -o /dbfs/jars/sedona/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.{{ sedona.current_version }}.jar"
+
+curl -o /dbfs/jars/sedona/sedona-viz-2.4_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-viz-2.4_2.12/{{ sedona.current_version }}/sedona-viz-2.4_2.12-{{ sedona.current_version }}.jar"
+```
+
+Create an init script in DBFS that loads the Sedona jars into the cluster's default jar directory. You can create that from any notebook by running: 
+
+```bash
+%sh 
+
+# Create init script directory for Sedona
+mkdir -p /dbfs/sedona/
+
+# Create init script
+cat > /dbfs/sedona/sedona-init.sh <<'EOF'
+#!/bin/bash
+#
+# File: sedona-init.sh
+# Author: Erni Durdevic
+# Created: 2021-11-01
+# 
+# On cluster startup, this script will copy the Sedona jars to the cluster's default jar directory.
+# In order to activate Sedona functions, remember to add to your spark configuration the Sedona extensions: "spark.sql.extensions org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions"
+
+cp /dbfs/jars/sedona/*.jar /databricks/jars
+
+EOF
+```
+
+From your cluster configuration (`Cluster` -> `Edit` -> `Configuration` -> `Advanced options` -> `Spark`) activate the Sedona functions by adding to the Spark Config 
+```
+spark.sql.extensions org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions
+```
+
+From your cluster configuration (`Cluster` -> `Edit` -> `Configuration` -> `Advanced options` -> `Init Scripts`) add the newly created init script 
+```
+/dbfs/sedona/sedona-init.sh
+```
+
+*Note: You need to install the sedona libraries via init script because the libraries installed via UI are installed after the cluster has already started, and therefore the classes specified by the config `spark.sql.extensions` are not available at startup time.*
 
