@@ -60,14 +60,14 @@ Download the Sedona jars to a DBFS location. You can do that manually via UI or 
 ```bash
 %sh 
 # Create JAR directory for Sedona
-mkdir -p /dbfs/jars/sedona
+mkdir -p /dbfs/jars/sedona/{{ sedona.current_version }}
 
 # Download the dependencies from Maven into DBFS
-curl -o /dbfs/jars/sedona/geotools-wrapper-geotools-{{ sedona.current_geotools }}.jar "https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/geotools-{{ sedona.current_geotools }}/geotools-wrapper-geotools-{{ sedona.current_geotools }}.jar"
+curl -o /dbfs/jars/sedona/{{ sedona.current_version }}/geotools-wrapper-geotools-{{ sedona.current_geotools }}.jar "https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/geotools-{{ sedona.current_geotools }}/geotools-wrapper-geotools-{{ sedona.current_geotools }}.jar"
 
-curl -o /dbfs/jars/sedona/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.{{ sedona.current_version }}.jar"
+curl -o /dbfs/jars/sedona/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.{{ sedona.current_version }}.jar"
 
-curl -o /dbfs/jars/sedona/sedona-viz-2.4_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-viz-2.4_2.12/{{ sedona.current_version }}/sedona-viz-2.4_2.12-{{ sedona.current_version }}.jar"
+curl -o /dbfs/jars/sedona/{{ sedona.current_version }}/sedona-viz-2.4_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-viz-2.4_2.12/{{ sedona.current_version }}/sedona-viz-2.4_2.12-{{ sedona.current_version }}.jar"
 ```
 
 Create an init script in DBFS that loads the Sedona jars into the cluster's default jar directory. You can create that from any notebook by running: 
@@ -89,7 +89,7 @@ cat > /dbfs/sedona/sedona-init.sh <<'EOF'
 # On cluster startup, this script will copy the Sedona jars to the cluster's default jar directory.
 # In order to activate Sedona functions, remember to add to your spark configuration the Sedona extensions: "spark.sql.extensions org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions"
 
-cp /dbfs/jars/sedona/*.jar /databricks/jars
+cp /dbfs/jars/sedona/{{ sedona.current_version }}/*.jar /databricks/jars
 
 EOF
 ```
