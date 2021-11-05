@@ -73,6 +73,10 @@ case class RS_NormalizedDifference(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 // Calculate mean value for a particular band
@@ -103,6 +107,10 @@ case class RS_Mean(inputExpressions: Seq[Expression])
   override def dataType: DataType = DoubleType
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 // Calculate mode of a particular band
@@ -135,6 +143,10 @@ case class RS_Mode(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 // fetch a particular region from a raster image given particular indexes(Array[minx...maxX][minY...maxY])
@@ -176,6 +188,10 @@ case class RS_FetchRegion(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 // Mark all the band values with 1 which are greater than a particular threshold
@@ -215,6 +231,10 @@ case class RS_GreaterThan(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 // Mark all the band values with 1 which are greater than or equal to a particular threshold
@@ -254,6 +274,10 @@ case class RS_GreaterThanEqual(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 // Mark all the band values with 1 which are less than a particular threshold
@@ -293,6 +317,10 @@ case class RS_LessThan(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 // Mark all the band values with 1 which are less than or equal to a particular threshold
@@ -332,6 +360,10 @@ case class RS_LessThanEqual(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 // Count number of occurences of a particular value in a band
@@ -370,6 +402,10 @@ case class RS_Count(inputExpressions: Seq[Expression])
   override def dataType: DataType = IntegerType
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 // Multiply a factor to all values of a band
@@ -407,6 +443,10 @@ case class RS_MultiplyFactor(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 // Add two bands
@@ -449,6 +489,10 @@ case class RS_AddBands(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 // Subtract two bands
@@ -490,6 +534,10 @@ case class RS_SubtractBands(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 // Multiple two bands
@@ -531,6 +579,10 @@ case class RS_MultiplyBands(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 // Divide two bands
@@ -572,6 +624,10 @@ case class RS_DivideBands(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 // Modulo of a band
@@ -609,6 +665,10 @@ case class RS_Modulo(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 // Square root of values in a band
@@ -643,6 +703,10 @@ case class RS_SquareRoot(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 // Bitwise AND between two bands
@@ -685,6 +749,10 @@ case class RS_BitwiseAnd(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 // Bitwise OR between two bands
@@ -726,6 +794,10 @@ case class RS_BitwiseOr(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 // if a value in band1 and band2 are different,value from band1 ins returned else return 0
@@ -774,6 +846,10 @@ case class RS_LogicalDifference(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 // If a value in band 1 is not equal to 0, band1 is returned else value from band2 is returned
@@ -822,6 +898,10 @@ case class RS_LogicalOver(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 case class RS_Normalize(inputExpressions: Seq[Expression])
@@ -860,6 +940,10 @@ case class RS_Normalize(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 

@@ -29,10 +29,10 @@ import org.apache.spark.unsafe.types.UTF8String
 
 case class ST_TileName(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
+  assert(inputExpressions.length == 2)
   override def nullable: Boolean = false
 
   override def eval(input: InternalRow): Any = {
-    assert(inputExpressions.length == 2)
     val inputArray = inputExpressions(0).eval(input).asInstanceOf[ArrayData]
     val zoomLevel = inputExpressions(1).eval(input).asInstanceOf[Int]
     val partPerAxis = Math.pow(2, zoomLevel).intValue()
@@ -45,4 +45,8 @@ case class ST_TileName(inputExpressions: Seq[Expression])
   override def dataType: DataType = StringType
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }

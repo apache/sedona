@@ -19,6 +19,7 @@
 package org.apache.sedona.viz.sql.UDF
 
 import org.apache.spark.sql.catalyst.FunctionIdentifier
+import org.apache.spark.sql.catalyst.expressions.ExpressionInfo
 import org.apache.spark.sql.{SQLContext, SparkSession}
 
 object UdfRegistrator {
@@ -28,7 +29,18 @@ object UdfRegistrator {
   }
 
   def registerAll(sparkSession: SparkSession): Unit = {
-    Catalog.expressions.foreach(f => sparkSession.sessionState.functionRegistry.createOrReplaceTempFunction(f.getClass.getSimpleName.dropRight(1), f))
+    Catalog.expressions.foreach(f => {
+      val functionIdentifier = FunctionIdentifier(f.getClass.getSimpleName.dropRight(1))
+      val expressionInfo = new ExpressionInfo(
+        f.getClass.getCanonicalName,
+        functionIdentifier.database.orNull,
+        functionIdentifier.funcName)
+      sparkSession.sessionState.functionRegistry.registerFunction(
+        functionIdentifier,
+        expressionInfo,
+        f
+      )
+    })
     Catalog.aggregateExpressions.foreach(f => sparkSession.udf.register(f.getClass.getSimpleName, f))
   }
 

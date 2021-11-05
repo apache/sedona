@@ -15,26 +15,32 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        spark: [2.4.7, 3.0.2, 3.1.1]
+        spark: [2.4.8, 3.0.3, 3.1.2]
         scala: [2.11.8, 2.12.8]
         r: [oldrel, release]
         exclude:
-          - spark: 3.1.1
+          - spark: 3.2.0
             scala: 2.11.8
             r: oldrel
-          - spark: 3.1.1
+          - spark: 3.2.0
             scala: 2.11.8
-            r: release
-          - spark: 3.0.2
+            r: release          
+          - spark: 3.1.2
             scala: 2.11.8
             r: oldrel
-          - spark: 3.0.2
+          - spark: 3.1.2
             scala: 2.11.8
             r: release
-          - spark: 2.4.7
+          - spark: 3.0.3
+            scala: 2.11.8
+            r: oldrel
+          - spark: 3.0.3
+            scala: 2.11.8
+            r: release
+          - spark: 2.4.8
             scala: 2.12.8
             r: oldrel
-          - spark: 2.4.7
+          - spark: 2.4.8
             scala: 2.12.8
             r: release
     env:

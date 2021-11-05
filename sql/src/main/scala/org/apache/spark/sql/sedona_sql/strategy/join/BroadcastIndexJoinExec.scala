@@ -28,7 +28,8 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, Predicate, UnsafeRow}
 import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeRowJoiner
 import org.apache.spark.sql.catalyst.plans.physical.Partitioning
-import org.apache.spark.sql.execution.{BinaryExecNode, SparkPlan}
+import org.apache.spark.sql.execution.SparkPlan
+import org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.index.SpatialIndex
 
@@ -40,7 +41,7 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
                                   intersects: Boolean,
                                   extraCondition: Option[Expression] = None,
                                   radius: Option[Expression] = None)
-  extends BinaryExecNode
+  extends SedonaBinaryExecNode
     with TraitJoinQueryBase
     with Logging {
 
@@ -126,5 +127,9 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
           joiner.join(leftRow, rightRow)
       }.filter(boundCondition(_))
     }
+  }
+
+  protected def withNewChildrenInternal(newLeft: SparkPlan, newRight: SparkPlan): SparkPlan = {
+    copy(left = newLeft, right = newRight)
   }
 }

@@ -29,16 +29,15 @@ class optVizOperatorTest extends TestBaseScala {
   describe("SedonaViz SQL function Test") {
 
     it("Passed full pipeline using optimized operator") {
-      spark.sql(
-        """
-          |CREATE OR REPLACE TEMP VIEW pixels AS
-          |SELECT pixel, shape FROM pointtable
-          |LATERAL VIEW EXPLODE(ST_Pixelize(shape, 1000, 1000, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000))) AS pixel
+      val table = spark.sql(
+       """
+         |SELECT pixel, shape FROM pointtable
+         |LATERAL VIEW EXPLODE(ST_Pixelize(shape, 1000, 1000, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000))) AS pixel
         """.stripMargin)
 
       // Test visualization partitioner
       val zoomLevel = 2
-      val newDf = VizPartitioner(spark.table("pixels"), zoomLevel, "pixel", new Envelope(0, 1000, 0, 1000))
+      val newDf = VizPartitioner(table, zoomLevel, "pixel", new Envelope(0, 1000, 0, 1000))
       newDf.createOrReplaceTempView("pixels")
       assert(newDf.select(Conf.PrimaryPID).distinct().count() <= Math.pow(4, zoomLevel))
       val secondaryPID = newDf.select(Conf.SecondaryPID).distinct().count()
@@ -50,26 +49,25 @@ class optVizOperatorTest extends TestBaseScala {
 
       // Test the colorize operator
       result.createOrReplaceTempView("pixelaggregates")
-      spark.sql(
+      val colorTable = spark.sql(
         s"""
-          |CREATE OR REPLACE TEMP VIEW colors AS
           |SELECT pixel, ${Conf.PrimaryPID}, ${Conf.SecondaryPID}, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates))
           |FROM pixelaggregates
         """.stripMargin)
-      spark.table("colors").show(1)
+
+      colorTable.show(1)
     }
 
     it("Passed full pipeline - aggregate:avg - color:uniform") {
-      spark.sql(
+      var table = spark.sql(
         """
-          |CREATE OR REPLACE TEMP VIEW pixels AS
           |SELECT pixel, shape FROM pointtable
           |LATERAL VIEW EXPLODE(ST_Pixelize(shape, 1000, 1000, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000))) AS pixel
         """.stripMargin)
 
       // Test visualization partitioner
       val zoomLevel = 2
-      val newDf = VizPartitioner(spark.table("pixels"), zoomLevel, "pixel", new Envelope(0, 1000, 0, 1000))
+      val newDf = VizPartitioner(table, zoomLevel, "pixel", new Envelope(0, 1000, 0, 1000))
       newDf.createOrReplaceTempView("pixels")
       assert(newDf.select(Conf.PrimaryPID).distinct().count() <= Math.pow(4, zoomLevel))
       val secondaryPID = newDf.select(Conf.SecondaryPID).distinct().count()
@@ -81,13 +79,12 @@ class optVizOperatorTest extends TestBaseScala {
 
       // Test the colorize operator
       result.createOrReplaceTempView("pixelaggregates")
-      spark.sql(
+      val colorTable = spark.sql(
         s"""
-           |CREATE OR REPLACE TEMP VIEW colors AS
            |SELECT pixel, ${Conf.PrimaryPID}, ${Conf.SecondaryPID}, ST_Colorize(weight, 0, 'red')
            |FROM pixelaggregates
         """.stripMargin)
-      spark.table("colors").show(1)
+      colorTable.show(1)
     }
 
     it("Passed lineage decoder"){
