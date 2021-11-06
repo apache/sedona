@@ -57,8 +57,8 @@ object Adapter {
   def toSpatialRdd(dataFrame: DataFrame, geometryFieldName: String, fieldNames: Seq[String]): SpatialRDD[Geometry] = {
     var spatialRDD = new SpatialRDD[Geometry]
     spatialRDD.rawSpatialRDD = toRdd(dataFrame, geometryFieldName).toJavaRDD()
-    import scala.collection.JavaConversions._
-    if (fieldNames != null && fieldNames.nonEmpty) spatialRDD.fieldNames = fieldNames
+    import scala.jdk.CollectionConverters._
+    if (fieldNames != null && fieldNames.nonEmpty) spatialRDD.fieldNames = fieldNames.asJava
     else spatialRDD.fieldNames = null
     spatialRDD
   }
@@ -81,8 +81,8 @@ object Adapter {
   def toSpatialRdd(dataFrame: DataFrame, geometryColId: Int, fieldNames: Seq[String]): SpatialRDD[Geometry] = {
     var spatialRDD = new SpatialRDD[Geometry]
     spatialRDD.rawSpatialRDD = toRdd(dataFrame, geometryColId).toJavaRDD()
-    import scala.collection.JavaConversions._
-    if (fieldNames.nonEmpty) spatialRDD.fieldNames = fieldNames
+    import scala.jdk.CollectionConverters._
+    if (fieldNames.nonEmpty) spatialRDD.fieldNames = fieldNames.asJava
     else spatialRDD.fieldNames = null
     spatialRDD
   }
@@ -107,7 +107,7 @@ object Adapter {
   }
 
   def toDf[T <: Geometry](spatialRDD: SpatialRDD[T], sparkSession: SparkSession): DataFrame = {
-    import scala.collection.JavaConverters._
+    import scala.jdk.CollectionConverters._
     if (spatialRDD.fieldNames != null) return toDf(spatialRDD, spatialRDD.fieldNames.asScala.toList, sparkSession)
     toDf(spatialRDD, null, sparkSession);
   }

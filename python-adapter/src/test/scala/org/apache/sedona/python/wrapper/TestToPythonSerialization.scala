@@ -23,7 +23,7 @@ import org.apache.sedona.python.wrapper.translation.{FlatPairRddConverter, Geome
 import org.apache.spark.api.java.JavaPairRDD
 import org.scalatest.Matchers
 import org.apache.sedona.python.wrapper.utils.implicits._
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 class TestToPythonSerialization extends SparkUtil with GeometrySample with Matchers {

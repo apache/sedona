@@ -23,6 +23,9 @@ jobs:
             scala: 2.11.8
           - spark: 3.0.3
             scala: 2.11.8
+        include:
+          - spark: 3.2.0
+            scala: 2.13.5
 
     steps:
     - uses: actions/checkout@v2

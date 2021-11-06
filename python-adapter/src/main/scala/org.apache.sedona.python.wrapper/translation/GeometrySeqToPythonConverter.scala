@@ -22,7 +22,7 @@ package org.apache.sedona.python.wrapper.translation
 import org.apache.sedona.python.wrapper.utils.implicits._
 import org.locationtech.jts.geom.Geometry
 
-case class GeometrySeqToPythonConverter(spatialData: scala.collection.convert.Wrappers.SeqWrapper[Geometry],
+case class GeometrySeqToPythonConverter(spatialData: Seq[Geometry],
                                         geometrySerializer: PythonGeometrySerializer) {
 
   def translateToPython: Array[Array[Byte]] = {

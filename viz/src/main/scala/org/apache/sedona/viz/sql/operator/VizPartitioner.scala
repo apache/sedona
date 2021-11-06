@@ -26,7 +26,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Row}
 import org.locationtech.jts.geom.{Envelope, Geometry}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable.ArrayBuffer
 
 object VizPartitioner {
@@ -75,7 +75,7 @@ object VizPartitioner {
           currentValues(secondIdPos) = LineageDecoder(secondaryZone.lineage)
           // Assign primary id
           currentValues(primaryIdPos) = LineageDecoder(secondaryZone.lineage.take(zoomLevel))
-          list += Row.fromSeq(currentValues)
+          list += Row.fromSeq(currentValues.toSeq)
         })
       }
       list.iterator

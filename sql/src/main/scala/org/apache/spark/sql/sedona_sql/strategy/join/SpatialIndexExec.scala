@@ -18,7 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import org.apache.sedona.core.enums.IndexType
 import org.apache.spark.broadcast.Broadcast

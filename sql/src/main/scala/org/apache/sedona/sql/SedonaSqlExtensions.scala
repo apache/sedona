@@ -26,7 +26,7 @@ class SedonaSqlExtensions extends (SparkSessionExtensions => Unit) {
   def apply(e: SparkSessionExtensions): Unit = {
     e.injectCheckRule(spark => {
       SedonaSQLRegistrator.registerAll(spark)
-      _ => Unit
+      _ => ()
     })
   }
 }

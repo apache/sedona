@@ -21,8 +21,7 @@ package org.apache.sedona.python.wrapper
 
 import org.locationtech.jts.geom.Geometry
 
-import java.io.FileInputStream
-import scala.tools.nsc.interpreter.InputStream
+import java.io.{FileInputStream, InputStream}
 import scala.io.Source
 
 trait GeometrySample extends PythonTestSpec {

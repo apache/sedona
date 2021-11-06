@@ -218,6 +218,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.scala-lang.modules</groupId>
+            <artifactId>scala-collection-compat_${scala.compat.version}</artifactId>
+            <version>2.5.0</version>
+        </dependency>
         <!-- Test -->
         <dependency>
             <groupId>junit</groupId>
@@ -545,6 +550,21 @@
                 <spark.converter.version>spark2</spark.converter.version>
                 <jackson.version>2.6.7</jackson.version>
                 <maven.deploy.skip>true</maven.deploy.skip>
+            </properties>
+        </profile>
+        <profile>
+            <id>scala2.13</id>
+            <activation>
+                <property>
+                    <name>scala</name>
+                    <value>2.13</value>
+                </property>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <scala.version>2.13.5</scala.version>
+                <scala.compat.version>2.13</scala.compat.version>
+                <scaladoc.arg>-no-java-comments</scaladoc.arg>
             </properties>
         </profile>
         <profile>
