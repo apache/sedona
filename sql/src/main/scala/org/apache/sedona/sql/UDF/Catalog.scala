@@ -93,6 +93,7 @@ object Catalog {
     ST_MakePolygon,
     ST_GeoHash,
     ST_GeomFromGeoHash,
+    ST_Collect,
 
     // Expression for rasters
     RS_NormalizedDifference,

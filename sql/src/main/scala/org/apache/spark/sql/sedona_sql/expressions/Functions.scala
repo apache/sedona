@@ -24,13 +24,14 @@ import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.{CodegenContext, CodegenFallback, ExprCode}
-import org.apache.spark.sql.catalyst.expressions.{BoundReference, Expression, Generator}
+import org.apache.spark.sql.catalyst.expressions.{BoundReference, Expression, Generator, UnsafeArrayData}
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.geohash.{GeoHashDecoder, GeometryGeoHashEncoder, InvalidGeoHashException}
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.sedona_sql.expressions.subdivide.GeometrySubDivider
 import org.apache.spark.sql.types.{ArrayType, _}
+import org.apache.spark.sql.vectorized.ColumnarArray
 import org.apache.spark.unsafe.types.UTF8String
 import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.CRS
@@ -51,7 +52,7 @@ import java.nio.ByteOrder
 import java.util
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
-
+import scala.collection.JavaConverters._
 /**
   * Return the distance between two geometries.
   *
@@ -1505,4 +1506,60 @@ case class ST_GeoHash(inputExpressions: Seq[Expression])
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
+}
+
+case class ST_Collect(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback {
+  assert(inputExpressions.length >= 1)
+  private val geomFactory = new GeometryFactory()
+
+
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    val firstElement = inputExpressions.head
+
+    firstElement.dataType match {
+      case ArrayType(elementType, containsNull) =>
+        elementType match {
+          case _: GeometryUDT =>
+            val data = firstElement.eval(input).asInstanceOf[ArrayData]
+            val numElements = data.numElements()
+            val geomElements = (0 until numElements)
+              .map(element => data.getArray(element))
+              .filter(_ != null)
+              .map(_.toGeometry)
+
+            geomFactory.buildGeometry(geomElements.asJava).toGenericArrayData
+          case _ =>
+            geomFactory.createGeometryCollection().toGenericArrayData
+        }
+      case _ =>
+        val geomElements =inputExpressions.map(_.toGeometry(input)).filter(_ != null)
+        if (geomElements.length > 1)
+          geomFactory.buildGeometry(geomElements.asJava).toGenericArrayData
+        else if (geomElements.length == 0) geomFactory.createGeometryCollection().toGenericArrayData
+        else {
+          val geom = geomElements.head
+          geom match {
+            case circle: Circle => geomFactory.createGeometryCollection(Array(circle))
+              .toGenericArrayData
+            case collection: GeometryCollection => collection.toGenericArrayData
+            case string: LineString => geomFactory.createMultiLineString(Array(string))
+              .toGenericArrayData
+            case point: Point => geomFactory.createMultiPoint(Array(point)).toGenericArrayData
+            case polygon: Polygon => geomFactory.createMultiPolygon(Array(polygon)).toGenericArrayData
+            case _ => geomFactory.createGeometryCollection().toGenericArrayData
+          }
+        }
+    }
+    }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+
 }
