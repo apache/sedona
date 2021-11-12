@@ -23,8 +23,7 @@ import org.apache.spark.sql.{Dataset, Row}
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKTReader
 
-import java.io.FileInputStream
-import scala.tools.nsc.interpreter.InputStream
+import java.io.{FileInputStream, InputStream}
 
 
 trait GeometrySample {

@@ -23,7 +23,7 @@ import org.apache.sedona.python.wrapper.translation.{FlatPairRddConverter, Geome
 import org.apache.spark.api.java.{JavaPairRDD, JavaRDD}
 import org.locationtech.jts.geom.Geometry
 
-import scala.collection.convert.Wrappers.SeqWrapper
+import scala.jdk.CollectionConverters._
 
 object PythonConverter extends GeomSerializer {
 
@@ -39,6 +39,6 @@ object PythonConverter extends GeomSerializer {
   def translatePythonRDDToJava(pythonRDD: JavaRDD[Array[Byte]]): JavaRDD[Geometry] =
     PythonRDDToJavaConverter(pythonRDD, geometrySerializer).translateToJava
 
-  def translateGeometrySeqToPython(spatialData: SeqWrapper[Geometry]): Array[Array[Byte]] =
-    GeometrySeqToPythonConverter(spatialData, geometrySerializer).translateToPython
+  def translateGeometrySeqToPython(spatialData: java.util.List[Geometry]): Array[Array[Byte]] =
+    GeometrySeqToPythonConverter(spatialData.asScala.toSeq, geometrySerializer).translateToPython
 }

@@ -26,7 +26,7 @@ class SedonaVizExtensions extends (SparkSessionExtensions => Unit) {
   def apply(e: SparkSessionExtensions): Unit = {
     e.injectCheckRule(spark => {
       SedonaVizRegistrator.registerAll(spark)
-      _ => Unit
+      _ => ()
     })
   }
 }

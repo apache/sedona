@@ -25,9 +25,8 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.{TableDrivenPropertyChecks, TableFor3, TableFor4}
 
-import java.io.FileInputStream
+import java.io.{FileInputStream, InputStream}
 import scala.io.Source
-import scala.tools.nsc.interpreter.InputStream
 
 
 class TestStSubDivide extends AnyFunSuite with Matchers with TableDrivenPropertyChecks with FunctionsHelper {

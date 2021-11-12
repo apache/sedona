@@ -136,8 +136,8 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
       assert(joinResultDf.schema(1).dataType == GeometryUDT)
       assert(joinResultDf.schema(0).name == "leftgeometry")
       assert(joinResultDf.schema(1).name == "rightgeometry")
-      import scala.collection.JavaConversions._
-      val joinResultDf2 = Adapter.toDf(joinResultPairRDD, polygonRDD.fieldNames, List(), sparkSession)
+      import scala.jdk.CollectionConverters._
+      val joinResultDf2 = Adapter.toDf(joinResultPairRDD, polygonRDD.fieldNames.asScala.toSeq, List(), sparkSession)
       assert(joinResultDf2.schema(0).dataType == GeometryUDT)
       assert(joinResultDf2.schema(0).name == "leftgeometry")
       assert(joinResultDf2.schema(1).name == "abc")
@@ -194,7 +194,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
       val HDFDataVariableList:Array[String] = Array("LST", "QC", "Error_LST", "Emis_31", "Emis_32")
       val earthdataHDFPoint = new EarthdataHDFPointMapper(HDFincrement, HDFoffset, HDFrootGroupName, HDFDataVariableList, HDFDataVariableName, urlPrefix)
       val spatialRDD = new PointRDD(sparkSession.sparkContext, InputLocation, numPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY)
-      import scala.collection.JavaConverters._
+      import scala.jdk.CollectionConverters._
       spatialRDD.fieldNames = HDFDataVariableList.dropRight(4).toList.asJava
       val spatialDf = Adapter.toDf(spatialRDD, sparkSession)
       assert(spatialDf.schema.fields(1).name == "LST")

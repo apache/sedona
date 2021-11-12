@@ -77,7 +77,7 @@ case class ST_Pixelize(inputExpressions: Seq[Expression])
       }
     }
     assert(pixels.size() > 0)
-    import scala.collection.JavaConverters._
+    import scala.jdk.CollectionConverters._
     return new GenericArrayData(pixels.asScala.map(f=> {
       val out = new ByteArrayOutputStream()
       val kryo = new Kryo()

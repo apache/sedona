@@ -75,7 +75,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     it("Passed RS_Mode") {
       val inputDf = Seq((Seq(200.0, 400.0, 600.0, 200.0)), (Seq(200.0, 400.0, 600.0, 700.0))).toDF("Band")
       val expectedResult = List(List(200.0), List(200.0, 400.0, 600.0, 700.0))
-      val actualResult = inputDf.selectExpr("RS_Mode(Band) as mode").as[List[Double]].collect().toList
+      val actualResult = inputDf.selectExpr("sort_array(RS_Mode(Band)) as mode").as[List[Double]].collect().toList
       val resultList = actualResult zip expectedResult
       for((actual, expected) <- resultList) {
         assert(actual == expected)

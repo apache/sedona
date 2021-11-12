@@ -369,26 +369,25 @@ case class ST_MakeValid(inputExpressions: Seq[Expression])
     val removeHoles = inputExpressions(1).eval(input).asInstanceOf[Boolean]
 
     // in order to do flatMap on java collections(util.List[Polygon])
-    import scala.collection.JavaConversions._
+    import scala.jdk.CollectionConverters._
 
     // makeValid works only on polygon or multipolygon
     if (!geometry.getGeometryType.equalsIgnoreCase("POLYGON") && !geometry.getGeometryType.equalsIgnoreCase("MULTIPOLYGON")) {
       throw new IllegalArgumentException("ST_MakeValid works only on Polygons and MultiPolygons")
     }
 
-    val validGeometry: util.List[Polygon] = geometry match {
+    val validGeometry = geometry match {
       case g: MultiPolygon =>
         (0 until g.getNumGeometries).flatMap(i => {
           val polygon = g.getGeometryN(i).asInstanceOf[Polygon]
-          val fixedPolygons = JTS.makeValid(polygon, removeHoles)
-          fixedPolygons
+          JTS.makeValid(polygon, removeHoles).asScala.iterator
         })
       case g: Polygon =>
-        JTS.makeValid(g, removeHoles)
+        JTS.makeValid(g, removeHoles).asScala.iterator
       case _ => Nil
     }
 
-    val result = validGeometry.toArray.map(g => {
+    val result = validGeometry.map(g => {
       val serializedGeometry = GeometrySerializer.serialize(g.asInstanceOf[Geometry])
       InternalRow(new GenericArrayData(serializedGeometry))
     })
