@@ -113,6 +113,6 @@ case class ST_Render() extends UserDefinedAggregateFunction with Logging {
     for (i <- xArray.indices) {
       bufferedImage.setRGB(xArray(i), yArray(i), colorArray(i))
     }
-    return new ImageSerializableWrapper(bufferedImage)
+    new ImageSerializableWrapper(bufferedImage)
   }
 }

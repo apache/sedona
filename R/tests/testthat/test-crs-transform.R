@@ -30,6 +30,9 @@ test_that("crs_transform() works as expected", {
       sdf_register() %>%
       head(5) %>%
       dplyr::transmute(x = ST_X(geometry), y = ST_Y(geometry)) %>%
+      # NOTE: the extra `sdf_register()` call is a workaround until SPARK-37202 is
+      # fixed
+      sdf_register(name = random_string()) %>%
       collect(),
     tibble::tribble(
       ~x, ~y,

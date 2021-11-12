@@ -65,11 +65,6 @@ class TestGeometryConvert(TestBase):
 
         assert geom.area == 712.5
 
-    def test_multipolygon_deserialization(self):
-        geom = self.spark.sql(
-            """select st_geomFromWKT()"""
-        )
-
     def test_point_deserialization(self):
         geom = self.spark.sql("""SELECT st_geomfromtext('POINT(-6.0 52.0)') as geom""").collect()[0][0]
         assert geom.wkt == Point(-6.0, 52.0).wkt

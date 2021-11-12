@@ -4,6 +4,7 @@ You just need to install the Sedona jars and Sedona Python on Databricks using D
 
 ## Advanced editions
 
+
 ### Databricks DBR 7.x
 
 If you are using the commercial version of Databricks up to version 7.x you can install the Sedona jars and Sedona Python using the Databricks default web UI and everything should work.

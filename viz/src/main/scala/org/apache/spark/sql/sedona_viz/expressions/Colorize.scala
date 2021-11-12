@@ -30,10 +30,10 @@ import org.beryx.awt.color.ColorFactory
 
 case class ST_Colorize(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with Logging {
+  assert(inputExpressions.length <= 3)
   override def nullable: Boolean = false
 
   override def eval(input: InternalRow): Any = {
-    assert(inputExpressions.length <= 3)
     if (inputExpressions.length == 3) {
       // This means the user wants to apply the same color to everywhere
       // Fetch the color from the third input string
@@ -62,4 +62,8 @@ case class ST_Colorize(inputExpressions: Seq[Expression])
   override def dataType: DataType = IntegerType
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }

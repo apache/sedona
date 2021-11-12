@@ -35,11 +35,10 @@ import org.locationtech.jts.geom._
 
 case class ST_Pixelize(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with Logging {
-
+  assert(inputExpressions.length <= 5)
   override def toString: String = s" **${ST_Pixelize.getClass.getName}**  "
 
   override def eval(input: InternalRow): Any = {
-    assert(inputExpressions.length <= 5)
     val inputGeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
     val resolutionX = inputExpressions(1).eval(input).asInstanceOf[Integer]
     val resolutionY = inputExpressions(2).eval(input).asInstanceOf[Integer]
@@ -93,4 +92,8 @@ case class ST_Pixelize(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 
   override def nullable: Boolean = false
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
