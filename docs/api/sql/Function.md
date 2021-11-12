@@ -844,3 +844,52 @@ Result:
 |u3r0p                        |
 +-----------------------------+
 ```
+
+## ST_Collect
+
+Introduction: Returns MultiGeometry object based on geometry column/s or array with geometries
+
+Format 
+
+`ST_Collect(*geom: geometry)`
+
+`ST_Collect(geom: array<geometry>)`
+
+Since: `v1.2.0`
+
+Example: 
+```SQL
+SELECT ST_Collect(
+    ST_GeomFromText('POINT(21.427834 52.042576573)'),
+    ST_GeomFromText('POINT(45.342524 56.342354355)')
+) AS geom
+```
+Result:
+
+```
++---------------------------------------------------------------+
+|geom                                                           |
++---------------------------------------------------------------+
+|MULTIPOINT ((21.427834 52.042576573), (45.342524 56.342354355))|
++---------------------------------------------------------------+
+```
+
+Example:
+```SQL
+SELECT ST_Collect(
+    Array(
+        ST_GeomFromText('POINT(21.427834 52.042576573)'),
+        ST_GeomFromText('POINT(45.342524 56.342354355)')
+    )
+) AS geom
+```
+
+Result:
+
+```
++---------------------------------------------------------------+
+|geom                                                           |
++---------------------------------------------------------------+
+|MULTIPOINT ((21.427834 52.042576573), (45.342524 56.342354355))|
++---------------------------------------------------------------+
+```
