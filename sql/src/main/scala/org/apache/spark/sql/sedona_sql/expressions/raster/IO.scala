@@ -119,6 +119,10 @@ case class RS_GetBand(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 case class RS_Array(inputExpressions: Seq[Expression])
@@ -147,6 +151,10 @@ case class RS_Array(inputExpressions: Seq[Expression])
   override def dataType: DataType = ArrayType(DoubleType)
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 case class RS_Base64(inputExpressions: Seq[Expression])
@@ -223,6 +231,10 @@ case class RS_Base64(inputExpressions: Seq[Expression])
   override def dataType: DataType = StringType
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 case class RS_HTML(inputExpressions: Seq[Expression])
@@ -252,5 +264,9 @@ case class RS_HTML(inputExpressions: Seq[Expression])
   override def dataType: DataType = StringType
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 

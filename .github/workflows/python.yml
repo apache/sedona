@@ -15,19 +15,22 @@ jobs:
     strategy:
       matrix:
         include:
-          - spark: 3.1.1
-            scala: 2.12.8
-            python: 3.7
-          - spark: 3.1.1
-            scala: 2.12.8
-            python: 3.8
-          - spark: 3.1.1
+          - spark: 3.2.0
             scala: 2.12.8
             python: 3.9
-          - spark: 3.0.2
+          - spark: 3.2.0
+            scala: 2.12.8
+            python: 3.8
+          - spark: 3.2.0
             scala: 2.12.8
             python: 3.7
-          - spark: 2.4.7
+          - spark: 3.1.2
+            scala: 2.12.8
+            python: 3.7
+          - spark: 3.0.3
+            scala: 2.12.8
+            python: 3.7
+          - spark: 2.4.8
             scala: 2.11.8
             python: 3.7
 

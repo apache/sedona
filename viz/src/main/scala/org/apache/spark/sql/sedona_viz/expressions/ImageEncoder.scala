@@ -32,10 +32,10 @@ import org.apache.spark.unsafe.types.UTF8String
 
 case class ST_EncodeImage(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
+  assert(inputExpressions.length == 1)
   override def nullable: Boolean = false
 
   override def eval(input: InternalRow): Any = {
-    assert(inputExpressions.length == 1)
     val inputArray = inputExpressions(0).eval(input).asInstanceOf[ArrayData]
     val serializer = new ImageWrapperSerializer
     val image = serializer.readImage(inputArray.toByteArray()).getImage
@@ -47,4 +47,8 @@ case class ST_EncodeImage(inputExpressions: Seq[Expression])
   override def dataType: DataType = StringType
 
   override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }

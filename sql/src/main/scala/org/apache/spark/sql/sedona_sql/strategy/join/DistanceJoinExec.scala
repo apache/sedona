@@ -25,7 +25,8 @@ import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.expressions.{BindReferences, Expression, UnsafeRow}
 import org.apache.spark.sql.catalyst.util.ArrayData
-import org.apache.spark.sql.execution.{BinaryExecNode, SparkPlan}
+import org.apache.spark.sql.execution.SparkPlan
+import org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode
 import org.locationtech.jts.geom.Geometry
 
 // ST_Distance(left, right) <= radius
@@ -37,7 +38,7 @@ case class DistanceJoinExec(left: SparkPlan,
                             radius: Expression,
                             intersects: Boolean,
                             extraCondition: Option[Expression] = None)
-  extends BinaryExecNode
+  extends SedonaBinaryExecNode
     with TraitJoinQueryExec
     with Logging {
 
@@ -63,6 +64,10 @@ case class DistanceJoinExec(left: SparkPlan,
         }
         .toJavaRDD())
     spatialRdd
+  }
+
+  protected def withNewChildrenInternal(newLeft: SparkPlan, newRight: SparkPlan): SparkPlan = {
+    copy(left = newLeft, right = newRight)
   }
 
 }
