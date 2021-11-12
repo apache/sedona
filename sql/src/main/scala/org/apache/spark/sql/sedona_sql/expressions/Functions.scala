@@ -1519,7 +1519,7 @@ case class ST_Collect(inputExpressions: Seq[Expression]) extends Expression with
     val firstElement = inputExpressions.head
 
     firstElement.dataType match {
-      case ArrayType(elementType, containsNull) =>
+      case ArrayType(elementType, _) =>
         elementType match {
           case _: GeometryUDT =>
             val data = firstElement.eval(input).asInstanceOf[ArrayData]
@@ -1529,30 +1529,33 @@ case class ST_Collect(inputExpressions: Seq[Expression]) extends Expression with
               .filter(_ != null)
               .map(_.toGeometry)
 
-            geomFactory.buildGeometry(geomElements.asJava).toGenericArrayData
-          case _ =>
-            geomFactory.createGeometryCollection().toGenericArrayData
+            createMultiGeometry(geomElements)
+          case _ => emptyCollection
         }
       case _ =>
         val geomElements =inputExpressions.map(_.toGeometry(input)).filter(_ != null)
-        if (geomElements.length > 1)
-          geomFactory.buildGeometry(geomElements.asJava).toGenericArrayData
-        else if (geomElements.length == 0) geomFactory.createGeometryCollection().toGenericArrayData
-        else {
-          val geom = geomElements.head
-          geom match {
-            case circle: Circle => geomFactory.createGeometryCollection(Array(circle))
-              .toGenericArrayData
-            case collection: GeometryCollection => collection.toGenericArrayData
-            case string: LineString => geomFactory.createMultiLineString(Array(string))
-              .toGenericArrayData
-            case point: Point => geomFactory.createMultiPoint(Array(point)).toGenericArrayData
-            case polygon: Polygon => geomFactory.createMultiPolygon(Array(polygon)).toGenericArrayData
-            case _ => geomFactory.createGeometryCollection().toGenericArrayData
-          }
-        }
+        val length = geomElements.length
+        if (length > 1) createMultiGeometry(geomElements)
+        else if (length == 1) createMultiGeometryFromOneElement(geomElements.head).toGenericArrayData
+        else emptyCollection
     }
     }
+
+  private def createMultiGeometry(geomElements: Seq[Geometry]) =
+    geomFactory.buildGeometry(geomElements.asJava).toGenericArrayData
+
+  private def emptyCollection = geomFactory.createGeometryCollection().toGenericArrayData
+
+  private def createMultiGeometryFromOneElement(geom: Geometry): Geometry = {
+    geom match {
+      case circle: Circle => geomFactory.createGeometryCollection(Array(circle))
+      case collection: GeometryCollection => collection
+      case string: LineString => geomFactory.createMultiLineString(Array(string))
+      case point: Point => geomFactory.createMultiPoint(Array(point))
+      case polygon: Polygon => geomFactory.createMultiPolygon(Array(polygon))
+      case _ => geomFactory.createGeometryCollection()
+    }
+  }
 
   override def dataType: DataType = GeometryUDT
 
