@@ -31,8 +31,7 @@ import org.apache.spark.sql.catalyst.expressions.codegen.{
 import org.apache.spark.sql.catalyst.expressions.{
   BoundReference,
   Expression,
-  Generator,
-  UnsafeArrayData
+  Generator
 }
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
@@ -44,7 +43,6 @@ import org.apache.spark.sql.sedona_sql.expressions.geohash.{
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.sedona_sql.expressions.subdivide.GeometrySubDivider
 import org.apache.spark.sql.types.{ArrayType, _}
-import org.apache.spark.sql.vectorized.ColumnarArray
 import org.apache.spark.unsafe.types.UTF8String
 import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.CRS
@@ -65,7 +63,6 @@ import java.nio.ByteOrder
 import java.util
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
-import scala.collection.JavaConverters._
 
 /**
   * Return the distance between two geometries.
