@@ -33,6 +33,7 @@ from tests.test_base import TestBase
 
 
 class TestPredicateJoin(TestBase):
+
     geo_schema = StructType(
         [StructField("geom", GeometryType(), False)]
     )
@@ -165,34 +166,29 @@ class TestPredicateJoin(TestBase):
         polygon_df = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
         polygon_df.createOrReplaceTempView("polygondf")
         polygon_df.show()
-        function_df = self.spark.sql(
-            "select ST_Transform(ST_FlipCoordinates(polygondf.countyshape), 'epsg:4326','epsg:3857', false) from polygondf")
+        function_df = self.spark.sql("select ST_Transform(ST_FlipCoordinates(polygondf.countyshape), 'epsg:4326','epsg:3857', false) from polygondf")
         function_df.show()
 
     def test_st_intersection_intersects_but_not_contains(self):
-        test_table = self.spark.sql(
-            "select ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
+        test_table = self.spark.sql("select ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
         test_table.createOrReplaceTempView("testtable")
         intersect = self.spark.sql("select ST_Intersection(a,b) from testtable")
         assert intersect.take(1)[0][0].wkt == "POLYGON ((2 8, 8 8, 8 2, 2 2, 2 8))"
 
     def test_st_intersection_intersects_but_left_contains_right(self):
-        test_table = self.spark.sql(
-            "select ST_GeomFromWKT('POLYGON((1 1, 1 5, 5 5, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 2 3, 3 3, 2 2))') as b")
+        test_table = self.spark.sql("select ST_GeomFromWKT('POLYGON((1 1, 1 5, 5 5, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 2 3, 3 3, 2 2))') as b")
         test_table.createOrReplaceTempView("testtable")
         intersects = self.spark.sql("select ST_Intersection(a,b) from testtable")
         assert intersects.take(1)[0][0].wkt == "POLYGON ((2 2, 2 3, 3 3, 2 2))"
 
     def test_st_intersection_intersects_but_right_contains_left(self):
-        test_table = self.spark.sql(
-            "select ST_GeomFromWKT('POLYGON((2 2, 2 3, 3 3, 2 2))') as a,ST_GeomFromWKT('POLYGON((1 1, 1 5, 5 5, 1 1))') as b")
+        test_table = self.spark.sql("select ST_GeomFromWKT('POLYGON((2 2, 2 3, 3 3, 2 2))') as a,ST_GeomFromWKT('POLYGON((1 1, 1 5, 5 5, 1 1))') as b")
         test_table.createOrReplaceTempView("testtable")
         intersects = self.spark.sql("select ST_Intersection(a,b) from testtable")
         assert intersects.take(1)[0][0].wkt == "POLYGON ((2 2, 2 3, 3 3, 2 2))"
 
     def test_st_intersection_not_intersects(self):
-        test_table = self.spark.sql(
-            "select ST_GeomFromWKT('POLYGON((40 21, 40 22, 40 23, 40 21))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
+        test_table = self.spark.sql("select ST_GeomFromWKT('POLYGON((40 21, 40 22, 40 23, 40 21))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
         test_table.createOrReplaceTempView("testtable")
         intersects = self.spark.sql("select ST_Intersection(a,b) from testtable")
         assert intersects.take(1)[0][0].wkt == "POLYGON EMPTY"
@@ -242,12 +238,10 @@ class TestPredicateJoin(TestBase):
         assert polygon_df.take(1)[0]["countyshape"].wkt == loads(wkt_df.take(1)[0]["wkt"]).wkt
 
     def test_st_n_points(self):
-        test = self.spark.sql(
-            "SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
+        test = self.spark.sql("SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
 
     def test_st_geometry_type(self):
-        test = self.spark.sql(
-            "SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
+        test = self.spark.sql("SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
 
     def test_st_azimuth(self):
         sample_points = create_sample_points(20)
@@ -290,11 +284,11 @@ class TestPredicateJoin(TestBase):
 
         linestrings = linestring_df.selectExpr("ST_X(geom) as x").filter("x IS NOT NULL")
 
-        assert ([point[0] for point in points] == [-71.064544, -88.331492, 88.331492, 1.0453, 32.324142])
+        assert([point[0] for point in points] == [-71.064544, -88.331492, 88.331492, 1.0453, 32.324142])
 
-        assert (not linestrings.count())
+        assert(not linestrings.count())
 
-        assert (not polygons.count())
+        assert(not polygons.count())
 
     def test_st_y(self):
         point_df = create_sample_points_df(self.spark, 5)
@@ -308,11 +302,11 @@ class TestPredicateJoin(TestBase):
 
         linestrings = linestring_df.selectExpr("ST_Y(geom) as y").filter("y IS NOT NULL")
 
-        assert ([point[0] for point in points] == [42.28787, 32.324142, 32.324142, 5.3324324, -88.331492])
+        assert([point[0] for point in points] == [42.28787, 32.324142, 32.324142, 5.3324324, -88.331492])
 
-        assert (not linestrings.count())
+        assert(not linestrings.count())
 
-        assert (not polygons.count())
+        assert(not polygons.count())
 
     def test_st_start_point(self):
 
@@ -334,11 +328,11 @@ class TestPredicateJoin(TestBase):
 
         linestrings = linestring_df.selectExpr("ST_StartPoint(geom) as geom").filter("geom IS NOT NULL")
 
-        assert ([line[0] for line in linestrings.collect()] == [wkt.loads(el) for el in expected_points])
+        assert([line[0] for line in linestrings.collect()] == [wkt.loads(el) for el in expected_points])
 
-        assert (not points.count())
+        assert(not points.count())
 
-        assert (not polygons.count())
+        assert(not polygons.count())
 
     def test_st_end_point(self):
         linestring_dataframe = create_sample_lines_df(self.spark, 5)
@@ -358,10 +352,10 @@ class TestPredicateJoin(TestBase):
         empty_dataframe = other_geometry_dataframe.selectExpr("ST_EndPoint(geom) as geom"). \
             filter("geom IS NOT NULL")
 
-        assert ([wkt_row[0]
-                 for wkt_row in point_data_frame.selectExpr("ST_AsText(geom)").collect()] == expected_ending_points)
+        assert([wkt_row[0]
+                for wkt_row in point_data_frame.selectExpr("ST_AsText(geom)").collect()] == expected_ending_points)
 
-        assert (empty_dataframe.count() == 0)
+        assert(empty_dataframe.count() == 0)
 
     def test_st_boundary(self):
         wkt_list = [
@@ -384,7 +378,7 @@ class TestPredicateJoin(TestBase):
         boundary_table = geometry_table.selectExpr("ST_Boundary(geom) as geom")
 
         boundary_wkt = [wkt_row[0] for wkt_row in boundary_table.selectExpr("ST_AsText(geom)").collect()]
-        assert (boundary_wkt == [
+        assert(boundary_wkt == [
             "MULTIPOINT ((1 1), (-1 1))",
             "MULTIPOINT ((100 150), (160 170))",
             "MULTILINESTRING ((10 130, 50 190, 110 190, 140 150, 150 80, 100 10, 20 40, 10 130), (70 40, 100 50, 120 80, 80 110, 50 90, 70 40))",
@@ -407,21 +401,20 @@ class TestPredicateJoin(TestBase):
 
         linestring_wkt = [wkt_row[0] for wkt_row in linestring_df.selectExpr("ST_AsText(geom)").collect()]
 
-        assert (linestring_wkt == ["LINESTRING (0 0, 0 1, 1 1, 1 0, 0 0)", "LINESTRING (0 0, 1 1, 1 2, 1 1, 0 0)"])
+        assert(linestring_wkt == ["LINESTRING (0 0, 0 1, 1 1, 1 0, 0 0)", "LINESTRING (0 0, 1 1, 1 2, 1 1, 0 0)"])
 
-        assert (not empty_df.count())
+        assert(not empty_df.count())
 
     def test_st_geometry_n(self):
         data_frame = self.__wkt_list_to_data_frame(["MULTIPOINT((1 2), (3 4), (5 6), (8 9))"])
         wkts = [data_frame.selectExpr(f"ST_GeometryN(geom, {i}) as geom").selectExpr("st_asText(geom)").collect()[0][0]
                 for i in range(0, 4)]
 
-        assert (wkts == ["POINT (1 2)", "POINT (3 4)", "POINT (5 6)", "POINT (8 9)"])
+        assert(wkts == ["POINT (1 2)", "POINT (3 4)", "POINT (5 6)", "POINT (8 9)"])
 
     def test_st_interior_ring_n(self):
         polygon_df = self.__wkt_list_to_data_frame(
-            [
-                "POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1), (1 3, 2 3, 2 4, 1 4, 1 3), (3 3, 4 3, 4 4, 3 4, 3 3))"]
+            ["POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1), (1 3, 2 3, 2 4, 1 4, 1 3), (3 3, 4 3, 4 4, 3 4, 3 3))"]
         )
 
         other_geometry = create_sample_points_df(self.spark, 5).union(create_sample_lines_df(self.spark, 5))
@@ -431,10 +424,10 @@ class TestPredicateJoin(TestBase):
 
         empty_df = other_geometry.selectExpr("ST_InteriorRingN(geom, 1) as geom").filter("geom IS NOT NULL")
 
-        assert (not empty_df.count())
-        assert (wholes == ["LINESTRING (1 1, 2 1, 2 2, 1 2, 1 1)",
-                           "LINESTRING (1 3, 2 3, 2 4, 1 4, 1 3)",
-                           "LINESTRING (3 3, 4 3, 4 4, 3 4, 3 3)"])
+        assert(not empty_df.count())
+        assert(wholes == ["LINESTRING (1 1, 2 1, 2 2, 1 2, 1 1)",
+                          "LINESTRING (1 3, 2 3, 2 4, 1 4, 1 3)",
+                          "LINESTRING (3 3, 4 3, 4 4, 3 4, 3 3)"])
 
     def test_st_dumps(self):
         expected_geometries = [
@@ -464,14 +457,14 @@ class TestPredicateJoin(TestBase):
 
         dumped_geometries = geometry_df.selectExpr("ST_Dump(geom) as geom")
 
-        assert (dumped_geometries.select(explode(col("geom"))).count() == 14)
+        assert(dumped_geometries.select(explode(col("geom"))).count() == 14)
 
         collected_geometries = dumped_geometries \
             .select(explode(col("geom")).alias("geom")) \
             .selectExpr("ST_AsText(geom) as geom") \
             .collect()
 
-        assert ([geom_row[0] for geom_row in collected_geometries] == expected_geometries)
+        assert([geom_row[0] for geom_row in collected_geometries] == expected_geometries)
 
     def test_st_dump_points(self):
         expected_points = [
@@ -491,10 +484,10 @@ class TestPredicateJoin(TestBase):
         dumped_points = geometry_df.selectExpr("ST_DumpPoints(geom) as geom") \
             .select(explode(col("geom")).alias("geom"))
 
-        assert (dumped_points.count() == 10)
+        assert(dumped_points.count() == 10)
 
         collected_points = [geom_row[0] for geom_row in dumped_points.selectExpr("ST_AsText(geom)").collect()]
-        assert (collected_points == expected_points)
+        assert(collected_points == expected_points)
 
     def test_st_is_closed(self):
         expected_result = [
@@ -519,14 +512,13 @@ class TestPredicateJoin(TestBase):
             (7, "MULTILINESTRING ((10 10, 20 20, 10 40, 10 10), (40 40, 30 30, 40 20, 30 10, 40 40))"),
             (8, "MULTILINESTRING ((10 10, 20 20, 10 40, 10 10), (40 40, 30 30, 40 20, 30 10))"),
             (9, "MULTILINESTRING ((10 10, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))"),
-            (10,
-             "GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (10 10, 20 20, 10 40), POLYGON ((40 40, 20 45, 45 30, 40 40)))")
+            (10, "GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (10 10, 20 20, 10 40), POLYGON ((40 40, 20 45, 45 30, 40 40)))")
         ]
 
         geometry_df = self.__wkt_pair_list_with_index_to_data_frame(geometry_list)
         is_closed = geometry_df.selectExpr("index", "ST_IsClosed(geom)").collect()
         is_closed_collected = [[*row] for row in is_closed]
-        assert (is_closed_collected == expected_result)
+        assert(is_closed_collected == expected_result)
 
     def test_num_interior_ring(self):
         geometries = [
@@ -539,15 +531,14 @@ class TestPredicateJoin(TestBase):
             (7, "MULTILINESTRING ((10 10, 20 20, 10 40, 10 10), (40 40, 30 30, 40 20, 30 10, 40 40))"),
             (8, "MULTILINESTRING ((10 10, 20 20, 10 40, 10 10), (40 40, 30 30, 40 20, 30 10))"),
             (9, "MULTILINESTRING ((10 10, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))"),
-            (10,
-             "GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (10 10, 20 20, 10 40), POLYGON ((40 40, 20 45, 45 30, 40 40)))"),
+            (10, "GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (10 10, 20 20, 10 40), POLYGON ((40 40, 20 45, 45 30, 40 40)))"),
             (11, "POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))")]
 
         geometry_df = self.__wkt_pair_list_with_index_to_data_frame(geometries)
 
         number_of_interior_rings = geometry_df.selectExpr("index", "ST_NumInteriorRings(geom) as num")
         collected_interior_rings = [[*row] for row in number_of_interior_rings.filter("num is not null").collect()]
-        assert (collected_interior_rings == [[2, 0], [11, 1]])
+        assert(collected_interior_rings == [[2, 0], [11, 1]])
 
     def test_st_add_point(self):
         geometry = [
@@ -560,9 +551,7 @@ class TestPredicateJoin(TestBase):
             ("MULTILINESTRING ((10 10, 20 20, 10 40, 10 10), (40 40, 30 30, 40 20, 30 10, 40 40))", "Point(21 52)"),
             ("MULTILINESTRING ((10 10, 20 20, 10 40, 10 10), (40 40, 30 30, 40 20, 30 10))", "Point(21 52)"),
             ("MULTILINESTRING ((10 10, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))", "Point(21 52)"),
-            (
-            "GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (10 10, 20 20, 10 40), POLYGON ((40 40, 20 45, 45 30, 40 40)))",
-            "Point(21 52)"),
+            ("GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (10 10, 20 20, 10 40), POLYGON ((40 40, 20 45, 45 30, 40 40)))", "Point(21 52)"),
             ("POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))", "Point(21 52)")
         ]
         geometry_df = self.__wkt_pairs_to_data_frame(geometry)
@@ -570,7 +559,7 @@ class TestPredicateJoin(TestBase):
         collected_geometries = [
             row[0] for row in modified_geometries.filter("geom is not null").selectExpr("ST_AsText(geom)").collect()
         ]
-        assert (collected_geometries[0] == "LINESTRING (0 0, 1 1, 1 0, 21 52)")
+        assert(collected_geometries[0] == "LINESTRING (0 0, 1 1, 1 0, 21 52)")
 
     def test_st_remove_point(self):
         result_and_expected = [
@@ -581,13 +570,11 @@ class TestPredicateJoin(TestBase):
             [self.calculate_st_remove("POINT(0 1)", 3), None],
             [self.calculate_st_remove("POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))", 3), None],
             [self.calculate_st_remove("GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (10 10, 20 20, 10 40))", 0), None],
-            [self.calculate_st_remove(
-                "MULTIPOLYGON (((30 20, 45 40, 10 40, 30 20)), ((15 5, 40 10, 10 20, 5 10, 15 5)))", 3), None],
-            [self.calculate_st_remove(
-                "MULTILINESTRING ((10 10, 20 20, 10 40, 10 10), (40 40, 30 30, 40 20, 30 10, 40 40))", 3), None]
+            [self.calculate_st_remove("MULTIPOLYGON (((30 20, 45 40, 10 40, 30 20)), ((15 5, 40 10, 10 20, 5 10, 15 5)))", 3), None],
+            [self.calculate_st_remove("MULTILINESTRING ((10 10, 20 20, 10 40, 10 10), (40 40, 30 30, 40 20, 30 10, 40 40))", 3), None]
         ]
         for actual, expected in result_and_expected:
-            assert (actual == expected)
+            assert(actual == expected)
 
     def test_st_is_ring(self):
         result_and_expected = [
@@ -598,7 +585,7 @@ class TestPredicateJoin(TestBase):
             [self.calculate_st_is_ring("POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))"), None],
         ]
         for actual, expected in result_and_expected:
-            assert (actual == expected)
+            assert(actual == expected)
 
     def test_st_subdivide(self):
         # Given
@@ -669,10 +656,11 @@ class TestPredicateJoin(TestBase):
         geom_poly = geometry_df.withColumn("polygon", expr("ST_MakePolygon(geom)"))
 
         # Then only based on closed linestring geom is created
-        geom_poly.filter("polygon IS NOT NULL").selectExpr("ST_AsText(polygon)", "expected"). \
+        geom_poly.filter("polygon IS NOT NULL").selectExpr("ST_AsText(polygon)", "expected").\
             show()
-        result = geom_poly.filter("polygon IS NOT NULL").selectExpr("ST_AsText(polygon)", "expected"). \
+        result = geom_poly.filter("polygon IS NOT NULL").selectExpr("ST_AsText(polygon)", "expected").\
             collect()
+
 
         assert result.__len__() == 1
 
@@ -690,7 +678,7 @@ class TestPredicateJoin(TestBase):
         ).select(expr("St_GeomFromText(_1)").alias("geom"), col("_2").alias("expected_hash"))
 
         # When
-        geohash_df = geometry_df.withColumn("geohash", expr("ST_GeoHash(geom, 10)")). \
+        geohash_df = geometry_df.withColumn("geohash", expr("ST_GeoHash(geom, 10)")).\
             select("geohash", "expected_hash")
 
         # Then
@@ -781,24 +769,6 @@ class TestPredicateJoin(TestBase):
             "MULTIPOLYGON (((1 2, 1 4, 3 4, 3 2, 1 2)), ((0.5 0.5, 5 0, 5 5, 0 5, 0.5 0.5)))"
         })
 
-        self.spark.sql(
-            """
-            SELECT ST_Collect(
-                ST_GeomFromText('POINT(21.427834 52.042576573)'),
-                ST_GeomFromText('POINT(45.342524 56.342354355)')
-            ) AS geom
-            """
-        ).show(5, False)
-
-        self.spark.sql(
-            """
-            SELECT ST_Collect(
-                Array(ST_GeomFromText('POINT(21.427834 52.042576573)'),
-                ST_GeomFromText('POINT(45.342524 56.342354355)'))
-            ) AS geom
-            """
-        ).show(5, False)
-
     def calculate_st_is_ring(self, wkt):
         geometry_collected = self.__wkt_list_to_data_frame([wkt]). \
             selectExpr("ST_IsRing(geom) as is_ring") \
@@ -815,12 +785,10 @@ class TestPredicateJoin(TestBase):
         return geometry_collected[0][0] if geometry_collected.__len__() != 0 else None
 
     def __wkt_pairs_to_data_frame(self, wkt_list: List) -> DataFrame:
-        return self.spark.createDataFrame([[wkt.loads(wkt_a), wkt.loads(wkt_b)] for wkt_a, wkt_b in wkt_list],
-                                          self.geo_pair_schema)
+        return self.spark.createDataFrame([[wkt.loads(wkt_a), wkt.loads(wkt_b)] for wkt_a, wkt_b in wkt_list], self.geo_pair_schema)
 
     def __wkt_list_to_data_frame(self, wkt_list: List) -> DataFrame:
         return self.spark.createDataFrame([[wkt.loads(given_wkt)] for given_wkt in wkt_list], self.geo_schema)
 
     def __wkt_pair_list_with_index_to_data_frame(self, wkt_list: List) -> DataFrame:
-        return self.spark.createDataFrame([[index, wkt.loads(given_wkt)] for index, given_wkt in wkt_list],
-                                          self.geo_schema_with_index)
+        return self.spark.createDataFrame([[index, wkt.loads(given_wkt)] for index, given_wkt in wkt_list], self.geo_schema_with_index)
