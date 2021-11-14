@@ -192,7 +192,7 @@ Introduction: Create Geometry from geohash string and optional precision
 
 Format: `ST_GeomFromGeoHash(geohash: string, precision: int)`
 
-Since: `v1.1.0`
+Since: `v1.1.1`
 
 Spark SQL example:
 ```SQL

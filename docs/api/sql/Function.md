@@ -249,7 +249,7 @@ Introduction: Return the Well-Known Binary representation of a geometry
 
 Format: `ST_AsBinary (A:geometry)`
 
-Since: `v1.2.0`
+Since: `v1.1.1`
 
 Spark SQL example:
 ```SQL
@@ -267,7 +267,7 @@ If the geometry is lacking SRID a WKB format is produced.
 
 Format: `ST_AsEWKB (A:geometry)`
 
-Since: `v1.2.0`
+Since: `v1.1.1`
 
 Spark SQL example:
 ```SQL
@@ -281,7 +281,7 @@ Introduction: Return the spatial refence system identifier (SRID) of the geometr
 
 Format: `ST_SRID (A:geometry)`
 
-Since: `v1.2.0`
+Since: `v1.1.1`
 
 Spark SQL example:
 ```SQL
@@ -295,7 +295,7 @@ Introduction: Sets the spatial refence system identifier (SRID) of the geometry.
 
 Format: `ST_SetSRID (A:geometry, srid: Integer)`
 
-Since: `v1.2.0`
+Since: `v1.1.1`
 
 Spark SQL example:
 ```SQL
@@ -825,7 +825,7 @@ Introduction: Returns GeoHash of the geometry with given precision
 
 Format: `ST_GeoHash(geom: geometry, precision: int)`
 
-Since: `v1.1.0`
+Since: `v1.1.1`
 
 Example: 
 

@@ -12,6 +12,7 @@ If you are using the commercial version of Databricks up to version 7.x you can 
 ### Databricks DBR 8.x, 9.x, 10.x
 
 If you are using the commercial version of Databricks for DBR 8.x+
+
 * You need to use sedona version `1.1.1-incubating` or higher. 
 * In order to activate the Kryo serializer (this speeds up the serialization and deserialization of geometry types) you need to install the libraries via init script as described below.
 

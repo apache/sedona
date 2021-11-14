@@ -1,3 +1,27 @@
+## Sedona 1.1.1
+
+This version is a maintenance release on Sedona 1.1.X line. It includes bug fixes and a few new functions.
+
+### Global
+
+New feature:
+
+* [SEDONA-73](https://issues.apache.org/jira/browse/SEDONA-73): Scala source code supports Scala 2.13
+
+### SQL
+
+Bug fix:
+
+* [SEDONA-67](https://issues.apache.org/jira/browse/SEDONA-67): Support Spark 3.2
+
+New features:
+
+* [SEDONA-43](https://issues.apache.org/jira/browse/SEDONA-43): Add ST_GeoHash and ST_GeomFromGeoHash
+* [SEDONA-45](https://issues.apache.org/jira/browse/SEDONA-45): Add ST_MakePolygon
+* [SEDONA-71](https://issues.apache.org/jira/browse/SEDONA-71): Add ST_AsBinary, ST_AsEWKB, ST_SRID, ST_SetSRID
+
+
+
 ## Sedona 1.1.0
 
 This version is a major release on Sedona 1.1.0 line. It includes bug fixes and new features: R language API, Raster data and Map algebra support
