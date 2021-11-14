@@ -19,39 +19,10 @@
 package org.apache.sedona.sql.UDF
 
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
-import org.apache.spark.sql.expressions.{
-  Aggregator,
-  UserDefinedAggregateFunction
-}
+import org.apache.spark.sql.expressions.{Aggregator, UserDefinedAggregateFunction}
 import org.apache.spark.sql.sedona_sql.expressions._
 import org.apache.spark.sql.sedona_sql.expressions.collect.ST_Collect
-import org.apache.spark.sql.sedona_sql.expressions.raster.{
-  RS_AddBands,
-  RS_Array,
-  RS_Base64,
-  RS_BitwiseAnd,
-  RS_BitwiseOr,
-  RS_Count,
-  RS_DivideBands,
-  RS_FetchRegion,
-  RS_GetBand,
-  RS_GreaterThan,
-  RS_GreaterThanEqual,
-  RS_HTML,
-  RS_LessThan,
-  RS_LessThanEqual,
-  RS_LogicalDifference,
-  RS_LogicalOver,
-  RS_Mean,
-  RS_Mode,
-  RS_Modulo,
-  RS_MultiplyBands,
-  RS_MultiplyFactor,
-  RS_Normalize,
-  RS_NormalizedDifference,
-  RS_SquareRoot,
-  RS_SubtractBands
-}
+import org.apache.spark.sql.sedona_sql.expressions.raster.{RS_AddBands, RS_Array, RS_Base64, RS_BitwiseAnd, RS_BitwiseOr, RS_Count, RS_DivideBands, RS_FetchRegion, RS_GetBand, RS_GreaterThan, RS_GreaterThanEqual, RS_HTML, RS_LessThan, RS_LessThanEqual, RS_LogicalDifference, RS_LogicalOver, RS_Mean, RS_Mode, RS_Modulo, RS_MultiplyBands, RS_MultiplyFactor, RS_Normalize, RS_NormalizedDifference, RS_SquareRoot, RS_SubtractBands}
 import org.locationtech.jts.geom.Geometry
 
 object Catalog {
