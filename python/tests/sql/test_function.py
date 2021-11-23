@@ -19,8 +19,8 @@ import math
 from typing import List
 
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import explode, expr
 from pyspark.sql.functions import col
+from pyspark.sql.functions import explode, expr
 from pyspark.sql.types import StructType, StructField, IntegerType
 from shapely import wkt
 from shapely.wkt import loads
@@ -733,6 +733,41 @@ class TestPredicateJoin(TestBase):
         for wkt, expected_wkt in geohash:
             assert wkt == expected_wkt
 
+    def test_st_collect_on_array_type(self):
+        # given
+        geometry_df = self.spark.createDataFrame([
+            [1, [loads("POLYGON((1 2,1 4,3 4,3 2,1 2))"), loads("POLYGON((0.5 0.5,5 0,5 5,0 5,0.5 0.5))")]],
+            [2, [loads("LINESTRING(1 2, 3 4)"), loads("LINESTRING(3 4, 4 5)")]],
+            [3, [loads("POINT(1 2)"), loads("POINT(-2 3)")]]
+        ]).toDF("id", "geom")
+
+        # when calculating st collect
+        geometry_df_collected = geometry_df.withColumn("collected", expr("ST_Collect(geom)"))
+
+        # then result should be as expected
+        assert(set([el[0] for el in  geometry_df_collected.selectExpr("ST_AsText(collected)").collect()]) == {
+            "MULTILINESTRING ((1 2, 3 4), (3 4, 4 5))",
+            "MULTIPOINT ((1 2), (-2 3))",
+            "MULTIPOLYGON (((1 2, 1 4, 3 4, 3 2, 1 2)), ((0.5 0.5, 5 0, 5 5, 0 5, 0.5 0.5)))"
+        })
+
+    def test_st_collect_on_multiple_columns(self):
+        # given geometry df with multiple geometry columns
+        geometry_df = self.spark.createDataFrame([
+            [1, loads("POLYGON((1 2,1 4,3 4,3 2,1 2))"), loads("POLYGON((0.5 0.5,5 0,5 5,0 5,0.5 0.5))")],
+            [2, loads("LINESTRING(1 2, 3 4)"), loads("LINESTRING(3 4, 4 5)")],
+            [3, loads("POINT(1 2)"), loads("POINT(-2 3)")]
+        ]).toDF("id", "geom_left", "geom_right")
+
+        # when calculating st collect on multiple columns
+        geometry_df_collected = geometry_df.withColumn("collected", expr("ST_Collect(geom_left, geom_right)"))
+
+        # then result should be calculated
+        assert(set([el[0] for el in  geometry_df_collected.selectExpr("ST_AsText(collected)").collect()]) == {
+            "MULTILINESTRING ((1 2, 3 4), (3 4, 4 5))",
+            "MULTIPOINT ((1 2), (-2 3))",
+            "MULTIPOLYGON (((1 2, 1 4, 3 4, 3 2, 1 2)), ((0.5 0.5, 5 0, 5 5, 0 5, 0.5 0.5)))"
+        })
 
     def calculate_st_is_ring(self, wkt):
         geometry_collected = self.__wkt_list_to_data_frame([wkt]). \
