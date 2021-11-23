@@ -29,7 +29,7 @@ Documentation contributions should satisfy the following requirements:
 * Change the ==mkdocs.yml== if necessary
 
 !!!note
-	Please read [Compile the source code](../download/compile.md#compile-the-documentation) to learn how to compile Sedona website.
+	Please read [Compile the source code](../setup/compile.md#compile-the-documentation) to learn how to compile Sedona website.
 
 ## Create a JIRA ticket and make a Pull Request
 After developing a contribution, the easiest and most visible way to push a contribution is to create a JIRA ticket and submit a Pull Request (PR) to the [GitHub repo](https://github.com/apache/incubator-sedona). Please use the JIRA ticket ID in the PR name, such as "[SEDONA-1] my subject".

@@ -17,7 +17,7 @@ SedonaViz encapsulates the main steps of map visualization process, e.g., pixeli
 This tutorial mainly focuses on explaining SQL/DataFrame API. SedonaViz RDD example can be found in Please see [Viz exmaple project](https://github.com/apache/incubator-sedona/tree/master/examples/viz)
 
 ## Set up dependencies
-1. Read [Sedona Maven Central coordinates](../download/maven-coordinates.md)
+1. Read [Sedona Maven Central coordinates](../setup/maven-coordinates.md)
 2. Add [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core, Sedona-SQL, Sedona-Viz
 
 ## Initiate SparkSession

@@ -9,7 +9,7 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.
 
 ## Set up dependencies
 
-1. Read [Sedona Maven Central coordinates](../download/maven-coordinates.md)
+1. Read [Sedona Maven Central coordinates](../setup/maven-coordinates.md)
 2. Select ==the minimum dependencies==: Add [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core and Sedona-SQL
 3. Add the dependencies in build.sbt or pom.xml.
 

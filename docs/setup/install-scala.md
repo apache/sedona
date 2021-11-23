@@ -30,8 +30,8 @@ There are two ways to use a Scala or Java library with Apache Spark. You can use
 1. Have your Spark cluster ready.
 
 2. Download Sedona jars:
-	* Download the pre-compiled jars from [Sedona Releases](download.md)
-	* Download / Git clone Sedona source code and compile the code by yourself (see [Compile Sedona](/download/compile))
+	* Download the pre-compiled jars from [Sedona Releases](../download.md)
+	* Download / Git clone Sedona source code and compile the code by yourself (see [Compile Sedona](/setup/compile))
 3. Run Spark shell with `--jars` option.
 ```
 ./bin/spark-shell --jars /Path/To/SedonaJars.jar

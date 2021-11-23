@@ -3,7 +3,7 @@ The page outlines the steps to create Spatial RDDs and run spatial queries using
 
 ## Set up dependencies
 
-1. Read [Sedona Maven Central coordinates](../download/maven-coordinates.md)
+1. Read [Sedona Maven Central coordinates](../setup/maven-coordinates.md)
 2. Select ==the minimum dependencies==: Add Apache Spark (only the Spark core) and Sedona (core).
 3. Add the dependencies in build.sbt or pom.xml.
 
