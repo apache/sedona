@@ -402,7 +402,7 @@ R CMD build .
 R CMD check --as-cran apache.sedona_*.tar.gz
 ```
 5. Instructions on how to submit a R package to CRAN are at the bottom of the [CRAN front page](https://cran.r-project.org/), “Submitting to CRAN.” Submission is now via [a web form](https://xmpalantir.wu.ac.at/cransubmit/).
-6. Close the staging repo on https://repository.apache.org. If the staging repo has been automatically closed by the system, please read ==Use Maven Release Plugin directly from an existing tag==.
+6. Close the staging repo on https://repository.apache.org. If the staging repo has been automatically closed by the system, please read below.
 
 #### Use Maven Release Plugin directly from an existing tag
 
@@ -439,32 +439,42 @@ failureMessage	Invalid Signature: '/org/apache/sedona/sedona-viz-3.0_2.12/{{ sed
 failureMessage	Invalid Signature: '/org/apache/sedona/sedona-viz-2.4_2.11/{{ sedona.current_version }}/sedona-viz-2.4_2.11-{{ sedona.current_version }}.pom.asc' is not a valid signature for 'sedona-viz-2.4_2.11-{{ sedona.current_version }}.pom'.
 ```
 
-This is caused by a bug in the resolved-pom-maven-plugin in POM.xml. You will have to upload the signatures of the 6 POM files mannualy. Please follow the steps below.
+This is caused by a bug in the resolved-pom-maven-plugin in POM.xml. You will have to upload the signatures of the POM files mannualy.
 
-1. Please download the correct 6 pom files from the staging repo to your local path and generate signatures. Please make sure you use the correct Sedona staging repo ID
+Please run the following script to reupload ASC files to the staging repo. Please make sure you use the correct Sedona staging repo ID, ASF username and password.
+
 ```bash
 #!/bin/bash
+username=admin
+password=admin123
 stagingid=1016
+
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-2.4_2.11/{{ sedona.current_version }}/sedona-core-2.4_2.11-{{ sedona.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-2.4_2.12/{{ sedona.current_version }}/sedona-core-2.4_2.12-{{ sedona.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-3.0_2.12/{{ sedona.current_version }}/sedona-core-3.0_2.12-{{ sedona.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-2.4_2.11/{{ sedona.current_version }}/sedona-sql-2.4_2.11-{{ sedona.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-2.4_2.12/{{ sedona.current_version }}/sedona-sql-2.4_2.12-{{ sedona.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-3.0_2.12/{{ sedona.current_version }}/sedona-sql-3.0_2.12-{{ sedona.current_version }}.pom
 wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-2.4_2.11/{{ sedona.current_version }}/sedona-viz-2.4_2.11-{{ sedona.current_version }}.pom
 wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-2.4_2.12/{{ sedona.current_version }}/sedona-viz-2.4_2.12-{{ sedona.current_version }}.pom
 wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-3.0_2.12/{{ sedona.current_version }}/sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom
 wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-2.4_2.11/{{ sedona.current_version }}/sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom
 wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-2.4_2.12/{{ sedona.current_version }}/sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom
 wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom
+
+gpg -ab sedona-core-2.4_2.11-{{ sedona.current_version }}.pom
+gpg -ab sedona-core-2.4_2.12-{{ sedona.current_version }}.pom
+gpg -ab sedona-core-3.0_2.12-{{ sedona.current_version }}.pom
+gpg -ab sedona-sql-2.4_2.11-{{ sedona.current_version }}.pom
+gpg -ab sedona-sql-2.4_2.12-{{ sedona.current_version }}.pom
+gpg -ab sedona-sql-3.0_2.12-{{ sedona.current_version }}.pom
 gpg -ab sedona-viz-2.4_2.11-{{ sedona.current_version }}.pom
 gpg -ab sedona-viz-2.4_2.12-{{ sedona.current_version }}.pom
 gpg -ab sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom
 gpg -ab sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom
 gpg -ab sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom
 gpg -ab sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom
-```
-2. Delete the asc files of the 6 pom files from the ASF staging repo web interface.
-3. Upload the 6 asc files to the staging repo using curl. For example,
-```bash
-#!/bin/bash
-username=admin
-password=admin123
-stagingid=1016
+
 curl -v -u $username:$password --upload-file sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-2.4_2.11/{{ sedona.current_version }}/sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom.asc
 
 curl -v -u $username:$password --upload-file sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-2.4_2.12/{{ sedona.current_version }}/sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom.asc
@@ -477,6 +487,24 @@ curl -v -u $username:$password --upload-file sedona-viz-2.4_2.12-{{ sedona.curre
 
 curl -v -u $username:$password --upload-file sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-3.0_2.12/{{ sedona.current_version }}/sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom.asc
 
+curl -v -u $username:$password --upload-file sedona-core-2.4_2.11-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-2.4_2.11/{{ sedona.current_version }}/sedona-core-2.4_2.11-{{ sedona.current_version }}.pom.asc
+
+curl -v -u $username:$password --upload-file sedona-core-2.4_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-2.4_2.12/{{ sedona.current_version }}/sedona-core-2.4_2.12-{{ sedona.current_version }}.pom.asc
+
+curl -v -u $username:$password --upload-file sedona-core-3.0_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-3.0_2.12/{{ sedona.current_version }}/sedona-core-3.0_2.12-{{ sedona.current_version }}.pom.asc
+
+curl -v -u $username:$password --upload-file sedona-sql-2.4_2.11-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-2.4_2.11/{{ sedona.current_version }}/sedona-sql-2.4_2.11-{{ sedona.current_version }}.pom.asc
+
+curl -v -u $username:$password --upload-file sedona-sql-2.4_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-2.4_2.12/{{ sedona.current_version }}/sedona-sql-2.4_2.12-{{ sedona.current_version }}.pom.asc
+
+curl -v -u $username:$password --upload-file sedona-sql-3.0_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-3.0_2.12/{{ sedona.current_version }}/sedona-sql-3.0_2.12-{{ sedona.current_version }}.pom.asc
+
+rm sedona-core-2.4_2.11-{{ sedona.current_version }}.pom.asc
+rm sedona-core-2.4_2.12-{{ sedona.current_version }}.pom.asc
+rm sedona-core-3.0_2.12-{{ sedona.current_version }}.pom.asc
+rm sedona-sql-2.4_2.11-{{ sedona.current_version }}.pom.asc
+rm sedona-sql-2.4_2.12-{{ sedona.current_version }}.pom.asc
+rm sedona-sql-3.0_2.12-{{ sedona.current_version }}.pom.asc
 rm sedona-viz-2.4_2.11-{{ sedona.current_version }}.pom.asc
 rm sedona-viz-2.4_2.12-{{ sedona.current_version }}.pom.asc
 rm sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom.asc
@@ -485,7 +513,8 @@ rm sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom.asc
 rm sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom.asc
 ```
 admin is your Apache ID username and admin123 is your Apache ID password. You can find the correct upload path from the web interface.
-4. Once the staging repo is closed, click "Release" on the web interface.
+
+Once the staging repo is closed, click "Release" on the web interface.
 
 ## Publish the doc website
 
