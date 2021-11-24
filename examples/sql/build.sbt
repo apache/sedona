@@ -32,30 +32,30 @@ lazy val root = (project in file(".")).
     publishMavenStyle := true
   )
 
-val SparkVersion = "3.1.1"
+val SparkVersion = "3.2.0"
 
 val SparkCompatibleVersion = "3.0"
 
 val HadoopVersion = "2.7.2"
 
-val SedonaVersion = "1.0.1-incubating"
+val SedonaVersion = "1.1.1-incubating"
 
 val ScalaCompatibleVersion = "2.12"
 
 // Change the dependency scope to "provided" when you run "sbt assembly"
 val dependencyScope = "compile"
 
-val geotoolsVersion = "1.1.0-24.1"
+val geotoolsVersion = "1.1.0-25.2"
 
-val jacksonVersion = "2.10.0"
+//val jacksonVersion = "2.10.0"
 
 logLevel := Level.Warn
 
 logLevel in assembly := Level.Error
 
 libraryDependencies ++= Seq(
-  "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion % dependencyScope,
-  "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion % dependencyScope,
+//  "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion % dependencyScope,
+//  "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion % dependencyScope,
   "org.apache.spark" %% "spark-core" % SparkVersion % dependencyScope exclude("org.apache.hadoop", "*"),
   "org.apache.spark" %% "spark-sql" % SparkVersion % dependencyScope exclude("org.apache.hadoop", "*"),
   "org.apache.hadoop" % "hadoop-mapreduce-client-core" % HadoopVersion % dependencyScope,
