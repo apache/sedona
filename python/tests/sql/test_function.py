@@ -387,7 +387,7 @@ class TestPredicateJoin(TestBase):
 
     def test_st_exterior_ring(self):
         polygon_df = create_simple_polygons_df(self.spark, 5)
-        additional_wkt = "POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))"
+        additional_wkt = "POLYGON((0 0, 1 1, 1 2, 1 1, 0 0))"
         additional_wkt_df = self.spark.createDataFrame([[wkt.loads(additional_wkt)]], self.geo_schema)
 
         polygons_df = polygon_df.union(additional_wkt_df)
