@@ -27,7 +27,7 @@ import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.geohash.GeoHashDecoder
-import org.apache.spark.sql.sedona_sql.expressions.implicits.{GeometryEnhancer, InputExpressionEnhancer}
+import org.apache.spark.sql.sedona_sql.expressions.implicits.{GeometryEnhancer, InputExpressionEnhancer, SequenceEnhancer}
 import org.apache.spark.sql.types.{DataType, Decimal}
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.geom.{Coordinate, GeometryFactory}
@@ -258,7 +258,7 @@ case class ST_GeomFromGeoJSON(inputExpressions: Seq[Expression])
   */
 case class ST_Point(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
-  assert(inputExpressions.length == 2)
+  inputExpressions.betweenLength(2, 3)
 
   override def nullable: Boolean = false
 
@@ -272,8 +272,18 @@ case class ST_Point(inputExpressions: Seq[Expression])
       case b: Decimal => b.toDouble
     }
 
+    val coord = if (inputExpressions.length == 2) {
+      new Coordinate(x, y)
+    } else {
+      val z = inputExpressions(2).eval(inputRow) match {
+        case a: Double => a
+        case b: Decimal => b.toDouble
+      }
+      new Coordinate(x, y, z)
+    }
+
     var geometryFactory = new GeometryFactory()
-    var geometry = geometryFactory.createPoint(new Coordinate(x, y))
+    var geometry = geometryFactory.createPoint(coord)
     new GenericArrayData(GeometrySerializer.serialize(geometry))
   }
 
