@@ -155,6 +155,11 @@ class TestPredicateJoin(TestBase):
         function_df = self.spark.sql("select ST_Distance(polygondf.countyshape, polygondf.countyshape) from polygondf")
         function_df.show()
 
+    def test_st_3ddistance(self):
+        function_df = self.spark.sql("select ST_3DDistance(ST_Point(0.0, 0.0, 5.0), ST_Point(1.0, 1.0, -6.0))")
+        function_df.show()
+        assert function_df.count() == 1
+
     def test_st_transform(self):
         polygon_wkt_df = self.spark.read.format("csv"). \
             option("delimiter", "\t"). \
@@ -237,6 +242,38 @@ class TestPredicateJoin(TestBase):
         wkt_df = self.spark.sql("select ST_AsText(countyshape) as wkt from polygondf")
         assert polygon_df.take(1)[0]["countyshape"].wkt == loads(wkt_df.take(1)[0]["wkt"]).wkt
 
+
+    def test_st_astext_3d(self):
+        input_df = self.spark.createDataFrame([
+            ("Point(21 52 87)",),
+            ("Polygon((0 0 1, 0 1 1, 1 1 1, 1 0 1, 0 0 1))",),
+            ("Linestring(0 0 1, 1 1 2, 1 0 3)",),
+            ("MULTIPOINT ((10 40 66), (40 30 77), (20 20 88), (30 10 99))",),
+            ("MULTIPOLYGON (((30 20 11, 45 40 11, 10 40 11, 30 20 11)), ((15 5 11, 40 10 11, 10 20 11, 5 10 11, 15 5 11)))",),
+            ("MULTILINESTRING ((10 10 11, 20 20 11, 10 40 11), (40 40 11, 30 30 11, 40 20 11, 30 10 11))",),
+            ("MULTIPOLYGON (((40 40 11, 20 45 11, 45 30 11, 40 40 11)), ((20 35 11, 10 30 11, 10 10 11, 30 5 11, 45 20 11, 20 35 11), (30 20 11, 20 15 11, 20 25 11, 30 20 11)))",),
+            ("POLYGON((0 0 11, 0 5 11, 5 5 11, 5 0 11, 0 0 11), (1 1 11, 2 1 11, 2 2 11, 1 2 11, 1 1 11))",),
+        ], ["wkt"])
+
+        input_df.createOrReplaceTempView("input_wkt")
+        input_df.show()
+        polygon_df = self.spark.sql("select ST_AsText(ST_GeomFromWkt(wkt)) as wkt from input_wkt")
+        polygon_df.show(10)
+        assert polygon_df.count() == 8
+
+    def test_st_as_text_3d(self):
+        polygon_wkt_df = self.spark.read.format("csv"). \
+            option("delimiter", "\t"). \
+            option("header", "false"). \
+            load(mixed_wkt_geometry_input_location)
+
+        polygon_wkt_df.createOrReplaceTempView("polygontable")
+        polygon_df = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+        polygon_df.createOrReplaceTempView("polygondf")
+        wkt_df = self.spark.sql("select ST_AsText(countyshape) as wkt from polygondf")
+        assert polygon_df.take(1)[0]["countyshape"].wkt == loads(wkt_df.take(1)[0]["wkt"]).wkt
+
+
     def test_st_n_points(self):
         test = self.spark.sql("SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
 
@@ -303,6 +340,30 @@ class TestPredicateJoin(TestBase):
         linestrings = linestring_df.selectExpr("ST_Y(geom) as y").filter("y IS NOT NULL")
 
         assert([point[0] for point in points] == [42.28787, 32.324142, 32.324142, 5.3324324, -88.331492])
+
+        assert(not linestrings.count())
+
+        assert(not polygons.count())
+
+    def test_st_z(self):
+        point_df = self.spark.sql(
+            "select ST_GeomFromWKT('POINT Z (1.1 2.2 3.3)') as geom"
+        )
+        polygon_df = self.spark.sql(
+            "select ST_GeomFromWKT('POLYGON Z ((0 0 2, 0 1 2, 1 1 2, 1 0 2, 0 0 2))') as geom"
+        )
+        linestring_df = self.spark.sql(
+            "select ST_GeomFromWKT('LINESTRING Z (0 0 1, 0 1 2)') as geom"
+        )
+
+        points = point_df \
+            .selectExpr("ST_Z(geom)").collect()
+
+        polygons = polygon_df.selectExpr("ST_Z(geom) as z").filter("z IS NOT NULL")
+
+        linestrings = linestring_df.selectExpr("ST_Z(geom) as z").filter("z IS NOT NULL")
+
+        assert([point[0] for point in points] == [3.3])
 
         assert(not linestrings.count())
 
