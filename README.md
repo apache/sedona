@@ -24,7 +24,7 @@ Apache Sedona™(incubating) is a cluster computing system for processing large-
 
 ## Compile the source code
 
-Please refer to [Sedona website](http://sedona.apache.org/download/compile/)
+Please refer to [Sedona website](http://sedona.apache.org/setup/compile/)
 
 ## Contact
 
