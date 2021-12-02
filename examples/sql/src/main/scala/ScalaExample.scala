@@ -45,11 +45,13 @@ object ScalaExample extends App{
   val csvPolygonInputLocation = resourceFolder + "testenvelope.csv"
   val csvPointInputLocation = resourceFolder + "testpoint.csv"
   val shapefileInputLocation = resourceFolder + "shapefiles/dbf"
+  val rasterdatalocation = resourceFolder + "raster/"
 
   testPredicatePushdownAndRangeJonQuery()
   testDistanceJoinQuery()
   testAggregateFunction()
   testShapefileConstructor()
+  testRasterIOAndMapAlgebra()
 
   System.out.println("All SedonaSQL DEMOs passed!")
 
@@ -138,5 +140,14 @@ object ScalaExample extends App{
                                      """.stripMargin)
     spatialDf.show()
     spatialDf.printSchema()
+  }
+
+  def testRasterIOAndMapAlgebra(): Unit = {
+    var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
+    df.printSchema()
+    df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.wkt) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as numBands").show()
+    df = df.selectExpr(" image.data as data", "image.nBands as numBands")
+    df = df.selectExpr("RS_GetBand(data, 1, numBands) as targetBand")
+    df.selectExpr("RS_MultiplyFactor(targetBand, 3) as multiply").show()
   }
 }
