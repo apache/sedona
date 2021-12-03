@@ -68,11 +68,11 @@ Download the Sedona jars to a DBFS location. You can do that manually via UI or 
 mkdir -p /dbfs/FileStore/jars/sedona/{{ sedona.current_version }}
 
 # Download the dependencies from Maven into DBFS
-curl -o /dbfs/FileStore/jars/sedona/{{ sedona.current_version }}/geotools-wrapper-geotools-{{ sedona.current_geotools }}.jar "https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/geotools-{{ sedona.current_geotools }}/geotools-wrapper-geotools-{{ sedona.current_geotools }}.jar"
+curl -o /dbfs/FileStore/jars/sedona/{{ sedona.current_version }}/geotools-wrapper-{{ sedona.current_geotools }}.jar "https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/{{ sedona.current_geotools }}/geotools-wrapper-{{ sedona.current_geotools }}.jar"
 
-curl -o /dbfs/FileStore/jars/sedona/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.{{ sedona.current_version }}.jar"
+curl -o /dbfs/FileStore/jars/sedona/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.jar"
 
-curl -o /dbfs/FileStore/jars/sedona/{{ sedona.current_version }}/sedona-viz-2.4_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-viz-2.4_2.12/{{ sedona.current_version }}/sedona-viz-2.4_2.12-{{ sedona.current_version }}.jar"
+curl -o /dbfs/FileStore/jars/sedona/{{ sedona.current_version }}/sedona-viz-2.4_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-viz-3.0_2.12/{{ sedona.current_version }}/sedona-viz-3.0_2.12-{{ sedona.current_version }}.jar"
 ```
 
 Create an init script in DBFS that loads the Sedona jars into the cluster's default jar directory. You can create that from any notebook by running: 
