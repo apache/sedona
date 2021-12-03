@@ -157,7 +157,6 @@ class TestPredicateJoin(TestBase):
 
     def test_st_3ddistance(self):
         function_df = self.spark.sql("select ST_3DDistance(ST_Point(0.0, 0.0, 5.0), ST_Point(1.0, 1.0, -6.0))")
-        function_df.show()
         assert function_df.count() == 1
 
     def test_st_transform(self):
@@ -256,9 +255,7 @@ class TestPredicateJoin(TestBase):
         ], ["wkt"])
 
         input_df.createOrReplaceTempView("input_wkt")
-        input_df.show()
         polygon_df = self.spark.sql("select ST_AsText(ST_GeomFromWkt(wkt)) as wkt from input_wkt")
-        polygon_df.show(10)
         assert polygon_df.count() == 8
 
     def test_st_as_text_3d(self):

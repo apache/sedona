@@ -73,9 +73,7 @@ class TestConstructors(TestBase):
         ], ["wkt"])
 
         input_df.createOrReplaceTempView("input_wkt")
-        input_df.show()
         polygon_df = self.spark.sql("select ST_GeomFromWkt(wkt) as geomn from input_wkt")
-        polygon_df.show(10)
         assert polygon_df.count() == 8
 
     def test_st_geom_from_text(self):
