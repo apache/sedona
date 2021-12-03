@@ -23,12 +23,12 @@ If you are using the commercial version of Databricks for DBR 8.x+
     org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
     ```
 
-2) From the Libraries tab install from PyPI
+2) For enabling python support, from the Libraries tab install from PyPI
     ```
     apache-sedona
     ```
 
-3) (For DBR up to 7.3 LTS) You can speed up the serialization of geometry types by adding to your spark configurations (`Cluster` -> `Edit` -> `Configuration` -> `Advanced options`) the following lines:
+3) (Only for DBR up to 7.3 LTS) You can speed up the serialization of geometry types by adding to your spark configurations (`Cluster` -> `Edit` -> `Configuration` -> `Advanced options`) the following lines:
     ```
     spark.serializer org.apache.spark.serializer.KryoSerializer
     spark.kryo.registrator org.apache.sedona.core.serde.SedonaKryoRegistrator
