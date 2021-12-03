@@ -26,6 +26,8 @@ import org.locationtech.jts.geom.Geometry
 
 class constructorTestScala extends TestBaseScala {
 
+  import sparkSession.implicits._
+
   describe("Sedona-SQL Constructor Test") {
     it("Passed ST_Point") {
 
@@ -39,6 +41,11 @@ class constructorTestScala extends TestBaseScala {
 
     it("Passed ST_Point by double") {
       val pointDf = sparkSession.sql("SELECT ST_Point(double(1.2345), 2.3456)")
+      assert(pointDf.count() == 1)
+    }
+
+    it("Passed ST_Point 3D") {
+      val pointDf = sparkSession.sql("SELECT ST_Point(1.2345, 2.3456, 3.4567)")
       assert(pointDf.count() == 1)
     }
 
@@ -60,6 +67,23 @@ class constructorTestScala extends TestBaseScala {
       polygonWktDf.createOrReplaceTempView("polygontable")
       var polygonDf = sparkSession.sql("select ST_GeomFromWkt(polygontable._c0) as countyshape from polygontable")
       assert(polygonDf.count() == 100)
+    }
+
+    it("Passed ST_GeomFromWKT 3D") {
+      val geometryDf = Seq(
+        "Point(21 52 87)",
+        "Polygon((0 0 1, 0 1 1, 1 1 1, 1 0 1, 0 0 1))",
+        "Linestring(0 0 1, 1 1 2, 1 0 3)",
+        "MULTIPOINT ((10 40 66), (40 30 77), (20 20 88), (30 10 99))",
+        "MULTIPOLYGON (((30 20 11, 45 40 11, 10 40 11, 30 20 11)), ((15 5 11, 40 10 11, 10 20 11, 5 10 11, 15 5 11)))",
+        "MULTILINESTRING ((10 10 11, 20 20 11, 10 40 11), (40 40 11, 30 30 11, 40 20 11, 30 10 11))",
+        "MULTIPOLYGON (((40 40 11, 20 45 11, 45 30 11, 40 40 11)), ((20 35 11, 10 30 11, 10 10 11, 30 5 11, 45 20 11, 20 35 11), (30 20 11, 20 15 11, 20 25 11, 30 20 11)))",
+        "POLYGON((0 0 11, 0 5 11, 5 5 11, 5 0 11, 0 0 11), (1 1 11, 2 1 11, 2 2 11, 1 2 11, 1 1 11))"
+      ).map(wkt => Tuple1(wkt)).toDF("geom")
+
+      geometryDf.createOrReplaceTempView("geometrytable")
+      var polygonDf = sparkSession.sql("select ST_GeomFromWkt(geometrytable.geom) from geometrytable")
+      assert(polygonDf.count() == 8)
     }
 
     it("Passed ST_GeomFromText") {

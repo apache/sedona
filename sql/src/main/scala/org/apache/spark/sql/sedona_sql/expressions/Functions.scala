@@ -36,10 +36,11 @@ import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.CRS
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom.{PrecisionModel, _}
-import org.locationtech.jts.io.{ByteOrderValues, WKBWriter}
+import org.locationtech.jts.io.{ByteOrderValues, WKBWriter, WKTWriter}
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.IsSimpleOp
 import org.locationtech.jts.operation.buffer.BufferParameters
+import org.locationtech.jts.operation.distance3d.Distance3DOp
 import org.locationtech.jts.operation.linemerge.LineMerger
 import org.locationtech.jts.operation.valid.IsValidOp
 import org.locationtech.jts.precision.GeometryPrecisionReducer
@@ -74,6 +75,33 @@ case class ST_Distance(inputExpressions: Seq[Expression])
     val rightGeometry = GeometrySerializer.deserialize(rightArray)
 
     leftGeometry.distance(rightGeometry)
+  }
+
+  override def dataType = DoubleType
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_3DDistance(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  assert(inputExpressions.length == 2)
+
+  override def nullable: Boolean = true
+
+  override def toString: String = s" **${ST_3DDistance.getClass.getName}**  "
+
+  override def eval(inputRow: InternalRow): Any = {
+    val leftGeometry = inputExpressions(0).toGeometry(inputRow)
+    val rightGeometry = inputExpressions(1).toGeometry(inputRow)
+
+    (leftGeometry, rightGeometry) match {
+      case (leftGeometry: Geometry, rightGeometry: Geometry) => Distance3DOp.distance(leftGeometry, rightGeometry)
+      case _ => null
+    }
   }
 
   override def dataType = DoubleType
@@ -527,7 +555,8 @@ case class ST_AsText(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     val geometry = GeometrySerializer.deserialize(inputExpressions.head.eval(input).asInstanceOf[ArrayData])
-    UTF8String.fromString(geometry.toText)
+    val writer = new WKTWriter(GeometrySerializer.getDimension(geometry))
+    UTF8String.fromString(writer.write(geometry))
   }
 
   override def dataType: DataType = StringType
@@ -782,6 +811,30 @@ case class ST_Y(inputExpressions: Seq[Expression])
 
     geometry match {
       case point: Point => point.getY
+      case _ => null
+    }
+  }
+
+  override def dataType: DataType = DoubleType
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_Z(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  assert(inputExpressions.length == 1)
+
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    val geometry = inputExpressions.head.toGeometry(input)
+
+    geometry match {
+      case point: Point => point.getCoordinate.getZ
       case _ => null
     }
   }

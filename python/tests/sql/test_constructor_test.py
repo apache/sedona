@@ -33,6 +33,10 @@ class TestConstructors(TestBase):
         point_df = self.spark.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
         assert point_df.count() == 1000
 
+    def test_st_point_3d(self):
+        point_df = self.spark.sql("SELECT ST_Point(1.2345, 2.3456, 3.4567)")
+        assert point_df.count() == 1
+
     def test_st_point_from_text(self):
         point_csv_df = self.spark.read.format("csv").\
             option("delimiter", ",").\
@@ -55,6 +59,22 @@ class TestConstructors(TestBase):
         polygon_df = self.spark.sql("select ST_GeomFromWkt(polygontable._c0) as countyshape from polygontable")
         polygon_df.show(10)
         assert polygon_df.count() == 100
+
+    def test_st_geom_from_wkt_3d(self):
+        input_df = self.spark.createDataFrame([
+            ("Point(21 52 87)",),
+            ("Polygon((0 0 1, 0 1 1, 1 1 1, 1 0 1, 0 0 1))",),
+            ("Linestring(0 0 1, 1 1 2, 1 0 3)",),
+            ("MULTIPOINT ((10 40 66), (40 30 77), (20 20 88), (30 10 99))",),
+            ("MULTIPOLYGON (((30 20 11, 45 40 11, 10 40 11, 30 20 11)), ((15 5 11, 40 10 11, 10 20 11, 5 10 11, 15 5 11)))",),
+            ("MULTILINESTRING ((10 10 11, 20 20 11, 10 40 11), (40 40 11, 30 30 11, 40 20 11, 30 10 11))",),
+            ("MULTIPOLYGON (((40 40 11, 20 45 11, 45 30 11, 40 40 11)), ((20 35 11, 10 30 11, 10 10 11, 30 5 11, 45 20 11, 20 35 11), (30 20 11, 20 15 11, 20 25 11, 30 20 11)))",),
+            ("POLYGON((0 0 11, 0 5 11, 5 5 11, 5 0 11, 0 0 11), (1 1 11, 2 1 11, 2 2 11, 1 2 11, 1 1 11))",),
+        ], ["wkt"])
+
+        input_df.createOrReplaceTempView("input_wkt")
+        polygon_df = self.spark.sql("select ST_GeomFromWkt(wkt) as geomn from input_wkt")
+        assert polygon_df.count() == 8
 
     def test_st_geom_from_text(self):
         polygon_wkt_df = self.spark.read.format("csv").\

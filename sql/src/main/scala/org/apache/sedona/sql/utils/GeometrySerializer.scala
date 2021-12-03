@@ -34,7 +34,7 @@ object GeometrySerializer {
     * @return Array of bites represents this geometry
     */
   def serialize(geometry: Geometry): Array[Byte] = {
-    val writer = new WKBWriter(2, 2, true)
+    val writer = new WKBWriter(getDimension(geometry), 2, true)
     writer.write(geometry)
   }
 
@@ -47,5 +47,9 @@ object GeometrySerializer {
   def deserialize(values: ArrayData): Geometry = {
     val reader = new WKBReader()
     reader.read(values.toByteArray())
+  }
+
+  def getDimension(geometry: Geometry): Int = {
+    if (geometry.getCoordinate != null && !java.lang.Double.isNaN(geometry.getCoordinate.getZ)) 3 else 2
   }
 }

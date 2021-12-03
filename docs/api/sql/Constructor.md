@@ -107,6 +107,7 @@ System.setProperty("sedona.global.charset", "utf8")
 Introduction: Construct a Point from X and Y
 
 Format: `ST_Point (X:decimal, Y:decimal)`
+Format: `ST_Point (X:decimal, Y:decimal, Z:decimal)`
 
 Since: `v1.0.0`
 

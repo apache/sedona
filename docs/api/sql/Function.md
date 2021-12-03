@@ -12,6 +12,20 @@ SELECT ST_Distance(polygondf.countyshape, polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_3DDistance
+
+Introduction: Return the 3-dimensional minimum cartesian distance between A and B
+
+Format: `ST_3DDistance (A:geometry, B:geometry)`
+
+Since: `v1.2.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_3DDistance(polygondf.countyshape, polygondf.countyshape)
+FROM polygondf
+```
+
 ## ST_ConvexHull
 
 Introduction: Return the Convex Hull of polgyon A
@@ -404,6 +418,21 @@ SELECT ST_Y(ST_POINT(0.0 25.0))
 ```
 
 Output: `25.0`
+
+## ST_Z
+
+Introduction: Returns Z Coordinate of given Point, null otherwise.
+
+Format: `ST_Z(pointA: Point)`
+
+Since: `v1.2.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_Z(ST_POINT(0.0 25.0 11.0))
+```
+
+Output: `11.0`
 
 ## ST_StartPoint
 
