@@ -141,6 +141,23 @@ public class ShapefileReaderTest
     }
 
     /**
+     * Test correctness of parsing shapefile with additional unnecessary files in directory (ex .xml)
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testReadToGeometryRDDWithAddFiles()
+            throws IOException
+    {
+        // load shape with geotool.shapefile
+        String inputLocation = getShapeFilePath("additionalunnecessaryfiles");
+        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = loadFeatures(inputLocation);
+        // load shapes with our tool
+        SpatialRDD shapeRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
+        assertEquals(shapeRDD.rawSpatialRDD.collect().size(), collection.size());
+    }
+
+    /**
      * Test correctness of parsing files with shape type = Polygon
      *
      * @throws IOException
