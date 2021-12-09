@@ -38,7 +38,6 @@ import java.util.TreeMap;
 public class ShapeInputFormat
         extends CombineFileInputFormat<ShapeKey, PrimitiveShape>
 {
-
     /**
      * suffix of attribute file
      */
@@ -114,7 +113,6 @@ public class ShapeInputFormat
                 }
                 prevfilename = filename;
             }
-
 
             if (fileSplitPathParts.size() != 0) {
                 splits.add(new CombineFileSplit(fileSplitPathParts.toArray(new Path[0]), Longs.toArray(fileSplitSizeParts)));
