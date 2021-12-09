@@ -38,6 +38,19 @@ import java.util.TreeMap;
 public class ShapeInputFormat
         extends CombineFileInputFormat<ShapeKey, PrimitiveShape>
 {
+    /**
+     * suffix of attribute file
+     */
+    private final static String DBF_SUFFIX = "dbf";
+    /**
+     * suffix of shape record file
+     */
+    private final static String SHP_SUFFIX = "shp";
+    /**
+     * suffix of index file
+     */
+    private final static String SHX_SUFFIX = "shx";
+
     public RecordReader<ShapeKey, PrimitiveShape> createRecordReader(InputSplit split, TaskAttemptContext context)
             throws IOException
     {
@@ -86,10 +99,13 @@ public class ShapeInputFormat
 
             for (Path filePath : filePathSizePair.keySet()) {
                 String filename = FilenameUtils.removeExtension(filePath.getName()).toLowerCase();
+                String suffix = FilenameUtils.getExtension(filePath.getName()).toLowerCase();
+
                 fileSplitPathParts.add(filePath);
                 fileSplitSizeParts.add(filePathSizePair.get(filePath));
 
-                if (prevfilename != "" && !prevfilename.equals(filename)) {
+                if (prevfilename != "" && !prevfilename.equals(filename)
+                        && (suffix.equals(SHX_SUFFIX) || suffix.equals(DBF_SUFFIX) || suffix.equals(SHP_SUFFIX))) {
                     // compare file name and if it is different then all same filename is into CombileFileSplit
                     splits.add(new CombineFileSplit(fileSplitPathParts.toArray(new Path[0]), Longs.toArray(fileSplitSizeParts)));
                     fileSplitPathParts.clear();

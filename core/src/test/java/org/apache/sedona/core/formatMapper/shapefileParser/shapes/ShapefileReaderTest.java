@@ -124,7 +124,7 @@ public class ShapefileReaderTest
     }
 
     /**
-     * Test correctness of parsing shapefile
+     * Test correctness of parsing shapefile. There are additional unnecessary files in directory
      *
      * @throws IOException
      */
