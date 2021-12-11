@@ -194,8 +194,10 @@ var spatialDf = sparkSession.sql(
 ```
 3. Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD
 ```Scala
-var spatialRDD = Adapter.toRdd(spatialDf, "checkin")
+var spatialRDD = Adapter.toSpatialRdd(spatialDf, "checkin")
 ```
+
+"checkin" is the name of the geometry column
 
 For WKT/WKB/GeoJSON data, please use ==ST_GeomFromWKT / ST_GeomFromWKB / ST_GeomFromGeoJSON== instead.
 	
