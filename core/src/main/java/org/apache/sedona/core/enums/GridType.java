@@ -32,6 +32,12 @@ import java.io.Serializable;
 public enum GridType
         implements Serializable
 {
+
+    /**
+     * Partition the space to uniform grids
+     */
+
+    EQUALGRID,
     /**
      * The Quad-Tree partitioning.
      */
@@ -41,6 +47,7 @@ public enum GridType
      * K-D-B-tree partitioning (k-dimensional B-tree)
      */
     KDBTREE;
+
 
     /**
      * Gets the grid type.

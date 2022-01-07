@@ -17,25 +17,17 @@
  * under the License.
  */
 
-package org.apache.sedona.core.spatialPartitioning.quadtree;
+package org.apache.sedona.core.spatialPartitioning;
 
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.joinJudgement.DedupParams;
-import org.apache.sedona.core.spatialPartitioning.SpatialPartitioner;
-import org.apache.sedona.core.utils.HalfOpenRectangle;
-import org.locationtech.jts.geom.Envelope;
+import org.apache.sedona.core.spatialPartitioning.quadtree.StandardQuadTree;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.Point;
 import scala.Tuple2;
 
 import javax.annotation.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 public class QuadTreePartitioner
         extends SpatialPartitioner
@@ -44,7 +36,7 @@ public class QuadTreePartitioner
 
     public QuadTreePartitioner(StandardQuadTree<? extends Geometry> quadTree)
     {
-        super(GridType.QUADTREE, getLeafGrids(quadTree));
+        super(GridType.QUADTREE, quadTree.fetchLeafZones());
         this.quadTree = quadTree;
 
         // Make sure not to broadcast all the samples used to build the Quad
@@ -52,42 +44,11 @@ public class QuadTreePartitioner
         this.quadTree.dropElements();
     }
 
-    private static List<Envelope> getLeafGrids(StandardQuadTree<? extends Geometry> quadTree)
-    {
-        Objects.requireNonNull(quadTree, "quadTree");
-
-        final List<QuadRectangle> zones = quadTree.getLeafZones();
-        final List<Envelope> grids = new ArrayList<>();
-        for (QuadRectangle zone : zones) {
-            grids.add(zone.getEnvelope());
-        }
-
-        return grids;
-    }
-
     @Override
-    public <T extends Geometry> Iterator<Tuple2<Integer, T>> placeObject(T spatialObject)
+    public Iterator<Tuple2<Integer, Geometry>> placeObject(Geometry spatialObject)
             throws Exception
     {
-        Objects.requireNonNull(spatialObject, "spatialObject");
-
-        final Envelope envelope = spatialObject.getEnvelopeInternal();
-
-        final List<QuadRectangle> matchedPartitions = quadTree.findZones(new QuadRectangle(envelope));
-
-        final Point point = spatialObject instanceof Point ? (Point) spatialObject : null;
-
-        final Set<Tuple2<Integer, T>> result = new HashSet<>();
-        for (QuadRectangle rectangle : matchedPartitions) {
-            // For points, make sure to return only one partition
-            if (point != null && !(new HalfOpenRectangle(rectangle.getEnvelope())).contains(point)) {
-                continue;
-            }
-
-            result.add(new Tuple2(rectangle.partitionId, spatialObject));
-        }
-
-        return result.iterator();
+        return quadTree.placeObject(spatialObject);
     }
 
     @Nullable
