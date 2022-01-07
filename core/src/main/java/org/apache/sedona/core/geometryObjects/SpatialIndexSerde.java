@@ -28,6 +28,8 @@ import org.locationtech.jts.index.quadtree.IndexSerde;
 import org.locationtech.jts.index.quadtree.Quadtree;
 import org.locationtech.jts.index.strtree.STRtree;
 
+import java.io.Serializable;
+
 /**
  * Provides methods to efficiently serialize and deserialize spatialIndex types.
  * <p>
@@ -36,10 +38,8 @@ import org.locationtech.jts.index.strtree.STRtree;
  * trees are serialized recursively.
  */
 public class SpatialIndexSerde
-        extends Serializer
+        extends Serializer implements Serializable
 {
-
-    private static final Logger log = Logger.getLogger(SpatialIndexSerde.class);
 
     private final GeometrySerde geometrySerde;
 

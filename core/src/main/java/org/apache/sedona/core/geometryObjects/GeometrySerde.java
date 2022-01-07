@@ -37,6 +37,8 @@ import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 
+import java.io.Serializable;
+
 /**
  * Provides methods to efficiently serialize and deserialize geometry types.
  * <p>
@@ -47,10 +49,9 @@ import org.locationtech.jts.geom.Polygon;
  * by user-data attached to the geometry.
  */
 public class GeometrySerde
-        extends Serializer
+        extends Serializer implements Serializable
 {
 
-    private static final Logger log = Logger.getLogger(GeometrySerde.class);
     private static final GeometryFactory geometryFactory = new GeometryFactory();
 
     @Override
