@@ -20,13 +20,22 @@
 package org.apache.sedona.core.spatialPartitioning.quadtree;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.apache.sedona.core.spatialPartitioning.PartitioningUtils;
+import org.apache.sedona.core.utils.HalfOpenRectangle;
 import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
+import scala.Tuple2;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
-public class StandardQuadTree<T>
+public class StandardQuadTree<T> extends PartitioningUtils
         implements Serializable
 {
     public static final int REGION_SELF = -1;
@@ -297,24 +306,6 @@ public class StandardQuadTree<T>
         return zones;
     }
 
-    public List<QuadRectangle> getLeafZones()
-    {
-        final List<QuadRectangle> leafZones = new ArrayList<>();
-        traverse(new Visitor<T>()
-        {
-            @Override
-            public boolean visit(StandardQuadTree<T> tree)
-            {
-                if (tree.isLeaf()) {
-                    leafZones.add(tree.zone);
-                }
-                return true;
-            }
-        });
-
-        return leafZones;
-    }
-
     public int getTotalNumLeafNode()
     {
         final MutableInt leafCount = new MutableInt(0);
@@ -448,6 +439,69 @@ public class StandardQuadTree<T>
                 return true;
             }
         }, "");
+    }
+
+    @Override
+    public Iterator<Tuple2<Integer, Geometry>> placeObject(Geometry geometry) {
+        Objects.requireNonNull(geometry, "spatialObject");
+
+        final Envelope envelope = geometry.getEnvelopeInternal();
+
+        final List<QuadRectangle> matchedPartitions = findZones(new QuadRectangle(envelope));
+
+        final Point point = geometry instanceof Point ? (Point) geometry : null;
+
+        final Set<Tuple2<Integer, Geometry>> result = new HashSet<>();
+        for (QuadRectangle rectangle : matchedPartitions) {
+            // For points, make sure to return only one partition
+            if (point != null && !(new HalfOpenRectangle(rectangle.getEnvelope())).contains(point)) {
+                continue;
+            }
+
+            result.add(new Tuple2(rectangle.partitionId, geometry));
+        }
+
+        return result.iterator();
+    }
+
+    @Override
+    public Set<Integer> getKeys(Geometry geometry) {
+        Objects.requireNonNull(geometry, "spatialObject");
+
+        final Envelope envelope = geometry.getEnvelopeInternal();
+
+        final List<QuadRectangle> matchedPartitions = findZones(new QuadRectangle(envelope));
+
+        final Point point = geometry instanceof Point ? (Point) geometry : null;
+
+        final Set<Integer> result = new HashSet<>();
+        for (QuadRectangle rectangle : matchedPartitions) {
+            // For points, make sure to return only one partition
+            if (point != null && !(new HalfOpenRectangle(rectangle.getEnvelope())).contains(point)) {
+                continue;
+            }
+
+            result.add(rectangle.partitionId);
+        }
+
+        return result;
+    }
+
+    @Override
+    public List<Envelope> fetchLeafZones() {
+        final List<Envelope> leafZones = new ArrayList<>();
+        traverse(new Visitor<T>()
+        {
+            @Override
+            public boolean visit(StandardQuadTree<T> tree)
+            {
+                if (tree.isLeaf()) {
+                    leafZones.add(tree.zone.getEnvelope());
+                }
+                return true;
+            }
+        });
+        return leafZones;
     }
 
     private interface Visitor<T>

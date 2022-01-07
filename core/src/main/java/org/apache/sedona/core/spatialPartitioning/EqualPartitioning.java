@@ -20,10 +20,16 @@
 package org.apache.sedona.core.spatialPartitioning;
 
 import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import scala.Tuple2;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 // TODO: Auto-generated Javadoc
 
@@ -39,6 +45,9 @@ public class EqualPartitioning
      */
     List<Envelope> grids = new ArrayList<Envelope>();
 
+    public EqualPartitioning(List<Envelope> grids) {
+        this.grids = grids;
+    }
     /**
      * Instantiates a new equal partitioning.
      *
@@ -77,5 +86,64 @@ public class EqualPartitioning
     {
 
         return this.grids;
+    }
+
+
+    public Iterator<Tuple2<Integer, Geometry>> placeObject(Geometry geometry) {
+        Objects.requireNonNull(geometry, "spatialObject");
+
+        // Some grid types (RTree and Voronoi) don't provide full coverage of the RDD extent and
+        // require an overflow container.
+        final int overflowContainerID = grids.size();
+
+        final Envelope envelope = geometry.getEnvelopeInternal();
+
+        Set<Tuple2<Integer, Geometry>> result = new HashSet();
+        boolean containFlag = false;
+        for (int i = 0; i < grids.size(); i++) {
+            final Envelope grid = grids.get(i);
+            if (grid.covers(envelope)) {
+                result.add(new Tuple2(i, geometry));
+                containFlag = true;
+            }
+            else if (grid.intersects(envelope) || envelope.covers(grid)) {
+                result.add(new Tuple2<>(i, geometry));
+            }
+        }
+
+        if (!containFlag) {
+            result.add(new Tuple2<>(overflowContainerID, geometry));
+        }
+
+        return result.iterator();
+    }
+
+
+    public Set<Integer> getKeys(Geometry geometry) {
+        Objects.requireNonNull(geometry, "spatialObject");
+
+        // Some grid types (RTree and Voronoi) don't provide full coverage of the RDD extent and
+        // require an overflow container.
+        final int overflowContainerID = grids.size();
+
+        final Envelope envelope = geometry.getEnvelopeInternal();
+
+        Set<Integer> result = new HashSet();
+        boolean containFlag = false;
+        for (int i = 0; i < grids.size(); i++) {
+            final Envelope grid = grids.get(i);
+            if (grid.covers(envelope)) {
+                result.add(i);
+                containFlag = true;
+            }
+            else if (grid.intersects(envelope) || envelope.covers(grid)) {
+                result.add(i);
+            }
+        }
+
+        if (!containFlag) {
+            result.add(overflowContainerID);
+        }
+        return result;
     }
 }

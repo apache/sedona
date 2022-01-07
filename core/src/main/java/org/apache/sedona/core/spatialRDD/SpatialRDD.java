@@ -23,12 +23,7 @@ import org.apache.commons.lang.NullArgumentException;
 import org.apache.log4j.Logger;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
-import org.apache.sedona.core.spatialPartitioning.FlatGridPartitioner;
-import org.apache.sedona.core.spatialPartitioning.KDBTree;
-import org.apache.sedona.core.spatialPartitioning.KDBTreePartitioner;
-import org.apache.sedona.core.spatialPartitioning.QuadtreePartitioning;
-import org.apache.sedona.core.spatialPartitioning.SpatialPartitioner;
-import org.apache.sedona.core.spatialPartitioning.quadtree.QuadTreePartitioner;
+import org.apache.sedona.core.spatialPartitioning.*;
 import org.apache.sedona.core.spatialPartitioning.quadtree.StandardQuadTree;
 import org.apache.sedona.core.spatialRddTool.IndexBuilder;
 import org.apache.sedona.core.spatialRddTool.StatCalculator;
@@ -209,7 +204,7 @@ public class SpatialRDD<T extends Geometry>
      * @return true, if successful
      * @throws Exception the exception
      */
-    public void spatialPartitioning(GridType gridType, int numPartitions)
+    public void calc_partitioner(GridType gridType, int numPartitions)
             throws Exception
     {
         if (numPartitions <= 0) {
@@ -220,7 +215,7 @@ public class SpatialRDD<T extends Geometry>
             throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD boundary is null. Please call analyze() first.");
         }
         if (this.approximateTotalCount == -1) {
-            throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD total count is unknown. Please call analyze() first.");
+            throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD total count is unkown. Please call analyze() first.");
         }
 
         //Calculate the number of samples we need to take.
@@ -253,14 +248,24 @@ public class SpatialRDD<T extends Geometry>
                 boundaryEnvelope.getMinY(), boundaryEnvelope.getMaxY() + 0.01);
 
         switch (gridType) {
+            case EQUALGRID: {
+                // Force the quad-tree to grow up to a certain level
+                // So the actual num of partitions might be slightly different
+                int minLevel = (int) Math.max(Math.log(numPartitions)/Math.log(4), 0);
+                QuadtreePartitioning quadtreePartitioning = new QuadtreePartitioning(new ArrayList<Envelope>(), paddedBoundary,
+                        numPartitions, minLevel);
+                StandardQuadTree tree = quadtreePartitioning.getPartitionTree();
+                partitioner = new QuadTreePartitioner(tree);
+                break;
+            }
             case QUADTREE: {
                 QuadtreePartitioning quadtreePartitioning = new QuadtreePartitioning(samples, paddedBoundary, numPartitions);
-                partitioner = new QuadTreePartitioner(quadtreePartitioning.getPartitionTree());
+                StandardQuadTree tree = quadtreePartitioning.getPartitionTree();
+                partitioner = new QuadTreePartitioner(tree);
                 break;
             }
             case KDBTREE: {
-                int maxItemsPerNode = Math.max(samples.size() / numPartitions, 1);
-                final KDBTree tree = new KDBTree(maxItemsPerNode, numPartitions, paddedBoundary);
+                final KDB tree = new KDB(samples.size() / numPartitions, numPartitions, paddedBoundary);
                 for (final Envelope sample : samples) {
                     tree.insert(sample);
                 }
@@ -270,9 +275,14 @@ public class SpatialRDD<T extends Geometry>
             }
             default:
                 throw new Exception("[AbstractSpatialRDD][spatialPartitioning] Unsupported spatial partitioning method. " +
-                        "The following partitioning methods are not longer supported: R-Tree, Hilbert curve, Voronoi, Equal-Grids");
+                        "The following partitioning methods are not longer supported: R-Tree, Hilbert curve, Voronoi");
         }
+    }
 
+    public void spatialPartitioning(GridType gridType, int numPartitions)
+            throws Exception
+    {
+        calc_partitioner(gridType, numPartitions);
         this.spatialPartitionedRDD = partition(partitioner);
     }
 

@@ -27,11 +27,8 @@ import scala.Tuple2;
 
 import javax.annotation.Nullable;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 public class FlatGridPartitioner
         extends SpatialPartitioner
@@ -48,35 +45,11 @@ public class FlatGridPartitioner
     }
 
     @Override
-    public <T extends Geometry> Iterator<Tuple2<Integer, T>> placeObject(T spatialObject)
+    public Iterator<Tuple2<Integer, Geometry>> placeObject(Geometry spatialObject)
             throws Exception
     {
-        Objects.requireNonNull(spatialObject, "spatialObject");
-
-        // Some grid types (RTree and Voronoi) don't provide full coverage of the RDD extent and
-        // require an overflow container.
-        final int overflowContainerID = grids.size();
-
-        final Envelope envelope = spatialObject.getEnvelopeInternal();
-
-        Set<Tuple2<Integer, T>> result = new HashSet();
-        boolean containFlag = false;
-        for (int i = 0; i < grids.size(); i++) {
-            final Envelope grid = grids.get(i);
-            if (grid.covers(envelope)) {
-                result.add(new Tuple2(i, spatialObject));
-                containFlag = true;
-            }
-            else if (grid.intersects(envelope) || envelope.covers(grid)) {
-                result.add(new Tuple2<>(i, spatialObject));
-            }
-        }
-
-        if (!containFlag) {
-            result.add(new Tuple2<>(overflowContainerID, spatialObject));
-        }
-
-        return result.iterator();
+        EqualPartitioning partitioning = new EqualPartitioning(grids);
+        return partitioning.placeObject(spatialObject);
     }
 
     @Nullable

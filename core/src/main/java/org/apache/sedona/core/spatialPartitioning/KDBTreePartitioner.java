@@ -21,49 +21,23 @@ package org.apache.sedona.core.spatialPartitioning;
 
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.joinJudgement.DedupParams;
-import org.apache.sedona.core.utils.HalfOpenRectangle;
-import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.Point;
 import scala.Tuple2;
 
 import javax.annotation.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 public class KDBTreePartitioner
         extends SpatialPartitioner
 {
-    private final KDBTree tree;
+    private final KDB tree;
 
-    public KDBTreePartitioner(KDBTree tree)
+    public KDBTreePartitioner(KDB tree)
     {
-        super(GridType.KDBTREE, getLeafZones(tree));
+        super(GridType.KDBTREE, tree.fetchLeafZones());
         this.tree = tree;
         this.tree.dropElements();
-    }
-
-    private static List<Envelope> getLeafZones(KDBTree tree)
-    {
-        final List<Envelope> leafs = new ArrayList<>();
-        tree.traverse(new KDBTree.Visitor()
-        {
-            @Override
-            public boolean visit(KDBTree tree)
-            {
-                if (tree.isLeaf()) {
-                    leafs.add(tree.getExtent());
-                }
-                return true;
-            }
-        });
-
-        return leafs;
     }
 
     @Override
@@ -73,29 +47,10 @@ public class KDBTreePartitioner
     }
 
     @Override
-    public <T extends Geometry> Iterator<Tuple2<Integer, T>> placeObject(T spatialObject)
+    public Iterator<Tuple2<Integer, Geometry>> placeObject(Geometry spatialObject)
             throws Exception
     {
-
-        Objects.requireNonNull(spatialObject, "spatialObject");
-
-        final Envelope envelope = spatialObject.getEnvelopeInternal();
-
-        final List<KDBTree> matchedPartitions = tree.findLeafNodes(envelope);
-
-        final Point point = spatialObject instanceof Point ? (Point) spatialObject : null;
-
-        final Set<Tuple2<Integer, T>> result = new HashSet<>();
-        for (KDBTree leaf : matchedPartitions) {
-            // For points, make sure to return only one partition
-            if (point != null && !(new HalfOpenRectangle(leaf.getExtent())).contains(point)) {
-                continue;
-            }
-
-            result.add(new Tuple2(leaf.getLeafId(), spatialObject));
-        }
-
-        return result.iterator();
+        return tree.placeObject(spatialObject);
     }
 
     @Nullable

@@ -19,18 +19,26 @@
 
 package org.apache.sedona.core.spatialPartitioning;
 
+import org.apache.sedona.core.utils.HalfOpenRectangle;
 import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
+import scala.Tuple2;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * see https://en.wikipedia.org/wiki/K-D-B-tree
  */
-public class KDBTree
+public class KDB extends PartitioningUtils
         implements Serializable
 {
 
@@ -39,15 +47,15 @@ public class KDBTree
     private final Envelope extent;
     private final int level;
     private final List<Envelope> items = new ArrayList<>();
-    private KDBTree[] children;
+    private KDB[] children;
     private int leafId = 0;
 
-    public KDBTree(int maxItemsPerNode, int maxLevels, Envelope extent)
+    public KDB(int maxItemsPerNode, int maxLevels, Envelope extent)
     {
         this(maxItemsPerNode, maxLevels, 0, extent);
     }
 
-    private KDBTree(int maxItemsPerNode, int maxLevels, int level, Envelope extent)
+    private KDB(int maxItemsPerNode, int maxLevels, int level, Envelope extent)
     {
         this.maxItemsPerNode = maxItemsPerNode;
         this.maxLevels = maxLevels;
@@ -101,7 +109,7 @@ public class KDBTree
                 }
             }
 
-            for (KDBTree child : children) {
+            for (KDB child : children) {
                 if (child.extent.contains(envelope.getMinX(), envelope.getMinY())) {
                     child.insert(envelope);
                     break;
@@ -115,7 +123,7 @@ public class KDBTree
         traverse(new Visitor()
         {
             @Override
-            public boolean visit(KDBTree tree)
+            public boolean visit(KDB tree)
             {
                 tree.items.clear();
                 return true;
@@ -123,13 +131,13 @@ public class KDBTree
         });
     }
 
-    public List<KDBTree> findLeafNodes(final Envelope envelope)
+    public List<KDB> findLeafNodes(final Envelope envelope)
     {
-        final List<KDBTree> matches = new ArrayList<>();
+        final List<KDB> matches = new ArrayList<>();
         traverse(new Visitor()
         {
             @Override
-            public boolean visit(KDBTree tree)
+            public boolean visit(KDB tree)
             {
                 if (!disjoint(tree.getExtent(), envelope)) {
                     if (tree.isLeaf()) {
@@ -162,7 +170,7 @@ public class KDBTree
         }
 
         if (children != null) {
-            for (KDBTree child : children) {
+            for (KDB child : children) {
                 child.traverse(visitor);
             }
         }
@@ -175,7 +183,7 @@ public class KDBTree
             int id = 0;
 
             @Override
-            public boolean visit(KDBTree tree)
+            public boolean visit(KDB tree)
             {
                 if (tree.isLeaf()) {
                     tree.leafId = id;
@@ -217,9 +225,9 @@ public class KDBTree
             }
         }
 
-        children = new KDBTree[2];
-        children[0] = new KDBTree(maxItemsPerNode, maxLevels, level + 1, splits[0]);
-        children[1] = new KDBTree(maxItemsPerNode, maxLevels, level + 1, splits[1]);
+        children = new KDB[2];
+        children[0] = new KDB(maxItemsPerNode, maxLevels, level + 1, splits[0]);
+        children[1] = new KDB(maxItemsPerNode, maxLevels, level + 1, splits[1]);
 
         // Move items
         splitItems(splitter);
@@ -253,6 +261,68 @@ public class KDBTree
         return splits;
     }
 
+    @Override
+    public Iterator<Tuple2<Integer, Geometry>> placeObject(Geometry geometry) {
+        Objects.requireNonNull(geometry, "spatialObject");
+
+        final Envelope envelope = geometry.getEnvelopeInternal();
+
+        final List<KDB> matchedPartitions = findLeafNodes(envelope);
+
+        final Point point = geometry instanceof Point ? (Point) geometry : null;
+
+        final Set<Tuple2<Integer, Geometry>> result = new HashSet<>();
+        for (KDB leaf : matchedPartitions) {
+            // For points, make sure to return only one partition
+            if (point != null && !(new HalfOpenRectangle(leaf.getExtent())).contains(point)) {
+                continue;
+            }
+
+            result.add(new Tuple2(leaf.getLeafId(), geometry));
+        }
+
+        return result.iterator();
+    }
+
+    @Override
+    public Set<Integer> getKeys(Geometry geometry) {
+        Objects.requireNonNull(geometry, "spatialObject");
+
+        final Envelope envelope = geometry.getEnvelopeInternal();
+
+        final List<KDB> matchedPartitions = findLeafNodes(envelope);
+
+        final Point point = geometry instanceof Point ? (Point) geometry : null;
+
+        final Set<Integer> result = new HashSet<>();
+        for (KDB leaf : matchedPartitions) {
+            // For points, make sure to return only one partition
+            if (point != null && !(new HalfOpenRectangle(leaf.getExtent())).contains(point)) {
+                continue;
+            }
+
+            result.add(leaf.getLeafId());
+        }
+        return result;
+    }
+
+    @Override
+    public List<Envelope> fetchLeafZones() {
+        final List<Envelope> leafs = new ArrayList<>();
+        this.traverse(new KDB.Visitor()
+        {
+            @Override
+            public boolean visit(KDB tree)
+            {
+                if (tree.isLeaf()) {
+                    leafs.add(tree.getExtent());
+                }
+                return true;
+            }
+        });
+        return leafs;
+    }
+
     public interface Visitor
     {
         /**
@@ -261,7 +331,7 @@ public class KDBTree
          * @param tree Node to visit
          * @return true to continue traversing the tree; false to stop
          */
-        boolean visit(KDBTree tree);
+        boolean visit(KDB tree);
     }
 
     private interface Splitter
