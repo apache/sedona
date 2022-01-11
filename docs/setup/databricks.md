@@ -105,7 +105,7 @@ spark.kryo.registrator org.apache.sedona.core.serde.SedonaKryoRegistrator
 
 From your cluster configuration (`Cluster` -> `Edit` -> `Configuration` -> `Advanced options` -> `Init Scripts`) add the newly created init script 
 ```
-/dbfs/FileStore/sedona/sedona-init.sh
+dbfs:/FileStore/sedona/sedona-init.sh
 ```
 
 *Note: You need to install the sedona libraries via init script because the libraries installed via UI are installed after the cluster has already started, and therefore the classes specified by the config `spark.sql.extensions`, `spark.serializer`, and `spark.kryo.registrator` are not available at startup time.*
