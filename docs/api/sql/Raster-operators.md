@@ -1,15 +1,15 @@
-## RS_AddBand
+## RS_AddBands
 
 Introduction: Add two spectral bands in a Geotiff image 
 
-Format: `RS_AddBand (Band1: Array[Double], Band2: Array[Double])`
+Format: `RS_AddBands (Band1: Array[Double], Band2: Array[Double])`
 
 Since: `v1.1.0`
 
 Spark SQL example:
 ```Scala
 
-val sumDF = spark.sql("select RS_Add(band1, band2) as sumOfBands from dataframe")
+val sumDF = spark.sql("select RS_AddBands(band1, band2) as sumOfBands from dataframe")
 
 ```
 
