@@ -24,7 +24,7 @@ Since: `v1.1.0`
 Spark SQL example:
 ```Scala
 
-val subtractDF = spark.sql("select RS_Subtract(band1, band2) as differenceOfOfBands from dataframe")
+val subtractDF = spark.sql("select RS_SubtractBands(band1, band2) as differenceOfOfBands from dataframe")
 
 ```
 
