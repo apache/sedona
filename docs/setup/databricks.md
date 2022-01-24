@@ -4,7 +4,7 @@ You just need to install the Sedona jars and Sedona Python on Databricks using D
 
 ## Advanced editions
 
-### Databricks DBR 7.x
+### Databricks DBR 7.x (Recommended)
 
 If you are using the commercial version of Databricks up to version 7.x you can install the Sedona jars and Sedona Python using the Databricks default web UI and everything should work.
 
@@ -14,6 +14,9 @@ If you are using the commercial version of Databricks for DBR 8.x+
 
 * You need to use sedona version `1.1.1-incubating` or higher. 
 * In order to activate the Kryo serializer (this speeds up the serialization and deserialization of geometry types) you need to install the libraries via init script as described below.
+* The the SQL functions that rely on `org.apache.spark.sql.catalyst.expressions.Generator` class do not currently work on Databricks DBR >= 8.x. Those functions are
+    * ST_MakeValid
+    * ST_SubDivideExplode
 
 ## Install Sedona from the web UI
 
