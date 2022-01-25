@@ -1,6 +1,8 @@
 /target/
 /.idea
 /*.iml
+/*.ipr
+/*.iws
 /.settings/
 /.classpath
 /.project
