@@ -40,6 +40,7 @@
         <module>sql</module>
         <module>viz</module>
         <module>python-adapter</module>
+        <module>flink</module>
     </modules>
     <licenses>
         <license>
