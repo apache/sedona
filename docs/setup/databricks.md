@@ -4,19 +4,23 @@ You just need to install the Sedona jars and Sedona Python on Databricks using D
 
 ## Advanced editions
 
-### Databricks DBR 7.x (Recommended)
+* Sedona 1.0.1 & 1.1.0 is compiled against Spark 3.1 (~ Databricks DBR 9 LTS, DBR 7 is Spark 3.0)
+* Sedona 1.1.1 is compiled against Spark 3.2 (~ DBR 10 & 11)
 
-If you are using the commercial version of Databricks up to version 7.x you can install the Sedona jars and Sedona Python using the Databricks default web UI and everything should work.
+> In Spark 3.2, `org.apache.spark.sql.catalyst.expressions.Generator` class added a field `nodePatterns`. Any SQL functions that rely on Generator class may have issues if compiled for a runtime with a differing spark version. For Sedona, those functions are:
+>    * ST_MakeValid
+>    * ST_SubDivideExplode
 
-### Databricks DBR 8.x, 9.x, 10.x
+__Sedona `1.1.1-incubating` is overall the recommended version to use. It is generally backwards compatible with earlier Spark releases but you should be aware of what Spark version Sedona was compiled against versus which is being executed in case you hit issues.__
 
-If you are using the commercial version of Databricks for DBR 8.x+
+#### Databricks 10.x+ (Recommended)
 
-* You need to use sedona version `1.1.1-incubating` or higher. 
+* You need to use Sedona version `1.1.1-incubating` or higher. 
 * In order to activate the Kryo serializer (this speeds up the serialization and deserialization of geometry types) you need to install the libraries via init script as described below.
-* The the SQL functions that rely on `org.apache.spark.sql.catalyst.expressions.Generator` class do not currently work on Databricks DBR >= 8.x. Those functions are
-    * ST_MakeValid
-    * ST_SubDivideExplode
+
+#### Databricks DBR 7.x - 9.x
+
+* If you are using the commercial version of Databricks you can install the Sedona jars and Sedona Python using the Databricks default web UI. DBR 7 matches with Sedona `1.1.0-incubating` and DBR 9 matches better with Sedona `1.1.1-incubating` due to Databricks cherry-picking some Spark 3.2 private APIs.
 
 ## Install Sedona from the web UI
 
@@ -36,6 +40,7 @@ If you are using the commercial version of Databricks for DBR 8.x+
     spark.serializer org.apache.spark.serializer.KryoSerializer
     spark.kryo.registrator org.apache.sedona.core.serde.SedonaKryoRegistrator
     ```
+    > For DBRs after 7.3, use the Init Script method described further down.
 
 
 ## Initialise
@@ -56,9 +61,9 @@ SedonaRegistrator.registerAll(spark)
 
 ## Pure SQL environment
  
-In order to use the Sedona `ST_*` functions from SQL without having to register the Sedona functions from a python/scala cell, you need to install the sedona libraries from the [cluster init-scripts](https://docs.databricks.com/clusters/init-scripts.html) as follows.
+In order to use the Sedona `ST_*` functions from SQL without having to register the Sedona functions from a python/scala cell, you need to install the Sedona libraries from the [cluster init-scripts](https://docs.databricks.com/clusters/init-scripts.html) as follows.
 
-## Install Sedona via init script
+## Install Sedona via init script (for DBRs > 7.3)
 
 Download the Sedona jars to a DBFS location. You can do that manually via UI or from a notebook by executing this code in a cell:
 
@@ -111,5 +116,5 @@ From your cluster configuration (`Cluster` -> `Edit` -> `Configuration` -> `Adva
 dbfs:/FileStore/sedona/sedona-init.sh
 ```
 
-*Note: You need to install the sedona libraries via init script because the libraries installed via UI are installed after the cluster has already started, and therefore the classes specified by the config `spark.sql.extensions`, `spark.serializer`, and `spark.kryo.registrator` are not available at startup time.*
+*Note: You need to install the Sedona libraries via init script because the libraries installed via UI are installed after the cluster has already started, and therefore the classes specified by the config `spark.sql.extensions`, `spark.serializer`, and `spark.kryo.registrator` are not available at startup time.*
 
