@@ -84,12 +84,14 @@ public enum FileDataSplitter
      */
     private final String splitter;
 
-    // Reverse-lookup map for getting a FileDataSplitter from a delimiter
+    // A lookup map for getting a FileDataSplitter from a delimiter, or its name
     private static final Map<String, FileDataSplitter> lookup = new HashMap<String, FileDataSplitter>();
 
     static {
         for (FileDataSplitter f : FileDataSplitter.values()) {
             lookup.put(f.getDelimiter(), f);
+            lookup.put(f.name().toLowerCase(), f);
+            lookup.put(f.name().toUpperCase(), f);
         }
     }
     /**
