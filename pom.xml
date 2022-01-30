@@ -35,13 +35,6 @@
     <developers>
         <developer><name>Apache Sedona</name></developer>
     </developers>
-    <modules>
-        <module>core</module>
-        <module>sql</module>
-        <module>viz</module>
-        <module>python-adapter</module>
-        <module>flink</module>
-    </modules>
     <licenses>
         <license>
             <name>Apache License 2.0</name>
@@ -566,9 +559,13 @@
                 <scala.version>2.13.5</scala.version>
                 <scala.compat.version>2.13</scala.compat.version>
                 <scaladoc.arg>-no-java-comments</scaladoc.arg>
-<!--                Flink only supports Scala 2.11 and 2.12, not 2.13-->
-                <scala.compat.version.flink>2.12</scala.compat.version.flink>
             </properties>
+            <modules>
+                <module>core</module>
+                <module>sql</module>
+                <module>viz</module>
+                <module>python-adapter</module>
+            </modules>
         </profile>
         <profile>
             <id>scala2.12</id>
@@ -583,8 +580,14 @@
                 <scala.version>2.12.15</scala.version>
                 <scala.compat.version>2.12</scala.compat.version>
                 <scaladoc.arg>-no-java-comments</scaladoc.arg>
-                <scala.compat.version.flink>2.12</scala.compat.version.flink>
             </properties>
+            <modules>
+                <module>core</module>
+                <module>sql</module>
+                <module>viz</module>
+                <module>python-adapter</module>
+                <module>flink</module>
+            </modules>
         </profile>
         <profile>
             <id>scala2.11</id>
@@ -598,9 +601,15 @@
             <properties>
                 <scala.version>2.11.8</scala.version>
                 <scala.compat.version>2.11</scala.compat.version>
-                <scala.compat.version.flink>2.11</scala.compat.version.flink>
                 <scaladoc.arg />
             </properties>
+            <modules>
+                <module>core</module>
+                <module>sql</module>
+                <module>viz</module>
+                <module>python-adapter</module>
+                <module>flink</module>
+            </modules>
         </profile>
     </profiles>
 </project>
