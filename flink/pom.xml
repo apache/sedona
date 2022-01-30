@@ -25,7 +25,7 @@
         <version>1.2.0-incubating-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-	<artifactId>sedona-flink_${scala.compat.version}</artifactId>
+	<artifactId>sedona-flink_${scala.compat.version.flink}</artifactId>
 
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>A cluster computing system for processing large-scale spatial data: Streaming API for Apache Flink. Apache Sedona is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Apache Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</description>
@@ -40,13 +40,13 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.sedona</groupId>
-            <artifactId>sedona-core-${spark.compat.version}_${scala.compat.version}</artifactId>
+            <artifactId>sedona-core-${spark.compat.version}_${scala.compat.version.flink}</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.sedona</groupId>
-            <artifactId>sedona-sql-${spark.compat.version}_${scala.compat.version}</artifactId>
+            <artifactId>sedona-sql-${spark.compat.version}_${scala.compat.version.flink}</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -59,35 +59,35 @@
 <!--        For Flink DataStream API-->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-streaming-java_${scala.compat.version}</artifactId>
+            <artifactId>flink-streaming-java_${scala.compat.version.flink}</artifactId>
             <version>${flink.version}</version>
             <scope>${dependency.scope}</scope>
         </dependency>
 <!--        Flink Kafka connector-->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-kafka_${scala.compat.version}</artifactId>
+            <artifactId>flink-connector-kafka_${scala.compat.version.flink}</artifactId>
             <version>${flink.version}</version>
             <scope>${dependency.scope}</scope>
         </dependency>
 <!--        For playing flink in IDE-->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-clients_${scala.compat.version}</artifactId>
+            <artifactId>flink-clients_${scala.compat.version.flink}</artifactId>
             <version>${flink.version}</version>
             <scope>${dependency.scope}</scope>
         </dependency>
 <!--        For Flink flink api, planner, udf/udt, csv-->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-table-api-java-bridge_${scala.compat.version}</artifactId>
+            <artifactId>flink-table-api-java-bridge_${scala.compat.version.flink}</artifactId>
             <version>${flink.version}</version>
             <scope>${dependency.scope}</scope>
         </dependency>
 <!--        Starting Flink 14, Blink planner has been renamed to the official Flink planner-->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-table-planner_${scala.compat.version}</artifactId>
+            <artifactId>flink-table-planner_${scala.compat.version.flink}</artifactId>
             <version>${flink.version}</version>
             <scope>${dependency.scope}</scope>
         </dependency>
@@ -106,7 +106,7 @@
 <!--        For Flink Web Ui in test-->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-runtime-web_${scala.compat.version}</artifactId>
+            <artifactId>flink-runtime-web_${scala.compat.version.flink}</artifactId>
             <version>${flink.version}</version>
             <scope>test</scope>
         </dependency>

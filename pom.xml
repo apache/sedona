@@ -566,6 +566,8 @@
                 <scala.version>2.13.5</scala.version>
                 <scala.compat.version>2.13</scala.compat.version>
                 <scaladoc.arg>-no-java-comments</scaladoc.arg>
+<!--                Flink only supports Scala 2.11 and 2.12, not 2.13-->
+                <scala.compat.version.flink>2.12</scala.compat.version.flink>
             </properties>
         </profile>
         <profile>
@@ -581,6 +583,7 @@
                 <scala.version>2.12.15</scala.version>
                 <scala.compat.version>2.12</scala.compat.version>
                 <scaladoc.arg>-no-java-comments</scaladoc.arg>
+                <scala.compat.version.flink>2.12</scala.compat.version.flink>
             </properties>
         </profile>
         <profile>
@@ -595,6 +598,7 @@
             <properties>
                 <scala.version>2.11.8</scala.version>
                 <scala.compat.version>2.11</scala.compat.version>
+                <scala.compat.version.flink>2.11</scala.compat.version.flink>
                 <scaladoc.arg />
             </properties>
         </profile>
