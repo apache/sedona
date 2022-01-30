@@ -42,7 +42,6 @@ public class Constructors {
         @DataTypeHint("RAW")
         public Geometry eval(@DataTypeHint("String") String s, @DataTypeHint("String") String inputDelimiter) throws ParseException {
             // The default delimiter is comma. Otherwise, use the delimiter given by the user
-            // TODO: The getSplitter function uses a loop to find the instance. Should use HashTable instead.
             FileDataSplitter delimiter = inputDelimiter == null? FileDataSplitter.CSV:FileDataSplitter.getFileDataSplitter(inputDelimiter);
             FormatUtils<Geometry> formatUtils = new FormatUtils(delimiter, false, GeometryType.POLYGON);
             return formatUtils.readGeometry(s);
