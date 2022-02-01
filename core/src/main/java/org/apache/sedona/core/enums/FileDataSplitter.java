@@ -20,6 +20,8 @@
 package org.apache.sedona.core.enums;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 // TODO: Auto-generated Javadoc
 
@@ -82,6 +84,16 @@ public enum FileDataSplitter
      */
     private final String splitter;
 
+    // A lookup map for getting a FileDataSplitter from a delimiter, or its name
+    private static final Map<String, FileDataSplitter> lookup = new HashMap<String, FileDataSplitter>();
+
+    static {
+        for (FileDataSplitter f : FileDataSplitter.values()) {
+            lookup.put(f.getDelimiter(), f);
+            lookup.put(f.name().toLowerCase(), f);
+            lookup.put(f.name().toUpperCase(), f);
+        }
+    }
     /**
      * Instantiates a new file data splitter.
      *
@@ -100,10 +112,11 @@ public enum FileDataSplitter
      */
     public static FileDataSplitter getFileDataSplitter(String str)
     {
-        for (FileDataSplitter me : FileDataSplitter.values()) {
-            if (me.getDelimiter().equalsIgnoreCase(str) || me.name().equalsIgnoreCase(str)) { return me; }
+        FileDataSplitter f = lookup.get(str);
+        if (f == null) {
+            throw new IllegalArgumentException("[" + FileDataSplitter.class + "] Unsupported FileDataSplitter:" + str);
         }
-        throw new IllegalArgumentException("[" + FileDataSplitter.class + "] Unsupported FileDataSplitter:" + str);
+        return f;
     }
 
     /**

@@ -122,42 +122,8 @@ abstract class JudgementBase
         }
     }
 
-    protected boolean match(Geometry left, Geometry right)
+    public boolean match(Geometry left, Geometry right)
     {
-        if (extent != null) {
-            // Handle easy case: points. Since each point is assigned to exactly one partition,
-            // different partitions cannot emit duplicate results.
-            if (left instanceof Point || right instanceof Point) {
-                return geoMatch(left, right);
-            }
-
-            // Neither geometry is a point
-
-            // Check if reference point of the intersection of the bounding boxes lies within
-            // the extent of this partition. If not, don't run any checks. Let the partition
-            // that contains the reference point do all the work.
-            Envelope intersection =
-                    left.getEnvelopeInternal().intersection(right.getEnvelopeInternal());
-            if (!intersection.isNull()) {
-                final Point referencePoint =
-                        makePoint(intersection.getMinX(), intersection.getMinY(), left.getFactory());
-                if (!extent.contains(referencePoint)) {
-                    return false;
-                }
-            }
-        }
-
-        return geoMatch(left, right);
-    }
-
-    private Point makePoint(double x, double y, GeometryFactory factory)
-    {
-        return factory.createPoint(new Coordinate(x, y));
-    }
-
-    private boolean geoMatch(Geometry left, Geometry right)
-    {
-        //log.warn("Check "+left.toText()+" with "+right.toText());
-        return considerBoundaryIntersection ? left.intersects(right) : left.covers(right);
+        return JudgementHelper.match(left, right, extent, considerBoundaryIntersection);
     }
 }

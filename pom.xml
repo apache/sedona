@@ -35,12 +35,6 @@
     <developers>
         <developer><name>Apache Sedona</name></developer>
     </developers>
-    <modules>
-        <module>core</module>
-        <module>sql</module>
-        <module>viz</module>
-        <module>python-adapter</module>
-    </modules>
     <licenses>
         <license>
             <name>Apache License 2.0</name>
@@ -566,6 +560,12 @@
                 <scala.compat.version>2.13</scala.compat.version>
                 <scaladoc.arg>-no-java-comments</scaladoc.arg>
             </properties>
+            <modules>
+                <module>core</module>
+                <module>sql</module>
+                <module>viz</module>
+                <module>python-adapter</module>
+            </modules>
         </profile>
         <profile>
             <id>scala2.12</id>
@@ -581,6 +581,13 @@
                 <scala.compat.version>2.12</scala.compat.version>
                 <scaladoc.arg>-no-java-comments</scaladoc.arg>
             </properties>
+            <modules>
+                <module>core</module>
+                <module>sql</module>
+                <module>viz</module>
+                <module>python-adapter</module>
+                <module>flink</module>
+            </modules>
         </profile>
         <profile>
             <id>scala2.11</id>
@@ -596,6 +603,13 @@
                 <scala.compat.version>2.11</scala.compat.version>
                 <scaladoc.arg />
             </properties>
+            <modules>
+                <module>core</module>
+                <module>sql</module>
+                <module>viz</module>
+                <module>python-adapter</module>
+                <module>flink</module>
+            </modules>
         </profile>
     </profiles>
 </project>
