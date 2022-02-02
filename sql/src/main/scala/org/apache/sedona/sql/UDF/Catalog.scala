@@ -51,6 +51,7 @@ object Catalog {
     ST_Centroid,
     ST_Transform,
     ST_Intersection,
+    ST_Difference,
     ST_IsValid,
     ST_PrecisionReduce,
     ST_Equals,

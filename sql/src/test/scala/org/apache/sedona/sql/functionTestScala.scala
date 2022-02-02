@@ -347,6 +347,37 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(test.take(1)(0).get(0).asInstanceOf[String].toUpperCase() == "ST_LINESTRING")
     }
 
+    it("Passed ST_Difference - part of right overlaps left") {
+
+      val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((0 -4, 4 -4, 4 4, 0 4, 0 -4))') as b")
+      testtable.createOrReplaceTempView("testtable")
+      val intersect = sparkSession.sql("select ST_Difference(a,b) from testtable")
+      assert(intersect.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON ((0 -3, -3 -3, -3 3, 0 3, 0 -3))"))
+    }
+
+    it("Passed ST_Difference - right not overlaps left") {
+
+      val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((5 -3, 7 -3, 7 -1, 5 -1, 5 -3))') as b")
+      testtable.createOrReplaceTempView("testtable")
+      val intersect = sparkSession.sql("select ST_Difference(a,b) from testtable")
+      assert(intersect.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))"))
+    }
+
+    it("Passed ST_Difference - left contains right") {
+
+      val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))') as b")
+      testtable.createOrReplaceTempView("testtable")
+      val intersect = sparkSession.sql("select ST_Difference(a,b) from testtable")
+      assert(intersect.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON ((-3 -3, -3 3, 3 3, 3 -3, -3 -3), (-1 -1, 1 -1, 1 1, -1 1, -1 -1))"))
+    }
+
+    it("Passed ST_Difference - right contains left") {
+
+      val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))') as a,ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as b")
+      testtable.createOrReplaceTempView("testtable")
+      val intersect = sparkSession.sql("select ST_Difference(a,b) from testtable")
+      assert(intersect.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON EMPTY"))    }
+
 
     it("Passed ST_Azimuth") {
 

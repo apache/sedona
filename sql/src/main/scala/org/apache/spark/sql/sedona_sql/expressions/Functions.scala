@@ -1559,3 +1559,42 @@ case class ST_GeoHash(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+
+
+
+case class ST_Difference(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  assert(inputExpressions.length == 2)
+
+  lazy val GeometryFactory = new GeometryFactory()
+  lazy val emptyPolygon = GeometryFactory.createPolygon(null, null)
+
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    val leftGeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData])
+    val rightGeometry = GeometrySerializer.deserialize(inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData])
+
+    val isIntersects = leftGeometry.intersects(rightGeometry)
+    lazy val isRightContainsLeft = rightGeometry.contains(leftGeometry)
+
+    if (!isIntersects) {
+      return new GenericArrayData(GeometrySerializer.serialize(leftGeometry))
+    }
+
+    if (isIntersects && isRightContainsLeft) {
+      return new GenericArrayData(GeometrySerializer.serialize(emptyPolygon))
+    }
+
+    return new GenericArrayData(GeometrySerializer.serialize(leftGeometry.difference(rightGeometry)))
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
