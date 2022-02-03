@@ -1560,9 +1560,6 @@ case class ST_GeoHash(inputExpressions: Seq[Expression])
   }
 }
 
-
-
-
 case class ST_Difference(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   assert(inputExpressions.length == 2)
