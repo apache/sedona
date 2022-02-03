@@ -271,7 +271,6 @@ public class ShapefileReaderTest
      *
      * @throws IOException
      */
-    @Ignore
     @Test
     public void testLoadDbfFile()
             throws IOException
