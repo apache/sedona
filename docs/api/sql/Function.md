@@ -904,8 +904,9 @@ Result:
 ```
 
 Example:
+
 ```SQL
-SELECT ST_Collect(
+SELECT ST_Difference(
     Array(
         ST_GeomFromText('POINT(21.427834 52.042576573)'),
         ST_GeomFromText('POINT(45.342524 56.342354355)')
@@ -921,4 +922,24 @@ Result:
 +---------------------------------------------------------------+
 |MULTIPOINT ((21.427834 52.042576573), (45.342524 56.342354355))|
 +---------------------------------------------------------------+
+```
+
+## ST_Difference
+
+Introduction: Return the difference between geometry A and B (return part of geometry A that does not intersect geometry B)
+
+Format: `ST_Difference (A:geometry, B:geometry)`
+
+Since: `v1.2.0`
+
+Example:
+
+```SQL
+SELECT ST_Difference(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((0 -4, 4 -4, 4 4, 0 4, 0 -4))'))
+```
+
+Result:
+
+```
+POLYGON ((0 -3, -3 -3, -3 3, 0 3, 0 -3))
 ```
