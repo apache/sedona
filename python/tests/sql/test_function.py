@@ -270,12 +270,35 @@ class TestPredicateJoin(TestBase):
         wkt_df = self.spark.sql("select ST_AsText(countyshape) as wkt from polygondf")
         assert polygon_df.take(1)[0]["countyshape"].wkt == loads(wkt_df.take(1)[0]["wkt"]).wkt
 
-
     def test_st_n_points(self):
         test = self.spark.sql("SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
 
     def test_st_geometry_type(self):
         test = self.spark.sql("SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
+
+    def test_st_difference_right_overlaps_left(self):
+        test_table = self.spark.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((0 -4, 4 -4, 4 4, 0 4, 0 -4))') as b")
+        test_table.createOrReplaceTempView("test_diff")
+        diff = self.spark.sql("select ST_Difference(a,b) from test_diff")
+        assert diff.take(1)[0][0].wkt == "POLYGON ((0 -3, -3 -3, -3 3, 0 3, 0 -3))"
+
+    def test_st_difference_right_not_overlaps_left(self):
+        test_table = self.spark.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((5 -3, 7 -3, 7 -1, 5 -1, 5 -3))') as b")
+        test_table.createOrReplaceTempView("test_diff")
+        diff = self.spark.sql("select ST_Difference(a,b) from test_diff")
+        assert diff.take(1)[0][0].wkt == "POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))"
+
+    def test_st_difference_left_contains_right(self):
+        test_table = self.spark.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))') as b")
+        test_table.createOrReplaceTempView("test_diff")
+        diff = self.spark.sql("select ST_Difference(a,b) from test_diff")
+        assert diff.take(1)[0][0].wkt == "POLYGON ((-3 -3, -3 3, 3 3, 3 -3, -3 -3), (-1 -1, 1 -1, 1 1, -1 1, -1 -1))"
+
+    def test_st_difference_right_not_overlaps_left(self):
+        test_table = self.spark.sql("select ST_GeomFromWKT('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))') as a,ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as b")
+        test_table.createOrReplaceTempView("test_diff")
+        diff = self.spark.sql("select ST_Difference(a,b) from test_diff")
+        assert diff.take(1)[0][0].wkt == "POLYGON EMPTY"
 
     def test_st_azimuth(self):
         sample_points = create_sample_points(20)
