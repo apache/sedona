@@ -277,28 +277,28 @@ class TestPredicateJoin(TestBase):
         test = self.spark.sql("SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
 
     def test_st_difference_right_overlaps_left(self):
-        testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((0 -4, 4 -4, 4 4, 0 4, 0 -4))') as b")
+        testtable = self.spark.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((0 -4, 4 -4, 4 4, 0 4, 0 -4))') as b")
         testtable.createOrReplaceTempView("testdiff")
-        intersec = sparkSession.sql("select ST_Difference(a,b) from testtable")
-        assert intersects.take(1)[0][0].wkt == "POLYGON ((0 -3, -3 -3, -3 3, 0 3, 0 -3))"
+        diff = self.spark.sql("select ST_Difference(a,b) from testtable")
+        assert diff.take(1)[0][0].wkt == "POLYGON ((0 -3, -3 -3, -3 3, 0 3, 0 -3))"
 
     def test_st_difference_right_not_overlaps_left(self):
-        testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((5 -3, 7 -3, 7 -1, 5 -1, 5 -3))') as b")
+        testtable = self.spark.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((5 -3, 7 -3, 7 -1, 5 -1, 5 -3))') as b")
         testtable.createOrReplaceTempView("testdiff")
-        intersec = sparkSession.sql("select ST_Difference(a,b) from testtable")
-        assert intersects.take(1)[0][0].wkt == "POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))"
+        diff = self.spark.sql("select ST_Difference(a,b) from testtable")
+        assert diff.take(1)[0][0].wkt == "POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))"
 
     def test_st_difference_left_contains_right(self):
-        testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))') as b")
+        testtable = self.spark.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))') as b")
         testtable.createOrReplaceTempView("testdiff")
-        intersec = sparkSession.sql("select ST_Difference(a,b) from testtable")
-        assert intersects.take(1)[0][0].wkt == "POLYGON ((-3 -3, -3 3, 3 3, 3 -3, -3 -3), (-1 -1, 1 -1, 1 1, -1 1, -1 -1))"
+        diff = self.spark.sql("select ST_Difference(a,b) from testtable")
+        assert diff.take(1)[0][0].wkt == "POLYGON ((-3 -3, -3 3, 3 3, 3 -3, -3 -3), (-1 -1, 1 -1, 1 1, -1 1, -1 -1))"
 
     def test_st_difference_right_not_overlaps_left(self):
-        testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))') as a,ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as b")
+        testtable = self.spark.sql("select ST_GeomFromWKT('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))') as a,ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as b")
         testtable.createOrReplaceTempView("testdiff")
-        intersec = sparkSession.sql("select ST_Difference(a,b) from testtable")
-        assert intersects.take(1)[0][0].wkt == "POLYGON EMPTY"
+        diff = self.spark.sql("select ST_Difference(a,b) from testtable")
+        assert diff.take(1)[0][0].wkt == "POLYGON EMPTY"
 
     def test_st_azimuth(self):
         sample_points = create_sample_points(20)
