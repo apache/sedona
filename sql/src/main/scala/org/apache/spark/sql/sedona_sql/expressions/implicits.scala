@@ -23,6 +23,7 @@ import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
+import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.geom.{Geometry, GeometryFactory, Point}
 
 object implicits {
@@ -37,6 +38,13 @@ object implicits {
 
     def toInt(input: InternalRow): Int = {
       inputExpression.eval(input).asInstanceOf[Int]
+    }
+
+    def asString(input: InternalRow): String = {
+      inputExpression.eval(input).asInstanceOf[UTF8String] match {
+        case s: UTF8String => s.toString
+        case _ => null
+      }
     }
   }
 
