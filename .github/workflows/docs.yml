@@ -16,7 +16,7 @@ jobs:
         fetch-depth: 0
     - uses: actions/setup-python@v2
       with:
-        python-version: 3.7
+        python-version: 3.x
     - run: pip install mkdocs-material
     - run: pip install mkdocs-macros-plugin
     - run: pip install mkdocs-git-revision-date-localized-plugin
