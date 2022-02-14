@@ -1474,3 +1474,22 @@ case class ST_Difference(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+case class ST_Symmetrical_Difference(inputExpressions: Seq[Expression])
+  extends BinaryGeometryExpression with CodegenFallback {
+  assert(inputExpressions.length == 2)
+
+  lazy val GeometryFactory = new GeometryFactory()
+
+  override protected def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
+    return new GenericArrayData(GeometrySerializer.serialize(leftGeometry.symDifference(rightGeometry)))
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

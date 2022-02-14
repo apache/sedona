@@ -300,6 +300,24 @@ class TestPredicateJoin(TestBase):
         diff = self.spark.sql("select ST_Difference(a,b) from test_diff")
         assert diff.take(1)[0][0].wkt == "POLYGON EMPTY"
 
+    def test_st_symmetrical_difference_part_of_right_overlaps_left(self):
+        test_table = self.spark.sql("select ST_GeomFromWKT('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))') as a,ST_GeomFromWKT('POLYGON ((0 -2, 2 -2, 2 0, 0 0, 0 -2))') as b")
+        test_table.createOrReplaceTempView("test_sym_diff")
+        diff = self.spark.sql("select ST_Symmetrical_Difference(a,b) from test_sym_diff")
+        assert diff.take(1)[0][0].wkt == "MULTIPOLYGON (((0 -1, -1 -1, -1 1, 1 1, 1 0, 0 0, 0 -1)), ((0 -1, 1 -1, 1 0, 2 0, 2 -2, 0 -2, 0 -1)))"
+
+    def test_st_symmetrical_difference_not_overlaps_left(self):
+        test_table = self.spark.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((5 -3, 7 -3, 7 -1, 5 -1, 5 -3))') as b")
+        test_table.createOrReplaceTempView("test_sym_diff")
+        diff = self.spark.sql("select ST_Symmetrical_Difference(a,b) from test_sym_diff")
+        assert diff.take(1)[0][0].wkt == "MULTIPOLYGON (((-3 -3, -3 3, 3 3, 3 -3, -3 -3)), ((5 -3, 5 -1, 7 -1, 7 -3, 5 -3)))"
+
+    def test_st_symmtrical_difference_contains(self):
+        test_table = self.spark.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))') as b")
+        test_table.createOrReplaceTempView("test_sym_diff")
+        diff = self.spark.sql("select ST_Symmetrical_Difference(a,b) from test_sym_diff")
+        assert diff.take(1)[0][0].wkt == "POLYGON ((-3 -3, -3 3, 3 3, 3 -3, -3 -3), (-1 -1, 1 -1, 1 1, -1 1, -1 -1))"
+
     def test_st_azimuth(self):
         sample_points = create_sample_points(20)
         sample_pair_points = [[el, sample_points[1]] for el in sample_points]
