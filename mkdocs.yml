@@ -118,7 +118,7 @@ theme:
     accent: 'green'
   favicon: https://www.apache.org/logos/res/sedona/sedona.png
   icon:
-    logo: fontawesome/solid/globe-americas
+    logo: fontawesome/solid/earth-americas
     repo: fontawesome/brands/github
   font:
     text: Lato
