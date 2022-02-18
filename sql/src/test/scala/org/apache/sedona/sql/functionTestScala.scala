@@ -403,6 +403,14 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(symDiff.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON ((-3 -3, -3 3, 3 3, 3 -3, -3 -3), (-1 -1, 1 -1, 1 1, -1 1, -1 -1))"))
     }
 
+    it("Passed ST_Symmetrical_Difference - one null") {
+
+      val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a")
+      testtable.createOrReplaceTempView("sym_table")
+      val symDiff = sparkSession.sql("select ST_Symmetrical_Difference(a,null) from sym_table")
+      assert(symDiff.first().get(0) == null)
+    }
+
     it("Passed ST_Azimuth") {
 
       val pointDataFrame = samplePoints
