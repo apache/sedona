@@ -944,19 +944,19 @@ Result:
 POLYGON ((0 -3, -3 -3, -3 3, 0 3, 0 -3))
 ```
 
-## ST_Symmetrical_Difference
+## ST_SymDifference
 
 Introduction: Return the symmetrical difference between geometry A and B (return parts of geometries which are in either of the sets, but not in their intersection)
 
 
-Format: `ST_Symmetrical_Difference (A:geometry, B:geometry)`
+Format: `ST_SymDifference (A:geometry, B:geometry)`
 
 Since: `v1.2.0`
 
 Example:
 
 ```SQL
-SELECT ST_Symmetrical_Difference(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((-2 -3, 4 -3, 4 3, -2 3, -2 -3))'))
+SELECT ST_SymDifference(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((-2 -3, 4 -3, 4 3, -2 3, -2 -3))'))
 ```
 
 Result:

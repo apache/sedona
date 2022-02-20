@@ -379,35 +379,35 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(diff.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON EMPTY"))
     }
 
-    it("Passed ST_Symmetrical_Difference - part of right overlaps left") {
+    it("Passed ST_SymDifference - part of right overlaps left") {
 
       val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))') as a,ST_GeomFromWKT('POLYGON ((0 -2, 2 -2, 2 0, 0 0, 0 -2))') as b")
       testtable.createOrReplaceTempView("sym_table")
-      val symDiff = sparkSession.sql("select ST_Symmetrical_Difference(a,b) from sym_table")
+      val symDiff = sparkSession.sql("select ST_SymDifference(a,b) from sym_table")
       assert(symDiff.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("MULTIPOLYGON (((0 -1, -1 -1, -1 1, 1 1, 1 0, 0 0, 0 -1)), ((0 -1, 1 -1, 1 0, 2 0, 2 -2, 0 -2, 0 -1)))"))
     }
 
-    it("Passed ST_Symmetrical_Difference - right not overlaps left") {
+    it("Passed ST_SymDifference - right not overlaps left") {
 
       val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((5 -3, 7 -3, 7 -1, 5 -1, 5 -3))') as b")
       testtable.createOrReplaceTempView("sym_table")
-      val symDiff = sparkSession.sql("select ST_Symmetrical_Difference(a,b) from sym_table")
+      val symDiff = sparkSession.sql("select ST_SymDifference(a,b) from sym_table")
       assert(symDiff.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("MULTIPOLYGON (((-3 -3, -3 3, 3 3, 3 -3, -3 -3)), ((5 -3, 5 -1, 7 -1, 7 -3, 5 -3)))"))
     }
 
-    it("Passed ST_Symmetrical_Difference - contains") {
+    it("Passed ST_SymDifference - contains") {
 
       val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))') as b")
       testtable.createOrReplaceTempView("sym_table")
-      val symDiff = sparkSession.sql("select ST_Symmetrical_Difference(a,b) from sym_table")
+      val symDiff = sparkSession.sql("select ST_SymDifference(a,b) from sym_table")
       assert(symDiff.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON ((-3 -3, -3 3, 3 3, 3 -3, -3 -3), (-1 -1, 1 -1, 1 1, -1 1, -1 -1))"))
     }
 
-    it("Passed ST_Symmetrical_Difference - one null") {
+    it("Passed ST_SymDifference - one null") {
 
       val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a")
       testtable.createOrReplaceTempView("sym_table")
-      val symDiff = sparkSession.sql("select ST_Symmetrical_Difference(a,null) from sym_table")
+      val symDiff = sparkSession.sql("select ST_SymDifference(a,null) from sym_table")
       assert(symDiff.first().get(0) == null)
     }
 
@@ -1336,7 +1336,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_Difference(null, null)")
     assert(functionDf.first().get(0) == null)
-    functionDf = sparkSession.sql("select ST_Symmetrical_Difference(null, null)")
+    functionDf = sparkSession.sql("select ST_SymDifference(null, null)")
     assert(functionDf.first().get(0) == null)
   }
 }

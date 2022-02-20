@@ -1480,7 +1480,7 @@ case class ST_Difference(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-case class ST_Symmetrical_Difference(inputExpressions: Seq[Expression])
+case class ST_SymDifference(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   assert(inputExpressions.length == 2)
 

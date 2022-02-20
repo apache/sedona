@@ -52,7 +52,7 @@ object Catalog {
     ST_Transform,
     ST_Intersection,
     ST_Difference,
-    ST_Symmetrical_Difference,
+    ST_SymDifference,
     ST_IsValid,
     ST_PrecisionReduce,
     ST_Equals,
