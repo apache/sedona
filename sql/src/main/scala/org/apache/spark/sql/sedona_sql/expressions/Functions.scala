@@ -1474,3 +1474,34 @@ case class ST_Difference(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+/**
+ * Return the symmetrical difference between geometry A and B
+ *
+ * @param inputExpressions
+ */
+case class ST_SymDifference(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  assert(inputExpressions.length == 2)
+
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    val leftGeometry = inputExpressions(0).toGeometry(input)
+    val rightGeometry = inputExpressions(1).toGeometry(input)
+
+    (leftGeometry, rightGeometry) match {
+      case (leftGeometry: Geometry, rightGeometry: Geometry)
+      => new GenericArrayData(GeometrySerializer.serialize(leftGeometry.symDifference(rightGeometry)))
+      case _ => null
+    }
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
