@@ -357,10 +357,10 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
     it("Passed ST_Difference - right not overlaps left") {
 
-      val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((5 -3, 7 -3, 7 -1, 5 -1, 5 -3))') as b")
+      val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, -3 3, 3 3, 3 -3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((5 -3, 7 -3, 7 -1, 5 -1, 5 -3))') as b")
       testtable.createOrReplaceTempView("testtable")
       val diff = sparkSession.sql("select ST_Difference(a,b) from testtable")
-      assert(diff.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))"))
+      assert(diff.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON ((-3 -3, -3 3, 3 3, 3 -3, -3 -3))"))
     }
 
     it("Passed ST_Difference - left contains right") {
@@ -377,6 +377,14 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       testtable.createOrReplaceTempView("testtable")
       val diff = sparkSession.sql("select ST_Difference(a,b) from testtable")
       assert(diff.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON EMPTY"))
+    }
+
+    it("Passed ST_Difference - one null") {
+
+      val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a")
+      testtable.createOrReplaceTempView("testtable")
+      val diff = sparkSession.sql("select ST_Difference(a,null) from testtable")
+      assert(diff.first().get(0) == null)
     }
 
     it("Passed ST_SymDifference - part of right overlaps left") {
