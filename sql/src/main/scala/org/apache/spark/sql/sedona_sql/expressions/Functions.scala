@@ -1450,31 +1450,25 @@ case class ST_GeoHash(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_Difference(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
+  extends BinaryGeometryExpression with CodegenFallback {
   assert(inputExpressions.length == 2)
 
-  override def nullable: Boolean = true
   lazy val GeometryFactory = new GeometryFactory()
   lazy val emptyPolygon = GeometryFactory.createPolygon(null, null)
 
-  override def eval(input: InternalRow): Any = {
-    val leftGeometry = inputExpressions(0).toGeometry(input)
-    val rightGeometry = inputExpressions(1).toGeometry(input)
+  override protected def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
+    val isIntersects = leftGeometry.intersects(rightGeometry)
+    lazy val isRightContainsLeft = rightGeometry.contains(leftGeometry)
 
-    (leftGeometry, rightGeometry) match {
-      case (leftGeometry: Geometry, rightGeometry: Geometry) =>
-        val isIntersects = leftGeometry.intersects(rightGeometry)
-        lazy val isRightContainsLeft = rightGeometry.contains(leftGeometry)
-
-        if (!isIntersects) {
-          new GenericArrayData(GeometrySerializer.serialize(leftGeometry))
-        }
-        if (isIntersects && isRightContainsLeft) {
-          new GenericArrayData(GeometrySerializer.serialize(emptyPolygon))
-        }
-        new GenericArrayData(GeometrySerializer.serialize(leftGeometry.difference(rightGeometry)))
-      case _ => null
+    if (!isIntersects) {
+      new GenericArrayData(GeometrySerializer.serialize(leftGeometry))
     }
+
+    if (isIntersects && isRightContainsLeft) {
+      new GenericArrayData(GeometrySerializer.serialize(emptyPolygon))
+    }
+
+    new GenericArrayData(GeometrySerializer.serialize(leftGeometry.difference(rightGeometry)))
   }
 
   override def dataType: DataType = GeometryUDT
@@ -1492,20 +1486,11 @@ case class ST_Difference(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_SymDifference(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
+  extends BinaryGeometryExpression with CodegenFallback {
   assert(inputExpressions.length == 2)
 
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val leftGeometry = inputExpressions(0).toGeometry(input)
-    val rightGeometry = inputExpressions(1).toGeometry(input)
-
-    (leftGeometry, rightGeometry) match {
-      case (leftGeometry: Geometry, rightGeometry: Geometry)
-      => new GenericArrayData(GeometrySerializer.serialize(leftGeometry.symDifference(rightGeometry)))
-      case _ => null
-    }
+  override protected def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
+    new GenericArrayData(GeometrySerializer.serialize(leftGeometry.symDifference(rightGeometry)))
   }
 
   override def dataType: DataType = GeometryUDT
