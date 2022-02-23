@@ -266,13 +266,6 @@ SEDONA_LISTED_SQL_FUNCTIONS = [
      .with_expected_result(2)
      .with_transform("ST_NPoints")),
     (SuiteContainer.empty()
-     .with_function_name("ST_MakePolygon")
-     .with_arguments([
-        "ST_GeomFromText('LINESTRING(7 -1, 7 6, 9 6, 9 1, 7 -1)')",
-        "ARRAY(ST_GeomFromText('LINESTRING(6 2, 8 2, 8 1, 6 1, 6 2)'))"])
-     .with_expected_result(14.0)
-     .with_transform("ST_AREA")),
-    (SuiteContainer.empty()
      .with_function_name("ST_GeoHash")
      .with_arguments([
         "ST_GeomFromText('POINT(21.427834 52.042576573)')",
