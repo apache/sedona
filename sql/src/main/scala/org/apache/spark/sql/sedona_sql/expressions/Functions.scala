@@ -1444,6 +1444,11 @@ case class ST_GeoHash(inputExpressions: Seq[Expression])
   }
 }
 
+/**
+ * Return the difference between geometry A and B
+ *
+ * @param inputExpressions
+ */
 case class ST_Difference(inputExpressions: Seq[Expression])
   extends BinaryGeometryExpression with CodegenFallback {
   assert(inputExpressions.length == 2)
@@ -1456,14 +1461,14 @@ case class ST_Difference(inputExpressions: Seq[Expression])
     lazy val isRightContainsLeft = rightGeometry.contains(leftGeometry)
 
     if (!isIntersects) {
-      return new GenericArrayData(GeometrySerializer.serialize(leftGeometry))
+      new GenericArrayData(GeometrySerializer.serialize(leftGeometry))
     }
 
     if (isIntersects && isRightContainsLeft) {
-      return new GenericArrayData(GeometrySerializer.serialize(emptyPolygon))
+      new GenericArrayData(GeometrySerializer.serialize(emptyPolygon))
     }
 
-    return new GenericArrayData(GeometrySerializer.serialize(leftGeometry.difference(rightGeometry)))
+    new GenericArrayData(GeometrySerializer.serialize(leftGeometry.difference(rightGeometry)))
   }
 
   override def dataType: DataType = GeometryUDT
@@ -1481,20 +1486,11 @@ case class ST_Difference(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_SymDifference(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
+  extends BinaryGeometryExpression with CodegenFallback {
   assert(inputExpressions.length == 2)
 
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val leftGeometry = inputExpressions(0).toGeometry(input)
-    val rightGeometry = inputExpressions(1).toGeometry(input)
-
-    (leftGeometry, rightGeometry) match {
-      case (leftGeometry: Geometry, rightGeometry: Geometry)
-      => new GenericArrayData(GeometrySerializer.serialize(leftGeometry.symDifference(rightGeometry)))
-      case _ => null
-    }
+  override protected def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
+    new GenericArrayData(GeometrySerializer.serialize(leftGeometry.symDifference(rightGeometry)))
   }
 
   override def dataType: DataType = GeometryUDT
