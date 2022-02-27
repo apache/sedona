@@ -18,6 +18,9 @@ import org.apache.sedona.flink.expressions.Functions;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
+import scala.Some;
+
+import java.util.Optional;
 
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
@@ -52,5 +55,14 @@ public class FunctionTest extends TestBase{
         pointTable = pointTable.select(call(Functions.ST_Distance.class.getSimpleName(), $(pointColNames[0])
                 , call("ST_GeomFromWKT", "POINT (0 0)")));
         assertEquals(0.0, first(pointTable).getField(0));
+    }
+
+    @Test
+    public void testGeomToGeoHash() {
+        Table pointTable = createPointTable(testDataSize);
+        pointTable = pointTable.select(
+                call("ST_GeoHash", $(pointColNames[0]), 5)
+        );
+        assertEquals(first(pointTable).getField(0), Optional.of("s0000"));
     }
 }

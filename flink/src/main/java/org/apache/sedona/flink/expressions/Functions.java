@@ -16,6 +16,8 @@ package org.apache.sedona.flink.expressions;
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.sedona.core.utils.GeomUtils;
+import org.apache.spark.sql.sedona_sql.expressions.geohash.GeometryGeoHashEncoder;
+import org.apache.spark.sql.sedona_sql.expressions.geohash.PointGeoHashEncoder;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Geometry;
@@ -23,6 +25,9 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
+import scala.Option;
+
+import java.util.Optional;
 
 public class Functions {
     public static class ST_Buffer extends ScalarFunction {
@@ -64,6 +69,18 @@ public class Functions {
             Geometry geom = (Geometry) o;
             GeomUtils.flipCoordinates(geom);
             return geom;
+        }
+    }
+
+    public static class ST_GeoHash extends ScalarFunction {
+        @DataTypeHint("RAW")
+        public Optional<String> eval(@DataTypeHint("RAW") Object geometry, Integer precision) {
+            Geometry geom = (Geometry) geometry;
+            Option<String> geoHash = GeometryGeoHashEncoder.calculate(geom, precision);
+            if (geoHash.isDefined()){
+                return Optional.of(geoHash.get());
+            }
+            return Optional.empty();
         }
     }
 }
