@@ -316,6 +316,12 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(Hex.encodeHexString(df.first().get(0).asInstanceOf[Array[Byte]]) == s)
     }
 
+    it("Passed ST_AsBinary empty geometry") {
+      val df = sparkSession.sql("SELECT ST_AsBinary(ST_GeomFromWKT('POINT EMPTY'))")
+      val s = "0101000000000000000000f87f000000000000f87f"
+      assert(Hex.encodeHexString(df.first().get(0).asInstanceOf[Array[Byte]]) == s)
+    }
+
     it("Passed ST_SRID") {
       val df = sparkSession.sql("SELECT ST_SRID(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))")
       assert(df.first().getInt(0) == 0)
@@ -333,6 +339,12 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       df.createOrReplaceTempView("table")
       df = sparkSession.sql("SELECT ST_AsEWKB(point) from table")
       val s = "0101000020cd0b0000000000000000f03f000000000000f03f"
+      assert(Hex.encodeHexString(df.first().get(0).asInstanceOf[Array[Byte]]) == s)
+    }
+
+    it("Passed ST_AsEWKB empty geometry") {
+      val df = sparkSession.sql("SELECT ST_AsEWKB(ST_SetSrid(ST_GeomFromWKT('POINT EMPTY'), 3021))")
+      val s = "0101000020cd0b0000000000000000f87f000000000000f87f"
       assert(Hex.encodeHexString(df.first().get(0).asInstanceOf[Array[Byte]]) == s)
     }
 
