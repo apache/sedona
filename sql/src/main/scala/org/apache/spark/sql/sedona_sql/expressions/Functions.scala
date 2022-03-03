@@ -541,7 +541,7 @@ case class ST_AsBinary(inputExpressions: Seq[Expression])
   inputExpressions.validateLength(1)
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
-    val dimensions = if (java.lang.Double.isNaN(geometry.getCoordinate.getZ)) 2 else 3
+    val dimensions = if (geometry.isEmpty() || java.lang.Double.isNaN(geometry.getCoordinate.getZ)) 2 else 3
     val endian = if (ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN) ByteOrderValues.BIG_ENDIAN else ByteOrderValues.LITTLE_ENDIAN
     val writer = new WKBWriter(dimensions, endian)
     writer.write(geometry)
@@ -561,7 +561,7 @@ case class ST_AsEWKB(inputExpressions: Seq[Expression])
   inputExpressions.validateLength(1)
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
-    val dimensions = if (java.lang.Double.isNaN(geometry.getCoordinate.getZ)) 2 else 3
+    val dimensions = if (geometry.isEmpty() || java.lang.Double.isNaN(geometry.getCoordinate.getZ)) 2 else 3
     val endian = if (ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN) ByteOrderValues.BIG_ENDIAN else ByteOrderValues.LITTLE_ENDIAN
     val writer = new WKBWriter(dimensions, endian, geometry.getSRID != 0)
     writer.write(geometry)
