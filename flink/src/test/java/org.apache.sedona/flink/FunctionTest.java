@@ -18,7 +18,6 @@ import org.apache.sedona.flink.expressions.Functions;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
-import scala.Some;
 
 import java.util.Optional;
 

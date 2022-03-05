@@ -42,7 +42,7 @@ public class Predicates {
         }
 
         @DataTypeHint("Boolean")
-        public Boolean eval(@DataTypeHint("RAW") Object o1, @DataTypeHint("RAW") Object o2) {
+        public Boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
             return geom1.intersects(geom2);
@@ -56,7 +56,7 @@ public class Predicates {
          * @return
          */
         @DataTypeHint("Boolean")
-        public Boolean eval(@DataTypeHint("INT") Integer key, @DataTypeHint("RAW") Object o1, @DataTypeHint("RAW") Object o2) {
+        public Boolean eval(@DataTypeHint("INT") Integer key, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
             Objects.requireNonNull(grids, "This predicate has to be initialized by a partitioner.");
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
@@ -82,7 +82,7 @@ public class Predicates {
         }
 
         @DataTypeHint("Boolean")
-        public Boolean eval(@DataTypeHint("RAW") Object o1, @DataTypeHint("RAW") Object o2) {
+        public Boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
             return geom1.covers(geom2);
@@ -96,7 +96,7 @@ public class Predicates {
          * @return
          */
         @DataTypeHint("Boolean")
-        public Boolean eval(@DataTypeHint("INT") Integer key, @DataTypeHint("RAW") Object o1, @DataTypeHint("RAW") Object o2) {
+        public Boolean eval(@DataTypeHint("INT") Integer key, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
             Objects.requireNonNull(grids, "This predicate has to be initialized by a partitioner.");
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;

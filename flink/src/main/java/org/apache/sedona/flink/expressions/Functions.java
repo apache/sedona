@@ -31,8 +31,8 @@ import java.util.Optional;
 
 public class Functions {
     public static class ST_Buffer extends ScalarFunction {
-        @DataTypeHint("RAW")
-        public Geometry eval(@DataTypeHint("RAW") Object o, @DataTypeHint("Double") Double radius) {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(Object o, @DataTypeHint("Double") Double radius) {
             Geometry geom = (Geometry) o;
             return geom.buffer(radius);
         }
@@ -40,7 +40,8 @@ public class Functions {
 
     public static class ST_Distance extends ScalarFunction {
         @DataTypeHint("Double")
-        public Double eval(@DataTypeHint("RAW") Object o1, @DataTypeHint("RAW") Object o2) {
+        public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
+                @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
             return geom1.distance(geom2);
@@ -48,8 +49,8 @@ public class Functions {
     }
 
     public static class ST_Transform extends ScalarFunction {
-        @DataTypeHint("RAW")
-        public Geometry eval(@DataTypeHint("RAW") Object o, @DataTypeHint("String") String sourceCRS, @DataTypeHint("String") String targetCRS) {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint("String") String sourceCRS, @DataTypeHint("String") String targetCRS) {
             Geometry geom = (Geometry) o;
             try {
                 CoordinateReferenceSystem sourceCRScode = CRS.decode(sourceCRS);
@@ -64,8 +65,8 @@ public class Functions {
     }
 
     public static class ST_FlipCoordinates extends ScalarFunction {
-        @DataTypeHint("RAW")
-        public Geometry eval(@DataTypeHint("RAW") Object o) {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
             GeomUtils.flipCoordinates(geom);
             return geom;
@@ -74,7 +75,7 @@ public class Functions {
 
     public static class ST_GeoHash extends ScalarFunction {
         @DataTypeHint("RAW")
-        public Optional<String> eval(@DataTypeHint("RAW") Object geometry, Integer precision) {
+        public Optional<String> eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object geometry, Integer precision) {
             Geometry geom = (Geometry) geometry;
             Option<String> geoHash = GeometryGeoHashEncoder.calculate(geom, precision);
             if (geoHash.isDefined()){
