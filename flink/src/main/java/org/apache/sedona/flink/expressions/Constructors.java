@@ -25,21 +25,21 @@ import org.locationtech.jts.io.ParseException;
 
 public class Constructors {
     public static class ST_PointFromText extends ScalarFunction {
-        @DataTypeHint("RAW")
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String s, @DataTypeHint("String") String inputDelimiter) throws ParseException {
             FileDataSplitter delimiter = inputDelimiter == null? FileDataSplitter.CSV:FileDataSplitter.getFileDataSplitter(inputDelimiter);
             FormatUtils<Geometry> formatUtils = new FormatUtils(delimiter, false, GeometryType.POINT);
             return formatUtils.readGeometry(s);
         }
 
-        @DataTypeHint("RAW")
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String s) throws ParseException {
             return eval(s, null);
         }
     }
 
     public static class ST_PolygonFromText extends ScalarFunction {
-        @DataTypeHint("RAW")
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String s, @DataTypeHint("String") String inputDelimiter) throws ParseException {
             // The default delimiter is comma. Otherwise, use the delimiter given by the user
             FileDataSplitter delimiter = inputDelimiter == null? FileDataSplitter.CSV:FileDataSplitter.getFileDataSplitter(inputDelimiter);
@@ -47,14 +47,14 @@ public class Constructors {
             return formatUtils.readGeometry(s);
         }
 
-        @DataTypeHint("RAW")
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String s) throws ParseException {
             return eval(s, null);
         }
     }
 
     public static class ST_PolygonFromEnvelope extends ScalarFunction {
-        @DataTypeHint("RAW")
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("Double") Double minX, @DataTypeHint("Double") Double minY,
                              @DataTypeHint("Double") Double maxX, @DataTypeHint("Double") Double maxY) {
             Coordinate[] coordinates = new Coordinate[5];
@@ -69,7 +69,7 @@ public class Constructors {
     }
 
     public static class ST_GeomFromWKT extends ScalarFunction {
-        @DataTypeHint("RAW")
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String wktString) throws ParseException {
             FormatUtils formatUtils = new FormatUtils(FileDataSplitter.WKT, false);
             return formatUtils.readGeometry(wktString);
@@ -77,7 +77,7 @@ public class Constructors {
     }
 
     public static class ST_GeomFromWKB extends ScalarFunction {
-        @DataTypeHint("RAW")
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String wkbString) throws ParseException {
             FormatUtils formatUtils = new FormatUtils(FileDataSplitter.WKB, false);
             return formatUtils.readGeometry(wkbString);

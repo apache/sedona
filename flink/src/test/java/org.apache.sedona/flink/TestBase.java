@@ -26,10 +26,10 @@ import org.apache.flink.types.Row;
 import org.apache.flink.util.CloseableIterator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.sedona.core.enums.GridType;
-import org.apache.sedona.core.spatialPartitioning.PartitioningUtils;
 import org.apache.sedona.flink.expressions.Constructors;
-import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 
 import java.util.ArrayList;
 import java.util.List;
