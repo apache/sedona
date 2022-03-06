@@ -1,68 +1,106 @@
 # Maven Coordinates
 
-Sedona has four modules: `sedona-core, sedona-sql, sedona-viz, sedona-python-adapter`. They have different packing policies. You will need to use `sedona-python-adapter` for Scala, Java and Python API.  ==You may also need geotools-wrapper (see below)==. If you want to use SedonaViz, you will include one more jar: `sedona-viz`.
+Sedona Spark has four modules: `sedona-core, sedona-sql, sedona-viz, sedona-python-adapter`. `sedona-python-adapter` is a fat jar of `sedona-core, sedona-sql` and python adapter code. If you want to use SedonaViz, you will include one more jar: `sedona-viz`.
+
+Sedona Flink has four modules :`sedona-core, sedona-sql, sedona-python-adapter, sedona-flink`. `sedona-python-adapter` is a fat jar of `sedona-core, sedona-sql`.
+
 
 ## Use Sedona fat jars
 
-=== "Spark 3.0 + Scala 2.12"
+This is the most common way to use Sedona in your environment. Do not use separate Sedona jars if you are not familar with Maven.
 
-	```xml
-	<dependency>
-	  <groupId>org.apache.sedona</groupId>
-	  <artifactId>sedona-python-adapter-3.0_2.12</artifactId>
-	  <version>{{ sedona.current_version }}</version>
-	</dependency>
-	<dependency>
-	  <groupId>org.apache.sedona</groupId>
-	  <artifactId>sedona-viz-3.0_2.12</artifactId>
-	  <version>{{ sedona.current_version }}</version>
-	</dependency>
-	```
+The optional GeoTools library is required only if you want to use CRS transformation and ShapefileReader. This wrapper library is a re-distriution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This libary is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
 
-=== "Spark 2.4 + Scala 2.11"
+!!! abstract "Sedona with Apache Spark"
 
-	```xml
-	<dependency>
-	  <groupId>org.apache.sedona</groupId>
-	  <artifactId>sedona-python-adapter-2.4_2.11</artifactId>
-	  <version>{{ sedona.current_version }}</version>
-	</dependency>
-	<dependency>
-	  <groupId>org.apache.sedona</groupId>
-	  <artifactId>sedona-viz-2.4_2.11</artifactId>
-	  <version>{{ sedona.current_version }}</version>
-	</dependency>
-	```
+	=== "Spark 3.0+ and Scala 2.12"
 	
-=== "Spark 2.4 + Scala 2.12"
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-python-adapter-3.0_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-viz-3.0_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>
+		```
+	
+	=== "Spark 2.4 and Scala 2.11"
+	
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-python-adapter-2.4_2.11</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-viz-2.4_2.11</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>
+		```
+		
+	=== "Spark 2.4 and Scala 2.12"
+	
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-python-adapter-2.4_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-viz-2.4_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>
+		```
 
-	```xml
-	<dependency>
-	  <groupId>org.apache.sedona</groupId>
-	  <artifactId>sedona-python-adapter-2.4_2.12</artifactId>
-	  <version>{{ sedona.current_version }}</version>
-	</dependency>
-	<dependency>
-	  <groupId>org.apache.sedona</groupId>
-	  <artifactId>sedona-viz-2.4_2.12</artifactId>
-	  <version>{{ sedona.current_version }}</version>
-	</dependency>
-	```
+!!! abstract "Sedona with Apache Flink"
 
-### GeoTools 24.0+
+	=== "Flink 2.12+ and Scala 2.12"
+	
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-python-adapter-3.0_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-flink_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>
+		```
 
-GeoTools library is required only if you want to use CRS transformation and ShapefileReader. This wrapper library is a re-distriution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This libary is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
 
-```xml
-<!-- https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
-<dependency>
-    <groupId>org.datasyslab</groupId>
-    <artifactId>geotools-wrapper</artifactId>
-    <version>{{ sedona.current_geotools }}</version>
-</dependency>
-```
-
-### SernetCDF 0.1.0
+#### SernetCDF 0.1.0
 
 For Scala / Java API, it is required only if you want to read HDF/NetCDF files.
 
@@ -83,65 +121,89 @@ Under Apache License 2.0.
 
 ==For Scala and Java users==, if by any chance you don't want to use an uber jar that includes every dependency, you can use the following jars instead. ==Otherwise, please do not continue reading this section.==
 
-=== "Spark 3.0 + Scala 2.12"
+!!! abstract "Sedona with Apache Spark"
 
-	```xml
-	<dependency>
-	  <groupId>org.apache.sedona</groupId>
-	  <artifactId>sedona-core-3.0_2.12</artifactId>
-	  <version>{{ sedona.current_version }}</version>
-	</dependency>
-	<dependency>
-	  <groupId>org.apache.sedona</groupId>
-	  <artifactId>sedona-sql-3.0_2.12</artifactId>
-	  <version>{{ sedona.current_version }}</version>
-	</dependency>
-	<dependency>
-	  <groupId>org.apache.sedona</groupId>
-	  <artifactId>sedona-viz-3.0_2.12</artifactId>
-	  <version>{{ sedona.current_version }}</version>
-	</dependency>
-	```
+	=== "Spark 3.0+ and Scala 2.12"
+	
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-core-3.0_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-sql-3.0_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-viz-3.0_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		```
+	
+	=== "Spark 2.4 and Scala 2.11"
+	
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-core-2.4_2.11</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-sql-2.4_2.11</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-viz-2.4_2.11</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		```
+	
+	=== "Spark 2.4 and Scala 2.12"
+	
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-core-2.4_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-sql-2.4_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-viz-2.4_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		```
 
-=== "Spark 2.4 + Scala 2.11"
+!!! abstract "Sedona with Apache Flink"
 
-	```xml
-	<dependency>
-	  <groupId>org.apache.sedona</groupId>
-	  <artifactId>sedona-core-2.4_2.11</artifactId>
-	  <version>{{ sedona.current_version }}</version>
-	</dependency>
-	<dependency>
-	  <groupId>org.apache.sedona</groupId>
-	  <artifactId>sedona-sql-2.4_2.11</artifactId>
-	  <version>{{ sedona.current_version }}</version>
-	</dependency>
-	<dependency>
-	  <groupId>org.apache.sedona</groupId>
-	  <artifactId>sedona-viz-2.4_2.11</artifactId>
-	  <version>{{ sedona.current_version }}</version>
-	</dependency>
-	```
-
-=== "Spark 2.4 + Scala 2.12"
-
-	```xml
-	<dependency>
-	  <groupId>org.apache.sedona</groupId>
-	  <artifactId>sedona-core-2.4_2.12</artifactId>
-	  <version>{{ sedona.current_version }}</version>
-	</dependency>
-	<dependency>
-	  <groupId>org.apache.sedona</groupId>
-	  <artifactId>sedona-sql-2.4_2.12</artifactId>
-	  <version>{{ sedona.current_version }}</version>
-	</dependency>
-	<dependency>
-	  <groupId>org.apache.sedona</groupId>
-	  <artifactId>sedona-viz-2.4_2.12</artifactId>
-	  <version>{{ sedona.current_version }}</version>
-	</dependency>
-	```
+	=== "Flink 1.12+ and Scala 2.12"
+	
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-core-3.0_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-sql-3.0_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-flink-3.0_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		```
 
 ### LocationTech JTS-core 1.18.0+
 
