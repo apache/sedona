@@ -1,6 +1,6 @@
 # Introduction
 
-SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. Please read the programming guide: [Sedona with Flink application](../../tutorial/flink/sql.md).
+SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. Please read the programming guide: [Sedona with Flink SQL app](../../tutorial/flink/sql.md).
 
 Sedona includes SQL operators as follows.
 
