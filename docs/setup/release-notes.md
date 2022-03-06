@@ -1,3 +1,38 @@
+## Sedona 1.2.0
+
+This version is a major release on Sedona 1.2.0 line. It includes bug fixes and new features: Sedona with Apache Flink.
+
+### RDD
+
+Bug fix:
+
+* [SEDONA-18](https://issues.apache.org/jira/browse/SEDONA-18): Fix an error reading Shapefile
+* [SEDONA-73](https://issues.apache.org/jira/browse/SEDONA-73): Exclude scala-library from scala-collection-compat
+
+Improvement:
+
+* [SEDONA-77](https://issues.apache.org/jira/browse/SEDONA-77): Refactor Format readers and spatial partitioning functions to be standalone libraries. So they can be used by Flink and others.
+
+### SQL
+
+New features:
+
+* [SEDONA-4](https://issues.apache.org/jira/browse/SEDONA-4): Handle nulls in SQL functions
+* [SEDONA-65](https://issues.apache.org/jira/browse/SEDONA-65): Create ST_Difference function
+* [SEDONA-68](https://issues.apache.org/jira/browse/SEDONA-68) Add St_Collect function.
+* [SEDONA-82](https://issues.apache.org/jira/browse/SEDONA-82): Create ST_SymmDifference function
+* [SEDONA-75](https://issues.apache.org/jira/browse/SEDONA-75): Add support for "3D" geometries: Preserve Z coordinates on geometries when serializing, ST_AsText , ST_Z, ST_3DDistance
+* [SEDONA-86](https://issues.apache.org/jira/browse/SEDONA-86): Support empty geometries in ST_AsBinary and ST_AsEWKB
+
+### Flink
+
+Major update:
+
+* [SEDONA-80](https://issues.apache.org/jira/browse/SEDONA-80): Geospatial stream processing support in Flink Table API
+* [SEDONA-85](https://issues.apache.org/jira/browse/SEDONA-85): ST_Geohash function in Flink
+* [SEDONA-87](https://issues.apache.org/jira/browse/SEDONA-87): Support Flink Table and DataStream conversion
+
+
 ## Sedona 1.1.1
 
 This version is a maintenance release on Sedona 1.1.X line. It includes bug fixes and a few new functions.
