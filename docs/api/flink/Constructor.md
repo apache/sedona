@@ -46,7 +46,7 @@ Introduction: Construct a Polygon from Text, delimited by Delimiter. Path must b
 
 Format: `ST_PolygonFromText (Text:string, Delimiter:char)`
 
-Since: `v1.0.0`
+Since: `v1.2.0`
 
 SQL example:
 ```SQL
@@ -59,7 +59,7 @@ Introduction: Construct a Polygon from MinX, MinY, MaxX, MaxY.
 
 Format: `ST_PolygonFromEnvelope (MinX:decimal, MinY:decimal, MaxX:decimal, MaxY:decimal)`
 
-Since: `v1.0.0`
+Since: `v1.2.0`
 
 SQL example:
 ```SQL
