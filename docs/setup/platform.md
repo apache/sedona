@@ -22,6 +22,6 @@ Sedona binary releases are compiled by Java 1.8 and Scala 2.11/2.12 and tested i
 	|:-----------:| :---------:|:---------:|:---------:|:---------:|
 	| Scala 2.11  |  ✅  |  not tested  | not tested  | not tested  |
 	| Scala 2.12 | not tested  |  ✅  | ✅ |  ✅ | ✅ |
-	
+
 !!!warning
 	Sedona Scala/Java/Python/R also work with Spark 2.3, Python 3.6 but we have no plan to officially support it.
