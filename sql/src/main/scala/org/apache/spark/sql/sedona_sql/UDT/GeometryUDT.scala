@@ -51,7 +51,7 @@ class GeometryUDT extends UserDefinedType[Geometry] {
   }
 
   override def equals(other: Any): Boolean = other match {
-    case _: UserDefinedType[_] => isInstanceOf[GeometryUDT]
+    case _: UserDefinedType[_] => other.isInstanceOf[GeometryUDT]
     case _ => false
   }
 
