@@ -64,7 +64,13 @@
         <jts.version>1.18.0</jts.version>
         <jts2geojson.version>0.16.1</jts2geojson.version>
     </properties>
-
+    <modules>
+        <module>core</module>
+        <module>sql</module>
+        <module>viz</module>
+        <module>python-adapter</module>
+        <module>flink</module>
+    </modules>
     <dependencies>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
