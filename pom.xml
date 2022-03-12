@@ -26,7 +26,7 @@
     </parent>
     <groupId>org.apache.sedona</groupId>
     <artifactId>sedona-parent</artifactId>
-    <version>1.2.0-incubating-SNAPSHOT</version>
+    <version>1.2.0-incubating</version>
     <packaging>pom</packaging>
     <name>sedona-parent</name>
     <url>http://sedona.apache.org/</url>
@@ -54,7 +54,7 @@
         <connection>scm:git:https://github.com/apache/incubator-sedona.git</connection>
         <developerConnection>scm:git:https://github.com/apache/incubator-sedona.git</developerConnection>
         <url>https://github.com/apache/incubator-sedona</url>
-        <tag>sedona-1.0.0-incubator</tag>
+        <tag>sedona-1.2.0-incubating-rc1</tag>
     </scm>
 
     <properties>
