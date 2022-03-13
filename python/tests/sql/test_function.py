@@ -318,13 +318,13 @@ class TestPredicateJoin(TestBase):
         diff = self.spark.sql("select ST_SymDifference(a,b) from test_sym_diff")
         assert diff.take(1)[0][0].wkt == "POLYGON ((-3 -3, -3 3, 3 3, 3 -3, -3 -3), (-1 -1, 1 -1, 1 1, -1 1, -1 -1))"
 
-	def test_st_sym_difference_part_of_right_overlaps_left(self):
+	def test_st_union_part_of_right_overlaps_left(self):
         test_table = self.spark.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a, ST_GeomFromWKT('POLYGON ((-2 1, 2 1, 2 4, -2 4, -2 1))') as b")
         test_table.createOrReplaceTempView("test_union")
         union = self.spark.sql("select ST_Union(a,b) from test_union")
         assert union.take(1)[0][0].wkt == "POLYGON ((2 3, 3 3, 3 -3, -3 -3, -3 3, -2 3, -2 4, 2 4, 2 3))"
 
-    def test_st_sym_difference_not_overlaps_left(self):
+    def test_st_union_not_overlaps_left(self):
         test_table = self.spark.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((5 -3, 7 -3, 7 -1, 5 -1, 5 -3))') as b")
         test_table.createOrReplaceTempView("test_union")
         union = self.spark.sql("select ST_Union(a,b) from test_union")
