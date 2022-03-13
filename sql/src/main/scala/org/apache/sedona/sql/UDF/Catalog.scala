@@ -53,6 +53,7 @@ object Catalog {
     ST_Intersection,
     ST_Difference,
     ST_SymDifference,
+    ST_Union,
     ST_IsValid,
     ST_PrecisionReduce,
     ST_Equals,
