@@ -1,23 +1,42 @@
 # Publish Sedona
 
-## Check ASF copyright in all file headers
+This page is for Sedona PPMC to publish Sedona releases.
 
-1. Download [Apache Rat binary (.jar file)](https://creadur.apache.org/rat/download_rat.cgi).
-2. Run the following terminal script:
-```bash
-#!/bin/bash
-git clone --shared --branch master https://github.com/apache/incubator-sedona.git sedona-src
-java -jar apache-rat-0.13.jar -d sedona-src > report.txt
-```
-3. Read the generated report.txt file and make sure all source code files have ASF header.
-4. Delete the generated report and cloned files
-```
-rm -rf sedona-src
-rm report.txt
-```
+## Obtain Write Access to Sedona GitHub repo
 
-!!!note
-	Please read the following guidelines first: 1. ASF Incubator Distribution Guidelines: https://incubator.apache.org/guides/distribution.html 2. ASF Release Guidelines: https://infra.apache.org/release-publishing.html 3. ASF Incubator Release Votes Guidelines: https://issues.apache.org/jira/browse/LEGAL-469
+1. Verify you have a Github ID enabled with 2FA https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/
+2. Enter your Github ID into your Apache ID profile https://id.apache.org/
+3. Merge your Apache and GitHub accounts using GitBox (Apache Account Linking utility): https://gitbox.apache.org/setup/
+	* You should see 3 green checks in GitBox
+	* Wait at least 30  minutes for an email inviting you to Apache GitHub Organization and accept invitation
+4. After accepting the Github Invitation verify that you are a member of the team https://github.com/orgs/apache/teams/openwhisk-committers
+5. Additionally, if you have been elected to the Sedona PPMC, verify you are part of the LDAP Sedona PPMC https://whimsy.apache.org/roster/ppmc/sedona
+
+## Prepare Secret GPG key
+
+1. Install GNUGPG if it was not installed before. On Mac: `brew install gnupg gnupg2`
+2. Generate a secret key. It must be RSA4096 (4096 bits long). Please follow Step 1 - 13 as listed here: https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key#generating-a-gpg-key
+
+## Set up ASF username for Maven
+
+In your `~/.m2/settings.xml` file, add the following content. Please create one if it does not exist. Please replace ASF\_ID and ASF\_PASSWORD with your own ASF ID and password.
+
+```
+<settings>
+  <servers>
+    <server>
+      <id>apache.snapshots.https</id>
+      <username>YOUR_ASF_ID</username>
+      <password>YOUR_ASF_PASSWORD</password>
+    </server>
+    <server>
+      <id>apache.releases.https</id>
+      <username>YOUR_ASF_ID</username>
+      <password>YOUR_ASF_PASSWORD</password>
+    </server>
+  </servers>
+</settings>
+```
 
 ## Publish SNAPSHOTs
 
@@ -60,6 +79,25 @@ mvn clean release:prepare -DdryRun=true -DautoVersionSubmodules=true -Dresume=fa
 mvn deploy -DskipTests -Dscala=2.12 -Dspark=2.4
 ```
 
+## Check ASF copyright in all file headers
+
+1. Download [Apache Rat binary (.jar file)](https://creadur.apache.org/rat/download_rat.cgi).
+2. Run the following terminal script:
+```bash
+#!/bin/bash
+git clone --shared --branch master https://github.com/apache/incubator-sedona.git sedona-src
+java -jar apache-rat-0.13.jar -d sedona-src > report.txt
+```
+3. Read the generated report.txt file and make sure all source code files have ASF header.
+4. Delete the generated report and cloned files
+```
+rm -rf sedona-src
+rm report.txt
+```
+
+!!!note
+	Please read the following guidelines first: 1. ASF Incubator Distribution Guidelines: https://incubator.apache.org/guides/distribution.html 2. ASF Release Guidelines: https://infra.apache.org/release-publishing.html 3. ASF Incubator Release Votes Guidelines: https://issues.apache.org/jira/browse/LEGAL-469
+	
 ## Publish releases
 
 ### Update Sedona Python, R and Zeppelin versions
@@ -123,6 +161,7 @@ cp apache-sedona-{{ sedona.current_version }}-src/core/target/sedona-*{{ sedona.
 cp apache-sedona-{{ sedona.current_version }}-src/sql/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
 cp apache-sedona-{{ sedona.current_version }}-src/viz/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
 cp apache-sedona-{{ sedona.current_version }}-src/python-adapter/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/flink/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
 cd apache-sedona-{{ sedona.current_version }}-src && mvn clean install -DskipTests -Dscala=2.11 -Dspark=2.4 && cd ..
 cp apache-sedona-{{ sedona.current_version }}-src/core/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
 cp apache-sedona-{{ sedona.current_version }}-src/sql/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
@@ -461,6 +500,7 @@ wget https://repository.apache.org/service/local/repositories/orgapachesedona-$s
 wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-2.4_2.11/{{ sedona.current_version }}/sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom
 wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-2.4_2.12/{{ sedona.current_version }}/sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom
 wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-flink_2.12/{{ sedona.current_version }}/sedona-flink_2.12-{{ sedona.current_version }}.pom
 
 gpg -ab sedona-core-2.4_2.11-{{ sedona.current_version }}.pom
 gpg -ab sedona-core-2.4_2.12-{{ sedona.current_version }}.pom
@@ -474,6 +514,7 @@ gpg -ab sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom
 gpg -ab sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom
 gpg -ab sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom
 gpg -ab sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom
+gpg -ab sedona-flink_2.12-{{ sedona.current_version }}.pom
 
 curl -v -u $username:$password --upload-file sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-2.4_2.11/{{ sedona.current_version }}/sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom.asc
 
@@ -499,6 +540,8 @@ curl -v -u $username:$password --upload-file sedona-sql-2.4_2.12-{{ sedona.curre
 
 curl -v -u $username:$password --upload-file sedona-sql-3.0_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-3.0_2.12/{{ sedona.current_version }}/sedona-sql-3.0_2.12-{{ sedona.current_version }}.pom.asc
 
+curl -v -u $username:$password --upload-file sedona-flink_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-flink_2.12/{{ sedona.current_version }}/sedona-flink_2.12-{{ sedona.current_version }}.pom.asc
+
 rm sedona-core-2.4_2.11-{{ sedona.current_version }}.pom.asc
 rm sedona-core-2.4_2.12-{{ sedona.current_version }}.pom.asc
 rm sedona-core-3.0_2.12-{{ sedona.current_version }}.pom.asc
@@ -511,6 +554,7 @@ rm sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom.asc
 rm sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom.asc
 rm sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom.asc
 rm sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom.asc
+rm sedona-flink_2.12-{{ sedona.current_version }}.pom.asc
 ```
 admin is your Apache ID username and admin123 is your Apache ID password. You can find the correct upload path from the web interface.
 
