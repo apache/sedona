@@ -1501,3 +1501,25 @@ case class ST_SymDifference(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+/**
+ * Return the union of geometry A and B
+ *
+ * @param inputExpressions
+ */
+case class ST_Union(inputExpressions: Seq[Expression])
+  extends BinaryGeometryExpression with CodegenFallback {
+  assert(inputExpressions.length == 2)
+
+  override protected def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
+    new GenericArrayData(GeometrySerializer.serialize(leftGeometry.union(rightGeometry)))
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

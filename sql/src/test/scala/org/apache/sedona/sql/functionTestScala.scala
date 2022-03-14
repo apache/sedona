@@ -431,6 +431,31 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(symDiff.first().get(0) == null)
     }
 
+    it("Passed ST_Union - part of right overlaps left") {
+
+      val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a, ST_GeomFromWKT('POLYGON ((-2 1, 2 1, 2 4, -2 4, -2 1))') as b")
+      testtable.createOrReplaceTempView("union_table")
+      val union = sparkSession.sql("select ST_Union(a,b) from union_table")
+      assert(union.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("POLYGON ((2 3, 3 3, 3 -3, -3 -3, -3 3, -2 3, -2 4, 2 4, 2 3))"))
+    }
+
+    it("Passed ST_Union - right not overlaps left") {
+
+      val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((5 -3, 7 -3, 7 -1, 5 -1, 5 -3))') as b")
+      testtable.createOrReplaceTempView("union_table")
+      val union = sparkSession.sql("select ST_Union(a,b) from union_table")
+      println(union.take(1)(0).get(0).asInstanceOf[Geometry].toText)
+      assert(union.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("MULTIPOLYGON (((-3 -3, -3 3, 3 3, 3 -3, -3 -3)), ((5 -3, 5 -1, 7 -1, 7 -3, 5 -3)))"))
+    }
+
+    it("Passed ST_Union - one null") {
+
+      val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a")
+      testtable.createOrReplaceTempView("union_table")
+      val union = sparkSession.sql("select ST_Union(a,null) from union_table")
+      assert(union.first().get(0) == null)
+    }
+
     it("Passed ST_Azimuth") {
 
       val pointDataFrame = samplePoints
@@ -1357,6 +1382,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     functionDf = sparkSession.sql("select ST_Difference(null, null)")
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_SymDifference(null, null)")
+    assert(functionDf.first().get(0) == null)
+    functionDf = sparkSession.sql("select ST_Union(null, null)")
     assert(functionDf.first().get(0) == null)
   }
 }

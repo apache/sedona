@@ -964,3 +964,24 @@ Result:
 ```
 MULTIPOLYGON (((-2 -3, -3 -3, -3 3, -2 3, -2 -3)), ((3 -3, 3 3, 4 3, 4 -3, 3 -3)))
 ```
+
+## ST_Union
+
+Introduction: Return the union of geometry A and B
+
+
+Format: `ST_Union (A:geometry, B:geometry)`
+
+Since: `v1.2.0`
+
+Example:
+
+```SQL
+SELECT ST_Union(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((1 -2, 5 0, 1 2, 1 -2))'))
+```
+
+Result:
+
+```
+POLYGON ((3 -1, 3 -3, -3 -3, -3 3, 3 3, 3 1, 5 0, 3 -1))
+```
