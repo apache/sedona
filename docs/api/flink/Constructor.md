@@ -27,6 +27,20 @@ SELECT ST_GeomFromWKB(polygontable._c0) AS polygonshape
 FROM polygontable
 ```
 
+## ST_GeomFromGeoJSON
+
+Introduction: Construct a Geometry from GeoJson
+
+Format: `ST_GeomFromGeoJSON (GeoJson:string)`
+
+Since: `v1.2.0`
+
+SQL example:
+```SQL
+SELECT ST_GeomFromGeoJSON(polygontable._c0) AS polygonshape
+FROM polygontable
+```
+
 ## ST_PointFromText
 
 Introduction: Construct a Point from Text, delimited by Delimiter

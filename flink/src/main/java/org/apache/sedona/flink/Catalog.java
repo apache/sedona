@@ -25,6 +25,7 @@ public class Catalog {
                 new Constructors.ST_PolygonFromEnvelope(),
                 new Constructors.ST_GeomFromWKT(),
                 new Constructors.ST_GeomFromWKB(),
+                new Constructors.ST_GeomFromGeoJSON(),
                 new Functions.ST_Buffer(),
                 new Functions.ST_Distance(),
                 new Functions.ST_Transform(),
