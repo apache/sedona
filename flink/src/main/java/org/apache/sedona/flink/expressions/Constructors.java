@@ -83,4 +83,12 @@ public class Constructors {
             return formatUtils.readGeometry(wkbString);
         }
     }
+
+    public static class ST_GeomFromGeoJSON extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String geoJson) throws ParseException {
+            FormatUtils formatUtils = new FormatUtils(FileDataSplitter.GEOJSON, false);
+            return formatUtils.readGeometry(geoJson);
+        }
+    }
 }

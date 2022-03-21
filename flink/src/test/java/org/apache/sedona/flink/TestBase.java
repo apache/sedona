@@ -27,12 +27,15 @@ import org.apache.flink.util.CloseableIterator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.sedona.flink.expressions.Constructors;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
+import org.wololo.geojson.Feature;
+import org.wololo.jts2geojson.GeoJSONWriter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
@@ -140,6 +143,33 @@ public class TestBase {
             polygon.add(minX + " " + minY);
             data.add(Row.of("POLYGON ((" + String.join(", ", polygon) + "))", "polygon" + i));
         }
+        return data;
+    }
+
+    static List<Row> createPolygonGeoJSON(int size) {
+        List<Row> data = new ArrayList<>();
+        GeometryFactory geometryFactory = new GeometryFactory();
+        GeoJSONWriter writer = new GeoJSONWriter();
+
+        Coordinate[] points = new Coordinate[5];
+        for (int i = 0; i < size; i++) {
+            double minX = i - 0.5;
+            double minY = i - 0.5;
+            double maxX = i + 0.5;
+            double maxY = i + 0.5;
+
+            points[0] = new Coordinate(minX, minY);
+            points[1] = new Coordinate(minX, maxY);
+            points[2] = new Coordinate(maxX, maxY);
+            points[3] = new Coordinate(maxX, minY);
+            points[4] = new Coordinate(minX, minY);
+
+            Geometry polygon = geometryFactory.createPolygon(points);
+
+            String geoJson = writer.write(polygon).toString();
+            data.add(Row.of(geoJson, "polygon" + i));
+        }
+
         return data;
     }
 

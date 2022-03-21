@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.wololo.jts2geojson.GeoJSONReader;
 
 import java.util.List;
 
@@ -79,5 +80,24 @@ public class ConstructorTest extends TestBase{
         assertEquals(geom.toString(), last(tableEnv.sqlQuery("SELECT ST_PolygonFromEnvelope(1.0, 100.0, 2.0, 200.0)"))
                 .getField(0).toString());
 
+    }
+
+    @Test
+    public void testGeomFromGeoJSON() {
+        List<Row> data = createPolygonGeoJSON(testDataSize);
+        Table geojsonTable = createTextTable(data, polygonColNames);
+        Table geomTable = geojsonTable
+                .select(call(Constructors.ST_GeomFromGeoJSON.class.getSimpleName(), $(polygonColNames[0]))
+                        .as(polygonColNames[0]), $(polygonColNames[1]));
+        String result = last(geomTable)
+                .getFieldAs(0)
+                .toString();
+
+        GeoJSONReader reader = new GeoJSONReader();
+        String expectedGeoJSON = data.get(data.size() - 1)
+                .getFieldAs(0);
+        String expectedGeom = reader.read(expectedGeoJSON).toText();
+
+        assertEquals(result, expectedGeom);
     }
 }
