@@ -61,7 +61,7 @@
         <geotools.version>24.0</geotools.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.scope>provided</dependency.scope>
-        <jts.version>1.18.0</jts.version>
+        <jts.version>1.18.2</jts.version>
         <jts2geojson.version>0.16.1</jts2geojson.version>
     </properties>
 

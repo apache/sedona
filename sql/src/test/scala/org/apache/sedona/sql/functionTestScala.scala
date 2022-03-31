@@ -22,6 +22,7 @@ package org.apache.sedona.sql
 import org.apache.commons.codec.binary.Hex
 import org.apache.sedona.sql.implicits._
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.sedona_sql.expressions.ST_MakeValid
 import org.apache.spark.sql.{DataFrame, Row}
 import org.geotools.geometry.jts.WKTReader2
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
@@ -203,62 +204,42 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     it("Passed ST_MakeValid On Invalid Polygon") {
 
       val df = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((1 5, 1 1, 3 3, 5 3, 7 1, 7 5, 5 3, 3 3, 1 5))') AS polygon")
-      df.createOrReplaceTempView("table")
 
-      val result = sparkSession.sql(
-        """
-          |SELECT geometryValid.polygon
-          |FROM table
-          |LATERAL VIEW ST_MakeValid(polygon, false) geometryValid AS polygon
-          |""".stripMargin
-      ).collect()
+      val result = df.withColumn("polygon", expr("ST_MakeValid(polygon)")).collect()
 
-      val wktReader = new WKTReader2()
-      val firstValidGeometry = wktReader.read("POLYGON ((1 5, 3 3, 1 1, 1 5))")
-      val secondValidGeometry = wktReader.read("POLYGON ((5 3, 7 5, 7 1, 5 3))")
-
-      assert(result.exists(row => row.getAs[Geometry](0).equals(firstValidGeometry)))
-      assert(result.exists(row => row.getAs[Geometry](0).equals(secondValidGeometry)))
+      assert(result.length == 1)
+      assert(result.take(1)(0).get(0).asInstanceOf[Geometry].toText() == "MULTIPOLYGON (((1 5, 3 3, 1 1, 1 5)), ((5 3, 7 5, 7 1, 5 3)))")
     }
 
     it("Passed ST_MakeValid On Invalid MultiPolygon") {
 
       val df = sparkSession.sql("SELECT ST_GeomFromWKT('MULTIPOLYGON(((0 0, 3 0, 3 3, 0 3, 0 0)), ((3 0, 6 0, 6 3, 3 3, 3 0)))') AS multipolygon")
-      df.createOrReplaceTempView("table")
 
-      val result = sparkSession.sql(
-        """
-          |SELECT geometryValid.multipolygon
-          |FROM table
-          |LATERAL VIEW ST_MakeValid(multipolygon, false) geometryValid AS multipolygon
-          |""".stripMargin
-      ).collect()
+      val result = df.withColumn("multipolygon", expr("ST_MakeValid(multipolygon)")).collect()
 
-      val wktReader = new WKTReader2()
-      val firstValidGeometry = wktReader.read("POLYGON ((0 3, 3 3, 3 0, 0 0, 0 3))")
-      val secondValidGeometry = wktReader.read("POLYGON ((3 3, 6 3, 6 0, 3 0, 3 3))")
-
-      assert(result.exists(row => row.getAs[Geometry](0).equals(firstValidGeometry)))
-      assert(result.exists(row => row.getAs[Geometry](0).equals(secondValidGeometry)))
+      assert(result.length == 1)
+      assert(result.take(1)(0).get(0).asInstanceOf[Geometry].toText() == "POLYGON ((0 3, 3 3, 6 3, 6 0, 3 0, 0 0, 0 3))")
     }
 
     it("Passed ST_MakeValid On Valid Polygon") {
 
       val df = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') AS polygon")
-      df.createOrReplaceTempView("table")
 
-      val result = sparkSession.sql(
-        """
-          |SELECT geometryValid.polygon
-          |FROM table
-          |LATERAL VIEW ST_MakeValid(polygon, false) geometryValid AS polygon
-          |""".stripMargin
-      ).collect()
+      val result = df.withColumn("polygon", expr("ST_MakeValid(polygon)")).collect()
 
-      val wktReader = new WKTReader2()
-      val validGeometry = wktReader.read("POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))")
+      assert(result.length == 1)
+      assert(result.take(1)(0).get(0).asInstanceOf[Geometry].toText() == "POLYGON ((1 1, 1 8, 8 8, 8 1, 1 1))")
+    }
 
-      assert(result.exists(row => row.getAs[Geometry](0).equals(validGeometry)))
+    it("Passed ST_MakeValid on Invalid LineString") {
+
+      val df = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(1 1, 1 1)') AS geom")
+
+      val result = df.selectExpr("ST_MakeValid(geom)", "ST_MakeValid(geom, true)").collect()
+
+      assert(result.length == 1)
+      assert(result.take(1)(0).get(0).asInstanceOf[Geometry].toText() == "LINESTRING EMPTY")
+      assert(result.take(1)(0).get(1).asInstanceOf[Geometry].toText() == "POINT (1 1)")
     }
 
     it("Passed ST_SimplifyPreserveTopology") {
