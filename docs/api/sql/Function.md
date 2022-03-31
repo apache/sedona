@@ -924,6 +924,33 @@ Result:
 +---------------------------------------------------------------+
 ```
 
+
+## ST_Multi
+
+Introduction: Returns a MultiGeometry object based on the geometry input.
+ST_Multi is basically an alias for ST_Collect with one geometry.
+
+Format
+
+`ST_Multi(geom: geometry)`
+
+Example:
+```SQL
+SELECT ST_Multi(
+    ST_GeomFromText('POINT(1 1)')
+) AS geom
+```
+Result:
+
+```
++---------------------------------------------------------------+
+|geom                                                           |
++---------------------------------------------------------------+
+|MULTIPOINT (1 1)                                               |
++---------------------------------------------------------------+
+```
+
+
 ## ST_Difference
 
 Introduction: Return the difference between geometry A and B (return part of geometry A that does not intersect geometry B)

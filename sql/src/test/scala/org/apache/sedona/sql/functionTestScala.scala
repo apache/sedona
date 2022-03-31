@@ -1278,6 +1278,12 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       )
   }
 
+  it ("Should pass ST_Multi"){
+    val df = sparkSession.sql("select ST_Astext(ST_Multi(ST_Point(1.0,1.0)))")
+    val result = df.collect()
+    assert(result.head.get(0).asInstanceOf[String]=="MULTIPOINT ((1 1))")
+
+  }
 
   it("handles nulls") {
     var functionDf: DataFrame = null
