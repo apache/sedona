@@ -18,7 +18,6 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions.collect
 
-import org.apache.sedona.core.geometryObjects.Circle
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 
@@ -28,14 +27,11 @@ import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.types.{ArrayType, _}
-import org.locationtech.jts.geom._
-import scala.collection.JavaConverters._
 
 case class ST_Collect(inputExpressions: Seq[Expression])
     extends Expression
     with CodegenFallback {
   assert(inputExpressions.length >= 1)
-  private val geomFactory = new GeometryFactory()
 
   override def nullable: Boolean = true
 
@@ -53,37 +49,14 @@ case class ST_Collect(inputExpressions: Seq[Expression])
               .filter(_ != null)
               .map(_.toGeometry)
 
-            createMultiGeometry(geomElements)
-          case _ => emptyCollection
+            Collect.createMultiGeometry(geomElements).toGenericArrayData
+          case _ => Collect.createMultiGeometry(Seq()).toGenericArrayData
         }
       case _ =>
         val geomElements =
           inputExpressions.map(_.toGeometry(input)).filter(_ != null)
-        val length = geomElements.length
-        if (length > 1) createMultiGeometry(geomElements)
-        else if (length == 1)
-          createMultiGeometryFromOneElement(
-            geomElements.head
-          ).toGenericArrayData
-        else emptyCollection
-    }
-  }
+        Collect.createMultiGeometry(geomElements).toGenericArrayData
 
-  private def createMultiGeometry(geomElements: Seq[Geometry]) =
-    geomFactory.buildGeometry(geomElements.asJava).toGenericArrayData
-
-  private def emptyCollection =
-    geomFactory.createGeometryCollection().toGenericArrayData
-
-  private def createMultiGeometryFromOneElement(geom: Geometry): Geometry = {
-    geom match {
-      case circle: Circle                 => geomFactory.createGeometryCollection(Array(circle))
-      case collection: GeometryCollection => collection
-      case string: LineString =>
-        geomFactory.createMultiLineString(Array(string))
-      case point: Point     => geomFactory.createMultiPoint(Array(point))
-      case polygon: Polygon => geomFactory.createMultiPolygon(Array(polygon))
-      case _                => geomFactory.createGeometryCollection()
     }
   }
 

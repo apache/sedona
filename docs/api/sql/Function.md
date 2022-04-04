@@ -887,12 +887,14 @@ Format
 Since: `v1.2.0`
 
 Example: 
+
 ```SQL
 SELECT ST_Collect(
     ST_GeomFromText('POINT(21.427834 52.042576573)'),
     ST_GeomFromText('POINT(45.342524 56.342354355)')
 ) AS geom
 ```
+
 Result:
 
 ```
@@ -921,6 +923,35 @@ Result:
 |geom                                                           |
 +---------------------------------------------------------------+
 |MULTIPOINT ((21.427834 52.042576573), (45.342524 56.342354355))|
++---------------------------------------------------------------+
+```
+
+## ST_Multi
+
+Introduction: Returns a MultiGeometry object based on the geometry input.
+ST_Multi is basically an alias for ST_Collect with one geometry.
+
+Format
+
+`ST_Multi(geom: geometry)`
+
+Since: `v1.2.1`
+
+Example:
+
+```SQL
+SELECT ST_Multi(
+    ST_GeomFromText('POINT(1 1)')
+) AS geom
+```
+
+Result:
+
+```
++---------------------------------------------------------------+
+|geom                                                           |
++---------------------------------------------------------------+
+|MULTIPOINT (1 1)                                               |
 +---------------------------------------------------------------+
 ```
 

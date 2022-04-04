@@ -100,6 +100,7 @@ object Catalog {
     ST_GeoHash,
     ST_GeomFromGeoHash,
     ST_Collect,
+    ST_Multi,
     // Expression for rasters
     RS_NormalizedDifference,
     RS_Mean,

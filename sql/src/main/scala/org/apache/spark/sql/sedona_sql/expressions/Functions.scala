@@ -27,6 +27,7 @@ import org.apache.spark.sql.catalyst.expressions.codegen.{CodegenContext, Codege
 import org.apache.spark.sql.catalyst.expressions.{BoundReference, Expression, Generator}
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.expressions.collect.Collect
 import org.apache.spark.sql.sedona_sql.expressions.geohash.{GeoHashDecoder, GeometryGeoHashEncoder, InvalidGeoHashException}
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.sedona_sql.expressions.subdivide.GeometrySubDivider
@@ -1521,5 +1522,19 @@ case class ST_Union(inputExpressions: Seq[Expression])
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_Multi(inputExpressions: Seq[Expression]) extends UnaryGeometryExpression with CodegenFallback{
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+
+  override protected def nullSafeEval(geometry: Geometry): Any ={
+    Collect.createMultiGeometry(Seq(geometry)).toGenericArrayData
   }
 }
