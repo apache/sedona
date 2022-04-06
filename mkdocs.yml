@@ -24,6 +24,7 @@ nav:
       - Release notes: setup/release-notes.md      
       - Compile the code: setup/compile.md
       - Publish the code: setup/publish.md
+      - Vote the release: setup/vote.md
     - Download: download.md
     - Programming Guides:
       - Sedona with Apache Spark:
