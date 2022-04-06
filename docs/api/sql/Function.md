@@ -162,27 +162,40 @@ FROM polygondf
 
 ## ST_MakeValid
 
-Introduction: Given an invalid polygon or multipolygon and removeHoles boolean flag,
- create a valid representation of the geometry.
+Introduction: Given an invalid geometry, create a valid representation of the geometry.
 
-Format: `ST_MakeValid (A:geometry, removeHoles:Boolean)`
+Collapsed geometries are either converted to empty (keepCollaped=true) or a valid geometry of lower dimension (keepCollapsed=false).
+Default is keepCollapsed=false.
+
+Format: `ST_MakeValid (A:geometry)`
+
+Format: `ST_MakeValid (A:geometry, keepCollapsed:Boolean)`
 
 Since: `v1.0.0`
 
 Spark SQL example:
 
 ```SQL
-SELECT geometryValid.polygon
-FROM table
-LATERAL VIEW ST_MakeValid(polygon, false) geometryValid AS polygon
+WITH linestring AS (
+    SELECT ST_GeomFromWKT('LINESTRING(1 1, 1 1)') AS geom
+) SELECT ST_MakeValid(geom), ST_MakeValid(geom, true) FROM linestring
+```
+
+Result:
+```
++------------------+------------------------+
+|st_makevalid(geom)|st_makevalid(geom, true)|
++------------------+------------------------+
+|  LINESTRING EMPTY|             POINT (1 1)|
++------------------+------------------------+
 ```
 
 !!!note
-    Might return multiple polygons from a only one invalid polygon
-    That's the reason why we need to use the LATERAL VIEW expression
-    
-!!!note
-    Throws an exception if the geometry isn't polygon or multipolygon
+    In Sedona up to and including version 1.2 the behaviour of ST_MakeValid was different.
+    Be sure to check you code when upgrading. 
+    The previous implementation only worked for (multi)polygons and had a different interpretation of the second, boolean, argument.
+    It would also sometimes return multiple geometries for a single geomtry input.
+
 
 ## ST_PrecisionReduce
 

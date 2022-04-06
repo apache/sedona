@@ -36,6 +36,7 @@ import org.apache.spark.unsafe.types.UTF8String
 import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.CRS
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
+import org.locationtech.jts.geom.util.GeometryFixer
 import org.locationtech.jts.geom.{PrecisionModel, _}
 import org.locationtech.jts.io.{ByteOrderValues, WKBWriter, WKTWriter}
 import org.locationtech.jts.linearref.LengthIndexedLine
@@ -343,48 +344,37 @@ case class ST_Intersection(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Given an invalid polygon or multipolygon and removeHoles boolean flag, create a valid representation of the geometry
+  * Given an invalid geometry, create a valid representation of the geometry.
+  * See: http://lin-ear-th-inking.blogspot.com/2021/05/fixing-invalid-geometry-with-jts.html
   *
   * @param inputExpressions
   */
 case class ST_MakeValid(inputExpressions: Seq[Expression])
-  extends Generator with CodegenFallback with UserDataGeneratator {
-  assert(inputExpressions.length == 2)
+  extends Expression with CodegenFallback {
+  assert(inputExpressions.length == 1 || inputExpressions.length == 2)
 
-  override def elementSchema: StructType = new StructType().add("Geometry", new GeometryUDT)
-
-  override def toString: String = s" **${ST_MakeValid.getClass.getName}** "
-
-  override def eval(input: InternalRow): TraversableOnce[InternalRow] = {
-    val geometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
-    val removeHoles = inputExpressions(1).eval(input).asInstanceOf[Boolean]
-
-    // in order to do flatMap on java collections(util.List[Polygon])
-    import scala.jdk.CollectionConverters._
-
-    // makeValid works only on polygon or multipolygon
-    if (!geometry.getGeometryType.equalsIgnoreCase("POLYGON") && !geometry.getGeometryType.equalsIgnoreCase("MULTIPOLYGON")) {
-      throw new IllegalArgumentException("ST_MakeValid works only on Polygons and MultiPolygons")
+  override def eval(input: InternalRow): Any = {
+    val geometry = inputExpressions.head.toGeometry(input)
+    val keepCollapsed = if (inputExpressions.length == 2) {
+      inputExpressions(1).eval(input).asInstanceOf[Boolean]
+    } else {
+      false
     }
-
-    val validGeometry = geometry match {
-      case g: MultiPolygon =>
-        (0 until g.getNumGeometries).flatMap(i => {
-          val polygon = g.getGeometryN(i).asInstanceOf[Polygon]
-          JTS.makeValid(polygon, removeHoles).asScala.iterator
-        })
-      case g: Polygon =>
-        JTS.makeValid(g, removeHoles).asScala.iterator
-      case _ => Nil
+    (geometry) match {
+      case (geometry: Geometry) => nullSafeEval(geometry, keepCollapsed)
+      case _ => null
     }
-
-    val result = validGeometry.map(g => {
-      val serializedGeometry = GeometrySerializer.serialize(g.asInstanceOf[Geometry])
-      InternalRow(new GenericArrayData(serializedGeometry))
-    })
-
-    result
   }
+
+  private def nullSafeEval(geometry: Geometry, keepCollapsed: Boolean) = {
+    val fixer = new GeometryFixer(geometry)
+    fixer.setKeepCollapsed(keepCollapsed)
+    fixer.getResult.toGenericArrayData
+  }
+
+  override def nullable: Boolean = true
+
+  override def dataType: DataType = GeometryUDT
 
   override def children: Seq[Expression] = inputExpressions
 
