@@ -179,7 +179,7 @@ object GeotiffSchema {
         // bands of a pixel will be put in [b0...b1...b2...]
         // Each "..." represent w * h pixels
         for (bandId <- 0 until nBands) {
-          val offset = i * width + j + nBands * bandId
+          val offset = i * width + j + width * height * bandId
           decoded(offset) = vals(bandId)
         }
       }
