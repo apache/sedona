@@ -70,6 +70,28 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
       assert(df.first().getAs[String](0).contains("img"))
 //      printf(df.first().getAs[String](0))
     }
+
+    it("should pass RS_GetBand for length of Band 2") {
+      var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/test3.tif")
+      df = df.selectExpr(" image.data as data", "image.nBands as bands")
+      df = df.selectExpr("RS_GetBand(data, 2, bands) as targetBand")
+      assert(df.first().getAs[mutable.WrappedArray[Double]](0).length == 32 * 32)
+    }
+
+    it("should pass RS_GetBand for elements of Band 2") {
+      var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/test3.tif")
+      df = df.selectExpr(" image.data as data", "image.nBands as bands")
+      df = df.selectExpr("RS_GetBand(data, 2, bands) as targetBand")
+      assert(df.first().getAs[mutable.WrappedArray[Double]](0)(1) == 956.0)
+    }
+
+    it("should pass RS_GetBand for elements of Band 4") {
+      var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/test3.tif")
+      df = df.selectExpr(" image.data as data", "image.nBands as bands")
+      df = df.selectExpr("RS_GetBand(data, 4, bands) as targetBand")
+      assert(df.first().getAs[mutable.WrappedArray[Double]](0)(2) == 0.0)
+    }
+    
   }
 }
 
