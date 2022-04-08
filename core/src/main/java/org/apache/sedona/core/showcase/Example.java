@@ -26,6 +26,7 @@ import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileRDD;
 import org.apache.sedona.core.serde.SedonaKryoRegistrator;
+import org.apache.sedona.core.spatialOperator.DBScanQuery;
 import org.apache.sedona.core.spatialOperator.JoinQuery;
 import org.apache.sedona.core.spatialOperator.KNNQuery;
 import org.apache.sedona.core.spatialOperator.RangeQuery;
@@ -165,7 +166,7 @@ public class Example
         PointRDDInputLocation = resourceFolder + "arealm-small.csv";
         PointRDDSplitter = FileDataSplitter.CSV;
         PointRDDIndexType = IndexType.RTREE;
-        PointRDDNumPartitions = 5;
+        PointRDDNumPartitions = 1;
         PointRDDOffset = 0;
 
         PolygonRDDInputLocation = resourceFolder + "primaryroads-polygon.csv";
@@ -183,17 +184,7 @@ public class Example
         ShapeFileInputLocation = resourceFolder + "shapefiles/polygon";
 
         try {
-            testSpatialRangeQuery();
-            testSpatialRangeQueryUsingIndex();
-            testSpatialKnnQuery();
-            testSpatialKnnQueryUsingIndex();
-            testSpatialJoinQuery();
-            testSpatialJoinQueryUsingIndex();
-            testDistanceJoinQuery();
-            testDistanceJoinQueryUsingIndex();
-            testCRSTransformationSpatialRangeQuery();
-            testCRSTransformationSpatialRangeQueryUsingIndex();
-            testLoadShapefileIntoPolygonRDD();
+            testSpatialDBScanQuery();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -268,6 +259,22 @@ public class Example
             List<Point> result = KNNQuery.SpatialKnnQuery(objectRDD, kNNQueryPoint, 1000, true);
             assert result.size() > -1;
         }
+    }
+
+    /**
+     * Test spatial DBScan query
+     *
+     * @throws Exception the exception
+     */
+    public static void testSpatialDBScanQuery()
+            throws Exception
+    {
+        String inputLocation = System.getProperty("user.dir") + "/src/test/resources/points_dbscan.csv";
+        objectRDD = new PointRDD(sc, inputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
+        objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
+        List<Integer> result = DBScanQuery.SpatialDBScanQuery(objectRDD, 0.8, 1, false);
+        System.out.println(result);
+        assert result.size() == 6;
     }
 
     /**
