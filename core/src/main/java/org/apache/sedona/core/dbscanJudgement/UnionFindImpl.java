@@ -74,19 +74,26 @@ public class UnionFindImpl implements UnionFind {
     }
 
     @Override
-    public Integer[] getCollapsedClusterIds() {
+    public Integer[] getCollapsedClusterIds(Set<Integer> isInCluster) {
         Integer[] orderedComponents = orderedByCluster();
         Integer[] newIds = new Integer[n];
-        int lastOldId = find(orderedComponents[0]), currentNewId = 0;
+        int lastOldId = 0, currentNewId = 0;
+        boolean encounteredCluster = false;
 
         for (int i = 0; i < n; i++) {
             int j = orderedComponents[i];
-            int currentOldId = find(j);
-            if (currentOldId != lastOldId) {
-                currentNewId++;
+            if (isInCluster.isEmpty() || isInCluster.contains(j)) {
+                int currentOldId = find(j);
+                if (!encounteredCluster) {
+                    encounteredCluster = true;
+                    lastOldId = currentOldId;
+                }
+                if (currentOldId != lastOldId) {
+                    currentNewId++;
+                }
+                newIds[j] = currentNewId;
+                lastOldId = currentOldId;
             }
-            newIds[i] = currentNewId;
-            lastOldId = currentOldId;
         }
         return newIds;
     }

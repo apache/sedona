@@ -185,6 +185,7 @@ public class Example
 
         try {
             testSpatialDBScanQuery();
+            testSpatialDBScanQueryUsingIndex();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -273,6 +274,21 @@ public class Example
         objectRDD = new PointRDD(sc, inputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
         objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
         List<Integer> result = DBScanQuery.SpatialDBScanQuery(objectRDD, 0.8, 1, false);
+        System.out.println(result);
+        assert result.size() == 6;
+    }
+
+    /**
+     * Test spatial DBScan query using index
+     */
+    public static void testSpatialDBScanQueryUsingIndex()
+            throws Exception
+    {
+        String inputLocation = System.getProperty("user.dir") + "/src/test/resources/points_dbscan.csv";
+        objectRDD = new PointRDD(sc, inputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
+        objectRDD.buildIndex(PointRDDIndexType, false);
+        objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
+        List<Integer> result = DBScanQuery.SpatialDBScanQuery(objectRDD, 0.8, 1, true);
         System.out.println(result);
         assert result.size() == 6;
     }

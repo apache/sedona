@@ -7,5 +7,5 @@ public interface UnionFind {
     int size(int i);
     void union(int i, int j);
     Integer[] orderedByCluster();
-    Integer[] getCollapsedClusterIds();
+    Integer[] getCollapsedClusterIds(Set<Integer> isInCluster);
 }

@@ -1,11 +1,14 @@
 package org.apache.sedona.core.spatialOperator;
 
 import org.apache.sedona.core.dbscanJudgement.DBScanJudgement;
+import org.apache.sedona.core.knnJudgement.GeometryDistanceComparator;
+import org.apache.sedona.core.knnJudgement.KnnJudgementUsingIndex;
 import org.apache.sedona.core.spatialRDD.SpatialRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.locationtech.jts.geom.Geometry;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
 
 public class DBScanQuery
@@ -17,11 +20,12 @@ public class DBScanQuery
             if (spatialRDD.indexedRawRDD == null) {
                 throw new NullPointerException("Need to invoke buildIndex() first, indexedRDDNoId is null");
             }
-            // TODO: Add implementation with index
-            return null;
+            JavaRDD<T> tmp = spatialRDD.indexedRawRDD.mapPartitions(new DBScanJudgement(eps, minPoints, new HashSet<>()));
+            JavaRDD<Integer> result = spatialRDD.getRawSpatialRDD().repartition(1).mapPartitions(new DBScanJudgement(eps, minPoints, new HashSet<>()), true);
+            return result.collect();
         }
         else {
-            JavaRDD<Integer> result = spatialRDD.getRawSpatialRDD().repartition(1).mapPartitions(new DBScanJudgement(eps, minPoints), true);
+            JavaRDD<Integer> result = spatialRDD.getRawSpatialRDD().repartition(1).mapPartitions(new DBScanJudgement(eps, minPoints, new HashSet<>()), true);
             return result.collect();
         }
     }

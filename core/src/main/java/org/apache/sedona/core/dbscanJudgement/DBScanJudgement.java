@@ -19,18 +19,9 @@
 
 package org.apache.sedona.core.dbscanJudgement;
 
-import org.apache.sedona.core.rangeJudgement.JudgementBase;
 import org.apache.spark.api.java.function.FlatMapFunction;
-import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.MapFunction;
-import org.geotools.geometry.Envelope2D;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.index.SpatialIndex;
-import org.locationtech.jts.index.strtree.GeometryItemDistance;
-import org.locationtech.jts.index.strtree.STRtree;
-import org.opengis.geometry.BoundingBox;
 
-import java.io.Serializable;
 import java.util.*;
 
 // TODO: Auto-generated Javadoc
@@ -53,15 +44,21 @@ public class DBScanJudgement<T extends Geometry>
     int minPoints;
 
     /**
+     * The indexes of geoms that are already part of a cluster
+     */
+    Set<Integer> isInCluster;
+
+    /**
      * Instantiates a new geometry knn judgement.
      *
      * @param eps the distance eps
      * @param minPoints minimum number of points to form a cluster
      */
-    public DBScanJudgement(double eps, int minPoints)
+    public DBScanJudgement(double eps, int minPoints, Set<Integer> isInCluster)
     {
         this.eps = eps;
         this.minPoints = minPoints;
+        this.isInCluster = isInCluster;
     }
 
 
@@ -72,30 +69,67 @@ public class DBScanJudgement<T extends Geometry>
         while (input.hasNext()) {
             geoms.add(input.next());
         }
+        if (geoms.size() <= minPoints) {
+            return Collections.emptyIterator();
+        }
+        Set<Integer> isInCore = new HashSet<>();
+        List<Integer> neighbors = new ArrayList<>();
         UnionFind unionFind = new UnionFindImpl(geoms.size());
         for (int i = 0; i < geoms.size(); i++) {
-            List<Integer> neighbors = getNeighbors(geoms, i, eps);
-            if (neighbors.size() >= minPoints) {
-                for (Integer neighbor : neighbors) {
-                    unionFind.union(i, neighbor);
+            List<Integer> geomsInEnvelope = getGeomsInEnvelope(geoms, i, eps);
+            for (Integer j : geomsInEnvelope) {
+                if (neighbors.size() >= minPoints) {
+                    if (unionFind.find(i) == unionFind.find(j)) {
+                        continue;
+                    }
+                    if (isInCluster.contains(j) && !isInCore.contains(j)) {
+                        continue;
+                    }
+                }
+                double minDistance = geoms.get(i).distance(geoms.get(j));
+                if (minDistance <= eps) {
+                    if (neighbors.size() < minPoints) {
+                        neighbors.add(j);
+                        if (neighbors.size() == minPoints) {
+                            isInCore.add(i);
+                            isInCluster.add(i);
+                            for (Integer neighbor : neighbors) {
+                                unionIfAvailable(unionFind, i, neighbor, isInCore, isInCluster);
+                            }
+                        }
+                    } else {
+                        unionIfAvailable(unionFind, i, j, isInCore, isInCluster);
+                    }
                 }
             }
         }
-        return Arrays.stream(unionFind.getCollapsedClusterIds()).iterator();
+        return Arrays.stream(unionFind.orderedByCluster()).iterator();
     }
 
 
-    private List<Integer> getNeighbors(List<T> geoms, int i, double eps)
+    private List<Integer> getGeomsInEnvelope(List<T> geoms, int i, double eps)
     {
-        List<Integer> neighbors = new ArrayList<>();
+        List<Integer> geomsInEnvelope = new ArrayList<>();
         T queryPoint = geoms.get(i);
         for (int j = 0; j < geoms.size(); j++) {
             T geom = geoms.get(j);
             double distance = queryPoint.distance(geom);
             if (i != j && distance <= eps) {
-                neighbors.add(j);
+                geomsInEnvelope.add(j);
             }
         }
-        return neighbors;
+        return geomsInEnvelope;
+    }
+
+    private void unionIfAvailable(UnionFind unionFind, int p, int q, Set<Integer> isInCore, Set<Integer> isInCluster)
+    {
+        if (isInCluster.contains(q)) {
+            if (isInCore.contains(q)) {
+                unionFind.union(p, q);
+            }
+        } else {
+            unionFind.union(p, q);
+            isInCluster.add(q);
+        }
     }
 }
