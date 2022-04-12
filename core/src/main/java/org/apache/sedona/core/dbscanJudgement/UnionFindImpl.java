@@ -1,8 +1,10 @@
 package org.apache.sedona.core.dbscanJudgement;
 
-import java.util.List;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -67,9 +69,9 @@ public class UnionFindImpl implements UnionFind {
         Integer[] clusterIdByElemId = new Integer[n];
         for (int i = 0; i < n; i++) {
             find(i);
-            clusterIdByElemId[i] = clusters.get(i);
+            clusterIdByElemId[i] = i;
         }
-        Arrays.sort(clusterIdByElemId);
+        Arrays.sort(clusterIdByElemId, Comparator.comparing(index -> clusters.get(index)));
         return clusterIdByElemId;
     }
 
@@ -79,6 +81,10 @@ public class UnionFindImpl implements UnionFind {
         Integer[] newIds = new Integer[n];
         int lastOldId = 0, currentNewId = 0;
         boolean encounteredCluster = false;
+
+        if (isInCluster == null) {
+            isInCluster = new HashSet<>();
+        }
 
         for (int i = 0; i < n; i++) {
             int j = orderedComponents[i];
@@ -96,5 +102,33 @@ public class UnionFindImpl implements UnionFind {
             }
         }
         return newIds;
+    }
+
+    public List<Integer> getClusters() {
+        return clusters;
+    }
+
+    public void setClusters(List<Integer> clusters) {
+        this.clusters = clusters;
+    }
+
+    public List<Integer> getClusterSizes() {
+        return clusterSizes;
+    }
+
+    public void setClusterSizes(List<Integer> clusterSizes) {
+        this.clusterSizes = clusterSizes;
+    }
+
+    public int getNumClusters() {
+        return numClusters;
+    }
+
+    public void setNumClusters(int numClusters) {
+        this.numClusters = numClusters;
+    }
+
+    public int getN() {
+        return n;
     }
 }

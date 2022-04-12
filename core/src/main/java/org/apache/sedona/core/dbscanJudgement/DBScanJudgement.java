@@ -103,7 +103,7 @@ public class DBScanJudgement<T extends Geometry>
                 }
             }
         }
-        return Arrays.stream(unionFind.orderedByCluster()).iterator();
+        return Arrays.stream(unionFind.getCollapsedClusterIds(isInCluster)).iterator();
     }
 
 

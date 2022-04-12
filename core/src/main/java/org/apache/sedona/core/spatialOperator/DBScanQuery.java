@@ -20,7 +20,6 @@ public class DBScanQuery
             if (spatialRDD.indexedRawRDD == null) {
                 throw new NullPointerException("Need to invoke buildIndex() first, indexedRDDNoId is null");
             }
-            JavaRDD<T> tmp = spatialRDD.indexedRawRDD.mapPartitions(new DBScanJudgement(eps, minPoints, new HashSet<>()));
             JavaRDD<Integer> result = spatialRDD.getRawSpatialRDD().repartition(1).mapPartitions(new DBScanJudgement(eps, minPoints, new HashSet<>()), true);
             return result.collect();
         }
