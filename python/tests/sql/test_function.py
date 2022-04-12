@@ -909,7 +909,7 @@ class TestPredicateJoin(TestBase):
                 "POLYGON Z((0 0 11, 5 0 11, 5 5 11, 0 5 11, 0 0 11), " \
                 "(1 1 11, 1 2 11, 2 2 11, 2 1 11, 1 1 11))"
         }
-        for input_geom, expected_geom in test_cases:
+        for input_geom, expected_geom in test_cases.items():
             reversed_geometry = self.spark.sql("select ST_AsText(ST_Reverse(ST_GeomFromText({})))".format(input_geom))
             assert reversed_geometry.take(1)[0][0].wkt == expected_geom
 

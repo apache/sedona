@@ -100,3 +100,22 @@ Result:
 |u3r0p                        |
 +-----------------------------+
 ```
+
+## ST_Reverse
+
+Introduction: Return the geometry with vertex order reversed
+
+Format: `ST_Reverse (A:geometry)`
+
+Since: `v1.2.0`
+
+Example:
+
+```SQL
+SELECT ST_Reverse(df.geometry) AS geom
+FROM df
+```
+
+Input: `POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))`
+
+Output: `POLYGON ((-0.5 -0.5, 0.5 -0.5, 0.5 0.5, -0.5 0.5, -0.5 -0.5))`
