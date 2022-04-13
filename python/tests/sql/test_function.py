@@ -911,7 +911,7 @@ class TestPredicateJoin(TestBase):
         }
         for input_geom, expected_geom in test_cases.items():
             reversed_geometry = self.spark.sql("select ST_AsText(ST_Reverse(ST_GeomFromText({})))".format(input_geom))
-            assert reversed_geometry.take(1)[0][0].wkt == expected_geom
+            assert reversed_geometry.take(1)[0][0] == expected_geom
 
     def calculate_st_is_ring(self, wkt):
         geometry_collected = self.__wkt_list_to_data_frame([wkt]). \
