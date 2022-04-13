@@ -64,4 +64,13 @@ public class FunctionTest extends TestBase{
         );
         assertEquals(first(pointTable).getField(0), Optional.of("s0000"));
     }
+
+    @Test
+    public void pointOnSurface() {
+        Table pointTable = createPointTable(testDataSize);
+        pointTable = pointTable.select(
+                call("ST_PointOnSurface", $(pointColNames[0]))
+        );
+        assertEquals("POINT (32 -118)",first(pointTable).getField(0));
+    }
 }

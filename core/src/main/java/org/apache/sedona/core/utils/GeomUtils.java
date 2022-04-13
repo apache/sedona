@@ -71,4 +71,13 @@ public class GeomUtils
             }
         });
     }
+    /*
+     * Returns a POINT that is guaranteed to lie on the surface.
+     */
+    public static Geometry pointOnSurface(Geometry geometry) {
+        if(geometry==null) {
+            return null;
+        }
+        return geometry.getInteriorPoint();
+    }
 }
