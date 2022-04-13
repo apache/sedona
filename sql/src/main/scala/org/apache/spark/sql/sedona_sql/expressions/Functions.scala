@@ -1529,7 +1529,7 @@ case class ST_Multi(inputExpressions: Seq[Expression]) extends UnaryGeometryExpr
   }
 
   /**
-  * Returns a version of the given geometry with X and Y axis flipped.
+  * Returns a POINT guaranteed to lie on the surface.
   *
   * @param inputExpressions Geometry
   */
