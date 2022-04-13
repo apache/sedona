@@ -940,15 +940,20 @@ class TestPredicateJoin(TestBase):
     def test_st_pointonsurface(self):
         tests1 = {
         "'POINT(0 5)'":"POINT(0 5)",
-        "'LINESTRING(0 5, 0 10)'":"POINT(0 5)",
-        "'POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))'":"POINT(2.5 2.5)"
+        "'LINESTRING(0 5, 0 10)'":"POINT (0 5)",
+        "'POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))'":"POINT (2.5 2.5)",
+        "'LINESTRING(0 5 1, 0 0 1, 0 10 2)'":"POINT Z(0 0 1)"
         }
-        tests2 = { "'LINESTRING(0 5 1, 0 0 1, 0 10 2)'":"POINT(0 0 1)" }
-        
+                
         for input_geom, expected_geom in tests1.items():
             pointOnSurface = self.spark.sql("select ST_AsText(ST_PointOnSurface(ST_GeomFromText({})))".format(input_geom))
             assert pointOnSurface.take(1)[0][0] == expected_geom
 
+        '''
+        ST_AsEWKT Has not been implemented yet
+        tests2 = { "'LINESTRING(0 5 1, 0 0 1, 0 10 2)'":"POINT(0 0 1)" }
+
         for input_geom, expected_geom in tests2.items():
             pointOnSurface = self.spark.sql("select ST_AsEWKT(ST_PointOnSurface(ST_GeomFromEWKT({})))".format(input_geom))
             assert pointOnSurface.take(1)[0][0] == expected_geom
+        '''

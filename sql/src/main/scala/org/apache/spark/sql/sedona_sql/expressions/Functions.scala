@@ -1539,8 +1539,7 @@ case class ST_PointOnSurface(inputExpressions: Seq[Expression])
   assert(inputExpressions.length == 1)
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
-    GeomUtils.pointOnSurface(geometry)
-    geometry.toGenericArrayData
+    new GenericArrayData(GeometrySerializer.serialize(GeomUtils.getInteriorPoint(geometry)))
   }
 
   override def dataType: DataType = GeometryUDT

@@ -89,7 +89,7 @@ public class Functions {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
-            GeomUtils.pointOnSurface(geom);
+            GeomUtils.getInteriorPoint(geom);
             return geom;
         }
     }

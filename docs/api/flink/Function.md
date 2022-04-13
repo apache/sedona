@@ -131,7 +131,7 @@ FROM df
 
 4.  Input: `LINESTRING(0 5 1, 0 0 1, 0 10 2)`
 
-    Output: `POINT (0 0 1)`  
+    Output: `POINT Z(0 0 1)`  
 
 ## ST_Reverse
 

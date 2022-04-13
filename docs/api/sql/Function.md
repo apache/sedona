@@ -1056,10 +1056,10 @@ SELECT ST_AsText(ST_PointOnSurface(ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0,
 ----------------
  POINT(2.5 2.5)
 
-SELECT ST_AsEWKT(ST_PointOnSurface(ST_GeomFromEWKT('LINESTRING(0 5 1, 0 0 1, 0 10 2)')));
-   st_asewkt
+SELECT ST_AsText(ST_PointOnSurface(ST_GeomFromText('LINESTRING(0 5 1, 0 0 1, 0 10 2)')));
+   st_astext
 ----------------
- POINT(0 0 1)
+ POINT Z(0 0 1)
 
 ```
 

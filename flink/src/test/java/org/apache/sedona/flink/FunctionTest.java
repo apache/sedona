@@ -67,11 +67,10 @@ public class FunctionTest extends TestBase{
 
     @Test
     public void testPointOnSurface() {
-        Table pointTable = createPointTable(testDataSize);
-        pointTable = pointTable.select(
-                call("ST_PointOnSurface", $(pointColNames[0]))
-        );
-        assertEquals("POINT (32 -118)",first(pointTable).getField(0));
+        Table pointTable = createPointTable_real(testDataSize);
+        Table surfaceTable = pointTable.select(call(Functions.ST_PointOnSurface.class.getSimpleName(), $(pointColNames[0])));
+        Geometry result = (Geometry) first(surfaceTable).getField(0);
+        assertEquals("POINT (32 -118)", result.toString());
     }
 
     public void testReverse() {
