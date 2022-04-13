@@ -1029,3 +1029,29 @@ Result:
 ```
 POLYGON ((3 -1, 3 -3, -3 -3, -3 3, 3 3, 3 1, 5 0, 3 -1))
 ```
+
+## ST_Reverse
+
+Introduction: Return the geometry with vertex order reversed
+
+Format: `ST_Reverse (A:geometry)`
+
+Since: `v1.2.1`
+
+Example:
+
+```SQL
+SELECT ST_AsText(
+    ST_Reverse(ST_GeomFromText('LINESTRING(0 0, 1 2, 2 4, 3 6)'))
+) AS geom
+```
+
+Result:
+
+```
++---------------------------------------------------------------+
+|geom                                                           |
++---------------------------------------------------------------+
+|LINESTRING (3 6, 2 4, 1 2, 0 0)                                |
++---------------------------------------------------------------+
+```
