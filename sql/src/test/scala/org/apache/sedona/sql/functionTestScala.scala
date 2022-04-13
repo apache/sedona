@@ -1283,13 +1283,13 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     )
 
     for((inputGeom, expectedGeom) <- geomTestCases1) {
-      var df = sparkSession.sql(s"select ST_AsText(ST_Reverse(ST_GeomFromText($inputGeom)))")
+      var df = sparkSession.sql(s"select ST_AsText(ST_PointOnSurface(ST_GeomFromText($inputGeom)))")
       var result = df.collect()
       assert(result.head.get(0).asInstanceOf[String]==expectedGeom)
     }
 
     for((inputGeom, expectedGeom) <- geomTestCases2) {
-      var df = sparkSession.sql(s"select ST_AsEWKT(ST_Reverse(ST_GeomFromText($inputGeom)))")
+      var df = sparkSession.sql(s"select ST_AsEWKT(ST_PointOnSurface(ST_GeomFromEWKT($inputGeom)))")
       var result = df.collect()
       assert(result.head.get(0).asInstanceOf[String]==expectedGeom)
     }
