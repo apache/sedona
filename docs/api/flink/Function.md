@@ -107,7 +107,7 @@ Introduction: Return the geometry with vertex order reversed
 
 Format: `ST_Reverse (A:geometry)`
 
-Since: `v1.2.0`
+Since: `v1.2.1`
 
 Example:
 
