@@ -107,7 +107,7 @@ Introduction: Returns a POINT guaranteed to lie on the surface.
 
 Format: `ST_PointOnSurface(geom: geometry)`
 
-Since: `v1.2.0`
+Since: `v1.2.1`
 
 Example: 
 

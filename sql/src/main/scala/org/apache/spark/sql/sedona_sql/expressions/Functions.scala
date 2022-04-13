@@ -1527,4 +1527,27 @@ case class ST_Multi(inputExpressions: Seq[Expression]) extends UnaryGeometryExpr
   override protected def nullSafeEval(geometry: Geometry): Any ={
     Collect.createMultiGeometry(Seq(geometry)).toGenericArrayData
   }
+
+  /**
+  * Returns a version of the given geometry with X and Y axis flipped.
+  *
+  * @param inputExpressions Geometry
+  */
+  case class ST_PointOnSurface(inputExpressions: Seq[Expression])
+    extends UnaryGeometryExpression with CodegenFallback {
+    assert(inputExpressions.length == 1)
+
+    override protected def nullSafeEval(geometry: Geometry): Any = {
+      GeomUtils.pointOnSurface(geometry)
+      geometry.toGenericArrayData
+    }
+
+    override def dataType: DataType = GeometryUDT
+
+    override def children: Seq[Expression] = inputExpressions
+
+    protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+      copy(inputExpressions = newChildren)
+    }
+  }
 }
