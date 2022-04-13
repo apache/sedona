@@ -1527,6 +1527,7 @@ case class ST_Multi(inputExpressions: Seq[Expression]) extends UnaryGeometryExpr
   override protected def nullSafeEval(geometry: Geometry): Any ={
     Collect.createMultiGeometry(Seq(geometry)).toGenericArrayData
   }
+}
 
 /**
  * Returns a POINT guaranteed to lie on the surface.
