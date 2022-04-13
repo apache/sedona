@@ -113,15 +113,15 @@ Example:
 
 
 ```
-SELECT ST_PointOnSurface('POINT(0 5)'::geometry);
+SELECT ST_PointOnSurface('POINT(0 5)'::geometry)
 ------------
  POINT(0 5)
 
-SELECT ST_PointOnSurface('LINESTRING(0 5, 0 10)'::geometry);
+SELECT ST_PointOnSurface('LINESTRING(0 5, 0 10)'::geometry)
 ------------
  POINT(0 5)
 
-SELECT ST_PointOnSurface('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))'::geometry);
+SELECT ST_PointOnSurface('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))'::geometry)
 ----------------
  POINT(2.5 2.5)
 
