@@ -66,7 +66,7 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
-    public void pointOnSurface() {
+    public void testPointOnSurface() {
         Table pointTable = createPointTable(testDataSize);
         pointTable = pointTable.select(
                 call("ST_PointOnSurface", $(pointColNames[0]))
