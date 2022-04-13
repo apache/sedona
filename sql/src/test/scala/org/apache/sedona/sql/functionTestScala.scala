@@ -1266,7 +1266,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
   }
 
-  it ("Should pass ST_Reverse") {
+  it ("Should pass ST_PointOnSurface") {
+
     val geomTestCases1 = Map(
       "'POINT(0 5)'"
         -> "POINT(0 5)",
@@ -1289,6 +1290,42 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
     for((inputGeom, expectedGeom) <- geomTestCases2) {
       var df = sparkSession.sql(s"select ST_AsEWKT(ST_Reverse(ST_GeomFromText($inputGeom)))")
+      var result = df.collect()
+      assert(result.head.get(0).asInstanceOf[String]==expectedGeom)
+    }
+  }
+
+  it ("Should pass ST_Reverse") {
+    val geomTestCases = Map(
+      "'POLYGON((-1 0 0, 1 0 0, 0 0 1, 0 1 0, -1 0 0))'"
+        -> "POLYGON Z((-1 0 0, 0 1 0, 0 0 1, 1 0 0, -1 0 0))",
+      "'LINESTRING(0 0, 1 2, 2 4, 3 6)'"
+        -> "LINESTRING (3 6, 2 4, 1 2, 0 0)",
+      "'POINT(1 2)'"
+        -> "POINT (1 2)",
+      "'MULTIPOINT((10 40 66), (40 30 77), (20 20 88), (30 10 99))'"
+        -> "MULTIPOINT Z((10 40 66), (40 30 77), (20 20 88), (30 10 99))",
+      """'MULTIPOLYGON(((30 20 11, 45 40 11, 10 40 11, 30 20 11)),
+      |((15 5 11, 40 10 11, 10 20 11, 5 10 11, 15 5 11)))'""".stripMargin.replaceAll("\n", " ")
+        -> """MULTIPOLYGON Z(((30 20 11, 10 40 11, 45 40 11, 30 20 11)),
+          |((15 5 11, 5 10 11, 10 20 11, 40 10 11, 15 5 11)))""".stripMargin.replaceAll("\n", " "),
+      """'MULTILINESTRING((10 10 11, 20 20 11, 10 40 11),
+        |(40 40 11, 30 30 11, 40 20 11, 30 10 11))'""".stripMargin.replaceAll("\n", " ")
+        -> """MULTILINESTRING Z((10 40 11, 20 20 11, 10 10 11),
+          |(30 10 11, 40 20 11, 30 30 11, 40 40 11))""".stripMargin.replaceAll("\n", " "),
+      """'MULTIPOLYGON(((40 40 11, 20 45 11, 45 30 11, 40 40 11)),
+      |((20 35 11, 10 30 11, 10 10 11, 30 5 11, 45 20 11, 20 35 11),
+      |(30 20 11, 20 15 11, 20 25 11, 30 20 11)))'""".stripMargin.replaceAll("\n", " ")
+        -> """MULTIPOLYGON Z(((40 40 11, 45 30 11, 20 45 11, 40 40 11)),
+          |((20 35 11, 45 20 11, 30 5 11, 10 10 11, 10 30 11, 20 35 11),
+          |(30 20 11, 20 25 11, 20 15 11, 30 20 11)))""".stripMargin.replaceAll("\n", " "),
+      """'POLYGON((0 0 11, 0 5 11, 5 5 11, 5 0 11, 0 0 11),
+      |(1 1 11, 2 1 11, 2 2 11, 1 2 11, 1 1 11))'""".stripMargin.replaceAll("\n", " ")
+        -> """POLYGON Z((0 0 11, 5 0 11, 5 5 11, 0 5 11, 0 0 11),
+          |(1 1 11, 1 2 11, 2 2 11, 2 1 11, 1 1 11))""".stripMargin.replaceAll("\n", " ")
+    )
+    for((inputGeom, expectedGeom) <- geomTestCases) {
+      var df = sparkSession.sql(s"select ST_AsText(ST_Reverse(ST_GeomFromText($inputGeom)))")
       var result = df.collect()
       assert(result.head.get(0).asInstanceOf[String]==expectedGeom)
     }
@@ -1401,6 +1438,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     functionDf = sparkSession.sql("select ST_Union(null, null)")
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_PointOnSurface(null)")
+    assert(functionDf.first().get(0) == null)
+    functionDf = sparkSession.sql("select ST_Reverse(null)")
     assert(functionDf.first().get(0) == null)
   }
 }

@@ -105,24 +105,49 @@ Result:
 
 Introduction: Returns a POINT guaranteed to lie on the surface.
 
-Format: `ST_PointOnSurface(geom: geometry)`
+Format: `ST_PointOnSurface(A:geometry)`
 
 Since: `v1.2.1`
 
-Example: 
+Examples: 
 
 
+```SQL
+SELECT ST_PointOnSurface(df.geometry)
+FROM df
 ```
-SELECT ST_PointOnSurface('POINT(0 5)'::geometry)
-------------
- POINT(0 5)
 
-SELECT ST_PointOnSurface('LINESTRING(0 5, 0 10)'::geometry)
-------------
- POINT(0 5)
+1.  Input: `POINT (0 5)`
 
-SELECT ST_PointOnSurface('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))'::geometry)
-----------------
- POINT(2.5 2.5)
+    Output: `POINT (0 5)`
 
+2.  Input: `LINESTRING(0 5, 0 10)`
+
+    Output: `POINT (0 5)`
+
+3.  Input: `POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))`
+
+    Output: `POINT (2.5 2.5)`
+
+4.  Input: `LINESTRING(0 5 1, 0 0 1, 0 10 2)`
+
+    Output: `POINT (0 0 1)`  
+
+## ST_Reverse
+
+Introduction: Return the geometry with vertex order reversed
+
+Format: `ST_Reverse (A:geometry)`
+
+Since: `v1.2.1`
+
+Example:
+
+```SQL
+SELECT ST_Reverse(df.geometry) AS geom
+FROM df
 ```
+
+Input: `POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))`
+
+Output: `POLYGON ((-0.5 -0.5, 0.5 -0.5, 0.5 0.5, -0.5 0.5, -0.5 -0.5))`
