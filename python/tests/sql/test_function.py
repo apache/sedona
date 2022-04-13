@@ -939,7 +939,7 @@ class TestPredicateJoin(TestBase):
 
     def test_st_pointonsurface(self):
         tests1 = {
-        "'POINT(0 5)'":"POINT(0 5)",
+        "'POINT(0 5)'":"POINT (0 5)",
         "'LINESTRING(0 5, 0 10)'":"POINT (0 5)",
         "'POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))'":"POINT (2.5 2.5)",
         "'LINESTRING(0 5 1, 0 0 1, 0 10 2)'":"POINT Z(0 0 1)"
