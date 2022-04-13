@@ -950,5 +950,5 @@ class TestPredicateJoin(TestBase):
             assert pointOnSurface.take(1)[0][0] == expected_geom
 
         for input_geom, expected_geom in tests2.items():
-            pointOnSurface = self.spark.sql("select ST_AsEWKT(ST_PointOnSurface(ST_GeomFromText({})))".format(input_geom))
+            pointOnSurface = self.spark.sql("select ST_AsEWKT(ST_PointOnSurface(ST_GeomFromEWKT({})))".format(input_geom))
             assert pointOnSurface.take(1)[0][0] == expected_geom
