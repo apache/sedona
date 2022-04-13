@@ -1530,6 +1530,28 @@ case class ST_Multi(inputExpressions: Seq[Expression]) extends UnaryGeometryExpr
 }
 
 /**
+ * Returns a POINT guaranteed to lie on the surface.
+ *
+ * @param inputExpressions Geometry
+ */
+case class ST_PointOnSurface(inputExpressions: Seq[Expression])
+  extends UnaryGeometryExpression with CodegenFallback {
+  assert(inputExpressions.length == 1)
+
+  override protected def nullSafeEval(geometry: Geometry): Any = {
+    new GenericArrayData(GeometrySerializer.serialize(GeomUtils.getInteriorPoint(geometry)))
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
  * Returns the geometry with vertex order reversed
  *
  * @param inputExpressions
