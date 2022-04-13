@@ -84,4 +84,13 @@ public class Functions {
             return Optional.empty();
         }
     }
+
+    public static class ST_PointOnSurface extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            GeomUtils.pointOnSurface(geom);
+            return geom;
+        }
+    }
 }

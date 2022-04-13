@@ -100,3 +100,29 @@ Result:
 |u3r0p                        |
 +-----------------------------+
 ```
+
+## ST_PointOnSurface
+
+Introduction: Returns a POINT guaranteed to lie on the surface.
+
+Format: `ST_PointOnSurface(geom: geometry)`
+
+Since: `v1.2.0`
+
+Example: 
+
+
+```
+SELECT ST_PointOnSurface('POINT(0 5)'::geometry);
+------------
+ POINT(0 5)
+
+SELECT ST_PointOnSurface('LINESTRING(0 5, 0 10)'::geometry);
+------------
+ POINT(0 5)
+
+SELECT ST_PointOnSurface('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))'::geometry);
+----------------
+ POINT(2.5 2.5)
+
+```
