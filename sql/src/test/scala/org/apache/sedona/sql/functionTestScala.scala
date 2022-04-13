@@ -1266,6 +1266,34 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
   }
 
+  it ("Should pass ST_Reverse") {
+    val geomTestCases1 = Map(
+      "'POINT(0 5)'"
+        -> "POINT(0 5)",
+      "'LINESTRING(0 5, 0 10)'"
+        -> "POINT(0 5)",
+      "'POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))'"
+        -> "POINT(2.5 2.5)"
+    )
+
+    val geomTestCases2 = Map(
+      "'LINESTRING(0 5 1, 0 0 1, 0 10 2)'"
+        -> "POINT(0 0 1)"
+    )
+
+    for((inputGeom, expectedGeom) <- geomTestCases1) {
+      var df = sparkSession.sql(s"select ST_AsText(ST_Reverse(ST_GeomFromText($inputGeom)))")
+      var result = df.collect()
+      assert(result.head.get(0).asInstanceOf[String]==expectedGeom)
+    }
+
+    for((inputGeom, expectedGeom) <- geomTestCases2) {
+      var df = sparkSession.sql(s"select ST_AsEWKT(ST_Reverse(ST_GeomFromText($inputGeom)))")
+      var result = df.collect()
+      assert(result.head.get(0).asInstanceOf[String]==expectedGeom)
+    }
+  }
+
   it("handles nulls") {
     var functionDf: DataFrame = null
     functionDf = sparkSession.sql("select ST_Distance(null, null)")
@@ -1371,6 +1399,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     functionDf = sparkSession.sql("select ST_SymDifference(null, null)")
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_Union(null, null)")
+    assert(functionDf.first().get(0) == null)
+    functionDf = sparkSession.sql("select ST_PointOnSurface(null)")
     assert(functionDf.first().get(0) == null)
   }
 }
