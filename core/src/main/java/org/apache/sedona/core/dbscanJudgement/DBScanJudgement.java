@@ -30,8 +30,7 @@ import java.util.*;
  * The Class KnnJudgementUsingIndex.
  */
 public class DBScanJudgement<T extends Geometry>
-        implements FlatMapFunction<Iterator<T>, Integer>
-{
+        implements FlatMapFunction<Iterator<T>, Integer> {
 
     /**
      * The eps distance
@@ -51,16 +50,14 @@ public class DBScanJudgement<T extends Geometry>
     /**
      * Instantiates a new geometry knn judgement.
      *
-     * @param eps the distance eps
+     * @param eps       the distance eps
      * @param minPoints minimum number of points to form a cluster
      */
-    public DBScanJudgement(double eps, int minPoints, Set<Integer> isInCluster)
-    {
+    public DBScanJudgement(double eps, int minPoints, Set<Integer> isInCluster) {
         this.eps = eps;
         this.minPoints = minPoints;
         this.isInCluster = isInCluster;
     }
-
 
 
     @Override
@@ -69,28 +66,38 @@ public class DBScanJudgement<T extends Geometry>
         while (input.hasNext()) {
             geoms.add(input.next());
         }
-        if (geoms.size() <= minPoints) {
+        if (geoms.size() < minPoints) {
             return Collections.emptyIterator();
         }
         Set<Integer> isInCore = new HashSet<>();
-        List<Integer> neighbors = new ArrayList<>();
+        Integer[] neighbors = new Integer[minPoints];
         UnionFind unionFind = new UnionFindImpl(geoms.size());
         for (int i = 0; i < geoms.size(); i++) {
+            int numNeighbors = 0;
             List<Integer> geomsInEnvelope = getGeomsInEnvelope(geoms, i, eps);
             for (Integer j : geomsInEnvelope) {
-                if (neighbors.size() >= minPoints) {
+                if (numNeighbors >= minPoints) {
+                    /*
+                     * If we've already identified p as a core point, and it's already
+                     * in the same cluster in q, then there's nothing to learn by
+                     * computing the distance.
+                     */
                     if (unionFind.find(i) == unionFind.find(j)) {
                         continue;
                     }
+                    /*
+                     * Similarly, if q is already identified as a border point of another
+                     * cluster, there's no point figuring out what the distance is.
+                     */
                     if (isInCluster.contains(j) && !isInCore.contains(j)) {
                         continue;
                     }
                 }
                 double minDistance = geoms.get(i).distance(geoms.get(j));
                 if (minDistance <= eps) {
-                    if (neighbors.size() < minPoints) {
-                        neighbors.add(j);
-                        if (neighbors.size() == minPoints) {
+                    if (numNeighbors < minPoints) {
+                        neighbors[numNeighbors++] = j;
+                        if (numNeighbors == minPoints) {
                             isInCore.add(i);
                             isInCluster.add(i);
                             for (Integer neighbor : neighbors) {
@@ -103,12 +110,12 @@ public class DBScanJudgement<T extends Geometry>
                 }
             }
         }
-        return Arrays.stream(unionFind.getCollapsedClusterIds(isInCluster)).iterator();
+        Integer[] collapsedClusterIds = unionFind.getCollapsedClusterIds(isInCluster);
+        return Arrays.stream(collapsedClusterIds).iterator();
     }
 
 
-    private List<Integer> getGeomsInEnvelope(List<T> geoms, int i, double eps)
-    {
+    private List<Integer> getGeomsInEnvelope(List<T> geoms, int i, double eps) {
         List<Integer> geomsInEnvelope = new ArrayList<>();
         T queryPoint = geoms.get(i);
         for (int j = 0; j < geoms.size(); j++) {
@@ -121,8 +128,7 @@ public class DBScanJudgement<T extends Geometry>
         return geomsInEnvelope;
     }
 
-    private void unionIfAvailable(UnionFind unionFind, int p, int q, Set<Integer> isInCore, Set<Integer> isInCluster)
-    {
+    private void unionIfAvailable(UnionFind unionFind, int p, int q, Set<Integer> isInCore, Set<Integer> isInCluster) {
         if (isInCluster.contains(q)) {
             if (isInCore.contains(q)) {
                 unionFind.union(p, q);

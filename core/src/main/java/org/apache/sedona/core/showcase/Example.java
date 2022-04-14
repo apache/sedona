@@ -34,6 +34,7 @@ import org.apache.sedona.core.spatialRDD.CircleRDD;
 import org.apache.sedona.core.spatialRDD.PointRDD;
 import org.apache.sedona.core.spatialRDD.PolygonRDD;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.serializer.KryoSerializer;
 import org.apache.spark.storage.StorageLevel;
@@ -276,6 +277,14 @@ public class Example
         List<Integer> result = DBScanQuery.SpatialDBScanQuery(objectRDD, 0.8, 1, false);
         System.out.println(result);
         assert result.size() == 6;
+
+        String inputLocation2 = System.getProperty("user.dir") + "/src/test/resources/points_dbscan_2.csv";
+        objectRDD = new PointRDD(sc, inputLocation2, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
+        objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
+        List<Integer> result2 = DBScanQuery.SpatialDBScanQuery(objectRDD, 1.01, 5, false);
+        System.out.println(result2);
+
+        assert result2.size() == 10;
     }
 
     /**
