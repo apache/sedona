@@ -33,30 +33,26 @@ class GeometryUdtTestScala extends TestBaseScala with BeforeAndAfter {
 
   var tempFolder: TemporaryFolder = new TemporaryFolder
   var dataFrame: DataFrame = _
-
   before {
     dataFrame = Seq(Tuple2(47.636, 9.389))
       .toDF("latitude", "longitude")
       .withColumn("point", expr("ST_Point(longitude, latitude)"))
   }
-
   describe("GeometryUDT Test") {
     it("Should write dataframe with geometry in Parquet format") {
       tempFolder.create()
-
-      dataFrame.write.parquet(tempFolder.getRoot.getPath + "/parquet")
-
-      val readDataFrame = sparkSession.read.parquet(tempFolder.getRoot.getPath + "/parquet")
+      //dataFrame.write.parquet(tempFolder.getRoot.getPath + "/parquet")
+      dataFrame.write.format("parquet").save(tempFolder.getRoot.getPath + "/parquet") //AS
+      //val readDataFrame = sparkSession.read.parquet(tempFolder.getRoot.getPath + "/parquet")
+      val readDataFrame = sparkSession.read.format("parquet").load(tempFolder.getRoot.getPath + "/parquet") //AS
       val row = readDataFrame.collect()(0)
       assert(row.getAs[Double]("latitude") == 47.636)
       assert(row.getAs[Double]("longitude") == 9.389)
       assert(row.getAs[Geometry]("point").equals(new WKTReader().read("POINT (9.389 47.636)")))
     }
-
     it("Should be able to render and parse JSON schema") {
       assert(DataType.fromJson(dataFrame.schema.json).asInstanceOf[StructType].equals(dataFrame.schema))
     }
-
     it("Case object and new instance should be equals") {
       assert(GeometryUDT.equals(new GeometryUDT))
     }
