@@ -149,6 +149,22 @@ class TestPredicate(TestBase):
 
         assert equal_df.count() == 0, f"Expected 0 value but got {equal_df.count()}"
 
+    def test_st_equals_for_st_line_and_st_polygon(self):
+        polygon_csv_df = self.spark.read.format("csv").option("delimiter", ",").option("header", "false").load(
+            csv_polygon1_input_location)
+        polygon_csv_df.createOrReplaceTempView("polygontable")
+
+        polygon_df = self.spark.sql(
+            "select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
+        polygon_df.createOrReplaceTempView("polygondf")
+        polygon_df.show()
+
+        string = "100.01,200.01,100.5,200.01,100.5,200.5,100.01,200.5,100.01,200.01"
+        equal_df = self.spark.sql(f"select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_LineFromText(\'{string}\', \',\')) ")
+        equal_df.show()
+
+        assert equal_df.count() == 0, f"Expected 0 value but got {equal_df.count()}"
+
     def test_st_equals_for_st_polygon_from_envelope_and_st_polygon_from_text(self):
         polygon_csv_df = self.spark.read.format("csv").\
             option("delimiter", ",").\

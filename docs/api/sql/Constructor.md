@@ -172,6 +172,24 @@ FROM linestringtable
 SELECT ST_LineStringFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794', ',') AS linestringshape
 ```
 
+## ST_LineFromText
+
+Introduction: Construct a Line from Text, delimited by Delimiter
+
+Format: `ST_LineFromText (Text:string, Delimiter:char)`
+
+Since: `v1.0.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_LineFromText(linestringtable._c0,',') AS linestringshape
+FROM linestringtable
+```
+
+```SQL
+SELECT ST_LineFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794', ',') AS linestringshape
+```
+
 ## ST_PolygonFromEnvelope
 
 Introduction: Construct a Polygon from MinX, MinY, MaxX, MaxY.

@@ -140,6 +140,37 @@ class predicateTestScala extends TestBaseScala {
       assert(equaldf.count() == 0, s"Expected 0 value but got ${equaldf.count()}")
 
     }
+
+    it("Passed ST_Equals for ST_LineFromText and ST_Polygon") {
+
+      // Test a Line against any polygon in the table for equality.
+
+      // Read csv to get the polygon table
+      var polygonCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygon1InputLocation)
+      polygonCsvDF.createOrReplaceTempView("polygontable")
+
+      // Convert the polygontable to polygons using ST_PolygonFromEnvelope and cast
+      var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+
+      /* Selected LineString is ST_LineFromText - (100.01,200.01,100.5,200.01,100.5,200.5,100.01,200.5,100.01,200.01)
+       * It forms the boundary of the polygon Polygon(100.01,200.01,100.5,200.5)
+       * x1 = 100.01, y1 = 200.01, x2 = 100.5, y2 = 200.5
+       * LineString(P1, P2, P3, P4) -
+       * P1->100.01,200.01
+       * P2->100.5,200.01
+       * P3->100.5,200.5
+       * P4->100.01,200.5
+       * P5->100.01,200.01
+       */
+      val string = "100.01,200.01,100.5,200.01,100.5,200.5,100.01,200.5,100.01,200.01"
+
+      var equaldf = sparkSession.sql(s"select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_LineFromText(\'$string\', \',\')) ")
+
+      assert(equaldf.count() == 0, s"Expected 0 value but got ${equaldf.count()}")
+
+    }
+
     it("Passed ST_Equals for ST_PolygonFromEnvelope and ST_PolygonFromText") {
 
       // Test a Polygon formed using ST_PolygonFromText against any polygon in the table formed using ST_PolygonFromEnvelope for equality.
