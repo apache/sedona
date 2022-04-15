@@ -182,8 +182,8 @@ Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
-SELECT ST_LineFromText(linestringtable._c0,',') AS linestringshape
-FROM linestringtable
+SELECT ST_LineFromText(linetable._c0,',') AS lineshape
+FROM linetable
 ```
 
 ```SQL
