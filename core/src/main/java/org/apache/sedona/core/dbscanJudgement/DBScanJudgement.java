@@ -20,9 +20,13 @@
 package org.apache.sedona.core.dbscanJudgement;
 
 import org.apache.spark.api.java.function.FlatMapFunction;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.index.strtree.STRtree;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 // TODO: Auto-generated Javadoc
 
@@ -72,9 +76,13 @@ public class DBScanJudgement<T extends Geometry>
         Set<Integer> isInCore = new HashSet<>();
         Integer[] neighbors = new Integer[minPoints];
         UnionFind unionFind = new UnionFindImpl(geoms.size());
+        STRtree strtree = new STRtree(geoms.size());
+        for (Geometry geom : geoms) {
+            strtree.insert(geom.getEnvelopeInternal(), geom);
+        }
         for (int i = 0; i < geoms.size(); i++) {
             int numNeighbors = 0;
-            List<Integer> geomsInEnvelope = getGeomsInEnvelope(geoms, i, eps);
+            List<Integer> geomsInEnvelope = getGeomsInEnvelope(geoms, i, eps, strtree);
             if (geomsInEnvelope.size() < minPoints) {
                 continue;
             }
@@ -119,17 +127,23 @@ public class DBScanJudgement<T extends Geometry>
     }
 
 
-    private List<Integer> getGeomsInEnvelope(List<T> geoms, int i, double eps) {
-        List<Integer> geomsInEnvelope = new ArrayList<>();
-        T queryPoint = geoms.get(i);
-        for (int j = 0; j < geoms.size(); j++) {
-            T geom = geoms.get(j);
-            double distance = queryPoint.distance(geom);
-            if (distance <= eps) {
-                geomsInEnvelope.add(j);
-            }
+    private List<Integer> getGeomsInEnvelope(List<T> geoms, int i, double eps, STRtree strTree) {
+        Map<Geometry, Integer> geomIndexMap = new HashMap<>();
+        for (int index = 0; index < geoms.size(); index++) {
+            geomIndexMap.put(geoms.get(index), index);
         }
-        return geomsInEnvelope;
+
+        Envelope envelope = null;
+        if (Objects.equals(geoms.get(i).getGeometryType(), Geometry.TYPENAME_POINT)) {
+            Point point = (Point) geoms.get(i);
+            envelope = new Envelope(point.getX() - eps, point.getX() + eps, point.getY() - eps, point.getY() + eps);
+        } else {
+            Envelope box = geoms.get(i).getEnvelopeInternal();
+            envelope = new Envelope(box.getMinX() - eps, box.getMaxX() + eps, box.getMinY() - eps, box.getMaxY() + eps);
+        }
+
+        List<Geometry> geomsInEnvelope = strTree.query(envelope);
+        return geomsInEnvelope.stream().map(geomIndexMap::get).collect(Collectors.toList());
     }
 
     private void unionIfAvailable(UnionFind unionFind, int p, int q, Set<Integer> isInCore, Set<Integer> isInCluster) {
