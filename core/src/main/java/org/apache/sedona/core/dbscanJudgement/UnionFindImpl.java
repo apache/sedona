@@ -82,8 +82,6 @@ public class UnionFindImpl implements UnionFind {
         int lastOldId = 0, currentNewId = 0;
         boolean encounteredCluster = false;
 
-        System.arraycopy(orderedComponents, 0, newIds, 0, orderedComponents.length);
-
         if (isInCluster == null) {
             isInCluster = new HashSet<>();
         }

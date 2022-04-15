@@ -25,13 +25,22 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.index.strtree.STRtree;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 // TODO: Auto-generated Javadoc
 
 /**
- * The Class KnnJudgementUsingIndex.
+ * The Class DBScanJudgement.
  */
 public class DBScanJudgement<T extends Geometry>
         implements FlatMapFunction<Iterator<T>, Integer> {
@@ -55,7 +64,7 @@ public class DBScanJudgement<T extends Geometry>
      * Instantiates a new geometry knn judgement.
      *
      * @param eps       the distance eps
-     * @param minPoints minimum number of points to form a cluster
+     * @param minPoints the minimum number of points to form a cluster
      */
     public DBScanJudgement(double eps, int minPoints, Set<Integer> isInCluster) {
         this.eps = eps;
@@ -107,8 +116,16 @@ public class DBScanJudgement<T extends Geometry>
                 }
                 double minDistance = geoms.get(i).distance(geoms.get(j));
                 if (minDistance <= eps) {
+                    /*
+                     * If we haven't hit min_points yet, we don't know if we can perform union of p and q.
+                     * Just set q aside for now.
+                     */
                     if (numNeighbors < minPoints) {
                         neighbors[numNeighbors++] = j;
+                        /*
+                         * If we just hit min_points, we can now perform union of all the neighbor geometries
+                         * we've been saving.
+                         */
                         if (numNeighbors == minPoints) {
                             isInCore.add(i);
                             isInCluster.add(i);
@@ -117,6 +134,10 @@ public class DBScanJudgement<T extends Geometry>
                             }
                         }
                     } else {
+                        /*
+                         * If we're above min_points, no need to store our neighbors, just go ahead
+                         * and union them now.  This may allow us to cut out some distance computations.
+                         */
                         unionIfAvailable(unionFind, i, j, isInCore, isInCluster);
                     }
                 }

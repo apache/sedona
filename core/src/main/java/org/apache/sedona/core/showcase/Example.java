@@ -44,6 +44,8 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 // TODO: Auto-generated Javadoc
@@ -167,7 +169,7 @@ public class Example
         PointRDDInputLocation = resourceFolder + "arealm-small.csv";
         PointRDDSplitter = FileDataSplitter.CSV;
         PointRDDIndexType = IndexType.RTREE;
-        PointRDDNumPartitions = 1;
+        PointRDDNumPartitions = 5;
         PointRDDOffset = 0;
 
         PolygonRDDInputLocation = resourceFolder + "primaryroads-polygon.csv";
@@ -185,6 +187,17 @@ public class Example
         ShapeFileInputLocation = resourceFolder + "shapefiles/polygon";
 
         try {
+            testSpatialRangeQuery();
+            testSpatialRangeQueryUsingIndex();
+            testSpatialKnnQuery();
+            testSpatialKnnQueryUsingIndex();
+            testSpatialJoinQuery();
+            testSpatialJoinQueryUsingIndex();
+            testDistanceJoinQuery();
+            testDistanceJoinQueryUsingIndex();
+            testCRSTransformationSpatialRangeQuery();
+            testCRSTransformationSpatialRangeQueryUsingIndex();
+            testLoadShapefileIntoPolygonRDD();
             testSpatialDBScanQuery();
             testSpatialDBScanQueryUsingIndex();
         }
@@ -274,21 +287,28 @@ public class Example
         String inputLocation = System.getProperty("user.dir") + "/src/test/resources/points_dbscan.csv";
         objectRDD = new PointRDD(sc, inputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
         objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
+        List<Integer> expectedResult = Arrays.asList(0, 0, 0, 1, 1, 1);
         List<Integer> result = DBScanQuery.SpatialDBScanQuery(objectRDD, 0.8, 1, false);
-        System.out.println(result);
         assert result.size() == 6;
+        for (int i = 0; i < expectedResult.size(); i++) {
+            assert result.get(i).equals(expectedResult.get(i));
+        }
 
         String inputLocation2 = System.getProperty("user.dir") + "/src/test/resources/points_dbscan_2.csv";
         objectRDD = new PointRDD(sc, inputLocation2, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
         objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
+        List<Integer> expectedResult2 = Arrays.asList(0, 0, 0, 0, 0, 1, 1, 1, 1);
         List<Integer> result2 = DBScanQuery.SpatialDBScanQuery(objectRDD, 1.01, 5, false);
-        System.out.println(result2);
-
         assert result2.size() == 10;
+        for (int i = 0; i < expectedResult2.size(); i++) {
+            assert result2.get(i).equals(expectedResult2.get(i));
+        }
     }
 
     /**
      * Test spatial DBScan query using index
+     *
+     * * @throws Exception the exception
      */
     public static void testSpatialDBScanQueryUsingIndex()
             throws Exception
@@ -297,9 +317,23 @@ public class Example
         objectRDD = new PointRDD(sc, inputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
         objectRDD.buildIndex(PointRDDIndexType, false);
         objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
-        List<Integer> result = DBScanQuery.SpatialDBScanQuery(objectRDD, 0.8, 1, true);
-        System.out.println(result);
+        List<Integer> expectedResult = Arrays.asList(0, 0, 0, 1, 1, 1);
+        List<Integer> result = DBScanQuery.SpatialDBScanQuery(objectRDD, 0.8, 1, false);
         assert result.size() == 6;
+        for (int i = 0; i < expectedResult.size(); i++) {
+            assert result.get(i).equals(expectedResult.get(i));
+        }
+
+        String inputLocation2 = System.getProperty("user.dir") + "/src/test/resources/points_dbscan_2.csv";
+        objectRDD = new PointRDD(sc, inputLocation2, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
+        objectRDD.buildIndex(PointRDDIndexType, false);
+        objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
+        List<Integer> expectedResult2 = Arrays.asList(0, 0, 0, 0, 0, 1, 1, 1, 1);
+        List<Integer> result2 = DBScanQuery.SpatialDBScanQuery(objectRDD, 1.01, 5, false);
+        assert result2.size() == 10;
+        for (int i = 0; i < expectedResult2.size(); i++) {
+            assert result2.get(i).equals(expectedResult2.get(i));
+        }
     }
 
     /**

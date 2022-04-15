@@ -31,7 +31,6 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.locationtech.jts.geom.{Coordinate, Envelope, GeometryFactory}
 
 import java.util
-import java.util.List
 
 
 /**
@@ -145,25 +144,47 @@ object ScalaExample extends App {
     val inputLocation: String = System.getProperty("user.dir") + "/src/test/resources/points_dbscan.csv"
     var objectRDD = new PointRDD(sc, inputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
     objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY)
+    val expectedResult = util.Arrays.asList(0, 0, 0, 1, 1, 1)
     val result: util.List[Integer] = DBScanQuery.SpatialDBScanQuery(objectRDD, 0.8, 1, false)
     assert(result.size == 6)
+    for (i <- 0 until expectedResult.size) {
+      assert(result.get(i) == expectedResult.get(i))
+    }
 
     val inputLocation2: String = System.getProperty("user.dir") + "/src/test/resources/points_dbscan_2.csv"
     objectRDD = new PointRDD(sc, inputLocation2, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
     objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY)
-    val result2: util.List[Integer] = DBScanQuery.SpatialDBScanQuery(objectRDD, 1.01, 5, false)
-
+    val expectedResult2 = util.Arrays.asList(0, 0, 0, 0, 0, 1, 1, 1, 1)
+    val result2 = DBScanQuery.SpatialDBScanQuery(objectRDD, 1.01, 5, false)
     assert(result2.size == 10)
+    for (i <- 0 until expectedResult2.size) {
+      assert(result2.get(i) == expectedResult2.get(i))
+    }
   }
 
   @throws[Exception]
   def testSpatialDBScanQueryUsingIndex(): Unit = {
     val inputLocation = System.getProperty("user.dir") + "/src/test/resources/points_dbscan.csv"
-    val objectRDD = new PointRDD(sc, inputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
+    var objectRDD = new PointRDD(sc, inputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
     objectRDD.buildIndex(PointRDDIndexType, false)
     objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY)
-    val result = DBScanQuery.SpatialDBScanQuery(objectRDD, 0.8, 1, true)
+    val expectedResult = util.Arrays.asList(0, 0, 0, 1, 1, 1)
+    val result: util.List[Integer] = DBScanQuery.SpatialDBScanQuery(objectRDD, 0.8, 1, false)
     assert(result.size == 6)
+    for (i <- 0 until expectedResult.size) {
+      assert(result.get(i) == expectedResult.get(i))
+    }
+
+    val inputLocation2 = System.getProperty("user.dir") + "/src/test/resources/points_dbscan_2.csv"
+    objectRDD = new PointRDD(sc, inputLocation2, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
+    objectRDD.buildIndex(PointRDDIndexType, false)
+    objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY)
+    val expectedResult2 = util.Arrays.asList(0, 0, 0, 1, 1, 1)
+    val result2: util.List[Integer] = DBScanQuery.SpatialDBScanQuery(objectRDD, 0.8, 1, false)
+    assert(result2.size == 6)
+    for (i <- 0 until expectedResult2.size) {
+      assert(result2.get(i) == expectedResult2.get(i))
+    }
   }
 
   /**
