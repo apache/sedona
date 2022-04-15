@@ -23,12 +23,15 @@ import org.apache.log4j.{Level, Logger}
 import org.apache.sedona.core.enums.{FileDataSplitter, GridType, IndexType}
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileRDD
 import org.apache.sedona.core.serde.SedonaKryoRegistrator
-import org.apache.sedona.core.spatialOperator.{JoinQuery, KNNQuery, RangeQuery}
+import org.apache.sedona.core.spatialOperator.{DBScanQuery, JoinQuery, KNNQuery, RangeQuery}
 import org.apache.sedona.core.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}
 import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{SparkConf, SparkContext}
 import org.locationtech.jts.geom.{Coordinate, Envelope, GeometryFactory}
+
+import java.util
+import java.util.List
 
 
 /**
@@ -70,6 +73,8 @@ object ScalaExample extends App {
   testSpatialRangeQueryUsingIndex()
   testSpatialKnnQuery()
   testSpatialKnnQueryUsingIndex()
+  testSpatialDBScanQuery()
+  testSpatialDBScanQueryUsingIndex()
   testSpatialJoinQuery()
   testSpatialJoinQueryUsingIndex()
   testDistanceJoinQuery()
@@ -134,6 +139,31 @@ object ScalaExample extends App {
     for (i <- 1 to eachQueryLoopTimes) {
       val result = KNNQuery.SpatialKnnQuery(objectRDD, kNNQueryPoint, 1000, true)
     }
+  }
+
+  def testSpatialDBScanQuery(): Unit = {
+    val inputLocation: String = System.getProperty("user.dir") + "/src/test/resources/points_dbscan.csv"
+    var objectRDD = new PointRDD(sc, inputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
+    objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY)
+    val result: util.List[Integer] = DBScanQuery.SpatialDBScanQuery(objectRDD, 0.8, 1, false)
+    assert(result.size == 6)
+
+    val inputLocation2: String = System.getProperty("user.dir") + "/src/test/resources/points_dbscan_2.csv"
+    objectRDD = new PointRDD(sc, inputLocation2, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
+    objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY)
+    val result2: util.List[Integer] = DBScanQuery.SpatialDBScanQuery(objectRDD, 1.01, 5, false)
+
+    assert(result2.size == 10)
+  }
+
+  @throws[Exception]
+  def testSpatialDBScanQueryUsingIndex(): Unit = {
+    val inputLocation = System.getProperty("user.dir") + "/src/test/resources/points_dbscan.csv"
+    val objectRDD = new PointRDD(sc, inputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
+    objectRDD.buildIndex(PointRDDIndexType, false)
+    objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY)
+    val result = DBScanQuery.SpatialDBScanQuery(objectRDD, 0.8, 1, true)
+    assert(result.size == 6)
   }
 
   /**

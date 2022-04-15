@@ -75,6 +75,10 @@ public class DBScanJudgement<T extends Geometry>
         for (int i = 0; i < geoms.size(); i++) {
             int numNeighbors = 0;
             List<Integer> geomsInEnvelope = getGeomsInEnvelope(geoms, i, eps);
+            if (geomsInEnvelope.size() < minPoints) {
+                continue;
+            }
+
             for (Integer j : geomsInEnvelope) {
                 if (numNeighbors >= minPoints) {
                     /*
@@ -100,8 +104,8 @@ public class DBScanJudgement<T extends Geometry>
                         if (numNeighbors == minPoints) {
                             isInCore.add(i);
                             isInCluster.add(i);
-                            for (Integer neighbor : neighbors) {
-                                unionIfAvailable(unionFind, i, neighbor, isInCore, isInCluster);
+                            for (int k = 0; k < numNeighbors; k++) {
+                                unionIfAvailable(unionFind, i, neighbors[k], isInCore, isInCluster);
                             }
                         }
                     } else {
@@ -121,7 +125,7 @@ public class DBScanJudgement<T extends Geometry>
         for (int j = 0; j < geoms.size(); j++) {
             T geom = geoms.get(j);
             double distance = queryPoint.distance(geom);
-            if (i != j && distance <= eps) {
+            if (distance <= eps) {
                 geomsInEnvelope.add(j);
             }
         }

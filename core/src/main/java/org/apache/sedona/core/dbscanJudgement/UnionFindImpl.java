@@ -28,7 +28,7 @@ public class UnionFindImpl implements UnionFind {
     @Override
     public int find(int i) {
         int base = i;
-        while (clusters.get(base) != base) {
+        while (!clusters.get(base).equals(base)) {
             base = clusters.get(base);
         }
         while (i != base) {
