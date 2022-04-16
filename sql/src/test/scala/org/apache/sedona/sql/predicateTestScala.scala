@@ -190,5 +190,13 @@ class predicateTestScala extends TestBaseScala {
       assert(overlaps.take(1)(0).get(0) == true)
       assert(notoverlaps.take(1)(0).get(0) == false)
     }
+    it("Passed ST_Disjoint") {
+      var testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 4, 4.5 4, 4.5 2, 1 2))') as a,ST_GeomFromWKT('POLYGON((5 4, 6 4, 6 2, 5 2))') as b, ST_GeomFromWKT('POLYGON((1 9, 6 6, 6 4, 1 2))') as c, ST_GeomFromWKT('POLYGON((2 5, 4 5, 4 1, 2 1))') as d")
+      testtable.createOrReplaceTempView("testtable")
+      var overlaps = sparkSession.sql("select ST_Overlaps(a,b) from testtable")
+      var notoverlaps = sparkSession.sql("select ST_Overlaps(c,d) from testtable")
+      assert(overlaps.take(1)(0).get(0) == true)
+      assert(notoverlaps.take(1)(0).get(0) == false)
+    }
   }
 }
