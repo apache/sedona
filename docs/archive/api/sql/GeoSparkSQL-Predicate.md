@@ -108,7 +108,7 @@ Introduction: Return true if A and B are disjoint
 
 Format: `ST_Disjoint (A:geometry, B:geometry)`
 
-Since: `v1.2.0`
+Since: `v1.2.1`
 
 Spark SQL example:
 ```SQL

@@ -100,8 +100,6 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
           Some(JoinQueryDetection(left, right, leftShape, rightShape, false, None, Some(radius)))
         case Some(And(LessThan(ST_Distance(Seq(leftShape, rightShape)), radius), extraCondition)) =>
           Some(JoinQueryDetection(left, right, leftShape, rightShape, false, Some(extraCondition), Some(radius)))
-        case Some(And(extraCondition, LessThan(ST_Distance(Seq(leftShape, rightShape)), radius))) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, false, Some(extraCondition), Some(radius)))
         case _ =>
           None
       }
