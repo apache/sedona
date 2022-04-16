@@ -111,7 +111,7 @@ case class ST_LineFromText(inputExpressions: Seq[Expression])
     val lineFormat = inputExpressions(1).eval(inputRow).asInstanceOf[UTF8String].toString
 
     var fileDataSplitter = FileDataSplitter.getFileDataSplitter(lineFormat)
-    var formatMapper = new FormatMapper(fileDataSplitter, false, GeometryType.LINE)
+    var formatMapper = new FormatMapper(fileDataSplitter, false, GeometryType.LINESTRING)
     var geometry = formatMapper.readGeometry(lineString)
     new GenericArrayData(GeometrySerializer.serialize(geometry))
   }
