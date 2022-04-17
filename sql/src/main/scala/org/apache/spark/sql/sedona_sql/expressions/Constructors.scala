@@ -101,16 +101,15 @@ case class ST_PolygonFromText(inputExpressions: Seq[Expression])
   */
 case class ST_LineFromText(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
-  // This is an expression which takes two input expressions.
-  assert(inputExpressions.length == 2)
+  // This is an expression which takes one input expressions.
+  assert(inputExpressions.length == 1)
 
   override def nullable: Boolean = false
 
   override def eval(inputRow: InternalRow): Any = {
     val lineString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
-    val lineFormat = inputExpressions(1).eval(inputRow).asInstanceOf[UTF8String].toString
 
-    var fileDataSplitter = FileDataSplitter.getFileDataSplitter(lineFormat)
+    var fileDataSplitter = FileDataSplitter.WKT
     var formatMapper = new FormatMapper(fileDataSplitter, false, GeometryType.LINESTRING)
     var geometry = formatMapper.readGeometry(lineString)
     new GenericArrayData(GeometrySerializer.serialize(geometry))

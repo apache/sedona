@@ -178,7 +178,7 @@ Introduction: Construct a Line from Text, delimited by Delimiter
 
 Format: `ST_LineFromText (Text:string, Delimiter:char)`
 
-Since: `v1.0.0`
+Since: `v1.2.1`
 
 Spark SQL example:
 ```SQL

@@ -19,6 +19,19 @@ FROM polygontable
 SELECT ST_GeomFromWKT('POINT(40.7128,-74.0060)') AS geometry
 ```
 
+## ST_LineFromText
+
+Introduction: Construct a Line from Wkt. Unlimited UUID strings can be appended.
+
+Format: `ST_LineFromText (Text:string, Delimiter:char, UUID1, UUID2, ...)`
+
+Since: `v1.0.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_LineFromText(linetable._c0,',') AS lineshape
+FROM linetable
+```
 ## ST_GeomFromWKB
 
 Introduction: Construct a Geometry from WKB string. Unlimited UUID strings can be appended.
@@ -153,20 +166,6 @@ FROM polygontable
 
 ```SQL
 SELECT ST_PolygonFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794,-74.0428197,40.6867969', ',') AS polygonshape
-```
-
-## ST_LineFromText
-
-Introduction: Construct a Line from Text, delimited by Delimiter. Path must be closed. Unlimited UUID strings can be appended.
-
-Format: `ST_LineFromText (Text:string, Delimiter:char, UUID1, UUID2, ...)`
-
-Since: `v1.0.0`
-
-Spark SQL example:
-```SQL
-SELECT ST_LineFromText(linetable._c0,',') AS lineshape
-FROM linetable
 ```
 
 ```SQL
