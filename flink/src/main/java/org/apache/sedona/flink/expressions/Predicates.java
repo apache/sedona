@@ -127,21 +127,5 @@ public class Predicates {
             Geometry geom2 = (Geometry) o2;
             return geom1.disjoint(geom2);
         }
-
-        /**
-         * Check spatial relation with duplicates removal
-         * @param key
-         * @param o1
-         * @param o2
-         * @return
-         */
-        @DataTypeHint("Boolean")
-        public Boolean eval(@DataTypeHint("INT") Integer key, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
-            Objects.requireNonNull(grids, "This predicate has to be initialized by a partitioner.");
-            Geometry geom1 = (Geometry) o1;
-            Geometry geom2 = (Geometry) o2;
-            HalfOpenRectangle halfOpenRectangle = new HalfOpenRectangle(grids.get(key));
-            return JudgementHelper.match(geom1, geom2, halfOpenRectangle, false);
-        }
     }
 }

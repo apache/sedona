@@ -101,18 +101,3 @@ SELECT *
 FROM geom
 WHERE ST_Overlaps(geom.geom_a, geom.geom_b)
 ```
-
-## ST_Disjoint
-
-Introduction: Return true if A and B are disjoint
-
-Format: `ST_Disjoint (A:geometry, B:geometry)`
-
-Since: `v1.2.1`
-
-Spark SQL example:
-```SQL
-SELECT *
-FROM geom
-WHERE ST_Disjoinnt(geom.geom_a, geom.geom_b)
-```
