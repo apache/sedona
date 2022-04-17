@@ -40,7 +40,6 @@ public class PredicateTest extends TestBase{
         String polygon = createPolygonWKT(testDataSize).get(0).getField(0).toString();
         String expr = "ST_Disjoint(ST_GeomFromWkt('" + polygon + "'), geom_point)";
         Table result = pointTable.filter(expr);
-        System.out.println(count(result));
         assertEquals(count(result), 999);
     }
 }
