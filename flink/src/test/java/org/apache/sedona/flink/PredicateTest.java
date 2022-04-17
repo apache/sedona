@@ -33,13 +33,4 @@ public class PredicateTest extends TestBase{
         Table result = pointTable.filter(expr);
         assertEquals(count(result), 1);
     }
-
-    @Test
-    public void testDisjoint() {
-        Table pointTable = createPointTable(testDataSize);
-        String polygon = createPolygonWKT(testDataSize).get(0).getField(0).toString();
-        String expr = "ST_Disjoint(ST_GeomFromWkt('" + polygon + "'), geom_point)";
-        Table result = pointTable.filter(expr);
-        assertEquals(count(result), 1);
-    }
 }
