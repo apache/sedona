@@ -69,8 +69,6 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
           Some(JoinQueryDetection(left, right, leftShape, rightShape, false, extraCondition))
         case ST_Crosses(Seq(leftShape, rightShape)) =>
           Some(JoinQueryDetection(right, left, rightShape, leftShape, false, extraCondition))
-        case ST_Disjoint(Seq(leftShape, rightShape)) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, false, extraCondition))
         case _ => None
       }
     }
