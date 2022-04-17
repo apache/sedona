@@ -948,7 +948,7 @@ Format
 
 `ST_Multi(geom: geometry)`
 
-Since: `v1.2.1`
+Since: `v1.2.0`
 
 Example:
 
