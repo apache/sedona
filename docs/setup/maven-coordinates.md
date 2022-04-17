@@ -98,6 +98,26 @@ The optional GeoTools library is required only if you want to use CRS transforma
 		    <version>{{ sedona.current_geotools }}</version>
 		</dependency>
 		```
+	=== "Flink 2.12+ and Scala 2.11"
+	
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-python-adapter-3.0_2.11</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-flink_2.11</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>
+		```
 
 
 #### SernetCDF 0.1.0
