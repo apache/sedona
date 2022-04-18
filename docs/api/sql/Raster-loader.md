@@ -142,3 +142,69 @@ Output:
 +--------------------+
 ```
 
+### Geotiff Dataframe Writer
+
+Introduction: You can write a GeoTiff dataframe as a GeoTiff image using the spark `write` feature with the format `geotiff`.
+
+Since: `v1.1.2`
+
+Spark SQL example:
+
+The schema of the GeoTiff dataframe to be written can be one of the following two schemas:
+
+```html
+ |-- image: struct (nullable = true)
+ |    |-- origin: string (nullable = true)
+ |    |-- Geometry: geometry (nullable = true)
+ |    |-- height: integer (nullable = true)
+ |    |-- width: integer (nullable = true)
+ |    |-- nBands: integer (nullable = true)
+ |    |-- data: array (nullable = true)
+ |    |    |-- element: double (containsNull = true)
+```
+
+or
+
+```html
+ |-- origin: string (nullable = true)
+ |-- Geometry: geometry (nullable = true)
+ |-- height: integer (nullable = true)
+ |-- width: integer (nullable = true)
+ |-- nBands: integer (nullable = true)
+ |-- data: array (nullable = true)
+ |    |-- element: double (containsNull = true)
+```
+
+Field names can be renamed, but schema should exactly match with one of these two schemas. The output path could be a path to a directory where GeoTiff images will be saved. If the directory already exists, `write` should be called in `overwrite` mode.
+
+```Scala
+var dfToWrite = sparkSession.read.format("geotiff").option("dropInvalid", true).load("PATH_TO_INPUT_GEOTIFF_IMAGES")
+dfToWrite.write.format("geotiff").save("DESTINATION_PATH")
+```
+
+You can override an existing path with the following approach.
+
+```Scala
+dfToWrite.write.mode("overwrite").format("geotiff").save("DESTINATION_PATH")
+```
+
+You can also extract the columns nested within `image` column and write the dataframe as GeoTiff image.
+
+```Scala
+dfToWrite = dfToWrite.selectExpr("image.origin as origin","image.wkt as wkt", "image.height as height", "image.width as width", "image.data as data", "image.nBands as nBands")
+dfToWrite.write.mode("overwrite").format("geotiff").save("DESTINATION_PATH")
+```
+
+If you want the saved GeoTiff images not to be distributed into multiple partitions, you can call coalesce to merge all files in a single partition.
+
+```Scala
+dfToWrite.coalesce(1).write.mode("overwrite").format("geotiff").save("DESTINATION_PATH")
+```
+
+In case, you rename the columns of GeoTiff dataframe, you can set the corresponding column names with option parameters.
+
+```Scala
+dfToWrite = sparkSession.read.format("geotiff").option("dropInvalid", true).load("PATH_TO_INPUT_GEOTIFF_IMAGES")
+dfToWrite = dfToWrite.selectExpr("image.origin as source","image.wkt as geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+dfToWrite.write.mode("overwrite").format("geotiff").option("key_origin", "source").option("key_wkt", "geom").option("key_n_bands", "bands").save("DESTINATION_PATH")
+```
