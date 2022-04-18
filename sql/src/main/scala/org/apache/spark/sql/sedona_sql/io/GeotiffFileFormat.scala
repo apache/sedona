@@ -242,7 +242,7 @@ private class GeotiffFileWriter(savePath: String,
     hfs.close()
   }
 
-  override def path(): String = {
+  def path(): String = {
     savePath
   }
 }
