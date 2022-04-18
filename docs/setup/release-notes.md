@@ -23,6 +23,12 @@ New features:
 * [SEDONA-82](https://issues.apache.org/jira/browse/SEDONA-82): Create ST_SymmDifference function
 * [SEDONA-75](https://issues.apache.org/jira/browse/SEDONA-75): Add support for "3D" geometries: Preserve Z coordinates on geometries when serializing, ST_AsText , ST_Z, ST_3DDistance
 * [SEDONA-86](https://issues.apache.org/jira/browse/SEDONA-86): Support empty geometries in ST_AsBinary and ST_AsEWKB
+* [SEDONA-90](https://issues.apache.org/jira/browse/SEDONA-90): Add ST_Union
+* [SEDONA-100](https://issues.apache.org/jira/browse/SEDONA-100): Add st_multi function
+
+Bug fix:
+
+* [SEDONA-89](https://issues.apache.org/jira/browse/SEDONA-89): GeometryUDT equals should test equivalence of the other object
 
 ### Flink
 
@@ -31,6 +37,7 @@ Major update:
 * [SEDONA-80](https://issues.apache.org/jira/browse/SEDONA-80): Geospatial stream processing support in Flink Table API
 * [SEDONA-85](https://issues.apache.org/jira/browse/SEDONA-85): ST_Geohash function in Flink
 * [SEDONA-87](https://issues.apache.org/jira/browse/SEDONA-87): Support Flink Table and DataStream conversion
+* [SEDONA-93](https://issues.apache.org/jira/browse/SEDONA-93): Add ST_GeomFromGeoJSON
 
 
 ## Sedona 1.1.1

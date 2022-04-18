@@ -948,7 +948,7 @@ Format
 
 `ST_Multi(geom: geometry)`
 
-Since: `v1.2.1`
+Since: `v1.2.0`
 
 Example:
 
@@ -1028,4 +1028,63 @@ Result:
 
 ```
 POLYGON ((3 -1, 3 -3, -3 -3, -3 3, 3 3, 3 1, 5 0, 3 -1))
+```
+
+## ST_PointOnSurface
+
+Introduction: Returns a POINT guaranteed to lie on the surface.
+
+Format: `ST_PointOnSurface(A:geometry)`
+
+Since: `v1.2.1`
+
+Examples: 
+
+```
+SELECT ST_AsText(ST_PointOnSurface(ST_GeomFromText('POINT(0 5)')));
+ st_astext
+------------
+ POINT(0 5)
+
+SELECT ST_AsText(ST_PointOnSurface(ST_GeomFromText('LINESTRING(0 5, 0 10)')));
+ st_astext
+------------
+ POINT(0 5)
+
+SELECT ST_AsText(ST_PointOnSurface(ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))')));
+   st_astext
+----------------
+ POINT(2.5 2.5)
+
+SELECT ST_AsText(ST_PointOnSurface(ST_GeomFromText('LINESTRING(0 5 1, 0 0 1, 0 10 2)')));
+   st_astext
+----------------
+ POINT Z(0 0 1)
+
+```
+
+## ST_Reverse
+
+Introduction: Return the geometry with vertex order reversed
+
+Format: `ST_Reverse (A:geometry)`
+
+Since: `v1.2.1`
+
+Example:
+
+```SQL
+SELECT ST_AsText(
+    ST_Reverse(ST_GeomFromText('LINESTRING(0 0, 1 2, 2 4, 3 6)'))
+) AS geom
+```
+
+Result:
+
+```
++---------------------------------------------------------------+
+|geom                                                           |
++---------------------------------------------------------------+
+|LINESTRING (3 6, 2 4, 1 2, 0 0)                                |
++---------------------------------------------------------------+
 ```

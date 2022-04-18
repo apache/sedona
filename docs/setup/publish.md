@@ -167,6 +167,7 @@ cp apache-sedona-{{ sedona.current_version }}-src/core/target/sedona-*{{ sedona.
 cp apache-sedona-{{ sedona.current_version }}-src/sql/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
 cp apache-sedona-{{ sedona.current_version }}-src/viz/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
 cp apache-sedona-{{ sedona.current_version }}-src/python-adapter/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
+cp apache-sedona-{{ sedona.current_version }}-src/flink/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
 cd apache-sedona-{{ sedona.current_version }}-src && mvn clean install -DskipTests -Dscala=2.12 -Dspark=2.4 && cd ..
 cp apache-sedona-{{ sedona.current_version }}-src/core/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
 cp apache-sedona-{{ sedona.current_version }}-src/sql/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
@@ -501,6 +502,7 @@ wget https://repository.apache.org/service/local/repositories/orgapachesedona-$s
 wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-2.4_2.12/{{ sedona.current_version }}/sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom
 wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom
 wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-flink_2.12/{{ sedona.current_version }}/sedona-flink_2.12-{{ sedona.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-flink_2.11/{{ sedona.current_version }}/sedona-flink_2.11-{{ sedona.current_version }}.pom
 
 gpg -ab sedona-core-2.4_2.11-{{ sedona.current_version }}.pom
 gpg -ab sedona-core-2.4_2.12-{{ sedona.current_version }}.pom
@@ -515,6 +517,7 @@ gpg -ab sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom
 gpg -ab sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom
 gpg -ab sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom
 gpg -ab sedona-flink_2.12-{{ sedona.current_version }}.pom
+gpg -ab sedona-flink_2.11-{{ sedona.current_version }}.pom
 
 curl -v -u $username:$password --upload-file sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-2.4_2.11/{{ sedona.current_version }}/sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom.asc
 
@@ -542,6 +545,8 @@ curl -v -u $username:$password --upload-file sedona-sql-3.0_2.12-{{ sedona.curre
 
 curl -v -u $username:$password --upload-file sedona-flink_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-flink_2.12/{{ sedona.current_version }}/sedona-flink_2.12-{{ sedona.current_version }}.pom.asc
 
+curl -v -u $username:$password --upload-file sedona-flink_2.11-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-flink_2.11/{{ sedona.current_version }}/sedona-flink_2.11-{{ sedona.current_version }}.pom.asc
+
 rm sedona-core-2.4_2.11-{{ sedona.current_version }}.pom.asc
 rm sedona-core-2.4_2.12-{{ sedona.current_version }}.pom.asc
 rm sedona-core-3.0_2.12-{{ sedona.current_version }}.pom.asc
@@ -555,6 +560,7 @@ rm sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom.asc
 rm sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom.asc
 rm sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom.asc
 rm sedona-flink_2.12-{{ sedona.current_version }}.pom.asc
+rm sedona-flink_2.11-{{ sedona.current_version }}.pom.asc
 ```
 admin is your Apache ID username and admin123 is your Apache ID password. You can find the correct upload path from the web interface.
 

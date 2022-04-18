@@ -880,6 +880,39 @@ class TestPredicateJoin(TestBase):
             "MULTIPOLYGON (((1 2, 1 4, 3 4, 3 2, 1 2)), ((0.5 0.5, 5 0, 5 5, 0 5, 0.5 0.5)))"
         })
 
+    def test_st_reverse(self):
+        test_cases = {
+            "'POLYGON((-1 0 0, 1 0 0, 0 0 1, 0 1 0, -1 0 0))'":
+                "POLYGON Z((-1 0 0, 0 1 0, 0 0 1, 1 0 0, -1 0 0))",
+            "'LINESTRING(0 0, 1 2, 2 4, 3 6)'":
+                "LINESTRING (3 6, 2 4, 1 2, 0 0)",
+            "'POINT(1 2)'":
+                "POINT (1 2)",
+            "'MULTIPOINT((10 40 66), (40 30 77), (20 20 88), (30 10 99))'":
+                "MULTIPOINT Z((10 40 66), (40 30 77), (20 20 88), (30 10 99))",
+            "'MULTIPOLYGON(((30 20 11, 45 40 11, 10 40 11, 30 20 11)), " \
+            "((15 5 11, 40 10 11, 10 20 11, 5 10 11, 15 5 11)))'":
+                "MULTIPOLYGON Z(((30 20 11, 10 40 11, 45 40 11, 30 20 11)), " \
+                "((15 5 11, 5 10 11, 10 20 11, 40 10 11, 15 5 11)))",
+            "'MULTILINESTRING((10 10 11, 20 20 11, 10 40 11), " \
+            "(40 40 11, 30 30 11, 40 20 11, 30 10 11))'":
+                "MULTILINESTRING Z((10 40 11, 20 20 11, 10 10 11), " \
+                "(30 10 11, 40 20 11, 30 30 11, 40 40 11))",
+            "'MULTIPOLYGON(((40 40 11, 20 45 11, 45 30 11, 40 40 11)), " \
+            "((20 35 11, 10 30 11, 10 10 11, 30 5 11, 45 20 11, 20 35 11)," \
+            "(30 20 11, 20 15 11, 20 25 11, 30 20 11)))'":
+                "MULTIPOLYGON Z(((40 40 11, 45 30 11, 20 45 11, 40 40 11)), " \
+                "((20 35 11, 45 20 11, 30 5 11, 10 10 11, 10 30 11, 20 35 11), " \
+                "(30 20 11, 20 25 11, 20 15 11, 30 20 11)))",
+            "'POLYGON((0 0 11, 0 5 11, 5 5 11, 5 0 11, 0 0 11), " \
+            "(1 1 11, 2 1 11, 2 2 11, 1 2 11, 1 1 11))'":
+                "POLYGON Z((0 0 11, 5 0 11, 5 5 11, 0 5 11, 0 0 11), " \
+                "(1 1 11, 1 2 11, 2 2 11, 2 1 11, 1 1 11))"
+        }
+        for input_geom, expected_geom in test_cases.items():
+            reversed_geometry = self.spark.sql("select ST_AsText(ST_Reverse(ST_GeomFromText({})))".format(input_geom))
+            assert reversed_geometry.take(1)[0][0] == expected_geom
+
     def calculate_st_is_ring(self, wkt):
         geometry_collected = self.__wkt_list_to_data_frame([wkt]). \
             selectExpr("ST_IsRing(geom) as is_ring") \
@@ -903,3 +936,24 @@ class TestPredicateJoin(TestBase):
 
     def __wkt_pair_list_with_index_to_data_frame(self, wkt_list: List) -> DataFrame:
         return self.spark.createDataFrame([[index, wkt.loads(given_wkt)] for index, given_wkt in wkt_list], self.geo_schema_with_index)
+
+    def test_st_pointonsurface(self):
+        tests1 = {
+        "'POINT(0 5)'":"POINT (0 5)",
+        "'LINESTRING(0 5, 0 10)'":"POINT (0 5)",
+        "'POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))'":"POINT (2.5 2.5)",
+        "'LINESTRING(0 5 1, 0 0 1, 0 10 2)'":"POINT Z(0 0 1)"
+        }
+                
+        for input_geom, expected_geom in tests1.items():
+            pointOnSurface = self.spark.sql("select ST_AsText(ST_PointOnSurface(ST_GeomFromText({})))".format(input_geom))
+            assert pointOnSurface.take(1)[0][0] == expected_geom
+
+        '''
+        ST_AsEWKT Has not been implemented yet
+        tests2 = { "'LINESTRING(0 5 1, 0 0 1, 0 10 2)'":"POINT(0 0 1)" }
+
+        for input_geom, expected_geom in tests2.items():
+            pointOnSurface = self.spark.sql("select ST_AsEWKT(ST_PointOnSurface(ST_GeomFromEWKT({})))".format(input_geom))
+            assert pointOnSurface.take(1)[0][0] == expected_geom
+        '''
