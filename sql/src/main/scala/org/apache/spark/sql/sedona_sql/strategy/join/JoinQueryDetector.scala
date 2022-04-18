@@ -30,56 +30,56 @@ import org.apache.spark.sql.sedona_sql.expressions._
 
 
 case class JoinQueryDetection(
-                               left: LogicalPlan,
-                               right: LogicalPlan,
-                               leftShape: Expression,
-                               rightShape: Expression,
-                               intersects: Boolean,
-                               extraCondition: Option[Expression] = None,
-                               radius: Option[Expression] = None
-                             )
+  left: LogicalPlan,
+  right: LogicalPlan,
+  leftShape: Expression,
+  rightShape: Expression,
+  intersects: Boolean,
+  extraCondition: Option[Expression] = None,
+  radius: Option[Expression] = None
+)
 
 /**
- * Plans `RangeJoinExec` for inner joins on spatial relationships ST_Contains(a, b)
- * and ST_Intersects(a, b).
- *
- * Plans `DistanceJoinExec` for inner joins on spatial relationship ST_Distance(a, b) < r.
- *
- * Plans `BroadcastIndexJoinExec for inner joins on spatial relationships with a broadcast hint.
- */
+  * Plans `RangeJoinExec` for inner joins on spatial relationships ST_Contains(a, b)
+  * and ST_Intersects(a, b).
+  *
+  * Plans `DistanceJoinExec` for inner joins on spatial relationship ST_Distance(a, b) < r.
+  * 
+  * Plans `BroadcastIndexJoinExec for inner joins on spatial relationships with a broadcast hint.
+  */
 class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
 
   private def getJoinDetection(
-                                left: LogicalPlan,
-                                right: LogicalPlan,
-                                predicate: ST_Predicate,
-                                extraCondition: Option[Expression] = None): Option[JoinQueryDetection] = {
-    predicate match {
-      case ST_Contains(Seq(leftShape, rightShape)) =>
-        Some(JoinQueryDetection(left, right, leftShape, rightShape, false, extraCondition))
-      case ST_Intersects(Seq(leftShape, rightShape)) =>
-        Some(JoinQueryDetection(left, right, leftShape, rightShape, true, extraCondition))
-      case ST_Within(Seq(leftShape, rightShape)) =>
-        Some(JoinQueryDetection(right, left, rightShape, leftShape, false, extraCondition))
-      case ST_Overlaps(Seq(leftShape, rightShape)) =>
-        Some(JoinQueryDetection(right, left, rightShape, leftShape, false, extraCondition))
-      case ST_Touches(Seq(leftShape, rightShape)) =>
-        Some(JoinQueryDetection(left, right, leftShape, rightShape, true, extraCondition))
-      case ST_Equals(Seq(leftShape, rightShape)) =>
-        Some(JoinQueryDetection(left, right, leftShape, rightShape, false, extraCondition))
-      case ST_Crosses(Seq(leftShape, rightShape)) =>
-        Some(JoinQueryDetection(right, left, rightShape, leftShape, false, extraCondition))
-      case _ => None
+    left: LogicalPlan,
+    right: LogicalPlan,
+    predicate: ST_Predicate,
+    extraCondition: Option[Expression] = None): Option[JoinQueryDetection] = {
+      predicate match {
+        case ST_Contains(Seq(leftShape, rightShape)) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, false, extraCondition))
+        case ST_Intersects(Seq(leftShape, rightShape)) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, true, extraCondition))
+        case ST_Within(Seq(leftShape, rightShape)) =>
+          Some(JoinQueryDetection(right, left, rightShape, leftShape, false, extraCondition))
+        case ST_Overlaps(Seq(leftShape, rightShape)) =>
+          Some(JoinQueryDetection(right, left, rightShape, leftShape, false, extraCondition))
+        case ST_Touches(Seq(leftShape, rightShape)) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, true, extraCondition))
+        case ST_Equals(Seq(leftShape, rightShape)) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, false, extraCondition))
+        case ST_Crosses(Seq(leftShape, rightShape)) =>
+          Some(JoinQueryDetection(right, left, rightShape, leftShape, false, extraCondition))
+        case _ => None
+      }
     }
-  }
 
   def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
     case Join(left, right, Inner, condition, JoinHint(leftHint, rightHint)) => { // SPARK3 anchor
-      //    case Join(left, right, Inner, condition) => { // SPARK2 anchor
+//    case Join(left, right, Inner, condition) => { // SPARK2 anchor
       val broadcastLeft = leftHint.exists(_.strategy.contains(BROADCAST)) // SPARK3 anchor
       val broadcastRight = rightHint.exists(_.strategy.contains(BROADCAST)) // SPARK3 anchor
-      //      val broadcastLeft = left.isInstanceOf[ResolvedHint] && left.asInstanceOf[ResolvedHint].hints.broadcast  // SPARK2 anchor
-      //      val broadcastRight = right.isInstanceOf[ResolvedHint] && right.asInstanceOf[ResolvedHint].hints.broadcast // SPARK2 anchor
+//      val broadcastLeft = left.isInstanceOf[ResolvedHint] && left.asInstanceOf[ResolvedHint].hints.broadcast  // SPARK2 anchor
+//      val broadcastRight = right.isInstanceOf[ResolvedHint] && right.asInstanceOf[ResolvedHint].hints.broadcast // SPARK2 anchor
 
       val queryDetection: Option[JoinQueryDetection] = condition match {
         case Some(predicate: ST_Predicate) =>
@@ -119,7 +119,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
             planSpatialJoin(left, right, Seq(leftShape, rightShape), intersects, extraCondition)
           case Some(JoinQueryDetection(left, right, leftShape, rightShape, intersects, extraCondition, Some(radius))) =>
             planDistanceJoin(left, right, Seq(leftShape, rightShape), radius, intersects, extraCondition)
-          case None =>
+          case None => 
             Nil
         }
       }
@@ -129,9 +129,9 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
   }
 
   /**
-   * Returns true if specified expression has at least one reference and all its references
-   * map to the output of the specified plan.
-   */
+    * Returns true if specified expression has at least one reference and all its references
+    * map to the output of the specified plan.
+    */
   private def matches(expr: Expression, plan: LogicalPlan): Boolean =
     expr.references.find(plan.outputSet.contains(_)).isDefined &&
       expr.references.find(!plan.outputSet.contains(_)).isEmpty
