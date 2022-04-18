@@ -144,9 +144,9 @@ Output:
 
 ### Geotiff Dataframe Writer
 
-Introduction: You can write a GeoTiff dataframe as a GeoTiff image using the spark `write` feature with the format `geotiff`.
+Introduction: You can write a GeoTiff dataframe as GeoTiff images using the spark `write` feature with the format `geotiff`.
 
-Since: `v1.1.2`
+Since: `v1.2.1`
 
 Spark SQL example:
 
@@ -175,14 +175,14 @@ or
  |    |-- element: double (containsNull = true)
 ```
 
-Field names can be renamed, but schema should exactly match with one of these two schemas. The output path could be a path to a directory where GeoTiff images will be saved. If the directory already exists, `write` should be called in `overwrite` mode.
+Field names can be renamed, but schema should exactly match with one of the above two schemas. The output path could be a path to a directory where GeoTiff images will be saved. If the directory already exists, `write` should be called in `overwrite` mode.
 
 ```Scala
 var dfToWrite = sparkSession.read.format("geotiff").option("dropInvalid", true).load("PATH_TO_INPUT_GEOTIFF_IMAGES")
 dfToWrite.write.format("geotiff").save("DESTINATION_PATH")
 ```
 
-You can override an existing path with the following approach.
+You can override an existing path with the following approach:
 
 ```Scala
 dfToWrite.write.mode("overwrite").format("geotiff").save("DESTINATION_PATH")
@@ -201,7 +201,7 @@ If you want the saved GeoTiff images not to be distributed into multiple partiti
 dfToWrite.coalesce(1).write.mode("overwrite").format("geotiff").save("DESTINATION_PATH")
 ```
 
-In case, you rename the columns of GeoTiff dataframe, you can set the corresponding column names with option parameters.
+In case, you rename the columns of GeoTiff dataframe, you can set the corresponding column names with the `option` parameter.
 
 ```Scala
 dfToWrite = sparkSession.read.format("geotiff").option("dropInvalid", true).load("PATH_TO_INPUT_GEOTIFF_IMAGES")
