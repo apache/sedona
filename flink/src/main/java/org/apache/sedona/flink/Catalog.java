@@ -32,7 +32,8 @@ public class Catalog {
                 new Functions.ST_FlipCoordinates(),
                 new Functions.ST_GeoHash(),
                 new Functions.ST_PointOnSurface(),
-                new Functions.ST_Reverse()
+                new Functions.ST_Reverse(),
+                new Functions.ST_AsEWKT()
         };
     }
 
