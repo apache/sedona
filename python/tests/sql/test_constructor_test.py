@@ -116,5 +116,5 @@ class TestConstructors(TestBase):
         input_df = self.spark.createDataFrame(["Linestring(1 2, 3 4)"], ["wkt"])
         input_df.createOrReplaceTempView("input_wkt")
         line_df = self.spark.sql("select ST_LineFromText(wkt) as geom from input_wkt")
-        assert polygon_df.count() == 1
+        assert line_df.count() == 1
     }
