@@ -112,7 +112,11 @@ case class ST_LineFromText(inputExpressions: Seq[Expression])
     var fileDataSplitter = FileDataSplitter.WKT
     var formatMapper = new FormatMapper(fileDataSplitter, false)
     var geometry = formatMapper.readGeometry(lineString)
-    new GenericArrayData(GeometrySerializer.serialize(geometry))
+    if(geometry.getGeometryType.contains("LineString")) {
+      new GenericArrayData(GeometrySerializer.serialize(geometry))
+    } else {
+      null
+    }
   }
 
   override def dataType: DataType = GeometryUDT
