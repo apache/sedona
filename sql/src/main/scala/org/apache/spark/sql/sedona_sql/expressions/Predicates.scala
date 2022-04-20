@@ -270,3 +270,37 @@ case class ST_Equals(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+/**
+ * Test if leftGeometry is disjoint from rightGeometry
+ *
+ * @param inputExpressions
+ */
+case class ST_Disjoint(inputExpressions: Seq[Expression])
+  extends ST_Predicate with CodegenFallback {
+  override def nullable: Boolean = false
+
+  // This is a binary expression
+  assert(inputExpressions.length == 2)
+
+  override def toString: String = s" **${ST_Disjoint.getClass.getName}**  "
+
+  override def children: Seq[Expression] = inputExpressions
+
+  override def eval(inputRow: InternalRow): Any = {
+    val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
+    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
+
+    val leftGeometry = GeometrySerializer.deserialize(leftArray)
+
+    val rightGeometry = GeometrySerializer.deserialize(rightArray)
+
+    leftGeometry.disjoint(rightGeometry)
+  }
+
+  override def dataType = BooleanType
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

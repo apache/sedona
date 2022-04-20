@@ -32,14 +32,16 @@ public class Catalog {
                 new Functions.ST_FlipCoordinates(),
                 new Functions.ST_GeoHash(),
                 new Functions.ST_PointOnSurface(),
-                new Functions.ST_Reverse()
+                new Functions.ST_Reverse(),
+                new Functions.ST_AsEWKT()
         };
     }
 
     public static UserDefinedFunction[] getPredicates() {
         return new UserDefinedFunction[]{
                 new Predicates.ST_Intersects(),
-                new Predicates.ST_Contains()
+                new Predicates.ST_Contains(),
+                new Predicates.ST_Disjoint(),
         };
     }
 }

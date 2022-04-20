@@ -27,3 +27,18 @@ SELECT *
 FROM pointdf 
 WHERE ST_Intersects(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
 ```
+
+## ST_Disjoint
+
+Introduction: Return true if A and B are disjoint
+
+Format: `ST_Disjoint (A:geometry, B:geometry)`
+
+Since: `v1.2.1`
+
+Spark SQL example:
+```SQL
+SELECT *
+FROM pointdf 
+WHERE ST_Disjoinnt(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
+```
