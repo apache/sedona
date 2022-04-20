@@ -104,7 +104,7 @@ case class ST_LineFromText(inputExpressions: Seq[Expression])
   // This is an expression which takes one input expressions.
   assert(inputExpressions.length == 1)
 
-  override def nullable: Boolean = false
+  override def nullable: Boolean = true
 
   override def eval(inputRow: InternalRow): Any = {
     val lineString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
