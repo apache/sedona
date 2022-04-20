@@ -20,18 +20,20 @@
 
 package org.apache.spark.sql.sedona_sql.io
 
-
 import com.google.common.io.{ByteStreams, Closeables}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileStatus, Path}
 import org.apache.hadoop.mapreduce.{Job, TaskAttemptContext}
-import org.apache.spark.sql.SparkSession
+import org.apache.sedona.sql.utils.GeometrySerializer
+import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.encoders.RowEncoder
 import org.apache.spark.sql.catalyst.expressions.UnsafeRow
+import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.execution.datasources.{FileFormat, OutputWriter, OutputWriterFactory, PartitionedFile}
 import org.apache.spark.sql.sources.{DataSourceRegister, Filter}
 import org.apache.spark.sql.types.StructType
+import org.apache.spark.unsafe.types.UTF8String
 import org.apache.spark.util.SerializableConfiguration
 import org.geotools.coverage.CoverageFactoryFinder
 import org.geotools.coverage.grid.io.{AbstractGridFormat, GridFormatFinder}
@@ -39,7 +41,7 @@ import org.geotools.gce.geotiff.{GeoTiffFormat, GeoTiffWriteParams, GeoTiffWrite
 import org.geotools.geometry.jts.ReferencedEnvelope
 import org.geotools.referencing.CRS
 import org.geotools.util.factory.Hints
-import org.locationtech.jts.geom.Polygon
+import org.locationtech.jts.geom.{Coordinate, Polygon}
 import org.locationtech.jts.io.WKTReader
 import org.opengis.parameter.GeneralParameterValue
 
@@ -61,7 +63,8 @@ private[spark] class GeotiffFileFormat extends FileFormat with DataSourceRegiste
                              job: Job,
                              options: Map[String, String],
                              dataSchema: StructType): OutputWriterFactory = {
-    if (!isValidGeoTiffSchema(options, dataSchema)) {
+    val imageWriteOptions = new ImageWriteOptions(options)
+    if (!isValidGeoTiffSchema(imageWriteOptions, dataSchema)) {
       throw new IllegalArgumentException("Invalid GeoTiff Schema")
     }
 
@@ -69,7 +72,7 @@ private[spark] class GeotiffFileFormat extends FileFormat with DataSourceRegiste
       override def getFileExtension(context: TaskAttemptContext): String = ""
 
       override def newInstance(path: String, dataSchema: StructType, context: TaskAttemptContext): OutputWriter = {
-        new GeotiffFileWriter(path, options, dataSchema, context)
+        new GeotiffFileWriter(path, imageWriteOptions, dataSchema, context)
       }
     }
   }
@@ -91,7 +94,7 @@ private[spark] class GeotiffFileFormat extends FileFormat with DataSourceRegiste
     val broadcastedHadoopConf =
       sparkSession.sparkContext.broadcast(new SerializableConfiguration(hadoopConf))
 
-    val imageSourceOptions = new ImageOptions(options)
+    val imageSourceOptions = new ImageReadOptions(options)
 
     (file: PartitionedFile) => {
       val emptyUnsafeRow = new UnsafeRow(0)
@@ -108,7 +111,7 @@ private[spark] class GeotiffFileFormat extends FileFormat with DataSourceRegiste
           Closeables.close(stream, true)
         }
 
-        val resultOpt = GeotiffSchema.decode(origin, bytes)
+        val resultOpt = GeotiffSchema.decode(origin, bytes, imageSourceOptions)
         val filteredResult = if (imageSourceOptions.dropInvalid) {
           resultOpt.toIterator
         } else {
@@ -127,11 +130,10 @@ private[spark] class GeotiffFileFormat extends FileFormat with DataSourceRegiste
     }
   }
 
-  private def isValidGeoTiffSchema(options: Map[String, String], dataSchema: StructType): Boolean = {
-    val colImage = options.getOrElse("key_image", "image")
+  private def isValidGeoTiffSchema(imageWriteOptions: ImageWriteOptions, dataSchema: StructType): Boolean = {
     val fields = dataSchema.fieldNames
-    if (fields.contains(colImage) ){
-      val schemaFields = dataSchema.fields(dataSchema.fieldIndex(colImage)).dataType.asInstanceOf[StructType]
+    if (fields.contains(imageWriteOptions.colImage) ){
+      val schemaFields = dataSchema.fields(dataSchema.fieldIndex(imageWriteOptions.colImage)).dataType.asInstanceOf[StructType]
       if (schemaFields.fieldNames.length != 6) return false
     }
     else {
@@ -144,7 +146,7 @@ private[spark] class GeotiffFileFormat extends FileFormat with DataSourceRegiste
 
 // class for writing geoTiff images
 private class GeotiffFileWriter(savePath: String,
-                                options: Map[String, String],
+                                imageWriteOptions: ImageWriteOptions,
                                 dataSchema: StructType,
                                 context: TaskAttemptContext) extends OutputWriter {
 
@@ -160,29 +162,28 @@ private class GeotiffFileWriter(savePath: String,
 
   override def write(row: InternalRow): Unit = {
     // retrieving the metadata of a geotiff image
+    println("Schema:")
+    println(dataSchema)
     var rowFields: InternalRow = row
     var schemaFields: StructType = dataSchema
     val fields = dataSchema.fieldNames
 
-    val colImage = options.getOrElse("key_image", "image")
-    val colOrigin = options.getOrElse("key_origin", "origin")
-    val colBands = options.getOrElse("key_n_bands", "nBands")
-    val colWidth = options.getOrElse("key_width", "width")
-    val colHeight = options.getOrElse("key_height", "height")
-    val colWkt = options.getOrElse("key_wkt", "wkt")
-    val colData = options.getOrElse("key_data", "data")
-
-    if (fields.contains(colImage)) {
-      schemaFields = dataSchema.fields(dataSchema.fieldIndex(colImage)).dataType.asInstanceOf[StructType]
-      rowFields = row.getStruct(dataSchema.fieldIndex(colImage), 6)
+    if (fields.contains(imageWriteOptions.colImage)) {
+      schemaFields = dataSchema.fields(dataSchema.fieldIndex(imageWriteOptions.colImage)).dataType.asInstanceOf[StructType]
+      rowFields = row.getStruct(dataSchema.fieldIndex(imageWriteOptions.colImage), 6)
     }
 
-    val tiffOrigin = rowFields.getString(schemaFields.fieldIndex(colOrigin))
-    val tiffBands = rowFields.getInt(schemaFields.fieldIndex(colBands))
-    val tiffWidth = rowFields.getInt(schemaFields.fieldIndex(colWidth))
-    val tiffHeight = rowFields.getInt(schemaFields.fieldIndex(colHeight))
-    val tiffGeometry = rowFields.getString(schemaFields.fieldIndex(colWkt))
-    val tiffData = rowFields.getArray(schemaFields.fieldIndex(colData)).toDoubleArray()
+    val tiffOrigin = rowFields.getString(schemaFields.fieldIndex(imageWriteOptions.colOrigin))
+    val tiffBands = rowFields.getInt(schemaFields.fieldIndex(imageWriteOptions.colBands))
+    val tiffWidth = rowFields.getInt(schemaFields.fieldIndex(imageWriteOptions.colWidth))
+    val tiffHeight = rowFields.getInt(schemaFields.fieldIndex(imageWriteOptions.colHeight))
+    //val tiffGeometry = rowFields.getString(schemaFields.fieldIndex(imageWriteOptions.colWkt))
+    val tiffGeometry = Row.fromSeq(rowFields.toSeq(schemaFields)).get(schemaFields.fieldIndex(imageWriteOptions.colWkt))
+    val tiffData = rowFields.getArray(schemaFields.fieldIndex(imageWriteOptions.colData)).toDoubleArray()
+    println("Geometry: " + tiffGeometry)
+
+    // if an image is invalid, fields are -1 and data array is empty. Skip writing that image
+    if (tiffBands == -1) return
 
     // create a writable raster object
     val raster = RasterFactory.createBandedRaster(DataBuffer.TYPE_DOUBLE, tiffWidth, tiffHeight, tiffBands, null)
@@ -198,13 +199,19 @@ private class GeotiffFileWriter(savePath: String,
       }
     }
 
-    // CRS is always fixed to EPSG:4326
-    val crs = CRS.decode("EPSG:4326", true)
+    // CRS is decoded to user-provided option "writeToCRS", default value is "EPSG:4326"
+    val crs = CRS.decode(imageWriteOptions.writeToCRS, true)
 
     // Extract the geometry coordinates and set the envelop of the geotiff source
-    val wktReader = new WKTReader()
-    val envGeom = wktReader.read(tiffGeometry).asInstanceOf[Polygon]
-    val coordinateList = envGeom.getCoordinates()
+    var coordinateList: Array[Coordinate] = null
+    if (tiffGeometry.isInstanceOf[UTF8String]) {
+      val wktReader = new WKTReader()
+      val envGeom = wktReader.read(tiffGeometry.toString).asInstanceOf[Polygon]
+      coordinateList = envGeom.getCoordinates()
+    } else {
+      val envGeom = GeometrySerializer.deserialize(tiffGeometry.asInstanceOf[ArrayData])
+      coordinateList = envGeom.getCoordinates()
+    }
     val referencedEnvelope = new ReferencedEnvelope(coordinateList(0).x, coordinateList(2).x, coordinateList(0).y, coordinateList(2).y, crs)
 
     // create the write path

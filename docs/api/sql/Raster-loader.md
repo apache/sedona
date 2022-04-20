@@ -29,6 +29,34 @@ Output:
  |    |    |-- element: double (containsNull = true)
 ```
 
+There are three more optional parameters for reading GeoTiff:
+
+```html
+ |-- readfromCRS: Coordinate reference system of the geometry coordinates representing the location of the Geotiff. An example value of readfromCRS is EPSG:4326.
+ |-- readToCRS: If you want to tranform the Geotiff location geometry coordinates to a different coordinate reference system, you can define the target coordinate reference system with this option.
+ |-- disableErrorInCRS: (Default value false) => Indicates whether to ignore errors in CRS transformation.
+```
+
+An example with all GeoTiff read options:
+
+```Scala
+var geotiffDF = sparkSession.read.format("geotiff").option("dropInvalid", true).option("readFromCRS", "EPSG:4499").option("readToCRS", "EPSG:4326").option("disableErrorInCRS", true).load("YOUR_PATH")
+geotiffDF.printSchema()
+```
+
+Output:
+
+```html
+ |-- image: struct (nullable = true)
+ |    |-- origin: string (nullable = true)
+ |    |-- Geometry: geometry (nullable = true)
+ |    |-- height: integer (nullable = true)
+ |    |-- width: integer (nullable = true)
+ |    |-- nBands: integer (nullable = true)
+ |    |-- data: array (nullable = true)
+ |    |    |-- element: double (containsNull = true)
+```
+
 You can also select sub-attributes individually to construct a new DataFrame
 
 ```Scala
@@ -178,7 +206,7 @@ or
 Field names can be renamed, but schema should exactly match with one of the above two schemas. The output path could be a path to a directory where GeoTiff images will be saved. If the directory already exists, `write` should be called in `overwrite` mode.
 
 ```Scala
-var dfToWrite = sparkSession.read.format("geotiff").option("dropInvalid", true).load("PATH_TO_INPUT_GEOTIFF_IMAGES")
+var dfToWrite = sparkSession.read.format("geotiff").option("dropInvalid", true).option("readToCRS", "EPSG:4326").load("PATH_TO_INPUT_GEOTIFF_IMAGES")
 dfToWrite.write.format("geotiff").save("DESTINATION_PATH")
 ```
 
@@ -201,10 +229,23 @@ If you want the saved GeoTiff images not to be distributed into multiple partiti
 dfToWrite.coalesce(1).write.mode("overwrite").format("geotiff").save("DESTINATION_PATH")
 ```
 
-In case, you rename the columns of GeoTiff dataframe, you can set the corresponding column names with the `option` parameter.
+In case, you rename the columns of GeoTiff dataframe, you can set the corresponding column names with the `option` parameter. All available optional parameters are listed below:
+
+```html
+ |-- writeToCRS: (Default value "EPSG:4326") => Coordinate reference system of the geometry coordinates representing the location of the Geotiff.
+ |-- fieldImage: (Default value "image") => Indicates the image column of GeoTiff DataFrame.
+ |-- fieldOrigin: (Default value "origin") => Indicates the origin column of GeoTiff DataFrame.
+ |-- fieldNBands: (Default value "nBands") => Indicates the nBands column of GeoTiff DataFrame.
+ |-- fieldWidth: (Default value "width") => Indicates the width column of GeoTiff DataFrame.
+ |-- fieldHeight: (Default value "height") => Indicates the height column of GeoTiff DataFrame.
+ |-- fieldWkt: (Default value "wkt") => Indicates the wkt column of GeoTiff DataFrame.
+ |-- fieldData: (Default value "data") => Indicates the data column of GeoTiff DataFrame.
+```
+
+An example:
 
 ```Scala
-dfToWrite = sparkSession.read.format("geotiff").option("dropInvalid", true).load("PATH_TO_INPUT_GEOTIFF_IMAGES")
-dfToWrite = dfToWrite.selectExpr("image.origin as source","image.wkt as geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
-dfToWrite.write.mode("overwrite").format("geotiff").option("key_origin", "source").option("key_wkt", "geom").option("key_n_bands", "bands").save("DESTINATION_PATH")
+dfToWrite = sparkSession.read.format("geotiff").option("dropInvalid", true).option("readToCRS", "EPSG:4326").load("PATH_TO_INPUT_GEOTIFF_IMAGES")
+dfToWrite = dfToWrite.selectExpr("image.origin as source","ST_GeomFromWkt(image.wkt) as geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+dfToWrite.write.mode("overwrite").format("geotiff").option("writeToCRS", "EPSG:4326").option("fieldOrigin", "source").option("fieldWkt", "geom").option("fieldNBands", "bands").save("DESTINATION_PATH")
 ```
