@@ -174,20 +174,21 @@ SELECT ST_LineStringFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.
 
 ## ST_LineFromText
 
-Introduction: Construct a Line from Text, delimited by Delimiter
+Introduction: Construct a Line from Wkt text
 
-Format: `ST_LineFromText (Text:string, Delimiter:char)`
+Format:
+`ST_LineFromText (Wkt:string)`
 
 Since: `v1.2.1`
 
 Spark SQL example:
 ```SQL
-SELECT ST_LineFromText(linetable._c0,',') AS lineshape
+SELECT ST_LineFromText(linetable._c0) AS lineshape
 FROM linetable
 ```
 
 ```SQL
-SELECT ST_LineFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794', ',') AS linestringshape
+SELECT ST_LineFromText('Linestring(1 2, 3 4)') AS line
 ```
 
 ## ST_PolygonFromEnvelope
