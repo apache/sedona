@@ -155,10 +155,6 @@ FROM polygontable
 SELECT ST_PolygonFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794,-74.0428197,40.6867969', ',') AS polygonshape
 ```
 
-```SQL
-SELECT ST_LineFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794,-74.0428197,40.6867969', ',') AS lineshape
-```
-
 ## ST_LineStringFromText
 
 Introduction: Construct a LineString from Text, delimited by Delimiter. Unlimited UUID strings can be appended.

@@ -140,7 +140,6 @@ class predicateTestScala extends TestBaseScala {
       assert(equaldf.count() == 0, s"Expected 0 value but got ${equaldf.count()}")
 
     }
-
     it("Passed ST_Equals for ST_PolygonFromEnvelope and ST_PolygonFromText") {
 
       // Test a Polygon formed using ST_PolygonFromText against any polygon in the table formed using ST_PolygonFromEnvelope for equality.
