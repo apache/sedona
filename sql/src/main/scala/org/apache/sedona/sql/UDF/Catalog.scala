@@ -40,6 +40,7 @@ object Catalog {
     ST_Contains,
     ST_Intersects,
     ST_Within,
+    ST_Disjoint,
     ST_Distance,
     ST_3DDistance,
     ST_ConvexHull,
@@ -103,6 +104,7 @@ object Catalog {
     ST_Multi,
     ST_PointOnSurface,
     ST_Reverse,
+    ST_AsEWKT,
     // Expression for rasters
     RS_NormalizedDifference,
     RS_Mean,

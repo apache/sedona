@@ -104,4 +104,28 @@ public class Predicates {
             return JudgementHelper.match(geom1, geom2, halfOpenRectangle, false);
         }
     }
+
+    public static class ST_Disjoint extends ScalarFunction {
+        private List<Envelope> grids;
+
+        /**
+         * Constructor for duplicate removal
+         */
+        public ST_Disjoint(PartitioningUtils partitioner) {
+            grids = partitioner.fetchLeafZones();
+        }
+
+        /**
+         * Constructor for relation checking without duplicate removal
+         */
+        public ST_Disjoint() {
+        }
+
+        @DataTypeHint("Boolean")
+        public Boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
+            return geom1.disjoint(geom2);
+        }
+    }
 }
