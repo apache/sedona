@@ -205,4 +205,33 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(df.first().getAs[mutable.WrappedArray[Double]](0)(1) == 255)
     }
   }
+
+  describe("Should pass all transformation tests") {
+    it("Passed RS_AppendNormalizedDifference for new data length") {
+      var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/test3.tif")
+      df = df.selectExpr(" image.data as data", "image.nBands as nBands")
+      val rowFirst = df.first()
+      val nBands = rowFirst.getAs[Int](1)
+      val lengthInitial = rowFirst.getAs[mutable.WrappedArray[Double]](0).length
+      val lengthBand = lengthInitial/nBands
+
+      df = df.selectExpr("RS_AppendNormalizedDifference(data, 1, 2, nBands) as targetData")
+      assert(df.first().getAs[mutable.WrappedArray[Double]](0).length == lengthInitial + lengthBand)
+    }
+
+    it("Passed RS_AppendNormalizedDifference for new band elements") {
+      var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/test3.tif")
+      df = df.selectExpr(" image.data as data", "image.nBands as nBands")
+      var rowFirst = df.first()
+      val nBands = rowFirst.getAs[Int](1)
+      val lengthInitial = rowFirst.getAs[mutable.WrappedArray[Double]](0).length
+      val lengthBand = lengthInitial/nBands
+
+      df = df.selectExpr("RS_AppendNormalizedDifference(data, 1, 2, nBands) as targetData")
+      rowFirst = df.first()
+      assert((rowFirst.getAs[mutable.WrappedArray[Double]](0)(lengthInitial) == 0.12567237163814182) &&
+        (rowFirst.getAs[mutable.WrappedArray[Double]](0)(lengthInitial + lengthBand - 1) == 0.033854166666666664))
+    }
+  }
+
 }

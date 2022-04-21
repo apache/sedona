@@ -771,3 +771,45 @@ case class RS_Normalize(inputExpressions: Seq[Expression])
 }
 
 
+/// Append the Normalized Difference between two bands to the image array data as a new band
+case class RS_AppendNormalizedDifference(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  // This is an expression which takes four input expressions
+  assert(inputExpressions.length == 4)
+
+  val EPSILON = 1e-10
+
+  override def nullable: Boolean = false
+
+  override def eval(inputRow: InternalRow): Any = {
+    val data = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
+    val indexBand1 = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
+    val indexBand2 = inputExpressions(2).eval(inputRow).asInstanceOf[Int]
+    val nBands = inputExpressions(3).eval(inputRow).asInstanceOf[Int]
+
+    assert(indexBand1 > 0 && indexBand2 > 0 && nBands > 0)
+
+    val appendedData = appendNormalizedDifference(data, indexBand1, indexBand2, nBands)
+    new GenericArrayData(appendedData)
+  }
+  private def appendNormalizedDifference(data: Array[Double], indexBand1: Int, indexBand2: Int, nBands: Int): Array[Double] = {
+    val bandLength = data.length/nBands
+    val dataBand1 = data.slice((indexBand1 - 1)*bandLength, indexBand1*bandLength)
+    val dataBand2 = data.slice((indexBand2 - 1)*bandLength, indexBand2*bandLength)
+
+    val dataBandNew = dataBand1.zip(dataBand2).map{case (x, y) => if ((x + y) != 0) (x - y)/(x + y) else (x - y)/(x + y + EPSILON)}
+    val result = data ++ dataBandNew
+
+    result
+  }
+
+  override def dataType: DataType = ArrayType(DoubleType)
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+

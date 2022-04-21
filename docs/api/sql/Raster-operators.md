@@ -307,3 +307,94 @@ Spark SQL example
 ```SQL
 SELECT RS_Normalize(band)
 ```
+
+## RS_AppendNormalizedDifference
+
+Introduction: Appends a Normalized Difference Index to the Geotiff Image Data as a new Band and returns the new data (example: NBR, NDBI) 
+
+Format: `RS_AppendNormalizedDifference (data: Array[Double], indexBand1: Int, indexBand2: Int, nBands: Int)`
+
+The normalized difference index is calculated for bands indexed at `indexBand1` and `indexBand2` in `data` array. `nBands` denotes total number of bands in `data` array. It returns the `data` array after appending the normalized difference index to it.
+
+!!!note
+	Index of Geotiff bands starts from 1 (instead of 0). Index of the first band is 1.
+
+Since: `v1.2.1`
+
+Spark SQL example:
+```Scala
+
+val dfAppendedNormDiff = spark.sql("select RS_AppendNormalizedDifference(data, index1, index2, nBands) as dataEdited from dataframe")
+
+```
+
+#### Detailed Explanation:
+
+If `band1` is the band indexed at `indexBand1` and `band2` is the band indexed at `indexBand2`, normalized difference index is calculated with the following formula:
+
+`normalized difference index = (band1 - band2)/(band1 + band2 + EPSILON)`
+
+When `(band1 + band2)` is 0, `EPSILON` is 1e-10. Otherwise, `EPSILON` is 0. Difference types of normalized difference indexes are listed below:
+
+##### Normalized Burn Ratio (NBR): [Link Here](https://www.sciencebase.gov/catalog/item/4f4e4b20e4b07f02db6abb36)
+
+```html
+ |-- indexBand1: index of the Near Infrared (NIR) band in the image
+ |-- indexBand2: index of the Short-wave Infrared (SWIR) band in the image
+```
+
+##### Normalized Difference Red Edge Vegetation Index (NDRE): [Link Here](https://agris.fao.org/agris-search/search.do?recordID=US201300795763)
+
+```html
+ |-- indexBand1: index of the NIR band in the image
+ |-- indexBand2: index of the Red Edge band in the image
+```
+
+##### Green Normalized Difference Vegetation Index (GNDVI): [Link Here](https://doi.org/10.2134/agronj2001.933583x)
+
+```html
+ |-- indexBand1: index of the NIR band in the image
+ |-- indexBand2: index of the Green band in the image
+```
+
+##### Normalized Difference Built-up Index (NDBI): [Link Here](https://doi.org/10.1080/01431160304987)
+
+```html
+ |-- indexBand1: index of the Short-wave Infrared (SWIR) band in the image
+ |-- indexBand2: index of the Near Infrared (NIR) band in the image
+```
+
+##### Blue Normalized Difference Vegetation Index (BNDVI): [Link Here](https://doi.org/10.1016/S1672-6308(07)60027-4)
+
+```html
+ |-- indexBand1: index of the NIR band in the image
+ |-- indexBand2: index of the Blue band in the image
+```
+
+##### Normalized Difference Snow Index (NDSI): [Link Here](https://doi.org/10.1109/IGARSS.1994.399618)
+
+```html
+ |-- indexBand1: index of the Green band in the image
+ |-- indexBand2: index of the Short-wave Infrared (SWIR) band in the image
+```
+
+##### Normalized Difference Vegetation Index (NDVI): [Link Here](https://doi.org/10.1016/0034-4257(79)90013-0)
+
+```html
+ |-- indexBand1: index of the Red band in the image
+ |-- indexBand2: index of the Near Infrared (NIR) band in the image
+```
+
+##### Normalized Difference Water Index (NDWI): [Link Here](https://doi.org/10.1080/01431169608948714)
+
+```html
+ |-- indexBand1: index of the Green band in the image
+ |-- indexBand2: index of the Near Infrared (NIR) band in the image
+```
+
+##### Standardized Water-Level Index (SWI): [Link Here](https://doi.org/10.3390/w13121647)
+
+```html
+ |-- indexBand1: index of the VRE1 band
+ |-- indexBand2: index of the SWIR2 band
+```
