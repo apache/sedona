@@ -111,3 +111,10 @@ class TestConstructors(TestBase):
         polygon_df = self.spark.sql("select ST_GeomFromGeoJSON(polygontable._c0) as countyshape from polygontable")
         polygon_df.show()
         assert polygon_df.count() == 1000
+
+    def test_line_from_text(self) :
+        input_df = self.spark.createDataFrame([("LineString(1 2, 3 4)",)], ["wkt"])
+        input_df.createOrReplaceTempView("input_wkt")
+        line_df = self.spark.sql("select ST_LineFromText(wkt) as geom from input_wkt")
+        assert line_df.count() == 1
+
