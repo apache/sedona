@@ -42,7 +42,7 @@ object GeotiffSchema {
    */
   val columnSchema = StructType(
     StructField("origin", StringType, true) ::
-      StructField("wkt", StringType, true) ::
+      StructField("geometry", StringType, true) ::
       StructField("height", IntegerType, false) ::
       StructField("width", IntegerType, false) ::
       StructField("nBands", IntegerType, false) ::

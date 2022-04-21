@@ -30,7 +30,7 @@ private[io] class ImageWriteOptions(@transient private val parameters: CaseInsen
   val colBands = parameters.getOrElse("fieldNBands", "nBands")
   val colWidth = parameters.getOrElse("fieldWidth", "width")
   val colHeight = parameters.getOrElse("fieldHeight", "height")
-  val colWkt = parameters.getOrElse("fieldWkt", "wkt")
+  val colGeometry = parameters.getOrElse("fieldGeometry", "geometry")
   val colData = parameters.getOrElse("fieldData", "data")
 
 }

@@ -60,7 +60,7 @@ Output:
 You can also select sub-attributes individually to construct a new DataFrame
 
 ```Scala
-geotiffDF = geotiffDF.selectExpr("image.origin as origin","ST_GeomFromWkt(image.wkt) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+geotiffDF = geotiffDF.selectExpr("image.origin as origin","ST_GeomFromWkt(image.geometry) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
 geotiffDF.createOrReplaceTempView("GeotiffDataframe")
 geotiffDF.show()
 ```
@@ -219,7 +219,7 @@ dfToWrite.write.mode("overwrite").format("geotiff").save("DESTINATION_PATH")
 You can also extract the columns nested within `image` column and write the dataframe as GeoTiff image.
 
 ```Scala
-dfToWrite = dfToWrite.selectExpr("image.origin as origin","image.wkt as wkt", "image.height as height", "image.width as width", "image.data as data", "image.nBands as nBands")
+dfToWrite = dfToWrite.selectExpr("image.origin as origin","image.geometry as geometry", "image.height as height", "image.width as width", "image.data as data", "image.nBands as nBands")
 dfToWrite.write.mode("overwrite").format("geotiff").save("DESTINATION_PATH")
 ```
 
@@ -238,7 +238,7 @@ In case, you rename the columns of GeoTiff dataframe, you can set the correspond
  |-- fieldNBands: (Default value "nBands") => Indicates the nBands column of GeoTiff DataFrame.
  |-- fieldWidth: (Default value "width") => Indicates the width column of GeoTiff DataFrame.
  |-- fieldHeight: (Default value "height") => Indicates the height column of GeoTiff DataFrame.
- |-- fieldWkt: (Default value "wkt") => Indicates the wkt column of GeoTiff DataFrame.
+ |-- fieldGeometry: (Default value "geometry") => Indicates the geometry column of GeoTiff DataFrame.
  |-- fieldData: (Default value "data") => Indicates the data column of GeoTiff DataFrame.
 ```
 
@@ -246,6 +246,6 @@ An example:
 
 ```Scala
 dfToWrite = sparkSession.read.format("geotiff").option("dropInvalid", true).option("readToCRS", "EPSG:4326").load("PATH_TO_INPUT_GEOTIFF_IMAGES")
-dfToWrite = dfToWrite.selectExpr("image.origin as source","ST_GeomFromWkt(image.wkt) as geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
-dfToWrite.write.mode("overwrite").format("geotiff").option("writeToCRS", "EPSG:4326").option("fieldOrigin", "source").option("fieldWkt", "geom").option("fieldNBands", "bands").save("DESTINATION_PATH")
+dfToWrite = dfToWrite.selectExpr("image.origin as source","ST_GeomFromWkt(image.geometry) as geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+dfToWrite.write.mode("overwrite").format("geotiff").option("writeToCRS", "EPSG:4326").option("fieldOrigin", "source").option("fieldGeometry", "geom").option("fieldNBands", "bands").save("DESTINATION_PATH")
 ```

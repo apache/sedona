@@ -162,8 +162,6 @@ private class GeotiffFileWriter(savePath: String,
 
   override def write(row: InternalRow): Unit = {
     // retrieving the metadata of a geotiff image
-    println("Schema:")
-    println(dataSchema)
     var rowFields: InternalRow = row
     var schemaFields: StructType = dataSchema
     val fields = dataSchema.fieldNames
@@ -177,10 +175,8 @@ private class GeotiffFileWriter(savePath: String,
     val tiffBands = rowFields.getInt(schemaFields.fieldIndex(imageWriteOptions.colBands))
     val tiffWidth = rowFields.getInt(schemaFields.fieldIndex(imageWriteOptions.colWidth))
     val tiffHeight = rowFields.getInt(schemaFields.fieldIndex(imageWriteOptions.colHeight))
-    //val tiffGeometry = rowFields.getString(schemaFields.fieldIndex(imageWriteOptions.colWkt))
-    val tiffGeometry = Row.fromSeq(rowFields.toSeq(schemaFields)).get(schemaFields.fieldIndex(imageWriteOptions.colWkt))
+    val tiffGeometry = Row.fromSeq(rowFields.toSeq(schemaFields)).get(schemaFields.fieldIndex(imageWriteOptions.colGeometry))
     val tiffData = rowFields.getArray(schemaFields.fieldIndex(imageWriteOptions.colData)).toDoubleArray()
-    println("Geometry: " + tiffGeometry)
 
     // if an image is invalid, fields are -1 and data array is empty. Skip writing that image
     if (tiffBands == -1) return

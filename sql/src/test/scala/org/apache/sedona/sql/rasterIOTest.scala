@@ -32,7 +32,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
   describe("Raster IO test") {
     it("Should Pass geotiff loading without readFromCRS and readToCRS") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
-      df = df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.wkt) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+      df = df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.geometry) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
       assert(df.first().getAs[Geometry](1).toText == "POLYGON ((-13095782 4021226.5, -13095782 3983905, -13058822 3983905, -13058822 4021226.5, -13095782 4021226.5))")
       assert(df.first().getInt(2) == 517)
       assert(df.first().getInt(3) == 512)
@@ -46,7 +46,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
 
     it("Should Pass geotiff loading with readToCRS") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).option("readToCRS", "EPSG:4326").load(rasterdatalocation)
-      df = df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.wkt) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+      df = df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.geometry) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
       assert(df.first().getAs[Geometry](1).toText == "POLYGON ((-117.64141128097314 33.94356351407699, -117.64141128097314 33.664978146501284, -117.30939395196258 33.664978146501284," +
         " -117.30939395196258 33.94356351407699, -117.64141128097314 33.94356351407699))")
       assert(df.first().getInt(2) == 517)
@@ -61,7 +61,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
 
     it("Should Pass geotiff loading with readFromCRS") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).option("readFromCRS", "EPSG:4499").load(rasterdatalocation)
-      df = df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.wkt) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+      df = df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.geometry) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
       assert(df.first().getAs[Geometry](1).toText == "POLYGON ((-13095782 4021226.5, -13095782 3983905, -13058822 3983905, -13058822 4021226.5, -13095782 4021226.5))")
       assert(df.first().getInt(2) == 517)
       assert(df.first().getInt(3) == 512)
@@ -75,7 +75,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
 
     it("Should Pass geotiff loading with readFromCRS and readToCRS") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).option("readFromCRS", "EPSG:4499").option("readToCRS", "EPSG:4326").load(rasterdatalocation)
-      df = df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.wkt) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+      df = df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.geometry) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
       assert(df.first().getAs[Geometry](1).toText == "POLYGON ((-117.64141128097314 33.94356351407699, -117.64141128097314 33.664978146501284, -117.30939395196258 33.664978146501284," +
         " -117.30939395196258 33.94356351407699, -117.64141128097314 33.94356351407699))")
       assert(df.first().getInt(2) == 517)
@@ -95,7 +95,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
         .option("readToCRS", "EPSG:4326")
         .option("disableErrorInCRS", true)
         .load(rasterdatalocation)
-      df = df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.wkt) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+      df = df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.geometry) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
       assert(df.first().getAs[Geometry](1).toText == "POLYGON ((-117.64141128097314 33.94356351407699, -117.64141128097314 33.664978146501284, -117.30939395196258 33.664978146501284," +
         " -117.30939395196258 33.94356351407699, -117.64141128097314 33.94356351407699))")
       assert(df.first().getInt(2) == 517)
@@ -117,7 +117,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
 
     it("should pass RS_Base64") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/")
-      df = df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.wkt) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+      df = df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.geometry) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
       df = df.selectExpr("RS_GetBand(data, 1, bands) as targetBand", "width","height")
       df.createOrReplaceTempView("geotiff")
       df = sparkSession.sql("Select RS_base64(height, width, targetBand, RS_Array(height*width, 0), RS_Array(height*width, 0)) as encodedstring from geotiff")
@@ -126,7 +126,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
 
     it("should pass RS_HTML") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/")
-      df = df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.wkt) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+      df = df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.geometry) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
       df = df.selectExpr("RS_GetBand(data, 1, bands) as targetBand", "width","height")
       df.createOrReplaceTempView("geotiff")
       df = sparkSession.sql("Select RS_base64(height, width, targetBand, RS_Array(height*width, 0.0), RS_Array(height*width, 0.0)) as encodedstring from geotiff")
@@ -158,7 +158,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
 
     it("Should Pass geotiff file writing with coalesce") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).option("readToCRS", "EPSG:4326").load(rasterdatalocation)
-      df = df.selectExpr("image.origin as origin","image.wkt as wkt", "image.height as height", "image.width as width", "image.data as data", "image.nBands as nBands")
+      df = df.selectExpr("image.origin as origin","image.geometry as geometry", "image.height as height", "image.width as width", "image.data as data", "image.nBands as nBands")
       val savePath = resourceFolder + "raster-written/"
       df.coalesce(1).write.mode("overwrite").format("geotiff").save(savePath)
 
@@ -170,7 +170,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
       }
 
       var dfWritten = sparkSession.read.format("geotiff").option("dropInvalid", true).load(loadPath)
-      dfWritten = dfWritten.selectExpr("image.origin as origin","ST_GeomFromWkt(image.wkt) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+      dfWritten = dfWritten.selectExpr("image.origin as origin","ST_GeomFromWkt(image.geometry) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
       val rowFirst = dfWritten.first()
       assert(rowFirst.getInt(2) == 517)
       assert(rowFirst.getInt(3) == 512)
@@ -185,7 +185,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
 
     it("Should Pass geotiff file writing with writeToCRS") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
-      df = df.selectExpr("image.origin as origin","image.wkt as wkt", "image.height as height", "image.width as width", "image.data as data", "image.nBands as nBands")
+      df = df.selectExpr("image.origin as origin","image.geometry as geometry", "image.height as height", "image.width as width", "image.data as data", "image.nBands as nBands")
       val savePath = resourceFolder + "raster-written/"
       df.coalesce(1).write.mode("overwrite").format("geotiff").option("writeToCRS", "EPSG:4499").save(savePath)
 
@@ -197,7 +197,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
       }
 
       var dfWritten = sparkSession.read.format("geotiff").option("dropInvalid", true).load(loadPath)
-      dfWritten = dfWritten.selectExpr("image.origin as origin","ST_GeomFromWkt(image.wkt) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+      dfWritten = dfWritten.selectExpr("image.origin as origin","ST_GeomFromWkt(image.geometry) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
       val rowFirst = dfWritten.first()
       assert(rowFirst.getInt(2) == 517)
       assert(rowFirst.getInt(3) == 512)
@@ -212,7 +212,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
 
     it("Should Pass geotiff file writing without coalesce") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
-      df = df.selectExpr("image.origin as origin","image.wkt as wkt", "image.height as height", "image.width as width", "image.data as data", "image.nBands as nBands")
+      df = df.selectExpr("image.origin as origin","image.geometry as geometry", "image.height as height", "image.width as width", "image.data as data", "image.nBands as nBands")
       val savePath = resourceFolder + "raster-written/"
       df.write.mode("overwrite").format("geotiff").save(savePath)
 
@@ -253,13 +253,13 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
 
     it("Should Pass geotiff file writing with renamed fields") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
-      df = df.selectExpr("image.origin as source","image.wkt as geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+      df = df.selectExpr("image.origin as source","image.geometry as geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
       val savePath = resourceFolder + "raster-written/"
       df.write
         .mode("overwrite")
         .format("geotiff")
         .option("fieldOrigin", "source")
-        .option("fieldWkt", "geom")
+        .option("fieldGeometry", "geom")
         .option("fieldNBands", "bands")
         .save(savePath)
 
@@ -305,13 +305,13 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
 
     it("Should Pass geotiff file writing with converted geometry") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
-      df = df.selectExpr("image.origin as source","ST_GeomFromWkt(image.wkt) as geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+      df = df.selectExpr("image.origin as source","ST_GeomFromWkt(image.geometry) as geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
       val savePath = resourceFolder + "raster-written/"
       df.write
         .mode("overwrite")
         .format("geotiff")
         .option("fieldOrigin", "source")
-        .option("fieldWkt", "geom")
+        .option("fieldGeometry", "geom")
         .option("fieldNBands", "bands")
         .save(savePath)
 
@@ -332,7 +332,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
 
     it("Should Pass geotiff file writing with handling invalid schema") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
-      df = df.selectExpr("image.origin as origin","image.wkt as wkt", "image.height as height", "image.width as width", "image.data as data")
+      df = df.selectExpr("image.origin as origin","image.geometry as geometry", "image.height as height", "image.width as width", "image.data as data")
       val savePath = resourceFolder + "raster-written/"
 
       try {
