@@ -32,6 +32,7 @@ object Catalog {
     ST_PolygonFromText,
     ST_LineStringFromText,
     ST_GeomFromText,
+    ST_LineFromText,
     ST_GeomFromWKT,
     ST_GeomFromWKB,
     ST_GeomFromGeoJSON,
