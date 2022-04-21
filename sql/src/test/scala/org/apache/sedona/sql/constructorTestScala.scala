@@ -69,6 +69,13 @@ class constructorTestScala extends TestBaseScala {
       assert(polygonDf.count() == 100)
     }
 
+    it("Passed ST_LineFromText") {
+      val geometryDf = Seq("Linestring(1 2, 3 4)").map(wkt => Tuple1(wkt)).toDF("geom")
+      geometryDf.createOrReplaceTempView("linetable")
+      var lineDf = sparkSession.sql("select ST_LineFromText(linetable.geom) from linetable")
+      assert(lineDf.count() == 1)
+    }
+
     it("Passed ST_GeomFromWKT 3D") {
       val geometryDf = Seq(
         "Point(21 52 87)",
