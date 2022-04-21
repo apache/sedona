@@ -26,9 +26,11 @@ import org.geotools.coverage.grid.{GridCoordinates2D, GridCoverage2D}
 import org.geotools.gce.geotiff.GeoTiffReader
 import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.CRS
-import org.locationtech.jts.geom.{Coordinate, GeometryFactory}
+import org.locationtech.jts.geom.{Coordinate, GeometryFactory, Polygon}
 import org.opengis.coverage.grid.{GridCoordinates, GridEnvelope}
 import org.opengis.parameter.{GeneralParameterValue, ParameterValue}
+import org.opengis.referencing.crs.CoordinateReferenceSystem
+import org.opengis.referencing.operation.MathTransform
 
 import java.io.ByteArrayInputStream
 
@@ -40,7 +42,7 @@ object GeotiffSchema {
    */
   val columnSchema = StructType(
     StructField("origin", StringType, true) ::
-      StructField("wkt", StringType, true) ::
+      StructField("geometry", StringType, true) ::
       StructField("height", IntegerType, false) ::
       StructField("width", IntegerType, false) ::
       StructField("nBands", IntegerType, false) ::
@@ -117,7 +119,7 @@ object GeotiffSchema {
    *
    */
 
-  private[io] def decode(origin: String, bytes: Array[Byte]): Option[Row] = {
+  private[io] def decode(origin: String, bytes: Array[Byte], imageSourceOptions: ImageReadOptions): Option[Row] = {
 
     val policy: ParameterValue[OverviewPolicy] = AbstractGridFormat.OVERVIEW_POLICY.createValue
     policy.setValue(OverviewPolicy.IGNORE)
@@ -141,9 +143,31 @@ object GeotiffSchema {
     }
 
     // Fetch geometry from given image
-    val source = coverage.getCoordinateReferenceSystem
-    val target = CRS.decode("EPSG:4326", true)
-    val targetCRS = CRS.findMathTransform(source, target)
+    var source: CoordinateReferenceSystem = try {
+      coverage.getCoordinateReferenceSystem
+    }
+    catch {
+      case _: Exception => null
+    }
+    if (source == null && imageSourceOptions.readFromCRS != "") {
+      source = CRS.decode(imageSourceOptions.readFromCRS, true)
+    }
+
+    val target: CoordinateReferenceSystem = if (imageSourceOptions.readToCRS != "") {
+      CRS.decode(imageSourceOptions.readToCRS, true)
+    } else {
+      null
+    }
+
+    var targetCRS: MathTransform = null
+    if (target != null) {
+      if (source == null) {
+        throw new IllegalArgumentException("Invalid arguments. Source coordinate reference system was not found.")
+      } else {
+        targetCRS = CRS.findMathTransform(source, target, imageSourceOptions.disableErrorInCRS)
+      }
+    }
+
     val gridRange2D = coverage.getGridGeometry.getGridRange
     val cords = Array(Array(gridRange2D.getLow(0), gridRange2D.getLow(1)), Array(gridRange2D.getLow(0), gridRange2D.getHigh(1)), Array(gridRange2D.getHigh(0), gridRange2D.getHigh(1)), Array(gridRange2D.getHigh(0), gridRange2D.getLow(1)))
     val polyCoordinates = new Array[Coordinate](5)
@@ -160,7 +184,10 @@ object GeotiffSchema {
 
     polyCoordinates(index) = polyCoordinates(0)
     val factory = new GeometryFactory
-    val polygon = JTS.transform(factory.createPolygon(polyCoordinates), targetCRS)
+    var polygon = factory.createPolygon(polyCoordinates)
+    if (targetCRS != null) {
+      polygon = JTS.transform(polygon, targetCRS).asInstanceOf[Polygon]
+    }
 
     // Fetch band values from given image
     val nBands: Int = coverage.getNumSampleDimensions
