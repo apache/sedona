@@ -128,7 +128,7 @@ public class Functions {
         @DataTypeHint("Boolean")
         public boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
-            return GeomUtils.isEmpty(geom);
+            return geom.isEmpty();
         }
     }
 }

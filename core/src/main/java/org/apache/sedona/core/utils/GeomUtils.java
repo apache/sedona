@@ -112,5 +112,6 @@ public class GeomUtils
         geom.geometryChanged();
         return geom;
     }
+
 }
 

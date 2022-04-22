@@ -1627,7 +1627,7 @@ case class ST_IsEmpty(inputExpressions: Seq[Expression])
   assert(inputExpressions.length == 1)
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
-    GeomUtils.isEmpty(geometry)
+    geometry.isEmpty()
   }
 
   override def dataType: DataType = BooleanType
