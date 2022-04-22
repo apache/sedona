@@ -22,6 +22,7 @@ import org.apache.spark.sql.sedona_sql.expressions.geohash.PointGeoHashEncoder;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Coordinate;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -109,5 +110,37 @@ public class Functions {
             Geometry geom = (Geometry) o;
             return GeomUtils.getEWKT(geom);
         }
+    }
+
+    public static class ST_XMax extends ScalarFunction {
+        @DataTypeHint("Double")
+        public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            Coordinate[] coord = geom.getCoordinates();
+            double max = Double.MIN_VALUE;
+            for(int i=0;i< coord.length;i++){
+                if(coord[i].getX()>max){
+                    max = coord[i].getX();
+                }
+            }
+            return max;
+        }
+
+    }
+
+    public static class ST_XMin extends ScalarFunction {
+        @DataTypeHint("Double")
+        public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            Coordinate[] coord = geom.getCoordinates();
+            double min = Double.MIN_VALUE;
+            for(int i=0;i< coord.length;i++){
+                if(coord[i].getX()<min){
+                    min = coord[i].getX();
+                }
+            }
+            return min;
+        }
+
     }
 }

@@ -88,4 +88,22 @@ public class FunctionTest extends TestBase{
         String result = (String) first(polygonTable).getField(0);
         assertEquals("POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))", result);
     }
+
+    @Test
+    public void testXMax() {
+        Table polygonTable = createPolygonTable(1);
+        Table MaxTable = polygonTable.select(call(Functions.ST_XMax.class.getSimpleName(), $(polygonColNames[0])));
+        double result = (double) first(MaxTable).getField(0);
+        System.out.println(result);
+        assertEquals(0.5, result,0);
+    }
+
+    @Test
+    public void testXMin() {
+        Table polygonTable = createPolygonTable(1);
+        Table MinTable = polygonTable.select(call(Functions.ST_XMin.class.getSimpleName(), $(polygonColNames[0])));
+        double result = (double) first(MinTable).getField(0);
+        System.out.println(result);
+        assertEquals(-0.5, result,0);
+    }
 }

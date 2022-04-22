@@ -46,6 +46,8 @@ object Catalog {
     ST_3DDistance,
     ST_ConvexHull,
     ST_NPoints,
+    ST_XMax,
+    ST_XMin,
     ST_Buffer,
     ST_Envelope,
     ST_Length,

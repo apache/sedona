@@ -31,6 +31,8 @@ import org.apache.spark.sql.sedona_sql.expressions.collect.Collect
 import org.apache.spark.sql.sedona_sql.expressions.geohash.{GeoHashDecoder, GeometryGeoHashEncoder, InvalidGeoHashException}
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.sedona_sql.expressions.subdivide.GeometrySubDivider
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Coordinate
 import org.apache.spark.sql.types.{ArrayType, _}
 import org.apache.spark.unsafe.types.UTF8String
 import org.geotools.geometry.jts.JTS
@@ -1587,6 +1589,69 @@ case class ST_AsEWKT(inputExpressions: Seq[Expression])
   }
 
   override def dataType: DataType = StringType
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Test if returning Max X coordinate value.
+ *
+ * @param inputExpressions
+ */
+case class ST_XMax(inputExpressions: Seq[Expression])
+  extends UnaryGeometryExpression with CodegenFallback {
+  assert(inputExpressions.length == 1)
+
+
+  override protected def nullSafeEval(geometry: Geometry): Any = {
+    var coord:Array[Coordinate] = geometry.getCoordinates()
+    var maxval = Double.MinValue
+    for (point<-coord) {
+      if(point.getX()>maxval){
+        maxval = point.getX()
+      }
+    }
+    maxval
+
+  }
+
+  override def dataType: DataType = DoubleType
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+
+/**
+ * Test if returning Min X coordinate value.
+ *
+ * @param inputExpressions
+ */
+case class ST_XMin(inputExpressions: Seq[Expression])
+  extends UnaryGeometryExpression with CodegenFallback {
+  assert(inputExpressions.length == 1)
+
+
+  override protected def nullSafeEval(geometry: Geometry): Any = {
+    var coord:Array[Coordinate] = geometry.getCoordinates()
+    var minval = Double.MaxValue
+    for (point<-coord) {
+      if(point.getX()<minval){
+        minval = point.getX()
+      }
+    }
+    minval
+
+  }
+
+  override def dataType: DataType = DoubleType
 
   override def children: Seq[Expression] = inputExpressions
 
