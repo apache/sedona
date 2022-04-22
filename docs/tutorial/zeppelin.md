@@ -1,4 +1,4 @@
-Sedona provides a Helium visualization plugin tailored for [Apache Zeppelin](). This finally bridges the gap between Sedona and Zeppelin.  Please read [Install Sedona-Zeppelin](../../download/zeppelin/) to learn how to install this plugin in Zeppelin.
+Sedona provides a Helium visualization plugin tailored for [Apache Zeppelin](). This finally bridges the gap between Sedona and Zeppelin.  Please read [Install Sedona-Zeppelin](../../setup/zeppelin/) to learn how to install this plugin in Zeppelin.
 
 Sedona-Zeppelin equips two approaches to visualize spatial data in Zeppelin. The first approach uses Zeppelin to plot all spatial objects on the map. The second one leverages SedonaViz to generate map images and overlay them on maps.
 

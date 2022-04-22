@@ -2,12 +2,19 @@ Sedona has received numerous help from the community. This page lists the contri
 
 ## Committers
 
-A committer has the write access to Sedona main repository and is in charge at least a major component of this project.
+A contributor who contributes enough code to Sedona will be promoted to a committer. A committer has the write access to Sedona main repository
+
+## Project Management Committee (PMC)
+
+A committer will be promoted to a PMC member when the community thinks he/she is able to be in charge at least a major component of this project.
+
+Current Sedona PMC members are as follows:
 
 
 |       Name      |        Affiliation       | Apache id |
 |:---------------:|:------------------------:|:------------------------:|
 | Paweł Kociński |	Allegro.pl	| imbruced@apache.org|
+| Yitao Li |	SafeGraph	| yitaoli@apache.org|
 |Netanel Malka| Sela Group | malka@apache.org|
 |  Mohamed Sarwat | Arizona State University | mosarwat@apache.org |
 | Jinxuan Wu| Bloomberg | jinxuanw@apache.org |

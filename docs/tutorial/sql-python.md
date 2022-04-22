@@ -18,7 +18,7 @@ spark.sql("YOUR_SQL")
 	
 ## Installation
 
-Please read [Quick start](/download/overview/#install-sedona-python) to install Sedona Python.
+Please read [Quick start](/setup/install-python) to install Sedona Python.
 
 ## Register package
 Before writing any code with Sedona please use the following code.

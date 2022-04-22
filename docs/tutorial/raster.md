@@ -14,4 +14,4 @@ Starting from `v1.1.0`, Sedona SQL supports raster data sources and raster opera
 
 ## Tutorials
 
-[Python Jupyter Notebook](https://github.com/apache/incubator-sedona/blob/master/binder/ApacheSedonaRaster_1.ipynb)
+[Python Jupyter Notebook](https://github.com/apache/incubator-sedona/blob/master/binder/ApacheSedonaRaster.ipynb)

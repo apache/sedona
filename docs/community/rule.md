@@ -5,9 +5,9 @@ The project welcomes contributions. You can contribute to Sedona code or documen
 
 The following sections brief the workflow of how to complete a contribution.
 
-## Pick / Annouce a task
+## Pick / Annouce a task using JIRA
 
-It is important to confirm that your contribution is acceptable. You should create a JIRA ticket or send an email to `dev@sedona.apache.org`
+It is important to confirm that your contribution is acceptable. You should create a JIRA ticket or pick an existing ticket. A new JIRA ticket will be automatically sent to `dev@sedona.apache.org`
 
 
 ## Develop a code contribution
@@ -31,13 +31,12 @@ Documentation contributions should satisfy the following requirements:
 !!!note
 	Please read [Compile the source code](../setup/compile.md#compile-the-documentation) to learn how to compile Sedona website.
 
-## Create a JIRA ticket and make a Pull Request
-After developing a contribution, the easiest and most visible way to push a contribution is to create a JIRA ticket and submit a Pull Request (PR) to the [GitHub repo](https://github.com/apache/incubator-sedona). Please use the JIRA ticket ID in the PR name, such as "[SEDONA-1] my subject".
+## Make a Pull Request
 
-When preparing a PR, please answser the following questions in the PR:
+After developing a contribution, the easiest and most visible way to submit a Pull Request (PR) to the [GitHub repo](https://github.com/apache/incubator-sedona). 
 
-1.  What changes were proposed in this pull request?
+**Please use the JIRA ticket ID in the PR name, such as "[SEDONA-1] my subject".**
 
-2. How was this patch tested?
+When creating a PR, please answser the questions in the PR template.
 
-When a PR is submitted Travis CI will check the build correctness. Please check the PR status, and fix any reported problems.
+When a PR is submitted, GitHub Action will check the build correctness. Please check the PR status, and fix any reported problems.
