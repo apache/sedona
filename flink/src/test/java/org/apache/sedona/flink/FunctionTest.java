@@ -64,24 +64,18 @@ public class FunctionTest extends TestBase{
     @Test
     public void testYMax() {
         Table polygonTable = createPolygonTable(1);
-        System.out.println("polygon table created");
         Table ResultTable = polygonTable.select(call(Functions.ST_YMax.class.getSimpleName(), $(polygonColNames[0])));
-        System.out.println("result table created");
         assert(first(ResultTable).getField(0)!=null);
         double result = (double) first(ResultTable).getField(0);
-        System.out.println(result);
         assertEquals(0.5, result,0);
     }
 
     @Test
     public void testYMin() {
         Table polygonTable = createPolygonTable(1);
-        System.out.println("polygon table created");
         Table ResultTable = polygonTable.select(call(Functions.ST_YMin.class.getSimpleName(), $(polygonColNames[0])));
-        System.out.println("result table created");
         assert(first(ResultTable).getField(0)!=null);
         double result = (double) first(ResultTable).getField(0);
-        System.out.println(result);
         assertEquals(-0.5, result, 0);
     }
 
