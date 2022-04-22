@@ -78,6 +78,8 @@ object Catalog {
     ST_X,
     ST_Y,
     ST_Z,
+    ST_YMax,
+    ST_YMin,
     ST_StartPoint,
     ST_Boundary,
     ST_MinimumBoundingRadius,

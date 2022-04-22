@@ -57,6 +57,22 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testYMax() {
+        Table polygonTable = createPolygonTable(1);
+        Table ResultTable = polygonTable.select(call(Functions.ST_YMax.class.getSimpleName(), $(polygonColNames[0])));
+        double result = (Double) first(ResultTable).getField(0);
+        assertEquals(0.5, result);
+    }
+
+    @Test
+    public void testYMin() {
+        Table polygonTable = createPolygonTable(1);
+        Table ResultTable = polygonTable.select(call(Functions.ST_YMin.class.getSimpleName(), $(polygonColNames[0])));
+        double result = (Double) first(ResultTable).getField(0);
+        assertEquals(-0.5, result);
+    }
+
+    @Test
     public void testGeomToGeoHash() {
         Table pointTable = createPointTable(testDataSize);
         pointTable = pointTable.select(

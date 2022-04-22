@@ -335,6 +335,16 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
     }
 
+    it("Passed ST_YMax") {
+      var test = sparkSession.sql("SELECT ST_YMax(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'))")
+      assert(test.take(1)(0).get(0).asInstanceOf[Double] == 3.0)
+    }
+
+    it("Passed ST_YMin") {
+      var test = sparkSession.sql("SELECT ST_YMin(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'))")
+      assert(test.take(1)(0).get(0).asInstanceOf[Double] == -3.0)
+    }
+
     it("Passed ST_GeometryType") {
       var test = sparkSession.sql("SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
       assert(test.take(1)(0).get(0).asInstanceOf[String].toUpperCase() == "ST_LINESTRING")

@@ -20,6 +20,8 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.core.geometryObjects.Circle
 import org.apache.sedona.core.utils.GeomUtils
+import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.geom.Coordinate
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
@@ -398,6 +400,50 @@ case class ST_IsValid(inputExpressions: Seq[Expression])
   }
 
   override def dataType: DataType = BooleanType
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_YMax(inputExpressions: Seq[Expression])
+  extends UnaryGeometryExpression with CodegenFallback {
+  assert(inputExpressions.length == 1)
+
+  override protected def nullSafeEval(geometry: Geometry): Any = {
+    val seqRev : collection.Seq[Coordinate] = geometry.getCoordinates
+    var maxVal:Double = Double.MinValue
+    for(x <- seqRev ){
+      maxVal=Math.max(maxVal,x.getY)
+    }
+    maxVal
+  }
+
+  override def dataType: DataType = DoubleType
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_YMin(inputExpressions: Seq[Expression])
+  extends UnaryGeometryExpression with CodegenFallback {
+  assert(inputExpressions.length == 1)
+
+  override protected def nullSafeEval(geometry: Geometry): Any = {
+    val seqRev : collection.Seq[Coordinate] = geometry.getCoordinates
+    var minVal:Double = Double.MaxValue
+    for(x <- seqRev ){
+      minVal=Math.max(minVal,x.getY)
+    }
+    minVal
+  }
+
+  override def dataType: DataType = DoubleType
 
   override def children: Seq[Expression] = inputExpressions
 

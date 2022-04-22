@@ -133,6 +133,37 @@ FROM df
 
     Output: `POINT Z(0 0 1)`  
 
+
+## ST_YMin
+
+Introduction: Return the minimum Y coordinate of A
+
+Format: `ST_Y_Min (A:geometry)`
+
+Since: `v1.0.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_YMin(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
+```
+
+Output : 0
+
+## ST_YMax
+
+Introduction: Return the minimum Y coordinate of A
+
+Format: `ST_YMax (A:geometry)`
+
+Since: `v1.0.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_YMax(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
+```
+
+Output: 2
+
 ## ST_Reverse
 
 Introduction: Return the geometry with vertex order reversed
