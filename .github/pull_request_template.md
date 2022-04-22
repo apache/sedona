@@ -1,3 +1,5 @@
+
+
 ## Did you read the Contributor Guide?
 
 - Yes, I have read [Contributor Rules](https://sedona.apache.org/community/rule/) and [Contributor Development Guide](https://sedona.apache.org/community/develop/)
@@ -6,7 +8,7 @@
 
 ## Is this PR related to a JIRA ticket?
 
-- Yes, the assoicated JIRA ticket is [SEDONA-XXX](https://issues.apache.org/jira/browse/SEDONA-XXX). The PR name follows the format `[SEDONA-XXX] my subject`.
+- Yes, the URL of the assoicated JIRA ticket is https://issues.apache.org/jira/browse/SEDONA-XXX. The PR name follows the format `[SEDONA-XXX] my subject`.
 
 
 - No, this is a documentation update. The PR name follows the format `[DOCS] my subject`.
