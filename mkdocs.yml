@@ -23,8 +23,6 @@ nav:
         - Install Sedona Scala/Java: setup/flink/install-scala.md
       - Release notes: setup/release-notes.md      
       - Compile the code: setup/compile.md
-      - Publish the code: setup/publish.md
-      - Vote the release: setup/vote.md
     - Download: download.md
     - Programming Guides:
       - Sedona with Apache Spark:
@@ -81,8 +79,13 @@ nav:
           - Predicate: api/flink/Predicate.md
     - Community:
       - Community: community/contact.md 
-      - Contributing rule: community/rule.md
-      - Committers: community/contributor.md
+      - Contributor Guide:
+        - Rules: community/rule.md
+        - Develop: community/develop.md
+      - Committer Guide:
+        - PMC List: community/contributor.md
+        - Publish the code: community/publish.md
+        - Vote the release: community/vote.md
       - Publications: community/publication.md
     - GeoSpark Legacy Docs:
       - Download:

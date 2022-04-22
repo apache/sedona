@@ -37,7 +37,7 @@ Sedona Python needs one additional jar file called `sedona-python-adapter` to wo
 
 You can get it using one of the following methods:
 
-1. Compile from the source within main project directory and copy it (in `python-adapter/target` folder) to SPARK_HOME/jars/ folder ([more details](/download/compile/#compile-scala-and-java-source-code))
+1. Compile from the source within main project directory and copy it (in `python-adapter/target` folder) to SPARK_HOME/jars/ folder ([more details](/setup/compile))
 
 2. Download from [GitHub release](https://github.com/apache/incubator-sedona/releases) and copy it to SPARK_HOME/jars/ folder
 3. Call the [Maven Central coordinate](../maven-coordinates) in your python program. For example, in PySparkSQL
