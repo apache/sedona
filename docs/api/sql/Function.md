@@ -1122,7 +1122,7 @@ SELECT ST_XMax(df.geometry) AS xmax
 FROM df
 ```
 
-Input: `POLYGON ((-1 1, 1 -1, -1 -1, 1 1))`
+Input: `POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))`
 
 Output: `1`
 
@@ -1141,6 +1141,6 @@ SELECT ST_XMin(df.geometry) AS xmin
 FROM df
 ```
 
-Input: `POLYGON ((-1 1, 1 -1, -1 -1, 1 1))`
+Input: `POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))`
 
 Output: `-1`

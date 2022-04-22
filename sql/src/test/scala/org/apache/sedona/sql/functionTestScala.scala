@@ -336,14 +336,14 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
 
     it("Passed ST_XMax") {
-      var test = sparkSession.sql("SELECT ST_XMax(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'))")
-      assert(test.take(1)(0).get(0).asInstanceOf[Double] == 3.0)
+      var test = sparkSession.sql("SELECT ST_XMax(ST_GeomFromWKT('POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))'))")
+      assert(test.take(1)(0).get(0).asInstanceOf[Double] == 2.0)
 
     }
 
     it("Passed ST_XMin") {
-      var test = sparkSession.sql("SELECT ST_XMin(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'))")
-      assert(test.take(1)(0).get(0).asInstanceOf[Double] == -3.0)
+      var test = sparkSession.sql("SELECT ST_XMin(ST_GeomFromWKT('POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))'))")
+      assert(test.take(1)(0).get(0).asInstanceOf[Double] == -1.0)
 
     }
 

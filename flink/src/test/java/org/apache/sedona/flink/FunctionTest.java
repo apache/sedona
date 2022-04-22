@@ -94,7 +94,6 @@ public class FunctionTest extends TestBase{
         Table polygonTable = createPolygonTable(1);
         Table MaxTable = polygonTable.select(call(Functions.ST_XMax.class.getSimpleName(), $(polygonColNames[0])));
         double result = (double) first(MaxTable).getField(0);
-        System.out.println(result);
         assertEquals(0.5, result,0);
     }
 
@@ -103,7 +102,6 @@ public class FunctionTest extends TestBase{
         Table polygonTable = createPolygonTable(1);
         Table MinTable = polygonTable.select(call(Functions.ST_XMin.class.getSimpleName(), $(polygonColNames[0])));
         double result = (double) first(MinTable).getField(0);
-        System.out.println(result);
         assertEquals(-0.5, result,0);
     }
 }

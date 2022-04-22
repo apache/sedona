@@ -133,7 +133,7 @@ public class Functions {
         public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
             Coordinate[] coord = geom.getCoordinates();
-            double min = Double.MIN_VALUE;
+            double min = Double.MAX_VALUE;
             for(int i=0;i< coord.length;i++){
                 if(coord[i].getX()<min){
                     min = coord[i].getX();
