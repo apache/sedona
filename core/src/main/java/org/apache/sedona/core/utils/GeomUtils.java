@@ -99,8 +99,15 @@ public class GeomUtils
         Coordinate[] coordinates = geom.getCoordinates();
         GeometryFactory geometryFactory = new GeometryFactory();
         CoordinateSequence sequence = geometryFactory.getCoordinateSequenceFactory().create(coordinates);
-        for(int i = 0; i < coordinates.length; i++) {
-            sequence.setOrdinate(i, 2, NULL_ORDINATE);
+        if(sequence.getDimension() > 2) {
+            for (int i = 0; i < coordinates.length; i++) {
+                sequence.setOrdinate(i, 2, NULL_ORDINATE);
+            }
+            if(sequence.getDimension() == 4) {
+                for (int i = 0; i < coordinates.length; i++) {
+                    sequence.setOrdinate(i, 3, NULL_ORDINATE);
+                }
+            }
         }
         geom.geometryChanged();
         return geom;
