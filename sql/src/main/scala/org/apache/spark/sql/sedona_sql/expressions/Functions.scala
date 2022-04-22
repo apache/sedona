@@ -1573,6 +1573,29 @@ case class ST_Reverse(inputExpressions: Seq[Expression])
   }
 }
 
+
+/**
+ * Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates.
+ *
+ * @param inputExpressions
+ */
+case class ST_Force_2D(inputExpressions: Seq[Expression])
+  extends UnaryGeometryExpression with CodegenFallback {
+  assert(inputExpressions.length == 1)
+
+  override protected def nullSafeEval(geometry: Geometry): Any = {
+    new GenericArrayData(GeometrySerializer.serialize(GeomUtils.get2dGeom(geometry)))
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
  * Returns the geometry in EWKT format
  *
