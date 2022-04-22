@@ -13,11 +13,11 @@
  */
 package org.apache.sedona.core.utils;
 
-import org.locationtech.jts.geom.CoordinateSequence;
-import org.locationtech.jts.geom.CoordinateSequenceFilter;
-import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.WKTWriter;
 import java.util.Objects;
+
+import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 
 public class GeomUtils
 {
@@ -93,5 +93,23 @@ public class GeomUtils
         }
 
         return sridString + new WKTWriter().write(geometry);
+    }
+
+    public static Geometry get2dGeom(Geometry geom) {
+        Coordinate[] coordinates = geom.getCoordinates();
+        GeometryFactory geometryFactory = new GeometryFactory();
+        CoordinateSequence sequence = geometryFactory.getCoordinateSequenceFactory().create(coordinates);
+        if(sequence.getDimension() > 2) {
+            for (int i = 0; i < coordinates.length; i++) {
+                sequence.setOrdinate(i, 2, NULL_ORDINATE);
+            }
+            if(sequence.getDimension() == 4) {
+                for (int i = 0; i < coordinates.length; i++) {
+                    sequence.setOrdinate(i, 3, NULL_ORDINATE);
+                }
+            }
+        }
+        geom.geometryChanged();
+        return geom;
     }
 }

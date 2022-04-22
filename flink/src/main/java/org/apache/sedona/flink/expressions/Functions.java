@@ -21,7 +21,10 @@ import org.apache.spark.sql.sedona_sql.expressions.geohash.GeometryGeoHashEncode
 import org.apache.spark.sql.sedona_sql.expressions.geohash.PointGeoHashEncoder;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -29,6 +32,8 @@ import org.opengis.referencing.operation.TransformException;
 import scala.Option;
 
 import java.util.Optional;
+
+import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 
 public class Functions {
     public static class ST_Buffer extends ScalarFunction {
@@ -42,7 +47,7 @@ public class Functions {
     public static class ST_Distance extends ScalarFunction {
         @DataTypeHint("Double")
         public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
-                @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
+                           @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
             return geom1.distance(geom2);
@@ -108,6 +113,14 @@ public class Functions {
         public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
             return GeomUtils.getEWKT(geom);
+        }
+    }
+
+    public static class ST_Force_2D extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return GeomUtils.get2dGeom(geom);
         }
     }
 }

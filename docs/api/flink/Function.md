@@ -19,10 +19,10 @@ Introduction:
 Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS
 
 !!!note
-	By default, this function uses lat/lon order. You can use ==ST_FlipCoordinates== to swap X and Y.
+By default, this function uses lat/lon order. You can use ==ST_FlipCoordinates== to swap X and Y.
 
 !!!note
-	If ==ST_Transform== throws an Exception called "Bursa wolf parameters required", you need to disable the error notification in ST_Transform. You can append a boolean value at the end.
+If ==ST_Transform== throws an Exception called "Bursa wolf parameters required", you need to disable the error notification in ST_Transform. You can append a boolean value at the end.
 
 Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional] DisableError)`
 
@@ -30,7 +30,7 @@ Since: `v1.2.0`
 
 Spark SQL example (simple):
 ```SQL
-SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857') 
+SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857')
 FROM polygondf
 ```
 
@@ -41,7 +41,7 @@ FROM polygondf
 ```
 
 !!!note
-	The detailed EPSG information can be searched on [EPSG.io](https://epsg.io/).
+The detailed EPSG information can be searched on [EPSG.io](https://epsg.io/).
 
 ## ST_Buffer
 
@@ -83,7 +83,7 @@ Format: `ST_GeoHash(geom: geometry, precision: int)`
 
 Since: `v1.2.0`
 
-Example: 
+Example:
 
 Query:
 
@@ -109,7 +109,7 @@ Format: `ST_PointOnSurface(A:geometry)`
 
 Since: `v1.2.1`
 
-Examples: 
+Examples:
 
 
 ```SQL
@@ -131,7 +131,7 @@ FROM df
 
 4.  Input: `LINESTRING(0 5 1, 0 0 1, 0 10 2)`
 
-    Output: `POINT Z(0 0 1)`  
+    Output: `POINT Z(0 0 1)`
 
 ## ST_Reverse
 
@@ -151,6 +151,25 @@ FROM df
 Input: `POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))`
 
 Output: `POLYGON ((-0.5 -0.5, 0.5 -0.5, 0.5 0.5, -0.5 0.5, -0.5 -0.5))`
+
+## ST_Force_2D
+
+Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates
+
+Format: `ST_Force_2D (A:geometry)`
+
+Since: `v1.2.1`
+
+Example:
+
+```SQL
+SELECT ST_Force_2D(df.geometry) AS geom
+FROM df
+```
+
+Input: `POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))`
+
+Output: `POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))`
 
 ## ST_AsEWKT
 
