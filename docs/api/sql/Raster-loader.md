@@ -86,6 +86,9 @@ Format: `RS_GetBand (allBandValues: Array[Double], targetBand:Int, totalBands:In
 
 Since: `v1.1.0`
 
+!!!note
+	Index of targetBand starts from 1 (instead of 0). Index of the first band is 1.
+
 Spark SQL example:
 
 ```Scala

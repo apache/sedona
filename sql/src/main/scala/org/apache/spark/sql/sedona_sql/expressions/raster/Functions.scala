@@ -385,7 +385,7 @@ case class RS_MultiplyFactor(inputExpressions: Seq[Expression])
 }
 
 // Add two bands
-case class RS_AddBands(inputExpressions: Seq[Expression])
+case class RS_Add(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   assert(inputExpressions.length == 2)
 
@@ -419,7 +419,7 @@ case class RS_AddBands(inputExpressions: Seq[Expression])
 }
 
 // Subtract two bands
-case class RS_SubtractBands(inputExpressions: Seq[Expression])
+case class RS_Subtract(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   assert(inputExpressions.length == 2)
 
@@ -453,7 +453,7 @@ case class RS_SubtractBands(inputExpressions: Seq[Expression])
 }
 
 // Multiple two bands
-case class RS_MultiplyBands(inputExpressions: Seq[Expression])
+case class RS_Multiply(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   assert(inputExpressions.length == 2)
 
@@ -487,7 +487,7 @@ case class RS_MultiplyBands(inputExpressions: Seq[Expression])
 }
 
 // Divide two bands
-case class RS_DivideBands(inputExpressions: Seq[Expression])
+case class RS_Divide(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   assert(inputExpressions.length == 2)
 
@@ -771,36 +771,28 @@ case class RS_Normalize(inputExpressions: Seq[Expression])
 }
 
 
-/// Append the Normalized Difference between two bands to the image array data as a new band
-case class RS_AppendNormalizedDifference(inputExpressions: Seq[Expression])
+/// Appends a new band to the image array data
+case class RS_Append(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
-  // This is an expression which takes four input expressions
-  assert(inputExpressions.length == 4)
-
-  val EPSILON = 1e-10
+  // This is an expression which takes three input expressions
+  assert(inputExpressions.length == 3)
 
   override def nullable: Boolean = false
 
   override def eval(inputRow: InternalRow): Any = {
     val data = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    val indexBand1 = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
-    val indexBand2 = inputExpressions(2).eval(inputRow).asInstanceOf[Int]
-    val nBands = inputExpressions(3).eval(inputRow).asInstanceOf[Int]
+    val newBand = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
+    val nBands = inputExpressions(2).eval(inputRow).asInstanceOf[Int]
 
-    assert(indexBand1 > 0 && indexBand2 > 0 && nBands > 0)
-
-    val appendedData = appendNormalizedDifference(data, indexBand1, indexBand2, nBands)
+    val appendedData = append(data, newBand, nBands)
     new GenericArrayData(appendedData)
   }
-  private def appendNormalizedDifference(data: Array[Double], indexBand1: Int, indexBand2: Int, nBands: Int): Array[Double] = {
+  private def append(data: Array[Double], newBand: Array[Double], nBands: Int): Array[Double] = {
     val bandLength = data.length/nBands
-    val dataBand1 = data.slice((indexBand1 - 1)*bandLength, indexBand1*bandLength)
-    val dataBand2 = data.slice((indexBand2 - 1)*bandLength, indexBand2*bandLength)
+    assert(newBand.length == bandLength)
 
-    val dataBandNew = dataBand1.zip(dataBand2).map{case (x, y) => if ((x + y) != 0) (x - y)/(x + y) else (x - y)/(x + y + EPSILON)}
-    val result = data ++ dataBandNew
-
-    result
+    // concat newBand to the end of data and return concatenated result
+    data ++ newBand
   }
 
   override def dataType: DataType = ArrayType(DoubleType)

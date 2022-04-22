@@ -1,60 +1,60 @@
-## RS_AddBands
+## RS_Add
 
 Introduction: Add two spectral bands in a Geotiff image 
 
-Format: `RS_AddBands (Band1: Array[Double], Band2: Array[Double])`
+Format: `RS_Add (Band1: Array[Double], Band2: Array[Double])`
 
 Since: `v1.1.0`
 
 Spark SQL example:
 ```Scala
 
-val sumDF = spark.sql("select RS_AddBands(band1, band2) as sumOfBands from dataframe")
+val sumDF = spark.sql("select RS_Add(band1, band2) as sumOfBands from dataframe")
 
 ```
 
-## RS_SubtractBands
+## RS_Subtract
 
 Introduction: Subtract two spectral bands in a Geotiff image(band2 - band1)
 
-Format: `RS_SubtractBands (Band1: Array[Double], Band2: Array[Double])`
+Format: `RS_Subtract (Band1: Array[Double], Band2: Array[Double])`
 
 Since: `v1.1.0`
 
 Spark SQL example:
 ```Scala
 
-val subtractDF = spark.sql("select RS_SubtractBands(band1, band2) as differenceOfOfBands from dataframe")
+val subtractDF = spark.sql("select RS_Subtract(band1, band2) as differenceOfOfBands from dataframe")
 
 ```
 
-## RS_MultiplyBands
+## RS_Multiply
 
 Introduction: Multiply two spectral bands in a Geotiff image
 
-Format: `RS_MultiplyBands (Band1: Array[Double], Band2: Array[Double])`
+Format: `RS_Multiply (Band1: Array[Double], Band2: Array[Double])`
 
 Since: `v1.1.0`
 
 Spark SQL example:
 ```Scala
 
-val multiplyDF = spark.sql("select RS_MultiplyBands(band1, band2) as multiplyBands from dataframe")
+val multiplyDF = spark.sql("select RS_Multiply(band1, band2) as multiplyBands from dataframe")
 
 ```
 
-## RS_DivideBands
+## RS_Divide
 
 Introduction: Divide band1 with band2 from a geotiff image
 
-Format: `RS_DivideBands (Band1: Array[Double], Band2: Array[Double])`
+Format: `RS_Divide (Band1: Array[Double], Band2: Array[Double])`
 
 Since: `v1.1.0`
 
 Spark SQL example:
 ```Scala
 
-val multiplyDF = spark.sql("select RS_DivideBands(band1, band2) as divideBands from dataframe")
+val multiplyDF = spark.sql("select RS_Divide(band1, band2) as divideBands from dataframe")
 
 ```
 
@@ -308,93 +308,19 @@ Spark SQL example
 SELECT RS_Normalize(band)
 ```
 
-## RS_AppendNormalizedDifference
+## RS_Append
 
-Introduction: Appends a Normalized Difference Index to the Geotiff Image Data as a new Band and returns the new data (example: NBR, NDBI) 
+Introduction: Appends a new band to the end of Geotiff image data and returns the new data. The new band to be appended can be a normalized difference index between two bands (example: NBR, NDBI). Normalized difference index between two bands can be calculated with RS_NormalizedDifference operator described earlier in this page. Specific bands can be retrieved using RS_GetBand operator described [here](../Raster-loader/).
 
-Format: `RS_AppendNormalizedDifference (data: Array[Double], indexBand1: Int, indexBand2: Int, nBands: Int)`
-
-The normalized difference index is calculated for bands indexed at `indexBand1` and `indexBand2` in `data` array. `nBands` denotes total number of bands in `data` array. It returns the `data` array after appending the normalized difference index to it.
-
-!!!note
-	Index of Geotiff bands starts from 1 (instead of 0). Index of the first band is 1.
+Format: `RS_Append(data: Array[Double], newBand: Array[Double], nBands: Int)`
 
 Since: `v1.2.1`
 
 Spark SQL example:
 ```Scala
 
-val dfAppendedNormDiff = spark.sql("select RS_AppendNormalizedDifference(data, index1, index2, nBands) as dataEdited from dataframe")
+val dfAppended = spark.sql("select RS_Append(data, normalizedDifference, nBands) as dataEdited from dataframe")
 
 ```
 
-#### Detailed Explanation:
 
-If `band1` is the band indexed at `indexBand1` and `band2` is the band indexed at `indexBand2`, normalized difference index is calculated with the following formula:
-
-`normalized difference index = (band1 - band2)/(band1 + band2 + EPSILON)`
-
-When `(band1 + band2)` is 0, `EPSILON` is 1e-10. Otherwise, `EPSILON` is 0. Difference types of normalized difference indexes are listed below:
-
-##### Normalized Burn Ratio (NBR): [Link Here](https://www.sciencebase.gov/catalog/item/4f4e4b20e4b07f02db6abb36)
-
-```html
- |-- indexBand1: index of the Near Infrared (NIR) band in the image
- |-- indexBand2: index of the Short-wave Infrared (SWIR) band in the image
-```
-
-##### Normalized Difference Red Edge Vegetation Index (NDRE): [Link Here](https://agris.fao.org/agris-search/search.do?recordID=US201300795763)
-
-```html
- |-- indexBand1: index of the NIR band in the image
- |-- indexBand2: index of the Red Edge band in the image
-```
-
-##### Green Normalized Difference Vegetation Index (GNDVI): [Link Here](https://doi.org/10.2134/agronj2001.933583x)
-
-```html
- |-- indexBand1: index of the NIR band in the image
- |-- indexBand2: index of the Green band in the image
-```
-
-##### Normalized Difference Built-up Index (NDBI): [Link Here](https://doi.org/10.1080/01431160304987)
-
-```html
- |-- indexBand1: index of the Short-wave Infrared (SWIR) band in the image
- |-- indexBand2: index of the Near Infrared (NIR) band in the image
-```
-
-##### Blue Normalized Difference Vegetation Index (BNDVI): [Link Here](https://doi.org/10.1016/S1672-6308(07)60027-4)
-
-```html
- |-- indexBand1: index of the NIR band in the image
- |-- indexBand2: index of the Blue band in the image
-```
-
-##### Normalized Difference Snow Index (NDSI): [Link Here](https://doi.org/10.1109/IGARSS.1994.399618)
-
-```html
- |-- indexBand1: index of the Green band in the image
- |-- indexBand2: index of the Short-wave Infrared (SWIR) band in the image
-```
-
-##### Normalized Difference Vegetation Index (NDVI): [Link Here](https://doi.org/10.1016/0034-4257(79)90013-0)
-
-```html
- |-- indexBand1: index of the Red band in the image
- |-- indexBand2: index of the Near Infrared (NIR) band in the image
-```
-
-##### Normalized Difference Water Index (NDWI): [Link Here](https://doi.org/10.1080/01431169608948714)
-
-```html
- |-- indexBand1: index of the Green band in the image
- |-- indexBand2: index of the Near Infrared (NIR) band in the image
-```
-
-##### Standardized Water-Level Index (SWI): [Link Here](https://doi.org/10.3390/w13121647)
-
-```html
- |-- indexBand1: index of the VRE1 band
- |-- indexBand2: index of the SWIR2 band
-```
