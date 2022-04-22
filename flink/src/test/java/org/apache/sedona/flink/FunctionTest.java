@@ -101,4 +101,13 @@ public class FunctionTest extends TestBase{
         Geometry result = (Geometry) first(Forced2DTable).getField(0);
         assertEquals("POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))", result.toString());
     }
+
+    @Test
+    public void testIsEmpty() {
+        Table polygonTable = createPolygonTable(testDataSize);
+        polygonTable = polygonTable.select(call(Functions.ST_IsEmpty.class.getSimpleName(), $(polygonColNames[0])));
+        boolean result = (boolean) first(polygonTable).getField(0);
+        assertEquals(false, result);
+    }
 }
+

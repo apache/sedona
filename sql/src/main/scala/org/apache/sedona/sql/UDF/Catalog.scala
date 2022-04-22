@@ -57,6 +57,7 @@ object Catalog {
     ST_SymDifference,
     ST_Union,
     ST_IsValid,
+    ST_IsEmpty,
     ST_PrecisionReduce,
     ST_Equals,
     ST_Touches,

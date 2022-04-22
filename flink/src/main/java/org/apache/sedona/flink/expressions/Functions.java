@@ -123,4 +123,12 @@ public class Functions {
             return GeomUtils.get2dGeom(geom);
         }
     }
+
+    public static class ST_IsEmpty extends ScalarFunction {
+        @DataTypeHint("String")
+        public boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return GeomUtils.isEmpty(geom);
+        }
+    }
 }
