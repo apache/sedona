@@ -85,10 +85,10 @@ case class ST_YMax(inputExpressions: Seq[Expression])
   assert(inputExpressions.length == 1)
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
-    val seqRev : collection.Seq[Coordinate] = geometry.getCoordinates
+    val seqRev : Array[Coordinate] = geometry.getCoordinates()
     var maxVal:Double = Double.MinValue
     for(x <- seqRev ){
-      maxVal=Math.max(maxVal,x.getY)
+      maxVal=Math.max(maxVal,x.getY())
     }
     maxVal
   }
@@ -107,10 +107,10 @@ case class ST_YMin(inputExpressions: Seq[Expression])
   assert(inputExpressions.length == 1)
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
-    val seqRev : collection.Seq[Coordinate] = geometry.getCoordinates
+    val seqRev : Array[Coordinate] = geometry.getCoordinates()
     var minVal:Double = Double.MaxValue
     for(x <- seqRev){
-      minVal=Math.max(minVal,x.getY)
+      minVal=Math.min(minVal,x.getY())
     }
     minVal
   }
