@@ -6,7 +6,7 @@ The versions of Sedona have three levels: X.X.X (i.e., 0.8.1)
 
 The first level means that this version contains big structure redesign which may bring big changes in APIs and performance.
 
-The second level (i.e., 0.8) indicates that this version contains significant performance enhancement, big new features and API changes. An old Sedona user who wants to pick this version needs to be careful about the API changes. Before you move to this version, please read [Sedona version release notes](/download/release-notes/) and make sure you are ready to accept the API changes.
+The second level (i.e., 0.8) indicates that this version contains significant performance enhancement, big new features and API changes. An old Sedona user who wants to pick this version needs to be careful about the API changes. Before you move to this version, please read [Sedona version release notes](/setup/release-notes/) and make sure you are ready to accept the API changes.
 
 The third level (i.e., 0.8.1) tells that this version only contains bug fixes, some small new features and slight performance enhancement. This version will not contain any API changes. Moving to this version is safe. We highly suggest all Sedona users that stay at the same level move to the latest version in this level.
 
