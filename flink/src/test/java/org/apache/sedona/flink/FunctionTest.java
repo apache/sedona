@@ -66,7 +66,7 @@ public class FunctionTest extends TestBase{
         Table polygonTable = createPolygonTable(1);
         Table ResultTable = polygonTable.select(call(Functions.ST_YMax.class.getSimpleName(), $(polygonColNames[0])));
         assert(first(ResultTable).getField(0)!=null);
-        double result = (Double) first(ResultTable).getField(0);
+        double result = (double) first(ResultTable).getField(0);
         assertEquals(0.5, result,0);
     }
 
@@ -75,7 +75,7 @@ public class FunctionTest extends TestBase{
         Table polygonTable = createPolygonTable(1);
         Table ResultTable = polygonTable.select(call(Functions.ST_YMin.class.getSimpleName(), $(polygonColNames[0])));
         assert(first(ResultTable).getField(0)!=null);
-        double result = (Double) first(ResultTable).getField(0);
+        double result = (double) first(ResultTable).getField(0);
         assertEquals(-0.5, result, 0);
     }
 
