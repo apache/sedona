@@ -961,8 +961,9 @@ class TestPredicateJoin(TestBase):
     def test_st_force2d(self):
         tests1 = {
             "'POINT(0 5)'": "POINT (0 5)",
-            "'POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'": "POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))",
-            "'LINESTRING(0 5 1, 0 0 1, 0 10 2)'": "LINESTRING(0 5, 0 0, 0 10)"
+            "'POLYGON((0 0 2, 0 5 2, 5 0 2, 0 0 2), (1 1 2, 3 1 2, 1 3 2, 1 1 2))'":
+                "POLYGON ((0 0, 0 5, 5 0, 0 0), (1 1, 3 1, 1 3, 1 1))",
+            "'LINESTRING(0 5 1, 0 0 1, 0 10 2)'": "LINESTRING (0 5, 0 0, 0 10)"
         }
 
         for input_geom, expected_geom in tests1.items():
