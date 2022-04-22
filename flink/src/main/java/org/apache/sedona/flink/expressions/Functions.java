@@ -26,6 +26,7 @@ import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Coordinate;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -48,7 +49,7 @@ public class Functions {
     public static class ST_Distance extends ScalarFunction {
         @DataTypeHint("Double")
         public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
-                @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
+                           @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
             return geom1.distance(geom2);
@@ -85,7 +86,7 @@ public class Functions {
         public Optional<String> eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object geometry, Integer precision) {
             Geometry geom = (Geometry) geometry;
             Option<String> geoHash = GeometryGeoHashEncoder.calculate(geom, precision);
-            if (geoHash.isDefined()){
+            if (geoHash.isDefined()) {
                 return Optional.of(geoHash.get());
             }
             return Optional.empty();
@@ -157,4 +158,3 @@ public class Functions {
         }
     }
 }
-
