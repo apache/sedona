@@ -125,7 +125,7 @@ public class Functions {
     }
 
     public static class ST_IsEmpty extends ScalarFunction {
-        @DataTypeHint("String")
+        @DataTypeHint("Boolean")
         public boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
             return GeomUtils.isEmpty(geom);
