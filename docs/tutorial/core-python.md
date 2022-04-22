@@ -37,7 +37,7 @@ GeoData has one method to get user data.
 
 ## Installation
 
-Please read [Quick start](/download/overview/#install-sedona-python) to install Sedona Python.
+Please read [Quick start](/setup/install-python) to install Sedona Python.
 
 ## Apache Sedona Serializers
 Sedona has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption.
