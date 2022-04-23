@@ -16,3 +16,4 @@
 /.metals/
 /.vscode/
 .Rproj.user
+.DS_Store
