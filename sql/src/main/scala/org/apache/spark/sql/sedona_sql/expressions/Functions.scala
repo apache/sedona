@@ -1674,6 +1674,15 @@ case class ST_XMin(inputExpressions: Seq[Expression])
   }
 
   override def dataType: DataType = DoubleType
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
  * Test if Geometry is empty geometry.
  *
  * @param inputExpressions
