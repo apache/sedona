@@ -1119,7 +1119,7 @@ Example:
 
 ```SQL
 SELECT ST_AsText(
-    ST_Reverse(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'))
+    ST_Force_2D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'))
 ) AS geom
 ```
 
