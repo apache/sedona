@@ -109,7 +109,7 @@ public class FunctionTest extends TestBase{
         double result = (double) first(MinTable).getField(0);
         assertEquals(-0.5, result,0);
     }
-
+  
     @Test
     public void testForce2D() {
         Table polygonTable = createPolygonTable(1);
@@ -117,6 +117,4 @@ public class FunctionTest extends TestBase{
         Geometry result = (Geometry) first(Forced2DTable).getField(0);
         assertEquals("POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))", result.toString());
     }
-
 }
-

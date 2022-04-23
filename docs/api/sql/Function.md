@@ -1145,6 +1145,7 @@ Input: `POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))`
 
 Output: `-1`
 
+
 ## ST_Force_2D
 
 Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates
