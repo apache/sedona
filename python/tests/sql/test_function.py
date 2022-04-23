@@ -767,9 +767,9 @@ class TestPredicateJoin(TestBase):
         geom_poly = geometry_df.withColumn("polygon", expr("ST_MakePolygon(geom)"))
 
         # Then only based on closed linestring geom is created
-        geom_poly.filter("polygon IS NOT NULL").selectExpr("ST_AsText(polygon)", "expected"). \
+        geom_poly.filter("polygon IS NOT NULL").selectExpr("ST_AsText(polygon)", "expected").\
             show()
-        result = geom_poly.filter("polygon IS NOT NULL").selectExpr("ST_AsText(polygon)", "expected"). \
+        result = geom_poly.filter("polygon IS NOT NULL").selectExpr("ST_AsText(polygon)", "expected").\
             collect()
 
 
@@ -789,7 +789,7 @@ class TestPredicateJoin(TestBase):
         ).select(expr("St_GeomFromText(_1)").alias("geom"), col("_2").alias("expected_hash"))
 
         # When
-        geohash_df = geometry_df.withColumn("geohash", expr("ST_GeoHash(geom, 10)")). \
+        geohash_df = geometry_df.withColumn("geohash", expr("ST_GeoHash(geom, 10)")).\
             select("geohash", "expected_hash")
 
         # Then
@@ -939,10 +939,10 @@ class TestPredicateJoin(TestBase):
 
     def test_st_pointonsurface(self):
         tests1 = {
-            "'POINT(0 5)'":"POINT (0 5)",
-            "'LINESTRING(0 5, 0 10)'":"POINT (0 5)",
-            "'POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))'":"POINT (2.5 2.5)",
-            "'LINESTRING(0 5 1, 0 0 1, 0 10 2)'":"POINT Z(0 0 1)"
+        "'POINT(0 5)'":"POINT (0 5)",
+        "'LINESTRING(0 5, 0 10)'":"POINT (0 5)",
+        "'POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))'":"POINT (2.5 2.5)",
+        "'LINESTRING(0 5 1, 0 0 1, 0 10 2)'":"POINT Z(0 0 1)"
         }
 
         for input_geom, expected_geom in tests1.items():
@@ -970,12 +970,3 @@ class TestPredicateJoin(TestBase):
             geom_2d = self.spark.sql(
                 "select ST_AsText(ST_Force_2D(ST_GeomFromText({})))".format(input_geom))
             assert geom_2d.take(1)[0][0] == expected_geom
-
-        '''
-        ST_AsEWKT Has not been implemented yet
-        tests2 = { "'LINESTRING(0 5 1, 0 0 1, 0 10 2)'": "LINESTRING(0 5, 0 0, 0 10)" }
-
-        for input_geom, expected_geom in tests2.items():
-            pointOnSurface = self.spark.sql("select ST_AsEWKT(ST_Force_2(ST_GeomFromEWKT({})))".format(input_geom))
-            assert pointOnSurface.take(1)[0][0] == expected_geom
-        '''

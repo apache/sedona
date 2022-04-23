@@ -106,10 +106,10 @@ Introduction:
 Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS
 
 !!!note
-By default, this function uses lat/lon order. You can use ==ST_FlipCoordinates== to swap X and Y.
+    By default, this function uses lat/lon order. You can use ==ST_FlipCoordinates== to swap X and Y.
 
 !!!note
-If ==ST_Transform== throws an Exception called "Bursa wolf parameters required", you need to disable the error notification in ST_Transform. You can append a boolean value at the end.
+    If ==ST_Transform== throws an Exception called "Bursa wolf parameters required", you need to disable the error notification in ST_Transform. You can append a boolean value at the end.
 
 Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional] DisableError)`
 
@@ -117,7 +117,7 @@ Since: `v1.0.0`
 
 Spark SQL example (simple):
 ```SQL
-SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857')
+SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857') 
 FROM polygondf
 ```
 
@@ -128,7 +128,7 @@ FROM polygondf
 ```
 
 !!!note
-The detailed EPSG information can be searched on [EPSG.io](https://epsg.io/).
+	The detailed EPSG information can be searched on [EPSG.io](https://epsg.io/).
 
 ## ST_Intersection
 
@@ -191,10 +191,10 @@ Result:
 ```
 
 !!!note
-In Sedona up to and including version 1.2 the behaviour of ST_MakeValid was different.
-Be sure to check you code when upgrading.
-The previous implementation only worked for (multi)polygons and had a different interpretation of the second, boolean, argument.
-It would also sometimes return multiple geometries for a single geomtry input.
+    In Sedona up to and including version 1.2 the behaviour of ST_MakeValid was different.
+    Be sure to check you code when upgrading.
+    The previous implementation only worked for (multi)polygons and had a different interpretation of the second, boolean, argument.
+    It would also sometimes return multiple geometries for a single geomtry input.
 
 
 ## ST_PrecisionReduce
@@ -364,7 +364,7 @@ FROM polygondf
 ## ST_SimplifyPreserveTopology
 
 Introduction: Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input,
-and with the components having the same topological relationship.
+              and with the components having the same topological relationship.
 
 Since: `v1.0.0`
 
@@ -394,7 +394,7 @@ FROM polygondf
 Introduction: Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.
 
 !!!note
-Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If the MultiLineString can't be merged, the original MULTILINESTRING is returned.
+    Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If the MultiLineString can't be merged, the original MULTILINESTRING is returned.
 
 Format: `ST_LineMerge (A:geometry)`
 
@@ -559,7 +559,7 @@ Output: `LINESTRING (1 1, 2 1, 2 2, 1 2, 1 1)`
 
 Introduction: It expands the geometries. If the geometry is simple (Point, Polygon Linestring etc.) it returns the geometry
 itself, if the geometry is collection or multi it returns record for each of collection components.
-
+ 
 Format: `ST_Dump(geom: geometry)`
 
 Since: `v1.0.0`
@@ -574,7 +574,7 @@ Output: `[POINT (10 40), POINT (40 30), POINT (20 20), POINT (30 10)]`
 ## ST_DumpPoints
 
 Introduction: Returns list of Points which geometry consists of.
-
+ 
 Format: `ST_DumpPoints(geom: geometry)`
 
 Since: `v1.0.0`
@@ -590,7 +590,7 @@ Output: `[POINT (0 0), POINT (0 1), POINT (1 1), POINT (1 0), POINT (0 0)]`
 ## ST_IsClosed
 
 Introduction: RETURNS true if the LINESTRING start and end point are the same.
-
+ 
 Format: `ST_IsClosed(geom: geometry)`
 
 Since: `v1.0.0`
@@ -605,7 +605,7 @@ Output: `false`
 ## ST_NumInteriorRings
 
 Introduction: RETURNS number of interior rings of polygon geometries.
-
+ 
 Format: `ST_NumInteriorRings(geom: geometry)`
 
 Since: `v1.0.0`
@@ -620,7 +620,7 @@ Output: `1`
 ## ST_AddPoint
 
 Introduction: RETURN Linestring with additional point at the given index, if position is not available the point will be added at the end of line.
-
+ 
 Format: `ST_AddPoint(geom: geometry, point: geometry, position: integer)`
 
 Format: `ST_AddPoint(geom: geometry, point: geometry)`
@@ -644,7 +644,7 @@ LINESTRING(0 0, 1 1, 1 0, 21 52)
 ## ST_RemovePoint
 
 Introduction: RETURN Line with removed point at given index, position can be omitted and then last one will be removed.
-
+ 
 Format: `ST_RemovePoint(geom: geometry, position: integer)`
 
 Format: `ST_RemovePoint(geom: geometry)`
@@ -661,7 +661,7 @@ Output: `LINESTRING(0 0, 1 0)`
 ## ST_IsRing
 
 Introduction: RETURN true if LINESTRING is ST_IsClosed and ST_IsSimple.
-
+ 
 Format: `ST_IsRing(geom: geometry)`
 
 Since: `v1.0.0`
@@ -794,7 +794,7 @@ Format: `ST_SubDivideExplode(geom: geometry, maxVertices: int)`
 
 Since: `v1.1.0`
 
-Example:
+Example: 
 
 Query:
 ```SQL
@@ -833,7 +833,7 @@ Query
 select geom from geometries LATERAL VIEW ST_SubdivideExplode(geometry, 5) AS geom
 ```
 
-Result:
+Result: 
 ```
 +-----------------------------+
 |geom                         |
@@ -862,9 +862,9 @@ Query:
 ```SQL
 SELECT
     ST_MakePolygon(
-            ST_GeomFromText('LINESTRING(7 -1, 7 6, 9 6, 9 1, 7 -1)'),
-            ARRAY(ST_GeomFromText('LINESTRING(6 2, 8 2, 8 1, 6 1, 6 2)'))
-        ) AS polygon
+        ST_GeomFromText('LINESTRING(7 -1, 7 6, 9 6, 9 1, 7 -1)'),
+        ARRAY(ST_GeomFromText('LINESTRING(6 2, 8 2, 8 1, 6 1, 6 2)'))
+    ) AS polygon
 ```
 
 Result:
@@ -887,7 +887,7 @@ Format: `ST_GeoHash(geom: geometry, precision: int)`
 
 Since: `v1.1.1`
 
-Example:
+Example: 
 
 Query:
 
@@ -909,7 +909,7 @@ Result:
 
 Introduction: Returns MultiGeometry object based on geometry column/s or array with geometries
 
-Format
+Format 
 
 `ST_Collect(*geom: geometry)`
 
@@ -917,13 +917,13 @@ Format
 
 Since: `v1.2.0`
 
-Example:
+Example: 
 
 ```SQL
 SELECT ST_Collect(
-               ST_GeomFromText('POINT(21.427834 52.042576573)'),
-               ST_GeomFromText('POINT(45.342524 56.342354355)')
-           ) AS geom
+           ST_GeomFromText('POINT(21.427834 52.042576573)'),
+           ST_GeomFromText('POINT(45.342524 56.342354355)')
+       ) AS geom
 ```
 
 Result:
@@ -940,11 +940,11 @@ Example:
 
 ```SQL
 SELECT ST_Collect(
-               Array(
-                       ST_GeomFromText('POINT(21.427834 52.042576573)'),
-                       ST_GeomFromText('POINT(45.342524 56.342354355)')
-                   )
-           ) AS geom
+   Array(
+           ST_GeomFromText('POINT(21.427834 52.042576573)'),
+           ST_GeomFromText('POINT(45.342524 56.342354355)')
+       )
+) AS geom
 ```
 
 Result:
@@ -972,8 +972,8 @@ Example:
 
 ```SQL
 SELECT ST_Multi(
-               ST_GeomFromText('POINT(1 1)')
-           ) AS geom
+   ST_GeomFromText('POINT(1 1)')
+) AS geom
 ```
 
 Result:
@@ -1056,7 +1056,7 @@ Format: `ST_PointOnSurface(A:geometry)`
 
 Since: `v1.2.1`
 
-Examples:
+Examples: 
 
 ```
 SELECT ST_AsText(ST_PointOnSurface(ST_GeomFromText('POINT(0 5)')));
@@ -1093,8 +1093,8 @@ Example:
 
 ```SQL
 SELECT ST_AsText(
-               ST_Reverse(ST_GeomFromText('LINESTRING(0 0, 1 2, 2 4, 3 6)'))
-           ) AS geom
+   ST_Reverse(ST_GeomFromText('LINESTRING(0 0, 1 2, 2 4, 3 6)'))
+) AS geom
 ```
 
 Result:
