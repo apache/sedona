@@ -1124,7 +1124,7 @@ FROM df
 
 Input: `POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))`
 
-Output: `1`
+Output: `2`
 
 ## ST_XMin
 
@@ -1144,3 +1144,29 @@ FROM df
 Input: `POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))`
 
 Output: `-1`
+
+## ST_Force_2D
+
+Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates
+
+Format: `ST_Force_2D (A:geometry)`
+
+Since: `v1.2.1`
+
+Example:
+
+```SQL
+SELECT ST_AsText(
+    ST_Force_2D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'))
+) AS geom
+```
+
+Result:
+
+```
++---------------------------------------------------------------+
+|geom                                                           |
++---------------------------------------------------------------+
+|POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))                                |
++---------------------------------------------------------------+
+```

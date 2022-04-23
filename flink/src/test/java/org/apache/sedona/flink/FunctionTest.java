@@ -14,11 +14,16 @@
 package org.apache.sedona.flink;
 
 import org.apache.flink.table.api.Table;
+import org.apache.flink.types.Row;
+import org.apache.sedona.flink.expressions.Constructors;
 import org.apache.sedona.flink.expressions.Functions;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.apache.flink.table.api.Expressions.$;
@@ -104,4 +109,13 @@ public class FunctionTest extends TestBase{
         double result = (double) first(MinTable).getField(0);
         assertEquals(-0.5, result,0);
     }
+
+    @Test
+    public void testForce2D() {
+        Table polygonTable = createPolygonTable(1);
+        Table Forced2DTable = polygonTable.select(call(Functions.ST_Force_2D.class.getSimpleName(), $(polygonColNames[0])));
+        Geometry result = (Geometry) first(Forced2DTable).getField(0);
+        assertEquals("POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))", result.toString());
+    }
 }
+
