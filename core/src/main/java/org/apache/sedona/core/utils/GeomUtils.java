@@ -113,7 +113,12 @@ public class GeomUtils
     }
 
     public static Geometry getExteriorRing(Geometry geometry) {
-        return geometry.getFactory().createLinearRing(geometry.getCoordinates());
+        try {
+            Polygon polygon = (Polygon) geometry;
+            return polygon.getExteriorRing();
+        } catch(ClassCastException e) {
+            return null;
+        }
     }
 
     public static String getEWKT(Geometry geometry) {

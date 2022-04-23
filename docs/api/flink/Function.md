@@ -179,6 +179,27 @@ Input: `CIRCULARSTRING(1 1, 1 2, 2 4, 3 6, 1 2, 1 1), -1`
 
 Output: `POINT (1 1)`
 
+
+## ST_ExteriorRing
+
+Introduction: Returns a LINESTRING representing the exterior ring (shell) of a POLYGON. Returns NULL if the geometry is not a polygon.
+
+Format: `ST_ExteriorRing(A:geometry)`
+
+Since: `v1.2.1`
+
+Examples:
+
+```SQL
+SELECT ST_ExteriorRing(df.geometry)
+FROM df
+```
+
+Input: `POLYGON((0 0, 1 1, 2 1, 0 1, 1 -1))`
+
+Output: `LINESTRING((0 0, 1 1, 2 1, 0 1, 1 -1))`
+
+
 =======
 ## ST_AsEWKT
 
