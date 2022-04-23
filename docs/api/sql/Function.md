@@ -18,7 +18,7 @@ Introduction: Return the minimum Y coordinate of A
 
 Format: `ST_Y_Min (A:geometry)`
 
-Since: `v1.0.0`
+Since: `v1.2.1`
 
 Spark SQL example:
 ```SQL
@@ -33,7 +33,7 @@ Introduction: Return the minimum Y coordinate of A
 
 Format: `ST_YMax (A:geometry)`
 
-Since: `v1.0.0`
+Since: `v1.2.1`
 
 Spark SQL example:
 ```SQL
