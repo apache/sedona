@@ -921,8 +921,8 @@ Example:
 
 ```SQL
 SELECT ST_Collect(
-   ST_GeomFromText('POINT(21.427834 52.042576573)'),
-   ST_GeomFromText('POINT(45.342524 56.342354355)')
+    ST_GeomFromText('POINT(21.427834 52.042576573)'),
+    ST_GeomFromText('POINT(45.342524 56.342354355)')
 ) AS geom
 ```
 
@@ -941,8 +941,8 @@ Example:
 ```SQL
 SELECT ST_Collect(
     Array(
-       ST_GeomFromText('POINT(21.427834 52.042576573)'),
-       ST_GeomFromText('POINT(45.342524 56.342354355)')
+        ST_GeomFromText('POINT(21.427834 52.042576573)'),
+        ST_GeomFromText('POINT(45.342524 56.342354355)')
     )
 ) AS geom
 ```
