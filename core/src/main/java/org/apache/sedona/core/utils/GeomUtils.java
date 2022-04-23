@@ -13,10 +13,13 @@
  */
 package org.apache.sedona.core.utils;
 
-import org.apache.sedona.core.enums.GeometryType;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 
+import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.CoordinateSequenceFilter;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.WKTWriter;
 import java.util.Objects;
 
 public class GeomUtils
@@ -111,5 +114,19 @@ public class GeomUtils
 
     public static Geometry getExteriorRing(Geometry geometry) {
         return geometry.getFactory().createLinearRing(geometry.getCoordinates());
+    }
+
+    public static String getEWKT(Geometry geometry) {
+        if(geometry==null) {
+            return null;
+        }
+
+        int srid = geometry.getSRID();
+        String sridString = "";
+        if (srid != 0) {
+            sridString = "SRID=" + String.valueOf(srid) + ";";
+        }
+
+        return sridString + new WKTWriter().write(geometry);
     }
 }

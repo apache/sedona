@@ -302,6 +302,24 @@ SELECT ST_AsEWKB(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_AsEWKT
+
+Introduction: Return the Extended Well-Known Text representation of a geometry.
+EWKT is an extended version of WKT which includes the SRID of the geometry.
+The format originated in PostGIS but is supported by many GIS tools.
+If the geometry is lacking SRID a WKT format is produced.
+[See ST_SetSRID](#ST_SetSRID)
+
+Format: `ST_AsEWKT (A:geometry)`
+
+Since: `v1.2.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_AsEWKT(polygondf.countyshape)
+FROM polygondf
+```
+
 ## ST_SRID
 
 Introduction: Return the spatial refence system identifier (SRID) of the geometry.

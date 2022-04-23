@@ -95,6 +95,40 @@ case class ST_PolygonFromText(inputExpressions: Seq[Expression])
 }
 
 /**
+  * Return a line from a string. The string must be plain string and each coordinate must be separated by a delimiter.
+  *
+  * @param inputExpressions
+  */
+case class ST_LineFromText(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with UserDataGeneratator {
+  // This is an expression which takes one input expressions.
+  assert(inputExpressions.length == 1)
+
+  override def nullable: Boolean = true
+
+  override def eval(inputRow: InternalRow): Any = {
+    val lineString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
+
+    var fileDataSplitter = FileDataSplitter.WKT
+    var formatMapper = new FormatMapper(fileDataSplitter, false)
+    var geometry = formatMapper.readGeometry(lineString)
+    if(geometry.getGeometryType.contains("LineString")) {
+      new GenericArrayData(GeometrySerializer.serialize(geometry))
+    } else {
+      null
+    }
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
   * Return a linestring from a string. The string must be plain string and each coordinate must be separated by a delimiter.
   *
   * @param inputExpressions

@@ -32,6 +32,7 @@ object Catalog {
     ST_PolygonFromText,
     ST_LineStringFromText,
     ST_GeomFromText,
+    ST_LineFromText,
     ST_GeomFromWKT,
     ST_GeomFromWKB,
     ST_GeomFromGeoJSON,
@@ -105,6 +106,7 @@ object Catalog {
     ST_PointOnSurface,
     ST_Reverse,
     ST_PointN,
+    ST_AsEWKT,
     // Expression for rasters
     RS_NormalizedDifference,
     RS_Mean,

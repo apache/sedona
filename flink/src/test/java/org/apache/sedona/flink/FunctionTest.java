@@ -80,6 +80,7 @@ public class FunctionTest extends TestBase{
         assertEquals("POINT (32 -118)", result.toString());
     }
 
+    @Test
     public void testReverse() {
         Table polygonTable = createPolygonTable(1);
         Table ReversedTable = polygonTable.select(call(Functions.ST_Reverse.class.getSimpleName(), $(polygonColNames[0])));
@@ -107,5 +108,12 @@ public class FunctionTest extends TestBase{
         Point point = (Point) first(pointTable).getField(0);
         assert point != null;
         Assert.assertEquals("POINT (0.5 0.5)", point.toString());
+    }
+
+    public void testAsEWKT() {
+        Table polygonTable = createPolygonTable(testDataSize);
+        polygonTable = polygonTable.select(call(Functions.ST_AsEWKT.class.getSimpleName(), $(polygonColNames[0])));
+        String result = (String) first(polygonTable).getField(0);
+        assertEquals("POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))", result);
     }
 }

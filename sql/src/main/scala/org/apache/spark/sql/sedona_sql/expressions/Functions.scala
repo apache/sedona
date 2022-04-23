@@ -1573,7 +1573,6 @@ case class ST_Reverse(inputExpressions: Seq[Expression])
   }
 }
 
-
 /**
  * Returns the nth point in the geometry, provided it is a linestring
  *
@@ -1584,6 +1583,7 @@ case class ST_PointN(inputExpressions: Seq[Expression])
   inputExpressions.validateLength(2)
 
   override def nullable: Boolean = true
+
   lazy val GeometryFactory = new GeometryFactory()
   lazy val emptyGeometry = GeometryFactory.createGeometryCollection(null)
 
@@ -1607,6 +1607,28 @@ case class ST_PointN(inputExpressions: Seq[Expression])
   }
 
   override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Returns the geometry in EWKT format
+ *
+ * @param inputExpressions
+ */
+case class ST_AsEWKT(inputExpressions: Seq[Expression])
+  extends UnaryGeometryExpression with CodegenFallback {
+  assert(inputExpressions.length == 1)
+
+  override protected def nullSafeEval(geometry: Geometry): Any = {
+    UTF8String.fromString(GeomUtils.getEWKT(geometry))
+  }
+
+  override def dataType: DataType = StringType
 
   override def children: Seq[Expression] = inputExpressions
 

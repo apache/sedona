@@ -162,7 +162,6 @@ Since: `v1.2.1`
 
 Examples:
 
-
 ```SQL
 SELECT ST_PointN(df.geometry, 2)
 FROM df
@@ -178,4 +177,23 @@ Output: `POINT (2 4)`
 
 Input: `CIRCULARSTRING(1 1, 1 2, 2 4, 3 6, 1 2, 1 1), -1`
 
-Output: `POINT (1 1)`  
+Output: `POINT (1 1)`
+
+=======
+## ST_AsEWKT
+
+Introduction: Return the Extended Well-Known Text representation of a geometry.
+EWKT is an extended version of WKT which includes the SRID of the geometry.
+The format originated in PostGIS but is supported by many GIS tools.
+If the geometry is lacking SRID a WKT format is produced.
+[See ST_SetSRID](#ST_SetSRID)
+
+Format: `ST_AsEWKT (A:geometry)`
+
+Since: `v1.2.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_AsEWKT(polygondf.countyshape)
+FROM polygondf
+```
