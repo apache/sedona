@@ -106,10 +106,10 @@ Introduction:
 Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS
 
 !!!note
-    By default, this function uses lat/lon order. You can use ==ST_FlipCoordinates== to swap X and Y.
+        By default, this function uses lat/lon order. You can use ==ST_FlipCoordinates== to swap X and Y.
 
 !!!note
-    If ==ST_Transform== throws an Exception called "Bursa wolf parameters required", you need to disable the error notification in ST_Transform. You can append a boolean value at the end.
+        If ==ST_Transform== throws an Exception called "Bursa wolf parameters required", you need to disable the error notification in ST_Transform. You can append a boolean value at the end.
 
 Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional] DisableError)`
 
@@ -192,7 +192,7 @@ Result:
 
 !!!note
     In Sedona up to and including version 1.2 the behaviour of ST_MakeValid was different.
-    Be sure to check you code when upgrading.
+    Be sure to check you code when upgrading. 
     The previous implementation only worked for (multi)polygons and had a different interpretation of the second, boolean, argument.
     It would also sometimes return multiple geometries for a single geomtry input.
 
@@ -921,9 +921,9 @@ Example:
 
 ```SQL
 SELECT ST_Collect(
-           ST_GeomFromText('POINT(21.427834 52.042576573)'),
-           ST_GeomFromText('POINT(45.342524 56.342354355)')
-       ) AS geom
+   ST_GeomFromText('POINT(21.427834 52.042576573)'),
+   ST_GeomFromText('POINT(45.342524 56.342354355)')
+) AS geom
 ```
 
 Result:
@@ -940,10 +940,10 @@ Example:
 
 ```SQL
 SELECT ST_Collect(
-   Array(
-           ST_GeomFromText('POINT(21.427834 52.042576573)'),
-           ST_GeomFromText('POINT(45.342524 56.342354355)')
-       )
+    Array(
+       ST_GeomFromText('POINT(21.427834 52.042576573)'),
+       ST_GeomFromText('POINT(45.342524 56.342354355)')
+    )
 ) AS geom
 ```
 
@@ -972,7 +972,7 @@ Example:
 
 ```SQL
 SELECT ST_Multi(
-   ST_GeomFromText('POINT(1 1)')
+    ST_GeomFromText('POINT(1 1)')
 ) AS geom
 ```
 
@@ -1093,7 +1093,7 @@ Example:
 
 ```SQL
 SELECT ST_AsText(
-   ST_Reverse(ST_GeomFromText('LINESTRING(0 0, 1 2, 2 4, 3 6)'))
+    ST_Reverse(ST_GeomFromText('LINESTRING(0 0, 1 2, 2 4, 3 6)'))
 ) AS geom
 ```
 
