@@ -1361,16 +1361,24 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       "'POINT(0 5)'"
         -> "POINT (0 5)",
       "'POLYGON((0 0 2, 0 5 2, 5 0 2, 0 0 2), (1 1 2, 3 1 2, 1 3 2, 1 1 2))'"
-        ->"POLYGON ((0 0, 0 5, 5 0, 0 0), (1 1, 3 1, 1 3, 1 1))",
+        -> "POLYGON ((0 0, 0 5, 5 0, 0 0), (1 1, 3 1, 1 3, 1 1))",
       "'LINESTRING(0 5 1, 0 0 1, 0 10 2)'"
-        ->"LINESTRING (0 5, 0 0, 0 10)"
+        -> "LINESTRING (0 5, 0 0, 0 10)"
     )
 
-    for((inputGeom, expectedGeom) <- geomTestCases1) {
+    for ((inputGeom, expectedGeom) <- geomTestCases1) {
       var df = sparkSession.sql(s"select ST_AsText(ST_Force_2D(ST_GeomFromText($inputGeom)))")
       var result = df.collect()
-      assert(result.head.get(0).asInstanceOf[String]==expectedGeom)
+      assert(result.head.get(0).asInstanceOf[String] == expectedGeom)
     }
+  }
+
+  it ("Should pass ST_IsEmpty") {
+    var df = sparkSession.sql("SELECT ST_SetSrid(ST_GeomFromWKT('POLYGON((0 0,0 1,1 1,1 0,0 0))'), 4326) as point")
+    df.createOrReplaceTempView("table")
+    df = sparkSession.sql("SELECT ST_IsEmpty(point) from table")
+    val s = false
+    assert(df.first().get(0).asInstanceOf[Boolean] == s)
   }
 
   it("handles nulls") {

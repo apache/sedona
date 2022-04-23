@@ -37,6 +37,8 @@ public class Catalog {
                 new Functions.ST_XMax(),
                 new Functions.ST_XMin(),
                 new Functions.ST_Force_2D(),
+                new Functions.ST_Force_2D(),
+                new Functions.ST_IsEmpty()
         };
     }
 

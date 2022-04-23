@@ -1674,6 +1674,19 @@ case class ST_XMin(inputExpressions: Seq[Expression])
   }
 
   override def dataType: DataType = DoubleType
+ * Test if Geometry is empty geometry.
+ *
+ * @param inputExpressions
+ */
+case class ST_IsEmpty(inputExpressions: Seq[Expression])
+  extends UnaryGeometryExpression with CodegenFallback {
+  assert(inputExpressions.length == 1)
+
+  override protected def nullSafeEval(geometry: Geometry): Any = {
+    geometry.isEmpty()
+  }
+
+  override def dataType: DataType = BooleanType
 
   override def children: Seq[Expression] = inputExpressions
 
