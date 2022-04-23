@@ -22,7 +22,7 @@ Transform the Spatial Reference System / Coordinate Reference System of A, from 
 	By default, this function uses lat/lon order. You can use ==ST_FlipCoordinates== to swap X and Y.
 
 !!!note
-        If ==ST_Transform== throws an Exception called "Bursa wolf parameters required", you need to disable the error notification in ST_Transform. You can append a boolean value at the end.
+	If ==ST_Transform== throws an Exception called "Bursa wolf parameters required", you need to disable the error notification in ST_Transform. You can append a boolean value at the end.
 
 Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional] DisableError)`
 
@@ -41,7 +41,7 @@ FROM polygondf
 ```
 
 !!!note
-        The detailed EPSG information can be searched on [EPSG.io](https://epsg.io/).
+	The detailed EPSG information can be searched on [EPSG.io](https://epsg.io/).
 
 ## ST_Buffer
 
