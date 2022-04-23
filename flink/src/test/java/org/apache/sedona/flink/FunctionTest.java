@@ -21,7 +21,9 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -106,6 +108,15 @@ public class FunctionTest extends TestBase{
         Point point = (Point) first(pointTable).getField(0);
         assert point != null;
         Assert.assertEquals("POINT (0.5 0.5)", point.toString());
+    }
+
+    @Test
+    public void testExteriorRing() {
+        Table polygonTable = createPolygonTable(1);
+        Table linearRingTable = polygonTable.select(call(Functions.ST_ExteriorRing.class.getSimpleName(), $(polygonColNames[0])));
+        LinearRing linearRing = (LinearRing) first(linearRingTable).getField(0);
+        assert linearRing != null;
+        Assert.assertEquals("LINEARRING (-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5)", linearRing.toString());
     }
 
     public void testAsEWKT() {

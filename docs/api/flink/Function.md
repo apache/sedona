@@ -195,9 +195,9 @@ SELECT ST_ExteriorRing(df.geometry)
 FROM df
 ```
 
-Input: `POLYGON((0 0, 1 1, 2 1, 0 1, 1 -1))`
+Input: `POLYGON ((0 0, 1 1, 2 1, 0 1, 1 -1, 0 0))`
 
-Output: `LINESTRING((0 0, 1 1, 2 1, 0 1, 1 -1))`
+Output: `LINESTRING (0 0, 1 1, 2 1, 0 1, 1 -1, 0 0)`
 
 
 =======
