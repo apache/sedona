@@ -111,7 +111,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(functionDf.take(1)(0).get(0).asInstanceOf[Double].equals(expected))
     }
 
-    ignore("Passed ST_Transform") {
+    it("Passed ST_Transform") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
       var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")

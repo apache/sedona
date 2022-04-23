@@ -19,7 +19,6 @@ import org.apache.flink.util.CloseableIterator;
 import org.apache.sedona.flink.expressions.Functions;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
@@ -46,7 +45,6 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
-    @Ignore
     public void testTransform() {
         Table pointTable = createPointTable_real(testDataSize);
         Table transformedTable = pointTable.select(call(Functions.ST_Transform.class.getSimpleName(), $(pointColNames[0])
