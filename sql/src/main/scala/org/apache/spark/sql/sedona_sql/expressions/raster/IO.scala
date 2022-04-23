@@ -22,7 +22,7 @@ package org.apache.spark.sql.sedona_sql.expressions.raster
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeArrayData}
-import org.apache.spark.sql.catalyst.util.GenericArrayData
+import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.expressions.UserDataGeneratator
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
@@ -99,7 +99,7 @@ case class RS_GetBand(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 3)
-    val bandInfo =inputExpressions(0).eval(inputRow).asInstanceOf[UnsafeArrayData].toDoubleArray()
+    val bandInfo =inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
     val targetBand = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
     val totalBands = inputExpressions(2).eval(inputRow).asInstanceOf[Int]
     val result = gettargetband(bandInfo, targetBand, totalBands)
