@@ -56,7 +56,35 @@ Spark SQL example:
 SELECT ST_Buffer(polygondf.countyshape, 1)
 FROM polygondf
 ```
+## ST_YMin
 
+Introduction: Return the minimum Y coordinate of A
+
+Format: `ST_Y_Min (A:geometry)`
+
+Since: `v1.2.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_YMin(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
+```
+
+Output : 0
+
+## ST_YMax
+
+Introduction: Return the minimum Y coordinate of A
+
+Format: `ST_YMax (A:geometry)`
+
+Since: `v1.2.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_YMax(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
+```
+
+Output : 2
 ## ST_FlipCoordinates
 
 Introduction: Returns a version of the given geometry with X and Y axis flipped.

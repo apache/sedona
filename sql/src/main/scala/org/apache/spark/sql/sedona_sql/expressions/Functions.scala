@@ -49,6 +49,8 @@ import org.locationtech.jts.precision.GeometryPrecisionReducer
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier
 import org.opengis.referencing.operation.MathTransform
 import org.wololo.jts2geojson.GeoJSONWriter
+import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.geom.Coordinate
 
 import java.nio.ByteOrder
 import scala.util.{Failure, Success, Try}
@@ -77,6 +79,50 @@ case class ST_Distance(inputExpressions: Seq[Expression])
   }
 }
 
+
+case class ST_YMax(inputExpressions: Seq[Expression])
+  extends UnaryGeometryExpression with CodegenFallback {
+  assert(inputExpressions.length == 1)
+
+  override protected def nullSafeEval(geometry: Geometry): Any = {
+    val seqRev : Array[Coordinate] = geometry.getCoordinates()
+    var maxVal:Double = Double.MinValue
+    for(x <- seqRev ){
+      maxVal=Math.max(maxVal,x.getY())
+    }
+    maxVal
+  }
+
+  override def dataType: DataType = DoubleType
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_YMin(inputExpressions: Seq[Expression])
+  extends UnaryGeometryExpression with CodegenFallback {
+  assert(inputExpressions.length == 1)
+
+  override protected def nullSafeEval(geometry: Geometry): Any = {
+    val seqRev : Array[Coordinate] = geometry.getCoordinates()
+    var minVal:Double = Double.MaxValue
+    for(x <- seqRev){
+      minVal=Math.min(minVal,x.getY())
+    }
+    minVal
+  }
+
+  override def dataType: DataType = DoubleType
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
 case class ST_3DDistance(inputExpressions: Seq[Expression])
   extends BinaryGeometryExpression with CodegenFallback {
   assert(inputExpressions.length == 2)

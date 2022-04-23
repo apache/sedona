@@ -65,6 +65,16 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(functionDf.count() > 0);
     }
 
+    it("Passed ST_YMax") {
+      var test = sparkSession.sql("SELECT ST_YMax(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'))")
+      assert(test.take(1)(0).get(0).asInstanceOf[Double] == 3.0)
+    }
+
+    it("Passed ST_YMin") {
+      var test = sparkSession.sql("SELECT ST_YMin(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'))")
+      assert(test.take(1)(0).get(0).asInstanceOf[Double] == -3.0)
+    }
+
     it("Passed ST_Centroid") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")

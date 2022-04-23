@@ -25,6 +25,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Coordinate;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -53,6 +54,33 @@ public class Functions {
             return geom1.distance(geom2);
         }
     }
+
+    public static class ST_YMin extends ScalarFunction {
+        @DataTypeHint("Double")
+        public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o){
+            Geometry geom = (Geometry) o;
+            Coordinate[] points= geom.getCoordinates();
+            double min=Double.MAX_VALUE;
+            for(int i=0;i<points.length;i++){
+                min=Math.min(points[i].getY(),min);
+            }
+            return min;
+        }
+    }
+
+    public static class ST_YMax extends ScalarFunction {
+        @DataTypeHint("Double")
+        public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o){
+            Geometry geom = (Geometry) o;
+            Coordinate[] points= geom.getCoordinates();
+            double max=Double.MIN_VALUE;
+            for(int i=0;i<points.length;i++){
+                max=Math.max(points[i].getY(),max);
+            }
+            return max;
+        }
+    }
+
 
     public static class ST_Transform extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
