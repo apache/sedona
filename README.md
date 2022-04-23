@@ -1,5 +1,5 @@
 ### Spatial RDD
-`Custom Spark RDD` to partition geospatial data based on spatial proximity for faster orthogonal range queries.
+Custom Spark RDD to partition geospatial data based on spatial proximity for faster orthogonal range queries.
 
 ### What is this Fork about?
 This fork modifies the Spatial RDD to partition dataset using KD Tree & Epsilon approximation based on [Parallel Algorithms for Constructing Range and
