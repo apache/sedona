@@ -160,6 +160,21 @@ SELECT ST_IsValid(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_IsEmpty
+
+Introduction: Test if a geometry is empty geometry
+
+Format: `ST_IsEmpty (A:geometry)`
+
+Since: `v1.2.1`
+
+Spark SQL example:
+
+```SQL
+SELECT ST_IsEmpty(polygondf.countyshape)
+FROM polygondf
+```
+
 ## ST_MakeValid
 
 Introduction: Given an invalid geometry, create a valid representation of the geometry.

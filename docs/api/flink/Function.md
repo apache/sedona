@@ -101,6 +101,21 @@ Result:
 +-----------------------------+
 ```
 
+## ST_IsEmpty
+
+Introduction: Test if a geometry is empty geometry
+
+Format: `ST_IsEmpty (A:geometry)`
+
+Since: `v1.2.1`
+
+Spark SQL example:
+
+```SQL
+SELECT ST_IsEmpty(polygondf.countyshape)
+FROM polygondf
+```
+
 ## ST_PointOnSurface
 
 Introduction: Returns a POINT guaranteed to lie on the surface.
