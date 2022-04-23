@@ -1107,7 +1107,6 @@ Result:
 +---------------------------------------------------------------+
 ```
 
-
 ## ST_PointN
 
 Introduction: Return the Nth point in a single linestring or circular linestring in the geometry. Negative values are counted backwards from the end of the LineString, so that -1 is the last point. Returns NULL if there is no linestring in the geometry.
@@ -1122,10 +1121,39 @@ SELECT ST_PointN(ST_GeomFromText("LINESTRING(0 0, 1 2, 2 4, 3 6)"), 2) AS geom
 ```
 
 Result:
+
 ```
 +---------------------------------------------------------------+
 |geom                                                           |
 +---------------------------------------------------------------+
-|POINT (1 2)                                               |
+|POINT (1 2)                                                    |
++---------------------------------------------------------------+
+```
+
+Result:
+=======
+## ST_Force_2D
+
+Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates
+
+Format: `ST_Force_2D (A:geometry)`
+
+Since: `v1.2.1`
+
+Example:
+
+```SQL
+SELECT ST_AsText(
+    ST_Force_2D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'))
+) AS geom
+```
+
+Result:
+
+```
++---------------------------------------------------------------+
+|geom                                                           |
++---------------------------------------------------------------+
+|POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))                   |
 +---------------------------------------------------------------+
 ```

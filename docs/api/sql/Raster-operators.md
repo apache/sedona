@@ -1,60 +1,60 @@
-## RS_AddBands
+## RS_Add
 
 Introduction: Add two spectral bands in a Geotiff image 
 
-Format: `RS_AddBands (Band1: Array[Double], Band2: Array[Double])`
+Format: `RS_Add (Band1: Array[Double], Band2: Array[Double])`
 
 Since: `v1.1.0`
 
 Spark SQL example:
 ```Scala
 
-val sumDF = spark.sql("select RS_AddBands(band1, band2) as sumOfBands from dataframe")
+val sumDF = spark.sql("select RS_Add(band1, band2) as sumOfBands from dataframe")
 
 ```
 
-## RS_SubtractBands
+## RS_Subtract
 
 Introduction: Subtract two spectral bands in a Geotiff image(band2 - band1)
 
-Format: `RS_SubtractBands (Band1: Array[Double], Band2: Array[Double])`
+Format: `RS_Subtract (Band1: Array[Double], Band2: Array[Double])`
 
 Since: `v1.1.0`
 
 Spark SQL example:
 ```Scala
 
-val subtractDF = spark.sql("select RS_SubtractBands(band1, band2) as differenceOfOfBands from dataframe")
+val subtractDF = spark.sql("select RS_Subtract(band1, band2) as differenceOfOfBands from dataframe")
 
 ```
 
-## RS_MultiplyBands
+## RS_Multiply
 
 Introduction: Multiply two spectral bands in a Geotiff image
 
-Format: `RS_MultiplyBands (Band1: Array[Double], Band2: Array[Double])`
+Format: `RS_Multiply (Band1: Array[Double], Band2: Array[Double])`
 
 Since: `v1.1.0`
 
 Spark SQL example:
 ```Scala
 
-val multiplyDF = spark.sql("select RS_MultiplyBands(band1, band2) as multiplyBands from dataframe")
+val multiplyDF = spark.sql("select RS_Multiply(band1, band2) as multiplyBands from dataframe")
 
 ```
 
-## RS_DivideBands
+## RS_Divide
 
 Introduction: Divide band1 with band2 from a geotiff image
 
-Format: `RS_DivideBands (Band1: Array[Double], Band2: Array[Double])`
+Format: `RS_Divide (Band1: Array[Double], Band2: Array[Double])`
 
 Since: `v1.1.0`
 
 Spark SQL example:
 ```Scala
 
-val multiplyDF = spark.sql("select RS_DivideBands(band1, band2) as divideBands from dataframe")
+val multiplyDF = spark.sql("select RS_Divide(band1, band2) as divideBands from dataframe")
 
 ```
 
@@ -307,3 +307,20 @@ Spark SQL example
 ```SQL
 SELECT RS_Normalize(band)
 ```
+
+## RS_Append
+
+Introduction: Appends a new band to the end of Geotiff image data and returns the new data. The new band to be appended can be a normalized difference index between two bands (example: NBR, NDBI). Normalized difference index between two bands can be calculated with RS_NormalizedDifference operator described earlier in this page. Specific bands can be retrieved using RS_GetBand operator described [here](../Raster-loader/).
+
+Format: `RS_Append(data: Array[Double], newBand: Array[Double], nBands: Int)`
+
+Since: `v1.2.1`
+
+Spark SQL example:
+```Scala
+
+val dfAppended = spark.sql("select RS_Append(data, normalizedDifference, nBands) as dataEdited from dataframe")
+
+```
+
+

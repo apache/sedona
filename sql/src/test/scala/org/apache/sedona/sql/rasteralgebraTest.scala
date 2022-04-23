@@ -28,31 +28,31 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
   import sparkSession.implicits._
 
   describe("should pass all the arithmetic operations on bands") {
-    it("Passed RS_AddBands") {
+    it("Passed RS_Add") {
       var inputDf = Seq((Seq(200.0, 400.0, 600.0), Seq(200.0, 500.0, 800.0))).toDF("Band1", "Band2")
       val expectedDF = Seq((Seq(400.0, 900.0, 1400.0))).toDF("sumOfBands")
-      inputDf = inputDf.selectExpr("RS_AddBands(Band1,Band2) as sumOfBands")
+      inputDf = inputDf.selectExpr("RS_Add(Band1,Band2) as sumOfBands")
       assert(inputDf.first().getAs[mutable.WrappedArray[Double]](0) == expectedDF.first().getAs[mutable.WrappedArray[Double]](0))
     }
 
-    it("Passed RS_SubtractBands") {
+    it("Passed RS_Subtract") {
       var inputDf = Seq((Seq(200.0, 400.0, 600.0), Seq(200.0, 500.0, 800.0))).toDF("Band1", "Band2")
       val expectedDF = Seq((Seq(0.0, 100.0, 200.0))).toDF("differenceOfBands")
-      inputDf = inputDf.selectExpr("RS_SubtractBands(Band1,Band2) as differenceOfBands")
+      inputDf = inputDf.selectExpr("RS_Subtract(Band1,Band2) as differenceOfBands")
       assert(inputDf.first().getAs[mutable.WrappedArray[Double]](0) == expectedDF.first().getAs[mutable.WrappedArray[Double]](0))
     }
 
-    it("Passed RS_MultiplyBands") {
+    it("Passed RS_Multiply") {
       var inputDf = Seq((Seq(200.0, 400.0, 600.0), Seq(200.0, 500.0, 800.0))).toDF("Band1", "Band2")
       val expectedDF = Seq((Seq(40000.0, 200000.0, 480000.0))).toDF("MultiplicationOfBands")
-      inputDf = inputDf.selectExpr("RS_MultiplyBands(Band1,Band2) as multiplicationOfBands")
+      inputDf = inputDf.selectExpr("RS_Multiply(Band1,Band2) as multiplicationOfBands")
       assert(inputDf.first().getAs[mutable.WrappedArray[Double]](0) == expectedDF.first().getAs[mutable.WrappedArray[Double]](0))
     }
 
-    it("Passed RS_DivideBands") {
+    it("Passed RS_Divide") {
       var inputDf = Seq((Seq(200.0, 400.0, 600.0), Seq(200.0, 200.0, 500.0)), ((Seq(0.4, 0.26, 0.27), Seq(0.3, 0.32, 0.43)))).toDF("Band1", "Band2")
       val expectedList = List(List(1.0, 2.0, 1.2), List(1.33, 0.81, 0.63))
-      val inputList = inputDf.selectExpr("RS_DivideBands(Band1,Band2) as divisionOfBands").as[List[Double]].collect().toList
+      val inputList = inputDf.selectExpr("RS_Divide(Band1,Band2) as divisionOfBands").as[List[Double]].collect().toList
       val resultList = inputList zip expectedList
       for((actual, expected) <- resultList) {
         assert(actual == expected)
@@ -205,4 +205,38 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(df.first().getAs[mutable.WrappedArray[Double]](0)(1) == 255)
     }
   }
+
+  describe("Should pass all transformation tests") {
+    it("Passed RS_Append for new data length") {
+      var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/test3.tif")
+      df = df.selectExpr(" image.data as data", "image.nBands as nBands")
+      val rowFirst = df.first()
+      val nBands = rowFirst.getAs[Int](1)
+      val lengthInitial = rowFirst.getAs[mutable.WrappedArray[Double]](0).length
+      val lengthBand = lengthInitial/nBands
+
+      df = df.selectExpr("data", "nBands", "RS_GetBand(data, 1, nBands) as band1", "RS_GetBand(data, 2, nBands) as band2")
+      df = df.selectExpr("data", "nBands", "RS_NormalizedDifference(band2, band1) as normalizedDifference")
+      df = df.selectExpr("RS_Append(data, normalizedDifference, nBands) as targetData")
+      assert(df.first().getAs[mutable.WrappedArray[Double]](0).length == lengthInitial + lengthBand)
+    }
+
+    it("Passed RS_Append for new band elements") {
+      var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/test3.tif")
+      df = df.selectExpr(" image.data as data", "image.nBands as nBands")
+      var rowFirst = df.first()
+      val nBands = rowFirst.getAs[Int](1)
+      val lengthInitial = rowFirst.getAs[mutable.WrappedArray[Double]](0).length
+      val lengthBand = lengthInitial/nBands
+
+      df = df.selectExpr("data", "nBands", "RS_GetBand(data, 1, nBands) as band1", "RS_GetBand(data, 2, nBands) as band2")
+      df = df.selectExpr("data", "nBands", "RS_NormalizedDifference(band2, band1) as normalizedDifference")
+      df = df.selectExpr("RS_Append(data, normalizedDifference, nBands) as targetData")
+
+      rowFirst = df.first()
+      assert((rowFirst.getAs[mutable.WrappedArray[Double]](0)(lengthInitial) == 0.13) &&
+        (rowFirst.getAs[mutable.WrappedArray[Double]](0)(lengthInitial + lengthBand - 1) == 0.03))
+    }
+  }
+
 }

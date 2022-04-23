@@ -31,6 +31,8 @@ import scala.Option;
 
 import java.util.Optional;
 
+import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
+
 public class Functions {
     public static class ST_Buffer extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
@@ -128,6 +130,14 @@ public class Functions {
         public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
             return GeomUtils.getEWKT(geom);
+        }
+    }
+
+    public static class ST_Force_2D extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return GeomUtils.get2dGeom(geom);
         }
     }
 }

@@ -1585,7 +1585,7 @@ case class ST_PointN(inputExpressions: Seq[Expression])
   override def nullable: Boolean = true
 
   lazy val GeometryFactory = new GeometryFactory()
-  lazy val emptyGeometry = GeometryFactory.createGeometryCollection(null)
+  lazy val emptyGeometry: GeometryCollection = GeometryFactory.createGeometryCollection(null)
 
   override def eval(input: InternalRow): Any = {
     val geometry = inputExpressions.head.toGeometry(input)
@@ -1604,6 +1604,27 @@ case class ST_PointN(inputExpressions: Seq[Expression])
         case _ => emptyGeometry
       })
     )
+  }
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+      copy(inputExpressions = newChildren)
+  }
+}
+
+ /*
+ * Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates.
+ *
+ * @param inputExpressions
+ */
+case class ST_Force_2D(inputExpressions: Seq[Expression])
+  extends UnaryGeometryExpression with CodegenFallback {
+  assert(inputExpressions.length == 1)
+
+  override protected def nullSafeEval(geometry: Geometry): Any = {
+    new GenericArrayData(GeometrySerializer.serialize(GeomUtils.get2dGeom(geometry)))
   }
 
   override def dataType: DataType = GeometryUDT

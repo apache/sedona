@@ -14,8 +14,7 @@
 package org.apache.sedona.flink;
 
 import org.apache.flink.table.api.Table;
-import org.apache.flink.types.Row;
-import org.apache.flink.util.CloseableIterator;
+import org.apache.sedona.flink.expressions.Constructors;
 import org.apache.sedona.flink.expressions.Functions;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -124,5 +123,13 @@ public class FunctionTest extends TestBase{
         polygonTable = polygonTable.select(call(Functions.ST_AsEWKT.class.getSimpleName(), $(polygonColNames[0])));
         String result = (String) first(polygonTable).getField(0);
         assertEquals("POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))", result);
+    }
+
+    @Test
+    public void testForce2D() {
+        Table polygonTable = createPolygonTable(1);
+        Table Forced2DTable = polygonTable.select(call(Functions.ST_Force_2D.class.getSimpleName(), $(polygonColNames[0])));
+        Geometry result = (Geometry) first(Forced2DTable).getField(0);
+        assertEquals("POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))", result.toString());
     }
 }
