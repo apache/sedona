@@ -36,7 +36,10 @@ public class Catalog {
                 new Functions.ST_PointN(),
                 new Functions.ST_ExteriorRing(),
                 new Functions.ST_AsEWKT(),
-                new Functions.ST_Force_2D()
+                new Functions.ST_Force_2D(),
+                new Functions.ST_IsEmpty(),
+                new Functions.ST_YMax(),
+                new Functions.ST_YMin()
         };
     }
 

@@ -12,6 +12,37 @@ SELECT ST_Distance(polygondf.countyshape, polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_YMin
+
+Introduction: Return the minimum Y coordinate of A
+
+Format: `ST_Y_Min (A:geometry)`
+
+Since: `v1.2.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_YMin(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
+```
+
+Output : 0
+
+## ST_YMax
+
+Introduction: Return the minimum Y coordinate of A
+
+Format: `ST_YMax (A:geometry)`
+
+Since: `v1.2.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_YMax(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
+```
+
+Output: 2
+
+
 ## ST_3DDistance
 
 Introduction: Return the 3-dimensional minimum cartesian distance between A and B
@@ -157,6 +188,21 @@ Spark SQL example:
 
 ```SQL
 SELECT ST_IsValid(polygondf.countyshape)
+FROM polygondf
+```
+
+## ST_IsEmpty
+
+Introduction: Test if a geometry is empty geometry
+
+Format: `ST_IsEmpty (A:geometry)`
+
+Since: `v1.2.1`
+
+Spark SQL example:
+
+```SQL
+SELECT ST_IsEmpty(polygondf.countyshape)
 FROM polygondf
 ```
 

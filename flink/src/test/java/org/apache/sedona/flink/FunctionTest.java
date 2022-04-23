@@ -63,6 +63,25 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testYMax() {
+        Table polygonTable = createPolygonTable(1);
+        Table ResultTable = polygonTable.select(call(Functions.ST_YMax.class.getSimpleName(), $(polygonColNames[0])));
+        assert(first(ResultTable).getField(0)!=null);
+        double result = (double) first(ResultTable).getField(0);
+        assertEquals(0.5, result,0);
+    }
+
+    @Test
+    public void testYMin() {
+        Table polygonTable = createPolygonTable(1);
+        Table ResultTable = polygonTable.select(call(Functions.ST_YMin.class.getSimpleName(), $(polygonColNames[0])));
+        assert(first(ResultTable).getField(0)!=null);
+        double result = (double) first(ResultTable).getField(0);
+        assertEquals(-0.5, result, 0);
+    }
+
+
+    @Test
     public void testGeomToGeoHash() {
         Table pointTable = createPointTable(testDataSize);
         pointTable = pointTable.select(
@@ -132,4 +151,13 @@ public class FunctionTest extends TestBase{
         Geometry result = (Geometry) first(Forced2DTable).getField(0);
         assertEquals("POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))", result.toString());
     }
+
+    @Test
+    public void testIsEmpty() {
+        Table polygonTable = createPolygonTable(testDataSize);
+        polygonTable = polygonTable.select(call(Functions.ST_IsEmpty.class.getSimpleName(), $(polygonColNames[0])));
+        boolean result = (boolean) first(polygonTable).getField(0);
+        assertEquals(false, result);
+    }
 }
+
