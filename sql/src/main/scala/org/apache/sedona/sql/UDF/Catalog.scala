@@ -104,6 +104,7 @@ object Catalog {
     ST_Multi,
     ST_PointOnSurface,
     ST_Reverse,
+    ST_PointN,
     // Expression for rasters
     RS_NormalizedDifference,
     RS_Mean,

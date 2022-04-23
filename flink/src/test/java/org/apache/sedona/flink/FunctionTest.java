@@ -14,11 +14,17 @@
 package org.apache.sedona.flink;
 
 import org.apache.flink.table.api.Table;
+import org.apache.flink.types.Row;
+import org.apache.flink.util.CloseableIterator;
 import org.apache.sedona.flink.expressions.Functions;
+import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import static org.apache.flink.table.api.Expressions.$;
@@ -40,6 +46,7 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    @Ignore
     public void testTransform() {
         Table pointTable = createPointTable_real(testDataSize);
         Table transformedTable = pointTable.select(call(Functions.ST_Transform.class.getSimpleName(), $(pointColNames[0])
@@ -78,5 +85,27 @@ public class FunctionTest extends TestBase{
         Table ReversedTable = polygonTable.select(call(Functions.ST_Reverse.class.getSimpleName(), $(polygonColNames[0])));
         Geometry result = (Geometry) first(ReversedTable).getField(0);
         assertEquals("POLYGON ((-0.5 -0.5, 0.5 -0.5, 0.5 0.5, -0.5 0.5, -0.5 -0.5))", result.toString());
+    }
+
+    @Test
+    public void testPointN_positiveN() {
+        int n = 1;
+        Table polygonTable = createPolygonTable(1);
+        Table linestringTable = polygonTable.select(call(Functions.ST_ExteriorRing.class.getSimpleName(), $(polygonColNames[0])));
+        Table pointTable = linestringTable.select(call(Functions.ST_PointN.class.getSimpleName(), $("_c0"), n));
+        Point point = (Point) first(pointTable).getField(0);
+        assert point != null;
+        Assert.assertEquals("POINT (-0.5 -0.5)", point.toString());
+    }
+
+    @Test
+    public void testPointN_negativeN() {
+        int n = -3;
+        Table polygonTable = createPolygonTable(1);
+        Table linestringTable = polygonTable.select(call(Functions.ST_ExteriorRing.class.getSimpleName(), $(polygonColNames[0])));
+        Table pointTable = linestringTable.select(call(Functions.ST_PointN.class.getSimpleName(), $("_c0"), n));
+        Point point = (Point) first(pointTable).getField(0);
+        assert point != null;
+        Assert.assertEquals("POINT (0.5 0.5)", point.toString());
     }
 }

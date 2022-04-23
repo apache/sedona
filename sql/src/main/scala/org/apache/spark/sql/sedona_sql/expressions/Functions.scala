@@ -1572,3 +1572,45 @@ case class ST_Reverse(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+
+/**
+ * Returns the nth point in the geometry, provided it is a linestring
+ *
+ * @param inputExpressions sequence of 2 input arguments, a geometry and a value 'n'
+ */
+case class ST_PointN(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  inputExpressions.validateLength(2)
+
+  override def nullable: Boolean = true
+  lazy val GeometryFactory = new GeometryFactory()
+  lazy val emptyGeometry = GeometryFactory.createGeometryCollection(null)
+
+  override def eval(input: InternalRow): Any = {
+    val geometry = inputExpressions.head.toGeometry(input)
+    val n = inputExpressions(1).toInt(input)
+    getNthPoint(geometry, n)
+  }
+
+  private def getNthPoint(geometry: Geometry, n: Int): GenericArrayData = {
+    new GenericArrayData(GeometrySerializer.serialize(
+      geometry match {
+        case linestring: LineString => val point = GeomUtils.getNthPoint(linestring, n)
+          point match {
+            case geometry: Geometry => geometry
+            case _ => emptyGeometry
+          }
+        case _ => emptyGeometry
+      })
+    )
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

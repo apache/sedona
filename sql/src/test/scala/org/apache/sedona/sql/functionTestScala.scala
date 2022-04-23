@@ -1286,7 +1286,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
 
     /* ST_AsEWKT Has not been implemented yet
-    
+
     val geomTestCases2 = Map(
       "'LINESTRING(0 5 1, 0 0 1, 0 10 2)'"
         -> "POINT (0 0 1)"
@@ -1334,6 +1334,40 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       var result = df.collect()
       assert(result.head.get(0).asInstanceOf[String]==expectedGeom)
     }
+  }
+
+  it("Should pass ST_PointN") {
+
+    Given("Some different types of geometries in a DF")
+
+    val sampleLineString = "LINESTRING(0 0, 1 2, 2 4, 3 6)"
+    val testData = Seq(
+      (sampleLineString, 1),
+      (sampleLineString, 2),
+      (sampleLineString, -1),
+      (sampleLineString, -2),
+      (sampleLineString, 3),
+      (sampleLineString, 4),
+      (sampleLineString, 5),
+      (sampleLineString, -5),
+      ("POLYGON((-1 0 0, 1 0 0, 0 0 1, 0 1 0, -1 0 0))", 2),
+      ("POINT(1 2)", 1)
+    ).toDF("Geometry", "N")
+
+    When("Using ST_PointN for getting the nth point in linestring type of Geometries")
+
+    val testDF = testData.selectExpr("ST_PointN(ST_GeomFromText(Geometry), N) as geom")
+
+    Then("Result should match the list of nth points")
+
+    testDF.selectExpr("ST_AsText(geom)")
+      .as[String].collect() should contain theSameElementsAs
+      List(
+        "POINT (0 0)", "POINT (1 2)", "POINT (3 6)",
+        "POINT (2 4)", "POINT (2 4)", "POINT (3 6)",
+        "GEOMETRYCOLLECTION EMPTY", "GEOMETRYCOLLECTION EMPTY",
+        "GEOMETRYCOLLECTION EMPTY", "GEOMETRYCOLLECTION EMPTY"
+      )
   }
 
   it("handles nulls") {

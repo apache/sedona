@@ -1088,3 +1088,26 @@ Result:
 |LINESTRING (3 6, 2 4, 1 2, 0 0)                                |
 +---------------------------------------------------------------+
 ```
+
+
+## ST_PointN
+
+Introduction: Return the Nth point in a single linestring or circular linestring in the geometry. Negative values are counted backwards from the end of the LineString, so that -1 is the last point. Returns NULL if there is no linestring in the geometry.
+
+Format: `ST_PointN(geom: geometry, n: integer)`
+
+Since: `v1.2.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_PointN(ST_GeomFromText("LINESTRING(0 0, 1 2, 2 4, 3 6)"), 2) AS geom
+```
+
+Result:
+```
++---------------------------------------------------------------+
+|geom                                                           |
++---------------------------------------------------------------+
+|POINT (1 2)                                               |
++---------------------------------------------------------------+
+```
