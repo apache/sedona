@@ -1412,6 +1412,18 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     assert(df.first().get(0).asInstanceOf[Boolean] == s)
   }
 
+  it("Passed ST_XMax") {
+    var test = sparkSession.sql("SELECT ST_XMax(ST_GeomFromWKT('POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))'))")
+    assert(test.take(1)(0).get(0).asInstanceOf[Double] == 2.0)
+
+  }
+
+  it("Passed ST_XMin") {
+    var test = sparkSession.sql("SELECT ST_XMin(ST_GeomFromWKT('POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))'))")
+    assert(test.take(1)(0).get(0).asInstanceOf[Double] == -1.0)
+
+  }
+
   it("handles nulls") {
     var functionDf: DataFrame = null
     functionDf = sparkSession.sql("select ST_Distance(null, null)")

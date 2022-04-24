@@ -176,4 +176,34 @@ public class Functions {
             return geom.isEmpty();
         }
     }
+
+    public static class ST_XMax extends ScalarFunction {
+        @DataTypeHint("Double")
+        public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            Coordinate[] coord = geom.getCoordinates();
+            double max = Double.MIN_VALUE;
+            for (int i = 0; i < coord.length; i++) {
+                if (coord[i].getX() > max) {
+                    max = coord[i].getX();
+                }
+            }
+            return max;
+        }
+    }
+
+    public static class ST_XMin extends ScalarFunction {
+        @DataTypeHint("Double")
+        public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            Coordinate[] coord = geom.getCoordinates();
+            double min = Double.MAX_VALUE;
+            for(int i=0;i< coord.length;i++){
+                if(coord[i].getX()<min){
+                    min = coord[i].getX();
+                }
+            }
+            return min;
+        }
+    }
 }
