@@ -1375,8 +1375,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       List(
         "POINT (0 0)", "POINT (1 2)", "POINT (3 6)",
         "POINT (2 4)", "POINT (2 4)", "POINT (3 6)",
-        "GEOMETRYCOLLECTION EMPTY", "GEOMETRYCOLLECTION EMPTY",
-        "GEOMETRYCOLLECTION EMPTY", "GEOMETRYCOLLECTION EMPTY"
+        null, null, null, null
       )
   }
 

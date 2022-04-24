@@ -967,10 +967,10 @@ class TestPredicateJoin(TestBase):
             [linestring, -2, "POINT (2 4)"],
             [linestring, 3, "POINT (2 4)"],
             [linestring, 4, "POINT (3 6)"],
-            [linestring, 5, "GEOMETRYCOLLECTION EMPTY"],
-            [linestring, -5, "GEOMETRYCOLLECTION EMPTY"],
-            ["'POLYGON((1 1, 3 1, 3 3, 1 3, 1 1))'", 2, "GEOMETRYCOLLECTION EMPTY"],
-            ["'POINT(1 2)'", 1, "GEOMETRYCOLLECTION EMPTY"]
+            [linestring, 5, None],
+            [linestring, -5, None],
+            ["'POLYGON((1 1, 3 1, 3 3, 1 3, 1 1))'", 2, None],
+            ["'POINT(1 2)'", 1, None]
         ]
 
         for test in tests:

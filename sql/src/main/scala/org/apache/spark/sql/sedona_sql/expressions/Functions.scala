@@ -1630,9 +1630,6 @@ case class ST_PointN(inputExpressions: Seq[Expression])
 
   override def nullable: Boolean = true
 
-  lazy val GeometryFactory = new GeometryFactory()
-  lazy val emptyGeometry: GeometryCollection = GeometryFactory.createGeometryCollection(null)
-
   override def eval(input: InternalRow): Any = {
     val geometry = inputExpressions.head.toGeometry(input)
     val n = inputExpressions(1).toInt(input)
@@ -1640,16 +1637,14 @@ case class ST_PointN(inputExpressions: Seq[Expression])
   }
 
   private def getNthPoint(geometry: Geometry, n: Int): GenericArrayData = {
-    new GenericArrayData(GeometrySerializer.serialize(
-      geometry match {
-        case linestring: LineString => val point = GeomUtils.getNthPoint(linestring, n)
-          point match {
-            case geometry: Geometry => geometry
-            case _ => emptyGeometry
-          }
-        case _ => emptyGeometry
-      })
-    )
+    geometry match {
+      case linestring: LineString => val point = GeomUtils.getNthPoint(linestring, n)
+        point match {
+          case geometry: Geometry => new GenericArrayData(GeometrySerializer.serialize(geometry))
+          case _ => null
+        }
+      case _ => null
+    }
   }
   override def dataType: DataType = GeometryUDT
 
