@@ -14,6 +14,11 @@
 package org.apache.sedona.core.utils;
 
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
+
+import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.CoordinateSequenceFilter;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTWriter;
 import java.util.Objects;
 
@@ -79,6 +84,43 @@ public class GeomUtils
             return null;
         }
         return geometry.getInteriorPoint();
+    }
+
+    /**
+     * Return the nth point from the given geometry (which could be a linestring or a circular linestring)
+     * If the value of n is negative, return a point backwards
+     * E.g. if n = 1, return 1st point, if n = -1, return last point
+     *
+     * @param lineString from which the nth point is to be returned
+     * @param n is the position of the point in the geometry
+     * @return a point
+     */
+    public static Geometry getNthPoint(LineString lineString, int n) {
+        if (lineString == null || n == 0) {
+            return null;
+        }
+
+        int p = lineString.getNumPoints();
+        if (Math.abs(n) > p) {
+            return null;
+        }
+
+        Coordinate[] nthCoordinate = new Coordinate[1];
+        if (n > 0) {
+            nthCoordinate[0] = lineString.getCoordinates()[n - 1];
+        } else {
+            nthCoordinate[0] = lineString.getCoordinates()[p + n];
+        }
+        return new Point(new CoordinateArraySequence(nthCoordinate), lineString.getFactory());
+    }
+
+    public static Geometry getExteriorRing(Geometry geometry) {
+        try {
+            Polygon polygon = (Polygon) geometry;
+            return polygon.getExteriorRing();
+        } catch(ClassCastException e) {
+            return null;
+        }
     }
 
     public static String getEWKT(Geometry geometry) {

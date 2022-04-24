@@ -1620,6 +1620,42 @@ case class ST_Reverse(inputExpressions: Seq[Expression])
 }
 
 /**
+ * Returns the nth point in the geometry, provided it is a linestring
+ *
+ * @param inputExpressions sequence of 2 input arguments, a geometry and a value 'n'
+ */
+case class ST_PointN(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  inputExpressions.validateLength(2)
+
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    val geometry = inputExpressions.head.toGeometry(input)
+    val n = inputExpressions(1).toInt(input)
+    getNthPoint(geometry, n)
+  }
+
+  private def getNthPoint(geometry: Geometry, n: Int): GenericArrayData = {
+    geometry match {
+      case linestring: LineString => val point = GeomUtils.getNthPoint(linestring, n)
+        point match {
+          case geometry: Geometry => new GenericArrayData(GeometrySerializer.serialize(geometry))
+          case _ => null
+        }
+      case _ => null
+    }
+  }
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+      copy(inputExpressions = newChildren)
+  }
+}
+
+ /*
  * Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates.
  *
  * @param inputExpressions

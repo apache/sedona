@@ -195,6 +195,54 @@ Input: `POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))`
 
 Output: `POLYGON ((-0.5 -0.5, 0.5 -0.5, 0.5 0.5, -0.5 0.5, -0.5 -0.5))`
 
+## ST_PointN
+
+Introduction: Return the Nth point in a single linestring or circular linestring in the geometry. Negative values are counted backwards from the end of the LineString, so that -1 is the last point. Returns NULL if there is no linestring in the geometry.
+
+Format: `ST_PointN(A:geometry, B:integer)`
+
+Since: `v1.2.1`
+
+Examples:
+
+```SQL
+SELECT ST_PointN(df.geometry, 2)
+FROM df
+```
+
+Input: `LINESTRING(0 0, 1 2, 2 4, 3 6), 2`
+
+Output: `POINT (1 2)`
+
+Input: `LINESTRING(0 0, 1 2, 2 4, 3 6), -2`
+
+Output: `POINT (2 4)`
+
+Input: `CIRCULARSTRING(1 1, 1 2, 2 4, 3 6, 1 2, 1 1), -1`
+
+Output: `POINT (1 1)`
+
+
+## ST_ExteriorRing
+
+Introduction: Returns a LINESTRING representing the exterior ring (shell) of a POLYGON. Returns NULL if the geometry is not a polygon.
+
+Format: `ST_ExteriorRing(A:geometry)`
+
+Since: `v1.2.1`
+
+Examples:
+
+```SQL
+SELECT ST_ExteriorRing(df.geometry)
+FROM df
+```
+
+Input: `POLYGON ((0 0, 1 1, 2 1, 0 1, 1 -1, 0 0))`
+
+Output: `LINESTRING (0 0, 1 1, 2 1, 0 1, 1 -1, 0 0)`
+
+
 ## ST_Force_2D
 
 Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates

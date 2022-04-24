@@ -106,6 +106,7 @@ object Catalog {
     ST_Multi,
     ST_PointOnSurface,
     ST_Reverse,
+    ST_PointN,
     ST_AsEWKT,
     ST_Force_2D,
     ST_YMax,

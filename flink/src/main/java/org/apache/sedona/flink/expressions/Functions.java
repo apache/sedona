@@ -21,10 +21,8 @@ import org.apache.spark.sql.sedona_sql.expressions.geohash.GeometryGeoHashEncode
 import org.apache.spark.sql.sedona_sql.expressions.geohash.PointGeoHashEncoder;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Coordinate;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -133,6 +131,25 @@ public class Functions {
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
             return geom.reverse();
+        }
+    }
+
+    public static class ST_PointN extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, int n) {
+            if(!(o instanceof LineString)) {
+                return null;
+            }
+            LineString lineString = (LineString) o;
+            return GeomUtils.getNthPoint(lineString, n);
+        }
+    }
+
+    public static class ST_ExteriorRing extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geometry = (Geometry) o;
+            return GeomUtils.getExteriorRing(geometry);
         }
     }
 
