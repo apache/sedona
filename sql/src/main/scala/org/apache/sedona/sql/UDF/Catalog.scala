@@ -110,6 +110,8 @@ object Catalog {
     ST_Force_2D,
     ST_YMax,
     ST_YMin,
+    ST_XMax,
+    ST_XMin,
     // Expression for rasters
     RS_NormalizedDifference,
     RS_Mean,

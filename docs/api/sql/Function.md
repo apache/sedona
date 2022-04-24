@@ -1178,3 +1178,41 @@ Result:
 |POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))                                |
 +---------------------------------------------------------------+
 ```
+
+## ST_XMax
+
+Introduction: Returns the maximum X coordinate of a geometry
+
+Format: `ST_XMax (A:geometry)`
+
+Since: `v1.2.1`
+
+Example:
+
+```SQL
+SELECT ST_XMax(df.geometry) AS xmax
+FROM df
+```
+
+Input: `POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))`
+
+Output: `2`
+
+## ST_XMin
+
+Introduction: Returns the minimum X coordinate of a geometry
+
+Format: `ST_XMin (A:geometry)`
+
+Since: `v1.2.1`
+
+Example:
+
+```SQL
+SELECT ST_XMin(df.geometry) AS xmin
+FROM df
+```
+
+Input: `POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))`
+
+Output: `-1`
