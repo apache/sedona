@@ -17,6 +17,7 @@
  * under the License.
  */
 package org.apache.spark.sql.sedona_sql.expressions
+
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
