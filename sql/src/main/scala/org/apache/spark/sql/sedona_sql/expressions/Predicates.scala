@@ -17,7 +17,6 @@
  * under the License.
  */
 package org.apache.spark.sql.sedona_sql.expressions
-
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
@@ -108,7 +107,7 @@ case class ST_Within(inputExpressions: Seq[Expression])
   // This is a binary expression
   assert(inputExpressions.length == 2)
 
-  override def toString: String = s" **${ST_Intersects.getClass.getName}**  "
+  override def toString: String = s" **${ST_Within.getClass.getName}**  "
 
   override def children: Seq[Expression] = inputExpressions
 
@@ -120,7 +119,7 @@ case class ST_Within(inputExpressions: Seq[Expression])
 
     val rightGeometry = GeometrySerializer.deserialize(rightArray)
 
-    leftGeometry.coveredBy(rightGeometry)
+    leftGeometry.within(rightGeometry)
   }
 
   override def dataType = BooleanType
