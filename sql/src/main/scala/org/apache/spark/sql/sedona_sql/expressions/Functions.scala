@@ -1801,7 +1801,7 @@ case class ST_BuildArea(inputExpressions: Seq[Expression])
 
   override def children: Seq[Expression] = inputExpressions
 
-  override protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
     copy(inputExpressions = newChildren)
   }
 }

@@ -173,24 +173,29 @@ public class GeomUtils
         int srid = geom.getSRID();
         Map<Polygon, Polygon> parentMap = findFaceHoles(polygons);
         List<Polygon> facesWithEvenAncestors = new ArrayList<>();
-        for (Polygon face : parentMap.keySet()) {
+        for (Polygon face : polygons) {
+            face.normalize();
             if (countParents(parentMap, face) % 2 == 0) {
                 facesWithEvenAncestors.add(face);
             }
         }
         UnaryUnionOp unaryUnionOp = new UnaryUnionOp(facesWithEvenAncestors);
         Geometry outputGeom = unaryUnionOp.union();
-        outputGeom.setSRID(srid);
+        if (outputGeom != null) {
+            outputGeom.normalize();
+            outputGeom.setSRID(srid);
+        }
         return outputGeom;
     }
 
     private static Map<Polygon, Polygon> findFaceHoles(List<Polygon> faces) {
         Map<Polygon, Polygon> parentMap = new HashMap<>();
-        faces.sort(Comparator.comparing(p -> p.getEnvelope().getArea()));
-        for (Polygon face : faces) {
+        faces.sort(Comparator.comparing((Polygon p) -> p.getEnvelope().getArea()).reversed());
+        for (int i = 0; i < faces.size(); i++) {
+            Polygon face = faces.get(i);
             int nHoles = face.getNumInteriorRing();
-            for (int i = 0; i < nHoles; i++) {
-                Geometry hole = face.getInteriorRingN(i);
+            for (int h = 0; h < nHoles; h++) {
+                Geometry hole = face.getInteriorRingN(h);
                 for (int j = i + 1; j < faces.size(); j++) {
                     Polygon face2 = faces.get(j);
                     if (parentMap.containsKey(face2)) {
