@@ -317,3 +317,22 @@ FROM df
 Input: `POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))`
 
 Output: `-1`
+
+## ST_BuildArea
+
+Introduction: Returns the areal geometry formed by the constituent linework of the input geometry.
+
+Format: `ST_BuildArea (A:geometry)`
+
+Since: `v1.2.1`
+
+Example:
+
+```SQL
+SELECT ST_BuildArea(ST_Collect(smallDf, bigDf)) AS geom
+FROM smallDf, bigDf
+```
+
+Input: `MULTILINESTRING((0 0, 10 0, 10 10, 0 10, 0 0),(10 10, 20 10, 20 20, 10 20, 10 10))`
+
+Output: `MULTIPOLYGON(((0 0,0 10,10 10,10 0,0 0)),((10 10,10 20,20 20,20 10,10 10)))`

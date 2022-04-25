@@ -20,7 +20,10 @@ import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.CoordinateSequenceFilter;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTWriter;
-import java.util.Objects;
+import org.locationtech.jts.operation.polygonize.Polygonizer;
+import org.locationtech.jts.operation.union.UnaryUnionOp;
+
+import java.util.*;
 
 import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 
@@ -153,5 +156,62 @@ public class GeomUtils
         }
         geom.geometryChanged();
         return geom;
+    }
+
+    public static Geometry buildArea(Geometry geom) {
+        if (geom.isEmpty()) {
+            return geom;
+        }
+        Polygonizer polygonizer = new Polygonizer();
+        polygonizer.add(geom);
+        List<Polygon> polygons = (List<Polygon>) polygonizer.getPolygons();
+        if (polygons.isEmpty()) {
+            return null;
+        } else if (polygons.size() == 1) {
+            return polygons.get(0);
+        }
+        int srid = geom.getSRID();
+        Map<Polygon, Polygon> parentMap = findFaceHoles(polygons);
+        List<Polygon> facesWithEvenAncestors = new ArrayList<>();
+        for (Polygon face : parentMap.keySet()) {
+            if (countParents(parentMap, face) % 2 == 0) {
+                facesWithEvenAncestors.add(face);
+            }
+        }
+        UnaryUnionOp unaryUnionOp = new UnaryUnionOp(facesWithEvenAncestors);
+        Geometry outputGeom = unaryUnionOp.union();
+        outputGeom.setSRID(srid);
+        return outputGeom;
+    }
+
+    private static Map<Polygon, Polygon> findFaceHoles(List<Polygon> faces) {
+        Map<Polygon, Polygon> parentMap = new HashMap<>();
+        faces.sort(Comparator.comparing(p -> p.getEnvelope().getArea()));
+        for (Polygon face : faces) {
+            int nHoles = face.getNumInteriorRing();
+            for (int i = 0; i < nHoles; i++) {
+                Geometry hole = face.getInteriorRingN(i);
+                for (int j = i + 1; j < faces.size(); j++) {
+                    Polygon face2 = faces.get(j);
+                    if (parentMap.containsKey(face2)) {
+                        continue;
+                    }
+                    Geometry face2ExteriorRing = face2.getExteriorRing();
+                    if (face2ExteriorRing.equals(hole)) {
+                        parentMap.put(face2, face);
+                    }
+                }
+            }
+        }
+        return parentMap;
+    }
+
+    private static int countParents(Map<Polygon, Polygon> parentMap, Polygon face) {
+        int pCount = 0;
+        while (parentMap.containsKey(face)) {
+            pCount++;
+            face = parentMap.get(face);
+        }
+        return pCount;
     }
 }

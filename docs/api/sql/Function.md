@@ -1241,3 +1241,29 @@ FROM df
 Input: `POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))`
 
 Output: `-1`
+
+## ST_BuildArea
+
+Introduction: Returns the areal geometry formed by the constituent linework of the input geometry.
+
+Format: `ST_BuildArea (A:geometry)`
+
+Since: `v1.2.1`
+
+Example:
+
+```SQL
+SELECT ST_BuildArea(
+    ST_GeomFromText('MULTILINESTRING((0 0, 20 0, 20 20, 0 20, 0 0),(2 2, 18 2, 18 18, 2 18, 2 2))')
+) AS geom
+```
+
+Result:
+
+```
++----------------------------------------------------------------------------+
+|geom                                                                        |
++----------------------------------------------------------------------------+
+|POLYGON((0 0,0 20,20 20,20 0,0 0),(2 2,18 2,18 18,2 18,2 2))                |
++----------------------------------------------------------------------------+
+```

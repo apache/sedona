@@ -113,6 +113,7 @@ object Catalog {
     ST_YMin,
     ST_XMax,
     ST_XMin,
+    ST_BuildArea,
     // Expression for rasters
     RS_NormalizedDifference,
     RS_Mean,
