@@ -159,7 +159,7 @@ public class GeomUtils
     }
 
     public static Geometry buildArea(Geometry geom) {
-        if (geom.isEmpty()) {
+        if (geom == null || geom.isEmpty()) {
             return geom;
         }
         Polygonizer polygonizer = new Polygonizer();

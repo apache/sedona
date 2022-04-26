@@ -1797,7 +1797,10 @@ case class ST_BuildArea(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     val geometry = inputExpressions.head.toGeometry(input)
-    new GenericArrayData(GeometrySerializer.serialize(GeomUtils.buildArea(geometry)))
+    geometry match {
+      case geom: Geometry => new GenericArrayData(GeometrySerializer.serialize(GeomUtils.buildArea(geom)))
+      case _ => null
+    }
   }
 
   override def dataType: DataType = GeometryUDT
