@@ -1785,15 +1785,18 @@ case class ST_XMin(inputExpressions: Seq[Expression])
 
 
 /**
- * Returns the areal geometry formed by the constituent linework of the input geometry assuming assumes all inner geometries represent holes
+ * Returns the areal geometry formed by the constituent linework of the input geometry assuming all inner geometries represent holes
  *
  * @param inputExpressions
  */
 case class ST_BuildArea(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
+  extends Expression with CodegenFallback {
   assert(inputExpressions.length == 1)
 
-  override protected def nullSafeEval(geometry: Geometry): Any = {
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    val geometry = inputExpressions.head.toGeometry(input)
     new GenericArrayData(GeometrySerializer.serialize(GeomUtils.buildArea(geometry)))
   }
 
