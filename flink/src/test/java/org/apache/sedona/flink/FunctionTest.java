@@ -30,6 +30,7 @@ import java.util.Optional;
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class FunctionTest extends TestBase{
     @BeforeClass
@@ -174,6 +175,14 @@ public class FunctionTest extends TestBase{
         Table MinTable = polygonTable.select(call(Functions.ST_XMin.class.getSimpleName(), $(polygonColNames[0])));
         double result = (double) first(MinTable).getField(0);
         assertEquals(-0.5, result,0);
+    }
+
+    @Test
+    public void testBuildArea() {
+        Table polygonTable = createPolygonTable(1);
+        Table arealGeomTable = polygonTable.select(call(Functions.ST_BuildArea.class.getSimpleName(), $(polygonColNames[0])));
+        Geometry result = (Geometry) first(arealGeomTable).getField(0);
+        assertEquals("POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))", result.toString());
     }
 }
 

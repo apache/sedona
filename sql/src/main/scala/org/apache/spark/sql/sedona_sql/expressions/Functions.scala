@@ -1763,10 +1763,10 @@ case class ST_XMin(inputExpressions: Seq[Expression])
 
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
-    var coord:Array[Coordinate] = geometry.getCoordinates()
+    var coord: Array[Coordinate] = geometry.getCoordinates()
     var minval = Double.MaxValue
-    for (point<-coord) {
-      if(point.getX()<minval){
+    for (point <- coord) {
+      if (point.getX() < minval) {
         minval = point.getX()
       }
     }
@@ -1779,6 +1779,35 @@ case class ST_XMin(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+
+/**
+ * Returns the areal geometry formed by the constituent linework of the input geometry assuming all inner geometries represent holes
+ *
+ * @param inputExpressions
+ */
+case class ST_BuildArea(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  assert(inputExpressions.length == 1)
+
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    val geometry = inputExpressions.head.toGeometry(input)
+    geometry match {
+      case geom: Geometry => new GenericArrayData(GeometrySerializer.serialize(GeomUtils.buildArea(geom)))
+      case _ => null
+    }
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
     copy(inputExpressions = newChildren)
   }
 }

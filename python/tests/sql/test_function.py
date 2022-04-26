@@ -16,20 +16,18 @@
 #  under the License.
 
 import math
-from typing import List
-
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col
 from pyspark.sql.functions import explode, expr
 from pyspark.sql.types import StructType, StructField, IntegerType
+from sedona.sql.types import GeometryType
 from shapely import wkt
 from shapely.wkt import loads
-
-from sedona.sql.types import GeometryType
 from tests import mixed_wkt_geometry_input_location
 from tests.sql.resource.sample_data import create_sample_points, create_simple_polygons_df, \
     create_sample_points_df, create_sample_polygons_df, create_sample_lines_df
 from tests.test_base import TestBase
+from typing import List
 
 
 class TestPredicateJoin(TestBase):
@@ -989,3 +987,33 @@ class TestPredicateJoin(TestBase):
             geom_2d = self.spark.sql(
                 "select ST_AsText(ST_Force_2D(ST_GeomFromText({})))".format(input_geom))
             assert geom_2d.take(1)[0][0] == expected_geom
+
+    def test_st_buildarea(self):
+        tests = {
+            "'MULTILINESTRING((0 0, 10 0, 10 10, 0 10, 0 0),(10 10, 20 10, 20 20, 10 20, 10 10))'":
+                "MULTIPOLYGON (((0 0, 0 10, 10 10, 10 0, 0 0)), ((10 10, 10 20, 20 20, 20 10, 10 10)))",
+            "'MULTILINESTRING((0 0, 10 0, 10 10, 0 10, 0 0),(10 10, 20 10, 20 0, 10 0, 10 10))'":
+                "POLYGON ((0 0, 0 10, 10 10, 20 10, 20 0, 10 0, 0 0))",
+            "'MULTILINESTRING((0 0, 20 0, 20 20, 0 20, 0 0),(2 2, 18 2, 18 18, 2 18, 2 2))'":
+                "POLYGON ((0 0, 0 20, 20 20, 20 0, 0 0), (2 2, 18 2, 18 18, 2 18, 2 2))",
+            "'MULTILINESTRING((0 0, 20 0, 20 20, 0 20, 0 0), (2 2, 18 2, 18 18, 2 18, 2 2), (8 8, 8 12, 12 12, 12 8, 8 8))'":
+                "MULTIPOLYGON (((0 0, 0 20, 20 20, 20 0, 0 0), (2 2, 18 2, 18 18, 2 18, 2 2)), ((8 8, 8 12, 12 12, 12 8, 8 8)))",
+            "'MULTILINESTRING((0 0, 20 0, 20 20, 0 20, 0 0),(2 2, 18 2, 18 18, 2 18, 2 2), " \
+            "(8 8, 8 9, 8 10, 8 11, 8 12, 9 12, 10 12, 11 12, 12 12, 12 11, 12 10, 12 9, 12 8, 11 8, 10 8, 9 8, 8 8))'":
+                "MULTIPOLYGON (((0 0, 0 20, 20 20, 20 0, 0 0), (2 2, 18 2, 18 18, 2 18, 2 2)), " \
+                "((8 8, 8 9, 8 10, 8 11, 8 12, 9 12, 10 12, 11 12, 12 12, 12 11, 12 10, 12 9, 12 8, 11 8, 10 8, 9 8, 8 8)))",
+            "'MULTILINESTRING((0 0, 20 0, 20 20, 0 20, 0 0),(2 2, 18 2, 18 18, 2 18, 2 2),(8 8, 8 12, 12 12, 12 8, 8 8),(10 8, 10 12))'":
+                "MULTIPOLYGON (((0 0, 0 20, 20 20, 20 0, 0 0), (2 2, 18 2, 18 18, 2 18, 2 2)), ((8 8, 8 12, 12 12, 12 8, 8 8)))",
+            "'MULTILINESTRING((0 0, 20 0, 20 20, 0 20, 0 0),(2 2, 18 2, 18 18, 2 18, 2 2),(10 2, 10 18))'":
+                "POLYGON ((0 0, 0 20, 20 20, 20 0, 0 0), (2 2, 18 2, 18 18, 2 18, 2 2))",
+            "'MULTILINESTRING( (0 0, 70 0, 70 70, 0 70, 0 0), (10 10, 10 60, 40 60, 40 10, 10 10), " \
+            "(20 20, 20 30, 30 30, 30 20, 20 20), (20 30, 30 30, 30 50, 20 50, 20 30), (50 20, 60 20, 60 40, 50 40, 50 20), " \
+            "(50 40, 60 40, 60 60, 50 60, 50 40), (80 0, 110 0, 110 70, 80 70, 80 0), (90 60, 100 60, 100 50, 90 50, 90 60))'":
+                "MULTIPOLYGON (((0 0, 0 70, 70 70, 70 0, 0 0), (10 10, 40 10, 40 60, 10 60, 10 10), (50 20, 60 20, 60 40, 60 60, 50 60, 50 40, 50 20)), " \
+                "((20 20, 20 30, 20 50, 30 50, 30 30, 30 20, 20 20)), " \
+                "((80 0, 80 70, 110 70, 110 0, 80 0), (90 50, 100 50, 100 60, 90 60, 90 50)))"
+        }
+
+        for input_geom, expected_geom in tests.items():
+            areal_geom = self.spark.sql("select ST_AsText(ST_BuildArea(ST_GeomFromText({})))".format(input_geom))
+            assert areal_geom.take(1)[0][0] == expected_geom
