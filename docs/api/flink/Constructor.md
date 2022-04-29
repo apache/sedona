@@ -81,3 +81,16 @@ SELECT *
 FROM pointdf
 WHERE ST_Contains(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.pointshape)
 ```
+
+## ST_GeomFromGeoHash
+
+Introduction: Create Geometry from geohash string and optional precision
+
+Format: `ST_GeomFromGeoHash(geohash: string, precision: int)`
+
+Since: `v1.2.1`
+
+SQL example:
+```SQL
+SELECT ST_GeomFromGeoHash('s00twy01mt', 4) AS geom
+```
