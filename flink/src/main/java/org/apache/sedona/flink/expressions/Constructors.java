@@ -97,8 +97,15 @@ public class Constructors {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String value,
                              @DataTypeHint("Int") Integer precision) throws ParseException {
+            // The default precision is the geohash length. Otherwise, use the precision given by the user
             scala.Option<Object> optionPrecision = scala.Option.apply(precision);
             return GeoHashDecoder.decode(value, optionPrecision);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String value) throws ParseException {
+            scala.Option<Object> nonePrecision = scala.Option.apply(null);
+            return GeoHashDecoder.decode(value, nonePrecision);
         }
     }
 }
