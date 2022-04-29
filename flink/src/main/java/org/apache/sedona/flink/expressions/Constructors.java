@@ -104,8 +104,7 @@ public class Constructors {
 
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String value) throws ParseException {
-            scala.Option<Object> nonePrecision = scala.Option.apply(null);
-            return GeoHashDecoder.decode(value, nonePrecision);
+            return eval(value, null);
         }
     }
 }
