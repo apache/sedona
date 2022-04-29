@@ -23,6 +23,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.wololo.jts2geojson.GeoJSONReader;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.flink.table.api.Expressions.$;
@@ -97,6 +98,43 @@ public class ConstructorTest extends TestBase{
         String expectedGeoJSON = data.get(data.size() - 1)
                 .getFieldAs(0);
         String expectedGeom = reader.read(expectedGeoJSON).toText();
+
+        assertEquals(result, expectedGeom);
+    }
+
+    @Test
+    public void testGeomFromGeoHash() {
+        Integer precision = 2;
+        List<Row> data = new ArrayList<>();
+        data.add(Row.of("2131s12fd", "polygon"));
+
+        Table geohashTable = createTextTable(data, polygonColNames);
+        Table geomTable = geohashTable
+                .select(call(Constructors.ST_GeomFromGeoHash.class.getSimpleName(),
+                        $(polygonColNames[0]), precision)
+                        .as(polygonColNames[0]), $(polygonColNames[1]));
+        String result = first(geomTable)
+                .getFieldAs(0)
+                        .toString();
+        String expectedGeom = "POLYGON ((-180 -39.375, -180 -33.75, -168.75 -33.75, -168.75 -39.375, -180 -39.375))";
+
+        assertEquals(result, expectedGeom);
+    }
+
+    @Test
+    public void testGeomFromGeoHashNullPrecision() {
+        List<Row> data = new ArrayList<>();
+        data.add(Row.of("2131s12fd", "polygon"));
+
+        Table geohashTable = createTextTable(data, polygonColNames);
+        Table geomTable = geohashTable
+                .select(call(Constructors.ST_GeomFromGeoHash.class.getSimpleName(),
+                        $(polygonColNames[0]))
+                        .as(polygonColNames[0]), $(polygonColNames[1]));
+        String result = first(geomTable)
+                .getFieldAs(0)
+                .toString();
+        String expectedGeom = "POLYGON ((-178.4168529510498 -37.69778251647949, -178.4168529510498 -37.697739601135254, -178.41681003570557 -37.697739601135254, -178.41681003570557 -37.69778251647949, -178.4168529510498 -37.69778251647949))";
 
         assertEquals(result, expectedGeom);
     }

@@ -26,6 +26,7 @@ public class Catalog {
                 new Constructors.ST_GeomFromWKT(),
                 new Constructors.ST_GeomFromWKB(),
                 new Constructors.ST_GeomFromGeoJSON(),
+                new Constructors.ST_GeomFromGeoHash(),
                 new Functions.ST_Buffer(),
                 new Functions.ST_Distance(),
                 new Functions.ST_Transform(),
