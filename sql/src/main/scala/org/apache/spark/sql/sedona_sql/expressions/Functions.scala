@@ -1811,3 +1811,25 @@ case class ST_BuildArea(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+/**
+ * Test if Geometry is simple.
+ *
+ * @param inputExpressions
+ */
+case class ST_OrderingEquals(inputExpressions: Seq[Expression])
+  extends BinaryGeometryExpression with CodegenFallback {
+  assert(inputExpressions.length == 2)
+
+  override protected def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
+    leftGeometry.equalsExact(rightGeometry)
+  }
+
+  override def dataType: DataType = BooleanType
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

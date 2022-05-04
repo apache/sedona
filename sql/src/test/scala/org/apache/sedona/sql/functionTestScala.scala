@@ -1457,6 +1457,38 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
   }
 
+  it("Passed ST_OrderingEquals") {
+
+    val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))') as a,ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))') as b")
+    testtable.createOrReplaceTempView("testtable")
+    val orderingEquals = sparkSession.sql("select ST_OrderingEquals(a,b) from testtable")
+    assert(orderingEquals.take(1)(0).get(0).asInstanceOf[Boolean])
+  }
+
+  it("Passed ST_OrderingEquals - different geometries") {
+
+    val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))') as a,ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 0 -2, 2 0))') as b")
+    testtable.createOrReplaceTempView("testtable")
+    val orderingEquals = sparkSession.sql("select ST_OrderingEquals(a,b) from testtable")
+    assert(!orderingEquals.take(1)(0).get(0).asInstanceOf[Boolean])
+  }
+
+  it("Passed ST_OrderingEquals - different order") {
+
+    val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))') as a,ST_GeomFromWKT('POLYGON((0 2, -2 0, 2 0, 0 2))') as b")
+    testtable.createOrReplaceTempView("testtable")
+    val orderingEquals = sparkSession.sql("select ST_OrderingEquals(a,b) from testtable")
+    assert(!orderingEquals.take(1)(0).get(0).asInstanceOf[Boolean])
+  }
+
+  it("Passed ST_OrderingEquals - one null") {
+
+    val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))') as a")
+    testtable.createOrReplaceTempView("testtable")
+    val orderingEquals = sparkSession.sql("select ST_OrderingEquals(a,null) from testtable")
+    assert(!orderingEquals.take(1)(0).get(0).asInstanceOf[Boolean])
+  }
+
   it("handles nulls") {
     var functionDf: DataFrame = null
     functionDf = sparkSession.sql("select ST_Distance(null, null)")
@@ -1572,6 +1604,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     functionDf = sparkSession.sql("select ST_Force_2D(null)")
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_BuildArea(null)")
+    assert(functionDf.first().get(0) == null)
+    functionDf = sparkSession.sql("select ST_OrderingEquals(null, null)")
     assert(functionDf.first().get(0) == null)
   }
 }

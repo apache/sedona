@@ -114,6 +114,7 @@ object Catalog {
     ST_XMax,
     ST_XMin,
     ST_BuildArea,
+    ST_OrderingEquals,
     // Expression for rasters
     RS_NormalizedDifference,
     RS_Mean,
