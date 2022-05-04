@@ -1813,7 +1813,7 @@ case class ST_BuildArea(inputExpressions: Seq[Expression])
 }
 
 /**
- * Test if Geometry is simple.
+ * Returns true if the geometries are equal and the coordinates are in the same order
  *
  * @param inputExpressions
  */
