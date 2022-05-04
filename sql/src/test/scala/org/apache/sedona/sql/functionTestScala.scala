@@ -1457,7 +1457,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
   }
 
-  it("Passed ST_OrderingEquals") {
+  it("Passed ST_OrderingEquals - everything ok") {
 
     val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))') as a,ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))') as b")
     testtable.createOrReplaceTempView("testtable")

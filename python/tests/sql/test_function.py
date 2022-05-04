@@ -1018,7 +1018,7 @@ class TestPredicateJoin(TestBase):
             areal_geom = self.spark.sql("select ST_AsText(ST_BuildArea(ST_GeomFromText({})))".format(input_geom))
             assert areal_geom.take(1)[0][0] == expected_geom
 
-    def test_st_ordering_equals(self):
+    def test_st_ordering_equals_ok(self):
         test_table = self.spark.sql("select ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))') as a,ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))') as b")
         test_table.createOrReplaceTempView("test_ordering_equals")
         order_equals = self.spark.sql("select ST_OrderingEquals(a,b) from test_ordering_equals")
