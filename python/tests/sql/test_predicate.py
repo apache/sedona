@@ -206,3 +206,13 @@ class TestPredicate(TestBase):
         not_overlaps = self.spark.sql("select ST_Overlaps(c,d) from testtable")
         assert overlaps.take(1)[0][0]
         assert not not_overlaps.take(1)[0][0]
+
+    def test_st_ordering_equals_ok(self):
+        test_table = self.spark.sql("select ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))') as a, ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))') as b, ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 0 -2, 2 0))') as c, ST_GeomFromWKT('POLYGON((0 2, -2 0, 2 0, 0 2))') as d")
+        test_table.createOrReplaceTempView("testorderingequals")
+        order_equals = self.spark.sql("select ST_OrderingEquals(a,b) from testorderingequals")
+        not_order_equals_diff_geom = self.spark.sql("select ST_OrderingEquals(a,c) from testorderingequals")
+        not_order_equals_diff_order = self.spark.sql("select ST_OrderingEquals(a,d) from testorderingequals")
+        assert order_equals.take(1)[0][0]
+        assert not not_order_equals_diff_geom.take(1)[0][0]
+        assert not not_order_equals_diff_order.take(1)[0][0]
