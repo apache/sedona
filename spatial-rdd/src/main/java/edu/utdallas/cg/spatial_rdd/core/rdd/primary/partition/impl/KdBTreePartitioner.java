@@ -1,6 +1,6 @@
-package edu.utdallas.cg.spatial_rdd.core.data.primary.partition.impl;
+package edu.utdallas.cg.spatial_rdd.core.rdd.primary.partition.impl;
 
-import edu.utdallas.cg.spatial_rdd.core.data.primary.partition.SpatialPartitioner;
+import edu.utdallas.cg.spatial_rdd.core.rdd.primary.partition.SpatialPartitioner;
 import edu.utdallas.cg.spatial_rdd.enums.GridType;
 import edu.utdallas.cg.spatial_rdd.core.tree.kdb.KdBTree;
 import org.locationtech.jts.geom.Geometry;

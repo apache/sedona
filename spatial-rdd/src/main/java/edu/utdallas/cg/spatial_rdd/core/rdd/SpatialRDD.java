@@ -1,11 +1,11 @@
 package edu.utdallas.cg.spatial_rdd.core.rdd;
 
-import edu.utdallas.cg.spatial_rdd.core.data.primary.partition.SpatialPartitioner;
+import edu.utdallas.cg.spatial_rdd.core.rdd.primary.partition.SpatialPartitioner;
 import edu.utdallas.cg.spatial_rdd.enums.GridType;
 import edu.utdallas.cg.spatial_rdd.enums.IndexType;
-import edu.utdallas.cg.spatial_rdd.core.data.secondary.index.IndexBuilder;
-import edu.utdallas.cg.spatial_rdd.core.data.primary.partition.impl.KdBTreePartitioner;
-import edu.utdallas.cg.spatial_rdd.core.data.primary.partition.impl.KdTreePartitioner;
+import edu.utdallas.cg.spatial_rdd.core.rdd.secondary.index.IndexBuilder;
+import edu.utdallas.cg.spatial_rdd.core.rdd.primary.partition.impl.KdBTreePartitioner;
+import edu.utdallas.cg.spatial_rdd.core.rdd.primary.partition.impl.KdTreePartitioner;
 import edu.utdallas.cg.spatial_rdd.core.approximation.StatCalculator;
 import edu.utdallas.cg.spatial_rdd.core.tree.kd.KdTree;
 import edu.utdallas.cg.spatial_rdd.core.tree.kdb.KdBTree;

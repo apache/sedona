@@ -1,4 +1,4 @@
-package edu.utdallas.cg.spatial_rdd.core.data.secondary.index.impl.kdtree;
+package edu.utdallas.cg.spatial_rdd.core.rdd.secondary.index.impl.kdtree;
 
 import java.util.ArrayList;
 import java.util.List;

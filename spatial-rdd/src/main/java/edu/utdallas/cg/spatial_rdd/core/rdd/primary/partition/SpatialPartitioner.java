@@ -1,4 +1,4 @@
-package edu.utdallas.cg.spatial_rdd.core.data.primary.partition;
+package edu.utdallas.cg.spatial_rdd.core.rdd.primary.partition;
 
 import edu.utdallas.cg.spatial_rdd.enums.GridType;
 import org.apache.spark.Partitioner;

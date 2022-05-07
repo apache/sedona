@@ -17,12 +17,11 @@
  * under the License.
  */
 
-package edu.utdallas.cg.spatial_rdd.core.data.secondary.index;
+package edu.utdallas.cg.spatial_rdd.core.rdd.secondary.index;
 
-import edu.utdallas.cg.spatial_rdd.core.data.secondary.index.impl.kdtree.KdTreeIndex;
+import edu.utdallas.cg.spatial_rdd.core.rdd.secondary.index.impl.kdtree.KdTreeIndex;
 import edu.utdallas.cg.spatial_rdd.enums.IndexType;
 import org.apache.spark.api.java.function.FlatMapFunction;
-import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.index.SpatialIndex;
 import org.locationtech.jts.index.quadtree.Quadtree;
