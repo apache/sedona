@@ -7,4 +7,4 @@ Nearest-Neighbor Searching Data Structures](https://users.cs.duke.edu/~pankaj/pu
 
 ### Note
 1. Here we have chosen to implement KD tree based on 2D points
-2. We are doing primary partitioning & secondary indexing with KD Tree.
+2. We are doing `primary partitioning` & `secondary indexing` using `KD Tree`.
