@@ -16,7 +16,7 @@ public class Driver {
     SparkConf conf = new SparkConf().setAppName("mpc-kd-tree").setMaster("local[2]");
     JavaSparkContext sc = new JavaSparkContext(conf);
 
-    String inputPath = Driver.class.getClassLoader().getResource("point.json").getPath();
+    String inputPath = Driver.class.getClassLoader().getResource("geojson_points.json").getPath();
     // 1 Load
     SpatialRDD spatialRDD = GeoJsonReader.readToGeometryRDD(sc, inputPath);
 
