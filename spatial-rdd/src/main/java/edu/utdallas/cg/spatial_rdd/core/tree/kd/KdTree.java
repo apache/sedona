@@ -127,25 +127,27 @@ public class KdTree implements Tree<KdTree> {
 
   @Override
   public void dropElements() {
-    traverse(tree -> {
-      tree.nodeKey = null;
-      return true;
-    });
+    traverse(
+        tree -> {
+          tree.nodeKey = null;
+          return true;
+        });
   }
 
   @Override
   public List<KdTree> findLeafNodes(final Envelope envelope) {
     final List<KdTree> matches = new ArrayList<>();
-    traverse(tree -> {
-      if (!disjoint(tree.getBoundaryEnvelope(), envelope)) {
-        if (tree.isLeaf()) {
-          matches.add(tree);
-        }
-        return true;
-      } else {
-        return false;
-      }
-    });
+    traverse(
+        tree -> {
+          if (!disjoint(tree.getBoundaryEnvelope(), envelope)) {
+            if (tree.isLeaf()) {
+              matches.add(tree);
+            }
+            return true;
+          } else {
+            return false;
+          }
+        });
 
     return matches;
   }
@@ -153,18 +155,18 @@ public class KdTree implements Tree<KdTree> {
   @Override
   public void assignLeafIds() {
     traverse(
-      new Visitor<KdTree>() {
-        int id = 0;
+        new Visitor<>() {
+          int id = 0;
 
-        @Override
-        public boolean visit(KdTree tree) {
-          if (tree.isLeaf()) {
-            tree.leafId = id;
-            id++;
+          @Override
+          public boolean visit(KdTree tree) {
+            if (tree.isLeaf()) {
+              tree.leafId = id;
+              id++;
+            }
+            return true;
           }
-          return true;
-        }
-      });
+        });
   }
 
   @Override
@@ -193,12 +195,13 @@ public class KdTree implements Tree<KdTree> {
   @Override
   public List<Envelope> fetchLeafZones() {
     final List<Envelope> leafs = new ArrayList<>();
-    this.traverse(tree -> {
-      if (tree.isLeaf()) {
-        leafs.add(tree.getBoundaryEnvelope());
-      }
-      return true;
-    });
+    this.traverse(
+        tree -> {
+          if (tree.isLeaf()) {
+            leafs.add(tree.getBoundaryEnvelope());
+          }
+          return true;
+        });
     return leafs;
   }
 
