@@ -1,5 +1,4 @@
 ### Spatial RDD
-![Core Idea](docs/imgs/core-idea.png)
 Custom Spark RDD to partition geospatial data, based on spatial proximity, for faster orthogonal range queries.
 
 ### What is this Fork about?
