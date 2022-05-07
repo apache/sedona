@@ -33,7 +33,7 @@ public abstract class PartitioningUtils {
             boundaryEnvelope.getMinY(), boundaryEnvelope.getMaxY() + 0.01);
     PartitioningUtils partitioner = null;
     switch (gridType) {
-      case KDBTREE:
+      case KDB_TREE:
         {
           final KdBTree tree = new KdBTree(sampleEnvelopes.size() / resolution, resolution, paddedBoundary);
           for (final Envelope sample : sampleEnvelopes) {

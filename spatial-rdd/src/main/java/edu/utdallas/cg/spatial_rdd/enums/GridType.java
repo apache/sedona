@@ -15,10 +15,9 @@ public enum GridType implements Serializable {
   QUADTREE,
 
   /** K-D-B-tree partitioning (k-dimensional B-tree) */
-  KDBTREE,
+  KDB_TREE,
 
-  KDTREE;
-
+  KD_TREE;
 
   /**
    * Gets the grid type.

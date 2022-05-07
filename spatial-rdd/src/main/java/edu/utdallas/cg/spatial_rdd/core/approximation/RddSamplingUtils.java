@@ -19,9 +19,6 @@
 
 package edu.utdallas.cg.spatial_rdd.core.approximation;
 
-// TODO: Auto-generated Javadoc
-
-/** The Class RDDSampleUtils. */
 public class RddSamplingUtils {
 
   /**
@@ -37,32 +34,9 @@ public class RddSamplingUtils {
    *
    * @param numPartitions the num partitions
    * @param totalNumberOfRecords the total number of records
-   * @param givenSampleNumbers the given sample numbers
    * @return the sample numbers
-   * @throws IllegalArgumentException if requested number of samples exceeds total number of records
-   *     or if requested number of partitions exceeds half of total number of records
    */
-  public static int getSampleNumbers(
-      int numPartitions, long totalNumberOfRecords, int givenSampleNumbers) {
-    if (givenSampleNumbers > 0) {
-      if (givenSampleNumbers > totalNumberOfRecords) {
-        throw new IllegalArgumentException(
-            "[Sedona] Number of samples "
-                + givenSampleNumbers
-                + " cannot be larger than total records num "
-                + totalNumberOfRecords);
-      }
-      return givenSampleNumbers;
-    }
-
-    // Make sure that number of records >= 2 * number of partitions
-    if (numPartitions > (totalNumberOfRecords + 1) / 2) {
-      throw new IllegalArgumentException(
-          "[Sedona] Number of partitions "
-              + numPartitions
-              + " cannot be larger than half of total records num "
-              + totalNumberOfRecords);
-    }
+  public static int getSampleNumbers(int numPartitions, long totalNumberOfRecords) {
 
     if (totalNumberOfRecords < 1000) {
       return (int) totalNumberOfRecords;

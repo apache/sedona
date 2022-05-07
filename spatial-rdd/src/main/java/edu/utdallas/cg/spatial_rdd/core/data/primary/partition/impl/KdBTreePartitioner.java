@@ -12,7 +12,7 @@ public class KdBTreePartitioner extends SpatialPartitioner {
   private final KdBTree tree;
 
   public KdBTreePartitioner(KdBTree tree) {
-    super(GridType.KDBTREE, tree.fetchLeafZones());
+    super(GridType.KDB_TREE, tree.fetchLeafZones());
     this.tree = tree;
     this.tree.dropElements();
   }

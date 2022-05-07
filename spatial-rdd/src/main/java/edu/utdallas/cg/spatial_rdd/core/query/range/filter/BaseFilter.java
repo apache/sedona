@@ -26,7 +26,7 @@ import java.io.Serializable;
 public class BaseFilter<U extends Geometry> implements Serializable {
 
   private final boolean considerBoundaryIntersection;
-  protected boolean leftCoveredByRight = true;
+  protected boolean leftCoveredByRight;
   protected U queryGeometry;
 
   /**

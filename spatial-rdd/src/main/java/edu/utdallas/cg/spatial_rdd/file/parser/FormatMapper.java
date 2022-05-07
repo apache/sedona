@@ -20,7 +20,6 @@
 package edu.utdallas.cg.spatial_rdd.file.parser;
 
 import edu.utdallas.cg.spatial_rdd.enums.FileDataSplitter;
-import edu.utdallas.cg.spatial_rdd.enums.GeometryType;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.locationtech.jts.geom.Geometry;
 
@@ -30,24 +29,6 @@ import java.util.List;
 
 public class FormatMapper<T extends Geometry> extends FormatUtils
     implements FlatMapFunction<Iterator<String>, T> {
-
-  /**
-   * Instantiates a new format mapper.
-   *
-   * @param startOffset the start offset
-   * @param endOffset the end offset
-   * @param splitter the splitter
-   * @param carryInputData the carry input data
-   * @param geometryType
-   */
-  public FormatMapper(
-      int startOffset,
-      int endOffset,
-      FileDataSplitter splitter,
-      boolean carryInputData,
-      GeometryType geometryType) {
-    super(startOffset, endOffset, splitter, carryInputData, geometryType);
-  }
 
   /**
    * Instantiates a new format mapper. This is extensively used in SedonaSQL.

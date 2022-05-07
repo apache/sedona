@@ -33,43 +33,29 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.index.SpatialIndex;
 
-// TODO: Auto-generated Javadoc
-
-/** The Class RangeQuery. */
 public class RangeQuery implements Serializable {
 
-  /**
-   * Spatial range query. Return objects in SpatialRDD are covered/intersected by
-   * originalQueryGeometry
-   *
-   * @param spatialRDD the spatial RDD
-   * @param originalQueryGeometry the original query window
-   * @param considerBoundaryIntersection the consider boundary intersection
-   * @param useIndex the use index
-   * @return the java RDD
-   * @throws Exception the exception
-   */
   public static <U extends Geometry, T extends Geometry> JavaRDD<T> spatialRangeQuery(
       SpatialRDD<T> spatialRDD,
       U originalQueryGeometry,
       boolean considerBoundaryIntersection,
       boolean useIndex)
       throws Exception {
-    U queryGeometry = originalQueryGeometry;
 
-    if (useIndex == true) {
+    if (useIndex) {
       JavaRDD<SpatialIndex> spatialIndexedRDD =
           spatialRDD.indexedRawRDD == null ? spatialRDD.indexedRDD : spatialRDD.indexedRawRDD;
+
       if (spatialIndexedRDD == null) {
         throw new Exception(
             "[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index on rawSpatialRDD or spatialPartitionedRDD.");
       }
       return spatialIndexedRDD.mapPartitions(
-          new RangeFilterUsingIndex(queryGeometry, considerBoundaryIntersection, true));
+          new RangeFilterUsingIndex(originalQueryGeometry, considerBoundaryIntersection, true));
     } else {
       return spatialRDD
-          .getRawSpatialRDD()
-          .filter(new RangeFilter(queryGeometry, considerBoundaryIntersection, true));
+          .getRawRdd()
+          .filter(new RangeFilter(originalQueryGeometry, considerBoundaryIntersection, true));
     }
   }
 

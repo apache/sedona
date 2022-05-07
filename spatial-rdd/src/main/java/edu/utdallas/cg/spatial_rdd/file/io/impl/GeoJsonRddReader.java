@@ -27,7 +27,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.locationtech.jts.geom.Geometry;
 
-public class GeoJsonReader extends RddReader {
+public class GeoJsonRddReader extends RddReader {
 
   /**
    * Read a SpatialRDD from a file.

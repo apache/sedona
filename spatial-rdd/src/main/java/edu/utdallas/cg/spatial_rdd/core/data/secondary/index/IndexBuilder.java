@@ -42,20 +42,21 @@ public final class IndexBuilder<T extends Geometry>
 
   @Override
   public Iterator<SpatialIndex> call(Iterator<T> objectIterator) throws Exception {
-    SpatialIndex spatialIndex;
+    SpatialIndex spatialIndex = null;
     if (indexType == IndexType.RTREE) {
       spatialIndex = new STRtree();
-    } else if(indexType == IndexType.QUADTREE){
+    } else if (indexType == IndexType.QUADTREE) {
       spatialIndex = new Quadtree();
-    } else {
+    } else if (indexType == IndexType.KDTREE) {
       spatialIndex = new KdTreeIndex();
     }
+
     while (objectIterator.hasNext()) {
       T spatialObject = objectIterator.next();
       spatialIndex.insert(spatialObject.getEnvelopeInternal(), spatialObject);
     }
+
     Set<SpatialIndex> result = new HashSet();
-    spatialIndex.query(new Envelope(0.0, 0.0, 0.0, 0.0));
     result.add(spatialIndex);
     return result.iterator();
   }

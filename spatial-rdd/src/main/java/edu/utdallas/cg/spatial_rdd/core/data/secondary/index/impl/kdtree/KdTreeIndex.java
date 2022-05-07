@@ -13,7 +13,6 @@ public class KdTreeIndex extends KdTree implements SpatialIndex {
 
   public static final double NULL_ORDINATE = Double.NaN;
 
-
   @Override
   public void insert(Envelope itemEnv, Object item) {
     Coordinate coordinate = new Coordinate(itemEnv.getMinX(), itemEnv.getMinY(), NULL_ORDINATE);
@@ -32,12 +31,12 @@ public class KdTreeIndex extends KdTree implements SpatialIndex {
 
   @Override
   public void query(Envelope searchEnv, ItemVisitor visitor) {
-    //implementation not required
+    // implementation not required
   }
 
   @Override
   public boolean remove(Envelope itemEnv, Object item) {
-    //implementation not required
+    // implementation not required
     return false;
   }
 }

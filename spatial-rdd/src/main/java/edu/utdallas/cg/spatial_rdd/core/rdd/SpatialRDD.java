@@ -33,7 +33,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
 
   public JavaRDD<T> spatialPartitionedRDD;
   /** The raw spatial RDD. */
-  public JavaRDD<T> rawSpatialRDD;
+  public JavaRDD<T> rawRdd;
 
   public JavaRDD<SpatialIndex> indexedRawRDD;
 
@@ -45,14 +45,12 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
 
   public long approximateTotalCount = -1;
 
-  private int sampleNumber = -1;
-
   /** The boundary envelope. */
   public Envelope boundaryEnvelope = null;
 
   @SneakyThrows
   public boolean spatialPartitioning(GridType gridType) {
-    int numPartitions = this.rawSpatialRDD.rdd().partitions().length;
+    int numPartitions = this.rawRdd.rdd().partitions().length;
     spatialPartitioning(gridType, numPartitions);
     return true;
   }
@@ -68,18 +66,16 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
     }
 
     if (this.boundaryEnvelope == null) {
-      throw new Exception(
-          "[AbstractSpatialRDD][spatialPartitioning] SpatialRDD boundary is null. Please call analyze() first.");
+      throw new Exception("SpatialRDD boundary is null. Please call analyze() first.");
     }
+
     if (this.approximateTotalCount == -1) {
-      throw new Exception(
-          "[AbstractSpatialRDD][spatialPartitioning] SpatialRDD total count is unkown. Please call analyze() first.");
+      throw new Exception("SpatialRDD total count is unknown. Please call analyze() first.");
     }
 
     // Calculate the number of samples we need to take.
     int sampleNumberOfRecords =
-        RddSamplingUtils.getSampleNumbers(
-            numPartitions, this.approximateTotalCount, this.sampleNumber);
+        RddSamplingUtils.getSampleNumbers(numPartitions, this.approximateTotalCount);
 
     // In Paper: r = s^(1/5)
     final double fraction =
@@ -87,7 +83,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
             sampleNumberOfRecords, approximateTotalCount, false);
 
     List<Envelope> samples =
-        this.rawSpatialRDD
+        this.rawRdd
             .sample(false, fraction)
             .map((Function<T, Envelope>) geometry -> geometry.getEnvelopeInternal())
             .collect();
@@ -102,14 +98,12 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
             boundaryEnvelope.getMinY(), boundaryEnvelope.getMaxY() + 0.01);
 
     switch (gridType) {
-      case KDBTREE:
+      case KDB_TREE:
         {
           final KdBTree tree =
               new KdBTree(samples.size() / numPartitions, numPartitions, paddedBoundary);
-          int i =0;
           for (final Envelope sample : samples) {
             tree.insert(sample);
-            i++;
           }
           tree.assignLeafIds();
 
@@ -117,35 +111,31 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
           break;
         }
 
-      case KDTREE:
-      {
-        final KdTree tree =
-            new KdTree(paddedBoundary);
-        int i = 0;
-        for (final Envelope sample : samples) {
-          tree.insert(sample);
-          i++;
-        }
-        tree.assignLeafIds();
+      case KD_TREE:
+        {
+          final KdTree tree = new KdTree(paddedBoundary);
+          for (final Envelope sample : samples) {
+            tree.insert(sample);
+          }
+          tree.assignLeafIds();
 
-        partitioner = new KdTreePartitioner(tree);
-        break;
-      }
+          partitioner = new KdTreePartitioner(tree);
+          break;
+        }
       default:
-        throw new Exception(
-            "[AbstractSpatialRDD][spatialPartitioning] Unsupported spatial partitioning method. "
-                + "The following partitioning methods are not longer supported: R-Tree, Hilbert curve, Voronoi");
+        throw new Exception("Unsupported spatial partitioning. We only support, KDTree & KDBTree ");
     }
   }
 
   private JavaRDD<T> partition(final SpatialPartitioner partitioner) {
 
-    JavaPairRDD<Integer, T> leafIdGeometryRddPair =
-        this.rawSpatialRDD.flatMapToPair(
+    JavaPairRDD<Integer, T> leafIdAndGeometryPairRdd =
+        this.rawRdd.flatMapToPair(
             (PairFlatMapFunction<T, Integer, T>)
                 spatialObject -> partitioner.placeObject(spatialObject));
 
-    JavaPairRDD<Integer, T> spatialPartitionedRdd = leafIdGeometryRddPair.partitionBy(partitioner);
+    JavaPairRDD<Integer, T> spatialPartitionedRdd =
+        leafIdAndGeometryPairRdd.partitionBy(partitioner);
 
     return spatialPartitionedRdd.mapPartitions(
         (FlatMapFunction<Iterator<Tuple2<Integer, T>>, T>)
@@ -169,16 +159,6 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
         true);
   }
 
-  public void setRawSpatialRDD(JavaRDD<T> rawSpatialRDD) {
-    this.rawSpatialRDD = rawSpatialRDD;
-  }
-
-  public boolean analyze(Envelope datasetBoundary, Integer approximateTotalCount) {
-    this.boundaryEnvelope = datasetBoundary;
-    this.approximateTotalCount = approximateTotalCount;
-    return true;
-  }
-
   public boolean analyze() {
     final Function2 combOp =
         (Function2<StatCalculator, StatCalculator, StatCalculator>)
@@ -188,7 +168,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
         (Function2<StatCalculator, Geometry, StatCalculator>)
             (agg, object) -> StatCalculator.add(agg, object);
 
-    StatCalculator agg = (StatCalculator) this.rawSpatialRDD.aggregate(null, seqOp, combOp);
+    StatCalculator agg = (StatCalculator) this.rawRdd.aggregate(null, seqOp, combOp);
     if (agg != null) {
       this.boundaryEnvelope = agg.getBoundary();
       this.approximateTotalCount = agg.getCount();
@@ -202,22 +182,19 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
   public void buildIndex(final IndexType indexType, boolean buildIndexOnSpatialPartitionedRDD)
       throws Exception {
     if (!buildIndexOnSpatialPartitionedRDD) {
-      // This index is built on top of unpartitioned SRDD
-      this.indexedRawRDD = this.rawSpatialRDD.mapPartitions(new IndexBuilder(indexType));
+      // This index is built on top of hash partitioned RDD
+      this.indexedRawRDD = this.rawRdd.mapPartitions(new IndexBuilder(indexType));
     } else {
-      if (this.spatialPartitionedRDD == null) {
-        throw new Exception(
-            "[AbstractSpatialRDD][buildIndex] spatialPartitionedRDD is null. Please do spatial partitioning before build index.");
-      }
+
+      // This index is built on top of spatially partitioned RDD
+      if (this.spatialPartitionedRDD == null)
+        throw new Exception("spatialPartitionedRDD is null.call spatialPartitioning");
+
       this.indexedRDD = this.spatialPartitionedRDD.mapPartitions(new IndexBuilder(indexType));
     }
   }
 
-  public JavaRDD<T> getRawSpatialRDD() {
-    return rawSpatialRDD;
-  }
-
-  public void setSampleNumber(int sampleNumber) {
-    this.sampleNumber = sampleNumber;
+  public JavaRDD<T> getRawRdd() {
+    return rawRdd;
   }
 }

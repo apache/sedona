@@ -16,20 +16,19 @@ public class Driver {
     SparkConf conf = new SparkConf().setAppName("sedona-lite").setMaster("local[2]");
     JavaSparkContext sc = new JavaSparkContext(conf);
 
-    String inputPath = Driver.class.getClassLoader().getResource("testPolygon.json").getPath();
-
     // 1 Load
+    String inputPath = Driver.class.getClassLoader().getResource("testPolygon.json").getPath();
     SpatialRDD spatialRDD = GeoJsonReader.readToGeometryRDD(sc, inputPath);
 
-    // 1. init parameters
+    // 2.a init parameters
     spatialRDD.analyze();
 
     // 2.b Spatial Partition : Sample + Partition
     spatialRDD.spatialPartitioning(GridType.KDBTREE);
+    System.out.println("HashRDD Count:" + spatialRDD.rawSpatialRDD.partitions().size());
+    System.out.println("SpatialRDD Count:" + spatialRDD.spatialPartitionedRDD.partitions().size());
 
-    System.out.println(spatialRDD.rawSpatialRDD.partitions().size());
-    System.out.println(spatialRDD.spatialPartitionedRDD.partitions().size());
-
+    // 3. Query
     Envelope queryEnvelope = new Envelope(-90.01, -80.01, 30.01, 40.01);
 
     // 3.a Query: without Indexing

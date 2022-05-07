@@ -42,7 +42,7 @@ public class FormatUtils<T extends Geometry> implements Serializable {
   /** Non-spatial attributes in each input row will be concatenated to a tab separated string */
   public String otherAttributes = "";
 
-  public GeometryType geometryType = null;
+  public GeometryType geometryType;
   /** The factory. */
   public transient GeometryFactory factory = new GeometryFactory();
 

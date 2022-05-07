@@ -28,8 +28,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-// TODO: Auto-generated Javadoc
-
 public class RangeFilterUsingIndex<U extends Geometry, T extends Geometry> extends BaseFilter
     implements FlatMapFunction<Iterator<SpatialIndex>, T> {
 
@@ -43,15 +41,18 @@ public class RangeFilterUsingIndex<U extends Geometry, T extends Geometry> exten
    *
    * @param treeIndexes the tree indexes
    * @return the iterator
-   * @throws Exception the exception
    */
   /* (non-Javadoc)
    * @see org.apache.spark.api.java.function.FlatMapFunction#call(java.lang.Object)
    */
   @Override
-  public Iterator<T> call(Iterator<SpatialIndex> treeIndexes) throws Exception {
-    assert treeIndexes.hasNext() == true;
+  public Iterator<T> call(Iterator<SpatialIndex> treeIndexes) {
+    assert treeIndexes.hasNext();
+
+    // Get Spatial Index from HashSet.iterator() first element.
     SpatialIndex treeIndex = treeIndexes.next();
+
+    // Run Query on Index
     List<T> results = new ArrayList<T>();
     List<T> tempResults = treeIndex.query(this.queryGeometry.getEnvelopeInternal());
     for (T tempResult : tempResults) {
@@ -65,6 +66,7 @@ public class RangeFilterUsingIndex<U extends Geometry, T extends Geometry> exten
         }
       }
     }
+
     return results.iterator();
   }
 }
