@@ -44,7 +44,7 @@ public class RangeQuery implements Serializable {
 
     if (useIndex) {
       JavaRDD<SpatialIndex> spatialIndexedRDD =
-          spatialRDD.indexedRawRDD == null ? spatialRDD.indexedRDD : spatialRDD.indexedRawRDD;
+          spatialRDD.indexedRawRDD == null ? spatialRDD.indexedSpatialPartitionedRDD : spatialRDD.indexedRawRDD;
 
       if (spatialIndexedRDD == null) {
         throw new Exception(

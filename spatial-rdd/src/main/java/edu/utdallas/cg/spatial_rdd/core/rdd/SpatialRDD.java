@@ -31,13 +31,10 @@ import java.util.List;
 @Slf4j
 public class SpatialRDD<T extends Geometry> implements Serializable {
 
-  public JavaRDD<T> spatialPartitionedRDD;
-  /** The raw spatial RDD. */
   public JavaRDD<T> rawRdd;
-
+  public JavaRDD<T> spatialPartitionedRDD;
   public JavaRDD<SpatialIndex> indexedRawRDD;
-
-  public JavaRDD<SpatialIndex> indexedRDD;
+  public JavaRDD<SpatialIndex> indexedSpatialPartitionedRDD;
 
   public List<String> fieldNames;
 
@@ -77,7 +74,6 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
     int sampleNumberOfRecords =
         RddSamplingUtils.getSampleNumbers(numPartitions, this.approximateTotalCount);
 
-    // In Paper: r = s^(1/5)
     final double fraction =
         SamplingUtils.computeFractionForSampleSize(
             sampleNumberOfRecords, approximateTotalCount, false);
@@ -130,9 +126,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
   private JavaRDD<T> partition(final SpatialPartitioner partitioner) {
 
     JavaPairRDD<Integer, T> leafIdAndGeometryPairRdd =
-        this.rawRdd.flatMapToPair(
-            (PairFlatMapFunction<T, Integer, T>)
-                spatialObject -> partitioner.placeObject(spatialObject));
+        this.rawRdd.flatMapToPair((PairFlatMapFunction<T, Integer, T>) partitioner::placeObject);
 
     JavaPairRDD<Integer, T> spatialPartitionedRdd =
         leafIdAndGeometryPairRdd.partitionBy(partitioner);
@@ -188,9 +182,10 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
 
       // This index is built on top of spatially partitioned RDD
       if (this.spatialPartitionedRDD == null)
-        throw new Exception("spatialPartitionedRDD is null.call spatialPartitioning");
+        throw new Exception("spatialPartitionedRDD is null. run spatialPartitioning");
 
-      this.indexedRDD = this.spatialPartitionedRDD.mapPartitions(new IndexBuilder(indexType));
+      this.indexedSpatialPartitionedRDD =
+          this.spatialPartitionedRDD.mapPartitions(new IndexBuilder(indexType));
     }
   }
 
