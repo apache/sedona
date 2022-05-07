@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>edu.utdallas.cg</groupId>
-    <artifactId>spatial-rdd</artifactId>
+    <artifactId>spatial-rdd-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -27,10 +27,9 @@
         <jts2geojson.version>0.16.1</jts2geojson.version>
     </properties>
 
-<!--    <modules>-->
-<!--        <module>mpc-kd-tree-sample</module>-->
-<!--        <module>sedona-lite</module>-->
-<!--        <module>mpc-kd-tree-core</module>-->
-<!--    </modules>-->
+    <modules>
+        <module>sedona-lite</module>
+        <module>spatial-rdd</module>
+    </modules>
 
 </project>
