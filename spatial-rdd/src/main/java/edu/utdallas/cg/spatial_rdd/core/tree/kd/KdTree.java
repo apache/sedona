@@ -264,7 +264,7 @@ public class KdTree implements Tree<KdTree> {
 
     @Override
     public boolean split(Envelope envelope) {
-      return envelope.getMinX() < x;
+      return envelope.getMinX() <= x;
     }
   }
 
@@ -278,7 +278,7 @@ public class KdTree implements Tree<KdTree> {
 
     @Override
     public boolean split(Envelope envelope) {
-      return envelope.getMinY() < y;
+      return envelope.getMinY() <= y;
     }
   }
 }

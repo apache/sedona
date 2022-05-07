@@ -45,7 +45,7 @@ public class FormatMapper<T extends Geometry> extends FormatUtils
     List<T> result = new ArrayList<>();
     while (stringIterator.hasNext()) {
       String line = stringIterator.next();
-      addGeometry(readGeometry(line), result);
+      if(line.contains("\"geometry\"")) addGeometry(readGeometry(line), result);
     }
     return result.iterator();
   }
