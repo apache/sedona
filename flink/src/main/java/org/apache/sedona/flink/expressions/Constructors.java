@@ -22,6 +22,7 @@ import org.apache.spark.sql.sedona_sql.expressions.geohash.GeoHashDecoder;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.ParseException;
 
 public class Constructors {
@@ -83,6 +84,13 @@ public class Constructors {
             FormatUtils formatUtils = new FormatUtils(FileDataSplitter.WKB, false);
             return formatUtils.readGeometry(wkbString);
         }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("Bytes") byte[] wkb) throws ParseException {
+            WKBReader wkbReader = new WKBReader();
+            return wkbReader.read(wkb);
+        }
+
     }
 
     public static class ST_GeomFromGeoJSON extends ScalarFunction {

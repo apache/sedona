@@ -30,6 +30,17 @@ import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
 import static org.junit.Assert.assertEquals;
 
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
+import org.apache.flink.api.common.typeinfo.PrimitiveArrayTypeInfo;
+import org.apache.flink.api.java.typeutils.RowTypeInfo;
+
+import org.apache.flink.streaming.api.datastream.DataStream;
+
+
+
+
+
 public class ConstructorTest extends TestBase{
 
     @BeforeClass
@@ -101,6 +112,31 @@ public class ConstructorTest extends TestBase{
 
         assertEquals(result, expectedGeom);
     }
+
+    @Test
+    public void testGeomFromWKBBytes()
+    {
+        byte[] wkb = new byte[]{1, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, -124, -42, 0, -64, 0, 0, 0, 0, -128, -75, -42, -65, 0, 0, 0, 96, -31, -17, -9, -65, 0, 0, 0, -128, 7, 93, -27, -65};
+        List<Row> data = new ArrayList<>();
+        data.add(Row.of(wkb, "polygon"));
+        TypeInformation<?>[] colTypes = {
+                PrimitiveArrayTypeInfo.BYTE_PRIMITIVE_ARRAY_TYPE_INFO,
+                BasicTypeInfo.STRING_TYPE_INFO};
+        RowTypeInfo typeInfo = new RowTypeInfo(colTypes, polygonColNames);
+        DataStream<Row> wkbDS = env.fromCollection(data).returns(typeInfo);
+        Table wkbTable = tableEnv.fromDataStream(wkbDS, $(polygonColNames[0]), $(polygonColNames[1]));
+
+        Table geomTable = wkbTable.select(
+                call(Constructors.ST_GeomFromWKB.class.getSimpleName(), $(polygonColNames[0])).
+                    as(polygonColNames[0]), $(polygonColNames[1]));
+        String result = first(geomTable).
+            getFieldAs(0).toString();
+
+        String expectedGeom = "LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)";
+
+        assertEquals(result, expectedGeom);
+
+       }
 
     @Test
     public void testGeomFromGeoHash() {
