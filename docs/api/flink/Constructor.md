@@ -14,12 +14,23 @@ SELECT ST_GeomFromWKT('POINT(40.7128 -74.0060)') AS geometry
 
 ## ST_GeomFromWKB
 
-Introduction: Construct a Geometry from WKB string
+Introduction: Construct a Geometry from WKB string ord Binary
 
 Format:
 `ST_GeomFromWKB (Wkb:string)`
 
 Since: `v1.2.0`
+
+SQL example:
+```SQL
+SELECT ST_GeomFromWKB(polygontable._c0) AS polygonshape
+FROM polygontable
+```
+
+Format:
+`ST_GeomFromWKB (Wkb:bytes)`
+
+Since: `v1.2.1`
 
 SQL example:
 ```SQL
