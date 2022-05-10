@@ -52,6 +52,7 @@ public class Catalog {
                 new Predicates.ST_Intersects(),
                 new Predicates.ST_Contains(),
                 new Predicates.ST_Disjoint(),
+                new Predicates.ST_OrderingEquals(),
         };
     }
 }

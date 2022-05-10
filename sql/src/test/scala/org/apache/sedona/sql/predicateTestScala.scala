@@ -198,5 +198,16 @@ class predicateTestScala extends TestBaseScala {
       assert(disjoint.take(1)(0).get(0) == true)
       assert(notdisjoint.take(1)(0).get(0) == false)
     }
+
+    it("Passed ST_OrderingEquals") {
+      var testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))') as a, ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))') as b, ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 0 -2, 2 0))') as c, ST_GeomFromWKT('POLYGON((0 2, -2 0, 2 0, 0 2))') as d")
+      testtable.createOrReplaceTempView("testtable")
+      var orderEquals = sparkSession.sql("select ST_OrderingEquals(a,b) from testtable")
+      var notOrderEqualsDiffGeom = sparkSession.sql("select ST_OrderingEquals(a,c) from testtable")
+      var notOrderEqualsDiffOrder = sparkSession.sql("select ST_OrderingEquals(a,d) from testtable")
+      assert(orderEquals.take(1)(0).get(0).asInstanceOf[Boolean])
+      assert(!notOrderEqualsDiffGeom.take(1)(0).get(0).asInstanceOf[Boolean])
+      assert(!notOrderEqualsDiffOrder.take(1)(0).get(0).asInstanceOf[Boolean])
+    }
   }
 }

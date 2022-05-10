@@ -42,3 +42,24 @@ SELECT *
 FROM pointdf 
 WHERE ST_Disjoinnt(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
 ```
+
+## ST_OrderingEquals
+Introduction: Returns true if the geometries are equal and the coordinates are in the same order
+
+Format: `ST_OrderingEquals(A: geometry, B: geometry)`
+
+Since: `v1.2.1`
+
+SQL example 1:
+```SQL
+SELECT ST_OrderingEquals(ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'), ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'))
+```
+
+Output: `true`
+
+SQL example 2:
+```SQL
+SELECT ST_OrderingEquals(ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'), ST_GeomFromWKT('POLYGON((0 2, -2 0, 2 0, 0 2))'))
+```
+
+Output: `false`
