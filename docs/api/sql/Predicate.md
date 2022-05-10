@@ -124,14 +124,14 @@ Format: `ST_OrderingEquals(A: geometry, B: geometry)`
 
 Since: `v1.2.1`
 
-SQL example 1:
+Spark SQL example 1:
 ```SQL
 SELECT ST_OrderingEquals(ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'), ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'))
 ```
 
 Output: `true`
 
-SQL example 2:
+Spark SQL example 2:
 ```SQL
 SELECT ST_OrderingEquals(ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'), ST_GeomFromWKT('POLYGON((0 2, -2 0, 2 0, 0 2))'))
 ```
