@@ -14,7 +14,7 @@ SELECT ST_GeomFromWKT('POINT(40.7128 -74.0060)') AS geometry
 
 ## ST_GeomFromWKB
 
-Introduction: Construct a Geometry from WKB string ord Binary
+Introduction: Construct a Geometry from WKB string or Binary
 
 Format:
 `ST_GeomFromWKB (Wkb:string)`
