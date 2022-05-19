@@ -5,7 +5,12 @@
 Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder) and play the interactive Sedona Python Jupyter Notebook immediately!
 
 
-Apache Sedona™(incubating) is a cluster computing system for processing large-scale spatial data. Sedona extends Apache Spark / SparkSQL with a set of out-of-the-box Spatial Resilient Distributed Datasets (SRDDs)/ SpatialSQL that efficiently load, process, and analyze large-scale spatial data across machines.
+Apache Sedona™(incubating) is a cluster computing system for processing large-scale spatial data. Sedona equips cluster computing systems such as Apache Spark and Apache Flink with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
+
+|Download statistics| **Maven** | **PyPI** | **CRAN** |
+|:-------------:|:------------------:|:--------------:|:---------:|
+| Apache Sedona |         80k/month        |[![Downloads](https://static.pepy.tech/personalized-badge/apache-sedona?period=month&units=international_system&left_color=black&right_color=brightgreen&left_text=downloads/month)](https://pepy.tech/project/apache-sedona) [![Downloads](https://static.pepy.tech/personalized-badge/apache-sedona?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/apache-sedona)|[![](https://cranlogs.r-pkg.org/badges/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona) [![](https://cranlogs.r-pkg.org/badges/grand-total/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona)|
+|    Archived GeoSpark releases   |300k/month|[![Downloads](https://static.pepy.tech/personalized-badge/geospark?period=month&units=international_system&left_color=black&right_color=brightgreen&left_text=downloads/month)](https://pepy.tech/project/geospark)[![Downloads](https://static.pepy.tech/personalized-badge/geospark?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/geospark)|           |
 
 ## System architecture
 
@@ -15,9 +20,12 @@ Apache Sedona™(incubating) is a cluster computing system for processing large-
 
 | Name  |  API |  Introduction|
 |---|---|---|
-|Core  | RDD  | SpatialRDDs and Query Operators. |
-|SQL  | SQL/DataFrame  |SQL interfaces for Sedona core.|
-|Viz |  RDD, SQL/DataFrame | Visualization for Spatial RDD and DataFrame|
+|Core  | Scala/Java  | Distributed Spatial Datasets and Query Operators |
+|SQL  | Spark RDD/DataFrame in Scala/Java/SQL  |Geospatial data processing on Apache Spark|
+|Flink | Flink DataStream/Table in Scala/Java/SQL | Geospatial data processing on Apache Flink
+|Viz |  Spark RDD/DataFrame in Scala/Java/SQL | Geospatial data visualization on Apache Spark|
+|Python | Spark RDD/DataFrame in Python | Python wrapper for Sedona |
+|R | Spark RDD/DataFrame in R | R wrapper for Sedona |
 |Zeppelin |  Apache Zeppelin | Plugin for Apache Zeppelin 0.8.1+|
 
 ### Sedona supports several programming languages: Scala, Java, SQL, Python and R.
