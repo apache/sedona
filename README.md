@@ -14,7 +14,7 @@ Apache Sedona™(incubating) is a cluster computing system for processing large-
 
 ## System architecture
 
-<img src="docs/image/architecture.jpeg" width="600">
+<img src="docs/image/architecture.svg" width="600">
 
 ### Modules in the source code
 

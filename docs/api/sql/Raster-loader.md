@@ -173,7 +173,7 @@ Output:
 +--------------------+
 ```
 
-### Geotiff Dataframe Writer
+## Geotiff Dataframe Writer
 
 Introduction: You can write a GeoTiff dataframe as GeoTiff images using the spark `write` feature with the format `geotiff`.
 
