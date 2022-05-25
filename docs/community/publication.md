@@ -23,26 +23,26 @@ GeoSpark were evaluated by papers published on database top venues. It is worth 
 ### GeoSpark Ecosystem
 
 ["Spatial Data Management in Apache Spark: The
-GeoSpark Perspective and Beyond"](https://link.springer.com/epdf/10.1007/s10707-018-0330-9?author_access_token=uN-xyHoyjIdl5eEkjN1PGPe4RwlQNchNByi7wbcMAY5FIy3715vvIQJ9siUDSsvKSCPSmrCsBtxOtdEB_GyuKrtBlViQhVx6JCZOXsifPdBZY7jWZcukeQQzhfGNyMG_XMyrXooXxi9zorwme2tlMw%3D%3D) (research paper). Jia Yu, Zongsi Zhang, Mohamed Sarwat. Geoinformatica Journal 2018.
+GeoSpark Perspective and Beyond"](https://jiayuasu.github.io/files/paper/GeoSpark_Geoinformatica_2018.pdf) (research paper). Jia Yu, Zongsi Zhang, Mohamed Sarwat. Geoinformatica Journal 2019.
 
- ["A Demonstration of GeoSpark: A Cluster Computing Framework for Processing Big Spatial Data"](http://www.public.asu.edu/~jiayu2/geospark/publication/GeoSpark_DemoPaper.pdf) (demo paper). Jia Yu, Jinxuan Wu, Mohamed Sarwat. In Proceeding of IEEE International Conference on Data Engineering ICDE 2016, Helsinki, FI, May 2016
+ ["A Demonstration of GeoSpark: A Cluster Computing Framework for Processing Big Spatial Data"](https://jiayuasu.github.io/files/paper/GeoSpark_DemoPaper.pdf) (demo paper). Jia Yu, Jinxuan Wu, Mohamed Sarwat. In Proceeding of IEEE International Conference on Data Engineering ICDE 2016, Helsinki, FI, May 2016
 
- ["GeoSpark: A Cluster Computing Framework for Processing Large-Scale Spatial Data"](http://www.public.asu.edu/~jiayu2/geospark/publication/GeoSpark_ShortPaper.pdf) (short paper). Jia Yu, Jinxuan Wu, Mohamed Sarwat. In Proceeding of the ACM International Conference on Advances in Geographic Information Systems ACM SIGSPATIAL GIS 2015, Seattle, WA, USA November 2015
+ ["GeoSpark: A Cluster Computing Framework for Processing Large-Scale Spatial Data"](https://jiayuasu.github.io/files/paper/GeoSpark_ShortPaper.pdf) (short paper). Jia Yu, Jinxuan Wu, Mohamed Sarwat. In Proceeding of the ACM International Conference on Advances in Geographic Information Systems ACM SIGSPATIAL GIS 2015, Seattle, WA, USA November 2015
 
 ### GeoSparkViz Visualization System
 
-["GeoSparkViz in Action: A Data System with built-in support for Geospatial Visualization"](http://www.public.asu.edu/~jiayu2/geospark/publication/geosparkviz-icde2019-demo.pdf) (demo paper) Jia Yu, Anique Tahir, and Mohamed Sarwat. In Proceedings of the International Conference on Data Engineering, ICDE, 2019
+["GeoSparkViz in Action: A Data System with built-in support for Geospatial Visualization"](https://jiayuasu.github.io/files/paper/geosparkviz-icde2019-demo.pdf) (demo paper) Jia Yu, Anique Tahir, and Mohamed Sarwat. In Proceedings of the International Conference on Data Engineering, ICDE, 2019
 
-["GeoSparkViz: A Scalable Geospatial Data Visualization Framework in the Apache Spark Ecosystem"](http://www.public.asu.edu/~jiayu2/geospark/publication/geosparkviz-ssdbm-2018.pdf) (research paper). Jia Yu, Zongsi Zhang, Mohamed Sarwat. In Proceedings of the International Conference on Scientific and Statistical Database Management, SSDBM 2018, Bolzano-Bozen, Italy July 2018
+["GeoSparkViz: A Scalable Geospatial Data Visualization Framework in the Apache Spark Ecosystem"](https://jiayuasu.github.io/files/paper/geosparkviz-ssdbm-2018.pdf) (research paper). Jia Yu, Zongsi Zhang, Mohamed Sarwat. In Proceedings of the International Conference on Scientific and Statistical Database Management, SSDBM 2018, Bolzano-Bozen, Italy July 2018
 
 ### GeoSparkSim Traffic Simulator
 
-Dissecting GeoSparkSim: a scalable microscopic road network traffic simulator in Apache Spark (journal paper) Jia Yu, Zishan Fu, Mohamed Sarwat. Distributed Parallel Databases 38(4): 963-994 (2020)
+["Dissecting GeoSparkSim: a scalable microscopic road network traffic simulator in Apache Spark"](https://link.springer.com/article/10.1007/s10619-020-07306-x) (journal paper) Jia Yu, Zishan Fu, Mohamed Sarwat. Distributed Parallel Databases 38(4): 963-994 (2020)
 
-Demonstrating GeoSparkSim: A Scalable Microscopic Road Network Traffic Simulator Based on Apache Spark. Zishan Fu, Jia Yu, Mohamed Sarwat. International Symposium on Spatial and Temporal Databases, SSTD, 2019
+["Demonstrating GeoSparkSim: A Scalable Microscopic Road Network Traffic Simulator Based on Apache Spark"](https://jiayuasu.github.io/files/paper/geosparksim_sstd2019_demopaper.pdf). Zishan Fu, Jia Yu, Mohamed Sarwat. International Symposium on Spatial and Temporal Databases, SSTD, 2019
 
-["Building A Microscopic Road Network Traffic Simulator in Apache Spark"](http://www.public.asu.edu/~jiayu2/geospark/publication/geosparksim-mdm-2019.pdf) (research paper) Zishan Fu, Jia Yu, and Mohamed Sarwat. In Proceedings of the International Conference on Mobile Data Management, MDM, 2019
+["Building A Microscopic Road Network Traffic Simulator in Apache Spark"](https://jiayuasu.github.io/files/paper/geosparksim_mdm2019_fullpaper.pdf) (research paper) Zishan Fu, Jia Yu, and Mohamed Sarwat. In Proceedings of the International Conference on Mobile Data Management, MDM, 2019
 
 ### A Tutorial about Geospatial Data Management in Spark
 
-["Geospatial Data Management in Apache Spark: A Tutorial"](http://www.public.asu.edu/~jiayu2/geospark/publication/geospatial-icde-2019.pdf) (Tutorial) Jia Yu and Mohamed Sarwat.  In Proceedings of the International Conference on Data Engineering, ICDE, 2019
+["Geospatial Data Management in Apache Spark: A Tutorial"](https://jiayuasu.github.io/files/talk/jia-icde19-tutorial.pdf) (Tutorial) Jia Yu and Mohamed Sarwat.  In Proceedings of the International Conference on Data Engineering, ICDE, 2019
