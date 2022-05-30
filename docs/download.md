@@ -31,3 +31,7 @@ Automatically generated binary JARs (per each Master branch commit): [GitHub Act
 ### Past releases
 
 Past Sedona releases are archived and can be found here: https://archive.apache.org/dist/incubator/sedona/
+
+## Security
+
+For security issues, please refer to https://www.apache.org/security/
