@@ -1276,6 +1276,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
   }
 
+
+
   it ("Should pass ST_PointOnSurface") {
 
     val geomTestCases1 = Map(
@@ -1573,5 +1575,18 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_BuildArea(null)")
     assert(functionDf.first().get(0) == null)
+  }
+
+  it ("Should pass St_CollectionExtract") {
+    var df = sparkSession.sql("SELECT ST_GeomFromText('GEOMETRYCOLLECTION(POINT(40 10), LINESTRING(0 5, 0 10), POLYGON((0 0, 0 5, 5 5, 5 0, 0 0)))') as geom")
+    assert(df.selectExpr("ST_AsText(ST_CollectionExtract(geom))").collect().head.get(0) == "MULTIPOLYGON (((0 0, 0 5, 5 5, 5 0, 0 0)))")
+    assert(df.selectExpr("ST_AsText(ST_CollectionExtract(geom, 3))").collect().head.get(0) == "MULTIPOLYGON (((0 0, 0 5, 5 5, 5 0, 0 0)))")
+    assert(df.selectExpr("ST_AsText(ST_CollectionExtract(geom, 1))").collect().head.get(0) == "MULTIPOINT ((40 10))")
+    assert(df.selectExpr("ST_AsText(ST_CollectionExtract(geom, 2))").collect().head.get(0) == "MULTILINESTRING ((0 5, 0 10))")
+    assert(df.selectExpr("ST_AsText(ST_CollectionExtract(geom, 2))").collect().head.get(0) == "MULTILINESTRING ((0 5, 0 10))")
+    df = sparkSession.sql("SELECT ST_GeomFromText('GEOMETRYCOLLECTION (POINT (40 10), POINT (40 10))') as geom")
+    assert(df.selectExpr("ST_AsText(ST_CollectionExtract(geom, 1))").collect().head.get(0) == "MULTIPOINT ((40 10), (40 10))")
+    assert(df.selectExpr("ST_AsText(ST_CollectionExtract(geom, 2))").collect().head.get(0) == "MULTILINESTRING EMPTY")
+    assert(df.selectExpr("ST_AsText(ST_CollectionExtract(geom))").collect().head.get(0) == "MULTIPOINT ((40 10), (40 10))")
   }
 }

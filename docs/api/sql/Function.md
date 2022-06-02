@@ -1259,9 +1259,50 @@ SELECT ST_BuildArea(
 Result:
 
 ```
+
 +----------------------------------------------------------------------------+
 |geom                                                                        |
 +----------------------------------------------------------------------------+
 |POLYGON((0 0,0 20,20 20,20 0,0 0),(2 2,18 2,18 18,2 18,2 2))                |
++----------------------------------------------------------------------------+
+```
+
+## ST_CollectionExtract
+
+Introduction: Returns a homogeneous multi-geometry from a given geometry collection.
+
+The type numbers are: 
+1. POINT
+2. LINESTRING
+3. POLYGON
+
+If the type parameter is omitted a multi-geometry of the highest dimension is returned.
+
+Format: `ST_CollectionExtract (A:geometry)`
+
+Format: `ST_CollectionExtract (A:geometry, type:Int)`
+
+Since: `v1.2.1`
+
+Example:
+
+```SQL
+WITH test_data as (
+    ST_GeomFromText(
+        'GEOMETRYCOLLECTION(POINT(40 10), POLYGON((0 0, 0 5, 5 5, 5 0, 0 0)))'
+    ) as geom
+)
+SELECT ST_CollectionExtract(geom) as c1, ST_CollectionExtract(geom, 1) as c2 
+FROM test_data
+
+```
+
+Result:
+
+```
++----------------------------------------------------------------------------+
+|c1                                        |c2                               |
++----------------------------------------------------------------------------+
+|MULTIPOLYGON(((0 0, 0 5, 5 5, 5 0, 0 0))) |MULTIPOINT(40 10)                |              |
 +----------------------------------------------------------------------------+
 ```
