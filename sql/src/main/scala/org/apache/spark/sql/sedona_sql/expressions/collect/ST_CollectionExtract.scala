@@ -38,7 +38,7 @@ case class ST_CollectionExtract(inputExpressions: Seq[Expression]) extends Expre
 
   override def children: Seq[Expression] = inputExpressions
 
-  override protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
     copy(inputExpressions = newChildren)
   }
 
