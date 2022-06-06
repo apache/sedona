@@ -27,12 +27,12 @@ You can skip this step if you installed these software before.
 ```bash
 #!/bin/bash
 wget https://downloads.apache.org/incubator/sedona/KEYS
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz.asc
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz.asc
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.next_version }}-src.tar.gz
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.next_version }}-src.tar.gz.asc
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.next_version }}-src.tar.gz.sha512
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.next_version }}-bin.tar.gz
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.next_version }}-bin.tar.gz.asc
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.next_version }}-bin.tar.gz.sha512
 ```
 
 ## Verify the signature and checksum
@@ -40,12 +40,12 @@ wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_r
 ```bash
 #!/bin/bash
 gpg --import KEYS.txt
-gpg --verify apache-sedona-{{ sedona.current_version }}-src.tar.gz.asc
-gpg --verify apache-sedona-{{ sedona.current_version }}-bin.tar.gz.asc
-shasum -a 512 apache-sedona-{{ sedona.current_version }}-src.tar.gz
-cat apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512
-shasum -a 512 apache-sedona-{{ sedona.current_version }}-bin.tar.gz
-cat apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512
+gpg --verify apache-sedona-{{ sedona.next_version }}-src.tar.gz.asc
+gpg --verify apache-sedona-{{ sedona.next_version }}-bin.tar.gz.asc
+shasum -a 512 apache-sedona-{{ sedona.next_version }}-src.tar.gz
+cat apache-sedona-{{ sedona.next_version }}-src.tar.gz.sha512
+shasum -a 512 apache-sedona-{{ sedona.next_version }}-bin.tar.gz
+cat apache-sedona-{{ sedona.next_version }}-bin.tar.gz.sha512
 ```
 
 If successful, you should be able to see something similar to the following text. It should include `Good signature from` and the final 4 lines should be two pairs of checksum matching each other.
@@ -79,9 +79,9 @@ d3bdfd4d870838ebe63f21cb93634d2421ec1ac1b8184636206a5dc0d89a78a88257798b1f17371a
 
 ## Check files manually
 
-1. Check if the downloaded files have the correct version: `{{ sedona.current_version }}`
+1. Check if the downloaded files have the correct version: `{{ sedona.next_version }}`
  
-2. Unzip the downloaded `apache-sedona-{{ sedona.current_version }}-src.tar.gz` file, and check if DISCLAIMER and NOTICE files and included and up to date.
+2. Unzip the downloaded `apache-sedona-{{ sedona.next_version }}-src.tar.gz` file, and check if DISCLAIMER and NOTICE files and included and up to date.
 
 ## Compile the project from source
 

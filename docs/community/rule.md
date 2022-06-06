@@ -40,3 +40,17 @@ After developing a contribution, the easiest and most visible way to submit a Pu
 When creating a PR, please answser the questions in the PR template.
 
 When a PR is submitted, GitHub Action will check the build correctness. Please check the PR status, and fix any reported problems.
+
+## Review a Pull Request
+
+* Every PR requires (1) at least 1 approval from a committer and (2) no disapproval from a committer. Everyone is welcome to review a PR but only the committer can make the final decision.
+* Other reviewers, including community members and committers, may comment on the changes and suggest modifications. Changes can be added by simply pushing more commits to the same branch.
+* Lively, polite, rapid technical debate is encouraged from everyone in the community even if the outcome may be a rejection of the entire change.
+* Keep in mind that changes to more critical parts of Sedona, like Sedona core and spatial join algorithms, will be subjected to more review, and may require more testing and proof of its correctness than other changes.
+* Sometimes, other changes will be merged which conflict with your pull request’s changes. The PR can’t be merged until the conflict is resolved. This can be resolved by resolving the conflicts by hand, then pushing the result to your branch.
+
+## Code of Conduct
+
+Please read [Apache Software Foundation Code of Conduct](https://www.apache.org/foundation/policies/conduct.html).
+
+We expect everyone who participates in the Apache community formally or informally, or claims any affiliation with the Foundation, in any Foundation-related activities and especially when representing the ASF in any role to honor this code of conduct.

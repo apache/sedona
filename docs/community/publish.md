@@ -9,7 +9,7 @@ This page is for Sedona PPMC to publish Sedona releases.
 3. Merge your Apache and GitHub accounts using GitBox (Apache Account Linking utility): https://gitbox.apache.org/setup/
 	* You should see 3 green checks in GitBox
 	* Wait at least 30  minutes for an email inviting you to Apache GitHub Organization and accept invitation
-4. After accepting the Github Invitation verify that you are a member of the team https://github.com/orgs/apache/teams/openwhisk-committers
+4. After accepting the Github Invitation, verify that you are a member of the team https://github.com/orgs/apache/teams/sedona-committers
 5. Additionally, if you have been elected to the Sedona PPMC, verify you are part of the LDAP Sedona PPMC https://whimsy.apache.org/roster/ppmc/sedona
 
 ## Prepare Secret GPG key
@@ -99,6 +99,10 @@ rm report.txt
 	Please read the following guidelines first: 1. ASF Incubator Distribution Guidelines: https://incubator.apache.org/guides/distribution.html 2. ASF Release Guidelines: https://infra.apache.org/release-publishing.html 3. ASF Incubator Release Votes Guidelines: https://issues.apache.org/jira/browse/LEGAL-469
 	
 ## Publish releases
+
+### Update mkdocs.yml
+
+Please change the `sedona.current_version`, `sedona.current_rc`, `sedona.current_git_tag` and `sedona.current_snapshot` in `mkdocs.yml` to the version you want to publish. Do NOT change `sedona.next_version` at this moment. Then compile the website by `mkdocs serve`. This will generate the scripts listed on this page in your local browser.
 
 ### Update Sedona Python, R and Zeppelin versions
 
@@ -203,6 +207,7 @@ rm -rf apache-sedona-{{ sedona.current_version }}-bin
 1. Check the status of the staging repo: [Locate and Examine Your Staging Repository
 ](https://central.sonatype.org/pages/releasing-the-deployment.html#locate-and-examine-your-staging-repository). You should see 12 Sedona modules in total.
 2. Call for a vote in Sedona community and Apache incubator. Then close the staging repo.
+3. The vote will be open for at least 72 hours or until at least 3 "+1" PMC votes are cast
 
 Here is a generated vote email. Please add changes at the end if needed:
 
@@ -228,7 +233,7 @@ https://downloads.apache.org/incubator/sedona/KEYS
 Source code and binaries:
 https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/
 
-The vote will be open for at least 72 hours or until a majority of at least 3 "approve" PMC votes are cast
+The vote will be open for at least 72 hours or until at least 3 "+1" PMC votes are cast
 
 Please vote accordingly:
 
@@ -281,7 +286,9 @@ approval by the IPMC. If this vote passes too, the release is accepted and will 
 
 ### Vote in general incubator.apache.org
 
-Here is a generated vote email. Please add changes at the end if needed:
+Here is a generated vote email. Please add changes at the end if needed.
+
+The vote will be open for at least 72 hours or until at least 3 "+1" PMC votes are cast.
 
 ```
 Subject: [VOTE] Release Apache Sedona {{ sedona.current_rc }}
@@ -309,7 +316,7 @@ https://downloads.apache.org/incubator/sedona/KEYS
 Source code and binaries:
 https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/
 
-The vote will be open for at least 72 hours or until a majority of at least 3 "approve" PMC votes are cast
+The vote will be open for at least 72 hours or until at least 3 "+1" PMC votes are cast
 
 Please vote accordingly:
 
@@ -567,11 +574,11 @@ admin is your Apache ID username and admin123 is your Apache ID password. You ca
 Once the staging repo is closed, click "Release" on the web interface.
 
 ## Publish the doc website
-
-1. Run `mkdocs build` in Sedona root directory. Copy all content in the `site` folder.
-2. Check out GitHub incubator-sedona-website [asf-site branch](https://github.com/apache/incubator-sedona-website/tree/asf-site)
-3. Use the copied content to replace all content in `asf-site` branch and upload to GitHub. Then `sedona.apache.org` will be automatically updated.
-4. You can also push the content to `asf-staging` branch. The staging website will be then updated: `sedona.staged.apache.org`
+1. Update `sedona.next_version` in `mkdocs.yml` to the next version. Note that: the next version means the version after the version you want to release.
+2. Run `mkdocs build` in Sedona root directory. Copy all content in the `site` folder.
+3. Check out GitHub incubator-sedona-website [asf-site branch](https://github.com/apache/incubator-sedona-website/tree/asf-site)
+4. Use the copied content to replace all content in `asf-site` branch and upload to GitHub. Then `sedona.apache.org` will be automatically updated.
+5. You can also push the content to `asf-staging` branch. The staging website will be then updated: `sedona.staged.apache.org`
 
 ### Javadoc and Scaladoc
 
