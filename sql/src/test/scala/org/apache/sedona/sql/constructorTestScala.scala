@@ -114,10 +114,18 @@ class constructorTestScala extends TestBaseScala {
     }
 
     it("Passed ST_GeomFromWKB") {
-      var polygonWkbDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWkbGeometryInputLocation)
+      // UTF-8 encoded WKB String
+      val polygonWkbDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWkbGeometryInputLocation)
       polygonWkbDf.createOrReplaceTempView("polygontable")
-      var polygonDf = sparkSession.sql("select ST_GeomFromWKB(polygontable._c0) as countyshape from polygontable")
+      val polygonDf = sparkSession.sql("select ST_GeomFromWKB(polygontable._c0) as countyshape from polygontable")
       assert(polygonDf.count() == 100)
+      // RAW binary array
+      val wkbSeq = Seq[Array[Byte]](Array[Byte](1, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, -124, -42, 0, -64, 0, 0, 0, 0, -128, -75, -42, -65, 0, 0, 0, 96, -31, -17, -9, -65, 0, 0, 0, -128, 7, 93, -27, -65))
+      val rawWkbDf = wkbSeq.toDF("wkb")
+      rawWkbDf.createOrReplaceTempView("rawWKBTable")
+      val geometries = sparkSession.sql("SELECT ST_GeomFromWKB(rawWKBTable.wkb) as countyshape from rawWKBTable")
+      val expectedGeom = "LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)";
+      assert(geometries.first().getAs[Geometry](0).toString.equals(expectedGeom))
     }
 
     it("Passed ST_GeomFromGeoJSON") {
