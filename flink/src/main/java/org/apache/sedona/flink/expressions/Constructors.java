@@ -26,12 +26,17 @@ import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.ParseException;
 
 public class Constructors {
+
+    private static Geometry getGeometryByType(String geom, String inputDelimiter, GeometryType geometryType) throws ParseException {
+        FileDataSplitter delimiter = inputDelimiter == null? FileDataSplitter.CSV:FileDataSplitter.getFileDataSplitter(inputDelimiter);
+        FormatUtils<Geometry> formatUtils = new FormatUtils<>(delimiter, false, geometryType);
+        return formatUtils.readGeometry(geom);
+    }
+
     public static class ST_PointFromText extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String s, @DataTypeHint("String") String inputDelimiter) throws ParseException {
-            FileDataSplitter delimiter = inputDelimiter == null? FileDataSplitter.CSV:FileDataSplitter.getFileDataSplitter(inputDelimiter);
-            FormatUtils<Geometry> formatUtils = new FormatUtils(delimiter, false, GeometryType.POINT);
-            return formatUtils.readGeometry(s);
+            return getGeometryByType(s, inputDelimiter, GeometryType.POINT);
         }
 
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
@@ -40,18 +45,44 @@ public class Constructors {
         }
     }
 
-    public static class ST_PolygonFromText extends ScalarFunction {
+    public static class ST_LineFromText extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-        public Geometry eval(@DataTypeHint("String") String s, @DataTypeHint("String") String inputDelimiter) throws ParseException {
+        public Geometry eval(@DataTypeHint("String") String lineString,
+                             @DataTypeHint("String") String inputDelimiter) throws ParseException {
             // The default delimiter is comma. Otherwise, use the delimiter given by the user
-            FileDataSplitter delimiter = inputDelimiter == null? FileDataSplitter.CSV:FileDataSplitter.getFileDataSplitter(inputDelimiter);
-            FormatUtils<Geometry> formatUtils = new FormatUtils(delimiter, false, GeometryType.POLYGON);
-            return formatUtils.readGeometry(s);
+            return getGeometryByType(lineString, inputDelimiter, GeometryType.LINESTRING);
         }
 
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-        public Geometry eval(@DataTypeHint("String") String s) throws ParseException {
-            return eval(s, null);
+        public Geometry eval(@DataTypeHint("String") String lineString) throws ParseException {
+            return eval(lineString, null);
+        }
+    }
+
+    public static class ST_LineStringFromText extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String lineString,
+                             @DataTypeHint("String") String inputDelimiter) throws ParseException {
+            // The default delimiter is comma. Otherwise, use the delimiter given by the user
+            return new ST_LineFromText().eval(lineString, inputDelimiter);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String lineString) throws ParseException {
+            return eval(lineString, null);
+        }
+    }
+
+    public static class ST_PolygonFromText extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String polygonString, @DataTypeHint("String") String inputDelimiter) throws ParseException {
+            // The default delimiter is comma. Otherwise, use the delimiter given by the user
+            return getGeometryByType(polygonString, inputDelimiter, GeometryType.POLYGON);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String polygonString) throws ParseException {
+            return eval(polygonString, null);
         }
     }
 
@@ -70,19 +101,29 @@ public class Constructors {
         }
     }
 
+    private static Geometry getGeometryByFileData(String wktString, FileDataSplitter dataSplitter) throws ParseException {
+        FormatUtils<Geometry> formatUtils = new FormatUtils<>(dataSplitter, false);
+        return formatUtils.readGeometry(wktString);
+    }
+
     public static class ST_GeomFromWKT extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String wktString) throws ParseException {
-            FormatUtils formatUtils = new FormatUtils(FileDataSplitter.WKT, false);
-            return formatUtils.readGeometry(wktString);
+            return getGeometryByFileData(wktString, FileDataSplitter.WKT);
+        }
+    }
+
+    public static class ST_GeomFromText extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String wktString) throws ParseException {
+            return new ST_GeomFromWKT().eval(wktString);
         }
     }
 
     public static class ST_GeomFromWKB extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String wkbString) throws ParseException {
-            FormatUtils formatUtils = new FormatUtils(FileDataSplitter.WKB, false);
-            return formatUtils.readGeometry(wkbString);
+            return getGeometryByFileData(wkbString, FileDataSplitter.WKB);
         }
 
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
@@ -96,8 +137,7 @@ public class Constructors {
     public static class ST_GeomFromGeoJSON extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String geoJson) throws ParseException {
-            FormatUtils formatUtils = new FormatUtils(FileDataSplitter.GEOJSON, false);
-            return formatUtils.readGeometry(geoJson);
+            return getGeometryByFileData(geoJson, FileDataSplitter.GEOJSON);
         }
     }
 

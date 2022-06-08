@@ -21,9 +21,12 @@ public class Catalog {
     public static UserDefinedFunction[] getFuncs() {
         return new UserDefinedFunction[]{
                 new Constructors.ST_PointFromText(),
+                new Constructors.ST_LineStringFromText(),
+                new Constructors.ST_LineFromText(),
                 new Constructors.ST_PolygonFromText(),
                 new Constructors.ST_PolygonFromEnvelope(),
                 new Constructors.ST_GeomFromWKT(),
+                new Constructors.ST_GeomFromText(),
                 new Constructors.ST_GeomFromWKB(),
                 new Constructors.ST_GeomFromGeoJSON(),
                 new Constructors.ST_GeomFromGeoHash(),

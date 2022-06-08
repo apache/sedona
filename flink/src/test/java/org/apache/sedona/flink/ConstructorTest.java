@@ -51,6 +51,30 @@ public class ConstructorTest extends TestBase{
     }
 
     @Test
+    public void testLineFromText() {
+        List<Row> data = createLineStringWKT(testDataSize);
+
+        Table lineStringTable = createLineStringTextTable(testDataSize)
+                .select(call(Constructors.ST_LineFromText.class.getSimpleName(), $(linestringColNames[0])).as(linestringColNames[0]),
+                        $(linestringColNames[1]));
+        Row result = last(lineStringTable);
+
+        assertEquals(result.toString(), data.get(data.size() - 1).toString());
+    }
+
+    @Test
+    public void testLineStringFromText() {
+        List<Row> data = createLineStringWKT(testDataSize);
+
+        Table lineStringTable = createLineStringTextTable(testDataSize)
+                .select(call(Constructors.ST_LineStringFromText.class.getSimpleName(), $(linestringColNames[0])).as(linestringColNames[0]),
+                        $(linestringColNames[1]));
+        Row result = last(lineStringTable);
+
+        assertEquals(result.toString(), data.get(data.size() - 1).toString());
+    }
+
+    @Test
     public void testPolygonFromText() {
         List<Row> data = createPolygonWKT(testDataSize);
         Row result = last(createPolygonTable(testDataSize));
@@ -63,6 +87,17 @@ public class ConstructorTest extends TestBase{
         Table wktTable = createTextTable(data, polygonColNames);
         Table geomTable = wktTable.select(call(Constructors.ST_GeomFromWKT.class.getSimpleName(),
                 $(polygonColNames[0])).as(polygonColNames[0]),
+                $(polygonColNames[1]));
+        Row result = last(geomTable);
+        assertEquals(result.toString(), data.get(data.size() - 1).toString());
+    }
+
+    @Test
+    public void testGeomFromText() {
+        List<Row> data = createPolygonWKT(testDataSize);
+        Table wktTable = createTextTable(data, polygonColNames);
+        Table geomTable = wktTable.select(call(Constructors.ST_GeomFromText.class.getSimpleName(),
+                        $(polygonColNames[0])).as(polygonColNames[0]),
                 $(polygonColNames[1]));
         Row result = last(geomTable);
         assertEquals(result.toString(), data.get(data.size() - 1).toString());

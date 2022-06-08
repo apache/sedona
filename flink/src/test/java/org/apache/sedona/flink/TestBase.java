@@ -28,14 +28,10 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.sedona.flink.expressions.Constructors;
 import org.locationtech.jts.geom.*;
-import org.locationtech.jts.geom.impl.CoordinateArraySequence;
-import org.wololo.geojson.Feature;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
@@ -45,6 +41,7 @@ public class TestBase {
     protected static StreamTableEnvironment tableEnv;
     static int testDataSize = 1000;
     static String[] pointColNames = {"geom_point", "name_point"};
+    static String[] linestringColNames = {"geom_linestring", "name_linestring"};
     static String[] polygonColNames = {"geom_polygon", "name_polygon"};
     static String pointTableName = "point_table";
     static String polygonTableName = "polygon_table";
@@ -126,6 +123,44 @@ public class TestBase {
         return data;
     }
 
+    static List<Row> createLineStringText(int size) {
+        List<Row> data = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            // Create polygons each of which only has 1 match in points
+            // Each polygon is an envelope like (-0.5, -0.5, 0.5, 0.5)
+            String minX = String.valueOf(i - 0.5);
+            String minY = String.valueOf(i - 0.5);
+            String maxX = String.valueOf(i + 0.5);
+            String maxY = String.valueOf(i + 0.5);
+            List<String> linestring = new ArrayList<>();
+            linestring.add(minX);
+            linestring.add(minY);
+            linestring.add(maxX);
+            linestring.add(maxY);
+
+            data.add(Row.of(String.join(",", linestring), "linestring" + i));
+        }
+        return data;
+    }
+
+    static List<Row> createLineStringWKT(int size) {
+        List<Row> data = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+
+            String minX = String.valueOf(i - 0.5);
+            String minY = String.valueOf(i - 0.5);
+            String maxX = String.valueOf(i + 0.5);
+            String maxY = String.valueOf(i + 0.5);
+
+            List<String> linestring = new ArrayList<>();
+            linestring.add(minX + " " + minY);
+            linestring.add(maxX + " " + maxY);
+
+            data.add(Row.of("LINESTRING (" + String.join(", ", linestring) + ")", "linestring" + i));
+        }
+        return data;
+    }
+
     static List<Row> createPolygonWKT(int size) {
         List<Row> data = new ArrayList<>();
         for (int i = 0; i < size; i++) {
@@ -188,6 +223,10 @@ public class TestBase {
 
     static Table createPointTextTable_real(int size){
         return createTextTable(createPointText_real(size), pointColNames);
+    }
+
+    static Table createLineStringTextTable(int size) {
+        return createTextTable(createLineStringText(size), linestringColNames);
     }
 
     static Table createPolygonTextTable(int size) {
