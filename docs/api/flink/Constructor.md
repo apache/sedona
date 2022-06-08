@@ -18,6 +18,7 @@ Introduction: Construct a Geometry from WKB string or Binary
 
 Format:
 `ST_GeomFromWKB (Wkb:string)`
+`ST_GeomFromWKB (Wkb:binary)`
 
 Since: `v1.2.0`
 
