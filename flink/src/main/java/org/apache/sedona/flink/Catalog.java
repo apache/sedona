@@ -20,6 +20,7 @@ import org.apache.sedona.flink.expressions.*;
 public class Catalog {
     public static UserDefinedFunction[] getFuncs() {
         return new UserDefinedFunction[]{
+                new Constructors.ST_Point(),
                 new Constructors.ST_PointFromText(),
                 new Constructors.ST_LineStringFromText(),
                 new Constructors.ST_LineFromText(),

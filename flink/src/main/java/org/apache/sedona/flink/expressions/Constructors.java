@@ -33,6 +33,15 @@ public class Constructors {
         return formatUtils.readGeometry(geom);
     }
 
+    public static class ST_Point extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y) throws ParseException {
+            Coordinate coordinates = new Coordinate(x, y);
+            GeometryFactory geometryFactory = new GeometryFactory();
+            return geometryFactory.createPoint(coordinates);
+        }
+    }
+
     public static class ST_PointFromText extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String s, @DataTypeHint("String") String inputDelimiter) throws ParseException {

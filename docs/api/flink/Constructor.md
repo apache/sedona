@@ -1,3 +1,17 @@
+## ST_Point
+
+Introduction: Construct a Point from X and Y
+
+Format: `ST_Point (X:decimal, Y:decimal)`
+
+Since: `v1.2.1`
+
+SQL example:
+```SQL
+SELECT ST_Point(x, y) AS pointshape
+FROM pointtable
+```
+
 ## ST_GeomFromWKT
 
 Introduction: Construct a Geometry from Wkt
