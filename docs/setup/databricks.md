@@ -116,5 +116,10 @@ From your cluster configuration (`Cluster` -> `Edit` -> `Configuration` -> `Adva
 dbfs:/FileStore/sedona/sedona-init.sh
 ```
 
+For enabling python support, from the Libraries tab install from PyPI
+```
+apache-sedona
+```
+
 *Note: You need to install the Sedona libraries via init script because the libraries installed via UI are installed after the cluster has already started, and therefore the classes specified by the config `spark.sql.extensions`, `spark.serializer`, and `spark.kryo.registrator` are not available at startup time.*
 
