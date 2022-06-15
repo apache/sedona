@@ -1,3 +1,17 @@
+## ST_Point
+
+Introduction: Construct a Point from X and Y
+
+Format: `ST_Point (X:decimal, Y:decimal)`
+
+Since: `v1.2.1`
+
+SQL example:
+```SQL
+SELECT ST_Point(x, y) AS pointshape
+FROM pointtable
+```
+
 ## ST_GeomFromWKT
 
 Introduction: Construct a Geometry from Wkt
@@ -10,6 +24,20 @@ Since: `v1.2.0`
 SQL example:
 ```SQL
 SELECT ST_GeomFromWKT('POINT(40.7128 -74.0060)') AS geometry
+```
+
+## ST_GeomFromText
+
+Introduction: Construct a Geometry from Wkt. Alias of  [ST_GeomFromWKT](#ST_GeomFromWKT)
+
+Format:
+`ST_GeomFromText (Wkt:string)`
+
+Since: `v1.2.1`
+
+SQL example:
+```SQL
+SELECT ST_GeomFromText('POINT(40.7128 -74.0060)') AS geometry
 ```
 
 ## ST_GeomFromWKB
@@ -64,6 +92,32 @@ Since: `v1.2.0`
 SQL example:
 ```SQL
 SELECT ST_PointFromText('40.7128,-74.0060', ',') AS pointshape
+```
+
+## ST_LineFromText
+
+Introduction: Construct a LineString from Text, delimited by Delimiter (Optional)
+
+Format: `ST_LineFromText (Text:string, Delimiter:char)`
+
+Since: `v1.2.1`
+
+SQL example:
+```SQL
+SELECT ST_LineFromText('Linestring(1 2, 3 4)') AS line
+```
+
+## ST_LineStringFromText
+
+Introduction: Construct a LineString from Text, delimited by Delimiter (Optional). Alias of  [ST_LineFromText](#ST_LineFromText)
+
+Format: `ST_LineStringFromText (Text:string, Delimiter:char)`
+
+Since: `v1.2.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_LineStringFromText('Linestring(1 2, 3 4)') AS line
 ```
 
 ## ST_PolygonFromText

@@ -44,9 +44,60 @@ public class ConstructorTest extends TestBase{
     }
 
     @Test
+    public void test2DPoint() {
+        List<Row> data = new ArrayList<>();
+        data.add(Row.of(1.0, 2.0 , "point"));
+        String[] colNames = new String[]{"x", "y", "name_point"};
+
+        TypeInformation<?>[] colTypes = {
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.STRING_TYPE_INFO};
+        RowTypeInfo typeInfo = new RowTypeInfo(colTypes, colNames);
+        DataStream<Row> ds = env.fromCollection(data).returns(typeInfo);
+        Table pointTable = tableEnv.fromDataStream(ds);
+
+        Table geomTable = pointTable
+                .select(call(Constructors.ST_Point.class.getSimpleName(), $(colNames[0]), $(colNames[1]))
+                        .as(colNames[2]));
+
+        String result = first(geomTable)
+                .getFieldAs(colNames[2])
+                .toString();
+
+        String expected = "POINT (1 2)";
+
+        assertEquals(result, expected);
+    }
+
+    @Test
     public void testPointFromText() {
         List<Row> data = createPointWKT(testDataSize);
         Row result = last(createPointTable(testDataSize));
+        assertEquals(result.toString(), data.get(data.size() - 1).toString());
+    }
+
+    @Test
+    public void testLineFromText() {
+        List<Row> data = createLineStringWKT(testDataSize);
+
+        Table lineStringTable = createLineStringTextTable(testDataSize)
+                .select(call(Constructors.ST_LineFromText.class.getSimpleName(), $(linestringColNames[0])).as(linestringColNames[0]),
+                        $(linestringColNames[1]));
+        Row result = last(lineStringTable);
+
+        assertEquals(result.toString(), data.get(data.size() - 1).toString());
+    }
+
+    @Test
+    public void testLineStringFromText() {
+        List<Row> data = createLineStringWKT(testDataSize);
+
+        Table lineStringTable = createLineStringTextTable(testDataSize)
+                .select(call(Constructors.ST_LineStringFromText.class.getSimpleName(), $(linestringColNames[0])).as(linestringColNames[0]),
+                        $(linestringColNames[1]));
+        Row result = last(lineStringTable);
+
         assertEquals(result.toString(), data.get(data.size() - 1).toString());
     }
 
@@ -63,6 +114,17 @@ public class ConstructorTest extends TestBase{
         Table wktTable = createTextTable(data, polygonColNames);
         Table geomTable = wktTable.select(call(Constructors.ST_GeomFromWKT.class.getSimpleName(),
                 $(polygonColNames[0])).as(polygonColNames[0]),
+                $(polygonColNames[1]));
+        Row result = last(geomTable);
+        assertEquals(result.toString(), data.get(data.size() - 1).toString());
+    }
+
+    @Test
+    public void testGeomFromText() {
+        List<Row> data = createPolygonWKT(testDataSize);
+        Table wktTable = createTextTable(data, polygonColNames);
+        Table geomTable = wktTable.select(call(Constructors.ST_GeomFromText.class.getSimpleName(),
+                        $(polygonColNames[0])).as(polygonColNames[0]),
                 $(polygonColNames[1]));
         Row result = last(geomTable);
         assertEquals(result.toString(), data.get(data.size() - 1).toString());
