@@ -67,6 +67,8 @@ class constructorTestScala extends TestBaseScala {
       polygonWktDf.createOrReplaceTempView("polygontable")
       var polygonDf = sparkSession.sql("select ST_GeomFromWkt(polygontable._c0) as countyshape from polygontable")
       assert(polygonDf.count() == 100)
+      val nullGeom = sparkSession.sql("select ST_GeomFromWKT(null)")
+      assert(nullGeom.first().isNullAt(0))
     }
 
     it("Passed ST_LineFromText") {
@@ -98,6 +100,8 @@ class constructorTestScala extends TestBaseScala {
       polygonWktDf.createOrReplaceTempView("polygontable")
       var polygonDf = sparkSession.sql("select ST_GeomFromText(polygontable._c0) as countyshape from polygontable")
       assert(polygonDf.count() == 100)
+      val nullGeom = sparkSession.sql("select ST_GeomFromText(null)")
+      assert(nullGeom.first().isNullAt(0))
     }
 
     it("Passed ST_GeomFromWKT multipolygon read as polygon bug") {
@@ -126,6 +130,9 @@ class constructorTestScala extends TestBaseScala {
       val geometries = sparkSession.sql("SELECT ST_GeomFromWKB(rawWKBTable.wkb) as countyshape from rawWKBTable")
       val expectedGeom = "LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)";
       assert(geometries.first().getAs[Geometry](0).toString.equals(expectedGeom))
+      // null input
+      val nullGeom = sparkSession.sql("SELECT ST_GeomFromWKB(null)")
+      assert(nullGeom.first().isNullAt(0))
     }
 
     it("Passed ST_GeomFromGeoJSON") {
