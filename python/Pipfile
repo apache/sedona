@@ -5,7 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 pytest="*"
-notebook="==6.0.0"
+notebook="==6.4.12"
 jupyter="*"
 mkdocs="*"
 pytest-cov = "*"
