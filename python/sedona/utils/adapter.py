@@ -18,7 +18,7 @@
 from typing import List
 
 from pyspark import RDD
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import DataFrame, SparkSession, SQLContext
 
 from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.core.enums.spatial import SpatialType
@@ -92,7 +92,7 @@ class Adapter(metaclass=MultipleMeta):
 
         jdf = jvm.PythonAdapterWrapper.toDf(spatialRDD._srdd, fieldNames, sparkSession._jsparkSession)
 
-        df = DataFrame(jdf, sparkSession._wrapped)
+        df = DataFrame(jdf, SQLContext.getOrCreate(sparkSession.sparkContext))
 
         return df
 
@@ -109,7 +109,7 @@ class Adapter(metaclass=MultipleMeta):
 
         jdf = jvm.Adapter.toDf(spatialRDD._srdd, sparkSession._jsparkSession)
 
-        df = DataFrame(jdf, sparkSession._wrapped)
+        df = DataFrame(jdf, SQLContext.getOrCreate(sparkSession.sparkContext))
 
         return df
 
@@ -150,7 +150,7 @@ class Adapter(metaclass=MultipleMeta):
     def toDf(cls, rawPairRDD: SedonaPairRDD, sparkSession: SparkSession):
         jvm = sparkSession._jvm
         jdf = jvm.Adapter.toDf(rawPairRDD.jsrdd, sparkSession._jsparkSession)
-        df = DataFrame(jdf, sparkSession._wrapped)
+        df = DataFrame(jdf, SQLContext.getOrCreate(sparkSession.sparkContext))
         return df
 
     @classmethod
@@ -158,7 +158,7 @@ class Adapter(metaclass=MultipleMeta):
         jvm = sparkSession._jvm
         jdf = jvm.PythonAdapterWrapper.toDf(
             rawPairRDD.jsrdd, leftFieldnames, rightFieldNames, sparkSession._jsparkSession)
-        df = DataFrame(jdf, sparkSession._wrapped)
+        df = DataFrame(jdf, SQLContext.getOrCreate(sparkSession.sparkContext))
         return df
 
     @classmethod
