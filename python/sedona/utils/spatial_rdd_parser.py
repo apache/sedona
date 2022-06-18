@@ -22,7 +22,10 @@ from typing import List, Any
 
 import attr
 from shapely.geometry.base import BaseGeometry
-from pyspark import PickleSerializer
+try:
+    from pyspark import CPickleSerializer
+except ImportError:
+    from pyspark import PickleSerializer as CPickleSerializer
 from shapely.wkb import dumps
 
 from sedona.core.geom.circle import Circle
@@ -177,7 +180,7 @@ PARSERS = {
 }
 
 
-class SedonaPickler(PickleSerializer):
+class SedonaPickler(CPickleSerializer):
 
     def __init__(self):
         super().__init__()
