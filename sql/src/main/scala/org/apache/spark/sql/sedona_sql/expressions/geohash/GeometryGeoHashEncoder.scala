@@ -24,7 +24,9 @@ object GeometryGeoHashEncoder {
   private val geometryFactory = new GeometryFactory()
   def calculate(geom: Geometry, precision: Int): Option[String] = {
     val gbox = geom.getEnvelope.getEnvelopeInternal
-    if (gbox.getMinX < -180 || gbox.getMinY < -90 || gbox.getMaxX > 180 || gbox.getMaxX > 90) None
+    // Latitude can take values in [-90, 90]
+    // Longitude can take values in [-180, 180]
+    if (gbox.getMinX < -180 || gbox.getMinY < -90 || gbox.getMaxX > 180 || gbox.getMaxY > 90) None
     else {
       val lon = gbox.getMinX + (gbox.getMaxX - gbox.getMinX) / 2
       val lat = gbox.getMinY + (gbox.getMaxY - gbox.getMinY) / 2
