@@ -15,24 +15,34 @@ jobs:
     strategy:
       matrix:
         include:
-          - spark: 3.2.0
+          - spark: 3.3.0
             scala: 2.12.8
             python: 3.9
-          - spark: 3.2.0
+            hadoop: 3
+          - spark: 3.3.0
             scala: 2.12.8
             python: 3.8
+            hadoop: 3
+          - spark: 3.3.0
+            scala: 2.12.8
+            python: 3.7
+            hadoop: 3
           - spark: 3.2.0
             scala: 2.12.8
             python: 3.7
+            hadoop: 2.7
           - spark: 3.1.2
             scala: 2.12.8
             python: 3.7
+            hadoop: 2.7
           - spark: 3.0.3
             scala: 2.12.8
             python: 3.7
+            hadoop: 2.7
           - spark: 2.4.8
             scala: 2.11.8
             python: 3.7
+            hadoop: 2.7
 
     steps:
     - uses: actions/checkout@v2
@@ -55,10 +65,12 @@ jobs:
       run: if [ ${SPARK_VERSION:0:1} == "3" ]; then mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=3.0 -Dgeotools ; else mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=2.4 -Dgeotools ; fi
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
-      run: wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz
+        HADOOP_VERSION: ${{ matrix.hadoop }}
+      run: wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
-      run: tar -xzf spark-${SPARK_VERSION}-bin-hadoop2.7.tgz
+        HADOOP_VERSION: ${{ matrix.hadoop }}
+      run: tar -xzf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz
     - run: sudo apt-get -y install python3-pip python-dev libgeos-dev
     - run: sudo pip3 install -U setuptools
     - run: sudo pip3 install -U wheel
@@ -70,7 +82,9 @@ jobs:
       run: (cd python;pipenv --python ${PYTHON_VERSION};pipenv install pyspark==${SPARK_VERSION};pipenv install --dev;pipenv graph)
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
-      run: find python-adapter/target -name sedona-* -exec cp {} spark-${SPARK_VERSION}-bin-hadoop2.7/jars/ \;
+        HADOOP_VERSION: ${{ matrix.hadoop }}
+      run: find python-adapter/target -name sedona-* -exec cp {} spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/jars/ \;
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
-      run: (export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop2.7;export PYTHONPATH=$SPARK_HOME/python;cd python;pipenv run pytest tests)
+        HADOOP_VERSION: ${{ matrix.hadoop }}
+      run: (export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION};export PYTHONPATH=$SPARK_HOME/python;cd python;pipenv run pytest tests)

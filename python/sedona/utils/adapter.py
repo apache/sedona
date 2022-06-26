@@ -31,6 +31,16 @@ class Adapter(metaclass=MultipleMeta):
     Class which allow to convert between Spark DataFrame and SpatialRDD and reverse.
     """
 
+    @staticmethod
+    def _create_dataframe(jdf, sparkSession: SparkSession) -> DataFrame:
+        if hasattr(sparkSession, '_wrapped'):
+            # In Spark < 3.3, use the _wrapped SQLContext
+            return DataFrame(jdf, sparkSession._wrapped)
+        else:
+            # In Spark >= 3.3, use the session directly
+            return DataFrame(jdf, sparkSession)
+
+
     @classmethod
     def toRdd(cls, dataFrame: DataFrame) -> 'JvmSpatialRDD':
         from sedona.core.SpatialRDD.spatial_rdd import JvmSpatialRDD
@@ -92,7 +102,7 @@ class Adapter(metaclass=MultipleMeta):
 
         jdf = jvm.PythonAdapterWrapper.toDf(spatialRDD._srdd, fieldNames, sparkSession._jsparkSession)
 
-        df = DataFrame(jdf, sparkSession._wrapped)
+        df = Adapter._create_dataframe(jdf, sparkSession)
 
         return df
 
@@ -109,7 +119,7 @@ class Adapter(metaclass=MultipleMeta):
 
         jdf = jvm.Adapter.toDf(spatialRDD._srdd, sparkSession._jsparkSession)
 
-        df = DataFrame(jdf, sparkSession._wrapped)
+        df = Adapter._create_dataframe(jdf, sparkSession)
 
         return df
 
@@ -150,7 +160,7 @@ class Adapter(metaclass=MultipleMeta):
     def toDf(cls, rawPairRDD: SedonaPairRDD, sparkSession: SparkSession):
         jvm = sparkSession._jvm
         jdf = jvm.Adapter.toDf(rawPairRDD.jsrdd, sparkSession._jsparkSession)
-        df = DataFrame(jdf, sparkSession._wrapped)
+        df = Adapter._create_dataframe(jdf, sparkSession)
         return df
 
     @classmethod
@@ -158,7 +168,7 @@ class Adapter(metaclass=MultipleMeta):
         jvm = sparkSession._jvm
         jdf = jvm.PythonAdapterWrapper.toDf(
             rawPairRDD.jsrdd, leftFieldnames, rightFieldNames, sparkSession._jsparkSession)
-        df = DataFrame(jdf, sparkSession._wrapped)
+        df = Adapter._create_dataframe(jdf, sparkSession)
         return df
 
     @classmethod

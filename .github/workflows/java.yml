@@ -14,18 +14,15 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        spark: [2.4.8, 3.0.3, 3.1.2, 3.2.0]
-        scala: [2.11.8, 2.12.15]
-        exclude:
-          - spark: 3.2.0
-            scala: 2.11.8
-          - spark: 3.1.2
-            scala: 2.11.8
-          - spark: 3.0.3
-            scala: 2.11.8
+        spark: [2.4.8, 3.0.3, 3.1.2, 3.2.0, 3.3.0]
+        scala: [2.12.15]
         include:
+          - spark: 3.3.0
+            scala: 2.13.8
           - spark: 3.2.0
             scala: 2.13.5
+          - spark: 2.4.8
+            scala: 2.11.8
 
     steps:
     - uses: actions/checkout@v2
