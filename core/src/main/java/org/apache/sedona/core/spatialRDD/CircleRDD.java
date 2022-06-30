@@ -56,7 +56,7 @@ public class CircleRDD
     public CircleRDD(JavaRDD<Circle> circleRDD, String sourceEpsgCRSCode, String targetEpsgCRSCode)
     {
         this.rawSpatialRDD = circleRDD;
-        this.CRSTransform(sourceEpsgCRSCode, targetEpsgCRSCode);
+        this.CRSTransform(sourceEpsgCRSCode, targetEpsgCRSCode, false, false);
     }
 
     /**

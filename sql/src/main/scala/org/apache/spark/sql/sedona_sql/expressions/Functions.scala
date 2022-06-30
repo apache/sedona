@@ -23,21 +23,21 @@ import org.apache.sedona.core.utils.GeomUtils
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.codegen.{CodegenContext, CodegenFallback, ExprCode}
-import org.apache.spark.sql.catalyst.expressions.{BoundReference, Expression, Generator}
+import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
+import org.apache.spark.sql.catalyst.expressions.{Expression, Generator}
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.collect.Collect
-import org.apache.spark.sql.sedona_sql.expressions.geohash.{GeoHashDecoder, GeometryGeoHashEncoder, InvalidGeoHashException}
+import org.apache.spark.sql.sedona_sql.expressions.geohash.GeometryGeoHashEncoder
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.sedona_sql.expressions.subdivide.GeometrySubDivider
-import org.apache.spark.sql.types.{ArrayType, _}
+import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.CRS
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom.util.GeometryFixer
-import org.locationtech.jts.geom.{PrecisionModel, _}
+import org.locationtech.jts.geom._
 import org.locationtech.jts.io.{ByteOrderValues, WKBWriter, WKTWriter}
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.IsSimpleOp
@@ -49,8 +49,6 @@ import org.locationtech.jts.precision.GeometryPrecisionReducer
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier
 import org.opengis.referencing.operation.MathTransform
 import org.wololo.jts2geojson.GeoJSONWriter
-import org.locationtech.jts.geom.Geometry
-import org.locationtech.jts.geom.Coordinate
 
 import java.nio.ByteOrder
 import scala.util.{Failure, Success, Try}
@@ -324,8 +322,8 @@ case class ST_Transform(inputExpressions: Seq[Expression])
 
     (originalGeometry, sourceCRS, targetCRS) match {
       case (originalGeometry: Geometry, sourceCRS: String, targetCRS: String) =>
-        val sourceCRScode = CRS.decode(sourceCRS)
-        val targetCRScode = CRS.decode(targetCRS)
+        val sourceCRScode = CRS.decode(sourceCRS,true)
+        val targetCRScode = CRS.decode(targetCRS, true)
         var transform: MathTransform = null
         if (inputExpressions.length == 4) {
           transform = CRS.findMathTransform(sourceCRScode, targetCRScode, inputExpressions(3).eval(input).asInstanceOf[Boolean])

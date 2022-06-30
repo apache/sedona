@@ -22,9 +22,7 @@ package org.apache.sedona.sql
 import org.apache.commons.codec.binary.Hex
 import org.apache.sedona.sql.implicits._
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.sedona_sql.expressions.ST_MakeValid
 import org.apache.spark.sql.{DataFrame, Row}
-import org.geotools.geometry.jts.WKTReader2
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom.{Geometry, Polygon}
 import org.locationtech.jts.io.WKTWriter
@@ -122,19 +120,17 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
 
     it("Passed ST_Transform") {
-      var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
-      polygonWktDf.createOrReplaceTempView("polygontable")
-      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-      polygonDf.createOrReplaceTempView("polygondf")
-      val polygon = "POLYGON ((110.54671 55.818002, 110.54671 55.143743, 110.940494 55.143743, 110.940494 55.818002, 110.54671 55.818002))"
-      val forceXYExpect = "POLYGON ((471596.69167460164 6185916.951191288, 471107.5623640998 6110880.974228167, 496207.109151055 6110788.804712435, 496271.31937046186 6185825.60569904, 471596.69167460164 6185916.951191288))"
+      // Longitude first, latitude later
+      val geom1BeforeCRS = "POINT (-0.063 51.5)"
+      val geom1AfterCRSexpect = "POINT (-7013.127919976235 6710219.083220741)"
 
-      sparkSession.createDataset(Seq(polygon))
-        .withColumn("geom", expr("ST_GeomFromWKT(value)"))
-        .createOrReplaceTempView("df")
+      val geom1AfterCRSactual = sparkSession.sql(s"""select ST_Transform(ST_geomFromWKT('$geom1BeforeCRS'),'EPSG:4326', 'EPSG:3857', false)""").rdd.map(row => row.getAs[Geometry](0).toString).collect()(0)
+      assert(geom1AfterCRSactual == geom1AfterCRSexpect)
 
-      val forceXYResult = sparkSession.sql(s"""select ST_Transform(ST_FlipCoordinates(ST_geomFromWKT('$polygon')),'EPSG:4326', 'EPSG:32649', false)""").rdd.map(row => row.getAs[Geometry](0).toString).collect()(0)
-      assert(forceXYResult == forceXYExpect)
+      val geom2BeforeCRS = "POINT (-176.058774 51.137904)"
+      val geom2AfterCRSexpect = "POINT (-19598773.07136803 6645723.691240616)"
+      val geom2AfterCRSactual = sparkSession.sql(s"""select ST_Transform(ST_geomFromWKT('$geom2BeforeCRS'),'EPSG:4326', 'EPSG:3857', false)""").rdd.map(row => row.getAs[Geometry](0).toString).collect()(0)
+      assert(geom2AfterCRSactual == geom2AfterCRSexpect)
     }
 
     it("Passed ST_Intersection - intersects but not contains") {
