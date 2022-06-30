@@ -6,7 +6,7 @@ Format: `ST_Distance (A:geometry, B:geometry)`
 
 Since: `v1.2.0`
 
-Spark SQL example:
+Flink SQL example:
 ```SQL
 SELECT ST_Distance(polygondf.countyshape, polygondf.countyshape)
 FROM polygondf
@@ -19,24 +19,30 @@ Introduction:
 Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS
 
 !!!note
-	By default, this function uses lat/lon order. You can use ==ST_FlipCoordinates== to swap X and Y.
+	By default, this function uses lon/lat order. You can use ==ST_FlipCoordinates== to swap X and Y.
 
 !!!note
-	If ==ST_Transform== throws an Exception called "Bursa wolf parameters required", you need to disable the error notification in ST_Transform. You can append a boolean value at the end.
+	If ==ST_Transform== throws an Exception called "Bursa wolf parameters required", you need to disable the error notification in ST_Transform.
 
-Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional] DisableError)`
+Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional] LongitudeFirst, [Optional] DisableError)`
 
 Since: `v1.2.0`
 
-Spark SQL example (simple):
+Flink SQL example (use lon/lat order and does not disable error):
 ```SQL
 SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857') 
 FROM polygondf
 ```
 
-Spark SQL example (with optional parameters):
+Flink SQL example (use lon/lat order and disable error):
 ```SQL
-SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857', false)
+SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857', true)
+FROM polygondf
+```
+
+Flink SQL example (use lat/lon order and disable error):
+```SQL
+SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857', false, true)
 FROM polygondf
 ```
 
@@ -51,7 +57,7 @@ Format: `ST_Buffer (A:geometry, buffer: Double)`
 
 Since: `v1.2.0`
 
-Spark SQL example:
+Flink SQL example:
 ```SQL
 SELECT ST_Buffer(polygondf.countyshape, 1)
 FROM polygondf
@@ -64,7 +70,7 @@ Format: `ST_Y_Min (A:geometry)`
 
 Since: `v1.2.1`
 
-Spark SQL example:
+Flink SQL example:
 ```SQL
 SELECT ST_YMin(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
@@ -79,12 +85,13 @@ Format: `ST_YMax (A:geometry)`
 
 Since: `v1.2.1`
 
-Spark SQL example:
+Flink SQL example:
 ```SQL
 SELECT ST_YMax(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
 Output : 2
+
 ## ST_FlipCoordinates
 
 Introduction: Returns a version of the given geometry with X and Y axis flipped.
@@ -93,7 +100,7 @@ Format: `ST_FlipCoordinates(A:geometry)`
 
 Since: `v1.2.0`
 
-Spark SQL example:
+Flink SQL example:
 ```SQL
 SELECT ST_FlipCoordinates(df.geometry)
 FROM df
@@ -137,7 +144,7 @@ Format: `ST_IsEmpty (A:geometry)`
 
 Since: `v1.2.1`
 
-Spark SQL example:
+Flink SQL example:
 
 ```SQL
 SELECT ST_IsEmpty(polygondf.countyshape)
@@ -274,7 +281,7 @@ Format: `ST_AsEWKT (A:geometry)`
 
 Since: `v1.2.1`
 
-Spark SQL example:
+Flink SQL example:
 ```SQL
 SELECT ST_AsEWKT(polygondf.countyshape)
 FROM polygondf

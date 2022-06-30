@@ -210,10 +210,11 @@ To convert Coordinate Reference System of an SpatialRDD, use the following code:
 ```Scala
 val sourceCrsCode = "epsg:4326" // WGS84, the most common degree-based CRS
 val targetCrsCode = "epsg:3857" // The most common meter-based CRS
-objectRDD.CRSTransform(sourceCrsCode, targetCrsCode, false)
+objectRDD.CRSTransform(sourceCrsCode, targetCrsCode, true, false)
 ```
 
-`false` in CRSTransform(sourceCrsCode, targetCrsCode, false) means that it will not tolerate Datum shift. If you want it to be lenient, use `true` instead.
+The `true` in CRSTransform() means that it will follow lon/lat order. If you want lat/lon order, set it to `false`.
+The `false` in CRSTransform() means that it will not tolerate Datum shift. If you want it to be lenient, use `true` instead.
 
 !!!warning
 	CRS transformation should be done right after creating each SpatialRDD, otherwise it will lead to wrong query results. For instace, use something like this:

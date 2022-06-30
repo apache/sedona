@@ -137,24 +137,30 @@ Introduction:
 Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS
 
 !!!note
-	By default, this function uses lat/lon order. You can use ==ST_FlipCoordinates== to swap X and Y.
+    By default, this function uses lon/lat order. You can use ==ST_FlipCoordinates== to swap X and Y.
 
 !!!note
-	If ==ST_Transform== throws an Exception called "Bursa wolf parameters required", you need to disable the error notification in ST_Transform. You can append a boolean value at the end.
+    If ==ST_Transform== throws an Exception called "Bursa wolf parameters required", you need to disable the error notification in ST_Transform.
 
-Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional] DisableError)`
+Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional] LongitudeFirst, [Optional] DisableError)`
 
 Since: `v1.0.0`
 
-Spark SQL example (simple):
+Spark SQL example (use lon/lat order and does not disable error):
 ```SQL
 SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857') 
 FROM polygondf
 ```
 
-Spark SQL example (with optional parameters):
+Spark SQL example (use lon/lat order and disable error):
 ```SQL
-SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857', false)
+SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857', true)
+FROM polygondf
+```
+
+Spark SQL example (use lat/lon order and disable error):
+```SQL
+SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857', false, true)
 FROM polygondf
 ```
 

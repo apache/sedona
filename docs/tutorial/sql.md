@@ -172,6 +172,8 @@ The coordinates of polygons have been changed. The output will be like this:
 
 ```
 
+!!!note
+	Read [SedonaSQL ST_Transform API](/api/sql/Function/#st_transform) to learn more.
 
 ## Run spatial queries
 

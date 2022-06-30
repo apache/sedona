@@ -125,7 +125,7 @@ The second EPSG code EPSG:3857 in `ST_Transform` is the target CRS of the geomet
 This `ST_Transform` transform the CRS of these geomtries from EPSG:4326 to EPSG:3857. The details CRS information can be found on [EPSG.io](https://epsg.io/.)
 
 !!!note
-	Read [SedonaSQL ST_Transform API](/api/flink/Function/#st_transform) to learn different spatial query predicates.
+	Read [SedonaSQL ST_Transform API](/api/flink/Function/#st_transform) to learn more.
 
 For example, a Table that has coordinates in the US will become like this.
 
