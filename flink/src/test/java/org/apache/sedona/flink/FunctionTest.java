@@ -50,7 +50,7 @@ public class FunctionTest extends TestBase{
     public void testTransform() {
         Table pointTable = createPointTable_real(testDataSize);
         Table transformedTable = pointTable.select(call(Functions.ST_Transform.class.getSimpleName(), $(pointColNames[0])
-                , "epsg:4326", "epsg:3857"));
+                , "epsg:4326", "epsg:3857", false, false));
         String result = first(transformedTable).getField(0).toString();
         assertEquals("POINT (-13135699.91360628 3763310.6271446524)", result);
     }

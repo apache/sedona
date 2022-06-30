@@ -311,7 +311,7 @@ case class ST_Centroid(inputExpressions: Seq[Expression])
   */
 case class ST_Transform(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
-  assert(inputExpressions.length >= 3 && inputExpressions.length <= 4)
+  assert(inputExpressions.length >= 3 && inputExpressions.length <= 5)
 
   override def nullable: Boolean = true
 
@@ -322,15 +322,18 @@ case class ST_Transform(inputExpressions: Seq[Expression])
 
     (originalGeometry, sourceCRS, targetCRS) match {
       case (originalGeometry: Geometry, sourceCRS: String, targetCRS: String) =>
-        val sourceCRScode = CRS.decode(sourceCRS,true)
-        val targetCRScode = CRS.decode(targetCRS, true)
-        var transform: MathTransform = null
-        if (inputExpressions.length == 4) {
-          transform = CRS.findMathTransform(sourceCRScode, targetCRScode, inputExpressions(3).eval(input).asInstanceOf[Boolean])
+        var longitudeFirst = true
+        var lenient = false
+        if (inputExpressions.length == 5) {
+          longitudeFirst = inputExpressions(3).eval(input).asInstanceOf[Boolean]
+          lenient = inputExpressions(4).eval(input).asInstanceOf[Boolean]
         }
-        else {
-          transform = CRS.findMathTransform(sourceCRScode, targetCRScode, false)
+        else if (inputExpressions.length == 4) {
+          lenient = inputExpressions(3).eval(input).asInstanceOf[Boolean]
         }
+        val sourceCRScode = CRS.decode(sourceCRS,longitudeFirst)
+        val targetCRScode = CRS.decode(targetCRS, longitudeFirst)
+        var transform: MathTransform = CRS.findMathTransform(sourceCRScode, targetCRScode, lenient)
         JTS.transform(originalGeometry, transform).toGenericArrayData
       case (_, _, _) => null
     }

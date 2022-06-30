@@ -83,11 +83,22 @@ public class Functions {
     public static class ST_Transform extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint("String") String sourceCRS, @DataTypeHint("String") String targetCRS) {
+            return eval(o, sourceCRS, targetCRS, true, false);
+        }
+
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint("String") String sourceCRS, @DataTypeHint("String") String targetCRS
+                , @DataTypeHint("Boolean") Boolean lenient) {
+            return eval(o, sourceCRS, targetCRS, true, lenient);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint("String") String sourceCRS
+                , @DataTypeHint("String") String targetCRS, @DataTypeHint("Boolean") Boolean longitudeFirst, @DataTypeHint("Boolean") Boolean lenient) {
             Geometry geom = (Geometry) o;
             try {
-                CoordinateReferenceSystem sourceCRScode = CRS.decode(sourceCRS);
-                CoordinateReferenceSystem targetCRScode = CRS.decode(targetCRS);
-                MathTransform transform = CRS.findMathTransform(sourceCRScode, targetCRScode);
+                CoordinateReferenceSystem sourceCRScode = CRS.decode(sourceCRS, longitudeFirst);
+                CoordinateReferenceSystem targetCRScode = CRS.decode(targetCRS, longitudeFirst);
+                MathTransform transform = CRS.findMathTransform(sourceCRScode, targetCRScode, lenient);
                 geom = JTS.transform(geom, transform);
             } catch (FactoryException | TransformException e) {
                 e.printStackTrace();
