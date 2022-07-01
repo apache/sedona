@@ -32,7 +32,7 @@ finds the average area of all polygons in `polygon_sdf`:
 
 ``` r
 mean_area_sdf <- polygon_sdf %>%
-  dplyr::summarize(dplyr::summarize(mean_area = mean(ST_Area(geometry))))
+  dplyr::summarize(mean_area = mean(ST_Area(geometry)))
 print(mean_area_sdf)
 ```
 
