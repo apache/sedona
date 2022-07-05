@@ -19,9 +19,14 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.catalyst.expressions._
+import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.locationtech.jts.geom.Geometry
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.types._
+
+import scala.reflect.runtime.universe._
 
 abstract class UnaryGeometryExpression extends Expression {
   def inputExpressions: Seq[Expression]
@@ -54,4 +59,97 @@ abstract class BinaryGeometryExpression extends Expression {
   }
 
   protected def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any
+}
+
+// This is a compile time type shield for the types we are able to infer. Anything
+// other than these types will cause a compilation error. This is the Scala
+// 2 way of making a union type.
+sealed class InferrableType[T: TypeTag]
+object InferrableType {
+  implicit val geometryInstance: InferrableType[Geometry] =
+    new InferrableType[Geometry] {}
+  implicit val doubleInstance: InferrableType[Double] =
+    new InferrableType[Double] {}
+}
+
+object InferredTypes {
+  def buildExtractor[T: TypeTag](expr: Expression): InternalRow => T = {
+    if (typeOf[T] =:= typeOf[Geometry]) {
+      input: InternalRow => expr.toGeometry(input).asInstanceOf[T]
+    } else {
+      input: InternalRow => expr.eval(input).asInstanceOf[T]
+    }
+  }
+
+  def inferSparkType[T: TypeTag]: DataType = {
+    if (typeOf[T] =:= typeOf[Geometry]) {
+      GeometryUDT
+    } else {
+      DoubleType
+    }
+  }
+}
+
+abstract class InferredUnaryExpression[A1: InferrableType, R: InferrableType]
+    (f: (A1) => R)
+    (implicit val a1Tag: TypeTag[A1], implicit val rTag: TypeTag[R])
+    extends Expression with ImplicitCastInputTypes with CodegenFallback with Serializable {
+  import InferredTypes._
+
+  def inputExpressions: Seq[Expression]
+  assert(inputExpressions.length == 1)
+
+  override def children: Seq[Expression] = inputExpressions
+
+  override def toString: String = s" **${getClass.getName}**  "
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(inferSparkType[A1])
+
+  override def nullable: Boolean = true
+
+  override def dataType = inferSparkType[R]
+
+  lazy val extract = buildExtractor[A1](inputExpressions(0))
+
+  override def eval(input: InternalRow): Any = {
+    val value = extract(input)
+    if (value != null) {
+      f(value)
+    } else {
+      null
+    }
+  }
+}
+
+abstract class InferredBinaryExpression[A1: InferrableType, A2: InferrableType, R: InferrableType]
+    (f: (A1, A2) => R)
+    (implicit val a1Tag: TypeTag[A1], implicit val a2Tag: TypeTag[A2], implicit val rTag: TypeTag[R])
+    extends Expression with ImplicitCastInputTypes with CodegenFallback with Serializable {
+  import InferredTypes._
+
+  def inputExpressions: Seq[Expression]
+  assert(inputExpressions.length == 2)
+
+  override def children: Seq[Expression] = inputExpressions
+
+  override def toString: String = s" **${getClass.getName}**  "
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(inferSparkType[A1], inferSparkType[A2])
+
+  override def nullable: Boolean = true
+
+  override def dataType = inferSparkType[R]
+
+  lazy val extractLeft = buildExtractor[A1](inputExpressions(0))
+  lazy val extractRight = buildExtractor[A2](inputExpressions(1))
+
+  override def eval(input: InternalRow): Any = {
+    val left = extractLeft(input)
+    val right = extractRight(input)
+    if (left != null && right != null) {
+      f(left, right)
+    } else {
+      null
+    }
+  }
 }

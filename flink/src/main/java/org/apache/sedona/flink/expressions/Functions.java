@@ -49,7 +49,7 @@ public class Functions {
                 @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
-            return geom1.distance(geom2);
+            return org.apache.sedona.Functions.ST_Distance(geom1, geom2);
         }
     }
 
@@ -57,12 +57,7 @@ public class Functions {
         @DataTypeHint("Double")
         public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o){
             Geometry geom = (Geometry) o;
-            Coordinate[] points= geom.getCoordinates();
-            double min=Double.MAX_VALUE;
-            for(int i=0;i<points.length;i++){
-                min=Math.min(points[i].getY(),min);
-            }
-            return min;
+            return org.apache.sedona.Functions.ST_YMin(geom);
         }
     }
 
@@ -70,12 +65,7 @@ public class Functions {
         @DataTypeHint("Double")
         public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o){
             Geometry geom = (Geometry) o;
-            Coordinate[] points= geom.getCoordinates();
-            double max=Double.MIN_VALUE;
-            for(int i=0;i<points.length;i++){
-                max=Math.max(points[i].getY(),max);
-            }
-            return max;
+            return org.apache.sedona.Functions.ST_YMax(geom);
         }
     }
 

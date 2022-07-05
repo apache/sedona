@@ -568,6 +568,7 @@
                 <scaladoc.arg>-no-java-comments</scaladoc.arg>
             </properties>
             <modules>
+                <module>common</module>
                 <module>core</module>
                 <module>sql</module>
                 <module>viz</module>
@@ -589,6 +590,7 @@
                 <scaladoc.arg>-no-java-comments</scaladoc.arg>
             </properties>
             <modules>
+                <module>common</module>
                 <module>core</module>
                 <module>sql</module>
                 <module>viz</module>

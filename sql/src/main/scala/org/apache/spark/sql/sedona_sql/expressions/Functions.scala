@@ -20,11 +20,12 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.core.geometryObjects.Circle
 import org.apache.sedona.core.utils.GeomUtils
+import org.apache.sedona.Functions
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.{CodegenContext, CodegenFallback, ExprCode}
-import org.apache.spark.sql.catalyst.expressions.{BoundReference, Expression, Generator}
+import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.collect.Collect
@@ -61,18 +62,7 @@ import scala.util.{Failure, Success, Try}
   * @param inputExpressions This function takes two geometries and calculates the distance between two objects.
   */
 case class ST_Distance(inputExpressions: Seq[Expression])
-  extends BinaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 2)
-
-  override def toString: String = s" **${ST_Distance.getClass.getName}**  "
-
-  override def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
-    leftGeometry.distance(rightGeometry)
-  }
-
-  override def dataType = DoubleType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(Functions.ST_Distance) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -81,21 +71,7 @@ case class ST_Distance(inputExpressions: Seq[Expression])
 
 
 case class ST_YMax(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    val seqRev : Array[Coordinate] = geometry.getCoordinates()
-    var maxVal:Double = Double.MinValue
-    for(x <- seqRev ){
-      maxVal=Math.max(maxVal,x.getY())
-    }
-    maxVal
-  }
-
-  override def dataType: DataType = DoubleType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.ST_YMax) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -103,26 +79,13 @@ case class ST_YMax(inputExpressions: Seq[Expression])
 }
 
 case class ST_YMin(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    val seqRev : Array[Coordinate] = geometry.getCoordinates()
-    var minVal:Double = Double.MaxValue
-    for(x <- seqRev){
-      minVal=Math.min(minVal,x.getY())
-    }
-    minVal
-  }
-
-  override def dataType: DataType = DoubleType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.ST_YMin) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
+
 case class ST_3DDistance(inputExpressions: Seq[Expression])
   extends BinaryGeometryExpression with CodegenFallback {
   assert(inputExpressions.length == 2)
