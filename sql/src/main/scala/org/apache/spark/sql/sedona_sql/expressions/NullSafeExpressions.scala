@@ -90,6 +90,10 @@ object InferredTypes {
   }
 }
 
+/**
+  * The implicit TypeTag's tell Scala to maintain generic type info at runtime. Normally type
+  * erasure would remove any knowledge of what the passed in generic type is.
+  */
 abstract class InferredUnaryExpression[A1: InferrableType, R: InferrableType]
     (f: (A1) => R)
     (implicit val a1Tag: TypeTag[A1], implicit val rTag: TypeTag[R])
