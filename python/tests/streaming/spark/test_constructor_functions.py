@@ -1,5 +1,5 @@
 import os
-import random
+import uuid
 from typing import List, Any, Optional
 
 import pytest
@@ -305,7 +305,7 @@ class TestConstructorFunctions(TestBase):
         ).selectExpr(f"{function_name}({', '.join(arguments)}) AS result")
 
         # and target table
-        random_table_name = f"view_{random.randint(0, 100000)}"
+        random_table_name = f"view_{uuid.uuid4().hex}"
 
         # when saving stream to memory
         streaming_query = input_stream.writeStream.format("memory") \
