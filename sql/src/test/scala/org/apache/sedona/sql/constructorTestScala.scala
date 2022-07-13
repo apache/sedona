@@ -69,6 +69,10 @@ class constructorTestScala extends TestBaseScala {
       assert(polygonDf.count() == 100)
       val nullGeom = sparkSession.sql("select ST_GeomFromWKT(null)")
       assert(nullGeom.first().isNullAt(0))
+      // Fail on wrong input type
+      intercept[Exception] {
+        sparkSession.sql("SELECT ST_GeomFromWKT(0)").collect()
+      }
     }
 
     it("Passed ST_LineFromText") {
@@ -102,6 +106,10 @@ class constructorTestScala extends TestBaseScala {
       assert(polygonDf.count() == 100)
       val nullGeom = sparkSession.sql("select ST_GeomFromText(null)")
       assert(nullGeom.first().isNullAt(0))
+      // Fail on wrong input type
+      intercept[Exception] {
+        sparkSession.sql("SELECT ST_GeomFromText(0)").collect()
+      }
     }
 
     it("Passed ST_GeomFromWKT multipolygon read as polygon bug") {
@@ -133,6 +141,10 @@ class constructorTestScala extends TestBaseScala {
       // null input
       val nullGeom = sparkSession.sql("SELECT ST_GeomFromWKB(null)")
       assert(nullGeom.first().isNullAt(0))
+      // Fail on wrong input type
+      intercept[Exception] {
+        sparkSession.sql("SELECT ST_GeomFromWKB(0)").collect()
+      }
     }
 
     it("Passed ST_GeomFromGeoJSON") {
