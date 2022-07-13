@@ -14,15 +14,31 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        spark: [2.4.8, 3.0.3, 3.1.2, 3.2.0, 3.3.0]
-        scala: [2.12.15]
         include:
           - spark: 3.3.0
             scala: 2.13.8
+            jackson: 2.13.3
           - spark: 3.2.0
             scala: 2.13.5
+            jackson: 2.12.3
+          - spark: 3.3.0
+            scala: 2.12.15
+            jackson: 2.13.3
+          - spark: 3.2.0
+            scala: 2.12.15
+            jackson: 2.12.3
+          - spark: 3.1.2
+            scala: 2.12.15
+            jackson: 2.10.0
+          - spark: 3.0.3
+            scala: 2.12.15
+            jackson: 2.10.0
+          - spark: 2.4.8
+            scala: 2.12.15
+            jackson: 2.6.7
           - spark: 2.4.8
             scala: 2.11.8
+            jackson: 2.6.7
 
     steps:
     - uses: actions/checkout@v2
@@ -42,7 +58,11 @@ jobs:
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         SCALA_VERSION: ${{ matrix.scala }}
-      run: if [ ${SPARK_VERSION:0:1} == "3" ]; then mvn -q clean install -Dscala=${SCALA_VERSION:0:4} -Dspark=3.0 ; else mvn -q clean install -Dscala=${SCALA_VERSION:0:4} -Dspark=2.4 ; fi
+        JACKSON_VERSION: ${{ matrix.jackson }}
+      run: |
+        if [ ${SPARK_VERSION:0:1} == "3" ]; \
+        then mvn -q clean install -Dscala=${SCALA_VERSION:0:4} -Dspark=3.0 -Dspark.version=${SPARK_VERSION} -Dsedona.jackson.version=${JACKSON_VERSION}; \
+        else mvn -q clean install -Dscala=${SCALA_VERSION:0:4} -Dspark=2.4 -Dspark.version=${SPARK_VERSION} -Dsedona.jackson.version=${JACKSON_VERSION}; fi \
     - run: mkdir staging
     - run: cp core/target/sedona-*.jar staging
     - run: cp sql/target/sedona-*.jar staging
