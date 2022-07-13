@@ -69,13 +69,13 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
+            <version>${sedona.jackson.version}</version>
             <scope>${dependency.scope}</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>${jackson.version}</version>
+            <version>${sedona.jackson.version}</version>
             <scope>${dependency.scope}</scope>
         </dependency>
         <dependency>
@@ -532,7 +532,7 @@
                 <spark.version>3.3.0</spark.version>
                 <spark.compat.version>3.0</spark.compat.version>
                 <spark.converter.version>spark3</spark.converter.version>
-                <jackson.version>2.13.3</jackson.version>
+                <sedona.jackson.version>2.13.3</sedona.jackson.version>
                 <maven.deploy.skip>false</maven.deploy.skip>
             </properties>
         </profile>
@@ -549,7 +549,7 @@
                 <spark.version>2.4.7</spark.version>
                 <spark.compat.version>2.4</spark.compat.version>
                 <spark.converter.version>spark2</spark.converter.version>
-                <jackson.version>2.6.7</jackson.version>
+                <sedona.jackson.version>2.6.7</sedona.jackson.version>
                 <maven.deploy.skip>true</maven.deploy.skip>
             </properties>
         </profile>
