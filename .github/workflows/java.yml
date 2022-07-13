@@ -13,6 +13,7 @@ jobs:
 
     runs-on: ubuntu-18.04
     strategy:
+      fail-fast: false
       matrix:
         include:
           - spark: 3.3.0
@@ -58,10 +59,10 @@ jobs:
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         SCALA_VERSION: ${{ matrix.scala }}
-        JACKSON_VERSION: ${{ matrix.jackson }}
+        JACKSON_VERSION_SPARK: ${{ matrix.jackson }}
       run: |
         if [ ${SPARK_VERSION:0:1} == "3" ]; \
-        then mvn -q clean install -Dscala=${SCALA_VERSION:0:4} -Dspark=3.0 -Dspark.version=${SPARK_VERSION} -Djackson.version=${JACKSON_VERSION}; \
+        then mvn -q clean install -Dscala=${SCALA_VERSION:0:4} -Dspark=3.0 -Dspark.version=${SPARK_VERSION} -Djackson.version=${JACKSON_VERSION_SPARK}; \
         else mvn -q clean install -Dscala=${SCALA_VERSION:0:4} -Dspark=2.4 -Dspark.version=${SPARK_VERSION}; fi \
     - run: mkdir staging
     - run: cp core/target/sedona-*.jar staging
