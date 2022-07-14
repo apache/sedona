@@ -136,6 +136,27 @@ root
 
 Shapefile and GeoJSON must be loaded by SpatialRDD and converted to DataFrame using Adapter. Please read [Load SpatialRDD](../rdd/#create-a-generic-spatialrdd) and [DataFrame <-> RDD](#convert-between-dataframe-and-spatialrdd).
 
+## Load GeoParquet
+
+GeoParquet must be loaded using DataFrame.
+
+```Scala
+val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation1)
+df.printSchema()
+```
+
+The output will be as follows:
+
+```
+root
+ |-- pop_est: long (nullable = true)
+ |-- continent: string (nullable = true)
+ |-- name: string (nullable = true)
+ |-- iso_a3: string (nullable = true)
+ |-- gdp_md_est: double (nullable = true)
+ |-- geometry: geometry (nullable = true)
+```
+
 
 ## Transform the Coordinate Reference System
 
@@ -239,6 +260,14 @@ var stringDf = sparkSession.sql(
 !!!note
 	ST_AsGeoJSON is also available. We would like to invite you to contribute more functions
 
+
+## Save GeoParquet
+
+GeoParquet can be saved as follows 
+
+```Scala
+df.write.format("geoparquet").save(geoparquetoutputlocation + "/GeoParquet_File_Name.parquet")
+```
 
 ## Convert between DataFrame and SpatialRDD
 
