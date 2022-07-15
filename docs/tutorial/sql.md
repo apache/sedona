@@ -138,11 +138,27 @@ Shapefile and GeoJSON must be loaded by SpatialRDD and converted to DataFrame us
 
 ## Load GeoParquet
 
-GeoParquet must be loaded using DataFrame.
+GeoParquet must be loaded using DataFrame if default name is geometry.
 
 ```Scala
 val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation1)
 df.printSchema()
+```
+The output will be as follows:
+
+```
+root
+ |-- pop_est: long (nullable = true)
+ |-- continent: string (nullable = true)
+ |-- name: string (nullable = true)
+ |-- iso_a3: string (nullable = true)
+ |-- gdp_md_est: double (nullable = true)
+ |-- geometry: geometry (nullable = true)
+```
+If geometry column name is different
+
+```Scala
+var df = sparkSession.read.format("geoparquet").option("fieldGeometry", "new_geometry").load(geoparquetdatalocation1)
 ```
 
 The output will be as follows:
@@ -154,7 +170,7 @@ root
  |-- name: string (nullable = true)
  |-- iso_a3: string (nullable = true)
  |-- gdp_md_est: double (nullable = true)
- |-- geometry: geometry (nullable = true)
+ |-- new_geometry: geometry (nullable = true)
 ```
 
 

@@ -175,6 +175,7 @@ class GeoParquetToSparkSchemaConverter(
     val parquetType = primitiveColumn.getType.asPrimitiveType()
     val typeAnnotation = primitiveColumn.getType.getLogicalTypeAnnotation
     val typeName = primitiveColumn.getPrimitive
+    val fieldName = primitiveColumn.getName
 
     def typeString =
       if (typeAnnotation == null) s"$typeName" else s"$typeName ($typeAnnotation)"
@@ -270,7 +271,7 @@ class GeoParquetToSparkSchemaConverter(
         typeAnnotation match {
           case _: StringLogicalTypeAnnotation | _: EnumLogicalTypeAnnotation |
                _: JsonLogicalTypeAnnotation => StringType
-          case null if GeoParquetSchemaConverter.checkGeomFieldName("geometry") => GeometryUDT
+          case null if GeoParquetSchemaConverter.checkGeomFieldName(fieldName) => GeometryUDT
           case null if assumeBinaryIsString => StringType
           case null => BinaryType
           case _: BsonLogicalTypeAnnotation => BinaryType
@@ -724,7 +725,8 @@ private[sql] object GeoParquetSchemaConverter {
   }
 
   def checkGeomFieldName(name: String): Boolean = {
-    if (name.matches("geometry")) {
+    if (name.equals(GeometryField.getFieldGeometry())) {
+      //println(GeometryField.getFieldGeometry())
       true
     } else false
   }

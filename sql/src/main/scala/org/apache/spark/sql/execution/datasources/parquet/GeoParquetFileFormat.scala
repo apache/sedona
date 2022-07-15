@@ -163,6 +163,8 @@ class GeoParquetFileFormat
                             sparkSession: SparkSession,
                             parameters: Map[String, String],
                             files: Seq[FileStatus]): Option[StructType] = {
+    val fieldGeometry = new GeoParquetOptions(parameters).fieldGeometry
+    GeometryField.setFieldGeometry(fieldGeometry)
     GeoParquetUtils.inferSchema(sparkSession, parameters, files)
   }
 

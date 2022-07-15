@@ -4,7 +4,7 @@ import org.locationtech.jts.geom.Geometry
 import org.scalatest.BeforeAndAfter
 
 class geoparquetIOTests extends TestBaseScala  with BeforeAndAfter{
-  var geoparquetdatalocation1: String = resourceFolder + "geoparquet/example1.parquet"
+  var geoparquetdatalocation1: String = resourceFolder + "geoparquet/example1_old.parquet"
   var geoparquetdatalocation2: String = resourceFolder + "geoparquet/example2.parquet"
   var geoparquetdatalocation3: String = resourceFolder + "geoparquet/example3.parquet"
   var geoparquetoutputlocation: String = resourceFolder + "geoparquet/geoparquet_output/"
