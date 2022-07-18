@@ -49,7 +49,7 @@ public class Functions {
                 @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
-            return org.apache.sedona.Functions.ST_Distance(geom1, geom2);
+            return org.apache.sedona.common.Functions.distance(geom1, geom2);
         }
     }
 
@@ -57,7 +57,7 @@ public class Functions {
         @DataTypeHint("Double")
         public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o){
             Geometry geom = (Geometry) o;
-            return org.apache.sedona.Functions.ST_YMin(geom);
+            return org.apache.sedona.common.Functions.yMin(geom);
         }
     }
 
@@ -65,7 +65,7 @@ public class Functions {
         @DataTypeHint("Double")
         public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o){
             Geometry geom = (Geometry) o;
-            return org.apache.sedona.Functions.ST_YMax(geom);
+            return org.apache.sedona.common.Functions.yMax(geom);
         }
     }
 

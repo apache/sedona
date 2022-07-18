@@ -18,9 +18,9 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
+import org.apache.sedona.common.Functions
 import org.apache.sedona.core.geometryObjects.Circle
 import org.apache.sedona.core.utils.GeomUtils
-import org.apache.sedona.Functions
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
@@ -62,7 +62,7 @@ import scala.util.{Failure, Success, Try}
   * @param inputExpressions This function takes two geometries and calculates the distance between two objects.
   */
 case class ST_Distance(inputExpressions: Seq[Expression])
-  extends InferredBinaryExpression(Functions.ST_Distance) {
+  extends InferredBinaryExpression(Functions.distance) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -71,7 +71,7 @@ case class ST_Distance(inputExpressions: Seq[Expression])
 
 
 case class ST_YMax(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.ST_YMax) {
+  extends InferredUnaryExpression(Functions.yMax) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -79,7 +79,7 @@ case class ST_YMax(inputExpressions: Seq[Expression])
 }
 
 case class ST_YMin(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.ST_YMin) {
+  extends InferredUnaryExpression(Functions.yMin) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
