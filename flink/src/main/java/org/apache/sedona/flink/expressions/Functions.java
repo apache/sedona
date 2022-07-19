@@ -39,7 +39,7 @@ public class Functions {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(Object o, @DataTypeHint("Double") Double radius) {
             Geometry geom = (Geometry) o;
-            return geom.buffer(radius);
+            return org.apache.sedona.common.Functions.buffer(geom, radius);
         }
     }
 
@@ -72,17 +72,10 @@ public class Functions {
 
     public static class ST_Transform extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint("String") String sourceCRS, @DataTypeHint("String") String targetCRS) {
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint("String") String sourceCRS, @DataTypeHint("String") String targetCRS)
+            throws FactoryException, TransformException {
             Geometry geom = (Geometry) o;
-            try {
-                CoordinateReferenceSystem sourceCRScode = CRS.decode(sourceCRS);
-                CoordinateReferenceSystem targetCRScode = CRS.decode(targetCRS);
-                MathTransform transform = CRS.findMathTransform(sourceCRScode, targetCRScode);
-                geom = JTS.transform(geom, transform);
-            } catch (FactoryException | TransformException e) {
-                e.printStackTrace();
-            }
-            return geom;
+            return org.apache.sedona.common.Functions.transform(geom, sourceCRS, targetCRS);
         }
     }
 
@@ -171,14 +164,7 @@ public class Functions {
         @DataTypeHint("Double")
         public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
-            Coordinate[] coord = geom.getCoordinates();
-            double max = Double.MIN_VALUE;
-            for (int i = 0; i < coord.length; i++) {
-                if (coord[i].getX() > max) {
-                    max = coord[i].getX();
-                }
-            }
-            return max;
+            return org.apache.sedona.common.Functions.xMax(geom);
         }
     }
 
@@ -186,14 +172,7 @@ public class Functions {
         @DataTypeHint("Double")
         public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
-            Coordinate[] coord = geom.getCoordinates();
-            double min = Double.MAX_VALUE;
-            for(int i=0;i< coord.length;i++){
-                if(coord[i].getX()<min){
-                    min = coord[i].getX();
-                }
-            }
-            return min;
+            return org.apache.sedona.common.Functions.xMin(geom);
         }
     }
 
