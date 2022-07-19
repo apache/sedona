@@ -114,7 +114,7 @@ expect_geom_equal <- function(sc, lhs, rhs) {
     testthat::expect_true(
       invoke_static(
         sc,
-        "org.apache.sedona.core.utils.GeomUtils",
+        "org.apache.sedona.common.utils.GeomUtils",
         "equalsExactGeom",
         lhs[[i]],
         rhs[[i]]

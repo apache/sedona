@@ -19,8 +19,8 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.Functions
+import org.apache.sedona.common.utils.GeomUtils
 import org.apache.sedona.core.geometryObjects.Circle
-import org.apache.sedona.core.utils.GeomUtils
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow

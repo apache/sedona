@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.core.geometryObjects;
 
-import org.apache.sedona.core.utils.GeomUtils;
+import org.apache.sedona.common.utils.GeomUtils;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;

@@ -15,7 +15,7 @@ package org.apache.sedona.flink.expressions;
 
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.functions.ScalarFunction;
-import org.apache.sedona.core.utils.GeomUtils;
+import org.apache.sedona.common.utils.GeomUtils;
 import org.locationtech.jts.io.WKTWriter;
 import org.apache.spark.sql.sedona_sql.expressions.geohash.GeometryGeoHashEncoder;
 import org.apache.spark.sql.sedona_sql.expressions.geohash.PointGeoHashEncoder;
@@ -83,8 +83,7 @@ public class Functions {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
-            GeomUtils.flipCoordinates(geom);
-            return geom;
+            return org.apache.sedona.common.Functions.flipCoordinates(geom);
         }
     }
 
