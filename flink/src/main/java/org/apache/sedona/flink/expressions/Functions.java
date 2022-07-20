@@ -87,9 +87,9 @@ public class Functions {
 
     public static class ST_GeoHash extends ScalarFunction {
         @DataTypeHint("RAW")
-        public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object geometry, Integer precision) {
+        public Optional<String> eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object geometry, Integer precision) {
             Geometry geom = (Geometry) geometry;
-            return org.apache.sedona.common.Functions.geohash(geom, precision);
+            return Optional.ofNullable(org.apache.sedona.common.Functions.geohash(geom, precision));
         }
     }
 
