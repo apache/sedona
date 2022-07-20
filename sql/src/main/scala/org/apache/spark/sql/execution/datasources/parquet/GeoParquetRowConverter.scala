@@ -46,22 +46,22 @@ import org.apache.spark.util.Utils
  * converted values to a [[InternalRow]]; or a converter for array elements may append converted
  * values to an [[ArrayBuffer]].
  */
-private[parquet] trait ParentContainerUpdater {
-  /** Called before a record field is being converted */
-  def start(): Unit = ()
-
-  /** Called after a record field is being converted */
-  def end(): Unit = ()
-
-  def set(value: Any): Unit = ()
-  def setBoolean(value: Boolean): Unit = set(value)
-  def setByte(value: Byte): Unit = set(value)
-  def setShort(value: Short): Unit = set(value)
-  def setInt(value: Int): Unit = set(value)
-  def setLong(value: Long): Unit = set(value)
-  def setFloat(value: Float): Unit = set(value)
-  def setDouble(value: Double): Unit = set(value)
-}
+//private[parquet] trait ParentContainerUpdater {
+//  /** Called before a record field is being converted */
+//  def start(): Unit = ()
+//
+//  /** Called after a record field is being converted */
+//  def end(): Unit = ()
+//
+//  def set(value: Any): Unit = ()
+//  def setBoolean(value: Boolean): Unit = set(value)
+//  def setByte(value: Byte): Unit = set(value)
+//  def setShort(value: Short): Unit = set(value)
+//  def setInt(value: Int): Unit = set(value)
+//  def setLong(value: Long): Unit = set(value)
+//  def setFloat(value: Float): Unit = set(value)
+//  def setDouble(value: Double): Unit = set(value)
+//}
 
 /** A no-op updater used for root converter (who doesn't have a parent). */
 private[parquet] object NoopUpdater extends ParentContainerUpdater
@@ -209,11 +209,11 @@ private[parquet] class GeoParquetRowConverter(
     }
     // (SPARK-38094) parquet field ids, if exist, should be prioritized for matching
     val catalystFieldIdxByFieldId =
-      if (SQLConf.get.parquetFieldIdReadEnabled && GeoParquetUtils.hasFieldIds(catalystType)) {
+      if (SQLConf.get.parquetFieldIdReadEnabled && ParquetUtils.hasFieldIds(catalystType)) {
         catalystType.fields
           .zipWithIndex
-          .filter { case (f, _) => GeoParquetUtils.hasFieldId(f) }
-          .map { case (f, idx) => (GeoParquetUtils.getFieldId(f), idx) }
+          .filter { case (f, _) => ParquetUtils.hasFieldId(f) }
+          .map { case (f, idx) => (ParquetUtils.getFieldId(f), idx) }
           .toMap
       } else {
         Map.empty[Int, Int]

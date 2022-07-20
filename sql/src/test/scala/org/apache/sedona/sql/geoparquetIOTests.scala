@@ -4,7 +4,7 @@ import org.locationtech.jts.geom.Geometry
 import org.scalatest.BeforeAndAfter
 
 class geoparquetIOTests extends TestBaseScala  with BeforeAndAfter{
-  var geoparquetdatalocation1: String = resourceFolder + "geoparquet/example1_old.parquet"
+  var geoparquetdatalocation1: String = resourceFolder + "geoparquet/example1.parquet"
   var geoparquetdatalocation2: String = resourceFolder + "geoparquet/example2.parquet"
   var geoparquetdatalocation3: String = resourceFolder + "geoparquet/example3.parquet"
   var geoparquetoutputlocation: String = resourceFolder + "geoparquet/geoparquet_output/"
@@ -47,6 +47,30 @@ class geoparquetIOTests extends TestBaseScala  with BeforeAndAfter{
       val df2 = sparkSession.read.format("geoparquet").load(geoparquetoutputlocation + "/gp_sample3.parquet")
       val newrows = df2.collect()(0)
       assert(newrows.getAs[Geometry]("geometry").toString.startsWith("MULTIPOLYGON (((970217.022"))
+    }
+    it("GEOPARQUET Test example3 i.e. nybb dataset's Read and Write Options"){
+      val df=sparkSession.read.format("geoparquet").option("fieldGeometry", "geometry").load(geoparquetdatalocation3)
+      val rows = df.collect()(0)
+      assert(rows.getAs[Long]("BoroCode") == 5)
+      assert(rows.getAs[String]("BoroName") == "Staten Island")
+      assert(rows.getAs[Double]("Shape_Leng") == 330470.010332)
+      assert(rows.getAs[Double]("Shape_Area") == 1.62381982381E9)
+      assert(rows.getAs[Geometry]("geometry").toString.startsWith("MULTIPOLYGON (((970217.022"))
+      df.write.format("geoparquet").save(geoparquetoutputlocation + "/gp_sample3o.parquet")
+      val df2 = sparkSession.read.format("geoparquet").load(geoparquetoutputlocation + "/gp_sample3.parquet")
+      val newrows = df2.collect()(0)
+      assert(newrows.getAs[Geometry]("geometry").toString.startsWith("MULTIPOLYGON (((970217.022"))
+    }
+    it("GEOPARQUET Test For Distance Query"){
+      val df1 = sparkSession.read.format("geoparquet").load(geoparquetdatalocation1)
+      df1.createOrReplaceTempView("FirstTable")
+      val pdf1 = sparkSession.sql("select name, geometry as geom1 from FirstTable").createOrReplaceTempView("pdf1")
+      val df2 = sparkSession.read.format("geoparquet").load(geoparquetdatalocation2)
+      df2.createOrReplaceTempView("SecondTable")
+      val pdf2 = sparkSession.sql("select name, geometry as geom2 from SecondTable").createOrReplaceTempView("pdf2")
+      val distanceJoinDf = sparkSession.sql("select * from pdf1, pdf2 where ST_Distance(pdf1.geom1,pdf2.geom2) > 200")
+      //println(distanceJoinDf.count())
+      distanceJoinDf.show(2,false)
     }
   }
 }

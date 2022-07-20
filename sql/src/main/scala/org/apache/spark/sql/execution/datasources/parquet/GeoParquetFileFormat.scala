@@ -44,6 +44,7 @@ import org.apache.spark.sql.catalyst.util.DateTimeUtils
 import org.apache.spark.sql.errors.QueryExecutionErrors
 import org.apache.spark.sql.execution.WholeStageCodegenExec
 import org.apache.spark.sql.execution.datasources._
+import org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.readParquetFootersInParallel
 import org.apache.spark.sql.execution.vectorized.{OffHeapColumnVector, OnHeapColumnVector}
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
@@ -52,7 +53,7 @@ import org.apache.spark.sql.types._
 import org.apache.spark.util.{SerializableConfiguration, ThreadUtils}
 
 class GeoParquetFileFormat
-  extends FileFormat
+  extends ParquetFileFormat with FileFormat
     with DataSourceRegister
     with Logging
     with Serializable {
@@ -64,101 +65,6 @@ class GeoParquetFileFormat
 
   override def shortName(): String = "geoparquet"
 
-  override def toString: String = "Parquet"
-
-  override def hashCode(): Int = getClass.hashCode()
-
-  override def equals(other: Any): Boolean = other.isInstanceOf[GeoParquetFileFormat]
-
-  override def prepareWrite(
-                             sparkSession: SparkSession,
-                             job: Job,
-                             options: Map[String, String],
-                             dataSchema: StructType): OutputWriterFactory = {
-    val parquetOptions = new ParquetOptions(options, sparkSession.sessionState.conf)
-
-    val conf = ContextUtil.getConfiguration(job)
-
-    val committerClass =
-      conf.getClass(
-        SQLConf.PARQUET_OUTPUT_COMMITTER_CLASS.key,
-        classOf[ParquetOutputCommitter],
-        classOf[OutputCommitter])
-
-    if (conf.get(SQLConf.PARQUET_OUTPUT_COMMITTER_CLASS.key) == null) {
-      logInfo("Using default output committer for Parquet: " +
-        classOf[ParquetOutputCommitter].getCanonicalName)
-    } else {
-      logInfo("Using user defined output committer for Parquet: " + committerClass.getCanonicalName)
-    }
-
-    conf.setClass(
-      SQLConf.OUTPUT_COMMITTER_CLASS.key,
-      committerClass,
-      classOf[OutputCommitter])
-
-    // We're not really using `ParquetOutputFormat[Row]` for writing data here, because we override
-    // it in `ParquetOutputWriter` to support appending and dynamic partitioning.  The reason why
-    // we set it here is to setup the output committer class to `ParquetOutputCommitter`, which is
-    // bundled with `ParquetOutputFormat[Row]`.
-    job.setOutputFormatClass(classOf[ParquetOutputFormat[Row]])
-
-    ParquetOutputFormat.setWriteSupportClass(job, classOf[ParquetWriteSupport])
-
-    // This metadata is useful for keeping UDTs like Vector/Matrix.
-    ParquetWriteSupport.setSchema(dataSchema, conf)
-
-    // Sets flags for `ParquetWriteSupport`, which converts Catalyst schema to Parquet
-    // schema and writes actual rows to Parquet files.
-    conf.set(
-      SQLConf.PARQUET_WRITE_LEGACY_FORMAT.key,
-      sparkSession.sessionState.conf.writeLegacyParquetFormat.toString)
-
-    conf.set(
-      SQLConf.PARQUET_OUTPUT_TIMESTAMP_TYPE.key,
-      sparkSession.sessionState.conf.parquetOutputTimestampType.toString)
-
-    conf.set(
-      SQLConf.PARQUET_FIELD_ID_WRITE_ENABLED.key,
-      sparkSession.sessionState.conf.parquetFieldIdWriteEnabled.toString)
-
-    // Sets compression scheme
-    conf.set(ParquetOutputFormat.COMPRESSION, parquetOptions.compressionCodecClassName)
-
-    // SPARK-15719: Disables writing Parquet summary files by default.
-    if (conf.get(ParquetOutputFormat.JOB_SUMMARY_LEVEL) == null
-      && conf.get(ParquetOutputFormat.ENABLE_JOB_SUMMARY) == null) {
-      conf.setEnum(ParquetOutputFormat.JOB_SUMMARY_LEVEL, JobSummaryLevel.NONE)
-    }
-
-    if (ParquetOutputFormat.getJobSummaryLevel(conf) != JobSummaryLevel.NONE
-      && !classOf[ParquetOutputCommitter].isAssignableFrom(committerClass)) {
-      // output summary is requested, but the class is not a Parquet Committer
-      logWarning(s"Committer $committerClass is not a ParquetOutputCommitter and cannot" +
-        s" create job summaries. " +
-        s"Set Parquet option ${ParquetOutputFormat.JOB_SUMMARY_LEVEL} to NONE.")
-    }
-
-    new OutputWriterFactory {
-      // This OutputWriterFactory instance is deserialized when writing Parquet files on the
-      // executor side without constructing or deserializing ParquetFileFormat. Therefore, we hold
-      // another reference to ParquetLogRedirector.INSTANCE here to ensure the latter class is
-      // initialized.
-      private val parquetLogRedirector = ParquetLogRedirector.INSTANCE
-
-      override def newInstance(
-                                path: String,
-                                dataSchema: StructType,
-                                context: TaskAttemptContext): OutputWriter = {
-        new ParquetOutputWriter(path, context)
-      }
-
-      override def getFileExtension(context: TaskAttemptContext): String = {
-        CodecConfig.from(context).getCodec.getExtension + ".parquet"
-      }
-    }
-  }
-
   override def inferSchema(
                             sparkSession: SparkSession,
                             parameters: Map[String, String],
@@ -166,36 +72,6 @@ class GeoParquetFileFormat
     val fieldGeometry = new GeoParquetOptions(parameters).fieldGeometry
     GeometryField.setFieldGeometry(fieldGeometry)
     GeoParquetUtils.inferSchema(sparkSession, parameters, files)
-  }
-
-  /**
-   * Returns whether the reader will return the rows as batch or not.
-   */
-  override def supportBatch(sparkSession: SparkSession, schema: StructType): Boolean = {
-    val conf = sparkSession.sessionState.conf
-    conf.parquetVectorizedReaderEnabled && conf.wholeStageEnabled &&
-      ParquetUtils.isBatchReadSupportedForSchema(conf, schema) &&
-      !WholeStageCodegenExec.isTooManyFields(conf, schema)
-  }
-
-  override def vectorTypes(
-                            requiredSchema: StructType,
-                            partitionSchema: StructType,
-                            sqlConf: SQLConf): Option[Seq[String]] = {
-    Option(Seq.fill(requiredSchema.fields.length + partitionSchema.fields.length)(
-      if (!sqlConf.offHeapColumnVectorEnabled) {
-        classOf[OnHeapColumnVector].getName
-      } else {
-        classOf[OffHeapColumnVector].getName
-      }
-    ))
-  }
-
-  override def isSplitable(
-                            sparkSession: SparkSession,
-                            options: Map[String, String],
-                            path: Path): Boolean = {
-    true
   }
 
   override def buildReaderWithPartitionValues(
@@ -206,9 +82,9 @@ class GeoParquetFileFormat
                                                filters: Seq[Filter],
                                                options: Map[String, String],
                                                hadoopConf: Configuration): (PartitionedFile) => Iterator[InternalRow] = {
-    hadoopConf.set(ParquetInputFormat.READ_SUPPORT_CLASS, classOf[GeoParquetReadSupport].getName)
+    hadoopConf.set(ParquetInputFormat.READ_SUPPORT_CLASS, classOf[ParquetReadSupport].getName)
     hadoopConf.set(
-      GeoParquetReadSupport.SPARK_ROW_REQUESTED_SCHEMA,
+      ParquetReadSupport.SPARK_ROW_REQUESTED_SCHEMA,
       requiredSchema.json)
     hadoopConf.set(
       ParquetWriteSupport.SPARK_ROW_SCHEMA,
@@ -358,7 +234,7 @@ class GeoParquetFileFormat
         }
       } else {
         logDebug(s"Falling back to parquet-mr")
-        // ParquetRecordReader returns InternalRow
+        // ParquetRecordReader returns InternalRow //FIXME here is class
         val readSupport = new GeoParquetReadSupport(
           convertTz,
           enableVectorizedReader = false,
@@ -395,6 +271,8 @@ class GeoParquetFileFormat
     }
   }
 
+//FIXME This can be removed, default definition is true always, anyway this function is also true always for most datatypes
+
   override def supportDataType(dataType: DataType): Boolean = dataType match {
     case _: AtomicType => true
 
@@ -416,7 +294,7 @@ class GeoParquetFileFormat
 object GeoParquetFileFormat extends Logging {
   private[parquet] def readSchema(
                                    footers: Seq[Footer], sparkSession: SparkSession): Option[StructType] = {
-
+//TODO No change is required here
     val converter = new GeoParquetToSparkSchemaConverter(
       sparkSession.sessionState.conf.isParquetBinaryAsString,
       sparkSession.sessionState.conf.isParquetINT96AsTimestamp)
@@ -467,12 +345,8 @@ object GeoParquetFileFormat extends Logging {
     }
   }
 
-  /**
-   * Reads Parquet footers in multi-threaded manner.
-   * If the config "spark.sql.files.ignoreCorruptFiles" is set to true, we will ignore the corrupted
-   * files when reading footers.
-   */
-
+// FIXME Nevere getting used anywhere till now, may be in future
+  //TODO TO remove??
   private[parquet] def readGeoParquetFootersInParallel(
                                                      conf: Configuration,
                                                      partFiles: Seq[FileStatus],
@@ -510,6 +384,7 @@ object GeoParquetFileFormat extends Logging {
    *     slow.  And basically locality is not available when using S3 (you can't run computation on
    *     S3 nodes).
    */
+  // TODO necessary
   def mergeSchemasInParallel(
                               parameters: Map[String, String],
                               filesToTouch: Seq[FileStatus],
@@ -522,8 +397,7 @@ object GeoParquetFileFormat extends Logging {
       val converter = new GeoParquetToSparkSchemaConverter(
         assumeBinaryIsString = assumeBinaryIsString,
         assumeInt96IsTimestamp = assumeInt96IsTimestamp)
-
-      readGeoParquetFootersInParallel(conf, files, ignoreCorruptFiles)
+      readParquetFootersInParallel(conf, files, ignoreCorruptFiles)
         .map(GeoParquetFileFormat.readSchemaFromFooter(_, converter))
     }
 
@@ -536,6 +410,7 @@ object GeoParquetFileFormat extends Logging {
    * a [[StructType]] converted from the [[org.apache.parquet.schema.MessageType]] stored in this
    * footer.
    */
+// TODO necessary
   def readSchemaFromFooter(
                             footer: Footer, converter: GeoParquetToSparkSchemaConverter): StructType = {
     val fileMetaData = footer.getParquetMetadata.getFileMetaData
@@ -564,4 +439,5 @@ object GeoParquetFileFormat extends Logging {
         Failure(cause)
     }.toOption
   }
+
 }

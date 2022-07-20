@@ -19,10 +19,8 @@ package org.apache.spark.sql.execution.datasources.parquet
 
 import java.time.ZoneId
 import java.util
-import java.util.{Locale, Map => JMap, UUID}
-
+import java.util.{Locale, UUID, Map => JMap}
 import scala.collection.JavaConverters._
-
 import org.apache.hadoop.conf.Configuration
 import org.apache.parquet.hadoop.api.{InitContext, ReadSupport}
 import org.apache.parquet.hadoop.api.ReadSupport.ReadContext
@@ -30,11 +28,11 @@ import org.apache.parquet.io.api.RecordMaterializer
 import org.apache.parquet.schema._
 import org.apache.parquet.schema.LogicalTypeAnnotation.ListLogicalTypeAnnotation
 import org.apache.parquet.schema.Type.Repetition
-
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.util.RebaseDateTime.RebaseSpec
 import org.apache.spark.sql.errors.QueryExecutionErrors
+import org.apache.spark.sql.execution.datasources.parquet.ParquetReadSupport.containsFieldIds
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.internal.SQLConf.LegacyBehaviorPolicy
 import org.apache.spark.sql.types._
@@ -56,10 +54,10 @@ import org.apache.spark.sql.types._
  * to [[prepareForRead()]], but use a private `var` for simplicity.
  */
 class GeoParquetReadSupport(
-                          val convertTz: Option[ZoneId],
-                          enableVectorizedReader: Boolean,
-                          datetimeRebaseSpec: RebaseSpec,
-                          int96RebaseSpec: RebaseSpec)
+                              val convertTz: Option[ZoneId],
+                              enableVectorizedReader: Boolean,
+                              datetimeRebaseSpec: RebaseSpec,
+                              int96RebaseSpec: RebaseSpec)
   extends ReadSupport[InternalRow] with Logging {
   private var catalystRequestedSchema: StructType = _
 
@@ -78,15 +76,16 @@ class GeoParquetReadSupport(
    * Called on executor side before [[prepareForRead()]] and instantiating actual Parquet record
    * readers.  Responsible for figuring out Parquet requested schema used for column pruning.
    */
+
   override def init(context: InitContext): ReadContext = {
     val conf = context.getConfiguration
-    catalystRequestedSchema = {
+    catalystRequestedSchema = { //FIXME works with ParquetReadSupport too , Geo as well , depends on requested schema later
       val schemaString = conf.get(GeoParquetReadSupport.SPARK_ROW_REQUESTED_SCHEMA)
-      assert(schemaString != null, "GeoParquet requested schema not set.")
+      assert(schemaString != null, "Parquet requested schema not set.")
       StructType.fromString(schemaString)
     }
 
-    val parquetRequestedSchema = GeoParquetReadSupport.getRequestedSchema(
+    val parquetRequestedSchema = ParquetReadSupport.getRequestedSchema(
       context.getFileSchema, catalystRequestedSchema, conf, enableVectorizedReader)
     new ReadContext(parquetRequestedSchema, new util.HashMap[String, String]())
   }
@@ -95,6 +94,7 @@ class GeoParquetReadSupport(
    * Responsible for instantiating [[RecordMaterializer]], which is used for converting Parquet
    * records to Catalyst [[InternalRow]]s.
    */
+    //TODO As it is.
   override def prepareForRead(
                                conf: Configuration,
                                keyValueMetaData: JMap[String, String],
@@ -103,7 +103,7 @@ class GeoParquetReadSupport(
     val parquetRequestedSchema = readContext.getRequestedSchema
     new GeoParquetRecordMaterializer(
       parquetRequestedSchema,
-      GeoParquetReadSupport.expandUDT(catalystRequestedSchema),
+      ParquetReadSupport.expandUDT(catalystRequestedSchema),
       new GeoParquetToSparkSchemaConverter(conf),
       convertTz,
       datetimeRebaseSpec,
@@ -116,102 +116,7 @@ object GeoParquetReadSupport extends Logging {
 
   val SPARK_METADATA_KEY = "org.apache.spark.sql.parquet.row.metadata"
   def generateFakeColumnName: String = s"_fake_name_${UUID.randomUUID()}"
-  def getRequestedSchema(
-                          parquetFileSchema: MessageType,
-                          catalystRequestedSchema: StructType,
-                          conf: Configuration,
-                          enableVectorizedReader: Boolean): MessageType = {
-    val caseSensitive = conf.getBoolean(SQLConf.CASE_SENSITIVE.key,
-      SQLConf.CASE_SENSITIVE.defaultValue.get)
-    val schemaPruningEnabled = conf.getBoolean(SQLConf.NESTED_SCHEMA_PRUNING_ENABLED.key,
-      SQLConf.NESTED_SCHEMA_PRUNING_ENABLED.defaultValue.get)
-    val useFieldId = conf.getBoolean(SQLConf.PARQUET_FIELD_ID_READ_ENABLED.key,
-      SQLConf.PARQUET_FIELD_ID_READ_ENABLED.defaultValue.get)
-    val ignoreMissingIds = conf.getBoolean(SQLConf.IGNORE_MISSING_PARQUET_FIELD_ID.key,
-      SQLConf.IGNORE_MISSING_PARQUET_FIELD_ID.defaultValue.get)
 
-    if (!ignoreMissingIds &&
-      !containsFieldIds(parquetFileSchema) &&
-      GeoParquetUtils.hasFieldIds(catalystRequestedSchema)) {
-      throw new RuntimeException(
-        "Spark read schema expects field Ids, " +
-          "but Parquet file schema doesn't contain any field Ids.\n" +
-          "Please remove the field ids from Spark schema or ignore missing ids by " +
-          s"setting `${SQLConf.IGNORE_MISSING_PARQUET_FIELD_ID.key} = true`\n" +
-          s"""
-             |Spark read schema:
-             |${catalystRequestedSchema.prettyJson}
-             |
-             |Parquet file schema:
-             |${parquetFileSchema.toString}
-             |""".stripMargin)
-    }
-    val parquetClippedSchema = GeoParquetReadSupport.clipParquetSchema(parquetFileSchema,
-      catalystRequestedSchema, caseSensitive, useFieldId)
-
-    // We pass two schema to ParquetRecordMaterializer:
-    // - parquetRequestedSchema: the schema of the file data we want to read
-    // - catalystRequestedSchema: the schema of the rows we want to return
-    // The reader is responsible for reconciling the differences between the two.
-    val parquetRequestedSchema = if (schemaPruningEnabled && !enableVectorizedReader) {
-      // Parquet-MR reader requires that parquetRequestedSchema include only those fields present
-      // in the underlying parquetFileSchema. Therefore, we intersect the parquetClippedSchema
-      // with the parquetFileSchema
-      GeoParquetReadSupport.intersectParquetGroups(parquetClippedSchema, parquetFileSchema)
-        .map(groupType => new MessageType(groupType.getName, groupType.getFields))
-        .getOrElse(GeoParquetSchemaConverter.EMPTY_MESSAGE)
-    } else {
-      // Spark's vectorized reader only support atomic types currently. It also skip fields
-      // in parquetRequestedSchema which are not present in the file.
-      parquetClippedSchema
-    }
-
-    logDebug(
-      s"""Going to read the following fields from the Parquet file with the following schema:
-         |Parquet file schema:
-         |$parquetFileSchema
-         |Parquet clipped schema:
-         |$parquetClippedSchema
-         |Parquet requested schema:
-         |$parquetRequestedSchema
-         |Catalyst requested schema:
-         |${catalystRequestedSchema.treeString}
-       """.stripMargin)
-
-    parquetRequestedSchema
-  }
-
-  /**
-   * Overloaded method for backward compatibility with
-   * `caseSensitive` default to `true` and `useFieldId` default to `false`
-   */
-  def clipParquetSchema(
-                         parquetSchema: MessageType,
-                         catalystSchema: StructType,
-                         caseSensitive: Boolean = true): MessageType = {
-    clipParquetSchema(parquetSchema, catalystSchema, caseSensitive, useFieldId = false)
-  }
-
-  /**
-   * Tailors `parquetSchema` according to `catalystSchema` by removing column paths don't exist
-   * in `catalystSchema`, and adding those only exist in `catalystSchema`.
-   */
-  def clipParquetSchema(
-                         parquetSchema: MessageType,
-                         catalystSchema: StructType,
-                         caseSensitive: Boolean,
-                         useFieldId: Boolean): MessageType = {
-    val clippedParquetFields = clipParquetGroupFields(
-      parquetSchema.asGroupType(), catalystSchema, caseSensitive, useFieldId)
-    if (clippedParquetFields.isEmpty) {
-      GeoParquetSchemaConverter.EMPTY_MESSAGE
-    } else {
-      Types
-        .buildMessage()
-        .addFields(clippedParquetFields: _*)
-        .named(GeoParquetSchemaConverter.SPARK_PARQUET_SCHEMA_NAME)
-    }
-  }
   private def clipParquetType(
                                parquetType: Type,
                                catalystType: DataType,
@@ -437,7 +342,7 @@ object GeoParquetReadSupport extends Logging {
     }
 
     def matchIdField(f: StructField): Type = {
-      val fieldId = GeoParquetUtils.getFieldId(f)
+      val fieldId = ParquetUtils.getFieldId(f)
       idToParquetFieldMap
         .get(fieldId)
         .map { parquetTypes =>
@@ -455,10 +360,10 @@ object GeoParquetReadSupport extends Logging {
         toParquet.convertField(f.copy(name = generateFakeColumnName))
       }
     }
-
-    val shouldMatchById = useFieldId && GeoParquetUtils.hasFieldIds(structType)
+    // FIXME here
+    val shouldMatchById = useFieldId && ParquetUtils.hasFieldIds(structType)
     structType.map { f =>
-      if (shouldMatchById && GeoParquetUtils.hasFieldId(f)) {
+      if (shouldMatchById && ParquetUtils.hasFieldId(f)) {
         matchIdField(f)
       } else if (caseSensitive) {
         matchCaseSensitiveField(f)
@@ -466,69 +371,5 @@ object GeoParquetReadSupport extends Logging {
         matchCaseInsensitiveField(f)
       }
     }
-  }
-
-  /**
-   * Computes the structural intersection between two Parquet group types.
-   * This is used to create a requestedSchema for ReadContext of Parquet-MR reader.
-   * Parquet-MR reader does not support the nested field access to non-existent field
-   * while parquet library does support to read the non-existent field by regular field access.
-   */
-  private def intersectParquetGroups(
-                                      groupType1: GroupType, groupType2: GroupType): Option[GroupType] = {
-    val fields =
-      groupType1.getFields.asScala
-        .filter(field => groupType2.containsField(field.getName))
-        .flatMap {
-          case field1: GroupType =>
-            val field2 = groupType2.getType(field1.getName)
-            if (field2.isPrimitive) {
-              None
-            } else {
-              intersectParquetGroups(field1, field2.asGroupType)
-            }
-          case field1 => Some(field1)
-        }
-
-    if (fields.nonEmpty) {
-      Some(groupType1.withNewFields(fields.asJava))
-    } else {
-      None
-    }
-  }
-
-  def expandUDT(schema: StructType): StructType = {
-    def expand(dataType: DataType): DataType = {
-      dataType match {
-        case t: ArrayType =>
-          t.copy(elementType = expand(t.elementType))
-
-        case t: MapType =>
-          t.copy(
-            keyType = expand(t.keyType),
-            valueType = expand(t.valueType))
-
-        case t: StructType =>
-          val expandedFields = t.fields.map(f => f.copy(dataType = expand(f.dataType)))
-          t.copy(fields = expandedFields)
-
-        case t: UserDefinedType[_] =>
-          t.sqlType
-
-        case t =>
-          t
-      }
-    }
-
-    expand(schema).asInstanceOf[StructType]
-  }
-
-  /**
-   * Whether the parquet schema contains any field IDs.
-   */
-  def containsFieldIds(schema: Type): Boolean = schema match {
-    case p: PrimitiveType => p.getId != null
-    // We don't require all fields to have IDs, so we use `exists` here.
-    case g: GroupType => g.getId != null || g.getFields.asScala.exists(containsFieldIds)
   }
 }

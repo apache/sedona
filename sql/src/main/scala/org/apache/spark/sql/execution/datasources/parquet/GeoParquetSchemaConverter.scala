@@ -74,22 +74,7 @@ class GeoParquetToSparkSchemaConverter(
     converted.sparkType.asInstanceOf[StructType]
   }
 
-  /**
-   * Convert `parquetSchema` into a [[ParquetColumn]] which contains its corresponding Spark
-   * SQL [[StructType]] along with other information such as the maximum repetition and definition
-   * level of each node, column descriptor for the leave nodes, etc.
-   *
-   * If `sparkReadSchema` is not empty, when deriving Spark SQL type from a Parquet field this will
-   * check if the same field also exists in the schema. If so, it will use the Spark SQL type.
-   * This is necessary since conversion from Parquet to Spark could cause precision loss. For
-   * instance, Spark read schema is smallint/tinyint but Parquet only support int.
-   */
-  def convertParquetColumn(
-                            parquetSchema: MessageType,
-                            sparkReadSchema: Option[StructType] = None): ParquetColumn = {
-    val column = new ColumnIOFactory().getColumnIO(parquetSchema)
-    convertInternal(column, sparkReadSchema)
-  }
+
 
   private def convertInternal(
                                groupColumn: GroupColumnIO,
@@ -107,21 +92,6 @@ class GeoParquetToSparkSchemaConverter(
       }
       var fieldReadType = fieldFromReadSchema.map(_.dataType)
 
-      // If a field is repeated here then it is neither contained by a `LIST` nor `MAP`
-      // annotated group (these should've been handled in `convertGroupField`), e.g.:
-      //
-      //  message schema {
-      //    repeated int32 int_array;
-      //  }
-      // or
-      //  message schema {
-      //    repeated group struct_array {
-      //      optional int32 field;
-      //    }
-      //  }
-      //
-      // the corresponding Spark read type should be an array and we should pass the element type
-      // to the group or primitive type conversion method.
       if (field.getType.getRepetition == REPEATED) {
         fieldReadType = fieldReadType.flatMap {
           case at: ArrayType => Some(at.elementType)
@@ -477,15 +447,16 @@ class SparkToGeoParquetSchemaConverter(
   /**
    * Converts a Spark SQL [[StructField]] to a Parquet [[Type]].
    */
+    //FIXME trying to remove geoPArquet
   def convertField(field: StructField): Type = {
     val converted = convertField(field, if (field.nullable) OPTIONAL else REQUIRED)
-    if (useFieldId && GeoParquetUtils.hasFieldId(field)) {
-      converted.withId(GeoParquetUtils.getFieldId(field))
+    if (useFieldId && ParquetUtils.hasFieldId(field)) {
+      converted.withId(ParquetUtils.getFieldId(field))
     } else {
       converted
     }
   }
-
+// FIXME can not remove it at all
   private def convertField(field: StructField, repetition: Type.Repetition): Type = {
     field.dataType match {
       // ===================
