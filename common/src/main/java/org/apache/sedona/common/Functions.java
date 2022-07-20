@@ -13,11 +13,14 @@
  */
 package org.apache.sedona.common;
 
+import java.util.Optional;
 import org.apache.sedona.common.utils.GeomUtils;
+import org.apache.sedona.common.utils.GeometryGeoHashEncoder;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LineString;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -86,5 +89,44 @@ public class Functions {
     public static Geometry flipCoordinates(Geometry geometry) {
         GeomUtils.flipCoordinates(geometry);
         return geometry;
+    }
+
+    public static String geohash(Geometry geometry, int precision) {
+        return GeometryGeoHashEncoder.calculate(geometry, precision);   
+    }
+
+    public static Geometry pointOnSurface(Geometry geometry) {
+        return GeomUtils.getInteriorPoint(geometry);
+    }
+
+    public static Geometry reverse(Geometry geometry) {
+        return geometry.reverse();
+    }
+
+    public static Geometry pointN(Geometry geometry, int n) {
+        if(!(geometry instanceof LineString)) {
+            return null;
+        }
+        return GeomUtils.getNthPoint((LineString)geometry, n);
+    }
+
+    public static Geometry exteriorRing(Geometry geometry) {
+        return GeomUtils.getExteriorRing(geometry);
+    }
+
+    public static String asEWKT(Geometry geometry) {
+        return GeomUtils.getEWKT(geometry);
+    }
+
+    public static Geometry force2D(Geometry geometry) {
+        return GeomUtils.get2dGeom(geometry);
+    }
+
+    public static boolean isEmpty(Geometry geometry) {
+        return geometry.isEmpty();
+    }
+
+    public static Geometry buildArea(Geometry geometry) {
+        return GeomUtils.buildArea(geometry);
     }
 }

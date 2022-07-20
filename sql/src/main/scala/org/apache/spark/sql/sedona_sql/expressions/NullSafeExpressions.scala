@@ -18,15 +18,19 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
+import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.locationtech.jts.geom.Geometry
+import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
+import org.apache.spark.unsafe.types.UTF8String
+import org.locationtech.jts.geom.Geometry
 
 import scala.reflect.runtime.universe._
+
 
 abstract class UnaryGeometryExpression extends Expression {
   def inputExpressions: Seq[Expression]
@@ -70,22 +74,54 @@ object InferrableType {
     new InferrableType[Geometry] {}
   implicit val doubleInstance: InferrableType[Double] =
     new InferrableType[Double] {}
+  implicit val booleanInstance: InferrableType[Boolean] =
+    new InferrableType[Boolean] {}
+  implicit val intInstance: InferrableType[Int] =
+    new InferrableType[Int] {}
+  implicit val stringInstance: InferrableType[String] =
+    new InferrableType[String] {}
 }
 
 object InferredTypes {
   def buildExtractor[T: TypeTag](expr: Expression): InternalRow => T = {
     if (typeOf[T] =:= typeOf[Geometry]) {
       input: InternalRow => expr.toGeometry(input).asInstanceOf[T]
+    } else if (typeOf[T] =:= typeOf[String]) {
+      input: InternalRow => expr.asString(input).asInstanceOf[T]
     } else {
       input: InternalRow => expr.eval(input).asInstanceOf[T]
+    }
+  }
+
+  def buildSerializer[T: TypeTag]: T => Any = {
+    if (typeOf[T] =:= typeOf[Geometry]) {
+      output: T => if (output != null) {
+        output.asInstanceOf[Geometry].toGenericArrayData
+      } else {
+        null
+      }
+    } else if (typeOf[T] =:= typeOf[String]) {
+      output: T => if (output != null) {
+        UTF8String.fromString(output.asInstanceOf[String])
+      } else {
+        null
+      }
+    } else {
+      output: T => output
     }
   }
 
   def inferSparkType[T: TypeTag]: DataType = {
     if (typeOf[T] =:= typeOf[Geometry]) {
       GeometryUDT
-    } else {
+    } else if (typeOf[T] =:= typeOf[Double]) {
       DoubleType
+    } else if (typeOf[T] =:= typeOf[Int]) {
+      IntegerType
+    } else if (typeOf[T] =:= typeOf[String]) {
+      StringType
+    } else {
+      BooleanType
     }
   }
 }
@@ -115,10 +151,12 @@ abstract class InferredUnaryExpression[A1: InferrableType, R: InferrableType]
 
   lazy val extract = buildExtractor[A1](inputExpressions(0))
 
+  lazy val serialize = buildSerializer[R]
+
   override def eval(input: InternalRow): Any = {
     val value = extract(input)
     if (value != null) {
-      f(value)
+      serialize(f(value))
     } else {
       null
     }
@@ -147,11 +185,13 @@ abstract class InferredBinaryExpression[A1: InferrableType, A2: InferrableType, 
   lazy val extractLeft = buildExtractor[A1](inputExpressions(0))
   lazy val extractRight = buildExtractor[A2](inputExpressions(1))
 
+  lazy val serialize = buildSerializer[R]
+
   override def eval(input: InternalRow): Any = {
     val left = extractLeft(input)
     val right = extractRight(input)
     if (left != null && right != null) {
-      f(left, right)
+      serialize(f(left, right))
     } else {
       null
     }
