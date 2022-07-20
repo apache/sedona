@@ -16,7 +16,6 @@ package org.apache.sedona.flink.expressions;
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.sedona.common.utils.GeomUtils;
-import org.apache.spark.sql.sedona_sql.expressions.geohash.GeometryGeoHashEncoder;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.io.WKTWriter;
