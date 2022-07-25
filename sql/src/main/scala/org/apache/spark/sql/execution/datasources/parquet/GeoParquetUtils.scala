@@ -29,34 +29,31 @@ object GeoParquetUtils {
                    parameters: Map[String, String],
                    files: Seq[FileStatus]): Option[StructType] = {
     val parquetOptions = new ParquetOptions(parameters, sparkSession.sessionState.conf)
-
-    // Should we merge schemas from all Parquet part-files?
     val shouldMergeSchemas = parquetOptions.mergeSchema
-
     val mergeRespectSummaries = sparkSession.sessionState.conf.isParquetSchemaRespectSummaries
     val filesByType = splitFiles(files)
     val filesToTouch =
-    if (shouldMergeSchemas) {
-      val needMerged: Seq[FileStatus] =
-        if (mergeRespectSummaries) {
-          Seq.empty
-        } else {
-          filesByType.data
-        }
-      needMerged ++ filesByType.metadata ++ filesByType.commonMetadata
-    } else {
-      // Tries any "_common_metadata" first. Parquet files written by old versions or Parquet
-      // don't have this.
-      filesByType.commonMetadata.headOption
-        // Falls back to "_metadata"
-        .orElse(filesByType.metadata.headOption)
-        // Summary file(s) not found, the Parquet file is either corrupted, or different part-
-        // files contain conflicting user defined metadata (two or more values are associated
-        // with a same key in different files).  In either case, we fall back to any of the
-        // first part-file, and just assume all schemas are consistent.
-        .orElse(filesByType.data.headOption)
-        .toSeq
-    }
+      if (shouldMergeSchemas) {
+        val needMerged: Seq[FileStatus] =
+          if (mergeRespectSummaries) {
+            Seq.empty
+          } else {
+            filesByType.data
+          }
+        needMerged ++ filesByType.metadata ++ filesByType.commonMetadata
+      } else {
+        // Tries any "_common_metadata" first. Parquet files written by old versions or Parquet
+        // don't have this.
+        filesByType.commonMetadata.headOption
+          // Falls back to "_metadata"
+          .orElse(filesByType.metadata.headOption)
+          // Summary file(s) not found, the Parquet file is either corrupted, or different part-
+          // files contain conflicting user defined metadata (two or more values are associated
+          // with a same key in different files).  In either case, we fall back to any of the
+          // first part-file, and just assume all schemas are consistent.
+          .orElse(filesByType.data.headOption)
+          .toSeq
+      }
     GeoParquetFileFormat.mergeSchemasInParallel(parameters, filesToTouch, sparkSession)
   }
 

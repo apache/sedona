@@ -61,16 +61,5 @@ class geoparquetIOTests extends TestBaseScala  with BeforeAndAfter{
       val newrows = df2.collect()(0)
       assert(newrows.getAs[Geometry]("geometry").toString.startsWith("MULTIPOLYGON (((970217.022"))
     }
-    it("GEOPARQUET Test For Distance Query"){
-      val df1 = sparkSession.read.format("geoparquet").load(geoparquetdatalocation1)
-      df1.createOrReplaceTempView("FirstTable")
-      val pdf1 = sparkSession.sql("select name, geometry as geom1 from FirstTable").createOrReplaceTempView("pdf1")
-      val df2 = sparkSession.read.format("geoparquet").load(geoparquetdatalocation2)
-      df2.createOrReplaceTempView("SecondTable")
-      val pdf2 = sparkSession.sql("select name, geometry as geom2 from SecondTable").createOrReplaceTempView("pdf2")
-      val distanceJoinDf = sparkSession.sql("select * from pdf1, pdf2 where ST_Distance(pdf1.geom1,pdf2.geom2) > 200")
-      //println(distanceJoinDf.count())
-      distanceJoinDf.show(2,false)
-    }
   }
 }

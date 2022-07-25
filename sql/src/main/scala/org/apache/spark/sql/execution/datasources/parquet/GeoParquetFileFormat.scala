@@ -17,10 +17,6 @@
 
 package org.apache.spark.sql.execution.datasources.parquet
 
-import java.net.URI
-import scala.collection.JavaConverters._
-import scala.collection.mutable
-import scala.util.{Failure, Try}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileStatus, Path}
 import org.apache.hadoop.mapred.FileSplit
@@ -30,9 +26,6 @@ import org.apache.parquet.filter2.compat.FilterCompat
 import org.apache.parquet.filter2.predicate.FilterApi
 import org.apache.parquet.format.converter.ParquetMetadataConverter.SKIP_ROW_GROUPS
 import org.apache.parquet.hadoop._
-import org.apache.parquet.hadoop.ParquetOutputFormat.JobSummaryLevel
-import org.apache.parquet.hadoop.codec.CodecConfig
-import org.apache.parquet.hadoop.util.ContextUtil
 import org.apache.spark.TaskContext
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql._
@@ -41,29 +34,24 @@ import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeProjection
 import org.apache.spark.sql.catalyst.parser.LegacyTypeStringParser
 import org.apache.spark.sql.catalyst.util.DateTimeUtils
-import org.apache.spark.sql.errors.QueryExecutionErrors
-import org.apache.spark.sql.execution.WholeStageCodegenExec
 import org.apache.spark.sql.execution.datasources._
 import org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.readParquetFootersInParallel
-import org.apache.spark.sql.execution.vectorized.{OffHeapColumnVector, OnHeapColumnVector}
 import org.apache.spark.sql.internal.SQLConf
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sources._
 import org.apache.spark.sql.types._
-import org.apache.spark.util.{SerializableConfiguration, ThreadUtils}
+import org.apache.spark.util.SerializableConfiguration
 
-class GeoParquetFileFormat
-  extends ParquetFileFormat with FileFormat
-    with DataSourceRegister
-    with Logging
-    with Serializable {
-  // Hold a reference to the (serializable) singleton instance of ParquetLogRedirector. This
-  // ensures the ParquetLogRedirector class is initialized whether an instance of ParquetFileFormat
-  // is constructed or deserialized. Do not heed the Scala compiler's warning about an unused field
-  // here.
-  private val parquetLogRedirector = ParquetLogRedirector.INSTANCE
+import java.net.URI
+import scala.collection.JavaConverters._
+import scala.util.{Failure, Try}
+
+class GeoParquetFileFormat extends ParquetFileFormat with FileFormat with DataSourceRegister with Logging with Serializable {
 
   override def shortName(): String = "geoparquet"
+
+  override def equals(other: Any): Boolean = other.isInstanceOf[GeoParquetFileFormat]
+
+  override def prepareWrite(sparkSession: SparkSession, job: Job, options: Map[String, String], dataSchema: StructType): OutputWriterFactory = super.prepareWrite(sparkSession, job, options, dataSchema)
 
   override def inferSchema(
                             sparkSession: SparkSession,
@@ -73,6 +61,15 @@ class GeoParquetFileFormat
     GeometryField.setFieldGeometry(fieldGeometry)
     GeoParquetUtils.inferSchema(sparkSession, parameters, files)
   }
+
+  /**
+   * Returns whether the reader will return the rows as batch or not.
+   */
+  override def supportBatch(sparkSession: SparkSession, schema: StructType): Boolean = super.supportBatch(sparkSession, schema)
+
+  override def vectorTypes(requiredSchema: StructType, partitionSchema: StructType, sqlConf: SQLConf): Option[Seq[String]] = super.vectorTypes(requiredSchema, partitionSchema, sqlConf)
+
+  override def isSplitable(sparkSession: SparkSession, options: Map[String, String], path: Path): Boolean = super.isSplitable(sparkSession, options, path)
 
   override def buildReaderWithPartitionValues(
                                                sparkSession: SparkSession,
@@ -98,8 +95,6 @@ class GeoParquetFileFormat
     hadoopConf.setBoolean(
       SQLConf.CASE_SENSITIVE.key,
       sparkSession.sessionState.conf.caseSensitiveAnalysis)
-
-    // Sets flags for `ParquetToSparkSchemaConverter`
     hadoopConf.setBoolean(
       SQLConf.PARQUET_BINARY_AS_STRING.key,
       sparkSession.sessionState.conf.isParquetBinaryAsString)
@@ -109,10 +104,6 @@ class GeoParquetFileFormat
 
     val broadcastedHadoopConf =
       sparkSession.sparkContext.broadcast(new SerializableConfiguration(hadoopConf))
-
-    // TODO: if you move this into the closure it reverts to the default values.
-    // If true, enable using the custom RecordReader for parquet. This only works for
-    // a subset of the types (no complex types).
     val resultSchema = StructType(partitionSchema.fields ++ requiredSchema.fields)
     val sqlConf = sparkSession.sessionState.conf
     val enableOffHeapColumnVector = sqlConf.offHeapColumnVectorEnabled
@@ -169,11 +160,6 @@ class GeoParquetFileFormat
         None
       }
 
-      // PARQUET_INT96_TIMESTAMP_CONVERSION says to apply timezone conversions to int96 timestamps'
-      // *only* if the file was created by something other than "parquet-mr", so check the actual
-      // writer here for this file.  We have to do this per-file, as each file in the table may
-      // have different writers.
-      // Define isCreatedByParquetMr as function to avoid unnecessary parquet footer reads.
       def isCreatedByParquetMr: Boolean =
         footerFileMetaData.getCreatedBy().startsWith("parquet-mr")
 
@@ -234,7 +220,6 @@ class GeoParquetFileFormat
         }
       } else {
         logDebug(s"Falling back to parquet-mr")
-        // ParquetRecordReader returns InternalRow //FIXME here is class
         val readSupport = new GeoParquetReadSupport(
           convertTz,
           enableVectorizedReader = false,
@@ -262,8 +247,6 @@ class GeoParquetFileFormat
           }
         } catch {
           case e: Throwable =>
-            // SPARK-23457: In case there is an exception in initialization, close the iterator to
-            // avoid leaking resources.
             iter.close()
             throw e
         }
@@ -271,103 +254,27 @@ class GeoParquetFileFormat
     }
   }
 
-//FIXME This can be removed, default definition is true always, anyway this function is also true always for most datatypes
-
-  override def supportDataType(dataType: DataType): Boolean = dataType match {
-    case _: AtomicType => true
-
-    case _: GeometryUDT => true
-
-    case st: StructType => st.forall { f => supportDataType(f.dataType) }
-
-    case ArrayType(elementType, _) => supportDataType(elementType)
-
-    case MapType(keyType, valueType, _) =>
-      supportDataType(keyType) && supportDataType(valueType)
-
-    case udt: UserDefinedType[_] => supportDataType(udt.sqlType)
-
-    case _ => false
-  }
+  override def supportDataType(dataType: DataType): Boolean = super.supportDataType(dataType)
 }
 
 object GeoParquetFileFormat extends Logging {
   private[parquet] def readSchema(
                                    footers: Seq[Footer], sparkSession: SparkSession): Option[StructType] = {
-//TODO No change is required here
-    val converter = new GeoParquetToSparkSchemaConverter(
-      sparkSession.sessionState.conf.isParquetBinaryAsString,
-      sparkSession.sessionState.conf.isParquetINT96AsTimestamp)
-
-    val seen = mutable.HashSet[String]()
-    val finalSchemas: Seq[StructType] = footers.flatMap { footer =>
-      val metadata = footer.getParquetMetadata.getFileMetaData
-      val serializedSchema = metadata
-        .getKeyValueMetaData
-        .asScala.toMap
-        .get(GeoParquetReadSupport.SPARK_METADATA_KEY)
-      if (serializedSchema.isEmpty) {
-        // Falls back to Parquet schema if no Spark SQL schema found.
-        Some(converter.convert(metadata.getSchema))
-      } else if (!seen.contains(serializedSchema.get)) {
-        seen += serializedSchema.get
-
-        // Don't throw even if we failed to parse the serialized Spark schema. Just fallback to
-        // whatever is available.
-        Some(Try(DataType.fromJson(serializedSchema.get))
-          .recover { case _: Throwable =>
-            logInfo(
-              "Serialized Spark schema in Parquet key-value metadata is not in JSON format, " +
-                "falling back to the deprecated DataType.fromCaseClassString parser.")
-            LegacyTypeStringParser.parseString(serializedSchema.get)
-          }
-          .recover { case cause: Throwable =>
-            logWarning(
-              s"""Failed to parse serialized Spark schema in Parquet key-value metadata:
-                 |\t$serializedSchema
-               """.stripMargin,
-              cause)
-          }
-          .map(_.asInstanceOf[StructType])
-          .getOrElse {
-            // Falls back to Parquet schema if Spark SQL schema can't be parsed.
-            converter.convert(metadata.getSchema)
-          })
-      } else {
-        None
-      }
-    }
-
-    finalSchemas.reduceOption { (left, right) =>
-      try left.merge(right) catch { case e: Throwable =>
-        throw QueryExecutionErrors.failedToMergeIncompatibleSchemasError(left, right, e)
-      }
-    }
+    ParquetFileFormat.readSchema(footers, sparkSession)
   }
 
-// FIXME Nevere getting used anywhere till now, may be in future
-  //TODO TO remove??
+  /**
+   * Reads Parquet footers in multi-threaded manner.
+   * If the config "spark.sql.files.ignoreCorruptFiles" is set to true, we will ignore the corrupted
+   * files when reading footers.
+   */
+
   private[parquet] def readGeoParquetFootersInParallel(
-                                                     conf: Configuration,
-                                                     partFiles: Seq[FileStatus],
-                                                     ignoreCorruptFiles: Boolean): Seq[Footer] = {
-    ThreadUtils.parmap(partFiles, "readingParquetFooters", 8) { currentFile =>
-      try {
-        // Skips row group information since we only need the schema.
-        // ParquetFileReader.readFooter throws RuntimeException, instead of IOException,
-        // when it can't read the footer.
-        Some(new Footer(currentFile.getPath(),
-          ParquetFooterReader.readFooter(
-            conf, currentFile, SKIP_ROW_GROUPS)))
-      } catch { case e: RuntimeException =>
-        if (ignoreCorruptFiles) {
-          logWarning(s"Skipped the footer in the corrupted file: $currentFile", e)
-          None
-        } else {
-          throw QueryExecutionErrors.cannotReadFooterForFileError(currentFile, e)
-        }
-      }
-    }.flatten
+                                                        conf: Configuration,
+                                                        partFiles: Seq[FileStatus],
+                                                        ignoreCorruptFiles: Boolean): Seq[Footer] = {
+
+    ParquetFileFormat.readParquetFootersInParallel(conf, partFiles, ignoreCorruptFiles)
   }
 
   /**
@@ -384,7 +291,6 @@ object GeoParquetFileFormat extends Logging {
    *     slow.  And basically locality is not available when using S3 (you can't run computation on
    *     S3 nodes).
    */
-  // TODO necessary
   def mergeSchemasInParallel(
                               parameters: Map[String, String],
                               filesToTouch: Seq[FileStatus],
@@ -410,21 +316,18 @@ object GeoParquetFileFormat extends Logging {
    * a [[StructType]] converted from the [[org.apache.parquet.schema.MessageType]] stored in this
    * footer.
    */
-// TODO necessary
   def readSchemaFromFooter(
                             footer: Footer, converter: GeoParquetToSparkSchemaConverter): StructType = {
     val fileMetaData = footer.getParquetMetadata.getFileMetaData
     fileMetaData
       .getKeyValueMetaData
       .asScala.toMap
-      .get(GeoParquetReadSupport.SPARK_METADATA_KEY)
+      .get(ParquetReadSupport.SPARK_METADATA_KEY)
       .flatMap(deserializeSchemaString)
       .getOrElse(converter.convert(fileMetaData.getSchema))
   }
 
   private def deserializeSchemaString(schemaString: String): Option[StructType] = {
-    // Tries to deserialize the schema string as JSON first, then falls back to the case class
-    // string parser (data generated by older versions of Spark SQL uses this format).
     Try(DataType.fromJson(schemaString).asInstanceOf[StructType]).recover {
       case _: Throwable =>
         logInfo(
@@ -439,5 +342,4 @@ object GeoParquetFileFormat extends Logging {
         Failure(cause)
     }.toOption
   }
-
 }

@@ -17,25 +17,24 @@
 
 package org.apache.spark.sql.execution.datasources.parquet
 
-import java.time.ZoneId
-import java.util
-import java.util.{Locale, UUID, Map => JMap}
-import scala.collection.JavaConverters._
 import org.apache.hadoop.conf.Configuration
-import org.apache.parquet.hadoop.api.{InitContext, ReadSupport}
 import org.apache.parquet.hadoop.api.ReadSupport.ReadContext
+import org.apache.parquet.hadoop.api.{InitContext, ReadSupport}
 import org.apache.parquet.io.api.RecordMaterializer
-import org.apache.parquet.schema._
 import org.apache.parquet.schema.LogicalTypeAnnotation.ListLogicalTypeAnnotation
 import org.apache.parquet.schema.Type.Repetition
+import org.apache.parquet.schema._
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.util.RebaseDateTime.RebaseSpec
 import org.apache.spark.sql.errors.QueryExecutionErrors
-import org.apache.spark.sql.execution.datasources.parquet.ParquetReadSupport.containsFieldIds
-import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.internal.SQLConf.LegacyBehaviorPolicy
 import org.apache.spark.sql.types._
+
+import java.time.ZoneId
+import java.util
+import java.util.{Locale, Map => JMap}
+import scala.collection.JavaConverters._
 
 /**
  * A Parquet [[ReadSupport]] implementation for reading Parquet records as Catalyst
@@ -53,18 +52,14 @@ import org.apache.spark.sql.types._
  * Due to this reason, we no longer rely on [[ReadContext]] to pass requested schema from [[init()]]
  * to [[prepareForRead()]], but use a private `var` for simplicity.
  */
-class GeoParquetReadSupport(
-                              val convertTz: Option[ZoneId],
+class GeoParquetReadSupport (
+                              override val convertTz: Option[ZoneId],
                               enableVectorizedReader: Boolean,
                               datetimeRebaseSpec: RebaseSpec,
                               int96RebaseSpec: RebaseSpec)
-  extends ReadSupport[InternalRow] with Logging {
+  extends ParquetReadSupport with Logging {
   private var catalystRequestedSchema: StructType = _
-
   def this() = {
-    // We need a zero-arg constructor for SpecificParquetRecordReaderBase.  But that is only
-    // used in the vectorized reader, where we get the convertTz/rebaseDateTime value directly,
-    // and the values here are ignored.
     this(
       None,
       enableVectorizedReader = true,
@@ -79,8 +74,8 @@ class GeoParquetReadSupport(
 
   override def init(context: InitContext): ReadContext = {
     val conf = context.getConfiguration
-    catalystRequestedSchema = { //FIXME works with ParquetReadSupport too , Geo as well , depends on requested schema later
-      val schemaString = conf.get(GeoParquetReadSupport.SPARK_ROW_REQUESTED_SCHEMA)
+    catalystRequestedSchema = {
+      val schemaString = conf.get(ParquetReadSupport.SPARK_ROW_REQUESTED_SCHEMA)
       assert(schemaString != null, "Parquet requested schema not set.")
       StructType.fromString(schemaString)
     }
@@ -94,7 +89,6 @@ class GeoParquetReadSupport(
    * Responsible for instantiating [[RecordMaterializer]], which is used for converting Parquet
    * records to Catalyst [[InternalRow]]s.
    */
-    //TODO As it is.
   override def prepareForRead(
                                conf: Configuration,
                                keyValueMetaData: JMap[String, String],
@@ -112,11 +106,6 @@ class GeoParquetReadSupport(
 }
 
 object GeoParquetReadSupport extends Logging {
-  val SPARK_ROW_REQUESTED_SCHEMA = "org.apache.spark.sql.parquet.row.requested_schema"
-
-  val SPARK_METADATA_KEY = "org.apache.spark.sql.parquet.row.metadata"
-  def generateFakeColumnName: String = s"_fake_name_${UUID.randomUUID()}"
-
   private def clipParquetType(
                                parquetType: Type,
                                catalystType: DataType,
@@ -124,13 +113,11 @@ object GeoParquetReadSupport extends Logging {
                                useFieldId: Boolean): Type = {
     val newParquetType = catalystType match {
       case t: ArrayType if !isPrimitiveCatalystType(t.elementType) =>
-        // Only clips array types with nested type as element type.
         clipParquetListType(parquetType.asGroupType(), t.elementType, caseSensitive, useFieldId)
 
       case t: MapType
         if !isPrimitiveCatalystType(t.keyType) ||
           !isPrimitiveCatalystType(t.valueType) =>
-        // Only clips map types with nested key type or value type
         clipParquetMapType(
           parquetType.asGroupType(), t.keyType, t.valueType, caseSensitive, useFieldId)
 
@@ -138,8 +125,6 @@ object GeoParquetReadSupport extends Logging {
         clipParquetGroup(parquetType.asGroupType(), t, caseSensitive, useFieldId)
 
       case _ =>
-        // UDTs and primitive types are not clipped.  For UDTs, a clipped version might not be able
-        // to be mapped to desired user-space types.  So UDTs shouldn't participate schema merging.
         parquetType
     }
 
@@ -172,11 +157,7 @@ object GeoParquetReadSupport extends Logging {
                                    elementType: DataType,
                                    caseSensitive: Boolean,
                                    useFieldId: Boolean): Type = {
-    // Precondition of this method, should only be called for lists with nested element types.
     assert(!isPrimitiveCatalystType(elementType))
-
-    // Unannotated repeated group should be interpreted as required list of required element, so
-    // list element type is just the group itself.  Clip it.
     if (parquetList.getLogicalTypeAnnotation == null &&
       parquetList.isRepetition(Repetition.REPEATED)) {
       clipParquetType(parquetList, elementType, caseSensitive, useFieldId)
@@ -193,16 +174,9 @@ object GeoParquetReadSupport extends Logging {
           "LIST-annotated group should only have exactly one repeated field: " +
           parquetList)
 
-      // Precondition of this method, should only be called for lists with nested element types.
       assert(!parquetList.getType(0).isPrimitive)
 
       val repeatedGroup = parquetList.getType(0).asGroupType()
-
-      // If the repeated field is a group with multiple fields, or the repeated field is a group
-      // with one field and is named either "array" or uses the LIST-annotated group's name with
-      // "_tuple" appended then the repeated type is the element type and elements are required.
-      // Build a new LIST-annotated group with clipped `repeatedGroup` as element type and the
-      // only field.
       if (
         repeatedGroup.getFieldCount > 1 ||
           repeatedGroup.getName == "array" ||
@@ -226,9 +200,6 @@ object GeoParquetReadSupport extends Logging {
         } else {
           newRepeatedGroup
         }
-
-        // Otherwise, the repeated field's type is the element type with the repeated field's
-        // repetition.
         Types
           .buildGroup(parquetList.getRepetition)
           .as(LogicalTypeAnnotation.listType())
@@ -249,7 +220,6 @@ object GeoParquetReadSupport extends Logging {
                                   valueType: DataType,
                                   caseSensitive: Boolean,
                                   useFieldId: Boolean): GroupType = {
-    // Precondition of this method, only handles maps with nested key types or value types.
     assert(!isPrimitiveCatalystType(keyType) || !isPrimitiveCatalystType(valueType))
 
     val repeatedGroup = parquetMap.getType(0).asGroupType()
@@ -326,12 +296,10 @@ object GeoParquetReadSupport extends Logging {
     }
 
     def matchCaseInsensitiveField(f: StructField): Type = {
-      // Do case-insensitive resolution only if in case-insensitive mode
       caseInsensitiveParquetFieldMap
         .get(f.name.toLowerCase(Locale.ROOT))
         .map { parquetTypes =>
           if (parquetTypes.size > 1) {
-            // Need to fail if there is ambiguity, i.e. more than one field is matched
             val parquetTypesString = parquetTypes.map(_.getName).mkString("[", ", ", "]")
             throw QueryExecutionErrors.foundDuplicateFieldInCaseInsensitiveModeError(
               f.name, parquetTypesString)
@@ -347,7 +315,6 @@ object GeoParquetReadSupport extends Logging {
         .get(fieldId)
         .map { parquetTypes =>
           if (parquetTypes.size > 1) {
-            // Need to fail if there is ambiguity, i.e. more than one field is matched
             val parquetTypesString = parquetTypes.map(_.getName).mkString("[", ", ", "]")
             throw QueryExecutionErrors.foundDuplicateFieldInFieldIdLookupModeError(
               fieldId, parquetTypesString)
@@ -355,12 +322,10 @@ object GeoParquetReadSupport extends Logging {
             clipParquetType(parquetTypes.head, f.dataType, caseSensitive, useFieldId)
           }
         }.getOrElse {
-        // When there is no ID match, we use a fake name to avoid a name match by accident
-        // We need this name to be unique as well, otherwise there will be type conflicts
-        toParquet.convertField(f.copy(name = generateFakeColumnName))
+        toParquet.convertField(f.copy(name = ParquetReadSupport.generateFakeColumnName))
       }
     }
-    // FIXME here
+
     val shouldMatchById = useFieldId && ParquetUtils.hasFieldIds(structType)
     structType.map { f =>
       if (shouldMatchById && ParquetUtils.hasFieldId(f)) {

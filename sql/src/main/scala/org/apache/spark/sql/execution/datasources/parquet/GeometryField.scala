@@ -1,6 +1,7 @@
 package org.apache.spark.sql.execution.datasources.parquet
 
 object GeometryField {
+
   var fieldGeometry: String = ""
 
   def getFieldGeometry(): String ={

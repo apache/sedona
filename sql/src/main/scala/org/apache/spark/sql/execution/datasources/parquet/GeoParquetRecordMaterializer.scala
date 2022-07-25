@@ -38,15 +38,14 @@ import org.apache.spark.sql.types.StructType
  * @param int96RebaseSpec the specification of rebasing INT96 timestamp from Julian to Proleptic
  *                        Gregorian calendar
  */
-private[parquet] class GeoParquetRecordMaterializer(
-    parquetSchema: MessageType,
-    catalystSchema: StructType,
-    schemaConverter: GeoParquetToSparkSchemaConverter,
-    convertTz: Option[ZoneId],
-    datetimeRebaseSpec: RebaseSpec,
-    int96RebaseSpec: RebaseSpec)
+class GeoParquetRecordMaterializer(
+                                    parquetSchema: MessageType,
+                                    catalystSchema: StructType,
+                                    schemaConverter: GeoParquetToSparkSchemaConverter,
+                                    convertTz: Option[ZoneId],
+                                    datetimeRebaseSpec: RebaseSpec,
+                                    int96RebaseSpec: RebaseSpec)
   extends RecordMaterializer[InternalRow] {
-
   private val rootConverter = new GeoParquetRowConverter(
     schemaConverter,
     parquetSchema,
