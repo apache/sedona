@@ -71,7 +71,7 @@ test_that("ST_Buffer() works as expected", {
       dbplyr::remote_query(),
     sprintf(
       "SELECT `id`, ST_Buffer(`pt`, CAST(3 AS DOUBLE)) AS `pt`\nFROM `%s`",
-      sdf$ops$x$x
+      dbplyr::remote_name(sdf)
     ) %>%
       dbplyr::sql()
   )
@@ -115,7 +115,7 @@ test_that("ST_SimplifyPreserveTopology() works as expected", {
       dbplyr::remote_query(),
     sprintf(
       "SELECT `id`, ST_SimplifyPreserveTopology(`pt`, CAST(1 AS DOUBLE)) AS `pt`\nFROM `%s`",
-      sdf$ops$x$x
+      dbplyr::remote_name(sdf)
     ) %>%
       dbplyr::sql()
   )

@@ -181,7 +181,7 @@ case class ST_GeomFromWKT(inputExpressions: Seq[Expression])
         var formatMapper = new FormatMapper(fileDataSplitter, false)
         formatMapper.readGeometry(geomString.toString).toGenericArrayData
       }
-      case _ => null
+      case null => null
     }
   }
 
@@ -214,7 +214,7 @@ case class ST_GeomFromText(inputExpressions: Seq[Expression])
         var formatMapper = new FormatMapper(fileDataSplitter, false)
         formatMapper.readGeometry(geomString.toString).toGenericArrayData
       }
-      case _ => null
+      case null => null
     }
   }
 
@@ -252,7 +252,7 @@ case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
         // convert raw wkb byte array to geometry
         new WKBReader().read(wkb).toGenericArrayData
       }
-      case _ => null
+      case null => null
     }
   }
 
