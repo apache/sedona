@@ -26,6 +26,7 @@ import org.apache.sedona.core.spatialOperator.JoinQuery
 import org.apache.sedona.core.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}
 import org.apache.sedona.sql.utils.Adapter
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.types.{DoubleType, IntegerType, StringType, StructField, StructType}
 import org.apache.spark.storage.StorageLevel
 import org.locationtech.jts.geom.Point
 import org.scalatest.GivenWhenThen
@@ -216,6 +217,77 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
         assert(rows(0).get(2).asInstanceOf[String] == "attr2")
       }
     }
+
+    it("can convert JavaPairRDD to DataFrame with user-supplied schema") {
+      // Prepare JavaPairRDD
+      // Left table
+      val pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(arealmPointInputLocation)
+      pointCsvDF.createOrReplaceTempView("pointtable")
+      val pointDf = sparkSession.sql("""
+        select
+          ST_Point(
+            cast(pointtable._c0 as Decimal(24,20)),
+            cast(pointtable._c1 as Decimal(24,20))
+          ) as arealandmark
+        from pointtable
+      """)
+      val pointRDD = Adapter.toSpatialRdd(pointDf, "arealandmark")
+      pointRDD.analyze()
+
+      // Right table
+      val polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      val polygonDf = sparkSession.sql("""
+        select
+          ST_GeomFromWKT(polygontable._c0) as usacounty,
+          'abc' as abc,
+          'def' as def,
+          1.23 as ghi,
+          234 as jkl
+        from polygontable
+      """)
+      val polygonRDD = Adapter.toSpatialRdd(polygonDf, "usacounty")
+      polygonRDD.analyze()
+
+      pointRDD.spatialPartitioning(GridType.QUADTREE)
+      polygonRDD.spatialPartitioning(pointRDD.getPartitioner)
+      pointRDD.buildIndex(IndexType.QUADTREE, true)
+      val joinResultPairRDD = JoinQuery.SpatialJoinQueryFlat(pointRDD, polygonRDD, true, true)
+
+      // Convert to DataFrame
+//      val schema = StructType(Array(
+//        StructField("leftgeometry", GeometryUDT, nullable = true),
+//        StructField("abc", StringType, nullable = true),
+//        StructField("def", StringType, nullable = true),
+//        StructField("ghi", StringType, nullable = true),
+//        StructField("jkl", StringType, nullable = true),
+//        StructField("rightgeometry", GeometryUDT, nullable = true)
+//      ))
+      val schema = StructType(Array(
+        StructField("leftgeometry", GeometryUDT, nullable = true),
+        StructField("abc", StringType, nullable = true),
+        StructField("def", StringType, nullable = true),
+        StructField("ghi", DoubleType, nullable = true),
+        StructField("jkl", IntegerType, nullable = true),
+        StructField("rightgeometry", GeometryUDT, nullable = true)
+      ))
+      val joinResultDf = Adapter.toDf(joinResultPairRDD, schema, sparkSession)
+
+      // Check results
+      // Force an action so that spark has to serialize the data
+      // If the DataFrame has a bad schema, error looks like:
+      // Error while encoding: java.lang.RuntimeException: org.locationtech.jts.geom.Point is not a valid external type for schema of string
+      println(s"Result df:")
+      println(joinResultDf.printSchema())
+      println(joinResultDf.show(1))
+
+      println(s"Expected schema:\n$schema")
+      println(s"Got schema:\n${joinResultDf.schema}")
+      assert(joinResultDf.schema == schema, s"Expected schema\n$schema\nbut got\n${joinResultDf.schema}!")
+    }
+
+    // it should handle null values in the original data
+    // it should match results from toDf if all fields are declared as stringtype
 
     it("can convert spatial pair RDD with user data to a valid Dataframe") {
       var srcDF = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)

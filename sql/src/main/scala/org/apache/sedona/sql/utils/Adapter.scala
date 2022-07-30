@@ -22,7 +22,7 @@ import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.spark.api.java.JavaPairRDD
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.types.{StringType, StructField, StructType}
+import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.locationtech.jts.geom.Geometry
 
@@ -148,6 +148,34 @@ object Adapter {
     sparkSession.createDataFrame(rowRdd, schema)
   }
 
+  def toDf(spatialPairRDD: JavaPairRDD[Geometry, Geometry], schema: StructType, sparkSession: SparkSession): DataFrame = {
+    val rdd = spatialPairRDD.rdd.map(f => {
+      // Extract user data from geometries
+      val left = getGeomAndFields(f._1, Seq(""))  // Empty seq to grab all col names
+      val right = getGeomAndFields(f._2, Seq(""))
+
+      val leftGeom = left._1
+      val leftUserData = left._2
+      val rightGeom = right._1
+      val rightUserData = right._2
+
+      // If a geometry has no user data, drop that field
+      // Otherwise the string row will have more fields than the desired schema
+      val stringRow = (leftGeom ++ leftUserData ++ rightGeom ++ rightUserData).filter(_ != "null")
+
+      // Convert data types
+      val parsedRow = stringRow.zipWithIndex.map{ case (value, idx) =>
+        val desiredDataType = schema(idx).dataType
+        // Don't convert geometry data, only user data
+        if (desiredDataType == GeometryUDT) value else convertDataType(value.toString, desiredDataType)
+      }
+
+      Row.fromSeq(parsedRow)
+    })
+
+    sparkSession.sqlContext.createDataFrame(rdd, schema)
+  }
+
   private def toRdd(dataFrame: DataFrame, geometryColId: Int): RDD[Geometry] = {
     dataFrame.rdd.map[Geometry](f => {
       var geometry = f.get(geometryColId).asInstanceOf[Geometry]
@@ -174,5 +202,16 @@ object Adapter {
       (Seq(geomWithoutUserData), fields)
     }
     else (Seq(geom), Seq())
+  }
+
+  private def convertDataType(data: String, desiredType: DataType): Any = desiredType match {
+    case _: ByteType => data.toByte
+    case _: ShortType => data.toShort
+    case _: IntegerType => data.toInt
+    case _: LongType => data.toLong
+    case _: FloatType => data.toFloat
+    case _: DoubleType => data.toDouble
+    case _: BooleanType => data.toBoolean
+    case _: StringType => data
   }
 }
