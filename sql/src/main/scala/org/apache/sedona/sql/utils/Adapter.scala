@@ -24,6 +24,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
+import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.locationtech.jts.geom.Geometry
 
 object Adapter {
@@ -167,7 +168,7 @@ object Adapter {
       val parsedRow = stringRow.zipWithIndex.map{ case (value, idx) =>
         val desiredDataType = schema(idx).dataType
         // Don't convert geometry data, only user data
-        if (desiredDataType == GeometryUDT) value else convertDataType(value.toString, desiredDataType)
+        if (desiredDataType == GeometryUDT) value else parseString(value.toString, desiredDataType)
       }
 
       Row.fromSeq(parsedRow)
@@ -204,7 +205,7 @@ object Adapter {
     else (Seq(geom), Seq())
   }
 
-  private def convertDataType(data: String, desiredType: DataType): Any = desiredType match {
+  private def parseString(data: String, desiredType: DataType): Any = desiredType match {
     case _: ByteType => data.toByte
     case _: ShortType => data.toShort
     case _: IntegerType => data.toInt
@@ -213,5 +214,17 @@ object Adapter {
     case _: DoubleType => data.toDouble
     case _: BooleanType => data.toBoolean
     case _: StringType => data
+    case _: StructType =>
+      val desiredTypeAsStruct = desiredType.asInstanceOf[StructType]
+      new GenericRowWithSchema(parseStruct(data, desiredTypeAsStruct), desiredTypeAsStruct)
+  }
+
+  def parseStruct(data: String, desiredType: StructType): Array[Any] = {
+    // Structs are stored as "[value1,value2,...]"
+    // Recurse into struct/array and parse
+    val csv = data.slice(1, data.length - 1)  // Remove brackets
+    csv.split(",").zipWithIndex.map { case (element, idx) =>
+      parseString(element, desiredType.slice(idx, idx + 1).head.dataType)
+    }
   }
 }
