@@ -61,8 +61,8 @@ jobs:
         JACKSON_VERSION: ${{ matrix.jackson }}
       run: |
         if [ ${SPARK_VERSION:0:1} == "3" ]; \
-        then mvn -q clean install -Dscala=${SCALA_VERSION:0:4} -Dspark=3.0 -Dspark.version=${SPARK_VERSION} -Dsedona.jackson.version=${JACKSON_VERSION}; \
-        else mvn -q clean install -Dscala=${SCALA_VERSION:0:4} -Dspark=2.4 -Dspark.version=${SPARK_VERSION} -Dsedona.jackson.version=${JACKSON_VERSION}; fi \
+        then mvn -q clean install -Dscala=${SCALA_VERSION:0:4} -Dspark=3.0 -Dspark.version=${SPARK_VERSION} -Dhadoop=3.0  -Dsedona.jackson.version=${JACKSON_VERSION} ; \
+        else mvn -q clean install -Dscala=${SCALA_VERSION:0:4} -Dspark=2.4 -Dspark.version=${SPARK_VERSION} -Dhadoop=2.10 -Dsedona.jackson.version=${JACKSON_VERSION} ; fi
     - run: mkdir staging
     - run: cp core/target/sedona-*.jar staging
     - run: cp sql/target/sedona-*.jar staging

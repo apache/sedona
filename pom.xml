@@ -625,13 +625,6 @@
                 <hadoop.version>3.2.4</hadoop.version>
                 <guava.version>27.0-jre</guava.version>
             </properties>
-            <modules>
-                <module>core</module>
-                <module>sql</module>
-                <module>viz</module>
-                <module>python-adapter</module>
-                <module>flink</module>
-            </modules>
         </profile>
         <profile>
             <id>hadoop2.10</id>
@@ -646,13 +639,6 @@
                 <hadoop.version>2.10.2</hadoop.version>
                 <guava.version>11.0.2</guava.version>
             </properties>
-            <modules>
-                <module>core</module>
-                <module>sql</module>
-                <module>viz</module>
-                <module>python-adapter</module>
-                <module>flink</module>
-            </modules>
         </profile>
     </profiles>
 </project>
