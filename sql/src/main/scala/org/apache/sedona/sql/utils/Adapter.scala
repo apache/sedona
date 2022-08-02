@@ -209,18 +209,34 @@ object Adapter {
    * @param desiredType Desired SparkSQL data type
    * @return Parsed value, or in the case of a struct column, an array of parsed values
    */
-  private def parseString(data: String, desiredType: DataType): Any = desiredType match {
-    case _: ByteType => data.toByte
-    case _: ShortType => data.toShort
-    case _: IntegerType => data.toInt
-    case _: LongType => data.toLong
-    case _: FloatType => data.toFloat
-    case _: DoubleType => data.toDouble
-    case _: BooleanType => data.toBoolean
-    case _: StringType => data
-    case _: StructType =>
-      val desiredTypeAsStruct = desiredType.asInstanceOf[StructType]
-      new GenericRowWithSchema(parseStruct(data, desiredTypeAsStruct), desiredTypeAsStruct)
+  private def parseString(data: String, desiredType: DataType): Any = {
+    // Spark needs to know how to serialize null values
+    if (data == "null") {
+      return desiredType match {
+        case _: ByteType => null.asInstanceOf[Byte]
+        case _: ShortType => null.asInstanceOf[Short]
+        case _: IntegerType => null.asInstanceOf[Integer]
+        case _: LongType => null.asInstanceOf[Long]
+        case _: FloatType => null.asInstanceOf[Float]
+        case _: DoubleType => null.asInstanceOf[Double]
+        case _: BooleanType => null.asInstanceOf[Boolean]
+        case _: StringType => null.asInstanceOf[String]
+      }
+    }
+
+    desiredType match {
+      case _: ByteType => data.toByte
+      case _: ShortType => data.toShort
+      case _: IntegerType => data.toInt
+      case _: LongType => data.toLong
+      case _: FloatType => data.toFloat
+      case _: DoubleType => data.toDouble
+      case _: BooleanType => data.toBoolean
+      case _: StringType => data
+      case _: StructType =>
+        val desiredTypeAsStruct = desiredType.asInstanceOf[StructType]
+        new GenericRowWithSchema(parseStruct(data, desiredTypeAsStruct), desiredTypeAsStruct)
+    }
   }
 
   /**

@@ -243,6 +243,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
           'abc' as exampletext,
           1.23 as examplefloat,
           1.23 as exampledouble,
+          null as nullabledouble,
           10 as examplefloat,
           234 as exampleint,
           9223372036854775800 as examplelong,
@@ -259,24 +260,26 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
       val joinResultPairRDD = JoinQuery.SpatialJoinQueryFlat(pointRDD, polygonRDD, true, true)
 
       // Convert to DataFrame
+      // Tweak the column names to camelCase to ensure it also renames
       val schema = StructType(Array(
-        StructField("leftgeometry", GeometryUDT, nullable = true),
-        StructField("exampletext", StringType, nullable = true),
-        StructField("examplefloat", FloatType, nullable = true),
-        StructField("exampledouble", DoubleType, nullable = true),
-        StructField("exampleshort", ShortType, nullable = true),
-        StructField("exampleint", IntegerType, nullable = true),
-        StructField("examplelong", LongType, nullable = true),
-        StructField("examplebool", BooleanType, nullable = true),
-        StructField("examplestruct", StructType(Array(
-          StructField("structtext", StringType, nullable = true),
-          StructField("structint", IntegerType, nullable = true),
-          StructField("structbool", BooleanType, nullable = true)
+        StructField("leftGeometry", GeometryUDT, nullable = true),
+        StructField("exampleText", StringType, nullable = true),
+        StructField("exampleFloat", FloatType, nullable = true),
+        StructField("exampleDouble", DoubleType, nullable = true),
+        StructField("nullableDouble", DoubleType, nullable = true),
+        StructField("exampleShort", ShortType, nullable = true),
+        StructField("exampleInt", IntegerType, nullable = true),
+        StructField("exampleLong", LongType, nullable = true),
+        StructField("exampleBool", BooleanType, nullable = true),
+        StructField("exampleStruct", StructType(Array(
+          StructField("structText", StringType, nullable = true),
+          StructField("structInt", IntegerType, nullable = true),
+          StructField("structBool", BooleanType, nullable = true)
         ))),
-        StructField("rightgeometry", GeometryUDT, nullable = true),
+        StructField("rightGeometry", GeometryUDT, nullable = true),
         // We have to include a column for right user data (even though there is none)
         // since there is no way to distinguish between no data and nullable data
-        StructField("rightuserdata", StringType, nullable = true)
+        StructField("rightUserData", StringType, nullable = true)
       ))
       val joinResultDf = Adapter.toDf(joinResultPairRDD, schema, sparkSession)
 
@@ -285,7 +288,6 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
       // a serialization error if the schema or coersion is incorrect, e.g.
       // "Error while encoding: java.lang.RuntimeException: <desired data type> is not a
       // valid external type for schema of <current data type>"
-      println("Result df:")
       println(joinResultDf.show(1))
 
       assert(
@@ -351,9 +353,8 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
       // Check results
       // Force an action so that spark has to serialize the data -- this will surface
       // a serialization error if the schema or coersion is incorrect, e.g.
-      // Error while encoding: java.lang.RuntimeException: <desired data type> is not a
-      // valid external type for schema of <current data type>
-      println("Result df:")
+      // "Error while encoding: java.lang.RuntimeException: <desired data type> is not a
+      // valid external type for schema of <current data type>"
       println(joinResultDf.show(1))
 
       assert(
