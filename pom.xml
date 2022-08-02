@@ -67,12 +67,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
-            <scope>${dependency.scope}</scope>
-        </dependency>
-        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${sedona.jackson.version}</version>
@@ -105,6 +99,22 @@
             <artifactId>jts-core</artifactId>
             <version>${jts.version}</version>
             <scope>${dependency.scope}</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client</artifactId>
+            <version>${hadoop.version}</version>
+            <scope>${dependency.scope}</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.datasyslab</groupId>
@@ -189,22 +199,6 @@
             <artifactId>spark-sql_${scala.compat.version}</artifactId>
             <version>${spark.version}</version>
             <scope>${dependency.scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-client</artifactId>
-            <version>${hadoop.version}</version>
-            <scope>${dependency.scope}</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.scala-lang.modules</groupId>
@@ -527,6 +521,7 @@
                 <spark.compat.version>3.0</spark.compat.version>
                 <spark.converter.version>spark3</spark.converter.version>
                 <sedona.jackson.version>2.13.3</sedona.jackson.version>
+                <hadoop.version>3.2.4</hadoop.version>
                 <maven.deploy.skip>false</maven.deploy.skip>
             </properties>
         </profile>
@@ -544,6 +539,7 @@
                 <spark.compat.version>2.4</spark.compat.version>
                 <spark.converter.version>spark2</spark.converter.version>
                 <sedona.jackson.version>2.6.7</sedona.jackson.version>
+                <hadoop.version>2.10.2</hadoop.version>
                 <maven.deploy.skip>true</maven.deploy.skip>
             </properties>
         </profile>
@@ -611,34 +607,6 @@
                 <module>python-adapter</module>
                 <module>flink</module>
             </modules>
-        </profile>
-        <profile>
-            <id>hadoop3.0</id>
-            <activation>
-                <property>
-                    <name>hadoop</name>
-                    <value>3.0</value>
-                </property>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <properties>
-                <hadoop.version>3.2.4</hadoop.version>
-                <guava.version>27.0-jre</guava.version>
-            </properties>
-        </profile>
-        <profile>
-            <id>hadoop2.10</id>
-            <activation>
-                <property>
-                    <name>hadoop</name>
-                    <value>2.10</value>
-                </property>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <hadoop.version>2.10.2</hadoop.version>
-                <guava.version>11.0.2</guava.version>
-            </properties>
         </profile>
     </profiles>
 </project>

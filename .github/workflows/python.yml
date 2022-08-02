@@ -62,19 +62,7 @@ jobs:
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         SCALA_VERSION: ${{ matrix.scala }}
-      run: |
-        if [ ${SPARK_VERSION:0:1} == "3" ]; \
-        then \
-          if [ ${HADOOP_VERSION:0:1} == "3" ]; \
-            then mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=3.0 -Dhadoop=3.0  -Dgeotools ; \
-            else mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=3.0 -Dhadoop=2.10 -Dgeotools ; \
-          fi \
-        else \
-          if [ ${HADOOP_VERSION:0:1} == "3" ]; \
-            then mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=2.4 -Dhadoop=3.0  -Dgeotools ; \
-            else mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=2.4 -Dhadoop=2.10 -Dgeotools ; \
-          fi \
-        fi
+      run: if [ ${SPARK_VERSION:0:1} == "3" ]; then mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=3.0 -Dgeotools ; else mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=2.4 -Dgeotools ; fi
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         HADOOP_VERSION: ${{ matrix.hadoop }}
