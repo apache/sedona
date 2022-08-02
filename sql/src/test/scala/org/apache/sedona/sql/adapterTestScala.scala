@@ -245,6 +245,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
           1.23 as exampledouble,
           10 as examplefloat,
           234 as exampleint,
+          9223372036854775800 as examplelong,
           true as examplebool,
           named_struct('structtext', 'spark', 'structint', 5, 'structbool', false) as examplestruct
         from polygontable
@@ -265,22 +266,26 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
         StructField("exampledouble", DoubleType, nullable = true),
         StructField("exampleshort", ShortType, nullable = true),
         StructField("exampleint", IntegerType, nullable = true),
+        StructField("examplelong", LongType, nullable = true),
         StructField("examplebool", BooleanType, nullable = true),
         StructField("examplestruct", StructType(Array(
           StructField("structtext", StringType, nullable = true),
           StructField("structint", IntegerType, nullable = true),
           StructField("structbool", BooleanType, nullable = true)
         ))),
-        StructField("rightgeometry", GeometryUDT, nullable = true)
+        StructField("rightgeometry", GeometryUDT, nullable = true),
+        // We have to include a column for right user data (even though there is none)
+        // since there is no way to distinguish between no data and nullable data
+        StructField("rightuserdata", StringType, nullable = true)
       ))
       val joinResultDf = Adapter.toDf(joinResultPairRDD, schema, sparkSession)
 
       // Check results
       // Force an action so that spark has to serialize the data -- this will surface
       // a serialization error if the schema or coersion is incorrect, e.g.
-      // Error while encoding: java.lang.RuntimeException: <desired data type> is not a
-      // valid external type for schema of <current data type>
-      println(s"Result df:")
+      // "Error while encoding: java.lang.RuntimeException: <desired data type> is not a
+      // valid external type for schema of <current data type>"
+      println("Result df:")
       println(joinResultDf.show(1))
 
       assert(
@@ -289,6 +294,10 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
       )
     }
 
+    /**
+     * If providing fieldNames instead of a schema, it should return the same result
+     * as if we do provide a schema but declare all non-geom fields to be StringType
+     */
     it("is consistent with toDf without schema vs with all StringType fields") {
       // Prepare JavaPairRDD
       // Left table
@@ -300,7 +309,8 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
           ST_Point(
             cast(pointtable._c0 as Decimal(24,20)),
             cast(pointtable._c1 as Decimal(24,20))
-          ) as arealandmark
+          ) as arealandmark,
+          null as userdata
         from pointtable
       """)
       val pointRDD = Adapter.toSpatialRdd(pointDf, "arealandmark")
@@ -329,27 +339,23 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
       // Convert to DataFrame
       val schema = StructType(Array(
         StructField("leftgeometry", GeometryUDT, nullable = true),
-        StructField("abc", StringType, nullable = true),
-        StructField("def", StringType, nullable = true),
-        StructField("ghi", StringType, nullable = true),
-        StructField("jkl", StringType, nullable = true),
-        StructField("rightgeometry", GeometryUDT, nullable = true)
+        StructField("exampletext", StringType, nullable = true),
+        StructField("exampledouble", StringType, nullable = true),
+        StructField("exampleint", StringType, nullable = true),
+        StructField("rightgeometry", GeometryUDT, nullable = true),
+        StructField("userdata", StringType, nullable = true)
       ))
       val joinResultDf = Adapter.toDf(joinResultPairRDD, schema, sparkSession)
-      val resultWithoutSchema = Adapter.toDf(joinResultPairRDD, Seq("abc", "def", "ghi", "jkl"), Seq(""), sparkSession)
+      val resultWithoutSchema = Adapter.toDf(joinResultPairRDD, Seq("exampletext", "exampledouble", "exampleint"), Seq("userdata"), sparkSession)
 
       // Check results
       // Force an action so that spark has to serialize the data -- this will surface
       // a serialization error if the schema or coersion is incorrect, e.g.
       // Error while encoding: java.lang.RuntimeException: <desired data type> is not a
       // valid external type for schema of <current data type>
-      println(s"Result df:")
+      println("Result df:")
       println(joinResultDf.show(1))
 
-      assert(
-        joinResultDf.schema == schema,
-        s"Expected schema\n$schema\nbut got\n${joinResultDf.schema}!"
-      )
       assert(
         joinResultDf.schema == resultWithoutSchema.schema,
         s"Schema of\n$schema\ndoes not match result from supplying field names\n${joinResultDf.schema}!"

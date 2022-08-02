@@ -152,17 +152,14 @@ object Adapter {
   def toDf(spatialPairRDD: JavaPairRDD[Geometry, Geometry], schema: StructType, sparkSession: SparkSession): DataFrame = {
     val rdd = spatialPairRDD.rdd.map(f => {
       // Extract user data from geometries
-      val left = getGeomAndFields(f._1, Seq(""))  // Empty seq to grab all col names
+      val left = getGeomAndFields(f._1, Seq(""))  // Use an empty seq to grab all col names
       val right = getGeomAndFields(f._2, Seq(""))
 
       val leftGeom = left._1
       val leftUserData = left._2
       val rightGeom = right._1
       val rightUserData = right._2
-
-      // If a geometry has no user data, drop that field
-      // Otherwise the string row will have more fields than the desired schema
-      val stringRow = (leftGeom ++ leftUserData ++ rightGeom ++ rightUserData).filter(_ != "null")
+      val stringRow = leftGeom ++ leftUserData ++ rightGeom ++ rightUserData
 
       // Convert data types
       val parsedRow = stringRow.zipWithIndex.map{ case (value, idx) =>
@@ -205,6 +202,13 @@ object Adapter {
     else (Seq(geom), Seq())
   }
 
+  /**
+   * Parse a string to another data type based on the desired schema
+   *
+   * @param data Data stored as string
+   * @param desiredType Desired SparkSQL data type
+   * @return Parsed value, or in the case of a struct column, an array of parsed values
+   */
   private def parseString(data: String, desiredType: DataType): Any = desiredType match {
     case _: ByteType => data.toByte
     case _: ShortType => data.toShort
@@ -219,12 +223,21 @@ object Adapter {
       new GenericRowWithSchema(parseStruct(data, desiredTypeAsStruct), desiredTypeAsStruct)
   }
 
-  def parseStruct(data: String, desiredType: StructType): Array[Any] = {
+  /**
+   * Parse the string representation of a struct into an array of values
+   *
+   * @param data Struct as a string (format: "[value1,value2,...]")
+   * @param desiredType Desired schema for the struct column
+   * @return Array of parsed values
+   */
+  private def parseStruct(data: String, desiredType: StructType): Array[Any] = {
     // Structs are stored as "[value1,value2,...]"
-    // Recurse into struct/array and parse
+    // Recurse into the struct and parse
     val csv = data.slice(1, data.length - 1)  // Remove brackets
     csv.split(",").zipWithIndex.map { case (element, idx) =>
-      parseString(element, desiredType.slice(idx, idx + 1).head.dataType)
+      val nestedField = desiredType.slice(idx, idx + 1).head
+      val nestedDataType = nestedField.dataType
+      parseString(element, nestedDataType)
     }
   }
 }
