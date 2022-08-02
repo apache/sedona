@@ -28,7 +28,6 @@ import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.util.RebaseDateTime.RebaseSpec
 import org.apache.spark.sql.errors.QueryExecutionErrors
-import org.apache.spark.sql.internal.SQLConf.LegacyBehaviorPolicy
 import org.apache.spark.sql.types._
 
 import java.time.ZoneId
@@ -59,13 +58,6 @@ class GeoParquetReadSupport (
                               int96RebaseSpec: RebaseSpec)
   extends ParquetReadSupport with Logging {
   private var catalystRequestedSchema: StructType = _
-  def this() = {
-    this(
-      None,
-      enableVectorizedReader = true,
-      datetimeRebaseSpec = RebaseSpec(LegacyBehaviorPolicy.CORRECTED),
-      int96RebaseSpec = RebaseSpec(LegacyBehaviorPolicy.LEGACY))
-  }
 
   /**
    * Called on executor side before [[prepareForRead()]] and instantiating actual Parquet record

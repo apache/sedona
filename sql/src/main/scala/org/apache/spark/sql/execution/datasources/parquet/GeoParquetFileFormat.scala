@@ -32,7 +32,6 @@ import org.apache.spark.sql._
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeProjection
-import org.apache.spark.sql.catalyst.parser.LegacyTypeStringParser
 import org.apache.spark.sql.catalyst.util.DateTimeUtils
 import org.apache.spark.sql.execution.datasources._
 import org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.readParquetFootersInParallel
@@ -42,16 +41,12 @@ import org.apache.spark.sql.types._
 import org.apache.spark.util.SerializableConfiguration
 
 import java.net.URI
-import scala.collection.JavaConverters._
-import scala.util.{Failure, Try}
 
 class GeoParquetFileFormat extends ParquetFileFormat with FileFormat with DataSourceRegister with Logging with Serializable {
 
   override def shortName(): String = "geoparquet"
 
   override def equals(other: Any): Boolean = other.isInstanceOf[GeoParquetFileFormat]
-
-  override def prepareWrite(sparkSession: SparkSession, job: Job, options: Map[String, String], dataSchema: StructType): OutputWriterFactory = super.prepareWrite(sparkSession, job, options, dataSchema)
 
   override def inferSchema(
                             sparkSession: SparkSession,
@@ -61,15 +56,6 @@ class GeoParquetFileFormat extends ParquetFileFormat with FileFormat with DataSo
     GeometryField.setFieldGeometry(fieldGeometry)
     GeoParquetUtils.inferSchema(sparkSession, parameters, files)
   }
-
-  /**
-   * Returns whether the reader will return the rows as batch or not.
-   */
-  override def supportBatch(sparkSession: SparkSession, schema: StructType): Boolean = super.supportBatch(sparkSession, schema)
-
-  override def vectorTypes(requiredSchema: StructType, partitionSchema: StructType, sqlConf: SQLConf): Option[Seq[String]] = super.vectorTypes(requiredSchema, partitionSchema, sqlConf)
-
-  override def isSplitable(sparkSession: SparkSession, options: Map[String, String], path: Path): Boolean = super.isSplitable(sparkSession, options, path)
 
   override def buildReaderWithPartitionValues(
                                                sparkSession: SparkSession,
@@ -258,24 +244,6 @@ class GeoParquetFileFormat extends ParquetFileFormat with FileFormat with DataSo
 }
 
 object GeoParquetFileFormat extends Logging {
-  private[parquet] def readSchema(
-                                   footers: Seq[Footer], sparkSession: SparkSession): Option[StructType] = {
-    ParquetFileFormat.readSchema(footers, sparkSession)
-  }
-
-  /**
-   * Reads Parquet footers in multi-threaded manner.
-   * If the config "spark.sql.files.ignoreCorruptFiles" is set to true, we will ignore the corrupted
-   * files when reading footers.
-   */
-
-  private[parquet] def readGeoParquetFootersInParallel(
-                                                        conf: Configuration,
-                                                        partFiles: Seq[FileStatus],
-                                                        ignoreCorruptFiles: Boolean): Seq[Footer] = {
-
-    ParquetFileFormat.readParquetFootersInParallel(conf, partFiles, ignoreCorruptFiles)
-  }
 
   /**
    * Figures out a merged Parquet schema with a distributed Spark job.
@@ -304,42 +272,9 @@ object GeoParquetFileFormat extends Logging {
         assumeBinaryIsString = assumeBinaryIsString,
         assumeInt96IsTimestamp = assumeInt96IsTimestamp)
       readParquetFootersInParallel(conf, files, ignoreCorruptFiles)
-        .map(GeoParquetFileFormat.readSchemaFromFooter(_, converter))
+        .map(ParquetFileFormat.readSchemaFromFooter(_, converter))
     }
 
     SchemaMergeUtils.mergeSchemasInParallel(sparkSession, parameters, filesToTouch, reader)
-  }
-
-  /**
-   * Reads Spark SQL schema from a Parquet footer.  If a valid serialized Spark SQL schema string
-   * can be found in the file metadata, returns the deserialized [[StructType]], otherwise, returns
-   * a [[StructType]] converted from the [[org.apache.parquet.schema.MessageType]] stored in this
-   * footer.
-   */
-  def readSchemaFromFooter(
-                            footer: Footer, converter: GeoParquetToSparkSchemaConverter): StructType = {
-    val fileMetaData = footer.getParquetMetadata.getFileMetaData
-    fileMetaData
-      .getKeyValueMetaData
-      .asScala.toMap
-      .get(ParquetReadSupport.SPARK_METADATA_KEY)
-      .flatMap(deserializeSchemaString)
-      .getOrElse(converter.convert(fileMetaData.getSchema))
-  }
-
-  private def deserializeSchemaString(schemaString: String): Option[StructType] = {
-    Try(DataType.fromJson(schemaString).asInstanceOf[StructType]).recover {
-      case _: Throwable =>
-        logInfo(
-          "Serialized Spark schema in Parquet key-value metadata is not in JSON format, " +
-            "falling back to the deprecated DataType.fromCaseClassString parser.")
-        LegacyTypeStringParser.parseString(schemaString).asInstanceOf[StructType]
-    }.recoverWith {
-      case cause: Throwable =>
-        logWarning(
-          "Failed to parse and ignored serialized Spark schema in " +
-            s"Parquet key-value metadata:\n\t$schemaString", cause)
-        Failure(cause)
-    }.toOption
   }
 }
