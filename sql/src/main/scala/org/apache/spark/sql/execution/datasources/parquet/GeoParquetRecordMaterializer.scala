@@ -18,12 +18,10 @@
 package org.apache.spark.sql.execution.datasources.parquet
 
 import java.time.ZoneId
-
 import org.apache.parquet.io.api.{GroupConverter, RecordMaterializer}
 import org.apache.parquet.schema.MessageType
-
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.util.RebaseDateTime.RebaseSpec
+import org.apache.spark.sql.internal.SQLConf.LegacyBehaviorPolicy
 import org.apache.spark.sql.types.StructType
 
 /**
@@ -43,16 +41,16 @@ class GeoParquetRecordMaterializer(
                                     catalystSchema: StructType,
                                     schemaConverter: GeoParquetToSparkSchemaConverter,
                                     convertTz: Option[ZoneId],
-                                    datetimeRebaseSpec: RebaseSpec,
-                                    int96RebaseSpec: RebaseSpec)
+                                    datetimeRebaseMode: LegacyBehaviorPolicy.Value,
+                                    int96RebaseMode: LegacyBehaviorPolicy.Value)
   extends RecordMaterializer[InternalRow] {
   private val rootConverter = new GeoParquetRowConverter(
     schemaConverter,
     parquetSchema,
     catalystSchema,
     convertTz,
-    datetimeRebaseSpec,
-    int96RebaseSpec,
+    datetimeRebaseMode,
+    int96RebaseMode,
     NoopUpdater)
 
   override def getCurrentRecord: InternalRow = rootConverter.currentRecord
