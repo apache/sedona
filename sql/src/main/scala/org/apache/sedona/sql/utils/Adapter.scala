@@ -18,6 +18,8 @@
  */
 package org.apache.sedona.sql.utils
 
+import java.sql.{Date, Timestamp}
+
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.spark.api.java.JavaPairRDD
 import org.apache.spark.rdd.RDD
@@ -149,6 +151,22 @@ object Adapter {
     sparkSession.createDataFrame(rowRdd, schema)
   }
 
+  /**
+    * Convert a JavaPairRDD to DataFrame with a specified schema.
+    *
+    * The schema is expected to follow the format:
+    *   [left geometry, (left user data columns), right geometry, (right user data columns)]
+    *
+    * Note that the schema _must_ provide columns for left and right user data, even if they do not exist in the
+    * original data.
+    *
+    * Also note that some complex types, such as `MapType`, and schemas as strings are not supported.
+    *
+    * @param spatialPairRDD
+    * @param schema Desired output schema
+    * @param sparkSession Spark session
+    * @return Spatial pair RDD as a DataFrame with the desired schema
+    */
   def toDf(spatialPairRDD: JavaPairRDD[Geometry, Geometry], schema: StructType, sparkSession: SparkSession): DataFrame = {
     val rdd = spatialPairRDD.rdd.map(f => {
       // Extract user data from geometries
@@ -203,14 +221,14 @@ object Adapter {
   }
 
   /**
-   * Parse a string to another data type based on the desired schema
-   *
-   * @param data Data stored as string
-   * @param desiredType Desired SparkSQL data type
-   * @return Parsed value, or in the case of a struct column, an array of parsed values
-   */
+    * Parse a string to another data type based on the desired schema
+    *
+    * @param data Data stored as string
+    * @param desiredType Desired SparkSQL data type
+    * @return Parsed value, or in the case of a struct column, an array of parsed values
+    */
   private def parseString(data: String, desiredType: DataType): Any = {
-    // Spark needs to know how to serialize null values
+    // Spark needs to know how to serialize null values, so we have to provide the relevant class
     if (data == "null") {
       return desiredType match {
         case _: ByteType => null.asInstanceOf[Byte]
@@ -219,6 +237,8 @@ object Adapter {
         case _: LongType => null.asInstanceOf[Long]
         case _: FloatType => null.asInstanceOf[Float]
         case _: DoubleType => null.asInstanceOf[Double]
+        case _: DateType => null.asInstanceOf[Date]
+        case _: TimestampType => null.asInstanceOf[Timestamp]
         case _: BooleanType => null.asInstanceOf[Boolean]
         case _: StringType => null.asInstanceOf[String]
       }
@@ -231,21 +251,23 @@ object Adapter {
       case _: LongType => data.toLong
       case _: FloatType => data.toFloat
       case _: DoubleType => data.toDouble
+      case _: DateType => Date.valueOf(data)
+      case _: TimestampType => Timestamp.valueOf(data)
       case _: BooleanType => data.toBoolean
       case _: StringType => data
       case _: StructType =>
-        val desiredTypeAsStruct = desiredType.asInstanceOf[StructType]
-        new GenericRowWithSchema(parseStruct(data, desiredTypeAsStruct), desiredTypeAsStruct)
+        val desiredStructSchema = desiredType.asInstanceOf[StructType]
+        new GenericRowWithSchema(parseStruct(data, desiredStructSchema), desiredStructSchema)
     }
   }
 
   /**
-   * Parse the string representation of a struct into an array of values
-   *
-   * @param data Struct as a string (format: "[value1,value2,...]")
-   * @param desiredType Desired schema for the struct column
-   * @return Array of parsed values
-   */
+    * Parse the string representation of a struct into an array of values
+    *
+    * @param data Struct as a string (format: "[value1,value2,...]")
+    * @param desiredType Desired schema for the struct column
+    * @return Array of parsed values
+    */
   private def parseStruct(data: String, desiredType: StructType): Array[Any] = {
     // Structs are stored as "[value1,value2,...]"
     // Recurse into the struct and parse

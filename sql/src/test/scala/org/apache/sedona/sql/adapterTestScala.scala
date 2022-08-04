@@ -248,9 +248,12 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
           234 as exampleint,
           9223372036854775800 as examplelong,
           true as examplebool,
+          date('2022-01-01') as exampledate,
+          timestamp('2022-01-01T00:00:00.000000Z') as exampletimestamp,
           named_struct('structtext', 'spark', 'structint', 5, 'structbool', false) as examplestruct
         from polygontable
       """)
+      polygonDf.show(1)
       val polygonRDD = Adapter.toSpatialRdd(polygonDf, "usacounty")
       polygonRDD.analyze()
 
@@ -271,6 +274,8 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
         StructField("exampleInt", IntegerType, nullable = true),
         StructField("exampleLong", LongType, nullable = true),
         StructField("exampleBool", BooleanType, nullable = true),
+        StructField("exampleDate", DateType, nullable = true),
+        StructField("exampleTimestamp", TimestampType, nullable = true),
         StructField("exampleStruct", StructType(Array(
           StructField("structText", StringType, nullable = true),
           StructField("structInt", IntegerType, nullable = true),
