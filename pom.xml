@@ -18,12 +18,12 @@
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-<!--    <parent>-->
-<!--        <groupId>org.apache</groupId>-->
-<!--        <artifactId>apache</artifactId>-->
-<!--        <version>23</version>-->
-<!--        <relativePath />-->
-<!--    </parent>-->
+    <parent>
+        <groupId>org.apache</groupId>
+        <artifactId>apache</artifactId>
+        <version>23</version>
+        <relativePath />
+    </parent>
     <groupId>org.apache.sedona</groupId>
     <artifactId>sedona-parent</artifactId>
     <version>1.2.1-incubating-SNAPSHOT</version>
@@ -529,10 +529,10 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <spark.version>3.1.0</spark.version>
+                <spark.version>3.3.0</spark.version>
                 <spark.compat.version>3.0</spark.compat.version>
                 <spark.converter.version>spark3</spark.converter.version>
-                <sedona.jackson.version>2.10.0</sedona.jackson.version>
+                <sedona.jackson.version>2.13.3</sedona.jackson.version>
                 <maven.deploy.skip>false</maven.deploy.skip>
             </properties>
         </profile>
