@@ -22,6 +22,7 @@ import org.apache.parquet.io.api.{Binary, Converter, GroupConverter, PrimitiveCo
 import org.apache.parquet.schema.OriginalType.LIST
 import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName._
 import org.apache.parquet.schema.{GroupType, OriginalType, Type}
+import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.util.{ArrayBasedMapData, CaseInsensitiveMap, DateTimeUtils, GenericArrayData}
@@ -83,7 +84,7 @@ private[parquet] class GeoParquetRowConverter(
                                             datetimeRebaseMode: LegacyBehaviorPolicy.Value,
                                             int96RebaseMode: LegacyBehaviorPolicy.Value,
                                             updater: ParentContainerUpdater)
-  extends ParquetRowConverter(schemaConverter, parquetType, catalystType, convertTz, datetimeRebaseMode, int96RebaseMode, updater){
+  extends ParquetGroupConverter(updater) with Logging {
 
   assert(
     parquetType.getFieldCount <= catalystType.length,
@@ -126,6 +127,11 @@ private[parquet] class GeoParquetRowConverter(
   }
 
   private[this] val currentRow = new SpecificInternalRow(catalystType.map(_.dataType))
+
+  /**
+   * The [[InternalRow]] converted from an entire Parquet record.
+   */
+  def currentRecord: InternalRow = currentRow
 
   private val dateRebaseFunc = DataSourceUtils.creteDateRebaseFuncInRead(
     datetimeRebaseMode, "Parquet")
