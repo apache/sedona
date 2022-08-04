@@ -40,6 +40,7 @@ import org.apache.spark.sql.types._
 import org.apache.spark.util.SerializableConfiguration
 
 import java.net.URI
+import java.util.NoSuchElementException
 
 class GeoParquetFileFormat extends ParquetFileFormat with FileFormat with DataSourceRegister with Logging with Serializable {
 
@@ -136,7 +137,7 @@ class GeoParquetFileFormat extends ParquetFileFormat with FileFormat with DataSo
       // Try to push down filters when filter push-down is enabled.
       val pushed = if (enableParquetFilterPushDown) {
         val parquetSchema = footerFileMetaData.getSchema
-        val parquetFilters = new ParquetFilters(parquetSchema, pushDownDate, pushDownTimestamp,
+        val parquetFilters = new GeoParquetFilters(parquetSchema, pushDownDate, pushDownTimestamp,
           pushDownDecimal, pushDownStringStartWith, pushDownInFilterThreshold, isCaseSensitive)
         filters
           // Collects all converted Parquet filter predicates. Notice that not all predicates can be
@@ -162,13 +163,23 @@ class GeoParquetFileFormat extends ParquetFileFormat with FileFormat with DataSo
         } else {
           None
         }
-
+      var dateTimeRebaseModeConf:String = ""
+      var int96RebaseModeConf:String = ""
+      try {
+        dateTimeRebaseModeConf = SQLConf.get.getConfString("spark.sql.parquet.datetimeRebaseModeInRead")
+        int96RebaseModeConf = SQLConf.get.getConfString("spark.sql.parquet.int96RebaseModeInRead")
+      } catch {
+        case e:NoSuchElementException => {
+          dateTimeRebaseModeConf = SQLConf.get.getConfString("spark.sql.legacy.parquet.datetimeRebaseModeInRead")
+          int96RebaseModeConf = SQLConf.get.getConfString("spark.sql.legacy.parquet.int96RebaseModeInRead")
+        }
+      }
       val datetimeRebaseMode = DataSourceUtils.datetimeRebaseMode(
         footerFileMetaData.getKeyValueMetaData.get,
-        SQLConf.get.getConf(SQLConf.LEGACY_PARQUET_REBASE_MODE_IN_READ))
+        dateTimeRebaseModeConf)
       val int96RebaseMode = DataSourceUtils.int96RebaseMode(
         footerFileMetaData.getKeyValueMetaData.get,
-        SQLConf.get.getConf(SQLConf.LEGACY_PARQUET_INT96_REBASE_MODE_IN_READ))
+        int96RebaseModeConf)
 
       val attemptId = new TaskAttemptID(new TaskID(new JobID(), TaskType.MAP, 0), 0)
       val hadoopAttemptContext =

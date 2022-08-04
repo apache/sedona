@@ -202,7 +202,7 @@ extends ParquetToSparkSchemaConverter(assumeBinaryIsString, assumeInt96IsTimesta
         ParquetSchemaConverter.checkConversionRequirement(
           repeatedType.isRepetition(REPEATED), s"Invalid list type $field")
 
-        if (isElementType(repeatedType, field.getName)) {
+        if (isElementTypeWithGeo(repeatedType, field.getName)) {
           ArrayType(convertField(repeatedType), containsNull = false)
         } else {
           val elementType = repeatedType.asGroupType().getType(0)
@@ -241,7 +241,7 @@ extends ParquetToSparkSchemaConverter(assumeBinaryIsString, assumeInt96IsTimesta
   // Here we implement Parquet LIST backwards-compatibility rules.
   // See: https://github.com/apache/parquet-format/blob/master/LogicalTypes.md#backward-compatibility-rules
   // scalastyle:on
-  private def isElementType(repeatedType: Type, parentName: String): Boolean = {
+  def isElementTypeWithGeo(repeatedType: Type, parentName: String): Boolean = {
     {
       // For legacy 2-level list types with primitive element type, e.g.:
       //
