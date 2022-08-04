@@ -34,6 +34,7 @@ import org.apache.spark.sql.catalyst.util.{CaseInsensitiveMap, DateTimeUtils}
 import org.apache.spark.sql.sources
 import org.apache.spark.unsafe.types.UTF8String
 
+// Needed by Sedona to support Spark 3.0 - 3.3
 /**
  * Some utility function to convert Spark data source filters to Parquet filters.
  */
@@ -151,7 +152,7 @@ class GeoParquetFilters(
 
   private def timestampToMillis(v: Any): JLong = {
     val micros = timestampToMicros(v)
-    val millis = DateTimeUtils.microsToMillis(micros)
+    val millis = GeoDateTimeUtils.microsToMillis(micros)
     millis.asInstanceOf[JLong]
   }
 

@@ -166,12 +166,22 @@ class GeoParquetFileFormat extends ParquetFileFormat with FileFormat with DataSo
       var dateTimeRebaseModeConf:String = ""
       var int96RebaseModeConf:String = ""
       try {
+        // Try Spark 3.2+ style
         dateTimeRebaseModeConf = SQLConf.get.getConfString("spark.sql.parquet.datetimeRebaseModeInRead")
         int96RebaseModeConf = SQLConf.get.getConfString("spark.sql.parquet.int96RebaseModeInRead")
       } catch {
-        case e:NoSuchElementException => {
+        case e1:NoSuchElementException => {
+          // Try Spark 3.1 style
           dateTimeRebaseModeConf = SQLConf.get.getConfString("spark.sql.legacy.parquet.datetimeRebaseModeInRead")
-          int96RebaseModeConf = SQLConf.get.getConfString("spark.sql.legacy.parquet.int96RebaseModeInRead")
+          try {
+            int96RebaseModeConf = SQLConf.get.getConfString("spark.sql.legacy.parquet.int96RebaseModeInRead")
+          }
+          catch {
+            case e2: NoSuchElementException => {
+              // This is Spark 3.1 style. Assume int96 mode is same as dateTime
+              int96RebaseModeConf = dateTimeRebaseModeConf
+            }
+          }
         }
       }
       val datetimeRebaseMode = GeoDataSourceUtils.datetimeRebaseMode(
@@ -260,6 +270,6 @@ object GeoParquetFileFormat extends Logging {
         .map(ParquetFileFormat.readSchemaFromFooter(_, converter))
     }
 
-    SchemaMergeUtils.mergeSchemasInParallel(sparkSession, parameters, filesToTouch, reader)
+    GeoSchemaMergeUtils.mergeSchemasInParallel(sparkSession, parameters, filesToTouch, reader)
   }
 }

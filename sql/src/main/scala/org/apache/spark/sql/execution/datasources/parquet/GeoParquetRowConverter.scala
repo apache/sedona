@@ -251,7 +251,7 @@ private[parquet] class GeoParquetRowConverter(
       case TimestampType if parquetType.getOriginalType == OriginalType.TIMESTAMP_MILLIS =>
         new ParquetPrimitiveConverter(updater) {
           override def addLong(value: Long): Unit = {
-            val micros = DateTimeUtils.millisToMicros(value)
+            val micros = GeoDateTimeUtils.millisToMicros(value)
             updater.setLong(timestampRebaseFunc(micros))
           }
         }

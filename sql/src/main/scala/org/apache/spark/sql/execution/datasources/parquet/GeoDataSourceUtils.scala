@@ -21,6 +21,7 @@ import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.internal.SQLConf.LegacyBehaviorPolicy
 import org.apache.spark.util.Utils
 
+// Needed by Sedona to support Spark 3.0 - 3.3
 object GeoDataSourceUtils {
   def datetimeRebaseMode(
                           lookupFileMeta: String => String,
