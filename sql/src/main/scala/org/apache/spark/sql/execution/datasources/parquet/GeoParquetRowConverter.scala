@@ -26,7 +26,6 @@ import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.util.{ArrayBasedMapData, CaseInsensitiveMap, DateTimeUtils, GenericArrayData}
-import org.apache.spark.sql.execution.datasources.DataSourceUtils
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.internal.SQLConf.LegacyBehaviorPolicy
 import org.apache.spark.sql.types._
@@ -133,13 +132,13 @@ private[parquet] class GeoParquetRowConverter(
    */
   def currentRecord: InternalRow = currentRow
 
-  private val dateRebaseFunc = DataSourceUtils.creteDateRebaseFuncInRead(
+  private val dateRebaseFunc = GeoDataSourceUtils.creteDateRebaseFuncInRead(
     datetimeRebaseMode, "Parquet")
 
-  private val timestampRebaseFunc = DataSourceUtils.creteTimestampRebaseFuncInRead(
+  private val timestampRebaseFunc = GeoDataSourceUtils.creteTimestampRebaseFuncInRead(
     datetimeRebaseMode, "Parquet")
 
-  private val int96RebaseFunc = DataSourceUtils.creteTimestampRebaseFuncInRead(
+  private val int96RebaseFunc = GeoDataSourceUtils.creteTimestampRebaseFuncInRead(
     int96RebaseMode, "Parquet INT96")
 
   // Converters for each field.
@@ -503,7 +502,7 @@ private[parquet] class GeoParquetRowConverter(
       // Here we try to convert field `list` into a Catalyst type to see whether the converted type
       // matches the Catalyst array element type. If it doesn't match, then it's case 1; otherwise,
       // it's case 2.
-      val guessedElementType = schemaConverter.convertField(repeatedType)
+      val guessedElementType = schemaConverter.convertFieldWithGeo(repeatedType)
 
       if (DataType.equalsIgnoreCompatibleNullability(guessedElementType, elementType)) {
         // If the repeated field corresponds to the element type, creates a new converter using the

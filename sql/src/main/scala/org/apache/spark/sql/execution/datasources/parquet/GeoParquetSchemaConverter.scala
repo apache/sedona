@@ -24,6 +24,7 @@ import org.apache.parquet.schema.OriginalType._
 import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName._
 import org.apache.parquet.schema.Type.Repetition._
 import org.apache.spark.sql.AnalysisException
+import org.apache.spark.sql.execution.datasources.parquet.ParquetSchemaConverter.checkConversionRequirement
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
@@ -64,16 +65,16 @@ extends ParquetToSparkSchemaConverter(assumeBinaryIsString, assumeInt96IsTimesta
     val fields = parquetSchema.getFields.asScala.map { field =>
       field.getRepetition match {
         case OPTIONAL =>
-          StructField(field.getName, convertField(field), nullable = true)
+          StructField(field.getName, convertFieldWithGeo(field), nullable = true)
 
         case REQUIRED =>
-          StructField(field.getName, convertField(field), nullable = false)
+          StructField(field.getName, convertFieldWithGeo(field), nullable = false)
 
         case REPEATED =>
           // A repeated field that is neither contained by a `LIST`- or `MAP`-annotated group nor
           // annotated by `LIST` or `MAP` should be interpreted as a required list of required
           // elements where the element type is the type of the field.
-          val arrayType = ArrayType(convertField(field), containsNull = false)
+          val arrayType = ArrayType(convertFieldWithGeo(field), containsNull = false)
           StructField(field.getName, arrayType, nullable = false)
       }
     }
@@ -84,7 +85,7 @@ extends ParquetToSparkSchemaConverter(assumeBinaryIsString, assumeInt96IsTimesta
   /**
    * Converts a Parquet [[Type]] to a Spark SQL [[DataType]].
    */
-  override def convertField(parquetType: Type): DataType = parquetType match {
+  def convertFieldWithGeo(parquetType: Type): DataType = parquetType match {
     case t: PrimitiveType => convertPrimitiveField(t)
     case t: GroupType => convertGroupField(t.asGroupType())
   }
@@ -203,11 +204,11 @@ extends ParquetToSparkSchemaConverter(assumeBinaryIsString, assumeInt96IsTimesta
           repeatedType.isRepetition(REPEATED), s"Invalid list type $field")
 
         if (isElementTypeWithGeo(repeatedType, field.getName)) {
-          ArrayType(convertField(repeatedType), containsNull = false)
+          ArrayType(convertFieldWithGeo(repeatedType), containsNull = false)
         } else {
           val elementType = repeatedType.asGroupType().getType(0)
           val optional = elementType.isRepetition(OPTIONAL)
-          ArrayType(convertField(elementType), containsNull = optional)
+          ArrayType(convertFieldWithGeo(elementType), containsNull = optional)
         }
 
       // scalastyle:off
@@ -228,8 +229,8 @@ extends ParquetToSparkSchemaConverter(assumeBinaryIsString, assumeInt96IsTimesta
         val valueType = keyValueType.getType(1)
         val valueOptional = valueType.isRepetition(OPTIONAL)
         MapType(
-          convertField(keyType),
-          convertField(valueType),
+          convertFieldWithGeo(keyType),
+          convertFieldWithGeo(valueType),
           valueContainsNull = valueOptional)
 
       case _ =>
@@ -332,7 +333,7 @@ extends SparkToParquetSchemaConverter(writeLegacyParquetFormat, outputTimestampT
   }
 
   private def convertField(field: StructField, repetition: Type.Repetition): Type = {
-    ParquetSchemaConverter.checkFieldName(field.name)
+    GeoParquetSchemaConverter.checkFieldName(field.name)
 
     field.dataType match {
       // ===================
@@ -561,6 +562,15 @@ private[sql] object GeoParquetSchemaConverter {
     if (name.equals(GeometryField.getFieldGeometry())) {
       true
     } else false
+  }
+
+  def checkFieldName(name: String): Unit = {
+    // ,;{}()\n\t= and space are special characters in Parquet schema
+    checkConversionRequirement(
+      !name.matches(".*[ ,;{}()\n\t=].*"),
+      s"""Attribute name "$name" contains invalid character(s) among " ,;{}()\\n\\t=".
+         |Please use alias to rename it.
+       """.stripMargin.split("\n").mkString(" ").trim)
   }
 }
 
