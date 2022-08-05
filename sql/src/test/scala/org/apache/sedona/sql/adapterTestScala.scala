@@ -218,6 +218,47 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
       }
     }
 
+    it("can convert spatial RDD to DataFrame with user-supplied schema") {
+      val srcDF = sparkSession.sql("""
+        select
+          ST_PointFromText('40.7128,-74.0060', ',') as geom,
+          'abc' as exampletext,
+          1.23 as exampledouble,
+          234 as exampleint
+
+        union
+
+        select
+          ST_PointFromText('40.7128,-74.0060', ',') as geom,
+          null as exampletext,
+          null as exampledouble,
+          null as exampleint
+      """)
+
+      // Convert to DataFrame
+      // Tweak the column names to camelCase to ensure it also renames
+      val schema = StructType(Array(
+        StructField("leftGeometry", GeometryUDT, nullable = true),
+        StructField("exampleText", StringType, nullable = true),
+        StructField("exampleDouble", DoubleType, nullable = true),
+        StructField("exampleInt", IntegerType, nullable = true),
+      ))
+      val rdd = Adapter.toSpatialRdd(srcDF, "geom")
+      val df = Adapter.toDf(rdd, schema, sparkSession)
+
+      // Check results
+      // Force an action so that spark has to serialize the data -- this will surface
+      // a serialization error if the schema or coercion is incorrect, e.g.
+      // "Error while encoding: java.lang.RuntimeException: <desired data type> is not a
+      // valid external type for schema of <current data type>"
+      println(df.show(1))
+
+      assert(
+        df.schema == schema,
+        s"Expected schema\n$schema\nbut got\n${df.schema}!"
+      )
+    }
+
     it("can convert JavaPairRDD to DataFrame with user-supplied schema") {
       // Prepare JavaPairRDD
       // Left table
@@ -305,7 +346,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
 
       // Check results
       // Force an action so that spark has to serialize the data -- this will surface
-      // a serialization error if the schema or coersion is incorrect, e.g.
+      // a serialization error if the schema or coercion is incorrect, e.g.
       // "Error while encoding: java.lang.RuntimeException: <desired data type> is not a
       // valid external type for schema of <current data type>"
       println(joinResultDf.show(1))

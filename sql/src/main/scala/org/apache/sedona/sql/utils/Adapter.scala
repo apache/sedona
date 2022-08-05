@@ -182,7 +182,7 @@ object Adapter {
   def toDf(spatialPairRDD: JavaPairRDD[Geometry, Geometry], schema: StructType, sparkSession: SparkSession): DataFrame = {
     val rdd = spatialPairRDD.rdd.map(f => {
       // Extract user data from geometries
-      // Use an empty seq to grab all col names
+      // Use an empty seq to grab all col names -- we will rename to fit the schema anyways
       val stringRow = extractUserData(row = f, leftFieldnames = Seq(""), rightFieldnames = Seq(""))
 
       // Convert data types
