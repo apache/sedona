@@ -241,7 +241,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
         StructField("leftGeometry", GeometryUDT, nullable = true),
         StructField("exampleText", StringType, nullable = true),
         StructField("exampleDouble", DoubleType, nullable = true),
-        StructField("exampleInt", IntegerType, nullable = true),
+        StructField("exampleInt", IntegerType, nullable = true)
       ))
       val rdd = Adapter.toSpatialRdd(srcDF, "geom")
       val df = Adapter.toDf(rdd, schema, sparkSession)
