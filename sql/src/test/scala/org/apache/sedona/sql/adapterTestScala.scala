@@ -243,14 +243,30 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
           'abc' as exampletext,
           1.23 as examplefloat,
           1.23 as exampledouble,
-          null as nullabledouble,
-          10 as examplefloat,
+          10 as exampleshort,
           234 as exampleint,
           9223372036854775800 as examplelong,
           true as examplebool,
           date('2022-01-01') as exampledate,
           timestamp('2022-01-01T00:00:00.000000Z') as exampletimestamp,
           named_struct('structtext', 'spark', 'structint', 5, 'structbool', false) as examplestruct
+        from polygontable
+
+        union
+
+        -- Test that nulls can be properly encoded
+        select
+          ST_GeomFromWKT(polygontable._c0) as usacounty,
+          null as exampletext,
+          null as examplefloat,
+          null as exampledouble,
+          null as exampleshort,
+          null as exampleint,
+          null as examplelong,
+          null as examplebool,
+          null as exampledate,
+          null as exampletimestamp,
+          null as examplestruct
         from polygontable
       """)
       polygonDf.show(1)
@@ -269,7 +285,6 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
         StructField("exampleText", StringType, nullable = true),
         StructField("exampleFloat", FloatType, nullable = true),
         StructField("exampleDouble", DoubleType, nullable = true),
-        StructField("nullableDouble", DoubleType, nullable = true),
         StructField("exampleShort", ShortType, nullable = true),
         StructField("exampleInt", IntegerType, nullable = true),
         StructField("exampleLong", LongType, nullable = true),
@@ -367,8 +382,6 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
         s"Schema of\n$schema\ndoes not match result from supplying field names\n${joinResultDf.schema}!"
       )
     }
-
-    // it should handle null values in the original data
 
     it("can convert spatial pair RDD with user data to a valid Dataframe") {
       var srcDF = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
