@@ -160,7 +160,7 @@ extra:
     - icon: fontawesome/brands/twitter
       link: 'https://twitter.com/ApacheSedona'
   sedona:
-    current_version: 1.2.0-incubating
+    current_version: 1.2.1-incubating
     current_git_tag: sedona-1.2.1-incubating-rc1
     current_rc: 1.2.1-incubating-rc1
     current_snapshot: 1.2.1-incubating-SNAPSHOT
