@@ -101,6 +101,22 @@
             <scope>${dependency.scope}</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client</artifactId>
+            <version>${hadoop.version}</version>
+            <scope>${dependency.scope}</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>org.datasyslab</groupId>
             <artifactId>sernetcdf</artifactId>
             <version>0.1.0</version>
@@ -183,34 +199,6 @@
             <artifactId>spark-sql_${scala.compat.version}</artifactId>
             <version>${spark.version}</version>
             <scope>${dependency.scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-mapreduce-client-core</artifactId>
-            <version>2.8.2</version>
-            <scope>${dependency.scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-common</artifactId>
-            <version>2.8.2</version>
-            <scope>${dependency.scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-hdfs</artifactId>
-            <version>2.8.2</version>
-            <scope>${dependency.scope}</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.scala-lang.modules</groupId>
@@ -533,6 +521,7 @@
                 <spark.compat.version>3.0</spark.compat.version>
                 <spark.converter.version>spark3</spark.converter.version>
                 <sedona.jackson.version>2.13.3</sedona.jackson.version>
+                <hadoop.version>3.2.4</hadoop.version>
                 <maven.deploy.skip>false</maven.deploy.skip>
             </properties>
         </profile>
@@ -550,6 +539,7 @@
                 <spark.compat.version>2.4</spark.compat.version>
                 <spark.converter.version>spark2</spark.converter.version>
                 <sedona.jackson.version>2.6.7</sedona.jackson.version>
+                <hadoop.version>2.10.2</hadoop.version>
                 <maven.deploy.skip>true</maven.deploy.skip>
             </properties>
         </profile>
