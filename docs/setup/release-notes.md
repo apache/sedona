@@ -1,3 +1,63 @@
+## Sedona 1.2.1
+
+This version is a maintenance release on Sedona 1.2.0 line. It includes bug fixes.
+
+Sedona on Spark is now compiled against Spark 3.3, instead of Spark 2.2.
+
+
+### SQL (for Spark)
+
+Bug fixes:
+
+* [SEDONA-104](https://issues.apache.org/jira/browse/SEDONA-104): Bug in reading band values of GeoTiff images
+* [SEDONA-118](https://issues.apache.org/jira/browse/SEDONA-118): Fix the wrong result in ST_Within
+* [SEDONA-123](https://issues.apache.org/jira/browse/SEDONA-123): Fix the check for invalid lat/lon in ST_GeoHash
+
+Improvement:
+
+* [SEDONA-96](https://issues.apache.org/jira/browse/SEDONA-96): Refactor ST_MakeValid to use GeometryFixer
+* [SEDONA-108](https://issues.apache.org/jira/browse/SEDONA-108): Write support for GeoTiff images
+* [SEDONA-122](https://issues.apache.org/jira/browse/SEDONA-122): Overload ST_GeomFromWKB for BYTES column
+* [SEDONA-127](https://issues.apache.org/jira/browse/SEDONA-127): Add null safety to ST_GeomFromWKT/WKB/Text
+* [SEDONA-129](https://issues.apache.org/jira/browse/SEDONA-129): Support Spark 3.3
+* [SEDONA-135](https://issues.apache.org/jira/browse/SEDONA-135): Consolidate and upgrade hadoop dependency
+
+New features:
+
+* [SEDONA-107](https://issues.apache.org/jira/projects/SEDONA/issues/SEDONA-107): Add St_Reverse function
+* [SEDONA-105](https://issues.apache.org/jira/browse/SEDONA-105): Add ST_PointOnSurface function
+* [SEDONA-95](https://issues.apache.org/jira/browse/SEDONA-95): Add ST_Disjoint predicate
+* [SEDONA-112](https://issues.apache.org/jira/browse/SEDONA-112): Add ST_AsEWKT
+* [SEDONA-106](https://issues.apache.org/jira/browse/SEDONA-106): Add ST_LineFromText
+* [SEDONA-117](https://issues.apache.org/jira/browse/SEDONA-117): Add RS_AppendNormalizedDifference
+* [SEDONA-97](https://issues.apache.org/jira/browse/SEDONA-97): Add ST_Force_2D
+* [SEDONA-98](https://issues.apache.org/jira/browse/SEDONA-98): Add ST_IsEmpty
+* [SEDONA-116](https://issues.apache.org/jira/browse/SEDONA-116): Add ST_YMax and ST_Ymin
+* [SEDONA-115](https://issues.apache.org/jira/browse/SEDONA-15): Add ST_XMax and ST_Min
+* [SEDONA-120](https://issues.apache.org/jira/browse/SEDONA-120): Add ST_BuildArea
+* [SEDONA-113](https://issues.apache.org/jira/browse/SEDONA-113): Add ST_PointN
+* [SEDONA-124](https://issues.apache.org/jira/browse/SEDONA-124): Add ST_CollectionExtract
+* [SEDONA-109](https://issues.apache.org/jira/browse/SEDONA-109): Add ST_OrderingEquals
+
+### Flink
+
+New features:
+
+* [SEDONA-107](https://issues.apache.org/jira/projects/SEDONA/issues/SEDONA-107): Add St_Reverse function
+* [SEDONA-105](https://issues.apache.org/jira/browse/SEDONA-105): Add ST_PointOnSurface function
+* [SEDONA-95](https://issues.apache.org/jira/browse/SEDONA-95): Add ST_Disjoint predicate
+* [SEDONA-112](https://issues.apache.org/jira/browse/SEDONA-112): Add ST_AsEWKT
+* [SEDONA-97](https://issues.apache.org/jira/browse/SEDONA-97): Add ST_Force_2D
+* [SEDONA-98](https://issues.apache.org/jira/browse/SEDONA-98): Add ST_IsEmpty
+* [SEDONA-116](https://issues.apache.org/jira/browse/SEDONA-116): Add ST_YMax and ST_Ymin
+* [SEDONA-115](https://issues.apache.org/jira/browse/SEDONA-15): Add ST_XMax and ST_Min
+* [SEDONA-120](https://issues.apache.org/jira/browse/SEDONA-120): Add ST_BuildArea
+* [SEDONA-113](https://issues.apache.org/jira/browse/SEDONA-113): Add ST_PointN
+* [SEDONA-110](https://issues.apache.org/jira/browse/SEDONA-110): Add ST_GeomFromGeoHash
+* [SEDONA-121](https://issues.apache.org/jira/browse/SEDONA-124): More ST constructors to Flink
+* [SEDONA-122](https://issues.apache.org/jira/browse/SEDONA-122): Overload ST_GeomFromWKB for BYTES column
+
+
 ## Sedona 1.2.0
 
 This version is a major release on Sedona 1.2.0 line. It includes bug fixes and new features: Sedona with Apache Flink.
