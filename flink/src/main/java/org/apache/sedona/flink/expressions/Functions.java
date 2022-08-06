@@ -37,7 +37,8 @@ import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 public class Functions {
     public static class ST_Buffer extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-        public Geometry eval(Object o, @DataTypeHint("Double") Double radius) {
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+                Object o, @DataTypeHint("Double") Double radius) {
             Geometry geom = (Geometry) o;
             return geom.buffer(radius);
         }
