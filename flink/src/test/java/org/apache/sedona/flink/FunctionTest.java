@@ -138,6 +138,7 @@ public class FunctionTest extends TestBase{
         Assert.assertEquals("LINEARRING (-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5)", linearRing.toString());
     }
 
+    @Test
     public void testAsEWKT() {
         Table polygonTable = createPolygonTable(testDataSize);
         polygonTable = polygonTable.select(call(Functions.ST_AsEWKT.class.getSimpleName(), $(polygonColNames[0])));
