@@ -67,7 +67,7 @@ public class FunctionTest extends TestBase{
     public void testYMax() {
         Table polygonTable = createPolygonTable(1);
         Table ResultTable = polygonTable.select(call(Functions.ST_YMax.class.getSimpleName(), $(polygonColNames[0])));
-        assert(first(ResultTable).getField(0)!=null);
+        assertNotNull(first(ResultTable).getField(0));
         double result = (double) first(ResultTable).getField(0);
         assertEquals(0.5, result,0);
     }
@@ -76,7 +76,7 @@ public class FunctionTest extends TestBase{
     public void testYMin() {
         Table polygonTable = createPolygonTable(1);
         Table ResultTable = polygonTable.select(call(Functions.ST_YMin.class.getSimpleName(), $(polygonColNames[0])));
-        assert(first(ResultTable).getField(0)!=null);
+        assertNotNull(first(ResultTable).getField(0));
         double result = (double) first(ResultTable).getField(0);
         assertEquals(-0.5, result, 0);
     }
@@ -114,8 +114,8 @@ public class FunctionTest extends TestBase{
         Table linestringTable = polygonTable.select(call(Functions.ST_ExteriorRing.class.getSimpleName(), $(polygonColNames[0])));
         Table pointTable = linestringTable.select(call(Functions.ST_PointN.class.getSimpleName(), $("_c0"), n));
         Point point = (Point) first(pointTable).getField(0);
-        assert point != null;
-        Assert.assertEquals("POINT (-0.5 -0.5)", point.toString());
+        assertNotNull(point);
+        assertEquals("POINT (-0.5 -0.5)", point.toString());
     }
 
     @Test
@@ -125,8 +125,8 @@ public class FunctionTest extends TestBase{
         Table linestringTable = polygonTable.select(call(Functions.ST_ExteriorRing.class.getSimpleName(), $(polygonColNames[0])));
         Table pointTable = linestringTable.select(call(Functions.ST_PointN.class.getSimpleName(), $("_c0"), n));
         Point point = (Point) first(pointTable).getField(0);
-        assert point != null;
-        Assert.assertEquals("POINT (0.5 0.5)", point.toString());
+        assertNotNull(point);
+        assertEquals("POINT (0.5 0.5)", point.toString());
     }
 
     @Test
@@ -134,7 +134,7 @@ public class FunctionTest extends TestBase{
         Table polygonTable = createPolygonTable(1);
         Table linearRingTable = polygonTable.select(call(Functions.ST_ExteriorRing.class.getSimpleName(), $(polygonColNames[0])));
         LinearRing linearRing = (LinearRing) first(linearRingTable).getField(0);
-        assert linearRing != null;
+        assertNotNull(linearRing);
         Assert.assertEquals("LINEARRING (-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5)", linearRing.toString());
     }
 

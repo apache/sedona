@@ -31,7 +31,7 @@ public class PredicateTest extends TestBase{
         String polygon = createPolygonWKT(testDataSize).get(0).getField(0).toString();
         String expr = "ST_Intersects(ST_GeomFromWkt('" + polygon + "'), geom_point)";
         Table result = pointTable.filter(expr);
-        assertEquals(count(result), 1);
+        assertEquals(1, count(result));
     }
 
     @Test
@@ -40,6 +40,6 @@ public class PredicateTest extends TestBase{
         String polygon = createPolygonWKT(testDataSize).get(0).getField(0).toString();
         String expr = "ST_Disjoint(ST_GeomFromWkt('" + polygon + "'), geom_point)";
         Table result = pointTable.filter(expr);
-        assertEquals(count(result), 999);
+        assertEquals(999, count(result));
     }
 }
