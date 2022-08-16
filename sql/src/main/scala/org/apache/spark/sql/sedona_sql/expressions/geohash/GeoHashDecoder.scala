@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions.geohash
 
+import org.apache.sedona.common.utils.BBox
 import org.locationtech.jts.geom.{Geometry, GeometryFactory}
 
 import scala.collection.mutable
@@ -68,10 +69,10 @@ object GeoHashDecoder {
 }
 
 private case class LatLon(var lons: mutable.Seq[Double], var lats: mutable.Seq[Double]){
-  def getBbox(): BBox = BBox(
-    startLat = lats.head,
-    endLat = lats(1),
-    startLon = lons.head,
-    endLon = lons(1)
+  def getBbox(): BBox = new BBox(
+    lons.head,
+    lons(1),
+    lats.head,
+    lats(1)
   )
 }

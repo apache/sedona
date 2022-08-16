@@ -22,33 +22,55 @@ If you can successfully finish the steps below, you will pass the items mentione
 You can skip this step if you installed these software before.
 
 
-## Download a Sedona release
+## Run the verify script
+
+Please replace SEDONA\_CURRENT\_RC and SEDONA\_CURRENT\_VERSION with the correct versions. Then paste the content in a script called `verify.sh` and re-direct the output to a file. To run a script, do the following:
 
 ```bash
 #!/bin/bash
-wget https://downloads.apache.org/incubator/sedona/KEYS
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.next_version }}-src.tar.gz
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.next_version }}-src.tar.gz.asc
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.next_version }}-src.tar.gz.sha512
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.next_version }}-bin.tar.gz
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.next_version }}-bin.tar.gz.asc
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.next_version }}-bin.tar.gz.sha512
+
+## Change the permission of the script to executable
+chmod 777 verify.sh
+
+## Run and redirect the output to a file
+./verify.sh &> verify.out
 ```
+
+The content of the `verify.sh` script is as follows. ==If you copy the following content, a line break is automatically added to a long line of code. Please remove it in your local script.==
+
+```bash
+#!/bin/bash
+
+SEDONA_CURRENT_RC={{ sedona.current_rc }}
+SEDONA_CURRENT_VERSION={{ sedona.next_version }}
+
+## Download a Sedona release
+wget -q https://downloads.apache.org/incubator/sedona/KEYS
+wget -q https://dist.apache.org/repos/dist/dev/incubator/sedona/$SEDONA_CURRENT_RC/apache-sedona-$SEDONA_CURRENT_VERSION-src.tar.gz
+wget -q https://dist.apache.org/repos/dist/dev/incubator/sedona/$SEDONA_CURRENT_RC/apache-sedona-$SEDONA_CURRENT_VERSION-src.tar.gz.asc
+wget -q https://dist.apache.org/repos/dist/dev/incubator/sedona/$SEDONA_CURRENT_RC/apache-sedona-$SEDONA_CURRENT_VERSION-src.tar.gz.sha512
+wget -q https://dist.apache.org/repos/dist/dev/incubator/sedona/$SEDONA_CURRENT_RC/apache-sedona-$SEDONA_CURRENT_VERSION-bin.tar.gz
+wget -q https://dist.apache.org/repos/dist/dev/incubator/sedona/$SEDONA_CURRENT_RC/apache-sedona-$SEDONA_CURRENT_VERSION-bin.tar.gz.asc
+wget -q https://dist.apache.org/repos/dist/dev/incubator/sedona/$SEDONA_CURRENT_RC/apache-sedona-$SEDONA_CURRENT_VERSION-bin.tar.gz.sha512
 
 ## Verify the signature and checksum
+gpg --import KEYS
+gpg --verify apache-sedona-$SEDONA_CURRENT_VERSION-src.tar.gz.asc
+gpg --verify apache-sedona-$SEDONA_CURRENT_VERSION-bin.tar.gz.asc
+shasum -a 512 apache-sedona-$SEDONA_CURRENT_VERSION-src.tar.gz
+cat apache-sedona-$SEDONA_CURRENT_VERSION-src.tar.gz.sha512
+shasum -a 512 apache-sedona-$SEDONA_CURRENT_VERSION-bin.tar.gz
+cat apache-sedona-$SEDONA_CURRENT_VERSION-bin.tar.gz.sha512
 
-```bash
-#!/bin/bash
-gpg --import KEYS.txt
-gpg --verify apache-sedona-{{ sedona.next_version }}-src.tar.gz.asc
-gpg --verify apache-sedona-{{ sedona.next_version }}-bin.tar.gz.asc
-shasum -a 512 apache-sedona-{{ sedona.next_version }}-src.tar.gz
-cat apache-sedona-{{ sedona.next_version }}-src.tar.gz.sha512
-shasum -a 512 apache-sedona-{{ sedona.next_version }}-bin.tar.gz
-cat apache-sedona-{{ sedona.next_version }}-bin.tar.gz.sha512
+## Uncompress the source code folder
+tar -xvf apache-sedona-$SEDONA_CURRENT_VERSION-src.tar.gz
+
+## Compile the project from source
+(cd apache-sedona-$SEDONA_CURRENT_VERSION-src;mvn clean install -DskipTests)
+
 ```
 
-If successful, you should be able to see something similar to the following text. It should include `Good signature from` and the final 4 lines should be two pairs of checksum matching each other.
+* If successful, in the output file, you should be able to see something similar to the following text. It should include `Good signature from` and the final 4 lines should be two pairs of checksum matching each other.
 
 ```
 gpg: key 3A79A47AC26FF4CD: "Jia Yu <jiayu@apache.org>" not changed
@@ -77,19 +99,10 @@ d3bdfd4d870838ebe63f21cb93634d2421ec1ac1b8184636206a5dc0d89a78a88257798b1f17371a
 64cea38dd3ca171ee4e2a7365dbce999773862f2a11599bd0f27e9551d740659a519a9b976b3e7b0826088010967093e6acc9462f7073e9737c24b007a2df846  apache-sedona-1.2.0-incubating-bin.tar.gz
 ```
 
+* At the end of the output, you should also see the `BUILD SUCCESS` if you can compile the source code. If this step fails, you can contact Sedona PPMC and see if this is just because of your environment.
+
 ## Check files manually
 
-1. Check if the downloaded files have the correct version: `{{ sedona.next_version }}`
+1. Check if the downloaded files have the correct version.
  
-2. Unzip the downloaded `apache-sedona-{{ sedona.next_version }}-src.tar.gz` file, and check if DISCLAIMER and NOTICE files and included and up to date.
-
-## Compile the project from source
-
-In the unzipped source code folder, try to compile the source code
-
-```
-mvn clean install -DskipTests
-```
-
-If everything works fine, this should give you `Build Success`. If this step fails, you can contact Sedona PPMC and see if this is just because of your environment.
-
+2. In the unzipped source code folder, and check if DISCLAIMER and NOTICE files and included and up to date.

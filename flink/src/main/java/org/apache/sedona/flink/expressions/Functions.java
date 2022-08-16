@@ -15,15 +15,13 @@ package org.apache.sedona.flink.expressions;
 
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.functions.ScalarFunction;
-import org.apache.sedona.core.utils.GeomUtils;
-import org.locationtech.jts.io.WKTWriter;
-import org.apache.spark.sql.sedona_sql.expressions.geohash.GeometryGeoHashEncoder;
-import org.apache.spark.sql.sedona_sql.expressions.geohash.PointGeoHashEncoder;
+import org.apache.sedona.common.utils.GeomUtils;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.locationtech.jts.io.WKTWriter;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.Coordinate;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -35,9 +33,10 @@ import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 public class Functions {
     public static class ST_Buffer extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-        public Geometry eval(Object o, @DataTypeHint("Double") Double radius) {
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+                Object o, @DataTypeHint("Double") Double radius) {
             Geometry geom = (Geometry) o;
-            return geom.buffer(radius);
+            return org.apache.sedona.common.Functions.buffer(geom, radius);
         }
     }
 
@@ -47,7 +46,7 @@ public class Functions {
                 @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
-            return geom1.distance(geom2);
+            return org.apache.sedona.common.Functions.distance(geom1, geom2);
         }
     }
 
@@ -55,12 +54,7 @@ public class Functions {
         @DataTypeHint("Double")
         public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o){
             Geometry geom = (Geometry) o;
-            Coordinate[] points= geom.getCoordinates();
-            double min=Double.MAX_VALUE;
-            for(int i=0;i<points.length;i++){
-                min=Math.min(points[i].getY(),min);
-            }
-            return min;
+            return org.apache.sedona.common.Functions.yMin(geom);
         }
     }
 
@@ -68,29 +62,17 @@ public class Functions {
         @DataTypeHint("Double")
         public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o){
             Geometry geom = (Geometry) o;
-            Coordinate[] points= geom.getCoordinates();
-            double max=Double.MIN_VALUE;
-            for(int i=0;i<points.length;i++){
-                max=Math.max(points[i].getY(),max);
-            }
-            return max;
+            return org.apache.sedona.common.Functions.yMax(geom);
         }
     }
 
 
     public static class ST_Transform extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint("String") String sourceCRS, @DataTypeHint("String") String targetCRS) {
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint("String") String sourceCRS, @DataTypeHint("String") String targetCRS)
+            throws FactoryException, TransformException {
             Geometry geom = (Geometry) o;
-            try {
-                CoordinateReferenceSystem sourceCRScode = CRS.decode(sourceCRS);
-                CoordinateReferenceSystem targetCRScode = CRS.decode(targetCRS);
-                MathTransform transform = CRS.findMathTransform(sourceCRScode, targetCRScode);
-                geom = JTS.transform(geom, transform);
-            } catch (FactoryException | TransformException e) {
-                e.printStackTrace();
-            }
-            return geom;
+            return org.apache.sedona.common.Functions.transform(geom, sourceCRS, targetCRS);
         }
     }
 
@@ -98,8 +80,7 @@ public class Functions {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
-            GeomUtils.flipCoordinates(geom);
-            return geom;
+            return org.apache.sedona.common.Functions.flipCoordinates(geom);
         }
     }
 
@@ -107,11 +88,7 @@ public class Functions {
         @DataTypeHint("String")
         public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object geometry, Integer precision) {
             Geometry geom = (Geometry) geometry;
-            Option<String> geoHash = GeometryGeoHashEncoder.calculate(geom, precision);
-            if (geoHash.isDefined()){
-                return geoHash.get();
-            }
-            return null;
+            return org.apache.sedona.common.Functions.geohash(geom, precision);
         }
     }
 
@@ -119,8 +96,7 @@ public class Functions {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
-            GeomUtils.getInteriorPoint(geom);
-            return geom;
+            return org.apache.sedona.common.Functions.pointOnSurface(geom);
         }
     }
 
@@ -128,26 +104,23 @@ public class Functions {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
-            return geom.reverse();
+            return org.apache.sedona.common.Functions.reverse(geom);
         }
     }
 
     public static class ST_PointN extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, int n) {
-            if(!(o instanceof LineString)) {
-                return null;
-            }
-            LineString lineString = (LineString) o;
-            return GeomUtils.getNthPoint(lineString, n);
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.pointN(geom, n);
         }
     }
 
     public static class ST_ExteriorRing extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
-            Geometry geometry = (Geometry) o;
-            return GeomUtils.getExteriorRing(geometry);
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.exteriorRing(geom);
         }
     }
 
@@ -155,7 +128,7 @@ public class Functions {
         @DataTypeHint("String")
         public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
-            return GeomUtils.getEWKT(geom);
+            return org.apache.sedona.common.Functions.asEWKT(geom);
         }
     }
 
@@ -163,7 +136,7 @@ public class Functions {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
-            return GeomUtils.get2dGeom(geom);
+            return org.apache.sedona.common.Functions.force2D(geom);
         }
     }
 
@@ -171,7 +144,7 @@ public class Functions {
         @DataTypeHint("Boolean")
         public boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
-            return geom.isEmpty();
+            return org.apache.sedona.common.Functions.isEmpty(geom);
         }
     }
 
@@ -179,14 +152,7 @@ public class Functions {
         @DataTypeHint("Double")
         public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
-            Coordinate[] coord = geom.getCoordinates();
-            double max = Double.MIN_VALUE;
-            for (int i = 0; i < coord.length; i++) {
-                if (coord[i].getX() > max) {
-                    max = coord[i].getX();
-                }
-            }
-            return max;
+            return org.apache.sedona.common.Functions.xMax(geom);
         }
     }
 
@@ -194,14 +160,7 @@ public class Functions {
         @DataTypeHint("Double")
         public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
-            Coordinate[] coord = geom.getCoordinates();
-            double min = Double.MAX_VALUE;
-            for(int i=0;i< coord.length;i++){
-                if(coord[i].getX()<min){
-                    min = coord[i].getX();
-                }
-            }
-            return min;
+            return org.apache.sedona.common.Functions.xMin(geom);
         }
     }
 
@@ -209,7 +168,7 @@ public class Functions {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
-            return GeomUtils.buildArea(geom);
+            return org.apache.sedona.common.Functions.buildArea(geom);
         }
     }
 }

@@ -42,7 +42,7 @@ spark_dependencies <- function(spark_version, scala_version, ...) {
       paste0(
         "org.apache.sedona:sedona-",
         c("core", "sql", "viz"),
-        sprintf("-%s_%s:1.0.0-incubating", spark_version, scala_version)
+        sprintf("-%s_%s:1.2.0-incubating", spark_version, scala_version)
       ),
       packages
     )

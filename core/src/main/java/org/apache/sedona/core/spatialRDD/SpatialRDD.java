@@ -21,13 +21,13 @@ package org.apache.sedona.core.spatialRDD;
 
 import org.apache.commons.lang.NullArgumentException;
 import org.apache.log4j.Logger;
+import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.spatialPartitioning.*;
 import org.apache.sedona.core.spatialPartitioning.quadtree.StandardQuadTree;
 import org.apache.sedona.core.spatialRddTool.IndexBuilder;
 import org.apache.sedona.core.spatialRddTool.StatCalculator;
-import org.apache.sedona.core.utils.GeomUtils;
 import org.apache.sedona.core.utils.RDDSampleUtils;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.FlatMapFunction;
