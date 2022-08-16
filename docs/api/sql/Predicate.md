@@ -13,11 +13,11 @@ FROM pointdf
 WHERE ST_Contains(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
 ```
 
-## ST_Intersects
+## ST_Crosses
 
-Introduction: Return true if A intersects B
+Introduction: Return true if A crosses B
 
-Format: `ST_Intersects (A:geometry, B:geometry)`
+Format: `ST_Crosses (A:geometry, B:geometry)`
 
 Since: `v1.0.0`
 
@@ -25,22 +25,22 @@ Spark SQL example:
 ```SQL
 SELECT * 
 FROM pointdf 
-WHERE ST_Intersects(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
+WHERE ST_Crosses(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
 ```
 
-## ST_Within
+## ST_Disjoint
 
-Introduction: Return true if A is fully contained by B
+Introduction: Return true if A and B are disjoint
 
-Format: `ST_Within (A:geometry, B:geometry)`
+Format: `ST_Disjoint (A:geometry, B:geometry)`
 
-Since: `v1.0.0`
+Since: `v1.2.1`
 
 Spark SQL example:
 ```SQL
-SELECT * 
-FROM pointdf 
-WHERE ST_Within(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
+SELECT *
+FROM geom
+WHERE ST_Disjoinnt(geom.geom_a, geom.geom_b)
 ```
 
 ## ST_Equals
@@ -58,11 +58,11 @@ FROM pointdf
 WHERE ST_Equals(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
 ```
 
-## ST_Crosses
+## ST_Intersects
 
-Introduction: Return true if A crosses B
+Introduction: Return true if A intersects B
 
-Format: `ST_Crosses (A:geometry, B:geometry)`
+Format: `ST_Intersects (A:geometry, B:geometry)`
 
 Since: `v1.0.0`
 
@@ -70,51 +70,7 @@ Spark SQL example:
 ```SQL
 SELECT * 
 FROM pointdf 
-WHERE ST_Crosses(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
-```
-
-## ST_Touches
-
-Introduction: Return true if A touches B
-
-Format: `ST_Touches (A:geometry, B:geometry)`
-
-Since: `v1.0.0`
-
-```SQL
-SELECT * 
-FROM pointdf 
-WHERE ST_Touches(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
-```
-
-## ST_Overlaps
-
-Introduction: Return true if A overlaps B
-
-Format: `ST_Overlaps (A:geometry, B:geometry)`
-
-Since: `v1.0.0`
-
-Spark SQL example:
-```SQL
-SELECT *
-FROM geom
-WHERE ST_Overlaps(geom.geom_a, geom.geom_b)
-```
-
-## ST_Disjoint
-
-Introduction: Return true if A and B are disjoint
-
-Format: `ST_Disjoint (A:geometry, B:geometry)`
-
-Since: `v1.2.1`
-
-Spark SQL example:
-```SQL
-SELECT *
-FROM geom
-WHERE ST_Disjoinnt(geom.geom_a, geom.geom_b)
+WHERE ST_Intersects(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
 ```
 
 ## ST_OrderingEquals
@@ -137,3 +93,47 @@ SELECT ST_OrderingEquals(ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'), ST_Ge
 ```
 
 Output: `false`
+
+## ST_Overlaps
+
+Introduction: Return true if A overlaps B
+
+Format: `ST_Overlaps (A:geometry, B:geometry)`
+
+Since: `v1.0.0`
+
+Spark SQL example:
+```SQL
+SELECT *
+FROM geom
+WHERE ST_Overlaps(geom.geom_a, geom.geom_b)
+```
+
+## ST_Touches
+
+Introduction: Return true if A touches B
+
+Format: `ST_Touches (A:geometry, B:geometry)`
+
+Since: `v1.0.0`
+
+```SQL
+SELECT * 
+FROM pointdf 
+WHERE ST_Touches(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
+```
+
+## ST_Within
+
+Introduction: Return true if A is fully contained by B
+
+Format: `ST_Within (A:geometry, B:geometry)`
+
+Since: `v1.0.0`
+
+Spark SQL example:
+```SQL
+SELECT * 
+FROM pointdf 
+WHERE ST_Within(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
+```

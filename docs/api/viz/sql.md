@@ -18,45 +18,12 @@ SedonaVizRegistrator.registerAll(sparkSession)
 
 ## Regular functions
 
-### ST_Pixelize
-
-Introduction: Convert a geometry to an array of pixels given a resolution
-
-You should use it together with `Lateral View` and `Explode`
-
-Format: `ST_Pixelize (A:geometry, ResolutionX:int, ResolutionY:int, Boundary:geometry)`
-
-Since: `v1.0.0`
-
-Spark SQL example:
-```SQL
-SELECT ST_Pixelize(shape, 256, 256, (ST_Envelope_Aggr(shape) FROM pointtable))
-FROM polygondf
-```
-
-### ST_TileName
-
-Introduction: Return the map tile name for a given zoom level. Please refer to [OpenStreetMap ZoomLevel](http://wiki.openstreetmap.org/wiki/Zoom_levels) and [OpenStreetMap tile name](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames).
-
-!!!note
-	Tile name is formatted as a "Z-X-Y" string. Z is zoom level. X is tile coordinate on X axis. Y is tile coordinate on Y axis.
-
-Format: `ST_TileName (A:pixel, ZoomLevel:int)`
-
-Since: `v1.0.0`
-
-Spark SQL example:
-```SQL
-SELECT ST_TileName(pixels.px, 3)
-FROM pixels
-```
-
 ### ST_Colorize
 
 Introduction: Given the weight of a pixel, return the corresponding color. The weight can be the spatial aggregation of spatial objects or spatial observations such as temperature and humidity.
 
 !!!note
-	The color is encoded to an Integer type value in DataFrame. When you print it, it will show some nonsense values. You can just treat them as colors in GeoSparkViz.
+The color is encoded to an Integer type value in DataFrame. When you print it, it will show some nonsense values. You can just treat them as colors in GeoSparkViz.
 
 Format: `ST_Colorize (weight:Double, maxWeight:Double, mandatory color: string (Optional))`
 
@@ -104,6 +71,39 @@ Spark SQL example:
 ```SQL
 SELECT ST_EncodeImage(images.img)
 FROM images
+```
+
+### ST_Pixelize
+
+Introduction: Convert a geometry to an array of pixels given a resolution
+
+You should use it together with `Lateral View` and `Explode`
+
+Format: `ST_Pixelize (A:geometry, ResolutionX:int, ResolutionY:int, Boundary:geometry)`
+
+Since: `v1.0.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_Pixelize(shape, 256, 256, (ST_Envelope_Aggr(shape) FROM pointtable))
+FROM polygondf
+```
+
+### ST_TileName
+
+Introduction: Return the map tile name for a given zoom level. Please refer to [OpenStreetMap ZoomLevel](http://wiki.openstreetmap.org/wiki/Zoom_levels) and [OpenStreetMap tile name](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames).
+
+!!!note
+	Tile name is formatted as a "Z-X-Y" string. Z is zoom level. X is tile coordinate on X axis. Y is tile coordinate on Y axis.
+
+Format: `ST_TileName (A:pixel, ZoomLevel:int)`
+
+Since: `v1.0.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_TileName(pixels.px, 3)
+FROM pixels
 ```
 
 ## Aggregate functions
