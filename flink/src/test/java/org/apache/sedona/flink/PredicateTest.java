@@ -42,4 +42,22 @@ public class PredicateTest extends TestBase{
         Table result = pointTable.filter(expr);
         assertEquals(999, count(result));
     }
+
+    @Test
+    public void testContains() {
+        Table pointTable = createPointTable(testDataSize);
+        String polygon = createPolygonWKT(testDataSize).get(0).getField(0).toString();
+        String expr = "ST_Contains(ST_GeomFromWkt('" + polygon + "'), geom_point)";
+        Table result = pointTable.filter(expr);
+        assertEquals(1, count(result));
+    }
+
+    @Test
+    public void testOrderingEquals() {
+        Table lineStringTable = createLineStringTable(testDataSize);
+        String lineString = createLineStringWKT(testDataSize).get(0).getField(0).toString();
+        String expr = "ST_OrderingEquals(ST_GeomFromWkt('" + lineString + "'), geom_linestring)";
+        Table result = lineStringTable.filter(expr);
+        assertEquals(1, count(result));
+    }
 }

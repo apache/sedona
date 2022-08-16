@@ -247,6 +247,13 @@ public class TestBase {
                         $(pointColNames[1]));
     }
 
+    static Table createLineStringTable(int size) {
+        return createLineStringTextTable(size)
+                .select(call(Constructors.ST_LineStringFromText.class.getSimpleName(),
+                        $(linestringColNames[0])).as(linestringColNames[0]),
+                        $(linestringColNames[1]));
+    }
+
     Table createPolygonTable(int size) {
         return createPolygonTextTable(size)
                 .select(call(Constructors.ST_PolygonFromText.class.getSimpleName(),
