@@ -26,6 +26,7 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
+import org.wololo.jts2geojson.GeoJSONWriter;
 import scala.Option;
 
 import java.util.Optional;
@@ -131,6 +132,14 @@ public class Functions {
         public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.asEWKT(geom);
+        }
+    }
+
+    public static class ST_AsGeoJSON extends ScalarFunction {
+        @DataTypeHint("String")
+        public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.asGeoJson(geom);
         }
     }
 

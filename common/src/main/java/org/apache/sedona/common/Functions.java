@@ -13,7 +13,6 @@
  */
 package org.apache.sedona.common;
 
-import java.util.Optional;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.common.utils.GeometryGeoHashEncoder;
 import org.geotools.geometry.jts.JTS;
@@ -25,7 +24,7 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
-
+import org.wololo.jts2geojson.GeoJSONWriter;
 
 
 public class Functions {
@@ -116,6 +115,14 @@ public class Functions {
 
     public static String asEWKT(Geometry geometry) {
         return GeomUtils.getEWKT(geometry);
+    }
+
+    public static String asGeoJson(Geometry geometry) {
+        if (geometry == null) {
+            return null;
+        }
+        GeoJSONWriter writer = new GeoJSONWriter();
+        return writer.write(geometry).toString();
     }
 
     public static Geometry force2D(Geometry geometry) {
