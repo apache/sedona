@@ -16,22 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.expressions.geohash
+package org.apache.sedona.common.utils;
 
-import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory}
+import java.util.Optional;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 
-object GeometryGeoHashEncoder {
-  private val geometryFactory = new GeometryFactory()
-  def calculate(geom: Geometry, precision: Int): Option[String] = {
-    val gbox = geom.getEnvelope.getEnvelopeInternal
+public class GeometryGeoHashEncoder {
+  private static GeometryFactory geometryFactory = new GeometryFactory();
+
+  public static String calculate(Geometry geom, int precision) {
+    Envelope gbox = geom.getEnvelope().getEnvelopeInternal();
     // Latitude can take values in [-90, 90]
     // Longitude can take values in [-180, 180]
-    if (gbox.getMinX < -180 || gbox.getMinY < -90 || gbox.getMaxX > 180 || gbox.getMaxY > 90) None
-    else {
-      val lon = gbox.getMinX + (gbox.getMaxX - gbox.getMinX) / 2
-      val lat = gbox.getMinY + (gbox.getMaxY - gbox.getMinY) / 2
-
-      Some(PointGeoHashEncoder.calculateGeoHash(geometryFactory.createPoint(new Coordinate(lon, lat)), precision))
+    if (gbox.getMinX() < -180 || gbox.getMinY() < -90 || gbox.getMaxX() > 180 || gbox.getMaxY() > 90) {
+        return null;
     }
+
+    double lon = gbox.getMinX() + (gbox.getMaxX() - gbox.getMinX()) / 2;
+    double lat = gbox.getMinY() + (gbox.getMaxY() - gbox.getMinY()) / 2;
+
+    return PointGeoHashEncoder.calculateGeoHash(geometryFactory.createPoint(new Coordinate(lon, lat)), precision);
   }
 }

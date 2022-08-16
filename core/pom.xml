@@ -37,6 +37,12 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.sedona</groupId>
+            <artifactId>sedona-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>org.apache.hadoop</groupId>

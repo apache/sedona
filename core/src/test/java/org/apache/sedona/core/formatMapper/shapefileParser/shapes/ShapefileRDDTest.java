@@ -20,13 +20,13 @@ package org.apache.sedona.core.formatMapper.shapefileParser.shapes;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileRDD;
 import org.apache.sedona.core.formatMapper.shapefileParser.boundary.BoundBox;
 import org.apache.sedona.core.spatialOperator.RangeQuery;
 import org.apache.sedona.core.spatialRDD.LineStringRDD;
 import org.apache.sedona.core.spatialRDD.PointRDD;
 import org.apache.sedona.core.spatialRDD.PolygonRDD;
-import org.apache.sedona.core.utils.GeomUtils;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.geotools.data.DataStore;

@@ -18,17 +18,18 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
+import org.apache.sedona.common.Functions
+import org.apache.sedona.common.utils.GeomUtils
 import org.apache.sedona.core.geometryObjects.Circle
-import org.apache.sedona.core.utils.GeomUtils
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.{CodegenContext, CodegenFallback, ExprCode}
-import org.apache.spark.sql.catalyst.expressions.{BoundReference, Expression, Generator}
+import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.collect.Collect
-import org.apache.spark.sql.sedona_sql.expressions.geohash.{GeoHashDecoder, GeometryGeoHashEncoder, InvalidGeoHashException}
+import org.apache.spark.sql.sedona_sql.expressions.geohash.{GeoHashDecoder, InvalidGeoHashException}
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.sedona_sql.expressions.subdivide.GeometrySubDivider
 import org.apache.spark.sql.types.{ArrayType, _}
@@ -61,18 +62,7 @@ import scala.util.{Failure, Success, Try}
   * @param inputExpressions This function takes two geometries and calculates the distance between two objects.
   */
 case class ST_Distance(inputExpressions: Seq[Expression])
-  extends BinaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 2)
-
-  override def toString: String = s" **${ST_Distance.getClass.getName}**  "
-
-  override def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
-    leftGeometry.distance(rightGeometry)
-  }
-
-  override def dataType = DoubleType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(Functions.distance) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -81,21 +71,7 @@ case class ST_Distance(inputExpressions: Seq[Expression])
 
 
 case class ST_YMax(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    val seqRev : Array[Coordinate] = geometry.getCoordinates()
-    var maxVal:Double = Double.MinValue
-    for(x <- seqRev ){
-      maxVal=Math.max(maxVal,x.getY())
-    }
-    maxVal
-  }
-
-  override def dataType: DataType = DoubleType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.yMax) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -103,26 +79,13 @@ case class ST_YMax(inputExpressions: Seq[Expression])
 }
 
 case class ST_YMin(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    val seqRev : Array[Coordinate] = geometry.getCoordinates()
-    var minVal:Double = Double.MaxValue
-    for(x <- seqRev){
-      minVal=Math.min(minVal,x.getY())
-    }
-    minVal
-  }
-
-  override def dataType: DataType = DoubleType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.yMin) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
+
 case class ST_3DDistance(inputExpressions: Seq[Expression])
   extends BinaryGeometryExpression with CodegenFallback {
   assert(inputExpressions.length == 2)
@@ -191,26 +154,7 @@ case class ST_NPoints(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_Buffer(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
-  assert(inputExpressions.length == 2)
-
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val buffer: Double = inputExpressions(1).eval(input) match {
-      case a: Decimal => a.toDouble
-      case a: Double => a
-      case a: Int => a
-    }
-    inputExpressions(0).toGeometry(input) match {
-      case geometry: Geometry => geometry.buffer(buffer).toGenericArrayData
-      case _ => null
-    }
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(Functions.buffer) with CodegenFallback {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -318,22 +262,18 @@ case class ST_Transform(inputExpressions: Seq[Expression])
   override def nullable: Boolean = true
 
   override def eval(input: InternalRow): Any = {
-    val originalGeometry = inputExpressions(0).toGeometry(input)
+    val geometry = inputExpressions(0).toGeometry(input)
     val sourceCRS = inputExpressions(1).asString(input)
     val targetCRS = inputExpressions(2).asString(input)
 
-    (originalGeometry, sourceCRS, targetCRS) match {
-      case (originalGeometry: Geometry, sourceCRS: String, targetCRS: String) =>
-        val sourceCRScode = CRS.decode(sourceCRS)
-        val targetCRScode = CRS.decode(targetCRS)
-        var transform: MathTransform = null
-        if (inputExpressions.length == 4) {
-          transform = CRS.findMathTransform(sourceCRScode, targetCRScode, inputExpressions(3).eval(input).asInstanceOf[Boolean])
+    (geometry, sourceCRS, targetCRS) match {
+      case (geometry: Geometry, sourceCRS: String, targetCRS: String) =>
+        val lenient = if (inputExpressions.length == 4) {
+          inputExpressions(3).eval(input).asInstanceOf[Boolean]
+        } else {
+          false
         }
-        else {
-          transform = CRS.findMathTransform(sourceCRScode, targetCRScode, false)
-        }
-        JTS.transform(originalGeometry, transform).toGenericArrayData
+        Functions.transform(geometry, sourceCRS, targetCRS, lenient).toGenericArrayData
       case (_, _, _) => null
     }
   }
@@ -1027,19 +967,7 @@ case class ST_EndPoint(inputExpressions: Seq[Expression])
 }
 
 case class ST_ExteriorRing(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    geometry match {
-      case polygon: Polygon => polygon.getExteriorRing.toGenericArrayData
-      case _ => null
-    }
-
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.exteriorRing) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1333,17 +1261,7 @@ case class ST_NumGeometries(inputExpressions: Seq[Expression])
   * @param inputExpressions Geometry
   */
 case class ST_FlipCoordinates(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    GeomUtils.flipCoordinates(geometry)
-    geometry.toGenericArrayData
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.flipCoordinates) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1449,32 +1367,7 @@ case class ST_MakePolygon(inputExpressions: Seq[Expression])
 }
 
 case class ST_GeoHash(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
-  assert(inputExpressions.length == 2)
-
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val geometry = inputExpressions(0).toGeometry(input)
-
-    val precision = inputExpressions(1).toInt(input)
-
-    geometry match {
-      case geom: Geometry =>
-        val geoHash = GeometryGeoHashEncoder.calculate(geom, precision)
-        geoHash match {
-          case Some(value) => UTF8String.fromString(value)
-          case None => null
-        }
-
-      case _ => null
-    }
-
-  }
-
-  override def dataType: DataType = StringType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(Functions.geohash) with CodegenFallback {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1581,16 +1474,7 @@ case class ST_Multi(inputExpressions: Seq[Expression]) extends UnaryGeometryExpr
  * @param inputExpressions Geometry
  */
 case class ST_PointOnSurface(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    new GenericArrayData(GeometrySerializer.serialize(GeomUtils.getInteriorPoint(geometry)))
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.pointOnSurface) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1603,16 +1487,7 @@ case class ST_PointOnSurface(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_Reverse(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    new GenericArrayData(GeometrySerializer.serialize(geometry.reverse()))
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.reverse) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1625,30 +1500,7 @@ case class ST_Reverse(inputExpressions: Seq[Expression])
  * @param inputExpressions sequence of 2 input arguments, a geometry and a value 'n'
  */
 case class ST_PointN(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
-  inputExpressions.validateLength(2)
-
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val geometry = inputExpressions.head.toGeometry(input)
-    val n = inputExpressions(1).toInt(input)
-    getNthPoint(geometry, n)
-  }
-
-  private def getNthPoint(geometry: Geometry, n: Int): GenericArrayData = {
-    geometry match {
-      case linestring: LineString => val point = GeomUtils.getNthPoint(linestring, n)
-        point match {
-          case geometry: Geometry => new GenericArrayData(GeometrySerializer.serialize(geometry))
-          case _ => null
-        }
-      case _ => null
-    }
-  }
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(Functions.pointN) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
       copy(inputExpressions = newChildren)
@@ -1661,16 +1513,7 @@ case class ST_PointN(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_Force_2D(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    new GenericArrayData(GeometrySerializer.serialize(GeomUtils.get2dGeom(geometry)))
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.force2D) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1683,16 +1526,7 @@ case class ST_Force_2D(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_AsEWKT(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    UTF8String.fromString(GeomUtils.getEWKT(geometry))
-  }
-
-  override def dataType: DataType = StringType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends  InferredUnaryExpression(Functions.asEWKT) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1705,16 +1539,7 @@ case class ST_AsEWKT(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_IsEmpty(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    geometry.isEmpty()
-  }
-
-  override def dataType: DataType = BooleanType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.isEmpty) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1727,25 +1552,7 @@ case class ST_IsEmpty(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_XMax(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    var coord:Array[Coordinate] = geometry.getCoordinates()
-    var maxval = Double.MinValue
-    for (point<-coord) {
-      if(point.getX()>maxval){
-        maxval = point.getX()
-      }
-    }
-    maxval
-
-  }
-
-  override def dataType: DataType = DoubleType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.xMax) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1758,25 +1565,7 @@ case class ST_XMax(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_XMin(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    var coord: Array[Coordinate] = geometry.getCoordinates()
-    var minval = Double.MaxValue
-    for (point <- coord) {
-      if (point.getX() < minval) {
-        minval = point.getX()
-      }
-    }
-    minval
-
-  }
-
-  override def dataType: DataType = DoubleType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.xMin) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1790,22 +1579,7 @@ case class ST_XMin(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_BuildArea(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val geometry = inputExpressions.head.toGeometry(input)
-    geometry match {
-      case geom: Geometry => new GenericArrayData(GeometrySerializer.serialize(GeomUtils.buildArea(geom)))
-      case _ => null
-    }
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.buildArea) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
     copy(inputExpressions = newChildren)
