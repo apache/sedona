@@ -67,14 +67,14 @@ public class ConstructorTest extends TestBase{
 
         String expected = "POINT (1 2)";
 
-        assertEquals(result, expected);
+        assertEquals(expected, result);
     }
 
     @Test
     public void testPointFromText() {
         List<Row> data = createPointWKT(testDataSize);
         Row result = last(createPointTable(testDataSize));
-        assertEquals(result.toString(), data.get(data.size() - 1).toString());
+        assertEquals(data.get(data.size() - 1).toString(), result.toString());
     }
 
     @Test
@@ -86,7 +86,7 @@ public class ConstructorTest extends TestBase{
                         $(linestringColNames[1]));
         Row result = last(lineStringTable);
 
-        assertEquals(result.toString(), data.get(data.size() - 1).toString());
+        assertEquals(data.get(data.size() - 1).toString(), result.toString());
     }
 
     @Test
@@ -98,14 +98,14 @@ public class ConstructorTest extends TestBase{
                         $(linestringColNames[1]));
         Row result = last(lineStringTable);
 
-        assertEquals(result.toString(), data.get(data.size() - 1).toString());
+        assertEquals(data.get(data.size() - 1).toString(), result.toString());
     }
 
     @Test
     public void testPolygonFromText() {
         List<Row> data = createPolygonWKT(testDataSize);
         Row result = last(createPolygonTable(testDataSize));
-        assertEquals(result.toString(), data.get(data.size() - 1).toString());
+        assertEquals(data.get(data.size() - 1).toString(), result.toString());
     }
 
     @Test
@@ -116,7 +116,7 @@ public class ConstructorTest extends TestBase{
                 $(polygonColNames[0])).as(polygonColNames[0]),
                 $(polygonColNames[1]));
         Row result = last(geomTable);
-        assertEquals(result.toString(), data.get(data.size() - 1).toString());
+        assertEquals(data.get(data.size() - 1).toString(), result.toString());
     }
 
     @Test
@@ -127,7 +127,7 @@ public class ConstructorTest extends TestBase{
                         $(polygonColNames[0])).as(polygonColNames[0]),
                 $(polygonColNames[1]));
         Row result = last(geomTable);
-        assertEquals(result.toString(), data.get(data.size() - 1).toString());
+        assertEquals(data.get(data.size() - 1).toString(), result.toString());
     }
 
     @Test
@@ -144,10 +144,10 @@ public class ConstructorTest extends TestBase{
         coordinates[4] = coordinates[0];
         GeometryFactory geometryFactory = new GeometryFactory();
         Geometry geom = geometryFactory.createPolygon(coordinates);
-        assertEquals(geom.toString(), last(tableEnv.sqlQuery("SELECT ST_PolygonFromEnvelope(1, 100, 2, 200)"))
-                .getField(0).toString());
-        assertEquals(geom.toString(), last(tableEnv.sqlQuery("SELECT ST_PolygonFromEnvelope(1.0, 100.0, 2.0, 200.0)"))
-                .getField(0).toString());
+        assertEquals(last(tableEnv.sqlQuery("SELECT ST_PolygonFromEnvelope(1, 100, 2, 200)"))
+                .getField(0).toString(), geom.toString());
+        assertEquals(last(tableEnv.sqlQuery("SELECT ST_PolygonFromEnvelope(1.0, 100.0, 2.0, 200.0)"))
+                .getField(0).toString(), geom.toString());
 
     }
 
@@ -167,7 +167,7 @@ public class ConstructorTest extends TestBase{
                 .getFieldAs(0);
         String expectedGeom = reader.read(expectedGeoJSON).toText();
 
-        assertEquals(result, expectedGeom);
+        assertEquals(expectedGeom, result);
     }
 
     @Test
@@ -191,7 +191,7 @@ public class ConstructorTest extends TestBase{
 
         String expectedGeom = "LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)";
 
-        assertEquals(result, expectedGeom);
+        assertEquals(expectedGeom, result);
 
        }
 
@@ -211,7 +211,7 @@ public class ConstructorTest extends TestBase{
                         .toString();
         String expectedGeom = "POLYGON ((-180 -39.375, -180 -33.75, -168.75 -33.75, -168.75 -39.375, -180 -39.375))";
 
-        assertEquals(result, expectedGeom);
+        assertEquals(expectedGeom, result);
     }
 
     @Test
@@ -229,6 +229,6 @@ public class ConstructorTest extends TestBase{
                 .toString();
         String expectedGeom = "POLYGON ((-178.4168529510498 -37.69778251647949, -178.4168529510498 -37.697739601135254, -178.41681003570557 -37.697739601135254, -178.41681003570557 -37.69778251647949, -178.4168529510498 -37.69778251647949))";
 
-        assertEquals(result, expectedGeom);
+        assertEquals(expectedGeom, result);
     }
 }
