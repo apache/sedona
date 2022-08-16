@@ -26,6 +26,7 @@ import org.apache.sedona.core.spatialOperator.JoinQuery
 import org.apache.sedona.core.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}
 import org.apache.sedona.sql.utils.Adapter
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.types._
 import org.apache.spark.storage.StorageLevel
 import org.locationtech.jts.geom.Point
 import org.scalatest.GivenWhenThen
@@ -215,6 +216,212 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
         assert(rows(0).get(1).asInstanceOf[String] == "attr1")
         assert(rows(0).get(2).asInstanceOf[String] == "attr2")
       }
+    }
+
+    it("can convert spatial RDD to DataFrame with user-supplied schema") {
+      val srcDF = sparkSession.sql("""
+        select
+          ST_PointFromText('40.7128,-74.0060', ',') as geom,
+          'abc' as exampletext,
+          1.23 as exampledouble,
+          234 as exampleint
+
+        union
+
+        select
+          ST_PointFromText('40.7128,-74.0060', ',') as geom,
+          null as exampletext,
+          null as exampledouble,
+          null as exampleint
+      """)
+
+      // Convert to DataFrame
+      // Tweak the column names to camelCase to ensure it also renames
+      val schema = StructType(Array(
+        StructField("leftGeometry", GeometryUDT, nullable = true),
+        StructField("exampleText", StringType, nullable = true),
+        StructField("exampleDouble", DoubleType, nullable = true),
+        StructField("exampleInt", IntegerType, nullable = true)
+      ))
+      val rdd = Adapter.toSpatialRdd(srcDF, "geom")
+      val df = Adapter.toDf(rdd, schema, sparkSession)
+
+      // Check results
+      // Force an action so that spark has to serialize the data -- this will surface
+      // a serialization error if the schema or coercion is incorrect, e.g.
+      // "Error while encoding: java.lang.RuntimeException: <desired data type> is not a
+      // valid external type for schema of <current data type>"
+      println(df.show(1))
+
+      assert(
+        df.schema == schema,
+        s"Expected schema\n$schema\nbut got\n${df.schema}!"
+      )
+    }
+
+    it("can convert JavaPairRDD to DataFrame with user-supplied schema") {
+      // Prepare JavaPairRDD
+      // Left table
+      val pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(arealmPointInputLocation)
+      pointCsvDF.createOrReplaceTempView("pointtable")
+      val pointDf = sparkSession.sql("""
+        select
+          ST_Point(
+            cast(pointtable._c0 as Decimal(24,20)),
+            cast(pointtable._c1 as Decimal(24,20))
+          ) as arealandmark
+        from pointtable
+      """)
+      val pointRDD = Adapter.toSpatialRdd(pointDf, "arealandmark")
+      pointRDD.analyze()
+
+      // Right table
+      val polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      val polygonDf = sparkSession.sql("""
+        select
+          ST_GeomFromWKT(polygontable._c0) as usacounty,
+          'abc' as exampletext,
+          1.23 as examplefloat,
+          1.23 as exampledouble,
+          10 as exampleshort,
+          234 as exampleint,
+          9223372036854775800 as examplelong,
+          true as examplebool,
+          date('2022-01-01') as exampledate,
+          timestamp('2022-01-01T00:00:00.000000Z') as exampletimestamp,
+          named_struct('structtext', 'spark', 'structint', 5, 'structbool', false) as examplestruct
+        from polygontable
+
+        union
+
+        -- Test that nulls can be properly encoded
+        select
+          ST_GeomFromWKT(polygontable._c0) as usacounty,
+          null as exampletext,
+          null as examplefloat,
+          null as exampledouble,
+          null as exampleshort,
+          null as exampleint,
+          null as examplelong,
+          null as examplebool,
+          null as exampledate,
+          null as exampletimestamp,
+          null as examplestruct
+        from polygontable
+      """)
+      polygonDf.show(1)
+      val polygonRDD = Adapter.toSpatialRdd(polygonDf, "usacounty")
+      polygonRDD.analyze()
+
+      pointRDD.spatialPartitioning(GridType.QUADTREE)
+      polygonRDD.spatialPartitioning(pointRDD.getPartitioner)
+      pointRDD.buildIndex(IndexType.QUADTREE, true)
+      val joinResultPairRDD = JoinQuery.SpatialJoinQueryFlat(pointRDD, polygonRDD, true, true)
+
+      // Convert to DataFrame
+      // Tweak the column names to camelCase to ensure it also renames
+      val schema = StructType(Array(
+        StructField("leftGeometry", GeometryUDT, nullable = true),
+        StructField("exampleText", StringType, nullable = true),
+        StructField("exampleFloat", FloatType, nullable = true),
+        StructField("exampleDouble", DoubleType, nullable = true),
+        StructField("exampleShort", ShortType, nullable = true),
+        StructField("exampleInt", IntegerType, nullable = true),
+        StructField("exampleLong", LongType, nullable = true),
+        StructField("exampleBool", BooleanType, nullable = true),
+        StructField("exampleDate", DateType, nullable = true),
+        StructField("exampleTimestamp", TimestampType, nullable = true),
+        StructField("exampleStruct", StructType(Array(
+          StructField("structText", StringType, nullable = true),
+          StructField("structInt", IntegerType, nullable = true),
+          StructField("structBool", BooleanType, nullable = true)
+        ))),
+        StructField("rightGeometry", GeometryUDT, nullable = true),
+        // We have to include a column for right user data (even though there is none)
+        // since there is no way to distinguish between no data and nullable data
+        StructField("rightUserData", StringType, nullable = true)
+      ))
+      val joinResultDf = Adapter.toDf(joinResultPairRDD, schema, sparkSession)
+
+      // Check results
+      // Force an action so that spark has to serialize the data -- this will surface
+      // a serialization error if the schema or coercion is incorrect, e.g.
+      // "Error while encoding: java.lang.RuntimeException: <desired data type> is not a
+      // valid external type for schema of <current data type>"
+      println(joinResultDf.show(1))
+
+      assert(
+        joinResultDf.schema == schema,
+        s"Expected schema\n$schema\nbut got\n${joinResultDf.schema}!"
+      )
+    }
+
+    /**
+     * If providing fieldNames instead of a schema, it should return the same result
+     * as if we do provide a schema but declare all non-geom fields to be StringType
+     */
+    it("is consistent with toDf without schema vs with all StringType fields") {
+      // Prepare JavaPairRDD
+      // Left table
+      val pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(arealmPointInputLocation)
+      pointCsvDF.createOrReplaceTempView("pointtable")
+      val pointDf = sparkSession.sql(
+        """
+        select
+          ST_Point(
+            cast(pointtable._c0 as Decimal(24,20)),
+            cast(pointtable._c1 as Decimal(24,20))
+          ) as arealandmark,
+          null as userdata
+        from pointtable
+      """)
+      val pointRDD = Adapter.toSpatialRdd(pointDf, "arealandmark")
+      pointRDD.analyze()
+
+      // Right table
+      val polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      val polygonDf = sparkSession.sql(
+        """
+        select
+          ST_GeomFromWKT(polygontable._c0) as usacounty,
+          'abc' as exampletext,
+          1.23 as exampledouble,
+          234 as exampleint
+        from polygontable
+      """)
+      val polygonRDD = Adapter.toSpatialRdd(polygonDf, "usacounty")
+      polygonRDD.analyze()
+
+      pointRDD.spatialPartitioning(GridType.QUADTREE)
+      polygonRDD.spatialPartitioning(pointRDD.getPartitioner)
+      pointRDD.buildIndex(IndexType.QUADTREE, true)
+      val joinResultPairRDD = JoinQuery.SpatialJoinQueryFlat(pointRDD, polygonRDD, true, true)
+
+      // Convert to DataFrame
+      val schema = StructType(Array(
+        StructField("leftgeometry", GeometryUDT, nullable = true),
+        StructField("exampletext", StringType, nullable = true),
+        StructField("exampledouble", StringType, nullable = true),
+        StructField("exampleint", StringType, nullable = true),
+        StructField("rightgeometry", GeometryUDT, nullable = true),
+        StructField("userdata", StringType, nullable = true)
+      ))
+      val joinResultDf = Adapter.toDf(joinResultPairRDD, schema, sparkSession)
+      val resultWithoutSchema = Adapter.toDf(joinResultPairRDD, Seq("exampletext", "exampledouble", "exampleint"), Seq("userdata"), sparkSession)
+
+      // Check results
+      // Force an action so that spark has to serialize the data -- this will surface
+      // a serialization error if the schema or coersion is incorrect, e.g.
+      // "Error while encoding: java.lang.RuntimeException: <desired data type> is not a
+      // valid external type for schema of <current data type>"
+      println(joinResultDf.show(1))
+
+      assert(
+        joinResultDf.schema == resultWithoutSchema.schema,
+        s"Schema of\n$schema\ndoes not match result from supplying field names\n${joinResultDf.schema}!"
+      )
     }
 
     it("can convert spatial pair RDD with user data to a valid Dataframe") {
