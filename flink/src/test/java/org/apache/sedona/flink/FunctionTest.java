@@ -39,6 +39,14 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testBuffer() {
+        Table pointTable = createPointTable_real(testDataSize);
+        Table bufferTable = pointTable.select(call(Functions.ST_Buffer.class.getSimpleName(), $(pointColNames[0]), 1));
+        Geometry result = (Geometry) first(bufferTable).getField(0);
+        assert(result instanceof Polygon);
+    }
+
+    @Test
     public void testFlipCoordinates() {
         Table pointTable = createPointTable_real(testDataSize);
         Table flippedTable = pointTable.select(call(Functions.ST_FlipCoordinates.class.getSimpleName(), $(pointColNames[0])));
