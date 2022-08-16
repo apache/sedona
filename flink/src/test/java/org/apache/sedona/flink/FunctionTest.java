@@ -96,7 +96,7 @@ public class FunctionTest extends TestBase{
         pointTable = pointTable.select(
                 call("ST_GeoHash", $(pointColNames[0]), 5)
         );
-        assertEquals(first(pointTable).getField(0), Optional.of("s0000"));
+        assertEquals(first(pointTable).getField(0), "s0000");
     }
 
     @Test

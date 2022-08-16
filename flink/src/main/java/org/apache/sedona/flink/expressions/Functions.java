@@ -28,8 +28,6 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import scala.Option;
 
-import java.util.Optional;
-
 import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 
 public class Functions {
@@ -87,10 +85,10 @@ public class Functions {
     }
 
     public static class ST_GeoHash extends ScalarFunction {
-        @DataTypeHint("RAW")
-        public Optional<String> eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object geometry, Integer precision) {
+        @DataTypeHint("String")
+        public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object geometry, Integer precision) {
             Geometry geom = (Geometry) geometry;
-            return Optional.ofNullable(org.apache.sedona.common.Functions.geohash(geom, precision));
+            return org.apache.sedona.common.Functions.geohash(geom, precision);
         }
     }
 
