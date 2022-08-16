@@ -16,6 +16,20 @@ SELECT ST_AsEWKT(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_AsGeoJSON
+
+Introduction: Return the [GeoJSON](https://geojson.org/) string representation of a geometry
+
+Format: `ST_AsGeoJSON (A:geometry)`
+
+Since: `v1.3.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_AsGeoJSON(polygondf.countyshape)
+FROM polygondf
+```
+
 ## ST_Buffer
 
 Introduction: Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance.

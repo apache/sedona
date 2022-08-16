@@ -19,26 +19,22 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.Functions
-import org.apache.sedona.common.utils.GeomUtils
 import org.apache.sedona.core.geometryObjects.Circle
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.codegen.{CodegenContext, CodegenFallback, ExprCode}
+import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.collect.Collect
-import org.apache.spark.sql.sedona_sql.expressions.geohash.{GeoHashDecoder, InvalidGeoHashException}
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.sedona_sql.expressions.subdivide.GeometrySubDivider
-import org.apache.spark.sql.types.{ArrayType, _}
+import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
-import org.geotools.geometry.jts.JTS
-import org.geotools.referencing.CRS
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom.util.GeometryFixer
-import org.locationtech.jts.geom.{PrecisionModel, _}
+import org.locationtech.jts.geom._
 import org.locationtech.jts.io.{ByteOrderValues, WKBWriter, WKTWriter}
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.IsSimpleOp
@@ -48,8 +44,6 @@ import org.locationtech.jts.operation.linemerge.LineMerger
 import org.locationtech.jts.operation.valid.IsValidOp
 import org.locationtech.jts.precision.GeometryPrecisionReducer
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier
-import org.opengis.referencing.operation.MathTransform
-import org.wololo.jts2geojson.GeoJSONWriter
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.Coordinate
 
@@ -497,16 +491,7 @@ case class ST_AsText(inputExpressions: Seq[Expression])
 }
 
 case class ST_AsGeoJSON(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    val writer = new GeoJSONWriter()
-    UTF8String.fromString(writer.write(geometry).toString)
-  }
-
-  override def dataType: DataType = StringType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.asGeoJson) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
