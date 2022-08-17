@@ -117,6 +117,10 @@ public class Functions {
         return GeomUtils.getEWKT(geometry);
     }
 
+    public static byte[] asEWKB(Geometry geometry) {
+        return GeomUtils.getEWKB(geometry);
+    }
+
     public static String asGeoJson(Geometry geometry) {
         if (geometry == null) {
             return null;

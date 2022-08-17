@@ -19,7 +19,6 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.Functions
-import org.apache.sedona.common.utils.GeomUtils
 import org.apache.sedona.core.geometryObjects.Circle
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.internal.Logging
@@ -36,7 +35,6 @@ import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom.util.GeometryFixer
 import org.locationtech.jts.geom._
-import org.locationtech.jts.io.{ByteOrderValues, WKBWriter, WKTWriter}
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.IsSimpleOp
 import org.locationtech.jts.operation.buffer.BufferParameters
@@ -48,7 +46,6 @@ import org.locationtech.jts.simplify.TopologyPreservingSimplifier
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.Coordinate
 
-import java.nio.ByteOrder
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -474,17 +471,7 @@ case class ST_PrecisionReduce(inputExpressions: Seq[Expression])
 }
 
 case class ST_AsText(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    val writer = new WKTWriter(GeomUtils.getDimension(geometry))
-    UTF8String.fromString(writer.write(geometry))
-  }
-
-  override def dataType: DataType = StringType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends  InferredUnaryExpression(Functions.asEWKT) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -500,19 +487,7 @@ case class ST_AsGeoJSON(inputExpressions: Seq[Expression])
 }
 
 case class ST_AsBinary(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  inputExpressions.validateLength(1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    val dimensions = if (geometry.isEmpty() || java.lang.Double.isNaN(geometry.getCoordinate.getZ)) 2 else 3
-    val endian = if (ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN) ByteOrderValues.BIG_ENDIAN else ByteOrderValues.LITTLE_ENDIAN
-    val writer = new WKBWriter(dimensions, endian)
-    writer.write(geometry)
-  }
-
-  override def dataType: DataType = BinaryType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.asEWKB) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -520,19 +495,7 @@ case class ST_AsBinary(inputExpressions: Seq[Expression])
 }
 
 case class ST_AsEWKB(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  inputExpressions.validateLength(1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    val dimensions = if (geometry.isEmpty() || java.lang.Double.isNaN(geometry.getCoordinate.getZ)) 2 else 3
-    val endian = if (ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN) ByteOrderValues.BIG_ENDIAN else ByteOrderValues.LITTLE_ENDIAN
-    val writer = new WKBWriter(dimensions, endian, geometry.getSRID != 0)
-    writer.write(geometry)
-  }
-
-  override def dataType: DataType = BinaryType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.asEWKB) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

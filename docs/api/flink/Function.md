@@ -1,3 +1,36 @@
+## ST_AsBinary
+
+Introduction: Return the Well-Known Binary representation of a geometry
+
+Format: `ST_AsBinary (A:geometry)`
+
+Since: `v1.3.0`
+
+Example:
+
+```SQL
+SELECT ST_AsBinary(polygondf.countyshape)
+FROM polygondf
+```
+
+## ST_AsEWKB
+
+Introduction: Return the Extended Well-Known Binary representation of a geometry.
+EWKB is an extended version of WKB which includes the SRID of the geometry.
+The format originated in PostGIS but is supported by many GIS tools.
+If the geometry is lacking SRID a WKB format is produced.
+
+Format: `ST_AsEWKB (A:geometry)`
+
+Since: `v1.3.0`
+
+Example:
+
+```SQL
+SELECT ST_AsEWKB(polygondf.countyshape)
+FROM polygondf
+```
+
 ## ST_AsEWKT
 
 Introduction: Return the Extended Well-Known Text representation of a geometry.
@@ -27,6 +60,21 @@ Since: `v1.3.0`
 Spark SQL example:
 ```SQL
 SELECT ST_AsGeoJSON(polygondf.countyshape)
+FROM polygondf
+```
+
+## ST_AsText
+
+Introduction: Return the Well-Known Text string representation of a geometry
+
+Format: `ST_AsText (A:geometry)`
+
+Since: `v1.3.0`
+
+Example:
+
+```SQL
+SELECT ST_AsText(polygondf.countyshape)
 FROM polygondf
 ```
 
