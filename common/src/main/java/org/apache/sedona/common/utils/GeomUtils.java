@@ -19,10 +19,13 @@ import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.CoordinateSequenceFilter;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.ByteOrderValues;
+import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTWriter;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
 
+import java.nio.ByteOrder;
 import java.util.*;
 
 import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
@@ -137,6 +140,15 @@ public class GeomUtils {
         }
 
         return sridString + new WKTWriter(GeomUtils.getDimension(geometry)).write(geometry);
+    }
+
+    public static byte[] getEWKB(Geometry geometry) {
+        if (geometry == null) {
+            return null;
+        }
+        int endian = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN ? ByteOrderValues.BIG_ENDIAN : ByteOrderValues.LITTLE_ENDIAN;
+        WKBWriter writer = new WKBWriter(GeomUtils.getDimension(geometry), endian, geometry.getSRID() != 0);
+        return writer.write(geometry);
     }
 
     public static Geometry get2dGeom(Geometry geom) {

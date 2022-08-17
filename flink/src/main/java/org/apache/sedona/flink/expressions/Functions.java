@@ -133,6 +133,30 @@ public class Functions {
         }
     }
 
+    public static class ST_AsText extends ScalarFunction {
+        @DataTypeHint("String")
+        public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.asEWKT(geom);
+        }
+    }
+
+    public static class ST_AsEWKB extends ScalarFunction {
+        @DataTypeHint("Bytes")
+        public byte[] eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.asEWKB(geom);
+        }
+    }
+
+    public static class ST_AsBinary extends ScalarFunction {
+        @DataTypeHint("Bytes")
+        public byte[] eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.asEWKB(geom);
+        }
+    }
+
     public static class ST_AsGeoJSON extends ScalarFunction {
         @DataTypeHint("String")
         public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
