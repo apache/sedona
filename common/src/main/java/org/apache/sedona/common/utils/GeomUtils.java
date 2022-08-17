@@ -136,7 +136,7 @@ public class GeomUtils {
             sridString = "SRID=" + String.valueOf(srid) + ";";
         }
 
-        return sridString + new WKTWriter().write(geometry);
+        return sridString + new WKTWriter(GeomUtils.getDimension(geometry)).write(geometry);
     }
 
     public static Geometry get2dGeom(Geometry geom) {
@@ -185,6 +185,10 @@ public class GeomUtils {
             outputGeom.setSRID(srid);
         }
         return outputGeom;
+    }
+
+    public static int getDimension(Geometry geometry) {
+        return geometry.getCoordinate() != null && !java.lang.Double.isNaN(geometry.getCoordinate().getZ()) ? 3 : 2;
     }
 
     private static Map<Polygon, Polygon> findFaceHoles(List<Polygon> faces) {

@@ -19,6 +19,7 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.Functions
+import org.apache.sedona.common.utils.GeomUtils
 import org.apache.sedona.core.geometryObjects.Circle
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.internal.Logging
@@ -477,7 +478,7 @@ case class ST_AsText(inputExpressions: Seq[Expression])
   assert(inputExpressions.length == 1)
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
-    val writer = new WKTWriter(GeometrySerializer.getDimension(geometry))
+    val writer = new WKTWriter(GeomUtils.getDimension(geometry))
     UTF8String.fromString(writer.write(geometry))
   }
 

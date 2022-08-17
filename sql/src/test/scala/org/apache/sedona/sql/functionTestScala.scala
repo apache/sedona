@@ -1291,25 +1291,22 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         -> "POINT Z(0 0 1)"
     )
 
-        for((inputGeom, expectedGeom) <- geomTestCases1) {
-      var df = sparkSession.sql(s"select ST_AsText(ST_PointOnSurface(ST_GeomFromText($inputGeom)))")
-      var result = df.collect()
+    for((inputGeom, expectedGeom) <- geomTestCases1) {
+      val df = sparkSession.sql(s"select ST_AsText(ST_PointOnSurface(ST_GeomFromText($inputGeom)))")
+      val result = df.collect()
       assert(result.head.get(0).asInstanceOf[String]==expectedGeom)
     }
-
-    /* ST_AsEWKT Has not been implemented yet
 
     val geomTestCases2 = Map(
       "'LINESTRING(0 5 1, 0 0 1, 0 10 2)'"
-        -> "POINT (0 0 1)"
+        -> "POINT Z(0 0 1)"
     )
 
     for((inputGeom, expectedGeom) <- geomTestCases2) {
-      var df = sparkSession.sql(s"select ST_AsEWKT(ST_PointOnSurface(ST_GeomFromEWKT($inputGeom)))")
-      var result = df.collect()
+      val df = sparkSession.sql(s"select ST_AsEWKT(ST_PointOnSurface(ST_GeomFromWKT($inputGeom)))")
+      val result = df.collect()
       assert(result.head.get(0).asInstanceOf[String]==expectedGeom)
     }
-    */
   }
 
   it ("Should pass ST_Reverse") {
