@@ -204,4 +204,20 @@ public class Functions {
             return org.apache.sedona.common.Functions.buildArea(geom);
         }
     }
+
+    public static class ST_SetSRID extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, int srid) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.setSRID(geom, srid);
+        }
+    }
+
+    public static class ST_SRID extends ScalarFunction {
+        @DataTypeHint("Integer")
+        public Integer eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.getSRID(geom);
+        }
+    }
 }

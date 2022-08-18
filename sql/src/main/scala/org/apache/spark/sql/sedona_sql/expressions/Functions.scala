@@ -503,16 +503,7 @@ case class ST_AsEWKB(inputExpressions: Seq[Expression])
 }
 
 case class ST_SRID(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  inputExpressions.validateLength(1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    geometry.getSRID
-  }
-
-  override def dataType: DataType = IntegerType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.getSRID) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -520,24 +511,7 @@ case class ST_SRID(inputExpressions: Seq[Expression])
 }
 
 case class ST_SetSRID(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
-  inputExpressions.validateLength(2)
-
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val srid = inputExpressions(1).eval(input).asInstanceOf[Integer]
-    inputExpressions(0).toGeometry(input) match {
-      case geometry: Geometry =>
-        val factory = new GeometryFactory(geometry.getPrecisionModel, srid, geometry.getFactory.getCoordinateSequenceFactory)
-        factory.createGeometry(geometry).toGenericArrayData
-      case _ => null
-    }
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(Functions.setSRID) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
