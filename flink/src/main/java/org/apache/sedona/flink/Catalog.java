@@ -50,7 +50,9 @@ public class Catalog {
                 new Functions.ST_YMin(),
                 new Functions.ST_XMax(),
                 new Functions.ST_XMin(),
-                new Functions.ST_BuildArea()
+                new Functions.ST_BuildArea(),
+                new Functions.ST_SetSRID(),
+                new Functions.ST_SRID()
         };
     }
 

@@ -226,5 +226,23 @@ public class FunctionTest extends TestBase{
         Geometry result = (Geometry) first(arealGeomTable).getField(0);
         assertEquals("POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))", result.toString());
     }
+
+    @Test
+    public void testSetSRID() {
+        Table polygonTable = createPolygonTable(1);
+        polygonTable = polygonTable
+                .select(call(Functions.ST_SetSRID.class.getSimpleName(), $(polygonColNames[0]), 3021))
+                .select(call(Functions.ST_SRID.class.getSimpleName(), $("_c0")));
+        int result = (int) first(polygonTable).getField(0);
+        assertEquals(3021, result);
+    }
+
+    @Test
+    public void testSRID() {
+        Table polygonTable = createPolygonTable(1);
+        polygonTable = polygonTable.select(call(Functions.ST_SRID.class.getSimpleName(), $(polygonColNames[0])));
+        int result = (int) first(polygonTable).getField(0);
+        assertEquals(0, result);
+    }
 }
 

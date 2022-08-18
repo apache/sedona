@@ -19,6 +19,7 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -139,5 +140,20 @@ public class Functions {
 
     public static Geometry buildArea(Geometry geometry) {
         return GeomUtils.buildArea(geometry);
+    }
+
+    public static Geometry setSRID(Geometry geometry, int srid) {
+        if (geometry == null) {
+            return null;
+        }
+        GeometryFactory factory = new GeometryFactory(geometry.getPrecisionModel(), srid, geometry.getFactory().getCoordinateSequenceFactory());
+        return factory.createGeometry(geometry);
+    }
+
+    public static int getSRID(Geometry geometry) {
+        if (geometry == null) {
+            return 0;
+        }
+        return geometry.getSRID();
     }
 }

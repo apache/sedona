@@ -299,6 +299,34 @@ Input: `POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))`
 
 Output: `POLYGON ((-0.5 -0.5, 0.5 -0.5, 0.5 0.5, -0.5 0.5, -0.5 -0.5))`
 
+## ST_SetSRID
+
+Introduction: Sets the spatial refence system identifier (SRID) of the geometry.
+
+Format: `ST_SetSRID (A:geometry, srid: integer)`
+
+Since: `v1.3.0`
+
+Example:
+```SQL
+SELECT ST_SetSRID(polygondf.countyshape, 3021)
+FROM polygondf
+```
+
+## ST_SRID
+
+Introduction: Return the spatial refence system identifier (SRID) of the geometry.
+
+Format: `ST_SRID (A:geometry)`
+
+Since: `v1.3.0`
+
+Example:
+```SQL
+SELECT ST_SRID(polygondf.countyshape)
+FROM polygondf
+```
+
 ## ST_Transform
 
 Introduction:
