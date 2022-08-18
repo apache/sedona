@@ -52,7 +52,11 @@ public class Catalog {
                 new Functions.ST_XMin(),
                 new Functions.ST_BuildArea(),
                 new Functions.ST_SetSRID(),
-                new Functions.ST_SRID()
+                new Functions.ST_SRID(),
+                new Functions.ST_IsClosed(),
+                new Functions.ST_IsRing(),
+                new Functions.ST_IsSimple(),
+                new Functions.ST_IsValid()
         };
     }
 

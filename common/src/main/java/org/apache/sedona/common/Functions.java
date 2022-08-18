@@ -13,14 +13,23 @@
  */
 package org.apache.sedona.common;
 
+import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.common.utils.GeometryGeoHashEncoder;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPoint;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.operation.valid.IsSimpleOp;
+import org.locationtech.jts.operation.valid.IsValidOp;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -155,5 +164,30 @@ public class Functions {
             return 0;
         }
         return geometry.getSRID();
+    }
+
+    public static boolean isClosed(Geometry geometry) {
+        if (geometry instanceof Circle || geometry instanceof MultiPoint || geometry instanceof MultiPolygon || geometry instanceof Point || geometry instanceof Polygon) {
+            return true;
+        } else if (geometry instanceof LineString) {
+            return ((LineString) geometry).isClosed();
+        } else if (geometry instanceof MultiLineString) {
+            return ((MultiLineString) geometry).isClosed();
+        } else if (geometry instanceof GeometryCollection) {
+            return false;
+        }
+        return false;
+    }
+
+    public static boolean isRing(Geometry geometry) {
+        return geometry instanceof LineString && ((LineString) geometry).isClosed() && geometry.isSimple();
+    }
+
+    public static boolean isSimple(Geometry geometry) {
+        return new IsSimpleOp(geometry).isSimple();
+    }
+
+    public static boolean isValid(Geometry geometry) {
+        return new IsValidOp(geometry).isValid();
     }
 }

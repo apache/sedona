@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.core.geometryObjects;
 
+import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;

@@ -31,7 +31,9 @@ import java.util.Optional;
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class FunctionTest extends TestBase{
     @BeforeClass
@@ -244,5 +246,47 @@ public class FunctionTest extends TestBase{
         int result = (int) first(polygonTable).getField(0);
         assertEquals(0, result);
     }
-}
 
+    @Test
+    public void testIsClosedForOpen() {
+        Table linestringTable = createLineStringTable(1);
+        linestringTable = linestringTable.select(call(Functions.ST_IsClosed.class.getSimpleName(), $(linestringColNames[0])));
+        assertFalse((boolean) first(linestringTable).getField(0));
+    }
+
+    @Test
+    public void testIsClosedForClosed() {
+        Table polygonTable = createPolygonTable(1);
+        polygonTable = polygonTable.select(call(Functions.ST_IsClosed.class.getSimpleName(), $(polygonColNames[0])));
+        assertTrue((boolean) first(polygonTable).getField(0));
+    }
+
+    @Test
+    public void testIsRingForRing() {
+        Table polygonTable = createPolygonTable(1);
+        Table linestringTable = polygonTable.select(call(Functions.ST_ExteriorRing.class.getSimpleName(), $(polygonColNames[0])));
+        linestringTable = linestringTable.select(call(Functions.ST_IsRing.class.getSimpleName(), $("_c0")));
+        assertTrue((boolean) first(linestringTable).getField(0));
+    }
+
+    @Test
+    public void testIsRingForNonRing() {
+        Table linestringTable = createLineStringTable(1);
+        linestringTable = linestringTable.select(call(Functions.ST_IsClosed.class.getSimpleName(), $(linestringColNames[0])));
+        assertFalse((boolean) first(linestringTable).getField(0));
+    }
+
+    @Test
+    public void testIsSimple() {
+        Table polygonTable = createPolygonTable(1);
+        polygonTable = polygonTable.select(call(Functions.ST_IsSimple.class.getSimpleName(), $(polygonColNames[0])));
+        assertTrue((boolean) first(polygonTable).getField(0));
+    }
+
+    @Test
+    public void testIsValid() {
+        Table polygonTable = createPolygonTable(1);
+        polygonTable = polygonTable.select(call(Functions.ST_IsValid.class.getSimpleName(), $(polygonColNames[0])));
+        assertTrue((boolean) first(polygonTable).getField(0));
+    }
+}

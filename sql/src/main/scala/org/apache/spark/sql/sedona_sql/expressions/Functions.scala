@@ -19,7 +19,6 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.Functions
-import org.apache.sedona.core.geometryObjects.Circle
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
@@ -36,7 +35,6 @@ import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom.util.GeometryFixer
 import org.locationtech.jts.geom._
 import org.locationtech.jts.linearref.LengthIndexedLine
-import org.locationtech.jts.operation.IsSimpleOp
 import org.locationtech.jts.operation.buffer.BufferParameters
 import org.locationtech.jts.operation.distance3d.Distance3DOp
 import org.locationtech.jts.operation.linemerge.LineMerger
@@ -367,17 +365,7 @@ case class ST_MakeValid(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_IsValid(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    new IsValidOp(geometry).isValid
-  }
-
-  override def dataType: DataType = BooleanType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.isValid) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -390,16 +378,7 @@ case class ST_IsValid(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_IsSimple(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    new IsSimpleOp(geometry).isSimple
-  }
-
-  override def dataType: DataType = BooleanType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.isSimple) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1002,26 +981,7 @@ case class ST_DumpPoints(inputExpressions: Seq[Expression])
 
 
 case class ST_IsClosed(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    geometry match {
-      case circle: Circle => true
-      case point: MultiPoint => true
-      case multilinestring: MultiLineString => multilinestring.isClosed
-      case multipolygon: MultiPolygon => true
-      case collection: GeometryCollection => false
-      case string: LineString => string.isClosed
-      case point: Point => true
-      case polygon: Polygon => true
-      case _ => null
-    }
-  }
-
-  override def dataType: DataType = BooleanType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.isClosed) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1138,7 +1098,7 @@ case class ST_IsRing(inputExpressions: Seq[Expression])
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
     geometry match {
-      case string: LineString => string.isSimple & string.isClosed
+      case string: LineString => Functions.isRing(string)
       case _ => null
     }
   }

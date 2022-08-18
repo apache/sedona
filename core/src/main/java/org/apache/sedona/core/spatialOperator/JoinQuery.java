@@ -25,7 +25,7 @@ import org.apache.log4j.Logger;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.enums.JoinBuildSide;
-import org.apache.sedona.core.geometryObjects.Circle;
+import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.core.joinJudgement.DedupParams;
 import org.apache.sedona.core.joinJudgement.DynamicIndexLookupJudgement;
 import org.apache.sedona.core.joinJudgement.LeftIndexLookupJudgement;

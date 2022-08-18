@@ -15,7 +15,7 @@ package org.apache.sedona.flink;
 
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-import org.apache.sedona.core.geometryObjects.Circle;
+import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.core.geometryObjects.GeometrySerde;
 import org.apache.sedona.core.geometryObjects.SpatialIndexSerde;
 import org.apache.sedona.core.spatialPartitioning.PartitioningUtils;
