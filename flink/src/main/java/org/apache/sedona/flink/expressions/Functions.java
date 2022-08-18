@@ -220,4 +220,36 @@ public class Functions {
             return org.apache.sedona.common.Functions.getSRID(geom);
         }
     }
+
+    public static class ST_IsClosed extends ScalarFunction {
+        @DataTypeHint("Boolean")
+        public boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.isClosed(geom);
+        }
+    }
+
+    public static class ST_IsRing extends ScalarFunction {
+        @DataTypeHint("Boolean")
+        public boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.isRing(geom);
+        }
+    }
+
+    public static class ST_IsSimple extends ScalarFunction {
+        @DataTypeHint("Boolean")
+        public boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.isSimple(geom);
+        }
+    }
+
+    public static class ST_IsValid extends ScalarFunction {
+        @DataTypeHint("Boolean")
+        public boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.isValid(geom);
+        }
+    }
 }

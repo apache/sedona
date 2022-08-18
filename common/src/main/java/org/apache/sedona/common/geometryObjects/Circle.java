@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.sedona.core.geometryObjects;
+package org.apache.sedona.common.geometryObjects;
 
 import org.apache.sedona.common.utils.GeomUtils;
 import org.locationtech.jts.geom.Coordinate;

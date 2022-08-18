@@ -25,6 +25,7 @@ import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import org.apache.log4j.Logger;
+import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeSerde;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;

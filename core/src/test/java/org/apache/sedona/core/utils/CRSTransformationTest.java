@@ -23,7 +23,7 @@ import org.apache.log4j.Logger;
 import org.apache.sedona.core.enums.FileDataSplitter;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
-import org.apache.sedona.core.geometryObjects.Circle;
+import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.core.knnJudgement.GeometryDistanceComparator;
 import org.apache.sedona.core.spatialOperator.JoinQuery;
 import org.apache.sedona.core.spatialOperator.KNNQuery;

@@ -207,6 +207,20 @@ Result:
 +-----------------------------+
 ```
 
+## ST_IsClosed
+
+Introduction: RETURNS true if the LINESTRING start and end point are the same.
+
+Format: `ST_IsClosed(geom: geometry)`
+
+Since: `v1.3.0`
+
+Example:
+
+```SQL
+SELECT ST_IsClosed(ST_GeomFromText('LINESTRING(0 0, 1 1, 1 0)'))
+```
+
 ## ST_IsEmpty
 
 Introduction: Test if a geometry is empty geometry
@@ -219,6 +233,52 @@ Spark SQL example:
 
 ```SQL
 SELECT ST_IsEmpty(polygondf.countyshape)
+FROM polygondf
+```
+
+## ST_IsRing
+
+Introduction: RETURN true if LINESTRING is ST_IsClosed and ST_IsSimple.
+
+Format: `ST_IsRing(geom: geometry)`
+
+Since: `v1.3.0`
+
+Example:
+
+```SQL
+SELECT ST_IsRing(ST_GeomFromText("LINESTRING(0 0, 0 1, 1 1, 1 0, 0 0)"))
+```
+
+Output: `true`
+
+## ST_IsSimple
+
+Introduction: Test if geometry's only self-intersections are at boundary points.
+
+Format: `ST_IsSimple (A:geometry)`
+
+Since: `v1.3.0`
+
+Example:
+
+```SQL
+SELECT ST_IsSimple(polygondf.countyshape)
+FROM polygondf
+```
+
+## ST_IsValid
+
+Introduction: Test if a geometry is well formed
+
+Format: `ST_IsValid (A:geometry)`
+
+Since: `v1.3.0`
+
+Example:
+
+```SQL
+SELECT ST_IsValid(polygondf.countyshape)
 FROM polygondf
 ```
 

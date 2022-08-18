@@ -21,7 +21,7 @@ package org.apache.sedona.core.serde;
 
 import com.esotericsoftware.kryo.Kryo;
 import org.apache.log4j.Logger;
-import org.apache.sedona.core.geometryObjects.Circle;
+import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.core.geometryObjects.GeometrySerde;
 import org.apache.sedona.core.geometryObjects.SpatialIndexSerde;
 import org.apache.spark.serializer.KryoRegistrator;
