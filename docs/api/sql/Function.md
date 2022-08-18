@@ -646,6 +646,28 @@ SELECT ST_Length(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_LineInterpolatePoint
+
+Introduction: Returns a point interpolated along a line. First argument must be a LINESTRING. Second argument is a Double between 0 and 1 representing fraction of total linestring length the point has to be located.
+
+Format: `ST_LineInterpolatePoint (geom: geometry, fraction: Double)`
+
+Since: `v1.0.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_LineInterpolatePoint(ST_GeomFromWKT('LINESTRING(25 50, 100 125, 150 190)'), 0.2) as Interpolated
+```
+
+Output:
+```
++-----------------------------------------+
+|Interpolated                             |
++-----------------------------------------+
+|POINT (51.5974135047432 76.5974135047432)|
++-----------------------------------------+
+```
+
 ## ST_LineMerge
 
 Introduction: Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.
@@ -660,6 +682,28 @@ Since: `v1.0.0`
 ```SQL
 SELECT ST_LineMerge(geometry)
 FROM df
+```
+
+## ST_LineSubstring
+
+Introduction: Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length. Second and third arguments are Double values between 0 and 1. This only works with LINESTRINGs.
+
+Format: `ST_LineSubstring (geom: geometry, startfraction: Double, endfraction: Double)`
+
+Since: `v1.0.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_LineSubstring(ST_GeomFromWKT('LINESTRING(25 50, 100 125, 150 190)'), 0.333, 0.666) as Substring
+```
+
+Output:
+```
++------------------------------------------------------------------------------------------------+
+|Substring                                                                                       |
++------------------------------------------------------------------------------------------------+
+|LINESTRING (69.28469348539744 94.28469348539744, 100 125, 111.70035626068274 140.21046313888758)|
++------------------------------------------------------------------------------------------------+
 ```
 
 ## ST_MakePolygon
