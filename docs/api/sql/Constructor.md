@@ -90,6 +90,20 @@ polygonDf.show()
 !!!warning
 	The way that SedonaSQL reads GeoJSON is different from that in SparkSQL
 
+## ST_GeomFromText
+
+Introduction: Construct a Geometry from Wkt. Alias of [ST_GeomFromWKT](#ST_GeomFromWKT)
+
+Format:
+`ST_GeomFromText (Wkt:string)`
+
+Since: `v1.0.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_GeomFromText('POINT(40.7128 -74.0060)') AS geometry
+```
+
 ## ST_GeomFromWKB
 
 Introduction: Construct a Geometry from WKB string or Binary
