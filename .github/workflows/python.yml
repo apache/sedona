@@ -43,10 +43,6 @@ jobs:
             scala: '2.12.8'
             python: '3.7'
             hadoop: '2.7'
-          - spark: '2.4.8'
-            scala: '2.11.8'
-            python: '3.7'
-            hadoop: '2.7'
 
     steps:
     - uses: actions/checkout@v2

@@ -32,10 +32,6 @@
     <url>http://sedona.apache.org/</url>
     <packaging>jar</packaging>
 
-    <properties>
-        <maven.deploy.skip>false</maven.deploy.skip>
-    </properties>
-
     <dependencies>
     </dependencies>
     <build>
@@ -51,5 +47,20 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>common-scala2.13</id>
+            <activation>
+                <property>
+                    <name>scala</name>
+                    <value>2.13</value>
+                </property>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <maven.deploy.skip>true</maven.deploy.skip>
+            </properties>
+        </profile>
+    </profiles>
 </project>
   
