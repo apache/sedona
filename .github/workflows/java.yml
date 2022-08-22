@@ -13,7 +13,7 @@ jobs:
 
     runs-on: ubuntu-18.04
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         include:
           - spark: 3.3.0
