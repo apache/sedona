@@ -14,7 +14,6 @@
 package org.apache.sedona.flink;
 
 import org.apache.flink.table.functions.UserDefinedFunction;
-import org.apache.sedona.core.spatialPartitioning.PartitioningUtils;
 import org.apache.sedona.flink.expressions.*;
 
 public class Catalog {
@@ -41,13 +40,23 @@ public class Catalog {
                 new Functions.ST_PointN(),
                 new Functions.ST_ExteriorRing(),
                 new Functions.ST_AsEWKT(),
+                new Functions.ST_AsEWKB(),
+                new Functions.ST_AsText(),
+                new Functions.ST_AsBinary(),
+                new Functions.ST_AsGeoJSON(),
                 new Functions.ST_Force_2D(),
                 new Functions.ST_IsEmpty(),
                 new Functions.ST_YMax(),
                 new Functions.ST_YMin(),
                 new Functions.ST_XMax(),
                 new Functions.ST_XMin(),
-                new Functions.ST_BuildArea()
+                new Functions.ST_BuildArea(),
+                new Functions.ST_SetSRID(),
+                new Functions.ST_SRID(),
+                new Functions.ST_IsClosed(),
+                new Functions.ST_IsRing(),
+                new Functions.ST_IsSimple(),
+                new Functions.ST_IsValid()
         };
     }
 

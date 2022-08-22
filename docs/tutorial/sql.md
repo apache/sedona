@@ -310,6 +310,22 @@ var spatialDf = Adapter.toDf(spatialRDD, sparkSession)
 
 All other attributes such as price and age will be also brought to the DataFrame as long as you specify ==carryOtherAttributes== (see [Read other attributes in an SpatialRDD](../rdd#read-other-attributes-in-an-spatialrdd)).
 
+You may also manually specify a schema for the resulting DataFrame in case you require different column names or data
+types. Note that string schemas and not all data types are supported&mdash;please check the
+[Adapter Scaladoc](/api/javadoc/sql/org/apache/sedona/sql/utils/index.html) and
+[source code](/sql/src/main/scala/org/apache/sedona/sql/utils/Adapter.scala) to confirm what is supported for your use
+case. At least one column for the user data must be provided.
+
+```Scala
+val schema = StructType(Array(
+  StructField("county", GeometryUDT, nullable = true),
+  StructField("name", StringType, nullable = true),
+  StructField("price", DoubleType, nullable = true),
+  StructField("age", IntegerType, nullable = true)
+))
+val spatialDf = Adapter.toDf(spatialRDD, schema, sparkSession)
+```
+
 ### SpatialPairRDD to DataFrame
 
 PairRDD is the result of a spatial join query or distance join query. SedonaSQL DataFrame-RDD Adapter can convert the result to a DataFrame. But you need to provide the name of other attributes.
@@ -326,3 +342,21 @@ var joinResultDf = Adapter.toDf(joinResultPairRDD, leftRdd.fieldNames, rightRdd.
 ```
 
 All other attributes such as price and age will be also brought to the DataFrame as long as you specify ==carryOtherAttributes== (see [Read other attributes in an SpatialRDD](../rdd#read-other-attributes-in-an-spatialrdd)).
+
+You may also manually specify a schema for the resulting DataFrame in case you require different column names or data
+types. Note that string schemas and not all data types are supported&mdash;please check the
+[Adapter Scaladoc](/api/javadoc/sql/org/apache/sedona/sql/utils/index.html) and
+[source code](/sql/src/main/scala/org/apache/sedona/sql/utils/Adapter.scala) to confirm what is supported for your use
+case. Columns for the left and right user data must be provided.
+
+```Scala
+val schema = StructType(Array(
+  StructField("leftGeometry", GeometryUDT, nullable = true),
+  StructField("name", StringType, nullable = true),
+  StructField("price", DoubleType, nullable = true),
+  StructField("age", IntegerType, nullable = true),
+  StructField("rightGeometry", GeometryUDT, nullable = true),
+  StructField("category", StringType, nullable = true)
+))
+val joinResultDf = Adapter.toDf(joinResultPairRDD, schema, sparkSession)
+```

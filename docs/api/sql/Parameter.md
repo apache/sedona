@@ -28,14 +28,14 @@ println(sedonaConf)
 	* Spatial partitioning grid type for join query
 	* Default: kdbtree
 	* Possible values: quadtree, kdbtree
-* sedona.join.numpartition **(Advanced users only!)**
-	* Number of partitions for both sides in a join query
-	* Default: -1, which means use the existing partitions
-	* Possible values: any integers
 * sedona.join.indexbuildside **(Advanced users only!)**
 	* The side which Sedona builds spatial indices on
 	* Default: left
 	* Possible values: left, right
+* sedona.join.numpartition **(Advanced users only!)**
+	* Number of partitions for both sides in a join query
+	* Default: -1, which means use the existing partitions
+	* Possible values: any integers
 * sedona.join.spatitionside **(Advanced users only!)**
 	* The dominant side in spatial partitioning stage
 	* Default: left

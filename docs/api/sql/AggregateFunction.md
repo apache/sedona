@@ -12,20 +12,6 @@ SELECT ST_Envelope_Aggr(pointdf.arealandmark)
 FROM pointdf
 ```
 
-## ST_Union_Aggr
-
-Introduction: Return the polygon union of all polygons in A
-
-Format: `ST_Union_Aggr (A:geometryColumn)`
-
-Since: `v1.0.0`
-
-Spark SQL example:
-```SQL
-SELECT ST_Union_Aggr(polygondf.polygonshape)
-FROM polygondf
-```
-
 ## ST_Intersection_Aggr
 
 Introduction: Return the polygon intersection of all polygons in A
@@ -37,5 +23,19 @@ Since: `v1.0.0`
 Spark SQL example:
 ```SQL
 SELECT ST_Intersection_Aggr(polygondf.polygonshape)
+FROM polygondf
+```
+
+## ST_Union_Aggr
+
+Introduction: Return the polygon union of all polygons in A
+
+Format: `ST_Union_Aggr (A:geometryColumn)`
+
+Since: `v1.0.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_Union_Aggr(polygondf.polygonshape)
 FROM polygondf
 ```

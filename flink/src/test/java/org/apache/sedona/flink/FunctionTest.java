@@ -13,6 +13,7 @@
  */
 package org.apache.sedona.flink;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.flink.table.api.Table;
 import org.apache.sedona.flink.expressions.Constructors;
 import org.apache.sedona.flink.expressions.Functions;
@@ -30,12 +31,22 @@ import java.util.Optional;
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class FunctionTest extends TestBase{
     @BeforeClass
     public static void onceExecutedBeforeAll() {
         initialize();
+    }
+
+    @Test
+    public void testBuffer() {
+        Table pointTable = createPointTable_real(testDataSize);
+        Table bufferTable = pointTable.select(call(Functions.ST_Buffer.class.getSimpleName(), $(pointColNames[0]), 1));
+        Geometry result = (Geometry) first(bufferTable).getField(0);
+        assert(result instanceof Polygon);
     }
 
     @Test
@@ -67,7 +78,7 @@ public class FunctionTest extends TestBase{
     public void testYMax() {
         Table polygonTable = createPolygonTable(1);
         Table ResultTable = polygonTable.select(call(Functions.ST_YMax.class.getSimpleName(), $(polygonColNames[0])));
-        assert(first(ResultTable).getField(0)!=null);
+        assertNotNull(first(ResultTable).getField(0));
         double result = (double) first(ResultTable).getField(0);
         assertEquals(0.5, result,0);
     }
@@ -76,7 +87,7 @@ public class FunctionTest extends TestBase{
     public void testYMin() {
         Table polygonTable = createPolygonTable(1);
         Table ResultTable = polygonTable.select(call(Functions.ST_YMin.class.getSimpleName(), $(polygonColNames[0])));
-        assert(first(ResultTable).getField(0)!=null);
+        assertNotNull(first(ResultTable).getField(0));
         double result = (double) first(ResultTable).getField(0);
         assertEquals(-0.5, result, 0);
     }
@@ -88,7 +99,7 @@ public class FunctionTest extends TestBase{
         pointTable = pointTable.select(
                 call("ST_GeoHash", $(pointColNames[0]), 5)
         );
-        assertEquals(first(pointTable).getField(0), Optional.of("s0000"));
+        assertEquals(first(pointTable).getField(0), "s0000");
     }
 
     @Test
@@ -114,8 +125,8 @@ public class FunctionTest extends TestBase{
         Table linestringTable = polygonTable.select(call(Functions.ST_ExteriorRing.class.getSimpleName(), $(polygonColNames[0])));
         Table pointTable = linestringTable.select(call(Functions.ST_PointN.class.getSimpleName(), $("_c0"), n));
         Point point = (Point) first(pointTable).getField(0);
-        assert point != null;
-        Assert.assertEquals("POINT (-0.5 -0.5)", point.toString());
+        assertNotNull(point);
+        assertEquals("POINT (-0.5 -0.5)", point.toString());
     }
 
     @Test
@@ -125,8 +136,8 @@ public class FunctionTest extends TestBase{
         Table linestringTable = polygonTable.select(call(Functions.ST_ExteriorRing.class.getSimpleName(), $(polygonColNames[0])));
         Table pointTable = linestringTable.select(call(Functions.ST_PointN.class.getSimpleName(), $("_c0"), n));
         Point point = (Point) first(pointTable).getField(0);
-        assert point != null;
-        Assert.assertEquals("POINT (0.5 0.5)", point.toString());
+        assertNotNull(point);
+        assertEquals("POINT (0.5 0.5)", point.toString());
     }
 
     @Test
@@ -134,15 +145,48 @@ public class FunctionTest extends TestBase{
         Table polygonTable = createPolygonTable(1);
         Table linearRingTable = polygonTable.select(call(Functions.ST_ExteriorRing.class.getSimpleName(), $(polygonColNames[0])));
         LinearRing linearRing = (LinearRing) first(linearRingTable).getField(0);
-        assert linearRing != null;
+        assertNotNull(linearRing);
         Assert.assertEquals("LINEARRING (-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5)", linearRing.toString());
     }
 
+    @Test
     public void testAsEWKT() {
         Table polygonTable = createPolygonTable(testDataSize);
         polygonTable = polygonTable.select(call(Functions.ST_AsEWKT.class.getSimpleName(), $(polygonColNames[0])));
         String result = (String) first(polygonTable).getField(0);
         assertEquals("POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))", result);
+    }
+
+    @Test
+    public void testAsText() {
+        Table polygonTable = createPolygonTable(testDataSize);
+        polygonTable = polygonTable.select(call(Functions.ST_AsText.class.getSimpleName(), $(polygonColNames[0])));
+        String result = (String) first(polygonTable).getField(0);
+        assertEquals("POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))", result);
+    }
+
+    @Test
+    public void testAsEWKB() {
+        Table polygonTable = createPolygonTable(testDataSize);
+        polygonTable = polygonTable.select(call(Functions.ST_AsEWKB.class.getSimpleName(), $(polygonColNames[0])));
+        String result = Hex.encodeHexString((byte[]) first(polygonTable).getField(0));
+        assertEquals("01030000000100000005000000000000000000e0bf000000000000e0bf000000000000e0bf000000000000e03f000000000000e03f000000000000e03f000000000000e03f000000000000e0bf000000000000e0bf000000000000e0bf", result);
+    }
+
+    @Test
+    public void testAsBinary() {
+        Table polygonTable = createPolygonTable(testDataSize);
+        polygonTable = polygonTable.select(call(Functions.ST_AsBinary.class.getSimpleName(), $(polygonColNames[0])));
+        String result = Hex.encodeHexString((byte[]) first(polygonTable).getField(0));
+        assertEquals("01030000000100000005000000000000000000e0bf000000000000e0bf000000000000e0bf000000000000e03f000000000000e03f000000000000e03f000000000000e03f000000000000e0bf000000000000e0bf000000000000e0bf", result);
+    }
+
+    @Test
+    public void testGeoJSON() {
+        Table polygonTable = createPolygonTable(testDataSize);
+        polygonTable = polygonTable.select(call(Functions.ST_AsGeoJSON.class.getSimpleName(), $(polygonColNames[0])));
+        String result = (String) first(polygonTable).getField(0);
+        assertEquals("{\"type\":\"Polygon\",\"coordinates\":[[[-0.5,-0.5],[-0.5,0.5],[0.5,0.5],[0.5,-0.5],[-0.5,-0.5]]]}", result);
     }
 
     @Test
@@ -184,5 +228,65 @@ public class FunctionTest extends TestBase{
         Geometry result = (Geometry) first(arealGeomTable).getField(0);
         assertEquals("POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))", result.toString());
     }
-}
 
+    @Test
+    public void testSetSRID() {
+        Table polygonTable = createPolygonTable(1);
+        polygonTable = polygonTable
+                .select(call(Functions.ST_SetSRID.class.getSimpleName(), $(polygonColNames[0]), 3021))
+                .select(call(Functions.ST_SRID.class.getSimpleName(), $("_c0")));
+        int result = (int) first(polygonTable).getField(0);
+        assertEquals(3021, result);
+    }
+
+    @Test
+    public void testSRID() {
+        Table polygonTable = createPolygonTable(1);
+        polygonTable = polygonTable.select(call(Functions.ST_SRID.class.getSimpleName(), $(polygonColNames[0])));
+        int result = (int) first(polygonTable).getField(0);
+        assertEquals(0, result);
+    }
+
+    @Test
+    public void testIsClosedForOpen() {
+        Table linestringTable = createLineStringTable(1);
+        linestringTable = linestringTable.select(call(Functions.ST_IsClosed.class.getSimpleName(), $(linestringColNames[0])));
+        assertFalse((boolean) first(linestringTable).getField(0));
+    }
+
+    @Test
+    public void testIsClosedForClosed() {
+        Table polygonTable = createPolygonTable(1);
+        polygonTable = polygonTable.select(call(Functions.ST_IsClosed.class.getSimpleName(), $(polygonColNames[0])));
+        assertTrue((boolean) first(polygonTable).getField(0));
+    }
+
+    @Test
+    public void testIsRingForRing() {
+        Table polygonTable = createPolygonTable(1);
+        Table linestringTable = polygonTable.select(call(Functions.ST_ExteriorRing.class.getSimpleName(), $(polygonColNames[0])));
+        linestringTable = linestringTable.select(call(Functions.ST_IsRing.class.getSimpleName(), $("_c0")));
+        assertTrue((boolean) first(linestringTable).getField(0));
+    }
+
+    @Test
+    public void testIsRingForNonRing() {
+        Table linestringTable = createLineStringTable(1);
+        linestringTable = linestringTable.select(call(Functions.ST_IsClosed.class.getSimpleName(), $(linestringColNames[0])));
+        assertFalse((boolean) first(linestringTable).getField(0));
+    }
+
+    @Test
+    public void testIsSimple() {
+        Table polygonTable = createPolygonTable(1);
+        polygonTable = polygonTable.select(call(Functions.ST_IsSimple.class.getSimpleName(), $(polygonColNames[0])));
+        assertTrue((boolean) first(polygonTable).getField(0));
+    }
+
+    @Test
+    public void testIsValid() {
+        Table polygonTable = createPolygonTable(1);
+        polygonTable = polygonTable.select(call(Functions.ST_IsValid.class.getSimpleName(), $(polygonColNames[0])));
+        assertTrue((boolean) first(polygonTable).getField(0));
+    }
+}

@@ -26,7 +26,7 @@
     </parent>
     <groupId>org.apache.sedona</groupId>
     <artifactId>sedona-parent</artifactId>
-    <version>1.2.1-incubating-SNAPSHOT</version>
+    <version>1.3.0-incubating-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>sedona-parent</name>
     <url>http://sedona.apache.org/</url>
@@ -63,6 +63,11 @@
         <dependency.scope>provided</dependency.scope>
         <jts.version>1.18.2</jts.version>
         <jts2geojson.version>0.16.1</jts2geojson.version>
+        <spark.version>3.3.0</spark.version>
+        <spark.compat.version>3.0</spark.compat.version>
+        <sedona.jackson.version>2.13.3</sedona.jackson.version>
+        <hadoop.version>3.2.4</hadoop.version>
+        <maven.deploy.skip>false</maven.deploy.skip>
     </properties>
 
     <dependencies>
@@ -464,28 +469,6 @@
                 <artifactId>apache-rat-plugin</artifactId>
                 <version>0.13</version>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <configuration>
-                            <executable>python3</executable>
-                            <workingDirectory>${maven.multiModuleProjectDirectory}</workingDirectory>
-                            <arguments>
-                                <argument>spark-version-converter.py</argument>
-                                <argument>${spark.converter.version}</argument>
-                            </arguments>
-                        </configuration>
-                        <id>python_build</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
     <profiles>
@@ -508,42 +491,6 @@
             </repositories>
         </profile>
         <profile>
-            <id>spark3.0</id>
-            <activation>
-                <property>
-                    <name>spark</name>
-                    <value>3.0</value>
-                </property>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <spark.version>3.3.0</spark.version>
-                <spark.compat.version>3.0</spark.compat.version>
-                <spark.converter.version>spark3</spark.converter.version>
-                <sedona.jackson.version>2.13.3</sedona.jackson.version>
-                <hadoop.version>3.2.4</hadoop.version>
-                <maven.deploy.skip>false</maven.deploy.skip>
-            </properties>
-        </profile>
-        <profile>
-            <id>spark2.4</id>
-            <activation>
-                <property>
-                    <name>spark</name>
-                    <value>2.4</value>
-                </property>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <properties>
-                <spark.version>2.4.7</spark.version>
-                <spark.compat.version>2.4</spark.compat.version>
-                <spark.converter.version>spark2</spark.converter.version>
-                <sedona.jackson.version>2.6.7</sedona.jackson.version>
-                <hadoop.version>2.10.2</hadoop.version>
-                <maven.deploy.skip>true</maven.deploy.skip>
-            </properties>
-        </profile>
-        <profile>
             <id>scala2.13</id>
             <activation>
                 <property>
@@ -558,6 +505,7 @@
                 <scaladoc.arg>-no-java-comments</scaladoc.arg>
             </properties>
             <modules>
+                <module>common</module>
                 <module>core</module>
                 <module>sql</module>
                 <module>viz</module>
@@ -579,28 +527,7 @@
                 <scaladoc.arg>-no-java-comments</scaladoc.arg>
             </properties>
             <modules>
-                <module>core</module>
-                <module>sql</module>
-                <module>viz</module>
-                <module>python-adapter</module>
-                <module>flink</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>scala2.11</id>
-            <activation>
-                <property>
-                    <name>scala</name>
-                    <value>2.11</value>
-                </property>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <properties>
-                <scala.version>2.11.8</scala.version>
-                <scala.compat.version>2.11</scala.compat.version>
-                <scaladoc.arg />
-            </properties>
-            <modules>
+                <module>common</module>
                 <module>core</module>
                 <module>sql</module>
                 <module>viz</module>

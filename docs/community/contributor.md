@@ -120,9 +120,8 @@ In recognition of your demonstrated commitment to, and alignment with, the
 goals of the Apache Sedona project, the Sedona PPMC has voted to offer you
 membership in the Sedona PPMC ("Podling Project Management Committee").
 
-Please let us know if you accept by subscribing to the private alias [by
-sending mail to private-subscribe@sedona.apache.org], and posting 
-a message to private@sedona.apache.org.
+Please let us know if you accept by replying to this email 
+(including private@sedona.apache.org).
 
 The PPMC is the Incubator podling version of a project PMC ("Project
 Management Committee") that for every top-level project is tasked by the
@@ -143,19 +142,6 @@ distinction, it shouldn't enter your thinking when working on the PPMC -
 members should treat every decision as if it were legally binding for the
  ASF. Also, in day-to-day activities, the Incubator PMC member vs PPMC 
  member distinction should be invisible -- we are peers.
-
-All PPMC members are subscribed to the project's private mail list, which 
-is used to discuss issues unsuitable for an open, public forum, such as
-people issues (e.g. new committers, problematic community members, etc.),
-security issues, and the like.  It can't be emphasized enough that
-care should be taken to minimize the use of the private list, discussing
-everything possible on the appropriate public list.
-
-The private PPMC list is *private* - it is strictly for the use of the
-PPMC. Messages are not to be forwarded to anyone else without the express
-permission of the PPMC. Also note that any Member of the Foundation has
-the right to review and participate in any PPMC or PMC list, as a PMC 
-and PPMC are acting on behalf of the Membership.
 
 Finally, the PPMC (and assuming graduation, the PMC) is not meant to create 
 a hierarchy within the committership or the community.  In fact, a goal is 
@@ -183,7 +169,7 @@ Subject: Re: invitation to become Apache Sedona PMC
 Welcome. Here are the next steps in becoming a project committer. After that we will make
 an announcement to the dev@sedona.apache.org
 
-You need to send a Contributor License Agreement to the ASF.
+1. You need to send a Contributor License Agreement to the ASF.
 Normally you would send an Individual CLA. If you also make
 contributions done in work time or using work resources,
 see the Corporate CLA. Ask us if you have any issues.
@@ -199,9 +185,10 @@ you did so. This will enable us to monitor its progress.
 We will arrange for your Apache user account when the CLA has 
 been recorded.
 
-After that is done, please make followup replies to the [PROJECT]-dev list.
-We generally discuss everything there and keep the
-private@sedona.apache.org list for occasional matters which must be private.
+2. After that is done, please use your ASF email to subscribe to the dev@sedona.apache.org
+and private@sedona.apache.org by sending an email to dev-subscribe@sedona.apache.org and 
+private-subscribe@sedona.apache.org. We generally discuss everything on the dev list and 
+keep the private@sedona.apache.org list for occasional matters which must be private.
 
 The developer section of the website describes roles within the ASF and provides other
 resources:
@@ -260,13 +247,6 @@ Subject: account request: New PMC NAME
 New PMC NAME, as you know, the ASF Infrastructure has set up your
 committer account with the username '####'.
 
-Please follow the instructions to set up your GitHub, SSH,
-svn password, svn configuration, email forwarding, etc.
-https://www.apache.org/dev/#committers
-
-Please subscribe to the Sedona Project Management 
-Committee mailing list private@sedona.apache.org.
-
 You have commit access to specific sections of the
 ASF repository, as follows:
 https://github.com/apache/incubator-sedona
@@ -284,6 +264,9 @@ Here are the steps
 	* Wait at least 30  minutes for an email inviting you to Apache GitHub Organization and accept invitation
 4. After accepting the Github Invitation verify that you are a 
 member of the team https://github.com/orgs/apache/teams/sedona-committers
+
+Optionally, if you want, please follow the instructions to set up your GitHub, SSH, svn password, svn configuration, email forwarding, etc.
+https://www.apache.org/dev/#committers
 
 Additionally, if you have been elected to the Sedona Podling
  Project Mgmt. Committee (PPMC): Verify you are part of the LDAP sedona

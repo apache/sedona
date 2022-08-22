@@ -19,7 +19,7 @@
 
 package org.apache.spark.sql.sedona_sql.expressions.simplify
 
-import org.apache.sedona.core.geometryObjects.Circle
+import org.apache.sedona.common.geometryObjects.Circle
 import org.locationtech.jts.geom._
 
 object GeometrySimplifier {
