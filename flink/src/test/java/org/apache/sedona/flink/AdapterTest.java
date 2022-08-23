@@ -48,13 +48,13 @@ public class AdapterTest extends TestBase
                         $(polygonColNames[0])).as(polygonColNames[0]),
                 $(polygonColNames[1]));
         Row result = last(geomTable);
-        assertEquals(data.get(data.size() - 1).toString(), result.toString());
+        assertEquals(data.get(data.size() - 1).getField(0).toString(), result.getField(0).toString());
         // GeomTable to GeomDS
         DataStream<Row> geomStream = tableEnv.toDataStream(geomTable);
-        assertEquals(data.get(0).toString(), geomStream.executeAndCollect(1).get(0).toString());
+        assertEquals(data.get(0).getField(0).toString(), geomStream.executeAndCollect(1).get(0).getField(0).toString());
         // GeomDS to GeomTable
         geomTable = tableEnv.fromDataStream(geomStream);
         result = last(geomTable);
-        assertEquals(data.get(data.size() - 1).toString(), result.toString());
+        assertEquals(data.get(data.size() - 1).getField(0).toString(), result.getField(0).toString());
     }
 }
