@@ -24,6 +24,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.wololo.jts2geojson.GeoJSONReader;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.flink.table.api.Expressions.$;
@@ -74,7 +75,7 @@ public class ConstructorTest extends TestBase{
     public void testPointFromText() {
         List<Row> data = createPointWKT(testDataSize);
         Row result = last(createPointTable(testDataSize));
-        assertEquals(data.get(data.size() - 1).toString(), result.toString());
+        assertEquals(data.get(data.size() - 1).getField(0).toString(), result.getField(0).toString());
     }
 
     @Test
@@ -86,7 +87,7 @@ public class ConstructorTest extends TestBase{
                         $(linestringColNames[1]));
         Row result = last(lineStringTable);
 
-        assertEquals(data.get(data.size() - 1).toString(), result.toString());
+        assertEquals(data.get(data.size() - 1).getField(0).toString(), result.getField(0).toString());
     }
 
     @Test
@@ -98,14 +99,14 @@ public class ConstructorTest extends TestBase{
                         $(linestringColNames[1]));
         Row result = last(lineStringTable);
 
-        assertEquals(data.get(data.size() - 1).toString(), result.toString());
+        assertEquals(data.get(data.size() - 1).getField(0).toString(), result.getField(0).toString());
     }
 
     @Test
     public void testPolygonFromText() {
         List<Row> data = createPolygonWKT(testDataSize);
         Row result = last(createPolygonTable(testDataSize));
-        assertEquals(data.get(data.size() - 1).toString(), result.toString());
+        assertEquals(data.get(data.size() - 1).getField(0).toString(), result.getField(0).toString());
     }
 
     @Test
@@ -116,7 +117,7 @@ public class ConstructorTest extends TestBase{
                 $(polygonColNames[0])).as(polygonColNames[0]),
                 $(polygonColNames[1]));
         Row result = last(geomTable);
-        assertEquals(data.get(data.size() - 1).toString(), result.toString());
+        assertEquals(data.get(data.size() - 1).getField(0).toString(), result.getField(0).toString());
     }
 
     @Test
@@ -127,7 +128,7 @@ public class ConstructorTest extends TestBase{
                         $(polygonColNames[0])).as(polygonColNames[0]),
                 $(polygonColNames[1]));
         Row result = last(geomTable);
-        assertEquals(data.get(data.size() - 1).toString(), result.toString());
+        assertEquals(data.get(data.size() - 1).getField(0).toString(), result.getField(0).toString());
     }
 
     @Test
@@ -179,7 +180,7 @@ public class ConstructorTest extends TestBase{
         TypeInformation<?>[] colTypes = {
                 PrimitiveArrayTypeInfo.BYTE_PRIMITIVE_ARRAY_TYPE_INFO,
                 BasicTypeInfo.STRING_TYPE_INFO};
-        RowTypeInfo typeInfo = new RowTypeInfo(colTypes, polygonColNames);
+        RowTypeInfo typeInfo = new RowTypeInfo(colTypes, Arrays.copyOfRange(polygonColNames, 0, 2));
         DataStream<Row> wkbDS = env.fromCollection(data).returns(typeInfo);
         Table wkbTable = tableEnv.fromDataStream(wkbDS, $(polygonColNames[0]), $(polygonColNames[1]));
 
@@ -199,7 +200,7 @@ public class ConstructorTest extends TestBase{
     public void testGeomFromGeoHash() {
         Integer precision = 2;
         List<Row> data = new ArrayList<>();
-        data.add(Row.of("2131s12fd", "polygon"));
+        data.add(Row.of("2131s12fd", "polygon", 0L));
 
         Table geohashTable = createTextTable(data, polygonColNames);
         Table geomTable = geohashTable
@@ -217,7 +218,7 @@ public class ConstructorTest extends TestBase{
     @Test
     public void testGeomFromGeoHashNullPrecision() {
         List<Row> data = new ArrayList<>();
-        data.add(Row.of("2131s12fd", "polygon"));
+        data.add(Row.of("2131s12fd", "polygon", 0L));
 
         Table geohashTable = createTextTable(data, polygonColNames);
         Table geomTable = geohashTable

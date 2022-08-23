@@ -19,6 +19,8 @@ import org.apache.sedona.flink.expressions.*;
 public class Catalog {
     public static UserDefinedFunction[] getFuncs() {
         return new UserDefinedFunction[]{
+                new Aggregators.ST_Envelope_Aggr(),
+                new Aggregators.ST_Union_Aggr(),
                 new Constructors.ST_Point(),
                 new Constructors.ST_PointFromText(),
                 new Constructors.ST_LineStringFromText(),

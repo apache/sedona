@@ -76,6 +76,7 @@ nav:
           - Overview: api/flink/Overview.md
           - Constructor: api/flink/Constructor.md
           - Function: api/flink/Function.md
+          - Aggregator: api/flink/Aggregator.md
           - Predicate: api/flink/Predicate.md
     - Community:
       - Community: community/contact.md 
