@@ -36,9 +36,7 @@ import org.locationtech.jts.geom.util.GeometryFixer
 import org.locationtech.jts.geom._
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.buffer.BufferParameters
-import org.locationtech.jts.operation.distance3d.Distance3DOp
 import org.locationtech.jts.operation.linemerge.LineMerger
-import org.locationtech.jts.operation.valid.IsValidOp
 import org.locationtech.jts.precision.GeometryPrecisionReducer
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier
 import org.locationtech.jts.geom.Geometry
@@ -77,18 +75,7 @@ case class ST_YMin(inputExpressions: Seq[Expression])
 }
 
 case class ST_3DDistance(inputExpressions: Seq[Expression])
-  extends BinaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 2)
-
-  override def toString: String = s" **${ST_3DDistance.getClass.getName}**  "
-
-  override def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
-    Distance3DOp.distance(leftGeometry, rightGeometry)
-  }
-
-  override def dataType = DoubleType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(Functions.distance3d) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -180,16 +167,7 @@ case class ST_Envelope(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_Length(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override def nullSafeEval(geometry: Geometry): Any = {
-    geometry.getLength
-  }
-
-  override def dataType: DataType = DoubleType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.length) with CodegenFallback {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -202,16 +180,7 @@ case class ST_Length(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_Area(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override def nullSafeEval(geometry: Geometry): Any = {
-    geometry.getArea
-  }
-
-  override def dataType: DataType = DoubleType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.area) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -562,25 +531,7 @@ case class ST_LineMerge(inputExpressions: Seq[Expression])
 }
 
 case class ST_Azimuth(inputExpressions: Seq[Expression])
-  extends BinaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 2)
-
-  override def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
-    (leftGeometry, rightGeometry) match {
-      case (pointA: Point, pointB: Point) => calculateAzimuth(pointA, pointB)
-    }
-  }
-
-  private def calculateAzimuth(pointA: Point, pointB: Point): Double = {
-    val deltaX = pointB.getX - pointA.getX
-    val deltaY = pointB.getY - pointA.getY
-    val azimuth = math.atan2(deltaX, deltaY)
-    if (azimuth < 0) azimuth + (2 * math.Pi) else azimuth
-  }
-
-  override def dataType: DataType = DoubleType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(Functions.azimuth) with CodegenFallback {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

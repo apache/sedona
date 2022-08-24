@@ -137,7 +137,7 @@ Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
-SELECT ST_Azimuth(ST_POINT(0.0 25.0), ST_POINT(0.0 0.0))
+SELECT ST_Azimuth(ST_POINT(0.0, 25.0), ST_POINT(0.0, 0.0))
 ```
 
 Output: `3.141592653589793`

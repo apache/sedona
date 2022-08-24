@@ -15,7 +15,6 @@ package org.apache.sedona.flink;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.flink.table.api.Table;
-import org.apache.sedona.flink.expressions.Constructors;
 import org.apache.sedona.flink.expressions.Functions;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -24,9 +23,6 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
-
-import java.util.Arrays;
-import java.util.Optional;
 
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
@@ -39,6 +35,21 @@ public class FunctionTest extends TestBase{
     @BeforeClass
     public static void onceExecutedBeforeAll() {
         initialize();
+    }
+
+    @Test
+    public void testArea() {
+        Table polygonTable = createPolygonTable(1);
+        Table ResultTable = polygonTable.select(call(Functions.ST_Area.class.getSimpleName(), $(polygonColNames[0])));
+        assertNotNull(first(ResultTable).getField(0));
+        double result = (double) first(ResultTable).getField(0);
+        assertEquals(1.0, result, 0);
+    }
+
+    @Test
+    public void testAzimuth() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_Azimuth(ST_GeomFromWKT('POINT (0 0)'), ST_GeomFromWKT('POINT (1 1)'))");
+        assertEquals(45, ((double) first(pointTable).getField(0)) / (Math.PI * 2) * 360, 0);
     }
 
     @Test
@@ -72,6 +83,21 @@ public class FunctionTest extends TestBase{
         pointTable = pointTable.select(call(Functions.ST_Distance.class.getSimpleName(), $(pointColNames[0])
                 , call("ST_GeomFromWKT", "POINT (0 0)")));
         assertEquals(0.0, first(pointTable).getField(0));
+    }
+
+    @Test
+    public void test3dDistance() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_3DDistance(ST_GeomFromWKT('POINT (0 0 0)'), ST_GeomFromWKT('POINT (1 1 1)'))");
+        assertEquals(Math.sqrt(3), first(pointTable).getField(0));
+    }
+
+    @Test
+    public void testLength() {
+        Table polygonTable = createPolygonTable(1);
+        Table resultTable = polygonTable.select(call(Functions.ST_Length.class.getSimpleName(), $(polygonColNames[0])));
+        assertNotNull(first(resultTable).getField(0));
+        double result = (double) first(resultTable).getField(0);
+        assertEquals(4, result, 0);
     }
 
     @Test
