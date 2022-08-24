@@ -93,6 +93,34 @@ SELECT ST_AsGeoJSON(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_AsGML
+
+Introduction: Return the [GML](https://www.ogc.org/standards/gml) string representation of a geometry
+
+Format: `ST_AsGML (A:geometry)`
+
+Since: `v1.3.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_AsGML(polygondf.countyshape)
+FROM polygondf
+```
+
+## ST_AsKML
+
+Introduction: Return the [KML](https://www.ogc.org/standards/kml) string representation of a geometry
+
+Format: `ST_AsKML (A:geometry)`
+
+Since: `v1.3.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_AsKML(polygondf.countyshape)
+FROM polygondf
+```
+
 ## ST_AsText
 
 Introduction: Return the Well-Known Text string representation of a geometry

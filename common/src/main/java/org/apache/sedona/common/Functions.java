@@ -29,6 +29,8 @@ import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.operation.distance3d.Distance3DOp;
+import org.locationtech.jts.io.gml2.GMLWriter;
+import org.locationtech.jts.io.kml.KMLWriter;
 import org.locationtech.jts.operation.valid.IsSimpleOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.opengis.referencing.FactoryException;
@@ -159,6 +161,14 @@ public class Functions {
         }
         GeoJSONWriter writer = new GeoJSONWriter();
         return writer.write(geometry).toString();
+    }
+
+    public static String asGML(Geometry geometry) {
+        return new GMLWriter().write(geometry);
+    }
+
+    public static String asKML(Geometry geometry) {
+        return new KMLWriter().write(geometry);
     }
 
     public static Geometry force2D(Geometry geometry) {

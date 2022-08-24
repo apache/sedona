@@ -208,6 +208,40 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testAsGML() throws Exception {
+        Table polygonTable = createPolygonTable(testDataSize);
+        polygonTable = polygonTable.select(call(Functions.ST_AsGML.class.getSimpleName(), $(polygonColNames[0])));
+        String result = (String) first(polygonTable).getField(0);
+        String expected =
+                "<gml:Polygon>\n" +
+                "  <gml:outerBoundaryIs>\n" +
+                "    <gml:LinearRing>\n" +
+                "      <gml:coordinates>\n" +
+                "        -0.5,-0.5 -0.5,0.5 0.5,0.5 0.5,-0.5 -0.5,-0.5 \n" +
+                "      </gml:coordinates>\n" +
+                "    </gml:LinearRing>\n" +
+                "  </gml:outerBoundaryIs>\n" +
+                "</gml:Polygon>\n";
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testAsKML() {
+        Table polygonTable = createPolygonTable(testDataSize);
+        polygonTable = polygonTable.select(call(Functions.ST_AsKML.class.getSimpleName(), $(polygonColNames[0])));
+        String result = (String) first(polygonTable).getField(0);
+        String expected =
+                "<Polygon>\n" +
+                "  <outerBoundaryIs>\n" +
+                "  <LinearRing>\n" +
+                "    <coordinates>-0.5,-0.5 -0.5,0.5 0.5,0.5 0.5,-0.5 -0.5,-0.5</coordinates>\n" +
+                "  </LinearRing>\n" +
+                "  </outerBoundaryIs>\n" +
+                "</Polygon>\n";
+        assertEquals(expected, result);
+    }
+
+    @Test
     public void testGeoJSON() {
         Table polygonTable = createPolygonTable(testDataSize);
         polygonTable = polygonTable.select(call(Functions.ST_AsGeoJSON.class.getSimpleName(), $(polygonColNames[0])));

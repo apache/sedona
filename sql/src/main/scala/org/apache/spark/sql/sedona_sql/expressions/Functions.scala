@@ -1367,6 +1367,22 @@ case class ST_AsEWKT(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_AsGML(inputExpressions: Seq[Expression])
+  extends InferredUnaryExpression(Functions.asGML) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_AsKML(inputExpressions: Seq[Expression])
+  extends InferredUnaryExpression(Functions.asKML) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
  * Test if Geometry is empty geometry.
  *
