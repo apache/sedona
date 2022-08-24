@@ -90,6 +90,34 @@ polygonDf.show()
 !!!warning
 	The way that SedonaSQL reads GeoJSON is different from that in SparkSQL
 
+## ST_GeomFromGML
+
+Introduction: Construct a Geometry from GML.
+
+Format:
+`ST_GeomFromGML (gml:string)`
+
+Since: `v1.3.0`
+
+SQL example:
+```SQL
+SELECT ST_GeomFromGML('<gml:LineString srsName="EPSG:4269"><gml:coordinates>-71.16028,42.258729 -71.160837,42.259112 -71.161143,42.25932</gml:coordinates></gml:LineString>') AS geometry
+```
+
+## ST_GeomFromKML
+
+Introduction: Construct a Geometry from KML.
+
+Format:
+`ST_GeomFromKML (kml:string)`
+
+Since: `v1.3.0`
+
+SQL example:
+```SQL
+SELECT ST_GeomFromKML('<LineString><coordinates>-71.1663,42.2614 -71.1667,42.2616</coordinates></LineString>') AS geometry
+```
+
 ## ST_GeomFromText
 
 Introduction: Construct a Geometry from Wkt. Alias of [ST_GeomFromWKT](#ST_GeomFromWKT)

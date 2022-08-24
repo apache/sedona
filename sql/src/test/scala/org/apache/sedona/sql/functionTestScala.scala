@@ -22,15 +22,18 @@ package org.apache.sedona.sql
 import org.apache.commons.codec.binary.Hex
 import org.apache.sedona.sql.implicits._
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.sedona_sql.expressions.ST_MakeValid
 import org.apache.spark.sql.{DataFrame, Row}
-import org.geotools.geometry.jts.WKTReader2
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom.{Geometry, Polygon}
 import org.locationtech.jts.io.WKTWriter
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.distance3d.Distance3DOp
 import org.scalatest.{GivenWhenThen, Matchers}
+import org.xml.sax.InputSource
+
+import java.io.StringReader
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.xpath.XPathFactory
 
 class functionTestScala extends TestBaseScala with Matchers with GeometrySample with GivenWhenThen {
 
@@ -311,6 +314,32 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       val df = sparkSession.sql("SELECT ST_AsBinary(ST_GeomFromWKT('POINT EMPTY'))")
       val s = "0101000000000000000000f87f000000000000f87f"
       assert(Hex.encodeHexString(df.first().get(0).asInstanceOf[Array[Byte]]) == s)
+    }
+
+    it("Passed ST_AsGML") {
+      val df = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') AS polygon")
+      df.createOrReplaceTempView("table")
+
+      val gmlDf = sparkSession.sql(
+        """select ST_AsGML(polygon) as geojson
+          |from table""".stripMargin)
+
+      val gml = DocumentBuilderFactory.newInstance.newDocumentBuilder.parse(new InputSource(new StringReader(gmlDf.first().getString(0))))
+      val coordinates = XPathFactory.newInstance.newXPath.evaluate("/Polygon/outerBoundaryIs/LinearRing/coordinates", gml)
+      assert(coordinates.trim === "1.0,1.0 8.0,1.0 8.0,8.0 1.0,8.0 1.0,1.0")
+    }
+
+    it("Passed ST_AsKML") {
+      val df = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') AS polygon")
+      df.createOrReplaceTempView("table")
+
+      val kmlDf = sparkSession.sql(
+        """select ST_AsKML(polygon) as geojson
+          |from table""".stripMargin)
+
+      val kml = DocumentBuilderFactory.newInstance.newDocumentBuilder.parse(new InputSource(new StringReader(kmlDf.first().getString(0))))
+      val coordinates = XPathFactory.newInstance.newXPath.evaluate("/Polygon/outerBoundaryIs/LinearRing/coordinates", kml)
+      assert(coordinates.trim === "1.0,1.0 8.0,1.0 8.0,8.0 1.0,8.0 1.0,1.0")
     }
 
     it("Passed ST_SRID") {

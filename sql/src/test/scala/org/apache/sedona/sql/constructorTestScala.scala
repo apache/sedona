@@ -22,7 +22,7 @@ package org.apache.sedona.sql
 import org.apache.sedona.core.formatMapper.GeoJsonReader
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader
 import org.apache.sedona.sql.utils.Adapter
-import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.geom.{Geometry, LineString}
 
 class constructorTestScala extends TestBaseScala {
 
@@ -152,6 +152,34 @@ class constructorTestScala extends TestBaseScala {
       polygonJsonDf.createOrReplaceTempView("polygontable")
       val polygonDf = sparkSession.sql("select ST_GeomFromGeoJSON(polygontable._c0) as countyshape from polygontable")
       assert(polygonDf.count() == 1000)
+    }
+
+    it("Passed ST_GeomFromGML") {
+      val linestring =
+        """'<gml:LineString srsName="EPSG:4269">
+          |    <gml:coordinates>
+          |        -71.16028,42.258729 -71.160837,42.259112 -71.161143,42.25932
+          |    </gml:coordinates>
+          |</gml:LineString>
+          |'""".stripMargin
+      val gml = sparkSession.sql(
+        s"""
+           |SELECT ST_GeomFromGML($linestring)
+           |""".stripMargin)
+      assert(gml.first().getAs[Geometry](0).isInstanceOf[LineString])
+    }
+
+    it("Passed ST_GeomFromKML") {
+      val linestring =
+        """'<LineString>
+          |<coordinates>-71.1663,42.2614 -71.1667,42.2616</coordinates>
+          |</LineString>
+          |'""".stripMargin
+      val kml = sparkSession.sql(
+        s"""
+           |SELECT ST_GeomFromKML($linestring)
+           |""".stripMargin)
+      assert(kml.first().getAs[Geometry](0).isInstanceOf[LineString])
     }
 
     it("Passed GeoJsonReader to DataFrame") {

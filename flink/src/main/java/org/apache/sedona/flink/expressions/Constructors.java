@@ -24,6 +24,8 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.gml2.GMLReader;
+import org.locationtech.jts.io.kml.KMLReader;
 
 public class Constructors {
 
@@ -162,6 +164,25 @@ public class Constructors {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String value) throws ParseException {
             return eval(value, null);
+        }
+    }
+
+    public static class ST_GeomFromGML extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String gml) throws ParseException {
+            GMLReader reader = new GMLReader();
+            try {
+                return reader.read(gml, new GeometryFactory());
+            } catch (Exception e) {
+                throw new ParseException(e);
+            }
+        }
+    }
+
+    public static class ST_GeomFromKML extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String kml) throws ParseException {
+            return new KMLReader().read(kml);
         }
     }
 }

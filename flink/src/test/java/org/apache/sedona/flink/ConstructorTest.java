@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Polygon;
 import org.wololo.jts2geojson.GeoJSONReader;
 
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import java.util.List;
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
@@ -231,5 +233,47 @@ public class ConstructorTest extends TestBase{
         String expectedGeom = "POLYGON ((-178.4168529510498 -37.69778251647949, -178.4168529510498 -37.697739601135254, -178.41681003570557 -37.697739601135254, -178.41681003570557 -37.69778251647949, -178.4168529510498 -37.69778251647949))";
 
         assertEquals(expectedGeom, result);
+    }
+
+    @Test
+    public void testGeomFromGML() {
+        List<Row> data = new ArrayList<>();
+        String gml =
+                "<gml:Polygon>\n" +
+                "  <gml:outerBoundaryIs>\n" +
+                "    <gml:LinearRing>\n" +
+                "      <gml:coordinates>\n" +
+                "        0.0,0.0 0.0,1.0 1.0,1.0 1.0,0.0 0.0,0.0\n" +
+                "      </gml:coordinates>\n" +
+                "    </gml:LinearRing>\n" +
+                "  </gml:outerBoundaryIs>\n" +
+                "</gml:Polygon>";
+        data.add(Row.of(gml, "polygon", 0L));
+
+        Table wktTable = createTextTable(data, polygonColNames);
+        Table geomTable = wktTable.select(call(Constructors.ST_GeomFromGML.class.getSimpleName(),
+                $(polygonColNames[0])).as(polygonColNames[0]),
+                $(polygonColNames[1]));
+        assertTrue(first(geomTable).getField(0) instanceof Polygon);
+    }
+
+    @Test
+    public void testGeomFromKML() {
+        List<Row> data = new ArrayList<>();
+        String kml =
+                "<Polygon>\n" +
+                "  <outerBoundaryIs>\n" +
+                "    <LinearRing>\n" +
+                "      <coordinates>0.0,0.0 0.0,1.0 1.0,1.0 1.0,0.0 0.0,0.0</coordinates>\n" +
+                "    </LinearRing>\n" +
+                "  </outerBoundaryIs>\n" +
+                "</Polygon>";
+        data.add(Row.of(kml, "polygon", 0L));
+
+        Table wktTable = createTextTable(data, polygonColNames);
+        Table geomTable = wktTable.select(call(Constructors.ST_GeomFromKML.class.getSimpleName(),
+                $(polygonColNames[0])).as(polygonColNames[0]),
+                $(polygonColNames[1]));
+        assertTrue(first(geomTable).getField(0) instanceof Polygon);
     }
 }
