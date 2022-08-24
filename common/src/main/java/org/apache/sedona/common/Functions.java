@@ -28,6 +28,7 @@ import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.operation.distance3d.Distance3DOp;
 import org.locationtech.jts.io.gml2.GMLWriter;
 import org.locationtech.jts.io.kml.KMLWriter;
 import org.locationtech.jts.operation.valid.IsSimpleOp;
@@ -40,12 +41,33 @@ import org.wololo.jts2geojson.GeoJSONWriter;
 
 
 public class Functions {
+    public static double area(Geometry geometry) {
+        return geometry.getArea();
+    }
+
+    public static double azimuth(Geometry left, Geometry right) {
+        Coordinate leftCoordinate = left.getCoordinate();
+        Coordinate rightCoordinate = right.getCoordinate();
+        double deltaX = rightCoordinate.x - leftCoordinate.x;
+        double deltaY = rightCoordinate.y - leftCoordinate.y;
+        double azimuth = Math.atan2(deltaX, deltaY);
+        return azimuth < 0 ? azimuth + (2 * Math.PI) : azimuth;
+    }
+
     public static Geometry buffer(Geometry geometry, double radius) {
         return geometry.buffer(radius);
     }
 
     public static double distance(Geometry left, Geometry right) {
         return left.distance(right);
+    }
+
+    public static double distance3d(Geometry left, Geometry right) {
+        return new Distance3DOp(left, right).distance();
+    }
+
+    public static double length(Geometry geometry) {
+        return geometry.getLength();
     }
 
     public static double xMin(Geometry geometry) {

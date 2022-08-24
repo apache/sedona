@@ -15,23 +15,29 @@ package org.apache.sedona.flink.expressions;
 
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.functions.ScalarFunction;
-import org.apache.sedona.common.utils.GeomUtils;
-import org.geotools.geometry.jts.JTS;
-import org.geotools.referencing.CRS;
-import org.locationtech.jts.io.WKTWriter;
-import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.LineString;
 import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
-import org.wololo.jts2geojson.GeoJSONWriter;
-import scala.Option;
-
-import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 
 public class Functions {
+    public static class ST_Area extends ScalarFunction {
+        @DataTypeHint("Double")
+        public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.area(geom);
+        }
+    }
+
+    public static class ST_Azimuth extends ScalarFunction {
+        @DataTypeHint("Double")
+        public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
+                           @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
+            return org.apache.sedona.common.Functions.azimuth(geom1, geom2);
+        }
+    }
+
     public static class ST_Buffer extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
@@ -48,6 +54,24 @@ public class Functions {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
             return org.apache.sedona.common.Functions.distance(geom1, geom2);
+        }
+    }
+
+    public static class ST_3DDistance extends ScalarFunction {
+        @DataTypeHint("Double")
+        public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
+                           @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
+            return org.apache.sedona.common.Functions.distance3d(geom1, geom2);
+        }
+    }
+
+    public static class ST_Length extends ScalarFunction {
+        @DataTypeHint("Double")
+        public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.length(geom);
         }
     }
 

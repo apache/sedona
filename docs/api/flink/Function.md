@@ -1,3 +1,33 @@
+## ST_3DDistance
+
+Introduction: Return the 3-dimensional minimum cartesian distance between A and B
+
+Format: `ST_3DDistance (A:geometry, B:geometry)`
+
+Since: `v1.3.0`
+
+Example:
+
+```SQL
+SELECT ST_3DDistance(polygondf.countyshape, polygondf.countyshape)
+FROM polygondf
+```
+
+## ST_Area
+
+Introduction: Return the area of A
+
+Format: `ST_Area (A:geometry)`
+
+Since: `v1.3.0`
+
+Example:
+
+```SQL
+SELECT ST_Area(polygondf.countyshape)
+FROM polygondf
+```
+
 ## ST_AsBinary
 
 Introduction: Return the Well-Known Binary representation of a geometry
@@ -105,6 +135,22 @@ Example:
 SELECT ST_AsText(polygondf.countyshape)
 FROM polygondf
 ```
+
+## ST_Azimuth
+
+Introduction: Returns Azimuth for two given points in radians null otherwise.
+
+Format: `ST_Azimuth(pointA: Point, pointB: Point)`
+
+Since: `v1.3.0`
+
+Example:
+
+```SQL
+SELECT ST_Azimuth(ST_POINT(0.0, 25.0), ST_POINT(0.0, 0.0))
+```
+
+Output: `3.141592653589793`
 
 ## ST_Buffer
 
@@ -307,6 +353,21 @@ Example:
 
 ```SQL
 SELECT ST_IsValid(polygondf.countyshape)
+FROM polygondf
+```
+
+## ST_Length
+
+Introduction: Return the perimeter of A
+
+Format: ST_Length (A:geometry)
+
+Since: `v1.3.0`
+
+Example:
+
+```SQL
+SELECT ST_Length(polygondf.countyshape)
 FROM polygondf
 ```
 
