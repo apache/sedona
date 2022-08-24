@@ -32,6 +32,8 @@ import org.apache.spark.sql.types.{BinaryType, DataType, Decimal, StringType}
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.geom.{Coordinate, GeometryFactory}
 import org.locationtech.jts.io.WKBReader
+import org.locationtech.jts.io.gml2.GMLReader
+import org.locationtech.jts.io.kml.KMLReader
 
 /**
   * Return a point from a string. The string must be plain string and each coordinate must be separated by a delimiter.
@@ -429,6 +431,50 @@ case class ST_GeomFromGeoHash(inputExpressions: Seq[Expression])
     }
     catch {
       case e: Exception => null
+    }
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_GeomFromGML(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  assert(inputExpressions.length == 1)
+  override def nullable: Boolean = true
+
+  override def eval(inputRow: InternalRow): Any = {
+    (inputExpressions(0).eval(inputRow)) match {
+      case geomString: UTF8String =>
+        new GMLReader().read(geomString.toString, new GeometryFactory()).toGenericArrayData
+      case _ => null
+    }
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_GeomFromKML(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback {
+  assert(inputExpressions.length == 1)
+  override def nullable: Boolean = true
+
+  override def eval(inputRow: InternalRow): Any = {
+    (inputExpressions(0).eval(inputRow)) match {
+      case geomString: UTF8String =>
+        new KMLReader().read(geomString.toString).toGenericArrayData
+      case _ => null
     }
   }
 
