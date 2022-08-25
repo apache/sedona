@@ -116,3 +116,7 @@ class TestGeometryConvert(TestBase):
 
         gdf = counties_geom.toPandas()
         print(gpd.GeoDataFrame(gdf, geometry="geometry"))
+
+    def test_null_deserializer(self):
+        result = self.spark.sql("select st_geomfromwkt(null)").collect()[0][0]
+        assert result is None
