@@ -28,10 +28,16 @@ class GeometryType(UserDefinedType):
         return ArrayType(ByteType(), containsNull=False)
 
     def fromInternal(self, obj):
-        return self.deserialize(obj)
+        deserialized_obj = None
+        if obj is not None:
+            deserialized_obj = self.deserialize(obj)
+        return deserialized_obj
 
     def toInternal(self, obj):
-        return [el - 256 if el >= 128 else el for el in self.serialize(obj)]
+        serialized_obj = None
+        if obj is not None:
+            serialized_obj = [el - 256 if el >= 128 else el for el in self.serialize(obj)]
+        return serialized_obj
 
     def serialize(self, obj):
         return dumps(obj)

@@ -179,3 +179,23 @@ class TestsSerializers(TestBase):
         ).createOrReplaceTempView("polygon")
         length = self.spark.sql("select st_area(geom) from polygon").collect()[0][0]
         assert length == 4.75
+
+    def test_null_serializer(self):
+        data = [
+            [1, None]
+
+        ]
+
+        schema = t.StructType(
+            [
+                t.StructField("id", IntegerType(), True),
+                t.StructField("geom", GeometryType(), True),
+            ]
+        )
+        self.spark.createDataFrame(
+            data,
+            schema
+        ).createOrReplaceTempView("points")
+
+        count = self.spark.sql("select count(*) from points").collect()[0][0]
+        assert count == 1
