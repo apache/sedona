@@ -7,7 +7,8 @@ Sedona Flink has four modules :`sedona-core, sedona-sql, sedona-python-adapter, 
 
 ## Use Sedona fat jars
 
-This is the most common way to use Sedona in your environment. Do not use separate Sedona jars if you are not familar with Maven.
+!!!warning
+	For Scala/Java/Python/R users, this is the most common way to use Sedona in your environment. Do not use separate Sedona jars othwerwise you will get dependency conflicts. `sedona-python-adapter` already contains all you need.
 
 The optional GeoTools library is required only if you want to use CRS transformation and ShapefileReader. This wrapper library is a re-distriution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This libary is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
 
@@ -78,7 +79,7 @@ The optional GeoTools library is required only if you want to use CRS transforma
 
 !!! abstract "Sedona with Apache Flink"
 
-	=== "Flink 2.12+ and Scala 2.12"
+	=== "Flink 1.12+ and Scala 2.12"
 	
 		```xml
 		<dependency>
@@ -98,7 +99,7 @@ The optional GeoTools library is required only if you want to use CRS transforma
 		    <version>{{ sedona.current_geotools }}</version>
 		</dependency>
 		```
-	=== "Flink 2.12+ and Scala 2.11"
+	=== "Flink 1.12+ and Scala 2.11"
 	
 		```xml
 		<dependency>

@@ -1,3 +1,6 @@
+!!!warning
+	Support of Spark 2.X and Scala 2.11 will be removed in Sedona 1.3.0+ although some parts of the source code might still be compatible. Sedona 1.3.0+ will release binary for both Scala 2.12 and 2.13.
+
 ## Sedona 1.2.1
 
 This version is a maintenance release on Sedona 1.2.0 line. It includes bug fixes.
