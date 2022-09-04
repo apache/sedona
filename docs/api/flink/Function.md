@@ -281,6 +281,36 @@ Result:
 +-----------------------------+
 ```
 
+## ST_GeometryN
+
+Introduction: Return the 0-based Nth geometry if the geometry is a GEOMETRYCOLLECTION, (MULTI)POINT, (MULTI)LINESTRING, MULTICURVE or (MULTI)POLYGON. Otherwise, return null
+
+Format: `ST_GeometryN(geom: geometry, n: Int)`
+
+Since: `v1.3.0`
+
+Example:
+```SQL
+SELECT ST_GeometryN(ST_GeomFromText('MULTIPOINT((1 2), (3 4), (5 6), (8 9))'), 1)
+```
+
+Output: `POINT (3 4)`
+
+## ST_InteriorRingN
+
+Introduction: Returns the Nth interior linestring ring of the polygon geometry. Returns NULL if the geometry is not a polygon or the given N is out of range
+
+Format: `ST_InteriorRingN(geom: geometry, n: Int)`
+
+Since: `v1.3.0`
+
+Example:
+```SQL
+SELECT ST_InteriorRingN(ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1), (1 3, 2 3, 2 4, 1 4, 1 3), (3 3, 4 3, 4 4, 3 4, 3 3))'), 0)
+```
+
+Output: `LINEARRING (1 1, 2 1, 2 2, 1 2, 1 1)`
+
 ## ST_IsClosed
 
 Introduction: RETURNS true if the LINESTRING start and end point are the same.

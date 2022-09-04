@@ -133,6 +133,22 @@ public class Functions {
         }
     }
 
+    public static class ST_GeometryN extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, int n) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.geometryN(geom, n);
+        }
+    }
+
+    public static class ST_InteriorRingN extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, int n) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.interiorRingN(geom, n);
+        }
+    }
+
     public static class ST_PointN extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, int n) {

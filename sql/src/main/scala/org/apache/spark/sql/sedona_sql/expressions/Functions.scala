@@ -20,7 +20,6 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.Functions
 import org.apache.sedona.sql.utils.GeometrySerializer
-import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions._
@@ -793,33 +792,7 @@ case class ST_ExteriorRing(inputExpressions: Seq[Expression])
 
 
 case class ST_GeometryN(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with Logging {
-  assert(inputExpressions.length == 2)
-
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val geometry = inputExpressions(0).toGeometry(input)
-    val n = inputExpressions(1).toInt(input)
-    geometry match {
-      case geom: Geometry => getNthGeom(geom, n)
-      case _ => null
-    }
-  }
-
-  private def getNthGeom(geom: Geometry, index: Int): GenericArrayData = {
-    val nthGeom = Try(geom.getGeometryN(index))
-    nthGeom match {
-      case Failure(exception) =>
-        logWarning(s"Geometry ${geom.toString}, Out Of index")
-        null
-      case Success(geom) => geom.toGenericArrayData
-    }
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(Functions.geometryN) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -827,24 +800,7 @@ case class ST_GeometryN(inputExpressions: Seq[Expression])
 }
 
 case class ST_InteriorRingN(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
-  assert(inputExpressions.length == 2)
-
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val geometry = inputExpressions(0).toGeometry(input)
-    val n = inputExpressions(1).toInt(input)
-    geometry match {
-      case geom: Polygon => geom.getInteriorRingN(n)
-        .toGenericArrayData
-      case _ => null
-    }
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(Functions.interiorRingN) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
