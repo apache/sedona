@@ -266,6 +266,27 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testX() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (1.23 4.56 7.89)') AS " + pointColNames[0]);
+        pointTable = pointTable.select(call(Functions.ST_X.class.getSimpleName(), $(pointColNames[0])));
+        assertEquals(1.23, first(pointTable).getField(0));
+    }
+
+    @Test
+    public void testY() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (1.23 4.56 7.89)') AS " + pointColNames[0]);
+        pointTable = pointTable.select(call(Functions.ST_Y.class.getSimpleName(), $(pointColNames[0])));
+        assertEquals(4.56, first(pointTable).getField(0));
+    }
+
+    @Test
+    public void testZ() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (1.23 4.56 7.89)') AS " + pointColNames[0]);
+        pointTable = pointTable.select(call(Functions.ST_Z.class.getSimpleName(), $(pointColNames[0])));
+        assertEquals(7.89, first(pointTable).getField(0));
+    }
+
+    @Test
     public void testXMax() {
         Table polygonTable = createPolygonTable(1);
         Table MaxTable = polygonTable.select(call(Functions.ST_XMax.class.getSimpleName(), $(polygonColNames[0])));

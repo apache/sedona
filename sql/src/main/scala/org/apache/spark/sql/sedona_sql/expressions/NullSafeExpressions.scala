@@ -72,6 +72,8 @@ sealed class InferrableType[T: TypeTag]
 object InferrableType {
   implicit val geometryInstance: InferrableType[Geometry] =
     new InferrableType[Geometry] {}
+  implicit val javaDoubleInstance: InferrableType[java.lang.Double] =
+    new InferrableType[java.lang.Double] {}
   implicit val doubleInstance: InferrableType[Double] =
     new InferrableType[Double] {}
   implicit val booleanInstance: InferrableType[Boolean] =
@@ -116,6 +118,8 @@ object InferredTypes {
   def inferSparkType[T: TypeTag]: DataType = {
     if (typeOf[T] =:= typeOf[Geometry]) {
       GeometryUDT
+    } else if (typeOf[T] =:= typeOf[java.lang.Double]) {
+      DoubleType
     } else if (typeOf[T] =:= typeOf[Double]) {
       DoubleType
     } else if (typeOf[T] =:= typeOf[Int]) {

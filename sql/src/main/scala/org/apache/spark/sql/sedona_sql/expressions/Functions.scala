@@ -539,19 +539,7 @@ case class ST_Azimuth(inputExpressions: Seq[Expression])
 }
 
 case class ST_X(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    geometry match {
-      case point: Point => point.getX
-      case _ => null
-    }
-  }
-
-  override def dataType: DataType = DoubleType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.x) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -560,19 +548,7 @@ case class ST_X(inputExpressions: Seq[Expression])
 
 
 case class ST_Y(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    geometry match {
-      case point: Point => point.getY
-      case _ => null
-    }
-  }
-
-  override def dataType: DataType = DoubleType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.y) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -580,19 +556,7 @@ case class ST_Y(inputExpressions: Seq[Expression])
 }
 
 case class ST_Z(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    geometry match {
-      case point: Point => point.getCoordinate.getZ
-      case _ => null
-    }
-  }
-
-  override def dataType: DataType = DoubleType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.z) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
