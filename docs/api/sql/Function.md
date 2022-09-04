@@ -528,7 +528,7 @@ Result:
 
 ## ST_GeometryN
 
-Introduction: Return the 1-based Nth geometry if the geometry is a GEOMETRYCOLLECTION, (MULTI)POINT, (MULTI)LINESTRING, MULTICURVE or (MULTI)POLYGON Otherwise, return null
+Introduction: Return the 0-based Nth geometry if the geometry is a GEOMETRYCOLLECTION, (MULTI)POINT, (MULTI)LINESTRING, MULTICURVE or (MULTI)POLYGON. Otherwise, return null
 
 Format: `ST_GeometryN(geom: geometry, n: Int)`
 
