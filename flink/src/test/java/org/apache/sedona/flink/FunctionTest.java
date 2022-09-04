@@ -267,23 +267,23 @@ public class FunctionTest extends TestBase{
 
     @Test
     public void testX() {
-        Table pointTable = createPointTable_real(testDataSize);
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (1.23 4.56 7.89)') AS " + pointColNames[0]);
         pointTable = pointTable.select(call(Functions.ST_X.class.getSimpleName(), $(pointColNames[0])));
-        assertEquals(32.01, first(pointTable).getField(0));
+        assertEquals(1.23, first(pointTable).getField(0));
     }
 
     @Test
     public void testY() {
-        Table pointTable = createPointTable_real(testDataSize);
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (1.23 4.56 7.89)') AS " + pointColNames[0]);
         pointTable = pointTable.select(call(Functions.ST_Y.class.getSimpleName(), $(pointColNames[0])));
-        assertEquals(-117.99, first(pointTable).getField(0));
+        assertEquals(4.56, first(pointTable).getField(0));
     }
 
     @Test
     public void testZ() {
-        Table pointTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (0 1 2)') AS " + pointColNames[0]);
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (1.23 4.56 7.89)') AS " + pointColNames[0]);
         pointTable = pointTable.select(call(Functions.ST_Z.class.getSimpleName(), $(pointColNames[0])));
-        assertEquals(2.0, first(pointTable).getField(0));
+        assertEquals(7.89, first(pointTable).getField(0));
     }
 
     @Test
