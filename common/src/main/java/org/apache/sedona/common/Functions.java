@@ -70,6 +70,27 @@ public class Functions {
         return geometry.getLength();
     }
 
+    public static Double x(Geometry geometry) {
+        if (geometry instanceof Point) {
+            return geometry.getCoordinate().x;
+        }
+        return null;
+    }
+
+    public static Double y(Geometry geometry) {
+        if (geometry instanceof Point) {
+            return geometry.getCoordinate().y;
+        }
+        return null;
+    }
+
+    public static Double z(Geometry geometry) {
+        if (geometry instanceof Point) {
+            return geometry.getCoordinate().z;
+        }
+        return null;
+    }
+
     public static double xMin(Geometry geometry) {
         Coordinate[] points = geometry.getCoordinates();
         double min = Double.MAX_VALUE;

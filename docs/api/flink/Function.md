@@ -507,6 +507,21 @@ FROM polygondf
 !!!note
 The detailed EPSG information can be searched on [EPSG.io](https://epsg.io/).
 
+## ST_X
+
+Introduction: Returns X Coordinate of given Point, null otherwise.
+
+Format: `ST_X(pointA: Point)`
+
+Since: `v1.3.0`
+
+Example:
+```SQL
+SELECT ST_X(ST_POINT(0.0 25.0))
+```
+
+Output: `0.0`
+
 ## ST_XMax
 
 Introduction: Returns the maximum X coordinate of a geometry
@@ -545,6 +560,21 @@ Input: `POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))`
 
 Output: `-1`
 
+## ST_Y
+
+Introduction: Returns Y Coordinate of given Point, null otherwise.
+
+Format: `ST_Y(pointA: Point)`
+
+Since: `v1.3.0`
+
+Example:
+```SQL
+SELECT ST_Y(ST_POINT(0.0 25.0))
+```
+
+Output: `25.0`
+
 ## ST_YMax
 
 Introduction: Return the minimum Y coordinate of A
@@ -574,3 +604,18 @@ SELECT ST_YMin(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
 Output : 0
+
+## ST_Z
+
+Introduction: Returns Z Coordinate of given Point, null otherwise.
+
+Format: `ST_Z(pointA: Point)`
+
+Since: `v1.3.0`
+
+Example:
+```SQL
+SELECT ST_Z(ST_POINT(0.0 25.0 11.0))
+```
+
+Output: `11.0`
