@@ -157,6 +157,23 @@ public class Functions {
         return geometry.reverse();
     }
 
+    public static Geometry geometryN(Geometry geometry, int n) {
+        if (n < geometry.getNumGeometries()) {
+            return geometry.getGeometryN(n);
+        }
+        return null;
+    }
+
+    public static Geometry interiorRingN(Geometry geometry, int n) {
+        if (geometry instanceof Polygon) {
+            Polygon polygon = (Polygon) geometry;
+            if (n < polygon.getNumInteriorRing()) {
+                return polygon.getInteriorRingN(n);
+            }
+        }
+        return null;
+    }
+
     public static Geometry pointN(Geometry geometry, int n) {
         if(!(geometry instanceof LineString)) {
             return null;

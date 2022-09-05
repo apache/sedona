@@ -45,6 +45,8 @@ public class Catalog {
                 new Functions.ST_GeoHash(),
                 new Functions.ST_PointOnSurface(),
                 new Functions.ST_Reverse(),
+                new Functions.ST_GeometryN(),
+                new Functions.ST_InteriorRingN(),
                 new Functions.ST_PointN(),
                 new Functions.ST_ExteriorRing(),
                 new Functions.ST_AsEWKT(),

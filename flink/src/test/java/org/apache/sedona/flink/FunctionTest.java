@@ -145,6 +145,22 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testGeometryN() {
+        Table collectionTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION(POINT(10 10), POINT(30 30), LINESTRING(15 15, 20 20))') AS collection");
+        Table resultTable = collectionTable.select(call(Functions.ST_GeometryN.class.getSimpleName(), $("collection"), 1));
+        Point point = (Point) first(resultTable).getField(0);
+        assertEquals("POINT (30 30)", point.toString());
+    }
+
+    @Test
+    public void testInteriorRingN() {
+        Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromText('POLYGON((7 9,8 7,11 6,15 8,16 6,17 7,17 10,18 12,17 14,15 15,11 15,10 13,9 12,7 9),(9 9,10 10,11 11,11 10,10 8,9 9),(12 14,15 14,13 11,12 14))') AS polygon");
+        Table resultTable = polygonTable.select(call(Functions.ST_InteriorRingN.class.getSimpleName(), $("polygon"), 1));
+        LinearRing linearRing = (LinearRing) first(resultTable).getField(0);
+        assertEquals("LINEARRING (12 14, 15 14, 13 11, 12 14)", linearRing.toString());
+    }
+
+    @Test
     public void testPointN_positiveN() {
         int n = 1;
         Table polygonTable = createPolygonTable(1);
