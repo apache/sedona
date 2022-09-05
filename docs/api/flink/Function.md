@@ -152,6 +152,21 @@ SELECT ST_Azimuth(ST_POINT(0.0, 25.0), ST_POINT(0.0, 0.0))
 
 Output: `3.141592653589793`
 
+## ST_Boundary
+
+Introduction: Returns the closure of the combinatorial boundary of this Geometry.
+
+Format: `ST_Boundary(geom: geometry)`
+
+Since: `v1.3.0`
+
+Example:
+```SQL
+SELECT ST_Boundary(ST_GeomFromText('POLYGON ((1 1, 0 0, -1 1, 1 1))'))
+```
+
+Output: `LINEARRING (1 1, 0 0, -1 1, 1 1)`
+
 ## ST_Buffer
 
 Introduction: Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance.

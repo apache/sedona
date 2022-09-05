@@ -54,6 +54,10 @@ public class Functions {
         return azimuth < 0 ? azimuth + (2 * Math.PI) : azimuth;
     }
 
+    public static Geometry boundary(Geometry geometry) {
+        return geometry.getBoundary();
+    }
+
     public static Geometry buffer(Geometry geometry, double radius) {
         return geometry.buffer(radius);
     }

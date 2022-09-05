@@ -584,16 +584,7 @@ case class ST_StartPoint(inputExpressions: Seq[Expression])
 
 
 case class ST_Boundary(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    val geometryBoundary = geometry.getBoundary
-    geometryBoundary.toGenericArrayData
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.boundary) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
