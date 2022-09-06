@@ -62,6 +62,10 @@ public class Functions {
         return geometry.buffer(radius);
     }
 
+    public static Geometry envelope(Geometry geometry) {
+        return geometry.getEnvelope();
+    }
+
     public static double distance(Geometry left, Geometry right) {
         return left.distance(right);
     }

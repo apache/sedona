@@ -214,6 +214,21 @@ SELECT ST_Distance(polygondf.countyshape, polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_Envelope
+
+Introduction: Return the envelop boundary of A
+
+Format: `ST_Envelope (A:geometry)`
+
+Since: `v1.3.0`
+
+Example:
+
+```SQL
+SELECT ST_Envelope(polygondf.countyshape)
+FROM polygondf
+```
+
 ## ST_ExteriorRing
 
 Introduction: Returns a LINESTRING representing the exterior ring (shell) of a POLYGON. Returns NULL if the geometry is not a polygon.

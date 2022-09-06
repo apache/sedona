@@ -69,6 +69,13 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testEnvelope() {
+        Table linestringTable = createLineStringTable(1);
+        linestringTable = linestringTable.select(call(Functions.ST_Envelope.class.getSimpleName(), $(linestringColNames[0])));
+        assertEquals("POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))", first(linestringTable).getField(0).toString());
+    }
+
+    @Test
     public void testFlipCoordinates() {
         Table pointTable = createPointTable_real(testDataSize);
         Table flippedTable = pointTable.select(call(Functions.ST_FlipCoordinates.class.getSimpleName(), $(pointColNames[0])));
