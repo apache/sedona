@@ -53,6 +53,14 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testBoundary() {
+        Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((1 1, 0 0, -1 1, 1 1))') AS geom");
+        Table boundaryTable = polygonTable.select(call(Functions.ST_Boundary.class.getSimpleName(), $("geom")));
+        Geometry result = (Geometry) first(boundaryTable).getField(0);
+        assertEquals("LINEARRING (1 1, 0 0, -1 1, 1 1)", result.toString());
+    }
+
+    @Test
     public void testBuffer() {
         Table pointTable = createPointTable_real(testDataSize);
         Table bufferTable = pointTable.select(call(Functions.ST_Buffer.class.getSimpleName(), $(pointColNames[0]), 1));
