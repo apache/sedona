@@ -213,8 +213,17 @@ BSD 2-Clause License
 --------------------------------------
 zeppelin/index.js (modified based on volume-leaflet: https://github.com/volumeint/helium-volume-leaflet)
 
+
 No-copyright data used in unit tests
 --------------------------------------
+
+UrbIS-Adm 3D from datastore.brussels (Creative Commons CC-0 licence, No copyright)
+---------------
+core/src/test/resources/shapefiles/unsupported/UrbAdm3D_142166_Bu_Ground.dbf
+core/src/test/resources/shapefiles/unsupported/UrbAdm3D_142166_Bu_Ground.prj
+core/src/test/resources/shapefiles/unsupported/UrbAdm3D_142166_Bu_Ground.shp
+core/src/test/resources/shapefiles/unsupported/UrbAdm3D_142166_Bu_Ground.shx
+
 
 TIGER/Line from United States Census Bureau
 ---------------

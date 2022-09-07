@@ -35,6 +35,6 @@ public class TypeUnknownException
      */
     public TypeUnknownException(int typeID)
     {
-        super("Unknown shape type " + typeID);
+        super("Unknown shape type " + ShapeType.getType(typeID).name());
     }
 }
