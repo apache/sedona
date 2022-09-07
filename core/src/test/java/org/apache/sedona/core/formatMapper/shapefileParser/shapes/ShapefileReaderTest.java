@@ -104,23 +104,14 @@ public class ShapefileReaderTest
      *
      * @throws IOException
      */
-    @Ignore
-    public void testShapefileEndWithUndefinedType()
+    @Test
+    public void testShapefileEndWithUnsupportedType()
             throws IOException
     {
-        // load shape with geotool.shapefile
-        String inputLocation = getShapeFilePath("undefined");
-        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = loadFeatures(inputLocation);
-        // load shapes with our tool
+        // Read data that is in PolygonZ format
+        String inputLocation = getShapeFilePath("unsupported");
         SpatialRDD shapeRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
-        FeatureIterator<SimpleFeature> features = collection.features();
-        int nullNum = 0;
-        while (features.hasNext()) {
-            SimpleFeature feature = features.next();
-            Geometry g = (Geometry) feature.getDefaultGeometry();
-            if (g == null) { nullNum++; }
-        }
-        assertEquals(shapeRDD.getRawSpatialRDD().count(), collection.size() - nullNum);
+        assertEquals(0, shapeRDD.getRawSpatialRDD().count());
     }
 
     /**

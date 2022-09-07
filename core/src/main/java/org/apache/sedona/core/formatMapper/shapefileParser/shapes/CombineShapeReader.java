@@ -144,11 +144,13 @@ public class CombineShapeReader
         boolean hasNextShp = shapeFileReader.nextKeyValue();
         if (hasDbf) { hasNextDbf = dbfFileReader.nextKeyValue(); }
 
-        int curShapeType = shapeFileReader.getCurrentValue().getTypeID();
-        while (hasNextShp && ShapeType.getType(curShapeType) == ShapeType.UNDEFINED) {
+        ShapeType curShapeType = shapeFileReader.getCurrentValue().getType();
+        while (hasNextShp && !curShapeType.isSupported()) {
+            logger.warn("[SEDONA] Shapefile type " + curShapeType.name() + " is not supported. Skipped this record." +
+                    " Please use QGIS or GeoPandas to convert it to a type listed in ShapeType.java");
             if (hasDbf) { hasNextDbf = dbfFileReader.nextKeyValue(); }
             hasNextShp = shapeFileReader.nextKeyValue();
-            curShapeType = shapeFileReader.getCurrentValue().getTypeID();
+            curShapeType = shapeFileReader.getCurrentValue().getType();
         }
         // check if records match in .shp and .dbf
         if (hasDbf) {

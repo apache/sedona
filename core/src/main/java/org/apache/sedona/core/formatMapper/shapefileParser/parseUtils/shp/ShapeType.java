@@ -22,22 +22,45 @@ package org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp;
 import org.locationtech.jts.geom.GeometryFactory;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 public enum ShapeType
         implements Serializable
 {
-
-    UNDEFINED(0),
-    POINT(1),
-    POLYLINE(3),
-    POLYGON(5),
-    MULTIPOINT(8);
+    // The following IDs are defined in Shapefile specification
+    NULL(0, false),
+    POINT(1, true),
+    POLYLINE(3, true),
+    POLYGON(5, true),
+    MULTIPOINT(8, true),
+    POINTZ(11, false),
+    POLYLINEZ(13, false),
+    POLYGONZ(15, false),
+    MULTIPOINTZ(18, false),
+    POINTM(21, false),
+    POLYLINEM(23, false),
+    POLYGONM(25, false),
+    MULTIPOINTM(28, false),
+    MULTIPATCH(31, false),
+    // A normal shapefile should NOT have UNDEFINED type
+    UNDEFINED(-1, false);
 
     private final int id;
+    private final boolean supported;
+    // A lookup map for getting a Type from its id
+    private static final Map<Integer, ShapeType> lookup = new HashMap<Integer, ShapeType>();
 
-    ShapeType(int id)
+    static {
+        for (ShapeType s : ShapeType.values()) {
+            lookup.put(s.id, s);
+        }
+    }
+
+    ShapeType(int id, boolean supported)
     {
         this.id = id;
+        this.supported = supported;
     }
 
     /**
@@ -48,24 +71,8 @@ public enum ShapeType
      */
     public static ShapeType getType(int id)
     {
-        ShapeType type;
-        switch (id) {
-            case 1:
-                type = POINT;
-                break;
-            case 3:
-                type = POLYLINE;
-                break;
-            case 5:
-                type = POLYGON;
-                break;
-            case 8:
-                type = MULTIPOINT;
-                break;
-            default:
-                type = UNDEFINED;
-        }
-        return type;
+        ShapeType type = lookup.get(id);
+        return type == null ? UNDEFINED : type;
     }
 
     /**
@@ -98,5 +105,14 @@ public enum ShapeType
     public int getId()
     {
         return id;
+    }
+
+    /**
+     * return whether the shape type is supported by Sedona
+     * @return
+     */
+    public boolean isSupported()
+    {
+        return supported;
     }
 }

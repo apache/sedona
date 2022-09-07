@@ -20,6 +20,7 @@
 package org.apache.sedona.core.formatMapper.shapefileParser.shapes;
 
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeType;
 
 import java.io.Serializable;
 
@@ -58,5 +59,10 @@ public class ShpRecord
     public int getTypeID()
     {
         return typeID;
+    }
+
+    public ShapeType getType()
+    {
+        return ShapeType.getType(typeID);
     }
 }
