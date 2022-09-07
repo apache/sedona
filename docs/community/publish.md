@@ -86,7 +86,7 @@ mvn deploy -DskipTests -Dscala=2.12 -Dspark=2.4
 ```bash
 #!/bin/bash
 git clone --shared --branch master https://github.com/apache/incubator-sedona.git sedona-src
-java -jar apache-rat-0.13.jar -d sedona-src > report.txt
+java -jar apache-rat-0.14.jar -d sedona-src > report.txt
 ```
 3. Read the generated report.txt file and make sure all source code files have ASF header.
 4. Delete the generated report and cloned files
