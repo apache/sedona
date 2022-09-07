@@ -74,6 +74,8 @@ object InferrableType {
     new InferrableType[Geometry] {}
   implicit val javaDoubleInstance: InferrableType[java.lang.Double] =
     new InferrableType[java.lang.Double] {}
+  implicit val javaIntegerInstance: InferrableType[java.lang.Integer] =
+    new InferrableType[java.lang.Integer] {}
   implicit val doubleInstance: InferrableType[Double] =
     new InferrableType[Double] {}
   implicit val booleanInstance: InferrableType[Boolean] =
@@ -120,6 +122,8 @@ object InferredTypes {
       GeometryUDT
     } else if (typeOf[T] =:= typeOf[java.lang.Double]) {
       DoubleType
+    } else if (typeOf[T] =:= typeOf[java.lang.Integer]) {
+      IntegerType
     } else if (typeOf[T] =:= typeOf[Double]) {
       DoubleType
     } else if (typeOf[T] =:= typeOf[Int]) {
