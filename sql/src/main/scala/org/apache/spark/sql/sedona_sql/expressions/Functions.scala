@@ -107,15 +107,7 @@ case class ST_ConvexHull(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_NPoints(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-
-  override def nullSafeEval(geometry: Geometry): Any = {
-    geometry.getCoordinates.length
-  }
-
-  override def dataType: DataType = IntegerType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.nPoints) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -840,19 +832,7 @@ case class ST_IsClosed(inputExpressions: Seq[Expression])
 }
 
 case class ST_NumInteriorRings(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    geometry match {
-      case polygon: Polygon => polygon.getNumInteriorRing
-      case _: Geometry => null
-    }
-  }
-
-  override def dataType: DataType = IntegerType
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.numInteriorRings) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -972,17 +952,7 @@ case class ST_IsRing(inputExpressions: Seq[Expression])
   * @param inputExpressions Geometry
   */
 case class ST_NumGeometries(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    geometry.getNumGeometries()
-  }
-
-  override def dataType: DataType = IntegerType
-
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.numGeometries) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

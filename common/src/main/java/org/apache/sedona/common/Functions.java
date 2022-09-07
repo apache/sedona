@@ -209,6 +209,21 @@ public class Functions {
         return writer.write(geometry).toString();
     }
 
+    public static int nPoints(Geometry geometry) {
+        return geometry.getNumPoints();
+    }
+
+    public static int numGeometries(Geometry geometry) {
+        return geometry.getNumGeometries();
+    }
+
+    public static Integer numInteriorRings(Geometry geometry) {
+        if (geometry instanceof Polygon) {
+            return ((Polygon) geometry).getNumInteriorRing();
+        }
+        return null;
+    }
+
     public static String asGML(Geometry geometry) {
         return new GMLWriter().write(geometry);
     }

@@ -198,6 +198,27 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testNPoints() {
+        Table polygonTable = createPolygonTable(1);
+        Table resultTable = polygonTable.select(call(Functions.ST_NPoints.class.getSimpleName(), $(polygonColNames[0])));
+        assertEquals(5, first(resultTable).getField(0));
+    }
+
+    @Test
+    public void testNumGeometries() {
+        Table collectionTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION(POINT(10 10), POINT(30 30), LINESTRING(15 15, 20 20))') AS collection");
+        Table resultTable = collectionTable.select(call(Functions.ST_NumGeometries.class.getSimpleName(), $("collection")));
+        assertEquals(3, first(resultTable).getField(0));
+    }
+
+    @Test
+    public void testNumInteriorRings() {
+        Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromText('POLYGON((7 9,8 7,11 6,15 8,16 6,17 7,17 10,18 12,17 14,15 15,11 15,10 13,9 12,7 9),(9 9,10 10,11 11,11 10,10 8,9 9),(12 14,15 14,13 11,12 14))') AS polygon");
+        Table resultTable = polygonTable.select(call(Functions.ST_NumInteriorRings.class.getSimpleName(), $("polygon")));
+        assertEquals(2, first(resultTable).getField(0));
+    }
+
+    @Test
     public void testExteriorRing() {
         Table polygonTable = createPolygonTable(1);
         Table linearRingTable = polygonTable.select(call(Functions.ST_ExteriorRing.class.getSimpleName(), $(polygonColNames[0])));

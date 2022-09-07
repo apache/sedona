@@ -431,6 +431,49 @@ SELECT ST_Length(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_NPoints
+
+Introduction: Returns the number of points of the geometry
+
+Since: `v1.3.0`
+
+Format: `ST_NPoints (A:geometry)`
+
+Example:
+```SQL
+SELECT ST_NPoints(polygondf.countyshape)
+FROM polygondf
+```
+
+## ST_NumGeometries
+
+Introduction: Returns the number of Geometries. If geometry is a GEOMETRYCOLLECTION (or MULTI*) return the number of geometries, for single geometries will return 1.
+
+Format: `ST_NumGeometries (A:geometry)`
+
+Since: `v1.3.0`
+
+Example:
+```SQL
+SELECT ST_NumGeometries(df.geometry)
+FROM df
+```
+
+## ST_NumInteriorRings
+
+Introduction: Returns number of interior rings of polygon geometries.
+
+Format: `ST_NumInteriorRings(geom: geometry)`
+
+Since: `v1.3.0`
+
+Example:
+```SQL
+SELECT ST_NumInteriorRings(ST_GeomFromText('POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))'))
+```
+
+Output: `1`
+
 ## ST_PointN
 
 Introduction: Return the Nth point in a single linestring or circular linestring in the geometry. Negative values are counted backwards from the end of the LineString, so that -1 is the last point. Returns NULL if there is no linestring in the geometry.
