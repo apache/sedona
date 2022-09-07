@@ -48,7 +48,7 @@ public enum ShapeType
 
     private final int id;
     private final boolean supported;
-    // A lookup map for getting a Type from its id, or its name
+    // A lookup map for getting a Type from its id
     private static final Map<Integer, ShapeType> lookup = new HashMap<Integer, ShapeType>();
 
     static {
@@ -107,6 +107,10 @@ public enum ShapeType
         return id;
     }
 
+    /**
+     * return whether the shape type is supported by Sedona
+     * @return
+     */
     public boolean isSupported()
     {
         return supported;
