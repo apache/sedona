@@ -18,6 +18,7 @@ import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.common.utils.GeometryGeoHashEncoder;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.jetbrains.annotations.Nullable;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -34,6 +35,7 @@ import org.locationtech.jts.io.kml.KMLWriter;
 import org.locationtech.jts.operation.valid.IsSimpleOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
@@ -142,10 +144,46 @@ public class Functions {
 
     public static Geometry transform(Geometry geometry, String sourceCRS, String targetCRS, boolean lenient)
         throws FactoryException, TransformException {
-        CoordinateReferenceSystem sourceCRScode = CRS.decode(sourceCRS);
-        CoordinateReferenceSystem targetCRScode = CRS.decode(targetCRS);
+
+        CoordinateReferenceSystem sourceCRScode = parseCRSString(sourceCRS);
+        CoordinateReferenceSystem targetCRScode = parseCRSString(targetCRS);
         MathTransform transform = CRS.findMathTransform(sourceCRScode, targetCRScode, lenient);
         return JTS.transform(geometry, transform);
+    }
+
+    @Nullable
+    private static CoordinateReferenceSystem parseCRSString(String CRSString) throws FactoryException{
+        if (checkCRSCodeFormat(CRSString) ){
+            return CRS.decode(CRSString);
+        }
+        else if (checkCRSWKTFormat(CRSString)){
+            return CRS.parseWKT(CRSString);
+        }
+        else {
+            return null;
+        }
+    }
+
+    private static boolean checkCRSCodeFormat(String CRSCode) {
+        try{
+            CRS.decode(CRSCode);
+        }
+        catch (FactoryException ex){
+            return false;
+        }
+
+        return true;
+    }
+
+    private static boolean checkCRSWKTFormat(String CRSWKT) {
+        try{
+            CRS.parseWKT(CRSWKT);
+        }
+        catch (FactoryException ex){
+            return false;
+        }
+
+        return true;
     }
 
     public static Geometry transform(Geometry geometry, CoordinateReferenceSystem sourceCRS, CoordinateReferenceSystem targetCRS, boolean lenient)

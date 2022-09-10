@@ -202,27 +202,6 @@ case class ST_Transform(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   assert(inputExpressions.length >= 3 && inputExpressions.length <= 4)
 
-  def checkCRSFormat(CRSCode: String ):Boolean = {
-    try{
-      val d = CRS.decode(CRSCode)
-      true
-    }
-    catch {
-      case _: NoSuchAuthorityCodeException => false
-      case _: FactoryException => false
-    }
-  }
-
-  def checkParseWKT(WKT:String):Boolean = {
-    try {
-      val d = CRS.parseWKT(WKT)
-      true
-    }
-    catch {
-      case _: FactoryException => false
-    }
-  }
-
   override def nullable: Boolean = true
 
   override def eval(input: InternalRow): Any = {
@@ -236,38 +215,8 @@ case class ST_Transform(inputExpressions: Seq[Expression])
       false
     }
 
-    (geometry, sourceCRSString, targetCRSString) match {
-      case (geometry: Geometry, sourceCRSString: String, targetCRSString: String) => {
-        (checkCRSFormat(sourceCRSString), checkCRSFormat(targetCRSString),checkParseWKT(sourceCRSString),checkParseWKT(targetCRSString)) match {
-          case (true,true,false,false)  => {
+    (Functions transform(geometry, sourceCRSString, targetCRSString, lenient)).toGenericArrayData
 
-            (Functions transform(geometry, sourceCRSString, targetCRSString, lenient)).toGenericArrayData
-          }
-          case (true,false,false,true) => {
-
-            val sourceCRS = CRS.decode(sourceCRSString)
-            val targetCRS = CRS.parseWKT(targetCRSString)
-
-            (Functions transform(geometry, sourceCRS, targetCRS, lenient)).toGenericArrayData
-          }
-          case (false,true,true,false) => {
-            val sourceCRS = CRS.parseWKT(sourceCRSString)
-            val targetCRS = CRS.decode(targetCRSString)
-
-            (Functions transform(geometry, sourceCRS, targetCRS, lenient)).toGenericArrayData
-
-          }
-          case (false,false,true,true) => {
-            val sourceCRS = CRS.parseWKT(sourceCRSString)
-            val targetCRS = CRS.parseWKT(targetCRSString)
-
-            (Functions transform(geometry, sourceCRS, targetCRS, lenient)).toGenericArrayData
-          }
-          case _ => null
-        }
-      }
-      case (_, _, _) => null
-    }
   }
 
   override def dataType: DataType = GeometryUDT
