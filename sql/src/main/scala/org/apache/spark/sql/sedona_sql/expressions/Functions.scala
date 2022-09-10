@@ -30,6 +30,7 @@ import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.sedona_sql.expressions.subdivide.GeometrySubDivider
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
+import org.geotools.referencing.CRS
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom.util.GeometryFixer
 import org.locationtech.jts.geom._
@@ -38,6 +39,9 @@ import org.locationtech.jts.operation.buffer.BufferParameters
 import org.locationtech.jts.operation.linemerge.LineMerger
 import org.locationtech.jts.precision.GeometryPrecisionReducer
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier
+import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.geom.Coordinate
+import org.opengis.referencing.{FactoryException, NoSuchAuthorityCodeException}
 
 import scala.util.{Failure, Success, Try}
 
@@ -198,21 +202,70 @@ case class ST_Transform(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   assert(inputExpressions.length >= 3 && inputExpressions.length <= 4)
 
+  def checkCRSFormat(CRSCode: String ):Boolean = {
+    try{
+      val d = CRS.decode(CRSCode)
+      true
+    }
+    catch {
+      case _: NoSuchAuthorityCodeException => false
+      case _: FactoryException => false
+    }
+  }
+
+  def checkParseWKT(WKT:String):Boolean = {
+    try {
+      val d = CRS.parseWKT(WKT)
+      true
+    }
+    catch {
+      case _: FactoryException => false
+    }
+  }
+
   override def nullable: Boolean = true
 
   override def eval(input: InternalRow): Any = {
     val geometry = inputExpressions(0).toGeometry(input)
-    val sourceCRS = inputExpressions(1).asString(input)
-    val targetCRS = inputExpressions(2).asString(input)
+    val sourceCRSString = inputExpressions(1).asString(input)
+    val targetCRSString = inputExpressions(2).asString(input)
 
-    (geometry, sourceCRS, targetCRS) match {
-      case (geometry: Geometry, sourceCRS: String, targetCRS: String) =>
-        val lenient = if (inputExpressions.length == 4) {
-          inputExpressions(3).eval(input).asInstanceOf[Boolean]
-        } else {
-          false
+    val lenient = if (inputExpressions.length == 4) {
+      inputExpressions(3).eval(input).asInstanceOf[Boolean]
+    } else {
+      false
+    }
+
+    (geometry, sourceCRSString, targetCRSString) match {
+      case (geometry: Geometry, sourceCRSString: String, targetCRSString: String) => {
+        (checkCRSFormat(sourceCRSString), checkCRSFormat(targetCRSString),checkParseWKT(sourceCRSString),checkParseWKT(targetCRSString)) match {
+          case (true,true,false,false)  => {
+
+            (Functions transform(geometry, sourceCRSString, targetCRSString, lenient)).toGenericArrayData
+          }
+          case (true,false,false,true) => {
+
+            val sourceCRS = CRS.decode(sourceCRSString)
+            val targetCRS = CRS.parseWKT(targetCRSString)
+
+            (Functions transform(geometry, sourceCRS, targetCRS, lenient)).toGenericArrayData
+          }
+          case (false,true,true,false) => {
+            val sourceCRS = CRS.parseWKT(sourceCRSString)
+            val targetCRS = CRS.decode(targetCRSString)
+
+            (Functions transform(geometry, sourceCRS, targetCRS, lenient)).toGenericArrayData
+
+          }
+          case (false,false,true,true) => {
+            val sourceCRS = CRS.parseWKT(sourceCRSString)
+            val targetCRS = CRS.parseWKT(targetCRSString)
+
+            (Functions transform(geometry, sourceCRS, targetCRS, lenient)).toGenericArrayData
+          }
+          case _ => null
         }
-        Functions.transform(geometry, sourceCRS, targetCRS, lenient).toGenericArrayData
+      }
       case (_, _, _) => null
     }
   }
