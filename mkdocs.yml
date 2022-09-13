@@ -126,15 +126,18 @@ nav:
           - DataFrame/SQL: archive/api/viz/sql.md
           - RDD: archive/api/viz/Babylon-Scala-and-Java-API.md
     - Apache Software Foundation:
-      - Foundation: asf/asf.md
+      - Copyright: asf/asf.md
+      - Disclaimer: asf/disclaimer.md
       - License: https://www.apache.org/licenses/" target="_blank
       - Events: https://www.apache.org/events/current-event" target="_blank
       - Sponsorship: https://www.apache.org/foundation/sponsorship.html" target="_blank
       - Thanks: https://www.apache.org/foundation/thanks.html" target="_blank
       - Security: https://www.apache.org/security/" target="_blank
+      - Privacy: https://privacy.apache.org/policies/privacy-policy-public.html" target="_blank
 repo_url: https://github.com/apache/incubator-sedona
 repo_name: apache/incubator-sedona
-theme: 
+theme:
+  font: false
   name: 'material'
   custom_dir: docs-overrides
   palette:
@@ -153,7 +156,6 @@ theme:
     - search.suggest
     - search.highlight
     - search.share
-google_analytics: ['UA-64886725-1', 'www.public.asu.edu/~jiayu2/geospark/index.html']
 extra:
   social:
     - icon: fontawesome/brands/github-alt
@@ -198,4 +200,4 @@ plugins:
       prebuild_index: true
   - macros
   - git-revision-date-localized:
-      type: datetime  
+      type: datetime

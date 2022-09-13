@@ -11,15 +11,18 @@ A committer will be promoted to a PMC member when the community thinks he/she is
 Current Sedona PMC members are as follows:
 
 
-|       Name      |        Affiliation       | Apache id |
-|:---------------:|:------------------------:|:------------------------:|
-| Paweł Kociński |	Allegro.pl	| imbruced@apache.org|
-| Yitao Li |	SafeGraph	| yitaoli@apache.org|
-|Netanel Malka| Sela Group | malka@apache.org|
-|  Mohamed Sarwat | Arizona State University | mosarwat@apache.org |
-| Jinxuan Wu| Bloomberg | jinxuanw@apache.org |
-|      Jia Yu     | Washington State University | jiayu@apache.org
-|   Zongsi Zhang  | GrabTaxi | zongsizhang@apache.org |
+|        Name       |        Affiliation       |        Apache id       |
+|:-----------------:|:------------------------:|:----------------------:|
+|    Adam Binford   |           Maxar          |  kimahriman@apache.org |
+| Kanchan Chowdhury | Arizona State University | kanchanchy@apache.org  |
+| Paweł Kociński    |         GetInData        |   imbruced@apache.org  |
+|      Yitao Li     |         SafeGraph        |   yitaoli@apache.org   |
+|   Netanel Malka   |     Upstream Security    |    malka@apache.org    |
+|   Mohamed Sarwat  |      Wherobots Inc.      |   mosarwat@apache.org  |
+|    Sachio Wakai   |           KDDI           |    swakai@apache.org   |
+|     Jinxuan Wu    |       Bloomberg LP       |   jinxuanw@apache.org  |
+|       Jia Yu      |      Wherobots Inc.      |    jiayu@apache.org    |
+|    Zongsi Zhang   |         GrabTaxi         | zongsizhang@apache.org |
 
 ## Mentors
 
