@@ -1601,6 +1601,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_BuildArea(null)")
     assert(functionDf.first().get(0) == null)
+    functionDf = sparkSession.sql("select ST_Normalize(null)")
+    assert(functionDf.first().get(0) == null)
   }
 
   it ("Should pass St_CollectionExtract") {
@@ -1614,5 +1616,10 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     assert(df.selectExpr("ST_AsText(ST_CollectionExtract(geom, 1))").collect().head.get(0) == "MULTIPOINT ((40 10), (40 10))")
     assert(df.selectExpr("ST_AsText(ST_CollectionExtract(geom, 2))").collect().head.get(0) == "MULTILINESTRING EMPTY")
     assert(df.selectExpr("ST_AsText(ST_CollectionExtract(geom))").collect().head.get(0) == "MULTIPOINT ((40 10), (40 10))")
+  }
+
+  it("Should pass ST_Normalize") {
+    val df = sparkSession.sql("SELECT ST_AsEWKT(ST_Normalize(ST_GeomFromWKT('POLYGON((0 1, 1 1, 1 0, 0 0, 0 1))')))")
+    assert(df.first().get(0).asInstanceOf[String] == "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))")
   }
 }

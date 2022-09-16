@@ -120,6 +120,7 @@ object Catalog {
     ST_BuildArea,
     ST_OrderingEquals,
     ST_CollectionExtract,
+    ST_Normalize,
     // Expression for rasters
     RS_NormalizedDifference,
     RS_Mean,

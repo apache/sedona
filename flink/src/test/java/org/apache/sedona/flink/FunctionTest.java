@@ -422,4 +422,12 @@ public class FunctionTest extends TestBase{
         polygonTable = polygonTable.select(call(Functions.ST_IsValid.class.getSimpleName(), $(polygonColNames[0])));
         assertTrue((boolean) first(polygonTable).getField(0));
     }
+
+    @Test
+    public void testNormalize() {
+        Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromText('POLYGON((0 1, 1 1, 1 0, 0 0, 0 1))') AS polygon");
+        polygonTable = polygonTable.select(call(Functions.ST_Normalize.class.getSimpleName(), $("polygon")));
+        Geometry result = (Geometry) first(polygonTable).getField(0);
+        assertEquals("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))", result.toString());
+    }
 }

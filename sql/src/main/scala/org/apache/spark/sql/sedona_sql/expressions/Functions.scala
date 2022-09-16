@@ -1305,3 +1305,16 @@ case class ST_BuildArea(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+/**
+ * Returns the input geometry in its normalized form.
+ *
+ * @param inputExpressions
+ */
+case class ST_Normalize(inputExpressions: Seq[Expression])
+  extends InferredUnaryExpression(Functions.normalize) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
+    copy(inputExpressions = newChildren)
+  }
+}
