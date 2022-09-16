@@ -138,7 +138,7 @@ Shapefile and GeoJSON must be loaded by SpatialRDD and converted to DataFrame us
 
 ## Load GeoParquet
 
-GeoParquet must be loaded using DataFrame if default name is geometry.
+Since v`1.3.0`, Sedona natively supports loading GeoParquet file. GeoParquet must be loaded using DataFrame if default name is geometry.
 
 ```Scala
 val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation1)
@@ -279,7 +279,7 @@ var stringDf = sparkSession.sql(
 
 ## Save GeoParquet
 
-GeoParquet can be saved as follows 
+Since v`1.3.0`, Sedona natively supports writing GeoParquet file. GeoParquet can be saved as follows:
 
 ```Scala
 df.write.format("geoparquet").save(geoparquetoutputlocation + "/GeoParquet_File_Name.parquet")

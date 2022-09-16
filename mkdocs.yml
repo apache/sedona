@@ -1,5 +1,5 @@
-site_name: Apache Sedona™ (incubating) 
-site_description: Apache Sedona (incubating) is a cluster computing system for processing large-scale spatial data. Sedona extends existing cluster computing systems, such as Apache Spark and Apache Flink, with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
+site_name: Apache Sedona&trade; (incubating) 
+site_description: Apache Sedona&trade; (incubating) is a cluster computing system for processing large-scale spatial data. Sedona extends existing cluster computing systems, such as Apache Spark and Apache Flink, with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
 nav:
     - Home: index.md
     - Setup:
@@ -126,7 +126,7 @@ nav:
           - DataFrame/SQL: archive/api/viz/sql.md
           - RDD: archive/api/viz/Babylon-Scala-and-Java-API.md
     - Apache Software Foundation:
-      - Copyright: asf/asf.md
+      - Foundation: asf/asf.md
       - Disclaimer: asf/disclaimer.md
       - License: https://www.apache.org/licenses/" target="_blank
       - Events: https://www.apache.org/events/current-event" target="_blank
@@ -147,8 +147,6 @@ theme:
   icon:
     logo: fontawesome/solid/earth-americas
     repo: fontawesome/brands/github
-  font:
-    text: Lato
   features:
     - navigation.instant
     - navigation.tabs
@@ -169,7 +167,7 @@ extra:
     current_snapshot: 1.2.1-incubating-SNAPSHOT
     next_version: 1.3.0-incubating
     current_geotools: 1.1.0-25.2
-copyright: Apache Sedona, Apache Incubator, Apache, the Apache feather logo, and the Apache Incubator project logo are trademarks or registered trademarks of The Apache Software Foundation. Copyright © 2021 The Apache Software Foundation
+copyright: Copyright © 2022 The Apache Software Foundation
 markdown_extensions:
   - admonition
   - attr_list
