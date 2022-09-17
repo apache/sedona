@@ -78,6 +78,11 @@ public class Functions {
         return geometry.getLength();
     }
 
+    public static Geometry normalize(Geometry geometry) {
+        geometry.normalize();
+        return geometry;
+    }
+
     public static Double x(Geometry geometry) {
         if (geometry instanceof Point) {
             return geometry.getCoordinate().x;

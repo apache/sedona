@@ -372,4 +372,12 @@ public class Functions {
             return org.apache.sedona.common.Functions.isValid(geom);
         }
     }
+
+    public static class ST_Normalize extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.normalize(geom);
+        }
+    }
 }
