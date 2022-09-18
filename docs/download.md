@@ -4,7 +4,7 @@ Latest source code: [GitHub repository](https://github.com/apache/incubator-sedo
 
 Old GeoSpark releases: [GitHub releases](https://github.com/apache/incubator-sedona/releases)
 
-Automatically generated binary JARs (per each Master branch commit): [GitHub Action](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Scala+and+Java+build%22)
+Automatically generated binary JARs (per each Master branch commit): [GitHub Action](https://github.com/apache/incubator-sedona/actions/workflows/java.yml)
 
 ## Verify the integrity
 

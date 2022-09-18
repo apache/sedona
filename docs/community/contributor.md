@@ -11,15 +11,20 @@ A committer will be promoted to a PMC member when the community thinks he/she is
 Current Sedona PMC members are as follows:
 
 
-|       Name      |        Affiliation       | Apache id |
-|:---------------:|:------------------------:|:------------------------:|
-| Paweł Kociński |	Allegro.pl	| imbruced@apache.org|
-| Yitao Li |	SafeGraph	| yitaoli@apache.org|
-|Netanel Malka| Sela Group | malka@apache.org|
-|  Mohamed Sarwat | Arizona State University | mosarwat@apache.org |
-| Jinxuan Wu| Bloomberg | jinxuanw@apache.org |
-|      Jia Yu     | Washington State University | jiayu@apache.org
-|   Zongsi Zhang  | GrabTaxi | zongsizhang@apache.org |
+|        Name       |  GitHub ID |        Apache ID       |
+|:-----------------:|:----------:|:----------------------:|
+|    Adam Binford   | Kimahriman |  kimahriman@apache.org |
+| Kanchan Chowdhury | kanchanchy | kanchanchy@apache.org  |
+| Paweł Kociński    |  Imbruced  |   imbruced@apache.org  |
+|      Yitao Li     |            |   yitaoli@apache.org   |
+|   Netanel Malka   | netanel246 |    malka@apache.org    |
+|   Mohamed Sarwat  |            |   mosarwat@apache.org  |
+| Kengo Seki        | sekikn     | sekikn@apache.org      |
+|    Sachio Wakai   |  SW186000  |    swakai@apache.org   |
+|     Jinxuan Wu    |            |   jinxuanw@apache.org  |
+|       Jia Yu      |  jiayuasu  |    jiayu@apache.org    |
+|    Zongsi Zhang   |            | zongsizhang@apache.org |
+
 
 ## Mentors
 
@@ -213,6 +218,10 @@ The Apache Sedona PMC
 Once the ICLA has been filed, use the [ASF New Account Request form](https://whimsy.apache.org/officers/acreq) to generate the request. Sedona mentors will request the account.
 
 Once Sedona graduates, the PMC chair will make the request.
+
+### Add to the system
+
+Once the new PPMC subscribes to the Sedona mailing lists using his/her ASF account, one of the PPMC needs to add the new PPMC to the Whimsy system (https://whimsy.apache.org/roster/ppmc/sedona).
 
 ### PMC annoucement
 

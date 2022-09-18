@@ -51,7 +51,7 @@ To compile all modules, please make sure you are in the root folder of all modul
 
 ### Download staged jars
 
-Sedona uses GitHub action to automatically generate jars per commit. You can go [here](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Scala+and+Java+build%22) and download the jars by clicking the commit's ==Artifacts== tag.
+Sedona uses GitHub action to automatically generate jars per commit. You can go [here](https://github.com/apache/incubator-sedona/actions/workflows/java.yml) and download the jars by clicking the commit's ==Artifacts== tag.
 
 ## Run Python test
 

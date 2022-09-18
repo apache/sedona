@@ -855,6 +855,32 @@ Result:
 +---------------------------------------------------------------+
 ```
 
+## ST_Normalize
+
+Introduction: Returns the input geometry in its normalized form.
+
+Format
+
+`ST_Normalize(geom: geometry)`
+
+Since: `v1.3.0`
+
+Example:
+
+```SQL
+SELECT ST_AsEWKT(ST_Normalize(ST_GeomFromWKT('POLYGON((0 1, 1 1, 1 0, 0 0, 0 1))'))) AS geom
+```
+
+Result:
+
+```
++-----------------------------------+
+|geom                               |
++-----------------------------------+
+|POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))|
++-----------------------------------+
+```
+
 ## ST_NPoints
 
 Introduction: Return points of the geometry
