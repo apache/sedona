@@ -215,7 +215,7 @@ case class ST_Transform(inputExpressions: Seq[Expression])
       false
     }
 
-    (Functions transform(geometry, sourceCRSString, targetCRSString, lenient)).toGenericArrayData
+    Functions.transform(geometry, sourceCRSString, targetCRSString, lenient).toGenericArrayData
 
   }
 
