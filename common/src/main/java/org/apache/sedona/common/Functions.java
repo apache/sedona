@@ -156,11 +156,13 @@ public class Functions {
     }
 
     private static CoordinateReferenceSystem parseCRSString(String CRSString) throws FactoryException{
-        if (checkCRSCodeFormat(CRSString) ){
+        try {
             return CRS.decode(CRSString);
-        }
-        else if (checkCRSWKTFormat(CRSString)){
-            return CRS.parseWKT(CRSString);
+        } catch (FactoryException ex) {
+            try {
+                return CRS.parseWKT(CRSString);
+            }  catch (FactoryException ex2) {
+                // ...raise some exception maybe from one or the other or some custom thing explaining can't be parsed
         }
         else {
             return null;
