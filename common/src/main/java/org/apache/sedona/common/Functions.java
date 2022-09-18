@@ -189,12 +189,6 @@ public class Functions {
         return true;
     }
 
-    public static Geometry transform(Geometry geometry, CoordinateReferenceSystem sourceCRS, CoordinateReferenceSystem targetCRS, boolean lenient)
-        throws FactoryException,TransformException {
-        MathTransform transform = CRS.findMathTransform(sourceCRS,targetCRS,lenient);
-        return JTS.transform(geometry, transform);
-    }
-
     public static Geometry flipCoordinates(Geometry geometry) {
         GeomUtils.flipCoordinates(geometry);
         return geometry;
