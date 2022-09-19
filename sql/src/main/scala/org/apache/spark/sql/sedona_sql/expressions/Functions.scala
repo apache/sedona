@@ -39,8 +39,6 @@ import org.locationtech.jts.operation.linemerge.LineMerger
 import org.locationtech.jts.precision.GeometryPrecisionReducer
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier
 
-import scala.util.{Failure, Success, Try}
-
 /**
   * Return the distance between two geometries.
   *
@@ -843,43 +841,20 @@ case class ST_AddPoint(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   inputExpressions.betweenLength(2, 3)
 
-  private val geometryFactory = new GeometryFactory()
-
   override def nullable: Boolean = true
 
   override def eval(input: InternalRow): Any = {
     val geometry = inputExpressions.head.toGeometry(input)
     val point = inputExpressions(1).toGeometry(input)
-    if (inputExpressions.length == 2) addPointToGeometry(geometry, point, -1) else {
+    val geom = if (inputExpressions.length == 2) Functions.addPoint(geometry, point) else {
       val index = inputExpressions(2).toInt(input)
-      addPointToGeometry(geometry, point, index)
+      Functions.addPoint(geometry, point, index)
     }
-  }
-
-  private def addPointToGeometry(geometry: Geometry, pointGeom: Geometry, index: Int): GenericArrayData = {
-    geometry match {
-      case string: LineString => pointGeom match {
-        case point: Point => addPointToLineString(string, point, index) match {
-          case None => null
-          case Some(geom) => geom.toGenericArrayData
-        }
-        case _ => null
-      }
+    geom match {
+      case linestring: LineString => linestring.toGenericArrayData
       case _ => null
     }
   }
-
-  private def addPointToLineString(lineString: LineString, point: Point, index: Int): Option[LineString] = {
-    val coordinates = lineString.getCoordinates
-    val length = coordinates.length
-    if (index == -1) Some(lineStringFromCoordinates(coordinates ++ Array(point.getCoordinate)))
-    else if (index >= 0 && index <= length) Some(lineStringFromCoordinates(
-      coordinates.slice(0, index) ++ Array(point.getCoordinate) ++ coordinates.slice(index, length)))
-    else None
-  }
-
-  private def lineStringFromCoordinates(coordinates: Array[Coordinate]): LineString =
-    geometryFactory.createLineString(coordinates)
 
   override def dataType: DataType = GeometryUDT
 
@@ -894,23 +869,16 @@ case class ST_RemovePoint(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
   inputExpressions.betweenLength(1, 2)
 
-  private val geometryFactory = new GeometryFactory()
-
   override def nullable: Boolean = true
 
   override def eval(input: InternalRow): Any = {
     val linesString = inputExpressions(0).toGeometry(input)
-    linesString match {
-      case string: LineString =>
-        val coordinates = string.getCoordinates
-        val length = coordinates.length
-        val pointToRemove = if (inputExpressions.length < 2) coordinates.length - 1
-          else inputExpressions(1).eval(input).asInstanceOf[Int]
-        if (coordinates.length <= pointToRemove | coordinates.length <= 2) null
-        else {
-          val coordinatesWithPointRemoved = coordinates.slice(0, pointToRemove) ++ coordinates.slice(pointToRemove + 1, length)
-          geometryFactory.createLineString(coordinatesWithPointRemoved).toGenericArrayData
-        }
+    val geom = if (inputExpressions.length < 2) Functions.removePoint(linesString) else {
+      val index = inputExpressions(1).toInt(input)
+      Functions.removePoint(linesString, index)
+    }
+    geom match {
+      case linestring: LineString => linestring.toGenericArrayData
       case _ => null
     }
   }
