@@ -892,7 +892,7 @@ case class ST_AddPoint(inputExpressions: Seq[Expression])
 
 case class ST_RemovePoint(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback {
-  assert(inputExpressions.length == 2)
+  inputExpressions.betweenLength(1, 2)
 
   private val geometryFactory = new GeometryFactory()
 
@@ -900,11 +900,12 @@ case class ST_RemovePoint(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     val linesString = inputExpressions(0).toGeometry(input)
-    val pointToRemove = inputExpressions(1).eval(input).asInstanceOf[Int]
     linesString match {
       case string: LineString =>
         val coordinates = string.getCoordinates
         val length = coordinates.length
+        val pointToRemove = if (inputExpressions.length < 2) coordinates.length - 1
+          else inputExpressions(1).eval(input).asInstanceOf[Int]
         if (coordinates.length <= pointToRemove | coordinates.length <= 2) null
         else {
           val coordinatesWithPointRemoved = coordinates.slice(0, pointToRemove) ++ coordinates.slice(pointToRemove + 1, length)
