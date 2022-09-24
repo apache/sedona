@@ -20,37 +20,36 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.Column
-import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.sedona_sql.expressions_udaf.{ST_Envelope_Aggr => ST_Envelope_Aggr_udaf, ST_Intersection_Aggr => ST_Intersection_Aggr_udaf, ST_Union_Aggr => ST_Union_Aggr_udaf}
+import org.apache.spark.sql.functions.{col, udaf}
 
 object st_aggregates extends DataFrameAPI {
   def ST_Envelope_Aggr(geometry: Column): Column = {
-    val udaf = new ST_Envelope_Aggr_udaf
-    udaf(geometry)
+    val aggrFunc = udaf(new ST_Envelope_Aggr)
+    aggrFunc(geometry)
   }
 
   def ST_Envelope_Aggr(geometry: String): Column = {
-    val udaf = new ST_Envelope_Aggr_udaf
-    udaf(col(geometry))
+    val aggrFunc = udaf(new ST_Envelope_Aggr)
+    aggrFunc(col(geometry))
   }
 
   def ST_Intersection_Aggr(geometry: Column): Column = {
-    val udaf = new ST_Intersection_Aggr_udaf
-    udaf(geometry)
+    val aggrFunc = udaf(new ST_Intersection_Aggr)
+    aggrFunc(geometry)
   }
 
   def ST_Intersection_Aggr(geometry: String): Column = {
-    val udaf = new ST_Intersection_Aggr_udaf
-    udaf(col(geometry))
+    val aggrFunc = udaf(new ST_Intersection_Aggr)
+    aggrFunc(col(geometry))
   }
 
   def ST_Union_Aggr(geometry: Column): Column = {
-    val udaf = new ST_Union_Aggr_udaf
-    udaf(geometry)
+    val aggrFunc = udaf(new ST_Union_Aggr)
+    aggrFunc(geometry)
   }
 
   def ST_Union_Aggr(geometry: String): Column = {
-    val udaf = new ST_Union_Aggr_udaf
-    udaf(col(geometry))
+    val aggrFunc = udaf(new ST_Union_Aggr)
+    aggrFunc(col(geometry))
   }
 }
