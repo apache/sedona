@@ -48,6 +48,10 @@ class SedonaJvmLib(Enum):
     EnvelopeAdapter = "org.apache.sedona.python.wrapper.adapters.EnvelopeAdapter"
     PythonConverter = "org.apache.sedona.python.wrapper.adapters.PythonConverter"
     PythonRddToJavaRDDAdapter = "org.apache.sedona.python.wrapper.adapters.PythonRddToJavaRDDAdapter"
+    st_constructors = "org.apache.spark.sql.sedona_sql.expressions.st_constructors"
+    st_functions = "org.apache.spark.sql.sedona_sql.expressions.st_functions"
+    st_predicates = "org.apache.spark.sql.sedona_sql.expressions.st_predicates"
+    st_aggregates = "org.apache.spark.sql.sedona_sql.expressions.st_aggregates"
 
     @classmethod
     def from_str(cls, geo_lib: str) -> 'SedonaJvmLib':
