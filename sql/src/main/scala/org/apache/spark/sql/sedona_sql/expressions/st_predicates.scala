@@ -22,21 +22,30 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.Column
 
 object st_predicates extends DataFrameAPI {
-  def ST_Contains(a: ColumnOrName, b: ColumnOrName): Column = wrapExpression[ST_Contains](a, b)
+  def ST_Contains(a: Column, b: Column): Column = wrapExpression[ST_Contains](a, b)
+  def ST_Contains(a: String, b: String): Column = wrapExpression[ST_Contains](a, b)
 
-  def ST_Crosses(a: ColumnOrName, b: ColumnOrName): Column = wrapExpression[ST_Crosses](a, b)
+  def ST_Crosses(a: Column, b: Column): Column = wrapExpression[ST_Crosses](a, b)
+  def ST_Crosses(a: String, b: String): Column = wrapExpression[ST_Crosses](a, b)
 
-  def ST_Disjoint(a: ColumnOrName, b: ColumnOrName): Column = wrapExpression[ST_Disjoint](a, b)
+  def ST_Disjoint(a: Column, b: Column): Column = wrapExpression[ST_Disjoint](a, b)
+  def ST_Disjoint(a: String, b: String): Column = wrapExpression[ST_Disjoint](a, b)
 
-  def ST_Equals(a: ColumnOrName, b: ColumnOrName): Column = wrapExpression[ST_Equals](a, b)
+  def ST_Equals(a: Column, b: Column): Column = wrapExpression[ST_Equals](a, b)
+  def ST_Equals(a: String, b: String): Column = wrapExpression[ST_Equals](a, b)
 
-  def ST_Intersects(a: ColumnOrName, b: ColumnOrName): Column = wrapExpression[ST_Intersects](a, b)
+  def ST_Intersects(a: Column, b: Column): Column = wrapExpression[ST_Intersects](a, b)
+  def ST_Intersects(a: String, b: String): Column = wrapExpression[ST_Intersects](a, b)
 
-  def ST_OrderingEquals(a: ColumnOrName, b: ColumnOrName): Column = wrapExpression[ST_OrderingEquals](a, b)
+  def ST_OrderingEquals(a: Column, b: Column): Column = wrapExpression[ST_OrderingEquals](a, b)
+  def ST_OrderingEquals(a: String, b: String): Column = wrapExpression[ST_OrderingEquals](a, b)
 
-  def ST_Overlaps(a: ColumnOrName, b: ColumnOrName): Column = wrapExpression[ST_Overlaps](a, b)
+  def ST_Overlaps(a: Column, b: Column): Column = wrapExpression[ST_Overlaps](a, b)
+  def ST_Overlaps(a: String, b: String): Column = wrapExpression[ST_Overlaps](a, b)
 
-  def ST_Touches(a: ColumnOrName, b: ColumnOrName): Column = wrapExpression[ST_Touches](a, b)
+  def ST_Touches(a: Column, b: Column): Column = wrapExpression[ST_Touches](a, b)
+  def ST_Touches(a: String, b: String): Column = wrapExpression[ST_Touches](a, b)
 
-  def ST_Within(a: ColumnOrName, b: ColumnOrName): Column = wrapExpression[ST_Within](a, b)
+  def ST_Within(a: Column, b: Column): Column = wrapExpression[ST_Within](a, b)
+  def ST_Within(a: String, b: String): Column = wrapExpression[ST_Within](a, b)
 }

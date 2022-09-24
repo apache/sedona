@@ -35,31 +35,8 @@ class dataFrameAPITestScala extends TestBaseScala {
   import sparkSession.implicits._
 
   describe("Sedona DataFrame API Test") {
-
-    it ("passed using columns for ColumnOrNameOrNumber arguments") {
-      val df = sparkSession.sql("SELECT 0.0 AS x, 1.0 AS y").select(ST_Point($"x", $"y"))
-      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
-      val expectedResult = "POINT (0 1)"
-      assert(actualResult == expectedResult)
-    }
-
-    it ("passed using floating points for ColumnOrNameOrNumber arguments") {
-      val df = sparkSession.sql("SELECT 2").select(ST_Point(0.0, 1.0))
-      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
-      val expectedResult = "POINT (0 1)"
-      assert(actualResult == expectedResult)
-    }
-
-    it ("passed using integers for ColumnOrNameOrNumber arguments") {
-      val df = sparkSession.sql("SELECT 2").select(ST_Point(0, 1))
-      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
-      val expectedResult = "POINT (0 1)"
-      assert(actualResult == expectedResult)
-    }
-
     // constructors
     it("passed st_point") {
-      // val df = sparkSession.sql("SELECT 0.0 AS x, 1.0 AS y").select(st_point("x", "y"))
       val df = sparkSession.sql("SELECT 0.0 AS x, 1.0 AS y").select(ST_Point("x", "y"))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "POINT (0 1)"
@@ -67,14 +44,14 @@ class dataFrameAPITestScala extends TestBaseScala {
     }
 
     it("passed st_pointfromtext") {
-      val df = sparkSession.sql("SELECT '0.0,1.0' AS c").select(ST_PointFromText("c", lit(',')))
+      val df = sparkSession.sql("SELECT '0.0,1.0' AS c").select(ST_PointFromText($"c", lit(',')))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "POINT (0 1)"
       assert(actualResult == expectedResult)
     }
 
     it("passed st_polygonfromtext") {
-      val df = sparkSession.sql("SELECT '0.0,0.0,1.0,0.0,1.0,1.0,0.0,0.0' AS c").select(ST_PolygonFromText("c", lit(',')))
+      val df = sparkSession.sql("SELECT '0.0,0.0,1.0,0.0,1.0,1.0,0.0,0.0' AS c").select(ST_PolygonFromText($"c", lit(',')))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "POLYGON ((0 0, 1 0, 1 1, 0 0))"
       assert(actualResult == expectedResult)
@@ -88,7 +65,7 @@ class dataFrameAPITestScala extends TestBaseScala {
     }
 
     it("passed st_linestringfromtext") {
-      val df = sparkSession.sql("SELECT '0.0,0.0,1.0,0.0' AS c").select(ST_LineStringFromText("c", lit(',')))
+      val df = sparkSession.sql("SELECT '0.0,0.0,1.0,0.0' AS c").select(ST_LineStringFromText($"c", lit(',')))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "LINESTRING (0 0, 1 0)"
       assert(actualResult == expectedResult)
@@ -243,7 +220,7 @@ class dataFrameAPITestScala extends TestBaseScala {
 
     it("Passed ST_Transform") {
       val pointDf = sparkSession.sql("SELECT ST_Point(1.0, 1.0) AS geom")
-      val df = pointDf.select(ST_Transform("geom", lit("EPSG:4326"), lit("EPSG:32649")).as("geom")).selectExpr("ST_PrecisionReduce(geom, 2)")
+      val df = pointDf.select(ST_Transform($"geom", lit("EPSG:4326"), lit("EPSG:32649")).as("geom")).selectExpr("ST_PrecisionReduce(geom, 2)")
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "POINT (-33741810.95 1823994.03)"
       assert(actualResult == expectedResult)

@@ -28,28 +28,11 @@ import org.apache.spark.sql.execution.aggregate.ScalaUDAF
 import org.apache.spark.sql.functions.{lit, array}
 import org.locationtech.jts.geom.Geometry
 
-case class ColumnOrName(column: Column)
-
-object ColumnOrName {
-  implicit def stringToColumnOrName(columnName: String): ColumnOrName = ColumnOrName(Column(columnName))
-  implicit def columnToColumnOrName(column: Column): ColumnOrName = ColumnOrName(column)
-}
-
-case class ColumnOrNameOrNumber(column: Column)
-
-object ColumnOrNameOrNumber {
-  implicit def stringToColumnOrNameOrNumber(columnName: String): ColumnOrNameOrNumber = ColumnOrNameOrNumber(Column(columnName))
-  implicit def columnToColumnOrNameOrNumber(column: Column): ColumnOrNameOrNumber = ColumnOrNameOrNumber(column)
-  implicit def columnToColumnOrNameOrNumber(num: Double): ColumnOrNameOrNumber = ColumnOrNameOrNumber(lit(num))
-}
-
 trait DataFrameAPI {
   protected def wrapExpression[E <: Expression : ClassTag](args: Any *): Column = {
     val exprArgs = args.map(_ match {
       case c: Column => c.expr
       case s: String => Column(s).expr
-      case c: ColumnOrName => c.column.expr
-      case c: ColumnOrNameOrNumber => c.column.expr
       case e: Expression => e
       case x: Any => Literal(x)
     })
@@ -62,8 +45,6 @@ trait DataFrameAPI {
     val exprArgs = arg.map(_ match {
       case c: Column => c.expr
       case s: String => Column(s).expr
-      case c: ColumnOrName => c.column.expr
-      case c: ColumnOrNameOrNumber => c.column.expr
       case e: Expression => e
       case x: Any => Literal(x)
     })
@@ -76,8 +57,6 @@ trait DataFrameAPI {
     val exprArgs = arg.map(_ match {
       case c: Column => c.expr
       case s: String => Column(s).expr
-      case c: ColumnOrName => c.column.expr
-      case c: ColumnOrNameOrNumber => c.column.expr
       case e: Expression => e
       case x: Any => Literal(x)
     })
