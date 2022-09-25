@@ -1008,6 +1008,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
   }
 
   it("Should correctly remove using ST_RemovePoint") {
+    calculateStRemovePointOption("Linestring(0 0, 1 1, 1 0, 0 0)") shouldBe Some("LINESTRING (0 0, 1 1, 1 0)")
     calculateStRemovePointOption("Linestring(0 0, 1 1, 1 0, 0 0)", 0) shouldBe Some("LINESTRING (1 1, 1 0, 0 0)")
     calculateStRemovePointOption("Linestring(0 0, 1 1)", 0) shouldBe None
     calculateStRemovePointOption("Linestring(0 0, 1 1, 1 0, 0 0)", 1) shouldBe Some("LINESTRING (0 0, 1 0, 0 0)")
@@ -1163,6 +1164,14 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
   private def wktToDf(wkt: String): DataFrame =
     Seq(Tuple1(wktReader.read(wkt))).toDF("geom")
+
+  private def calculateStRemovePointOption(wkt: String): Option[String] =
+    calculateStRemovePoint(wkt).headOption
+
+  private def calculateStRemovePoint(wkt: String): Array[String] =
+    wktToDf(wkt).selectExpr(s"ST_RemovePoint(geom) as geom")
+      .filter("geom is not null")
+      .selectExpr("ST_AsText(geom)").as[String].collect()
 
   private def calculateStRemovePointOption(wkt: String, index: Int): Option[String] =
     calculateStRemovePoint(wkt, index).headOption

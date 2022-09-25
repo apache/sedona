@@ -466,4 +466,32 @@ public class FunctionTest extends TestBase{
         Geometry result = (Geometry) first(polygonTable).getField(0);
         assertEquals("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))", result.toString());
     }
+
+    @Test
+    public void testAddPoint() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_AddPoint(ST_GeomFromWKT('LINESTRING (0 0, 1 1)'), ST_GeomFromWKT('POINT (2 2)'))");
+        assertEquals("LINESTRING (0 0, 1 1, 2 2)", first(pointTable).getField(0).toString());
+
+    }
+
+    @Test
+    public void testAddPointWithIndex() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_AddPoint(ST_GeomFromWKT('LINESTRING (0 0, 1 1)'), ST_GeomFromWKT('POINT (2 2)'), 1)");
+        assertEquals("LINESTRING (0 0, 2 2, 1 1)", first(pointTable).getField(0).toString());
+
+    }
+
+    @Test
+    public void testRemovePoint() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_RemovePoint(ST_GeomFromWKT('LINESTRING (0 0, 1 1, 2 2)'))");
+        assertEquals("LINESTRING (0 0, 1 1)", first(pointTable).getField(0).toString());
+
+    }
+
+    @Test
+    public void testRemovePointWithIndex() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_RemovePoint(ST_GeomFromWKT('LINESTRING (0 0, 1 1, 2 2)'), 1)");
+        assertEquals("LINESTRING (0 0, 2 2)", first(pointTable).getField(0).toString());
+
+    }
 }

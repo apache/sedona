@@ -40,8 +40,14 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 
 public class Functions {
+    private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
+
     public static double area(Geometry geometry) {
         return geometry.getArea();
     }
@@ -331,5 +337,45 @@ public class Functions {
 
     public static boolean isValid(Geometry geometry) {
         return new IsValidOp(geometry).isValid();
+    }
+
+    public static Geometry addPoint(Geometry linestring, Geometry point) {
+        return addPoint(linestring, point, -1);
+    }
+
+    public static Geometry addPoint(Geometry linestring, Geometry point, int position) {
+        if (linestring instanceof LineString && point instanceof Point) {
+            List<Coordinate> coordinates = new ArrayList<>(Arrays.asList(linestring.getCoordinates()));
+            if (-1 <= position && position <= coordinates.size()) {
+                if (position < 0) {
+                    coordinates.add(point.getCoordinate());
+                } else {
+                    coordinates.add(position, point.getCoordinate());
+                }
+                return GEOMETRY_FACTORY.createLineString(coordinates.toArray(new Coordinate[0]));
+            }
+        }
+        return null;
+    }
+
+    public static Geometry removePoint(Geometry linestring) {
+        if (linestring != null) {
+            int length = linestring.getCoordinates().length;
+            if (1 < length) {
+                return removePoint(linestring, length - 1);
+            }
+        }
+        return null;
+    }
+
+    public static Geometry removePoint(Geometry linestring, int position) {
+        if (linestring instanceof LineString) {
+            List<Coordinate> coordinates = new ArrayList<>(Arrays.asList(linestring.getCoordinates()));
+            if (2 < coordinates.size() && position < coordinates.size()) {
+                coordinates.remove(position);
+                return GEOMETRY_FACTORY.createLineString(coordinates.toArray(new Coordinate[0]));
+            }
+        }
+        return null;
     }
 }
