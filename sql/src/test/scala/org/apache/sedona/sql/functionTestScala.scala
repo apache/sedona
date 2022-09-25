@@ -35,8 +35,9 @@ import java.io.StringReader
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.xpath.XPathFactory
 import org.apache.sedona.sql.utils.GeometrySerializer
+import org.apache.spark.SparkException
 import org.geotools.referencing.CRS
-import org.opengis.referencing.NoSuchAuthorityCodeException
+import org.opengis.referencing.{FactoryException, NoSuchAuthorityCodeException}
 
 class functionTestScala extends TestBaseScala with Matchers with GeometrySample with GivenWhenThen {
 
@@ -174,6 +175,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     it("Passed Function exception check"){
       val epsgErrorString = "EPSG:9999999"
       val epsgString = "EPSG:4326"
+      val epsgTGTString = "EPSG:32649"
       val polygon = "POLYGON ((110.54671 55.818002, 110.54671 55.143743, 110.940494 55.143743, 110.940494 55.818002, 110.54671 55.818002))"
       import org.locationtech.jts.io.WKTReader
       val reader = new WKTReader
@@ -181,6 +183,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
       intercept[NoSuchAuthorityCodeException]{
         val d = org.apache.sedona.common.Functions.transform(polygeom, epsgString, epsgErrorString)
+      }
+
       }
 
     }
