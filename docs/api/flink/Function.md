@@ -650,6 +650,7 @@ FROM polygondf
 Introduction:
 
 Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS
+For SourceCRS and TargetCRS, WKT format is also available since v1.3.1.
 
 !!!note
 By default, this function uses lat/lon order. You can use ==ST_FlipCoordinates== to swap X and Y.
