@@ -77,7 +77,9 @@ public class Catalog {
                 new Functions.ST_IsRing(),
                 new Functions.ST_IsSimple(),
                 new Functions.ST_IsValid(),
-                new Functions.ST_Normalize()
+                new Functions.ST_Normalize(),
+                new Functions.ST_AddPoint(),
+                new Functions.ST_RemovePoint()
         };
     }
 

@@ -13,6 +13,29 @@ SELECT ST_3DDistance(polygondf.countyshape, polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_AddPoint
+
+Introduction: Return Linestring with additional point at the given index, if position is not available the point will be added at the end of line.
+
+Format: `ST_AddPoint(geom: geometry, point: geometry, position: integer)`
+
+Format: `ST_AddPoint(geom: geometry, point: geometry)`
+
+Since: `v1.3.0`
+
+Example:
+```SQL
+SELECT ST_AddPoint(ST_GeomFromText("LINESTRING(0 0, 1 1, 1 0)"), ST_GeomFromText("Point(21 52)"), 1)
+
+SELECT ST_AddPoint(ST_GeomFromText("Linestring(0 0, 1 1, 1 0)"), ST_GeomFromText("Point(21 52)"))
+```
+
+Output:
+```
+LINESTRING(0 0, 21 52, 1 1, 1 0)
+LINESTRING(0 0, 1 1, 1 0, 21 52)
+```
+
 ## ST_Area
 
 Introduction: Return the area of A
@@ -576,6 +599,23 @@ FROM df
 Input: `POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))`
 
 Output: `POLYGON ((-0.5 -0.5, 0.5 -0.5, 0.5 0.5, -0.5 0.5, -0.5 -0.5))`
+
+## ST_RemovePoint
+
+Introduction: Return Linestring with removed point at given index, position can be omitted and then last one will be removed.
+
+Format: `ST_RemovePoint(geom: geometry, position: integer)`
+
+Format: `ST_RemovePoint(geom: geometry)`
+
+Since: `v1.3.0`
+
+Example:
+```SQL
+SELECT ST_RemovePoint(ST_GeomFromText("LINESTRING(0 0, 1 1, 1 0)"), 1)
+```
+
+Output: `LINESTRING(0 0, 1 0)`
 
 ## ST_SetSRID
 

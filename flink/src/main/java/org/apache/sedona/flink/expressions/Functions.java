@@ -388,4 +388,37 @@ public class Functions {
             return org.apache.sedona.common.Functions.normalize(geom);
         }
     }
+
+    public static class ST_AddPoint extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
+                             @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
+            Geometry linestring = (Geometry) o1;
+            Geometry point = (Geometry) o2;
+            return org.apache.sedona.common.Functions.addPoint(linestring, point);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
+                             @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2,
+                             int position) {
+            Geometry linestring = (Geometry) o1;
+            Geometry point = (Geometry) o2;
+            return org.apache.sedona.common.Functions.addPoint(linestring, point, position);
+        }
+    }
+
+    public static class ST_RemovePoint extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.removePoint(geom);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, int offset) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.removePoint(geom, offset);
+        }
+    }
 }
