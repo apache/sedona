@@ -187,7 +187,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
       }
 
-    }
+
     it("Passed ST_Intersection - intersects but not contains") {
 
       val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
