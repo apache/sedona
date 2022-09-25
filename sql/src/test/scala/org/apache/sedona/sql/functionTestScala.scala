@@ -30,11 +30,13 @@ import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.distance3d.Distance3DOp
 import org.scalatest.{GivenWhenThen, Matchers}
 import org.xml.sax.InputSource
-
 import java.io.StringReader
+
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.xpath.XPathFactory
+import org.apache.sedona.sql.utils.GeometrySerializer
 import org.geotools.referencing.CRS
+import org.opengis.referencing.NoSuchAuthorityCodeException
 
 class functionTestScala extends TestBaseScala with Matchers with GeometrySample with GivenWhenThen {
 
@@ -169,6 +171,19 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
     }
 
+    it("Passed Function exception check"){
+      val epsgErrorString = "EPSG:9999999"
+      val epsgString = "EPSG:4326"
+      val polygon = "POLYGON ((110.54671 55.818002, 110.54671 55.143743, 110.940494 55.143743, 110.940494 55.818002, 110.54671 55.818002))"
+      import org.locationtech.jts.io.WKTReader
+      val reader = new WKTReader
+      val polygeom = reader.read(polygon)
+
+      intercept[NoSuchAuthorityCodeException]{
+        val d = org.apache.sedona.common.Functions.transform(polygeom, epsgString, epsgErrorString)
+      }
+
+    }
     it("Passed ST_Intersection - intersects but not contains") {
 
       val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")

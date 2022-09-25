@@ -35,6 +35,7 @@ import org.locationtech.jts.operation.valid.IsSimpleOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.opengis.referencing.FactoryException;
 
+import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
@@ -155,40 +156,19 @@ public class Functions {
         return JTS.transform(geometry, transform);
     }
 
-    private static CoordinateReferenceSystem parseCRSString(String CRSString) throws FactoryException{
+    private static CoordinateReferenceSystem parseCRSString(String CRSString) throws FactoryException {
         try {
             return CRS.decode(CRSString);
-        } catch (FactoryException ex) {
+        } catch(NoSuchAuthorityCodeException ex2) {
+            throw new NoSuchAuthorityCodeException("that Authority code cannot be found",CRSString,CRSString);
+        }
+        catch (FactoryException ex1) {
             try {
                 return CRS.parseWKT(CRSString);
-            }  catch (FactoryException ex2) {
-                // ...raise some exception maybe from one or the other or some custom thing explaining can't be parsed
+            } catch (FactoryException ex2) {
+                throw new FactoryException("EPSG code format and WKT code is invalid");
+            }
         }
-        else {
-            return null;
-        }
-    }
-
-    private static boolean checkCRSCodeFormat(String CRSCode) {
-        try{
-            CRS.decode(CRSCode);
-        }
-        catch (FactoryException ex){
-            return false;
-        }
-
-        return true;
-    }
-
-    private static boolean checkCRSWKTFormat(String CRSWKT) {
-        try{
-            CRS.parseWKT(CRSWKT);
-        }
-        catch (FactoryException ex){
-            return false;
-        }
-
-        return true;
     }
 
     public static Geometry flipCoordinates(Geometry geometry) {
