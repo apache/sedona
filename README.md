@@ -4,6 +4,7 @@
 
 Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder) and play the interactive Sedona Python Jupyter Notebook immediately!
 
+Are you a user / contributor / PPMC of Apache Sedona? Please fill in <a href="https://www.surveymonkey.com/r/CKP9RR7">this survey</a> to participate in the <b>first ever Sedona online community call</b> in October 2022!
 
 Apache Sedona™(incubating) is a cluster computing system for processing large-scale spatial data. Sedona equips cluster computing systems such as Apache Spark and Apache Flink with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
 

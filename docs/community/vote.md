@@ -10,7 +10,9 @@ In order to vote a Sedona release, you must provide your checklist inlcuding the
 * Source code artifacts have correct names matching the current release
 * The project can compile from the source code
 
-If you can successfully finish the steps below, you will pass the items mentioned above. Then you can vote `+1` in the vote email and provide your checklist.
+To make your life easier, we have provided an [online Jupyter notebook](https://github.com/jiayuasu/sedona-tools) using MyBinder. Please click this button to open the notebook and verify the release: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jiayuasu/sedona-tools/HEAD?labpath=binder%2Fverify-release.ipynb). Then you can vote `+1` in the vote email.
+
+If you prefer to run the steps on your local machine, please read the steps below. If you can successfully finish the steps, you will pass the items mentioned above. Then you can vote `+1` in the vote email and provide your checklist.
 
 ## Install necessary software
 
