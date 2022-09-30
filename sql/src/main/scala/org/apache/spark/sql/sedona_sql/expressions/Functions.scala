@@ -1287,3 +1287,16 @@ case class ST_Normalize(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+/**
+ * Returns the LineString geometry given a MultiPoint geometry
+ *
+ * @param inputExpressions
+ */
+case class ST_LineFromMultiPoint(inputExpressions: Seq[Expression])
+  extends InferredUnaryExpression(Functions.lineFromMultiPoint) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

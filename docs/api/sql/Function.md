@@ -1394,3 +1394,29 @@ SELECT ST_Z(ST_POINT(0.0 25.0 11.0))
 ```
 
 Output: `11.0`
+
+## ST_LineFromMultiPoint
+
+Introduction: Creates a LineString from a MultiPoint geometry.
+
+Format: `ST_LineFromMultiPoint (A:geometry)`
+
+Since: `v1.3.0`
+
+Example:
+
+```SQL
+SELECT ST_AsText(
+    ST_LineFromMultiPoint(ST_GeomFromText('MULTIPOINT((10 40), (40 30), (20 20), (30 10))'))
+) AS geom
+```
+
+Result:
+
+```
++---------------------------------------------------------------+
+|geom                                                           |
++---------------------------------------------------------------+
+|LINESTRING (10 40, 40 30, 20 20, 30 10)                        |
++---------------------------------------------------------------+
+```
