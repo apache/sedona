@@ -1,0 +1,23 @@
+version: 2
+models:
+  - name: point_length
+    description: "geospatial tests"
+    columns:
+      - name: geom
+        description: "The primary key for this table"
+        tests:
+          - geobox.expect_length_gte:
+              length: 0
+          - geobox.expect_length_gt:
+              length: -1
+          - geobox.expect_lay_within_polygon:
+              polygon_wkt: 'POLYGON((17.5643 52.7864,23.6946 52.7864,23.6946 50.1877,17.5643 50.1877,17.5643 52.7864))'
+          - geobox.expect_intersects_with_polygon:
+              polygon_wkt: 'POLYGON((17.5643 52.7864,23.6946 52.7864,23.6946 50.1877,17.5643 50.1877,17.5643 52.7864))'
+          - geobox.has_epsg:
+              epsg_code: 0
+          - geobox.is_simple
+          - geobox.is_valid
+          - geobox.is_closed
+          - geobox.is_empty
+          - geobox.has_valid_geographic_coordinates
