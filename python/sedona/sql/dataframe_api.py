@@ -101,19 +101,19 @@ def _get_bound_arguments(f: Callable, *args, **kwargs) -> Mapping[str, Any]:
 def _check_bound_arguments(bound_args: Mapping[str, Any], type_annotations: List[Type], function_name: str) -> None:
     """Check bound arguments against type annotations and raise a ValueError if any do not match.
 
-    :param bound_args: _description_
-    :type bound_args: List[Any]
-    :param type_annotations: _description_
+    :param bound_args: Bound arguments to check.
+    :type bound_args: Mapping[str, Any]
+    :param type_annotations: Type annotations to check bound_args against.
     :type type_annotations: List[Type]
-    :param function_name: _description_
+    :param function_name: Name of the function that is being checked for, used in the exception if raised.
     :type function_name: str
-    :raises ValueError: _description_
+    :raises ValueError: If a bound argument does not match the parameter type.
     """
     for bound_arg_name, bound_arg_value in bound_args.arguments.items():
         annotated_type = type_annotations[bound_arg_name]
         valid_type_list = _get_type_list(annotated_type)
         if not any([isinstance(bound_arg_value, valid_type) for valid_type in valid_type_list]):
-            raise ValueError(f"Incorrect parameter type: {bound_arg_name} for {function_name} should be {_get_readable_name_for_type(annotated_type)} but received {_strip_extra_from_class_name(str(type(bound_arg_value)))}.")
+            raise ValueError(f"Incorrect argument type: {bound_arg_name} for {function_name} should be {_get_readable_name_for_type(annotated_type)} but received {_strip_extra_from_class_name(str(type(bound_arg_value)))}.")
 
 
 def validate_argument_types(f: Callable) -> Callable:
