@@ -1,4 +1,18 @@
-from typing import Any, Tuple, Union, Iterable
+import functools
+import inspect
+import itertools
+from typing import (
+    Any,
+    Callable,
+    Iterable,
+    List,
+    Mapping,
+    Tuple,
+    Type,
+    Union,
+)
+import typing
+
 from pyspark.sql import SparkSession, Column, functions as f
 
 
@@ -22,8 +36,9 @@ def call_sedona_function(object_name: str, function_name: str, args: Union[Any, 
     if spark is None:
         raise ValueError("No active spark session was detected. Unable to call sedona function.")
     
-    if not isinstance(args, Iterable) or isinstance(args, str):
-        args = (args,)
+    # apparently a Column is an Iterable so we need to check for it explicitely
+    if (not isinstance(args, Iterable)) or isinstance(args, str) or isinstance(args, Column):
+        args = [args]
 
     args = map(_convert_argument_to_java_column, args)
 
@@ -32,4 +47,91 @@ def call_sedona_function(object_name: str, function_name: str, args: Union[Any, 
     
     jc = jfunc(*args)
     return Column(jc)
-        
+
+
+def _get_type_list(annotated_type: Type) -> Tuple[Type, ...]:
+    """Convert a type annotation into a tuple of types.
+    For most types this will be a tuple with a single element, but
+    for Union a tuple with multiple elements will be returned.
+
+    :param annotated_type: Type annotation to convert a tuple.
+    :type annotated_type: Type
+    :return: Tuple of all types covered by the type annotation.
+    :rtype: Tuple[Type, ...]
+    """
+    if typing.get_origin(annotated_type) is Union:
+        valid_types = typing.get_args(annotated_type)
+    else:
+        valid_types = (annotated_type,)
+    
+    return valid_types
+
+
+def _strip_extra_from_class_name(class_name):
+    return class_name[len("<class '"):-len("'>")].split(".")[-1]
+
+
+def _get_readable_name_for_type(type: Type) -> str:
+    """Get a human readable name for a type annotation used on a function's parameter.
+
+    :param type: Type annotation for a parameter.
+    :type type: Type
+    :return: Human readable name for the type annotation.
+    :rtype: str
+    """
+    if typing.get_origin(type) is Union:
+        return f"Union[{', '.join((_strip_extra_from_class_name(str(x)) for x in typing.get_args(type)))}]"
+    return _strip_extra_from_class_name(str(type))
+
+
+def _get_bound_arguments(f: Callable, *args, **kwargs) -> Mapping[str, Any]:
+    """Bind the passed arguments to f with actual parameter names, including defaults.
+
+    :param f: Function to bind arguments for.
+    :type f: Callable
+    :return: Dictionary of parameter names to argument values.
+    :rtype: Mapping[str, Any]
+    """
+    f_signature = inspect.signature(f)
+    bound_args = f_signature.bind(*args, **kwargs)
+    bound_args.apply_defaults()
+    return bound_args
+
+
+def _check_bound_arguments(bound_args: Mapping[str, Any], type_annotations: List[Type], function_name: str) -> None:
+    """Check bound arguments against type annotations and raise a ValueError if any do not match.
+
+    :param bound_args: _description_
+    :type bound_args: List[Any]
+    :param type_annotations: _description_
+    :type type_annotations: List[Type]
+    :param function_name: _description_
+    :type function_name: str
+    :raises ValueError: _description_
+    """
+    for bound_arg_name, bound_arg_value in bound_args.arguments.items():
+        annotated_type = type_annotations[bound_arg_name]
+        valid_type_list = _get_type_list(annotated_type)
+        if not any([isinstance(bound_arg_value, valid_type) for valid_type in valid_type_list]):
+            raise ValueError(f"Incorrect parameter type: {bound_arg_name} for {function_name} should be {_get_readable_name_for_type(annotated_type)} but received {_strip_extra_from_class_name(str(type(bound_arg_value)))}.")
+
+
+def validate_argument_types(f: Callable) -> Callable:
+    """Validates types of arguments passed to a dataframe API style function.
+    Arguments will need to be either strings, columns, or match the typehints of f.
+    This function is meant to be used a decorator.
+
+    :param f: Function to validate for.
+    :type f: Callable
+    :return: f wrapped with type validation checks.
+    :rtype: Callable
+    """
+    def validated_function(*args, **kwargs) -> Column:
+        # all arguments are Columns or strings are always legal, so only check types when one of the arguments is not a column
+        if not all([isinstance(x, Column) or isinstance(x, str) for x in itertools.chain(args, kwargs.values())]):
+            bound_args = _get_bound_arguments(f, *args, **kwargs)
+            type_annotations = typing.get_type_hints(f)
+            _check_bound_arguments(bound_args, type_annotations, f.__name__)
+
+        return f(*args, **kwargs)
+    return functools.update_wrapper(validated_function, f)
