@@ -76,6 +76,7 @@ test_configurations = [
     (stf.ST_LineMerge, ("geom",), "multiline_geom", "", "LINESTRING (0 0, 1 0, 1 1, 0 0)"),
     (stf.ST_LineSubstring, ("line", 0.5, 1.0), "linestring_geom", "", "LINESTRING (2.5 0, 3 0, 4 0, 5 0)"),
     (stf.ST_MakeValid, ("geom",), "invalid_geom", "", "MULTIPOLYGON (((1 5, 3 3, 1 1, 1 5)), ((5 3, 7 5, 7 1, 5 3)))"),
+    (stf.ST_MakePolygon, ("geom",), "closed_linestring_geom", "", "POLYGON ((0 0, 1 0, 1 1, 0 0))"),
     (stf.ST_MinimumBoundingCircle, ("line",), "linestring_geom", "ST_PrecisionReduce(geom, 2)", "POLYGON ((4.95 -0.49, 4.81 -0.96, 4.58 -1.39, 4.27 -1.77, 3.89 -2.08, 3.46 -2.31, 2.99 -2.45, 2.5 -2.5, 2.01 -2.45, 1.54 -2.31, 1.11 -2.08, 0.73 -1.77, 0.42 -1.39, 0.19 -0.96, 0.05 -0.49, 0 0, 0.05 0.49, 0.19 0.96, 0.42 1.39, 0.73 1.77, 1.11 2.08, 1.54 2.31, 2.01 2.45, 2.5 2.5, 2.99 2.45, 3.46 2.31, 3.89 2.08, 4.27 1.77, 4.58 1.39, 4.81 0.96, 4.95 0.49, 5 0, 4.95 -0.49))"),
     (stf.ST_MinimumBoundingCircle, ("line", 2), "linestring_geom", "ST_PrecisionReduce(geom, 2)", "POLYGON ((4.95 -0.49, 4.81 -0.96, 4.58 -1.39, 4.27 -1.77, 3.89 -2.08, 3.46 -2.31, 2.99 -2.45, 2.5 -2.5, 2.01 -2.45, 1.54 -2.31, 1.11 -2.08, 0.73 -1.77, 0.42 -1.39, 0.19 -0.96, 0.05 -0.49, 0 0, 0.05 0.49, 0.19 0.96, 0.42 1.39, 0.73 1.77, 1.11 2.08, 1.54 2.31, 2.01 2.45, 2.5 2.5, 2.99 2.45, 3.46 2.31, 3.89 2.08, 4.27 1.77, 4.58 1.39, 4.81 0.96, 4.95 0.49, 5 0, 4.95 -0.49))"),
     (stf.ST_MinimumBoundingRadius, ("line",), "linestring_geom", "", {"center": "POINT (2.5 0)", "radius": 2.5}),
@@ -204,6 +205,7 @@ wrong_type_configurations = [
     (stf.ST_LineSubstring, ("", None, 1.0)),
     (stf.ST_LineSubstring, ("", 0.5, None)),
     (stf.ST_MakeValid, (None,)),
+    (stf.ST_MakePolygon, (None,)),
     (stf.ST_MinimumBoundingCircle, (None,)),
     (stf.ST_MinimumBoundingRadius, (None,)),
     (stf.ST_Multi, (None,)),
@@ -377,5 +379,5 @@ class TestDataFrameAPI(TestBase):
 
     @pytest.mark.parametrize("func,args", wrong_type_configurations, ids=_id_test_configuration)
     def test_call_function_with_wrong_type(self, func, args):
-        with pytest.raises(ValueError, match=f"Incorrect parameter type: [A-Za-z_0-9]+ for {func.__name__} should be [A-Za-z0-9\\[\\]_, ]+ but received [A-Za-z0-9_]+."):
+        with pytest.raises(ValueError, match=f"Incorrect argument type: [A-Za-z_0-9]+ for {func.__name__} should be [A-Za-z0-9\\[\\]_, ]+ but received [A-Za-z0-9_]+."):
             func(*args)
