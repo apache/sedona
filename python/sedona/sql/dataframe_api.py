@@ -82,8 +82,8 @@ def _get_readable_name_for_type(type: Type) -> str:
     :return: Human readable name for the type annotation.
     :rtype: str
     """
-    if typing.get_origin(type) is Union:
-        return f"Union[{', '.join((_strip_extra_from_class_name(str(x)) for x in typing.get_args(type)))}]"
+    if isinstance(type, typing._GenericAlias) and type.__origin__._name == "Union":
+        return f"Union[{', '.join((_strip_extra_from_class_name(str(x)) for x in type.__args__))}]"
     return _strip_extra_from_class_name(str(type))
 
 
