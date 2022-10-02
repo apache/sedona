@@ -264,6 +264,22 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_MakePolygon") {
+      val invalidDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)') AS geom")
+      val df = invalidDf.select(ST_MakePolygon("geom"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      val expectedResult = "POLYGON ((0 0, 1 0, 1 1, 0 0))"
+      assert(actualResult == expectedResult)
+    }
+
+    it("Passed ST_MakePolygon with holes") {
+      val invalidDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)') AS geom, array(ST_GeomFromWKT('LINESTRING (0.5 0.1, 0.7 0.1, 0.7 0.3, 0.5 0.1)')) AS holes")
+      val df = invalidDf.select(ST_MakePolygon("geom", "holes"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      val expectedResult = "POLYGON ((0 0, 1 0, 1 1, 0 0), (0.5 0.1, 0.7 0.1, 0.7 0.3, 0.5 0.1))"
+      assert(actualResult == expectedResult)
+    }
+
     it("Passed ST_SimplifyPreserveTopology") {
       val polygonDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 0.9, 1 1, 0 0))') AS geom")
       val df = polygonDf.select(ST_SimplifyPreserveTopology("geom", 0.2))
