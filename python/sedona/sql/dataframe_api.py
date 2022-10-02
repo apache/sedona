@@ -26,7 +26,7 @@ def _convert_argument_to_java_column(arg: Any) -> Column:
     elif isinstance(arg, str):
         return f.col(arg)._jc
     elif isinstance(arg, Iterable):
-        return f.array(*[Column(x) for x in map(_convert_argument_to_java_column, arg)])._jc
+        return f.array(*[Column(_convert_argument_to_java_column(x)) for x in arg])._jc
     else:
         return f.lit(arg)._jc
 
