@@ -256,6 +256,64 @@ gdf.plot(
 <br>
 <br>
 
+### DataFrame Style API
+
+Sedona functions can be called used a DataFrame style API similar to PySpark's own functions.
+The functions are spread across four different modules: `sedona.sql.st_constructors`, `sedona.sql.st_functions`, `sedona.sql.st_predicates`, and `sedona.sql.st_aggregates`.
+All of the functions can take columns or strings as arguments and will return a column representing the sedona function call.
+This makes them integratable with `DataFrame.select`, `DataFrame.join`, and all of the PySpark functions found in the `pyspark.sql.functions` module.
+
+As an example of the flexibility:
+
+```python3
+from pyspark.sql import functions as f
+
+from sedona.sql import st_constructors as stc
+
+df = spark.sql("SELECT array(0.0, 1.0, 2.0) AS values")
+
+min_value = f.array_min("values")
+max_value = f.array_max("values")
+
+df = df.select(stc.ST_Point(min_value, max_value).alias("point"))
+```
+
+The above code will generate the following dataframe:
+```
++-----------+
+|point      |
++-----------+
+|POINT (0 2)|
++-----------+
+```
+
+Some functions will take native python values and infer them as literals.
+For example:
+
+```python3
+df = df.select(stc.ST_Point(1.0, 3.0).alias("point"))
+```
+
+This will generate a dataframe with a constant point in a column:
+```
++-----------+
+|point      |
++-----------+
+|POINT (1 3)|
++-----------+
+```
+
+For a description of what values a function may take please refer to their specific docstrings.
+
+The following rules are followed when passing values to the sedona functions:
+1. `Column` type arguments are passed straight through and are always accepted.
+1. `str` type arguments are always assumed to be names of columns and are wrapped in a `Column` to support that.
+If an actual string literal needs to be passed then it will need to be wrapped in a `Column` using `pyspark.sql.functions.lit`.
+1. Any other types of arguments are checked on a per function basis.
+Generally, arguments that could reasonably support a python native type are accepted and passed through.
+Check the specific docstring of the function to be sure.
+1. Shapely `Geometry` objects are not currently accepted in any of the functions.
+
 ## Creating Spark DataFrame based on shapely objects
 
 ### Supported Shapely objects
