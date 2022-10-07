@@ -1014,3 +1014,17 @@ class TestPredicateJoin(TestBase):
         for input_geom, expected_geom in tests.items():
             areal_geom = self.spark.sql("select ST_AsText(ST_BuildArea(ST_GeomFromText({})))".format(input_geom))
             assert areal_geom.take(1)[0][0] == expected_geom
+
+    def test_st_line_from_multi_point(self):
+        test_cases = {
+            "'POLYGON((-1 0 0, 1 0 0, 0 0 1, 0 1 0, -1 0 0))'": None,
+            "'LINESTRING(0 0, 1 2, 2 4, 3 6)'": None,
+            "'POINT(1 2)'": None,
+            "'MULTIPOINT((10 40), (40 30), (20 20), (30 10))'":
+                "LINESTRING (10 40, 40 30, 20 20, 30 10)",
+            "'MULTIPOINT((10 40 66), (40 30 77), (20 20 88), (30 10 99))'":
+                "LINESTRING Z(10 40 66, 40 30 77, 20 20 88, 30 10 99)"
+        }
+        for input_geom, expected_geom in test_cases.items():
+            line_geometry = self.spark.sql("select ST_AsText(ST_LineFromMultiPoint(ST_GeomFromText({})))".format(input_geom))
+            assert line_geometry.take(1)[0][0] == expected_geom

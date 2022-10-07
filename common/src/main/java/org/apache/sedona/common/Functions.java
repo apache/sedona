@@ -334,4 +334,15 @@ public class Functions {
         }
         return null;
     }
+
+    public static Geometry lineFromMultiPoint(Geometry geometry) {
+        if(!(geometry instanceof MultiPoint)) {
+            return null;
+        }
+        List<Coordinate> coordinates = new ArrayList<>();
+        for(Coordinate c : geometry.getCoordinates()){
+            coordinates.add(c); 
+        }
+        return GEOMETRY_FACTORY.createLineString(coordinates.toArray(new Coordinate[0]));
+    }
 }
