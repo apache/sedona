@@ -26,9 +26,9 @@ Feedback to improve Apache Sedona: [Google Form](https://docs.google.com/forms/d
 
 Get help using Sedona or contribute to the project on our mailing lists
 
-[Sedona Mailing Lists](https://lists.apache.org/list.html?sedona.apache.org): 
+[Sedona Mailing Lists](https://lists.apache.org/list.html?sedona.apache.org): [dev@sedona.apache.org](https://lists.apache.org/list.html?dev@sedona.apache.org): project development and general questions
 
-* [dev@sedona.apache.org](https://lists.apache.org/list.html?dev@sedona.apache.org): project development and general questions
+* Please first subscribe and then post emails. To subscribe, please send an email (leave the subject and content blank) to dev-subscribe@sedona.apache.org
 
 ## Issue tracker
 
