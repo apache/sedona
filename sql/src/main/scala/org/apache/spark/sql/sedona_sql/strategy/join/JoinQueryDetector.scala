@@ -61,6 +61,10 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
           Some(JoinQueryDetection(left, right, leftShape, rightShape, true, extraCondition))
         case ST_Within(Seq(leftShape, rightShape)) =>
           Some(JoinQueryDetection(right, left, rightShape, leftShape, false, extraCondition))
+        case ST_Covers(Seq(leftShape, rightShape)) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, false, extraCondition))
+        case ST_CoveredBy(Seq(leftShape, rightShape)) =>
+          Some(JoinQueryDetection(right, left, rightShape, leftShape, false, extraCondition))
         case ST_Overlaps(Seq(leftShape, rightShape)) =>
           Some(JoinQueryDetection(right, left, rightShape, leftShape, false, extraCondition))
         case ST_Touches(Seq(leftShape, rightShape)) =>

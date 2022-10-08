@@ -48,4 +48,10 @@ object st_predicates extends DataFrameAPI {
 
   def ST_Within(a: Column, b: Column): Column = wrapExpression[ST_Within](a, b)
   def ST_Within(a: String, b: String): Column = wrapExpression[ST_Within](a, b)
+
+  def ST_Covers(a: Column, b: Column): Column = wrapExpression[ST_Covers](a, b)
+  def ST_Covers(a: String, b: String): Column = wrapExpression[ST_Covers](a, b)
+
+  def ST_CoveredBy(a: Column, b: Column): Column = wrapExpression[ST_CoveredBy](a, b)
+  def ST_CoveredBy(a: String, b: String): Column = wrapExpression[ST_CoveredBy](a, b)
 }

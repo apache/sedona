@@ -807,6 +807,22 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(!actualResult)
     }
 
+    it("Passed ST_Covers") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))') AS a, ST_Point(1.0, 0.0) AS b, ST_Point(0.0, 1.0) AS c")
+      val df = baseDf.select(ST_Covers("a", "b"), ST_Covers("a", "c"))
+      val actualResult = df.take(1)(0)
+      assert(actualResult.getBoolean(0))
+      assert(!actualResult.getBoolean(1))
+    }
+
+    it("Passed ST_CoveredBy") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))') AS a, ST_Point(1.0, 0.0) AS b, ST_Point(0.0, 1.0) AS c")
+      val df = baseDf.select(ST_CoveredBy("b", "a"), ST_CoveredBy("c", "a"))
+      val actualResult = df.take(1)(0)
+      assert(actualResult.getBoolean(0))
+      assert(!actualResult.getBoolean(1))
+    }
+
     // aggregates
     it("Passed ST_Envelope_Aggr") {
       val baseDf = sparkSession.sql("SELECT explode(array(ST_Point(0.0, 0.0), ST_Point(1.0, 1.0))) AS geom")

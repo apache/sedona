@@ -118,6 +118,12 @@ test_configurations = [
     (stp.ST_Overlaps, ("a", "b"), "overlapping_polys", "", True),
     (stp.ST_Touches, ("a", "b"), "touching_polys", "", True),
     (stp.ST_Within, (lambda: f.expr("ST_Point(0.5, 0.25)"), "geom"), "triangle_geom", "", True),
+    (stp.ST_Covers, ("geom", lambda: f.expr("ST_Point(0.5, 0.25)")), "triangle_geom", "", True),
+    (stp.ST_CoveredBy, (lambda: f.expr("ST_Point(0.5, 0.25)"), "geom"), "triangle_geom", "", True),
+    (stp.ST_Contains, ("geom", lambda: f.expr("ST_Point(0.0, 0.0)")), "triangle_geom", "", False),
+    (stp.ST_Within, (lambda: f.expr("ST_Point(0.0, 0.0)"), "geom"), "triangle_geom", "", False),
+    (stp.ST_Covers, ("geom", lambda: f.expr("ST_Point(0.0, 0.0)")), "triangle_geom", "", True),
+    (stp.ST_CoveredBy, (lambda: f.expr("ST_Point(0.0, 0.0)"), "geom"), "triangle_geom", "", True),
 
     # aggregates
     (sta.ST_Envelope_Aggr, ("geom",), "exploded_points", "", "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"),

@@ -53,6 +53,33 @@ public class PredicateTest extends TestBase{
     }
 
     @Test
+    public void testWithin() {
+        Table pointTable = createPointTable(testDataSize);
+        String polygon = createPolygonWKT(testDataSize).get(0).getField(0).toString();
+        String expr = "ST_Within(geom_point, ST_GeomFromWkt('" + polygon + "'))";
+        Table result = pointTable.filter(expr);
+        assertEquals(1, count(result));
+    }
+
+    @Test
+    public void testCovers() {
+        Table pointTable = createPointTable(testDataSize);
+        String polygon = createPolygonWKT(testDataSize).get(0).getField(0).toString();
+        String expr = "ST_Covers(ST_GeomFromWkt('" + polygon + "'), geom_point)";
+        Table result = pointTable.filter(expr);
+        assertEquals(1, count(result));
+    }
+
+    @Test
+    public void testCoveredBy() {
+        Table pointTable = createPointTable(testDataSize);
+        String polygon = createPolygonWKT(testDataSize).get(0).getField(0).toString();
+        String expr = "ST_CoveredBy(geom_point, ST_GeomFromWkt('" + polygon + "'))";
+        Table result = pointTable.filter(expr);
+        assertEquals(1, count(result));
+    }
+
+    @Test
     public void testOrderingEquals() {
         Table lineStringTable = createLineStringTable(testDataSize);
         String lineString = createLineStringWKT(testDataSize).get(0).getField(0).toString();

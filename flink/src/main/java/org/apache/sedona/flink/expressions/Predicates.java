@@ -85,6 +85,86 @@ public class Predicates {
         public Boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
+            return geom1.contains(geom2);
+        }
+
+        /**
+         * Check spatial relation with duplicates removal
+         * @param key
+         * @param o1
+         * @param o2
+         * @return
+         */
+        @DataTypeHint("Boolean")
+        public Boolean eval(@DataTypeHint("INT") Integer key, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
+            Objects.requireNonNull(grids, "This predicate has to be initialized by a partitioner.");
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
+            HalfOpenRectangle halfOpenRectangle = new HalfOpenRectangle(grids.get(key));
+            return JudgementHelper.match(geom1, geom2, halfOpenRectangle, false);
+        }
+    }
+
+    public static class ST_Within extends ScalarFunction {
+        private List<Envelope> grids;
+
+        /**
+         * Constructor for duplicate removal
+         */
+        public ST_Within(PartitioningUtils partitioner) {
+            grids = partitioner.fetchLeafZones();
+        }
+
+        /**
+         * Constructor for relation checking without duplicate removal
+         */
+        public ST_Within() {
+        }
+
+        @DataTypeHint("Boolean")
+        public Boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
+            return geom1.within(geom2);
+        }
+
+        /**
+         * Check spatial relation with duplicates removal
+         * @param key
+         * @param o1
+         * @param o2
+         * @return
+         */
+        @DataTypeHint("Boolean")
+        public Boolean eval(@DataTypeHint("INT") Integer key, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
+            Objects.requireNonNull(grids, "This predicate has to be initialized by a partitioner.");
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
+            HalfOpenRectangle halfOpenRectangle = new HalfOpenRectangle(grids.get(key));
+            return JudgementHelper.match(geom1, geom2, halfOpenRectangle, true);
+        }
+    }
+
+    public static class ST_Covers extends ScalarFunction {
+        private List<Envelope> grids;
+
+        /**
+         * Constructor for duplicate removal
+         */
+        public ST_Covers(PartitioningUtils partitioner) {
+            grids = partitioner.fetchLeafZones();
+        }
+
+        /**
+         * Constructor for relation checking without duplicate removal
+         */
+        public ST_Covers() {
+        }
+
+        @DataTypeHint("Boolean")
+        public Boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
             return geom1.covers(geom2);
         }
 
@@ -102,6 +182,46 @@ public class Predicates {
             Geometry geom2 = (Geometry) o2;
             HalfOpenRectangle halfOpenRectangle = new HalfOpenRectangle(grids.get(key));
             return JudgementHelper.match(geom1, geom2, halfOpenRectangle, false);
+        }
+    }
+
+    public static class ST_CoveredBy extends ScalarFunction {
+        private List<Envelope> grids;
+
+        /**
+         * Constructor for duplicate removal
+         */
+        public ST_CoveredBy(PartitioningUtils partitioner) {
+            grids = partitioner.fetchLeafZones();
+        }
+
+        /**
+         * Constructor for relation checking without duplicate removal
+         */
+        public ST_CoveredBy() {
+        }
+
+        @DataTypeHint("Boolean")
+        public Boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
+            return geom1.coveredBy(geom2);
+        }
+
+        /**
+         * Check spatial relation with duplicates removal
+         * @param key
+         * @param o1
+         * @param o2
+         * @return
+         */
+        @DataTypeHint("Boolean")
+        public Boolean eval(@DataTypeHint("INT") Integer key, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
+            Objects.requireNonNull(grids, "This predicate has to be initialized by a partitioner.");
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
+            HalfOpenRectangle halfOpenRectangle = new HalfOpenRectangle(grids.get(key));
+            return JudgementHelper.match(geom1, geom2, halfOpenRectangle, true);
         }
     }
 

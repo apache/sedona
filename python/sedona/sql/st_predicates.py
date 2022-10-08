@@ -145,3 +145,31 @@ def ST_Within(a: ColumnOrName, b: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_predicate_function("ST_Within", (a, b))
+
+
+@validate_argument_types
+def ST_Covers(a: ColumnOrName, b: ColumnOrName) -> Column:
+    """Check whether geometry a covers geometry b.
+
+    :param a: Geometry column to check.
+    :type a: ColumnOrName
+    :param b: Geometry column to check.
+    :type b: ColumnOrName
+    :return: True if a covers b and False otherwise, as a boolean column.
+    :rtype: Column
+    """
+    return _call_predicate_function("ST_Covers", (a, b))
+
+
+@validate_argument_types
+def ST_CoveredBy(a: ColumnOrName, b: ColumnOrName) -> Column:
+    """Check if geometry a is covered by geometry b.
+
+    :param a: Geometry column to check.
+    :type a: ColumnOrName
+    :param b: Geometry column to check.
+    :type b: ColumnOrName
+    :return: True if a is covered by b and False otherwise, as a boolean column.
+    :rtype: Column
+    """
+    return _call_predicate_function("ST_CoveredBy", (a, b))
