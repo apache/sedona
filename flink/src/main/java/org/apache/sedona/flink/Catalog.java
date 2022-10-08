@@ -80,7 +80,8 @@ public class Catalog {
                 new Functions.ST_Normalize(),
                 new Functions.ST_AddPoint(),
                 new Functions.ST_RemovePoint(),
-                new Functions.ST_SetPoint()
+                new Functions.ST_SetPoint(),
+                new Functions.ST_LineFromMultiPoint(),
         };
     }
 

@@ -122,6 +122,7 @@ object Catalog {
     ST_OrderingEquals,
     ST_CollectionExtract,
     ST_Normalize,
+    ST_LineFromMultiPoint,
     // Expression for rasters
     RS_NormalizedDifference,
     RS_Mean,

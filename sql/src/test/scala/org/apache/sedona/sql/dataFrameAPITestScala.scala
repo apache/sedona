@@ -839,5 +839,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       val expectedResult = "POLYGON ((2 0, 1 0, 1 1, 2 1, 2 0))"
       assert(actualResult == expectedResult)
     }
+
+    it ("Passed ST_LineFromMultiPoint") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('MULTIPOINT((10 40), (40 30), (20 20), (30 10))') AS multipoint")
+      val df = baseDf.select(ST_LineFromMultiPoint("multipoint"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      val expectedResult = "LINESTRING (10 40, 40 30, 20 20, 30 10)"
+      assert(actualResult == expectedResult)
+    }
   }
 }

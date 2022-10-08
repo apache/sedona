@@ -45,6 +45,7 @@ __all__ = [
     "ST_IsSimple",
     "ST_IsValid",
     "ST_Length",
+    "ST_LineFromMultiPoint",
     "ST_LineInterpolatePoint",
     "ST_LineMerge",
     "ST_LineSubstring",
@@ -587,6 +588,18 @@ def ST_Length(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_Length", geometry)
+
+
+@validate_argument_types
+def ST_LineFromMultiPoint(geometry: ColumnOrName) -> Column:
+    """Creates a LineString from a MultiPoint geometry.
+
+    :param geometry: MultiPoint geometry column to create LineString from.
+    :type geometry: ColumnOrName
+    :return: LineString geometry of a MultiPoint geometry column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_LineFromMultiPoint", geometry)
 
 
 @validate_argument_types

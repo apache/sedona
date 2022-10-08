@@ -466,4 +466,10 @@ public class FunctionTest extends TestBase{
         Table pointTable = tableEnv.sqlQuery("SELECT ST_SetPoint(ST_GeomFromWKT('LINESTRING (0 0, 1 1, 2 2)'), -1, ST_GeomFromWKT('POINT (3 3)'))");
         assertEquals("LINESTRING (0 0, 1 1, 3 3)", first(pointTable).getField(0).toString());
     }
+
+    @Test
+    public void testLineFromMultiPoint() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_LineFromMultiPoint(ST_GeomFromWKT('MULTIPOINT((10 40), (40 30), (20 20), (30 10))'))");
+        assertEquals("LINESTRING (10 40, 40 30, 20 20, 30 10)", first(pointTable).getField(0).toString());
+    }
 }

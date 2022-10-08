@@ -72,6 +72,7 @@ test_configurations = [
     (stf.ST_IsSimple, ("geom",), "triangle_geom", "", True),
     (stf.ST_IsValid, (lambda: f.col("geom"),), "triangle_geom", "", True),
     (stf.ST_Length, ("line",), "linestring_geom", "", 5.0),
+    (stf.ST_LineFromMultiPoint, ("multipoint",), "multipoint_geom", "", "LINESTRING (10 40, 40 30, 20 20, 30 10)"),
     (stf.ST_LineInterpolatePoint, ("line", 0.5), "linestring_geom", "", "POINT (2.5 0)"),
     (stf.ST_LineMerge, ("geom",), "multiline_geom", "", "LINESTRING (0 0, 1 0, 1 1, 0 0)"),
     (stf.ST_LineSubstring, ("line", 0.5, 1.0), "linestring_geom", "", "LINESTRING (2.5 0, 3 0, 4 0, 5 0)"),
@@ -199,6 +200,7 @@ wrong_type_configurations = [
     (stf.ST_IsSimple, (None,)),
     (stf.ST_IsValid, (None,)),
     (stf.ST_Length, (None,)),
+    (stf.ST_LineFromMultiPoint, (None,)),
     (stf.ST_LineInterpolatePoint, (None, 0.5)),
     (stf.ST_LineInterpolatePoint, ("", None)),
     (stf.ST_LineMerge, (None,)),
@@ -311,6 +313,8 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql("SELECT 'LINESTRING (1 2, 3 4)' AS wkt")
         elif request.param == "min_max_x_y":
             return TestDataFrameAPI.spark.sql("SELECT 0.0 AS minx, 1.0 AS miny, 2.0 AS maxx, 3.0 AS maxy")
+        elif request.param == "multipoint_geom":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('MULTIPOINT((10 40), (40 30), (20 20), (30 10))') AS multipoint")
         elif request.param == "null":
             return TestDataFrameAPI.spark.sql("SELECT null")
         elif request.param == "triangle_geom":
