@@ -19,6 +19,7 @@
 package org.apache.spark.sql.sedona_sql.strategy.join
 
 import org.apache.sedona.core.enums.IndexType
+import org.apache.sedona.core.spatialOperator.SpatialPredicate
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.spark.sql.{SparkSession, Strategy}
 import org.apache.spark.sql.catalyst.expressions.{And, Expression, LessThan, LessThanOrEqual}
@@ -28,13 +29,12 @@ import org.apache.spark.sql.execution.SparkPlan
 import org.apache.spark.sql.sedona_sql.expressions._
 
 
-
 case class JoinQueryDetection(
   left: LogicalPlan,
   right: LogicalPlan,
   leftShape: Expression,
   rightShape: Expression,
-  intersects: Boolean,
+  spatialPredicate: SpatialPredicate,
   extraCondition: Option[Expression] = None,
   radius: Option[Expression] = None
 )
@@ -45,7 +45,7 @@ case class JoinQueryDetection(
   *
   * Plans `DistanceJoinExec` for inner joins on spatial relationship ST_Distance(a, b) < r.
   * 
-  * Plans `BroadcastIndexJoinExec for inner joins on spatial relationships with a broadcast hint.
+  * Plans `BroadcastIndexJoinExec` for inner joins on spatial relationships with a broadcast hint.
   */
 class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
 
@@ -56,23 +56,23 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     extraCondition: Option[Expression] = None): Option[JoinQueryDetection] = {
       predicate match {
         case ST_Contains(Seq(leftShape, rightShape)) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, false, extraCondition))
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.CONTAINS, extraCondition))
         case ST_Intersects(Seq(leftShape, rightShape)) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, true, extraCondition))
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, extraCondition))
         case ST_Within(Seq(leftShape, rightShape)) =>
-          Some(JoinQueryDetection(right, left, rightShape, leftShape, false, extraCondition))
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.WITHIN, extraCondition))
         case ST_Covers(Seq(leftShape, rightShape)) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, false, extraCondition))
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.COVERS, extraCondition))
         case ST_CoveredBy(Seq(leftShape, rightShape)) =>
-          Some(JoinQueryDetection(right, left, rightShape, leftShape, false, extraCondition))
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.COVERED_BY, extraCondition))
         case ST_Overlaps(Seq(leftShape, rightShape)) =>
-          Some(JoinQueryDetection(right, left, rightShape, leftShape, false, extraCondition))
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.OVERLAPS, extraCondition))
         case ST_Touches(Seq(leftShape, rightShape)) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, true, extraCondition))
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.TOUCHES, extraCondition))
         case ST_Equals(Seq(leftShape, rightShape)) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, false, extraCondition))
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.EQUALS, extraCondition))
         case ST_Crosses(Seq(leftShape, rightShape)) =>
-          Some(JoinQueryDetection(right, left, rightShape, leftShape, false, extraCondition))
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.CROSSES, extraCondition))
         case _ => None
       }
     }
@@ -93,17 +93,17 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
         case Some(And(extraCondition, predicate: ST_Predicate)) =>
           getJoinDetection(left, right, predicate, Some(extraCondition))
         case Some(LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), radius)) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, true, None, Some(radius)))
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, None, Some(radius)))
         case Some(And(LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), radius), extraCondition)) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, true, Some(extraCondition), Some(radius)))
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, Some(extraCondition), Some(radius)))
         case Some(And(extraCondition, LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), radius))) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, true, Some(extraCondition), Some(radius)))
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, Some(extraCondition), Some(radius)))
         case Some(LessThan(ST_Distance(Seq(leftShape, rightShape)), radius)) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, false, None, Some(radius)))
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.COVERS, None, Some(radius)))
         case Some(And(LessThan(ST_Distance(Seq(leftShape, rightShape)), radius), extraCondition)) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, false, Some(extraCondition), Some(radius)))
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.COVERS, Some(extraCondition), Some(radius)))
         case Some(And(extraCondition, LessThan(ST_Distance(Seq(leftShape, rightShape)), radius))) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, false, Some(extraCondition), Some(radius)))
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.COVERS, Some(extraCondition), Some(radius)))
         case _ =>
           None
       }
@@ -112,17 +112,17 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
 
       if ((broadcastLeft || broadcastRight) && sedonaConf.getUseIndex) {
         queryDetection match {
-          case Some(JoinQueryDetection(left, right, leftShape, rightShape, intersects, extraCondition, radius)) =>
-            planBroadcastJoin(left, right, Seq(leftShape, rightShape), intersects, sedonaConf.getIndexType, broadcastLeft, extraCondition, radius)
+          case Some(JoinQueryDetection(left, right, leftShape, rightShape, spatialPredicate, extraCondition, radius)) =>
+            planBroadcastJoin(left, right, Seq(leftShape, rightShape), spatialPredicate, sedonaConf.getIndexType, broadcastLeft, extraCondition, radius)
           case _ =>
             Nil
         }
       } else {
         queryDetection match {
-          case Some(JoinQueryDetection(left, right, leftShape, rightShape, intersects, extraCondition, None)) =>
-            planSpatialJoin(left, right, Seq(leftShape, rightShape), intersects, extraCondition)
-          case Some(JoinQueryDetection(left, right, leftShape, rightShape, intersects, extraCondition, Some(radius))) =>
-            planDistanceJoin(left, right, Seq(leftShape, rightShape), radius, intersects, extraCondition)
+          case Some(JoinQueryDetection(left, right, leftShape, rightShape, spatialPredicate, extraCondition, None)) =>
+            planSpatialJoin(left, right, Seq(leftShape, rightShape), spatialPredicate, extraCondition)
+          case Some(JoinQueryDetection(left, right, leftShape, rightShape, spatialPredicate, extraCondition, Some(radius))) =>
+            planDistanceJoin(left, right, Seq(leftShape, rightShape), radius, spatialPredicate, extraCondition)
           case None => 
             Nil
         }
@@ -137,8 +137,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     * map to the output of the specified plan.
     */
   private def matches(expr: Expression, plan: LogicalPlan): Boolean =
-    expr.references.find(plan.outputSet.contains(_)).isDefined &&
-      expr.references.find(!plan.outputSet.contains(_)).isEmpty
+    expr.references.nonEmpty && expr.references.forall(plan.outputSet.contains(_))
 
   private def matchExpressionsToPlans(exprA: Expression,
                                       exprB: Expression,
@@ -155,17 +154,17 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
   private def planSpatialJoin(left: LogicalPlan,
                               right: LogicalPlan,
                               children: Seq[Expression],
-                              intersects: Boolean,
+                              spatialPredicate: SpatialPredicate,
                               extraCondition: Option[Expression] = None): Seq[SparkPlan] = {
     val a = children.head
     val b = children.tail.head
 
-    val relationship = if (intersects) "ST_Intersects" else "ST_Contains";
+    val relationship = s"ST_$spatialPredicate"
 
     matchExpressionsToPlans(a, b, left, right) match {
       case Some((planA, planB, _)) =>
         logInfo(s"Planning spatial join for $relationship relationship")
-        RangeJoinExec(planLater(planA), planLater(planB), a, b, intersects, extraCondition) :: Nil
+        RangeJoinExec(planLater(planA), planLater(planB), a, b, spatialPredicate, extraCondition) :: Nil
       case None =>
         logInfo(
           s"Spatial join for $relationship with arguments not aligned " +
@@ -178,21 +177,19 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
                                right: LogicalPlan,
                                children: Seq[Expression],
                                radius: Expression,
-                               intersects: Boolean,
+                               spatialPredicate: SpatialPredicate,
                                extraCondition: Option[Expression] = None): Seq[SparkPlan] = {
     val a = children.head
     val b = children.tail.head
-
-    val relationship = if (intersects) "ST_Distance <=" else "ST_Distance <";
 
     matchExpressionsToPlans(a, b, left, right) match {
       case Some((planA, planB, _)) =>
         if (radius.references.isEmpty || matches(radius, planA)) {
           logInfo("Planning spatial distance join")
-          DistanceJoinExec(planLater(planA), planLater(planB), a, b, radius, intersects, extraCondition) :: Nil
+          DistanceJoinExec(planLater(planA), planLater(planB), a, b, radius, spatialPredicate, extraCondition) :: Nil
         } else if (matches(radius, planB)) {
           logInfo("Planning spatial distance join")
-          DistanceJoinExec(planLater(planB), planLater(planA), b, a, radius, intersects, extraCondition) :: Nil
+          DistanceJoinExec(planLater(planB), planLater(planA), b, a, radius, spatialPredicate, extraCondition) :: Nil
         } else {
           logInfo(
             "Spatial distance join for ST_Distance with non-scalar radius " +
@@ -210,7 +207,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
   private def planBroadcastJoin(left: LogicalPlan,
                                 right: LogicalPlan,
                                 children: Seq[Expression],
-                                intersects: Boolean,
+                                spatialPredicate: SpatialPredicate,
                                 indexType: IndexType,
                                 broadcastLeft: Boolean,
                                 extraCondition: Option[Expression],
@@ -218,11 +215,10 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     val a = children.head
     val b = children.tail.head
 
-    val relationship = radius match {
-      case Some(_) if intersects => "ST_Distance <="
-      case Some(_) if !intersects => "ST_Distance <"
-      case None if intersects => "ST_Intersects"
-      case None if !intersects => "ST_Contains"
+    val relationship = (radius, spatialPredicate) match {
+      case (Some(_), SpatialPredicate.INTERSECTS) => "ST_Distance <="
+      case (Some(_), _) => "ST_Distance <"
+      case (None, _) => s"ST_$spatialPredicate"
     }
 
     matchExpressionsToPlans(a, b, left, right) match {
@@ -239,7 +235,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
           case (RightSide, true) => // Broadcast the right side, objects on the left
             (planLater(left), SpatialIndexExec(planLater(right), a, indexType, radius), b, RightSide)
         }
-        BroadcastIndexJoinExec(leftPlan, rightPlan, streamShape, broadcastSide, windowSide, intersects, extraCondition, radius) :: Nil
+        BroadcastIndexJoinExec(leftPlan, rightPlan, streamShape, broadcastSide, windowSide, spatialPredicate, extraCondition, radius) :: Nil
       case None =>
         logInfo(
           s"Spatial join for $relationship with arguments not aligned " +

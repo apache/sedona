@@ -76,7 +76,7 @@ class predicateJoinTestScala extends TestBaseScala {
 
       var rangeJoinDf = sparkSession.sql("select * from polygondf, pointdf where ST_Touches(polygondf.polygonshape,pointdf.pointshape) ")
 
-      assert(rangeJoinDf.count() == 1000)
+      assert(rangeJoinDf.count() == 0)
     }
 
     it("Passed ST_Within in a join") {
@@ -108,7 +108,7 @@ class predicateJoinTestScala extends TestBaseScala {
 
       var rangeJoinDf = sparkSession.sql("select * from polygondf, polygonodf where ST_Overlaps(polygondf.polygonshape, polygonodf.polygonshape)")
 
-      assert(rangeJoinDf.count() == 57)
+      assert(rangeJoinDf.count() == 15)
     }
 
     it("Passed ST_Crosses in a join") {
@@ -124,7 +124,7 @@ class predicateJoinTestScala extends TestBaseScala {
 
       var rangeJoinDf = sparkSession.sql("select * from polygondf, pointdf where ST_Crosses(pointdf.pointshape, polygondf.polygonshape) ")
 
-      assert(rangeJoinDf.count() == 1000)
+      assert(rangeJoinDf.count() == 0)
     }
 
     it("Passed ST_Covers in a join") {

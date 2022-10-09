@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.enums.JoinBuildSide;
 import org.apache.sedona.core.monitoring.Metric;
+import org.apache.sedona.core.spatialOperator.SpatialPredicate;
 import org.apache.sedona.core.utils.TimeUtils;
 import org.apache.spark.TaskContext;
 import org.apache.spark.api.java.function.FlatMapFunction2;
@@ -61,7 +62,8 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
     /**
      * @see JudgementBase
      */
-    public DynamicIndexLookupJudgement(boolean considerBoundaryIntersection,
+    public DynamicIndexLookupJudgement(
+            SpatialPredicate spatialPredicate,
             IndexType indexType,
             JoinBuildSide joinBuildSide,
             @Nullable DedupParams dedupParams,
@@ -70,7 +72,7 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
             Metric resultCount,
             Metric candidateCount)
     {
-        super(considerBoundaryIntersection, dedupParams);
+        super(spatialPredicate, dedupParams);
         this.indexType = indexType;
         this.joinBuildSide = joinBuildSide;
         this.buildCount = buildCount;

@@ -18,8 +18,10 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
-import collection.JavaConverters._
+import org.apache.sedona.core.spatialOperator.SpatialPredicate
+import org.apache.sedona.core.spatialOperator.SpatialPredicateEvaluators
 
+import collection.JavaConverters._
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.internal.Logging
@@ -38,7 +40,7 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
                                   streamShape: Expression,
                                   indexBuildSide: JoinSide,
                                   windowJoinSide: JoinSide,
-                                  intersects: Boolean,
+                                  spatialPredicate: SpatialPredicate,
                                   extraCondition: Option[Expression] = None,
                                   radius: Option[Expression] = None)
   extends SedonaBinaryExecNode
@@ -69,12 +71,11 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
     (streamShape, broadcast.shape)
   }
 
-  private val spatialExpression = radius match {
-      case Some(r) if intersects => s"ST_Distance($windowExpression, $objectExpression) <= $r"
-      case Some(r) if !intersects => s"ST_Distance($windowExpression, $objectExpression) < $r"
-      case None if intersects => s"ST_Intersects($windowExpression, $objectExpression)"
-      case None if !intersects => s"ST_Contains($windowExpression, $objectExpression)"
-    }
+  private val spatialExpression = (radius, spatialPredicate) match {
+    case (Some(r), SpatialPredicate.INTERSECTS) => s"ST_Distance($windowExpression, $objectExpression) <= $r"
+    case (Some(r), _) => s"ST_Distance($windowExpression, $objectExpression) < $r"
+    case (None, _) => s"ST_$spatialPredicate($windowExpression, $objectExpression)"
+  }
 
   override def simpleString(maxFields: Int): String = super.simpleString(maxFields) + s" $spatialExpression" // SPARK3 anchor
 //  override def simpleString: String = super.simpleString + s" $spatialExpression" // SPARK2 anchor
@@ -82,8 +83,9 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
   private def windowBroadcastJoin(index: Broadcast[SpatialIndex], spatialRdd: SpatialRDD[Geometry]): RDD[(Geometry, Geometry)] = {
     spatialRdd.getRawSpatialRDD.rdd.flatMap { row =>
       val candidates = index.value.query(row.getEnvelopeInternal).iterator.asScala.asInstanceOf[Iterator[Geometry]]
+      val evaluator = SpatialPredicateEvaluators.create(spatialPredicate)
       candidates
-        .filter(candidate => if (intersects) candidate.intersects(row) else candidate.covers(row))
+        .filter(candidate => evaluator.eval(candidate, row))
         .map(candidate => (candidate, row))
     }
   }
@@ -91,8 +93,9 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
   private def objectBroadcastJoin(index: Broadcast[SpatialIndex], spatialRdd: SpatialRDD[Geometry]): RDD[(Geometry, Geometry)] = {
     spatialRdd.getRawSpatialRDD.rdd.flatMap { row =>
       val candidates = index.value.query(row.getEnvelopeInternal).iterator.asScala.asInstanceOf[Iterator[Geometry]]
+      val evaluator = SpatialPredicateEvaluators.create(spatialPredicate)
       candidates
-        .filter(candidate => if (intersects) row.intersects(candidate) else row.covers(candidate))
+        .filter(candidate => evaluator.eval(row, candidate))
         .map(candidate => (row, candidate))
     }
   }

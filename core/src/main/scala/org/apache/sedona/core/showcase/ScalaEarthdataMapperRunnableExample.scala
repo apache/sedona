@@ -23,6 +23,7 @@ import org.apache.log4j.{Level, Logger}
 import org.apache.sedona.core.enums.{FileDataSplitter, IndexType}
 import org.apache.sedona.core.formatMapper.EarthdataHDFPointMapper
 import org.apache.sedona.core.spatialOperator.RangeQuery
+import org.apache.sedona.core.spatialOperator.SpatialPredicate
 import org.apache.sedona.core.spatialRDD.PointRDD
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{SparkConf, SparkContext}
@@ -59,7 +60,7 @@ object ScalaEarthdataMapperRunnableExample extends App {
     var i = 0
     while (i < loopTimes) {
       var resultSize = 0L
-      resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).count
+      resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, SpatialPredicate.COVERED_BY, false).count
       i = i + 1
     }
   }
@@ -74,7 +75,7 @@ object ScalaEarthdataMapperRunnableExample extends App {
     var i = 0
     while (i < loopTimes) {
       var resultSize = 0L
-      resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, true).count
+      resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, SpatialPredicate.COVERED_BY, true).count
       i = i + 1
     }
   }

@@ -19,6 +19,7 @@
 package org.apache.spark.sql.sedona_sql.strategy.join
 
 import org.apache.sedona.common.geometryObjects.Circle
+import org.apache.sedona.core.spatialOperator.SpatialPredicate
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.internal.Logging
@@ -36,7 +37,7 @@ case class DistanceJoinExec(left: SparkPlan,
                             leftShape: Expression,
                             rightShape: Expression,
                             radius: Expression,
-                            intersects: Boolean,
+                            spatialPredicate: SpatialPredicate,
                             extraCondition: Option[Expression] = None)
   extends SedonaBinaryExecNode
     with TraitJoinQueryExec

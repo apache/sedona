@@ -22,6 +22,7 @@ package org.apache.sedona.core.joinJudgement;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.apache.sedona.core.spatialOperator.SpatialPredicate;
 import org.apache.spark.api.java.function.FlatMapFunction2;
 import org.locationtech.jts.geom.Geometry;
 
@@ -42,9 +43,9 @@ public class NestedLoopJudgement<T extends Geometry, U extends Geometry>
     /**
      * @see JudgementBase
      */
-    public NestedLoopJudgement(boolean considerBoundaryIntersection, @Nullable DedupParams dedupParams)
+    public NestedLoopJudgement(SpatialPredicate spatialPredicate, @Nullable DedupParams dedupParams)
     {
-        super(considerBoundaryIntersection, dedupParams);
+        super(spatialPredicate, dedupParams);
     }
 
     @Override

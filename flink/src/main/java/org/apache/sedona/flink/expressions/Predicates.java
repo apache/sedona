@@ -15,7 +15,8 @@ package org.apache.sedona.flink.expressions;
 
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.functions.ScalarFunction;
-import org.apache.sedona.core.joinJudgement.JudgementHelper;
+import org.apache.sedona.core.joinJudgement.JoinConditionMatcher;
+import org.apache.sedona.core.spatialOperator.SpatialPredicate;
 import org.apache.sedona.core.spatialPartitioning.PartitioningUtils;
 import org.apache.sedona.core.utils.HalfOpenRectangle;
 import org.locationtech.jts.geom.Envelope;
@@ -27,6 +28,7 @@ import java.util.Objects;
 public class Predicates {
     public static class ST_Intersects extends ScalarFunction {
         private List<Envelope> grids;
+        private static final JoinConditionMatcher MATCHER = JoinConditionMatcher.create(SpatialPredicate.INTERSECTS);
 
         /**
          * Constructor for duplicate removal
@@ -61,12 +63,13 @@ public class Predicates {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
             HalfOpenRectangle halfOpenRectangle = new HalfOpenRectangle(grids.get(key));
-            return JudgementHelper.match(geom1, geom2, halfOpenRectangle, true);
+            return MATCHER.match(geom1, geom2, halfOpenRectangle);
         }
     }
 
     public static class ST_Contains extends ScalarFunction {
         private List<Envelope> grids;
+        private static final JoinConditionMatcher MATCHER = JoinConditionMatcher.create(SpatialPredicate.CONTAINS);
 
         /**
          * Constructor for duplicate removal
@@ -101,12 +104,13 @@ public class Predicates {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
             HalfOpenRectangle halfOpenRectangle = new HalfOpenRectangle(grids.get(key));
-            return JudgementHelper.match(geom1, geom2, halfOpenRectangle, false);
+            return MATCHER.match(geom1, geom2, halfOpenRectangle);
         }
     }
 
     public static class ST_Within extends ScalarFunction {
         private List<Envelope> grids;
+        private static final JoinConditionMatcher MATCHER = JoinConditionMatcher.create(SpatialPredicate.WITHIN);
 
         /**
          * Constructor for duplicate removal
@@ -141,12 +145,13 @@ public class Predicates {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
             HalfOpenRectangle halfOpenRectangle = new HalfOpenRectangle(grids.get(key));
-            return JudgementHelper.match(geom1, geom2, halfOpenRectangle, true);
+            return MATCHER.match(geom1, geom2, halfOpenRectangle);
         }
     }
 
     public static class ST_Covers extends ScalarFunction {
         private List<Envelope> grids;
+        private static final JoinConditionMatcher MATCHER = JoinConditionMatcher.create(SpatialPredicate.COVERS);
 
         /**
          * Constructor for duplicate removal
@@ -181,12 +186,13 @@ public class Predicates {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
             HalfOpenRectangle halfOpenRectangle = new HalfOpenRectangle(grids.get(key));
-            return JudgementHelper.match(geom1, geom2, halfOpenRectangle, false);
+            return MATCHER.match(geom1, geom2, halfOpenRectangle);
         }
     }
 
     public static class ST_CoveredBy extends ScalarFunction {
         private List<Envelope> grids;
+        private static final JoinConditionMatcher MATCHER = JoinConditionMatcher.create(SpatialPredicate.COVERED_BY);
 
         /**
          * Constructor for duplicate removal
@@ -221,7 +227,7 @@ public class Predicates {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
             HalfOpenRectangle halfOpenRectangle = new HalfOpenRectangle(grids.get(key));
-            return JudgementHelper.match(geom1, geom2, halfOpenRectangle, true);
+            return MATCHER.match(geom1, geom2, halfOpenRectangle);
         }
     }
 

@@ -21,6 +21,7 @@ package org.apache.spark.sql.sedona_sql.strategy.join
 import org.apache.sedona.core.enums.JoinSparitionDominantSide
 import org.apache.sedona.core.spatialOperator.JoinQuery
 import org.apache.sedona.core.spatialOperator.JoinQuery.JoinParams
+import org.apache.sedona.core.spatialOperator.SpatialPredicate
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
@@ -45,7 +46,7 @@ trait TraitJoinQueryExec extends TraitJoinQueryBase {
   val right: SparkPlan
   val leftShape: Expression
   val rightShape: Expression
-  val intersects: Boolean
+  val spatialPredicate: SpatialPredicate
   val extraCondition: Option[Expression]
 
   override def output: Seq[Attribute] = left.output ++ right.output
@@ -119,7 +120,7 @@ trait TraitJoinQueryExec extends TraitJoinQueryBase {
     }
 
 
-    val joinParams = new JoinParams(sedonaConf.getUseIndex, intersects, sedonaConf.getIndexType, sedonaConf.getJoinBuildSide)
+    val joinParams = new JoinParams(sedonaConf.getUseIndex, spatialPredicate, sedonaConf.getIndexType, sedonaConf.getJoinBuildSide)
 
     //logInfo(s"leftShape count ${leftShapes.spatialPartitionedRDD.count()}")
     //logInfo(s"rightShape count ${rightShapes.spatialPartitionedRDD.count()}")

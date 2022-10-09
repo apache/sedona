@@ -19,6 +19,7 @@
 
 package org.apache.sedona.core.rangeJudgement;
 
+import org.apache.sedona.core.spatialOperator.SpatialPredicate;
 import org.apache.spark.api.java.function.Function;
 import org.locationtech.jts.geom.Geometry;
 
@@ -28,6 +29,11 @@ public class RangeFilter<U extends Geometry, T extends Geometry>
         extends JudgementBase
         implements Function<T, Boolean>
 {
+
+    public RangeFilter(U queryWindow, SpatialPredicate spatialPredicate)
+    {
+        super(queryWindow, spatialPredicate);
+    }
 
     public RangeFilter(U queryWindow, boolean considerBoundaryIntersection, boolean leftCoveredByRight)
     {
@@ -40,11 +46,6 @@ public class RangeFilter<U extends Geometry, T extends Geometry>
     public Boolean call(T geometry)
             throws Exception
     {
-        if (leftCoveredByRight) {
-            return match(geometry, queryGeometry);
-        }
-        else {
-            return match(queryGeometry, geometry);
-        }
+        return match(geometry, queryGeometry);
     }
 }
