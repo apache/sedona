@@ -1041,6 +1041,24 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     calculateStRemovePointOption("MULTILINESTRING ((10 10, 20 20, 10 40, 10 10), (40 40, 30 30, 40 20, 30 10, 40 40))", 3) shouldBe None
   }
 
+  it("Should correctly set using ST_SetPoint") {
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", 0, "Point(0 1)") shouldBe Some("LINESTRING (0 1, 1 1, 1 0, 0 0)")
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", 1, "Point(0 1)") shouldBe Some("LINESTRING (0 0, 0 1, 1 0, 0 0)")
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", 2, "Point(0 1)") shouldBe Some("LINESTRING (0 0, 1 1, 0 1, 0 0)")
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", 3, "Point(0 1)") shouldBe Some("LINESTRING (0 0, 1 1, 1 0, 0 1)")
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", 4, "Point(0 1)") shouldBe None
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", -1, "Point(0 1)") shouldBe Some("LINESTRING (0 0, 1 1, 1 0, 0 1)")
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", -2, "Point(0 1)") shouldBe Some("LINESTRING (0 0, 1 1, 0 1, 0 0)")
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", -3, "Point(0 1)") shouldBe Some("LINESTRING (0 0, 0 1, 1 0, 0 0)")
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", -4, "Point(0 1)") shouldBe Some("LINESTRING (0 1, 1 1, 1 0, 0 0)")
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", -5, "Point(0 1)") shouldBe None
+    calculateStSetPointOption("POINT(0 1)", 0, "Point(0 1)") shouldBe None
+    calculateStSetPointOption("POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))", 0, "Point(0 1)") shouldBe None
+    calculateStSetPointOption("GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (10 10, 20 20, 10 40))", 0, "Point(0 1)") shouldBe None
+    calculateStSetPointOption("MULTIPOLYGON (((30 20, 45 40, 10 40, 30 20)), ((15 5, 40 10, 10 20, 5 10, 15 5)))", 0, "Point(0 1)") shouldBe None
+    calculateStSetPointOption("MULTILINESTRING ((10 10, 20 20, 10 40, 10 10), (40 40, 30 30, 40 20, 30 10, 40 40))", 0, "Point(0 1)") shouldBe None
+  }
+
   it("Should pass ST_IsRing") {
     calculateStIsRing("LINESTRING(0 0, 0 1, 1 0, 1 1, 0 0)") shouldBe Some(false)
     calculateStIsRing("LINESTRING(2 0, 2 2, 3 3)") shouldBe Some(false)
@@ -1197,6 +1215,15 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
   private def calculateStRemovePoint(wkt: String, index: Int): Array[String] =
     wktToDf(wkt).selectExpr(s"ST_RemovePoint(geom, $index) as geom")
+      .filter("geom is not null")
+      .selectExpr("ST_AsText(geom)").as[String].collect()
+
+  private def calculateStSetPointOption(wktA: String, index: Int, wktB: String): Option[String] =
+    calculateStSetPoint(wktA, index, wktB).headOption
+
+  private def calculateStSetPoint(wktA: String, index: Int, wktB: String): Array[String] =
+    Seq(Tuple3(wktReader.read(wktA), index, wktReader.read(wktB))).toDF("geomA", "index", "geomB")
+      .selectExpr(s"ST_SetPoint(geomA, index, geomB) as geom")
       .filter("geom is not null")
       .selectExpr("ST_AsText(geom)").as[String].collect()
 
@@ -1660,6 +1687,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_Normalize(null)")
     assert(functionDf.first().get(0) == null)
+    functionDf = sparkSession.sql("select ST_LineFromMultiPoint(null)")
+    assert(functionDf.first().get(0) == null)
   }
 
   it ("Should pass St_CollectionExtract") {
@@ -1678,5 +1707,25 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
   it("Should pass ST_Normalize") {
     val df = sparkSession.sql("SELECT ST_AsEWKT(ST_Normalize(ST_GeomFromWKT('POLYGON((0 1, 1 1, 1 0, 0 0, 0 1))')))")
     assert(df.first().get(0).asInstanceOf[String] == "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))")
+  }
+
+  it ("Should pass ST_LineFromMultiPoint") {
+    val geomTestCases = Map(
+      "'POLYGON((-1 0 0, 1 0 0, 0 0 1, 0 1 0, -1 0 0))'"
+        -> null,
+      "'LINESTRING(0 0, 1 2, 2 4, 3 6)'"
+        -> null,
+      "'POINT(1 2)'"
+        -> null,
+      "'MULTIPOINT((10 40), (40 30), (20 20), (30 10))'"
+        -> "LINESTRING (10 40, 40 30, 20 20, 30 10)",
+      "'MULTIPOINT((10 40 66), (40 30 77), (20 20 88), (30 10 99))'"
+        -> "LINESTRING Z(10 40 66, 40 30 77, 20 20 88, 30 10 99)"
+    )
+    for((inputGeom, expectedGeom) <- geomTestCases) {
+      var df = sparkSession.sql(s"select ST_AsText(ST_LineFromMultiPoint(ST_GeomFromText($inputGeom)))")
+      var result = df.collect()
+      assert(result.head.get(0).asInstanceOf[String]==expectedGeom)
+    }
   }
 }

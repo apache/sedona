@@ -421,4 +421,22 @@ public class Functions {
             return org.apache.sedona.common.Functions.removePoint(geom, offset);
         }
     }
+
+    public static class ST_SetPoint extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, int position,
+                             @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
+            Geometry linestring = (Geometry) o1;
+            Geometry point = (Geometry) o2;
+            return org.apache.sedona.common.Functions.setPoint(linestring, position, point);
+        }
+    }
+
+    public static class ST_LineFromMultiPoint extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.lineFromMultiPoint(geom);
+        }
+    }
 }

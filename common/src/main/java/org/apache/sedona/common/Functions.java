@@ -352,4 +352,30 @@ public class Functions {
         }
         return null;
     }
+
+    public static Geometry setPoint(Geometry linestring, int position, Geometry point) {
+        if (linestring instanceof LineString) {
+            List<Coordinate> coordinates = new ArrayList<>(Arrays.asList(linestring.getCoordinates()));
+            if (-coordinates.size() <= position && position < coordinates.size()) {
+                if (position < 0) {
+                    coordinates.set(coordinates.size() + position, point.getCoordinate());
+                } else {
+                    coordinates.set(position, point.getCoordinate());
+                }
+                return GEOMETRY_FACTORY.createLineString(coordinates.toArray(new Coordinate[0]));
+            }
+        }
+        return null;
+    }
+
+    public static Geometry lineFromMultiPoint(Geometry geometry) {
+        if(!(geometry instanceof MultiPoint)) {
+            return null;
+        }
+        List<Coordinate> coordinates = new ArrayList<>();
+        for(Coordinate c : geometry.getCoordinates()){
+            coordinates.add(c); 
+        }
+        return GEOMETRY_FACTORY.createLineString(coordinates.toArray(new Coordinate[0]));
+    }
 }

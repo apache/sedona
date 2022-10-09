@@ -674,6 +674,32 @@ SELECT ST_Length(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_LineFromMultiPoint
+
+Introduction: Creates a LineString from a MultiPoint geometry.
+
+Format: `ST_LineFromMultiPoint (A:geometry)`
+
+Since: `v1.3.0`
+
+Example:
+
+```SQL
+SELECT ST_AsText(
+    ST_LineFromMultiPoint(ST_GeomFromText('MULTIPOINT((10 40), (40 30), (20 20), (30 10))'))
+) AS geom
+```
+
+Result:
+
+```
++---------------------------------------------------------------+
+|geom                                                           |
++---------------------------------------------------------------+
+|LINESTRING (10 40, 40 30, 20 20, 30 10)                        |
++---------------------------------------------------------------+
+```
+
 ## ST_LineInterpolatePoint
 
 Introduction: Returns a point interpolated along a line. First argument must be a LINESTRING. Second argument is a Double between 0 and 1 representing fraction of total linestring length the point has to be located.
@@ -1035,6 +1061,30 @@ Result:
 +---------------------------------------------------------------+
 |LINESTRING (3 6, 2 4, 1 2, 0 0)                                |
 +---------------------------------------------------------------+
+```
+
+## ST_SetPoint
+
+Introduction: Replace Nth point of linestring with given point. Index is 0-based. Negative index are counted backwards, e.g., -1 is last point.
+
+Format: `ST_SetPoint (linestring: geometry, index: integer, point: geometry)`
+
+Since: `v1.3.0`
+
+Example:
+
+```SQL
+SELECT ST_SetPoint(ST_GeomFromText('LINESTRING (0 0, 0 1, 1 1)'), 2, ST_GeomFromText('POINT (1 0)')) AS geom
+```
+
+Result:
+
+```
++--------------------------+
+|geom                      |
++--------------------------+
+|LINESTRING (0 0, 0 1, 1 0)|
++--------------------------+
 ```
 
 ## ST_SetSRID

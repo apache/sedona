@@ -471,27 +471,41 @@ public class FunctionTest extends TestBase{
     public void testAddPoint() {
         Table pointTable = tableEnv.sqlQuery("SELECT ST_AddPoint(ST_GeomFromWKT('LINESTRING (0 0, 1 1)'), ST_GeomFromWKT('POINT (2 2)'))");
         assertEquals("LINESTRING (0 0, 1 1, 2 2)", first(pointTable).getField(0).toString());
-
     }
 
     @Test
     public void testAddPointWithIndex() {
         Table pointTable = tableEnv.sqlQuery("SELECT ST_AddPoint(ST_GeomFromWKT('LINESTRING (0 0, 1 1)'), ST_GeomFromWKT('POINT (2 2)'), 1)");
         assertEquals("LINESTRING (0 0, 2 2, 1 1)", first(pointTable).getField(0).toString());
-
     }
 
     @Test
     public void testRemovePoint() {
         Table pointTable = tableEnv.sqlQuery("SELECT ST_RemovePoint(ST_GeomFromWKT('LINESTRING (0 0, 1 1, 2 2)'))");
         assertEquals("LINESTRING (0 0, 1 1)", first(pointTable).getField(0).toString());
-
     }
 
     @Test
     public void testRemovePointWithIndex() {
         Table pointTable = tableEnv.sqlQuery("SELECT ST_RemovePoint(ST_GeomFromWKT('LINESTRING (0 0, 1 1, 2 2)'), 1)");
         assertEquals("LINESTRING (0 0, 2 2)", first(pointTable).getField(0).toString());
+    }
 
+    @Test
+    public void testSetPoint() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_SetPoint(ST_GeomFromWKT('LINESTRING (0 0, 1 1, 2 2)'), 0, ST_GeomFromWKT('POINT (3 3)'))");
+        assertEquals("LINESTRING (3 3, 1 1, 2 2)", first(pointTable).getField(0).toString());
+    }
+
+    @Test
+    public void testSetPointWithNegativeIndex() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_SetPoint(ST_GeomFromWKT('LINESTRING (0 0, 1 1, 2 2)'), -1, ST_GeomFromWKT('POINT (3 3)'))");
+        assertEquals("LINESTRING (0 0, 1 1, 3 3)", first(pointTable).getField(0).toString());
+    }
+
+    @Test
+    public void testLineFromMultiPoint() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_LineFromMultiPoint(ST_GeomFromWKT('MULTIPOINT((10 40), (40 30), (20 20), (30 10))'))");
+        assertEquals("LINESTRING (10 40, 40 30, 20 20, 30 10)", first(pointTable).getField(0).toString());
     }
 }

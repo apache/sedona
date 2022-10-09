@@ -97,6 +97,7 @@ object Catalog {
     ST_NumInteriorRings,
     ST_AddPoint,
     ST_RemovePoint,
+    ST_SetPoint,
     ST_IsRing,
     ST_FlipCoordinates,
     ST_LineSubstring,
@@ -121,6 +122,7 @@ object Catalog {
     ST_OrderingEquals,
     ST_CollectionExtract,
     ST_Normalize,
+    ST_LineFromMultiPoint,
     // Expression for rasters
     RS_NormalizedDifference,
     RS_Mean,
