@@ -892,6 +892,14 @@ case class ST_RemovePoint(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_SetPoint(inputExpressions: Seq[Expression])
+  extends InferredTernaryExpression(Functions.setPoint) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_IsRing(inputExpressions: Seq[Expression])
   extends UnaryGeometryExpression with CodegenFallback {
   assert(inputExpressions.length == 1)

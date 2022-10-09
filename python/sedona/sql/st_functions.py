@@ -63,6 +63,7 @@ __all__ = [
     "ST_PrecisionReduce",
     "ST_RemovePoint",
     "ST_Reverse",
+    "ST_SetPoint",
     "ST_SetSRID",
     "ST_SRID",
     "ST_StartPoint",
@@ -825,6 +826,22 @@ def ST_Reverse(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_Reverse", geometry)
+
+
+@validate_argument_types
+def ST_SetPoint(line_string: ColumnOrName, index: Union[ColumnOrName, int], point: ColumnOrName) -> Column:
+    """Replace a point in a linestring.
+
+    :param line_string: Linestring geometry column which contains the point to be replaced.
+    :type line_string: ColumnOrName
+    :param index: Index for the point to be replaced, 0-based, negative values start from the end so -1 is the last point.
+    :type index: Union[ColumnOrName, int]
+    :param point: Point geometry column to be newly set.
+    :type point: ColumnOrName
+    :return: Linestring geometry column with the replaced point, or null if the index is out of bounds.
+    :rtype: Column
+    """
+    return _call_st_function("ST_SetPoint", (line_string, index, point))
 
 
 @validate_argument_types

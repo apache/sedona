@@ -993,6 +993,24 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     calculateStRemovePointOption("MULTILINESTRING ((10 10, 20 20, 10 40, 10 10), (40 40, 30 30, 40 20, 30 10, 40 40))", 3) shouldBe None
   }
 
+  it("Should correctly set using ST_SetPoint") {
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", 0, "Point(0 1)") shouldBe Some("LINESTRING (0 1, 1 1, 1 0, 0 0)")
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", 1, "Point(0 1)") shouldBe Some("LINESTRING (0 0, 0 1, 1 0, 0 0)")
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", 2, "Point(0 1)") shouldBe Some("LINESTRING (0 0, 1 1, 0 1, 0 0)")
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", 3, "Point(0 1)") shouldBe Some("LINESTRING (0 0, 1 1, 1 0, 0 1)")
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", 4, "Point(0 1)") shouldBe None
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", -1, "Point(0 1)") shouldBe Some("LINESTRING (0 0, 1 1, 1 0, 0 1)")
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", -2, "Point(0 1)") shouldBe Some("LINESTRING (0 0, 1 1, 0 1, 0 0)")
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", -3, "Point(0 1)") shouldBe Some("LINESTRING (0 0, 0 1, 1 0, 0 0)")
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", -4, "Point(0 1)") shouldBe Some("LINESTRING (0 1, 1 1, 1 0, 0 0)")
+    calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", -5, "Point(0 1)") shouldBe None
+    calculateStSetPointOption("POINT(0 1)", 0, "Point(0 1)") shouldBe None
+    calculateStSetPointOption("POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))", 0, "Point(0 1)") shouldBe None
+    calculateStSetPointOption("GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (10 10, 20 20, 10 40))", 0, "Point(0 1)") shouldBe None
+    calculateStSetPointOption("MULTIPOLYGON (((30 20, 45 40, 10 40, 30 20)), ((15 5, 40 10, 10 20, 5 10, 15 5)))", 0, "Point(0 1)") shouldBe None
+    calculateStSetPointOption("MULTILINESTRING ((10 10, 20 20, 10 40, 10 10), (40 40, 30 30, 40 20, 30 10, 40 40))", 0, "Point(0 1)") shouldBe None
+  }
+
   it("Should pass ST_IsRing") {
     calculateStIsRing("LINESTRING(0 0, 0 1, 1 0, 1 1, 0 0)") shouldBe Some(false)
     calculateStIsRing("LINESTRING(2 0, 2 2, 3 3)") shouldBe Some(false)
@@ -1149,6 +1167,15 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
   private def calculateStRemovePoint(wkt: String, index: Int): Array[String] =
     wktToDf(wkt).selectExpr(s"ST_RemovePoint(geom, $index) as geom")
+      .filter("geom is not null")
+      .selectExpr("ST_AsText(geom)").as[String].collect()
+
+  private def calculateStSetPointOption(wktA: String, index: Int, wktB: String): Option[String] =
+    calculateStSetPoint(wktA, index, wktB).headOption
+
+  private def calculateStSetPoint(wktA: String, index: Int, wktB: String): Array[String] =
+    Seq(Tuple3(wktReader.read(wktA), index, wktReader.read(wktB))).toDF("geomA", "index", "geomB")
+      .selectExpr(s"ST_SetPoint(geomA, index, geomB) as geom")
       .filter("geom is not null")
       .selectExpr("ST_AsText(geom)").as[String].collect()
 

@@ -97,6 +97,7 @@ object Catalog {
     ST_NumInteriorRings,
     ST_AddPoint,
     ST_RemovePoint,
+    ST_SetPoint,
     ST_IsRing,
     ST_FlipCoordinates,
     ST_LineSubstring,
