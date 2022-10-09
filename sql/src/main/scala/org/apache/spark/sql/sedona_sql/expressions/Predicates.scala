@@ -53,7 +53,7 @@ case class ST_Contains(inputExpressions: Seq[Expression])
 
     val rightGeometry = GeometrySerializer.deserialize(rightArray)
 
-    leftGeometry.covers(rightGeometry)
+    leftGeometry.contains(rightGeometry)
   }
 
   override def dataType = BooleanType
@@ -131,6 +131,75 @@ case class ST_Within(inputExpressions: Seq[Expression])
   }
 }
 
+/**
+  * Test if leftGeometry covers rightGeometry
+  *
+  * @param inputExpressions
+  */
+case class ST_Covers(inputExpressions: Seq[Expression])
+  extends ST_Predicate with CodegenFallback {
+
+  // This is a binary expression
+  assert(inputExpressions.length == 2)
+
+  override def nullable: Boolean = false
+
+  override def toString: String = s" **${ST_Covers.getClass.getName}**  "
+
+  override def children: Seq[Expression] = inputExpressions
+
+  override def eval(inputRow: InternalRow): Any = {
+    val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
+    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
+
+    val leftGeometry = GeometrySerializer.deserialize(leftArray)
+
+    val rightGeometry = GeometrySerializer.deserialize(rightArray)
+
+    leftGeometry.covers(rightGeometry)
+  }
+
+  override def dataType = BooleanType
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+  * Test if leftGeometry is covered by rightGeometry
+  *
+  * @param inputExpressions
+  */
+case class ST_CoveredBy(inputExpressions: Seq[Expression])
+  extends ST_Predicate with CodegenFallback {
+
+  // This is a binary expression
+  assert(inputExpressions.length == 2)
+
+  override def nullable: Boolean = false
+
+  override def toString: String = s" **${ST_CoveredBy.getClass.getName}**  "
+
+  override def children: Seq[Expression] = inputExpressions
+
+  override def eval(inputRow: InternalRow): Any = {
+    val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
+    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
+
+    val leftGeometry = GeometrySerializer.deserialize(leftArray)
+
+    val rightGeometry = GeometrySerializer.deserialize(rightArray)
+
+    leftGeometry.coveredBy(rightGeometry)
+  }
+
+  override def dataType = BooleanType
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
 
 /**
   * Test if leftGeometry crosses rightGeometry

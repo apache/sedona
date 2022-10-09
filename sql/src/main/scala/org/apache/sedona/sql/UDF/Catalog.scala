@@ -43,6 +43,8 @@ object Catalog {
     ST_Contains,
     ST_Intersects,
     ST_Within,
+    ST_Covers,
+    ST_CoveredBy,
     ST_Disjoint,
     ST_Distance,
     ST_3DDistance,

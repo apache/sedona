@@ -137,3 +137,33 @@ SELECT *
 FROM pointdf 
 WHERE ST_Within(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
 ```
+
+## ST_Covers
+
+Introduction: Return true if A covers B
+
+Format: `ST_Covers (A:geometry, B:geometry)`
+
+Since: `v1.3.0`
+
+Spark SQL example:
+```SQL
+SELECT * 
+FROM pointdf 
+WHERE ST_Covers(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
+```
+
+## ST_CoveredBy
+
+Introduction: Return true if A is covered by B
+
+Format: `ST_CoveredBy (A:geometry, B:geometry)`
+
+Since: `v1.3.0`
+
+Spark SQL example:
+```SQL
+SELECT * 
+FROM pointdf 
+WHERE ST_CoveredBy(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
+```

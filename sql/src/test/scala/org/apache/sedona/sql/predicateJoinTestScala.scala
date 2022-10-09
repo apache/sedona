@@ -127,6 +127,41 @@ class predicateJoinTestScala extends TestBaseScala {
       assert(rangeJoinDf.count() == 1000)
     }
 
+    it("Passed ST_Covers in a join") {
+      val sedonaConf = new SedonaConf(sparkSession.sparkContext.getConf)
+      println(sedonaConf)
+
+      var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygonInputLocation)
+      polygonCsvDf.createOrReplaceTempView("polygontable")
+      var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+
+      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
+      pointCsvDF.createOrReplaceTempView("pointtable")
+      var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape from pointtable")
+      pointDf.createOrReplaceTempView("pointdf")
+
+      var rangeJoinDf = sparkSession.sql("select * from polygondf, pointdf where ST_Covers(polygondf.polygonshape,pointdf.pointshape) ")
+
+      assert(rangeJoinDf.count() == 1000)
+    }
+
+    it("Passed ST_CoveredBy in a join") {
+      var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygonInputLocation)
+      polygonCsvDf.createOrReplaceTempView("polygontable")
+      var polygonDf = sparkSession.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+
+      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
+      pointCsvDF.createOrReplaceTempView("pointtable")
+      var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape from pointtable")
+      pointDf.createOrReplaceTempView("pointdf")
+
+      var rangeJoinDf = sparkSession.sql("select * from polygondf, pointdf where ST_CoveredBy(pointdf.pointshape, polygondf.polygonshape) ")
+
+      assert(rangeJoinDf.count() == 1000)
+    }
+
     it("Passed ST_Intersects in a join with singleton dataframe") {
       var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygonInputLocation).limit(1).repartition(1)
       polygonCsvDf.createOrReplaceTempView("polygontable")

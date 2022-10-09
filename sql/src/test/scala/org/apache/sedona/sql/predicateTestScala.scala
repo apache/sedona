@@ -50,6 +50,24 @@ class predicateTestScala extends TestBaseScala {
       var resultDf = sparkSession.sql("select * from pointdf where ST_Within(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))")
       assert(resultDf.count() == 999)
     }
+    it("Passed ST_Covers") {
+      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
+      pointCsvDF.createOrReplaceTempView("pointtable")
+      var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
+      pointDf.createOrReplaceTempView("pointdf")
+
+      var resultDf = sparkSession.sql("select * from pointdf where ST_Covers(ST_PolygonFromEnvelope(1.0,100.0,101.0,201.0), pointdf.arealandmark)")
+      assert(resultDf.count() == 100)
+    }
+    it("Passed ST_CoveredBy") {
+      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
+      pointCsvDF.createOrReplaceTempView("pointtable")
+      var pointDf = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
+      pointDf.createOrReplaceTempView("pointdf")
+
+      var resultDf = sparkSession.sql("select * from pointdf where ST_CoveredBy(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,101.0,201.0))")
+      assert(resultDf.count() == 100)
+    }
 
     it("Passed ST_Equals for ST_Point") {
       // Select a point from the table and check if any point in the table is equal to the selected point.
@@ -208,6 +226,24 @@ class predicateTestScala extends TestBaseScala {
       assert(orderEquals.take(1)(0).get(0).asInstanceOf[Boolean])
       assert(!notOrderEqualsDiffGeom.take(1)(0).get(0).asInstanceOf[Boolean])
       assert(!notOrderEqualsDiffOrder.take(1)(0).get(0).asInstanceOf[Boolean])
+    }
+
+    it("Passed edge cases of ST_Contains and ST_Covers") {
+      val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))') AS a, ST_GeomFromWKT('POINT(2 0)') AS b")
+      testtable.createOrReplaceTempView("testtable")
+      val contains = sparkSession.sql("select ST_Contains(a, b) from testtable").take(1)(0)
+      val covers = sparkSession.sql("select ST_Covers(a, b) from testtable").take(1)(0)
+      assert(!contains.get(0).asInstanceOf[Boolean])
+      assert(covers.get(0).asInstanceOf[Boolean])
+    }
+
+    it("Passed edge cases of ST_Within and ST_CoveredBy") {
+      val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))') AS a, ST_GeomFromWKT('POINT(2 0)') AS b")
+      testtable.createOrReplaceTempView("testtable")
+      val within = sparkSession.sql("select ST_Within(b, a) from testtable").take(1)(0)
+      val coveredBy = sparkSession.sql("select ST_CoveredBy(b, a) from testtable").take(1)(0)
+      assert(!within.get(0).asInstanceOf[Boolean])
+      assert(coveredBy.get(0).asInstanceOf[Boolean])
     }
   }
 }

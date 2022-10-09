@@ -89,6 +89,9 @@ public class Catalog {
         return new UserDefinedFunction[]{
                 new Predicates.ST_Intersects(),
                 new Predicates.ST_Contains(),
+                new Predicates.ST_Within(),
+                new Predicates.ST_Covers(),
+                new Predicates.ST_CoveredBy(),
                 new Predicates.ST_Disjoint(),
                 new Predicates.ST_OrderingEquals(),
         };
