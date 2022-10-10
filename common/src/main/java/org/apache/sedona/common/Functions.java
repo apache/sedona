@@ -164,17 +164,18 @@ public class Functions {
 
     private static CoordinateReferenceSystem parseCRSString(String CRSString) throws FactoryException {
         try {
-            return CRS.decode(CRSString);
-        } catch(NoSuchAuthorityCodeException ex2) {
-            throw new NoSuchAuthorityCodeException("that Authority code cannot be found",CRSString,CRSString);
+            return CRS.parseWKT(CRSString);
         }
         catch (FactoryException ex1) {
             try {
-                return CRS.parseWKT(CRSString);
-            } catch (FactoryException ex2) {
-                throw new FactoryException("EPSG code format and WKT code is invalid");
+                return CRS.decode(CRSString);
+            } catch (NoSuchAuthorityCodeException ex4) {
+                throw new NoSuchAuthorityCodeException("that Authority code cannot be found", CRSString, CRSString);
+            } catch (FactoryException ex6) {
+                throw new FactoryException("WKT format is illegal");
             }
         }
+
     }
 
     public static Geometry flipCoordinates(Geometry geometry) {

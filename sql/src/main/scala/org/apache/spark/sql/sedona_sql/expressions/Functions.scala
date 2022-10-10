@@ -30,18 +30,14 @@ import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.sedona_sql.expressions.subdivide.GeometrySubDivider
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
-import org.geotools.referencing.CRS
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
+import org.locationtech.jts.geom.{Geometry, _}
 import org.locationtech.jts.geom.util.GeometryFixer
-import org.locationtech.jts.geom._
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.buffer.BufferParameters
 import org.locationtech.jts.operation.linemerge.LineMerger
 import org.locationtech.jts.precision.GeometryPrecisionReducer
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier
-import org.locationtech.jts.geom.Geometry
-import org.locationtech.jts.geom.Coordinate
-import org.opengis.referencing.{FactoryException, NoSuchAuthorityCodeException}
 
 /**
   * Return the distance between two geometries.
@@ -213,7 +209,10 @@ case class ST_Transform(inputExpressions: Seq[Expression])
       false
     }
 
-    Functions.transform(geometry, sourceCRSString, targetCRSString, lenient).toGenericArrayData
+    (geometry,sourceCRSString,targetCRSString,lenient) match {
+      case (null,_,_,_)  => null
+      case _ => Functions.transform (geometry, sourceCRSString, targetCRSString, lenient).toGenericArrayData
+    }
 
   }
 

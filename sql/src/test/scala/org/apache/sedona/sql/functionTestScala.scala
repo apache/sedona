@@ -173,16 +173,22 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
 
     it("Passed Function exception check"){
-      val epsgErrorString = "EPSG:9999999"
+      val EPSG_TGT_CRS = CRS.decode("EPSG:32649")
+      val EPSG_TGT_WKT = EPSG_TGT_CRS.toWKT()
+      val epsgFactoryErrorString = EPSG_TGT_WKT.substring(0,EPSG_TGT_WKT.length() - 1)
       val epsgString = "EPSG:4326"
-      val epsgTGTString = "EPSG:32649"
+      val epsgNoSuchAuthorityString = "EPSG:9377"
       val polygon = "POLYGON ((110.54671 55.818002, 110.54671 55.143743, 110.940494 55.143743, 110.940494 55.818002, 110.54671 55.818002))"
       import org.locationtech.jts.io.WKTReader
       val reader = new WKTReader
       val polygeom = reader.read(polygon)
 
+      intercept[FactoryException]{
+        val d = org.apache.sedona.common.Functions.transform(polygeom, epsgString, epsgFactoryErrorString)
+      }
+
       intercept[NoSuchAuthorityCodeException]{
-        val d = org.apache.sedona.common.Functions.transform(polygeom, epsgString, epsgErrorString)
+        val d2 = org.apache.sedona.common.Functions.transform(polygeom, epsgString, epsgNoSuchAuthorityString)
       }
 
       }
