@@ -34,6 +34,8 @@ import org.locationtech.jts.io.kml.KMLWriter;
 import org.locationtech.jts.operation.valid.IsSimpleOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.opengis.referencing.FactoryException;
+
+import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
@@ -153,10 +155,27 @@ public class Functions {
 
     public static Geometry transform(Geometry geometry, String sourceCRS, String targetCRS, boolean lenient)
         throws FactoryException, TransformException {
-        CoordinateReferenceSystem sourceCRScode = CRS.decode(sourceCRS);
-        CoordinateReferenceSystem targetCRScode = CRS.decode(targetCRS);
+
+        CoordinateReferenceSystem sourceCRScode = parseCRSString(sourceCRS);
+        CoordinateReferenceSystem targetCRScode = parseCRSString(targetCRS);
         MathTransform transform = CRS.findMathTransform(sourceCRScode, targetCRScode, lenient);
         return JTS.transform(geometry, transform);
+    }
+
+    private static CoordinateReferenceSystem parseCRSString(String CRSString) throws FactoryException {
+        try {
+            return CRS.parseWKT(CRSString);
+        }
+        catch (FactoryException ex1) {
+            try {
+                return CRS.decode(CRSString);
+            } catch (NoSuchAuthorityCodeException ex4) {
+                throw new NoSuchAuthorityCodeException("that Authority code cannot be found", CRSString, CRSString);
+            } catch (FactoryException ex6) {
+                throw new FactoryException("WKT format is illegal");
+            }
+        }
+
     }
 
     public static Geometry flipCoordinates(Geometry geometry) {

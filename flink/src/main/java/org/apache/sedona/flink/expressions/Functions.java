@@ -115,6 +115,14 @@ public class Functions {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.transform(geom, sourceCRS, targetCRS);
         }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint("String") String sourceCRS, @DataTypeHint("String") String targetCRS, @DataTypeHint("Boolean") Boolean lenient)
+                throws FactoryException, TransformException {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.transform(geom, sourceCRS, targetCRS, lenient);
+        }
+
     }
 
     public static class ST_FlipCoordinates extends ScalarFunction {

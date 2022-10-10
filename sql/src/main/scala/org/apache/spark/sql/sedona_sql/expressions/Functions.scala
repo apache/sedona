@@ -31,8 +31,8 @@ import org.apache.spark.sql.sedona_sql.expressions.subdivide.GeometrySubDivider
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
+import org.locationtech.jts.geom.{Geometry, _}
 import org.locationtech.jts.geom.util.GeometryFixer
-import org.locationtech.jts.geom._
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.buffer.BufferParameters
 import org.locationtech.jts.operation.linemerge.LineMerger
@@ -200,19 +200,20 @@ case class ST_Transform(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     val geometry = inputExpressions(0).toGeometry(input)
-    val sourceCRS = inputExpressions(1).asString(input)
-    val targetCRS = inputExpressions(2).asString(input)
+    val sourceCRSString = inputExpressions(1).asString(input)
+    val targetCRSString = inputExpressions(2).asString(input)
 
-    (geometry, sourceCRS, targetCRS) match {
-      case (geometry: Geometry, sourceCRS: String, targetCRS: String) =>
-        val lenient = if (inputExpressions.length == 4) {
-          inputExpressions(3).eval(input).asInstanceOf[Boolean]
-        } else {
-          false
-        }
-        Functions.transform(geometry, sourceCRS, targetCRS, lenient).toGenericArrayData
-      case (_, _, _) => null
+    val lenient = if (inputExpressions.length == 4) {
+      inputExpressions(3).eval(input).asInstanceOf[Boolean]
+    } else {
+      false
     }
+
+    (geometry,sourceCRSString,targetCRSString,lenient) match {
+      case (null,_,_,_)  => null
+      case _ => Functions.transform (geometry, sourceCRSString, targetCRSString, lenient).toGenericArrayData
+    }
+
   }
 
   override def dataType: DataType = GeometryUDT

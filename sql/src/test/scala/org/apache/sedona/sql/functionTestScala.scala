@@ -30,10 +30,14 @@ import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.distance3d.Distance3DOp
 import org.scalatest.{GivenWhenThen, Matchers}
 import org.xml.sax.InputSource
-
 import java.io.StringReader
+
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.xpath.XPathFactory
+import org.apache.sedona.sql.utils.GeometrySerializer
+import org.apache.spark.SparkException
+import org.geotools.referencing.CRS
+import org.opengis.referencing.{FactoryException, NoSuchAuthorityCodeException}
 
 class functionTestScala extends TestBaseScala with Matchers with GeometrySample with GivenWhenThen {
 
@@ -139,6 +143,56 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       val forceXYResult = sparkSession.sql(s"""select ST_Transform(ST_FlipCoordinates(ST_geomFromWKT('$polygon')),'EPSG:4326', 'EPSG:32649', false)""").rdd.map(row => row.getAs[Geometry](0).toString).collect()(0)
       assert(forceXYResult == forceXYExpect)
     }
+
+    it("Passed ST_transform WKT version"){
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      val polygon = "POLYGON ((110.54671 55.818002, 110.54671 55.143743, 110.940494 55.143743, 110.940494 55.818002, 110.54671 55.818002))"
+      val forceXYExpect = "POLYGON ((471596.69167460164 6185916.951191288, 471107.5623640998 6110880.974228167, 496207.109151055 6110788.804712435, 496271.31937046186 6185825.60569904, 471596.69167460164 6185916.951191288))"
+
+      val EPSG_TGT_CRS = CRS.decode("EPSG:32649")
+      val EPSG_TGT_WKT = EPSG_TGT_CRS.toWKT()
+      val EPSG_SRC_CRS = CRS.decode("EPSG:4326")
+      val EPSG_SRC_WKT = EPSG_SRC_CRS.toWKT()
+
+      sparkSession.createDataset(Seq(polygon))
+        .withColumn("geom", expr("ST_GeomFromWKT(value)"))
+        .createOrReplaceTempView("df")
+
+      val forceXYResult_TGT_WKT = sparkSession.sql(s"""select ST_Transform(ST_FlipCoordinates(ST_geomFromWKT('$polygon')),'EPSG:4326', '$EPSG_TGT_WKT', false)""").rdd.map(row => row.getAs[Geometry](0).toString).collect()(0)
+      assert(forceXYResult_TGT_WKT == forceXYExpect)
+
+      val forceXYResult_SRC_WKT = sparkSession.sql(s"""select ST_Transform(ST_FlipCoordinates(ST_geomFromWKT('$polygon')),'$EPSG_SRC_WKT', 'EPSG:32649', false)""").rdd.map(row => row.getAs[Geometry](0).toString).collect()(0)
+      assert(forceXYResult_SRC_WKT == forceXYExpect)
+
+      val forceXYResult_SRC_TGT_WKT = sparkSession.sql(s"""select ST_Transform(ST_FlipCoordinates(ST_geomFromWKT('$polygon')),'$EPSG_SRC_WKT', '$EPSG_TGT_WKT', false)""").rdd.map(row => row.getAs[Geometry](0).toString).collect()(0)
+      assert(forceXYResult_SRC_TGT_WKT == forceXYExpect)
+
+    }
+
+    it("Passed Function exception check"){
+      val EPSG_TGT_CRS = CRS.decode("EPSG:32649")
+      val EPSG_TGT_WKT = EPSG_TGT_CRS.toWKT()
+      val epsgFactoryErrorString = EPSG_TGT_WKT.substring(0,EPSG_TGT_WKT.length() - 1)
+      val epsgString = "EPSG:4326"
+      val epsgNoSuchAuthorityString = "EPSG:9377"
+      val polygon = "POLYGON ((110.54671 55.818002, 110.54671 55.143743, 110.940494 55.143743, 110.940494 55.818002, 110.54671 55.818002))"
+      import org.locationtech.jts.io.WKTReader
+      val reader = new WKTReader
+      val polygeom = reader.read(polygon)
+
+      intercept[FactoryException]{
+        val d = org.apache.sedona.common.Functions.transform(polygeom, epsgString, epsgFactoryErrorString)
+      }
+
+      intercept[NoSuchAuthorityCodeException]{
+        val d2 = org.apache.sedona.common.Functions.transform(polygeom, epsgString, epsgNoSuchAuthorityString)
+      }
+
+      }
+
 
     it("Passed ST_Intersection - intersects but not contains") {
 
