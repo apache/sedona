@@ -22,6 +22,7 @@ package org.apache.sedona.core
 import org.apache.sedona.core.enums.{FileDataSplitter, GridType, IndexType, JoinBuildSide}
 import org.apache.sedona.core.formatMapper.EarthdataHDFPointMapper
 import org.apache.sedona.core.spatialOperator.JoinQuery.JoinParams
+import org.apache.sedona.core.spatialOperator.SpatialPredicate
 import org.apache.sedona.core.spatialOperator.{JoinQuery, KNNQuery, RangeQuery}
 import org.apache.sedona.core.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}
 import org.apache.spark.storage.StorageLevel
@@ -57,6 +58,13 @@ class scalaTest extends SparkUtil {
     objectRDDcopy.analyze()
   }
 
+  test("should pass spatial range query with spatial predicate") {
+    val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
+    for (i <- 1 to eachQueryLoopTimes) {
+      val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, SpatialPredicate.COVERED_BY, false).count
+    }
+  }
+
   test("should pass spatial range query") {
     val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
     for (i <- 1 to eachQueryLoopTimes) {
@@ -84,6 +92,18 @@ class scalaTest extends SparkUtil {
     objectRDD.buildIndex(PointRDDIndexType, false)
     for (i <- 1 to eachQueryLoopTimes) {
       val result = KNNQuery.SpatialKnnQuery(objectRDD, kNNQueryPoint, 1000, true)
+    }
+  }
+
+  test("should pass spatial join query with spatial predicate") {
+    val queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true)
+    val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
+    objectRDD.analyze()
+    objectRDD.spatialPartitioning(joinQueryPartitioningType)
+    queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
+
+    for (i <- 1 to eachQueryLoopTimes) {
+      val resultSize = JoinQuery.SpatialJoinQuery(objectRDD, queryWindowRDD, false, SpatialPredicate.INTERSECTS).count
     }
   }
 
@@ -149,6 +169,18 @@ class scalaTest extends SparkUtil {
     for (i <- 1 to eachQueryLoopTimes) {
       val joinParams = new JoinParams(true, false, PolygonRDDIndexType, JoinBuildSide.LEFT)
       val resultSize = JoinQuery.spatialJoin(queryWindowRDD, objectRDD, joinParams).count()
+    }
+  }
+
+  test("should pass distance join query with spatial predicate") {
+    val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false)
+    val queryWindowRDD = new CircleRDD(objectRDD, 0.1)
+    objectRDD.analyze()
+    objectRDD.spatialPartitioning(GridType.QUADTREE)
+    queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
+
+    for (i <- 1 to eachQueryLoopTimes) {
+      val resultSize = JoinQuery.DistanceJoinQuery(objectRDD, queryWindowRDD, false, SpatialPredicate.INTERSECTS).count()
     }
   }
 
