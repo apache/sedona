@@ -43,6 +43,10 @@ class GeometryType(UserDefinedType):
         return dumps(obj)
 
     def deserialize(self, datum):
+        # Do not try and process null geometry
+        if datum is None:
+            return None
+        
         bytes_data = b''.join([struct.pack('b', el) for el in datum])
         geom = loads(bytes_data)
         return geom
