@@ -42,7 +42,7 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
                                   windowJoinSide: JoinSide,
                                   spatialPredicate: SpatialPredicate,
                                   extraCondition: Option[Expression] = None,
-                                  radius: Option[Expression] = None)
+                                  distance: Option[Expression] = None)
   extends SedonaBinaryExecNode
     with TraitJoinQueryBase
     with Logging {
@@ -71,7 +71,7 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
     (streamShape, broadcast.shape)
   }
 
-  private val spatialExpression = (radius, spatialPredicate) match {
+  private val spatialExpression = (distance, spatialPredicate) match {
     case (Some(r), SpatialPredicate.INTERSECTS) => s"ST_Distance($windowExpression, $objectExpression) <= $r"
     case (Some(r), _) => s"ST_Distance($windowExpression, $objectExpression) < $r"
     case (None, _) => s"ST_$spatialPredicate($windowExpression, $objectExpression)"
@@ -104,10 +104,10 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
     val boundStreamShape = BindReferences.bindReference(streamShape, streamed.output)
     val streamResultsRaw = streamed.execute().asInstanceOf[RDD[UnsafeRow]]
 
-    // If there's a radius and the objects are being broadcast, we need to build the CircleRDD on the window stream side
-    val streamShapes = radius match {
-      case Some(radiusExpression) if indexBuildSide != windowJoinSide =>
-        toCircleRDD(streamResultsRaw, boundStreamShape, BindReferences.bindReference(radiusExpression, streamed.output))
+    // If there's a distance and the objects are being broadcast, we need to build the expanded envelope on the window stream side
+    val streamShapes = distance match {
+      case Some(distanceExpression) if indexBuildSide != windowJoinSide =>
+        toExpandedEnvelopeRDD(streamResultsRaw, boundStreamShape, BindReferences.bindReference(distanceExpression, streamed.output))
       case _ =>
         toSpatialRDD(streamResultsRaw, boundStreamShape)
     }

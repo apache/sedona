@@ -18,7 +18,6 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
-import org.apache.sedona.common.geometryObjects.Circle
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.sedona.sql.utils.GeometrySerializer
@@ -52,15 +51,18 @@ trait TraitJoinQueryBase {
     spatialRdd
   }
 
-  def toCircleRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression, boundRadius: Expression): SpatialRDD[Geometry] = {
+  def toExpandedEnvelopeRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression, boundRadius: Expression): SpatialRDD[Geometry] = {
     val spatialRdd = new SpatialRDD[Geometry]
     spatialRdd.setRawSpatialRDD(
       rdd
         .map { x => {
           val shape = GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[ArrayData])
-          val circle = new Circle(shape, boundRadius.eval(x).asInstanceOf[Double])
-          circle.setUserData(x.copy)
-          circle.asInstanceOf[Geometry]
+          val envelope = shape.getEnvelopeInternal.copy()
+          envelope.expandBy(boundRadius.eval(x).asInstanceOf[Double])
+
+          val expandedEnvelope = shape.getFactory.toGeometry(envelope)
+          expandedEnvelope.setUserData(x.copy)
+          expandedEnvelope
         }
         }
         .toJavaRDD())

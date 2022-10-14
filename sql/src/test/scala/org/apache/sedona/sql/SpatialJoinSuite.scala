@@ -128,11 +128,10 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       case "ST_Touches" => (l: Geometry, r: Geometry) => l.touches(r)
       case "ST_Within" => (l: Geometry, r: Geometry) => l.within(r)
       case "ST_Distance" =>
-        // XXX: ST_Distance has a weird behavior, it is wildly different from `l.distance(r)`.
         if (joinCondition.contains("<=")) {
-          (l: Geometry, r: Geometry) => new Circle(l, 1.0).intersects(r)
+          (l: Geometry, r: Geometry) => l.distance(r) <= 1.0
         } else {
-          (l: Geometry, r: Geometry) => new Circle(l, 1.0).covers(r)
+          (l: Geometry, r: Geometry) => l.distance(r) < 1.0
         }
     }
     left.flatMap { case (id, geom) =>

@@ -156,7 +156,7 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       assert(broadcastJoinDf.count() == 0)
     }
 
-    it("Passed ST_Distance <= radius in a broadcast join") {
+    it("Passed ST_Distance <= distance in a broadcast join") {
       var pointDf1 = buildPointDf
       var pointDf2 = buildPointDf
 
@@ -169,7 +169,7 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       assert(distanceJoinDf.count() == 2998)
     }
 
-    it("Passed ST_Distance < radius in a broadcast join") {
+    it("Passed ST_Distance < distance in a broadcast join") {
       var pointDf1 = buildPointDf
       var pointDf2 = buildPointDf
 
@@ -182,7 +182,7 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       assert(distanceJoinDf.count() == 2998)
     }
 
-    it("Passed ST_Distance radius is bound to first expression") {
+    it("Passed ST_Distance distance is bound to first expression") {
       var pointDf1 = buildPointDf.withColumn("radius", two())
       var pointDf2 = buildPointDf
 
@@ -228,6 +228,23 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       assert(broadcastJoinDf.rdd.getNumPartitions == polygonDf.rdd.getNumPartitions)
       assert(broadcastJoinDf.count() == 1000)
       sparkSession.conf.set("spark.sql.adaptive.enabled", false)
+    }
+
+    it("Passed broadcast distance join with LineString") {
+      assert(sparkSession.sql(
+        """
+          |select /*+ BROADCAST(a) */ *
+          |from (select ST_LineFromText('LineString(1 1, 1 3, 3 3)') as geom) a
+          |join (select ST_Point(2.0,2.0) as geom) b
+          |on ST_Distance(a.geom, b.geom) < 0.1
+          |""".stripMargin).isEmpty)
+      assert(sparkSession.sql(
+        """
+          |select /*+ BROADCAST(a) */ *
+          |from (select ST_LineFromText('LineString(1 1, 1 4)') as geom) a
+          |join (select ST_Point(1.0,5.0) as geom) b
+          |on ST_Distance(a.geom, b.geom) < 1.5
+          |""".stripMargin).count() == 1)
     }
   }
 }
