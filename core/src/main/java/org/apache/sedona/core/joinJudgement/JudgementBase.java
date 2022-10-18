@@ -21,16 +21,14 @@ package org.apache.sedona.core.joinJudgement;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.apache.sedona.core.spatialOperator.SpatialPredicate;
 import org.apache.sedona.core.utils.HalfOpenRectangle;
 import org.apache.spark.SparkContext;
 import org.apache.spark.TaskContext;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.broadcast.Broadcast;
-import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
 
 import javax.annotation.Nullable;
 
@@ -65,20 +63,21 @@ abstract class JudgementBase
 
     private static final Logger log = LogManager.getLogger(JudgementBase.class);
 
-    private final boolean considerBoundaryIntersection;
+    private final SpatialPredicate spatialPredicate;
     // Supplier will return a broadcasted reference if broadcastDedupParams() is called,
     // otherwise a local reference is returned.
     private SerializableSupplier<DedupParams> dedupParams;
 
     transient private HalfOpenRectangle extent;
+    transient private JoinConditionMatcher matcher;
 
     /**
-     * @param considerBoundaryIntersection true for 'intersects', false for 'contains' join condition
+     * @param spatialPredicate spatial predicate as join condition
      * @param dedupParams Optional information to activate de-dup logic
      */
-    protected JudgementBase(boolean considerBoundaryIntersection, @Nullable DedupParams dedupParams)
+    protected JudgementBase(SpatialPredicate spatialPredicate, @Nullable DedupParams dedupParams)
     {
-        this.considerBoundaryIntersection = considerBoundaryIntersection;
+        this.spatialPredicate = spatialPredicate;
         this.dedupParams = dedupParams == null ? null : () -> dedupParams;
     }
 
@@ -120,10 +119,11 @@ abstract class JudgementBase
         else {
             log.warn("Didn't find partition extent for this partition: " + partitionId);
         }
+        matcher = JoinConditionMatcher.create(spatialPredicate);
     }
 
     public boolean match(Geometry left, Geometry right)
     {
-        return JudgementHelper.match(left, right, extent, considerBoundaryIntersection);
+        return matcher.match(left, right, extent);
     }
 }

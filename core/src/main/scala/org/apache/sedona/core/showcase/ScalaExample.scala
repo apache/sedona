@@ -23,6 +23,7 @@ import org.apache.log4j.{Level, Logger}
 import org.apache.sedona.core.enums.{FileDataSplitter, GridType, IndexType}
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileRDD
 import org.apache.sedona.core.serde.SedonaKryoRegistrator
+import org.apache.sedona.core.spatialOperator.SpatialPredicate
 import org.apache.sedona.core.spatialOperator.{JoinQuery, KNNQuery, RangeQuery}
 import org.apache.sedona.core.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}
 import org.apache.spark.serializer.KryoSerializer
@@ -89,7 +90,7 @@ object ScalaExample extends App {
     val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY)
     objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY)
     for (i <- 1 to eachQueryLoopTimes) {
-      val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false, false).count
+      val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, SpatialPredicate.COVERED_BY, false).count
     }
   }
 
@@ -104,7 +105,7 @@ object ScalaExample extends App {
     objectRDD.buildIndex(PointRDDIndexType, false)
     objectRDD.indexedRawRDD.persist(StorageLevel.MEMORY_ONLY)
     for (i <- 1 to eachQueryLoopTimes) {
-      val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false, true).count
+      val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, SpatialPredicate.COVERED_BY, true).count
     }
 
   }
@@ -151,7 +152,7 @@ object ScalaExample extends App {
     objectRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY)
     queryWindowRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY)
     for (i <- 1 to eachQueryLoopTimes) {
-      val resultSize = JoinQuery.SpatialJoinQuery(objectRDD, queryWindowRDD, false, true).count
+      val resultSize = JoinQuery.SpatialJoinQuery(objectRDD, queryWindowRDD, false, SpatialPredicate.INTERSECTS).count
     }
   }
 
@@ -173,7 +174,7 @@ object ScalaExample extends App {
     queryWindowRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY)
 
     for (i <- 1 to eachQueryLoopTimes) {
-      val resultSize = JoinQuery.SpatialJoinQuery(objectRDD, queryWindowRDD, true, false).count()
+      val resultSize = JoinQuery.SpatialJoinQuery(objectRDD, queryWindowRDD, true, SpatialPredicate.COVERED_BY).count()
     }
   }
 
@@ -193,7 +194,7 @@ object ScalaExample extends App {
     queryWindowRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY)
 
     for (i <- 1 to eachQueryLoopTimes) {
-      val resultSize = JoinQuery.DistanceJoinQuery(objectRDD, queryWindowRDD, false, true).count()
+      val resultSize = JoinQuery.DistanceJoinQuery(objectRDD, queryWindowRDD, false, SpatialPredicate.INTERSECTS).count()
     }
   }
 
@@ -215,7 +216,7 @@ object ScalaExample extends App {
     queryWindowRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY)
 
     for (i <- 1 to eachQueryLoopTimes) {
-      val resultSize = JoinQuery.DistanceJoinQuery(objectRDD, queryWindowRDD, true, true).count
+      val resultSize = JoinQuery.DistanceJoinQuery(objectRDD, queryWindowRDD, true, SpatialPredicate.INTERSECTS).count
     }
   }
 
@@ -227,7 +228,7 @@ object ScalaExample extends App {
     while ( {
       i < eachQueryLoopTimes
     }) {
-      val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false, false).count
+      val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, SpatialPredicate.COVERED_BY, false).count
       assert(resultSize > -1)
 
       {
@@ -247,7 +248,7 @@ object ScalaExample extends App {
     while ( {
       i < eachQueryLoopTimes
     }) {
-      val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false, true).count
+      val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, SpatialPredicate.COVERED_BY, true).count
       assert(resultSize > -1)
 
       {
@@ -262,7 +263,7 @@ object ScalaExample extends App {
     val shapefileRDD = new ShapefileRDD(sc, ShapeFileInputLocation)
     val spatialRDD = new PolygonRDD(shapefileRDD.getPolygonRDD)
     try
-      RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180, 180, -90, 90), false, false).count
+      RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180, 180, -90, 90), SpatialPredicate.COVERED_BY, false).count
     catch {
       case e: Exception =>
         // TODO Auto-generated catch block

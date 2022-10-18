@@ -237,26 +237,36 @@ val rddWithOtherAttributes = objectRDD.rawSpatialRDD.rdd.map[String](f=>f.getUse
 
 ## Write a Spatial Range Query
 
-A spatial range query takes as input a range query window and an SpatialRDD and returns all geometries that intersect / are fully covered by the query window.
+A spatial range query takes as input a range query window and an SpatialRDD and returns all geometries that have specified relationship with the query window.
 
 
 Assume you now have an SpatialRDD (typed or generic). You can use the following code to issue an Spatial Range Query on it.
 
 ```Scala
 val rangeQueryWindow = new Envelope(-90.01, -80.01, 30.01, 40.01)
-val considerBoundaryIntersection = false // Only return gemeotries fully covered by the window
+val spatialPredicate = SpatialPredicate.COVERED_BY // Only return gemeotries fully covered by the window
 val usingIndex = false
-var queryResult = RangeQuery.SpatialRangeQuery(spatialRDD, rangeQueryWindow, considerBoundaryIntersection, usingIndex)
+var queryResult = RangeQuery.SpatialRangeQuery(spatialRDD, rangeQueryWindow, spatialPredicate, usingIndex)
 ```
 
-==considerBoundaryIntersection== can be set to TRUE to return all geometries intersect with query window.
+==spatialPredicate== can be set to `SpatialPredicate.INTERSECTS` to return all geometries intersect with query window. Supported spatial predicates are:
+
+* `CONTAINS`: geometry is completely inside the query window
+* `INTERSECTS`: geometry have at least one point in common with the query window
+* `WITHIN`: geometry is completely within the query window (no touching edges)
+* `COVERS`: query window has no point outside of the geometry
+* `COVERED_BY`: geometry has no point outside of the query window
+* `OVERLAPS`: geometry and the query window spatially overlap
+* `CROSSES`: geometry and the query window spatially cross
+* `TOUCHES`: the only points shared between geometry and the query window are on the boundary of geometry and the query window
+* `EQUALS`: geometry and the query window are spatially equal
 
 !!!note
-	Spatial range query is equal to ==ST_Within== and ==ST_Intersects== in Spatial SQL. An example query is as follows:
+	Spatial range query is equivalent with a SELECT query with spatial predicate as search condition in Spatial SQL. An example query is as follows:
 	```SQL
 	SELECT *
 	FROM checkin
-	WHERE ST_Intersects(queryWindow, checkin.location)
+	WHERE ST_Intersects(checkin.location, queryWindow)
 	```
 
 ### Range query window
@@ -303,13 +313,13 @@ To utilize a spatial index in a spatial range query, use the following code:
 
 ```Scala
 val rangeQueryWindow = new Envelope(-90.01, -80.01, 30.01, 40.01)
-val considerBoundaryIntersection = false // Only return gemeotries fully covered by the window
+val spatialPredicate = SpatialPredicate.COVERED_BY // Only return gemeotries fully covered by the window
 
 val buildOnSpatialPartitionedRDD = false // Set to TRUE only if run join query
 spatialRDD.buildIndex(IndexType.QUADTREE, buildOnSpatialPartitionedRDD)
 
 val usingIndex = true
-var queryResult = RangeQuery.SpatialRangeQuery(spatialRDD, rangeQueryWindow, considerBoundaryIntersection, usingIndex)
+var queryResult = RangeQuery.SpatialRangeQuery(spatialRDD, rangeQueryWindow, spatialPredicate, usingIndex)
 ```
 
 !!!tip
@@ -382,7 +392,7 @@ A spatial join query takes as input two Spatial RDD A and B. For each geometry i
 Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue an Spatial Join Query on them.
 
 ```Scala
-val considerBoundaryIntersection = false // Only return gemeotries fully covered by each query window in queryWindowRDD
+val spatialPredicate = SpatialPredicate.COVERED_BY // Only return gemeotries fully covered by each query window in queryWindowRDD
 val usingIndex = false
 
 objectRDD.analyze()
@@ -390,7 +400,7 @@ objectRDD.analyze()
 objectRDD.spatialPartitioning(GridType.KDBTREE)
 queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
 
-val result = JoinQuery.SpatialJoinQuery(objectRDD, queryWindowRDD, usingIndex, considerBoundaryIntersection)
+val result = JoinQuery.SpatialJoinQuery(objectRDD, queryWindowRDD, usingIndex, spatialPredicate)
 ```
 
 !!!note
@@ -433,7 +443,7 @@ val buildOnSpatialPartitionedRDD = true // Set to TRUE only if run join query
 val usingIndex = true
 queryWindowRDD.buildIndex(IndexType.QUADTREE, buildOnSpatialPartitionedRDD)
 
-val result = JoinQuery.SpatialJoinQueryFlat(objectRDD, queryWindowRDD, usingIndex, considerBoundaryIntersection)
+val result = JoinQuery.SpatialJoinQueryFlat(objectRDD, queryWindowRDD, usingIndex, spatialPredicate)
 ```
 
 The index should be built on either one of two SpatialRDDs. In general, you should build it on the larger SpatialRDD.
@@ -468,13 +478,13 @@ val circleRDD = new CircleRDD(objectRddA, 0.1) // Create a CircleRDD using the g
 circleRDD.spatialPartitioning(GridType.KDBTREE)
 objectRddB.spatialPartitioning(circleRDD.getPartitioner)
 
-val considerBoundaryIntersection = false // Only return gemeotries fully covered by each query window in queryWindowRDD
+val spatialPredicate = SpatialPredicate.COVERED_BY // Only return gemeotries fully covered by each query window in queryWindowRDD
 val usingIndex = false
 
-val result = JoinQuery.DistanceJoinQueryFlat(objectRddB, circleRDD, usingIndex, considerBoundaryIntersection)
+val result = JoinQuery.DistanceJoinQueryFlat(objectRddB, circleRDD, usingIndex, spatialPredicate)
 ```
 
-The rest part of the join query is same as the spatial join query.
+Distance join can only accept `COVERED_BY` and `INTERSECTS` as spatial predicates. The rest part of the join query is same as the spatial join query.
 
 The details of spatial partitioning in join query is [here](#use-spatial-partitioning).
 

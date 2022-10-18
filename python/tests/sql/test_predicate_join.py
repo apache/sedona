@@ -110,7 +110,7 @@ class TestPredicateJoin(TestBase):
 
         range_join_df.explain()
         range_join_df.show(3)
-        assert range_join_df.count() == 1000
+        assert range_join_df.count() == 0
 
     def test_st_within_in_a_join(self):
         polygon_csv_df = self.spark.read.format("csv").option("delimiter", ",").option("header", "false").load(
@@ -165,7 +165,7 @@ class TestPredicateJoin(TestBase):
 
         range_join_df.explain()
         range_join_df.show(3)
-        assert range_join_df.count() == 57
+        assert range_join_df.count() == 15
 
     def test_st_crosses_in_a_join(self):
         polygon_csv_df = self.spark.read.format("csv").\
@@ -199,7 +199,7 @@ class TestPredicateJoin(TestBase):
 
         range_join_df.explain()
         range_join_df.show(3)
-        assert range_join_df.count() == 1000
+        assert range_join_df.count() == 0
 
     def test_st_distance_radius_in_a_join(self):
         point_csv_df_1 = self.spark.read.format("csv").\

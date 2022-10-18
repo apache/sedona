@@ -19,6 +19,7 @@
 
 package org.apache.sedona.core.rangeJudgement;
 
+import org.apache.sedona.core.spatialOperator.SpatialPredicate;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.index.SpatialIndex;
@@ -33,6 +34,11 @@ public class RangeFilterUsingIndex<U extends Geometry, T extends Geometry>
         extends JudgementBase
         implements FlatMapFunction<Iterator<SpatialIndex>, T>
 {
+
+    public RangeFilterUsingIndex(U queryWindow, SpatialPredicate spatialPredicate)
+    {
+        super(queryWindow, spatialPredicate);
+    }
 
     public RangeFilterUsingIndex(U queryWindow, boolean considerBoundaryIntersection, boolean leftCoveredByRight)
     {
@@ -58,15 +64,8 @@ public class RangeFilterUsingIndex<U extends Geometry, T extends Geometry>
         List<T> results = new ArrayList<T>();
         List<T> tempResults = treeIndex.query(this.queryGeometry.getEnvelopeInternal());
         for (T tempResult : tempResults) {
-            if (leftCoveredByRight) {
-                if (match(tempResult, queryGeometry)) {
-                    results.add(tempResult);
-                }
-            }
-            else {
-                if (match(queryGeometry, tempResult)) {
-                    results.add(tempResult);
-                }
+            if (match(tempResult, queryGeometry)) {
+                results.add(tempResult);
             }
         }
         return results.iterator();

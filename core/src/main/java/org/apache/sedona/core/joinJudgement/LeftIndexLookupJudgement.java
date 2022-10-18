@@ -20,6 +20,7 @@
 package org.apache.sedona.core.joinJudgement;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.sedona.core.spatialOperator.SpatialPredicate;
 import org.apache.spark.api.java.function.FlatMapFunction2;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.index.SpatialIndex;
@@ -39,9 +40,9 @@ public class LeftIndexLookupJudgement<T extends Geometry, U extends Geometry>
     /**
      * @see JudgementBase
      */
-    public LeftIndexLookupJudgement(boolean considerBoundaryIntersection, @Nullable DedupParams dedupParams)
+    public LeftIndexLookupJudgement(SpatialPredicate spatialPredicate, @Nullable DedupParams dedupParams)
     {
-        super(considerBoundaryIntersection, dedupParams);
+        super(spatialPredicate, dedupParams);
     }
 
     @Override
