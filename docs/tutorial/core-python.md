@@ -450,6 +450,8 @@ Each object on the left is covered/intersected by the object on the right.
 
 ## Write a Distance Join Query
 
+!!!warning RDD distance joins are only reliable for points. For other geometry types, please use Spatial SQL.
+
 A distance join query takes two spatial RDD assuming that we have two SpatialRDD's:
 <li> object_rdd </li>
 <li> spatial_rdd </li>
