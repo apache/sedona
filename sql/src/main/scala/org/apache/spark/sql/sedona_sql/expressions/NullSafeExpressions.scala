@@ -18,11 +18,9 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
@@ -31,11 +29,20 @@ import org.locationtech.jts.geom.Geometry
 
 import scala.reflect.runtime.universe._
 
+/**
+  * Make expression foldable by constant folding optimizer. If all children
+  * expressions are foldable, then the expression itself is foldable.
+  */
+trait FoldableExpression extends Expression {
+  override def foldable: Boolean = children.forall(_.foldable)
+}
 
-abstract class UnaryGeometryExpression extends Expression {
+abstract class UnaryGeometryExpression extends Expression with ExpectsInputTypes {
   def inputExpressions: Seq[Expression]
 
   override def nullable: Boolean = true
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(GeometryUDT)
 
   override def eval(input: InternalRow): Any = {
     val geometry = inputExpressions.head.toGeometry(input)
@@ -48,10 +55,12 @@ abstract class UnaryGeometryExpression extends Expression {
   protected def nullSafeEval(geometry: Geometry): Any
 }
 
-abstract class BinaryGeometryExpression extends Expression {
+abstract class BinaryGeometryExpression extends Expression with ExpectsInputTypes {
   def inputExpressions: Seq[Expression]
 
   override def nullable: Boolean = true
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(GeometryUDT, GeometryUDT)
 
   override def eval(input: InternalRow): Any = {
     val leftGeometry = inputExpressions(0).toGeometry(input)
@@ -149,7 +158,6 @@ abstract class InferredUnaryExpression[A1: InferrableType, R: InferrableType]
   import InferredTypes._
 
   def inputExpressions: Seq[Expression]
-  assert(inputExpressions.length == 1)
 
   override def children: Seq[Expression] = inputExpressions
 
@@ -182,7 +190,6 @@ abstract class InferredBinaryExpression[A1: InferrableType, A2: InferrableType, 
   import InferredTypes._
 
   def inputExpressions: Seq[Expression]
-  assert(inputExpressions.length == 2)
 
   override def children: Seq[Expression] = inputExpressions
 
@@ -217,7 +224,6 @@ abstract class InferredTernaryExpression[A1: InferrableType, A2: InferrableType,
   import InferredTypes._
 
   def inputExpressions: Seq[Expression]
-  assert(inputExpressions.length == 3)
 
   override def children: Seq[Expression] = inputExpressions
 

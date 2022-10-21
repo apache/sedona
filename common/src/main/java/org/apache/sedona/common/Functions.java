@@ -18,6 +18,7 @@ import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.common.utils.GeometryGeoHashEncoder;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.locationtech.jts.algorithm.MinimumBoundingCircle;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -28,13 +29,17 @@ import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.operation.distance3d.Distance3DOp;
+import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.io.gml2.GMLWriter;
 import org.locationtech.jts.io.kml.KMLWriter;
+import org.locationtech.jts.linearref.LengthIndexedLine;
+import org.locationtech.jts.operation.distance3d.Distance3DOp;
+import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.locationtech.jts.operation.valid.IsSimpleOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
+import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.opengis.referencing.FactoryException;
-
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -48,6 +53,8 @@ import java.util.List;
 
 public class Functions {
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
+    private static Geometry EMPTY_POLYGON = GEOMETRY_FACTORY.createPolygon(null, null);
+    private static GeometryCollection EMPTY_GEOMETRY_COLLECTION = GEOMETRY_FACTORY.createGeometryCollection(null);
 
     public static double area(Geometry geometry) {
         return geometry.getArea();
@@ -339,10 +346,7 @@ public class Functions {
 
     public static Geometry removePoint(Geometry linestring) {
         if (linestring != null) {
-            int length = linestring.getCoordinates().length;
-            if (1 < length) {
-                return removePoint(linestring, length - 1);
-            }
+            return removePoint(linestring, -1);
         }
         return null;
     }
@@ -351,6 +355,9 @@ public class Functions {
         if (linestring instanceof LineString) {
             List<Coordinate> coordinates = new ArrayList<>(Arrays.asList(linestring.getCoordinates()));
             if (2 < coordinates.size() && position < coordinates.size()) {
+                if (position == -1) {
+                    position = coordinates.size() - 1;
+                }
                 coordinates.remove(position);
                 return GEOMETRY_FACTORY.createLineString(coordinates.toArray(new Coordinate[0]));
             }
@@ -382,5 +389,99 @@ public class Functions {
             coordinates.add(c); 
         }
         return GEOMETRY_FACTORY.createLineString(coordinates.toArray(new Coordinate[0]));
+    }
+
+    public static Geometry convexHull(Geometry geometry) {
+        return geometry.convexHull();
+    }
+
+    public static Geometry getCentroid(Geometry geometry) {
+        return geometry.getCentroid();
+    }
+
+    public static Geometry intersection(Geometry leftGeometry, Geometry rightGeometry) {
+        boolean isIntersects = leftGeometry.intersects(rightGeometry);
+        if (!isIntersects) {
+            return EMPTY_POLYGON;
+        }
+        if (leftGeometry.contains(rightGeometry)) {
+            return rightGeometry;
+        }
+        if (rightGeometry.contains(leftGeometry)) {
+            return leftGeometry;
+        }
+        return leftGeometry.intersection(rightGeometry);
+    }
+
+    public static Geometry makeValid(Geometry geometry, boolean keepCollapsed) {
+        GeometryFixer fixer = new GeometryFixer(geometry);
+        fixer.setKeepCollapsed(keepCollapsed);
+        return fixer.getResult();
+    }
+
+    public static Geometry reducePrecision(Geometry geometry, int precisionScale) {
+        GeometryPrecisionReducer precisionReduce = new GeometryPrecisionReducer(new PrecisionModel(Math.pow(10, precisionScale)));
+        return precisionReduce.reduce(geometry);
+    }
+
+    public static Geometry lineMerge(Geometry geometry) {
+        if (geometry instanceof MultiLineString) {
+            MultiLineString multiLineString = (MultiLineString) geometry;
+            int numLineStrings = multiLineString.getNumGeometries();
+            LineMerger merger = new LineMerger();
+            for (int k = 0; k < numLineStrings; k++) {
+                LineString line = (LineString) multiLineString.getGeometryN(k);
+                merger.add(line);
+            }
+            if (merger.getMergedLineStrings().size() == 1) {
+                // If the merger was able to join the lines, there will be only one element
+                return (Geometry) merger.getMergedLineStrings().iterator().next();
+            } else {
+                // if the merger couldn't join the lines, it will contain the individual lines, so return the input
+                return geometry;
+            }
+        }
+        return EMPTY_GEOMETRY_COLLECTION;
+    }
+
+    public static Geometry minimumBoundingCircle(Geometry geometry, int quadrantSegments) {
+        MinimumBoundingCircle minimumBoundingCircle = new MinimumBoundingCircle(geometry);
+        Coordinate centre = minimumBoundingCircle.getCentre();
+        double radius = minimumBoundingCircle.getRadius();
+        Geometry circle = null;
+        if (centre == null) {
+            circle = geometry.getFactory().createPolygon();
+        } else {
+            circle = geometry.getFactory().createPoint(centre);
+            if (radius != 0D) {
+                circle = circle.buffer(radius, quadrantSegments);
+            }
+        }
+        return circle;
+    }
+
+    public static Geometry lineSubString(Geometry geom, double fromFraction, double toFraction) {
+        double length = geom.getLength();
+        LengthIndexedLine indexedLine = new LengthIndexedLine(geom);
+        Geometry subLine = indexedLine.extractLine(length * fromFraction, length * toFraction);
+        return subLine;
+    }
+
+    public static Geometry lineInterpolatePoint(Geometry geom, double fraction) {
+        double length = geom.getLength();
+        LengthIndexedLine indexedLine = new LengthIndexedLine(geom);
+        Coordinate interPoint = indexedLine.extractPoint(length * fraction);
+        return GEOMETRY_FACTORY.createPoint(interPoint);
+    }
+
+    public static Geometry difference(Geometry leftGeometry, Geometry rightGeometry) {
+        boolean isIntersects = leftGeometry.intersects(rightGeometry);
+        if (!isIntersects) {
+            return leftGeometry;
+        } else if (rightGeometry.contains(leftGeometry)) {
+            return EMPTY_POLYGON;
+        } else {
+            return leftGeometry.difference(rightGeometry);
+        }
     }
 }

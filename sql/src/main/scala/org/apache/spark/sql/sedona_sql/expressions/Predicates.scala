@@ -25,8 +25,34 @@ import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.types.{BooleanType, DataType}
 import org.locationtech.jts.geom.Geometry
+import org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes
+import org.apache.spark.sql.types.AbstractDataType
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 
-abstract class ST_Predicate extends Expression
+abstract class ST_Predicate extends Expression with FoldableExpression with ExpectsInputTypes {
+
+  def inputExpressions: Seq[Expression]
+
+  override def toString: String = s" **${this.getClass.getName}**  "
+
+  override def nullable: Boolean = false
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(GeometryUDT, GeometryUDT)
+
+  override def dataType: DataType = BooleanType
+
+  override def children: Seq[Expression] = inputExpressions
+
+  override def eval(inputRow: InternalRow): Any = {
+    val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
+    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
+    val leftGeometry = GeometrySerializer.deserialize(leftArray)
+    val rightGeometry = GeometrySerializer.deserialize(rightArray)
+    evalGeom(leftGeometry, rightGeometry)
+  }
+
+  def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean
+}
 
 /**
   * Test if leftGeometry full contains rightGeometry
@@ -36,27 +62,9 @@ abstract class ST_Predicate extends Expression
 case class ST_Contains(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
 
-  // This is a binary expression
-  assert(inputExpressions.length == 2)
-
-  override def nullable: Boolean = false
-
-  override def toString: String = s" **${ST_Contains.getClass.getName}**  "
-
-  override def children: Seq[Expression] = inputExpressions
-
-  override def eval(inputRow: InternalRow): Any = {
-    val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
-    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
-
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
-
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
-
+  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     leftGeometry.contains(rightGeometry)
   }
-
-  override def dataType = BooleanType
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -70,27 +78,10 @@ case class ST_Contains(inputExpressions: Seq[Expression])
   */
 case class ST_Intersects(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
-  override def nullable: Boolean = false
 
-  // This is a binary expression
-  assert(inputExpressions.length == 2)
-
-  override def toString: String = s" **${ST_Intersects.getClass.getName}**  "
-
-  override def children: Seq[Expression] = inputExpressions
-
-  override def eval(inputRow: InternalRow): Any = {
-    val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
-    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
-
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
-
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
-
+  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     leftGeometry.intersects(rightGeometry)
   }
-
-  override def dataType = BooleanType
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -104,27 +95,10 @@ case class ST_Intersects(inputExpressions: Seq[Expression])
   */
 case class ST_Within(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
-  override def nullable: Boolean = false
 
-  // This is a binary expression
-  assert(inputExpressions.length == 2)
-
-  override def toString: String = s" **${ST_Within.getClass.getName}**  "
-
-  override def children: Seq[Expression] = inputExpressions
-
-  override def eval(inputRow: InternalRow): Any = {
-    val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
-    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
-
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
-
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
-
+  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     leftGeometry.within(rightGeometry)
   }
-
-  override def dataType = BooleanType
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -139,27 +113,9 @@ case class ST_Within(inputExpressions: Seq[Expression])
 case class ST_Covers(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
 
-  // This is a binary expression
-  assert(inputExpressions.length == 2)
-
-  override def nullable: Boolean = false
-
-  override def toString: String = s" **${ST_Covers.getClass.getName}**  "
-
-  override def children: Seq[Expression] = inputExpressions
-
-  override def eval(inputRow: InternalRow): Any = {
-    val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
-    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
-
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
-
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
-
+  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     leftGeometry.covers(rightGeometry)
   }
-
-  override def dataType = BooleanType
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -174,27 +130,9 @@ case class ST_Covers(inputExpressions: Seq[Expression])
 case class ST_CoveredBy(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
 
-  // This is a binary expression
-  assert(inputExpressions.length == 2)
-
-  override def nullable: Boolean = false
-
-  override def toString: String = s" **${ST_CoveredBy.getClass.getName}**  "
-
-  override def children: Seq[Expression] = inputExpressions
-
-  override def eval(inputRow: InternalRow): Any = {
-    val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
-    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
-
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
-
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
-
+  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     leftGeometry.coveredBy(rightGeometry)
   }
-
-  override def dataType = BooleanType
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -208,26 +146,10 @@ case class ST_CoveredBy(inputExpressions: Seq[Expression])
   */
 case class ST_Crosses(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
-  assert(inputExpressions.length == 2)
 
-  override def nullable: Boolean = false
-
-  override def toString: String = s" **${ST_Crosses.getClass.getName}**  "
-
-  override def children: Seq[Expression] = inputExpressions
-
-  override def eval(inputRow: InternalRow): Any = {
-    val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
-    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
-
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
-
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
-
+  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     leftGeometry.crosses(rightGeometry)
   }
-
-  override def dataType = BooleanType
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -242,27 +164,10 @@ case class ST_Crosses(inputExpressions: Seq[Expression])
   */
 case class ST_Overlaps(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
-  override def nullable: Boolean = false
 
-  // This is a binary expression
-  assert(inputExpressions.length == 2)
-
-  override def toString: String = s" **${ST_Overlaps.getClass.getName}**  "
-
-  override def children: Seq[Expression] = inputExpressions
-
-  override def eval(inputRow: InternalRow): Any = {
-    val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
-    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
-
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
-
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
-
+  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     leftGeometry.overlaps(rightGeometry)
   }
-
-  override def dataType = BooleanType
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -276,27 +181,10 @@ case class ST_Overlaps(inputExpressions: Seq[Expression])
   */
 case class ST_Touches(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
-  override def nullable: Boolean = false
 
-  // This is a binary expression
-  assert(inputExpressions.length == 2)
-
-  override def toString: String = s" **${ST_Touches.getClass.getName}**  "
-
-  override def children: Seq[Expression] = inputExpressions
-
-  override def eval(inputRow: InternalRow): Any = {
-    val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
-    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
-
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
-
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
-
+  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     leftGeometry.touches(rightGeometry)
   }
-
-  override def dataType = BooleanType
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -310,31 +198,12 @@ case class ST_Touches(inputExpressions: Seq[Expression])
   */
 case class ST_Equals(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
-  override def nullable: Boolean = false
 
-  // This is a binary expression
-  assert(inputExpressions.length == 2)
-
-  override def toString: String = s" **${ST_Equals.getClass.getName}**  "
-
-  override def children: Seq[Expression] = inputExpressions
-
-  override def eval(inputRow: InternalRow): Any = {
-    val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
-
-    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
-
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
-
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
-
+  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     // Returns GeometryCollection object
     val symDifference = leftGeometry.symDifference(rightGeometry)
-
     symDifference.isEmpty
   }
-
-  override def dataType = BooleanType
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -348,27 +217,10 @@ case class ST_Equals(inputExpressions: Seq[Expression])
  */
 case class ST_Disjoint(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
-  override def nullable: Boolean = false
 
-  // This is a binary expression
-  assert(inputExpressions.length == 2)
-
-  override def toString: String = s" **${ST_Disjoint.getClass.getName}**  "
-
-  override def children: Seq[Expression] = inputExpressions
-
-  override def eval(inputRow: InternalRow): Any = {
-    val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
-    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
-
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
-
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
-
+  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     leftGeometry.disjoint(rightGeometry)
   }
-
-  override def dataType = BooleanType
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -382,27 +234,10 @@ case class ST_Disjoint(inputExpressions: Seq[Expression])
  */
 case class ST_OrderingEquals(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
-  override def nullable: Boolean = false
 
-  // This is a binary expression
-  assert(inputExpressions.length == 2)
-
-  override def toString: String = s" **${ST_OrderingEquals.getClass.getName}**  "
-
-  override def children: Seq[Expression] = inputExpressions
-
-  override def eval(inputRow: InternalRow): Any = {
-    val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
-    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
-
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
-
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
-
+  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     leftGeometry.equalsExact(rightGeometry)
   }
-
-  override def dataType = BooleanType
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
