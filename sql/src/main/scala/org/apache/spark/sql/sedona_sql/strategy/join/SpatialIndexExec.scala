@@ -33,7 +33,7 @@ import org.apache.spark.sql.sedona_sql.execution.SedonaUnaryExecNode
 case class SpatialIndexExec(child: SparkPlan,
                             shape: Expression,
                             indexType: IndexType,
-                            radius: Option[Expression] = None)
+                            distance: Option[Expression] = None)
   extends SedonaUnaryExecNode
     with TraitJoinQueryBase
     with Logging {
@@ -50,8 +50,8 @@ case class SpatialIndexExec(child: SparkPlan,
 
     val resultRaw = child.execute().asInstanceOf[RDD[UnsafeRow]].coalesce(1)
 
-    val spatialRDD = radius match {
-      case Some(radiusExpression) => toCircleRDD(resultRaw, boundShape, BindReferences.bindReference(radiusExpression, child.output))
+    val spatialRDD = distance match {
+      case Some(distanceExpression) => toExpandedEnvelopeRDD(resultRaw, boundShape, BindReferences.bindReference(distanceExpression, child.output))
       case None => toSpatialRDD(resultRaw, boundShape)
     }
 

@@ -68,6 +68,10 @@
         <sedona.jackson.version>2.13.3</sedona.jackson.version>
         <hadoop.version>3.2.4</hadoop.version>
         <maven.deploy.skip>false</maven.deploy.skip>
+
+        <!-- Actual scala version will be set by a profile.
+        Setting a default value helps IDE:s that can't make sense of profiles. -->
+        <scala.compat.version>2.12</scala.compat.version>
     </properties>
 
     <dependencies>

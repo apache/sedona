@@ -21,6 +21,7 @@ package org.apache.sedona.sql
 
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.spark.sql.Row
+import org.apache.spark.sql.execution.ExplainMode
 import org.apache.spark.sql.types._
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKTWriter
@@ -218,7 +219,7 @@ class predicateJoinTestScala extends TestBaseScala {
       assert(distanceJoinDf.count() == 2998)
     }
 
-    it("Passed ST_Distance < radius in a join") {
+    it("Passed ST_Distance < distance in a join") {
       var pointCsvDF1 = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF1.createOrReplaceTempView("pointtable")
       var pointDf1 = sparkSession.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape1 from pointtable")
@@ -232,6 +233,23 @@ class predicateJoinTestScala extends TestBaseScala {
       var distanceJoinDf = sparkSession.sql("select * from pointdf1, pointdf2 where ST_Distance(pointdf1.pointshape1,pointdf2.pointshape2) < 2")
 
       assert(distanceJoinDf.count() == 2998)
+    }
+
+    it("Passed ST_Distance < distance with LineString in a join") {
+      assert(sparkSession.sql(
+        """
+          |select *
+          |from (select ST_LineFromText('LineString(1 1, 1 3, 3 3)') as geom) a
+          |join (select ST_Point(2.0,2.0) as geom) b
+          |on ST_Distance(a.geom, b.geom) < 0.1
+          |""".stripMargin).isEmpty)
+      assert(sparkSession.sql(
+        """
+          |select *
+          |from (select ST_LineFromText('LineString(1 1, 1 4)') as geom) a
+          |join (select ST_Point(1.0,5.0) as geom) b
+          |on ST_Distance(a.geom, b.geom) < 1.5
+          |""".stripMargin).count() == 1)
     }
 
     it("Passed ST_Contains in a range and join") {

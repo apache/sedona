@@ -134,14 +134,15 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
       val polygon = "POLYGON ((110.54671 55.818002, 110.54671 55.143743, 110.940494 55.143743, 110.940494 55.818002, 110.54671 55.818002))"
-      val forceXYExpect = "POLYGON ((471596.69167460164 6185916.951191288, 471107.5623640998 6110880.974228167, 496207.109151055 6110788.804712435, 496271.31937046186 6185825.60569904, 471596.69167460164 6185916.951191288))"
+      // Floats don't have an exact decimal representation. String format varies across jvm:s. Do an approximate match.
+      val forceXYExpect = "POLYGON \\(\\(471596.69167460\\d* 6185916.95119\\d*, 471107.562364\\d* 6110880.97422\\d*, 496207.10915\\d* 6110788.80471\\d*, 496271.3193704\\d* 6185825.6056\\d*, 471596.6916746\\d* 6185916.95119\\d*\\)\\)"
 
       sparkSession.createDataset(Seq(polygon))
         .withColumn("geom", expr("ST_GeomFromWKT(value)"))
         .createOrReplaceTempView("df")
 
       val forceXYResult = sparkSession.sql(s"""select ST_Transform(ST_FlipCoordinates(ST_geomFromWKT('$polygon')),'EPSG:4326', 'EPSG:32649', false)""").rdd.map(row => row.getAs[Geometry](0).toString).collect()(0)
-      assert(forceXYResult == forceXYExpect)
+      forceXYResult should fullyMatch regex(forceXYExpect)
     }
 
     it("Passed ST_transform WKT version"){
@@ -150,7 +151,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
       val polygon = "POLYGON ((110.54671 55.818002, 110.54671 55.143743, 110.940494 55.143743, 110.940494 55.818002, 110.54671 55.818002))"
-      val forceXYExpect = "POLYGON ((471596.69167460164 6185916.951191288, 471107.5623640998 6110880.974228167, 496207.109151055 6110788.804712435, 496271.31937046186 6185825.60569904, 471596.69167460164 6185916.951191288))"
+      val forceXYExpect = "POLYGON \\(\\(471596.6916746\\d* 6185916.95119\\d*, 471107.562364\\d* 6110880.97422\\d*, 496207.10915\\d* 6110788.80471\\d*, 496271.319370\\d* 6185825.6056\\d*, 471596.6916746\\d* 6185916.95119\\d*\\)\\)"
 
       val EPSG_TGT_CRS = CRS.decode("EPSG:32649")
       val EPSG_TGT_WKT = EPSG_TGT_CRS.toWKT()
@@ -162,13 +163,13 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         .createOrReplaceTempView("df")
 
       val forceXYResult_TGT_WKT = sparkSession.sql(s"""select ST_Transform(ST_FlipCoordinates(ST_geomFromWKT('$polygon')),'EPSG:4326', '$EPSG_TGT_WKT', false)""").rdd.map(row => row.getAs[Geometry](0).toString).collect()(0)
-      assert(forceXYResult_TGT_WKT == forceXYExpect)
+      forceXYResult_TGT_WKT should fullyMatch regex(forceXYExpect)
 
       val forceXYResult_SRC_WKT = sparkSession.sql(s"""select ST_Transform(ST_FlipCoordinates(ST_geomFromWKT('$polygon')),'$EPSG_SRC_WKT', 'EPSG:32649', false)""").rdd.map(row => row.getAs[Geometry](0).toString).collect()(0)
-      assert(forceXYResult_SRC_WKT == forceXYExpect)
+      forceXYResult_SRC_WKT should fullyMatch regex(forceXYExpect)
 
       val forceXYResult_SRC_TGT_WKT = sparkSession.sql(s"""select ST_Transform(ST_FlipCoordinates(ST_geomFromWKT('$polygon')),'$EPSG_SRC_WKT', '$EPSG_TGT_WKT', false)""").rdd.map(row => row.getAs[Geometry](0).toString).collect()(0)
-      assert(forceXYResult_SRC_TGT_WKT == forceXYExpect)
+      forceXYResult_SRC_TGT_WKT should fullyMatch regex(forceXYExpect)
 
     }
 
