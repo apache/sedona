@@ -56,6 +56,9 @@ class GeometryUDT extends UserDefinedType[Geometry] {
   }
 
   override def hashCode(): Int = super.hashCode()
+
+  override def toString: String = "Geometry"
+
 }
 
 case object GeometryUDT extends org.apache.spark.sql.sedona_sql.UDT.GeometryUDT with scala.Serializable

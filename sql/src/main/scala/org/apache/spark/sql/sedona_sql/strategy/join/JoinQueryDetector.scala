@@ -54,7 +54,9 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     right: LogicalPlan,
     predicate: ST_Predicate,
     extraCondition: Option[Expression] = None): Option[JoinQueryDetection] = {
+      print("s")
       predicate match {
+
         case ST_Contains(Seq(leftShape, rightShape)) =>
           Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.CONTAINS, extraCondition))
         case ST_Intersects(Seq(leftShape, rightShape)) =>
@@ -79,6 +81,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
 
   def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
     case Join(left, right, Inner, condition, JoinHint(leftHint, rightHint)) => { // SPARK3 anchor
+      print("s")
 //    case Join(left, right, Inner, condition) => { // SPARK2 anchor
       val broadcastLeft = leftHint.exists(_.strategy.contains(BROADCAST)) // SPARK3 anchor
       val broadcastRight = rightHint.exists(_.strategy.contains(BROADCAST)) // SPARK3 anchor
