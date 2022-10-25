@@ -142,6 +142,13 @@ public class GeomUtils {
         return sridString + new WKTWriter(GeomUtils.getDimension(geometry)).write(geometry);
     }
 
+    public static String getWKT(Geometry geometry) {
+        if (geometry == null) {
+            return null;
+        }
+        return new WKTWriter(GeomUtils.getDimension(geometry)).write(geometry);
+    }
+
     public static byte[] getEWKB(Geometry geometry) {
         if (geometry == null) {
             return null;

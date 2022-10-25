@@ -325,6 +325,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       polygonDf.createOrReplaceTempView("polygondf")
       var wktDf = sparkSession.sql("select ST_AsText(countyshape) as wkt from polygondf")
       assert(polygonDf.take(1)(0).getAs[Geometry]("countyshape").toText.equals(wktDf.take(1)(0).getAs[String]("wkt")))
+      val wkt = sparkSession.sql("select ST_AsText(ST_SetSRID(ST_Point(1.0,1.0), 3021))").first().getString(0)
+      assert(wkt == "POINT (1 1)", "WKT should not contain SRID")
     }
 
     it("Passed ST_AsText 3D") {

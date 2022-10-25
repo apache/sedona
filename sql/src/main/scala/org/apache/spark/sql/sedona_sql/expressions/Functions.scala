@@ -398,7 +398,7 @@ case class ST_PrecisionReduce(inputExpressions: Seq[Expression])
 }
 
 case class ST_AsText(inputExpressions: Seq[Expression])
-  extends  InferredUnaryExpression(Functions.asEWKT) {
+  extends  InferredUnaryExpression(Functions.asWKT) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
