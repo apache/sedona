@@ -227,6 +227,10 @@ public class Functions {
         return GeomUtils.getEWKT(geometry);
     }
 
+    public static String asWKT(Geometry geometry) {
+        return GeomUtils.getWKT(geometry);
+    }
+
     public static byte[] asEWKB(Geometry geometry) {
         return GeomUtils.getEWKB(geometry);
     }
