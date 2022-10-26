@@ -18,10 +18,12 @@
 import logging
 import os
 from re import findall
-from typing import Optional
+from typing import Any, Optional
 
 from pyspark.sql import SparkSession
 from sedona.utils.decorators import classproperty
+
+from py4j.protocol import Py4JJavaError
 
 
 def is_greater_or_equal_version(version_a: str, version_b: str) -> bool:
@@ -78,26 +80,26 @@ class SparkJars:
     @staticmethod
     def get_used_jars():
         spark = SparkSession._instantiatedSession
-        if spark is not None:
-            spark_conf = spark.conf
-        else:
-            raise TypeError("SparkSession is not initiated")
-        java_spark_conf = spark_conf._jconf
-        used_jar_files = None
-        try:
-            used_jar_files = java_spark_conf.get("spark.jars")
-        except Exception as e:
-            logging.warning(
-                f"Failed to get the value of spark.jars from SparkConf: {e}"
+
+        # When deployed normally, Sedona appears in `spark.jars``, when it's submitted
+        # via YARN it's in `spark.yarn.dist.jars`
+        used_jar_files_lookup = [
+            SparkJars.get_spark_java_config(spark, config_id)
+            for config_id in ("spark.jars", "spark.yarn.dist.jars")
+        ]
+
+        used_jar_files = (
+            ",".join(jars for jars in used_jar_files_lookup if jars)
+            if any(used_jar_files_lookup)
+            else None
+        )
+
+        if not used_jar_files:
+            logging.info("Trying to get filenames from the $SPARK_HOME/jars directory")
+            used_jar_files = ",".join(
+                os.listdir(os.path.join(os.environ["SPARK_HOME"], "jars"))
             )
-        finally:
-            if not used_jar_files:
-                logging.info(
-                    "Trying to get filenames from the $SPARK_HOME/jars directory"
-                )
-                used_jar_files = ",".join(
-                    os.listdir(os.path.join(os.environ["SPARK_HOME"], "jars"))
-                )
+
         return used_jar_files
 
     @property
@@ -105,6 +107,24 @@ class SparkJars:
         if not hasattr(self, "__spark_jars"):
             setattr(self, "__spark_jars", self.get_used_jars())
         return getattr(self, "__spark_jars")
+
+    @staticmethod
+    def get_spark_java_config(spark: SparkSession, value: str) -> Any:
+        if spark is not None:
+            spark_conf = spark.conf
+        else:
+            raise TypeError("SparkSession is not initiated")
+
+        java_spark_conf = spark_conf._jconf
+        used_jar_files = None
+        try:
+            used_jar_files = java_spark_conf.get(value)
+        except Py4JJavaError as java_error:
+            logging.warning(
+                f"Failed to get the value of %s from SparkConf: %s", value, java_error
+            )
+
+        return used_jar_files
 
 
 class SedonaMeta:
