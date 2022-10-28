@@ -18,16 +18,16 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.sedona_sql.expressions.collect.{ST_Collect, ST_CollectionExtract}
+import org.locationtech.jts.operation.buffer.BufferParameters
 
 object st_functions extends DataFrameAPI {
   def ST_3DDistance(a: Column, b: Column): Column = wrapExpression[ST_3DDistance](a, b)
   def ST_3DDistance(a: String, b: String): Column = wrapExpression[ST_3DDistance](a, b)
 
-  def ST_AddPoint(lineString: Column, point: Column): Column = wrapExpression[ST_AddPoint](lineString, point)
-  def ST_AddPoint(lineString: String, point: String): Column = wrapExpression[ST_AddPoint](lineString, point)
+  def ST_AddPoint(lineString: Column, point: Column): Column = wrapExpression[ST_AddPoint](lineString, point, -1)
+  def ST_AddPoint(lineString: String, point: String): Column = wrapExpression[ST_AddPoint](lineString, point, -1)
   def ST_AddPoint(lineString: Column, point: Column, index: Column): Column = wrapExpression[ST_AddPoint](lineString, point, index)
   def ST_AddPoint(lineString: String, point: String, index: Int): Column = wrapExpression[ST_AddPoint](lineString, point, index)
 
@@ -159,15 +159,15 @@ object st_functions extends DataFrameAPI {
   def ST_MakePolygon(lineString: Column, holes: Column): Column = wrapExpression[ST_MakePolygon](lineString, holes)
   def ST_MakePolygon(lineString: String, holes: String): Column = wrapExpression[ST_MakePolygon](lineString, holes)
 
-  def ST_MakeValid(geometry: Column): Column = wrapExpression[ST_MakeValid](geometry)
-  def ST_MakeValid(geometry: String): Column = wrapExpression[ST_MakeValid](geometry)
+  def ST_MakeValid(geometry: Column): Column = wrapExpression[ST_MakeValid](geometry, false)
+  def ST_MakeValid(geometry: String): Column = wrapExpression[ST_MakeValid](geometry, false)
   def ST_MakeValid(geometry: Column, keepCollapsed: Column): Column = wrapExpression[ST_MakeValid](geometry, keepCollapsed)
   def ST_MakeValid(geometry: String, keepCollapsed: Boolean): Column = wrapExpression[ST_MakeValid](geometry, keepCollapsed)
 
-  def ST_MinimumBoundingCircle(geometry: Column): Column = wrapExpression[ST_MinimumBoundingCircle](geometry)
-  def ST_MinimumBoundingCircle(geometry: String): Column = wrapExpression[ST_MinimumBoundingCircle](geometry)
-  def ST_MinimumBoundingCircle(geometry: Column, quadrantSegments: Column): Column = wrapExpression[ST_MinimumBoundingCircle](geometry)
-  def ST_MinimumBoundingCircle(geometry: String, quadrantSegments: Int): Column = wrapExpression[ST_MinimumBoundingCircle](geometry)
+  def ST_MinimumBoundingCircle(geometry: Column): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, BufferParameters.DEFAULT_QUADRANT_SEGMENTS)
+  def ST_MinimumBoundingCircle(geometry: String): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, BufferParameters.DEFAULT_QUADRANT_SEGMENTS)
+  def ST_MinimumBoundingCircle(geometry: Column, quadrantSegments: Column): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, quadrantSegments)
+  def ST_MinimumBoundingCircle(geometry: String, quadrantSegments: Int): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, quadrantSegments)
 
   def ST_MinimumBoundingRadius(geometry: Column): Column = wrapExpression[ST_MinimumBoundingRadius](geometry)
   def ST_MinimumBoundingRadius(geometry: String): Column = wrapExpression[ST_MinimumBoundingRadius](geometry)
@@ -226,8 +226,8 @@ object st_functions extends DataFrameAPI {
   def ST_SymDifference(a: Column, b: Column): Column = wrapExpression[ST_SymDifference](a, b)
   def ST_SymDifference(a: String, b: String): Column = wrapExpression[ST_SymDifference](a, b)
 
-  def ST_Transform(geometry: Column, sourceCRS: Column, targetCRS: Column): Column = wrapExpression[ST_Transform](geometry, sourceCRS, targetCRS)
-  def ST_Transform(geometry: String, sourceCRS: String, targetCRS: String): Column = wrapExpression[ST_Transform](geometry, sourceCRS, targetCRS)
+  def ST_Transform(geometry: Column, sourceCRS: Column, targetCRS: Column): Column = wrapExpression[ST_Transform](geometry, sourceCRS, targetCRS, false)
+  def ST_Transform(geometry: String, sourceCRS: String, targetCRS: String): Column = wrapExpression[ST_Transform](geometry, sourceCRS, targetCRS, false)
   def ST_Transform(geometry: Column, sourceCRS: Column, targetCRS: Column, disableError: Column): Column = wrapExpression[ST_Transform](geometry, sourceCRS, targetCRS, disableError)
   def ST_Transform(geometry: String, sourceCRS: String, targetCRS: String, disableError: Boolean): Column = wrapExpression[ST_Transform](geometry, sourceCRS, targetCRS, disableError)
   

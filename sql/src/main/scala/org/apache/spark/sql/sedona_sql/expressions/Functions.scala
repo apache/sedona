@@ -22,7 +22,7 @@ import org.apache.sedona.common.Functions
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.expressions.{Expression, Generator}
+import org.apache.spark.sql.catalyst.expressions.{Expression, Generator, ImplicitCastInputTypes}
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.collect.Collect
@@ -32,11 +32,6 @@ import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom.{Geometry, _}
-import org.locationtech.jts.geom.util.GeometryFixer
-import org.locationtech.jts.linearref.LengthIndexedLine
-import org.locationtech.jts.operation.buffer.BufferParameters
-import org.locationtech.jts.operation.linemerge.LineMerger
-import org.locationtech.jts.precision.GeometryPrecisionReducer
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier
 
 /**
@@ -45,7 +40,7 @@ import org.locationtech.jts.simplify.TopologyPreservingSimplifier
   * @param inputExpressions This function takes two geometries and calculates the distance between two objects.
   */
 case class ST_Distance(inputExpressions: Seq[Expression])
-  extends InferredBinaryExpression(Functions.distance) {
+  extends InferredBinaryExpression(Functions.distance) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -54,7 +49,7 @@ case class ST_Distance(inputExpressions: Seq[Expression])
 
 
 case class ST_YMax(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.yMax) {
+  extends InferredUnaryExpression(Functions.yMax) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -62,7 +57,7 @@ case class ST_YMax(inputExpressions: Seq[Expression])
 }
 
 case class ST_YMin(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.yMin) {
+  extends InferredUnaryExpression(Functions.yMin) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -70,7 +65,7 @@ case class ST_YMin(inputExpressions: Seq[Expression])
 }
 
 case class ST_3DDistance(inputExpressions: Seq[Expression])
-  extends InferredBinaryExpression(Functions.distance3d) {
+  extends InferredBinaryExpression(Functions.distance3d) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -83,16 +78,7 @@ case class ST_3DDistance(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_ConvexHull(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override def nullSafeEval(geometry: Geometry): Any = {
-    new GenericArrayData(GeometrySerializer.serialize(geometry.convexHull()))
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.convexHull) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -105,7 +91,7 @@ case class ST_ConvexHull(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_NPoints(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.nPoints) {
+  extends InferredUnaryExpression(Functions.nPoints) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -118,7 +104,7 @@ case class ST_NPoints(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_Buffer(inputExpressions: Seq[Expression])
-  extends InferredBinaryExpression(Functions.buffer) with CodegenFallback {
+  extends InferredBinaryExpression(Functions.buffer) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -132,7 +118,7 @@ case class ST_Buffer(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_Envelope(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.envelope) {
+  extends InferredUnaryExpression(Functions.envelope) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -145,7 +131,7 @@ case class ST_Envelope(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_Length(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.length) with CodegenFallback {
+  extends InferredUnaryExpression(Functions.length) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -158,7 +144,7 @@ case class ST_Length(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_Area(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.area) {
+  extends InferredUnaryExpression(Functions.area) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -171,16 +157,7 @@ case class ST_Area(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_Centroid(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  override def nullSafeEval(geometry: Geometry): Any = {
-    new GenericArrayData(GeometrySerializer.serialize(geometry.getCentroid()))
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.getCentroid) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -193,8 +170,7 @@ case class ST_Centroid(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_Transform(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
-  assert(inputExpressions.length >= 3 && inputExpressions.length <= 4)
+  extends Expression with FoldableExpression with ImplicitCastInputTypes with CodegenFallback {
 
   override def nullable: Boolean = true
 
@@ -202,19 +178,14 @@ case class ST_Transform(inputExpressions: Seq[Expression])
     val geometry = inputExpressions(0).toGeometry(input)
     val sourceCRSString = inputExpressions(1).asString(input)
     val targetCRSString = inputExpressions(2).asString(input)
-
-    val lenient = if (inputExpressions.length == 4) {
-      inputExpressions(3).eval(input).asInstanceOf[Boolean]
-    } else {
-      false
-    }
-
+    val lenient = inputExpressions(3).eval(input).asInstanceOf[Boolean]
     (geometry,sourceCRSString,targetCRSString,lenient) match {
       case (null,_,_,_)  => null
-      case _ => Functions.transform (geometry, sourceCRSString, targetCRSString, lenient).toGenericArrayData
+      case _ => Functions.transform(geometry, sourceCRSString, targetCRSString, lenient).toGenericArrayData
     }
-
   }
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(GeometryUDT, StringType, StringType, BooleanType)
 
   override def dataType: DataType = GeometryUDT
 
@@ -225,42 +196,13 @@ case class ST_Transform(inputExpressions: Seq[Expression])
   }
 }
 
-
 /**
   * Return the intersection shape of two geometries. The return type is a geometry
   *
   * @param inputExpressions
   */
 case class ST_Intersection(inputExpressions: Seq[Expression])
-  extends BinaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 2)
-
-  lazy val GeometryFactory = new GeometryFactory()
-  lazy val emptyPolygon = GeometryFactory.createPolygon(null, null)
-
-  override def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
-    val isIntersects = leftGeometry.intersects(rightGeometry)
-    lazy val isLeftContainsRight = leftGeometry.contains(rightGeometry)
-    lazy val isRightContainsLeft = rightGeometry.contains(leftGeometry)
-
-    if (!isIntersects) {
-      return new GenericArrayData(GeometrySerializer.serialize(emptyPolygon))
-    }
-
-    if (isIntersects && isLeftContainsRight) {
-      return new GenericArrayData(GeometrySerializer.serialize(rightGeometry))
-    }
-
-    if (isIntersects && isRightContainsLeft) {
-      return new GenericArrayData(GeometrySerializer.serialize(leftGeometry))
-    }
-
-    new GenericArrayData(GeometrySerializer.serialize(leftGeometry.intersection(rightGeometry)))
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(Functions.intersection) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -274,33 +216,7 @@ case class ST_Intersection(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_MakeValid(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
-  assert(inputExpressions.length == 1 || inputExpressions.length == 2)
-
-  override def eval(input: InternalRow): Any = {
-    val geometry = inputExpressions.head.toGeometry(input)
-    val keepCollapsed = if (inputExpressions.length == 2) {
-      inputExpressions(1).eval(input).asInstanceOf[Boolean]
-    } else {
-      false
-    }
-    (geometry) match {
-      case (geometry: Geometry) => nullSafeEval(geometry, keepCollapsed)
-      case _ => null
-    }
-  }
-
-  private def nullSafeEval(geometry: Geometry, keepCollapsed: Boolean) = {
-    val fixer = new GeometryFixer(geometry)
-    fixer.setKeepCollapsed(keepCollapsed)
-    fixer.getResult.toGenericArrayData
-  }
-
-  override def nullable: Boolean = true
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(Functions.makeValid) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -313,7 +229,7 @@ case class ST_MakeValid(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_IsValid(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.isValid) {
+  extends InferredUnaryExpression(Functions.isValid) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -326,7 +242,7 @@ case class ST_IsValid(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_IsSimple(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.isSimple) {
+  extends InferredUnaryExpression(Functions.isSimple) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -342,26 +258,7 @@ case class ST_IsSimple(inputExpressions: Seq[Expression])
   *                         second arg is distance tolerance for the simplification(all vertices in the simplified geometry will be within this distance of the original geometry)
   */
 case class ST_SimplifyPreserveTopology(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
-  assert(inputExpressions.length == 2)
-
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val distanceTolerance = inputExpressions(1).eval(input) match {
-      case number: Decimal => number.toDouble
-      case number: Double => number
-      case number: Int => number.toDouble
-    }
-    inputExpressions(0).toGeometry(input) match {
-      case geometry: Geometry => TopologyPreservingSimplifier.simplify(geometry, distanceTolerance).toGenericArrayData
-      case _ => null
-    }
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(TopologyPreservingSimplifier.simplify) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -375,22 +272,7 @@ case class ST_SimplifyPreserveTopology(inputExpressions: Seq[Expression])
   *                         be rounded to the nearest number.
   */
 case class ST_PrecisionReduce(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val precisionScale = inputExpressions(1).eval(input).asInstanceOf[Int]
-    inputExpressions(0).toGeometry(input) match {
-      case geometry: Geometry =>
-        val precisionReduce =new GeometryPrecisionReducer(new PrecisionModel(Math.pow(10, precisionScale)))
-        precisionReduce.reduce(geometry).toGenericArrayData
-      case _ => null
-    }
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(Functions.reducePrecision) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -398,7 +280,7 @@ case class ST_PrecisionReduce(inputExpressions: Seq[Expression])
 }
 
 case class ST_AsText(inputExpressions: Seq[Expression])
-  extends  InferredUnaryExpression(Functions.asWKT) {
+  extends InferredUnaryExpression(Functions.asWKT) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -406,13 +288,15 @@ case class ST_AsText(inputExpressions: Seq[Expression])
 }
 
 case class ST_AsGeoJSON(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.asGeoJson) {
+  extends InferredUnaryExpression(Functions.asGeoJson) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
+// TODO: sernetcdf is bundled with an ancient version of apache commons-codec, which
+// causes spark sql to throw NoSuchMethodError when folding binary expressions.
 case class ST_AsBinary(inputExpressions: Seq[Expression])
   extends InferredUnaryExpression(Functions.asEWKB) {
 
@@ -421,6 +305,8 @@ case class ST_AsBinary(inputExpressions: Seq[Expression])
   }
 }
 
+// TODO: ST_AsEWKB is an alias of ST_AsBinary, which is also affected by the sernetcdf
+// problem.
 case class ST_AsEWKB(inputExpressions: Seq[Expression])
   extends InferredUnaryExpression(Functions.asEWKB) {
 
@@ -430,7 +316,7 @@ case class ST_AsEWKB(inputExpressions: Seq[Expression])
 }
 
 case class ST_SRID(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.getSRID) {
+  extends InferredUnaryExpression(Functions.getSRID) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -438,7 +324,7 @@ case class ST_SRID(inputExpressions: Seq[Expression])
 }
 
 case class ST_SetSRID(inputExpressions: Seq[Expression])
-  extends InferredBinaryExpression(Functions.setSRID) {
+  extends InferredBinaryExpression(Functions.setSRID) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -446,8 +332,7 @@ case class ST_SetSRID(inputExpressions: Seq[Expression])
 }
 
 case class ST_GeometryType(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
+  extends UnaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
     UTF8String.fromString("ST_" + geometry.getGeometryType)
@@ -470,39 +355,7 @@ case class ST_GeometryType(inputExpressions: Seq[Expression])
   * @param inputExpressions Geometry
   */
 case class ST_LineMerge(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
-
-  // Definition of the Geometry Collection Empty
-  lazy val GeometryFactory = new GeometryFactory()
-  lazy val emptyGeometry = GeometryFactory.createGeometryCollection(null)
-
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    val merger = new LineMerger()
-
-    val output: Geometry = geometry match {
-      case g: MultiLineString => {
-        // Add the components of the multilinestring to the merger
-        (0 until g.getNumGeometries).map(i => {
-          val line = g.getGeometryN(i).asInstanceOf[LineString]
-          merger.add(line)
-        })
-        if (merger.getMergedLineStrings().size() == 1) {
-          // If the merger was able to join the lines, there will be only one element
-          merger.getMergedLineStrings().iterator().next().asInstanceOf[Geometry]
-        } else {
-          // if the merger couldn't join the lines, it will contain the individual lines, so return the input
-          geometry
-        }
-      }
-      case _ => emptyGeometry
-    }
-    new GenericArrayData(GeometrySerializer.serialize(output))
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredUnaryExpression(Functions.lineMerge) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -510,7 +363,7 @@ case class ST_LineMerge(inputExpressions: Seq[Expression])
 }
 
 case class ST_Azimuth(inputExpressions: Seq[Expression])
-  extends InferredBinaryExpression(Functions.azimuth) with CodegenFallback {
+  extends InferredBinaryExpression(Functions.azimuth) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -518,7 +371,7 @@ case class ST_Azimuth(inputExpressions: Seq[Expression])
 }
 
 case class ST_X(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.x) {
+  extends InferredUnaryExpression(Functions.x) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -527,7 +380,7 @@ case class ST_X(inputExpressions: Seq[Expression])
 
 
 case class ST_Y(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.y) {
+  extends InferredUnaryExpression(Functions.y) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -535,7 +388,7 @@ case class ST_Y(inputExpressions: Seq[Expression])
 }
 
 case class ST_Z(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.z) {
+  extends InferredUnaryExpression(Functions.z) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -543,8 +396,7 @@ case class ST_Z(inputExpressions: Seq[Expression])
 }
 
 case class ST_StartPoint(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
+  extends UnaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
     geometry match {
@@ -564,7 +416,7 @@ case class ST_StartPoint(inputExpressions: Seq[Expression])
 
 
 case class ST_Boundary(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.boundary) {
+  extends InferredUnaryExpression(Functions.boundary) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -573,7 +425,7 @@ case class ST_Boundary(inputExpressions: Seq[Expression])
 
 
 case class ST_MinimumBoundingRadius(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
+  extends UnaryGeometryExpression with FoldableExpression with CodegenFallback {
   private val geometryFactory = new GeometryFactory()
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
@@ -602,42 +454,7 @@ case class ST_MinimumBoundingRadius(inputExpressions: Seq[Expression])
 
 
 case class ST_MinimumBoundingCircle(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
-  inputExpressions.betweenLength(1, 2)
-
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val geometry = inputExpressions.head.toGeometry(input)
-    val quadrantSegments = if (inputExpressions.length == 2) {
-      inputExpressions(1).toInt(input)
-    } else {
-      BufferParameters.DEFAULT_QUADRANT_SEGMENTS
-    }
-    geometry match {
-      case geom: Geometry => getMinimumBoundingCircle(geom, quadrantSegments).toGenericArrayData
-      case _ => null
-    }
-  }
-
-  private def getMinimumBoundingCircle(geom: Geometry, quadrantSegments: Int): Geometry = {
-    val minimumBoundingCircle = new MinimumBoundingCircle(geom)
-    val centre = minimumBoundingCircle.getCentre
-    val radius = minimumBoundingCircle.getRadius
-    var circle: Geometry = null
-    if (centre == null) {
-      circle = geom.getFactory.createPolygon
-    } else {
-      circle = geom.getFactory.createPoint(centre)
-      if (radius != 0D)
-        circle = circle.buffer(radius, quadrantSegments)
-    }
-    circle
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(Functions.minimumBoundingCircle) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -652,37 +469,7 @@ case class ST_MinimumBoundingCircle(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_LineSubstring(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
-  assert(inputExpressions.length == 3)
-
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val geometry = inputExpressions.head.toGeometry(input)
-    val fractions = inputExpressions.slice(1, 3).map{
-      x => x.eval(input) match {
-        case a: Decimal => a.toDouble
-        case a: Double => a
-        case a: Int => a
-      }
-    }
-
-    (geometry, fractions) match {
-      case (g:LineString, r:Seq[Double]) if r.head >= 0 && r.last <= 1 && r.last >= r.head => getLineSubstring(g, r)
-      case _ => null
-    }
-  }
-
-  private def getLineSubstring(geom: Geometry, fractions: Seq[Double]): Any = {
-    val length = geom.getLength()
-    val indexedLine = new LengthIndexedLine(geom)
-    val subLine = indexedLine.extractLine(length * fractions.head, length * fractions.last)
-    subLine.toGenericArrayData
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredTernaryExpression(Functions.lineSubString) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -697,35 +484,7 @@ case class ST_LineSubstring(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_LineInterpolatePoint(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
-  assert(inputExpressions.length == 2)
-
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val geometry = inputExpressions(0).toGeometry(input)
-    val fraction: Double = inputExpressions(1).eval(input) match {
-      case a: Decimal => a.toDouble
-      case a: Double => a
-      case a: Int => a
-    }
-
-    (geometry, fraction) match {
-      case (g:LineString, f:Double) if f >= 0 && f <= 1 => getLineInterpolatePoint(g, f)
-      case _ => null
-    }
-  }
-
-  private def getLineInterpolatePoint(geom: Geometry, fraction: Double): Any = {
-    val length = geom.getLength()
-    val indexedLine = new LengthIndexedLine(geom)
-    val interPoint = indexedLine.extractPoint(length * fraction)
-    new GeometryFactory().createPoint(interPoint).toGenericArrayData
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(Functions.lineInterpolatePoint) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -734,14 +493,13 @@ case class ST_LineInterpolatePoint(inputExpressions: Seq[Expression])
 
 
 case class ST_EndPoint(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
+  extends UnaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
     geometry match {
       case string: LineString => string.getEndPoint.toGenericArrayData
       case _ => null
     }
-
   }
 
   override def dataType: DataType = GeometryUDT
@@ -754,7 +512,7 @@ case class ST_EndPoint(inputExpressions: Seq[Expression])
 }
 
 case class ST_ExteriorRing(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.exteriorRing) {
+  extends InferredUnaryExpression(Functions.exteriorRing) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -763,7 +521,7 @@ case class ST_ExteriorRing(inputExpressions: Seq[Expression])
 
 
 case class ST_GeometryN(inputExpressions: Seq[Expression])
-  extends InferredBinaryExpression(Functions.geometryN) {
+  extends InferredBinaryExpression(Functions.geometryN) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -771,7 +529,7 @@ case class ST_GeometryN(inputExpressions: Seq[Expression])
 }
 
 case class ST_InteriorRingN(inputExpressions: Seq[Expression])
-  extends InferredBinaryExpression(Functions.interiorRingN) {
+  extends InferredBinaryExpression(Functions.interiorRingN) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -779,8 +537,7 @@ case class ST_InteriorRingN(inputExpressions: Seq[Expression])
 }
 
 case class ST_Dump(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
+  extends UnaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
     val geometryCollection = geometry match {
@@ -805,8 +562,7 @@ case class ST_Dump(inputExpressions: Seq[Expression])
 }
 
 case class ST_DumpPoints(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
+  extends UnaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
     ArrayData.toArrayData(geometry.getPoints.map(geom => geom.toGenericArrayData))
@@ -823,7 +579,7 @@ case class ST_DumpPoints(inputExpressions: Seq[Expression])
 
 
 case class ST_IsClosed(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.isClosed) {
+  extends InferredUnaryExpression(Functions.isClosed) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -831,7 +587,7 @@ case class ST_IsClosed(inputExpressions: Seq[Expression])
 }
 
 case class ST_NumInteriorRings(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.numInteriorRings) {
+  extends InferredUnaryExpression(Functions.numInteriorRings) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -839,27 +595,7 @@ case class ST_NumInteriorRings(inputExpressions: Seq[Expression])
 }
 
 case class ST_AddPoint(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
-  inputExpressions.betweenLength(2, 3)
-
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val geometry = inputExpressions.head.toGeometry(input)
-    val point = inputExpressions(1).toGeometry(input)
-    val geom = if (inputExpressions.length == 2) Functions.addPoint(geometry, point) else {
-      val index = inputExpressions(2).toInt(input)
-      Functions.addPoint(geometry, point, index)
-    }
-    geom match {
-      case linestring: LineString => linestring.toGenericArrayData
-      case _ => null
-    }
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredTernaryExpression(Functions.addPoint) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -867,26 +603,7 @@ case class ST_AddPoint(inputExpressions: Seq[Expression])
 }
 
 case class ST_RemovePoint(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
-  inputExpressions.betweenLength(1, 2)
-
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val linesString = inputExpressions(0).toGeometry(input)
-    val geom = if (inputExpressions.length < 2) Functions.removePoint(linesString) else {
-      val index = inputExpressions(1).toInt(input)
-      Functions.removePoint(linesString, index)
-    }
-    geom match {
-      case linestring: LineString => linestring.toGenericArrayData
-      case _ => null
-    }
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(Functions.removePoint) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -894,7 +611,7 @@ case class ST_RemovePoint(inputExpressions: Seq[Expression])
 }
 
 case class ST_SetPoint(inputExpressions: Seq[Expression])
-  extends InferredTernaryExpression(Functions.setPoint) {
+  extends InferredTernaryExpression(Functions.setPoint) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -902,8 +619,7 @@ case class ST_SetPoint(inputExpressions: Seq[Expression])
 }
 
 case class ST_IsRing(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 1)
+  extends UnaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
     geometry match {
@@ -930,7 +646,7 @@ case class ST_IsRing(inputExpressions: Seq[Expression])
   * @param inputExpressions Geometry
   */
 case class ST_NumGeometries(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.numGeometries) {
+  extends InferredUnaryExpression(Functions.numGeometries) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -943,7 +659,7 @@ case class ST_NumGeometries(inputExpressions: Seq[Expression])
   * @param inputExpressions Geometry
   */
 case class ST_FlipCoordinates(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.flipCoordinates) {
+  extends InferredUnaryExpression(Functions.flipCoordinates) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -951,8 +667,7 @@ case class ST_FlipCoordinates(inputExpressions: Seq[Expression])
 }
 
 case class ST_SubDivide(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
-  assert(inputExpressions.length == 2)
+  extends Expression with FoldableExpression with ImplicitCastInputTypes with CodegenFallback {
 
   override def nullable: Boolean = true
 
@@ -963,10 +678,11 @@ case class ST_SubDivide(inputExpressions: Seq[Expression])
       )
       case null => null
     }
-
   }
 
   override def dataType: DataType = ArrayType(GeometryUDT)
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(GeometryUDT, IntegerType)
 
   override def children: Seq[Expression] = inputExpressions
 
@@ -1002,7 +718,7 @@ case class ST_SubDivideExplode(children: Seq[Expression])
 
 
 case class ST_MakePolygon(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
+  extends Expression with FoldableExpression with CodegenFallback {
   inputExpressions.betweenLength(1, 2)
 
   override def nullable: Boolean = true
@@ -1049,7 +765,7 @@ case class ST_MakePolygon(inputExpressions: Seq[Expression])
 }
 
 case class ST_GeoHash(inputExpressions: Seq[Expression])
-  extends InferredBinaryExpression(Functions.geohash) with CodegenFallback {
+  extends InferredBinaryExpression(Functions.geohash) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1062,30 +778,7 @@ case class ST_GeoHash(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_Difference(inputExpressions: Seq[Expression])
-  extends BinaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 2)
-
-  lazy val GeometryFactory = new GeometryFactory()
-  lazy val emptyPolygon = GeometryFactory.createPolygon(null, null)
-
-  override protected def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
-    val isIntersects = leftGeometry.intersects(rightGeometry)
-    lazy val isRightContainsLeft = rightGeometry.contains(leftGeometry)
-
-    if (!isIntersects) {
-      new GenericArrayData(GeometrySerializer.serialize(leftGeometry))
-    }
-
-    if (isIntersects && isRightContainsLeft) {
-      new GenericArrayData(GeometrySerializer.serialize(emptyPolygon))
-    }
-
-    new GenericArrayData(GeometrySerializer.serialize(leftGeometry.difference(rightGeometry)))
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(Functions.difference) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1098,8 +791,7 @@ case class ST_Difference(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_SymDifference(inputExpressions: Seq[Expression])
-  extends BinaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 2)
+  extends BinaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
     new GenericArrayData(GeometrySerializer.serialize(leftGeometry.symDifference(rightGeometry)))
@@ -1120,8 +812,7 @@ case class ST_SymDifference(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_Union(inputExpressions: Seq[Expression])
-  extends BinaryGeometryExpression with CodegenFallback {
-  assert(inputExpressions.length == 2)
+  extends BinaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
     new GenericArrayData(GeometrySerializer.serialize(leftGeometry.union(rightGeometry)))
@@ -1136,17 +827,11 @@ case class ST_Union(inputExpressions: Seq[Expression])
   }
 }
 
-case class ST_Multi(inputExpressions: Seq[Expression]) extends UnaryGeometryExpression with CodegenFallback{
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
+case class ST_Multi(inputExpressions: Seq[Expression])
+  extends InferredUnaryExpression(Collect.createMultiGeometryFromOneElement) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
-  }
-
-  override protected def nullSafeEval(geometry: Geometry): Any ={
-    Collect.createMultiGeometry(Seq(geometry)).toGenericArrayData
   }
 }
 
@@ -1156,7 +841,7 @@ case class ST_Multi(inputExpressions: Seq[Expression]) extends UnaryGeometryExpr
  * @param inputExpressions Geometry
  */
 case class ST_PointOnSurface(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.pointOnSurface) {
+  extends InferredUnaryExpression(Functions.pointOnSurface) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1169,7 +854,7 @@ case class ST_PointOnSurface(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_Reverse(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.reverse) {
+  extends InferredUnaryExpression(Functions.reverse) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1182,7 +867,7 @@ case class ST_Reverse(inputExpressions: Seq[Expression])
  * @param inputExpressions sequence of 2 input arguments, a geometry and a value 'n'
  */
 case class ST_PointN(inputExpressions: Seq[Expression])
-  extends InferredBinaryExpression(Functions.pointN) {
+  extends InferredBinaryExpression(Functions.pointN) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
       copy(inputExpressions = newChildren)
@@ -1195,7 +880,7 @@ case class ST_PointN(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_Force_2D(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.force2D) {
+  extends InferredUnaryExpression(Functions.force2D) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1208,7 +893,7 @@ case class ST_Force_2D(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_AsEWKT(inputExpressions: Seq[Expression])
-  extends  InferredUnaryExpression(Functions.asEWKT) {
+  extends InferredUnaryExpression(Functions.asEWKT) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1216,7 +901,7 @@ case class ST_AsEWKT(inputExpressions: Seq[Expression])
 }
 
 case class ST_AsGML(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.asGML) {
+  extends InferredUnaryExpression(Functions.asGML) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1224,7 +909,7 @@ case class ST_AsGML(inputExpressions: Seq[Expression])
 }
 
 case class ST_AsKML(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.asKML) {
+  extends InferredUnaryExpression(Functions.asKML) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1237,7 +922,7 @@ case class ST_AsKML(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_IsEmpty(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.isEmpty) {
+  extends InferredUnaryExpression(Functions.isEmpty) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1250,7 +935,7 @@ case class ST_IsEmpty(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_XMax(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.xMax) {
+  extends InferredUnaryExpression(Functions.xMax) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1263,7 +948,7 @@ case class ST_XMax(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_XMin(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.xMin) {
+  extends InferredUnaryExpression(Functions.xMin) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1277,7 +962,7 @@ case class ST_XMin(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_BuildArea(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.buildArea) {
+  extends InferredUnaryExpression(Functions.buildArea) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
     copy(inputExpressions = newChildren)
@@ -1290,7 +975,7 @@ case class ST_BuildArea(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_Normalize(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.normalize) {
+  extends InferredUnaryExpression(Functions.normalize) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
     copy(inputExpressions = newChildren)
@@ -1303,7 +988,7 @@ case class ST_Normalize(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_LineFromMultiPoint(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.lineFromMultiPoint) {
+  extends InferredUnaryExpression(Functions.lineFromMultiPoint) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

@@ -20,13 +20,10 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import scala.reflect.ClassTag
 
-import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.catalyst.expressions.{Expression, Literal}
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
 import org.apache.spark.sql.execution.aggregate.ScalaUDAF
-import org.apache.spark.sql.functions.{lit, array}
-import org.locationtech.jts.geom.Geometry
 
 trait DataFrameAPI {
   protected def wrapExpression[E <: Expression : ClassTag](args: Any *): Column = {
@@ -35,6 +32,7 @@ trait DataFrameAPI {
       case s: String => Column(s).expr
       case e: Expression => e
       case x: Any => Literal(x)
+      case null => Literal(null)
     })
     val expressionConstructor = implicitly[ClassTag[E]].runtimeClass.getConstructor(classOf[Seq[Expression]])
     val expressionInstance = expressionConstructor.newInstance(exprArgs).asInstanceOf[E]
@@ -47,6 +45,7 @@ trait DataFrameAPI {
       case s: String => Column(s).expr
       case e: Expression => e
       case x: Any => Literal(x)
+      case null => Literal(null)
     })
     val expressionConstructor = implicitly[ClassTag[E]].runtimeClass.getConstructor(classOf[Seq[Expression]])
     val expressionInstance = expressionConstructor.newInstance(exprArgs).asInstanceOf[E]
@@ -59,6 +58,7 @@ trait DataFrameAPI {
       case s: String => Column(s).expr
       case e: Expression => e
       case x: Any => Literal(x)
+      case null => Literal(null)
     })
     val aggregatorClass = implicitly[ClassTag[A]].runtimeClass
     val aggregatorConstructor = aggregatorClass.getConstructor()

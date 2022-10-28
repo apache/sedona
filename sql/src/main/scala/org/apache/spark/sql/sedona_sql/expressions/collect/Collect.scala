@@ -39,7 +39,7 @@ object Collect {
     }
   }
 
-  private def createMultiGeometryFromOneElement(geom: Geometry): Geometry = {
+  def createMultiGeometryFromOneElement(geom: Geometry): Geometry = {
     geom match {
       case circle: Circle                 => geomFactory.createGeometryCollection(Array(circle))
       case collection: GeometryCollection => collection

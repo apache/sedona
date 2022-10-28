@@ -29,24 +29,21 @@ object UdfRegistrator {
   }
 
   def registerAll(sparkSession: SparkSession): Unit = {
-    Catalog.expressions.foreach(f => {
-      val functionIdentifier = FunctionIdentifier(f.getClass.getSimpleName.dropRight(1))
-      val expressionInfo = new ExpressionInfo(
-        f.getClass.getCanonicalName,
-        functionIdentifier.database.orNull,
-        functionIdentifier.funcName)
+    Catalog.expressions.foreach { case (functionIdentifier, expressionInfo, functionBuilder) =>
       sparkSession.sessionState.functionRegistry.registerFunction(
         functionIdentifier,
         expressionInfo,
-        f
+        functionBuilder
       )
-    })
+    }
 Catalog.aggregateExpressions.foreach(f => sparkSession.udf.register(f.getClass.getSimpleName, functions.udaf(f))) // SPARK3 anchor
 //Catalog.aggregateExpressions_UDAF.foreach(f => sparkSession.udf.register(f.getClass.getSimpleName, f)) // SPARK2 anchor
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
-    Catalog.expressions.foreach(f => sparkSession.sessionState.functionRegistry.dropFunction(FunctionIdentifier(f.getClass.getSimpleName.dropRight(1))))
+    Catalog.expressions.foreach { case (functionIdentifier, _, _) =>
+      sparkSession.sessionState.functionRegistry.dropFunction(functionIdentifier)
+    }
 Catalog.aggregateExpressions.foreach(f => sparkSession.sessionState.functionRegistry.dropFunction(FunctionIdentifier(f.getClass.getSimpleName))) // SPARK3 anchor
 //Catalog.aggregateExpressions_UDAF.foreach(f => sparkSession.sessionState.functionRegistry.dropFunction(FunctionIdentifier(f.getClass.getSimpleName))) // SPARK2 anchor
   }
