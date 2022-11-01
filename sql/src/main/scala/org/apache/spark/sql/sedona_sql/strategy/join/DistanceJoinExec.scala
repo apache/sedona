@@ -38,18 +38,20 @@ import org.locationtech.jts.geom.Geometry
  *
  * select * from a join b on ST_Intersects(ST_Envelope(ST_Buffer(a.geom, 1)), b.geom) and ST_Distance(a.geom, b.geom) <= 1
  *
- * @param left
- * @param right
- * @param leftShape
- * @param rightShape
+ * @param left left side of the join
+ * @param right right side of the join
+ * @param leftShape expression for the first argument of spatialPredicate
+ * @param rightShape expression for the second argument of spatialPredicate
+ * @param swappedLeftAndRight boolean indicating whether left and right plans were swapped
  * @param distance - ST_Distance(left, right) <= distance. Distance can be literal or a computation over 'left'.
- * @param spatialPredicate
- * @param extraCondition
+ * @param spatialPredicate spatial predicate as join condition
+ * @param extraCondition extra join condition other than spatialPredicate
  */
 case class DistanceJoinExec(left: SparkPlan,
                             right: SparkPlan,
                             leftShape: Expression,
                             rightShape: Expression,
+                            swappedLeftAndRight: Boolean,
                             distance: Expression,
                             spatialPredicate: SpatialPredicate,
                             extraCondition: Option[Expression] = None)

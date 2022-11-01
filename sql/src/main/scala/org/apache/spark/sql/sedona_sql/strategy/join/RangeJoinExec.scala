@@ -31,15 +31,17 @@ import org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode
   *
   * @param left       left side of the join
   * @param right      right side of the join
-  * @param leftShape  expression for the first argument of ST_Contains or ST_Intersects
-  * @param rightShape expression for the second argument of ST_Contains or ST_Intersects
-  * @param intersects boolean indicating whether spatial relationship is 'intersects' (true)
-  *                   or 'contains' (false)
+  * @param leftShape  expression for the first argument of spatialPredicate
+  * @param rightShape expression for the second argument of spatialPredicate
+  * @param swappedLeftAndRight boolean indicating whether left and right plans were swapped
+  * @param spatialPredicate spatial predicate as join condition
+  * @param extraCondition extra join condition other than spatialPredicate
   */
 case class RangeJoinExec(left: SparkPlan,
                          right: SparkPlan,
                          leftShape: Expression,
                          rightShape: Expression,
+                         swappedLeftAndRight: Boolean,
                          spatialPredicate: SpatialPredicate,
                          extraCondition: Option[Expression] = None)
   extends SedonaBinaryExecNode

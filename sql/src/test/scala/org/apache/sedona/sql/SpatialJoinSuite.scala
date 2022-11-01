@@ -19,7 +19,6 @@
 
 package org.apache.sedona.sql
 
-import org.apache.sedona.common.geometryObjects.Circle
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.col
@@ -98,15 +97,55 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
     }
   }
 
+  describe("Sedona-SQL Spatial Join Test with SELECT *") {
+    val joinConditions = Table("join condition",
+      "ST_Contains(df1.geom, df2.geom)",
+      "ST_Contains(df2.geom, df1.geom)",
+      "ST_Distance(df1.geom, df2.geom) < 1.0",
+      "ST_Distance(df2.geom, df1.geom) < 1.0"
+    )
+
+    forAll (joinConditions) { joinCondition =>
+      it(s"should SELECT * in join query with $joinCondition produce correct result") {
+        prepareTempViewsForTestData()
+        val resultAll = sparkSession.sql(s"SELECT * FROM df1 JOIN df2 ON $joinCondition").collect()
+        val result = resultAll.map(row => (row.getInt(0), row.getInt(2))).sorted
+        val expected = buildExpectedResult(joinCondition)
+        assert(result.nonEmpty)
+        assert(result === expected)
+      }
+
+      it(s"should SELECT * in join query with $joinCondition produce correct result, broadcast the left side") {
+        prepareTempViewsForTestData()
+        val resultAll = sparkSession.sql(s"SELECT /*+ BROADCAST(df1) */ * FROM df1 JOIN df2 ON $joinCondition").collect()
+        val result = resultAll.map(row => (row.getInt(0), row.getInt(2))).sorted
+        val expected = buildExpectedResult(joinCondition)
+        assert(result.nonEmpty)
+        assert(result === expected)
+      }
+
+      it(s"should SELECT * in join query with $joinCondition produce correct result, broadcast the right side") {
+        prepareTempViewsForTestData()
+        val resultAll = sparkSession.sql(s"SELECT /*+ BROADCAST(df2) */ * FROM df1 JOIN df2 ON $joinCondition").collect()
+        val result = resultAll.map(row => (row.getInt(0), row.getInt(2))).sorted
+        val expected = buildExpectedResult(joinCondition)
+        assert(result.nonEmpty)
+        assert(result === expected)
+      }
+    }
+  }
+
   private def prepareTempViewsForTestData(): (DataFrame, DataFrame) = {
     val df1 = sparkSession.read.format("csv").option("header", "false").option("delimiter", testDataDelimiter)
       .load(spatialJoinLeftInputLocation)
       .withColumn("id", col("_c0").cast(IntegerType))
       .withColumn("geom", ST_GeomFromText(new Column("_c2")))
+      .select("id", "geom")
     val df2 = sparkSession.read.format("csv").option("header", "false").option("delimiter", testDataDelimiter)
       .load(spatialJoinRightInputLocation)
       .withColumn("id", col("_c0").cast(IntegerType))
       .withColumn("geom", ST_GeomFromText(new Column("_c2")))
+      .select("id", "geom")
     df1.createOrReplaceTempView("df1")
     df2.createOrReplaceTempView("df2")
     (df1, df2)
