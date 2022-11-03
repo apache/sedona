@@ -18,12 +18,11 @@
 import logging
 import os
 from re import findall
-from typing import Any, Optional
-
-from pyspark.sql import SparkSession
-from sedona.utils.decorators import classproperty
+from typing import Any, Optional, Tuple
 
 from py4j.protocol import Py4JJavaError
+from pyspark.sql import SparkSession
+from sedona.utils.decorators import classproperty
 
 
 def is_greater_or_equal_version(version_a: str, version_b: str) -> bool:
@@ -83,9 +82,13 @@ class SparkJars:
 
         # When deployed normally, Sedona appears in `spark.jars``, when it's submitted
         # via YARN it's in `spark.yarn.dist.jars`
-        used_jar_files_lookup = [
+        used_jar_files_lookup_with_errors = [
             SparkJars.get_spark_java_config(spark, config_id)
             for config_id in ("spark.jars", "spark.yarn.dist.jars")
+        ]
+
+        used_jar_files_lookup = [
+            lookup_result for lookup_result, _ in used_jar_files_lookup_with_errors
         ]
 
         used_jar_files = (
@@ -95,6 +98,10 @@ class SparkJars:
         )
 
         if not used_jar_files:
+
+            for _, error in used_jar_files_lookup_with_errors:
+                logging.warning(error)
+
             logging.info("Trying to get filenames from the $SPARK_HOME/jars directory")
             used_jar_files = ",".join(
                 os.listdir(os.path.join(os.environ["SPARK_HOME"], "jars"))
@@ -109,7 +116,9 @@ class SparkJars:
         return getattr(self, "__spark_jars")
 
     @staticmethod
-    def get_spark_java_config(spark: SparkSession, value: str) -> Any:
+    def get_spark_java_config(
+        spark: SparkSession, value: str
+    ) -> Tuple[Optional[str], Optional[str]]:
         if spark is not None:
             spark_conf = spark.conf
         else:
@@ -117,14 +126,16 @@ class SparkJars:
 
         java_spark_conf = spark_conf._jconf
         used_jar_files = None
+        error_message = None
+
         try:
             used_jar_files = java_spark_conf.get(value)
         except Py4JJavaError as java_error:
-            logging.warning(
-                f"Failed to get the value of %s from SparkConf: %s", value, java_error
+            error_message = "Failed to get the value of {} from SparkConf: {}".format(
+                value, java_error
             )
 
-        return used_jar_files
+        return used_jar_files, error_message
 
 
 class SedonaMeta:
