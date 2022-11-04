@@ -20,6 +20,7 @@
 package org.apache.sedona.core.spatialOperator;
 
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.prep.PreparedGeometry;
 
 import java.io.Serializable;
 
@@ -32,10 +33,16 @@ public class SpatialPredicateEvaluators {
      */
     public interface SpatialPredicateEvaluator extends Serializable {
         boolean eval(Geometry left, Geometry right);
+
+        boolean eval(PreparedGeometry left, Geometry right);
     }
 
     public interface ContainsEvaluator extends SpatialPredicateEvaluator {
         default boolean eval(Geometry left, Geometry right) {
+            return left.contains(right);
+        }
+
+        default boolean eval(PreparedGeometry left, Geometry right) {
             return left.contains(right);
         }
     }
@@ -44,16 +51,29 @@ public class SpatialPredicateEvaluators {
         default boolean eval(Geometry left, Geometry right) {
             return left.intersects(right);
         }
+
+        default boolean eval(PreparedGeometry left, Geometry right) {
+            return left.intersects(right);
+        }
     }
 
     public interface WithinEvaluator extends SpatialPredicateEvaluator {
         default boolean eval(Geometry left, Geometry right) {
             return left.within(right);
         }
+
+        default boolean eval(PreparedGeometry left, Geometry right) {
+            return left.within(right);
+        }
+
     }
 
     public interface CoversEvaluator extends SpatialPredicateEvaluator {
         default boolean eval(Geometry left, Geometry right) {
+            return left.covers(right);
+        }
+
+        default boolean eval(PreparedGeometry left, Geometry right) {
             return left.covers(right);
         }
     }
@@ -62,10 +82,18 @@ public class SpatialPredicateEvaluators {
         default boolean eval(Geometry left, Geometry right) {
             return left.coveredBy(right);
         }
+
+        default boolean eval(PreparedGeometry left, Geometry right) {
+            return left.coveredBy(right);
+        }
     }
 
     public interface TouchesEvaluator extends SpatialPredicateEvaluator {
         default boolean eval(Geometry left, Geometry right) {
+            return left.touches(right);
+        }
+
+        default boolean eval(PreparedGeometry left, Geometry right) {
             return left.touches(right);
         }
     }
@@ -74,10 +102,18 @@ public class SpatialPredicateEvaluators {
         default boolean eval(Geometry left, Geometry right) {
             return left.overlaps(right);
         }
+
+        default boolean eval(PreparedGeometry left, Geometry right) {
+            return left.overlaps(right);
+        }
     }
 
     public interface CrossesEvaluator extends SpatialPredicateEvaluator {
         default boolean eval(Geometry left, Geometry right) {
+            return left.crosses(right);
+        }
+
+        default boolean eval(PreparedGeometry left, Geometry right) {
             return left.crosses(right);
         }
     }
@@ -85,6 +121,10 @@ public class SpatialPredicateEvaluators {
     public interface EqualsEvaluator extends SpatialPredicateEvaluator {
         default boolean eval(Geometry left, Geometry right) {
             return left.symDifference(right).isEmpty();
+        }
+
+        default boolean eval(PreparedGeometry left, Geometry right) {
+            return left.getGeometry().symDifference(right).isEmpty();
         }
     }
 
