@@ -33,7 +33,10 @@ import org.apache.spark.sql.catalyst.plans.physical.Partitioning
 import org.apache.spark.sql.execution.SparkPlan
 import org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode
 import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.geom.prep.{PreparedGeometry, PreparedGeometryFactory}
 import org.locationtech.jts.index.SpatialIndex
+
+import scala.collection.mutable
 
 case class BroadcastIndexJoinExec(left: SparkPlan,
                                   right: SparkPlan,
@@ -81,22 +84,30 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
 //  override def simpleString: String = super.simpleString + s" $spatialExpression" // SPARK2 anchor
 
   private def windowBroadcastJoin(index: Broadcast[SpatialIndex], spatialRdd: SpatialRDD[Geometry]): RDD[(Geometry, Geometry)] = {
-    spatialRdd.getRawSpatialRDD.rdd.flatMap { row =>
-      val candidates = index.value.query(row.getEnvelopeInternal).iterator.asScala.asInstanceOf[Iterator[Geometry]]
+    spatialRdd.getRawSpatialRDD.rdd.mapPartitions { rows =>
+      val factory = new PreparedGeometryFactory()
+      val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
       val evaluator = SpatialPredicateEvaluators.create(spatialPredicate)
-      candidates
-        .filter(candidate => evaluator.eval(candidate, row))
-        .map(candidate => (candidate, row))
+      rows.flatMap { row =>
+        val candidates = index.value.query(row.getEnvelopeInternal).iterator.asScala.asInstanceOf[Iterator[Geometry]]
+        candidates
+          .filter(candidate => evaluator.eval(preparedGeometries.getOrElseUpdate(candidate, { factory.create(candidate) }), row))
+          .map(candidate => (candidate, row))
+      }
     }
   }
 
   private def objectBroadcastJoin(index: Broadcast[SpatialIndex], spatialRdd: SpatialRDD[Geometry]): RDD[(Geometry, Geometry)] = {
-    spatialRdd.getRawSpatialRDD.rdd.flatMap { row =>
-      val candidates = index.value.query(row.getEnvelopeInternal).iterator.asScala.asInstanceOf[Iterator[Geometry]]
-      val evaluator = SpatialPredicateEvaluators.create(spatialPredicate)
-      candidates
-        .filter(candidate => evaluator.eval(row, candidate))
-        .map(candidate => (row, candidate))
+    spatialRdd.getRawSpatialRDD.rdd.mapPartitions { rows =>
+      val factory = new PreparedGeometryFactory()
+      val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
+      val evaluator = SpatialPredicateEvaluators.create(SpatialPredicate.inverse(spatialPredicate))
+      rows.flatMap { row =>
+        val candidates = index.value.query(row.getEnvelopeInternal).iterator.asScala.asInstanceOf[Iterator[Geometry]]
+        candidates
+          .filter(candidate => evaluator.eval(preparedGeometries.getOrElseUpdate(candidate, { factory.create(candidate) }), row))
+          .map(candidate => (row, candidate))
+      }
     }
   }
 
