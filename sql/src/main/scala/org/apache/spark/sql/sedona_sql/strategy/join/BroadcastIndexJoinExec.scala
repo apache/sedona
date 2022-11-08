@@ -30,6 +30,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, Predicate, UnsafeRow}
 import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeRowJoiner
 import org.apache.spark.sql.catalyst.plans.physical.Partitioning
+import org.apache.spark.sql.catalyst.plans.{Inner, InnerLike, JoinType, LeftOuter, RightOuter}
 import org.apache.spark.sql.execution.SparkPlan
 import org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode
 import org.locationtech.jts.geom.Geometry
@@ -38,19 +39,30 @@ import org.locationtech.jts.index.SpatialIndex
 
 import scala.collection.mutable
 
-case class BroadcastIndexJoinExec(left: SparkPlan,
-                                  right: SparkPlan,
-                                  streamShape: Expression,
-                                  indexBuildSide: JoinSide,
-                                  windowJoinSide: JoinSide,
-                                  spatialPredicate: SpatialPredicate,
-                                  extraCondition: Option[Expression] = None,
-                                  distance: Option[Expression] = None)
+case class BroadcastIndexJoinExec(
+  left: SparkPlan,
+  right: SparkPlan,
+  streamShape: Expression,
+  indexBuildSide: JoinSide,
+  windowJoinSide: JoinSide,
+  joinType: JoinType,
+  spatialPredicate: SpatialPredicate,
+  extraCondition: Option[Expression] = None,
+  distance: Option[Expression] = None)
   extends SedonaBinaryExecNode
     with TraitJoinQueryBase
     with Logging {
 
-  override def output: Seq[Attribute] = left.output ++ right.output
+  override def output: Seq[Attribute] = {
+    joinType match {
+      case _: InnerLike =>
+        left.output ++ right.output
+      case LeftOuter =>
+        left.output ++ right.output.map(_.withNullability(true))
+      case x =>
+        throw new IllegalArgumentException(s"BroadcastIndexJoinExec should not take $x as the JoinType")
+    }
+  }
 
   // Using lazy val to avoid serialization
   @transient private lazy val boundCondition: (InternalRow => Boolean) = extraCondition match {
@@ -83,7 +95,7 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
   override def simpleString(maxFields: Int): String = super.simpleString(maxFields) + s" $spatialExpression" // SPARK3 anchor
 //  override def simpleString: String = super.simpleString + s" $spatialExpression" // SPARK2 anchor
 
-  private def windowBroadcastJoin(index: Broadcast[SpatialIndex], spatialRdd: SpatialRDD[Geometry]): RDD[(Geometry, Geometry)] = {
+  private def innerJoin(index: Broadcast[SpatialIndex], spatialRdd: SpatialRDD[Geometry], spatialPredicate: SpatialPredicate): RDD[(Geometry, Geometry)] = {
     spatialRdd.getRawSpatialRDD.rdd.mapPartitions { rows =>
       val factory = new PreparedGeometryFactory()
       val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
@@ -97,16 +109,19 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
     }
   }
 
-  private def objectBroadcastJoin(index: Broadcast[SpatialIndex], spatialRdd: SpatialRDD[Geometry]): RDD[(Geometry, Geometry)] = {
+  private def outerJoin(
+    index: Broadcast[SpatialIndex], spatialRdd: SpatialRDD[Geometry],
+    spatialPredicate: SpatialPredicate
+  ): RDD[(Geometry, Geometry)] = {
     spatialRdd.getRawSpatialRDD.rdd.mapPartitions { rows =>
       val factory = new PreparedGeometryFactory()
       val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
-      val evaluator = SpatialPredicateEvaluators.create(SpatialPredicate.inverse(spatialPredicate))
+      val evaluator = SpatialPredicateEvaluators.create(spatialPredicate)
       rows.flatMap { row =>
         val candidates = index.value.query(row.getEnvelopeInternal).iterator.asScala.asInstanceOf[Iterator[Geometry]]
         candidates
           .filter(candidate => evaluator.eval(preparedGeometries.getOrElseUpdate(candidate, { factory.create(candidate) }), row))
-          .map(candidate => (row, candidate))
+          .map(candidate => (candidate, row))
       }
     }
   }
@@ -125,11 +140,23 @@ case class BroadcastIndexJoinExec(left: SparkPlan,
 
     val broadcastIndex = broadcast.executeBroadcast[SpatialIndex]()
 
-    val pairs = (indexBuildSide, windowJoinSide) match {
-      case (LeftSide, LeftSide) => windowBroadcastJoin(broadcastIndex, streamShapes)
-      case (LeftSide, RightSide) => objectBroadcastJoin(broadcastIndex, streamShapes).map { case (left, right) => (right, left) }
-      case (RightSide, LeftSide) => objectBroadcastJoin(broadcastIndex, streamShapes)
-      case (RightSide, RightSide) => windowBroadcastJoin(broadcastIndex, streamShapes).map { case (left, right) => (right, left) }
+    val (updatedSpatialPredicate, shouldSwap) = (indexBuildSide, windowJoinSide) match {
+      case (LeftSide, LeftSide) => (spatialPredicate, false)
+      case (LeftSide, RightSide) => (SpatialPredicate.inverse(spatialPredicate), false)
+      case (RightSide, LeftSide) => (SpatialPredicate.inverse(spatialPredicate), true)
+      case (RightSide, RightSide) => (spatialPredicate, true)
+    }
+
+    var pairs = joinType match {
+      case Inner =>
+        innerJoin(broadcastIndex, streamShapes, updatedSpatialPredicate)
+      case LeftOuter | RightOuter =>
+        outerJoin(broadcastIndex, streamShapes, updatedSpatialPredicate)
+      case x =>
+        throw new IllegalArgumentException(s"BroadcastIndexJoinExec should not take $x as the JoinType")
+    }
+    if (shouldSwap) {
+      pairs = pairs.map { case (l, r) => (r, l) }
     }
 
     pairs.mapPartitions { iter =>

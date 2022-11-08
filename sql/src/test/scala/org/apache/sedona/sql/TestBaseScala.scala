@@ -39,7 +39,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     .config("spark.sql.warehouse.dir", warehouseLocation)
     .getOrCreate()
 
-  val resourceFolder = System.getProperty("user.dir") + "/../core/src/test/resources/"
+  val resourceFolder = System.getProperty("user.dir") + "/core/src/test/resources/"
   val mixedWkbGeometryInputLocation = resourceFolder + "county_small_wkb.tsv"
   val mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv"
   val shapefileInputLocation = resourceFolder + "shapefiles/dbf"

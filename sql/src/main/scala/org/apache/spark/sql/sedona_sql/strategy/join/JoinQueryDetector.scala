@@ -23,7 +23,7 @@ import org.apache.sedona.core.spatialOperator.SpatialPredicate
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.spark.sql.{SparkSession, Strategy}
 import org.apache.spark.sql.catalyst.expressions.{And, Expression, LessThan, LessThanOrEqual}
-import org.apache.spark.sql.catalyst.plans.Inner
+import org.apache.spark.sql.catalyst.plans.{ExistenceJoin, FullOuter, Inner, InnerLike, JoinType, LeftAnti, LeftOuter, LeftSemi, NaturalJoin, RightOuter, UsingJoin}
 import org.apache.spark.sql.catalyst.plans.logical._
 import org.apache.spark.sql.execution.SparkPlan
 import org.apache.spark.sql.sedona_sql.expressions._
@@ -78,7 +78,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     }
 
   def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
-    case Join(left, right, Inner, condition, JoinHint(leftHint, rightHint)) => { // SPARK3 anchor
+    case Join(left, right, joinType, condition, JoinHint(leftHint, rightHint)) => { // SPARK3 anchor
 //    case Join(left, right, Inner, condition) => { // SPARK2 anchor
       val broadcastLeft = leftHint.exists(_.strategy.contains(BROADCAST)) // SPARK3 anchor
       val broadcastRight = rightHint.exists(_.strategy.contains(BROADCAST)) // SPARK3 anchor
@@ -115,16 +115,19 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
       if ((broadcastLeft || broadcastRight) && sedonaConf.getUseIndex) {
         queryDetection match {
           case Some(JoinQueryDetection(left, right, leftShape, rightShape, spatialPredicate, extraCondition, distance)) =>
-            planBroadcastJoin(left, right, Seq(leftShape, rightShape), spatialPredicate, sedonaConf.getIndexType, broadcastLeft, extraCondition, distance)
+            planBroadcastJoin(
+              left, right, Seq(leftShape, rightShape), joinType,
+              spatialPredicate, sedonaConf.getIndexType,
+              broadcastLeft, extraCondition, distance)
           case _ =>
             Nil
         }
       } else {
         queryDetection match {
           case Some(JoinQueryDetection(left, right, leftShape, rightShape, spatialPredicate, extraCondition, None)) =>
-            planSpatialJoin(left, right, Seq(leftShape, rightShape), spatialPredicate, extraCondition)
+            planSpatialJoin(left, right, Seq(leftShape, rightShape), joinType, spatialPredicate, extraCondition)
           case Some(JoinQueryDetection(left, right, leftShape, rightShape, spatialPredicate, extraCondition, Some(distance))) =>
-            planDistanceJoin(left, right, Seq(leftShape, rightShape), distance, spatialPredicate, extraCondition)
+            planDistanceJoin(left, right, Seq(leftShape, rightShape), joinType, distance, spatialPredicate, extraCondition)
           case None => 
             Nil
         }
@@ -153,11 +156,18 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
       None
     }
 
-  private def planSpatialJoin(left: LogicalPlan,
-                              right: LogicalPlan,
-                              children: Seq[Expression],
-                              spatialPredicate: SpatialPredicate,
-                              extraCondition: Option[Expression] = None): Seq[SparkPlan] = {
+  private def planSpatialJoin(
+    left: LogicalPlan,
+    right: LogicalPlan,
+    children: Seq[Expression],
+    joinType: JoinType,
+    spatialPredicate: SpatialPredicate,
+    extraCondition: Option[Expression] = None): Seq[SparkPlan] = {
+
+    if (joinType != Inner) {
+      return Nil
+    }
+
     val a = children.head
     val b = children.tail.head
 
@@ -175,12 +185,19 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     }
   }
 
-  private def planDistanceJoin(left: LogicalPlan,
-                               right: LogicalPlan,
-                               children: Seq[Expression],
-                               distance: Expression,
-                               spatialPredicate: SpatialPredicate,
-                               extraCondition: Option[Expression] = None): Seq[SparkPlan] = {
+  private def planDistanceJoin(
+    left: LogicalPlan,
+    right: LogicalPlan,
+    children: Seq[Expression],
+    joinType: JoinType,
+    distance: Expression,
+    spatialPredicate: SpatialPredicate,
+    extraCondition: Option[Expression] = None): Seq[SparkPlan] = {
+
+    if (joinType != Inner) {
+      return Nil
+    }
+
     val a = children.head
     val b = children.tail.head
 
@@ -206,14 +223,24 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     }
   }
 
-  private def planBroadcastJoin(left: LogicalPlan,
-                                right: LogicalPlan,
-                                children: Seq[Expression],
-                                spatialPredicate: SpatialPredicate,
-                                indexType: IndexType,
-                                broadcastLeft: Boolean,
-                                extraCondition: Option[Expression],
-                                distance: Option[Expression]): Seq[SparkPlan] = {
+  private def planBroadcastJoin(
+    left: LogicalPlan,
+    right: LogicalPlan,
+    children: Seq[Expression],
+    joinType: JoinType,
+    spatialPredicate: SpatialPredicate,
+    indexType: IndexType,
+    broadcastLeft: Boolean,
+    extraCondition: Option[Expression],
+    distance: Option[Expression]): Seq[SparkPlan] = {
+
+    joinType match {
+      case Inner =>
+      case LeftOuter if !broadcastLeft =>
+      case RightOuter if broadcastLeft =>
+      case _ => return Nil
+    }
+
     val a = children.head
     val b = children.tail.head
 
@@ -237,7 +264,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
           case (RightSide, true) => // Broadcast the right side, objects on the left
             (planLater(left), SpatialIndexExec(planLater(right), a, indexType, distance), b, RightSide)
         }
-        BroadcastIndexJoinExec(leftPlan, rightPlan, streamShape, broadcastSide, windowSide, spatialPredicate, extraCondition, distance) :: Nil
+        BroadcastIndexJoinExec(leftPlan, rightPlan, streamShape, broadcastSide, windowSide, joinType, spatialPredicate, extraCondition, distance) :: Nil
       case None =>
         logInfo(
           s"Spatial join for $relationship with arguments not aligned " +
