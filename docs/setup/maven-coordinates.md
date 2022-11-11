@@ -35,17 +35,17 @@ The optional GeoTools library is required only if you want to use CRS transforma
 		</dependency>
 		```
 	
-	=== "Spark 2.4 and Scala 2.11"
+	=== "Spark 3.0 and Scala 2.13"
 	
 		```xml
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-python-adapter-2.4_2.11</artifactId>
+		  <artifactId>sedona-python-adapter-3.0_2.13</artifactId>
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-viz-2.4_2.11</artifactId>
+		  <artifactId>sedona-viz-3.0_2.13</artifactId>
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
 		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
@@ -55,27 +55,7 @@ The optional GeoTools library is required only if you want to use CRS transforma
 		    <version>{{ sedona.current_geotools }}</version>
 		</dependency>
 		```
-		
-	=== "Spark 2.4 and Scala 2.12"
-	
-		```xml
-		<dependency>
-		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-python-adapter-2.4_2.12</artifactId>
-		  <version>{{ sedona.current_version }}</version>
-		</dependency>
-		<dependency>
-		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-viz-2.4_2.12</artifactId>
-		  <version>{{ sedona.current_version }}</version>
-		</dependency>
-		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
-		<dependency>
-		    <groupId>org.datasyslab</groupId>
-		    <artifactId>geotools-wrapper</artifactId>
-		    <version>{{ sedona.current_geotools }}</version>
-		</dependency>
-		```
+
 
 !!! abstract "Sedona with Apache Flink"
 
@@ -90,26 +70,6 @@ The optional GeoTools library is required only if you want to use CRS transforma
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
 		  <artifactId>sedona-flink_2.12</artifactId>
-		  <version>{{ sedona.current_version }}</version>
-		</dependency>
-		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
-		<dependency>
-		    <groupId>org.datasyslab</groupId>
-		    <artifactId>geotools-wrapper</artifactId>
-		    <version>{{ sedona.current_geotools }}</version>
-		</dependency>
-		```
-	=== "Flink 1.12+ and Scala 2.11"
-	
-		```xml
-		<dependency>
-		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-python-adapter-3.0_2.11</artifactId>
-		  <version>{{ sedona.current_version }}</version>
-		</dependency>
-		<dependency>
-		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-flink_2.11</artifactId>
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
 		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->

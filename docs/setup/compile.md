@@ -35,15 +35,11 @@ To compile all modules, please make sure you are in the root folder of all modul
 
 === "Spark 3.0 + Scala 2.12"
 	```
-	mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.0
+	mvn clean install -DskipTests -Dscala=2.12
 	```
-=== "Spark 2.4 + Scala 2.11"
+=== "Spark 3.0 + Scala 2.13"
 	```
-	mvn clean install -DskipTests -Dscala=2.11 -Dspark=2.4
-	```
-=== "Spark 2.4 + Scala 2.12"
-	```
-	mvn clean install -DskipTests -Dscala=2.12 -Dspark=2.4
+	mvn clean install -DskipTests -Dscala=2.13
 	```
 
 !!!tip
