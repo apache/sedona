@@ -136,7 +136,8 @@ case class BroadcastIndexJoinExec(
     val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
     val joinedRow = new JoinedRow
     streamIter.flatMap { srow =>
-      joinedRow.withLeft(srow.getUserData.asInstanceOf[UnsafeRow])
+      val left = srow.getUserData.asInstanceOf[UnsafeRow]
+      joinedRow.withLeft(left)
       val anyMatches = index.value.query(srow.getEnvelopeInternal)
         .iterator.asScala.asInstanceOf[Iterator[Geometry]]
         .filter(candidate => evaluator.eval(preparedGeometries.getOrElseUpdate(candidate, {
@@ -146,7 +147,7 @@ case class BroadcastIndexJoinExec(
         .exists(boundCondition)
 
       if (anyMatches) {
-        Iterator.single(joinedRow.getLeft)
+        Iterator.single(left)
       } else {
         Iterator.empty
       }
@@ -160,7 +161,8 @@ case class BroadcastIndexJoinExec(
     val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
     val joinedRow = new JoinedRow
     streamIter.flatMap { srow =>
-      joinedRow.withLeft(srow.getUserData.asInstanceOf[UnsafeRow])
+      val left = srow.getUserData.asInstanceOf[UnsafeRow]
+      joinedRow.withLeft(left)
       val anyMatches = index.value.query(srow.getEnvelopeInternal)
         .iterator.asScala.asInstanceOf[Iterator[Geometry]]
         .filter(candidate => evaluator.eval(preparedGeometries.getOrElseUpdate(candidate, {
@@ -172,7 +174,7 @@ case class BroadcastIndexJoinExec(
       if (anyMatches) {
         Iterator.empty
       } else {
-        Iterator.single(joinedRow.getLeft)
+        Iterator.single(left)
       }
     }
   }
