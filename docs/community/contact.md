@@ -18,9 +18,9 @@ Feedback to improve Apache Sedona: [Google Form](https://docs.google.com/forms/d
 
 [Apache Sedona@Twitter](https://twitter.com/ApacheSedona)
 
-## Gitter chat
+## Discord Server
 
-[![Gitter](https://badges.gitter.im/apache/sedona.svg)](https://gitter.im/apache/sedona?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://discord.gg/9A3k5dEBsY)
 
 ## Mailing list
 

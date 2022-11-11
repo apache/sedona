@@ -15,7 +15,20 @@ This page is for Sedona PPMC to publish Sedona releases.
 ## Prepare Secret GPG key
 
 1. Install GNUGPG if it was not installed before. On Mac: `brew install gnupg gnupg2`
-2. Generate a secret key. It must be RSA4096 (4096 bits long). Please follow Step 1 - 13 as listed here: https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key#generating-a-gpg-key
+2. Generate a secret key. It must be RSA4096 (4096 bits long). 
+	* Run `gpg --full-generate-key`. If not work, run `gpg --default-new-key-algo rsa4096 --gen-key`
+	* At the prompt, specify the kind of key you want: Select `RSA`, then press `enter`
+    * At the prompt, specify the key size you want: Enter `4096`
+    * At the prompt, enter the length of time the key should be valid: Press `enter` to make the key never expire.
+    * Verify that your selections are correct.
+    * Enter your user ID information: use your real name and Apache email address.
+    * Type a secure passphrase.
+    * Use the `gpg --list-secret-keys --keyid-format=long` command to list the long form of the GPG keys.
+    * From the list of GPG keys, copy the long form of the GPG key ID you'd like to use (e.g., `3AA5C34371567BD2`)
+    * Run `gpg --export --armor 3AA5C34371567BD2`, substituting in the GPG key ID you'd like to use.
+    * Copy your GPG key, beginning with `-----BEGIN PGP PUBLIC KEY BLOCK-----` and ending with `-----END PGP PUBLIC KEY BLOCK-----`.
+3. Publish your armored key in major key servers: https://keyserver.pgp.com/
+4. Append your armored PGP public key to the `KEYS` file: https://dist.apache.org/repos/dist/dev/incubator/sedona/KEYS
 
 ## Set up ASF username for Maven
 
@@ -57,26 +70,22 @@ mvn clean -Darguments="-DskipTests" release:prepare -DdryRun=true -DautoVersionS
 mvn deploy -DskipTests
 ```
 
-#### Prepare for Spark 2.4 and Scala 2.11
+If you are using Mac and see `sign artifacts failed`, please enter the following command in your terminal and re-compile again.
+
+```bash
+GPG_TTY=$(tty)
+export GPG_TTY
+```
+
+#### Prepare for Spark 3.0 and Scala 2.13
 
 1. Prepare the SNAPSHOTs
 ```
-mvn clean release:prepare -DdryRun=true -DautoVersionSubmodules=true -Dresume=false -DcheckModificationExcludeList=sql/src/main/scala/org/apache/sedona/sql/UDF/UdfRegistrator.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/JoinQueryDetector.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryExec.scala -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
+mvn clean -Darguments="-DskipTests -Dscala=2.13" release:prepare -DdryRun=true -DautoVersionSubmodules=true -Dresume=false
 ```
 2. Deploy the SNAPSHOTs
 ```
-mvn deploy -DskipTests -Dscala=2.11 -Dspark=2.4
-```
-
-#### Prepare for Spark 2.4 and Scala 2.12
-
-1. Prepare the SNAPSHOTs
-```
-mvn clean release:prepare -DdryRun=true -DautoVersionSubmodules=true -Dresume=false -DcheckModificationExcludeList=sql/src/main/scala/org/apache/sedona/sql/UDF/UdfRegistrator.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/JoinQueryDetector.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryExec.scala -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
-```
-2. Deploy the SNAPSHOTs
-```
-mvn deploy -DskipTests -Dscala=2.12 -Dspark=2.4
+mvn deploy -DskipTests -Dscala=2.13
 ```
 
 ## Check ASF copyright in all file headers
@@ -130,16 +139,10 @@ mvn clean release:perform -DautoVersionSubmodules=true -Dresume=false -Dargument
 
 Now let's repeat the process to other Sedona modules. Make sure you use the correct SCM Git tag id `{{ sedona.current_git_tag }}` (see below).
 
-#### For Spark 2.4 and Scala 2.11
+#### For Spark 3.0 and Scala 2.13
 
 ```
-mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
-```
-
-#### For Spark 2.4 and Scala 2.12
-
-```
-mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
+mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.13"
 ```
 
 
@@ -147,7 +150,7 @@ mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=
 
 All release candidates must be first placed in ASF Dist Dev SVN before vote: https://dist.apache.org/repos/dist/dev/incubator/sedona
 
-1. Make sure your armored PGP public key (must be encrypted by RSA-4096) is included in the `KEYS` file: https://dist.apache.org/repos/dist/dev/incubator/sedona/KEYS, and publish in major key servers: https://pgp.mit.edu/, https://keyserver.ubuntu.com/
+1. Make sure your armored PGP public key (must be encrypted by RSA-4096) is included in the `KEYS` file: https://dist.apache.org/repos/dist/dev/incubator/sedona/KEYS, and publish in major key servers: https://keyserver.pgp.com/
 2. Create a folder on SVN, such as `{{ sedona.current_git_tag }}`
 ```bash
 #!/bin/bash
@@ -160,23 +163,18 @@ git clone --shared --branch {{ sedona.current_git_tag}} https://github.com/apach
 rm -rf apache-sedona-{{ sedona.current_version }}-src/.git
 tar czf apache-sedona-{{ sedona.current_version }}-src.tar.gz apache-sedona-{{ sedona.current_version }}-src
 mkdir apache-sedona-{{ sedona.current_version }}-bin
-cd apache-sedona-{{ sedona.current_version }}-src && mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.0 && cd ..
+cd apache-sedona-{{ sedona.current_version }}-src && mvn clean install -DskipTests -Dscala=2.12 && cd ..
 cp apache-sedona-{{ sedona.current_version }}-src/core/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
 cp apache-sedona-{{ sedona.current_version }}-src/sql/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
 cp apache-sedona-{{ sedona.current_version }}-src/viz/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
 cp apache-sedona-{{ sedona.current_version }}-src/python-adapter/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
 cp apache-sedona-{{ sedona.current_version }}-src/flink/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
-cd apache-sedona-{{ sedona.current_version }}-src && mvn clean install -DskipTests -Dscala=2.11 -Dspark=2.4 && cd ..
+cd apache-sedona-{{ sedona.current_version }}-src && mvn clean install -DskipTests -Dscala=2.13 && cd ..
 cp apache-sedona-{{ sedona.current_version }}-src/core/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
 cp apache-sedona-{{ sedona.current_version }}-src/sql/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
 cp apache-sedona-{{ sedona.current_version }}-src/viz/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
 cp apache-sedona-{{ sedona.current_version }}-src/python-adapter/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
 cp apache-sedona-{{ sedona.current_version }}-src/flink/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
-cd apache-sedona-{{ sedona.current_version }}-src && mvn clean install -DskipTests -Dscala=2.12 -Dspark=2.4 && cd ..
-cp apache-sedona-{{ sedona.current_version }}-src/core/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/sql/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/viz/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/python-adapter/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
 tar czf apache-sedona-{{ sedona.current_version }}-bin.tar.gz apache-sedona-{{ sedona.current_version }}-bin
 shasum -a 512 apache-sedona-{{ sedona.current_version }}-src.tar.gz > apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512
 shasum -a 512 apache-sedona-{{ sedona.current_version }}-bin.tar.gz > apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512
@@ -235,7 +233,12 @@ https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/
 
 The vote will be open for at least 72 hours or until at least 3 "+1" PMC votes are cast
 
-Please vote accordingly:
+Instruction for checking items on the checklist: https://sedona.apache.org/community/vote/
+
+We recommend you use this Jupyter notebook on MyBinder to perform this task: https://mybinder.org/v2/gh/jiayuasu/sedona-tools/HEAD?labpath=binder%2Fverify-release.ipynb
+
+**Please vote accordingly and you must provide your checklist for your vote**.
+
 
 [ ] +1 approve
 
@@ -243,7 +246,7 @@ Please vote accordingly:
 
 [ ] -1 disapprove with the reason
 
-Checklist for reference (because of DISCLAIMER-WIP, other checklist items are not blockers):
+Checklist:
 
 [ ] Download links are valid.
 
@@ -461,29 +464,19 @@ The staging repo on repository.apache.org is usually automatically closed before
 mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests"
 ```
 
-##### For Spark 2.4 and Scala 2.11
+##### For Spark 3.0 and Scala 2.13
 
 ```
-mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
-```
-
-##### For Spark 2.4 and Scala 2.12
-
-```
-mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
+mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.13"
 ```
 
 #### Fix the error when close the staged repo
 
-In the last step, you may see 6 errors similar to the following:
+In the last step, you may see many errors similar to the following:
 ```
 typeId	signature-staging
-failureMessage	Invalid Signature: '/org/apache/sedona/sedona-python-adapter-2.4_2.12/{{ sedona.current_version }}/sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom.asc' is not a valid signature for 'sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom'.
-failureMessage	Invalid Signature: '/org/apache/sedona/sedona-python-adapter-2.4_2.11/{{ sedona.current_version }}/sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom.asc' is not a valid signature for 'sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom'.
 failureMessage	Invalid Signature: '/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom.asc' is not a valid signature for 'sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom'.
-failureMessage	Invalid Signature: '/org/apache/sedona/sedona-viz-2.4_2.12/{{ sedona.current_version }}/sedona-viz-2.4_2.12-{{ sedona.current_version }}.pom.asc' is not a valid signature for 'sedona-viz-2.4_2.12-{{ sedona.current_version }}.pom'.
 failureMessage	Invalid Signature: '/org/apache/sedona/sedona-viz-3.0_2.12/{{ sedona.current_version }}/sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom.asc' is not a valid signature for 'sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom'.
-failureMessage	Invalid Signature: '/org/apache/sedona/sedona-viz-2.4_2.11/{{ sedona.current_version }}/sedona-viz-2.4_2.11-{{ sedona.current_version }}.pom.asc' is not a valid signature for 'sedona-viz-2.4_2.11-{{ sedona.current_version }}.pom'.
 ```
 
 This is caused by a bug in the resolved-pom-maven-plugin in POM.xml. You will have to upload the signatures of the POM files mannualy.
@@ -496,78 +489,59 @@ username=admin
 password=admin123
 stagingid=1016
 
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-2.4_2.11/{{ sedona.current_version }}/sedona-core-2.4_2.11-{{ sedona.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-2.4_2.12/{{ sedona.current_version }}/sedona-core-2.4_2.12-{{ sedona.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-common/{{ sedona.current_version }}/sedona-common-{{ sedona.current_version }}.pom
 wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-3.0_2.12/{{ sedona.current_version }}/sedona-core-3.0_2.12-{{ sedona.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-2.4_2.11/{{ sedona.current_version }}/sedona-sql-2.4_2.11-{{ sedona.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-2.4_2.12/{{ sedona.current_version }}/sedona-sql-2.4_2.12-{{ sedona.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-3.0_2.13/{{ sedona.current_version }}/sedona-core-3.0_2.13-{{ sedona.current_version }}.pom
 wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-3.0_2.12/{{ sedona.current_version }}/sedona-sql-3.0_2.12-{{ sedona.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-2.4_2.11/{{ sedona.current_version }}/sedona-viz-2.4_2.11-{{ sedona.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-2.4_2.12/{{ sedona.current_version }}/sedona-viz-2.4_2.12-{{ sedona.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-3.0_2.13/{{ sedona.current_version }}/sedona-sql-3.0_2.13-{{ sedona.current_version }}.pom
 wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-3.0_2.12/{{ sedona.current_version }}/sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-2.4_2.11/{{ sedona.current_version }}/sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-2.4_2.12/{{ sedona.current_version }}/sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-3.0_2.13/{{ sedona.current_version }}/sedona-viz-3.0_2.13-{{ sedona.current_version }}.pom
 wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-3.0_2.13/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.13-{{ sedona.current_version }}.pom
 wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-flink_2.12/{{ sedona.current_version }}/sedona-flink_2.12-{{ sedona.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-flink_2.11/{{ sedona.current_version }}/sedona-flink_2.11-{{ sedona.current_version }}.pom
 
-gpg -ab sedona-core-2.4_2.11-{{ sedona.current_version }}.pom
-gpg -ab sedona-core-2.4_2.12-{{ sedona.current_version }}.pom
+gpg -ab sedona-common-{{ sedona.current_version }}.pom
 gpg -ab sedona-core-3.0_2.12-{{ sedona.current_version }}.pom
-gpg -ab sedona-sql-2.4_2.11-{{ sedona.current_version }}.pom
-gpg -ab sedona-sql-2.4_2.12-{{ sedona.current_version }}.pom
 gpg -ab sedona-sql-3.0_2.12-{{ sedona.current_version }}.pom
-gpg -ab sedona-viz-2.4_2.11-{{ sedona.current_version }}.pom
-gpg -ab sedona-viz-2.4_2.12-{{ sedona.current_version }}.pom
 gpg -ab sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom
-gpg -ab sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom
-gpg -ab sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom
 gpg -ab sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom
 gpg -ab sedona-flink_2.12-{{ sedona.current_version }}.pom
-gpg -ab sedona-flink_2.11-{{ sedona.current_version }}.pom
+gpg -ab sedona-core-3.0_2.13-{{ sedona.current_version }}.pom
+gpg -ab sedona-sql-3.0_2.13-{{ sedona.current_version }}.pom
+gpg -ab sedona-viz-3.0_2.13-{{ sedona.current_version }}.pom
+gpg -ab sedona-python-adapter-3.0_2.13-{{ sedona.current_version }}.pom
 
-curl -v -u $username:$password --upload-file sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-2.4_2.11/{{ sedona.current_version }}/sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom.asc
 
-curl -v -u $username:$password --upload-file sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-2.4_2.12/{{ sedona.current_version }}/sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom.asc
+curl -v -u $username:$password --upload-file sedona-common-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-common/{{ sedona.current_version }}/sedona-common-{{ sedona.current_version }}.pom.asc
 
 curl -v -u $username:$password --upload-file sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom.asc
 
-curl -v -u $username:$password --upload-file sedona-viz-2.4_2.11-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-2.4_2.11/{{ sedona.current_version }}/sedona-viz-2.4_2.11-{{ sedona.current_version }}.pom.asc
-
-curl -v -u $username:$password --upload-file sedona-viz-2.4_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-2.4_2.12/{{ sedona.current_version }}/sedona-viz-2.4_2.12-{{ sedona.current_version }}.pom.asc
-
 curl -v -u $username:$password --upload-file sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-3.0_2.12/{{ sedona.current_version }}/sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom.asc
 
-curl -v -u $username:$password --upload-file sedona-core-2.4_2.11-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-2.4_2.11/{{ sedona.current_version }}/sedona-core-2.4_2.11-{{ sedona.current_version }}.pom.asc
-
-curl -v -u $username:$password --upload-file sedona-core-2.4_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-2.4_2.12/{{ sedona.current_version }}/sedona-core-2.4_2.12-{{ sedona.current_version }}.pom.asc
-
 curl -v -u $username:$password --upload-file sedona-core-3.0_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-3.0_2.12/{{ sedona.current_version }}/sedona-core-3.0_2.12-{{ sedona.current_version }}.pom.asc
-
-curl -v -u $username:$password --upload-file sedona-sql-2.4_2.11-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-2.4_2.11/{{ sedona.current_version }}/sedona-sql-2.4_2.11-{{ sedona.current_version }}.pom.asc
-
-curl -v -u $username:$password --upload-file sedona-sql-2.4_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-2.4_2.12/{{ sedona.current_version }}/sedona-sql-2.4_2.12-{{ sedona.current_version }}.pom.asc
 
 curl -v -u $username:$password --upload-file sedona-sql-3.0_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-3.0_2.12/{{ sedona.current_version }}/sedona-sql-3.0_2.12-{{ sedona.current_version }}.pom.asc
 
 curl -v -u $username:$password --upload-file sedona-flink_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-flink_2.12/{{ sedona.current_version }}/sedona-flink_2.12-{{ sedona.current_version }}.pom.asc
 
-curl -v -u $username:$password --upload-file sedona-flink_2.11-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-flink_2.11/{{ sedona.current_version }}/sedona-flink_2.11-{{ sedona.current_version }}.pom.asc
+curl -v -u $username:$password --upload-file sedona-python-adapter-3.0_2.13-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-3.0_2.13/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom.asc
 
-rm sedona-core-2.4_2.11-{{ sedona.current_version }}.pom.asc
-rm sedona-core-2.4_2.12-{{ sedona.current_version }}.pom.asc
+curl -v -u $username:$password --upload-file sedona-viz-3.0_2.13-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-3.0_2.13/{{ sedona.current_version }}/sedona-viz-3.0_2.13-{{ sedona.current_version }}.pom.asc
+
+curl -v -u $username:$password --upload-file sedona-core-3.0_2.13-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-3.0_2.13/{{ sedona.current_version }}/sedona-core-3.0_2.13-{{ sedona.current_version }}.pom.asc
+
+curl -v -u $username:$password --upload-file sedona-sql-3.0_2.13-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-3.0_2.13/{{ sedona.current_version }}/sedona-sql-3.0_2.13-{{ sedona.current_version }}.pom.asc
+
+rm sedona-common-{{ sedona.current_version }}.pom.asc
 rm sedona-core-3.0_2.12-{{ sedona.current_version }}.pom.asc
-rm sedona-sql-2.4_2.11-{{ sedona.current_version }}.pom.asc
-rm sedona-sql-2.4_2.12-{{ sedona.current_version }}.pom.asc
 rm sedona-sql-3.0_2.12-{{ sedona.current_version }}.pom.asc
-rm sedona-viz-2.4_2.11-{{ sedona.current_version }}.pom.asc
-rm sedona-viz-2.4_2.12-{{ sedona.current_version }}.pom.asc
 rm sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom.asc
-rm sedona-python-adapter-2.4_2.11-{{ sedona.current_version }}.pom.asc
-rm sedona-python-adapter-2.4_2.12-{{ sedona.current_version }}.pom.asc
 rm sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom.asc
 rm sedona-flink_2.12-{{ sedona.current_version }}.pom.asc
-rm sedona-flink_2.11-{{ sedona.current_version }}.pom.asc
+rm sedona-core-3.0_2.13-{{ sedona.current_version }}.pom.asc
+rm sedona-sql-3.0_2.13-{{ sedona.current_version }}.pom.asc
+rm sedona-viz-3.0_2.13-{{ sedona.current_version }}.pom.asc
+rm sedona-python-adapter-3.0_2.13-{{ sedona.current_version }}.pom.asc
 ```
 admin is your Apache ID username and admin123 is your Apache ID password. You can find the correct upload path from the web interface.
 
