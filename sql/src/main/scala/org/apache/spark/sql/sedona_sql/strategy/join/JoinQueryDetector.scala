@@ -30,13 +30,13 @@ import org.apache.spark.sql.sedona_sql.expressions._
 
 
 case class JoinQueryDetection(
-                               left: LogicalPlan,
-                               right: LogicalPlan,
-                               leftShape: Expression,
-                               rightShape: Expression,
-                               spatialPredicate: SpatialPredicate,
-                               extraCondition: Option[Expression] = None,
-                               distance: Option[Expression] = None
+  left: LogicalPlan,
+  right: LogicalPlan,
+  leftShape: Expression,
+  rightShape: Expression,
+  spatialPredicate: SpatialPredicate,
+  extraCondition: Option[Expression] = None,
+  distance: Option[Expression] = None
 )
 
 /**
@@ -118,7 +118,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
             planBroadcastJoin(
               left, right, Seq(leftShape, rightShape), joinType,
               spatialPredicate, sedonaConf.getIndexType,
-              broadcastLeft, extraCondition, distance)
+              broadcastLeft, broadcastRight, extraCondition, distance)
           case _ =>
             Nil
         }
@@ -231,13 +231,15 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     spatialPredicate: SpatialPredicate,
     indexType: IndexType,
     broadcastLeft: Boolean,
+    broadcastRight: Boolean,
     extraCondition: Option[Expression],
     distance: Option[Expression]): Seq[SparkPlan] = {
 
-    joinType match {
-      case Inner =>
-      case LeftOuter if !broadcastLeft =>
-      case RightOuter if broadcastLeft =>
+    val broadcastSide = joinType match {
+      case Inner if broadcastLeft => LeftSide
+      case Inner if broadcastRight => RightSide
+      case LeftSemi if broadcastRight => RightSide
+      case LeftAnti if broadcastRight => RightSide
       case _ => return Nil
     }
 
@@ -253,7 +255,6 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     matchExpressionsToPlans(a, b, left, right) match {
       case Some((_, _, swapped)) =>
         logInfo(s"Planning spatial join for $relationship relationship")
-        val broadcastSide = if (broadcastLeft) LeftSide else RightSide
         val (leftPlan, rightPlan, streamShape, windowSide) = (broadcastSide, swapped) match {
           case (LeftSide, false) => // Broadcast the left side, windows on the left
             (SpatialIndexExec(planLater(left), a, indexType, distance), planLater(right), b, LeftSide)

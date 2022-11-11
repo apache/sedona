@@ -18,19 +18,17 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
-import org.apache.sedona.core.spatialOperator.SpatialPredicate
-import org.apache.sedona.core.spatialOperator.SpatialPredicateEvaluators
+import org.apache.sedona.core.spatialOperator.{SpatialPredicate, SpatialPredicateEvaluators}
+import org.apache.sedona.core.spatialOperator.SpatialPredicateEvaluators.SpatialPredicateEvaluator
 
-import collection.JavaConverters._
-import org.apache.sedona.core.spatialRDD.SpatialRDD
+import scala.collection.JavaConverters._
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, Predicate, UnsafeRow}
-import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeRowJoiner
+import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, JoinedRow, Predicate, UnsafeProjection, UnsafeRow}
 import org.apache.spark.sql.catalyst.plans.physical.Partitioning
-import org.apache.spark.sql.catalyst.plans.{Inner, InnerLike, JoinType, LeftOuter, RightOuter}
+import org.apache.spark.sql.catalyst.plans._
 import org.apache.spark.sql.execution.SparkPlan
 import org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode
 import org.locationtech.jts.geom.Geometry
@@ -59,23 +57,39 @@ case class BroadcastIndexJoinExec(
         left.output ++ right.output
       case LeftOuter =>
         left.output ++ right.output.map(_.withNullability(true))
+      case RightOuter =>
+        left.output.map(_.withNullability(true)) ++ right.output
+      case j: ExistenceJoin =>
+        left.output :+ j.exists
+      case LeftExistence(_) =>
+        left.output
       case x =>
         throw new IllegalArgumentException(s"BroadcastIndexJoinExec should not take $x as the JoinType")
     }
   }
 
+  private val (streamed, broadcast) = indexBuildSide match {
+    case LeftSide => (right, left.asInstanceOf[SpatialIndexExec])
+    case RightSide => (left, right.asInstanceOf[SpatialIndexExec])
+  }
+
   // Using lazy val to avoid serialization
   @transient private lazy val boundCondition: (InternalRow => Boolean) = extraCondition match {
     case Some(condition) =>
-      Predicate.create(condition, output).eval _ // SPARK3 anchor
-//      newPredicate(condition, output).eval _ // SPARK2 anchor
+      Predicate.create(condition, streamed.output ++ broadcast.output).eval _ // SPARK3 anchor
+    //      newPredicate(condition, broadcast.output ++ streamed.output).eval _ // SPARK2 anchor
     case None =>
       (r: InternalRow) => true
   }
 
-  private val (streamed, broadcast) = indexBuildSide match {
-    case LeftSide => (right, left.asInstanceOf[SpatialIndexExec])
-    case RightSide => (left, right.asInstanceOf[SpatialIndexExec])
+  protected def createResultProjection(): InternalRow => InternalRow = joinType match {
+    case LeftExistence(_) =>
+      UnsafeProjection.create(output, output)
+    case _ =>
+      // Always put the stream side on left to simplify implementation
+      // both of left and right side could be null
+      UnsafeProjection.create(
+        output, (streamed.output ++ broadcast.output).map(_.withNullability(true)))
   }
 
   override def outputPartitioning: Partitioning = streamed.outputPartitioning
@@ -95,33 +109,70 @@ case class BroadcastIndexJoinExec(
   override def simpleString(maxFields: Int): String = super.simpleString(maxFields) + s" $spatialExpression" // SPARK3 anchor
 //  override def simpleString: String = super.simpleString + s" $spatialExpression" // SPARK2 anchor
 
-  private def innerJoin(index: Broadcast[SpatialIndex], spatialRdd: SpatialRDD[Geometry], spatialPredicate: SpatialPredicate): RDD[(Geometry, Geometry)] = {
-    spatialRdd.getRawSpatialRDD.rdd.mapPartitions { rows =>
-      val factory = new PreparedGeometryFactory()
-      val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
-      val evaluator = SpatialPredicateEvaluators.create(spatialPredicate)
-      rows.flatMap { row =>
-        val candidates = index.value.query(row.getEnvelopeInternal).iterator.asScala.asInstanceOf[Iterator[Geometry]]
-        candidates
-          .filter(candidate => evaluator.eval(preparedGeometries.getOrElseUpdate(candidate, { factory.create(candidate) }), row))
-          .map(candidate => (candidate, row))
+  private lazy val evaluator: SpatialPredicateEvaluator = if (indexBuildSide == windowJoinSide) {
+    SpatialPredicateEvaluators.create(spatialPredicate)
+  } else {
+    SpatialPredicateEvaluators.create(SpatialPredicate.inverse(spatialPredicate))
+  }
+
+  private def innerJoin(streamIter: Iterator[Geometry], index: Broadcast[SpatialIndex]): Iterator[InternalRow] = {
+    val factory = new PreparedGeometryFactory()
+    val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
+    val joinRow = new JoinedRow
+    streamIter.flatMap { srow =>
+      joinRow.withLeft(srow.getUserData.asInstanceOf[UnsafeRow])
+      index.value.query(srow.getEnvelopeInternal)
+        .iterator.asScala.asInstanceOf[Iterator[Geometry]]
+        .filter(candidate => evaluator.eval(preparedGeometries.getOrElseUpdate(candidate, { factory.create(candidate) }), srow))
+        .map(candidate => joinRow.withRight(candidate.getUserData.asInstanceOf[UnsafeRow]))
+        .filter(boundCondition)
+    }
+  }
+
+  private def semiJoin(
+    streamIter: Iterator[Geometry], index: Broadcast[SpatialIndex]
+  ): Iterator[InternalRow] = {
+    val factory = new PreparedGeometryFactory()
+    val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
+    val joinRow = new JoinedRow
+    streamIter.flatMap { srow =>
+      joinRow.withLeft(srow.getUserData.asInstanceOf[UnsafeRow])
+      val anyMatches = index.value.query(srow.getEnvelopeInternal)
+        .iterator.asScala.asInstanceOf[Iterator[Geometry]]
+        .filter(candidate => evaluator.eval(preparedGeometries.getOrElseUpdate(candidate, {
+          factory.create(candidate)
+        }), srow))
+        .map(candidate => joinRow.withRight(candidate.getUserData.asInstanceOf[UnsafeRow]))
+        .exists(boundCondition)
+
+      if (anyMatches) {
+        Iterator.single(joinRow.getLeft)
+      } else {
+        Iterator.empty
       }
     }
   }
 
-  private def outerJoin(
-    index: Broadcast[SpatialIndex], spatialRdd: SpatialRDD[Geometry],
-    spatialPredicate: SpatialPredicate
-  ): RDD[(Geometry, Geometry)] = {
-    spatialRdd.getRawSpatialRDD.rdd.mapPartitions { rows =>
-      val factory = new PreparedGeometryFactory()
-      val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
-      val evaluator = SpatialPredicateEvaluators.create(spatialPredicate)
-      rows.flatMap { row =>
-        val candidates = index.value.query(row.getEnvelopeInternal).iterator.asScala.asInstanceOf[Iterator[Geometry]]
-        candidates
-          .filter(candidate => evaluator.eval(preparedGeometries.getOrElseUpdate(candidate, { factory.create(candidate) }), row))
-          .map(candidate => (candidate, row))
+  private def antiJoin(
+    streamIter: Iterator[Geometry], index: Broadcast[SpatialIndex]
+  ): Iterator[InternalRow] = {
+    val factory = new PreparedGeometryFactory()
+    val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
+    val joinRow = new JoinedRow
+    streamIter.flatMap { srow =>
+      joinRow.withLeft(srow.getUserData.asInstanceOf[UnsafeRow])
+      val anyMatches = index.value.query(srow.getEnvelopeInternal)
+        .iterator.asScala.asInstanceOf[Iterator[Geometry]]
+        .filter(candidate => evaluator.eval(preparedGeometries.getOrElseUpdate(candidate, {
+          factory.create(candidate)
+        }), srow))
+        .map(candidate => joinRow.withRight(candidate.getUserData.asInstanceOf[UnsafeRow]))
+        .exists(boundCondition)
+
+      if (anyMatches) {
+        Iterator.empty
+      } else {
+        Iterator.single(joinRow.getLeft)
       }
     }
   }
@@ -129,6 +180,8 @@ case class BroadcastIndexJoinExec(
   override protected def doExecute(): RDD[InternalRow] = {
     val boundStreamShape = BindReferences.bindReference(streamShape, streamed.output)
     val streamResultsRaw = streamed.execute().asInstanceOf[RDD[UnsafeRow]]
+
+    val broadcastIndex = broadcast.executeBroadcast[SpatialIndex]()
 
     // If there's a distance and the objects are being broadcast, we need to build the expanded envelope on the window stream side
     val streamShapes = distance match {
@@ -138,35 +191,23 @@ case class BroadcastIndexJoinExec(
         toSpatialRDD(streamResultsRaw, boundStreamShape)
     }
 
-    val broadcastIndex = broadcast.executeBroadcast[SpatialIndex]()
+    streamShapes.getRawSpatialRDD.rdd.mapPartitions { streamedIter =>
+      val joinedIter = joinType match {
+        case _: InnerLike =>
+          innerJoin(streamedIter, broadcastIndex)
+        case LeftSemi =>
+          semiJoin(streamedIter, broadcastIndex)
+        case LeftAnti =>
+          antiJoin(streamedIter, broadcastIndex)
+        case x =>
+          throw new IllegalArgumentException(s"BroadcastIndexJoinExec should not take $x as the JoinType")
 
-    val (updatedSpatialPredicate, shouldSwap) = (indexBuildSide, windowJoinSide) match {
-      case (LeftSide, LeftSide) => (spatialPredicate, false)
-      case (LeftSide, RightSide) => (SpatialPredicate.inverse(spatialPredicate), false)
-      case (RightSide, LeftSide) => (SpatialPredicate.inverse(spatialPredicate), true)
-      case (RightSide, RightSide) => (spatialPredicate, true)
-    }
+      }
 
-    var pairs = joinType match {
-      case Inner =>
-        innerJoin(broadcastIndex, streamShapes, updatedSpatialPredicate)
-      case LeftOuter | RightOuter =>
-        outerJoin(broadcastIndex, streamShapes, updatedSpatialPredicate)
-      case x =>
-        throw new IllegalArgumentException(s"BroadcastIndexJoinExec should not take $x as the JoinType")
-    }
-    if (shouldSwap) {
-      pairs = pairs.map { case (l, r) => (r, l) }
-    }
-
-    pairs.mapPartitions { iter =>
-      val joiner = GenerateUnsafeRowJoiner.create(left.schema, right.schema)
-      iter.map {
-        case (l, r) =>
-          val leftRow = l.getUserData.asInstanceOf[UnsafeRow]
-          val rightRow = r.getUserData.asInstanceOf[UnsafeRow]
-          joiner.join(leftRow, rightRow)
-      }.filter(boundCondition(_))
+      val resultProj = createResultProjection()
+      joinedIter.map { r =>
+        resultProj(r)
+      }
     }
   }
 
