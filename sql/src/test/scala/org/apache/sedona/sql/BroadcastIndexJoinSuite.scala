@@ -64,7 +64,7 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       val polygonDf = buildPolygonDf.repartition(3)
       val pointDf = buildPointDf.repartition(5)
 
-      var broadcastJoinDf = broadcast(pointDf).alias("pointDf").join(
+      val broadcastJoinDf = broadcast(pointDf).alias("pointDf").join(
         broadcast(polygonDf).alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(broadcastJoinDf.rdd.getNumPartitions == polygonDf.rdd.getNumPartitions)
@@ -167,8 +167,8 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     }
 
     it("Passed ST_Distance <= distance in a broadcast join") {
-      var pointDf1 = buildPointDf
-      var pointDf2 = buildPointDf
+      val pointDf1 = buildPointDf
+      val pointDf2 = buildPointDf
 
       var distanceJoinDf = pointDf1.alias("pointDf1").join(
         broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) <= 2"))
@@ -182,8 +182,8 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     }
 
     it("Passed ST_Distance < distance in a broadcast join") {
-      var pointDf1 = buildPointDf
-      var pointDf2 = buildPointDf
+      val pointDf1 = buildPointDf
+      val pointDf2 = buildPointDf
 
       var distanceJoinDf = pointDf1.alias("pointDf1").join(
         broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < 2"))
@@ -197,8 +197,8 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     }
 
     it("Passed ST_Distance distance is bound to first expression") {
-      var pointDf1 = buildPointDf.withColumn("radius", two())
-      var pointDf2 = buildPointDf
+      val pointDf1 = buildPointDf.withColumn("radius", two())
+      val pointDf2 = buildPointDf
 
       var distanceJoinDf = pointDf1.alias("pointDf1").join(
         broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < radius"))
@@ -286,6 +286,16 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       assert(broadcastJoinDf.rdd.getNumPartitions == pointDf.rdd.getNumPartitions)
       assert(broadcastJoinDf.count() == 1000)
 
+      broadcastJoinDf = broadcast(polygonDf).alias("polygonDf").join(
+        pointDf.alias("pointDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_semi")
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastNestedLoopJoinExec => p }.size === 1)
+      assert(broadcastJoinDf.count() == 1000)
+
+      broadcastJoinDf = broadcast(pointDf).alias("pointDf").join(
+        polygonDf.alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_semi")
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastNestedLoopJoinExec => p }.size === 1)
+      assert(broadcastJoinDf.count() == 1000)
+
       broadcastJoinDf = polygonDf.alias("polygonDf").join(
         broadcast(pointDf).alias("pointDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_semi")
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
@@ -297,25 +307,31 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       val polygonDf = buildPolygonDf.repartition(3)
       val pointDf = buildPointDf.repartition(5)
 
-      var broadcastJoinDf = broadcast(pointDf).alias("pointDf").join(
+      val broadcastJoinDf = broadcast(pointDf).alias("pointDf").join(
         broadcast(polygonDf).alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_semi")
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(broadcastJoinDf.rdd.getNumPartitions == pointDf.rdd.getNumPartitions)
       assert(broadcastJoinDf.count() == 1000)
     }
 
-    it("Passed Can access attributes of left side of broadcast semi-join") {
+    it("Passed Can access attributes of left side of broadcast join") {
       val polygonDf = buildPolygonDf.withColumn("window_extra", one())
       val pointDf = buildPointDf.withColumn("object_extra", one())
 
       var broadcastJoinDf = polygonDf.alias("polygonDf").join(
         broadcast(pointDf).alias("pointDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_semi")
-      assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(broadcastJoinDf.select(sum("window_extra")).collect().head(0) == 1000)
+
+      broadcastJoinDf = broadcast(polygonDf).alias("polygonDf").join(
+        pointDf.alias("pointDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_semi")
+      assert(broadcastJoinDf.select(sum("window_extra")).collect().head(0) == 1000)
+
+      broadcastJoinDf = broadcast(pointDf).alias("pointDf").join(
+        polygonDf.alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_semi")
+      assert(broadcastJoinDf.select(sum("object_extra")).collect().head(0) == 1000)
 
       broadcastJoinDf = pointDf.alias("pointDf").join(
         broadcast(polygonDf).alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_semi")
-      assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(broadcastJoinDf.select(sum("object_extra")).collect().head(0) == 1000)
     }
 
@@ -396,37 +412,57 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     }
 
     it("Passed ST_Distance <= distance in a broadcast join") {
-      var pointDf1 = buildPointDf
-      var pointDf2 = buildPointDf
+      val pointDf1 = buildPointDf
+      val pointDf2 = buildPointDf
 
       var distanceJoinDf = pointDf1.alias("pointDf1").join(
         broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) <= 2"), "left_semi")
       assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(distanceJoinDf.count() == 1000)
+
+      distanceJoinDf = broadcast(pointDf1).alias("pointDf1").join(
+        pointDf2.alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) <= 2"), "left_semi")
+      assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastNestedLoopJoinExec => p }.size === 1)
+      assert(distanceJoinDf.count() == 1000)
     }
 
     it("Passed ST_Distance < distance in a broadcast join") {
-      var pointDf1 = buildPointDf
-      var pointDf2 = buildPointDf
+      val pointDf1 = buildPointDf
+      val pointDf2 = buildPointDf
 
       var distanceJoinDf = pointDf1.alias("pointDf1").join(
         broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < 2"), "left_semi")
       assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(distanceJoinDf.count() == 1000)
+
+      distanceJoinDf = broadcast(pointDf1).alias("pointDf1").join(
+        pointDf2.alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < 2"), "left_semi")
+      assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastNestedLoopJoinExec => p }.size === 1)
+      assert(distanceJoinDf.count() == 1000)
     }
 
     it("Passed ST_Distance distance is bound to first expression") {
-      var pointDf1 = buildPointDf.withColumn("radius", two())
-      var pointDf2 = buildPointDf
+      val pointDf1 = buildPointDf.withColumn("radius", two())
+      val pointDf2 = buildPointDf
 
       var distanceJoinDf = pointDf1.alias("pointDf1").join(
         broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < radius"), "left_semi")
       assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(distanceJoinDf.count() == 1000)
 
+      distanceJoinDf = broadcast(pointDf1).alias("pointDf1").join(
+        pointDf2.alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < radius"), "left_semi")
+      assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastNestedLoopJoinExec => p }.size === 1)
+      assert(distanceJoinDf.count() == 1000)
+
       distanceJoinDf = pointDf2.alias("pointDf2").join(
         broadcast(pointDf1).alias("pointDf1"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < radius"), "left_semi")
       assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(distanceJoinDf.count() == 1000)
+
+      distanceJoinDf = broadcast(pointDf2).alias("pointDf2").join(
+        pointDf1.alias("pointDf1"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < radius"), "left_semi")
+      assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastNestedLoopJoinExec => p }.size === 1)
       assert(distanceJoinDf.count() == 1000)
     }
 
@@ -439,6 +475,16 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
         broadcast(polygonDf).alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_semi")
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(broadcastJoinDf.rdd.getNumPartitions == pointDf.rdd.getNumPartitions)
+      assert(broadcastJoinDf.count() == 1000)
+
+      broadcastJoinDf = broadcast(polygonDf).alias("polygonDf").join(
+        pointDf.alias("pointDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_semi")
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastNestedLoopJoinExec => p }.size === 1)
+      assert(broadcastJoinDf.count() == 1000)
+
+      broadcastJoinDf = broadcast(pointDf).alias("pointDf").join(
+        polygonDf.alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_semi")
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastNestedLoopJoinExec => p }.size === 1)
       assert(broadcastJoinDf.count() == 1000)
 
       broadcastJoinDf = polygonDf.alias("polygonDf").join(
@@ -466,6 +512,16 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       assert(broadcastJoinDf.rdd.getNumPartitions == pointDf.rdd.getNumPartitions)
       assert(broadcastJoinDf.count() == 0)
 
+      broadcastJoinDf = broadcast(polygonDf).alias("polygonDf").join(
+        pointDf.alias("pointDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_anti")
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastNestedLoopJoinExec => p }.size === 1)
+      assert(broadcastJoinDf.count() == 0)
+
+      broadcastJoinDf = broadcast(pointDf).alias("pointDf").join(
+        polygonDf.alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_anti")
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastNestedLoopJoinExec => p }.size === 1)
+      assert(broadcastJoinDf.count() == 0)
+
       broadcastJoinDf = polygonDf.alias("polygonDf").join(
         broadcast(pointDf).alias("pointDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_anti")
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
@@ -477,14 +533,14 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       val polygonDf = buildPolygonDf.repartition(3)
       val pointDf = buildPointDf.repartition(5)
 
-      var broadcastJoinDf = broadcast(pointDf).alias("pointDf").join(
+      val broadcastJoinDf = broadcast(pointDf).alias("pointDf").join(
         broadcast(polygonDf).alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_anti")
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(broadcastJoinDf.rdd.getNumPartitions == pointDf.rdd.getNumPartitions)
       assert(broadcastJoinDf.count() == 0)
     }
 
-    it("Passed Can access attributes of left side of broadcast semi-join") {
+    it("Passed Can access attributes of left side of broadcast join") {
       val polygonDf = buildPolygonDf.withColumn("window_extra", one())
       val pointDf = buildPointDf.withColumn("object_extra", one())
 
@@ -492,6 +548,16 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
         broadcast(pointDf).alias("pointDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_anti")
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(broadcastJoinDf.select(sum("window_extra")).collect().head(0) == null)
+
+      broadcastJoinDf = broadcast(polygonDf).alias("polygonDf").join(
+        pointDf.alias("pointDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_anti")
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastNestedLoopJoinExec => p }.size === 1)
+      assert(broadcastJoinDf.select(sum("window_extra")).collect().head(0) == null)
+
+      broadcastJoinDf = broadcast(pointDf).alias("pointDf").join(
+        polygonDf.alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_anti")
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastNestedLoopJoinExec => p }.size === 1)
+      assert(broadcastJoinDf.select(sum("object_extra")).collect().head(0) == null)
 
       broadcastJoinDf = pointDf.alias("pointDf").join(
         broadcast(polygonDf).alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_anti")
@@ -545,7 +611,7 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
         )
 
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
-      assert(broadcastJoinDf.count() == 0)
+      assert(broadcastJoinDf.count() == 1000)
     }
 
     it("Passed Handles multiple extra conditions on a broadcast join with the ST predicate last") {
@@ -576,37 +642,57 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     }
 
     it("Passed ST_Distance <= distance in a broadcast join") {
-      var pointDf1 = buildPointDf
-      var pointDf2 = buildPointDf
+      val pointDf1 = buildPointDf
+      val pointDf2 = buildPointDf
 
       var distanceJoinDf = pointDf1.alias("pointDf1").join(
         broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) <= 2"), "left_anti")
       assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(distanceJoinDf.count() == 0)
+
+      distanceJoinDf = broadcast(pointDf1).alias("pointDf1").join(
+        pointDf2.alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) <= 2"), "left_anti")
+      assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastNestedLoopJoinExec => p }.size === 1)
+      assert(distanceJoinDf.count() == 0)
     }
 
     it("Passed ST_Distance < distance in a broadcast join") {
-      var pointDf1 = buildPointDf
-      var pointDf2 = buildPointDf
+      val pointDf1 = buildPointDf
+      val pointDf2 = buildPointDf
 
       var distanceJoinDf = pointDf1.alias("pointDf1").join(
         broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < 2"), "left_anti")
       assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(distanceJoinDf.count() == 0)
+
+      distanceJoinDf = broadcast(pointDf1).alias("pointDf1").join(
+        pointDf2.alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < 2"), "left_anti")
+      assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastNestedLoopJoinExec => p }.size === 1)
+      assert(distanceJoinDf.count() == 0)
     }
 
     it("Passed ST_Distance distance is bound to first expression") {
-      var pointDf1 = buildPointDf.withColumn("radius", two())
-      var pointDf2 = buildPointDf
+      val pointDf1 = buildPointDf.withColumn("radius", two())
+      val pointDf2 = buildPointDf
 
       var distanceJoinDf = pointDf1.alias("pointDf1").join(
         broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < radius"), "left_anti")
       assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(distanceJoinDf.count() == 0)
 
+      distanceJoinDf = broadcast(pointDf1).alias("pointDf1").join(
+        pointDf2.alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < radius"), "left_anti")
+      assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastNestedLoopJoinExec => p }.size === 1)
+      assert(distanceJoinDf.count() == 0)
+
       distanceJoinDf = pointDf2.alias("pointDf2").join(
         broadcast(pointDf1).alias("pointDf1"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < radius"), "left_anti")
       assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(distanceJoinDf.count() == 0)
+
+      distanceJoinDf = broadcast(pointDf2).alias("pointDf2").join(
+        pointDf1.alias("pointDf1"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < radius"), "left_anti")
+      assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastNestedLoopJoinExec => p }.size === 1)
       assert(distanceJoinDf.count() == 0)
     }
 
@@ -618,14 +704,22 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       var broadcastJoinDf = pointDf.alias("pointDf").join(
         broadcast(polygonDf).alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_anti")
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
-      assert(broadcastJoinDf.rdd.getNumPartitions == pointDf.rdd.getNumPartitions)
-      assert(broadcastJoinDf.count() == 1000)
+      assert(broadcastJoinDf.count() == 0)
+
+      broadcastJoinDf = broadcast(polygonDf).alias("polygonDf").join(
+        pointDf.alias("pointDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_anti")
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastNestedLoopJoinExec => p }.size === 1)
+      assert(broadcastJoinDf.count() == 0)
+
+      broadcastJoinDf = broadcast(pointDf).alias("pointDf").join(
+        polygonDf.alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_anti")
+      assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastNestedLoopJoinExec => p }.size === 1)
+      assert(broadcastJoinDf.count() == 0)
 
       broadcastJoinDf = polygonDf.alias("polygonDf").join(
         broadcast(pointDf).alias("pointDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_anti")
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
-      assert(broadcastJoinDf.rdd.getNumPartitions == polygonDf.rdd.getNumPartitions)
-      assert(broadcastJoinDf.count() == 1000)
+      assert(broadcastJoinDf.count() == 0)
       sparkSession.conf.set("spark.sql.adaptive.enabled", false)
     }
   }
@@ -667,7 +761,7 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       val polygonDf = buildPolygonDf.repartition(3)
       val pointDf = buildPointDf.repartition(5)
 
-      var broadcastJoinDf = broadcast(pointDf).alias("pointDf").join(
+      val broadcastJoinDf = broadcast(pointDf).alias("pointDf").join(
         broadcast(polygonDf).alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "left_outer")
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(broadcastJoinDf.rdd.getNumPartitions == pointDf.rdd.getNumPartitions)
@@ -776,8 +870,8 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     }
 
     it("Passed ST_Distance <= distance in a broadcast join") {
-      var pointDf1 = buildPointDf
-      var pointDf2 = buildPointDf
+      val pointDf1 = buildPointDf
+      val pointDf2 = buildPointDf
 
       var distanceJoinDf = pointDf1.alias("pointDf1").join(
         broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) <= 2"), "left_outer")
@@ -791,8 +885,8 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     }
 
     it("Passed ST_Distance < distance in a broadcast join") {
-      var pointDf1 = buildPointDf
-      var pointDf2 = buildPointDf
+      val pointDf1 = buildPointDf
+      val pointDf2 = buildPointDf
 
       var distanceJoinDf = pointDf1.alias("pointDf1").join(
         broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < 2"), "left_outer")
@@ -806,8 +900,8 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     }
 
     it("Passed ST_Distance distance is bound to first expression") {
-      var pointDf1 = buildPointDf.withColumn("radius", two())
-      var pointDf2 = buildPointDf
+      val pointDf1 = buildPointDf.withColumn("radius", two())
+      val pointDf2 = buildPointDf
 
       var distanceJoinDf = pointDf1.alias("pointDf1").join(
         broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < radius"), "left_outer")
@@ -897,7 +991,7 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       val polygonDf = buildPolygonDf.repartition(3)
       val pointDf = buildPointDf.repartition(5)
 
-      var broadcastJoinDf = broadcast(pointDf).alias("pointDf").join(
+      val broadcastJoinDf = broadcast(pointDf).alias("pointDf").join(
         broadcast(polygonDf).alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"), "right_outer")
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(broadcastJoinDf.rdd.getNumPartitions == polygonDf.rdd.getNumPartitions)
@@ -1006,8 +1100,8 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     }
 
     it("Passed ST_Distance <= distance in a broadcast join") {
-      var pointDf1 = buildPointDf
-      var pointDf2 = buildPointDf
+      val pointDf1 = buildPointDf
+      val pointDf2 = buildPointDf
 
       var distanceJoinDf = pointDf1.alias("pointDf1").join(
         broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) <= 2"), "right_outer")
@@ -1021,8 +1115,8 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     }
 
     it("Passed ST_Distance < distance in a broadcast join") {
-      var pointDf1 = buildPointDf
-      var pointDf2 = buildPointDf
+      val pointDf1 = buildPointDf
+      val pointDf2 = buildPointDf
 
       var distanceJoinDf = pointDf1.alias("pointDf1").join(
         broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < 2"), "right_outer")
@@ -1036,8 +1130,8 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     }
 
     it("Passed ST_Distance distance is bound to first expression") {
-      var pointDf1 = buildPointDf.withColumn("radius", two())
-      var pointDf2 = buildPointDf
+      val pointDf1 = buildPointDf.withColumn("radius", two())
+      val pointDf2 = buildPointDf
 
       var distanceJoinDf = pointDf1.alias("pointDf1").join(
         broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) < radius"), "right_outer")
