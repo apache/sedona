@@ -39,11 +39,6 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.sedona</groupId>
-            <artifactId>sedona-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sedona</groupId>
             <artifactId>sedona-core-${spark.compat.version}_${scala.compat.version}</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
