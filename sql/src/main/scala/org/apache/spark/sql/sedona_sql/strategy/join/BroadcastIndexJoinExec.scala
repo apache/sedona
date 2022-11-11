@@ -26,10 +26,10 @@ import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, JoinedRow, Predicate, UnsafeProjection, UnsafeRow}
+import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, GenericInternalRow, JoinedRow, Predicate, UnsafeProjection, UnsafeRow}
 import org.apache.spark.sql.catalyst.plans.physical.Partitioning
 import org.apache.spark.sql.catalyst.plans._
-import org.apache.spark.sql.execution.SparkPlan
+import org.apache.spark.sql.execution.{RowIterator, SparkPlan}
 import org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.prep.{PreparedGeometry, PreparedGeometryFactory}
@@ -118,13 +118,13 @@ case class BroadcastIndexJoinExec(
   private def innerJoin(streamIter: Iterator[Geometry], index: Broadcast[SpatialIndex]): Iterator[InternalRow] = {
     val factory = new PreparedGeometryFactory()
     val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
-    val joinRow = new JoinedRow
+    val joinedRow = new JoinedRow
     streamIter.flatMap { srow =>
-      joinRow.withLeft(srow.getUserData.asInstanceOf[UnsafeRow])
+      joinedRow.withLeft(srow.getUserData.asInstanceOf[UnsafeRow])
       index.value.query(srow.getEnvelopeInternal)
         .iterator.asScala.asInstanceOf[Iterator[Geometry]]
         .filter(candidate => evaluator.eval(preparedGeometries.getOrElseUpdate(candidate, { factory.create(candidate) }), srow))
-        .map(candidate => joinRow.withRight(candidate.getUserData.asInstanceOf[UnsafeRow]))
+        .map(candidate => joinedRow.withRight(candidate.getUserData.asInstanceOf[UnsafeRow]))
         .filter(boundCondition)
     }
   }
@@ -134,19 +134,19 @@ case class BroadcastIndexJoinExec(
   ): Iterator[InternalRow] = {
     val factory = new PreparedGeometryFactory()
     val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
-    val joinRow = new JoinedRow
+    val joinedRow = new JoinedRow
     streamIter.flatMap { srow =>
-      joinRow.withLeft(srow.getUserData.asInstanceOf[UnsafeRow])
+      joinedRow.withLeft(srow.getUserData.asInstanceOf[UnsafeRow])
       val anyMatches = index.value.query(srow.getEnvelopeInternal)
         .iterator.asScala.asInstanceOf[Iterator[Geometry]]
         .filter(candidate => evaluator.eval(preparedGeometries.getOrElseUpdate(candidate, {
           factory.create(candidate)
         }), srow))
-        .map(candidate => joinRow.withRight(candidate.getUserData.asInstanceOf[UnsafeRow]))
+        .map(candidate => joinedRow.withRight(candidate.getUserData.asInstanceOf[UnsafeRow]))
         .exists(boundCondition)
 
       if (anyMatches) {
-        Iterator.single(joinRow.getLeft)
+        Iterator.single(joinedRow.getLeft)
       } else {
         Iterator.empty
       }
@@ -158,22 +158,60 @@ case class BroadcastIndexJoinExec(
   ): Iterator[InternalRow] = {
     val factory = new PreparedGeometryFactory()
     val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
-    val joinRow = new JoinedRow
+    val joinedRow = new JoinedRow
     streamIter.flatMap { srow =>
-      joinRow.withLeft(srow.getUserData.asInstanceOf[UnsafeRow])
+      joinedRow.withLeft(srow.getUserData.asInstanceOf[UnsafeRow])
       val anyMatches = index.value.query(srow.getEnvelopeInternal)
         .iterator.asScala.asInstanceOf[Iterator[Geometry]]
         .filter(candidate => evaluator.eval(preparedGeometries.getOrElseUpdate(candidate, {
           factory.create(candidate)
         }), srow))
-        .map(candidate => joinRow.withRight(candidate.getUserData.asInstanceOf[UnsafeRow]))
+        .map(candidate => joinedRow.withRight(candidate.getUserData.asInstanceOf[UnsafeRow]))
         .exists(boundCondition)
 
       if (anyMatches) {
         Iterator.empty
       } else {
-        Iterator.single(joinRow.getLeft)
+        Iterator.single(joinedRow.getLeft)
       }
+    }
+  }
+
+  private def outerJoin(
+    streamIter: Iterator[Geometry], index: Broadcast[SpatialIndex]
+  ): Iterator[InternalRow] = {
+    val factory = new PreparedGeometryFactory()
+    val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
+    val joinedRow = new JoinedRow
+    val nullRow = new GenericInternalRow(broadcast.output.length)
+
+    streamIter.flatMap { srow =>
+      joinedRow.withLeft(srow.getUserData.asInstanceOf[UnsafeRow])
+      val candidates = index.value.query(srow.getEnvelopeInternal)
+        .iterator.asScala.asInstanceOf[Iterator[Geometry]]
+        .filter(candidate => evaluator.eval(preparedGeometries.getOrElseUpdate(candidate, {
+          factory.create(candidate)
+        }), srow))
+
+      new RowIterator {
+        private var found = false
+        override def advanceNext(): Boolean = {
+          while (candidates.hasNext) {
+            val candidateRow = candidates.next().getUserData.asInstanceOf[UnsafeRow]
+            if (boundCondition(joinedRow.withRight(candidateRow))) {
+              found = true
+              return true
+            }
+          }
+          if (!found) {
+            joinedRow.withRight(nullRow)
+            found = true
+            return true
+          }
+          false
+        }
+        override def getRow: InternalRow = joinedRow
+      }.toScala
     }
   }
 
@@ -199,6 +237,8 @@ case class BroadcastIndexJoinExec(
           semiJoin(streamedIter, broadcastIndex)
         case LeftAnti =>
           antiJoin(streamedIter, broadcastIndex)
+        case LeftOuter | RightOuter =>
+          outerJoin(streamedIter, broadcastIndex)
         case x =>
           throw new IllegalArgumentException(s"BroadcastIndexJoinExec should not take $x as the JoinType")
 

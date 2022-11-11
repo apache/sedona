@@ -240,6 +240,8 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
       case Inner if broadcastRight => RightSide
       case LeftSemi if broadcastRight => RightSide
       case LeftAnti if broadcastRight => RightSide
+      case LeftOuter if broadcastRight => RightSide
+      case RightOuter if broadcastLeft => LeftSide
       case _ => return Nil
     }
 
