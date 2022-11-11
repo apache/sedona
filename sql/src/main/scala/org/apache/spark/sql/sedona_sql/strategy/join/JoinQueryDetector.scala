@@ -236,13 +236,17 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     distance: Option[Expression]): Seq[SparkPlan] = {
 
     val broadcastSide = joinType match {
-      case Inner if broadcastLeft => LeftSide
-      case Inner if broadcastRight => RightSide
-      case LeftSemi if broadcastRight => RightSide
-      case LeftAnti if broadcastRight => RightSide
-      case LeftOuter if broadcastRight => RightSide
-      case RightOuter if broadcastLeft => LeftSide
-      case _ => return Nil
+      case Inner if broadcastLeft => Some(LeftSide)
+      case Inner if broadcastRight => Some(RightSide)
+      case LeftSemi if broadcastRight => Some(RightSide)
+      case LeftAnti if broadcastRight => Some(RightSide)
+      case LeftOuter if broadcastRight => Some(RightSide)
+      case RightOuter if broadcastLeft => Some(LeftSide)
+      case _ => None
+    }
+
+    if (broadcastSide.isEmpty) {
+      return Nil
     }
 
     val a = children.head
@@ -257,7 +261,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     matchExpressionsToPlans(a, b, left, right) match {
       case Some((_, _, swapped)) =>
         logInfo(s"Planning spatial join for $relationship relationship")
-        val (leftPlan, rightPlan, streamShape, windowSide) = (broadcastSide, swapped) match {
+        val (leftPlan, rightPlan, streamShape, windowSide) = (broadcastSide.get, swapped) match {
           case (LeftSide, false) => // Broadcast the left side, windows on the left
             (SpatialIndexExec(planLater(left), a, indexType, distance), planLater(right), b, LeftSide)
           case (LeftSide, true) => // Broadcast the left side, objects on the left
@@ -267,7 +271,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
           case (RightSide, true) => // Broadcast the right side, objects on the left
             (planLater(left), SpatialIndexExec(planLater(right), a, indexType, distance), b, RightSide)
         }
-        BroadcastIndexJoinExec(leftPlan, rightPlan, streamShape, broadcastSide, windowSide, joinType, spatialPredicate, extraCondition, distance) :: Nil
+        BroadcastIndexJoinExec(leftPlan, rightPlan, streamShape, broadcastSide.get, windowSide, joinType, spatialPredicate, extraCondition, distance) :: Nil
       case None =>
         logInfo(
           s"Spatial join for $relationship with arguments not aligned " +
