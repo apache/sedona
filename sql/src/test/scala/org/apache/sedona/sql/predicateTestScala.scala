@@ -257,6 +257,7 @@ class predicateTestScala extends TestBaseScala {
         val point = ST_Point(Literal.create(0.0) :: Literal.create(0.0) :: Literal.create(0.0):: Nil)
         val missing = Literal.create(null)
 
+        assert(predicate(point :: point :: Nil).eval(EmptyRow) != null)
         assert(predicate(point :: missing :: Nil).eval(EmptyRow) == null)
         assert(predicate(missing :: point :: Nil).eval(EmptyRow) == null)
         assert(predicate(missing :: missing :: Nil).eval(EmptyRow) == null)
