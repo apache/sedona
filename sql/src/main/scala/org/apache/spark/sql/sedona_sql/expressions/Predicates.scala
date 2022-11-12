@@ -47,13 +47,17 @@ abstract class ST_Predicate extends Expression
 
   override def eval(inputRow: InternalRow): Any = {
     val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
-    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
-    if (leftArray == null || rightArray == null) {
+    if (leftArray == null) {
       null
     } else {
-      val leftGeometry = GeometrySerializer.deserialize(leftArray)
-      val rightGeometry = GeometrySerializer.deserialize(rightArray)
-      evalGeom(leftGeometry, rightGeometry)
+      val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
+      if (rightArray == null) {
+        null
+      } else {
+        val leftGeometry = GeometrySerializer.deserialize(leftArray)
+        val rightGeometry = GeometrySerializer.deserialize(rightArray)
+        evalGeom(leftGeometry, rightGeometry)
+      }
     }
   }
 
