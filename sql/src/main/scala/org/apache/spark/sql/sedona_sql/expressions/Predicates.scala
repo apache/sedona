@@ -45,7 +45,7 @@ abstract class ST_Predicate extends Expression
 
   override def children: Seq[Expression] = inputExpressions
 
-  override def eval(inputRow: InternalRow): Any = {
+  override final def eval(inputRow: InternalRow): Any = {
     val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
     if (leftArray == null) {
       null
