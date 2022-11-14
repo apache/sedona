@@ -373,6 +373,15 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(Hex.encodeHexString(df.first().get(0).asInstanceOf[Array[Byte]]) == s)
     }
 
+    it("Passed ST_AsBinary with srid") {
+      // ST_AsBinary should return a WKB.
+      // WKB does not contain any srid.
+      val df = sparkSession.sql("SELECT ST_AsBinary(ST_SetSRID(ST_Point(1.0,1.0), 3021)), ST_AsBinary(ST_Point(1.0,1.0))")
+      val withSrid: Array[Byte] = df.first().getAs(0)
+      val withoutSrid: Array[Byte] = df.first().getAs(1)
+      assert(withSrid.seq == withoutSrid.seq)
+    }
+
     it("Passed ST_AsGML") {
       val df = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') AS polygon")
       df.createOrReplaceTempView("table")

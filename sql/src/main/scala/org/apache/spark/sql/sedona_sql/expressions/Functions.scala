@@ -298,14 +298,14 @@ case class ST_AsGeoJSON(inputExpressions: Seq[Expression])
 // TODO: sernetcdf is bundled with an ancient version of apache commons-codec, which
 // causes spark sql to throw NoSuchMethodError when folding binary expressions.
 case class ST_AsBinary(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.asEWKB) {
+  extends InferredUnaryExpression(Functions.asWKB) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-// TODO: ST_AsEWKB is an alias of ST_AsBinary, which is also affected by the sernetcdf
+// TODO: ST_AsEWKB is similar to ST_AsBinary, which is also affected by the sernetcdf
 // problem.
 case class ST_AsEWKB(inputExpressions: Seq[Expression])
   extends InferredUnaryExpression(Functions.asEWKB) {
