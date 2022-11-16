@@ -32,13 +32,13 @@ git pull
 
 # Spark 3.0 and Scala 2.12
 # Prepare the SNAPSHOTs
-mvn -q clean -Darguments="-DskipTests" release:prepare -DdryRun=true -DautoVersionSubmodules=true -Dresume=false
+mvn -q -B clean -Darguments="-DskipTests" release:prepare -Dtag={{ sedona_create_release.current_git_tag }} -DreleaseVersion={{ sedona_create_release.current_version }} -DdevelopmentVersion={{ sedona_create_release.current_snapshot }} -DdryRun=true -DautoVersionSubmodules=true -Dresume=false
 # Deploy the SNAPSHOTs
 mvn -q deploy -DskipTests
 
 # Prepare for Spark 3.0 and Scala 2.13
 # Prepare the SNAPSHOTs
-mvn -q clean -Darguments="-DskipTests -Dscala=2.13" release:prepare -DdryRun=true -DautoVersionSubmodules=true -Dresume=false
+mvn -q -B clean -Darguments="-DskipTests -Dscala=2.13" release:prepare  -Dtag={{ sedona_create_release.current_git_tag }} -DreleaseVersion={{ sedona_create_release.current_version }} -DdevelopmentVersion={{ sedona_create_release.current_snapshot }} -DdryRun=true -DautoVersionSubmodules=true -Dresume=false
 # Deploy the SNAPSHOTs
 mvn -q deploy -DskipTests -Dscala=2.13
 ```
