@@ -58,6 +58,7 @@
     </scm>
 
     <properties>
+        <project.scm.id>github</project.scm.id>
         <geotools.version>24.0</geotools.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.scope>provided</dependency.scope>

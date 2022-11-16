@@ -1,235 +1,164 @@
-# Publish Sedona
+# Make a Sedona release
 
 This page is for Sedona PPMC to publish Sedona releases.
 
-## Obtain Write Access to Sedona GitHub repo
+You can read ASF guidelines: 1. ASF Incubator Distribution Guidelines: https://incubator.apache.org/guides/distribution.html 2. ASF Release Guidelines: https://infra.apache.org/release-publishing.html 3. ASF Incubator Release Votes Guidelines: https://issues.apache.org/jira/browse/LEGAL-469
 
-1. Verify you have a Github ID enabled with 2FA https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/
-2. Enter your Github ID into your Apache ID profile https://id.apache.org/
-3. Merge your Apache and GitHub accounts using GitBox (Apache Account Linking utility): https://gitbox.apache.org/setup/
-	* You should see 3 green checks in GitBox
-	* Wait at least 30  minutes for an email inviting you to Apache GitHub Organization and accept invitation
-4. After accepting the Github Invitation, verify that you are a member of the team https://github.com/orgs/apache/teams/sedona-committers
-5. Additionally, if you have been elected to the Sedona PPMC, verify you are part of the LDAP Sedona PPMC https://whimsy.apache.org/roster/ppmc/sedona
+!!!warning
+    All scripts on this page should be run in your local Sedona Git repo under master branch via a single script file.
 
-## Prepare Secret GPG key
+## 0. Prepare an empty script file
 
-1. Install GNUGPG if it was not installed before. On Mac: `brew install gnupg gnupg2`
-2. Generate a secret key. It must be RSA4096 (4096 bits long). 
-	* Run `gpg --full-generate-key`. If not work, run `gpg --default-new-key-algo rsa4096 --gen-key`
-	* At the prompt, specify the kind of key you want: Select `RSA`, then press `enter`
-    * At the prompt, specify the key size you want: Enter `4096`
-    * At the prompt, enter the length of time the key should be valid: Press `enter` to make the key never expire.
-    * Verify that your selections are correct.
-    * Enter your user ID information: use your real name and Apache email address.
-    * Type a secure passphrase.
-    * Use the `gpg --list-secret-keys --keyid-format=long` command to list the long form of the GPG keys.
-    * From the list of GPG keys, copy the long form of the GPG key ID you'd like to use (e.g., `3AA5C34371567BD2`)
-    * Run `gpg --export --armor 3AA5C34371567BD2`, substituting in the GPG key ID you'd like to use.
-    * Copy your GPG key, beginning with `-----BEGIN PGP PUBLIC KEY BLOCK-----` and ending with `-----END PGP PUBLIC KEY BLOCK-----`.
-3. Publish your armored key in major key servers: https://keyserver.pgp.com/
-4. Append your armored PGP public key to the `KEYS` file: https://dist.apache.org/repos/dist/dev/incubator/sedona/KEYS
-
-## Set up ASF username for Maven
-
-In your `~/.m2/settings.xml` file, add the following content. Please create one if it does not exist. Please replace ASF\_ID and ASF\_PASSWORD with your own ASF ID and password.
-
-```
-<settings>
-  <servers>
-    <server>
-      <id>apache.snapshots.https</id>
-      <username>YOUR_ASF_ID</username>
-      <password>YOUR_ASF_PASSWORD</password>
-    </server>
-    <server>
-      <id>apache.releases.https</id>
-      <username>YOUR_ASF_ID</username>
-      <password>YOUR_ASF_PASSWORD</password>
-    </server>
-  </servers>
-</settings>
-```
-
-## Publish SNAPSHOTs
-
-### Publish Maven SNAPSHOTs
-
-This step is to publish the SNAPSHOTs to https://repository.apache.org
-
-The detailed requirement is on [ASF Infra website](https://infra.apache.org/publishing-maven-artifacts.html)
-
-#### Prepare for Spark 3.0 and Scala 2.12
-
-1. Prepare the SNAPSHOTs
-```
-mvn clean -Darguments="-DskipTests" release:prepare -DdryRun=true -DautoVersionSubmodules=true -Dresume=false
-```
-2. Deploy the SNAPSHOTs
-```
-mvn deploy -DskipTests
-```
-
-If you are using Mac and see `sign artifacts failed`, please enter the following command in your terminal and re-compile again.
-
+1. In your local Sedona Git repo under master branch, run
 ```bash
-GPG_TTY=$(tty)
-export GPG_TTY
+echo "#!/bin/bash" > create-release.sh
+chmod 777 create-release.sh
 ```
+2. Use your favourite GUI text editor to open `create-release.sh`.
+3. Then keep copying the scripts on this web page to replace all content in this text file.
+4. Do NOT directly copy/paste the scripts to your terminal because a bug in `clipboard.js` will create link breaks in such case. 
 
-#### Prepare for Spark 3.0 and Scala 2.13
+## 1. Check ASF copyright in all file headers
 
-1. Prepare the SNAPSHOTs
-```
-mvn clean -Darguments="-DskipTests -Dscala=2.13" release:prepare -DdryRun=true -DautoVersionSubmodules=true -Dresume=false
-```
-2. Deploy the SNAPSHOTs
-```
-mvn deploy -DskipTests -Dscala=2.13
-```
-
-## Check ASF copyright in all file headers
-
-1. Download [Apache Rat binary (.jar file)](https://creadur.apache.org/rat/download_rat.cgi).
-2. Run the following terminal script:
+1. Run the following script:
 ```bash
 #!/bin/bash
+wget -q https://dlcdn.apache.org//creadur/apache-rat-$RAT_VERSION/apache-rat-0.15-bin.tar.gz
+tar -xvf  apache-rat-0.15-bin.tar.gz
 git clone --shared --branch master https://github.com/apache/incubator-sedona.git sedona-src
-java -jar apache-rat-0.14.jar -d sedona-src > report.txt
+java -jar apache-rat-0.15.jar -d sedona-src > report.txt
 ```
-3. Read the generated report.txt file and make sure all source code files have ASF header.
-4. Delete the generated report and cloned files
-```
+2. Read the generated report.txt file and make sure all source code files have ASF header.
+3. Delete the generated report and cloned files
+```bash
+#!/bin/bash
 rm -rf sedona-src
 rm report.txt
 ```
 
-!!!note
-	Please read the following guidelines first: 1. ASF Incubator Distribution Guidelines: https://incubator.apache.org/guides/distribution.html 2. ASF Release Guidelines: https://infra.apache.org/release-publishing.html 3. ASF Incubator Release Votes Guidelines: https://issues.apache.org/jira/browse/LEGAL-469
-	
-## Publish releases
+## 2. Update Sedona Python, R and Zeppelin versions
 
-### Update mkdocs.yml
-
-Please change the `sedona.current_version`, `sedona.current_rc`, `sedona.current_git_tag` and `sedona.current_snapshot` in `mkdocs.yml` to the version you want to publish. Do NOT change `sedona.next_version` at this moment. Then compile the website by `mkdocs serve`. This will generate the scripts listed on this page in your local browser.
-
-### Update Sedona Python, R and Zeppelin versions
-
-Make sure the Sedona version in the following files are {{ sedona.current_version }}. Note that: Python and R versions cannot have "incubating" postfix.
+Make sure the Sedona version in the following files are {{ sedona_create_release.current_version }}. Note that: Python and R versions cannot have "incubating" postfix.
 
 1. https://github.com/apache/incubator-sedona/blob/master/python/sedona/version.py
 2. https://github.com/apache/incubator-sedona/blob/master/R/DESCRIPTION
 3. https://github.com/apache/incubator-sedona/blob/master/zeppelin/package.json
 
-### Stage the Release Candidate
 
-This step is to stage the release to https://repository.apache.org
+## 3. Update mkdocs.yml
 
-#### For Spark 3.0 and Scala 2.12
+* Please change the following variables in `mkdocs.yml` to the version you want to publish.
+    * `sedona_create_release.current_version`
+    * `sedona_create_release.current_rc`
+    * `sedona_create_release.current_git_tag`
+    * `sedona_create_release.current_snapshot`
+* Then compile the website by `mkdocs serve`. This will generate the scripts listed on this page in your local browser.
+* You can also publish this website if needed. See the instruction at bottom.
 
-1. Prepare a release. Manually enter the following variables in the terminal: release id: `{{ sedona.current_version }}`, scm tag id: `{{ sedona.current_git_tag }}`. You also need to provide GitHub username and password three times.
-```bash
-mvn clean release:prepare -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests"
-```
-2. Stage a release
-```bash
-mvn clean release:perform -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests" 
-```
-3. Now the releases are staged. A tag and two commits will be created on Sedona GitHub repo.
+## 4. Stage and upload release candidates
 
-Now let's repeat the process to other Sedona modules. Make sure you use the correct SCM Git tag id `{{ sedona.current_git_tag }}` (see below).
-
-#### For Spark 3.0 and Scala 2.13
-
-```
-mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.13"
-```
-
-
-### Upload Release Candidate
-
-All release candidates must be first placed in ASF Dist Dev SVN before vote: https://dist.apache.org/repos/dist/dev/incubator/sedona
-
-1. Make sure your armored PGP public key (must be encrypted by RSA-4096) is included in the `KEYS` file: https://dist.apache.org/repos/dist/dev/incubator/sedona/KEYS, and publish in major key servers: https://keyserver.pgp.com/
-2. Create a folder on SVN, such as `{{ sedona.current_git_tag }}`
 ```bash
 #!/bin/bash
-svn mkdir -m "Adding folder" https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}
-```
-3. In a folder other than the Sedona git repo, run the following script to create six files and two folders.
-```bash
-#!/bin/bash
-git clone --shared --branch {{ sedona.current_git_tag}} https://github.com/apache/incubator-sedona.git apache-sedona-{{ sedona.current_version }}-src
-rm -rf apache-sedona-{{ sedona.current_version }}-src/.git
-tar czf apache-sedona-{{ sedona.current_version }}-src.tar.gz apache-sedona-{{ sedona.current_version }}-src
-mkdir apache-sedona-{{ sedona.current_version }}-bin
-cd apache-sedona-{{ sedona.current_version }}-src && mvn clean install -DskipTests -Dscala=2.12 && cd ..
-cp apache-sedona-{{ sedona.current_version }}-src/core/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/sql/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/viz/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/python-adapter/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/flink/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
-cd apache-sedona-{{ sedona.current_version }}-src && mvn clean install -DskipTests -Dscala=2.13 && cd ..
-cp apache-sedona-{{ sedona.current_version }}-src/core/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/sql/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/viz/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/python-adapter/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
-cp apache-sedona-{{ sedona.current_version }}-src/flink/target/sedona-*{{ sedona.current_version}}.jar apache-sedona-{{ sedona.current_version }}-bin/
-tar czf apache-sedona-{{ sedona.current_version }}-bin.tar.gz apache-sedona-{{ sedona.current_version }}-bin
-shasum -a 512 apache-sedona-{{ sedona.current_version }}-src.tar.gz > apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512
-shasum -a 512 apache-sedona-{{ sedona.current_version }}-bin.tar.gz > apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512
-gpg -ab apache-sedona-{{ sedona.current_version }}-src.tar.gz
-gpg -ab apache-sedona-{{ sedona.current_version }}-bin.tar.gz
-```
-4. Upload six files to SVN and delete all created files using the following script
-```bash
-#!/bin/bash
-svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-src.tar.gz https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz
-svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-src.tar.gz.asc https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz.asc
-svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512
-svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-bin.tar.gz https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz
-svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-bin.tar.gz.asc https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz.asc
-svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512
-rm apache-sedona-{{ sedona.current_version }}-src.tar.gz
-rm apache-sedona-{{ sedona.current_version }}-src.tar.gz.asc
-rm apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512
-rm apache-sedona-{{ sedona.current_version }}-bin.tar.gz
-rm apache-sedona-{{ sedona.current_version }}-bin.tar.gz.asc
-rm apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512
-rm -rf apache-sedona-{{ sedona.current_version }}-src
-rm -rf apache-sedona-{{ sedona.current_version }}-bin
+
+git checkout master
+git pull
+
+echo "Step 1. Stage the Release Candidate to GitHub."
+
+mvn -q -B clean release:prepare -Dtag={{ sedona_create_release.current_git_tag }} -DreleaseVersion={{ sedona_create_release.current_version }} \
+-DdevelopmentVersion={{ sedona_create_release.current_snapshot }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests"
+
+echo "Now the releases are staged. A tag and two commits have been created on Sedona GitHub repo"
+
+echo "Step 2: Upload the Release Candidate to https://repository.apache.org."
+
+# For Spark 3.0 and Scala 2.12
+mvn -q clean release:perform -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests" 
+
+# For Spark 3.0 and Scala 2.13
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform \
+-DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona_create_release.current_git_tag }} \
+-DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.13"
+
+echo "Step 3: Upload Release Candidate on ASF SVN: https://dist.apache.org/repos/dist/dev/incubator/sedona"
+
+echo "Creating a folder on SVN..."
+
+svn mkdir -m "Adding folder" https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}
+
+echo "Creating release files locally..."
+
+git clone --shared --branch {{ sedona_create_release.current_git_tag}} https://github.com/apache/incubator-sedona.git apache-sedona-{{ sedona_create_release.current_version }}-src
+rm -rf apache-sedona-{{ sedona_create_release.current_version }}-src/.git
+tar czf apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz apache-sedona-{{ sedona_create_release.current_version }}-src
+mkdir apache-sedona-{{ sedona_create_release.current_version }}-bin
+cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn clean install -DskipTests -Dscala=2.12 && cd ..
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/core/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/sql/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/viz/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/python-adapter/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/flink/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn clean install -DskipTests -Dscala=2.13 && cd ..
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/core/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/sql/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/viz/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/python-adapter/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/flink/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+tar czf apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz apache-sedona-{{ sedona_create_release.current_version }}-bin
+shasum -a 512 apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz > apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512
+shasum -a 512 apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz > apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512
+gpg -ab apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz
+gpg -ab apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz
+
+echo "Uploading local release files..."
+
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.asc https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.asc
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.asc https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.asc
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512
+
+echo "Removing local release files..."
+
+rm apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz
+rm apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.asc
+rm apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512
+rm apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz
+rm apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.asc
+rm apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512
+rm -rf apache-sedona-{{ sedona_create_release.current_version }}-src
+rm -rf apache-sedona-{{ sedona_create_release.current_version }}-bin
+
 ```
 
-### Vote in dev sedona.apache.org
+## 5. Vote in dev sedona.apache.org
 
-1. Check the status of the staging repo: [Locate and Examine Your Staging Repository
-](https://central.sonatype.org/pages/releasing-the-deployment.html#locate-and-examine-your-staging-repository). You should see 12 Sedona modules in total.
-2. Call for a vote in Sedona community and Apache incubator. Then close the staging repo.
-3. The vote will be open for at least 72 hours or until at least 3 "+1" PMC votes are cast
+### Vote email
 
-Here is a generated vote email. Please add changes at the end if needed:
+Please add changes at the end if needed:
 
 ```
-Subject: [VOTE] Release Apache Sedona {{ sedona.current_rc }}
+Subject: [VOTE] Release Apache Sedona {{ sedona_create_release.current_rc }}
 
 Hi all,
 
-This is a call for vote on Apache Sedona {{ sedona.current_rc }}. Please refer to the changes listed at the bottom of this email.
+This is a call for vote on Apache Sedona {{ sedona_create_release.current_rc }}. Please refer to the changes listed at the bottom of this email.
 
 Release notes:
-https://github.com/apache/incubator-sedona/blob/{{ sedona.current_git_tag }}/docs/setup/release-notes.md
+https://github.com/apache/incubator-sedona/blob/{{ sedona_create_release.current_git_tag }}/docs/setup/release-notes.md
 
 Build instructions:
-https://github.com/apache/incubator-sedona/blob/{{ sedona.current_git_tag }}/docs/setup/compile.md
+https://github.com/apache/incubator-sedona/blob/{{ sedona_create_release.current_git_tag }}/docs/setup/compile.md
 
 GitHub tag:
-https://github.com/apache/incubator-sedona/releases/tag/{{ sedona.current_git_tag }}
+https://github.com/apache/incubator-sedona/releases/tag/{{ sedona_create_release.current_git_tag }}
 
 GPG public key to verify the Release:
 https://downloads.apache.org/incubator/sedona/KEYS
 
 Source code and binaries:
-https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/
+https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/
 
 The vote will be open for at least 72 hours or until at least 3 "+1" PMC votes are cast
 
@@ -267,10 +196,12 @@ Original comment (Permalink from https://lists.apache.org/list.html):
 
 ```
 
-Here is a generated "pass" email:
+### Pass email
+
+Please count the votes and add the Permalink of the vote thread at the end.
 
 ```
-Subject: [RESULT][VOTE] Release Apache Sedona {{ sedona.current_rc }}
+Subject: [RESULT][VOTE] Release Apache Sedona {{ sedona_create_release.current_rc }}
 
 Dear all,
 
@@ -287,37 +218,39 @@ approval by the IPMC. If this vote passes too, the release is accepted and will 
 
 ```
 
-### Vote in general incubator.apache.org
+## 6. Vote in general incubator.apache.org
 
-Here is a generated vote email. Please add changes at the end if needed.
+### Vote email
 
-The vote will be open for at least 72 hours or until at least 3 "+1" PMC votes are cast.
+1. Please add the permalink of Sedona Community vote thread
+2. Please add the permalink of Sedona Community vote result thread
+3. Please add changes at the end if needed.
 
 ```
-Subject: [VOTE] Release Apache Sedona {{ sedona.current_rc }}
+Subject: [VOTE] Release Apache Sedona {{ sedona_create_release.current_rc }}
 
 Hi all,
 
-This is a call for vote on Apache Sedona {{ sedona.current_rc }}. Please refer to the changes listed at the bottom of this email.
+This is a call for vote on Apache Sedona {{ sedona_create_release.current_rc }}. Please refer to the changes listed at the bottom of this email.
 
 Sedona Community vote thread (Permalink from https://lists.apache.org/list.html):
 
 Sedona community vote result thread (Permalink from https://lists.apache.org/list.html):
 
 Release notes:
-https://github.com/apache/incubator-sedona/blob/{{ sedona.current_git_tag }}/docs/setup/release-notes.md
+https://github.com/apache/incubator-sedona/blob/{{ sedona_create_release.current_git_tag }}/docs/setup/release-notes.md
 
 Build instructions:
-https://github.com/apache/incubator-sedona/blob/{{ sedona.current_git_tag }}/docs/setup/compile.md
+https://github.com/apache/incubator-sedona/blob/{{ sedona_create_release.current_git_tag }}/docs/setup/compile.md
 
 GitHub tag:
-https://github.com/apache/incubator-sedona/releases/tag/{{ sedona.current_git_tag }}
+https://github.com/apache/incubator-sedona/releases/tag/{{ sedona_create_release.current_git_tag }}
 
 GPG public key to verify the Release:
 https://downloads.apache.org/incubator/sedona/KEYS
 
 Source code and binaries:
-https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/
+https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/
 
 The vote will be open for at least 72 hours or until at least 3 "+1" PMC votes are cast
 
@@ -350,10 +283,12 @@ Original comment (Permalink from https://lists.apache.org/list.html):
 
 ```
 
-Here is a generated "pass" email:
+### Pass email
+
+Please count the votes and add the permalink of the vote thread.
 
 ```
-Subject: [RESULT][VOTE] Release Apache Sedona {{ sedona.current_rc }}
+Subject: [RESULT][VOTE] Release Apache Sedona {{ sedona_create_release.current_rc }}
 
 Dear all,
 
@@ -369,14 +304,18 @@ I will publish the release and make an annoucement once it is done.
 
 ```
 
-Here is a generated "announce" email. This email should be CCed to dev@sedona.apache.org:
+### Announce email
+
+1. This email should be CCed to dev@sedona.apache.org
+2. Please add the permalink of the incubator vote thread
+3. Please add the permalink of the incubator vote result thread
 
 ```
-Subject: [ANNOUNCE] Apache Sedona {{ sedona.current_version }} released
+Subject: [ANNOUNCE] Apache Sedona {{ sedona_create_release.current_version }} released
 
 Dear all,
 
-We are happy to report that we have released Apache Sedona (incubating) {{ sedona.current_version }}. Thank you again for your help.
+We are happy to report that we have released Apache Sedona (incubating) {{ sedona_create_release.current_version }}. Thank you again for your help.
 
 Apache Sedona (incubating) is a cluster computing system for processing large-scale spatial data. 
 
@@ -391,10 +330,10 @@ Website:
 http://sedona.apache.org/
 
 Release notes:
-https://github.com/apache/incubator-sedona/blob/sedona-{{ sedona.current_version }}/docs/setup/release-notes.md
+https://github.com/apache/incubator-sedona/blob/sedona-{{ sedona_create_release.current_version }}/docs/setup/release-notes.md
 
 Download links:
-https://github.com/apache/incubator-sedona/releases/tag/sedona-{{ sedona.current_version }}
+https://github.com/apache/incubator-sedona/releases/tag/sedona-{{ sedona_create_release.current_version }}
 
 Additional resources:
 Get started: http://sedona.apache.org/setup/overview/
@@ -407,81 +346,53 @@ Regards,
 Apache Sedona (incubating) Team
 ```
 
-### Failed vote
+## 7. Failed vote
 
-If a vote failed, please first drop the staging repo on `repository.apache.org`. Then redo all the steps above. Make sure you use a new scm tag for the new release candidate when use maven-release-plugin (i.e., `{{ sedona.current_version}}-rc2`). You can change the `sedona.current_rc` and `sedona.current_git_tag` in `mkdocs.yml` to generate the script listed on this webpage.
+If a vote failed, do the following:
+
+1. Drop the staging repo on `repository.apache.org`.
+2. Restart from Step 3 `Update mkdocs.yml`. Please use `{{ sedona_create_release.current_version}}-rc2` to update `sedona_create_release.current_rc` and `sedona_create_release.current_git_tag` in `mkdocs.yml` to generate the script listed on this webpage.
  
-### Release the package
+## 8. Release source code and Maven package
 
-1. Move all files in https://dist.apache.org/repos/dist/dev/incubator/sedona to https://dist.apache.org/repos/dist/release/incubator/sedona, using svn
+### Upload releases
+
 ```bash
 #!/bin/bash
-svn mkdir -m "Adding folder" https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona.current_version }}
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz.asc
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz.asc
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona.current_rc }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512
-svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-src.tar.gz https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona.current_version }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz
-svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-src.tar.gz.asc https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona.current_version }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz.asc
-svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512 https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona.current_version }}/apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512
-svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-bin.tar.gz https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona.current_version }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz
-svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-bin.tar.gz.asc https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona.current_version }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz.asc
-svn import -m "Adding file" apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512 https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona.current_version }}/apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512
-rm apache-sedona-{{ sedona.current_version }}-src.tar.gz
-rm apache-sedona-{{ sedona.current_version }}-src.tar.gz.asc
-rm apache-sedona-{{ sedona.current_version }}-src.tar.gz.sha512
-rm apache-sedona-{{ sedona.current_version }}-bin.tar.gz
-rm apache-sedona-{{ sedona.current_version }}-bin.tar.gz.asc
-rm apache-sedona-{{ sedona.current_version }}-bin.tar.gz.sha512
-```
-2. Add the download link to [Download page](/download#versions) and create a GitHub release.
-3. (1) Publish Python project to PyPi using twine. You must have the maintainer priviledge of https://pypi.org/project/apache-sedona/. (2) Publish Zeppelin plugin to NPM
-```bash
-#!/bin/bash
-git clone --shared --branch {{ sedona.current_git_tag}} https://github.com/apache/incubator-sedona.git apache-sedona-{{ sedona.current_version }}-src
-cd apache-sedona-{{ sedona.current_version }}-src/python && python3 setup.py sdist bdist_wheel && twine upload dist/* && cd ..
-cd zeppelin && npm publish && cd ..
-rm -rf apache-sedona-{{ sedona.current_version }}-src
-```
-4. Publish Sedona R to CRAN. More details to be added.
-```bash
-#!/bin/bash
-R CMD build .
-R CMD check --as-cran apache.sedona_*.tar.gz
-```
-5. Instructions on how to submit a R package to CRAN are at the bottom of the [CRAN front page](https://cran.r-project.org/), “Submitting to CRAN.” Submission is now via [a web form](https://xmpalantir.wu.ac.at/cransubmit/).
-6. Close the staging repo on https://repository.apache.org. If the staging repo has been automatically closed by the system, please read below.
 
-#### Use Maven Release Plugin directly from an existing tag
+echo "Move all files in https://dist.apache.org/repos/dist/dev/incubator/sedona to https://dist.apache.org/repos/dist/release/incubator/sedona, using svn"
+svn mkdir -m "Adding folder" https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona_create_release.current_version }}
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.asc
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.asc
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona_create_release.current_version }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.asc https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona_create_release.current_version }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.asc
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512 https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona_create_release.current_version }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona_create_release.current_version }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.asc https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona_create_release.current_version }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.asc
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512 https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona_create_release.current_version }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512
+rm apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz
+rm apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.asc
+rm apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512
+rm apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz
+rm apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.asc
+rm apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512
 
-The staging repo on repository.apache.org is usually automatically closed before the voting is closed. If so, you need to do `mvn release:perform` from an existing tag. Note that: you have to use `org.apache.maven.plugins:maven-release-plugin:2.3.2:perform` due to a bug in maven release plugin from v2.4 (https://issues.apache.org/jira/browse/SCM-729). Make sure you use the correct scm tag (i.e.,  `{{ sedona.current_git_tag }}`).
-
-##### For Spark 3.0 and Scala 2.12
-
-```
-mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests"
+echo "Re-staging releases to https://repository.apache.org"
+# For Spark 3.0 and Scala 2.12
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests"
+# For Spark 3.0 and Scala 2.13
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.13"
 ```
 
-##### For Spark 3.0 and Scala 2.13
+### Fix signature issues
 
-```
-mvn org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.13"
-```
+Please find the Sedona staging id on https://repository.apache.org under `staging repository`.
 
-#### Fix the error when close the staged repo
-
-In the last step, you may see many errors similar to the following:
-```
-typeId	signature-staging
-failureMessage	Invalid Signature: '/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom.asc' is not a valid signature for 'sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom'.
-failureMessage	Invalid Signature: '/org/apache/sedona/sedona-viz-3.0_2.12/{{ sedona.current_version }}/sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom.asc' is not a valid signature for 'sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom'.
-```
-
-This is caused by a bug in the resolved-pom-maven-plugin in POM.xml. You will have to upload the signatures of the POM files mannualy.
-
-Please run the following script to reupload ASC files to the staging repo. Please make sure you use the correct Sedona staging repo ID, ASF username and password.
+Then run the following script. Replace `admin`, `admind123` with your Apache ID username and Apache ID password. Replace `stagingid` with the correct id.
 
 ```bash
 #!/bin/bash
@@ -489,66 +400,86 @@ username=admin
 password=admin123
 stagingid=1016
 
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-common/{{ sedona.current_version }}/sedona-common-{{ sedona.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-3.0_2.12/{{ sedona.current_version }}/sedona-core-3.0_2.12-{{ sedona.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-3.0_2.13/{{ sedona.current_version }}/sedona-core-3.0_2.13-{{ sedona.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-3.0_2.12/{{ sedona.current_version }}/sedona-sql-3.0_2.12-{{ sedona.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-3.0_2.13/{{ sedona.current_version }}/sedona-sql-3.0_2.13-{{ sedona.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-3.0_2.12/{{ sedona.current_version }}/sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-3.0_2.13/{{ sedona.current_version }}/sedona-viz-3.0_2.13-{{ sedona.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-3.0_2.13/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.13-{{ sedona.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-flink_2.12/{{ sedona.current_version }}/sedona-flink_2.12-{{ sedona.current_version }}.pom
 
-gpg -ab sedona-common-{{ sedona.current_version }}.pom
-gpg -ab sedona-core-3.0_2.12-{{ sedona.current_version }}.pom
-gpg -ab sedona-sql-3.0_2.12-{{ sedona.current_version }}.pom
-gpg -ab sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom
-gpg -ab sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom
-gpg -ab sedona-flink_2.12-{{ sedona.current_version }}.pom
-gpg -ab sedona-core-3.0_2.13-{{ sedona.current_version }}.pom
-gpg -ab sedona-sql-3.0_2.13-{{ sedona.current_version }}.pom
-gpg -ab sedona-viz-3.0_2.13-{{ sedona.current_version }}.pom
-gpg -ab sedona-python-adapter-3.0_2.13-{{ sedona.current_version }}.pom
+echo "Re-uploading signatures to fix *failureMessage	Invalid Signature*"
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-common/{{ sedona_create_release.current_version }}/sedona-common-{{ sedona_create_release.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-3.0_2.12/{{ sedona_create_release.current_version }}/sedona-core-3.0_2.12-{{ sedona_create_release.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-3.0_2.13/{{ sedona_create_release.current_version }}/sedona-core-3.0_2.13-{{ sedona_create_release.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-3.0_2.12/{{ sedona_create_release.current_version }}/sedona-sql-3.0_2.12-{{ sedona_create_release.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-3.0_2.13/{{ sedona_create_release.current_version }}/sedona-sql-3.0_2.13-{{ sedona_create_release.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-3.0_2.12/{{ sedona_create_release.current_version }}/sedona-viz-3.0_2.12-{{ sedona_create_release.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-3.0_2.13/{{ sedona_create_release.current_version }}/sedona-viz-3.0_2.13-{{ sedona_create_release.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona_create_release.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona_create_release.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-3.0_2.13/{{ sedona_create_release.current_version }}/sedona-python-adapter-3.0_2.13-{{ sedona_create_release.current_version }}.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-flink_2.12/{{ sedona_create_release.current_version }}/sedona-flink_2.12-{{ sedona_create_release.current_version }}.pom
+
+gpg -ab sedona-common-{{ sedona_create_release.current_version }}.pom
+gpg -ab sedona-core-3.0_2.12-{{ sedona_create_release.current_version }}.pom
+gpg -ab sedona-sql-3.0_2.12-{{ sedona_create_release.current_version }}.pom
+gpg -ab sedona-viz-3.0_2.12-{{ sedona_create_release.current_version }}.pom
+gpg -ab sedona-python-adapter-3.0_2.12-{{ sedona_create_release.current_version }}.pom
+gpg -ab sedona-flink_2.12-{{ sedona_create_release.current_version }}.pom
+gpg -ab sedona-core-3.0_2.13-{{ sedona_create_release.current_version }}.pom
+gpg -ab sedona-sql-3.0_2.13-{{ sedona_create_release.current_version }}.pom
+gpg -ab sedona-viz-3.0_2.13-{{ sedona_create_release.current_version }}.pom
+gpg -ab sedona-python-adapter-3.0_2.13-{{ sedona_create_release.current_version }}.pom
 
 
-curl -v -u $username:$password --upload-file sedona-common-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-common/{{ sedona.current_version }}/sedona-common-{{ sedona.current_version }}.pom.asc
+curl -v -u $username:$password --upload-file sedona-common-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-common/{{ sedona_create_release.current_version }}/sedona-common-{{ sedona_create_release.current_version }}.pom.asc
 
-curl -v -u $username:$password --upload-file sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom.asc
+curl -v -u $username:$password --upload-file sedona-python-adapter-3.0_2.12-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona_create_release.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona_create_release.current_version }}.pom.asc
 
-curl -v -u $username:$password --upload-file sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-3.0_2.12/{{ sedona.current_version }}/sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom.asc
+curl -v -u $username:$password --upload-file sedona-viz-3.0_2.12-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-3.0_2.12/{{ sedona_create_release.current_version }}/sedona-viz-3.0_2.12-{{ sedona_create_release.current_version }}.pom.asc
 
-curl -v -u $username:$password --upload-file sedona-core-3.0_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-3.0_2.12/{{ sedona.current_version }}/sedona-core-3.0_2.12-{{ sedona.current_version }}.pom.asc
+curl -v -u $username:$password --upload-file sedona-core-3.0_2.12-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-3.0_2.12/{{ sedona_create_release.current_version }}/sedona-core-3.0_2.12-{{ sedona_create_release.current_version }}.pom.asc
 
-curl -v -u $username:$password --upload-file sedona-sql-3.0_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-3.0_2.12/{{ sedona.current_version }}/sedona-sql-3.0_2.12-{{ sedona.current_version }}.pom.asc
+curl -v -u $username:$password --upload-file sedona-sql-3.0_2.12-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-3.0_2.12/{{ sedona_create_release.current_version }}/sedona-sql-3.0_2.12-{{ sedona_create_release.current_version }}.pom.asc
 
-curl -v -u $username:$password --upload-file sedona-flink_2.12-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-flink_2.12/{{ sedona.current_version }}/sedona-flink_2.12-{{ sedona.current_version }}.pom.asc
+curl -v -u $username:$password --upload-file sedona-flink_2.12-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-flink_2.12/{{ sedona_create_release.current_version }}/sedona-flink_2.12-{{ sedona_create_release.current_version }}.pom.asc
 
-curl -v -u $username:$password --upload-file sedona-python-adapter-3.0_2.13-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-3.0_2.13/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom.asc
+curl -v -u $username:$password --upload-file sedona-python-adapter-3.0_2.13-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-3.0_2.13/{{ sedona_create_release.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona_create_release.current_version }}.pom.asc
 
-curl -v -u $username:$password --upload-file sedona-viz-3.0_2.13-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-3.0_2.13/{{ sedona.current_version }}/sedona-viz-3.0_2.13-{{ sedona.current_version }}.pom.asc
+curl -v -u $username:$password --upload-file sedona-viz-3.0_2.13-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-3.0_2.13/{{ sedona_create_release.current_version }}/sedona-viz-3.0_2.13-{{ sedona_create_release.current_version }}.pom.asc
 
-curl -v -u $username:$password --upload-file sedona-core-3.0_2.13-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-3.0_2.13/{{ sedona.current_version }}/sedona-core-3.0_2.13-{{ sedona.current_version }}.pom.asc
+curl -v -u $username:$password --upload-file sedona-core-3.0_2.13-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-3.0_2.13/{{ sedona_create_release.current_version }}/sedona-core-3.0_2.13-{{ sedona_create_release.current_version }}.pom.asc
 
-curl -v -u $username:$password --upload-file sedona-sql-3.0_2.13-{{ sedona.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-3.0_2.13/{{ sedona.current_version }}/sedona-sql-3.0_2.13-{{ sedona.current_version }}.pom.asc
+curl -v -u $username:$password --upload-file sedona-sql-3.0_2.13-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-3.0_2.13/{{ sedona_create_release.current_version }}/sedona-sql-3.0_2.13-{{ sedona_create_release.current_version }}.pom.asc
 
-rm sedona-common-{{ sedona.current_version }}.pom.asc
-rm sedona-core-3.0_2.12-{{ sedona.current_version }}.pom.asc
-rm sedona-sql-3.0_2.12-{{ sedona.current_version }}.pom.asc
-rm sedona-viz-3.0_2.12-{{ sedona.current_version }}.pom.asc
-rm sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.pom.asc
-rm sedona-flink_2.12-{{ sedona.current_version }}.pom.asc
-rm sedona-core-3.0_2.13-{{ sedona.current_version }}.pom.asc
-rm sedona-sql-3.0_2.13-{{ sedona.current_version }}.pom.asc
-rm sedona-viz-3.0_2.13-{{ sedona.current_version }}.pom.asc
-rm sedona-python-adapter-3.0_2.13-{{ sedona.current_version }}.pom.asc
+rm *.pom
+rm *.asc
 ```
-admin is your Apache ID username and admin123 is your Apache ID password. You can find the correct upload path from the web interface.
 
-Once the staging repo is closed, click "Release" on the web interface.
+### Manually close and release the package
 
-## Publish the doc website
-1. Update `sedona.next_version` in `mkdocs.yml` to the next version. Note that: the next version means the version after the version you want to release.
+1. Click `Close` on the Sedona staging repo on https://repository.apache.org under `staging repository`
+2. Once the staging repo is closed, click `Release` on this repo.
+
+
+## 9. Release Sedona Python and Zeppelin
+
+You must have the maintainer priviledge of `https://pypi.org/project/apache-sedona/` and `https://www.npmjs.com/package/apache-sedona`
+
+```bash
+#!/bin/bash
+git clone --shared --branch {{ sedona_create_release.current_git_tag}} https://github.com/apache/incubator-sedona.git apache-sedona-{{ sedona_create_release.current_version }}-src
+cd apache-sedona-{{ sedona_create_release.current_version }}-src/python && python3 setup.py sdist bdist_wheel && twine upload dist/* && cd ..
+cd zeppelin && npm publish && cd ..
+rm -rf apache-sedona-{{ sedona_create_release.current_version }}-src
+```
+
+## 10. Release Sedona R to CRAN.
+
+```bash
+#!/bin/bash
+R CMD build .
+R CMD check --as-cran apache.sedona_*.tar.gz
+```
+
+Then submit to CRAN using this [web form](https://xmpalantir.wu.ac.at/cransubmit/).
+
+## 11. Publish the doc website
+
+1. Add the download link to [Download page](/download#versions) and create a GitHub release.
 2. Run `mkdocs build` in Sedona root directory. Copy all content in the `site` folder.
 3. Check out GitHub incubator-sedona-website [asf-site branch](https://github.com/apache/incubator-sedona-website/tree/asf-site)
 4. Use the copied content to replace all content in `asf-site` branch and upload to GitHub. Then `sedona.apache.org` will be automatically updated.

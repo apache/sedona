@@ -11,19 +11,19 @@ A committer will be promoted to a PMC member when the community thinks he/she is
 Current Sedona PMC members are as follows:
 
 
-|        Name       |  GitHub ID |        Apache ID       |
-|:-----------------:|:----------:|:----------------------:|
-|    Adam Binford   | Kimahriman |  kimahriman@apache.org |
-| Kanchan Chowdhury | kanchanchy | kanchanchy@apache.org  |
-| Paweł Kociński    |  Imbruced  |   imbruced@apache.org  |
-|      Yitao Li     |            |   yitaoli@apache.org   |
-|   Netanel Malka   | netanel246 |    malka@apache.org    |
-|   Mohamed Sarwat  |            |   mosarwat@apache.org  |
-| Kengo Seki        | sekikn     | sekikn@apache.org      |
-|    Sachio Wakai   |  SW186000  |    swakai@apache.org   |
-|     Jinxuan Wu    |            |   jinxuanw@apache.org  |
-|       Jia Yu      |  jiayuasu  |    jiayu@apache.org    |
-|    Zongsi Zhang   |            | zongsizhang@apache.org |
+|        Name       |  GitHub ID  |        Apache ID       |
+|:-----------------:|:-----------:|:----------------------:|
+|    Adam Binford   | Kimahriman  |  kimahriman@apache.org |
+| Kanchan Chowdhury | kanchanchy  | kanchanchy@apache.org  |
+| Paweł Kociński    |  Imbruced   |   imbruced@apache.org  |
+|      Yitao Li     |  yitao-li   |   yitaoli@apache.org   |
+|   Netanel Malka   | netanel246  |    malka@apache.org    |
+|   Mohamed Sarwat  |   Sarwat    |   mosarwat@apache.org  |
+| Kengo Seki        |   sekikn    | sekikn@apache.org      |
+|    Sachio Wakai   |  SW186000   |    swakai@apache.org   |
+|     Jinxuan Wu    | jinxuan     |   jinxuanw@apache.org  |
+|       Jia Yu      |  jiayuasu   |    jiayu@apache.org    |
+|    Zongsi Zhang   | zongsizhang | zongsizhang@apache.org |
 
 
 ## Mentors
@@ -31,12 +31,13 @@ Current Sedona PMC members are as follows:
 Mentors from Apache Incubator help the project to turn into a good shape following the "Apache" way. Thank you, mentors!
 
 
-|       Name       | Apache id |
-|:---------------:|:------------------------:|
-| Felix Cheung |	felixcheung@apache.org |
-| Von Gosling| vongosling@apache.org |
-|Jean-Baptiste Onofré| jbonofre@apache.org |
-|  George Percivall | percivall@apache.org |
+|         Name         | Apache id |
+|:--------------------:|:------------------------:|
+|     Felix Cheung     |	felixcheung@apache.org |
+|     Von Gosling      | vongosling@apache.org |
+| Jean-Baptiste Onofré | jbonofre@apache.org |
+|   George Percivall   | percivall@apache.org |
+|     Sunil Govindan   |sunilg@apache.org|
 
 ## Become a committer
 
