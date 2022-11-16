@@ -7,13 +7,13 @@ This is a good practice for a release manager to try out his/her credential setu
 The detailed requirement is on [ASF Infra website](https://infra.apache.org/publishing-maven-artifacts.html)
 
 !!!warning
-All scripts on this page should be run in your local Sedona Git repo under master branch via a single script file.
+    All scripts on this page should be run in your local Sedona Git repo under master branch via a single script file.
 
 ## 0. Prepare an empty script file
 
 1. In your local Sedona Git repo under master branch, run
 ```bash
-echo "#!/bin/bash" > create-release.sh
+echo " " > create-release.sh
 chmod 777 create-release.sh
 ```
 2. Use your favourite GUI text editor to open `create-release.sh`.
