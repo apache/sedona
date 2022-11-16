@@ -120,14 +120,14 @@ public class Constructors {
     public static class ST_GeomFromWKT extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String wktString) throws ParseException {
-            return getGeometryByFileData(wktString, FileDataSplitter.WKT);
+            return org.apache.sedona.common.Constructors.geomFromWKT(wktString, 0);
         }
     }
 
     public static class ST_GeomFromText extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String wktString) throws ParseException {
-            return new ST_GeomFromWKT().eval(wktString);
+            return org.apache.sedona.common.Constructors.geomFromWKT(wktString, 0);
         }
     }
 

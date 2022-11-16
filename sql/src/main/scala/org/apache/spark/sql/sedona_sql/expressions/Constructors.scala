@@ -34,9 +34,8 @@ import org.locationtech.jts.geom.{Coordinate, GeometryFactory}
 import org.locationtech.jts.io.WKBReader
 import org.locationtech.jts.io.gml2.GMLReader
 import org.locationtech.jts.io.kml.KMLReader
-import org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes
 import org.apache.spark.sql.catalyst.expressions.ImplicitCastInputTypes
-import org.apache.commons.collections.collection.TypedCollection
+import org.apache.sedona.common.Constructors
 import org.apache.spark.sql.types.BinaryType
 
 /**
@@ -179,31 +178,10 @@ case class ST_LineStringFromText(inputExpressions: Seq[Expression])
 /**
   * Return a Geometry from a WKT string
   *
-  * @param inputExpressions This function takes 1 parameter which is the geometry string. The string format must be WKT.
+  * @param inputExpressions This function takes a geometry string and a srid. The string format must be WKT.
   */
 case class ST_GeomFromWKT(inputExpressions: Seq[Expression])
-  extends Expression with FoldableExpression with ImplicitCastInputTypes with CodegenFallback with UserDataGeneratator {
-  // This is an expression which takes one input expressions
-  assert(inputExpressions.length == 1)
-
-  override def nullable: Boolean = true
-
-  override def eval(inputRow: InternalRow): Any = {
-    (inputExpressions(0).eval(inputRow)) match {
-      case (geomString: UTF8String) => {
-        var fileDataSplitter = FileDataSplitter.WKT
-        var formatMapper = new FormatMapper(fileDataSplitter, false)
-        formatMapper.readGeometry(geomString.toString).toGenericArrayData
-      }
-      case null => null
-    }
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def inputTypes: Seq[AbstractDataType] = Seq(StringType)
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(Constructors.geomFromWKT) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -214,33 +192,10 @@ case class ST_GeomFromWKT(inputExpressions: Seq[Expression])
 /**
   * Return a Geometry from a WKT string
   *
-  * @param inputExpressions This function takes 1 parameter which is the geometry string. The string format must be WKT.
+  * @param inputExpressions This function takes a geometry string and a srid. The string format must be WKT.
   */
 case class ST_GeomFromText(inputExpressions: Seq[Expression])
-  extends Expression with FoldableExpression with ImplicitCastInputTypes with CodegenFallback with UserDataGeneratator with ExpectsInputTypes {
-  // This is an expression which takes one input expressions
-  assert(inputExpressions.length == 1)
-
-  override def nullable: Boolean = true
-
-  override def foldable: Boolean = inputExpressions.forall(_.foldable)
-
-  override def eval(inputRow: InternalRow): Any = {
-    (inputExpressions(0).eval(inputRow)) match {
-      case (geomString: UTF8String) => {
-        var fileDataSplitter = FileDataSplitter.WKT
-        var formatMapper = new FormatMapper(fileDataSplitter, false)
-        formatMapper.readGeometry(geomString.toString).toGenericArrayData
-      }
-      case null => null
-    }
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def inputTypes: Seq[AbstractDataType] = Seq(StringType)
-
-  override def children: Seq[Expression] = inputExpressions
+  extends InferredBinaryExpression(Constructors.geomFromWKT) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

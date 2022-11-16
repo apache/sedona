@@ -120,12 +120,15 @@ SELECT ST_GeomFromKML('<LineString><coordinates>-71.1663,42.2614 -71.1667,42.261
 
 ## ST_GeomFromText
 
-Introduction: Construct a Geometry from Wkt. Alias of [ST_GeomFromWKT](#ST_GeomFromWKT)
+Introduction: Construct a Geometry from Wkt. If srid is not set, it defaults to 0 (unknown). Alias of [ST_GeomFromWKT](#ST_GeomFromWKT)
 
 Format:
 `ST_GeomFromText (Wkt:string)`
+`ST_GeomFromText (Wkt:string, srid:integer)`
 
 Since: `v1.0.0`
+
+The optional srid parameter was added in `v1.3.1`
 
 Spark SQL example:
 ```SQL
@@ -150,12 +153,15 @@ FROM polygontable
 
 ## ST_GeomFromWKT
 
-Introduction: Construct a Geometry from Wkt
+Introduction: Construct a Geometry from Wkt. If srid is not set, it defaults to 0 (unknown).
 
 Format:
 `ST_GeomFromWKT (Wkt:string)`
+`ST_GeomFromWKT (Wkt:string, srid:integer)`
 
 Since: `v1.0.0`
+
+The optional srid parameter was added in `v1.3.1`
 
 Spark SQL example:
 ```SQL
