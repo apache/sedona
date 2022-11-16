@@ -1,9 +1,9 @@
 !!!warning
-	Support of Spark 2.X and Scala 2.11 will be removed in Sedona 1.3.0+ although some parts of the source code might still be compatible. Sedona 1.3.0+ will release binary for both Scala 2.12 and 2.13.
+	Support of Spark 2.X and Scala 2.11 was removed in Sedona 1.3.0+ although some parts of the source code might still be compatible. Sedona 1.3.0+ releases binary for both Scala 2.12 and 2.13.
 
 ## Sedona 1.3.0
 
-This version is a major release on Sedona 1.3.0 line and consists of 46 PRs. It includes many new functions, optimization and bug fixes.
+This version is a major release on Sedona 1.3.0 line and consists of 50 PRs. It includes many new functions, optimization and bug fixes.
 
 ### Highlights
 
@@ -14,10 +14,10 @@ This version is a major release on Sedona 1.3.0 line and consists of 46 PRs. It 
 - [X] Python 3.10 support is added.
 - [X] Aggregators in Flink are added
 - [X] Correctness fixes for corner cases in range join and distance join.
-- [X] Native GeoParquet read and write.
+- [X] Native GeoParquet read and write (https://sedona.apache.org/tutorial/sql/#load-geoparquet).
     * `df = spark.read.format("geoparquet").option("fieldGeometry", "myGeometryColumn").load("PATH/TO/MYFILE.parquet")`
     * `df.write.format("geoparquet").save("PATH/TO/MYFILE.parquet")`
-- [X] DataFrame style API
+- [X] DataFrame style API (https://sedona.apache.org/tutorial/sql/#dataframe-style-api)
     * `df.select(ST_Point(min_value, max_value).as("point"))`
 - [X] Allow WKT format CRS in ST_Transform
     * `ST_Transform(geom, "srcWktString", "tgtWktString")`
@@ -50,6 +50,7 @@ GEOGCS["WGS 84",
   * [SEDONA-182](https://issues.apache.org/jira/browse/SEDONA-182) - ST_AsText should not return SRID
   * [SEDONA-186](https://issues.apache.org/jira/browse/SEDONA-186) - collecting result rows of a spatial join query with SELECT * fails with serde error
   * [SEDONA-188](https://issues.apache.org/jira/browse/SEDONA-188) - Python warns about missing `jars` even when some are found
+  * [SEDONA-193](https://issues.apache.org/jira/browse/SEDONA-193) - ST_AsBinary produces EWKB by mistake
 
 ### New Features
 
@@ -91,6 +92,8 @@ GEOGCS["WGS 84",
   * [SEDONA-177](https://issues.apache.org/jira/browse/SEDONA-177) - Support spatial predicates other than INTERSECTS and COVERS/COVERED_BY in RangeQuery.SpatialRangeQuery and JoinQuery.SpatialJoinQuery
   * [SEDONA-181](https://issues.apache.org/jira/browse/SEDONA-181) - Build fails with java.lang.IllegalAccessError: class org.apache.spark.storage.StorageUtils$
   * [SEDONA-189](https://issues.apache.org/jira/browse/SEDONA-189) - Prepare geometries in broadcast join
+  * [SEDONA-192](https://issues.apache.org/jira/browse/SEDONA-192) - Null handling in predicates
+  * [SEDONA-195](https://issues.apache.org/jira/browse/SEDONA-195) - Add wkt validation and an optional srid to ST_GeomFromWKT/ST_GeomFromText
 
 ### Task
 
