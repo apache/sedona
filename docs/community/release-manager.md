@@ -94,7 +94,6 @@ Please replace all capitalized text with your own ID and password.
     <profile>
       <id>gpg</id>
       <properties>
-        <gpg.executable>gpg2</gpg.executable>
         <gpg.passphrase>YOUR_GPG_PASSPHRASE</gpg.passphrase>
       </properties>
     </profile>
