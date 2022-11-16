@@ -19,6 +19,9 @@
 
 package org.apache.sedona.sql
 
+import org.apache.spark.sql.catalyst.expressions.{EmptyRow, Literal}
+import org.apache.spark.sql.sedona_sql.expressions.{ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_Disjoint, ST_Equals, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Point, ST_Touches, ST_Within}
+
 class predicateTestScala extends TestBaseScala {
 
   describe("Sedona-SQL Predicate Test") {
@@ -244,6 +247,21 @@ class predicateTestScala extends TestBaseScala {
       val coveredBy = sparkSession.sql("select ST_CoveredBy(b, a) from testtable").take(1)(0)
       assert(!within.get(0).asInstanceOf[Boolean])
       assert(coveredBy.get(0).asInstanceOf[Boolean])
+    }
+
+    Seq(
+      ST_Contains, ST_Intersects, ST_Within, ST_Covers, ST_CoveredBy, ST_Crosses,
+      ST_Overlaps, ST_Touches, ST_Equals, ST_Disjoint, ST_OrderingEquals
+    ).foreach { predicate =>
+      it(s"Passed null handling in $predicate") {
+        val point = ST_Point(Literal.create(0.0) :: Literal.create(0.0) :: Literal.create(0.0):: Nil)
+        val missing = Literal.create(null)
+
+        assert(predicate(point :: point :: Nil).eval(EmptyRow) != null)
+        assert(predicate(point :: missing :: Nil).eval(EmptyRow) == null)
+        assert(predicate(missing :: point :: Nil).eval(EmptyRow) == null)
+        assert(predicate(missing :: missing :: Nil).eval(EmptyRow) == null)
+      }
     }
   }
 }
