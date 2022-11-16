@@ -60,7 +60,7 @@ rm -rf sedona-dev
 rm -rf sedona-release
 ```
 
-### 3. Add GPG_TTY environment variable
+### 4. Add GPG_TTY environment variable
 
 In your `~/.bashrc` file, add the following content. Then restart your terminal.
 
@@ -69,7 +69,7 @@ GPG_TTY=$(tty)
 export GPG_TTY
 ```
 
-### 4. Get GitHub personal access token (classic)
+### 5. Get GitHub personal access token (classic)
 
 You need to create a GitHub personal access token (classic). You can follow the instruction on [GitHub](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic).
 
@@ -86,7 +86,7 @@ In short:
 9. Please save your token somewhere because we will use it in the next step.
 
 
-### 5. Set up credentials for Maven
+### 6. Set up credentials for Maven
 
 In your `~/.m2/settings.xml` file, add the following content. Please create this file or `.m2` folder if it does not exist.
 
