@@ -15,8 +15,9 @@ echo "#!/bin/bash" > create-release.sh
 chmod 777 create-release.sh
 ```
 2. Use your favourite GUI text editor to open `create-release.sh`.
-3. Then keep copying the scripts on this web page to replace all content in this text file.
+3. Then keep copying the scripts on this web page to replace all content in this script file.
 4. Do NOT directly copy/paste the scripts to your terminal because a bug in `clipboard.js` will create link breaks in such case. 
+5. Each time when you copy content to this script file, run `./create-release.sh` to execute it.
 
 ## 1. Check ASF copyright in all file headers
 
@@ -59,6 +60,8 @@ Make sure the Sedona version in the following files are {{ sedona_create_release
 
 ```bash
 #!/bin/bash
+
+source ~/.bashrc
 
 git checkout master
 git pull
@@ -350,8 +353,8 @@ Apache Sedona (incubating) Team
 
 If a vote failed, do the following:
 
-1. Drop the staging repo on `repository.apache.org`.
-2. Restart from Step 3 `Update mkdocs.yml`. Please use `{{ sedona_create_release.current_version}}-rc2` to update `sedona_create_release.current_rc` and `sedona_create_release.current_git_tag` in `mkdocs.yml` to generate the script listed on this webpage.
+1. In the vote email, say that we will create another release candidate.
+2. Restart from Step 3 `Update mkdocs.yml`. Please increment the release candidate ID (e.g., `{{ sedona_create_release.current_version}}-rc2`) and update `sedona_create_release.current_rc` and `sedona_create_release.current_git_tag` in `mkdocs.yml` to generate the script listed on this webpage.
  
 ## 8. Release source code and Maven package
 

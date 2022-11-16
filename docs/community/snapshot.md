@@ -19,6 +19,7 @@ chmod 777 create-release.sh
 2. Use your favourite GUI text editor to open `create-release.sh`.
 3. Then keep copying the scripts on this web page to replace all content in this text file.
 4. Do NOT directly copy/paste the scripts to your terminal because a bug in `clipboard.js` will create link breaks in such case.
+5. Each time when you copy content to this script file, run `./create-release.sh` to execute it.
 
 ## 1. Upload snapshot versions
 
@@ -26,6 +27,8 @@ In your Sedona GitHub repo, run this script:
 
 ```bash
 #!/bin/bash
+
+source ~/.bashrc
 
 git checkout master
 git pull
