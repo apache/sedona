@@ -17,7 +17,7 @@
 
 import struct
 
-from pyspark.sql.types import UserDefinedType, ArrayType, ByteType
+from pyspark.sql.types import UserDefinedType, BinaryType
 from shapely.wkb import dumps, loads
 
 
@@ -25,27 +25,13 @@ class GeometryType(UserDefinedType):
 
     @classmethod
     def sqlType(cls):
-        return ArrayType(ByteType(), containsNull=False)
-
-    def fromInternal(self, obj):
-        deserialized_obj = None
-        if obj is not None:
-            deserialized_obj = self.deserialize(obj)
-        return deserialized_obj
-
-    def toInternal(self, obj):
-        serialized_obj = None
-        if obj is not None:
-            serialized_obj = [el - 256 if el >= 128 else el for el in self.serialize(obj)]
-        return serialized_obj
+        return BinaryType()
 
     def serialize(self, obj):
         return dumps(obj)
 
     def deserialize(self, datum):
-        bytes_data = b''.join([struct.pack('b', el) for el in datum])
-        geom = loads(bytes_data)
-        return geom
+        return loads(bytes(datum))
 
     @classmethod
     def module(cls):
