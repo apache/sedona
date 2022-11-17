@@ -33,15 +33,24 @@ source ~/.bashrc
 git checkout master
 git pull
 
+rm -f release.*
+rm -f pom.xml.*
+
 # Spark 3.0 and Scala 2.12
 # Prepare the SNAPSHOTs
 mvn -q -B clean -Darguments="-DskipTests" release:prepare -Dtag={{ sedona_create_release.current_git_tag }} -DreleaseVersion={{ sedona_create_release.current_version }} -DdevelopmentVersion={{ sedona_create_release.current_snapshot }} -DdryRun=true -DautoVersionSubmodules=true -Dresume=false
 # Deploy the SNAPSHOTs
 mvn -q deploy -DskipTests
 
+rm -f release.*
+rm -f pom.xml.*
+
 # Prepare for Spark 3.0 and Scala 2.13
 # Prepare the SNAPSHOTs
 mvn -q -B clean -Darguments="-DskipTests -Dscala=2.13" release:prepare  -Dtag={{ sedona_create_release.current_git_tag }} -DreleaseVersion={{ sedona_create_release.current_version }} -DdevelopmentVersion={{ sedona_create_release.current_snapshot }} -DdryRun=true -DautoVersionSubmodules=true -Dresume=false
 # Deploy the SNAPSHOTs
 mvn -q deploy -DskipTests -Dscala=2.13
+
+rm -f release.*
+rm -f pom.xml.*
 ```

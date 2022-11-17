@@ -66,47 +66,62 @@ source ~/.bashrc
 git checkout master
 git pull
 
-echo "Step 1. Stage the Release Candidate to GitHub."
+rm -f release.*
+rm -f pom.xml.*
 
-mvn -q -B clean release:prepare -Dtag={{ sedona_create_release.current_git_tag }} -DreleaseVersion={{ sedona_create_release.current_version }} \
--DdevelopmentVersion={{ sedona_create_release.current_snapshot }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests"
+echo "*****Step 1. Stage the Release Candidate to GitHub."
+
+mvn -q -B clean release:prepare -Dtag={{ sedona_create_release.current_git_tag }} -DreleaseVersion={{ sedona_create_release.current_version }} -DdevelopmentVersion={{ sedona_create_release.current_snapshot }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests"
+
+rm -f release.*
+rm -f pom.xml.*
 
 echo "Now the releases are staged. A tag and two commits have been created on Sedona GitHub repo"
 
-echo "Step 2: Upload the Release Candidate to https://repository.apache.org."
+echo "*****Step 2: Upload the Release Candidate to https://repository.apache.org."
 
 # For Spark 3.0 and Scala 2.12
-mvn -q clean release:perform -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests" 
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.12"
 
 # For Spark 3.0 and Scala 2.13
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform \
--DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona_create_release.current_git_tag }} \
--DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.13"
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.13"
 
-echo "Step 3: Upload Release Candidate on ASF SVN: https://dist.apache.org/repos/dist/dev/incubator/sedona"
+echo "*****Step 3: Upload Release Candidate on ASF SVN: https://dist.apache.org/repos/dist/dev/incubator/sedona"
 
-echo "Creating a folder on SVN..."
+echo "Creating {{ sedona_create_release.current_rc }} folder on SVN..."
 
 svn mkdir -m "Adding folder" https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}
 
 echo "Creating release files locally..."
 
-git clone --shared --branch {{ sedona_create_release.current_git_tag}} https://github.com/apache/incubator-sedona.git apache-sedona-{{ sedona_create_release.current_version }}-src
-rm -rf apache-sedona-{{ sedona_create_release.current_version }}-src/.git
+echo "Downloading source code..."
+
+wget https://github.com/apache/incubator-sedona/archive/refs/tags/{{ sedona_create_release.current_git_tag}}.tar.gz
+tar -xvf {{ sedona_create_release.current_git_tag}}.tar.gz
+mkdir apache-sedona-{{ sedona_create_release.current_version }}-src
+cp -r incubator-sedona-{{ sedona_create_release.current_git_tag}}/* apache-sedona-{{ sedona_create_release.current_version }}-src/
 tar czf apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz apache-sedona-{{ sedona_create_release.current_version }}-src
+rm {{ sedona_create_release.current_git_tag}}.tar.gz
+rm -rf incubator-sedona-{{ sedona_create_release.current_git_tag}}
+
+echo "Compiling the source code..."
+
 mkdir apache-sedona-{{ sedona_create_release.current_version }}-bin
-cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn clean install -DskipTests -Dscala=2.12 && cd ..
+
+cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dscala=2.12 && cd ..
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/core/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/sql/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/viz/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/python-adapter/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/flink/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
-cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn clean install -DskipTests -Dscala=2.13 && cd ..
+
+cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dscala=2.13 && cd ..
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/core/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/sql/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/viz/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/python-adapter/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/flink/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+
 tar czf apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz apache-sedona-{{ sedona_create_release.current_version }}-bin
 shasum -a 512 apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz > apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512
 shasum -a 512 apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz > apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512
