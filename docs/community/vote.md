@@ -43,8 +43,8 @@ The content of the `verify.sh` script is as follows. ==If you copy the following
 ```bash
 #!/bin/bash
 
-SEDONA_CURRENT_RC={{ sedona.current_rc }}
-SEDONA_CURRENT_VERSION={{ sedona.next_version }}
+SEDONA_CURRENT_RC={{ sedona_create_release.current_rc }}
+SEDONA_CURRENT_VERSION={{ sedona_create_release.current_version }}
 
 ## Download a Sedona release
 wget -q https://downloads.apache.org/incubator/sedona/KEYS

@@ -19,13 +19,12 @@
 package org.apache.sedona.sql.UDF
 
 import org.apache.spark.sql.catalyst.FunctionIdentifier
-import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, ExpressionInfo}
-import org.apache.spark.sql.catalyst.expressions.Literal
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
-import org.apache.spark.sql.expressions.{Aggregator, UserDefinedAggregateFunction}
-import org.apache.spark.sql.sedona_sql.expressions.{ST_YMax, ST_YMin, _}
+import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, ExpressionInfo, Literal}
+import org.apache.spark.sql.expressions.Aggregator
 import org.apache.spark.sql.sedona_sql.expressions.collect.{ST_Collect, ST_CollectionExtract}
-import org.apache.spark.sql.sedona_sql.expressions.raster.{RS_Add, RS_Append, RS_Array, RS_Base64, RS_BitwiseAnd, RS_BitwiseOr, RS_Count, RS_Divide, RS_FetchRegion, RS_GetBand, RS_GreaterThan, RS_GreaterThanEqual, RS_HTML, RS_LessThan, RS_LessThanEqual, RS_LogicalDifference, RS_LogicalOver, RS_Mean, RS_Mode, RS_Modulo, RS_Multiply, RS_MultiplyFactor, RS_Normalize, RS_NormalizedDifference, RS_SquareRoot, RS_Subtract}
+import org.apache.spark.sql.sedona_sql.expressions.raster._
+import org.apache.spark.sql.sedona_sql.expressions._
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.operation.buffer.BufferParameters
 
@@ -40,9 +39,9 @@ object Catalog {
     function[ST_PointFromText](),
     function[ST_PolygonFromText](),
     function[ST_LineStringFromText](),
-    function[ST_GeomFromText](),
+    function[ST_GeomFromText](0),
     function[ST_LineFromText](),
-    function[ST_GeomFromWKT](),
+    function[ST_GeomFromWKT](0),
     function[ST_GeomFromWKB](),
     function[ST_GeomFromGeoJSON](),
     function[ST_GeomFromGML](),
@@ -167,13 +166,6 @@ object Catalog {
     new ST_Union_Aggr,
     new ST_Envelope_Aggr,
     new ST_Intersection_Aggr
-  )
-
-  import org.apache.spark.sql.sedona_sql.expressions_udaf
-  val aggregateExpressions_UDAF: Seq[UserDefinedAggregateFunction] = Seq(
-    new expressions_udaf.ST_Union_Aggr,
-    new expressions_udaf.ST_Envelope_Aggr,
-    new expressions_udaf.ST_Intersection_Aggr
   )
 
   private def function[T <: Expression : ClassTag](defaultArgs: Any *): FunctionDescription = {

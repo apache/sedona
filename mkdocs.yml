@@ -84,9 +84,11 @@ nav:
         - Rules: community/rule.md
         - Develop: community/develop.md
       - Committer Guide:
-        - PMC List: community/contributor.md
-        - Publish the code: community/publish.md
-        - Vote the release: community/vote.md
+        - Project Management Committee: community/contributor.md
+        - Become a release manager: community/release-manager.md
+        - Publish a snapshot version: community/snapshot.md
+        - Make a release: community/publish.md
+        - Vote a release: community/vote.md
       - Publications: community/publication.md
     - GeoSpark Legacy Docs:
       - Download:
@@ -162,11 +164,12 @@ extra:
       link: 'https://twitter.com/ApacheSedona'
   sedona:
     current_version: 1.2.1-incubating
-    current_git_tag: sedona-1.2.1-incubating-rc1
-    current_rc: 1.2.1-incubating-rc1
-    current_snapshot: 1.2.1-incubating-SNAPSHOT
-    next_version: 1.3.0-incubating
-    current_geotools: 1.1.0-25.2
+    current_geotools: 1.3.0-27.2
+  sedona_create_release:
+    current_version: 1.3.0-incubating
+    current_git_tag: sedona-1.3.0-incubating-rc2
+    current_rc: 1.3.0-incubating-rc2
+    current_snapshot: 1.3.1-incubating-SNAPSHOT
 copyright: Copyright © 2022 The Apache Software Foundation
 markdown_extensions:
   - admonition

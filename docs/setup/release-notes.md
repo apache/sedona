@@ -1,11 +1,110 @@
 !!!warning
-	Support of Spark 2.X and Scala 2.11 will be removed in Sedona 1.3.0+ although some parts of the source code might still be compatible. Sedona 1.3.0+ will release binary for both Scala 2.12 and 2.13.
+	Support of Spark 2.X and Scala 2.11 was removed in Sedona 1.3.0+ although some parts of the source code might still be compatible. Sedona 1.3.0+ releases binary for both Scala 2.12 and 2.13.
+
+## Sedona 1.3.0
+
+This version is a major release on Sedona 1.3.0 line and consists of 50 PRs. It includes many new functions, optimization and bug fixes.
+
+### Highlights
+
+- [X] Sedona on Spark in this release is compiled against Spark 3.3.
+- [X] Sedona on Flink in this release is compiled against Flink 1.14.
+- [X] Scala 2.11 support is removed.
+- [X] Spark 2.X support is removed.
+- [X] Python 3.10 support is added.
+- [X] Aggregators in Flink are added
+- [X] Correctness fixes for corner cases in range join and distance join.
+- [X] Native GeoParquet read and write (https://sedona.apache.org/tutorial/sql/#load-geoparquet).
+    * `df = spark.read.format("geoparquet").option("fieldGeometry", "myGeometryColumn").load("PATH/TO/MYFILE.parquet")`
+    * `df.write.format("geoparquet").save("PATH/TO/MYFILE.parquet")`
+- [X] DataFrame style API (https://sedona.apache.org/tutorial/sql/#dataframe-style-api)
+    * `df.select(ST_Point(min_value, max_value).as("point"))`
+- [X] Allow WKT format CRS in ST_Transform
+    * `ST_Transform(geom, "srcWktString", "tgtWktString")`
+
+```yaml
+
+GEOGCS["WGS 84",
+  DATUM["WGS_1984",
+  SPHEROID["WGS 84",6378137,298.257223563,
+  AUTHORITY["EPSG","7030"]],
+  AUTHORITY["EPSG","6326"]],
+  PRIMEM["Greenwich",0,
+  AUTHORITY["EPSG","8901"]],
+  UNIT["degree",0.0174532925199433,
+  AUTHORITY["EPSG","9122"]],
+  AUTHORITY["EPSG","4326"]]
+
+```
+
+### Bug fixes
+
+  * [SEDONA-119](https://issues.apache.org/jira/browse/SEDONA-119) - ST_Touches join query returns true for polygons whose interiors intersect
+  * [SEDONA-136](https://issues.apache.org/jira/browse/SEDONA-136) - Enable testAsEWKT for Flink
+  * [SEDONA-137](https://issues.apache.org/jira/browse/SEDONA-137) - Fix ST_Buffer for Flink to work
+  * [SEDONA-138](https://issues.apache.org/jira/browse/SEDONA-138) - Fix ST_GeoHash for Flink to work
+  * [SEDONA-153](https://issues.apache.org/jira/browse/SEDONA-153) - Python Serialization Fails with Nulls
+  * [SEDONA-158](https://issues.apache.org/jira/browse/SEDONA-158) - Fix wrong description about ST_GeometryN in the API docs
+  * [SEDONA-169](https://issues.apache.org/jira/browse/SEDONA-169) - Fix ST_RemovePoint in accordance with the API document
+  * [SEDONA-178](https://issues.apache.org/jira/browse/SEDONA-178) - Correctness issue in distance join queries
+  * [SEDONA-182](https://issues.apache.org/jira/browse/SEDONA-182) - ST_AsText should not return SRID
+  * [SEDONA-186](https://issues.apache.org/jira/browse/SEDONA-186) - collecting result rows of a spatial join query with SELECT * fails with serde error
+  * [SEDONA-188](https://issues.apache.org/jira/browse/SEDONA-188) - Python warns about missing `jars` even when some are found
+  * [SEDONA-193](https://issues.apache.org/jira/browse/SEDONA-193) - ST_AsBinary produces EWKB by mistake
+
+### New Features
+
+  * [SEDONA-94](https://issues.apache.org/jira/browse/SEDONA-94) - GeoParquet  Support For Sedona
+  * [SEDONA-125](https://issues.apache.org/jira/browse/SEDONA-125) - Allows customized CRS in ST_Transform
+  * [SEDONA-166](https://issues.apache.org/jira/browse/SEDONA-166) - Provide Type-safe DataFrame Style API
+  * [SEDONA-168](https://issues.apache.org/jira/browse/SEDONA-168) - Add ST_Normalize to Apache Sedona
+  * [SEDONA-171](https://issues.apache.org/jira/browse/SEDONA-171) - Add ST_SetPoint to Apache Sedona
+
+
+### Improvement
+
+  * [SEDONA-121](https://issues.apache.org/jira/browse/SEDONA-121) - Add equivalent constructors left over from Spark to Flink
+  * [SEDONA-132](https://issues.apache.org/jira/browse/SEDONA-132) - Create common module for SQL functions
+  * [SEDONA-133](https://issues.apache.org/jira/browse/SEDONA-133) - Allow user-defined schemas in Adapter.toDf()
+  * [SEDONA-139](https://issues.apache.org/jira/browse/SEDONA-139) - Fix wrong argument order in Flink unit tests
+  * [SEDONA-140](https://issues.apache.org/jira/browse/SEDONA-140) - Update Sedona Dependencies in R Package
+  * [SEDONA-143](https://issues.apache.org/jira/browse/SEDONA-143) - Add missing unit tests for the Flink predicates
+  * [SEDONA-144](https://issues.apache.org/jira/browse/SEDONA-144) - Add ST_AsGeoJSON to the Flink API
+  * [SEDONA-145](https://issues.apache.org/jira/browse/SEDONA-145) - Fix ST_AsEWKT to reserve the Z coordinate
+  * [SEDONA-146](https://issues.apache.org/jira/browse/SEDONA-146) - Add missing output funtions to the Flink API
+  * [SEDONA-147](https://issues.apache.org/jira/browse/SEDONA-147) - Add SRID functions to the Flink API
+  * [SEDONA-148](https://issues.apache.org/jira/browse/SEDONA-148) - Add boolean functions to the Flink API
+  * [SEDONA-149](https://issues.apache.org/jira/browse/SEDONA-149) - Add Python 3.10 support
+  * [SEDONA-151](https://issues.apache.org/jira/browse/SEDONA-151) - Add ST aggregators to Sedona Flink
+  * [SEDONA-152](https://issues.apache.org/jira/browse/SEDONA-152) - Add reader/writer functions for GML and KML
+  * [SEDONA-154](https://issues.apache.org/jira/browse/SEDONA-154) - Add measurement functions to the Flink API
+  * [SEDONA-157](https://issues.apache.org/jira/browse/SEDONA-157) - Add coordinate accessors to the Flink API
+  * [SEDONA-159](https://issues.apache.org/jira/browse/SEDONA-159) - Add Nth accessor functions to the Flink API
+  * [SEDONA-160](https://issues.apache.org/jira/browse/SEDONA-160) - Fix geoparquetIOTests.scala to cleanup after test
+  * [SEDONA-161](https://issues.apache.org/jira/browse/SEDONA-161) - Add ST_Boundary to the Flink API
+  * [SEDONA-162](https://issues.apache.org/jira/browse/SEDONA-162) - Add ST_Envelope to the Flink API
+  * [SEDONA-163](https://issues.apache.org/jira/browse/SEDONA-163) - Better handle of unsupported types in shapefile reader
+  * [SEDONA-164](https://issues.apache.org/jira/browse/SEDONA-164) - Add geometry count functions to the Flink API
+  * [SEDONA-165](https://issues.apache.org/jira/browse/SEDONA-165) - Upgrade Apache Rat to 0.14
+  * [SEDONA-170](https://issues.apache.org/jira/browse/SEDONA-170) - Add ST_AddPoint and ST_RemovePoint to the Flink API
+  * [SEDONA-172](https://issues.apache.org/jira/browse/SEDONA-172) - Add ST_LineFromMultiPoint to Apache Sedona
+  * [SEDONA-176](https://issues.apache.org/jira/browse/SEDONA-176) - Make ST_Contains conform with OGC standard, and add ST_Covers and ST_CoveredBy functions.
+  * [SEDONA-177](https://issues.apache.org/jira/browse/SEDONA-177) - Support spatial predicates other than INTERSECTS and COVERS/COVERED_BY in RangeQuery.SpatialRangeQuery and JoinQuery.SpatialJoinQuery
+  * [SEDONA-181](https://issues.apache.org/jira/browse/SEDONA-181) - Build fails with java.lang.IllegalAccessError: class org.apache.spark.storage.StorageUtils$
+  * [SEDONA-189](https://issues.apache.org/jira/browse/SEDONA-189) - Prepare geometries in broadcast join
+  * [SEDONA-192](https://issues.apache.org/jira/browse/SEDONA-192) - Null handling in predicates
+  * [SEDONA-195](https://issues.apache.org/jira/browse/SEDONA-195) - Add wkt validation and an optional srid to ST_GeomFromWKT/ST_GeomFromText
+
+### Task
+
+* [SEDONA-150](https://issues.apache.org/jira/browse/SEDONA-150) - Drop Spark 2.4 and Scala 2.11 support
+
 
 ## Sedona 1.2.1
 
 This version is a maintenance release on Sedona 1.2.0 line. It includes bug fixes.
 
-Sedona on Spark is now compiled against Spark 3.3, instead of Spark 2.2.
+Sedona on Spark is now compiled against Spark 3.3, instead of Spark 3.2.
 
 
 ### SQL (for Spark)

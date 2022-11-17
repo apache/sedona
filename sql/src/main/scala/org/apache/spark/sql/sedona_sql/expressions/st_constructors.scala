@@ -34,14 +34,22 @@ object st_constructors extends DataFrameAPI {
   def ST_GeomFromKML(kmlString: Column): Column = wrapExpression[ST_GeomFromKML](kmlString)
   def ST_GeomFromKML(kmlString: String): Column = wrapExpression[ST_GeomFromKML](kmlString)
 
-  def ST_GeomFromText(wkt: Column): Column = wrapExpression[ST_GeomFromText](wkt)
-  def ST_GeomFromText(wkt: String): Column = wrapExpression[ST_GeomFromText](wkt)
+  def ST_GeomFromText(wkt: Column): Column = wrapExpression[ST_GeomFromText](wkt, 0)
+  def ST_GeomFromText(wkt: String): Column = wrapExpression[ST_GeomFromText](wkt, 0)
+
+  def ST_GeomFromText(wkt: Column, srid: Column): Column = wrapExpression[ST_GeomFromText](wkt, srid)
+
+  def ST_GeomFromText(wkt: String, srid: Int): Column = wrapExpression[ST_GeomFromText](wkt, srid)
 
   def ST_GeomFromWKB(wkb: Column): Column = wrapExpression[ST_GeomFromWKB](wkb)
   def ST_GeomFromWKB(wkb: String): Column = wrapExpression[ST_GeomFromWKB](wkb)
 
-  def ST_GeomFromWKT(wkt: Column): Column = wrapExpression[ST_GeomFromWKT](wkt)
-  def ST_GeomFromWKT(wkt: String): Column = wrapExpression[ST_GeomFromWKT](wkt)
+  def ST_GeomFromWKT(wkt: Column): Column = wrapExpression[ST_GeomFromWKT](wkt, 0)
+  def ST_GeomFromWKT(wkt: String): Column = wrapExpression[ST_GeomFromWKT](wkt, 0)
+
+  def ST_GeomFromWKT(wkt: Column, srid: Column): Column = wrapExpression[ST_GeomFromWKT](wkt, srid)
+
+  def ST_GeomFromWKT(wkt: String, srid: Int): Column = wrapExpression[ST_GeomFromWKT](wkt, srid)
 
   def ST_LineFromText(wkt: Column): Column = wrapExpression[ST_LineFromText](wkt)
   def ST_LineFromText(wkt: String): Column = wrapExpression[ST_LineFromText](wkt)

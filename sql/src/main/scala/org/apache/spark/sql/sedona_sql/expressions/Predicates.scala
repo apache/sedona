@@ -20,22 +20,24 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, NullIntolerant}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.types.{BooleanType, DataType}
 import org.locationtech.jts.geom.Geometry
-import org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes
 import org.apache.spark.sql.types.AbstractDataType
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 
-abstract class ST_Predicate extends Expression with FoldableExpression with ExpectsInputTypes {
+abstract class ST_Predicate extends Expression
+  with FoldableExpression
+  with ExpectsInputTypes
+  with NullIntolerant {
 
   def inputExpressions: Seq[Expression]
 
   override def toString: String = s" **${this.getClass.getName}**  "
 
-  override def nullable: Boolean = false
+  override def nullable: Boolean = children.exists(_.nullable)
 
   override def inputTypes: Seq[AbstractDataType] = Seq(GeometryUDT, GeometryUDT)
 
@@ -43,12 +45,20 @@ abstract class ST_Predicate extends Expression with FoldableExpression with Expe
 
   override def children: Seq[Expression] = inputExpressions
 
-  override def eval(inputRow: InternalRow): Any = {
+  override final def eval(inputRow: InternalRow): Any = {
     val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
-    val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
-    val leftGeometry = GeometrySerializer.deserialize(leftArray)
-    val rightGeometry = GeometrySerializer.deserialize(rightArray)
-    evalGeom(leftGeometry, rightGeometry)
+    if (leftArray == null) {
+      null
+    } else {
+      val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
+      if (rightArray == null) {
+        null
+      } else {
+        val leftGeometry = GeometrySerializer.deserialize(leftArray)
+        val rightGeometry = GeometrySerializer.deserialize(rightArray)
+        evalGeom(leftGeometry, rightGeometry)
+      }
+    }
   }
 
   def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean

@@ -158,6 +158,15 @@ public class GeomUtils {
         return writer.write(geometry);
     }
 
+    public static byte[] getWKB(Geometry geometry) {
+        if (geometry == null) {
+            return null;
+        }
+        int endian = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN ? ByteOrderValues.BIG_ENDIAN : ByteOrderValues.LITTLE_ENDIAN;
+        WKBWriter writer = new WKBWriter(GeomUtils.getDimension(geometry), endian, false);
+        return writer.write(geometry);
+    }
+
     public static Geometry get2dGeom(Geometry geom) {
         Coordinate[] coordinates = geom.getCoordinates();
         GeometryFactory geometryFactory = new GeometryFactory();

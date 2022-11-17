@@ -18,9 +18,9 @@ Feedback to improve Apache Sedona: [Google Form](https://docs.google.com/forms/d
 
 [Apache Sedona@Twitter](https://twitter.com/ApacheSedona)
 
-## Gitter chat
+## Discord Server
 
-[![Gitter](https://badges.gitter.im/apache/sedona.svg)](https://gitter.im/apache/sedona?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+Join [Apache Sedona community server](https://discord.gg/9A3k5dEBsY)!
 
 ## Mailing list
 
@@ -40,10 +40,10 @@ Before submitting an issue, please:
 
 * Verify that the bug does in fact exist.
 * Search the issue tracker to verify there is no existing issue reporting the bug you’ve found.
-* Consider tracking down the bug yourself in the Wink’s source and submitting a patch along with your bug report. This is a great time saver for the Wink developers and helps ensure the bug will be fixed quickly.
+* Consider tracking down the bug yourself in the Sedona’s source and submitting a patch along with your bug report. This is a great time saver for the Sedona developers and helps ensure the bug will be fixed quickly.
 
 ### Feature Requests
 
-Enhancement requests for new features are also welcome. The more concrete and rationale the request is, the greater the chance it will incorporated into future releases.
+Enhancement requests for new features are also welcome. The more concrete and rationale the request is, the greater the chance it will be incorporated into future releases.
 
 Enter an issue in the [Sedona JIRA](https://issues.apache.org/jira/projects/SEDONA) or send an email to [dev@sedona.apache.org](https://lists.apache.org/list.html?dev@sedona.apache.org)

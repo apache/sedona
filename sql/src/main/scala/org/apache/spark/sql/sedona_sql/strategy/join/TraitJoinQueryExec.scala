@@ -33,23 +33,17 @@ import org.locationtech.jts.geom.Geometry
 trait TraitJoinQueryExec extends TraitJoinQueryBase {
   self: SparkPlan =>
 
-  // Using lazy val to avoid serialization
-  @transient private lazy val boundCondition: (InternalRow => Boolean) = {
-    if (extraCondition.isDefined) {
-      Predicate.create(extraCondition.get, left.output ++ right.output).eval _ // SPARK3 anchor
-//      newPredicate(extraCondition.get, left.output ++ right.output).eval _ // SPARK2 anchor
-    } else { (r: InternalRow) =>
-      true
-    }
-  }
   val left: SparkPlan
   val right: SparkPlan
   val leftShape: Expression
   val rightShape: Expression
+  val swappedLeftAndRight: Boolean
   val spatialPredicate: SpatialPredicate
   val extraCondition: Option[Expression]
 
-  override def output: Seq[Attribute] = left.output ++ right.output
+  override def output: Seq[Attribute] = {
+    if (!swappedLeftAndRight) left.output ++ right.output else right.output ++ left.output
+  }
 
   override protected def doExecute(): RDD[InternalRow] = {
     val boundLeftShape = BindReferences.bindReference(leftShape, left.output)
@@ -58,7 +52,7 @@ trait TraitJoinQueryExec extends TraitJoinQueryBase {
     val leftResultsRaw = left.execute().asInstanceOf[RDD[UnsafeRow]]
     val rightResultsRaw = right.execute().asInstanceOf[RDD[UnsafeRow]]
 
-    var sedonaConf = new SedonaConf(sparkContext.conf)
+    val sedonaConf = new SedonaConf(sparkContext.conf)
     val (leftShapes, rightShapes) =
       toSpatialRddPair(leftResultsRaw, boundLeftShape, rightResultsRaw, boundRightShape)
 
@@ -135,27 +129,25 @@ trait TraitJoinQueryExec extends TraitJoinQueryBase {
     logDebug(s"Join result has ${matchesRDD.count()} rows")
 
     matchesRDD.mapPartitions { iter =>
-      val filtered =
-        if (extraCondition.isDefined) {
-          val boundCondition = Predicate.create(extraCondition.get, left.output ++ right.output) // SPARK3 anchor
-//          val boundCondition = newPredicate(extraCondition.get, left.output ++ right.output) // SPARK2 anchor
-          iter.filter {
-            case (l, r) =>
-              val leftRow = l.getUserData.asInstanceOf[UnsafeRow]
-              val rightRow = r.getUserData.asInstanceOf[UnsafeRow]
-              var joiner = GenerateUnsafeRowJoiner.create(left.schema, right.schema)
-              boundCondition.eval(joiner.join(leftRow, rightRow))
-          }
-        } else {
-          iter
-        }
+      val joinRow = if (!swappedLeftAndRight) {
+        val joiner = GenerateUnsafeRowJoiner.create(left.schema, right.schema)
+        (l: UnsafeRow, r: UnsafeRow) => joiner.join(l, r)
+      } else {
+        val joiner = GenerateUnsafeRowJoiner.create(right.schema, left.schema)
+        (l: UnsafeRow, r: UnsafeRow) => joiner.join(r, l)
+      }
 
-      filtered.map {
-        case (l, r) =>
-          val leftRow = l.getUserData.asInstanceOf[UnsafeRow]
-          val rightRow = r.getUserData.asInstanceOf[UnsafeRow]
-          var joiner = GenerateUnsafeRowJoiner.create(left.schema, right.schema)
-          joiner.join(leftRow, rightRow)
+      val joined = iter.map { case (l, r) =>
+        val leftRow = l.getUserData.asInstanceOf[UnsafeRow]
+        val rightRow = r.getUserData.asInstanceOf[UnsafeRow]
+        joinRow(leftRow, rightRow)
+      }
+
+      extraCondition match {
+        case Some(condition) =>
+          val boundCondition = Predicate.create(condition, output)
+          joined.filter(row => boundCondition.eval(row))
+        case None => joined
       }
     }
   }

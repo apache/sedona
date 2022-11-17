@@ -1,7 +1,7 @@
 Type: Package
 Package: apache.sedona
 Title: R Interface for Apache Sedona
-Version: 1.2.1
+Version: 1.3.0
 Authors@R:
     c(person(family = "Apache Sedona",
              role = c("aut", "cre"),
