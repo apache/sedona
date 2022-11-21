@@ -82,6 +82,25 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(test.take(1)(0).get(0).asInstanceOf[Double] == -3.0)
     }
 
+    it("Passed ST_ZMax") {
+      var test = sparkSession.sql("SELECT ST_ZMax(ST_GeomFromWKT('POLYGON((0 0 0,0 5 0,5 0 0,0 0 5),(1 1 0,3 1 0,1 3 0,1 1 0))'))")
+      assert(test.take(1)(0).get(0).asInstanceOf[Double] == 5.0)
+    }
+    it("Passed ST_ZMax with no Z coordinate") {
+      var test = sparkSession.sql("SELECT ST_ZMax(ST_GeomFromWKT('POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))'))")
+      assert(test.take(1)(0).get(0) == null)
+    }
+
+    it("Passed ST_ZMin") {
+      val test = sparkSession.sql("SELECT ST_ZMin(ST_GeomFromWKT('LINESTRING(1 3 4, 5 6 7)'))")
+      assert(test.take(1)(0).get(0).asInstanceOf[Double] == 4.0)
+    }
+
+    it("Passed ST_ZMin with no Z coordinate") {
+      var test = sparkSession.sql("SELECT ST_ZMin(ST_GeomFromWKT('LINESTRING(1 3, 5 6)'))")
+      assert(test.take(1)(0).get(0) == null)
+    }
+
     it("Passed ST_Centroid") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")

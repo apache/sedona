@@ -155,6 +155,28 @@ public class Functions {
         return max;
     }
 
+    public static Double zMax(Geometry geometry) {
+        Coordinate[] points = geometry.getCoordinates();
+        double max = Double.MIN_VALUE;
+        for (int i=0; i < points.length; i++) {
+            if(java.lang.Double.isNaN(points[i].getZ()))
+                continue;
+            max = Math.max(points[i].getZ(), max);
+        }
+        return max == Double.MIN_VALUE ? null : max;
+    }
+
+    public static Double zMin(Geometry geometry) {
+        Coordinate[] points = geometry.getCoordinates();
+        double min = Double.MAX_VALUE;
+        for(int i=0; i < points.length; i++){
+            if(java.lang.Double.isNaN(points[i].getZ()))
+                continue;
+            min = Math.min(points[i].getZ(), min);
+        }
+        return min == Double.MAX_VALUE ? null : min;
+    }
+
     public static Geometry transform(Geometry geometry, String sourceCRS, String targetCRS)
         throws FactoryException, TransformException {
         return transform(geometry, sourceCRS, targetCRS, false);
