@@ -1445,3 +1445,33 @@ SELECT ST_Z(ST_POINT(0.0 25.0 11.0))
 ```
 
 Output: `11.0`
+
+## ST_ZMax
+
+Introduction: Returns Z maxima of the given geometry or null if there is no Z coordinate.
+
+Format: `ST_ZMax(geom: geometry)`
+
+Since: `v1.2.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_ZMax(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
+```
+
+Output: `1.0`
+
+## ST_ZMin
+
+Introduction: Returns Z minima of the given geometry or null if there is no Z coordinate.
+
+Format: `ST_ZMin(geom: geometry)`
+
+Since: `v1.2.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_ZMin(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'))
+```
+
+Output: `4.0`
