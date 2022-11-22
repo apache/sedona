@@ -97,6 +97,8 @@ __all__ = [
     "ST_YMax",
     "ST_YMin",
     "ST_Z",
+    "ST_ZMax",
+    "ST_ZMin",
 ]
 
 
@@ -1070,3 +1072,25 @@ def ST_Z(point: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_Z", point)
+
+@validate_argument_types
+def ST_ZMax(geometry: ColumnOrName) -> Column:
+    """Return the maximum Z coordinate of a geometry.
+
+    :param geometry: Geometry column to get the maximum Z coordinate from.
+    :type geometry: ColumnOrName
+    :return: Maximum Z coordinate for the geometry as a double column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_ZMax", geometry)
+
+@validate_argument_types
+def ST_ZMin(geometry: ColumnOrName) -> Column:
+    """Return the minimum Z coordinate of a geometry.
+
+    :param geometry: Geometry column to get the minimum Z coordinate from.
+    :type geometry: ColumnOrName
+    :return: Minimum Z coordinate for the geometry as a double column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_ZMin", geometry)

@@ -417,6 +417,16 @@ class TestPredicateJoin(TestBase):
 
         assert(not polygons.count())
 
+    def test_st_z_max(self):
+        linestring_df = self.spark.sql("SELECT ST_GeomFromWKT('LINESTRING Z (0 0 1, 0 1 2)') as geom")
+        linestring_row = [lnstr_row[0] for lnstr_row in linestring_df.selectExpr("ST_ZMax(geom)").collect()]
+        assert(linestring_row == [2.0])
+
+    def test_st_z_min(self):
+        linestring_df = self.spark.sql("SELECT ST_GeomFromWKT('POLYGON Z ((0 0 2, 0 1 1, 1 1 2, 1 0 2, 0 0 2))') as geom")
+        linestring_row = [lnstr_row[0] for lnstr_row in linestring_df.selectExpr("ST_ZMin(geom)").collect()]
+        assert(linestring_row == [1.0])
+
     def test_st_start_point(self):
 
         point_df = create_sample_points_df(self.spark, 5)
