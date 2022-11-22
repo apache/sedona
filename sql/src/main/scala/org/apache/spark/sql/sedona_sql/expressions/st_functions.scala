@@ -254,4 +254,10 @@ object st_functions extends DataFrameAPI {
 
   def ST_Z(point: Column): Column = wrapExpression[ST_Z](point)
   def ST_Z(point: String): Column = wrapExpression[ST_Z](point)
+
+  def ST_ZMax(geometry: Column): Column = wrapExpression[ST_ZMax](geometry)
+  def ST_ZMax(geometry: String): Column = wrapExpression[ST_ZMax](geometry)
+
+  def ST_ZMin(geometry: Column): Column = wrapExpression[ST_ZMin](geometry)
+  def ST_ZMin(geometry: String): Column = wrapExpression[ST_ZMin](geometry)
 }

@@ -83,11 +83,11 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
 
     it("Passed ST_ZMax") {
-      var test = sparkSession.sql("SELECT ST_ZMax(ST_GeomFromWKT('POLYGON((0 0 0,0 5 0,5 0 0,0 0 5),(1 1 0,3 1 0,1 3 0,1 1 0))'))")
+      val test = sparkSession.sql("SELECT ST_ZMax(ST_GeomFromWKT('POLYGON((0 0 0,0 5 0,5 0 0,0 0 5),(1 1 0,3 1 0,1 3 0,1 1 0))'))")
       assert(test.take(1)(0).get(0).asInstanceOf[Double] == 5.0)
     }
     it("Passed ST_ZMax with no Z coordinate") {
-      var test = sparkSession.sql("SELECT ST_ZMax(ST_GeomFromWKT('POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))'))")
+      val test = sparkSession.sql("SELECT ST_ZMax(ST_GeomFromWKT('POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))'))")
       assert(test.take(1)(0).get(0) == null)
     }
 
@@ -97,7 +97,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
 
     it("Passed ST_ZMin with no Z coordinate") {
-      var test = sparkSession.sql("SELECT ST_ZMin(ST_GeomFromWKT('LINESTRING(1 3, 5 6)'))")
+      val test = sparkSession.sql("SELECT ST_ZMin(ST_GeomFromWKT('LINESTRING(1 3, 5 6)'))")
       assert(test.take(1)(0).get(0) == null)
     }
 

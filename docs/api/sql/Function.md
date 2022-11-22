@@ -1452,7 +1452,7 @@ Introduction: Returns Z maxima of the given geometry or null if there is no Z co
 
 Format: `ST_ZMax(geom: geometry)`
 
-Since: `v1.2.1`
+Since: `v1.3.1`
 
 Spark SQL example:
 ```SQL
@@ -1467,7 +1467,7 @@ Introduction: Returns Z minima of the given geometry or null if there is no Z co
 
 Format: `ST_ZMin(geom: geometry)`
 
-Since: `v1.2.1`
+Since: `v1.3.1`
 
 Spark SQL example:
 ```SQL
