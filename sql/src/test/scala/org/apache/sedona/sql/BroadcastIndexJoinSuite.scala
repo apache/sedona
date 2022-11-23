@@ -22,6 +22,7 @@ package org.apache.sedona.sql
 import org.apache.spark.sql.execution.joins.BroadcastNestedLoopJoinExec
 import org.apache.spark.sql.sedona_sql.strategy.join.BroadcastIndexJoinExec
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.Row
 
 class BroadcastIndexJoinSuite extends TestBaseScala {
 
@@ -271,6 +272,35 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
           |join (select ST_Point(1.0,5.0) as geom) b
           |on ST_Distance(a.geom, b.geom) < 1.5
           |""".stripMargin).count() == 1)
+    }
+
+    it("Passed validate output rows") {
+      val left = sparkSession.createDataFrame(Seq(
+        (1.0, 1.0, "left_1"),
+        (2.0, 2.0, "left_2"),
+      )).toDF("l_x", "l_y", "l_data")
+
+      val right = sparkSession.createDataFrame(Seq(
+        (2.0, 2.0, "right_2"),
+        (3.0, 3.0, "right_3"),
+      )).toDF("r_x", "r_y", "r_data")
+
+      val joined = left.join(broadcast(right),
+        expr("ST_Intersects(ST_Point(l_x, l_y), ST_Point(r_x, r_y))"), "inner")
+      assert(joined.queryExecution.sparkPlan.collect{ case p: BroadcastIndexJoinExec => p }.size === 1)
+
+      val rows = joined.collect()
+      assert(rows.length == 1)
+      assert(rows(0) == Row(2.0, 2.0, "left_2", 2.0, 2.0, "right_2"))
+
+      val joined2 = broadcast(left).join(right,
+        expr("ST_Intersects(ST_Point(l_x, l_y), ST_Point(r_x, r_y))"), "inner")
+      assert(joined.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
+
+      val rows2 = joined2.collect()
+      assert(rows2.length == 1)
+      assert(rows2(0) == Row(2.0, 2.0, "left_2", 2.0, 2.0, "right_2"))
+
     }
   }
 
@@ -524,6 +554,26 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       assert(broadcastJoinDf.count() == 1000)
       sparkSession.conf.set("spark.sql.adaptive.enabled", false)
     }
+
+    it("Passed validate output rows") {
+      val left = sparkSession.createDataFrame(Seq(
+        (1.0, 1.0, "left_1"),
+        (2.0, 2.0, "left_2"),
+      )).toDF("l_x", "l_y", "l_data")
+
+      val right = sparkSession.createDataFrame(Seq(
+        (2.0, 2.0, "right_2"),
+        (3.0, 3.0, "right_3"),
+      )).toDF("r_x", "r_y", "r_data")
+
+      val joined = left.join(broadcast(right),
+        expr("ST_Intersects(ST_Point(l_x, l_y), ST_Point(r_x, r_y))"), "left_semi")
+      assert(joined.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
+
+      val rows = joined.collect()
+      assert(rows.length == 1)
+      assert(rows(0) == Row(2.0, 2.0, "left_2"))
+    }
   }
 
   describe("Sedona-SQL Broadcast Index Join Test for left anti joins") {
@@ -775,6 +825,26 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
       assert(broadcastJoinDf.count() == 0)
       sparkSession.conf.set("spark.sql.adaptive.enabled", false)
+    }
+
+    it("Passed validate output rows") {
+      val left = sparkSession.createDataFrame(Seq(
+        (1.0, 1.0, "left_1"),
+        (2.0, 2.0, "left_2"),
+      )).toDF("l_x", "l_y", "l_data")
+
+      val right = sparkSession.createDataFrame(Seq(
+        (2.0, 2.0, "right_2"),
+        (3.0, 3.0, "right_3"),
+      )).toDF("r_x", "r_y", "r_data")
+
+      val joined = left.join(broadcast(right),
+        expr("ST_Intersects(ST_Point(l_x, l_y), ST_Point(r_x, r_y))"), "left_anti")
+      assert(joined.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
+
+      val rows = joined.collect()
+      assert(rows.length == 1)
+      assert(rows(0) == Row(1.0, 1.0, "left_1"))
     }
   }
 
@@ -1040,6 +1110,27 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       assert(broadcastJoinDf.count() == 1000)
       sparkSession.conf.set("spark.sql.adaptive.enabled", false)
     }
+
+    it("Passed validate output rows") {
+      val left = sparkSession.createDataFrame(Seq(
+        (1.0, 1.0, "left_1"),
+        (2.0, 2.0, "left_2"),
+      )).toDF("l_x", "l_y", "l_data")
+
+      val right = sparkSession.createDataFrame(Seq(
+        (2.0, 2.0, "right_2"),
+        (3.0, 3.0, "right_3"),
+      )).toDF("r_x", "r_y", "r_data")
+
+      val joined = left.join(broadcast(right),
+        expr("ST_Intersects(ST_Point(l_x, l_y), ST_Point(r_x, r_y))"), "left_outer")
+      assert(joined.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
+
+      val rows = joined.collect()
+      assert(rows.length == 2)
+      assert(rows(0) == Row(1.0, 1.0, "left_1", null, null, null))
+      assert(rows(1) == Row(2.0, 2.0, "left_2", 2.0, 2.0, "right_2"))
+    }
   }
 
   describe("Sedona-SQL Broadcast Index Join Test for right outer joins") {
@@ -1293,6 +1384,27 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       assert(broadcastJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastNestedLoopJoinExec => p }.size === 1)
       assert(broadcastJoinDf.count() == 1000)
       sparkSession.conf.set("spark.sql.adaptive.enabled", false)
+    }
+
+    it("Passed validate output rows") {
+      val left = sparkSession.createDataFrame(Seq(
+        (1.0, 1.0, "left_1"),
+        (2.0, 2.0, "left_2"),
+      )).toDF("l_x", "l_y", "l_data")
+
+      val right = sparkSession.createDataFrame(Seq(
+        (2.0, 2.0, "right_2"),
+        (3.0, 3.0, "right_3"),
+      )).toDF("r_x", "r_y", "r_data")
+
+      val joined = broadcast(left).join(right,
+        expr("ST_Intersects(ST_Point(l_x, l_y), ST_Point(r_x, r_y))"), "right_outer")
+      assert(joined.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
+
+      val rows = joined.collect()
+      assert(rows.length == 2)
+      assert(rows(0) == Row(2.0, 2.0, "left_2", 2.0, 2.0, "right_2"))
+      assert(rows(1) == Row(null, null, null, 3.0, 3.0, "right_3"))
     }
   }
 
