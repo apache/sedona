@@ -277,12 +277,12 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     it("Passed validate output rows") {
       val left = sparkSession.createDataFrame(Seq(
         (1.0, 1.0, "left_1"),
-        (2.0, 2.0, "left_2"),
+        (2.0, 2.0, "left_2")
       )).toDF("l_x", "l_y", "l_data")
 
       val right = sparkSession.createDataFrame(Seq(
         (2.0, 2.0, "right_2"),
-        (3.0, 3.0, "right_3"),
+        (3.0, 3.0, "right_3")
       )).toDF("r_x", "r_y", "r_data")
 
       val joined = left.join(broadcast(right),
@@ -558,12 +558,12 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     it("Passed validate output rows") {
       val left = sparkSession.createDataFrame(Seq(
         (1.0, 1.0, "left_1"),
-        (2.0, 2.0, "left_2"),
+        (2.0, 2.0, "left_2")
       )).toDF("l_x", "l_y", "l_data")
 
       val right = sparkSession.createDataFrame(Seq(
         (2.0, 2.0, "right_2"),
-        (3.0, 3.0, "right_3"),
+        (3.0, 3.0, "right_3")
       )).toDF("r_x", "r_y", "r_data")
 
       val joined = left.join(broadcast(right),
@@ -830,12 +830,12 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     it("Passed validate output rows") {
       val left = sparkSession.createDataFrame(Seq(
         (1.0, 1.0, "left_1"),
-        (2.0, 2.0, "left_2"),
+        (2.0, 2.0, "left_2")
       )).toDF("l_x", "l_y", "l_data")
 
       val right = sparkSession.createDataFrame(Seq(
         (2.0, 2.0, "right_2"),
-        (3.0, 3.0, "right_3"),
+        (3.0, 3.0, "right_3")
       )).toDF("r_x", "r_y", "r_data")
 
       val joined = left.join(broadcast(right),
@@ -1114,12 +1114,12 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     it("Passed validate output rows") {
       val left = sparkSession.createDataFrame(Seq(
         (1.0, 1.0, "left_1"),
-        (2.0, 2.0, "left_2"),
+        (2.0, 2.0, "left_2")
       )).toDF("l_x", "l_y", "l_data")
 
       val right = sparkSession.createDataFrame(Seq(
         (2.0, 2.0, "right_2"),
-        (3.0, 3.0, "right_3"),
+        (3.0, 3.0, "right_3")
       )).toDF("r_x", "r_y", "r_data")
 
       val joined = left.join(broadcast(right),
@@ -1389,12 +1389,12 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     it("Passed validate output rows") {
       val left = sparkSession.createDataFrame(Seq(
         (1.0, 1.0, "left_1"),
-        (2.0, 2.0, "left_2"),
+        (2.0, 2.0, "left_2")
       )).toDF("l_x", "l_y", "l_data")
 
       val right = sparkSession.createDataFrame(Seq(
         (2.0, 2.0, "right_2"),
-        (3.0, 3.0, "right_3"),
+        (3.0, 3.0, "right_3")
       )).toDF("r_x", "r_y", "r_data")
 
       val joined = broadcast(left).join(right,
