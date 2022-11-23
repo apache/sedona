@@ -27,6 +27,7 @@ import org.locationtech.jts.geom.Polygon;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import static junit.framework.TestCase.assertNull;
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
 import static org.junit.Assert.assertEquals;
@@ -168,7 +169,6 @@ public class FunctionTest extends TestBase{
         double result = (double) first(ResultTable).getField(0);
         assertEquals(-0.5, result, 0);
     }
-
 
     @Test
     public void testGeomToGeoHash() {
@@ -372,6 +372,36 @@ public class FunctionTest extends TestBase{
         Table pointTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (1.23 4.56 7.89)') AS " + pointColNames[0]);
         pointTable = pointTable.select(call(Functions.ST_Z.class.getSimpleName(), $(pointColNames[0])));
         assertEquals(7.89, first(pointTable).getField(0));
+    }
+
+    @Test
+    public void testZMax() {
+        Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(1 3 4, 5 6 7)') AS " + polygonColNames[0]);
+        polygonTable = polygonTable.select(call(Functions.ST_ZMax.class.getSimpleName(), $(polygonColNames[0])));
+        double result = (double) first(polygonTable).getField(0);
+        assertEquals(7.0, result, 0);
+    }
+
+    @Test
+    public void testZMaxWithNoZCoordinate() {
+        Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(1 3, 5 6)') AS " + polygonColNames[0]);
+        polygonTable = polygonTable.select(call(Functions.ST_ZMax.class.getSimpleName(), $(polygonColNames[0])));
+        assertNull(first(polygonTable).getField(0));
+    }
+
+    @Test
+    public void testZMin() {
+        Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(1 3 4, 5 6 7)') AS " + polygonColNames[0]);
+        polygonTable = polygonTable.select(call(Functions.ST_ZMin.class.getSimpleName(), $(polygonColNames[0])));
+        double result = (double) first(polygonTable).getField(0);
+        assertEquals(4.0, result, 0);
+    }
+
+    @Test
+    public void testZMinWithNoZCoordinate() {
+        Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(1 3, 5 6)') AS " + polygonColNames[0]);
+        polygonTable = polygonTable.select(call(Functions.ST_ZMin.class.getSimpleName(), $(polygonColNames[0])));
+        assertNull(first(polygonTable).getField(0));
     }
 
     @Test

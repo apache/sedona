@@ -64,6 +64,32 @@ case class ST_YMin(inputExpressions: Seq[Expression])
   }
 }
 
+/**
+  * Return the Z maxima of the geometry.
+  *
+  * @param inputExpressions This function takes a geometry and returns the maximum of all Z-coordinate values.
+*/
+case class ST_ZMax(inputExpressions: Seq[Expression])
+  extends InferredUnaryExpression(Functions.zMax) with FoldableExpression {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Return the Z minima of the geometry.
+ *
+ * @param inputExpressions This function takes a geometry and returns the minimum of all Z-coordinate values.
+*/
+case class ST_ZMin(inputExpressions: Seq[Expression])
+  extends InferredUnaryExpression(Functions.zMin) with FoldableExpression {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_3DDistance(inputExpressions: Seq[Expression])
   extends InferredBinaryExpression(Functions.distance3d) with FoldableExpression {
 

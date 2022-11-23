@@ -124,6 +124,8 @@ object Catalog {
     function[ST_PointN](),
     function[ST_AsEWKT](),
     function[ST_Force_2D](),
+    function[ST_ZMax](),
+    function[ST_ZMin](),
     function[ST_YMax](),
     function[ST_YMin](),
     function[ST_XMax](),
