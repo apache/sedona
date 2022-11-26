@@ -73,7 +73,15 @@ DistanceJoin pointshape1#12: geometry, pointshape2#33: geometry, 2.0, true
 	Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. To change the geometry's unit, please transform the coordinate reference system. See [ST_Transform](Function.md#st_transform).
 
 ## Broadcast join
-Introduction: Perform a range join or distance join but broadcast one of the sides of the join. This maintains the partitioning of the non-broadcast side and doesn't require a shuffle.
+Introduction: Perform a range join or distance join but broadcast one of the sides of the join.
+This maintains the partitioning of the non-broadcast side and doesn't require a shuffle.
+Sedona uses broadcast join only if the correct side has a broadcast hint.
+The supported join type - broadcast side combinations are
+* Inner - either side, preferring to broadcast left if both sides have the hint
+* Left semi - broadcast right
+* Left anti - broadcast right
+* Left outer - broadcast right
+* Right outer - broadcast left
 
 ```Scala
 pointDf.alias("pointDf").join(broadcast(polygonDf).alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
@@ -107,7 +115,7 @@ BroadcastIndexJoin pointshape#52: geometry, BuildRight, BuildLeft, true, 2.0 ST_
       +- FileScan csv
 ```
 
-Note: Ff the distance is an expression, it is only evaluated on the first argument to ST_Distance (`pointDf1` above).
+Note: If the distance is an expression, it is only evaluated on the first argument to ST_Distance (`pointDf1` above).
 
 ## Predicate pushdown
 
