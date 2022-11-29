@@ -135,6 +135,8 @@ object Catalog {
     function[ST_CollectionExtract](),
     function[ST_Normalize](),
     function[ST_LineFromMultiPoint](),
+    function[ST_MPolyFromWKT](),
+    function[ST_MLineFromWKT](),
     // Expression for rasters
     function[RS_NormalizedDifference](),
     function[RS_Mean](),

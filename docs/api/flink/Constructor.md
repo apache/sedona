@@ -134,6 +134,32 @@ Spark SQL example:
 SELECT ST_LineStringFromText('Linestring(1 2, 3 4)') AS line
 ```
 
+## ST_MLineFromWKT
+
+Introduction: Construct a MultiLineString from Text
+
+Format: `ST_MLineFromWKT (Text:string)`
+
+Since: `1.3.0`
+
+SQL example:
+```SQL
+SELECT ST_MLineFromWKT('MULTILINESTRING((1 2, 3 4), (4 5, 6 7))') AS multiLine
+```
+
+## ST_MPolyFromWKT
+
+Introduction: Construct a MultiPolygon from Text
+
+Format: `ST_MPolyFromWKT (Text:string)`
+
+Since: `1.3.0`
+
+SQL example:
+```SQL
+SELECT ST_MPolyFromWKT('MULTIPOLYGON(((-70.916 42.1002,-70.9468 42.0946,-70.9765 42.0872 )))') AS multiPolygon
+```
+
 ## ST_Point
 
 Introduction: Construct a Point from X and Y

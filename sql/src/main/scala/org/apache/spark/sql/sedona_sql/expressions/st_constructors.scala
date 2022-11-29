@@ -20,6 +20,7 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.Column
+import org.apache.spark.sql.sedona_sql.expressions.st_functions.wrapExpression
 
 object st_constructors extends DataFrameAPI {
   def ST_GeomFromGeoHash(geohash: Column, precision: Column): Column = wrapExpression[ST_GeomFromGeoHash](geohash, precision)
@@ -73,4 +74,9 @@ object st_constructors extends DataFrameAPI {
 
   def ST_PolygonFromText(coords: Column, delimiter: Column): Column = wrapExpression[ST_PolygonFromText](coords, delimiter)
   def ST_PolygonFromText(coords: String, delimiter: String): Column = wrapExpression[ST_PolygonFromText](coords, delimiter)
+  def ST_MPolyFromWKT(wkt: Column): Column = wrapExpression[ST_MPolyFromWKT](wkt, 0)
+  def ST_MLineFromWKT(wkt: Column): Column = wrapExpression[ST_MLineFromWKT](wkt, 0)
+
+
+
 }

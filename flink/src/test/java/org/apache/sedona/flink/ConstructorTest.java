@@ -276,4 +276,27 @@ public class ConstructorTest extends TestBase{
                 $(polygonColNames[1]));
         assertTrue(first(geomTable).getField(0) instanceof Polygon);
     }
+
+    @Test
+    public void testMPolygonFromWKT() {
+        List<Row> data = createMultiPolygonWKT(testDataSize);
+        Row result = last(createMultiPolygonTable(testDataSize));
+        assertEquals(data.get(data.size() - 1).getField(0).toString(), result.getField(0).toString());
+    }
+    @Test
+    public void testMLineFromWKT() {
+        List<Row> data = new ArrayList<>();
+        data.add(Row.of("MULTILINESTRING((1 2, 3 4), (4 5, 6 7))", "multiline", 0L));
+
+        Table geohashTable = createTextTable(data, multilinestringColNames);
+        Table geomTable = geohashTable
+                .select(call(Constructors.ST_MLineFromWKT.class.getSimpleName(),
+                        $(multilinestringColNames[0]))
+                        .as(multilinestringColNames[0]), $(multilinestringColNames[1]));
+        String result = first(geomTable)
+                .getFieldAs(0)
+                .toString();
+        String expectedGeom = "MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))";
+        assertEquals(expectedGeom, result);
+    }
 }

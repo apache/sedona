@@ -36,4 +36,41 @@ public class ConstructorsTest {
         ParseException invalid = assertThrows(ParseException.class, () -> Constructors.geomFromWKT("not valid", 0));
         assertEquals("Unknown geometry type: NOT (line 1)", invalid.getMessage());
     }
+    @Test
+    public void mLineFromWKT() throws ParseException {
+        assertNull(Constructors.mLineFromWKT(null, 0));
+        assertNull(Constructors.mLineFromWKT("POINT (1 1)", 0));
+        Geometry geom = Constructors.mLineFromWKT("MULTILINESTRING((1 2, 3 4), (4 5, 6 7))", 0);
+        assertEquals(0,geom.getSRID());
+        assertEquals("MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))",geom.toText());
+
+        geom = Constructors.mLineFromWKT("MULTILINESTRING((1 2, 3 4), (4 5, 6 7))", 3306);
+        assertEquals(3306,geom.getSRID());
+        assertEquals("MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))",geom.toText());
+
+        ParseException invalid = assertThrows(ParseException.class, () -> Constructors.mLineFromWKT("MULTILINESTRING(not valid)", 0));
+        assertEquals("Expected EMPTY or ( but found 'not' (line 1)", invalid.getMessage());
+
+    }
+    @Test
+    public void mPolyFromWKT() throws ParseException {
+        assertNull(Constructors.mPolyFromWKT(null, 0));
+        assertNull(Constructors.mPolyFromWKT("POINT (1 1)", 0));
+        Geometry geom = Constructors.mPolyFromWKT("MULTIPOLYGON(((0 0 ,20 0 ,20 20 ,0 20 ,0 0 ),(5 5 ,5 7 ,7 7 ,7 5 ,5 5)))", 0);
+        assertEquals(0,geom.getSRID());
+        assertEquals("MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))",geom.toText());
+
+        geom = Constructors.mPolyFromWKT("MULTIPOLYGON(((0 0 ,20 0 ,20 20 ,0 20 ,0 0 ),(5 5 ,5 7 ,7 7 ,7 5 ,5 5)))", 3306);
+        assertEquals(3306,geom.getSRID());
+        assertEquals("MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))"
+                ,geom.toText());
+
+        IllegalArgumentException invalid = assertThrows(IllegalArgumentException.class,
+                () -> Constructors.mPolyFromWKT("MULTIPOLYGON(((-70.916 42.1002,-70.9468 42.0946,-70.9765 42.0872 )))", 0));
+        assertEquals("Points of LinearRing do not form a closed linestring", invalid.getMessage());
+
+        ParseException parseException = assertThrows(ParseException.class, () -> Constructors.mPolyFromWKT("MULTIPOLYGON(not valid)", 0));
+        assertEquals("Expected EMPTY or ( but found 'not' (line 1)", parseException.getMessage());
+
+    }
 }

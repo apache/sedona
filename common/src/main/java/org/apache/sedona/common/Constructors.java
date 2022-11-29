@@ -28,4 +28,19 @@ public class Constructors {
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
         return new WKTReader(geometryFactory).read(wkt);
     }
+
+    public static Geometry mLineFromWKT(String wkt, int srid) throws ParseException {
+        if (wkt == null || !wkt.startsWith("MULTILINESTRING")) {
+            return null;
+        }
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        return new WKTReader(geometryFactory).read(wkt);
+    }
+    public static Geometry mPolyFromWKT(String wkt, int srid) throws ParseException {
+        if (wkt == null || !wkt.startsWith("MULTIPOLYGON")) {
+            return null;
+        }
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        return new WKTReader(geometryFactory).read(wkt);
+    }
 }

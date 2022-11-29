@@ -34,6 +34,8 @@ public class Catalog {
                 new Constructors.ST_GeomFromGeoHash(),
                 new Constructors.ST_GeomFromGML(),
                 new Constructors.ST_GeomFromKML(),
+                new Constructors.ST_MPolyFromWKT(),
+                new Constructors.ST_MLineFromWKT(),
                 new Functions.ST_Area(),
                 new Functions.ST_Azimuth(),
                 new Functions.ST_Boundary(),

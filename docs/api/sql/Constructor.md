@@ -209,6 +209,35 @@ FROM linestringtable
 ```SQL
 SELECT ST_LineStringFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794', ',') AS linestringshape
 ```
+## ST_MLineFromWKT
+
+Introduction: Construct a MultiLineString from Wkt. If srid is not set, it defaults to 0 (unknown).
+
+Format:
+`ST_MLineFromWKT (Wkt:string)`
+`ST_MLineFromWKT (Wkt:string, srid:integer)`
+
+Since: `v1.3.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_MLineFromWKT('MULTILINESTRING((1 2, 3 4), (4 5, 6 7))') AS multiLine
+```
+
+## ST_MPolyFromWKT
+
+Introduction: Construct a MultiPolygon from Wkt. If srid is not set, it defaults to 0 (unknown).
+
+Format:
+`ST_MPolyFromWKT (Wkt:string)`
+`ST_MPolyFromWKT (Wkt:string, srid:integer)`
+
+Since: `v1.3.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_MPolyFromWKT('MULTIPOLYGON(((-70.916 42.1002,-70.9468 42.0946,-70.9765 42.0872 )))') AS multiPolygon
+```
 
 ## ST_Point
 

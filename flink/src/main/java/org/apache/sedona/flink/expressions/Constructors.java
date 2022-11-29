@@ -30,7 +30,7 @@ import org.locationtech.jts.io.kml.KMLReader;
 public class Constructors {
 
     private static Geometry getGeometryByType(String geom, String inputDelimiter, GeometryType geometryType) throws ParseException {
-        FileDataSplitter delimiter = inputDelimiter == null? FileDataSplitter.CSV:FileDataSplitter.getFileDataSplitter(inputDelimiter);
+        FileDataSplitter delimiter = inputDelimiter == null ? FileDataSplitter.CSV : FileDataSplitter.getFileDataSplitter(inputDelimiter);
         FormatUtils<Geometry> formatUtils = new FormatUtils<>(delimiter, false, geometryType);
         return formatUtils.readGeometry(geom);
     }
@@ -185,4 +185,19 @@ public class Constructors {
             return new KMLReader().read(kml);
         }
     }
+
+    public static class ST_MPolyFromWKT extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "String") String wkt) throws ParseException {
+            return org.apache.sedona.common.Constructors.mPolyFromWKT(wkt, 0);
+        }
+    }
+
+    public static class ST_MLineFromWKT extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "String") String wkt) throws ParseException {
+            return org.apache.sedona.common.Constructors.mLineFromWKT(wkt, 0);
+        }
+    }
+
 }

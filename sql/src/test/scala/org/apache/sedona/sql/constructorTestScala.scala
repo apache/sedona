@@ -204,5 +204,14 @@ class constructorTestScala extends TestBaseScala {
       var spatialRDD2 = Adapter.toSpatialRdd(df, "geometry")
       Adapter.toDf(spatialRDD2, sparkSession).show(1)
     }
+
+    it("Passed ST_MLineFromWKT") {
+      var mLineDf = sparkSession.sql("select ST_MLineFromWKT('MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))',0)")
+      assert(mLineDf.count() == 1)
+    }
+    it("Passed ST_MPolyFromWKT") {
+      var mLineDf = sparkSession.sql("select ST_MPolyFromWKT('MULTIPOLYGON(((-70.916 42.1002,-70.9468 42.0946,-70.9765 42.0872 )))',0)")
+      assert(mLineDf.count() == 1)
+    }
   }
 }

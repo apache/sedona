@@ -45,7 +45,10 @@ public class TestBase {
     static int testDataSize = 1000;
     static String[] pointColNames = {"geom_point", "name_point", "event_time", "proc_time"};
     static String[] linestringColNames = {"geom_linestring", "name_linestring", "event_time", "proc_time"};
+    static String[] multilinestringColNames = {"geom_multilinestring", "name_multilinestring", "event_time", "proc_time"};
     static String[] polygonColNames = {"geom_polygon", "name_polygon", "event_time", "proc_time"};
+
+    static String[] multipolygonColNames = {"geom_multipolygon", "name_multipolygon", "event_time", "proc_time"};
     static String pointTableName = "point_table";
     static String polygonTableName = "polygon_table";
     static Long timestamp_base = new Timestamp(System.currentTimeMillis()).getTime();
@@ -61,7 +64,7 @@ public class TestBase {
 
     static void initialize(boolean enableWebUI) {
         Logger.getLogger("org").setLevel(Level.WARN);
-        env = enableWebUI? StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(new Configuration()):
+        env = enableWebUI ? StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(new Configuration()) :
                 StreamExecutionEnvironment.getExecutionEnvironment();
         EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
         tableEnv = StreamTableEnvironment.create(env, settings);
@@ -69,7 +72,7 @@ public class TestBase {
         SedonaFlinkRegistrator.registerFunc(tableEnv);
     }
 
-    static List<Row> createPointText(int size){
+    static List<Row> createPointText(int size) {
         List<Row> data = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             // Create a numer of points (1, 1) (2, 2) ...
@@ -78,7 +81,7 @@ public class TestBase {
         return data;
     }
 
-    static List<Point> creatPoint(int size){
+    static List<Point> creatPoint(int size) {
         List<Point> data = new ArrayList<>();
         GeometryFactory geomFact = new GeometryFactory();
         for (int i = 0; i < size; i++) {
@@ -89,11 +92,11 @@ public class TestBase {
     }
 
     // Simulate some points in the US
-    static List<Row> createPointText_real(int size){
+    static List<Row> createPointText_real(int size) {
         List<Row> data = new ArrayList<>();
         double x = 32.0;
         double y = -118.0;
-        double increment = 10.0/size;
+        double increment = 10.0 / size;
         for (int i = 0; i < size; i++) {
             x += increment;
             y += increment;
@@ -102,11 +105,11 @@ public class TestBase {
         return data;
     }
 
-    static List<Row> createPointWKT(int size){
+    static List<Row> createPointWKT(int size) {
         List<Row> data = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             // Create a numer of points (1, 1) (2, 2) ...
-            data.add(Row.of("POINT (" + i + " " + i +")", "point" + i, timestamp_base + time_interval * 1000 * i));
+            data.add(Row.of("POINT (" + i + " " + i + ")", "point" + i, timestamp_base + time_interval * 1000 * i));
         }
         return data;
     }
@@ -212,6 +215,32 @@ public class TestBase {
         return data;
     }
 
+    static String createPolygonString(int i) {
+        // Each polygon is an envelope like (-0.5, -0.5, 0.5, 0.5)
+        String minX = String.valueOf(i - 0.5);
+        String minY = String.valueOf(i - 0.5);
+        String maxX = String.valueOf(i + 0.5);
+        String maxY = String.valueOf(i + 0.5);
+        List<String> polygon = new ArrayList<>();
+        polygon.add(minX + " " + minY);
+        polygon.add(minX + " " + maxY);
+        polygon.add(maxX + " " + maxY);
+        polygon.add(maxX + " " + minY);
+        polygon.add(minX + " " + minY);
+        return "(("+ String.join(", ", polygon)+"))";
+    }
+
+    static List<Row> createMultiPolygonWKT(int size) {
+        List<Row> data = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            List<String> multiPolygon=new ArrayList<>();
+            multiPolygon.add(createPolygonString(i));
+            multiPolygon.add(createPolygonString(size-i-1));
+            data.add(Row.of("MULTIPOLYGON (" + String.join(", ", multiPolygon) + ")", "multipolygon" + i, timestamp_base + time_interval * 1000 * i));
+        }
+        return data;
+    }
+
     static List<Row> createPolygonGeoJSON(int size) {
         List<Row> data = new ArrayList<>();
         GeometryFactory geometryFactory = new GeometryFactory();
@@ -239,7 +268,7 @@ public class TestBase {
         return data;
     }
 
-    static Table createTextTable(List<Row> data, String[] colNames){
+    static Table createTextTable(List<Row> data, String[] colNames) {
         TypeInformation<?>[] colTypes = {
                 BasicTypeInfo.STRING_TYPE_INFO,
                 BasicTypeInfo.STRING_TYPE_INFO,
@@ -255,11 +284,11 @@ public class TestBase {
         return tableEnv.fromDataStream(ds.assignTimestampsAndWatermarks(wmStrategy), $(colNames[0]), $(colNames[1]), $(colNames[2]).rowtime(), $(colNames[3]).proctime());
     }
 
-    static Table createPointTextTable(int size){
+    static Table createPointTextTable(int size) {
         return createTextTable(createPointText(size), pointColNames);
     }
 
-    static Table createPointTextTable_real(int size){
+    static Table createPointTextTable_real(int size) {
         return createTextTable(createPointText_real(size), pointColNames);
     }
 
@@ -270,22 +299,24 @@ public class TestBase {
     static Table createPolygonTextTable(int size) {
         return createTextTable(createPolygonText(size), polygonColNames);
     }
-
+    static Table createMultiPolygonTextTable(int size) {
+        return createTextTable(createMultiPolygonWKT(size), multipolygonColNames);
+    }
     static Table createPolygonTextOverlappingTable(int size) {
         return createTextTable(createPolygonOverlapping(size), polygonColNames);
     }
 
-    static Table createPointTable(int size){
+    static Table createPointTable(int size) {
         return createPointTextTable(size)
                 .select(call(Constructors.ST_PointFromText.class.getSimpleName(),
-                        $(pointColNames[0])).as(pointColNames[0]),
+                                $(pointColNames[0])).as(pointColNames[0]),
                         $(pointColNames[1]), $(pointColNames[2]), $(pointColNames[3]));
     }
 
-    static Table createPointTable_real(int size){
+    static Table createPointTable_real(int size) {
         return createPointTextTable_real(size)
                 .select(call(Constructors.ST_PointFromText.class.getSimpleName(),
-                        $(pointColNames[0])).as(pointColNames[0]),
+                                $(pointColNames[0])).as(pointColNames[0]),
                         $(pointColNames[1]), $(pointColNames[2]), $(pointColNames[3]));
     }
 
@@ -303,6 +334,12 @@ public class TestBase {
                         $(polygonColNames[1]), $(polygonColNames[2]), $(polygonColNames[3]));
     }
 
+    Table createMultiPolygonTable(int size) {
+        return createMultiPolygonTextTable(size)
+                .select(call(Constructors.ST_MPolyFromWKT.class.getSimpleName(),
+                                $(multipolygonColNames[0])).as(multipolygonColNames[0]),
+                        $(multipolygonColNames[1]), $(multipolygonColNames[2]), $(multipolygonColNames[3]));
+    }
     //createPolygonTextOverlapping
 
     Table createPolygonOverlappingTable(int size) {
@@ -314,6 +351,7 @@ public class TestBase {
 
     /**
      * Get the iterator of the table
+     *
      * @param table
      * @return
      */
@@ -323,6 +361,7 @@ public class TestBase {
 
     /**
      * Iterate to the last row of the table
+     *
      * @param table
      * @return
      */
@@ -335,12 +374,13 @@ public class TestBase {
 
     /**
      * Get the first row of the table
+     *
      * @param table
      * @return
      */
     static Row first(Table table) {
         CloseableIterator<Row> it = iterate(table);
-        assert(it.hasNext());
+        assert (it.hasNext());
         Row firstRow = it.next();
         return firstRow;
     }

@@ -39,11 +39,11 @@ import org.apache.sedona.common.Constructors
 import org.apache.spark.sql.types.BinaryType
 
 /**
-  * Return a point from a string. The string must be plain string and each coordinate must be separated by a delimiter.
-  *
-  * @param inputExpressions This function takes 2 parameters. The first parameter is the input geometry
-  *                         string, the second parameter is the delimiter. String format should be similar to CSV/TSV
-  */
+ * Return a point from a string. The string must be plain string and each coordinate must be separated by a delimiter.
+ *
+ * @param inputExpressions This function takes 2 parameters. The first parameter is the input geometry
+ *                         string, the second parameter is the delimiter. String format should be similar to CSV/TSV
+ */
 case class ST_PointFromText(inputExpressions: Seq[Expression])
   extends Expression with FoldableExpression with ImplicitCastInputTypes with CodegenFallback with UserDataGeneratator {
   // This is an expression which takes two input expressions.
@@ -72,10 +72,10 @@ case class ST_PointFromText(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Return a polygon from a string. The string must be plain string and each coordinate must be separated by a delimiter.
-  *
-  * @param inputExpressions
-  */
+ * Return a polygon from a string. The string must be plain string and each coordinate must be separated by a delimiter.
+ *
+ * @param inputExpressions
+ */
 case class ST_PolygonFromText(inputExpressions: Seq[Expression])
   extends Expression with FoldableExpression with ImplicitCastInputTypes with CodegenFallback with UserDataGeneratator {
   // This is an expression which takes two input expressions.
@@ -105,10 +105,10 @@ case class ST_PolygonFromText(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Return a line from a string. The string must be plain string and each coordinate must be separated by a delimiter.
-  *
-  * @param inputExpressions
-  */
+ * Return a line from a string. The string must be plain string and each coordinate must be separated by a delimiter.
+ *
+ * @param inputExpressions
+ */
 case class ST_LineFromText(inputExpressions: Seq[Expression])
   extends Expression with FoldableExpression with ImplicitCastInputTypes with CodegenFallback with UserDataGeneratator {
   // This is an expression which takes one input expressions.
@@ -122,7 +122,7 @@ case class ST_LineFromText(inputExpressions: Seq[Expression])
     var fileDataSplitter = FileDataSplitter.WKT
     var formatMapper = new FormatMapper(fileDataSplitter, false)
     var geometry = formatMapper.readGeometry(lineString)
-    if(geometry.getGeometryType.contains("LineString")) {
+    if (geometry.getGeometryType.contains("LineString")) {
       new GenericArrayData(GeometrySerializer.serialize(geometry))
     } else {
       null
@@ -141,10 +141,10 @@ case class ST_LineFromText(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Return a linestring from a string. The string must be plain string and each coordinate must be separated by a delimiter.
-  *
-  * @param inputExpressions
-  */
+ * Return a linestring from a string. The string must be plain string and each coordinate must be separated by a delimiter.
+ *
+ * @param inputExpressions
+ */
 case class ST_LineStringFromText(inputExpressions: Seq[Expression])
   extends Expression with FoldableExpression with ImplicitCastInputTypes with CodegenFallback with UserDataGeneratator {
   // This is an expression which takes two input expressions.
@@ -176,10 +176,10 @@ case class ST_LineStringFromText(inputExpressions: Seq[Expression])
 
 
 /**
-  * Return a Geometry from a WKT string
-  *
-  * @param inputExpressions This function takes a geometry string and a srid. The string format must be WKT.
-  */
+ * Return a Geometry from a WKT string
+ *
+ * @param inputExpressions This function takes a geometry string and a srid. The string format must be WKT.
+ */
 case class ST_GeomFromWKT(inputExpressions: Seq[Expression])
   extends InferredBinaryExpression(Constructors.geomFromWKT) with FoldableExpression {
 
@@ -190,10 +190,10 @@ case class ST_GeomFromWKT(inputExpressions: Seq[Expression])
 
 
 /**
-  * Return a Geometry from a WKT string
-  *
-  * @param inputExpressions This function takes a geometry string and a srid. The string format must be WKT.
-  */
+ * Return a Geometry from a WKT string
+ *
+ * @param inputExpressions This function takes a geometry string and a srid. The string format must be WKT.
+ */
 case class ST_GeomFromText(inputExpressions: Seq[Expression])
   extends InferredBinaryExpression(Constructors.geomFromWKT) with FoldableExpression {
 
@@ -204,10 +204,10 @@ case class ST_GeomFromText(inputExpressions: Seq[Expression])
 
 
 /**
-  * Return a Geometry from a WKB string
-  *
-  * @param inputExpressions This function takes 1 parameter which is the utf-8 encoded geometry wkb string or the binary wkb array.
-  */
+ * Return a Geometry from a WKB string
+ *
+ * @param inputExpressions This function takes 1 parameter which is the utf-8 encoded geometry wkb string or the binary wkb array.
+ */
 case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
   extends Expression with FoldableExpression with ImplicitCastInputTypes with CodegenFallback with UserDataGeneratator {
   // This is an expression which takes one input expressions
@@ -243,10 +243,10 @@ case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Return a Geometry from a GeoJSON string
-  *
-  * @param inputExpressions This function takes 1 parameter which is the geometry string. The string format must be GeoJson.
-  */
+ * Return a Geometry from a GeoJSON string
+ *
+ * @param inputExpressions This function takes 1 parameter which is the geometry string. The string format must be GeoJson.
+ */
 case class ST_GeomFromGeoJSON(inputExpressions: Seq[Expression])
   extends Expression with FoldableExpression with CodegenFallback with UserDataGeneratator {
   // This is an expression which takes one input expressions
@@ -278,10 +278,10 @@ case class ST_GeomFromGeoJSON(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Return a Point from X and Y
-  *
-  * @param inputExpressions This function takes 3 parameter which are point x, y and z.
-  */
+ * Return a Point from X and Y
+ *
+ * @param inputExpressions This function takes 3 parameter which are point x, y and z.
+ */
 case class ST_Point(inputExpressions: Seq[Expression])
   extends Expression with FoldableExpression with ImplicitCastInputTypes with CodegenFallback with UserDataGeneratator {
 
@@ -312,10 +312,10 @@ case class ST_Point(inputExpressions: Seq[Expression])
 
 
 /**
-  * Return a polygon given minX,minY,maxX,maxY
-  *
-  * @param inputExpressions
-  */
+ * Return a polygon given minX,minY,maxX,maxY
+ *
+ * @param inputExpressions
+ */
 case class ST_PolygonFromEnvelope(inputExpressions: Seq[Expression])
   extends Expression with FoldableExpression with ImplicitCastInputTypes with CodegenFallback with UserDataGeneratator {
   assert(inputExpressions.length == 4)
@@ -395,6 +395,7 @@ case class ST_GeomFromGeoHash(inputExpressions: Seq[Expression])
 case class ST_GeomFromGML(inputExpressions: Seq[Expression])
   extends Expression with FoldableExpression with ImplicitCastInputTypes with CodegenFallback {
   assert(inputExpressions.length == 1)
+
   override def nullable: Boolean = true
 
   override def eval(inputRow: InternalRow): Any = {
@@ -419,6 +420,7 @@ case class ST_GeomFromGML(inputExpressions: Seq[Expression])
 case class ST_GeomFromKML(inputExpressions: Seq[Expression])
   extends Expression with FoldableExpression with ImplicitCastInputTypes with CodegenFallback {
   assert(inputExpressions.length == 1)
+
   override def nullable: Boolean = true
 
   override def eval(inputRow: InternalRow): Any = {
@@ -439,3 +441,30 @@ case class ST_GeomFromKML(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+/**
+ * Return a Geometry from a WKT string
+ *
+ * @param inputExpressions This function takes a geometry string and a srid. The string format must be WKT.
+ */
+case class ST_MPolyFromWKT(inputExpressions: Seq[Expression])
+  extends InferredBinaryExpression(Constructors.mPolyFromWKT) with FoldableExpression {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+
+/**
+ * Return a Geometry from a WKT string
+ *
+ * @param inputExpressions This function takes a geometry string and a srid. The string format must be WKT.
+ */
+case class ST_MLineFromWKT(inputExpressions: Seq[Expression])
+  extends InferredBinaryExpression(Constructors.mLineFromWKT) with FoldableExpression {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
