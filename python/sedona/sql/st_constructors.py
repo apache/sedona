@@ -234,6 +234,7 @@ def ST_MPolyFromWKT(wkt: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_constructor_function("ST_MPolyFromWKT", wkt)
+
 @validate_argument_types
 def ST_MLineFromWKT(wkt: ColumnOrName) -> Column:
     """Generate multiLineString geometry from a multiLineString WKT representation.

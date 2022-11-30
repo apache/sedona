@@ -30,7 +30,7 @@ import org.locationtech.jts.io.kml.KMLReader;
 public class Constructors {
 
     private static Geometry getGeometryByType(String geom, String inputDelimiter, GeometryType geometryType) throws ParseException {
-        FileDataSplitter delimiter = inputDelimiter == null ? FileDataSplitter.CSV : FileDataSplitter.getFileDataSplitter(inputDelimiter);
+        FileDataSplitter delimiter = inputDelimiter == null? FileDataSplitter.CSV:FileDataSplitter.getFileDataSplitter(inputDelimiter);
         FormatUtils<Geometry> formatUtils = new FormatUtils<>(delimiter, false, geometryType);
         return formatUtils.readGeometry(geom);
     }

@@ -123,6 +123,7 @@ class TestConstructors(TestBase):
         input_df.createOrReplaceTempView("input_wkt")
         line_df = self.spark.sql("select ST_MLineFromWKT(wkt) as geom from input_wkt")
         assert line_df.count() == 1
+
     def test_MPoly_from_wkt(self) :
         input_df = self.spark.createDataFrame([("MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))",)], ["wkt"])
         input_df.createOrReplaceTempView("input_wkt")
