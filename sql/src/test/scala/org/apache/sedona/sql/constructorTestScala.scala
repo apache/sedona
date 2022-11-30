@@ -78,7 +78,7 @@ class constructorTestScala extends TestBaseScala {
     it("Passed ST_GeomFromWKT invalid input") {
       // Fail on non wkt strings
       val thrown = intercept[Exception] {
-        sparkSession.sql("SELECT ST_GeomFromWKT('MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))')").collect()
+        sparkSession.sql("SELECT ST_GeomFromWKT('not wkt')").collect()
       }
       assert(thrown.getMessage == "Unknown geometry type: NOT (line 1)")
     }
