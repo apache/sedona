@@ -78,7 +78,7 @@ class constructorTestScala extends TestBaseScala {
     it("Passed ST_GeomFromWKT invalid input") {
       // Fail on non wkt strings
       val thrown = intercept[Exception] {
-        sparkSession.sql("SELECT ST_GeomFromWKT('not wkt')").collect()
+        sparkSession.sql("SELECT ST_GeomFromWKT('MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))')").collect()
       }
       assert(thrown.getMessage == "Unknown geometry type: NOT (line 1)")
     }
@@ -206,11 +206,12 @@ class constructorTestScala extends TestBaseScala {
     }
 
     it("Passed ST_MLineFromWKT") {
-      var mLineDf = sparkSession.sql("select ST_MLineFromWKT('MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))',0)")
+      var mLineDf = sparkSession.sql("select ST_MLineFromWKT('MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))')")
       assert(mLineDf.count() == 1)
     }
+
     it("Passed ST_MPolyFromWKT") {
-      var mLineDf = sparkSession.sql("select ST_MPolyFromWKT('MULTIPOLYGON(((-70.916 42.1002,-70.9468 42.0946,-70.9765 42.0872 )))',0)")
+      var mLineDf = sparkSession.sql("select ST_MPolyFromWKT('MULTIPOLYGON(((-70.916 42.1002,-70.9468 42.0946,-70.9765 42.0872 )))')")
       assert(mLineDf.count() == 1)
     }
   }
