@@ -1475,3 +1475,24 @@ SELECT ST_ZMin(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'))
 ```
 
 Output: `4.0`
+
+## ST_NDims
+
+Introduction: Returns the coordinate dimension of the geometry, eg. 2 for 2-D geometry and 3 for 3-D geometry
+
+Format: `ST_NDims(geom: geometry)`
+
+Since: `v1.3.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_NDims(ST_GeomFromEWKT('POINT(1 1 2)'))
+```
+
+Output: `3.0`
+
+```SQL
+SELECT ST_NDims(ST_GeomFromText('POINT(1 1)'))
+```
+
+Output: `2.0`
