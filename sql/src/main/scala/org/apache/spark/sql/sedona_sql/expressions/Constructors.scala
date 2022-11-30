@@ -452,7 +452,6 @@ case class ST_MPolyFromWKT(inputExpressions: Seq[Expression])
   }
 }
 
-
 /**
  * Return a Geometry from a WKT string
  *

@@ -52,6 +52,7 @@ public class ConstructorsTest {
         assertEquals("Expected EMPTY or ( but found 'not' (line 1)", invalid.getMessage());
 
     }
+
     @Test
     public void mPolyFromWKT() throws ParseException {
         assertNull(Constructors.mPolyFromWKT(null, 0));

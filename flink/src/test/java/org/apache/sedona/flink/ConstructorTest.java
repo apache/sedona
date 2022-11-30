@@ -283,6 +283,7 @@ public class ConstructorTest extends TestBase{
         Row result = last(createMultiPolygonTable(testDataSize));
         assertEquals(data.get(data.size() - 1).getField(0).toString(), result.getField(0).toString());
     }
+
     @Test
     public void testMLineFromWKT() {
         List<Row> data = new ArrayList<>();
