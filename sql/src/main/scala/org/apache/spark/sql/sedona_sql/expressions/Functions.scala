@@ -129,7 +129,7 @@ case class ST_NPoints(inputExpressions: Seq[Expression])
   *
   * @param inputExpressions
   */
-case class ST_NPoints(inputExpressions: Seq[Expression])
+case class ST_NDims(inputExpressions: Seq[Expression])
   extends InferredUnaryExpression(Functions.nDims) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
