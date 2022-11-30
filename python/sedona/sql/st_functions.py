@@ -73,6 +73,7 @@ __all__ = [
     "ST_Multi",
     "ST_Normalize",
     "ST_NPoints",
+    "ST_NDims",
     "ST_NumGeometries",
     "ST_NumInteriorRings",
     "ST_PointN",
@@ -755,6 +756,18 @@ def ST_NPoints(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_NPoints", geometry)
+
+
+@validate_argument_types
+def ST_NDims(geometry: ColumnOrName) -> Column:
+    """Return the number of dimensions contained in a geometry.
+
+    :param geometry: Geometry column to return for.
+    :type geometry: ColumnOrName
+    :return: Number of dimensions in a geometry column as an integer column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_NDims", geometry)
 
 
 @validate_argument_types

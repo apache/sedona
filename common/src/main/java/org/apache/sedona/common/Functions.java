@@ -280,6 +280,10 @@ public class Functions {
         return geometry.getNumPoints();
     }
 
+    public static int nDims(Geometry geometry) {
+            return 1 + geom.getCoordinate().toString().count(_ == ',');
+    }
+
     public static int numGeometries(Geometry geometry) {
         return geometry.getNumGeometries();
     }

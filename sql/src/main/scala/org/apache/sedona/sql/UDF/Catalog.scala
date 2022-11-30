@@ -58,6 +58,7 @@ object Catalog {
     function[ST_3DDistance](),
     function[ST_ConvexHull](),
     function[ST_NPoints](),
+    function[ST_NDims](),
     function[ST_Buffer](),
     function[ST_Envelope](),
     function[ST_Length](),
