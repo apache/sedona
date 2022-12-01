@@ -100,8 +100,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
 
     it("Passed ST_NDims") {
-      var test = sparkSession.sql("SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
-      assert(test.take(1)(0).get(0).asInstanceOf[Int] == 4)
+//      var test = sparkSession.sql("SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
+//      assert(test.take(1)(0).get(0).asInstanceOf[Int] == 4)
       val test = sparkSession.sql("SELECT ST_NDims(ST_GeomFromWKT('POINT(1 1 2)'))")
       assert(test.take(1)(0).get(0).asInstanceOf[Int] == 3)
     }
