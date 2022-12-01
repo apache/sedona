@@ -281,7 +281,16 @@ public class Functions {
     }
 
     public static int nDims(Geometry geometry) {
-            return 1 + geom.getCoordinate().toString().count(_ == ',');
+        String str = geometry.getCoordinate().toString();
+        str = str.replaceAll("[()]", "");
+        List<String> list = Arrays.asList(str.split(","));
+        int count = list.size();
+        for(int i=0;i<list.size();i++){
+            if(list.get(i).equals(" NaN")){
+                count=count-1;
+            }
+        }
+        return count;
     }
 
     public static int numGeometries(Geometry geometry) {

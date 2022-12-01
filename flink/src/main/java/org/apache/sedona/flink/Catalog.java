@@ -72,6 +72,7 @@ public class Catalog {
                 new Functions.ST_XMin(),
                 new Functions.ST_ZMax(),
                 new Functions.ST_ZMin(),
+                new Functions.ST_NDims(),
                 new Functions.ST_BuildArea(),
                 new Functions.ST_SetSRID(),
                 new Functions.ST_SRID(),
