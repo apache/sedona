@@ -427,6 +427,12 @@ class TestPredicateJoin(TestBase):
         linestring_row = [lnstr_row[0] for lnstr_row in linestring_df.selectExpr("ST_ZMin(geom)").collect()]
         assert(linestring_row == [1.0])
 
+    def test_st_n_dims(self):
+        point_df = self.spark.sql("SELECT ST_GeomFromWKT('POINT(1 1 2)') as geom")
+        point_row = [pt_row[0] for pt_row in point_df.selectExpr("ST_NDims(geom)").collect()]
+        assert(point_row == [3])
+
+
     def test_st_start_point(self):
 
         point_df = create_sample_points_df(self.spark, 5)
