@@ -21,7 +21,7 @@ sc <- testthat_spark_connection()
 
 knn_query_pt_x <- -84.01
 knn_query_pt_y <- 34.01
-knn_query_pt_tbl <- DBI::dbGetQuery(
+knn_query_pt_tbl <- sdf_sql(
   sc,
   sprintf(
     "SELECT ST_GeomFromText(\"POINT(%f %f)\") AS `pt`",
