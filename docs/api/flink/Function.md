@@ -539,7 +539,7 @@ Output: `2`
 Spark SQL example with m measure value:
 
 ```SQL
-SELECT ST_NDims(ST_GeomFromText('POINT(1 2 3 4)'))
+SELECT ST_NDims(ST_GeomFromText('POINTZM(1 2 3 4)'))
 ```
 
 Output: `4`
