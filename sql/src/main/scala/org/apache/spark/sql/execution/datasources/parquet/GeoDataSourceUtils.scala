@@ -21,8 +21,30 @@ import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.internal.SQLConf.LegacyBehaviorPolicy
 import org.apache.spark.util.Utils
 
+import scala.util.Try
+
 // Needed by Sedona to support Spark 3.0 - 3.3
 object GeoDataSourceUtils {
+
+  val PARQUET_REBASE_MODE_IN_READ = firstAvailableConf(
+    "spark.sql.parquet.datetimeRebaseModeInRead",
+    "spark.sql.legacy.parquet.datetimeRebaseModeInRead")
+  val PARQUET_REBASE_MODE_IN_WRITE = firstAvailableConf(
+    "spark.sql.parquet.datetimeRebaseModeInWrite",
+    "spark.sql.legacy.parquet.datetimeRebaseModeInWrite")
+  val PARQUET_INT96_REBASE_MODE_IN_READ = firstAvailableConf(
+    "spark.sql.parquet.int96RebaseModeInRead",
+    "spark.sql.legacy.parquet.int96RebaseModeInRead",
+    "spark.sql.legacy.parquet.datetimeRebaseModeInRead")
+  val PARQUET_INT96_REBASE_MODE_IN_WRITE = firstAvailableConf(
+    "spark.sql.parquet.int96RebaseModeInWrite",
+    "spark.sql.legacy.parquet.int96RebaseModeInWrite",
+    "spark.sql.legacy.parquet.datetimeRebaseModeInWrite")
+
+  private def firstAvailableConf(confs: String *): String = {
+    confs.find(c => Try(SQLConf.get.getConfString(c)).isSuccess).get
+  }
+
   def datetimeRebaseMode(
                           lookupFileMeta: String => String,
                           modeByConfig: String): LegacyBehaviorPolicy.Value = {
@@ -75,6 +97,18 @@ object GeoDataSourceUtils {
     case LegacyBehaviorPolicy.CORRECTED => identity[Int]
   }
 
+  def creteDateRebaseFuncInWrite(
+    rebaseMode: LegacyBehaviorPolicy.Value,
+    format: String): Int => Int = rebaseMode match {
+    case LegacyBehaviorPolicy.EXCEPTION => days: Int =>
+      if (days < RebaseDateTime.lastSwitchGregorianDay) {
+        throw DataSourceUtils.newRebaseExceptionInWrite(format)
+      }
+      days
+    case LegacyBehaviorPolicy.LEGACY => RebaseDateTime.rebaseGregorianToJulianDays
+    case LegacyBehaviorPolicy.CORRECTED => identity[Int]
+  }
+
   def creteTimestampRebaseFuncInRead(
                                       rebaseMode: LegacyBehaviorPolicy.Value,
                                       format: String): Long => Long = rebaseMode match {
@@ -84,6 +118,18 @@ object GeoDataSourceUtils {
       }
       micros
     case LegacyBehaviorPolicy.LEGACY => RebaseDateTime.rebaseJulianToGregorianMicros
+    case LegacyBehaviorPolicy.CORRECTED => identity[Long]
+  }
+
+  def creteTimestampRebaseFuncInWrite(
+    rebaseMode: LegacyBehaviorPolicy.Value,
+    format: String): Long => Long = rebaseMode match {
+    case LegacyBehaviorPolicy.EXCEPTION => micros: Long =>
+      if (micros < RebaseDateTime.lastSwitchGregorianTs) {
+        throw DataSourceUtils.newRebaseExceptionInWrite(format)
+      }
+      micros
+    case LegacyBehaviorPolicy.LEGACY => RebaseDateTime.rebaseGregorianToJulianMicros
     case LegacyBehaviorPolicy.CORRECTED => identity[Long]
   }
 }

@@ -27,6 +27,7 @@ import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.internal.SQLConf.LegacyBehaviorPolicy
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
 
 import java.time.ZoneId
@@ -119,7 +120,7 @@ class GeoParquetReadSupport (
     val parquetRequestedSchema = readContext.getRequestedSchema
     new GeoParquetRecordMaterializer(
       parquetRequestedSchema,
-      ParquetReadSupport.expandUDT(catalystRequestedSchema),
+      GeoParquetReadSupport.expandUDT(catalystRequestedSchema),
       new GeoParquetToSparkSchemaConverter(conf),
       convertTz,
       datetimeRebaseMode,
@@ -378,6 +379,10 @@ object GeoParquetReadSupport extends Logging {
         case t: StructType =>
           val expandedFields = t.fields.map(f => f.copy(dataType = expand(f.dataType)))
           t.copy(fields = expandedFields)
+
+        // Don't expand GeometryUDT types. We'll treat geometry columns specially in
+        // GeoParquetRowConverter
+        case t: GeometryUDT => t
 
         case t: UserDefinedType[_] =>
           t.sqlType
