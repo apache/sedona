@@ -459,9 +459,29 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
     }
 
-    it("Passed ST_NDims") {
+    it("Passed ST_NDims with 2D point") {
+      val test = sparkSession.sql("SELECT ST_NDims(ST_GeomFromWKT('POINT(1 1)'))")
+      assert(test.take(1)(0).get(0).asInstanceOf[Int] == 2)
+    }
+
+    it("Passed ST_NDims with 3D point") {
       val test = sparkSession.sql("SELECT ST_NDims(ST_GeomFromWKT('POINT(1 1 2)'))")
       assert(test.take(1)(0).get(0).asInstanceOf[Int] == 3)
+    }
+
+    it("Passed ST_NDims with M coordinates") {
+      val test = sparkSession.sql("SELECT ST_NDims(ST_GeomFromWKT('POINTM(1 1 0.5)'))")
+      assert(test.take(1)(0).get(0).asInstanceOf[Int] == 3)
+    }
+
+    it("Passed ST_NDims with Z coordinates") {
+      val test = sparkSession.sql("SELECT ST_NDims(ST_GeomFromWKT('POINTZ(1 1 0.5)'))")
+      assert(test.take(1)(0).get(0).asInstanceOf[Int] == 3)
+    }
+
+    it("Passed ST_NDims with Z and M coordinates") {
+      val test = sparkSession.sql("SELECT ST_NDims(ST_GeomFromWKT('POINTZM(1 1 1 0.5)'))")
+      assert(test.take(1)(0).get(0).asInstanceOf[Int] == 4)
     }
 
     it("Passed ST_GeometryType") {

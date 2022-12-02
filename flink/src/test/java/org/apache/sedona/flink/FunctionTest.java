@@ -409,6 +409,7 @@ public class FunctionTest extends TestBase{
         Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT(1 1)') AS " + polygonColNames[0]);
         polygonTable = polygonTable.select(call(Functions.ST_NDims.class.getSimpleName(), $(polygonColNames[0])));
         int result = (int) first(polygonTable).getField(0);
+        System.out.println(result);
         assertEquals(2, result, 0);
     }
 
@@ -417,6 +418,7 @@ public class FunctionTest extends TestBase{
         Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT(1 1 2)') AS " + polygonColNames[0]);
         polygonTable = polygonTable.select(call(Functions.ST_NDims.class.getSimpleName(), $(polygonColNames[0])));
         int result = (int) first(polygonTable).getField(0);
+        System.out.println(result);
         assertEquals(3, result, 0);
     }
     @Test
