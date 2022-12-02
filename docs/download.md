@@ -14,19 +14,19 @@ Automatically generated binary JARs (per each Master branch commit): [GitHub Act
 
 ## Versions
 
+### 1.3.0-incubating
+
+| | Download from ASF | Checksum | Signature |
+|:-----------------:|:--------:|:--------:|:---------:|
+|    Source code    |    [src](https://www.apache.org/dyn/closer.lua/incubator/sedona/1.3.0-incubating/apache-sedona-1.3.0-incubating-src.tar.gz)      |     [sha512](https://downloads.apache.org/incubator/sedona/1.3.0-incubating/apache-sedona-1.3.0-incubating-src.tar.gz.sha512)     |     [asc](https://downloads.apache.org/incubator/sedona/1.3.0-incubating/apache-sedona-1.3.0-incubating-src.tar.gz.asc)      |
+|       Binary      |    [bin](https://www.apache.org/dyn/closer.lua/incubator/sedona/1.3.0-incubating/apache-sedona-1.3.0-incubating-bin.tar.gz)      |     [sha512](https://downloads.apache.org/incubator/sedona/1.3.0-incubating/apache-sedona-1.3.0-incubating-bin.tar.gz.sha512)     |     [asc](https://downloads.apache.org/incubator/sedona/1.3.0-incubating/apache-sedona-1.3.0-incubating-bin.tar.gz.asc)
+
 ### 1.2.1-incubating
 
 | | Download from ASF | Checksum | Signature |
 |:-----------------:|:--------:|:--------:|:---------:|
 |    Source code    |    [src](https://www.apache.org/dyn/closer.lua/incubator/sedona/1.2.1-incubating/apache-sedona-1.2.1-incubating-src.tar.gz)      |     [sha512](https://downloads.apache.org/incubator/sedona/1.2.1-incubating/apache-sedona-1.2.1-incubating-src.tar.gz.sha512)     |     [asc](https://downloads.apache.org/incubator/sedona/1.2.1-incubating/apache-sedona-1.2.1-incubating-src.tar.gz.asc)      |
 |       Binary      |    [bin](https://www.apache.org/dyn/closer.lua/incubator/sedona/1.2.1-incubating/apache-sedona-1.2.1-incubating-bin.tar.gz)      |     [sha512](https://downloads.apache.org/incubator/sedona/1.2.1-incubating/apache-sedona-1.2.1-incubating-bin.tar.gz.sha512)     |     [asc](https://downloads.apache.org/incubator/sedona/1.2.1-incubating/apache-sedona-1.2.1-incubating-bin.tar.gz.asc)
-
-### 1.2.0-incubating
-
-| | Download from ASF | Checksum | Signature |
-|:-----------------:|:--------:|:--------:|:---------:|
-|    Source code    |    [src](https://www.apache.org/dyn/closer.lua/incubator/sedona/1.2.0-incubating/apache-sedona-1.2.0-incubating-src.tar.gz)      |     [sha512](https://downloads.apache.org/incubator/sedona/1.2.0-incubating/apache-sedona-1.2.0-incubating-src.tar.gz.sha512)     |     [asc](https://downloads.apache.org/incubator/sedona/1.2.0-incubating/apache-sedona-1.2.0-incubating-src.tar.gz.asc)      |
-|       Binary      |    [bin](https://www.apache.org/dyn/closer.lua/incubator/sedona/1.2.0-incubating/apache-sedona-1.2.0-incubating-bin.tar.gz)      |     [sha512](https://downloads.apache.org/incubator/sedona/1.2.0-incubating/apache-sedona-1.2.0-incubating-bin.tar.gz.sha512)     |     [asc](https://downloads.apache.org/incubator/sedona/1.2.0-incubating/apache-sedona-1.2.0-incubating-bin.tar.gz.asc) 
 
 ### Past releases
 

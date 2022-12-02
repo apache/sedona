@@ -416,54 +416,26 @@ Then run the following script. Replace `admin`, `admind123` with your Apache ID 
 #!/bin/bash
 username=admin
 password=admin123
-stagingid=1016
+stagingid=1027
 
+artifacts=(parent core-3.0_2.12 core-3.0_2.13 sql-3.0_2.12 sql-3.0_2.13 viz-3.0_2.12 viz-3.0_2.13 python-adapter-3.0_2.12 python-adapter-3.0_2.13 common flink_2.12)
+filenames=(.pom .jar -javadoc.jar)
 
-echo "Re-uploading signatures to fix *failureMessage	Invalid Signature*"
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-common/{{ sedona_create_release.current_version }}/sedona-common-{{ sedona_create_release.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-3.0_2.12/{{ sedona_create_release.current_version }}/sedona-core-3.0_2.12-{{ sedona_create_release.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-3.0_2.13/{{ sedona_create_release.current_version }}/sedona-core-3.0_2.13-{{ sedona_create_release.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-3.0_2.12/{{ sedona_create_release.current_version }}/sedona-sql-3.0_2.12-{{ sedona_create_release.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-3.0_2.13/{{ sedona_create_release.current_version }}/sedona-sql-3.0_2.13-{{ sedona_create_release.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-3.0_2.12/{{ sedona_create_release.current_version }}/sedona-viz-3.0_2.12-{{ sedona_create_release.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-3.0_2.13/{{ sedona_create_release.current_version }}/sedona-viz-3.0_2.13-{{ sedona_create_release.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona_create_release.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona_create_release.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-3.0_2.13/{{ sedona_create_release.current_version }}/sedona-python-adapter-3.0_2.13-{{ sedona_create_release.current_version }}.pom
-wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-flink_2.12/{{ sedona_create_release.current_version }}/sedona-flink_2.12-{{ sedona_create_release.current_version }}.pom
-
-gpg -ab sedona-common-{{ sedona_create_release.current_version }}.pom
-gpg -ab sedona-core-3.0_2.12-{{ sedona_create_release.current_version }}.pom
-gpg -ab sedona-sql-3.0_2.12-{{ sedona_create_release.current_version }}.pom
-gpg -ab sedona-viz-3.0_2.12-{{ sedona_create_release.current_version }}.pom
-gpg -ab sedona-python-adapter-3.0_2.12-{{ sedona_create_release.current_version }}.pom
-gpg -ab sedona-flink_2.12-{{ sedona_create_release.current_version }}.pom
-gpg -ab sedona-core-3.0_2.13-{{ sedona_create_release.current_version }}.pom
-gpg -ab sedona-sql-3.0_2.13-{{ sedona_create_release.current_version }}.pom
-gpg -ab sedona-viz-3.0_2.13-{{ sedona_create_release.current_version }}.pom
-gpg -ab sedona-python-adapter-3.0_2.13-{{ sedona_create_release.current_version }}.pom
-
-
-curl -v -u $username:$password --upload-file sedona-common-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-common/{{ sedona_create_release.current_version }}/sedona-common-{{ sedona_create_release.current_version }}.pom.asc
-
-curl -v -u $username:$password --upload-file sedona-python-adapter-3.0_2.12-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona_create_release.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona_create_release.current_version }}.pom.asc
-
-curl -v -u $username:$password --upload-file sedona-viz-3.0_2.12-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-3.0_2.12/{{ sedona_create_release.current_version }}/sedona-viz-3.0_2.12-{{ sedona_create_release.current_version }}.pom.asc
-
-curl -v -u $username:$password --upload-file sedona-core-3.0_2.12-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-3.0_2.12/{{ sedona_create_release.current_version }}/sedona-core-3.0_2.12-{{ sedona_create_release.current_version }}.pom.asc
-
-curl -v -u $username:$password --upload-file sedona-sql-3.0_2.12-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-3.0_2.12/{{ sedona_create_release.current_version }}/sedona-sql-3.0_2.12-{{ sedona_create_release.current_version }}.pom.asc
-
-curl -v -u $username:$password --upload-file sedona-flink_2.12-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-flink_2.12/{{ sedona_create_release.current_version }}/sedona-flink_2.12-{{ sedona_create_release.current_version }}.pom.asc
-
-curl -v -u $username:$password --upload-file sedona-python-adapter-3.0_2.13-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-python-adapter-3.0_2.13/{{ sedona_create_release.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona_create_release.current_version }}.pom.asc
-
-curl -v -u $username:$password --upload-file sedona-viz-3.0_2.13-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-viz-3.0_2.13/{{ sedona_create_release.current_version }}/sedona-viz-3.0_2.13-{{ sedona_create_release.current_version }}.pom.asc
-
-curl -v -u $username:$password --upload-file sedona-core-3.0_2.13-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-core-3.0_2.13/{{ sedona_create_release.current_version }}/sedona-core-3.0_2.13-{{ sedona_create_release.current_version }}.pom.asc
-
-curl -v -u $username:$password --upload-file sedona-sql-3.0_2.13-{{ sedona_create_release.current_version }}.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-sql-3.0_2.13/{{ sedona_create_release.current_version }}/sedona-sql-3.0_2.13-{{ sedona_create_release.current_version }}.pom.asc
+echo "Re-uploading signatures to fix *failureMessage Invalid Signature*"
+for artifact in "${artifacts[@]}"; do
+	for filename in "${filenames[@]}"; do
+	if [ $artifact -eq 'parent' && $filename -ne '.pom' ]
+    then
+       continue
+    fi
+	wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-$artifact/{{ sedona_create_release.current_version }}/sedona-${artifact}-{{ sedona_create_release.current_version }}${filename}
+	gpg -ab sedona-${artifact}-{{ sedona_create_release.current_version }}${filename}
+	curl -v -u $username:$password --upload-file sedona-${artifact}-{{ sedona_create_release.current_version }}${filename}.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-${artifact}/{{ sedona_create_release.current_version }}/sedona-${artifact}-{{ sedona_create_release.current_version }}${filename}.asc
+   done
+done
 
 rm *.pom
+rm *.jar
 rm *.asc
 ```
 
