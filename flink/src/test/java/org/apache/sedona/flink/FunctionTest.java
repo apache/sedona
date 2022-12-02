@@ -406,10 +406,6 @@ public class FunctionTest extends TestBase{
 
     @Test
     public void testNDimsFor2D() {
-//        Table resultTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT(1 3)') AS " + polygonColNames[0]);
-//        resultTable = resultTable.select(call(Functions.ST_NDims.class.getSimpleName(), $(polygonColNames[0])));
-//        int result = (int) first(resultTable).getField(0);
-//        assertEquals(2, result,0);
         Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT(1 1)') AS " + polygonColNames[0]);
         polygonTable = polygonTable.select(call(Functions.ST_NDims.class.getSimpleName(), $(polygonColNames[0])));
         int result = (int) first(polygonTable).getField(0);
