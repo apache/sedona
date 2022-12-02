@@ -11,8 +11,12 @@ sparkSession = SparkSession.builder().
 ```
 2. Check your current SedonaSQL configuration:
 ```Scala
-val sedonaConf = new SedonaConf(sparkSession.sparkContext.getConf)
+val sedonaConf = new SedonaConf(sparkSession.conf)
 println(sedonaConf)
+```
+3. Sedona parameters can be changed at runtime:
+```Scala
+sparkSession.conf.set("sedona.global.index","false")
 ```
 ## Explanation
 

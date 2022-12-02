@@ -110,7 +110,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
           None
       }
 
-      val sedonaConf = new SedonaConf(sparkSession.sparkContext.conf)
+      val sedonaConf = new SedonaConf(sparkSession.conf)
 
       if ((broadcastLeft || broadcastRight) && sedonaConf.getUseIndex) {
         queryDetection match {
