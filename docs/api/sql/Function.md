@@ -912,7 +912,6 @@ SELECT ST_NDims(ST_GeomFromText('POINT(1 2 3 4)'))
 Output: `4`
 
 
-
 ## ST_Normalize
 
 Introduction: Returns the input geometry in its normalized form.
