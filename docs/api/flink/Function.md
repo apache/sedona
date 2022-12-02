@@ -515,24 +515,34 @@ FROM polygondf
 
 ## ST_NDims
 
-Introduction: Returns the coordinate dimension of the geometry, eg. 2 for 2-D geometry and 3 for 3-D geometry
+Introduction: Returns the coordinate dimension of the geometry. It supports 2 - (x,y) , 3 - (x,y,z) or 2D with measure - x,y,m, and 4 - 3D with measure space x,y,z,m
 
 Format: `ST_NDims(geom: geometry)`
 
 Since: `v1.3.1`
 
-Spark SQL example:
+Spark SQL example with z co-rodinate:
 ```SQL
 SELECT ST_NDims(ST_GeomFromEWKT('POINT(1 1 2)'))
 ```
 
-Output: `3.0`
+Output: `3`
+
+Spark SQL example with x,y co-ordinate:
 
 ```SQL
 SELECT ST_NDims(ST_GeomFromText('POINT(1 1)'))
 ```
 
-Output: `2.0`
+Output: `2`
+
+Spark SQL example with m measure value:
+
+```SQL
+SELECT ST_NDims(ST_GeomFromText('POINT(1 2 3 4)'))
+```
+
+Output: `4`
 
 ## ST_NumGeometries
 
