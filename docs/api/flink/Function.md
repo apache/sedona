@@ -513,6 +513,27 @@ SELECT ST_NPoints(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_NDims
+
+Introduction: Returns the coordinate dimension of the geometry, eg. 2 for 2-D geometry and 3 for 3-D geometry
+
+Format: `ST_NDims(geom: geometry)`
+
+Since: `v1.3.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_NDims(ST_GeomFromEWKT('POINT(1 1 2)'))
+```
+
+Output: `3.0`
+
+```SQL
+SELECT ST_NDims(ST_GeomFromText('POINT(1 1)'))
+```
+
+Output: `2.0`
+
 ## ST_NumGeometries
 
 Introduction: Returns the number of Geometries. If geometry is a GEOMETRYCOLLECTION (or MULTI*) return the number of geometries, for single geometries will return 1.
