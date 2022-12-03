@@ -125,6 +125,19 @@ case class ST_NPoints(inputExpressions: Seq[Expression])
 }
 
 /**
+  * Return the number of Dimensions in geometry.
+  *
+  * @param inputExpressions
+  */
+case class ST_NDims(inputExpressions: Seq[Expression])
+  extends InferredUnaryExpression(Functions.nDims) with FoldableExpression {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
   * Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance.
   *
   * @param inputExpressions

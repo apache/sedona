@@ -123,6 +123,13 @@ public class Functions {
         }
     }
 
+    public static class ST_NDims extends ScalarFunction {
+        @DataTypeHint("Integer")
+        public Integer eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o){
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.nDims(geom);
+        }
+    }
 
     public static class ST_Transform extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)

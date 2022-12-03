@@ -280,6 +280,24 @@ public class Functions {
         return geometry.getNumPoints();
     }
 
+    public static int nDims(Geometry geometry) {
+        int count_dimension =0;
+        Coordinate geom = geometry.getCoordinate();
+        Double x_cord = geom.getX();
+        Double y_cord = geom.getY();
+        Double z_cord = geom.getZ();
+        Double m_cord = geom.getM();
+        if(!java.lang.Double.isNaN(x_cord))
+            count_dimension++;
+        if(!java.lang.Double.isNaN(y_cord))
+            count_dimension++;
+        if(!java.lang.Double.isNaN(z_cord))
+            count_dimension++;
+        if(!java.lang.Double.isNaN(m_cord))
+            count_dimension++;
+        return count_dimension;
+    }
+
     public static int numGeometries(Geometry geometry) {
         return geometry.getNumGeometries();
     }
