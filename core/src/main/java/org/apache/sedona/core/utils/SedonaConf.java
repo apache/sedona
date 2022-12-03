@@ -23,7 +23,8 @@ import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.enums.JoinBuildSide;
 import org.apache.sedona.core.enums.JoinSparitionDominantSide;
-import org.apache.spark.SparkConf;
+import org.apache.spark.sql.RuntimeConfig;
+import org.apache.spark.sql.SparkSession;
 import org.locationtech.jts.geom.Envelope;
 
 import java.io.Serializable;
@@ -35,46 +36,45 @@ public class SedonaConf
 
     // Global parameters of Sedona. All these parameters can be initialized through SparkConf.
 
-    private Boolean useIndex = false;
+    private boolean useIndex;
 
-    private IndexType indexType = IndexType.QUADTREE;
+    private IndexType indexType;
 
     // Parameters for JoinQuery including RangeJoin and DistanceJoin
 
-    private JoinSparitionDominantSide joinSparitionDominantSide = JoinSparitionDominantSide.LEFT;
+    private JoinSparitionDominantSide joinSparitionDominantSide;
 
-    private JoinBuildSide joinBuildSide = JoinBuildSide.LEFT;
+    private JoinBuildSide joinBuildSide;
 
-    private Long joinApproximateTotalCount = (long) -1;
+    private long joinApproximateTotalCount;
 
-    private Envelope datasetBoundary = new Envelope(0, 0, 0, 0);
+    private Envelope datasetBoundary;
 
-    private Integer fallbackPartitionNum = -1;
+    private int fallbackPartitionNum;
 
-    private GridType joinGridType = GridType.KDBTREE;
+    private GridType joinGridType;
 
-    public SedonaConf(SparkConf sparkConf)
-    {
-        this.useIndex = sparkConf.getBoolean("sedona.global.index", true);
-        this.indexType = IndexType.getIndexType(sparkConf.get("sedona.global.indextype", "quadtree"));
-        this.joinApproximateTotalCount = sparkConf.getLong("sedona.join.approxcount", -1);
-        String[] boundaryString = sparkConf.get("sedona.join.boundary", "0,0,0,0").split(",");
-        this.datasetBoundary = new Envelope(Double.parseDouble(boundaryString[0]), Double.parseDouble(boundaryString[0]),
-                Double.parseDouble(boundaryString[0]), Double.parseDouble(boundaryString[0]));
-        this.joinGridType = GridType.getGridType(sparkConf.get("sedona.join.gridtype", "kdbtree"));
-        this.joinBuildSide = JoinBuildSide.getBuildSide(sparkConf.get("sedona.join.indexbuildside", "left"));
-        this.joinSparitionDominantSide = JoinSparitionDominantSide.getJoinSparitionDominantSide(sparkConf.get("sedona.join.spatitionside", "left"));
-        this.fallbackPartitionNum = sparkConf.getInt("sedona.join.numpartition", -1);
+    public static SedonaConf fromActiveSession() {
+        return new SedonaConf(SparkSession.active().conf());
     }
 
-    public Boolean getUseIndex()
+    public SedonaConf(RuntimeConfig runtimeConfig)
+    {
+        this.useIndex = Boolean.parseBoolean(runtimeConfig.get("sedona.global.index", "true"));
+        this.indexType = IndexType.getIndexType(runtimeConfig.get("sedona.global.indextype", "quadtree"));
+        this.joinApproximateTotalCount = Long.parseLong(runtimeConfig.get("sedona.join.approxcount", "-1"));
+        String[] boundaryString = runtimeConfig.get("sedona.join.boundary", "0,0,0,0").split(",");
+        this.datasetBoundary = new Envelope(Double.parseDouble(boundaryString[0]), Double.parseDouble(boundaryString[1]),
+                Double.parseDouble(boundaryString[2]), Double.parseDouble(boundaryString[3]));
+        this.joinGridType = GridType.getGridType(runtimeConfig.get("sedona.join.gridtype", "kdbtree"));
+        this.joinBuildSide = JoinBuildSide.getBuildSide(runtimeConfig.get("sedona.join.indexbuildside", "left"));
+        this.joinSparitionDominantSide = JoinSparitionDominantSide.getJoinSparitionDominantSide(runtimeConfig.get("sedona.join.spatitionside", "left"));
+        this.fallbackPartitionNum = Integer.parseInt(runtimeConfig.get("sedona.join.numpartition", "-1"));
+    }
+
+    public boolean getUseIndex()
     {
         return useIndex;
-    }
-
-    public void setUseIndex(Boolean useIndex)
-    {
-        this.useIndex = useIndex;
     }
 
     public IndexType getIndexType()
@@ -82,19 +82,10 @@ public class SedonaConf
         return indexType;
     }
 
-    public void setIndexType(IndexType indexType)
-    {
-        this.indexType = indexType;
-    }
 
-    public Long getJoinApproximateTotalCount()
+    public long getJoinApproximateTotalCount()
     {
         return joinApproximateTotalCount;
-    }
-
-    public void setJoinApproximateTotalCount(Long joinApproximateTotalCount)
-    {
-        this.joinApproximateTotalCount = joinApproximateTotalCount;
     }
 
     public Envelope getDatasetBoundary()
@@ -102,19 +93,9 @@ public class SedonaConf
         return datasetBoundary;
     }
 
-    public void setDatasetBoundary(Envelope datasetBoundary)
-    {
-        this.datasetBoundary = datasetBoundary;
-    }
-
     public JoinBuildSide getJoinBuildSide()
     {
         return joinBuildSide;
-    }
-
-    public void setJoinBuildSide(JoinBuildSide joinBuildSide)
-    {
-        this.joinBuildSide = joinBuildSide;
     }
 
     public GridType getJoinGridType()
@@ -122,29 +103,14 @@ public class SedonaConf
         return joinGridType;
     }
 
-    public void setJoinGridType(GridType joinGridType)
-    {
-        this.joinGridType = joinGridType;
-    }
-
     public JoinSparitionDominantSide getJoinSparitionDominantSide()
     {
         return joinSparitionDominantSide;
     }
 
-    public void setJoinSparitionDominantSide(JoinSparitionDominantSide joinSparitionDominantSide)
-    {
-        this.joinSparitionDominantSide = joinSparitionDominantSide;
-    }
-
-    public Integer getFallbackPartitionNum()
+    public int getFallbackPartitionNum()
     {
         return fallbackPartitionNum;
-    }
-
-    public void setFallbackPartitionNum(Integer fallbackPartitionNum)
-    {
-        this.fallbackPartitionNum = fallbackPartitionNum;
     }
 
     public String toString()

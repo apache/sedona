@@ -31,7 +31,7 @@ class predicateJoinTestScala extends TestBaseScala {
   describe("Sedona-SQL Predicate Join Test") {
 
     it("Passed ST_Contains in a join") {
-      val sedonaConf = new SedonaConf(sparkSession.sparkContext.getConf)
+      val sedonaConf = new SedonaConf(sparkSession.conf)
       println(sedonaConf)
 
       var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygonInputLocation)
@@ -129,7 +129,7 @@ class predicateJoinTestScala extends TestBaseScala {
     }
 
     it("Passed ST_Covers in a join") {
-      val sedonaConf = new SedonaConf(sparkSession.sparkContext.getConf)
+      val sedonaConf = new SedonaConf(sparkSession.conf)
       println(sedonaConf)
 
       var polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPolygonInputLocation)

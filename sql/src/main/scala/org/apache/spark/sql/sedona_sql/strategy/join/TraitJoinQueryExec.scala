@@ -52,7 +52,7 @@ trait TraitJoinQueryExec extends TraitJoinQueryBase {
     val leftResultsRaw = left.execute().asInstanceOf[RDD[UnsafeRow]]
     val rightResultsRaw = right.execute().asInstanceOf[RDD[UnsafeRow]]
 
-    val sedonaConf = new SedonaConf(sparkContext.conf)
+    val sedonaConf = SedonaConf.fromActiveSession
     val (leftShapes, rightShapes) =
       toSpatialRddPair(leftResultsRaw, boundLeftShape, rightResultsRaw, boundRightShape)
 
@@ -61,13 +61,9 @@ trait TraitJoinQueryExec extends TraitJoinQueryBase {
     if (sedonaConf.getJoinApproximateTotalCount == -1) {
       if (sedonaConf.getJoinSparitionDominantSide == JoinSparitionDominantSide.LEFT) {
         leftShapes.analyze()
-        sedonaConf.setJoinApproximateTotalCount(leftShapes.approximateTotalCount)
-        sedonaConf.setDatasetBoundary(leftShapes.boundaryEnvelope)
       }
       else {
         rightShapes.analyze()
-        sedonaConf.setJoinApproximateTotalCount(rightShapes.approximateTotalCount)
-        sedonaConf.setDatasetBoundary(rightShapes.boundaryEnvelope)
       }
     }
     log.info("[SedonaSQL] Number of partitions on the left: " + leftResultsRaw.partitions.size)
