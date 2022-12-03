@@ -287,10 +287,6 @@ public class Functions {
         Double y_cord = geom.getY();
         Double z_cord = geom.getZ();
         Double m_cord = geom.getM();
-        System.out.println(x_cord);
-        System.out.println(y_cord);
-        System.out.println(z_cord);
-        System.out.println(m_cord);
         if(!java.lang.Double.isNaN(x_cord))
             count_dimension++;
         if(!java.lang.Double.isNaN(y_cord))
