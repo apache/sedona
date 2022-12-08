@@ -29,7 +29,7 @@ public class Constructors {
         return new WKTReader(geometryFactory).read(wkt);
     }
 
-    public static Geometry mLineFromWKT(String wkt, int srid) throws ParseException {
+    public static Geometry mLineFromText(String wkt, int srid) throws ParseException {
         if (wkt == null || !wkt.startsWith("MULTILINESTRING")) {
             return null;
         }
@@ -37,7 +37,7 @@ public class Constructors {
         return new WKTReader(geometryFactory).read(wkt);
     }
 
-    public static Geometry mPolyFromWKT(String wkt, int srid) throws ParseException {
+    public static Geometry mPolyFromText(String wkt, int srid) throws ParseException {
         if (wkt == null || !wkt.startsWith("MULTIPOLYGON")) {
             return null;
         }

@@ -134,30 +134,32 @@ Spark SQL example:
 SELECT ST_LineStringFromText('Linestring(1 2, 3 4)') AS line
 ```
 
-## ST_MLineFromWKT
+## ST_MLineFromText
 
-Introduction: Construct a MultiLineString from Text
+Introduction: Construct a MultiLineString from Text and Optional SRID
 
-Format: `ST_MLineFromWKT (Text:string)`
+Format: `ST_MLineFromText (Text:string, Srid: int)`
 
-Since: `1.3.0`
+Since: `1.3.1`
 
 SQL example:
 ```SQL
-SELECT ST_MLineFromWKT('MULTILINESTRING((1 2, 3 4), (4 5, 6 7))') AS multiLine
+SELECT ST_MLineFromText('MULTILINESTRING((1 2, 3 4), (4 5, 6 7))') AS multiLine
+SELECT ST_MLineFromText('MULTILINESTRING((1 2, 3 4), (4 5, 6 7))', 4269) AS multiLine
 ```
 
-## ST_MPolyFromWKT
+## ST_MPolyFromText
 
-Introduction: Construct a MultiPolygon from Text
+Introduction: Construct a MultiPolygon from Text and Optional SRID
 
-Format: `ST_MPolyFromWKT (Text:string)`
+Format: `ST_MPolyFromText (Text:string, Srid: int)`
 
-Since: `1.3.0`
+Since: `1.3.1`
 
 SQL example:
 ```SQL
-SELECT ST_MPolyFromWKT('MULTIPOLYGON(((-70.916 42.1002,-70.9468 42.0946,-70.9765 42.0872 )))') AS multiPolygon
+SELECT ST_MPolyFromText('MULTIPOLYGON(((-70.916 42.1002,-70.9468 42.0946,-70.9765 42.0872 )))') AS multiPolygon
+SELECT ST_MPolyFromText('MULTIPOLYGON(((-70.916 42.1002,-70.9468 42.0946,-70.9765 42.0872 )))', 4269) AS multiPolygon
 ```
 
 ## ST_Point

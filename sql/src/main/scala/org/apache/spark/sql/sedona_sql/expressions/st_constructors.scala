@@ -74,10 +74,16 @@ object st_constructors extends DataFrameAPI {
   def ST_PolygonFromText(coords: Column, delimiter: Column): Column = wrapExpression[ST_PolygonFromText](coords, delimiter)
   def ST_PolygonFromText(coords: String, delimiter: String): Column = wrapExpression[ST_PolygonFromText](coords, delimiter)
 
-  def ST_MPolyFromWKT(wkt: Column): Column = wrapExpression[ST_MPolyFromWKT](wkt, 0)
-  def ST_MPolyFromWKT(wkt: String): Column = wrapExpression[ST_MPolyFromWKT](wkt, 0)
+  def ST_MPolyFromText(wkt: Column): Column = wrapExpression[ST_MPolyFromText](wkt, 0)
+  def ST_MPolyFromText(wkt: String): Column = wrapExpression[ST_MPolyFromText](wkt, 0)
 
-  def ST_MLineFromWKT(wkt: Column): Column = wrapExpression[ST_MLineFromWKT](wkt, 0)
-  def ST_MLineFromWKT(wkt: String): Column = wrapExpression[ST_MLineFromWKT](wkt, 0)
+  def ST_MPolyFromText(wkt: Column, srid: Column): Column = wrapExpression[ST_MPolyFromText](wkt, srid)
+  def ST_MPolyFromText(wkt: String, srid: Int): Column = wrapExpression[ST_GeomFromText](wkt, srid)
 
+  def ST_MLineFromText(wkt: Column): Column = wrapExpression[ST_MLineFromText](wkt, 0)
+  def ST_MLineFromText(wkt: String): Column = wrapExpression[ST_MLineFromText](wkt, 0)
+
+  def ST_MLineFromText(wkt: Column, srid: Column): Column = wrapExpression[ST_MLineFromText](wkt, srid)
+
+  def ST_MLineFromText(wkt: String, srid: Int): Column = wrapExpression[ST_MLineFromText](wkt, srid)
 }

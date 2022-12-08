@@ -30,7 +30,7 @@ import org.locationtech.jts.io.kml.KMLReader;
 public class Constructors {
 
     private static Geometry getGeometryByType(String geom, String inputDelimiter, GeometryType geometryType) throws ParseException {
-        FileDataSplitter delimiter = inputDelimiter == null? FileDataSplitter.CSV:FileDataSplitter.getFileDataSplitter(inputDelimiter);
+        FileDataSplitter delimiter = inputDelimiter == null ? FileDataSplitter.CSV : FileDataSplitter.getFileDataSplitter(inputDelimiter);
         FormatUtils<Geometry> formatUtils = new FormatUtils<>(delimiter, false, geometryType);
         return formatUtils.readGeometry(geom);
     }
@@ -186,17 +186,26 @@ public class Constructors {
         }
     }
 
-    public static class ST_MPolyFromWKT extends ScalarFunction {
+    public static class ST_MPolyFromText extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "String") String wkt, @DataTypeHint("Int") Integer srid) throws ParseException {
+            return org.apache.sedona.common.Constructors.mPolyFromText(wkt, srid);
+        }
+
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "String") String wkt) throws ParseException {
-            return org.apache.sedona.common.Constructors.mPolyFromWKT(wkt, 0);
+            return org.apache.sedona.common.Constructors.mPolyFromText(wkt, 0);
         }
     }
 
-    public static class ST_MLineFromWKT extends ScalarFunction {
+    public static class ST_MLineFromText extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "String") String wkt, @DataTypeHint("Int") Integer srid) throws ParseException {
+            return org.apache.sedona.common.Constructors.mLineFromText(wkt, srid);
+        }
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "String") String wkt) throws ParseException {
-            return org.apache.sedona.common.Constructors.mLineFromWKT(wkt, 0);
+            return org.apache.sedona.common.Constructors.mLineFromText(wkt, 0);
         }
     }
 

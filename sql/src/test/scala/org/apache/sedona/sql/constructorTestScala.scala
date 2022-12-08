@@ -205,13 +205,22 @@ class constructorTestScala extends TestBaseScala {
       Adapter.toDf(spatialRDD2, sparkSession).show(1)
     }
 
-    it("Passed ST_MLineFromWKT") {
-      var mLineDf = sparkSession.sql("select ST_MLineFromWKT('MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))')")
+    it("Passed ST_MLineFromText") {
+      var mLineDf = sparkSession.sql("select ST_MLineFromText('MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))')")
+      assert(mLineDf.count() == 1)
+    }
+    it("Passed ST_MLineFromText With Srid") {
+      var mLineDf = sparkSession.sql("select ST_MLineFromText('MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))',4269)")
       assert(mLineDf.count() == 1)
     }
 
-    it("Passed ST_MPolyFromWKT") {
-      var mLineDf = sparkSession.sql("select ST_MPolyFromWKT('MULTIPOLYGON(((-70.916 42.1002,-70.9468 42.0946,-70.9765 42.0872 )))')")
+    it("Passed ST_MPolyFromText") {
+      var mLineDf = sparkSession.sql("select ST_MPolyFromText('MULTIPOLYGON(((-70.916 42.1002,-70.9468 42.0946,-70.9765 42.0872 )))')")
+      assert(mLineDf.count() == 1)
+    }
+
+    it("Passed ST_MPolyFromText With Srid") {
+      var mLineDf = sparkSession.sql("select ST_MPolyFromText('MULTIPOLYGON(((-70.916 42.1002,-70.9468 42.0946,-70.9765 42.0872 )))',4269)")
       assert(mLineDf.count() == 1)
     }
   }

@@ -37,8 +37,8 @@ __all__ = [
     "ST_PointFromText",
     "ST_PolygonFromEnvelope",
     "ST_PolygonFromText",
-    "ST_MLineFromWKT",
-    "ST_MPolyFromWKT"
+    "ST_MLineFromText",
+    "ST_MPolyFromText"
 ]
 
 
@@ -225,7 +225,7 @@ def ST_PolygonFromText(coords: ColumnOrName, delimiter: ColumnOrName) -> Column:
     return _call_constructor_function("ST_PolygonFromText", (coords, delimiter))
 
 @validate_argument_types
-def ST_MPolyFromWKT(wkt: ColumnOrName) -> Column:
+def ST_MPolyFromText(wkt: ColumnOrName) -> Column:
     """Generate multiPolygon geometry from a multiPolygon WKT representation.
 
     :param wkt: multiPolygon WKT string column to generate from.
@@ -233,10 +233,10 @@ def ST_MPolyFromWKT(wkt: ColumnOrName) -> Column:
     :return: multiPolygon geometry generated from the wkt column.
     :rtype: Column
     """
-    return _call_constructor_function("ST_MPolyFromWKT", wkt)
+    return _call_constructor_function("ST_MPolyFromText", wkt)
 
 @validate_argument_types
-def ST_MLineFromWKT(wkt: ColumnOrName) -> Column:
+def ST_MLineFromText(wkt: ColumnOrName) -> Column:
     """Generate multiLineString geometry from a multiLineString WKT representation.
 
     :param wkt: multiLineString WKT string column to generate from.
@@ -244,4 +244,4 @@ def ST_MLineFromWKT(wkt: ColumnOrName) -> Column:
     :return: multiLineString geometry generated from the wkt column.
     :rtype: Column
     """
-    return _call_constructor_function("ST_MLineFromWKT", wkt)
+    return _call_constructor_function("ST_MLineFromText", wkt)

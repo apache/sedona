@@ -229,7 +229,7 @@ public class TestBase {
         return "(("+ String.join(", ", polygon)+"))";
     }
 
-    static List<Row> createMultiPolygonWKT(int size) {
+    static List<Row> createMultiPolygonText(int size) {
         List<Row> data = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             List<String> multiPolygon=new ArrayList<>();
@@ -300,7 +300,7 @@ public class TestBase {
     }
 
     static Table createMultiPolygonTextTable(int size) {
-        return createTextTable(createMultiPolygonWKT(size), multipolygonColNames);
+        return createTextTable(createMultiPolygonText(size), multipolygonColNames);
     }
 
     static Table createPolygonTextOverlappingTable(int size) {
@@ -337,7 +337,7 @@ public class TestBase {
 
     Table createMultiPolygonTable(int size) {
         return createMultiPolygonTextTable(size)
-                .select(call(Constructors.ST_MPolyFromWKT.class.getSimpleName(),
+                .select(call(Constructors.ST_MPolyFromText.class.getSimpleName(),
                                 $(multipolygonColNames[0])).as(multipolygonColNames[0]),
                         $(multipolygonColNames[1]), $(multipolygonColNames[2]), $(multipolygonColNames[3]));
     }
