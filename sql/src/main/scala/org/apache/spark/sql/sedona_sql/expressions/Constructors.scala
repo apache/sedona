@@ -439,3 +439,29 @@ case class ST_GeomFromKML(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+/**
+ * Return a Geometry from a WKT string
+ *
+ * @param inputExpressions This function takes a geometry string and a srid. The string format must be WKT.
+ */
+case class ST_MPolyFromText(inputExpressions: Seq[Expression])
+  extends InferredBinaryExpression(Constructors.mPolyFromText) with FoldableExpression {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Return a Geometry from a WKT string
+ *
+ * @param inputExpressions This function takes a geometry string and a srid. The string format must be WKT.
+ */
+case class ST_MLineFromText(inputExpressions: Seq[Expression])
+  extends InferredBinaryExpression(Constructors.mLineFromText) with FoldableExpression {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+

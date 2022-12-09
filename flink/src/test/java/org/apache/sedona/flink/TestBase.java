@@ -45,7 +45,9 @@ public class TestBase {
     static int testDataSize = 1000;
     static String[] pointColNames = {"geom_point", "name_point", "event_time", "proc_time"};
     static String[] linestringColNames = {"geom_linestring", "name_linestring", "event_time", "proc_time"};
+    static String[] multilinestringColNames = {"geom_multilinestring", "name_multilinestring", "event_time", "proc_time"};
     static String[] polygonColNames = {"geom_polygon", "name_polygon", "event_time", "proc_time"};
+    static String[] multipolygonColNames = {"geom_multipolygon", "name_multipolygon", "event_time", "proc_time"};
     static String pointTableName = "point_table";
     static String polygonTableName = "polygon_table";
     static Long timestamp_base = new Timestamp(System.currentTimeMillis()).getTime();
@@ -212,6 +214,32 @@ public class TestBase {
         return data;
     }
 
+    static String createPolygonString(int i) {
+        // Each polygon is an envelope like (-0.5, -0.5, 0.5, 0.5)
+        String minX = String.valueOf(i - 0.5);
+        String minY = String.valueOf(i - 0.5);
+        String maxX = String.valueOf(i + 0.5);
+        String maxY = String.valueOf(i + 0.5);
+        List<String> polygon = new ArrayList<>();
+        polygon.add(minX + " " + minY);
+        polygon.add(minX + " " + maxY);
+        polygon.add(maxX + " " + maxY);
+        polygon.add(maxX + " " + minY);
+        polygon.add(minX + " " + minY);
+        return "(("+ String.join(", ", polygon)+"))";
+    }
+
+    static List<Row> createMultiPolygonText(int size) {
+        List<Row> data = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            List<String> multiPolygon=new ArrayList<>();
+            multiPolygon.add(createPolygonString(i));
+            multiPolygon.add(createPolygonString(size-i-1));
+            data.add(Row.of("MULTIPOLYGON (" + String.join(", ", multiPolygon) + ")", "multipolygon" + i, timestamp_base + time_interval * 1000 * i));
+        }
+        return data;
+    }
+
     static List<Row> createPolygonGeoJSON(int size) {
         List<Row> data = new ArrayList<>();
         GeometryFactory geometryFactory = new GeometryFactory();
@@ -271,6 +299,10 @@ public class TestBase {
         return createTextTable(createPolygonText(size), polygonColNames);
     }
 
+    static Table createMultiPolygonTextTable(int size) {
+        return createTextTable(createMultiPolygonText(size), multipolygonColNames);
+    }
+
     static Table createPolygonTextOverlappingTable(int size) {
         return createTextTable(createPolygonOverlapping(size), polygonColNames);
     }
@@ -303,6 +335,12 @@ public class TestBase {
                         $(polygonColNames[1]), $(polygonColNames[2]), $(polygonColNames[3]));
     }
 
+    Table createMultiPolygonTable(int size) {
+        return createMultiPolygonTextTable(size)
+                .select(call(Constructors.ST_MPolyFromText.class.getSimpleName(),
+                                $(multipolygonColNames[0])).as(multipolygonColNames[0]),
+                        $(multipolygonColNames[1]), $(multipolygonColNames[2]), $(multipolygonColNames[3]));
+    }
     //createPolygonTextOverlapping
 
     Table createPolygonOverlappingTable(int size) {

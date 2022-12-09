@@ -118,3 +118,14 @@ class TestConstructors(TestBase):
         line_df = self.spark.sql("select ST_LineFromText(wkt) as geom from input_wkt")
         assert line_df.count() == 1
 
+    def test_Mline_from_text(self) :
+        input_df = self.spark.createDataFrame([("MULTILINESTRING((1 2, 3 4), (4 5, 6 7))",)], ["wkt"])
+        input_df.createOrReplaceTempView("input_wkt")
+        line_df = self.spark.sql("select ST_MLineFromText(wkt) as geom from input_wkt")
+        assert line_df.count() == 1
+
+    def test_MPoly_from_text(self) :
+        input_df = self.spark.createDataFrame([("MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))",)], ["wkt"])
+        input_df.createOrReplaceTempView("input_wkt")
+        line_df = self.spark.sql("select ST_MPolyFromText(wkt) as geom from input_wkt")
+        assert line_df.count() == 1

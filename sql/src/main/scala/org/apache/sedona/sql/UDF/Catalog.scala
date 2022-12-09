@@ -136,6 +136,8 @@ object Catalog {
     function[ST_CollectionExtract](),
     function[ST_Normalize](),
     function[ST_LineFromMultiPoint](),
+    function[ST_MPolyFromText](0),
+    function[ST_MLineFromText](0),
     // Expression for rasters
     function[RS_NormalizedDifference](),
     function[RS_Mean](),
