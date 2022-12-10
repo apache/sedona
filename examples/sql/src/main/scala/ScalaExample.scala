@@ -145,7 +145,7 @@ object ScalaExample extends App{
   def testRasterIOAndMapAlgebra(): Unit = {
     var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
     df.printSchema()
-    df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.wkt) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as numBands").show()
+    df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.geometry) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as numBands").show()
     df = df.selectExpr(" image.data as data", "image.nBands as numBands")
     df = df.selectExpr("RS_GetBand(data, 1, numBands) as targetBand")
     df.selectExpr("RS_MultiplyFactor(targetBand, 3) as multiply").show()
