@@ -171,6 +171,7 @@
                 <artifactId>gt-epsg-hsql</artifactId>
                 <version>${geotools.version}</version>
                 <scope>${geotools.scope}</scope>
+                <optional>true</optional>
                 <exclusions>
                     <exclusion>
                         <groupId>com.fasterxml.jackson.core</groupId>
@@ -183,6 +184,7 @@
                 <artifactId>gt-shapefile</artifactId>
                 <version>${geotools.version}</version>
                 <scope>${geotools.scope}</scope>
+                <optional>true</optional>
                 <exclusions>
                     <exclusion>
                         <groupId>com.fasterxml.jackson.core</groupId>
@@ -240,13 +242,6 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <!-- We don't include this in any projects, but defining it pins the version in transitive deps -->
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jackson.version}</version>
-                <scope>provided</scope>
-            </dependency>
             <dependency>
                 <groupId>commons-lang</groupId>
                 <artifactId>commons-lang</artifactId>
@@ -256,6 +251,13 @@
                 <groupId>org.scala-lang.modules</groupId>
                 <artifactId>scala-collection-compat_${scala.compat.version}</artifactId>
                 <version>2.5.0</version>
+            </dependency>
+            <!-- We don't include this in any projects, but defining it pins the version in transitive deps for tests -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
+                <scope>provided</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
