@@ -47,7 +47,7 @@ jobs:
           r-version: ${{ matrix.r }}
       - uses: actions/setup-java@v1
         with:
-          java-version: '11'
+          java-version: '8'
       - name: Query R dependencies
         run: |
           print(R.version)
