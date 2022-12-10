@@ -38,14 +38,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.locationtech.jts</groupId>
-            <artifactId>jts-core</artifactId>
-            <version>${jts.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wololo</groupId>
-            <artifactId>jts2geojson</artifactId>
-            <version>${jts2geojson.version}</version>
+            <groupId>org.apache.sedona</groupId>
+            <artifactId>sedona-common</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.sedona</groupId>
@@ -57,53 +52,76 @@
             <artifactId>sedona-sql-${spark.compat.version}_${scala.compat.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--for CRS transformation-->
-        <dependency>
-            <groupId>org.datasyslab</groupId>
-            <artifactId>geotools-wrapper</artifactId>
-            <version>geotools-${geotools.version}</version>
-            <scope>${geotools.scope}</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.locationtech.jts</groupId>
-                    <artifactId>jts-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!--for CRS transformation-->
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-epsg-extension</artifactId>
-            <version>${geotools.version}</version>
-            <scope>${geotools.scope}</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!--for GeoTiff Reader-->
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-geotiff</artifactId>
-            <version>${geotools.version}</version>
-            <scope>${geotools.scope}</scope>
+       <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-core_${scala.compat.version}</artifactId>
+       </dependency>
+       <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql_${scala.compat.version}</artifactId>
+       </dependency>
+       <dependency>
+            <groupId>org.locationtech.jts</groupId>
+            <artifactId>jts-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-coverage</artifactId>
-            <version>${geotools.version}</version>
-            <scope>${geotools.scope}</scope>
+            <groupId>org.scala-lang.modules</groupId>
+            <artifactId>scala-collection-compat_${scala.compat.version}</artifactId>
         </dependency>
     </dependencies>
     <build>
         <sourceDirectory>src/main/scala</sourceDirectory>
         <plugins>
+            <plugin>
+                <groupId>io.paradoxical</groupId>
+                <artifactId>resolved-pom-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <id>resolve-my-pom</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <!--  use transformer to handle merge of META-INF/services - see http://java.net/jira/browse/JERSEY-440?focusedCommentId=14822&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#action_14822 -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>reference.conf</resource>
+                                </transformer>
+                            </transformers>
+                            <filters>
+                                <!--  filter to address "Invalid signature file" issue - see http://stackoverflow.com/a/6743609/589215 -->
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.datasyslab:sernetcdf</artifact>
+                                    <excludes>
+                                        <exclude>com/fasterxml/**</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.scalastyle</groupId>
                 <artifactId>scalastyle-maven-plugin</artifactId>

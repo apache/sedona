@@ -68,11 +68,11 @@ public class ShapefileReaderTest
         extends TestBase
 {
 
-    public static FileSystem fs;
+    // public static FileSystem fs;
 
-    public static MiniDFSCluster hdfsCluster;
+    // public static MiniDFSCluster hdfsCluster;
 
-    public static String hdfsURI;
+    // public static String hdfsURI;
 
     @BeforeClass
     public static void onceExecutedBeforeAll()
@@ -80,14 +80,14 @@ public class ShapefileReaderTest
     {
         initialize(ShapefileReaderTest.class.getName());
         // Set up HDFS minicluster
-        File baseDir = new File("./target/hdfs/shapefile").getAbsoluteFile();
-        FileUtil.fullyDelete(baseDir);
-        HdfsConfiguration hdfsConf = new HdfsConfiguration();
-        hdfsConf.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, baseDir.getAbsolutePath());
-        MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(hdfsConf);
-        hdfsCluster = builder.build();
-        fs = FileSystem.get(hdfsConf);
-        hdfsURI = "hdfs://127.0.0.1:" + hdfsCluster.getNameNodePort() + "/";
+        // File baseDir = new File("./target/hdfs/shapefile").getAbsoluteFile();
+        // FileUtil.fullyDelete(baseDir);
+        // HdfsConfiguration hdfsConf = new HdfsConfiguration();
+        // hdfsConf.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, baseDir.getAbsolutePath());
+        // MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(hdfsConf);
+        // hdfsCluster = builder.build();
+        // fs = FileSystem.get(hdfsConf);
+        // hdfsURI = "hdfs://127.0.0.1:" + hdfsCluster.getNameNodePort() + "/";
     }
 
     @AfterClass
@@ -95,8 +95,8 @@ public class ShapefileReaderTest
             throws Exception
     {
         sc.stop();
-        hdfsCluster.shutdown();
-        fs.close();
+        // hdfsCluster.shutdown();
+        // fs.close();
     }
 
     /**
@@ -364,19 +364,19 @@ public class ShapefileReaderTest
      *
      * @throws IOException
      */
-    @Test
-    public void testLoadFromHDFS()
-            throws IOException
-    {
-        String shapefileHDFSpath = hdfsURI + "dbf";
-        fs.copyFromLocalFile(new Path(getShapeFilePath("dbf")), new Path(shapefileHDFSpath));
-        RemoteIterator<LocatedFileStatus> hdfsFileIterator = fs.listFiles(new Path(shapefileHDFSpath), false);
-        while (hdfsFileIterator.hasNext()) {
-            assertEquals(hdfsFileIterator.next().getPath().getParent().toString(), shapefileHDFSpath);
-        }
-        SpatialRDD<Geometry> spatialRDD = ShapefileReader.readToGeometryRDD(sc, shapefileHDFSpath);
-        assertEquals("[STATEFP, COUNTYFP, COUNTYNS, AFFGEOID, GEOID, NAME, LSAD, ALAND, AWATER]", spatialRDD.fieldNames.toString());
-    }
+    // @Test
+    // public void testLoadFromHDFS()
+    //         throws IOException
+    // {
+    //     String shapefileHDFSpath = hdfsURI + "dbf";
+    //     fs.copyFromLocalFile(new Path(getShapeFilePath("dbf")), new Path(shapefileHDFSpath));
+    //     RemoteIterator<LocatedFileStatus> hdfsFileIterator = fs.listFiles(new Path(shapefileHDFSpath), false);
+    //     while (hdfsFileIterator.hasNext()) {
+    //         assertEquals(hdfsFileIterator.next().getPath().getParent().toString(), shapefileHDFSpath);
+    //     }
+    //     SpatialRDD<Geometry> spatialRDD = ShapefileReader.readToGeometryRDD(sc, shapefileHDFSpath);
+    //     assertEquals("[STATEFP, COUNTYFP, COUNTYNS, AFFGEOID, GEOID, NAME, LSAD, ALAND, AWATER]", spatialRDD.fieldNames.toString());
+    // }
 
     /**
      * Test read Multiple Shape Files by MultiPartitions
