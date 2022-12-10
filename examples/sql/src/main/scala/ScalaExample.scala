@@ -84,7 +84,7 @@ object ScalaExample extends App{
 
   def testDistanceJoinQuery(): Unit =
   {
-    val sedonaConf = new SedonaConf(sparkSession.getConf)
+    val sedonaConf = new SedonaConf(sparkSession.conf)
     println(sedonaConf)
 
     var pointCsvDF1 = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation)
@@ -109,7 +109,7 @@ object ScalaExample extends App{
 
   def testAggregateFunction(): Unit =
   {
-    val sedonaConf = new SedonaConf(sparkSession.getConf)
+    val sedonaConf = new SedonaConf(sparkSession.conf)
     println(sedonaConf)
 
     var pointCsvDF = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation)
