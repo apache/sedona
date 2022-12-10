@@ -29,8 +29,6 @@ package org.apache.sedona.viz.core;
  * http://nyomdmegteis.hu/en/
  */
 
-import sun.nio.ch.DirectBuffer;
-
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
@@ -517,7 +515,12 @@ public class BigBufferedImage
             FileDataBufferDeleterHook.undisposedBuffers.remove(this);
             if (disposedBuffer != null) {
                 for (MappedByteBuffer b : disposedBuffer) {
-                    ((DirectBuffer) b).cleaner().clean();
+                    // This method does not actually erase the data in the buffer,
+                    // but it is named as if it did because it will most often be used in situations
+                    // in which that might as well be the case
+                    // The original method uses the ((DirectBuffer) b).cleaner().clean(), which is
+                    // no longer available since Java 9
+                    b.clear();
                 }
             }
             if (accessFiles != null) {

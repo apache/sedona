@@ -57,7 +57,7 @@ object ScalaExample extends App{
 
   def testPredicatePushdownAndRangeJonQuery():Unit =
   {
-    val sedonaConf = new SedonaConf(sparkSession.sparkContext.getConf)
+    val sedonaConf = new SedonaConf(sparkSession.conf)
     println(sedonaConf)
 
     var polygonCsvDf = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(csvPolygonInputLocation)
@@ -84,7 +84,7 @@ object ScalaExample extends App{
 
   def testDistanceJoinQuery(): Unit =
   {
-    val sedonaConf = new SedonaConf(sparkSession.sparkContext.getConf)
+    val sedonaConf = new SedonaConf(sparkSession.conf)
     println(sedonaConf)
 
     var pointCsvDF1 = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation)
@@ -109,7 +109,7 @@ object ScalaExample extends App{
 
   def testAggregateFunction(): Unit =
   {
-    val sedonaConf = new SedonaConf(sparkSession.sparkContext.getConf)
+    val sedonaConf = new SedonaConf(sparkSession.conf)
     println(sedonaConf)
 
     var pointCsvDF = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(csvPointInputLocation)
@@ -145,7 +145,7 @@ object ScalaExample extends App{
   def testRasterIOAndMapAlgebra(): Unit = {
     var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
     df.printSchema()
-    df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.wkt) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as numBands").show()
+    df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.geometry) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as numBands").show()
     df = df.selectExpr(" image.data as data", "image.nBands as numBands")
     df = df.selectExpr("RS_GetBand(data, 1, numBands) as targetBand")
     df.selectExpr("RS_MultiplyFactor(targetBand, 3) as multiply").show()
