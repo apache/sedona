@@ -39,14 +39,14 @@ val SparkCompatibleVersion = "3.0"
 
 val HadoopVersion = "2.7.2"
 
-val SedonaVersion = "1.1.1-incubating"
+val SedonaVersion = "1.3.1-incubating-SNAPSHOT"
 
 val ScalaCompatibleVersion = "2.12"
 
 // Change the dependency scope to "provided" when you run "sbt assembly"
 val dependencyScope = "compile"
 
-val geotoolsVersion = "1.1.0-25.2"
+val geotoolsVersion = "1.3.0-27.2"
 
 //val jacksonVersion = "2.10.0"
 
@@ -62,11 +62,8 @@ libraryDependencies ++= Seq(
   "org.apache.hadoop" % "hadoop-mapreduce-client-core" % HadoopVersion % dependencyScope,
   "org.apache.hadoop" % "hadoop-common" % HadoopVersion % dependencyScope,
   "org.apache.hadoop" % "hadoop-hdfs" % HadoopVersion % dependencyScope,
-  "org.apache.sedona" % "sedona-core-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion,
-  "org.apache.sedona" % "sedona-sql-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion ,
-  "org.apache.sedona" % "sedona-viz-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion,
-  "org.locationtech.jts"% "jts-core"% "1.18.0" % "compile",
-  "org.wololo" % "jts2geojson" % "0.14.3" % "compile", // Only needed if you read GeoJSON files. Under MIT License
+  "org.apache.sedona" % "sedona-python-adapter-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion changing(),
+  "org.apache.sedona" % "sedona-viz-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion changing(),
   //  The following GeoTools packages are only required if you need CRS transformation. Under GNU Lesser General Public License (LGPL) license
   "org.datasyslab" % "geotools-wrapper" % geotoolsVersion % "compile"
 )
