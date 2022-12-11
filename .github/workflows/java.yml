@@ -60,7 +60,14 @@ jobs:
         SPARK_VERSION: ${{ matrix.spark }}
         SCALA_VERSION: ${{ matrix.scala }}
         JACKSON_VERSION: ${{ matrix.jackson }}
-      run: mvn -q clean install -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} -Dsedona.jackson.version=${JACKSON_VERSION}; \
+      if: ${{ matrix.jdk }} == '8'
+      run: mvn -q clean install -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} -Dsedona.jackson.version=${JACKSON_VERSION}
+    - env:
+        SPARK_VERSION: ${{ matrix.spark }}
+        SCALA_VERSION: ${{ matrix.scala }}
+        JACKSON_VERSION: ${{ matrix.jackson }}
+      if: ${{ matrix.jdk }} == '11'
+      run: mvn -q clean install -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} -Dsedona.jackson.version=${JACKSON_VERSION} -DskipTests
     - run: mkdir staging
     - run: cp core/target/sedona-*.jar staging
     - run: cp sql/target/sedona-*.jar staging
