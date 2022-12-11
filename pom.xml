@@ -79,7 +79,7 @@
         Setting a default value helps IDE:s that can't make sense of profiles. -->
         <scala.compat.version>2.12</scala.compat.version>
 
-        <geotools.scope>compile</geotools.scope>
+        <geotools.scope>provided</geotools.scope>
         <netcdf.scope>compile</netcdf.scope>
     </properties>
 
@@ -112,6 +112,10 @@
                 <artifactId>jts2geojson</artifactId>
                 <version>${jts2geojson.version}</version>
                 <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
                     <exclusion>
                         <groupId>org.locationtech.jts</groupId>
                         <artifactId>jts-core</artifactId>

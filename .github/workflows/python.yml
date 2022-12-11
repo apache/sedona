@@ -83,7 +83,7 @@ jobs:
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         HADOOP_VERSION: ${{ matrix.hadoop }}
-      run: find python-adapter/target -name sedona-* -exec cp {} spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/jars/ \;
+      run: find python-adapter/target -name sedona-*-shaded.jar -exec cp {} spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/jars/ \;
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         HADOOP_VERSION: ${{ matrix.hadoop }}
