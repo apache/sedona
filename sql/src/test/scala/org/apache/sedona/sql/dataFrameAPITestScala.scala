@@ -19,14 +19,11 @@
 package org.apache.sedona.sql
 
 import scala.collection.mutable.WrappedArray
-
 import org.apache.commons.codec.binary.Hex
 import org.apache.spark.sql.functions.lit
-
 import org.locationtech.jts.geom.Geometry
-
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors._
-import org.apache.spark.sql.sedona_sql.expressions.st_functions._
+import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ST_ConcaveHull, _}
 import org.apache.spark.sql.sedona_sql.expressions.st_predicates._
 import org.apache.spark.sql.sedona_sql.expressions.st_aggregates._
 
@@ -153,6 +150,15 @@ class dataFrameAPITestScala extends TestBaseScala {
     }
 
     // functions
+    it("Passed ST_ConcaveHull") {
+      it("Passed ST_ConcaveHull"){
+        val baseDF = sparkSession.sql("SELECT ST_GeomFromWKT('Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))') as mline")
+        val df = baseDF.select(ST_ConcaveHull("mline", 0, true))
+        val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+        assert(actualResult == "POLYGON ((1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0, 1 2))")
+      }
+    }
+
     it("Passed ST_ConvexHull") {
       val polygonDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))') AS geom")
       val df = polygonDf.select(ST_ConvexHull("geom"))
