@@ -71,8 +71,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
 
     it("Passed ST_YMax") {
-      var test = sparkSession.sql("SELECT ST_YMax(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'))")
-      assert(test.take(1)(0).get(0).asInstanceOf[Double] == 3.0)
+      var test = sparkSession.sql("SELECT ST_YMax(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 -2, -3 -1, -3 -3))'))")
+      assert(test.take(1)(0).get(0).asInstanceOf[Double] == -1)
     }
 
     it("Passed ST_YMin") {
