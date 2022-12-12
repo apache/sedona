@@ -19,8 +19,8 @@
 
 package org.apache.sedona.core.formatMapper;
 
+import org.apache.sedona.core.formatMapper.netcdfParser.SerNetCDFUtils;
 import org.apache.spark.api.java.function.FlatMapFunction;
-import org.datasyslab.sernetcdf.SerNetCDFUtils;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;

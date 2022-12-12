@@ -81,22 +81,51 @@ The optional GeoTools library is required only if you want to use CRS transforma
 		```
 
 
-#### SernetCDF 0.1.0
+### netCDF-Java 5.4.2
 
 For Scala / Java API, it is required only if you want to read HDF/NetCDF files.
 
-HDF/NetCDF function is currently not supported in Sedona Python.
+HDF/NetCDF function is only supported in Spark RDD with Java/Scala API. The current function is deprecated and more mature support will be released soon.
 
-Under Apache License 2.0.
+Under BSD 3-clause (compatible with Apache 2.0 license)
 
-```xml
-<!-- https://mvnrepository.com/artifact/org.datasyslab/sernetcdf -->
-<dependency>
-    <groupId>org.datasyslab</groupId>
-    <artifactId>sernetcdf</artifactId>
-    <version>0.1.0</version>
-</dependency>
-```
+!!! abstract "Add HDF/NetCDF dependency"
+
+	=== "Sedona 1.3.1+"
+
+		Add unidata repo to your POM.xml
+		
+		```
+		<repositories>
+		    <repository>
+		        <id>unidata-all</id>
+		        <name>Unidata All</name>
+		        <url>https://artifacts.unidata.ucar.edu/repository/unidata-all/</url>
+		    </repository>
+		</repositories>
+		```
+		
+		Then add cdm-core to your POM dependency.
+		
+		```xml
+		<dependency>
+		    <groupId>edu.ucar</groupId>
+		    <artifactId>cdm-core</artifactId>
+		    <version>5.4.2</version>
+		</dependency>
+		```
+
+	=== "Before Sedona 1.3.1"
+	
+		```xml
+		<!-- https://mvnrepository.com/artifact/org.datasyslab/sernetcdf -->
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>sernetcdf</artifactId>
+		    <version>0.1.0</version>
+		</dependency>
+		```
+
 
 ## Use Sedona and third-party jars separately
 
@@ -123,46 +152,27 @@ Under Apache License 2.0.
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
 		```
-	
-	=== "Spark 2.4 and Scala 2.11"
-	
-		```xml
-		<dependency>
-		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-core-2.4_2.11</artifactId>
-		  <version>{{ sedona.current_version }}</version>
-		</dependency>
-		<dependency>
-		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-sql-2.4_2.11</artifactId>
-		  <version>{{ sedona.current_version }}</version>
-		</dependency>
-		<dependency>
-		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-viz-2.4_2.11</artifactId>
-		  <version>{{ sedona.current_version }}</version>
-		</dependency>
-		```
-	
-	=== "Spark 2.4 and Scala 2.12"
+	=== "Spark 3.0+ and Scala 2.13"
 	
 		```xml
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-core-2.4_2.12</artifactId>
+		  <artifactId>sedona-core-3.0_2.13</artifactId>
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-sql-2.4_2.12</artifactId>
+		  <artifactId>sedona-sql-3.0_2.13</artifactId>
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-viz-2.4_2.12</artifactId>
+		  <artifactId>sedona-viz-3.0_2.13</artifactId>
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
 		```
+		
+	
 
 !!! abstract "Sedona with Apache Flink"
 
@@ -235,20 +245,50 @@ GeoTools library is required only if you want to use CRS transformation and Shap
 </dependency>
 ```
 
-### SernetCDF 0.1.0
+### netCDF-Java 5.4.2
 
-For Scala / Java API: `required` if you want to read HDF files.
+For Scala / Java API, it is required only if you want to read HDF/NetCDF files.
 
-Under Apache License 2.0.
+HDF/NetCDF function is only supported in Spark RDD with Java/Scala API. The current function is deprecated and more mature support will be released soon.
 
-```xml
-<!-- https://mvnrepository.com/artifact/org.datasyslab/sernetcdf -->
-<dependency>
-    <groupId>org.datasyslab</groupId>
-    <artifactId>sernetcdf</artifactId>
-    <version>0.1.0</version>
-</dependency>
-```
+Under BSD 3-clause (compatible with Apache 2.0 license)
+
+!!! abstract "Add HDF/NetCDF dependency"
+
+	=== "Sedona 1.3.1+"
+
+		Add unidata repo to your POM.xml
+		
+		```
+		<repositories>
+		    <repository>
+		        <id>unidata-all</id>
+		        <name>Unidata All</name>
+		        <url>https://artifacts.unidata.ucar.edu/repository/unidata-all/</url>
+		    </repository>
+		</repositories>
+		```
+		
+		Then add cdm-core to your POM dependency.
+		
+		```xml
+		<dependency>
+		    <groupId>edu.ucar</groupId>
+		    <artifactId>cdm-core</artifactId>
+		    <version>5.4.2</version>
+		</dependency>
+		```
+
+	=== "Before Sedona 1.3.1"
+	
+		```xml
+		<!-- https://mvnrepository.com/artifact/org.datasyslab/sernetcdf -->
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>sernetcdf</artifactId>
+		    <version>0.1.0</version>
+		</dependency>
+		```
 
 ## SNAPSHOT versions
 Sometimes Sedona has a SNAPSHOT version for the upcoming release. It follows the same naming conversion but has "SNAPSHOT" as suffix in the version. For example, `{{ sedona.current_snapshot }}`
