@@ -23,21 +23,19 @@ import org.apache.commons.codec.binary.Hex
 import org.apache.sedona.sql.implicits._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Row}
+import org.geotools.referencing.CRS
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom.{Geometry, Polygon}
 import org.locationtech.jts.io.WKTWriter
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.distance3d.Distance3DOp
+import org.opengis.referencing.FactoryException
 import org.scalatest.{GivenWhenThen, Matchers}
 import org.xml.sax.InputSource
-import java.io.StringReader
 
+import java.io.StringReader
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.xpath.XPathFactory
-import org.apache.sedona.sql.utils.GeometrySerializer
-import org.apache.spark.SparkException
-import org.geotools.referencing.CRS
-import org.opengis.referencing.{FactoryException, NoSuchAuthorityCodeException}
 
 class functionTestScala extends TestBaseScala with Matchers with GeometrySample with GivenWhenThen {
 
@@ -207,7 +205,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         val d = org.apache.sedona.common.Functions.transform(polygeom, epsgString, epsgFactoryErrorString)
       }
 
-      intercept[NoSuchAuthorityCodeException]{
+      intercept[FactoryException]{
         val d2 = org.apache.sedona.common.Functions.transform(polygeom, epsgString, epsgNoSuchAuthorityString)
       }
 
