@@ -130,7 +130,7 @@ public class Functions {
     
     public static double xMax(Geometry geometry) {
         Coordinate[] points = geometry.getCoordinates();
-        double max = Double.MIN_VALUE;
+        double max = - Double.MAX_VALUE;
         for (int i=0; i < points.length; i++) {
             max = Math.max(points[i].getX(), max);
         }
@@ -148,7 +148,7 @@ public class Functions {
     
     public static double yMax(Geometry geometry) {
         Coordinate[] points = geometry.getCoordinates();
-        double max = Double.MIN_VALUE;
+        double max = - Double.MAX_VALUE;
         for (int i=0; i < points.length; i++) {
             max = Math.max(points[i].getY(), max);
         }
@@ -157,13 +157,13 @@ public class Functions {
 
     public static Double zMax(Geometry geometry) {
         Coordinate[] points = geometry.getCoordinates();
-        double max = Double.MIN_VALUE;
+        double max = - Double.MAX_VALUE;
         for (int i=0; i < points.length; i++) {
             if(java.lang.Double.isNaN(points[i].getZ()))
                 continue;
             max = Math.max(points[i].getZ(), max);
         }
-        return max == Double.MIN_VALUE ? null : max;
+        return max == -Double.MAX_VALUE ? null : max;
     }
 
     public static Double zMin(Geometry geometry) {
