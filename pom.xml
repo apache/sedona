@@ -64,6 +64,7 @@
         <dependency.scope>provided</dependency.scope>
         <jts.version>1.18.2</jts.version>
         <jts2geojson.version>0.16.1</jts2geojson.version>
+        <netcdf.version>5.4.2</netcdf.version>
         <spark.version>3.3.0</spark.version>
         <spark.compat.version>3.0</spark.compat.version>
         <sedona.jackson.version>2.13.3</sedona.jackson.version>
@@ -127,9 +128,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.datasyslab</groupId>
-            <artifactId>sernetcdf</artifactId>
-            <version>0.1.0</version>
+            <groupId>edu.ucar</groupId>
+            <artifactId>cdm-core</artifactId>
+            <version>${netcdf.version}</version>
             <scope>${dependency.scope}</scope>
         </dependency>
         <!--The following GeoTools dependencies use GNU Lesser General Public License and thus are excluded from the binary distribution-->
@@ -240,6 +241,17 @@
             <id>osgeo</id>
             <name>OSGeo Release Repository</name>
             <url>https://repo.osgeo.org/repository/release/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+        <repository>
+            <id>unidata-all</id>
+            <name>Unidata All</name>
+            <url>https://artifacts.unidata.ucar.edu/repository/unidata-all/</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
@@ -386,7 +398,7 @@
                                     </excludes>
                                 </filter>
                                 <filter>
-                                    <artifact>org.datasyslab:sernetcdf</artifact>
+                                    <artifact>edu.ucar:cdm-core</artifact>
                                     <excludes>
                                         <exclude>com/fasterxml/**</exclude>
                                     </excludes>
