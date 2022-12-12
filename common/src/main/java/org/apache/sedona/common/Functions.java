@@ -191,20 +191,20 @@ public class Functions {
         return JTS.transform(geometry, transform);
     }
 
-    private static CoordinateReferenceSystem parseCRSString(String CRSString) throws FactoryException {
+    private static CoordinateReferenceSystem parseCRSString(String CRSString)
+            throws FactoryException
+    {
         try {
-            return CRS.parseWKT(CRSString);
+            return CRS.decode(CRSString);
         }
-        catch (FactoryException ex1) {
+        catch (NoSuchAuthorityCodeException e) {
             try {
-                return CRS.decode(CRSString);
-            } catch (NoSuchAuthorityCodeException ex4) {
-                throw new NoSuchAuthorityCodeException("that Authority code cannot be found", CRSString, CRSString);
-            } catch (FactoryException ex6) {
-                throw new FactoryException("WKT format is illegal");
+                return CRS.parseWKT(CRSString);
+            }
+            catch (FactoryException ex) {
+                throw new FactoryException("First failed to read as a well-known CRS code: \n" + e.getMessage() + "\nThen failed to read as a WKT CRS string: \n" + ex.getMessage());
             }
         }
-
     }
 
     public static Geometry flipCoordinates(Geometry geometry) {

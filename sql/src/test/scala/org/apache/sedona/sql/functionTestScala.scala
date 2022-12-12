@@ -29,7 +29,7 @@ import org.locationtech.jts.geom.{Geometry, Polygon}
 import org.locationtech.jts.io.WKTWriter
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.distance3d.Distance3DOp
-import org.opengis.referencing.{FactoryException, NoSuchAuthorityCodeException}
+import org.opengis.referencing.FactoryException
 import org.scalatest.{GivenWhenThen, Matchers}
 import org.xml.sax.InputSource
 
@@ -205,7 +205,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         val d = org.apache.sedona.common.Functions.transform(polygeom, epsgString, epsgFactoryErrorString)
       }
 
-      intercept[NoSuchAuthorityCodeException]{
+      intercept[FactoryException]{
         val d2 = org.apache.sedona.common.Functions.transform(polygeom, epsgString, epsgNoSuchAuthorityString)
       }
 
