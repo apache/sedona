@@ -24,13 +24,13 @@ public class Accumulators {
     public static class Envelope {
         public double minX = Double.MAX_VALUE;
         public double minY = Double.MAX_VALUE;
-        public double maxX = Double.MIN_VALUE;
-        public double maxY = Double.MIN_VALUE;
+        public double maxX = -Double.MAX_VALUE;
+        public double maxY = -Double.MAX_VALUE;
         void reset() {
             minX = Double.MAX_VALUE;
             minY = Double.MAX_VALUE;
-            maxX = Double.MIN_VALUE;
-            maxY = Double.MIN_VALUE;
+            maxX = -Double.MAX_VALUE;
+            maxY = -Double.MAX_VALUE;
         }
     }
     public static class AccGeometry {
