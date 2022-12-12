@@ -21,14 +21,15 @@ sc <- testthat_spark_connection()
 
 knn_query_pt_x <- -84.01
 knn_query_pt_y <- 34.01
-knn_query_pt_tbl <- DBI::dbGetQuery(
+knn_query_pt_tbl <- sdf_sql(
   sc,
   sprintf(
     "SELECT ST_GeomFromText(\"POINT(%f %f)\") AS `pt`",
     knn_query_pt_x,
     knn_query_pt_y
   )
-)
+) %>%
+  collect()
 knn_query_pt <- knn_query_pt_tbl$pt[[1]]
 knn_query_size <- 100
 polygon_sdf <- read_polygon_rdd() %>% sdf_register()
