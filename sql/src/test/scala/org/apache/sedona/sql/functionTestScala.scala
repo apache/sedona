@@ -303,7 +303,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       val df = sparkSession.sql("SELECT ST_GeomFromWKT('MULTIPOLYGON(((0 0, 3 0, 3 3, 0 3, 0 0)), ((3 0, 6 0, 6 3, 3 3, 3 0)))') AS multipolygon")
 
       val result = df.withColumn("multipolygon", expr("ST_MakeValid(multipolygon)")).collect()
-      println(result.toString)
+
       assert(result.length == 1)
       assert(result.take(1)(0).get(0).asInstanceOf[Geometry].toText() == "MULTIPOLYGON (((0 3, 3 3, 6 3, 6 0, 3 0, 0 0, 0 3)))")
     }
