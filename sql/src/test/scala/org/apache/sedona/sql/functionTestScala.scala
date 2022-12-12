@@ -303,7 +303,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       val result = df.withColumn("multipolygon", expr("ST_MakeValid(multipolygon)")).collect()
 
       assert(result.length == 1)
-      assert(result.take(1)(0).get(0).asInstanceOf[Geometry].toText() == "POLYGON ((0 3, 3 3, 6 3, 6 0, 3 0, 0 0, 0 3))")
+      assert(result.take(1)(0).get(0).asInstanceOf[Geometry].toText() == "MULTIPOLYGON (((0 3, 3 3, 6 3, 6 0, 3 0, 0 0, 0 3)))")
     }
 
     it("Passed ST_MakeValid On Valid Polygon") {
