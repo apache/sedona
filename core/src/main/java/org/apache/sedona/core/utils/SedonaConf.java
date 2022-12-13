@@ -25,6 +25,7 @@ import org.apache.sedona.core.enums.JoinBuildSide;
 import org.apache.sedona.core.enums.JoinSparitionDominantSide;
 import org.apache.spark.sql.RuntimeConfig;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.util.Utils;
 import org.locationtech.jts.geom.Envelope;
 
 import java.io.Serializable;
@@ -54,6 +55,8 @@ public class SedonaConf
 
     private GridType joinGridType;
 
+    private long autoBroadcastJoinThreshold;
+
     public static SedonaConf fromActiveSession() {
         return new SedonaConf(SparkSession.active().conf());
     }
@@ -70,6 +73,11 @@ public class SedonaConf
         this.joinBuildSide = JoinBuildSide.getBuildSide(runtimeConfig.get("sedona.join.indexbuildside", "left"));
         this.joinSparitionDominantSide = JoinSparitionDominantSide.getJoinSparitionDominantSide(runtimeConfig.get("sedona.join.spatitionside", "left"));
         this.fallbackPartitionNum = Integer.parseInt(runtimeConfig.get("sedona.join.numpartition", "-1"));
+        this.autoBroadcastJoinThreshold = bytesFromString(
+                runtimeConfig.get("sedona.join.autoBroadcastJoinThreshold",
+                        runtimeConfig.get("spark.sql.autoBroadcastJoinThreshold")
+                )
+        );
     }
 
     public boolean getUseIndex()
@@ -113,6 +121,11 @@ public class SedonaConf
         return fallbackPartitionNum;
     }
 
+    public long getAutoBroadcastJoinThreshold()
+    {
+        return autoBroadcastJoinThreshold;
+    }
+
     public String toString()
     {
         try {
@@ -130,6 +143,14 @@ public class SedonaConf
         catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    static long bytesFromString(String str) {
+        if (str.startsWith("-")) {
+            return -1 * Utils.byteStringAsBytes(str.substring(1));
+        } else {
+            return Utils.byteStringAsBytes(str);
         }
     }
 }

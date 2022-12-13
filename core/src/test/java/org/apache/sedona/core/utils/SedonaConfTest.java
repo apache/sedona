@@ -53,4 +53,11 @@ public class SedonaConfTest {
         Envelope datasetBoundary = SedonaConf.fromActiveSession().getDatasetBoundary();
         assertEquals("Env[1.0 : 2.0, 3.0 : 4.0]", datasetBoundary.toString());
     }
+
+    @Test
+    public void testBytesFromString() {
+        assertEquals(-1, SedonaConf.bytesFromString("-1"));
+        assertEquals(1024, SedonaConf.bytesFromString("1k"));
+        assertEquals(2097152, SedonaConf.bytesFromString("2MB"));
+    }
 }

@@ -1408,4 +1408,26 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     }
   }
 
+  describe("Sedona SQL automatic broadcast") {
+    it("Datasets smaller than threshold should be broadcasted") {
+      val polygonDf = buildPolygonDf.repartition(3).alias("polygon")
+      val pointDf = buildPointDf.repartition(5).alias("point")
+      val df = polygonDf.join(pointDf, expr("ST_Contains(polygon.polygonshape, point.pointshape)"))
+      sparkSession.conf.set("sedona.global.index", "true")
+      sparkSession.conf.set("sedona.join.autoBroadcastJoinThreshold", "10mb")
+
+      assert(df.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
+      sparkSession.conf.set("sedona.join.autoBroadcastJoinThreshold", "-1")
+    }
+
+    it("Datasets larger than threshold should not be broadcasted") {
+      val polygonDf = buildPolygonDf.repartition(3).alias("polygon")
+      val pointDf = buildPointDf.repartition(5).alias("point")
+      val df = polygonDf.join(pointDf, expr("ST_Contains(polygon.polygonshape, point.pointshape)"))
+      sparkSession.conf.set("sedona.global.index", "true")
+      sparkSession.conf.set("sedona.join.autoBroadcastJoinThreshold", "-1")
+
+      assert(df.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 0)
+    }
+  }
 }
