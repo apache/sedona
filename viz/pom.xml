@@ -52,13 +52,6 @@
             <groupId>org.apache.sedona</groupId>
             <artifactId>sedona-core-${spark.compat.version}_${scala.compat.version}</artifactId>
             <version>${project.version}</version>
-            <exclusions>
-                <!-- Make sure Hadoop's guava version is used for older versions of Spark tests -->
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.sedona</groupId>
@@ -68,6 +61,13 @@
          <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_${scala.compat.version}</artifactId>
+            <exclusions>
+                <!-- Make sure Hadoop's guava version is used for older versions of Spark tests -->
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
@@ -127,8 +127,8 @@
         <sourceDirectory>src/main/java</sourceDirectory>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.scalatest</groupId>

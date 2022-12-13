@@ -250,7 +250,7 @@
             </dependency>
 
             <!-- We don't include this in any projects, but defining it pins the version in transitive deps for tests -->
-            <dependency>
+            <!-- <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
                 <version>${jackson.version}</version>
@@ -267,7 +267,7 @@
                 <artifactId>jackson-annotations</artifactId>
                 <version>${jackson.version}</version>
                 <scope>runtime</scope>
-            </dependency>
+            </dependency> -->
         </dependencies>
     </dependencyManagement>
     <repositories>
@@ -443,12 +443,6 @@
                         <algorithm>SHA-512</algorithm>
                     </algorithms>
                 </configuration>
-            </plugin>
-            <plugin>
-                <!-- see http://davidb.github.com/scala-maven-plugin -->
-                <groupId>net.alchim31.maven</groupId>
-                <artifactId>scala-maven-plugin</artifactId>
-                <version>3.2.1</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
