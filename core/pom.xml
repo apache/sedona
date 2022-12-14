@@ -69,8 +69,8 @@
             <artifactId>hadoop-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.datasyslab</groupId>
-            <artifactId>sernetcdf</artifactId>
+            <groupId>edu.ucar</groupId>
+            <artifactId>cdm-core</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
