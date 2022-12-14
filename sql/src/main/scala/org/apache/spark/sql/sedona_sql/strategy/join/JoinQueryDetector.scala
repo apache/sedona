@@ -78,12 +78,28 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     }
 
   def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
-    case Join(left, right, joinType, condition, JoinHint(leftHint, rightHint)) => { // SPARK3 anchor
-//    case Join(left, right, Inner, condition) => { // SPARK2 anchor
-      val broadcastLeft = leftHint.exists(_.strategy.contains(BROADCAST)) // SPARK3 anchor
-      val broadcastRight = rightHint.exists(_.strategy.contains(BROADCAST)) // SPARK3 anchor
-//      val broadcastLeft = left.isInstanceOf[ResolvedHint] && left.asInstanceOf[ResolvedHint].hints.broadcast  // SPARK2 anchor
-//      val broadcastRight = right.isInstanceOf[ResolvedHint] && right.asInstanceOf[ResolvedHint].hints.broadcast // SPARK2 anchor
+    case Join(left, right, joinType, condition, JoinHint(leftHint, rightHint)) => {
+      var broadcastLeft = leftHint.exists(_.strategy.contains(BROADCAST))
+      var broadcastRight = rightHint.exists(_.strategy.contains(BROADCAST))
+
+      /*
+      If either side is small we can automatically broadcast just like Spark does.
+      This only applies to inner joins as there are no optimized fallback plan for other join types.
+      It's better that users are explicit about broadcasting for other join types than seeing wildly different behavior
+      depending on data size.
+       */
+      if (!broadcastLeft && !broadcastRight && joinType == Inner) {
+        val canAutoBroadCastLeft = canAutoBroadcastBySize(left)
+        val canAutoBroadCastRight = canAutoBroadcastBySize(right)
+        if (canAutoBroadCastLeft && canAutoBroadCastRight) {
+          // Both sides can be broadcasted. Choose the smallest side.
+          broadcastLeft = left.stats.sizeInBytes <= right.stats.sizeInBytes
+          broadcastRight = !broadcastLeft
+        } else {
+          broadcastLeft = canAutoBroadCastLeft
+          broadcastRight = canAutoBroadCastRight
+        }
+      }
 
       val queryDetection: Option[JoinQueryDetection] = condition match {
         case Some(predicate: ST_Predicate) =>
@@ -136,6 +152,9 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     case _ =>
       Nil
   }
+
+  private def canAutoBroadcastBySize(plan: LogicalPlan) =
+    plan.stats.sizeInBytes != 0 && plan.stats.sizeInBytes <= SedonaConf.fromActiveSession.getAutoBroadcastJoinThreshold
 
   /**
     * Returns true if specified expression has at least one reference and all its references

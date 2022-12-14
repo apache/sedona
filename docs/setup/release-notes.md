@@ -1,6 +1,32 @@
 !!!warning
 	Support of Spark 2.X and Scala 2.11 was removed in Sedona 1.3.0+ although some parts of the source code might still be compatible. Sedona 1.3.0+ releases binary for both Scala 2.12 and 2.13.
 
+## Sedona 1.3.1
+
+This version is a minor release on Sedoma 1.3.0 line. It fixes a few critical bugs in 1.3.0. We suggest all 1.3.0 users to migrate to this version.
+
+### Bug fixes
+
+* [SEDONA-204](https://issues.apache.org/jira/browse/SEDONA-204) - Init value in X/Y/Z max should be -Double.MAX
+* [SEDONA-206](https://issues.apache.org/jira/browse/SEDONA-206) - Performance regression of ST_Transform in 1.3.0-incubating
+* [SEDONA-210](https://issues.apache.org/jira/browse/SEDONA-210) - 1.3.0-incubating doesn't work with Scala 2.12 sbt projects
+* [SEDONA-211](https://issues.apache.org/jira/browse/SEDONA-211) - Enforce release managers to use JDK 8
+* [SEDONA-201](https://issues.apache.org/jira/browse/SEDONA-201) - Implement ST_MLineFromText and ST_MPolyFromText methods
+
+
+### New Feature
+
+* [SEDONA-196](https://issues.apache.org/jira/browse/SEDONA-196) - Add ST_Force3D to Sedona
+* [SEDONA-197](https://issues.apache.org/jira/browse/SEDONA-197) - Add ST_ZMin, ST_ZMax to Sedona
+* [SEDONA-199](https://issues.apache.org/jira/browse/SEDONA-199) - Add ST_NDims to Sedona
+
+
+### Improvement
+
+* [SEDONA-194](https://issues.apache.org/jira/browse/SEDONA-194) - Merge org.datasyslab.sernetcdf into Sedona
+* [SEDONA-208](https://issues.apache.org/jira/browse/SEDONA-208) - Use Spark RuntimeConfig in SedonaConf
+
+
 ## Sedona 1.3.0
 
 This version is a major release on Sedona 1.3.0 line and consists of 50 PRs. It includes many new functions, optimization and bug fixes.

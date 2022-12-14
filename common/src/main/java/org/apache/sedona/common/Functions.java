@@ -131,7 +131,7 @@ public class Functions {
     
     public static double xMax(Geometry geometry) {
         Coordinate[] points = geometry.getCoordinates();
-        double max = Double.MIN_VALUE;
+        double max = - Double.MAX_VALUE;
         for (int i=0; i < points.length; i++) {
             max = Math.max(points[i].getX(), max);
         }
@@ -149,7 +149,7 @@ public class Functions {
     
     public static double yMax(Geometry geometry) {
         Coordinate[] points = geometry.getCoordinates();
-        double max = Double.MIN_VALUE;
+        double max = - Double.MAX_VALUE;
         for (int i=0; i < points.length; i++) {
             max = Math.max(points[i].getY(), max);
         }
@@ -158,13 +158,13 @@ public class Functions {
 
     public static Double zMax(Geometry geometry) {
         Coordinate[] points = geometry.getCoordinates();
-        double max = Double.MIN_VALUE;
+        double max = - Double.MAX_VALUE;
         for (int i=0; i < points.length; i++) {
             if(java.lang.Double.isNaN(points[i].getZ()))
                 continue;
             max = Math.max(points[i].getZ(), max);
         }
-        return max == Double.MIN_VALUE ? null : max;
+        return max == -Double.MAX_VALUE ? null : max;
     }
 
     public static Double zMin(Geometry geometry) {
@@ -192,20 +192,20 @@ public class Functions {
         return JTS.transform(geometry, transform);
     }
 
-    private static CoordinateReferenceSystem parseCRSString(String CRSString) throws FactoryException {
+    private static CoordinateReferenceSystem parseCRSString(String CRSString)
+            throws FactoryException
+    {
         try {
-            return CRS.parseWKT(CRSString);
+            return CRS.decode(CRSString);
         }
-        catch (FactoryException ex1) {
+        catch (NoSuchAuthorityCodeException e) {
             try {
-                return CRS.decode(CRSString);
-            } catch (NoSuchAuthorityCodeException ex4) {
-                throw new NoSuchAuthorityCodeException("that Authority code cannot be found", CRSString, CRSString);
-            } catch (FactoryException ex6) {
-                throw new FactoryException("WKT format is illegal");
+                return CRS.parseWKT(CRSString);
+            }
+            catch (FactoryException ex) {
+                throw new FactoryException("First failed to read as a well-known CRS code: \n" + e.getMessage() + "\nThen failed to read as a WKT CRS string: \n" + ex.getMessage());
             }
         }
-
     }
 
     public static Geometry flipCoordinates(Geometry geometry) {
