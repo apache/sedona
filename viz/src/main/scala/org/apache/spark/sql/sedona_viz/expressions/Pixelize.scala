@@ -39,10 +39,10 @@ case class ST_Pixelize(inputExpressions: Seq[Expression])
   override def toString: String = s" **${ST_Pixelize.getClass.getName}**  "
 
   override def eval(input: InternalRow): Any = {
-    val inputGeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[ArrayData])
+    val inputGeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[Array[Byte]])
     val resolutionX = inputExpressions(1).eval(input).asInstanceOf[Integer]
     val resolutionY = inputExpressions(2).eval(input).asInstanceOf[Integer]
-    val boundary = GeometrySerializer.deserialize(inputExpressions(3).eval(input).asInstanceOf[ArrayData]).getEnvelopeInternal
+    val boundary = GeometrySerializer.deserialize(inputExpressions(3).eval(input).asInstanceOf[Array[Byte]]).getEnvelopeInternal
     val reverseCoordinate = false
     val pixels = inputGeometry match {
       case geometry: LineString => {
