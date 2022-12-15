@@ -81,8 +81,8 @@ object st_functions extends DataFrameAPI {
 
   def ST_ConcaveHull(geometry: Column, pctConvex:Double): Column = wrapExpression[ST_ConcaveHull](geometry, pctConvex, false)
   def ST_ConcaveHull(geometry: String, pctConvex:Double): Column = wrapExpression[ST_ConcaveHull](geometry, pctConvex, false)
-  def ST_ConcaveHull(geometry: Column, pctConvex:Double, allow_holes: Boolean): Column = wrapExpression[ST_ConcaveHull](geometry, pctConvex, allow_holes)
-  def ST_ConcaveHull(geometry: String, pctConvex:Double, allow_holes: Boolean): Column = wrapExpression[ST_ConcaveHull](geometry, pctConvex, allow_holes)
+  def ST_ConcaveHull(geometry: Column, pctConvex:Double, allowHoles: Boolean): Column = wrapExpression[ST_ConcaveHull](geometry, pctConvex, allowHoles)
+  def ST_ConcaveHull(geometry: String, pctConvex:Double, allowHoles: Boolean): Column = wrapExpression[ST_ConcaveHull](geometry, pctConvex, allowHoles)
 
   def ST_ConvexHull(geometry: Column): Column = wrapExpression[ST_ConvexHull](geometry)
   def ST_ConvexHull(geometry: String): Column = wrapExpression[ST_ConvexHull](geometry)
