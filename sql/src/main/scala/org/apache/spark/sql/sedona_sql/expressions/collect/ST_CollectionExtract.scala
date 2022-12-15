@@ -63,7 +63,7 @@ case class ST_CollectionExtract(inputExpressions: Seq[Expression]) extends Expre
 
   override def nullable: Boolean = true
 
-  def nullSafeEval(geometry: Geometry, geomType: GeomTypeVal): GenericArrayData = {
+  def nullSafeEval(geometry: Geometry, geomType: GeomTypeVal): Array[Byte] = {
     val geometries : util.ArrayList[Geometry] = new util.ArrayList[Geometry]()
     filterGeometry(geometries, geometry, geomType);
 

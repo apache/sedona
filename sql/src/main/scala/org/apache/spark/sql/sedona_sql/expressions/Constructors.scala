@@ -57,7 +57,7 @@ case class ST_PointFromText(inputExpressions: Seq[Expression])
     var fileDataSplitter = FileDataSplitter.getFileDataSplitter(geomFormat)
     var formatMapper = new FormatMapper(fileDataSplitter, false, GeometryType.POINT)
     var geometry = formatMapper.readGeometry(geomString)
-    new GenericArrayData(GeometrySerializer.serialize(geometry))
+    GeometrySerializer.serialize(geometry)
   }
 
   override def dataType: DataType = GeometryUDT
@@ -90,7 +90,7 @@ case class ST_PolygonFromText(inputExpressions: Seq[Expression])
     var fileDataSplitter = FileDataSplitter.getFileDataSplitter(geomFormat)
     var formatMapper = new FormatMapper(fileDataSplitter, false, GeometryType.POLYGON)
     var geometry = formatMapper.readGeometry(geomString)
-    new GenericArrayData(GeometrySerializer.serialize(geometry))
+    GeometrySerializer.serialize(geometry)
   }
 
   override def dataType: DataType = GeometryUDT
@@ -123,7 +123,7 @@ case class ST_LineFromText(inputExpressions: Seq[Expression])
     var formatMapper = new FormatMapper(fileDataSplitter, false)
     var geometry = formatMapper.readGeometry(lineString)
     if(geometry.getGeometryType.contains("LineString")) {
-      new GenericArrayData(GeometrySerializer.serialize(geometry))
+      GeometrySerializer.serialize(geometry)
     } else {
       null
     }
@@ -160,7 +160,7 @@ case class ST_LineStringFromText(inputExpressions: Seq[Expression])
     var formatMapper = new FormatMapper(fileDataSplitter, false, GeometryType.LINESTRING)
     var geometry = formatMapper.readGeometry(geomString)
 
-    new GenericArrayData(GeometrySerializer.serialize(geometry))
+    GeometrySerializer.serialize(geometry)
   }
 
   override def dataType: DataType = GeometryUDT
@@ -265,7 +265,7 @@ case class ST_GeomFromGeoJSON(inputExpressions: Seq[Expression])
     if (inputExpressions.length > 1) {
       geometry.setUserData(generateUserData(minInputLength, inputExpressions, inputRow))
     }
-    new GenericArrayData(GeometrySerializer.serialize(geometry))
+    GeometrySerializer.serialize(geometry)
   }
 
   override def dataType: DataType = GeometryUDT
@@ -296,7 +296,7 @@ case class ST_Point(inputExpressions: Seq[Expression])
     }
     val geometryFactory = new GeometryFactory()
     val geometry = geometryFactory.createPoint(coord)
-    new GenericArrayData(GeometrySerializer.serialize(geometry))
+    GeometrySerializer.serialize(geometry)
   }
 
   override def dataType: DataType = GeometryUDT
@@ -335,7 +335,7 @@ case class ST_PolygonFromEnvelope(inputExpressions: Seq[Expression])
     coordinates(4) = coordinates(0)
     val geometryFactory = new GeometryFactory()
     val polygon = geometryFactory.createPolygon(coordinates)
-    new GenericArrayData(GeometrySerializer.serialize(polygon))
+    GeometrySerializer.serialize(polygon)
   }
 
   override def dataType: DataType = GeometryUDT
