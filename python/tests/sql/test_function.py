@@ -63,7 +63,7 @@ class TestPredicateJoin(TestBase):
         polygon_df.createOrReplaceTempView("polygondf")
         polygon_df.show()
 
-        function_df = self.spark.sql("select ST_ConcaveHull(polygondf.countyshape) from polygondf")
+        function_df = self.spark.sql("select ST_ConcaveHull(polygondf.countyshape, 1) from polygondf")
         function_df.show()
 
     def test_st_convex_hull(self):

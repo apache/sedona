@@ -99,7 +99,7 @@ case class ST_3DDistance(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return the convex hull of a Geometry.
+ * Return the concave hull of a Geometry.
  *
  * @param inputExpressions
  */

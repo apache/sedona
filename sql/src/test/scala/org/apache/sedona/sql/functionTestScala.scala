@@ -48,7 +48,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       polygonWktDf.createOrReplaceTempView("polygontable")
       var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      var functionDf = sparkSession.sql("select ST_ConcaveHull(polygondf.countyshape, 0, true) from polygondf")
+      var functionDf = sparkSession.sql("select ST_ConcaveHull(polygondf.countyshape, 1, true) from polygondf")
       assert(functionDf.count() > 0);
     }
 

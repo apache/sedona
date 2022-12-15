@@ -152,7 +152,7 @@ class dataFrameAPITestScala extends TestBaseScala {
     // functions
       it("Passed ST_ConcaveHull"){
         val baseDF = sparkSession.sql("SELECT ST_GeomFromWKT('Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))') as mline")
-        val df = baseDF.select(ST_ConcaveHull("mline", 0, true))
+        val df = baseDF.select(ST_ConcaveHull("mline", 1, true))
         val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
         assert(actualResult == "POLYGON ((1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0, 1 2))")
       }
