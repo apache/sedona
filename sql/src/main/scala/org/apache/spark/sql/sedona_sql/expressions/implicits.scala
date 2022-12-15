@@ -30,8 +30,8 @@ object implicits {
 
   implicit class InputExpressionEnhancer(inputExpression: Expression) {
     def toGeometry(input: InternalRow): Geometry = {
-      inputExpression.eval(input).asInstanceOf[ArrayData] match {
-        case arrData: ArrayData => GeometrySerializer.deserialize(arrData)
+      inputExpression.eval(input).asInstanceOf[Array[Byte]] match {
+        case binary: Array[Byte] => GeometrySerializer.deserialize(binary)
         case _ => null
       }
     }
@@ -63,10 +63,10 @@ object implicits {
     }
   }
 
-  implicit class ArrayDataEnhancer(arrayData: ArrayData) {
+  implicit class ArrayDataEnhancer(arrayData: Array[Byte]) {
     def toGeometry: Geometry = {
       arrayData match {
-        case arrData: ArrayData => GeometrySerializer.deserialize(arrData)
+        case binary: Array[Byte] => GeometrySerializer.deserialize(binary)
         case _ => null
       }
     }
@@ -75,8 +75,7 @@ object implicits {
   implicit class GeometryEnhancer(geom: Geometry) {
     private val geometryFactory = new GeometryFactory()
 
-    def toGenericArrayData: GenericArrayData =
-      new GenericArrayData(GeometrySerializer.serialize(geom))
+    def toGenericArrayData: Array[Byte] = GeometrySerializer.serialize(geom)
 
     def getPoints: Array[Point] =
       geom.getCoordinates.map(coordinate => geometryFactory.createPoint(coordinate))

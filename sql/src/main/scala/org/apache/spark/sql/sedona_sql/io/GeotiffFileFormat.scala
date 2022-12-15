@@ -205,7 +205,7 @@ private class GeotiffFileWriter(savePath: String,
       val envGeom = wktReader.read(tiffGeometry.toString).asInstanceOf[Polygon]
       coordinateList = envGeom.getCoordinates()
     } else {
-      val envGeom = GeometrySerializer.deserialize(tiffGeometry.asInstanceOf[ArrayData])
+      val envGeom = GeometrySerializer.deserialize(tiffGeometry.asInstanceOf[Array[Byte]])
       coordinateList = envGeom.getCoordinates()
     }
     val referencedEnvelope = new ReferencedEnvelope(coordinateList(0).x, coordinateList(2).x, coordinateList(0).y, coordinateList(2).y, crs)

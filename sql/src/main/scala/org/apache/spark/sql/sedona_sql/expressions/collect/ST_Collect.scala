@@ -45,7 +45,7 @@ case class ST_Collect(inputExpressions: Seq[Expression])
             val data = firstElement.eval(input).asInstanceOf[ArrayData]
             val numElements = data.numElements()
             val geomElements = (0 until numElements)
-              .map(element => data.getArray(element))
+              .map(element => data.getBinary(element))
               .filter(_ != null)
               .map(_.toGeometry)
 

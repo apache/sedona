@@ -27,21 +27,20 @@ import org.locationtech.jts.geom.Geometry
 
 
 class GeometryUDT extends UserDefinedType[Geometry] {
-  override def sqlType: DataType = ArrayType(ByteType, containsNull = false)
+  override def sqlType: DataType = BinaryType
 
   override def pyUDT: String = "sedona.sql.types.GeometryType"
 
   override def userClass: Class[Geometry] = classOf[Geometry]
 
-  override def serialize(obj: Geometry): GenericArrayData =
-    new GenericArrayData(GeometrySerializer.serialize(obj))
+  override def serialize(obj: Geometry): Array[Byte] = GeometrySerializer.serialize(obj)
 
   override def deserialize(datum: Any): Geometry = {
     datum match {
-      case values: ArrayData =>
-        GeometrySerializer.deserialize(values)
+      case value: Array[Byte] => GeometrySerializer.deserialize(value)
     }
   }
+
 
   override private[sql] def jsonValue: JValue = {
     super.jsonValue mapField {
