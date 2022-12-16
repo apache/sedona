@@ -105,7 +105,8 @@ case class ST_3DDistance(inputExpressions: Seq[Expression])
  */
 case class ST_ConcaveHull(inputExpressions: Seq[Expression])
   extends InferredTernaryExpression(Functions.concaveHull) with FoldableExpression {
-  override protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
     copy(inputExpressions = newChildren)
   }
 }
