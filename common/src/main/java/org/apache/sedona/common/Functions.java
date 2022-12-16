@@ -435,6 +435,14 @@ public class Functions {
         return GEOMETRY_FACTORY.createLineString(coordinates.toArray(new Coordinate[0]));
     }
 
+    public static Geometry concaveHull(Geometry geometry, double pct_convex, boolean allow_holes){
+        ConcaveHull concave_hull = new ConcaveHull(geometry);
+        concave_hull.setMaximumEdgeLengthRatio(pct_convex);
+        concave_hull.setHolesAllowed(allow_holes);
+
+        return concave_hull.getHull();
+    }
+
     public static Geometry convexHull(Geometry geometry) {
         return geometry.convexHull();
     }
