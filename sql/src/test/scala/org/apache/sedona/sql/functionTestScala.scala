@@ -43,6 +43,15 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
   describe("Sedona-SQL Function Test") {
 
+    it("Passed ST_ConcaveHull") {
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      var functionDf = sparkSession.sql("select ST_ConcaveHull(polygondf.countyshape, 1, true) from polygondf")
+      assert(functionDf.count() > 0);
+    }
+
     it("Passed ST_ConvexHull") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
@@ -1624,6 +1633,10 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     functionDf = sparkSession.sql("select ST_Distance(null, null)")
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_3DDistance(null, null)")
+    assert(functionDf.first().get(0) == null)
+    functionDf = sparkSession.sql("select ST_ConcaveHull(null, 1, true)")
+    assert(functionDf.first().get(0) == null)
+    functionDf = sparkSession.sql("select ST_ConcaveHull(null, 1)")
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_ConvexHull(null)")
     assert(functionDf.first().get(0) == null)

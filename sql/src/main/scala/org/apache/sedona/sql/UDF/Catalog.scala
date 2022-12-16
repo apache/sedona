@@ -56,6 +56,7 @@ object Catalog {
     function[ST_Disjoint](),
     function[ST_Distance](),
     function[ST_3DDistance](),
+    function[ST_ConcaveHull](false),
     function[ST_ConvexHull](),
     function[ST_NPoints](),
     function[ST_NDims](),
