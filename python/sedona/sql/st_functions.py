@@ -328,7 +328,7 @@ def ST_CollectionExtract(collection: ColumnOrName, geom_type: Optional[Union[Col
     :type collection: ColumnOrName
     :param geom_type: Type of geometry to extract where 1 is point, 2 is linestring, and 3 is polygon, if None then the highest dimension geometry is extracted, defaults to None
     :type geom_type: Optional[Union[ColumnOrName, int]], optional
-    :return: Multi-geometry column coST_Centroidntaining all geometry from collection of the selected type.
+    :return: Multi-geometry column containing all geometry from collection of the selected type.
     :rtype: Column
     """
     args = (collection,) if geom_type is None else (collection, geom_type)
