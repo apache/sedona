@@ -41,7 +41,7 @@ __all__ = [
     "ST_Centroid",
     "ST_Collect",
     "ST_CollectionExtract",
-    "ST_ConcaveHull",
+    "ST_ConcaveHull"
     "ST_ConvexHull",
     "ST_Difference",
     "ST_Distance",
@@ -336,20 +336,21 @@ def ST_CollectionExtract(collection: ColumnOrName, geom_type: Optional[Union[Col
 
 
 @validate_argument_types
-def ST_ConcaveHull(geometry: ColumnOrName, pctConvex: Union[ColumnOrName, float], allowHoles: Optional[Union[ColumnOrName, bool]] = None) -> Column:
-    """Generate the cancave hull of a geometry column.
+def ST_ConcaveHull(geometry: ColumnOrName, pct_convex: , allow_holes: Optional[Union[ColumnOrName, bool]] = None) -> Column:
+    """Generate the concave hull of a geometry column based on Delaunay Triangulation method.
 
-    :param geometry: Geometry column to generate a cancave hull for.
+    :param geometry: Geometry column to generate a convex hull for.
     :type geometry: ColumnOrName
-    :param pctConvex: value between 0 and 1, controls the concaveness of the computed hull.
-    :type pctConvex: Union[ColumnOrName, float]
-    :param allowHoles: The computed hull will not contain holes unless allowHoles is specified as true
-    :type allowHoles: Optional[Union[ColumnOrName, bool]], optional
-    :return: Concave hull of geometry as a geometry column.
+    :param pct_convex: Controls the concaveness of the computed hull. A value of 1 produces the convex hull; a value of 0 produces the original polygons.
+    :type pct_convex: float
+    :param allow_holes: The returned polygon will not contain holes unless the optional allow_holes argument is specified as true
+    :type allow_holes: Optional[Union[ColumnOrName, bool]], optional
+    :return: Convex hull of geometry as a geometry column.
     :rtype: Column
     """
-    args = (geometry, pctConvex) if allowHoles is None else (geometry, pctConvex, allowHoles)
+    args = (geometry, pct_convex) if allow_holes is None else (geometry, pct_convex, allow_holes)
     return _call_st_function("ST_ConcaveHull", args)
+
 
 @validate_argument_types
 def ST_ConvexHull(geometry: ColumnOrName) -> Column:

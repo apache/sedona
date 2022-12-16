@@ -19,7 +19,6 @@ import org.apache.sedona.common.utils.GeometryGeoHashEncoder;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
-import org.locationtech.jts.algorithm.hull.ConcaveHull;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -436,10 +435,10 @@ public class Functions {
         return GEOMETRY_FACTORY.createLineString(coordinates.toArray(new Coordinate[0]));
     }
 
-    public static Geometry concaveHull(Geometry geometry, double pctConvex, boolean allowHoles){
+    public static Geometry concaveHull(Geometry geometry, double pct_convex, boolean allow_holes){
         ConcaveHull concave_hull = new ConcaveHull(geometry);
-        concave_hull.setMaximumEdgeLengthRatio(pctConvex);
-        concave_hull.setHolesAllowed(allowHoles);
+        concave_hull.setMaximumEdgeLengthRatio(pct_convex);
+        concave_hull.setHolesAllowed(allow_holes);
 
         return concave_hull.getHull();
     }

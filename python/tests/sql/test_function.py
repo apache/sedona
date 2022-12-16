@@ -50,22 +50,6 @@ class TestPredicateJoin(TestBase):
         ]
     )
 
-    def test_st_concave_hull(self):
-        polygon_wkt_df = self.spark.read.format("csv"). \
-            option("delimiter", "\t"). \
-            option("header", "false"). \
-            load(mixed_wkt_geometry_input_location)
-
-        polygon_wkt_df.createOrReplaceTempView("polygontable")
-        polygon_wkt_df.show()
-
-        polygon_df = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-        polygon_df.createOrReplaceTempView("polygondf")
-        polygon_df.show()
-
-        function_df = self.spark.sql("select ST_ConcaveHull(polygondf.countyshape, 1.0) from polygondf")
-        function_df.show()
-
     def test_st_convex_hull(self):
         polygon_wkt_df = self.spark.read.format("csv"). \
             option("delimiter", "\t"). \

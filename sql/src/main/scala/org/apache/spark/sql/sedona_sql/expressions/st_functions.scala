@@ -79,10 +79,10 @@ object st_functions extends DataFrameAPI {
   def ST_CollectionExtract(collection: Column, geomType: Column): Column = wrapExpression[ST_CollectionExtract](collection, geomType)
   def ST_CollectionExtract(collection: String, geomType: Int): Column = wrapExpression[ST_CollectionExtract](collection, geomType)
 
-  def ST_ConcaveHull(geometry: Column, pctConvex:Column): Column = wrapExpression[ST_ConcaveHull](geometry, pctConvex, false)
-  def ST_ConcaveHull(geometry: String, pctConvex:Double): Column = wrapExpression[ST_ConcaveHull](geometry, pctConvex, false)
-  def ST_ConcaveHull(geometry: Column, pctConvex:Column, allowHoles: Column): Column = wrapExpression[ST_ConcaveHull](geometry, pctConvex, allowHoles)
-  def ST_ConcaveHull(geometry: String, pctConvex:Double, allowHoles: Boolean): Column = wrapExpression[ST_ConcaveHull](geometry, pctConvex, allowHoles)
+  def ST_ConcaveHull(geometry: Column, pct_convex:Double): Column = wrapExpression[ST_ConcaveHull](geometry, pct_convex, false)
+  def ST_ConcaveHull(geometry: String, pct_convex:Double): Column = wrapExpression[ST_ConcaveHull](geometry, pct_convex, false)
+  def ST_ConcaveHull(geometry: Column, pct_convex:Double, allow_holes: Boolean): Column = wrapExpression[ST_ConcaveHull](geometry, pct_convex, allow_holes)
+  def ST_ConcaveHull(geometry: String, pct_convex:Double, allow_holes: Boolean): Column = wrapExpression[ST_ConcaveHull](geometry, pct_convex, allow_holes)
 
   def ST_ConvexHull(geometry: Column): Column = wrapExpression[ST_ConvexHull](geometry)
   def ST_ConvexHull(geometry: String): Column = wrapExpression[ST_ConvexHull](geometry)
