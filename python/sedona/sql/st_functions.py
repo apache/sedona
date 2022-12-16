@@ -342,9 +342,9 @@ def ST_ConcaveHull(geometry: ColumnOrName, pctConvex: Union[ColumnOrName, float]
     :param geometry: Geometry column to generate a cancave hull for.
     :type geometry: ColumnOrName
     :param pctConvex: value between 0 and 1, controls the concaveness of the computed hull.
-    :type pctConvex: Union[ColumnOrName, float]: ColumnOrName
+    :type pctConvex: Union[ColumnOrName, float]
     :param allowHoles: The computed hull will not contain holes unless allowHoles is specified as true
-    :type allowHoles: Optional[Union[ColumnOrName, bool]]: ColumnOrName
+    :type allowHoles: Optional[Union[ColumnOrName, bool]], optional
     :return: Convex hull of geometry as a geometry column.
     :rtype: Column
     """
