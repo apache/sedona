@@ -332,6 +332,22 @@ Result:
 +----------------------------------------------------------------------------+
 ```
 
+## ST_ConcaveHull
+
+Introduction: Return the Concave Hull of polgyon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true
+
+Format: `ST_ConcaveHull (A:geometry, pctConvex:float)`
+
+Format: `ST_ConcaveHull (A:geometry, pctConvex:float, allowHoles:Boolean)`
+
+Since: `v1.3.1`
+
+Spark SQL example:
+```SQL
+SELECT ST_ConcaveHull(polygondf.countyshape, pctConvex)`
+FROM polygondf
+```
+
 ## ST_ConvexHull
 
 Introduction: Return the Convex Hull of polgyon A
