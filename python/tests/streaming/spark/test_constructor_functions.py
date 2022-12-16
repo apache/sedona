@@ -51,7 +51,7 @@ SEDONA_LISTED_SQL_FUNCTIONS = [
      .with_expected_result(1.0)),
     (SuiteContainer.empty()
      .with_function_name("ST_ConcaveHull")
-     .with_arguments(["ST_GeomFromText('POLYGON ((21 52, 21 53, 22 53, 22 52, 21 52))')", "1"])
+     .with_arguments(["ST_GeomFromText('POLYGON ((21 52, 21 53, 22 53, 22 52, 21 52))')", "1.0"])
      .with_expected_result(1.0)
      .with_transform("ST_AREA")),
     (SuiteContainer.empty()

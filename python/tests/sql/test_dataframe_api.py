@@ -70,7 +70,7 @@ test_configurations = [
     (stf.ST_CollectionExtract, ("geom",), "geom_collection", "", "MULTILINESTRING ((0 0, 1 0))"),
     (stf.ST_CollectionExtract, ("geom", 1), "geom_collection", "", "MULTIPOINT (0 0)"),
     (stf.ST_ConcaveHull, ("geom", 1.0), "triangle_geom", "", "POLYGON ((0 0, 1 1, 1 0, 0 0))"),
-    (stf.ST_ConcaveHull, ("geom", 1.0, True), "triangle_geom", "", "POLYGON ((0 0, 1 1, 1 0, 0 0))"),
+    (stf.ST_ConcaveHull, ("geom", 1.0, True), "triangle_geom", "", "POLYGON ((1 1, 1 0, 0 0, 1 1))"),
     (stf.ST_ConvexHull, ("geom",), "triangle_geom", "", "POLYGON ((0 0, 1 1, 1 0, 0 0))"),
     (stf.ST_Difference, ("a", "b"), "overlapping_polys", "", "POLYGON ((1 0, 0 0, 0 1, 1 1, 1 0))"),
     (stf.ST_Distance, ("a", "b"), "two_points", "", 3.0),

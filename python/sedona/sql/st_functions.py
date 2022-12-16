@@ -328,7 +328,7 @@ def ST_CollectionExtract(collection: ColumnOrName, geom_type: Optional[Union[Col
     :type collection: ColumnOrName
     :param geom_type: Type of geometry to extract where 1 is point, 2 is linestring, and 3 is polygon, if None then the highest dimension geometry is extracted, defaults to None
     :type geom_type: Optional[Union[ColumnOrName, int]], optional
-    :return: Multi-geometry column containing all geometry from collection of the selected type.
+    :return: Multi-geometry column coST_Centroidntaining all geometry from collection of the selected type.
     :rtype: Column
     """
     args = (collection,) if geom_type is None else (collection, geom_type)
@@ -336,7 +336,7 @@ def ST_CollectionExtract(collection: ColumnOrName, geom_type: Optional[Union[Col
 
 
 @validate_argument_types
-def ST_ConcaveHull(geometry: ColumnOrName, pctConvex: Union[ColumnOrName, float], allowHoles: Optional[Union[ColumnOrName, bool]] = False) -> Column:
+def ST_ConcaveHull(geometry: ColumnOrName, pctConvex: Union[ColumnOrName, float], allowHoles: Optional[Union[ColumnOrName, bool]] = None) -> Column:
     """Generate the cancave hull of a geometry column.
 
     :param geometry: Geometry column to generate a cancave hull for.
@@ -345,7 +345,7 @@ def ST_ConcaveHull(geometry: ColumnOrName, pctConvex: Union[ColumnOrName, float]
     :type pctConvex: Union[ColumnOrName, float]
     :param allowHoles: The computed hull will not contain holes unless allowHoles is specified as true
     :type allowHoles: Optional[Union[ColumnOrName, bool]], optional
-    :return: Convex hull of geometry as a geometry column.
+    :return: Concave hull of geometry as a geometry column.
     :rtype: Column
     """
     args = (geometry, pctConvex) if allowHoles is None else (geometry, pctConvex, allowHoles)
