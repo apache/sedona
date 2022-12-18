@@ -340,7 +340,7 @@ Format: `ST_ConcaveHull (A:geometry, pctConvex:float)`
 
 Format: `ST_ConcaveHull (A:geometry, pctConvex:float, allowHoles:Boolean)`
 
-Since: `v1.3.1`
+Since: `v1.3.2`
 
 Spark SQL example:
 ```SQL
