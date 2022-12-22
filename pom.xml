@@ -537,6 +537,7 @@
                 <module>sql</module>
                 <module>viz</module>
                 <module>python-adapter</module>
+                <module>spark-shaded</module>
             </modules>
         </profile>
         <profile>
@@ -559,7 +560,9 @@
                 <module>sql</module>
                 <module>viz</module>
                 <module>python-adapter</module>
+                <module>spark-shaded</module>
                 <module>flink</module>
+                <module>flink-shaded</module>
             </modules>
         </profile>
     </profiles>
