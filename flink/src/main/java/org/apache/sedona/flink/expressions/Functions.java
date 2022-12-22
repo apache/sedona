@@ -55,6 +55,22 @@ public class Functions {
         }
     }
 
+    public static class ST_ConcaveHull extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Double") Double pctConvex) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.concaveHull(geom, pctConvex, false);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Double") Double pctConvex, @DataTypeHint("Boolean") Boolean allowHoles) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.concaveHull(geom, pctConvex, allowHoles);
+        }
+    }
+
     public static class ST_Envelope extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {

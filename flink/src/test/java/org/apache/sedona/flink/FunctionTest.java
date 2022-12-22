@@ -73,6 +73,19 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testConcaveHull() {
+        Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))') as geom");
+        Table concaveHullPolygonTable = polygonTable.select(call(Functions.ST_ConcaveHull.class.getSimpleName(), $("geom"), 1.0, true));
+        Geometry result = (Geometry) first(concaveHullPolygonTable).getField(0);
+        assertEquals("POLYGON ((1 2, 2 2, 3 2, 5 0, 4 0, 1 0, 0 0, 1 2))", result.toString());
+
+        Table polygonTable2 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))') as geom");
+        Table concaveHullPolygonTable2 = polygonTable2.select(call(Functions.ST_ConcaveHull.class.getSimpleName(), $("geom"), 1.0));
+        Geometry result2 = (Geometry) first(concaveHullPolygonTable2).getField(0);
+        assertEquals("POLYGON ((0 0, 1 1, 1 0, 0 0))", result2.toString());
+    }
+
+    @Test
     public void testEnvelope() {
         Table linestringTable = createLineStringTable(1);
         linestringTable = linestringTable.select(call(Functions.ST_Envelope.class.getSimpleName(), $(linestringColNames[0])));

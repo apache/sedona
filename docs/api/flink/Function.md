@@ -223,6 +223,27 @@ Input: `MULTILINESTRING((0 0, 10 0, 10 10, 0 10, 0 0),(10 10, 20 10, 20 20, 10 2
 
 Output: `MULTIPOLYGON(((0 0,0 10,10 10,10 0,0 0)),((10 10,10 20,20 20,20 10,10 10)))`
 
+## ST_ConcaveHull
+
+Introduction: Return the Concave Hull of polgyon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true
+
+Format: `ST_ConcaveHull (A:geometry, pctConvex:float)`
+
+Format: `ST_ConcaveHull (A:geometry, pctConvex:float, allowHoles:Boolean)`
+
+Since: `v1.3.2`
+
+Example:
+
+```SQL
+SELECT ST_ConcaveHull(polygondf.countyshape, pctConvex)`
+FROM polygondf
+```
+
+Input: `Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))`
+
+Output: `POLYGON ((1 2, 2 2, 3 2, 5 0, 4 0, 1 0, 0 0, 1 2))`
+
 ## ST_Distance
 
 Introduction: Return the Euclidean distance between A and B

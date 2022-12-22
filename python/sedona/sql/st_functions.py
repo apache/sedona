@@ -41,6 +41,7 @@ __all__ = [
     "ST_Centroid",
     "ST_Collect",
     "ST_CollectionExtract",
+    "ST_ConcaveHull",
     "ST_ConvexHull",
     "ST_Difference",
     "ST_Distance",
@@ -333,6 +334,22 @@ def ST_CollectionExtract(collection: ColumnOrName, geom_type: Optional[Union[Col
     args = (collection,) if geom_type is None else (collection, geom_type)
     return _call_st_function("ST_CollectionExtract", args)
 
+
+@validate_argument_types
+def ST_ConcaveHull(geometry: ColumnOrName, pctConvex: Union[ColumnOrName, float], allowHoles: Optional[Union[ColumnOrName, bool]] = None) -> Column:
+    """Generate the cancave hull of a geometry column.
+
+    :param geometry: Geometry column to generate a cancave hull for.
+    :type geometry: ColumnOrName
+    :param pctConvex: value between 0 and 1, controls the concaveness of the computed hull.
+    :type pctConvex: Union[ColumnOrName, float]
+    :param allowHoles: The computed hull will not contain holes unless allowHoles is specified as true
+    :type allowHoles: Optional[Union[ColumnOrName, bool]], optional
+    :return: Concave hull of geometry as a geometry column.
+    :rtype: Column
+    """
+    args = (geometry, pctConvex) if allowHoles is None else (geometry, pctConvex, allowHoles)
+    return _call_st_function("ST_ConcaveHull", args)
 
 @validate_argument_types
 def ST_ConvexHull(geometry: ColumnOrName) -> Column:
