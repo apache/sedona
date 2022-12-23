@@ -3887,10 +3887,60 @@ rm apache-sedona-1.3.1-incubating-bin.tar.gz.asc
 rm apache-sedona-1.3.1-incubating-bin.tar.gz.sha512
 
 <span class="nb">echo</span> <span class="s2">&quot;Re-staging releases to https://repository.apache.org&quot;</span>
+
 <span class="c1"># For Spark 3.0 and Scala 2.12</span>
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/incubator-sedona.git -Dtag<span class="o">=</span>sedona-1.3.1-incubating-rc1 -DautoVersionSubmodules<span class="o">=</span><span class="nb">true</span> -Dresume<span class="o">=</span><span class="nb">false</span> -Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests&quot;</span>
+
+git pull
+
+git checkout -b sedona-1.3.1-incubating-rc1 sedona-1.3.1-incubating-rc1
+
+mvn versions:set -DnewVersion<span class="o">=</span><span class="m">1</span>.3.1-incubating-SNAPSHOT
+
+git add -A
+
+git commit -m <span class="s2">&quot;tmp SNAPSHOT pom&quot;</span>
+
+mvn clean release:prepare -DautoVersionSubmodules<span class="o">=</span><span class="nb">true</span> -DdryRun<span class="o">=</span><span class="nb">true</span> -Dresume<span class="o">=</span><span class="nb">false</span> -Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests&quot;</span> -Dtag<span class="o">=</span>sedona-1.3.1-incubating-rc1 -DreleaseVersion<span class="o">=</span><span class="m">1</span>.3.1-incubating -DdevelopmentVersion<span class="o">={{</span> no such element: dict object<span class="o">[</span><span class="s1">&#39;next_version&#39;</span><span class="o">]</span> <span class="o">}}</span>
+
+mvn versions:set -DnewVersion<span class="o">=</span><span class="m">1</span>.3.1-incubating
+
+git add -A
+
+git commit -m <span class="s2">&quot;revert back to the correct pom&quot;</span>
+
+mvn clean release:perform -DautoVersionSubmodules<span class="o">=</span><span class="nb">true</span> -Dresume<span class="o">=</span><span class="nb">false</span> -Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests&quot;</span>
+
+rm -f release.*
+rm -f pom.xml.*
+
 <span class="c1"># For Spark 3.0 and Scala 2.13</span>
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/incubator-sedona.git -Dtag<span class="o">=</span>sedona-1.3.1-incubating-rc1 -DautoVersionSubmodules<span class="o">=</span><span class="nb">true</span> -Dresume<span class="o">=</span><span class="nb">false</span> -Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dscala=2.13&quot;</span>
+
+mvn versions:set -DnewVersion<span class="o">=</span><span class="m">1</span>.3.1-incubating-SNAPSHOT
+
+git add -A
+
+git commit -m <span class="s2">&quot;tmp SNAPSHOT pom&quot;</span>
+
+mvn clean release:prepare -DautoVersionSubmodules<span class="o">=</span><span class="nb">true</span> -DdryRun<span class="o">=</span><span class="nb">true</span> -Dresume<span class="o">=</span><span class="nb">false</span> -Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dscala=2.13&quot;</span> -Dtag<span class="o">=</span>sedona-1.3.1-incubating-rc1 -DreleaseVersion<span class="o">=</span><span class="m">1</span>.3.1-incubating -DdevelopmentVersion<span class="o">={{</span> no such element: dict object<span class="o">[</span><span class="s1">&#39;next_version&#39;</span><span class="o">]</span> <span class="o">}}</span>
+
+mvn versions:set -DnewVersion<span class="o">=</span><span class="m">1</span>.3.1-incubating
+
+git add -A
+
+git commit -m <span class="s2">&quot;revert back to the correct pom&quot;</span>
+
+mvn clean release:perform -DautoVersionSubmodules<span class="o">=</span><span class="nb">true</span> -Dresume<span class="o">=</span><span class="nb">false</span> -Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dscala=2.13&quot;</span>
+
+rm -f release.*
+rm -f pom.xml.*
+
+git add -A
+
+git commit -m <span class="s2">&quot;cleanup the branch&quot;</span>
+
+git checkout master
+
+git branch -d sedona-1.3.1-incubating-rc1
 </code></pre></div>
 
 <h3 id="fix-signature-issues">Fix signature issues<a class="headerlink" href="#fix-signature-issues" title="Permanent link">&para;</a></h3>
@@ -3984,7 +4034,7 @@ Rscript generate-docs.R
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">December 2, 2022 01:00:56</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">December 23, 2022 10:16:55</span>
       
     
   </small>
