@@ -1694,15 +1694,6 @@
       
         <li class="md-nav__item">
   
-  <a href="#st_concavehull" class="md-nav__link">
-    ST_ConcaveHull
-  </a>  
-  
-  
-</li>
-      
-        <li class="md-nav__item">
-  
   <a href="#st_convexhull" class="md-nav__link">
     ST_ConvexHull
   </a>  
@@ -3860,15 +3851,6 @@
       
         <li class="md-nav__item">
   
-  <a href="#st_concavehull" class="md-nav__link">
-    ST_ConcaveHull
-  </a>  
-  
-  
-</li>
-      
-        <li class="md-nav__item">
-  
   <a href="#st_convexhull" class="md-nav__link">
     ST_ConvexHull
   </a>  
@@ -4632,15 +4614,6 @@ If the geometry is lacking SRID a WKT format is produced.
 +----------------------------------------------------------------------------+
 </code></pre></div>
 
-<h2 id="st_concavehull">ST_ConcaveHull<a class="headerlink" href="#st_concavehull" title="Permanent link">&para;</a></h2>
-<p>Introduction: Return the Concave Hull of polgyon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true</p>
-<p>Format: <code>ST_ConcaveHull (A:geometry, pctConvex:float)</code></p>
-<p>Format: <code>ST_ConcaveHull (A:geometry, pctConvex:float, allowHoles:Boolean)</code></p>
-<p>Since: <code>v1.3.2</code></p>
-<p>Spark SQL example:
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_ConcaveHull</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">,</span><span class="w"> </span><span class="n">pctConvex</span><span class="p">)</span><span class="o">`</span><span class="w"></span>
-<span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span><span class="w"></span>
-</code></pre></div></p>
 <h2 id="st_convexhull">ST_ConvexHull<a class="headerlink" href="#st_convexhull" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the Convex Hull of polgyon A</p>
 <p>Format: <code>ST_ConvexHull (A:geometry)</code></p>
@@ -5380,7 +5353,7 @@ For SourceCRS and TargetCRS, WKT format is also available since v1.3.1.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">December 22, 2022 07:16:10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">December 3, 2022 19:27:54</span>
       
     
   </small>
