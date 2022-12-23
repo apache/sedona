@@ -76,7 +76,7 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-  You're not viewing the latest version.
+  You're not viewing the latest stable version.
   <a href="../../.."> 
     <strong>Click here to go to latest.</strong>
   </a>
@@ -3116,7 +3116,7 @@ python3 setup.py install
 </code></pre></div>
 
 <h3 id="prepare-python-adapter-jar">Prepare python-adapter jar<a class="headerlink" href="#prepare-python-adapter-jar" title="Permanent link">&para;</a></h3>
-<p>Sedona Python needs one additional jar file called <code>sedona-python-adapter</code> to work properly. Please make sure you use the correct version for Spark and Scala. For Spark 3.0 + Scala 2.12, it is called <code>sedona-python-adapter-3.0_2.12-1.3.0-incubating.jar</code></p>
+<p>Sedona Python needs one additional jar file called <code>sedona-python-adapter</code> to work properly. Please make sure you use the correct version for Spark and Scala. For Spark 3.0 + Scala 2.12, it is called <code>sedona-python-adapter-3.0_2.12-1.3.1-incubating.jar</code></p>
 <p>You can get it using one of the following methods:</p>
 <ol>
 <li>
@@ -3132,7 +3132,7 @@ python3 setup.py install
     <span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.serializer&quot;</span><span class="p">,</span> <span class="n">KryoSerializer</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span><span class="o">.</span> \
     <span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.kryo.registrator&quot;</span><span class="p">,</span> <span class="n">SedonaKryoRegistrator</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span><span class="o">.</span> \
     <span class="n">config</span><span class="p">(</span><span class="s1">&#39;spark.jars.packages&#39;</span><span class="p">,</span>
-           <span class="s1">&#39;org.apache.sedona:sedona-python-adapter-3.0_2.12:1.3.0-incubating,&#39;</span>
+           <span class="s1">&#39;org.apache.sedona:sedona-python-adapter-3.0_2.12:1.3.1-incubating,&#39;</span>
            <span class="s1">&#39;org.datasyslab:geotools-wrapper:1.3.0-27.2&#39;</span><span class="p">)</span><span class="o">.</span> \
     <span class="n">getOrCreate</span><span class="p">()</span>
 </code></pre></div></li>
