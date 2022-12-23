@@ -3260,10 +3260,13 @@ pipenv run pytest tests
 pip install mkdocs-material
 pip install mkdocs-macros-plugin
 pip install mkdocs-git-revision-date-localized-plugin
+pip install mike
 </code></pre></div>
 
 <p>After installing MkDocs and MkDocs-Material, run the command in Sedona root folder:</p>
-<div class="highlight"><pre><span></span><code>mkdocs serve
+<div class="highlight"><pre><span></span><code>mike deploy --update-aliases current-snapshot latest
+mike set-default latest
+mike serve
 </code></pre></div>
 
   <hr>
