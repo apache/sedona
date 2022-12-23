@@ -501,7 +501,14 @@ You must have the maintainer priviledge of `https://pypi.org/project/apache-sedo
 
 ```bash
 #!/bin/bash
-git clone --shared --branch {{ sedona_create_release.current_git_tag}} https://github.com/apache/incubator-sedona.git apache-sedona-{{ sedona_create_release.current_version }}-src
+
+wget https://github.com/apache/incubator-sedona/archive/refs/tags/{{ sedona_create_release.current_git_tag}}.tar.gz
+tar -xvf {{ sedona_create_release.current_git_tag}}.tar.gz
+mkdir apache-sedona-{{ sedona_create_release.current_version }}-src
+cp -r incubator-sedona-{{ sedona_create_release.current_git_tag}}/* apache-sedona-{{ sedona_create_release.current_version }}-src/
+
+rm -rf incubator-sedona-{{ sedona_create_release.current_git_tag}}
+
 cd apache-sedona-{{ sedona_create_release.current_version }}-src/python && python3 setup.py sdist bdist_wheel && twine upload dist/* && cd ..
 cd zeppelin && npm publish && cd ..
 rm -rf apache-sedona-{{ sedona_create_release.current_version }}-src
