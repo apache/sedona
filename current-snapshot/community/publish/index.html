@@ -3980,7 +3980,14 @@ rm *.asc
 <h2 id="9-release-sedona-python-and-zeppelin">9. Release Sedona Python and Zeppelin<a class="headerlink" href="#9-release-sedona-python-and-zeppelin" title="Permanent link">&para;</a></h2>
 <p>You must have the maintainer priviledge of <code>https://pypi.org/project/apache-sedona/</code> and <code>https://www.npmjs.com/package/apache-sedona</code></p>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
-git clone --shared --branch sedona-1.3.2-incubating-rc1 https://github.com/apache/incubator-sedona.git apache-sedona-1.3.2-incubating-src
+
+wget https://github.com/apache/incubator-sedona/archive/refs/tags/sedona-1.3.2-incubating-rc1.tar.gz
+tar -xvf sedona-1.3.2-incubating-rc1.tar.gz
+mkdir apache-sedona-1.3.2-incubating-src
+cp -r incubator-sedona-sedona-1.3.2-incubating-rc1/* apache-sedona-1.3.2-incubating-src/
+
+rm -rf incubator-sedona-sedona-1.3.2-incubating-rc1
+
 <span class="nb">cd</span> apache-sedona-1.3.2-incubating-src/python <span class="o">&amp;&amp;</span> python3 setup.py sdist bdist_wheel <span class="o">&amp;&amp;</span> twine upload dist/* <span class="o">&amp;&amp;</span> <span class="nb">cd</span> ..
 <span class="nb">cd</span> zeppelin <span class="o">&amp;&amp;</span> npm publish <span class="o">&amp;&amp;</span> <span class="nb">cd</span> ..
 rm -rf apache-sedona-1.3.2-incubating-src
