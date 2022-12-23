@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.39.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.39.1/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiY29vbGJlYXIxMDI3IiwiYSI6ImNqNW9nOG5meTM4Znoyd256czFjZzFvcXIifQ.GupCOF68TTnJIBpe6COAZw';
+var mapStyle = {
+    "version": 8,
+    "name": "Dark",
+    "sources": {
+        "mapbox": {
+            "type": "vector",
+            "url": "mapbox://mapbox.mapbox-streets-v6"
+        },
+        "overlay": {
+            "type": "image",
+            "url": "https://sedona.apache.org/image/heatmapnyc.png",
+            "coordinates": [
+                [-74.25, 40.9],
+                [-73.7, 40.9],
+                [-73.7, 40.5],
+                [-74.25, 40.5]
+            ]
+        }
+    },
+    "sprite": "mapbox://sprites/mapbox/dark-v9",
+    "glyphs": "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
+    "layers": [
+        {
+            "id": "background",
+            "type": "background",
+            "paint": {"background-color": "#111"}
+        },
+        {
+            "id": "water",
+            "source": "mapbox",
+            "source-layer": "water",
+            "type": "fill",
+            "paint": {"fill-color": "#2c2c2c"}
+        },
+        {
+            "id": "boundaries",
+            "source": "mapbox",
+            "source-layer": "admin",
+            "type": "line",
+            "paint": {"line-color": "#797979", "line-dasharray": [2, 2, 6, 2]},
+            "filter": ["all", ["==", "maritime", 0]]
+        },
+        {
+            "id": "overlay",
+            "source": "overlay",
+            "type": "raster",
+            "paint": {"raster-opacity": 0.7}
+        },
+        {
+            "id": "cities",
+            "source": "mapbox",
+            "source-layer": "place_label",
+            "type": "symbol",
+            "layout": {
+                "text-field": "{name_en}",
+                "text-font": ["DIN Offc Pro Bold", "Arial Unicode MS Bold"],
+                "text-size": {"stops": [[4, 9], [6, 12]]}
+            },
+            "paint": {
+                "text-color": "#969696",
+                "text-halo-width": 2,
+                "text-halo-color": "rgba(0, 0, 0, 0.85)"
+            }
+        },
+        {
+            "id": "states",
+            "source": "mapbox",
+            "source-layer": "state_label",
+            "type": "symbol",
+            "layout": {
+                "text-transform": "uppercase",
+                "text-field": "{name_en}",
+                "text-font": ["DIN Offc Pro Bold", "Arial Unicode MS Bold"],
+                "text-letter-spacing": 0.15,
+                "text-max-width": 7,
+                "text-size": {"stops": [[4, 10], [6, 14]]}
+            },
+            "filter": [">=", "area", 80000],
+            "paint": {
+                "text-color": "#969696",
+                "text-halo-width": 2,
+                "text-halo-color": "rgba(0, 0, 0, 0.85)"
+            }
+        }
+    ]
+};
+
+var map = new mapboxgl.Map({
+    container: 'map',
+    maxZoom: 20,
+    minZoom: 4,
+    zoom: 10,
+    center: [-73.889, 40.774],
+    style: mapStyle,
+    hash: false
+});
+
+</script>
+
+</body>
+</html>
