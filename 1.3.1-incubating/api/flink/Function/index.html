@@ -2033,6 +2033,15 @@
       
         <li class="md-nav__item">
   
+  <a href="#st_concavehull" class="md-nav__link">
+    ST_ConcaveHull
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
   <a href="#st_distance" class="md-nav__link">
     ST_Distance
   </a>  
@@ -3597,6 +3606,15 @@
       
         <li class="md-nav__item">
   
+  <a href="#st_concavehull" class="md-nav__link">
+    ST_ConcaveHull
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
   <a href="#st_distance" class="md-nav__link">
     ST_Distance
   </a>  
@@ -4086,6 +4104,18 @@ If the geometry is lacking SRID a WKT format is produced.
 
 <p>Input: <code>MULTILINESTRING((0 0, 10 0, 10 10, 0 10, 0 0),(10 10, 20 10, 20 20, 10 20, 10 10))</code></p>
 <p>Output: <code>MULTIPOLYGON(((0 0,0 10,10 10,10 0,0 0)),((10 10,10 20,20 20,20 10,10 10)))</code></p>
+<h2 id="st_concavehull">ST_ConcaveHull<a class="headerlink" href="#st_concavehull" title="Permanent link">&para;</a></h2>
+<p>Introduction: Return the Concave Hull of polgyon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true</p>
+<p>Format: <code>ST_ConcaveHull (A:geometry, pctConvex:float)</code></p>
+<p>Format: <code>ST_ConcaveHull (A:geometry, pctConvex:float, allowHoles:Boolean)</code></p>
+<p>Since: <code>v1.3.2</code></p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_ConcaveHull</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">,</span><span class="w"> </span><span class="n">pctConvex</span><span class="p">)</span><span class="o">`</span><span class="w"></span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span><span class="w"></span>
+</code></pre></div>
+
+<p>Input: <code>Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))</code></p>
+<p>Output: <code>POLYGON ((1 2, 2 2, 3 2, 5 0, 4 0, 1 0, 0 0, 1 2))</code></p>
 <h2 id="st_distance">ST_Distance<a class="headerlink" href="#st_distance" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the Euclidean distance between A and B</p>
 <p>Format: <code>ST_Distance (A:geometry, B:geometry)</code></p>
@@ -4491,7 +4521,7 @@ For SourceCRS and TargetCRS, WKT format is also available since v1.3.1.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">December 3, 2022 19:27:54</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">December 22, 2022 07:16:10</span>
       
     
   </small>

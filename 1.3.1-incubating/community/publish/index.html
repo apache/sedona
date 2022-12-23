@@ -2341,8 +2341,17 @@
         
           <li class="md-nav__item">
   
-  <a href="#javadoc-and-scaladoc" class="md-nav__link">
-    Javadoc and Scaladoc
+  <a href="#prepare-the-environment-and-doc-folder" class="md-nav__link">
+    Prepare the environment and doc folder
+  </a>  
+  
+  
+</li>
+        
+          <li class="md-nav__item">
+  
+  <a href="#generate-javadoc-and-scaladoc" class="md-nav__link">
+    Generate Javadoc and Scaladoc
   </a>  
   
   
@@ -2352,6 +2361,15 @@
   
   <a href="#compile-r-html-docs" class="md-nav__link">
     Compile R html docs
+  </a>  
+  
+  
+</li>
+        
+          <li class="md-nav__item">
+  
+  <a href="#deploy-the-website" class="md-nav__link">
+    Deploy the website
   </a>  
   
   
@@ -3437,8 +3455,17 @@
         
           <li class="md-nav__item">
   
-  <a href="#javadoc-and-scaladoc" class="md-nav__link">
-    Javadoc and Scaladoc
+  <a href="#prepare-the-environment-and-doc-folder" class="md-nav__link">
+    Prepare the environment and doc folder
+  </a>  
+  
+  
+</li>
+        
+          <li class="md-nav__item">
+  
+  <a href="#generate-javadoc-and-scaladoc" class="md-nav__link">
+    Generate Javadoc and Scaladoc
   </a>  
   
   
@@ -3448,6 +3475,15 @@
   
   <a href="#compile-r-html-docs" class="md-nav__link">
     Compile R html docs
+  </a>  
+  
+  
+</li>
+        
+          <li class="md-nav__item">
+  
+  <a href="#deploy-the-website" class="md-nav__link">
+    Deploy the website
   </a>  
   
   
@@ -3908,25 +3944,19 @@ R CMD check --as-cran apache.sedona_*.tar.gz
 
 <p>Then submit to CRAN using this <a href="https://xmpalantir.wu.ac.at/cransubmit/">web form</a>.</p>
 <h2 id="11-publish-the-doc-website">11. Publish the doc website<a class="headerlink" href="#11-publish-the-doc-website" title="Permanent link">&para;</a></h2>
+<h3 id="prepare-the-environment-and-doc-folder">Prepare the environment and doc folder<a class="headerlink" href="#prepare-the-environment-and-doc-folder" title="Permanent link">&para;</a></h3>
 <ol>
-<li>Add the download link to <a href="/download#versions">Download page</a> and create a GitHub release.</li>
-<li>Run <code>mkdocs build</code> in Sedona root directory. Copy all content in the <code>site</code> folder.</li>
-<li>Check out GitHub incubator-sedona-website <a href="https://github.com/apache/incubator-sedona-website/tree/asf-site">asf-site branch</a></li>
-<li>Use the copied content to replace all content in <code>asf-site</code> branch and upload to GitHub. Then <code>sedona.apache.org</code> will be automatically updated.</li>
-<li>You can also push the content to <code>asf-staging</code> branch. The staging website will be then updated: <code>sedona.staged.apache.org</code></li>
+<li>Check out the 1.3.1-incubating Git tag on your local repo.</li>
+<li>Read <a href="/setup/compile/#compile-the-documentation">Compile documentation website</a> to set up your environment. But don't deploy anything yet.</li>
+<li>Add the download link to <a href="/download#versions">Download page</a>.</li>
+<li>Add the news to <code>docs/index.md</code>.</li>
 </ol>
-<h3 id="javadoc-and-scaladoc">Javadoc and Scaladoc<a class="headerlink" href="#javadoc-and-scaladoc" title="Permanent link">&para;</a></h3>
-<h4>Compile</h4>
-<p>You should first compile the entire docs using <code>mkdocs build</code> to get the <code>site</code> folder.</p>
+<h3 id="generate-javadoc-and-scaladoc">Generate Javadoc and Scaladoc<a class="headerlink" href="#generate-javadoc-and-scaladoc" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Javadoc: Use Intelij IDEA to generate Javadoc for <code>core</code> and <code>viz</code> module</li>
-<li>Scaladoc: Run <code>scaladoc -d site/api/javadoc/sql/ sql/src/main/scala/org/apache/sedona/sql/utils/*.scala</code></li>
+<li>Javadoc: Use Intelij IDEA to generate Javadoc for <code>core</code> and <code>viz</code> module, output them to <code>docs/api/javadoc</code></li>
+<li>Scaladoc: Run <code>scaladoc -d docs/api/javadoc/sql/ sql/src/main/scala/org/apache/sedona/sql/utils/*.scala</code></li>
 </ul>
-<h4>Copy</h4>
-<ol>
-<li>Copy the generated Javadoc (Scaladoc should already be there) to the corresponding folders in <code>site/api/javadoc</code></li>
-<li>Deploy Javadoc and Scaladoc with the project website</li>
-</ol>
+<p>Please do not commit these generated docs to Sedona GitHub.</p>
 <h3 id="compile-r-html-docs">Compile R html docs<a class="headerlink" href="#compile-r-html-docs" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Make sure you install R, tree and curl on your Ubuntu machine. On Mac, just do <code>brew install tree</code>
@@ -3937,6 +3967,16 @@ R CMD check --as-cran apache.sedona_*.tar.gz
 Rscript generate-docs.R
 <span class="nb">cd</span> ./docs/api/rdocs <span class="o">&amp;&amp;</span> tree -H <span class="s1">&#39;.&#39;</span> -L <span class="m">1</span> --noreport --charset utf-8 -o index.html <span class="o">&amp;&amp;</span> <span class="nb">cd</span> ../../../
 </code></pre></div></li>
+</ol>
+<h3 id="deploy-the-website">Deploy the website<a class="headerlink" href="#deploy-the-website" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Run <code>mike deploy --push --update-aliases 1.3.1-incubating latest</code>. This will deploy this website to Sedona main repo's gh-page. But Sedona does not use gh-page for hosting website.</li>
+<li>Check out the master branch.</li>
+<li>Git commit and push your changes in <code>download.md</code> and <code>index.md</code> to master branch. Delete all generated docs.</li>
+<li>Check out the <code>gh-page</code> branch.</li>
+<li>In a separate folder, check out GitHub sedona-website <a href="https://github.com/apache/incubator-sedona-website/tree/asf-site">asf-site branch</a></li>
+<li>Copy all content to in Sedona main repo <code>gh-page</code> branch to Sedona website repo <code>asf-site</code> branch.</li>
+<li>Commit and push the changes to the remote <code>asf-site</code> branch.</li>
 </ol>
 
   <hr>
