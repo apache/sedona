@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Visualize a Sedona spatial RDD using a heatmap.</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body><div class="container">
+
+<table width="100%" summary="page for sedona_render_heatmap {apache.sedona}"><tr><td>sedona_render_heatmap {apache.sedona}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Visualize a Sedona spatial RDD using a heatmap.</h2>
+
+<h3>Description</h3>
+
+<p>Generate a heatmap of geometrical object(s) within a Sedona spatial RDD.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+sedona_render_heatmap(
+  rdd,
+  resolution_x,
+  resolution_y,
+  output_location,
+  output_format = c("png", "gif", "svg"),
+  boundary = NULL,
+  blur_radius = 10L,
+  overlay = NULL,
+  browse = interactive()
+)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>rdd</code></td>
+<td>
+<p>A Sedona spatial RDD.</p>
+</td></tr>
+<tr valign="top"><td><code>resolution_x</code></td>
+<td>
+<p>Resolution on the x-axis.</p>
+</td></tr>
+<tr valign="top"><td><code>resolution_y</code></td>
+<td>
+<p>Resolution on the y-axis.</p>
+</td></tr>
+<tr valign="top"><td><code>output_location</code></td>
+<td>
+<p>Location of the output image. This should be the
+desired path of the image file excluding extension in its file name.</p>
+</td></tr>
+<tr valign="top"><td><code>output_format</code></td>
+<td>
+<p>File format of the output image. Currently &quot;png&quot;,
+&quot;gif&quot;, and &quot;svg&quot; formats are supported (default: &quot;png&quot;).</p>
+</td></tr>
+<tr valign="top"><td><code>boundary</code></td>
+<td>
+<p>Only render data within the given rectangular boundary.
+The 'boundary' parameter can be set to either a numeric vector of
+c(min_x, max_y, min_y, max_y) values, or with a bounding box object
+e.g., new_bounding_box(sc, min_x, max_y, min_y, max_y), or NULL
+(the default). If 'boundary' is NULL, then the minimum bounding box of the
+input spatial RDD will be computed and used as boundary for rendering.</p>
+</td></tr>
+<tr valign="top"><td><code>blur_radius</code></td>
+<td>
+<p>Controls the radius of a Gaussian blur in the resulting
+heatmap.</p>
+</td></tr>
+<tr valign="top"><td><code>overlay</code></td>
+<td>
+<p>A <code>viz_op</code> object containing a raster image to be
+displayed on top of the resulting image.</p>
+</td></tr>
+<tr valign="top"><td><code>browse</code></td>
+<td>
+<p>Whether to open the rendered image in a browser (default:
+interactive()).</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>No return value.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other Sedona visualization routines: 
+<code>sedona_render_choropleth_map()</code>,
+<code>sedona_render_scatter_plot()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+
+library(sparklyr)
+library(apache.sedona)
+
+sc &lt;- spark_connect(master = "spark://HOST:PORT")
+
+if (!inherits(sc, "test_connection")) {
+  input_location &lt;- "/dev/null" # replace it with the path to your input file
+  rdd &lt;- sedona_read_dsv_to_typed_rdd(
+    sc,
+    location = input_location,
+    type = "point"
+  )
+
+  sedona_render_heatmap(
+    rdd,
+    resolution_x = 800,
+    resolution_y = 600,
+    output_location = tempfile("points-"),
+    output_format = "png",
+    boundary = c(-91, -84, 30, 35),
+    blur_radius = 10
+  )
+}
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>apache.sedona</em> version 1.3.0 ]</div>
+</div></body></html>

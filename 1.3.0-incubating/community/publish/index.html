@@ -1,0 +1,4078 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Apache Sedona&trade; (incubating) is a cluster computing system for processing large-scale spatial data. Sedona extends existing cluster computing systems, such as Apache Spark and Apache Flink, with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.">
+      
+      
+      
+      <link rel="icon" href="https://www.apache.org/logos/res/sedona/sedona.png">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-8.5.10">
+    
+    
+      
+        <title>Make a release - Apache Sedona&trade; (incubating)</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.975780f9.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.2505c338.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#ff6e42">
+        
+      
+      
+
+    
+    
+    
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="green">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#make-a-sedona-release" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../../.."> 
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Apache Sedona&amp;trade; (incubating)" class="md-header__button md-logo" aria-label="Apache Sedona&trade; (incubating)" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="m57.7 193 9.4 16.4c8.3 14.5 21.9 25.2 38 29.8l57.9 16.5c17.2 4.9 29 20.6 29 38.5v39.9c0 11 6.2 21 16 25.9s16 14.9 16 25.9v39c0 15.6 14.9 26.9 29.9 22.6 16.1-4.6 28.6-17.5 32.7-33.8l2.8-11.2c4.2-16.9 15.2-31.4 30.3-40l8.1-4.6c15-8.5 24.2-24.5 24.2-41.7v-8.3c0-12.7-5.1-24.9-14.1-33.9l-3.9-3.9c-9-9-21.2-14.1-33.9-14.1H257c-11.1 0-22.1-2.9-31.8-8.4l-34.5-19.7c-4.3-2.5-7.6-6.5-9.2-11.2-3.2-9.6 1.1-20 10.2-24.5l5.9-3c6.6-3.3 14.3-3.9 21.3-1.5l23.2 7.7c8.2 2.7 17.2-.4 21.9-7.5 4.7-7 4.2-16.3-1.2-22.8l-13.6-16.3c-10-12-9.9-29.5.3-41.3l15.7-18.3c8.8-10.3 10.2-25 3.5-36.7l-2.4-4.2c-3.5-.2-6.9-.3-10.4-.3-92.8 0-171.5 60.9-198.2 145zM464 256c0-36.8-9.6-71.4-26.4-101.5L412 164.8c-15.7 6.3-23.8 23.8-18.5 39.8l16.9 50.7c3.5 10.4 12 18.3 22.6 20.9l29.1 7.3c1.2-9 1.8-18.2 1.8-27.5zm48 0c0 141.4-114.6 256-256 256S0 397.4 0 256 114.6 0 256 0s256 114.6 256 256z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Apache Sedona&trade; (incubating)
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Make a release
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7 0-.24-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08Z"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/apache/incubator-sedona" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    apache/incubator-sedona
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../.." class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../setup/overview/" class="md-tabs__link">
+        Setup
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../../download/" class="md-tabs__link">
+      Download
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    
+
+  
+  
+  
+    
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../tutorial/sql/" class="md-tabs__link">
+        Programming Guides
+      </a>
+    </li>
+  
+
+  
+
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    
+
+  
+  
+  
+    
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../api/sql/Overview/" class="md-tabs__link">
+        API Docs
+      </a>
+    </li>
+  
+
+  
+
+  
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../contact/" class="md-tabs__link md-tabs__link--active">
+        Community
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../archive/download/overview/" class="md-tabs__link">
+        GeoSpark Legacy Docs
+      </a>
+    </li>
+  
+
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../asf/asf/" class="md-tabs__link">
+        Apache Software Foundation
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Apache Sedona&amp;trade; (incubating)" class="md-nav__button md-logo" aria-label="Apache Sedona&trade; (incubating)" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="m57.7 193 9.4 16.4c8.3 14.5 21.9 25.2 38 29.8l57.9 16.5c17.2 4.9 29 20.6 29 38.5v39.9c0 11 6.2 21 16 25.9s16 14.9 16 25.9v39c0 15.6 14.9 26.9 29.9 22.6 16.1-4.6 28.6-17.5 32.7-33.8l2.8-11.2c4.2-16.9 15.2-31.4 30.3-40l8.1-4.6c15-8.5 24.2-24.5 24.2-41.7v-8.3c0-12.7-5.1-24.9-14.1-33.9l-3.9-3.9c-9-9-21.2-14.1-33.9-14.1H257c-11.1 0-22.1-2.9-31.8-8.4l-34.5-19.7c-4.3-2.5-7.6-6.5-9.2-11.2-3.2-9.6 1.1-20 10.2-24.5l5.9-3c6.6-3.3 14.3-3.9 21.3-1.5l23.2 7.7c8.2 2.7 17.2-.4 21.9-7.5 4.7-7 4.2-16.3-1.2-22.8l-13.6-16.3c-10-12-9.9-29.5.3-41.3l15.7-18.3c8.8-10.3 10.2-25 3.5-36.7l-2.4-4.2c-3.5-.2-6.9-.3-10.4-.3-92.8 0-171.5 60.9-198.2 145zM464 256c0-36.8-9.6-71.4-26.4-101.5L412 164.8c-15.7 6.3-23.8 23.8-18.5 39.8l16.9 50.7c3.5 10.4 12 18.3 22.6 20.9l29.1 7.3c1.2-9 1.8-18.2 1.8-27.5zm48 0c0 141.4-114.6 256-256 256S0 397.4 0 256 114.6 0 256 0s256 114.6 256 256z"/></svg>
+
+    </a>
+    Apache Sedona&trade; (incubating)
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/apache/incubator-sedona" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    apache/incubator-sedona
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Setup
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Setup" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Setup
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/overview/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_2" type="checkbox" id="__nav_2_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_2">
+          Supported platforms
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Supported platforms" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_2">
+          <span class="md-nav__icon md-icon"></span>
+          Supported platforms
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_2_1" type="checkbox" id="__nav_2_2_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_2_1">
+          Sedona with Apache Spark
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Sedona with Apache Spark" data-md-level="3">
+        <label class="md-nav__title" for="__nav_2_2_1">
+          <span class="md-nav__icon md-icon"></span>
+          Sedona with Apache Spark
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/modules/" class="md-nav__link">
+        Modules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/platform/" class="md-nav__link">
+        Language wrappers
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_2_2" type="checkbox" id="__nav_2_2_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_2_2">
+          Sedona with Apache Flink
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Sedona with Apache Flink" data-md-level="3">
+        <label class="md-nav__title" for="__nav_2_2_2">
+          <span class="md-nav__icon md-icon"></span>
+          Sedona with Apache Flink
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/flink/modules/" class="md-nav__link">
+        Modules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/flink/platform/" class="md-nav__link">
+        Language wrappers
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/maven-coordinates/" class="md-nav__link">
+        Maven Central coordinate
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_4" type="checkbox" id="__nav_2_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_4">
+          Install with Apache Spark
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Install with Apache Spark" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_4">
+          <span class="md-nav__icon md-icon"></span>
+          Install with Apache Spark
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/install-scala/" class="md-nav__link">
+        Install Sedona Scala/Java
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/install-python/" class="md-nav__link">
+        Install Sedona Python
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/install-r/" class="md-nav__link">
+        Install Sedona R
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/zeppelin/" class="md-nav__link">
+        Install Sedona-Zeppelin
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/databricks/" class="md-nav__link">
+        Install on Databricks
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/cluster/" class="md-nav__link">
+        Set up Spark cluser
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_5" type="checkbox" id="__nav_2_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_5">
+          Install with Apache Flink
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Install with Apache Flink" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_5">
+          <span class="md-nav__icon md-icon"></span>
+          Install with Apache Flink
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/flink/install-scala/" class="md-nav__link">
+        Install Sedona Scala/Java
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/release-notes/" class="md-nav__link">
+        Release notes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/compile/" class="md-nav__link">
+        Compile the code
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../download/" class="md-nav__link">
+        Download
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          Programming Guides
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Programming Guides" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Programming Guides
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1" type="checkbox" id="__nav_4_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4_1">
+          Sedona with Apache Spark
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Sedona with Apache Spark" data-md-level="2">
+        <label class="md-nav__title" for="__nav_4_1">
+          <span class="md-nav__icon md-icon"></span>
+          Sedona with Apache Spark
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1_1" type="checkbox" id="__nav_4_1_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4_1_1">
+          Spatial SQL app
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Spatial SQL app" data-md-level="3">
+        <label class="md-nav__title" for="__nav_4_1_1">
+          <span class="md-nav__icon md-icon"></span>
+          Spatial SQL app
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/sql/" class="md-nav__link">
+        Scala/Java
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/sql-pure-sql/" class="md-nav__link">
+        Pure SQL
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/sql-python/" class="md-nav__link">
+        Python
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/sql-r/" class="md-nav__link">
+        R
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/raster/" class="md-nav__link">
+        Raster data - Map Algebra
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1_2" type="checkbox" id="__nav_4_1_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4_1_2">
+          Spatial RDD app
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Spatial RDD app" data-md-level="3">
+        <label class="md-nav__title" for="__nav_4_1_2">
+          <span class="md-nav__icon md-icon"></span>
+          Spatial RDD app
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/rdd/" class="md-nav__link">
+        Scala/Java
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/core-python/" class="md-nav__link">
+        Python
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/rdd-r/" class="md-nav__link">
+        R
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1_3" type="checkbox" id="__nav_4_1_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4_1_3">
+          Map visualization SQL app
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Map visualization SQL app" data-md-level="3">
+        <label class="md-nav__title" for="__nav_4_1_3">
+          <span class="md-nav__icon md-icon"></span>
+          Map visualization SQL app
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/viz/" class="md-nav__link">
+        Scala/Java
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/zeppelin/" class="md-nav__link">
+        Use Apache Zeppelin
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/viz-r/" class="md-nav__link">
+        R
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/viz-gallery/" class="md-nav__link">
+        Gallery
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1_4" type="checkbox" id="__nav_4_1_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4_1_4">
+          Performance tuning
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Performance tuning" data-md-level="3">
+        <label class="md-nav__title" for="__nav_4_1_4">
+          <span class="md-nav__icon md-icon"></span>
+          Performance tuning
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/benchmark/" class="md-nav__link">
+        Benchmark
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/Advanced-Tutorial-Tune-your-Application/" class="md-nav__link">
+        Tune RDD application
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_2" type="checkbox" id="__nav_4_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4_2">
+          Sedona with Apache Flink
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Sedona with Apache Flink" data-md-level="2">
+        <label class="md-nav__title" for="__nav_4_2">
+          <span class="md-nav__icon md-icon"></span>
+          Sedona with Apache Flink
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_2_1" type="checkbox" id="__nav_4_2_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4_2_1">
+          Spatial SQL app
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Spatial SQL app" data-md-level="3">
+        <label class="md-nav__title" for="__nav_4_2_1">
+          <span class="md-nav__icon md-icon"></span>
+          Spatial SQL app
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/flink/sql/" class="md-nav__link">
+        Scala/Java
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_3" type="checkbox" id="__nav_4_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4_3">
+          Examples
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Examples" data-md-level="2">
+        <label class="md-nav__title" for="__nav_4_3">
+          <span class="md-nav__icon md-icon"></span>
+          Examples
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/demo/" class="md-nav__link">
+        Scala/Java
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/jupyter-notebook/" class="md-nav__link">
+        Python
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          API Docs
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="API Docs" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          API Docs
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_1" type="checkbox" id="__nav_5_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_1">
+          Sedona with Apache Spark
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Sedona with Apache Spark" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_1">
+          <span class="md-nav__icon md-icon"></span>
+          Sedona with Apache Spark
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_1_1" type="checkbox" id="__nav_5_1_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_1_1">
+          SQL
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="SQL" data-md-level="3">
+        <label class="md-nav__title" for="__nav_5_1_1">
+          <span class="md-nav__icon md-icon"></span>
+          SQL
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Overview/" class="md-nav__link">
+        Quick start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_1_1_2" type="checkbox" id="__nav_5_1_1_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_1_1_2">
+          Vector data
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Vector data" data-md-level="4">
+        <label class="md-nav__title" for="__nav_5_1_1_2">
+          <span class="md-nav__icon md-icon"></span>
+          Vector data
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Constructor/" class="md-nav__link">
+        Constructor
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Function/" class="md-nav__link">
+        Function
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Predicate/" class="md-nav__link">
+        Predicate
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/AggregateFunction/" class="md-nav__link">
+        Aggregate function
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Optimizer/" class="md-nav__link">
+        Join query (optimizer)
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_1_1_3" type="checkbox" id="__nav_5_1_1_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_1_1_3">
+          Raster data
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Raster data" data-md-level="4">
+        <label class="md-nav__title" for="__nav_5_1_1_3">
+          <span class="md-nav__icon md-icon"></span>
+          Raster data
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Raster-loader/" class="md-nav__link">
+        Raster input and output
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Raster-operators/" class="md-nav__link">
+        Raster operators
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Parameter/" class="md-nav__link">
+        Parameter
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_1_2" type="checkbox" id="__nav_5_1_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_1_2">
+          RDD (core)
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="RDD (core)" data-md-level="3">
+        <label class="md-nav__title" for="__nav_5_1_2">
+          <span class="md-nav__icon md-icon"></span>
+          RDD (core)
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/java-api/" class="md-nav__link">
+        Scala/Java doc
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/python-api/" class="md-nav__link">
+        Python doc
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/r-api/" class="md-nav__link">
+        R doc
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_1_3" type="checkbox" id="__nav_5_1_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_1_3">
+          Viz
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Viz" data-md-level="3">
+        <label class="md-nav__title" for="__nav_5_1_3">
+          <span class="md-nav__icon md-icon"></span>
+          Viz
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/viz/sql/" class="md-nav__link">
+        DataFrame/SQL
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/viz/java-api/" class="md-nav__link">
+        RDD
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2" type="checkbox" id="__nav_5_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_2">
+          Sedona with Apache Flink
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Sedona with Apache Flink" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_2">
+          <span class="md-nav__icon md-icon"></span>
+          Sedona with Apache Flink
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_1" type="checkbox" id="__nav_5_2_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_2_1">
+          SQL
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="SQL" data-md-level="3">
+        <label class="md-nav__title" for="__nav_5_2_1">
+          <span class="md-nav__icon md-icon"></span>
+          SQL
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/flink/Overview/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/flink/Constructor/" class="md-nav__link">
+        Constructor
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/flink/Function/" class="md-nav__link">
+        Function
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/flink/Aggregator/" class="md-nav__link">
+        Aggregator
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/flink/Predicate/" class="md-nav__link">
+        Predicate
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6">
+          Community
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Community" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Community
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contact/" class="md-nav__link">
+        Community
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6_2" type="checkbox" id="__nav_6_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6_2">
+          Contributor Guide
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Contributor Guide" data-md-level="2">
+        <label class="md-nav__title" for="__nav_6_2">
+          <span class="md-nav__icon md-icon"></span>
+          Contributor Guide
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rule/" class="md-nav__link">
+        Rules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../develop/" class="md-nav__link">
+        Develop
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6_3" type="checkbox" id="__nav_6_3" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6_3">
+          Committer Guide
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Committer Guide" data-md-level="2">
+        <label class="md-nav__title" for="__nav_6_3">
+          <span class="md-nav__icon md-icon"></span>
+          Committer Guide
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributor/" class="md-nav__link">
+        Project Management Committee
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-manager/" class="md-nav__link">
+        Become a release manager
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../snapshot/" class="md-nav__link">
+        Publish a snapshot version
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Make a release
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Make a release
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      
+        Table of contents
+      
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  
+  <a href="#0-prepare-an-empty-script-file" class="md-nav__link">
+    0. Prepare an empty script file
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#1-check-asf-copyright-in-all-file-headers" class="md-nav__link">
+    1. Check ASF copyright in all file headers
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#2-update-sedona-python-r-and-zeppelin-versions" class="md-nav__link">
+    2. Update Sedona Python, R and Zeppelin versions
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#3-update-mkdocsyml" class="md-nav__link">
+    3. Update mkdocs.yml
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#4-stage-and-upload-release-candidates" class="md-nav__link">
+    4. Stage and upload release candidates
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#5-vote-in-dev-sedonaapacheorg" class="md-nav__link">
+    5. Vote in dev sedona.apache.org
+  </a>  
+  
+  
+    <nav class="md-nav" aria-label="5. Vote in dev sedona.apache.org">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  
+  <a href="#vote-email" class="md-nav__link">
+    Vote email
+  </a>  
+  
+  
+</li>
+        
+          <li class="md-nav__item">
+  
+  <a href="#pass-email" class="md-nav__link">
+    Pass email
+  </a>  
+  
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#6-vote-in-general-incubatorapacheorg" class="md-nav__link">
+    6. Vote in general incubator.apache.org
+  </a>  
+  
+  
+    <nav class="md-nav" aria-label="6. Vote in general incubator.apache.org">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  
+  <a href="#vote-email_1" class="md-nav__link">
+    Vote email
+  </a>  
+  
+  
+</li>
+        
+          <li class="md-nav__item">
+  
+  <a href="#pass-email_1" class="md-nav__link">
+    Pass email
+  </a>  
+  
+  
+</li>
+        
+          <li class="md-nav__item">
+  
+  <a href="#announce-email" class="md-nav__link">
+    Announce email
+  </a>  
+  
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#7-failed-vote" class="md-nav__link">
+    7. Failed vote
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#8-release-source-code-and-maven-package" class="md-nav__link">
+    8. Release source code and Maven package
+  </a>  
+  
+  
+    <nav class="md-nav" aria-label="8. Release source code and Maven package">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  
+  <a href="#upload-releases" class="md-nav__link">
+    Upload releases
+  </a>  
+  
+  
+</li>
+        
+          <li class="md-nav__item">
+  
+  <a href="#fix-signature-issues" class="md-nav__link">
+    Fix signature issues
+  </a>  
+  
+  
+</li>
+        
+          <li class="md-nav__item">
+  
+  <a href="#manually-close-and-release-the-package" class="md-nav__link">
+    Manually close and release the package
+  </a>  
+  
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#9-release-sedona-python-and-zeppelin" class="md-nav__link">
+    9. Release Sedona Python and Zeppelin
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#10-release-sedona-r-to-cran" class="md-nav__link">
+    10. Release Sedona R to CRAN.
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#11-publish-the-doc-website" class="md-nav__link">
+    11. Publish the doc website
+  </a>  
+  
+  
+    <nav class="md-nav" aria-label="11. Publish the doc website">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  
+  <a href="#javadoc-and-scaladoc" class="md-nav__link">
+    Javadoc and Scaladoc
+  </a>  
+  
+  
+</li>
+        
+          <li class="md-nav__item">
+  
+  <a href="#compile-r-html-docs" class="md-nav__link">
+    Compile R html docs
+  </a>  
+  
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vote/" class="md-nav__link">
+        Vote a release
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../publication/" class="md-nav__link">
+        Publications
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7">
+          GeoSpark Legacy Docs
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="GeoSpark Legacy Docs" data-md-level="1">
+        <label class="md-nav__title" for="__nav_7">
+          <span class="md-nav__icon md-icon"></span>
+          GeoSpark Legacy Docs
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_1" type="checkbox" id="__nav_7_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7_1">
+          Download
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Download" data-md-level="2">
+        <label class="md-nav__title" for="__nav_7_1">
+          <span class="md-nav__icon md-icon"></span>
+          Download
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/download/overview/" class="md-nav__link">
+        Quick start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/download/GeoSpark-All-Modules-Release-notes/" class="md-nav__link">
+        Release notes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/download/GeoSpark-All-Modules-Maven-Central-Coordinates/" class="md-nav__link">
+        Maven Central coordinate
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/download/cluster/" class="md-nav__link">
+        Set up Spark cluser
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/download/scalashell/" class="md-nav__link">
+        Spark Scala shell
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/download/project/" class="md-nav__link">
+        Self-contained project
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/download/zeppelin/" class="md-nav__link">
+        Install GeoSpark-Zeppelin
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/download/compile/" class="md-nav__link">
+        Compile the source code
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_2" type="checkbox" id="__nav_7_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7_2">
+          Tutorial
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Tutorial" data-md-level="2">
+        <label class="md-nav__title" for="__nav_7_2">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorial
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/tutorial/rdd/" class="md-nav__link">
+        Spatial RDD application
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/tutorial/sql/" class="md-nav__link">
+        Spatial SQL application
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/tutorial/viz/" class="md-nav__link">
+        Visualize Spatial DataFrame
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/tutorial/zeppelin/" class="md-nav__link">
+        Run GeoSpark via Zeppelin
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/tutorial/geospark-core-python/" class="md-nav__link">
+        Spatial RDD in Python
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/tutorial/geospark-sql-python/" class="md-nav__link">
+        Spatial SQL in Python
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/tutorial/GeoSpark-Runnable-DEMO/" class="md-nav__link">
+        GeoSpark template project
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/tutorial/faq/" class="md-nav__link">
+        Frequently Asked Questions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/tutorial/Advanced-Tutorial-Tune-your-GeoSpark-Application/" class="md-nav__link">
+        Tune GeoSpark RDD application
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/tutorial/benchmark/" class="md-nav__link">
+        Benchmark
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_3" type="checkbox" id="__nav_7_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7_3">
+          API
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="API" data-md-level="2">
+        <label class="md-nav__title" for="__nav_7_3">
+          <span class="md-nav__icon md-icon"></span>
+          API
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_3_1" type="checkbox" id="__nav_7_3_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7_3_1">
+          GeoSpark core (RDD)
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="GeoSpark core (RDD)" data-md-level="3">
+        <label class="md-nav__title" for="__nav_7_3_1">
+          <span class="md-nav__icon md-icon"></span>
+          GeoSpark core (RDD)
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/api/GeoSpark-Scala-and-Java-API/" class="md-nav__link">
+        Scala/Java doc
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/api/GeoSpark-Python-API/" class="md-nav__link">
+        Python doc
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_3_2" type="checkbox" id="__nav_7_3_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7_3_2">
+          GeoSpark SQL
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="GeoSpark SQL" data-md-level="3">
+        <label class="md-nav__title" for="__nav_7_3_2">
+          <span class="md-nav__icon md-icon"></span>
+          GeoSpark SQL
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/api/sql/GeoSparkSQL-javadoc/" class="md-nav__link">
+        JavaDoc
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/api/sql/GeoSparkSQL-Overview/" class="md-nav__link">
+        Quick start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/api/sql/GeoSparkSQL-Constructor/" class="md-nav__link">
+        Constructor
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/api/sql/GeoSparkSQL-Function/" class="md-nav__link">
+        Function
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/api/sql/GeoSparkSQL-Predicate/" class="md-nav__link">
+        Predicate
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/api/sql/GeoSparkSQL-AggregateFunction/" class="md-nav__link">
+        Aggregate function
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/api/sql/GeoSparkSQL-Optimizer/" class="md-nav__link">
+        Join query (optimizer)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/api/sql/GeoSparkSQL-Parameter/" class="md-nav__link">
+        Parameter
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_3_3" type="checkbox" id="__nav_7_3_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7_3_3">
+          GeoSpark Viz
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="GeoSpark Viz" data-md-level="3">
+        <label class="md-nav__title" for="__nav_7_3_3">
+          <span class="md-nav__icon md-icon"></span>
+          GeoSpark Viz
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/api/viz/sql/" class="md-nav__link">
+        DataFrame/SQL
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archive/api/viz/Babylon-Scala-and-Java-API/" class="md-nav__link">
+        RDD
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8">
+          Apache Software Foundation
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Apache Software Foundation" data-md-level="1">
+        <label class="md-nav__title" for="__nav_8">
+          <span class="md-nav__icon md-icon"></span>
+          Apache Software Foundation
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../asf/asf/" class="md-nav__link">
+        Foundation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../asf/disclaimer/" class="md-nav__link">
+        Disclaimer
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/licenses/" target="_blank" class="md-nav__link">
+        License
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/events/current-event" target="_blank" class="md-nav__link">
+        Events
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/foundation/sponsorship.html" target="_blank" class="md-nav__link">
+        Sponsorship
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/foundation/thanks.html" target="_blank" class="md-nav__link">
+        Thanks
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/security/" target="_blank" class="md-nav__link">
+        Security
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://privacy.apache.org/policies/privacy-policy-public.html" target="_blank" class="md-nav__link">
+        Privacy
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      
+        Table of contents
+      
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  
+  <a href="#0-prepare-an-empty-script-file" class="md-nav__link">
+    0. Prepare an empty script file
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#1-check-asf-copyright-in-all-file-headers" class="md-nav__link">
+    1. Check ASF copyright in all file headers
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#2-update-sedona-python-r-and-zeppelin-versions" class="md-nav__link">
+    2. Update Sedona Python, R and Zeppelin versions
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#3-update-mkdocsyml" class="md-nav__link">
+    3. Update mkdocs.yml
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#4-stage-and-upload-release-candidates" class="md-nav__link">
+    4. Stage and upload release candidates
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#5-vote-in-dev-sedonaapacheorg" class="md-nav__link">
+    5. Vote in dev sedona.apache.org
+  </a>  
+  
+  
+    <nav class="md-nav" aria-label="5. Vote in dev sedona.apache.org">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  
+  <a href="#vote-email" class="md-nav__link">
+    Vote email
+  </a>  
+  
+  
+</li>
+        
+          <li class="md-nav__item">
+  
+  <a href="#pass-email" class="md-nav__link">
+    Pass email
+  </a>  
+  
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#6-vote-in-general-incubatorapacheorg" class="md-nav__link">
+    6. Vote in general incubator.apache.org
+  </a>  
+  
+  
+    <nav class="md-nav" aria-label="6. Vote in general incubator.apache.org">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  
+  <a href="#vote-email_1" class="md-nav__link">
+    Vote email
+  </a>  
+  
+  
+</li>
+        
+          <li class="md-nav__item">
+  
+  <a href="#pass-email_1" class="md-nav__link">
+    Pass email
+  </a>  
+  
+  
+</li>
+        
+          <li class="md-nav__item">
+  
+  <a href="#announce-email" class="md-nav__link">
+    Announce email
+  </a>  
+  
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#7-failed-vote" class="md-nav__link">
+    7. Failed vote
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#8-release-source-code-and-maven-package" class="md-nav__link">
+    8. Release source code and Maven package
+  </a>  
+  
+  
+    <nav class="md-nav" aria-label="8. Release source code and Maven package">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  
+  <a href="#upload-releases" class="md-nav__link">
+    Upload releases
+  </a>  
+  
+  
+</li>
+        
+          <li class="md-nav__item">
+  
+  <a href="#fix-signature-issues" class="md-nav__link">
+    Fix signature issues
+  </a>  
+  
+  
+</li>
+        
+          <li class="md-nav__item">
+  
+  <a href="#manually-close-and-release-the-package" class="md-nav__link">
+    Manually close and release the package
+  </a>  
+  
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#9-release-sedona-python-and-zeppelin" class="md-nav__link">
+    9. Release Sedona Python and Zeppelin
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#10-release-sedona-r-to-cran" class="md-nav__link">
+    10. Release Sedona R to CRAN.
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
+  <a href="#11-publish-the-doc-website" class="md-nav__link">
+    11. Publish the doc website
+  </a>  
+  
+  
+    <nav class="md-nav" aria-label="11. Publish the doc website">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  
+  <a href="#javadoc-and-scaladoc" class="md-nav__link">
+    Javadoc and Scaladoc
+  </a>  
+  
+  
+</li>
+        
+          <li class="md-nav__item">
+  
+  <a href="#compile-r-html-docs" class="md-nav__link">
+    Compile R html docs
+  </a>  
+  
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+  
+    
+                  
+
+  <a href="https://github.com/apache/incubator-sedona/edit/master/docs/community/publish.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+<h1 id="make-a-sedona-release">Make a Sedona release<a class="headerlink" href="#make-a-sedona-release" title="Permanent link">&para;</a></h1>
+<p>This page is for Sedona PPMC to publish Sedona releases.</p>
+<p>You can read ASF guidelines: 1. ASF Incubator Distribution Guidelines: <a href="https://incubator.apache.org/guides/distribution.html">https://incubator.apache.org/guides/distribution.html</a> 2. ASF Release Guidelines: <a href="https://infra.apache.org/release-publishing.html">https://infra.apache.org/release-publishing.html</a> 3. ASF Incubator Release Votes Guidelines: <a href="https://issues.apache.org/jira/browse/LEGAL-469">https://issues.apache.org/jira/browse/LEGAL-469</a></p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>All scripts on this page should be run in your local Sedona Git repo under master branch via a single script file.</p>
+</div>
+<h2 id="0-prepare-an-empty-script-file">0. Prepare an empty script file<a class="headerlink" href="#0-prepare-an-empty-script-file" title="Permanent link">&para;</a></h2>
+<ol>
+<li>In your local Sedona Git repo under master branch, run
+<div class="highlight"><pre><span></span><code><span class="nb">echo</span> <span class="s2">&quot;#!/bin/bash&quot;</span> &gt; create-release.sh
+chmod <span class="m">777</span> create-release.sh
+</code></pre></div></li>
+<li>Use your favourite GUI text editor to open <code>create-release.sh</code>.</li>
+<li>Then keep copying the scripts on this web page to replace all content in this script file.</li>
+<li>Do NOT directly copy/paste the scripts to your terminal because a bug in <code>clipboard.js</code> will create link breaks in such case. </li>
+<li>Each time when you copy content to this script file, run <code>./create-release.sh</code> to execute it.</li>
+</ol>
+<h2 id="1-check-asf-copyright-in-all-file-headers">1. Check ASF copyright in all file headers<a class="headerlink" href="#1-check-asf-copyright-in-all-file-headers" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Run the following script:
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+wget -q https://dlcdn.apache.org//creadur/apache-rat-<span class="nv">$RAT_VERSION</span>/apache-rat-0.15-bin.tar.gz
+tar -xvf  apache-rat-0.15-bin.tar.gz
+git clone --shared --branch master https://github.com/apache/incubator-sedona.git sedona-src
+java -jar apache-rat-0.15.jar -d sedona-src &gt; report.txt
+</code></pre></div></li>
+<li>Read the generated report.txt file and make sure all source code files have ASF header.</li>
+<li>Delete the generated report and cloned files
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+rm -rf sedona-src
+rm report.txt
+</code></pre></div></li>
+</ol>
+<h2 id="2-update-sedona-python-r-and-zeppelin-versions">2. Update Sedona Python, R and Zeppelin versions<a class="headerlink" href="#2-update-sedona-python-r-and-zeppelin-versions" title="Permanent link">&para;</a></h2>
+<p>Make sure the Sedona version in the following files are 1.3.0-incubating. Note that: Python and R versions cannot have "incubating" postfix.</p>
+<ol>
+<li><a href="https://github.com/apache/incubator-sedona/blob/master/python/sedona/version.py">https://github.com/apache/incubator-sedona/blob/master/python/sedona/version.py</a></li>
+<li><a href="https://github.com/apache/incubator-sedona/blob/master/R/DESCRIPTION">https://github.com/apache/incubator-sedona/blob/master/R/DESCRIPTION</a></li>
+<li><a href="https://github.com/apache/incubator-sedona/blob/master/zeppelin/package.json">https://github.com/apache/incubator-sedona/blob/master/zeppelin/package.json</a></li>
+</ol>
+<h2 id="3-update-mkdocsyml">3. Update mkdocs.yml<a class="headerlink" href="#3-update-mkdocsyml" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Please change the following variables in <code>mkdocs.yml</code> to the version you want to publish.<ul>
+<li><code>sedona_create_release.current_version</code></li>
+<li><code>sedona_create_release.current_rc</code></li>
+<li><code>sedona_create_release.current_git_tag</code></li>
+<li><code>sedona_create_release.current_snapshot</code></li>
+</ul>
+</li>
+<li>Then compile the website by <code>mkdocs serve</code>. This will generate the scripts listed on this page in your local browser.</li>
+<li>You can also publish this website if needed. See the instruction at bottom.</li>
+</ul>
+<h2 id="4-stage-and-upload-release-candidates">4. Stage and upload release candidates<a class="headerlink" href="#4-stage-and-upload-release-candidates" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+
+<span class="nb">source</span> ~/.bashrc
+
+git checkout master
+git pull
+
+<span class="nb">echo</span> <span class="s2">&quot;Step 1. Stage the Release Candidate to GitHub.&quot;</span>
+
+mvn -q -B clean release:prepare -Dtag<span class="o">=</span>sedona-1.3.0-incubating-rc2 -DreleaseVersion<span class="o">=</span><span class="m">1</span>.3.0-incubating <span class="se">\</span>
+-DdevelopmentVersion<span class="o">=</span><span class="m">1</span>.3.1-incubating-SNAPSHOT -DautoVersionSubmodules<span class="o">=</span><span class="nb">true</span> -Dresume<span class="o">=</span><span class="nb">false</span> -Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests&quot;</span>
+
+<span class="nb">echo</span> <span class="s2">&quot;Now the releases are staged. A tag and two commits have been created on Sedona GitHub repo&quot;</span>
+
+<span class="nb">echo</span> <span class="s2">&quot;Step 2: Upload the Release Candidate to https://repository.apache.org.&quot;</span>
+
+<span class="c1"># For Spark 3.0 and Scala 2.12</span>
+mvn -q clean release:perform -DautoVersionSubmodules<span class="o">=</span><span class="nb">true</span> -Dresume<span class="o">=</span><span class="nb">false</span> -Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests&quot;</span> 
+
+<span class="c1"># For Spark 3.0 and Scala 2.13</span>
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform <span class="se">\</span>
+-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/incubator-sedona.git -Dtag<span class="o">=</span>sedona-1.3.0-incubating-rc2 <span class="se">\</span>
+-DautoVersionSubmodules<span class="o">=</span><span class="nb">true</span> -Dresume<span class="o">=</span><span class="nb">false</span> -Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dscala=2.13&quot;</span>
+
+<span class="nb">echo</span> <span class="s2">&quot;Step 3: Upload Release Candidate on ASF SVN: https://dist.apache.org/repos/dist/dev/incubator/sedona&quot;</span>
+
+<span class="nb">echo</span> <span class="s2">&quot;Creating a folder on SVN...&quot;</span>
+
+svn mkdir -m <span class="s2">&quot;Adding folder&quot;</span> https://dist.apache.org/repos/dist/dev/incubator/sedona/1.3.0-incubating-rc2
+
+<span class="nb">echo</span> <span class="s2">&quot;Creating release files locally...&quot;</span>
+
+git clone --shared --branch sedona-1.3.0-incubating-rc2 https://github.com/apache/incubator-sedona.git apache-sedona-1.3.0-incubating-src
+rm -rf apache-sedona-1.3.0-incubating-src/.git
+tar czf apache-sedona-1.3.0-incubating-src.tar.gz apache-sedona-1.3.0-incubating-src
+mkdir apache-sedona-1.3.0-incubating-bin
+<span class="nb">cd</span> apache-sedona-1.3.0-incubating-src <span class="o">&amp;&amp;</span> mvn clean install -DskipTests -Dscala<span class="o">=</span><span class="m">2</span>.12 <span class="o">&amp;&amp;</span> <span class="nb">cd</span> ..
+cp apache-sedona-1.3.0-incubating-src/core/target/sedona-*1.3.0-incubating.jar apache-sedona-1.3.0-incubating-bin/
+cp apache-sedona-1.3.0-incubating-src/sql/target/sedona-*1.3.0-incubating.jar apache-sedona-1.3.0-incubating-bin/
+cp apache-sedona-1.3.0-incubating-src/viz/target/sedona-*1.3.0-incubating.jar apache-sedona-1.3.0-incubating-bin/
+cp apache-sedona-1.3.0-incubating-src/python-adapter/target/sedona-*1.3.0-incubating.jar apache-sedona-1.3.0-incubating-bin/
+cp apache-sedona-1.3.0-incubating-src/flink/target/sedona-*1.3.0-incubating.jar apache-sedona-1.3.0-incubating-bin/
+<span class="nb">cd</span> apache-sedona-1.3.0-incubating-src <span class="o">&amp;&amp;</span> mvn clean install -DskipTests -Dscala<span class="o">=</span><span class="m">2</span>.13 <span class="o">&amp;&amp;</span> <span class="nb">cd</span> ..
+cp apache-sedona-1.3.0-incubating-src/core/target/sedona-*1.3.0-incubating.jar apache-sedona-1.3.0-incubating-bin/
+cp apache-sedona-1.3.0-incubating-src/sql/target/sedona-*1.3.0-incubating.jar apache-sedona-1.3.0-incubating-bin/
+cp apache-sedona-1.3.0-incubating-src/viz/target/sedona-*1.3.0-incubating.jar apache-sedona-1.3.0-incubating-bin/
+cp apache-sedona-1.3.0-incubating-src/python-adapter/target/sedona-*1.3.0-incubating.jar apache-sedona-1.3.0-incubating-bin/
+cp apache-sedona-1.3.0-incubating-src/flink/target/sedona-*1.3.0-incubating.jar apache-sedona-1.3.0-incubating-bin/
+tar czf apache-sedona-1.3.0-incubating-bin.tar.gz apache-sedona-1.3.0-incubating-bin
+shasum -a <span class="m">512</span> apache-sedona-1.3.0-incubating-src.tar.gz &gt; apache-sedona-1.3.0-incubating-src.tar.gz.sha512
+shasum -a <span class="m">512</span> apache-sedona-1.3.0-incubating-bin.tar.gz &gt; apache-sedona-1.3.0-incubating-bin.tar.gz.sha512
+gpg -ab apache-sedona-1.3.0-incubating-src.tar.gz
+gpg -ab apache-sedona-1.3.0-incubating-bin.tar.gz
+
+<span class="nb">echo</span> <span class="s2">&quot;Uploading local release files...&quot;</span>
+
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.3.0-incubating-src.tar.gz https://dist.apache.org/repos/dist/dev/incubator/sedona/1.3.0-incubating-rc2/apache-sedona-1.3.0-incubating-src.tar.gz
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.3.0-incubating-src.tar.gz.asc https://dist.apache.org/repos/dist/dev/incubator/sedona/1.3.0-incubating-rc2/apache-sedona-1.3.0-incubating-src.tar.gz.asc
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.3.0-incubating-src.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/incubator/sedona/1.3.0-incubating-rc2/apache-sedona-1.3.0-incubating-src.tar.gz.sha512
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.3.0-incubating-bin.tar.gz https://dist.apache.org/repos/dist/dev/incubator/sedona/1.3.0-incubating-rc2/apache-sedona-1.3.0-incubating-bin.tar.gz
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.3.0-incubating-bin.tar.gz.asc https://dist.apache.org/repos/dist/dev/incubator/sedona/1.3.0-incubating-rc2/apache-sedona-1.3.0-incubating-bin.tar.gz.asc
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.3.0-incubating-bin.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/incubator/sedona/1.3.0-incubating-rc2/apache-sedona-1.3.0-incubating-bin.tar.gz.sha512
+
+<span class="nb">echo</span> <span class="s2">&quot;Removing local release files...&quot;</span>
+
+rm apache-sedona-1.3.0-incubating-src.tar.gz
+rm apache-sedona-1.3.0-incubating-src.tar.gz.asc
+rm apache-sedona-1.3.0-incubating-src.tar.gz.sha512
+rm apache-sedona-1.3.0-incubating-bin.tar.gz
+rm apache-sedona-1.3.0-incubating-bin.tar.gz.asc
+rm apache-sedona-1.3.0-incubating-bin.tar.gz.sha512
+rm -rf apache-sedona-1.3.0-incubating-src
+rm -rf apache-sedona-1.3.0-incubating-bin
+</code></pre></div>
+
+<h2 id="5-vote-in-dev-sedonaapacheorg">5. Vote in dev sedona.apache.org<a class="headerlink" href="#5-vote-in-dev-sedonaapacheorg" title="Permanent link">&para;</a></h2>
+<h3 id="vote-email">Vote email<a class="headerlink" href="#vote-email" title="Permanent link">&para;</a></h3>
+<p>Please add changes at the end if needed:</p>
+<div class="highlight"><pre><span></span><code>Subject: [VOTE] Release Apache Sedona 1.3.0-incubating-rc2
+
+Hi all,
+
+This is a call for vote on Apache Sedona 1.3.0-incubating-rc2. Please refer to the changes listed at the bottom of this email.
+
+Release notes:
+https://github.com/apache/incubator-sedona/blob/sedona-1.3.0-incubating-rc2/docs/setup/release-notes.md
+
+Build instructions:
+https://github.com/apache/incubator-sedona/blob/sedona-1.3.0-incubating-rc2/docs/setup/compile.md
+
+GitHub tag:
+https://github.com/apache/incubator-sedona/releases/tag/sedona-1.3.0-incubating-rc2
+
+GPG public key to verify the Release:
+https://downloads.apache.org/incubator/sedona/KEYS
+
+Source code and binaries:
+https://dist.apache.org/repos/dist/dev/incubator/sedona/1.3.0-incubating-rc2/
+
+The vote will be open for at least 72 hours or until at least 3 &quot;+1&quot; PMC votes are cast
+
+Instruction for checking items on the checklist: https://sedona.apache.org/community/vote/
+
+We recommend you use this Jupyter notebook on MyBinder to perform this task: https://mybinder.org/v2/gh/jiayuasu/sedona-tools/HEAD?labpath=binder%2Fverify-release.ipynb
+
+**Please vote accordingly and you must provide your checklist for your vote**.
+
+
+[ ] +1 approve
+
+[ ] +0 no opinion
+
+[ ] -1 disapprove with the reason
+
+Checklist:
+
+[ ] Download links are valid.
+
+[ ] Checksums and PGP signatures are valid.
+
+[ ] DISCLAIMER is included.
+
+[ ] Source code artifacts have correct names matching the current release.
+
+For a detailed checklist  please refer to:
+https://cwiki.apache.org/confluence/display/INCUBATOR/Incubator+Release+Checklist
+
+------------
+
+Changes according to the comments on the previous release
+Original comment (Permalink from https://lists.apache.org/list.html): 
+</code></pre></div>
+
+<h3 id="pass-email">Pass email<a class="headerlink" href="#pass-email" title="Permanent link">&para;</a></h3>
+<p>Please count the votes and add the Permalink of the vote thread at the end.</p>
+<div class="highlight"><pre><span></span><code>Subject: [RESULT][VOTE] Release Apache Sedona 1.3.0-incubating-rc2
+
+Dear all,
+
+The vote closes now as 72hr have passed. The vote PASSES with
+
++? (binding): NAME1, NAME2, NAME3
++? (non-binding): NAME4
+No -1 votes
+
+The vote thread (Permalink from https://lists.apache.org/list.html):
+
+I will now bring the vote to general@incubator.apache.org to get
+approval by the IPMC. If this vote passes too, the release is accepted and will be published.
+</code></pre></div>
+
+<h2 id="6-vote-in-general-incubatorapacheorg">6. Vote in general incubator.apache.org<a class="headerlink" href="#6-vote-in-general-incubatorapacheorg" title="Permanent link">&para;</a></h2>
+<h3 id="vote-email_1">Vote email<a class="headerlink" href="#vote-email_1" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Please add the permalink of Sedona Community vote thread</li>
+<li>Please add the permalink of Sedona Community vote result thread</li>
+<li>Please add changes at the end if needed.</li>
+</ol>
+<div class="highlight"><pre><span></span><code>Subject: [VOTE] Release Apache Sedona 1.3.0-incubating-rc2
+
+Hi all,
+
+This is a call for vote on Apache Sedona 1.3.0-incubating-rc2. Please refer to the changes listed at the bottom of this email.
+
+Sedona Community vote thread (Permalink from https://lists.apache.org/list.html):
+
+Sedona community vote result thread (Permalink from https://lists.apache.org/list.html):
+
+Release notes:
+https://github.com/apache/incubator-sedona/blob/sedona-1.3.0-incubating-rc2/docs/setup/release-notes.md
+
+Build instructions:
+https://github.com/apache/incubator-sedona/blob/sedona-1.3.0-incubating-rc2/docs/setup/compile.md
+
+GitHub tag:
+https://github.com/apache/incubator-sedona/releases/tag/sedona-1.3.0-incubating-rc2
+
+GPG public key to verify the Release:
+https://downloads.apache.org/incubator/sedona/KEYS
+
+Source code and binaries:
+https://dist.apache.org/repos/dist/dev/incubator/sedona/1.3.0-incubating-rc2/
+
+The vote will be open for at least 72 hours or until at least 3 &quot;+1&quot; PMC votes are cast
+
+Please vote accordingly:
+
+[ ] +1 approve
+
+[ ] +0 no opinion
+
+[ ] -1 disapprove with the reason
+
+Checklist for reference (because of DISCLAIMER-WIP, other checklist items are not blockers):
+
+[ ] Download links are valid.
+
+[ ] Checksums and PGP signatures are valid.
+
+[ ] DISCLAIMER is included.
+
+[ ] Source code artifacts have correct names matching the current release.
+
+For a detailed checklist  please refer to:
+https://cwiki.apache.org/confluence/display/INCUBATOR/Incubator+Release+Checklist
+
+------------
+
+Changes according to the comments on the previous release
+Original comment (Permalink from https://lists.apache.org/list.html): 
+</code></pre></div>
+
+<h3 id="pass-email_1">Pass email<a class="headerlink" href="#pass-email_1" title="Permanent link">&para;</a></h3>
+<p>Please count the votes and add the permalink of the vote thread.</p>
+<div class="highlight"><pre><span></span><code>Subject: [RESULT][VOTE] Release Apache Sedona 1.3.0-incubating-rc2
+
+Dear all,
+
+The vote closes now as 72hr have passed. The vote PASSES with
+
++? (binding): NAME1, NAME2, NAME3
++? (non-binding): NAME4
+No -1 votes
+
+The vote thread (Permalink from https://lists.apache.org/list.html):
+
+I will publish the release and make an annoucement once it is done.
+</code></pre></div>
+
+<h3 id="announce-email">Announce email<a class="headerlink" href="#announce-email" title="Permanent link">&para;</a></h3>
+<ol>
+<li>This email should be CCed to <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#100;&#101;&#118;&#64;&#115;&#101;&#100;&#111;&#110;&#97;&#46;&#97;&#112;&#97;&#99;&#104;&#101;&#46;&#111;&#114;&#103;">&#100;&#101;&#118;&#64;&#115;&#101;&#100;&#111;&#110;&#97;&#46;&#97;&#112;&#97;&#99;&#104;&#101;&#46;&#111;&#114;&#103;</a></li>
+<li>Please add the permalink of the incubator vote thread</li>
+<li>Please add the permalink of the incubator vote result thread</li>
+</ol>
+<div class="highlight"><pre><span></span><code>Subject: [ANNOUNCE] Apache Sedona 1.3.0-incubating released
+
+Dear all,
+
+We are happy to report that we have released Apache Sedona (incubating) 1.3.0-incubating. Thank you again for your help.
+
+Apache Sedona (incubating) is a cluster computing system for processing large-scale spatial data. 
+
+
+Vote thread (Permalink from https://lists.apache.org/list.html):
+
+
+Vote result thread (Permalink from https://lists.apache.org/list.html):
+
+
+Website:
+http://sedona.apache.org/
+
+Release notes:
+https://github.com/apache/incubator-sedona/blob/sedona-1.3.0-incubating/docs/setup/release-notes.md
+
+Download links:
+https://github.com/apache/incubator-sedona/releases/tag/sedona-1.3.0-incubating
+
+Additional resources:
+Get started: http://sedona.apache.org/setup/overview/
+Tutorials: http://sedona.apache.org/tutorial/rdd/
+Mailing list: dev@sedona.apache.org
+Twitter: https://twitter.com/ApacheSedona
+Gitter: https://gitter.im/apache/sedona
+
+Regards,
+Apache Sedona (incubating) Team
+</code></pre></div>
+
+<h2 id="7-failed-vote">7. Failed vote<a class="headerlink" href="#7-failed-vote" title="Permanent link">&para;</a></h2>
+<p>If a vote failed, do the following:</p>
+<ol>
+<li>In the vote email, say that we will create another release candidate.</li>
+<li>Restart from Step 3 <code>Update mkdocs.yml</code>. Please increment the release candidate ID (e.g., <code>1.3.0-incubating-rc2</code>) and update <code>sedona_create_release.current_rc</code> and <code>sedona_create_release.current_git_tag</code> in <code>mkdocs.yml</code> to generate the script listed on this webpage.</li>
+</ol>
+<h2 id="8-release-source-code-and-maven-package">8. Release source code and Maven package<a class="headerlink" href="#8-release-source-code-and-maven-package" title="Permanent link">&para;</a></h2>
+<h3 id="upload-releases">Upload releases<a class="headerlink" href="#upload-releases" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+
+<span class="nb">echo</span> <span class="s2">&quot;Move all files in https://dist.apache.org/repos/dist/dev/incubator/sedona to https://dist.apache.org/repos/dist/release/incubator/sedona, using svn&quot;</span>
+svn mkdir -m <span class="s2">&quot;Adding folder&quot;</span> https://dist.apache.org/repos/dist/release/incubator/sedona/1.3.0-incubating
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/1.3.0-incubating-rc2/apache-sedona-1.3.0-incubating-src.tar.gz
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/1.3.0-incubating-rc2/apache-sedona-1.3.0-incubating-src.tar.gz.asc
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/1.3.0-incubating-rc2/apache-sedona-1.3.0-incubating-src.tar.gz.sha512
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/1.3.0-incubating-rc2/apache-sedona-1.3.0-incubating-bin.tar.gz
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/1.3.0-incubating-rc2/apache-sedona-1.3.0-incubating-bin.tar.gz.asc
+wget https://dist.apache.org/repos/dist/dev/incubator/sedona/1.3.0-incubating-rc2/apache-sedona-1.3.0-incubating-bin.tar.gz.sha512
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.3.0-incubating-src.tar.gz https://dist.apache.org/repos/dist/release/incubator/sedona/1.3.0-incubating/apache-sedona-1.3.0-incubating-src.tar.gz
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.3.0-incubating-src.tar.gz.asc https://dist.apache.org/repos/dist/release/incubator/sedona/1.3.0-incubating/apache-sedona-1.3.0-incubating-src.tar.gz.asc
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.3.0-incubating-src.tar.gz.sha512 https://dist.apache.org/repos/dist/release/incubator/sedona/1.3.0-incubating/apache-sedona-1.3.0-incubating-src.tar.gz.sha512
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.3.0-incubating-bin.tar.gz https://dist.apache.org/repos/dist/release/incubator/sedona/1.3.0-incubating/apache-sedona-1.3.0-incubating-bin.tar.gz
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.3.0-incubating-bin.tar.gz.asc https://dist.apache.org/repos/dist/release/incubator/sedona/1.3.0-incubating/apache-sedona-1.3.0-incubating-bin.tar.gz.asc
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.3.0-incubating-bin.tar.gz.sha512 https://dist.apache.org/repos/dist/release/incubator/sedona/1.3.0-incubating/apache-sedona-1.3.0-incubating-bin.tar.gz.sha512
+rm apache-sedona-1.3.0-incubating-src.tar.gz
+rm apache-sedona-1.3.0-incubating-src.tar.gz.asc
+rm apache-sedona-1.3.0-incubating-src.tar.gz.sha512
+rm apache-sedona-1.3.0-incubating-bin.tar.gz
+rm apache-sedona-1.3.0-incubating-bin.tar.gz.asc
+rm apache-sedona-1.3.0-incubating-bin.tar.gz.sha512
+
+<span class="nb">echo</span> <span class="s2">&quot;Re-staging releases to https://repository.apache.org&quot;</span>
+<span class="c1"># For Spark 3.0 and Scala 2.12</span>
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/incubator-sedona.git -Dtag<span class="o">=</span>sedona-1.3.0-incubating-rc2 -DautoVersionSubmodules<span class="o">=</span><span class="nb">true</span> -Dresume<span class="o">=</span><span class="nb">false</span> -Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests&quot;</span>
+<span class="c1"># For Spark 3.0 and Scala 2.13</span>
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/incubator-sedona.git -Dtag<span class="o">=</span>sedona-1.3.0-incubating-rc2 -DautoVersionSubmodules<span class="o">=</span><span class="nb">true</span> -Dresume<span class="o">=</span><span class="nb">false</span> -Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dscala=2.13&quot;</span>
+</code></pre></div>
+
+<h3 id="fix-signature-issues">Fix signature issues<a class="headerlink" href="#fix-signature-issues" title="Permanent link">&para;</a></h3>
+<p>Please find the Sedona staging id on <a href="https://repository.apache.org">https://repository.apache.org</a> under <code>staging repository</code>.</p>
+<p>Then run the following script. Replace <code>admin</code>, <code>admind123</code> with your Apache ID username and Apache ID password. Replace <code>stagingid</code> with the correct id.</p>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="nv">username</span><span class="o">=</span>admin
+<span class="nv">password</span><span class="o">=</span>admin123
+<span class="nv">stagingid</span><span class="o">=</span><span class="m">1016</span>
+
+
+<span class="nb">echo</span> <span class="s2">&quot;Re-uploading signatures to fix *failureMessage    Invalid Signature*&quot;</span>
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-common/1.3.0-incubating/sedona-common-1.3.0-incubating.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-core-3.0_2.12/1.3.0-incubating/sedona-core-3.0_2.12-1.3.0-incubating.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-core-3.0_2.13/1.3.0-incubating/sedona-core-3.0_2.13-1.3.0-incubating.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-sql-3.0_2.12/1.3.0-incubating/sedona-sql-3.0_2.12-1.3.0-incubating.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-sql-3.0_2.13/1.3.0-incubating/sedona-sql-3.0_2.13-1.3.0-incubating.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-viz-3.0_2.12/1.3.0-incubating/sedona-viz-3.0_2.12-1.3.0-incubating.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-viz-3.0_2.13/1.3.0-incubating/sedona-viz-3.0_2.13-1.3.0-incubating.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-python-adapter-3.0_2.12/1.3.0-incubating/sedona-python-adapter-3.0_2.12-1.3.0-incubating.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-python-adapter-3.0_2.13/1.3.0-incubating/sedona-python-adapter-3.0_2.13-1.3.0-incubating.pom
+wget https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-flink_2.12/1.3.0-incubating/sedona-flink_2.12-1.3.0-incubating.pom
+
+gpg -ab sedona-common-1.3.0-incubating.pom
+gpg -ab sedona-core-3.0_2.12-1.3.0-incubating.pom
+gpg -ab sedona-sql-3.0_2.12-1.3.0-incubating.pom
+gpg -ab sedona-viz-3.0_2.12-1.3.0-incubating.pom
+gpg -ab sedona-python-adapter-3.0_2.12-1.3.0-incubating.pom
+gpg -ab sedona-flink_2.12-1.3.0-incubating.pom
+gpg -ab sedona-core-3.0_2.13-1.3.0-incubating.pom
+gpg -ab sedona-sql-3.0_2.13-1.3.0-incubating.pom
+gpg -ab sedona-viz-3.0_2.13-1.3.0-incubating.pom
+gpg -ab sedona-python-adapter-3.0_2.13-1.3.0-incubating.pom
+
+
+curl -v -u <span class="nv">$username</span>:<span class="nv">$password</span> --upload-file sedona-common-1.3.0-incubating.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-common/1.3.0-incubating/sedona-common-1.3.0-incubating.pom.asc
+
+curl -v -u <span class="nv">$username</span>:<span class="nv">$password</span> --upload-file sedona-python-adapter-3.0_2.12-1.3.0-incubating.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-python-adapter-3.0_2.12/1.3.0-incubating/sedona-python-adapter-3.0_2.12-1.3.0-incubating.pom.asc
+
+curl -v -u <span class="nv">$username</span>:<span class="nv">$password</span> --upload-file sedona-viz-3.0_2.12-1.3.0-incubating.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-viz-3.0_2.12/1.3.0-incubating/sedona-viz-3.0_2.12-1.3.0-incubating.pom.asc
+
+curl -v -u <span class="nv">$username</span>:<span class="nv">$password</span> --upload-file sedona-core-3.0_2.12-1.3.0-incubating.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-core-3.0_2.12/1.3.0-incubating/sedona-core-3.0_2.12-1.3.0-incubating.pom.asc
+
+curl -v -u <span class="nv">$username</span>:<span class="nv">$password</span> --upload-file sedona-sql-3.0_2.12-1.3.0-incubating.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-sql-3.0_2.12/1.3.0-incubating/sedona-sql-3.0_2.12-1.3.0-incubating.pom.asc
+
+curl -v -u <span class="nv">$username</span>:<span class="nv">$password</span> --upload-file sedona-flink_2.12-1.3.0-incubating.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-flink_2.12/1.3.0-incubating/sedona-flink_2.12-1.3.0-incubating.pom.asc
+
+curl -v -u <span class="nv">$username</span>:<span class="nv">$password</span> --upload-file sedona-python-adapter-3.0_2.13-1.3.0-incubating.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-python-adapter-3.0_2.13/1.3.0-incubating/sedona-python-adapter-3.0_2.12-1.3.0-incubating.pom.asc
+
+curl -v -u <span class="nv">$username</span>:<span class="nv">$password</span> --upload-file sedona-viz-3.0_2.13-1.3.0-incubating.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-viz-3.0_2.13/1.3.0-incubating/sedona-viz-3.0_2.13-1.3.0-incubating.pom.asc
+
+curl -v -u <span class="nv">$username</span>:<span class="nv">$password</span> --upload-file sedona-core-3.0_2.13-1.3.0-incubating.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-core-3.0_2.13/1.3.0-incubating/sedona-core-3.0_2.13-1.3.0-incubating.pom.asc
+
+curl -v -u <span class="nv">$username</span>:<span class="nv">$password</span> --upload-file sedona-sql-3.0_2.13-1.3.0-incubating.pom.asc https://repository.apache.org/service/local/repositories/orgapachesedona-<span class="nv">$stagingid</span>/content/org/apache/sedona/sedona-sql-3.0_2.13/1.3.0-incubating/sedona-sql-3.0_2.13-1.3.0-incubating.pom.asc
+
+rm *.pom
+rm *.asc
+</code></pre></div>
+
+<h3 id="manually-close-and-release-the-package">Manually close and release the package<a class="headerlink" href="#manually-close-and-release-the-package" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Click <code>Close</code> on the Sedona staging repo on <a href="https://repository.apache.org">https://repository.apache.org</a> under <code>staging repository</code></li>
+<li>Once the staging repo is closed, click <code>Release</code> on this repo.</li>
+</ol>
+<h2 id="9-release-sedona-python-and-zeppelin">9. Release Sedona Python and Zeppelin<a class="headerlink" href="#9-release-sedona-python-and-zeppelin" title="Permanent link">&para;</a></h2>
+<p>You must have the maintainer priviledge of <code>https://pypi.org/project/apache-sedona/</code> and <code>https://www.npmjs.com/package/apache-sedona</code></p>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+git clone --shared --branch sedona-1.3.0-incubating-rc2 https://github.com/apache/incubator-sedona.git apache-sedona-1.3.0-incubating-src
+<span class="nb">cd</span> apache-sedona-1.3.0-incubating-src/python <span class="o">&amp;&amp;</span> python3 setup.py sdist bdist_wheel <span class="o">&amp;&amp;</span> twine upload dist/* <span class="o">&amp;&amp;</span> <span class="nb">cd</span> ..
+<span class="nb">cd</span> zeppelin <span class="o">&amp;&amp;</span> npm publish <span class="o">&amp;&amp;</span> <span class="nb">cd</span> ..
+rm -rf apache-sedona-1.3.0-incubating-src
+</code></pre></div>
+
+<h2 id="10-release-sedona-r-to-cran">10. Release Sedona R to CRAN.<a class="headerlink" href="#10-release-sedona-r-to-cran" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+R CMD build .
+R CMD check --as-cran apache.sedona_*.tar.gz
+</code></pre></div>
+
+<p>Then submit to CRAN using this <a href="https://xmpalantir.wu.ac.at/cransubmit/">web form</a>.</p>
+<h2 id="11-publish-the-doc-website">11. Publish the doc website<a class="headerlink" href="#11-publish-the-doc-website" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Add the download link to <a href="/download#versions">Download page</a> and create a GitHub release.</li>
+<li>Run <code>mkdocs build</code> in Sedona root directory. Copy all content in the <code>site</code> folder.</li>
+<li>Check out GitHub incubator-sedona-website <a href="https://github.com/apache/incubator-sedona-website/tree/asf-site">asf-site branch</a></li>
+<li>Use the copied content to replace all content in <code>asf-site</code> branch and upload to GitHub. Then <code>sedona.apache.org</code> will be automatically updated.</li>
+<li>You can also push the content to <code>asf-staging</code> branch. The staging website will be then updated: <code>sedona.staged.apache.org</code></li>
+</ol>
+<h3 id="javadoc-and-scaladoc">Javadoc and Scaladoc<a class="headerlink" href="#javadoc-and-scaladoc" title="Permanent link">&para;</a></h3>
+<h4>Compile</h4>
+<p>You should first compile the entire docs using <code>mkdocs build</code> to get the <code>site</code> folder.</p>
+<ul>
+<li>Javadoc: Use Intelij IDEA to generate Javadoc for <code>core</code> and <code>viz</code> module</li>
+<li>Scaladoc: Run <code>scaladoc -d site/api/javadoc/sql/ sql/src/main/scala/org/apache/sedona/sql/utils/*.scala</code></li>
+</ul>
+<h4>Copy</h4>
+<ol>
+<li>Copy the generated Javadoc (Scaladoc should already be there) to the corresponding folders in <code>site/api/javadoc</code></li>
+<li>Deploy Javadoc and Scaladoc with the project website</li>
+</ol>
+<h3 id="compile-r-html-docs">Compile R html docs<a class="headerlink" href="#compile-r-html-docs" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Make sure you install R, tree and curl on your Ubuntu machine. On Mac, just do <code>brew install tree</code>
+<div class="highlight"><pre><span></span><code>sudo apt install littler tree libcurl4-openssl-dev
+</code></pre></div></li>
+<li>In the Sedona root directory, run the script below. This will create <code>rdocs</code> folder in Sedona <code>/docs/api/rdocs</code>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+Rscript generate-docs.R
+<span class="nb">cd</span> ./docs/api/rdocs <span class="o">&amp;&amp;</span> tree -H <span class="s1">&#39;.&#39;</span> -L <span class="m">1</span> --noreport --charset utf-8 -o index.html <span class="o">&amp;&amp;</span> <span class="nb">cd</span> ../../../
+</code></pre></div></li>
+</ol>
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">November 16, 2022 19:23:40</span>
+      
+    
+  </small>
+</div>
+
+
+
+
+
+                
+  
+
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <a href="#" class="md-top md-icon" data-md-component="top" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </a>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
+        
+          <a href="../snapshot/" title="Publish a snapshot version" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+            </div>
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Publish a snapshot version
+              </div>
+            </div>
+          </a>
+        
+        
+          <a href="../vote/" title="Vote a release" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Vote a release
+              </div>
+            </div>
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright © 2022 The Apache Software Foundation
+          </div>
+        
+Apache Sedona, Apache Incubator, Apache, the Apache feather logo, and the Apache Incubator project logo are trademarks or registered trademarks of The Apache Software Foundation.
+<br>
+<img src="https://incubator.apache.org/images/incubator_feather_egg_logo_bw_crop.png" width="300">
+<br>
+Apache Sedona is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Apache Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.
+<br>
+Please visit <a href="http://www.apache.org/">Apache Software Foundation</a> for more details.
+      </div>
+      <div class="md-social">
+  
+    
+    
+      
+      
+    
+    <a href="https://github.com/apache/incubator-sedona" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M186.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1zM480 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2zm-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3zm-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/ApacheSedona" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+    </a>
+  
+</div>
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tabs", "navigation.top", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      
+    
+    
+  </body>
+</html>
