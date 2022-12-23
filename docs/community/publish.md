@@ -400,10 +400,60 @@ rm apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.asc
 rm apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512
 
 echo "Re-staging releases to https://repository.apache.org"
+
 # For Spark 3.0 and Scala 2.12
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests"
+
+git pull
+
+git checkout -b {{ sedona_create_release.current_git_tag }} {{ sedona_create_release.current_git_tag }}
+
+mvn versions:set -DnewVersion={{ sedona_create_release.current_version }}-SNAPSHOT
+
+git add -A
+
+git commit -m "tmp SNAPSHOT pom"
+
+mvn clean release:prepare -DautoVersionSubmodules=true -DdryRun=true -Dresume=false -Darguments="-DskipTests" -Dtag={{ sedona_create_release.current_git_tag }} -DreleaseVersion={{ sedona_create_release.current_version }} -DdevelopmentVersion={{ sedona_create_release.next_version }}
+
+mvn versions:set -DnewVersion={{ sedona_create_release.current_version }}
+
+git add -A
+
+git commit -m "revert back to the correct pom"
+
+mvn clean release:perform -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests"
+
+rm -f release.*
+rm -f pom.xml.*
+
 # For Spark 3.0 and Scala 2.13
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.13"
+
+mvn versions:set -DnewVersion={{ sedona_create_release.current_version }}-SNAPSHOT
+
+git add -A
+
+git commit -m "tmp SNAPSHOT pom"
+
+mvn clean release:prepare -DautoVersionSubmodules=true -DdryRun=true -Dresume=false -Darguments="-DskipTests -Dscala=2.13" -Dtag={{ sedona_create_release.current_git_tag }} -DreleaseVersion={{ sedona_create_release.current_version }} -DdevelopmentVersion={{ sedona_create_release.next_version }}
+
+mvn versions:set -DnewVersion={{ sedona_create_release.current_version }}
+
+git add -A
+
+git commit -m "revert back to the correct pom"
+
+mvn clean release:perform -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.13"
+
+rm -f release.*
+rm -f pom.xml.*
+
+git add -A
+
+git commit -m "cleanup the branch"
+
+git checkout master
+
+git branch -d {{ sedona_create_release.current_git_tag }}
 ```
 
 ### Fix signature issues
@@ -451,7 +501,14 @@ You must have the maintainer priviledge of `https://pypi.org/project/apache-sedo
 
 ```bash
 #!/bin/bash
-git clone --shared --branch {{ sedona_create_release.current_git_tag}} https://github.com/apache/incubator-sedona.git apache-sedona-{{ sedona_create_release.current_version }}-src
+
+wget https://github.com/apache/incubator-sedona/archive/refs/tags/{{ sedona_create_release.current_git_tag}}.tar.gz
+tar -xvf {{ sedona_create_release.current_git_tag}}.tar.gz
+mkdir apache-sedona-{{ sedona_create_release.current_version }}-src
+cp -r incubator-sedona-{{ sedona_create_release.current_git_tag}}/* apache-sedona-{{ sedona_create_release.current_version }}-src/
+
+rm -rf incubator-sedona-{{ sedona_create_release.current_git_tag}}
+
 cd apache-sedona-{{ sedona_create_release.current_version }}-src/python && python3 setup.py sdist bdist_wheel && twine upload dist/* && cd ..
 cd zeppelin && npm publish && cd ..
 rm -rf apache-sedona-{{ sedona_create_release.current_version }}-src

@@ -291,7 +291,7 @@ Under BSD 3-clause (compatible with Apache 2.0 license)
 		```
 
 ## SNAPSHOT versions
-Sometimes Sedona has a SNAPSHOT version for the upcoming release. It follows the same naming conversion but has "SNAPSHOT" as suffix in the version. For example, `{{ sedona.current_snapshot }}`
+Sometimes Sedona has a SNAPSHOT version for the upcoming release. It follows the same naming conversion but has "SNAPSHOT" as suffix in the version. For example, `{{ sedona_create_release.current_snapshot }}`
 
 In order to download SNAPSHOTs, you need to add the following repositories in your POM.XML or build.sbt
 ### build.sbt

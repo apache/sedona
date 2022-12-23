@@ -39,6 +39,8 @@ jobs:
           ${{ runner.os }}-pip-
 
     - run: (cd docs/api/rdocs/; sudo tree -H '.' -L 1 --noreport --charset utf-8 -o index.html)
+    - run: git config --global user.name = "test-name"
+    - run: git config --global user.email = "test-email@abc.com"
     - run: mike deploy --update-aliases current-snapshot
     - run: mkdir staging
     - run: cp -r site/* staging/
