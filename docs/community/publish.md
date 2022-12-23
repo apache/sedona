@@ -469,26 +469,19 @@ Then submit to CRAN using this [web form](https://xmpalantir.wu.ac.at/cransubmit
 
 ## 11. Publish the doc website
 
-1. Add the download link to [Download page](/download#versions) and create a GitHub release.
-2. Run `mkdocs build` in Sedona root directory. Copy all content in the `site` folder.
-3. Check out GitHub incubator-sedona-website [asf-site branch](https://github.com/apache/incubator-sedona-website/tree/asf-site)
-4. Use the copied content to replace all content in `asf-site` branch and upload to GitHub. Then `sedona.apache.org` will be automatically updated.
-5. You can also push the content to `asf-staging` branch. The staging website will be then updated: `sedona.staged.apache.org`
+### Prepare the environment and doc folder
 
-### Javadoc and Scaladoc
+1. Check out the {{ sedona_create_release.current_version }} Git tag on your local repo.
+2. Read [Compile documentation website](/setup/compile/#compile-the-documentation) to set up your environment. But don't deploy anything yet.
+3. Add the download link to [Download page](/download#versions).
+4. Add the news to `docs/index.md`.
 
-#### Compile
+### Generate Javadoc and Scaladoc
 
-You should first compile the entire docs using `mkdocs build` to get the `site` folder.
+* Javadoc: Use Intelij IDEA to generate Javadoc for `core` and `viz` module, output them to `docs/api/javadoc`
+* Scaladoc: Run `scaladoc -d docs/api/javadoc/sql/ sql/src/main/scala/org/apache/sedona/sql/utils/*.scala`
 
-* Javadoc: Use Intelij IDEA to generate Javadoc for `core` and `viz` module
-* Scaladoc: Run `scaladoc -d site/api/javadoc/sql/ sql/src/main/scala/org/apache/sedona/sql/utils/*.scala`
-
-#### Copy
-
-1. Copy the generated Javadoc (Scaladoc should already be there) to the corresponding folders in `site/api/javadoc`
-2. Deploy Javadoc and Scaladoc with the project website
-
+Please do not commit these generated docs to Sedona GitHub.
 
 ### Compile R html docs
 
@@ -502,3 +495,13 @@ sudo apt install littler tree libcurl4-openssl-dev
 Rscript generate-docs.R
 cd ./docs/api/rdocs && tree -H '.' -L 1 --noreport --charset utf-8 -o index.html && cd ../../../
 ```
+
+### Deploy the website
+
+1. Run `mike deploy --push --update-aliases {{ sedona_create_release.current_version }} latest`. This will deploy this website to Sedona main repo's gh-page. But Sedona does not use gh-page for hosting website.
+2. Check out the master branch.
+3. Git commit and push your changes in `download.md` and `index.md` to master branch. Delete all generated docs.
+4. Check out the `gh-page` branch.
+5. In a separate folder, check out GitHub sedona-website [asf-site branch](https://github.com/apache/incubator-sedona-website/tree/asf-site)
+6. Copy all content to in Sedona main repo `gh-page` branch to Sedona website repo `asf-site` branch.
+7. Commit and push the changes to the remote `asf-site` branch.

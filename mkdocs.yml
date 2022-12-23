@@ -157,6 +157,8 @@ theme:
     - search.highlight
     - search.share
 extra:
+  version:
+    provider: mike
   social:
     - icon: fontawesome/brands/github-alt
       link: 'https://github.com/apache/incubator-sedona'

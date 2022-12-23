@@ -20,6 +20,7 @@ jobs:
     - run: pip install mkdocs-material
     - run: pip install mkdocs-macros-plugin
     - run: pip install mkdocs-git-revision-date-localized-plugin
+    - run: pip install mike
     - run: sudo apt update
     - run: sudo apt install littler tree libcurl4-openssl-dev
     - run: (sudo Rscript generate-docs.R)
@@ -38,7 +39,7 @@ jobs:
           ${{ runner.os }}-pip-
 
     - run: (cd docs/api/rdocs/; sudo tree -H '.' -L 1 --noreport --charset utf-8 -o index.html)
-    - run: mkdocs build
+    - run: mike deploy --update-aliases current-snapshot
     - run: mkdir staging
     - run: cp -r site/* staging/
     - uses: actions/upload-artifact@v2
