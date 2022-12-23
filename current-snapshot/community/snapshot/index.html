@@ -3105,7 +3105,7 @@ rm -f pom.xml.*
 
 <span class="c1"># Spark 3.0 and Scala 2.12</span>
 <span class="c1"># Prepare the SNAPSHOTs</span>
-mvn -q -B clean -Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests&quot;</span> release:prepare -Dtag<span class="o">=</span>sedona-1.3.1-incubating-rc1 -DreleaseVersion<span class="o">=</span><span class="m">1</span>.3.1-incubating -DdevelopmentVersion<span class="o">=</span><span class="m">1</span>.3.1-incubating-SNAPSHOT -DdryRun<span class="o">=</span><span class="nb">true</span> -DautoVersionSubmodules<span class="o">=</span><span class="nb">true</span> -Dresume<span class="o">=</span><span class="nb">false</span>
+mvn -q -B clean -Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests&quot;</span> release:prepare -Dtag<span class="o">=</span>sedona-1.3.2-incubating-rc1 -DreleaseVersion<span class="o">=</span><span class="m">1</span>.3.2-incubating -DdevelopmentVersion<span class="o">=</span><span class="m">1</span>.3.2-incubating-SNAPSHOT -DdryRun<span class="o">=</span><span class="nb">true</span> -DautoVersionSubmodules<span class="o">=</span><span class="nb">true</span> -Dresume<span class="o">=</span><span class="nb">false</span>
 <span class="c1"># Deploy the SNAPSHOTs</span>
 mvn -q deploy -DskipTests
 
@@ -3114,7 +3114,7 @@ rm -f pom.xml.*
 
 <span class="c1"># Prepare for Spark 3.0 and Scala 2.13</span>
 <span class="c1"># Prepare the SNAPSHOTs</span>
-mvn -q -B clean -Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dscala=2.13&quot;</span> release:prepare  -Dtag<span class="o">=</span>sedona-1.3.1-incubating-rc1 -DreleaseVersion<span class="o">=</span><span class="m">1</span>.3.1-incubating -DdevelopmentVersion<span class="o">=</span><span class="m">1</span>.3.1-incubating-SNAPSHOT -DdryRun<span class="o">=</span><span class="nb">true</span> -DautoVersionSubmodules<span class="o">=</span><span class="nb">true</span> -Dresume<span class="o">=</span><span class="nb">false</span>
+mvn -q -B clean -Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dscala=2.13&quot;</span> release:prepare  -Dtag<span class="o">=</span>sedona-1.3.2-incubating-rc1 -DreleaseVersion<span class="o">=</span><span class="m">1</span>.3.2-incubating -DdevelopmentVersion<span class="o">=</span><span class="m">1</span>.3.2-incubating-SNAPSHOT -DdryRun<span class="o">=</span><span class="nb">true</span> -DautoVersionSubmodules<span class="o">=</span><span class="nb">true</span> -Dresume<span class="o">=</span><span class="nb">false</span>
 <span class="c1"># Deploy the SNAPSHOTs</span>
 mvn -q deploy -DskipTests -Dscala<span class="o">=</span><span class="m">2</span>.13
 
