@@ -33,6 +33,7 @@
 
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
+        <cdm.scope>compile</cdm.scope>
     </properties>
 
     <dependencies>
@@ -40,6 +41,11 @@
             <groupId>org.apache.sedona</groupId>
             <artifactId>sedona-flink_${scala.compat.version}</artifactId>
             <version>${project.version}</version>
+        </dependency>
+         <!-- Define this to be shaded since it is provided in other modules -->
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>cdm-core</artifactId>
         </dependency>
     </dependencies>
     <build>

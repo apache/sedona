@@ -34,6 +34,7 @@
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
         <geotools.scope>provided</geotools.scope>
+        <cdm.scope>compile</cdm.scope>
     </properties>
 
     <dependencies>
@@ -63,9 +64,10 @@
             <artifactId>sedona-python-adapter-${spark.compat.version}_${scala.compat.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- Define this to be shaded since it is provided in other modules -->
         <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
+            <groupId>edu.ucar</groupId>
+            <artifactId>cdm-core</artifactId>
         </dependency>
         <!-- Define these so they get included in shaded jar for python testing purposes -->
         <dependency>

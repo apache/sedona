@@ -66,12 +66,12 @@
         <maven.deploy.skip>false</maven.deploy.skip>
         <maven.compiler.plugin.version>3.10.1</maven.compiler.plugin.version>
 
+        <cdm.version>5.4.2</cdm.version>
         <geotools.version>24.0</geotools.version>
         <hadoop.version>3.2.4</hadoop.version>
         <jackson.version>2.13.4</jackson.version>
         <jts.version>1.19.0</jts.version>
         <jts2geojson.version>0.16.1</jts2geojson.version>
-        <netcdf.version>5.4.2</netcdf.version>
         <spark.version>3.3.0</spark.version>
         <spark.compat.version>3.0</spark.compat.version>
         
@@ -80,7 +80,8 @@
         <scala.compat.version>2.12</scala.compat.version>
 
         <geotools.scope>provided</geotools.scope>
-        <netcdf.scope>compile</netcdf.scope>
+        <!-- Because it's not in Maven central, make it provided by default -->
+        <cdm.scope>provided</cdm.scope>
     </properties>
 
     <dependencies>
@@ -112,8 +113,8 @@
             <dependency>
                 <groupId>edu.ucar</groupId>
                 <artifactId>cdm-core</artifactId>
-                <version>${netcdf.version}</version>
-                <scope>${netcdf.scope}</scope>
+                <version>${cdm.version}</version>
+                <scope>${cdm.scope}</scope>
             </dependency>
             <!--The following GeoTools dependencies use GNU Lesser General Public License and thus are excluded from the binary distribution-->
             <!-- Users have to include them by themselves manually -->
@@ -248,26 +249,6 @@
                 <version>3.1.1</version>
                 <scope>test</scope>
             </dependency>
-
-            <!-- We don't include this in any projects, but defining it pins the version in transitive deps for tests -->
-            <!-- <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jackson.version}</version>
-                <scope>runtime</scope>
-            </dependency>
-             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
-                <scope>runtime</scope>
-            </dependency>
-             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${jackson.version}</version>
-                <scope>runtime</scope>
-            </dependency> -->
         </dependencies>
     </dependencyManagement>
     <repositories>
