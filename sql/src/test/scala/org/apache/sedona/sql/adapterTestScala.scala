@@ -349,7 +349,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
       // a serialization error if the schema or coercion is incorrect, e.g.
       // "Error while encoding: java.lang.RuntimeException: <desired data type> is not a
       // valid external type for schema of <current data type>"
-      println(joinResultDf.show(1))
+      joinResultDf.foreach(r => ())
 
       assert(
         joinResultDf.schema == schema,

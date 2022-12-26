@@ -295,6 +295,8 @@ object Adapter {
         case _: TimestampType => null.asInstanceOf[Timestamp]
         case _: BooleanType => null.asInstanceOf[Boolean]
         case _: StringType => null.asInstanceOf[String]
+        case _: BinaryType => null.asInstanceOf[Array[Byte]]
+        case _: StructType => null.asInstanceOf[StructType]
       }
     }
 

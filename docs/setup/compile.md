@@ -105,11 +105,14 @@ pip install mkdocs
 pip install mkdocs-material
 pip install mkdocs-macros-plugin
 pip install mkdocs-git-revision-date-localized-plugin
+pip install mike
 ```
 
 After installing MkDocs and MkDocs-Material, run the command in Sedona root folder:
 
 ```
-mkdocs serve
+mike deploy --update-aliases current-snapshot latest
+mike set-default latest
+mike serve
 ```
 

@@ -23,7 +23,7 @@ import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{Expression, Generator, ImplicitCastInputTypes}
-import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
+import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.collect.Collect
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
@@ -94,6 +94,19 @@ case class ST_3DDistance(inputExpressions: Seq[Expression])
   extends InferredBinaryExpression(Functions.distance3d) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Return the concave hull of a Geometry.
+ *
+ * @param inputExpressions
+ */
+case class ST_ConcaveHull(inputExpressions: Seq[Expression])
+  extends InferredTernaryExpression(Functions.concaveHull) with FoldableExpression {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
     copy(inputExpressions = newChildren)
   }
 }
@@ -334,20 +347,16 @@ case class ST_AsGeoJSON(inputExpressions: Seq[Expression])
   }
 }
 
-// TODO: sernetcdf is bundled with an ancient version of apache commons-codec, which
-// causes spark sql to throw NoSuchMethodError when folding binary expressions.
 case class ST_AsBinary(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.asWKB) {
+  extends InferredUnaryExpression(Functions.asWKB) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-// TODO: ST_AsEWKB is similar to ST_AsBinary, which is also affected by the sernetcdf
-// problem.
 case class ST_AsEWKB(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.asEWKB) {
+  extends InferredUnaryExpression(Functions.asEWKB) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -769,7 +778,7 @@ case class ST_MakePolygon(inputExpressions: Seq[Expression])
     val numOfElements = possibleHolesRaw.map(_.numElements()).getOrElse(0)
 
     val holes = (0 until numOfElements).map(el => possibleHolesRaw match {
-      case Some(value) => Some(value.getArray(el))
+      case Some(value) => Some(value.getBinary(el))
       case None => None
     }).filter(_.nonEmpty)
       .map(el => el.map(_.toGeometry))
@@ -833,7 +842,7 @@ case class ST_SymDifference(inputExpressions: Seq[Expression])
   extends BinaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
-    new GenericArrayData(GeometrySerializer.serialize(leftGeometry.symDifference(rightGeometry)))
+    leftGeometry.symDifference(rightGeometry).toGenericArrayData
   }
 
   override def dataType: DataType = GeometryUDT
@@ -854,7 +863,7 @@ case class ST_Union(inputExpressions: Seq[Expression])
   extends BinaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
-    new GenericArrayData(GeometrySerializer.serialize(leftGeometry.union(rightGeometry)))
+    leftGeometry.union(rightGeometry).toGenericArrayData
   }
 
   override def dataType: DataType = GeometryUDT
