@@ -95,17 +95,6 @@
         <sourceDirectory>src/main/scala</sourceDirectory>
         <plugins>
             <plugin>
-                <groupId>io.paradoxical</groupId>
-                <artifactId>resolved-pom-maven-plugin</artifactId>
-                <version>1.0</version>
-                <executions>
-                    <execution>
-                        <id>resolve-my-pom</id>
-                        <phase>none</phase>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
             </plugin>
