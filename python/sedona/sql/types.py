@@ -15,10 +15,9 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-import struct
-
 from pyspark.sql.types import UserDefinedType, BinaryType
-from shapely.wkb import dumps, loads
+
+from . import geometry_serde
 
 
 class GeometryType(UserDefinedType):
@@ -28,10 +27,11 @@ class GeometryType(UserDefinedType):
         return BinaryType()
 
     def serialize(self, obj):
-        return dumps(obj)
+        return geometry_serde.serialize(obj)
 
     def deserialize(self, datum):
-        return loads(bytes(datum))
+        geom, offset = geometry_serde.deserialize(datum)
+        return geom
 
     @classmethod
     def module(cls):
