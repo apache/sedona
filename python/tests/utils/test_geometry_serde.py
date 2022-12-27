@@ -25,12 +25,13 @@ from shapely.geometry import MultiPoint
 from shapely.geometry import MultiLineString
 from shapely.geometry import MultiPolygon
 from shapely.geometry import GeometryCollection
+from shapely.wkt import loads as wkt_loads
 
 
 class TestGeometrySerde:
     def test_point(self):
         points = [
-            Point(),
+            wkt_loads("POINT EMPTY"),
             Point(10, 20),
             Point(10, 20, 30)
         ]
@@ -38,7 +39,7 @@ class TestGeometrySerde:
 
     def test_linestring(self):
         linestrings = [
-            LineString(),
+            wkt_loads("LINESTRING EMPTY"),
             LineString([(10, 20), (30, 40)]),
             LineString([(10, 20), (30, 40), (50, 60)]),
             LineString([(10, 20, 30), (30, 40, 50), (50, 60, 70)]),
@@ -47,7 +48,7 @@ class TestGeometrySerde:
 
     def test_multi_point(self):
         multi_points = [
-            MultiPoint(),
+            wkt_loads("MULTIPOINT EMPTY"),
             MultiPoint([(10, 20)]),
             MultiPoint([(10, 20), (30, 40)]),
             MultiPoint([(10, 20), (30, 40), (50, 60)]),
@@ -57,7 +58,7 @@ class TestGeometrySerde:
 
     def test_multi_linestring(self):
         multi_linestrings = [
-            MultiLineString(),
+            wkt_loads("MULTILINESTRING EMPTY"),
             MultiLineString([[(10, 20), (30, 40)]]),
             MultiLineString([[(10, 20), (30, 40)], [(50, 60), (70, 80)]]),
             MultiLineString([[(10, 20, 30), (30, 40, 50)], [(50, 60, 70), (70, 80, 90)]]),
@@ -69,7 +70,7 @@ class TestGeometrySerde:
         int0 = [(1, 1), (1, 1.5), (1.5, 1.5), (1.5, 1), (1, 1)]
         int1 = [(2, 2), (2, 2.5), (2.5, 2.5), (2.5, 2), (2, 2)]
         polygons = [
-            Polygon(),
+            wkt_loads("POLYGON EMPTY"),
             Polygon(ext),
             Polygon(ext, [int0]),
             Polygon(ext, [int0, int1]),
@@ -81,7 +82,7 @@ class TestGeometrySerde:
         int0 = [(10, 10), (10, 15), (15, 15), (15, 10), (10, 10)]
         int1 = [(2, 2), (2, 2.5), (2.5, 2.5), (2.5, 2), (2, 2)]
         multi_polygons = [
-            MultiPolygon(),
+            wkt_loads("MULTIPOLYGON EMPTY"),
             MultiPolygon([Polygon(ext)]),
             MultiPolygon([Polygon(ext), Polygon(ext, [int0])]),
             MultiPolygon([Polygon(ext), Polygon(ext, [int0, int1])]),
@@ -91,7 +92,7 @@ class TestGeometrySerde:
 
     def test_geometry_collection(self):
         geometry_collections = [
-            GeometryCollection(),
+            wkt_loads("GEOMETRYCOLLECTION EMPTY"),
             GeometryCollection([Point(10, 20), LineString([(10, 20), (30, 40)]), Point(30, 40)]),
             GeometryCollection([
                 MultiPoint([(10, 20), (30, 40)]),
@@ -119,6 +120,7 @@ class TestGeometrySerde:
         for geom in geoms:
             geom_actual = TestGeometrySerde.serde_roundtrip(geom)
             assert geom_actual.equals_exact(geom, 1e-6)
+            assert geom.wkt == geom_actual.wkt
 
     @staticmethod
     def serde_roundtrip(geom: BaseGeometry) -> BaseGeometry:

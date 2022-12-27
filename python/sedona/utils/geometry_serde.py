@@ -28,6 +28,7 @@ from shapely.geometry import MultiPoint
 from shapely.geometry import MultiLineString
 from shapely.geometry import MultiPolygon
 from shapely.geometry import GeometryCollection
+from shapely.wkt import loads as wkt_loads
 
 
 class GeometryTypeID:
@@ -283,7 +284,10 @@ def serialize_point(geom: Point) -> bytearray:
 
 def deserialize_point(geom_buffer: GeometryBuffer) -> Point:
     if geom_buffer.num_coords == 0:
-        return Point()
+        # Here we don't call Point() directly since it would create an empty GeometryCollection
+        # in shapely 1.x. You'll find similar code for creating empty geometries in other
+        # deserialization functions.
+        return wkt_loads("POINT EMPTY")
     coord = geom_buffer.read_coordinate()
     return Point(coord)
 
@@ -307,7 +311,7 @@ def serialize_multi_point(geom: MultiPoint) -> bytearray:
 
 def deserialize_multi_point(geom_buffer: GeometryBuffer) -> MultiPoint:
     if geom_buffer.num_coords == 0:
-        return MultiPoint()
+        return wkt_loads("MULTIPOINT EMPTY")
     coords = geom_buffer.read_coordinates(geom_buffer.num_coords)
     points = []
     for coord in coords:
@@ -331,7 +335,7 @@ def serialize_linestring(geom: LineString) -> bytearray:
 
 def deserialize_linestring(geom_buffer: GeometryBuffer) -> LineString:
     if geom_buffer.num_coords == 0:
-        return LineString()
+        return wkt_loads("LINESTRING EMPTY")
     coords = geom_buffer.read_coordinates(geom_buffer.num_coords)
     return LineString(coords)
 
@@ -355,7 +359,7 @@ def serialize_multi_linestring(geom: MultiLineString) -> bytearray:
 
 def deserialize_multi_linestring(geom_buffer: GeometryBuffer) -> MultiLineString:
     if geom_buffer.num_coords == 0:
-        return MultiLineString()
+        return wkt_loads("MULTILINESTRING EMPTY")
     num_linestrings = geom_buffer.read_int()
     linestrings = []
     for k in range(0, num_linestrings):
@@ -385,7 +389,7 @@ def serialize_polygon(geom: Polygon) -> bytearray:
 
 def deserialize_polygon(geom_buffer: GeometryBuffer) -> Polygon:
     if geom_buffer.num_coords == 0:
-        return Polygon()
+        return wkt_loads("POLYGON EMPTY")
     return geom_buffer.read_polygon()
 
 
@@ -417,7 +421,7 @@ def serialize_multi_polygon(geom: MultiPolygon) -> bytearray:
 
 def deserialize_multi_polygon(geom_buffer: GeometryBuffer) -> MultiPolygon:
     if geom_buffer.num_coords == 0:
-        return MultiPolygon()
+        return wkt_loads("MULTIPOLYGON EMPTY")
     num_polygons = geom_buffer.read_int()
     polygons = []
     for k in range(0, num_polygons):
@@ -472,7 +476,7 @@ def serialize_shapely_1_empty_geom(geom) -> bytearray:
 def deserialize_geometry_collection(geom_buffer: GeometryBuffer) -> GeometryCollection:
     num_geometries = geom_buffer.num_coords
     if num_geometries == 0:
-        return GeometryCollection()
+        return wkt_loads("GEOMETRYCOLLECTION EMPTY")
     geometries = []
     geom_end_offset = 8
     buffer = geom_buffer.buffer[8:]
