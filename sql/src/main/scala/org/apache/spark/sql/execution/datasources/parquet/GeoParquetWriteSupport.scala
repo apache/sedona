@@ -216,7 +216,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
           case SQLConf.ParquetOutputTimestampType.TIMESTAMP_MILLIS =>
             (row: SpecializedGetters, ordinal: Int) =>
               val micros = row.getLong(ordinal)
-              val millis = DateTimeUtils.microsToMillis(timestampRebaseFunc(micros))
+              val millis = GeoDateTimeUtils.microsToMillis(timestampRebaseFunc(micros))
               recordConsumer.addLong(millis)
         }
 
