@@ -17,6 +17,7 @@
 
 import struct
 import math
+from typing import List, Optional
 
 from shapely.coords import CoordinateSequence
 from shapely.geometry import Point
@@ -87,7 +88,6 @@ class GeometryBuffer:
     num_coords: int
     coords_offset: int
     ints_offset: int
-    mark_offset: int
 
     def __init__(self, buffer: bytearray, coord_type: int, coords_offset: int, num_coords: int):
         self.buffer = buffer
@@ -96,12 +96,6 @@ class GeometryBuffer:
         self.num_coords = num_coords
         self.coords_offset = coords_offset
         self.ints_offset = coords_offset + self.bytes_per_coord * num_coords
-
-    def mark(self, offset: int):
-        self.mark_offset = offset
-
-    def mark_end_of_buffer(self):
-        self.mark_offset = self.ints_offset
 
     def read_linestring(self) -> LineString:
         num_points = self.read_int()
@@ -122,19 +116,21 @@ class GeometryBuffer:
         return Polygon(exterior, holes=interiors)
 
     def write_linestring(self, line):
-        self.write_int(len(line.coords))
-        self.coords_offset = put_coordinates(self.buffer, self.coords_offset, self.coord_type, line.coords)
+        coords = line.coords
+        self.write_int(len(coords))
+        self.coords_offset = put_coordinates(self.buffer, self.coords_offset, self.coord_type, coords)
 
     def write_polygon(self, polygon: Polygon):
         exterior = polygon.exterior
         if not exterior.coords:
             self.write_int(0)
             return
+        self.write_int(len(polygon.interiors) + 1)
         self.write_linestring(exterior)
         for interior in polygon.interiors:
             self.write_linestring(interior)
 
-    def read_coordinates(self, num_coords: int) -> CoordinateSequence:
+    def read_coordinates(self, num_coords: int) -> List[tuple]:
         coords = get_coordinates(self.buffer, self.coords_offset, self.coord_type, num_coords)
         self.coords_offset += num_coords * self.bytes_per_coord
         return coords
@@ -154,12 +150,14 @@ class GeometryBuffer:
         self.ints_offset += 4
 
 
-def serialize(geom) -> bytearray:
+def serialize(geom) -> Optional[bytearray]:
     """
     Serialize a shapely geometry object to the internal representation of GeometryUDT.
     :param geom: shapely geometry object
     :return: internal representation of GeometryUDT
     """
+    if geom is None:
+        return None
     geom_type = geom.geom_type
     if geom_type == 'Point':
         return serialize_point(geom)
@@ -185,6 +183,8 @@ def deserialize(buffer: bytearray):
     :param buffer: internal representation of GeometryUDT
     :return: shapely geometry object
     """
+    if buffer is None:
+        return None
     preamble_byte = buffer[0]
     geom_type = (preamble_byte >> 4) & 0x0F
     coord_type = (preamble_byte >> 1) & 0x07
@@ -203,11 +203,10 @@ def deserialize(buffer: bytearray):
     elif geom_type == GeometryTypeID.MULTIPOLYGON:
         geom = deserialize_multi_polygon(geom_buffer)
     elif geom_type == GeometryTypeID.GEOMETRYCOLLECTION:
-        geom = deserialize_geometry_collection(buffer, num_coords)
+        geom = deserialize_geometry_collection(geom_buffer)
     else:
         raise ValueError("Unsupported geometry type ID: {}".format(geom_type))
-    geom_buffer.mark_end_of_buffer()
-    return geom, geom_buffer.mark_offset
+    return geom, geom_buffer.ints_offset
 
 
 def create_buffer_for_geom(geom_type: int, coord_type: int, size: int, num_coords: int) -> bytearray:
@@ -230,26 +229,27 @@ def put_coordinate(buffer: bytearray, offset: int, coord_type: int, coord: tuple
     z = coord[2] if len(coord) > 2 else math.nan
     if coord_type == CoordinateType.XY:
         struct.pack_into('d', buffer, offset, x)
-        struct.pack_into('d', buffer, offset, y)
+        struct.pack_into('d', buffer, offset + 8, y)
         offset += 16
     elif coord_type == CoordinateType.XYZ:
         struct.pack_into('d', buffer, offset, x)
-        struct.pack_into('d', buffer, offset, y)
-        struct.pack_into('d', buffer, offset, z)
+        struct.pack_into('d', buffer, offset + 8, y)
+        struct.pack_into('d', buffer, offset + 16, z)
         offset += 24
     else:
         # Shapely does not support M dimension for now
         raise ValueError("Invalid coordinate type: {}".format(coord_type))
+    return offset
 
 
-def get_coordinates(buffer: bytearray, offset: int, coord_type: int, num_coords: int) -> CoordinateSequence:
+def get_coordinates(buffer: bytearray, offset: int, coord_type: int, num_coords: int) -> List[tuple]:
     coords = []
     bytes_per_coord = CoordinateType.bytes_per_coord(coord_type)
     for i in range(num_coords):
         coord = get_coordinate(buffer, offset, coord_type)
         coords.append(coord)
         offset += bytes_per_coord
-    return CoordinateSequence(coords)
+    return coords
 
 
 def get_coordinate(buffer: bytearray, offset: int, coord_type: int) -> tuple:
@@ -273,8 +273,9 @@ def serialize_point(geom: Point) -> bytearray:
     coords = geom.coords
     if not coords:
         return create_buffer_for_geom(GeometryTypeID.POINT, CoordinateType.XY, 8, 0)
-    size = 8 + len(coords[0]) * 8
     coord_type = CoordinateType.type_of(coords, geom.has_z)
+    bytes_per_coord = CoordinateType.bytes_per_coord(coord_type)
+    size = 8 + bytes_per_coord
     buffer = create_buffer_for_geom(GeometryTypeID.POINT, coord_type, size, 1)
     put_coordinates(buffer, 8, coord_type, coords)
     return buffer
@@ -311,7 +312,8 @@ def deserialize_multi_point(geom_buffer: GeometryBuffer) -> MultiPoint:
     points = []
     for coord in coords:
         if math.isnan(coord[0]):
-            points.append(Point())
+            # Shapely does not allow creating MultiPoint with empty components
+            pass
         else:
             points.append(Point(coord))
     return MultiPoint(points)
@@ -320,7 +322,8 @@ def deserialize_multi_point(geom_buffer: GeometryBuffer) -> MultiPoint:
 def serialize_linestring(geom: LineString) -> bytearray:
     coords = geom.coords
     coord_type = CoordinateType.type_of(coords, geom.has_z)
-    size = 8 + len(coords) * len(coords[0]) * 8
+    bytes_per_coord = CoordinateType.bytes_per_coord(coord_type)
+    size = 8 + len(coords) * bytes_per_coord
     buffer = create_buffer_for_geom(GeometryTypeID.LINESTRING, coord_type, size, len(coords))
     put_coordinates(buffer, 8, coord_type, coords)
     return buffer
@@ -357,7 +360,8 @@ def deserialize_multi_linestring(geom_buffer: GeometryBuffer) -> MultiLineString
     linestrings = []
     for k in range(0, num_linestrings):
         linestring = geom_buffer.read_linestring()
-        linestrings.append(linestring)
+        if not linestring.is_empty:
+            linestrings.append(linestring)
     return MultiLineString(linestrings)
 
 
@@ -370,7 +374,8 @@ def serialize_polygon(geom: Polygon) -> bytearray:
         num_coords += len(interior.coords)
     bytes_per_coord = len(exterior_coords[0]) * 8
     num_rings_offset = 8 + num_coords * bytes_per_coord
-    size = num_rings_offset + 4 + 4 * len(geom.interiors + 1)
+    num_rings = len(geom.interiors) + 1
+    size = num_rings_offset + 4 + 4 * num_rings
     coord_type = CoordinateType.type_of(exterior_coords, geom.has_z)
     buffer = create_buffer_for_geom(GeometryTypeID.POLYGON, coord_type, size, num_coords)
     geom_buffer = GeometryBuffer(buffer, coord_type, 8, num_coords)
@@ -417,11 +422,17 @@ def deserialize_multi_polygon(geom_buffer: GeometryBuffer) -> MultiPolygon:
     polygons = []
     for k in range(0, num_polygons):
         polygon = geom_buffer.read_polygon()
-        polygons.append(polygon)
+        if not polygon.is_empty:
+            polygons.append(polygon)
     return MultiPolygon(polygons)
 
 
 def serialize_geometry_collection(geom: GeometryCollection) -> bytearray:
+    if not isinstance(geom, GeometryCollection):
+        # In shapely 1.x, Empty geometries such as empty points, empty polygons etc.
+        # have geom_type property evaluated to 'GeometryCollection'. Such geometries are not
+        # instances of GeometryCollection and do not have `geom` property.
+        return serialize_shapely_1_empty_geom(geom)
     geometries = geom.geoms
     if not geometries:
         return create_buffer_for_geom(GeometryTypeID.GEOMETRYCOLLECTION, CoordinateType.XY, 8, 0)
@@ -440,13 +451,36 @@ def serialize_geometry_collection(geom: GeometryCollection) -> bytearray:
     return buffer
 
 
-def deserialize_geometry_collection(buffer: bytearray, num_geometries: int) -> GeometryCollection:
+def serialize_shapely_1_empty_geom(geom) -> bytearray:
+    if isinstance(geom, Point):
+        geom_type = GeometryTypeID.POINT
+    elif isinstance(geom, LineString):
+        geom_type = GeometryTypeID.LINESTRING
+    elif isinstance(geom, Polygon):
+        geom_type = GeometryTypeID.POLYGON
+    elif isinstance(geom, MultiPoint):
+        geom_type = GeometryTypeID.MULTIPOINT
+    elif isinstance(geom, MultiLineString):
+        geom_type = GeometryTypeID.MULTILINESTRING
+    elif isinstance(geom, MultiPolygon):
+        geom_type = GeometryTypeID.MULTIPOLYGON
+    else:
+        raise ValueError("Invalid empty geometry collection object: {}".format(geom))
+    return create_buffer_for_geom(geom_type, CoordinateType.XY, 8, 0)
+
+
+def deserialize_geometry_collection(geom_buffer: GeometryBuffer) -> GeometryCollection:
+    num_geometries = geom_buffer.num_coords
     if num_geometries == 0:
         return GeometryCollection()
     geometries = []
+    geom_end_offset = 8
+    buffer = geom_buffer.buffer[8:]
     for k in range(0, num_geometries):
         geom, offset = deserialize(buffer)
         geometries.append(geom)
         offset = aligned_offset(offset)
         buffer = buffer[offset:]
+        geom_end_offset += offset
+    geom_buffer.ints_offset = geom_end_offset
     return GeometryCollection(geometries)

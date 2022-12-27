@@ -17,7 +17,7 @@
 
 from pyspark.sql.types import UserDefinedType, BinaryType
 
-from . import geometry_serde
+from ..utils import geometry_serde
 
 
 class GeometryType(UserDefinedType):
