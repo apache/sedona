@@ -121,7 +121,7 @@ class GeoParquetReadSupport (
     new GeoParquetRecordMaterializer(
       parquetRequestedSchema,
       GeoParquetReadSupport.expandUDT(catalystRequestedSchema),
-      new GeoParquetToSparkSchemaConverter(conf),
+      new GeoParquetToSparkSchemaConverter(keyValueMetaData, conf),
       convertTz,
       datetimeRebaseMode,
       int96RebaseMode)

@@ -13,9 +13,10 @@ pytest-cov = "*"
 [packages]
 shapely="==1.8.5"
 pandas="*"
-geopandas="==0.6.0"
+geopandas="==0.10.2"
 pyspark=">=2.3.0"
 attrs="*"
+pyarrow="*"
 
 [requires]
 python_version = "3.7"

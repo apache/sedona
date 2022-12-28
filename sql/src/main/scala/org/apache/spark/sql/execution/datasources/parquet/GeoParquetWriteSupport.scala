@@ -17,13 +17,12 @@
 
 package org.apache.spark.sql.execution.datasources.parquet
 
-import java.nio.{ByteBuffer, ByteOrder}
-import java.util
-import scala.collection.JavaConverters.mapAsJavaMapConverter
 import org.apache.hadoop.conf.Configuration
 import org.apache.parquet.hadoop.api.WriteSupport
+import org.apache.parquet.hadoop.api.WriteSupport.FinalizedWriteContext
 import org.apache.parquet.hadoop.api.WriteSupport.WriteContext
-import org.apache.parquet.io.api.{Binary, RecordConsumer}
+import org.apache.parquet.io.api.Binary
+import org.apache.parquet.io.api.RecordConsumer
 import org.apache.sedona.common.utils.GeomUtils
 import org.apache.spark.SPARK_VERSION_SHORT
 import org.apache.spark.internal.Logging
@@ -31,11 +30,22 @@ import org.apache.spark.sql.SPARK_VERSION_METADATA_KEY
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters
 import org.apache.spark.sql.catalyst.util.DateTimeUtils
+import org.apache.spark.sql.execution.datasources.parquet.GeoParquetWriteSupport.GeometryColumnInfo
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.internal.SQLConf.LegacyBehaviorPolicy
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
+import org.json4s.DefaultFormats
+import org.json4s.Extraction
+import org.json4s.jackson.compactJson
+import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKBWriter
+
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.util
+import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 /**
  * A Parquet [[WriteSupport]] implementation that writes Catalyst [[InternalRow]]s as Parquet
@@ -91,6 +101,11 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
   private val int96RebaseFunc = GeoDataSourceUtils.creteTimestampRebaseFuncInWrite(
     int96RebaseMode, "Parquet INT96")
 
+  // A mapping from geometry field ordinal to bounding box. According to the geoparquet specification,
+  // "Geometry columns MUST be at the root of the schema", so we don't need to worry about geometry
+  // fields in nested structures.
+  private val geometryColumnInfoMap: mutable.Map[Int, GeometryColumnInfo] = mutable.Map.empty
+
   override def init(configuration: Configuration): WriteContext = {
     val schemaString = configuration.get(ParquetWriteSupport.SPARK_ROW_SCHEMA)
     this.schema = StructType.fromString(schemaString)
@@ -106,7 +121,13 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       SQLConf.ParquetOutputTimestampType.withName(configuration.get(key))
     }
 
-    this.rootFieldWriters = schema.map(_.dataType).map(makeWriter).toArray[ValueWriter]
+    this.rootFieldWriters = schema.zipWithIndex.map { case (field, ordinal) =>
+      makeWriter(field.dataType, Some(ordinal))
+    }.toArray[ValueWriter]
+
+    if (geometryColumnInfoMap.isEmpty) {
+      throw new RuntimeException("No geometry column found in the schema")
+    }
 
     val messageType = new SparkToParquetSchemaConverter(configuration).convert(schema)
     val metadata = Map(
@@ -140,6 +161,27 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
     this.recordConsumer = recordConsumer
   }
 
+  override def finalizeWrite(): WriteSupport.FinalizedWriteContext = {
+    val metadata = new util.HashMap[String, String]()
+    if (geometryColumnInfoMap.nonEmpty) {
+      val primaryColumnIndex = geometryColumnInfoMap.keys.head
+      val primaryColumn = schema.fields(primaryColumnIndex).name
+      val columns = geometryColumnInfoMap.map { case (ordinal, columnInfo) =>
+        val columnName = schema.fields(ordinal).name
+        val geometryTypes = columnInfo.seenGeometryTypes.toSeq
+        val bbox = if (geometryTypes.nonEmpty) {
+          Seq(columnInfo.bbox.minX, columnInfo.bbox.minY, columnInfo.bbox.maxX, columnInfo.bbox.maxY)
+        } else Seq(0.0, 0.0, 0.0, 0.0)
+        columnName -> GeometryFieldMetaData("WKB", geometryTypes, bbox)
+      }.toMap
+      val geoParquetMetadata = GeoParquetMetaData(Some(GeoParquetMetaData.VERSION), primaryColumn, columns)
+      implicit val formats: org.json4s.Formats = DefaultFormats.preservingEmptyValues
+      val geoParquetMetadataJson = compactJson(Extraction.decompose(geoParquetMetadata).underscoreKeys)
+      metadata.put("geo", geoParquetMetadataJson)
+    }
+    new FinalizedWriteContext(metadata)
+  }
+
   override def write(row: InternalRow): Unit = {
     consumeMessage {
       writeFields(row, schema, rootFieldWriters)
@@ -159,7 +201,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
     }
   }
 
-  private def makeWriter(dataType: DataType): ValueWriter = {
+  private def makeWriter(dataType: DataType, rootOrdinal: Option[Int] = None): ValueWriter = {
     dataType match {
       case BooleanType =>
         (row: SpecializedGetters, ordinal: Int) =>
@@ -228,7 +270,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
         makeDecimalWriter(precision, scale)
 
       case t: StructType =>
-        val fieldWriters = t.map(_.dataType).map(makeWriter).toArray[ValueWriter]
+        val fieldWriters = t.map(_.dataType).map(makeWriter(_, None)).toArray[ValueWriter]
         (row: SpecializedGetters, ordinal: Int) =>
           consumeGroup {
             writeFields(row.getStruct(ordinal, t.length), t, fieldWriters)
@@ -239,11 +281,20 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       case t: MapType => makeMapWriter(t)
 
       case GeometryUDT =>
-        (row: SpecializedGetters, ordinal: Int) =>
+        val geometryColumnInfo = rootOrdinal match {
+          case Some(ordinal) =>
+            geometryColumnInfoMap.getOrElseUpdate(ordinal, new GeometryColumnInfo())
+          case None => null
+        }
+        (row: SpecializedGetters, ordinal: Int) => {
           val serializedGeometry = row.getBinary(ordinal)
           val geom = GeometryUDT.deserialize(serializedGeometry)
           val wkbWriter = new WKBWriter(GeomUtils.getDimension(geom))
           recordConsumer.addBinary(Binary.fromReusedByteArray(wkbWriter.write(geom)))
+          if (geometryColumnInfo != null) {
+            geometryColumnInfo.update(geom)
+          }
+        }
 
       case t: UserDefinedType[_] => makeWriter(t.sqlType)
 
@@ -479,5 +530,40 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
     recordConsumer.startField(field, index)
     f
     recordConsumer.endField(field, index)
+  }
+}
+
+object GeoParquetWriteSupport {
+  class GeometryColumnInfo {
+    val bbox: GeometryColumnBoundingBox = new GeometryColumnBoundingBox()
+
+    // GeoParquet column metadata has a `geometry_types` property, which contains a list of geometry types
+    // that are present in the column.
+    val seenGeometryTypes: mutable.Set[String] = mutable.Set.empty
+
+    def update(geom: Geometry): Unit = {
+      bbox.update(geom)
+      // In case of 3D geometries, a " Z" suffix gets added (e.g. ["Point Z"]).
+      val hasZ = {
+        val coordinate = geom.getCoordinate
+        if (coordinate != null) !coordinate.getZ.isNaN else false
+      }
+      val geometryType = if (!hasZ) geom.getGeometryType else geom.getGeometryType + " Z"
+      seenGeometryTypes.add(geometryType)
+    }
+  }
+
+  class GeometryColumnBoundingBox(
+    var minX: Double = Double.PositiveInfinity,
+    var minY: Double = Double.PositiveInfinity,
+    var maxX: Double = Double.NegativeInfinity,
+    var maxY: Double = Double.NegativeInfinity) {
+    def update(geom: Geometry): Unit = {
+      val env = geom.getEnvelopeInternal
+      minX = math.min(minX, env.getMinX)
+      minY = math.min(minY, env.getMinY)
+      maxX = math.max(maxX, env.getMaxX)
+      maxY = math.max(maxY, env.getMaxY)
+    }
   }
 }
