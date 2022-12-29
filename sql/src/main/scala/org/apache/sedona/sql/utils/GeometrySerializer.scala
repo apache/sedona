@@ -18,10 +18,8 @@
  */
 package org.apache.sedona.sql.utils
 
-import org.apache.sedona.common.utils.GeomUtils;
-import org.apache.spark.sql.catalyst.util.ArrayData
+import org.apache.sedona.common.geometrySerde
 import org.locationtech.jts.geom.Geometry
-import org.locationtech.jts.io.{WKBReader, WKBWriter}
 
 /**
   * SerDe using the WKB reader and writer objects
@@ -35,8 +33,7 @@ object GeometrySerializer {
     * @return Array of bites represents this geometry
     */
   def serialize(geometry: Geometry): Array[Byte] = {
-    val writer = new WKBWriter(GeomUtils.getDimension(geometry), 2, true)
-    writer.write(geometry)
+    geometrySerde.GeometrySerializer.serialize(geometry)
   }
 
   /**
@@ -46,7 +43,6 @@ object GeometrySerializer {
     * @return JTS geometry
     */
   def deserialize(value: Array[Byte]): Geometry = {
-    val reader = new WKBReader()
-    reader.read(value)
+    geometrySerde.GeometrySerializer.deserialize(value)
   }
 }
