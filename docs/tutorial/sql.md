@@ -138,7 +138,7 @@ Shapefile and GeoJSON must be loaded by SpatialRDD and converted to DataFrame us
 
 ## Load GeoParquet
 
-Since v`1.3.0`, Sedona natively supports loading GeoParquet file. GeoParquet must be loaded using DataFrame if default name is geometry.
+Since v`1.3.0`, Sedona natively supports loading GeoParquet file. Sedona will infer geometry fields using the "geo" metadata in GeoParquet files.
 
 ```Scala
 val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation1)
@@ -155,24 +155,6 @@ root
  |-- gdp_md_est: double (nullable = true)
  |-- geometry: geometry (nullable = true)
 ```
-If geometry column name is different
-
-```Scala
-var df = sparkSession.read.format("geoparquet").option("fieldGeometry", "new_geometry").load(geoparquetdatalocation1)
-```
-
-The output will be as follows:
-
-```
-root
- |-- pop_est: long (nullable = true)
- |-- continent: string (nullable = true)
- |-- name: string (nullable = true)
- |-- iso_a3: string (nullable = true)
- |-- gdp_md_est: double (nullable = true)
- |-- new_geometry: geometry (nullable = true)
-```
-
 
 ## Transform the Coordinate Reference System
 
