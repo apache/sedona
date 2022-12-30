@@ -1,5 +1,4 @@
-/**
- *
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,13 +45,20 @@ import scala.collection.JavaConverters._
 import scala.util.Failure
 import scala.util.Try
 
-class GeoParquetFileFormat extends ParquetFileFormat with FileFormat with DataSourceRegister with Logging with Serializable {
+class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
+  extends ParquetFileFormat with FileFormat with DataSourceRegister with Logging with Serializable {
+
+  def this() = this(None)
 
   override def shortName(): String = "geoparquet"
 
-  override def equals(other: Any): Boolean = other.isInstanceOf[GeoParquetFileFormat]
+  override def equals(other: Any): Boolean = other.isInstanceOf[GeoParquetFileFormat] &&
+    other.asInstanceOf[GeoParquetFileFormat].spatialFilter == spatialFilter
 
   override def hashCode(): Int = getClass.hashCode()
+
+  def withSpatialPredicates(spatialFilter: GeoParquetSpatialFilter): GeoParquetFileFormat =
+    new GeoParquetFileFormat(Some(spatialFilter))
 
   override def inferSchema(
                             sparkSession: SparkSession,
@@ -224,7 +230,7 @@ class GeoParquetFileFormat extends ParquetFileFormat with FileFormat with DataSo
 
       val sharedConf = broadcastedHadoopConf.value.value
 
-      lazy val footerFileMetaData =
+      val footerFileMetaData =
         ParquetFileReader.readFooter(sharedConf, filePath, SKIP_ROW_GROUPS).getFileMetaData
       // Try to push down filters when filter push-down is enabled.
       val pushed = if (enableParquetFilterPushDown) {
@@ -241,67 +247,76 @@ class GeoParquetFileFormat extends ParquetFileFormat with FileFormat with DataSo
         None
       }
 
-      // PARQUET_INT96_TIMESTAMP_CONVERSION says to apply timezone conversions to int96 timestamps'
-      // *only* if the file was created by something other than "parquet-mr", so check the actual
-      // writer here for this file.  We have to do this per-file, as each file in the table may
-      // have different writers.
-      // Define isCreatedByParquetMr as function to avoid unnecessary parquet footer reads.
-      def isCreatedByParquetMr: Boolean =
-        footerFileMetaData.getCreatedBy().startsWith("parquet-mr")
+      // Prune file scans using pushed down spatial filters and per-column bboxes in geoparquet metadata
+      val shouldScanFile = GeoParquetMetaData.parseKeyValueMetaData(footerFileMetaData.getKeyValueMetaData).forall {
+        metadata => spatialFilter.forall(_.evaluate(metadata.columns))
+      }
+      if (!shouldScanFile) {
+        // The entire file is pruned so that we don't need to scan this file.
+        Seq.empty[InternalRow].iterator
+      } else {
+        // PARQUET_INT96_TIMESTAMP_CONVERSION says to apply timezone conversions to int96 timestamps'
+        // *only* if the file was created by something other than "parquet-mr", so check the actual
+        // writer here for this file.  We have to do this per-file, as each file in the table may
+        // have different writers.
+        // Define isCreatedByParquetMr as function to avoid unnecessary parquet footer reads.
+        def isCreatedByParquetMr: Boolean =
+          footerFileMetaData.getCreatedBy().startsWith("parquet-mr")
 
-      val convertTz =
-        if (timestampConversion && !isCreatedByParquetMr) {
-          Some(DateTimeUtils.getZoneId(sharedConf.get(SQLConf.SESSION_LOCAL_TIMEZONE.key)))
-        } else {
-          None
+        val convertTz =
+          if (timestampConversion && !isCreatedByParquetMr) {
+            Some(DateTimeUtils.getZoneId(sharedConf.get(SQLConf.SESSION_LOCAL_TIMEZONE.key)))
+          } else {
+            None
+          }
+        val datetimeRebaseMode = GeoDataSourceUtils.datetimeRebaseMode(
+          footerFileMetaData.getKeyValueMetaData.get,
+          SQLConf.get.getConfString(GeoDataSourceUtils.PARQUET_REBASE_MODE_IN_READ))
+        val int96RebaseMode = GeoDataSourceUtils.int96RebaseMode(
+          footerFileMetaData.getKeyValueMetaData.get,
+          SQLConf.get.getConfString(GeoDataSourceUtils.PARQUET_INT96_REBASE_MODE_IN_READ))
+
+        val attemptId = new TaskAttemptID(new TaskID(new JobID(), TaskType.MAP, 0), 0)
+        val hadoopAttemptContext =
+          new TaskAttemptContextImpl(broadcastedHadoopConf.value.value, attemptId)
+
+        // Try to push down filters when filter push-down is enabled.
+        // Notice: This push-down is RowGroups level, not individual records.
+        if (pushed.isDefined) {
+          ParquetInputFormat.setFilterPredicate(hadoopAttemptContext.getConfiguration, pushed.get)
         }
-      val datetimeRebaseMode = GeoDataSourceUtils.datetimeRebaseMode(
-        footerFileMetaData.getKeyValueMetaData.get,
-        SQLConf.get.getConfString(GeoDataSourceUtils.PARQUET_REBASE_MODE_IN_READ))
-      val int96RebaseMode = GeoDataSourceUtils.int96RebaseMode(
-        footerFileMetaData.getKeyValueMetaData.get,
-        SQLConf.get.getConfString(GeoDataSourceUtils.PARQUET_INT96_REBASE_MODE_IN_READ))
+        val taskContext = Option(TaskContext.get())
+        if (enableVectorizedReader) {
+          logWarning(s"GeoParquet currently does not support vectorized reader. Falling back to parquet-mr")
+        }
+        logDebug(s"Falling back to parquet-mr")
+        // ParquetRecordReader returns InternalRow
+        val readSupport = new GeoParquetReadSupport(
+          convertTz,
+          enableVectorizedReader = false,
+          datetimeRebaseMode,
+          int96RebaseMode)
+        val reader = if (pushed.isDefined && enableRecordFilter) {
+          val parquetFilter = FilterCompat.get(pushed.get, null)
+          new ParquetRecordReader[InternalRow](readSupport, parquetFilter)
+        } else {
+          new ParquetRecordReader[InternalRow](readSupport)
+        }
+        val iter = new RecordReaderIterator[InternalRow](reader)
+        // SPARK-23457 Register a task completion listener before `initialization`.
+        taskContext.foreach(_.addTaskCompletionListener[Unit](_ => iter.close()))
+        reader.initialize(split, hadoopAttemptContext)
 
-      val attemptId = new TaskAttemptID(new TaskID(new JobID(), TaskType.MAP, 0), 0)
-      val hadoopAttemptContext =
-        new TaskAttemptContextImpl(broadcastedHadoopConf.value.value, attemptId)
+        val fullSchema = requiredSchema.toAttributes ++ partitionSchema.toAttributes
+        val unsafeProjection = GenerateUnsafeProjection.generate(fullSchema, fullSchema)
 
-      // Try to push down filters when filter push-down is enabled.
-      // Notice: This push-down is RowGroups level, not individual records.
-      if (pushed.isDefined) {
-        ParquetInputFormat.setFilterPredicate(hadoopAttemptContext.getConfiguration, pushed.get)
-      }
-      val taskContext = Option(TaskContext.get())
-      if (enableVectorizedReader) {
-        logWarning(s"GeoParquet currently does not support vectorized reader. Falling back to parquet-mr")
-      }
-      logDebug(s"Falling back to parquet-mr")
-      // ParquetRecordReader returns InternalRow
-      val readSupport = new GeoParquetReadSupport(
-        convertTz,
-        enableVectorizedReader = false,
-        datetimeRebaseMode,
-        int96RebaseMode)
-      val reader = if (pushed.isDefined && enableRecordFilter) {
-        val parquetFilter = FilterCompat.get(pushed.get, null)
-        new ParquetRecordReader[InternalRow](readSupport, parquetFilter)
-      } else {
-        new ParquetRecordReader[InternalRow](readSupport)
-      }
-      val iter = new RecordReaderIterator[InternalRow](reader)
-      // SPARK-23457 Register a task completion listener before `initialization`.
-      taskContext.foreach(_.addTaskCompletionListener[Unit](_ => iter.close()))
-      reader.initialize(split, hadoopAttemptContext)
-
-      val fullSchema = requiredSchema.toAttributes ++ partitionSchema.toAttributes
-      val unsafeProjection = GenerateUnsafeProjection.generate(fullSchema, fullSchema)
-
-      if (partitionSchema.length == 0) {
-        // There is no partition columns
-        iter.map(unsafeProjection)
-      } else {
-        val joinedRow = new JoinedRow()
-        iter.map(d => unsafeProjection(joinedRow(d, file.partitionValues)))
+        if (partitionSchema.length == 0) {
+          // There is no partition columns
+          iter.map(unsafeProjection)
+        } else {
+          val joinedRow = new JoinedRow()
+          iter.map(d => unsafeProjection(joinedRow(d, file.partitionValues)))
+        }
       }
     }
   }
