@@ -511,6 +511,8 @@
                 <scala.version>2.13.8</scala.version>
                 <scala.compat.version>2.13</scala.compat.version>
                 <scaladoc.arg>-no-java-comments</scaladoc.arg>
+                <!-- Skip deploying parent module for Scala 2.13 profile, it will be deployed with 2.12 -->
+                <maven.deploy.skip>true</maven.deploy.skip>
             </properties>
             <modules>
                 <module>common</module>
