@@ -17,7 +17,7 @@
 
 import os
 
-from shapely.geometry import MultiPoint, Point, MultiLineString, LineString, Polygon, MultiPolygon
+from shapely.geometry import MultiPoint, Point, MultiLineString, LineString, Polygon, MultiPolygon, GeometryCollection
 import geopandas as gpd
 
 from tests import tests_resource
@@ -94,6 +94,21 @@ class TestGeometryConvert(TestBase):
                 ((10, 10), (20, 20), (10, 40)),
                 ((40, 40), (30, 30), (40, 20), (30, 10))
             ]).wkt
+
+    def test_geometry_collection_deserialization(self):
+        geom = self.spark.sql(
+            """SELECT st_geomFromWKT('GEOMETRYCOLLECTION (
+                MULTILINESTRING((1 2, 3 4), (5 6, 7 8)),
+                MULTILINESTRING((1 2, 3 4), (5 6, 7 8), (9 10, 11 12)),
+                POINT(10 20))') as geom"""
+        ).collect()[0][0]
+
+        assert type(geom) == GeometryCollection
+        assert geom.wkt == GeometryCollection([
+            MultiLineString([[(1, 2), (3, 4)], [(5, 6), (7, 8)]]),
+            MultiLineString([[(1, 2), (3, 4)], [(5, 6), (7, 8)], [(9, 10), (11, 12)]]),
+            Point(10, 20)
+        ]).wkt
 
     def test_from_geopandas_convert(self):
         gdf = gpd.read_file(os.path.join(tests_resource, "shapefiles/gis_osm_pois_free_1/"))

@@ -24,17 +24,12 @@ import com.esotericsoftware.kryo.Registration;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import org.apache.log4j.Logger;
 import org.apache.sedona.common.geometryObjects.Circle;
-import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeSerde;
+import org.apache.sedona.common.geometrySerde.GeometrySerializer;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.MultiLineString;
-import org.locationtech.jts.geom.MultiPoint;
-import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 
@@ -52,9 +47,6 @@ import java.io.Serializable;
 public class GeometrySerde
         extends Serializer implements Serializable
 {
-
-    private static final GeometryFactory geometryFactory = new GeometryFactory();
-
     @Override
     public void write(Kryo kryo, Output out, Object object)
     {
@@ -66,19 +58,9 @@ public class GeometrySerde
             writeUserData(kryo, out, circle);
         }
         else if (object instanceof Point || object instanceof LineString
-                || object instanceof Polygon || object instanceof MultiPoint
-                || object instanceof MultiLineString || object instanceof MultiPolygon) {
+                || object instanceof Polygon || object instanceof GeometryCollection) {
             writeType(out, Type.SHAPE);
             writeGeometry(kryo, out, (Geometry) object);
-        }
-        else if (object instanceof GeometryCollection) {
-            GeometryCollection collection = (GeometryCollection) object;
-            writeType(out, Type.GEOMETRYCOLLECTION);
-            out.writeInt(collection.getNumGeometries());
-            for (int i = 0; i < collection.getNumGeometries(); i++) {
-                writeGeometry(kryo, out, collection.getGeometryN(i));
-            }
-            writeUserData(kryo, out, collection);
         }
         else if (object instanceof Envelope) {
             Envelope envelope = (Envelope) object;
@@ -101,7 +83,8 @@ public class GeometrySerde
 
     private void writeGeometry(Kryo kryo, Output out, Geometry geometry)
     {
-        byte[] data = ShapeSerde.serialize(geometry);
+        byte[] data = GeometrySerializer.serialize(geometry);
+        out.writeInt(data.length);
         out.write(data, 0, data.length);
         writeUserData(kryo, out, geometry);
     }
@@ -132,16 +115,6 @@ public class GeometrySerde
                 circle.setUserData(userData);
                 return circle;
             }
-            case GEOMETRYCOLLECTION: {
-                int numGeometries = input.readInt();
-                Geometry[] geometries = new Geometry[numGeometries];
-                for (int i = 0; i < numGeometries; i++) {
-                    geometries[i] = readGeometry(kryo, input);
-                }
-                GeometryCollection collection = geometryFactory.createGeometryCollection(geometries);
-                collection.setUserData(readUserData(kryo, input));
-                return collection;
-            }
             case ENVELOPE: {
                 double xMin = input.readDouble();
                 double xMax = input.readDouble();
@@ -167,7 +140,10 @@ public class GeometrySerde
 
     private Geometry readGeometry(Kryo kryo, Input input)
     {
-        Geometry geometry = ShapeSerde.deserialize(input, geometryFactory);
+        int length = input.readInt();
+        byte[] bytes = new byte[length];
+        input.readBytes(bytes);
+        Geometry geometry = GeometrySerializer.deserialize(bytes);
         geometry.setUserData(readUserData(kryo, input));
         return geometry;
     }
@@ -176,8 +152,7 @@ public class GeometrySerde
     {
         SHAPE(0),
         CIRCLE(1),
-        GEOMETRYCOLLECTION(2),
-        ENVELOPE(3);
+        ENVELOPE(2);
 
         private final int id;
 

@@ -28,6 +28,7 @@ import org.apache.spark.sql.execution.datasources.parquet.ParquetSchemaConverter
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
+import org.json4s.jackson.JsonMethods.parse
 
 /**
  * This converter class is used to convert Parquet [[MessageType]] to Spark SQL [[StructType]].
@@ -43,23 +44,33 @@ import org.apache.spark.sql.types._
  *        [[TimestampType]] fields.
  */
 class GeoParquetToSparkSchemaConverter(
-                                     assumeBinaryIsString: Boolean = SQLConf.PARQUET_BINARY_AS_STRING.defaultValue.get,
-                                     assumeInt96IsTimestamp: Boolean = SQLConf.PARQUET_INT96_AS_TIMESTAMP.defaultValue.get)
-extends ParquetToSparkSchemaConverter(assumeBinaryIsString, assumeInt96IsTimestamp) {
+  keyValueMetaData: java.util.Map[String, String],
+  assumeBinaryIsString: Boolean = SQLConf.PARQUET_BINARY_AS_STRING.defaultValue.get,
+  assumeInt96IsTimestamp: Boolean = SQLConf.PARQUET_INT96_AS_TIMESTAMP.defaultValue.get) {
 
-  def this(conf: SQLConf) = this(
+  private val geoParquetMetaData: GeoParquetMetaData = {
+    val geo = keyValueMetaData.get("geo")
+    if (geo == null) {
+      throw new AnalysisException("GeoParquet file does not contain valid geo metadata")
+    }
+    implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+    parse(geo).camelizeKeys.extract[GeoParquetMetaData]
+  }
+
+  def this(keyValueMetaData: java.util.Map[String, String], conf: SQLConf) = this(
+    keyValueMetaData = keyValueMetaData,
     assumeBinaryIsString = conf.isParquetBinaryAsString,
     assumeInt96IsTimestamp = conf.isParquetINT96AsTimestamp)
 
-  def this(conf: Configuration) = this(
+  def this(keyValueMetaData: java.util.Map[String, String], conf: Configuration) = this(
+    keyValueMetaData = keyValueMetaData,
     assumeBinaryIsString = conf.get(SQLConf.PARQUET_BINARY_AS_STRING.key).toBoolean,
     assumeInt96IsTimestamp = conf.get(SQLConf.PARQUET_INT96_AS_TIMESTAMP.key).toBoolean)
-
 
   /**
    * Converts Parquet [[MessageType]] `parquetSchema` to a Spark SQL [[StructType]].
    */
-  override def convert(parquetSchema: MessageType): StructType = convert(parquetSchema.asGroupType())
+  def convert(parquetSchema: MessageType): StructType = convert(parquetSchema.asGroupType())
 
   private def convert(parquetSchema: GroupType): StructType = {
     val fields = parquetSchema.getFields.asScala.map { field =>
@@ -89,6 +100,9 @@ extends ParquetToSparkSchemaConverter(assumeBinaryIsString, assumeInt96IsTimesta
     case t: PrimitiveType => convertPrimitiveField(t)
     case t: GroupType => convertGroupField(t.asGroupType())
   }
+
+  private def isGeometryField(fieldName: String): Boolean =
+    geoParquetMetaData.columns.contains(fieldName)
 
   private def convertPrimitiveField(field: PrimitiveType): DataType = {
     val typeName = field.getPrimitiveTypeName
@@ -161,7 +175,7 @@ extends ParquetToSparkSchemaConverter(assumeBinaryIsString, assumeInt96IsTimesta
       case BINARY =>
         originalType match {
           case UTF8 | ENUM | JSON => StringType
-          case null if GeoParquetSchemaConverter.checkGeomFieldName(field.getName) => GeometryUDT
+          case null if isGeometryField(field.getName) => GeometryUDT
           case null if assumeBinaryIsString => StringType
           case null => BinaryType
           case BSON => BinaryType
@@ -558,12 +572,6 @@ extends SparkToParquetSchemaConverter(writeLegacyParquetFormat, outputTimestampT
 }
 
 private[sql] object GeoParquetSchemaConverter {
-  def checkGeomFieldName(name: String): Boolean = {
-    if (name.equals(GeometryField.getFieldGeometry())) {
-      true
-    } else false
-  }
-
   def checkFieldName(name: String): Unit = {
     // ,;{}()\n\t= and space are special characters in Parquet schema
     checkConversionRequirement(

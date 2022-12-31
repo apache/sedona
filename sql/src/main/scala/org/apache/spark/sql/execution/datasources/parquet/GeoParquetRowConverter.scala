@@ -28,8 +28,10 @@ import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.util.{ArrayBasedMapData, CaseInsensitiveMap, DateTimeUtils, GenericArrayData}
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.internal.SQLConf.LegacyBehaviorPolicy
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
+import org.locationtech.jts.io.WKBReader
 
 import java.math.{BigDecimal, BigInteger}
 import java.time.{ZoneId, ZoneOffset}
@@ -67,7 +69,7 @@ import scala.collection.mutable.ArrayBuffer
  * @param schemaConverter A utility converter used to convert Parquet types to Catalyst types.
  * @param parquetType Parquet schema of Parquet records
  * @param catalystType Spark SQL schema that corresponds to the Parquet record type. User-defined
- *        types should have been expanded.
+ *        types other than [[GeometryUDT]] should have been expanded.
  * @param convertTz the optional time zone to convert to int96 data
  * @param datetimeRebaseMode the mode of rebasing date/timestamp from Julian to Proleptic Gregorian
  *                           calendar
@@ -96,7 +98,7 @@ private[parquet] class GeoParquetRowConverter(
      """.stripMargin)
 
   assert(
-    !catalystType.existsRecursively(_.isInstanceOf[UserDefinedType[_]]),
+    !catalystType.existsRecursively(t => !t.isInstanceOf[GeometryUDT] && t.isInstanceOf[UserDefinedType[_]]),
     s"""User-defined types in Catalyst schema should have already been expanded:
        |${catalystType.prettyJson}
      """.stripMargin)
@@ -198,6 +200,15 @@ private[parquet] class GeoParquetRowConverter(
     catalystType match {
       case BooleanType | IntegerType | LongType | FloatType | DoubleType | BinaryType =>
         new ParquetPrimitiveConverter(updater)
+
+      case GeometryUDT =>
+        new ParquetPrimitiveConverter(updater) {
+          override def addBinary(value: Binary): Unit = {
+            val wkbReader = new WKBReader()
+            val geom = wkbReader.read(value.getBytes)
+            updater.set(GeometryUDT.serialize(geom))
+          }
+        }
 
       case ByteType =>
         new ParquetPrimitiveConverter(updater) {
