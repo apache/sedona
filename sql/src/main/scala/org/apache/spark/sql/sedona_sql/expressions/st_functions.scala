@@ -86,7 +86,7 @@ object st_functions extends DataFrameAPI {
 
   def ST_ConvexHull(geometry: Column): Column = wrapExpression[ST_ConvexHull](geometry)
   def ST_ConvexHull(geometry: String): Column = wrapExpression[ST_ConvexHull](geometry)
-  
+
   def ST_Difference(a: Column, b: Column): Column = wrapExpression[ST_Difference](a, b)
   def ST_Difference(a: String, b: String): Column = wrapExpression[ST_Difference](a, b)
 
@@ -110,7 +110,7 @@ object st_functions extends DataFrameAPI {
 
   def ST_FlipCoordinates(geometry: Column): Column = wrapExpression[ST_FlipCoordinates](geometry)
   def ST_FlipCoordinates(geometry: String): Column = wrapExpression[ST_FlipCoordinates](geometry)
-  
+
   def ST_Force_2D(geometry: Column): Column = wrapExpression[ST_Force_2D](geometry)
   def ST_Force_2D(geometry: String): Column = wrapExpression[ST_Force_2D](geometry)
 
@@ -131,7 +131,7 @@ object st_functions extends DataFrameAPI {
 
   def ST_IsClosed(geometry: Column): Column = wrapExpression[ST_IsClosed](geometry)
   def ST_IsClosed(geometry: String): Column = wrapExpression[ST_IsClosed](geometry)
-  
+
   def ST_IsEmpty(geometry: Column): Column = wrapExpression[ST_IsEmpty](geometry)
   def ST_IsEmpty(geometry: String): Column = wrapExpression[ST_IsEmpty](geometry)
 
@@ -176,7 +176,7 @@ object st_functions extends DataFrameAPI {
 
   def ST_MinimumBoundingRadius(geometry: Column): Column = wrapExpression[ST_MinimumBoundingRadius](geometry)
   def ST_MinimumBoundingRadius(geometry: String): Column = wrapExpression[ST_MinimumBoundingRadius](geometry)
-  
+
   def ST_Multi(geometry: Column): Column = wrapExpression[ST_Multi](geometry)
   def ST_Multi(geometry: String): Column = wrapExpression[ST_Multi](geometry)
 
@@ -194,10 +194,10 @@ object st_functions extends DataFrameAPI {
 
   def ST_NumInteriorRings(geometry: Column): Column = wrapExpression[ST_NumInteriorRings](geometry)
   def ST_NumInteriorRings(geometry: String): Column = wrapExpression[ST_NumInteriorRings](geometry)
-  
+
   def ST_PointN(geometry: Column, n: Column): Column = wrapExpression[ST_PointN](geometry, n)
   def ST_PointN(geometry: String, n: Int): Column = wrapExpression[ST_PointN](geometry, n)
-  
+
   def ST_PointOnSurface(geometry: Column): Column = wrapExpression[ST_PointOnSurface](geometry)
   def ST_PointOnSurface(geometry: String): Column = wrapExpression[ST_PointOnSurface](geometry)
 
@@ -206,7 +206,7 @@ object st_functions extends DataFrameAPI {
 
   def ST_RemovePoint(lineString: Column, index: Column): Column = wrapExpression[ST_RemovePoint](lineString, index)
   def ST_RemovePoint(lineString: String, index: Int): Column = wrapExpression[ST_RemovePoint](lineString, index)
-  
+
   def ST_Reverse(geometry: Column): Column = wrapExpression[ST_Reverse](geometry)
   def ST_Reverse(geometry: String): Column = wrapExpression[ST_Reverse](geometry)
 
@@ -230,7 +230,10 @@ object st_functions extends DataFrameAPI {
 
   def ST_SimplifyPreserveTopology(geometry: Column, distanceTolerance: Column): Column = wrapExpression[ST_SimplifyPreserveTopology](geometry, distanceTolerance)
   def ST_SimplifyPreserveTopology(geometry: String, distanceTolerance: Double): Column = wrapExpression[ST_SimplifyPreserveTopology](geometry, distanceTolerance)
-  
+
+  def ST_Split(input: Column, blade: Column): Column = wrapExpression[ST_Split](input, blade)
+  def ST_Split(input: String, blade: String): Column = wrapExpression[ST_Split](input, blade)
+
   def ST_SymDifference(a: Column, b: Column): Column = wrapExpression[ST_SymDifference](a, b)
   def ST_SymDifference(a: String, b: String): Column = wrapExpression[ST_SymDifference](a, b)
 
@@ -238,16 +241,16 @@ object st_functions extends DataFrameAPI {
   def ST_Transform(geometry: String, sourceCRS: String, targetCRS: String): Column = wrapExpression[ST_Transform](geometry, sourceCRS, targetCRS, false)
   def ST_Transform(geometry: Column, sourceCRS: Column, targetCRS: Column, disableError: Column): Column = wrapExpression[ST_Transform](geometry, sourceCRS, targetCRS, disableError)
   def ST_Transform(geometry: String, sourceCRS: String, targetCRS: String, disableError: Boolean): Column = wrapExpression[ST_Transform](geometry, sourceCRS, targetCRS, disableError)
-  
+
   def ST_Union(a: Column, b: Column): Column = wrapExpression[ST_Union](a, b)
   def ST_Union(a: String, b: String): Column = wrapExpression[ST_Union](a, b)
-  
+
   def ST_X(point: Column): Column = wrapExpression[ST_X](point)
   def ST_X(point: String): Column = wrapExpression[ST_X](point)
 
   def ST_XMax(geometry: Column): Column = wrapExpression[ST_XMax](geometry)
   def ST_XMax(geometry: String): Column = wrapExpression[ST_XMax](geometry)
-  
+
   def ST_XMin(geometry: Column): Column = wrapExpression[ST_XMin](geometry)
   def ST_XMin(geometry: String): Column = wrapExpression[ST_XMin](geometry)
 
