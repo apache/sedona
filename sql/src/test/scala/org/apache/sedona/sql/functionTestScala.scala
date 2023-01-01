@@ -1802,7 +1802,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         -> null
     )
     for(((target, blade), expected) <- geomTestCases) {
-      var df = sparkSession.sql(s"SELECT ST_Split(ST_GeomFromText($target), ST_GeomFromText($blade)))")
+      var df = sparkSession.sql(s"SELECT ST_Split(ST_GeomFromText($target), ST_GeomFromText($blade))")
       var result = df.take(1)(0).get(0).asInstanceOf[Geometry]
       var textResult = if (result == null) result.toText() else null
       assert(result==expected)
