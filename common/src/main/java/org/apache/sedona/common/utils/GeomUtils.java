@@ -219,6 +219,76 @@ public class GeomUtils {
         return geometry.getCoordinate() != null && !java.lang.Double.isNaN(geometry.getCoordinate().getZ()) ? 3 : 2;
     }
 
+    /**
+     * Checks if the geometry only contains geometry of
+     * the same dimension. By dimension this refers to whether the
+     * geometries are all, for example, lines (1D).
+     *
+     * @param  geometry geometry to check
+     * @return          true iff geometry is homogeneous
+     */
+    public static boolean geometryIsHomogeneous(Geometry geometry) {
+        int dimension = geometry.getDimension();
+
+        if (!geometry.isEmpty()) {
+            for (int i = 0; i < geometry.getNumGeometries(); i++) {
+                if (dimension != geometry.getGeometryN(i).getDimension()) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks if either the geometry is, or contains, only point geometry.
+     * GeometryCollections that only contain points will return true.
+     *
+     * @param  geometry geometry to check
+     * @return          true iff geometry is puntal
+     */
+    public static boolean geometryIsPuntal(Geometry geometry) {
+        if (geometry instanceof Puntal) {
+            return true;
+        } else if (geometryIsHomogeneous(geometry) && geometry.getDimension() == 0) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if either the geometry is, or contains, only line geometry.
+     * GeometryCollections that only contain lines will return true.
+     *
+     * @param  geometry geometry to check
+     * @return          true iff geometry is lineal
+     */
+    public static boolean geometryIsLineal(Geometry geometry) {
+        if (geometry instanceof Lineal) {
+            return true;
+        } else if (geometryIsHomogeneous(geometry) && geometry.getDimension() == 1) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if either the geometry is, or contains, only polygon geometry.
+     * GeometryCollections that only contain polygons will return true.
+     *
+     * @param  geometry geometry to check
+     * @return          true iff geometry is polygonal
+     */
+    public static boolean geometryIsPolygonal(Geometry geometry) {
+        if (geometry instanceof Polygonal) {
+            return true;
+        } else if (geometryIsHomogeneous(geometry) && geometry.getDimension() == 2) {
+            return true;
+        }
+        return false;
+    }
+
     private static Map<Polygon, Polygon> findFaceHoles(List<Polygon> faces) {
         Map<Polygon, Polygon> parentMap = new HashMap<>();
         faces.sort(Comparator.comparing((Polygon p) -> p.getEnvelope().getArea()).reversed());
