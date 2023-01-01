@@ -19,19 +19,38 @@
 
 package org.apache.sedona.common.geometrySerde;
 
-import org.apache.spark.unsafe.Platform;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.CoordinateXY;
 import org.locationtech.jts.geom.CoordinateXYM;
 import org.locationtech.jts.geom.CoordinateXYZM;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
+import sun.misc.Unsafe;
+
+import java.lang.reflect.Field;
 
 class UnsafeGeometryBuffer implements GeometryBuffer {
-    private static final long BYTE_ARRAY_BASE_OFFSET = Platform.BYTE_ARRAY_OFFSET;
+    private static final Unsafe UNSAFE;
+    private static final long BYTE_ARRAY_BASE_OFFSET;
+
+    static {
+        Unsafe unsafe;
+        long byteArrayOffset = 0;
+        try {
+            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
+            theUnsafe.setAccessible(true);
+            unsafe = (Unsafe) theUnsafe.get(null);
+            byteArrayOffset = unsafe.arrayBaseOffset(byte[].class);
+        } catch (IllegalAccessException | NoSuchFieldException | SecurityException e) {
+            // Unsafe is not available
+            unsafe = null;
+        }
+        UNSAFE = unsafe;
+        BYTE_ARRAY_BASE_OFFSET = byteArrayOffset;
+    }
 
     public static boolean isUnsafeAvailable() {
-        return BYTE_ARRAY_BASE_OFFSET != 0;
+        return UNSAFE != null;
     }
 
     private CoordinateType coordinateType = CoordinateType.XY;
@@ -81,37 +100,37 @@ class UnsafeGeometryBuffer implements GeometryBuffer {
 
     @Override
     public void putByte(int offset, byte value) {
-        Platform.putByte(bytes, baseOffset + offset, value);
+        UNSAFE.putByte(bytes, baseOffset + offset, value);
     }
 
     @Override
     public byte getByte(int offset) {
         assert baseOffset + offset < bytes.length + BYTE_ARRAY_BASE_OFFSET;
-        return Platform.getByte(bytes, baseOffset + offset);
+        return UNSAFE.getByte(bytes, baseOffset + offset);
     }
 
     @Override
     public void putBytes(int offset, byte[] inBytes) {
         assert baseOffset + offset + inBytes.length <= bytes.length + BYTE_ARRAY_BASE_OFFSET;
-        Platform.copyMemory(inBytes, BYTE_ARRAY_BASE_OFFSET, bytes, baseOffset + offset, inBytes.length);
+        UNSAFE.copyMemory(inBytes, BYTE_ARRAY_BASE_OFFSET, bytes, baseOffset + offset, inBytes.length);
     }
 
     @Override
     public void getBytes(byte[] outBytes, int offset, int length) {
         assert baseOffset + offset + length <= bytes.length + BYTE_ARRAY_BASE_OFFSET;
-        Platform.copyMemory(bytes, baseOffset + offset, outBytes, BYTE_ARRAY_BASE_OFFSET, length);
+        UNSAFE.copyMemory(bytes, baseOffset + offset, outBytes, BYTE_ARRAY_BASE_OFFSET, length);
     }
 
     @Override
     public void putInt(int offset, int value) {
         assert baseOffset + offset + 4 <= bytes.length + BYTE_ARRAY_BASE_OFFSET;
-        Platform.putInt(bytes, baseOffset + offset, value);
+        UNSAFE.putInt(bytes, baseOffset + offset, value);
     }
 
     @Override
     public int getInt(int offset) {
         assert baseOffset + offset + 4 <= bytes.length + BYTE_ARRAY_BASE_OFFSET;
-        return Platform.getInt(bytes, baseOffset + offset);
+        return UNSAFE.getInt(bytes, baseOffset + offset);
     }
 
     @Override
@@ -120,24 +139,24 @@ class UnsafeGeometryBuffer implements GeometryBuffer {
         assert coordOffset + coordinateType.bytes <= bytes.length + BYTE_ARRAY_BASE_OFFSET;
         switch (coordinateType) {
             case XY:
-                Platform.putDouble(bytes, coordOffset, coordinate.x);
-                Platform.putDouble(bytes, coordOffset + 8, coordinate.y);
+                UNSAFE.putDouble(bytes, coordOffset, coordinate.x);
+                UNSAFE.putDouble(bytes, coordOffset + 8, coordinate.y);
                 break;
             case XYZ:
-                Platform.putDouble(bytes, coordOffset, coordinate.x);
-                Platform.putDouble(bytes, coordOffset + 8, coordinate.y);
-                Platform.putDouble(bytes, coordOffset + 16, coordinate.getZ());
+                UNSAFE.putDouble(bytes, coordOffset, coordinate.x);
+                UNSAFE.putDouble(bytes, coordOffset + 8, coordinate.y);
+                UNSAFE.putDouble(bytes, coordOffset + 16, coordinate.getZ());
                 break;
             case XYM:
-                Platform.putDouble(bytes, coordOffset, coordinate.x);
-                Platform.putDouble(bytes, coordOffset + 8, coordinate.y);
-                Platform.putDouble(bytes, coordOffset + 16, coordinate.getM());
+                UNSAFE.putDouble(bytes, coordOffset, coordinate.x);
+                UNSAFE.putDouble(bytes, coordOffset + 8, coordinate.y);
+                UNSAFE.putDouble(bytes, coordOffset + 16, coordinate.getM());
                 break;
             case XYZM:
-                Platform.putDouble(bytes, coordOffset, coordinate.x);
-                Platform.putDouble(bytes, coordOffset + 8, coordinate.y);
-                Platform.putDouble(bytes, coordOffset + 16, coordinate.getZ());
-                Platform.putDouble(bytes, coordOffset + 24, coordinate.getM());
+                UNSAFE.putDouble(bytes, coordOffset, coordinate.x);
+                UNSAFE.putDouble(bytes, coordOffset + 8, coordinate.y);
+                UNSAFE.putDouble(bytes, coordOffset + 16, coordinate.getZ());
+                UNSAFE.putDouble(bytes, coordOffset + 24, coordinate.getM());
                 break;
             default:
                 throw new IllegalStateException("coordinateType was not configured properly");
@@ -148,8 +167,8 @@ class UnsafeGeometryBuffer implements GeometryBuffer {
     public CoordinateSequence getCoordinate(int offset) {
         long coordOffset = baseOffset + offset;
         assert coordOffset + coordinateType.bytes <= bytes.length + BYTE_ARRAY_BASE_OFFSET;
-        double x = Platform.getDouble(bytes, coordOffset);
-        double y = Platform.getDouble(bytes, coordOffset + 8);
+        double x = UNSAFE.getDouble(bytes, coordOffset);
+        double y = UNSAFE.getDouble(bytes, coordOffset + 8);
         double z;
         double m;
         Coordinate[] coordinates = new Coordinate[1];
@@ -158,16 +177,16 @@ class UnsafeGeometryBuffer implements GeometryBuffer {
                 coordinates[0] = new CoordinateXY(x, y);
                 return new CoordinateArraySequence(coordinates, 2, 0);
             case XYZ:
-                z = Platform.getDouble(bytes, coordOffset + 16);
+                z = UNSAFE.getDouble(bytes, coordOffset + 16);
                 coordinates[0] = new Coordinate(x, y, z);
                 return new CoordinateArraySequence(coordinates, 3, 0);
             case XYM:
-                m = Platform.getDouble(bytes, coordOffset + 16);
+                m = UNSAFE.getDouble(bytes, coordOffset + 16);
                 coordinates[0] = new CoordinateXYM(x, y, m);
                 return new CoordinateArraySequence(coordinates, 3, 1);
             case XYZM:
-                z = Platform.getDouble(bytes, coordOffset + 16);
-                m = Platform.getDouble(bytes, coordOffset + 24);
+                z = UNSAFE.getDouble(bytes, coordOffset + 16);
+                m = UNSAFE.getDouble(bytes, coordOffset + 24);
                 coordinates[0] = new CoordinateXYZM(x, y, z, m);
                 return new CoordinateArraySequence(coordinates, 4, 1);
             default:
@@ -185,36 +204,36 @@ class UnsafeGeometryBuffer implements GeometryBuffer {
             case XY:
                 for (int k = 0; k < numCoordinates; k++) {
                     Coordinate coord = coordinates.getCoordinate(k);
-                    Platform.putDouble(bytes, coordOffset, coord.x);
-                    Platform.putDouble(bytes, coordOffset + 8, coord.y);
+                    UNSAFE.putDouble(bytes, coordOffset, coord.x);
+                    UNSAFE.putDouble(bytes, coordOffset + 8, coord.y);
                     coordOffset += 16;
                 }
                 break;
             case XYZ:
                 for (int k = 0; k < numCoordinates; k++) {
                     Coordinate coord = coordinates.getCoordinate(k);
-                    Platform.putDouble(bytes, coordOffset, coord.x);
-                    Platform.putDouble(bytes, coordOffset + 8, coord.y);
-                    Platform.putDouble(bytes, coordOffset + 16, coord.getZ());
+                    UNSAFE.putDouble(bytes, coordOffset, coord.x);
+                    UNSAFE.putDouble(bytes, coordOffset + 8, coord.y);
+                    UNSAFE.putDouble(bytes, coordOffset + 16, coord.getZ());
                     coordOffset += 24;
                 }
                 break;
             case XYM:
                 for (int k = 0; k < numCoordinates; k++) {
                     Coordinate coord = coordinates.getCoordinate(k);
-                    Platform.putDouble(bytes, coordOffset, coord.x);
-                    Platform.putDouble(bytes, coordOffset + 8, coord.y);
-                    Platform.putDouble(bytes, coordOffset + 16, coord.getM());
+                    UNSAFE.putDouble(bytes, coordOffset, coord.x);
+                    UNSAFE.putDouble(bytes, coordOffset + 8, coord.y);
+                    UNSAFE.putDouble(bytes, coordOffset + 16, coord.getM());
                     coordOffset += 24;
                 }
                 break;
             case XYZM:
                 for (int k = 0; k < numCoordinates; k++) {
                     Coordinate coord = coordinates.getCoordinate(k);
-                    Platform.putDouble(bytes, coordOffset, coord.x);
-                    Platform.putDouble(bytes, coordOffset + 8, coord.y);
-                    Platform.putDouble(bytes, coordOffset + 16, coord.getZ());
-                    Platform.putDouble(bytes, coordOffset + 24, coord.getM());
+                    UNSAFE.putDouble(bytes, coordOffset, coord.x);
+                    UNSAFE.putDouble(bytes, coordOffset + 8, coord.y);
+                    UNSAFE.putDouble(bytes, coordOffset + 16, coord.getZ());
+                    UNSAFE.putDouble(bytes, coordOffset + 24, coord.getM());
                     coordOffset += 32;
                 }
                 break;
@@ -234,8 +253,8 @@ class UnsafeGeometryBuffer implements GeometryBuffer {
         switch (coordinateType) {
             case XY:
                 for (int k = 0; k < numCoordinates; k++) {
-                    double x = Platform.getDouble(bytes, coordOffset);
-                    double y = Platform.getDouble(bytes, coordOffset + 8);
+                    double x = UNSAFE.getDouble(bytes, coordOffset);
+                    double y = UNSAFE.getDouble(bytes, coordOffset + 8);
                     coordinates[k] = new CoordinateXY(x, y);
                     coordOffset += 16;
                 }
@@ -243,9 +262,9 @@ class UnsafeGeometryBuffer implements GeometryBuffer {
             case XYZ:
                 dimension = 3;
                 for (int k = 0; k < numCoordinates; k++) {
-                    double x = Platform.getDouble(bytes, coordOffset);
-                    double y = Platform.getDouble(bytes, coordOffset + 8);
-                    double z = Platform.getDouble(bytes, coordOffset + 16);
+                    double x = UNSAFE.getDouble(bytes, coordOffset);
+                    double y = UNSAFE.getDouble(bytes, coordOffset + 8);
+                    double z = UNSAFE.getDouble(bytes, coordOffset + 16);
                     coordinates[k] = new Coordinate(x, y, z);
                     coordOffset += 24;
                 }
@@ -254,9 +273,9 @@ class UnsafeGeometryBuffer implements GeometryBuffer {
                 dimension = 3;
                 measures = 1;
                 for (int k = 0; k < numCoordinates; k++) {
-                    double x = Platform.getDouble(bytes, coordOffset);
-                    double y = Platform.getDouble(bytes, coordOffset + 8);
-                    double m = Platform.getDouble(bytes, coordOffset + 16);
+                    double x = UNSAFE.getDouble(bytes, coordOffset);
+                    double y = UNSAFE.getDouble(bytes, coordOffset + 8);
+                    double m = UNSAFE.getDouble(bytes, coordOffset + 16);
                     coordinates[k] = new CoordinateXYM(x, y, m);
                     coordOffset += 24;
                 }
@@ -265,10 +284,10 @@ class UnsafeGeometryBuffer implements GeometryBuffer {
                 dimension = 4;
                 measures = 1;
                 for (int k = 0; k < numCoordinates; k++) {
-                    double x = Platform.getDouble(bytes, coordOffset);
-                    double y = Platform.getDouble(bytes, coordOffset + 8);
-                    double z = Platform.getDouble(bytes, coordOffset + 16);
-                    double m = Platform.getDouble(bytes, coordOffset + 24);
+                    double x = UNSAFE.getDouble(bytes, coordOffset);
+                    double y = UNSAFE.getDouble(bytes, coordOffset + 8);
+                    double z = UNSAFE.getDouble(bytes, coordOffset + 16);
+                    double m = UNSAFE.getDouble(bytes, coordOffset + 24);
                     coordinates[k] = new CoordinateXYZM(x, y, z, m);
                     coordOffset += 32;
                 }
@@ -293,7 +312,7 @@ class UnsafeGeometryBuffer implements GeometryBuffer {
         } else {
             int length = (int) (bytes.length - baseOffset + BYTE_ARRAY_BASE_OFFSET);
             byte[] copy = new byte[(int) length];
-            Platform.copyMemory(this.bytes, baseOffset, copy, BYTE_ARRAY_BASE_OFFSET, length);
+            UNSAFE.copyMemory(this.bytes, baseOffset, copy, BYTE_ARRAY_BASE_OFFSET, length);
             return copy;
         }
     }
