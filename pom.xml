@@ -253,11 +253,6 @@
     </dependencyManagement>
     <repositories>
         <repository>
-            <id>maven2-repository.dev.java.net</id>
-            <name>Java.net repository</name>
-            <url>https://download.java.net/maven/2</url>
-        </repository>
-        <repository>
             <id>osgeo</id>
             <name>OSGeo Release Repository</name>
             <url>https://repo.osgeo.org/repository/release/</url>
