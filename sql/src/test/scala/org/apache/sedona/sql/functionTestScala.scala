@@ -1799,14 +1799,12 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       ("null", "'MULTIPOINT (0.5 0.5, 1 1)'")
         -> null,
       ("'LINESTRING (0 0, 1.5 1.5, 2 2)'", "null")
-        -> null,
+        -> null
     )
     for(((target, blade), expected) <- geomTestCases) {
       var df = sparkSession.sql(s"SELECT ST_Split(ST_GeomFromText($target), ST_GeomFromText($blade)))")
       var result = df.take(1)(0).get(0).asInstanceOf[Geometry]
-      var textResult =
-        if (result == null) result.toText()
-        else null
+      var textResult = if (result == null) result.toText() else null
       assert(result==expected)
     }
   }
