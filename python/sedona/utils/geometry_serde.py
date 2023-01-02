@@ -19,6 +19,7 @@ import struct
 import math
 from typing import List, Optional
 
+import numpy as np
 from shapely.coords import CoordinateSequence
 from shapely.geometry import Point
 from shapely.geometry import LineString
@@ -243,22 +244,17 @@ def put_coordinate(buffer: bytearray, offset: int, coord_type: int, coord: tuple
     return offset
 
 
-def get_coordinates(buffer: bytearray, offset: int, coord_type: int, num_coords: int) -> List[tuple]:
-    coords = []
-    bytes_per_coord = CoordinateType.bytes_per_coord(coord_type)
+def get_coordinates(buffer: bytearray, offset: int, coord_type: int, num_coords: int) -> np.ndarray:
 
     if coord_type == CoordinateType.XY or coord_type == CoordinateType.XYM:
-        coords = [
-            struct.unpack_from('dd', buffer, offset + i * bytes_per_coord)
-            for i in range(num_coords)
-        ]
+        nums_per_coord = 2
     elif coord_type == CoordinateType.XYZ or coord_type == CoordinateType.XYZM:
-        coords = [
-            struct.unpack_from('ddd', buffer, offset + i * bytes_per_coord)
-            for i in range(num_coords)
-        ]
+        nums_per_coord = 3
     else:
         raise NotImplementedError("XYM or XYZM coordinates were not supported")
+
+    coords = np.frombuffer(buffer, np.float64, num_coords * nums_per_coord, offset).reshape((num_coords, nums_per_coord))
+
     return coords
 
 
