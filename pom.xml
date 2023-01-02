@@ -59,184 +59,199 @@
 
     <properties>
         <project.scm.id>github</project.scm.id>
-        <geotools.version>24.0</geotools.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <dependency.scope>provided</dependency.scope>
-        <jts.version>1.19.0</jts.version>
-        <jts2geojson.version>0.16.1</jts2geojson.version>
-        <netcdf.version>5.4.2</netcdf.version>
-        <spark.version>3.3.0</spark.version>
-        <spark.compat.version>3.0</spark.compat.version>
-        <sedona.jackson.version>2.13.3</sedona.jackson.version>
-        <hadoop.version>3.2.4</hadoop.version>
+        <java.version>1.8</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.deploy.skip>false</maven.deploy.skip>
         <maven.compiler.plugin.version>3.10.1</maven.compiler.plugin.version>
+
+        <cdm.version>5.4.2</cdm.version>
+        <geotools.version>24.0</geotools.version>
+        <hadoop.version>3.2.4</hadoop.version>
+        <jackson.version>2.13.4</jackson.version>
+        <jts.version>1.19.0</jts.version>
+        <jts2geojson.version>0.16.1</jts2geojson.version>
+        <spark.version>3.3.0</spark.version>
+        <spark.compat.version>3.0</spark.compat.version>
+        
         <!-- Actual scala version will be set by a profile.
         Setting a default value helps IDE:s that can't make sense of profiles. -->
         <scala.compat.version>2.12</scala.compat.version>
+
+        <geotools.scope>provided</geotools.scope>
+        <!-- Because it's not in Maven central, make it provided by default -->
+        <cdm.scope>provided</cdm.scope>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${sedona.jackson.version}</version>
-            <scope>${dependency.scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>${sedona.jackson.version}</version>
-            <scope>${dependency.scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.wololo</groupId>
-            <artifactId>jts2geojson</artifactId>
-            <version>${jts2geojson.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.locationtech.jts</groupId>
-                    <artifactId>jts-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-            <scope>${dependency.scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.locationtech.jts</groupId>
-            <artifactId>jts-core</artifactId>
-            <version>${jts.version}</version>
-            <scope>${dependency.scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-client</artifactId>
-            <version>${hadoop.version}</version>
-            <scope>${dependency.scope}</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>edu.ucar</groupId>
-            <artifactId>cdm-core</artifactId>
-            <version>${netcdf.version}</version>
-            <scope>${dependency.scope}</scope>
-        </dependency>
-        <!--The following GeoTools dependencies use GNU Lesser General Public License and thus are excluded from the binary distribution-->
-        <!-- Users have to include them by themselves manually -->
-        <!-- See https://www.apache.org/legal/resolved.html#category-x -->
-        <!-- See https://github.com/geotools/geotools#license -->
-        <!--for CRS transformation-->
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-main</artifactId>
-            <version>${geotools.version}</version>
-            <scope>${dependency.scope}</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.locationtech.jts</groupId>
-                    <artifactId>jts-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!--for CRS transformation-->
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-referencing</artifactId>
-            <version>${geotools.version}</version>
-            <scope>${dependency.scope}</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!--for CRS transformation-->
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-epsg-hsql</artifactId>
-            <version>${geotools.version}</version>
-            <scope>${dependency.scope}</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!--for GeoTiff Reader-->
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-geotiff</artifactId>
-            <version>${geotools.version}</version>
-            <scope>${dependency.scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-coverage</artifactId>
-            <version>${geotools.version}</version>
-            <scope>${dependency.scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-core_${scala.compat.version}</artifactId>
-            <version>${spark.version}</version>
-            <scope>${dependency.scope}</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.hadoop</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-sql_${scala.compat.version}</artifactId>
-            <version>${spark.version}</version>
-            <scope>${dependency.scope}</scope>
-        </dependency>
-        <!-- Test -->
+        <!-- Include junit automatically, projects must include scalatest themselves since not all use -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_${scala.compat.version}</artifactId>
-            <version>3.1.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-compiler</artifactId>
-            <version>${scala.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.wololo</groupId>
+                <artifactId>jts2geojson</artifactId>
+                <version>${jts2geojson.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.locationtech.jts</groupId>
+                        <artifactId>jts-core</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.locationtech.jts</groupId>
+                <artifactId>jts-core</artifactId>
+                <version>${jts.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>edu.ucar</groupId>
+                <artifactId>cdm-core</artifactId>
+                <version>${cdm.version}</version>
+                <scope>${cdm.scope}</scope>
+            </dependency>
+            <!--The following GeoTools dependencies use GNU Lesser General Public License and thus are excluded from the binary distribution-->
+            <!-- Users have to include them by themselves manually -->
+            <!-- See https://www.apache.org/legal/resolved.html#category-x -->
+            <!-- See https://github.com/geotools/geotools#license -->
+            <!--for CRS transformation-->
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-main</artifactId>
+                <version>${geotools.version}</version>
+                <scope>${geotools.scope}</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.locationtech.jts</groupId>
+                        <artifactId>jts-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!--for CRS transformation-->
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-referencing</artifactId>
+                <version>${geotools.version}</version>
+                <scope>${geotools.scope}</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!--for CRS transformation-->
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-epsg-hsql</artifactId>
+                <version>${geotools.version}</version>
+                <scope>${geotools.scope}</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-shapefile</artifactId>
+                <version>${geotools.version}</version>
+                <scope>${geotools.scope}</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!--for GeoTiff Reader-->
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-geotiff</artifactId>
+                <version>${geotools.version}</version>
+                <scope>${geotools.scope}</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-coverage</artifactId>
+                <version>${geotools.version}</version>
+                <scope>${geotools.scope}</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-core_${scala.compat.version}</artifactId>
+                <version>${spark.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-sql_${scala.compat.version}</artifactId>
+                <version>${spark.version}</version>
+                <scope>provided</scope>
+            </dependency>
+           <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-client</artifactId>
+                <version>${hadoop.version}</version>
+                <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>2.6</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-library</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-compiler</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang.modules</groupId>
+                <artifactId>scala-collection-compat_${scala.compat.version}</artifactId>
+                <version>2.5.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.13.1</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.scalatest</groupId>
+                <artifactId>scalatest_${scala.compat.version}</artifactId>
+                <version>3.1.1</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <repositories>
-        <repository>
-            <id>maven2-repository.dev.java.net</id>
-            <name>Java.net repository</name>
-            <url>https://download.java.net/maven/2</url>
-        </repository>
         <repository>
             <id>osgeo</id>
             <name>OSGeo Release Repository</name>
@@ -325,6 +340,52 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.3.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.scalatest</groupId>
+                    <artifactId>scalatest-maven-plugin</artifactId>
+                    <version>2.2.0</version>
+                    <configuration>
+                        <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+                        <junitxml>.</junitxml>
+                        <filereports>TestSuiteReport.txt</filereports>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>test</id>
+                            <goals>
+                                <goal>test</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.scalastyle</groupId>
+                    <artifactId>scalastyle-maven-plugin</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <verbose>false</verbose>
+                        <failOnViolation>true</failOnViolation>
+                        <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                        <failOnWarning>false</failOnWarning>
+                        <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
+                        <testSourceDirectory>${project.basedir}/src/test/scala</testSourceDirectory>
+                        <configLocation>${project.basedir}/../scalastyle_config.xml</configLocation>
+                        <outputFile>${project.basedir}/target/scalastyle-output.xml</outputFile>
+                        <outputEncoding>UTF-8</outputEncoding>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -360,51 +421,27 @@
                 </configuration>
             </plugin>
             <plugin>
-                <!-- see http://davidb.github.com/scala-maven-plugin -->
-                <groupId>net.alchim31.maven</groupId>
-                <artifactId>scala-maven-plugin</artifactId>
-                <version>3.2.1</version>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
+            <!-- This plugin is to replace property values in artifact names when publish -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.1</version>
+                <groupId>io.paradoxical</groupId>
+                <artifactId>resolved-pom-maven-plugin</artifactId>
+                <version>1.0</version>
+                <configuration>
+                    <properties>
+                        <spark.compat.version>${spark.compat.version}</spark.compat.version>
+                        <scala.compat.version>${scala.compat.version}</scala.compat.version>
+                    </properties>
+                </configuration>
                 <executions>
                     <execution>
+                        <id>resolve-my-pom</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>resolve-pom</goal>
                         </goals>
-                        <configuration>
-                            <transformers>
-                                <!--  use transformer to handle merge of META-INF/services - see http://java.net/jira/browse/JERSEY-440?focusedCommentId=14822&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#action_14822 -->
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>reference.conf</resource>
-                                </transformer>
-                            </transformers>
-                            <filters>
-                                <!--  filter to address "Invalid signature file" issue - see http://stackoverflow.com/a/6743609/589215 -->
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>edu.ucar:cdm-core</artifact>
-                                    <excludes>
-                                        <exclude>com/fasterxml/**</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -412,24 +449,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.18.1</version>
-            </plugin>
-            <plugin>
-                <groupId>org.scalatest</groupId>
-                <artifactId>scalatest-maven-plugin</artifactId>
-                <version>2.2.0</version>
-                <configuration>
-                    <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
-                    <junitxml>.</junitxml>
-                    <filereports>TestSuiteReport.txt</filereports>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>test</id>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -447,27 +466,6 @@
                     <failOnError>false</failOnError>
                     <additionalparam>-Xdoclint:none</additionalparam>
                 </configuration>
-            </plugin>
-            <!-- This plugin is to replace property values in artifact names when publish -->
-            <plugin>
-                <groupId>io.paradoxical</groupId>
-                <artifactId>resolved-pom-maven-plugin</artifactId>
-                <version>1.0</version>
-                <configuration>
-                    <properties>
-                        <spark.compat.version>${spark.compat.version}</spark.compat.version>
-                        <scala.compat.version>${scala.compat.version}</scala.compat.version>
-                    </properties>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>resolve-my-pom</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>resolve-pom</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.rat</groupId>
@@ -508,6 +506,8 @@
                 <scala.version>2.13.8</scala.version>
                 <scala.compat.version>2.13</scala.compat.version>
                 <scaladoc.arg>-no-java-comments</scaladoc.arg>
+                <!-- Skip deploying parent module for Scala 2.13 profile, it will be deployed with 2.12 -->
+                <maven.deploy.skip>true</maven.deploy.skip>
             </properties>
             <modules>
                 <module>common</module>
@@ -515,6 +515,7 @@
                 <module>sql</module>
                 <module>viz</module>
                 <module>python-adapter</module>
+                <module>spark-shaded</module>
             </modules>
         </profile>
         <profile>
@@ -537,7 +538,9 @@
                 <module>sql</module>
                 <module>viz</module>
                 <module>python-adapter</module>
+                <module>spark-shaded</module>
                 <module>flink</module>
+                <module>flink-shaded</module>
             </modules>
         </profile>
     </profiles>

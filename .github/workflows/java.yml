@@ -18,32 +18,26 @@ jobs:
         include:
           - spark: 3.3.0
             scala: 2.13.8
-            jackson: 2.13.3
             jdk: '8'
             skipTests: ''
           - spark: 3.3.0
             scala: 2.12.15
-            jackson: 2.13.3
             jdk: '8'
             skipTests: ''            
           - spark: 3.3.0
             scala: 2.12.15
-            jackson: 2.13.3
             jdk: '11'
             skipTests: '-DskipTests'            
           - spark: 3.2.0
             scala: 2.12.15
-            jackson: 2.12.3
             jdk: '8'
             skipTests: ''            
           - spark: 3.1.2
             scala: 2.12.15
-            jackson: 2.10.0
             jdk: '8'
             skipTests: ''            
           - spark: 3.0.3
             scala: 2.12.15
-            jackson: 2.10.0
             jdk: '8'
             skipTests: ''
 
@@ -65,9 +59,8 @@ jobs:
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         SCALA_VERSION: ${{ matrix.scala }}
-        JACKSON_VERSION: ${{ matrix.jackson }}
-        SKIP_TESTS: ${{ matrix.skipTests}}
-      run: mvn -q clean install -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} -Dsedona.jackson.version=${JACKSON_VERSION} ${SKIP_TESTS}
+        SKIP_TESTS: ${{ matrix.skipTests }}
+      run: mvn -q clean install -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${SKIP_TESTS}
     - run: mkdir staging
     - run: cp core/target/sedona-*.jar staging
     - run: cp sql/target/sedona-*.jar staging

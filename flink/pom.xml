@@ -35,79 +35,115 @@
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
         <flink.version>1.14.3</flink.version>
+        <flink.scope>provided</flink.scope>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.apache.sedona</groupId>
+            <artifactId>sedona-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sedona</groupId>
             <artifactId>sedona-core-${spark.compat.version}_${scala.compat.version}</artifactId>
             <version>${project.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.sedona</groupId>
             <artifactId>sedona-sql-${spark.compat.version}_${scala.compat.version}</artifactId>
             <version>${project.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-core</artifactId>
             <version>${flink.version}</version>
-            <scope>${dependency.scope}</scope>
+            <scope>${flink.scope}</scope>
         </dependency>
 <!--        For Flink DataStream API-->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-java_${scala.compat.version}</artifactId>
             <version>${flink.version}</version>
-            <scope>${dependency.scope}</scope>
+            <scope>${flink.scope}</scope>
         </dependency>
 <!--        Flink Kafka connector-->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka_${scala.compat.version}</artifactId>
             <version>${flink.version}</version>
-            <scope>${dependency.scope}</scope>
+            <scope>${flink.scope}</scope>
         </dependency>
 <!--        For playing flink in IDE-->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-clients_${scala.compat.version}</artifactId>
             <version>${flink.version}</version>
-            <scope>${dependency.scope}</scope>
+            <scope>${flink.scope}</scope>
         </dependency>
 <!--        For Flink flink api, planner, udf/udt, csv-->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-api-java-bridge_${scala.compat.version}</artifactId>
             <version>${flink.version}</version>
-            <scope>${dependency.scope}</scope>
+            <scope>${flink.scope}</scope>
         </dependency>
 <!--        Starting Flink 14, Blink planner has been renamed to the official Flink planner-->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-planner_${scala.compat.version}</artifactId>
             <version>${flink.version}</version>
-            <scope>${dependency.scope}</scope>
+            <scope>${flink.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-common</artifactId>
             <version>${flink.version}</version>
-            <scope>${dependency.scope}</scope>
+            <scope>${flink.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-csv</artifactId>
             <version>${flink.version}</version>
-            <scope>${dependency.scope}</scope>
+            <scope>${flink.scope}</scope>
         </dependency>
 <!--        For Flink Web Ui in test-->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-runtime-web_${scala.compat.version}</artifactId>
             <version>${flink.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-main</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-referencing</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-epsg-hsql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_${scala.compat.version}</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.reload4j</groupId>
+            <artifactId>reload4j</artifactId>
+            <version>1.2.21</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.15</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -120,38 +156,18 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.scalatest</groupId>
+                <artifactId>scalatest-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.scalastyle</groupId>
+                <artifactId>scalastyle-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
-<!--	<build>-->
-<!--        <sourceDirectory>src/main/scala</sourceDirectory>-->
-<!--        <plugins>-->
-<!--            <plugin>-->
-<!--                <groupId>org.scalastyle</groupId>-->
-<!--                <artifactId>scalastyle-maven-plugin</artifactId>-->
-<!--                <version>1.0.0</version>-->
-<!--                <configuration>-->
-<!--                    <verbose>false</verbose>-->
-<!--                    <failOnViolation>true</failOnViolation>-->
-<!--                    <includeTestSourceDirectory>true</includeTestSourceDirectory>-->
-<!--                    <failOnWarning>false</failOnWarning>-->
-<!--                    <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>-->
-<!--                    <testSourceDirectory>${project.basedir}/src/test/scala</testSourceDirectory>-->
-<!--                    <configLocation>${project.basedir}/../scalastyle_config.xml</configLocation>-->
-<!--                    <outputFile>${project.basedir}/target/scalastyle-output.xml</outputFile>-->
-<!--                    <outputEncoding>UTF-8</outputEncoding>-->
-<!--                </configuration>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <goals>-->
-<!--                            <goal>check</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-<!--        </plugins>-->
-<!--	</build>-->
 </project>
   
