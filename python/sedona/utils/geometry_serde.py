@@ -109,13 +109,13 @@ class GeometryBuffer:
 
     def read_polygon(self) -> Polygon:
         num_rings = self.read_int()
+
         if num_rings == 0:
             return Polygon()
-        exterior = self.read_linearring()
-        interiors = []
-        for i in range(num_rings - 1):
-            interiors.append(self.read_linearring())
-        return Polygon(exterior, holes=interiors)
+
+        rings = [self.read_coordinates(self.read_int()) for _ in range(num_rings)]
+
+        return Polygon(rings[0], holes=rings[1:])
 
     def write_linestring(self, line):
         coords = line.coords
