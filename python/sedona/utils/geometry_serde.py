@@ -246,10 +246,19 @@ def put_coordinate(buffer: bytearray, offset: int, coord_type: int, coord: tuple
 def get_coordinates(buffer: bytearray, offset: int, coord_type: int, num_coords: int) -> List[tuple]:
     coords = []
     bytes_per_coord = CoordinateType.bytes_per_coord(coord_type)
-    for i in range(num_coords):
-        coord = get_coordinate(buffer, offset, coord_type)
-        coords.append(coord)
-        offset += bytes_per_coord
+
+    if coord_type == CoordinateType.XY or coord_type == CoordinateType.XYM:
+        coords = [
+            struct.unpack_from('dd', buffer, offset + i * bytes_per_coord)
+            for i in range(num_coords)
+        ]
+    elif coord_type == CoordinateType.XYZ or coord_type == CoordinateType.XYZM:
+        coords = [
+            struct.unpack_from('ddd', buffer, offset + i * bytes_per_coord)
+            for i in range(num_coords)
+        ]
+    else:
+        raise NotImplementedError("XYM or XYZM coordinates were not supported")
     return coords
 
 
