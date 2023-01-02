@@ -15,6 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+from dataclasses import dataclass
 import struct
 import math
 from typing import List, Optional
@@ -43,6 +44,22 @@ class GeometryTypeID:
     MULTILINESTRING = 5
     MULTIPOLYGON = 6
     GEOMETRYCOLLECTION = 7
+
+
+@dataclass
+class CoordinateInfo:
+    name: str
+    num_coords: int
+    bytes_per_coord: int
+    unpack_format: str
+
+
+_COORD_INFOS = {
+    1: CoordinateInfo("XY", 2, 16, 'dd'),
+    2: CoordinateInfo("XYZ", 3, 24, 'ddd'),
+    3: CoordinateInfo("XYM", 3, 24, 'ddd'),
+    4: CoordinateInfo("XYZM", 4, 32, 'dddd')
+}
 
 
 class CoordinateType:
@@ -113,7 +130,10 @@ class GeometryBuffer:
         if num_rings == 0:
             return Polygon()
 
-        rings = [self.read_coordinates(self.read_int()) for _ in range(num_rings)]
+        rings = [
+            self.read_coordinates(self.read_int())
+            for _ in range(num_rings)
+        ]
 
         return Polygon(rings[0], rings[1:])
 
@@ -245,15 +265,17 @@ def put_coordinate(buffer: bytearray, offset: int, coord_type: int, coord: tuple
 
 
 def get_coordinates(buffer: bytearray, offset: int, coord_type: int, num_coords: int) -> np.ndarray:
-
-    if coord_type == CoordinateType.XY or coord_type == CoordinateType.XYM:
-        nums_per_coord = 2
-    elif coord_type == CoordinateType.XYZ or coord_type == CoordinateType.XYZM:
-        nums_per_coord = 3
-    else:
+    if coord_type == CoordinateType.XYM or coord_type == CoordinateType.XYZM:
         raise NotImplementedError("XYM or XYZM coordinates were not supported")
 
-    coords = np.frombuffer(buffer, np.float64, num_coords * nums_per_coord, offset).reshape((num_coords, nums_per_coord))
+    if num_coords < 50:
+        coords = [
+            struct.unpack_from(_COORD_INFOS[coord_type].unpack_format,buffer, offset + (i * _COORD_INFOS[coord_type].bytes_per_coord))
+            for i in range(num_coords)
+        ]
+    else:
+        nums_per_coord = _COORD_INFOS[coord_type].num_coords
+        coords = np.frombuffer(buffer, np.float64, num_coords * nums_per_coord, offset).reshape((num_coords, nums_per_coord))
 
     return coords
 
