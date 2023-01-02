@@ -115,7 +115,7 @@ class GeometryBuffer:
 
         rings = [self.read_coordinates(self.read_int()) for _ in range(num_rings)]
 
-        return Polygon(rings[0], holes=rings[1:])
+        return Polygon(rings[0], rings[1:])
 
     def write_linestring(self, line):
         coords = line.coords
