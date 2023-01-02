@@ -72,6 +72,7 @@
         <jackson.version>2.13.4</jackson.version>
         <jts.version>1.19.0</jts.version>
         <jts2geojson.version>0.16.1</jts2geojson.version>
+        <log4j.version>2.17.2</log4j.version>
         <spark.version>3.3.0</spark.version>
         <spark.compat.version>3.0</spark.compat.version>
         
@@ -89,6 +90,15 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+        </dependency>
+        <!-- Include log4j deps for tests for consistent logging across modules-->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
         </dependency>
     </dependencies>
 
@@ -193,6 +203,17 @@
                 <artifactId>spark-core_${scala.compat.version}</artifactId>
                 <version>${spark.version}</version>
                 <scope>provided</scope>
+                <!-- Exclude log4j 1 for older versions of Spark-->
+                <exclusions>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.spark</groupId>
@@ -211,10 +232,33 @@
                         <artifactId>log4j</artifactId>
                     </exclusion>
                     <exclusion>
+                        <groupId>ch.qos.reload4j</groupId>
+                        <artifactId>reload4j</artifactId>
+                    </exclusion>
+                    <exclusion>
                         <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
+                        <artifactId>*</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-1.2-api</artifactId>
+                <version>${log4j.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <!-- Just include log4j deps for tests for consistent logging across modules-->
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${log4j.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>commons-lang</groupId>
