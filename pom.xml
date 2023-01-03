@@ -73,6 +73,7 @@
         <jts.version>1.19.0</jts.version>
         <jts2geojson.version>0.16.1</jts2geojson.version>
         <log4j.version>2.17.2</log4j.version>
+        <slf4j.version>1.7.36</slf4j.version>
         <spark.version>3.3.0</spark.version>
         <spark.compat.version>3.0</spark.compat.version>
         
@@ -240,6 +241,12 @@
                         <artifactId>*</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
