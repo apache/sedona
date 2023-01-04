@@ -29,7 +29,6 @@ import org.apache.spark.sql.catalyst.expressions.LessThanOrEqual
 import org.apache.spark.sql.catalyst.expressions.Literal
 import org.apache.spark.sql.catalyst.expressions.Not
 import org.apache.spark.sql.catalyst.expressions.Or
-import org.apache.spark.sql.catalyst.expressions.PredicateHelper
 import org.apache.spark.sql.catalyst.expressions.SubqueryExpression
 import org.apache.spark.sql.catalyst.plans.logical.Filter
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
@@ -61,8 +60,7 @@ import org.apache.spark.sql.types.DoubleType
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.Point
 
-class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession)
-  extends Rule[LogicalPlan] with PredicateHelper {
+class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rule[LogicalPlan] {
 
   override def apply(plan: LogicalPlan): LogicalPlan = plan transform {
     case filter@Filter(condition, lr: LogicalRelation) if isGeoParquetRelation(lr) =>
@@ -171,6 +169,22 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession)
       case Seq(pushableColumn(name), Literal(v, _)) => Some(name, v)
       case Seq(Literal(v, _), pushableColumn(name)) => Some(name, v)
       case _ => None
+    }
+  }
+
+  /**
+   * This is a polyfill for running on Spark 3.0 while compiling against Spark 3.3. We'd really like to mixin
+   * `PredicateHelper` here, but the class hierarchy of `PredicateHelper` has changed between Spark 3.0 and 3.3 so
+   * it would raise `java.lang.ClassNotFoundException: org.apache.spark.sql.catalyst.expressions.AliasHelper`
+   * at runtime on Spark 3.0.
+   * @param condition filter condition to split
+   * @return A list of conjunctive conditions
+   */
+  private def splitConjunctivePredicates(condition: Expression): Seq[Expression] = {
+    condition match {
+      case And(cond1, cond2) =>
+        splitConjunctivePredicates(cond1) ++ splitConjunctivePredicates(cond2)
+      case other => other :: Nil
     }
   }
 }
