@@ -507,7 +507,7 @@ def serialize_geometry_collection(geom: GeometryCollection) -> bytearray:
     return buffer
 
 
-def serialize_shapely_1_empty_geom(geom) -> bytearray:
+def serialize_shapely_1_empty_geom(geom: BaseGeometry) -> bytearray:
     if isinstance(geom, Point):
         geom_type = GeometryTypeID.POINT
     elif isinstance(geom, LineString):
