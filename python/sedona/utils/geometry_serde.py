@@ -164,7 +164,7 @@ class GeometryBuffer:
         struct.pack_into("i", self.buffer, self.ints_offset, value)
         self.ints_offset += 4
 
-def serialize(geom: BaseGeometry) -> Optional[bytearray]:
+def serialize(geom: BaseGeometry) -> Optional[bytes]:
     """
     Serialize a shapely geometry object to the internal representation of GeometryUDT.
     :param geom: shapely geometry object
@@ -185,7 +185,9 @@ def serialize(geom: BaseGeometry) -> Optional[bytearray]:
         return serialize_multi_linestring(geom)
     elif isinstance(geom, MultiPolygon):
         return serialize_multi_polygon(geom)
-    elif isinstance(geom, GeometryCollection):
+    elif geom.geom_type == "GeometryCollection":
+        # this check is slightly different due to how shapely
+        # handles empty geometries in version 1.x
         return serialize_geometry_collection(geom)
     else:
         raise ValueError(f"Unsupported geometry type: {type(geom)}")
@@ -448,29 +450,24 @@ def deserialize_polygon(geom_buffer: GeometryBuffer) -> Polygon:
 
 
 def serialize_multi_polygon(geom: MultiPolygon) -> bytearray:
-    polygons = list(geom.geoms)
+    coords_for = lambda x: [y for y in list(x)]
+    polygons = [[coords_for(polygon.exterior.coords)] + [coords_for(ring.coords) for ring in polygon.interiors] for polygon in list(geom.geoms)]
+
     if not polygons:
-        return create_buffer_for_geom(GeometryTypeID.MULTIPOLYGON, CoordinateType.XY, 8, 0)
-    coord_type = CoordinateType.type_of(polygons[0])
-    bytes_per_coord = CoordinateType.bytes_per_coord(coord_type)
-    num_coords = 0
-    num_rings = 0
-    for polygon in polygons:
-        num_exterior_coords = len(polygon.exterior.coords)
-        if num_exterior_coords == 0:
-            continue
-        num_coords += num_exterior_coords
-        num_rings += (1 + len(polygon.interiors))
-        for interior in polygon.interiors:
-            num_coords += len(interior.coords)
-    num_polygons_offset = 8 + num_coords * bytes_per_coord
-    size = num_polygons_offset + 4 + len(polygons) * 4 + num_rings * 4
-    buffer = create_buffer_for_geom(GeometryTypeID.MULTIPOLYGON, coord_type, size, num_coords)
-    geom_buffer = GeometryBuffer(buffer, coord_type, 8, num_coords)
-    geom_buffer.write_int(len(polygons))
-    for polygon in polygons:
-        geom_buffer.write_polygon(polygon)
-    return buffer
+        return generate_header_bytes(GeometryTypeID.MULTIPOLYGON, CoordinateType.XY, 0)
+
+    coord_type = CoordinateType.type_of(geom)
+
+    structure_data = array.array('i', [val for polygon in polygons for val in [len(polygon)] + [len(ring) for ring in polygon]]).tobytes()
+    coords = array.array('d', [component for polygon in polygons for ring in polygon for coord in ring for component in coord]).tobytes()
+
+    num_coords = len(coords) // _COORD_INFOS[coord_type].bytes_per_coord
+    header = generate_header_bytes(GeometryTypeID.MULTIPOLYGON, coord_type, num_coords)
+
+    num_polygons = struct.pack('i', len(polygons))
+
+    result = header + coords + num_polygons + structure_data
+    return result
 
 
 def deserialize_multi_polygon(geom_buffer: GeometryBuffer) -> MultiPolygon:
