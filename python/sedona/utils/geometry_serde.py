@@ -275,7 +275,6 @@ def get_coordinates(buffer: bytearray, offset: int, coord_type: int, num_coords:
 
 
 def get_coordinate(buffer: bytearray, offset: int, coord_type: int) -> CoordType:
-    # Shapely does not support M dimension for now, so raise if it was passed
     return struct.unpack_from(CoordinateType.unpack_format(coord_type), buffer, offset)
 
 
