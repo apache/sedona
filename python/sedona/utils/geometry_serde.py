@@ -190,7 +190,7 @@ def serialize(geom: BaseGeometry) -> Optional[bytearray]:
     else:
         raise ValueError(f"Unsupported geometry type: {type(geom)}")
 
-def deserialize(buffer: bytearray):
+def deserialize(buffer: bytes):
     """
     Deserialize a shapely geometry object from the internal representation of GeometryUDT.
     :param buffer: internal representation of GeometryUDT
@@ -232,8 +232,11 @@ def create_buffer_for_geom(geom_type: int, coord_type: int, size: int, num_coord
 def generate_header_bytes(geom_type: int, coord_type: int, num_coords: int) -> bytes:
     preamble_byte = (geom_type << 4) | (coord_type << 1)
     return struct.pack(
-        'Bi',
+        'BBBBi',
         preamble_byte,
+        0,
+        0,
+        0,
         num_coords
     )
 
@@ -374,21 +377,25 @@ def deserialize_linestring(geom_buffer: GeometryBuffer) -> LineString:
     return LineString(coords)
 
 
-def serialize_multi_linestring(geom: MultiLineString) -> bytearray:
-    linestrings = geom.geoms
+def serialize_multi_linestring(geom: MultiLineString) -> bytes:
+    linestrings = list(geom.geoms)
+
     if not linestrings:
-        return create_buffer_for_geom(GeometryTypeID.MULTILINESTRING, CoordinateType.XY, 8, 0)
-    coord_type = CoordinateType.type_of(linestrings[0])
-    bytes_per_coord = CoordinateType.bytes_per_coord(coord_type)
-    num_coords = sum(len(ls.coords) for ls in linestrings)
-    num_linestrings_offset = 8 + num_coords * bytes_per_coord
-    size = num_linestrings_offset + 4 + 4 * len(linestrings)
-    buffer = create_buffer_for_geom(GeometryTypeID.MULTILINESTRING, coord_type, size, num_coords)
-    geom_buffer = GeometryBuffer(buffer, coord_type, 8, num_coords)
-    geom_buffer.write_int(len(linestrings))
-    for ls in linestrings:
-        geom_buffer.write_linestring(ls)
-    return buffer
+        return generate_header_bytes(GeometryTypeID.MULTILINESTRING, CoordinateType.XY, 0)
+
+    coord_type = CoordinateType.type_of(geom)
+    lines = [[list(coord) for coord in ls.coords] for ls in linestrings]
+    line_lengths = [len(l) for l in lines]
+    num_coords = sum(line_lengths)
+
+    header = generate_header_bytes(GeometryTypeID.MULTILINESTRING, coord_type, num_coords)
+    coord_data = array.array('d', [c for l in lines for coord in l for c in coord]).tobytes()
+    num_lines = struct.pack('i', len(lines))
+    structure_data = array.array('i', line_lengths).tobytes()
+
+    result = header + coord_data + num_lines + structure_data
+
+    return result
 
 
 def deserialize_multi_linestring(geom_buffer: GeometryBuffer) -> MultiLineString:
