@@ -25,8 +25,6 @@ import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.CloseableIterator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.apache.sedona.flink.expressions.Constructors;
 import org.locationtech.jts.geom.*;
 import org.wololo.jts2geojson.GeoJSONWriter;
@@ -62,7 +60,6 @@ public class TestBase {
     }
 
     static void initialize(boolean enableWebUI) {
-        Logger.getLogger("org").setLevel(Level.WARN);
         env = enableWebUI? StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(new Configuration()):
                 StreamExecutionEnvironment.getExecutionEnvironment();
         EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
