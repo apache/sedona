@@ -20,7 +20,8 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -39,6 +40,7 @@ import org.locationtech.jts.operation.polygonize.Polygonizer;
  * Class to split geometry by other geometry.
  */
 public final class GeometrySplitter {
+    final static Logger logger = LoggerFactory.getLogger(GeometrySplitter.class);
     private final GeometryFactory geometryFactory;
 
     public GeometrySplitter(GeometryFactory geometryFactory) {
@@ -161,7 +163,7 @@ public final class GeometrySplitter {
             // blade and inputLines are disjoint so just return the input as a multilinestring
             return (MultiLineString)ensureMultiGeometryOfDimensionN(inputLines, 1);
         } else if (intersectionWithBlade.getDimension() != 0) {
-            Logger.getLogger(GeometrySplitter.class).error("Colinear sections detected between source and blade geometry. Returned null.");
+            logger.warn("Colinear sections detected between source and blade geometry. Returned null.");
             return null;
         }
 
