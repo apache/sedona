@@ -20,6 +20,7 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -163,8 +164,7 @@ public final class GeometrySplitter {
             // blade and inputLines are disjoint so just return the input as a multilinestring
             return (MultiLineString)ensureMultiGeometryOfDimensionN(inputLines, 1);
         } else if (intersectionWithBlade.getDimension() != 0) {
-            // FIXME need way to access the logger
-            System.err.println("Colinear sections detected between source and blade geometry. Returned null.");
+            Logger.getLogger(GeometrySplitter.class).error("Colinear sections detected between source and blade geometry. Returned null.");
             return null;
         }
 
