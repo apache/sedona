@@ -268,7 +268,7 @@ def get_coordinates(buffer: bytearray, offset: int, coord_type: int, num_coords:
 
     if num_coords < 50:
         coords = [
-            struct.unpack_from(_COORD_INFOS[coord_type].unpack_format,buffer, offset + (i * _COORD_INFOS[coord_type].bytes_per_coord))
+            struct.unpack_from(_COORD_INFOS[coord_type].unpack_format, buffer, offset + (i * _COORD_INFOS[coord_type].bytes_per_coord))
             for i in range(num_coords)
         ]
     else:
