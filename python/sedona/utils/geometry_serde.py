@@ -20,20 +20,23 @@ from dataclasses import dataclass
 import struct
 import math
 import sys
-from typing import List, Optional
+from typing import List, Optional, NoReturn
 
 import numpy as np
 from shapely.coords import CoordinateSequence
-from shapely.geometry import Point
-from shapely.geometry import LineString
-from shapely.geometry import Polygon
-from shapely.geometry import LinearRing
-from shapely.geometry import MultiPoint
-from shapely.geometry import MultiLineString
-from shapely.geometry import MultiPolygon
-from shapely.geometry import GeometryCollection
+from shapely.geometry import (
+    GeometryCollection,
+    LinearRing,
+    LineString,
+    MultiLineString,
+    MultiPoint,
+    MultiPolygon,
+    Point,
+    Polygon,
+)
+from shapely.geometry.base import BaseGeometry
+from shapely.wkb import dumps as wkb_dumps
 from shapely.wkt import loads as wkt_loads
-from shapely import wkb
 
 
 class GeometryTypeID:
@@ -161,8 +164,7 @@ class GeometryBuffer:
         struct.pack_into("i", self.buffer, self.ints_offset, value)
         self.ints_offset += 4
 
-
-def serialize(geom) -> Optional[bytearray]:
+def serialize(geom: BaseGeometry) -> Optional[bytearray]:
     """
     Serialize a shapely geometry object to the internal representation of GeometryUDT.
     :param geom: shapely geometry object
@@ -170,24 +172,23 @@ def serialize(geom) -> Optional[bytearray]:
     """
     if geom is None:
         return None
-    geom_type = geom.geom_type
-    if geom_type == 'Point':
+
+    if isinstance(geom, Point):
         return serialize_point(geom)
-    elif geom_type == 'LineString':
+    elif isinstance(geom, LineString):
         return serialize_linestring(geom)
-    elif geom_type == 'Polygon':
+    elif isinstance(geom, Polygon):
         return serialize_polygon(geom)
-    elif geom_type == 'MultiPoint':
+    elif isinstance(geom, MultiPoint):
         return serialize_multi_point(geom)
-    elif geom_type == 'MultiLineString':
+    elif isinstance(geom, MultiLineString):
         return serialize_multi_linestring(geom)
-    elif geom_type == 'MultiPolygon':
+    elif isinstance(geom, MultiPolygon):
         return serialize_multi_polygon(geom)
-    elif geom_type == 'GeometryCollection':
+    elif isinstance(geom, GeometryCollection):
         return serialize_geometry_collection(geom)
     else:
-        raise ValueError("Unsupported geometry type: " + geom_type)
-
+        raise ValueError(f"Unsupported geometry type: {type(geom)}")
 
 def deserialize(buffer: bytearray):
     """
@@ -229,7 +230,7 @@ def create_buffer_for_geom(geom_type: int, coord_type: int, size: int, num_coord
     return buffer
 
 def generate_header_bytes(geom_type: int, coord_type: int, num_coords: int) -> bytes:
-    preamble_byte = ((geom_type << 4) | (coord_type << 1))
+    preamble_byte = (geom_type << 4) | (coord_type << 1)
     return struct.pack(
         'Bi',
         preamble_byte,
@@ -252,13 +253,13 @@ def put_coordinate(buffer: bytearray, offset: int, coord_type: int, coord: tuple
         offset += 24
     else:
         # Shapely does not support M dimension for now
-        raise ValueError("Invalid coordinate type: {}".format(coord_type))
+        raise ValueError(f"Invalid coordinate type: {coord_type}")
     return offset
 
 
 def get_coordinates(buffer: bytearray, offset: int, coord_type: int, num_coords: int) -> np.ndarray:
     if coord_type == CoordinateType.XYM or coord_type == CoordinateType.XYZM:
-        raise NotImplementedError("XYM or XYZM coordinates were not supported")
+        raise NotImplementedError("XYM or XYZM coordinates are not supported")
 
     if num_coords < 50:
         coords = [
@@ -329,21 +330,17 @@ def deserialize_point(geom_buffer: GeometryBuffer) -> Point:
     return Point(coord)
 
 
-def serialize_multi_point(geom: MultiPoint) -> bytearray:
-    points = geom.geoms
+def serialize_multi_point(geom: MultiPoint) -> bytes:
+    points = list(geom.geoms)
     num_points = len(points)
     if num_points == 0:
-        return create_buffer_for_geom(GeometryTypeID.MULTIPOINT, CoordinateType.XY, 8, 0)
-    coord_type = CoordinateType.type_of(points[0])
-    bytes_per_coord = CoordinateType.bytes_per_coord(coord_type)
-    size = 8 + bytes_per_coord * num_points
-    buffer = create_buffer_for_geom(GeometryTypeID.MULTIPOINT, coord_type, size, num_points)
-    offset = 8
-    for point in points:
-        coords = point.coords
-        coord = coords[0] if coords else [(math.nan, math.nan)]
-        offset = put_coordinate(buffer, offset, coord_type, coord)
-    return buffer
+        return generate_header_bytes(GeometryTypeID.MULTIPOINT, CoordinateType.XY, 0)
+    coord_type = CoordinateType.type_of(geom)
+
+    header = generate_header_bytes(GeometryTypeID.MULTIPOINT, coord_type, num_points)
+    body = array.array('d', (coord for point in points for coord in list(point.coords[0]))).tobytes()
+
+    return header + body
 
 
 def deserialize_multi_point(geom_buffer: GeometryBuffer) -> MultiPoint:
@@ -406,7 +403,7 @@ def deserialize_multi_linestring(geom_buffer: GeometryBuffer) -> MultiLineString
     return MultiLineString(linestrings)
 
 def serialize_polygon(geom: Polygon) -> bytes:
-    wkb_string = wkb.dumps(geom)
+    wkb_string = wkb_dumps(geom)
 
     int_format = ">i" if struct.unpack_from('B', wkb_string) == 0 else "<i"
     num_rings = struct.unpack_from(int_format, wkb_string, 5)[0]
