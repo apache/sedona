@@ -16,11 +16,9 @@
 #  under the License.
 
 import array
-from dataclasses import dataclass
 import struct
 import math
-import sys
-from typing import List, Optional, NoReturn
+from typing import List, Optional
 
 import numpy as np
 from shapely.coords import CoordinateSequence
@@ -52,22 +50,6 @@ class GeometryTypeID:
     GEOMETRYCOLLECTION = 7
 
 
-@dataclass
-class CoordinateInfo:
-    name: str
-    num_coords: int
-    bytes_per_coord: int
-    unpack_format: str
-
-
-_COORD_INFOS = {
-    1: CoordinateInfo("XY", 2, 16, 'dd'),
-    2: CoordinateInfo("XYZ", 3, 24, 'ddd'),
-    3: CoordinateInfo("XYM", 3, 24, 'ddd'),
-    4: CoordinateInfo("XYZM", 4, 32, 'dddd')
-}
-
-
 class CoordinateType:
     """
     Constants used to identify geometry dimensions in the serialized bytearray of geometry.
@@ -78,6 +60,8 @@ class CoordinateType:
     XYZM = 4
 
     BYTES_PER_COORDINATE = [16, 24, 24, 32]
+    NUM_COORD_COMPONENTS = [2, 3, 3, 4]
+    UNPACK_FORMAT = ['dd', 'ddd', 'dddd']
 
     @staticmethod
     def type_of(geom) -> int:
@@ -91,6 +75,14 @@ class CoordinateType:
     @staticmethod
     def bytes_per_coord(coord_type: int) -> int:
         return CoordinateType.BYTES_PER_COORDINATE[coord_type - 1]
+
+    @staticmethod
+    def components_per_coord(coord_type: int) -> int:
+        return CoordinateType.NUM_COORD_COMPONENTS[coord_type - 1]
+
+    @staticmethod
+    def unpack_format(coord_type: int) -> str:
+        return CoordinateType.UNPACK_FORMAT[coord_type - 1]
 
 
 class GeometryBuffer:
@@ -245,20 +237,14 @@ def generate_header_bytes(geom_type: int, coord_type: int, num_coords: int) -> b
 
 def put_coordinates(buffer: bytearray, offset: int, coord_type: int, coords: CoordinateSequence):
     for coord in coords:
-        offset = put_coordinate(buffer, offset, coord_type, coord)
+        struct.pack_into(CoordinateType.unpack_format(coord_type, buffer, offset, *coord))
+        offset += CoordinateType.bytes_per_coord(coord_type)
     return offset
 
 
 def put_coordinate(buffer: bytearray, offset: int, coord_type: int, coord: tuple):
-    if coord_type == CoordinateType.XY:
-        struct.pack_into('dd', buffer, offset, coord[0], coord[1])
-        offset += 16
-    elif coord_type == CoordinateType.XYZ:
-        struct.pack_into('ddd', buffer, offset, coord[0], coord[1], coord[2])
-        offset += 24
-    else:
-        # Shapely does not support M dimension for now
-        raise ValueError(f"Invalid coordinate type: {coord_type}")
+    struct.pack_into(CoordinateType.unpack_format(coord_type, buffer, offset, *coord))
+    offset += CoordinateType.bytes_per_coord(coord_type)
     return offset
 
 
@@ -268,11 +254,11 @@ def get_coordinates(buffer: bytearray, offset: int, coord_type: int, num_coords:
 
     if num_coords < 50:
         coords = [
-            struct.unpack_from(_COORD_INFOS[coord_type].unpack_format, buffer, offset + (i * _COORD_INFOS[coord_type].bytes_per_coord))
+            struct.unpack_from(CoordinateType.unpack_format(coord_type), buffer, offset + (i * CoordinateType.bytes_per_coord(coord_type)))
             for i in range(num_coords)
         ]
     else:
-        nums_per_coord = _COORD_INFOS[coord_type].num_coords
+        nums_per_coord = CoordinateType.components_per_coord(coord_type)
         coords = np.frombuffer(buffer, np.float64, num_coords * nums_per_coord, offset).reshape((num_coords, nums_per_coord))
 
     return coords
@@ -280,12 +266,7 @@ def get_coordinates(buffer: bytearray, offset: int, coord_type: int, num_coords:
 
 def get_coordinate(buffer: bytearray, offset: int, coord_type: int) -> tuple:
     # Shapely does not support M dimension for now, so raise if it was passed
-    if coord_type == CoordinateType.XY:
-        return struct.unpack_from('dd', buffer, offset)
-    elif coord_type == CoordinateType.XYZ:
-        return struct.unpack_from('ddd', buffer, offset)
-    else:
-        raise NotImplementedError("XYM or XYZM coordinates are not supported")
+    return struct.unpack_from(CoordinateType.unpack_format(coord_type), buffer, offset)
 
 
 def aligned_offset(offset):
@@ -303,8 +284,11 @@ def serialize_point(geom: Point) -> bytes:
 
         if has_z:
             return struct.pack(
-                'Biddd',
+                'BBBBiddd',
                 preamble_byte,
+                0,
+                0,
+                0,
                 1,
                 coords[0],
                 coords[1],
@@ -312,16 +296,22 @@ def serialize_point(geom: Point) -> bytes:
             )
         else:
             return struct.pack(
-                'Bidd',
+                'BBBBidd',
                 preamble_byte,
+                0,
+                0,
+                0,
                 1,
                 coords[0],
                 coords[1]
             )
     else:
         return struct.pack(
-            'Bi',
+            'BBBBi',
             18,
+            0,
+            0,
+            0,
             0
         )
 
@@ -412,6 +402,7 @@ def deserialize_multi_linestring(geom_buffer: GeometryBuffer) -> MultiLineString
     return MultiLineString(linestrings)
 
 def serialize_polygon(geom: Polygon) -> bytes:
+    # it may seem odd, but dumping to wkb and parsing proved to be the fastest here
     wkb_string = wkb_dumps(geom)
 
     int_format = ">i" if struct.unpack_from('B', wkb_string) == 0 else "<i"
@@ -461,7 +452,7 @@ def serialize_multi_polygon(geom: MultiPolygon) -> bytearray:
     structure_data = array.array('i', [val for polygon in polygons for val in [len(polygon)] + [len(ring) for ring in polygon]]).tobytes()
     coords = array.array('d', [component for polygon in polygons for ring in polygon for coord in ring for component in coord]).tobytes()
 
-    num_coords = len(coords) // _COORD_INFOS[coord_type].bytes_per_coord
+    num_coords = len(coords) // CoordinateType.bytes_per_coord(coord_type)
     header = generate_header_bytes(GeometryTypeID.MULTIPOLYGON, coord_type, num_coords)
 
     num_polygons = struct.pack('i', len(polygons))
