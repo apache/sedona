@@ -18,7 +18,7 @@
 import array
 import struct
 import math
-from typing import List, Optional
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 from shapely.coords import CoordinateSequence
@@ -35,6 +35,10 @@ from shapely.geometry import (
 from shapely.geometry.base import BaseGeometry
 from shapely.wkb import dumps as wkb_dumps
 from shapely.wkt import loads as wkt_loads
+
+
+CoordType = Union[Tuple[float, float], Tuple[float, float, float], Tuple[float, float, float, float]]
+ListCoordType = Union[List[Tuple[float, float]], List[Tuple[float, float, float]], List[Tuple[float, float, float, float]]]
 
 
 class GeometryTypeID:
@@ -93,7 +97,13 @@ class GeometryBuffer:
     coords_offset: int
     ints_offset: int
 
-    def __init__(self, buffer: bytearray, coord_type: int, coords_offset: int, num_coords: int):
+    def __init__(
+        self,
+        buffer: bytearray,
+        coord_type: int,
+        coords_offset: int,
+        num_coords: int
+        ) -> None:
         self.buffer = buffer
         self.coord_type = coord_type
         self.bytes_per_coord = CoordinateType.bytes_per_coord(coord_type)
@@ -122,12 +132,12 @@ class GeometryBuffer:
 
         return Polygon(rings[0], rings[1:])
 
-    def write_linestring(self, line):
+    def write_linestring(self, line: LineString) -> None:
         coords = [tuple(c) for c in line.coords]
         self.write_int(len(coords))
         self.coords_offset = put_coordinates(self.buffer, self.coords_offset, self.coord_type, coords)
 
-    def write_polygon(self, polygon: Polygon):
+    def write_polygon(self, polygon: Polygon) -> None:
         exterior = polygon.exterior
         if not exterior.coords:
             self.write_int(0)
@@ -137,12 +147,12 @@ class GeometryBuffer:
         for interior in polygon.interiors:
             self.write_linestring(interior)
 
-    def read_coordinates(self, num_coords: int) -> List[tuple]:
+    def read_coordinates(self, num_coords: int) -> ListCoordType:
         coords = get_coordinates(self.buffer, self.coords_offset, self.coord_type, num_coords)
         self.coords_offset += num_coords * self.bytes_per_coord
         return coords
 
-    def read_coordinate(self) -> tuple:
+    def read_coordinate(self) -> CoordType:
         coord = get_coordinate(self.buffer, self.coords_offset, self.coord_type)
         self.coords_offset += self.bytes_per_coord
         return coord
@@ -152,11 +162,11 @@ class GeometryBuffer:
         self.ints_offset += 4
         return value
 
-    def write_int(self, value: int):
+    def write_int(self, value: int) -> None:
         struct.pack_into("i", self.buffer, self.ints_offset, value)
         self.ints_offset += 4
 
-def serialize(geom: BaseGeometry) -> Optional[bytes]:
+def serialize(geom: BaseGeometry) -> Optional[Union[bytes, bytearray]]:
     """
     Serialize a shapely geometry object to the internal representation of GeometryUDT.
     :param geom: shapely geometry object
@@ -184,7 +194,7 @@ def serialize(geom: BaseGeometry) -> Optional[bytes]:
     else:
         raise ValueError(f"Unsupported geometry type: {type(geom)}")
 
-def deserialize(buffer: bytes):
+def deserialize(buffer: bytes) -> Optional[BaseGeometry]:
     """
     Deserialize a shapely geometry object from the internal representation of GeometryUDT.
     :param buffer: internal representation of GeometryUDT
@@ -235,20 +245,20 @@ def generate_header_bytes(geom_type: int, coord_type: int, num_coords: int) -> b
     )
 
 
-def put_coordinates(buffer: bytearray, offset: int, coord_type: int, coords: CoordinateSequence):
+def put_coordinates(buffer: bytearray, offset: int, coord_type: int, coords: ListCoordType) -> int:
     for coord in coords:
         struct.pack_into(CoordinateType.unpack_format(coord_type, buffer, offset, *coord))
         offset += CoordinateType.bytes_per_coord(coord_type)
     return offset
 
 
-def put_coordinate(buffer: bytearray, offset: int, coord_type: int, coord: tuple):
+def put_coordinate(buffer: bytearray, offset: int, coord_type: int, coord: CoordType) -> int:
     struct.pack_into(CoordinateType.unpack_format(coord_type, buffer, offset, *coord))
     offset += CoordinateType.bytes_per_coord(coord_type)
     return offset
 
 
-def get_coordinates(buffer: bytearray, offset: int, coord_type: int, num_coords: int) -> np.ndarray:
+def get_coordinates(buffer: bytearray, offset: int, coord_type: int, num_coords: int) -> Union[np.ndarray, ListCoordType]:
     if coord_type == CoordinateType.XYM or coord_type == CoordinateType.XYZM:
         raise NotImplementedError("XYM or XYZM coordinates are not supported")
 
@@ -264,12 +274,12 @@ def get_coordinates(buffer: bytearray, offset: int, coord_type: int, num_coords:
     return coords
 
 
-def get_coordinate(buffer: bytearray, offset: int, coord_type: int) -> tuple:
+def get_coordinate(buffer: bytearray, offset: int, coord_type: int) -> CoordType:
     # Shapely does not support M dimension for now, so raise if it was passed
     return struct.unpack_from(CoordinateType.unpack_format(coord_type), buffer, offset)
 
 
-def aligned_offset(offset):
+def aligned_offset(offset: int) -> int:
     return (offset + 7) & ~7
 
 
@@ -352,7 +362,7 @@ def deserialize_multi_point(geom_buffer: GeometryBuffer) -> MultiPoint:
     return MultiPoint(points)
 
 
-def serialize_linestring(geom: LineString) -> bytearray:
+def serialize_linestring(geom: LineString) -> bytes:
     coords = [tuple(c) for c in geom.coords]
     if coords:
         coord_type = CoordinateType.type_of(geom)
@@ -440,7 +450,7 @@ def deserialize_polygon(geom_buffer: GeometryBuffer) -> Polygon:
     return geom_buffer.read_polygon()
 
 
-def serialize_multi_polygon(geom: MultiPolygon) -> bytearray:
+def serialize_multi_polygon(geom: MultiPolygon) -> bytes:
     coords_for = lambda x: [y for y in list(x)]
     polygons = [[coords_for(polygon.exterior.coords)] + [coords_for(ring.coords) for ring in polygon.interiors] for polygon in list(geom.geoms)]
 
