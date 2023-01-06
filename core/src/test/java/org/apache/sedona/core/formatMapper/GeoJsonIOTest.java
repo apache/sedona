@@ -73,7 +73,6 @@ public class GeoJsonIOTest
         // load geojson with our tool
         SpatialRDD geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithFeatureProperty);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 1001);
-        geojsonRDD.saveAsGeoJSON("target/geojson.tmp");
         geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithoutFeatureProperty);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 10);
     }
@@ -103,6 +102,26 @@ public class GeoJsonIOTest
         }
         assertEquals(initRdd.fieldNames.size(), newRdd.fieldNames.size());
         assertEquals(initRdd.rawSpatialRDD.count(), newRdd.rawSpatialRDD.count());
+    }
+
+    @Test
+    public void testReadWriteSpecialGeoJsons()
+            throws IOException
+    {
+        String tmpFilePath = "target/geojson.tmp";
+        SpatialRDD initRdd = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithoutFeatureProperty);
+        deleteFile(tmpFilePath);
+        initRdd.saveAsGeoJSON(tmpFilePath);
+        SpatialRDD newRdd = GeoJsonReader.readToGeometryRDD(sc, tmpFilePath);
+        assertEquals(initRdd.rawSpatialRDD.count(), newRdd.rawSpatialRDD.count());
+
+        initRdd = GeoJsonReader.readToGeometryRDD(sc, geoJsonWithNullProperty);
+        deleteFile(tmpFilePath);
+        initRdd.saveAsGeoJSON(tmpFilePath);
+        newRdd = GeoJsonReader.readToGeometryRDD(sc, tmpFilePath);
+        assertEquals(initRdd.rawSpatialRDD.count(), newRdd.rawSpatialRDD.count());
+
+        deleteFile(tmpFilePath);
     }
 
     /**
