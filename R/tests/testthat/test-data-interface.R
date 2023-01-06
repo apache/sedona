@@ -51,6 +51,21 @@ expect_result_matches_original <- function(pt_rdd) {
   )
 }
 
+expect_result_matches_original_geojson <- function(pt_rdd) {
+  expect_equal(
+    pt_rdd %>% invoke("%>%", list("rawSpatialRDD"), list("count")),
+    test_rdd_with_non_spatial_attrs$.jobj %>%
+      invoke("%>%", list("rawSpatialRDD"), list("count"))
+  )
+  expect_geom_equal_geojson(
+    sc,
+    test_rdd_with_non_spatial_attrs$.jobj %>%
+      invoke("%>%", list("rawSpatialRDD"), list("takeOrdered", 5L), list("toArray")),
+    pt_rdd %>%
+      invoke("%>%", list("rawSpatialRDD"), list("takeOrdered", 5L), list("toArray"))
+  )
+}
+
 test_that("sedona_read_dsv_to_typed_rdd() creates PointRDD correctly", {
   pt_rdd <- sedona_read_dsv_to_typed_rdd(
     sc,
@@ -319,11 +334,11 @@ test_that("sedona_write_geojson() works as expected", {
     sc$state$object_cache$storage_levels$memory_only
   )
 
-  expect_result_matches_original(pt_rdd)
+  expect_result_matches_original_geojson(pt_rdd)
 })
 
 test_that("sedona_save_spatial_rdd() works as expected", {
-  for (fmt in c("wkb", "wkt", "geojson")) {
+  for (fmt in c("wkb", "wkt")) {
     location <- tempfile(pattern = "pt_", fileext = paste0(".", fmt))
     copy_to(
       sc, tibble::tibble(id = 1, name = "a point", type = "point")

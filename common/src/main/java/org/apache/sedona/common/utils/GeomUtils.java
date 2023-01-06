@@ -57,6 +57,34 @@ public class GeomUtils {
     }
 
     /**
+     * This is for verifying the correctness of two geometries loaded from geojson
+     * @param geom1
+     * @param geom2
+     * @return
+     */
+    public static boolean equalsExactGeomUnsortedUserData(Geometry geom1, Object geom2) {
+        if (! (geom2 instanceof Geometry)) return false;
+        Geometry g = (Geometry) geom2;
+        if (equalsUserData(geom1.getUserData(), g.getUserData())) return geom1.equalsExact(g);
+        else return false;
+    }
+
+    /**
+     * Use for check if two user data attributes are equal
+     * This is mainly used for GeoJSON parser as the column order is uncertain each time
+     * @param userData1
+     * @param userData2
+     * @return
+     */
+    public static boolean equalsUserData(Object userData1, Object userData2) {
+        String[] split1 = ((String) userData1).split("\t");
+        String[] split2 = ((String) userData2).split("\t");
+        Arrays.sort(split1);
+        Arrays.sort(split2);
+        return Arrays.equals(split1, split2);
+    }
+
+    /**
      * Swaps the XY coordinates of a geometry.
      */
     public static void flipCoordinates(Geometry g) {
