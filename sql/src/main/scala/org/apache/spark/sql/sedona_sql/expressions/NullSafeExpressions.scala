@@ -207,7 +207,7 @@ abstract class InferredUnaryExpression[A1: InferrableType, R: InferrableType]
   lazy val serialize = buildSerializer[R]
 
   override def eval(input: InternalRow): Any = {
-    println(toString)
+    // println(toString)
     val value = extract(input)
     if (value != null) {
       if (serializeOutput) {
