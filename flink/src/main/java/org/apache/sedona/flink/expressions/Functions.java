@@ -478,4 +478,14 @@ public class Functions {
             return org.apache.sedona.common.Functions.lineFromMultiPoint(geom);
         }
     }
+
+    public static class ST_Split extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
+                             @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
+            Geometry input = (Geometry) o1;
+            Geometry blade = (Geometry) o2;
+            return org.apache.sedona.common.Functions.split(input, blade);
+        }
+    }
 }

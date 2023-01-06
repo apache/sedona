@@ -1042,3 +1042,16 @@ case class ST_LineFromMultiPoint(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+/**
+ * Returns a multi-geometry that is the result of splitting the input geometry by the blade geometry
+ *
+ * @param inputExpressions
+ */
+case class ST_Split(inputExpressions: Seq[Expression])
+  extends InferredBinaryExpression(Functions.split) with FoldableExpression {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

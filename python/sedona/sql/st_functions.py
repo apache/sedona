@@ -85,6 +85,7 @@ __all__ = [
     "ST_SetPoint",
     "ST_SetSRID",
     "ST_SRID",
+    "ST_Split",
     "ST_StartPoint",
     "ST_SubDivide",
     "ST_SubDivideExplode",
@@ -105,7 +106,7 @@ __all__ = [
 
 
 _call_st_function = partial(call_sedona_function, "st_functions")
-    
+
 
 @validate_argument_types
 def ST_3DDistance(a: ColumnOrName, b: ColumnOrName) -> Column:
@@ -266,7 +267,7 @@ def ST_Boundary(geometry: ColumnOrName) -> Column:
 
 @validate_argument_types
 def ST_Buffer(geometry: ColumnOrName, buffer: ColumnOrNameOrNumber) -> Column:
-    """Calculate a geometry that represents all points whose distance from the 
+    """Calculate a geometry that represents all points whose distance from the
     input geometry column is equal to or less than a given amount.
 
     :param geometry: Input geometry column to buffer.
@@ -397,11 +398,11 @@ def ST_Distance(a: ColumnOrName, b: ColumnOrName) -> Column:
 def ST_Dump(geometry: ColumnOrName) -> Column:
     """Returns an array of geometries that are members of a multi-geometry
     or geometry collection column. If the input geometry is a regular geometry
-    then the geometry is returned inside of a single element array. 
+    then the geometry is returned inside of a single element array.
 
     :param geometry: Geometry column to dump.
     :type geometry: ColumnOrName
-    :return: Array of geometries column comprised of the members of geometry. 
+    :return: Array of geometries column comprised of the members of geometry.
     :rtype: Column
     """
     return _call_st_function("ST_Dump", geometry)
@@ -505,7 +506,7 @@ def ST_GeometryN(multi_geometry: ColumnOrName, n: Union[ColumnOrName, int]) -> C
     :type n: Union[ColumnOrName, int]
     :return: Geometry located at index n in multi_geometry as a geometry column.
     :rtype: Column
-    :raises ValueError: If 
+    :raises ValueError: If
     """
     if isinstance(n, int) and n < 0:
         raise ValueError(f"Index n for ST_GeometryN must by >= 0: {n} < 0")
@@ -533,7 +534,7 @@ def ST_InteriorRingN(polygon: ColumnOrName, n: Union[ColumnOrName, int]) -> Colu
     :param n: Index of interior ring to return as either an integer or integer column, 0-th based.
     :type n: Union[ColumnOrName, int]
     :raises ValueError: If n is an integer and less than 0.
-    :return: Interior ring at index n as a linestring geometry column or null if n is greater than maximum index 
+    :return: Interior ring at index n as a linestring geometry column or null if n is greater than maximum index
     :rtype: Column
     """
     if isinstance(n, int) and n < 0:
@@ -731,7 +732,7 @@ def ST_MinimumBoundingCircle(geometry: ColumnOrName, quadrant_segments: Optional
 def ST_MinimumBoundingRadius(geometry: ColumnOrName) -> Column:
     """Calculate the minimum bounding radius from the centroid of a geometry that will contain it.
 
-    :param geometry: Geometry column to generate minimum bounding radii for. 
+    :param geometry: Geometry column to generate minimum bounding radii for.
     :type geometry: ColumnOrName
     :return: Struct column with a center field containing point geometry for the center of geometry and a radius field with a double value for the bounding radius.
     :rtype: Column
@@ -974,6 +975,20 @@ def ST_SimplifyPreserveTopology(geometry: ColumnOrName, distance_tolerance: Colu
 
 
 @validate_argument_types
+def ST_Split(input: ColumnOrName, blade: ColumnOrName) -> Column:
+    """Split input geometry by the blade geometry.
+
+    :param input: One geometry column to use.
+    :type input: ColumnOrName
+    :param blade: Other geometry column to use.
+    :type blase: ColumnOrName
+    :return: Multi-geometry representing the split of input by blade.
+    :rtype: Column
+    """
+    return _call_st_function("ST_SymDifference", (input, blade))
+
+
+@validate_argument_types
 def ST_SymDifference(a: ColumnOrName, b: ColumnOrName) -> Column:
     """Calculate the symmetric difference of two geometries (the regions that are only in one of them).
 
@@ -999,7 +1014,7 @@ def ST_Transform(geometry: ColumnOrName, source_crs: ColumnOrName, target_crs: C
     :type target_crs: ColumnOrName
     :param disable_error: Whether to disable the error "Bursa wolf parameters required", defaults to None
     :type disable_error: Optional[Union[ColumnOrName, bool]], optional
-    :return: Geometry converted to the target coordinate system as an 
+    :return: Geometry converted to the target coordinate system as an
     :rtype: Column
     """
     args = (geometry, source_crs, target_crs) if disable_error is None else (geometry, source_crs, target_crs, disable_error)

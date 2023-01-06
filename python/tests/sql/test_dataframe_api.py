@@ -113,6 +113,7 @@ test_configurations = [
     (stf.ST_SetPoint, ("line", 1, lambda: f.expr("ST_Point(1.0, 1.0)")), "linestring_geom", "", "LINESTRING (0 0, 1 1, 2 0, 3 0, 4 0, 5 0)"),
     (stf.ST_SetSRID, ("point", 3021), "point_geom", "ST_SRID(geom)", 3021),
     (stf.ST_SimplifyPreserveTopology, ("geom", 0.2), "0.9_poly", "", "POLYGON ((0 0, 1 0, 1 1, 0 0))"),
+    (stf.ST_Split, ("a", "b"), "overlapping_polys", "", "MULTIPOLYGON (((1 0, 0 0, 0 1, 1 1, 1 0)), ((2 0, 2 1, 3 1, 3 0, 2 0)))"),
     (stf.ST_SRID, ("point",), "point_geom", "", 0),
     (stf.ST_StartPoint, ("line",), "linestring_geom", "", "POINT (0 0)"),
     (stf.ST_SubDivide, ("line", 5), "linestring_geom", "", ["LINESTRING (0 0, 2.5 0)", "LINESTRING (2.5 0, 5 0)"]),
@@ -318,13 +319,13 @@ class TestDataFrameAPI(TestBase):
         geojson = "{ \"type\": \"Feature\", \"properties\": { \"prop\": \"01\" }, \"geometry\": { \"type\": \"Point\", \"coordinates\": [ 0.0, 1.0 ] }},"
         gml_string = "<gml:LineString srsName=\"EPSG:4269\"><gml:coordinates>-71.16,42.25 -71.17,42.25 -71.18,42.25</gml:coordinates></gml:LineString>"
         kml_string = "<LineString><coordinates>-71.16,42.26 -71.17,42.26</coordinates></LineString>"
-        
+
         if request.param == "constructor":
             return TestDataFrameAPI.spark.sql("SELECT null").selectExpr(
                 "0.0 AS x",
                 "1.0 AS y",
                 "'0.0,1.0' AS single_point",
-                "'0.0,0.0,1.0,0.0,1.0,1.0,0.0,0.0' AS multiple_point", 
+                "'0.0,0.0,1.0,0.0,1.0,1.0,0.0,0.0' AS multiple_point",
                 f"X'{wkb}' AS wkb",
                 f"'{geojson}' AS geojson",
                 "'s00twy01mt' AS geohash",

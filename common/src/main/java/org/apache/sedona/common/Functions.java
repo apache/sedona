@@ -16,6 +16,7 @@ package org.apache.sedona.common;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.common.utils.GeometryGeoHashEncoder;
+import org.apache.sedona.common.utils.GeometrySplitter;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
@@ -128,7 +129,7 @@ public class Functions {
         }
         return min;
     }
-    
+
     public static double xMax(Geometry geometry) {
         Coordinate[] points = geometry.getCoordinates();
         double max = - Double.MAX_VALUE;
@@ -146,7 +147,7 @@ public class Functions {
         }
         return min;
     }
-    
+
     public static double yMax(Geometry geometry) {
         Coordinate[] points = geometry.getCoordinates();
         double max = - Double.MAX_VALUE;
@@ -214,7 +215,7 @@ public class Functions {
     }
 
     public static String geohash(Geometry geometry, int precision) {
-        return GeometryGeoHashEncoder.calculate(geometry, precision);   
+        return GeometryGeoHashEncoder.calculate(geometry, precision);
     }
 
     public static Geometry pointOnSurface(Geometry geometry) {
@@ -431,7 +432,7 @@ public class Functions {
         }
         List<Coordinate> coordinates = new ArrayList<>();
         for(Coordinate c : geometry.getCoordinates()){
-            coordinates.add(c); 
+            coordinates.add(c);
         }
         return GEOMETRY_FACTORY.createLineString(coordinates.toArray(new Coordinate[0]));
     }
@@ -536,5 +537,10 @@ public class Functions {
         } else {
             return leftGeometry.difference(rightGeometry);
         }
+    }
+
+    public static Geometry split(Geometry input, Geometry blade) {
+        // check input geometry
+        return new GeometrySplitter(GEOMETRY_FACTORY).split(input, blade);
     }
 }

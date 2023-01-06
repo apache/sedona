@@ -139,6 +139,7 @@ object Catalog {
     function[ST_LineFromMultiPoint](),
     function[ST_MPolyFromText](0),
     function[ST_MLineFromText](0),
+    function[ST_Split](),
     // Expression for rasters
     function[RS_NormalizedDifference](),
     function[RS_Mean](),

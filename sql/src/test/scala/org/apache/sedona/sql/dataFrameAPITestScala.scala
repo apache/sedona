@@ -221,7 +221,7 @@ class dataFrameAPITestScala extends TestBaseScala {
     }
 
     it("Passed ST_Distance") {
-      val pointDf = sparkSession.sql("SELECT ST_Point(0.0, 0.0) AS a, ST_Point(1.0, 0.0) as b") 
+      val pointDf = sparkSession.sql("SELECT ST_Point(0.0, 0.0) AS a, ST_Point(1.0, 0.0) as b")
       val df = pointDf.select(ST_Distance("a", "b"))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Double]
       val expectedResult = 1.0
@@ -367,7 +367,7 @@ class dataFrameAPITestScala extends TestBaseScala {
       val df = sridPointDf.select(ST_AsEWKB("geom"))
       val actualResult = Hex.encodeHexString(df.take(1)(0).get(0).asInstanceOf[Array[Byte]])
       val expectedResult = "0101000020cd0b000000000000000000000000000000000000"
-      assert(actualResult == expectedResult) 
+      assert(actualResult == expectedResult)
     }
 
     it("Passed ST_NPoints") {
@@ -624,10 +624,10 @@ class dataFrameAPITestScala extends TestBaseScala {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS geom")
       val df = baseDf.select(ST_MinimumBoundingRadius("geom").as("c")).select("c.center", "c.radius")
       val rowResult = df.take(1)(0)
-      
+
       val actualCenter = rowResult.get(0).asInstanceOf[Geometry].toText()
       val actualRadius = rowResult.getDouble(1)
-      
+
       val expectedCenter = "POINT (0.5 0)"
       val expectedRadius = 0.5
 
@@ -767,6 +767,18 @@ class dataFrameAPITestScala extends TestBaseScala {
       val df = baseDf.select(ST_Normalize("polygon"))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "POLYGON ((0 0, 1 1, 1 0, 0 0))"
+      assert(actualResult == expectedResult)
+    }
+
+    it("Passed ST_Split") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1.5 1.5, 2 2)') AS input, ST_GeomFromWKT('MULTIPOINT (0.5 0.5, 1 1)') AS blade")
+      var df = baseDf.select(ST_Split("input", "blade"))
+      var actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      val expectedResult = "MULTILINESTRING ((0 0, 0.5 0.5), (0.5 0.5, 1 1), (1 1, 1.5 1.5, 2 2))"
+      assert(actualResult == expectedResult)
+
+      df = baseDf.select(ST_Split($"input", $"blade"))
+      actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       assert(actualResult == expectedResult)
     }
 

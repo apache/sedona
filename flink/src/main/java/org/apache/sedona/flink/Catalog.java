@@ -88,6 +88,7 @@ public class Catalog {
                 new Functions.ST_RemovePoint(),
                 new Functions.ST_SetPoint(),
                 new Functions.ST_LineFromMultiPoint(),
+                new Functions.ST_Split(),
         };
     }
 

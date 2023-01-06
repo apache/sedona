@@ -317,7 +317,7 @@ WITH test_data as (
         'GEOMETRYCOLLECTION(POINT(40 10), POLYGON((0 0, 0 5, 5 5, 5 0, 0 0)))'
     ) as geom
 )
-SELECT ST_CollectionExtract(geom) as c1, ST_CollectionExtract(geom, 1) as c2 
+SELECT ST_CollectionExtract(geom) as c1, ST_CollectionExtract(geom, 1) as c2
 FROM test_data
 
 ```
@@ -422,7 +422,7 @@ Since: `v1.0.0`
 
 Spark SQL example:
 ```SQL
-SELECT ST_DumpPoints(ST_GeomFromText('LINESTRING (0 0, 1 1, 1 0)')) 
+SELECT ST_DumpPoints(ST_GeomFromText('LINESTRING (0 0, 1 1, 1 0)'))
 ```
 
 Output: `[POINT (0 0), POINT (0 1), POINT (1 1), POINT (1 0), POINT (0 0)]`
@@ -1154,6 +1154,29 @@ SELECT ST_SimplifyPreserveTopology(polygondf.countyshape, 10.0)
 FROM polygondf
 ```
 
+## ST_Split
+
+Introduction: Split an input geometry by another geometry (called the blade).
+Linear (LineString or MultiLineString) geometry can be split by a Point, MultiPoint, LineString, MultiLineString, Polygon, or MultiPolygon.
+Polygonal (Polygon or MultiPolygon) geometry can be split by a LineString, MultiLineString, Polygon, or MultiPolygon.
+In either case, when a polygonal blade is used then the boundary of the blade is what is actually split by.
+ST_Split will always return either a MultiLineString or MultiPolygon even if they only contain a single geometry.
+Homogeneous GeometryCollections are treated as a multi-geometry of the type it contains.
+For example, if a GeometryCollection of only Point geometries is passed as a blade it is the same as passing a MultiPoint of the same geometries.
+
+Since: `v1.3.2`
+
+Format: `ST_Split (input: geometry, blade: geometry)`
+
+Spark SQL Example:
+```SQL
+SELECT ST_Split(
+    ST_GeomFromWKT('LINESTRING (0 0, 1.5 1.5, 2 2)'),
+    ST_GeomFromWKT('MULTIPOINT (0.5 0.5, 1 1)'))
+```
+
+Output: `MULTILINESTRING ((0 0, 0.5 0.5), (0.5 0.5, 1 1), (1 1, 1.5 1.5, 2 2))`
+
 ## ST_SRID
 
 Introduction: Return the spatial refence system identifier (SRID) of the geometry.
@@ -1274,12 +1297,12 @@ Table:
 +-------------------------------------------------------------+
 |geometry                                                     |
 +-------------------------------------------------------------+
-|LINESTRING(0 0, 85 85, 100 100, 120 120, 21 21, 10 10, 5 5)  |  
+|LINESTRING(0 0, 85 85, 100 100, 120 120, 21 21, 10 10, 5 5)  |
 +-------------------------------------------------------------+
 ```
 
 Query
-```SQL 
+```SQL
 select geom from geometries LATERAL VIEW ST_SubdivideExplode(geometry, 5) AS geom
 ```
 
@@ -1338,7 +1361,7 @@ Since: `v1.0.0`
 
 Spark SQL example (simple):
 ```SQL
-SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857') 
+SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857')
 FROM polygondf
 ```
 
