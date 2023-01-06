@@ -121,20 +121,21 @@ expect_geom_equal <- function(sc, lhs, rhs) {
       )
     )
   }
+}
 
-  expect_geom_equal_geojson <- function(sc, lhs, rhs) {
-    testthat::expect_equal(length(lhs), length(rhs))
-    for (i in seq_along(lhs)) {
-      testthat::expect_true(
-        invoke_static(
-          sc,
-          "org.apache.sedona.common.utils.GeomUtils",
-          "equalsExactGeomUnsortedUserData",
-          lhs[[i]],
-          rhs[[i]]
-        )
+expect_geom_equal_geojson <- function(sc, lhs, rhs) {
+  testthat::expect_equal(length(lhs), length(rhs))
+  for (i in seq_along(lhs)) {
+    testthat::expect_true(
+      invoke_static(
+        sc,
+        "org.apache.sedona.common.utils.GeomUtils",
+        "equalsExactGeomUnsortedUserData",
+        lhs[[i]],
+        rhs[[i]]
       )
-    }
+    )
+  }
 }
 
 as.coordinate_list <- function(geometry) {
