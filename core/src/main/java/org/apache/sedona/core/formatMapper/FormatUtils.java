@@ -119,23 +119,22 @@ public class FormatUtils<T extends Geometry> implements Serializable {
 
     public static List<String> readGeoJsonPropertyNames(String geoJson)
     {
+        if (geoJson == null) {
+            logger.warn("The given GeoJson record is null and cannot be used to find property names");
+            return null;
+        }
+        List<String> propertyList = new ArrayList<>();
         if (geoJson.contains("Feature") || geoJson.contains("feature") || geoJson.contains("FEATURE")) {
-            if (geoJson.contains("properties")) {
-                Feature feature = (Feature) GeoJSONFactory.create(geoJson);
-                if (Objects.isNull(feature.getId())) {
-                    return new ArrayList(feature.getProperties().keySet());
-                }
-                else {
-                    List<String> propertyList = new ArrayList<>(Arrays.asList("id"));
-                    for (String geoJsonProperty : feature.getProperties().keySet()) {
-                        propertyList.add(geoJsonProperty);
-                    }
-                    return propertyList;
-                }
+            Feature feature = (Feature) GeoJSONFactory.create(geoJson);
+            if (!Objects.isNull(feature.getId())) {
+                propertyList.add("id");
+            }
+            Map<String, Object> properties = feature.getProperties();
+            if (properties != null) {
+                propertyList.addAll(properties.keySet());
             }
         }
-        logger.warn("[Sedona] The GeoJSON file doesn't have feature properties");
-        return null;
+        return propertyList.size() > 0 ? propertyList:null;
     }
 
     private void readObject(ObjectInputStream inputStream)
@@ -173,7 +172,7 @@ public class FormatUtils<T extends Geometry> implements Serializable {
                 for (Object property : featurePropertiesproperties.values()
                 ) {
                     if (property == null) {
-                        nonSpatialData.add("null");
+                        nonSpatialData.add("");
                     }
                     else {
                         nonSpatialData.add(property.toString());

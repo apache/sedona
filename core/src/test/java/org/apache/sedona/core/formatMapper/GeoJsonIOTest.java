@@ -24,12 +24,17 @@ import org.apache.sedona.core.spatialRDD.SpatialRDD;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.locationtech.jts.geom.Geometry;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-public class GeoJsonReaderTest
+public class GeoJsonIOTest
         extends TestBase
 {
 
@@ -43,12 +48,12 @@ public class GeoJsonReaderTest
     public static void onceExecutedBeforeAll()
             throws IOException
     {
-        initialize(GeoJsonReaderTest.class.getName());
-        geoJsonGeomWithFeatureProperty = GeoJsonReaderTest.class.getClassLoader().getResource("testPolygon.json").getPath();
-        geoJsonGeomWithoutFeatureProperty = GeoJsonReaderTest.class.getClassLoader().getResource("testpolygon-no-property.json").getPath();
-        geoJsonWithInvalidGeometries = GeoJsonReaderTest.class.getClassLoader().getResource("testInvalidPolygon.json").getPath();
-        geoJsonWithNullProperty = GeoJsonReaderTest.class.getClassLoader().getResource("testpolygon-with-null-property-value.json").getPath();
-        geoJsonContainsId = GeoJsonReaderTest.class.getClassLoader().getResource("testContainsId.json").getPath();
+        initialize(GeoJsonIOTest.class.getName());
+        geoJsonGeomWithFeatureProperty = GeoJsonIOTest.class.getClassLoader().getResource("testPolygon.json").getPath();
+        geoJsonGeomWithoutFeatureProperty = GeoJsonIOTest.class.getClassLoader().getResource("testpolygon-no-property.json").getPath();
+        geoJsonWithInvalidGeometries = GeoJsonIOTest.class.getClassLoader().getResource("testInvalidPolygon.json").getPath();
+        geoJsonWithNullProperty = GeoJsonIOTest.class.getClassLoader().getResource("testpolygon-with-null-property-value.json").getPath();
+        geoJsonContainsId = GeoJsonIOTest.class.getClassLoader().getResource("testContainsId.json").getPath();
     }
 
     @AfterClass
@@ -72,6 +77,65 @@ public class GeoJsonReaderTest
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 1001);
         geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithoutFeatureProperty);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 10);
+    }
+
+    @Test
+    public void testReadWriteGeoJson()
+            throws IOException
+    {
+        String tmpFilePath = "target/geojson.tmp";
+        SpatialRDD initRdd = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithFeatureProperty);
+        deleteFile(tmpFilePath);
+        initRdd.saveAsGeoJSON(tmpFilePath);
+        SpatialRDD newRdd = GeoJsonReader.readToGeometryRDD(sc, tmpFilePath);
+
+        // Check the basic correctness
+        assertEquals(initRdd.fieldNames.size(), newRdd.fieldNames.size());
+        assertEquals(initRdd.rawSpatialRDD.count(), newRdd.rawSpatialRDD.count());
+
+        // Note that two RDDs may put <field name, value> in different order
+
+        // Put field names and values to a hash map for comparison
+        Geometry initGeom = (Geometry) initRdd.rawSpatialRDD.takeOrdered(1).get(0);
+        String[] initGeomFields = initGeom.getUserData().toString().split("\t");
+        Map<String, Object> initKvs = new HashMap<String, Object>();
+        for (int i = 0; i < initGeomFields.length; i++) {
+            initKvs.put(initRdd.fieldNames.get(i).toString(), initGeomFields[i]);
+        }
+
+        // Put field names and values to a hash map for comparison
+        Geometry newGeom = (Geometry) newRdd.rawSpatialRDD.takeOrdered(1).get(0);
+        String[] newGeomFields = newGeom.getUserData().toString().split("\t");
+        Map<String, Object> newKvs = new HashMap<String, Object>();
+        for (int i = 0; i < initGeomFields.length; i++) {
+            newKvs.put(newRdd.fieldNames.get(i).toString(), newGeomFields[i]);
+        }
+
+        for (int i = 0; i < initRdd.fieldNames.size(); i++) {
+            // The same field name should fetch the same value in both maps
+            assertEquals(initKvs.get(initRdd.fieldNames.get(i).toString()),
+                    newKvs.get(initRdd.fieldNames.get(i).toString()));
+        }
+    }
+
+    @Test
+    public void testReadWriteSpecialGeoJsons()
+            throws IOException
+    {
+        String tmpFilePath = "target/geojson.tmp";
+        SpatialRDD initRdd = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithoutFeatureProperty);
+        deleteFile(tmpFilePath);
+        initRdd.saveAsGeoJSON(tmpFilePath);
+        SpatialRDD newRdd = GeoJsonReader.readToGeometryRDD(sc, tmpFilePath);
+        assertEquals(initRdd.rawSpatialRDD.count(), newRdd.rawSpatialRDD.count());
+
+        initRdd = GeoJsonReader.readToGeometryRDD(sc, geoJsonWithNullProperty);
+        deleteFile(tmpFilePath);
+        initRdd.saveAsGeoJSON(tmpFilePath);
+        newRdd = GeoJsonReader.readToGeometryRDD(sc, tmpFilePath);
+        assertEquals(initRdd.rawSpatialRDD.count(), newRdd.rawSpatialRDD.count());
+
+//        deleteFile(tmpFilePath);
     }
 
     /**
