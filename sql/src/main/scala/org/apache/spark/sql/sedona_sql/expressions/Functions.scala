@@ -448,7 +448,13 @@ case class ST_StartPoint(inputExpressions: Seq[Expression])
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
     geometry match {
-      case line: LineString => line.getPointN(0).toGenericArrayData
+      case line: LineString => {
+        if (serializeOutput) {
+          line.getPointN(0).toGenericArrayData
+        } else {
+          line.getPointN(0)
+        }
+      }
       case _ => null
     }
   }
@@ -545,7 +551,11 @@ case class ST_EndPoint(inputExpressions: Seq[Expression])
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
     geometry match {
-      case string: LineString => string.getEndPoint.toGenericArrayData
+      case string: LineString => if (serializeOutput) {
+        string.getEndPoint.toGenericArrayData
+      } else {
+        string.getEndPoint
+      }
       case _ => null
     }
   }
@@ -591,13 +601,27 @@ case class ST_Dump(inputExpressions: Seq[Expression])
     val geometryCollection = geometry match {
       case collection: GeometryCollection => {
         val numberOfGeometries = collection.getNumGeometries
-        (0 until numberOfGeometries).map(
-          index => collection.getGeometryN(index).toGenericArrayData
-        ).toArray
+        if (serializeOutput) {
+          (0 until numberOfGeometries).map(
+            index => collection.getGeometryN(index).toGenericArrayData
+          ).toArray
+        } else {
+          (0 until numberOfGeometries).map(
+            index => collection.getGeometryN(index)
+          ).toArray
+        }
       }
-      case geom: Geometry => Array(geom.toGenericArrayData)
+      case geom: Geometry => if (serializeOutput) {
+        Array(geom.toGenericArrayData)
+      } else {
+        Array(geom)
+      }
     }
-    ArrayData.toArrayData(geometryCollection)
+    if (serializeOutput){
+      ArrayData.toArrayData(geometryCollection)
+    } else {
+      geometryCollection
+    }
   }
 
   override def dataType: DataType = ArrayType(GeometryUDT)
@@ -613,7 +637,11 @@ case class ST_DumpPoints(inputExpressions: Seq[Expression])
   extends UnaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
-    ArrayData.toArrayData(geometry.getPoints.map(geom => geom.toGenericArrayData))
+    if (serializeOutput){
+      ArrayData.toArrayData(geometry.getPoints.map(geom => geom.toGenericArrayData))
+    } else {
+      geometry.getPoints.map(geom => geom).toArray
+    }
   }
 
   override def dataType: DataType = ArrayType(GeometryUDT)
@@ -842,7 +870,11 @@ case class ST_SymDifference(inputExpressions: Seq[Expression])
   extends BinaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
-    leftGeometry.symDifference(rightGeometry).toGenericArrayData
+    if (serializeOutput) {
+      leftGeometry.symDifference(rightGeometry).toGenericArrayData
+    } else {
+      leftGeometry.symDifference(rightGeometry)
+    }
   }
 
   override def dataType: DataType = GeometryUDT
@@ -863,7 +895,11 @@ case class ST_Union(inputExpressions: Seq[Expression])
   extends BinaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
-    leftGeometry.union(rightGeometry).toGenericArrayData
+    if (serializeOutput) {
+      leftGeometry.union(rightGeometry).toGenericArrayData
+    } else {
+      leftGeometry.union(rightGeometry)
+    }
   }
 
   override def dataType: DataType = GeometryUDT
