@@ -39,7 +39,7 @@ public class TestReadInvalidSyntaxGeometriesTest
     public static void onceExecutedBeforeAll()
             throws IOException
     {
-        initialize(GeoJsonReaderTest.class.getName());
+        initialize(GeoJsonIOTest.class.getName());
         invalidSyntaxGeoJsonGeomWithFeatureProperty = TestReadInvalidSyntaxGeometriesTest.class.getClassLoader().getResource("invalidSyntaxGeometriesJson.json").getPath();
     }
 

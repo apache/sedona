@@ -19,12 +19,17 @@
 
 package org.apache.sedona.core;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.sedona.core.serde.SedonaKryoRegistrator;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.serializer.KryoSerializer;
+
+import java.io.IOException;
 
 public class TestBase
 {
@@ -40,6 +45,14 @@ public class TestBase
         sc = new JavaSparkContext(conf);
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
+    }
+
+    protected static void deleteFile(String path)
+            throws IOException
+    {
+        Configuration hadoopConfig = new Configuration();
+        FileSystem fileSystem = FileSystem.get(hadoopConfig);
+        fileSystem.delete(new Path(path), true);
     }
 }
 

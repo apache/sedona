@@ -56,6 +56,7 @@ import scala.Tuple2;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -583,30 +584,34 @@ public class SpatialRDD<T extends Geometry>
      */
     public void saveAsGeoJSON(String outputLocation)
     {
-        this.rawSpatialRDD.mapPartitions(new FlatMapFunction<Iterator<T>, String>()
-        {
-            @Override
-            public Iterator<String> call(Iterator<T> iterator)
-                    throws Exception
-            {
-                ArrayList<String> result = new ArrayList();
-                GeoJSONWriter writer = new GeoJSONWriter();
-                while (iterator.hasNext()) {
-                    Geometry spatialObject = iterator.next();
-                    Feature jsonFeature;
-                    if (spatialObject.getUserData() != null) {
-                        Map<String, Object> userData = new HashMap<String, Object>();
-                        userData.put("UserData", spatialObject.getUserData());
-                        jsonFeature = new Feature(writer.write(spatialObject), userData);
+        this.rawSpatialRDD.mapPartitions((FlatMapFunction<Iterator<T>, String>) iterator -> {
+            ArrayList<String> result = new ArrayList();
+            GeoJSONWriter writer = new GeoJSONWriter();
+            while (iterator.hasNext()) {
+                Geometry spatialObject = iterator.next();
+                Feature jsonFeature;
+                if (spatialObject.getUserData() != null) {
+                    Map<String, Object> fields = new HashMap<String, Object>();
+                    String[] fieldValues = spatialObject.getUserData().toString().split("\t");
+                    if (fieldValues.length == fieldNames.size()) {
+                        for (int i = 0 ; i < fieldValues.length ; i++) {
+                            fields.put(fieldNames.get(i), fieldValues[i]);
+                        }
                     }
                     else {
-                        jsonFeature = new Feature(writer.write(spatialObject), null);
+                        for (int i = 0 ; i < fieldValues.length ; i++) {
+                            fields.put("_c" + i, fieldValues[i]);
+                        }
                     }
-                    String jsonstring = jsonFeature.toString();
-                    result.add(jsonstring);
+                    jsonFeature = new Feature(writer.write(spatialObject), fields);
                 }
-                return result.iterator();
+                else {
+                    jsonFeature = new Feature(writer.write(spatialObject), null);
+                }
+                String jsonstring = jsonFeature.toString();
+                result.add(jsonstring);
             }
+            return result.iterator();
         }).saveAsTextFile(outputLocation);
     }
 

@@ -24,12 +24,15 @@ import org.apache.sedona.core.spatialRDD.SpatialRDD;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.locationtech.jts.geom.Geometry;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 
-public class GeoJsonReaderTest
+public class GeoJsonIOTest
         extends TestBase
 {
 
@@ -43,12 +46,12 @@ public class GeoJsonReaderTest
     public static void onceExecutedBeforeAll()
             throws IOException
     {
-        initialize(GeoJsonReaderTest.class.getName());
-        geoJsonGeomWithFeatureProperty = GeoJsonReaderTest.class.getClassLoader().getResource("testPolygon.json").getPath();
-        geoJsonGeomWithoutFeatureProperty = GeoJsonReaderTest.class.getClassLoader().getResource("testpolygon-no-property.json").getPath();
-        geoJsonWithInvalidGeometries = GeoJsonReaderTest.class.getClassLoader().getResource("testInvalidPolygon.json").getPath();
-        geoJsonWithNullProperty = GeoJsonReaderTest.class.getClassLoader().getResource("testpolygon-with-null-property-value.json").getPath();
-        geoJsonContainsId = GeoJsonReaderTest.class.getClassLoader().getResource("testContainsId.json").getPath();
+        initialize(GeoJsonIOTest.class.getName());
+        geoJsonGeomWithFeatureProperty = GeoJsonIOTest.class.getClassLoader().getResource("testPolygon.json").getPath();
+        geoJsonGeomWithoutFeatureProperty = GeoJsonIOTest.class.getClassLoader().getResource("testpolygon-no-property.json").getPath();
+        geoJsonWithInvalidGeometries = GeoJsonIOTest.class.getClassLoader().getResource("testInvalidPolygon.json").getPath();
+        geoJsonWithNullProperty = GeoJsonIOTest.class.getClassLoader().getResource("testpolygon-with-null-property-value.json").getPath();
+        geoJsonContainsId = GeoJsonIOTest.class.getClassLoader().getResource("testContainsId.json").getPath();
     }
 
     @AfterClass
@@ -70,8 +73,36 @@ public class GeoJsonReaderTest
         // load geojson with our tool
         SpatialRDD geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithFeatureProperty);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 1001);
+        geojsonRDD.saveAsGeoJSON("target/geojson.tmp");
         geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithoutFeatureProperty);
         assertEquals(geojsonRDD.rawSpatialRDD.count(), 10);
+    }
+
+    @Test
+    public void testReadWriteGeoJson()
+            throws IOException
+    {
+        String tmpFilePath = "target/geojson.tmp";
+        SpatialRDD initRdd = GeoJsonReader.readToGeometryRDD(sc, geoJsonGeomWithFeatureProperty);
+        deleteFile(tmpFilePath);
+        initRdd.saveAsGeoJSON(tmpFilePath);
+        SpatialRDD newRdd = GeoJsonReader.readToGeometryRDD(sc, tmpFilePath);
+        Geometry initGeom = (Geometry) initRdd.rawSpatialRDD.takeOrdered(1).get(0);
+        String[] initGeomFields = initGeom.getUserData().toString().split("\t");
+        Arrays.sort(initGeomFields);
+        Geometry newGeom = (Geometry) newRdd.rawSpatialRDD.takeOrdered(1).get(0);
+        String[] newGeomFields = newGeom.getUserData().toString().split("\t");
+        Arrays.sort(newGeomFields);
+        for (int i = 0; i < initGeomFields.length; i++) {
+            assertEquals(initGeomFields[i], newGeomFields[i]);
+        }
+        Collections.sort(initRdd.fieldNames);
+        Collections.sort(newRdd.fieldNames);
+        for (int i = 0; i < initRdd.fieldNames.size(); i++) {
+            assertEquals(initRdd.fieldNames.get(i), initRdd.fieldNames.get(i));
+        }
+        assertEquals(initRdd.fieldNames.size(), newRdd.fieldNames.size());
+        assertEquals(initRdd.rawSpatialRDD.count(), newRdd.rawSpatialRDD.count());
     }
 
     /**
