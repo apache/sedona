@@ -252,13 +252,14 @@ abstract class InferredBinaryExpression[A1: InferrableType, A2: InferrableType, 
   lazy val serialize = buildSerializer[R]
 
   override def eval(input: InternalRow): Any = {
-    println(toString)
+    // println(toString)
     val left = extractLeft(input)
     val right = extractRight(input)
     if (left != null && right != null) {
       if (serializeOutput) {
         serialize(f(left, right))
       } else {
+        println("----- Serialization/deserialization avoided -----")
         f(left, right)
       }
     } else {
