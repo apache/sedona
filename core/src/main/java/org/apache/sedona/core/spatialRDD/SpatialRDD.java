@@ -593,7 +593,7 @@ public class SpatialRDD<T extends Geometry>
                 if (spatialObject.getUserData() != null) {
                     Map<String, Object> fields = new HashMap<String, Object>();
                     String[] fieldValues = spatialObject.getUserData().toString().split("\t");
-                    if (fieldValues.length == fieldNames.size()) {
+                    if (fieldNames != null && fieldValues.length == fieldNames.size()) {
                         for (int i = 0 ; i < fieldValues.length ; i++) {
                             fields.put(fieldNames.get(i), fieldValues[i]);
                         }
