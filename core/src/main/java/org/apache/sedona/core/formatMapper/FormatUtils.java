@@ -172,7 +172,7 @@ public class FormatUtils<T extends Geometry> implements Serializable {
                 for (Object property : featurePropertiesproperties.values()
                 ) {
                     if (property == null) {
-                        nonSpatialData.add("null");
+                        nonSpatialData.add("");
                     }
                     else {
                         nonSpatialData.add(property.toString());
