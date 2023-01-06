@@ -861,7 +861,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     lineStringDf.selectExpr("ST_AsText(geom)")
       .as[String]
       .collect() should contain theSameElementsAs List(
-      "LINESTRING (0 0, 0 1, 1 1, 1 0, 0 0)", "LINESTRING (0 0, 1 1, 1 2, 1 1, 0 0)"
+      "LINEARRING (0 0, 0 1, 1 1, 1 0, 0 0)", "LINEARRING (0 0, 1 1, 1 2, 1 1, 0 0)"
     )
 
     emptyDf.count shouldBe 0
