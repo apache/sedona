@@ -156,6 +156,8 @@ root
  |-- geometry: geometry (nullable = true)
 ```
 
+Sedona supports spatial predicate push-down for GeoParquet files, please refer to the [SedonaSQL query optimizer](../api/sql/Optimizer.md) documentation for details.
+
 ## Transform the Coordinate Reference System
 
 Sedona doesn't control the coordinate unit (degree-based or meter-based) of all geometries in a Geometry column. The unit of all related distances in SedonaSQL is same as the unit of all geometries in a Geometry column.

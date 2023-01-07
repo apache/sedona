@@ -141,3 +141,21 @@ RangeJoin polygonshape#20: geometry, pointshape#43: geometry, false
 +- Project [st_point(cast(_c0#31 as decimal(24,20)), cast(_c1#32 as decimal(24,20)), myPointId) AS pointshape#43]
    +- *FileScan csv
 ```
+
+### GeoParquet
+
+Sedona supports spatial predicate push-down for GeoParquet files. When spatial filters were applied to dataframes backed by GeoParquet files, Sedona will use the
+[`bbox` properties in the metadata](https://github.com/opengeospatial/geoparquet/blob/v1.0.0-beta.1/format-specs/geoparquet.md#bbox)
+to determine if all data in the file will be discarded by the spatial predicate. This optimization could reduce the number of files scanned
+when the queried GeoParquet dataset was partitioned by spatial proximity.
+
+The following figure is the visualization of a GeoParquet dataset. `bbox`es of all GeoParquet files were plotted as blue rectangles and the query window was plotted as a red rectangle. Sedona will only scan 1 of the 6 files to
+answer queries such as `SELECT * FROM geoparquet_dataset WHERE ST_Intersects(geom, <query window>)`, thus only part of the data covered by the light green rectangle needs to be scanned.
+
+![](../../image/geoparquet-pred-pushdown.png)
+
+We can compare the metrics of querying the GeoParquet dataset with or without the spatial predicate and observe that querying with spatial predicate results in fewer number of rows scanned.
+
+| Without spatial predicate | With spatial predicate |
+| ----------- | ----------- |
+| ![](../../image/scan-parquet-without-spatial-pred.png) | ![](../../image/scan-parquet-with-spatial-pred.png) |
