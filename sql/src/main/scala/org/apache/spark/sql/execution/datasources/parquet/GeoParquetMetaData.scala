@@ -1,5 +1,4 @@
-/**
- *
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +12,8 @@
  * limitations under the License.
  */
 package org.apache.spark.sql.execution.datasources.parquet
+
+import org.json4s.jackson.JsonMethods.parse
 
 /**
  * A case class that holds CRS metadata for geometry columns. This class is left empty since CRS
@@ -48,4 +49,11 @@ object GeoParquetMetaData {
   // https://github.com/opengeospatial/geoparquet/blob/v1.0.0-beta.1/format-specs/geoparquet.md
   // for more details.
   val VERSION = "1.0.0-beta.1"
+
+  def parseKeyValueMetaData(keyValueMetaData: java.util.Map[String, String]): Option[GeoParquetMetaData] = {
+    Option(keyValueMetaData.get("geo")).map { geo =>
+      implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+      parse(geo).camelizeKeys.extract[GeoParquetMetaData]
+    }
+  }
 }

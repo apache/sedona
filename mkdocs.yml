@@ -59,7 +59,7 @@ nav:
               - Function: api/sql/Function.md
               - Predicate: api/sql/Predicate.md
               - Aggregate function: api/sql/AggregateFunction.md
-              - Join query (optimizer): api/sql/Optimizer.md
+              - SedonaSQL query optimizer: api/sql/Optimizer.md
           - Raster data:
               - Raster input and output: api/sql/Raster-loader.md
               - Raster operators: api/sql/Raster-operators.md

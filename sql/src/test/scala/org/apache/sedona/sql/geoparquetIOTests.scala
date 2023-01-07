@@ -26,7 +26,10 @@ import org.apache.parquet.hadoop.util.HadoopInputFile
 import org.apache.spark.SparkException
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.SaveMode
+import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.expressions.st_constructors.ST_Point
+import org.apache.spark.sql.sedona_sql.expressions.st_predicates.ST_Intersects
 import org.apache.spark.sql.types.IntegerType
 import org.apache.spark.sql.types.StructField
 import org.apache.spark.sql.types.StructType
@@ -174,6 +177,13 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         sparkSession.read.format("geoparquet").load(resourceFolder + "geoparquet/plain.parquet")
       }
       assert(e.getMessage.contains("does not contain valid geo metadata"))
+    }
+
+    it("GeoParquet load with spatial predicates") {
+      val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation1)
+      val rows = df.where(ST_Intersects(ST_Point(35.174722, -6.552465), col("geometry"))).collect()
+      assert(rows.length == 1)
+      assert(rows(0).getAs[String]("name") == "Tanzania")
     }
   }
 }

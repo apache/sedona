@@ -20,6 +20,7 @@ package org.apache.sedona.sql.utils
 
 import org.apache.sedona.sql.UDF.UdfRegistrator
 import org.apache.sedona.sql.UDT.UdtRegistrator
+import org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet
 import org.apache.spark.sql.{SQLContext, SparkSession}
 import org.apache.spark.sql.sedona_sql.strategy.join.JoinQueryDetector
 
@@ -29,7 +30,12 @@ object SedonaSQLRegistrator {
   }
 
   def registerAll(sparkSession: SparkSession): Unit = {
-    sparkSession.experimental.extraStrategies = new JoinQueryDetector(sparkSession) :: Nil
+    if (!sparkSession.experimental.extraStrategies.exists(_.isInstanceOf[JoinQueryDetector])) {
+      sparkSession.experimental.extraStrategies ++= Seq(new JoinQueryDetector(sparkSession))
+    }
+    if (!sparkSession.experimental.extraOptimizations.exists(_.isInstanceOf[SpatialFilterPushDownForGeoParquet])) {
+      sparkSession.experimental.extraOptimizations ++= Seq(new SpatialFilterPushDownForGeoParquet(sparkSession))
+    }
     UdtRegistrator.registerAll()
     UdfRegistrator.registerAll(sparkSession)
   }

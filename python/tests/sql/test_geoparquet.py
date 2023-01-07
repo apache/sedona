@@ -24,6 +24,7 @@ from shapely.wkt import loads as wkt_loads
 import geopandas
 
 from tests.test_base import TestBase
+from tests import geoparquet_input_location
 
 
 class TestGeoParquet(TestBase):
@@ -53,3 +54,10 @@ class TestGeoParquet(TestBase):
         assert df2.count() == 2
         row = df2.collect()[0]
         assert isinstance(row['g'], BaseGeometry)
+
+    def test_load_geoparquet_with_spatial_filter(self):
+        df = self.spark.read.format("geoparquet").load(geoparquet_input_location)\
+            .where("ST_Contains(geometry, ST_GeomFromText('POINT (35.174722 -6.552465)'))")
+        rows = df.collect()
+        assert len(rows) == 1
+        assert rows[0]['name'] == 'Tanzania'

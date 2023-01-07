@@ -28,7 +28,6 @@ import org.apache.spark.sql.execution.datasources.parquet.ParquetSchemaConverter
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
-import org.json4s.jackson.JsonMethods.parse
 
 /**
  * This converter class is used to convert Parquet [[MessageType]] to Spark SQL [[StructType]].
@@ -48,13 +47,8 @@ class GeoParquetToSparkSchemaConverter(
   assumeBinaryIsString: Boolean = SQLConf.PARQUET_BINARY_AS_STRING.defaultValue.get,
   assumeInt96IsTimestamp: Boolean = SQLConf.PARQUET_INT96_AS_TIMESTAMP.defaultValue.get) {
 
-  private val geoParquetMetaData: GeoParquetMetaData = {
-    val geo = keyValueMetaData.get("geo")
-    if (geo == null) {
-      throw new AnalysisException("GeoParquet file does not contain valid geo metadata")
-    }
-    implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
-    parse(geo).camelizeKeys.extract[GeoParquetMetaData]
+  private val geoParquetMetaData: GeoParquetMetaData = GeoParquetMetaData.parseKeyValueMetaData(keyValueMetaData).getOrElse {
+    throw new AnalysisException("GeoParquet file does not contain valid geo metadata")
   }
 
   def this(keyValueMetaData: java.util.Map[String, String], conf: SQLConf) = this(
