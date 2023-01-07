@@ -99,7 +99,7 @@ abstract class BinaryGeometryExpression extends Expression with SerdeAware with 
       case _ => leftExpression.toGeometry(input)
     }
 
-    val rightExpression = inputExpressions(0)
+    val rightExpression = inputExpressions(1)
     val rightGeometry = rightExpression match {
       case expr: SerdeAware => expr.evalWithoutSerialization(input)
       case _ => rightExpression.toGeometry(input)
