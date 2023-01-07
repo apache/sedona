@@ -449,11 +449,7 @@ case class ST_StartPoint(inputExpressions: Seq[Expression])
   override protected def nullSafeEval(geometry: Geometry): Any = {
     geometry match {
       case line: LineString => {
-        if (serializeOutput) {
-          line.getPointN(0).toGenericArrayData
-        } else {
-          line.getPointN(0)
-        }
+        line.getPointN(0)
       }
       case _ => null
     }
@@ -479,11 +475,23 @@ case class ST_Boundary(inputExpressions: Seq[Expression])
 
 
 case class ST_MinimumBoundingRadius(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with FoldableExpression with CodegenFallback {
+  extends Expression with FoldableExpression with CodegenFallback {
+
+  override def nullable: Boolean = true
+
   private val geometryFactory = new GeometryFactory()
 
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    getMinimumBoundingRadius(geometry)
+  override def eval(input: InternalRow): Any = {
+    val expr = inputExpressions(0)
+    val geometry = expr match {
+      case s: SerdeAware => s.evalWithoutSerialization(input)
+      case _ => expr.toGeometry(input)
+    }
+
+    geometry match {
+      case geometry: Geometry => getMinimumBoundingRadius(geometry)
+      case _ => null
+    }
   }
 
   private def getMinimumBoundingRadius(geom: Geometry): InternalRow = {
@@ -551,11 +559,7 @@ case class ST_EndPoint(inputExpressions: Seq[Expression])
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
     geometry match {
-      case string: LineString => if (serializeOutput) {
-        string.getEndPoint.toGenericArrayData
-      } else {
-        string.getEndPoint
-      }
+      case string: LineString => string.getEndPoint
       case _ => null
     }
   }
@@ -598,30 +602,21 @@ case class ST_Dump(inputExpressions: Seq[Expression])
   extends UnaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
-    val geometryCollection = geometry match {
+    geometry match {
       case collection: GeometryCollection => {
         val numberOfGeometries = collection.getNumGeometries
-        if (serializeOutput) {
-          (0 until numberOfGeometries).map(
-            index => collection.getGeometryN(index).toGenericArrayData
-          ).toArray
-        } else {
-          (0 until numberOfGeometries).map(
-            index => collection.getGeometryN(index)
-          ).toArray
-        }
+        (0 until numberOfGeometries).map(
+          index => collection.getGeometryN(index)
+        ).toArray
       }
-      case geom: Geometry => if (serializeOutput) {
-        Array(geom.toGenericArrayData)
-      } else {
-        Array(geom)
-      }
+      case geom: Geometry => Array(geom)
     }
-    if (serializeOutput){
-      ArrayData.toArrayData(geometryCollection)
-    } else {
-      geometryCollection
-    }
+  }
+
+  override protected def serializeResult(result: Any): Any = {
+    ArrayData.toArrayData(
+      result.asInstanceOf[Array[Geometry]].map(_.toGenericArrayData)
+    )
   }
 
   override def dataType: DataType = ArrayType(GeometryUDT)
@@ -637,11 +632,11 @@ case class ST_DumpPoints(inputExpressions: Seq[Expression])
   extends UnaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
-    if (serializeOutput){
-      ArrayData.toArrayData(geometry.getPoints.map(geom => geom.toGenericArrayData))
-    } else {
-      geometry.getPoints.map(geom => geom).toArray
-    }
+    geometry.getPoints.map(geom => geom).toArray
+  }
+
+  override protected def serializeResult(result: Any): Any = {
+    ArrayData.toArrayData(result.asInstanceOf[Array[Geometry]].map(geom => geom.toGenericArrayData))
   }
 
   override def dataType: DataType = ArrayType(GeometryUDT)
@@ -870,11 +865,7 @@ case class ST_SymDifference(inputExpressions: Seq[Expression])
   extends BinaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
-    if (serializeOutput) {
-      leftGeometry.symDifference(rightGeometry).toGenericArrayData
-    } else {
-      leftGeometry.symDifference(rightGeometry)
-    }
+    leftGeometry.symDifference(rightGeometry)
   }
 
   override def dataType: DataType = GeometryUDT
@@ -895,11 +886,7 @@ case class ST_Union(inputExpressions: Seq[Expression])
   extends BinaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
-    if (serializeOutput) {
-      leftGeometry.union(rightGeometry).toGenericArrayData
-    } else {
-      leftGeometry.union(rightGeometry)
-    }
+    leftGeometry.union(rightGeometry)
   }
 
   override def dataType: DataType = GeometryUDT
