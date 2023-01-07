@@ -113,7 +113,10 @@ abstract class BinaryGeometryExpression extends Expression with SerdeAware with 
   }
 
   protected def serializeResult(result: Any): Any = {
-    result.asInstanceOf[Geometry].toGenericArrayData
+    result match {
+      case geometry: Geometry => geometry.toGenericArrayData
+      case _ => result
+    }
   }
 
   protected def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any
