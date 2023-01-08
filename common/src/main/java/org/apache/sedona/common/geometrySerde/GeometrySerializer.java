@@ -39,6 +39,7 @@ public class GeometrySerializer {
 
     public static byte[] serialize(Geometry geometry) {
         GeometryBuffer buffer;
+        // System.out.println("Inside GeometrySerializer.serialize");
         if (geometry instanceof Point) {
             buffer = serializePoint((Point) geometry);
         } else if (geometry instanceof MultiPoint) {
@@ -61,6 +62,7 @@ public class GeometrySerializer {
     }
 
     public static Geometry deserialize(byte[] bytes) {
+        // System.out.println("Inside GeometrySerializer.deserialize");
         GeometryBuffer buffer = GeometryBufferFactory.wrap(bytes);
         return deserialize(buffer);
     }
