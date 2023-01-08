@@ -21,7 +21,6 @@ import math
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
-from shapely.coords import CoordinateSequence
 from shapely.geometry import (
     GeometryCollection,
     LinearRing,
@@ -39,6 +38,8 @@ from shapely.wkt import loads as wkt_loads
 
 CoordType = Union[Tuple[float, float], Tuple[float, float, float], Tuple[float, float, float, float]]
 ListCoordType = Union[List[Tuple[float, float]], List[Tuple[float, float, float]], List[Tuple[float, float, float, float]]]
+
+GET_COORDS_NUMPY_THRESHOLD = 50
 
 
 class GeometryTypeID:
@@ -262,7 +263,7 @@ def get_coordinates(buffer: bytearray, offset: int, coord_type: int, num_coords:
     if coord_type == CoordinateType.XYM or coord_type == CoordinateType.XYZM:
         raise NotImplementedError("XYM or XYZM coordinates are not supported")
 
-    if num_coords < 50:
+    if num_coords < GET_COORDS_NUMPY_THRESHOLD:
         coords = [
             struct.unpack_from(CoordinateType.unpack_format(coord_type), buffer, offset + (i * CoordinateType.bytes_per_coord(coord_type)))
             for i in range(num_coords)
@@ -286,34 +287,19 @@ def serialize_point(geom: Point) -> bytes:
     coords = [tuple(c) for c in geom.coords]
     if coords:
         # FIXME this does not handle M yet, but geom.has_z is extremely slow
-        has_z = geom._ndim == 3
+        pack_format = "BBBBi" + "d" * geom._ndim
         coord_type = CoordinateType.type_of(geom)
         preamble_byte = ((GeometryTypeID.POINT << 4) | (coord_type << 1))
         coords = coords[0]
-
-        if has_z:
-            return struct.pack(
-                'BBBBiddd',
-                preamble_byte,
-                0,
-                0,
-                0,
-                1,
-                coords[0],
-                coords[1],
-                coords[2]
-            )
-        else:
-            return struct.pack(
-                'BBBBidd',
-                preamble_byte,
-                0,
-                0,
-                0,
-                1,
-                coords[0],
-                coords[1]
-            )
+        return struct.pack(
+            pack_format,
+            preamble_byte,
+            0,
+            0,
+            0,
+            1,
+            *coords
+        )
     else:
         return struct.pack(
             'BBBBi',
