@@ -614,9 +614,12 @@ case class ST_Dump(inputExpressions: Seq[Expression])
   }
 
   override protected def serializeResult(result: Any): Any = {
-    ArrayData.toArrayData(
-      result.asInstanceOf[Array[Geometry]].map(_.toGenericArrayData)
-    )
+    result match {
+      case array: Array[Geometry] => ArrayData.toArrayData(
+        array.map(_.toGenericArrayData)
+      )
+      case _ => null
+    }
   }
 
   override def dataType: DataType = ArrayType(GeometryUDT)
@@ -636,7 +639,13 @@ case class ST_DumpPoints(inputExpressions: Seq[Expression])
   }
 
   override protected def serializeResult(result: Any): Any = {
-    ArrayData.toArrayData(result.asInstanceOf[Array[Geometry]].map(geom => geom.toGenericArrayData))
+    result match {
+      case array: Array[Geometry] => ArrayData.toArrayData(
+        array.map(geom => geom.toGenericArrayData)
+      )
+      case _ => null
+    }
+
   }
 
   override def dataType: DataType = ArrayType(GeometryUDT)
