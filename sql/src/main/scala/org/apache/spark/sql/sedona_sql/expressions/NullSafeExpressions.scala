@@ -251,7 +251,7 @@ abstract class InferredUnaryExpression[A1: InferrableType, R: InferrableType]
   override def evalWithoutSerialization(input: InternalRow): Any = {
     val value = extract(input)
     if (value != null) {
-      println("----- Serialization/deserialization avoided -----")
+      // println("----- Serialization/deserialization avoided -----")
       f(value)
     } else {
       null
