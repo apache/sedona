@@ -14,21 +14,48 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
+import pytest
 
-from shapely.geometry.base import BaseGeometry
+from pyspark.sql.types import StructType
+from sedona.sql.types import GeometryType
 from sedona.utils import geometry_serde
 
-from shapely.geometry import Point
-from shapely.geometry import LineString
-from shapely.geometry import Polygon
-from shapely.geometry import MultiPoint
-from shapely.geometry import MultiLineString
-from shapely.geometry import MultiPolygon
-from shapely.geometry import GeometryCollection
+from shapely.geometry.base import BaseGeometry
+from shapely.geometry import (
+    GeometryCollection,
+    LineString,
+    MultiLineString,
+    MultiPoint,
+    MultiPolygon,
+    Point,
+    Polygon,
+)
 from shapely.wkt import loads as wkt_loads
 
+from tests.test_base import TestBase
 
-class TestGeometrySerde:
+class TestGeometrySerde(TestBase):
+
+
+    @pytest.mark.parametrize("geom", [
+        GeometryCollection([Point([10.0, 20.0]), Polygon([(10.0, 10.0), (20.0, 20.0), (20.0, 10.0)])]),
+        LineString([(10.0, 20.0), (30.0, 40.0)]),
+        LineString([(10.0, 20.0, 30.0), (40.0, 50.0, 60.0)]),
+        MultiLineString([[(10.0, 20.0), (30.0, 40.0)], [(50.0, 60.0), (70.0, 80.0)]]),
+        MultiLineString([[(10.0, 20.0, 30.0), (40.0, 50.0, 60.0)], [(70.0, 80.0, 90.0), (100.0, 110.0, 120.0)]]),
+        MultiPoint([(10.0, 20.0), (30.0, 40.0)]),
+        MultiPoint([(10.0, 20.0, 30.0), (40.0, 50.0, 60.0)]),
+        MultiPolygon([Polygon([(10.0, 10.0), (20.0, 20.0), (20.0, 10.0), (10.0, 10.0)]), Polygon([(-10.0, -10.0), (-20.0, -20.0), (-20.0, -10.0), (-10.0, -10.0)])]),
+        MultiPolygon([Polygon([(10.0, 10.0, 10.0), (20.0, 20.0, 10.0), (20.0, 10.0, 10.0), (10.0, 10.0, 10.0)]), Polygon([(-10.0, -10.0, -10.0), (-20.0, -20.0, -10.0), (-20.0, -10.0, -10.0), (-10.0, -10.0, -10.0)])]),
+        Point((10.0, 20.0)),
+        Point((10.0, 20.0, 30.0)),
+        Polygon([(10.0, 10.0), (20.0, 20.0), (20.0, 10.0), (10.0, 10.0)]),
+        Polygon([(10.0, 10.0, 10.0), (20.0, 20.0, 10.0), (20.0, 10.0, 10.0), (10.0, 10.0, 10.0)]),
+    ])
+    def test_spark_serde(self, geom):
+        returned_geom = TestGeometrySerde.spark.createDataFrame([(geom,)], StructType().add("geom", GeometryType())).take(1)[0][0]
+        assert geom.equals_exact(returned_geom, 1e-6)
+
     def test_point(self):
         points = [
             wkt_loads("POINT EMPTY"),
