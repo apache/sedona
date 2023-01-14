@@ -28,7 +28,7 @@ jobs:
             scala: 2.12.15
             jdk: '11'
             skipTests: '-DskipTests'            
-          - spark: 3.2.0
+          - spark: 3.2.3
             scala: 2.12.15
             jdk: '8'
             skipTests: ''            
