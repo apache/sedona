@@ -66,13 +66,12 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
             SpatialPredicate spatialPredicate,
             IndexType indexType,
             JoinBuildSide joinBuildSide,
-            @Nullable DedupParams dedupParams,
             Metric buildCount,
             Metric streamCount,
             Metric resultCount,
             Metric candidateCount)
     {
-        super(spatialPredicate, dedupParams);
+        super(spatialPredicate);
         this.indexType = indexType;
         this.joinBuildSide = joinBuildSide;
         this.buildCount = buildCount;

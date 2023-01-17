@@ -317,6 +317,39 @@ public class GeomUtils {
         return false;
     }
 
+    /**
+     * Checks if the geoemetry pair - <code>left</code> and <code>right</code> - should be handled be the current partition - <code>extent</code>.
+     *
+     * @param left
+     * @param right
+     * @param extent
+     * @return
+     */
+    public static boolean isDuplicate(Geometry left, Geometry right, HalfOpenRectangle extent) {
+        // Handle easy case: points. Since each point is assigned to exactly one partition,
+        // different partitions cannot emit duplicate results.
+        if (left instanceof Point || right instanceof Point) {
+            return false;
+        }
+
+        // Neither geometry is a point
+
+        // Check if reference point of the intersection of the bounding boxes lies within
+        // the extent of this partition. If not, don't run any checks. Let the partition
+        // that contains the reference point do all the work.
+        Envelope intersection =
+                left.getEnvelopeInternal().intersection(right.getEnvelopeInternal());
+        if (!intersection.isNull()) {
+            final Point referencePoint =
+                    left.getFactory().createPoint(new Coordinate(intersection.getMinX(), intersection.getMinY()));
+            if (!extent.contains(referencePoint)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private static Map<Polygon, Polygon> findFaceHoles(List<Polygon> faces) {
         Map<Polygon, Polygon> parentMap = new HashMap<>();
         faces.sort(Comparator.comparing((Polygon p) -> p.getEnvelope().getArea()).reversed());

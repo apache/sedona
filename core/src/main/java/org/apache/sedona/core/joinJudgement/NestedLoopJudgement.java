@@ -43,9 +43,9 @@ public class NestedLoopJudgement<T extends Geometry, U extends Geometry>
     /**
      * @see JudgementBase
      */
-    public NestedLoopJudgement(SpatialPredicate spatialPredicate, @Nullable DedupParams dedupParams)
+    public NestedLoopJudgement(SpatialPredicate spatialPredicate)
     {
-        super(spatialPredicate, dedupParams);
+        super(spatialPredicate);
     }
 
     @Override

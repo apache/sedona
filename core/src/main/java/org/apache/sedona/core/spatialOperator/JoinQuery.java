@@ -26,11 +26,7 @@ import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.enums.JoinBuildSide;
 import org.apache.sedona.common.geometryObjects.Circle;
-import org.apache.sedona.core.joinJudgement.DedupParams;
-import org.apache.sedona.core.joinJudgement.DynamicIndexLookupJudgement;
-import org.apache.sedona.core.joinJudgement.LeftIndexLookupJudgement;
-import org.apache.sedona.core.joinJudgement.NestedLoopJudgement;
-import org.apache.sedona.core.joinJudgement.RightIndexLookupJudgement;
+import org.apache.sedona.core.joinJudgement.*;
 import org.apache.sedona.core.monitoring.Metric;
 import org.apache.sedona.core.spatialPartitioning.SpatialPartitioner;
 import org.apache.sedona.core.spatialRDD.CircleRDD;
@@ -38,6 +34,7 @@ import org.apache.sedona.core.spatialRDD.SpatialRDD;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.sedona.core.monitoring.Metrics;
@@ -552,14 +549,12 @@ public class JoinQuery
         if (joinParams.useIndex) {
             if (rightRDD.indexedRDD != null) {
                 final RightIndexLookupJudgement judgement =
-                        new RightIndexLookupJudgement(joinParams.spatialPredicate, dedupParams);
-                judgement.broadcastDedupParams(cxt);
+                        new RightIndexLookupJudgement(joinParams.spatialPredicate);
                 joinResult = leftRDD.spatialPartitionedRDD.zipPartitions(rightRDD.indexedRDD, judgement);
             }
             else if (leftRDD.indexedRDD != null) {
                 final LeftIndexLookupJudgement judgement =
-                        new LeftIndexLookupJudgement(joinParams.spatialPredicate, dedupParams);
-                judgement.broadcastDedupParams(cxt);
+                        new LeftIndexLookupJudgement(joinParams.spatialPredicate);
                 joinResult = leftRDD.indexedRDD.zipPartitions(rightRDD.spatialPartitionedRDD, judgement);
             }
             else {
@@ -569,27 +564,17 @@ public class JoinQuery
                                 joinParams.spatialPredicate,
                                 joinParams.indexType,
                                 joinParams.joinBuildSide,
-                                dedupParams,
                                 buildCount, streamCount, resultCount, candidateCount);
-                judgement.broadcastDedupParams(cxt);
                 joinResult = leftRDD.spatialPartitionedRDD.zipPartitions(rightRDD.spatialPartitionedRDD, judgement);
             }
         }
         else {
-            NestedLoopJudgement judgement = new NestedLoopJudgement(joinParams.spatialPredicate, dedupParams);
-            judgement.broadcastDedupParams(cxt);
+            NestedLoopJudgement judgement = new NestedLoopJudgement(joinParams.spatialPredicate);
             joinResult = rightRDD.spatialPartitionedRDD.zipPartitions(leftRDD.spatialPartitionedRDD, judgement);
         }
 
-        return joinResult.mapToPair(new PairFunction<Pair<U, T>, U, T>()
-        {
-            @Override
-            public Tuple2<U, T> call(Pair<U, T> pair)
-                    throws Exception
-            {
-                return new Tuple2<>(pair.getKey(), pair.getValue());
-            }
-        });
+        return joinResult.mapPartitionsWithIndex(new DuplicatesFilter(new JavaSparkContext(cxt).broadcast(dedupParams)), false)
+                .mapToPair((PairFunction<Pair<U, T>, U, T>) pair -> new Tuple2<>(pair.getKey(), pair.getValue()));
     }
 
     public static final class JoinParams
