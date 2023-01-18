@@ -1408,7 +1408,7 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     }
   }
 
-  describe("Sedona SQL automatic broadcast") {
+  describe("Sedona-SQL Automatic broadcast") {
     it("Datasets smaller than threshold should be broadcasted") {
       val polygonDf = buildPolygonDf.repartition(3).alias("polygon")
       val pointDf = buildPointDf.repartition(5).alias("point")
@@ -1428,6 +1428,34 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       sparkSession.conf.set("sedona.join.autoBroadcastJoinThreshold", "-1")
 
       assert(df.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 0)
+    }
+  }
+
+  describe("Sedona-SQL Broadcast join with null geometries") {
+    it("Left outer join with nulls on left side") {
+      import sparkSession.implicits._
+      val left = Seq(("1", "POINT(1 1)"), ("2", "POINT(1 1)"), ("3", "POINT(1 1)"), ("4", null))
+        .toDF("seq", "left_geom")
+        .withColumn("left_geom", expr("ST_GeomFromText(left_geom)"))
+      val right = Seq("POLYGON((2 0, 2 2, 0 2, 0 0, 2 0))")
+        .toDF("right_geom")
+        .withColumn("right_geom", expr("ST_GeomFromText(right_geom)"))
+      val result = left.join(broadcast(right), expr("ST_Intersects(left_geom, right_geom)"), "left")
+      assert(result.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(result.count() == 4)
+    }
+
+    it("Left anti join with nulls on left side") {
+      import sparkSession.implicits._
+      val left = Seq(("1", "POINT(1 1)"), ("2", "POINT(1 1)"), ("3", "POINT(1 1)"), ("4", null))
+        .toDF("seq", "left_geom")
+        .withColumn("left_geom", expr("ST_GeomFromText(left_geom)"))
+      val right = Seq("POLYGON((2 0, 2 2, 0 2, 0 0, 2 0))")
+        .toDF("right_geom")
+        .withColumn("right_geom", expr("ST_GeomFromText(right_geom)"))
+      val result = left.join(broadcast(right), expr("ST_Intersects(left_geom, right_geom)"), "left_anti")
+      assert(result.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(result.count() == 1)
     }
   }
 }
