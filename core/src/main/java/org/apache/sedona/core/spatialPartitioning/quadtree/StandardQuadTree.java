@@ -21,7 +21,7 @@ package org.apache.sedona.core.spatialPartitioning.quadtree;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.sedona.core.spatialPartitioning.PartitioningUtils;
-import org.apache.sedona.core.utils.HalfOpenRectangle;
+import org.apache.sedona.common.utils.HalfOpenRectangle;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;

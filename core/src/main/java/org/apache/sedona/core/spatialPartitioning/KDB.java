@@ -19,7 +19,7 @@
 
 package org.apache.sedona.core.spatialPartitioning;
 
-import org.apache.sedona.core.utils.HalfOpenRectangle;
+import org.apache.sedona.common.utils.HalfOpenRectangle;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;

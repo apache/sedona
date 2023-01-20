@@ -40,9 +40,9 @@ public class LeftIndexLookupJudgement<T extends Geometry, U extends Geometry>
     /**
      * @see JudgementBase
      */
-    public LeftIndexLookupJudgement(SpatialPredicate spatialPredicate, @Nullable DedupParams dedupParams)
+    public LeftIndexLookupJudgement(SpatialPredicate spatialPredicate)
     {
-        super(spatialPredicate, dedupParams);
+        super(spatialPredicate);
     }
 
     @Override
