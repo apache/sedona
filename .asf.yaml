@@ -1,6 +1,6 @@
 notifications:
     commits:      commits@sedona.apache.org
-    issues:       issues@sedona.apache.org
+    issues:       dev@sedona.apache.org
     pullrequests_status:  dev@sedona.apache.org
     jira_options: link label worklog
 github:
