@@ -6,6 +6,8 @@ notifications:
 github:
   description: "A cluster computing framework for processing large-scale geospatial data"
   homepage: http://sedona.apache.org/
+  autolink_jira:
+    - SEDONA
   labels:
     - geospatial
     - cluster-computing
