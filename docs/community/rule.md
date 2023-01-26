@@ -1,6 +1,6 @@
 # Contributing to Apache Sedona
 
-The project welcomes contributions. You can contribute to Sedona code or documentation by making Pull Requests on [Sedona GitHub Repo](https://github.com/apache/incubator-sedona).
+The project welcomes contributions. You can contribute to Sedona code or documentation by making Pull Requests on [Sedona GitHub Repo](https://github.com/apache/sedona).
 
 
 The following sections brief the workflow of how to complete a contribution.
@@ -33,7 +33,7 @@ Documentation contributions should satisfy the following requirements:
 
 ## Make a Pull Request
 
-After developing a contribution, the easiest and most visible way to submit a Pull Request (PR) to the [GitHub repo](https://github.com/apache/incubator-sedona). 
+After developing a contribution, the easiest and most visible way to submit a Pull Request (PR) to the [GitHub repo](https://github.com/apache/sedona). 
 
 **Please use the JIRA ticket ID in the PR name, such as "[SEDONA-1] my subject".**
 

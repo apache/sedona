@@ -340,7 +340,7 @@ Format: `ST_ConcaveHull (A:geometry, pctConvex:float)`
 
 Format: `ST_ConcaveHull (A:geometry, pctConvex:float, allowHoles:Boolean)`
 
-Since: `v1.3.2`
+Since: `v1.4.0`
 
 Spark SQL example:
 ```SQL
@@ -1164,7 +1164,7 @@ ST_Split will always return either a MultiLineString or MultiPolygon even if the
 Homogeneous GeometryCollections are treated as a multi-geometry of the type it contains.
 For example, if a GeometryCollection of only Point geometries is passed as a blade it is the same as passing a MultiPoint of the same geometries.
 
-Since: `v1.3.2`
+Since: `v1.4.0`
 
 Format: `ST_Split (input: geometry, blade: geometry)`
 

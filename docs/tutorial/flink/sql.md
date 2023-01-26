@@ -5,11 +5,11 @@ SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of 
 Table myTable = tableEnv.sqlQuery("YOUR_SQL")
 ```
 
-Detailed SedonaSQL APIs are available here: [SedonaSQL API](/api/flink/Overview)
+Detailed SedonaSQL APIs are available here: [SedonaSQL API](../../../api/flink/Overview)
 
 ## Set up dependencies
 
-1. Read [Sedona Maven Central coordinates](/setup/maven-coordinates)
+1. Read [Sedona Maven Central coordinates](../../../setup/maven-coordinates)
 2. Add Sedona dependencies in build.sbt or pom.xml.
 3. Add [Flink dependencies](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/configuration/overview/) in build.sbt or pom.xml.
 
@@ -105,7 +105,7 @@ The output will be like this:
 ```
 
 !!!note
-	SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL constructor API](/api/flink/Constructor).
+	SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL constructor API](../../../api/flink/Constructor).
 
 ## Transform the Coordinate Reference System
 
@@ -122,10 +122,10 @@ The first EPSG code EPSG:4326 in `ST_Transform` is the source CRS of the geometr
 
 The second EPSG code EPSG:3857 in `ST_Transform` is the target CRS of the geometries. It is the most common meter-based CRS.
 
-This `ST_Transform` transform the CRS of these geomtries from EPSG:4326 to EPSG:3857. The details CRS information can be found on [EPSG.io](https://epsg.io/.)
+This `ST_Transform` transform the CRS of these geomtries from EPSG:4326 to EPSG:3857. The details CRS information can be found on [EPSG.io](https://epsg.io/)
 
 !!!note
-	Read [SedonaSQL ST_Transform API](/api/flink/Function/#st_transform) to learn different spatial query predicates.
+	Read [SedonaSQL ST_Transform API](../../../api/flink/Function/#st_transform) to learn different spatial query predicates.
 
 For example, a Table that has coordinates in the US will become like this.
 
@@ -188,7 +188,7 @@ geomTable.execute().print()
 ```
 
 !!!note
-	Read [SedonaSQL Predicate API](/api/flink/Predicate) to learn different spatial query predicates.
+	Read [SedonaSQL Predicate API](../../../api/flink/Predicate) to learn different spatial query predicates.
 	
 ### KNN query
 

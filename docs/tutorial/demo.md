@@ -1,6 +1,6 @@
 # Scala and Java Examples
 
-[Scala and Java Examples](https://github.com/apache/incubator-sedona/tree/master/examples) contains template projects for RDD, SQL and Viz. The template projects have been configured properly.
+[Scala and Java Examples](https://github.com/apache/sedona/tree/master/examples) contains template projects for RDD, SQL and Viz. The template projects have been configured properly.
 
 Note that, although the template projects are written in Scala, the same APIs can be  used in Java as well.
 

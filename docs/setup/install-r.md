@@ -12,9 +12,9 @@ Generally speaking, when working with Apache Sedona, one choose between
 the following two modes:
 
 -   Manipulating Sedona [Spatial Resilient Distributed
-    Datasets](/tutorial/rdd)
+    Datasets](../../tutorial/rdd)
     with spatial-RDD-related routines
--   Querying geometric columns within [Spatial dataframes](/tutorial/sql) with Sedona
+-   Querying geometric columns within [Spatial dataframes](../../tutorial/sql) with Sedona
     spatial UDFs
 
 While the former option enables more fine-grained control over low-level
@@ -39,7 +39,7 @@ At the moment `apache.sedona` consists of the following components:
         operations
     -   Visualization routines
 -   `dplyr`-integration for Sedona spatial UDTs and UDFs
-    -   See [SQL APIs](/api/sql/Overview/) for the list
+    -   See [SQL APIs](../../api/sql/Overview/) for the list
         of available UDFs
 -   Functions importing data from spatial RDDs to Spark dataframes and
     vice versa
@@ -101,5 +101,5 @@ spark_session(sc) %>%
 For more information about connecting to Spark with `sparklyr`, see
 <https://therinspark.com/connections.html> and
 `?sparklyr::spark_connect`. Also see
-[Initiate Spark Context](/tutorial/rdd/#initiate-sparkcontext) and [Initiate Spark Session](/tutorial/sql/#initiate-sparksession) for
+[Initiate Spark Context](../../tutorial/rdd/#initiate-sparkcontext) and [Initiate Spark Session](../../tutorial/sql/#initiate-sparksession) for
 minimum and recommended dependencies for Apache Sedona.

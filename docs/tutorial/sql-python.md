@@ -14,11 +14,11 @@ spark.sql("YOUR_SQL")
 ```
 
 !!!note
-	This tutorial is based on [Sedona SQL Jupyter Notebook example](../jupyter-notebook). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder) and wait for a few minutes. Then select a notebook and enjoy!
+	This tutorial is based on [Sedona SQL Jupyter Notebook example](../jupyter-notebook). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder) and wait for a few minutes. Then select a notebook and enjoy!
 	
 ## Installation
 
-Please read [Quick start](/setup/install-python) to install Sedona Python.
+Please read [Quick start](../../setup/install-python) to install Sedona Python.
 
 ## Register package
 Before writing any code with Sedona please use the following code.

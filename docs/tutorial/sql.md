@@ -14,7 +14,7 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.
 3. Add the dependencies in build.sbt or pom.xml.
 
 !!!note
-	To enjoy the full functions of Sedona, we suggest you include ==the full dependencies==: [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core, Sedona-SQL, Sedona-Viz. Please see [SQL example project](/tutorial/demo/)
+	To enjoy the full functions of Sedona, we suggest you include ==the full dependencies==: [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core, Sedona-SQL, Sedona-Viz. Please see [SQL example project](../demo/)
 
 
 ## Initiate SparkSession
@@ -178,7 +178,7 @@ The first EPSG code EPSG:4326 in `ST_Transform` is the source CRS of the geometr
 
 The second EPSG code EPSG:3857 in `ST_Transform` is the target CRS of the geometries. It is the most common meter-based CRS.
 
-This `ST_Transform` transform the CRS of these geomtries from EPSG:4326 to EPSG:3857. The details CRS information can be found on [EPSG.io](https://epsg.io/.)
+This `ST_Transform` transform the CRS of these geomtries from EPSG:4326 to EPSG:3857. The details CRS information can be found on [EPSG.io](https://epsg.io/)
 
 The coordinates of polygons have been changed. The output will be like this:
 
@@ -273,7 +273,7 @@ df.write.format("geoparquet").save(geoparquetoutputlocation + "/GeoParquet_File_
 
 ### DataFrame to SpatialRDD
 
-Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read [Adapter Scaladoc](/api/javadoc/sql/org/apache/sedona/sql/utils/index.html)
+Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read [Adapter Scaladoc](../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html)
 
 ```Scala
 var spatialRDD = Adapter.toSpatialRdd(spatialDf, "usacounty")
@@ -286,7 +286,7 @@ var spatialRDD = Adapter.toSpatialRdd(spatialDf, "usacounty")
 	
 ### SpatialRDD to DataFrame
 
-Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read [Adapter Scaladoc](/api/javadoc/sql/org/apache/sedona/sql/utils/index.html)
+Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read [Adapter Scaladoc](../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html)
 
 ```Scala
 var spatialDf = Adapter.toDf(spatialRDD, sparkSession)
@@ -296,8 +296,7 @@ All other attributes such as price and age will be also brought to the DataFrame
 
 You may also manually specify a schema for the resulting DataFrame in case you require different column names or data
 types. Note that string schemas and not all data types are supported&mdash;please check the
-[Adapter Scaladoc](/api/javadoc/sql/org/apache/sedona/sql/utils/index.html) and
-[source code](/sql/src/main/scala/org/apache/sedona/sql/utils/Adapter.scala) to confirm what is supported for your use
+[Adapter Scaladoc](../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html) to confirm what is supported for your use
 case. At least one column for the user data must be provided.
 
 ```Scala
@@ -329,8 +328,7 @@ All other attributes such as price and age will be also brought to the DataFrame
 
 You may also manually specify a schema for the resulting DataFrame in case you require different column names or data
 types. Note that string schemas and not all data types are supported&mdash;please check the
-[Adapter Scaladoc](/api/javadoc/sql/org/apache/sedona/sql/utils/index.html) and
-[source code](/sql/src/main/scala/org/apache/sedona/sql/utils/Adapter.scala) to confirm what is supported for your use
+[Adapter Scaladoc](../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html) to confirm what is supported for your use
 case. Columns for the left and right user data must be provided.
 
 ```Scala

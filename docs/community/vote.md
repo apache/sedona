@@ -47,13 +47,13 @@ SEDONA_CURRENT_RC={{ sedona_create_release.current_rc }}
 SEDONA_CURRENT_VERSION={{ sedona_create_release.current_version }}
 
 ## Download a Sedona release
-wget -q https://downloads.apache.org/incubator/sedona/KEYS
-wget -q https://dist.apache.org/repos/dist/dev/incubator/sedona/$SEDONA_CURRENT_RC/apache-sedona-$SEDONA_CURRENT_VERSION-src.tar.gz
-wget -q https://dist.apache.org/repos/dist/dev/incubator/sedona/$SEDONA_CURRENT_RC/apache-sedona-$SEDONA_CURRENT_VERSION-src.tar.gz.asc
-wget -q https://dist.apache.org/repos/dist/dev/incubator/sedona/$SEDONA_CURRENT_RC/apache-sedona-$SEDONA_CURRENT_VERSION-src.tar.gz.sha512
-wget -q https://dist.apache.org/repos/dist/dev/incubator/sedona/$SEDONA_CURRENT_RC/apache-sedona-$SEDONA_CURRENT_VERSION-bin.tar.gz
-wget -q https://dist.apache.org/repos/dist/dev/incubator/sedona/$SEDONA_CURRENT_RC/apache-sedona-$SEDONA_CURRENT_VERSION-bin.tar.gz.asc
-wget -q https://dist.apache.org/repos/dist/dev/incubator/sedona/$SEDONA_CURRENT_RC/apache-sedona-$SEDONA_CURRENT_VERSION-bin.tar.gz.sha512
+wget -q https://downloads.apache.org/sedona/KEYS
+wget -q https://dist.apache.org/repos/dist/dev/sedona/$SEDONA_CURRENT_RC/apache-sedona-$SEDONA_CURRENT_VERSION-src.tar.gz
+wget -q https://dist.apache.org/repos/dist/dev/sedona/$SEDONA_CURRENT_RC/apache-sedona-$SEDONA_CURRENT_VERSION-src.tar.gz.asc
+wget -q https://dist.apache.org/repos/dist/dev/sedona/$SEDONA_CURRENT_RC/apache-sedona-$SEDONA_CURRENT_VERSION-src.tar.gz.sha512
+wget -q https://dist.apache.org/repos/dist/dev/sedona/$SEDONA_CURRENT_RC/apache-sedona-$SEDONA_CURRENT_VERSION-bin.tar.gz
+wget -q https://dist.apache.org/repos/dist/dev/sedona/$SEDONA_CURRENT_RC/apache-sedona-$SEDONA_CURRENT_VERSION-bin.tar.gz.asc
+wget -q https://dist.apache.org/repos/dist/dev/sedona/$SEDONA_CURRENT_RC/apache-sedona-$SEDONA_CURRENT_VERSION-bin.tar.gz.sha512
 
 ## Verify the signature and checksum
 gpg --import KEYS
@@ -101,7 +101,7 @@ d3bdfd4d870838ebe63f21cb93634d2421ec1ac1b8184636206a5dc0d89a78a88257798b1f17371a
 64cea38dd3ca171ee4e2a7365dbce999773862f2a11599bd0f27e9551d740659a519a9b976b3e7b0826088010967093e6acc9462f7073e9737c24b007a2df846  apache-sedona-1.2.0-incubating-bin.tar.gz
 ```
 
-* At the end of the output, you should also see the `BUILD SUCCESS` if you can compile the source code. If this step fails, you can contact Sedona PPMC and see if this is just because of your environment.
+* At the end of the output, you should also see the `BUILD SUCCESS` if you can compile the source code. If this step fails, you can contact Sedona PMC and see if this is just because of your environment.
 
 ## Check files manually
 

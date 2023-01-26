@@ -4,7 +4,7 @@
 An important part of `apache.sedona` is its collection of R interfaces
 to Sedona visualization routines. For example, the following is
 essentially the R equivalent of [this example in
-Scala](https://github.com/apache/incubator-sedona/blob/f6b1c5e24bdb67d2c8d701a9b2af1fb5658fdc4d/viz/src/main/scala/org/apache/sedona/viz/showcase/ScalaExample.scala#L142-L160).
+Scala](https://github.com/apache/sedona/blob/f6b1c5e24bdb67d2c8d701a9b2af1fb5658fdc4d/viz/src/main/scala/org/apache/sedona/viz/showcase/ScalaExample.scala#L142-L160).
 
 ``` r
 library(sparklyr)
@@ -59,7 +59,7 @@ sedona_render_choropleth_map(
 It will create a scatter plot, and then overlay it on top of a
 choropleth map, as shown below:
 
-<img src="/image/choropleth-map.png" width=800 />
+<img src="../../image/choropleth-map.png" width=800 />
 
 See `?apache.sedona::sedona_render_scatter_plot`,
 `?apache.sedona::sedona_render_heatmap`, and

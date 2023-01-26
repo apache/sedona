@@ -2,7 +2,7 @@
 
 ## What are `SpatialRDD`s?
 
-[SpatialRDDs](/tutorial/rdd) are basic building blocks of distributed spatial data in Apache Sedona.
+[SpatialRDDs](../rdd) are basic building blocks of distributed spatial data in Apache Sedona.
 A `SpatialRDD` can be partitioned and indexed using well-known spatial
 data structures to facilitate range queries, KNN queries, and other
 low-level operations. One can also export records from `SpatailRDD`s
@@ -12,7 +12,7 @@ and through the `dplyr` interface of `sparklyr`.
 ## Creating a SpatialRDD
 
 NOTE: this section is largely based on
-[Spatial RDD Scala tutorial](/tutorial/rdd/#create-a-spatialrdd), except
+[Spatial RDD Scala tutorial](../rdd/#create-a-spatialrdd), except
 for examples have been written in R instead of Scala to reflect usages
 of `apache.sedona`.
 
@@ -21,7 +21,7 @@ file in a supported geospatial format, or by extracting data from a
 Spark SQL query.
 
 For example, the following code will import data from
-[arealm-small.csv](https://github.com/apache/incubator-sedona/blob/master/binder/data/arealm-small.csv)
+[arealm-small.csv](https://github.com/apache/sedona/blob/master/binder/data/arealm-small.csv)
 into a `SpatialRDD`:
 
 ``` r
@@ -38,7 +38,7 @@ pt_rdd <- sedona_read_dsv_to_typed_rdd(
 .
 
 Records from the example
-[arealm-small.csv](https://github.com/apache/incubator-sedona/blob/master/binder/data/arealm-small.csv)
+[arealm-small.csv](https://github.com/apache/sedona/blob/master/binder/data/arealm-small.csv)
 file look like the following:
 
     testattribute0,-88.331492,32.324142,testattribute1,testattribute2

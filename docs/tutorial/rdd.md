@@ -8,7 +8,7 @@ The page outlines the steps to create Spatial RDDs and run spatial queries using
 3. Add the dependencies in build.sbt or pom.xml.
 
 !!!note
-	To enjoy the full functions of Sedona, we suggest you include ==the full dependencies==: [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core, Sedona-SQL, Sedona-Viz. Please see [RDD example project](/tutorial/demo/)
+	To enjoy the full functions of Sedona, we suggest you include ==the full dependencies==: [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core, Sedona-SQL, Sedona-Viz. Please see [RDD example project](../demo/)
 
 ## Initiate SparkContext
 
@@ -222,7 +222,7 @@ objectRDD.CRSTransform(sourceCrsCode, targetCrsCode, false)
 	objectRDD.CRSTransform("epsg:4326", "epsg:3857", false)
 	```
 
-The details CRS information can be found on [EPSG.io](https://epsg.io/.)
+The details CRS information can be found on [EPSG.io](https://epsg.io/)
 
 ## Read other attributes in an SpatialRDD
 
