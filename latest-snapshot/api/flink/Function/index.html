@@ -3820,12 +3820,12 @@ If the geometry is lacking SRID a WKT format is produced.
 For SourceCRS and TargetCRS, WKT format is also available since v1.3.1.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-</div>
 <p>By default, this function uses lat/lon order. You can use <mark>ST_FlipCoordinates</mark> to swap X and Y.</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-</div>
 <p>If <mark>ST_Transform</mark> throws an Exception called "Bursa wolf parameters required", you need to disable the error notification in ST_Transform. You can append a boolean value at the end.</p>
+</div>
 <p>Format: <code>ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional] DisableError)</code></p>
 <p>Since: <code>v1.2.0</code></p>
 <p>Spark SQL example (simple):
@@ -3838,8 +3838,8 @@ For SourceCRS and TargetCRS, WKT format is also available since v1.3.1.</p>
 </code></pre></div></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-</div>
 <p>The detailed EPSG information can be searched on <a href="https://epsg.io/">EPSG.io</a>.</p>
+</div>
 <h2 id="st_x">ST_X<a class="headerlink" href="#st_x" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns X Coordinate of given Point, null otherwise.</p>
 <p>Format: <code>ST_X(pointA: Point)</code></p>
@@ -3924,7 +3924,7 @@ For SourceCRS and TargetCRS, WKT format is also available since v1.3.1.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 26, 2023 10:29:25</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 26, 2023 11:00:09</span>
       
     
   </small>

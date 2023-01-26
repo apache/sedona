@@ -2562,7 +2562,7 @@ as a Sedona geometry and is transformed to WGS84 (EPSG:4326) reference system.</
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code> |-- image: struct (nullable = true)
  |    |-- origin: string (nullable = true)
- |    |-- Geometry: geometry (nullable = true)
+ |    |-- Geometry: string (nullable = true)
  |    |-- height: integer (nullable = true)
  |    |-- width: integer (nullable = true)
  |    |-- nBands: integer (nullable = true)
@@ -2584,7 +2584,7 @@ as a Sedona geometry and is transformed to WGS84 (EPSG:4326) reference system.</
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code> |-- image: struct (nullable = true)
  |    |-- origin: string (nullable = true)
- |    |-- Geometry: geometry (nullable = true)
+ |    |-- Geometry: string (nullable = true)
  |    |-- height: integer (nullable = true)
  |    |-- width: integer (nullable = true)
  |    |-- nBands: integer (nullable = true)
@@ -2695,8 +2695,8 @@ optional: alphaBand: Array[Double])</code></p>
 
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-</div>
 <p>Although the 3 RGB bands are mandatory, you can use <a href="#rs_array">RS_Array(h*w, 0.0)</a> to create an array (zeroed out, size = h * w) as input.</p>
+</div>
 <h2 id="rs_getband">RS_GetBand<a class="headerlink" href="#rs_getband" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return a particular band from Geotiff Dataframe</p>
 <p>The number of total bands can be obtained from the GeoTiff loader</p>
@@ -2741,7 +2741,7 @@ optional: alphaBand: Array[Double])</code></p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">August 16, 2022 08:03:14</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 26, 2023 11:00:09</span>
       
     
   </small>

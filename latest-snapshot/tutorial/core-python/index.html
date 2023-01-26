@@ -3453,7 +3453,10 @@ Polygon,LineString
 
 <p>Each object on the left is covered/intersected by the object on the right.</p>
 <h2 id="write-a-distance-join-query">Write a Distance Join Query<a class="headerlink" href="#write-a-distance-join-query" title="Permanent link">&para;</a></h2>
-<p>!!!warning RDD distance joins are only reliable for points. For other geometry types, please use Spatial SQL.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>RDD distance joins are only reliable for points. For other geometry types, please use Spatial SQL.</p>
+</div>
 <p>A distance join query takes two spatial RDD assuming that we have two SpatialRDD's:
 <li> object_rdd </li>
 <li> spatial_rdd </li></p>
@@ -3685,7 +3688,7 @@ to Spatial DataFrame. </p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 26, 2023 10:29:25</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 26, 2023 11:00:09</span>
       
     
   </small>

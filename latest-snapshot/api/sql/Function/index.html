@@ -4297,8 +4297,8 @@ itself, if the geometry is collection or multi it returns record for each of col
 <p>Introduction: Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-</div>
 <p>Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If the MultiLineString can't be merged, the original MULTILINESTRING is returned.</p>
+</div>
 <p>Format: <code>ST_LineMerge (A:geometry)</code></p>
 <p>Since: <code>v1.0.0</code></p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_LineMerge</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span><span class="w"></span>
@@ -4361,10 +4361,9 @@ Default is keepCollapsed=false.</p>
 </code></pre></div></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
+<p>In Sedona up to and including version 1.2 the behaviour of ST_MakeValid was different.</p>
 </div>
-<p>In Sedona up to and including version 1.2 the behaviour of ST_MakeValid was different.
-Be sure to check you code when upgrading.
-The previous implementation only worked for (multi)polygons and had a different interpretation of the second, boolean, argument.
+<p>Be sure to check you code when upgrading. The previous implementation only worked for (multi)polygons and had a different interpretation of the second, boolean, argument.
 It would also sometimes return multiple geometries for a single geomtry input.</p>
 <h2 id="st_minimumboundingcircle">ST_MinimumBoundingCircle<a class="headerlink" href="#st_minimumboundingcircle" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns the smallest circle polygon that contains a geometry.</p>
@@ -4817,7 +4816,7 @@ For SourceCRS and TargetCRS, WKT format is also available since v1.3.1.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 26, 2023 10:29:25</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 26, 2023 11:00:09</span>
       
     
   </small>

@@ -3308,7 +3308,10 @@ Polygon,LineString
 
 <p>Each object on the left is covered/intersected by the object on the right.</p>
 <h2 id="write-a-distance-join-query">Write a Distance Join Query<a class="headerlink" href="#write-a-distance-join-query" title="Permanent link">&para;</a></h2>
-<p>!!!warning RDD distance joins are only reliable for points. For other geometry types, please use Spatial SQL.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>RDD distance joins are only reliable for points. For other geometry types, please use Spatial SQL.</p>
+</div>
 <p>A distance join query takes as input two Spatial RDD A and B and a distance. For each geometry in A, finds the geometries (from B) are within the given distance to it. A and B can be any geometry type and are not necessary to have the same geometry type. The unit of the distance is explained <a href="#transform-the-coordinate-reference-system">here</a>.</p>
 <p>Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue an Distance Join Query on them.</p>
 <div class="highlight"><pre><span></span><code><span class="n">objectRddA</span><span class="p">.</span><span class="n">analyze</span><span class="p">()</span><span class="w"></span>
@@ -3406,7 +3409,7 @@ Find the super heros within 10 miles of each city</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 26, 2023 10:29:25</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 26, 2023 11:00:09</span>
       
     
   </small>
