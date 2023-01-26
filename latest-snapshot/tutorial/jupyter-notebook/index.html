@@ -2420,14 +2420,14 @@
 
 
 <h1 id="python-jupyter-notebook-examples">Python Jupyter Notebook Examples<a class="headerlink" href="#python-jupyter-notebook-examples" title="Permanent link">&para;</a></h1>
-<p>Click <a href="https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder"><img alt="Binder" src="https://mybinder.org/badge_logo.svg" /></a> and play the interactive Sedona Python Jupyter Notebook immediately!</p>
-<p>Sedona Python provides a number of <a href="https://github.com/apache/incubator-sedona/blob/master/binder/">Jupyter Notebook examples</a>.</p>
+<p>Click <a href="https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder"><img alt="Binder" src="https://mybinder.org/badge_logo.svg" /></a> and play the interactive Sedona Python Jupyter Notebook immediately!</p>
+<p>Sedona Python provides a number of <a href="https://github.com/apache/sedona/blob/master/binder/">Jupyter Notebook examples</a>.</p>
 <p>Please use the following steps to run Jupyter notebook with Pipenv on your machine</p>
 <ol>
 <li>Clone Sedona GitHub repo or download the source code</li>
-<li>Install Sedona Python from PyPi or GitHub source: Read <a href="/setup/install-python/#install-sedona">Install Sedona Python</a> to learn.</li>
-<li>Prepare python-adapter jar: Read <a href="/setup/install-python/#prepare-python-adapter-jar">Install Sedona Python</a> to learn.</li>
-<li>Setup pipenv python version. For Spark 3.0, Sedona supports 3.7 - 3.9
+<li>Install Sedona Python from PyPi or GitHub source: Read <a href="../../setup/install-python/#install-sedona">Install Sedona Python</a> to learn.</li>
+<li>Prepare python-adapter jar: Read <a href="../../setup/install-python/#prepare-python-adapter-jar">Install Sedona Python</a> to learn.</li>
+<li>Setup pipenv python version. Please use your desired Python version.
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span> binder
 pipenv --python <span class="m">3</span>.8
 </code></pre></div></li>
@@ -2442,7 +2442,7 @@ pipenv shell
 <li>In the pipenv shell, do
 <div class="highlight"><pre><span></span><code>python -m ipykernel install --user --name<span class="o">=</span>apache-sedona
 </code></pre></div></li>
-<li>Setup environment variables <code>SPARK_HOME</code> and <code>PYTHONPATH</code> if you didn't do it before. Read <a href="/setup/install-python/#setup-environment-variables">Install Sedona Python</a> to learn.</li>
+<li>Setup environment variables <code>SPARK_HOME</code> and <code>PYTHONPATH</code> if you didn't do it before. Read <a href="../../setup/install-python/#setup-environment-variables">Install Sedona Python</a> to learn.</li>
 <li>Launch jupyter notebook: <code>jupyter notebook</code></li>
 <li>Select Sedona notebook. In your notebook, Kernel -&gt; Change Kernel. Your kernel should now be an option.</li>
 </ol>

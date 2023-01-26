@@ -2206,39 +2206,6 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  
-  <a href="#6-vote-in-general-incubatorapacheorg" class="md-nav__link">
-    6. Vote in general incubator.apache.org
-  </a>  
-  
-  
-    <nav class="md-nav" aria-label="6. Vote in general incubator.apache.org">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  
-  <a href="#vote-email_1" class="md-nav__link">
-    Vote email
-  </a>  
-  
-  
-</li>
-        
-          <li class="md-nav__item">
-  
-  <a href="#pass-email_1" class="md-nav__link">
-    Pass email
-  </a>  
-  
-  
-</li>
-        
           <li class="md-nav__item">
   
   <a href="#announce-email" class="md-nav__link">
@@ -2744,39 +2711,6 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  
-  <a href="#6-vote-in-general-incubatorapacheorg" class="md-nav__link">
-    6. Vote in general incubator.apache.org
-  </a>  
-  
-  
-    <nav class="md-nav" aria-label="6. Vote in general incubator.apache.org">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  
-  <a href="#vote-email_1" class="md-nav__link">
-    Vote email
-  </a>  
-  
-  
-</li>
-        
-          <li class="md-nav__item">
-  
-  <a href="#pass-email_1" class="md-nav__link">
-    Pass email
-  </a>  
-  
-  
-</li>
-        
           <li class="md-nav__item">
   
   <a href="#announce-email" class="md-nav__link">
@@ -2935,7 +2869,6 @@
 
 <h1 id="make-a-sedona-release">Make a Sedona release<a class="headerlink" href="#make-a-sedona-release" title="Permanent link">&para;</a></h1>
 <p>This page is for Sedona PPMC to publish Sedona releases.</p>
-<p>You can read ASF guidelines: 1. ASF Incubator Distribution Guidelines: <a href="https://incubator.apache.org/guides/distribution.html">https://incubator.apache.org/guides/distribution.html</a> 2. ASF Release Guidelines: <a href="https://infra.apache.org/release-publishing.html">https://infra.apache.org/release-publishing.html</a> 3. ASF Incubator Release Votes Guidelines: <a href="https://issues.apache.org/jira/browse/LEGAL-469">https://issues.apache.org/jira/browse/LEGAL-469</a></p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>All scripts on this page should be run in your local Sedona Git repo under master branch via a single script file.</p>
@@ -2957,7 +2890,7 @@ chmod <span class="m">777</span> create-release.sh
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 wget -q https://dlcdn.apache.org//creadur/apache-rat-<span class="nv">$RAT_VERSION</span>/apache-rat-0.15-bin.tar.gz
 tar -xvf  apache-rat-0.15-bin.tar.gz
-git clone --shared --branch master https://github.com/apache/incubator-sedona.git sedona-src
+git clone --shared --branch master https://github.com/apache/sedona.git sedona-src
 java -jar apache-rat-0.15.jar -d sedona-src &gt; report.txt
 </code></pre></div></li>
 <li>Read the generated report.txt file and make sure all source code files have ASF header.</li>
@@ -2968,11 +2901,11 @@ rm report.txt
 </code></pre></div></li>
 </ol>
 <h2 id="2-update-sedona-python-r-and-zeppelin-versions">2. Update Sedona Python, R and Zeppelin versions<a class="headerlink" href="#2-update-sedona-python-r-and-zeppelin-versions" title="Permanent link">&para;</a></h2>
-<p>Make sure the Sedona version in the following files are 1.4.0. Note that: Python and R versions cannot have "incubating" postfix.</p>
+<p>Make sure the Sedona version in the following files are 1.4.0. </p>
 <ol>
-<li><a href="https://github.com/apache/incubator-sedona/blob/master/python/sedona/version.py">https://github.com/apache/incubator-sedona/blob/master/python/sedona/version.py</a></li>
-<li><a href="https://github.com/apache/incubator-sedona/blob/master/R/DESCRIPTION">https://github.com/apache/incubator-sedona/blob/master/R/DESCRIPTION</a></li>
-<li><a href="https://github.com/apache/incubator-sedona/blob/master/zeppelin/package.json">https://github.com/apache/incubator-sedona/blob/master/zeppelin/package.json</a></li>
+<li><a href="https://github.com/apache/sedona/blob/master/python/sedona/version.py">https://github.com/apache/sedona/blob/master/python/sedona/version.py</a></li>
+<li><a href="https://github.com/apache/sedona/blob/master/R/DESCRIPTION">https://github.com/apache/sedona/blob/master/R/DESCRIPTION</a></li>
+<li><a href="https://github.com/apache/sedona/blob/master/zeppelin/package.json">https://github.com/apache/sedona/blob/master/zeppelin/package.json</a></li>
 </ol>
 <h2 id="3-update-mkdocsyml">3. Update mkdocs.yml<a class="headerlink" href="#3-update-mkdocsyml" title="Permanent link">&para;</a></h2>
 <ul>
@@ -3009,28 +2942,28 @@ rm -f pom.xml.*
 <span class="nb">echo</span> <span class="s2">&quot;*****Step 2: Upload the Release Candidate to https://repository.apache.org.&quot;</span>
 
 <span class="c1"># For Spark 3.0 and Scala 2.12</span>
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/incubator-sedona.git -Dtag<span class="o">=</span>sedona-1.4.0-rc1 -DautoVersionSubmodules<span class="o">=</span><span class="nb">true</span> -Dresume<span class="o">=</span><span class="nb">false</span> -Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dscala=2.12&quot;</span>
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git -Dtag<span class="o">=</span>sedona-1.4.0-rc1 -DautoVersionSubmodules<span class="o">=</span><span class="nb">true</span> -Dresume<span class="o">=</span><span class="nb">false</span> -Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dscala=2.12&quot;</span>
 
 <span class="c1"># For Spark 3.0 and Scala 2.13</span>
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/incubator-sedona.git -Dtag<span class="o">=</span>sedona-1.4.0-rc1 -DautoVersionSubmodules<span class="o">=</span><span class="nb">true</span> -Dresume<span class="o">=</span><span class="nb">false</span> -Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dscala=2.13&quot;</span>
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git -Dtag<span class="o">=</span>sedona-1.4.0-rc1 -DautoVersionSubmodules<span class="o">=</span><span class="nb">true</span> -Dresume<span class="o">=</span><span class="nb">false</span> -Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dscala=2.13&quot;</span>
 
-<span class="nb">echo</span> <span class="s2">&quot;*****Step 3: Upload Release Candidate on ASF SVN: https://dist.apache.org/repos/dist/dev/incubator/sedona&quot;</span>
+<span class="nb">echo</span> <span class="s2">&quot;*****Step 3: Upload Release Candidate on ASF SVN: https://dist.apache.org/repos/dist/dev/sedona&quot;</span>
 
 <span class="nb">echo</span> <span class="s2">&quot;Creating 1.4.0-rc1 folder on SVN...&quot;</span>
 
-svn mkdir -m <span class="s2">&quot;Adding folder&quot;</span> https://dist.apache.org/repos/dist/dev/incubator/sedona/1.4.0-rc1
+svn mkdir -m <span class="s2">&quot;Adding folder&quot;</span> https://dist.apache.org/repos/dist/dev/sedona/1.4.0-rc1
 
 <span class="nb">echo</span> <span class="s2">&quot;Creating release files locally...&quot;</span>
 
 <span class="nb">echo</span> <span class="s2">&quot;Downloading source code...&quot;</span>
 
-wget https://github.com/apache/incubator-sedona/archive/refs/tags/sedona-1.4.0-rc1.tar.gz
+wget https://github.com/apache/sedona/archive/refs/tags/sedona-1.4.0-rc1.tar.gz
 tar -xvf sedona-1.4.0-rc1.tar.gz
 mkdir apache-sedona-1.4.0-src
-cp -r incubator-sedona-sedona-1.4.0-rc1/* apache-sedona-1.4.0-src/
+cp -r sedona-sedona-1.4.0-rc1/* apache-sedona-1.4.0-src/
 tar czf apache-sedona-1.4.0-src.tar.gz apache-sedona-1.4.0-src
 rm sedona-1.4.0-rc1.tar.gz
-rm -rf incubator-sedona-sedona-1.4.0-rc1
+rm -rf sedona-sedona-1.4.0-rc1
 
 <span class="nb">echo</span> <span class="s2">&quot;Compiling the source code...&quot;</span>
 
@@ -3058,12 +2991,12 @@ gpg -ab apache-sedona-1.4.0-bin.tar.gz
 
 <span class="nb">echo</span> <span class="s2">&quot;Uploading local release files...&quot;</span>
 
-svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-src.tar.gz https://dist.apache.org/repos/dist/dev/incubator/sedona/1.4.0-rc1/apache-sedona-1.4.0-src.tar.gz
-svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-src.tar.gz.asc https://dist.apache.org/repos/dist/dev/incubator/sedona/1.4.0-rc1/apache-sedona-1.4.0-src.tar.gz.asc
-svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-src.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/incubator/sedona/1.4.0-rc1/apache-sedona-1.4.0-src.tar.gz.sha512
-svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-bin.tar.gz https://dist.apache.org/repos/dist/dev/incubator/sedona/1.4.0-rc1/apache-sedona-1.4.0-bin.tar.gz
-svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-bin.tar.gz.asc https://dist.apache.org/repos/dist/dev/incubator/sedona/1.4.0-rc1/apache-sedona-1.4.0-bin.tar.gz.asc
-svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-bin.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/incubator/sedona/1.4.0-rc1/apache-sedona-1.4.0-bin.tar.gz.sha512
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-src.tar.gz https://dist.apache.org/repos/dist/dev/sedona/1.4.0-rc1/apache-sedona-1.4.0-src.tar.gz
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-src.tar.gz.asc https://dist.apache.org/repos/dist/dev/sedona/1.4.0-rc1/apache-sedona-1.4.0-src.tar.gz.asc
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-src.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/sedona/1.4.0-rc1/apache-sedona-1.4.0-src.tar.gz.sha512
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-bin.tar.gz https://dist.apache.org/repos/dist/dev/sedona/1.4.0-rc1/apache-sedona-1.4.0-bin.tar.gz
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-bin.tar.gz.asc https://dist.apache.org/repos/dist/dev/sedona/1.4.0-rc1/apache-sedona-1.4.0-bin.tar.gz.asc
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-bin.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/sedona/1.4.0-rc1/apache-sedona-1.4.0-bin.tar.gz.sha512
 
 <span class="nb">echo</span> <span class="s2">&quot;Removing local release files...&quot;</span>
 
@@ -3087,19 +3020,19 @@ Hi all,
 This is a call for vote on Apache Sedona 1.4.0-rc1. Please refer to the changes listed at the bottom of this email.
 
 Release notes:
-https://github.com/apache/incubator-sedona/blob/sedona-1.4.0-rc1/docs/setup/release-notes.md
+https://github.com/apache/sedona/blob/sedona-1.4.0-rc1/docs/setup/release-notes.md
 
 Build instructions:
-https://github.com/apache/incubator-sedona/blob/sedona-1.4.0-rc1/docs/setup/compile.md
+https://github.com/apache/sedona/blob/sedona-1.4.0-rc1/docs/setup/compile.md
 
 GitHub tag:
-https://github.com/apache/incubator-sedona/releases/tag/sedona-1.4.0-rc1
+https://github.com/apache/sedona/releases/tag/sedona-1.4.0-rc1
 
 GPG public key to verify the Release:
-https://downloads.apache.org/incubator/sedona/KEYS
+https://downloads.apache.org/sedona/KEYS
 
 Source code and binaries:
-https://dist.apache.org/repos/dist/dev/incubator/sedona/1.4.0-rc1/
+https://dist.apache.org/repos/dist/dev/sedona/1.4.0-rc1/
 
 The vote will be open for at least 72 hours or until at least 3 &quot;+1&quot; PMC votes are cast
 
@@ -3149,101 +3082,22 @@ No -1 votes
 
 The vote thread (Permalink from https://lists.apache.org/list.html):
 
-I will now bring the vote to general@incubator.apache.org to get
-approval by the IPMC. If this vote passes too, the release is accepted and will be published.
-</code></pre></div>
-
-<h2 id="6-vote-in-general-incubatorapacheorg">6. Vote in general incubator.apache.org<a class="headerlink" href="#6-vote-in-general-incubatorapacheorg" title="Permanent link">&para;</a></h2>
-<h3 id="vote-email_1">Vote email<a class="headerlink" href="#vote-email_1" title="Permanent link">&para;</a></h3>
-<ol>
-<li>Please add the permalink of Sedona Community vote thread</li>
-<li>Please add the permalink of Sedona Community vote result thread</li>
-<li>Please add changes at the end if needed.</li>
-</ol>
-<div class="highlight"><pre><span></span><code>Subject: [VOTE] Release Apache Sedona 1.4.0-rc1
-
-Hi all,
-
-This is a call for vote on Apache Sedona 1.4.0-rc1. Please refer to the changes listed at the bottom of this email.
-
-Sedona Community vote thread (Permalink from https://lists.apache.org/list.html):
-
-Sedona community vote result thread (Permalink from https://lists.apache.org/list.html):
-
-Release notes:
-https://github.com/apache/incubator-sedona/blob/sedona-1.4.0-rc1/docs/setup/release-notes.md
-
-Build instructions:
-https://github.com/apache/incubator-sedona/blob/sedona-1.4.0-rc1/docs/setup/compile.md
-
-GitHub tag:
-https://github.com/apache/incubator-sedona/releases/tag/sedona-1.4.0-rc1
-
-GPG public key to verify the Release:
-https://downloads.apache.org/incubator/sedona/KEYS
-
-Source code and binaries:
-https://dist.apache.org/repos/dist/dev/incubator/sedona/1.4.0-rc1/
-
-The vote will be open for at least 72 hours or until at least 3 &quot;+1&quot; PMC votes are cast
-
-Please vote accordingly:
-
-[ ] +1 approve
-
-[ ] +0 no opinion
-
-[ ] -1 disapprove with the reason
-
-Checklist for reference (because of DISCLAIMER-WIP, other checklist items are not blockers):
-
-[ ] Download links are valid.
-
-[ ] Checksums and PGP signatures are valid.
-
-[ ] DISCLAIMER is included.
-
-[ ] Source code artifacts have correct names matching the current release.
-
-For a detailed checklist  please refer to:
-https://cwiki.apache.org/confluence/display/INCUBATOR/Incubator+Release+Checklist
-
-------------
-
-Changes according to the comments on the previous release
-Original comment (Permalink from https://lists.apache.org/list.html): 
-</code></pre></div>
-
-<h3 id="pass-email_1">Pass email<a class="headerlink" href="#pass-email_1" title="Permanent link">&para;</a></h3>
-<p>Please count the votes and add the permalink of the vote thread.</p>
-<div class="highlight"><pre><span></span><code>Subject: [RESULT][VOTE] Release Apache Sedona 1.4.0-rc1
-
-Dear all,
-
-The vote closes now as 72hr have passed. The vote PASSES with
-
-+? (binding): NAME1, NAME2, NAME3
-+? (non-binding): NAME4
-No -1 votes
-
-The vote thread (Permalink from https://lists.apache.org/list.html):
-
-I will publish the release and make an annoucement once it is done.
+I will make an annoucement soon.
 </code></pre></div>
 
 <h3 id="announce-email">Announce email<a class="headerlink" href="#announce-email" title="Permanent link">&para;</a></h3>
 <ol>
-<li>This email should be CCed to <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#100;&#101;&#118;&#64;&#115;&#101;&#100;&#111;&#110;&#97;&#46;&#97;&#112;&#97;&#99;&#104;&#101;&#46;&#111;&#114;&#103;">&#100;&#101;&#118;&#64;&#115;&#101;&#100;&#111;&#110;&#97;&#46;&#97;&#112;&#97;&#99;&#104;&#101;&#46;&#111;&#114;&#103;</a></li>
-<li>Please add the permalink of the incubator vote thread</li>
-<li>Please add the permalink of the incubator vote result thread</li>
+<li>This email should be sent to <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#100;&#101;&#118;&#64;&#115;&#101;&#100;&#111;&#110;&#97;&#46;&#97;&#112;&#97;&#99;&#104;&#101;&#46;&#111;&#114;&#103;">&#100;&#101;&#118;&#64;&#115;&#101;&#100;&#111;&#110;&#97;&#46;&#97;&#112;&#97;&#99;&#104;&#101;&#46;&#111;&#114;&#103;</a></li>
+<li>Please add the permalink of the vote thread</li>
+<li>Please add the permalink of the vote result thread</li>
 </ol>
 <div class="highlight"><pre><span></span><code>Subject: [ANNOUNCE] Apache Sedona 1.4.0 released
 
 Dear all,
 
-We are happy to report that we have released Apache Sedona (incubating) 1.4.0. Thank you again for your help.
+We are happy to report that we have released Apache Sedona 1.4.0. Thank you again for your help.
 
-Apache Sedona (incubating) is a cluster computing system for processing large-scale spatial data. 
+Apache Sedona is a cluster computing system for processing large-scale spatial data. 
 
 
 Vote thread (Permalink from https://lists.apache.org/list.html):
@@ -3256,20 +3110,18 @@ Website:
 http://sedona.apache.org/
 
 Release notes:
-https://github.com/apache/incubator-sedona/blob/sedona-1.4.0/docs/setup/release-notes.md
+https://github.com/apache/sedona/blob/sedona-1.4.0/docs/setup/release-notes.md
 
 Download links:
-https://github.com/apache/incubator-sedona/releases/tag/sedona-1.4.0
+https://github.com/apache/sedona/releases/tag/sedona-1.4.0
 
 Additional resources:
-Get started: http://sedona.apache.org/setup/overview/
-Tutorials: http://sedona.apache.org/tutorial/rdd/
 Mailing list: dev@sedona.apache.org
 Twitter: https://twitter.com/ApacheSedona
 Gitter: https://gitter.im/apache/sedona
 
 Regards,
-Apache Sedona (incubating) Team
+Apache Sedona Team
 </code></pre></div>
 
 <h2 id="7-failed-vote">7. Failed vote<a class="headerlink" href="#7-failed-vote" title="Permanent link">&para;</a></h2>
@@ -3282,20 +3134,20 @@ Apache Sedona (incubating) Team
 <h3 id="upload-releases">Upload releases<a class="headerlink" href="#upload-releases" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 
-<span class="nb">echo</span> <span class="s2">&quot;Move all files in https://dist.apache.org/repos/dist/dev/incubator/sedona to https://dist.apache.org/repos/dist/release/incubator/sedona, using svn&quot;</span>
-svn mkdir -m <span class="s2">&quot;Adding folder&quot;</span> https://dist.apache.org/repos/dist/release/incubator/sedona/1.4.0
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/1.4.0-rc1/apache-sedona-1.4.0-src.tar.gz
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/1.4.0-rc1/apache-sedona-1.4.0-src.tar.gz.asc
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/1.4.0-rc1/apache-sedona-1.4.0-src.tar.gz.sha512
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/1.4.0-rc1/apache-sedona-1.4.0-bin.tar.gz
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/1.4.0-rc1/apache-sedona-1.4.0-bin.tar.gz.asc
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/1.4.0-rc1/apache-sedona-1.4.0-bin.tar.gz.sha512
-svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-src.tar.gz https://dist.apache.org/repos/dist/release/incubator/sedona/1.4.0/apache-sedona-1.4.0-src.tar.gz
-svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-src.tar.gz.asc https://dist.apache.org/repos/dist/release/incubator/sedona/1.4.0/apache-sedona-1.4.0-src.tar.gz.asc
-svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-src.tar.gz.sha512 https://dist.apache.org/repos/dist/release/incubator/sedona/1.4.0/apache-sedona-1.4.0-src.tar.gz.sha512
-svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-bin.tar.gz https://dist.apache.org/repos/dist/release/incubator/sedona/1.4.0/apache-sedona-1.4.0-bin.tar.gz
-svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-bin.tar.gz.asc https://dist.apache.org/repos/dist/release/incubator/sedona/1.4.0/apache-sedona-1.4.0-bin.tar.gz.asc
-svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-bin.tar.gz.sha512 https://dist.apache.org/repos/dist/release/incubator/sedona/1.4.0/apache-sedona-1.4.0-bin.tar.gz.sha512
+<span class="nb">echo</span> <span class="s2">&quot;Move all files in https://dist.apache.org/repos/dist/dev/sedona to https://dist.apache.org/repos/dist/release/sedona, using svn&quot;</span>
+svn mkdir -m <span class="s2">&quot;Adding folder&quot;</span> https://dist.apache.org/repos/dist/release/sedona/1.4.0
+wget https://dist.apache.org/repos/dist/dev/sedona/1.4.0-rc1/apache-sedona-1.4.0-src.tar.gz
+wget https://dist.apache.org/repos/dist/dev/sedona/1.4.0-rc1/apache-sedona-1.4.0-src.tar.gz.asc
+wget https://dist.apache.org/repos/dist/dev/sedona/1.4.0-rc1/apache-sedona-1.4.0-src.tar.gz.sha512
+wget https://dist.apache.org/repos/dist/dev/sedona/1.4.0-rc1/apache-sedona-1.4.0-bin.tar.gz
+wget https://dist.apache.org/repos/dist/dev/sedona/1.4.0-rc1/apache-sedona-1.4.0-bin.tar.gz.asc
+wget https://dist.apache.org/repos/dist/dev/sedona/1.4.0-rc1/apache-sedona-1.4.0-bin.tar.gz.sha512
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-src.tar.gz https://dist.apache.org/repos/dist/release/sedona/1.4.0/apache-sedona-1.4.0-src.tar.gz
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-src.tar.gz.asc https://dist.apache.org/repos/dist/release/sedona/1.4.0/apache-sedona-1.4.0-src.tar.gz.asc
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-src.tar.gz.sha512 https://dist.apache.org/repos/dist/release/sedona/1.4.0/apache-sedona-1.4.0-src.tar.gz.sha512
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-bin.tar.gz https://dist.apache.org/repos/dist/release/sedona/1.4.0/apache-sedona-1.4.0-bin.tar.gz
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-bin.tar.gz.asc https://dist.apache.org/repos/dist/release/sedona/1.4.0/apache-sedona-1.4.0-bin.tar.gz.asc
+svn import -m <span class="s2">&quot;Adding file&quot;</span> apache-sedona-1.4.0-bin.tar.gz.sha512 https://dist.apache.org/repos/dist/release/sedona/1.4.0/apache-sedona-1.4.0-bin.tar.gz.sha512
 rm apache-sedona-1.4.0-src.tar.gz
 rm apache-sedona-1.4.0-src.tar.gz.asc
 rm apache-sedona-1.4.0-src.tar.gz.sha512
@@ -3398,12 +3250,12 @@ rm *.asc
 <p>You must have the maintainer priviledge of <code>https://pypi.org/project/apache-sedona/</code> and <code>https://www.npmjs.com/package/apache-sedona</code></p>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 
-wget https://github.com/apache/incubator-sedona/archive/refs/tags/sedona-1.4.0-rc1.tar.gz
+wget https://github.com/apache/sedona/archive/refs/tags/sedona-1.4.0-rc1.tar.gz
 tar -xvf sedona-1.4.0-rc1.tar.gz
 mkdir apache-sedona-1.4.0-src
-cp -r incubator-sedona-sedona-1.4.0-rc1/* apache-sedona-1.4.0-src/
+cp -r sedona-sedona-1.4.0-rc1/* apache-sedona-1.4.0-src/
 
-rm -rf incubator-sedona-sedona-1.4.0-rc1
+rm -rf sedona-sedona-1.4.0-rc1
 
 <span class="nb">cd</span> apache-sedona-1.4.0-src/python <span class="o">&amp;&amp;</span> python3 setup.py sdist bdist_wheel <span class="o">&amp;&amp;</span> twine upload dist/* <span class="o">&amp;&amp;</span> <span class="nb">cd</span> ..
 <span class="nb">cd</span> zeppelin <span class="o">&amp;&amp;</span> npm publish <span class="o">&amp;&amp;</span> <span class="nb">cd</span> ..
@@ -3421,8 +3273,8 @@ R CMD check --as-cran apache.sedona_*.tar.gz
 <h3 id="prepare-the-environment-and-doc-folder">Prepare the environment and doc folder<a class="headerlink" href="#prepare-the-environment-and-doc-folder" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Check out the 1.4.0 Git tag on your local repo.</li>
-<li>Read <a href="/setup/compile/#compile-the-documentation">Compile documentation website</a> to set up your environment. But don't deploy anything yet.</li>
-<li>Add the download link to <a href="/download#versions">Download page</a>.</li>
+<li>Read <a href="../../setup/compile/#compile-the-documentation">Compile documentation website</a> to set up your environment. But don't deploy anything yet.</li>
+<li>Add the download link to <a href="../../download">Download page</a>.</li>
 <li>Add the news to <code>docs/index.md</code>.</li>
 </ol>
 <h3 id="generate-javadoc-and-scaladoc">Generate Javadoc and Scaladoc<a class="headerlink" href="#generate-javadoc-and-scaladoc" title="Permanent link">&para;</a></h3>
@@ -3448,7 +3300,7 @@ Rscript generate-docs.R
 <li>Check out the master branch.</li>
 <li>Git commit and push your changes in <code>download.md</code> and <code>index.md</code> to master branch. Delete all generated docs.</li>
 <li>Check out the <code>gh-page</code> branch.</li>
-<li>In a separate folder, check out GitHub sedona-website <a href="https://github.com/apache/incubator-sedona-website/tree/asf-site">asf-site branch</a></li>
+<li>In a separate folder, check out GitHub sedona-website <a href="https://github.com/apache/sedona-website/tree/asf-site">asf-site branch</a></li>
 <li>Copy all content to in Sedona main repo <code>gh-page</code> branch to Sedona website repo <code>asf-site</code> branch.</li>
 <li>Commit and push the changes to the remote <code>asf-site</code> branch.</li>
 </ol>

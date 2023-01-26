@@ -2675,12 +2675,12 @@
 <p>We recommend Intellij IDEA with Scala plugin installed.</p>
 <h3 id="import-the-project">Import the project<a class="headerlink" href="#import-the-project" title="Permanent link">&para;</a></h3>
 <h4>Choose <code>Open</code></h4>
-<p><img src="/image/ide-java-1.png"/></p>
+<p><img src="../../image/ide-java-1.png"/></p>
 <h4>Go to the Sedona root folder (not a submodule folder) and choose <code>open</code></h4>
-<p><img src="/image/ide-java-2.png" style="width:500px;"/></p>
+<p><img src="../../image/ide-java-2.png" style="width:500px;"/></p>
 <h4>The IDE might show errors</h4>
 <p>The IDE usually has trouble understanding the complex project structure in Sedona. </p>
-<p><img src="/image/ide-java-4.png"/></p>
+<p><img src="../../image/ide-java-4.png"/></p>
 <h4>Fix errors by changing POM.xml</h4>
 <p>You need to comment out the following lines in <code>pom.xml</code> at the root folder, as follows. <mark>Remember that you should NOT submit this change to Sedona.</mark></p>
 <div class="highlight"><pre><span></span><code><span class="cm">&lt;!--    &lt;parent&gt;--&gt;</span>
@@ -2693,24 +2693,24 @@
 
 <h4>Reload POM.xml</h4>
 <p>Make sure you reload the POM.xml or reload the maven project. The IDE will ask you to remove some modules. Please select <code>yes</code>.</p>
-<p><img src="/image/ide-java-5.png"/></p>
+<p><img src="../../image/ide-java-5.png"/></p>
 <h4>The final project structure should be like this:</h4>
-<p><img src="/image/ide-java-3.png" style="width:400px;"/></p>
+<p><img src="../../image/ide-java-3.png" style="width:400px;"/></p>
 <h3 id="run-unit-tests">Run unit tests<a class="headerlink" href="#run-unit-tests" title="Permanent link">&para;</a></h3>
 <h4>Run all unit tests</h4>
 <p>In a terminal, go to the Sedona root folder. Run <code>mvn clean install</code>. All tests will take more than 15 minutes. To only build the project jars, run <code>mvn clean install -DskipTests</code>.</p>
-<p>More details can be found on <a href="/setup/compile/">Compile Sedona</a></p>
+<p>More details can be found on <a href="../../setup/compile/">Compile Sedona</a></p>
 <h4>Run a single unit test</h4>
 <p>In the IDE, right-click a test case and run this test case.</p>
-<p><img src="/image/ide-java-6.png" style="width:400px;"/></p>
+<p><img src="../../image/ide-java-6.png" style="width:400px;"/></p>
 <p>The IDE might tell you that the PATH does not exist as follows:</p>
-<p><img src="/image/ide-java-7.png" style="width:600px;"/></p>
+<p><img src="../../image/ide-java-7.png" style="width:600px;"/></p>
 <p>Go to <code>Edit Configuration</code></p>
-<p><img src="/image/ide-java-8.png"/></p>
+<p><img src="../../image/ide-java-8.png"/></p>
 <p>Append the submodule folder to <code>Working Directory</code>. For example, <code>incubator-sedona/sql</code>.</p>
-<p><img src="/image/ide-java-9.png"/></p>
+<p><img src="../../image/ide-java-9.png"/></p>
 <p>Re-run the test case. Do NOT right click the test case to re-run. Instead, click the button as shown in the figure below.</p>
-<p><img src="/image/ide-java-10.png"/></p>
+<p><img src="../../image/ide-java-10.png"/></p>
 <h2 id="python-developers">Python developers<a class="headerlink" href="#python-developers" title="Permanent link">&para;</a></h2>
 <p>More details to come.</p>
 <h3 id="ide_1">IDE<a class="headerlink" href="#ide_1" title="Permanent link">&para;</a></h3>

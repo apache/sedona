@@ -2635,12 +2635,12 @@ JAVA_HOME=&quot;${JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}&quot; exec &quot;
 </ol>
 <h3 id="3-use-svn-to-update-keys">3. Use SVN to update KEYS<a class="headerlink" href="#3-use-svn-to-update-keys" title="Permanent link">&para;</a></h3>
 <p>Use SVN to append your armored PGP public key to the <code>KEYS</code> files
-     * <a href="https://dist.apache.org/repos/dist/dev/incubator/sedona/KEYS">https://dist.apache.org/repos/dist/dev/incubator/sedona/KEYS</a>
-     * <a href="https://dist.apache.org/repos/dist/release/incubator/sedona/KEYS">https://dist.apache.org/repos/dist/release/incubator/sedona/KEYS</a></p>
+     * <a href="https://dist.apache.org/repos/dist/dev/sedona/KEYS">https://dist.apache.org/repos/dist/dev/sedona/KEYS</a>
+     * <a href="https://dist.apache.org/repos/dist/release/sedona/KEYS">https://dist.apache.org/repos/dist/release/sedona/KEYS</a></p>
 <ol>
 <li>Check out both KEYS files
-<div class="highlight"><pre><span></span><code>svn checkout https://dist.apache.org/repos/dist/dev/incubator/sedona/ sedona-dev --depth files
-svn checkout https://dist.apache.org/repos/dist/release/incubator/sedona/ sedona-release --depth files
+<div class="highlight"><pre><span></span><code>svn checkout https://dist.apache.org/repos/dist/dev/sedona/ sedona-dev --depth files
+svn checkout https://dist.apache.org/repos/dist/release/sedona/ sedona-release --depth files
 </code></pre></div></li>
 <li>Use your favorite text editor to open <code>sedona-dev/KEYS</code> and <code>sedona-release/KEYS</code>.</li>
 <li>Paste your armored key to the end of both files. Note: There must be an empty line between <code>-----BEGIN PGP PUBLIC KEY BLOCK-----</code> and the actual key.</li>
