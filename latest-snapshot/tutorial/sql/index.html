@@ -2848,7 +2848,7 @@
 </ol>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>To enjoy the full functions of Sedona, we suggest you include <mark>the full dependencies</mark>: <a href="https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11">Apache Spark core</a>, <a href="https://mvnrepository.com/artifact/org.apache.spark/spark-sql">Apache SparkSQL</a>, Sedona-core, Sedona-SQL, Sedona-Viz. Please see <a href="/tutorial/demo/">SQL example project</a></p>
+<p>To enjoy the full functions of Sedona, we suggest you include <mark>the full dependencies</mark>: <a href="https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11">Apache Spark core</a>, <a href="https://mvnrepository.com/artifact/org.apache.spark/spark-sql">Apache SparkSQL</a>, Sedona-core, Sedona-SQL, Sedona-Viz. Please see <a href="../demo/">SQL example project</a></p>
 </div>
 <h2 id="initiate-sparksession">Initiate SparkSession<a class="headerlink" href="#initiate-sparksession" title="Permanent link">&para;</a></h2>
 <p>Use the following code to initiate your SparkSession at the beginning:
@@ -2971,7 +2971,7 @@ The output will be as follows:</p>
 
 <p>The first EPSG code EPSG:4326 in <code>ST_Transform</code> is the source CRS of the geometries. It is WGS84, the most common degree-based CRS.</p>
 <p>The second EPSG code EPSG:3857 in <code>ST_Transform</code> is the target CRS of the geometries. It is the most common meter-based CRS.</p>
-<p>This <code>ST_Transform</code> transform the CRS of these geomtries from EPSG:4326 to EPSG:3857. The details CRS information can be found on <a href="https://epsg.io/.">EPSG.io</a></p>
+<p>This <code>ST_Transform</code> transform the CRS of these geomtries from EPSG:4326 to EPSG:3857. The details CRS information can be found on <a href="https://epsg.io/">EPSG.io</a></p>
 <p>The coordinates of polygons have been changed. The output will be like this:</p>
 <div class="highlight"><pre><span></span><code>+--------------------+---+---+--------+-----+-----------+--------------------+---+
 |      newcountyshape|_c1|_c2|     _c3|  _c4|        _c5|                 _c6|_c7|
@@ -3039,7 +3039,7 @@ The output will be as follows:</p>
 
 <h2 id="convert-between-dataframe-and-spatialrdd">Convert between DataFrame and SpatialRDD<a class="headerlink" href="#convert-between-dataframe-and-spatialrdd" title="Permanent link">&para;</a></h2>
 <h3 id="dataframe-to-spatialrdd">DataFrame to SpatialRDD<a class="headerlink" href="#dataframe-to-spatialrdd" title="Permanent link">&para;</a></h3>
-<p>Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read <a href="/api/javadoc/sql/org/apache/sedona/sql/utils/index.html">Adapter Scaladoc</a></p>
+<p>Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read <a href="../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html">Adapter Scaladoc</a></p>
 <div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">spatialRDD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Adapter</span><span class="p">.</span><span class="n">toSpatialRdd</span><span class="p">(</span><span class="n">spatialDf</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;usacounty&quot;</span><span class="p">)</span><span class="w"></span>
 </code></pre></div>
 
@@ -3049,15 +3049,14 @@ The output will be as follows:</p>
 <p>Only one Geometry type column is allowed per DataFrame.</p>
 </div>
 <h3 id="spatialrdd-to-dataframe">SpatialRDD to DataFrame<a class="headerlink" href="#spatialrdd-to-dataframe" title="Permanent link">&para;</a></h3>
-<p>Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read <a href="/api/javadoc/sql/org/apache/sedona/sql/utils/index.html">Adapter Scaladoc</a></p>
+<p>Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read <a href="../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html">Adapter Scaladoc</a></p>
 <div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">spatialDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Adapter</span><span class="p">.</span><span class="n">toDf</span><span class="p">(</span><span class="n">spatialRDD</span><span class="p">,</span><span class="w"> </span><span class="n">sparkSession</span><span class="p">)</span><span class="w"></span>
 </code></pre></div>
 
 <p>All other attributes such as price and age will be also brought to the DataFrame as long as you specify <mark>carryOtherAttributes</mark> (see <a href="../rdd#read-other-attributes-in-an-spatialrdd">Read other attributes in an SpatialRDD</a>).</p>
 <p>You may also manually specify a schema for the resulting DataFrame in case you require different column names or data
 types. Note that string schemas and not all data types are supported&mdash;please check the
-<a href="/api/javadoc/sql/org/apache/sedona/sql/utils/index.html">Adapter Scaladoc</a> and
-<a href="/sql/src/main/scala/org/apache/sedona/sql/utils/Adapter.scala">source code</a> to confirm what is supported for your use
+<a href="../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html">Adapter Scaladoc</a> to confirm what is supported for your use
 case. At least one column for the user data must be provided.</p>
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">schema</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">StructType</span><span class="p">(</span><span class="nc">Array</span><span class="p">(</span><span class="w"></span>
 <span class="w">  </span><span class="nc">StructField</span><span class="p">(</span><span class="s">&quot;county&quot;</span><span class="p">,</span><span class="w"> </span><span class="nc">GeometryUDT</span><span class="p">,</span><span class="w"> </span><span class="n">nullable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">),</span><span class="w"></span>
@@ -3081,8 +3080,7 @@ case. At least one column for the user data must be provided.</p>
 <p>All other attributes such as price and age will be also brought to the DataFrame as long as you specify <mark>carryOtherAttributes</mark> (see <a href="../rdd#read-other-attributes-in-an-spatialrdd">Read other attributes in an SpatialRDD</a>).</p>
 <p>You may also manually specify a schema for the resulting DataFrame in case you require different column names or data
 types. Note that string schemas and not all data types are supported&mdash;please check the
-<a href="/api/javadoc/sql/org/apache/sedona/sql/utils/index.html">Adapter Scaladoc</a> and
-<a href="/sql/src/main/scala/org/apache/sedona/sql/utils/Adapter.scala">source code</a> to confirm what is supported for your use
+<a href="../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html">Adapter Scaladoc</a> to confirm what is supported for your use
 case. Columns for the left and right user data must be provided.</p>
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">schema</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">StructType</span><span class="p">(</span><span class="nc">Array</span><span class="p">(</span><span class="w"></span>
 <span class="w">  </span><span class="nc">StructField</span><span class="p">(</span><span class="s">&quot;leftGeometry&quot;</span><span class="p">,</span><span class="w"> </span><span class="nc">GeometryUDT</span><span class="p">,</span><span class="w"> </span><span class="n">nullable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">),</span><span class="w"></span>
