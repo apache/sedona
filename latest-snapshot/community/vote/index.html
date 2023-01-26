@@ -2334,20 +2334,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../asf/disclaimer/" class="md-nav__link">
-        Disclaimer
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="https://www.apache.org/licenses/" target="_blank" class="md-nav__link">
         License
       </a>
@@ -2545,13 +2531,13 @@ chmod <span class="m">777</span> verify.sh
 <span class="nv">SEDONA_CURRENT_VERSION</span><span class="o">=</span><span class="m">1</span>.4.0
 
 <span class="c1">## Download a Sedona release</span>
-wget -q https://downloads.apache.org/incubator/sedona/KEYS
-wget -q https://dist.apache.org/repos/dist/dev/incubator/sedona/<span class="nv">$SEDONA_CURRENT_RC</span>/apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-src.tar.gz
-wget -q https://dist.apache.org/repos/dist/dev/incubator/sedona/<span class="nv">$SEDONA_CURRENT_RC</span>/apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-src.tar.gz.asc
-wget -q https://dist.apache.org/repos/dist/dev/incubator/sedona/<span class="nv">$SEDONA_CURRENT_RC</span>/apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-src.tar.gz.sha512
-wget -q https://dist.apache.org/repos/dist/dev/incubator/sedona/<span class="nv">$SEDONA_CURRENT_RC</span>/apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-bin.tar.gz
-wget -q https://dist.apache.org/repos/dist/dev/incubator/sedona/<span class="nv">$SEDONA_CURRENT_RC</span>/apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-bin.tar.gz.asc
-wget -q https://dist.apache.org/repos/dist/dev/incubator/sedona/<span class="nv">$SEDONA_CURRENT_RC</span>/apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-bin.tar.gz.sha512
+wget -q https://downloads.apache.org/sedona/KEYS
+wget -q https://dist.apache.org/repos/dist/dev/sedona/<span class="nv">$SEDONA_CURRENT_RC</span>/apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-src.tar.gz
+wget -q https://dist.apache.org/repos/dist/dev/sedona/<span class="nv">$SEDONA_CURRENT_RC</span>/apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-src.tar.gz.asc
+wget -q https://dist.apache.org/repos/dist/dev/sedona/<span class="nv">$SEDONA_CURRENT_RC</span>/apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-src.tar.gz.sha512
+wget -q https://dist.apache.org/repos/dist/dev/sedona/<span class="nv">$SEDONA_CURRENT_RC</span>/apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-bin.tar.gz
+wget -q https://dist.apache.org/repos/dist/dev/sedona/<span class="nv">$SEDONA_CURRENT_RC</span>/apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-bin.tar.gz.asc
+wget -q https://dist.apache.org/repos/dist/dev/sedona/<span class="nv">$SEDONA_CURRENT_RC</span>/apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-bin.tar.gz.sha512
 
 <span class="c1">## Verify the signature and checksum</span>
 gpg --import KEYS
@@ -2599,7 +2585,7 @@ d3bdfd4d870838ebe63f21cb93634d2421ec1ac1b8184636206a5dc0d89a78a88257798b1f17371a
 </code></pre></div>
 
 <ul>
-<li>At the end of the output, you should also see the <code>BUILD SUCCESS</code> if you can compile the source code. If this step fails, you can contact Sedona PPMC and see if this is just because of your environment.</li>
+<li>At the end of the output, you should also see the <code>BUILD SUCCESS</code> if you can compile the source code. If this step fails, you can contact Sedona PMC and see if this is just because of your environment.</li>
 </ul>
 <h2 id="check-files-manually">Check files manually<a class="headerlink" href="#check-files-manually" title="Permanent link">&para;</a></h2>
 <ol>

@@ -2341,20 +2341,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../asf/disclaimer/" class="md-nav__link">
-        Disclaimer
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="https://www.apache.org/licenses/" target="_blank" class="md-nav__link">
         License
       </a>
@@ -2540,12 +2526,12 @@
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">pointraw</span><span class="w"> </span><span class="p">(</span><span class="n">_c0</span><span class="w"> </span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">_c1</span><span class="w"> </span><span class="n">string</span><span class="p">)</span><span class="w"> </span>
 <span class="k">USING</span><span class="w"> </span><span class="n">csv</span><span class="w"> </span>
 <span class="k">OPTIONS</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="s1">&#39;false&#39;</span><span class="p">)</span><span class="w"> </span>
-<span class="k">LOCATION</span><span class="w"> </span><span class="s1">&#39;&lt;some path&gt;/incubator-sedona/examples/sql/src/test/resources/testpoint.csv&#39;</span><span class="p">;</span><span class="w"></span>
+<span class="k">LOCATION</span><span class="w"> </span><span class="s1">&#39;&lt;some path&gt;/sedona/examples/sql/src/test/resources/testpoint.csv&#39;</span><span class="p">;</span><span class="w"></span>
 
 <span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">polygonraw</span><span class="w"> </span><span class="p">(</span><span class="n">_c0</span><span class="w"> </span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">_c1</span><span class="w"> </span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">_c2</span><span class="w"> </span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">_c3</span><span class="w"> </span><span class="n">string</span><span class="p">)</span><span class="w"> </span>
 <span class="k">USING</span><span class="w"> </span><span class="n">csv</span><span class="w"> </span>
 <span class="k">OPTIONS</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="s1">&#39;false&#39;</span><span class="p">)</span><span class="w"> </span>
-<span class="k">LOCATION</span><span class="w"> </span><span class="s1">&#39;&lt;some path&gt;/incubator-sedona/examples/sql/src/test/resources/testenvelope.csv&#39;</span><span class="p">;</span><span class="w"></span>
+<span class="k">LOCATION</span><span class="w"> </span><span class="s1">&#39;&lt;some path&gt;/sedona/examples/sql/src/test/resources/testenvelope.csv&#39;</span><span class="p">;</span><span class="w"></span>
 </code></pre></div>
 
 <h2 id="transform-the-data">Transform the data<a class="headerlink" href="#transform-the-data" title="Permanent link">&para;</a></h2>

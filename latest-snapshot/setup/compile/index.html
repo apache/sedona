@@ -2371,20 +2371,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../asf/disclaimer/" class="md-nav__link">
-        Disclaimer
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="https://www.apache.org/licenses/" target="_blank" class="md-nav__link">
         License
       </a>
@@ -2584,7 +2570,7 @@
 
 
 <h1 id="compile-sedona-source-code">Compile Sedona source code<a class="headerlink" href="#compile-sedona-source-code" title="Permanent link">&para;</a></h1>
-<p><a href="https://github.com/apache/incubator-sedona/actions/workflows/java.yml"><img alt="Scala and Java build" src="https://github.com/apache/incubator-sedona/actions/workflows/java.yml/badge.svg" /></a> <a href="https://github.com/apache/incubator-sedona/actions/workflows/python.yml"><img alt="Python build" src="https://github.com/apache/incubator-sedona/actions/workflows/python.yml/badge.svg" /></a> <a href="https://github.com/apache/incubator-sedona/actions/workflows/r.yml"><img alt="R build" src="https://github.com/apache/incubator-sedona/actions/workflows/r.yml/badge.svg" /></a> <a href="https://github.com/apache/incubator-sedona/actions/workflows/example.yml"><img alt="Example project build" src="https://github.com/apache/incubator-sedona/actions/workflows/example.yml/badge.svg" /></a> <a href="https://github.com/apache/incubator-sedona/actions/workflows/docs.yml"><img alt="Docs build" src="https://github.com/apache/incubator-sedona/actions/workflows/docs.yml/badge.svg" /></a> <a href="https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder"><img alt="Binder" src="https://mybinder.org/badge_logo.svg" /></a></p>
+<p><a href="https://github.com/apache/sedona/actions/workflows/java.yml"><img alt="Scala and Java build" src="https://github.com/apache/sedona/actions/workflows/java.yml/badge.svg" /></a> <a href="https://github.com/apache/sedona/actions/workflows/python.yml"><img alt="Python build" src="https://github.com/apache/sedona/actions/workflows/python.yml/badge.svg" /></a> <a href="https://github.com/apache/sedona/actions/workflows/r.yml"><img alt="R build" src="https://github.com/apache/sedona/actions/workflows/r.yml/badge.svg" /></a> <a href="https://github.com/apache/sedona/actions/workflows/example.yml"><img alt="Example project build" src="https://github.com/apache/sedona/actions/workflows/example.yml/badge.svg" /></a> <a href="https://github.com/apache/sedona/actions/workflows/docs.yml"><img alt="Docs build" src="https://github.com/apache/sedona/actions/workflows/docs.yml/badge.svg" /></a> <a href="https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder"><img alt="Binder" src="https://mybinder.org/badge_logo.svg" /></a></p>
 <h2 id="compile-scala-java-source-code">Compile Scala / Java source code<a class="headerlink" href="#compile-scala-java-source-code" title="Permanent link">&para;</a></h2>
 <p>Sedona Scala/Java code is a project with four modules, core, sql, viz and python adapter. Each module is a Scala/Java mixed project which is managed by Apache Maven 3.</p>
 <ul>
@@ -2634,7 +2620,7 @@ Geotools jars will be packaged into the produced fat jars.  </p>
 <p>To get the Sedona Python-adapter jar with all GeoTools jars included, simply append <code>-Dgeotools</code> option. The command is like this:<code>mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.0 -Dgeotools</code></p>
 </div>
 <h3 id="download-staged-jars">Download staged jars<a class="headerlink" href="#download-staged-jars" title="Permanent link">&para;</a></h3>
-<p>Sedona uses GitHub action to automatically generate jars per commit. You can go <a href="https://github.com/apache/incubator-sedona/actions/workflows/java.yml">here</a> and download the jars by clicking the commit's <mark>Artifacts</mark> tag.</p>
+<p>Sedona uses GitHub action to automatically generate jars per commit. You can go <a href="https://github.com/apache/sedona/actions/workflows/java.yml">here</a> and download the jars by clicking the commit's <mark>Artifacts</mark> tag.</p>
 <h2 id="run-python-test">Run Python test<a class="headerlink" href="#run-python-test" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Set up the environment variable SPARK_HOME and PYTHONPATH</li>

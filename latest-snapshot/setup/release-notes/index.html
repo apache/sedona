@@ -2709,20 +2709,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../asf/disclaimer/" class="md-nav__link">
-        Disclaimer
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="https://www.apache.org/licenses/" target="_blank" class="md-nav__link">
         License
       </a>
@@ -3549,7 +3535,7 @@
 <h2 id="sedona-101">Sedona 1.0.1<a class="headerlink" href="#sedona-101" title="Permanent link">&para;</a></h2>
 <p>This version is a maintenance release on Sedona 1.0.0 line. It includes bug fixes, some new features, one <mark>API change</mark></p>
 <h3 id="known-issue">Known issue<a class="headerlink" href="#known-issue" title="Permanent link">&para;</a></h3>
-<p>In Sedona v1.0.1 and eariler versions, the Spark dependency in setup.py was configured to be <mark>&lt; v3.1.0</mark> <a href="https://github.com/apache/incubator-sedona/blob/8235924ac80939cbf2ce562b0209b71833ed9429/python/setup.py#L39">by mistake</a>. When you install  Sedona Python (apache-sedona v1.0.1) from Pypi, pip might unstall PySpark 3.1.1 and install PySpark 3.0.2 on your machine.</p>
+<p>In Sedona v1.0.1 and eariler versions, the Spark dependency in setup.py was configured to be <mark>&lt; v3.1.0</mark> <a href="https://github.com/apache/sedona/blob/8235924ac80939cbf2ce562b0209b71833ed9429/python/setup.py#L39">by mistake</a>. When you install  Sedona Python (apache-sedona v1.0.1) from Pypi, pip might unstall PySpark 3.1.1 and install PySpark 3.0.2 on your machine.</p>
 <p>Three ways to fix this:</p>
 <ol>
 <li>
@@ -3623,8 +3609,8 @@
 <h3 id="sedona-core">Sedona-core<a class="headerlink" href="#sedona-core" title="Permanent link">&para;</a></h3>
 <p>Bug fix:</p>
 <ul>
-<li>PR <a href="https://github.com/apache/incubator-sedona/pull/443">443</a>: read multiple Shape Files by multiPartitions</li>
-<li>PR <a href="https://github.com/apache/incubator-sedona/pull/451">451</a> (<mark>API change</mark>): modify CRSTransform to ignore datum shift</li>
+<li>PR <a href="https://github.com/apache/sedona/pull/443">443</a>: read multiple Shape Files by multiPartitions</li>
+<li>PR <a href="https://github.com/apache/sedona/pull/451">451</a> (<mark>API change</mark>): modify CRSTransform to ignore datum shift</li>
 </ul>
 <p>New function:</p>
 <ul>
@@ -3632,25 +3618,25 @@
 </ul>
 <p>API / behavior change:</p>
 <ul>
-<li>PR <a href="https://github.com/apache/incubator-sedona/pull/488">488</a>: JoinQuery.SpatialJoinQuery/DistanceJoinQuery now returns <code>&lt;Geometry, List&gt;</code> instead of <code>&lt;Geometry, HashSet&gt;</code> because we can no longer use HashSet in Sedona for duplicates removal. All original duplicates in both input RDDs will be preserved in the output.</li>
+<li>PR <a href="https://github.com/apache/sedona/pull/488">488</a>: JoinQuery.SpatialJoinQuery/DistanceJoinQuery now returns <code>&lt;Geometry, List&gt;</code> instead of <code>&lt;Geometry, HashSet&gt;</code> because we can no longer use HashSet in Sedona for duplicates removal. All original duplicates in both input RDDs will be preserved in the output.</li>
 </ul>
 <h3 id="sedona-sql">Sedona-sql<a class="headerlink" href="#sedona-sql" title="Permanent link">&para;</a></h3>
 <p>Bug fix:</p>
 <ul>
-<li><a href="https://issues.apache.org/jira/browse/SEDONA-8">SEDONA-8</a> (<mark>API change</mark>): ST_Transform slow due to lock contention. See <a href="/api/sql/GeoSparkSQL-Function/#st_transform">here</a></li>
-<li>PR <a href="https://github.com/apache/incubator-sedona/pull/427">427</a>: ST_Point and ST_PolygonFromEnvelope now allows Double type</li>
+<li><a href="https://issues.apache.org/jira/browse/SEDONA-8">SEDONA-8</a> (<mark>API change</mark>): ST_Transform slow due to lock contention.</li>
+<li>PR <a href="https://github.com/apache/sedona/pull/427">427</a>: ST_Point and ST_PolygonFromEnvelope now allows Double type</li>
 </ul>
 <p>New function:</p>
 <ul>
-<li>PR <a href="https://github.com/apache/incubator-sedona/pull/449">499</a>: ST_Azimuth, ST_X, ST_Y, ST_StartPoint, ST_Boundary, ST_EndPoint, ST_ExteriorRing, ST_GeometryN, ST_InteriorRingN, ST_Dump, ST_DumpPoints, ST_IsClosed, ST_NumInteriorRings, ST_AddPoint, ST_RemovePoint, ST_IsRing</li>
-<li>PR <a href="https://github.com/apache/incubator-sedona/pull/459">459</a>: ST_LineMerge</li>
-<li>PR <a href="https://github.com/apache/incubator-sedona/pull/460">460</a>: ST_NumGeometries</li>
-<li>PR <a href="https://github.com/apache/incubator-sedona/pull/469">469</a>: ST_AsGeoJSON</li>
+<li>PR <a href="https://github.com/apache/sedona/pull/449">499</a>: ST_Azimuth, ST_X, ST_Y, ST_StartPoint, ST_Boundary, ST_EndPoint, ST_ExteriorRing, ST_GeometryN, ST_InteriorRingN, ST_Dump, ST_DumpPoints, ST_IsClosed, ST_NumInteriorRings, ST_AddPoint, ST_RemovePoint, ST_IsRing</li>
+<li>PR <a href="https://github.com/apache/sedona/pull/459">459</a>: ST_LineMerge</li>
+<li>PR <a href="https://github.com/apache/sedona/pull/460">460</a>: ST_NumGeometries</li>
+<li>PR <a href="https://github.com/apache/sedona/pull/469">469</a>: ST_AsGeoJSON</li>
 <li><a href="https://issues.apache.org/jira/browse/SEDONA-8">SEDONA-8</a>: ST_FlipCoordinates</li>
 </ul>
 <p>Behavior change:</p>
 <ul>
-<li>PR <a href="https://github.com/apache/incubator-sedona/pull/480">480</a>: Aggregate Functions rewrite for new Aggregator API. The functions can be used as typed functions in code and enable compilation-time type check.</li>
+<li>PR <a href="https://github.com/apache/sedona/pull/480">480</a>: Aggregate Functions rewrite for new Aggregator API. The functions can be used as typed functions in code and enable compilation-time type check.</li>
 </ul>
 <p>API change:</p>
 <ul>
@@ -3665,7 +3651,7 @@
 </ul>
 <p>New function:</p>
 <ul>
-<li>PR <a href="https://github.com/apache/incubator-sedona/pull/448">448</a>: Add support for partition number in spatialPartitioning function <code>spatial_rdd.spatialPartitioning(grid_type, NUM_PARTITION)</code></li>
+<li>PR <a href="https://github.com/apache/sedona/pull/448">448</a>: Add support for partition number in spatialPartitioning function <code>spatial_rdd.spatialPartitioning(grid_type, NUM_PARTITION)</code></li>
 </ul>
 
   <hr>

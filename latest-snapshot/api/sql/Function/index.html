@@ -3009,20 +3009,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../asf/disclaimer/" class="md-nav__link">
-        Disclaimer
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="https://www.apache.org/licenses/" target="_blank" class="md-nav__link">
         License
       </a>
@@ -4071,7 +4057,7 @@ If the geometry is lacking SRID a WKT format is produced.
 <p>Introduction: Return the Concave Hull of polgyon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true</p>
 <p>Format: <code>ST_ConcaveHull (A:geometry, pctConvex:float)</code></p>
 <p>Format: <code>ST_ConcaveHull (A:geometry, pctConvex:float, allowHoles:Boolean)</code></p>
-<p>Since: <code>v1.3.2</code></p>
+<p>Since: <code>v1.4.0</code></p>
 <p>Spark SQL example:
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_ConcaveHull</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">,</span><span class="w"> </span><span class="n">pctConvex</span><span class="p">)</span><span class="o">`</span><span class="w"></span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span><span class="w"></span>
@@ -4587,7 +4573,7 @@ In either case, when a polygonal blade is used then the boundary of the blade is
 ST_Split will always return either a MultiLineString or MultiPolygon even if they only contain a single geometry.
 Homogeneous GeometryCollections are treated as a multi-geometry of the type it contains.
 For example, if a GeometryCollection of only Point geometries is passed as a blade it is the same as passing a MultiPoint of the same geometries.</p>
-<p>Since: <code>v1.3.2</code></p>
+<p>Since: <code>v1.4.0</code></p>
 <p>Format: <code>ST_Split (input: geometry, blade: geometry)</code></p>
 <p>Spark SQL Example:
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Split</span><span class="p">(</span><span class="w"></span>
