@@ -15,7 +15,7 @@
     
     
       
-        <title>Join query (optimizer) - Apache Sedona&trade; (incubating)</title>
+        <title>SedonaSQL query optimizer - Apache Sedona&trade; (incubating)</title>
       
     
     
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Join query (optimizer)
+              SedonaSQL query optimizer
             
           </span>
         </div>
@@ -1562,12 +1562,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Join query (optimizer)
+          SedonaSQL query optimizer
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Join query (optimizer)
+        SedonaSQL query optimizer
       </a>
       
         
@@ -1618,6 +1618,21 @@
     Predicate pushdown
   </a>  
   
+  
+    <nav class="md-nav" aria-label="Predicate pushdown">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  
+  <a href="#geoparquet" class="md-nav__link">
+    GeoParquet
+  </a>  
+  
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -3088,6 +3103,21 @@
   </a>  
   
   
+    <nav class="md-nav" aria-label="Predicate pushdown">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  
+  <a href="#geoparquet" class="md-nav__link">
+    GeoParquet
+  </a>  
+  
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -3227,12 +3257,36 @@ RangeJoin polygonshape#20: geometry, pointshape#43: geometry, false
    +- *FileScan csv
 </code></pre></div>
 
+<h3 id="geoparquet">GeoParquet<a class="headerlink" href="#geoparquet" title="Permanent link">&para;</a></h3>
+<p>Sedona supports spatial predicate push-down for GeoParquet files. When spatial filters were applied to dataframes backed by GeoParquet files, Sedona will use the
+<a href="https://github.com/opengeospatial/geoparquet/blob/v1.0.0-beta.1/format-specs/geoparquet.md#bbox"><code>bbox</code> properties in the metadata</a>
+to determine if all data in the file will be discarded by the spatial predicate. This optimization could reduce the number of files scanned
+when the queried GeoParquet dataset was partitioned by spatial proximity.</p>
+<p>The following figure is the visualization of a GeoParquet dataset. <code>bbox</code>es of all GeoParquet files were plotted as blue rectangles and the query window was plotted as a red rectangle. Sedona will only scan 1 of the 6 files to
+answer queries such as <code>SELECT * FROM geoparquet_dataset WHERE ST_Intersects(geom, &lt;query window&gt;)</code>, thus only part of the data covered by the light green rectangle needs to be scanned.</p>
+<p><img alt="" src="../../../image/geoparquet-pred-pushdown.png" /></p>
+<p>We can compare the metrics of querying the GeoParquet dataset with or without the spatial predicate and observe that querying with spatial predicate results in fewer number of rows scanned.</p>
+<table>
+<thead>
+<tr>
+<th>Without spatial predicate</th>
+<th>With spatial predicate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img alt="" src="../../../image/scan-parquet-without-spatial-pred.png" /></td>
+<td><img alt="" src="../../../image/scan-parquet-with-spatial-pred.png" /></td>
+</tr>
+</tbody>
+</table>
+
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">November 26, 2022 07:43:29</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 7, 2023 18:32:52</span>
       
     
   </small>

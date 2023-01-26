@@ -2090,6 +2090,15 @@
       
         <li class="md-nav__item">
   
+  <a href="#st_split" class="md-nav__link">
+    ST_Split
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
   <a href="#st_srid" class="md-nav__link">
     ST_SRID
   </a>  
@@ -2276,7 +2285,7 @@
   
     <li class="md-nav__item">
       <a href="../Optimizer/" class="md-nav__link">
-        Join query (optimizer)
+        SedonaSQL query optimizer
       </a>
     </li>
   
@@ -4256,6 +4265,15 @@
       
         <li class="md-nav__item">
   
+  <a href="#st_split" class="md-nav__link">
+    ST_Split
+  </a>  
+  
+  
+</li>
+      
+        <li class="md-nav__item">
+  
   <a href="#st_srid" class="md-nav__link">
     ST_SRID
   </a>  
@@ -4620,7 +4638,7 @@ If the geometry is lacking SRID a WKT format is produced.
 <span class="w">        </span><span class="s1">&#39;GEOMETRYCOLLECTION(POINT(40 10), POLYGON((0 0, 0 5, 5 5, 5 0, 0 0)))&#39;</span><span class="w"></span>
 <span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">geom</span><span class="w"></span>
 <span class="p">)</span><span class="w"></span>
-<span class="k">SELECT</span><span class="w"> </span><span class="n">ST_CollectionExtract</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">ST_CollectionExtract</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">c2</span><span class="w"> </span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">ST_CollectionExtract</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">ST_CollectionExtract</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">c2</span><span class="w"></span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">test_data</span><span class="w"></span>
 </code></pre></div>
 
@@ -4683,7 +4701,7 @@ itself, if the geometry is collection or multi it returns record for each of col
 <p>Format: <code>ST_DumpPoints(geom: geometry)</code></p>
 <p>Since: <code>v1.0.0</code></p>
 <p>Spark SQL example:
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_DumpPoints</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING (0 0, 1 1, 1 0)&#39;</span><span class="p">))</span><span class="w"> </span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_DumpPoints</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING (0 0, 1 1, 1 0)&#39;</span><span class="p">))</span><span class="w"></span>
 </code></pre></div></p>
 <p>Output: <code>[POINT (0 0), POINT (0 1), POINT (1 1), POINT (1 0), POINT (0 0)]</code></p>
 <h2 id="st_endpoint">ST_EndPoint<a class="headerlink" href="#st_endpoint" title="Permanent link">&para;</a></h2>
@@ -5144,6 +5162,22 @@ and with the components having the same topological relationship.</p>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span><span class="w"></span>
 </code></pre></div>
 
+<h2 id="st_split">ST_Split<a class="headerlink" href="#st_split" title="Permanent link">&para;</a></h2>
+<p>Introduction: Split an input geometry by another geometry (called the blade).
+Linear (LineString or MultiLineString) geometry can be split by a Point, MultiPoint, LineString, MultiLineString, Polygon, or MultiPolygon.
+Polygonal (Polygon or MultiPolygon) geometry can be split by a LineString, MultiLineString, Polygon, or MultiPolygon.
+In either case, when a polygonal blade is used then the boundary of the blade is what is actually split by.
+ST_Split will always return either a MultiLineString or MultiPolygon even if they only contain a single geometry.
+Homogeneous GeometryCollections are treated as a multi-geometry of the type it contains.
+For example, if a GeometryCollection of only Point geometries is passed as a blade it is the same as passing a MultiPoint of the same geometries.</p>
+<p>Since: <code>v1.3.2</code></p>
+<p>Format: <code>ST_Split (input: geometry, blade: geometry)</code></p>
+<p>Spark SQL Example:
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Split</span><span class="p">(</span><span class="w"></span>
+<span class="w">    </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING (0 0, 1.5 1.5, 2 2)&#39;</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;MULTIPOINT (0.5 0.5, 1 1)&#39;</span><span class="p">))</span><span class="w"></span>
+</code></pre></div></p>
+<p>Output: <code>MULTILINESTRING ((0 0, 0.5 0.5), (0.5 0.5, 1 1), (1 1, 1.5 1.5, 2 2))</code></p>
 <h2 id="st_srid">ST_SRID<a class="headerlink" href="#st_srid" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the spatial refence system identifier (SRID) of the geometry.</p>
 <p>Format: <code>ST_SRID (A:geometry)</code></p>
@@ -5227,7 +5261,7 @@ and with the components having the same topological relationship.</p>
 <div class="highlight"><pre><span></span><code>+-------------------------------------------------------------+
 |geometry                                                     |
 +-------------------------------------------------------------+
-|LINESTRING(0 0, 85 85, 100 100, 120 120, 21 21, 10 10, 5 5)  |  
+|LINESTRING(0 0, 85 85, 100 100, 120 120, 21 21, 10 10, 5 5)  |
 +-------------------------------------------------------------+
 </code></pre></div></p>
 <p>Query
@@ -5273,7 +5307,7 @@ For SourceCRS and TargetCRS, WKT format is also available since v1.3.1.</p>
 <p>Format: <code>ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional] DisableError)</code></p>
 <p>Since: <code>v1.0.0</code></p>
 <p>Spark SQL example (simple):
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;epsg:4326&#39;</span><span class="p">,</span><span class="s1">&#39;epsg:3857&#39;</span><span class="p">)</span><span class="w"> </span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;epsg:4326&#39;</span><span class="p">,</span><span class="s1">&#39;epsg:3857&#39;</span><span class="p">)</span><span class="w"></span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span><span class="w"></span>
 </code></pre></div></p>
 <p>Spark SQL example (with optional parameters):
@@ -5380,7 +5414,7 @@ For SourceCRS and TargetCRS, WKT format is also available since v1.3.1.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">December 22, 2022 07:16:10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 6, 2023 01:36:32</span>
       
     
   </small>
