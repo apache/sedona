@@ -2970,7 +2970,7 @@
 </ol>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>To enjoy the full functions of Sedona, we suggest you include <mark>the full dependencies</mark>: <a href="https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11">Apache Spark core</a>, <a href="https://mvnrepository.com/artifact/org.apache.spark/spark-sql">Apache SparkSQL</a>, Sedona-core, Sedona-SQL, Sedona-Viz. Please see <a href="/tutorial/demo/">RDD example project</a></p>
+<p>To enjoy the full functions of Sedona, we suggest you include <mark>the full dependencies</mark>: <a href="https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11">Apache Spark core</a>, <a href="https://mvnrepository.com/artifact/org.apache.spark/spark-sql">Apache SparkSQL</a>, Sedona-core, Sedona-SQL, Sedona-Viz. Please see <a href="../../demo/">RDD example project</a></p>
 </div>
 <h2 id="initiate-sparkcontext">Initiate SparkContext<a class="headerlink" href="#initiate-sparkcontext" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">conf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="nc">SparkConf</span><span class="p">()</span><span class="w"></span>
@@ -3136,7 +3136,7 @@ via <code>sedona.global.charset</code> system property before the call to <code>
 <span class="n">objectRDD</span><span class="p">.</span><span class="nc">CRSTransform</span><span class="p">(</span><span class="s">&quot;epsg:4326&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;epsg:3857&quot;</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span><span class="w"></span>
 </code></pre></div></p>
 </div>
-<p>The details CRS information can be found on <a href="https://epsg.io/.">EPSG.io</a></p>
+<p>The details CRS information can be found on <a href="https://epsg.io/">EPSG.io</a></p>
 <h2 id="read-other-attributes-in-an-spatialrdd">Read other attributes in an SpatialRDD<a class="headerlink" href="#read-other-attributes-in-an-spatialrdd" title="Permanent link">&para;</a></h2>
 <p>Each SpatialRDD can carry non-spatial attributes such as price, age and name as long as the user sets <mark>carryOtherAttributes</mark> as <a href="#create-a-spatialrdd">TRUE</a>.</p>
 <p>The other attributes are combined together to a string and stored in <mark>UserData</mark> field of each geometry.</p>

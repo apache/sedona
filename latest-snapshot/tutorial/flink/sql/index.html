@@ -2779,10 +2779,10 @@
 <p>SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows. All these operators can be directly called through:
 <div class="highlight"><pre><span></span><code><span class="n">Table</span><span class="w"> </span><span class="n">myTable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tableEnv</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span><span class="s">&quot;YOUR_SQL&quot;</span><span class="p">)</span><span class="w"></span>
 </code></pre></div></p>
-<p>Detailed SedonaSQL APIs are available here: <a href="/api/flink/Overview">SedonaSQL API</a></p>
+<p>Detailed SedonaSQL APIs are available here: <a href="../../../api/flink/Overview">SedonaSQL API</a></p>
 <h2 id="set-up-dependencies">Set up dependencies<a class="headerlink" href="#set-up-dependencies" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Read <a href="/setup/maven-coordinates">Sedona Maven Central coordinates</a></li>
+<li>Read <a href="../../../setup/maven-coordinates">Sedona Maven Central coordinates</a></li>
 <li>Add Sedona dependencies in build.sbt or pom.xml.</li>
 <li>Add <a href="https://nightlies.apache.org/flink/flink-docs-master/docs/dev/configuration/overview/">Flink dependencies</a> in build.sbt or pom.xml.</li>
 </ol>
@@ -2861,7 +2861,7 @@
 
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>SedonaSQL provides lots of functions to create a Geometry column, please read <a href="/api/flink/Constructor">SedonaSQL constructor API</a>.</p>
+<p>SedonaSQL provides lots of functions to create a Geometry column, please read <a href="../../../api/flink/Constructor">SedonaSQL constructor API</a>.</p>
 </div>
 <h2 id="transform-the-coordinate-reference-system">Transform the Coordinate Reference System<a class="headerlink" href="#transform-the-coordinate-reference-system" title="Permanent link">&para;</a></h2>
 <p>Sedona doesn't control the coordinate unit (degree-based or meter-based) of all geometries in a Geometry column. The unit of all related distances in SedonaSQL is same as the unit of all geometries in a Geometry column.</p>
@@ -2872,10 +2872,10 @@
 
 <p>The first EPSG code EPSG:4326 in <code>ST_Transform</code> is the source CRS of the geometries. It is WGS84, the most common degree-based CRS.</p>
 <p>The second EPSG code EPSG:3857 in <code>ST_Transform</code> is the target CRS of the geometries. It is the most common meter-based CRS.</p>
-<p>This <code>ST_Transform</code> transform the CRS of these geomtries from EPSG:4326 to EPSG:3857. The details CRS information can be found on <a href="https://epsg.io/.">EPSG.io</a></p>
+<p>This <code>ST_Transform</code> transform the CRS of these geomtries from EPSG:4326 to EPSG:3857. The details CRS information can be found on <a href="https://epsg.io/">EPSG.io</a></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Read <a href="/api/flink/Function/#st_transform">SedonaSQL ST_Transform API</a> to learn different spatial query predicates.</p>
+<p>Read <a href="../../../api/flink/Function/#st_transform">SedonaSQL ST_Transform API</a> to learn different spatial query predicates.</p>
 </div>
 <p>For example, a Table that has coordinates in the US will become like this.</p>
 <p>Before the transformation:
@@ -2927,7 +2927,7 @@
 
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Read <a href="/api/flink/Predicate">SedonaSQL Predicate API</a> to learn different spatial query predicates.</p>
+<p>Read <a href="../../../api/flink/Predicate">SedonaSQL Predicate API</a> to learn different spatial query predicates.</p>
 </div>
 <h3 id="knn-query">KNN query<a class="headerlink" href="#knn-query" title="Permanent link">&para;</a></h3>
 <p>Use <mark>ST_Distance</mark> to calculate the distance and rank the distance.</p>
