@@ -2510,7 +2510,7 @@
 <li>shapely</li>
 <li>attrs</li>
 </ul>
-<p>You need to install necessary packages if your system does not have them installed. See <a href="https://github.com/apache/incubator-sedona/blob/master/python/Pipfile">"packages" in our Pipfile</a>.</p>
+<p>You need to install necessary packages if your system does not have them installed. See <a href="https://github.com/apache/sedona/blob/master/python/Pipfile">"packages" in our Pipfile</a>.</p>
 <h3 id="install-sedona">Install sedona<a class="headerlink" href="#install-sedona" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Installing from PyPi repositories. You can find the latest Sedona Python on <a href="https://pypi.org/project/apache-sedona/">PyPi</a>. <a href="../release-notes/#known-issue">There is an known issue in Sedona v1.0.1 and earlier versions</a>.</li>
@@ -2537,10 +2537,10 @@ python3 setup.py install
 <p>You can get it using one of the following methods:</p>
 <ol>
 <li>
-<p>Compile from the source within main project directory and copy it (in <code>python-adapter/target</code> folder) to SPARK_HOME/jars/ folder (<a href="/setup/compile">more details</a>)</p>
+<p>Compile from the source within main project directory and copy it (in <code>python-adapter/target</code> folder) to SPARK_HOME/jars/ folder (<a href="../compile">more details</a>)</p>
 </li>
 <li>
-<p>Download from <a href="https://github.com/apache/incubator-sedona/releases">GitHub release</a> and copy it to SPARK_HOME/jars/ folder</p>
+<p>Download from <a href="https://github.com/apache/sedona/releases">GitHub release</a> and copy it to SPARK_HOME/jars/ folder</p>
 </li>
 <li>Call the <a href="../maven-coordinates">Maven Central coordinate</a> in your python program. For example, in PySparkSQL
 <div class="highlight"><pre><span></span><code><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span> \
@@ -2572,7 +2572,7 @@ python3 setup.py install
 <div class="highlight"><pre><span></span><code><span class="nb">export</span> <span class="nv">PYTHONPATH</span><span class="o">=</span><span class="nv">$SPARK_HOME</span>/python
 </code></pre></div>
 
-<p>You can then play with <a href="/tutorial/jupyter-notebook/">Sedona Python Jupyter notebook</a>.</p>
+<p>You can then play with <a href="../../tutorial/jupyter-notebook/">Sedona Python Jupyter notebook</a>.</p>
 
   <hr>
 <div class="md-source-file">
