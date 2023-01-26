@@ -2745,8 +2745,8 @@
 
 <div class="admonition note">
 <p class="admonition-title">Note</p>
+<p>The file extensions of .shp, .shx, .dbf must be in lowercase. Assume you have a shape file called <mark>myShapefile</mark>, the file structure should be like this:</p>
 </div>
-<p>The file extensions of .shp, .shx, .dbf must be in lowercase. Assume you have a shape file called <mark>myShapefile</mark>, the file structure should be like this:
 <div class="highlight"><pre><span></span><code>- shapefile1
 - shapefile2
 - myshapefile
@@ -2755,11 +2755,12 @@
 - myshapefile.dbf
 - myshapefile...
 - ...
-</code></pre></div></p>
+</code></pre></div>
+
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-</div>
 <p>Please make sure you use <mark>ST_GeomFromWKT</mark> to create Geometry type column otherwise that column cannot be used in SedonaSQL.</p>
+</div>
 <p>If the file you are reading contains non-ASCII characters you'll need to explicitly set the encoding
 via <code>sedona.global.charset</code> system property before the call to <code>ShapefileReader.readToGeometryRDD</code>.</p>
 <p>Example:</p>
