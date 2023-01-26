@@ -743,7 +743,7 @@ Output:
 Introduction: Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.
 
 !!!note
-Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If the MultiLineString can't be merged, the original MULTILINESTRING is returned.
+    Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If the MultiLineString can't be merged, the original MULTILINESTRING is returned.
 
 Format: `ST_LineMerge (A:geometry)`
 
@@ -837,9 +837,8 @@ Result:
 ```
 
 !!!note
-In Sedona up to and including version 1.2 the behaviour of ST_MakeValid was different.
-Be sure to check you code when upgrading.
-The previous implementation only worked for (multi)polygons and had a different interpretation of the second, boolean, argument.
+    In Sedona up to and including version 1.2 the behaviour of ST_MakeValid was different.
+Be sure to check you code when upgrading. The previous implementation only worked for (multi)polygons and had a different interpretation of the second, boolean, argument.
 It would also sometimes return multiple geometries for a single geomtry input.
 
 ## ST_MinimumBoundingCircle

@@ -90,10 +90,10 @@ nav:
         - Make a release: community/publish.md
         - Vote a release: community/vote.md
       - Publications: community/publication.md
-    - Gallery:
-      - Spatially aggregate airports per country: gallery/airport-country.md
-      - Match foot traffic to Seattle coffee shops: gallery/foot-traffic.md
-      - Raster image manipulation: gallery/raster.md
+    - Use cases:
+      - Spatially aggregate airports per country: usecases/airport-country.md
+      - Match foot traffic to Seattle coffee shops: usecases/foot-traffic.md
+      - Raster image manipulation: usecases/raster.md
     - Apache Software Foundation:
       - Foundation: asf/asf.md
       - License: https://www.apache.org/licenses/" target="_blank

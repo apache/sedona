@@ -21,7 +21,7 @@ Output:
 ```html
  |-- image: struct (nullable = true)
  |    |-- origin: string (nullable = true)
- |    |-- Geometry: geometry (nullable = true)
+ |    |-- Geometry: string (nullable = true)
  |    |-- height: integer (nullable = true)
  |    |-- width: integer (nullable = true)
  |    |-- nBands: integer (nullable = true)
@@ -49,7 +49,7 @@ Output:
 ```html
  |-- image: struct (nullable = true)
  |    |-- origin: string (nullable = true)
- |    |-- Geometry: geometry (nullable = true)
+ |    |-- Geometry: string (nullable = true)
  |    |-- height: integer (nullable = true)
  |    |-- width: integer (nullable = true)
  |    |-- nBands: integer (nullable = true)
@@ -197,7 +197,7 @@ Output:
 ```
 
 !!!note
-Although the 3 RGB bands are mandatory, you can use [RS_Array(h*w, 0.0)](#rs_array) to create an array (zeroed out, size = h * w) as input.
+    Although the 3 RGB bands are mandatory, you can use [RS_Array(h*w, 0.0)](#rs_array) to create an array (zeroed out, size = h * w) as input.
 
 ## RS_GetBand
 
