@@ -347,7 +347,7 @@ class TestDataFrameAPI(TestBase):
         elif request.param == "triangle_geom":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))') AS geom")
         elif request.param == "two_points":
-            return TestDataFrameAPI.spark.sql("SELECT ST_Point(0.0, 0.0, 0.0) AS a, ST_Point(3.0, 0.0, 4.0) AS b")
+            return TestDataFrameAPI.spark.sql("SELECT ST_PointZ(0.0, 0.0, 0.0) AS a, ST_PointZ(3.0, 0.0, 4.0) AS b")
         elif request.param == "invalid_geom":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POLYGON ((1 5, 1 1, 3 3, 5 3, 7 1, 7 5, 5 3, 3 3, 1 5))') AS geom")
         elif request.param == "overlapping_polys":

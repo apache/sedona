@@ -161,21 +161,35 @@ def ST_LineStringFromText(coords: ColumnOrName, delimiter: ColumnOrName) -> Colu
 
 
 @validate_argument_types
-def ST_Point(x: ColumnOrNameOrNumber, y: ColumnOrNameOrNumber, z: Optional[ColumnOrNameOrNumber] = None) -> Column:
-    """Generate either a 2D or 3D point geometry column from numeric values.
+def ST_Point(x: ColumnOrNameOrNumber, y: ColumnOrNameOrNumber) -> Column:
+    """Generates a 2D point geometry column from numeric values.
+
+    :param x: Either a number or numeric column representing the X coordinate of a point.
+    :type x: ColumnOrNameOrNumber
+    :param y: Either a number or numeric column representing the Y coordinate of a point.
+    :type y: ColumnOrNameOrNumber
+    :return: Point geometry column generated from the coordinate values.
+    :rtype: Column
+    """
+    return _call_constructor_function("ST_Point", (x, y))
+
+@validate_argument_types
+def ST_PointZ(x: ColumnOrNameOrNumber, y: ColumnOrNameOrNumber, z: ColumnOrNameOrNumber, srid: Optional[ColumnOrNameOrNumber] = None) -> Column:
+    """Generates a 3D point geometry column from numeric values.
 
     :param x: Either a number or numeric column representing the X coordinate of a point.
     :type x: ColumnOrNameOrNumber
     :param y: Either a number or numeric column representing the Y coordinate of a point.
     :type y: ColumnOrNameOrNumber
     :param z: Either a number or numeric column representing the Z coordinate of a point, if None then a 2D point is generated, defaults to None
-    :type z: Optional[ColumnOrNameOrNumber], optional
+    :type z: ColumnOrNameOrNumber
+    :param srid: The srid of the point. Defaults to 0 (unknown).
+    :type srid: Optional[ColumnOrNameOrNumber], optional
     :return: Point geometry column generated from the coordinate values.
     :rtype: Column
     """
-    args = (x, y) if z is None else (x, y, z)
-    return _call_constructor_function("ST_Point", args)
-
+    args = (x, y, z) if srid is None else (x, y, z, srid)
+    return _call_constructor_function("ST_PointZ", args)
 
 @validate_argument_types
 def ST_PointFromText(coords: ColumnOrName, delimiter: ColumnOrName) -> Column:
