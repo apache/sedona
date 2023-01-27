@@ -13,6 +13,7 @@
  */
 package org.apache.sedona.common;
 
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
@@ -43,5 +44,38 @@ public class Constructors {
         }
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
         return new WKTReader(geometryFactory).read(wkt);
+    }
+
+
+    /**
+     * Creates a point from the given coordinate.
+     * ST_Point in Sedona Spark API took an optional z value before v1.4.0.
+     * This was removed to avoid confusion with other GIS implementations where the optional third argument is srid.
+     *
+     * A future version of Sedona will add a srid parameter once enough users have upgraded and hence are forced
+     * to use ST_PointZ for 3D points.
+     *
+     * @param x the x value
+     * @param y the y value
+     * @return The point geometry
+     */
+    public static Geometry point(double x, double y) {
+        // See srid parameter discussion in https://issues.apache.org/jira/browse/SEDONA-234
+        GeometryFactory geometryFactory = new GeometryFactory();
+        return geometryFactory.createPoint(new Coordinate(x, y));
+    }
+
+    /**
+     * Creates a point from the given coordinate.
+     *
+     * @param x the x value
+     * @param y the y value
+     * @param z the z value
+     * @param srid Set to 0 if unknown
+     * @return The point geometry
+     */
+    public static Geometry pointZ(double x, double y, double z, int srid) {
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        return geometryFactory.createPoint(new Coordinate(x, y, z));
     }
 }
