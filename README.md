@@ -1,17 +1,17 @@
 <img src="https://www.apache.org/logos/res/sedona/sedona.png" width="400">
 
-[![Scala and Java build](https://github.com/apache/incubator-sedona/actions/workflows/java.yml/badge.svg)](https://github.com/apache/incubator-sedona/actions/workflows/java.yml) [![Python build](https://github.com/apache/incubator-sedona/actions/workflows/python.yml/badge.svg)](https://github.com/apache/incubator-sedona/actions/workflows/python.yml) [![R build](https://github.com/apache/incubator-sedona/actions/workflows/r.yml/badge.svg)](https://github.com/apache/incubator-sedona/actions/workflows/r.yml) [![Example project build](https://github.com/apache/incubator-sedona/actions/workflows/example.yml/badge.svg)](https://github.com/apache/incubator-sedona/actions/workflows/example.yml) [![Docs build](https://github.com/apache/incubator-sedona/actions/workflows/docs.yml/badge.svg)](https://github.com/apache/incubator-sedona/actions/workflows/docs.yml)
+[![Scala and Java build](https://github.com/apache/sedona/actions/workflows/java.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/java.yml) [![Python build](https://github.com/apache/sedona/actions/workflows/python.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/python.yml) [![R build](https://github.com/apache/sedona/actions/workflows/r.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/r.yml) [![Example project build](https://github.com/apache/sedona/actions/workflows/example.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/example.yml) [![Docs build](https://github.com/apache/sedona/actions/workflows/docs.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/docs.yml)
 
-Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder) and play the interactive Sedona Python Jupyter Notebook immediately!
+Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder) and play the interactive Sedona Python Jupyter Notebook immediately!
 
 [![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://discord.gg/9A3k5dEBsY)
 
-Apache Sedona™(incubating) is a cluster computing system for processing large-scale spatial data. Sedona equips cluster computing systems such as Apache Spark and Apache Flink with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
+Apache Sedona™ is a cluster computing system for processing large-scale spatial data. Sedona equips cluster computing systems such as Apache Spark and Apache Flink with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
 
 |Download statistics| **Maven** | **PyPI** | **CRAN** |
 |:-------------:|:------------------:|:--------------:|:---------:|
-| Apache Sedona |         80k/month        |[![Downloads](https://static.pepy.tech/personalized-badge/apache-sedona?period=month&units=international_system&left_color=black&right_color=brightgreen&left_text=downloads/month)](https://pepy.tech/project/apache-sedona) [![Downloads](https://static.pepy.tech/personalized-badge/apache-sedona?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/apache-sedona)|[![](https://cranlogs.r-pkg.org/badges/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona) [![](https://cranlogs.r-pkg.org/badges/grand-total/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona)|
-|    Archived GeoSpark releases   |300k/month|[![Downloads](https://static.pepy.tech/personalized-badge/geospark?period=month&units=international_system&left_color=black&right_color=brightgreen&left_text=downloads/month)](https://pepy.tech/project/geospark)[![Downloads](https://static.pepy.tech/personalized-badge/geospark?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/geospark)|           |
+| Apache Sedona |         180k/month        |[![Downloads](https://static.pepy.tech/personalized-badge/apache-sedona?period=month&units=international_system&left_color=black&right_color=brightgreen&left_text=downloads/month)](https://pepy.tech/project/apache-sedona) [![Downloads](https://static.pepy.tech/personalized-badge/apache-sedona?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/apache-sedona)|[![](https://cranlogs.r-pkg.org/badges/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona) [![](https://cranlogs.r-pkg.org/badges/grand-total/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona)|
+|    Archived GeoSpark releases   |10k/month|[![Downloads](https://static.pepy.tech/personalized-badge/geospark?period=month&units=international_system&left_color=black&right_color=brightgreen&left_text=downloads/month)](https://pepy.tech/project/geospark)[![Downloads](https://static.pepy.tech/personalized-badge/geospark?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/geospark)|           |
 
 ## System architecture
 
@@ -58,4 +58,4 @@ Twitter: [Sedona@Twitter](https://twitter.com/ApacheSedona)
 
 ## Powered by
 
-<img src="http://apache.org/logos/res/incubator/incubator.png" width="400">
+<img src="https://www.apache.org/foundation/press/kit/asf_logo_wide.png" width="500">

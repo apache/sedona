@@ -24,20 +24,12 @@ Current Sedona PMC members are as follows:
 |     Jinxuan Wu    | jinxuan     |   jinxuanw@apache.org  |
 |       Jia Yu      |  jiayuasu   |    jiayu@apache.org    |
 |    Zongsi Zhang   | zongsizhang | zongsizhang@apache.org |
+|     Felix Cheung     ||	felixcheung@apache.org |
+|     Von Gosling      || vongosling@apache.org |
+| Jean-Baptiste Onofré || jbonofre@apache.org |
+|   George Percivall   || percivall@apache.org |
+|     Sunil Govindan   ||sunilg@apache.org|
 
-
-## Mentors
-
-Mentors from Apache Incubator help the project to turn into a good shape following the "Apache" way. Thank you, mentors!
-
-
-|         Name         | Apache id |
-|:--------------------:|:------------------------:|
-|     Felix Cheung     |	felixcheung@apache.org |
-|     Von Gosling      | vongosling@apache.org |
-| Jean-Baptiste Onofré | jbonofre@apache.org |
-|   George Percivall   | percivall@apache.org |
-|     Sunil Govindan   |sunilg@apache.org|
 
 ## Become a committer
 
@@ -60,13 +52,14 @@ Steps are as follows:
 2. Close the vote. If the result is positive, invite the new committer.
 
 ### Call for a vote
-We do the vote and discussion on the private@sedona.apache.org to enable a frank discussion. Please read [ASF Incubator New committer Discussion](hhttps://incubator.apache.org/guides/ppmc.html) for notable items.
+
+We do the vote and discussion on the private@sedona.apache.org to enable a frank discussion.
 
 Let the Vote thread run for one week. A positive result is achieved by Consensus Approval: at least 3 +1 votes and no vetoes.
 
 #### PMC vote template
 
-This is the email to commence a vote for a new PMC candidate. New PMC members need to be voted for by the existing PMC members and subsequently approved by the Board (or Incubator PMC for incubating projects).
+This is the email to commence a vote for a new PMC candidate. New PMC members need to be voted for by the existing PMC members and subsequently approved by the Board.
 
 ```
 To: private@sedona.apache.org
@@ -76,8 +69,6 @@ Subject: [VOTE] New PMC candidate: [New PMC NAME]
 
 Voting ends one week from today, or until at least 3 +1 votes are cast.
 
-See voting guidelines at
-https://incubator.apache.org/guides/ppmc.html
 ```
 
 ### Close a vote
@@ -99,20 +90,18 @@ Binding Votes:
 The vote is ***successful/not successful***
 ```
 
-### Send a notice to IPMC
+### Send a notice to ASF Board
 
-The nominating PPMC member should send a message to the IPMC (private@incubator.apache.org) with a reference to the vote result in the following form:
+The nominating PMC member should send a message to the ASF Board (board@apache.org) with a reference to the vote result in the following form:
 
 ```
-To: private at incubator.apache.org
+To: board at apache.org
 CC: private at sedona.apache.org
-Subject: [NOTICE] New PMC NAME for Apache Sedona PPMC
+Subject: [NOTICE] New PMC NAME for Apache Sedona PMC
 Body:
 
-New PMC NAME has been voted as a new member of the Apache Sedona PPMC. the vote thread is at: *link to the vote result thread*
+New PMC NAME has been voted as a new member of the Apache Sedona PMC. the vote thread is at: *link to the vote result thread*
 ```
-
-**Note that there is a grace period of 72 hours from when the PPMC sends the NOTICE to the IPMC to when the PPMC should formally invite the proposed member. This is an important part of the overall process. Failure to do this can result in an embarassing situation for people involved.**
 
 ### Send the invitation
 
@@ -120,49 +109,53 @@ New PMC NAME has been voted as a new member of the Apache Sedona PPMC. the vote 
 To: New PMC Email address
 CC: private@sedona.apache.org
 
-Dear NEW PMC NAME,
+Hello [New PMC NAME],
 
-In recognition of your demonstrated commitment to, and alignment with, the
-goals of the Apache Sedona project, the Sedona PPMC has voted to offer you
-membership in the Sedona PPMC ("Podling Project Management Committee").
+The Sedona Project Management Committee (PMC) 
+hereby offers you committer privileges to the project 
+[as well as membership in the PMC]. These privileges are
+offered on the understanding that you'll use them
+reasonably and with common sense. We like to work on trust
+rather than unnecessary constraints. 
 
-Please let us know if you accept by replying to this email 
-(including private@sedona.apache.org).
+Being a committer enables you to more easily make 
+changes without needing to go through the patch 
+submission process. Being a PMC member enables you 
+to guide the direction of the project.
 
-The PPMC is the Incubator podling version of a project PMC ("Project
-Management Committee") that for every top-level project is tasked by the
-Apache Board of Directors with official oversight and binding votes in
-that project.  When Sedona graduates from the Incubator to a top-level
-project, the project PMC is usually formed from the membership of the PPMC.
-Note that while participation in the PMC after graduation is not
-guaranteed, simply continuing your constructive and active participation
-is usually sufficient.
+Being a committer does not require you to 
+participate any more than you already do. It does 
+tend to make one even more committed.  You will 
+probably find that you spend more time here.
 
-As a PPMC member, and later as a PMC member, you are responsible for
-continuing the general project, code, and community oversight that you
-have exhibited so far.  The votes of the PPMC are not legally binding;
-votes of the Incubator PMC are.  However, many of the PPMC members
-are also Incubator PMC members, so they implicitly cast binding votes
-when we vote on PPMC issues.  While this is an important legal
-distinction, it shouldn't enter your thinking when working on the PPMC -
-members should treat every decision as if it were legally binding for the
- ASF. Also, in day-to-day activities, the Incubator PMC member vs PPMC 
- member distinction should be invisible -- we are peers.
+Of course, you can decline and instead remain as a 
+contributor, participating as you do now.
 
-Finally, the PPMC (and assuming graduation, the PMC) is not meant to create 
-a hierarchy within the committership or the community.  In fact, a goal is 
-to add all committers over time to the PPMC/PMC, as our belief is that those 
-who do the work should get a binding vote.  Therefore, in our day-to-day
-interactions with the rest of the community, we continue to interact as
-peers, where every reasonable opinion is considered, and all community
-members are invited to participate in our public voting.  If there ever
-is a situation where the PMC/PPMC's view differs significantly from that 
-of the rest of the community, this is a symptom of a problem that needs to
-be addressed.
+A. This personal invitation is a chance for you to 
+accept or decline in private.  Either way, please 
+let us know in reply to the private@sedona.apache.org 
+address only.
 
-With the expectation of your acceptance, welcome!
+B. If you accept, the next step is to register an iCLA:
+    1. Details of the iCLA and the forms are found 
+    through this link: https://www.apache.org/licenses/#clas
 
-The Apache Sedona PPMC
+    2. Instructions for its completion and return to 
+    the Secretary of the ASF are found at
+    https://www.apache.org/licenses/#submitting
+
+    3. When you transmit the completed iCLA, request 
+    to notify the Apache Sedona project and choose a 
+    unique Apache ID. Look to see if your preferred 
+    ID is already taken at 
+    https://people.apache.org/committer-index.html
+    This will allow the Secretary to notify the PMC 
+    when your iCLA has been recorded.
+
+When recording of your iCLA is noted, you will 
+receive a follow-up message with the next steps for 
+establishing you as a committer.
+
 ```
 
 ### PMC Accept and ICLA instruction
@@ -172,8 +165,7 @@ To: New PMC Email address
 Cc: private@sedona.apache.org
 Subject: Re: invitation to become Apache Sedona PMC
 
-Welcome. Here are the next steps in becoming a project committer. After that we will make
-an announcement to the dev@sedona.apache.org
+Welcome. Here are the next steps in becoming a project committer. After that we will make an announcement to the dev@sedona.apache.org
 
 1. You need to send a Contributor License Agreement to the ASF.
 Normally you would send an Individual CLA. If you also make
@@ -201,11 +193,6 @@ resources:
   https://www.apache.org/foundation/how-it-works.html
   https://www.apache.org/dev/
 
-The incubator also has some useful information for new committers
-in incubating projects:
-  https://incubator.apache.org/guides/committer.html
-  https://incubator.apache.org/guides/ppmc.html
-
 Just as before you became a committer, participation in any ASF community
 requires adherence to the ASF Code of Conduct:
   https://www.apache.org/foundation/policies/conduct.html
@@ -222,7 +209,7 @@ Once Sedona graduates, the PMC chair will make the request.
 
 ### Add to the system
 
-Once the new PPMC subscribes to the Sedona mailing lists using his/her ASF account, one of the PPMC needs to add the new PPMC to the Whimsy system (https://whimsy.apache.org/roster/ppmc/sedona).
+Once the new PMC subscribes to the Sedona mailing lists using his/her ASF account, one of the PMC needs to add the new PMC to the Whimsy system (https://whimsy.apache.org/roster/pmc/sedona).
 
 ### PMC annoucement
 
@@ -233,7 +220,7 @@ This is the email to announce the new committer to sedona-dev once the account h
 To: dev@sedona.apache.org
 Subject: new committer: ###New PMC NAME
 
-The Podling Project Management Committee (PPMC) for Apache Sedona
+The Project Management Committee (PMC) for Apache Sedona
 has invited New PMC NAME to become a committer and we are pleased 
 to announce that they have accepted.
 
@@ -259,7 +246,7 @@ committer account with the username '####'.
 
 You have commit access to specific sections of the
 ASF repository, as follows:
-https://github.com/apache/incubator-sedona
+https://github.com/apache/sedona
 
 You need to link your ASF Account with your GitHub account.
 
@@ -278,7 +265,7 @@ member of the team https://github.com/orgs/apache/teams/sedona-committers
 Optionally, if you want, please follow the instructions to set up your GitHub, SSH, svn password, svn configuration, email forwarding, etc.
 https://www.apache.org/dev/#committers
 
-Additionally, if you have been elected to the Sedona Podling
- Project Mgmt. Committee (PPMC): Verify you are part of the LDAP sedona
-  ppmc https://whimsy.apache.org/roster/ppmc/sedona
+Additionally, if you have been elected to the Sedona
+ Project Mgmt. Committee (PMC): Verify you are part of the LDAP sedona
+  pmc https://whimsy.apache.org/roster/pmc/sedona
 ```

@@ -40,7 +40,7 @@ setup(
     extras_require={"spark": ['pyspark>=2.3.0']},
     project_urls={
         'Documentation': 'https://sedona.apache.org',
-        'Source code': 'https://github.com/apache/incubator-sedona',
+        'Source code': 'https://github.com/apache/sedona',
         'Bug Reports': 'https://issues.apache.org/jira/projects/SEDONA'
     },
     classifiers=[

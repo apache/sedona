@@ -28,12 +28,12 @@ Use the following code to load the data and create a raw DataFrame:
 CREATE TABLE IF NOT EXISTS pointraw (_c0 string, _c1 string) 
 USING csv 
 OPTIONS(header='false') 
-LOCATION '<some path>/incubator-sedona/examples/sql/src/test/resources/testpoint.csv';
+LOCATION '<some path>/sedona/examples/sql/src/test/resources/testpoint.csv';
 
 CREATE TABLE IF NOT EXISTS polygonraw (_c0 string, _c1 string, _c2 string, _c3 string) 
 USING csv 
 OPTIONS(header='false') 
-LOCATION '<some path>/incubator-sedona/examples/sql/src/test/resources/testenvelope.csv';
+LOCATION '<some path>/sedona/examples/sql/src/test/resources/testenvelope.csv';
 
 ```
 

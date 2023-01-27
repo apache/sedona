@@ -22,12 +22,12 @@
     <parent>
         <artifactId>sedona-parent</artifactId>
         <groupId>org.apache.sedona</groupId>
-        <version>1.3.2-incubating-SNAPSHOT</version>
+        <version>1.4.0-SNAPSHOT</version>
     </parent>
     <artifactId>sedona-python-adapter-${spark.compat.version}_${scala.compat.version}</artifactId>
 
     <name>${project.groupId}:${project.artifactId}</name>
-    <description>A cluster computing system for processing large-scale spatial data: Python Adapter. Apache Sedona is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Apache Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</description>
+    <description>A cluster computing system for processing large-scale spatial data: Python Adapter.</description>
     <url>http://sedona.apache.org/</url>
     <packaging>jar</packaging>
 

@@ -23,7 +23,7 @@ SedonaVizRegistrator.registerAll(sparkSession)
 Introduction: Given the weight of a pixel, return the corresponding color. The weight can be the spatial aggregation of spatial objects or spatial observations such as temperature and humidity.
 
 !!!note
-The color is encoded to an Integer type value in DataFrame. When you print it, it will show some nonsense values. You can just treat them as colors in GeoSparkViz.
+	The color is encoded to an Integer type value in DataFrame. When you print it, it will show some nonsense values. You can just treat them as colors in GeoSparkViz.
 
 Format: `ST_Colorize (weight:Double, maxWeight:Double, mandatory color: string (Optional))`
 

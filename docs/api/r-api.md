@@ -1,1 +1,1 @@
-Please read [R docs](/api/rdocs/)
+Please read [R docs](../rdocs/)

@@ -1,8 +1,6 @@
 # Make a Sedona release
 
-This page is for Sedona PPMC to publish Sedona releases.
-
-You can read ASF guidelines: 1. ASF Incubator Distribution Guidelines: https://incubator.apache.org/guides/distribution.html 2. ASF Release Guidelines: https://infra.apache.org/release-publishing.html 3. ASF Incubator Release Votes Guidelines: https://issues.apache.org/jira/browse/LEGAL-469
+This page is for Sedona PMC to publish Sedona releases.
 
 !!!warning
     All scripts on this page should be run in your local Sedona Git repo under master branch via a single script file.
@@ -26,7 +24,7 @@ chmod 777 create-release.sh
 #!/bin/bash
 wget -q https://dlcdn.apache.org//creadur/apache-rat-$RAT_VERSION/apache-rat-0.15-bin.tar.gz
 tar -xvf  apache-rat-0.15-bin.tar.gz
-git clone --shared --branch master https://github.com/apache/incubator-sedona.git sedona-src
+git clone --shared --branch master https://github.com/apache/sedona.git sedona-src
 java -jar apache-rat-0.15.jar -d sedona-src > report.txt
 ```
 2. Read the generated report.txt file and make sure all source code files have ASF header.
@@ -39,11 +37,11 @@ rm report.txt
 
 ## 2. Update Sedona Python, R and Zeppelin versions
 
-Make sure the Sedona version in the following files are {{ sedona_create_release.current_version }}. Note that: Python and R versions cannot have "incubating" postfix.
+Make sure the Sedona version in the following files are {{ sedona_create_release.current_version }}. 
 
-1. https://github.com/apache/incubator-sedona/blob/master/python/sedona/version.py
-2. https://github.com/apache/incubator-sedona/blob/master/R/DESCRIPTION
-3. https://github.com/apache/incubator-sedona/blob/master/zeppelin/package.json
+1. https://github.com/apache/sedona/blob/master/python/sedona/version.py
+2. https://github.com/apache/sedona/blob/master/R/DESCRIPTION
+3. https://github.com/apache/sedona/blob/master/zeppelin/package.json
 
 
 ## 3. Update mkdocs.yml
@@ -81,28 +79,28 @@ echo "Now the releases are staged. A tag and two commits have been created on Se
 echo "*****Step 2: Upload the Release Candidate to https://repository.apache.org."
 
 # For Spark 3.0 and Scala 2.12
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.12"
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.12"
 
 # For Spark 3.0 and Scala 2.13
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/incubator-sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.13"
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.13"
 
-echo "*****Step 3: Upload Release Candidate on ASF SVN: https://dist.apache.org/repos/dist/dev/incubator/sedona"
+echo "*****Step 3: Upload Release Candidate on ASF SVN: https://dist.apache.org/repos/dist/dev/sedona"
 
 echo "Creating {{ sedona_create_release.current_rc }} folder on SVN..."
 
-svn mkdir -m "Adding folder" https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}
+svn mkdir -m "Adding folder" https://dist.apache.org/repos/dist/dev/sedona/{{ sedona_create_release.current_rc }}
 
 echo "Creating release files locally..."
 
 echo "Downloading source code..."
 
-wget https://github.com/apache/incubator-sedona/archive/refs/tags/{{ sedona_create_release.current_git_tag}}.tar.gz
+wget https://github.com/apache/sedona/archive/refs/tags/{{ sedona_create_release.current_git_tag}}.tar.gz
 tar -xvf {{ sedona_create_release.current_git_tag}}.tar.gz
 mkdir apache-sedona-{{ sedona_create_release.current_version }}-src
-cp -r incubator-sedona-{{ sedona_create_release.current_git_tag}}/* apache-sedona-{{ sedona_create_release.current_version }}-src/
+cp -r sedona-{{ sedona_create_release.current_git_tag}}/* apache-sedona-{{ sedona_create_release.current_version }}-src/
 tar czf apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz apache-sedona-{{ sedona_create_release.current_version }}-src
 rm {{ sedona_create_release.current_git_tag}}.tar.gz
-rm -rf incubator-sedona-{{ sedona_create_release.current_git_tag}}
+rm -rf sedona-{{ sedona_create_release.current_git_tag}}
 
 echo "Compiling the source code..."
 
@@ -130,12 +128,12 @@ gpg -ab apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz
 
 echo "Uploading local release files..."
 
-svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz
-svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.asc https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.asc
-svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512
-svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz
-svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.asc https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.asc
-svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz https://dist.apache.org/repos/dist/dev/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.asc https://dist.apache.org/repos/dist/dev/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.asc
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz https://dist.apache.org/repos/dist/dev/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.asc https://dist.apache.org/repos/dist/dev/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.asc
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512
 
 echo "Removing local release files..."
 
@@ -164,19 +162,19 @@ Hi all,
 This is a call for vote on Apache Sedona {{ sedona_create_release.current_rc }}. Please refer to the changes listed at the bottom of this email.
 
 Release notes:
-https://github.com/apache/incubator-sedona/blob/{{ sedona_create_release.current_git_tag }}/docs/setup/release-notes.md
+https://github.com/apache/sedona/blob/{{ sedona_create_release.current_git_tag }}/docs/setup/release-notes.md
 
 Build instructions:
-https://github.com/apache/incubator-sedona/blob/{{ sedona_create_release.current_git_tag }}/docs/setup/compile.md
+https://github.com/apache/sedona/blob/{{ sedona_create_release.current_git_tag }}/docs/setup/compile.md
 
 GitHub tag:
-https://github.com/apache/incubator-sedona/releases/tag/{{ sedona_create_release.current_git_tag }}
+https://github.com/apache/sedona/releases/tag/{{ sedona_create_release.current_git_tag }}
 
 GPG public key to verify the Release:
-https://downloads.apache.org/incubator/sedona/KEYS
+https://downloads.apache.org/sedona/KEYS
 
 Source code and binaries:
-https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/
+https://dist.apache.org/repos/dist/dev/sedona/{{ sedona_create_release.current_rc }}/
 
 The vote will be open for at least 72 hours or until at least 3 "+1" PMC votes are cast
 
@@ -231,111 +229,24 @@ No -1 votes
 
 The vote thread (Permalink from https://lists.apache.org/list.html):
 
-I will now bring the vote to general@incubator.apache.org to get
-approval by the IPMC. If this vote passes too, the release is accepted and will be published.
-
-```
-
-## 6. Vote in general incubator.apache.org
-
-### Vote email
-
-1. Please add the permalink of Sedona Community vote thread
-2. Please add the permalink of Sedona Community vote result thread
-3. Please add changes at the end if needed.
-
-```
-Subject: [VOTE] Release Apache Sedona {{ sedona_create_release.current_rc }}
-
-Hi all,
-
-This is a call for vote on Apache Sedona {{ sedona_create_release.current_rc }}. Please refer to the changes listed at the bottom of this email.
-
-Sedona Community vote thread (Permalink from https://lists.apache.org/list.html):
-
-Sedona community vote result thread (Permalink from https://lists.apache.org/list.html):
-
-Release notes:
-https://github.com/apache/incubator-sedona/blob/{{ sedona_create_release.current_git_tag }}/docs/setup/release-notes.md
-
-Build instructions:
-https://github.com/apache/incubator-sedona/blob/{{ sedona_create_release.current_git_tag }}/docs/setup/compile.md
-
-GitHub tag:
-https://github.com/apache/incubator-sedona/releases/tag/{{ sedona_create_release.current_git_tag }}
-
-GPG public key to verify the Release:
-https://downloads.apache.org/incubator/sedona/KEYS
-
-Source code and binaries:
-https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/
-
-The vote will be open for at least 72 hours or until at least 3 "+1" PMC votes are cast
-
-Please vote accordingly:
-
-[ ] +1 approve
-
-[ ] +0 no opinion
-
-[ ] -1 disapprove with the reason
-
-Checklist for reference (because of DISCLAIMER-WIP, other checklist items are not blockers):
-
-[ ] Download links are valid.
-
-[ ] Checksums and PGP signatures are valid.
-
-[ ] DISCLAIMER is included.
-
-[ ] Source code artifacts have correct names matching the current release.
-
-For a detailed checklist  please refer to:
-https://cwiki.apache.org/confluence/display/INCUBATOR/Incubator+Release+Checklist
-
-------------
-
-Changes according to the comments on the previous release
-Original comment (Permalink from https://lists.apache.org/list.html): 
-
-
-```
-
-### Pass email
-
-Please count the votes and add the permalink of the vote thread.
-
-```
-Subject: [RESULT][VOTE] Release Apache Sedona {{ sedona_create_release.current_rc }}
-
-Dear all,
-
-The vote closes now as 72hr have passed. The vote PASSES with
- 
-+? (binding): NAME1, NAME2, NAME3
-+? (non-binding): NAME4
-No -1 votes
-
-The vote thread (Permalink from https://lists.apache.org/list.html):
-
-I will publish the release and make an annoucement once it is done.
+I will make an annoucement soon.
 
 ```
 
 ### Announce email
 
-1. This email should be CCed to dev@sedona.apache.org
-2. Please add the permalink of the incubator vote thread
-3. Please add the permalink of the incubator vote result thread
+1. This email should be sent to dev@sedona.apache.org
+2. Please add the permalink of the vote thread
+3. Please add the permalink of the vote result thread
 
 ```
 Subject: [ANNOUNCE] Apache Sedona {{ sedona_create_release.current_version }} released
 
 Dear all,
 
-We are happy to report that we have released Apache Sedona (incubating) {{ sedona_create_release.current_version }}. Thank you again for your help.
+We are happy to report that we have released Apache Sedona {{ sedona_create_release.current_version }}. Thank you again for your help.
 
-Apache Sedona (incubating) is a cluster computing system for processing large-scale spatial data. 
+Apache Sedona is a cluster computing system for processing large-scale spatial data. 
 
 
 Vote thread (Permalink from https://lists.apache.org/list.html):
@@ -348,20 +259,18 @@ Website:
 http://sedona.apache.org/
 
 Release notes:
-https://github.com/apache/incubator-sedona/blob/sedona-{{ sedona_create_release.current_version }}/docs/setup/release-notes.md
+https://github.com/apache/sedona/blob/sedona-{{ sedona_create_release.current_version }}/docs/setup/release-notes.md
 
 Download links:
-https://github.com/apache/incubator-sedona/releases/tag/sedona-{{ sedona_create_release.current_version }}
+https://github.com/apache/sedona/releases/tag/sedona-{{ sedona_create_release.current_version }}
 
 Additional resources:
-Get started: http://sedona.apache.org/setup/overview/
-Tutorials: http://sedona.apache.org/tutorial/rdd/
 Mailing list: dev@sedona.apache.org
 Twitter: https://twitter.com/ApacheSedona
 Gitter: https://gitter.im/apache/sedona
 
 Regards,
-Apache Sedona (incubating) Team
+Apache Sedona Team
 ```
 
 ## 7. Failed vote
@@ -378,20 +287,20 @@ If a vote failed, do the following:
 ```bash
 #!/bin/bash
 
-echo "Move all files in https://dist.apache.org/repos/dist/dev/incubator/sedona to https://dist.apache.org/repos/dist/release/incubator/sedona, using svn"
-svn mkdir -m "Adding folder" https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona_create_release.current_version }}
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.asc
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.asc
-wget https://dist.apache.org/repos/dist/dev/incubator/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512
-svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona_create_release.current_version }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz
-svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.asc https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona_create_release.current_version }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.asc
-svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512 https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona_create_release.current_version }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512
-svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona_create_release.current_version }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz
-svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.asc https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona_create_release.current_version }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.asc
-svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512 https://dist.apache.org/repos/dist/release/incubator/sedona/{{ sedona_create_release.current_version }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512
+echo "Move all files in https://dist.apache.org/repos/dist/dev/sedona to https://dist.apache.org/repos/dist/release/sedona, using svn"
+svn mkdir -m "Adding folder" https://dist.apache.org/repos/dist/release/sedona/{{ sedona_create_release.current_version }}
+wget https://dist.apache.org/repos/dist/dev/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz
+wget https://dist.apache.org/repos/dist/dev/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.asc
+wget https://dist.apache.org/repos/dist/dev/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512
+wget https://dist.apache.org/repos/dist/dev/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz
+wget https://dist.apache.org/repos/dist/dev/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.asc
+wget https://dist.apache.org/repos/dist/dev/sedona/{{ sedona_create_release.current_rc }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz https://dist.apache.org/repos/dist/release/sedona/{{ sedona_create_release.current_version }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.asc https://dist.apache.org/repos/dist/release/sedona/{{ sedona_create_release.current_version }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.asc
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512 https://dist.apache.org/repos/dist/release/sedona/{{ sedona_create_release.current_version }}/apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz https://dist.apache.org/repos/dist/release/sedona/{{ sedona_create_release.current_version }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.asc https://dist.apache.org/repos/dist/release/sedona/{{ sedona_create_release.current_version }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.asc
+svn import -m "Adding file" apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512 https://dist.apache.org/repos/dist/release/sedona/{{ sedona_create_release.current_version }}/apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512
 rm apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz
 rm apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.asc
 rm apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512
@@ -502,12 +411,12 @@ You must have the maintainer priviledge of `https://pypi.org/project/apache-sedo
 ```bash
 #!/bin/bash
 
-wget https://github.com/apache/incubator-sedona/archive/refs/tags/{{ sedona_create_release.current_git_tag}}.tar.gz
+wget https://github.com/apache/sedona/archive/refs/tags/{{ sedona_create_release.current_git_tag}}.tar.gz
 tar -xvf {{ sedona_create_release.current_git_tag}}.tar.gz
 mkdir apache-sedona-{{ sedona_create_release.current_version }}-src
-cp -r incubator-sedona-{{ sedona_create_release.current_git_tag}}/* apache-sedona-{{ sedona_create_release.current_version }}-src/
+cp -r sedona-{{ sedona_create_release.current_git_tag}}/* apache-sedona-{{ sedona_create_release.current_version }}-src/
 
-rm -rf incubator-sedona-{{ sedona_create_release.current_git_tag}}
+rm -rf sedona-{{ sedona_create_release.current_git_tag}}
 
 cd apache-sedona-{{ sedona_create_release.current_version }}-src/python && python3 setup.py sdist bdist_wheel && twine upload dist/* && cd ..
 cd zeppelin && npm publish && cd ..
@@ -529,8 +438,8 @@ Then submit to CRAN using this [web form](https://xmpalantir.wu.ac.at/cransubmit
 ### Prepare the environment and doc folder
 
 1. Check out the {{ sedona_create_release.current_version }} Git tag on your local repo.
-2. Read [Compile documentation website](/setup/compile/#compile-the-documentation) to set up your environment. But don't deploy anything yet.
-3. Add the download link to [Download page](/download#versions).
+2. Read [Compile documentation website](../../setup/compile) to set up your environment. But don't deploy anything yet.
+3. Add the download link to [Download page](../../download).
 4. Add the news to `docs/index.md`.
 
 ### Generate Javadoc and Scaladoc
@@ -559,6 +468,6 @@ cd ./docs/api/rdocs && tree -H '.' -L 1 --noreport --charset utf-8 -o index.html
 2. Check out the master branch.
 3. Git commit and push your changes in `download.md` and `index.md` to master branch. Delete all generated docs.
 4. Check out the `gh-page` branch.
-5. In a separate folder, check out GitHub sedona-website [asf-site branch](https://github.com/apache/incubator-sedona-website/tree/asf-site)
+5. In a separate folder, check out GitHub sedona-website [asf-site branch](https://github.com/apache/sedona-website/tree/asf-site)
 6. Copy all content to in Sedona main repo `gh-page` branch to Sedona website repo `asf-site` branch.
 7. Commit and push the changes to the remote `asf-site` branch.

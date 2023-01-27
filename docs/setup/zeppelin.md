@@ -28,7 +28,7 @@ Create a file called `sedona-zeppelin.json` in this folder and put the following
   "type": "VISUALIZATION",
   "name": "sedona-zeppelin",
   "description": "Zeppelin visualization support for Sedona",
-  "artifact": "/Absolute/Path/incubator-sedona/zeppelin",
+  "artifact": "/Absolute/Path/sedona/zeppelin",
   "license": "BSD-2-Clause",
   "icon": "<i class='fa fa-globe'></i>"
 }

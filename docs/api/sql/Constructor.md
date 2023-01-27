@@ -19,20 +19,20 @@ spatialDf.printSchema()
 ```
 
 !!!note
-The file extensions of .shp, .shx, .dbf must be in lowercase. Assume you have a shape file called ==myShapefile==, the file structure should be like this:
-```
-- shapefile1
-- shapefile2
-- myshapefile
-- myshapefile.shp
-- myshapefile.shx
-- myshapefile.dbf
-- myshapefile...
-- ...
-```
+	The file extensions of .shp, .shx, .dbf must be in lowercase. Assume you have a shape file called ==myShapefile==, the file structure should be like this:
+	```
+	- shapefile1
+	- shapefile2
+	- myshapefile
+	- myshapefile.shp
+	- myshapefile.shx
+	- myshapefile.dbf
+	- myshapefile...
+	- ...
+	```
 
 !!!warning
-Please make sure you use ==ST_GeomFromWKT== to create Geometry type column otherwise that column cannot be used in SedonaSQL.
+	Please make sure you use ==ST_GeomFromWKT== to create Geometry type column otherwise that column cannot be used in SedonaSQL.
 
 If the file you are reading contains non-ASCII characters you'll need to explicitly set the encoding
 via `sedona.global.charset` system property before the call to `ShapefileReader.readToGeometryRDD`.

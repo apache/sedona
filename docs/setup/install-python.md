@@ -1,4 +1,4 @@
-Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder) and play the interactive Sedona Python Jupyter Notebook immediately!
+Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder) and play the interactive Sedona Python Jupyter Notebook immediately!
 
 Apache Sedona extends pyspark functions which depends on libraries:
 
@@ -6,7 +6,7 @@ Apache Sedona extends pyspark functions which depends on libraries:
 * shapely
 * attrs
 
-You need to install necessary packages if your system does not have them installed. See ["packages" in our Pipfile](https://github.com/apache/incubator-sedona/blob/master/python/Pipfile).
+You need to install necessary packages if your system does not have them installed. See ["packages" in our Pipfile](https://github.com/apache/sedona/blob/master/python/Pipfile).
 
 ### Install sedona
 
@@ -37,9 +37,9 @@ Sedona Python needs one additional jar file called `sedona-python-adapter` to wo
 
 You can get it using one of the following methods:
 
-1. Compile from the source within main project directory and copy it (in `python-adapter/target` folder) to SPARK_HOME/jars/ folder ([more details](/setup/compile))
+1. Compile from the source within main project directory and copy it (in `python-adapter/target` folder) to SPARK_HOME/jars/ folder ([more details](../compile))
 
-2. Download from [GitHub release](https://github.com/apache/incubator-sedona/releases) and copy it to SPARK_HOME/jars/ folder
+2. Download from [GitHub release](https://github.com/apache/sedona/releases) and copy it to SPARK_HOME/jars/ folder
 3. Call the [Maven Central coordinate](../maven-coordinates) in your python program. For example, in PySparkSQL
 ```python
 spark = SparkSession. \
@@ -72,4 +72,4 @@ export SPARK_HOME=~/Downloads/spark-3.0.1-bin-hadoop2.7
 export PYTHONPATH=$SPARK_HOME/python
 ``` 
 
-You can then play with [Sedona Python Jupyter notebook](/tutorial/jupyter-notebook/).
+You can then play with [Sedona Python Jupyter notebook](../../tutorial/jupyter-notebook/).

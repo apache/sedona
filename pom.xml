@@ -26,11 +26,11 @@
     </parent>
     <groupId>org.apache.sedona</groupId>
     <artifactId>sedona-parent</artifactId>
-    <version>1.3.2-incubating-SNAPSHOT</version>
+    <version>1.4.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>sedona-parent</name>
     <url>http://sedona.apache.org/</url>
-    <description>Apache Sedona is a cluster computing system for processing large-scale spatial data. Apache Sedona is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Apache Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.
+    <description>Apache Sedona is a cluster computing system for processing large-scale spatial data.
     </description>
     <developers>
         <developer><name>Apache Sedona</name></developer>
@@ -51,10 +51,10 @@
         </mailingList>
     </mailingLists>
     <scm>
-        <connection>scm:git:https://github.com/apache/incubator-sedona.git</connection>
-        <developerConnection>scm:git:https://github.com/apache/incubator-sedona.git</developerConnection>
-        <url>https://github.com/apache/incubator-sedona</url>
-        <tag>sedona-1.2.0-incubating-rc2</tag>
+        <connection>scm:git:https://github.com/apache/sedona.git</connection>
+        <developerConnection>scm:git:https://github.com/apache/sedona.git</developerConnection>
+        <url>https://github.com/apache/sedona</url>
+        <tag>sedona-1.3.1-incubating-rc1</tag>
     </scm>
 
     <properties>

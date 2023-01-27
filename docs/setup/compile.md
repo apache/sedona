@@ -1,6 +1,6 @@
 # Compile Sedona source code
 
-[![Scala and Java build](https://github.com/apache/incubator-sedona/actions/workflows/java.yml/badge.svg)](https://github.com/apache/incubator-sedona/actions/workflows/java.yml) [![Python build](https://github.com/apache/incubator-sedona/actions/workflows/python.yml/badge.svg)](https://github.com/apache/incubator-sedona/actions/workflows/python.yml) [![R build](https://github.com/apache/incubator-sedona/actions/workflows/r.yml/badge.svg)](https://github.com/apache/incubator-sedona/actions/workflows/r.yml) [![Example project build](https://github.com/apache/incubator-sedona/actions/workflows/example.yml/badge.svg)](https://github.com/apache/incubator-sedona/actions/workflows/example.yml) [![Docs build](https://github.com/apache/incubator-sedona/actions/workflows/docs.yml/badge.svg)](https://github.com/apache/incubator-sedona/actions/workflows/docs.yml) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/incubator-sedona/HEAD?filepath=binder)
+[![Scala and Java build](https://github.com/apache/sedona/actions/workflows/java.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/java.yml) [![Python build](https://github.com/apache/sedona/actions/workflows/python.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/python.yml) [![R build](https://github.com/apache/sedona/actions/workflows/r.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/r.yml) [![Example project build](https://github.com/apache/sedona/actions/workflows/example.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/example.yml) [![Docs build](https://github.com/apache/sedona/actions/workflows/docs.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/docs.yml) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder)
 
 
 ## Compile Scala / Java source code
@@ -47,7 +47,7 @@ To compile all modules, please make sure you are in the root folder of all modul
 
 ### Download staged jars
 
-Sedona uses GitHub action to automatically generate jars per commit. You can go [here](https://github.com/apache/incubator-sedona/actions/workflows/java.yml) and download the jars by clicking the commit's ==Artifacts== tag.
+Sedona uses GitHub action to automatically generate jars per commit. You can go [here](https://github.com/apache/sedona/actions/workflows/java.yml) and download the jars by clicking the commit's ==Artifacts== tag.
 
 ## Run Python test
 

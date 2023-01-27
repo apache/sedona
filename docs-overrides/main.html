@@ -4,9 +4,9 @@
 {% extends "base.html" %}
 
 {% block outdated %}
-  You're not viewing the latest stable version.
+  You're not viewing the latest snapshot version.
   <a href="{{ '../' ~ base_url }}"> 
-    <strong>Click here to go to latest.</strong>
+    <strong>Click here to go to the latest snapshot.</strong>
   </a>
 {% endblock %}
 
@@ -98,12 +98,15 @@
               </div>
             </div>            
           </div>
+
+          <br><br><br><br>
           
           <span class="br"></span> 
 
         </div>
       </div>
     </section>
+
   {% else %}
     {{ super() }}
   {% endif %}

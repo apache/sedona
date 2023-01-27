@@ -1,5 +1,5 @@
-site_name: Apache Sedona&trade; (incubating) 
-site_description: Apache Sedona&trade; (incubating) is a cluster computing system for processing large-scale spatial data. Sedona extends existing cluster computing systems, such as Apache Spark and Apache Flink, with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
+site_name: Apache Sedona&trade;
+site_description: Apache Sedona&trade; is a cluster computing system for processing large-scale spatial data. Sedona extends existing cluster computing systems, such as Apache Spark and Apache Flink, with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
 nav:
     - Home: index.md
     - Setup:
@@ -90,54 +90,20 @@ nav:
         - Make a release: community/publish.md
         - Vote a release: community/vote.md
       - Publications: community/publication.md
-    - GeoSpark Legacy Docs:
-      - Download:
-        - Quick start: archive/download/overview.md
-        - Release notes: archive/download/GeoSpark-All-Modules-Release-notes.md      
-        - Maven Central coordinate: archive/download/GeoSpark-All-Modules-Maven-Central-Coordinates.md
-        - Set up Spark cluser: archive/download/cluster.md
-        - Spark Scala shell: archive/download/scalashell.md
-        - Self-contained project: archive/download/project.md
-        - Install GeoSpark-Zeppelin: archive/download/zeppelin.md
-        - Compile the source code: archive/download/compile.md
-      - Tutorial:
-        - Spatial RDD application: archive/tutorial/rdd.md
-        - Spatial SQL application: archive/tutorial/sql.md
-        - Visualize Spatial DataFrame: archive/tutorial/viz.md
-        - Run GeoSpark via Zeppelin: archive/tutorial/zeppelin.md
-        - Spatial RDD in Python: archive/tutorial/geospark-core-python.md
-        - Spatial SQL in Python: archive/tutorial/geospark-sql-python.md
-        - GeoSpark template project: archive/tutorial/GeoSpark-Runnable-DEMO.md
-        - Frequently Asked Questions: archive/tutorial/faq.md
-        - Tune GeoSpark RDD application: archive/tutorial/Advanced-Tutorial-Tune-your-GeoSpark-Application.md
-        - Benchmark: archive/tutorial/benchmark.md
-      - API:
-        - GeoSpark core (RDD):
-          - Scala/Java doc: archive/api/GeoSpark-Scala-and-Java-API.md
-          - Python doc: archive/api/GeoSpark-Python-API.md
-        - GeoSpark SQL:
-          - JavaDoc: archive/api/sql/GeoSparkSQL-javadoc.md
-          - Quick start: archive/api/sql/GeoSparkSQL-Overview.md
-          - Constructor: archive/api/sql/GeoSparkSQL-Constructor.md
-          - Function: archive/api/sql/GeoSparkSQL-Function.md
-          - Predicate: archive/api/sql/GeoSparkSQL-Predicate.md
-          - Aggregate function: archive/api/sql/GeoSparkSQL-AggregateFunction.md
-          - Join query (optimizer): archive/api/sql/GeoSparkSQL-Optimizer.md
-          - Parameter: archive/api/sql/GeoSparkSQL-Parameter.md
-        - GeoSpark Viz:
-          - DataFrame/SQL: archive/api/viz/sql.md
-          - RDD: archive/api/viz/Babylon-Scala-and-Java-API.md
+    - Use cases:
+      - Spatially aggregate airports per country: usecases/airport-country.md
+      - Match foot traffic to Seattle coffee shops: usecases/foot-traffic.md
+      - Raster image manipulation: usecases/raster.md
     - Apache Software Foundation:
       - Foundation: asf/asf.md
-      - Disclaimer: asf/disclaimer.md
       - License: https://www.apache.org/licenses/" target="_blank
       - Events: https://www.apache.org/events/current-event" target="_blank
       - Sponsorship: https://www.apache.org/foundation/sponsorship.html" target="_blank
       - Thanks: https://www.apache.org/foundation/thanks.html" target="_blank
       - Security: https://www.apache.org/security/" target="_blank
       - Privacy: https://privacy.apache.org/policies/privacy-policy-public.html" target="_blank
-repo_url: https://github.com/apache/incubator-sedona
-repo_name: apache/incubator-sedona
+repo_url: https://github.com/apache/sedona
+repo_name: apache/sedona
 theme:
   font: false
   name: 'material'
@@ -161,18 +127,18 @@ extra:
     provider: mike
   social:
     - icon: fontawesome/brands/github-alt
-      link: 'https://github.com/apache/incubator-sedona'
+      link: 'https://github.com/apache/sedona'
     - icon: fontawesome/brands/twitter
       link: 'https://twitter.com/ApacheSedona'
   sedona:
     current_version: 1.3.1-incubating
     current_geotools: 1.3.0-27.2
   sedona_create_release:
-    current_version: 1.3.2-incubating
-    current_git_tag: sedona-1.3.2-incubating-rc1
-    current_rc: 1.3.2-incubating-rc1
-    current_snapshot: 1.3.2-incubating-SNAPSHOT
-copyright: Copyright © 2022 The Apache Software Foundation
+    current_version: 1.4.0
+    current_git_tag: sedona-1.4.0-rc1
+    current_rc: 1.4.0-rc1
+    current_snapshot: 1.4.0-SNAPSHOT
+copyright: Copyright © 2023 The Apache Software Foundation
 markdown_extensions:
   - admonition
   - attr_list
