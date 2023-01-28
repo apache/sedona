@@ -247,14 +247,30 @@ SELECT ST_MPolyFromText('MULTIPOLYGON(((-70.916 42.1002,-70.9468 42.0946,-70.976
 Introduction: Construct a Point from X and Y
 
 Format: `ST_Point (X:decimal, Y:decimal)`
-Format: `ST_Point (X:decimal, Y:decimal, Z:decimal)`
 
 Since: `v1.0.0`
+
+In `v1.4.0` an optional Z parameter was removed to be more consistent with other spatial SQL implementations.
+If you are upgrading from an older version of Sedona - please use ST_PointZ to create 3D points.
 
 Spark SQL example:
 ```SQL
 SELECT ST_Point(CAST(pointtable._c0 AS Decimal(24,20)), CAST(pointtable._c1 AS Decimal(24,20))) AS pointshape
 FROM pointtable
+```
+
+## ST_PointZ
+
+Introduction: Construct a Point from X, Y and Z and an optional srid. If srid is not set, it defaults to 0 (unknown).
+
+Format: `ST_PointZ (X:decimal, Y:decimal, Z:decimal)`
+Format: `ST_PointZ (X:decimal, Y:decimal, Z:decimal, srid:integer)`
+
+Since: `v1.4.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_PointZ(1.0, 2.0, 3.0) AS pointshape
 ```
 
 ## ST_PointFromText

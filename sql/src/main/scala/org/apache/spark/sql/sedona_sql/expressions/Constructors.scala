@@ -280,30 +280,23 @@ case class ST_GeomFromGeoJSON(inputExpressions: Seq[Expression])
 /**
   * Return a Point from X and Y
   *
-  * @param inputExpressions This function takes 3 parameter which are point x, y and z.
+  * @param inputExpressions This function takes 2 parameter which are point x, y.
   */
 case class ST_Point(inputExpressions: Seq[Expression])
-  extends Expression with FoldableExpression with ImplicitCastInputTypes with CodegenFallback with UserDataGeneratator {
+  extends InferredBinaryExpression(Constructors.point) with FoldableExpression {
 
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    val x = inputExpressions(0).eval(inputRow).asInstanceOf[Double]
-    val y = inputExpressions(1).eval(inputRow).asInstanceOf[Double]
-    val coord = inputExpressions(2).eval(inputRow) match {
-      case null => new Coordinate(x, y)
-      case z: Double => new Coordinate(x, y, z)
-    }
-    val geometryFactory = new GeometryFactory()
-    val geometry = geometryFactory.createPoint(coord)
-    GeometrySerializer.serialize(geometry)
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
   }
+}
 
-  override def dataType: DataType = GeometryUDT
-
-  override def inputTypes: Seq[AbstractDataType] = Seq(DoubleType, DoubleType, DoubleType)
-
-  override def children: Seq[Expression] = inputExpressions
+/**
+ * Return a Point from X, Y, Z and srid
+ *
+ * @param inputExpressions This function takes 4 parameter which are point x, y, z and srid (default 0).
+ */
+case class ST_PointZ(inputExpressions: Seq[Expression])
+  extends InferredQuarternaryExpression(Constructors.pointZ) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

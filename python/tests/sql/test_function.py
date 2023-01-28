@@ -170,7 +170,7 @@ class TestPredicateJoin(TestBase):
         function_df.show()
 
     def test_st_3ddistance(self):
-        function_df = self.spark.sql("select ST_3DDistance(ST_Point(0.0, 0.0, 5.0), ST_Point(1.0, 1.0, -6.0))")
+        function_df = self.spark.sql("select ST_3DDistance(ST_PointZ(0.0, 0.0, 5.0), ST_PointZ(1.0, 1.0, -6.0))")
         assert function_df.count() == 1
 
     def test_st_transform(self):

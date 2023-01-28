@@ -57,13 +57,20 @@ object st_constructors extends DataFrameAPI {
   def ST_LineStringFromText(coords: Column, delimiter: Column): Column = wrapExpression[ST_LineStringFromText](coords, delimiter)
   def ST_LineStringFromText(coords: String, delimiter: String): Column = wrapExpression[ST_LineStringFromText](coords, delimiter)
 
-  def ST_Point(x: Column, y: Column): Column = wrapExpression[ST_Point](x, y, null)
-  def ST_Point(x: String, y: String): Column = wrapExpression[ST_Point](x, y, null)
-  def ST_Point(x: Double, y: Double): Column = wrapExpression[ST_Point](x, y, null)
-  def ST_Point(x: Column, y: Column, z: Column): Column = wrapExpression[ST_Point](x, y, z)
-  def ST_Point(x: String, y: String, z: String): Column = wrapExpression[ST_Point](x, y, z)
-  def ST_Point(x: Double, y: Double, z: Double): Column = wrapExpression[ST_Point](x, y, z)
- 
+  def ST_Point(x: Column, y: Column): Column = wrapExpression[ST_Point](x, y)
+  def ST_Point(x: String, y: String): Column = wrapExpression[ST_Point](x, y)
+  def ST_Point(x: Double, y: Double): Column = wrapExpression[ST_Point](x, y)
+
+  def ST_PointZ(x: Column, y: Column, z: Column): Column = wrapExpression[ST_PointZ](x, y, z, 0)
+  def ST_PointZ(x: String, y: String, z: String): Column = wrapExpression[ST_PointZ](x, y, z, 0)
+  def ST_PointZ(x: Double, y: Double, z: Double): Column = wrapExpression[ST_PointZ](x, y, z, 0)
+
+  def ST_PointZ(x: Column, y: Column, z: Column, srid: Column): Column = wrapExpression[ST_PointZ](x, y, z, srid)
+
+  def ST_PointZ(x: String, y: String, z: String, srid: Column): Column = wrapExpression[ST_PointZ](x, y, z, srid)
+
+  def ST_PointZ(x: Double, y: Double, z: Double, srid: Int): Column = wrapExpression[ST_PointZ](x, y, z, srid)
+
   def ST_PointFromText(coords: Column, delimiter: Column): Column = wrapExpression[ST_PointFromText](coords, delimiter)
   def ST_PointFromText(coords: String, delimiter: String): Column = wrapExpression[ST_PointFromText](coords, delimiter)
 

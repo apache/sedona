@@ -15,6 +15,7 @@ package org.apache.sedona.common;
 
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.io.ParseException;
 
 import static org.junit.Assert.*;
@@ -73,5 +74,23 @@ public class ConstructorsTest {
         ParseException parseException = assertThrows(ParseException.class, () -> Constructors.mPolyFromText("MULTIPOLYGON(not valid)", 0));
         assertEquals("Expected EMPTY or ( but found 'not' (line 1)", parseException.getMessage());
 
+    }
+
+    @Test
+    public void point() {
+        Geometry point = Constructors.point(1.0d, 2.0d);
+
+        assertTrue(point instanceof Point);
+        assertEquals(0, point.getSRID());
+        assertEquals("POINT (1 2)", point.toText());
+    }
+
+    @Test
+    public void pointZ() {
+        Geometry point = Constructors.pointZ(0.0d, 1.0d, 2.0d, 4326);
+
+        assertTrue(point instanceof Point);
+        assertEquals(4326, point.getSRID());
+        assertEquals("POINT Z(0 1 2)", Functions.asWKT(point));
     }
 }

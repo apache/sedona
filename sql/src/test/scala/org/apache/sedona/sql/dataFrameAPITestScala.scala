@@ -40,6 +40,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("passed st_pointz") {
+      val df = sparkSession.sql("SELECT 0.0 AS x, 1.0 AS y, 2.0 AS z").select(ST_AsText(ST_PointZ("x", "y", "z")))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[String]
+      val expectedResult = "POINT Z(0 1 2)"
+      assert(actualResult == expectedResult)
+    }
+
     it("passed st_pointfromtext") {
       val df = sparkSession.sql("SELECT '0.0,1.0' AS c").select(ST_PointFromText($"c", lit(',')))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
@@ -229,7 +236,7 @@ class dataFrameAPITestScala extends TestBaseScala {
     }
 
     it("Passed ST_3DDistance") {
-      val pointDf = sparkSession.sql("SELECT ST_Point(0.0, 0.0, 0.0) AS a, ST_Point(3.0, 0.0, 4.0) as b")
+      val pointDf = sparkSession.sql("SELECT ST_PointZ(0.0, 0.0, 0.0) AS a, ST_PointZ(3.0, 0.0, 4.0) as b")
       val df = pointDf.select(ST_3DDistance("a", "b"))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Double]
       val expectedResult = 5.0
@@ -419,7 +426,7 @@ class dataFrameAPITestScala extends TestBaseScala {
     }
 
     it("Should pass ST_X") {
-      val baseDf = sparkSession.sql("SELECT ST_Point(0.0, 1.0, 2.0) AS geom")
+      val baseDf = sparkSession.sql("SELECT ST_PointZ(0.0, 1.0, 2.0) AS geom")
       val df = baseDf.select(ST_X("geom"))
       val actualResult = df.take(1)(0).getDouble(0)
       val expectedResult = 0.0
@@ -427,7 +434,7 @@ class dataFrameAPITestScala extends TestBaseScala {
     }
 
     it("Should pass ST_Y") {
-      val baseDf = sparkSession.sql("SELECT ST_Point(0.0, 1.0, 2.0) AS geom")
+      val baseDf = sparkSession.sql("SELECT ST_PointZ(0.0, 1.0, 2.0) AS geom")
       val df = baseDf.select(ST_Y("geom"))
       val actualResult = df.take(1)(0).getDouble(0)
       val expectedResult = 1.0
@@ -435,7 +442,7 @@ class dataFrameAPITestScala extends TestBaseScala {
     }
 
     it("Should pass ST_Z") {
-      val baseDf = sparkSession.sql("SELECT ST_Point(0.0, 1.0, 2.0) AS geom")
+      val baseDf = sparkSession.sql("SELECT ST_PointZ(0.0, 1.0, 2.0) AS geom")
       val df = baseDf.select(ST_Z("geom"))
       val actualResult = df.take(1)(0).getDouble(0)
       val expectedResult = 2.0
@@ -692,7 +699,7 @@ class dataFrameAPITestScala extends TestBaseScala {
     }
 
     it ("Passed ST_Force_2D") {
-      val baseDf = sparkSession.sql("SELECT ST_Point(0.0, 0.0, 1.0) AS point")
+      val baseDf = sparkSession.sql("SELECT ST_PointZ(0.0, 0.0, 1.0) AS point")
       val df = baseDf.select(ST_Force_2D("point"))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "POINT (0 0)"

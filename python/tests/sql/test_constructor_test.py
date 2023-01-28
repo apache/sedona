@@ -33,8 +33,8 @@ class TestConstructors(TestBase):
         point_df = self.spark.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
         assert point_df.count() == 1000
 
-    def test_st_point_3d(self):
-        point_df = self.spark.sql("SELECT ST_Point(1.2345, 2.3456, 3.4567)")
+    def test_st_point_z(self):
+        point_df = self.spark.sql("SELECT ST_PointZ(1.2345, 2.3456, 3.4567)")
         assert point_df.count() == 1
 
     def test_st_point_from_text(self):

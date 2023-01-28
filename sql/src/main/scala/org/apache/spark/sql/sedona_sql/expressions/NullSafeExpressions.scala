@@ -252,3 +252,41 @@ abstract class InferredTernaryExpression[A1: InferrableType, A2: InferrableType,
     }
   }
 }
+
+abstract class InferredQuarternaryExpression[A1: InferrableType, A2: InferrableType, A3: InferrableType, A4: InferrableType, R: InferrableType]
+(f: (A1, A2, A3, A4) => R)
+(implicit val a1Tag: TypeTag[A1], implicit val a2Tag: TypeTag[A2], implicit val a3Tag: TypeTag[A3], implicit val a4Tag: TypeTag[A4], implicit val rTag: TypeTag[R])
+  extends Expression with ImplicitCastInputTypes with CodegenFallback with Serializable {
+  import InferredTypes._
+
+  def inputExpressions: Seq[Expression]
+
+  override def children: Seq[Expression] = inputExpressions
+
+  override def toString: String = s" **${getClass.getName}**  "
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(inferSparkType[A1], inferSparkType[A2], inferSparkType[A3], inferSparkType[A4])
+
+  override def nullable: Boolean = true
+
+  override def dataType = inferSparkType[R]
+
+  lazy val extractFirst = buildExtractor[A1](inputExpressions(0))
+  lazy val extractSecond = buildExtractor[A2](inputExpressions(1))
+  lazy val extractThird = buildExtractor[A3](inputExpressions(2))
+  lazy val extractForth = buildExtractor[A4](inputExpressions(3))
+
+  lazy val serialize = buildSerializer[R]
+
+  override def eval(input: InternalRow): Any = {
+    val first = extractFirst(input)
+    val second = extractSecond(input)
+    val third = extractThird(input)
+    val forth = extractForth(input)
+    if (first != null && second != null && third != null && forth != null) {
+      serialize(f(first, second, third, forth))
+    } else {
+      null
+    }
+  }
+}
