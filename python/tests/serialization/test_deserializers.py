@@ -19,6 +19,7 @@ import os
 
 from shapely.geometry import MultiPoint, Point, MultiLineString, LineString, Polygon, MultiPolygon, GeometryCollection
 import geopandas as gpd
+import pandas as pd
 
 from tests import tests_resource
 from tests.test_base import TestBase
@@ -112,6 +113,7 @@ class TestGeometryConvert(TestBase):
 
     def test_from_geopandas_convert(self):
         gdf = gpd.read_file(os.path.join(tests_resource, "shapefiles/gis_osm_pois_free_1/"))
+        gdf = gdf.replace(pd.NA, '')
 
         self.spark.createDataFrame(
             gdf

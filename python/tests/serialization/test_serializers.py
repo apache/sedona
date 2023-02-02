@@ -19,6 +19,7 @@ import os
 
 from pyspark.sql.types import IntegerType
 import geopandas as gpd
+import pandas as pd
 
 from tests import tests_resource
 from sedona.sql.types import GeometryType
@@ -145,6 +146,7 @@ class TestsSerializers(TestBase):
 
     def test_geopandas_convertion(self):
         gdf = gpd.read_file(os.path.join(tests_resource, "shapefiles/gis_osm_pois_free_1/"))
+        gdf = gdf.replace(pd.NA, '')
         print(self.spark.createDataFrame(
             gdf
         ).toPandas())
