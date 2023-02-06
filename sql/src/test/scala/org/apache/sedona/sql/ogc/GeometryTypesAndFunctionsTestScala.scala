@@ -270,7 +270,7 @@ class GeometryTypesAndFunctionsTestScala extends TestBaseScala with BeforeAndAft
       assert(actual == "POINT (0 18)")
     }
     it("T24") {
-      // Probable error in the specification.
+      // Probable error in the test specification.
       // Both Sedona and PostGIS agrees that the point should be 63 15.5 and not 53 15.5.
       val actual = sparkSession.sql(
         """
@@ -527,6 +527,17 @@ class GeometryTypesAndFunctionsTestScala extends TestBaseScala with BeforeAndAft
       assert(actual == "POLYGON ((52 18, 66 23, 73 9, 48 6, 52 18))")
     }
     it("T50") {
+      // Test specification uses 'Goose Island' but test SQL uses 'Ashton' as named_places.
+      val actual = sparkSession.sql(
+        """
+          |SELECT ST_AsText(ST_SymDifference(shore, boundary))
+          |FROM lakes, named_places
+          |WHERE lakes.name = 'Blue Lake'
+          |AND named_places.name = 'Goose Island'
+          |""".stripMargin).first().getString(0)
+      assert(actual == "POLYGON ((52 18, 66 23, 73 9, 48 6, 52 18))")
+    }
+    it("T51") {
       val actual = sparkSession.sql(
         """
           |SELECT count(*)
