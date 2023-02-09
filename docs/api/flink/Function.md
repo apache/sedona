@@ -707,7 +707,7 @@ Result:
 
 ## ST_SetSRID
 
-Introduction: Sets the spatial refence system identifier (SRID) of the geometry.
+Introduction: Sets the spatial reference system identifier (SRID) of the geometry.
 
 Format: `ST_SetSRID (A:geometry, srid: integer)`
 
@@ -721,7 +721,7 @@ FROM polygondf
 
 ## ST_SRID
 
-Introduction: Return the spatial refence system identifier (SRID) of the geometry.
+Introduction: Return the spatial reference system identifier (SRID) of the geometry.
 
 Format: `ST_SRID (A:geometry)`
 
