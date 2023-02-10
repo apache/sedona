@@ -41,7 +41,7 @@ FROM pixels
 
 #### Produce uniform colors - scatter plot
 
-If a mandatory color name is put as the third input argument, this function will directly ouput this color, without considering the weights. In this case, every pixel will possess the same color.
+If a mandatory color name is put as the third input argument, this function will directly output this color, without considering the weights. In this case, every pixel will possess the same color.
 
 Spark SQL example:
 ```SQL

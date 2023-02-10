@@ -92,7 +92,7 @@ val multiplyDF = spark.sql("select RS_Divide(band1, band2) as divideBands from d
 
 Introduction: Fetch a subset of region from given Geotiff image based on minimumX, minimumY, maximumX and maximumY index as well original height and width of image
 
-Format: `RS_FetchRegion (Band: Array[Double], coordinates: Array[Int], dimenstions: Array[Int])`
+Format: `RS_FetchRegion (Band: Array[Double], coordinates: Array[Int], dimensions: Array[Int])`
 
 Since: `v1.1.0`
 

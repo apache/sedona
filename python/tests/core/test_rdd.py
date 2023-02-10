@@ -335,7 +335,7 @@ class TestSpatialRDD(TestBase):
                 object_rdd, range_query_window, False, False
             )
 
-    def test_crs_tranformed_spatial_range_query_using_index(self):
+    def test_crs_transformed_spatial_range_query_using_index(self):
         object_rdd = PointRDD(
             sparkContext=self.sc,
             InputLocation=point_rdd_input_location,

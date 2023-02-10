@@ -50,7 +50,7 @@ modified_polygon_sdf <- polygon_sdf %>%
 ```
 
 
-Notice that all of the above can open up many interesting possiblities. For
+Notice that all of the above can open up many interesting possibilities. For
 example, one can extract ML features from geospatial data in Spark
 dataframes, build a ML pipeline using `ml_*` family of functions in
 `sparklyr` to work with such features, and if the output of a ML model

@@ -320,11 +320,11 @@ This version is a maintenance release on Sedona 1.0.0 line. It includes bug fixe
 
 ### Known issue
 
-In Sedona v1.0.1 and eariler versions, the Spark dependency in setup.py was configured to be ==< v3.1.0== [by mistake](https://github.com/apache/sedona/blob/8235924ac80939cbf2ce562b0209b71833ed9429/python/setup.py#L39). When you install  Sedona Python (apache-sedona v1.0.1) from Pypi, pip might unstall PySpark 3.1.1 and install PySpark 3.0.2 on your machine.
+In Sedona v1.0.1 and earlier versions, the Spark dependency in setup.py was configured to be ==< v3.1.0== [by mistake](https://github.com/apache/sedona/blob/8235924ac80939cbf2ce562b0209b71833ed9429/python/setup.py#L39). When you install Sedona Python (apache-sedona v1.0.1) from Pypi, pip might uninstall PySpark 3.1.1 and install PySpark 3.0.2 on your machine.
 
 Three ways to fix this:
 
-1. After install apache-sedona v1.0.1, unstall PySpark 3.0.2 and reinstall PySpark 3.1.1
+1. After install apache-sedona v1.0.1, uninstall PySpark 3.0.2 and reinstall PySpark 3.1.1
 
 2. Ask pip not to install Sedona dependencies: `pip install --no-deps apache-sedona`
 

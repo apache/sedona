@@ -48,7 +48,7 @@ At the moment `apache.sedona` consists of the following components:
 
 To ensure Sedona serialization routines, UDTs, and UDFs are properly
 registered when creating a Spark session, one simply needs to attach
-`apache.sedona` before instantiating a Spark conneciton. apache.sedona
+`apache.sedona` before instantiating a Spark connection. apache.sedona
 will take care of the rest. For example,
 
 ``` r

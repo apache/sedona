@@ -242,7 +242,7 @@ query_result = RangeQuery.SpatialRangeQuery(
 
 The output format of the spatial range query is another RDD which consists of GeoData objects.
 
-SpatialRangeQuery result can be used as RDD with map or other spark RDD funtions. Also it can be used as 
+SpatialRangeQuery result can be used as RDD with map or other spark RDD functions. Also it can be used as 
 Python objects when using collect method.
 Example:
 

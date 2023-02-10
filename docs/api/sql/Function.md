@@ -839,7 +839,7 @@ Result:
 !!!note
     In Sedona up to and including version 1.2 the behaviour of ST_MakeValid was different.
 Be sure to check you code when upgrading. The previous implementation only worked for (multi)polygons and had a different interpretation of the second, boolean, argument.
-It would also sometimes return multiple geometries for a single geomtry input.
+It would also sometimes return multiple geometries for a single geometry input.
 
 ## ST_MinimumBoundingCircle
 

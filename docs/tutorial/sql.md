@@ -178,7 +178,7 @@ The first EPSG code EPSG:4326 in `ST_Transform` is the source CRS of the geometr
 
 The second EPSG code EPSG:3857 in `ST_Transform` is the target CRS of the geometries. It is the most common meter-based CRS.
 
-This `ST_Transform` transform the CRS of these geomtries from EPSG:4326 to EPSG:3857. The details CRS information can be found on [EPSG.io](https://epsg.io/)
+This `ST_Transform` transform the CRS of these geometries from EPSG:4326 to EPSG:3857. The details CRS information can be found on [EPSG.io](https://epsg.io/)
 
 The coordinates of polygons have been changed. The output will be like this:
 
