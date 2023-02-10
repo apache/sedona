@@ -63,7 +63,7 @@ val pointRDDSplitter = FileDataSplitter.TSV
 #### PolygonRDD/LineStringRDD from CSV/TSV
 In general, polygon and line string data is stored in WKT, WKB, GeoJSON and Shapefile formats instead of CSV/TSV because the geometries in a file may have different lengths. However, if all polygons / line strings in your CSV/TSV possess the same length, you can create PolygonRDD and LineStringRDD from these files.
 
-Suppose we have a `checkinshape.csv` CSV file at Path `/Download/checkinshape.csv ` as follows:
+Suppose we have a `checkinshape.csv` CSV file at Path `/Download/checkinshape.csv` as follows:
 ```
 -88.331492,32.324142,-88.331492,32.324142,-88.331492,32.324142,-88.331492,32.324142,-88.331492,32.324142,hotel
 -88.175933,32.360763,-88.175933,32.360763,-88.175933,32.360763,-88.175933,32.360763,-88.175933,32.360763,gas
