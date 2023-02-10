@@ -229,7 +229,7 @@ No -1 votes
 
 The vote thread (Permalink from https://lists.apache.org/list.html):
 
-I will make an annoucement soon.
+I will make an announcement soon.
 
 ```
 
@@ -406,7 +406,7 @@ rm *.asc
 
 ## 9. Release Sedona Python and Zeppelin
 
-You must have the maintainer priviledge of `https://pypi.org/project/apache-sedona/` and `https://www.npmjs.com/package/apache-sedona`
+You must have the maintainer privilege of `https://pypi.org/project/apache-sedona/` and `https://www.npmjs.com/package/apache-sedona`
 
 ```bash
 #!/bin/bash

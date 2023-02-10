@@ -2,7 +2,7 @@
 
 This page is for Sedona community to vote a Sedona release. The script below is tested on MacOS.
 
-In order to vote a Sedona release, you must provide your checklist inlcuding the following minimum requirement:
+In order to vote a Sedona release, you must provide your checklist including the following minimum requirement:
 
 * Download links are valid
 * Checksums and PGP signatures are valid

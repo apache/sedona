@@ -8,9 +8,9 @@ Sedona Flink has four modules :`sedona-core, sedona-sql, sedona-python-adapter, 
 ## Use Sedona fat jars
 
 !!!warning
-	For Scala/Java/Python/R users, this is the most common way to use Sedona in your environment. Do not use separate Sedona jars othwerwise you will get dependency conflicts. `sedona-python-adapter` already contains all you need.
+	For Scala/Java/Python/R users, this is the most common way to use Sedona in your environment. Do not use separate Sedona jars otherwise you will get dependency conflicts. `sedona-python-adapter` already contains all you need.
 
-The optional GeoTools library is required only if you want to use CRS transformation and ShapefileReader. This wrapper library is a re-distriution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This libary is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
+The optional GeoTools library is required only if you want to use CRS transformation and ShapefileReader. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
 
 !!! abstract "Sedona with Apache Spark"
 
@@ -234,7 +234,7 @@ Under MIT License. Please make sure you exclude jts and jackson from this librar
 
 ### GeoTools 24.0+
 
-GeoTools library is required only if you want to use CRS transformation and ShapefileReader. This wrapper library is a re-distriution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This libary is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
+GeoTools library is required only if you want to use CRS transformation and ShapefileReader. This wrapper library is a re-distriution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
 
 ```xml
 <!-- https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->

@@ -211,7 +211,7 @@ Once Sedona graduates, the PMC chair will make the request.
 
 Once the new PMC subscribes to the Sedona mailing lists using his/her ASF account, one of the PMC needs to add the new PMC to the Whimsy system (https://whimsy.apache.org/roster/pmc/sedona).
 
-### PMC annoucement
+### PMC announcement
 
 This is the email to announce the new committer to sedona-dev once the account has been created.
 

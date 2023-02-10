@@ -5,7 +5,7 @@ The project welcomes contributions. You can contribute to Sedona code or documen
 
 The following sections brief the workflow of how to complete a contribution.
 
-## Pick / Annouce a task using JIRA
+## Pick / Announce a task using JIRA
 
 It is important to confirm that your contribution is acceptable. You should create a JIRA ticket or pick an existing ticket. A new JIRA ticket will be automatically sent to `dev@sedona.apache.org`
 

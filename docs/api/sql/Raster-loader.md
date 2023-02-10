@@ -33,7 +33,7 @@ There are three more optional parameters for reading GeoTiff:
 
 ```html
  |-- readfromCRS: Coordinate reference system of the geometry coordinates representing the location of the Geotiff. An example value of readfromCRS is EPSG:4326.
- |-- readToCRS: If you want to tranform the Geotiff location geometry coordinates to a different coordinate reference system, you can define the target coordinate reference system with this option.
+ |-- readToCRS: If you want to transform the Geotiff location geometry coordinates to a different coordinate reference system, you can define the target coordinate reference system with this option.
  |-- disableErrorInCRS: (Default value false) => Indicates whether to ignore errors in CRS transformation.
 ```
 
