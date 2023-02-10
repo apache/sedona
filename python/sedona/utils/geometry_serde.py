@@ -408,7 +408,7 @@ def serialize_polygon(geom: Polygon) -> bytes:
 
     coord_bytes = b''
     ring_lengths = []
-    offset = 9  #  1 byte endianess + 4 byte geom type + 4 byte num rings
+    offset = 9  #  1 byte endianness + 4 byte geom type + 4 byte num rings
     bytes_per_coord = geom._ndim * 8
     num_coords = 0
 

@@ -59,7 +59,7 @@ public final class GeometrySplitter {
      * restrictions on the blade for polygonal input geometry.
      * <p>
      * The result will be null if the input geometry and blade are either
-     * invalid in general or in relation to eachother. Otherwise, the result
+     * invalid in general or in relation to each other. Otherwise, the result
      * will always be a MultiLineString or MultiPolygon depending on the input,
      * and even if the result is a single geometry.
      *
@@ -83,7 +83,7 @@ public final class GeometrySplitter {
      * Split linear input geometry by the blade geometry.
      * Input geometry is assumed to be either a LineString,
      * MultiLineString, or a homogeneous collection of lines in a
-     * GeometryCollection. The blade geometry can be any indivdual
+     * GeometryCollection. The blade geometry can be any individual
      * puntal, lineal, or polygonal geometry or homogeneous collection
      * of those geometries. Blades that are polygonal will use their
      * boundary for the split. Will always return a MultiLineString.

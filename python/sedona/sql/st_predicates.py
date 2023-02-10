@@ -82,7 +82,7 @@ def ST_Disjoint(a: ColumnOrName, b: ColumnOrName) -> Column:
 
 @validate_argument_types
 def ST_Equals(a: ColumnOrName, b: ColumnOrName) -> Column:
-    """Check whether two geometries are equal regardles of vertex ordering.
+    """Check whether two geometries are equal regardless of vertex ordering.
 
     :param a: One geometry column to check.
     :type a: ColumnOrName
