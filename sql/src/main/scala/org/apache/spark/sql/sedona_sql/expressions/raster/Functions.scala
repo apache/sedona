@@ -315,7 +315,7 @@ case class RS_LessThanEqual(inputExpressions: Seq[Expression])
   }
 }
 
-// Count number of occurences of a particular value in a band
+// Count number of occurrences of a particular value in a band
 case class RS_Count(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   assert(inputExpressions.length == 2)

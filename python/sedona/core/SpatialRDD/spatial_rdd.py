@@ -114,7 +114,7 @@ class SpatialRDD:
     def CRSTransform(self, sourceEpsgCRSCode: crs, targetEpsgCRSCode: crs) -> bool:
         """
         Function transforms coordinates from one crs to another one
-        :param sourceEpsgCRSCode: crs,  Cooridnate Reference System to transform from
+        :param sourceEpsgCRSCode: crs,  Coordinate Reference System to transform from
         :param targetEpsgCRSCode: crs, Coordinate Reference System to transform to
         :return: bool, True if transforming was correct
         """

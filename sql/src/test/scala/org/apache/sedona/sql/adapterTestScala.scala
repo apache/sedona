@@ -413,7 +413,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
 
       // Check results
       // Force an action so that spark has to serialize the data -- this will surface
-      // a serialization error if the schema or coersion is incorrect, e.g.
+      // a serialization error if the schema or coercion is incorrect, e.g.
       // "Error while encoding: java.lang.RuntimeException: <desired data type> is not a
       // valid external type for schema of <current data type>"
       println(joinResultDf.show(1))
