@@ -37,7 +37,7 @@ Apache Sedona™ is a cluster computing system for processing large-scale spatia
 
 ## Compile the source code
 
-Please refer to [Sedona website](http://sedona.apache.org/setup/compile/)
+Please refer to [Sedona website](https://sedona.apache.org/latest-snapshot/setup/compile/)
 
 ## Contact
 
