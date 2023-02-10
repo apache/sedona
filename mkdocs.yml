@@ -18,7 +18,7 @@ nav:
         - Install Sedona R: setup/install-r.md
         - Install Sedona-Zeppelin: setup/zeppelin.md
         - Install on Databricks: setup/databricks.md
-        - Set up Spark cluser: setup/cluster.md
+        - Set up Spark cluster: setup/cluster.md
       - Install with Apache Flink:
         - Install Sedona Scala/Java: setup/flink/install-scala.md
       - Release notes: setup/release-notes.md      

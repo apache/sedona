@@ -71,7 +71,7 @@ NULL
 #'   )
 #' }
 #'
-#' @family Sedona data inferface functions
+#' @family Sedona data interface functions
 #'
 #' @export
 sedona_read_dsv_to_typed_rdd <- function(sc,
@@ -169,7 +169,7 @@ sedona_read_dsv_to_typed_rdd <- function(sc,
 #'   )
 #' }
 #'
-#' @family Sedona data inferface functions
+#' @family Sedona data interface functions
 #'
 #' @export
 sedona_read_shapefile_to_typed_rdd <- function(sc,
@@ -210,7 +210,7 @@ sedona_read_shapefile_to_typed_rdd <- function(sc,
 #'   )
 #' }
 #'
-#' @family Sedona data inferface functions
+#' @family Sedona data interface functions
 #'
 #' @export
 sedona_read_geojson_to_typed_rdd <- function(sc,
@@ -256,7 +256,7 @@ sedona_read_geojson_to_typed_rdd <- function(sc,
 #'   rdd <- sedona_read_geojson(sc, location = input_location)
 #' }
 #'
-#' @family Sedona data inferface functions
+#' @family Sedona data interface functions
 #'
 #' @export
 sedona_read_geojson <- function(sc,
@@ -313,7 +313,7 @@ sedona_read_geojson <- function(sc,
 #'   )
 #' }
 #'
-#' @family Sedona data inferface functions
+#' @family Sedona data interface functions
 #'
 #' @export
 sedona_read_wkb <- function(sc,
@@ -373,7 +373,7 @@ sedona_read_wkb <- function(sc,
 #'   )
 #' }
 #'
-#' @family Sedona data inferface functions
+#' @family Sedona data interface functions
 #'
 #' @export
 sedona_read_wkt <- function(sc,
@@ -422,7 +422,7 @@ sedona_read_wkt <- function(sc,
 #'   rdd <- sedona_read_shapefile(sc, location = input_location)
 #' }
 #'
-#' @family Sedona data inferface functions
+#' @family Sedona data interface functions
 #'
 #' @export
 sedona_read_shapefile <- function(sc,
@@ -473,7 +473,7 @@ NULL
 #'   sedona_write_wkb(rdd, "/tmp/wkb_output.tsv")
 #' }
 #'
-#' @family Sedona data inferface functions
+#' @family Sedona data interface functions
 #'
 #' @export
 sedona_write_wkb <- function(x, output_location) {
@@ -504,7 +504,7 @@ sedona_write_wkb <- function(x, output_location) {
 #'   sedona_write_wkt(rdd, "/tmp/wkt_output.tsv")
 #' }
 #'
-#' @family Sedona data inferface functions
+#' @family Sedona data interface functions
 #'
 #' @export
 sedona_write_wkt <- function(x, output_location) {
@@ -534,7 +534,7 @@ sedona_write_wkt <- function(x, output_location) {
 #'   sedona_write_geojson(rdd, "/tmp/example.json")
 #' }
 #'
-#' @family Sedona data inferface functions
+#' @family Sedona data interface functions
 #'
 #' @export
 sedona_write_geojson <- function(x, output_location) {
@@ -573,7 +573,7 @@ sedona_write_geojson <- function(x, output_location) {
 #'   )
 #' }
 #'
-#' @family Sedona data inferface functions
+#' @family Sedona data interface functions
 #'
 #' @export
 sedona_save_spatial_rdd <- function(x,
