@@ -7,7 +7,7 @@ Format: `ST_Envelope_Aggr (A:geometryColumn)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_Envelope_Aggr(pointdf.arealandmark)
 FROM pointdf
 ```
@@ -21,7 +21,7 @@ Format: `ST_Intersection_Aggr (A:geometryColumn)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_Intersection_Aggr(polygondf.polygonshape)
 FROM polygondf
 ```
@@ -35,7 +35,7 @@ Format: `ST_Union_Aggr (A:geometryColumn)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_Union_Aggr(polygondf.polygonshape)
 FROM polygondf
 ```

@@ -7,7 +7,7 @@ Format: `ST_Envelope_Aggr (A:geometryColumn)`
 Since: `v1.3.0`
 
 SQL example:
-```SQL
+```sql
 SELECT ST_Envelope_Aggr(pointdf.arealandmark)
 FROM pointdf
 ```
@@ -21,7 +21,7 @@ Format: `ST_Union_Aggr (A:geometryColumn)`
 Since: `v1.3.0`
 
 SQL example:
-```SQL
+```sql
 SELECT ST_Union_Aggr(polygondf.polygonshape)
 FROM polygondf
 ```

@@ -263,7 +263,7 @@ var queryResult = RangeQuery.SpatialRangeQuery(spatialRDD, rangeQueryWindow, spa
 
 !!!note
 	Spatial range query is equivalent with a SELECT query with spatial predicate as search condition in Spatial SQL. An example query is as follows:
-	```SQL
+	```sql
 	SELECT *
 	FROM checkin
 	WHERE ST_Intersects(checkin.location, queryWindow)
@@ -345,7 +345,7 @@ val result = KNNQuery.SpatialKnnQuery(objectRDD, pointObject, K, usingIndex)
 
 !!!note
 	Spatial KNN query that returns 5 Nearest Neighbors is equal to the following statement in Spatial SQL
-	```SQL
+	```sql
 	SELECT ck.name, ck.rating, ST_Distance(ck.location, myLocation) AS distance
 	FROM checkins ck
 	ORDER BY distance DESC
@@ -405,7 +405,7 @@ val result = JoinQuery.SpatialJoinQuery(objectRDD, queryWindowRDD, usingIndex, s
 
 !!!note
 	Spatial join query is equal to the following query in Spatial SQL:
-	```SQL
+	```sql
 	SELECT superhero.name
 	FROM city, superhero
 	WHERE ST_Contains(city.geom, superhero.geom);
@@ -497,7 +497,7 @@ The output format of the distance join query is [here](#output-format_2).
 
 !!!note
 	Distance join query is equal to the following query in Spatial SQL:
-	```SQL
+	```sql
 	SELECT superhero.name
 	FROM city, superhero
 	WHERE ST_Distance(city.geom, superhero.geom) <= 10;

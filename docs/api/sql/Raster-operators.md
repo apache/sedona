@@ -274,7 +274,7 @@ Introduction: Normalize the value in the array to [0, 255]
 Since: `v1.1.0`
 
 Spark SQL example
-```SQL
+```sql
 SELECT RS_Normalize(band)
 ```
 

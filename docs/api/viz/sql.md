@@ -34,7 +34,7 @@ Since: `v1.0.0`
 This function will normalize the weight according to the max weight among all pixels. Different pixel obtains different color.
 
 Spark SQL example:
-```SQL
+```sql
 SELECT pixels.px, ST_Colorize(pixels.weight, 999) AS color
 FROM pixels
 ```
@@ -44,7 +44,7 @@ FROM pixels
 If a mandatory color name is put as the third input argument, this function will directly output this color, without considering the weights. In this case, every pixel will possess the same color.
 
 Spark SQL example:
-```SQL
+```sql
 SELECT pixels.px, ST_Colorize(pixels.weight, 999, 'red') AS color
 FROM pixels
 ```
@@ -68,7 +68,7 @@ Format: `ST_EncodeImage (A:image)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_EncodeImage(images.img)
 FROM images
 ```
@@ -84,7 +84,7 @@ Format: `ST_Pixelize (A:geometry, ResolutionX:int, ResolutionY:int, Boundary:geo
 Since: `v1.0.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_Pixelize(shape, 256, 256, (ST_Envelope_Aggr(shape) FROM pointtable))
 FROM polygondf
 ```
@@ -101,7 +101,7 @@ Format: `ST_TileName (A:pixel, ZoomLevel:int)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_TileName(pixels.px, 3)
 FROM pixels
 ```
@@ -117,7 +117,7 @@ Format: `ST_Render (A:pixel, B:color, C:Integer - optional zoom level)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT tilename, ST_Render(pixels.px, pixels.color) AS tileimg
 FROM pixels
 GROUP BY tilename
