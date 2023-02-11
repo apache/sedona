@@ -94,7 +94,7 @@ public class PointJoinTest
      * @throws Exception the exception
      */
     @Test
-    public void testNestedLoopWithRectanges()
+    public void testNestedLoopWithRectangles()
             throws Exception
     {
         RectangleRDD queryRDD = createRectangleRDD();
@@ -135,7 +135,7 @@ public class PointJoinTest
      * @throws Exception the exception
      */
     @Test
-    public void testRTreeWithRectanges()
+    public void testRTreeWithRectangles()
             throws Exception
     {
         RectangleRDD queryRDD = createRectangleRDD();
@@ -163,7 +163,7 @@ public class PointJoinTest
      * @throws Exception the exception
      */
     @Test
-    public void testQuadTreeWithRectanges()
+    public void testQuadTreeWithRectangles()
             throws Exception
     {
         RectangleRDD queryRDD = createRectangleRDD();

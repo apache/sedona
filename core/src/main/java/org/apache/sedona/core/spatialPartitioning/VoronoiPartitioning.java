@@ -60,7 +60,7 @@ public class VoronoiPartitioning
         ArrayList<Point> subSampleList = new ArrayList<Point>();
         MultiPoint mp;
 
-        //Take a subsample accoring to the partitions
+        //Take a subsample according to the partitions
         for (int i = 0; i < samples.size(); i = i + samples.size() / partitions) {
             Envelope envelope = samples.get(i);
             Coordinate coordinate = new Coordinate((envelope.getMinX() + envelope.getMaxX()) / 2.0, (envelope.getMinY() + envelope.getMaxY()) / 2.0);

@@ -210,7 +210,7 @@ public class SpatialIndexSerdeTest
             }
             return strtree.query(envelope);
         }
-        else { throw new UnsupportedOperationException("unsupport index type"); }
+        else { throw new UnsupportedOperationException("unsupported index type"); }
     }
 
     private SpatialIndex generateIndex(int geomNum, Class aClass)

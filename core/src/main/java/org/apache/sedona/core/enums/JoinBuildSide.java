@@ -23,7 +23,7 @@ import java.io.Serializable;
 
 /**
  * The enumerator type of JoinQuery JoinBuildSide. Each join query has two sides, left shape and right shape.
- * The join side desides which side the spatial index is built on. The other side will be streamed out.
+ * The join side decides which side the spatial index is built on. The other side will be streamed out.
  */
 public enum JoinBuildSide
         implements Serializable

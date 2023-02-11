@@ -36,7 +36,7 @@ public class ShpFileParser
      */
     private final SafeReader reader;
     /**
-     * lenth of file in bytes
+     * length of file in bytes
      */
     private long fileLength = 0;
     /**
