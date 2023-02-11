@@ -184,7 +184,7 @@ def ST_AsEWKT(geometry: ColumnOrName) -> Column:
 
     :param geometry: Geometry column to generate EWKT for.
     :type geometry: ColumnOrName
-    :return: Extended Well-Known Text represenation of geometry as a string column.
+    :return: Extended Well-Known Text representation of geometry as a string column.
     :rtype: Column
     """
     return _call_st_function("ST_AsEWKT", geometry)
@@ -192,7 +192,7 @@ def ST_AsEWKT(geometry: ColumnOrName) -> Column:
 
 @validate_argument_types
 def ST_AsGeoJSON(geometry: ColumnOrName) -> Column:
-    """Generate the GeoJSON style represenation of a geometry column.
+    """Generate the GeoJSON style representation of a geometry column.
 
     :param geometry: Geometry column to generate GeoJSON for.
     :type geometry: ColumnOrName
@@ -282,7 +282,7 @@ def ST_Buffer(geometry: ColumnOrName, buffer: ColumnOrNameOrNumber) -> Column:
 
 @validate_argument_types
 def ST_BuildArea(geometry: ColumnOrName) -> Column:
-    """Generate a geometry described by the consituent linework of the input
+    """Generate a geometry described by the constituent linework of the input
     geometry column.
 
     :param geometry: Linestring or multilinestring geometry column to use as input.
@@ -311,7 +311,7 @@ def ST_Collect(*geometries: ColumnOrName) -> Column:
     multi-geometry or geometry collection.
 
     :param geometries: Either a single geometry column that holds an array of geometries or multiple geometry columns.
-    :return: If the types of geometries are homogenous then a multi-geometry is returned, otherwise a geometry collection is returned.
+    :return: If the types of geometries are homogeneous then a multi-geometry is returned, otherwise a geometry collection is returned.
     :rtype: Column
     """
     if len(geometries) == 1:

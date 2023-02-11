@@ -147,7 +147,7 @@ def ST_LineFromText(wkt: ColumnOrName) -> Column:
 
 @validate_argument_types
 def ST_LineStringFromText(coords: ColumnOrName, delimiter: ColumnOrName) -> Column:
-    """Generate a linestring geometry column from a list of coords seperated by a delimiter
+    """Generate a linestring geometry column from a list of coords separated by a delimiter
     in a string column.
 
     :param coords: String column containing a list of coords.

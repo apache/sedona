@@ -71,7 +71,7 @@ public class TestBase {
     static List<Row> createPointText(int size){
         List<Row> data = new ArrayList<>();
         for (int i = 0; i < size; i++) {
-            // Create a numer of points (1, 1) (2, 2) ...
+            // Create a number of points (1, 1) (2, 2) ...
             data.add(Row.of(i + "," + i, "point" + i, timestamp_base + time_interval * 1000 * i));
         }
         return data;
@@ -81,7 +81,7 @@ public class TestBase {
         List<Point> data = new ArrayList<>();
         GeometryFactory geomFact = new GeometryFactory();
         for (int i = 0; i < size; i++) {
-            // Create a numer of points (1, 1) (2, 2) ...
+            // Create a number of points (1, 1) (2, 2) ...
             data.add(geomFact.createPoint(new Coordinate(i, i)));
         }
         return data;
@@ -104,7 +104,7 @@ public class TestBase {
     static List<Row> createPointWKT(int size){
         List<Row> data = new ArrayList<>();
         for (int i = 0; i < size; i++) {
-            // Create a numer of points (1, 1) (2, 2) ...
+            // Create a number of points (1, 1) (2, 2) ...
             data.add(Row.of("POINT (" + i + " " + i +")", "point" + i, timestamp_base + time_interval * 1000 * i));
         }
         return data;

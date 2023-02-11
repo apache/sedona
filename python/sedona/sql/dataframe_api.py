@@ -53,7 +53,7 @@ def call_sedona_function(object_name: str, function_name: str, args: Union[Any, 
     if spark is None:
         raise ValueError("No active spark session was detected. Unable to call sedona function.")
     
-    # apparently a Column is an Iterable so we need to check for it explicitely
+    # apparently a Column is an Iterable so we need to check for it explicitly
     if (not isinstance(args, Iterable)) or isinstance(args, str) or isinstance(args, Column):
         args = [args]
 
