@@ -1,7 +1,7 @@
 The page outlines the steps to manage spatial data using SedonaSQL. ==The example code is written in Java but also works for Scala==.
 
 SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows. All these operators can be directly called through:
-```Java
+```java
 Table myTable = tableEnv.sqlQuery("YOUR_SQL")
 ```
 
@@ -15,7 +15,7 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../../../api/flink/O
 
 ## Initiate Stream Environment
 Use the following code to initiate your `StreamExecutionEnvironment` at the beginning:
-```Java
+```java
 StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment()
 EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
 StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
@@ -25,7 +25,7 @@ StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
 
 Add the following line after your `StreamExecutionEnvironment` and `StreamTableEnvironment` declaration
 
-```Java
+```java
 SedonaFlinkRegistrator.registerType(env);
 SedonaFlinkRegistrator.registerFunc(tableEnv);
 ```
@@ -61,7 +61,7 @@ Assume you have a Flink Table `tbl` like this:
 
 You can create a Table with a Geometry type column as follows:
 
-```Java
+```java
 tableEnv.createTemporaryView("myTable", tbl)
 Table geomTbl = tableEnv.sql("SELECT ST_GeomFromWKT(geom_polygon) as geom_polygon, name_polygon FROM myTable")
 geomTbl.execute().print()
@@ -91,7 +91,7 @@ Although it looks same with the input, actually the type of column geom_polygon 
 
 To verify this, use the following code to print the schema of the DataFrame:
 
-```Java
+```java
 geomTbl.printSchema()
 ```
 
@@ -113,7 +113,7 @@ Sedona doesn't control the coordinate unit (degree-based or meter-based) of all 
 
 To convert Coordinate Reference System of the Geometry column created before, use the following code:
 
-```Java
+```java
 Table geomTbl3857 = tableEnv.sqlQuery("SELECT ST_Transform(countyshape, "epsg:4326", "epsg:3857") AS geom_polygon, name_polygon FROM myTable")
 geomTbl3857.execute().print()
 ```
@@ -177,7 +177,7 @@ Use ==ST_Contains==, ==ST_Intersects== and so on to run a range query over a sin
 
 The following example finds all counties that are within the given polygon:
 
-```Java
+```java
 geomTable = tableEnv.sqlQuery(
   "
     SELECT *
@@ -196,7 +196,7 @@ Use ==ST_Distance== to calculate the distance and rank the distance.
 
 The following code returns the 5 nearest neighbor of the given polygon.
 
-```Java
+```java
 geomTable = tableEnv.sqlQuery(
   "
     SELECT countyname, ST_Distance(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), newcountyshape) AS distance
@@ -213,7 +213,7 @@ geomTable.execute().print()
 
 Use TableEnv's toDataStream function
 
-```Java
+```java
 DataStream<Row> geomStream = tableEnv.toDataStream(geomTable)
 ```
 
@@ -221,7 +221,7 @@ DataStream<Row> geomStream = tableEnv.toDataStream(geomTable)
 
 Then get the Geometry from each Row object using Map
 
-```Java
+```java
 import org.locationtech.jts.geom.Geometry;
 
 DataStream<Geometry> geometries = geomStream.map(new MapFunction<Row, Geometry>() {
@@ -252,7 +252,7 @@ The output will be
 
 You can concatenate other non-spatial attributes and store them in Geometry's `userData` field so you can recover them later on. `userData` field can be any object type.
 
-```Java
+```java
 import org.locationtech.jts.geom.Geometry;
 
 DataStream<Geometry> geometries = geomStream.map(new MapFunction<Row, Geometry>() {
@@ -268,7 +268,7 @@ geometries.print();
 
 The `print` command will not print out `userData` field. But you can get it this way:
 
-```Java
+```java
 import org.locationtech.jts.geom.Geometry;
 
 geometries.map(new MapFunction<Geometry, String>() {
@@ -301,7 +301,7 @@ The output will be
 
 * Create a Geometry from a WKT string
 
-```Java
+```java
 import org.apache.sedona.core.formatMapper.FormatUtils;
 import org.locationtech.jts.geom.Geometry;
 
@@ -317,7 +317,7 @@ DataStream<Geometry> geometries = text.map(new MapFunction<String, Geometry>() {
 
 * Create a Point from a String `1.1, 2.2`. Use `,` as the delimiter.
 
-```Java
+```java
 import org.apache.sedona.core.formatMapper.FormatUtils;
 import org.locationtech.jts.geom.Geometry;
 
@@ -333,7 +333,7 @@ DataStream<Geometry> geometries = text.map(new MapFunction<String, Geometry>() {
 
 * Create a Polygon from a String `1.1, 1.1, 10.1, 10.1`. This is a rectangle with (1.1, 1.1) and (10.1, 10.1) as their min/max corners.
 
-```Java
+```java
 import org.apache.sedona.core.formatMapper.FormatUtils;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Geometry;
@@ -360,7 +360,7 @@ DataStream<Geometry> geometries = text.map(new MapFunction<String, Geometry>() {
 
 Put a geometry in a Flink Row to a `geomStream`. Note that you can put other attributes in Row as well. This example uses a constant value `myName` for all geometries.
 
-```Java
+```java
 import org.apache.sedona.core.formatMapper.FormatUtils;
 import org.locationtech.jts.geom.Geometry;
 import org.apache.flink.types.Row;
@@ -378,6 +378,6 @@ DataStream<Row> geomStream = text.map(new MapFunction<String, Row>() {
 ### Get Spatial Table
 
 Use TableEnv's fromDataStream function, with two column names `geom` and `geom_name`.
-```Java
+```java
 Table geomTable = tableEnv.fromDataStream(geomStream, "geom", "geom_name")
 ```

@@ -2,7 +2,7 @@
 SedonaSQL supports many parameters. To change their values,
 
 1. Set it through SparkConf:
-```Scala
+```scala
 sparkSession = SparkSession.builder().
       config("spark.serializer","org.apache.spark.serializer.KryoSerializer").
       config("spark.kryo.registrator", "org.apache.sedona.core.serde.SedonaKryoRegistrator").
@@ -10,12 +10,12 @@ sparkSession = SparkSession.builder().
       master("local[*]").appName("mySedonaSQLdemo").getOrCreate()
 ```
 2. Check your current SedonaSQL configuration:
-```Scala
+```scala
 val sedonaConf = new SedonaConf(sparkSession.conf)
 println(sedonaConf)
 ```
 3. Sedona parameters can be changed at runtime:
-```Scala
+```scala
 sparkSession.conf.set("sedona.global.index","false")
 ```
 ## Explanation

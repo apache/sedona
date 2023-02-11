@@ -5,7 +5,7 @@ Since: `v1.0.0`
 
 SparkSQL example:
 
-```Scala
+```scala
 var spatialRDD = new SpatialRDD[Geometry]
 spatialRDD.rawSpatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileInputLocation)
 var rawSpatialDf = Adapter.toDf(spatialRDD,sparkSession)
@@ -39,7 +39,7 @@ via `sedona.global.charset` system property before the call to `ShapefileReader.
 
 Example:
 
-```Scala
+```scala
 System.setProperty("sedona.global.charset", "utf8")
 ```
 
@@ -75,7 +75,7 @@ Format: `ST_GeomFromGeoJSON (GeoJson:string)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```Scala
+```scala
 var polygonJsonDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(geoJsonGeomInputLocation)
 polygonJsonDf.createOrReplaceTempView("polygontable")
 polygonJsonDf.show()

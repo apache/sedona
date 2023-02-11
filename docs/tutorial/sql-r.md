@@ -5,7 +5,7 @@ In `apache.sedona` , `sdf_register()`, a S3 generic from `sparklyr`
 converting a lower-level object to a Spark dataframe, can be applied to
 a `SpatialRDD` objects:
 
-``` r
+```r
 library(sparklyr)
 library(apache.sedona)
 
@@ -30,7 +30,7 @@ Sedona can inter-operate seamlessly with other functions supported in
 `sparklyr`’s dbplyr SQL translation env. For example, the code below
 finds the average area of all polygons in `polygon_sdf`:
 
-``` r
+```r
 mean_area_sdf <- polygon_sdf %>%
   dplyr::summarize(mean_area = mean(ST_Area(geometry)))
 print(mean_area_sdf)
@@ -44,7 +44,7 @@ print(mean_area_sdf)
 Once spatial objects are imported into Spark dataframes, they can also
 be easily integrated with other non-spatial attributes, e.g.,
 
-``` r
+```r
 modified_polygon_sdf <- polygon_sdf %>%
   dplyr::mutate(type = "polygon")
 ```

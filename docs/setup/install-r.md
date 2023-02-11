@@ -51,7 +51,7 @@ registered when creating a Spark session, one simply needs to attach
 `apache.sedona` before instantiating a Spark connection. apache.sedona
 will take care of the rest. For example,
 
-``` r
+```r
 library(sparklyr)
 library(apache.sedona)
 
@@ -61,7 +61,7 @@ sc <- spark_connect(master = "yarn", spark_home = spark_home)
 
 will create a Sedona-capable Spark connection in YARN client mode, and
 
-``` r
+```r
 library(sparklyr)
 library(apache.sedona)
 
@@ -75,7 +75,7 @@ In `sparklyr`, one can easily inspect the Spark connection object to
 sanity-check it has been properly initialized with all Sedona-related
 dependencies, e.g.,
 
-``` r
+```r
 print(sc$extensions$packages)
 ```
 
@@ -89,7 +89,7 @@ print(sc$extensions$packages)
 
 and
 
-``` r
+```r
 spark_session(sc) %>%
   invoke("%>%", list("conf"), list("get", "spark.kryo.registrator")) %>%
   print()

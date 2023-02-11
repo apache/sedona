@@ -4,14 +4,14 @@ The detailed explanation is here: [Visualize Spatial DataFrame/RDD](../../tutori
 
 1. Add Sedona-core, Sedona-SQL,Sedona-Viz into your project POM.xml or build.sbt
 2. Declare your Spark Session
-```Scala
+```scala
 sparkSession = SparkSession.builder().
 config("spark.serializer","org.apache.spark.serializer.KryoSerializer").
 config("spark.kryo.registrator", "org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator").
 master("local[*]").appName("mySedonaVizDemo").getOrCreate()
 ```
 3. Add the following lines after your SparkSession declaration:
-```Scala
+```scala
 SedonaSQLRegistrator.registerAll(sparkSession)
 SedonaVizRegistrator.registerAll(sparkSession)
 ```

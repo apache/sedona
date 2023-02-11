@@ -2,12 +2,12 @@
 
 ## Function list
 SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows. All these operators can be directly called through:
-```Scala
+```scala
 var myDataFrame = sparkSession.sql("YOUR_SQL")
 ```
 
 Alternatively, `expr` and `selectExpr` can be used:
-```Scala
+```scala
 myDataFrame.withColumn("geometry", expr("ST_*")).selectExpr("ST_*")
 ```
 
@@ -34,14 +34,14 @@ The detailed explanation is here [Write a SQL/DataFrame application](../../tutor
 
 1. Add Sedona-core and Sedona-SQL into your project POM.xml or build.sbt
 2. Declare your Spark Session
-```Scala
+```scala
 sparkSession = SparkSession.builder().
       config("spark.serializer","org.apache.spark.serializer.KryoSerializer").
       config("spark.kryo.registrator", "org.apache.sedona.core.serde.SedonaKryoRegistrator").
       master("local[*]").appName("mySedonaSQLdemo").getOrCreate()
 ```
 3. Add the following line after your SparkSession declaration:
-```Scala
+```scala
 import org.apache.sedona.sql.utils.SedonaSQLRegistrator
 SedonaSQLRegistrator.registerAll(sparkSession)
 ```
