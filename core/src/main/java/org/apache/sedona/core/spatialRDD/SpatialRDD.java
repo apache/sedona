@@ -216,7 +216,7 @@ public class SpatialRDD<T extends Geometry>
             throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD boundary is null. Please call analyze() first.");
         }
         if (this.approximateTotalCount == -1) {
-            throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD total count is unkown. Please call analyze() first.");
+            throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD total count is unknown. Please call analyze() first.");
         }
 
         //Calculate the number of samples we need to take.

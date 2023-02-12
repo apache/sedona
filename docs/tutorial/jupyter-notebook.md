@@ -8,7 +8,7 @@ Sedona Python provides a number of [Jupyter Notebook examples](https://github.co
 Please use the following steps to run Jupyter notebook with Pipenv on your machine
 
 1. Clone Sedona GitHub repo or download the source code
-2. Install Sedona Python from PyPi or GitHub source: Read [Install Sedona Python](../../setup/install-python/#install-sedona) to learn.
+2. Install Sedona Python from PyPI or GitHub source: Read [Install Sedona Python](../../setup/install-python/#install-sedona) to learn.
 3. Prepare python-adapter jar: Read [Install Sedona Python](../../setup/install-python/#prepare-python-adapter-jar) to learn.
 4. Setup pipenv python version. Please use your desired Python version.
 ```bash

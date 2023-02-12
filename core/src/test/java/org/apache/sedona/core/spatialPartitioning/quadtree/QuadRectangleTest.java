@@ -32,7 +32,7 @@ public class QuadRectangleTest
         QuadRectangle r1 = makeRect(0, 0, 10, 10);
         QuadRectangle r2 = makeRect(0, 0, 10, 10);
 
-        // contains rectange
+        // contains rectangle
         assertTrue(r1.contains(r2));
 
         // contains point
