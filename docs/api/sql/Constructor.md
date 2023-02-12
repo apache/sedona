@@ -5,7 +5,7 @@ Since: `v1.0.0`
 
 SparkSQL example:
 
-```Scala
+```scala
 var spatialRDD = new SpatialRDD[Geometry]
 spatialRDD.rawSpatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileInputLocation)
 var rawSpatialDf = Adapter.toDf(spatialRDD,sparkSession)
@@ -39,7 +39,7 @@ via `sedona.global.charset` system property before the call to `ShapefileReader.
 
 Example:
 
-```Scala
+```scala
 System.setProperty("sedona.global.charset", "utf8")
 ```
 
@@ -52,7 +52,7 @@ Format: `ST_GeomFromGeoHash(geohash: string, precision: int)`
 Since: `v1.1.1`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_GeomFromGeoHash('s00twy01mt', 4) AS geom
 ```
 
@@ -75,7 +75,7 @@ Format: `ST_GeomFromGeoJSON (GeoJson:string)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```Scala
+```scala
 var polygonJsonDf = sparkSession.read.format("csv").option("delimiter","\t").option("header","false").load(geoJsonGeomInputLocation)
 polygonJsonDf.createOrReplaceTempView("polygontable")
 polygonJsonDf.show()
@@ -100,7 +100,7 @@ Format:
 Since: `v1.3.0`
 
 SQL example:
-```SQL
+```sql
 SELECT ST_GeomFromGML('<gml:LineString srsName="EPSG:4269"><gml:coordinates>-71.16028,42.258729 -71.160837,42.259112 -71.161143,42.25932</gml:coordinates></gml:LineString>') AS geometry
 ```
 
@@ -114,7 +114,7 @@ Format:
 Since: `v1.3.0`
 
 SQL example:
-```SQL
+```sql
 SELECT ST_GeomFromKML('<LineString><coordinates>-71.1663,42.2614 -71.1667,42.2616</coordinates></LineString>') AS geometry
 ```
 
@@ -131,7 +131,7 @@ Since: `v1.0.0`
 The optional srid parameter was added in `v1.3.1`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_GeomFromText('POINT(40.7128 -74.0060)') AS geometry
 ```
 
@@ -146,7 +146,7 @@ Format:
 Since: `v1.0.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_GeomFromWKB(polygontable._c0) AS polygonshape
 FROM polygontable
 ```
@@ -164,12 +164,12 @@ Since: `v1.0.0`
 The optional srid parameter was added in `v1.3.1`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_GeomFromWKT(polygontable._c0) AS polygonshape
 FROM polygontable
 ```
 
-```SQL
+```sql
 SELECT ST_GeomFromWKT('POINT(40.7128 -74.0060)') AS geometry
 ```
 
@@ -183,12 +183,12 @@ Format:
 Since: `v1.2.1`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_LineFromText(linetable._c0) AS lineshape
 FROM linetable
 ```
 
-```SQL
+```sql
 SELECT ST_LineFromText('Linestring(1 2, 3 4)') AS line
 ```
 
@@ -201,12 +201,12 @@ Format: `ST_LineStringFromText (Text:string, Delimiter:char)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_LineStringFromText(linestringtable._c0,',') AS linestringshape
 FROM linestringtable
 ```
 
-```SQL
+```sql
 SELECT ST_LineStringFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794', ',') AS linestringshape
 ```
 ## ST_MLineFromText
@@ -220,7 +220,7 @@ Format:
 Since: `v1.3.1`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_MLineFromText('MULTILINESTRING((1 2, 3 4), (4 5, 6 7))') AS multiLine;
 SELECT ST_MLineFromText('MULTILINESTRING((1 2, 3 4), (4 5, 6 7))',4269) AS multiLine;
 ```
@@ -236,7 +236,7 @@ Format:
 Since: `v1.3.1`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_MPolyFromText('MULTIPOLYGON(((-70.916 42.1002,-70.9468 42.0946,-70.9765 42.0872 )))') AS multiPolygon
 SELECT ST_MPolyFromText('MULTIPOLYGON(((-70.916 42.1002,-70.9468 42.0946,-70.9765 42.0872 )))',4269) AS multiPolygon
 
@@ -254,7 +254,7 @@ In `v1.4.0` an optional Z parameter was removed to be more consistent with other
 If you are upgrading from an older version of Sedona - please use ST_PointZ to create 3D points.
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_Point(CAST(pointtable._c0 AS Decimal(24,20)), CAST(pointtable._c1 AS Decimal(24,20))) AS pointshape
 FROM pointtable
 ```
@@ -269,7 +269,7 @@ Format: `ST_PointZ (X:decimal, Y:decimal, Z:decimal, srid:integer)`
 Since: `v1.4.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_PointZ(1.0, 2.0, 3.0) AS pointshape
 ```
 
@@ -282,12 +282,12 @@ Format: `ST_PointFromText (Text:string, Delimiter:char)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_PointFromText(pointtable._c0,',') AS pointshape
 FROM pointtable
 ```
 
-```SQL
+```sql
 SELECT ST_PointFromText('40.7128,-74.0060', ',') AS pointshape
 ```
 
@@ -300,7 +300,7 @@ Format: `ST_PolygonFromEnvelope (MinX:decimal, MinY:decimal, MaxX:decimal, MaxY:
 Since: `v1.0.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT *
 FROM pointdf
 WHERE ST_Contains(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.pointshape)
@@ -315,11 +315,11 @@ Format: `ST_PolygonFromText (Text:string, Delimiter:char)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_PolygonFromText(polygontable._c0,',') AS polygonshape
 FROM polygontable
 ```
 
-```SQL
+```sql
 SELECT ST_PolygonFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794,-74.0428197,40.6867969', ',') AS polygonshape
 ```

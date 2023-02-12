@@ -7,7 +7,7 @@ Format: `ST_Contains (A:geometry, B:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT * 
 FROM pointdf 
 WHERE ST_Contains(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
@@ -22,7 +22,7 @@ Format: `ST_Crosses (A:geometry, B:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT * 
 FROM pointdf 
 WHERE ST_Crosses(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
@@ -37,7 +37,7 @@ Format: `ST_Disjoint (A:geometry, B:geometry)`
 Since: `v1.2.1`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT *
 FROM geom
 WHERE ST_Disjoinnt(geom.geom_a, geom.geom_b)
@@ -52,7 +52,7 @@ Format: `ST_Equals (A:geometry, B:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT * 
 FROM pointdf 
 WHERE ST_Equals(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
@@ -67,7 +67,7 @@ Format: `ST_Intersects (A:geometry, B:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT * 
 FROM pointdf 
 WHERE ST_Intersects(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
@@ -81,14 +81,14 @@ Format: `ST_OrderingEquals(A: geometry, B: geometry)`
 Since: `v1.2.1`
 
 Spark SQL example 1:
-```SQL
+```sql
 SELECT ST_OrderingEquals(ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'), ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'))
 ```
 
 Output: `true`
 
 Spark SQL example 2:
-```SQL
+```sql
 SELECT ST_OrderingEquals(ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'), ST_GeomFromWKT('POLYGON((0 2, -2 0, 2 0, 0 2))'))
 ```
 
@@ -103,7 +103,7 @@ Format: `ST_Overlaps (A:geometry, B:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT *
 FROM geom
 WHERE ST_Overlaps(geom.geom_a, geom.geom_b)
@@ -117,7 +117,7 @@ Format: `ST_Touches (A:geometry, B:geometry)`
 
 Since: `v1.0.0`
 
-```SQL
+```sql
 SELECT * 
 FROM pointdf 
 WHERE ST_Touches(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
@@ -132,7 +132,7 @@ Format: `ST_Within (A:geometry, B:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT * 
 FROM pointdf 
 WHERE ST_Within(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
@@ -147,7 +147,7 @@ Format: `ST_Covers (A:geometry, B:geometry)`
 Since: `v1.3.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT * 
 FROM pointdf 
 WHERE ST_Covers(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
@@ -162,7 +162,7 @@ Format: `ST_CoveredBy (A:geometry, B:geometry)`
 Since: `v1.3.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT * 
 FROM pointdf 
 WHERE ST_CoveredBy(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))

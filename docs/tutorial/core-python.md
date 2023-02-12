@@ -162,7 +162,7 @@ The other attributes are combined together to a string and stored in ==UserData=
 To retrieve the UserData field, use the following code:
 ```python
 rdd_with_other_attributes = object_rdd.rawSpatialRDD.map(lambda x: x.getUserData())
-``` 
+```
 
 ## Write a Spatial Range Query
 

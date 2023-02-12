@@ -24,7 +24,7 @@ For example, the following code will import data from
 [arealm-small.csv](https://github.com/apache/sedona/blob/master/binder/data/arealm-small.csv)
 into a `SpatialRDD`:
 
-``` r
+```r
 pt_rdd <- sedona_read_dsv_to_typed_rdd(
   sc,
   location = "arealm-small.csv",
@@ -61,7 +61,7 @@ Binary), and GeoJSON formats. See `?apache.sedona::sedona_read_wkt`,
 One can also run `to_spatial_rdd()` to extract a SpatailRDD from a Spark
 SQL query, e.g.,
 
-``` r
+```r
 library(sparklyr)
 library(apache.sedona)
 library(dplyr)

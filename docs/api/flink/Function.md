@@ -8,7 +8,7 @@ Since: `v1.3.0`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_3DDistance(polygondf.countyshape, polygondf.countyshape)
 FROM polygondf
 ```
@@ -24,7 +24,7 @@ Format: `ST_AddPoint(geom: geometry, point: geometry)`
 Since: `v1.3.0`
 
 Example:
-```SQL
+```sql
 SELECT ST_AddPoint(ST_GeomFromText("LINESTRING(0 0, 1 1, 1 0)"), ST_GeomFromText("Point(21 52)"), 1)
 
 SELECT ST_AddPoint(ST_GeomFromText("Linestring(0 0, 1 1, 1 0)"), ST_GeomFromText("Point(21 52)"))
@@ -46,7 +46,7 @@ Since: `v1.3.0`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_Area(polygondf.countyshape)
 FROM polygondf
 ```
@@ -61,7 +61,7 @@ Since: `v1.3.0`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_AsBinary(polygondf.countyshape)
 FROM polygondf
 ```
@@ -79,7 +79,7 @@ Since: `v1.3.0`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_AsEWKB(polygondf.countyshape)
 FROM polygondf
 ```
@@ -97,7 +97,7 @@ Format: `ST_AsEWKT (A:geometry)`
 Since: `v1.2.1`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_AsEWKT(polygondf.countyshape)
 FROM polygondf
 ```
@@ -111,7 +111,7 @@ Format: `ST_AsGeoJSON (A:geometry)`
 Since: `v1.3.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_AsGeoJSON(polygondf.countyshape)
 FROM polygondf
 ```
@@ -125,7 +125,7 @@ Format: `ST_AsGML (A:geometry)`
 Since: `v1.3.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_AsGML(polygondf.countyshape)
 FROM polygondf
 ```
@@ -139,7 +139,7 @@ Format: `ST_AsKML (A:geometry)`
 Since: `v1.3.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_AsKML(polygondf.countyshape)
 FROM polygondf
 ```
@@ -154,7 +154,7 @@ Since: `v1.3.0`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_AsText(polygondf.countyshape)
 FROM polygondf
 ```
@@ -169,7 +169,7 @@ Since: `v1.3.0`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_Azimuth(ST_POINT(0.0, 25.0), ST_POINT(0.0, 0.0))
 ```
 
@@ -184,7 +184,7 @@ Format: `ST_Boundary(geom: geometry)`
 Since: `v1.3.0`
 
 Example:
-```SQL
+```sql
 SELECT ST_Boundary(ST_GeomFromText('POLYGON ((1 1, 0 0, -1 1, 1 1))'))
 ```
 
@@ -199,7 +199,7 @@ Format: `ST_Buffer (A:geometry, buffer: Double)`
 Since: `v1.2.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_Buffer(polygondf.countyshape, 1)
 FROM polygondf
 ```
@@ -214,7 +214,7 @@ Since: `v1.2.1`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_BuildArea(ST_Collect(smallDf, bigDf)) AS geom
 FROM smallDf, bigDf
 ```
@@ -235,7 +235,7 @@ Since: `v1.4.0`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_ConcaveHull(polygondf.countyshape, pctConvex)`
 FROM polygondf
 ```
@@ -253,7 +253,7 @@ Format: `ST_Distance (A:geometry, B:geometry)`
 Since: `v1.2.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_Distance(polygondf.countyshape, polygondf.countyshape)
 FROM polygondf
 ```
@@ -268,7 +268,7 @@ Since: `v1.3.0`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_Envelope(polygondf.countyshape)
 FROM polygondf
 ```
@@ -283,7 +283,7 @@ Since: `v1.2.1`
 
 Examples:
 
-```SQL
+```sql
 SELECT ST_ExteriorRing(df.geometry)
 FROM df
 ```
@@ -301,7 +301,7 @@ Format: `ST_FlipCoordinates(A:geometry)`
 Since: `v1.2.0`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_FlipCoordinates(df.geometry)
 FROM df
 ```
@@ -320,7 +320,7 @@ Since: `v1.2.1`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_Force_2D(df.geometry) AS geom
 FROM df
 ```
@@ -341,7 +341,7 @@ Example:
 
 Query:
 
-```SQL
+```sql
 SELECT ST_GeoHash(ST_GeomFromText('POINT(21.427834 52.042576573)'), 5) AS geohash
 ```
 
@@ -364,7 +364,7 @@ Format: `ST_GeometryN(geom: geometry, n: Int)`
 Since: `v1.3.0`
 
 Example:
-```SQL
+```sql
 SELECT ST_GeometryN(ST_GeomFromText('MULTIPOINT((1 2), (3 4), (5 6), (8 9))'), 1)
 ```
 
@@ -379,7 +379,7 @@ Format: `ST_InteriorRingN(geom: geometry, n: Int)`
 Since: `v1.3.0`
 
 Example:
-```SQL
+```sql
 SELECT ST_InteriorRingN(ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1), (1 3, 2 3, 2 4, 1 4, 1 3), (3 3, 4 3, 4 4, 3 4, 3 3))'), 0)
 ```
 
@@ -395,7 +395,7 @@ Since: `v1.3.0`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_IsClosed(ST_GeomFromText('LINESTRING(0 0, 1 1, 1 0)'))
 ```
 
@@ -409,7 +409,7 @@ Since: `v1.2.1`
 
 Spark SQL example:
 
-```SQL
+```sql
 SELECT ST_IsEmpty(polygondf.countyshape)
 FROM polygondf
 ```
@@ -424,7 +424,7 @@ Since: `v1.3.0`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_IsRing(ST_GeomFromText("LINESTRING(0 0, 0 1, 1 1, 1 0, 0 0)"))
 ```
 
@@ -440,7 +440,7 @@ Since: `v1.3.0`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_IsSimple(polygondf.countyshape)
 FROM polygondf
 ```
@@ -455,7 +455,7 @@ Since: `v1.3.0`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_IsValid(polygondf.countyshape)
 FROM polygondf
 ```
@@ -470,7 +470,7 @@ Since: `v1.3.0`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_Length(polygondf.countyshape)
 FROM polygondf
 ```
@@ -485,7 +485,7 @@ Since: `v1.3.0`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_LineFromMultiPoint(df.geometry) AS geom
 FROM df
 ```
@@ -506,7 +506,7 @@ Since: `v1.3.0`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_AsEWKT(ST_Normalize(ST_GeomFromWKT('POLYGON((0 1, 1 1, 1 0, 0 0, 0 1))'))) AS geom
 ```
 
@@ -529,7 +529,7 @@ Since: `v1.3.0`
 Format: `ST_NPoints (A:geometry)`
 
 Example:
-```SQL
+```sql
 SELECT ST_NPoints(polygondf.countyshape)
 FROM polygondf
 ```
@@ -544,7 +544,7 @@ Since: `v1.3.1`
 
 Spark SQL example with z co-rodinate:
 
-```SQL
+```sql
 SELECT ST_NDims(ST_GeomFromEWKT('POINT(1 1 2)'))
 ```
 
@@ -552,7 +552,7 @@ Output: `3`
 
 Spark SQL example with x,y co-ordinate:
 
-```SQL
+```sql
 SELECT ST_NDims(ST_GeomFromText('POINT(1 1)'))
 ```
 
@@ -567,7 +567,7 @@ Format: `ST_NumGeometries (A:geometry)`
 Since: `v1.3.0`
 
 Example:
-```SQL
+```sql
 SELECT ST_NumGeometries(df.geometry)
 FROM df
 ```
@@ -581,7 +581,7 @@ Format: `ST_NumInteriorRings(geom: geometry)`
 Since: `v1.3.0`
 
 Example:
-```SQL
+```sql
 SELECT ST_NumInteriorRings(ST_GeomFromText('POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))'))
 ```
 
@@ -597,7 +597,7 @@ Since: `v1.2.1`
 
 Examples:
 
-```SQL
+```sql
 SELECT ST_PointN(df.geometry, 2)
 FROM df
 ```
@@ -624,7 +624,7 @@ Since: `v1.2.1`
 
 Examples:
 
-```SQL
+```sql
 SELECT ST_PointOnSurface(df.geometry)
 FROM df
 ```
@@ -655,7 +655,7 @@ Since: `v1.2.1`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_Reverse(df.geometry) AS geom
 FROM df
 ```
@@ -675,7 +675,7 @@ Format: `ST_RemovePoint(geom: geometry)`
 Since: `v1.3.0`
 
 Example:
-```SQL
+```sql
 SELECT ST_RemovePoint(ST_GeomFromText("LINESTRING(0 0, 1 1, 1 0)"), 1)
 ```
 
@@ -691,7 +691,7 @@ Since: `v1.3.0`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_SetPoint(ST_GeomFromText('LINESTRING (0 0, 0 1, 1 1)'), 2, ST_GeomFromText('POINT (1 0)')) AS geom
 ```
 
@@ -714,7 +714,7 @@ Format: `ST_SetSRID (A:geometry, srid: integer)`
 Since: `v1.3.0`
 
 Example:
-```SQL
+```sql
 SELECT ST_SetSRID(polygondf.countyshape, 3021)
 FROM polygondf
 ```
@@ -728,7 +728,7 @@ Format: `ST_SRID (A:geometry)`
 Since: `v1.3.0`
 
 Example:
-```SQL
+```sql
 SELECT ST_SRID(polygondf.countyshape)
 FROM polygondf
 ```
@@ -751,13 +751,13 @@ Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional
 Since: `v1.2.0`
 
 Spark SQL example (simple):
-```SQL
+```sql
 SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857') 
 FROM polygondf
 ```
 
 Spark SQL example (with optional parameters):
-```SQL
+```sql
 SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857', false)
 FROM polygondf
 ```
@@ -774,7 +774,7 @@ Format: `ST_X(pointA: Point)`
 Since: `v1.3.0`
 
 Example:
-```SQL
+```sql
 SELECT ST_X(ST_POINT(0.0 25.0))
 ```
 
@@ -790,7 +790,7 @@ Since: `v1.2.1`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_XMax(df.geometry) AS xmax
 FROM df
 ```
@@ -809,7 +809,7 @@ Since: `v1.2.1`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_XMin(df.geometry) AS xmin
 FROM df
 ```
@@ -827,7 +827,7 @@ Format: `ST_Y(pointA: Point)`
 Since: `v1.3.0`
 
 Example:
-```SQL
+```sql
 SELECT ST_Y(ST_POINT(0.0 25.0))
 ```
 
@@ -842,7 +842,7 @@ Format: `ST_YMax (A:geometry)`
 Since: `v1.2.1`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_YMax(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
@@ -857,7 +857,7 @@ Format: `ST_Y_Min (A:geometry)`
 Since: `v1.2.1`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_YMin(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
@@ -872,7 +872,7 @@ Format: `ST_Z(pointA: Point)`
 Since: `v1.3.0`
 
 Example:
-```SQL
+```sql
 SELECT ST_Z(ST_POINT(0.0 25.0 11.0))
 ```
 
@@ -887,7 +887,7 @@ Format: `ST_ZMax(geom: geometry)`
 Since: `v1.3.1`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_ZMax(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
@@ -902,7 +902,7 @@ Format: `ST_ZMin(geom: geometry)`
 Since: `v1.3.1`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_ZMin(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'))
 ```
 

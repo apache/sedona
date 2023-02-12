@@ -12,7 +12,7 @@ The page outlines the steps to create Spatial RDDs and run spatial queries using
 
 ## Initiate SparkContext
 
-```Scala
+```scala
 val conf = new SparkConf()
 conf.setAppName("SedonaRunnableExample") // Change this to a proper name
 conf.setMaster("local[*]") // Delete this if run in cluster mode
@@ -26,7 +26,7 @@ val sc = new SparkContext(conf)
 	Sedona has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption.
 
 If you add ==the Sedona full dependencies== as suggested above, please use the following two lines to enable Sedona Kryo serializer instead:
-```Scala
+```scala
 conf.set("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
 conf.set("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
 ```
@@ -47,7 +47,7 @@ Suppose we have a `checkin.csv` CSV file at Path `/Download/checkin.csv` as foll
 This file has three columns and corresponding ==offsets==(Column IDs) are 0, 1, 2.
 Use the following code to create a PointRDD
 
-```Scala
+```scala
 val pointRDDInputLocation = "/Download/checkin.csv"
 val pointRDDOffset = 0 // The point long/lat starts from Column 0
 val pointRDDSplitter = FileDataSplitter.CSV
@@ -56,7 +56,7 @@ var objectRDD = new PointRDD(sc, pointRDDInputLocation, pointRDDOffset, pointRDD
 ```
 
 If the data file is in TSV format, just simply use the following line to replace the old FileDataSplitter:
-```Scala
+```scala
 val pointRDDSplitter = FileDataSplitter.TSV
 ```
 
@@ -77,7 +77,7 @@ This file has 11 columns and corresponding offsets (Column IDs) are 0 - 10. Colu
 	For polygon data, the last coordinate must be the same as the first coordinate because a polygon is a closed linear ring.
 	
 Use the following code to create a PolygonRDD.
-```Scala
+```scala
 val polygonRDDInputLocation = "/Download/checkinshape.csv"
 val polygonRDDStartOffset = 0 // The coordinates start from Column 0
 val polygonRDDEndOffset = 9 // The coordinates end at Column 9
@@ -87,7 +87,7 @@ var objectRDD = new PolygonRDD(sc, polygonRDDInputLocation, polygonRDDStartOffse
 ```
 
 If the data file is in TSV format, just simply use the following line to replace the old FileDataSplitter:
-```Scala
+```scala
 val polygonRDDSplitter = FileDataSplitter.TSV
 ```
 
@@ -111,7 +111,7 @@ This file has two columns and corresponding ==offsets==(Column IDs) are 0, 1. Co
 
 Use the following code to create a SpatialRDD
 
-```Scala
+```scala
 val inputLocation = "/Download/checkin.tsv"
 val wktColumn = 0 // The WKT string starts from Column 0
 val allowTopologyInvalidGeometries = true // Optional
@@ -134,7 +134,7 @@ Suppose we have a `polygon.json` GeoJSON file at Path `/Download/polygon.json` a
 ```
 
 Use the following code to create a generic SpatialRDD:
-```Scala
+```scala
 val inputLocation = "/Download/polygon.json"
 val allowTopologyInvalidGeometries = true // Optional
 val skipSyntaxInvalidGeometries = false // Optional
@@ -146,7 +146,7 @@ val spatialRDD = GeoJsonReader.readToGeometryRDD(sparkSession.sparkContext, inpu
 	
 #### From Shapefile
 
-```Scala
+```scala
 val shapefileInputLocation="/Download/myshapefile"
 val spatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileInputLocation)
 ```
@@ -169,7 +169,7 @@ via `sedona.global.charset` system property before the call to `ShapefileReader.
 
 Example:
 
-```Scala
+```scala
 System.setProperty("sedona.global.charset", "utf8")
 ```
 
@@ -180,12 +180,12 @@ To create a generic SpatialRDD from CSV, TSV, WKT, WKB and GeoJSON input formats
 We use [checkin.csv CSV file](#pointrdd-from-csvtsv) as the example. You can create a generic SpatialRDD using the following steps:
 
 1. Load data in SedonaSQL.
-```Scala
+```scala
 var df = sparkSession.read.format("csv").option("header", "false").load(csvPointInputLocation)
 df.createOrReplaceTempView("inputtable")
 ```
 2. Create a Geometry type column in SedonaSQL
-```Scala
+```scala
 var spatialDf = sparkSession.sql(
 	"""
    		|SELECT ST_Point(CAST(inputtable._c0 AS Decimal(24,20)),CAST(inputtable._c1 AS Decimal(24,20))) AS checkin
@@ -193,7 +193,7 @@ var spatialDf = sparkSession.sql(
    	""".stripMargin)
 ```
 3. Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD
-```Scala
+```scala
 var spatialRDD = Adapter.toSpatialRdd(spatialDf, "checkin")
 ```
 
@@ -207,7 +207,7 @@ Sedona doesn't control the coordinate unit (degree-based or meter-based) of all 
 
 To convert Coordinate Reference System of an SpatialRDD, use the following code:
 
-```Scala
+```scala
 val sourceCrsCode = "epsg:4326" // WGS84, the most common degree-based CRS
 val targetCrsCode = "epsg:3857" // The most common meter-based CRS
 objectRDD.CRSTransform(sourceCrsCode, targetCrsCode, false)
@@ -217,7 +217,7 @@ objectRDD.CRSTransform(sourceCrsCode, targetCrsCode, false)
 
 !!!warning
 	CRS transformation should be done right after creating each SpatialRDD, otherwise it will lead to wrong query results. For instance, use something like this:
-	```Scala
+	```scala
 	var objectRDD = new PointRDD(sc, pointRDDInputLocation, pointRDDOffset, pointRDDSplitter, carryOtherAttributes)
 	objectRDD.CRSTransform("epsg:4326", "epsg:3857", false)
 	```
@@ -231,9 +231,9 @@ Each SpatialRDD can carry non-spatial attributes such as price, age and name as 
 The other attributes are combined together to a string and stored in ==UserData== field of each geometry.
 
 To retrieve the UserData field, use the following code:
-```Scala
+```scala
 val rddWithOtherAttributes = objectRDD.rawSpatialRDD.rdd.map[String](f=>f.getUserData.asInstanceOf[String])
-``` 
+```
 
 ## Write a Spatial Range Query
 
@@ -242,7 +242,7 @@ A spatial range query takes as input a range query window and an SpatialRDD and 
 
 Assume you now have an SpatialRDD (typed or generic). You can use the following code to issue an Spatial Range Query on it.
 
-```Scala
+```scala
 val rangeQueryWindow = new Envelope(-90.01, -80.01, 30.01, 40.01)
 val spatialPredicate = SpatialPredicate.COVERED_BY // Only return gemeotries fully covered by the window
 val usingIndex = false
@@ -263,7 +263,7 @@ var queryResult = RangeQuery.SpatialRangeQuery(spatialRDD, rangeQueryWindow, spa
 
 !!!note
 	Spatial range query is equivalent with a SELECT query with spatial predicate as search condition in Spatial SQL. An example query is as follows:
-	```SQL
+	```sql
 	SELECT *
 	FROM checkin
 	WHERE ST_Intersects(checkin.location, queryWindow)
@@ -275,14 +275,14 @@ Besides the rectangle (Envelope) type range query window, Sedona range query win
 
 The code to create a point is as follows:
 
-```Scala
+```scala
 val geometryFactory = new GeometryFactory()
 val pointObject = geometryFactory.createPoint(new Coordinate(-84.01, 34.01))
 ```
 
 The code to create a polygon (with 4 vertexes) is as follows:
 
-```Scala
+```scala
 val geometryFactory = new GeometryFactory()
 val coordinates = new Array[Coordinate](5)
 coordinates(0) = new Coordinate(0,0)
@@ -295,7 +295,7 @@ val polygonObject = geometryFactory.createPolygon(coordinates)
 
 The code to create a line string (with 4 vertexes) is as follows:
 
-```Scala
+```scala
 val geometryFactory = new GeometryFactory()
 val coordinates = new Array[Coordinate](4)
 coordinates(0) = new Coordinate(0,0)
@@ -311,7 +311,7 @@ Sedona provides two types of spatial indexes, Quad-Tree and R-Tree. Once you spe
 
 To utilize a spatial index in a spatial range query, use the following code:
 
-```Scala
+```scala
 val rangeQueryWindow = new Envelope(-90.01, -80.01, 30.01, 40.01)
 val spatialPredicate = SpatialPredicate.COVERED_BY // Only return gemeotries fully covered by the window
 
@@ -335,7 +335,7 @@ A spatial K Nearnest Neighbor query takes as input a K, a query point and an Spa
 
 Assume you now have an SpatialRDD (typed or generic). You can use the following code to issue an Spatial KNN Query on it.
 
-```Scala
+```scala
 val geometryFactory = new GeometryFactory()
 val pointObject = geometryFactory.createPoint(new Coordinate(-84.01, 34.01))
 val K = 1000 // K Nearest Neighbors
@@ -345,7 +345,7 @@ val result = KNNQuery.SpatialKnnQuery(objectRDD, pointObject, K, usingIndex)
 
 !!!note
 	Spatial KNN query that returns 5 Nearest Neighbors is equal to the following statement in Spatial SQL
-	```SQL
+	```sql
 	SELECT ck.name, ck.rating, ST_Distance(ck.location, myLocation) AS distance
 	FROM checkins ck
 	ORDER BY distance DESC
@@ -365,7 +365,7 @@ To learn how to create Polygon and LineString object, see [Range query window](#
 
 To utilize a spatial index in a spatial KNN query, use the following code:
 
-```Scala
+```scala
 val geometryFactory = new GeometryFactory()
 val pointObject = geometryFactory.createPoint(new Coordinate(-84.01, 34.01))
 val K = 1000 // K Nearest Neighbors
@@ -391,7 +391,7 @@ A spatial join query takes as input two Spatial RDD A and B. For each geometry i
 
 Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue an Spatial Join Query on them.
 
-```Scala
+```scala
 val spatialPredicate = SpatialPredicate.COVERED_BY // Only return gemeotries fully covered by each query window in queryWindowRDD
 val usingIndex = false
 
@@ -405,7 +405,7 @@ val result = JoinQuery.SpatialJoinQuery(objectRDD, queryWindowRDD, usingIndex, s
 
 !!!note
 	Spatial join query is equal to the following query in Spatial SQL:
-	```SQL
+	```sql
 	SELECT superhero.name
 	FROM city, superhero
 	WHERE ST_Contains(city.geom, superhero.geom);
@@ -418,14 +418,14 @@ Sedona spatial partitioning method can significantly speed up the join query. Th
 
 If you first partition SpatialRDD A, then you must use the partitioner of A to partition B.
 
-```Scala
+```scala
 objectRDD.spatialPartitioning(GridType.KDBTREE)
 queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
 ```
 
 Or 
 
-```Scala
+```scala
 queryWindowRDD.spatialPartitioning(GridType.KDBTREE)
 objectRDD.spatialPartitioning(queryWindowRDD.getPartitioner)
 ```
@@ -435,7 +435,7 @@ objectRDD.spatialPartitioning(queryWindowRDD.getPartitioner)
 
 To utilize a spatial index in a spatial join query, use the following code:
 
-```Scala
+```scala
 objectRDD.spatialPartitioning(joinQueryPartitioningType)
 queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
 
@@ -473,7 +473,7 @@ A distance join query takes as input two Spatial RDD A and B and a distance. For
 
 Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue an Distance Join Query on them.
 
-```Scala
+```scala
 objectRddA.analyze()
 
 val circleRDD = new CircleRDD(objectRddA, 0.1) // Create a CircleRDD using the given distance
@@ -497,7 +497,7 @@ The output format of the distance join query is [here](#output-format_2).
 
 !!!note
 	Distance join query is equal to the following query in Spatial SQL:
-	```SQL
+	```sql
 	SELECT superhero.name
 	FROM city, superhero
 	WHERE ST_Distance(city.geom, superhero.geom) <= 10;
@@ -519,7 +519,7 @@ Typed SpatialRDD and generic SpatialRDD can be saved to permanent storage.
 
 Use the following code to save an SpatialRDD as a distributed WKT text file:
 
-```Scala
+```scala
 objectRDD.rawSpatialRDD.saveAsTextFile("hdfs://PATH")
 objectRDD.saveAsWKT("hdfs://PATH")
 ```
@@ -528,7 +528,7 @@ objectRDD.saveAsWKT("hdfs://PATH")
 
 Use the following code to save an SpatialRDD as a distributed WKB text file:
 
-```Scala
+```scala
 objectRDD.saveAsWKB("hdfs://PATH")
 ```
 
@@ -536,7 +536,7 @@ objectRDD.saveAsWKB("hdfs://PATH")
 
 Use the following code to save an SpatialRDD as a distributed GeoJSON text file:
 
-```Scala
+```scala
 objectRDD.saveAsGeoJSON("hdfs://PATH")
 ```
 
@@ -545,7 +545,7 @@ objectRDD.saveAsGeoJSON("hdfs://PATH")
 
 Use the following code to save an SpatialRDD as a distributed object file:
 
-```Scala
+```scala
 objectRDD.rawSpatialRDD.saveAsObjectFile("hdfs://PATH")
 ```
 
@@ -576,7 +576,7 @@ You can easily reload an SpatialRDD that has been saved to ==a distributed objec
 
 Use the following code to reload the PointRDD/PolygonRDD/LineStringRDD:
 
-```Scala
+```scala
 var savedRDD = new PointRDD(sc.objectFile[Point]("hdfs://PATH"))
 
 var savedRDD = new PointRDD(sc.objectFile[Polygon]("hdfs://PATH"))
@@ -588,13 +588,13 @@ var savedRDD = new PointRDD(sc.objectFile[LineString]("hdfs://PATH"))
 
 Use the following code to reload the SpatialRDD:
 
-```Scala
+```scala
 var savedRDD = new SpatialRDD[Geometry]
 savedRDD.rawSpatialRDD = sc.objectFile[Geometry]("hdfs://PATH")
 ```
 
 Use the following code to reload the indexed SpatialRDD:
-```Scala
+```scala
 var savedRDD = new SpatialRDD[Geometry]
 savedRDD.indexedRawRDD = sc.objectFile[SpatialIndex]("hdfs://PATH")
 ```

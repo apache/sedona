@@ -70,6 +70,6 @@ export SPARK_HOME=~/Downloads/spark-3.0.1-bin-hadoop2.7
 
 ```bash
 export PYTHONPATH=$SPARK_HOME/python
-``` 
+```
 
 You can then play with [Sedona Python Jupyter notebook](../../tutorial/jupyter-notebook/).

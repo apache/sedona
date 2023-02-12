@@ -6,7 +6,7 @@ to Sedona visualization routines. For example, the following is
 essentially the R equivalent of [this example in
 Scala](https://github.com/apache/sedona/blob/f6b1c5e24bdb67d2c8d701a9b2af1fb5658fdc4d/viz/src/main/scala/org/apache/sedona/viz/showcase/ScalaExample.scala#L142-L160).
 
-``` r
+```r
 library(sparklyr)
 library(apache.sedona)
 

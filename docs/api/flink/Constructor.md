@@ -7,7 +7,7 @@ Format: `ST_GeomFromGeoHash(geohash: string, precision: int)`
 Since: `v1.2.1`
 
 SQL example:
-```SQL
+```sql
 SELECT ST_GeomFromGeoHash('s00twy01mt', 4) AS geom
 ```
 
@@ -20,7 +20,7 @@ Format: `ST_GeomFromGeoJSON (GeoJson:string)`
 Since: `v1.2.0`
 
 SQL example:
-```SQL
+```sql
 SELECT ST_GeomFromGeoJSON(polygontable._c0) AS polygonshape
 FROM polygontable
 ```
@@ -35,7 +35,7 @@ Format:
 Since: `v1.3.0`
 
 SQL example:
-```SQL
+```sql
 SELECT ST_GeomFromGML('<gml:LineString srsName="EPSG:4269"><gml:coordinates>-71.16028,42.258729 -71.160837,42.259112 -71.161143,42.25932</gml:coordinates></gml:LineString>') AS geometry
 ```
 
@@ -49,7 +49,7 @@ Format:
 Since: `v1.3.0`
 
 SQL example:
-```SQL
+```sql
 SELECT ST_GeomFromKML('<LineString><coordinates>-71.1663,42.2614 -71.1667,42.2616</coordinates></LineString>') AS geometry
 ```
 
@@ -63,7 +63,7 @@ Format:
 Since: `v1.2.1`
 
 SQL example:
-```SQL
+```sql
 SELECT ST_GeomFromText('POINT(40.7128 -74.0060)') AS geometry
 ```
 
@@ -78,7 +78,7 @@ Format:
 Since: `v1.2.0`
 
 SQL example:
-```SQL
+```sql
 SELECT ST_GeomFromWKB(polygontable._c0) AS polygonshape
 FROM polygontable
 ```
@@ -89,7 +89,7 @@ Format:
 Since: `v1.2.1`
 
 SQL example:
-```SQL
+```sql
 SELECT ST_GeomFromWKB(polygontable._c0) AS polygonshape
 FROM polygontable
 ```
@@ -104,7 +104,7 @@ Format:
 Since: `v1.2.0`
 
 SQL example:
-```SQL
+```sql
 SELECT ST_GeomFromWKT('POINT(40.7128 -74.0060)') AS geometry
 ```
 
@@ -117,7 +117,7 @@ Format: `ST_LineFromText (Text:string, Delimiter:char)`
 Since: `v1.2.1`
 
 SQL example:
-```SQL
+```sql
 SELECT ST_LineFromText('Linestring(1 2, 3 4)') AS line
 ```
 
@@ -130,7 +130,7 @@ Format: `ST_LineStringFromText (Text:string, Delimiter:char)`
 Since: `v1.2.1`
 
 Spark SQL example:
-```SQL
+```sql
 SELECT ST_LineStringFromText('Linestring(1 2, 3 4)') AS line
 ```
 
@@ -143,7 +143,7 @@ Format: `ST_MLineFromText (Text:string, Srid: int)`
 Since: `1.3.1`
 
 SQL example:
-```SQL
+```sql
 SELECT ST_MLineFromText('MULTILINESTRING((1 2, 3 4), (4 5, 6 7))') AS multiLine
 SELECT ST_MLineFromText('MULTILINESTRING((1 2, 3 4), (4 5, 6 7))', 4269) AS multiLine
 ```
@@ -157,7 +157,7 @@ Format: `ST_MPolyFromText (Text:string, Srid: int)`
 Since: `1.3.1`
 
 SQL example:
-```SQL
+```sql
 SELECT ST_MPolyFromText('MULTIPOLYGON(((-70.916 42.1002,-70.9468 42.0946,-70.9765 42.0872 )))') AS multiPolygon
 SELECT ST_MPolyFromText('MULTIPOLYGON(((-70.916 42.1002,-70.9468 42.0946,-70.9765 42.0872 )))', 4269) AS multiPolygon
 ```
@@ -171,7 +171,7 @@ Format: `ST_Point (X:decimal, Y:decimal)`
 Since: `v1.2.1`
 
 SQL example:
-```SQL
+```sql
 SELECT ST_Point(x, y) AS pointshape
 FROM pointtable
 ```
@@ -185,7 +185,7 @@ Format: `ST_PointFromText (Text:string, Delimiter:char)`
 Since: `v1.2.0`
 
 SQL example:
-```SQL
+```sql
 SELECT ST_PointFromText('40.7128,-74.0060', ',') AS pointshape
 ```
 
@@ -198,7 +198,7 @@ Format: `ST_PolygonFromEnvelope (MinX:decimal, MinY:decimal, MaxX:decimal, MaxY:
 Since: `v1.2.0`
 
 SQL example:
-```SQL
+```sql
 SELECT *
 FROM pointdf
 WHERE ST_Contains(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.pointshape)
@@ -213,6 +213,6 @@ Format: `ST_PolygonFromText (Text:string, Delimiter:char)`
 Since: `v1.2.0`
 
 SQL example:
-```SQL
+```sql
 SELECT ST_PolygonFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794,-74.0428197,40.6867969', ',') AS polygonshape
 ```

@@ -9,19 +9,19 @@ Introduction: Find geometries from A and geometries from B such that each geomet
 
 Spark SQL Example:
 
-```SQL
+```sql
 SELECT *
 FROM polygondf, pointdf
 WHERE ST_Contains(polygondf.polygonshape,pointdf.pointshape)
 ```
 
-```SQL
+```sql
 SELECT *
 FROM polygondf, pointdf
 WHERE ST_Intersects(polygondf.polygonshape,pointdf.pointshape)
 ```
 
-```SQL
+```sql
 SELECT *
 FROM pointdf, polygondf
 WHERE ST_Within(pointdf.pointshape, polygondf.polygonshape)
@@ -46,14 +46,14 @@ Introduction: Find geometries from A and geometries from B such that the interna
 Spark SQL Example:
 
 *Only consider ==fully within a certain distance==*
-```SQL
+```sql
 SELECT *
 FROM pointdf1, pointdf2
 WHERE ST_Distance(pointdf1.pointshape1,pointdf2.pointshape2) < 2
 ```
 
 *Consider ==intersects within a certain distance==*
-```SQL
+```sql
 SELECT *
 FROM pointdf1, pointdf2
 WHERE ST_Distance(pointdf1.pointshape1,pointdf2.pointshape2) <= 2
@@ -83,7 +83,7 @@ The supported join type - broadcast side combinations are
 * Left outer - broadcast right
 * Right outer - broadcast left
 
-```Scala
+```scala
 pointDf.alias("pointDf").join(broadcast(polygonDf).alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
 ```
 
@@ -100,7 +100,7 @@ BroadcastIndexJoin pointshape#52: geometry, BuildRight, BuildRight, false ST_Con
 
 This also works for distance joins:
 
-```Scala
+```scala
 pointDf1.alias("pointDf1").join(broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) <= 2"))
 ```
 
@@ -123,7 +123,7 @@ Introduction: Given a join query and a predicate in the same WHERE clause, first
 
 Spark SQL Example:
 
-```SQL
+```sql
 SELECT *
 FROM polygondf, pointdf 
 WHERE ST_Contains(polygondf.polygonshape,pointdf.pointshape)

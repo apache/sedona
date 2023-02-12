@@ -48,13 +48,13 @@ __Sedona `1.1.1-incubating` is overall the recommended version to use. It is gen
 After you have installed the libraries and started the cluster, you can initialize the Sedona `ST_*` functions and types by running from your code: 
 
 (scala)
-```Scala
+```scala
 import org.apache.sedona.sql.utils.SedonaSQLRegistrator
 SedonaSQLRegistrator.registerAll(spark)
 ```
 
 (or python)
-```Python
+```python
 from sedona.register.geo_registrator import SedonaRegistrator
 SedonaRegistrator.registerAll(spark)
 ```
