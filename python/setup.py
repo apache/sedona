@@ -15,14 +15,29 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from setuptools import setup, find_packages
-from os import path
+from setuptools import setup, find_packages, Extension
+import os
 from sedona import version
-
-here = path.abspath(path.dirname(__file__))
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
+
+extension_args = {}
+
+if os.getenv('ENABLE_ASAN'):
+    extension_args = {
+        'extra_compile_args': ["-fsanitize=address"],
+        'extra_link_args': ["-fsanitize=address"]
+    }
+
+ext_modules = [
+    Extension('sedona.utils.geomserde_speedup', sources=[
+        'src/geomserde_speedup_module.c',
+        'src/geomserde.c',
+        'src/geom_buf.c',
+        'src/geos_c_dyn.c'
+    ], **extension_args)
+]
 
 setup(
     name='apache-sedona',
@@ -33,10 +48,11 @@ setup(
     author='Apache Sedona',
     author_email='dev@sedona.apache.org',
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
+    ext_modules=ext_modules,
     long_description=long_description,
     long_description_content_type="text/markdown",
     python_requires='>=3.6',
-    install_requires=['attrs', "shapely"],
+    install_requires=['attrs', "shapely>=1.7.0"],
     extras_require={"spark": ['pyspark>=2.3.0']},
     project_urls={
         'Documentation': 'https://sedona.apache.org',
@@ -48,4 +64,3 @@ setup(
         "License :: OSI Approved :: Apache Software License"
     ]
 )
-
