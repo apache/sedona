@@ -81,7 +81,7 @@ path = "hdfs://776faf4d6a1e:8020/"+file_name
 df = spark.read.json(path, multiLine = "true")
 ```
 
-### Consulting and organizing data for analisis
+### Consulting and organizing data for analysis
 
 ```
 from pyspark.sql.functions import explode, arrays_zip

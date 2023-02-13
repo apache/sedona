@@ -550,7 +550,7 @@ SELECT ST_NDims(ST_GeomFromEWKT('POINT(1 1 2)'))
 
 Output: `3`
 
-Spark SQL example with x,y co-ordinate:
+Spark SQL example with x,y coordinate:
 
 ```sql
 SELECT ST_NDims(ST_GeomFromText('POINT(1 1)'))

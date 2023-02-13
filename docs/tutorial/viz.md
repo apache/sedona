@@ -108,7 +108,7 @@ LATERAL VIEW explode(ST_Pixelize(ST_Transform(shape, 'epsg:4326','epsg:3857'), 2
 This will give you a 256*256 resolution image after you run ST_Render at the end of this tutorial.
 
 !!!warning
-	We highly suggest that you should use ST_Transform to transform coordiantes to a visualization-specific coordinate system such as epsg:3857. Otherwise you map may look distorted.
+	We highly suggest that you should use ST_Transform to transform coordinates to a visualization-specific coordinate system such as epsg:3857. Otherwise you map may look distorted.
 	
 ### Aggregate pixels
 
