@@ -432,6 +432,15 @@ public class FunctionTest extends TestBase{
         int result = (int) first(polygonTable).getField(0);
         assertEquals(3, result, 0);
     }
+
+    @Test
+    public void testNDimsForMCoordinate() {
+        Object result = first(tableEnv.sqlQuery("SELECT ST_NDims(ST_GeomFromWKT('POINT M (1 2 3)'))")).getField(0);
+        assertEquals(result, 3);
+        result = first(tableEnv.sqlQuery("SELECT ST_NDims(ST_GeomFromWKT('POINT ZM (1 2 3 4)'))")).getField(0);
+        assertEquals(result, 4);
+    }
+
     @Test
     public void testXMax() {
         Table polygonTable = createPolygonTable(1);

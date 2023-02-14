@@ -897,7 +897,7 @@ Result:
 ```
 ## ST_NDims
 
-Introduction: Returns the coordinate dimension of the geometry. It supports 2 - (x,y) , 3 - (x,y,z). Currently the geometry serializer in sedona-sql does not support M dimension, 4D geometries with ZM coordinates will have their M coordinates dropped and became 3D geometries. We're working on a new geometry serializer to resolve this issue.
+Introduction: Returns the coordinate dimension of the geometry.
 
 Format: `ST_NDims(geom: geometry)`
 
