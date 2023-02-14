@@ -87,6 +87,21 @@ public class MultiPointSerdeTest {
     }
 
     @Test
+    public void testMultiPointWithEmptyPointsOnly() {
+        Point[] points =
+                new Point[]{
+                        gf.createPoint(),
+                        gf.createPoint(),
+                        gf.createPoint()
+                };
+        MultiPoint multiPoint = gf.createMultiPoint(points);
+        byte[] bytes = GeometrySerializer.serialize(multiPoint);
+        Geometry geom = GeometrySerializer.deserialize(bytes);
+        Assert.assertEquals(3, geom.getNumGeometries());
+        Assert.assertEquals(multiPoint, geom);
+    }
+
+    @Test
     public void testMultiPointXYM() {
         MultiPoint multiPoint =
                 gf.createMultiPointFromCoords(

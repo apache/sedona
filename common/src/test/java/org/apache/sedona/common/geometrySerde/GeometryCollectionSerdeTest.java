@@ -32,6 +32,8 @@ import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 
+import javax.sound.sampled.Line;
+
 public class GeometryCollectionSerdeTest {
     private static final GeometryFactory gf = new GeometryFactory();
 
@@ -82,9 +84,23 @@ public class GeometryCollectionSerdeTest {
                                 gf.createMultiPoint(),
                                 gf.createMultiLineString(),
                                 gf.createMultiPolygon(),
+                                gf.createMultiPoint(new Point[] {
+                                        gf.createPoint(),
+                                        gf.createPoint()
+                                }),
+                                gf.createMultiLineString(new LineString[] {
+                                        gf.createLineString(),
+                                        gf.createLineString()
+                                }),
+                                gf.createMultiPolygon(new Polygon[] {
+                                        gf.createPolygon(),
+                                        gf.createPolygon(),
+                                        gf.createPolygon()
+                                }),
                                 multiPoint,
                                 multiLineString,
-                                multiPolygon
+                                multiPolygon,
+                                point
                         });
         geometryCollection.setSRID(4326);
         byte[] bytes = GeometrySerializer.serialize(geometryCollection);

@@ -86,4 +86,19 @@ public class MultiPolygonSerdeTest {
         Assert.assertEquals(3, mp.getNumGeometries());
         Assert.assertEquals(multiPolygon, mp);
     }
+
+    @Test
+    public void testMultiPolygonContainingEmptyPolygons() {
+        MultiPolygon multiPolygon =
+                gf.createMultiPolygon(
+                        new Polygon[]{
+                                gf.createPolygon(),
+                                gf.createPolygon()
+                        });
+        multiPolygon.setSRID(4326);
+        byte[] bytes = GeometrySerializer.serialize(multiPolygon);
+        Geometry geom = GeometrySerializer.deserialize(bytes);
+        Assert.assertEquals(2, geom.getNumGeometries());
+        Assert.assertEquals(multiPolygon, geom);
+    }
 }

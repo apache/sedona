@@ -119,7 +119,7 @@ public class GeometrySerializer {
 
     private static Point deserializePoint(GeometryBuffer buffer, int srid) {
         CoordinateType coordType = buffer.getCoordinateType();
-        int numCoordinates = getNonNegativeInt(buffer, 4);
+        int numCoordinates = getBoundedInt(buffer, 4);
         Point point;
         if (numCoordinates == 0) {
             point = FACTORY.createPoint();
@@ -161,7 +161,7 @@ public class GeometrySerializer {
 
     private static MultiPoint deserializeMultiPoint(GeometryBuffer buffer, int srid) {
         CoordinateType coordType = buffer.getCoordinateType();
-        int numPoints = getNonNegativeInt(buffer, 4);
+        int numPoints = getBoundedInt(buffer, 4);
         int bufferSize = 8 + numPoints * coordType.bytes;
         checkBufferSize(buffer, bufferSize);
         Point[] points = new Point[numPoints];
@@ -203,7 +203,7 @@ public class GeometrySerializer {
 
     private static LineString deserializeLineString(GeometryBuffer buffer, int srid) {
         CoordinateType coordType = buffer.getCoordinateType();
-        int numCoordinates = getNonNegativeInt(buffer, 4);
+        int numCoordinates = getBoundedInt(buffer, 4);
         int bufferSize = 8 + numCoordinates * coordType.bytes;
         checkBufferSize(buffer, bufferSize);
         CoordinateSequence coordinates = buffer.getCoordinates(8, numCoordinates);
@@ -215,10 +215,6 @@ public class GeometrySerializer {
 
     private static GeometryBuffer serializeMultiLineString(MultiLineString multiLineString) {
         int numLineStrings = multiLineString.getNumGeometries();
-        if (numLineStrings <= 0) {
-            return createGeometryBuffer(
-                    WKBConstants.wkbMultiLineString, CoordinateType.XY, multiLineString.getSRID(), 8, 0);
-        }
         CoordinateType coordType = getCoordinateType(multiLineString);
         int numCoordinates = multiLineString.getNumPoints();
         int coordsOffset = 8;
@@ -243,17 +239,11 @@ public class GeometrySerializer {
 
     private static MultiLineString deserializeMultiLineString(GeometryBuffer buffer, int srid) {
         CoordinateType coordType = buffer.getCoordinateType();
-        int numCoordinates = getNonNegativeInt(buffer, 4);
-        if (numCoordinates == 0) {
-            buffer.mark(8);
-            MultiLineString multiLineString = FACTORY.createMultiLineString();
-            multiLineString.setSRID(srid);
-            return multiLineString;
-        }
+        int numCoordinates = getBoundedInt(buffer, 4);
         int coordsOffset = 8;
         int numOffset = 8 + numCoordinates * coordType.bytes;
         GeomPartSerializer serializer = new GeomPartSerializer(buffer, coordsOffset, numOffset);
-        int numLineStrings = serializer.checkedReadNonNegativeInt();
+        int numLineStrings = serializer.checkedReadBoundedInt();
         serializer.checkRemainingIntsAtLeast(numLineStrings);
         LineString[] lineStrings = new LineString[numLineStrings];
         for (int k = 0; k < numLineStrings; k++) {
@@ -291,7 +281,7 @@ public class GeometrySerializer {
 
     private static Polygon deserializePolygon(GeometryBuffer buffer, int srid) {
         CoordinateType coordType = buffer.getCoordinateType();
-        int numCoordinates = getNonNegativeInt(buffer, 4);
+        int numCoordinates = getBoundedInt(buffer, 4);
         if (numCoordinates == 0) {
             buffer.mark(8);
             Polygon polygon = FACTORY.createPolygon();
@@ -309,10 +299,6 @@ public class GeometrySerializer {
 
     private static GeometryBuffer serializeMultiPolygon(MultiPolygon multiPolygon) {
         int numPolygons = multiPolygon.getNumGeometries();
-        if (numPolygons == 0) {
-            return createGeometryBuffer(
-                    WKBConstants.wkbMultiPolygon, CoordinateType.XY, multiPolygon.getSRID(), 8, 0);
-        }
         int numCoordinates = 0;
         CoordinateType coordType = getCoordinateType(multiPolygon);
         int totalRings = 0;
@@ -346,17 +332,11 @@ public class GeometrySerializer {
 
     private static MultiPolygon deserializeMultiPolygon(GeometryBuffer buffer, int srid) {
         CoordinateType coordType = buffer.getCoordinateType();
-        int numCoordinates = getNonNegativeInt(buffer, 4);
-        if (numCoordinates == 0) {
-            buffer.mark(8);
-            MultiPolygon multiPolygon = FACTORY.createMultiPolygon();
-            multiPolygon.setSRID(srid);
-            return multiPolygon;
-        }
+        int numCoordinates = getBoundedInt(buffer, 4);
         int coordsOffset = 8;
         int numPolygonsOffset = 8 + numCoordinates * coordType.bytes;
         GeomPartSerializer serializer = new GeomPartSerializer(buffer, coordsOffset, numPolygonsOffset);
-        int numPolygons = serializer.checkedReadNonNegativeInt();
+        int numPolygons = serializer.checkedReadBoundedInt();
         Polygon[] polygons = new Polygon[numPolygons];
         for (int k = 0; k < numPolygons; k++) {
             Polygon polygon = serializer.readPolygon();
@@ -405,7 +385,7 @@ public class GeometrySerializer {
     }
 
     private static GeometryCollection deserializeGeometryCollection(GeometryBuffer buffer, int srid) {
-        int numGeometries = getNonNegativeInt(buffer, 4);
+        int numGeometries = getBoundedInt(buffer, 4);
         if (numGeometries == 0) {
             buffer.mark(8);
             GeometryCollection geometryCollection = FACTORY.createGeometryCollection();
@@ -454,10 +434,13 @@ public class GeometrySerializer {
         }
     }
 
-    private static int getNonNegativeInt(GeometryBuffer buffer, int offset) {
+    private static int getBoundedInt(GeometryBuffer buffer, int offset) {
         int value = buffer.getInt(offset);
         if (value < 0) {
             throw new IllegalArgumentException("Unexpected negative value encountered: " + value);
+        }
+        if (value > buffer.getLength()) {
+            throw new IllegalArgumentException("Unexpected large value encountered: " + value);
         }
         return value;
     }
@@ -517,7 +500,7 @@ public class GeometrySerializer {
         }
 
         Polygon readPolygon() {
-            int numRings = checkedReadNonNegativeInt();
+            int numRings = checkedReadBoundedInt();
             if (numRings == 0) {
                 return FACTORY.createPolygon();
             }
@@ -532,7 +515,7 @@ public class GeometrySerializer {
         }
 
         CoordinateSequence readCoordinates() {
-            int numCoordinates = getNonNegativeInt(buffer, intsOffset);
+            int numCoordinates = getBoundedInt(buffer, intsOffset);
             int newCoordsOffset = coordsOffset + buffer.getCoordinateType().bytes * numCoordinates;
             if (newCoordsOffset > coordsEndOffset) {
                 throw new IllegalStateException(
@@ -544,15 +527,15 @@ public class GeometrySerializer {
             return coordinates;
         }
 
-        int readNonNegativeInt() {
-            int value = getNonNegativeInt(buffer, intsOffset);
+        int readBoundedInt() {
+            int value = getBoundedInt(buffer, intsOffset);
             intsOffset += 4;
             return value;
         }
 
-        int checkedReadNonNegativeInt() {
+        int checkedReadBoundedInt() {
             checkBufferSize(buffer, intsOffset + 4);
-            return readNonNegativeInt();
+            return readBoundedInt();
         }
 
         void checkRemainingIntsAtLeast(int num) {

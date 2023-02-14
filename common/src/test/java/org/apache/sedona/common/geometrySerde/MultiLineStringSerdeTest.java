@@ -65,4 +65,20 @@ public class MultiLineStringSerdeTest {
         Assert.assertEquals(3, multiLineString2.getNumGeometries());
         Assert.assertEquals(multiLineString, multiLineString2);
     }
+
+    @Test
+    public void testMultiLineStringContainingEmptyLineStrings() {
+        MultiLineString multiLineString = gf.createMultiLineString(
+                new LineString[] {
+                        gf.createLineString(),
+                        gf.createLineString(),
+                        gf.createLineString()
+                }
+        );
+        multiLineString.setSRID(4326);
+        byte[] bytes = GeometrySerializer.serialize(multiLineString);
+        Geometry geom = GeometrySerializer.deserialize(bytes);
+        Assert.assertEquals(3, geom.getNumGeometries());
+        Assert.assertEquals(multiLineString, geom);
+    }
 }
