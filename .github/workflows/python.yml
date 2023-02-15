@@ -71,11 +71,12 @@ jobs:
         SPARK_VERSION: ${{ matrix.spark }}
         HADOOP_VERSION: ${{ matrix.hadoop }}
       run: tar -xzf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz
-    - run: sudo apt-get -y install python3-pip python-dev libgeos-dev
+    - run: sudo apt-get -y install python3-pip python-dev
     - run: sudo pip3 install -U setuptools
     - run: sudo pip3 install -U wheel
     - run: sudo pip3 install -U virtualenvwrapper
     - run: python3 -m pip install pipenv
+    - run: cd python; python3 setup.py build_ext --inplace
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         PYTHON_VERSION: ${{ matrix.python }}

@@ -1,0 +1,55 @@
+name: Python build extension
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '*'
+      
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
+        python: ['3.10', '3.9', '3.8']
+
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python }}
+    - name: Install pipenv
+      run: pip install -U pipenv
+    - name: Install dependencies
+      run: |
+        cd python
+        pipenv --python ${{ matrix.python }}
+        pipenv install --dev
+    - name: Build extension
+      run: |
+        cd python
+        pipenv run python setup.py build_ext --inplace
+    - name: Run tests
+      run: |
+        cd python
+        pipenv run pytest tests/utils/test_geomserde_speedup.py
+    - name: Run tests on Shapely 2.0
+      run: |
+        cd python
+        pipenv install shapely~=2.0
+        pipenv run pytest tests/utils/test_geomserde_speedup.py
+    - name: Run tests on Shapley 1.7
+      # Shapely 1.7 only provides wheels for cp36 ~ cp39, so we'll skip running
+      # this test for recent python versions.
+      if: ${{ matrix.python == '3.9' || matrix.python == '3.8' }}
+      run: |
+        cd python
+        pipenv install shapely~=1.7
+        pipenv run pytest tests/utils/test_geomserde_speedup.py
