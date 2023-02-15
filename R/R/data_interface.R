@@ -439,6 +439,52 @@ sedona_read_shapefile <- function(sc,
     new_spatial_rdd(NULL)
 }
 
+
+#' Read a geoparquet file into a Spark DataFrame.
+#' Read a geoparquet file into a Spark DataFrame. The created dataframe is automatically registered.
+#'
+#' @param sc A \code{spark_connection}.
+#' @param location Location of the data source.
+#' @param name The name to assign to the newly generated table.
+#'
+#'
+#' @return A SpatialRDD.
+#'
+#' @examples
+#' library(sparklyr)
+#' library(apache.sedona)
+#'
+#' sc <- spark_connect(master = "spark://HOST:PORT")
+#'
+#' if (!inherits(sc, "test_connection")) {
+#'   input_location <- "/dev/null" # replace it with the path to your input file
+#'   rdd <- sedona_read_geoparquet(sc, location = input_location)
+#' }
+#'
+#' @family Sedona data interface functions
+#'
+#' @export
+sedona_read_geoparquet <- function(sc,
+                                   location,
+                                   name = NULL) {
+  
+  ## don't have sparklyr's `%<-%`' maybe to replicate later
+  checked <- sparklyr:::spark_read_compat_param(sc, name, location)
+  name <- checked[[1]]
+  path <- checked[[2]]
+  
+  df <- 
+    invoke(
+      spark_session(sc), 
+      "%>%", 
+      list("read"), list("format", "geoparquet"), list("load", sparklyr:::spark_normalize_path(path))) 
+  
+  
+  
+  sdf_register(df, name = name)
+}
+
+
 #' Write SpatialRDD into a file.
 #'
 #' Export serialized data from a Sedona SpatialRDD into an output file.
@@ -588,6 +634,45 @@ sedona_save_spatial_rdd <- function(x,
     list(spatial_rdd, output_location)
   )
 }
+
+
+#' Read a geoparquet file into a Spark DataFrame.
+#' Read a geoparquet file into a Spark DataFrame. The created dataframe is automatically registered.
+#'
+#' @param sc A \code{spark_connection}.
+#' @param location Location of the data source.
+#' @param name The name to assign to the newly generated table.
+#'
+#'
+#' @return A SpatialRDD.
+#'
+#' @examples
+#' library(sparklyr)
+#' library(apache.sedona)
+#'
+#' sc <- spark_connect(master = "spark://HOST:PORT")
+#'
+#' if (!inherits(sc, "test_connection")) {
+#'   input_location <- "/dev/null" # replace it with the path to your input file
+#'   rdd <- sedona_read_geoparquet(sc, location = input_location)
+#' }
+#'
+#' @family Sedona data interface functions
+#'
+#' @export
+sedona_save_geoparquet <- function(x,
+                                   output_location) {
+  
+  ## Get back jobj
+  x_obj <- sparklyr:::spark_sqlresult_from_dplyr(x)
+  
+  invoke(
+    x_obj, 
+    "%>%", 
+    list("write"), list("format", "geoparquet"), list("save", sparklyr:::spark_normalize_path(output_location))) 
+
+}
+
 
 rdd_cls_from_type <- function(type = c("point", "polygon", "linestring")) {
   type <- match.arg(type)
