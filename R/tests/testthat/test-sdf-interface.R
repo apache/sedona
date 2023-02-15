@@ -21,19 +21,59 @@ sc <- testthat_spark_connection()
 
 pt_rdd <- read_point_rdd_with_non_spatial_attrs()
 
+shapefile <- function(filename) {
+  test_data(file.path("shapefiles", filename))
+}
+
 test_that("sdf_register() works as expected for Spatial RDDs", {
   sdf_name <- random_string("spatial_sdf")
   pt_sdf <- sdf_register(pt_rdd, name = sdf_name)
-
+  
   expect_equivalent(
     pt_sdf %>% sdf_schema(),
-    list(geometry = list(name = "geometry", type = "GeometryUDT"))
+    list(
+      geometry = list(name = "geometry", type = "GeometryUDT")
+      
+    )
   )
   expect_equal(pt_sdf %>% dbplyr::remote_name(), dbplyr::ident(sdf_name))
-
+  
   pt_sdf %>% collect()
   succeed()
 })
+
+
+test_that("sdf_register() works as expected for Spatial RDDs with fieldNames", {
+  sdf_name <- random_string("spatial_sdf")
+  polygon_rdd <- sedona_read_shapefile_to_typed_rdd(
+    sc,
+    location = shapefile("dbf"), type = "polygon"
+  )
+  polygon_sdf <- sdf_register(polygon_rdd, name = sdf_name)
+  
+  expect_equivalent(
+    polygon_sdf %>% sdf_schema(),
+    list(
+      geometry = list(name = "geometry", type = "GeometryUDT"),
+      geometry = list(name = "STATEFP", type = "StringType"),
+      geometry = list(name = "COUNTYFP", type = "StringType"),
+      geometry = list(name = "COUNTYNS", type = "StringType"),
+      geometry = list(name = "AFFGEOID", type = "StringType"),
+      geometry = list(name = "GEOID", type = "StringType"),
+      geometry = list(name = "NAME", type = "StringType"),
+      geometry = list(name = "LSAD", type = "StringType"),
+      geometry = list(name = "ALAND", type = "StringType"),
+      geometry = list(name = "AWATER", type = "StringType")
+      
+    )
+  )
+  
+  expect_equal(polygon_sdf %>% dbplyr::remote_name(), dbplyr::ident(sdf_name))
+  
+  polygon_sdf %>% collect()
+  succeed()
+})
+
 
 test_that("as.spark.dataframe() works as expected for Spatial RDDs with non-spatial attributes", {
   sdf_name <- random_string("spatial_sdf")
