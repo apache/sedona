@@ -27,10 +27,10 @@ spark_dependencies <- function(spark_version, scala_version, ...) {
   }
 
   packages <- c(
-    "org.datasyslab:geotools-wrapper:geotools-24.1",
-    "org.datasyslab:sernetcdf:0.1.0",
-    "org.locationtech.jts:jts-core:1.18.0",
-    "org.wololo:jts2geojson:0.14.3"
+    "org.datasyslab:geotools-wrapper:1.3.0-27.2",
+    "edu.ucar:cdm-core:5.4.2",
+    "org.locationtech.jts:jts-core:1.19.0",
+    "org.wololo:jts2geojson:0.16.1"
   )
   jars <- NULL
 
@@ -52,6 +52,7 @@ spark_dependencies <- function(spark_version, scala_version, ...) {
     jars = jars,
     packages = packages,
     initializer = sedona_initialize_spark_connection,
+    repositories = c("https://artifacts.unidata.ucar.edu/repository/unidata-all"),
     dbplyr_sql_variant = sedona_dbplyr_sql_variant()
   )
 }

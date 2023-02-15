@@ -68,7 +68,7 @@ collect_coords <- function(sdf) {
   sdf %>%
     dplyr::transmute(
       coords = transform(
-        ST_DumpPoints(geometry), ~ array(ST_X(.x), ST_Y(.x))
+        ST_DumpPoints(geometry), ~ array(ST_X(geometry), ST_Y(geometry))
       )
     ) %>%
     dplyr::pull(coords)
