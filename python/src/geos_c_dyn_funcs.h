@@ -19,9 +19,8 @@
 
 /* The following are function pointers to GEOS C APIs provided by
  * libgeos_c. These functions must be called after a successful invocation of
- * `load_geos_c_functions` */
+ * `load_geos_c_library` or `load_geos_c_from_handle` */
 
-#include "geos_c_dyn.h"
 GEOS_FP_QUALIFIER GEOSContextHandle_t (*dyn_GEOS_init_r)();
 
 GEOS_FP_QUALIFIER void (*dyn_GEOS_finish_r)(GEOSContextHandle_t handle);

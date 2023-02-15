@@ -17,8 +17,8 @@
  * under the License.
  */
 
-#ifndef GEOS_C_NODEPS
-#define GEOS_C_NODEPS
+#ifndef GEOS_C_DYN
+#define GEOS_C_DYN
 
 /* We don't need to depend on geos_c.h in libgeos directly. We can add forward
  * type declarations for them since the libgeos C API only deals with pointer
@@ -88,4 +88,4 @@ enum GEOSGeomTypes {
   GEOS_GEOMETRYCOLLECTION
 };
 
-#endif /* GEOS_C_NODEPS */
+#endif /* GEOS_C_DYN */
