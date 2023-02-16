@@ -23,7 +23,6 @@ import org.apache.parquet.schema._
 import org.apache.parquet.schema.OriginalType._
 import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName._
 import org.apache.parquet.schema.Type.Repetition._
-import org.apache.spark.sql.AnalysisException
 import org.apache.spark.sql.execution.datasources.parquet.ParquetSchemaConverter.checkConversionRequirement
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
@@ -48,7 +47,7 @@ class GeoParquetToSparkSchemaConverter(
   assumeInt96IsTimestamp: Boolean = SQLConf.PARQUET_INT96_AS_TIMESTAMP.defaultValue.get) {
 
   private val geoParquetMetaData: GeoParquetMetaData = GeoParquetMetaData.parseKeyValueMetaData(keyValueMetaData).getOrElse {
-    throw new AnalysisException("GeoParquet file does not contain valid geo metadata")
+    throw new IllegalArgumentException("GeoParquet file does not contain valid geo metadata")
   }
 
   def this(keyValueMetaData: java.util.Map[String, String], conf: SQLConf) = this(
@@ -106,13 +105,13 @@ class GeoParquetToSparkSchemaConverter(
       if (originalType == null) s"$typeName" else s"$typeName ($originalType)"
 
     def typeNotSupported() =
-      throw new AnalysisException(s"Parquet type not supported: $typeString")
+      throw new IllegalArgumentException(s"Parquet type not supported: $typeString")
 
     def typeNotImplemented() =
-      throw new AnalysisException(s"Parquet type not yet supported: $typeString")
+      throw new IllegalArgumentException(s"Parquet type not yet supported: $typeString")
 
     def illegalType() =
-      throw new AnalysisException(s"Illegal Parquet type: $typeString")
+      throw new IllegalArgumentException(s"Illegal Parquet type: $typeString")
 
     // When maxPrecision = -1, we skip precision range check, and always respect the precision
     // specified in field.getDecimalMetadata.  This is useful when interpreting decimal types stored
@@ -242,7 +241,7 @@ class GeoParquetToSparkSchemaConverter(
           valueContainsNull = valueOptional)
 
       case _ =>
-        throw new AnalysisException(s"Unrecognized Parquet type: $field")
+        throw new IllegalArgumentException(s"Unrecognized Parquet type: $field")
     }
   }
 
@@ -560,7 +559,7 @@ extends SparkToParquetSchemaConverter(writeLegacyParquetFormat, outputTimestampT
         convertField(field.copy(dataType = udt.sqlType))
 
       case _ =>
-        throw new AnalysisException(s"Unsupported data type ${field.dataType.catalogString}")
+        throw new IllegalArgumentException(s"Unsupported data type ${field.dataType.catalogString}")
     }
   }
 }
