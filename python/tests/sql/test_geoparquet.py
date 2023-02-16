@@ -15,6 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+import pytest
 import os.path
 
 from shapely.geometry import Point
@@ -25,6 +26,7 @@ import geopandas
 
 from tests.test_base import TestBase
 from tests import geoparquet_input_location
+from tests import plain_parquet_input_location
 
 
 class TestGeoParquet(TestBase):
@@ -61,3 +63,8 @@ class TestGeoParquet(TestBase):
         rows = df.collect()
         assert len(rows) == 1
         assert rows[0]['name'] == 'Tanzania'
+
+    def test_load_plain_parquet_file(self):
+        with pytest.raises(Exception) as excinfo:
+            self.spark.read.format("geoparquet").load(plain_parquet_input_location)
+        assert "does not contain valid geo metadata" in str(excinfo.value)

@@ -16,15 +16,8 @@
 #  under the License.
 
 import os
-from os import path
 
 from tests.tools import tests_resource
-
-# data_path = path.abspath(path.dirname(__file__))
-#
-#
-# def create_data_path(relative_path: str) -> str:
-#     return os.path.join(data_path, relative_path)
 
 
 mixed_wkb_geometry_input_location = os.path.join(tests_resource, "county_small_wkb.tsv")
@@ -45,3 +38,4 @@ csv_point1_input_location = os.path.join(tests_resource, "equalitycheckfiles/tes
 csv_point2_input_location = os.path.join(tests_resource, "equalitycheckfiles/testequals_point2.csv")
 geojson_id_input_location = os.path.join(tests_resource, "testContainsId.json")
 geoparquet_input_location = os.path.join(tests_resource, "geoparquet/example1.parquet")
+plain_parquet_input_location = os.path.join(tests_resource, "geoparquet/plain.parquet")
