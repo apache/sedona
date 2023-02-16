@@ -636,15 +636,16 @@ sedona_save_spatial_rdd <- function(x,
 }
 
 
-#' Read a geoparquet file into a Spark DataFrame.
-#' Read a geoparquet file into a Spark DataFrame. The created dataframe is automatically registered.
+#' Save a Spark dataframe into a geoparquet file.
 #'
-#' @param sc A \code{spark_connection}.
-#' @param location Location of the data source.
-#' @param name The name to assign to the newly generated table.
+#' Export spatial from a Spark dataframe into a geoparquet file
+#'
+#' @param x A Spark dataframe object in sparklyr or a dplyr expression
+#'   representing a Spark SQL query.
+#' @param output_location Location of the output file.
 #'
 #'
-#' @return A SpatialRDD.
+#' @return NULL
 #'
 #' @examples
 #' library(sparklyr)
@@ -653,8 +654,14 @@ sedona_save_spatial_rdd <- function(x,
 #' sc <- spark_connect(master = "spark://HOST:PORT")
 #'
 #' if (!inherits(sc, "test_connection")) {
-#'   input_location <- "/dev/null" # replace it with the path to your input file
-#'   rdd <- sedona_read_geoparquet(sc, location = input_location)
+#'   tbl <- dplyr::tbl(
+#'     sc,
+#'     dplyr::sql("SELECT ST_GeomFromText('POINT(-71.064544 42.28787)') AS `pt`")
+#'   )
+#'   sedona_save_geoparquet(
+#'     tbl %>% dplyr::mutate(id = 1),
+#'     output_location = "/tmp/pts.geoparquet"
+#'   )
 #' }
 #'
 #' @family Sedona data interface functions
