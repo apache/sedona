@@ -451,7 +451,7 @@ sedona_read_shapefile <- function(sc,
 #' @param name The name to assign to the newly generated table.
 #'
 #'
-#' @return A SpatialRDD.
+#' @return A tbl
 #'
 #' @examples
 #' library(sparklyr)
@@ -672,12 +672,13 @@ sedona_save_spatial_rdd <- function(x,
 #'
 #' @family Sedona data interface functions
 #'
+#' @importFrom sparklyr spark_dataframe
 #' @export
 sedona_write_geoparquet <- function(x,
                                    output_location) {
   
   ## Get back jobj
-  x_obj <- sparklyr:::spark_sqlresult_from_dplyr(x)
+  x_obj <- spark_dataframe(x)
   
   invoke(
     x_obj, 
