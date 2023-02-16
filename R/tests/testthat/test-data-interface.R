@@ -343,12 +343,12 @@ test_that("sedona_read_geoparquet() works as expected", {
 })
 
 
-test_that("sedona_save_geoparquet() works as expected", {
+test_that("sedona_write_geoparquet() works as expected", {
   geoparquet_sdf <- sedona_read_geoparquet(sc, geoparquet("example2.parquet"))
   tmp_dest <- tempfile(fileext = ".parquet")
   
   ## Save
-  geoparquet_sdf %>% sedona_save_geoparquet(tmp_dest)
+  geoparquet_sdf %>% sedona_write_geoparquet(tmp_dest)
   
   ### Reload
   geoparquet_2_sdf <- sedona_read_geoparquet(sc, tmp_dest)
@@ -366,10 +366,8 @@ test_that("sedona_save_geoparquet() works as expected", {
 test_that("sedona_read_geoparquet() throws an error with plain parquet files", {
 
   expect_error(
-    # geoparquet_sdf <- tryCatch(
-    {geoparquet_sdf <- sedona_read_geoparquet(sc, geoparquet("plain.parquet"))},
+    sedona_read_geoparquet(sc, geoparquet("plain.parquet")),
     regexp = "GeoParquet file does not contain valid geo metadata"
-      # error = function(e) e
     )
  
 })

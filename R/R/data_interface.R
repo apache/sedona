@@ -15,6 +15,9 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+
+# ------- Read ------------
+
 #' Create a SpatialRDD from an external data source.
 #' Import spatial object from an external data source into a Sedona SpatialRDD.
 #'
@@ -485,6 +488,9 @@ sedona_read_geoparquet <- function(sc,
 }
 
 
+# ------- Write ------------
+
+
 #' Write SpatialRDD into a file.
 #'
 #' Export serialized data from a Sedona SpatialRDD into an output file.
@@ -658,7 +664,7 @@ sedona_save_spatial_rdd <- function(x,
 #'     sc,
 #'     dplyr::sql("SELECT ST_GeomFromText('POINT(-71.064544 42.28787)') AS `pt`")
 #'   )
-#'   sedona_save_geoparquet(
+#'   sedona_write_geoparquet(
 #'     tbl %>% dplyr::mutate(id = 1),
 #'     output_location = "/tmp/pts.geoparquet"
 #'   )
@@ -667,7 +673,7 @@ sedona_save_spatial_rdd <- function(x,
 #' @family Sedona data interface functions
 #'
 #' @export
-sedona_save_geoparquet <- function(x,
+sedona_write_geoparquet <- function(x,
                                    output_location) {
   
   ## Get back jobj
@@ -680,7 +686,7 @@ sedona_save_geoparquet <- function(x,
 
 }
 
-
+# ------- Utilities ------------
 rdd_cls_from_type <- function(type = c("point", "polygon", "linestring")) {
   type <- match.arg(type)
 
