@@ -15,6 +15,10 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+#' Prepare dependencies for sparklyr
+#'
+#' @importFrom cli cli_alert_info
+
 spark_dependencies <- function(spark_version, scala_version, ...) {
   if (spark_version[1, 1] == "3") {
     spark_version <- "3.0"
@@ -36,6 +40,7 @@ spark_dependencies <- function(spark_version, scala_version, ...) {
 
   sedona_jar_files <- Sys.getenv("SEDONA_JAR_FILES")
   if (nchar(sedona_jar_files) > 0) {
+    cli::cli_alert_info("Using Sedona jars listed in SEDONA_JAR_FILES variable (see Sys.getenv(\"SEDONA_JAR_FILES\"))")
     jars <- strsplit(sedona_jar_files, ":")[[1]]
   } else {
     packages <- c(
@@ -46,6 +51,7 @@ spark_dependencies <- function(spark_version, scala_version, ...) {
       ),
       packages
     )
+    cli::cli_alert_info(sprintf("Using Sedona jars versions: %s etc.", packages[1]))
   }
 
   spark_dependency(
