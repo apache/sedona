@@ -60,7 +60,7 @@ sdf_register.spatial_rdd <- function(x, name = NULL) {
 #'
 #' @inheritParams as_spark_dataframe
 #' @param non_spatial_cols Column names for non-spatial attributes in the
-#'   resulting Spark Dataframe.
+#'   resulting Spark Dataframe. By default (NULL) it will import all field names if that property exists, in particular for shapefiles.
 #'
 #' @return A Spark Dataframe containing the imported spatial data.
 #'
@@ -86,6 +86,18 @@ sdf_register.spatial_rdd <- function(x, name = NULL) {
 #' @export
 as.spark.dataframe <- function(x, non_spatial_cols = NULL, name = NULL) {
   sc <- spark_connection(x$.jobj)
+  
+  # Defaut keep all columns
+  if (is.null(non_spatial_cols)) {
+    if (!is.null(invoke(x$.jobj, "%>%", list("fieldNames")))) { ## Only if dataset has field names
+      non_spatial_cols <- invoke(x$.jobj, "%>%", list("fieldNames"), list("toString")) ### Get columns names
+      non_spatial_cols <- gsub("(^\\[|\\]$)", "", non_spatial_cols)  ##### remove brackets
+      non_spatial_cols <- strsplit(non_spatial_cols, ", ")[[1]]  ##### turn into list
+    }
+  } else {
+    stopifnot("non_spatial_cols needs to be a charcter vector (or NULL, default)" = is.character(non_spatial_cols))
+  }
+  
   sdf <- invoke_static(
     sc,
     "org.apache.sedona.sql.utils.Adapter",
