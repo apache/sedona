@@ -34,5 +34,5 @@ Suggests:
     knitr,
     rmarkdown
 Encoding: UTF-8
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 SystemRequirements: 'Apache Spark' 2.4.x or 3.x
