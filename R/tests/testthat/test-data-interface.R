@@ -69,7 +69,7 @@ expect_result_matches_original_geojson <- function(pt_rdd) {
       invoke("%>%", list("rawSpatialRDD"), list("takeOrdered", 5L), list("toArray"))
   )
 }
-
+# ------- Read RDD ------------
 test_that("sedona_read_dsv_to_typed_rdd() creates PointRDD correctly", {
   pt_rdd <- sedona_read_dsv_to_typed_rdd(
     sc,
@@ -288,11 +288,11 @@ test_that("sedona_read_shapefile() works as expected", {
 })
 
 
-#### TESTS TO WRITE: writing
+# ------- Read SDF ------------
 
-test_that("sedona_read_geoparquet() works as expected", {
+test_that("spark_read_geoparquet() works as expected", {
   sdf_name <- random_string("spatial_sdf")
-  geoparquet_sdf <- sedona_read_geoparquet(sc, geoparquet("example1.parquet"), name = sdf_name)
+  geoparquet_sdf <- spark_read_geoparquet(sc, geoparquet("example1.parquet"), name = sdf_name)
   
   ## Right number of rows
   geoparquet_df <-
@@ -342,35 +342,16 @@ test_that("sedona_read_geoparquet() works as expected", {
  
 })
 
-
-test_that("sedona_write_geoparquet() works as expected", {
-  geoparquet_sdf <- sedona_read_geoparquet(sc, geoparquet("example2.parquet"))
-  tmp_dest <- tempfile(fileext = ".parquet")
-  
-  ## Save
-  geoparquet_sdf %>% sedona_write_geoparquet(tmp_dest)
-  
-  ### Reload
-  geoparquet_2_sdf <- sedona_read_geoparquet(sc, tmp_dest)
-  
-  expect_equivalent(
-    geoparquet_sdf %>% mutate(geometry = geometry %>% st_astext()) %>% collect(),
-    geoparquet_2_sdf %>% mutate(geometry = geometry %>% st_astext()) %>% collect()
-  )
-  
-  unlink(tmp_dest, recursive = TRUE)
-  
-})
-
-
-test_that("sedona_read_geoparquet() throws an error with plain parquet files", {
+test_that("spark_read_geoparquet() throws an error with plain parquet files", {
 
   expect_error(
-    sedona_read_geoparquet(sc, geoparquet("plain.parquet")),
+    spark_read_geoparquet(sc, geoparquet("plain.parquet")),
     regexp = "GeoParquet file does not contain valid geo metadata"
     )
  
 })
+
+# ------- Write RDD ------------
 
 test_that("sedona_write_wkb() works as expected", {
   output_location <- tempfile()
@@ -451,4 +432,26 @@ test_that("sedona_save_spatial_rdd() works as expected", {
     expect_equal(pts[[1]] %>% invoke("getY"), 456)
     expect_equal(pts[[1]] %>% invoke("getUserData"), "1.0\ta point\tpoint")
   }
+})
+
+
+# ------- Write SDF ------------
+
+test_that("spark_write_geoparquet() works as expected", {
+  geoparquet_sdf <- spark_read_geoparquet(sc, geoparquet("example2.parquet"))
+  tmp_dest <- tempfile(fileext = ".parquet")
+  
+  ## Save
+  geoparquet_sdf %>% spark_write_geoparquet(tmp_dest)
+  
+  ### Reload
+  geoparquet_2_sdf <- spark_read_geoparquet(sc, tmp_dest)
+  
+  expect_equivalent(
+    geoparquet_sdf %>% mutate(geometry = geometry %>% st_astext()) %>% collect(),
+    geoparquet_2_sdf %>% mutate(geometry = geometry %>% st_astext()) %>% collect()
+  )
+  
+  unlink(tmp_dest, recursive = TRUE)
+  
 })

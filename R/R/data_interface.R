@@ -16,7 +16,7 @@
 #  under the License.
 
 
-# ------- Read ------------
+# ------- Read RDD ------------
 
 #' Create a SpatialRDD from an external data source.
 #' Import spatial object from an external data source into a Sedona SpatialRDD.
@@ -443,8 +443,9 @@ sedona_read_shapefile <- function(sc,
 }
 
 
-#' Read a geoparquet file into a Spark DataFrame.
-#' Read a geoparquet file into a Spark DataFrame. The created dataframe is automatically registered.
+# ------- Read SDF ------------
+#' Read a shapefile into a Spark DataFrame.
+#' Read a shapefile into a Spark DataFrame.
 #'
 #' @param sc A \code{spark_connection}.
 #' @param location Location of the data source.
@@ -461,34 +462,179 @@ sedona_read_shapefile <- function(sc,
 #'
 #' if (!inherits(sc, "test_connection")) {
 #'   input_location <- "/dev/null" # replace it with the path to your input file
-#'   rdd <- sedona_read_geoparquet(sc, location = input_location)
+#'   rdd <- spark_read_shapefile(sc, location = input_location)
 #' }
 #'
 #' @family Sedona data interface functions
 #'
 #' @export
-sedona_read_geoparquet <- function(sc,
-                                   location,
-                                   name = NULL) {
+spark_read_shapefile <- function(sc,
+                                 name = NULL,
+                                 path = name,
+                                 ...) {
   
-  ## don't have sparklyr's `%<-%`' maybe to replicate later
-  checked <- sparklyr:::spark_read_compat_param(sc, name, location)
-  name <- checked[[1]]
-  path <- checked[[2]]
+  # TODO : check tidydots
+  lapply(names(options), function(name) {
+    if (!name %in% c("")) {
+      writeLines(paste0("Ignoring unkown option '", name,"'"))
+    }
+  })
   
-  df <- 
-    invoke(
-      spark_session(sc), 
-      "%>%", 
-      list("read"), list("format", "geoparquet"), list("load", sparklyr:::spark_normalize_path(path))) 
+  rdd <- sedona_read_shapefile(sc,
+                               location = path,
+                               storage_level = "MEMORY_ONLY")
   
   
   
-  sdf_register(df, name = name)
+  rdd %>% sdf_register(name = name)
+}
+
+#' Read a geojson file into a Spark DataFrame.
+#' Read a geojson file into a Spark DataFrame.
+#'
+#' @param sc A \code{spark_connection}.
+#' @param location Location of the data source.
+#' @param name The name to assign to the newly generated table.
+#'
+#'
+#' @return A tbl
+#'
+#' @examples
+#' library(sparklyr)
+#' library(apache.sedona)
+#'
+#' sc <- spark_connect(master = "spark://HOST:PORT")
+#'
+#' if (!inherits(sc, "test_connection")) {
+#'   input_location <- "/dev/null" # replace it with the path to your input file
+#'   rdd <- spark_read_geojson(sc, location = input_location)
+#' }
+#'
+#' @family Sedona data interface functions
+#'
+#' @export
+spark_read_geojson <- function(sc,
+                               name = NULL,
+                               path = name,
+                               options = list(),
+                               repartition = 0,
+                               memory = TRUE,
+                               overwrite = TRUE) {
+  
+  # check options
+  if ("allow_invalid_geometries" %in% names(options)) final_allow_invalid <- options[["allow_invalid_geometries"]] else final_allow_invalid <- NULL
+  if ("skip_syntactically_invalid_geometries" %in% names(options)) final_skip <- options[["skip_syntactically_invalid_geometries"]] else final_skip <- NULL
+  lapply(names(options), function(name) {
+    if (!name %in% c("allow_invalid_geometries", "skip_syntactically_invalid_geometries")) {
+      writeLines(paste0("Ignoring unkown option '", name,"'"))
+    }
+  })
+  
+  final_repartition <- max(as.integer(repartition), 1L)
+  
+  rdd <- sedona_read_geojson(sc,
+                             location = path,
+                             allow_invalid_geometries = final_allow,
+                             skip_syntactically_invalid_geometries = final_skip,
+                             storage_level = "MEMORY_ONLY",
+                             repartition = final_repartition)
+  
+  
+  
+  rdd %>% sdf_register(name = name)
+}
+
+#' Read a geoparquet file into a Spark DataFrame.
+#' Read a geoparquet file into a Spark DataFrame.
+#'
+#' @param sc A \code{spark_connection}.
+#' @param location Location of the data source.
+#' @param name The name to assign to the newly generated table.
+#'
+#'
+#' @return A tbl
+#'
+#' @examples
+#' library(sparklyr)
+#' library(apache.sedona)
+#'
+#' sc <- spark_connect(master = "spark://HOST:PORT")
+#'
+#' if (!inherits(sc, "test_connection")) {
+#'   input_location <- "/dev/null" # replace it with the path to your input file
+#'   rdd <- spark_read_geoparquet(sc, location = input_location)
+#' }
+#'
+#' @family Sedona data interface functions
+#'
+#' @export
+#' @importFrom sparklyr spark_read_source
+spark_read_geoparquet <- function(sc,
+                                  name = NULL,
+                                  path = name,
+                                  options = list(),
+                                  repartition = 0,
+                                  memory = TRUE,
+                                  overwrite = TRUE) {
+  
+  spark_read_source(sc, 
+                    name = name,
+                    path = path,
+                    source = "geoparquet",
+                    options = options,
+                    repartition = repartition,
+                    memory = memory,
+                    overwrite = overwrite,
+                    columns = NULL)
 }
 
 
-# ------- Write ------------
+#' Read a GeoTiff file into a Spark DataFrame.
+#' Read a GeoTiff file into a Spark DataFrame.
+#'
+#' @param sc A \code{spark_connection}.
+#' @param location Location of the data source.
+#' @param name The name to assign to the newly generated table.
+#'
+#'
+#' @return A tbl
+#'
+#' @examples
+#' library(sparklyr)
+#' library(apache.sedona)
+#'
+#' sc <- spark_connect(master = "spark://HOST:PORT")
+#'
+#' if (!inherits(sc, "test_connection")) {
+#'   input_location <- "/dev/null" # replace it with the path to your input file
+#'   rdd <- spark_read_geotiff(sc, location = input_location)
+#' }
+#'
+#' @family Sedona data interface functions
+#'
+#' @export
+#' @importFrom sparklyr spark_read_source
+spark_read_geotiff <- function(sc,
+                               name = NULL,
+                               path = name,
+                               options = list(),
+                               repartition = 0,
+                               memory = TRUE,
+                               overwrite = TRUE) {
+  
+  spark_read_source(sc, 
+                    name = name,
+                    path = path,
+                    source = "geotiff",
+                    options = options,
+                    repartition = repartition,
+                    memory = memory,
+                    overwrite = overwrite,
+                    columns = NULL)
+}
+
+
+# ------- Write RDD ------------
 
 
 #' Write SpatialRDD into a file.
@@ -642,6 +788,8 @@ sedona_save_spatial_rdd <- function(x,
 }
 
 
+# ------- Write SDF ------------
+
 #' Save a Spark dataframe into a geoparquet file.
 #'
 #' Export spatial from a Spark dataframe into a geoparquet file
@@ -664,7 +812,7 @@ sedona_save_spatial_rdd <- function(x,
 #'     sc,
 #'     dplyr::sql("SELECT ST_GeomFromText('POINT(-71.064544 42.28787)') AS `pt`")
 #'   )
-#'   sedona_write_geoparquet(
+#'   spark_write_geoparquet(
 #'     tbl %>% dplyr::mutate(id = 1),
 #'     output_location = "/tmp/pts.geoparquet"
 #'   )
@@ -672,19 +820,27 @@ sedona_save_spatial_rdd <- function(x,
 #'
 #' @family Sedona data interface functions
 #'
-#' @importFrom sparklyr spark_dataframe
+#' @importFrom sparklyr spark_write_source
 #' @export
-sedona_write_geoparquet <- function(x,
-                                   output_location) {
+spark_write_geoparquet <- function(x,
+                                   path,
+                                   mode = NULL,
+                                   options = list(),
+                                   partition_by = NULL,
+                                   ...) {
   
-  ## Get back jobj
-  x_obj <- spark_dataframe(x)
+  ## TODO: check other arguments
   
-  invoke(
-    x_obj, 
-    "%>%", 
-    list("write"), list("format", "geoparquet"), list("save", sparklyr:::spark_normalize_path(output_location))) 
-
+  spark_write_source(
+    x = x,
+    source = "geoparquet",
+    mode = NULL,
+    options = list(),
+    partition_by = NULL,
+    save_args = list(path),
+    ...
+  )
+  
 }
 
 # ------- Utilities ------------
