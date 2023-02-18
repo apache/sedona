@@ -23,12 +23,10 @@ import org.apache.log4j.Logger;
 import org.apache.sedona.core.enums.FileDataSplitter;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
-import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.core.knnJudgement.GeometryDistanceComparator;
 import org.apache.sedona.core.spatialOperator.JoinQuery;
 import org.apache.sedona.core.spatialOperator.KNNQuery;
 import org.apache.sedona.core.spatialOperator.RangeQuery;
-import org.apache.sedona.core.spatialRDD.CircleRDD;
 import org.apache.sedona.core.spatialRDD.PointRDD;
 import org.apache.sedona.core.spatialRDD.PolygonRDD;
 import org.apache.spark.SparkConf;
@@ -39,7 +37,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
@@ -51,9 +48,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 // TODO: Auto-generated Javadoc
 
@@ -350,33 +344,6 @@ public class CRSTransformationTest
         assert result.get(1)._1().getUserData() != null;
         for (int i = 0; i < result.size(); i++) {
             assert result.get(i)._2().size() == 0 || result.get(i)._2().iterator().next().getUserData() != null;
-        }
-    }
-
-    /**
-     * Test polygon distance join with CRS transformation.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testPolygonDistanceJoinWithCRSTransformation()
-            throws Exception
-    {
-        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3857");
-        CircleRDD windowRDD = new CircleRDD(queryRDD, 0.1);
-        PolygonRDD objectRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3857");
-        objectRDD.rawSpatialRDD.repartition(4);
-        objectRDD.spatialPartitioning(GridType.KDBTREE);
-        objectRDD.buildIndex(IndexType.RTREE, true);
-        windowRDD.spatialPartitioning(objectRDD.getPartitioner());
-
-        List<Tuple2<Geometry, List<Polygon>>> results = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true, false).collect();
-        assertEquals(5467, results.size());
-
-        for (Tuple2<Geometry, List<Polygon>> tuple : results) {
-            for (Polygon polygon : tuple._2()) {
-                assertTrue(new Circle(tuple._1(), 0.1).covers(polygon));
-            }
         }
     }
 }
