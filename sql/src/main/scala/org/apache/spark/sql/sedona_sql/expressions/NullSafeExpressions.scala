@@ -21,6 +21,7 @@ package org.apache.spark.sql.sedona_sql.expressions
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
+import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
@@ -53,6 +54,8 @@ abstract class UnaryGeometryExpression extends Expression with ExpectsInputTypes
   }
 
   protected def nullSafeEval(geometry: Geometry): Any
+
+
 }
 
 abstract class BinaryGeometryExpression extends Expression with ExpectsInputTypes {
@@ -95,6 +98,8 @@ object InferrableType {
     new InferrableType[String] {}
   implicit val binaryInstance: InferrableType[Array[Byte]] =
     new InferrableType[Array[Byte]] {}
+  implicit val longArrayInstance: InferrableType[Array[java.lang.Long]] =
+    new InferrableType[Array[java.lang.Long]] {}
 }
 
 object InferredTypes {
@@ -121,6 +126,13 @@ object InferredTypes {
       } else {
         null
       }
+    } else if (typeOf[T] =:= typeOf[Array[java.lang.Long]]) {
+      output: T =>
+        if (output != null) {
+          ArrayData.toArrayData(output)
+        } else {
+          null
+        }
     } else {
       output: T => output
     }
@@ -141,6 +153,8 @@ object InferredTypes {
       StringType
     } else if (typeOf[T] =:= typeOf[Array[Byte]]) {
       BinaryType
+    } else if (typeOf[T] =:= typeOf[Array[java.lang.Long]]) {
+      DataTypes.createArrayType(LongType)
     } else {
       BooleanType
     }

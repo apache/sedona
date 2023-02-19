@@ -5,3 +5,4 @@
 /apache_sedona.egg-info/
 /build/
 /dist/
+/sedona/utils/*.so

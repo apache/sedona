@@ -210,6 +210,10 @@ object st_functions extends DataFrameAPI {
   def ST_Reverse(geometry: Column): Column = wrapExpression[ST_Reverse](geometry)
   def ST_Reverse(geometry: String): Column = wrapExpression[ST_Reverse](geometry)
 
+  def ST_S2CellIDs(geometry: Column, level: Column): Column = wrapExpression[ST_S2CellIDs](geometry, level)
+
+  def ST_S2CellIDs(geometry: String, level: Int): Column = wrapExpression[ST_S2CellIDs](geometry, level)
+
   def ST_SetPoint(lineString: Column, index: Column, point: Column): Column = wrapExpression[ST_SetPoint](lineString, index, point)
   def ST_SetPoint(lineString: String, index: Int, point: String): Column = wrapExpression[ST_SetPoint](lineString, index, point)
 

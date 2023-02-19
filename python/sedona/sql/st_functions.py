@@ -82,6 +82,7 @@ __all__ = [
     "ST_PrecisionReduce",
     "ST_RemovePoint",
     "ST_Reverse",
+    "ST_S2CellIDs",
     "ST_SetPoint",
     "ST_SetSRID",
     "ST_SRID",
@@ -876,6 +877,19 @@ def ST_Reverse(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_Reverse", geometry)
+
+@validate_argument_types
+def ST_S2CellIDs(geometry: ColumnOrName, level: Union[ColumnOrName, int]) -> Column:
+    """Cover Geometry with S2 Cells and return a List of Long type cell IDs
+    :param geometry: Geometry column to generate cell IDs
+    :type geometry: ColumnOrName
+    :param level: value between 1 and 31, controls the size of the cells used for coverage. With a bigger level, the cells will be smaller, the coverage will be more accurate, but the result size will be exponentially increasing.
+    :type level: int
+    :return: List of cellIDs
+    :rtype: List[long]
+    """
+    args = (geometry, level)
+    return _call_st_function("ST_S2CellIDs", args)
 
 
 @validate_argument_types

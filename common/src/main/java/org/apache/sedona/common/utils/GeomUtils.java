@@ -381,4 +381,28 @@ public class GeomUtils {
         }
         return pCount;
     }
+
+    public static List<Geometry> extractGeometryCollection(Geometry geom){
+        ArrayList<Geometry> leafs = new ArrayList<>();
+        if (!(geom instanceof GeometryCollection)) {
+            leafs.add(geom);
+            return leafs;
+        }
+        LinkedList<GeometryCollection> parents = new LinkedList<>();
+        parents.add((GeometryCollection) geom);
+        while (!parents.isEmpty()) {
+            GeometryCollection parent = parents.removeFirst();
+            for (int i = 0;i < parent.getNumGeometries(); i++) {
+                Geometry child = parent.getGeometryN(i);
+                if (child instanceof GeometryCollection) {
+                    parents.add((GeometryCollection) child);
+                } else {
+                    leafs.add(child);
+                }
+            }
+        }
+        return leafs;
+    }
+
+
 }
