@@ -34,8 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.apache.flink.table.api.Expressions.$;
-import static org.apache.flink.table.api.Expressions.call;
+import static org.apache.flink.table.api.Expressions.*;
 
 public class TestBase {
     protected static StreamExecutionEnvironment env;
@@ -378,6 +377,15 @@ public class TestBase {
         assert(it.hasNext());
         Row firstRow = it.next();
         return firstRow;
+    }
+
+    static List<Row> take(Table table, int n) {
+        CloseableIterator<Row> it = iterate(table);
+        List<Row> rows = new ArrayList<>();
+        while (it.hasNext() && rows.size() < n ) {
+            rows.add(it.next());
+        }
+        return rows;
     }
 
     static long count(Table table) {

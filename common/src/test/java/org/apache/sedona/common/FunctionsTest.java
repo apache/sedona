@@ -13,20 +13,19 @@
  */
 package org.apache.sedona.common;
 
+import com.google.common.geometry.S2CellId;
+import org.apache.sedona.common.utils.GeomUtils;
+import org.apache.sedona.common.utils.S2Utils;
 import org.junit.Test;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryCollection;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LinearRing;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.MultiLineString;
-import org.locationtech.jts.geom.MultiPoint;
-import org.locationtech.jts.geom.MultiPolygon;
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.geom.*;
 
-import static org.junit.Assert.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class FunctionsTest {
     public static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
@@ -237,5 +236,157 @@ public class FunctionsTest {
         Geometry actualResult = Functions.split(geometryCollection, lineString);
 
         assertNull(actualResult);
+    }
+
+    private static boolean intersects(Set<?> s1, Set<?> s2) {
+        Set<?> copy = new HashSet<>(s1);
+        copy.retainAll(s2);
+        return !copy.isEmpty();
+    }
+
+    @Test
+    public void getGoogleS2CellIDsPoint() {
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 2));
+        Long[] cid = Functions.s2CellIDs(point, 30);
+        Polygon reversedPolygon = S2Utils.toJTSPolygon(new S2CellId(cid[0]));
+        // cast the cell to a rectangle, it must be able to cover the points
+        assert(reversedPolygon.contains(point));
+    }
+
+    @Test
+    public void getGoogleS2CellIDsPolygon() {
+        // polygon with holes
+        Polygon target = GEOMETRY_FACTORY.createPolygon(
+                GEOMETRY_FACTORY.createLinearRing(coordArray(0.1, 0.1, 0.5, 0.1, 1.0, 0.3, 1.0, 1.0, 0.1, 1.0, 0.1, 0.1)),
+                new LinearRing[] {
+                        GEOMETRY_FACTORY.createLinearRing(coordArray(0.2, 0.2, 0.5, 0.2, 0.6, 0.7, 0.2, 0.6, 0.2, 0.2))
+                }
+                );
+        // polygon inside the hole, shouldn't intersect with the polygon
+        Polygon polygonInHole = GEOMETRY_FACTORY.createPolygon(coordArray(0.3, 0.3, 0.4, 0.3, 0.3, 0.4, 0.3, 0.3));
+        // mbr of the polygon that cover all
+        Geometry mbr = target.getEnvelope();
+        HashSet<Long> targetCells = new HashSet<>(Arrays.asList(Functions.s2CellIDs(target, 10)));
+        HashSet<Long> inHoleCells = new HashSet<>(Arrays.asList(Functions.s2CellIDs(polygonInHole, 10)));
+        HashSet<Long> mbrCells = new HashSet<>(Arrays.asList(Functions.s2CellIDs(mbr, 10)));
+        assert mbrCells.containsAll(targetCells);
+        assert !intersects(targetCells, inHoleCells);
+        assert mbrCells.containsAll(targetCells);
+    }
+
+    @Test
+    public void getGoogleS2CellIDsLineString() {
+        // polygon with holes
+        LineString target = GEOMETRY_FACTORY.createLineString(coordArray(0.2, 0.2, 0.3, 0.4, 0.4, 0.6));
+        LineString crossLine = GEOMETRY_FACTORY.createLineString(coordArray(0.4, 0.1, 0.1, 0.4));
+        // mbr of the polygon that cover all
+        Geometry mbr = target.getEnvelope();
+        // cover the target polygon, and convert cells back to polygons
+        HashSet<Long> targetCells = new HashSet<>(Arrays.asList(Functions.s2CellIDs(target, 15)));
+        HashSet<Long> crossCells = new HashSet<>(Arrays.asList(Functions.s2CellIDs(crossLine, 15)));
+        HashSet<Long> mbrCells = new HashSet<>(Arrays.asList(Functions.s2CellIDs(mbr, 15)));
+        assert intersects(targetCells, crossCells);
+        assert mbrCells.containsAll(targetCells);
+    }
+
+    @Test
+    public void getGoogleS2CellIDsMultiPolygon() {
+        // polygon with holes
+        Polygon[] geoms = new Polygon[] {
+                GEOMETRY_FACTORY.createPolygon(coordArray(0.1, 0.1, 0.5, 0.1, 0.1, 0.6, 0.1, 0.1)),
+                GEOMETRY_FACTORY.createPolygon(coordArray(0.2, 0.1, 0.6, 0.3, 0.7, 0.6, 0.2, 0.5, 0.2, 0.1))
+        };
+        MultiPolygon target = GEOMETRY_FACTORY.createMultiPolygon(geoms);
+        Geometry mbr = target.getEnvelope();
+        HashSet<Long> targetCells = new HashSet<>(Arrays.asList(Functions.s2CellIDs(target, 10)));
+        HashSet<Long> mbrCells = new HashSet<>(Arrays.asList(Functions.s2CellIDs(mbr, 10)));
+        HashSet<Long> separateCoverCells = new HashSet<>();
+        for(Geometry geom: geoms) {
+            separateCoverCells.addAll(Arrays.asList(Functions.s2CellIDs(geom, 10)));
+        }
+        assert mbrCells.containsAll(targetCells);
+        assert targetCells.equals(separateCoverCells);
+    }
+
+    @Test
+    public void getGoogleS2CellIDsMultiLineString() {
+        // polygon with holes
+        MultiLineString target = GEOMETRY_FACTORY.createMultiLineString(
+                new LineString[] {
+                        GEOMETRY_FACTORY.createLineString(coordArray(0.1, 0.1, 0.2, 0.1, 0.3, 0.4, 0.5, 0.9)),
+                        GEOMETRY_FACTORY.createLineString(coordArray(0.5, 0.1, 0.1, 0.5, 0.3, 0.1))
+                }
+        );
+        Geometry mbr = target.getEnvelope();
+        Point outsidePoint = GEOMETRY_FACTORY.createPoint(new Coordinate(0.3, 0.7));
+        HashSet<Long> targetCells = new HashSet<>(Arrays.asList(Functions.s2CellIDs(target, 10)));
+        HashSet<Long> mbrCells = new HashSet<>(Arrays.asList(Functions.s2CellIDs(mbr, 10)));
+        Long outsideCell = Functions.s2CellIDs(outsidePoint, 10)[0];
+        // the cells should all be within mbr
+        assert mbrCells.containsAll(targetCells);
+        // verify point within mbr but shouldn't intersect with linestring
+        assert mbrCells.contains(outsideCell);
+        assert !targetCells.contains(outsideCell);
+    }
+
+    @Test
+    public void getGoogleS2CellIDsMultiPoint() {
+        // polygon with holes
+        MultiPoint target = GEOMETRY_FACTORY.createMultiPoint(new Point[] {
+                GEOMETRY_FACTORY.createPoint(new Coordinate(0.1, 0.1)),
+                GEOMETRY_FACTORY.createPoint(new Coordinate(0.2, 0.1)),
+                GEOMETRY_FACTORY.createPoint(new Coordinate(0.3, 0.2)),
+                GEOMETRY_FACTORY.createPoint(new Coordinate(0.5, 0.4))
+        });
+        Geometry mbr = target.getEnvelope();
+        Point outsidePoint = GEOMETRY_FACTORY.createPoint(new Coordinate(0.3, 0.7));
+        HashSet<Long> targetCells = new HashSet<>(Arrays.asList(Functions.s2CellIDs(target, 10)));
+        HashSet<Long> mbrCells = new HashSet<>(Arrays.asList(Functions.s2CellIDs(mbr, 10)));
+        // the cells should all be within mbr
+        assert mbrCells.containsAll(targetCells);
+        assert targetCells.size() == 4;
+    }
+
+    @Test
+    public void getGoogleS2CellIDsGeometryCollection() {
+        // polygon with holes
+        Geometry[] geoms = new Geometry[] {
+                GEOMETRY_FACTORY.createLineString(coordArray(0.1, 0.1, 0.2, 0.1, 0.3, 0.4, 0.5, 0.9)),
+                GEOMETRY_FACTORY.createPolygon(coordArray(0.1, 0.1, 0.5, 0.1, 0.1, 0.6, 0.1, 0.1)),
+                GEOMETRY_FACTORY.createMultiPoint(new Point[] {
+                        GEOMETRY_FACTORY.createPoint(new Coordinate(0.1, 0.1)),
+                        GEOMETRY_FACTORY.createPoint(new Coordinate(0.2, 0.1)),
+                        GEOMETRY_FACTORY.createPoint(new Coordinate(0.3, 0.2)),
+                        GEOMETRY_FACTORY.createPoint(new Coordinate(0.5, 0.4))
+                })
+        };
+        GeometryCollection target = GEOMETRY_FACTORY.createGeometryCollection(geoms);
+        Geometry mbr = target.getEnvelope();
+        HashSet<Long> targetCells = new HashSet<>(Arrays.asList(Functions.s2CellIDs(target, 10)));
+        HashSet<Long> mbrCells = new HashSet<>(Arrays.asList(Functions.s2CellIDs(mbr, 10)));
+        HashSet<Long> separateCoverCells = new HashSet<>();
+        for(Geometry geom: geoms) {
+            separateCoverCells.addAll(Arrays.asList(Functions.s2CellIDs(geom, 10)));
+        }
+        // the cells should all be within mbr
+        assert mbrCells.containsAll(targetCells);
+        // separately cover should return same result as covered together
+        assert separateCoverCells.equals(targetCells);
+    }
+
+    @Test
+    public void getGoogleS2CellIDsAllSameLevel() {
+        // polygon with holes
+        GeometryCollection target = GEOMETRY_FACTORY.createGeometryCollection(
+                new Geometry[]{
+                        GEOMETRY_FACTORY.createPolygon(coordArray(0.3, 0.3, 0.4, 0.3, 0.3, 0.4, 0.3, 0.3)),
+                        GEOMETRY_FACTORY.createPoint(new Coordinate(0.7, 1.2))
+                }
+        );
+        Long[] cellIds = Functions.s2CellIDs(target, 10);
+        HashSet<Integer> levels = Arrays.stream(cellIds).map(c -> new S2CellId(c).level()).collect(Collectors.toCollection(HashSet::new));
+        HashSet<Integer> expects = new HashSet<>();
+        expects.add(10);
+        assertEquals(expects, levels);
     }
 }

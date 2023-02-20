@@ -488,4 +488,13 @@ public class Functions {
             return org.apache.sedona.common.Functions.split(input, blade);
         }
     }
+
+    public static class ST_S2CellIDs extends ScalarFunction {
+        @DataTypeHint(value = "ARRAY<BIGINT>")
+        public Long[] eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("INT") Integer level) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.s2CellIDs(geom, level);
+        }
+    }
 }

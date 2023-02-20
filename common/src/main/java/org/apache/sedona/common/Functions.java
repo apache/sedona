@@ -13,25 +13,21 @@
  */
 package org.apache.sedona.common;
 
+import com.google.common.geometry.S2CellId;
+import com.google.common.geometry.S2Point;
+import com.google.common.geometry.S2Region;
+import com.google.common.geometry.S2RegionCoverer;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.common.utils.GeometryGeoHashEncoder;
 import org.apache.sedona.common.utils.GeometrySplitter;
+import org.apache.sedona.common.utils.S2Utils;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
 import org.locationtech.jts.algorithm.hull.ConcaveHull;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryCollection;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.MultiLineString;
-import org.locationtech.jts.geom.MultiPoint;
-import org.locationtech.jts.geom.MultiPolygon;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.io.gml2.GMLWriter;
 import org.locationtech.jts.io.kml.KMLWriter;
@@ -50,7 +46,10 @@ import org.wololo.jts2geojson.GeoJSONWriter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 public class Functions {
@@ -542,5 +541,26 @@ public class Functions {
     public static Geometry split(Geometry input, Geometry blade) {
         // check input geometry
         return new GeometrySplitter(GEOMETRY_FACTORY).split(input, blade);
+    }
+
+
+    /**
+     * get the coordinates of a geometry and transform to Google s2 cell id
+     * @param input Geometry
+     * @param level integer, minimum level of cells covering the geometry
+     * @return List of coordinates
+     */
+    public static Long[] s2CellIDs(Geometry input, int level) {
+        HashSet<S2CellId> cellIds = new HashSet<>();
+        List<Geometry> geoms = GeomUtils.extractGeometryCollection(input);
+        for (Geometry geom : geoms) {
+            try {
+                cellIds.addAll(S2Utils.s2RegionToCellIDs(S2Utils.toS2Region(geom), 1, level, Integer.MAX_VALUE - 1));
+            } catch (IllegalArgumentException e) {
+                // the geometry can't be cast to region, we cover its coordinates, for example, Point
+                cellIds.addAll(Arrays.stream(geom.getCoordinates()).map(c -> S2Utils.coordinateToCellID(c, level)).collect(Collectors.toList()));
+            }
+        }
+        return S2Utils.roundCellsToSameLevel(new ArrayList<>(cellIds), level).stream().map(S2CellId::id).collect(Collectors.toList()).toArray(new Long[cellIds.size()]);
     }
 }

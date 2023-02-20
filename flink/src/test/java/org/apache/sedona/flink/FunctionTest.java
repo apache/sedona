@@ -27,13 +27,14 @@ import org.locationtech.jts.geom.Polygon;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import static junit.framework.TestCase.assertNull;
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class FunctionTest extends TestBase{
     @BeforeClass
@@ -580,5 +581,37 @@ public class FunctionTest extends TestBase{
     public void testSplit() {
         Table pointTable = tableEnv.sqlQuery("SELECT ST_Split(ST_GeomFromWKT('LINESTRING (0 0, 1.5 1.5, 2 2)'), ST_GeomFromWKT('MULTIPOINT (0.5 0.5, 1 1)'))");
         assertEquals("MULTILINESTRING ((0 0, 0.5 0.5), (0.5 0.5, 1 1), (1 1, 1.5 1.5, 2 2))", ((Geometry)first(pointTable).getField(0)).norm().toText());
+    }
+
+    @Test
+    public void testS2CellIDs() {
+        String initExplodeQuery = "SELECT id, geom, cell_tbl.cell from (VALUES %s) as raw_tbl(id, geom, cells) CROSS JOIN UNNEST(raw_tbl.cells) AS cell_tbl (cell)";
+        // left is a polygon
+        tableEnv.createTemporaryView(
+                "lefts",
+                tableEnv.sqlQuery(String.format(initExplodeQuery, "(1, ST_GeomFromWKT('POLYGON ((0 0, 0.2 0, 0.2 0.2, 0 0.2, 0 0))'), ST_S2CellIDs(ST_GeomFromWKT('POLYGON ((0 0, 0.2 0, 0.2 0.2, 0 0.2, 0 0))'), 10))"))
+        );
+        // points for test
+        String points = String.join(", ", new String[] {
+                "(2, ST_GeomFromWKT('POINT (0.1 0.1)'), ST_S2CellIDs(ST_GeomFromWKT('POINT (0.1 0.1)'), 10))", // points within polygon
+                "(3, ST_GeomFromWKT('POINT (0.25 0.1)'), ST_S2CellIDs(ST_GeomFromWKT('POINT (0.25 0.1)'), 10))", // points outside of polygon
+                "(4, ST_GeomFromWKT('POINT (0.2005 0.1)'), ST_S2CellIDs(ST_GeomFromWKT('POINT (0.2005 0.1)'), 10))" // points outside of polygon, but very close to border
+        });
+        tableEnv.createTemporaryView(
+                "rights",
+                tableEnv.sqlQuery(String.format(initExplodeQuery, points))
+        );
+        Table joinTable = tableEnv.sqlQuery("select lefts.id, rights.id from lefts join rights on lefts.cell = rights.cell group by (lefts.id, rights.id)");
+        assertEquals(2, count(joinTable));
+        ;
+        assert take(joinTable, 2).stream().map(
+                r -> Objects.requireNonNull(r.getField(1)).toString()
+        ).collect(Collectors.toSet()).containsAll(Arrays.asList("2", "4"));
+        // This is due to under level = 10, point id = 4 fall into same cell as the boarder of polygon id = 1
+        // join and filter by st_intersects to exclude the wrong join
+        Table joinCleanedTable = tableEnv.sqlQuery("select lefts.id, rights.id from lefts join rights on lefts.cell = rights.cell where ST_Intersects(lefts.geom, rights.geom) is true group by (lefts.id, rights.id)");
+        // after filter by ST_Intersects, only id =2 point
+        assertEquals(1, count(joinCleanedTable));
+        assertEquals(2, first(joinCleanedTable).getField(1));
     }
 }

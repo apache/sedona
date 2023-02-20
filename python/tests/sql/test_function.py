@@ -1060,3 +1060,17 @@ class TestPredicateJoin(TestBase):
         for input_geom, expected_geom in test_cases.items():
             line_geometry = self.spark.sql("select ST_AsText(ST_LineFromMultiPoint(ST_GeomFromText({})))".format(input_geom))
             assert line_geometry.take(1)[0][0] == expected_geom
+
+    def test_st_s2_cell_ids(self):
+        test_cases = [
+            "'POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'",
+            "'LINESTRING(0 0, 1 2, 2 4, 3 6)'",
+            "'POINT(1 2)'"
+        ]
+        for input_geom in test_cases:
+            cell_ids = self.spark.sql("select ST_S2CellIDs(ST_GeomFromText({}), 6)".format(input_geom)).take(1)[0][0]
+            assert isinstance(cell_ids, list)
+            assert isinstance(cell_ids[0], int)
+        # test null case
+        cell_ids = self.spark.sql("select ST_S2CellIDs(null, 6)").take(1)[0][0]
+        assert cell_ids is None

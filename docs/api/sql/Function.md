@@ -1101,6 +1101,30 @@ Result:
 +---------------------------------------------------------------+
 ```
 
+## ST_S2CellIDs
+
+Introduction: Cover the geometry with Google S2 Cells, return the corresponding cell IDs with the given level.
+The level indicates the [size of cells](https://s2geometry.io/resources/s2cell_statistics.html). With a bigger level,
+the cells will be smaller, the coverage will be more accurate, but the result size will be exponentially increasing.
+
+Format: `ST_S2CellIDs(geom: geometry, level: Int)`
+
+Since: `v1.4.0`
+
+Spark SQL example:
+```SQL
+SELECT ST_S2CellIDs(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'), 6)
+```
+
+Output:
+```
++------------------------------------------------------------------------------------------------------------------------------+
+|st_s2cellids(st_geomfromtext(LINESTRING(1 3 4, 5 6 7), 0), 6)                                                                 |
++------------------------------------------------------------------------------------------------------------------------------+
+|[1159395429071192064, 1159958379024613376, 1160521328978034688, 1161084278931456000, 1170091478186196992, 1170654428139618304]|
++------------------------------------------------------------------------------------------------------------------------------+
+```
+
 ## ST_SetPoint
 
 Introduction: Replace Nth point of linestring with given point. Index is 0-based. Negative index are counted backwards, e.g., -1 is last point.
