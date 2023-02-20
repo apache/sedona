@@ -18,6 +18,8 @@
  */
 package org.apache.sedona.sql
 
+import org.geotools.coverage.grid.GridCoverage2D
+import org.locationtech.jts.geom.Geometry
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
 import scala.collection.mutable
@@ -213,7 +215,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val rowFirst = df.first()
       val nBands = rowFirst.getAs[Int](1)
       val lengthInitial = rowFirst.getAs[mutable.WrappedArray[Double]](0).length
-      val lengthBand = lengthInitial/nBands
+      val lengthBand = lengthInitial / nBands
 
       df = df.selectExpr("data", "nBands", "RS_GetBand(data, 1, nBands) as band1", "RS_GetBand(data, 2, nBands) as band2")
       df = df.selectExpr("data", "nBands", "RS_NormalizedDifference(band2, band1) as normalizedDifference")
@@ -227,7 +229,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       var rowFirst = df.first()
       val nBands = rowFirst.getAs[Int](1)
       val lengthInitial = rowFirst.getAs[mutable.WrappedArray[Double]](0).length
-      val lengthBand = lengthInitial/nBands
+      val lengthBand = lengthInitial / nBands
 
       df = df.selectExpr("data", "nBands", "RS_GetBand(data, 1, nBands) as band1", "RS_GetBand(data, 2, nBands) as band2")
       df = df.selectExpr("data", "nBands", "RS_NormalizedDifference(band2, band1) as normalizedDifference")
@@ -239,4 +241,76 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
   }
 
+  describe("Should pass all raster function tests") {
+
+    it("Passed RS_FromGeoTiff should handle null values") {
+      val result = sparkSession.sql("select RS_FromGeoTiff(null)").first().get(0)
+      assert(result == null)
+    }
+
+    it("Passed RS_FromGeoTiff from binary") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df.selectExpr("RS_FromGeoTiff(content)").first().get(0)
+      assert(result != null)
+      assert(result.isInstanceOf[GridCoverage2D])
+    }
+
+    it("Passed RS_FromArcInfoAsciiGrid should handle null values") {
+      val result = sparkSession.sql("select RS_FromArcInfoAsciiGrid(null)").first().get(0)
+      assert(result == null)
+    }
+
+    it("Passed RS_FromArcInfoAsciiGrid from binary") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_asc/test1.asc")
+      val result = df.selectExpr("RS_FromArcInfoAsciiGrid(content)").first().get(0)
+      assert(result != null)
+    }
+
+    it("Passed RS_Envelope should handle null values") {
+      val result = sparkSession.sql("select RS_Envelope(null)").first().get(0)
+      assert(result == null)
+    }
+
+    it("Passed RS_Envelope with raster") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df.selectExpr("RS_Envelope(RS_FromGeoTiff(content))").first().get(0)
+      assert(result != null)
+      assert(result.isInstanceOf[Geometry])
+    }
+
+    it("Passed RS_NumBands should handle null values") {
+      val result = sparkSession.sql("select RS_NumBands(null)").first().get(0)
+      assert(result == null)
+    }
+
+    it("Passed RS_NumBands with raster") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df.selectExpr("RS_NumBands(RS_FromGeoTiff(content))").first().getInt(0)
+      assert(result == 1)
+    }
+
+    it("Passed RS_Value should handle null values") {
+      val result = sparkSession.sql("select RS_Value(null, null)").first().get(0)
+      assert(result == null)
+    }
+
+    it("Passed RS_Value with raster") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df.selectExpr("RS_Value(RS_FromGeoTiff(content), ST_Point(-13077301.685, 4002565.802))").first().getDouble(0)
+      assert(result == 255d)
+    }
+
+    it("Passed RS_Values should handle null values") {
+      val result = sparkSession.sql("select RS_Values(null, null)").first().get(0)
+      assert(result == null)
+    }
+
+    it("Passed RS_Values with raster") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df.selectExpr("RS_Values(RS_FromGeoTiff(content), array(ST_Point(-13077301.685, 4002565.802), null))").first().getList[Any](0)
+      assert(result.size() == 2)
+      assert(result.get(0) == 255d)
+      assert(result.get(1) == null)
+    }
+  }
 }
