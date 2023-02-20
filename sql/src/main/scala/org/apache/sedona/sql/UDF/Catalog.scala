@@ -141,6 +141,7 @@ object Catalog {
     function[ST_MPolyFromText](0),
     function[ST_MLineFromText](0),
     function[ST_Split](),
+    function[ST_S2CellIDs](),
     // Expression for rasters
     function[RS_NormalizedDifference](),
     function[RS_Mean](),
