@@ -168,7 +168,13 @@ object Catalog {
     function[RS_HTML](),
     function[RS_Array](),
     function[RS_Normalize](),
-    function[RS_Append]()
+    function[RS_Append](),
+    function[RS_FromArcInfoAsciiGrid](),
+    function[RS_FromGeoTiff](),
+    function[RS_Envelope](),
+    function[RS_NumBands](),
+    function[RS_Value](1),
+    function[RS_Values](1)
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(

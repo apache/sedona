@@ -199,6 +199,39 @@ Output:
 !!!note
     Although the 3 RGB bands are mandatory, you can use [RS_Array(h*w, 0.0)](#rs_array) to create an array (zeroed out, size = h * w) as input.
 
+
+## RS_FromArcInfoAsciiGrid
+
+Introduction: Returns a raster geometry from an Arc Info Ascii Grid file.
+
+Format: `RS_FromArcInfoAsciiGrid(asc: Array[Byte])`
+
+Since: `v1.4.0`
+
+Spark SQL example:
+
+```scala
+val df = spark.read.format("binaryFile").load("/some/path/*.asc")
+  .withColumn("raster", f.expr("RS_FromArcInfoAsciiGrid(content)"))
+```
+
+
+## RS_FromGeoTiff
+
+Introduction: Returns a raster geometry from a GeoTiff file.
+
+Format: `RS_FromGeoTiff(asc: Array[Byte])`
+
+Since: `v1.4.0`
+
+Spark SQL example:
+
+```scala
+val df = spark.read.format("binaryFile").load("/some/path/*.tiff")
+  .withColumn("raster", f.expr("RS_FromGeoTiff(content)"))
+```
+
+
 ## RS_GetBand
 
 Introduction: Return a particular band from Geotiff Dataframe
