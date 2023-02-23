@@ -18,13 +18,26 @@
  */
 package org.apache.spark.sql.sedona_sql.UDT
 
+import org.slf4j.{Logger, LoggerFactory}
 import org.apache.spark.sql.types.UDTRegistration
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.index.SpatialIndex
 
 object UdtRegistratorWrapper {
+
+  val logger: Logger = LoggerFactory.getLogger(getClass)
+
   def registerAll(): Unit = {
     UDTRegistration.register(classOf[Geometry].getName, classOf[GeometryUDT].getName)
     UDTRegistration.register(classOf[SpatialIndex].getName, classOf[IndexUDT].getName)
+    // Rasters requires geotools which is optional.
+    val gridClassName = "org.geotools.coverage.grid.GridCoverage2D"
+    try {
+      // Trigger an exception if geotools is not found.
+      java.lang.Class.forName(gridClassName, true, Thread.currentThread().getContextClassLoader)
+      UDTRegistration.register(gridClassName, classOf[RasterUDT].getName)
+    } catch {
+      case e: ClassNotFoundException => logger.warn("Geotools was not found on the classpath. Raster type will not be registered.")
+    }
   }
 }

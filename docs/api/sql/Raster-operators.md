@@ -88,6 +88,23 @@ val multiplyDF = spark.sql("select RS_Divide(band1, band2) as divideBands from d
 
 ```
 
+## RS_Envelope
+
+Introduction: Returns the envelope of the raster as a Geometry.
+
+Format: `RS_Envelope (raster: Raster)`
+
+Since: `v1.4.0`
+
+Spark SQL example:
+```sql
+SELECT RS_Envelope(raster) FROM raster_table
+```
+Output:
+```
+POLYGON((0 0,20 0,20 60,0 60,0 0))
+```
+
 ## RS_FetchRegion
 
 Introduction: Fetch a subset of region from given Geotiff image based on minimumX, minimumY, maximumX and maximumY index as well original height and width of image
@@ -293,6 +310,24 @@ val normalizedDF = spark.sql("select RS_NormalizedDifference(band1, band2) as no
 
 ```
 
+## RS_NumBands
+
+Introduction: Returns the number of the bands in the raster.
+
+Format: `RS_NumBands (raster: Raster)`
+
+Since: `v1.4.0`
+
+Spark SQL example:
+```sql
+SELECT RS_NumBands(raster) FROM raster_table
+```
+
+Output:
+```
+4
+```
+
 ## RS_SquareRoot
 
 Introduction: Find Square root of band values in a geotiff image 
@@ -321,4 +356,79 @@ Spark SQL example:
 
 val subtractDF = spark.sql("select RS_Subtract(band1, band2) as differenceOfOfBands from dataframe")
 
+```
+
+## RS_Value
+
+Introduction: Returns the value at the given point in the raster.
+If no band number is specified it defaults to 1. 
+
+Format: `RS_Value (raster: Raster, point: Geometry)`
+
+Format: `RS_Value (raster: Raster, point: Geometry, band: Int)`
+
+Since: `v1.4.0`
+
+Spark SQL example:
+```sql
+SELECT RS_Value(raster, ST_Point(-13077301.685, 4002565.802)) FROM raster_table
+```
+
+Output:
+```
+5.0
+```
+
+## RS_Values
+
+Introduction: Returns the values at the given points in the raster.
+If no band number is specified it defaults to 1.
+
+RS_Values is similar to RS_Value but operates on an array of points.
+RS_Values can be significantly faster since a raster only has to be loaded once for several points.
+
+Format: `RS_Values (raster: Raster, points: Array[Geometry])`
+
+Format: `RS_Values (raster: Raster, points: Array[Geometry], band: Int)`
+
+Since: `v1.4.0`
+
+Spark SQL example:
+```sql
+SELECT RS_Values(raster, Array(ST_Point(-1307.5, 400.8), ST_Point(-1403.3, 399.1)))
+FROM raster_table
+```
+
+Output:
+```
+Array(5.0, 3.0)
+```
+
+Spark SQL example for joining a point dataset with a raster dataset:
+```scala
+val pointDf = spark.read...
+val rasterDf = spark.read.format("binaryFile").load("/some/path/*.tiff")
+  .withColumn("raster", expr("RS_FromGeoTiff(content)"))
+  .withColumn("envelope", expr("RS_Envelope(raster)"))
+
+// Join the points with the raster extent and aggregate points to arrays.
+// We only use the path and envelope of the raster to keep the shuffle as small as possible.
+val df = pointDf.join(rasterDf.select("path", "envelope"), expr("ST_Within(point_geom, envelope)"))
+  .groupBy("path")
+  .agg(collect_list("point_geom").alias("point"), collect_list("point_id").alias("id"))
+
+df.join(rasterDf, "path")
+  .selectExpr("explode(arrays_zip(id, point, RS_Values(raster, point))) as result")
+  .selectExpr("result.*")
+  .show()
+```
+
+Output:
+```
++----+------------+-------+
+| id | point      | value |
++----+------------+-------+
+|  4 | POINT(1 1) |   3.0 |
+|  5 | POINT(2 2) |   7.0 |
++----+------------+-------+
 ```
