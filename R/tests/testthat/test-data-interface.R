@@ -297,7 +297,7 @@ test_that("spark_read_geoparquet() works as expected", {
   ## Right number of rows
   geoparquet_df <-
     geoparquet_sdf %>% 
-    sparklyr:::spark_sqlresult_from_dplyr()
+    spark_dataframe()
 
   expect_equal(
     invoke(geoparquet_df, 'count'), 5
@@ -341,6 +341,65 @@ test_that("spark_read_geoparquet() works as expected", {
   expect_equal(filtered$name, "Tanzania")
  
 })
+
+
+test_that("spark_read_geoparquet() works as expected, ex 2", {
+  sdf_name <- random_string("spatial_sdf")
+  geoparquet_sdf <- spark_read_geoparquet(sc, geoparquet("example2.parquet"), name = sdf_name)
+  
+  ## Right data (first row)
+  expect_equivalent(
+    geoparquet_sdf %>% head(1) %>% select(name, geometry) %>%  mutate(geometry = geometry %>% st_astext()) %>% collect() %>% as.list(),
+    list(
+      name = "Vatican City",
+      geometry = "POINT (12.453386544971766 41.903282179960115)"
+    )
+  )
+ 
+})
+
+
+test_that("spark_read_geoparquet() works as expected, ex 3", {
+  sdf_name <- random_string("spatial_sdf")
+  geoparquet_sdf <- spark_read_geoparquet(sc, geoparquet("example3.parquet"), name = sdf_name)
+  
+  ## Right data (first row)
+  expect_equivalent(
+    geoparquet_sdf %>% head(1) %>% mutate(geometry = geometry %>% st_astext() %>% substring(1, 26)) %>% collect() %>% as.list(),
+    list(
+      BoroCode = 5,
+      BoroName = "Staten Island",
+      Shape_Leng = 330470.010332,
+      Shape_Area = 1.62381982381E9,
+      geometry = "MULTIPOLYGON (((970217.022"
+    )
+  )
+ 
+})
+
+
+test_that("spark_read_geoparquet() works as expected, ex 1.0.0-beta.1", {
+  sdf_name <- random_string("spatial_sdf")
+  geoparquet_sdf <- spark_read_geoparquet(sc, geoparquet("example-1.0.0-beta.1.parquet"), name = sdf_name)
+  
+  ## Right number of rows
+  geoparquet_df <-
+    geoparquet_sdf %>% 
+    spark_dataframe()
+  
+  expect_equal(
+    invoke(geoparquet_df, 'count'), 5
+  )
+ 
+})
+
+
+# TODO: multiple geometry columns
+test_that("spark_read_geoparquet() works as expected, multiple geom", {
+
+ 
+})
+
 
 test_that("spark_read_geoparquet() throws an error with plain parquet files", {
 
