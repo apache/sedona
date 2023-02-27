@@ -263,7 +263,7 @@ SedonaErrorCode read_geom_buf_header(const char *buf, int buf_size,
     cs_info->num_coords = num_coords;
 
     /* geom_buf contains a series of serialized geometries. buf_coord is the
-     * begining of its first child geometry, and buf_int is unused. */
+     * beginning of its first child geometry, and buf_int is unused. */
     const void *buf_coord = buf + 8;
     geom_buf->buf = (void *)buf;
     geom_buf->buf_coord = (double *)(buf_coord);
