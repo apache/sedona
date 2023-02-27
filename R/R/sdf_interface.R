@@ -87,7 +87,7 @@ sdf_register.spatial_rdd <- function(x, name = NULL) {
 as.spark.dataframe <- function(x, non_spatial_cols = NULL, name = NULL) {
   sc <- spark_connection(x$.jobj)
   
-  # Defaut keep all columns
+  # Default keep all columns
   if (is.null(non_spatial_cols)) {
     if (!is.null(invoke(x$.jobj, "%>%", list("fieldNames")))) { ## Only if dataset has field names
       non_spatial_cols <- invoke(x$.jobj, "%>%", list("fieldNames"), list("toString")) ### Get columns names
@@ -95,7 +95,7 @@ as.spark.dataframe <- function(x, non_spatial_cols = NULL, name = NULL) {
       non_spatial_cols <- strsplit(non_spatial_cols, ", ")[[1]]  ##### turn into list
     }
   } else {
-    stopifnot("non_spatial_cols needs to be a charcter vector (or NULL, default)" = is.character(non_spatial_cols))
+    stopifnot("non_spatial_cols needs to be a character vector (or NULL, default)" = is.character(non_spatial_cols))
   }
   
   sdf <- invoke_static(
