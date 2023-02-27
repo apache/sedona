@@ -447,9 +447,7 @@ sedona_read_shapefile <- function(sc,
 #' Read a shapefile into a Spark DataFrame.
 #' Read a shapefile into a Spark DataFrame.
 #'
-#' @param sc A \code{spark_connection}.
-#' @param location Location of the data source.
-#' @param name The name to assign to the newly generated table.
+#' @inheritParams sparklyr::spark_read_source
 #'
 #'
 #' @return A tbl
@@ -476,7 +474,7 @@ spark_read_shapefile <- function(sc,
   # TODO : check tidydots
   lapply(names(options), function(name) {
     if (!name %in% c("")) {
-      writeLines(paste0("Ignoring unkown option '", name,"'"))
+      warning(paste0("Ignoring unkown option '", name,"'"))
     }
   })
   
@@ -492,9 +490,7 @@ spark_read_shapefile <- function(sc,
 #' Read a geojson file into a Spark DataFrame.
 #' Read a geojson file into a Spark DataFrame.
 #'
-#' @param sc A \code{spark_connection}.
-#' @param location Location of the data source.
-#' @param name The name to assign to the newly generated table.
+#' @inheritParams sparklyr::spark_read_source
 #'
 #'
 #' @return A tbl
@@ -526,7 +522,7 @@ spark_read_geojson <- function(sc,
   if ("skip_syntactically_invalid_geometries" %in% names(options)) final_skip <- options[["skip_syntactically_invalid_geometries"]] else final_skip <- NULL
   lapply(names(options), function(name) {
     if (!name %in% c("allow_invalid_geometries", "skip_syntactically_invalid_geometries")) {
-      writeLines(paste0("Ignoring unkown option '", name,"'"))
+      warning(paste0("Ignoring unkown option '", name,"'"))
     }
   })
   
@@ -534,7 +530,7 @@ spark_read_geojson <- function(sc,
   
   rdd <- sedona_read_geojson(sc,
                              location = path,
-                             allow_invalid_geometries = final_allow,
+                             allow_invalid_geometries = final_allow_invalid,
                              skip_syntactically_invalid_geometries = final_skip,
                              storage_level = "MEMORY_ONLY",
                              repartition = final_repartition)
@@ -547,10 +543,7 @@ spark_read_geojson <- function(sc,
 #' Read a geoparquet file into a Spark DataFrame.
 #' Read a geoparquet file into a Spark DataFrame.
 #'
-#' @param sc A \code{spark_connection}.
-#' @param location Location of the data source.
-#' @param name The name to assign to the newly generated table.
-#'
+#' @inheritParams sparklyr::spark_read_source
 #'
 #' @return A tbl
 #'
@@ -592,9 +585,7 @@ spark_read_geoparquet <- function(sc,
 #' Read a GeoTiff file into a Spark DataFrame.
 #' Read a GeoTiff file into a Spark DataFrame.
 #'
-#' @param sc A \code{spark_connection}.
-#' @param location Location of the data source.
-#' @param name The name to assign to the newly generated table.
+#' @inheritParams sparklyr::spark_read_source
 #'
 #'
 #' @return A tbl
@@ -794,9 +785,9 @@ sedona_save_spatial_rdd <- function(x,
 #'
 #' Export spatial from a Spark dataframe into a geoparquet file
 #'
-#' @param x A Spark dataframe object in sparklyr or a dplyr expression
-#'   representing a Spark SQL query.
-#' @param output_location Location of the output file.
+#' @param path The path to the file. Needs to be accessible from the cluster.
+#'   Supports the \samp{"hdfs://"}, \samp{"s3a://"} and \samp{"file://"} protocols.
+#' @inheritParams sparklyr::spark_write_source
 #'
 #'
 #' @return NULL
@@ -828,8 +819,6 @@ spark_write_geoparquet <- function(x,
                                    options = list(),
                                    partition_by = NULL,
                                    ...) {
-  
-  ## TODO: check other arguments
   
   spark_write_source(
     x = x,
