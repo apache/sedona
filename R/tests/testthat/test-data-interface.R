@@ -410,6 +410,120 @@ test_that("spark_read_geoparquet() throws an error with plain parquet files", {
  
 })
 
+
+test_that("spark_read_geojson() works as expected", {
+  sdf_name <- random_string("spatial_sdf")
+  geojson_sdf <- spark_read_geojson(sc, path = test_data("testPolygon.json"), name = sdf_name)
+  tmp_dest <- tempfile(fileext = ".json")
+  
+  ## Right number of rows
+  geojson_df <-
+    geojson_sdf %>% 
+    spark_dataframe()
+  
+  expect_equal(
+    invoke(geojson_df, 'count'), 1001
+  )
+  
+  ## Right registered name
+  expect_equal(geojson_sdf %>% dbplyr::remote_name(), dbplyr::ident(sdf_name))
+  
+})
+
+
+test_that("spark_read_geojson() works as expected, no feat", {
+  sdf_name <- random_string("spatial_sdf")
+  geojson_sdf <- spark_read_geojson(sc, path = test_data("testpolygon-no-property.json"), name = sdf_name)
+  
+  ## Right number of rows
+  expect_equal(
+    invoke(geojson_sdf %>% spark_dataframe(), 'count'), 10
+  )
+  
+  ## Right registered name
+  expect_equal(geojson_sdf %>% dbplyr::remote_name(), dbplyr::ident(sdf_name))
+  
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
+  
+})
+
+test_that("spark_read_geojson() works as expected, null values", {
+  sdf_name <- random_string("spatial_sdf")
+  geojson_sdf <- spark_read_geojson(sc, path = test_data("testpolygon-with-null-property-value.json"), name = sdf_name)
+  
+  ## Right number of rows
+  expect_equal(
+    invoke(geojson_sdf %>% spark_dataframe(), 'count'), 3
+  )
+  
+  ## Right registered name
+  expect_equal(geojson_sdf %>% dbplyr::remote_name(), dbplyr::ident(sdf_name))
+  
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
+  
+})
+
+
+test_that("spark_read_geojson() works as expected, with id", {
+  sdf_name <- random_string("spatial_sdf")
+  geojson_sdf <- spark_read_geojson(sc, path = test_data("testContainsId.json"), name = sdf_name)
+  
+  ## Right number of rows
+  expect_equal(
+    invoke(geojson_sdf %>% spark_dataframe(), 'count'), 1
+  )
+  
+  ## Right cols
+  expect_equal(
+    geojson_sdf %>% sdf_schema(),
+    list(
+      geometry = list(name = "geometry", type = "GeometryUDT"),
+      id       = list(name = "id", type = "StringType"), 
+      zipcode  = list(name = "zipcode", type = "StringType"), 
+      name     = list(name = "name", type = "StringType")
+    )
+  )
+  
+  ## Right registered name
+  expect_equal(geojson_sdf %>% dbplyr::remote_name(), dbplyr::ident(sdf_name))
+  
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
+  
+})
+
+
+test_that("spark_read_geojson() works as expected, invalid geom", {
+  sdf_name <- random_string("spatial_sdf")
+  
+  # Keep invalid
+  geojson_sdf <- spark_read_geojson(sc, path = test_data("testInvalidPolygon.json"), name = sdf_name)
+  
+  ## Right number of rows
+  expect_equal(
+    invoke(geojson_sdf %>% spark_dataframe(), 'count'), 3
+  )
+  
+  ## Right registered name
+  expect_equal(geojson_sdf %>% dbplyr::remote_name(), dbplyr::ident(sdf_name))
+  
+  
+  # Remove invalid
+  geojson_sdf <- spark_read_geojson(sc, path = test_data("testInvalidPolygon.json"), name = sdf_name, options = list(allow_invalid_geometries = FALSE))
+  
+  ## Right number of rows
+  expect_equal(
+    invoke(geojson_sdf %>% spark_dataframe(), 'count'), 2
+  )
+  
+  ## Right registered name
+  expect_equal(geojson_sdf %>% dbplyr::remote_name(), dbplyr::ident(sdf_name))
+  
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
+  
+})
+
+
+
 # ------- Write RDD ------------
 
 test_that("sedona_write_wkb() works as expected", {
@@ -510,6 +624,33 @@ test_that("spark_write_geoparquet() works as expected", {
     geoparquet_sdf %>% mutate(geometry = geometry %>% st_astext()) %>% collect(),
     geoparquet_2_sdf %>% mutate(geometry = geometry %>% st_astext()) %>% collect()
   )
+  
+  unlink(tmp_dest, recursive = TRUE)
+  
+})
+
+test_that("spark_write_geojson() works as expected", {
+  sdf_name <- random_string("spatial_sdf")
+  geojson_sdf <- spark_read_geojson(sc, path = test_data("testPolygon.json"), name = sdf_name)
+  tmp_dest <- tempfile(fileext = ".json")
+ 
+  ## Save
+  geojson_sdf %>% spark_write_geojson(tmp_dest)
+  
+  ### Reload
+  geojson_2_sdf <- spark_read_geojson(sc, path = tmp_dest)
+    
+  ## order of columns changes !
+  expect_equal(
+    names(geojson_sdf) %>% sort(), 
+    names(geojson_2_sdf) %>% sort()
+  )
+  expect_equal(
+    geojson_sdf %>% mutate(geometry = geometry %>% st_astext()) %>% collect(),
+    geojson_2_sdf %>% mutate(geometry = geometry %>% st_astext()) %>% collect() %>% 
+      select(names(geojson_sdf))
+  )
+  
   
   unlink(tmp_dest, recursive = TRUE)
   

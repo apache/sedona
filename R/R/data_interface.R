@@ -518,8 +518,8 @@ spark_read_geojson <- function(sc,
                                overwrite = TRUE) {
   
   # check options
-  if ("allow_invalid_geometries" %in% names(options)) final_allow_invalid <- options[["allow_invalid_geometries"]] else final_allow_invalid <- NULL
-  if ("skip_syntactically_invalid_geometries" %in% names(options)) final_skip <- options[["skip_syntactically_invalid_geometries"]] else final_skip <- NULL
+  if ("allow_invalid_geometries" %in% names(options)) final_allow_invalid <- options[["allow_invalid_geometries"]] else final_allow_invalid <- TRUE
+  if ("skip_syntactically_invalid_geometries" %in% names(options)) final_skip <- options[["skip_syntactically_invalid_geometries"]] else final_skip <- TRUE
   lapply(names(options), function(name) {
     if (!name %in% c("allow_invalid_geometries", "skip_syntactically_invalid_geometries")) {
       warning(paste0("Ignoring unkown option '", name,"'"))
@@ -780,6 +780,75 @@ sedona_save_spatial_rdd <- function(x,
 
 
 # ------- Write SDF ------------
+
+
+### No shapefile writer in Sedona
+
+
+
+#' Save a Spark dataframe into a geojson file.
+#'
+#' Export spatial from a Spark dataframe into a geojson file
+#'
+#' @param path The path to the file. Needs to be accessible from the cluster.
+#'   Supports the \samp{"hdfs://"}, \samp{"s3a://"} and \samp{"file://"} protocols.
+#' @inheritParams sparklyr::spark_write_source
+#'
+#'
+#' @return NULL
+#'
+#' @examples
+#' library(sparklyr)
+#' library(apache.sedona)
+#'
+#' sc <- spark_connect(master = "spark://HOST:PORT")
+#'
+#' if (!inherits(sc, "test_connection")) {
+#'   tbl <- dplyr::tbl(
+#'     sc,
+#'     dplyr::sql("SELECT ST_GeomFromText('POINT(-71.064544 42.28787)') AS `pt`")
+#'   )
+#'   spark_write_geojson(
+#'     tbl %>% dplyr::mutate(id = 1),
+#'     output_location = "/tmp/pts.geojson"
+#'   )
+#' }
+#'
+#' @family Sedona data interface functions
+#'
+#' @importFrom sparklyr spark_write_source
+#' @export
+spark_write_geojson <- function(x,
+                                path,
+                                mode = NULL,
+                                options = list(),
+                                partition_by = NULL,
+                                ...) {
+  
+  ## find geometry column if not specified
+  if (!"spatial_col" %in% names(options)) {
+    schema <- x %>% sdf_schema()
+    potential_cols <- which(sapply(schema, function(x) x$type == "GeometryUDT"))
+    
+    if (length(potential_cols) == 0) {
+      cli::cli_abort("No geometry column found")
+    } else if (length(potential_cols) > 1) {
+      spatial_col = names(potential_cols)[1]
+      cli::cli_warn("Multiple geometry columns found, using {spatial_col}")
+    } else {
+      spatial_col = names(potential_cols)
+    }
+    
+  } else {
+    spatial_col = options["spatial_col"]
+  }
+  
+  rdd <- x %>% to_spatial_rdd(spatial_col = spatial_col)
+  
+  sedona_write_geojson(x = rdd, output_location = path)
+  
+}
+
 
 #' Save a Spark dataframe into a geoparquet file.
 #'
