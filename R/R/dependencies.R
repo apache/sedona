@@ -16,7 +16,11 @@
 #  under the License.
 
 #' Prepare dependencies for sparklyr
+#' 
+#' Called by sparklyr to register dependencies at clsuter start
 #'
+#' @param spark_version spark version 
+#' @param scala_version scala version
 #' @importFrom cli cli_alert_info
 
 spark_dependencies <- function(spark_version, scala_version, ...) {
