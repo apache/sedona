@@ -469,9 +469,9 @@ sedona_read_shapefile <- function(sc,
 spark_read_shapefile <- function(sc,
                                  name = NULL,
                                  path = name,
+                                 options = list(),
                                  ...) {
   
-  # TODO : check tidydots
   lapply(names(options), function(name) {
     if (!name %in% c("")) {
       warning(paste0("Ignoring unkown option '", name,"'"))
