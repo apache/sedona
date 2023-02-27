@@ -901,6 +901,58 @@ spark_write_geoparquet <- function(x,
   
 }
 
+
+#' Save a Spark dataframe into a GeoTiff file.
+#'
+#' Export spatial from a Spark dataframe into a GeoTiff file
+#'
+#' @param path The path to the file. Needs to be accessible from the cluster.
+#'   Supports the \samp{"hdfs://"}, \samp{"s3a://"} and \samp{"file://"} protocols.
+#' @inheritParams sparklyr::spark_write_source
+#'
+#'
+#' @return NULL
+#'
+#' @examples
+#' library(sparklyr)
+#' library(apache.sedona)
+#'
+#' sc <- spark_connect(master = "spark://HOST:PORT")
+#'
+#' if (!inherits(sc, "test_connection")) {
+#'   tbl <- dplyr::tbl(
+#'     sc,
+#'     dplyr::sql("SELECT ST_GeomFromText('POINT(-71.064544 42.28787)') AS `pt`")
+#'   )
+#'   spark_write_geotiff(
+#'     tbl %>% dplyr::mutate(id = 1),
+#'     output_location = "/tmp/pts.geotiff"
+#'   )
+#' }
+#'
+#' @family Sedona data interface functions
+#'
+#' @importFrom sparklyr spark_write_source
+#' @export
+spark_write_geotiff <- function(x,
+                                   path,
+                                   mode = NULL,
+                                   options = list(),
+                                   partition_by = NULL,
+                                   ...) {
+  
+  spark_write_source(
+    x = x,
+    source = "geotiff",
+    mode = NULL,
+    options = list(),
+    partition_by = NULL,
+    save_args = list(path),
+    ...
+  )
+  
+}
+
 # ------- Utilities ------------
 rdd_cls_from_type <- function(type = c("point", "polygon", "linestring")) {
   type <- match.arg(type)
