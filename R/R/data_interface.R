@@ -866,7 +866,7 @@ spark_write_geojson <- function(x,
     }
     
   } else {
-    spatial_col = options["spatial_col"]
+    spatial_col = options[["spatial_col"]]
   }
   
   rdd <- x %>% to_spatial_rdd(spatial_col = spatial_col)
