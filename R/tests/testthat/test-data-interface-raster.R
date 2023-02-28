@@ -414,7 +414,7 @@ test_that("Should Pass geotiff file writing without coalesce", {
   
   geotiff_df <- geotiff_sdf %>% spark_dataframe()
   geotiff_df <- invoke(geotiff_df, "selectExpr", list("image.origin as origin","image.geometry as geometry", "image.height as height", "image.width as width", "image.data as data", "image.nBands as nBands"))
-  geotiff_2_sdf <- geotiff_df %>% sdf_register(sdf_name)
+  geotiff_2_sdf <- geotiff_df %>% sdf_register()
   
   geotiff_2_sdf %>% 
     spark_write_geotiff(path = tmp_dest)
@@ -428,6 +428,7 @@ test_that("Should Pass geotiff file writing without coalesce", {
   ## Cleanup
   unlink(tmp_dest, recursive = TRUE)
   sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", dbplyr::remote_name(geotiff_2_sdf)))
 })
 
 test_that("Should Pass geotiff file writing with nested schema", {
@@ -463,7 +464,7 @@ test_that("Should Pass geotiff file writing with renamed fields", {
   
   geotiff_df <- geotiff_sdf %>% spark_dataframe()
   geotiff_df <- invoke(geotiff_df, "selectExpr", list("image.origin as source","image.geometry as geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands"))
-  geotiff_2_sdf <- geotiff_df %>% sdf_register(sdf_name)
+  geotiff_2_sdf <- geotiff_df %>% sdf_register()
   
   geotiff_2_sdf %>% 
     spark_write_geotiff(path = tmp_dest, 
@@ -483,6 +484,7 @@ test_that("Should Pass geotiff file writing with renamed fields", {
   ## Cleanup
   unlink(tmp_dest, recursive = TRUE)
   sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", dbplyr::remote_name(geotiff_2_sdf)))
 })
 
 test_that("Should Pass geotiff file writing with nested schema and renamed fields", {
@@ -495,7 +497,7 @@ test_that("Should Pass geotiff file writing with nested schema and renamed field
   
   geotiff_df <- geotiff_sdf %>% spark_dataframe()
   geotiff_df <- invoke(geotiff_df, "selectExpr", list("image as tiff_image"))
-  geotiff_2_sdf <- geotiff_df %>% sdf_register(sdf_name)
+  geotiff_2_sdf <- geotiff_df %>% sdf_register()
   
   geotiff_2_sdf %>% 
     spark_write_geotiff(path = tmp_dest, 
@@ -513,6 +515,7 @@ test_that("Should Pass geotiff file writing with nested schema and renamed field
   ## Cleanup
   unlink(tmp_dest, recursive = TRUE)
   sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", dbplyr::remote_name(geotiff_2_sdf)))
 })
 
 test_that("Should Pass geotiff file writing with converted geometry", {
@@ -525,7 +528,7 @@ test_that("Should Pass geotiff file writing with converted geometry", {
   
   geotiff_df <- geotiff_sdf %>% spark_dataframe()
   geotiff_df <- invoke(geotiff_df, "selectExpr", list("image.origin as source","ST_GeomFromWkt(image.geometry) as geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands"))
-  geotiff_2_sdf <- geotiff_df %>% sdf_register(sdf_name)
+  geotiff_2_sdf <- geotiff_df %>% sdf_register()
   
   geotiff_2_sdf %>% 
     spark_write_geotiff(path = tmp_dest, 
@@ -545,6 +548,7 @@ test_that("Should Pass geotiff file writing with converted geometry", {
   ## Cleanup
   unlink(tmp_dest, recursive = TRUE)
   sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", dbplyr::remote_name(geotiff_2_sdf)))
 })
 
 test_that("Should Pass geotiff file writing with handling invalid schema", {
@@ -557,7 +561,7 @@ test_that("Should Pass geotiff file writing with handling invalid schema", {
   
   geotiff_df <- geotiff_sdf %>% spark_dataframe()
   geotiff_df <- invoke(geotiff_df, "selectExpr", list("image.origin as origin","image.geometry as geometry", "image.height as height", "image.width as width", "image.data as data"))
-  geotiff_2_sdf <- geotiff_df %>% sdf_register(sdf_name)
+  geotiff_2_sdf <- geotiff_df %>% sdf_register()
   
   expect_error(
     geotiff_2_sdf %>% 
@@ -571,6 +575,7 @@ test_that("Should Pass geotiff file writing with handling invalid schema", {
   
   ## Cleanup
   sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", dbplyr::remote_name(geotiff_2_sdf)))
 })
 
 
