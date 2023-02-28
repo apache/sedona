@@ -394,9 +394,41 @@ test_that("spark_read_geoparquet() works as expected, ex 1.0.0-beta.1", {
 })
 
 
-# TODO: multiple geometry columns
-test_that("spark_read_geoparquet() works as expected, multiple geom", {
 
+test_that("spark_read_geoparquet() works as expected, multiple geom", {
+  
+  ## Load
+  sdf_name <- random_string("spatial_sdf")
+  
+  test_data <- 
+    tibble(
+      id = 1:3,
+      g0 = c("POINT (1 2)", "POINT Z(1 2 3)", "MULTIPOINT (0 0, 1 1, 2 2)"),
+      g1 = c("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", "POLYGON Z((0 0 2, 1 0 2, 1 1 2, 0 1 2, 0 0 2))", "MULTILINESTRING ((0 0, 1 1), (2 2, 3 3))")
+    )
+  
+  geoparquet_sdf <- copy_to(sc, test_data, sdf_name)
+  geoparquet_sdf <- geoparquet_sdf %>% mutate(g0 = st_geomfromtext(g0), g1 = st_geomfromtext(g1))
+  
+  ## Write
+  tmp_dest <- tempfile()
+  spark_write_geoparquet(geoparquet_sdf, path = tmp_dest, mode = "overwrite")
+  
+  ## Check
+  ### Can't check on geoparquet metadata with available packages
+  
+  file <- dir(tmp_dest, full.names = TRUE, pattern = "parquet$")
+  
+  geoparquet_2_sdf <- spark_read_geoparquet(sc, path = file)
+  out <- geoparquet_2_sdf %>% sdf_schema()
+  
+  expect_match(out$g0$type, "GeometryUDT")
+  expect_match(out$g1$type, "GeometryUDT")
+  
+  ## Cleanup
+  unlink(tmp_dest, recursive = TRUE)
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", dbplyr::remote_name(geoparquet_2_sdf)))
  
 })
 
