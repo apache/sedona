@@ -18,12 +18,12 @@
 #' Execute a spatial query
 #'
 #' Given a spatial RDD, run a spatial query parameterized by a spatial object
-#' \code{x}.
+#' `x`.
 #'
 #' @param rdd A Sedona spatial RDD.
 #' @param x The query object.
 #' @param index_type Index to use to facilitate the KNN query. If NULL, then
-#'   do not build any additional spatial index on top of \code{x}. Supported
+#'   do not build any additional spatial index on top of `x`. Supported
 #'   index types are "quadtree" and "rtree".
 #' @param result_type Type of result to return.
 #'   If "rdd" (default), then the k nearest objects will be returned in a Sedona
@@ -32,7 +32,7 @@
 #'   returned.
 #'   If "raw", then a list of k nearest objects will be returned. Each element
 #'   within this list will be a JVM object of type
-#'   \code{org.locationtech.jts.geom.Geometry}.
+#'   `org.locationtech.jts.geom.Geometry`.
 #'
 #' @name spatial_query
 NULL
@@ -40,9 +40,9 @@ NULL
 
 #' Query the k nearest spatial objects.
 #'
-#' Given a spatial RDD, a query object \code{x}, and an integer k, find the k
-#' nearest spatial objects within the RDD from \code{x} (distance between
-#' \code{x} and another geometrical object will be measured by the minimum
+#' Given a spatial RDD, a query object `x`, and an integer k, find the k
+#' nearest spatial objects within the RDD from `x` (distance between
+#' `x` and another geometrical object will be measured by the minimum
 #' possible length of any line segment connecting those 2 objects).
 #'
 #' @inheritParams spatial_query
@@ -131,8 +131,8 @@ sedona_knn_query <- function(rdd,
 
 #' Execute a range query.
 #'
-#' Given a spatial RDD and a query object \code{x}, find all spatial objects
-#' within the RDD that are covered by \code{x} or intersect \code{x}.
+#' Given a spatial RDD and a query object `x`, find all spatial objects
+#' within the RDD that are covered by `x` or intersect `x`.
 #'
 #' @inheritParams spatial_query
 #' @param query_type Type of spatial relationship involved in the query.

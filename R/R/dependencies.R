@@ -21,6 +21,7 @@
 #'
 #' @param spark_version spark version 
 #' @param scala_version scala version
+#' @param ... not used
 #' @importFrom cli cli_alert_info
 
 spark_dependencies <- function(spark_version, scala_version, ...) {

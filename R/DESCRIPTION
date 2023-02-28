@@ -29,7 +29,8 @@ Imports:
     rlang,
     sparklyr (>= 1.3),
     dbplyr (>= 1.1.0),
-    cli
+    cli,
+    lifecycle
 Suggests:
     dplyr (>= 0.7.2),
     knitr,
@@ -37,3 +38,4 @@ Suggests:
 Encoding: UTF-8
 RoxygenNote: 7.2.3
 SystemRequirements: 'Apache Spark' 2.4.x or 3.x
+Roxygen: list(markdown = TRUE)

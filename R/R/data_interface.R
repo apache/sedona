@@ -21,7 +21,7 @@
 #' Create a SpatialRDD from an external data source.
 #' Import spatial object from an external data source into a Sedona SpatialRDD.
 #'
-#' @param sc A \code{spark_connection}.
+#' @param sc A `spark_connection`.
 #' @param location Location of the data source.
 #' @param type Type of the SpatialRDD (must be one of "point", "polygon", or
 #'   "linestring".
@@ -45,7 +45,7 @@ NULL
 #'
 #' @inheritParams sedona_spatial_rdd_data_source
 #' @param delimiter Delimiter within each record. Must be one of
-#'   ',', '\\t', '?', '\\'', '"', '_', '-', '\%', '~', '|', ';'
+#'   ',', '\\t', '?', '\\'', '"', '_', '-', '%', '~', '|', ';'
 #' @param first_spatial_col_index Zero-based index of the left-most column
 #'   containing spatial attributes (default: 0).
 #' @param last_spatial_col_index Zero-based index of the right-most column
@@ -151,8 +151,14 @@ sedona_read_dsv_to_typed_rdd <- function(sc,
 
 #' Create a typed SpatialRDD from a shapefile data source.
 #'
+#' @description
+#' `r lifecycle::badge("deprecated")`
+#' 
+#' Constructors of typed RDD (PointRDD, PolygonRDD, LineStringRDD) are soft deprecated, use non-types versions
+#' 
 #' Create a typed SpatialRDD (namely, a PointRDD, a PolygonRDD, or a
 #' LineStringRDD) from a shapefile data source.
+#' 
 #'
 #' @inheritParams sedona_spatial_rdd_data_source
 #'
@@ -179,6 +185,13 @@ sedona_read_shapefile_to_typed_rdd <- function(sc,
                                                location,
                                                type = c("point", "polygon", "linestring"),
                                                storage_level = "MEMORY_ONLY") {
+  
+  lifecycle::deprecate_soft(
+    "1.4.0",
+    "sedona_read_shapefile_to_typed_rdd()",
+    with = "sedona_read_shapefile()"
+  )
+  
   invoke_static(
     sc,
     "org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader",
@@ -192,8 +205,14 @@ sedona_read_shapefile_to_typed_rdd <- function(sc,
 
 #' Create a typed SpatialRDD from a GeoJSON data source.
 #'
+#' @description
+#' `r lifecycle::badge("deprecated")`
+#' 
+#' Constructors of typed RDD (PointRDD, PolygonRDD, LineStringRDD) are soft deprecated, use non-types versions
+#' 
 #' Create a typed SpatialRDD (namely, a PointRDD, a PolygonRDD, or a
 #' LineStringRDD) from a GeoJSON data source.
+#' 
 #'
 #' @inheritParams sedona_spatial_rdd_data_source
 #'
@@ -222,6 +241,13 @@ sedona_read_geojson_to_typed_rdd <- function(sc,
                                              has_non_spatial_attrs = TRUE,
                                              storage_level = "MEMORY_ONLY",
                                              repartition = 1L) {
+  
+  lifecycle::deprecate_soft(
+    "1.4.0",
+    "sedona_read_geojson_to_typed_rdd()",
+    with = "sedona_read_geojson()"
+  )
+  
   invoke_new(
     sc,
     rdd_cls_from_type(type),
