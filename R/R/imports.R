@@ -19,4 +19,5 @@
 NULL
 
 #' @importFrom rlang %||%
+#' @importFrom cli cli_alert_info
 NULL

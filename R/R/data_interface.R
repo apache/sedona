@@ -41,7 +41,7 @@ NULL
 #' The data source can contain spatial attributes (e.g., longitude and latidude)
 #' and other attributes. Currently only inputs with spatial attributes occupying
 #' a contiguous range of columns (i.e.,
-#' [first_spatial_col_index, last_spatial_col_index]) are supported.
+#' \[first_spatial_col_index, last_spatial_col_index\]) are supported.
 #'
 #' @inheritParams sedona_spatial_rdd_data_source
 #' @param delimiter Delimiter within each record. Must be one of
@@ -74,7 +74,7 @@ NULL
 #'   )
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_read_dsv_to_typed_rdd <- function(sc,
@@ -178,7 +178,7 @@ sedona_read_dsv_to_typed_rdd <- function(sc,
 #'   )
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_read_shapefile_to_typed_rdd <- function(sc,
@@ -232,7 +232,7 @@ sedona_read_shapefile_to_typed_rdd <- function(sc,
 #'   )
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_read_geojson_to_typed_rdd <- function(sc,
@@ -285,7 +285,7 @@ sedona_read_geojson_to_typed_rdd <- function(sc,
 #'   rdd <- sedona_read_geojson(sc, location = input_location)
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_read_geojson <- function(sc,
@@ -342,7 +342,7 @@ sedona_read_geojson <- function(sc,
 #'   )
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_read_wkb <- function(sc,
@@ -402,7 +402,7 @@ sedona_read_wkb <- function(sc,
 #'   )
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_read_wkt <- function(sc,
@@ -451,7 +451,7 @@ sedona_read_wkt <- function(sc,
 #'   rdd <- sedona_read_shapefile(sc, location = input_location)
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_read_shapefile <- function(sc,
@@ -489,7 +489,7 @@ sedona_read_shapefile <- function(sc,
 #'   rdd <- spark_read_shapefile(sc, location = input_location)
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona DF data interface functions
 #'
 #' @export
 spark_read_shapefile <- function(sc,
@@ -532,7 +532,7 @@ spark_read_shapefile <- function(sc,
 #'   rdd <- spark_read_geojson(sc, location = input_location)
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona DF data interface functions
 #'
 #' @export
 spark_read_geojson <- function(sc,
@@ -584,7 +584,7 @@ spark_read_geojson <- function(sc,
 #'   rdd <- spark_read_geoparquet(sc, location = input_location)
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona DF data interface functions
 #'
 #' @export
 #' @importFrom sparklyr spark_read_source
@@ -627,7 +627,7 @@ spark_read_geoparquet <- function(sc,
 #'   rdd <- spark_read_geotiff(sc, location = input_location)
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona DF data interface functions
 #'
 #' @export
 #' @importFrom sparklyr spark_read_source
@@ -688,7 +688,7 @@ NULL
 #'   sedona_write_wkb(rdd, "/tmp/wkb_output.tsv")
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_write_wkb <- function(x, output_location) {
@@ -719,7 +719,7 @@ sedona_write_wkb <- function(x, output_location) {
 #'   sedona_write_wkt(rdd, "/tmp/wkt_output.tsv")
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_write_wkt <- function(x, output_location) {
@@ -749,7 +749,7 @@ sedona_write_wkt <- function(x, output_location) {
 #'   sedona_write_geojson(rdd, "/tmp/example.json")
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_write_geojson <- function(x, output_location) {
@@ -788,7 +788,7 @@ sedona_write_geojson <- function(x, output_location) {
 #'   )
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_save_spatial_rdd <- function(x,
@@ -840,7 +840,7 @@ sedona_save_spatial_rdd <- function(x,
 #'   )
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona DF data interface functions
 #'
 #' @importFrom sparklyr spark_write_source
 #' @export
@@ -904,7 +904,7 @@ spark_write_geojson <- function(x,
 #'   )
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona DF data interface functions
 #'
 #' @importFrom sparklyr spark_write_source
 #' @export
@@ -956,7 +956,7 @@ spark_write_geoparquet <- function(x,
 #'   )
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona DF data interface functions
 #'
 #' @importFrom sparklyr spark_write_source
 #' @export
