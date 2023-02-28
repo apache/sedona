@@ -16,12 +16,12 @@
 #  under the License.
 
 
-# ------- Read ------------
+# ------- Read RDD ------------
 
 #' Create a SpatialRDD from an external data source.
 #' Import spatial object from an external data source into a Sedona SpatialRDD.
 #'
-#' @param sc A \code{spark_connection}.
+#' @param sc A `spark_connection`.
 #' @param location Location of the data source.
 #' @param type Type of the SpatialRDD (must be one of "point", "polygon", or
 #'   "linestring".
@@ -41,11 +41,11 @@ NULL
 #' The data source can contain spatial attributes (e.g., longitude and latidude)
 #' and other attributes. Currently only inputs with spatial attributes occupying
 #' a contiguous range of columns (i.e.,
-#' [first_spatial_col_index, last_spatial_col_index]) are supported.
+#' \[first_spatial_col_index, last_spatial_col_index\]) are supported.
 #'
 #' @inheritParams sedona_spatial_rdd_data_source
 #' @param delimiter Delimiter within each record. Must be one of
-#'   ',', '\\t', '?', '\\'', '"', '_', '-', '\%', '~', '|', ';'
+#'   ',', '\\t', '?', '\\'', '"', '_', '-', '%', '~', '|', ';'
 #' @param first_spatial_col_index Zero-based index of the left-most column
 #'   containing spatial attributes (default: 0).
 #' @param last_spatial_col_index Zero-based index of the right-most column
@@ -74,7 +74,7 @@ NULL
 #'   )
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_read_dsv_to_typed_rdd <- function(sc,
@@ -151,8 +151,14 @@ sedona_read_dsv_to_typed_rdd <- function(sc,
 
 #' Create a typed SpatialRDD from a shapefile data source.
 #'
+#' @description
+#' `r lifecycle::badge("deprecated")`
+#' 
+#' Constructors of typed RDD (PointRDD, PolygonRDD, LineStringRDD) are soft deprecated, use non-types versions
+#' 
 #' Create a typed SpatialRDD (namely, a PointRDD, a PolygonRDD, or a
 #' LineStringRDD) from a shapefile data source.
+#' 
 #'
 #' @inheritParams sedona_spatial_rdd_data_source
 #'
@@ -172,13 +178,20 @@ sedona_read_dsv_to_typed_rdd <- function(sc,
 #'   )
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_read_shapefile_to_typed_rdd <- function(sc,
                                                location,
                                                type = c("point", "polygon", "linestring"),
                                                storage_level = "MEMORY_ONLY") {
+  
+  lifecycle::deprecate_soft(
+    "1.4.0",
+    "sedona_read_shapefile_to_typed_rdd()",
+    with = "sedona_read_shapefile()"
+  )
+  
   invoke_static(
     sc,
     "org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader",
@@ -192,8 +205,14 @@ sedona_read_shapefile_to_typed_rdd <- function(sc,
 
 #' Create a typed SpatialRDD from a GeoJSON data source.
 #'
+#' @description
+#' `r lifecycle::badge("deprecated")`
+#' 
+#' Constructors of typed RDD (PointRDD, PolygonRDD, LineStringRDD) are soft deprecated, use non-types versions
+#' 
 #' Create a typed SpatialRDD (namely, a PointRDD, a PolygonRDD, or a
 #' LineStringRDD) from a GeoJSON data source.
+#' 
 #'
 #' @inheritParams sedona_spatial_rdd_data_source
 #'
@@ -213,7 +232,7 @@ sedona_read_shapefile_to_typed_rdd <- function(sc,
 #'   )
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_read_geojson_to_typed_rdd <- function(sc,
@@ -222,6 +241,13 @@ sedona_read_geojson_to_typed_rdd <- function(sc,
                                              has_non_spatial_attrs = TRUE,
                                              storage_level = "MEMORY_ONLY",
                                              repartition = 1L) {
+  
+  lifecycle::deprecate_soft(
+    "1.4.0",
+    "sedona_read_geojson_to_typed_rdd()",
+    with = "sedona_read_geojson()"
+  )
+  
   invoke_new(
     sc,
     rdd_cls_from_type(type),
@@ -259,7 +285,7 @@ sedona_read_geojson_to_typed_rdd <- function(sc,
 #'   rdd <- sedona_read_geojson(sc, location = input_location)
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_read_geojson <- function(sc,
@@ -316,7 +342,7 @@ sedona_read_geojson <- function(sc,
 #'   )
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_read_wkb <- function(sc,
@@ -376,7 +402,7 @@ sedona_read_wkb <- function(sc,
 #'   )
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_read_wkt <- function(sc,
@@ -425,7 +451,7 @@ sedona_read_wkt <- function(sc,
 #'   rdd <- sedona_read_shapefile(sc, location = input_location)
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_read_shapefile <- function(sc,
@@ -443,12 +469,11 @@ sedona_read_shapefile <- function(sc,
 }
 
 
-#' Read a geoparquet file into a Spark DataFrame.
-#' Read a geoparquet file into a Spark DataFrame. The created dataframe is automatically registered.
+# ------- Read SDF ------------
+#' Read a shapefile into a Spark DataFrame.
+#' Read a shapefile into a Spark DataFrame.
 #'
-#' @param sc A \code{spark_connection}.
-#' @param location Location of the data source.
-#' @param name The name to assign to the newly generated table.
+#' @inheritParams sparklyr::spark_read_source
 #'
 #'
 #' @return A tbl
@@ -461,34 +486,172 @@ sedona_read_shapefile <- function(sc,
 #'
 #' if (!inherits(sc, "test_connection")) {
 #'   input_location <- "/dev/null" # replace it with the path to your input file
-#'   rdd <- sedona_read_geoparquet(sc, location = input_location)
+#'   rdd <- spark_read_shapefile(sc, location = input_location)
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona DF data interface functions
 #'
 #' @export
-sedona_read_geoparquet <- function(sc,
-                                   location,
-                                   name = NULL) {
+spark_read_shapefile <- function(sc,
+                                 name = NULL,
+                                 path = name,
+                                 options = list(),
+                                 ...) {
   
-  ## don't have sparklyr's `%<-%`' maybe to replicate later
-  checked <- sparklyr:::spark_read_compat_param(sc, name, location)
-  name <- checked[[1]]
-  path <- checked[[2]]
+  lapply(names(options), function(name) {
+    if (!name %in% c("")) {
+      warning(paste0("Ignoring unkown option '", name,"'"))
+    }
+  })
   
-  df <- 
-    invoke(
-      spark_session(sc), 
-      "%>%", 
-      list("read"), list("format", "geoparquet"), list("load", sparklyr:::spark_normalize_path(path))) 
-  
+  rdd <- sedona_read_shapefile(sc,
+                               location = path,
+                               storage_level = "MEMORY_ONLY")
   
   
-  sdf_register(df, name = name)
+  
+  rdd %>% sdf_register(name = name)
+}
+
+#' Read a geojson file into a Spark DataFrame.
+#' Read a geojson file into a Spark DataFrame.
+#'
+#' @inheritParams sparklyr::spark_read_source
+#'
+#'
+#' @return A tbl
+#'
+#' @examples
+#' library(sparklyr)
+#' library(apache.sedona)
+#'
+#' sc <- spark_connect(master = "spark://HOST:PORT")
+#'
+#' if (!inherits(sc, "test_connection")) {
+#'   input_location <- "/dev/null" # replace it with the path to your input file
+#'   rdd <- spark_read_geojson(sc, location = input_location)
+#' }
+#'
+#' @family Sedona DF data interface functions
+#'
+#' @export
+spark_read_geojson <- function(sc,
+                               name = NULL,
+                               path = name,
+                               options = list(),
+                               repartition = 0,
+                               memory = TRUE,
+                               overwrite = TRUE) {
+  
+  # check options
+  if ("allow_invalid_geometries" %in% names(options)) final_allow_invalid <- options[["allow_invalid_geometries"]] else final_allow_invalid <- TRUE
+  if ("skip_syntactically_invalid_geometries" %in% names(options)) final_skip <- options[["skip_syntactically_invalid_geometries"]] else final_skip <- TRUE
+  lapply(names(options), function(name) {
+    if (!name %in% c("allow_invalid_geometries", "skip_syntactically_invalid_geometries")) {
+      warning(paste0("Ignoring unkown option '", name,"'"))
+    }
+  })
+  
+  final_repartition <- max(as.integer(repartition), 1L)
+  
+  rdd <- sedona_read_geojson(sc,
+                             location = path,
+                             allow_invalid_geometries = final_allow_invalid,
+                             skip_syntactically_invalid_geometries = final_skip,
+                             storage_level = "MEMORY_ONLY",
+                             repartition = final_repartition)
+  
+  
+  
+  rdd %>% sdf_register(name = name)
+}
+
+#' Read a geoparquet file into a Spark DataFrame.
+#' Read a geoparquet file into a Spark DataFrame.
+#'
+#' @inheritParams sparklyr::spark_read_source
+#'
+#' @return A tbl
+#'
+#' @examples
+#' library(sparklyr)
+#' library(apache.sedona)
+#'
+#' sc <- spark_connect(master = "spark://HOST:PORT")
+#'
+#' if (!inherits(sc, "test_connection")) {
+#'   input_location <- "/dev/null" # replace it with the path to your input file
+#'   rdd <- spark_read_geoparquet(sc, location = input_location)
+#' }
+#'
+#' @family Sedona DF data interface functions
+#'
+#' @export
+#' @importFrom sparklyr spark_read_source
+spark_read_geoparquet <- function(sc,
+                                  name = NULL,
+                                  path = name,
+                                  options = list(),
+                                  repartition = 0,
+                                  memory = TRUE,
+                                  overwrite = TRUE) {
+  
+  spark_read_source(sc, 
+                    name = name,
+                    path = path,
+                    source = "geoparquet",
+                    options = options,
+                    repartition = repartition,
+                    memory = memory,
+                    overwrite = overwrite,
+                    columns = NULL)
 }
 
 
-# ------- Write ------------
+#' Read a GeoTiff file into a Spark DataFrame.
+#' Read a GeoTiff file into a Spark DataFrame.
+#'
+#' @inheritParams sparklyr::spark_read_source
+#'
+#'
+#' @return A tbl
+#'
+#' @examples
+#' library(sparklyr)
+#' library(apache.sedona)
+#'
+#' sc <- spark_connect(master = "spark://HOST:PORT")
+#'
+#' if (!inherits(sc, "test_connection")) {
+#'   input_location <- "/dev/null" # replace it with the path to your input file
+#'   rdd <- spark_read_geotiff(sc, location = input_location)
+#' }
+#'
+#' @family Sedona DF data interface functions
+#'
+#' @export
+#' @importFrom sparklyr spark_read_source
+spark_read_geotiff <- function(sc,
+                               name = NULL,
+                               path = name,
+                               options = list(),
+                               repartition = 0,
+                               memory = TRUE,
+                               overwrite = TRUE) {
+  
+  spark_read_source(sc, 
+                    name = name,
+                    path = path,
+                    source = "geotiff",
+                    options = options,
+                    repartition = repartition,
+                    memory = memory,
+                    overwrite = overwrite,
+                    columns = NULL)
+}
+
+
+# ------- Write RDD ------------
 
 
 #' Write SpatialRDD into a file.
@@ -525,7 +688,7 @@ NULL
 #'   sedona_write_wkb(rdd, "/tmp/wkb_output.tsv")
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_write_wkb <- function(x, output_location) {
@@ -556,7 +719,7 @@ sedona_write_wkb <- function(x, output_location) {
 #'   sedona_write_wkt(rdd, "/tmp/wkt_output.tsv")
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_write_wkt <- function(x, output_location) {
@@ -586,7 +749,7 @@ sedona_write_wkt <- function(x, output_location) {
 #'   sedona_write_geojson(rdd, "/tmp/example.json")
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_write_geojson <- function(x, output_location) {
@@ -625,7 +788,7 @@ sedona_write_geojson <- function(x, output_location) {
 #'   )
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona RDD data interface functions
 #'
 #' @export
 sedona_save_spatial_rdd <- function(x,
@@ -642,13 +805,20 @@ sedona_save_spatial_rdd <- function(x,
 }
 
 
-#' Save a Spark dataframe into a geoparquet file.
+# ------- Write SDF ------------
+
+
+### No shapefile writer in Sedona
+
+
+
+#' Save a Spark dataframe into a geojson file.
 #'
-#' Export spatial from a Spark dataframe into a geoparquet file
+#' Export spatial from a Spark dataframe into a geojson file
 #'
-#' @param x A Spark dataframe object in sparklyr or a dplyr expression
-#'   representing a Spark SQL query.
-#' @param output_location Location of the output file.
+#' @param path The path to the file. Needs to be accessible from the cluster.
+#'   Supports the \samp{"hdfs://"}, \samp{"s3a://"} and \samp{"file://"} protocols.
+#' @inheritParams sparklyr::spark_write_source
 #'
 #'
 #' @return NULL
@@ -664,27 +834,149 @@ sedona_save_spatial_rdd <- function(x,
 #'     sc,
 #'     dplyr::sql("SELECT ST_GeomFromText('POINT(-71.064544 42.28787)') AS `pt`")
 #'   )
-#'   sedona_write_geoparquet(
+#'   spark_write_geojson(
+#'     tbl %>% dplyr::mutate(id = 1),
+#'     output_location = "/tmp/pts.geojson"
+#'   )
+#' }
+#'
+#' @family Sedona DF data interface functions
+#'
+#' @importFrom sparklyr spark_write_source
+#' @export
+spark_write_geojson <- function(x,
+                                path,
+                                mode = NULL,
+                                options = list(),
+                                partition_by = NULL,
+                                ...) {
+  
+  ## find geometry column if not specified
+  if (!"spatial_col" %in% names(options)) {
+    schema <- x %>% sdf_schema()
+    potential_cols <- which(sapply(schema, function(x) x$type == "GeometryUDT"))
+    
+    if (length(potential_cols) == 0) {
+      cli::cli_abort("No geometry column found")
+    } else if (length(potential_cols) > 1) {
+      spatial_col = names(potential_cols)[1]
+      cli::cli_warn("Multiple geometry columns found, using {spatial_col}")
+    } else {
+      spatial_col = names(potential_cols)
+    }
+    
+  } else {
+    spatial_col = options[["spatial_col"]]
+  }
+  
+  rdd <- x %>% to_spatial_rdd(spatial_col = spatial_col)
+  
+  sedona_write_geojson(x = rdd, output_location = path)
+  
+}
+
+
+#' Save a Spark dataframe into a geoparquet file.
+#'
+#' Export spatial from a Spark dataframe into a geoparquet file
+#'
+#' @param path The path to the file. Needs to be accessible from the cluster.
+#'   Supports the \samp{"hdfs://"}, \samp{"s3a://"} and \samp{"file://"} protocols.
+#' @inheritParams sparklyr::spark_write_source
+#'
+#'
+#' @return NULL
+#'
+#' @examples
+#' library(sparklyr)
+#' library(apache.sedona)
+#'
+#' sc <- spark_connect(master = "spark://HOST:PORT")
+#'
+#' if (!inherits(sc, "test_connection")) {
+#'   tbl <- dplyr::tbl(
+#'     sc,
+#'     dplyr::sql("SELECT ST_GeomFromText('POINT(-71.064544 42.28787)') AS `pt`")
+#'   )
+#'   spark_write_geoparquet(
 #'     tbl %>% dplyr::mutate(id = 1),
 #'     output_location = "/tmp/pts.geoparquet"
 #'   )
 #' }
 #'
-#' @family Sedona data interface functions
+#' @family Sedona DF data interface functions
 #'
-#' @importFrom sparklyr spark_dataframe
+#' @importFrom sparklyr spark_write_source
 #' @export
-sedona_write_geoparquet <- function(x,
-                                   output_location) {
+spark_write_geoparquet <- function(x,
+                                   path,
+                                   mode = NULL,
+                                   options = list(),
+                                   partition_by = NULL,
+                                   ...) {
   
-  ## Get back jobj
-  x_obj <- spark_dataframe(x)
+  spark_write_source(
+    x = x,
+    source = "geoparquet",
+    mode = mode,
+    options = options,
+    partition_by = partition_by,
+    save_args = list(path),
+    ...
+  )
   
-  invoke(
-    x_obj, 
-    "%>%", 
-    list("write"), list("format", "geoparquet"), list("save", sparklyr:::spark_normalize_path(output_location))) 
+}
 
+
+#' Save a Spark dataframe into a GeoTiff file.
+#'
+#' Export spatial from a Spark dataframe into a GeoTiff file
+#'
+#' @param path The path to the file. Needs to be accessible from the cluster.
+#'   Supports the \samp{"hdfs://"}, \samp{"s3a://"} and \samp{"file://"} protocols.
+#' @inheritParams sparklyr::spark_write_source
+#'
+#'
+#' @return NULL
+#'
+#' @examples
+#' library(sparklyr)
+#' library(apache.sedona)
+#'
+#' sc <- spark_connect(master = "spark://HOST:PORT")
+#'
+#' if (!inherits(sc, "test_connection")) {
+#'   tbl <- dplyr::tbl(
+#'     sc,
+#'     dplyr::sql("SELECT ST_GeomFromText('POINT(-71.064544 42.28787)') AS `pt`")
+#'   )
+#'   spark_write_geotiff(
+#'     tbl %>% dplyr::mutate(id = 1),
+#'     output_location = "/tmp/pts.geotiff"
+#'   )
+#' }
+#'
+#' @family Sedona DF data interface functions
+#'
+#' @importFrom sparklyr spark_write_source
+#' @export
+spark_write_geotiff <- function(x,
+                                   path,
+                                   mode = NULL,
+                                   options = list(),
+                                   partition_by = NULL,
+                                   ...) {
+  
+  spark_write_source(
+    x = x,
+    source = "geotiff",
+    mode = mode,
+    options = options,
+    partition_by = partition_by,
+    save_args = list(path),
+    ...
+  )
+  
 }
 
 # ------- Utilities ------------

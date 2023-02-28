@@ -40,7 +40,7 @@
 #'   Default: c(0, 0, 0).
 #' @param shade Whether data point with larger magnitude will be displayed with
 #'   darker color. Default: TRUE.
-#' @param overlay A \code{viz_op} object containing a raster image to be
+#' @param overlay A `viz_op` object containing a raster image to be
 #'   displayed on top of the resulting image.
 #' @param browse Whether to open the rendered image in a browser (default:
 #'   interactive()).

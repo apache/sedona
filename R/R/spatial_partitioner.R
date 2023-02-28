@@ -23,13 +23,13 @@
 #' @param rdd The spatial RDD to be partitioned.
 #' @param partitioner The name of a grid type to use (currently "quadtree" and
 #'   "kdbtree" are supported) or an
-#'   \code{org.apache.sedona.core.spatialPartitioning.SpatialPartitioner} JVM
+#'   `org.apache.sedona.core.spatialPartitioning.SpatialPartitioner` JVM
 #'   object. The latter option is only relevant for advanced use cases involving
 #'   a custom spatial partitioner.
 #' @param max_levels Maximum number of levels in the partitioning tree data
 #'   structure. If NULL (default), then use the current number of partitions
-#'   within \code{rdd} as maximum number of levels.
-#'   Specifying \code{max_levels} is unsupported for use cases involving a
+#'   within `rdd` as maximum number of levels.
+#'   Specifying `max_levels` is unsupported for use cases involving a
 #'   custom spatial partitioner because in these scenarios the partitioner
 #'   object already has its own maximum number of levels set and there is no
 #'   well-defined way to override this existing setting in the partitioning
