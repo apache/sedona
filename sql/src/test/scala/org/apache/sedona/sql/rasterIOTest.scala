@@ -117,11 +117,11 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
 
     it("should pass RS_Base64") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/")
-      df = df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.geometry) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
-      df = df.selectExpr("RS_GetBand(data, 1, bands) as targetBand", "width","height")
+      df = df.selectExpr("image.origin as origin", "ST_GeomFromWkt(image.geometry) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
+      df = df.selectExpr("RS_GetBand(data, 1, bands) as targetBand", "width", "height")
       df.createOrReplaceTempView("geotiff")
-      df = sparkSession.sql("Select RS_base64(height, width, targetBand, RS_Array(height*width, 0), RS_Array(height*width, 0)) as encodedstring from geotiff")
-//      printf(df.first().getAs[String](0))
+      df = sparkSession.sql("Select RS_base64(height, width, targetBand, RS_Array(height*width, 0.0), RS_Array(height*width, 0.0)) as encodedstring from geotiff")
+      assert(df.first().getAs[String](0).startsWith("iVBORw"))
     }
 
     it("should pass RS_HTML") {
@@ -131,9 +131,8 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
       df.createOrReplaceTempView("geotiff")
       df = sparkSession.sql("Select RS_base64(height, width, targetBand, RS_Array(height*width, 0.0), RS_Array(height*width, 0.0)) as encodedstring from geotiff")
       df = df.selectExpr("RS_HTML(encodedstring, '300') as htmlstring" )
-      assert(df.first().getAs[String](0).contains("img"))
-//      printf(df.first().getAs[String](0))
-    }
+      assert(df.first().getAs[String](0).startsWith("<img src=\"data:image/png;base64,iVBORw"))
+      assert(df.first().getAs[String](0).endsWith("/>"))    }
 
     it("should pass RS_GetBand for length of Band 2") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(resourceFolder + "raster/test3.tif")
