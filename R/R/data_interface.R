@@ -944,9 +944,9 @@ spark_write_geotiff <- function(x,
   spark_write_source(
     x = x,
     source = "geotiff",
-    mode = NULL,
-    options = list(),
-    partition_by = NULL,
+    mode = mode,
+    options = options,
+    partition_by = partition_by,
     save_args = list(path),
     ...
   )

@@ -214,6 +214,8 @@ test_that("FIX: should pass RS_Base64", {
   sdf_name <- random_string("spatial_sdf")
   geotiff_sdf <- spark_read_geotiff(sc, path = test_data("raster/"), name = sdf_name, options = list(dropInvalid = TRUE))
   
+  bloub
+  
   expect_no_error(
     # row <- 
     sc %>% 
@@ -300,247 +302,280 @@ test_that("should pass RS_GetBand for elements of Band 4", {
 
 
 # Write geotiff ---------------
-test_that("TODO: Should Pass geotiff file writing with coalesce", {
+test_that("Should Pass geotiff file writing with coalesce", {
   
-  # sdf_name <- random_string("spatial_sdf")
-  # geotiff_sdf <- spark_read_geotiff(sc, path = test_data("raster/"), name = sdf_name, options = list(dropInvalid = TRUE, readToCRS = "EPSG:4326"))
-  # 
-  # row <- sc %>% 
-  #   DBI::dbGetQuery("SELECT 
-  #            image.geometry as Geom, 
-  #            image.height as height, 
-  #            image.width as width, 
-  #            image.data as data,
-  #            image.nBands as bands 
-  #            FROM ? LIMIT 1", DBI::dbQuoteIdentifier(sc, sdf_name))
-  # 
-  # expect_equal(
-  #   row  %>% select(Geom, height, width, bands) %>% as.list(),
-  #   list(
-  #     Geom = "POLYGON ((-117.64141128097314 33.94356351407699, -117.64141128097314 33.664978146501284, -117.30939395196258 33.664978146501284, -117.30939395196258 33.94356351407699, -117.64141128097314 33.94356351407699))",
-  #     height = 517,
-  #     width = 512,
-  #     bands = 1
-  #   )
-  # )
-  # 
-  # line1 <- row$data[[1]][1:512] 
-  # line2 <- row$data[[1]][513:1024]
-  # expect_equal(line1[0 + 1], 0) 
-  # expect_equal(line2[159 + 1], 0)
-  # expect_equal(line2[160 + 1], 123)
-  # 
-  # sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
-  # 
-  # 
-  # val savePath = resourceFolder + "raster-written/"
-  # df.coalesce(1).write.mode("overwrite").format("geotiff").save(savePath)
-  # 
-  # var loadPath = savePath
-  # val tempFile = new File(loadPath)
-  # val fileList = tempFile.listFiles()
-  # for (i <- 0 until fileList.length) {
-  #   if (fileList(i).isDirectory) loadPath = fileList(i).getAbsolutePath
-  # }
-  # 
-  # var dfWritten = sparkSession.read.format("geotiff").option("dropInvalid", true).load(loadPath)
-  # dfWritten = dfWritten.selectExpr("image.origin as origin","ST_GeomFromWkt(image.geometry) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
-  # val rowFirst = dfWritten.first()
-  # assert(rowFirst.getInt(2) == 517)
-  # assert(rowFirst.getInt(3) == 512)
-  # assert(rowFirst.getInt(5) == 1)
-  # 
-  # val blackBand = rowFirst.getAs[mutable.WrappedArray[Double]](4)
-  # val line1 = blackBand.slice(0, 512)
-  # val line2 = blackBand.slice(512, 1024)
-  # assert(line1(0) == 0.0) // The first value at line 1 is black
-  # assert(line2(159) == 0.0 && line2(160) == 123.0) // In the second line, value at 159 is black and at 160 is not black
+  ## Load
+  sdf_name <- random_string("spatial_sdf")
+  geotiff_sdf <- spark_read_geotiff(sc, path = test_data("raster/"), name = sdf_name, options = list(dropInvalid = TRUE, readToCRS = "EPSG:4326"))
+
+  ## Write
+  tmp_dest <- tempfile()
+  
+  geotiff_df <- geotiff_sdf %>% spark_dataframe()
+  geotiff_df <- invoke(geotiff_df, "selectExpr", list("image.origin as origin","image.geometry as geometry", "image.height as height", "image.width as width", "image.data as data", "image.nBands as nBands"))
+  
+  geotiff_df %>% 
+    sdf_coalesce(1L) %>% 
+    spark_write_geotiff(path = tmp_dest)
+ 
+  ## not clear what the issue is here
+  for (file in dir(path = tmp_dest, full.names = TRUE)) load_path <- path.expand(file)
+  
+  geotiff_2_sdf <- spark_read_geotiff(sc, path = load_path, options = list(dropInvalid = TRUE))
+
+  row <- sc %>% 
+    DBI::dbGetQuery("SELECT 
+             image.geometry as Geom, 
+             image.height as height, 
+             image.width as width, 
+             image.data as data,
+             image.nBands as bands 
+             FROM ? LIMIT 1", DBI::dbQuoteIdentifier(sc, dbplyr::remote_name(geotiff_2_sdf)))
+  
+  expect_equal(
+    row  %>% select(height, width, bands) %>% as.list(),
+    list(
+      # Geom = "POLYGON ((-117.64141128097314 33.94356351407699, -117.64141128097314 33.664978146501284, -117.30939395196258 33.664978146501284, -117.30939395196258 33.94356351407699, -117.64141128097314 33.94356351407699))",
+      height = 517,
+      width = 512,
+      bands = 1
+    )
+  )
+  
+  line1 <- row$data[[1]][1:512] 
+  line2 <- row$data[[1]][513:1024]
+  expect_equal(line1[0 + 1], 0) 
+  expect_equal(line2[159 + 1], 0)
+  expect_equal(line2[160 + 1], 123)
+  
+  
+  ## Cleanup
+  unlink(tmp_dest, recursive = TRUE)
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", dbplyr::remote_name(geotiff_2_sdf)))
 })
 
-test_that("TODO: Should Pass geotiff file writing with writeToCRS", {
-  # sdf_name <- random_string("spatial_sdf")
-  # geotiff_sdf <- spark_read_geotiff(sc, path = test_data("raster/"), name = sdf_name, options = list(dropInvalid = TRUE))
-  # 
-  # row <- sc %>%
-  #   DBI::dbGetQuery("SELECT
-  #            image.geometry as Geom,
-  #            image.height as height,
-  #            image.width as width,
-  #            image.data as data,
-  #            image.nBands as bands
-  #            FROM ? LIMIT 1", DBI::dbQuoteIdentifier(sc, sdf_name))
-  # 
-  # expect_equal(
-  #   row$targetBand[[1]] %>% length(),
-  #   517 * 512
-  # )
-  # 
-  # sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
-  # 
-  # 
-  # 
-  # df = df.selectExpr("image.origin as origin","image.geometry as geometry", "image.height as height", "image.width as width", "image.data as data", "image.nBands as nBands")
-  # val savePath = resourceFolder + "raster-written/"
-  # df.coalesce(1).write.mode("overwrite").format("geotiff").option("writeToCRS", "EPSG:4499").save(savePath)
-  # 
-  # var loadPath = savePath
-  # val tempFile = new File(loadPath)
-  # val fileList = tempFile.listFiles()
-  # for (i <- 0 until fileList.length) {
-  #   if (fileList(i).isDirectory) loadPath = fileList(i).getAbsolutePath
-  # }
-  # 
-  # var dfWritten = sparkSession.read.format("geotiff").option("dropInvalid", true).load(loadPath)
-  # dfWritten = dfWritten.selectExpr("image.origin as origin","ST_GeomFromWkt(image.geometry) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
-  # val rowFirst = dfWritten.first()
-  # assert(rowFirst.getInt(2) == 517)
-  # assert(rowFirst.getInt(3) == 512)
-  # assert(rowFirst.getInt(5) == 1)
-  # 
-  # val blackBand = rowFirst.getAs[mutable.WrappedArray[Double]](4)
-  # val line1 = blackBand.slice(0, 512)
-  # val line2 = blackBand.slice(512, 1024)
-  # assert(line1(0) == 0.0) // The first value at line 1 is black
-  # assert(line2(159) == 0.0 && line2(160) == 123.0) // In the second line, value at 159 is black and at 160 is not black
+test_that("Should Pass geotiff file writing with writeToCRS", {
+  
+  ## Load
+  sdf_name <- random_string("spatial_sdf")
+  geotiff_sdf <- spark_read_geotiff(sc, path = test_data("raster/"), name = sdf_name, options = list(dropInvalid = TRUE, readToCRS = "EPSG:4326"))
+  
+  ## Write
+  tmp_dest <- tempfile()
+  
+  geotiff_df <- geotiff_sdf %>% spark_dataframe()
+  geotiff_df <- invoke(geotiff_df, "selectExpr", list("image.origin as origin","image.geometry as geometry", "image.height as height", "image.width as width", "image.data as data", "image.nBands as nBands"))
+  
+  geotiff_df %>% 
+    sdf_coalesce(1L) %>% 
+    spark_write_geotiff(path = tmp_dest, options = list(writeToCRS = "EPSG:4499"))
+  
+  ## not clear what the issue is here
+  for (file in dir(path = tmp_dest, full.names = TRUE)) load_path <- path.expand(file)
+  
+  geotiff_2_sdf <- spark_read_geotiff(sc, path = load_path, options = list(dropInvalid = TRUE))
+  
+  row <- sc %>% 
+    DBI::dbGetQuery("SELECT 
+             image.geometry as Geom, 
+             image.height as height, 
+             image.width as width, 
+             image.data as data,
+             image.nBands as bands 
+             FROM ? LIMIT 1", DBI::dbQuoteIdentifier(sc, dbplyr::remote_name(geotiff_2_sdf)))
+  
+  expect_equal(
+    row  %>% select(height, width, bands) %>% as.list(),
+    list(
+      # Geom = "POLYGON ((-117.64141128097314 33.94356351407699, -117.64141128097314 33.664978146501284, -117.30939395196258 33.664978146501284, -117.30939395196258 33.94356351407699, -117.64141128097314 33.94356351407699))",
+      height = 517,
+      width = 512,
+      bands = 1
+    )
+  )
+  
+  line1 <- row$data[[1]][1:512] 
+  line2 <- row$data[[1]][513:1024]
+  expect_equal(line1[0 + 1], 0) 
+  expect_equal(line2[159 + 1], 0)
+  expect_equal(line2[160 + 1], 123)
+  
+  
+  ## Cleanup
+  unlink(tmp_dest, recursive = TRUE)
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", dbplyr::remote_name(geotiff_2_sdf)))
+  
 })
 
-test_that("TODO: Should Pass geotiff file writing without coalesce", {
-  # var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
-  # df = df.selectExpr("image.origin as origin","image.geometry as geometry", "image.height as height", "image.width as width", "image.data as data", "image.nBands as nBands")
-  # val savePath = resourceFolder + "raster-written/"
-  # df.write.mode("overwrite").format("geotiff").save(savePath)
-  # 
-  # var imageCount = 0
-  # def getFile(loadPath: String): Unit ={
-  #   val tempFile = new File(loadPath)
-  #   val fileList = tempFile.listFiles()
-  #   if (fileList == null) return
-  #   for (i <- 0 until fileList.length) {
-  #     if (fileList(i).isDirectory) getFile(fileList(i).getAbsolutePath)
-  #     else if (fileList(i).getAbsolutePath.endsWith(".tiff") || fileList(i).getAbsolutePath.endsWith(".tif")) imageCount += 1
-  #   }
-  # }
-  # 
-  # getFile(savePath)
-  # assert(imageCount == 3)
+test_that("Should Pass geotiff file writing without coalesce", {
+  ## Load
+  sdf_name <- random_string("spatial_sdf")
+  geotiff_sdf <- spark_read_geotiff(sc, path = test_data("raster/"), name = sdf_name, options = list(dropInvalid = TRUE, readToCRS = "EPSG:4326"))
+  
+  ## Write
+  tmp_dest <- tempfile()
+  
+  geotiff_df <- geotiff_sdf %>% spark_dataframe()
+  geotiff_df <- invoke(geotiff_df, "selectExpr", list("image.origin as origin","image.geometry as geometry", "image.height as height", "image.width as width", "image.data as data", "image.nBands as nBands"))
+  geotiff_2_sdf <- geotiff_df %>% sdf_register(sdf_name)
+  
+  geotiff_2_sdf %>% 
+    spark_write_geotiff(path = tmp_dest)
+  
+  
+  ## Count created files
+  files <- dir(path = tmp_dest) %>% setdiff("_SUCCESS")
+  
+  expect_equal(length(files), 3)
+  
+  ## Cleanup
+  unlink(tmp_dest, recursive = TRUE)
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
 })
 
-test_that("TODO: Should Pass geotiff file writing with nested schema", {
-  # val df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
-  # val savePath = resourceFolder + "raster-written/"
-  # df.write.mode("overwrite").format("geotiff").save(savePath)
-  # 
-  # var imageCount = 0
-  # def getFile(loadPath: String): Unit ={
-  #   val tempFile = new File(loadPath)
-  #   val fileList = tempFile.listFiles()
-  #   if (fileList == null) return
-  #   for (i <- 0 until fileList.length) {
-  #     if (fileList(i).isDirectory) getFile(fileList(i).getAbsolutePath)
-  #     else if (fileList(i).getAbsolutePath.endsWith(".tiff") || fileList(i).getAbsolutePath.endsWith(".tif")) imageCount += 1
-  #   }
-  # }
-  # 
-  # getFile(savePath)
-  # assert(imageCount == 3)
+test_that("Should Pass geotiff file writing with nested schema", {
+  ## Load
+  sdf_name <- random_string("spatial_sdf")
+  geotiff_sdf <- spark_read_geotiff(sc, path = test_data("raster/"), name = sdf_name, options = list(dropInvalid = TRUE, readToCRS = "EPSG:4326"))
+  
+  ## Write
+  tmp_dest <- tempfile()
+
+  geotiff_sdf %>% 
+    spark_write_geotiff(path = tmp_dest)
+  
+  
+  ## Count created files
+  files <- dir(path = tmp_dest) %>% setdiff("_SUCCESS")
+  
+  expect_equal(length(files), 3)
+  
+  ## Cleanup
+  unlink(tmp_dest, recursive = TRUE)
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
 })
 
-test_that("TODO: Should Pass geotiff file writing with renamed fields", {
-  # var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
-  # df = df.selectExpr("image.origin as source","image.geometry as geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
-  # val savePath = resourceFolder + "raster-written/"
-  # df.write
-  # .mode("overwrite")
-  # .format("geotiff")
-  # .option("fieldOrigin", "source")
-  # .option("fieldGeometry", "geom")
-  # .option("fieldNBands", "bands")
-  # .save(savePath)
-  # 
-  # var imageCount = 0
-  # def getFile(loadPath: String): Unit ={
-  #   val tempFile = new File(loadPath)
-  #   val fileList = tempFile.listFiles()
-  #   if (fileList == null) return
-  #   for (i <- 0 until fileList.length) {
-  #     if (fileList(i).isDirectory) getFile(fileList(i).getAbsolutePath)
-  #     else if (fileList(i).getAbsolutePath.endsWith(".tiff") || fileList(i).getAbsolutePath.endsWith(".tif")) imageCount += 1
-  #   }
-  # }
-  # 
-  # getFile(savePath)
-  # assert(imageCount == 3)
+
+test_that("Should Pass geotiff file writing with renamed fields", {
+  ## Load
+  sdf_name <- random_string("spatial_sdf")
+  geotiff_sdf <- spark_read_geotiff(sc, path = test_data("raster/"), name = sdf_name, options = list(dropInvalid = TRUE, readToCRS = "EPSG:4326"))
+  
+  ## Write
+  tmp_dest <- tempfile()
+  
+  geotiff_df <- geotiff_sdf %>% spark_dataframe()
+  geotiff_df <- invoke(geotiff_df, "selectExpr", list("image.origin as source","image.geometry as geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands"))
+  geotiff_2_sdf <- geotiff_df %>% sdf_register(sdf_name)
+  
+  geotiff_2_sdf %>% 
+    spark_write_geotiff(path = tmp_dest, 
+                        mode = "overwrite",
+                        options = list(
+                          fieldOrigin   = "source",
+                          fieldGeometry = "geom",
+                          fieldNBands   = "bands"
+                          ))
+  
+  
+  ## Count created files
+  files <- dir(path = tmp_dest) %>% setdiff("_SUCCESS")
+  
+  expect_equal(length(files), 3)
+  
+  ## Cleanup
+  unlink(tmp_dest, recursive = TRUE)
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
 })
 
 test_that("TODO: Should Pass geotiff file writing with nested schema and renamed fields", {
-  # var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
-  # df = df.selectExpr("image as tiff_image")
-  # val savePath = resourceFolder + "raster-written/"
-  # df.write
-  # .mode("overwrite")
-  # .format("geotiff")
-  # .option("fieldImage", "tiff_image")
-  # .save(savePath)
-  # 
-  # var imageCount = 0
-  # def getFile(loadPath: String): Unit ={
-  #   val tempFile = new File(loadPath)
-  #   val fileList = tempFile.listFiles()
-  #   if (fileList == null) return
-  #   for (i <- 0 until fileList.length) {
-  #     if (fileList(i).isDirectory) getFile(fileList(i).getAbsolutePath)
-  #     else if (fileList(i).getAbsolutePath.endsWith(".tiff") || fileList(i).getAbsolutePath.endsWith(".tif")) imageCount += 1
-  #   }
-  # }
-  # 
-  # getFile(savePath)
-  # assert(imageCount == 3)
+  ## Load
+  sdf_name <- random_string("spatial_sdf")
+  geotiff_sdf <- spark_read_geotiff(sc, path = test_data("raster/"), name = sdf_name, options = list(dropInvalid = TRUE, readToCRS = "EPSG:4326"))
+  
+  ## Write
+  tmp_dest <- tempfile()
+  
+  geotiff_df <- geotiff_sdf %>% spark_dataframe()
+  geotiff_df <- invoke(geotiff_df, "selectExpr", list("image as tiff_image"))
+  geotiff_2_sdf <- geotiff_df %>% sdf_register(sdf_name)
+  
+  geotiff_2_sdf %>% 
+    spark_write_geotiff(path = tmp_dest, 
+                        mode = "overwrite",
+                        options = list(
+                          fieldImage   = "tiff_image"
+                        ))
+  
+  
+  ## Count created files
+  files <- dir(path = tmp_dest) %>% setdiff("_SUCCESS")
+  
+  expect_equal(length(files), 3)
+  
+  ## Cleanup
+  unlink(tmp_dest, recursive = TRUE)
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
 })
 
 test_that("TODO: Should Pass geotiff file writing with converted geometry", {
-  # var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
-  # df = df.selectExpr("image.origin as source","ST_GeomFromWkt(image.geometry) as geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
-  # val savePath = resourceFolder + "raster-written/"
-  # df.write
-  # .mode("overwrite")
-  # .format("geotiff")
-  # .option("fieldOrigin", "source")
-  # .option("fieldGeometry", "geom")
-  # .option("fieldNBands", "bands")
-  # .save(savePath)
-  # 
-  # var imageCount = 0
-  # def getFile(loadPath: String): Unit ={
-  #   val tempFile = new File(loadPath)
-  #   val fileList = tempFile.listFiles()
-  #   if (fileList == null) return
-  #   for (i <- 0 until fileList.length) {
-  #     if (fileList(i).isDirectory) getFile(fileList(i).getAbsolutePath)
-  #     else if (fileList(i).getAbsolutePath.endsWith(".tiff") || fileList(i).getAbsolutePath.endsWith(".tif")) imageCount += 1
-  #   }
-  # }
-  # 
-  # getFile(savePath)
-  # assert(imageCount == 3)
+  ## Load
+  sdf_name <- random_string("spatial_sdf")
+  geotiff_sdf <- spark_read_geotiff(sc, path = test_data("raster/"), name = sdf_name, options = list(dropInvalid = TRUE))
+  
+  ## Write
+  tmp_dest <- tempfile()
+  
+  geotiff_df <- geotiff_sdf %>% spark_dataframe()
+  geotiff_df <- invoke(geotiff_df, "selectExpr", list("image.origin as source","ST_GeomFromWkt(image.geometry) as geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands"))
+  geotiff_2_sdf <- geotiff_df %>% sdf_register(sdf_name)
+  
+  geotiff_2_sdf %>% 
+    spark_write_geotiff(path = tmp_dest, 
+                        mode = "overwrite",
+                        options = list(
+                          fieldOrigin   = "source",
+                          fieldGeometry = "geom",
+                          fieldNBands   = "bands"
+                        ))
+  
+  
+  ## Count created files
+  files <- dir(path = tmp_dest) %>% setdiff("_SUCCESS")
+  
+  expect_equal(length(files), 3)
+  
+  ## Cleanup
+  unlink(tmp_dest, recursive = TRUE)
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
 })
 
-test_that("TODO: Should Pass geotiff file writing with handling invalid schema", {
-  # var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
-  # df = df.selectExpr("image.origin as origin","image.geometry as geometry", "image.height as height", "image.width as width", "image.data as data")
-  # val savePath = resourceFolder + "raster-written/"
-  # 
-  # try {
-  #   df.write
-  #   .mode("overwrite")
-  #   .format("geotiff")
-  #   .option("fieldImage", "tiff_image")
-  #   .save(savePath)
-  # }
-  # catch {
-  #   case e: IllegalArgumentException => {
-  #     assert(e.getMessage == "Invalid GeoTiff Schema")
-  #   }
-  # }
+test_that("Should Pass geotiff file writing with handling invalid schema", {
+  ## Load
+  sdf_name <- random_string("spatial_sdf")
+  geotiff_sdf <- spark_read_geotiff(sc, path = test_data("raster/"), name = sdf_name, options = list(dropInvalid = TRUE))
+  
+  ## Write
+  tmp_dest <- tempfile()
+  
+  geotiff_df <- geotiff_sdf %>% spark_dataframe()
+  geotiff_df <- invoke(geotiff_df, "selectExpr", list("image.origin as origin","image.geometry as geometry", "image.height as height", "image.width as width", "image.data as data"))
+  geotiff_2_sdf <- geotiff_df %>% sdf_register(sdf_name)
+  
+  expect_error(
+    geotiff_2_sdf %>% 
+      spark_write_geotiff(path = tmp_dest, 
+                          mode = "overwrite",
+                          options = list(
+                            fieldImage   = "tiff_image"
+                          )),
+    regexp = "Invalid GeoTiff Schema"
+  )
+  
+  ## Cleanup
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
 })
 
 
