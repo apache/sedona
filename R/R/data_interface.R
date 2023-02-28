@@ -918,9 +918,9 @@ spark_write_geoparquet <- function(x,
   spark_write_source(
     x = x,
     source = "geoparquet",
-    mode = NULL,
-    options = list(),
-    partition_by = NULL,
+    mode = mode,
+    options = options,
+    partition_by = partition_by,
     save_args = list(path),
     ...
   )
