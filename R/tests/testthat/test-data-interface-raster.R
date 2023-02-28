@@ -209,7 +209,7 @@ test_that("should pass RS_GetBand", {
   sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
 })
 
-test_that("FIX: should pass RS_Base64", {
+test_that("should pass RS_Base64", {
   
   sdf_name <- random_string("spatial_sdf")
   geotiff_sdf <- spark_read_geotiff(sc, path = test_data("raster/"), name = sdf_name, options = list(dropInvalid = TRUE))
@@ -219,13 +219,14 @@ test_that("FIX: should pass RS_Base64", {
       DBI::dbGetQuery("SELECT RS_base64(height, width, targetBand, RS_Array(height*width, 0.0), RS_Array(height*width, 0.0)) as encodedstring
                      FROM (
                        SELECT RS_GetBand(image.data, 1, image.nBands) as targetBand, image.height as height, image.width as width
-                       FROM ? LIMIT 1) tmp", DBI::dbQuoteIdentifier(sc, sdf_name))# %>% print()
+                       FROM ?) tmp
+                     LIMIT 1", DBI::dbQuoteIdentifier(sc, sdf_name))# %>% print()
   )
   
   sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
 })
 
-test_that("FIX: should pass RS_HTML", {
+test_that("should pass RS_HTML", {
   
   sdf_name <- random_string("spatial_sdf")
   geotiff_sdf <- spark_read_geotiff(sc, path = test_data("raster/"), name = sdf_name, options = list(dropInvalid = TRUE))
