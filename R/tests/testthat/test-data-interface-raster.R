@@ -421,7 +421,7 @@ test_that("Should Pass geotiff file writing without coalesce", {
   
   
   ## Count created files
-  files <- dir(path = tmp_dest) %>% setdiff("_SUCCESS")
+  files <- dir(path = tmp_dest, recursive = TRUE, pattern = "tiff?$")
   
   expect_equal(length(files), 3)
   
@@ -443,7 +443,7 @@ test_that("Should Pass geotiff file writing with nested schema", {
   
   
   ## Count created files
-  files <- dir(path = tmp_dest) %>% setdiff("_SUCCESS")
+  files <- dir(path = tmp_dest, recursive = TRUE, pattern = "tiff?$")
   
   expect_equal(length(files), 3)
   
@@ -476,7 +476,7 @@ test_that("Should Pass geotiff file writing with renamed fields", {
   
   
   ## Count created files
-  files <- dir(path = tmp_dest) %>% setdiff("_SUCCESS")
+  files <- dir(path = tmp_dest, recursive = TRUE, pattern = "tiff?$")
   
   expect_equal(length(files), 3)
   
@@ -506,7 +506,7 @@ test_that("Should Pass geotiff file writing with nested schema and renamed field
   
   
   ## Count created files
-  files <- dir(path = tmp_dest) %>% setdiff("_SUCCESS")
+  files <- dir(path = tmp_dest, recursive = TRUE, pattern = "tiff?$")
   
   expect_equal(length(files), 3)
   
@@ -538,7 +538,7 @@ test_that("Should Pass geotiff file writing with converted geometry", {
   
   
   ## Count created files
-  files <- dir(path = tmp_dest) %>% setdiff("_SUCCESS")
+  files <- dir(path = tmp_dest, recursive = TRUE, pattern = "tiff?$")
   
   expect_equal(length(files), 3)
   
