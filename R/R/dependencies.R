@@ -139,28 +139,6 @@ sedona_initialize_spark_connection <- function(sc) {
 sedona_dbplyr_sql_variant <- function() {
   list(
     scalar = list(
-      ST_Point = function(x, y) {
-        dbplyr::build_sql(
-          "ST_Point(CAST(",
-          x,
-          " AS DECIMAL(24, 20)), CAST(",
-          y,
-          " AS DECIMAL(24, 20)))"
-        )
-      },
-      ST_PolygonFromEnvelope = function(min_x, min_y, max_x, max_y) {
-        dbplyr::build_sql(
-          "ST_PolygonFromEnvelope(CAST(",
-          min_x,
-          " AS DECIMAL(24, 20)), CAST(",
-          min_y,
-          " AS DECIMAL(24, 20)), CAST(",
-          max_x,
-          " AS DECIMAL(24, 20)), CAST(",
-          max_y,
-          " AS DECIMAL(24, 20)))"
-        )
-      },
       ST_Buffer = function(geometry, buffer) {
         dbplyr::build_sql(
           "ST_Buffer(", geometry, ", CAST(", buffer, " AS DOUBLE))"
