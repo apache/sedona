@@ -20,18 +20,13 @@ spark_dependencies <- function(spark_version, scala_version, ...) {
   if (spark_version[1, 1] == "3") {
     spark_version <- "3.0"
     scala_version <- scala_version %||% "2.12"
-  } else if (spark_version[1, 1] == "2" && spark_version[1, 2] == "4") {
-    spark_version <- "2.4"
-    scala_version <- scala_version %||% "2.11"
   } else {
     stop("Unsupported Spark version: ", spark_version)
   }
 
   packages <- c(
-    "org.datasyslab:geotools-wrapper:1.3.0-27.2",
-    "edu.ucar:cdm-core:5.4.2",
-    "org.locationtech.jts:jts-core:1.19.0",
-    "org.wololo:jts2geojson:0.16.1"
+    "org.datasyslab:geotools-wrapper:1.4.0-28.2",
+    "edu.ucar:cdm-core:5.4.2"
   )
   jars <- NULL
 
