@@ -19,7 +19,7 @@
 
 sedona_jar_files () {
   local subdir
-  for subdir in 'common' 'core' 'sql' 'viz'; do
+  for subdir in 'spark-shaded' 'viz'; do
     local artifact_id="$(
       mvn \
         org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate \
