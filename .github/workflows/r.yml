@@ -3,7 +3,7 @@ name: R build
 on:
   push:
     branches:
-      - r-workflow-update
+      - master
   pull_request:
     branches:
       - '*'
