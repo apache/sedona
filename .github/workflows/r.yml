@@ -85,8 +85,8 @@ jobs:
           args: 'c("--no-build-vignettes", "--no-manual", "--no-tests")'
           error-on: '"warning"'
           working-directory: './R'
-          env:
-            _R_CHECK_FORCE_SUGGESTS_: false
+        env:
+          _R_CHECK_FORCE_SUGGESTS_: false
       - name: Install apache.sedona from source
         run: Rscript -e 'install.packages("./R/", repos = NULL, type = "source")'
       - name: Run tests
