@@ -28,9 +28,14 @@ testthat_spark_connection <- function(conn_retry_interval_s = 2) {
     for (attempt in seq(conn_attempts)) {
       success <- tryCatch(
         {
+          
+          config <- spark_config()
+          config[["sparklyr.connect.timeout"]] <- 300
+          
           sc <- spark_connect(
             master = "local",
             method = "shell",
+            config = config,
             app_name = paste0("testthat-", uuid::UUIDgenerate()),
             version = version
           )
