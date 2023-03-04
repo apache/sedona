@@ -46,11 +46,6 @@ jobs:
         with:
           r-version: ${{ matrix.r }}
           use-public-rspm: true
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '8'
-          cache: 'maven'
       - name: Query R dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
@@ -59,6 +54,22 @@ jobs:
             any::testthat
             any::rcmdcheck
           working-directory : './R'
+      - name: Build and check R package
+        uses: r-lib/actions/check-r-package@v2
+        with:
+          build_args: 'c("--no-build-vignettes", "--no-manual")'
+          args: 'c("--no-build-vignettes", "--no-manual", "--no-tests")'
+          error-on: '"error"'
+          working-directory: './R'
+        env:
+          _R_CHECK_FORCE_SUGGESTS_: false
+      - name: Install apache.sedona from source
+        run: Rscript -e 'install.packages("./R/", repos = NULL, type = "source")'
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+          cache: 'maven'
       - name: Get OS name
         id: os-name
         run: |
@@ -78,17 +89,6 @@ jobs:
           else
             mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=2.4 -Dgeotools
           fi
-      - name: Build and check R package
-        uses: r-lib/actions/check-r-package@v2
-        with:
-          build_args: 'c("--no-build-vignettes", "--no-manual")'
-          args: 'c("--no-build-vignettes", "--no-manual", "--no-tests")'
-          error-on: '"error"'
-          working-directory: './R'
-        env:
-          _R_CHECK_FORCE_SUGGESTS_: false
-      - name: Install apache.sedona from source
-        run: Rscript -e 'install.packages("./R/", repos = NULL, type = "source")'
       - name: Run tests
         run: |
           export SPARKLYR_LOG_FILE='/tmp/sparklyr.log'
