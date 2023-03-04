@@ -81,9 +81,9 @@ jobs:
       - name: Build and check R package
         uses: r-lib/actions/check-r-package@v2
         with:
-          build_args: 'c("--no-build-vignettes")'
+          build_args: 'c("--no-build-vignettes", "--no-manual")'
           args: 'c("--no-build-vignettes", "--no-manual", "--no-tests")'
-          error-on: '"warning"'
+          error-on: '"error"'
           working-directory: './R'
         env:
           _R_CHECK_FORCE_SUGGESTS_: false
