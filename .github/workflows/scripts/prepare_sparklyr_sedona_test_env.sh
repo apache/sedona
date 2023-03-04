@@ -20,7 +20,7 @@
 sedona_jar_files () {
   local subdir
   for subdir in 'spark-shaded' 'viz'; do
-    echo "$(find ${subdir}/target -name 'sedona-*.jar' \! -name '*javadoc*')"
+    echo "$(pwd)/$(find ${subdir}/target -name 'sedona-*.jar' \! -name '*javadoc*')"
   done
 }
 
