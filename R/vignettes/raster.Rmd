@@ -1,0 +1,21 @@
+---
+title: "Using raster data in Apache Sedona for R"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using raster data in Apache Sedona for R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(apache.sedona)
+```
+
+TODO

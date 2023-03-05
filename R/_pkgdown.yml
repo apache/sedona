@@ -1,0 +1,60 @@
+url: ~
+template:
+  bootstrap: 5
+  #bootswatch: united
+  bslib:
+    primary: "#ff6e42"
+    light: "#ff6e42"
+    navbar-light-color: "#fff"
+    # navbar-dark-bg: "#ff6e42"
+    # navbar-light-bg: "#ff6e42"
+    # bg: "#fff"
+navbar:
+  structure:
+    left:  [intro, articles, reference, news]
+    right: [search, github]
+reference:
+- title: "Reading and Writing Data"
+  desc: "Functions for reading and writing Spark DataFrames."
+  contents:
+  - starts_with("spark_read")
+  - starts_with("spark_write")
+- title: "Reading and Writing Spatial RDD"
+  desc: "Functions for reading and writing Spatial RDDs."
+  contents:
+  - starts_with("sedona_read")
+  - starts_with("sedona_write")
+  - starts_with("sedona_save")
+  - sedona_spatial_rdd_data_source
+  - sedona_spatial_rdd_serialization_routine
+- title: "Conversion"
+  desc: "Functions to convert between Spark DataFrames and Spatial RDDs."
+  contents:
+  - as.spark.dataframe
+  - as_spark_dataframe
+  - contains("sdf_register")
+  - to_spatial_rdd
+- title: "RDD functions"
+- subtitle: "Visualization"
+  contents:
+  - starts_with("sedona_visualization_routines")
+  - starts_with("sedona_render")
+- subtitle: "Joins"
+  contents:
+  - sedona_spatial_join
+  - sedona_spatial_join_count_by_key
+  - spatial_join_op
+- subtitle: "Query"
+  contents:
+  - sedona_knn_query
+  - sedona_range_query
+  - spatial_query
+- subtitle: "Others"
+  contents:
+  - sedona_apply_spatial_partitioner
+  - sedona_build_index
+  - sedona_spatial_rdd_aggregation_routine
+  - approx_count
+  - crs_transform
+  - minimum_bounding_box
+  - new_bounding_box
