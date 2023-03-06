@@ -1,6 +1,6 @@
 
 
-# apache.sedona <img src="man/figures/hex-.png" align="right" width="120"/>
+# apache.sedona <img src="man/figures/logo.png" align="right" width="120"/>
 R interface for 'Apache Sedona' based on 'sparklyr'
 
 ## Installation
