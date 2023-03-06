@@ -69,14 +69,3 @@ jobs:
       with:
         name: generated-jars
         path: staging
-    - uses: "marvinpinto/action-automatic-releases@latest"
-      with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "latest"
-        prerelease: true
-        title: "Latest Development Build"
-        files: |
-          LICENSE
-          viz/target/sedona-*.jar
-          spark-shaded/target/sedona-*.jar
-          flink-shaded/target/sedona-*.jar
