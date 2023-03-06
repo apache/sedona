@@ -53,7 +53,7 @@ public class Predicates {
          * @param key
          * @param o1
          * @param o2
-         * @return
+         * @return True if intersecting, false otherwise
          */
         @DataTypeHint("Boolean")
         public Boolean eval(@DataTypeHint("INT") Integer key, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
@@ -93,7 +93,7 @@ public class Predicates {
          * @param key
          * @param o1
          * @param o2
-         * @return
+         * @return True if o1 contains o2, false otherwise
          */
         @DataTypeHint("Boolean")
         public Boolean eval(@DataTypeHint("INT") Integer key, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
@@ -133,7 +133,7 @@ public class Predicates {
          * @param key
          * @param o1
          * @param o2
-         * @return
+         * @return True if o1 is within o2, false otherwise
          */
         @DataTypeHint("Boolean")
         public Boolean eval(@DataTypeHint("INT") Integer key, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
@@ -173,7 +173,7 @@ public class Predicates {
          * @param key
          * @param o1
          * @param o2
-         * @return
+         * @return True if o1 covers o2, false otherwise
          */
         @DataTypeHint("Boolean")
         public Boolean eval(@DataTypeHint("INT") Integer key, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
@@ -213,7 +213,7 @@ public class Predicates {
          * @param key
          * @param o1
          * @param o2
-         * @return
+         * @return True if o1 is covered by o2, false otherwise
          */
         @DataTypeHint("Boolean")
         public Boolean eval(@DataTypeHint("INT") Integer key, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
