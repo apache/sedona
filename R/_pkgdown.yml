@@ -6,13 +6,24 @@ template:
     primary: "#ff6e42"
     light: "#ff6e42"
     navbar-light-color: "#fff"
+    # navbar-light-active-color: "#ff8a66"
+    nav-tabs-link-active-bg: "#ff8a66"
     # navbar-dark-bg: "#ff6e42"
     # navbar-light-bg: "#ff6e42"
     # bg: "#fff"
 navbar:
   structure:
-    left:  [intro, articles, reference, news]
+   # left:  [intro, articles, reference, news]
     right: [search, github]
+home:
+  sidebar:
+    structure: [project, links, license, community, citation, authors, dev]
+    components:
+      project:
+        title: Sedona Project
+        text: >
+          [Homepage](https://sedona.apache.org/)
+ 
 reference:
 - title: "Reading and Writing Spatial DataFrames"
   desc: "Functions for reading and writing Spark DataFrames."
@@ -51,3 +62,9 @@ reference:
   - crs_transform
   - minimum_bounding_box
   - new_bounding_box
+repo:
+  url:
+    home: https://github.com/apache/sedona/
+    source: https://github.com/apache/sedona/blob/master/R/
+    issue: https://github.com/apache/sedona/issues/
+    user: https://github.com/
