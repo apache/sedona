@@ -14,12 +14,12 @@ navbar:
     left:  [intro, articles, reference, news]
     right: [search, github]
 reference:
-- title: "Reading and Writing Data"
+- title: "Reading and Writing Spatial DataFrames"
   desc: "Functions for reading and writing Spark DataFrames."
   contents:
   - starts_with("spark_read")
   - starts_with("spark_write")
-- title: "Reading and Writing Spatial RDD"
+- title: "Reading and Writing Spatial RDDs"
   desc: "Functions for reading and writing Spatial RDDs."
   contents:
   - starts_with("sedona_read")
