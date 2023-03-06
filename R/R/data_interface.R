@@ -19,6 +19,7 @@
 # ------- Read RDD ------------
 
 #' Create a SpatialRDD from an external data source.
+#' 
 #' Import spatial object from an external data source into a Sedona SpatialRDD.
 #'
 #' @param sc A `spark_connection`.
@@ -470,8 +471,14 @@ sedona_read_shapefile <- function(sc,
 
 
 # ------- Read SDF ------------
-#' Read a shapefile into a Spark DataFrame.
-#' Read a shapefile into a Spark DataFrame.
+#' Read geospatial data into a Spark DataFrame.
+#' 
+#' @description Functions to read geospatial data from a variety of formats into Spark DataFrames.
+#' 
+#' * `spark_read_shapefile`: from a shapefile 
+#' * `spark_read_geojson`: from a geojson file 
+#' * `spark_read_geoparquet`: from a geoparquet file 
+#' * `spark_read_geotiff`: from a GeoTiff file, or a folder containing GeoTiff files
 #'
 #' @inheritParams sparklyr::spark_read_source
 #'
@@ -513,28 +520,9 @@ spark_read_shapefile <- function(sc,
   rdd %>% sdf_register(name = name)
 }
 
-#' Read a geojson file into a Spark DataFrame.
-#' Read a geojson file into a Spark DataFrame.
-#'
-#' @inheritParams sparklyr::spark_read_source
-#'
-#'
-#' @return A tbl
-#'
-#' @examples
-#' library(sparklyr)
-#' library(apache.sedona)
-#'
-#' sc <- spark_connect(master = "spark://HOST:PORT")
-#'
-#' if (!inherits(sc, "test_connection")) {
-#'   input_location <- "/dev/null" # replace it with the path to your input file
-#'   rdd <- spark_read_geojson(sc, location = input_location)
-#' }
-#'
-#' @family Sedona DF data interface functions
-#'
+
 #' @export
+#' @rdname spark_read_shapefile
 spark_read_geojson <- function(sc,
                                name = NULL,
                                path = name,
@@ -566,27 +554,8 @@ spark_read_geojson <- function(sc,
   rdd %>% sdf_register(name = name)
 }
 
-#' Read a geoparquet file into a Spark DataFrame.
-#' Read a geoparquet file into a Spark DataFrame.
-#'
-#' @inheritParams sparklyr::spark_read_source
-#'
-#' @return A tbl
-#'
-#' @examples
-#' library(sparklyr)
-#' library(apache.sedona)
-#'
-#' sc <- spark_connect(master = "spark://HOST:PORT")
-#'
-#' if (!inherits(sc, "test_connection")) {
-#'   input_location <- "/dev/null" # replace it with the path to your input file
-#'   rdd <- spark_read_geoparquet(sc, location = input_location)
-#' }
-#'
-#' @family Sedona DF data interface functions
-#'
 #' @export
+#' @rdname spark_read_shapefile
 #' @importFrom sparklyr spark_read_source
 spark_read_geoparquet <- function(sc,
                                   name = NULL,
@@ -608,28 +577,8 @@ spark_read_geoparquet <- function(sc,
 }
 
 
-#' Read a GeoTiff file into a Spark DataFrame.
-#' Read a GeoTiff file into a Spark DataFrame.
-#'
-#' @inheritParams sparklyr::spark_read_source
-#'
-#'
-#' @return A tbl
-#'
-#' @examples
-#' library(sparklyr)
-#' library(apache.sedona)
-#'
-#' sc <- spark_connect(master = "spark://HOST:PORT")
-#'
-#' if (!inherits(sc, "test_connection")) {
-#'   input_location <- "/dev/null" # replace it with the path to your input file
-#'   rdd <- spark_read_geotiff(sc, location = input_location)
-#' }
-#'
-#' @family Sedona DF data interface functions
-#'
 #' @export
+#' @rdname spark_read_shapefile
 #' @importFrom sparklyr spark_read_source
 spark_read_geotiff <- function(sc,
                                name = NULL,
@@ -812,9 +761,14 @@ sedona_save_spatial_rdd <- function(x,
 
 
 
-#' Save a Spark dataframe into a geojson file.
+#' Write geospatial data from a Spark DataFrame.
 #'
-#' Export spatial from a Spark dataframe into a geojson file
+#' @description Functions to write geospatial data into a variety of formats from Spark DataFrames.
+#' 
+#' * `spark_write_geojson`: from a geojson file 
+#' * `spark_write_geoparquet`: from a geoparquet file 
+#' * `spark_write_geotiff`: from a GeoTiff file, or a folder containing GeoTiff files
+#'
 #'
 #' @param path The path to the file. Needs to be accessible from the cluster.
 #'   Supports the \samp{"hdfs://"}, \samp{"s3a://"} and \samp{"file://"} protocols.
@@ -876,38 +830,9 @@ spark_write_geojson <- function(x,
 }
 
 
-#' Save a Spark dataframe into a geoparquet file.
-#'
-#' Export spatial from a Spark dataframe into a geoparquet file
-#'
-#' @param path The path to the file. Needs to be accessible from the cluster.
-#'   Supports the \samp{"hdfs://"}, \samp{"s3a://"} and \samp{"file://"} protocols.
-#' @inheritParams sparklyr::spark_write_source
-#'
-#'
-#' @return NULL
-#'
-#' @examples
-#' library(sparklyr)
-#' library(apache.sedona)
-#'
-#' sc <- spark_connect(master = "spark://HOST:PORT")
-#'
-#' if (!inherits(sc, "test_connection")) {
-#'   tbl <- dplyr::tbl(
-#'     sc,
-#'     dplyr::sql("SELECT ST_GeomFromText('POINT(-71.064544 42.28787)') AS `pt`")
-#'   )
-#'   spark_write_geoparquet(
-#'     tbl %>% dplyr::mutate(id = 1),
-#'     output_location = "/tmp/pts.geoparquet"
-#'   )
-#' }
-#'
-#' @family Sedona DF data interface functions
-#'
-#' @importFrom sparklyr spark_write_source
 #' @export
+#' @rdname spark_write_geojson
+#' @importFrom sparklyr spark_write_source
 spark_write_geoparquet <- function(x,
                                    path,
                                    mode = NULL,
@@ -927,39 +852,9 @@ spark_write_geoparquet <- function(x,
   
 }
 
-
-#' Save a Spark dataframe into a GeoTiff file.
-#'
-#' Export spatial from a Spark dataframe into a GeoTiff file
-#'
-#' @param path The path to the file. Needs to be accessible from the cluster.
-#'   Supports the \samp{"hdfs://"}, \samp{"s3a://"} and \samp{"file://"} protocols.
-#' @inheritParams sparklyr::spark_write_source
-#'
-#'
-#' @return NULL
-#'
-#' @examples
-#' library(sparklyr)
-#' library(apache.sedona)
-#'
-#' sc <- spark_connect(master = "spark://HOST:PORT")
-#'
-#' if (!inherits(sc, "test_connection")) {
-#'   tbl <- dplyr::tbl(
-#'     sc,
-#'     dplyr::sql("SELECT ST_GeomFromText('POINT(-71.064544 42.28787)') AS `pt`")
-#'   )
-#'   spark_write_geotiff(
-#'     tbl %>% dplyr::mutate(id = 1),
-#'     output_location = "/tmp/pts.geotiff"
-#'   )
-#' }
-#'
-#' @family Sedona DF data interface functions
-#'
-#' @importFrom sparklyr spark_write_source
 #' @export
+#' @rdname spark_write_geojson
+#' @importFrom sparklyr spark_write_source
 spark_write_geotiff <- function(x,
                                    path,
                                    mode = NULL,
