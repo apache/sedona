@@ -42,6 +42,7 @@
 #'   and `query_window_rdd`, which will be inefficient for large data sets.
 #'
 #' @name spatial_join_op
+#' @keywords internal
 #'
 NULL
 

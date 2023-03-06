@@ -19,19 +19,15 @@ reference:
   contents:
   - starts_with("spark_read")
   - starts_with("spark_write")
+  - sedona_save_spatial_rdd
 - title: "Reading and Writing Spatial RDDs"
   desc: "Functions for reading and writing Spatial RDDs."
   contents:
   - starts_with("sedona_read")
   - starts_with("sedona_write")
-  - starts_with("sedona_save")
-  - sedona_spatial_rdd_data_source
-  - sedona_spatial_rdd_serialization_routine
 - title: "Conversion"
   desc: "Functions to convert between Spark DataFrames and Spatial RDDs."
   contents:
-  - as.spark.dataframe
-  - as_spark_dataframe
   - contains("sdf_register")
   - to_spatial_rdd
 - title: "RDD functions"
@@ -43,17 +39,14 @@ reference:
   contents:
   - sedona_spatial_join
   - sedona_spatial_join_count_by_key
-  - spatial_join_op
 - subtitle: "Query"
   contents:
   - sedona_knn_query
   - sedona_range_query
-  - spatial_query
 - subtitle: "Others"
   contents:
   - sedona_apply_spatial_partitioner
   - sedona_build_index
-  - sedona_spatial_rdd_aggregation_routine
   - approx_count
   - crs_transform
   - minimum_bounding_box
