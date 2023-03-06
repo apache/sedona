@@ -146,7 +146,11 @@
    <parameter name="regex"><![CDATA[^[A-Z_]$]]></parameter>
   </parameters>
  </check>
- <check class="org.scalastyle.scalariform.UnderscoreImportChecker" level="warning" enabled="true"></check>
+ <check class="org.scalastyle.scalariform.UnderscoreImportChecker" level="warning" enabled="true">
+  <parameters>
+   <parameter name="ignoreRegex"><parameter name="ignoreRegex">jdk\.CollectionConverters\._|implicits\._</parameter></parameter>
+  </parameters>
+ </check>
  <check class="org.scalastyle.scalariform.LowercasePatternMatchChecker" level="warning" enabled="true"></check>
  <check class="org.scalastyle.scalariform.EmptyInterpolatedStringChecker" level="warning" enabled="true"></check>
  <check class="org.scalastyle.scalariform.MultipleStringLiteralsChecker" level="warning" enabled="false">
