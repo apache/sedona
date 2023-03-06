@@ -11,7 +11,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: true
       matrix:
@@ -62,11 +62,21 @@ jobs:
         SKIP_TESTS: ${{ matrix.skipTests }}
       run: mvn -q clean install -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${SKIP_TESTS}
     - run: mkdir staging
-    - run: cp core/target/sedona-*.jar staging
-    - run: cp sql/target/sedona-*.jar staging
     - run: cp viz/target/sedona-*.jar staging
-    - run: cp python-adapter/target/sedona-*.jar staging
+    - run: cp spark-shaded/target/sedona-*.jar staging
+    - run: cp flink-shaded/target/sedona-*.jar staging
     - uses: actions/upload-artifact@v2
       with:
         name: generated-jars
         path: staging
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "latest"
+        prerelease: true
+        title: "Latest Development Build"
+        files: |
+          LICENSE
+          viz/target/sedona-*.jar
+          spark-shaded/target/sedona-*.jar
+          flink-shaded/target/sedona-*.jar
