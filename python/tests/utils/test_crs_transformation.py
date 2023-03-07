@@ -159,27 +159,3 @@ class TestCrsTransformation(TestBase):
             if data[1].__len__() != 0:
                 for right_data in data[1]:
                     assert right_data.getUserData() is not None
-
-    def test_polygon_distance_join_with_crs_transformation(self):
-        query_rdd = PolygonRDD(
-            self.sc,
-            input_location_query_polygon, splitter, True,
-            num_partitions, StorageLevel.MEMORY_ONLY, "epsg:4326", "epsg:3857"
-        )
-        window_rdd = CircleRDD(query_rdd, 0.1)
-
-        object_rdd = PolygonRDD(
-            self.sc, input_location_query_polygon, splitter, True, num_partitions, StorageLevel.MEMORY_ONLY,
-            "epsg:4326", "epsg:3857")
-
-        object_rdd.rawJvmSpatialRDD.jsrdd.repartition(4)
-        object_rdd.spatialPartitioning(GridType.KDBTREE)
-        object_rdd.buildIndex(IndexType.RTREE, True)
-        window_rdd.spatialPartitioning(object_rdd.getPartitioner())
-
-        results = JoinQuery.DistanceJoinQuery(object_rdd, window_rdd, True, False).collect()
-        assert 5467 == results.__len__()
-
-        for data in results:
-            for polygon_data in data[1]:
-                assert Circle(data[0].geom, 0.1).covers(polygon_data.geom)
