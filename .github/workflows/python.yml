@@ -11,7 +11,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         include:
@@ -58,7 +58,6 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
-    - run: git submodule update --init --recursive # Checkout Git submodule if necessary
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         SCALA_VERSION: ${{ matrix.scala }}
@@ -71,7 +70,7 @@ jobs:
         SPARK_VERSION: ${{ matrix.spark }}
         HADOOP_VERSION: ${{ matrix.hadoop }}
       run: tar -xzf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz
-    - run: sudo apt-get -y install python3-pip python-dev
+    - run: sudo apt-get -y install python3-pip python-dev-is-python3
     - run: sudo pip3 install -U setuptools
     - run: sudo pip3 install -U wheel
     - run: sudo pip3 install -U virtualenvwrapper
