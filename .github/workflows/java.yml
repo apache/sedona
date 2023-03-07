@@ -27,7 +27,7 @@ jobs:
           - spark: 3.3.0
             scala: 2.12.15
             jdk: '11'
-            skipTests: '-DskipTests'            
+            skipTests: ''
           - spark: 3.2.3
             scala: 2.12.15
             jdk: '8'
@@ -55,7 +55,6 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
-    - run: git submodule update --init --recursive # Checkout Git submodule if necessary
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         SCALA_VERSION: ${{ matrix.scala }}
@@ -64,7 +63,8 @@ jobs:
     - run: mkdir staging
     - run: cp viz/target/sedona-*.jar staging
     - run: cp spark-shaded/target/sedona-*.jar staging
-    - run: cp flink-shaded/target/sedona-*.jar staging
+    - run: |
+        [ -d "flink-shaded" ] && cp flink-shaded/target/sedona-*.jar staging
     - uses: actions/upload-artifact@v2
       with:
         name: generated-jars
