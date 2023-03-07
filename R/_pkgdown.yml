@@ -1,14 +1,14 @@
 url: ~
 template:
   bootstrap: 5
-  #bootswatch: united
+  # bootswatch: cosmo
   bslib:
+    #font_scale: 1.1
     primary: "#ff6e42"
     light: "#ff6e42"
     navbar-light-color: "#fff"
     # navbar-light-active-color: "#ff8a66"
     nav-tabs-link-active-bg: "#ff8a66"
-    # navbar-dark-bg: "#ff6e42"
     # navbar-light-bg: "#ff6e42"
     # bg: "#fff"
 navbar:

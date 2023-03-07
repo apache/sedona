@@ -38,7 +38,7 @@ The path to the sedona-spark-shaded and sedona-viz jars needs to be put in the `
 
 `spark_read_*` functions will read geospatial data into Spark Dataframes. The resulting Spark dataframe object can then be modified using dplyr verbs familiar to many R users. In addition, spatial UDFs supported by Sedona can inter-operate seamlessly with other functions supported in sparklyr’s dbplyr SQL translation env. For example, the code below finds the average area of all polygons in polygon_sdf:
 
-On the first 
+The first time you load Sedona, Spark will download all the dependent jars, which can take a few minutes and cause the connection to timeout. You can either retry (some jars will already be downloaded and cached) or increase the `"sparklyr.connect.timeout"` parameter in the sparklyr config.
 
 ``` r
 library(sparklyr)

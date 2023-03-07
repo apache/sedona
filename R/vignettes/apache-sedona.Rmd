@@ -14,11 +14,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
-library(apache.sedona)
-```
-
-
 # Introduction
 
 `{apache.sedona}` is a `{sparklyr}`-based R interface for
@@ -84,15 +79,11 @@ will create a Sedona-capable Spark connection in YARN client mode, and
 Sys.setenv("SEDONA_JAR_FILES" = "~/WORK/MISC_CODE/sedona/spark-shaded/target/sedona-spark-shaded-3.0_2.12-1.4.0-SNAPSHOT.jar:~/WORK/MISC_CODE/sedona/viz/target/sedona-viz-3.0_2.12-1.4.0-SNAPSHOT.jar")
 ```
 
-```{r}
-suppressPackageStartupMessages({
-  library(sparklyr)
-  library(apache.sedona)
-  
-})
+```{r message=FALSE, warning=FALSE}
+library(sparklyr)
+library(apache.sedona)
 
 sc <- spark_connect(master = "local")
-sc
 ```
 
 will create a Sedona-capable Spark connection to an Apache Spark
@@ -112,52 +103,172 @@ and
 spark_session(sc) %>%
   invoke("%>%", list("conf"), list("get", "spark.kryo.registrator")) %>%
   print()
-
-spark_context(sc) %>%
-  invoke("listJars") %>%
-  # invoke("toList") %>%
-  # invoke("asJava")
-  # invoke("apply", "printLn") 
-  # invoke("toArray", "java.lang.String[]")
-  invoke("toString") %>% 
-  stringr::str_remove("Vector\\(") %>% 
-  stringr::str_remove("\\)$") %>% 
-  stringr::str_split(", ") %>% 
-  `[[`(1) %>% 
-  sort()
-  print()
 ```
 
 
-
 For more information about connecting to Spark with `sparklyr`, see
-<https://therinspark.com/connections.html> and
-`?sparklyr::spark_connect`. Also see
+<https://therinspark.com/connections.html> and `?sparklyr::spark_connect`. Also see
 [Initiate Spark Context](../../tutorial/rdd/#initiate-sparkcontext) and [Initiate Spark Session](../../tutorial/sql/#initiate-sparksession) for minimum and recommended dependencies for Apache Sedona.
 
 
 
 # dplyr workflows
+
+`apache.sedona` extends `sparklyr` integrates with dplyr workflows. See the [sparklyr cheatsheet](https://spark.rstudio.com/images/homepage/sparklyr.pdf)
+
+```{r message=FALSE, warning=FALSE}
+library(dplyr)
+```
+
+## Loading data
+
+### Copying from R
+
+Data loaded in R can be copied to Spark using `copy_to`. Columns containing spatial information can be converted to the geometry type in Spark DataFrames (GeometryUDT) with Spark SQL functions such as `ST_GeomFromText` or `ST_GeomFromText`, see [Vector constructors](https://sedona.apache.org/latest-snapshot/api/sql/Constructor/) and [Raster input and output](https://sedona.apache.org/latest-snapshot/api/sql/Raster-loader/).
+
 ```{r}
-suppressPackageStartupMessages({
-  library(dplyr)
-})
+data <- readr::read_tsv("../../binder/data/county_small.tsv", col_names = FALSE, show_col_types = FALSE)
+data %>% glimpse()
+
+data_tbl <- copy_to(sc, data)
+
+data_tbl
+
+data_tbl %>% 
+  transmute(geometry = st_geomfromtext(X1)) %>% 
+  sdf_schema()
+```
+No automatic translation of `{sf}` objects is provided, they need to be converted to text (or binary) format before copying to spark.
+
+```{r}
+data <- sf::st_read("../../binder/data/testPolygon.json")
+
+data %>% glimpse()
+
+data_tbl <- 
+  copy_to(
+    sc, 
+    data %>% 
+    mutate(geometry_wkb = geometry %>% sf::st_as_text()) %>% 
+    sf::st_drop_geometry(),
+  name = "data",
+  overwrite = TRUE
+)
+
+data_tbl %>% 
+  transmute(geometry = st_geomfromtext(geometry_wkb)) %>% 
+  sdf_schema()
+```
+
+### Loading directly in Spark
+
+Loading data in R and then copying it to Spark will most likely not be the optimal method to prepare data for analysis; loading data directly into Spark will often be best.`spark_read_*` functions are made for this purpose (and extend `spark_read_*` functions in `sparklyr`).
+
+```{r}
+data_tbl <- spark_read_geojson(sc, path = "../../binder/data/testPolygon.json", name = "data")
+
+data_tbl %>% 
+  glimpse()
+
+data_tbl %>% 
+  select(geometry) %>% 
+  sdf_schema()
 ```
 
 
-## Reading
-
-### From R
-
-### Direct
-
 ## Manipulating
 
-Collect
+The dbplyr interface transparently translates dbplyr worklfows into SQL, and gives access to all Apache Sedona SQL functions:
+ 
+* [Vector functions](https://sedona.apache.org/latest-snapshot/api/sql/Function/)
+* [Vector predicates](https://sedona.apache.org/latest-snapshot/api/sql/Predicate/)
+* [Vector aggregate functions](https://sedona.apache.org/latest-snapshot/api/sql/AggregateFunction/)
+* [Raster operators](https://sedona.apache.org/latest-snapshot/api/sql/Raster-operators/)
+
+Results are then collected back into R with `collect`.
+
+```{r}
+## ! ST_FlipCoordinates needs to be called before st_transform as by default, this function uses lat/lon order
+data_tbl %>% 
+  mutate(
+    ALAND = ALAND %>% as.numeric(),
+    AWATER = AWATER %>% as.numeric(),
+    area = ALAND + AWATER,
+    geometry_proj = st_transform(ST_FlipCoordinates(geometry), "epsg:4326", "epsg:5070", TRUE),
+    area_geom = st_area(geometry_proj)
+    ) %>% 
+  select(STATEFP, COUNTYFP, area, area_geom) %>% 
+  head() %>% 
+  collect()
+```
+
+Geometries need to be converted to a serializable (text or binary) format before `collect` is called:
+```{r}
+## Setting the CRS in R post-collect
+data_tbl %>% 
+  mutate(
+    area = st_area(st_transform(ST_FlipCoordinates(geometry), "epsg:4326", "epsg:5070", TRUE)),
+    geometry_wkb = geometry %>% st_asBinary()
+    ) %>% 
+  select(COUNTYFP, geometry_wkb) %>% 
+  head() %>% 
+  collect() %>% 
+  sf::st_as_sf(crs = 4326)
+```
+
+
+```{r}
+## Setting the CRS in Spark (and using EWKT to keep it)
+data_tbl %>% 
+  mutate(
+    area = st_area(st_transform(ST_FlipCoordinates(geometry), "epsg:4326", "epsg:5070", TRUE)),
+    geometry_ewkt = geometry %>% st_setsrid(4326) %>% st_asewkt()
+    ) %>% 
+  select(COUNTYFP, geometry_ewkt) %>% 
+  head() %>% 
+  collect() %>% 
+  sf::st_as_sf(wkt = "geometry_ewkt") 
+```
+
 
 ## Writing
+Collected results can be saved from R. In many cases it will be more efficient to write results directly from Spark. The `spark_write_*` (see [docs](?apache.sedona::spark_write_geojson)) functions are made for this purpose (and extend `spark_write_*` functions in `sparklyr`).
+
+```{r}
+dest_file <- tempfile() ## Destination folder
+data_tbl %>% 
+  filter(str_sub(COUNTYFP, 1, 2) == "00") %>% 
+  spark_write_geoparquet(path = dest_file)
+
+dest_file %>% dir(recursive = TRUE)
+```
+
+The output can be partitioned by the columns present in the data:
+
+```{r}
+dest_file <- tempfile()  ## Destination folder
+data_tbl %>% 
+  filter(str_sub(COUNTYFP, 1, 2) == "00") %>% 
+  spark_write_geoparquet(path = dest_file, partition_by = "COUNTYFP")
+
+dest_file %>% dir(recursive = TRUE)
+```
 
 ## Spark DataFrames
+
+[Spark DataFrames](https://spark.apache.org/docs/latest/sql-programming-guide.html) provide a higher level API than RDDs, and can be used with SQL queries. `sparklyr` and `apache.sedona` automatically wrap Spark DataFrames in `dplyr` `tbl`s to work in dplyr workflows.
+
+```{r}
+data_tbl %>% class()
+```
+
+You can get to the underlying Spark DataFrame (SDF) with `sparklyr::spark_dataframe`, to be used for example in with `spakrlyr::invoke` to call SDF methods within Spark.
+```{r}
+sdf <- data_tbl %>% spark_dataframe()
+sdf
+```
+
+
 
 
 # RDD workflows
@@ -214,7 +325,7 @@ is parsed correctly.
 
 In addition to formats such as CSV and TSV, currently `apache.sedona`
 also supports reading files in WKT (Well-Known Text), WKB (Well-Known
-Binary), Shapefile and GeoJSON formats. See `sedona_read_wkt` for details.
+Binary), Shapefile and GeoJSON formats. See `sedona_read_wkt()` for details.
 
 
 ## Conversion to and from SpatialRDD
@@ -231,10 +342,14 @@ sdf <- tbl(
 )
 
 spatial_rdd <- sdf %>% to_spatial_rdd(spatial_col = "geom")
-print(spatial_rdd)
+spatial_rdd
 ```
 
-
+A `SpatialRDD` can be converted into a Spark DataFrame with `sdf_register` (generic method from `sparklyr`).
+```{r}
+spatial_sdf <- spatial_rdd %>% sdf_register(name = "my_table")
+spatial_sdf
+```
 
 
 # Visualization
@@ -252,12 +367,12 @@ boundary <- c(-126.790180, -64.630926, 24.863836, 50.000)
 
 pt_rdd <- sedona_read_dsv_to_typed_rdd(
   sc,
-  location = "arealm.csv",
+  location = "../../core/src/test/resources/arealm.csv",
   type = "point"
 )
 polygon_rdd <- sedona_read_dsv_to_typed_rdd(
   sc,
-  location = "primaryroads-polygon.csv",
+  location = "../../core/src/test/resources/primaryroads-polygon.csv",
   type = "polygon"
 )
 pair_rdd <- sedona_spatial_join_count_by_key(
@@ -280,7 +395,7 @@ sedona_render_choropleth_map(
   pair_rdd,
   resolution_x,
   resolution_y,
-  output_location = "/tmp/choropleth-map",
+  output_location = "./choropleth-map",
   boundary = boundary,
   overlay = overlay,
   # vary the green color channel according to relative magnitudes of data points so
@@ -293,7 +408,7 @@ sedona_render_choropleth_map(
 It will create a scatter plot, and then overlay it on top of a
 choropleth map, as shown below:
 
-<img src="../../image/choropleth-map.png" width=800 />
+<img src="choropleth-map.png" width=800 />
 
 See `?apache.sedona::sedona_render_scatter_plot`,
 `?apache.sedona::sedona_render_heatmap`, and
