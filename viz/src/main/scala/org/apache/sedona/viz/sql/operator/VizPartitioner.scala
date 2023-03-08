@@ -22,7 +22,7 @@ import org.apache.sedona.core.spatialPartitioning.QuadtreePartitioning
 import org.apache.sedona.core.spatialPartitioning.quadtree.QuadRectangle
 import org.apache.sedona.viz.sql.utils.{Conf, LineageDecoder}
 import org.apache.sedona.viz.utils.Pixel
-import org.apache.spark.sql.functions._
+import org.apache.spark.sql.functions.{expr, lit}
 import org.apache.spark.sql.{DataFrame, Row}
 import org.locationtech.jts.geom.{Envelope, Geometry}
 
