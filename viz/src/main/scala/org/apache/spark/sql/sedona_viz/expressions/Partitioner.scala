@@ -38,7 +38,14 @@ case class ST_TileName(inputExpressions: Seq[Expression])
     val partPerAxis = Math.pow(2, zoomLevel).intValue()
     val serializer = new PixelSerializer
     val pixel = serializer.readPixel(inputArray.toByteArray())
-    val id = VisualizationPartitioner.Calculate2DPartitionId(pixel.getResolutionX, pixel.getResolutionY, partPerAxis, partPerAxis, pixel.getX.intValue(), pixel.getY.intValue())
+    val id =
+      VisualizationPartitioner.Calculate2DPartitionId(
+        pixel.getResolutionX,
+        pixel.getResolutionY,
+        partPerAxis,
+        partPerAxis,
+        pixel.getX.intValue(),
+        pixel.getY.intValue())
     UTF8String.fromString(zoomLevel + "-" + id._1 + "-" + id._2)
   }
 

@@ -65,7 +65,13 @@ object AggregateWithinPartitons {
         val cursorValue = cursorRow.getAs[Double](valueCol)
         val currentAggregate = aggregator.getOrElse(cursorKey, Tuple4(0.0, 0.0, "", ""))
         // Update the aggregator values, partition ids are appended directly
-        aggregator.update(cursorKey, Tuple4(currentAggregate._1 + cursorValue, currentAggregate._2 + 1, cursorRow.getAs[String](Conf.PrimaryPID), cursorRow.getAs[String](Conf.SecondaryPID)))
+        aggregator.update(
+          cursorKey,
+          Tuple4(
+            currentAggregate._1 + cursorValue,
+            currentAggregate._2 + 1,
+            cursorRow.getAs[String](Conf.PrimaryPID),
+            cursorRow.getAs[String](Conf.SecondaryPID)))
       }
       var result = new ArrayBuffer[Row]()
       aggFunc match {

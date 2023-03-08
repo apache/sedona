@@ -55,23 +55,61 @@ case class ST_Pixelize(inputExpressions: Seq[Expression])
         RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, boundary, inputGeometry.asInstanceOf[Point], ColorizeOption.NORMAL, reverseCoordinate)
       }
       case geometry: MultiLineString => {
-        var manyPixels = RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, boundary, geometry.getGeometryN(0).asInstanceOf[LineString], reverseCoordinate)
+        var manyPixels =
+          RasterizationUtils.FindPixelCoordinates(
+            resolutionX,
+            resolutionY,
+            boundary,
+            geometry.getGeometryN(0).asInstanceOf[LineString],
+            reverseCoordinate)
         for (i <- 1 to geometry.getNumGeometries - 1) {
-          manyPixels.addAll(RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, boundary, geometry.getGeometryN(i).asInstanceOf[LineString], reverseCoordinate))
+          manyPixels.addAll(
+            RasterizationUtils.FindPixelCoordinates(
+              resolutionX,
+              resolutionY,
+              boundary,
+              geometry.getGeometryN(i).asInstanceOf[LineString],
+              reverseCoordinate))
         }
         manyPixels
       }
       case geometry: MultiPolygon => {
-        var manyPixels = RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, boundary, geometry.getGeometryN(0).asInstanceOf[Polygon], reverseCoordinate)
+        var manyPixels =
+          RasterizationUtils.FindPixelCoordinates(
+            resolutionX,
+            resolutionY,
+            boundary,
+            geometry.getGeometryN(0).asInstanceOf[Polygon],
+            reverseCoordinate)
         for (i <- 1 to geometry.getNumGeometries - 1) {
-          manyPixels.addAll(RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, boundary, geometry.getGeometryN(i).asInstanceOf[Polygon], reverseCoordinate))
+          manyPixels.addAll(
+            RasterizationUtils.FindPixelCoordinates(
+              resolutionX,
+              resolutionY,
+              boundary,
+              geometry.getGeometryN(i).asInstanceOf[Polygon],
+              reverseCoordinate))
         }
         manyPixels
       }
       case geometry: MultiPoint => {
-        var manyPixels = RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, boundary, geometry.getGeometryN(0).asInstanceOf[Point], ColorizeOption.NORMAL, reverseCoordinate)
+        var manyPixels =
+          RasterizationUtils.FindPixelCoordinates(
+            resolutionX,
+            resolutionY,
+            boundary,
+            geometry.getGeometryN(0).asInstanceOf[Point],
+            ColorizeOption.NORMAL,
+            reverseCoordinate)
         for (i <- 1 to geometry.getNumGeometries - 1) {
-          manyPixels.addAll(RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, boundary, geometry.getGeometryN(i).asInstanceOf[Point], ColorizeOption.NORMAL, reverseCoordinate))
+          manyPixels.addAll(
+            RasterizationUtils.FindPixelCoordinates(
+              resolutionX,
+              resolutionY,
+              boundary,
+              geometry.getGeometryN(i).asInstanceOf[Point],
+              ColorizeOption.NORMAL,
+              reverseCoordinate))
         }
         manyPixels
       }
