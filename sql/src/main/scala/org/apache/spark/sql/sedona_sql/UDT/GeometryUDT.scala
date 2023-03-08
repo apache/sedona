@@ -33,17 +33,11 @@ class GeometryUDT extends UserDefinedType[Geometry] {
 
   override def userClass: Class[Geometry] = classOf[Geometry]
 
-  override def serialize(obj: Geometry): Array[Byte] = {
-    // println("Inside UDT serialize.")
-    GeometrySerializer.serialize(obj)
-  }
+  override def serialize(obj: Geometry): Array[Byte] = GeometrySerializer.serialize(obj)
 
   override def deserialize(datum: Any): Geometry = {
     datum match {
-      case value: Array[Byte] => {
-        // println("Inside UDT deserialize.")
-        GeometrySerializer.deserialize(value)
-      }
+      case value: Array[Byte] => GeometrySerializer.deserialize(value)
     }
   }
 

@@ -61,7 +61,6 @@ abstract class UnaryGeometryExpression extends Expression with SerdeAware with E
       case expr: Any => expr.toGeometry(input)
     }
 
-    // println("----- Serialization/deserialization avoided -----")
     (geometry) match {
       case (geometry: Geometry) => nullSafeEval(geometry)
       case _ => null
@@ -105,7 +104,6 @@ abstract class BinaryGeometryExpression extends Expression with SerdeAware with 
       case _ => rightExpression.toGeometry(input)
     }
 
-    // println("----- Serialization/deserialization avoided -----")
     (leftGeometry, rightGeometry) match {
       case (leftGeometry: Geometry, rightGeometry: Geometry) => nullSafeEval(leftGeometry, rightGeometry)
       case _ => null
@@ -239,7 +237,6 @@ abstract class InferredUnaryExpression[A1: InferrableType, R: InferrableType]
   lazy val serialize = buildSerializer[R]
 
   override def eval(input: InternalRow): Any = {
-    // println(toString)
     val value = extract(input)
     if (value != null) {
       serialize(f(value))
@@ -251,7 +248,6 @@ abstract class InferredUnaryExpression[A1: InferrableType, R: InferrableType]
   override def evalWithoutSerialization(input: InternalRow): Any = {
     val value = extract(input)
     if (value != null) {
-      // println("----- Serialization/deserialization avoided -----")
       f(value)
     } else {
       null
@@ -283,7 +279,6 @@ abstract class InferredBinaryExpression[A1: InferrableType, A2: InferrableType, 
   lazy val serialize = buildSerializer[R]
 
   override def eval(input: InternalRow): Any = {
-    // println(toString)
     val left = extractLeft(input)
     val right = extractRight(input)
     if (left != null && right != null) {
@@ -294,11 +289,9 @@ abstract class InferredBinaryExpression[A1: InferrableType, A2: InferrableType, 
   }
 
   override def evalWithoutSerialization(input: InternalRow): Any = {
-    // println(toString)
     val left = extractLeft(input)
     val right = extractRight(input)
     if (left != null && right != null) {
-        // println("----- Serialization/deserialization avoided -----")
         f(left, right)
     } else {
       null
@@ -346,7 +339,6 @@ abstract class InferredTernaryExpression[A1: InferrableType, A2: InferrableType,
     val second = extractSecond(input)
     val third = extractThird(input)
     if (first != null && second != null && third != null) {
-      // println("----- Serialization/deserialization avoided -----")
       f(first, second, third)
     } else {
       null

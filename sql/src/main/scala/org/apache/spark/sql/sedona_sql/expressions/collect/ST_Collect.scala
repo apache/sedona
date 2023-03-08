@@ -42,11 +42,9 @@ case class ST_Collect(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     evalWithoutSerialization(input).asInstanceOf[Geometry].toGenericArrayData
-    // println("Did not avoid it :(")
   }
 
   override def evalWithoutSerialization(input: InternalRow): Any = {
-    // println("------------- Possibly avoided serialization/deserialization ----------------")
     val firstElement = inputExpressions.head
 
     firstElement.dataType match {
