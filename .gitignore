@@ -17,3 +17,5 @@
 /.vscode/
 .Rproj.user
 __pycache__
+/.bsp
+/.scala-build
