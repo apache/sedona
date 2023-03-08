@@ -45,7 +45,7 @@ class standardVizOperatorTest extends TestBaseScala {
         """.stripMargin).createOrReplaceTempView("images")
       var image = spark.table("images").take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage
       var imageGenerator = new ImageGenerator
-      imageGenerator.SaveRasterImageAsLocalFile(image, System.getProperty("user.dir")+"/target/points", ImageType.PNG)
+      imageGenerator.SaveRasterImageAsLocalFile(image, System.getProperty("user.dir") + "/target/points", ImageType.PNG)
       val imageString = spark.sql(
         """
           |SELECT ST_EncodeImage(image)
@@ -125,7 +125,7 @@ class standardVizOperatorTest extends TestBaseScala {
         """.stripMargin)
       var image = imageDf.take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage
       var imageGenerator = new ImageGenerator
-      imageGenerator.SaveRasterImageAsLocalFile(image, System.getProperty("user.dir")+"/target/polygons", ImageType.PNG)
+      imageGenerator.SaveRasterImageAsLocalFile(image, System.getProperty("user.dir") + "/target/polygons", ImageType.PNG)
     }
 
     it("Passed ST_TileName") {
