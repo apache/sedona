@@ -20,7 +20,7 @@ package org.apache.sedona.viz.sql.operator
 
 import org.apache.sedona.viz.sql.utils.Conf
 import org.apache.sedona.viz.utils.Pixel
-import org.apache.spark.sql.functions._
+import org.apache.spark.sql.functions.lit
 import org.apache.spark.sql.{DataFrame, Row}
 
 import scala.collection.mutable
