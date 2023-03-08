@@ -31,7 +31,7 @@ import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_viz.UDT.PixelUDT
 import org.apache.spark.sql.types.{ArrayType, DataType}
-import org.locationtech.jts.geom._
+import org.locationtech.jts.geom.{Envelope, Geometry, LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon}
 import scala.jdk.CollectionConverters._
 
 case class ST_Pixelize(inputExpressions: Seq[Expression])
