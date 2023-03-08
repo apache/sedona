@@ -55,7 +55,7 @@ object AggregateWithinPartitons {
     if (aggFunc.equalsIgnoreCase("count")) formattedDf = dataFrame.select(keyCol, Conf.PrimaryPID, Conf.SecondaryPID).withColumn(valueCol, lit(0.0))
     else formattedDf = dataFrame.select(keyCol, Conf.PrimaryPID, Conf.SecondaryPID, valueCol)
 
-    //formattedDf.show()
+    // formattedDf.show()
 
     val aggRdd = formattedDf.rdd.mapPartitions(iterator => {
       var aggregator = new mutable.HashMap[Pixel, Tuple4[Double, Double, String, String]]()
