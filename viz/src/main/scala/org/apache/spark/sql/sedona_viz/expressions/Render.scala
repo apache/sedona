@@ -26,7 +26,7 @@ import org.apache.spark.internal.Logging
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.expressions.{MutableAggregationBuffer, UserDefinedAggregateFunction}
 import org.apache.spark.sql.sedona_viz.UDT.{ImageWrapperUDT, PixelUDT}
-import org.apache.spark.sql.types._
+import org.apache.spark.sql.types.{ArrayType, DataType, IntegerType, StructType}
 
 case class ST_Render() extends UserDefinedAggregateFunction with Logging {
   // This is the input fields for your aggregate function.
