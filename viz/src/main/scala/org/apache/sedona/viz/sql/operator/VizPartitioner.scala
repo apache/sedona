@@ -22,7 +22,7 @@ import org.apache.sedona.core.spatialPartitioning.QuadtreePartitioning
 import org.apache.sedona.core.spatialPartitioning.quadtree.QuadRectangle
 import org.apache.sedona.viz.sql.utils.{Conf, LineageDecoder}
 import org.apache.sedona.viz.utils.Pixel
-import org.apache.spark.sql.functions._
+import org.apache.spark.sql.functions.{expr, lit}
 import org.apache.spark.sql.{DataFrame, Row}
 import org.locationtech.jts.geom.{Envelope, Geometry}
 
@@ -32,8 +32,10 @@ import scala.collection.mutable.ArrayBuffer
 object VizPartitioner {
 
   /**
-    * Partition the data frame to many pieces. Each partition has two partition ids. Primary id is the uniform map tile id and secondary id is the non-uniformed partition id.
-    * The generated DataFrame guarantees that rows with the same secondary ids are in the partition. But each partition may contain rows with different secondary ids.
+    * Partition the data frame to many pieces. Each partition has two partition ids.
+    * Primary id is the uniform map tile id and secondary id is the non-uniformed partition id.
+    * The generated DataFrame guarantees that rows with the same secondary ids are in the partition.
+    * But each partition may contain rows with different secondary ids.
     *
     * @param dataFrame
     * @param zoomLevel

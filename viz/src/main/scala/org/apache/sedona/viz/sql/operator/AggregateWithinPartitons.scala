@@ -20,7 +20,7 @@ package org.apache.sedona.viz.sql.operator
 
 import org.apache.sedona.viz.sql.utils.Conf
 import org.apache.sedona.viz.utils.Pixel
-import org.apache.spark.sql.functions._
+import org.apache.spark.sql.functions.lit
 import org.apache.spark.sql.{DataFrame, Row}
 
 import scala.collection.mutable
@@ -55,7 +55,7 @@ object AggregateWithinPartitons {
     if (aggFunc.equalsIgnoreCase("count")) formattedDf = dataFrame.select(keyCol, Conf.PrimaryPID, Conf.SecondaryPID).withColumn(valueCol, lit(0.0))
     else formattedDf = dataFrame.select(keyCol, Conf.PrimaryPID, Conf.SecondaryPID, valueCol)
 
-    //formattedDf.show()
+    // formattedDf.show()
 
     val aggRdd = formattedDf.rdd.mapPartitions(iterator => {
       var aggregator = new mutable.HashMap[Pixel, Tuple4[Double, Double, String, String]]()
@@ -65,7 +65,13 @@ object AggregateWithinPartitons {
         val cursorValue = cursorRow.getAs[Double](valueCol)
         val currentAggregate = aggregator.getOrElse(cursorKey, Tuple4(0.0, 0.0, "", ""))
         // Update the aggregator values, partition ids are appended directly
-        aggregator.update(cursorKey, Tuple4(currentAggregate._1 + cursorValue, currentAggregate._2 + 1, cursorRow.getAs[String](Conf.PrimaryPID), cursorRow.getAs[String](Conf.SecondaryPID)))
+        aggregator.update(
+          cursorKey,
+          Tuple4(
+            currentAggregate._1 + cursorValue,
+            currentAggregate._2 + 1,
+            cursorRow.getAs[String](Conf.PrimaryPID),
+            cursorRow.getAs[String](Conf.SecondaryPID)))
       }
       var result = new ArrayBuffer[Row]()
       aggFunc match {

@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.viz.rdd
 
-import java.awt.Color
+import java.awt.Color // scalastyle:ignore illegal.imports
 import java.io.FileInputStream
 import java.util.Properties
 

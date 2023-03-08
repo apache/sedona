@@ -22,7 +22,7 @@ package org.apache.sedona.viz.sql
 import org.apache.sedona.viz.sql.operator.{AggregateWithinPartitons, VizPartitioner}
 import org.apache.sedona.viz.sql.utils.{Conf, LineageDecoder}
 import org.locationtech.jts.geom.Envelope
-import org.apache.spark.sql.functions._
+import org.apache.spark.sql.functions.lit
 
 class optVizOperatorTest extends TestBaseScala {
 

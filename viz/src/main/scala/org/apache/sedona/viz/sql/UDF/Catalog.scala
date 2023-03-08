@@ -20,7 +20,7 @@ package org.apache.sedona.viz.sql.UDF
 
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
-import org.apache.spark.sql.sedona_viz.expressions._
+import org.apache.spark.sql.sedona_viz.expressions.{ST_Colorize, ST_EncodeImage, ST_Pixelize, ST_Render, ST_TileName}
 
 object Catalog {
   val expressions: Seq[FunctionBuilder] = Seq(

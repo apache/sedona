@@ -31,7 +31,8 @@ import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_viz.UDT.PixelUDT
 import org.apache.spark.sql.types.{ArrayType, DataType}
-import org.locationtech.jts.geom._
+import org.locationtech.jts.geom.{Envelope, Geometry, LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon}
+import scala.jdk.CollectionConverters._
 
 case class ST_Pixelize(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with Logging {
@@ -55,29 +56,67 @@ case class ST_Pixelize(inputExpressions: Seq[Expression])
         RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, boundary, inputGeometry.asInstanceOf[Point], ColorizeOption.NORMAL, reverseCoordinate)
       }
       case geometry: MultiLineString => {
-        var manyPixels = RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, boundary, geometry.getGeometryN(0).asInstanceOf[LineString], reverseCoordinate)
+        var manyPixels =
+          RasterizationUtils.FindPixelCoordinates(
+            resolutionX,
+            resolutionY,
+            boundary,
+            geometry.getGeometryN(0).asInstanceOf[LineString],
+            reverseCoordinate)
         for (i <- 1 to geometry.getNumGeometries - 1) {
-          manyPixels.addAll(RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, boundary, geometry.getGeometryN(i).asInstanceOf[LineString], reverseCoordinate))
+          manyPixels.addAll(
+            RasterizationUtils.FindPixelCoordinates(
+              resolutionX,
+              resolutionY,
+              boundary,
+              geometry.getGeometryN(i).asInstanceOf[LineString],
+              reverseCoordinate))
         }
         manyPixels
       }
       case geometry: MultiPolygon => {
-        var manyPixels = RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, boundary, geometry.getGeometryN(0).asInstanceOf[Polygon], reverseCoordinate)
+        var manyPixels =
+          RasterizationUtils.FindPixelCoordinates(
+            resolutionX,
+            resolutionY,
+            boundary,
+            geometry.getGeometryN(0).asInstanceOf[Polygon],
+            reverseCoordinate)
         for (i <- 1 to geometry.getNumGeometries - 1) {
-          manyPixels.addAll(RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, boundary, geometry.getGeometryN(i).asInstanceOf[Polygon], reverseCoordinate))
+          manyPixels.addAll(
+            RasterizationUtils.FindPixelCoordinates(
+              resolutionX,
+              resolutionY,
+              boundary,
+              geometry.getGeometryN(i).asInstanceOf[Polygon],
+              reverseCoordinate))
         }
         manyPixels
       }
       case geometry: MultiPoint => {
-        var manyPixels = RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, boundary, geometry.getGeometryN(0).asInstanceOf[Point], ColorizeOption.NORMAL, reverseCoordinate)
+        var manyPixels =
+          RasterizationUtils.FindPixelCoordinates(
+            resolutionX,
+            resolutionY,
+            boundary,
+            geometry.getGeometryN(0).asInstanceOf[Point],
+            ColorizeOption.NORMAL,
+            reverseCoordinate)
         for (i <- 1 to geometry.getNumGeometries - 1) {
-          manyPixels.addAll(RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, boundary, geometry.getGeometryN(i).asInstanceOf[Point], ColorizeOption.NORMAL, reverseCoordinate))
+          manyPixels.addAll(
+            RasterizationUtils.FindPixelCoordinates(
+              resolutionX,
+              resolutionY,
+              boundary,
+              geometry.getGeometryN(i).asInstanceOf[Point],
+              ColorizeOption.NORMAL,
+              reverseCoordinate))
         }
         manyPixels
       }
     }
     assert(pixels.size() > 0)
-    import scala.jdk.CollectionConverters._
+
     return new GenericArrayData(pixels.asScala.map(f=> {
       val out = new ByteArrayOutputStream()
       val kryo = new Kryo()
