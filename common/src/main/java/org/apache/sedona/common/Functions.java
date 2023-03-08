@@ -71,7 +71,11 @@ public class Functions {
     }
 
     public static Geometry boundary(Geometry geometry) {
-        return geometry.getBoundary();
+        Geometry boundary = geometry.getBoundary();
+        if (boundary instanceof LinearRing) {
+            boundary = GEOMETRY_FACTORY.createLineString(boundary.getCoordinates());
+        }
+        return boundary;
     }
 
     public static Geometry buffer(Geometry geometry, double radius) {
