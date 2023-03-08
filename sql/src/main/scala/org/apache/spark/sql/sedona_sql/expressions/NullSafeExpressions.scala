@@ -236,14 +236,7 @@ abstract class InferredUnaryExpression[A1: InferrableType, R: InferrableType]
 
   lazy val serialize = buildSerializer[R]
 
-  override def eval(input: InternalRow): Any = {
-    val value = extract(input)
-    if (value != null) {
-      serialize(f(value))
-    } else {
-      null
-    }
-  }
+  override def eval(input: InternalRow): Any = serialize(evalWithoutSerialization(input).asInstanceOf[R])
 
   override def evalWithoutSerialization(input: InternalRow): Any = {
     val value = extract(input)
@@ -278,15 +271,7 @@ abstract class InferredBinaryExpression[A1: InferrableType, A2: InferrableType, 
 
   lazy val serialize = buildSerializer[R]
 
-  override def eval(input: InternalRow): Any = {
-    val left = extractLeft(input)
-    val right = extractRight(input)
-    if (left != null && right != null) {
-      serialize(f(left, right))
-    } else {
-      null
-    }
-  }
+  override def eval(input: InternalRow): Any = serialize(evalWithoutSerialization(input).asInstanceOf[R])
 
   override def evalWithoutSerialization(input: InternalRow): Any = {
     val left = extractLeft(input)
@@ -323,16 +308,7 @@ abstract class InferredTernaryExpression[A1: InferrableType, A2: InferrableType,
 
   lazy val serialize = buildSerializer[R]
 
-  override def eval(input: InternalRow): Any = {
-    val first = extractFirst(input)
-    val second = extractSecond(input)
-    val third = extractThird(input)
-    if (first != null && second != null && third != null) {
-      serialize(f(first, second, third))
-    } else {
-      null
-    }
-  }
+  override def eval(input: InternalRow): Any = serialize(evalWithoutSerialization(input).asInstanceOf[R])
 
   override def evalWithoutSerialization(input: InternalRow): Any = {
     val first = extractFirst(input)
