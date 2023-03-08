@@ -240,7 +240,11 @@ public class Functions {
         if (geometry instanceof Polygon) {
             Polygon polygon = (Polygon) geometry;
             if (n < polygon.getNumInteriorRing()) {
-                return polygon.getInteriorRingN(n);
+                Geometry interiorRing = polygon.getInteriorRingN(n);
+                if (interiorRing instanceof LinearRing) {
+                    interiorRing = GEOMETRY_FACTORY.createLineString(interiorRing.getCoordinates());
+                }
+                return interiorRing;
             }
         }
         return null;
