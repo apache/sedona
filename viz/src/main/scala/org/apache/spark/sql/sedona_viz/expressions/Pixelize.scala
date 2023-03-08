@@ -32,6 +32,7 @@ import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_viz.UDT.PixelUDT
 import org.apache.spark.sql.types.{ArrayType, DataType}
 import org.locationtech.jts.geom._
+import scala.jdk.CollectionConverters._
 
 case class ST_Pixelize(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with Logging {
@@ -115,7 +116,7 @@ case class ST_Pixelize(inputExpressions: Seq[Expression])
       }
     }
     assert(pixels.size() > 0)
-    import scala.jdk.CollectionConverters._
+
     return new GenericArrayData(pixels.asScala.map(f=> {
       val out = new ByteArrayOutputStream()
       val kryo = new Kryo()
