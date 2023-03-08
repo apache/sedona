@@ -21,7 +21,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.opengis.referencing.FactoryException;
@@ -62,7 +62,7 @@ public class FunctionTest extends TestBase{
         Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((1 1, 0 0, -1 1, 1 1))') AS geom");
         Table boundaryTable = polygonTable.select(call(Functions.ST_Boundary.class.getSimpleName(), $("geom")));
         Geometry result = (Geometry) first(boundaryTable).getField(0);
-        assertEquals("LINEARRING (1 1, 0 0, -1 1, 1 1)", result.toString());
+        assertEquals("LINESTRING (1 1, 0 0, -1 1, 1 1)", result.toString());
     }
 
     @Test
@@ -221,8 +221,8 @@ public class FunctionTest extends TestBase{
     public void testInteriorRingN() {
         Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromText('POLYGON((7 9,8 7,11 6,15 8,16 6,17 7,17 10,18 12,17 14,15 15,11 15,10 13,9 12,7 9),(9 9,10 10,11 11,11 10,10 8,9 9),(12 14,15 14,13 11,12 14))') AS polygon");
         Table resultTable = polygonTable.select(call(Functions.ST_InteriorRingN.class.getSimpleName(), $("polygon"), 1));
-        LinearRing linearRing = (LinearRing) first(resultTable).getField(0);
-        assertEquals("LINEARRING (12 14, 15 14, 13 11, 12 14)", linearRing.toString());
+        LineString lineString = (LineString) first(resultTable).getField(0);
+        assertEquals("LINESTRING (12 14, 15 14, 13 11, 12 14)", lineString.toString());
     }
 
     @Test
@@ -272,9 +272,9 @@ public class FunctionTest extends TestBase{
     public void testExteriorRing() {
         Table polygonTable = createPolygonTable(1);
         Table linearRingTable = polygonTable.select(call(Functions.ST_ExteriorRing.class.getSimpleName(), $(polygonColNames[0])));
-        LinearRing linearRing = (LinearRing) first(linearRingTable).getField(0);
-        assertNotNull(linearRing);
-        Assert.assertEquals("LINEARRING (-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5)", linearRing.toString());
+        LineString lineString = (LineString) first(linearRingTable).getField(0);
+        assertNotNull(lineString);
+        Assert.assertEquals("LINESTRING (-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5)", lineString.toString());
     }
 
     @Test
