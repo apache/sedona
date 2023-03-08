@@ -254,7 +254,11 @@ public class Functions {
     }
 
     public static Geometry exteriorRing(Geometry geometry) {
-        return GeomUtils.getExteriorRing(geometry);
+        Geometry ring = GeomUtils.getExteriorRing(geometry);
+        if (ring instanceof LinearRing) {
+            ring = GEOMETRY_FACTORY.createLineString(ring.getCoordinates());
+        }
+        return ring;
     }
 
     public static String asEWKT(Geometry geometry) {
