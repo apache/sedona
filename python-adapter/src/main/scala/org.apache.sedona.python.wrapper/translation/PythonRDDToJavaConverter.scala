@@ -20,11 +20,12 @@
 package org.apache.sedona.python.wrapper.translation
 
 import java.io.{ByteArrayInputStream, DataInputStream}
-
 import org.apache.sedona.common.geometryObjects.Circle
 import org.apache.sedona.python.wrapper.SerializationException
 import org.apache.spark.api.java.JavaRDD
 import org.locationtech.jts.geom.Geometry
+
+import java.nio.{ByteBuffer, ByteOrder}
 
 case class PythonRDDToJavaConverter(javaRDD: JavaRDD[Array[Byte]], geometrySerializer: PythonGeometrySerializer) {
   def translateToJava: JavaRDD[Geometry] = {
@@ -32,35 +33,34 @@ case class PythonRDDToJavaConverter(javaRDD: JavaRDD[Array[Byte]], geometrySeria
       val geoDataBytes = new ByteArrayInputStream(serializedGeoData)
       val geoDataInputBytes = new DataInputStream(geoDataBytes)
       val rddType = geoDataInputBytes.readInt()
-      val isCircle = geoDataInputBytes.readByte().toInt
-      if (isCircle == 1) {
-        val radius = geoDataInputBytes.readDouble()
-        val geometry = readGeometry(serializedGeoData, geoDataInputBytes, 20)
-        new Circle(geometry, radius)
-      }
-      if (isCircle == 0) {
-        readGeometry(serializedGeoData, geoDataInputBytes, 12)
-      }
-      else throw SerializationException()
-
-
-    }
-
-    )
+      readGeometry(serializedGeoData, geoDataInputBytes)
+    })
   }
 
-  private def readGeometry(serializedGeoData: Array[Byte], inputStream: DataInputStream, skipBytes: Int): Geometry = {
+  private def readGeometry(serializedGeoData: Array[Byte], inputStream: DataInputStream): Geometry = {
+    val isCircle = inputStream.readByte().toInt
     val geomDataLength = java.lang.Integer.reverseBytes(inputStream.readInt())
     val userDataLength = java.lang.Integer.reverseBytes(inputStream.readInt())
+    val skipBytes = 13  // 4 bytes for rddType, 1 byte for isCircle, 4 bytes for geomDataLength, 4 bytes for userDataLength
 
-    val toReadGeometry = serializedGeoData.slice(skipBytes, skipBytes + geomDataLength + 1)
-    val geom = geometrySerializer.deserialize(toReadGeometry)
-
-    val userData = serializedGeoData.slice(skipBytes + geomDataLength + 1, skipBytes + geomDataLength + 1 + userDataLength)
+    // Circle will be handled specially in the next step. We don't let geometrySerializer.deserialize handle Circle
+    // for us since this serialization format is a little bit different from the one used in PythonGeometrySerializer.
+    val geom = geometrySerializer.deserialize(0, serializedGeoData, skipBytes)
+    val userData = serializedGeoData.slice(skipBytes + geomDataLength, skipBytes + geomDataLength + userDataLength)
       .map(_.toChar).mkString
 
-    geom.setUserData(userData)
-    geom
+    val finalGeom = if (isCircle == 1) {
+      val radiusOffset = skipBytes + geomDataLength + userDataLength
+      val radiusBytes = serializedGeoData.slice(radiusOffset, radiusOffset + 8)
+      val radius = ByteBuffer.wrap(radiusBytes).order(ByteOrder.LITTLE_ENDIAN).getDouble
+      new Circle(geom, radius)
+    } else if (isCircle == 0) {
+      geom
+    } else {
+      throw SerializationException("Can not deserialize object")
+    }
+    finalGeom.setUserData(userData)
+    finalGeom
   }
 }
 

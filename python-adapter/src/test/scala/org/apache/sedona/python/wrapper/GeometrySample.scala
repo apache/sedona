@@ -19,6 +19,7 @@
 
 package org.apache.sedona.python.wrapper
 
+import org.apache.sedona.common.geometryObjects.Circle
 import org.locationtech.jts.geom.Geometry
 
 import java.io.{FileInputStream, InputStream}
@@ -30,6 +31,8 @@ trait GeometrySample extends PythonTestSpec {
   val resourceFolder = System.getProperty("user.dir") + "/../core/src/test/resources/"
   private[python] val samplePoints: List[Geometry] =
     loadGeometriesFromResources(resourceFolder + "python/samplePoints")
+
+  private[python] val sampleCircles: List[Geometry] = samplePoints.map(new Circle(_, 1.0))
 
   private[python] val sampleLines: List[Geometry] =
     loadGeometriesFromResources(resourceFolder + "python/sampleLines")

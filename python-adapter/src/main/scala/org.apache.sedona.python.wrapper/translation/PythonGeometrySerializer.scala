@@ -36,26 +36,29 @@ private[python] class PythonGeometrySerializer extends Serializable {
       - Translate user attributes using UTF-8 encoding
    */
 
-  def serialize: (Geometry => Array[Byte]) = {
-    case geometry: Circle => CircleSerializer(geometry).serialize
-    case geometry: Geometry => GeometrySerializer(geometry).serialize
-
+  def serialize(geometry: Geometry): Array[Byte] = {
+    geometry match {
+      case circle: Circle => CircleSerializer(circle).serialize
+      case _ => GeometrySerializer(geometry).serialize
+    }
   }
 
-  def deserialize: Array[Byte] => Geometry = (values: Array[Byte]) => {
-    val reader = new WKBReader()
+  def deserialize(values: Array[Byte]): Geometry = {
     val isCircle = values.head.toInt
-    val valuesLength = values.length
+    deserialize(isCircle, values, 1)
+  }
 
+  def deserialize(isCircle: Int, values: Array[Byte], offset: Int): Geometry = {
+    val reader = new WKBReader()
     if (isCircle == 1) {
-      val geom = reader.read(values.slice(9, valuesLength))
-      val radius = ByteBuffer.wrap(values.slice(1, 9)).getDouble()
+      val geom = reader.read(values.slice(offset + 8, values.length))
+      val radius = ByteBuffer.wrap(values.slice(offset, offset + 8)).getDouble()
       new Circle(geom, radius)
     }
     else if (isCircle == 0) {
-      reader.read(values.slice(1, valuesLength))
+      reader.read(values.slice(offset, values.length))
+    } else {
+      throw SerializationException("Can not deserialize object")
     }
-    else throw SerializationException("Can not deserialize object")
-
   }
 }
