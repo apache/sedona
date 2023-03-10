@@ -19,10 +19,12 @@
 
 package org.apache.sedona.python.wrapper
 
-import org.apache.sedona.python.wrapper.translation.{FlatPairRddConverter, GeometryRddConverter, ListPairRddConverter}
+import org.apache.sedona.python.wrapper.adapters.PythonConverter
+import org.apache.sedona.python.wrapper.translation.{FlatPairRddConverter, GeometryRddConverter, ListPairRddConverter, PythonRDDToJavaConverter}
 import org.apache.spark.api.java.JavaPairRDD
 import org.scalatest.Matchers
 import org.apache.sedona.python.wrapper.utils.implicits._
+
 import scala.jdk.CollectionConverters._
 
 
@@ -34,7 +36,18 @@ class TestToPythonSerialization extends SparkUtil with GeometrySample with Match
       case a: Array[Byte] => a.toList
     })
     convertedToPythonArrays should contain theSameElementsAs expectedPointArray
+  }
 
+  test("Test between Circle RDD and Python RDD") {
+    val rddPython = PythonConverter.translateSpatialRDDToPython(circleSpatialRDD)
+    val rddJava = PythonConverter.translatePythonRDDToJava(rddPython)
+    rddJava.collect() should contain theSameElementsAs sampleCircles
+  }
+
+  test("Test between Point RDD and Python RDD") {
+    val rddPython = PythonConverter.translateSpatialRDDToPython(pointSpatialRDD)
+    val rddJava = PythonConverter.translatePythonRDDToJava(rddPython)
+    rddJava.collect() should contain theSameElementsAs samplePoints
   }
 
   test("Should serialize to Python JavaRDD[Geometry, Geometry]") {
@@ -55,9 +68,9 @@ class TestToPythonSerialization extends SparkUtil with GeometrySample with Match
     existingValues should contain theSameElementsAs expectedPairRDDWithListPythonArray
   }
 
-  private val pointSpatialRDD = sc.parallelize(
-    samplePoints
-  ).toJavaRDD()
+  private val pointSpatialRDD = sc.parallelize(samplePoints).toJavaRDD()
+
+  private val circleSpatialRDD = sc.parallelize(sampleCircles).toJavaRDD()
 
   private val spatialPairRDD = sc.parallelize(
     samplePoints.zip(samplePolygons).map(
@@ -70,7 +83,6 @@ class TestToPythonSerialization extends SparkUtil with GeometrySample with Match
       polygon => (polygon, samplePoints.slice(0, 2).asJava)
     )
   )
-
 
   private val expectedPointArray: List[List[Byte]] = samplePoints.map(point =>
     0.toByteArray().toList ++ pythonGeometrySerializer.serialize(point).toList ++ 0.toByteArray().toList)

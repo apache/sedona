@@ -31,8 +31,7 @@ private[python] case class GeometryRddConverter[T <: Geometry](spatialRDD: JavaR
       val typeBuffer = 0.toByteArray()
       val sizeBuffer = 0.toByteArray()
       typeBuffer ++ geometrySerializer.serialize(geom) ++ sizeBuffer
-    }
-    ).toJavaRDD()
+    }).toJavaRDD()
   }
 
 }
