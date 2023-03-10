@@ -70,7 +70,7 @@ class Adapter(metaclass=MultipleMeta):
         return spatial_rdd
 
     @classmethod
-    def toSpatialRdd(cls, dataFrame: DataFrame, fieldNames: List) -> SpatialRDD:
+    def toSpatialRdd(cls, dataFrame: DataFrame, geometryFieldName: str, fieldNames: List) -> SpatialRDD:
         """
 
         :param dataFrame:
@@ -81,7 +81,7 @@ class Adapter(metaclass=MultipleMeta):
         sc = dataFrame._sc
         jvm = sc._jvm
 
-        srdd = jvm.PythonAdapterWrapper.toSpatialRdd(dataFrame._jdf, fieldNames)
+        srdd = jvm.PythonAdapterWrapper.toSpatialRdd(dataFrame._jdf, geometryFieldName, fieldNames)
 
         spatial_rdd = SpatialRDD(sc)
         spatial_rdd.set_srdd(srdd)
