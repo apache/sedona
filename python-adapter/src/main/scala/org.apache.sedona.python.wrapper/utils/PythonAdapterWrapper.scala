@@ -27,6 +27,10 @@ import org.locationtech.jts.geom.Geometry
 import scala.jdk.CollectionConverters._
 
 object PythonAdapterWrapper {
+  def toSpatialRdd(df: DataFrame, geometryColumn: String, fieldNames: java.util.List[String]): SpatialRDD[Geometry] = {
+    Adapter.toSpatialRdd(df, geometryColumn, fieldNames.asScala.toSeq)
+  }
+
   def toDf[T <: Geometry](spatialRDD: SpatialRDD[T], fieldNames: java.util.ArrayList[String], sparkSession: SparkSession): DataFrame = {
     Adapter.toDf(spatialRDD, fieldNames.asScala.toSeq, sparkSession)
   }

@@ -264,6 +264,24 @@ class TestAdapter(TestBase):
         assert spatial_rdd.approximateTotalCount == 121960
         assert spatial_rdd.boundaryEnvelope == Envelope(-179.147236, 179.475569, -14.548699, 71.35513400000001)
 
+    def test_to_spatial_rdd_df_with_non_geom_fields(self):
+        spatial_df = self._create_spatial_point_table()
+        spatial_df = spatial_df.withColumn("i", expr("10")).withColumn("s", expr("'20'"))
+        spatial_rdd = Adapter.toSpatialRdd(spatial_df, "geom")
+        assert spatial_rdd.fieldNames == ['i', 's']
+        spatial_rdd.analyze()
+        assert spatial_rdd.approximateTotalCount == 121960
+        assert spatial_rdd.boundaryEnvelope == Envelope(-179.147236, 179.475569, -14.548699, 71.35513400000001)
+
+    def test_to_spatial_rdd_df_with_custom_user_data_field_names(self):
+        spatial_df = self._create_spatial_point_table()
+        spatial_df = spatial_df.withColumn("i", expr("10")).withColumn("s", expr("'20'"))
+        spatial_rdd = Adapter.toSpatialRdd(spatial_df, "geom", ["i2", "s2"])
+        assert spatial_rdd.fieldNames == ['i2', 's2']
+        spatial_rdd.analyze()
+        assert spatial_rdd.approximateTotalCount == 121960
+        assert spatial_rdd.boundaryEnvelope == Envelope(-179.147236, 179.475569, -14.548699, 71.35513400000001)
+
     def test_to_spatial_rdd_df(self):
         spatial_df = self._create_spatial_point_table()
 
