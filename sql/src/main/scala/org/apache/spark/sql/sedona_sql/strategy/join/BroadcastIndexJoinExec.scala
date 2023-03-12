@@ -257,9 +257,8 @@ case class BroadcastIndexJoinExec(
   }
 
   private def createStreamShapes(streamResultsRaw: RDD[UnsafeRow], boundStreamShape: Expression) = {
-    // If there's a distance and the objects are being broadcast, we need to build the expanded envelope on the window stream side
     distance match {
-      case Some(distanceExpression) if indexBuildSide != windowJoinSide =>
+      case Some(distanceExpression) =>
         streamResultsRaw.map(row => {
           val geom = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
           if (geom == null) {
