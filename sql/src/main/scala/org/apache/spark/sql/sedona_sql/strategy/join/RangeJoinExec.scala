@@ -33,7 +33,6 @@ import org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode
   * @param right      right side of the join
   * @param leftShape  expression for the first argument of spatialPredicate
   * @param rightShape expression for the second argument of spatialPredicate
-  * @param swappedLeftAndRight boolean indicating whether left and right plans were swapped
   * @param spatialPredicate spatial predicate as join condition
   * @param extraCondition extra join condition other than spatialPredicate
   */
@@ -41,7 +40,6 @@ case class RangeJoinExec(left: SparkPlan,
                          right: SparkPlan,
                          leftShape: Expression,
                          rightShape: Expression,
-                         swappedLeftAndRight: Boolean,
                          spatialPredicate: SpatialPredicate,
                          extraCondition: Option[Expression] = None)
   extends SedonaBinaryExecNode

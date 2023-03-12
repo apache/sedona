@@ -42,8 +42,8 @@ import org.locationtech.jts.geom.Geometry
  * @param right right side of the join
  * @param leftShape expression for the first argument of spatialPredicate
  * @param rightShape expression for the second argument of spatialPredicate
- * @param swappedLeftAndRight boolean indicating whether left and right plans were swapped
- * @param distance - ST_Distance(left, right) <= distance. Distance can be literal or a computation over 'left'.
+ * @param distance - ST_Distance(left, right) <= distance. Distance can be literal or a computation over 'left' or 'right'.
+ * @param distanceBoundToLeft whether distance expression references attributes from left relation or right relation
  * @param spatialPredicate spatial predicate as join condition
  * @param extraCondition extra join condition other than spatialPredicate
  */
@@ -51,22 +51,30 @@ case class DistanceJoinExec(left: SparkPlan,
                             right: SparkPlan,
                             leftShape: Expression,
                             rightShape: Expression,
-                            swappedLeftAndRight: Boolean,
                             distance: Expression,
+                            distanceBoundToLeft: Boolean,
                             spatialPredicate: SpatialPredicate,
                             extraCondition: Option[Expression] = None)
   extends SedonaBinaryExecNode
     with TraitJoinQueryExec
     with Logging {
 
-  private val boundRadius = BindReferences.bindReference(distance, left.output)
+  private val boundRadius = if (distanceBoundToLeft) {
+    BindReferences.bindReference(distance, left.output)
+  } else {
+    BindReferences.bindReference(distance, right.output)
+  }
 
-  override def toSpatialRddPair(
-                                 buildRdd: RDD[UnsafeRow],
-                                 buildExpr: Expression,
-                                 streamedRdd: RDD[UnsafeRow],
-                                 streamedExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) =
-    (toExpandedEnvelopeRDD(buildRdd, buildExpr, boundRadius), toSpatialRDD(streamedRdd, streamedExpr))
+  override def toSpatialRddPair(leftRdd: RDD[UnsafeRow],
+                                leftShapeExpr: Expression,
+                                rightRdd: RDD[UnsafeRow],
+                                rightShapeExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) = {
+    if (distanceBoundToLeft) {
+      (toExpandedEnvelopeRDD(leftRdd, leftShapeExpr, boundRadius), toSpatialRDD(rightRdd, rightShapeExpr))
+    } else {
+      (toSpatialRDD(leftRdd, leftShapeExpr), toExpandedEnvelopeRDD(rightRdd, rightShapeExpr, boundRadius))
+    }
+  }
 
   protected def withNewChildrenInternal(newLeft: SparkPlan, newRight: SparkPlan): SparkPlan = {
     copy(left = newLeft, right = newRight)

@@ -37,13 +37,10 @@ trait TraitJoinQueryExec extends TraitJoinQueryBase {
   val right: SparkPlan
   val leftShape: Expression
   val rightShape: Expression
-  val swappedLeftAndRight: Boolean
   val spatialPredicate: SpatialPredicate
   val extraCondition: Option[Expression]
 
-  override def output: Seq[Attribute] = {
-    if (!swappedLeftAndRight) left.output ++ right.output else right.output ++ left.output
-  }
+  override def output: Seq[Attribute] = left.output ++ right.output
 
   override protected def doExecute(): RDD[InternalRow] = {
     val boundLeftShape = BindReferences.bindReference(leftShape, left.output)
@@ -125,12 +122,9 @@ trait TraitJoinQueryExec extends TraitJoinQueryBase {
     logDebug(s"Join result has ${matchesRDD.count()} rows")
 
     matchesRDD.mapPartitions { iter =>
-      val joinRow = if (!swappedLeftAndRight) {
+      val joinRow = {
         val joiner = GenerateUnsafeRowJoiner.create(left.schema, right.schema)
         (l: UnsafeRow, r: UnsafeRow) => joiner.join(l, r)
-      } else {
-        val joiner = GenerateUnsafeRowJoiner.create(right.schema, left.schema)
-        (l: UnsafeRow, r: UnsafeRow) => joiner.join(r, l)
       }
 
       val joined = iter.map { case (l, r) =>
