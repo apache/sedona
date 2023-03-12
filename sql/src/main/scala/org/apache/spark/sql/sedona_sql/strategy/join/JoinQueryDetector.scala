@@ -175,6 +175,16 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
       None
     }
 
+  private def matchDistanceExpressionToJoinSide(distance: Expression, left: LogicalPlan, right: LogicalPlan): Option[JoinSide] = {
+    if (distance.references.isEmpty || matches(distance, left)) {
+      Some(LeftSide)
+    } else if (matches(distance, right)) {
+      Some(RightSide)
+    } else {
+      None
+    }
+  }
+
   private def planSpatialJoin(
     left: LogicalPlan,
     right: LogicalPlan,
@@ -277,20 +287,31 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
       case (None, _) => s"ST_$spatialPredicate"
     }
 
+    val (distanceOnIndexSide, distanceOnStreamSide) = distance.map { distanceExpr =>
+      matchDistanceExpressionToJoinSide(distanceExpr, left, right) match {
+        case Some(side) =>
+          if (broadcastSide.get == side) (Some(distanceExpr), None)
+          else if (distanceExpr.references.isEmpty) (Some(distanceExpr), None)
+          else (None, Some(distanceExpr))
+        case _ => throw new IllegalArgumentException("Distance expression must be bound to one side of the join")
+      }
+    }.getOrElse((None, None))
+
     matchExpressionsToPlans(a, b, left, right) match {
       case Some((_, _, swapped)) =>
         logInfo(s"Planning spatial join for $relationship relationship")
         val (leftPlan, rightPlan, streamShape, windowSide) = (broadcastSide.get, swapped) match {
           case (LeftSide, false) => // Broadcast the left side, windows on the left
-            (SpatialIndexExec(planLater(left), a, indexType, distance), planLater(right), b, LeftSide)
+            (SpatialIndexExec(planLater(left), a, indexType, distanceOnIndexSide), planLater(right), b, LeftSide)
           case (LeftSide, true) => // Broadcast the left side, objects on the left
-            (SpatialIndexExec(planLater(left), b, indexType), planLater(right), a, RightSide)
+            (SpatialIndexExec(planLater(left), b, indexType, distanceOnIndexSide), planLater(right), a, RightSide)
           case (RightSide, false) => // Broadcast the right side, windows on the left
-            (planLater(left), SpatialIndexExec(planLater(right), b, indexType), a, LeftSide)
+            (planLater(left), SpatialIndexExec(planLater(right), b, indexType, distanceOnIndexSide), a, LeftSide)
           case (RightSide, true) => // Broadcast the right side, objects on the left
-            (planLater(left), SpatialIndexExec(planLater(right), a, indexType, distance), b, RightSide)
+            (planLater(left), SpatialIndexExec(planLater(right), a, indexType, distanceOnIndexSide), b, RightSide)
         }
-        BroadcastIndexJoinExec(leftPlan, rightPlan, streamShape, broadcastSide.get, windowSide, joinType, spatialPredicate, extraCondition, distance) :: Nil
+        BroadcastIndexJoinExec(leftPlan, rightPlan, streamShape, broadcastSide.get, windowSide, joinType,
+          spatialPredicate, extraCondition, distanceOnStreamSide) :: Nil
       case None =>
         logInfo(
           s"Spatial join for $relationship with arguments not aligned " +
