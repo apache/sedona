@@ -203,9 +203,13 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     val relationship = s"ST_$spatialPredicate"
 
     matchExpressionsToPlans(a, b, left, right) match {
-      case Some((planA, planB, swappedLeftAndRight)) =>
+      case Some((_, _, false)) =>
         logInfo(s"Planning spatial join for $relationship relationship")
-        RangeJoinExec(planLater(planA), planLater(planB), a, b, swappedLeftAndRight, spatialPredicate, extraCondition) :: Nil
+        RangeJoinExec(planLater(left), planLater(right), a, b, spatialPredicate, extraCondition) :: Nil
+      case Some((_, _, true)) =>
+        logInfo(s"Planning spatial join for $relationship relationship with swapped left and right shapes")
+        val invSpatialPredicate = SpatialPredicate.inverse(spatialPredicate)
+        RangeJoinExec(planLater(left), planLater(right), b, a, invSpatialPredicate, extraCondition) :: Nil
       case None =>
         logInfo(
           s"Spatial join for $relationship with arguments not aligned " +
@@ -231,18 +235,22 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     val b = children.tail.head
 
     matchExpressionsToPlans(a, b, left, right) match {
-      case Some((planA, planB, swappedLeftAndRight)) =>
-        if (distance.references.isEmpty || matches(distance, planA)) {
-          logInfo("Planning spatial distance join")
-          DistanceJoinExec(planLater(planA), planLater(planB), a, b, swappedLeftAndRight, distance, spatialPredicate, extraCondition) :: Nil
-        } else if (matches(distance, planB)) {
-          logInfo("Planning spatial distance join")
-          DistanceJoinExec(planLater(planB), planLater(planA), b, a, swappedLeftAndRight, distance, spatialPredicate, extraCondition) :: Nil
-        } else {
-          logInfo(
-            "Spatial distance join for ST_Distance with non-scalar distance " +
-              "that is not a computation over just one side of the join is not supported")
-          Nil
+      case Some((_, _, swappedLeftAndRight)) =>
+        val (leftShape, rightShape) = if (swappedLeftAndRight) (b, a) else (a, b)
+        matchDistanceExpressionToJoinSide(distance, left, right) match {
+          case Some(LeftSide) =>
+            logInfo("Planning spatial distance join, distance bound to left relation")
+            DistanceJoinExec(planLater(left), planLater(right), leftShape, rightShape, distance, distanceBoundToLeft = true,
+              spatialPredicate, extraCondition) :: Nil
+          case Some(RightSide) =>
+            logInfo("Planning spatial distance join, distance bound to right relation")
+            DistanceJoinExec(planLater(left), planLater(right), leftShape, rightShape, distance, distanceBoundToLeft = false,
+              spatialPredicate, extraCondition) :: Nil
+          case _ =>
+            logInfo(
+              "Spatial distance join for ST_Distance with non-scalar distance " +
+                "that is not a computation over just one side of the join is not supported")
+            Nil
         }
       case None =>
         logInfo(

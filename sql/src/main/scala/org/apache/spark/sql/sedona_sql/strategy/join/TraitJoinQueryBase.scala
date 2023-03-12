@@ -23,29 +23,26 @@ import org.apache.sedona.core.utils.SedonaConf
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeRow}
-import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.execution.SparkPlan
 import org.locationtech.jts.geom.Geometry
 
 trait TraitJoinQueryBase {
   self: SparkPlan =>
 
-  def toSpatialRddPair(buildRdd: RDD[UnsafeRow],
-                       buildExpr: Expression,
-                       streamedRdd: RDD[UnsafeRow],
-                       streamedExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) =
-    (toSpatialRDD(buildRdd, buildExpr), toSpatialRDD(streamedRdd, streamedExpr))
+  def toSpatialRddPair(leftRdd: RDD[UnsafeRow],
+                       leftShapeExpr: Expression,
+                       rightRdd: RDD[UnsafeRow],
+                       rightShapeExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) =
+    (toSpatialRDD(leftRdd, leftShapeExpr), toSpatialRDD(rightRdd, rightShapeExpr))
 
   def toSpatialRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression): SpatialRDD[Geometry] = {
     val spatialRdd = new SpatialRDD[Geometry]
     spatialRdd.setRawSpatialRDD(
       rdd
-        .map { x => {
+        .map { x =>
           val shape = GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
-          //logInfo(shape.toString)
           shape.setUserData(x.copy)
           shape
-        }
         }
         .toJavaRDD())
     spatialRdd
@@ -55,7 +52,7 @@ trait TraitJoinQueryBase {
     val spatialRdd = new SpatialRDD[Geometry]
     spatialRdd.setRawSpatialRDD(
       rdd
-        .map { x => {
+        .map { x =>
           val shape = GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
           val envelope = shape.getEnvelopeInternal.copy()
           envelope.expandBy(boundRadius.eval(x).asInstanceOf[Double])
@@ -63,7 +60,6 @@ trait TraitJoinQueryBase {
           val expandedEnvelope = shape.getFactory.toGeometry(envelope)
           expandedEnvelope.setUserData(x.copy)
           expandedEnvelope
-        }
         }
         .toJavaRDD())
     spatialRdd
