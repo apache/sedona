@@ -49,3 +49,10 @@ sparkSession.conf.set("sedona.global.index","false")
 	* The dominant side in spatial partitioning stage
 	* Default: left
 	* Possible values: left, right
+* sedona.join.optimizationmode **(Advanced users only!)**
+	* When should Sedona optimize spatial join SQL queries
+	* Default: nonequi
+	* Possible values:
+		* all: Always optimize spatial join queries, even for equi-joins.
+		* none: Disable optimization for spatial joins.
+		* nonequi: Optimize spatial join queries that are not equi-joins.

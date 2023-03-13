@@ -23,6 +23,7 @@ import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.enums.JoinBuildSide;
 import org.apache.sedona.core.enums.JoinSparitionDominantSide;
+import org.apache.sedona.core.enums.SpatialJoinOptimizationMode;
 import org.apache.spark.sql.RuntimeConfig;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.util.Utils;
@@ -57,6 +58,8 @@ public class SedonaConf
 
     private long autoBroadcastJoinThreshold;
 
+    private SpatialJoinOptimizationMode spatialJoinOptimizationMode;
+
     public static SedonaConf fromActiveSession() {
         return new SedonaConf(SparkSession.active().conf());
     }
@@ -78,6 +81,8 @@ public class SedonaConf
                         runtimeConfig.get("spark.sql.autoBroadcastJoinThreshold")
                 )
         );
+        this.spatialJoinOptimizationMode = SpatialJoinOptimizationMode.getSpatialJoinOptimizationMode(
+                runtimeConfig.get("sedona.join.optimizationmode", "nonequi"));
     }
 
     public boolean getUseIndex()
@@ -152,5 +157,9 @@ public class SedonaConf
         } else {
             return Utils.byteStringAsBytes(str);
         }
+    }
+
+    public SpatialJoinOptimizationMode getSpatialJoinOptimizationMode() {
+        return spatialJoinOptimizationMode;
     }
 }
