@@ -56,6 +56,7 @@ import org.apache.spark.sql.sedona_sql.expressions.ST_OrderingEquals
 import org.apache.spark.sql.sedona_sql.expressions.ST_Overlaps
 import org.apache.spark.sql.sedona_sql.expressions.ST_Touches
 import org.apache.spark.sql.sedona_sql.expressions.ST_Within
+import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.splitConjunctivePredicates
 import org.apache.spark.sql.types.DoubleType
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.Point
@@ -169,22 +170,6 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
       case Seq(pushableColumn(name), Literal(v, _)) => Some(name, v)
       case Seq(Literal(v, _), pushableColumn(name)) => Some(name, v)
       case _ => None
-    }
-  }
-
-  /**
-   * This is a polyfill for running on Spark 3.0 while compiling against Spark 3.3. We'd really like to mixin
-   * `PredicateHelper` here, but the class hierarchy of `PredicateHelper` has changed between Spark 3.0 and 3.3 so
-   * it would raise `java.lang.ClassNotFoundException: org.apache.spark.sql.catalyst.expressions.AliasHelper`
-   * at runtime on Spark 3.0.
-   * @param condition filter condition to split
-   * @return A list of conjunctive conditions
-   */
-  private def splitConjunctivePredicates(condition: Expression): Seq[Expression] = {
-    condition match {
-      case And(cond1, cond2) =>
-        splitConjunctivePredicates(cond1) ++ splitConjunctivePredicates(cond2)
-      case other => other :: Nil
     }
   }
 }

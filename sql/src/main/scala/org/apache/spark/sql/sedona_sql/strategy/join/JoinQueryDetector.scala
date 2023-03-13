@@ -18,15 +18,16 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
-import org.apache.sedona.core.enums.IndexType
+import org.apache.sedona.core.enums.{IndexType, SpatialJoinOptimizationMode}
 import org.apache.sedona.core.spatialOperator.SpatialPredicate
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.spark.sql.{SparkSession, Strategy}
-import org.apache.spark.sql.catalyst.expressions.{And, Expression, LessThan, LessThanOrEqual}
+import org.apache.spark.sql.catalyst.expressions.{And, EqualNullSafe, EqualTo, Expression, LessThan, LessThanOrEqual}
 import org.apache.spark.sql.catalyst.plans.{ExistenceJoin, FullOuter, Inner, InnerLike, JoinType, LeftAnti, LeftOuter, LeftSemi, NaturalJoin, RightOuter, UsingJoin}
 import org.apache.spark.sql.catalyst.plans.logical._
 import org.apache.spark.sql.execution.SparkPlan
 import org.apache.spark.sql.sedona_sql.expressions._
+import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.splitConjunctivePredicates
 
 
 case class JoinQueryDetection(
@@ -44,7 +45,7 @@ case class JoinQueryDetection(
   * and ST_Intersects(a, b).
   *
   * Plans `DistanceJoinExec` for inner joins on spatial relationship ST_Distance(a, b) < r.
-  * 
+  *
   * Plans `BroadcastIndexJoinExec` for inner joins on spatial relationships with a broadcast hint.
   */
 class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
@@ -78,7 +79,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     }
 
   def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
-    case Join(left, right, joinType, condition, JoinHint(leftHint, rightHint)) => {
+    case Join(left, right, joinType, condition, JoinHint(leftHint, rightHint)) if optimizationEnabled(left, right, condition) => {
       var broadcastLeft = leftHint.exists(_.strategy.contains(BROADCAST))
       var broadcastRight = rightHint.exists(_.strategy.contains(BROADCAST))
 
@@ -144,13 +145,23 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
             planSpatialJoin(left, right, Seq(leftShape, rightShape), joinType, spatialPredicate, extraCondition)
           case Some(JoinQueryDetection(left, right, leftShape, rightShape, spatialPredicate, extraCondition, Some(distance))) =>
             planDistanceJoin(left, right, Seq(leftShape, rightShape), joinType, distance, spatialPredicate, extraCondition)
-          case None => 
+          case None =>
             Nil
         }
       }
     }
     case _ =>
       Nil
+  }
+
+  private def optimizationEnabled(left: LogicalPlan, right: LogicalPlan, condition: Option[Expression]): Boolean = {
+    val sedonaConf = new SedonaConf(sparkSession.conf)
+    sedonaConf.getSpatialJoinOptimizationMode match {
+      case SpatialJoinOptimizationMode.NONE => false
+      case SpatialJoinOptimizationMode.ALL => true
+      case SpatialJoinOptimizationMode.NONEQUI => !isEquiJoin(left, right, condition)
+      case mode => throw new IllegalArgumentException(s"Unknown spatial join optimization mode: $mode")
+    }
   }
 
   private def canAutoBroadcastBySize(plan: LogicalPlan) =
@@ -161,7 +172,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     * map to the output of the specified plan.
     */
   private def matches(expr: Expression, plan: LogicalPlan): Boolean =
-    expr.references.nonEmpty && expr.references.forall(plan.outputSet.contains(_))
+    expr.references.nonEmpty && expr.references.subsetOf(plan.outputSet)
 
   private def matchExpressionsToPlans(exprA: Expression,
                                       exprB: Expression,
@@ -325,6 +336,28 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
           s"Spatial join for $relationship with arguments not aligned " +
             "with join relations is not supported")
         Nil
+    }
+  }
+
+  /**
+   * Check if the given condition is an equi-join between the given plans. This method basically replicates
+   * the logic of [[org.apache.spark.sql.catalyst.planning.ExtractEquiJoinKeys.unapply]] but it does not
+   * populate the join keys.
+   *
+   * @param left left side of the join
+   * @param right right side of the join
+   * @param condition join condition
+   * @return true if the condition is an equi-join between the given plans
+   */
+  private def isEquiJoin(left: LogicalPlan, right: LogicalPlan, condition: Option[Expression]): Boolean = {
+    val predicates = condition.map(splitConjunctivePredicates).getOrElse(Nil)
+    predicates.exists {
+      case EqualTo(l, r) if l.references.isEmpty || r.references.isEmpty => false
+      case EqualTo(l, r) if matches(l, left) && matches(r, right) => true
+      case EqualTo(l, r) if matches(l, right) && matches(r, left) => true
+      case EqualNullSafe(l, r) if matches(l, left) && matches(r, right) => true
+      case EqualNullSafe(l, r) if matches(l, right) && matches(r, left) => true
+      case _ => false
     }
   }
 }

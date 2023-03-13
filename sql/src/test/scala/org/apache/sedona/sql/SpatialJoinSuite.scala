@@ -23,6 +23,7 @@ import org.apache.spark.sql.Column
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.{col, expr}
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors.ST_GeomFromText
+import org.apache.spark.sql.sedona_sql.strategy.join.{BroadcastIndexJoinExec, DistanceJoinExec, RangeJoinExec}
 import org.apache.spark.sql.types.IntegerType
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKTReader
@@ -140,6 +141,47 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
     }
   }
 
+  describe("Spatial join in Sedona SQL should be configurable using sedona.join.optimizationmode") {
+    it("Optimize all spatial joins when sedona.join.optimizationmode = all") {
+      withOptimizationMode("all") {
+        prepareTempViewsForTestData()
+        val df = sparkSession.sql("SELECT df1.id, df2.id FROM df1 JOIN df2 ON df1.id = df2.id AND ST_Intersects(df1.geom, df2.geom)")
+        assert(isUsingOptimizedSpatialJoin(df))
+        val expectedResult = buildExpectedResult("ST_Intersects(df1.geom, df2.geom)")
+          .filter { case (id1, id2) => id1 == id2 }
+        verifyResult(expectedResult, df)
+      }
+    }
+
+    it("Only optimize non-equi-joins when sedona.join.optimizationmode = nonequi") {
+      withOptimizationMode("nonequi") {
+        prepareTempViewsForTestData()
+        val df = sparkSession.sql("SELECT df1.id, df2.id FROM df1 JOIN df2 ON ST_Intersects(df1.geom, df2.geom)")
+        assert(isUsingOptimizedSpatialJoin(df))
+        val df2 = sparkSession.sql("SELECT df1.id, df2.id FROM df1 JOIN df2 ON df1.id = df2.id AND ST_Intersects(df1.geom, df2.geom)")
+        assert(!isUsingOptimizedSpatialJoin(df2))
+      }
+    }
+
+    it("Won't optimize spatial joins when sedona.join.optimizationmode = none") {
+      withOptimizationMode("none") {
+        prepareTempViewsForTestData()
+        val df = sparkSession.sql("SELECT df1.id, df2.id FROM df1 JOIN df2 ON ST_Intersects(df1.geom, df2.geom)")
+        assert(!isUsingOptimizedSpatialJoin(df))
+      }
+    }
+  }
+
+  private def withOptimizationMode(mode: String)(body: => Unit) : Unit = {
+    val oldOptimizationMode = sparkSession.conf.get("sedona.join.optimizationmode", "nonequi")
+    try {
+      sparkSession.conf.set("sedona.join.optimizationmode", mode)
+      body
+    } finally {
+      sparkSession.conf.set("sedona.join.optimizationmode", oldOptimizationMode)
+    }
+  }
+
   private def prepareTempViewsForTestData(): (DataFrame, DataFrame) = {
     val df1 = sparkSession.read.format("csv").option("header", "false").option("delimiter", testDataDelimiter)
       .load(spatialJoinLeftInputLocation)
@@ -207,8 +249,17 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
   }
 
   def verifyResult(expected: Seq[(Int, Int)], result: DataFrame): Unit = {
+    isUsingOptimizedSpatialJoin(result)
     val actual = result.collect().map(row => (row.getInt(0), row.getInt(1))).sorted
     assert(actual.nonEmpty)
     assert(actual === expected)
+  }
+
+  def isUsingOptimizedSpatialJoin(df: DataFrame): Boolean = {
+    df.queryExecution.executedPlan.collect {
+      case _: BroadcastIndexJoinExec |
+           _: DistanceJoinExec |
+           _: RangeJoinExec => true
+    }.nonEmpty
   }
 }
