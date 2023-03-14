@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
       with:
@@ -22,6 +22,10 @@ jobs:
     - run: pip install mkdocs-git-revision-date-localized-plugin
     - run: pip install mike
     - run: sudo apt update
+    - uses: r-lib/actions/setup-r@v2
+      with:
+        r-version: release
+        use-public-rspm: true
     - name: Query R dependencies
       uses: r-lib/actions/setup-r-dependencies@v2
       with:
