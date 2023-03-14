@@ -36,9 +36,9 @@ While the former option enables more fine-grained control over low-level
 implementation details (e.g., which index to build for spatial queries,
 which data structure to use for spatial partitioning, etc), the latter
 is simpler and leads to a straightforward integration with `{dplyr}`,
-`{sparklyr}`, and other `{sparklyr}` extensions (e.g., one can build ML
+`{sparklyr}`, and other `sparklyr` extensions (e.g., one can build ML
 feature extractors with Sedona UDFs and connect them with ML pipelines
-using `ml_*()` family of functions in `{sparklyr}`, hence creating ML
+using `ml_*()` family of functions in `sparklyr`, hence creating ML
 workflows capable of understanding spatial data).
 
 Because data from spatial RDDs can be imported into Spark DataFrames as
@@ -124,7 +124,7 @@ library(dplyr)
 
 ### Copying from R
 
-Data loaded in R can be copied to Spark using `copy_to`. Columns containing spatial information can be converted to the geometry type in Spark DataFrames (GeometryUDT) with Spark SQL functions such as `ST_GeomFromText` or `ST_GeomFromText`, see [Vector constructors](https://sedona.apache.org/latest-snapshot/api/sql/Constructor/) and [Raster input and output](https://sedona.apache.org/latest-snapshot/api/sql/Raster-loader/).
+Data loaded in R can be copied to Spark using `copy_to`. Columns containing spatial information can be converted to the geometry type in Spark DataFrames (GeometryUDT) with Spark SQL functions such as `ST_GeomFromText` or `ST_GeomFromText`, see [Vector constructors](../../api/sql/Constructor/) and [Raster input and output](../../api/sql/Raster-loader/).
 
 ```{r}
 data <- readr::read_csv(here::here("../core/src/test/resources/arealm.csv"), col_names = FALSE, show_col_types = FALSE)
@@ -181,10 +181,10 @@ data_tbl %>%
 
 The dbplyr interface transparently translates dbplyr worklfows into SQL, and gives access to all Apache Sedona SQL functions:
  
-* [Vector functions](https://sedona.apache.org/latest-snapshot/api/sql/Function/)
-* [Vector predicates](https://sedona.apache.org/latest-snapshot/api/sql/Predicate/)
-* [Vector aggregate functions](https://sedona.apache.org/latest-snapshot/api/sql/AggregateFunction/)
-* [Raster operators](https://sedona.apache.org/latest-snapshot/api/sql/Raster-operators/)
+* [Vector functions](../../api/sql/Function/)
+* [Vector predicates](../../api/sql/Predicate/)
+* [Vector aggregate functions](../../api/sql/AggregateFunction/)
+* [Raster operators](../../api/sql/Raster-operators/)
 
 Results are then collected back into R with `collect`.
 
@@ -276,7 +276,7 @@ sdf
 
 ## What are `SpatialRDD`s?
 
-[SpatialRDDs](https://sedona.apache.org/latest-snapshot/tutorial/rdd/) are basic building blocks of distributed spatial data in Apache Sedona.
+[SpatialRDDs](../../tutorial/rdd/) are basic building blocks of distributed spatial data in Apache Sedona.
 A `SpatialRDD` can be partitioned and indexed using well-known spatial
 data structures to facilitate range queries, KNN queries, and other
 low-level operations. One can also export records from `SpatialRDD`s
@@ -421,7 +421,7 @@ visualization-related R interfaces currently implemented by
 
 
 # Advanced parameters
-Various advanced parameters can be set in Apache Sedona, see [parameters](https://sedona.apache.org/latest-snapshot/api/sql/Parameter/)
+Various advanced parameters can be set in Apache Sedona, see [parameters](../../api/sql/Parameter/)
 
 Currently not working through the sparklyr config:
 ```{r include=FALSE}
