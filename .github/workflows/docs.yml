@@ -33,7 +33,7 @@ jobs:
         extra-packages: |
           any::pkgdown
         working-directory : './R'
-    - run: r -e 'pkgdown::build_site(pkg = "./R", preview = FALSE, override = list(destination = "./docs/api/rdocs"))'
+    - run: Rscript -e 'pkgdown::build_site(pkg = "./R", preview = FALSE, override = list(destination = "./docs/api/rdocs"))'
     - uses: actions/cache@v2
       with:
         path: ~/.cache/pip
