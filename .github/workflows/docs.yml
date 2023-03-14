@@ -2,7 +2,7 @@ name: Docs build
 on:
   push:
     branches:
-      - master
+      - r-pkgdown
   pull_request:
     branches:
       - '*'
@@ -22,15 +22,14 @@ jobs:
     - run: pip install mkdocs-git-revision-date-localized-plugin
     - run: pip install mike
     - run: sudo apt update
-    - run: sudo apt install littler tree libcurl4-openssl-dev
-    - run: (sudo Rscript generate-docs.R)
-
-    - uses: actions/cache@v2
+    - name: Query R dependencies
+      uses: r-lib/actions/setup-r-dependencies@v2
       with:
-        path: ~/.local/share/renv
-        key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-renv-
+        cache: true
+        extra-packages: |
+          any::pkgdown
+        working-directory : './R'
+    - run: r -e 'pkgdown::build_site(pkg = "./R", preview = FALSE, override = list(destination = "./docs/api/rdocs"))'
     - uses: actions/cache@v2
       with:
         path: ~/.cache/pip
@@ -38,7 +37,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
 
-    - run: (cd docs/api/rdocs/; sudo tree -H '.' -L 1 --noreport --charset utf-8 -o index.html)
     - run: git config --global user.name = "test-name"
     - run: git config --global user.email = "test-email@abc.com"
     - run: mike deploy --update-aliases current-snapshot
