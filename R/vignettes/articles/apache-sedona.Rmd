@@ -28,9 +28,9 @@ Generally speaking, when working with Apache Sedona, one choose between
 the following two modes:
 
 -   Manipulating Sedona [Spatial Resilient Distributed
-    Datasets](../../tutorial/rdd)
+    Datasets](../../../tutorial/rdd)
     with spatial-RDD-related routines
--   Querying geometric columns within [Spatial DataFrames](../../tutorial/sql) with Sedona
+-   Querying geometric columns within [Spatial DataFrames](../../../tutorial/sql) with Sedona
     spatial UDFs
 
 While the former option enables more fine-grained control over low-level
