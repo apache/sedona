@@ -32,7 +32,7 @@ library(apache.sedona)
 
 sc <- spark_connect(master = "local")
 
-data_tbl <- spark_read_binary(sc, dir = "../../core/src/test/resources/raster/", name = "data") 
+data_tbl <- spark_read_binary(sc, dir = "../../../core/src/test/resources/raster/", name = "data") 
 
 raster <- 
   data_tbl %>% 
@@ -90,7 +90,7 @@ raster %>%
 
 The Sedona Geotiff Dataframe Loader will read data from GeoTiff file (or folder containing multiple files) into a Spark DataFrame. The resulting data is a nested column. It can be unnested using SQL (results are collected)...:
 ```{r}
-data_tbl <- spark_read_geotiff(sc, path = ("../../core/src/test/resources/raster/"), name = "data", options = list(dropInvalid = TRUE))
+data_tbl <- spark_read_geotiff(sc, path = ("../../../core/src/test/resources/raster/"), name = "data", options = list(dropInvalid = TRUE))
 data_tbl
 
 ## Using a direct SQL query: results are collected directly
@@ -107,7 +107,7 @@ sc %>%
 ```{r}
 library(sparklyr.nested)
 
-data_tbl %>% sdf_schema_json(parse_json = FALSE) %>% jsonlite::prettify()
+data_tbl %>% sdf_schema_json(parse_json = TRUE) %>% lobstr::tree()
 
 data_tbl %>% 
   sdf_unnest(image) %>% 

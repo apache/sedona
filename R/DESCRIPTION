@@ -41,4 +41,3 @@ Encoding: UTF-8
 RoxygenNote: 7.2.3
 SystemRequirements: 'Apache Spark' 3.x
 Roxygen: list(markdown = TRUE)
-VignetteBuilder: knitr

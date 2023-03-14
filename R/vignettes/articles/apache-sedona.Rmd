@@ -127,7 +127,7 @@ library(dplyr)
 Data loaded in R can be copied to Spark using `copy_to`. Columns containing spatial information can be converted to the geometry type in Spark DataFrames (GeometryUDT) with Spark SQL functions such as `ST_GeomFromText` or `ST_GeomFromText`, see [Vector constructors](https://sedona.apache.org/latest-snapshot/api/sql/Constructor/) and [Raster input and output](https://sedona.apache.org/latest-snapshot/api/sql/Raster-loader/).
 
 ```{r}
-data <- readr::read_tsv("../../binder/data/county_small.tsv", col_names = FALSE, show_col_types = FALSE)
+data <- readr::read_csv(here::here("../core/src/test/resources/arealm.csv"), col_names = FALSE, show_col_types = FALSE)
 data %>% glimpse()
 
 data_tbl <- copy_to(sc, data)
@@ -141,7 +141,7 @@ data_tbl %>%
 No automatic translation of `{sf}` objects is provided, they need to be converted to text (or binary) format before copying to spark.
 
 ```{r}
-data <- sf::st_read("../../binder/data/testPolygon.json")
+data <- sf::st_read(here::here("../core/src/test/resources/testPolygon.json"))
 
 data %>% glimpse()
 
@@ -165,14 +165,15 @@ data_tbl %>%
 Loading data in R and then copying it to Spark will most likely not be the optimal method to prepare data for analysis; loading data directly into Spark will often be best.`spark_read_*` functions are made for this purpose (and extend `spark_read_*` functions in `sparklyr`).
 
 ```{r}
-data_tbl <- spark_read_geojson(sc, path = "../../binder/data/testPolygon.json", name = "data")
+data_tbl <- spark_read_geojson(sc, path = here::here("../core/src/test/resources/testPolygon.json"), name = "data")
 
 data_tbl %>% 
   glimpse()
 
 data_tbl %>% 
-  select(geometry) %>% 
-  sdf_schema()
+  # select(geometry) %>% 
+  sdf_schema() %>% 
+  lobstr::tree()
 ```
 
 
@@ -300,7 +301,7 @@ into a `SpatialRDD`:
 ```{r}
 pt_rdd <- sedona_read_dsv_to_typed_rdd(
   sc,
-  location = "../../binder/data/arealm-small.csv",
+  location = here::here("../core/src/test/resources/arealm.csv"),
   delimiter = ",",
   type = "point",
   first_spatial_col_index = 1,
@@ -367,12 +368,12 @@ boundary <- c(-126.790180, -64.630926, 24.863836, 50.000)
 
 pt_rdd <- sedona_read_dsv_to_typed_rdd(
   sc,
-  location = "../../core/src/test/resources/arealm.csv",
+  location = here::here("../core/src/test/resources/arealm.csv"),
   type = "point"
 )
 polygon_rdd <- sedona_read_dsv_to_typed_rdd(
   sc,
-  location = "../../core/src/test/resources/primaryroads-polygon.csv",
+  location = here::here("../core/src/test/resources/primaryroads-polygon.csv"),
   type = "polygon"
 )
 pair_rdd <- sedona_spatial_join_count_by_key(
@@ -422,7 +423,7 @@ visualization-related R interfaces currently implemented by
 # Advanced parameters
 Various advanced parameters can be set in Apache Sedona, see [parameters](https://sedona.apache.org/latest-snapshot/api/sql/Parameter/)
 
-Through the sparklyr config:
+Currently not working through the sparklyr config:
 ```{r include=FALSE}
 ## Disconnect first
 sc %>% spark_disconnect()
@@ -439,17 +440,20 @@ Check
 ```{r}
 invoke_new(sc, "org.apache.sedona.core.utils.SedonaConf", invoke(spark_session(sc), "conf")) 
 ```
-
+(Still true)
 
 Or change at runtime:
 ```{r}
 spark_session(sc) %>% 
   invoke("conf") %>% 
-  invoke("set", "sedona.global.index","true")
+  invoke("set", "sedona.global.index","false")
 
 invoke_new(sc, "org.apache.sedona.core.utils.SedonaConf", invoke(spark_session(sc), "conf")) 
 ```
 
+```{r}
+invoke_new(sc, "org.apache.sedona.core.utils.SedonaConf", invoke(spark_session(sc), "conf")) 
+```
 
 
 
