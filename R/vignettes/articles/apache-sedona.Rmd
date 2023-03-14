@@ -55,7 +55,7 @@ At the moment `apache.sedona` consists of the following components:
         operations
     -   Visualization routines
 -   `dplyr`-integration for Sedona spatial UDTs and UDFs
-    -   See [SQL APIs](../../api/sql/Overview/) for the list
+    -   See [SQL APIs](../../../api/sql/Overview/) for the list
         of available UDFs
 -   Functions importing data from spatial RDDs to Spark DataFrames and
     vice versa
@@ -109,7 +109,7 @@ spark_session(sc) %>%
 
 For more information about connecting to Spark with `sparklyr`, see
 <https://therinspark.com/connections.html> and `?sparklyr::spark_connect`. Also see
-[Initiate Spark Context](../../tutorial/rdd/#initiate-sparkcontext) and [Initiate Spark Session](../../tutorial/sql/#initiate-sparksession) for minimum and recommended dependencies for Apache Sedona.
+[Initiate Spark Context](../../../tutorial/rdd/#initiate-sparkcontext) and [Initiate Spark Session](../../../tutorial/sql/#initiate-sparksession) for minimum and recommended dependencies for Apache Sedona.
 
 
 
@@ -125,7 +125,7 @@ library(dplyr)
 
 ### Copying from R
 
-Data loaded in R can be copied to Spark using `copy_to`. Columns containing spatial information can be converted to the geometry type in Spark DataFrames (GeometryUDT) with Spark SQL functions such as `ST_GeomFromText` or `ST_GeomFromText`, see [Vector constructors](../../api/sql/Constructor/) and [Raster input and output](../../api/sql/Raster-loader/).
+Data loaded in R can be copied to Spark using `copy_to`. Columns containing spatial information can be converted to the geometry type in Spark DataFrames (GeometryUDT) with Spark SQL functions such as `ST_GeomFromText` or `ST_GeomFromText`, see [Vector constructors](../../../api/sql/Constructor/) and [Raster input and output](../../../api/sql/Raster-loader/).
 
 ```{r}
 data <- readr::read_csv(here::here("../core/src/test/resources/arealm.csv"), col_names = FALSE, show_col_types = FALSE)
@@ -182,10 +182,10 @@ data_tbl %>%
 
 The dbplyr interface transparently translates dbplyr worklfows into SQL, and gives access to all Apache Sedona SQL functions:
  
-* [Vector functions](../../api/sql/Function/)
-* [Vector predicates](../../api/sql/Predicate/)
-* [Vector aggregate functions](../../api/sql/AggregateFunction/)
-* [Raster operators](../../api/sql/Raster-operators/)
+* [Vector functions](../../../api/sql/Function/)
+* [Vector predicates](../../../api/sql/Predicate/)
+* [Vector aggregate functions](../../../api/sql/AggregateFunction/)
+* [Raster operators](../../../api/sql/Raster-operators/)
 
 Results are then collected back into R with `collect`.
 
@@ -277,7 +277,7 @@ sdf
 
 ## What are `SpatialRDD`s?
 
-[SpatialRDDs](../../tutorial/rdd/) are basic building blocks of distributed spatial data in Apache Sedona.
+[SpatialRDDs](../../../tutorial/rdd/) are basic building blocks of distributed spatial data in Apache Sedona.
 A `SpatialRDD` can be partitioned and indexed using well-known spatial
 data structures to facilitate range queries, KNN queries, and other
 low-level operations. One can also export records from `SpatialRDD`s
@@ -287,7 +287,7 @@ and through the `dplyr` interface of `sparklyr`.
 ## Creating a SpatialRDD
 
 NOTE: this section is largely based on
-[Spatial RDD Scala tutorial](../rdd/#create-a-spatialrdd), except
+[Spatial RDD Scala tutorial](../../../tutorial/rdd/#create-a-spatialrdd), except
 for examples have been written in R instead of Scala to reflect usages
 of `apache.sedona`.
 
@@ -422,7 +422,7 @@ visualization-related R interfaces currently implemented by
 
 
 # Advanced parameters
-Various advanced parameters can be set in Apache Sedona, see [parameters](../../api/sql/Parameter/)
+Various advanced parameters can be set in Apache Sedona, see [parameters](../../../api/sql/Parameter/)
 
 Currently not working through the sparklyr config:
 ```{r include=FALSE}

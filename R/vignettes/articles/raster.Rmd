@@ -46,8 +46,8 @@ raster %>% sdf_schema()
 
  Once the data is loaded, raster functions are available in dplyr workflows:
  
- * [Raster operators](../../api/sql/Raster-operators/)
- * [Raster input and output](../../api/sql/Raster-loader/)
+ * [Raster operators](../../../api/sql/Raster-operators/)
+ * [Raster input and output](../../../api/sql/Raster-loader/)
  
 Functions taking in `raster: Raster` arguments are meant to be used with data loaded with this reader, such as `RS_Value`, `RS_Values`, `RS_Envelope`. Functions taking in `Band: Array[Double]` arguments work with data loaded using the Sedona Geotiff DataFrame loader (see [below](#Using the Sedona Geotiff Dataframe Loader)).
  
