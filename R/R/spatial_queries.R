@@ -35,6 +35,7 @@
 #'   `org.locationtech.jts.geom.Geometry`.
 #'
 #' @name spatial_query
+#' @keywords internal
 NULL
 
 

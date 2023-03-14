@@ -64,6 +64,7 @@ to_spatial_rdd <- function(x, spatial_col) {
 #' @param x A Sedona spatial RDD.
 #'
 #' @name sedona_spatial_rdd_aggregation_routine
+#' @keywords internal
 NULL
 
 #' Find the minimal bounding box of a geometry.

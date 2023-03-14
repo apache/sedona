@@ -1,0 +1,152 @@
+---
+title: "Using raster data in Apache Sedona for R"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using raster data in Apache Sedona for R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  eval = FALSE,
+  comment = "#>"
+)
+```
+
+
+Raster data in GeoTiff and ArcInfoAsciiGrid formats can be read into Spark.
+
+# Using the RasterUDT
+
+Raster data in GeoTiff and ArcInfo Grid format can be loaded directly into Spark using the `sparklyr::spark_read_binary` and Sedona constructors `RS_FromGeoTiff` and `RS_FromArcInfoAsciiGrid`.
+
+```{r include=FALSE}
+Sys.setenv("SEDONA_JAR_FILES" = "~/WORK/MISC_CODE/sedona/spark-shaded/target/sedona-spark-shaded-3.0_2.12-1.4.0-SNAPSHOT.jar:~/WORK/MISC_CODE/sedona/viz/target/sedona-viz-3.0_2.12-1.4.0-SNAPSHOT.jar")
+```
+
+```{r message=FALSE, warning=FALSE}
+library(dplyr)
+library(sparklyr)
+library(apache.sedona)
+
+sc <- spark_connect(master = "local")
+
+data_tbl <- spark_read_binary(sc, dir = here::here("/../core/src/test/resources/raster/"), name = "data") 
+
+raster <- 
+  data_tbl %>% 
+  mutate(raster = RS_FromGeoTiff(content))
+
+raster 
+
+raster %>% sdf_schema()
+```
+
+ Once the data is loaded, raster functions are available in dplyr workflows:
+ 
+ * [Raster operators](../../../api/sql/Raster-operators/)
+ * [Raster input and output](../../../api/sql/Raster-loader/)
+ 
+Functions taking in `raster: Raster` arguments are meant to be used with data loaded with this reader, such as `RS_Value`, `RS_Values`, `RS_Envelope`. Functions taking in `Band: Array[Double]` arguments work with data loaded using the Sedona Geotiff DataFrame loader (see [below](#Using the Sedona Geotiff Dataframe Loader)).
+ 
+
+For example, getting the number of bands:
+```{r}
+raster %>% 
+  mutate(
+    nbands = RS_NumBands(raster)
+  ) %>% 
+  select(path, nbands) %>% 
+  collect() %>% 
+  mutate(path = path %>% basename())
+```
+
+Or getting values the envelope:
+```{r}
+raster %>% 
+  mutate(
+    env = RS_Envelope(raster) %>% st_astext()
+  ) %>% 
+  select(path, env) %>% 
+  collect() %>% 
+  mutate(path = path %>% basename())
+```
+
+Or getting values at specific points:
+```{r}
+raster %>% 
+  mutate(
+    val = RS_Value(raster, ST_Point(-13077301.685, 4002565.802))
+  ) %>% 
+  select(path, val) %>% 
+  collect() %>% 
+  mutate(path = path %>% basename())
+```
+
+
+
+# Using the Sedona Geotiff Dataframe Loader
+
+The Sedona Geotiff Dataframe Loader will read data from GeoTiff file (or folder containing multiple files) into a Spark DataFrame. The resulting data is a nested column. It can be unnested using SQL (results are collected)...:
+```{r}
+data_tbl <- spark_read_geotiff(sc, path = here::here("../core/src/test/resources/raster/"), name = "data", options = list(dropInvalid = TRUE))
+data_tbl
+
+## Using a direct SQL query: results are collected directly
+sc %>% 
+    DBI::dbGetQuery("SELECT 
+             image.geometry as Geom, 
+             image.height as height, 
+             image.width as width, 
+             image.nBands as bands 
+             FROM data")
+```
+
+... or using `{sparklyr.nested}` (results stay in Spark until collection):
+```{r}
+library(sparklyr.nested)
+
+data_tbl %>% sdf_schema_json(parse_json = TRUE) %>% lobstr::tree()
+
+data_tbl %>% 
+  sdf_unnest(image) %>% 
+  glimpse()
+```
+
+```{r}
+res <- 
+  data_tbl %>% 
+  sdf_unnest(image) %>% 
+  mutate(
+    mult = RS_MultiplyFactor(data, 2L)
+  ) %>% 
+  select(data, mult) %>% 
+  collect()
+
+res$data[[1]][750:760]
+res$mult[[1]][750:760]
+```
+
+
+Writing data back:
+```{r}
+dest_file <- tempfile()
+data_tbl %>% 
+  sdf_unnest(image) %>% 
+  mutate(
+    data = RS_MultiplyFactor(data, 2L)
+  ) %>% 
+  spark_write_geotiff(path = dest_file, mode = "overwrite")
+
+dir(dest_file, recursive = TRUE)
+```
+
+
+```{r include=FALSE}
+## Clean-up
+sc %>% spark_disconnect()
+spark_disconnect_all()
+rm(sc)
+```

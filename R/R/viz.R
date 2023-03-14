@@ -46,6 +46,7 @@
 #'   interactive()).
 #'
 #' @name sedona_visualization_routines
+#' @keywords internal
 NULL
 
 #' Visualize a Sedona spatial RDD using a heatmap.
