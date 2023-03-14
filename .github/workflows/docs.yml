@@ -2,7 +2,7 @@ name: Docs build
 on:
   push:
     branches:
-      - r-pkgdown
+      - master
   pull_request:
     branches:
       - '*'
