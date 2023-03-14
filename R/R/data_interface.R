@@ -256,10 +256,6 @@ sedona_read_geojson_to_typed_rdd <- function(sc,
 #'
 #' @param sc A `spark_connection`.
 #' @param location Location of the data source.
-#' @param type Type of the SpatialRDD (must be one of "point", "polygon", or
-#'   "linestring".
-#' @param has_non_spatial_attrs Whether the input contains non-spatial
-#'   attributes.
 #' @param storage_level Storage level of the RDD (default: MEMORY_ONLY).
 #' @param repartition The minimum number of partitions to have in the resulting
 #'   RDD (default: 1).
@@ -268,6 +264,10 @@ sedona_read_geojson_to_typed_rdd <- function(sc,
 #' @param skip_syntactically_invalid_geometries Whether to allows Sedona to
 #'   automatically skip syntax-invalid geometries, rather than throwing
 #'   errorings.
+#' @param wkt_col_idx Zero-based index of column containing hex-encoded WKB data
+#'   (default: 0).
+#' @param wkb_col_idx Zero-based index of column containing hex-encoded WKB data
+#'   (default: 0).
 #'
 #' @return A SpatialRDD.
 #'
