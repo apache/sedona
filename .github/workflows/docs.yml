@@ -2,7 +2,7 @@ name: Docs build
 on:
   push:
     branches:
-      - r-pkgdown
+      - master
   pull_request:
     branches:
       - '*'
@@ -11,12 +11,13 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 0
     - uses: actions/setup-python@v2
       with:
         python-version: 3.x
+        cache: 'pip'
     - run: pip install mkdocs-material
     - run: pip install mkdocs-macros-plugin
     - run: pip install mkdocs-git-revision-date-localized-plugin
@@ -34,13 +35,6 @@ jobs:
           any::pkgdown
         working-directory : './R'
     - run: Rscript -e 'pkgdown::build_site(pkg = "./R", preview = FALSE, override = list(destination = "../docs/api/rdocs"))'
-    - uses: actions/cache@v2
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-
     - run: git config --global user.name = "test-name"
     - run: git config --global user.email = "test-email@abc.com"
     - run: mike deploy --update-aliases current-snapshot
