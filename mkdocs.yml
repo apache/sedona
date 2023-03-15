@@ -27,14 +27,12 @@ nav:
     - Programming Guides:
       - Sedona with Apache Spark:
         - Spatial SQL app:
-          - Scala/Java: tutorial/sql.md
+          - Scala/Java/Python: tutorial/sql.md
           - Pure SQL: tutorial/sql-pure-sql.md
-          - Python: tutorial/sql-python.md
           - R: tutorial/sql-r.md
-          - Raster data - Map Algebra: tutorial/raster.md      
+          - Raster data processing: tutorial/raster.md      
         - Spatial RDD app:
-          - Scala/Java: tutorial/rdd.md
-          - Python: tutorial/core-python.md
+          - Scala/Java/Python: tutorial/rdd.md
           - R: tutorial/rdd-r.md
         - Map visualization SQL app:
           - Scala/Java: tutorial/viz.md

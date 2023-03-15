@@ -31,13 +31,13 @@ cd python
 python3 setup.py install
 ```
 
-### Prepare python-adapter jar
+### Prepare sedona-spark-shaded jar
 
-Sedona Python needs one additional jar file called `sedona-python-adapter` to work properly. Please make sure you use the correct version for Spark and Scala. For Spark 3.0 + Scala 2.12, it is called `sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.jar`
+Sedona Python needs one additional jar file called `sedona-spark-shaded` to work properly. Please make sure you use the correct version for Spark and Scala. For Spark 3.0 + Scala 2.12, it is called `sedona-spark-shaded-3.0_2.12-{{ sedona.current_version }}.jar`
 
 You can get it using one of the following methods:
 
-1. Compile from the source within main project directory and copy it (in `python-adapter/target` folder) to SPARK_HOME/jars/ folder ([more details](../compile))
+1. Compile from the source within main project directory and copy it (in `spark-shaded/target` folder) to SPARK_HOME/jars/ folder ([more details](../compile))
 
 2. Download from [GitHub release](https://github.com/apache/sedona/releases) and copy it to SPARK_HOME/jars/ folder
 3. Call the [Maven Central coordinate](../maven-coordinates) in your python program. For example, in PySparkSQL
@@ -48,7 +48,7 @@ spark = SparkSession. \
     config("spark.serializer", KryoSerializer.getName). \
     config("spark.kryo.registrator", SedonaKryoRegistrator.getName). \
     config('spark.jars.packages',
-           'org.apache.sedona:sedona-python-adapter-3.0_2.12:{{ sedona.current_version }},'
+           'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
            'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
     getOrCreate()
 ```
@@ -58,7 +58,7 @@ spark = SparkSession. \
 
 ### Setup environment variables
 
-If you manually copy the python-adapter jar to `SPARK_HOME/jars/` folder, you need to setup two environment variables
+If you manually copy the sedona-spark-shaded jar to `SPARK_HOME/jars/` folder, you need to setup two environment variables
 
 * SPARK_HOME. For example, run the command in your terminal
 

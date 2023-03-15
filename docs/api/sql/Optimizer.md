@@ -76,7 +76,8 @@ DistanceJoin pointshape1#12: geometry, pointshape2#33: geometry, 2.0, true
 Introduction: Perform a range join or distance join but broadcast one of the sides of the join.
 This maintains the partitioning of the non-broadcast side and doesn't require a shuffle.
 Sedona uses broadcast join only if the correct side has a broadcast hint.
-The supported join type - broadcast side combinations are
+The supported join type - broadcast side combinations are:
+
 * Inner - either side, preferring to broadcast left if both sides have the hint
 * Left semi - broadcast right
 * Left anti - broadcast right
@@ -148,6 +149,14 @@ Sedona supports spatial predicate push-down for GeoParquet files. When spatial f
 [`bbox` properties in the metadata](https://github.com/opengeospatial/geoparquet/blob/v1.0.0-beta.1/format-specs/geoparquet.md#bbox)
 to determine if all data in the file will be discarded by the spatial predicate. This optimization could reduce the number of files scanned
 when the queried GeoParquet dataset was partitioned by spatial proximity.
+
+To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](../../api/sql/Function/#st_geohash)) and then save as a GeoParquet file. An example is as follows:
+
+```
+SELECT col1, col2, geom, ST_GeoHash(geom, 5) as geohash
+FROM spatialDf
+ORDER BY geohash
+```
 
 The following figure is the visualization of a GeoParquet dataset. `bbox`es of all GeoParquet files were plotted as blue rectangles and the query window was plotted as a red rectangle. Sedona will only scan 1 of the 6 files to
 answer queries such as `SELECT * FROM geoparquet_dataset WHERE ST_Intersects(geom, <query window>)`, thus only part of the data covered by the light green rectangle needs to be scanned.
