@@ -1,5 +1,3 @@
-# Write a Sedona SQL application
-
 The page outlines the steps to manage spatial data using SedonaSQL.
 
 

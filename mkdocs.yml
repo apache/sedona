@@ -26,25 +26,20 @@ nav:
     - Download: download.md
     - Programming Guides:
       - Sedona with Apache Spark:
-        - Spatial SQL app:
-          - Scala/Java/Python: tutorial/sql.md
-          - Pure SQL: tutorial/sql-pure-sql.md
-          - R: tutorial/sql-r.md
-          - Raster data processing: tutorial/raster.md      
-        - Spatial RDD app:
-          - Scala/Java/Python: tutorial/rdd.md
-          - R: tutorial/rdd-r.md
+        - Spatial SQL app: tutorial/sql.md
+        - Raster SQL app: tutorial/raster.md
+        - Pure SQL environment: tutorial/sql-pure-sql.md
+        - Spatial RDD app: tutorial/rdd.md
+        - Sedona R: api/rdocs
         - Map visualization SQL app:
           - Scala/Java: tutorial/viz.md
           - Use Apache Zeppelin: tutorial/zeppelin.md
-          - R: tutorial/viz-r.md
           - Gallery: tutorial/viz-gallery.md
         - Performance tuning:
-          - Benchmark: tutorial/benchmark.md            
+          - Benchmark: tutorial/benchmark.md
           - Tune RDD application: tutorial/Advanced-Tutorial-Tune-your-Application.md
       - Sedona with Apache Flink:
-        - Spatial SQL app:
-          - Scala/Java: tutorial/flink/sql.md
+        - Spatial SQL app: tutorial/flink/sql.md
       - Examples:
           - Scala/Java: tutorial/demo.md
           - Python: tutorial/jupyter-notebook.md

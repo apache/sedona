@@ -15,8 +15,9 @@ Sedona 1.4.0 is compiled against, Spark 3.3 / Flink 1.12, Java 8.
 
 ### Behavior change
 
-* **Sedona Spark & Flink** Packaging stategy changed. See [Maven Coordinate](../maven-coordinates). Please change your Sedona dependencies if needed.
-* **Sedona Spark** Join optimization stragy changed. Sedona no longer optimizes spatial join when use a spatial predicate together with a equijoin predicate. By default, it prefers equijoin whenever possible. SedonaConf adds a config option called `sedona.join.optimizationmode`, it can be configured as one of the following values:
+* **Sedona Spark & Flink** Packaging strategy changed. See [Maven Coordinate](../maven-coordinates). Please change your Sedona dependencies if needed.
+* **Sedona Flink** Sedona Flink no longer outputs any LinearRing type geometry. All LinearRing are changed to LineString.
+* **Sedona Spark** Join optimization strategy changed. Sedona no longer optimizes spatial join when use a spatial predicate together with a equijoin predicate. By default, it prefers equijoin whenever possible. SedonaConf adds a config option called `sedona.join.optimizationmode`, it can be configured as one of the following values:
 	* `all`: optimize all joins having spatial predicate in join conditions. This was the behavior of Apache Sedona prior to 1.4.0.
 	* `none`: disable spatial join optimization.
 	* `nonequi`: only enable spatial join optimization on non-equi joins. This is the default mode.
@@ -98,6 +99,8 @@ When `sedona.join.optimizationmode` is configured as `nonequi`, it won't optimiz
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-226'>SEDONA-226</a>] -         Support reading and writing GeoParquet file metadata
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-228'>SEDONA-228</a>] -         Standardize logging dependencies
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-231'>SEDONA-231</a>] -         Redundant Serde Removal
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-234'>SEDONA-234</a>] -         ST_Point inconsistencies
 </li>
