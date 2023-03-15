@@ -13,9 +13,13 @@ Sedona 1.4.0 is compiled against, Spark 3.3 / Flink 1.12, Java 8.
 * [X] **Sedona Spark** New RasterUDT added to Sedona GeoTiff reader.
 * [X] **Sedona Spark** A number of bug fixes and improvement to the Sedona R module.
 
+### API change
+
+* **Sedona Spark & Flink** Packaging strategy changed. See [Maven Coordinate](../maven-coordinates). Please change your Sedona dependencies if needed. We recommend `sedona-spark-shaded-3.0_2.12-1.4.0` and `sedona-flink-shaded-3.0_2.12-1.4.0`
+* **Sedona Spark & Flink** GeoTools-wrapper version upgraded. Please use `geotools-wrapper-1.4.0-28.2`.
+
 ### Behavior change
 
-* **Sedona Spark & Flink** Packaging strategy changed. See [Maven Coordinate](../maven-coordinates). Please change your Sedona dependencies if needed.
 * **Sedona Flink** Sedona Flink no longer outputs any LinearRing type geometry. All LinearRing are changed to LineString.
 * **Sedona Spark** Join optimization strategy changed. Sedona no longer optimizes spatial join when use a spatial predicate together with a equijoin predicate. By default, it prefers equijoin whenever possible. SedonaConf adds a config option called `sedona.join.optimizationmode`, it can be configured as one of the following values:
 	* `all`: optimize all joins having spatial predicate in join conditions. This was the behavior of Apache Sedona prior to 1.4.0.
@@ -23,8 +27,6 @@ Sedona 1.4.0 is compiled against, Spark 3.3 / Flink 1.12, Java 8.
 	* `nonequi`: only enable spatial join optimization on non-equi joins. This is the default mode.
 
 When `sedona.join.optimizationmode` is configured as `nonequi`, it won't optimize join queries such as `SELECT * FROM A, B WHERE A.x = B.x AND ST_Contains(A.geom, B.geom)`, since it is an equi-join with equi-condition `A.x = B.x`. Sedona will optimize for `SELECT * FROM A, B WHERE A.x = B.x AND ST_Contains(A.geom, B.geom)`
-
-
 
 
 ### Bug

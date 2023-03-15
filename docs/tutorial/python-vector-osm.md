@@ -40,7 +40,7 @@ spark = SparkSession.\
     config('spark.kryoserializer.buffer.max', 2047).\
     config("spark.serializer", KryoSerializer.getName).\
     config("spark.kryo.registrator", SedonaKryoRegistrator.getName).\
-    config("spark.jars.packages", "org.apache.sedona:sedona-python-adapter-3.0_2.12:1.1.0-incubating,org.datasyslab:geotools-wrapper:1.1.0-25.2") .\
+    config("spark.jars.packages", "org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.4.0,org.datasyslab:geotools-wrapper:1.4.0-28.2") .\
     enableHiveSupport().\
     getOrCreate()
 

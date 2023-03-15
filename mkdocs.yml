@@ -54,7 +54,7 @@ nav:
               - Predicate: api/sql/Predicate.md
               - Aggregate function: api/sql/AggregateFunction.md
               - DataFrame Style functions: api/sql/DataFrameAPI.md
-              - SedonaSQL query optimizer: api/sql/Optimizer.md
+              - Query optimization: api/sql/Optimizer.md
           - Raster data:
               - Raster loader: api/sql/Raster-loader.md
               - Raster writer: api/sql/Raster-writer.md
@@ -62,11 +62,10 @@ nav:
           - Parameter: api/sql/Parameter.md
         - RDD (core):
           - Scala/Java doc: api/java-api.md
-          - Python doc: api/python-api.md
-          - R doc: api/r-api.md
         - Viz:
           - DataFrame/SQL: api/viz/sql.md
           - RDD: api/viz/java-api.md
+        - Sedona R: api/rdocs
       - Sedona with Apache Flink:
         - SQL:
           - Overview: api/flink/Overview.md
