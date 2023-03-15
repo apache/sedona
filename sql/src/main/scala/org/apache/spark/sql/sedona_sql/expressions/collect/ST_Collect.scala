@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions.collect
 
+
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 
@@ -26,16 +27,24 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
+import org.apache.spark.sql.sedona_sql.expressions.SerdeAware
 import org.apache.spark.sql.types.{ArrayType, _}
+
+import org.locationtech.jts.geom.Geometry
 
 case class ST_Collect(inputExpressions: Seq[Expression])
     extends Expression
+    with SerdeAware
     with CodegenFallback {
   assert(inputExpressions.length >= 1)
 
   override def nullable: Boolean = true
 
   override def eval(input: InternalRow): Any = {
+    evalWithoutSerialization(input).asInstanceOf[Geometry].toGenericArrayData
+  }
+
+  override def evalWithoutSerialization(input: InternalRow): Any = {
     val firstElement = inputExpressions.head
 
     firstElement.dataType match {
@@ -49,14 +58,13 @@ case class ST_Collect(inputExpressions: Seq[Expression])
               .filter(_ != null)
               .map(_.toGeometry)
 
-            Collect.createMultiGeometry(geomElements).toGenericArrayData
-          case _ => Collect.createMultiGeometry(Seq()).toGenericArrayData
+            Collect.createMultiGeometry(geomElements)
+          case _ => Collect.createMultiGeometry(Seq())
         }
       case _ =>
         val geomElements =
           inputExpressions.map(_.toGeometry(input)).filter(_ != null)
-        Collect.createMultiGeometry(geomElements).toGenericArrayData
-
+        Collect.createMultiGeometry(geomElements)
     }
   }
 

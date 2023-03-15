@@ -71,7 +71,11 @@ public class Functions {
     }
 
     public static Geometry boundary(Geometry geometry) {
-        return geometry.getBoundary();
+        Geometry boundary = geometry.getBoundary();
+        if (boundary instanceof LinearRing) {
+            boundary = GEOMETRY_FACTORY.createLineString(boundary.getCoordinates());
+        }
+        return boundary;
     }
 
     public static Geometry buffer(Geometry geometry, double radius) {
@@ -236,7 +240,11 @@ public class Functions {
         if (geometry instanceof Polygon) {
             Polygon polygon = (Polygon) geometry;
             if (n < polygon.getNumInteriorRing()) {
-                return polygon.getInteriorRingN(n);
+                Geometry interiorRing = polygon.getInteriorRingN(n);
+                if (interiorRing instanceof LinearRing) {
+                    interiorRing = GEOMETRY_FACTORY.createLineString(interiorRing.getCoordinates());
+                }
+                return interiorRing;
             }
         }
         return null;
@@ -250,7 +258,11 @@ public class Functions {
     }
 
     public static Geometry exteriorRing(Geometry geometry) {
-        return GeomUtils.getExteriorRing(geometry);
+        Geometry ring = GeomUtils.getExteriorRing(geometry);
+        if (ring instanceof LinearRing) {
+            ring = GEOMETRY_FACTORY.createLineString(ring.getCoordinates());
+        }
+        return ring;
     }
 
     public static String asEWKT(Geometry geometry) {

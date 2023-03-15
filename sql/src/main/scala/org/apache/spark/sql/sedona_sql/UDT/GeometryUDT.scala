@@ -58,4 +58,3 @@ class GeometryUDT extends UserDefinedType[Geometry] {
 }
 
 case object GeometryUDT extends org.apache.spark.sql.sedona_sql.UDT.GeometryUDT with scala.Serializable
-

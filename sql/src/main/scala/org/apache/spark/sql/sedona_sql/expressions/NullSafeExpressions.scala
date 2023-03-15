@@ -38,7 +38,7 @@ trait FoldableExpression extends Expression {
   override def foldable: Boolean = children.forall(_.foldable)
 }
 
-abstract class UnaryGeometryExpression extends Expression with ExpectsInputTypes {
+abstract class UnaryGeometryExpression extends Expression with SerdeAware with ExpectsInputTypes {
   def inputExpressions: Seq[Expression]
 
   override def nullable: Boolean = true
@@ -46,10 +46,27 @@ abstract class UnaryGeometryExpression extends Expression with ExpectsInputTypes
   override def inputTypes: Seq[AbstractDataType] = Seq(GeometryUDT)
 
   override def eval(input: InternalRow): Any = {
-    val geometry = inputExpressions.head.toGeometry(input)
+    val result = evalWithoutSerialization(input)
+    serializeResult(result)
+  }
+
+  override def evalWithoutSerialization(input: InternalRow): Any ={
+    val inputExpression = inputExpressions.head
+    val geometry = inputExpression match {
+      case expr: SerdeAware => expr.evalWithoutSerialization(input)
+      case expr: Any => expr.toGeometry(input)
+    }
+
     (geometry) match {
       case (geometry: Geometry) => nullSafeEval(geometry)
       case _ => null
+    }
+  }
+
+  protected def serializeResult(result: Any): Any = {
+    result match {
+      case geometry: Geometry => geometry.toGenericArrayData
+      case _ => result
     }
   }
 
@@ -58,7 +75,7 @@ abstract class UnaryGeometryExpression extends Expression with ExpectsInputTypes
 
 }
 
-abstract class BinaryGeometryExpression extends Expression with ExpectsInputTypes {
+abstract class BinaryGeometryExpression extends Expression with SerdeAware with ExpectsInputTypes {
   def inputExpressions: Seq[Expression]
 
   override def nullable: Boolean = true
@@ -66,11 +83,33 @@ abstract class BinaryGeometryExpression extends Expression with ExpectsInputType
   override def inputTypes: Seq[AbstractDataType] = Seq(GeometryUDT, GeometryUDT)
 
   override def eval(input: InternalRow): Any = {
-    val leftGeometry = inputExpressions(0).toGeometry(input)
-    val rightGeometry = inputExpressions(1).toGeometry(input)
+    val result = evalWithoutSerialization(input)
+    serializeResult(result)
+  }
+
+  override def evalWithoutSerialization(input: InternalRow): Any = {
+    val leftExpression = inputExpressions(0)
+    val leftGeometry = leftExpression match {
+      case expr: SerdeAware => expr.evalWithoutSerialization(input)
+      case _ => leftExpression.toGeometry(input)
+    }
+
+    val rightExpression = inputExpressions(1)
+    val rightGeometry = rightExpression match {
+      case expr: SerdeAware => expr.evalWithoutSerialization(input)
+      case _ => rightExpression.toGeometry(input)
+    }
+
     (leftGeometry, rightGeometry) match {
       case (leftGeometry: Geometry, rightGeometry: Geometry) => nullSafeEval(leftGeometry, rightGeometry)
       case _ => null
+    }
+  }
+
+  protected def serializeResult(result: Any): Any = {
+    result match {
+      case geometry: Geometry => geometry.toGenericArrayData
+      case _ => result
     }
   }
 
@@ -168,7 +207,7 @@ object InferredTypes {
 abstract class InferredUnaryExpression[A1: InferrableType, R: InferrableType]
     (f: (A1) => R)
     (implicit val a1Tag: TypeTag[A1], implicit val rTag: TypeTag[R])
-    extends Expression with ImplicitCastInputTypes with CodegenFallback with Serializable {
+    extends Expression with ImplicitCastInputTypes with SerdeAware with CodegenFallback with Serializable {
   import InferredTypes._
 
   def inputExpressions: Seq[Expression]
@@ -187,10 +226,12 @@ abstract class InferredUnaryExpression[A1: InferrableType, R: InferrableType]
 
   lazy val serialize = buildSerializer[R]
 
-  override def eval(input: InternalRow): Any = {
+  override def eval(input: InternalRow): Any = serialize(evalWithoutSerialization(input).asInstanceOf[R])
+
+  override def evalWithoutSerialization(input: InternalRow): Any = {
     val value = extract(input)
     if (value != null) {
-      serialize(f(value))
+      f(value)
     } else {
       null
     }
@@ -200,7 +241,7 @@ abstract class InferredUnaryExpression[A1: InferrableType, R: InferrableType]
 abstract class InferredBinaryExpression[A1: InferrableType, A2: InferrableType, R: InferrableType]
     (f: (A1, A2) => R)
     (implicit val a1Tag: TypeTag[A1], implicit val a2Tag: TypeTag[A2], implicit val rTag: TypeTag[R])
-    extends Expression with ImplicitCastInputTypes with CodegenFallback with Serializable {
+    extends Expression with ImplicitCastInputTypes with SerdeAware with CodegenFallback with Serializable {
   import InferredTypes._
 
   def inputExpressions: Seq[Expression]
@@ -220,11 +261,13 @@ abstract class InferredBinaryExpression[A1: InferrableType, A2: InferrableType, 
 
   lazy val serialize = buildSerializer[R]
 
-  override def eval(input: InternalRow): Any = {
+  override def eval(input: InternalRow): Any = serialize(evalWithoutSerialization(input).asInstanceOf[R])
+
+  override def evalWithoutSerialization(input: InternalRow): Any = {
     val left = extractLeft(input)
     val right = extractRight(input)
     if (left != null && right != null) {
-      serialize(f(left, right))
+        f(left, right)
     } else {
       null
     }
@@ -234,7 +277,7 @@ abstract class InferredBinaryExpression[A1: InferrableType, A2: InferrableType, 
 abstract class InferredTernaryExpression[A1: InferrableType, A2: InferrableType, A3: InferrableType, R: InferrableType]
 (f: (A1, A2, A3) => R)
 (implicit val a1Tag: TypeTag[A1], implicit val a2Tag: TypeTag[A2], implicit val a3Tag: TypeTag[A3], implicit val rTag: TypeTag[R])
-  extends Expression with ImplicitCastInputTypes with CodegenFallback with Serializable {
+  extends Expression with ImplicitCastInputTypes with SerdeAware with CodegenFallback with Serializable {
   import InferredTypes._
 
   def inputExpressions: Seq[Expression]
@@ -255,12 +298,14 @@ abstract class InferredTernaryExpression[A1: InferrableType, A2: InferrableType,
 
   lazy val serialize = buildSerializer[R]
 
-  override def eval(input: InternalRow): Any = {
+  override def eval(input: InternalRow): Any = serialize(evalWithoutSerialization(input).asInstanceOf[R])
+
+  override def evalWithoutSerialization(input: InternalRow): Any = {
     val first = extractFirst(input)
     val second = extractSecond(input)
     val third = extractThird(input)
     if (first != null && second != null && third != null) {
-      serialize(f(first, second, third))
+      f(first, second, third)
     } else {
       null
     }

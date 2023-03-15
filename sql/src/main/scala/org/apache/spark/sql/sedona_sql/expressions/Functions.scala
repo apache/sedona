@@ -448,7 +448,9 @@ case class ST_StartPoint(inputExpressions: Seq[Expression])
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
     geometry match {
-      case line: LineString => line.getPointN(0).toGenericArrayData
+      case line: LineString => {
+        line.getPointN(0)
+      }
       case _ => null
     }
   }
@@ -473,11 +475,23 @@ case class ST_Boundary(inputExpressions: Seq[Expression])
 
 
 case class ST_MinimumBoundingRadius(inputExpressions: Seq[Expression])
-  extends UnaryGeometryExpression with FoldableExpression with CodegenFallback {
+  extends Expression with FoldableExpression with CodegenFallback {
+
+  override def nullable: Boolean = true
+
   private val geometryFactory = new GeometryFactory()
 
-  override protected def nullSafeEval(geometry: Geometry): Any = {
-    getMinimumBoundingRadius(geometry)
+  override def eval(input: InternalRow): Any = {
+    val expr = inputExpressions(0)
+    val geometry = expr match {
+      case s: SerdeAware => s.evalWithoutSerialization(input)
+      case _ => expr.toGeometry(input)
+    }
+
+    geometry match {
+      case geometry: Geometry => getMinimumBoundingRadius(geometry)
+      case _ => null
+    }
   }
 
   private def getMinimumBoundingRadius(geom: Geometry): InternalRow = {
@@ -545,7 +559,7 @@ case class ST_EndPoint(inputExpressions: Seq[Expression])
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
     geometry match {
-      case string: LineString => string.getEndPoint.toGenericArrayData
+      case string: LineString => string.getEndPoint
       case _ => null
     }
   }
@@ -588,16 +602,24 @@ case class ST_Dump(inputExpressions: Seq[Expression])
   extends UnaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
-    val geometryCollection = geometry match {
+    geometry match {
       case collection: GeometryCollection => {
         val numberOfGeometries = collection.getNumGeometries
         (0 until numberOfGeometries).map(
-          index => collection.getGeometryN(index).toGenericArrayData
+          index => collection.getGeometryN(index)
         ).toArray
       }
-      case geom: Geometry => Array(geom.toGenericArrayData)
+      case geom: Geometry => Array(geom)
     }
-    ArrayData.toArrayData(geometryCollection)
+  }
+
+  override protected def serializeResult(result: Any): Any = {
+    result match {
+      case array: Array[Geometry] => ArrayData.toArrayData(
+        array.map(_.toGenericArrayData)
+      )
+      case _ => null
+    }
   }
 
   override def dataType: DataType = ArrayType(GeometryUDT)
@@ -613,7 +635,17 @@ case class ST_DumpPoints(inputExpressions: Seq[Expression])
   extends UnaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(geometry: Geometry): Any = {
-    ArrayData.toArrayData(geometry.getPoints.map(geom => geom.toGenericArrayData))
+    geometry.getPoints.map(geom => geom).toArray
+  }
+
+  override protected def serializeResult(result: Any): Any = {
+    result match {
+      case array: Array[Geometry] => ArrayData.toArrayData(
+        array.map(geom => geom.toGenericArrayData)
+      )
+      case _ => null
+    }
+
   }
 
   override def dataType: DataType = ArrayType(GeometryUDT)
@@ -842,7 +874,7 @@ case class ST_SymDifference(inputExpressions: Seq[Expression])
   extends BinaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
-    leftGeometry.symDifference(rightGeometry).toGenericArrayData
+    leftGeometry.symDifference(rightGeometry)
   }
 
   override def dataType: DataType = GeometryUDT
@@ -863,7 +895,7 @@ case class ST_Union(inputExpressions: Seq[Expression])
   extends BinaryGeometryExpression with FoldableExpression with CodegenFallback {
 
   override protected def nullSafeEval(leftGeometry: Geometry, rightGeometry: Geometry): Any = {
-    leftGeometry.union(rightGeometry).toGenericArrayData
+    leftGeometry.union(rightGeometry)
   }
 
   override def dataType: DataType = GeometryUDT
