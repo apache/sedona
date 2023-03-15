@@ -41,8 +41,6 @@ Please refer to [Sedona website](https://sedona.apache.org/latest-snapshot/setup
 
 ## Contact
 
-Feedback to improve Apache Sedona: [Google Form](https://docs.google.com/forms/d/e/1FAIpQLSeYHlc4cX5Pw0bIx2dQbhHDeWF2G2Wf7BgN_n29IzXsSzwptA/viewform)
-
 Twitter: [Sedona@Twitter](https://twitter.com/ApacheSedona)
 
 [![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://discord.gg/9A3k5dEBsY)
