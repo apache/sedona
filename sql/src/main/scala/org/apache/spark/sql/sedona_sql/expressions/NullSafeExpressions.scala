@@ -38,10 +38,6 @@ trait FoldableExpression extends Expression {
   override def foldable: Boolean = children.forall(_.foldable)
 }
 
-trait SerdeAware {
-  def evalWithoutSerialization(input: InternalRow): Any
-}
-
 abstract class UnaryGeometryExpression extends Expression with SerdeAware with ExpectsInputTypes {
   def inputExpressions: Seq[Expression]
 
@@ -148,13 +144,7 @@ object InferrableType {
 object InferredTypes {
   def buildExtractor[T: TypeTag](expr: Expression): InternalRow => T = {
     if (typeOf[T] =:= typeOf[Geometry]) {
-      input: InternalRow => {
-        if (expr.isInstanceOf[SerdeAware]) {
-          expr.asInstanceOf[SerdeAware].evalWithoutSerialization(input).asInstanceOf[T]
-        } else {
-          expr.toGeometry(input).asInstanceOf[T]
-        }
-      }
+      input: InternalRow => expr.toGeometry(input).asInstanceOf[T]
     } else if (typeOf[T] =:= typeOf[String]) {
       input: InternalRow => expr.asString(input).asInstanceOf[T]
     } else {
