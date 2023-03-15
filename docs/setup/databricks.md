@@ -5,13 +5,14 @@ You just need to install the Sedona jars and Sedona Python on Databricks using D
 ## Advanced editions
 
 * Sedona 1.0.1 & 1.1.0 is compiled against Spark 3.1 (~ Databricks DBR 9 LTS, DBR 7 is Spark 3.0)
-* Sedona 1.1.1 is compiled against Spark 3.2 (~ DBR 10 & 11)
+* Sedona 1.1.1, 1.2.0 are compiled against Spark 3.2 (~ DBR 10 & 11)
+* Sedona 1.2.1, 1.3.1, 1.4.0 are complied against Spark 3.3
 
 > In Spark 3.2, `org.apache.spark.sql.catalyst.expressions.Generator` class added a field `nodePatterns`. Any SQL functions that rely on Generator class may have issues if compiled for a runtime with a differing spark version. For Sedona, those functions are:
 >    * ST_MakeValid
 >    * ST_SubDivideExplode
 
-__Sedona `1.1.1-incubating` is overall the recommended version to use. It is generally backwards compatible with earlier Spark releases but you should be aware of what Spark version Sedona was compiled against versus which is being executed in case you hit issues.__
+__Sedona `1.1.1-incubating` and above is overall the recommended version to use. It is generally backwards compatible with earlier Spark releases but you should be aware of what Spark version Sedona was compiled against versus which is being executed in case you hit issues.__
 
 #### Databricks 10.x+ (Recommended)
 
@@ -26,7 +27,7 @@ __Sedona `1.1.1-incubating` is overall the recommended version to use. It is gen
 
 1) From the Libraries tab install from Maven Coordinates
     ```
-    org.apache.sedona:sedona-python-adapter-3.0_2.12:{{ sedona.current_version }}
+    org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }}
     org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
     ```
 
@@ -75,7 +76,7 @@ mkdir -p /dbfs/FileStore/jars/sedona/{{ sedona.current_version }}
 # Download the dependencies from Maven into DBFS
 curl -o /dbfs/FileStore/jars/sedona/{{ sedona.current_version }}/geotools-wrapper-{{ sedona.current_geotools }}.jar "https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/{{ sedona.current_geotools }}/geotools-wrapper-{{ sedona.current_geotools }}.jar"
 
-curl -o /dbfs/FileStore/jars/sedona/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-python-adapter-3.0_2.12/{{ sedona.current_version }}/sedona-python-adapter-3.0_2.12-{{ sedona.current_version }}.jar"
+curl -o /dbfs/FileStore/jars/sedona/{{ sedona.current_version }}/sedona-spark-shaded-3.0_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.0_2.12/{{ sedona.current_version }}/sedona-spark-shaded-3.0_2.12-{{ sedona.current_version }}.jar"
 
 curl -o /dbfs/FileStore/jars/sedona/{{ sedona.current_version }}/sedona-viz-3.0_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-viz-3.0_2.12/{{ sedona.current_version }}/sedona-viz-3.0_2.12-{{ sedona.current_version }}.jar"
 ```

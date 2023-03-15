@@ -15,7 +15,7 @@ nav:
       - Install with Apache Spark:
         - Install Sedona Scala/Java: setup/install-scala.md
         - Install Sedona Python: setup/install-python.md
-        - Install Sedona R: setup/install-r.md
+        - Install Sedona R: api/rdocs
         - Install Sedona-Zeppelin: setup/zeppelin.md
         - Install on Databricks: setup/databricks.md
         - Set up Spark cluster: setup/cluster.md
@@ -31,6 +31,7 @@ nav:
         - Pure SQL environment: tutorial/sql-pure-sql.md
         - Spatial RDD app: tutorial/rdd.md
         - Sedona R: api/rdocs
+        - Work with GeoPandas and Shapely: tutorial/geopandas-shapely.md
         - Map visualization SQL app:
           - Scala/Java: tutorial/viz.md
           - Use Apache Zeppelin: tutorial/zeppelin.md
@@ -52,9 +53,11 @@ nav:
               - Function: api/sql/Function.md
               - Predicate: api/sql/Predicate.md
               - Aggregate function: api/sql/AggregateFunction.md
+              - DataFrame Style functions: api/sql/DataFrameAPI.md
               - SedonaSQL query optimizer: api/sql/Optimizer.md
           - Raster data:
-              - Raster input and output: api/sql/Raster-loader.md
+              - Raster loader: api/sql/Raster-loader.md
+              - Raster writer: api/sql/Raster-writer.md
               - Raster operators: api/sql/Raster-operators.md
           - Parameter: api/sql/Parameter.md
         - RDD (core):

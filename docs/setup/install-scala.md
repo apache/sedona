@@ -18,12 +18,12 @@ There are two ways to use a Scala or Java library with Apache Spark. You can use
 
 * Local mode: test Sedona without setting up a cluster
 ```
-./bin/spark-shell --packages org.apache.sedona:sedona-python-adapter-3.0_2.12:{{ sedona.current_version }},org.apache.sedona:sedona-viz-3.0_2.12:{{ sedona.current_version }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
+./bin/spark-shell --packages org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},org.apache.sedona:sedona-viz-3.0_2.12:{{ sedona.current_version }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
 ```
   
 * Cluster mode: you need to specify Spark Master IP
 ```
-./bin/spark-shell --master spark://localhost:7077 --packages org.apache.sedona:sedona-python-adapter-3.0_2.12:{{ sedona.current_version }},org.apache.sedona:sedona-viz-3.0_2.12:{{ sedona.current_version }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
+./bin/spark-shell --master spark://localhost:7077 --packages org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},org.apache.sedona:sedona-viz-3.0_2.12:{{ sedona.current_version }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
 ```
   
 ### Download Sedona jar manually
@@ -39,12 +39,12 @@ There are two ways to use a Scala or Java library with Apache Spark. You can use
  
 * Local mode: test Sedona without setting up a cluster
 ```
-./bin/spark-shell --jars org.apache.sedona:sedona-python-adapter-3.0_2.12:{{ sedona.current_version }},org.apache.sedona:sedona-viz-3.0_2.12:{{ sedona.current_version }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
+./bin/spark-shell --jars org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},org.apache.sedona:sedona-viz-3.0_2.12:{{ sedona.current_version }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
 ```
   
 * Cluster mode: you need to specify Spark Master IP  
 ```
-./bin/spark-shell --master spark://localhost:7077 --jars org.apache.sedona:sedona-python-adapter-3.0_2.12:{{ sedona.current_version }},org.apache.sedona:sedona-viz-3.0_2.12:{{ sedona.current_version }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
+./bin/spark-shell --master spark://localhost:7077 --jars org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},org.apache.sedona:sedona-viz-3.0_2.12:{{ sedona.current_version }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
 ```
 
 ## Spark SQL shell
