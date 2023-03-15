@@ -18,6 +18,7 @@ nav:
         - Install Sedona R: api/rdocs
         - Install Sedona-Zeppelin: setup/zeppelin.md
         - Install on Databricks: setup/databricks.md
+        - Install on AWS EMR: setup/emr.md
         - Set up Spark cluster: setup/cluster.md
       - Install with Apache Flink:
         - Install Sedona Scala/Java: setup/flink/install-scala.md
