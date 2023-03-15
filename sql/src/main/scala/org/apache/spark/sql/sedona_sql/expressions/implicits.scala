@@ -30,7 +30,7 @@ object implicits {
 
   implicit class InputExpressionEnhancer(inputExpression: Expression) {
     def toGeometry(input: InternalRow): Geometry = {
-      if inputExpression.isInstanceOf[SerdeAware] {
+      if (inputExpression.isInstanceOf[SerdeAware]) {
         inputExpression.asInstanceOf[SerdeAware].evalWithoutSerialization(input).asInstanceOf[Geometry]
       } else {
         inputExpression.eval(input).asInstanceOf[Array[Byte]] match {
