@@ -8,9 +8,11 @@ Starting from `v1.1.0`, Sedona SQL supports raster data sources and raster opera
 
 ## API docs
 
-[IO of raster data in DataFrame](../../api/sql/Raster-loader/)
+[Read raster data in DataFrame](../../api/sql/Raster-loader/)
 
-[Map algebra in DataFrame](../../api/sql/Raster-operators/)
+[Write raster data in DataFrame](../../api/sql/Raster-writer/)
+
+[Raster operators in DataFrame](../../api/sql/Raster-operators/)
 
 ## Tutorials
 

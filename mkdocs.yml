@@ -15,9 +15,10 @@ nav:
       - Install with Apache Spark:
         - Install Sedona Scala/Java: setup/install-scala.md
         - Install Sedona Python: setup/install-python.md
-        - Install Sedona R: setup/install-r.md
+        - Install Sedona R: api/rdocs
         - Install Sedona-Zeppelin: setup/zeppelin.md
         - Install on Databricks: setup/databricks.md
+        - Install on AWS EMR: setup/emr.md
         - Set up Spark cluster: setup/cluster.md
       - Install with Apache Flink:
         - Install Sedona Scala/Java: setup/flink/install-scala.md
@@ -26,27 +27,21 @@ nav:
     - Download: download.md
     - Programming Guides:
       - Sedona with Apache Spark:
-        - Spatial SQL app:
-          - Scala/Java: tutorial/sql.md
-          - Pure SQL: tutorial/sql-pure-sql.md
-          - Python: tutorial/sql-python.md
-          - R: tutorial/sql-r.md
-          - Raster data - Map Algebra: tutorial/raster.md      
-        - Spatial RDD app:
-          - Scala/Java: tutorial/rdd.md
-          - Python: tutorial/core-python.md
-          - R: tutorial/rdd-r.md
+        - Spatial SQL app: tutorial/sql.md
+        - Raster SQL app: tutorial/raster.md
+        - Pure SQL environment: tutorial/sql-pure-sql.md
+        - Spatial RDD app: tutorial/rdd.md
+        - Sedona R: api/rdocs
+        - Work with GeoPandas and Shapely: tutorial/geopandas-shapely.md
         - Map visualization SQL app:
           - Scala/Java: tutorial/viz.md
           - Use Apache Zeppelin: tutorial/zeppelin.md
-          - R: tutorial/viz-r.md
           - Gallery: tutorial/viz-gallery.md
         - Performance tuning:
-          - Benchmark: tutorial/benchmark.md            
+          - Benchmark: tutorial/benchmark.md
           - Tune RDD application: tutorial/Advanced-Tutorial-Tune-your-Application.md
       - Sedona with Apache Flink:
-        - Spatial SQL app:
-          - Scala/Java: tutorial/flink/sql.md
+        - Spatial SQL app: tutorial/flink/sql.md
       - Examples:
           - Scala/Java: tutorial/demo.md
           - Python: tutorial/jupyter-notebook.md
@@ -59,18 +54,19 @@ nav:
               - Function: api/sql/Function.md
               - Predicate: api/sql/Predicate.md
               - Aggregate function: api/sql/AggregateFunction.md
-              - SedonaSQL query optimizer: api/sql/Optimizer.md
+              - DataFrame Style functions: api/sql/DataFrameAPI.md
+              - Query optimization: api/sql/Optimizer.md
           - Raster data:
-              - Raster input and output: api/sql/Raster-loader.md
+              - Raster loader: api/sql/Raster-loader.md
+              - Raster writer: api/sql/Raster-writer.md
               - Raster operators: api/sql/Raster-operators.md
           - Parameter: api/sql/Parameter.md
         - RDD (core):
           - Scala/Java doc: api/java-api.md
-          - Python doc: api/python-api.md
-          - R doc: api/r-api.md
         - Viz:
           - DataFrame/SQL: api/viz/sql.md
           - RDD: api/viz/java-api.md
+        - Sedona R: api/rdocs
       - Sedona with Apache Flink:
         - SQL:
           - Overview: api/flink/Overview.md

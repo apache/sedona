@@ -22,15 +22,16 @@ chmod 777 create-release.sh
 1. Run the following script:
 ```bash
 #!/bin/bash
-wget -q https://dlcdn.apache.org//creadur/apache-rat-$RAT_VERSION/apache-rat-0.15-bin.tar.gz
+wget -q https://dlcdn.apache.org//creadur/apache-rat-0.15/apache-rat-0.15-bin.tar.gz
 tar -xvf  apache-rat-0.15-bin.tar.gz
 git clone --shared --branch master https://github.com/apache/sedona.git sedona-src
-java -jar apache-rat-0.15.jar -d sedona-src > report.txt
+java -jar apache-rat-0.15/apache-rat-0.15.jar -d sedona-src > report.txt
 ```
 2. Read the generated report.txt file and make sure all source code files have ASF header.
 3. Delete the generated report and cloned files
 ```bash
 #!/bin/bash
+rm -rf apache-rat-0.15
 rm -rf sedona-src
 rm report.txt
 ```
@@ -41,7 +42,8 @@ Make sure the Sedona version in the following files are {{ sedona_create_release
 
 1. https://github.com/apache/sedona/blob/master/python/sedona/version.py
 2. https://github.com/apache/sedona/blob/master/R/DESCRIPTION
-3. https://github.com/apache/sedona/blob/master/zeppelin/package.json
+3. https://github.com/apache/sedona/blob/master/R/R/dependencies.R#L42
+4. https://github.com/apache/sedona/blob/master/zeppelin/package.json
 
 
 ## 3. Update mkdocs.yml
@@ -107,18 +109,21 @@ echo "Compiling the source code..."
 mkdir apache-sedona-{{ sedona_create_release.current_version }}-bin
 
 cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dscala=2.12 && cd ..
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/common/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/core/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/sql/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/viz/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/python-adapter/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/spark-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/flink/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/flink-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 
 cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dscala=2.13 && cd ..
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/core/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/sql/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/viz/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/python-adapter/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
-cp apache-sedona-{{ sedona_create_release.current_version }}-src/flink/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/spark-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 
 tar czf apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz apache-sedona-{{ sedona_create_release.current_version }}-bin
 shasum -a 512 apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz > apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512
@@ -377,7 +382,7 @@ username=admin
 password=admin123
 stagingid=1027
 
-artifacts=(parent core-3.0_2.12 core-3.0_2.13 sql-3.0_2.12 sql-3.0_2.13 viz-3.0_2.12 viz-3.0_2.13 python-adapter-3.0_2.12 python-adapter-3.0_2.13 common flink_2.12)
+artifacts=(parent core-3.0_2.12 core-3.0_2.13 sql-3.0_2.12 sql-3.0_2.13 viz-3.0_2.12 viz-3.0_2.13 python-adapter-3.0_2.12 python-adapter-3.0_2.13 common flink_2.12 spark-shaded-3.0_2.12 spark-shaded-3.0_2.13 flink-shaded_2.12)
 filenames=(.pom .jar -javadoc.jar)
 
 echo "Re-uploading signatures to fix *failureMessage Invalid Signature*"
@@ -451,16 +456,7 @@ Please do not commit these generated docs to Sedona GitHub.
 
 ### Compile R html docs
 
-1. Make sure you install R, tree and curl on your Ubuntu machine. On Mac, just do `brew install tree`
-```
-sudo apt install littler tree libcurl4-openssl-dev
-```
-2. In the Sedona root directory, run the script below. This will create `rdocs` folder in Sedona `/docs/api/rdocs`
-```bash
-#!/bin/bash
-Rscript generate-docs.R
-cd ./docs/api/rdocs && tree -H '.' -L 1 --noreport --charset utf-8 -o index.html && cd ../../../
-```
+From [GitHub Action docs workflow](https://github.com/apache/sedona/actions/workflows/docs.yml), find generated-docs in the tagged commit. Download it and copy this folder `docs/api/rdocs` to the same location of the Sedona to-be-released source repo.
 
 ### Deploy the website
 

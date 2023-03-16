@@ -4,7 +4,7 @@
 
 
 ## Compile Scala / Java source code
-Sedona Scala/Java code is a project with four modules, core, sql, viz and python adapter. Each module is a Scala/Java mixed project which is managed by Apache Maven 3.
+Sedona Scala/Java code is a project with multiple modules. Each module is a Scala/Java mixed project which is managed by Apache Maven 3.
 
 * Make sure your Linux/Mac machine has Java 1.8, Apache Maven 3.3.1+, and Python3. The compilation of Sedona is not tested on Windows machine.
 
@@ -43,7 +43,7 @@ To compile all modules, please make sure you are in the root folder of all modul
 	```
 
 !!!tip
-	To get the Sedona Python-adapter jar with all GeoTools jars included, simply append `-Dgeotools` option. The command is like this:`mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.0 -Dgeotools`
+	To get the Sedona Spark Shaded jar with all GeoTools jars included, simply append `-Dgeotools` option. The command is like this:`mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.0 -Dgeotools`
 
 ### Download staged jars
 
@@ -58,9 +58,9 @@ For example,
 export SPARK_HOME=$PWD/spark-3.0.1-bin-hadoop2.7
 export PYTHONPATH=$SPARK_HOME/python
 ```
-2. Compile the Sedona Scala and Java code with `-Dgeotools` and then copy the ==sedona-python-adapter-{{ sedona.current_version }}.jar== to ==SPARK_HOME/jars/== folder.
+2. Compile the Sedona Scala and Java code with `-Dgeotools` and then copy the ==sedona-spark-shaded-{{ sedona.current_version }}.jar== to ==SPARK_HOME/jars/== folder.
 ```
-cp python-adapter/target/sedona-python-adapter-xxx.jar SPARK_HOME/jars/
+cp spark-shaded/target/sedona-spark-shaded-xxx.jar SPARK_HOME/jars/
 ```
 3. Install the following libraries
 ```
@@ -111,7 +111,7 @@ pip install mike
 After installing MkDocs and MkDocs-Material, run the command in Sedona root folder:
 
 ```
-mike deploy --update-aliases current-snapshot latest
+mike deploy --update-aliases latest-snapshot latest
 mike set-default latest
 mike serve
 ```

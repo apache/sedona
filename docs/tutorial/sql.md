@@ -1,50 +1,123 @@
-The page outlines the steps to manage spatial data using SedonaSQL. ==The example code is written in Scala but also works for Java==.
+The page outlines the steps to manage spatial data using SedonaSQL.
+
 
 SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows. All these operators can be directly called through:
-```scala
-var myDataFrame = sparkSession.sql("YOUR_SQL")
-```
 
-Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.md)
+=== "Scala"
+
+	```scala
+	var myDataFrame = sparkSession.sql("YOUR_SQL")
+	myDataFrame.createOrReplaceTempView("spatialDf")
+	```
+
+=== "Java"
+
+	```java
+	Dataset<Row> myDataFrame = sparkSession.sql("YOUR_SQL")
+	myDataFrame.createOrReplaceTempView("spatialDf")
+	```
+	
+=== "Python"
+
+	```python
+	myDataFrame = sparkSession.sql("YOUR_SQL")
+	myDataFrame.createOrReplaceTempView("spatialDf")
+	```
+
+Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.md). You can find example county data (i.e., `county_small.tsv`) in [Sedona GitHub repo](https://github.com/apache/sedona/tree/master/core/src/test/resources).
 
 ## Set up dependencies
 
-1. Read [Sedona Maven Central coordinates](../setup/maven-coordinates.md)
-2. Select ==the minimum dependencies==: Add [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core and Sedona-SQL
-3. Add the dependencies in build.sbt or pom.xml.
+=== "Scala/Java"
 
-!!!note
-	To enjoy the full functions of Sedona, we suggest you include ==the full dependencies==: [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core, Sedona-SQL, Sedona-Viz. Please see [SQL example project](../demo/)
+	1. Read [Sedona Maven Central coordinates](../setup/maven-coordinates.md) and add Sedona dependencies in build.sbt or pom.xml.
+	2. Add [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql) in build.sbt or pom.xml.
+	3. Please see [SQL example project](../demo/)
 
+=== "Python"
+
+	1. Please read [Quick start](../../setup/install-python) to install Sedona Python.
+	2. This tutorial is based on [Sedona SQL Jupyter Notebook example](../jupyter-notebook). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder) to interact with Sedona Python Jupyter notebook immediately on Binder.
 
 ## Initiate SparkSession
 Use the following code to initiate your SparkSession at the beginning:
-```scala
-var sparkSession = SparkSession.builder()
-.master("local[*]") // Delete this if run in cluster mode
-.appName("readTestScala") // Change this to a proper name
-// Enable Sedona custom Kryo serializer
-.config("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
-.config("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName)
-.getOrCreate() // org.apache.sedona.core.serde.SedonaKryoRegistrator
-```
+
+=== "Scala"
+
+	```scala
+	var sparkSession = SparkSession.builder()
+	.master("local[*]") // Delete this if run in cluster mode
+	.appName("readTestScala") // Change this to a proper name
+	// Enable Sedona custom Kryo serializer
+	.config("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
+	.config("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName)
+	.getOrCreate() // org.apache.sedona.core.serde.SedonaKryoRegistrator
+	```
+	If you use SedonaViz together with SedonaSQL, please use the following two lines to enable Sedona Kryo serializer instead:
+	```scala
+	.config("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
+	.config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+	```
+
+=== "Java"
+
+	```java
+	SparkSession sparkSession = SparkSession.builder()
+	.master("local[*]") // Delete this if run in cluster mode
+	.appName("readTestScala") // Change this to a proper name
+	// Enable Sedona custom Kryo serializer
+	.config("spark.serializer", KryoSerializer.class.getName) // org.apache.spark.serializer.KryoSerializer
+	.config("spark.kryo.registrator", SedonaKryoRegistrator.class.getName)
+	.getOrCreate() // org.apache.sedona.core.serde.SedonaKryoRegistrator
+	```
+	If you use SedonaViz together with SedonaSQL, please use the following two lines to enable Sedona Kryo serializer instead:
+	```scala
+	.config("spark.serializer", KryoSerializer.class.getName) // org.apache.spark.serializer.KryoSerializer
+	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+	```
+	
+=== "Python"
+
+	```python
+	sparkSession = SparkSession. \
+	    builder. \
+	    appName('appName'). \
+	    config("spark.serializer", KryoSerializer.getName). \
+	    config("spark.kryo.registrator", SedonaKryoRegistrator.getName). \
+	    config('spark.jars.packages',
+	           'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
+	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
+	    getOrCreate()
+	```
 
 !!!warning
-	Sedona has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption.
+	Sedona has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption and slow performance.
 
-If you add ==the Sedona full dependencies== as suggested above, please use the following two lines to enable Sedona Kryo serializer instead:
-```scala
-.config("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
-.config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
-```
+
 
 ## Register SedonaSQL
 
 Add the following line after your SparkSession declaration
 
-```scala
-SedonaSQLRegistrator.registerAll(sparkSession)
-```
+=== "Scala"
+
+	```scala
+	SedonaSQLRegistrator.registerAll(sparkSession)
+	```
+
+=== "Java"
+
+	```java
+	SedonaSQLRegistrator.registerAll(sparkSession)
+	```
+	
+=== "Python"
+
+	```python
+	from sedona.register import SedonaRegistrator
+	
+	SedonaRegistrator.registerAll(spark)
+	```
 
 This function will register Sedona User Defined Type, User Defined Function and optimized join query strategy.
 
@@ -64,11 +137,26 @@ The file may have many other columns.
 
 Use the following code to load the data and create a raw DataFrame:
 
-```scala
-var rawDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load("/Download/usa-county.tsv")
-rawDf.createOrReplaceTempView("rawdf")
-rawDf.show()
-```
+=== "Scala/Java"
+	```scala
+	var rawDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load("/Download/usa-county.tsv")
+	rawDf.createOrReplaceTempView("rawdf")
+	rawDf.show()
+	```
+
+=== "Java"
+	```java
+	Dataset<Row> rawDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load("/Download/usa-county.tsv")
+	rawDf.createOrReplaceTempView("rawdf")
+	rawDf.show()
+	```
+
+=== "Python"
+	```python
+	rawDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load("/Download/usa-county.tsv")
+	rawDf.createOrReplaceTempView("rawdf")
+	rawDf.show()
+	```
 
 The output will be like this:
 
@@ -85,15 +173,8 @@ The output will be like this:
 
 All geometrical operations in SedonaSQL are on Geometry type objects. Therefore, before any kind of queries, you need to create a Geometry type column on a DataFrame.
 
-
-```scala
-var spatialDf = sparkSession.sql(
-  """
-    |SELECT ST_GeomFromWKT(_c0) AS countyshape, _c1, _c2
-    |FROM rawdf
-  """.stripMargin)
-spatialDf.createOrReplaceTempView("spatialdf")
-spatialDf.show()
+```sql
+SELECT ST_GeomFromWKT(_c0) AS countyshape, _c1, _c2
 ```
 
 You can select many other attributes to compose this `spatialdDf`. The output will be something like this:
@@ -140,10 +221,27 @@ Shapefile and GeoJSON must be loaded by SpatialRDD and converted to DataFrame us
 
 Since v`1.3.0`, Sedona natively supports loading GeoParquet file. Sedona will infer geometry fields using the "geo" metadata in GeoParquet files.
 
-```scala
-val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation1)
-df.printSchema()
-```
+=== "Scala/Java"
+
+	```scala
+	val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation1)
+	df.printSchema()
+	```
+
+=== "Java"
+
+	```java
+	Dataset<Row> df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation1)
+	df.printSchema()
+	```
+
+=== "Python"
+
+	```python
+	df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation1)
+	df.printSchema()
+	```
+
 The output will be as follows:
 
 ```
@@ -164,14 +262,9 @@ Sedona doesn't control the coordinate unit (degree-based or meter-based) of all 
 
 To convert Coordinate Reference System of the Geometry column created before, use the following code:
 
-```scala
-spatialDf = sparkSession.sql(
-  """
-    |SELECT ST_Transform(countyshape, "epsg:4326", "epsg:3857") AS newcountyshape, _c1, _c2, _c3, _c4, _c5, _c6, _c7
-    |FROM spatialdf
-  """.stripMargin)
-spatialDf.createOrReplaceTempView("spatialdf")
-spatialDf.show()
+```sql
+SELECT ST_Transform(countyshape, "epsg:4326", "epsg:3857") AS newcountyshape, _c1, _c2, _c3, _c4, _c5, _c6, _c7
+FROM spatialdf
 ```
 
 The first EPSG code EPSG:4326 in `ST_Transform` is the source CRS of the geometries. It is WGS84, the most common degree-based CRS.
@@ -204,35 +297,27 @@ Use ==ST_Contains==, ==ST_Intersects==, ==ST_Within== to run a range query over 
 
 The following example finds all counties that are within the given polygon:
 
-```scala
-spatialDf = sparkSession.sql(
-  """
-    |SELECT *
-    |FROM spatialdf
-    |WHERE ST_Contains (ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), newcountyshape)
-  """.stripMargin)
-spatialDf.createOrReplaceTempView("spatialdf")
-spatialDf.show()
+```sql
+SELECT *
+FROM spatialdf
+WHERE ST_Contains (ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), newcountyshape)
 ```
+
 
 !!!note
 	Read [SedonaSQL constructor API](../api/sql/Constructor.md) to learn how to create a Geometry type query window
+
 ### KNN query
 
 Use ==ST_Distance== to calculate the distance and rank the distance.
 
 The following code returns the 5 nearest neighbor of the given polygon.
 
-```scala
-spatialDf = sparkSession.sql(
-  """
-    |SELECT countyname, ST_Distance(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), newcountyshape) AS distance
-    |FROM spatialdf
-    |ORDER BY distance DESC
-    |LIMIT 5
-  """.stripMargin)
-spatialDf.createOrReplaceTempView("spatialdf")
-spatialDf.show()
+```sql
+SELECT countyname, ST_Distance(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), newcountyshape) AS distance
+FROM spatialdf
+ORDER BY distance DESC
+LIMIT 5
 ```
 
 ### Join query
@@ -249,12 +334,10 @@ To save a Spatial DataFrame to some permanent storage such as Hive tables and HD
 
 
 Use the following code to convert the Geometry column in a DataFrame back to a WKT string column:
-```scala
-var stringDf = sparkSession.sql(
-  """
-    |SELECT ST_AsText(countyshape)
-    |FROM polygondf
-  """.stripMargin)
+
+```sql
+SELECT ST_AsText(countyshape)
+FROM polygondf
 ```
 
 !!!note
@@ -269,15 +352,42 @@ Since v`1.3.0`, Sedona natively supports writing GeoParquet file. GeoParquet can
 df.write.format("geoparquet").save(geoparquetoutputlocation + "/GeoParquet_File_Name.parquet")
 ```
 
+## Sort then Save GeoParquet
+
+To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](../../api/sql/Function/#st_geohash)) and then save as a GeoParquet file. An example is as follows:
+
+```
+SELECT col1, col2, geom, ST_GeoHash(geom, 5) as geohash
+FROM spatialDf
+ORDER BY geohash
+```
+
+
 ## Convert between DataFrame and SpatialRDD
 
 ### DataFrame to SpatialRDD
 
 Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read [Adapter Scaladoc](../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html)
 
-```scala
-var spatialRDD = Adapter.toSpatialRdd(spatialDf, "usacounty")
-```
+=== "Scala"
+
+	```scala
+	var spatialRDD = Adapter.toSpatialRdd(spatialDf, "usacounty")
+	```
+	
+=== "Java"
+
+	```java
+	SpatialRDD spatialRDD = Adapter.toSpatialRdd(spatialDf, "usacounty")
+	```
+
+=== "Python"
+
+	```python
+	from sedona.utils.adapter import Adapter
+
+	spatialRDD = Adapter.toSpatialRdd(spatialDf, "usacounty")
+	```
 
 "usacounty" is the name of the geometry column
 
@@ -288,9 +398,25 @@ var spatialRDD = Adapter.toSpatialRdd(spatialDf, "usacounty")
 
 Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read [Adapter Scaladoc](../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html)
 
-```scala
-var spatialDf = Adapter.toDf(spatialRDD, sparkSession)
-```
+=== "Scala"
+
+	```scala
+	var spatialDf = Adapter.toDf(spatialRDD, sparkSession)
+	```
+
+=== "Java"
+
+	```java
+	Dataset<Row> spatialDf = Adapter.toDf(spatialRDD, sparkSession)
+	```
+	
+=== "Python"
+
+	```python
+	from sedona.utils.adapter import Adapter
+	
+	spatialDf = Adapter.toDf(spatialRDD, sparkSession)
+	```
 
 All other attributes such as price and age will be also brought to the DataFrame as long as you specify ==carryOtherAttributes== (see [Read other attributes in an SpatialRDD](../rdd#read-other-attributes-in-an-spatialrdd)).
 
@@ -299,30 +425,67 @@ types. Note that string schemas and not all data types are supported&mdash;pleas
 [Adapter Scaladoc](../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html) to confirm what is supported for your use
 case. At least one column for the user data must be provided.
 
-```scala
-val schema = StructType(Array(
-  StructField("county", GeometryUDT, nullable = true),
-  StructField("name", StringType, nullable = true),
-  StructField("price", DoubleType, nullable = true),
-  StructField("age", IntegerType, nullable = true)
-))
-val spatialDf = Adapter.toDf(spatialRDD, schema, sparkSession)
-```
+=== "Scala"
+
+	```scala
+	val schema = StructType(Array(
+	  StructField("county", GeometryUDT, nullable = true),
+	  StructField("name", StringType, nullable = true),
+	  StructField("price", DoubleType, nullable = true),
+	  StructField("age", IntegerType, nullable = true)
+	))
+	val spatialDf = Adapter.toDf(spatialRDD, schema, sparkSession)
+	```
 
 ### SpatialPairRDD to DataFrame
 
 PairRDD is the result of a spatial join query or distance join query. SedonaSQL DataFrame-RDD Adapter can convert the result to a DataFrame. But you need to provide the name of other attributes.
 
-```scala
-var joinResultDf = Adapter.toDf(joinResultPairRDD, Seq("left_attribute1", "left_attribute2"), Seq("right_attribute1", "right_attribute2"), sparkSession)
-```
+=== "Scala"
 
+	```scala
+	var joinResultDf = Adapter.toDf(joinResultPairRDD, Seq("left_attribute1", "left_attribute2"), Seq("right_attribute1", "right_attribute2"), sparkSession)
+	```
+
+=== "Java"
+
+	```java
+	import scala.collection.JavaConverters;	
+	
+	List leftFields = new ArrayList<>(Arrays.asList("c1", "c2", "c3"));
+	List rightFields = new ArrayList<>(Arrays.asList("c4", "c5", "c6"));
+	Dataset joinResultDf = Adapter.toDf(joinResultPairRDD, JavaConverters.asScalaBuffer(leftFields).toSeq(), JavaConverters.asScalaBuffer(rightFields).toSeq(), sparkSession);
+	```
+
+=== "Python"
+
+	```python
+	from sedona.utils.adapter import Adapter
+
+	joinResultDf = Adapter.toDf(jvm_sedona_rdd, ["poi_from_id", "poi_from_name"], ["poi_to_id", "poi_to_name"], spark))
+	```
 or you can use the attribute names directly from the input RDD
 
-```scala
-import scala.collection.JavaConversions._
-var joinResultDf = Adapter.toDf(joinResultPairRDD, leftRdd.fieldNames, rightRdd.fieldNames, sparkSession)
-```
+=== "Scala"
+
+	```scala
+	import scala.collection.JavaConversions._
+	var joinResultDf = Adapter.toDf(joinResultPairRDD, leftRdd.fieldNames, rightRdd.fieldNames, sparkSession)
+	```
+
+=== "Java"
+
+	```java
+	import scala.collection.JavaConverters;	
+	Dataset joinResultDf = Adapter.toDf(joinResultPairRDD, JavaConverters.asScalaBuffer(leftRdd.fieldNames).toSeq(), JavaConverters.asScalaBuffer(rightRdd.fieldNames).toSeq(), sparkSession);
+	```
+=== "Python"
+
+	```python
+	from sedona.utils.adapter import Adapter
+
+	joinResultDf = Adapter.toDf(result_pair_rdd, leftRdd.fieldNames, rightRdd.fieldNames, spark)
+	```
 
 All other attributes such as price and age will be also brought to the DataFrame as long as you specify ==carryOtherAttributes== (see [Read other attributes in an SpatialRDD](../rdd#read-other-attributes-in-an-spatialrdd)).
 
@@ -331,38 +494,16 @@ types. Note that string schemas and not all data types are supported&mdash;pleas
 [Adapter Scaladoc](../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html) to confirm what is supported for your use
 case. Columns for the left and right user data must be provided.
 
-```scala
-val schema = StructType(Array(
-  StructField("leftGeometry", GeometryUDT, nullable = true),
-  StructField("name", StringType, nullable = true),
-  StructField("price", DoubleType, nullable = true),
-  StructField("age", IntegerType, nullable = true),
-  StructField("rightGeometry", GeometryUDT, nullable = true),
-  StructField("category", StringType, nullable = true)
-))
-val joinResultDf = Adapter.toDf(joinResultPairRDD, schema, sparkSession)
-```
+=== "Scala"
 
-## DataFrame Style API
-
-Sedona functions can be used in a DataFrame style API similar to Spark functions.
-The following objects contain the exposed functions: `org.apache.spark.sql.sedona_sql.expressions.st_functions`, `org.apache.spark.sql.sedona_sql.expressions.st_constructors`, `org.apache.spark.sql.sedona_sql.expressions.st_predicates`, and `org.apache.spark.sql.sedona_sql.expressions.st_aggregates`.
-Every functions can take all `Column` arguments.
-Additionally, overloaded forms can commonly take a mix of `String` and other Scala types (such as `Double`) as arguments.
-In general the following rules apply (although check the documentation of specific functions for any exceptions):
-1. Every function returns a `Column` so that it can be used interchangeably with Spark functions as well as `DataFrame` methods such as `DataFrame.select` or `DataFrame.join`.
-1. Every function has a form that takes all `Column` arguments.
-These are the most versatile of the forms.
-1. Most functions have a form that takes a mix of `String` arguments with other Scala types.
-The exact mixture of argument types allowed is function specific.
-However, in these instances, all `String` arguments are assumed to be the names of columns and will be wrapped in a `Column` automatically.
-Non-`String` arguments are assumed to be literals that are passed to the sedona function. If you need to pass a `String` literal then you should use the all `Column` form of the sedona function and wrap the `String` literal in a `Column` with the `lit` Spark function.
-
-A short example of using this API (uses the `array_min` and `array_max` Spark functions):
-
-```scala
-val values_df = spark.sql("SELECT array(0.0, 1.0, 2.0) AS values")
-val min_value = array_min("values")
-val max_value = array_max("values")
-val point_df = values_df.select(ST_Point(min_value, max_value).as("point"))
-```
+	```scala
+	val schema = StructType(Array(
+	  StructField("leftGeometry", GeometryUDT, nullable = true),
+	  StructField("name", StringType, nullable = true),
+	  StructField("price", DoubleType, nullable = true),
+	  StructField("age", IntegerType, nullable = true),
+	  StructField("rightGeometry", GeometryUDT, nullable = true),
+	  StructField("category", StringType, nullable = true)
+	))
+	val joinResultDf = Adapter.toDf(joinResultPairRDD, schema, sparkSession)
+	```

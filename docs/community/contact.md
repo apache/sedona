@@ -9,11 +9,6 @@ You can participate in the community as follows:
 * Report bugs and submit patches.
 * Contribute code and documentation.
 
-## Feedback
-
-Feedback to improve Apache Sedona: [Google Form](https://docs.google.com/forms/d/e/1FAIpQLSeYHlc4cX5Pw0bIx2dQbhHDeWF2G2Wf7BgN_n29IzXsSzwptA/viewform)
-
-
 ## Twitter
 
 [Apache Sedona@Twitter](https://twitter.com/ApacheSedona)

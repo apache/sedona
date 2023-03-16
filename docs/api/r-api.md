@@ -1,1 +1,0 @@
-Please read [R docs](../rdocs/)

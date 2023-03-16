@@ -213,6 +213,10 @@ BSD 2-Clause License
 --------------------------------------
 zeppelin/index.js (modified based on volume-leaflet: https://github.com/volumeint/helium-volume-leaflet)
 
+BSD 3-Clause License
+--------------------------------------
+python/src/pygeos/c_api.h (modified based on https://github.com/pygeos/pygeos/blob/master/src/c_api.h)
+
 
 No-copyright data used in unit tests
 --------------------------------------

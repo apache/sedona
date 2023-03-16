@@ -1,6 +1,125 @@
 !!!warning
 	Support of Spark 2.X and Scala 2.11 was removed in Sedona 1.3.0+ although some parts of the source code might still be compatible. Sedona 1.3.0+ releases binary for both Scala 2.12 and 2.13.
 
+## Sedona 1.4.0
+
+Sedona 1.4.0 is compiled against, Spark 3.3 / Flink 1.12, Java 8.
+
+### Highlights
+
+* [X] **Sedona Spark** Pushdown spatial predicate on GeoParquet to reduce memory consumption by 10X: see [explanation](../../api/sql/Optimizer/#geoparquet)
+* [X] **Sedona Spark & Flink** Serialize and deserialize geometries 3 - 7X faster
+* [X] **Sedona Spark** Automatically use broadcast index spatial join for small datasets
+* [X] **Sedona Spark** New RasterUDT added to Sedona GeoTiff reader.
+* [X] **Sedona Spark** A number of bug fixes and improvement to the Sedona R module.
+
+### API change
+
+* **Sedona Spark & Flink** Packaging strategy changed. See [Maven Coordinate](../maven-coordinates). Please change your Sedona dependencies if needed. We recommend `sedona-spark-shaded-3.0_2.12-1.4.0` and `sedona-flink-shaded-3.0_2.12-1.4.0`
+* **Sedona Spark & Flink** GeoTools-wrapper version upgraded. Please use `geotools-wrapper-1.4.0-28.2`.
+
+### Behavior change
+
+* **Sedona Flink** Sedona Flink no longer outputs any LinearRing type geometry. All LinearRing are changed to LineString.
+* **Sedona Spark** Join optimization strategy changed. Sedona no longer optimizes spatial join when use a spatial predicate together with a equijoin predicate. By default, it prefers equijoin whenever possible. SedonaConf adds a config option called `sedona.join.optimizationmode`, it can be configured as one of the following values:
+	* `all`: optimize all joins having spatial predicate in join conditions. This was the behavior of Apache Sedona prior to 1.4.0.
+	* `none`: disable spatial join optimization.
+	* `nonequi`: only enable spatial join optimization on non-equi joins. This is the default mode.
+
+When `sedona.join.optimizationmode` is configured as `nonequi`, it won't optimize join queries such as `SELECT * FROM A, B WHERE A.x = B.x AND ST_Contains(A.geom, B.geom)`, since it is an equi-join with equi-condition `A.x = B.x`. Sedona will optimize for `SELECT * FROM A, B WHERE A.x = B.x AND ST_Contains(A.geom, B.geom)`
+
+
+### Bug
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-218'>SEDONA-218</a>] -         Flaky test caused by improper handling of null struct values in Adapter.toDf
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-221'>SEDONA-221</a>] -         Outer join throws NPE for null geometries
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-222'>SEDONA-222</a>] -         GeoParquet reader does not work in non-local mode
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-224'>SEDONA-224</a>] -         java.lang.NoSuchMethodError when loading GeoParquet files using Spark 3.0.x ~ 3.2.x
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-225'>SEDONA-225</a>] -         Cannot count dataframes loaded from GeoParquet files
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-227'>SEDONA-227</a>] -         Python SerDe Performance Degradation
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-230'>SEDONA-230</a>] -         rdd.saveAsGeoJSON should generate feature properties with field names
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-233'>SEDONA-233</a>] -         Incorrect results for several joins in a single stage
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-236'>SEDONA-236</a>] -         Flakey python tests in tests.serialization.test_[de]serializers
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-242'>SEDONA-242</a>] -         Update jars dependencies in Sedona R to Sedona 1.4.0 version
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-250'>SEDONA-250</a>] -         R Deprecate use of Spark 2.4
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-252'>SEDONA-252</a>] -         Fix disabled RS_Base64 test
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-255'>SEDONA-255</a>] -         R – Translation issue for ST_Point and ST_PolygonFromEnvelope
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-258'>SEDONA-258</a>] -         Cannot directly assign raw spatial RDD to CircleRDD using Python binding
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-259'>SEDONA-259</a>] -         Adapter.toSpatialRdd in Python binding does not have valid implementation for specifying custom field names for user data
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-261'>SEDONA-261</a>] -         Cannot run distance join using broadcast index join when the distance expression references to attributes from the right-side relation
+</li>
+</ul>
+        
+### New Feature
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-156'>SEDONA-156</a>] -         predicate pushdown support for GeoParquet
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-215'>SEDONA-215</a>] -         Add ST_ConcaveHull
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-216'>SEDONA-216</a>] -         Upgrade jts version to 1.19.0
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-235'>SEDONA-235</a>] -         Create ST_S2CellIds in Sedona
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-246'>SEDONA-246</a>] -         R GeoTiff read/write
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-254'>SEDONA-254</a>] -         R – Add raster type
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-262'>SEDONA-262</a>] -         Don&#39;t optimize equi-join by default, add an option to configure when to optimize spatial joins
+</li>
+</ul>
+        
+<h2>        Improvement
+</h2>
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-205'>SEDONA-205</a>] -         Use BinaryType in GeometryUDT in Sedona Spark
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-207'>SEDONA-207</a>] -         Faster serialization/deserialization of geometry objects
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-212'>SEDONA-212</a>] -         Move shading to separate maven modules
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-217'>SEDONA-217</a>] -         Automatically broadcast small datasets
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-220'>SEDONA-220</a>] -         Upgrade Ubuntu build image from 18.04 to 20.04
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-226'>SEDONA-226</a>] -         Support reading and writing GeoParquet file metadata
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-228'>SEDONA-228</a>] -         Standardize logging dependencies
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-231'>SEDONA-231</a>] -         Redundant Serde Removal
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-234'>SEDONA-234</a>] -         ST_Point inconsistencies
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-243'>SEDONA-243</a>] -         Improve Sedona R file readers: GeoParquet and Shapefile
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-244'>SEDONA-244</a>] -         Align R read/write functions with the Sparklyr framework
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-249'>SEDONA-249</a>] -         Add jvm flags for running tests on Java 17 
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-251'>SEDONA-251</a>] -         Add raster type to Sedona
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-253'>SEDONA-253</a>] -         Upgrade geotools to version 28.2
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-260'>SEDONA-260</a>] -         More intuitive configuration of partition and index-build side of spatial joins in Sedona SQL
+</li>
+</ul>
+
 ## Sedona 1.3.1
 
 This version is a minor release on Sedoma 1.3.0 line. It fixes a few critical bugs in 1.3.0. We suggest all 1.3.0 users to migrate to this version.

@@ -1,16 +1,15 @@
 # Maven Coordinates
 
-Sedona Spark has four modules: `sedona-core, sedona-sql, sedona-viz, sedona-python-adapter`. `sedona-python-adapter` is a fat jar of `sedona-core, sedona-sql` and python adapter code. If you want to use SedonaViz, you will include one more jar: `sedona-viz`.
 
-Sedona Flink has four modules :`sedona-core, sedona-sql, sedona-python-adapter, sedona-flink`. `sedona-python-adapter` is a fat jar of `sedona-core, sedona-sql`.
-
-
-## Use Sedona fat jars
+## Use Sedona shaded (fat) jars
 
 !!!warning
-	For Scala/Java/Python/R users, this is the most common way to use Sedona in your environment. Do not use separate Sedona jars otherwise you will get dependency conflicts. `sedona-python-adapter` already contains all you need.
+	For Scala/Java/Python users, this is the most common way to use Sedona in your environment. Do not use separate Sedona jars unless you are sure that you do not need shaded jars.
+	
+!!!warning
+	For R users, this is the only way to use Sedona in your environment.
 
-The optional GeoTools library is required only if you want to use CRS transformation and ShapefileReader. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
+The optional GeoTools library is required if you want to use CRS transformation, ShapefileReader or GeoTiff reader. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
 
 !!! abstract "Sedona with Apache Spark"
 
@@ -19,7 +18,7 @@ The optional GeoTools library is required only if you want to use CRS transforma
 		```xml
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-python-adapter-3.0_2.12</artifactId>
+		  <artifactId>sedona-spark-shaded-3.0_2.12</artifactId>
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
 		<dependency>
@@ -40,7 +39,7 @@ The optional GeoTools library is required only if you want to use CRS transforma
 		```xml
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-python-adapter-3.0_2.13</artifactId>
+		  <artifactId>sedona-spark-shaded-3.0_2.13</artifactId>
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
 		<dependency>
@@ -64,12 +63,7 @@ The optional GeoTools library is required only if you want to use CRS transforma
 		```xml
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-python-adapter-3.0_2.12</artifactId>
-		  <version>{{ sedona.current_version }}</version>
-		</dependency>
-		<dependency>
-		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-flink_2.12</artifactId>
+		  <artifactId>sedona-flink-shaded_2.12</artifactId>
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
 		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
@@ -127,9 +121,12 @@ Under BSD 3-clause (compatible with Apache 2.0 license)
 		```
 
 
-## Use Sedona and third-party jars separately
+## Use Sedona unshaded jars
 
-==For Scala and Java users==, if by any chance you don't want to use an uber jar that includes every dependency, you can use the following jars instead. ==Otherwise, please do not continue reading this section.==
+!!!warning
+	For Scala, Java, Python users, please use the following jars only if you satisfy these conditions: (1) you know how to exclude transient dependencies in a complex application. (2) your environment has internet access (3) you are using some sort of Maven package resolver, or pom.xml, or build.sbt. It usually directly takes an input like this `GroupID:ArtifactID:Version`. If you don't understand what we are talking about, the following jars are not for you.
+
+The optional GeoTools library is required if you want to use CRS transformation, ShapefileReader or GeoTiff reader. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
 
 !!! abstract "Sedona with Apache Spark"
 
@@ -151,6 +148,17 @@ Under BSD 3-clause (compatible with Apache 2.0 license)
 		  <artifactId>sedona-viz-3.0_2.12</artifactId>
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
+		<!-- Required if you use Sedona Python -->
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-python-adapter-3.0_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>			
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>	
 		```
 	=== "Spark 3.0+ and Scala 2.13"
 	
@@ -170,6 +178,17 @@ Under BSD 3-clause (compatible with Apache 2.0 license)
 		  <artifactId>sedona-viz-3.0_2.13</artifactId>
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
+		<!-- Required if you use Sedona Python -->
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-python-adapter-3.0_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>	
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>		
 		```
 		
 	
@@ -194,56 +213,13 @@ Under BSD 3-clause (compatible with Apache 2.0 license)
 		  <artifactId>sedona-flink-3.0_2.12</artifactId>
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>		
 		```
 
-### LocationTech JTS-core 1.18.0+
-
-Under Eclipse Public License 2.0 ("EPL") or the Eclipse Distribution License 1.0 (a BSD Style License)
-
-```xml
-<!-- https://mvnrepository.com/artifact/org.locationtech.jts/jts-core -->
-<dependency>
-    <groupId>org.locationtech.jts</groupId>
-    <artifactId>jts-core</artifactId>
-    <version>1.18.0</version>
-</dependency>
-```
-
-### jts2geojson 0.16.1+
-
-Under MIT License. Please make sure you exclude jts and jackson from this library.
-
-```xml
-<!-- https://mvnrepository.com/artifact/org.wololo/jts2geojson -->
-<dependency>
-    <groupId>org.wololo</groupId>
-    <artifactId>jts2geojson</artifactId>
-    <version>0.16.1</version>
-    <exclusions>
-        <exclusion>
-            <groupId>org.locationtech.jts</groupId>
-            <artifactId>jts-core</artifactId>
-        </exclusion>
-        <exclusion>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>*</artifactId>
-        </exclusion>
-    </exclusions>
-</dependency>
-```
-
-### GeoTools 24.0+
-
-GeoTools library is required only if you want to use CRS transformation and ShapefileReader. This wrapper library is a re-distriution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
-
-```xml
-<!-- https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
-<dependency>
-    <groupId>org.datasyslab</groupId>
-    <artifactId>geotools-wrapper</artifactId>
-    <version>{{ sedona.current_geotools }}</version>
-</dependency>
-```
 
 ### netCDF-Java 5.4.2
 
