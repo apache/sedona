@@ -38,8 +38,8 @@ spark_dependencies <- function(spark_version, scala_version, ...) {
     packages <- c(
       paste0(
         "org.apache.sedona:sedona-",
-        c("core", "sql", "viz"),
-        sprintf("-%s_%s:1.3.1-incubating", spark_version, scala_version)
+        c("spark-shaded", "viz"),
+        sprintf("-%s_%s:1.4.0", spark_version, scala_version)
       ),
       packages
     )
