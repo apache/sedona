@@ -57,7 +57,7 @@ export default class LeafletMap extends Visualization {
 		];
 
 		this.transformation = new ColumnselectorTransformation(config, columnSpec);
-		this.chartInstance = L.map(this.getChartElementId());
+		this.chartInstance = this.createMap();
 	}
 
 	getTransformation() {
@@ -68,10 +68,15 @@ export default class LeafletMap extends Visualization {
 		super.setConfig(config);
 		this.transformation.setConfig(config);
 		if (!this.chartInstance) {
-			this.chartInstance = L.map(this.getChartElementId());
+			this.chartInstance = this.createMap();
 		}
 		return this.chartInstance;
 	};
+
+	createMap() {
+	    // using canvas renderer to support drawing geometry like LineString, Polygon etc.
+	    return L.map(this.getChartElementId(), {renderer: L.canvas()});
+	}
 
 	getChartElementId() {
 		return this.targetEl[0].id
@@ -109,21 +114,33 @@ export default class LeafletMap extends Visualization {
 		map.invalidateSize(true)
 
 		var imageBounds = null
-		const markers = chartDataModel.rows.map(
+		const markers = chartDataModel.rows.flatMap(
 				row => {
 					const {image, boundary, info} = row;
+					var markers = [];
+
 					// throw new Error(image);
 					var jsts = require("jsts");
 					// Read WKT string from Sedona
 					var reader = new jsts.io.WKTReader();
-					var obj = reader.read(boundary)
+					var obj = reader.read(boundary);
 					// Collect the centroid point of the input geometry
 					var centroid = obj.getCentroid()
 					var marker = L.marker([centroid.getY(), centroid.getX()]);
 					const mapMarker = marker.addTo(map);
+					markers.push(marker);
+
+					if (obj.getGeometryType() !== 'Point') {
+					    var writer = new jsts.io.GeoJSONWriter();
+					    var geojson = writer.write(obj);
+					    marker = L.geoJSON(geojson);
+					    marker.addTo(map);
+					    markers.push(marker);
+					}
+
 					// Attach the marker information if exists
 					if(info){
-						mapMarker.bindTooltip(info)
+						mapMarker.bindTooltip(info);
 					}
 					// Overlay the generated image over the tile layer
 					if (image) {
@@ -133,7 +150,7 @@ export default class LeafletMap extends Visualization {
 						var imageUrl = 'data:image/png;base64,' + image;
 						L.imageOverlay(imageUrl, imageBounds).addTo(map);
 					}
-					return marker
+					return markers;
 			}
 		);
 		// Adjust the location of the viewport
