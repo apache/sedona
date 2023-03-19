@@ -133,7 +133,8 @@ extra:
     current_version: 1.4.0
     current_git_tag: sedona-1.4.0-rc1
     current_rc: 1.4.0-rc1
-    current_snapshot: 1.4.0-SNAPSHOT
+    current_snapshot: 1.4.1-SNAPSHOT
+    next_version: 1.4.1
 copyright: Copyright © 2023 The Apache Software Foundation
 markdown_extensions:
   - admonition
