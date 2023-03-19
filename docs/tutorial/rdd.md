@@ -928,6 +928,8 @@ The index should be built on either one of two SpatialRDDs. In general, you shou
 
 A distance join query takes as input two Spatial RDD A and B and a distance. For each geometry in A, finds the geometries (from B) are within the given distance to it. A and B can be any geometry type and are not necessary to have the same geometry type. The unit of the distance is explained [here](#transform-the-coordinate-reference-system).
 
+If you don't want to transform your data and are ok with sacrificing the query accuracy, you can use an approximate degree value for distance. Please use [this calculator](https://lucidar.me/en/online-unit-converter-length-to-angle/convert-degrees-to-meters/#online-converter).
+
 Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue an Distance Join Query on them.
 
 === "Scala"

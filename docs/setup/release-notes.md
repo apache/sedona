@@ -1,14 +1,18 @@
 !!!warning
 	Support of Spark 2.X and Scala 2.11 was removed in Sedona 1.3.0+ although some parts of the source code might still be compatible. Sedona 1.3.0+ releases binary for both Scala 2.12 and 2.13.
 
+!!!danger
+	Sedona Python currently only works with Shapely 1.x. If you use GeoPandas, please use <= GeoPandas `0.11.1`. GeoPandas > 0.11.1 will automatically installe Shapely 2.0. If you use Shapely, please use <= `1.8.4`.
+
 ## Sedona 1.4.0
 
 Sedona 1.4.0 is compiled against, Spark 3.3 / Flink 1.12, Java 8.
 
 ### Highlights
 
-* [X] **Sedona Spark** Pushdown spatial predicate on GeoParquet to reduce memory consumption by 10X: see [explanation](../../api/sql/Optimizer/#geoparquet)
 * [X] **Sedona Spark & Flink** Serialize and deserialize geometries 3 - 7X faster
+* [X] **Sedona Spark & Flink** Google S2 based spatial join for fast approximate point-in-polygon join. See [Join query in Spark](../../api/sql/Optimizer/#google-s2-based-approximate-equi-join) and [Join query in Flink](../../tutorial/flink/sql/#join-query)
+* [X] **Sedona Spark** Pushdown spatial predicate on GeoParquet to reduce memory consumption by 10X: see [explanation](../../api/sql/Optimizer/#geoparquet)
 * [X] **Sedona Spark** Automatically use broadcast index spatial join for small datasets
 * [X] **Sedona Spark** New RasterUDT added to Sedona GeoTiff reader.
 * [X] **Sedona Spark** A number of bug fixes and improvement to the Sedona R module.

@@ -1,5 +1,8 @@
 # Work with GeoPandas and Shapely
 
+!!!danger
+	Sedona Python currently only works with Shapely 1.x. If you use GeoPandas, please use <= GeoPandas `0.11.1`. GeoPandas > 0.11.1 will automatically installe Shapely 2.0. If you use Shapely, please use <= `1.8.4`.
+
 ## Interoperate with GeoPandas
 
 Sedona Python has implemented serializers and deserializers which allows to convert Sedona Geometry objects into Shapely BaseGeometry objects. Based on that it is possible to load the data with geopandas from file (look at Fiona possible drivers) and create Spark DataFrame based on GeoDataFrame object.
