@@ -413,6 +413,8 @@ rm *.asc
 
 You must have the maintainer privilege of `https://pypi.org/project/apache-sedona/` and `https://www.npmjs.com/package/apache-sedona`
 
+To publish Sedona pythons, you have to use GitHub actions since we release wheels for different platforms. Please use this repo: https://github.com/jiayuasu/sedona-publish-python
+
 ```bash
 #!/bin/bash
 
@@ -423,7 +425,6 @@ cp -r sedona-{{ sedona_create_release.current_git_tag}}/* apache-sedona-{{ sedon
 
 rm -rf sedona-{{ sedona_create_release.current_git_tag}}
 
-cd apache-sedona-{{ sedona_create_release.current_version }}-src/python && python3 setup.py sdist bdist_wheel && twine upload dist/* && cd ..
 cd zeppelin && npm publish && cd ..
 rm -rf apache-sedona-{{ sedona_create_release.current_version }}-src
 ```
