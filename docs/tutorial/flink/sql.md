@@ -207,7 +207,7 @@ geomTable.execute().print()
 
 ## Join query
 
-This equi-join leverages Flink's internal equi-join algorithm. You can opt to skip the Sedona refinement step  by sacrificing query accuracy.
+This equi-join leverages Flink's internal equi-join algorithm. You can opt to skip the Sedona refinement step  by sacrificing query accuracy. A running example is in [SQL example project](../../demo/).
 
 Please use the following steps:
 
@@ -216,16 +216,30 @@ Please use the following steps:
 Use [ST_S2CellIds](../../../api/flink/Function/#st_s2cellids) to generate cell IDs. Each geometry may produce one or more IDs.
 
 ```sql
-SELECT id, geom, name, explode(ST_S2CellIDs(geom, 15)) as cellId
+SELECT id, geom, name, ST_S2CellIDs(geom, 15) as idarray
 FROM lefts
 ```
 
 ```sql
-SELECT id, geom, name, explode(ST_S2CellIDs(geom, 15)) as cellId
+SELECT id, geom, name, ST_S2CellIDs(geom, 15) as idarray
 FROM rights
 ```
 
-### 2. Perform equi-join
+### 2. Explode id array
+
+The produced S2 ids are arrays of integers. We need to explode these Ids to multiple rows so later we can join two tables by ids.
+
+```
+SELECT id, geom, name, cellId
+FROM lefts CROSS JOIN UNNEST(lefts.idarray) AS tmpTbl1(cellId)
+```
+
+```
+SELECT id, geom, name, cellId
+FROM rights CROSS JOIN UNNEST(rights.idarray) AS tmpTbl2(cellId)
+```
+
+### 3. Perform equi-join
 
 Join the two tables by their S2 cellId
 
@@ -234,12 +248,11 @@ SELECT lcs.id as lcs_id, lcs.geom as lcs_geom, lcs.name as lcs_name, rcs.id as r
 FROM lcs JOIN rcs ON lcs.cellId = rcs.cellId
 ```
 
-
-### 3. Optional: Refine the result
+### 4. Optional: Refine the result
 
 Due to the nature of S2 Cellid, the equi-join results might have a few false-positives depending on the S2 level you choose. A smaller level indicates bigger cells, less exploded rows, but more false positives.
 
-To ensure the correctness, you can use one of the [Spatial Predicates](../../../api/Predicate/) to filter out them. Use this query instead of the query in Step 2.
+To ensure the correctness, you can use one of the [Spatial Predicates](../../../api/Predicate/) to filter out them. Use this query as the query in Step 3.
 
 ```sql
 SELECT lcs.id as lcs_id, lcs.geom as lcs_geom, lcs.name as lcs_name, rcs.id as rcs_id, rcs.geom as rcs_geom, rcs.name as rcs_name
@@ -252,7 +265,7 @@ As you see, compared to the query in Step 2, we added one more filter, which is 
 !!!tip
 	You can skip this step if you don't need 100% accuracy and want faster query speed.
 
-### 4. Optional: De-duplcate
+### 5. Optional: De-duplcate
 
 Due to the explode function used when we generate S2 Cell Ids, the resulting DataFrame may have several duplicate <lcs_geom, rcs_geom> matches. You can remove them by performing a GroupBy query.
 
