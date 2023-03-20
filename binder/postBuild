@@ -1,6 +1,6 @@
 #Download Apache Spark
-wget https://archive.apache.org/dist/spark/spark-3.1.2/spark-3.1.2-bin-hadoop3.2.tgz
-tar -xzf spark-3.1.2-bin-hadoop3.2.tgz
+wget https://archive.apache.org/dist/spark/spark-3.3.2/spark-3.3.2-bin-hadoop3.tgz
+tar -xzf spark-3.3.2-bin-hadoop3.tgz
 
 #Tidy up
-rm spark-3.1.2-bin-hadoop3.2.tgz
+rm spark-3.3.2-bin-hadoop3.tgz
