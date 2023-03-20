@@ -12,11 +12,11 @@ pytest-cov = "*"
 
 [packages]
 pandas="*"
-geopandas="==0.6.0"
+geopandas="==0.10.2"
 pyspark="==3.1.2"
 attrs="*"
 ipykernel = "*"
-apache-sedona="==1.1.0"
+apache-sedona="==1.4.0"
 matplotlib = "*"
 descartes = "*"
 

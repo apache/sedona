@@ -22,7 +22,7 @@ import sbt.Keys.{libraryDependencies, version}
 
 lazy val root = (project in file(".")).
   settings(
-    name := "sedona-analysis",
+    name := "SedonaVizTemplate",
 
     version := "0.1.0",
 
@@ -39,14 +39,14 @@ val SparkCompatibleVersion = "3.0"
 
 val HadoopVersion = "2.7.2"
 
-val SedonaVersion = "1.3.1-incubating"
+val SedonaVersion = "1.4.0"
 
 val ScalaCompatibleVersion = "2.12"
 
 // Change the dependency scope to "provided" when you run "sbt assembly"
 val dependencyScope = "compile"
 
-val geotoolsVersion = "1.3.0-27.2"
+val geotoolsVersion = "1.4.0-28.2"
 
 //val jacksonVersion = "2.10.0"
 
@@ -62,7 +62,7 @@ libraryDependencies ++= Seq(
   "org.apache.hadoop" % "hadoop-mapreduce-client-core" % HadoopVersion % dependencyScope,
   "org.apache.hadoop" % "hadoop-common" % HadoopVersion % dependencyScope,
   "org.apache.hadoop" % "hadoop-hdfs" % HadoopVersion % dependencyScope,
-  "org.apache.sedona" % "sedona-python-adapter-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion changing(),
+  "org.apache.sedona" % "sedona-spark-shaded-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion changing(),
   "org.apache.sedona" % "sedona-viz-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion changing(),
   //  The following GeoTools packages are only required if you need CRS transformation. Under GNU Lesser General Public License (LGPL) license
   "org.datasyslab" % "geotools-wrapper" % geotoolsVersion % "compile"

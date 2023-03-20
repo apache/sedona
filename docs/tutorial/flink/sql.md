@@ -12,11 +12,12 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../../../api/flink/O
 1. Read [Sedona Maven Central coordinates](../../../setup/maven-coordinates)
 2. Add Sedona dependencies in build.sbt or pom.xml.
 3. Add [Flink dependencies](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/configuration/overview/) in build.sbt or pom.xml.
+4. Please see [SQL example project](../../demo/)
 
 ## Initiate Stream Environment
 Use the following code to initiate your `StreamExecutionEnvironment` at the beginning:
 ```java
-StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment()
+StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
 StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
 ```
@@ -63,7 +64,7 @@ You can create a Table with a Geometry type column as follows:
 
 ```java
 tableEnv.createTemporaryView("myTable", tbl)
-Table geomTbl = tableEnv.sql("SELECT ST_GeomFromWKT(geom_polygon) as geom_polygon, name_polygon FROM myTable")
+Table geomTbl = tableEnv.sqlQuery("SELECT ST_GeomFromWKT(geom_polygon) as geom_polygon, name_polygon FROM myTable")
 geomTbl.execute().print()
 ```
 
@@ -166,12 +167,9 @@ After the transformation:
 +----+--------------------------------+--------------------------------+
 ```
 
-
-## Run spatial queries
-
 After creating a Geometry type column, you are able to run spatial queries.
 
-### Range query
+## Range query
 
 Use ==ST_Contains==, ==ST_Intersects== and so on to run a range query over a single column.
 
@@ -190,7 +188,7 @@ geomTable.execute().print()
 !!!note
 	Read [SedonaSQL Predicate API](../../../api/flink/Predicate) to learn different spatial query predicates.
 	
-### KNN query
+## KNN query
 
 Use ==ST_Distance== to calculate the distance and rank the distance.
 
@@ -206,6 +204,102 @@ geomTable = tableEnv.sqlQuery(
   ")
 geomTable.execute().print()
 ```
+
+## Join query
+
+This equi-join leverages Flink's internal equi-join algorithm. You can opt to skip the Sedona refinement step  by sacrificing query accuracy. A running example is in [SQL example project](../../demo/).
+
+Please use the following steps:
+
+### 1. Generate S2 ids for both tables
+
+Use [ST_S2CellIds](../../../api/flink/Function/#st_s2cellids) to generate cell IDs. Each geometry may produce one or more IDs.
+
+```sql
+SELECT id, geom, name, ST_S2CellIDs(geom, 15) as idarray
+FROM lefts
+```
+
+```sql
+SELECT id, geom, name, ST_S2CellIDs(geom, 15) as idarray
+FROM rights
+```
+
+### 2. Explode id array
+
+The produced S2 ids are arrays of integers. We need to explode these Ids to multiple rows so later we can join two tables by ids.
+
+```
+SELECT id, geom, name, cellId
+FROM lefts CROSS JOIN UNNEST(lefts.idarray) AS tmpTbl1(cellId)
+```
+
+```
+SELECT id, geom, name, cellId
+FROM rights CROSS JOIN UNNEST(rights.idarray) AS tmpTbl2(cellId)
+```
+
+### 3. Perform equi-join
+
+Join the two tables by their S2 cellId
+
+```sql
+SELECT lcs.id as lcs_id, lcs.geom as lcs_geom, lcs.name as lcs_name, rcs.id as rcs_id, rcs.geom as rcs_geom, rcs.name as rcs_name
+FROM lcs JOIN rcs ON lcs.cellId = rcs.cellId
+```
+
+### 4. Optional: Refine the result
+
+Due to the nature of S2 Cellid, the equi-join results might have a few false-positives depending on the S2 level you choose. A smaller level indicates bigger cells, less exploded rows, but more false positives.
+
+To ensure the correctness, you can use one of the [Spatial Predicates](../../../api/Predicate/) to filter out them. Use this query as the query in Step 3.
+
+```sql
+SELECT lcs.id as lcs_id, lcs.geom as lcs_geom, lcs.name as lcs_name, rcs.id as rcs_id, rcs.geom as rcs_geom, rcs.name as rcs_name
+FROM lcs, rcs
+WHERE lcs.cellId = rcs.cellId AND ST_Contains(lcs.geom, rcs.geom)
+```
+
+As you see, compared to the query in Step 2, we added one more filter, which is `ST_Contains`, to remove false positives. You can also use `ST_Intersects` and so on.
+
+!!!tip
+	You can skip this step if you don't need 100% accuracy and want faster query speed.
+
+### 5. Optional: De-duplcate
+
+Due to the explode function used when we generate S2 Cell Ids, the resulting DataFrame may have several duplicate <lcs_geom, rcs_geom> matches. You can remove them by performing a GroupBy query.
+
+```sql
+SELECT lcs_id, rcs_id , FIRST_VALUE(lcs_geom), FIRST_VALUE(lcs_name), first(rcs_geom), first(rcs_name)
+FROM joinresult
+GROUP BY (lcs_id, rcs_id)
+```
+
+The `FIRST_VALUE` function is to take the first value from a number of duplicate values.
+
+If you don't have a unique id for each geometry, you can also group by geometry itself. See below:
+
+```sql
+SELECT lcs_geom, rcs_geom, first(lcs_name), first(rcs_name)
+FROM joinresult
+GROUP BY (lcs_geom, rcs_geom)
+```
+
+!!!note
+	If you are doing point-in-polygon join, this is not a problem and you can safely discard this issue. This issue only happens when you do polygon-polygon, polygon-linestring, linestring-linestring join.
+
+### S2 for distance join
+
+This also works for distance join. You first need to use `ST_Buffer(geometry, distance)` to wrap one of your original geometry column. If your original geometry column contains points, this `ST_Buffer` will make them become circles with a radius of `distance`.
+
+For example. run this query first on the left table before Step 1.
+
+```sql
+SELECT id, ST_Buffer(geom, DISTANCE), name
+FROM lefts
+```
+
+Since the coordinates are in the longitude and latitude system, so the unit of `distance` should be degree instead of meter or mile. You will have to estimate the corresponding degrees based on your meter values. Please use [this calculator](https://lucidar.me/en/online-unit-converter-length-to-angle/convert-degrees-to-meters/#online-converter).
 
 ## Convert Spatial Table to Spatial DataStream
 

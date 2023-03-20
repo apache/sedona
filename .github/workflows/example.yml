@@ -32,6 +32,13 @@ jobs:
           ~/.ivy2/cache
           ~/.sbt
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
-    - run: (cd examples/rdd-colocation-mining;sbt clean assembly;java -jar target/scala-2.12/*.jar)
-    - run: (cd examples/sql;sbt clean assembly;java -jar target/scala-2.12/*.jar)
-    - run: (cd examples/viz;sbt clean assembly;java -jar target/scala-2.12/*.jar)
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    - run: (cd examples/spark-rdd-colocation-mining;sbt clean assembly;java -jar target/scala-2.12/*.jar)
+    - run: (cd examples/spark-sql;sbt clean assembly;java -jar target/scala-2.12/*.jar)
+    - run: (cd examples/spark-viz;sbt clean assembly;java -jar target/scala-2.12/*.jar)
+    - run: (cd examples/flink-sql;mvn clean install;java -jar target/sedona-flink-example-1.0.0.jar)
