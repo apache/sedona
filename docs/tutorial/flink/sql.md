@@ -12,11 +12,12 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../../../api/flink/O
 1. Read [Sedona Maven Central coordinates](../../../setup/maven-coordinates)
 2. Add Sedona dependencies in build.sbt or pom.xml.
 3. Add [Flink dependencies](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/configuration/overview/) in build.sbt or pom.xml.
+4. Please see [SQL example project](../../demo/)
 
 ## Initiate Stream Environment
 Use the following code to initiate your `StreamExecutionEnvironment` at the beginning:
 ```java
-StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment()
+StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
 StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
 ```
@@ -63,7 +64,7 @@ You can create a Table with a Geometry type column as follows:
 
 ```java
 tableEnv.createTemporaryView("myTable", tbl)
-Table geomTbl = tableEnv.sql("SELECT ST_GeomFromWKT(geom_polygon) as geom_polygon, name_polygon FROM myTable")
+Table geomTbl = tableEnv.sqlQuery("SELECT ST_GeomFromWKT(geom_polygon) as geom_polygon, name_polygon FROM myTable")
 geomTbl.execute().print()
 ```
 
