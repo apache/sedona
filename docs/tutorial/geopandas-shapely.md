@@ -1,7 +1,7 @@
 # Work with GeoPandas and Shapely
 
 !!!danger
-	Sedona Python currently only works with Shapely 1.x. If you use GeoPandas, please use <= GeoPandas `0.11.1`. GeoPandas > 0.11.1 will automatically installe Shapely 2.0. If you use Shapely, please use <= `1.8.4`.
+	Sedona Python currently only works with Shapely 1.x. If you use GeoPandas, please use <= GeoPandas `0.11.1`. GeoPandas > 0.11.1 will automatically install Shapely 2.0. If you use Shapely, please use <= `1.8.4`.
 
 ## Interoperate with GeoPandas
 
