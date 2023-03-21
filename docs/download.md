@@ -6,7 +6,7 @@ Old GeoSpark releases: [GitHub releases](https://github.com/apache/sedona/releas
 
 Automatically generated binary JARs (per each Master branch commit): [GitHub Action](https://github.com/apache/sedona/actions/workflows/java.yml)
 
-## Verify the integ1.4.0rity
+## Verify the integrity
 
 [Public keys](https://downloads.apache.org/sedona/KEYS)
 

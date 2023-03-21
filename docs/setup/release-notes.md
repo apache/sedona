@@ -19,7 +19,7 @@ Sedona 1.4.0 is compiled against, Spark 3.3 / Flink 1.12, Java 8.
 
 ### API change
 
-* **Sedona Spark & Flink** Packaging strategy changed. See [Maven Coordinate](../maven-coordinates). Please change your Sedona dependencies if needed. We recommend `sedona-spark-shaded-3.0_2.12-1.4.0` and `sedona-flink-shaded-3.0_2.12-1.4.0`
+* **Sedona Spark & Flink** Packaging strategy changed. See [Maven Coordinate](../maven-coordinates). Please change your Sedona dependencies if needed. We recommend `sedona-spark-shaded-3.0_2.12-1.4.0` and `sedona-flink-shaded_2.12-1.4.0`
 * **Sedona Spark & Flink** GeoTools-wrapper version upgraded. Please use `geotools-wrapper-1.4.0-28.2`.
 
 ### Behavior change
@@ -30,7 +30,7 @@ Sedona 1.4.0 is compiled against, Spark 3.3 / Flink 1.12, Java 8.
 	* `none`: disable spatial join optimization.
 	* `nonequi`: only enable spatial join optimization on non-equi joins. This is the default mode.
 
-When `sedona.join.optimizationmode` is configured as `nonequi`, it won't optimize join queries such as `SELECT * FROM A, B WHERE A.x = B.x AND ST_Contains(A.geom, B.geom)`, since it is an equi-join with equi-condition `A.x = B.x`. Sedona will optimize for `SELECT * FROM A, B WHERE A.x = B.x AND ST_Contains(A.geom, B.geom)`
+When `sedona.join.optimizationmode` is configured as `nonequi`, it won't optimize join queries such as `SELECT * FROM A, B WHERE A.x = B.x AND ST_Contains(A.geom, B.geom)`, since it is an equi-join with equi-condition `A.x = B.x`. Sedona will optimize for `SELECT * FROM A, B WHERE ST_Contains(A.geom, B.geom)`
 
 
 ### Bug

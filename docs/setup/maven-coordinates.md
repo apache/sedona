@@ -210,7 +210,7 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		</dependency>
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-flink-3.0_2.12</artifactId>
+		  <artifactId>sedona-flink_2.12</artifactId>
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
 		<dependency>
