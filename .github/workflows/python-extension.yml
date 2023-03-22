@@ -53,3 +53,8 @@ jobs:
         cd python
         pipenv install shapely~=1.7
         pipenv run pytest tests/utils/test_geomserde_speedup.py
+    - name: Install from sdist
+      run: |
+        cd python
+        pipenv run python setup.py sdist
+        pipenv run python -m pip install dist/apache-sedona-*.tar.gz
