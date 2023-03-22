@@ -894,9 +894,8 @@ case class RS_Values(inputExpressions: Seq[Expression]) extends Expression with 
     if (raster == null || serializedGeometries == null) {
       null
     } else {
-      val geometries = serializedGeometries.array.map {
-        case b: Array[Byte] => GeometrySerializer.deserialize(b)
-        case _ => null
+      val geometries = (0 until serializedGeometries.numElements()).map {
+        i => Option(serializedGeometries.getBinary(i)).map(GeometrySerializer.deserialize).orNull
       }
       new GenericArrayData(Functions.values(raster, java.util.Arrays.asList(geometries:_*), band).toArray)
     }

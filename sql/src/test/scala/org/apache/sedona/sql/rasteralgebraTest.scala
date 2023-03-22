@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.spark.sql.functions.{collect_list, expr}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.locationtech.jts.geom.Geometry
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
@@ -308,6 +309,23 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     it("Passed RS_Values with raster") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       val result = df.selectExpr("RS_Values(RS_FromGeoTiff(content), array(ST_Point(-13077301.685, 4002565.802), null))").first().getList[Any](0)
+      assert(result.size() == 2)
+      assert(result.get(0) == 255d)
+      assert(result.get(1) == null)
+    }
+
+    it("Passed RS_Values with raster and serialized point array") {
+      // https://issues.apache.org/jira/browse/SEDONA-266
+      // A shuffle changes the internal type for the geometry array (point in this case) from GenericArrayData to UnsafeArrayData.
+      // UnsafeArrayData.array() throws UnsupportedOperationException.
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val points = sparkSession.createDataFrame(Seq(("POINT (-13077301.685 4002565.802)",1), ("POINT (0 0)",2)))
+        .toDF("point", "id")
+        .withColumn("point", expr("ST_GeomFromText(point)"))
+        .groupBy().agg(collect_list("point").alias("point"))
+
+      val result = df.crossJoin(points).selectExpr("RS_Values(RS_FromGeoTiff(content), point)").first().getList[Any](0)
+
       assert(result.size() == 2)
       assert(result.get(0) == 255d)
       assert(result.get(1) == null)
