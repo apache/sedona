@@ -296,6 +296,66 @@ root
 
 Sedona supports spatial predicate push-down for GeoParquet files, please refer to the [SedonaSQL query optimizer](../api/sql/Optimizer.md) documentation for details.
 
+## Load data from JDBC data sources
+
+The 'query' option in Spark SQL's JDBC data source can be used to convert geometry columns to a format that Sedona can interpret.
+This should work for most spatial JDBC data sources.
+For Postgis there is no need to add a query to convert geometry types since it's already using EWKB as it's wire format.
+
+=== "Scala"
+
+	```scala
+	// For any JDBC data source, inluding Postgis.
+	val df = sparkSession.read.format("jdbc")
+		// Other options.
+		.option("query", "SELECT id, ST_AsBinary(geom) as geom FROM my_table")
+		.load()
+		.withColumn("geom", expr("ST_GeomFromWKB(geom)"))
+
+	// This is a simplified version that works for Postgis.
+	val df = sparkSession.read.format("jdbc")
+		// Other options.
+		.option("dbtable", "my_table")
+		.load()
+		.withColumn("geom", expr("ST_GeomFromWKB(geom)"))
+	```
+
+=== "Java"
+
+	```java
+	// For any JDBC data source, inluding Postgis.
+	Dataset<Row> df = sparkSession.read().format("jdbc")
+		// Other options.
+		.option("query", "SELECT id, ST_AsBinary(geom) as geom FROM my_table")
+		.load()
+		.withColumn("geom", expr("ST_GeomFromWKB(geom)"))
+
+	// This is a simplified version that works for Postgis.
+	Dataset<Row> df = sparkSession.read().format("jdbc")
+		// Other options.
+		.option("dbtable", "my_table")
+		.load()
+		.withColumn("geom", expr("ST_GeomFromWKB(geom)"))
+	```
+
+=== "Python"
+
+	```python
+	# For any JDBC data source, inluding Postgis.
+	df = (sparkSession.read.format("jdbc")
+		# Other options.
+		.option("query", "SELECT id, ST_AsBinary(geom) as geom FROM my_table")
+		.load()
+		.withColumn("geom", f.expr("ST_GeomFromWKB(geom)")))
+
+	# This is a simplified version that works for Postgis.
+	df = (sparkSession.read.format("jdbc")
+		# Other options.
+		.option("dbtable", "my_table")
+		.load()
+		.withColumn("geom", f.expr("ST_GeomFromWKB(geom)")))
+	```
+
 ## Transform the Coordinate Reference System
 
 Sedona doesn't control the coordinate unit (degree-based or meter-based) of all geometries in a Geometry column. The unit of all related distances in SedonaSQL is same as the unit of all geometries in a Geometry column.
@@ -402,6 +462,30 @@ FROM spatialDf
 ORDER BY geohash
 ```
 
+## Save to Postgis
+
+Unfortunately, the Spark SQL JDBC data source doesn't support creating geometry types in PostGIS using the 'createTableColumnTypes' option.
+Only the Spark built-in types are recognized.
+This means that you'll need to manage your PostGIS schema separately from Spark.
+One way to do this is to create the table with the correct geometry column before writing data to it with Spark.
+Alternatively, you can write your data to the table using Spark and then manually alter the column to be a geometry type afterward.
+
+Postgis uses EWKB to serialize geometries.
+If you convert your geometries to EWKB format in Sedona you don't have to do any additional conversion in Postgis.
+
+```
+my_postgis_db# create table my_table (id int8, geom geometry);
+
+df.withColumn("geom", expr("ST_AsEWKB(geom)")
+	.write.format("jdbc")
+	.option("truncate","true") // Don't let Spark recreate the table.
+	// Other options.
+	.save()
+
+// If you didn't create the table before writing you can change the type afterward.
+my_postgis_db# alter table my_table alter column geom type geometry;
+
+```
 
 ## Convert between DataFrame and SpatialRDD
 
