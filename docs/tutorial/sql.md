@@ -212,10 +212,50 @@ root
 
 !!!note
 	SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL constructor API](../api/sql/Constructor.md).
-	
-## Load Shapefile and GeoJSON
 
-Shapefile and GeoJSON must be loaded by SpatialRDD and converted to DataFrame using Adapter. Please read [Load SpatialRDD](../rdd/#create-a-generic-spatialrdd) and [DataFrame <-> RDD](#convert-between-dataframe-and-spatialrdd).
+## Load GeoJSON using Spark JSON Data Source
+
+Spark SQL's built-in JSON data source supports reading GeoJSON data.
+To ensure proper parsing of the geometry property, we can define a schema with the geometry property set to type 'string'.
+This prevents Spark from interpreting the property and allows us to use the ST_GeomFromGeoJSON function for accurate geometry parsing.
+
+=== "Scala"
+
+	```scala
+	val schema = "type string, crs string, totalFeatures long, features array<struct<type string, geometry string, properties map<string, string>>>"
+	sparkSession.read.schema(schema).json(geojson_path)
+		.selectExpr("explode(features) as features") // Explode the envelope to get one feature per row.
+		.select("features.*") // Unpack the features struct.
+		.withColumn("geometry", expr("ST_GeomFromGeoJSON(geometry)")) // Convert the geometry string.
+		.printSchema()
+	```
+
+=== "Java"
+
+	```java
+	String schema = "type string, crs string, totalFeatures long, features array<struct<type string, geometry string, properties map<string, string>>>";
+	sparkSession.read.schema(schema).json(geojson_path)
+		.selectExpr("explode(features) as features") // Explode the envelope to get one feature per row.
+		.select("features.*") // Unpack the features struct.
+		.withColumn("geometry", expr("ST_GeomFromGeoJSON(geometry)")) // Convert the geometry string.
+		.printSchema();
+	```
+
+=== "Python"
+
+	```python
+	schema = "type string, crs string, totalFeatures long, features array<struct<type string, geometry string, properties map<string, string>>>";
+	(sparkSession.read.json(geojson_path, schema=schema) 
+		.selectExpr("explode(features) as features") # Explode the envelope to get one feature per row.
+		.select("features.*") # Unpack the features struct.
+		.withColumn("geometry", f.expr("ST_GeomFromGeoJSON(geometry)")) # Convert the geometry string.
+		.printSchema())
+	```
+
+	
+## Load Shapefile and GeoJSON using SpatialRDD
+
+Shapefile and GeoJSON can be loaded by SpatialRDD and converted to DataFrame using Adapter. Please read [Load SpatialRDD](../rdd/#create-a-generic-spatialrdd) and [DataFrame <-> RDD](#convert-between-dataframe-and-spatialrdd).
 
 ## Load GeoParquet
 
