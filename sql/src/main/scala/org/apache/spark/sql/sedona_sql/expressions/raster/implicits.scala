@@ -21,15 +21,20 @@ package org.apache.spark.sql.sedona_sql.expressions.raster
 import org.apache.sedona.common.raster.Serde
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.sedona_sql.expressions.SerdeAware
 import org.geotools.coverage.grid.GridCoverage2D
 
 object implicits {
 
   implicit class RasterInputExpressionEnhancer(inputExpression: Expression) {
     def toRaster(input: InternalRow): GridCoverage2D = {
-      inputExpression.eval(input).asInstanceOf[Array[Byte]] match {
-        case binary: Array[Byte] => Serde.deserialize(binary)
-        case _ => null
+      if (inputExpression.isInstanceOf[SerdeAware]) {
+        inputExpression.asInstanceOf[SerdeAware].evalWithoutSerialization(input).asInstanceOf[GridCoverage2D]
+      } else {
+        inputExpression.eval(input).asInstanceOf[Array[Byte]] match {
+          case binary: Array[Byte] => Serde.deserialize(binary)
+          case _ => null
+        }
       }
     }
   }
