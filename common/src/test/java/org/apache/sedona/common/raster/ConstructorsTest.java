@@ -16,6 +16,7 @@ package org.apache.sedona.common.raster;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
+import org.opengis.referencing.FactoryException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -25,7 +26,7 @@ import static org.junit.Assert.*;
 public class ConstructorsTest extends RasterTestBase {
 
     @Test
-    public void fromArcInfoAsciiGrid() throws IOException {
+    public void fromArcInfoAsciiGrid() throws IOException, FactoryException {
         GridCoverage2D gridCoverage2D = Constructors.fromArcInfoAsciiGrid(arc.getBytes(StandardCharsets.UTF_8));
 
         Geometry envelope = Functions.envelope(gridCoverage2D);
@@ -39,7 +40,7 @@ public class ConstructorsTest extends RasterTestBase {
     }
 
     @Test
-    public void fromGeoTiff() throws IOException {
+    public void fromGeoTiff() throws IOException, FactoryException {
         GridCoverage2D gridCoverage2D = Constructors.fromGeoTiff(geoTiff);
 
         Geometry envelope = Functions.envelope(gridCoverage2D);
