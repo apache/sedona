@@ -57,4 +57,4 @@ mean_area_sdf <- polygon_sdf %>%
 print(mean_area_sdf)
 ```
 
-Notice that all of the above can open up many interesting possiblities. For example, one can extract ML features from geospatial data in Spark dataframes, build a ML pipeline using `ml_*` family of functions in `{sparklyr}` to work with such features, and if the output of a ML model happens to be a geospatial object as well, one can even apply visualization routines in `{apache.sedona}` to visualize the difference between any predicted geometry and the corresponding ground truth.
+Notice that all of the above can open up many interesting possibilities. For example, one can extract ML features from geospatial data in Spark dataframes, build a ML pipeline using `ml_*` family of functions in `{sparklyr}` to work with such features, and if the output of a ML model happens to be a geospatial object as well, one can even apply visualization routines in `{apache.sedona}` to visualize the difference between any predicted geometry and the corresponding ground truth.

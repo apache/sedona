@@ -305,7 +305,7 @@ For Postgis there is no need to add a query to convert geometry types since it's
 === "Scala"
 
 	```scala
-	// For any JDBC data source, inluding Postgis.
+	// For any JDBC data source, including Postgis.
 	val df = sparkSession.read.format("jdbc")
 		// Other options.
 		.option("query", "SELECT id, ST_AsBinary(geom) as geom FROM my_table")
@@ -323,7 +323,7 @@ For Postgis there is no need to add a query to convert geometry types since it's
 === "Java"
 
 	```java
-	// For any JDBC data source, inluding Postgis.
+	// For any JDBC data source, including Postgis.
 	Dataset<Row> df = sparkSession.read().format("jdbc")
 		// Other options.
 		.option("query", "SELECT id, ST_AsBinary(geom) as geom FROM my_table")
@@ -341,7 +341,7 @@ For Postgis there is no need to add a query to convert geometry types since it's
 === "Python"
 
 	```python
-	# For any JDBC data source, inluding Postgis.
+	# For any JDBC data source, including Postgis.
 	df = (sparkSession.read.format("jdbc")
 		# Other options.
 		.option("query", "SELECT id, ST_AsBinary(geom) as geom FROM my_table")

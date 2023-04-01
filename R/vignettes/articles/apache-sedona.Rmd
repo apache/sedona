@@ -180,7 +180,7 @@ data_tbl %>%
 
 ## Manipulating
 
-The dbplyr interface transparently translates dbplyr worklfows into SQL, and gives access to all Apache Sedona SQL functions:
+The dbplyr interface transparently translates dbplyr workflows into SQL, and gives access to all Apache Sedona SQL functions:
  
 * [Vector functions](../../../api/sql/Function/)
 * [Vector predicates](../../../api/sql/Predicate/)
