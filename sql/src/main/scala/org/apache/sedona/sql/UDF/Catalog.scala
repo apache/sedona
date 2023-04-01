@@ -173,6 +173,7 @@ object Catalog {
     function[RS_FromGeoTiff](),
     function[RS_Envelope](),
     function[RS_NumBands](),
+    function[RS_SRID](),
     function[RS_Value](1),
     function[RS_Values](1)
   )

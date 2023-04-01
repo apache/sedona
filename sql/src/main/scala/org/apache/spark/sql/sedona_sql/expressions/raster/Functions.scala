@@ -855,6 +855,29 @@ case class RS_NumBands(inputExpressions: Seq[Expression]) extends Expression wit
   override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT)
 }
 
+case class RS_SRID(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback with ExpectsInputTypes {
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    val raster = inputExpressions(0).toRaster(input)
+    if (raster == null) {
+      null
+    } else {
+      Functions.srid(raster)
+    }
+  }
+
+  override def dataType: DataType = IntegerType
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT)
+}
+
 case class RS_Value(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback with ExpectsInputTypes {
 
   override def nullable: Boolean = true

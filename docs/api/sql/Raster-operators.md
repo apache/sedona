@@ -35,6 +35,24 @@ Output:
 4
 ```
 
+### RS_SRID
+
+Introduction: Returns the spatial reference system identifier (SRID) of the raster geometry.
+
+Format: `RS_SRID (raster: Raster)`
+
+Since: `v1.4.1`
+
+Spark SQL example:
+```sql
+SELECT RS_SRID(raster) FROM raster_table
+```
+
+Output:
+```
+3857
+```
+
 ### RS_Value
 
 Introduction: Returns the value at the given point in the raster.
