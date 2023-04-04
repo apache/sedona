@@ -7,3 +7,5 @@ Apache Sedona extends Apache Spark / SparkSQL with a set of out-of-the-box Spati
 
 Please visit the official Apache Sedona website:
 https://sedona.apache.org/
+
+Development environment setup docs: https://sedona.apache.org/latest-snapshot/setup/compile/#run-python-test
