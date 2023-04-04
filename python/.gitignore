@@ -6,3 +6,4 @@
 /build/
 /dist/
 /sedona/utils/*.so
+__pycache__
