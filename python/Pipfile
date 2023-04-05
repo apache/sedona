@@ -12,7 +12,7 @@ pytest-cov = "*"
 
 [packages]
 shapely="==1.8.5"
-pandas="*"
+pandas="==1.5.3"
 geopandas="==0.10.2"
 pyspark=">=2.3.0"
 attrs="*"
