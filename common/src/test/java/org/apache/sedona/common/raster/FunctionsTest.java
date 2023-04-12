@@ -13,6 +13,7 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -43,6 +44,20 @@ public class FunctionsTest extends RasterTestBase {
     public void testNumBands() {
         assertEquals(1, Functions.numBands(oneBandRaster));
         assertEquals(4, Functions.numBands(multiBandRaster));
+    }
+
+    @Test
+    public void testSetSrid() throws FactoryException {
+        assertEquals(0, Functions.srid(oneBandRaster));
+        assertEquals(4326, Functions.srid(multiBandRaster));
+
+        GridCoverage2D oneBandRasterWithUpdatedSrid = Functions.setSrid(oneBandRaster, 4326);
+        assertEquals(4326, Functions.srid(oneBandRasterWithUpdatedSrid));
+        assertEquals(4326, Functions.envelope(oneBandRasterWithUpdatedSrid).getSRID());
+        assertTrue(Functions.envelope(oneBandRasterWithUpdatedSrid).equalsTopo(Functions.envelope(oneBandRaster)));
+
+        GridCoverage2D multiBandRasterWithUpdatedSrid = Functions.setSrid(multiBandRaster, 0);
+        assertEquals(0 , Functions.srid(multiBandRasterWithUpdatedSrid));
     }
 
     @Test
