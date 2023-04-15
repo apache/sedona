@@ -35,6 +35,20 @@ Output:
 4
 ```
 
+## RS_SetSRID
+
+Introduction: Sets the spatial reference system identifier (SRID) of the raster geometry.
+
+Format: `RS_SetSRID (raster: Raster, srid: Integer)`
+
+Since: `v1.4.1`
+
+Spark SQL example:
+```sql
+SELECT RS_SetSRID(raster, 4326)
+FROM raster_table
+```
+
 ### RS_SRID
 
 Introduction: Returns the spatial reference system identifier (SRID) of the raster geometry.

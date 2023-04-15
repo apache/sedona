@@ -20,16 +20,17 @@
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
 import org.apache.sedona.common.geometrySerde.GeometrySerializer
-import org.apache.sedona.common.raster.Functions
+import org.apache.sedona.common.raster.{Functions, Serde}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression}
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, RasterUDT}
-import org.apache.spark.sql.sedona_sql.expressions.UserDataGeneratator
+import org.apache.spark.sql.sedona_sql.expressions.{SerdeAware, UserDataGeneratator}
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.sedona_sql.expressions.raster.implicits._
 import org.apache.spark.sql.types._
+import org.geotools.coverage.grid.GridCoverage2D
 
 
 
@@ -853,6 +854,34 @@ case class RS_NumBands(inputExpressions: Seq[Expression]) extends Expression wit
   }
 
   override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT)
+}
+
+case class RS_SetSRID(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback with ExpectsInputTypes with SerdeAware {
+  override def nullable: Boolean = true
+
+  override def eval(input: InternalRow): Any = {
+    Option(evalWithoutSerialization(input)).map(Serde.serialize).orNull
+  }
+
+  override def evalWithoutSerialization(input: InternalRow): GridCoverage2D = {
+    val raster = inputExpressions(0).toRaster(input)
+    val srid = inputExpressions(1).eval(input).asInstanceOf[Int]
+    if (raster == null) {
+      null
+    } else {
+      Functions.setSrid(raster, srid)
+    }
+  }
+
+  override def dataType: DataType = RasterUDT
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, IntegerType)
 }
 
 case class RS_SRID(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback with ExpectsInputTypes {

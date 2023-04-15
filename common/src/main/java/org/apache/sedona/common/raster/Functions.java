@@ -13,11 +13,15 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.GridGeometry2D;
+import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.Envelope2D;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.locationtech.jts.geom.*;
@@ -46,6 +50,18 @@ public class Functions {
 
     public static int numBands(GridCoverage2D raster) {
         return raster.getNumSampleDimensions();
+    }
+
+    public static GridCoverage2D setSrid(GridCoverage2D raster, int srid) throws FactoryException {
+        CoordinateReferenceSystem crs;
+        if (srid == 0) {
+            crs = DefaultEngineeringCRS.CARTESIAN_2D;
+        } else {
+            crs = CRS.decode("EPSG:" + srid);
+        }
+        ReferencedEnvelope referencedEnvelope = new ReferencedEnvelope(raster.getEnvelope2D(), crs);
+        GridCoverageFactory gridCoverageFactory = CoverageFactoryFinder.getGridCoverageFactory(null);
+        return gridCoverageFactory.create(raster.getName().toString(), raster.getRenderedImage(), referencedEnvelope);
     }
 
     public static int srid(GridCoverage2D raster) throws FactoryException {
