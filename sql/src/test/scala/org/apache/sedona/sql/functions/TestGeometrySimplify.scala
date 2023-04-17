@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.sql.functions
 
-import org.apache.spark.sql.sedona_sql.expressions.simplify.GeometrySimplifier
+import org.apache.sedona.common.simplify.GeometrySimplifier
 import org.locationtech.jts.geom.Geometry
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
