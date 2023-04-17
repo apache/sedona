@@ -404,5 +404,11 @@ public class GeomUtils {
         return leafs;
     }
 
-
+    public static Geometry[] getSubGeometries(Geometry geom) {
+        Geometry[] geometries = new Geometry[geom.getNumGeometries()];
+        for ( int i = 0; i < geom.getNumGeometries() ; i++) {
+            geometries[i] = geom.getGeometryN(i);
+        }
+        return geometries;
+    }
 }

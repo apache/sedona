@@ -19,7 +19,7 @@
 
 package org.apache.sedona.sql.functions
 
-import org.apache.spark.sql.sedona_sql.expressions.subdivide.{GeometrySubDivider, GeometrySubDividerConfiguration}
+import org.apache.sedona.common.subDivide.GeometrySubDivider
 import org.locationtech.jts.geom.Geometry
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
@@ -79,9 +79,9 @@ class TestStSubDivide extends AnyFunSuite with Matchers with TableDrivenProperty
 
     val geometriesWithNumberOfVerticesLowerThanThreshold: TableFor3[String, String, Int] = Table(
       ("geometryType", "inputWkt", "numberOfVertices"),
-      ("point", "POINT(4 43)", GeometrySubDividerConfiguration.minMaxVertices - 1),
-      ("polygon", "POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))", GeometrySubDividerConfiguration.minMaxVertices - 1),
-      ("linestring", "LINESTRING(1 1, 2 2, 3 2)", GeometrySubDividerConfiguration.minMaxVertices - 1)
+      ("point", "POINT(4 43)", GeometrySubDivider.minMaxVertices - 1),
+      ("polygon", "POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))", GeometrySubDivider.minMaxVertices - 1),
+      ("linestring", "LINESTRING(1 1, 2 2, 3 2)", GeometrySubDivider.minMaxVertices - 1)
     )
 
     val testPolygons: TableFor4[String, String, Int, Seq[String]] = Table(
