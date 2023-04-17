@@ -22,7 +22,7 @@ package org.apache.sedona.core.spatialRDD;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.NullArgumentException;
 import org.apache.sedona.common.utils.GeomUtils;
-import org.apache.sedona.core.enums.FileDataSplitter;
+import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.spark.storage.StorageLevel;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

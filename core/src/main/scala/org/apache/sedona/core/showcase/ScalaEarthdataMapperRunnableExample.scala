@@ -20,7 +20,8 @@
 package org.apache.sedona.core.showcase
 
 import org.apache.log4j.{Level, Logger}
-import org.apache.sedona.core.enums.{FileDataSplitter, IndexType}
+import org.apache.sedona.common.enums.FileDataSplitter
+import org.apache.sedona.core.enums.IndexType
 import org.apache.sedona.core.formatMapper.EarthdataHDFPointMapper
 import org.apache.sedona.core.spatialOperator.RangeQuery
 import org.apache.sedona.core.spatialOperator.SpatialPredicate

@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.viz;
 
-import org.apache.sedona.core.enums.FileDataSplitter;
+import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.core.spatialRDD.PointRDD;
 import org.apache.sedona.viz.core.ImageGenerator;
 import org.apache.sedona.viz.extension.visualizationEffect.HeatMap;

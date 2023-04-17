@@ -19,7 +19,7 @@
 package org.apache.sedona.core.spatialOperator;
 
 import org.apache.sedona.core.TestBase;
-import org.apache.sedona.core.enums.FileDataSplitter;
+import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.spatialRDD.LineStringRDD;

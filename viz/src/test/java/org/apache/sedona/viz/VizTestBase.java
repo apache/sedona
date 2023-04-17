@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.viz;
 
-import org.apache.sedona.core.enums.FileDataSplitter;
+import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator;
 import org.locationtech.jts.geom.Envelope;
 import org.apache.log4j.Level;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.sedona.core.enums;
+package org.apache.sedona.common.enums;
 
 import java.io.Serializable;
 import java.util.HashMap;

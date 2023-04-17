@@ -396,7 +396,7 @@ The output will be
 * Create a Geometry from a WKT string
 
 ```java
-import org.apache.sedona.core.formatMapper.FormatUtils;
+import org.apache.sedona.common.utils.FormatUtils;
 import org.locationtech.jts.geom.Geometry;
 
 DataStream<Geometry> geometries = text.map(new MapFunction<String, Geometry>() {
@@ -412,7 +412,7 @@ DataStream<Geometry> geometries = text.map(new MapFunction<String, Geometry>() {
 * Create a Point from a String `1.1, 2.2`. Use `,` as the delimiter.
 
 ```java
-import org.apache.sedona.core.formatMapper.FormatUtils;
+import org.apache.sedona.common.utils.FormatUtils;
 import org.locationtech.jts.geom.Geometry;
 
 DataStream<Geometry> geometries = text.map(new MapFunction<String, Geometry>() {
@@ -428,7 +428,7 @@ DataStream<Geometry> geometries = text.map(new MapFunction<String, Geometry>() {
 * Create a Polygon from a String `1.1, 1.1, 10.1, 10.1`. This is a rectangle with (1.1, 1.1) and (10.1, 10.1) as their min/max corners.
 
 ```java
-import org.apache.sedona.core.formatMapper.FormatUtils;
+import org.apache.sedona.common.utils.FormatUtils;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Geometry;
 
@@ -455,7 +455,7 @@ DataStream<Geometry> geometries = text.map(new MapFunction<String, Geometry>() {
 Put a geometry in a Flink Row to a `geomStream`. Note that you can put other attributes in Row as well. This example uses a constant value `myName` for all geometries.
 
 ```java
-import org.apache.sedona.core.formatMapper.FormatUtils;
+import org.apache.sedona.common.utils.FormatUtils;
 import org.locationtech.jts.geom.Geometry;
 import org.apache.flink.types.Row;
 

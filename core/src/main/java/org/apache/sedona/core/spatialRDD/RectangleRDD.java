@@ -19,7 +19,7 @@
 
 package org.apache.sedona.core.spatialRDD;
 
-import org.apache.sedona.core.enums.FileDataSplitter;
+import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.core.formatMapper.RectangleFormatMapper;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;

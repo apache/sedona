@@ -20,7 +20,8 @@
 package org.apache.sedona.core.showcase
 
 import org.apache.log4j.{Level, Logger}
-import org.apache.sedona.core.enums.{FileDataSplitter, GridType, IndexType}
+import org.apache.sedona.common.enums.FileDataSplitter
+import org.apache.sedona.core.enums.{GridType, IndexType}
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileRDD
 import org.apache.sedona.core.serde.SedonaKryoRegistrator
 import org.apache.sedona.core.spatialOperator.SpatialPredicate

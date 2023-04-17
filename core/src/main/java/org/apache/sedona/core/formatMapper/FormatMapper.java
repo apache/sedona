@@ -19,8 +19,9 @@
 
 package org.apache.sedona.core.formatMapper;
 
-import org.apache.sedona.core.enums.FileDataSplitter;
-import org.apache.sedona.core.enums.GeometryType;
+import org.apache.sedona.common.enums.FileDataSplitter;
+import org.apache.sedona.common.enums.GeometryType;
+import org.apache.sedona.common.utils.FormatUtils;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.locationtech.jts.geom.Geometry;
 

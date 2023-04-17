@@ -11,16 +11,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sedona.core.formatMapper;
+package org.apache.sedona.common.utils;
 
-import org.apache.log4j.Logger;
-import org.apache.sedona.core.enums.FileDataSplitter;
-import org.apache.sedona.core.enums.GeometryType;
+
+import org.apache.sedona.common.enums.FileDataSplitter;
+import org.apache.sedona.common.enums.GeometryType;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.operation.valid.IsValidOp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wololo.geojson.Feature;
 import org.wololo.geojson.GeoJSONFactory;
 import org.wololo.jts2geojson.GeoJSONReader;
@@ -34,7 +36,7 @@ import java.util.*;
  * This format mapper is isolated on purpose for the sake of sharing across Spark and Flink
  */
 public class FormatUtils<T extends Geometry> implements Serializable {
-    final static Logger logger = Logger.getLogger(FormatUtils.class);
+    final static Logger logger = LoggerFactory.getLogger(FormatUtils.class);
     /**
      * The start offset.
      */

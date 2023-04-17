@@ -15,9 +15,9 @@ package org.apache.sedona.flink.expressions;
 
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.functions.ScalarFunction;
-import org.apache.sedona.core.enums.FileDataSplitter;
-import org.apache.sedona.core.enums.GeometryType;
-import org.apache.sedona.core.formatMapper.FormatUtils;
+import org.apache.sedona.common.enums.FileDataSplitter;
+import org.apache.sedona.common.enums.GeometryType;
+import org.apache.sedona.common.utils.FormatUtils;
 import org.apache.spark.sql.sedona_sql.expressions.geohash.GeoHashDecoder;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
