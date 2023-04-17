@@ -68,12 +68,12 @@ public class FormatUtils<T extends Geometry> implements Serializable {
     /**
      * Allow mapping of invalid geometries.
      */
-    boolean allowTopologicallyInvalidGeometries;
+    public boolean allowTopologicallyInvalidGeometries;
     // For some unknown reasons, the wkb reader cannot be used in transient variable like the wkt reader.
     /**
      * Crash on syntactically invalid geometries or skip them.
      */
-    boolean skipSyntacticallyInvalidGeometries;
+    public boolean skipSyntacticallyInvalidGeometries;
 
     /**
      * Instantiates a new format mapper.
