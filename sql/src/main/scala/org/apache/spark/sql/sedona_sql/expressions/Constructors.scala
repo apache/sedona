@@ -20,7 +20,6 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.Constructors
 import org.apache.sedona.common.enums.{FileDataSplitter, GeometryType}
-import org.apache.sedona.core.formatMapper.FormatMapper
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes}
