@@ -23,6 +23,7 @@ import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
+import org.apache.spark.sql.types.{ByteType, DataTypes}
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.geom.{Geometry, GeometryFactory, Point}
 
@@ -37,6 +38,19 @@ object implicits {
           case binary: Array[Byte] => GeometrySerializer.deserialize(binary)
           case _ => null
         }
+      }
+    }
+
+    def toGeometryArray(input: InternalRow): Array[Geometry] = {
+      inputExpression.eval(input).asInstanceOf[ArrayData] match {
+        case arrayData: ArrayData =>
+          val length = arrayData.numElements()
+          val geometries = new Array[Geometry](length)
+          for (i <- 0 until length) {
+            geometries(i) = arrayData.getBinary(i).toGeometry
+          }
+          geometries
+        case _ => null
       }
     }
 
