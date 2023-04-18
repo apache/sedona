@@ -24,7 +24,8 @@ import java.util.Properties
 
 import org.locationtech.jts.geom.Envelope
 import org.apache.log4j.{Level, Logger}
-import org.apache.sedona.core.enums.{FileDataSplitter, GridType, IndexType}
+import org.apache.sedona.common.enums.FileDataSplitter
+import org.apache.sedona.core.enums.{GridType, IndexType}
 import org.apache.sedona.core.formatMapper.EarthdataHDFPointMapper
 import org.apache.sedona.core.spatialOperator.JoinQuery
 import org.apache.sedona.core.spatialRDD.{PointRDD, PolygonRDD, RectangleRDD}

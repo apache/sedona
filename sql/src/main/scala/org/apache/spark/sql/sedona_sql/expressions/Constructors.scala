@@ -18,25 +18,21 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-import org.apache.sedona.core.enums.{FileDataSplitter, GeometryType}
-import org.apache.sedona.core.formatMapper.FormatMapper
+import org.apache.sedona.common.Constructors
+import org.apache.sedona.common.enums.{FileDataSplitter, GeometryType}
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.geohash.GeoHashDecoder
 import org.apache.spark.sql.sedona_sql.expressions.implicits.GeometryEnhancer
-import org.apache.spark.sql.types.{AbstractDataType, DataType, DoubleType, IntegerType, StringType, TypeCollection}
+import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.geom.{Coordinate, GeometryFactory}
 import org.locationtech.jts.io.WKBReader
 import org.locationtech.jts.io.gml2.GMLReader
 import org.locationtech.jts.io.kml.KMLReader
-import org.apache.spark.sql.catalyst.expressions.ImplicitCastInputTypes
-import org.apache.sedona.common.Constructors
-import org.apache.spark.sql.types.BinaryType
 
 /**
   * Return a point from a string. The string must be plain string and each coordinate must be separated by a delimiter.
@@ -54,9 +50,7 @@ case class ST_PointFromText(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
     val geomFormat = inputExpressions(1).eval(inputRow).asInstanceOf[UTF8String].toString
-    var fileDataSplitter = FileDataSplitter.getFileDataSplitter(geomFormat)
-    var formatMapper = new FormatMapper(fileDataSplitter, false, GeometryType.POINT)
-    var geometry = formatMapper.readGeometry(geomString)
+    val geometry = Constructors.geomFromText(geomString, geomFormat, GeometryType.POINT)
     GeometrySerializer.serialize(geometry)
   }
 
@@ -87,9 +81,7 @@ case class ST_PolygonFromText(inputExpressions: Seq[Expression])
     val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
     val geomFormat = inputExpressions(1).eval(inputRow).asInstanceOf[UTF8String].toString
 
-    var fileDataSplitter = FileDataSplitter.getFileDataSplitter(geomFormat)
-    var formatMapper = new FormatMapper(fileDataSplitter, false, GeometryType.POLYGON)
-    var geometry = formatMapper.readGeometry(geomString)
+    var geometry = Constructors.geomFromText(geomString, geomFormat, GeometryType.POLYGON)
     GeometrySerializer.serialize(geometry)
   }
 
@@ -119,9 +111,8 @@ case class ST_LineFromText(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     val lineString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
 
-    var fileDataSplitter = FileDataSplitter.WKT
-    var formatMapper = new FormatMapper(fileDataSplitter, false)
-    var geometry = formatMapper.readGeometry(lineString)
+    val fileDataSplitter = FileDataSplitter.WKT
+    val geometry = Constructors.geomFromText(lineString, fileDataSplitter)
     if(geometry.getGeometryType.contains("LineString")) {
       GeometrySerializer.serialize(geometry)
     } else {
@@ -156,9 +147,7 @@ case class ST_LineStringFromText(inputExpressions: Seq[Expression])
     val geomString = inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
     val geomFormat = inputExpressions(1).eval(inputRow).asInstanceOf[UTF8String].toString
 
-    var fileDataSplitter = FileDataSplitter.getFileDataSplitter(geomFormat)
-    var formatMapper = new FormatMapper(fileDataSplitter, false, GeometryType.LINESTRING)
-    var geometry = formatMapper.readGeometry(geomString)
+    val geometry = Constructors.geomFromText(geomString, geomFormat, GeometryType.LINESTRING)
 
     GeometrySerializer.serialize(geometry)
   }
@@ -219,9 +208,7 @@ case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
     (inputExpressions.head.eval(inputRow)) match {
       case (geomString: UTF8String) => {
         // Parse UTF-8 encoded wkb string
-        val fileDataSplitter = FileDataSplitter.WKB
-        val formatMapper = new FormatMapper(fileDataSplitter, false)
-        formatMapper.readGeometry(geomString.toString).toGenericArrayData
+        Constructors.geomFromText(geomString.toString, FileDataSplitter.WKB).toGenericArrayData
       }
       case (wkb: Array[Byte]) => {
         // convert raw wkb byte array to geometry
@@ -257,10 +244,7 @@ case class ST_GeomFromGeoJSON(inputExpressions: Seq[Expression])
 
   override def eval(inputRow: InternalRow): Any = {
     val geomString = inputExpressions.head.eval(inputRow).asInstanceOf[UTF8String].toString
-
-    var fileDataSplitter = FileDataSplitter.GEOJSON
-    var formatMapper = new FormatMapper(fileDataSplitter, false)
-    var geometry = formatMapper.readGeometry(geomString)
+    val geometry = Constructors.geomFromText(geomString, FileDataSplitter.GEOJSON)
     // If the user specify a bunch of attributes to go with each geometry, we need to store all of them in this geometry
     if (inputExpressions.length > 1) {
       geometry.setUserData(generateUserData(minInputLength, inputExpressions, inputRow))

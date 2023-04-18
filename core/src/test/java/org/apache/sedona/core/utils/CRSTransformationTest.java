@@ -20,7 +20,7 @@ package org.apache.sedona.core.utils;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.sedona.core.enums.FileDataSplitter;
+import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.knnJudgement.GeometryDistanceComparator;

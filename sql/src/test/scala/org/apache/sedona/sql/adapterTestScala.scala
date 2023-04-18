@@ -19,7 +19,8 @@
 
 package org.apache.sedona.sql
 
-import org.apache.sedona.core.enums.{FileDataSplitter, GridType, IndexType}
+import org.apache.sedona.common.enums.FileDataSplitter
+import org.apache.sedona.core.enums.{GridType, IndexType}
 import org.apache.sedona.core.formatMapper.EarthdataHDFPointMapper
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader
 import org.apache.sedona.core.spatialOperator.JoinQuery

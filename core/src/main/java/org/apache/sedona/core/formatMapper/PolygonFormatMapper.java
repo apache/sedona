@@ -19,8 +19,8 @@
 
 package org.apache.sedona.core.formatMapper;
 
-import org.apache.sedona.core.enums.FileDataSplitter;
-import org.apache.sedona.core.enums.GeometryType;
+import org.apache.sedona.common.enums.FileDataSplitter;
+import org.apache.sedona.common.enums.GeometryType;
 
 public class PolygonFormatMapper
         extends FormatMapper

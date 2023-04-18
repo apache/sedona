@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.core.spatialRDD;
 
-import org.apache.sedona.core.enums.FileDataSplitter;
+import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.spark.storage.StorageLevel;
 import org.junit.AfterClass;

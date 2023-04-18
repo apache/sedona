@@ -13,6 +13,9 @@
  */
 package org.apache.sedona.common;
 
+import org.apache.sedona.common.enums.FileDataSplitter;
+import org.apache.sedona.common.enums.GeometryType;
+import org.apache.sedona.common.utils.FormatUtils;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -77,5 +80,24 @@ public class Constructors {
     public static Geometry pointZ(double x, double y, double z, int srid) {
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
         return geometryFactory.createPoint(new Coordinate(x, y, z));
+    }
+
+    public static Geometry geomFromText(String geomString, String geomFormat, GeometryType geometryType) {
+        FileDataSplitter fileDataSplitter = FileDataSplitter.getFileDataSplitter(geomFormat);
+        FormatUtils<Geometry> formatMapper = new FormatUtils<>(fileDataSplitter, false, geometryType);
+        try {
+            return formatMapper.readGeometry(geomString);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Geometry geomFromText(String geomString, FileDataSplitter fileDataSplitter) {
+        FormatUtils<Geometry> formatMapper = new FormatUtils<>(fileDataSplitter, false);
+        try {
+            return formatMapper.readGeometry(geomString);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

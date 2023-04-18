@@ -20,7 +20,7 @@ package org.apache.sedona.core.io;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.sedona.core.enums.FileDataSplitter;
+import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.formatMapper.EarthdataHDFPointMapper;
 import org.apache.sedona.core.spatialOperator.RangeQuery;
@@ -31,7 +31,6 @@ import org.apache.spark.storage.StorageLevel;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
-import org.junit.Test;
 import org.locationtech.jts.geom.Envelope;
 
 // TODO: Auto-generated Javadoc
