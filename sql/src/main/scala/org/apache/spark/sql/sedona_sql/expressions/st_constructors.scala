@@ -25,6 +25,10 @@ object st_constructors extends DataFrameAPI {
   def ST_GeomFromGeoHash(geohash: Column, precision: Column): Column = wrapExpression[ST_GeomFromGeoHash](geohash, precision)
   def ST_GeomFromGeoHash(geohash: String, precision: Int): Column = wrapExpression[ST_GeomFromGeoHash](geohash, precision)
 
+  def ST_GeomFromGeoHash(geohash: Column): Column = wrapExpression[ST_GeomFromGeoHash](geohash, null)
+
+  def ST_GeomFromGeoHash(geohash: String): Column = wrapExpression[ST_GeomFromGeoHash](geohash, null)
+
   def ST_GeomFromGeoJSON(geojsonString: Column): Column = wrapExpression[ST_GeomFromGeoJSON](geojsonString)
   def ST_GeomFromGeoJSON(geojsonString: String): Column = wrapExpression[ST_GeomFromGeoJSON](geojsonString)
 

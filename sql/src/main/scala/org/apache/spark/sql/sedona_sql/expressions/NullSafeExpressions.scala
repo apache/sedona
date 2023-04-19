@@ -123,6 +123,8 @@ sealed class InferrableType[T: TypeTag]
 object InferrableType {
   implicit val geometryInstance: InferrableType[Geometry] =
     new InferrableType[Geometry] {}
+  implicit val geometryArrayInstance: InferrableType[Array[Geometry]] =
+    new InferrableType[Array[Geometry]] {}
   implicit val javaDoubleInstance: InferrableType[java.lang.Double] =
     new InferrableType[java.lang.Double] {}
   implicit val javaIntegerInstance: InferrableType[java.lang.Integer] =
@@ -145,6 +147,8 @@ object InferredTypes {
   def buildExtractor[T: TypeTag](expr: Expression): InternalRow => T = {
     if (typeOf[T] =:= typeOf[Geometry]) {
       input: InternalRow => expr.toGeometry(input).asInstanceOf[T]
+    } else if (typeOf[T] =:= typeOf[Array[Geometry]]) {
+      input: InternalRow => expr.toGeometryArray(input).asInstanceOf[T]
     } else if (typeOf[T] =:= typeOf[String]) {
       input: InternalRow => expr.asString(input).asInstanceOf[T]
     } else {
@@ -172,6 +176,13 @@ object InferredTypes {
         } else {
           null
         }
+    } else if (typeOf[T] =:= typeOf[Array[Geometry]]) {
+      output: T =>
+        if (output != null) {
+          ArrayData.toArrayData(output.asInstanceOf[Array[Geometry]].map(_.toGenericArrayData))
+        } else {
+          null
+        }
     } else {
       output: T => output
     }
@@ -180,6 +191,8 @@ object InferredTypes {
   def inferSparkType[T: TypeTag]: DataType = {
     if (typeOf[T] =:= typeOf[Geometry]) {
       GeometryUDT
+    } else if (typeOf[T] =:= typeOf[Array[Geometry]]) {
+      DataTypes.createArrayType(GeometryUDT)
     } else if (typeOf[T] =:= typeOf[java.lang.Double]) {
       DoubleType
     } else if (typeOf[T] =:= typeOf[java.lang.Integer]) {
@@ -254,6 +267,8 @@ abstract class InferredBinaryExpression[A1: InferrableType, A2: InferrableType, 
 
   override def nullable: Boolean = true
 
+  def allowRightNull: Boolean = false
+
   override def dataType = inferSparkType[R]
 
   lazy val extractLeft = buildExtractor[A1](inputExpressions(0))
@@ -266,7 +281,7 @@ abstract class InferredBinaryExpression[A1: InferrableType, A2: InferrableType, 
   override def evalWithoutSerialization(input: InternalRow): Any = {
     val left = extractLeft(input)
     val right = extractRight(input)
-    if (left != null && right != null) {
+    if (left != null && (right != null || allowRightNull)) {
         f(left, right)
     } else {
       null

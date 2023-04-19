@@ -117,7 +117,7 @@ object Catalog {
     function[ST_LineInterpolatePoint](),
     function[ST_SubDivideExplode](),
     function[ST_SubDivide](),
-    function[ST_MakePolygon](),
+    function[ST_MakePolygon](null),
     function[ST_GeoHash](),
     function[ST_GeomFromGeoHash](null),
     function[ST_Collect](),

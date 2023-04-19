@@ -18,15 +18,14 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
+import org.apache.sedona.common.Predicates
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, NullIntolerant}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.util.ArrayData
-import org.apache.spark.sql.types.{BooleanType, DataType}
-import org.locationtech.jts.geom.Geometry
-import org.apache.spark.sql.types.AbstractDataType
+import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, NullIntolerant}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.types.{AbstractDataType, BooleanType, DataType}
+import org.locationtech.jts.geom.Geometry
 
 abstract class ST_Predicate extends Expression
   with FoldableExpression
@@ -73,7 +72,7 @@ case class ST_Contains(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    leftGeometry.contains(rightGeometry)
+    Predicates.contains(leftGeometry, rightGeometry)
   }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -90,7 +89,7 @@ case class ST_Intersects(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    leftGeometry.intersects(rightGeometry)
+    Predicates.intersects(leftGeometry, rightGeometry)
   }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -107,7 +106,7 @@ case class ST_Within(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    leftGeometry.within(rightGeometry)
+    Predicates.within(leftGeometry, rightGeometry)
   }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -124,7 +123,7 @@ case class ST_Covers(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    leftGeometry.covers(rightGeometry)
+    Predicates.covers(leftGeometry, rightGeometry)
   }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -141,7 +140,7 @@ case class ST_CoveredBy(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    leftGeometry.coveredBy(rightGeometry)
+    Predicates.coveredBy(leftGeometry, rightGeometry)
   }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -158,7 +157,7 @@ case class ST_Crosses(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    leftGeometry.crosses(rightGeometry)
+    Predicates.crosses(leftGeometry, rightGeometry)
   }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -176,7 +175,7 @@ case class ST_Overlaps(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    leftGeometry.overlaps(rightGeometry)
+    Predicates.overlaps(leftGeometry, rightGeometry)
   }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -193,7 +192,7 @@ case class ST_Touches(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    leftGeometry.touches(rightGeometry)
+    Predicates.touches(leftGeometry, rightGeometry)
   }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -211,8 +210,7 @@ case class ST_Equals(inputExpressions: Seq[Expression])
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     // Returns GeometryCollection object
-    val symDifference = leftGeometry.symDifference(rightGeometry)
-    symDifference.isEmpty
+    Predicates.equals(leftGeometry, rightGeometry)
   }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -229,7 +227,7 @@ case class ST_Disjoint(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    leftGeometry.disjoint(rightGeometry)
+    Predicates.disjoint(leftGeometry, rightGeometry)
   }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -246,7 +244,7 @@ case class ST_OrderingEquals(inputExpressions: Seq[Expression])
   extends ST_Predicate with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    leftGeometry.equalsExact(rightGeometry)
+    Predicates.orderingEquals(leftGeometry, rightGeometry)
   }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {

@@ -14,11 +14,8 @@
 package org.apache.sedona.common;
 
 import com.google.common.geometry.S2CellId;
-import com.google.common.geometry.S2Point;
-import com.google.common.geometry.S2Region;
-import com.google.common.geometry.S2RegionCoverer;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.sedona.common.geometryObjects.Circle;
+import org.apache.sedona.common.subDivide.GeometrySubDivider;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.common.utils.GeometryGeoHashEncoder;
 import org.apache.sedona.common.utils.GeometrySplitter;
@@ -37,6 +34,7 @@ import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.locationtech.jts.operation.valid.IsSimpleOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
+import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -48,7 +46,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -574,5 +571,103 @@ public class Functions {
             }
         }
         return S2Utils.roundCellsToSameLevel(new ArrayList<>(cellIds), level).stream().map(S2CellId::id).collect(Collectors.toList()).toArray(new Long[cellIds.size()]);
+    }
+
+
+    // create static function named simplifyPreserveTopology
+    public static Geometry simplifyPreserveTopology(Geometry geometry, double distanceTolerance) {
+        return TopologyPreservingSimplifier.simplify(geometry, distanceTolerance);
+    }
+
+    public static String geometryType(Geometry geometry) {
+        return "ST_" + geometry.getGeometryType();
+    }
+
+    public static Geometry startPoint(Geometry geometry) {
+        if (geometry instanceof LineString) {
+            LineString line = (LineString) geometry;
+            return line.getStartPoint();
+        }
+        return null;
+    }
+
+    public static Geometry endPoint(Geometry geometry) {
+        if (geometry instanceof LineString) {
+            LineString line = (LineString) geometry;
+            return line.getEndPoint();
+        }
+        return null;
+    }
+
+    public static Geometry[] dump(Geometry geometry) {
+        int numGeom = geometry.getNumGeometries();
+        if (geometry instanceof GeometryCollection) {
+            Geometry[] geoms = new Geometry[geometry.getNumGeometries()];
+            for (int i = 0; i < numGeom; i++) {
+                geoms[i] = geometry.getGeometryN(i);
+            }
+            return geoms;
+        } else {
+            return new Geometry[] {geometry};
+        }
+    }
+
+    public static Geometry[] dumpPoints(Geometry geometry) {
+        return Arrays.stream(geometry.getCoordinates()).map(GEOMETRY_FACTORY::createPoint).toArray(Point[]::new);
+    }
+
+    public static Geometry symDifference(Geometry leftGeom, Geometry rightGeom) {
+        return leftGeom.symDifference(rightGeom);
+    }
+
+    public static Geometry union(Geometry leftGeom, Geometry rightGeom) {
+        return leftGeom.union(rightGeom);
+    }
+
+    public static Geometry createMultiGeometryFromOneElement(Geometry geometry) {
+        if (geometry instanceof Circle) {
+            return GEOMETRY_FACTORY.createGeometryCollection(new Circle[] {(Circle) geometry});
+        } else if (geometry instanceof GeometryCollection) {
+            return geometry;
+        } else if (geometry instanceof  LineString) {
+            return GEOMETRY_FACTORY.createMultiLineString(new LineString[]{(LineString) geometry});
+        } else if (geometry instanceof Point) {
+            return GEOMETRY_FACTORY.createMultiPoint(new Point[] {(Point) geometry});
+        } else if (geometry instanceof Polygon) {
+            return GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {(Polygon) geometry});
+        } else {
+            return GEOMETRY_FACTORY.createGeometryCollection();
+        }
+    }
+
+    public static Geometry[] subDivide(Geometry geometry, int maxVertices) {
+        return GeometrySubDivider.subDivide(geometry, maxVertices);
+    }
+
+    public static Geometry makePolygon(Geometry shell, Geometry[] holes) {
+        try {
+            if (holes != null) {
+                LinearRing[] interiorRings =  Arrays.stream(holes).filter(
+                        h -> h != null && !h.isEmpty() && h instanceof LineString && ((LineString) h).isClosed()
+                ).map(
+                        h -> GEOMETRY_FACTORY.createLinearRing(h.getCoordinates())
+                ).toArray(LinearRing[]::new);
+                if (interiorRings.length != 0) {
+                    return GEOMETRY_FACTORY.createPolygon(
+                            GEOMETRY_FACTORY.createLinearRing(shell.getCoordinates()),
+                            Arrays.stream(holes).filter(
+                                    h -> h != null && !h.isEmpty() && h instanceof LineString && ((LineString) h).isClosed()
+                            ).map(
+                                    h -> GEOMETRY_FACTORY.createLinearRing(h.getCoordinates())
+                            ).toArray(LinearRing[]::new)
+                    );
+                }
+            }
+            return GEOMETRY_FACTORY.createPolygon(
+                    GEOMETRY_FACTORY.createLinearRing(shell.getCoordinates())
+            );
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 }

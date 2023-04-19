@@ -20,6 +20,7 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.sedona_sql.expressions.collect.{ST_Collect, ST_CollectionExtract}
+import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.operation.buffer.BufferParameters
 
 object st_functions extends DataFrameAPI {
@@ -159,8 +160,8 @@ object st_functions extends DataFrameAPI {
   def ST_LineSubstring(lineString: Column, startFraction: Column, endFraction: Column): Column = wrapExpression[ST_LineSubstring](lineString, startFraction, endFraction)
   def ST_LineSubstring(lineString: String, startFraction: Double, endFraction: Double): Column = wrapExpression[ST_LineSubstring](lineString, startFraction, endFraction)
 
-  def ST_MakePolygon(lineString: Column): Column = wrapExpression[ST_MakePolygon](lineString)
-  def ST_MakePolygon(lineString: String): Column = wrapExpression[ST_MakePolygon](lineString)
+  def ST_MakePolygon(lineString: Column): Column = wrapExpression[ST_MakePolygon](lineString, null)
+  def ST_MakePolygon(lineString: String): Column = wrapExpression[ST_MakePolygon](lineString, null)
   def ST_MakePolygon(lineString: Column, holes: Column): Column = wrapExpression[ST_MakePolygon](lineString, holes)
   def ST_MakePolygon(lineString: String, holes: String): Column = wrapExpression[ST_MakePolygon](lineString, holes)
 
