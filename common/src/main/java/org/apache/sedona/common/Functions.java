@@ -645,25 +645,29 @@ public class Functions {
     }
 
     public static Geometry makePolygon(Geometry shell, Geometry[] holes) {
-        if (holes != null) {
-            LinearRing[] interiorRings =  Arrays.stream(holes).filter(
-                    h -> h != null && !h.isEmpty() && h instanceof LineString && ((LineString) h).isClosed()
-            ).map(
-                    h -> GEOMETRY_FACTORY.createLinearRing(h.getCoordinates())
-            ).toArray(LinearRing[]::new);
-            if (interiorRings.length != 0) {
-                return GEOMETRY_FACTORY.createPolygon(
-                        GEOMETRY_FACTORY.createLinearRing(shell.getCoordinates()),
-                        Arrays.stream(holes).filter(
-                                h -> h != null && !h.isEmpty() && h instanceof LineString && ((LineString) h).isClosed()
-                        ).map(
-                                h -> GEOMETRY_FACTORY.createLinearRing(h.getCoordinates())
-                        ).toArray(LinearRing[]::new)
-                );
+        try {
+            if (holes != null) {
+                LinearRing[] interiorRings =  Arrays.stream(holes).filter(
+                        h -> h != null && !h.isEmpty() && h instanceof LineString && ((LineString) h).isClosed()
+                ).map(
+                        h -> GEOMETRY_FACTORY.createLinearRing(h.getCoordinates())
+                ).toArray(LinearRing[]::new);
+                if (interiorRings.length != 0) {
+                    return GEOMETRY_FACTORY.createPolygon(
+                            GEOMETRY_FACTORY.createLinearRing(shell.getCoordinates()),
+                            Arrays.stream(holes).filter(
+                                    h -> h != null && !h.isEmpty() && h instanceof LineString && ((LineString) h).isClosed()
+                            ).map(
+                                    h -> GEOMETRY_FACTORY.createLinearRing(h.getCoordinates())
+                            ).toArray(LinearRing[]::new)
+                    );
+                }
             }
+            return GEOMETRY_FACTORY.createPolygon(
+                    GEOMETRY_FACTORY.createLinearRing(shell.getCoordinates())
+            );
+        } catch (IllegalArgumentException e) {
+            return null;
         }
-        return GEOMETRY_FACTORY.createPolygon(
-                GEOMETRY_FACTORY.createLinearRing(shell.getCoordinates())
-        );
     }
 }

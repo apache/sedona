@@ -42,15 +42,20 @@ object implicits {
     }
 
     def toGeometryArray(input: InternalRow): Array[Geometry] = {
-      inputExpression.eval(input).asInstanceOf[ArrayData] match {
-        case arrayData: ArrayData =>
-          val length = arrayData.numElements()
-          val geometries = new Array[Geometry](length)
-          for (i <- 0 until length) {
-            geometries(i) = arrayData.getBinary(i).toGeometry
+      inputExpression match {
+        case aware: SerdeAware =>
+          aware.evalWithoutSerialization(input).asInstanceOf[Array[Geometry]]
+        case _ =>
+          inputExpression.eval(input).asInstanceOf[ArrayData] match {
+            case arrayData: ArrayData =>
+              val length = arrayData.numElements()
+              val geometries = new Array[Geometry](length)
+              for (i <- 0 until length) {
+                geometries(i) = arrayData.getBinary(i).toGeometry
+              }
+              geometries
+            case _ => null
           }
-          geometries
-        case _ => null
       }
     }
 
