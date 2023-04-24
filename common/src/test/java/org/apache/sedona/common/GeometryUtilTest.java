@@ -34,7 +34,7 @@ public class GeometryUtilTest {
     }
 
     @Test
-    public void extractGeometryCollection() throws ParseException, IOException {
+    public void extractGeometryCollection() {
         MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(
                 new Polygon[] {
                         GEOMETRY_FACTORY.createPolygon(coordArray(0, 1,3, 0,4, 3,0, 4,0, 1)),
@@ -60,7 +60,6 @@ public class GeometryUtilTest {
                         "GEOMETRYCOLLECTION (POLYGON ((0 1, 3 0, 4 3, 0 4, 0 1)), POLYGON ((3 4, 6 3, 5 5, 3 4)), POINT (5 8), POLYGON ((0 1, 3 0, 4 3, 0 4, 0 1)), POLYGON ((3 4, 6 3, 5 5, 3 4)))"
                 )
         );
-
     }
 
 

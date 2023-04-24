@@ -19,8 +19,7 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.spark.sql.Column
-import org.apache.spark.sql.sedona_sql.expressions.collect.{ST_Collect, ST_CollectionExtract}
-import org.locationtech.jts.geom.Geometry
+import org.apache.spark.sql.sedona_sql.expressions.collect.{ST_Collect}
 import org.locationtech.jts.operation.buffer.BufferParameters
 
 object st_functions extends DataFrameAPI {
@@ -75,8 +74,8 @@ object st_functions extends DataFrameAPI {
   def ST_Collect(geoms: String): Column = wrapExpression[ST_Collect](geoms)
   def ST_Collect(geoms: Any*): Column = wrapVarArgExpression[ST_Collect](geoms)
 
-  def ST_CollectionExtract(collection: Column): Column = wrapExpression[ST_CollectionExtract](collection)
-  def ST_CollectionExtract(collection: String): Column = wrapExpression[ST_CollectionExtract](collection)
+  def ST_CollectionExtract(collection: Column): Column = wrapExpression[ST_CollectionExtract](collection, null)
+  def ST_CollectionExtract(collection: String): Column = wrapExpression[ST_CollectionExtract](collection, null)
   def ST_CollectionExtract(collection: Column, geomType: Column): Column = wrapExpression[ST_CollectionExtract](collection, geomType)
   def ST_CollectionExtract(collection: String, geomType: Int): Column = wrapExpression[ST_CollectionExtract](collection, geomType)
 

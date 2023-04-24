@@ -22,7 +22,7 @@ import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, ExpressionInfo, Literal}
 import org.apache.spark.sql.expressions.Aggregator
-import org.apache.spark.sql.sedona_sql.expressions.collect.{ST_Collect, ST_CollectionExtract}
+import org.apache.spark.sql.sedona_sql.expressions.collect.{ST_Collect}
 import org.apache.spark.sql.sedona_sql.expressions.raster._
 import org.apache.spark.sql.sedona_sql.expressions._
 import org.locationtech.jts.geom.Geometry
@@ -135,7 +135,7 @@ object Catalog {
     function[ST_XMin](),
     function[ST_BuildArea](),
     function[ST_OrderingEquals](),
-    function[ST_CollectionExtract](),
+    function[ST_CollectionExtract](defaultArgs = null),
     function[ST_Normalize](),
     function[ST_LineFromMultiPoint](),
     function[ST_MPolyFromText](0),

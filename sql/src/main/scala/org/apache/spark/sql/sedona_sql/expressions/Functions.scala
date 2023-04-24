@@ -923,3 +923,13 @@ case class ST_S2CellIDs(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+case class ST_CollectionExtract(inputExpressions: Seq[Expression])
+  extends InferredBinaryExpression(Functions.collectionExtract) with FoldableExpression {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+
+  override def allowRightNull: Boolean = true
+}

@@ -382,10 +382,12 @@ public class GeomUtils {
         return pCount;
     }
 
-    public static List<Geometry> extractGeometryCollection(Geometry geom){
+    public static <T extends Geometry> List<Geometry> extractGeometryCollection(Geometry geom, Class<T> geomType){
         ArrayList<Geometry> leafs = new ArrayList<>();
         if (!(geom instanceof GeometryCollection)) {
-            leafs.add(geom);
+            if (geom.getClass().isAssignableFrom(geomType)) {
+                leafs.add(geom);
+            }
             return leafs;
         }
         LinkedList<GeometryCollection> parents = new LinkedList<>();
@@ -397,11 +399,17 @@ public class GeomUtils {
                 if (child instanceof GeometryCollection) {
                     parents.add((GeometryCollection) child);
                 } else {
-                    leafs.add(child);
+                    if (geomType.isAssignableFrom(child.getClass())) {
+                        leafs.add(child);
+                    }
                 }
             }
         }
         return leafs;
+    }
+
+    public static List<Geometry> extractGeometryCollection(Geometry geom){
+        return extractGeometryCollection(geom, Geometry.class);
     }
 
     public static Geometry[] getSubGeometries(Geometry geom) {
