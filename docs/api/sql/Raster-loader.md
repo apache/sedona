@@ -49,7 +49,7 @@ df = df.withColumn("raster", f.expr("RS_FromGeoTiff(content)"))
 
 ## Load GeoTiff to Array[Double] format
 
-The `geotiff` loader of Sedona is a Spark built-in data source. It can read a single geotiff image or a number of geotiff images into a DataFrame. Each geotiff is a row in the resulting DataFrame and stored in an arrya of Double type format.
+The `geotiff` loader of Sedona is a Spark built-in data source. It can read a single geotiff image or a number of geotiff images into a DataFrame. Each geotiff is a row in the resulting DataFrame and stored in an array of Double type format.
 
 Since: `v1.1.0`
 
