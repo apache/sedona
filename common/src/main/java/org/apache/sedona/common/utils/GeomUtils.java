@@ -385,7 +385,7 @@ public class GeomUtils {
     public static <T extends Geometry> List<Geometry> extractGeometryCollection(Geometry geom, Class<T> geomType){
         ArrayList<Geometry> leafs = new ArrayList<>();
         if (!(geom instanceof GeometryCollection)) {
-            if (geom.getClass().isAssignableFrom(geomType)) {
+            if (geomType.isAssignableFrom(geom.getClass())) {
                 leafs.add(geom);
             }
             return leafs;
