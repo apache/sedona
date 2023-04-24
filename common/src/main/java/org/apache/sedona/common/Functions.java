@@ -47,6 +47,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class Functions {
@@ -670,4 +671,63 @@ public class Functions {
             return null;
         }
     }
+
+    public static Geometry createMultiGeometry(Geometry[] geometries) {
+        if (geometries.length > 1){
+            return GEOMETRY_FACTORY.buildGeometry(Arrays.asList(geometries));
+        }
+        else if(geometries.length==1){
+            return createMultiGeometryFromOneElement(geometries[0]);
+        }
+        else{
+            return GEOMETRY_FACTORY.createGeometryCollection();
+        }
+    }
+
+    public static Geometry collectionExtract(Geometry geometry, Integer geomType) {
+        if (geomType == null) {
+            return collectionExtract(geometry);
+        }
+        Class<? extends Geometry> geomClass;
+        GeometryCollection emptyResult;
+        switch (geomType) {
+            case 1:
+                geomClass = Point.class;
+                emptyResult = GEOMETRY_FACTORY.createMultiPoint();
+                break;
+            case 2:
+                geomClass = LineString.class;
+                emptyResult = GEOMETRY_FACTORY.createMultiLineString();
+                break;
+            case 3:
+                geomClass = Polygon.class;
+                emptyResult = GEOMETRY_FACTORY.createMultiPolygon();
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid geometry type");
+        }
+        List<Geometry> geometries = GeomUtils.extractGeometryCollection(geometry, geomClass);
+        if (geometries.isEmpty()) {
+            return emptyResult;
+        }
+        return Functions.createMultiGeometry(geometries.toArray(new Geometry[0]));
+    }
+
+    public static Geometry collectionExtract(Geometry geometry) {
+        List<Geometry> geometries = GeomUtils.extractGeometryCollection(geometry);
+        Polygon[] polygons = geometries.stream().filter(g -> g instanceof Polygon).toArray(Polygon[]::new);
+        if (polygons.length > 0) {
+            return GEOMETRY_FACTORY.createMultiPolygon(polygons);
+        }
+        LineString[] lines = geometries.stream().filter(g -> g instanceof LineString).toArray(LineString[]::new);
+        if (lines.length > 0) {
+            return GEOMETRY_FACTORY.createMultiLineString(lines);
+        }
+        Point[] points = geometries.stream().filter(g -> g instanceof Point).toArray(Point[]::new);
+        if (points.length > 0) {
+            return GEOMETRY_FACTORY.createMultiPoint(points);
+        }
+        return GEOMETRY_FACTORY.createGeometryCollection();
+    }
+
 }

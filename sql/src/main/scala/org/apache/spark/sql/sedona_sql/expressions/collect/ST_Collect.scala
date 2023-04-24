@@ -19,17 +19,15 @@
 package org.apache.spark.sql.sedona_sql.expressions.collect
 
 
+import org.apache.sedona.common.Functions
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-
 import org.apache.spark.sql.catalyst.expressions.Expression
-
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.sedona_sql.expressions.SerdeAware
 import org.apache.spark.sql.types.{ArrayType, _}
-
 import org.locationtech.jts.geom.Geometry
 
 case class ST_Collect(inputExpressions: Seq[Expression])
@@ -58,13 +56,13 @@ case class ST_Collect(inputExpressions: Seq[Expression])
               .filter(_ != null)
               .map(_.toGeometry)
 
-            Collect.createMultiGeometry(geomElements)
-          case _ => Collect.createMultiGeometry(Seq())
+            Functions.createMultiGeometry(geomElements.toArray)
+          case _ => Functions.createMultiGeometry(Array())
         }
       case _ =>
         val geomElements =
           inputExpressions.map(_.toGeometry(input)).filter(_ != null)
-        Collect.createMultiGeometry(geomElements)
+        Functions.createMultiGeometry(geomElements.toArray)
     }
   }
 
