@@ -1,0 +1,12 @@
+/target/
+/.settings/
+/.classpath
+/.project
+/dependency-reduced-pom.xml
+/doc/
+/.idea/
+*.iml
+/latest/
+/spark-warehouse/
+/metastore_db/
+*.log
