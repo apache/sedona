@@ -63,7 +63,8 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <maven.deploy.skip>false</maven.deploy.skip>
+        <skip.deploy.common.modules>false</skip.deploy.common.modules>
+        <maven.deploy.skip>${skip.deploy.common.modules}</maven.deploy.skip>
         <maven.compiler.plugin.version>3.10.1</maven.compiler.plugin.version>
 
         <cdm.version>5.4.2</cdm.version>
@@ -76,9 +77,9 @@
         <!-- Actual scala, spark and log4j version will be set by activated profiles.
              Setting a default value helps IDE:s that can't make sense of profiles. -->
         <scala.compat.version>2.12</scala.compat.version>
-        <spark.version>3.3.0</spark.version>
-        <spark.compat.version>3.0</spark.compat.version>
-        <log4j.version>2.17.2</log4j.version>
+        <spark.version>3.4.0</spark.version>
+        <spark.compat.version>3.4</spark.compat.version>
+        <log4j.version>2.19.0</log4j.version>
 
         <slf4j.version>1.7.36</slf4j.version>
         <googles2.version>2.0.0</googles2.version>
@@ -554,12 +555,13 @@
                     <name>spark</name>
                     <value>3.0</value>
                 </property>
-                <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
                 <spark.version>3.3.0</spark.version>
                 <spark.compat.version>3.0</spark.compat.version>
                 <log4j.version>2.17.2</log4j.version>
+                <!-- Skip deploying parent module for sedona-spark-3.0 profile, it will be deployed with sedona-spark-3.4 -->
+                <skip.deploy.common.modules>true</skip.deploy.common.modules>
             </properties>
         </profile>
         <profile>
@@ -569,6 +571,7 @@
                     <name>spark</name>
                     <value>3.4</value>
                 </property>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
                 <spark.version>3.4.0</spark.version>
@@ -590,7 +593,7 @@
                 <scala.compat.version>2.13</scala.compat.version>
                 <scaladoc.arg>-no-java-comments</scaladoc.arg>
                 <!-- Skip deploying parent module for Scala 2.13 profile, it will be deployed with 2.12 -->
-                <maven.deploy.skip>true</maven.deploy.skip>
+                <skip.deploy.common.modules>true</skip.deploy.common.modules>
             </properties>
             <modules>
                 <module>common</module>
