@@ -93,6 +93,16 @@ jobs:
           mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4}
       - name: Run tests
         run: |
+          if [[ "${SPARK_VERSION:0:3}" < "3.3" ]]; then
+            case "$HADOOP_VERSION" in
+              3)
+                export HADOOP_VERSION=3.2
+                ;;
+              2)
+                export HADOOP_VERSION=2.7
+                ;;
+            esac
+          fi
           export SPARKLYR_LOG_FILE='/tmp/sparklyr.log'
           source ./.github/workflows/scripts/prepare_sparklyr_sedona_test_env.sh
           echo "Apache Sedona jar files: ${SEDONA_JAR_FILES}"
