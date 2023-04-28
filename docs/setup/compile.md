@@ -21,6 +21,7 @@ To compile all modules, please make sure you are in the root folder of all modul
 	mvn clean install
 	```
 	The maven unit tests of all modules may take up to 30 minutes. 	
+
 === "With Geotools jars packaged"
 	```bash
 	mvn clean install -DskipTests -Dgeotools
@@ -33,14 +34,29 @@ To compile all modules, please make sure you are in the root folder of all modul
 
 ### Compile with different targets
 
-=== "Spark 3.0 + Scala 2.12"
+User can specify `-Dspark` and `-Dscala` command line options to compile with different targets. Available targets are:
+
+* `-Dspark`: `3.0` for Spark 3.0 to 3.3; `{major}.{minor}` for Spark 3.4 or later. For example, specify `-Dspark=3.4` to build for Spark 3.4.
+* `-Dscala`: `2.12` or `2.13`
+
+=== "Spark 3.0 to 3.3 Scala 2.12"
 	```
-	mvn clean install -DskipTests -Dscala=2.12
+	mvn clean install -DskipTests -Dspark=3.0 -Dscala=2.12
 	```
-=== "Spark 3.0 + Scala 2.13"
+=== "Spark 3.4+ Scala 2.12"
 	```
-	mvn clean install -DskipTests -Dscala=2.13
+	mvn clean install -DskipTests -Dspark=3.4 -Dscala=2.12
 	```
+    Please replace `3.4` with Spark major.minor version when building for higher Spark versions.
+=== "Spark 3.0 to 3.3 Scala 2.13"
+	```
+	mvn clean install -DskipTests -Dspark=3.0 -Dscala=2.13
+	```
+=== "Spark 3.4+ Scala 2.13"
+	```
+	mvn clean install -DskipTests -Dspark=3.4 -Dscala=2.13
+	```
+    Please replace `3.4` with Spark major.minor version when building for higher Spark versions.
 
 !!!tip
 	To get the Sedona Spark Shaded jar with all GeoTools jars included, simply append `-Dgeotools` option. The command is like this:`mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.0 -Dgeotools`
@@ -84,6 +100,7 @@ pipenv install --dev
 6. Run the Python tests
 ```
 cd python
+pipenv run python setup.py build_ext --inplace
 pipenv run pytest tests
 ```
 ## Compile the documentation

@@ -5,14 +5,28 @@ SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. Detailed SedonaSQL APIs ar
 
 ## Initiate Session
 
-Start `spark-sql` as following (replace `<VERSION>` with actual version, like, `1.0.1-incubating`):
+Start `spark-sql` as following (replace `<VERSION>` with actual version, like, `1.0.1-incubating` or `{{ sedona.current_version }}`):
 
-```sh
-spark-sql --packages org.apache.sedona:sedona-spark-shaded-3.0_2.12:<VERSION>,org.apache.sedona:sedona-viz-3.0_2.12:<VERSION>,org.datasyslab:geotools-wrapper:geotools-24.0 \
-  --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
-  --conf spark.kryo.registrator=org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator \
-  --conf spark.sql.extensions=org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions
-```
+!!! abstract "Run spark-sql with Apache Sedona"
+
+	=== "Spark 3.0 to 3.3 and Scala 2.12"
+
+        ```sh
+        spark-sql --packages org.apache.sedona:sedona-spark-shaded-3.0_2.12:<VERSION>,org.apache.sedona:sedona-viz-3.0_2.12:<VERSION>,org.datasyslab:geotools-wrapper:geotools-24.0 \
+          --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
+          --conf spark.kryo.registrator=org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator \
+          --conf spark.sql.extensions=org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions
+        ```
+
+	=== "Spark 3.4+ and Scala 2.12"
+
+        ```sh
+        spark-sql --packages org.apache.sedona:sedona-spark-shaded-3.4_2.12:<VERSION>,org.apache.sedona:sedona-viz-3.4_2.12:<VERSION>,org.datasyslab:geotools-wrapper:geotools-24.0 \
+          --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
+          --conf spark.kryo.registrator=org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator \
+          --conf spark.sql.extensions=org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions
+        ```
+        If you are using Spark versions higher than 3.4, please replace the `3.4` in artifact names with the corresponding major.minor version of Spark.
 
 
 This will register all User Defined Tyeps, functions and optimizations in SedonaSQL and SedonaViz.
