@@ -15,21 +15,25 @@ jobs:
     strategy:
       matrix:
         include:
-          - spark: '3.3.0'
+          - spark: '3.4.0'
             scala: '2.12.8'
             python: '3.10'
             hadoop: '3'
-          - spark: '3.3.0'
+          - spark: '3.4.0'
             scala: '2.12.8'
             python: '3.9'
+            hadoop: '3'
+          - spark: '3.4.0'
+            scala: '2.12.8'
+            python: '3.8'
+            hadoop: '3'
+          - spark: '3.4.0'
+            scala: '2.12.8'
+            python: '3.7'
             hadoop: '3'
           - spark: '3.3.0'
             scala: '2.12.8'
             python: '3.8'
-            hadoop: '3'
-          - spark: '3.3.0'
-            scala: '2.12.8'
-            python: '3.7'
             hadoop: '3'
           - spark: '3.2.0'
             scala: '2.12.8'
@@ -61,7 +65,12 @@ jobs:
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         SCALA_VERSION: ${{ matrix.scala }}
-      run: if [ ${SPARK_VERSION:0:1} == "3" ]; then mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=3.0 -Dgeotools ; else mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=2.4 -Dgeotools ; fi
+      run: |
+          SPARK_COMPAT_VERSION="3.0"
+          if [ ${SPARK_VERSION:2:1} -gt "3" ]; then
+            SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
+          fi
+          mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dgeotools
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         HADOOP_VERSION: ${{ matrix.hadoop }}

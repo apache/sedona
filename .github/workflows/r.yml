@@ -15,12 +15,14 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        spark: [3.0.3, 3.1.2, 3.2.1, 3.3.0]
+        spark: [3.0.3, 3.1.2, 3.2.1, 3.3.0, 3.4.0]
+        hadoop: [3]
         scala: [2.12.15]
         r: [oldrel, release]
 
     env:
       SPARK_VERSION: ${{ matrix.spark }}
+      HADOOP_VERSION: ${{ matrix.hadoop }}
       SCALA_VERSION: ${{ matrix.scala }}
       # Ensure the temporary auth token for this workflow, instead of the
       # bundled GitHub PAT from the `remotes` package is used for
@@ -84,13 +86,23 @@ jobs:
           key: apache.sedona-apache-spark-${{ steps.os-name.outputs.os-name }}-${{ env.SPARK_VERSION }}
       - name: Build Sedona libraries
         run: |
-          if [ ${SPARK_VERSION:0:1} == "3" ]; then
-            mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=3.0 -Dgeotools
-          else
-            mvn -q clean install -DskipTests -Dscala=${SCALA_VERSION:0:4} -Dspark=2.4 -Dgeotools
+          SPARK_COMPAT_VERSION="3.0"
+          if [ ${SPARK_VERSION:2:1} -gt "3" ]; then
+            SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
           fi
+          mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4}
       - name: Run tests
         run: |
+          if [[ "${SPARK_VERSION:0:3}" < "3.3" ]]; then
+            case "$HADOOP_VERSION" in
+              3)
+                export HADOOP_VERSION=3.2
+                ;;
+              2)
+                export HADOOP_VERSION=2.7
+                ;;
+            esac
+          fi
           export SPARKLYR_LOG_FILE='/tmp/sparklyr.log'
           source ./.github/workflows/scripts/prepare_sparklyr_sedona_test_env.sh
           echo "Apache Sedona jar files: ${SEDONA_JAR_FILES}"

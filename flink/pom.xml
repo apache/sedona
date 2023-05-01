@@ -33,7 +33,7 @@
 	<packaging>jar</packaging>
 
     <properties>
-        <maven.deploy.skip>false</maven.deploy.skip>
+        <maven.deploy.skip>${skip.deploy.common.modules}</maven.deploy.skip>
         <flink.version>1.14.3</flink.version>
         <flink.scope>provided</flink.scope>
     </properties>
@@ -129,10 +129,13 @@
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
+            <version>${scala.version}</version>
         </dependency>
         <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest_${scala.compat.version}</artifactId>
+            <version>${scalatest.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>

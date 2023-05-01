@@ -5,16 +5,23 @@
 
 !!!warning
 	For Scala/Java/Python users, this is the most common way to use Sedona in your environment. Do not use separate Sedona jars unless you are sure that you do not need shaded jars.
-	
+
 !!!warning
 	For R users, this is the only way to use Sedona in your environment.
+
+Apache Sedona provides different packages for each supported version of Spark.
+
+* For Spark 3.0 to 3.3, the artifacts to use should be `sedona-spark-shaded-3.0_2.12`, `sedona-vis-3.0_2.12`.
+* For Spark 3.4 or higher versions, please use the artifacts with Spark major.minor version in the artifact name. For example, for Spark 3.4, the artifacts to use should be `sedona-spark-shaded-3.4_2.12`, `sedona-vis-3.4_2.12`.
+
+If you are using the Scala 2.13 builds of Spark, please use the corresponding packages for Scala 2.13, which are suffixed by `_2.13`.
 
 The optional GeoTools library is required if you want to use CRS transformation, ShapefileReader or GeoTiff reader. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
 
 !!! abstract "Sedona with Apache Spark"
 
-	=== "Spark 3.0+ and Scala 2.12"
-	
+	=== "Spark 3.0 to 3.3 and Scala 2.12"
+
 		```xml
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
@@ -33,9 +40,31 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		    <version>{{ sedona.current_geotools }}</version>
 		</dependency>
 		```
-	
-	=== "Spark 3.0 and Scala 2.13"
-	
+
+	=== "Spark 3.4+ and Scala 2.12"
+
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-spark-shaded-3.4_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-viz-3.4_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>
+		```
+        If you are using Spark versions higher than 3.4, please replace the `3.4` in artifact names with the corresponding major.minor version numbers.
+
+	=== "Spark 3.0 to 3.3 and Scala 2.13"
+
 		```xml
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
@@ -55,11 +84,33 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		</dependency>
 		```
 
+	=== "Spark 3.4+ and Scala 2.13"
+
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-spark-shaded-3.4_2.13</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-viz-3.4_2.13</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>
+		```
+        If you are using Spark versions higher than 3.4, please replace the `3.4` in artifact names with the corresponding major.minor version numbers.
+
 
 !!! abstract "Sedona with Apache Flink"
 
 	=== "Flink 1.12+ and Scala 2.12"
-	
+
 		```xml
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
@@ -88,7 +139,7 @@ Under BSD 3-clause (compatible with Apache 2.0 license)
 	=== "Sedona 1.3.1+"
 
 		Add unidata repo to your POM.xml
-		
+
 		```
 		<repositories>
 		    <repository>
@@ -98,9 +149,9 @@ Under BSD 3-clause (compatible with Apache 2.0 license)
 		    </repository>
 		</repositories>
 		```
-		
+
 		Then add cdm-core to your POM dependency.
-		
+
 		```xml
 		<dependency>
 		    <groupId>edu.ucar</groupId>
@@ -110,7 +161,7 @@ Under BSD 3-clause (compatible with Apache 2.0 license)
 		```
 
 	=== "Before Sedona 1.3.1"
-	
+
 		```xml
 		<!-- https://mvnrepository.com/artifact/org.datasyslab/sernetcdf -->
 		<dependency>
@@ -126,12 +177,18 @@ Under BSD 3-clause (compatible with Apache 2.0 license)
 !!!warning
 	For Scala, Java, Python users, please use the following jars only if you satisfy these conditions: (1) you know how to exclude transient dependencies in a complex application. (2) your environment has internet access (3) you are using some sort of Maven package resolver, or pom.xml, or build.sbt. It usually directly takes an input like this `GroupID:ArtifactID:Version`. If you don't understand what we are talking about, the following jars are not for you.
 
+Apache Sedona provides different packages for each supported version of Spark.
+
+* For Spark 3.0 to 3.3, the artifacts to use should be `sedona-core-3.0_2.12`, `sedona-sql-3.0_2.12`, `sedona-vis-3.0_2.12`, `sedona-python-adapter-3.0_2.12`.
+* For Spark 3.4 or higher versions, please use the artifacts with Spark major.minor version in the artifact name. For example, for Spark 3.4, the artifacts to use should be `sedona-core-3.4_2.12`, `sedona-sql-3.4_2.12`, `sedona-vis-3.4_2.12`, `sedona-python-adapter-3.4_2.12`.
+
+If you are using the Scala 2.13 builds of Spark, please use the corresponding packages for Scala 2.13, which are suffixed by `_2.13`.
+
 The optional GeoTools library is required if you want to use CRS transformation, ShapefileReader or GeoTiff reader. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
 
 !!! abstract "Sedona with Apache Spark"
 
-	=== "Spark 3.0+ and Scala 2.12"
-	
+	=== "Spark 3.0 to 3.3 and Scala 2.12"
 		```xml
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
@@ -153,15 +210,44 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		  <groupId>org.apache.sedona</groupId>
 		  <artifactId>sedona-python-adapter-3.0_2.12</artifactId>
 		  <version>{{ sedona.current_version }}</version>
-		</dependency>			
+		</dependency>
 		<dependency>
 		    <groupId>org.datasyslab</groupId>
 		    <artifactId>geotools-wrapper</artifactId>
 		    <version>{{ sedona.current_geotools }}</version>
-		</dependency>	
+		</dependency>
 		```
+	=== "Spark 3.4+ and Scala 2.12"
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-core-3.4_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-sql-3.4_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-viz-3.4_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<!-- Required if you use Sedona Python -->
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-python-adapter-3.4_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>
+		```
+        If you are using Spark versions higher than 3.4, please replace the `3.4` in artifact names with the corresponding major.minor version numbers.
 	=== "Spark 3.0+ and Scala 2.13"
-	
 		```xml
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
@@ -183,20 +269,48 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		  <groupId>org.apache.sedona</groupId>
 		  <artifactId>sedona-python-adapter-3.0_2.12</artifactId>
 		  <version>{{ sedona.current_version }}</version>
-		</dependency>	
+		</dependency>
 		<dependency>
 		    <groupId>org.datasyslab</groupId>
 		    <artifactId>geotools-wrapper</artifactId>
 		    <version>{{ sedona.current_geotools }}</version>
-		</dependency>		
+		</dependency>
 		```
-		
-	
+	=== "Spark 3.4+ and Scala 2.13"
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-core-3.4_2.13</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-sql-3.4_2.13</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-viz-3.4_2.13</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<!-- Required if you use Sedona Python -->
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-python-adapter-3.4_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>
+		```
+        If you are using Spark versions higher than 3.4, please replace the `3.4` in artifact names with the corresponding major.minor version numbers.
 
 !!! abstract "Sedona with Apache Flink"
 
 	=== "Flink 1.12+ and Scala 2.12"
-	
+
 		```xml
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
@@ -217,7 +331,7 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		    <groupId>org.datasyslab</groupId>
 		    <artifactId>geotools-wrapper</artifactId>
 		    <version>{{ sedona.current_geotools }}</version>
-		</dependency>		
+		</dependency>
 		```
 
 
@@ -234,7 +348,7 @@ Under BSD 3-clause (compatible with Apache 2.0 license)
 	=== "Sedona 1.3.1+"
 
 		Add unidata repo to your POM.xml
-		
+
 		```
 		<repositories>
 		    <repository>
@@ -244,9 +358,9 @@ Under BSD 3-clause (compatible with Apache 2.0 license)
 		    </repository>
 		</repositories>
 		```
-		
+
 		Then add cdm-core to your POM dependency.
-		
+
 		```xml
 		<dependency>
 		    <groupId>edu.ucar</groupId>
@@ -256,7 +370,7 @@ Under BSD 3-clause (compatible with Apache 2.0 license)
 		```
 
 	=== "Before Sedona 1.3.1"
-	
+
 		```xml
 		<!-- https://mvnrepository.com/artifact/org.datasyslab/sernetcdf -->
 		<dependency>

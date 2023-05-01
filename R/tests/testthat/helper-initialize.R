@@ -19,9 +19,10 @@ testthat_spark_connection <- function(conn_retry_interval_s = 2) {
   conn_key <- ".testthat_spark_connection"
   if (!exists(conn_key, envir = .GlobalEnv)) {
     version <- Sys.getenv("SPARK_VERSION")
+    hadoop_version <- Sys.getenv("HADOOP_VERSION")
     spark_installed <- spark_installed_versions()
-    if (nrow(spark_installed[spark_installed$spark == version, ]) == 0) {
-      spark_install(version)
+    if (nrow(spark_installed[spark_installed$spark == version & spark_installed$hadoop_version == hadoop_version, ]) == 0) {
+      spark_install(version, hadoop_version)
     }
 
     conn_attempts <- 3
@@ -37,7 +38,8 @@ testthat_spark_connection <- function(conn_retry_interval_s = 2) {
             method = "shell",
             config = config,
             app_name = paste0("testthat-", uuid::UUIDgenerate()),
-            version = version
+            version = version,
+            hadoop_version = hadoop_version
           )
           assign(conn_key, sc, envir = .GlobalEnv)
           TRUE

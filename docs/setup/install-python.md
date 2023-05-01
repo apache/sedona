@@ -33,7 +33,10 @@ python3 setup.py install
 
 ### Prepare sedona-spark-shaded jar
 
-Sedona Python needs one additional jar file called `sedona-spark-shaded` to work properly. Please make sure you use the correct version for Spark and Scala. For Spark 3.0 + Scala 2.12, it is called `sedona-spark-shaded-3.0_2.12-{{ sedona.current_version }}.jar`
+Sedona Python needs one additional jar file called `sedona-spark-shaded` to work properly. Please make sure you use the correct version for Spark and Scala.
+
+* For Spark 3.0 to 3.3 and Scala 2.12, it is called `sedona-spark-shaded-3.0_2.12-{{ sedona.current_version }}.jar`
+* For Spark 3.4+ and Scala 2.12, it is called `sedona-spark-shaded-3.4_2.12-{{ sedona.current_version }}.jar`. If you are using Spark versions higher than 3.4, please replace the `3.4` in artifact names with the corresponding major.minor version numbers.
 
 You can get it using one of the following methods:
 

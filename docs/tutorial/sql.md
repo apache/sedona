@@ -89,6 +89,7 @@ Use the following code to initiate your SparkSession at the beginning:
 	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
 	    getOrCreate()
 	```
+    If you are using Spark versions >= 3.4, please replace the `3.0` in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
 
 !!!warning
 	Sedona has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption and slow performance.

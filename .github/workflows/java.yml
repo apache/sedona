@@ -16,18 +16,22 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - spark: 3.3.0
+          - spark: 3.4.0
             scala: 2.13.8
             jdk: '8'
+            skipTests: ''
+          - spark: 3.4.0
+            scala: 2.12.15
+            jdk: '8'
+            skipTests: ''
+          - spark: 3.4.0
+            scala: 2.12.15
+            jdk: '11'
             skipTests: ''
           - spark: 3.3.0
             scala: 2.12.15
             jdk: '8'
             skipTests: ''            
-          - spark: 3.3.0
-            scala: 2.12.15
-            jdk: '11'
-            skipTests: ''
           - spark: 3.2.3
             scala: 2.12.15
             jdk: '8'
@@ -59,7 +63,12 @@ jobs:
         SPARK_VERSION: ${{ matrix.spark }}
         SCALA_VERSION: ${{ matrix.scala }}
         SKIP_TESTS: ${{ matrix.skipTests }}
-      run: mvn -q clean install -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${SKIP_TESTS}
+      run: |
+        SPARK_COMPAT_VERSION="3.0"
+        if [ ${SPARK_VERSION:2:1} -gt "3" ]; then
+          SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
+        fi
+        mvn -q clean install -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${SKIP_TESTS}
     - run: mkdir staging
     - run: cp viz/target/sedona-*.jar staging
     - run: cp spark-shaded/target/sedona-*.jar staging
