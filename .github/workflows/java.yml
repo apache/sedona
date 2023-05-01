@@ -29,17 +29,9 @@ jobs:
             jdk: '11'
             skipTests: ''
           - spark: 3.3.0
-            scala: 2.13.8
-            jdk: '8'
-            skipTests: ''
-          - spark: 3.3.0
             scala: 2.12.15
             jdk: '8'
             skipTests: ''            
-          - spark: 3.3.0
-            scala: 2.12.15
-            jdk: '11'
-            skipTests: ''
           - spark: 3.2.3
             scala: 2.12.15
             jdk: '8'
