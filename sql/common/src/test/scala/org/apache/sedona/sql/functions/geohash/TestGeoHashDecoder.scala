@@ -18,8 +18,8 @@
  */
 package org.apache.sedona.sql.functions.geohash
 
+import org.apache.sedona.common.utils.GeoHashDecoder.InvalidGeoHashException
 import org.apache.sedona.sql.functions.FunctionsHelper
-import org.apache.spark.sql.sedona_sql.expressions.geohash.InvalidGeoHashException
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
@@ -27,13 +27,13 @@ import org.scalatest.prop.TableDrivenPropertyChecks
 class TestGeoHashDecoder extends AnyFunSuite with Matchers with TableDrivenPropertyChecks with FunctionsHelper{
   for ((statement: String, geoHash: String, precision: Int, geometry: String) <- Fixtures.geometriesFromGeoHash) {
     test("it should decode " + statement) {
-      Fixtures.decodeGeoHash(geoHash, Some(precision)) shouldBe wktReader.read(geometry)
+      Fixtures.decodeGeoHash(geoHash, precision) shouldBe wktReader.read(geometry)
     }
   }
 
   for ((statement: String, geoHash: String, precision: Int) <- Fixtures.invalidGeoHashes) {
     test("it should raise InvalidGeoHashException when " + statement) {
-      an[InvalidGeoHashException] shouldBe thrownBy(Fixtures.decodeGeoHash(geoHash, Some(precision)))
+      an[InvalidGeoHashException] shouldBe thrownBy(Fixtures.decodeGeoHash(geoHash, precision))
     }
   }
 }

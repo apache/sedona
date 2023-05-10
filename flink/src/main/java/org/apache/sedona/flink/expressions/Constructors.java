@@ -18,7 +18,7 @@ import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.enums.GeometryType;
 import org.apache.sedona.common.utils.FormatUtils;
-import org.apache.spark.sql.sedona_sql.expressions.geohash.GeoHashDecoder;
+import org.apache.sedona.common.utils.GeoHashDecoder;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -155,14 +155,17 @@ public class Constructors {
     public static class ST_GeomFromGeoHash extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String value,
-                             @DataTypeHint("Int") Integer precision) throws ParseException {
+                             @DataTypeHint("Int") Integer precision)
+                throws ParseException, GeoHashDecoder.InvalidGeoHashException
+        {
             // The default precision is the geohash length. Otherwise, use the precision given by the user
-            scala.Option<Object> optionPrecision = scala.Option.apply(precision);
-            return GeoHashDecoder.decode(value, optionPrecision);
+            return GeoHashDecoder.decode(value, precision);
         }
 
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-        public Geometry eval(@DataTypeHint("String") String value) throws ParseException {
+        public Geometry eval(@DataTypeHint("String") String value)
+                throws ParseException, GeoHashDecoder.InvalidGeoHashException
+        {
             return eval(value, null);
         }
     }

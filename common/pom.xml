@@ -73,6 +73,10 @@
             <groupId>com.google.geometry</groupId>
             <artifactId>s2-geometry</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
