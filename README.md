@@ -12,23 +12,24 @@ Apache Sedona™ is a spatial computing engine that enables developers to easily
 
 ### Load NYC taxi trip and taxi zones data from AWS S3
 ```
-taxidf = spark.read.format('csv').option("header","true").option("delimiter", ",").load("s3a://wherobots-examples/data/nyc-taxi-data.csv")
-taxidf.show()
+taxidf = spark.read.format('csv').option("header","true").option("delimiter", ",").load("s3a://your-directory/data/nyc-taxi-data.csv")
 taxidf = taxidf.selectExpr('ST_Point(CAST(Start_Lon AS Decimal(24,20)), CAST(Start_Lat AS Decimal(24,20))) AS pickup', 'Trip_Pickup_DateTime', 'Payment_Type', 'Fare_Amt')
-taxidf = taxidf.filter(col("pickup").isNotNull())
-taxidf.show()
 taxidf.createOrReplaceTempView('taxiDf')
-taxiRdd = Adapter.toSpatialRdd(taxidf, "pickup")
-import shutil
-shutil.rmtree(PATH_PREFIX + "taxi-pickup.geojson", ignore_errors=True)
-delete_path(sc, PATH_PREFIX + "taxi-pickup.geojson")
-taxiRdd.saveAsGeoJSON(PATH_PREFIX + "taxi-pickup.geojson")
+
 ```
 ```
 zoneDf = spark.read.format('csv').option("delimiter", ",").load("s3a://wherobots-examples/data/TIGER2018_ZCTA5.csv")
 zoneDf = zoneDf.selectExpr('ST_GeomFromWKT(_c0) as zone', '_c1 as zipcode')
-zoneDf.show()
 zoneDf.createOrReplaceTempView('zoneDf')
+```
+
+
+### Spatial SQL query to only keep records in Manhattan
+
+```
+
+taxidf_mhtn = taxidf.where('ST_Contains(ST_PolygonFromEnvelope(-74.01,40.73,-73.93,40.79), pickup)')
+
 ```
 
 ### Show a map of the loaded Spatial Dataframes using GeoPandas
@@ -47,15 +48,6 @@ zone.set_ylim(40.65, 40.9)
 
 taxi = taxiGpd.plot(ax=zone, alpha=0.01, color='red', zorder=3)
 ```
-
-### Spatial SQL query to only keep records in Manhattan
-
-```
-
-taxidf_mhtn = taxidf.where('ST_Contains(ST_PolygonFromEnvelope(-74.01,40.73,-73.93,40.79), pickup)')
-
-```
-
 
 |Download statistics| **Maven** | **PyPI** | **CRAN** |
 |:-------------:|:------------------:|:--------------:|:---------:|
