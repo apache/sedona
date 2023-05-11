@@ -16,21 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.io
+package org.apache.spark.sql.sedona_sql.io.raster
 
 import org.apache.spark.sql.catalyst.util.CaseInsensitiveMap
 
-private[io] class ImageWriteOptions(@transient private val parameters: CaseInsensitiveMap[String]) extends Serializable {
+private[io] class RasterOptions(@transient private val parameters: CaseInsensitiveMap[String]) extends Serializable {
   def this(parameters: Map[String, String]) = this(CaseInsensitiveMap(parameters))
 
-  // Optional parameters for writing GeoTiff
-  val writeToCRS = parameters.getOrElse("writeToCRS", "EPSG:4326")
-  val colImage = parameters.getOrElse("fieldImage", "image")
-  val colOrigin = parameters.getOrElse("fieldOrigin", "origin")
-  val colBands = parameters.getOrElse("fieldNBands", "nBands")
-  val colWidth = parameters.getOrElse("fieldWidth", "width")
-  val colHeight = parameters.getOrElse("fieldHeight", "height")
-  val colGeometry = parameters.getOrElse("fieldGeometry", "geometry")
-  val colData = parameters.getOrElse("fieldData", "data")
-
+  // Optional parameters for writing rasters to different image formats
+  val rasterFormat = parameters.getOrElse("rasterType", "geotiff")
+  // Column of the raster image name
+  val rasterPathField = parameters.get("pathField")
 }

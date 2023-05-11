@@ -19,15 +19,19 @@
 
 package org.apache.sedona.sql
 
+import org.apache.commons.io.FileUtils
+import org.apache.spark.sql.SaveMode
 import org.locationtech.jts.geom.Geometry
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
 import java.io.File
+import java.nio.file.Files
 import scala.collection.mutable
 
 class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
 
   var rasterdatalocation: String = resourceFolder + "raster/"
+  val tempDir: String = Files.createTempDirectory("sedona_raster_io_test_").toFile.getAbsolutePath
 
   describe("Raster IO test") {
     it("Should Pass geotiff loading without readFromCRS and readToCRS") {
@@ -158,7 +162,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
     it("Should Pass geotiff file writing with coalesce") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).option("readToCRS", "EPSG:4326").load(rasterdatalocation)
       df = df.selectExpr("image.origin as origin","image.geometry as geometry", "image.height as height", "image.width as width", "image.data as data", "image.nBands as nBands")
-      val savePath = resourceFolder + "raster-written/"
+      val savePath = tempDir + "/raster-written/"
       df.coalesce(1).write.mode("overwrite").format("geotiff").save(savePath)
 
       var loadPath = savePath
@@ -185,7 +189,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
     it("Should Pass geotiff file writing with writeToCRS") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
       df = df.selectExpr("image.origin as origin","image.geometry as geometry", "image.height as height", "image.width as width", "image.data as data", "image.nBands as nBands")
-      val savePath = resourceFolder + "raster-written/"
+      val savePath = tempDir + "/raster-written/"
       df.coalesce(1).write.mode("overwrite").format("geotiff").option("writeToCRS", "EPSG:4499").save(savePath)
 
       var loadPath = savePath
@@ -212,7 +216,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
     it("Should Pass geotiff file writing without coalesce") {
       var df = sparkSession.read.format("geotiff").option("dropInvalid", true).load(rasterdatalocation)
       df = df.selectExpr("image.origin as origin","image.geometry as geometry", "image.height as height", "image.width as width", "image.data as data", "image.nBands as nBands")
-      val savePath = resourceFolder + "raster-written/"
+      val savePath = tempDir + "/raster-written/"
       df.write.mode("overwrite").format("geotiff").save(savePath)
 
       var imageCount = 0
@@ -347,11 +351,48 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
         }
       }
     }
-    
+
+    it("should read geotiff using binary source and write geotiff back to disk using raster source") {
+      var df = sparkSession.read.format("binaryFile").load(rasterdatalocation)
+      var rasterDf = df.selectExpr("RS_FromGeoTiff(content)", "length")
+      val rasterCount = rasterDf.count()
+      rasterDf.write.format("raster").mode(SaveMode.Overwrite).save(tempDir + "/geotiff-written")
+      df = sparkSession.read.format("binaryFile").load(tempDir + "/geotiff-written/*")
+      rasterDf = df.selectExpr("RS_FromGeoTiff(content)")
+      assert(rasterDf.count() == rasterCount)
+    }
+
+    it("should read and write geotiff using given options") {
+      var df = sparkSession.read.format("binaryFile").load(rasterdatalocation)
+      var rasterDf = df.selectExpr("RS_FromGeoTiff(content)", "path")
+      val rasterCount = rasterDf.count()
+      rasterDf.write.format("raster").option("rasterType", "geotiff").option("pathField", "path").mode(SaveMode.Overwrite).save(tempDir + "/geotiff-written")
+      df = sparkSession.read.format("binaryFile").load(tempDir + "/geotiff-written/*")
+      rasterDf = df.selectExpr("RS_FromGeoTiff(content)")
+      assert(rasterDf.count() == rasterCount)
+    }
+
+    it("should read geotiff and write asc") {
+      var df = sparkSession.read.format("binaryFile").load(rasterdatalocation)
+      var rasterDf = df.selectExpr("RS_FromGeoTiff(content)", "path")
+      val rasterCount = rasterDf.count()
+      rasterDf.write.format("raster").option("rasterType", "arcgrid").option("pathField", "path").mode(SaveMode.Overwrite).save(tempDir + "/asc-written")
+      df = sparkSession.read.format("binaryFile").load(tempDir + "/asc-written/*")
+      rasterDf = df.selectExpr("RS_FromArcInfoAsciiGrid(content)")
+      assert(rasterDf.count() == rasterCount)
+    }
+
+    it("should handle null") {
+      var df = sparkSession.read.format("binaryFile").load(rasterdatalocation)
+      var rasterDf = df.selectExpr("RS_FromGeoTiff(null)", "length")
+      val rasterCount = rasterDf.count()
+      rasterDf.write.format("raster").mode(SaveMode.Overwrite).save(tempDir + "/geotiff-written")
+      df = sparkSession.read.format("binaryFile").load(tempDir + "/geotiff-written/*")
+      rasterDf = df.selectExpr("RS_FromGeoTiff(content)")
+      assert(rasterCount == 3)
+      assert(rasterDf.count() == 0)
+    }
   }
+
+  override def afterAll(): Unit = FileUtils.deleteDirectory(new File(tempDir))
 }
-
-
-
-
-

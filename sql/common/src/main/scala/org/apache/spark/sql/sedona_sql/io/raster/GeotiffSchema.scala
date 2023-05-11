@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.io
+package org.apache.spark.sql.sedona_sql.io.raster
 
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
@@ -38,8 +38,8 @@ object GeotiffSchema {
   val undefinedImageType = "Undefined"
 
   /**
-   * Schema for the image column: Row(String,Geometry, Int, Int, Int, Array[Double])
-   */
+    * Schema for the image column: Row(String,Geometry, Int, Int, Int, Array[Double])
+    */
   val columnSchema = StructType(
     StructField("origin", StringType, true) ::
       StructField("geometry", StringType, true) ::
@@ -51,73 +51,72 @@ object GeotiffSchema {
   val imageFields: Array[String] = columnSchema.fieldNames
 
   /**
-   * DataFrame with a single column of images named "image" (nullable)
-   */
+    * DataFrame with a single column of images named "image" (nullable)
+    */
   val imageSchema = StructType(StructField("image", columnSchema, true) :: Nil)
 
   /**
-   * Gets the origin of the image
-   *
-   * @return The origin of the image
-   */
+    * Gets the origin of the image
+    *
+    * @return The origin of the image
+    */
   def getOrigin(row: Row): String = row.getString(0)
 
   /**
-   * Gets the origin of the image
-   *
-   * @return The origin of the image
-   */
+    * Gets the origin of the image
+    *
+    * @return The origin of the image
+    */
   def getGeometry(row: Row): GeometryUDT = row.getAs[GeometryUDT](1)
 
 
   /**
-   * Gets the height of the image
-   *
-   * @return The height of the image
-   */
+    * Gets the height of the image
+    *
+    * @return The height of the image
+    */
   def getHeight(row: Row): Int = row.getInt(2)
 
   /**
-   * Gets the width of the image
-   *
-   * @return The width of the image
-   */
+    * Gets the width of the image
+    *
+    * @return The width of the image
+    */
   def getWidth(row: Row): Int = row.getInt(3)
 
   /**
-   * Gets the number of channels in the image
-   *
-   * @return The number of bands in the image
-   */
+    * Gets the number of channels in the image
+    *
+    * @return The number of bands in the image
+    */
   def getNBands(row: Row): Int = row.getInt(4)
 
 
   /**
-   * Gets the image data
-   *
-   * @return The image data
-   */
+    * Gets the image data
+    *
+    * @return The image data
+    */
   def getData(row: Row): Array[Double] = row.getAs[Array[Double]](5)
 
   /**
-   * Default values for the invalid image
-   *
-   * @param origin Origin of the invalid image
-   * @return Row with the default values
-   */
+    * Default values for the invalid image
+    *
+    * @param origin Origin of the invalid image
+    * @return Row with the default values
+    */
   private[io] def invalidImageRow(origin: String): Row =
     Row(Row(origin, -1, -1, -1, Array.ofDim[Byte](0)))
 
   /**
-   *
-   * Convert a GeoTiff image into a dataframe row
-   *
-   *
-   * @param origin Arbitrary string that identifies the image
-   * @param bytes  Image bytes (for example, jpeg)
-   * @return DataFrame Row or None (if the decompression fails)
-   *
-   */
+    *
+    * Convert a GeoTiff image into a dataframe row
+    *
+    * @param origin Arbitrary string that identifies the image
+    * @param bytes  Image bytes (for example, jpeg)
+    * @return DataFrame Row or None (if the decompression fails)
+    *
+    */
 
   private[io] def decode(origin: String, bytes: Array[Byte], imageSourceOptions: ImageReadOptions): Option[Row] = {
 
@@ -215,8 +214,3 @@ object GeotiffSchema {
     Some(Row(Row(origin, polygon.toText, height, width, nBands, decoded)))
   }
 }
-
-
-
-
-
