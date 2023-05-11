@@ -30,9 +30,12 @@ zoneDf.createOrReplaceTempView('zoneDf')
 ### Spatial SQL query to only keep records in Manhattan
 
 ```
-
 taxidf_mhtn = taxidf.where('ST_Contains(ST_PolygonFromEnvelope(-74.01,40.73,-73.93,40.79), pickup)')
+```
 
+### Spatial Join between Taxi Dataframe and Zone Dataframe to Find taxis in each zone
+```
+taxiVsZone = spark.sql('SELECT zone, zipcode, pickup, Fare_Amt FROM zoneDf, taxiDf WHERE ST_Contains(zone, pickup)')
 ```
 
 ### Show a map of the loaded Spatial Dataframes using GeoPandas
