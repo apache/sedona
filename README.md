@@ -12,17 +12,15 @@ Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/g
 
 ## Example
 
-### Load NYC taxi trip and taxi zones data from AWS S3
+### Load NYC taxi trips and taxi zones data from CSV Files Stored on AWS S3
 ```
 taxidf = spark.read.format('csv').option("header","true").option("delimiter", ",").load("s3a://your-directory/data/nyc-taxi-data.csv")
 taxidf = taxidf.selectExpr('ST_Point(CAST(Start_Lon AS Decimal(24,20)), CAST(Start_Lat AS Decimal(24,20))) AS pickup', 'Trip_Pickup_DateTime', 'Payment_Type', 'Fare_Amt')
-taxidf.createOrReplaceTempView('taxiDf')
 
 ```
 ```
 zoneDf = spark.read.format('csv').option("delimiter", ",").load("s3a://wherobots-examples/data/TIGER2018_ZCTA5.csv")
 zoneDf = zoneDf.selectExpr('ST_GeomFromWKT(_c0) as zone', '_c1 as zipcode')
-zoneDf.createOrReplaceTempView('zoneDf')
 ```
 
 ### Spatial SQL query to only return Taxi trips in Manhattan
