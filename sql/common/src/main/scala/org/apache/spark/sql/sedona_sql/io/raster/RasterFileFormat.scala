@@ -20,14 +20,13 @@
 
 package org.apache.spark.sql.sedona_sql.io.raster
 
-import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FSDataOutputStream, FileStatus, Path}
 import org.apache.hadoop.mapreduce.{Job, TaskAttemptContext}
 import org.apache.sedona.common.raster.Serde
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.execution.datasources.{FileFormat, OutputWriter, OutputWriterFactory, PartitionedFile}
-import org.apache.spark.sql.sources.{DataSourceRegister, Filter}
+import org.apache.spark.sql.execution.datasources.{FileFormat, OutputWriter, OutputWriterFactory}
+import org.apache.spark.sql.sources.DataSourceRegister
 import org.apache.spark.sql.types.StructType
 import org.geotools.gce.arcgrid.ArcGridWriter
 import org.geotools.gce.geotiff.GeoTiffWriter
@@ -42,7 +41,10 @@ private[spark] class RasterFileFormat extends FileFormat with DataSourceRegister
   override def inferSchema(
                             sparkSession: SparkSession,
                             options: Map[String, String],
-                            files: Seq[FileStatus]): Option[StructType] = None
+                            files: Seq[FileStatus]): Option[StructType] = {
+    throw new UnsupportedOperationException("Please use 'binaryFile' data source to reading raster files")
+    None
+  }
 
   override def prepareWrite(
                              sparkSession: SparkSession,
@@ -64,17 +66,6 @@ private[spark] class RasterFileFormat extends FileFormat with DataSourceRegister
   }
 
   override def shortName(): String = "raster"
-
-  override protected def buildReader(
-                                      sparkSession: SparkSession,
-                                      dataSchema: StructType,
-                                      partitionSchema: StructType,
-                                      requiredSchema: StructType,
-                                      filters: Seq[Filter],
-                                      options: Map[String, String],
-                                      hadoopConf: Configuration): (PartitionedFile) => Iterator[InternalRow] = {
-    throw new UnsupportedOperationException("Please use Binary data source to reading raster files")
-  }
 
   private def isValidRasterSchema(dataSchema: StructType): Boolean = {
     var imageColExist: Boolean = false
