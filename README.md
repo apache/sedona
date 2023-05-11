@@ -10,7 +10,7 @@ Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/g
 
 [![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://discord.gg/9A3k5dEBsY)
 
-## Processing Spatial Data with Sedona
+## Example
 
 ### Load NYC taxi trip and taxi zones data from AWS S3
 ```
@@ -25,8 +25,7 @@ zoneDf = zoneDf.selectExpr('ST_GeomFromWKT(_c0) as zone', '_c1 as zipcode')
 zoneDf.createOrReplaceTempView('zoneDf')
 ```
 
-
-### Spatial SQL query to only keep records in Manhattan
+### Spatial SQL query to only return Taxi trips in Manhattan
 
 ```
 taxidf_mhtn = taxidf.where('ST_Contains(ST_PolygonFromEnvelope(-74.01,40.73,-73.93,40.79), pickup)')
