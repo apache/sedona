@@ -497,4 +497,37 @@ public class Functions {
             return org.apache.sedona.common.Functions.s2CellIDs(geom, level);
         }
     }
+
+    public static class ST_GeometricMedian extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.geometricMedian(geometry);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Double") Double tolerance) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.geometricMedian(geometry, tolerance);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Double") Double tolerance,
+                             int maxIter) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.geometricMedian(geometry, tolerance, maxIter);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Double") Double tolerance,
+                             int maxIter, @DataTypeHint("Boolean") Boolean failIfNotConverged) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.geometricMedian(geometry, tolerance, maxIter, failIfNotConverged);
+        }
+
+    }
+
 }

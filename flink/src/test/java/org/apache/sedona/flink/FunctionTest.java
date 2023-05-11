@@ -614,4 +614,11 @@ public class FunctionTest extends TestBase{
         assertEquals(1, count(joinCleanedTable));
         assertEquals(2, first(joinCleanedTable).getField(1));
     }
+
+    @Test
+    public void testGeometricMedian() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_GeometricMedian(ST_GeomFromWKT('MULTIPOINT((0 0), (1 1), (2 2), (200 200))'))");
+        assertEquals("POINT (1.9761550281255005 1.9761550281255005)", first(pointTable).getField(0).toString());
+    }
+
 }
