@@ -8,6 +8,9 @@ Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/g
 
 Apache Sedona™ is a spatial computing engine that enables developers to easily process spatial data at any scale within modern cluster computing systems such as Apache Spark and Apache Flink. Sedona developers can express their spatial data processing tasks in Spatial SQL, Spatial Python or Spatial R. Internally, Sedona provides spaital data loading, indexing, partitioning, and query processing functionality that enable user analyze large-scale spatial data.
 
+
+<img src="sedonaarch.png" width="400">
+
 ## Processing Spatial Data with Sedona
 
 ### Load NYC taxi trip and taxi zones data from AWS S3
