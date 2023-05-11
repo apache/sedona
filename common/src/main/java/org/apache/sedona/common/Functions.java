@@ -735,31 +735,25 @@ public class Functions {
     // ported from https://github.com/postgis/postgis/blob/f6ed58d1fdc865d55d348212d02c11a10aeb2b30/liblwgeom/lwgeom_median.c
     // geometry ST_GeometricMedian ( geometry g , float8 tolerance , int max_iter , boolean fail_if_not_converged );
 
-    private static double distance(Coordinate p1, Coordinate p2) {
+    private static double distance3d(Coordinate p1, Coordinate p2) {
         double dx = p2.x - p1.x;
         double dy = p2.y - p1.y;
-        if(!Double.isNaN(p1.z) && !Double.isNaN(p2.z)) {
-            double dz = p2.z - p1.z;
-            return Math.sqrt(dx * dx + dy * dy + dz * dz);
-        }
-        else
-            return Math.sqrt(dx * dx + dy * dy);
+        double dz = p2.z - p1.z;
+        return Math.sqrt(dx * dx + dy * dy + dz * dz);
     }
 
-    private static double[] distances(Coordinate curr, Coordinate[] points) {
-        double[] distances = new double[points.length];
+    private static void distances(Coordinate curr, Coordinate[] points, double[] distances) {
         for(int i = 0; i < points.length; i++) {
-            distances[i] = distance(curr, points[i]);
+            distances[i] = distance3d(curr, points[i]);
         }
-        return distances;
     }
 
-    private static double iteratePoints(Coordinate curr, Coordinate[] points) {
+    private static double iteratePoints(Coordinate curr, Coordinate[] points, double[] distances) {
         Coordinate next = new Coordinate(0, 0, 0);
         double delta = 0;
         double denom = 0;
         boolean hit = false;
-        double[] distances = distances(curr, points);
+        distances(curr, points, distances);
 
         for (int i = 0; i < points.length; i++) {
             /* we need to use lower epsilon than in FP_IS_ZERO in the loop for calculation to converge */
@@ -819,7 +813,7 @@ public class Functions {
                     next.z = (1.0 - rInv)*next.z + rInv*curr.z;
                 }
             }
-            delta = distance(curr, next);
+            delta = distance3d(curr, next);
             curr.x = next.x;
             curr.y = next.y;
             curr.z = next.z;
@@ -837,30 +831,48 @@ public class Functions {
         return guess;
     }
 
-    public static Geometry geometricMedian(Geometry geometry, double tolerance, int maxIter, boolean failIfNotConverged) {
+    private static Coordinate[] extractCoordinates(Geometry geometry) {
         Coordinate[] points = geometry.getCoordinates();
         if(points.length == 0)
+            return points;
+        boolean is3d = !Double.isNaN(points[0].z);
+        Coordinate[] coordinates = new Coordinate[points.length];
+        for(int i = 0; i < points.length; i++) {
+            coordinates[i] = points[i].copy();
+            if(!is3d)
+                coordinates[i].z = 0.0;
+        }
+        return coordinates;
+    }
+
+    public static Point geometricMedian(Geometry geometry, double tolerance, int maxIter, boolean failIfNotConverged) throws Exception {
+        Coordinate[] coordinates = extractCoordinates(geometry);
+        if(coordinates.length == 0)
             return new Point(null, GEOMETRY_FACTORY);
-        Coordinate median = initGuess(points);
+        Coordinate median = initGuess(coordinates);
         double delta = Double.MAX_VALUE;
+        double[] distances = new double[coordinates.length]; // preallocate to reduce gc pressure for large iterations
         for(int i = 0; i < maxIter && delta > tolerance; i++)
-            delta = iteratePoints(median, points);
+            delta = iteratePoints(median, coordinates, distances);
         if (failIfNotConverged && delta > tolerance)
-            return null; // lwerror("Median failed to converge within %g after %d iterations.", tol, max_iter);
+            throw new Exception(String.format("Median failed to converge within %.1E after %d iterations.", tolerance, maxIter));
+        boolean is3d = !Double.isNaN(geometry.getCoordinate().z);
+        if(!is3d)
+            median.z = Double.NaN;
         Point point = new Point(new CoordinateArraySequence(new Coordinate[]{median}), GEOMETRY_FACTORY);
         point.setSRID(geometry.getSRID());
         return point;
     }
 
-    public static Geometry geometricMedian(Geometry geometry, double tolerance, int maxIter) {
+    public static Geometry geometricMedian(Geometry geometry, double tolerance, int maxIter) throws Exception {
         return geometricMedian(geometry, tolerance, maxIter, false);
     }
 
-    public static Geometry geometricMedian(Geometry geometry, double tolerance) {
+    public static Geometry geometricMedian(Geometry geometry, double tolerance) throws Exception {
         return geometricMedian(geometry, tolerance, DEFAULT_MAX_ITER, false);
     }
 
-    public static Geometry geometricMedian(Geometry geometry) {
+    public static Geometry geometricMedian(Geometry geometry) throws Exception {
         return geometricMedian(geometry, DEFAULT_TOLERANCE, DEFAULT_MAX_ITER, false);
     }
 

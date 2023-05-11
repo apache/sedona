@@ -500,14 +500,14 @@ public class Functions {
 
     public static class ST_GeometricMedian extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) throws Exception {
             Geometry geometry = (Geometry) o;
             return org.apache.sedona.common.Functions.geometricMedian(geometry);
         }
 
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
-                             @DataTypeHint("Double") Double tolerance) {
+                             @DataTypeHint("Double") Double tolerance) throws Exception {
             Geometry geometry = (Geometry) o;
             return org.apache.sedona.common.Functions.geometricMedian(geometry, tolerance);
         }
@@ -515,7 +515,7 @@ public class Functions {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
                              @DataTypeHint("Double") Double tolerance,
-                             int maxIter) {
+                             int maxIter) throws Exception {
             Geometry geometry = (Geometry) o;
             return org.apache.sedona.common.Functions.geometricMedian(geometry, tolerance, maxIter);
         }
@@ -523,7 +523,7 @@ public class Functions {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
                              @DataTypeHint("Double") Double tolerance,
-                             int maxIter, @DataTypeHint("Boolean") Boolean failIfNotConverged) {
+                             int maxIter, @DataTypeHint("Boolean") Boolean failIfNotConverged) throws Exception {
             Geometry geometry = (Geometry) o;
             return org.apache.sedona.common.Functions.geometricMedian(geometry, tolerance, maxIter, failIfNotConverged);
         }
