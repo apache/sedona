@@ -24,7 +24,7 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.common.geometryObjects.Circle;
-import org.apache.sedona.core.geometryObjects.GeometrySerde;
+import org.apache.sedona.common.geometrySerde.GeometrySerde;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
