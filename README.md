@@ -53,6 +53,8 @@ zone.set_ylim(40.65, 40.9)
 taxi = taxiGpd.plot(ax=zone, alpha=0.01, color='red', zorder=3)
 ```
 
+## Package Download Statistics
+
 |Download statistics| **Maven** | **PyPI** | **CRAN** |
 |:-------------:|:------------------:|:--------------:|:---------:|
 | Apache Sedona |         180k/month        |[![Downloads](https://static.pepy.tech/personalized-badge/apache-sedona?period=month&units=international_system&left_color=black&right_color=brightgreen&left_text=downloads/month)](https://pepy.tech/project/apache-sedona) [![Downloads](https://static.pepy.tech/personalized-badge/apache-sedona?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/apache-sedona)|[![](https://cranlogs.r-pkg.org/badges/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona) [![](https://cranlogs.r-pkg.org/badges/grand-total/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona)|
