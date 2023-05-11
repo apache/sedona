@@ -1,6 +1,75 @@
 !!!note
 	Sedona writers are available in Scala, Java and Python and have the same APIs.
 	
+## Write RasterUDT to raster files
+
+Introduction: You can write a Sedona Raster DataFrame to any raster formats using Sedona's built-in `raster` data source. With this, you can even read GeoTiff rasters and write them to ArcGrid rasters. Note that: `raster` data source does not support reading rasters. Please use Spark built-in `binaryFile` and Sedona RS constructors together to read rasters.
+
+Since: `v1.4.1`
+
+Available options:
+
+* rasterType
+	* mandatory
+	* Allowed values: `geotiff`, `arcgrid`
+* pathField
+	* optional. If you use this option, then the column specified in this option must exist in the DataFrame schema. If this option is not used, each produced raster image will have a random UUID file name.
+	* Allowed values: any column name that indicates the paths of each raster file
+
+The schema of the Raster dataframe to be written can be one of the following two schemas:
+
+```html
+root
+ |-- rs_fromgeotiff(content): raster (nullable = true)
+```
+
+or
+
+```html
+root
+ |-- rs_fromgeotiff(content): raster (nullable = true)
+ |-- path: string (nullable = true)
+```
+
+Spark SQL example 1:
+
+```scala
+sparkSession.write.format("raster").option("rasterType", "geotiff").mode(SaveMode.Overwrite).save("my_raster_file")
+```
+
+Spark SQL example 2:
+
+```scala
+sparkSession.write.format("raster").option("rasterType", "geotiff").option("pathField", "path").mode(SaveMode.Overwrite).save("my_raster_file")
+```
+
+The produced file structure will look like this:
+
+```html
+my_raster_file
+- part-00000-6c7af016-c371-4564-886d-1690f3b27ca8-c000
+	- test1.tiff
+	- .test1.tiff.crc
+- part-00001-6c7af016-c371-4564-886d-1690f3b27ca8-c000
+	- test2.tiff
+	- .test2.tiff.crc
+- part-00002-6c7af016-c371-4564-886d-1690f3b27ca8-c000
+	- test3.tiff
+	- .test3.tiff.crc
+- _SUCCESS
+```
+
+To read it back to Sedona Raster DataFrame, you can use the following command (note the `*` in the path):
+
+```scala
+sparkSession.read.format("binaryFile").load("my_raster_file/*")
+```
+
+Then you can create Raster type in Sedona like this `RS_FromGeoTiff(content)` (if the written data was in GeoTiff format).
+
+The newly created DataFrame can be written to disk again but must be under a different name such as `my_raster_file_modified`
+
+
 ## Write Array[Double] to GeoTiff files
 
 Introduction: You can write a GeoTiff dataframe as GeoTiff images using the spark `write` feature with the format `geotiff`. The geotiff raster column needs to be an array of double type data.
