@@ -1,21 +1,63 @@
-<img src="https://www.apache.org/logos/res/sedona/sedona.png" width="400">
+<img src="https://www.apache.org/logos/res/sedona/sedona.png" width="200">
+
+Apache Sedona™ is a spatial computing engine that enables developers to easily process spatial data at any scale within modern cluster computing systems such as Apache Spark and Apache Flink. Sedona developers can express their spatial data processing tasks in Spatial SQL, Spatial Python or Spatial R. Internally, Sedona provides spaital data loading, indexing, partitioning, and query processing/optimization functionality that enable users to efficiently analyze spatial data at any scale.
 
 [![Scala and Java build](https://github.com/apache/sedona/actions/workflows/java.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/java.yml) [![Python build](https://github.com/apache/sedona/actions/workflows/python.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/python.yml) [![R build](https://github.com/apache/sedona/actions/workflows/r.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/r.yml) [![Example project build](https://github.com/apache/sedona/actions/workflows/example.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/example.yml) [![Docs build](https://github.com/apache/sedona/actions/workflows/docs.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/docs.yml)
+
+<img src="docs/image/sedona-ecosystem.png" width="800" class="center">
 
 Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder) and play the interactive Sedona Python Jupyter Notebook immediately!
 
 [![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://discord.gg/9A3k5dEBsY)
 
-Apache Sedona™ is a cluster computing system for processing large-scale spatial data. Sedona equips cluster computing systems such as Apache Spark and Apache Flink with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
+## Example
+
+### Load NYC taxi trips and taxi zones data from CSV Files Stored on AWS S3
+```
+taxidf = spark.read.format('csv').option("header","true").option("delimiter", ",").load("s3a://your-directory/data/nyc-taxi-data.csv")
+taxidf = taxidf.selectExpr('ST_Point(CAST(Start_Lon AS Decimal(24,20)), CAST(Start_Lat AS Decimal(24,20))) AS pickup', 'Trip_Pickup_DateTime', 'Payment_Type', 'Fare_Amt')
+
+```
+```
+zoneDf = spark.read.format('csv').option("delimiter", ",").load("s3a://your-directory/data/TIGER2018_ZCTA5.csv")
+zoneDf = zoneDf.selectExpr('ST_GeomFromWKT(_c0) as zone', '_c1 as zipcode')
+```
+
+### Spatial SQL query to only return Taxi trips in Manhattan
+
+```
+taxidf_mhtn = taxidf.where('ST_Contains(ST_PolygonFromEnvelope(-74.01,40.73,-73.93,40.79), pickup)')
+```
+
+### Spatial Join between Taxi Dataframe and Zone Dataframe to Find taxis in each zone
+```
+taxiVsZone = spark.sql('SELECT zone, zipcode, pickup, Fare_Amt FROM zoneDf, taxiDf WHERE ST_Contains(zone, pickup)')
+```
+
+### Show a map of the loaded Spatial Dataframes using GeoPandas
+
+```
+zoneGpd = gpd.GeoDataFrame(zoneDf.toPandas(), geometry="zone")
+taxiGpd = gpd.GeoDataFrame(taxidf.toPandas(), geometry="pickup")
+
+zone = zoneGpd.plot(color='yellow', edgecolor='black', zorder=1)
+zone.set_xlabel('Longitude (degrees)')
+zone.set_ylabel('Latitude (degrees)')
+
+# Local view
+zone.set_xlim(-74.1, -73.8)
+zone.set_ylim(40.65, 40.9)
+
+taxi = taxiGpd.plot(ax=zone, alpha=0.01, color='red', zorder=3)
+```
+
+## Package Download Statistics
 
 |Download statistics| **Maven** | **PyPI** | **CRAN** |
 |:-------------:|:------------------:|:--------------:|:---------:|
 | Apache Sedona |         180k/month        |[![Downloads](https://static.pepy.tech/personalized-badge/apache-sedona?period=month&units=international_system&left_color=black&right_color=brightgreen&left_text=downloads/month)](https://pepy.tech/project/apache-sedona) [![Downloads](https://static.pepy.tech/personalized-badge/apache-sedona?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/apache-sedona)|[![](https://cranlogs.r-pkg.org/badges/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona) [![](https://cranlogs.r-pkg.org/badges/grand-total/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona)|
 |    Archived GeoSpark releases   |10k/month|[![Downloads](https://static.pepy.tech/personalized-badge/geospark?period=month&units=international_system&left_color=black&right_color=brightgreen&left_text=downloads/month)](https://pepy.tech/project/geospark)[![Downloads](https://static.pepy.tech/personalized-badge/geospark?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/geospark)|           |
 
-## System architecture
-
-<img src="docs/image/architecture.svg" width="600">
 
 ## Our users and code contributors are from ...
 
