@@ -3,6 +3,50 @@
 	
 ## Write RasterUDT to raster files
 
+To write a Sedona Raster DataFrame to raster files, you need to first convert the RasterUDT to a binary DataFrame and then write it to raster files using Sedona's built-in `raster` data source.
+
+### Write RasterUDT to a binary DataFrame
+
+You can use the following RS output functions to convert a RasterUDT to a binary DataFrame.
+
+#### RS_AsGeoTiff
+
+Introduction: Returns a binary DataFrame from a RasterUDT. Each RasterUDT object in the resulting DataFrame is a GeoTiff image in binary format.
+
+Since: `v1.4.1`
+
+Format 1: `RS_AsGeoTiff(raster: Raster)`
+
+Format 2: `RS_AsGeoTiff(raster: Raster, compressionType:String, imageQuality:Integer/Decimal)`
+
+Possible values for `compressionType`: `None`, `PackBits`, `Deflate`, `Huffman`, `LZW` and `JPEG`
+
+Possible values for `imageQuality`: any decimal number between 0 and 1. 0 means the lowest quality and 1 means the highest quality.
+
+SQL example:
+
+```sql
+SELECT RS_AsGeoTiff(raster, 'LZW', '0.75') FROM my_raster_table
+```
+
+Output:
+
+```html
++--------------------+
+|             geotiff|
++--------------------+
+|[4D 4D 00 2A 00 0...|
++--------------------+
+```
+
+Output schema:
+
+```sql
+root
+ |-- geotiff: binary (nullable = true)
+```
+
+### Write a binary DataFrame to raster files
 Introduction: You can write a Sedona Raster DataFrame to any raster formats using Sedona's built-in `raster` data source. With this, you can even read GeoTiff rasters and write them to ArcGrid rasters. Note that: `raster` data source does not support reading rasters. Please use Spark built-in `binaryFile` and Sedona RS constructors together to read rasters.
 
 Since: `v1.4.1`
