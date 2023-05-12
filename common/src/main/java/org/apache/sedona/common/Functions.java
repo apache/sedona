@@ -846,6 +846,10 @@ public class Functions {
     }
 
     public static Point geometricMedian(Geometry geometry, double tolerance, int maxIter, boolean failIfNotConverged) throws Exception {
+        String geometryType = geometry.getGeometryType();
+        if(!(Geometry.TYPENAME_POINT.equals(geometryType) || Geometry.TYPENAME_MULTIPOINT.equals(geometryType))) {
+            throw new Exception("Unsupported geometry type: " + geometryType);
+        }
         Coordinate[] coordinates = extractCoordinates(geometry);
         if(coordinates.length == 0)
             return new Point(null, GEOMETRY_FACTORY);
