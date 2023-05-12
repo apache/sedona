@@ -22,11 +22,10 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.ArrayData
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
-import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, RasterUDT}
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
-import org.geotools.coverage.grid.GridCoverage2D
 import org.locationtech.jts.geom.Geometry
 
 import scala.reflect.runtime.universe._
@@ -192,8 +191,6 @@ object InferredTypes {
   def inferSparkType[T: TypeTag]: DataType = {
     if (typeOf[T] =:= typeOf[Geometry]) {
       GeometryUDT
-    } else if (typeOf[T] =:= typeOf[GridCoverage2D]) {
-      RasterUDT
     } else if (typeOf[T] =:= typeOf[Array[Geometry]]) {
       DataTypes.createArrayType(GeometryUDT)
     } else if (typeOf[T] =:= typeOf[java.lang.Double]) {
