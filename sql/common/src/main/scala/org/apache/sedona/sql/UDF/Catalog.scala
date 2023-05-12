@@ -176,7 +176,8 @@ object Catalog {
     function[RS_SetSRID](),
     function[RS_SRID](),
     function[RS_Value](1),
-    function[RS_Values](1)
+    function[RS_Values](1),
+    function[RS_AsGeoTiff]()
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(

@@ -20,6 +20,7 @@ package org.apache.sedona.sql
 
 import org.apache.spark.sql.functions.{collect_list, expr}
 import org.geotools.coverage.grid.GridCoverage2D
+import org.junit.Assert.assertEquals
 import org.locationtech.jts.geom.Geometry
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
@@ -338,6 +339,31 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(result.size() == 2)
       assert(result.get(0) == 255d)
       assert(result.get(1) == null)
+    }
+
+    it("Passed RS_AsGeoTiff") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val resultRaw = df.selectExpr("RS_FromGeoTiff(content) as raster").first().get(0)
+      val resultLoaded = df.selectExpr("RS_FromGeoTiff(content) as raster")
+        .selectExpr("RS_AsGeoTiff(raster) as geotiff")
+        .selectExpr("RS_FromGeoTiff(geotiff) as raster_new").first().get(0)
+      assert(resultLoaded != null)
+      assert(resultLoaded.isInstanceOf[GridCoverage2D])
+      assertEquals(resultRaw.asInstanceOf[GridCoverage2D].getEnvelope.toString, resultLoaded.asInstanceOf[GridCoverage2D].getEnvelope.toString)
+    }
+
+    it("Passed RS_AsGeoTiff with different compression types") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val resultRaw = df.selectExpr("RS_FromGeoTiff(content) as raster").first().get(0)
+      val resultLoadedDf = df.selectExpr("RS_FromGeoTiff(content) as raster")
+        .withColumn("geotiff", expr("RS_AsGeoTiff(raster, 'LZW', 1)"))
+        .withColumn("geotiff2", expr("RS_AsGeoTiff(raster, 'Deflate', 0.5)"))
+        .withColumn("raster_new", expr("RS_FromGeoTiff(geotiff)"))
+      val resultLoaded = resultLoadedDf.first().getAs[GridCoverage2D]("raster_new")
+      val writtenBinary1 = resultLoadedDf.first().getAs[Array[Byte]]("geotiff")
+      val writtenBinary2 = resultLoadedDf.first().getAs[Array[Byte]]("geotiff2")
+      assertEquals(resultRaw.asInstanceOf[GridCoverage2D].getEnvelope.toString, resultLoaded.getEnvelope.toString)
+      assert(writtenBinary1.length > writtenBinary2.length)
     }
   }
 }
