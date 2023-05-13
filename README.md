@@ -27,7 +27,7 @@ Apache Sedona™ is a spatial computing engine that enables developers to easily
 Some of the key features of Apache Sedona include:
 
 * Support for a wide range of geospatial data formats, including GeoJSON, WKT, and ESRI Shapefile.
-* Scalable distributed processing of large datasets.
+* Scalable distributed processing of large vector and raster datasets.
 * Tools for spatial indexing, spatial querying, and spatial join operations.
 * Integration with popular geospatial python tools such as GeoPandas.
 * Integration with popular big data tools, such as Spark, Hadopp, Hive, and Flink for data storage and querying.
@@ -58,7 +58,7 @@ Apache Sedona is a widely used framework for working with spatial data, and it h
 
 ### Code Example:
 
-This example loads NYC taxi trip records and taxi zone information stored as .CSV files on AWS S3. It then performs spatial SQL query on the taxi trip datasets to filter out all records except those in the Manhattan area of New York. The example also show a spatial join operation that match taxi trip records to zones based on whether the taxi trip lies within the geographical extents of the zone. Finally, the last code snippet integrates the output of Sedona with GeoPandas to plot the spatial distribution of both datasets.
+This example loads NYC taxi trip records and taxi zone information stored as .CSV files on AWS S3 into Sedona spatial dataframes. It then performs spatial SQL query on the taxi trip datasets to filter out all records except those within the Manhattan area of New York. The example also shows a spatial join operation that matches taxi trip records to zones based on whether the taxi trip lies within the geographical extents of the zone. Finally, the last code snippet integrates the output of Sedona with GeoPandas and plots the spatial distribution of both datasets.
 
 #### Load NYC taxi trips and taxi zones data from CSV Files Stored on AWS S3
 ``` python
