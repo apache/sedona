@@ -1,10 +1,10 @@
 <img src="https://www.apache.org/logos/res/sedona/sedona.png" width="200">
----
+
+-----
 
 [![Scala and Java build](https://github.com/apache/sedona/actions/workflows/java.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/java.yml) [![Python build](https://github.com/apache/sedona/actions/workflows/python.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/python.yml) [![R build](https://github.com/apache/sedona/actions/workflows/r.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/r.yml) [![Example project build](https://github.com/apache/sedona/actions/workflows/example.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/example.yml) [![Docs build](https://github.com/apache/sedona/actions/workflows/docs.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/docs.yml)
 
 [What is Apache Sedona?](https://github.com/apache/sedona#what-is-apache-sedona)
-
 [When to use Sedona?](https://github.com/apache/sedona#when-to-use-sedona)
 
 ## What is Apache Sedona?
@@ -19,7 +19,7 @@ Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/g
 
 [![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://discord.gg/9A3k5dEBsY)
 
-## Example
+Example:
 
 ### Load NYC taxi trips and taxi zones data from CSV Files Stored on AWS S3
 ```
