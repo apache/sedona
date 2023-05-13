@@ -6,9 +6,13 @@
 
 [What is Apache Sedona?](#what-is-apache-sedona)
 
+[Features](#features)
+
 [When to use Sedona?](#when-to-use-sedona)
 
 [Join the community](#join-the-community)
+
+[Documentation](#documentation)
 
 ## What is Apache Sedona?
 Apache Sedona™ is a spatial computing engine that enables developers to easily process spatial data at any scale within modern cluster computing systems such as Apache Spark and Apache Flink. Sedona developers can express their spatial data processing tasks in Spatial SQL, Spatial Python or Spatial R. Internally, Sedona provides spaital data loading, indexing, partitioning, and query processing/optimization functionality that enable users to efficiently analyze spatial data at any scale.
@@ -112,6 +116,15 @@ Please refer to [Sedona website](https://sedona.apache.org/latest-snapshot/setup
 |Zeppelin |  Apache Zeppelin | Plugin for Apache Zeppelin 0.8.1+|
 
 
+## Documentation
+
+* Spatial SQL in Sedona [](https://sedona.apache.org/latest-snapshot/tutorial/sql/)
+* Integrate with GeoPandas and Shapely [](https://sedona.apache.org/latest-snapshot/tutorial/geopandas-shapely/)
+* Working with Satial R in Sedona [](https://sedona.apache.org/latest-snapshot/api/rdocs/)
+
+Please visit [Apache Sedona website](http://sedona.apache.org/) for detailed information
+
+
 ## Join the community
 
 Follow Sedona on Twitter for fresh news: [Sedona@Twitter](https://twitter.com/ApacheSedona)
@@ -123,8 +136,6 @@ Join the Sedona Discord community: [![](https://dcbadge.vercel.app/api/server/9A
 [Sedona Mailing Lists](https://lists.apache.org/list.html?sedona.apache.org): [dev@sedona.apache.org](https://lists.apache.org/list.html?dev@sedona.apache.org): project development, general questions or tutorials.
 
 * Please first subscribe and then post emails. To subscribe, please send an email (leave the subject and content blank) to dev-subscribe@sedona.apache.org
-
-# Please visit [Apache Sedona website](http://sedona.apache.org/) for detailed information
 
 
 ### Package Download Statistics
