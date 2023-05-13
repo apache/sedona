@@ -4,17 +4,12 @@
 
 [![Scala and Java build](https://github.com/apache/sedona/actions/workflows/java.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/java.yml) [![Python build](https://github.com/apache/sedona/actions/workflows/python.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/python.yml) [![R build](https://github.com/apache/sedona/actions/workflows/r.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/r.yml) [![Example project build](https://github.com/apache/sedona/actions/workflows/example.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/example.yml) [![Docs build](https://github.com/apache/sedona/actions/workflows/docs.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/docs.yml)
 
-[What is Apache Sedona?](#what-is-apache-sedona)
-
-[Features](#features)
-
-[When to use Sedona?](#when-to-use-sedona)
-
-[Building Sedona](#building-sedona)
-
-[Documentation](#documentation)
-
-[Join the community](#join-the-community)
+* [What is Apache Sedona?](#what-is-apache-sedona)
+* [Features](#features)
+* [When to use Sedona?](#when-to-use-sedona)
+* [Building Sedona](#building-sedona)
+* [Documentation](#documentation)
+* [Join the community](#join-the-community)
 
 
 ## What is Apache Sedona?
