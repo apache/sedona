@@ -35,7 +35,19 @@ Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/g
 
 ## When to use Sedona?
 
-Example:
+
+### Use Cases:
+
+Apache Sedona is a widely used framework for working with spatial data, and it has many different use cases and applications. Some of the main use cases for Apache Sedona include:
+
+* Automotive data analytics: Apache Sedona is widely used in geospatial analytics applications, where it is used to perform spatial analysis and data mining on large and complex datasets collected from fleets.
+* Urban planning and development: Apache Sedona is commonly used in urban planning and development applications to analyze and visualize spatial data sets related to urban environments, such as land use, transportation networks, and population density.
+* Location-based services: Apache Sedona is often used in location-based services, such as mapping and navigation applications, where it is used to process and analyze spatial data to provide location-based information and services to users.
+* Environmental modeling and analysis: Apache Sedona is used in many different environmental modeling and analysis applications, where it is used to process and analyze spatial data related to environmental factors, such as air quality, water quality, and weather patterns.
+* Disaster response and management: Apache Sedona is used in disaster response and management applications to process and analyze spatial data related to disasters, such as floods, earthquakes, and other natural disasters, in order to support emergency response and recovery efforts.
+
+
+### Code Example:
 
 ### Load NYC taxi trips and taxi zones data from CSV Files Stored on AWS S3
 ```
