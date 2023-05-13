@@ -141,7 +141,7 @@ Join the Sedona Discord community: [![](https://dcbadge.vercel.app/api/server/9A
 * Please first subscribe and then post emails. To subscribe, please send an email (leave the subject and content blank) to dev-subscribe@sedona.apache.org
 
 
-### Package Download Statistics
+Package Download Statistics
 
 |Download statistics| **Maven** | **PyPI** | **CRAN** |
 |:-------------:|:------------------:|:--------------:|:---------:|
