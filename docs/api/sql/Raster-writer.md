@@ -1,17 +1,17 @@
 !!!note
 	Sedona writers are available in Scala, Java and Python and have the same APIs.
 	
-## Write RasterUDT to raster files
+## Write Raster DataFrame to raster files
 
-To write a Sedona Raster DataFrame to raster files, you need to first convert the RasterUDT to a binary DataFrame and then write it to raster files using Sedona's built-in `raster` data source.
+To write a Sedona Raster DataFrame to raster files, you need to (1) first convert the Raster DataFrame to a binary DataFrame using `RS_AsXXX` functions and (2) then write the binary DataFrame to raster files using Sedona's built-in `raster` data source.
 
-### Write RasterUDT to a binary DataFrame
+### Write raster DataFrame to a binary DataFrame
 
-You can use the following RS output functions to convert a RasterUDT to a binary DataFrame.
+You can use the following RS output functions (`RS_AsXXX`) to convert a Raster DataFrame to a binary DataFrame. Generally the output format of a raster can be different from the original input format. For example, you can use `RS_FromGeoTiff` to create rasters and save them using `RS_AsArcInfoAsciiGrid`.
 
 #### RS_AsGeoTiff
 
-Introduction: Returns a binary DataFrame from a RasterUDT. Each RasterUDT object in the resulting DataFrame is a GeoTiff image in binary format.
+Introduction: Returns a binary DataFrame from a Raster DataFrame. Each raster object in the resulting DataFrame is a GeoTiff image in binary format.
 
 Since: `v1.4.1`
 
@@ -47,44 +47,48 @@ root
 ```
 
 ### Write a binary DataFrame to raster files
-Introduction: You can write a Sedona Raster DataFrame to any raster formats using Sedona's built-in `raster` data source. With this, you can even read GeoTiff rasters and write them to ArcGrid rasters. Note that: `raster` data source does not support reading rasters. Please use Spark built-in `binaryFile` and Sedona RS constructors together to read rasters.
+
+Introduction: You can write a Sedona binary DataFrame to external storage using Sedona's built-in `raster` data source. Note that: `raster` data source does not support reading rasters. Please use Spark built-in `binaryFile` and Sedona RS constructors together to read rasters.
 
 Since: `v1.4.1`
 
 Available options:
 
-* rasterType
-	* mandatory
-	* Allowed values: `geotiff`, `arcgrid`
+* rasterField:
+	* Default value: the `binary` type column in the DataFrame. If the input DataFrame has several binary columns, please specify which column you want to use.
+	* Allowed values: the name of the to-be-saved binary type column
+* fileExtension
+	* Default value: `.tiff`
+	* Allowed values: any string values such as `.png`, `.jpeg`, `.asc`
 * pathField
-	* optional. If you use this option, then the column specified in this option must exist in the DataFrame schema. If this option is not used, each produced raster image will have a random UUID file name.
+	* No defaulut value. If you use this option, then the column specified in this option must exist in the DataFrame schema. If this option is not used, each produced raster image will have a random UUID file name.
 	* Allowed values: any column name that indicates the paths of each raster file
 
 The schema of the Raster dataframe to be written can be one of the following two schemas:
 
 ```html
 root
- |-- rs_fromgeotiff(content): raster (nullable = true)
+ |-- rs_asgeotiff(raster): binary (nullable = true)
 ```
 
 or
 
 ```html
 root
- |-- rs_fromgeotiff(content): raster (nullable = true)
+ |-- rs_asgeotiff(raster): binary (nullable = true)
  |-- path: string (nullable = true)
 ```
 
 Spark SQL example 1:
 
 ```scala
-sparkSession.write.format("raster").option("rasterType", "geotiff").mode(SaveMode.Overwrite).save("my_raster_file")
+sparkSession.write.format("raster").mode(SaveMode.Overwrite).save("my_raster_file")
 ```
 
 Spark SQL example 2:
 
 ```scala
-sparkSession.write.format("raster").option("rasterType", "geotiff").option("pathField", "path").mode(SaveMode.Overwrite).save("my_raster_file")
+sparkSession.write.format("raster").option("rasterField", "raster").option("pathField", "path").option("fileExtension", ".tiff").mode(SaveMode.Overwrite).save("my_raster_file")
 ```
 
 The produced file structure will look like this:

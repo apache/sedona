@@ -23,8 +23,10 @@ import org.apache.spark.sql.catalyst.util.CaseInsensitiveMap
 private[io] class RasterOptions(@transient private val parameters: CaseInsensitiveMap[String]) extends Serializable {
   def this(parameters: Map[String, String]) = this(CaseInsensitiveMap(parameters))
 
-  // Optional parameters for writing rasters to different image formats
-  val rasterFormat = parameters.getOrElse("rasterType", "geotiff")
+  // The file format of the raster image
+  val fileExtension = parameters.getOrElse("fileExtension", ".tiff")
   // Column of the raster image name
   val rasterPathField = parameters.get("pathField")
+  // Column of the raster image itself
+  val rasterField = parameters.get("rasterField")
 }

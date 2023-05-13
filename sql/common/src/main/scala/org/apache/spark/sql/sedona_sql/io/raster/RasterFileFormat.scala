@@ -20,17 +20,13 @@
 
 package org.apache.spark.sql.sedona_sql.io.raster
 
-import org.apache.hadoop.fs.{FSDataOutputStream, FileStatus, Path}
+import org.apache.hadoop.fs.{FileStatus, Path}
 import org.apache.hadoop.mapreduce.{Job, TaskAttemptContext}
-import org.apache.sedona.common.raster.Serde
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.execution.datasources.{FileFormat, OutputWriter, OutputWriterFactory}
 import org.apache.spark.sql.sources.DataSourceRegister
 import org.apache.spark.sql.types.StructType
-import org.geotools.gce.arcgrid.ArcGridWriter
-import org.geotools.gce.geotiff.GeoTiffWriter
-import org.opengis.coverage.grid.GridCoverageWriter
 
 import java.io.IOException
 import java.nio.file.Paths
@@ -53,7 +49,7 @@ private[spark] class RasterFileFormat extends FileFormat with DataSourceRegister
                              dataSchema: StructType): OutputWriterFactory = {
     val rasterOptions = new RasterOptions(options)
     if (!isValidRasterSchema(dataSchema)) {
-      throw new IllegalArgumentException("Invalid GeoTiff Schema")
+      throw new IllegalArgumentException("Invalid Raster DataFrame Schema")
     }
 
     new OutputWriterFactory {
@@ -71,7 +67,7 @@ private[spark] class RasterFileFormat extends FileFormat with DataSourceRegister
     var imageColExist: Boolean = false
     val fields = dataSchema.fields
     fields.foreach(field => {
-      if (field.dataType.typeName.equals("raster")) {
+      if (field.dataType.typeName.equals("binary")) {
         imageColExist = true
       }
     })
@@ -87,46 +83,32 @@ private class RasterFileWriter(savePath: String,
                                 context: TaskAttemptContext) extends OutputWriter {
 
   private val hfs = new Path(savePath).getFileSystem(context.getConfiguration)
+  private val rasterFieldIndex = if (rasterOptions.rasterField.isEmpty) getRasterFieldIndex else dataSchema.fieldIndex(rasterOptions.rasterField.get)
 
-  override def write(row: InternalRow): Unit = {
-    val rowFields: InternalRow = row
+  private def getRasterFieldIndex: Int = {
     val schemaFields: StructType = dataSchema
-    var imageColIndex = -1
+    var curField = -1
     for (i <- schemaFields.indices) {
-      if (schemaFields.fields(i).dataType.typeName.equals("raster")) {
-        imageColIndex = i
+      if (schemaFields.fields(i).dataType.typeName.equals("binary")) {
+        curField = i
       }
     }
+    curField
+  }
+  override def write(row: InternalRow): Unit = {
     // Get grid coverage 2D from the row
-    val rasterRaw = rowFields.getBinary(imageColIndex)
+    val rasterRaw = row.getBinary(rasterFieldIndex)
     // If the raster is null, return
     if (rasterRaw == null) return
-    // If the raster is not null, deserialize it
-    val gridCoverage2D = Serde.deserialize(rasterRaw)
-    var writer:GridCoverageWriter = null
-    var out:FSDataOutputStream = null
-    if (rasterOptions.rasterFormat.equalsIgnoreCase("geotiff")) {
-      // If the output path is not provided, generate a random UUID as the file name
-      val fileExtension = ".tiff"
-      val rasterFilePath = getRasterFilePath(fileExtension, rowFields, schemaFields, rasterOptions)
-      // create the write path
-      out = hfs.create(new Path(Paths.get(savePath, new Path(rasterFilePath).getName).toString))
-      writer = new GeoTiffWriter(out)
-    } else if (rasterOptions.rasterFormat.equalsIgnoreCase("arcgrid")) {
-      val fileExtension = ".asc"
-      val rasterFilePath = getRasterFilePath(fileExtension, rowFields, schemaFields, rasterOptions)
-      out = hfs.create(new Path(Paths.get(savePath, new Path(rasterFilePath).getName).toString))
-      writer = new ArcGridWriter(out)
-    } else
-      throw new IllegalArgumentException("Invalid raster format")
-
+    // If the raster is not null, write it to disk
+    val rasterFilePath = getRasterFilePath(row, dataSchema, rasterOptions)
     // write the image to file
     try {
-      writer.write(gridCoverage2D)
-      writer.dispose()
+      val out = hfs.create(new Path(Paths.get(savePath, new Path(rasterFilePath).getName).toString))
+      out.write(rasterRaw)
       out.close()
     } catch {
-      case e@(_: IllegalArgumentException | _: IOException) =>
+      case e@(_: IOException) =>
         // TODO Auto-generated catch block
         e.printStackTrace()
     }
@@ -140,7 +122,7 @@ private class RasterFileWriter(savePath: String,
     savePath
   }
 
-  private def getRasterFilePath(fileExtension: String, row: InternalRow, schema: StructType, rasterOptions: RasterOptions): String = {
+  private def getRasterFilePath(row: InternalRow, schema: StructType, rasterOptions: RasterOptions): String = {
     // If the output path is not provided, generate a random UUID as the file name
     var rasterFilePath = UUID.randomUUID().toString
     if (rasterOptions.rasterPathField.isDefined) {
@@ -152,6 +134,6 @@ private class RasterFileWriter(savePath: String,
         else rasterFilePath = rasterFilePathRaw
       }
     }
-    rasterFilePath + fileExtension
+    rasterFilePath + rasterOptions.fileExtension
   }
 }
