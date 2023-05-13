@@ -8,6 +8,8 @@
 
 [When to use Sedona?](#when-to-use-sedona)
 
+[Join the community](#join-the-community)
+
 ## What is Apache Sedona?
 Apache Sedona™ is a spatial computing engine that enables developers to easily process spatial data at any scale within modern cluster computing systems such as Apache Spark and Apache Flink. Sedona developers can express their spatial data processing tasks in Spatial SQL, Spatial Python or Spatial R. Internally, Sedona provides spaital data loading, indexing, partitioning, and query processing/optimization functionality that enable users to efficiently analyze spatial data at any scale.
 
@@ -90,19 +92,14 @@ zone.set_ylim(40.65, 40.9)
 taxi = taxiGpd.plot(ax=zone, alpha=0.01, color='red', zorder=3)
 ```
 
-## Package Download Statistics
-
-|Download statistics| **Maven** | **PyPI** | **CRAN** |
-|:-------------:|:------------------:|:--------------:|:---------:|
-| Apache Sedona |         180k/month        |[![Downloads](https://static.pepy.tech/personalized-badge/apache-sedona?period=month&units=international_system&left_color=black&right_color=brightgreen&left_text=downloads/month)](https://pepy.tech/project/apache-sedona) [![Downloads](https://static.pepy.tech/personalized-badge/apache-sedona?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/apache-sedona)|[![](https://cranlogs.r-pkg.org/badges/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona) [![](https://cranlogs.r-pkg.org/badges/grand-total/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona)|
-|    Archived GeoSpark releases   |10k/month|[![Downloads](https://static.pepy.tech/personalized-badge/geospark?period=month&units=international_system&left_color=black&right_color=brightgreen&left_text=downloads/month)](https://pepy.tech/project/geospark)[![Downloads](https://static.pepy.tech/personalized-badge/geospark?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/geospark)|           |
+## Building Sedona
 
 
-## Our users and code contributors are from ...
+### Compile the source code
 
-<img src="docs/image/sedona-community.png" width="600">
+Please refer to [Sedona website](https://sedona.apache.org/latest-snapshot/setup/compile/)
 
-## Modules in the source code
+### Modules in the source code
 
 | Name  |  API |  Introduction|
 |---|---|---|
@@ -114,18 +111,12 @@ taxi = taxiGpd.plot(ax=zone, alpha=0.01, color='red', zorder=3)
 |R | Spark RDD/DataFrame in R | R wrapper for Sedona |
 |Zeppelin |  Apache Zeppelin | Plugin for Apache Zeppelin 0.8.1+|
 
-### Sedona supports several programming languages: Scala, Java, SQL, Python and R.
 
-## Compile the source code
+## Join the community
 
-Please refer to [Sedona website](https://sedona.apache.org/latest-snapshot/setup/compile/)
+Follow Sedona on Twitter for fresh news: [Sedona@Twitter](https://twitter.com/ApacheSedona)
 
-## Contact
-
-Twitter: [Sedona@Twitter](https://twitter.com/ApacheSedona)
-
-[![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://discord.gg/9A3k5dEBsY)
-
+Join the Sedona Discord community: [![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://discord.gg/9A3k5dEBsY)
 
 [Sedona JIRA](https://issues.apache.org/jira/projects/SEDONA): Bugs, Pull Requests, and other similar issues
 
@@ -134,6 +125,20 @@ Twitter: [Sedona@Twitter](https://twitter.com/ApacheSedona)
 * Please first subscribe and then post emails. To subscribe, please send an email (leave the subject and content blank) to dev-subscribe@sedona.apache.org
 
 # Please visit [Apache Sedona website](http://sedona.apache.org/) for detailed information
+
+
+### Package Download Statistics
+
+|Download statistics| **Maven** | **PyPI** | **CRAN** |
+|:-------------:|:------------------:|:--------------:|:---------:|
+| Apache Sedona |         180k/month        |[![Downloads](https://static.pepy.tech/personalized-badge/apache-sedona?period=month&units=international_system&left_color=black&right_color=brightgreen&left_text=downloads/month)](https://pepy.tech/project/apache-sedona) [![Downloads](https://static.pepy.tech/personalized-badge/apache-sedona?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/apache-sedona)|[![](https://cranlogs.r-pkg.org/badges/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona) [![](https://cranlogs.r-pkg.org/badges/grand-total/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona)|
+|    Archived GeoSpark releases   |10k/month|[![Downloads](https://static.pepy.tech/personalized-badge/geospark?period=month&units=international_system&left_color=black&right_color=brightgreen&left_text=downloads/month)](https://pepy.tech/project/geospark)[![Downloads](https://static.pepy.tech/personalized-badge/geospark?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/geospark)|           |
+
+
+### Our users and code contributors are from ...
+
+<img src="docs/image/sedona-community.png" width="600">
+
 
 ## Powered by
 
