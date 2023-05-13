@@ -11,8 +11,22 @@
 ## What is Apache Sedona?
 Apache Sedona™ is a spatial computing engine that enables developers to easily process spatial data at any scale within modern cluster computing systems such as Apache Spark and Apache Flink. Sedona developers can express their spatial data processing tasks in Spatial SQL, Spatial Python or Spatial R. Internally, Sedona provides spaital data loading, indexing, partitioning, and query processing/optimization functionality that enable users to efficiently analyze spatial data at any scale.
 
-
 <img src="https://github.com/MoSarwat/sedona/blob/master/docs/image/SedonaNewFig.001.png" width="800" class="center">
+
+
+### Features
+Some of the key features of Apache Sedona include:
+
+⋅⋅*Support for a wide range of geospatial data formats, including GeoJSON, WKT, and ESRI Shapefile.
+⋅⋅*Scalable distributed processing of large datasets.
+⋅⋅*Tools for spatial indexing, spatial querying, and spatial join operations.
+⋅⋅*Support for common spatial analytics tasks, such as clustering, classification, and regression analysis.
+⋅⋅*Integration with popular big data tools, such as Apache Spark, Apache Hadopp, Apache Hive, and Apache Flink for data storage and querying.
+⋅⋅*A user-friendly API for working with geospatial data in the Scala and Java programming languages.
+⋅⋅*Flexible deployment options, including standalone, local, and cluster modes.
+
+These are some of the key features of Apache Sedona, but it may offer additional capabilities depending on the specific version and configuration.
+
 
 Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder) and play the interactive Sedona Python Jupyter Notebook immediately!
 
