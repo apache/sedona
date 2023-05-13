@@ -100,7 +100,9 @@ taxi = taxiGpd.plot(ax=zone, alpha=0.01, color='red', zorder=3)
 ## Building Sedona
 
 * To install the Python package: 
-  ``` pip install apache-sedona
+
+  ``` 
+  pip install apache-sedona
   ```
 * To Compile the source code, please refer to [Sedona website](https://sedona.apache.org/latest-snapshot/setup/compile/)
 
