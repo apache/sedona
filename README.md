@@ -151,7 +151,7 @@ Package Download Statistics:
 
 Our users and code contributors are from:
 
-<img src="[docs/image/sedona-community.png](https://github.com/MoSarwat/sedona/blob/master/docs/image/SedonaUsers.001.png)" width="600">
+<img src="https://github.com/MoSarwat/sedona/blob/master/docs/image/SedonaUsers.001.png" width="600">
 
 
 ## Powered by
