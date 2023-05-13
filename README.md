@@ -151,9 +151,9 @@ Package Download Statistics:
 
 Our users and code contributors are from:
 
-<img src="docs/image/sedona-community.png" width="600">
+<img src="[docs/image/sedona-community.png](https://github.com/MoSarwat/sedona/blob/master/docs/image/SedonaUsers.001.png)" width="600">
 
 
 ## Powered by
 
-<img src="https://www.apache.org/foundation/press/kit/asf_logo_wide.png" width="500">
+<img src="https://www.apache.org/foundation/press/kit/asf_logo_wide.png" width="500" class="center">
