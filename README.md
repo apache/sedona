@@ -10,9 +10,12 @@
 
 [When to use Sedona?](#when-to-use-sedona)
 
-[Join the community](#join-the-community)
+[Building Sedona](#building-sedona)
 
 [Documentation](#documentation)
+
+[Join the community](#join-the-community)
+
 
 ## What is Apache Sedona?
 Apache Sedona™ is a spatial computing engine that enables developers to easily process spatial data at any scale within modern cluster computing systems such as Apache Spark and Apache Flink. Sedona developers can express their spatial data processing tasks in Spatial SQL, Spatial Python or Spatial R. Internally, Sedona provides spaital data loading, indexing, partitioning, and query processing/optimization functionality that enable users to efficiently analyze spatial data at any scale.
@@ -58,12 +61,11 @@ Apache Sedona is a widely used framework for working with spatial data, and it h
 This example loads NYC taxi trip records and taxi zone information stored as .CSV files on AWS S3. It then performs spatial SQL query on the taxi trip datasets to filter out all records except those in the Manhattan area of New York. The example also show a spatial join operation that match taxi trip records to zones based on whether the taxi trip lies within the geographical extents of the zone. Finally, the last code snippet integrates the output of Sedona with GeoPandas to plot the spatial distribution of both datasets.
 
 #### Load NYC taxi trips and taxi zones data from CSV Files Stored on AWS S3
-```
+``` python
 taxidf = spark.read.format('csv').option("header","true").option("delimiter", ",").load("s3a://your-directory/data/nyc-taxi-data.csv")
 taxidf = taxidf.selectExpr('ST_Point(CAST(Start_Lon AS Decimal(24,20)), CAST(Start_Lat AS Decimal(24,20))) AS pickup', 'Trip_Pickup_DateTime', 'Payment_Type', 'Fare_Amt')
-
 ```
-```
+``` python
 zoneDf = spark.read.format('csv').option("delimiter", ",").load("s3a://wherobots-examples/data/TIGER2018_ZCTA5.csv")
 zoneDf = zoneDf.selectExpr('ST_GeomFromWKT(_c0) as zone', '_c1 as zipcode')
 ```
@@ -118,9 +120,9 @@ Please refer to [Sedona website](https://sedona.apache.org/latest-snapshot/setup
 
 ## Documentation
 
-* Spatial SQL in Sedona [](https://sedona.apache.org/latest-snapshot/tutorial/sql/)
-* Integrate with GeoPandas and Shapely [](https://sedona.apache.org/latest-snapshot/tutorial/geopandas-shapely/)
-* Working with Satial R in Sedona [](https://sedona.apache.org/latest-snapshot/api/rdocs/)
+* [Spatial SQL in Sedona](https://sedona.apache.org/latest-snapshot/tutorial/sql/)
+* [Integrate with GeoPandas and Shapely](https://sedona.apache.org/latest-snapshot/tutorial/geopandas-shapely/)
+* [Working with Satial R in Sedona](https://sedona.apache.org/latest-snapshot/api/rdocs/)
 
 Please visit [Apache Sedona website](http://sedona.apache.org/) for detailed information
 
