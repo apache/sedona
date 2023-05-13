@@ -20,9 +20,9 @@ Some of the key features of Apache Sedona include:
 * Support for a wide range of geospatial data formats, including GeoJSON, WKT, and ESRI Shapefile.
 * Scalable distributed processing of large datasets.
 * Tools for spatial indexing, spatial querying, and spatial join operations.
-* Support for common spatial analytics tasks, such as clustering, classification, and regression analysis.
-* Integration with popular big data tools, such as Apache Spark, Apache Hadopp, Apache Hive, and Apache Flink for data storage and querying.
-* A user-friendly API for working with geospatial data in the Scala and Java programming languages.
+* Integration with popular geospatial python tools such as GeoPandas.
+* Integration with popular big data tools, such as Spark, Hadopp, Hive, and Flink for data storage and querying.
+* A user-friendly API for working with geospatial data in the SQL, Python Scala and Java languages.
 * Flexible deployment options, including standalone, local, and cluster modes.
 
 These are some of the key features of Apache Sedona, but it may offer additional capabilities depending on the specific version and configuration.
@@ -49,7 +49,9 @@ Apache Sedona is a widely used framework for working with spatial data, and it h
 
 ### Code Example:
 
-### Load NYC taxi trips and taxi zones data from CSV Files Stored on AWS S3
+This example loads NYC taxi trip records and taxi zone information stored as .CSV files on AWS S3. It then performs spatial SQL query on the taxi trip datasets to filter out all records except those in the Manhattan area of New York. The example also show a spatial join operation that match taxi trip records to zones based on whether the taxi trip lies within the geographical extents of the zone. Finally, the last code snippet integrates the output of Sedona with GeoPandas to plot the spatial distribution of both datasets.
+
+#### Load NYC taxi trips and taxi zones data from CSV Files Stored on AWS S3
 ```
 taxidf = spark.read.format('csv').option("header","true").option("delimiter", ",").load("s3a://your-directory/data/nyc-taxi-data.csv")
 taxidf = taxidf.selectExpr('ST_Point(CAST(Start_Lon AS Decimal(24,20)), CAST(Start_Lat AS Decimal(24,20))) AS pickup', 'Trip_Pickup_DateTime', 'Payment_Type', 'Fare_Amt')
@@ -60,18 +62,18 @@ zoneDf = spark.read.format('csv').option("delimiter", ",").load("s3a://wherobots
 zoneDf = zoneDf.selectExpr('ST_GeomFromWKT(_c0) as zone', '_c1 as zipcode')
 ```
 
-### Spatial SQL query to only return Taxi trips in Manhattan
+#### Spatial SQL query to only return Taxi trips in Manhattan
 
 ```
 taxidf_mhtn = taxidf.where('ST_Contains(ST_PolygonFromEnvelope(-74.01,40.73,-73.93,40.79), pickup)')
 ```
 
-### Spatial Join between Taxi Dataframe and Zone Dataframe to Find taxis in each zone
+#### Spatial Join between Taxi Dataframe and Zone Dataframe to Find taxis in each zone
 ```
 taxiVsZone = spark.sql('SELECT zone, zipcode, pickup, Fare_Amt FROM zoneDf, taxiDf WHERE ST_Contains(zone, pickup)')
 ```
 
-### Show a map of the loaded Spatial Dataframes using GeoPandas
+#### Show a map of the loaded Spatial Dataframes using GeoPandas
 
 ```
 zoneGpd = gpd.GeoDataFrame(zoneDf.toPandas(), geometry="zone")
