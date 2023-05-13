@@ -141,7 +141,7 @@ Join the Sedona Discord community: [![](https://dcbadge.vercel.app/api/server/9A
 * Please first subscribe and then post emails. To subscribe, please send an email (leave the subject and content blank) to dev-subscribe@sedona.apache.org
 
 
-Package Download Statistics
+Package Download Statistics:
 
 |Download statistics| **Maven** | **PyPI** | **CRAN** |
 |:-------------:|:------------------:|:--------------:|:---------:|
@@ -149,7 +149,7 @@ Package Download Statistics
 |    Archived GeoSpark releases   |10k/month|[![Downloads](https://static.pepy.tech/personalized-badge/geospark?period=month&units=international_system&left_color=black&right_color=brightgreen&left_text=downloads/month)](https://pepy.tech/project/geospark)[![Downloads](https://static.pepy.tech/personalized-badge/geospark?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/geospark)|           |
 
 
-### Our users and code contributors are from ...
+Our users and code contributors are from:
 
 <img src="docs/image/sedona-community.png" width="600">
 
