@@ -72,12 +72,12 @@ zoneDf = zoneDf.selectExpr('ST_GeomFromWKT(_c0) as zone', '_c1 as zipcode')
 
 #### Spatial SQL query to only return Taxi trips in Manhattan
 
-```java
+```python
 taxidf_mhtn = taxidf.where('ST_Contains(ST_PolygonFromEnvelope(-74.01,40.73,-73.93,40.79), pickup)')
 ```
 
 #### Spatial Join between Taxi Dataframe and Zone Dataframe to Find taxis in each zone
-```java
+```python
 taxiVsZone = spark.sql('SELECT zone, zipcode, pickup, Fare_Amt FROM zoneDf, taxiDf WHERE ST_Contains(zone, pickup)')
 ```
 
@@ -91,7 +91,6 @@ zone = zoneGpd.plot(color='yellow', edgecolor='black', zorder=1)
 zone.set_xlabel('Longitude (degrees)')
 zone.set_ylabel('Latitude (degrees)')
 
-# Local view
 zone.set_xlim(-74.1, -73.8)
 zone.set_ylim(40.65, 40.9)
 
