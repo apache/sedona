@@ -378,8 +378,8 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
 
     it("Passed RS_AsArcGrid with different bands") {
-      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_asc/*")
-      val resultRaw = df.selectExpr("RS_FromArcInfoAsciiGrid(content) as raster").first().get(0)
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/*")
+      val resultRaw = df.selectExpr("RS_FromGeoTiff(content) as raster").first().get(0)
       val resultLoadedDf = df.selectExpr("RS_FromArcInfoAsciiGrid(content) as raster")
         .withColumn("arc", expr("RS_AsArcGrid(raster, 0)"))
         .withColumn("arc2", expr("RS_AsArcGrid(raster, 1)"))

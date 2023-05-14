@@ -392,7 +392,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
     }
 
     it("should read RS_FromGeoTiff and write RS_AsArcGrid") {
-      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/FAA_UTM18N_NAD83.tif")
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/*")
       var rasterDf = df.selectExpr("RS_FromGeoTiff(content) as raster", "path").selectExpr("RS_AsArcGrid(raster, 1) as content", "path")
       val rasterCount = rasterDf.count()
       rasterDf.write.format("raster").option("rasterField", "content").option("fileExtension", ".asc").option("pathField", "path").mode(SaveMode.Overwrite).save(tempDir + "/raster-written")

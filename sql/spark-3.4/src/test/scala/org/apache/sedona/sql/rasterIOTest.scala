@@ -353,32 +353,30 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
     }
 
     it("should read geotiff using binary source and write geotiff back to disk using raster source") {
-      var df = sparkSession.read.format("binaryFile").load(rasterdatalocation)
-      var rasterDf = df.selectExpr("RS_FromGeoTiff(content)", "length")
+      var rasterDf = sparkSession.read.format("binaryFile").load(rasterdatalocation)
       val rasterCount = rasterDf.count()
-      rasterDf.write.format("raster").mode(SaveMode.Overwrite).save(tempDir + "/geotiff-written")
-      df = sparkSession.read.format("binaryFile").load(tempDir + "/geotiff-written/*")
-      rasterDf = df.selectExpr("RS_FromGeoTiff(content)")
+      rasterDf.write.format("raster").mode(SaveMode.Overwrite).save(tempDir + "/raster-written")
+      rasterDf = sparkSession.read.format("binaryFile").load(tempDir + "/raster-written/*")
+      rasterDf = rasterDf.selectExpr("RS_FromGeoTiff(content)")
       assert(rasterDf.count() == rasterCount)
     }
 
     it("should read and write geotiff using given options") {
-      var df = sparkSession.read.format("binaryFile").load(rasterdatalocation)
-      var rasterDf = df.selectExpr("RS_FromGeoTiff(content)", "path")
+      var rasterDf = sparkSession.read.format("binaryFile").load(rasterdatalocation)
       val rasterCount = rasterDf.count()
-      rasterDf.write.format("raster").option("rasterType", "geotiff").option("pathField", "path").mode(SaveMode.Overwrite).save(tempDir + "/geotiff-written")
-      df = sparkSession.read.format("binaryFile").load(tempDir + "/geotiff-written/*")
-      rasterDf = df.selectExpr("RS_FromGeoTiff(content)")
+      rasterDf.write.format("raster").option("rasterField", "content").option("fileExtension", ".tiff").option("pathField", "path").mode(SaveMode.Overwrite).save(tempDir + "/raster-written")
+      rasterDf = sparkSession.read.format("binaryFile").load(tempDir + "/raster-written/*")
+      rasterDf = rasterDf.selectExpr("RS_FromGeoTiff(content)")
       assert(rasterDf.count() == rasterCount)
     }
 
-    it("should read geotiff and write asc") {
+    it("should read and write via RS_FromGeoTiff and RS_AsGeoTiff") {
       var df = sparkSession.read.format("binaryFile").load(rasterdatalocation)
-      var rasterDf = df.selectExpr("RS_FromGeoTiff(content)", "path")
+      var rasterDf = df.selectExpr("RS_FromGeoTiff(content) as raster", "path").selectExpr("RS_AsGeoTiff(raster) as content", "path")
       val rasterCount = rasterDf.count()
-      rasterDf.write.format("raster").option("rasterType", "arcgrid").option("pathField", "path").mode(SaveMode.Overwrite).save(tempDir + "/asc-written")
-      df = sparkSession.read.format("binaryFile").load(tempDir + "/asc-written/*")
-      rasterDf = df.selectExpr("RS_FromArcInfoAsciiGrid(content)")
+      rasterDf.write.format("raster").option("rasterField", "content").option("fileExtension", ".tiff").option("pathField", "path").mode(SaveMode.Overwrite).save(tempDir + "/raster-written")
+      df = sparkSession.read.format("binaryFile").load(tempDir + "/raster-written/*")
+      rasterDf = df.selectExpr("RS_FromGeoTiff(content)")
       assert(rasterDf.count() == rasterCount)
     }
 
@@ -386,11 +384,21 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
       var df = sparkSession.read.format("binaryFile").load(rasterdatalocation)
       var rasterDf = df.selectExpr("RS_FromGeoTiff(null)", "length")
       val rasterCount = rasterDf.count()
-      rasterDf.write.format("raster").mode(SaveMode.Overwrite).save(tempDir + "/geotiff-written")
-      df = sparkSession.read.format("binaryFile").load(tempDir + "/geotiff-written/*")
+      rasterDf.write.format("raster").mode(SaveMode.Overwrite).save(tempDir + "/raster-written")
+      df = sparkSession.read.format("binaryFile").load(tempDir + "/raster-written/*")
       rasterDf = df.selectExpr("RS_FromGeoTiff(content)")
       assert(rasterCount == 3)
       assert(rasterDf.count() == 0)
+    }
+
+    it("should read RS_FromGeoTiff and write RS_AsArcGrid") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/*")
+      var rasterDf = df.selectExpr("RS_FromGeoTiff(content) as raster", "path").selectExpr("RS_AsArcGrid(raster, 1) as content", "path")
+      val rasterCount = rasterDf.count()
+      rasterDf.write.format("raster").option("rasterField", "content").option("fileExtension", ".asc").option("pathField", "path").mode(SaveMode.Overwrite).save(tempDir + "/raster-written")
+      df = sparkSession.read.format("binaryFile").load(tempDir + "/raster-written/*")
+      rasterDf = df.selectExpr("RS_FromArcInfoAsciiGrid(content)")
+      assert(rasterDf.count() == rasterCount)
     }
   }
 
