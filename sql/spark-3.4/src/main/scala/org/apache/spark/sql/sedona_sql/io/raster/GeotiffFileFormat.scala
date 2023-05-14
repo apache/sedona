@@ -18,7 +18,7 @@
  */
 
 
-package org.apache.spark.sql.sedona_sql.io
+package org.apache.spark.sql.sedona_sql.io.raster
 
 import com.google.common.io.{ByteStreams, Closeables}
 import org.apache.hadoop.conf.Configuration
