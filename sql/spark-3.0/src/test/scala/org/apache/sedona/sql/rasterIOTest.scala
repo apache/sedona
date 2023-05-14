@@ -19,17 +19,19 @@
 
 package org.apache.sedona.sql
 
+import org.apache.commons.io.FileUtils
 import org.apache.spark.sql.SaveMode
 import org.locationtech.jts.geom.Geometry
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
 import java.io.File
+import java.nio.file.Files
 import scala.collection.mutable
 
 class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen {
 
   var rasterdatalocation: String = resourceFolder + "raster/"
-  val tempDir: String = resourceFolder//Files.createTempDirectory("sedona_raster_io_test_").toFile.getAbsolutePath
+  val tempDir: String = Files.createTempDirectory("sedona_raster_io_test_").toFile.getAbsolutePath
 
   describe("Raster IO test") {
     it("Should Pass geotiff loading without readFromCRS and readToCRS") {
@@ -388,7 +390,17 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
       assert(rasterCount == 3)
       assert(rasterDf.count() == 0)
     }
+
+    it("should read RS_FromGeoTiff and write RS_AsArcGrid") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/FAA_UTM18N_NAD83.tif")
+      var rasterDf = df.selectExpr("RS_FromGeoTiff(content) as raster", "path").selectExpr("RS_AsArcGrid(raster, 1) as content", "path")
+      val rasterCount = rasterDf.count()
+      rasterDf.write.format("raster").option("rasterField", "content").option("fileExtension", ".asc").option("pathField", "path").mode(SaveMode.Overwrite).save(tempDir + "/raster-written")
+      df = sparkSession.read.format("binaryFile").load(tempDir + "/raster-written/*")
+      rasterDf = df.selectExpr("RS_FromArcInfoAsciiGrid(content)")
+      assert(rasterDf.count() == rasterCount)
+    }
   }
 
-//  override def afterAll(): Unit = FileUtils.deleteDirectory(new File(tempDir))
+  override def afterAll(): Unit = FileUtils.deleteDirectory(new File(tempDir))
 }

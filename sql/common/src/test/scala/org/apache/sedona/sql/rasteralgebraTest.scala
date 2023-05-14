@@ -342,7 +342,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
 
     it("Passed RS_AsGeoTiff") {
-      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/*")
       val resultRaw = df.selectExpr("RS_FromGeoTiff(content) as raster").first().get(0)
       val resultLoaded = df.selectExpr("RS_FromGeoTiff(content) as raster")
         .selectExpr("RS_AsGeoTiff(raster) as geotiff")
@@ -364,6 +364,30 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val writtenBinary2 = resultLoadedDf.first().getAs[Array[Byte]]("geotiff2")
       assertEquals(resultRaw.asInstanceOf[GridCoverage2D].getEnvelope.toString, resultLoaded.getEnvelope.toString)
       assert(writtenBinary1.length > writtenBinary2.length)
+    }
+
+    it("Passed RS_AsArcGrid") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_asc/*")
+      val resultRaw = df.selectExpr("RS_FromArcInfoAsciiGrid(content) as raster").first().get(0)
+      val resultLoaded = df.selectExpr("RS_FromArcInfoAsciiGrid(content) as raster")
+        .selectExpr("RS_AsArcGrid(raster) as arcgrid")
+        .selectExpr("RS_FromArcInfoAsciiGrid(arcgrid) as raster_new").first().get(0)
+      assert(resultLoaded != null)
+      assert(resultLoaded.isInstanceOf[GridCoverage2D])
+      assertEquals(resultRaw.asInstanceOf[GridCoverage2D].getEnvelope.toString, resultLoaded.asInstanceOf[GridCoverage2D].getEnvelope.toString)
+    }
+
+    it("Passed RS_AsArcGrid with different bands") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_asc/*")
+      val resultRaw = df.selectExpr("RS_FromArcInfoAsciiGrid(content) as raster").first().get(0)
+      val resultLoadedDf = df.selectExpr("RS_FromArcInfoAsciiGrid(content) as raster")
+        .withColumn("arc", expr("RS_AsArcGrid(raster, 0)"))
+        .withColumn("arc2", expr("RS_AsArcGrid(raster, 1)"))
+        .withColumn("raster_new", expr("RS_FromArcInfoAsciiGrid(arc)"))
+      val resultLoaded = resultLoadedDf.first().getAs[GridCoverage2D]("raster_new")
+      val writtenBinary1 = resultLoadedDf.first().getAs[Array[Byte]]("arc")
+      val writtenBinary2 = resultLoadedDf.first().getAs[Array[Byte]]("arc2")
+      assertEquals(resultRaw.asInstanceOf[GridCoverage2D].getEnvelope.toString, resultLoaded.getEnvelope.toString)
     }
   }
 }

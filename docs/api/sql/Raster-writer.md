@@ -23,7 +23,13 @@ Possible values for `compressionType`: `None`, `PackBits`, `Deflate`, `Huffman`,
 
 Possible values for `imageQuality`: any decimal number between 0 and 1. 0 means the lowest quality and 1 means the highest quality.
 
-SQL example:
+SQL example 1:
+
+```sql
+SELECT RS_AsGeoTiff(raster) FROM my_raster_table
+```
+
+SQL example 2:
 
 ```sql
 SELECT RS_AsGeoTiff(raster, 'LZW', '0.75') FROM my_raster_table
@@ -44,6 +50,47 @@ Output schema:
 ```sql
 root
  |-- geotiff: binary (nullable = true)
+```
+
+#### RS_AsArcGrid
+
+Introduction: Returns a binary DataFrame from a Raster DataFrame. Each raster object in the resulting DataFrame is an ArcGrid image in binary format. ArcGrid only takes 1 source band. If your raster has multiple bands, you need to specify which band you want to use as the source.
+
+Since: `v1.4.1`
+
+Format 1: `RS_AsArcGrid(raster: Raster)`
+
+Format 2: `RS_AsArcGrid(raster: Raster, sourceBand:Integer)`
+
+Possible values for `sourceBand `: any non-negative value (>=0). If not given, it will use Band 0.
+
+SQL example 1:
+
+```sql
+SELECT RS_AsArcGrid(raster) FROM my_raster_table
+```
+
+SQL example 2:
+
+```sql
+SELECT RS_AsArcGrid(raster, 1) FROM my_raster_table
+```
+
+Output:
+
+```html
++--------------------+
+|             arcgrid|
++--------------------+
+|[4D 4D 00 2A 00 0...|
++--------------------+
+```
+
+Output schema:
+
+```sql
+root
+ |-- arcgrid: binary (nullable = true)
 ```
 
 ### Write a binary DataFrame to raster files
