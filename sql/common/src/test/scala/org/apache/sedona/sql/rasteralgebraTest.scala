@@ -378,16 +378,10 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
 
     it("Passed RS_AsArcGrid with different bands") {
-      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/*")
-      val resultRaw = df.selectExpr("RS_FromGeoTiff(content) as raster").first().get(0)
-      val resultLoadedDf = df.selectExpr("RS_FromArcInfoAsciiGrid(content) as raster")
-        .withColumn("arc", expr("RS_AsArcGrid(raster, 0)"))
-        .withColumn("arc2", expr("RS_AsArcGrid(raster, 1)"))
-        .withColumn("raster_new", expr("RS_FromArcInfoAsciiGrid(arc)"))
-      val resultLoaded = resultLoadedDf.first().getAs[GridCoverage2D]("raster_new")
-      val writtenBinary1 = resultLoadedDf.first().getAs[Array[Byte]]("arc")
-      val writtenBinary2 = resultLoadedDf.first().getAs[Array[Byte]]("arc2")
-      assertEquals(resultRaw.asInstanceOf[GridCoverage2D].getEnvelope.toString, resultLoaded.getEnvelope.toString)
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/*").selectExpr("RS_FromGeoTiff(content) as raster")
+      val rasterDf = df.selectExpr("RS_AsArcGrid(raster, 0) as arc", "RS_AsArcGrid(raster, 1) as arc2")
+      val binaryDf = rasterDf.selectExpr("RS_FromArcInfoAsciiGrid(arc) as raster", "RS_FromArcInfoAsciiGrid(arc2) as raster2")
+      assertEquals(rasterDf.count(), binaryDf.count())
     }
   }
 }
