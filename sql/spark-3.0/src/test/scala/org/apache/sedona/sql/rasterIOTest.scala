@@ -382,7 +382,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
 
     it("should handle null") {
       var df = sparkSession.read.format("binaryFile").load(rasterdatalocation)
-      var rasterDf = df.selectExpr("RS_FromGeoTiff(null)", "length")
+      var rasterDf = df.selectExpr("RS_FromGeoTiff(null) as raster", "length").selectExpr("RS_AsGeoTiff(raster) as content", "length")
       val rasterCount = rasterDf.count()
       rasterDf.write.format("raster").mode(SaveMode.Overwrite).save(tempDir + "/raster-written")
       df = sparkSession.read.format("binaryFile").load(tempDir + "/raster-written/*")
