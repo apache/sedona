@@ -53,6 +53,7 @@ __all__ = [
     "ST_FlipCoordinates",
     "ST_Force_2D",
     "ST_GeoHash",
+    "ST_GeometricMedian",
     "ST_GeometryN",
     "ST_GeometryType",
     "ST_InteriorRingN",
@@ -495,6 +496,31 @@ def ST_GeoHash(geometry: ColumnOrName, precision: Union[ColumnOrName, int]) -> C
     :rtype: Column
     """
     return _call_st_function("ST_GeoHash", (geometry, precision))
+
+@validate_argument_types
+def ST_GeometricMedian(geometry: ColumnOrName, tolerance: Optional[Union[ColumnOrName, float]] = 1e-6,
+                       maxIter: Optional[Union[ColumnOrName, int]] = 1000,
+                       failIfNotConverged: Optional[Union[ColumnOrName, boolean]] = False) -> Column:
+    """Computes the approximate geometric median of a MultiPoint geometry using the Weiszfeld algorithm.
+    The geometric median provides a centrality measure that is less sensitive to outlier points than the centroid.
+    The algorithm will iterate until the distance change between successive iterations is less than the
+    supplied `tolerance` parameter. If this condition has not been met after `maxIter` iterations, the function will
+    produce an error and exit, unless `failIfNotConverged` is set to `false`. If a `tolerance` value is not provided,
+    a default `tolerance` value is `1e-6`.
+
+    :param geometry: MultiPoint or Point geometry.
+    :type geometry: ColumnOrName
+    :param tolerance: Distance limit change between successive iterations, defaults to 1e-6.
+    :type tolerance: Optional[Union[ColumnOrName, float]], optional
+    :param maxIter: Max number of iterations, defaults to 1000.
+    :type maxIter: Optional[Union[ColumnOrName, int]], optional
+    :param failIfNotConverged: Generate error if not converged within given tolerance and number of iterations, defaults to False
+    :type failIfNotConverged: Optional[Union[ColumnOrName, boolean]], optional
+    :return: Point geometry column.
+    :rtype: Column
+    """
+    args = (geometry, tolerance, maxIter, failIfNotConverged)
+    return _call_st_function("ST_GeometricMedian", args)
 
 
 @validate_argument_types

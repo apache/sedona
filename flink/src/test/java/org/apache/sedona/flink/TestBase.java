@@ -13,6 +13,7 @@
  */
 package org.apache.sedona.flink;
 
+import com.google.common.math.DoubleMath;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -27,6 +28,7 @@ import org.apache.flink.types.Row;
 import org.apache.flink.util.CloseableIterator;
 import org.apache.sedona.flink.expressions.Constructors;
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.io.WKTReader;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
 import java.sql.Timestamp;
@@ -49,6 +51,21 @@ public class TestBase {
     static String polygonTableName = "polygon_table";
     static Long timestamp_base = new Timestamp(System.currentTimeMillis()).getTime();
     static Long time_interval = 1L; // Generate a record per this interval. Unit is second
+
+    static final double FP_TOLERANCE = 1e-12;
+    static final CoordinateSequenceComparator COORDINATE_SEQUENCE_COMPARATOR = new CoordinateSequenceComparator(2){
+        @Override
+        protected int compareCoordinate(CoordinateSequence s1, CoordinateSequence s2, int i, int dimension) {
+            for (int d = 0; d < dimension; d++) {
+                double ord1 = s1.getOrdinate(i, d);
+                double ord2 = s2.getOrdinate(i, d);
+                int comp = DoubleMath.fuzzyCompare(ord1, ord2, FP_TOLERANCE);
+                if (comp != 0) return comp;
+            }
+            return 0;
+        }
+    };
+    final WKTReader wktReader = new WKTReader();
 
     public void setTestDataSize(int testDataSize) {
         this.testDataSize = testDataSize;

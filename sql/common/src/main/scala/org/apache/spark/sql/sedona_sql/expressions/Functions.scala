@@ -941,7 +941,7 @@ case class ST_CollectionExtract(inputExpressions: Seq[Expression])
  * @param inputExpressions Geometry
  */
 case class ST_GeometricMedian(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.geometricMedian) with FoldableExpression {
+  extends InferredQuarternaryExpression(Functions.geometricMedian) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

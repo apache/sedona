@@ -25,7 +25,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Row}
 import org.geotools.referencing.CRS
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
-import org.locationtech.jts.geom.{Geometry, Polygon}
+import org.locationtech.jts.geom.{CoordinateSequenceComparator, Geometry, Polygon}
 import org.locationtech.jts.io.WKTWriter
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.distance3d.Distance3DOp
@@ -1762,6 +1762,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_LineFromMultiPoint(null)")
     assert(functionDf.first().get(0) == null)
+    functionDf = sparkSession.sql("select ST_GeometricMedian(null)")
+    assert(functionDf.first().get(0) == null)
   }
 
   it ("Should pass St_CollectionExtract") {
@@ -1818,4 +1820,23 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(textResult==expected)
     }
   }
+
+  it ("Should pass ST_GeometricMedian") {
+    val geomTestCases = Map(
+      ("'MULTIPOINT((10 40), (40 30), (20 20), (30 10))'", 1e-15) -> "'POINT(22.5 21.25)'",
+      ("'MULTIPOINT((0 0), (1 1), (2 2), (200 200))'", 1e-6) -> "'POINT (1.9761550281255005 1.9761550281255005)'",
+      ("'MULTIPOINT ((0 0), (10 1), (5 1), (20 20))'", 1e-15) -> "'POINT (5 1)'",
+      ("'MULTIPOINT ((0 -1), (0 0), (0 0), (0 1))'", 1e-6) -> "'POINT (0 0)'",
+      ("'POINT (7 6)'", 1e-6) -> "'POINT (7 6)'",
+      ("'MULTIPOINT ((12 5),(62 7),(100 -1),(100 -5),(10 20),(105 -5))'", 1e-15) -> "'POINT(84.21672412761632 0.1351485929395439)'",
+    )
+    for(((targetWkt, tolerance), expectedWkt) <- geomTestCases) {
+      val df = sparkSession.sql(s"SELECT ST_GeometricMedian(ST_GeomFromWKT($targetWkt), $tolerance), " +
+        s"ST_GeomFromWKT($expectedWkt)")
+      val actual = df.take(1)(0).get(0).asInstanceOf[Geometry]
+      val expected = df.take(1)(0).get(1).asInstanceOf[Geometry]
+      assert(expected.compareTo(actual, COORDINATE_SEQUENCE_COMPARATOR) == 0)
+    }
+  }
+
 }
