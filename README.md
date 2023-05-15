@@ -15,7 +15,7 @@
 ## What is Apache Sedona?
 Apache Sedona™ is a spatial computing engine that enables developers to easily process spatial data at any scale within modern cluster computing systems such as Apache Spark and Apache Flink. Sedona developers can express their spatial data processing tasks in Spatial SQL, Spatial Python or Spatial R. Internally, Sedona provides spaital data loading, indexing, partitioning, and query processing/optimization functionality that enable users to efficiently analyze spatial data at any scale.
 
-<img src="https://github.com/MoSarwat/sedona/blob/master/docs/image/SedonaNewFig.001.png" width="800" class="center">
+<img src="docs/image/sedona-ecosystem.png" width="800" class="center">
 
 
 ### Features
@@ -61,7 +61,7 @@ taxidf = spark.read.format('csv').option("header","true").option("delimiter", ",
 taxidf = taxidf.selectExpr('ST_Point(CAST(Start_Lon AS Decimal(24,20)), CAST(Start_Lat AS Decimal(24,20))) AS pickup', 'Trip_Pickup_DateTime', 'Payment_Type', 'Fare_Amt')
 ```
 ``` python
-zoneDf = spark.read.format('csv').option("delimiter", ",").load("s3a://wherobots-examples/data/TIGER2018_ZCTA5.csv")
+zoneDf = spark.read.format('csv').option("delimiter", ",").load("s3a://your-directory/data/TIGER2018_ZCTA5.csv")
 zoneDf = zoneDf.selectExpr('ST_GeomFromWKT(_c0) as zone', '_c1 as zipcode')
 ```
 
@@ -146,7 +146,7 @@ Package Download Statistics:
 
 Our users and code contributors are from:
 
-<img src="https://github.com/MoSarwat/sedona/blob/master/docs/image/SedonaUsers.001.png" width="600">
+<img src="docs/image/SedonaUsers.001.png" width="600">
 
 
 ## Powered by
