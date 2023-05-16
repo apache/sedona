@@ -499,8 +499,8 @@ def ST_GeoHash(geometry: ColumnOrName, precision: Union[ColumnOrName, int]) -> C
 
 @validate_argument_types
 def ST_GeometricMedian(geometry: ColumnOrName, tolerance: Optional[Union[ColumnOrName, float]] = 1e-6,
-                       maxIter: Optional[Union[ColumnOrName, int]] = 1000,
-                       failIfNotConverged: Optional[Union[ColumnOrName, bool]] = False) -> Column:
+                       max_iter: Optional[Union[ColumnOrName, int]] = 1000,
+                       fail_if_not_converged: Optional[Union[ColumnOrName, bool]] = False) -> Column:
     """Computes the approximate geometric median of a MultiPoint geometry using the Weiszfeld algorithm.
     The geometric median provides a centrality measure that is less sensitive to outlier points than the centroid.
     The algorithm will iterate until the distance change between successive iterations is less than the
@@ -512,14 +512,14 @@ def ST_GeometricMedian(geometry: ColumnOrName, tolerance: Optional[Union[ColumnO
     :type geometry: ColumnOrName
     :param tolerance: Distance limit change between successive iterations, defaults to 1e-6.
     :type tolerance: Optional[Union[ColumnOrName, float]], optional
-    :param maxIter: Max number of iterations, defaults to 1000.
-    :type maxIter: Optional[Union[ColumnOrName, int]], optional
-    :param failIfNotConverged: Generate error if not converged within given tolerance and number of iterations, defaults to False
-    :type failIfNotConverged: Optional[Union[ColumnOrName, boolean]], optional
+    :param max_iter: Max number of iterations, defaults to 1000.
+    :type max_iter: Optional[Union[ColumnOrName, int]], optional
+    :param fail_if_not_converged: Generate error if not converged within given tolerance and number of iterations, defaults to False
+    :type fail_if_not_converged: Optional[Union[ColumnOrName, boolean]], optional
     :return: Point geometry column.
     :rtype: Column
     """
-    args = (geometry, tolerance, maxIter, failIfNotConverged)
+    args = (geometry, tolerance, max_iter, fail_if_not_converged)
     return _call_st_function("ST_GeometricMedian", args)
 
 
