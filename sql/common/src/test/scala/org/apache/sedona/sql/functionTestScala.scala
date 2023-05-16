@@ -1828,7 +1828,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       ("'MULTIPOINT ((0 0), (10 1), (5 1), (20 20))'", 1e-15) -> "'POINT (5 1)'",
       ("'MULTIPOINT ((0 -1), (0 0), (0 0), (0 1))'", 1e-6) -> "'POINT (0 0)'",
       ("'POINT (7 6)'", 1e-6) -> "'POINT (7 6)'",
-      ("'MULTIPOINT ((12 5),(62 7),(100 -1),(100 -5),(10 20),(105 -5))'", 1e-15) -> "'POINT(84.21672412761632 0.1351485929395439)'",
+      ("'MULTIPOINT ((12 5),(62 7),(100 -1),(100 -5),(10 20),(105 -5))'", 1e-15) -> "'POINT(84.21672412761632 0.1351485929395439)'"
     )
     for(((targetWkt, tolerance), expectedWkt) <- geomTestCases) {
       val df = sparkSession.sql(s"SELECT ST_GeometricMedian(ST_GeomFromWKT($targetWkt), $tolerance), " +
