@@ -500,7 +500,7 @@ def ST_GeoHash(geometry: ColumnOrName, precision: Union[ColumnOrName, int]) -> C
 @validate_argument_types
 def ST_GeometricMedian(geometry: ColumnOrName, tolerance: Optional[Union[ColumnOrName, float]] = 1e-6,
                        maxIter: Optional[Union[ColumnOrName, int]] = 1000,
-                       failIfNotConverged: Optional[Union[ColumnOrName, boolean]] = False) -> Column:
+                       failIfNotConverged: Optional[Union[ColumnOrName, bool]] = False) -> Column:
     """Computes the approximate geometric median of a MultiPoint geometry using the Weiszfeld algorithm.
     The geometric median provides a centrality measure that is less sensitive to outlier points than the centroid.
     The algorithm will iterate until the distance change between successive iterations is less than the
