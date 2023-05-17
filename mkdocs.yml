@@ -40,6 +40,7 @@ nav:
         - Performance tuning:
           - Benchmark: tutorial/benchmark.md
           - Tune RDD application: tutorial/Advanced-Tutorial-Tune-your-Application.md
+          - Storing large raster geometries in Parquet files: tutorial/storing-blobs-in-parquet.md
       - Sedona with Apache Flink:
         - Spatial SQL app: tutorial/flink/sql.md
       - Examples:
