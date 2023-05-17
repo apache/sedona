@@ -20,4 +20,4 @@ Starting from `v1.1.0`, Sedona SQL supports raster data sources and raster opera
 
 ## Performance
 
-[Storing large raster geometries in Parquet files](storing-blobs-in-parquet)
+[Storing large raster geometries in Parquet files](../storing-blobs-in-parquet)
