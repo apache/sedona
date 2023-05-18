@@ -24,6 +24,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.io.ParseException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -37,6 +38,7 @@ import static org.apache.flink.table.api.Expressions.call;
 import static org.junit.Assert.*;
 
 public class FunctionTest extends TestBase{
+
     @BeforeClass
     public static void onceExecutedBeforeAll() {
         initialize();
@@ -614,4 +616,34 @@ public class FunctionTest extends TestBase{
         assertEquals(1, count(joinCleanedTable));
         assertEquals(2, first(joinCleanedTable).getField(1));
     }
+
+    @Test
+    public void testGeometricMedian() throws ParseException {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_GeometricMedian(ST_GeomFromWKT('MULTIPOINT((0 0), (1 1), (2 2), (200 200))'))");
+        Geometry expected = wktReader.read("POINT (1.9761550281255005 1.9761550281255005)");
+        Geometry actual = (Geometry) first(pointTable).getField(0);
+        assertEquals(String.format("expected: %s was %s", expected.toText(), actual != null ? actual.toText() : "null"),
+                0, expected.compareTo(actual, COORDINATE_SEQUENCE_COMPARATOR));
+    }
+
+    @Test
+    public void testGeometricMedianParamsTolerance() throws ParseException {
+        Table pointTable = tableEnv.sqlQuery(
+                "SELECT ST_GeometricMedian(ST_GeomFromWKT('MULTIPOINT ((0 0), (1 1), (0 1), (2 2))'), 1e-5)");
+        Geometry expected = wktReader.read("POINT (0.996230268436779 0.9999899629155288)");
+        Geometry actual = (Geometry) first(pointTable).getField(0);
+        assertEquals(String.format("expected: %s was %s", expected.toText(), actual != null ? actual.toText() : "null"),
+                0, expected.compareTo(actual, COORDINATE_SEQUENCE_COMPARATOR));
+    }
+
+    @Test
+    public void testGeometricMedianParamsFull() throws ParseException {
+        Table pointTable = tableEnv.sqlQuery(
+                "SELECT ST_GeometricMedian(ST_GeomFromWKT('MULTIPOINT ((0 0), (1 1), (0 1), (2 2))'), 1e-5, 10, false)");
+        Geometry expected = wktReader.read("POINT (0.8844442206215307 0.9912184073718183)");
+        Geometry actual = (Geometry) first(pointTable).getField(0);
+        assertEquals(String.format("expected: %s was %s", expected.toText(), actual != null ? actual.toText() : "null"),
+                0, expected.compareTo(actual, COORDINATE_SEQUENCE_COMPARATOR));
+    }
+
 }

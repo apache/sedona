@@ -275,4 +275,14 @@ object st_functions extends DataFrameAPI {
 
   def ST_ZMin(geometry: Column): Column = wrapExpression[ST_ZMin](geometry)
   def ST_ZMin(geometry: String): Column = wrapExpression[ST_ZMin](geometry)
+
+  def ST_GeometricMedian(geometry: Column): Column = wrapExpression[ST_GeometricMedian](geometry, 1e-6, 1000, false)
+  def ST_GeometricMedian(geometry: String): Column = wrapExpression[ST_GeometricMedian](geometry, 1e-6, 1000, false)
+  def ST_GeometricMedian(geometry: Column, tolerance: Column): Column = wrapExpression[ST_GeometricMedian](geometry, tolerance, 1000, false)
+  def ST_GeometricMedian(geometry: String, tolerance: Double): Column = wrapExpression[ST_GeometricMedian](geometry, tolerance, 1000, false)
+  def ST_GeometricMedian(geometry: Column, tolerance: Column, maxIter: Column): Column = wrapExpression[ST_GeometricMedian](geometry, tolerance, maxIter, false)
+  def ST_GeometricMedian(geometry: String, tolerance: Double, maxIter: Int): Column = wrapExpression[ST_GeometricMedian](geometry, tolerance, maxIter, false)
+  def ST_GeometricMedian(geometry: Column, tolerance: Column, maxIter: Column, failIfNotConverged: Column): Column = wrapExpression[ST_GeometricMedian](geometry, tolerance, maxIter, failIfNotConverged)
+  def ST_GeometricMedian(geometry: String, tolerance: Double, maxIter: Int, failIfNotConverged: Boolean): Column = wrapExpression[ST_GeometricMedian](geometry, tolerance, maxIter, failIfNotConverged)
+
 }

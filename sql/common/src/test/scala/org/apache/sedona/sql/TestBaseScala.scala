@@ -18,11 +18,13 @@
  */
 package org.apache.sedona.sql
 
+import com.google.common.math.DoubleMath
 import org.apache.log4j.{Level, Logger}
 import org.apache.sedona.core.serde.SedonaKryoRegistrator
 import org.apache.sedona.sql.utils.SedonaSQLRegistrator
 import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.locationtech.jts.geom.{CoordinateSequence, CoordinateSequenceComparator}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
 trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
@@ -81,4 +83,18 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
 
   lazy val buildPointDf = loadCsv(csvPointInputLocation).selectExpr("ST_Point(cast(_c0 as Decimal(24,20)),cast(_c1 as Decimal(24,20))) as pointshape")
   lazy val buildPolygonDf = loadCsv(csvPolygonInputLocation).selectExpr("ST_PolygonFromEnvelope(cast(_c0 as Decimal(24,20)),cast(_c1 as Decimal(24,20)), cast(_c2 as Decimal(24,20)), cast(_c3 as Decimal(24,20))) as polygonshape")
+
+  protected final val FP_TOLERANCE: Double = 1e-12
+  protected final val COORDINATE_SEQUENCE_COMPARATOR: CoordinateSequenceComparator = new CoordinateSequenceComparator(2) {
+    override protected def compareCoordinate(s1: CoordinateSequence, s2: CoordinateSequence, i: Int, dimension: Int): Int = {
+      for (d <- 0 until dimension) {
+        val ord1: Double = s1.getOrdinate(i, d)
+        val ord2: Double = s2.getOrdinate(i, d)
+        val comp: Int = DoubleMath.fuzzyCompare(ord1, ord2, FP_TOLERANCE)
+        if (comp != 0) return comp
+      }
+      0
+    }
+  }
+
 }

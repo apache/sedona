@@ -933,3 +933,18 @@ case class ST_CollectionExtract(inputExpressions: Seq[Expression])
 
   override def allowRightNull: Boolean = true
 }
+
+/**
+ * Returns a POINT Computes the approximate geometric median of a MultiPoint geometry using the Weiszfeld algorithm.
+ * The geometric median provides a centrality measure that is less sensitive to outlier points than the centroid.
+ *
+ * @param inputExpressions Geometry
+ */
+case class ST_GeometricMedian(inputExpressions: Seq[Expression])
+  extends InferredQuarternaryExpression(Functions.geometricMedian) with FoldableExpression {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+

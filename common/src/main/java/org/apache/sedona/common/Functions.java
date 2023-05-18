@@ -25,6 +25,7 @@ import org.geotools.referencing.CRS;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
 import org.locationtech.jts.algorithm.hull.ConcaveHull;
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.io.gml2.GMLWriter;
 import org.locationtech.jts.io.kml.KMLWriter;
@@ -42,18 +43,18 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import static com.google.common.geometry.S2.DBL_EPSILON;
 
 
 public class Functions {
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
     private static Geometry EMPTY_POLYGON = GEOMETRY_FACTORY.createPolygon(null, null);
     private static GeometryCollection EMPTY_GEOMETRY_COLLECTION = GEOMETRY_FACTORY.createGeometryCollection(null);
+    private static final double DEFAULT_TOLERANCE = 1e-6;
+    private static final int DEFAULT_MAX_ITER = 1000;
 
     public static double area(Geometry geometry) {
         return geometry.getArea();
@@ -728,6 +729,155 @@ public class Functions {
             return GEOMETRY_FACTORY.createMultiPoint(points);
         }
         return GEOMETRY_FACTORY.createGeometryCollection();
+    }
+
+
+    // ported from https://github.com/postgis/postgis/blob/f6ed58d1fdc865d55d348212d02c11a10aeb2b30/liblwgeom/lwgeom_median.c
+    // geometry ST_GeometricMedian ( geometry g , float8 tolerance , int max_iter , boolean fail_if_not_converged );
+
+    private static double distance3d(Coordinate p1, Coordinate p2) {
+        double dx = p2.x - p1.x;
+        double dy = p2.y - p1.y;
+        double dz = p2.z - p1.z;
+        return Math.sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
+    private static void distances(Coordinate curr, Coordinate[] points, double[] distances) {
+        for(int i = 0; i < points.length; i++) {
+            distances[i] = distance3d(curr, points[i]);
+        }
+    }
+
+    private static double iteratePoints(Coordinate curr, Coordinate[] points, double[] distances) {
+        Coordinate next = new Coordinate(0, 0, 0);
+        double delta = 0;
+        double denom = 0;
+        boolean hit = false;
+        distances(curr, points, distances);
+
+        for (int i = 0; i < points.length; i++) {
+            /* we need to use lower epsilon than in FP_IS_ZERO in the loop for calculation to converge */
+            double distance = distances[i];
+            if (distance > DBL_EPSILON) {
+                Coordinate coordinate = points[i];
+                next.x += coordinate.x / distance;
+                next.y += coordinate.y / distance;
+                next.z += coordinate.z / distance;
+                denom += 1.0 / distance;
+            } else {
+                hit = true;
+            }
+        }
+        /* negative weight shouldn't get here */
+        //assert(denom >= 0);
+
+        /* denom is zero in case of multipoint of single point when we've converged perfectly */
+        if (denom > DBL_EPSILON) {
+            next.x /= denom;
+            next.y /= denom;
+            next.z /= denom;
+
+            /* If any of the intermediate points in the calculation is found in the
+             * set of input points, the standard Weiszfeld method gets stuck with a
+             * divide-by-zero.
+             *
+             * To get ourselves out of the hole, we follow an alternate procedure to
+             * get the next iteration, as described in:
+             *
+             * Vardi, Y. and Zhang, C. (2011) "A modified Weiszfeld algorithm for the
+             * Fermat-Weber location problem."  Math. Program., Ser. A 90: 559-566.
+             * DOI 10.1007/s101070100222
+             *
+             * Available online at the time of this writing at
+             * http://www.stat.rutgers.edu/home/cunhui/papers/43.pdf
+             */
+            if (hit) {
+                double dx = 0;
+                double dy = 0;
+                double dz = 0;
+                for (int i = 0; i < points.length; i++) {
+                    double distance = distances[i];
+                    if (distance > DBL_EPSILON) {
+                        Coordinate coordinate = points[i];
+                        dx += (coordinate.x - curr.x) / distance;
+                        dy += (coordinate.y - curr.y) / distance;
+                        dz += (coordinate.z - curr.z) / distance;
+                    }
+                }
+                double dSqr = Math.sqrt(dx*dx + dy*dy + dz*dz);
+                /* Avoid division by zero if the intermediate point is the median */
+                if (dSqr > DBL_EPSILON) {
+                    double rInv = Math.max(0, 1.0 / dSqr);
+                    next.x = (1.0 - rInv)*next.x + rInv*curr.x;
+                    next.y = (1.0 - rInv)*next.y + rInv*curr.y;
+                    next.z = (1.0 - rInv)*next.z + rInv*curr.z;
+                }
+            }
+            delta = distance3d(curr, next);
+            curr.x = next.x;
+            curr.y = next.y;
+            curr.z = next.z;
+        }
+        return delta;
+    }
+
+    private static Coordinate initGuess(Coordinate[] points) {
+        Coordinate guess = new Coordinate(0, 0, 0);
+        for (Coordinate point : points) {
+            guess.x += point.x / points.length;
+            guess.y += point.y / points.length;
+            guess.z += point.z / points.length;
+        }
+        return guess;
+    }
+
+    private static Coordinate[] extractCoordinates(Geometry geometry) {
+        Coordinate[] points = geometry.getCoordinates();
+        if(points.length == 0)
+            return points;
+        boolean is3d = !Double.isNaN(points[0].z);
+        Coordinate[] coordinates = new Coordinate[points.length];
+        for(int i = 0; i < points.length; i++) {
+            coordinates[i] = points[i].copy();
+            if(!is3d)
+                coordinates[i].z = 0.0;
+        }
+        return coordinates;
+    }
+
+    public static Geometry geometricMedian(Geometry geometry, double tolerance, int maxIter, boolean failIfNotConverged) throws Exception {
+        String geometryType = geometry.getGeometryType();
+        if(!(Geometry.TYPENAME_POINT.equals(geometryType) || Geometry.TYPENAME_MULTIPOINT.equals(geometryType))) {
+            throw new Exception("Unsupported geometry type: " + geometryType);
+        }
+        Coordinate[] coordinates = extractCoordinates(geometry);
+        if(coordinates.length == 0)
+            return new Point(null, GEOMETRY_FACTORY);
+        Coordinate median = initGuess(coordinates);
+        double delta = Double.MAX_VALUE;
+        double[] distances = new double[coordinates.length]; // preallocate to reduce gc pressure for large iterations
+        for(int i = 0; i < maxIter && delta > tolerance; i++)
+            delta = iteratePoints(median, coordinates, distances);
+        if (failIfNotConverged && delta > tolerance)
+            throw new Exception(String.format("Median failed to converge within %.1E after %d iterations.", tolerance, maxIter));
+        boolean is3d = !Double.isNaN(geometry.getCoordinate().z);
+        if(!is3d)
+            median.z = Double.NaN;
+        Point point = new Point(new CoordinateArraySequence(new Coordinate[]{median}), GEOMETRY_FACTORY);
+        point.setSRID(geometry.getSRID());
+        return point;
+    }
+
+    public static Geometry geometricMedian(Geometry geometry, double tolerance, int maxIter) throws Exception {
+        return geometricMedian(geometry, tolerance, maxIter, false);
+    }
+
+    public static Geometry geometricMedian(Geometry geometry, double tolerance) throws Exception {
+        return geometricMedian(geometry, tolerance, DEFAULT_MAX_ITER, false);
+    }
+
+    public static Geometry geometricMedian(Geometry geometry) throws Exception {
+        return geometricMedian(geometry, DEFAULT_TOLERANCE, DEFAULT_MAX_ITER, false);
     }
 
 }
