@@ -85,6 +85,7 @@
         <googles2.version>2.0.0</googles2.version>
         <scalatest.version>3.1.1</scalatest.version>
         <scala-collection-compat.version>2.5.0</scala-collection-compat.version>
+        <geoglib.version>1.52</geoglib.version>
 
         <geotools.scope>provided</geotools.scope>
         <!-- Because it's not in Maven central, make it provided by default -->
@@ -181,6 +182,10 @@
                 <exclusions>
                     <exclusion>
                         <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>net.sf.geographiclib</groupId>
                         <artifactId>*</artifactId>
                     </exclusion>
                 </exclusions>
@@ -295,6 +300,11 @@
                 <groupId>com.google.geometry</groupId>
                 <artifactId>s2-geometry</artifactId>
                 <version>${googles2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.sf.geographiclib</groupId>
+                <artifactId>GeographicLib-Java</artifactId>
+                <version>${geoglib.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>

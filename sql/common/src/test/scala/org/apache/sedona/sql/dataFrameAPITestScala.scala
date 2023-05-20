@@ -26,6 +26,7 @@ import org.apache.spark.sql.sedona_sql.expressions.st_constructors._
 import org.apache.spark.sql.sedona_sql.expressions.st_functions._
 import org.apache.spark.sql.sedona_sql.expressions.st_predicates._
 import org.apache.spark.sql.sedona_sql.expressions.st_aggregates._
+import org.junit.Assert.assertEquals
 
 import scala.collection.mutable
 
@@ -910,6 +911,42 @@ class dataFrameAPITestScala extends TestBaseScala {
       val actualResult = df.take(1)(0).getAs[mutable.WrappedArray[Long]](0).toSet
       val mbrResult = dfMRB.take(1)(0).getAs[mutable.WrappedArray[Long]](0).toSet
       assert (actualResult.subsetOf(mbrResult))
+    }
+
+    it("Passed ST_DistanceSphere") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT (0 0)') AS geom1, ST_GeomFromWKT('POINT (0 90)') AS geom2")
+      var df = baseDf.select(ST_DistanceSphere("geom1", "geom2"))
+      var actualResult = df.take(1)(0).getDouble(0)
+      val expectedResult = 10018754.171394622
+      assert(actualResult == expectedResult)
+
+      df = baseDf.select(ST_DistanceSphere("geom1", "geom2", 6378137.0))
+      actualResult = df.take(1)(0).getDouble(0)
+      assertEquals(expectedResult, actualResult, 0.1)
+    }
+
+    it("Passed ST_DistanceSpheroid") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT (0 0)') AS geom1, ST_GeomFromWKT('POINT (0 90)') AS geom2")
+      val df = baseDf.select(ST_DistanceSpheroid("geom1", "geom2"))
+      val actualResult = df.take(1)(0).getDouble(0)
+      val expectedResult = 10018754.171394622
+      assertEquals(expectedResult, actualResult, 0.1)
+    }
+
+    it("Passed ST_AreaSpheroid") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('Polygon ((35 34, 30 28, 34 25, 35 34))') AS geom")
+      val df = baseDf.select(ST_AreaSpheroid("geom"))
+      val actualResult = df.take(1)(0).getDouble(0)
+      val expectedResult = 201824850811.76245
+      assertEquals(expectedResult, actualResult, 0.1)
+    }
+
+    it("Passed ST_LengthSpheroid") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LineString (0 0, 0 90)') AS geom")
+      val df = baseDf.select(ST_LengthSpheroid("geom"))
+      val actualResult = df.take(1)(0).getDouble(0)
+      val expectedResult = 10018754.171394622
+      assertEquals(expectedResult, actualResult, 0.1)
     }
   }
 }

@@ -49,6 +49,24 @@ SELECT ST_Area(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_AreaSpheroid
+
+Introduction: Return the geodesic area of A using WGS84 spheroid. Unit is meter. Works better for large geometries (country level) compared to `ST_Area` + `ST_Transform`. It is equivalent to PostGIS `ST_Area(geography, use_spheroid=true)` function and produces nearly identical results.
+
+Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lat/lon== order. You can use ==ST_FlipCoordinates== to swap lat and lon.
+
+Format: `ST_AreaSpheroid (A:geometry)`
+
+Since: `v1.4.1`
+
+Spark SQL example:
+
+```sql
+SELECT ST_AreaSpheroid(ST_GeomFromWKT('Polygon ((35 34, 30 28, 34 25, 35 34))'))
+```
+
+Output: `201824850811.76245`
+
 ## ST_AsBinary
 
 Introduction: Return the Well-Known Binary representation of a geometry
@@ -396,6 +414,48 @@ SELECT ST_Distance(polygondf.countyshape, polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_DistanceSphere
+
+Introduction: Return the haversine / great-circle distance of A using a given earth radius (default radius: 6378137.0). Unit is meter. Works better for large geometries (country level) compared to `ST_Distance` + `ST_Transform`. It is equivalent to PostGIS `ST_Distance(geography, use_spheroid=false)` and `ST_DistanceSphere` function and produces nearly identical results. It provides faster but less accurate result compared to `ST_DistanceSpheroid`.
+
+Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lat/lon== order. You can use ==ST_FlipCoordinates== to swap lat and lon. For non-point data, we first take the centroids of both geometries and then compute the distance.
+
+Format: `ST_DistanceSphere (A:geometry)`
+
+Since: `v1.4.1`
+
+Spark SQL example 1:
+```sql
+SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'))
+```
+
+Output: `544405.4459192449`
+
+Spark SQL example 2:
+```sql
+SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'), 6378137.0)
+```
+
+Output: `544405.4459192449`
+
+
+## ST_DistanceSpheroid
+
+Introduction: Return the geodesic distance of A using WGS84 spheroid. Unit is meter. Works better for large geometries (country level) compared to `ST_Distance` + `ST_Transform`. It is equivalent to PostGIS `ST_Distance(geography, use_spheroid=true)` and `ST_DistanceSpheroid` function and produces nearly identical results. It provides slower but more accurate result compared to `ST_DistanceSphere`.
+
+Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lat/lon== order. You can use ==ST_FlipCoordinates== to swap lat and lon. For non-point data, we first take the centroids of both geometries and then compute the distance.
+
+Format: `ST_DistanceSpheroid (A:geometry)`
+
+Since: `v1.4.1`
+
+Spark SQL example:
+```sql
+SELECT ST_DistanceSpheroid(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'))
+```
+
+Output: `544430.9411996207`
+
 ## ST_Dump
 
 Introduction: It expands the geometries. If the geometry is simple (Point, Polygon Linestring etc.) it returns the geometry
@@ -719,6 +779,23 @@ Spark SQL example:
 SELECT ST_Length(polygondf.countyshape)
 FROM polygondf
 ```
+
+## ST_LengthSpheroid
+
+Introduction: Return the geodesic perimeter of A using WGS84 spheroid. Unit is meter. Works better for large geometries (country level) compared to `ST_Length` + `ST_Transform`. It is equivalent to PostGIS `ST_Length(geography, use_spheroid=true)` and `ST_LengthSpheroid` function and produces nearly identical results.
+
+Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lat/lon== order. You can use ==ST_FlipCoordinates== to swap lat and lon.
+
+Format: `ST_LengthSpheroid (A:geometry)`
+
+Since: `v1.4.1`
+
+Spark SQL example:
+```sql
+SELECT ST_LengthSpheroid(ST_GeomFromWKT('Polygon ((0 0, 0 90, 0 0))'))
+```
+
+Output: `20037508.342789244`
 
 ## ST_LineFromMultiPoint
 

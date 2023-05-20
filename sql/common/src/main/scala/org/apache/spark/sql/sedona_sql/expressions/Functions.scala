@@ -19,6 +19,7 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.Functions
+import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{Expression, Generator}
@@ -942,6 +943,38 @@ case class ST_CollectionExtract(inputExpressions: Seq[Expression])
  */
 case class ST_GeometricMedian(inputExpressions: Seq[Expression])
   extends InferredQuarternaryExpression(Functions.geometricMedian) with FoldableExpression {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_DistanceSphere(inputExpressions: Seq[Expression])
+  extends InferredTernaryExpression(Haversine.distance) with FoldableExpression {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_DistanceSpheroid(inputExpressions: Seq[Expression])
+  extends InferredBinaryExpression(Spheroid.distance) with FoldableExpression {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_AreaSpheroid(inputExpressions: Seq[Expression])
+  extends InferredUnaryExpression(Spheroid.area) with FoldableExpression {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_LengthSpheroid(inputExpressions: Seq[Expression])
+  extends InferredUnaryExpression(Spheroid.length) with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
