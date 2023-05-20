@@ -77,7 +77,7 @@ test_configurations = [
     (stf.ST_Distance, ("a", "b"), "two_points", "", 3.0),
     (stf.ST_DistanceSpheroid, ("point", "point"), "point_geom", "", 0.0),
     (stf.ST_DistanceSphere, ("point", "point"), "point_geom", "", 0.0),
-    (stf.ST_DistanceSphere, ("point", "point", "6378137.0"), "point_geom", "", 0.0),
+    (stf.ST_DistanceSphere, ("point", "point", 6378137.0), "point_geom", "", 0.0),
     (stf.ST_Dump, ("geom",), "multipoint", "", ["POINT (0 0)", "POINT (1 1)"]),
     (stf.ST_DumpPoints, ("line",), "linestring_geom", "", ["POINT (0 0)", "POINT (1 0)", "POINT (2 0)", "POINT (3 0)", "POINT (4 0)", "POINT (5 0)"]),
     (stf.ST_EndPoint, ("line",), "linestring_geom", "", "POINT (5 0)"),
