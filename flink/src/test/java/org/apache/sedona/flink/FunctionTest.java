@@ -54,6 +54,15 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testAreaSpheroid() {
+        Table tbl = tableEnv.sqlQuery(
+                "SELECT ST_AreaSpheroid(ST_GeomFromWKT('Polygon ((35 34, 30 28, 34 25, 35 34))'))");
+        Double expected = 201824850811.76245;
+        Double actual = (Double) first(tbl).getField(0);
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testAzimuth() {
         Table pointTable = tableEnv.sqlQuery("SELECT ST_Azimuth(ST_GeomFromWKT('POINT (0 0)'), ST_GeomFromWKT('POINT (1 1)'))");
         assertEquals(45, ((double) first(pointTable).getField(0)) / (Math.PI * 2) * 360, 0);
@@ -154,6 +163,33 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testDistanceSpheroid() {
+        Table tbl = tableEnv.sqlQuery(
+                "SELECT ST_DistanceSpheroid(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'))");
+        Double expected = 544430.9411996207;
+        Double actual = (Double) first(tbl).getField(0);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testDistanceSphere() {
+        Table tbl = tableEnv.sqlQuery(
+                "SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'))");
+        Double expected = 544405.4459192449;
+        Double actual = (Double) first(tbl).getField(0);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testDistanceSphereWithRadius() {
+        Table tbl = tableEnv.sqlQuery(
+                "SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'), 6378137.0)");
+        Double expected = 544405.4459192449;
+        Double actual = (Double) first(tbl).getField(0);
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void test3dDistance() {
         Table pointTable = tableEnv.sqlQuery("SELECT ST_3DDistance(ST_GeomFromWKT('POINT (0 0 0)'), ST_GeomFromWKT('POINT (1 1 1)'))");
         assertEquals(Math.sqrt(3), first(pointTable).getField(0));
@@ -166,6 +202,15 @@ public class FunctionTest extends TestBase{
         assertNotNull(first(resultTable).getField(0));
         double result = (double) first(resultTable).getField(0);
         assertEquals(4, result, 0);
+    }
+
+    @Test
+    public void testLengthSpheroid() {
+        Table tbl = tableEnv.sqlQuery(
+                "SELECT ST_LengthSpheroid(ST_GeomFromWKT('Polygon ((0 0, 0 90, 0 0))'))");
+        Double expected = 20037508.342789244;
+        Double actual = (Double) first(tbl).getField(0);
+        assertEquals(expected, actual);
     }
 
     @Test
