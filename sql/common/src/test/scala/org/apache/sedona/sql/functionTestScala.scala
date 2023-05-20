@@ -24,8 +24,9 @@ import org.apache.sedona.sql.implicits._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Row}
 import org.geotools.referencing.CRS
+import org.junit.Assert.assertEquals
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
-import org.locationtech.jts.geom.{CoordinateSequenceComparator, Geometry, Polygon}
+import org.locationtech.jts.geom.{Geometry, Polygon}
 import org.locationtech.jts.io.WKTWriter
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.distance3d.Distance3DOp
@@ -1839,4 +1840,73 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
   }
 
+  it("Should pass ST_DistanceSphere") {
+    val geomTestCases = Map(
+      ("'POINT (51.3168 -0.56)'", "'POINT (55.9533 -3.1883)'") -> "544405.4459192449",
+      ("'LineString (0 0, 0 90)'", "'LineString (0 1, 0 0)'") -> "4953717.340300673"
+    )
+    for (((geom1, geom2), expectedResult) <- geomTestCases) {
+      val df = sparkSession.sql(s"SELECT ST_DistanceSphere(ST_GeomFromWKT($geom1), ST_GeomFromWKT($geom2)), " +
+        s"$expectedResult")
+      val actual = df.take(1)(0).get(0).asInstanceOf[Double]
+      val expected = df.take(1)(0).get(1).asInstanceOf[java.math.BigDecimal].doubleValue()
+      assertEquals(expected, actual, 0.000001)
+    }
+
+    val geomTestCases2 = Map(
+      ("'POINT (51.3168 -0.56)'", "'POINT (55.9533 -3.1883)'", "6378137") -> "544405.4459192449",
+      ("'LineString (0 0, 0 90)'", "'LineString (0 1, 0 0)'", "6378137.0") -> "4953717.340300673"
+    )
+    for (((geom1, geom2, radius), expectedResult) <- geomTestCases2) {
+      val df = sparkSession.sql(s"SELECT ST_DistanceSphere(ST_GeomFromWKT($geom1), ST_GeomFromWKT($geom2), $radius), " +
+        s"$expectedResult")
+      val actual = df.take(1)(0).get(0).asInstanceOf[Double]
+      val expected = df.take(1)(0).get(1).asInstanceOf[java.math.BigDecimal].doubleValue()
+      assertEquals(expected, actual, 0.000001)
+    }
+  }
+
+  it("Should pass ST_DistanceSpheroid") {
+    val geomTestCases = Map(
+      ("'POINT (51.3168 -0.56)'", "'POINT (55.9533 -3.1883)'") -> "544430.94119962039",
+      ("'LineString (0 0, 0 90)'", "'LineString (0 1, 0 0)'") -> "4953717.340300673"
+    )
+    for (((geom1, geom2), expectedResult) <- geomTestCases) {
+      val df = sparkSession.sql(s"SELECT ST_DistanceSpheroid(ST_GeomFromWKT($geom1), ST_GeomFromWKT($geom2)), " +
+        s"$expectedResult")
+      val actual = df.take(1)(0).get(0).asInstanceOf[Double]
+      val expected = df.take(1)(0).get(1).asInstanceOf[java.math.BigDecimal].doubleValue()
+      assertEquals(expected, actual, 0.000001)
+    }
+  }
+
+  it("Should pass ST_AreaSpheroid") {
+    val geomTestCases = Map(
+      ("'POINT (51.3168 -0.56)'") -> "0.0",
+      ("'LineString (0 0, 0 90)'") -> "0.0",
+      ("'Polygon ((35 34, 30 28, 34 25, 35 34))'") -> "201824850811.76245"
+    )
+    for (((geom1), expectedResult) <- geomTestCases) {
+      val df = sparkSession.sql(s"SELECT ST_AreaSpheroid(ST_GeomFromWKT($geom1)), " +
+        s"$expectedResult")
+      val actual = df.take(1)(0).get(0).asInstanceOf[Double]
+      val expected = df.take(1)(0).get(1).asInstanceOf[java.math.BigDecimal].doubleValue()
+      assertEquals(expected, actual, 0.000001)
+    }
+  }
+
+  it("Should pass ST_LengthSpheroid") {
+    val geomTestCases = Map(
+      ("'POINT (51.3168 -0.56)'") -> "0.0",
+      ("'LineString (0 0, 0 90)'") -> "10018754.17139462",
+      ("'Polygon ((0 0, 0 90, 0 0))'") -> "20037508.34278924"
+    )
+    for (((geom1), expectedResult) <- geomTestCases) {
+      val df = sparkSession.sql(s"SELECT ST_LengthSpheroid(ST_GeomFromWKT($geom1)), " +
+        s"$expectedResult")
+      val actual = df.take(1)(0).get(0).asInstanceOf[Double]
+      val expected = df.take(1)(0).get(1).asInstanceOf[java.math.BigDecimal].doubleValue()
+      assertEquals(expected, actual, 0.000001)
+    }
+  }
 }

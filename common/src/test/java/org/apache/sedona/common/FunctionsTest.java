@@ -15,6 +15,8 @@ package org.apache.sedona.common;
 
 import com.google.common.geometry.S2CellId;
 import com.google.common.math.DoubleMath;
+import org.apache.sedona.common.sphere.Haversine;
+import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.utils.S2Utils;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
@@ -26,6 +28,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class FunctionsTest {
     public static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
@@ -441,4 +444,125 @@ public class FunctionsTest {
         assertEquals("Median failed to converge within 1.0E-06 after 5 iterations.", e.getMessage());
     }
 
+    @Test
+    public void haversineDistance() {
+        // Basic check
+        Point p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 90));
+        Point p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+        assertEquals(1.0018754171394622E7, Haversine.distance(p1, p2), 0.00000001);
+
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(51.3168, -0.56));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(55.9533, -3.1883));
+        assertEquals(544405.4459192449, Haversine.distance(p1, p2), 0.00000001);
+
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(48.353889, 11.786111));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(50.033333, 8.570556));
+        assertEquals(299407.6894786948, Haversine.distance(p1, p2), 0.00000001);
+
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(48.353889, 11.786111));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(52.559722, 13.287778));
+        assertEquals(480106.0821386384, Haversine.distance(p1, p2), 0.00000001);
+
+        LineString l1 = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 0, 90));
+        LineString l2 = GEOMETRY_FACTORY.createLineString(coordArray(0, 1, 0, 0));
+        assertEquals(4953717.340300673, Haversine.distance(l1, l2), 0.00000001);
+
+        // HK to Sydney
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(22.308919, 113.914603));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(-33.946111, 151.177222));
+        assertEquals(7402166.655938837, Haversine.distance(p1, p2), 0.00000001);
+
+        // HK to Toronto
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(22.308919, 113.914603));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(43.677223, -79.630556));
+        assertEquals(1.2562590459399283E7, Haversine.distance(p1, p2), 0.00000001);
+    }
+
+    @Test
+    public void spheroidDistance() {
+        // Basic check
+        Point p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 90));
+        Point p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+        assertEquals(1.0018754171394622E7, Spheroid.distance(p1, p2), 0.00000001);
+
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(51.3168, -0.56));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(55.9533, -3.1883));
+        assertEquals(544430.9411996203, Spheroid.distance(p1, p2), 0.00000001);
+
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(48.353889, 11.786111));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(50.033333, 8.570556));
+        assertEquals(299648.07216251583, Spheroid.distance(p1, p2), 0.00000001);
+
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(48.353889, 11.786111));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(52.559722, 13.287778));
+        assertEquals(479817.9049528187, Spheroid.distance(p1, p2), 0.00000001);
+
+        LineString l1 = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 0, 90));
+        LineString l2 = GEOMETRY_FACTORY.createLineString(coordArray(0, 1, 0, 0));
+        assertEquals(4953717.340300673, Spheroid.distance(l1, l2), 0.00000001);
+
+        // HK to Sydney
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(22.308919, 113.914603));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(-33.946111, 151.177222));
+        assertEquals(7371809.8295041, Spheroid.distance(p1, p2), 0.00000001);
+
+        // HK to Toronto
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(22.308919, 113.914603));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(43.677223, -79.630556));
+        assertEquals(1.2568775317073349E7, Spheroid.distance(p1, p2), 0.00000001);
+    }
+
+    @Test
+    public void spheroidArea() {
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 90));
+        assertEquals(0, Spheroid.area(point), 0.00000001);
+
+        LineString line = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 0, 90));
+        assertEquals(0, Spheroid.area(line), 0.00000001);
+
+        Polygon polygon1 = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 90, 0, 0));
+        assertEquals(0, Spheroid.area(polygon1), 0.00000001);
+
+        Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray(35, 34, 30, 28, 34, 25, 35, 34));
+        assertEquals(2.0182485081176245E11, Spheroid.area(polygon2), 0.00000001);
+
+        Polygon polygon3 = GEOMETRY_FACTORY.createPolygon(coordArray(35, 34, 34, 25, 30, 28, 35, 34));
+        assertEquals(2.0182485081176245E11, Spheroid.area(polygon3), 0.00000001);
+
+        MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPoint(new Point[] { point, point });
+        assertEquals(0, Spheroid.area(multiPoint), 0.00000001);
+
+        MultiLineString multiLineString = GEOMETRY_FACTORY.createMultiLineString(new LineString[] { line, line });
+        assertEquals(0, Spheroid.area(multiLineString), 0.00000001);
+
+        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon2, polygon3});
+        assertEquals(4.036497016235249E11, Spheroid.area(multiPolygon), 0.00000001);
+
+        GeometryCollection geometryCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {point, polygon2, polygon3});
+        assertEquals(4.036497016235249E11, Spheroid.area(geometryCollection), 0.00000001);
+    }
+
+    @Test
+    public void spheroidLength() {
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 90));
+        assertEquals(0, Spheroid.length(point), 0.00000001);
+
+        LineString line = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 0, 90));
+        assertEquals(1.0018754171394622E7, Spheroid.length(line), 0.00000001);
+
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 90, 0, 0));
+        assertEquals(2.0037508342789244E7, Spheroid.length(polygon), 0.00000001);
+
+        MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPoint(new Point[] { point, point });
+        assertEquals(0, Spheroid.length(multiPoint), 0.00000001);
+
+        MultiLineString multiLineString = GEOMETRY_FACTORY.createMultiLineString(new LineString[] { line, line });
+        assertEquals(2.0037508342789244E7, Spheroid.length(multiLineString), 0.00000001);
+
+        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon, polygon});
+        assertEquals(4.007501668557849E7, Spheroid.length(multiPolygon), 0.00000001);
+
+        GeometryCollection geometryCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {point, line, multiLineString});
+        assertEquals(3.0056262514183864E7, Spheroid.length(geometryCollection), 0.00000001);
+    }
 }

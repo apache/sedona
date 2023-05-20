@@ -285,4 +285,20 @@ object st_functions extends DataFrameAPI {
   def ST_GeometricMedian(geometry: Column, tolerance: Column, maxIter: Column, failIfNotConverged: Column): Column = wrapExpression[ST_GeometricMedian](geometry, tolerance, maxIter, failIfNotConverged)
   def ST_GeometricMedian(geometry: String, tolerance: Double, maxIter: Int, failIfNotConverged: Boolean): Column = wrapExpression[ST_GeometricMedian](geometry, tolerance, maxIter, failIfNotConverged)
 
+  def ST_DistanceSphere(a: Column, b: Column): Column = wrapExpression[ST_DistanceSphere](a, b, 6378137.0)
+  def ST_DistanceSphere(a: String, b: String): Column = wrapExpression[ST_DistanceSphere](a, b, 6378137.0)
+  def ST_DistanceSphere(a: Column, b: Column, c: Column): Column = wrapExpression[ST_DistanceSphere](a, b, c)
+  def ST_DistanceSphere(a: String, b: String, c: Double): Column = wrapExpression[ST_DistanceSphere](a, b, c)
+
+  def ST_DistanceSpheroid(a: Column, b: Column): Column = wrapExpression[ST_DistanceSpheroid](a, b)
+
+  def ST_DistanceSpheroid(a: String, b: String): Column = wrapExpression[ST_DistanceSpheroid](a, b)
+
+  def ST_AreaSpheroid(a: Column): Column = wrapExpression[ST_AreaSpheroid](a)
+
+  def ST_AreaSpheroid(a: String): Column = wrapExpression[ST_AreaSpheroid](a)
+
+  def ST_LengthSpheroid(a: Column): Column = wrapExpression[ST_LengthSpheroid](a)
+
+  def ST_LengthSpheroid(a: String): Column = wrapExpression[ST_LengthSpheroid](a)
 }
