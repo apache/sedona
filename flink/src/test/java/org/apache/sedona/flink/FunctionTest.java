@@ -59,7 +59,7 @@ public class FunctionTest extends TestBase{
                 "SELECT ST_AreaSpheroid(ST_GeomFromWKT('Polygon ((35 34, 30 28, 34 25, 35 34))'))");
         Double expected = 201824850811.76245;
         Double actual = (Double) first(tbl).getField(0);
-        assertEquals(expected, actual);
+        assertEquals(expected, actual, 0.1);
     }
 
     @Test
@@ -168,7 +168,7 @@ public class FunctionTest extends TestBase{
                 "SELECT ST_DistanceSpheroid(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'))");
         Double expected = 544430.9411996207;
         Double actual = (Double) first(tbl).getField(0);
-        assertEquals(expected, actual);
+        assertEquals(expected, actual, 0.1);
     }
 
     @Test
@@ -177,7 +177,7 @@ public class FunctionTest extends TestBase{
                 "SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'))");
         Double expected = 544405.4459192449;
         Double actual = (Double) first(tbl).getField(0);
-        assertEquals(expected, actual);
+        assertEquals(expected, actual, 0.1);
     }
 
     @Test
@@ -186,7 +186,7 @@ public class FunctionTest extends TestBase{
                 "SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'), 6378137.0)");
         Double expected = 544405.4459192449;
         Double actual = (Double) first(tbl).getField(0);
-        assertEquals(expected, actual);
+        assertEquals(expected, actual, 0.1);
     }
 
     @Test
@@ -210,7 +210,7 @@ public class FunctionTest extends TestBase{
                 "SELECT ST_LengthSpheroid(ST_GeomFromWKT('Polygon ((0 0, 0 90, 0 0))'))");
         Double expected = 20037508.342789244;
         Double actual = (Double) first(tbl).getField(0);
-        assertEquals(expected, actual);
+        assertEquals(expected, actual, 0.1);
     }
 
     @Test

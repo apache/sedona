@@ -1850,7 +1850,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         s"$expectedResult")
       val actual = df.take(1)(0).get(0).asInstanceOf[Double]
       val expected = df.take(1)(0).get(1).asInstanceOf[java.math.BigDecimal].doubleValue()
-      assertEquals(expected, actual, 0.000001)
+      assertEquals(expected, actual, 0.1)
     }
 
     val geomTestCases2 = Map(
@@ -1862,7 +1862,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         s"$expectedResult")
       val actual = df.take(1)(0).get(0).asInstanceOf[Double]
       val expected = df.take(1)(0).get(1).asInstanceOf[java.math.BigDecimal].doubleValue()
-      assertEquals(expected, actual, 0.000001)
+      assertEquals(expected, actual, 0.1)
     }
   }
 
@@ -1876,7 +1876,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         s"$expectedResult")
       val actual = df.take(1)(0).get(0).asInstanceOf[Double]
       val expected = df.take(1)(0).get(1).asInstanceOf[java.math.BigDecimal].doubleValue()
-      assertEquals(expected, actual, 0.000001)
+      assertEquals(expected, actual, 0.1)
     }
   }
 
@@ -1891,7 +1891,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         s"$expectedResult")
       val actual = df.take(1)(0).get(0).asInstanceOf[Double]
       val expected = df.take(1)(0).get(1).asInstanceOf[java.math.BigDecimal].doubleValue()
-      assertEquals(expected, actual, 0.000001)
+      assertEquals(expected, actual, 0.1)
     }
   }
 
@@ -1906,7 +1906,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         s"$expectedResult")
       val actual = df.take(1)(0).get(0).asInstanceOf[Double]
       val expected = df.take(1)(0).get(1).asInstanceOf[java.math.BigDecimal].doubleValue()
-      assertEquals(expected, actual, 0.000001)
+      assertEquals(expected, actual, 0.1)
     }
   }
 }

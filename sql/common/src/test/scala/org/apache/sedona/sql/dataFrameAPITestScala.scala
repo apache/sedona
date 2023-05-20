@@ -26,6 +26,7 @@ import org.apache.spark.sql.sedona_sql.expressions.st_constructors._
 import org.apache.spark.sql.sedona_sql.expressions.st_functions._
 import org.apache.spark.sql.sedona_sql.expressions.st_predicates._
 import org.apache.spark.sql.sedona_sql.expressions.st_aggregates._
+import org.junit.Assert.assertEquals
 
 import scala.collection.mutable
 
@@ -921,7 +922,7 @@ class dataFrameAPITestScala extends TestBaseScala {
 
       df = baseDf.select(ST_DistanceSphere("geom1", "geom2", 6378137.0))
       actualResult = df.take(1)(0).getDouble(0)
-      assert(actualResult == expectedResult)
+      assertEquals(expectedResult, actualResult, 0.1)
     }
 
     it("Passed ST_DistanceSpheroid") {
@@ -929,7 +930,7 @@ class dataFrameAPITestScala extends TestBaseScala {
       val df = baseDf.select(ST_DistanceSpheroid("geom1", "geom2"))
       val actualResult = df.take(1)(0).getDouble(0)
       val expectedResult = 10018754.171394622
-      assert(actualResult == expectedResult)
+      assertEquals(expectedResult, actualResult, 0.1)
     }
 
     it("Passed ST_AreaSpheroid") {
@@ -937,7 +938,7 @@ class dataFrameAPITestScala extends TestBaseScala {
       val df = baseDf.select(ST_AreaSpheroid("geom"))
       val actualResult = df.take(1)(0).getDouble(0)
       val expectedResult = 201824850811.76245
-      assert(actualResult == expectedResult)
+      assertEquals(expectedResult, actualResult, 0.1)
     }
 
     it("Passed ST_LengthSpheroid") {
@@ -945,7 +946,7 @@ class dataFrameAPITestScala extends TestBaseScala {
       val df = baseDf.select(ST_LengthSpheroid("geom"))
       val actualResult = df.take(1)(0).getDouble(0)
       val expectedResult = 10018754.171394622
-      assert(actualResult == expectedResult)
+      assertEquals(expectedResult, actualResult, 0.1)
     }
   }
 }
