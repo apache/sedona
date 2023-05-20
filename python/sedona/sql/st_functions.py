@@ -27,6 +27,7 @@ __all__ = [
     "ST_3DDistance",
     "ST_AddPoint",
     "ST_Area",
+    "ST_AreaSpheroid",
     "ST_AsBinary",
     "ST_AsEWKB",
     "ST_AsEWKT",
@@ -45,6 +46,8 @@ __all__ = [
     "ST_ConvexHull",
     "ST_Difference",
     "ST_Distance",
+    "ST_DistanceSphere",
+    "ST_DistanceSpheroid",
     "ST_Dump",
     "ST_DumpPoints",
     "ST_EndPoint",
@@ -64,6 +67,7 @@ __all__ = [
     "ST_IsSimple",
     "ST_IsValid",
     "ST_Length",
+    "ST_LengthSpheroid",
     "ST_LineFromMultiPoint",
     "ST_LineInterpolatePoint",
     "ST_LineMerge",
@@ -152,6 +156,17 @@ def ST_Area(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_Area", geometry)
+
+@validate_argument_types
+def ST_AreaSpheroid(geometry: ColumnOrName) -> Column:
+    """Calculate the area of a geometry using WGS84 spheroid.
+
+    :param geometry: Geometry column to calculate the area of.
+    :type geometry: ColumnOrName
+    :return: Area of geometry as a double column. Unit is meter.
+    :rtype: Column
+    """
+    return _call_st_function("ST_AreaSpheroid", geometry)
 
 
 @validate_argument_types
@@ -395,6 +410,33 @@ def ST_Distance(a: ColumnOrName, b: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_Distance", (a, b))
 
+@validate_argument_types
+def ST_DistanceSpheroid(a: ColumnOrName, b: ColumnOrName) -> Column:
+    """Calculate the geodesic distance between two geometry columns using WGS84 spheroid.
+
+    :param a: Geometry column to use in the calculation.
+    :type a: ColumnOrName
+    :param b: Other geometry column to use in the calculation.
+    :type b: ColumnOrName
+    :return: Two-dimensional geodesic distance between a and b as a double column. Unit is meter.
+    :rtype: Column
+    """
+    return _call_st_function("ST_DistanceSpheroid", (a, b))
+
+@validate_argument_types
+def ST_DistanceSphere(a: ColumnOrName, b: ColumnOrName, radius: Optional[Union[ColumnOrName, float]] = 6378137.0) -> Column:
+    """Calculate the haversine/great-circle distance between two geometry columns using a given radius.
+
+    :param a: Geometry column to use in the calculation.
+    :type a: ColumnOrName
+    :param b: Other geometry column to use in the calculation.
+    :type b: ColumnOrName
+    :param radius: Radius of the sphere, defaults to 6378137.0
+    :type radius: Optional[Union[ColumnOrName, float]], optional
+    :return: Two-dimensional haversine/great-circle distance between a and b as a double column. Unit is meter.
+    :rtype: Column
+    """
+    return _call_st_function("ST_DistanceSphere", (a, b, radius))
 
 @validate_argument_types
 def ST_Dump(geometry: ColumnOrName) -> Column:
@@ -654,6 +696,16 @@ def ST_Length(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_Length", geometry)
 
+@validate_argument_types
+def ST_LengthSpheroid(geometry: ColumnOrName) -> Column:
+    """Calculate the perimeter of a geometry using WGS84 spheroid.
+
+    :param geometry: Geometry column to calculate length for.
+    :type geometry: ColumnOrName
+    :return: perimeter of geometry as a double column. Unit is meter.
+    :rtype: Column
+    """
+    return _call_st_function("ST_LengthSpheroid", geometry)
 
 @validate_argument_types
 def ST_LineFromMultiPoint(geometry: ColumnOrName) -> Column:
