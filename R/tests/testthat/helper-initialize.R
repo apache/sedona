@@ -21,7 +21,7 @@ testthat_spark_connection <- function(conn_retry_interval_s = 2) {
     version <- Sys.getenv("SPARK_VERSION")
     hadoop_version <- Sys.getenv("HADOOP_VERSION")
     spark_installed <- spark_installed_versions()
-    if (nrow(spark_installed[spark_installed$spark == version & spark_installed$hadoop_version == hadoop_version, ]) == 0) {
+    if (nrow(spark_installed[spark_installed$spark == version & spark_installed$hadoop == hadoop_version, ]) == 0) {
       spark_install(version, hadoop_version)
     }
 
