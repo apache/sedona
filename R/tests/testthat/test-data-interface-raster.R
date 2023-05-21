@@ -579,7 +579,7 @@ test_that("Should Pass geotiff file writing with handling invalid schema", {
 })
 
 
-# Binary and RS_functions  -----------------
+# Read Binary and RS_functions  -----------------
 # Only functions related to reading
 
 test_that("Passed RS_FromGeoTiff from binary", {
@@ -764,4 +764,174 @@ test_that("Passed RS_Values with raster", {
   ## Cleanup
   sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
   rm(a)
+})
+
+
+# Write Binary and RS_functions  -----------------
+test_that("Should read geotiff using binary source and write geotiff back to disk using raster source", {
+  
+  ## Load
+  sdf_name <- random_string("spatial_sdf")
+  binary_sdf <- spark_read_binary(sc, dir = test_data("raster"), name = sdf_name)
+  
+  tmp_dest <- tempfile()
+  
+  binary_sdf %>% 
+    spark_write_raster(path = tmp_dest)
+  
+  sdf_name_2 <- random_string("spatial_sdf_2")
+  binary_2_sdf <- spark_read_binary(sc, dir = tmp_dest, name = sdf_name_2, recursive_file_lookup = TRUE)
+  
+  expect_equal(
+    sc %>% DBI::dbGetQuery("SELECT count(*) as n FROM ? LIMIT 1", DBI::dbQuoteIdentifier(sc, sdf_name)),
+    sc %>% DBI::dbGetQuery("SELECT count(*) as n FROM (SELECT RS_FromGeoTiff(content) as raster FROM ?) LIMIT 1", DBI::dbQuoteIdentifier(sc, sdf_name_2))
+  )
+  
+  ## Cleanup
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name_2))
+  rm(binary_sdf, binary_2_sdf, tmp_dest)
+  
+  
+
+})
+
+test_that("Should read and write geotiff using given options", {
+  
+  ## Load
+  sdf_name <- random_string("spatial_sdf")
+  binary_sdf <- spark_read_binary(sc, dir = test_data("raster"), name = sdf_name)
+  
+  tmp_dest <- tempfile()
+  
+  binary_sdf %>% 
+    spark_write_raster(path = tmp_dest, 
+                       options = list("rasterField" = "content", 
+                                      "fileExtension" = ".tiff",
+                                      "pathField" = "path"
+                                      ))
+  
+  sdf_name_2 <- random_string("spatial_sdf_2")
+  binary_2_sdf <- spark_read_binary(sc, dir = tmp_dest, name = sdf_name_2, recursive_file_lookup = TRUE)
+  
+  
+  expect_equal(
+    sc %>% DBI::dbGetQuery("SELECT count(*) as n FROM ? LIMIT 1", DBI::dbQuoteIdentifier(sc, sdf_name)),
+    sc %>% DBI::dbGetQuery("SELECT count(*) as n FROM (SELECT RS_FromGeoTiff(content) as raster FROM ?) LIMIT 1", DBI::dbQuoteIdentifier(sc, sdf_name_2))
+  )
+  
+  ## Cleanup
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name_2))
+  rm(binary_sdf, binary_2_sdf, tmp_dest)
+  
+})
+
+test_that("Should read and write via RS_FromGeoTiff and RS_AsGeoTiff", {
+  
+  
+  ## Load
+  sdf_name <- random_string("spatial_sdf")
+  binary_sdf <- spark_read_binary(sc, dir = test_data("raster"), name = sdf_name)
+  
+  raster_sdf <- 
+    binary_sdf %>% 
+    mutate(raster = RS_FromGeoTiff(content)) %>% 
+    mutate(content = RS_AsGeoTiff(raster))
+  
+  
+  tmp_dest <- tempfile()
+  
+  raster_sdf %>% 
+    spark_write_raster(path = tmp_dest, 
+                       options = list("rasterField" = "content", 
+                                      "fileExtension" = ".tiff",
+                                      "pathField" = "path"
+                       ))
+  
+  sdf_name_2 <- random_string("spatial_sdf_2")
+  binary_2_sdf <- spark_read_binary(sc, dir = tmp_dest, name = sdf_name_2, recursive_file_lookup = TRUE)
+  
+  
+  expect_equal(
+    sc %>% DBI::dbGetQuery("SELECT count(*) as n FROM ? LIMIT 1", DBI::dbQuoteIdentifier(sc, sdf_name)),
+    sc %>% DBI::dbGetQuery("SELECT count(*) as n FROM (SELECT RS_FromGeoTiff(content) as raster FROM ?) LIMIT 1", DBI::dbQuoteIdentifier(sc, sdf_name))
+  )
+  
+  ## Cleanup
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name_2))
+  rm(raster_sdf, binary_sdf, binary_2_sdf, tmp_dest)
+  
+})
+
+test_that("Should handle null", {
+  
+  ## Load
+  sdf_name <- random_string("spatial_sdf")
+  binary_sdf <- spark_read_binary(sc, dir = test_data("raster"), name = sdf_name)
+  
+  raster_sdf <- 
+    binary_sdf %>% 
+    mutate(raster = RS_FromGeoTiff(NULL)) %>% 
+    mutate(content = RS_AsGeoTiff(raster))
+  
+  tmp_dest <- tempfile()
+  
+  raster_sdf %>% 
+    spark_write_raster(path = tmp_dest)
+  
+  sdf_name_2 <- random_string("spatial_sdf_2")
+  binary_2_sdf <- spark_read_binary(sc, dir = tmp_dest, name = sdf_name_2, recursive_file_lookup = TRUE)
+  
+  out <- sc %>% DBI::dbGetQuery("SELECT count(*) as n FROM (SELECT RS_FromGeoTiff(content) as raster FROM ?) LIMIT 1", DBI::dbQuoteIdentifier(sc, sdf_name_2))
+  
+  expect_equal(
+    out$n,
+    0
+  )
+  
+  ## Cleanup
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name_2))
+  rm(raster_sdf, binary_sdf, binary_2_sdf, tmp_dest)
+  
+})
+
+test_that("Should read RS_FromGeoTiff and write RS_AsArcGrid", {
+  
+  ## Load
+  sdf_name <- random_string("spatial_sdf")
+  binary_sdf <- spark_read_binary(sc, dir = test_data("raster"), name = sdf_name)
+  
+  raster_sdf <- 
+    binary_sdf %>% 
+    mutate(raster = RS_FromGeoTiff(content)) %>% 
+    mutate(content = RS_AsArcGrid(raster)) %>% 
+    sdf_register()
+  
+  tmp_dest <- tempfile()
+  
+  raster_sdf %>% 
+    spark_write_raster(path = tmp_dest, 
+                       options = list("rasterField" = "content", 
+                                      "fileExtension" = ".asc",
+                                      "pathField" = "path"
+                       ))
+  
+  sdf_name_2 <- random_string("spatial_sdf_2")
+  binary_2_sdf <- spark_read_binary(sc, dir = tmp_dest, name = sdf_name_2, recursive_file_lookup = TRUE)
+  
+  
+  
+  expect_equal(
+    sc %>% DBI::dbGetQuery("SELECT count(*) as n FROM ? LIMIT 1", DBI::dbQuoteIdentifier(sc, dbplyr::remote_name(raster_sdf))),
+    sc %>% DBI::dbGetQuery("SELECT count(*) as n FROM (SELECT RS_FromGeoTiff(content) as raster FROM ?) LIMIT 1", DBI::dbQuoteIdentifier(sc, sdf_name_2))
+  )
+  
+  ## Cleanup
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
+  sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name_2))
+  rm(raster_sdf, binary_sdf, binary_2_sdf, tmp_dest)
+  
 })

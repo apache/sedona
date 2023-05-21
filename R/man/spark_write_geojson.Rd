@@ -4,6 +4,7 @@
 \alias{spark_write_geojson}
 \alias{spark_write_geoparquet}
 \alias{spark_write_geotiff}
+\alias{spark_write_raster}
 \title{Write geospatial data from a Spark DataFrame.}
 \usage{
 spark_write_geojson(
@@ -25,6 +26,15 @@ spark_write_geoparquet(
 )
 
 spark_write_geotiff(
+  x,
+  path,
+  mode = NULL,
+  options = list(),
+  partition_by = NULL,
+  ...
+)
+
+spark_write_raster(
   x,
   path,
   mode = NULL,
@@ -57,7 +67,8 @@ Functions to write geospatial data into a variety of formats from Spark DataFram
 \itemize{
 \item \code{spark_write_geojson}: to GeoJSON
 \item \code{spark_write_geoparquet}: to GeoParquet
-\item \code{spark_write_geotiff}: to GeoTiff
+\item \code{spark_write_geotiff}: to GeoTiff from Array[Double] rasters
+\item \code{spark_write_raster}: to raster tiles after using RS output functions (\code{RS_AsXXX})
 }
 }
 \examples{
