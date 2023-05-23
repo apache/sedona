@@ -13,7 +13,7 @@
 
 
 ## What is Apache Sedona?
-Apache Sedona™ is a spatial computing engine that enables developers to easily process spatial data at any scale within modern cluster computing systems such as Apache Spark and Apache Flink. Sedona developers can express their spatial data processing tasks in Spatial SQL, Spatial Python or Spatial R. Internally, Sedona provides spaital data loading, indexing, partitioning, and query processing/optimization functionality that enable users to efficiently analyze spatial data at any scale.
+Apache Sedona™ is a spatial computing engine that enables developers to easily process spatial data at any scale within modern cluster computing systems such as Apache Spark and Apache Flink. Sedona developers can express their spatial data processing tasks in Spatial SQL, Spatial Python or Spatial R. Internally, Sedona provides spatial data loading, indexing, partitioning, and query processing/optimization functionality that enable users to efficiently analyze spatial data at any scale.
 
 <img src="docs/image/sedona-ecosystem.png" width="800" class="center">
 
@@ -25,8 +25,8 @@ Some of the key features of Apache Sedona include:
 * Scalable distributed processing of large vector and raster datasets.
 * Tools for spatial indexing, spatial querying, and spatial join operations.
 * Integration with popular geospatial python tools such as GeoPandas.
-* Integration with popular big data tools, such as Spark, Hadopp, Hive, and Flink for data storage and querying.
-* A user-friendly API for working with geospatial data in the SQL, Python Scala and Java languages.
+* Integration with popular big data tools, such as Spark, Hadoop, Hive, and Flink for data storage and querying.
+* A user-friendly API for working with geospatial data in the SQL, Python, Scala and Java languages.
 * Flexible deployment options, including standalone, local, and cluster modes.
 
 These are some of the key features of Apache Sedona, but it may offer additional capabilities depending on the specific version and configuration.
