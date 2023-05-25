@@ -99,9 +99,23 @@
         <sourceDirectory>src/main/scala</sourceDirectory>
         <plugins>
             <plugin>
+                <!-- Skip running resolved-pom-maven-plugin since shade will
+                     generate dependency reduced pom which substitudes property
+                     values. resolved-pom-maven-plugin will break pom
+                     installation when working with maven-shade-plugin.  -->
+                <groupId>io.paradoxical</groupId>
+                <artifactId>resolved-pom-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <id>resolve-my-pom</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
