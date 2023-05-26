@@ -1,0 +1,36 @@
+{
+  "name": "apache-sedona",
+  "description": "Zeppelin visualization support for Sedona",
+  "author": "Apache Sedona, original authors are listed on https://github.com/myuwono/zeppelin-leaflet",
+  "version": "1.4.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "jq '{ type: .helium.type, name: .name, description: .description, artifact: (.name + \"@\"+ .version), license: .license, icon: .helium.icon}' package.json > sedona-zeppelin.json",
+    "helium.dev": "jq --arg pwd `pwd` '{ type: .helium.type, name: .name, description: .description, artifact: $pwd, license: .license, icon: .helium.icon}' package.json > sedona-zeppelin.json"
+  },
+  "keywords": [
+    "zeppelin",
+    "helium",
+    "visualization"
+  ],
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "jsts": "^1.6.2",
+    "leaflet": "~1.4.0",
+    "zeppelin-tabledata": "*",
+    "zeppelin-vis": "*"
+  },
+  "helium": {
+    "type": "VISUALIZATION",
+    "icon": "<i class='fa fa-globe'></i>"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/apache/sedona"
+  },
+  "homepage": "http://sedona.apache.org/",
+  "bugs": {
+    "url": "https://issues.apache.org/jira/projects/SEDONA/issues/"
+  }
+}

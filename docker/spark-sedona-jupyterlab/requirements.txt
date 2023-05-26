@@ -1,0 +1,12 @@
+pytest
+jupyterlab
+pandas
+shapely==1.8.4
+geopandas<=0.11.1
+pyspark==3.3.2
+attrs
+pyarrow
+ipykernel
+apache-sedona==1.4.0
+matplotlib
+descartes

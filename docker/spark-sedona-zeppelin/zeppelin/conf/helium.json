@@ -1,0 +1,9 @@
+{
+  "enabled": {
+    "sedona-zeppelin": "/opt/zeppelin"
+  },
+  "packageConfig": {},
+  "bundleDisplayOrder": [
+    "sedona-zeppelin"
+  ]
+}

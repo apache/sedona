@@ -1,0 +1,615 @@
+{
+  "paragraphs": [
+    {
+      "text": "%spark\nspark.version",
+      "user": "anonymous",
+      "dateUpdated": "2023-05-01 09:06:10.289",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "\u001b[1m\u001b[34mres1\u001b[0m: \u001b[1m\u001b[32mString\u001b[0m \u003d 3.0.1\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682312058479_945167926",
+      "id": "paragraph_1682312058479_945167926",
+      "dateCreated": "2023-04-24 04:54:18.479",
+      "dateStarted": "2023-05-01 09:06:10.306",
+      "dateFinished": "2023-05-01 09:06:41.276",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%python\n!python3 --version",
+      "user": "anonymous",
+      "dateUpdated": "2023-05-01 09:06:19.875",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Python 3.7.12\r\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682312074110_344098364",
+      "id": "paragraph_1682312074110_344098364",
+      "dateCreated": "2023-04-24 04:54:34.110",
+      "dateStarted": "2023-05-01 09:06:19.905",
+      "dateFinished": "2023-05-01 09:06:42.050",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%ipyspark\nimport sys\nsys.exec_prefix",
+      "user": "anonymous",
+      "dateUpdated": "2023-05-01 09:06:16.122",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "\u0027/opt/conda/envs/python_3_with_R\u0027"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682312095702_517941248",
+      "id": "paragraph_1682312095702_517941248",
+      "dateCreated": "2023-04-24 04:54:55.716",
+      "dateStarted": "2023-05-01 09:06:16.223",
+      "dateFinished": "2023-05-01 09:06:46.819",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%python\nsys.executable",
+      "user": "anonymous",
+      "dateUpdated": "2023-04-24 07:29:20.055",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "\u0027/opt/conda/envs/python_3_with_R/bin/python\u0027"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682312149630_1203449647",
+      "id": "paragraph_1682312149630_1203449647",
+      "dateCreated": "2023-04-24 04:55:49.630",
+      "dateStarted": "2023-04-24 07:29:20.082",
+      "dateFinished": "2023-04-24 07:29:20.150",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%ipyspark\nfrom IPython.display import display, HTML\nfrom pyspark.sql import SparkSession\nfrom pyspark import StorageLevel\nimport pandas as pd\nfrom pyspark.sql.types import StructType, StructField,StringType, LongType, IntegerType, DoubleType, ArrayType\nfrom pyspark.sql.functions import regexp_replace\nfrom sedona.register import SedonaRegistrator\nfrom sedona.utils import SedonaKryoRegistrator, KryoSerializer\nfrom pyspark.sql.functions import col, split, expr\nfrom pyspark.sql.functions import udf, lit\nimport os",
+      "user": "anonymous",
+      "dateUpdated": "2023-04-27 06:16:33.123",
+      "progress": 0,
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/python"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "ERROR",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "org.apache.zeppelin.interpreter.InterpreterException: org.apache.zeppelin.interpreter.InterpreterException: java.io.IOException: Fail to setup JVMGateway\n\n\tat org.apache.zeppelin.interpreter.LazyOpenInterpreter.open(LazyOpenInterpreter.java:76)\n\tat org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer$InterpretJob.jobRun(RemoteInterpreterServer.java:844)\n\tat org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer$InterpretJob.jobRun(RemoteInterpreterServer.java:752)\n\tat org.apache.zeppelin.scheduler.Job.run(Job.java:172)\n\tat org.apache.zeppelin.scheduler.AbstractScheduler.runJob(AbstractScheduler.java:132)\n\tat org.apache.zeppelin.scheduler.FIFOScheduler.lambda$runJobInScheduler$0(FIFOScheduler.java:42)\n\tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)\n\tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n\tat java.lang.Thread.run(Thread.java:748)\nCaused by: org.apache.zeppelin.interpreter.InterpreterException: java.io.IOException: Fail to setup JVMGateway\n\n\tat org.apache.zeppelin.python.IPythonInterpreter.open(IPythonInterpreter.java:118)\n\tat org.apache.zeppelin.spark.IPySparkInterpreter.open(IPySparkInterpreter.java:75)\n\tat org.apache.zeppelin.interpreter.LazyOpenInterpreter.open(LazyOpenInterpreter.java:70)\n\t... 8 more\nCaused by: java.io.IOException: Fail to setup JVMGateway\n\n\tat org.apache.zeppelin.python.IPythonInterpreter.initPythonInterpreter(IPythonInterpreter.java:137)\n\tat org.apache.zeppelin.python.IPythonInterpreter.open(IPythonInterpreter.java:115)\n\t... 10 more\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682312198160_312099563",
+      "id": "paragraph_1682312198160_312099563",
+      "dateCreated": "2023-04-24 04:56:38.160",
+      "dateStarted": "2023-04-27 06:18:01.483",
+      "dateFinished": "2023-04-27 06:18:07.716",
+      "status": "ERROR"
+    },
+    {
+      "text": "%ipyspark\nimport os\n\nimport geopandas as gpd\nfrom pyspark.sql import SparkSession\nfrom pyspark.sql.functions import col, expr, when\n\nfrom py4j.java_gateway import java_import\njava_import(spark._sc._jvm, \"org.apache.spark.sql.api.python.*\")\n\nfrom sedona.register import SedonaRegistrator\nfrom sedona.utils import SedonaKryoRegistrator, KryoSerializer\nfrom sedona.core.formatMapper.shapefileParser import ShapefileReader\nfrom sedona.utils.adapter import Adapter\nfrom sedona.core.enums import GridType\nfrom sedona.core.enums import IndexType\nfrom sedona.core.spatialOperator import JoinQueryRaw",
+      "user": "anonymous",
+      "dateUpdated": "2023-04-27 04:32:40.222",
+      "progress": 0,
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true,
+        "editorSetting": {}
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": []
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682398301487_198787536",
+      "id": "paragraph_1682398301487_198787536",
+      "dateCreated": "2023-04-25 04:51:41.487",
+      "dateStarted": "2023-04-27 04:32:40.240",
+      "dateFinished": "2023-04-27 04:32:40.821",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%ipyspark\nspark \u003d SparkSession.builder.\\\n        master(\"local[*]\").\\\n        appName(\"SedonaSQL-Example\").\\\n        config(\"spark.serializer\", KryoSerializer.getName).\\\n        config(\"spark.kryo.registrator\", SedonaKryoRegistrator.getName) .\\\n        config(\"spark.jars.packages\", \"org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.4.0,org.datasyslab:geotools-wrapper:1.4.0-28.2\") .\\\n        getOrCreate()",
+      "user": "anonymous",
+      "dateUpdated": "2023-04-27 04:32:49.244",
+      "progress": 0,
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true,
+        "editorSetting": {}
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": []
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682398303355_801629753",
+      "id": "paragraph_1682398303355_801629753",
+      "dateCreated": "2023-04-25 04:51:43.355",
+      "dateStarted": "2023-04-27 04:32:49.271",
+      "dateFinished": "2023-04-27 04:32:50.814",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%ipyspark\nfrom py4j.java_gateway import java_import\njava_import(spark._sc._jvm, \"org.apache.spark.sql.api.python.*\")\n\nimport sys\nprint(sys.path)\n",
+      "user": "anonymous",
+      "dateUpdated": "2023-04-25 05:14:18.929",
+      "progress": 0,
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true,
+        "editorSetting": {}
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "[\u0027/opt/zeppelin\u0027, \u0027/tmp/spark-82df97d9-7602-4838-a766-bda2b65ce780/userFiles-37fde8bd-d4fb-4033-a635-1a8723ab6b24\u0027, \u0027/opt/zeppelin/spark/python/lib/pyspark.zip\u0027, \u0027/opt/zeppelin/spark/python/lib/py4j-0.10.9.3-src.zip\u0027, \u0027/opt/zeppelin/interpreter/lib/python\u0027, \u0027/opt/zeppelin/spark/python\u0027, \u0027/opt/conda/envs/python_3_with_R/lib/python37.zip\u0027, \u0027/opt/conda/envs/python_3_with_R/lib/python3.7\u0027, \u0027/opt/conda/envs/python_3_with_R/lib/python3.7/lib-dynload\u0027, \u0027\u0027, \u0027/opt/conda/envs/python_3_with_R/lib/python3.7/site-packages\u0027, \u0027/opt/conda/envs/python_3_with_R/lib/python3.7/site-packages/IPython/extensions\u0027, \u0027/opt/zeppelin/.ipython\u0027, \u0027/opt/zeppelin/interpreter/spark/spark-interpreter-0.10.1.jar\u0027]\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682398484002_670162391",
+      "id": "paragraph_1682398484002_670162391",
+      "dateCreated": "2023-04-25 04:54:44.002",
+      "dateStarted": "2023-04-25 05:14:18.948",
+      "dateFinished": "2023-04-25 05:14:19.181",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%python\nfrom pyspark.sql import SparkSession\nimport pyspark\n\npyspark.__version__\n\n# spark \u003d SparkSession.\\\n#     builder.\\\n#     master(\"local[*]\").\\\n#     appName(\"Demo-app\").\\\n#     config(\"spark.serializer\", KryoSerializer.getName).\\\n#     config(\"spark.kryo.registrator\", SedonaKryoRegistrator.getName) .\\\n#     getOrCreate()\n\n# SedonaRegistrator.registerAll(spark)\n# sc \u003d spark.sparkContext",
+      "user": "anonymous",
+      "dateUpdated": "2023-04-25 04:47:37.179",
+      "progress": 0,
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "editorHide": false,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "\u00273.2.1\u0027"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682314469965_574664711",
+      "id": "paragraph_1682314469965_574664711",
+      "dateCreated": "2023-04-24 05:34:29.965",
+      "dateStarted": "2023-04-25 04:47:37.242",
+      "dateFinished": "2023-04-25 04:47:44.162",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%ipyspark\ndata \u003d [(1, \"John\", \"Doe\"), (2, \"Jane\", \"Doe\"), (3, \"Bob\", \"Smith\"),  \n        (4, \"Alice\", \"Johnson\"), (5, \"Charlie\", \"Brown\"), (6, \"David\", \"Jones\"),\n        (7, \"Eve\", \"White\"), (8, \"Fred\", \"Garcia\"), (9, \"Gina\", \"Green\"),\n        (10, \"Harry\", \"Harris\")]\n\ndf \u003d spark.createDataFrame(data, [\"id\", \"first_name\", \"last_name\"])\n\ndf.show()",
+      "user": "anonymous",
+      "dateUpdated": "2023-04-27 08:36:48.639",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "ERROR",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m\n\u001b[0;31mPy4JJavaError\u001b[0m                             Traceback (most recent call last)\n\u001b[0;32m/tmp/ipykernel_1195/3204842833.py\u001b[0m in \u001b[0;36m\u003cmodule\u003e\u001b[0;34m\u001b[0m\n\u001b[1;32m      4\u001b[0m         (10, \"Harry\", \"Harris\")]\n\u001b[1;32m      5\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----\u003e 6\u001b[0;31m \u001b[0mdf\u001b[0m \u001b[0;34m\u003d\u001b[0m \u001b[0mspark\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mcreateDataFrame\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mdata\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m[\u001b[0m\u001b[0;34m\"id\"\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m\"first_name\"\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m\"last_name\"\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      7\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      8\u001b[0m \u001b[0mdf\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mshow\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\n\u001b[0;32m~/spark/python/lib/pyspark.zip/pyspark/sql/session.py\u001b[0m in \u001b[0;36mcreateDataFrame\u001b[0;34m(self, data, schema, samplingRatio, verifySchema)\u001b[0m\n\u001b[1;32m    673\u001b[0m             return super(SparkSession, self).createDataFrame(\n\u001b[1;32m    674\u001b[0m                 data, schema, samplingRatio, verifySchema)\n\u001b[0;32m--\u003e 675\u001b[0;31m         \u001b[0;32mreturn\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_create_dataframe\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mdata\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mschema\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0msamplingRatio\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mverifySchema\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    676\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    677\u001b[0m     \u001b[0;32mdef\u001b[0m \u001b[0m_create_dataframe\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mdata\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mschema\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0msamplingRatio\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mverifySchema\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\n\u001b[0;32m~/spark/python/lib/pyspark.zip/pyspark/sql/session.py\u001b[0m in \u001b[0;36m_create_dataframe\u001b[0;34m(self, data, schema, samplingRatio, verifySchema)\u001b[0m\n\u001b[1;32m    698\u001b[0m             \u001b[0mrdd\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mschema\u001b[0m \u001b[0;34m\u003d\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_createFromRDD\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mdata\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mmap\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mprepare\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mschema\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0msamplingRatio\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    699\u001b[0m         \u001b[0;32melse\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--\u003e 700\u001b[0;31m             \u001b[0mrdd\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mschema\u001b[0m \u001b[0;34m\u003d\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_createFromLocal\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mmap\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mprepare\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mdata\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mschema\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    701\u001b[0m         \u001b[0mjrdd\u001b[0m \u001b[0;34m\u003d\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_jvm\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mSerDeUtil\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mtoJavaArray\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mrdd\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_to_java_object_rdd\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    702\u001b[0m         \u001b[0mjdf\u001b[0m \u001b[0;34m\u003d\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_jsparkSession\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mapplySchemaToPythonRDD\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mjrdd\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mrdd\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mschema\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mjson\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\n\u001b[0;32m~/spark/python/lib/pyspark.zip/pyspark/sql/session.py\u001b[0m in \u001b[0;36m_createFromLocal\u001b[0;34m(self, data, schema)\u001b[0m\n\u001b[1;32m    524\u001b[0m         \u001b[0;31m# convert python objects to sql data\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    525\u001b[0m         \u001b[0mdata\u001b[0m \u001b[0;34m\u003d\u001b[0m \u001b[0;34m[\u001b[0m\u001b[0mschema\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mtoInternal\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mrow\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;32mfor\u001b[0m \u001b[0mrow\u001b[0m \u001b[0;32min\u001b[0m \u001b[0mdata\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--\u003e 526\u001b[0;31m         \u001b[0;32mreturn\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_sc\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mparallelize\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mdata\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mschema\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    527\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    528\u001b[0m     \u001b[0;34m@\u001b[0m\u001b[0mstaticmethod\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\n\u001b[0;32m~/spark/python/lib/pyspark.zip/pyspark/context.py\u001b[0m in \u001b[0;36mparallelize\u001b[0;34m(self, c, numSlices)\u001b[0m\n\u001b[1;32m    528\u001b[0m         \u001b[0;34m[\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m[\u001b[0m\u001b[0;36m0\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m[\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m[\u001b[0m\u001b[0;36m2\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m[\u001b[0m\u001b[0;36m4\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    529\u001b[0m         \"\"\"\n\u001b[0;32m--\u003e 530\u001b[0;31m         \u001b[0mnumSlices\u001b[0m \u001b[0;34m\u003d\u001b[0m \u001b[0mint\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mnumSlices\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;32mif\u001b[0m \u001b[0mnumSlices\u001b[0m \u001b[0;32mis\u001b[0m \u001b[0;32mnot\u001b[0m \u001b[0;32mNone\u001b[0m \u001b[0;32melse\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mdefaultParallelism\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    531\u001b[0m         \u001b[0;32mif\u001b[0m \u001b[0misinstance\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mc\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mrange\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    532\u001b[0m             \u001b[0msize\u001b[0m \u001b[0;34m\u003d\u001b[0m \u001b[0mlen\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mc\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\n\u001b[0;32m~/spark/python/lib/pyspark.zip/pyspark/context.py\u001b[0m in \u001b[0;36mdefaultParallelism\u001b[0;34m(self)\u001b[0m\n\u001b[1;32m    440\u001b[0m         reduce tasks)\n\u001b[1;32m    441\u001b[0m         \"\"\"\n\u001b[0;32m--\u003e 442\u001b[0;31m         \u001b[0;32mreturn\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_jsc\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0msc\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mdefaultParallelism\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    443\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    444\u001b[0m     \u001b[0;34m@\u001b[0m\u001b[0mproperty\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\n\u001b[0;32m~/spark/python/lib/py4j-0.10.9-src.zip/py4j/java_gateway.py\u001b[0m in \u001b[0;36m__call__\u001b[0;34m(self, *args)\u001b[0m\n\u001b[1;32m   1303\u001b[0m         \u001b[0manswer\u001b[0m \u001b[0;34m\u003d\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mgateway_client\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0msend_command\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mcommand\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1304\u001b[0m         return_value \u003d get_return_value(\n\u001b[0;32m-\u003e 1305\u001b[0;31m             answer, self.gateway_client, self.target_id, self.name)\n\u001b[0m\u001b[1;32m   1306\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1307\u001b[0m         \u001b[0;32mfor\u001b[0m \u001b[0mtemp_arg\u001b[0m \u001b[0;32min\u001b[0m \u001b[0mtemp_args\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\n\u001b[0;32m~/spark/python/lib/pyspark.zip/pyspark/sql/utils.py\u001b[0m in \u001b[0;36mdeco\u001b[0;34m(*a, **kw)\u001b[0m\n\u001b[1;32m    109\u001b[0m     \u001b[0;32mdef\u001b[0m \u001b[0mdeco\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m*\u001b[0m\u001b[0ma\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m**\u001b[0m\u001b[0mkw\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    110\u001b[0m         \u001b[0;32mtry\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--\u003e 111\u001b[0;31m             \u001b[0;32mreturn\u001b[0m \u001b[0mf\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m*\u001b[0m\u001b[0ma\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m**\u001b[0m\u001b[0mkw\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    112\u001b[0m         \u001b[0;32mexcept\u001b[0m \u001b[0mpy4j\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mprotocol\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mPy4JJavaError\u001b[0m \u001b[0;32mas\u001b[0m \u001b[0me\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    113\u001b[0m             \u001b[0mconverted\u001b[0m \u001b[0;34m\u003d\u001b[0m \u001b[0mconvert_exception\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0me\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mjava_exception\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\n\u001b[0;32m~/spark/python/lib/py4j-0.10.9-src.zip/py4j/protocol.py\u001b[0m in \u001b[0;36mget_return_value\u001b[0;34m(answer, gateway_client, target_id, name)\u001b[0m\n\u001b[1;32m    326\u001b[0m                 raise Py4JJavaError(\n\u001b[1;32m    327\u001b[0m                     \u001b[0;34m\"An error occurred while calling {0}{1}{2}.\\n\"\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--\u003e 328\u001b[0;31m                     format(target_id, \".\", name), value)\n\u001b[0m\u001b[1;32m    329\u001b[0m             \u001b[0;32melse\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    330\u001b[0m                 raise Py4JError(\n\n\u001b[0;31mPy4JJavaError\u001b[0m: An error occurred while calling o67.defaultParallelism.\n: java.lang.IllegalStateException: Cannot call methods on a stopped SparkContext.\nThis stopped SparkContext was created at:\n\norg.apache.spark.sql.SparkSession$Builder.getOrCreate(SparkSession.scala:939)\nsun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\nsun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\nsun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\njava.lang.reflect.Method.invoke(Method.java:498)\norg.apache.zeppelin.spark.BaseSparkScalaInterpreter.spark2CreateContext(BaseSparkScalaInterpreter.scala:299)\norg.apache.zeppelin.spark.BaseSparkScalaInterpreter.createSparkContext(BaseSparkScalaInterpreter.scala:228)\norg.apache.zeppelin.spark.SparkScala212Interpreter.open(SparkScala212Interpreter.scala:88)\norg.apache.zeppelin.spark.SparkInterpreter.open(SparkInterpreter.java:122)\norg.apache.zeppelin.interpreter.LazyOpenInterpreter.open(LazyOpenInterpreter.java:70)\norg.apache.zeppelin.interpreter.Interpreter.getInterpreterInTheSameSessionByClassName(Interpreter.java:322)\norg.apache.zeppelin.interpreter.Interpreter.getInterpreterInTheSameSessionByClassName(Interpreter.java:333)\norg.apache.zeppelin.spark.IPySparkInterpreter.open(IPySparkInterpreter.java:57)\norg.apache.zeppelin.interpreter.LazyOpenInterpreter.open(LazyOpenInterpreter.java:70)\norg.apache.zeppelin.interpreter.remote.RemoteInterpreterServer$InterpretJob.jobRun(RemoteInterpreterServer.java:844)\norg.apache.zeppelin.interpreter.remote.RemoteInterpreterServer$InterpretJob.jobRun(RemoteInterpreterServer.java:752)\norg.apache.zeppelin.scheduler.Job.run(Job.java:172)\norg.apache.zeppelin.scheduler.AbstractScheduler.runJob(AbstractScheduler.java:132)\norg.apache.zeppelin.scheduler.FIFOScheduler.lambda$runJobInScheduler$0(FIFOScheduler.java:42)\njava.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)\n\nThe currently active SparkContext was created at:\n\n(No active SparkContext.)\n         \n\tat org.apache.spark.SparkContext.assertNotStopped(SparkContext.scala:118)\n\tat org.apache.spark.SparkContext.defaultParallelism(SparkContext.scala:2492)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:244)\n\tat py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:357)\n\tat py4j.Gateway.invoke(Gateway.java:282)\n\tat py4j.commands.AbstractCommand.invokeMethod(AbstractCommand.java:132)\n\tat py4j.commands.CallCommand.execute(CallCommand.java:79)\n\tat py4j.GatewayConnection.run(GatewayConnection.java:238)\n\tat java.lang.Thread.run(Thread.java:748)\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682316786228_879117533",
+      "id": "paragraph_1682316786228_879117533",
+      "dateCreated": "2023-04-24 06:13:06.228",
+      "dateStarted": "2023-04-27 08:36:48.663",
+      "dateFinished": "2023-04-27 08:36:50.199",
+      "status": "ERROR"
+    },
+    {
+      "text": "%sql\nSELECT * FROM df",
+      "user": "anonymous",
+      "dateUpdated": "2023-04-25 04:59:22.901",
+      "progress": 0,
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {}
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "ERROR",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Table or view not found: df; line 2 pos 14;\n\u0027Project [*]\n+- \u0027UnresolvedRelation [df], [], false\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682317334948_1127972250",
+      "id": "paragraph_1682317334948_1127972250",
+      "dateCreated": "2023-04-24 06:22:14.948",
+      "dateStarted": "2023-04-25 04:59:22.921",
+      "dateFinished": "2023-04-25 04:59:23.115",
+      "status": "ERROR"
+    },
+    {
+      "text": "%spark\nimport org.apache.log4j.{Level, Logger}\nimport org.apache.sedona.core.enums.{FileDataSplitter, GridType, IndexType}\nimport org.apache.sedona.core.spatialOperator.JoinQuery\nimport org.apache.sedona.core.spatialRDD.{PointRDD, PolygonRDD, RectangleRDD}\nimport org.apache.sedona.sql.utils.SedonaSQLRegistrator\nimport org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator\nimport org.apache.sedona.viz.core.{ImageGenerator, ImageSerializableWrapper, RasterOverlayOperator}\nimport org.apache.sedona.viz.extension.visualizationEffect.{ChoroplethMap, HeatMap, ScatterPlot}\nimport org.apache.sedona.viz.sql.utils.SedonaVizRegistrator\nimport org.apache.sedona.viz.utils.{ColorizeOption, ImageType}\nimport org.apache.spark.serializer.KryoSerializer\nimport org.apache.spark.sql.SQLContext\nimport org.apache.spark.storage.StorageLevel\nimport org.apache.spark.{SparkConf, SparkContext}\nimport org.locationtech.jts.geom.Envelope\n\nimport java.awt.Color\nimport java.io.FileInputStream\nimport java.util.Properties\n",
+      "user": "anonymous",
+      "dateUpdated": "2023-04-27 04:37:23.448",
+      "progress": 0,
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "tableHide": false,
+        "results": {},
+        "enabled": true,
+        "editorSetting": {}
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "import org.apache.log4j.{Level, Logger}\nimport org.apache.sedona.core.enums.{FileDataSplitter, GridType, IndexType}\nimport org.apache.sedona.core.spatialOperator.JoinQuery\nimport org.apache.sedona.core.spatialRDD.{PointRDD, PolygonRDD, RectangleRDD}\nimport org.apache.sedona.sql.utils.SedonaSQLRegistrator\nimport org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator\nimport org.apache.sedona.viz.core.{ImageGenerator, ImageSerializableWrapper, RasterOverlayOperator}\nimport org.apache.sedona.viz.extension.visualizationEffect.{ChoroplethMap, HeatMap, ScatterPlot}\nimport org.apache.sedona.viz.sql.utils.SedonaVizRegistrator\nimport org.apache.sedona.viz.utils.{ColorizeOption, ImageType}\nimport org.apache.spark.serializer.KryoSerializer\nimport org.apache.spark.sql.SQLContext\nimport org.apache...\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682398762920_1025968779",
+      "id": "paragraph_1682398762920_1025968779",
+      "dateCreated": "2023-04-25 04:59:22.920",
+      "dateStarted": "2023-04-27 04:37:23.467",
+      "dateFinished": "2023-04-27 04:37:23.883",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%spark\nobject ScalaExample extends App{\n\tLogger.getLogger(\"org\").setLevel(Level.WARN)\n\tLogger.getLogger(\"akka\").setLevel(Level.WARN)\n\n\tval sparkConf \u003d new SparkConf().setAppName(\"SedonaVizDemo\").set(\"spark.serializer\", classOf[KryoSerializer].getName)\n\t\t.set(\"spark.kryo.registrator\", classOf[SedonaVizKryoRegistrator].getName)\n\t\t.setMaster(\"local[*]\")\n\tval sparkContext \u003d new SparkContext(sparkConf)\n\n\tval prop \u003d new Properties()\n\tval resourcePath \u003d \"src/test/resources/\"\n\tval demoOutputPath \u003d \"target/demo\"\n\tvar ConfFile \u003d new FileInputStream(resourcePath + \"babylon.point.properties\")\n\tprop.load(ConfFile)\n\tval scatterPlotOutputPath \u003d System.getProperty(\"user.dir\") + \"/\" + demoOutputPath + \"/scatterplot\"\n\tval heatMapOutputPath \u003d System.getProperty(\"user.dir\") + \"/\" + demoOutputPath + \"/heatmap\"\n\tval choroplethMapOutputPath \u003d System.getProperty(\"user.dir\") + \"/\" + demoOutputPath + \"/choroplethmap\"\n\tval parallelFilterRenderOutputPath \u003d System.getProperty(\"user.dir\") + \"/\" + demoOutputPath + \"/parallelfilterrender-heatmap\"\n\tval earthdataScatterPlotOutputPath \u003d System.getProperty(\"user.dir\") + \"/\" + demoOutputPath + \"/earthdatascatterplot\"\n\tval sqlApiOutputPath \u003d System.getProperty(\"user.dir\") + \"/\" + demoOutputPath + \"/sql-heatmap\"\n\n\tval PointInputLocation \u003d \"file://\" + System.getProperty(\"user.dir\") + \"/\" + resourcePath + prop.getProperty(\"inputLocation\")\n\tval PointOffset \u003d prop.getProperty(\"offset\").toInt\n\tval PointSplitter \u003d FileDataSplitter.getFileDataSplitter(prop.getProperty(\"splitter\"))\n\tval PointNumPartitions \u003d prop.getProperty(\"numPartitions\").toInt\n\tConfFile \u003d new FileInputStream(resourcePath + \"babylon.rectangle.properties\")\n\tprop.load(ConfFile)\n\tval RectangleInputLocation \u003d \"file://\" + System.getProperty(\"user.dir\") + \"/\" + resourcePath + prop.getProperty(\"inputLocation\")\n\tval RectangleOffset \u003d prop.getProperty(\"offset\").toInt\n\tval RectangleSplitter \u003d FileDataSplitter.getFileDataSplitter(prop.getProperty(\"splitter\"))\n\tval RectangleNumPartitions \u003d prop.getProperty(\"numPartitions\").toInt\n\tConfFile \u003d new FileInputStream(resourcePath + \"babylon.polygon.properties\")\n\tprop.load(ConfFile)\n\tval PolygonInputLocation \u003d \"file://\" + System.getProperty(\"user.dir\") + \"/\" + resourcePath + prop.getProperty(\"inputLocation\")\n\tval PolygonOffset \u003d prop.getProperty(\"offset\").toInt\n\tval PolygonSplitter \u003d FileDataSplitter.getFileDataSplitter(prop.getProperty(\"splitter\"))\n\tval PolygonNumPartitions \u003d prop.getProperty(\"numPartitions\").toInt\n\tval USMainLandBoundary \u003d new Envelope(-126.790180, -64.630926, 24.863836, 50.000)\n//\tval earthdataInputLocation \u003d System.getProperty(\"user.dir\") + \"/src/test/resources/modis/modis.csv\"\n//\tval earthdataNumPartitions \u003d 5\n//\tval HDFIncrement \u003d 5\n//\tval HDFOffset \u003d 2\n//\tval HDFRootGroupName \u003d \"MOD_Swath_LST\"\n//\tval HDFDataVariableName \u003d \"LST\"\n//\tval HDFDataVariableList \u003d Array(\"LST\", \"QC\", \"Error_LST\", \"Emis_31\", \"Emis_32\")\n//\tval HDFswitchXY \u003d true\n//\tval urlPrefix \u003d System.getProperty(\"user.dir\") + \"/src/test/resources/modis/\"\n\n\tif (buildScatterPlot(scatterPlotOutputPath)\n\t\t\u0026\u0026 buildHeatMap(heatMapOutputPath)\n\t\t\u0026\u0026 buildChoroplethMap(choroplethMapOutputPath)\n\t\t\u0026\u0026 parallelFilterRenderNoStitch(parallelFilterRenderOutputPath)\n//\t\t\u0026\u0026 earthdataVisualization(earthdataScatterPlotOutputPath)\n\t\t\u0026\u0026 sqlApiVisualization(sqlApiOutputPath))\n\t\tSystem.out.println(\"All SedonaViz Demos have passed.\")\n\telse System.out.println(\"SedonaViz Demos failed.\")\n\n\t/**\n\t\t* Builds the scatter plot.\n\t\t*\n\t\t* @param outputPath the output path\n\t\t* @return true, if successful\n\t\t*/\n\tdef buildScatterPlot(outputPath: String): Boolean \u003d {\n\t\tval spatialRDD \u003d new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions)\n\t\tvar visualizationOperator \u003d new ScatterPlot(1000, 600, USMainLandBoundary, false)\n\t\tvisualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true)\n\t\tvisualizationOperator.Visualize(sparkContext, spatialRDD)\n\t\tvar imageGenerator \u003d new ImageGenerator\n\t\timageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, outputPath, ImageType.PNG)\n\t\ttrue\n\t}\n\n\t/**\n\t\t* Builds the heat map.\n\t\t*\n\t\t* @param outputPath the output path\n\t\t* @return true, if successful\n\t\t*/\n\tdef buildHeatMap(outputPath: String): Boolean \u003d {\n\t\tval spatialRDD \u003d new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY)\n\t\tval visualizationOperator \u003d new HeatMap(1000, 600, USMainLandBoundary, false, 2)\n\t\tvisualizationOperator.Visualize(sparkContext, spatialRDD)\n\t\tval imageGenerator \u003d new ImageGenerator\n\t\timageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, outputPath, ImageType.PNG)\n\t\ttrue\n\t}\n\n\t/**\n\t\t* Builds the choropleth map.\n\t\t*\n\t\t* @param outputPath the output path\n\t\t* @return true, if successful\n\t\t*/\n\tdef buildChoroplethMap(outputPath: String): Boolean \u003d {\n\t\tval spatialRDD \u003d new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY)\n\t\tval queryRDD \u003d new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions, StorageLevel.MEMORY_ONLY)\n\t\tspatialRDD.spatialPartitioning(GridType.KDBTREE)\n\t\tqueryRDD.spatialPartitioning(spatialRDD.getPartitioner)\n\t\tspatialRDD.buildIndex(IndexType.QUADTREE, true)\n\t\tval joinResult \u003d JoinQuery.SpatialJoinQueryCountByKey(spatialRDD, queryRDD, true, false)\n\t\tval visualizationOperator \u003d new ChoroplethMap(1000, 600, USMainLandBoundary, false)\n\t\tvisualizationOperator.CustomizeColor(255, 255, 255, 255, Color.RED, true)\n\t\tvisualizationOperator.Visualize(sparkContext, joinResult)\n\t\tval frontImage \u003d new ScatterPlot(1000, 600, USMainLandBoundary, false)\n\t\tfrontImage.CustomizeColor(0, 0, 0, 255, Color.GREEN, true)\n\t\tfrontImage.Visualize(sparkContext, queryRDD)\n\t\tval overlayOperator \u003d new RasterOverlayOperator(visualizationOperator.rasterImage)\n\t\toverlayOperator.JoinImage(frontImage.rasterImage)\n\t\tval imageGenerator \u003d new ImageGenerator\n\t\timageGenerator.SaveRasterImageAsLocalFile(overlayOperator.backRasterImage, outputPath, ImageType.PNG)\n\t\ttrue\n\t}\n\n\t/**\n\t\t* Parallel filter render no stitch.\n\t\t*\n\t\t* @param outputPath the output path\n\t\t* @return true, if successful\n\t\t*/\n\tdef parallelFilterRenderNoStitch(outputPath: String): Boolean \u003d {\n\t\tval spatialRDD \u003d new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY)\n\t\tval visualizationOperator \u003d new HeatMap(1000, 600, USMainLandBoundary, false, 2, 4, 4, true, true)\n\t\tvisualizationOperator.Visualize(sparkContext, spatialRDD)\n\t\tval imageGenerator \u003d new ImageGenerator\n\t\timageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.distributedRasterImage, outputPath, ImageType.PNG)\n\t\ttrue\n\t}\n\n//\tdef earthdataVisualization(outputPath: String): Boolean \u003d {\n//\t\tval earthdataHDFPoint \u003d new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName,\n//\t\t\tHDFDataVariableList, HDFDataVariableName, HDFswitchXY, urlPrefix)\n//\t\tval spatialRDD \u003d new PointRDD(sparkContext, earthdataInputLocation, earthdataNumPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY)\n//\t\tval visualizationOperator \u003d new ScatterPlot(1000, 600, spatialRDD.boundaryEnvelope, ColorizeOption.EARTHOBSERVATION, false, false)\n//\t\tvisualizationOperator.CustomizeColor(255, 255, 255, 255, Color.BLUE, true)\n//\t\tvisualizationOperator.Visualize(sparkContext, spatialRDD)\n//\t\tval imageGenerator \u003d new ImageGenerator\n//\t\timageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, outputPath, ImageType.PNG)\n//\t\ttrue\n//\t}\n\n\tdef sqlApiVisualization(outputPath: String): Boolean \u003d {\n\t\tval sqlContext \u003d new SQLContext(sparkContext)\n\t\tval spark \u003d sqlContext.sparkSession\n\t\tSedonaSQLRegistrator.registerAll(spark)\n\t\tSedonaVizRegistrator.registerAll(spark)\n\t\tvar pointDf \u003d spark.read.format(\"csv\").option(\"delimiter\", \",\").option(\"header\", \"false\").load(PointInputLocation)\n\t\tpointDf.selectExpr(\"ST_Point(cast(_c0 as Decimal(24,20)),cast(_c1 as Decimal(24,20))) as shape\")\n\t\t\t.filter(\"ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)\").createOrReplaceTempView(\"pointtable\")\n\t\tspark.sql(\n\t\t\t\"\"\"\n\t\t\t\t|CREATE OR REPLACE TEMP VIEW pixels AS\n\t\t\t\t|SELECT pixel, shape FROM pointtable\n\t\t\t\t|LATERAL VIEW Explode(ST_Pixelize(shape, 256, 256, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000))) AS pixel\n\t\t\t\"\"\".stripMargin)\n\t\tspark.sql(\n\t\t\t\"\"\"\n\t\t\t\t|CREATE OR REPLACE TEMP VIEW pixelaggregates AS\n\t\t\t\t|SELECT pixel, count(*) as weight\n\t\t\t\t|FROM pixels\n\t\t\t\t|GROUP BY pixel\n\t\t\t\"\"\".stripMargin)\n\t\tspark.sql(\n\t\t\t\"\"\"\n\t\t\t\t|CREATE OR REPLACE TEMP VIEW images AS\n\t\t\t\t|SELECT ST_Render(pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates), \u0027red\u0027)) AS image\n\t\t\t\t|FROM pixelaggregates\n\t\t\t\"\"\".stripMargin)\n\t\tvar image \u003d spark.table(\"images\").take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage\n\t\tvar imageGenerator \u003d new ImageGenerator\n\t\timageGenerator.SaveRasterImageAsLocalFile(image, outputPath, ImageType.PNG)\n\t\tspark.sql(\n\t\t\t\"\"\"\n\t\t\t\t|CREATE OR REPLACE TEMP VIEW imagestring AS\n\t\t\t\t|SELECT ST_EncodeImage(image)\n\t\t\t\t|FROM images\n\t\t\t\"\"\".stripMargin)\n\t\tspark.table(\"imagestring\").show()\n\t\ttrue\n\t}\n\n\n}",
+      "user": "anonymous",
+      "dateUpdated": "2023-04-27 04:37:58.257",
+      "progress": 0,
+      "config": {
+        "tableHide": true,
+        "editorSetting": {},
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "\u001b[33mwarning: \u001b[0mthere were three deprecation warnings\n\u001b[33mwarning: \u001b[0mthere was one deprecation warning (since 2.0.0)\n\u001b[33mwarning: \u001b[0mthere were four deprecation warnings in total; for details, enable `:setting -deprecation\u0027 or `:replay -deprecation\u0027\ndefined object ScalaExample\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682398947724_428440944",
+      "id": "paragraph_1682398947724_428440944",
+      "dateCreated": "2023-04-25 05:02:27.724",
+      "dateStarted": "2023-04-27 04:37:58.277",
+      "dateFinished": "2023-04-27 04:37:59.878",
+      "status": "FINISHED"
+    },
+    {
+      "text": "\nmyDataFrame \u003d sparkSession.sql(\"YOUR_SQL\")\nmyDataFrame.createOrReplaceTempView(\"spatialDf\")\n",
+      "user": "anonymous",
+      "dateUpdated": "2023-04-27 04:42:10.776",
+      "progress": 0,
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true,
+        "editorSetting": {}
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "ERROR",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Undefined function: \u0027ST_Point\u0027. This function is neither a registered temporary function nor a permanent function registered in the database \u0027default\u0027.; line 3 pos 7"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682570278276_1735757981",
+      "id": "paragraph_1682570278276_1735757981",
+      "dateCreated": "2023-04-27 04:37:58.276",
+      "dateStarted": "2023-04-27 04:40:18.363",
+      "dateFinished": "2023-04-27 04:40:18.824",
+      "status": "ERROR"
+    },
+    {
+      "text": "%spark\nvar pointdf \u003d spark.read.format(\"csv\").option(\"delimiter\", \",\").option(\"header\", \"false\").load(\"data/arealm.csv\")",
+      "user": "anonymous",
+      "dateUpdated": "2023-04-27 08:26:07.584",
+      "progress": 0,
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "ERROR",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "org.apache.spark.SparkException: Job aborted due to stage failure: Master removed our application: KILLED\n  at org.apache.spark.scheduler.DAGScheduler.failJobAndIndependentStages(DAGScheduler.scala:2258)\n  at org.apache.spark.scheduler.DAGScheduler.$anonfun$abortStage$2(DAGScheduler.scala:2207)\n  at org.apache.spark.scheduler.DAGScheduler.$anonfun$abortStage$2$adapted(DAGScheduler.scala:2206)\n  at scala.collection.mutable.ResizableArray.foreach(ResizableArray.scala:62)\n  at scala.collection.mutable.ResizableArray.foreach$(ResizableArray.scala:55)\n  at scala.collection.mutable.ArrayBuffer.foreach(ArrayBuffer.scala:49)\n  at org.apache.spark.scheduler.DAGScheduler.abortStage(DAGScheduler.scala:2206)\n  at org.apache.spark.scheduler.DAGScheduler.$anonfun$handleTaskSetFailed$1(DAGScheduler.scala:1079)\n  at org.apache.spark.scheduler.DAGScheduler.$anonfun$handleTaskSetFailed$1$adapted(DAGScheduler.scala:1079)\n  at scala.Option.foreach(Option.scala:407)\n  at org.apache.spark.scheduler.DAGScheduler.handleTaskSetFailed(DAGScheduler.scala:1079)\n  at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.doOnReceive(DAGScheduler.scala:2445)\n  at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:2387)\n  at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:2376)\n  at org.apache.spark.util.EventLoop$$anon$1.run(EventLoop.scala:49)\n  at org.apache.spark.scheduler.DAGScheduler.runJob(DAGScheduler.scala:868)\n  at org.apache.spark.SparkContext.runJob(SparkContext.scala:2196)\n  at org.apache.spark.SparkContext.runJob(SparkContext.scala:2217)\n  at org.apache.spark.SparkContext.runJob(SparkContext.scala:2236)\n  at org.apache.spark.sql.execution.SparkPlan.executeTake(SparkPlan.scala:472)\n  at org.apache.spark.sql.execution.SparkPlan.executeTake(SparkPlan.scala:425)\n  at org.apache.spark.sql.execution.CollectLimitExec.executeCollect(limit.scala:47)\n  at org.apache.spark.sql.Dataset.collectFromPlan(Dataset.scala:3696)\n  at org.apache.spark.sql.Dataset.$anonfun$head$1(Dataset.scala:2722)\n  at org.apache.spark.sql.Dataset.$anonfun$withAction$1(Dataset.scala:3687)\n  at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withNewExecutionId$5(SQLExecution.scala:103)\n  at org.apache.spark.sql.execution.SQLExecution$.withSQLConfPropagated(SQLExecution.scala:163)\n  at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withNewExecutionId$1(SQLExecution.scala:90)\n  at org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:775)\n  at org.apache.spark.sql.execution.SQLExecution$.withNewExecutionId(SQLExecution.scala:64)\n  at org.apache.spark.sql.Dataset.withAction(Dataset.scala:3685)\n  at org.apache.spark.sql.Dataset.head(Dataset.scala:2722)\n  at org.apache.spark.sql.Dataset.take(Dataset.scala:2929)\n  at org.apache.spark.sql.execution.datasources.csv.TextInputCSVDataSource$.infer(CSVDataSource.scala:112)\n  at org.apache.spark.sql.execution.datasources.csv.CSVDataSource.inferSchema(CSVDataSource.scala:65)\n  at org.apache.spark.sql.execution.datasources.csv.CSVFileFormat.inferSchema(CSVFileFormat.scala:62)\n  at org.apache.spark.sql.execution.datasources.DataSource.$anonfun$getOrInferFileFormatSchema$11(DataSource.scala:209)\n  at scala.Option.orElse(Option.scala:447)\n  at org.apache.spark.sql.execution.datasources.DataSource.getOrInferFileFormatSchema(DataSource.scala:206)\n  at org.apache.spark.sql.execution.datasources.DataSource.resolveRelation(DataSource.scala:419)\n  at org.apache.spark.sql.DataFrameReader.loadV1Source(DataFrameReader.scala:325)\n  at org.apache.spark.sql.DataFrameReader.$anonfun$load$3(DataFrameReader.scala:307)\n  at scala.Option.getOrElse(Option.scala:189)\n  at org.apache.spark.sql.DataFrameReader.load(DataFrameReader.scala:307)\n  at org.apache.spark.sql.DataFrameReader.load(DataFrameReader.scala:239)\n  ... 44 elided\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://1daac7e0f8b9:4040/jobs/job?id\u003d4"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682570418363_458944591",
+      "id": "paragraph_1682570418363_458944591",
+      "dateCreated": "2023-04-27 04:40:18.363",
+      "dateStarted": "2023-04-27 08:26:07.605",
+      "dateFinished": "2023-04-27 08:33:54.004",
+      "status": "ERROR"
+    },
+    {
+      "text": "%spark\n",
+      "user": "anonymous",
+      "dateUpdated": "2023-04-27 08:26:07.605",
+      "progress": 0,
+      "config": {},
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682583967604_424996478",
+      "id": "paragraph_1682583967604_424996478",
+      "dateCreated": "2023-04-27 08:26:07.605",
+      "status": "READY"
+    }
+  ],
+  "name": "Spark",
+  "id": "2HWZWUD8H",
+  "defaultInterpreterGroup": "spark",
+  "version": "0.10.1",
+  "noteParams": {},
+  "noteForms": {},
+  "angularObjects": {},
+  "config": {
+    "isZeppelinNotebookCronEnable": false,
+    "looknfeel": "default",
+    "personalizedMode": "false"
+  },
+  "info": {}
+}

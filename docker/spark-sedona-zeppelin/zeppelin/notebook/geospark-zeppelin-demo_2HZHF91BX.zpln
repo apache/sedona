@@ -1,0 +1,686 @@
+{
+  "paragraphs": [
+    {
+      "text": "%spark\n// \"org.datasyslab\" % \"geotools-wrapper\" % \"geotools-24.1\"\n// \"org.locationtech.jts\" % \"jts-core\" % \"1.17.0\"\n\n// import org.datasyslab\nimport org.apache.sedona.sql.utils.SedonaSQLRegistrator\nimport org.apache.sedona.viz.sql.utils.SedonaVizRegistrator\n\n// Zeppelin creates and injects sc (SparkContext) and sqlContext (HiveContext or SqlContext)\n// So you don\u0027t need create them manually\n\nSedonaSQLRegistrator.registerAll(spark)\nSedonaVizRegistrator.registerAll(spark)\n\nvar pointdf \u003d spark.read.format(\"csv\").option(\"delimiter\", \",\").option(\"header\", \"false\").load(\"/usr/data/arealm.csv\")\npointdf.show()\npointdf.registerTempTable(\"pointtable\")\nspark.sql(\n  \"\"\"\n    |CREATE OR REPLACE TEMP VIEW pointtable AS\n    |SELECT ST_Point(cast(pointtable._c1 as Decimal(24,20)),cast(pointtable._c2 as Decimal(24,20))) as shape\n    |FROM pointtable\n  \"\"\".stripMargin)\n// spark.table(\"pointtable\").show()\nspark.sql(\n  \"\"\"\n    |CREATE OR REPLACE TEMP VIEW pointtable AS\n    |SELECT *\n    |FROM pointtable\n    |WHERE ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)\n  \"\"\".stripMargin)\n// spark.table(\"pointtable\").show()\nspark.sql(\n  \"\"\"\n    |CREATE OR REPLACE TEMP VIEW boundtable AS\n    |SELECT ST_Envelope_Aggr(shape) as bound FROM pointtable\n  \"\"\".stripMargin)\nspark.table(\"pointtable\").show()\nspark.sql(\n  \"\"\"\n    |CREATE OR REPLACE TEMP VIEW pixels AS\n    |SELECT pixel, shape FROM pointtable\n    |LATERAL VIEW EXPLODE(ST_Pixelize(ST_Transform(shape, \u0027epsg:4326\u0027,\u0027epsg:3857\u0027), 256, 256, (SELECT ST_Transform(bound, \u0027epsg:4326\u0027,\u0027epsg:3857\u0027) FROM boundtable))) AS pixel\n  \"\"\".stripMargin)\nspark.table(\"pixels\").show()\nspark.sql(\n  \"\"\"\n    |CREATE OR REPLACE TEMP VIEW pixelaggregates AS\n    |SELECT pixel, count(*) as weight\n    |FROM pixels\n    |GROUP BY pixel\n  \"\"\".stripMargin)\nspark.sql(\n  \"\"\"\n    |CREATE OR REPLACE TEMP VIEW images AS\n    |SELECT ST_EncodeImage(ST_Render(pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates)))) AS image, (SELECT ST_AsText(bound) FROM boundtable) AS boundary\n    |FROM pixelaggregates\n  \"\"\".stripMargin)\nspark.table(\"images\").show()\nspark.sql(\n  \"\"\"\n    |CREATE OR REPLACE TEMP VIEW wktpoint AS\n    |SELECT ST_AsText(shape) as geom\n    |FROM pointtable\n  \"\"\".stripMargin)\nspark.table(\"wktpoint\").show()",
+      "user": "anonymous",
+      "dateUpdated": "2023-05-03 08:32:03.447",
+      "progress": 99,
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "\u001b[33mwarning: \u001b[0mthere was one deprecation warning (since 2.0.0); for details, enable `:setting -deprecation\u0027 or `:replay -deprecation\u0027\n+--------------+----------+---------+--------------+--------------+\n|           _c0|       _c1|      _c2|           _c3|           _c4|\n+--------------+----------+---------+--------------+--------------+\n|testattribute0|-88.331492|32.324142|testattribute1|testattribute2|\n|testattribute0|-88.175933|32.360763|testattribute1|testattribute2|\n|testattribute0|-88.388954|32.357073|testattribute1|testattribute2|\n|testattribute0|-88.221102| 32.35078|testattribute1|testattribute2|\n|testattribute0|-88.323995|32.950671|testattribute1|testattribute2|\n|testattribute0|-88.231077|32.700812|testattribute1|testattribute2|\n|testattribute0|-88.349276|32.548266|testattribute1|testattribute2|\n|testattribute0|-88.304259|32.488903|testattribute1|testattribute2|\n|testattribute0|-88.182481| 32.59966|testattribute1|testattribute2|\n|testattribute0|-86.955186|32.617088|testattribute1|testattribute2|\n|testattribute0|-87.059169|32.378484|testattribute1|testattribute2|\n|testattribute0|-87.251219|32.052598|testattribute1|testattribute2|\n|testattribute0|-87.534883|31.934442|testattribute1|testattribute2|\n|testattribute0| -87.49702|31.894541|testattribute1|testattribute2|\n|testattribute0|-88.280149|33.325473|testattribute1|testattribute2|\n|testattribute0|-88.153618|33.261297|testattribute1|testattribute2|\n|testattribute0|-86.988768|31.866884|testattribute1|testattribute2|\n|testattribute0|-87.586341|31.959751|testattribute1|testattribute2|\n|testattribute0| -87.40708|31.887472|testattribute1|testattribute2|\n|testattribute0| -87.43091|31.901283|testattribute1|testattribute2|\n+--------------+----------+---------+--------------+--------------+\nonly showing top 20 rows\n\n+--------------------+\n|               shape|\n+--------------------+\n|POINT (-88.331492...|\n|POINT (-88.175933...|\n|POINT (-88.388954...|\n|POINT (-88.221102...|\n|POINT (-88.323995...|\n|POINT (-88.231077...|\n|POINT (-88.349276...|\n|POINT (-88.304259...|\n|POINT (-88.182481...|\n|POINT (-86.955186...|\n|POINT (-87.059169...|\n|POINT (-87.251219...|\n|POINT (-87.534883...|\n|POINT (-87.49702 ...|\n|POINT (-88.280149...|\n|POINT (-88.153618...|\n|POINT (-86.988768...|\n|POINT (-87.586341...|\n|POINT (-87.40708 ...|\n|POINT (-87.43091 ...|\n+--------------------+\nonly showing top 20 rows\n\n+--------------------+--------------------+\n|               pixel|               shape|\n+--------------------+--------------------+\n|Pixel(x\u003d112.0, y\u003d...|POINT (-88.331492...|\n|Pixel(x\u003d114.0, y\u003d...|POINT (-88.175933...|\n|Pixel(x\u003d113.0, y\u003d...|POINT (-88.388954...|\n|Pixel(x\u003d113.0, y\u003d...|POINT (-88.221102...|\n|Pixel(x\u003d145.0, y\u003d...|POINT (-88.323995...|\n|Pixel(x\u003d132.0, y\u003d...|POINT (-88.231077...|\n|Pixel(x\u003d124.0, y\u003d...|POINT (-88.349276...|\n|Pixel(x\u003d120.0, y\u003d...|POINT (-88.304259...|\n|Pixel(x\u003d126.0, y\u003d...|POINT (-88.182481...|\n|Pixel(x\u003d127.0, y\u003d...|POINT (-86.955186...|\n|Pixel(x\u003d114.0, y\u003d...|POINT (-87.059169...|\n|Pixel(x\u003d97.0, y\u003d1...|POINT (-87.251219...|\n|Pixel(x\u003d91.0, y\u003d9...|POINT (-87.534883...|\n|Pixel(x\u003d88.0, y\u003d1...|POINT (-87.49702 ...|\n|Pixel(x\u003d166.0, y\u003d...|POINT (-88.280149...|\n|Pixel(x\u003d162.0, y\u003d...|POINT (-88.153618...|\n|Pixel(x\u003d87.0, y\u003d1...|POINT (-86.988768...|\n|Pixel(x\u003d92.0, y\u003d9...|POINT (-87.586341...|\n|Pixel(x\u003d88.0, y\u003d1...|POINT (-87.40708 ...|\n|Pixel(x\u003d89.0, y\u003d1...|POINT (-87.43091 ...|\n+--------------------+--------------------+\nonly showing top 20 rows\n\n+--------------------+--------------------+\n|               image|            boundary|\n+--------------------+--------------------+\n|iVBORw0KGgoAAAANS...|POLYGON ((-88.437...|\n+--------------------+--------------------+\n\n+--------------------+\n|                geom|\n+--------------------+\n|POINT (-88.331492...|\n|POINT (-88.175933...|\n|POINT (-88.388954...|\n|POINT (-88.221102...|\n|POINT (-88.323995...|\n|POINT (-88.231077...|\n|POINT (-88.349276...|\n|POINT (-88.304259...|\n|POINT (-88.182481...|\n|POINT (-86.955186...|\n|POINT (-87.059169...|\n|POINT (-87.251219...|\n|POINT (-87.534883...|\n|POINT (-87.49702 ...|\n|POINT (-88.280149...|\n|POINT (-88.153618...|\n|POINT (-86.988768...|\n|POINT (-87.586341...|\n|POINT (-87.40708 ...|\n|POINT (-87.43091 ...|\n+--------------------+\nonly showing top 20 rows\n\nimport org.apache.sedona.sql.utils.SedonaSQLRegistrator\nimport org.apache.sedona.viz.sql.utils.SedonaVizRegistrator\n\u001b[1m\u001b[34mpointdf\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.DataFrame\u001b[0m \u003d [_c0: string, _c1: string ... 3 more fields]\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d5"
+            },
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d6"
+            },
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d7"
+            },
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d8"
+            },
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d9"
+            },
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d10"
+            },
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d11"
+            },
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d12"
+            },
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d13"
+            },
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d14"
+            },
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d15"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682571117166_286593095",
+      "id": "20190227-203333_1886473378",
+      "dateCreated": "2023-04-27 04:51:57.166",
+      "dateStarted": "2023-05-03 08:32:03.466",
+      "dateFinished": "2023-05-03 08:32:18.547",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%spark\nspark.sql(\n  \"\"\"\n    |CREATE OR REPLACE TEMP VIEW person AS\n    |SELECT * FROM (VALUES (100, \u0027John\u0027, 30, 1, \u0027Street 1\u0027),\n    |(200, \u0027Mary\u0027, NULL, 1, \u0027Street 2\u0027),\n    |(300, \u0027Mike\u0027, 80, 3, \u0027Street 3\u0027),\n    |(400, \u0027Dan\u0027, 50, 4, \u0027Street 4\u0027))\n    |LATERAL VIEW EXPLODE(ARRAY(40, 80)) AS c_age\n  \"\"\".stripMargin)\n// spark.sql(\n//   \"\"\"\n//     |SELECT * FROM (VALUES (100, \u0027John\u0027, 30, 1, \u0027Street 1\u0027),\n//     |(200, \u0027Mary\u0027, NULL, 1, \u0027Street 2\u0027),\n//     |(300, \u0027Mike\u0027, 80, 3, \u0027Street 3\u0027),\n//     |(400, \u0027Dan\u0027, 50, 4, \u0027Street 4\u0027))\n//     |LATERAL VIEW EXPLODE(ARRAY(40, 80)) AS c_age\n//     --|LATERAL VIEW EXPLODE(ARRAY(30, 60)) AS d_age;\n//   \"\"\".stripMargin).show()\n// spark.sql(\n//   \"\"\"\n//     SELECT d_age FROM LATERAL VIEW EXPLODE(ARRAY(30, 60)) AS d_age\n//   \"\"\".stripMargin).show()",
+      "user": "anonymous",
+      "dateUpdated": "2023-05-03 08:13:31.844",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "ERROR",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "org.apache.zeppelin.interpreter.InterpreterException: java.io.IOException: Interpreter process is not running\nInterpreter download command: /usr/lib/jvm/java-8-openjdk-amd64/bin/java -Dfile.encoding\u003dUTF-8 -Dlog4j.configuration\u003dfile:///opt/zeppelin/conf/log4j.properties -Dlog4j.configurationFile\u003dfile:///opt/zeppelin/conf/log4j2.properties -Dzeppelin.log.file\u003d/opt/zeppelin/logs/zeppelin-interpreter-spark-shared_process--5d63c832ac3f.log -cp :/opt/zeppelin/interpreter/spark/*:::/opt/zeppelin/interpreter/zeppelin-interpreter-shaded-0.10.1.jar:/opt/zeppelin/interpreter/spark/spark-interpreter-0.10.1.jar org.apache.zeppelin.interpreter.remote.RemoteInterpreterDownloader 172.18.0.4 46453 spark /opt/zeppelin/local-repo/spark\n23/05/03 07:31:03 INFO RemoteInterpreterDownloader: Loading all libraries for interpreter spark to /opt/zeppelin/local-repo/spark\n23/05/03 07:31:03 INFO RemoteInterpreterDownloader: Library sedona-python-adapter-3.0_2.12-1.3.1-incubating.jar is present \n23/05/03 07:31:03 INFO RemoteInterpreterDownloader: Library sedona-viz-3.0_2.12-1.3.1-incubating.jar is present \n[INFO] Interpreter launch command: /opt/zeppelin/spark/bin/spark-submit --class org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer --driver-class-path :/opt/zeppelin/local-repo/spark/*:/opt/zeppelin/interpreter/spark/*:::/opt/zeppelin/interpreter/zeppelin-interpreter-shaded-0.10.1.jar:/opt/zeppelin/interpreter/spark/spark-interpreter-0.10.1.jar --driver-java-options  -Dfile.encoding\u003dUTF-8 -Dlog4j.configuration\u003dfile:///opt/zeppelin/conf/log4j.properties -Dlog4j.configurationFile\u003dfile:///opt/zeppelin/conf/log4j2.properties -Dzeppelin.log.file\u003d/opt/zeppelin/logs/zeppelin-interpreter-spark-shared_process--5d63c832ac3f.log --conf spark.executor.instances\u003d2 --conf spark.app.name\u003dspark-shared_process --conf spark.webui.yarn.useProxy\u003dfalse --conf spark.driver.cores\u003d2 --conf spark.executor.memory\u003d1g --conf spark.master\u003dspark://spark-master:7077 --conf spark.jars.packages\u003dorg.datasyslab:geotools-wrapper:1.3.0-27.2 --conf spark.driver.memory\u003d1g --conf spark.executor.cores\u003d2 /opt/zeppelin/interpreter/spark/spark-interpreter-0.10.1.jar 172.18.0.4 46453 spark-shared_process :\nSLF4J: Class path contains multiple SLF4J bindings.\nSLF4J: Found binding in [jar:file:/opt/zeppelin/interpreter/spark/spark-interpreter-0.10.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]\nSLF4J: Found binding in [jar:file:/opt/zeppelin/spark/jars/slf4j-log4j12-1.7.30.jar!/org/slf4j/impl/StaticLoggerBinder.class]\nSLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.\nSLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]\nIvy Default Cache set to: /home/zeppelin/.ivy2/cache\nThe jars for the packages stored in: /home/zeppelin/.ivy2/jars\n:: loading settings :: url \u003d jar:file:/opt/zeppelin/spark/jars/ivy-2.4.0.jar!/org/apache/ivy/core/settings/ivysettings.xml\norg.datasyslab#geotools-wrapper added as a dependency\n:: resolving dependencies :: org.apache.spark#spark-submit-parent-a52e9e8a-e69c-4123-96fe-b90c01d9a0be;1.0\n\tconfs: [default]\nException in thread \"main\" java.io.FileNotFoundException: /home/zeppelin/.ivy2/cache/resolved-org.apache.spark-spark-submit-parent-a52e9e8a-e69c-4123-96fe-b90c01d9a0be-1.0.xml (No such file or directory)\n\tat java.io.FileOutputStream.open0(Native Method)\n\tat java.io.FileOutputStream.open(FileOutputStream.java:270)\n\tat java.io.FileOutputStream.\u003cinit\u003e(FileOutputStream.java:213)\n\tat java.io.FileOutputStream.\u003cinit\u003e(FileOutputStream.java:162)\n\tat org.apache.ivy.plugins.parser.xml.XmlModuleDescriptorWriter.write(XmlModuleDescriptorWriter.java:70)\n\tat org.apache.ivy.plugins.parser.xml.XmlModuleDescriptorWriter.write(XmlModuleDescriptorWriter.java:62)\n\tat org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor.toIvyFile(DefaultModuleDescriptor.java:563)\n\tat org.apache.ivy.core.cache.DefaultResolutionCacheManager.saveResolvedModuleDescriptor(DefaultResolutionCacheManager.java:176)\n\tat org.apache.ivy.core.resolve.ResolveEngine.resolve(ResolveEngine.java:245)\n\tat org.apache.ivy.Ivy.resolve(Ivy.java:523)\n\tat org.apache.spark.deploy.SparkSubmitUtils$.resolveMavenCoordinates(SparkSubmit.scala:1387)\n\tat org.apache.spark.deploy.DependencyUtils$.resolveMavenDependencies(DependencyUtils.scala:54)\n\tat org.apache.spark.deploy.SparkSubmit.prepareSubmitEnvironment(SparkSubmit.scala:308)\n\tat org.apache.spark.deploy.SparkSubmit.org$apache$spark$deploy$SparkSubmit$$runMain(SparkSubmit.scala:871)\n\tat org.apache.spark.deploy.SparkSubmit.doRunMain$1(SparkSubmit.scala:180)\n\tat org.apache.spark.deploy.SparkSubmit.submit(SparkSubmit.scala:203)\n\tat org.apache.spark.deploy.SparkSubmit.doSubmit(SparkSubmit.scala:90)\n\tat org.apache.spark.deploy.SparkSubmit$$anon$2.doSubmit(SparkSubmit.scala:1007)\n\tat org.apache.spark.deploy.SparkSubmit$.main(SparkSubmit.scala:1016)\n\tat org.apache.spark.deploy.SparkSubmit.main(SparkSubmit.scala)\n\n\tat org.apache.zeppelin.interpreter.remote.RemoteInterpreter.open(RemoteInterpreter.java:129)\n\tat org.apache.zeppelin.interpreter.remote.RemoteInterpreter.getFormType(RemoteInterpreter.java:271)\n\tat org.apache.zeppelin.notebook.Paragraph.jobRun(Paragraph.java:438)\n\tat org.apache.zeppelin.notebook.Paragraph.jobRun(Paragraph.java:69)\n\tat org.apache.zeppelin.scheduler.Job.run(Job.java:172)\n\tat org.apache.zeppelin.scheduler.AbstractScheduler.runJob(AbstractScheduler.java:132)\n\tat org.apache.zeppelin.scheduler.RemoteScheduler$JobRunner.run(RemoteScheduler.java:182)\n\tat java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)\n\tat java.util.concurrent.FutureTask.run(FutureTask.java:266)\n\tat java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$201(ScheduledThreadPoolExecutor.java:180)\n\tat java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:293)\n\tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)\n\tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n\tat java.lang.Thread.run(Thread.java:748)\nCaused by: java.io.IOException: Interpreter process is not running\nInterpreter download command: /usr/lib/jvm/java-8-openjdk-amd64/bin/java -Dfile.encoding\u003dUTF-8 -Dlog4j.configuration\u003dfile:///opt/zeppelin/conf/log4j.properties -Dlog4j.configurationFile\u003dfile:///opt/zeppelin/conf/log4j2.properties -Dzeppelin.log.file\u003d/opt/zeppelin/logs/zeppelin-interpreter-spark-shared_process--5d63c832ac3f.log -cp :/opt/zeppelin/interpreter/spark/*:::/opt/zeppelin/interpreter/zeppelin-interpreter-shaded-0.10.1.jar:/opt/zeppelin/interpreter/spark/spark-interpreter-0.10.1.jar org.apache.zeppelin.interpreter.remote.RemoteInterpreterDownloader 172.18.0.4 46453 spark /opt/zeppelin/local-repo/spark\n23/05/03 07:31:03 INFO RemoteInterpreterDownloader: Loading all libraries for interpreter spark to /opt/zeppelin/local-repo/spark\n23/05/03 07:31:03 INFO RemoteInterpreterDownloader: Library sedona-python-adapter-3.0_2.12-1.3.1-incubating.jar is present \n23/05/03 07:31:03 INFO RemoteInterpreterDownloader: Library sedona-viz-3.0_2.12-1.3.1-incubating.jar is present \n[INFO] Interpreter launch command: /opt/zeppelin/spark/bin/spark-submit --class org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer --driver-class-path :/opt/zeppelin/local-repo/spark/*:/opt/zeppelin/interpreter/spark/*:::/opt/zeppelin/interpreter/zeppelin-interpreter-shaded-0.10.1.jar:/opt/zeppelin/interpreter/spark/spark-interpreter-0.10.1.jar --driver-java-options  -Dfile.encoding\u003dUTF-8 -Dlog4j.configuration\u003dfile:///opt/zeppelin/conf/log4j.properties -Dlog4j.configurationFile\u003dfile:///opt/zeppelin/conf/log4j2.properties -Dzeppelin.log.file\u003d/opt/zeppelin/logs/zeppelin-interpreter-spark-shared_process--5d63c832ac3f.log --conf spark.executor.instances\u003d2 --conf spark.app.name\u003dspark-shared_process --conf spark.webui.yarn.useProxy\u003dfalse --conf spark.driver.cores\u003d2 --conf spark.executor.memory\u003d1g --conf spark.master\u003dspark://spark-master:7077 --conf spark.jars.packages\u003dorg.datasyslab:geotools-wrapper:1.3.0-27.2 --conf spark.driver.memory\u003d1g --conf spark.executor.cores\u003d2 /opt/zeppelin/interpreter/spark/spark-interpreter-0.10.1.jar 172.18.0.4 46453 spark-shared_process :\nSLF4J: Class path contains multiple SLF4J bindings.\nSLF4J: Found binding in [jar:file:/opt/zeppelin/interpreter/spark/spark-interpreter-0.10.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]\nSLF4J: Found binding in [jar:file:/opt/zeppelin/spark/jars/slf4j-log4j12-1.7.30.jar!/org/slf4j/impl/StaticLoggerBinder.class]\nSLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.\nSLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]\nIvy Default Cache set to: /home/zeppelin/.ivy2/cache\nThe jars for the packages stored in: /home/zeppelin/.ivy2/jars\n:: loading settings :: url \u003d jar:file:/opt/zeppelin/spark/jars/ivy-2.4.0.jar!/org/apache/ivy/core/settings/ivysettings.xml\norg.datasyslab#geotools-wrapper added as a dependency\n:: resolving dependencies :: org.apache.spark#spark-submit-parent-a52e9e8a-e69c-4123-96fe-b90c01d9a0be;1.0\n\tconfs: [default]\nException in thread \"main\" java.io.FileNotFoundException: /home/zeppelin/.ivy2/cache/resolved-org.apache.spark-spark-submit-parent-a52e9e8a-e69c-4123-96fe-b90c01d9a0be-1.0.xml (No such file or directory)\n\tat java.io.FileOutputStream.open0(Native Method)\n\tat java.io.FileOutputStream.open(FileOutputStream.java:270)\n\tat java.io.FileOutputStream.\u003cinit\u003e(FileOutputStream.java:213)\n\tat java.io.FileOutputStream.\u003cinit\u003e(FileOutputStream.java:162)\n\tat org.apache.ivy.plugins.parser.xml.XmlModuleDescriptorWriter.write(XmlModuleDescriptorWriter.java:70)\n\tat org.apache.ivy.plugins.parser.xml.XmlModuleDescriptorWriter.write(XmlModuleDescriptorWriter.java:62)\n\tat org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor.toIvyFile(DefaultModuleDescriptor.java:563)\n\tat org.apache.ivy.core.cache.DefaultResolutionCacheManager.saveResolvedModuleDescriptor(DefaultResolutionCacheManager.java:176)\n\tat org.apache.ivy.core.resolve.ResolveEngine.resolve(ResolveEngine.java:245)\n\tat org.apache.ivy.Ivy.resolve(Ivy.java:523)\n\tat org.apache.spark.deploy.SparkSubmitUtils$.resolveMavenCoordinates(SparkSubmit.scala:1387)\n\tat org.apache.spark.deploy.DependencyUtils$.resolveMavenDependencies(DependencyUtils.scala:54)\n\tat org.apache.spark.deploy.SparkSubmit.prepareSubmitEnvironment(SparkSubmit.scala:308)\n\tat org.apache.spark.deploy.SparkSubmit.org$apache$spark$deploy$SparkSubmit$$runMain(SparkSubmit.scala:871)\n\tat org.apache.spark.deploy.SparkSubmit.doRunMain$1(SparkSubmit.scala:180)\n\tat org.apache.spark.deploy.SparkSubmit.submit(SparkSubmit.scala:203)\n\tat org.apache.spark.deploy.SparkSubmit.doSubmit(SparkSubmit.scala:90)\n\tat org.apache.spark.deploy.SparkSubmit$$anon$2.doSubmit(SparkSubmit.scala:1007)\n\tat org.apache.spark.deploy.SparkSubmit$.main(SparkSubmit.scala:1016)\n\tat org.apache.spark.deploy.SparkSubmit.main(SparkSubmit.scala)\n\n\tat org.apache.zeppelin.interpreter.remote.RemoteInterpreter.internal_create(RemoteInterpreter.java:157)\n\tat org.apache.zeppelin.interpreter.remote.RemoteInterpreter.open(RemoteInterpreter.java:126)\n\t... 13 more\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682942277508_407287624",
+      "id": "paragraph_1682942277508_407287624",
+      "dateCreated": "2023-05-01 11:57:57.508",
+      "dateStarted": "2023-05-03 08:13:31.874",
+      "dateFinished": "2023-05-03 08:13:31.877",
+      "status": "ERROR"
+    },
+    {
+      "text": "%spark\nspark.table(\"pointtable\").show()",
+      "user": "anonymous",
+      "dateUpdated": "2023-05-03 06:53:56.218",
+      "progress": 50,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+--------------------+\n|               shape|\n+--------------------+\n|POINT (-88.331492...|\n|POINT (-88.175933...|\n|POINT (-88.388954...|\n|POINT (-88.221102...|\n|POINT (-88.323995...|\n|POINT (-88.231077...|\n|POINT (-88.349276...|\n|POINT (-88.304259...|\n|POINT (-88.182481...|\n|POINT (-86.955186...|\n|POINT (-87.059169...|\n|POINT (-87.251219...|\n|POINT (-87.534883...|\n|POINT (-87.49702 ...|\n|POINT (-88.280149...|\n|POINT (-88.153618...|\n|POINT (-86.988768...|\n|POINT (-87.586341...|\n|POINT (-87.40708 ...|\n|POINT (-87.43091 ...|\n+--------------------+\nonly showing top 20 rows\n\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://5d63c832ac3f:4040/jobs/job?id\u003d46"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1683089999665_1025440978",
+      "id": "paragraph_1683089999665_1025440978",
+      "dateCreated": "2023-05-03 04:59:59.665",
+      "dateStarted": "2023-05-03 06:53:56.235",
+      "dateFinished": "2023-05-03 06:53:56.541",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%sql\nSELECT *\nFROM wktpoint",
+      "user": "anonymous",
+      "dateUpdated": "2023-05-03 08:32:22.753",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9.0,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "apache-sedona",
+              "height": 300.0,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "geom": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                },
+                "apache-sedona": {
+                  "geometry": {
+                    "name": "geom",
+                    "index": 0.0,
+                    "aggr": "sum"
+                  }
+                },
+                "multiBarChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                }
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "geom",
+                  "index": 0.0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": []
+            },
+            "helium": {}
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TABLE",
+            "data": "geom\nPOINT (-88.331492 32.324142)\nPOINT (-88.175933 32.360763)\nPOINT (-88.388954 32.357073)\nPOINT (-88.221102 32.35078)\nPOINT (-88.323995 32.950671)\nPOINT (-88.231077 32.700812)\nPOINT (-88.349276 32.548266)\nPOINT (-88.304259 32.488903)\nPOINT (-88.182481 32.59966)\nPOINT (-86.955186 32.617088)\nPOINT (-87.059169 32.378484)\nPOINT (-87.251219 32.052598)\nPOINT (-87.534883 31.934442)\nPOINT (-87.49702 31.894541)\nPOINT (-88.280149 33.325473)\nPOINT (-88.153618 33.261297)\nPOINT (-86.988768 31.866884)\nPOINT (-87.586341 31.959751)\nPOINT (-87.40708 31.887472)\nPOINT (-87.43091 31.901283)\nPOINT (-87.296975 31.98196)\nPOINT (-87.989825 33.138512)\nPOINT (-88.279714 33.056158)\nPOINT (-87.903345 33.325066)\nPOINT (-85.770442 34.635835)\nPOINT (-87.441076 34.732319)\nPOINT (-87.849593 32.514133)\nPOINT (-87.727727 32.072313)\nPOINT (-87.297214 32.136159)\nPOINT (-88.22334 33.401035)\nPOINT (-88.27892 33.424303)\nPOINT (-88.231087 33.427042)\nPOINT (-85.313559 32.475982)\nPOINT (-85.86993 34.252899)\nPOINT (-85.624964 34.5007)\nPOINT (-85.731468 34.570682)\nPOINT (-85.692302 34.624062)\nPOINT (-85.531317 34.515826)\nPOINT (-85.176298 32.712359)\nPOINT (-85.675547 34.702872)\nPOINT (-85.622648 34.726025)\nPOINT (-85.868304 34.280348)\nPOINT (-87.997666 32.067377)\nPOINT (-87.754018 31.933427)\nPOINT (-87.900857 31.505556)\nPOINT (-87.75206 31.835213)\nPOINT (-87.896822 31.825628)\nPOINT (-87.832314 33.079741)\nPOINT (-88.009489 33.048378)\nPOINT (-88.052668 33.025677)\nPOINT (-88.040059 32.890493)\nPOINT (-88.08272 32.858272)\nPOINT (-87.904517 32.638514)\nPOINT (-85.852638 33.485912)\nPOINT (-85.60879 33.499487)\nPOINT (-85.43995 31.831141)\nPOINT (-85.508885 31.662225)\nPOINT (-85.592603 31.919352)\nPOINT (-85.576266 31.37517)\nPOINT (-85.471051 31.477447)\nPOINT (-86.907484 32.898887)\nPOINT (-85.595598 34.295102)\nPOINT (-85.590928 31.391637)\nPOINT (-85.76892 34.244298)\nPOINT (-87.410957 31.428077)\nPOINT (-87.67258 31.350691)\nPOINT (-86.995653 31.8049)\nPOINT (-87.49562 31.768868)\nPOINT (-86.192919 34.396765)\nPOINT (-85.472376 31.306926)\nPOINT (-85.534558 34.198603)\nPOINT (-85.459413 34.083355)\nPOINT (-85.79148 34.243672)\nPOINT (-85.716908 34.234799)\nPOINT (-85.747839 34.189321)\nPOINT (-85.480576 34.24759)\nPOINT (-85.685087 34.138127)\nPOINT (-85.710173 34.117499)\nPOINT (-85.773445 31.555344)\nPOINT (-85.631668 31.606412)\nPOINT (-85.648618 31.450672)\nPOINT (-85.640518 31.453655)\nPOINT (-85.647882 31.517597)\nPOINT (-88.229438 33.640421)\nPOINT (-88.084205 33.908644)\nPOINT (-88.022795 33.530668)\nPOINT (-86.943759 31.032665)\nPOINT (-88.153808 32.169641)\nPOINT (-88.38539 32.044417)\nPOINT (-87.358799 31.322289)\nPOINT (-87.4252 31.536122)\nPOINT (-87.463713 31.157989)\nPOINT (-88.223098 32.08822)\nPOINT (-86.199954 34.42215)\nPOINT (-87.178928 31.031561)\nPOINT (-86.211962 34.481298)\nPOINT (-87.147388 31.241187)\nPOINT (-86.787323 31.136704)\nPOINT (-87.597205 31.004429)\nPOINT (-86.174011 34.198769)\nPOINT (-86.439078 34.478315)\nPOINT (-86.2102 34.266362)\nPOINT (-86.141862 31.50221)\nPOINT (-86.183997 31.47244)\nPOINT (-85.9281 31.386069)\nPOINT (-85.249583 31.255858)\nPOINT (-85.12123 31.295949)\nPOINT (-85.9537 32.949935)\nPOINT (-85.675825 32.910345)\nPOINT (-85.976017 32.920054)\nPOINT (-87.320307 31.523614)\nPOINT (-85.91654 32.810679)\nPOINT (-86.689135 31.692897)\nPOINT (-86.484397 31.882322)\nPOINT (-86.467182 31.950225)\nPOINT (-86.834423 31.775774)\nPOINT (-86.519626 31.810448)\nPOINT (-86.568509 31.802747)\nPOINT (-86.539381 31.780034)\nPOINT (-86.469484 32.942814)\nPOINT (-88.031196 34.320087)\nPOINT (-87.886084 34.435597)\nPOINT (-87.76535 34.519997)\nPOINT (-86.956018 34.792149)\nPOINT (-87.140665 34.87079)\nPOINT (-87.134174 34.77669)\nPOINT (-87.208278 34.803619)\nPOINT (-87.946867 33.679719)\nPOINT (-87.805737 33.632587)\nPOINT (-87.688688 33.728094)\nPOINT (-87.589427 33.846982)\nPOINT (-87.622974 33.822286)\nPOINT (-87.591126 33.808408)\nPOINT (-86.839554 34.868023)\nPOINT (-85.279364 31.42974)\nPOINT (-85.387035 31.558294)\nPOINT (-87.591384 33.677834)\nPOINT (-86.193177 31.125174)\nPOINT (-86.069076 31.122589)\nPOINT (-86.946109 34.810445)\nPOINT (-85.08419 31.602258)\nPOINT (-86.995607 34.803945)\nPOINT (-85.387264 31.482895)\nPOINT (-87.182419 33.814973)\nPOINT (-87.092926 33.740829)\nPOINT (-87.289164 33.854504)\nPOINT (-87.358187 33.900677)\nPOINT (-87.214226 33.956774)\nPOINT (-86.257877 33.831763)\nPOINT (-87.23697 33.670688)\nPOINT (-87.331908 33.984754)\nPOINT (-85.417535 32.246656)\nPOINT (-85.085513 32.178963)\nPOINT (-85.079281 32.126125)\nPOINT (-86.262055 33.693827)\nPOINT (-86.688062 33.961911)\nPOINT (-86.589048 33.960245)\nPOINT (-86.264658 34.626)\nPOINT (-86.292029 34.737364)\nPOINT (-86.139904 34.685524)\nPOINT (-85.835169 34.874204)\nPOINT (-86.04574 34.669234)\nPOINT (-85.732584 34.863339)\nPOINT (-86.141461 34.74407)\nPOINT (-85.705225 34.750445)\nPOINT (-85.712377 34.751851)\nPOINT (-85.99517 34.66097)\nPOINT (-85.998752 34.886373)\nPOINT (-85.915426 34.888336)\nPOINT (-85.915808 34.714939)\nPOINT (-85.945006 34.718875)\nPOINT (-86.461129 34.155822)\nPOINT (-86.558472 34.002858)\nPOINT (-86.481722 34.12128)\nPOINT (-87.529107 33.889491)\nPOINT (-85.82299 34.618513)\nPOINT (-85.990183 34.766026)\nPOINT (-85.897266 34.765103)\nPOINT (-86.078793 34.893002)\nPOINT (-85.807645 34.841702)\nPOINT (-86.036259 34.662036)\nPOINT (-88.274033 30.654661)\nPOINT (-88.248711 30.428442)\nPOINT (-87.392559 34.19413)\nPOINT (-87.547093 34.047505)\nPOINT (-87.574166 34.253648)\nPOINT (-87.630336 34.233353)\nPOINT (-87.633806 34.29214)\nPOINT (-86.270448 32.227196)\nPOINT (-86.115793 32.192337)\nPOINT (-88.328687 31.092389)\nPOINT (-88.231224 31.064117)\nPOINT (-88.35633 30.819372)\nPOINT (-88.35457 30.634836)\nPOINT (-88.312483 31.043354)\nPOINT (-86.26295 32.352382)\nPOINT (-88.12883 30.251176)\nPOINT (-88.258617 30.679254)\nPOINT (-88.095613 30.697563)\nPOINT (-86.303285 32.484327)\nPOINT (-85.999763 32.522367)\nPOINT (-88.238112 31.090917)\nPOINT (-88.152078 31.11831)\nPOINT (-86.334758 32.575647)\nPOINT (-86.195705 32.562671)\nPOINT (-87.665227 34.854558)\nPOINT (-87.299915 34.827757)\nPOINT (-87.78928 34.908502)\nPOINT (-87.34158 34.907976)\nPOINT (-87.301546 34.811941)\nPOINT (-87.529125 34.877648)\nPOINT (-85.858592 33.27232)\nPOINT (-87.671252 34.79503)\nPOINT (-85.684548 33.488647)\nPOINT (-87.516048 32.454481)\nPOINT (-87.383782 32.496119)\nPOINT (-87.405794 32.641742)\nPOINT (-87.327001 32.620843)\nPOINT (-87.318449 32.631468)\nPOINT (-86.252236 33.171583)\nPOINT (-86.972997 34.523103)\nPOINT (-87.105455 34.64664)\nPOINT (-86.110675 33.611043)\nPOINT (-86.324848 33.334643)\nPOINT (-87.059583 34.484611)\nPOINT (-87.103763 34.492224)\nPOINT (-85.404462 32.899)\nPOINT (-85.49 33.0623)\nPOINT (-86.863941 34.259495)\nPOINT (-86.779523 34.298889)\nPOINT (-86.709657 34.294134)\nPOINT (-87.498863 34.592301)\nPOINT (-87.167192 34.680133)\nPOINT (-87.237538 34.637676)\nPOINT (-87.294124 34.44363)\nPOINT (-87.520222 34.367609)\nPOINT (-87.445219 34.536725)\nPOINT (-87.385319 34.539729)\nPOINT (-87.318847 34.481296)\nPOINT (-87.325244 34.759587)\nPOINT (-86.633521 32.818894)\nPOINT (-86.524659 32.755352)\nPOINT (-86.571503 32.796475)\nPOINT (-86.63847 32.860605)\nPOINT (-86.768239 33.054101)\nPOINT (-86.692411 32.808126)\nPOINT (-86.794306 32.918877)\nPOINT (-86.856849 32.946244)\nPOINT (-86.849555 32.927106)\nPOINT (-86.799716 32.919851)\nPOINT (-86.542447 32.937733)\nPOINT (-86.586318 32.940945)\nPOINT (-86.602837 32.901716)\nPOINT (-86.928204 31.633677)\nPOINT (-87.03305 31.296621)\nPOINT (-85.772524 33.824565)\nPOINT (-87.722351 30.260513)\nPOINT (-85.622386 33.919953)\nPOINT (-85.773801 33.821567)\nPOINT (-86.308526 31.62918)\nPOINT (-86.407279 31.920133)\nPOINT (-86.358954 31.551705)\nPOINT (-86.353709 31.595469)\nPOINT (-87.541825 33.261329)\nPOINT (-85.841853 32.14996)\nPOINT (-85.966597 32.131295)\nPOINT (-85.658597 32.161924)\nPOINT (-85.877393 32.214371)\nPOINT (-85.60367 32.216655)\nPOINT (-85.573166 32.170074)\nPOINT (-85.970015 31.807818)\nPOINT (-87.177647 33.295354)\nPOINT (-87.754418 33.14246)\nPOINT (-87.412662 33.573082)\nPOINT (-85.728834 31.860101)\nPOINT (-85.706317 31.823355)\nPOINT (-86.126184 31.747603)\nPOINT (-88.100508 34.094523)\nPOINT (-87.734685 34.120051)\nPOINT (-86.589085 34.680443)\nPOINT (-87.815135 33.935088)\nPOINT (-87.999352 34.111859)\nPOINT (-87.813889 34.155057)\nPOINT (-88.272022 31.4381)\nPOINT (-86.537713 34.719291)\nPOINT (-86.379107 34.750098)\nPOINT (-86.598029 34.866564)\nPOINT (-86.442157 34.603768)\nPOINT (-86.489228 34.505811)\nPOINT (-86.369816 34.5681)\nPOINT (-86.75027 34.844376)\nPOINT (-86.724759 34.647421)\nPOINT (-86.718717 34.782714)\nPOINT (-86.685308 34.774874)\nPOINT (-86.652811 34.77161)\nPOINT (-86.599272 34.736348)\nPOINT (-86.379009 34.749755)\nPOINT (-86.438937 33.334532)\nPOINT (-86.719272 33.206293)\nPOINT (-86.778207 34.745706)\nPOINT (-86.393392 31.170624)\nPOINT (-86.785772 33.296791)\nPOINT (-86.795242 33.34646)\nPOINT (-86.6679 34.698494)\nPOINT (-86.430756 31.245033)\nPOINT (-86.427225 31.31718)\nPOINT (-86.428343 31.095276)\nPOINT (-86.472434 31.285208)\nPOINT (-86.253861 31.284346)\nPOINT (-86.628894 31.513763)\nPOINT (-86.281895 31.508007)\nPOINT (-86.676382 32.181479)\nPOINT (-86.632802 32.160198)\nPOINT (-86.633423 32.156464)\nPOINT (-86.739685 33.554167)\nPOINT (-86.45477 32.175195)\nPOINT (-86.856913 33.477542)\nPOINT (-86.709508 32.469068)\nPOINT (-86.719281 33.577392)\nPOINT (-86.758741 33.565205)\nPOINT (-86.830538 33.555539)\nPOINT (-85.786077 32.298444)\nPOINT (-85.864352 32.459293)\nPOINT (-85.760367 32.465395)\nPOINT (-85.661947 32.352511)\nPOINT (-85.617273 32.277048)\nPOINT (-87.736584 30.545518)\nPOINT (-87.806677 30.383542)\nPOINT (-86.876465 33.501841)\nPOINT (-87.8158 30.807194)\nPOINT (-87.785978 30.757256)\nPOINT (-86.826296 33.525889)\nPOINT (-87.768528 31.278179)\nPOINT (-87.684565 30.73504)\nPOINT (-87.522569 30.414045)\nPOINT (-87.848711 31.042592)\nPOINT (-87.756806 30.253419)\nPOINT (-87.688457 30.24873)\nPOINT (-87.902885 30.605001)\nPOINT (-87.160103 34.280239)\nPOINT (-87.920995 33.309852)\nPOINT (-86.91365 33.479007)\nPOINT (-87.70359 30.485254)\nPOINT (-86.780063 33.565142)\nPOINT (-86.887479 33.48474)\nPOINT (-86.876689 33.493178)\nPOINT (-86.816614 33.245043)\nPOINT (-86.628386 33.181625)\nPOINT (-86.809032 33.814569)\nPOINT (-87.581279 30.2898)\nPOINT (-86.756263 33.501213)\nPOINT (-88.383822 32.349204)\nPOINT (-85.628821 32.032609)\nPOINT (-88.048249 34.758061)\nPOINT (-86.73144 32.18025)\nPOINT (-85.727765 31.733181)\nPOINT (-85.663957 34.184797)\nPOINT (-85.827504 34.92251)\nPOINT (-85.915561 34.61215)\nPOINT (-88.241926 32.709591)\nPOINT (-87.97473 33.480883)\nPOINT (-87.279108 33.627665)\nPOINT (-87.291893 34.431676)\nPOINT (-85.639183 32.415549)\nPOINT (-86.834474 31.153512)\nPOINT (-86.186711 34.389375)\nPOINT (-86.341801 31.473137)\nPOINT (-85.652507 33.280223)\nPOINT (-86.257071 34.802574)\nPOINT (-86.048716 32.44059)\nPOINT (-87.784291 32.302)\nPOINT (-86.687292 34.770874)\nPOINT (-86.953922 33.400892)\nPOINT (-86.733092 33.547855)\nPOINT (-86.717359 33.583832)\nPOINT (-86.124099 34.437269)\nPOINT (-87.725025 34.388238)\nPOINT (-85.041156 31.000585)\nPOINT (-87.082701 34.169986)\nPOINT (-87.219391 32.680325)\nPOINT (-87.693801 30.414064)\nPOINT (-86.620382 31.407858)\nPOINT (-87.931755 32.67465)\nPOINT (-88.205027 33.103257)\nPOINT (-86.3708 34.762286)\nPOINT (-87.981987 33.582388)\nPOINT (-86.325459 34.556721)\nPOINT (-85.591277 34.061312)\nPOINT (-88.38771 31.291488)\nPOINT (-87.504942 32.447505)\nPOINT (-86.308316 33.870472)\nPOINT (-86.598472 33.134679)\nPOINT (-86.587709 32.951804)\nPOINT (-87.004191 34.13678)\nPOINT (-88.025575 31.056138)\nPOINT (-86.677745 33.389966)\nPOINT (-85.451636 32.948546)\nPOINT (-86.728498 33.567304)\nPOINT (-86.481563 32.138831)\nPOINT (-88.154989 32.795201)\nPOINT (-85.754616 31.304855)\nPOINT (-86.818935 34.433497)\nPOINT (-87.221347 33.304955)\nPOINT (-86.450267 31.742019)\nPOINT (-85.953909 32.845653)\nPOINT (-86.393742 34.167866)\nPOINT (-87.218309 33.113756)\nPOINT (-87.588166 34.314393)\nPOINT (-85.777431 33.818477)\nPOINT (-86.945634 32.441588)\nPOINT (-88.104757 34.405693)\nPOINT (-87.907967 32.25723)\nPOINT (-85.251936 31.572208)\nPOINT (-85.964178 34.359783)\nPOINT (-85.650389 32.83594)\nPOINT (-86.615802 34.861497)\nPOINT (-85.862334 33.584871)\nPOINT (-85.281778 31.652543)\nPOINT (-85.706824 33.325629)\nPOINT (-85.838235 34.867976)\nPOINT (-87.768081 30.862751)\nPOINT (-86.983396 34.768058)\nPOINT (-86.599959 34.545151)\nPOINT (-86.797994 31.231891)\nPOINT (-86.747794 33.076058)\nPOINT (-86.879076 33.507319)\nPOINT (-86.915689 31.701685)\nPOINT (-88.384664 32.34299)\nPOINT (-87.215083 34.057359)\nPOINT (-85.665839 32.342602)\nPOINT (-85.475087 32.479419)\nPOINT (-85.812437 34.579143)\nPOINT (-87.625247 30.3822)\nPOINT (-86.489998 33.929028)\nPOINT (-86.247291 34.694335)\nPOINT (-88.075762 34.221227)\nPOINT (-85.469698 31.511232)\nPOINT (-88.029262 31.079208)\nPOINT (-87.517995 32.420758)\nPOINT (-86.293286 34.357907)\nPOINT (-85.891041 34.900988)\nPOINT (-85.171258 32.013258)\nPOINT (-86.210346 31.679173)\nPOINT (-87.65326 33.53571)\nPOINT (-87.918905 31.51441)\nPOINT (-87.493438 34.9251)\nPOINT (-86.776809 32.522333)\nPOINT (-86.761997 34.6751)\nPOINT (-85.263894 31.574663)\nPOINT (-86.954912 31.111595)\nPOINT (-86.609578 34.0938)\nPOINT (-85.594688 33.92309)\nPOINT (-85.715538 34.157346)\nPOINT (-86.448778 32.03044)\nPOINT (-85.627308 34.764328)\nPOINT (-85.652338 34.750083)\nPOINT (-87.961805 33.36692)\nPOINT (-85.533082 34.294976)\nPOINT (-87.666907 31.020253)\nPOINT (-87.996276 34.11457)\nPOINT (-87.278659 31.304097)\nPOINT (-85.361343 33.147729)\nPOINT (-87.430378 33.117015)\nPOINT (-86.085225 31.412311)\nPOINT (-85.777608 34.876162)\nPOINT (-86.577605 32.177981)\nPOINT (-86.675037 32.131858)\nPOINT (-87.237329 34.169095)\nPOINT (-85.249783 31.567258)\nPOINT (-87.71071 33.713029)\nPOINT (-88.023887 33.569306)\nPOINT (-87.203432 34.683797)\nPOINT (-87.191427 34.92707)\nPOINT (-86.688301 34.323123)\nPOINT (-87.116624 34.471642)\nPOINT (-86.296687 32.159787)\nPOINT (-86.944905 32.253974)\nPOINT (-88.006658 32.976363)\nPOINT (-85.963664 32.872109)\nPOINT (-88.217247 32.656121)\nPOINT (-86.712374 31.04646)\nPOINT (-86.185367 32.495435)\nPOINT (-86.551141 31.831533)\nPOINT (-88.239041 31.305381)\nPOINT (-85.977257 31.775216)\nPOINT (-85.805262 34.877265)\nPOINT (-86.984928 34.605586)\nPOINT (-87.182068 31.03064)\nPOINT (-85.336109 31.35158)\nPOINT (-87.997639 33.306554)\nPOINT (-87.908921 31.67044)\nPOINT (-86.776779 33.536222)\nPOINT (-87.18995 31.736327)\nPOINT (-86.726404 32.151463)\nPOINT (-85.425687 31.933472)\nPOINT (-86.465403 33.9506)\nPOINT (-87.682881 30.412977)\nPOINT (-88.083414 30.244859)\nPOINT (-87.070564 31.992672)\nPOINT (-86.959284 31.41676)\nPOINT (-87.306059 32.32135)\nPOINT (-88.051643 32.876198)\nPOINT (-85.148553 32.192729)\nPOINT (-88.016063 33.466383)\nPOINT (-86.916217 31.517558)\nPOINT (-86.442845 34.601243)\nPOINT (-86.801896 33.905075)\nPOINT (-87.367379 34.073219)\nPOINT (-85.033719 32.509451)\nPOINT (-85.610817 32.026868)\nPOINT (-86.624797 33.179727)\nPOINT (-87.345752 34.915186)\nPOINT (-86.875777 34.102354)\nPOINT (-86.880908 34.049256)\nPOINT (-86.81656 34.172451)\nPOINT (-86.48557 32.089851)\nPOINT (-87.33606 34.360797)\nPOINT (-85.647631 34.829221)\nPOINT (-86.578361 34.850553)\nPOINT (-88.299543 32.842042)\nPOINT (-86.259114 31.577035)\nPOINT (-86.888117 33.54088)\nPOINT (-85.678991 31.637388)\nPOINT (-85.751747 31.34646)\nPOINT (-85.872517 31.94539)\nPOINT (-85.695276 32.437745)\nPOINT (-87.013685 34.678126)\nPOINT (-85.804199 32.258495)\nPOINT (-87.621828 32.717306)\nPOINT (-86.782718 32.458228)\nPOINT (-88.046041 32.815373)\nPOINT (-87.095533 34.414939)\nPOINT (-85.248655 32.355918)\nPOINT (-87.188932 33.511262)\nPOINT (-85.432366 31.782543)\nPOINT (-87.669786 33.441284)\nPOINT (-86.730425 31.629108)\nPOINT (-86.77016 33.501206)\nPOINT (-85.583742 32.972887)\nPOINT (-86.620831 34.743173)\nPOINT (-85.64521 31.487689)\nPOINT (-86.21095 34.26737)\nPOINT (-88.343429 32.92559)\nPOINT (-85.649943 32.007458)\nPOINT (-87.756588 32.206277)\nPOINT (-86.608513 32.983714)\nPOINT (-85.892986 32.535704)\nPOINT (-86.592761 32.957371)\nPOINT (-86.790265 33.47907)\nPOINT (-87.823276 34.452555)\nPOINT (-85.943286 34.979206)\nPOINT (-86.499984 31.601078)\nPOINT (-86.544468 31.898205)\nPOINT (-86.278036 32.387864)\nPOINT (-85.477625 32.216059)\nPOINT (-85.861945 34.82898)\nPOINT (-87.28468 34.509193)\nPOINT (-88.061832 32.916877)\nPOINT (-86.633615 32.02261)\nPOINT (-87.917839 34.367813)\nPOINT (-87.40833 34.644286)\nPOINT (-87.259129 34.284952)\nPOINT (-88.193709 31.438093)\nPOINT (-85.115473 31.532494)\nPOINT (-88.09568 33.860857)\nPOINT (-86.391119 31.553239)\nPOINT (-87.019974 32.424417)\nPOINT (-88.199433 33.127659)\nPOINT (-85.50774 32.584043)\nPOINT (-86.16586 34.162295)\nPOINT (-85.875579 34.55046)\nPOINT (-85.895275 34.776976)\nPOINT (-87.27657 34.041832)\nPOINT (-85.785491 34.623936)\nPOINT (-88.076364 33.295085)\nPOINT (-87.642073 34.095263)\nPOINT (-88.206633 33.72003)\nPOINT (-85.653906 31.511704)\nPOINT (-88.112518 34.728463)\nPOINT (-87.487106 34.47734)\nPOINT (-86.427684 34.664184)\nPOINT (-85.968109 34.711481)\nPOINT (-85.775765 34.936669)\nPOINT (-87.906318 34.211538)\nPOINT (-85.866297 31.038765)\nPOINT (-87.497839 34.867151)\nPOINT (-85.756262 34.945873)\nPOINT (-86.895253 32.997732)\nPOINT (-86.932213 34.451346)\nPOINT (-86.331167 34.671664)\nPOINT (-87.805654 30.472903)\nPOINT (-86.401172 31.948492)\nPOINT (-86.091041 33.432561)\nPOINT (-85.090884 31.562775)\nPOINT (-85.369419 33.140171)\nPOINT (-85.86031 34.959136)\nPOINT (-85.96618 33.490187)\nPOINT (-86.34079 30.994331)\nPOINT (-86.952022 31.659498)\nPOINT (-88.034266 34.347443)\nPOINT (-87.667585 30.392203)\nPOINT (-87.913147 33.285961)\nPOINT (-86.708441 31.508779)\nPOINT (-86.724201 32.927055)\nPOINT (-88.051433 32.75774)\nPOINT (-86.758937 34.32903)\nPOINT (-87.845263 33.133826)\nPOINT (-87.110288 32.226443)\nPOINT (-86.6897 31.219826)\nPOINT (-86.192288 31.075947)\nPOINT (-85.620155 31.776683)\nPOINT (-87.892311 32.009901)\nPOINT (-86.188752 32.361325)\nPOINT (-85.890783 32.259669)\nPOINT (-86.952835 33.439197)\nPOINT (-86.707893 33.373596)\nPOINT (-88.283598 32.174773)\nPOINT (-87.551498 34.842292)\nPOINT (-88.290852 30.918718)\nPOINT (-88.433239 31.424064)\nPOINT (-86.99104 31.11539)\nPOINT (-85.385302 31.202856)\nPOINT (-85.331478 31.719644)\nPOINT (-86.696758 32.337125)\nPOINT (-87.082541 31.920676)\nPOINT (-87.459194 34.469472)\nPOINT (-87.548336 33.315541)\nPOINT (-86.32417 34.013789)\nPOINT (-86.90931 33.482642)\nPOINT (-85.724018 34.439862)\nPOINT (-88.082014 31.187496)\nPOINT (-85.695639 34.653984)\nPOINT (-85.82291 34.967365)\nPOINT (-86.234226 33.584863)\nPOINT (-85.947435 32.922415)\nPOINT (-87.786468 33.687922)\nPOINT (-87.166113 33.970356)\nPOINT (-88.21562 33.638781)\nPOINT (-87.860728 31.014264)\nPOINT (-86.577356 34.721189)\nPOINT (-87.418734 34.87048)\nPOINT (-87.981607 34.761804)\nPOINT (-86.907779 33.4665)\nPOINT (-85.850062 32.039673)\nPOINT (-88.33384 32.818562)\nPOINT (-85.83404 32.826079)\nPOINT (-86.528525 32.319122)\nPOINT (-87.506151 31.308529)\nPOINT (-86.751054 33.376606)\nPOINT (-88.39203 32.507796)\nPOINT (-87.238671 34.749723)\nPOINT (-87.62147 34.225833)\nPOINT (-88.089185 32.674746)\nPOINT (-85.311773 33.152894)\nPOINT (-85.643606 34.634533)\nPOINT (-87.193177 31.544829)\nPOINT (-86.720296 32.797156)\nPOINT (-87.430689 34.820238)\nPOINT (-86.352684 33.266303)\nPOINT (-86.567204 32.88196)\nPOINT (-87.86424 32.841997)\nPOINT (-87.662692 33.474603)\nPOINT (-87.734928 33.546086)\nPOINT (-87.686982 34.803559)\nPOINT (-87.368582 31.03007)\nPOINT (-86.954592 31.435689)\nPOINT (-87.683927 30.62592)\nPOINT (-87.185367 33.750947)\nPOINT (-88.092666 32.859598)\nPOINT (-86.329458 34.069801)\nPOINT (-86.450904 31.197666)\nPOINT (-86.862045 32.933379)\nPOINT (-87.606025 33.17792)\nPOINT (-87.682814 30.561043)\nPOINT (-88.257387 31.464939)\nPOINT (-85.675929 34.149189)\nPOINT (-87.883052 34.735771)\nPOINT (-88.238912 30.681108)\nPOINT (-87.408418 32.502057)\nPOINT (-86.33276 34.670648)\nPOINT (-86.935839 34.261647)\nPOINT (-87.47178 34.629541)\nPOINT (-87.541709 34.027098)\nPOINT (-87.810187 30.805809)\nPOINT (-88.393581 30.719663)\nPOINT (-87.191388 34.844669)\nPOINT (-86.560033 32.89841)\nPOINT (-86.745402 33.489928)\nPOINT (-88.035294 30.667355)\nPOINT (-85.696658 34.889271)\nPOINT (-88.078256 34.143629)\nPOINT (-87.608881 33.452863)\nPOINT (-85.368421 33.150657)\nPOINT (-88.004043 33.401148)\nPOINT (-88.031019 34.482755)\nPOINT (-87.582709 31.58088)\nPOINT (-85.863783 33.222747)\nPOINT (-86.569115 33.137921)\nPOINT (-87.627813 33.513745)\nPOINT (-86.824393 33.466513)\nPOINT (-87.525919 34.57419)\nPOINT (-88.009548 31.087675)\nPOINT (-86.200816 34.180035)\nPOINT (-86.9504 34.103457)\nPOINT (-87.6294 33.905259)\nPOINT (-87.807955 32.483947)\nPOINT (-86.792479 32.677062)\nPOINT (-87.634507 33.000698)\nPOINT (-85.621002 31.812962)\nPOINT (-88.341128 31.219645)\nPOINT (-87.799625 30.38068)\nPOINT (-86.932306 32.815554)\nPOINT (-85.418598 31.535549)\nPOINT (-85.965249 31.227181)\nPOINT (-85.481303 32.293501)\nPOINT (-86.193061 31.161104)\nPOINT (-88.145555 34.207423)\nPOINT (-86.789072 34.833016)\nPOINT (-87.758948 31.930778)\nPOINT (-87.051124 32.486061)\nPOINT (-85.808139 34.907425)\nPOINT (-85.676043 31.595825)\nPOINT (-88.084794 33.098864)\nPOINT (-88.103996 31.123967)\nPOINT (-86.216193 33.20003)\nPOINT (-86.63448 32.981122)\nPOINT (-87.8196 31.210995)\nPOINT (-86.94342 33.365682)\nPOINT (-86.728572 32.32341)\nPOINT (-87.297251 32.141227)\nPOINT (-87.745222 30.996559)\nPOINT (-85.994388 33.98933)\nPOINT (-86.830669 34.149724)\nPOINT (-86.77898 33.551926)\nPOINT (-86.7457 34.698158)\nPOINT (-87.901576 34.151585)\nPOINT (-86.681624 32.98147)\nPOINT (-86.304342 33.606379)\nPOINT (-86.234139 31.262822)\nPOINT (-87.821686 33.72374)\nPOINT (-87.638468 32.341924)\nPOINT (-85.539069 31.301392)\nPOINT (-87.279914 31.7874)\nPOINT (-87.527908 33.72387)\nPOINT (-85.993678 33.987033)\nPOINT (-88.252489 32.916134)\nPOINT (-87.191388 34.945502)\nPOINT (-86.150893 31.815061)\nPOINT (-85.249941 32.446286)\nPOINT (-86.861541 33.12963)\nPOINT (-87.517464 33.16857)\nPOINT (-85.838051 33.159457)\nPOINT (-86.419762 32.291142)\nPOINT (-86.08815 34.022278)\nPOINT (-87.771957 30.614546)\nPOINT (-86.048282 34.373231)\nPOINT (-86.632433 33.671847)\nPOINT (-87.079752 31.056924)\nPOINT (-87.388952 34.621195)\nPOINT (-87.800737 33.747223)\nPOINT (-85.697958 31.86864)\nPOINT (-85.599376 31.576691)\nPOINT (-87.608946 31.986559)\nPOINT (-87.636282 34.991464)\nPOINT (-87.741249 31.719453)\nPOINT (-86.934992 34.444539)\nPOINT (-85.837262 34.486223)\nPOINT (-86.627024 32.956611)\nPOINT (-86.304076 34.049651)\nPOINT (-87.347015 31.732285)\nPOINT (-87.7603 33.631626)\nPOINT (-85.943409 32.619646)\nPOINT (-85.699788 34.501948)\nPOINT (-87.878693 31.731882)\nPOINT (-86.816079 33.124083)\nPOINT (-86.856649 33.128143)\nPOINT (-87.419506 34.592943)\nPOINT (-86.847787 33.523772)\nPOINT (-86.261298 34.358022)\nPOINT (-85.944914 34.600183)\nPOINT (-85.520327 32.426701)\nPOINT (-87.289256 31.986936)\nPOINT (-87.547826 31.163691)\nPOINT (-87.094083 32.938017)\nPOINT (-86.996333 32.948292)\nPOINT (-86.437984 33.138573)\nPOINT (-87.745234 34.484401)\nPOINT (-87.145193 34.682716)\nPOINT (-87.482304 33.192318)\nPOINT (-85.213575 32.705243)\nPOINT (-85.655431 34.141887)\nPOINT (-86.49038 34.056175)\nPOINT (-87.124441 34.419973)\nPOINT (-87.181288 31.216203)\nPOINT (-86.024002 33.583785)\nPOINT (-87.64626 33.708432)\nPOINT (-85.449737 31.992118)\nPOINT (-85.472209 31.863598)\nPOINT (-87.715681 33.413097)\nPOINT (-87.009549 34.674517)\nPOINT (-85.352719 32.463603)\nPOINT (-86.96375 34.800526)\nPOINT (-86.59768 32.973882)\nPOINT (-86.499559 32.228764)\nPOINT (-87.917567 33.338968)\nPOINT (-85.946607 34.712429)\nPOINT (-86.59797 34.742166)\nPOINT (-85.399823 31.839168)\nPOINT (-87.73709 32.114396)\nPOINT (-88.111529 34.640422)\nPOINT (-85.627249 31.779813)\nPOINT (-86.248101 32.332281)\nPOINT (-88.075296 32.820901)\nPOINT (-86.298374 32.381285)\nPOINT (-87.036125 31.317859)\nPOINT (-85.999457 34.35249)\nPOINT (-86.503743 31.311205)\nPOINT (-88.105733 33.870143)\nPOINT (-87.832415 33.684657)\nPOINT (-85.920136 34.863151)\nPOINT (-85.618456 32.108327)\nPOINT (-86.031503 32.448149)\nPOINT (-88.145264 33.141073)\nPOINT (-88.137359 34.434415)\nPOINT (-86.417101 34.537389)\nPOINT (-86.322259 32.10308)\nPOINT (-85.678627 34.152457)\nPOINT (-87.667861 33.620807)\nPOINT (-87.286651 34.764193)\nPOINT (-86.338839 32.573693)\nPOINT (-86.492253 31.307966)\nPOINT (-87.428411 34.470353)\nPOINT (-88.074946 30.764509)\nPOINT (-86.21139 32.920731)\nPOINT (-85.545091 34.050575)\nPOINT (-87.798988 34.583758)\nPOINT (-88.133603 34.437643)\nPOINT (-88.42534 31.817802)\nPOINT (-86.967508 34.80268)\nPOINT (-85.962891 31.79538)\nPOINT (-87.701982 33.593304)\nPOINT (-85.078263 32.112499)\nPOINT (-85.976247 31.512647)\nPOINT (-88.401397 32.341222)\nPOINT (-87.901815 33.276668)\nPOINT (-85.40507 32.622729)\nPOINT (-85.580139 34.393922)\nPOINT (-85.931604 32.94943)\nPOINT (-86.642788 32.946114)\nPOINT (-85.524893 34.152014)\nPOINT (-88.11999 33.400497)\nPOINT (-87.528963 32.025903)\nPOINT (-85.693509 34.264547)\nPOINT (-85.979904 34.823145)\nPOINT (-88.054891 32.996114)\nPOINT (-87.9933 34.38015)\nPOINT (-87.44321 34.569106)\nPOINT (-86.282655 32.346736)\nPOINT (-88.090335 34.756901)\nPOINT (-86.343536 31.964485)\nPOINT (-87.404335 31.540814)\nPOINT (-86.840162 34.833112)\nPOINT (-85.847952 34.616188)\nPOINT (-86.788009 34.617995)\nPOINT (-86.717655 34.294428)\nPOINT (-86.559696 31.808031)\nPOINT (-88.414987 32.338364)\nPOINT (-85.962453 32.619085)\nPOINT (-86.892326 31.150379)\nPOINT (-85.761704 32.08779)\nPOINT (-88.150379 32.089391)\nPOINT (-86.162086 34.859719)\nPOINT (-88.04535 33.906609)\nPOINT (-85.752475 34.955938)\nPOINT (-87.245895 33.026988)\nPOINT (-86.515637 34.523387)\nPOINT (-85.465548 31.77916)\nPOINT (-85.637795 31.450452)\nPOINT (-86.981307 31.873659)\nPOINT (-87.568417 32.493361)\nPOINT (-88.01794 33.374294)\nPOINT (-88.237578 33.608082)\nPOINT (-86.750436 33.550309)\nPOINT (-87.323472 33.228547)\nPOINT (-85.853206 31.060451)\nPOINT (-85.591098 31.437951)\nPOINT (-88.015003 34.251982)\nPOINT (-86.180494 34.764915)\nPOINT (-85.375687 33.150037)\nPOINT (-87.797976 32.307066)\nPOINT (-88.35803 32.121423)\nPOINT (-86.253359 31.287438)\nPOINT (-86.809751 33.522224)\nPOINT (-85.848578 34.49338)\nPOINT (-85.592506 33.456325)\nPOINT (-88.015849 33.925081)\nPOINT (-87.641946 34.373392)\nPOINT (-85.820558 31.736544)\nPOINT (-87.631992 33.650967)\nPOINT (-85.102118 31.153121)\nPOINT (-86.865782 34.34837)\nPOINT (-87.510713 31.612856)\nPOINT (-87.504382 34.93479)\nPOINT (-87.902732 30.602125)\nPOINT (-87.571448 33.73317)\nPOINT (-87.639971 33.427728)\nPOINT (-87.155918 31.06689)\nPOINT (-85.606095 34.931308)\nPOINT (-85.675132 34.269873)\nPOINT (-87.110994 34.417081)\nPOINT (-88.149756 34.341584)\nPOINT (-87.295526 34.787902)\nPOINT (-85.622285 31.853022)\nPOINT (-85.320297 31.573628)\nPOINT (-87.70528 32.027847)\nPOINT (-86.52925 32.088292)\nPOINT (-86.449963 31.587829)\nPOINT (-86.225571 32.970796)\nPOINT (-87.538706 31.970311)\nPOINT (-86.926159 33.341197)\nPOINT (-88.435243 31.844656)\nPOINT (-85.491267 34.203894)\nPOINT (-86.818014 33.523828)\nPOINT (-86.801726 31.165166)\nPOINT (-88.277689 32.310778)\nPOINT (-85.22659 32.030994)\nPOINT (-85.843458 34.142417)\nPOINT (-87.42307 34.469948)\nPOINT (-87.860296 30.834375)\nPOINT (-86.353352 33.276977)\nPOINT (-85.672257 33.250165)\nPOINT (-88.027577 32.357778)\nPOINT (-87.382905 34.834233)\nPOINT (-87.207959 32.000332)\nPOINT (-85.754534 32.021065)\nPOINT (-86.967064 34.567908)\nPOINT (-87.519807 33.217557)\nPOINT (-86.288806 34.37544)\nPOINT (-88.084277 33.425272)\nPOINT (-87.062144 34.937228)\nPOINT (-87.58939 31.898999)\nPOINT (-86.556694 34.548827)\nPOINT (-85.886923 34.800433)\nPOINT (-85.796952 34.452452)\nPOINT (-87.572434 34.963567)\nPOINT (-87.018109 34.058734)\nPOINT (-85.572118 32.440964)\nPOINT (-86.282366 32.334158)\nPOINT (-88.275702 32.499449)\nPOINT (-86.097371 32.445843)\nPOINT (-87.88182 33.117767)\nPOINT (-88.158469 32.372466)\nPOINT (-86.447239 34.596983)\nPOINT (-86.691631 32.998942)\nPOINT (-87.734969 34.12138)\nPOINT (-85.482724 31.87103)\nPOINT (-87.668239 32.13785)\nPOINT (-87.900683 33.47403)\nPOINT (-86.57736 32.503372)\nPOINT (-87.362662 32.382771)\nPOINT (-86.281261 34.020646)\nPOINT (-86.846518 33.509341)\nPOINT (-86.871853 33.099344)\nPOINT (-87.337535 31.427193)\nPOINT (-85.622726 31.448553)\nPOINT (-85.666056 32.429772)\nPOINT (-88.178521 33.592193)\nPOINT (-87.343318 31.994784)\nPOINT (-85.22469 31.30362)\nPOINT (-86.384279 33.450248)\nPOINT (-87.92646 34.352185)\nPOINT (-87.238875 31.41025)\nPOINT (-86.758526 34.749498)\nPOINT (-86.687276 34.668651)\nPOINT (-87.672362 34.505195)\nPOINT (-86.606552 32.889718)\nPOINT (-85.558297 31.779088)\nPOINT (-87.573531 33.908083)\nPOINT (-85.84963 34.864768)\nPOINT (-86.807676 34.809585)\nPOINT (-87.102759 33.231389)\nPOINT (-86.359405 32.143365)\nPOINT (-87.668032 33.673123)\nPOINT (-86.454688 32.582576)\nPOINT (-88.00911 34.175462)\nPOINT (-86.841701 32.815612)\nPOINT (-86.927619 33.442408)\nPOINT (-85.972404 34.925075)\nPOINT (-86.508051 32.817134)\nPOINT (-88.071767 30.805039)\nPOINT (-87.29805 34.833907)\nPOINT (-88.386016 31.971007)\nPOINT (-87.475527 34.852916)\nPOINT (-86.252108 33.310845)\nPOINT (-86.784964 33.446644)\nPOINT (-85.476399 32.203319)\nPOINT (-86.559553 32.050452)\nPOINT (-88.335387 31.802093)\nPOINT (-86.831183 31.575458)\nPOINT (-85.986739 34.579118)\n"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"result-alert alert-warning\" role\u003d\"alert\"\u003e\u003cbutton type\u003d\"button\" class\u003d\"close\" data-dismiss\u003d\"alert\" aria-label\u003d\"Close\"\u003e\u003cspan aria-hidden\u003d\"true\"\u003e\u0026times;\u003c/span\u003e\u003c/button\u003e\u003cstrong\u003eOutput is truncated\u003c/strong\u003e to 1000 rows. Learn more about \u003cstrong\u003ezeppelin.spark.maxResult\u003c/strong\u003e\u003c/div\u003e\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d16"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1683008922001_50640958",
+      "id": "paragraph_1683008922001_50640958",
+      "dateCreated": "2023-05-02 06:28:42.001",
+      "dateStarted": "2023-05-03 08:32:22.768",
+      "dateFinished": "2023-05-03 08:32:23.117",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%sql\nSELECT *\nFROM images",
+      "user": "anonymous",
+      "dateUpdated": "2023-05-03 08:32:51.762",
+      "progress": 99,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9.0,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "apache-sedona",
+              "height": 300.0,
+              "optionOpen": true,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "geom": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                },
+                "geospark-zeppelin": {
+                  "geometry": {
+                    "name": "geom",
+                    "index": 0.0,
+                    "aggr": "sum"
+                  },
+                  "info": {
+                    "name": "geom",
+                    "index": 0.0,
+                    "aggr": "sum"
+                  }
+                },
+                "multiBarChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default",
+                  "stacked": false
+                },
+                "lineChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default",
+                  "forceY": false,
+                  "lineWithFocus": false,
+                  "isDateFormat": false,
+                  "dateFormat": ""
+                },
+                "apache-sedona": {}
+              },
+              "keys": [
+                {
+                  "name": "geom",
+                  "index": 0.0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": []
+            },
+            "helium": {}
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TABLE",
+            "data": "image\tboundary\n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\u003d\u003d\tPOLYGON ((-88.437301 30.244859, -88.437301 34.995625, -84.965961 34.995625, -84.965961 30.244859, -88.437301 30.244859))\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d17"
+            },
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d18"
+            },
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d19"
+            },
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d20"
+            },
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d21"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682571117167_1999503370",
+      "id": "20190227-203351_1519829707",
+      "dateCreated": "2023-04-27 04:51:57.167",
+      "dateStarted": "2023-05-03 08:32:51.781",
+      "dateFinished": "2023-05-03 08:32:59.776",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%sql\nSELECT *, \u0027I am the map center!\u0027\nFROM images",
+      "user": "anonymous",
+      "dateUpdated": "2023-05-03 08:34:51.989",
+      "progress": 100,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9.0,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "apache-sedona",
+              "height": 300.0,
+              "optionOpen": true,
+              "setting": {
+                "table": {
+                  "tableGridState": {
+                    "columns": [
+                      {
+                        "name": "st_encodeimage(image)",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {
+                          "priority": 0.0,
+                          "direction": "asc"
+                        },
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      },
+                      {
+                        "name": "1.0",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      }
+                    ],
+                    "scrollFocus": {},
+                    "selection": [],
+                    "grouping": {
+                      "grouping": [],
+                      "aggregations": [],
+                      "rowExpandedStates": {}
+                    },
+                    "treeView": {},
+                    "pagination": {
+                      "paginationCurrentPage": 1.0,
+                      "paginationPageSize": 250.0
+                    }
+                  },
+                  "tableColumnTypeState": {
+                    "names": {
+                      "image": "string",
+                      "boundary": "string",
+                      "I am the map center!": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                },
+                "zeppelin-leaflet": {},
+                "multiBarChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                },
+                "stackedAreaChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                },
+                "lineChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                },
+                "geospark-zeppelin": {
+                  "geometry": {
+                    "name": "boundary",
+                    "index": 1.0,
+                    "aggr": "sum"
+                  },
+                  "info": {
+                    "name": "I am the map center!",
+                    "index": 2.0,
+                    "aggr": "sum"
+                  },
+                  "mapimage": {
+                    "name": "image",
+                    "index": 0.0,
+                    "aggr": "sum"
+                  }
+                },
+                "apache-sedona": {
+                  "info": {
+                    "name": "I am the map center!",
+                    "index": 2.0,
+                    "aggr": "sum"
+                  },
+                  "geometry": {
+                    "name": "boundary",
+                    "index": 1.0,
+                    "aggr": "sum"
+                  },
+                  "mapimage": {
+                    "name": "image",
+                    "index": 0.0,
+                    "aggr": "sum"
+                  }
+                }
+              },
+              "keys": [],
+              "groups": [],
+              "values": []
+            },
+            "helium": {}
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TABLE",
+            "data": "image\tboundary\tI am the map center!\n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\u003d\u003d\tPOLYGON ((-88.437301 30.244859, -88.437301 34.995625, -84.965961 34.995625, -84.965961 30.244859, -88.437301 30.244859))\tI am the map center!\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d22"
+            },
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d23"
+            },
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d24"
+            },
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d25"
+            },
+            {
+              "jobUrl": "http://1a59348f7d33:4040/jobs/job?id\u003d26"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682571117167_1061550624",
+      "id": "20190227-203400_1171762279",
+      "dateCreated": "2023-04-27 04:51:57.167",
+      "dateStarted": "2023-05-03 08:32:59.576",
+      "dateFinished": "2023-05-03 08:33:06.632",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%python\n\nimport folium\n\nm \u003dfolium.Map(\nlocation\u003d[45.5236, -122.6750],\ntiles\u003d\u0027Stamen Toner\u0027,\nzoom_start\u003d13\n# width\u003d600,height\u003d300\n)\nhtml_string \u003d m._repr_html_()\nprint(\"%html\", html_string)\n",
+      "user": "anonymous",
+      "dateUpdated": "2023-04-27 05:14:06.665",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv style\u003d\"width:100%;\"\u003e\u003cdiv style\u003d\"position:relative;width:100%;height:0;padding-bottom:60%;\"\u003e\u003cspan style\u003d\"color:#565656\"\u003eMake this Notebook Trusted to load map: File -\u003e Trust Notebook\u003c/span\u003e\u003ciframe srcdoc\u003d\"\u0026lt;!DOCTYPE html\u0026gt;\n\u0026lt;html\u0026gt;\n\u0026lt;head\u0026gt;\n    \n    \u0026lt;meta http-equiv\u003d\u0026quot;content-type\u0026quot; content\u003d\u0026quot;text/html; charset\u003dUTF-8\u0026quot; /\u0026gt;\n    \n        \u0026lt;script\u0026gt;\n            L_NO_TOUCH \u003d false;\n            L_DISABLE_3D \u003d false;\n        \u0026lt;/script\u0026gt;\n    \n    \u0026lt;style\u0026gt;html, body {width: 100%;height: 100%;margin: 0;padding: 0;}\u0026lt;/style\u0026gt;\n    \u0026lt;style\u0026gt;#map {position:absolute;top:0;bottom:0;right:0;left:0;}\u0026lt;/style\u0026gt;\n    \u0026lt;script src\u003d\u0026quot;https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js\u0026quot;\u0026gt;\u0026lt;/script\u0026gt;\n    \u0026lt;script src\u003d\u0026quot;https://code.jquery.com/jquery-1.12.4.min.js\u0026quot;\u0026gt;\u0026lt;/script\u0026gt;\n    \u0026lt;script src\u003d\u0026quot;https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js\u0026quot;\u0026gt;\u0026lt;/script\u0026gt;\n    \u0026lt;script src\u003d\u0026quot;https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js\u0026quot;\u0026gt;\u0026lt;/script\u0026gt;\n    \u0026lt;link rel\u003d\u0026quot;stylesheet\u0026quot; href\u003d\u0026quot;https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css\u0026quot;/\u0026gt;\n    \u0026lt;link rel\u003d\u0026quot;stylesheet\u0026quot; href\u003d\u0026quot;https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css\u0026quot;/\u0026gt;\n    \u0026lt;link rel\u003d\u0026quot;stylesheet\u0026quot; href\u003d\u0026quot;https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css\u0026quot;/\u0026gt;\n    \u0026lt;link rel\u003d\u0026quot;stylesheet\u0026quot; href\u003d\u0026quot;https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css\u0026quot;/\u0026gt;\n    \u0026lt;link rel\u003d\u0026quot;stylesheet\u0026quot; href\u003d\u0026quot;https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css\u0026quot;/\u0026gt;\n    \u0026lt;link rel\u003d\u0026quot;stylesheet\u0026quot; href\u003d\u0026quot;https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css\u0026quot;/\u0026gt;\n    \n            \u0026lt;meta name\u003d\u0026quot;viewport\u0026quot; content\u003d\u0026quot;width\u003ddevice-width,\n                initial-scale\u003d1.0, maximum-scale\u003d1.0, user-scalable\u003dno\u0026quot; /\u0026gt;\n            \u0026lt;style\u0026gt;\n                #map_8f0bef56860e74dfb44479b0374b2270 {\n                    position: relative;\n                    width: 100.0%;\n                    height: 100.0%;\n                    left: 0.0%;\n                    top: 0.0%;\n                }\n                .leaflet-container { font-size: 1rem; }\n            \u0026lt;/style\u0026gt;\n        \n\u0026lt;/head\u0026gt;\n\u0026lt;body\u0026gt;\n    \n    \n            \u0026lt;div class\u003d\u0026quot;folium-map\u0026quot; id\u003d\u0026quot;map_8f0bef56860e74dfb44479b0374b2270\u0026quot; \u0026gt;\u0026lt;/div\u0026gt;\n        \n\u0026lt;/body\u0026gt;\n\u0026lt;script\u0026gt;\n    \n    \n            var map_8f0bef56860e74dfb44479b0374b2270 \u003d L.map(\n                \u0026quot;map_8f0bef56860e74dfb44479b0374b2270\u0026quot;,\n                {\n                    center: [45.5236, -122.675],\n                    crs: L.CRS.EPSG3857,\n                    zoom: 13,\n                    zoomControl: true,\n                    preferCanvas: false,\n                }\n            );\n\n            \n\n        \n    \n            var tile_layer_c91707d96c71eaf2016270c3c22d9b89 \u003d L.tileLayer(\n                \u0026quot;https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png\u0026quot;,\n                {\u0026quot;attribution\u0026quot;: \u0026quot;Map tiles by \\u003ca target\u003d\\\u0026quot;_blank\\\u0026quot; href\u003d\\\u0026quot;http://stamen.com\\\u0026quot;\\u003eStamen Design\\u003c/a\\u003e, under \\u003ca target\u003d\\\u0026quot;_blank\\\u0026quot; href\u003d\\\u0026quot;http://creativecommons.org/licenses/by/3.0\\\u0026quot;\\u003eCC BY 3.0\\u003c/a\\u003e. Data by \\u0026copy; \\u003ca target\u003d\\\u0026quot;_blank\\\u0026quot; href\u003d\\\u0026quot;http://openstreetmap.org\\\u0026quot;\\u003eOpenStreetMap\\u003c/a\\u003e, under \\u003ca target\u003d\\\u0026quot;_blank\\\u0026quot; href\u003d\\\u0026quot;http://www.openstreetmap.org/copyright\\\u0026quot;\\u003eODbL\\u003c/a\\u003e.\u0026quot;, \u0026quot;detectRetina\u0026quot;: false, \u0026quot;maxNativeZoom\u0026quot;: 18, \u0026quot;maxZoom\u0026quot;: 18, \u0026quot;minZoom\u0026quot;: 0, \u0026quot;noWrap\u0026quot;: false, \u0026quot;opacity\u0026quot;: 1, \u0026quot;subdomains\u0026quot;: \u0026quot;abc\u0026quot;, \u0026quot;tms\u0026quot;: false}\n            ).addTo(map_8f0bef56860e74dfb44479b0374b2270);\n        \n\u0026lt;/script\u0026gt;\n\u0026lt;/html\u0026gt;\" style\u003d\"position:absolute;width:100%;height:100%;left:0;top:0;border:none !important;\" allowfullscreen webkitallowfullscreen mozallowfullscreen\u003e\u003c/iframe\u003e\u003c/div\u003e\u003c/div\u003e\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682571117168_587558456",
+      "id": "20190303-221004_314008204",
+      "dateCreated": "2023-04-27 04:51:57.168",
+      "dateStarted": "2023-04-27 05:14:06.683",
+      "dateFinished": "2023-04-27 05:14:06.747",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%sh\n",
+      "user": "anonymous",
+      "dateUpdated": "2023-04-27 05:12:07.921",
+      "progress": 0,
+      "config": {},
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1682572327921_1778704009",
+      "id": "paragraph_1682572327921_1778704009",
+      "dateCreated": "2023-04-27 05:12:07.921",
+      "status": "READY"
+    }
+  ],
+  "name": "geospark-zeppelin-demo",
+  "id": "2HZHF91BX",
+  "defaultInterpreterGroup": "spark",
+  "version": "0.10.1",
+  "noteParams": {},
+  "noteForms": {},
+  "angularObjects": {},
+  "config": {
+    "isZeppelinNotebookCronEnable": false
+  },
+  "info": {}
+}
