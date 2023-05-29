@@ -48,14 +48,14 @@ trait TraitJoinQueryBase {
     spatialRdd
   }
 
-  def toExpandedEnvelopeRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression, boundRadius: Expression): SpatialRDD[Geometry] = {
+  def toExpandedEnvelopeRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression, boundRadius: Expression, isGeography: Boolean): SpatialRDD[Geometry] = {
     val spatialRdd = new SpatialRDD[Geometry]
     spatialRdd.setRawSpatialRDD(
       rdd
         .map { x =>
           val shape = GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
           val envelope = shape.getEnvelopeInternal.copy()
-          envelope.expandBy(boundRadius.eval(x).asInstanceOf[Double])
+          envelope.expandBy(distanceToDegree(boundRadius.eval(x).asInstanceOf[Double], isGeography))
 
           val expandedEnvelope = shape.getFactory.toGeometry(envelope)
           expandedEnvelope.setUserData(x.copy)
@@ -70,6 +70,23 @@ trait TraitJoinQueryBase {
     if (dominantShapes.approximateTotalCount > 0) {
       dominantShapes.spatialPartitioning(sedonaConf.getJoinGridType, numPartitions)
       followerShapes.spatialPartitioning(dominantShapes.getPartitioner)
+    }
+  }
+
+  /**
+    * Convert distance to degree based on the given isGeography flag.
+    * Note that this is an approximation since the degree of longitude is not constant.
+    * We assume that the degree of longitude is 111000 meters without considering the latitude.
+    * For latitude, the degree is always 111000 meters.
+    * @param distance
+    * @param isGeography
+    * @return
+    */
+  private def distanceToDegree(distance: Double, isGeography: Boolean): Double = {
+    if (isGeography) {
+      distance / 111000.0
+    } else {
+      distance
     }
   }
 }

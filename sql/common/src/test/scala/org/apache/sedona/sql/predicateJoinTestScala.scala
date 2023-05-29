@@ -21,10 +21,10 @@ package org.apache.sedona.sql
 
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.spark.sql.Row
-import org.apache.spark.sql.execution.ExplainMode
+import org.apache.spark.sql.functions.expr
+import org.apache.spark.sql.sedona_sql.strategy.join.DistanceJoinExec
 import org.apache.spark.sql.types._
 import org.locationtech.jts.geom.Geometry
-import org.locationtech.jts.io.WKTWriter
 
 class predicateJoinTestScala extends TestBaseScala {
 
@@ -360,6 +360,20 @@ class predicateJoinTestScala extends TestBaseScala {
       var equalJoinDf = sparkSession.sql("select * from pointdf, polygondf where ST_Equals(pointdf.pointshape,polygondf.polygonshape) ")
 
       assert(equalJoinDf.count() == 0, s"Expected 0 but got ${equalJoinDf.count()}")
+    }
+
+    it("Passed ST_DistanceSpheroid in a spatial join") {
+      val pointDf1 = buildPointDf
+      val pointDf2 = buildPointDf
+      var distanceJoinDf = pointDf1.alias("pointDf1").join(
+        pointDf2.alias("pointDf2"), expr("ST_DistanceSpheroid(pointDf1.pointshape, pointDf2.pointshape) <= 2.0"))
+      assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: DistanceJoinExec => p }.size === 1)
+      assert(distanceJoinDf.count() == 89)
+
+      distanceJoinDf = pointDf1.alias("pointDf1").join(
+        pointDf2.alias("pointDf2"), expr("ST_DistanceSpheroid(pointDf1.pointshape, pointDf2.pointshape) < 2.0"))
+      assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: DistanceJoinExec => p }.size === 1)
+      assert(distanceJoinDf.count() == 89)
     }
   }
 }

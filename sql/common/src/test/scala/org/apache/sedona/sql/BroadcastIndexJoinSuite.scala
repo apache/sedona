@@ -302,6 +302,25 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       assert(rows2(0) == Row(2.0, 2.0, "left_2", 2.0, 2.0, "right_2"))
 
     }
+
+    it("Passed ST_DistanceSpheroid in a broadcast join") {
+      val pointDf1 = buildPointDf
+      val pointDf2 = buildPointDf
+      var distanceJoinDf = pointDf1.alias("pointDf1").join(
+        broadcast(pointDf2).alias("pointDf2"), expr("ST_DistanceSpheroid(pointDf1.pointshape, pointDf2.pointshape) <= 2.0"))
+      assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(distanceJoinDf.count() == 89)
+
+      distanceJoinDf = broadcast(pointDf1).alias("pointDf1").join(
+        pointDf2.alias("pointDf2"), expr("ST_DistanceSpheroid(pointDf1.pointshape, pointDf2.pointshape) <= 2.0"))
+      assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(distanceJoinDf.count() == 89)
+
+      distanceJoinDf = broadcast(pointDf1).alias("pointDf1").join(
+        pointDf2.alias("pointDf2"), expr("ST_DistanceSpheroid(pointDf1.pointshape, pointDf2.pointshape) < 2.0"))
+      assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
+      assert(distanceJoinDf.count() == 89)
+    }
   }
 
   describe("Sedona-SQL Broadcast Index Join Test for left semi joins") {
