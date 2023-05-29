@@ -143,7 +143,7 @@ object Catalog {
     function[ST_Split](),
     function[ST_S2CellIDs](),
     function[ST_GeometricMedian](1e-6, 1000, false),
-    function[ST_DistanceSphere](6378137.0),
+    function[ST_DistanceSphere](6371008.0),
     function[ST_DistanceSpheroid](),
     function[ST_AreaSpheroid](),
     function[ST_LengthSpheroid](),

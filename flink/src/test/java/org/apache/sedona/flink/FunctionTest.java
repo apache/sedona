@@ -175,7 +175,7 @@ public class FunctionTest extends TestBase{
     public void testDistanceSphere() {
         Table tbl = tableEnv.sqlQuery(
                 "SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'))");
-        Double expected = 544405.4459192449;
+        Double expected = 543796.9506134904;
         Double actual = (Double) first(tbl).getField(0);
         assertEquals(expected, actual, 0.1);
     }
