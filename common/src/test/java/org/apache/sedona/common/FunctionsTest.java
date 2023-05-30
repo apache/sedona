@@ -449,33 +449,33 @@ public class FunctionsTest {
         // Basic check
         Point p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 90));
         Point p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
-        assertEquals(1.0018754171394622E7, Haversine.distance(p1, p2), 0.1);
+        assertEquals(1.00075559643809E7, Haversine.distance(p1, p2), 0.1);
 
         p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(51.3168, -0.56));
         p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(55.9533, -3.1883));
-        assertEquals(544405.4459192449, Haversine.distance(p1, p2), 0.1);
+        assertEquals(543796.9506134904, Haversine.distance(p1, p2), 0.1);
 
         p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(48.353889, 11.786111));
         p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(50.033333, 8.570556));
-        assertEquals(299407.6894786948, Haversine.distance(p1, p2), 0.1);
+        assertEquals(299073.03416817175, Haversine.distance(p1, p2), 0.1);
 
         p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(48.353889, 11.786111));
         p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(52.559722, 13.287778));
-        assertEquals(480106.0821386384, Haversine.distance(p1, p2), 0.1);
+        assertEquals(479569.4558072244, Haversine.distance(p1, p2), 0.1);
 
         LineString l1 = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 0, 90));
         LineString l2 = GEOMETRY_FACTORY.createLineString(coordArray(0, 1, 0, 0));
-        assertEquals(4953717.340300673, Haversine.distance(l1, l2), 0.1);
+        assertEquals(4948180.449055, Haversine.distance(l1, l2), 0.1);
 
         // HK to Sydney
         p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(22.308919, 113.914603));
         p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(-33.946111, 151.177222));
-        assertEquals(7402166.655938837, Haversine.distance(p1, p2), 0.1);
+        assertEquals(7393893.072901942, Haversine.distance(p1, p2), 0.1);
 
         // HK to Toronto
         p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(22.308919, 113.914603));
         p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(43.677223, -79.630556));
-        assertEquals(1.2562590459399283E7, Haversine.distance(p1, p2), 0.1);
+        assertEquals(1.2548548944238186E7, Haversine.distance(p1, p2), 0.1);
     }
 
     @Test

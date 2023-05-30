@@ -917,11 +917,12 @@ class dataFrameAPITestScala extends TestBaseScala {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT (0 0)') AS geom1, ST_GeomFromWKT('POINT (0 90)') AS geom2")
       var df = baseDf.select(ST_DistanceSphere("geom1", "geom2"))
       var actualResult = df.take(1)(0).getDouble(0)
-      val expectedResult = 10018754.171394622
+      var expectedResult = 1.00075559643809E7
       assert(actualResult == expectedResult)
 
       df = baseDf.select(ST_DistanceSphere("geom1", "geom2", 6378137.0))
       actualResult = df.take(1)(0).getDouble(0)
+      expectedResult = 1.0018754171394622E7
       assertEquals(expectedResult, actualResult, 0.1)
     }
 
