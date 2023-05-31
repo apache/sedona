@@ -54,6 +54,7 @@ case class DistanceJoinExec(left: SparkPlan,
                             distance: Expression,
                             distanceBoundToLeft: Boolean,
                             spatialPredicate: SpatialPredicate,
+                            isGeography: Boolean,
                             extraCondition: Option[Expression] = None)
   extends SedonaBinaryExecNode
     with TraitJoinQueryExec
@@ -70,9 +71,9 @@ case class DistanceJoinExec(left: SparkPlan,
                                 rightRdd: RDD[UnsafeRow],
                                 rightShapeExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) = {
     if (distanceBoundToLeft) {
-      (toExpandedEnvelopeRDD(leftRdd, leftShapeExpr, boundRadius), toSpatialRDD(rightRdd, rightShapeExpr))
+      (toExpandedEnvelopeRDD(leftRdd, leftShapeExpr, boundRadius, isGeography), toSpatialRDD(rightRdd, rightShapeExpr))
     } else {
-      (toSpatialRDD(leftRdd, leftShapeExpr), toExpandedEnvelopeRDD(rightRdd, rightShapeExpr, boundRadius))
+      (toSpatialRDD(leftRdd, leftShapeExpr), toExpandedEnvelopeRDD(rightRdd, rightShapeExpr, boundRadius, isGeography))
     }
   }
 

@@ -20,6 +20,7 @@ package org.apache.sedona.sql
 
 import com.google.common.math.DoubleMath
 import org.apache.log4j.{Level, Logger}
+import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.core.serde.SedonaKryoRegistrator
 import org.apache.sedona.sql.utils.SedonaSQLRegistrator
 import org.apache.spark.serializer.KryoSerializer
@@ -95,6 +96,28 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
       }
       0
     }
+  }
+
+  protected def bruteForceDistanceJoinCountSpheroid(sampleCount:Int, distance: Double): Int = {
+    val input = buildPointDf.limit(sampleCount).collect()
+    input.map(row => {
+      val point1 = row.getAs[org.locationtech.jts.geom.Point](0)
+      input.map(row => {
+        val point2 = row.getAs[org.locationtech.jts.geom.Point](0)
+        if (Spheroid.distance(point1, point2) <= distance) 1 else 0
+      }).sum
+    }).sum
+  }
+
+  protected def bruteForceDistanceJoinCountSphere(sampleCount: Int, distance: Double): Int = {
+    val input = buildPointDf.limit(sampleCount).collect()
+    input.map(row => {
+      val point1 = row.getAs[org.locationtech.jts.geom.Point](0)
+      input.map(row => {
+        val point2 = row.getAs[org.locationtech.jts.geom.Point](0)
+        if (Haversine.distance(point1, point2) <= distance) 1 else 0
+      }).sum
+    }).sum
   }
 
 }
