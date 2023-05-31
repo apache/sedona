@@ -424,14 +424,14 @@ def ST_DistanceSpheroid(a: ColumnOrName, b: ColumnOrName) -> Column:
     return _call_st_function("ST_DistanceSpheroid", (a, b))
 
 @validate_argument_types
-def ST_DistanceSphere(a: ColumnOrName, b: ColumnOrName, radius: Optional[Union[ColumnOrName, float]] = 6378137.0) -> Column:
+def ST_DistanceSphere(a: ColumnOrName, b: ColumnOrName, radius: Optional[Union[ColumnOrName, float]] = 6371008.0) -> Column:
     """Calculate the haversine/great-circle distance between two geometry columns using a given radius.
 
     :param a: Geometry column to use in the calculation.
     :type a: ColumnOrName
     :param b: Other geometry column to use in the calculation.
     :type b: ColumnOrName
-    :param radius: Radius of the sphere, defaults to 6378137.0
+    :param radius: Radius of the sphere, defaults to 6371008.0
     :type radius: Optional[Union[ColumnOrName, float]], optional
     :return: Two-dimensional haversine/great-circle distance between a and b as a double column. Unit is meter.
     :rtype: Column

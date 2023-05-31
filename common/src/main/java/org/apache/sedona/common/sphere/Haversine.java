@@ -60,6 +60,6 @@ public class Haversine
     // The radius of the earth is 6371.0 km
     public static double distance(Geometry geom1, Geometry geom2)
     {
-        return distance(geom1, geom2, 6378137.0);
+        return distance(geom1, geom2, 6371008.0);
     }
 }

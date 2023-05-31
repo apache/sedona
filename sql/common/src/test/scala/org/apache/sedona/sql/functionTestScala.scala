@@ -1842,8 +1842,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
   it("Should pass ST_DistanceSphere") {
     val geomTestCases = Map(
-      ("'POINT (51.3168 -0.56)'", "'POINT (55.9533 -3.1883)'") -> "544405.4459192449",
-      ("'LineString (0 0, 0 90)'", "'LineString (0 1, 0 0)'") -> "4953717.340300673"
+      ("'POINT (51.3168 -0.56)'", "'POINT (55.9533 -3.1883)'") -> "543796.9506134904",
+      ("'LineString (0 0, 0 90)'", "'LineString (0 1, 0 0)'") -> "4948180.449055"
     )
     for (((geom1, geom2), expectedResult) <- geomTestCases) {
       val df = sparkSession.sql(s"SELECT ST_DistanceSphere(ST_GeomFromWKT($geom1), ST_GeomFromWKT($geom2)), " +
