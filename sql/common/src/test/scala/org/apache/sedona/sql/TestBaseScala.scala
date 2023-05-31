@@ -98,20 +98,22 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     }
   }
 
-  protected def bruteForceDistanceJoinCountSpheroid(distance: Double): Int = {
-    buildPointDf.collect().map(row => {
+  protected def bruteForceDistanceJoinCountSpheroid(sampleCount:Int, distance: Double): Int = {
+    val input = buildPointDf.limit(sampleCount).collect()
+    input.map(row => {
       val point1 = row.getAs[org.locationtech.jts.geom.Point](0)
-      buildPointDf.collect().map(row => {
+      input.map(row => {
         val point2 = row.getAs[org.locationtech.jts.geom.Point](0)
         if (Spheroid.distance(point1, point2) <= distance) 1 else 0
       }).sum
     }).sum
   }
 
-  protected def bruteForceDistanceJoinCountSphere(distance: Double): Int = {
-    buildPointDf.collect().map(row => {
+  protected def bruteForceDistanceJoinCountSphere(sampleCount: Int, distance: Double): Int = {
+    val input = buildPointDf.limit(sampleCount).collect()
+    input.map(row => {
       val point1 = row.getAs[org.locationtech.jts.geom.Point](0)
-      buildPointDf.collect().map(row => {
+      input.map(row => {
         val point2 = row.getAs[org.locationtech.jts.geom.Point](0)
         if (Haversine.distance(point1, point2) <= distance) 1 else 0
       }).sum

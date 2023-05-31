@@ -304,22 +304,51 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
     }
 
     it("Passed ST_DistanceSpheroid in a broadcast join") {
-      val pointDf1 = buildPointDf
-      val pointDf2 = buildPointDf
-      var distanceJoinDf = pointDf1.alias("pointDf1").join(
-        broadcast(pointDf2).alias("pointDf2"), expr("ST_DistanceSpheroid(pointDf1.pointshape, pointDf2.pointshape) <= 2.0"))
-      assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
-      assert(distanceJoinDf.count() == 89)
+      val distanceCandidates = Seq(130000, 160000, 500000)
+      val sampleCount = 50
+      distanceCandidates.foreach(distance => {
+        val expected = bruteForceDistanceJoinCountSpheroid(sampleCount, distance)
+        val pointDf1 = buildPointDf.limit(sampleCount).repartition(4)
+        val pointDf2 = pointDf1
+        var distanceJoinDf = pointDf1.alias("pointDf1").join(
+          broadcast(pointDf2).alias("pointDf2"), expr(s"ST_DistanceSpheroid(pointDf1.pointshape, pointDf2.pointshape) <= $distance"))
+        assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
+        assert(distanceJoinDf.count() == expected)
 
-      distanceJoinDf = broadcast(pointDf1).alias("pointDf1").join(
-        pointDf2.alias("pointDf2"), expr("ST_DistanceSpheroid(pointDf1.pointshape, pointDf2.pointshape) <= 2.0"))
-      assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
-      assert(distanceJoinDf.count() == 89)
+        distanceJoinDf = broadcast(pointDf1).alias("pointDf1").join(
+          pointDf2.alias("pointDf2"), expr(s"ST_DistanceSpheroid(pointDf1.pointshape, pointDf2.pointshape) <= $distance"))
+        assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
+        assert(distanceJoinDf.count() == expected)
 
-      distanceJoinDf = broadcast(pointDf1).alias("pointDf1").join(
-        pointDf2.alias("pointDf2"), expr("ST_DistanceSpheroid(pointDf1.pointshape, pointDf2.pointshape) < 2.0"))
-      assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
-      assert(distanceJoinDf.count() == 89)
+        distanceJoinDf = broadcast(pointDf1).alias("pointDf1").join(
+          pointDf2.alias("pointDf2"), expr(s"ST_DistanceSpheroid(pointDf1.pointshape, pointDf2.pointshape) < $distance"))
+        assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
+        assert(distanceJoinDf.count() == expected)
+      })
+    }
+
+    it("Passed ST_DistanceSphere in a broadcast join") {
+      val distanceCandidates = Seq(130000, 160000, 500000)
+      val sampleCount = 50
+      distanceCandidates.foreach(distance => {
+        val expected = bruteForceDistanceJoinCountSphere(sampleCount, distance)
+        val pointDf1 = buildPointDf.limit(sampleCount).repartition(4)
+        val pointDf2 = pointDf1
+        var distanceJoinDf = pointDf1.alias("pointDf1").join(
+          broadcast(pointDf2).alias("pointDf2"), expr(s"ST_DistanceSphere(pointDf1.pointshape, pointDf2.pointshape) <= $distance"))
+        assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
+        assert(distanceJoinDf.count() == expected)
+
+        distanceJoinDf = broadcast(pointDf1).alias("pointDf1").join(
+          pointDf2.alias("pointDf2"), expr(s"ST_DistanceSphere(pointDf1.pointshape, pointDf2.pointshape) <= $distance"))
+        assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
+        assert(distanceJoinDf.count() == expected)
+
+        distanceJoinDf = broadcast(pointDf1).alias("pointDf1").join(
+          pointDf2.alias("pointDf2"), expr(s"ST_DistanceSphere(pointDf1.pointshape, pointDf2.pointshape, 6371008.0) < $distance"))
+        assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size === 1)
+        assert(distanceJoinDf.count() == expected)
+      })
     }
   }
 

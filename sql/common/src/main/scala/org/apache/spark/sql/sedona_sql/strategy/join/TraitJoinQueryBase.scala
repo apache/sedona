@@ -56,7 +56,6 @@ trait TraitJoinQueryBase {
           val shape = GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
           val envelope = shape.getEnvelopeInternal.copy()
           expandEnvelope(envelope, boundRadius.eval(x).asInstanceOf[Double], 6357000.0, isGeography)
-//          envelope.expandBy(distanceToDegree(boundRadius.eval(x).asInstanceOf[Double], isGeography))
 
           val expandedEnvelope = shape.getFactory.toGeometry(envelope)
           expandedEnvelope.setUserData(x.copy)
