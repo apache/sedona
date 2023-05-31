@@ -24,7 +24,7 @@ import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeRow}
 import org.apache.spark.sql.execution.SparkPlan
-import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.geom.{Envelope, Geometry}
 
 trait TraitJoinQueryBase {
   self: SparkPlan =>
@@ -55,7 +55,8 @@ trait TraitJoinQueryBase {
         .map { x =>
           val shape = GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
           val envelope = shape.getEnvelopeInternal.copy()
-          envelope.expandBy(distanceToDegree(boundRadius.eval(x).asInstanceOf[Double], isGeography))
+          expandEnvelope(envelope, boundRadius.eval(x).asInstanceOf[Double], 6357000.0, isGeography)
+//          envelope.expandBy(distanceToDegree(boundRadius.eval(x).asInstanceOf[Double], isGeography))
 
           val expandedEnvelope = shape.getFactory.toGeometry(envelope)
           expandedEnvelope.setUserData(x.copy)
@@ -74,19 +75,25 @@ trait TraitJoinQueryBase {
   }
 
   /**
-    * Convert distance to degree based on the given isGeography flag.
-    * Note that this is an approximation since the degree of longitude is not constant.
-    * We assume that the degree of longitude is 111000 meters without considering the latitude.
-    * For latitude, the degree is always 111000 meters.
-    * @param distance
+    * Expand the given envelope by the given distance in meter.
+    * For geography, we expand the envelope by the given distance in both longitude and latitude.
+    * @param envelope
+    * @param distance in meter
+    * @param radius in meter
     * @param isGeography
-    * @return
     */
-  private def distanceToDegree(distance: Double, isGeography: Boolean): Double = {
+  private def expandEnvelope(envelope:Envelope, distance:Double, radius:Double, isGeography:Boolean):Unit = {
     if (isGeography) {
-      distance / 111000.0
+      val scaleFactor = 1.1 // 10% buffer to get rid of false negatives
+      val latRadian = Math.toRadians((envelope.getMinX + envelope.getMaxX) / 2.0)
+      val latDeltaRadian = distance / radius;
+      val latDeltaDegree = Math.toDegrees(latDeltaRadian)
+      val lonDeltaRadian = Math.max(Math.abs(distance / (radius * Math.cos(latRadian + latDeltaRadian))),
+        Math.abs(distance / (radius * Math.cos(latRadian - latDeltaRadian))))
+      val lonDeltaDegree = Math.toDegrees(lonDeltaRadian)
+      envelope.expandBy(latDeltaDegree * scaleFactor, lonDeltaDegree * scaleFactor)
     } else {
-      distance
+      envelope.expandBy(distance)
     }
   }
 }
