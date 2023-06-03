@@ -19,6 +19,7 @@
 package org.apache.sedona.sql
 
 import org.apache.log4j.{Level, Logger}
+import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.sql.DataFrame
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
