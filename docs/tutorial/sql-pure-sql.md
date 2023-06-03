@@ -29,7 +29,7 @@ Start `spark-sql` as following (replace `<VERSION>` with actual version, like, `
         If you are using Spark versions higher than 3.4, please replace the `3.4` in artifact names with the corresponding major.minor version of Spark.
 
 
-This will register all User Defined Tyeps, functions and optimizations in SedonaSQL and SedonaViz.
+This will register all Sedona types, functions and optimizations in SedonaSQL and SedonaViz.
 
 ## Load data
 

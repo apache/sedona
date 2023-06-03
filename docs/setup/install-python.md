@@ -43,8 +43,27 @@ You can get it using one of the following methods:
 1. Compile from the source within main project directory and copy it (in `spark-shaded/target` folder) to SPARK_HOME/jars/ folder ([more details](../compile))
 
 2. Download from [GitHub release](https://github.com/apache/sedona/releases) and copy it to SPARK_HOME/jars/ folder
-3. Call the [Maven Central coordinate](../maven-coordinates) in your python program. For example, in PySparkSQL
+3. Call the [Maven Central coordinate](../maven-coordinates) in your python program. For example,
+==Sedona >= 1.4.1==
+
 ```python
+from sedona.spark import *
+config = SedonaContext.config(). \
+    config('spark.jars.packages',
+           'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
+           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
+    getOrCreate()
+sedona = SedonaContext.create(config)
+```
+
+==Sedona < 1.4.1==
+
+SedonaRegistrator is deprecated in Sedona 1.4.1 and later versions. Please use the above method instead.
+
+```python
+from pyspark.sql import SparkSession
+from sedona.register import SedonaRegistrator
+from sedona.utils import SedonaKryoRegistrator, KryoSerializer
 spark = SparkSession. \
     builder. \
     appName('appName'). \
@@ -54,6 +73,7 @@ spark = SparkSession. \
            'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
            'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
     getOrCreate()
+SedonaRegistrator.registerAll(spark)
 ```
 
 !!!warning

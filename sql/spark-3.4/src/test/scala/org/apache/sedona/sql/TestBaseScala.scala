@@ -19,10 +19,7 @@
 package org.apache.sedona.sql
 
 import org.apache.log4j.{Level, Logger}
-import org.apache.sedona.core.serde.SedonaKryoRegistrator
-import org.apache.sedona.sql.utils.SedonaSQLRegistrator
-import org.apache.spark.serializer.KryoSerializer
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.DataFrame
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
 trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
@@ -33,8 +30,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   Logger.getLogger("org.apache.sedona.core").setLevel(Level.WARN)
 
   val warehouseLocation = System.getProperty("user.dir") + "/target/"
-  val sparkSession = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
-    config("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName).
+  val sparkSession = SedonaContext.builder().
     master("local[*]").appName("sedonasqlScalaTest")
     .config("spark.sql.warehouse.dir", warehouseLocation)
     // We need to be explicit about broadcasting in tests.
@@ -44,7 +40,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   val resourceFolder = System.getProperty("user.dir") + "/../../core/src/test/resources/"
 
   override def beforeAll(): Unit = {
-    SedonaSQLRegistrator.registerAll(sparkSession)
+    SedonaContext.create(sparkSession)
   }
 
   override def afterAll(): Unit = {

@@ -79,9 +79,7 @@ public class TestBase {
         env = enableWebUI? StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(new Configuration()):
                 StreamExecutionEnvironment.getExecutionEnvironment();
         EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
-        tableEnv = StreamTableEnvironment.create(env, settings);
-        SedonaFlinkRegistrator.registerType(env);
-        SedonaFlinkRegistrator.registerFunc(tableEnv);
+        tableEnv = SedonaContext.create(env, StreamTableEnvironment.create(env, settings));
     }
 
     static List<Row> createPointText(int size){

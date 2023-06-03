@@ -18,27 +18,20 @@
  */
 package org.apache.sedona.sql.utils
 
+import org.apache.sedona.spark.SedonaContext
 import org.apache.sedona.sql.UDF.UdfRegistrator
-import org.apache.sedona.sql.UDT.UdtRegistrator
-import org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet
 import org.apache.spark.sql.{SQLContext, SparkSession}
-import org.apache.spark.sql.sedona_sql.strategy.join.JoinQueryDetector
 
+@deprecated("Use SedonaContext instead", "1.4.1")
 object SedonaSQLRegistrator {
+  @deprecated("Use SedonaContext.create instead", "1.4.1")
   def registerAll(sqlContext: SQLContext): Unit = {
-    registerAll(sqlContext.sparkSession)
+    SedonaContext.create(sqlContext.sparkSession)
   }
 
-  def registerAll(sparkSession: SparkSession): Unit = {
-    if (!sparkSession.experimental.extraStrategies.exists(_.isInstanceOf[JoinQueryDetector])) {
-      sparkSession.experimental.extraStrategies ++= Seq(new JoinQueryDetector(sparkSession))
-    }
-    if (!sparkSession.experimental.extraOptimizations.exists(_.isInstanceOf[SpatialFilterPushDownForGeoParquet])) {
-      sparkSession.experimental.extraOptimizations ++= Seq(new SpatialFilterPushDownForGeoParquet(sparkSession))
-    }
-    UdtRegistrator.registerAll()
-    UdfRegistrator.registerAll(sparkSession)
-  }
+  @deprecated("Use SedonaContext.create instead", "1.4.1")
+  def registerAll(sparkSession: SparkSession): Unit =
+    SedonaContext.create(sparkSession)
 
   def dropAll(sparkSession: SparkSession): Unit = {
     UdfRegistrator.dropAll(sparkSession)
