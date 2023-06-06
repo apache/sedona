@@ -16,7 +16,7 @@ Loading the data from shapefile using geopandas read_file method and create Spar
 import geopandas as gpd
 from sedona.spark import *
 
-config = SedonaContext.config().\
+config = SedonaContext.builder().\
       getOrCreate()
 
 sedona = SedonaContext.create(config)
@@ -55,7 +55,7 @@ Reading data with Spark and converting to GeoPandas
 import geopandas as gpd
 from sedona.spark import *
 
-config = SedonaContext.config().
+config = SedonaContext.builder().
 	getOrCreate()
 
 sedona = SedonaContext.create(config)

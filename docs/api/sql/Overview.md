@@ -36,7 +36,7 @@ The detailed explanation is here [Write a SQL/DataFrame application](../../tutor
 2. Create your Sedona config if you want to customize your SparkSession.
 ```scala
 import org.apache.sedona.spark.SedonaContext
-val config = SedonaContext.config().
+val config = SedonaContext.builder().
     master("local[*]").appName("SedonaSQL")
     .getOrCreate()
 ```

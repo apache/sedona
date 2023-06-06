@@ -38,7 +38,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll{
   val csvPointInputLocation = resourceFolder + "arealm.csv"
 
   override def beforeAll(): Unit = {
-    spark = SedonaContext.create(SedonaContext.config().
+    spark = SedonaContext.create(SedonaContext.builder().
       master("local[*]").appName("SedonaVizSQL").getOrCreate())
     SedonaVizRegistrator.registerAll(spark)
     getPoint().createOrReplaceTempView("pointtable")

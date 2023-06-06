@@ -48,7 +48,7 @@ You can get it using one of the following methods:
 
 ```python
 from sedona.spark import *
-config = SedonaContext.config(). \
+config = SedonaContext.builder(). \
     config('spark.jars.packages',
            'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
            'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \

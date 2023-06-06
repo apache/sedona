@@ -55,7 +55,7 @@ object SedonaContext {
     * This is only needed when the user needs to manually configure Sedona
     * @return
     */
-  def config(): SparkSession.Builder = {
+  def builder(): SparkSession.Builder = {
     SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
       config("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName)
   }

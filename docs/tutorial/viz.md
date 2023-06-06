@@ -27,7 +27,7 @@ Use the following code to create your Sedona config at the beginning. If you alr
 ==Sedona >= 1.4.1===
 
 ```scala
-val config = SedonaContext.config()
+val config = SedonaContext.builder()
 		.config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
 		.master("local[*]") // Delete this if run in cluster mode
 		.appName("Sedona Viz") // Change this to a proper name

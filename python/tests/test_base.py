@@ -24,7 +24,7 @@ class TestBase:
     @classproperty
     def spark(self):
         if not hasattr(self, "__spark"):
-            spark = SedonaContext.create(SedonaContext.config().master("local[*]").getOrCreate())
+            spark = SedonaContext.create(SedonaContext.builder().master("local[*]").getOrCreate())
             setattr(self, "__spark", spark)
         return getattr(self, "__spark")
 

@@ -59,7 +59,7 @@ public class adapterTestJava
     @BeforeClass
     public static void onceExecutedBeforeAll()
     {
-        sparkSession = SedonaContext.create(SedonaContext.config().master("local[*]").appName("adapterTestJava").getOrCreate());
+        sparkSession = SedonaContext.create(SedonaContext.builder().master("local[*]").appName("adapterTestJava").getOrCreate());
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
     }

@@ -43,19 +43,22 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.
 
 Use the following code to create your Sedona config at the beginning. If you already have a SparkSession (usually named `spark`) created by Wherobots/AWS EMR/Databricks, please skip this step and can use `spark` directly.
 
+
 ==Sedona >= 1.4.1==
+
+You can add additional Spark runtime config to the config builder. For example, `SedonaContext.builder().config("spark.sql.autoBroadcastJoinThreshold", "10485760")`
 
 === "Scala"
 
 	```scala
 	import org.apache.sedona.spark.SedonaContext
 
-	val config = SedonaContext.config()
+	val config = SedonaContext.builder()
 	.master("local[*]") // Delete this if run in cluster mode
 	.appName("readTestScala") // Change this to a proper name
 	.getOrCreate()
 	```
-	If you use SedonaViz together with SedonaSQL, please add the following line after `SedonaContext.config()` to enable Sedona Kryo serializer:
+	If you use SedonaViz together with SedonaSQL, please add the following line after `SedonaContext.builder()` to enable Sedona Kryo serializer:
 	```scala
 	.config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
 	```
@@ -65,12 +68,12 @@ Use the following code to create your Sedona config at the beginning. If you alr
 	```java
 	import org.apache.sedona.spark.SedonaContext;
 
-	SparkSession config = SedonaContext.config()
+	SparkSession config = SedonaContext.builder()
 	.master("local[*]") // Delete this if run in cluster mode
 	.appName("readTestScala") // Change this to a proper name
 	.getOrCreate()
 	```
-	If you use SedonaViz together with SedonaSQL, please add the following line after `SedonaContext.config()` to enable Sedona Kryo serializer:
+	If you use SedonaViz together with SedonaSQL, please add the following line after `SedonaContext.builder()` to enable Sedona Kryo serializer:
 	```scala
 	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
 	```
@@ -80,7 +83,7 @@ Use the following code to create your Sedona config at the beginning. If you alr
 	```python
 	from sedona.spark import *
 
-	config = SedonaContext.config() .\
+	config = SedonaContext.builder() .\
 	    config('spark.jars.packages',
 	           'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
 	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
@@ -211,7 +214,7 @@ The file may have many other columns.
 
 Use the following code to load the data and create a raw DataFrame:
 
-=== "Scala/Java"
+=== "Scala"
 	```scala
 	var rawDf = sedona.read.format("csv").option("delimiter", "\t").option("header", "false").load("/Download/usa-county.tsv")
 	rawDf.createOrReplaceTempView("rawdf")
