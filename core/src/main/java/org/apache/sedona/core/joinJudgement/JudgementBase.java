@@ -19,11 +19,22 @@
 
 package org.apache.sedona.core.joinJudgement;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.apache.sedona.core.monitoring.Metric;
 import org.apache.sedona.core.spatialOperator.SpatialPredicate;
 import org.apache.sedona.core.spatialOperator.SpatialPredicateEvaluators;
+import org.apache.spark.TaskContext;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.index.SpatialIndex;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Base class for partition level join implementations.
@@ -31,19 +42,41 @@ import java.io.Serializable;
  * Provides `match` method to test whether a given pair of geometries satisfies join condition.
  * <p>
  */
-abstract class JudgementBase
+abstract class JudgementBase<T extends Geometry, U extends Geometry>
         implements Serializable
 {
+    private static final Logger log = LogManager.getLogger(JudgementBase.class);
 
     private final SpatialPredicate spatialPredicate;
     private transient SpatialPredicateEvaluators.SpatialPredicateEvaluator evaluator;
+    protected final Metric buildCount;
+    protected final Metric streamCount;
+    protected final Metric resultCount;
+    protected final Metric candidateCount;
+
+    private int shapeCnt;
+
+    // A batch of pre-computed matches
+    private List<Pair<U, T>> batch = null;
+    // An index of the element from 'batch' to return next
+    private int nextIndex = 0;
 
     /**
+     *
      * @param spatialPredicate spatial predicate as join condition
+     * @param buildCount num of geometries in build side
+     * @param streamCount num of geometries in stream side
+     * @param resultCount num of join results
+     * @param candidateCount num of candidate pairs to be refined by their real geometries
      */
-    protected JudgementBase(SpatialPredicate spatialPredicate)
+    protected JudgementBase(SpatialPredicate spatialPredicate, Metric buildCount, Metric streamCount, Metric resultCount, Metric candidateCount)
     {
         this.spatialPredicate = spatialPredicate;
+        this.buildCount = buildCount;
+        this.streamCount = streamCount;
+        this.resultCount = resultCount;
+        this.candidateCount = candidateCount;
+        this.shapeCnt = 0;
     }
 
     /**
@@ -58,8 +91,166 @@ abstract class JudgementBase
         evaluator = SpatialPredicateEvaluators.create(spatialPredicate);
     }
 
-    public boolean match(Geometry left, Geometry right)
+    private boolean match(Geometry left, Geometry right)
     {
         return evaluator.eval(left, right);
+    }
+
+    protected boolean hasNextBase(SpatialIndex spatialIndex, Iterator<? extends Geometry> streamShapes,
+            boolean buildLeft)
+    {
+        if (batch != null) {
+            return true;
+        }
+        else {
+            return populateNextBatch(spatialIndex, streamShapes, buildLeft);
+        }
+    }
+
+    protected boolean hasNextBase(List<? extends Geometry> buildShapes, Iterator<? extends Geometry> streamShapes)
+    {
+        if (batch != null) {
+            return true;
+        }
+        else {
+            return populateNextBatch(buildShapes, streamShapes);
+        }
+    }
+
+    protected Pair<U, T> nextBase(SpatialIndex spatialIndex, Iterator<? extends Geometry> streamShapes,
+            boolean buildLeft) {
+        if (batch == null) {
+            populateNextBatch(spatialIndex, streamShapes, buildLeft);
+        }
+
+        if (batch != null) {
+            final Pair<U, T> result = batch.get(nextIndex);
+            nextIndex++;
+            if (nextIndex >= batch.size()) {
+                populateNextBatch(spatialIndex, streamShapes, buildLeft);
+                nextIndex = 0;
+            }
+            return result;
+        }
+
+        throw new NoSuchElementException();
+    }
+
+    protected Pair<U, T> nextBase(List<? extends Geometry> buildShapes, Iterator<? extends Geometry> streamShapes) {
+        if (batch == null) {
+            populateNextBatch(buildShapes, streamShapes);
+        }
+
+        if (batch != null) {
+            final Pair<U, T> result = batch.get(nextIndex);
+            nextIndex++;
+            if (nextIndex >= batch.size()) {
+                populateNextBatch(buildShapes, streamShapes);
+                nextIndex = 0;
+            }
+            return result;
+        }
+
+        throw new NoSuchElementException();
+    }
+
+    /**
+     * Populates the next batch of matches.
+     * It works as fo
+     * @param spatialIndex
+     * @param streamShapes
+     * @param buildLeft
+     * @return
+     */
+    private boolean populateNextBatch(SpatialIndex spatialIndex, Iterator<? extends Geometry> streamShapes,
+            boolean buildLeft)
+    {
+        if (!streamShapes.hasNext()) {
+            if (batch != null) {
+                batch = null;
+            }
+            return false;
+        }
+
+        batch = new ArrayList<>();
+
+        while (streamShapes.hasNext()) {
+            shapeCnt++;
+            streamCount.add(1);
+            final Geometry streamShape = streamShapes.next();
+            final List candidates = spatialIndex.query(streamShape.getEnvelopeInternal());
+            for (Object candidate : candidates) {
+                candidateCount.add(1);
+                final Geometry buildShape = (Geometry) candidate;
+                if (buildLeft) {
+                    if (match(buildShape, streamShape)) {
+                        batch.add(Pair.of((U) buildShape, (T) streamShape));
+                        resultCount.add(1);
+                    }
+                }
+                else {
+                    if (match(streamShape, buildShape)) {
+                        batch.add(Pair.of((U) streamShape, (T) buildShape));
+                        resultCount.add(1);
+                    }
+                }
+            }
+            logMilestone(shapeCnt, 100 * 1000, "Streaming shapes");
+            if (!batch.isEmpty()) {
+                return true;
+            }
+        }
+
+        batch = null;
+        return false;
+    }
+
+    private boolean populateNextBatch(List<? extends Geometry> buildShapes, Iterator<? extends Geometry> streamShapes)
+    {
+        if (!streamShapes.hasNext()) {
+            if (batch != null) {
+                batch = null;
+            }
+            return false;
+        }
+
+        batch = new ArrayList<>();
+
+        while (streamShapes.hasNext()) {
+            shapeCnt++;
+            streamCount.add(1);
+            final Geometry streamShape = streamShapes.next();
+            for (Object candidate : buildShapes) {
+                candidateCount.add(1);
+                final Geometry buildShape = (Geometry) candidate;
+                if (match(streamShape, buildShape)) {
+                    batch.add(Pair.of((U) streamShape, (T) buildShape));
+                    resultCount.add(1);
+                }
+            }
+            logMilestone(shapeCnt, 100 * 1000, "Streaming shapes");
+            if (!batch.isEmpty()) {
+                return true;
+            }
+        }
+
+        batch = null;
+        return false;
+    }
+
+    private void log(String message, Object... params)
+    {
+        if (Level.INFO.isGreaterOrEqual(log.getEffectiveLevel())) {
+            final int partitionId = TaskContext.getPartitionId();
+            final long threadId = Thread.currentThread().getId();
+            log.info("[" + threadId + ", PID=" + partitionId + "] " + String.format(message, params));
+        }
+    }
+
+    private void logMilestone(long cnt, long threshold, String name)
+    {
+        if (cnt > 1 && cnt % threshold == 1) {
+            log("[%s] Reached a milestone: %d", name, cnt);
+        }
     }
 }
