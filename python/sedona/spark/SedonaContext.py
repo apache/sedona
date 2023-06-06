@@ -16,52 +16,35 @@
 #  under the License.
 
 import attr
-from py4j.java_gateway import java_import
 from pyspark.sql import SparkSession
 
-from sedona.core.jvm.config import deprecated
-from sedona.register.java_libs import SedonaJvmLib
-from sedona.utils.prep import assign_all
-
-assign_all()
-jvm_import = str
+from sedona.register.geo_registrator import PackageImporter
+from sedona.utils import KryoSerializer, SedonaKryoRegistrator
 
 
 @attr.s
-class SedonaRegistrator:
-
+class SedonaContext:
     @classmethod
-    @deprecated("Deprecated since 1.4.1, use SedonaContext.create() instead.")
-    def registerAll(cls, spark: SparkSession) -> bool:
+    def create(cls, spark: SparkSession) -> SparkSession:
         """
         This is the core of whole package, It uses py4j to run wrapper which takes existing SparkSession
-        and register all User Defined Functions by Apache Sedona developers, for this SparkSession.
+        and register the core logics of Apache Sedona, for this SparkSession.
 
         :param spark: pyspark.sql.SparkSession, spark session instance
-        :return: bool, True if registration was correct.
+        :return: SedonaContext which is an instance of SparkSession
         """
         spark.sql("SELECT 1 as geom").count()
         PackageImporter.import_jvm_lib(spark._jvm)
-        cls.register(spark)
-        return True
+        spark._jvm.SedonaContext.create(spark._jsparkSession)
+        return spark
 
     @classmethod
-    @deprecated("Deprecated since 1.4.1, use SedonaContext.create() instead.")
-    def register(cls, spark: SparkSession):
-        return spark._jvm.SedonaSQLRegistrator.registerAll(spark._jsparkSession)
-
-class PackageImporter:
-
-    @staticmethod
-    def import_jvm_lib(jvm) -> bool:
-        from sedona.core.utils import ImportedJvmLib
+    def builder(cls) -> SparkSession.builder:
         """
-        Imports all the specified methods and functions in jvm
-        :param jvm: Jvm gateway from py4j
-        :return:
+        This method adds the basic Sedona configuration to the SparkSession builder.
+        Usually the user does not need to call this method directly, as it is configured when a cluster is created.
+        This method is needed when the user wants to manually configure Sedona
+        :return: SparkSession.builder
         """
-        for lib in SedonaJvmLib:
-            java_import(jvm, lib.value)
-            ImportedJvmLib.import_lib(lib.name)
-
-        return True
+        return SparkSession.builder.config("spark.serializer", KryoSerializer.getName).\
+            config("spark.kryo.registrator", SedonaKryoRegistrator.getName)

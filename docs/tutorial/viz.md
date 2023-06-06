@@ -20,10 +20,23 @@ This tutorial mainly focuses on explaining SQL/DataFrame API. SedonaViz RDD exam
 1. Read [Sedona Maven Central coordinates](../setup/maven-coordinates.md)
 2. Add [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core, Sedona-SQL, Sedona-Viz
 
-## Initiate SparkSession
+## Create Sedona config
 
-Use the following code to initiate your SparkSession at the beginning:
-This will register SedonaViz Kryo serializer.
+Use the following code to create your Sedona config at the beginning. If you already have a SparkSession (usually named `spark`) created by Wherobots/AWS EMR/Databricks, please skip this step and can use `spark` directly.
+
+==Sedona >= 1.4.1===
+
+```scala
+val config = SedonaContext.builder()
+		.config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+		.master("local[*]") // Delete this if run in cluster mode
+		.appName("Sedona Viz") // Change this to a proper name
+		.getOrCreate()
+```
+
+==Sedona <1.4.1==
+
+The following method has been deprecated since Sedona 1.4.1. Please use the method above to create your Sedona config.
 
 ```scala
 var sparkSession = SparkSession.builder()
@@ -35,16 +48,25 @@ var sparkSession = SparkSession.builder()
 .getOrCreate()
 ```
 
-## Register SedonaSQL and SedonaViz
+## Initiate SedonaContext
 
-Add the following line after your SparkSession declaration
+Add the following line after creating Sedona config. If you already have a SparkSession (usually named `spark`) created by Wherobots/AWS EMR/Databricks, please call `SedonaContext.create(spark)` instead.
+
+==Sedona >= 1.4.1===
+
+```scala
+val sedona = SedonaContext.create(config)
+SedonaVizRegistrator.registerAll(sedona)
+```
+
+==Sedona <1.4.1==
+
+The following method has been deprecated since Sedona 1.4.1. Please use the method above to create your SedonaContext.
 
 ```scala
 SedonaSQLRegistrator.registerAll(sparkSession)
 SedonaVizRegistrator.registerAll(sparkSession)
 ```
-
-This will register all User Defined Tyeps, functions and optimizations in SedonaSQL and SedonaViz.
 
 You can also register everything by passing `--conf spark.sql.extensions=org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions` to `spark-submit` or `spark-shell`.
 
@@ -153,7 +175,7 @@ This DataFrame will contain a Image type column which has only one image.
 Fetch the image from the previous DataFrame
 
 ```
-var image = sparkSession.table("images").take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage
+var image = sedona.table("images").take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage
 ```
 
 Use Sedona Viz ImageGenerator to store this image on disk.

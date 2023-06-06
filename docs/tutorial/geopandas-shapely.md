@@ -14,18 +14,16 @@ Loading the data from shapefile using geopandas read_file method and create Spar
 ```python
 
 import geopandas as gpd
-from pyspark.sql import SparkSession
+from sedona.spark import *
 
-from sedona.register import SedonaRegistrator
-
-spark = SparkSession.builder.\
+config = SedonaContext.builder().\
       getOrCreate()
 
-SedonaRegistrator.registerAll(spark)
+sedona = SedonaContext.create(config)
 
 gdf = gpd.read_file("gis_osm_pois_free_1.shp")
 
-spark.createDataFrame(
+sedona.createDataFrame(
   gdf
 ).show()
 
@@ -55,16 +53,14 @@ Reading data with Spark and converting to GeoPandas
 ```python
 
 import geopandas as gpd
-from pyspark.sql import SparkSession
+from sedona.spark import *
 
-from sedona.register import SedonaRegistrator
+config = SedonaContext.builder().
+	getOrCreate()
 
-spark = SparkSession.builder.\
-    getOrCreate()
+sedona = SedonaContext.create(config)
 
-SedonaRegistrator.registerAll(spark)
-
-counties = spark.\
+counties = sedona.\
     read.\
     option("delimiter", "|").\
     option("header", "true").\
@@ -72,7 +68,7 @@ counties = spark.\
 
 counties.createOrReplaceTempView("county")
 
-counties_geom = spark.sql(
+counties_geom = sedona.sql(
     "SELECT *, st_geomFromWKT(geom) as geometry from county"
 )
 
@@ -119,7 +115,7 @@ Schema for target table with integer id and geometry type can be defined as foll
 
 from pyspark.sql.types import IntegerType, StructField, StructType
 
-from sedona.sql.types import GeometryType
+from sedona.spark import *
 
 schema = StructType(
     [
@@ -144,7 +140,7 @@ data = [
 ]
 
 
-gdf = spark.createDataFrame(
+gdf = sedona.createDataFrame(
     data,
     schema
 )
@@ -183,7 +179,7 @@ data = [
     [1, MultiPoint([[19.511463, 51.765158], [19.446408, 51.779752]])]
 ]
 
-gdf = spark.createDataFrame(
+gdf = sedona.createDataFrame(
     data,
     schema
 ).show(1, False)
@@ -213,7 +209,7 @@ data = [
     [1, LineString(line)]
 ]
 
-gdf = spark.createDataFrame(
+gdf = sedona.createDataFrame(
     data,
     schema
 )
@@ -245,7 +241,7 @@ data = [
     [1, MultiLineString([line1, line2])]
 ]
 
-gdf = spark.createDataFrame(
+gdf = sedona.createDataFrame(
     data,
     schema
 )
@@ -284,7 +280,7 @@ data = [
     [1, polygon]
 ]
 
-gdf = spark.createDataFrame(
+gdf = sedona.createDataFrame(
     data,
     schema
 )
@@ -324,7 +320,7 @@ data = [
     [1, MultiPolygon(polygons)]
 ]
 
-gdf = spark.createDataFrame(
+gdf = sedona.createDataFrame(
     data,
     schema
 )

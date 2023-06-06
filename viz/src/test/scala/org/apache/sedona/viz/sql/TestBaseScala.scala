@@ -19,10 +19,8 @@
 package org.apache.sedona.viz.sql
 
 import org.apache.log4j.{Level, Logger}
-import org.apache.sedona.sql.utils.SedonaSQLRegistrator
-import org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+import org.apache.sedona.spark.SedonaContext
 import org.apache.sedona.viz.sql.utils.SedonaVizRegistrator
-import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
@@ -40,10 +38,8 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll{
   val csvPointInputLocation = resourceFolder + "arealm.csv"
 
   override def beforeAll(): Unit = {
-    spark = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
-      config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName).
-      master("local[*]").appName("SedonaVizSQL").getOrCreate()
-    SedonaSQLRegistrator.registerAll(spark)
+    spark = SedonaContext.create(SedonaContext.builder().
+      master("local[*]").appName("SedonaVizSQL").getOrCreate())
     SedonaVizRegistrator.registerAll(spark)
     getPoint().createOrReplaceTempView("pointtable")
     getPolygon().createOrReplaceTempView("usdata")

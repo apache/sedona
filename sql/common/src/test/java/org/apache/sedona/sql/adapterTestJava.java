@@ -24,12 +24,11 @@ import org.apache.log4j.Logger;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader;
-import org.apache.sedona.core.serde.SedonaKryoRegistrator;
 import org.apache.sedona.core.spatialOperator.JoinQuery;
 import org.apache.sedona.core.spatialRDD.CircleRDD;
 import org.apache.sedona.core.spatialRDD.SpatialRDD;
+import org.apache.sedona.spark.SedonaContext;
 import org.apache.sedona.sql.utils.Adapter;
-import org.apache.sedona.sql.utils.SedonaSQLRegistrator;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -60,15 +59,9 @@ public class adapterTestJava
     @BeforeClass
     public static void onceExecutedBeforeAll()
     {
-        conf = new SparkConf().setAppName("adapterTestJava").setMaster("local[2]");
-        conf.set("spark.serializer", org.apache.spark.serializer.KryoSerializer.class.getName());
-        conf.set("spark.kryo.registrator", SedonaKryoRegistrator.class.getName());
-
-        sc = new JavaSparkContext(conf);
-        sparkSession = new SparkSession(sc.sc());
+        sparkSession = SedonaContext.create(SedonaContext.builder().master("local[*]").appName("adapterTestJava").getOrCreate());
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
-        SedonaSQLRegistrator.registerAll(sparkSession.sqlContext());
     }
 
     /**
@@ -77,7 +70,6 @@ public class adapterTestJava
     @AfterClass
     public static void TearDown()
     {
-        SedonaSQLRegistrator.dropAll(sparkSession);
         sparkSession.stop();
     }
 

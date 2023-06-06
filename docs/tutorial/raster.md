@@ -3,8 +3,8 @@ Starting from `v1.1.0`, Sedona SQL supports raster data sources and raster opera
 ## Initial setup
 
 1. [Set up dependencies](../sql/#set-up-dependencies)
-2. [Initiate Spark session](../sql/#initiate-sparksession)
-3. [Register SedonaSQL](../sql/#register-sedonasql)
+2. [Create Sedona config](../sql/#create-sedona-config)
+3. [Initiate SedonaContext](../sql/#initiate-sedonacontext)
 
 ## API docs
 

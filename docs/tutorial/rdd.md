@@ -3,65 +3,15 @@ The page outlines the steps to create Spatial RDDs and run spatial queries using
 
 ## Set up dependencies
 
-=== "Scala/Java"
+Please refer to [Set up dependencies](../sql/#set-up-dependencies) to set up dependencies.
 
-	1. Read [Sedona Maven Central coordinates](../setup/maven-coordinates.md) and add Sedona dependencies in build.sbt or pom.xml.
-	2. Add [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql) in build.sbt or pom.xml.
-	3. Please see [RDD example project](../demo/)
+## Create Sedona config
 
-=== "Python"
+Please refer to [Create Sedona config](../sql/#create-sedona-config) to create a Sedona config.
 
-	1. Please read [Quick start](../../setup/install-python) to install Sedona Python.
-	2. This tutorial is based on [Sedona Core Jupyter Notebook example](../jupyter-notebook). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder) to interact with Sedona Python Jupyter notebook immediately on Binder.
+## Initiate SedonaContext
 
-## Initiate SparkContext
-
-=== "Scala"
-
-	```scala
-	val conf = new SparkConf()
-	conf.setAppName("SedonaRunnableExample") // Change this to a proper name
-	conf.setMaster("local[*]") // Delete this if run in cluster mode
-	// Enable Sedona custom Kryo serializer
-	conf.set("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
-	conf.set("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName) // org.apache.sedona.core.serde.SedonaKryoRegistrator
-	val sc = new SparkContext(conf)
-	```
-	
-	If you add ==the Sedona full dependencies== as suggested above, please use the following two lines to enable Sedona Kryo serializer instead:
-	```scala
-	conf.set("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
-	conf.set("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
-	```
-
-=== "Java"
-
-	```java
-	SparkConf conf = new SparkConf()
-	conf.setAppName("SedonaRunnableExample") // Change this to a proper name
-	conf.setMaster("local[*]") // Delete this if run in cluster mode
-	// Enable Sedona custom Kryo serializer
-	conf.set("spark.serializer", KryoSerializer.class.getName) // org.apache.spark.serializer.KryoSerializer
-	conf.set("spark.kryo.registrator", SedonaKryoRegistrator.class.getName) // org.apache.sedona.core.serde.SedonaKryoRegistrator
-	SparkContext sc = new SparkContext(conf)
-	```
-	
-	If you use SedonaViz with SedonaRDD, please use the following two lines to enable Sedona Kryo serializer instead:
-	```scala
-	conf.set("spark.serializer", KryoSerializer.class.getName) // org.apache.spark.serializer.KryoSerializer
-	conf.set("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
-	```
-
-=== "Python"
-
-```python
-conf.set("spark.serializer", KryoSerializer.getName)
-conf.set("spark.kryo.registrator", SedonaKryoRegistrator.getName)
-sc = SparkContext(conf=conf)
-```
-
-!!!warning
-	Sedona has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption.
+Please refer to [Initiate SedonaContext](../sql/#initiate-sedonacontext) to initiate a SedonaContext.
 
 ## Create a SpatialRDD
 
@@ -97,7 +47,7 @@ Use the following code to create a SpatialRDD
 	val wktColumn = 0 // The WKT string starts from Column 0
 	val allowTopologyInvalidGeometries = true // Optional
 	val skipSyntaxInvalidGeometries = false // Optional
-	val spatialRDD = WktReader.readToGeometryRDD(sparkSession.sparkContext, inputLocation, wktColumn, allowTopologyInvalidGeometries, skipSyntaxInvalidGeometries)
+	val spatialRDD = WktReader.readToGeometryRDD(sedona.sparkContext, inputLocation, wktColumn, allowTopologyInvalidGeometries, skipSyntaxInvalidGeometries)
 	```
 
 === "Java"
@@ -107,7 +57,7 @@ Use the following code to create a SpatialRDD
 	int wktColumn = 0 // The WKT string starts from Column 0
 	boolean allowTopologyInvalidGeometries = true // Optional
 	boolean skipSyntaxInvalidGeometries = false // Optional
-	SpatialRDD spatialRDD = WktReader.readToGeometryRDD(sparkSession.sparkContext, inputLocation, wktColumn, allowTopologyInvalidGeometries, skipSyntaxInvalidGeometries)
+	SpatialRDD spatialRDD = WktReader.readToGeometryRDD(sedona.sparkContext, inputLocation, wktColumn, allowTopologyInvalidGeometries, skipSyntaxInvalidGeometries)
 	```
 
 === "Python"
@@ -144,7 +94,7 @@ Use the following code to create a generic SpatialRDD:
 	val inputLocation = "/Download/polygon.json"
 	val allowTopologyInvalidGeometries = true // Optional
 	val skipSyntaxInvalidGeometries = false // Optional
-	val spatialRDD = GeoJsonReader.readToGeometryRDD(sparkSession.sparkContext, inputLocation, allowTopologyInvalidGeometries, skipSyntaxInvalidGeometries)
+	val spatialRDD = GeoJsonReader.readToGeometryRDD(sedona.sparkContext, inputLocation, allowTopologyInvalidGeometries, skipSyntaxInvalidGeometries)
 	```
 
 === "Java"
@@ -153,7 +103,7 @@ Use the following code to create a generic SpatialRDD:
 	String inputLocation = "/Download/polygon.json"
 	boolean allowTopologyInvalidGeometries = true // Optional
 	boolean skipSyntaxInvalidGeometries = false // Optional
-	SpatialRDD spatialRDD = GeoJsonReader.readToGeometryRDD(sparkSession.sparkContext, inputLocation, allowTopologyInvalidGeometries, skipSyntaxInvalidGeometries)
+	SpatialRDD spatialRDD = GeoJsonReader.readToGeometryRDD(sedona.sparkContext, inputLocation, allowTopologyInvalidGeometries, skipSyntaxInvalidGeometries)
 	```
 	
 === "Python"
@@ -173,14 +123,14 @@ Use the following code to create a generic SpatialRDD:
 
 	```scala
 	val shapefileInputLocation="/Download/myshapefile"
-	val spatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileInputLocation)
+	val spatialRDD = ShapefileReader.readToGeometryRDD(sedona.sparkContext, shapefileInputLocation)
 	```
 
 === "Java"
 
 	```java
 	String shapefileInputLocation="/Download/myshapefile"
-	SpatialRDD spatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileInputLocation)
+	SpatialRDD spatialRDD = ShapefileReader.readToGeometryRDD(sedona.sparkContext, shapefileInputLocation)
 	```
 
 === "Python"
@@ -229,12 +179,12 @@ We use checkin.csv CSV file as the example. You can create a generic SpatialRDD 
 
 1. Load data in SedonaSQL.
 ```scala
-var df = sparkSession.read.format("csv").option("header", "false").load(csvPointInputLocation)
+var df = sedona.read.format("csv").option("header", "false").load(csvPointInputLocation)
 df.createOrReplaceTempView("inputtable")
 ```
 2. Create a Geometry type column in SedonaSQL
 ```scala
-var spatialDf = sparkSession.sql(
+var spatialDf = sedona.sql(
 	"""
    		|SELECT ST_Point(CAST(inputtable._c0 AS Decimal(24,20)),CAST(inputtable._c1 AS Decimal(24,20))) AS checkin
    		|FROM inputtable
@@ -288,21 +238,21 @@ To convert Coordinate Reference System of an SpatialRDD, use the following code:
 === "Scala"
 
 	```scala
-	val objectRDD = WktReader.readToGeometryRDD(sparkSession.sparkContext, inputLocation, wktColumn, allowTopologyInvalidGeometries, skipSyntaxInvalidGeometries)
+	val objectRDD = WktReader.readToGeometryRDD(sedona.sparkContext, inputLocation, wktColumn, allowTopologyInvalidGeometries, skipSyntaxInvalidGeometries)
 	objectRDD.CRSTransform("epsg:4326", "epsg:3857", false)
 	```
 
 === "Java"
 
 	```java
-	SpatialRDD objectRDD = WktReader.readToGeometryRDD(sparkSession.sparkContext, inputLocation, wktColumn, allowTopologyInvalidGeometries, skipSyntaxInvalidGeometries)
+	SpatialRDD objectRDD = WktReader.readToGeometryRDD(sedona.sparkContext, inputLocation, wktColumn, allowTopologyInvalidGeometries, skipSyntaxInvalidGeometries)
 	objectRDD.CRSTransform("epsg:4326", "epsg:3857", false)
 	```
 
 === "Python"
 
 	```python
-	objectRDD = WktReader.readToGeometryRDD(sparkSession.sparkContext, inputLocation, wktColumn, allowTopologyInvalidGeometries, skipSyntaxInvalidGeometries)
+	objectRDD = WktReader.readToGeometryRDD(sedona.sparkContext, inputLocation, wktColumn, allowTopologyInvalidGeometries, skipSyntaxInvalidGeometries)
 	objectRDD.CRSTransform("epsg:4326", "epsg:3857", False)
 	```
 

@@ -6,21 +6,21 @@ SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of 
 === "Scala"
 
 	```scala
-	var myDataFrame = sparkSession.sql("YOUR_SQL")
+	var myDataFrame = sedona.sql("YOUR_SQL")
 	myDataFrame.createOrReplaceTempView("spatialDf")
 	```
 
 === "Java"
 
 	```java
-	Dataset<Row> myDataFrame = sparkSession.sql("YOUR_SQL")
+	Dataset<Row> myDataFrame = sedona.sql("YOUR_SQL")
 	myDataFrame.createOrReplaceTempView("spatialDf")
 	```
 	
 === "Python"
 
 	```python
-	myDataFrame = sparkSession.sql("YOUR_SQL")
+	myDataFrame = sedona.sql("YOUR_SQL")
 	myDataFrame.createOrReplaceTempView("spatialDf")
 	```
 
@@ -39,8 +39,61 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.
 	1. Please read [Quick start](../../setup/install-python) to install Sedona Python.
 	2. This tutorial is based on [Sedona SQL Jupyter Notebook example](../jupyter-notebook). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder) to interact with Sedona Python Jupyter notebook immediately on Binder.
 
-## Initiate SparkSession
-Use the following code to initiate your SparkSession at the beginning:
+## Create Sedona config
+
+Use the following code to create your Sedona config at the beginning. If you already have a SparkSession (usually named `spark`) created by Wherobots/AWS EMR/Databricks, please skip this step and can use `spark` directly.
+
+
+==Sedona >= 1.4.1==
+
+You can add additional Spark runtime config to the config builder. For example, `SedonaContext.builder().config("spark.sql.autoBroadcastJoinThreshold", "10485760")`
+
+=== "Scala"
+
+	```scala
+	import org.apache.sedona.spark.SedonaContext
+
+	val config = SedonaContext.builder()
+	.master("local[*]") // Delete this if run in cluster mode
+	.appName("readTestScala") // Change this to a proper name
+	.getOrCreate()
+	```
+	If you use SedonaViz together with SedonaSQL, please add the following line after `SedonaContext.builder()` to enable Sedona Kryo serializer:
+	```scala
+	.config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+	```
+
+=== "Java"
+
+	```java
+	import org.apache.sedona.spark.SedonaContext;
+
+	SparkSession config = SedonaContext.builder()
+	.master("local[*]") // Delete this if run in cluster mode
+	.appName("readTestScala") // Change this to a proper name
+	.getOrCreate()
+	```
+	If you use SedonaViz together with SedonaSQL, please add the following line after `SedonaContext.builder()` to enable Sedona Kryo serializer:
+	```scala
+	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+	```
+	
+=== "Python"
+
+	```python
+	from sedona.spark import *
+
+	config = SedonaContext.builder() .\
+	    config('spark.jars.packages',
+	           'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
+	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
+	    getOrCreate()
+	```
+    If you are using Spark versions >= 3.4, please replace the `3.0` in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
+
+==Sedona < 1.4.1==
+
+The following method has been deprecated since Sedona 1.4.1. Please use the method above to create your Sedona config.
 
 === "Scala"
 
@@ -75,7 +128,7 @@ Use the following code to initiate your SparkSession at the beginning:
 	.config("spark.serializer", KryoSerializer.class.getName) // org.apache.spark.serializer.KryoSerializer
 	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
 	```
-	
+
 === "Python"
 
 	```python
@@ -91,14 +144,39 @@ Use the following code to initiate your SparkSession at the beginning:
 	```
     If you are using Spark versions >= 3.4, please replace the `3.0` in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
 
-!!!warning
-	Sedona has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption and slow performance.
+## Initiate SedonaContext
 
+Add the following line after creating Sedona config. If you already have a SparkSession (usually named `spark`) created by Wherobots/AWS EMR/Databricks, please call `SedonaContext.create(spark)` instead.
 
+==Sedona >= 1.4.1==
 
-## Register SedonaSQL
+=== "Scala"
 
-Add the following line after your SparkSession declaration
+	```scala
+	import org.apache.sedona.spark.SedonaContext
+
+	val sedona = SedonaContext.create(config)
+	```
+
+=== "Java"
+
+	```java
+	import org.apache.sedona.spark.SedonaContext;
+
+	SparkSession sedona = SedonaContext.create(config)
+	```
+
+=== "Python"
+
+	```python
+	from sedona.spark import *
+	
+	sedona = SedonaContext.create(config)
+	```
+
+==Sedona < 1.4.1==
+
+The following method has been deprecated since Sedona 1.4.1. Please use the method above to create your SedonaContext.
 
 === "Scala"
 
@@ -120,8 +198,6 @@ Add the following line after your SparkSession declaration
 	SedonaRegistrator.registerAll(spark)
 	```
 
-This function will register Sedona User Defined Type, User Defined Function and optimized join query strategy.
-
 You can also register everything by passing `--conf spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions` to `spark-submit` or `spark-shell`.
 
 ## Load data from files
@@ -138,23 +214,23 @@ The file may have many other columns.
 
 Use the following code to load the data and create a raw DataFrame:
 
-=== "Scala/Java"
+=== "Scala"
 	```scala
-	var rawDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load("/Download/usa-county.tsv")
+	var rawDf = sedona.read.format("csv").option("delimiter", "\t").option("header", "false").load("/Download/usa-county.tsv")
 	rawDf.createOrReplaceTempView("rawdf")
 	rawDf.show()
 	```
 
 === "Java"
 	```java
-	Dataset<Row> rawDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load("/Download/usa-county.tsv")
+	Dataset<Row> rawDf = sedona.read.format("csv").option("delimiter", "\t").option("header", "false").load("/Download/usa-county.tsv")
 	rawDf.createOrReplaceTempView("rawdf")
 	rawDf.show()
 	```
 
 === "Python"
 	```python
-	rawDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load("/Download/usa-county.tsv")
+	rawDf = sedona.read.format("csv").option("delimiter", "\t").option("header", "false").load("/Download/usa-county.tsv")
 	rawDf.createOrReplaceTempView("rawdf")
 	rawDf.show()
 	```
@@ -224,7 +300,7 @@ This prevents Spark from interpreting the property and allows us to use the ST_G
 
 	```scala
 	val schema = "type string, crs string, totalFeatures long, features array<struct<type string, geometry string, properties map<string, string>>>"
-	sparkSession.read.schema(schema).json(geojson_path)
+	sedona.read.schema(schema).json(geojson_path)
 		.selectExpr("explode(features) as features") // Explode the envelope to get one feature per row.
 		.select("features.*") // Unpack the features struct.
 		.withColumn("geometry", expr("ST_GeomFromGeoJSON(geometry)")) // Convert the geometry string.
@@ -235,7 +311,7 @@ This prevents Spark from interpreting the property and allows us to use the ST_G
 
 	```java
 	String schema = "type string, crs string, totalFeatures long, features array<struct<type string, geometry string, properties map<string, string>>>";
-	sparkSession.read.schema(schema).json(geojson_path)
+	sedona.read.schema(schema).json(geojson_path)
 		.selectExpr("explode(features) as features") // Explode the envelope to get one feature per row.
 		.select("features.*") // Unpack the features struct.
 		.withColumn("geometry", expr("ST_GeomFromGeoJSON(geometry)")) // Convert the geometry string.
@@ -246,7 +322,7 @@ This prevents Spark from interpreting the property and allows us to use the ST_G
 
 	```python
 	schema = "type string, crs string, totalFeatures long, features array<struct<type string, geometry string, properties map<string, string>>>";
-	(sparkSession.read.json(geojson_path, schema=schema) 
+	(sedona.read.json(geojson_path, schema=schema) 
 		.selectExpr("explode(features) as features") # Explode the envelope to get one feature per row.
 		.select("features.*") # Unpack the features struct.
 		.withColumn("geometry", f.expr("ST_GeomFromGeoJSON(geometry)")) # Convert the geometry string.
@@ -265,21 +341,21 @@ Since v`1.3.0`, Sedona natively supports loading GeoParquet file. Sedona will in
 === "Scala/Java"
 
 	```scala
-	val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation1)
+	val df = sedona.read.format("geoparquet").load(geoparquetdatalocation1)
 	df.printSchema()
 	```
 
 === "Java"
 
 	```java
-	Dataset<Row> df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation1)
+	Dataset<Row> df = sedona.read.format("geoparquet").load(geoparquetdatalocation1)
 	df.printSchema()
 	```
 
 === "Python"
 
 	```python
-	df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation1)
+	df = sedona.read.format("geoparquet").load(geoparquetdatalocation1)
 	df.printSchema()
 	```
 
@@ -307,14 +383,14 @@ For Postgis there is no need to add a query to convert geometry types since it's
 
 	```scala
 	// For any JDBC data source, including Postgis.
-	val df = sparkSession.read.format("jdbc")
+	val df = sedona.read.format("jdbc")
 		// Other options.
 		.option("query", "SELECT id, ST_AsBinary(geom) as geom FROM my_table")
 		.load()
 		.withColumn("geom", expr("ST_GeomFromWKB(geom)"))
 
 	// This is a simplified version that works for Postgis.
-	val df = sparkSession.read.format("jdbc")
+	val df = sedona.read.format("jdbc")
 		// Other options.
 		.option("dbtable", "my_table")
 		.load()
@@ -325,14 +401,14 @@ For Postgis there is no need to add a query to convert geometry types since it's
 
 	```java
 	// For any JDBC data source, including Postgis.
-	Dataset<Row> df = sparkSession.read().format("jdbc")
+	Dataset<Row> df = sedona.read().format("jdbc")
 		// Other options.
 		.option("query", "SELECT id, ST_AsBinary(geom) as geom FROM my_table")
 		.load()
 		.withColumn("geom", expr("ST_GeomFromWKB(geom)"))
 
 	// This is a simplified version that works for Postgis.
-	Dataset<Row> df = sparkSession.read().format("jdbc")
+	Dataset<Row> df = sedona.read().format("jdbc")
 		// Other options.
 		.option("dbtable", "my_table")
 		.load()
@@ -343,14 +419,14 @@ For Postgis there is no need to add a query to convert geometry types since it's
 
 	```python
 	# For any JDBC data source, including Postgis.
-	df = (sparkSession.read.format("jdbc")
+	df = (sedona.read.format("jdbc")
 		# Other options.
 		.option("query", "SELECT id, ST_AsBinary(geom) as geom FROM my_table")
 		.load()
 		.withColumn("geom", f.expr("ST_GeomFromWKB(geom)")))
 
 	# This is a simplified version that works for Postgis.
-	df = (sparkSession.read.format("jdbc")
+	df = (sedona.read.format("jdbc")
 		# Other options.
 		.option("dbtable", "my_table")
 		.load()
@@ -526,13 +602,13 @@ Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Ple
 === "Scala"
 
 	```scala
-	var spatialDf = Adapter.toDf(spatialRDD, sparkSession)
+	var spatialDf = Adapter.toDf(spatialRDD, sedona)
 	```
 
 === "Java"
 
 	```java
-	Dataset<Row> spatialDf = Adapter.toDf(spatialRDD, sparkSession)
+	Dataset<Row> spatialDf = Adapter.toDf(spatialRDD, sedona)
 	```
 	
 === "Python"
@@ -540,7 +616,7 @@ Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Ple
 	```python
 	from sedona.utils.adapter import Adapter
 	
-	spatialDf = Adapter.toDf(spatialRDD, sparkSession)
+	spatialDf = Adapter.toDf(spatialRDD, sedona)
 	```
 
 All other attributes such as price and age will be also brought to the DataFrame as long as you specify ==carryOtherAttributes== (see [Read other attributes in an SpatialRDD](../rdd#read-other-attributes-in-an-spatialrdd)).
@@ -559,7 +635,7 @@ case. At least one column for the user data must be provided.
 	  StructField("price", DoubleType, nullable = true),
 	  StructField("age", IntegerType, nullable = true)
 	))
-	val spatialDf = Adapter.toDf(spatialRDD, schema, sparkSession)
+	val spatialDf = Adapter.toDf(spatialRDD, schema, sedona)
 	```
 
 ### SpatialPairRDD to DataFrame
@@ -569,7 +645,7 @@ PairRDD is the result of a spatial join query or distance join query. SedonaSQL 
 === "Scala"
 
 	```scala
-	var joinResultDf = Adapter.toDf(joinResultPairRDD, Seq("left_attribute1", "left_attribute2"), Seq("right_attribute1", "right_attribute2"), sparkSession)
+	var joinResultDf = Adapter.toDf(joinResultPairRDD, Seq("left_attribute1", "left_attribute2"), Seq("right_attribute1", "right_attribute2"), sedona)
 	```
 
 === "Java"
@@ -579,7 +655,7 @@ PairRDD is the result of a spatial join query or distance join query. SedonaSQL 
 	
 	List leftFields = new ArrayList<>(Arrays.asList("c1", "c2", "c3"));
 	List rightFields = new ArrayList<>(Arrays.asList("c4", "c5", "c6"));
-	Dataset joinResultDf = Adapter.toDf(joinResultPairRDD, JavaConverters.asScalaBuffer(leftFields).toSeq(), JavaConverters.asScalaBuffer(rightFields).toSeq(), sparkSession);
+	Dataset joinResultDf = Adapter.toDf(joinResultPairRDD, JavaConverters.asScalaBuffer(leftFields).toSeq(), JavaConverters.asScalaBuffer(rightFields).toSeq(), sedona);
 	```
 
 === "Python"
@@ -595,14 +671,14 @@ or you can use the attribute names directly from the input RDD
 
 	```scala
 	import scala.collection.JavaConversions._
-	var joinResultDf = Adapter.toDf(joinResultPairRDD, leftRdd.fieldNames, rightRdd.fieldNames, sparkSession)
+	var joinResultDf = Adapter.toDf(joinResultPairRDD, leftRdd.fieldNames, rightRdd.fieldNames, sedona)
 	```
 
 === "Java"
 
 	```java
 	import scala.collection.JavaConverters;	
-	Dataset joinResultDf = Adapter.toDf(joinResultPairRDD, JavaConverters.asScalaBuffer(leftRdd.fieldNames).toSeq(), JavaConverters.asScalaBuffer(rightRdd.fieldNames).toSeq(), sparkSession);
+	Dataset joinResultDf = Adapter.toDf(joinResultPairRDD, JavaConverters.asScalaBuffer(leftRdd.fieldNames).toSeq(), JavaConverters.asScalaBuffer(rightRdd.fieldNames).toSeq(), sedona);
 	```
 === "Python"
 
@@ -630,5 +706,5 @@ case. Columns for the left and right user data must be provided.
 	  StructField("rightGeometry", GeometryUDT, nullable = true),
 	  StructField("category", StringType, nullable = true)
 	))
-	val joinResultDf = Adapter.toDf(joinResultPairRDD, schema, sparkSession)
+	val joinResultDf = Adapter.toDf(joinResultPairRDD, schema, sedona)
 	```

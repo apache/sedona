@@ -15,10 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from pyspark.sql import SparkSession
-
-from sedona.register import SedonaRegistrator
-from sedona.utils import KryoSerializer, SedonaKryoRegistrator
+from sedona.spark import *
 from sedona.utils.decorators import classproperty
 
 
@@ -27,15 +24,7 @@ class TestBase:
     @classproperty
     def spark(self):
         if not hasattr(self, "__spark"):
-            spark = SparkSession. \
-                builder. \
-                config("spark.serializer", KryoSerializer.getName).\
-                config("spark.kryo.registrator", SedonaKryoRegistrator.getName) .\
-                master("local[*]").\
-                getOrCreate()
-
-            SedonaRegistrator.registerAll(spark)
-
+            spark = SedonaContext.create(SedonaContext.builder().master("local[*]").getOrCreate())
             setattr(self, "__spark", spark)
         return getattr(self, "__spark")
 
