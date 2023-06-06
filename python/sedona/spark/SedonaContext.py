@@ -39,7 +39,7 @@ class SedonaContext:
         return spark
 
     @classmethod
-    def config(cls) -> SparkSession.builder:
+    def builder(cls) -> SparkSession.builder:
         """
         This method adds the basic Sedona configuration to the SparkSession builder.
         Usually the user does not need to call this method directly, as it is configured when a cluster is created.
