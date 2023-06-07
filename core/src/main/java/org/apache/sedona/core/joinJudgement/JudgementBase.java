@@ -238,7 +238,7 @@ abstract class JudgementBase<T extends Geometry, U extends Geometry>
         return false;
     }
 
-    private void log(String message, Object... params)
+    protected void log(String message, Object... params)
     {
         if (Level.INFO.isGreaterOrEqual(log.getEffectiveLevel())) {
             final int partitionId = TaskContext.getPartitionId();
