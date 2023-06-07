@@ -19,7 +19,7 @@ from shapely.geometry import Polygon, Point
 from shapely.geometry.base import BaseGeometry
 
 from sedona.utils.decorators import require
-
+import math
 
 class Envelope(Polygon):
 
@@ -34,6 +34,15 @@ class Envelope(Polygon):
             [self.maxx, self.maxy],
             [self.maxx, self.miny]
         ])
+
+    def isClose(self, a, b) -> bool:
+        return math.isclose(a, b, rel_tol=1e-9)
+
+    def __eq__(self, other) -> bool:
+        return self.isClose(self.minx, other.minx) and\
+                self.isClose(self.miny, other.miny) and\
+                self.isClose(self.maxx, other.maxx) and\
+                self.isClose(self.maxy, other.maxy)
 
     @require(["Envelope"])
     def create_jvm_instance(self, jvm):
