@@ -322,27 +322,27 @@ class TestConstructorFunctions(TestBase):
     @pytest.mark.sparkstreaming
     def test_geospatial_function_on_stream(self, function_name: str, arguments: List[str],
                                            expected_result: Any, transform: Optional[str]):
-        # given input stream
+      # given input stream
 
-        input_stream = self.spark.readStream.schema(SCHEMA).parquet(os.path.join(
-            tests_resource,
-            "streaming/geometry_example")
-        ).selectExpr(f"{function_name}({', '.join(arguments)}) AS result")
+      input_stream = self.spark.readStream.schema(SCHEMA).parquet(os.path.join(
+         tests_resource,
+         "streaming/geometry_example")
+      ).selectExpr(f"{function_name}({', '.join(arguments)}) AS result")
 
-        # and target table
-        random_table_name = f"view_{uuid.uuid4().hex}"
+      # and target table
+      random_table_name = f"view_{uuid.uuid4().hex}"
 
-        # when saving stream to memory
-        streaming_query = input_stream.writeStream.format("memory") \
-            .queryName(random_table_name) \
-            .outputMode("append").start()
+      # when saving stream to memory
+      streaming_query = input_stream.writeStream.format("memory") \
+         .queryName(random_table_name) \
+         .outputMode("append").start()
 
-        streaming_query.processAllAvailable()
+      streaming_query.processAllAvailable()
 
-        # then result should be as expected
-        transform_query = "result" if not transform else f"{transform}(result)"
-        queryResult = self.spark.sql(f"select {transform_query} from {random_table_name}").collect()[0][0]
-        if (type(queryResult) is float and type(expected_result) is float):
+      # then result should be as expected
+      transform_query = "result" if not transform else f"{transform}(result)"
+      queryResult = self.spark.sql(f"select {transform_query} from {random_table_name}").collect()[0][0]
+      if (type(queryResult) is float and type(expected_result) is float):
          assert math.isclose(queryResult, expected_result, rel_tol=1e-9)
-        else:
+      else:
          assert queryResult == expected_result
