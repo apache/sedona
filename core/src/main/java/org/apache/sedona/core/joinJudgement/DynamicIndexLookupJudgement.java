@@ -42,10 +42,6 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
 {
     private final IndexType indexType;
     private final JoinBuildSide joinBuildSide;
-    private final Metric buildCount;
-    private final Metric streamCount;
-    private final Metric resultCount;
-    private final Metric candidateCount;
 
     /**
      * @see JudgementBase
@@ -62,10 +58,6 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
         super(spatialPredicate, buildCount, streamCount, resultCount, candidateCount);
         this.indexType = indexType;
         this.joinBuildSide = joinBuildSide;
-        this.buildCount = buildCount;
-        this.streamCount = streamCount;
-        this.resultCount = resultCount;
-        this.candidateCount = candidateCount;
     }
 
     @Override

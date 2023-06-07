@@ -38,7 +38,8 @@ public class LeftIndexLookupJudgement<T extends Geometry, U extends Geometry>
     /**
      * @see JudgementBase
      */
-    public LeftIndexLookupJudgement(SpatialPredicate spatialPredicate, Metric buildCount,
+    public LeftIndexLookupJudgement(SpatialPredicate spatialPredicate,
+            Metric buildCount,
             Metric streamCount,
             Metric resultCount,
             Metric candidateCount)

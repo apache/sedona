@@ -96,6 +96,14 @@ abstract class JudgementBase<T extends Geometry, U extends Geometry>
         return evaluator.eval(left, right);
     }
 
+    /**
+     * Iterator model for the index-based join.
+     * It checks if there is a next match and populate it to the result.
+     * @param spatialIndex
+     * @param streamShapes
+     * @param buildLeft
+     * @return
+     */
     protected boolean hasNextBase(SpatialIndex spatialIndex, Iterator<? extends Geometry> streamShapes,
             boolean buildLeft)
     {
@@ -107,6 +115,13 @@ abstract class JudgementBase<T extends Geometry, U extends Geometry>
         }
     }
 
+    /**
+     * Iterator model for the nest loop join.
+     * It checks if there is a next match and populate it to the result.
+     * @param buildShapes
+     * @param streamShapes
+     * @return
+     */
     protected boolean hasNextBase(List<? extends Geometry> buildShapes, Iterator<? extends Geometry> streamShapes)
     {
         if (batch != null) {
@@ -117,6 +132,16 @@ abstract class JudgementBase<T extends Geometry, U extends Geometry>
         }
     }
 
+    /**
+     * Iterator model for the index-based join.
+     * It returns 1 pair in the current batch.
+     * Each batch contains a list of pairs of geometries that satisfy the join condition.
+     * The current batch is the result of the current stream shape against all the build shapes.
+     * @param spatialIndex
+     * @param streamShapes
+     * @param buildLeft
+     * @return
+     */
     protected Pair<U, T> nextBase(SpatialIndex spatialIndex, Iterator<? extends Geometry> streamShapes,
             boolean buildLeft) {
         if (batch == null) {
@@ -136,6 +161,15 @@ abstract class JudgementBase<T extends Geometry, U extends Geometry>
         throw new NoSuchElementException();
     }
 
+    /**
+     * Iterator model for the nest loop join.
+     * It returns 1 pair in the current batch.
+     * Each batch contains a list of pairs of geometries that satisfy the join condition.
+     * The current batch is the result of the current stream shape against all the build shapes.
+     * @param buildShapes
+     * @param streamShapes
+     * @return
+     */
     protected Pair<U, T> nextBase(List<? extends Geometry> buildShapes, Iterator<? extends Geometry> streamShapes) {
         if (batch == null) {
             populateNextBatch(buildShapes, streamShapes);
@@ -155,12 +189,18 @@ abstract class JudgementBase<T extends Geometry, U extends Geometry>
     }
 
     /**
-     * Populates the next batch of matches.
-     * It works as fo
-     * @param spatialIndex
-     * @param streamShapes
-     * @param buildLeft
-     * @return
+     * Populates the next batch of matches given the current shape in the stream side.
+     * It works as follows:
+     * 1. If there is no shape left in the stream side, it returns false.
+     * 2. If there are shapes left in the stream side, it uses the current shape in the stream side to query the spatial index.
+     * The query result is a list of geometries in the build side that overlap with the current shape in the stream side.
+     * The query result is flattened to a list of pairs of geometries
+     * 3. If there are no results, it returns false.
+     *
+     * @param spatialIndex spatial index of the build side
+     * @param streamShapes stream side geometries
+     * @param buildLeft whether the build side is left
+     * @return whether there is a next batch
      */
     private boolean populateNextBatch(SpatialIndex spatialIndex, Iterator<? extends Geometry> streamShapes,
             boolean buildLeft)
@@ -205,6 +245,19 @@ abstract class JudgementBase<T extends Geometry, U extends Geometry>
         return false;
     }
 
+    /**
+     * Populates the next batch of matches given the current shape in the stream side.
+     * This is solely used for nested loop join.
+     * It works as follows:
+     * 1. If there is no shape left in the stream side, it returns false.
+     * 2. If there are shapes left in the stream side, it uses the current shape in the stream side to query buildShapes
+     * The query result is a list of geometries in the build side that overlap with the current shape in the stream side.
+     * The query result is flattened to a list of pairs of geometries
+     * 3. If there are no results, it returns false.
+     * @param buildShapes
+     * @param streamShapes
+     * @return
+     */
     private boolean populateNextBatch(List<? extends Geometry> buildShapes, Iterator<? extends Geometry> streamShapes)
     {
         if (!streamShapes.hasNext()) {
