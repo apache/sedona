@@ -981,3 +981,10 @@ case class ST_LengthSpheroid(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_NumPoints(inputExpressions: Seq[Expression])
+  extends InferredUnaryExpression(Functions.numPoints) with FoldableExpression {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+

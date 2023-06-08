@@ -1909,4 +1909,16 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assertEquals(expected, actual, 0.1)
     }
   }
+
+  it("Should pass ST_NumPoints") {
+    val geomTestCases = Map(
+      ("'LINESTRING (0 1, 1 0, 2 0)'") -> "3"
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val df = sparkSession.sql(s"SELECT ST_NumPoints(ST_GeomFromWKT($geom)), " + s"$expectedResult")
+      val actual = df.take(1)(0).get(0).asInstanceOf[Int]
+      val expected = df.take(1)(0).get(1).asInstanceOf[java.math.BigDecimal].intValue()
+      assertEquals(expected, actual)
+    }
+  }
 }

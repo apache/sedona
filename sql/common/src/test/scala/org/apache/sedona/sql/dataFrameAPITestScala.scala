@@ -949,5 +949,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       val expectedResult = 10018754.171394622
       assertEquals(expectedResult, actualResult, 0.1)
     }
+
+    it("Passed ST_NumPoints") {
+      val lineDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 1, 1 0, 2 0)') AS geom")
+      val df = lineDf.select(ST_NumPoints("geom"))
+      val actualResult = df.take(1)(0).getInt(0)
+      val expectedResult = 3
+      assert(actualResult == expectedResult)
+    }
   }
 }

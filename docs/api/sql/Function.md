@@ -1668,3 +1668,17 @@ SELECT ST_ZMin(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'))
 
 Output: `4.0`
 
+## ST_NumPoints
+Introduction: Returns number of points in a LineString
+
+Format: `ST_NumPoints(geom: geometry)`
+
+Since: `v1.4.2`
+
+Spark SQL example:
+```sql
+SELECT ST_NumPoints(ST_GeomFromText('LINESTRING(0 1, 1 0, 2 0)'))
+```
+
+Output: `3`
+

@@ -691,4 +691,12 @@ public class FunctionTest extends TestBase{
                 0, expected.compareTo(actual, COORDINATE_SEQUENCE_COMPARATOR));
     }
 
+    @Test
+    public void testNumPoints() {
+        Integer expected = 3;
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_NumPoints(ST_GeomFromWKT('LINESTRING(0 1, 1 0, 2 0)'))");
+        Integer actual =  (Integer) first(pointTable).getField(0);
+        assertEquals(expected, actual);
+    }
+
 }

@@ -565,4 +565,20 @@ public class FunctionsTest {
         GeometryCollection geometryCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {point, line, multiLineString});
         assertEquals(3.0056262514183864E7, Spheroid.length(geometryCollection), 0.1);
     }
+
+    @Test
+    public void numPoints() throws Exception{
+        LineString line = GEOMETRY_FACTORY.createLineString(coordArray(0, 1, 1, 0, 2, 0));
+        int expected = 3;
+        int actual = Functions.numPoints(line);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void numPointsUnsupported() throws Exception {
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 90, 0, 0));
+        String expected = "Unsupported geometry type: " + "Polygon";
+        Exception e = assertThrows(Exception.class, () -> Functions.numPoints(polygon));
+        assertEquals(expected, e.getMessage());
+    }
 }
