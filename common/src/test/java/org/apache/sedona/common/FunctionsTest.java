@@ -577,8 +577,8 @@ public class FunctionsTest {
     @Test
     public void numPointsUnsupported() throws Exception {
         Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 90, 0, 0));
-        String expected = "Unsupported geometry type: " + "Polygon";
-        Exception e = assertThrows(Exception.class, () -> Functions.numPoints(polygon));
+        String expected = "Unsupported geometry type: " + "Polygon" + ", only LineString geometry is supported.";
+        Exception e = assertThrows(IllegalArgumentException.class, () -> Functions.numPoints(polygon));
         assertEquals(expected, e.getMessage());
     }
 }

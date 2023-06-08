@@ -848,7 +848,7 @@ public class Functions {
     public static int numPoints(Geometry geometry) throws Exception {
         String geometryType = geometry.getGeometryType();
         if (!(Geometry.TYPENAME_LINESTRING.equalsIgnoreCase(geometryType))) {
-            throw new Exception("Unsupported geometry type: " + geometryType);
+            throw new IllegalArgumentException("Unsupported geometry type: " + geometryType + ", only LineString geometry is supported.");
         }
         return geometry.getNumPoints();
     }
