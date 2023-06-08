@@ -710,7 +710,7 @@ Format: `ST_NumPoints(geom: geometry)`
 
 Since: `v1.4.1`
 
-Spark SQL example:
+Example:
 ```sql
 SELECT ST_NumPoints(ST_GeomFromText('LINESTRING(1 2, 1 3)'))
 ```
