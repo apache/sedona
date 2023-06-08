@@ -1042,7 +1042,7 @@ Introduction: Returns number of points in a LineString
 
 Format: `ST_NumPoints(geom: geometry)`
 
-Since: `v1.4.2`
+Since: `v1.4.1`
 
 Spark SQL example:
 ```sql
