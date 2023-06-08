@@ -147,6 +147,7 @@ object Catalog {
     function[ST_DistanceSpheroid](),
     function[ST_AreaSpheroid](),
     function[ST_LengthSpheroid](),
+    function[ST_NumPoints](),
     // Expression for rasters
     function[RS_NormalizedDifference](),
     function[RS_Mean](),

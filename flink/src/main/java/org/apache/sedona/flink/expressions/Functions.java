@@ -574,4 +574,12 @@ public class Functions {
 
     }
 
+    public static class ST_NumPoints extends ScalarFunction {
+        @DataTypeHint(value = "Integer")
+        public int eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) throws Exception {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.numPoints(geometry);
+        }
+    }
+
 }

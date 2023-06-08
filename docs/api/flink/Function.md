@@ -695,6 +695,28 @@ SELECT ST_NumInteriorRings(ST_GeomFromText('POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), 
 
 Output: `1`
 
+## ST_NumPoints
+
+Introduction: Returns number of points in a LineString.
+
+!!!note
+    If any other geometry is provided as an argument, an IllegalArgumentException is thrown. 
+    Example: 
+    `SELECT ST_NumPoints(ST_GeomFromWKT('MULTIPOINT ((0 0), (1 1), (0 1), (2 2))'))`
+
+    Output: `IllegalArgumentException: Unsupported geometry type: MultiPoint, only LineString geometry is supported.`
+
+Format: `ST_NumPoints(geom: geometry)`
+
+Since: `v1.4.1`
+
+Example:
+```sql
+SELECT ST_NumPoints(ST_GeomFromText('LINESTRING(1 2, 1 3)'))
+```
+
+Output: `2`
+
 ## ST_PointN
 
 Introduction: Return the Nth point in a single linestring or circular linestring in the geometry. Negative values are counted backwards from the end of the LineString, so that -1 is the last point. Returns NULL if there is no linestring in the geometry.

@@ -845,6 +845,14 @@ public class Functions {
         return coordinates;
     }
 
+    public static int numPoints(Geometry geometry) throws Exception {
+        String geometryType = geometry.getGeometryType();
+        if (!(Geometry.TYPENAME_LINESTRING.equalsIgnoreCase(geometryType))) {
+            throw new IllegalArgumentException("Unsupported geometry type: " + geometryType + ", only LineString geometry is supported.");
+        }
+        return geometry.getNumPoints();
+    }
+
     public static Geometry geometricMedian(Geometry geometry, double tolerance, int maxIter, boolean failIfNotConverged) throws Exception {
         String geometryType = geometry.getGeometryType();
         if(!(Geometry.TYPENAME_POINT.equals(geometryType) || Geometry.TYPENAME_MULTIPOINT.equals(geometryType))) {
