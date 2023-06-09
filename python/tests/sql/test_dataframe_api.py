@@ -137,6 +137,7 @@ test_configurations = [
     (stf.ST_YMax, ("geom",), "triangle_geom", "", 1.0),
     (stf.ST_YMin, ("geom",), "triangle_geom", "", 0.0),
     (stf.ST_Z, ("b",), "two_points", "", 4.0),
+    (stf.ST_NumPoints, ("line",), "linestring_geom", "", 6),
 
     # predicates
     (stp.ST_Contains, ("geom", lambda: f.expr("ST_Point(0.5, 0.25)")), "triangle_geom", "", True),
