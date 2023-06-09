@@ -17,10 +17,12 @@ import com.google.common.geometry.S2CellId;
 import com.google.common.math.DoubleMath;
 import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
+import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.common.utils.S2Utils;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.WKTReader;
+import org.locationtech.jts.io.WKTWriter;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -594,7 +596,10 @@ public class FunctionsTest {
     public void force3DObject2D() {
         int expectedDims = 3;
         LineString line = GEOMETRY_FACTORY.createLineString(coordArray(0, 1, 1, 0, 2, 0));
-        Geometry forcedLine = Functions.force3D(line, 1.0);
+        LineString expectedLine = GEOMETRY_FACTORY.createLineString(coordArray3d(0, 1, 1.1, 1, 0, 1.1, 2, 0, 1.1));
+        Geometry forcedLine = Functions.force3D(line, 1.1);
+        WKTWriter wktWriter = new WKTWriter(GeomUtils.getDimension(expectedLine));
+        assertEquals(wktWriter.write(expectedLine), wktWriter.write(forcedLine));
         assertEquals(expectedDims, Functions.nDims(forcedLine));
     }
 
@@ -602,7 +607,10 @@ public class FunctionsTest {
     public void force3DObject2DDefaultValue() {
         int expectedDims = 3;
         Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 90, 0, 0));
+        Polygon expectedPolygon = GEOMETRY_FACTORY.createPolygon(coordArray3d(0, 0, 0, 0, 90, 0, 0, 0, 0));
         Geometry forcedPolygon = Functions.force3D(polygon);
+        WKTWriter wktWriter = new WKTWriter(GeomUtils.getDimension(expectedPolygon));
+        assertEquals(wktWriter.write(expectedPolygon), wktWriter.write(forcedPolygon));
         assertEquals(expectedDims, Functions.nDims(forcedPolygon));
     }
 
@@ -610,7 +618,9 @@ public class FunctionsTest {
     public void force3DObject3D() {
         int expectedDims = 3;
         LineString line3D = GEOMETRY_FACTORY.createLineString(coordArray3d(0, 1, 1, 1, 2, 1, 1, 2, 2));
-        Geometry forcedLine3D = Functions.force3D(line3D, 1.0);
+        Geometry forcedLine3D = Functions.force3D(line3D, 2.0);
+        WKTWriter wktWriter = new WKTWriter(GeomUtils.getDimension(line3D));
+        assertEquals(wktWriter.write(line3D), wktWriter.write(forcedLine3D));
         assertEquals(expectedDims, Functions.nDims(forcedLine3D));
     }
 
@@ -619,7 +629,23 @@ public class FunctionsTest {
         int expectedDims = 3;
         Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray3d(0, 0, 0, 90, 0, 0, 0, 0, 0));
         Geometry forcedPolygon = Functions.force3D(polygon);
+        WKTWriter wktWriter = new WKTWriter(GeomUtils.getDimension(polygon));
+        assertEquals(wktWriter.write(polygon), wktWriter.write(forcedPolygon));
         assertEquals(expectedDims, Functions.nDims(forcedPolygon));
+    }
+
+    @Test
+    public void force3DEmptyObject() {
+        LineString emptyLine = GEOMETRY_FACTORY.createLineString();
+        Geometry forcedEmptyLine = Functions.force3D(emptyLine, 1.2);
+        assertEquals(emptyLine.isEmpty(), forcedEmptyLine.isEmpty());
+    }
+
+    @Test
+    public void force3DEmptyObjectDefaultValue() {
+        LineString emptyLine = GEOMETRY_FACTORY.createLineString();
+        Geometry forcedEmptyLine = Functions.force3D(emptyLine);
+        assertEquals(emptyLine.isEmpty(), forcedEmptyLine.isEmpty());
     }
 
 }

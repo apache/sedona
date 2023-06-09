@@ -854,11 +854,11 @@ public class Functions {
     }
 
     public static Geometry force3D(Geometry geometry, double zValue) {
-        return GeomUtils.getGeom3d(geometry, zValue, false);
+        return GeomUtils.get3DGeom(geometry, zValue, false);
     }
 
     public static Geometry force3D(Geometry geometry) {
-       return GeomUtils.getGeom3d(geometry, -1, true);
+       return GeomUtils.get3DGeom(geometry, -1, true);
     }
 
     public static Geometry geometricMedian(Geometry geometry, double tolerance, int maxIter, boolean failIfNotConverged) throws Exception {

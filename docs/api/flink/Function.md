@@ -393,7 +393,12 @@ Output: `POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))`
 ## ST_Force3D
 Introduction: Forces the geometry into a 3-dimensional model so that all output representations will have X, Y and Z coordinates.
 An optionally given zValue is tacked onto the geometry if the geometry is 2-dimensional. Default value of zValue is 0.0
-If the given geometry is 3-dimensional, no change is done to it.
+If the given geometry is 3-dimensional, no change is performed on it.
+If the given geometry is empty, no change is performed on it.
+
+Format: `ST_Force3D(geometry, zValue)`
+
+Since: `1.4.1`
 
 Example: 
 
@@ -422,6 +427,10 @@ Output: `LINESTRING(0 1 2.3, 1 2 2.3, 2 1 2.3)`
 Input: `POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))`
 
 Output: `POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))`
+
+Input: `LINESTRING EMPTY`
+
+Output: `LINESTRING EMPTY`
 
 ## ST_GeoHash
 
