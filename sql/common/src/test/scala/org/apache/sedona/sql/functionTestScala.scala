@@ -1921,4 +1921,17 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assertEquals(expected, actual)
     }
   }
+
+  it("should pass ST_Force3D") {
+    val geomTestCases = Map(
+      ("'LINESTRING (0 1, 1 0, 2 0)'") -> "'LINESTRING (0 1 1, 1 0 1, 2 0 1)'",
+      ("'LINESTRING (0 1 3, 1 0 3, 2 0 3)'") -> "'LINESTRING (0 1 3, 1 0 3, 2 0 3)'"
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val df = sparkSession.sql(s"SELECT ST_AsText(ST_Force3D(ST_GeomFromWKT($geom), 1)), " + s"$expectedResult")
+      val actual = df.take(1)(0).get(1).asInstanceOf[String]
+      val expected = df.take(1)(0).get(1).asInstanceOf[java.lang.String].toString()
+      assertEquals(expected, actual)
+    }
+  }
 }

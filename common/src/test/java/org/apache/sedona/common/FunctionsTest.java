@@ -57,6 +57,14 @@ public class FunctionsTest {
         return coords;
     }
 
+    private Coordinate[] coordArray3d(double... coordValues) {
+        Coordinate[] coords = new Coordinate[(int)(coordValues.length / 3)];
+        for (int i = 0; i < coordValues.length; i += 3) {
+            coords[(int)(i / 3)] = new Coordinate(coordValues[i], coordValues[i+1], coordValues[i+2]);
+        }
+        return coords;
+    }
+
     @Test
     public void splitLineStringByMultipoint() {
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 1.5, 1.5, 2.0, 2.0));
@@ -581,4 +589,37 @@ public class FunctionsTest {
         Exception e = assertThrows(IllegalArgumentException.class, () -> Functions.numPoints(polygon));
         assertEquals(expected, e.getMessage());
     }
+
+    @Test
+    public void force3DObject2D() {
+        int expectedDims = 3;
+        LineString line = GEOMETRY_FACTORY.createLineString(coordArray(0, 1, 1, 0, 2, 0));
+        Geometry forcedLine = Functions.force3D(line, 1.0);
+        assertEquals(expectedDims, Functions.nDims(forcedLine));
+    }
+
+    @Test
+    public void force3DObject2DDefaultValue() {
+        int expectedDims = 3;
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 90, 0, 0));
+        Geometry forcedPolygon = Functions.force3D(polygon);
+        assertEquals(expectedDims, Functions.nDims(forcedPolygon));
+    }
+
+    @Test
+    public void force3DObject3D() {
+        int expectedDims = 3;
+        LineString line3D = GEOMETRY_FACTORY.createLineString(coordArray3d(0, 1, 1, 1, 2, 1, 1, 2, 2));
+        Geometry forcedLine3D = Functions.force3D(line3D, 1.0);
+        assertEquals(expectedDims, Functions.nDims(forcedLine3D));
+    }
+
+    @Test
+    public void force3DObject3DDefaultValue() {
+        int expectedDims = 3;
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray3d(0, 0, 0, 90, 0, 0, 0, 0, 0));
+        Geometry forcedPolygon = Functions.force3D(polygon);
+        assertEquals(expectedDims, Functions.nDims(forcedPolygon));
+    }
+
 }

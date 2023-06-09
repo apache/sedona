@@ -419,4 +419,23 @@ public class GeomUtils {
         }
         return geometries;
     }
+
+
+    public static Geometry getGeom3d(Geometry geometry, double zValue, boolean addDefaultZValue) {
+        Coordinate[] coordinates = geometry.getCoordinates();
+//        if(points.length == 0)
+//            return points;
+        boolean is3d = !Double.isNaN(coordinates[0].z);
+        for(int i = 0; i < coordinates.length; i++) {
+            if(!is3d) {
+                if (addDefaultZValue) {
+                    coordinates[i].z = 0.0;
+                }else {
+                    coordinates[i].z = zValue;
+                }
+            }
+        }
+        geometry.geometryChanged();
+        return geometry;
+    }
 }

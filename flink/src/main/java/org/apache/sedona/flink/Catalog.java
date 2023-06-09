@@ -95,7 +95,8 @@ public class Catalog {
                 new Functions.ST_Split(),
                 new Functions.ST_S2CellIDs(),
                 new Functions.ST_GeometricMedian(),
-                new Functions.ST_NumPoints()
+                new Functions.ST_NumPoints(),
+                new Functions.ST_Force3D()
         };
     }
 

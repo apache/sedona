@@ -853,6 +853,14 @@ public class Functions {
         return geometry.getNumPoints();
     }
 
+    public static Geometry force3D(Geometry geometry, double zValue) {
+        return GeomUtils.getGeom3d(geometry, zValue, false);
+    }
+
+    public static Geometry force3D(Geometry geometry) {
+       return GeomUtils.getGeom3d(geometry, -1, true);
+    }
+
     public static Geometry geometricMedian(Geometry geometry, double tolerance, int maxIter, boolean failIfNotConverged) throws Exception {
         String geometryType = geometry.getGeometryType();
         if(!(Geometry.TYPENAME_POINT.equals(geometryType) || Geometry.TYPENAME_MULTIPOINT.equals(geometryType))) {
