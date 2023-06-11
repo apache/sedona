@@ -396,6 +396,9 @@ An optionally given zValue is tacked onto the geometry if the geometry is 2-dime
 If the given geometry is 3-dimensional, no change is performed on it.
 If the given geometry is empty, no change is performed on it.
 
+!!!Note
+    Example output is after calling ST_AsText() on returned geometry, which adds Z for in the WKT for 3D geometries
+
 Format: `ST_Force3D(geometry, zValue)`
 
 Since: `1.4.1`
@@ -409,11 +412,11 @@ from df
 
 Input: `LINESTRING(0 1, 1 2, 2 1)`
 
-Output: `LINESTRING(0 1 0, 1 2 0, 2 1 0)`
+Output: `LINESTRING Z(0 1 0, 1 2 0, 2 1 0)`
 
 Input: `POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))`
 
-Output: `POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))`
+Output: `POLYGON Z((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))`
 
 ```sql
 SELECT ST_Force3D(df.geometry, 2.3) AS geom
@@ -422,11 +425,11 @@ from df
 
 Input: `LINESTRING(0 1, 1 2, 2 1)`
 
-Output: `LINESTRING(0 1 2.3, 1 2 2.3, 2 1 2.3)`
+Output: `LINESTRING Z(0 1 2.3, 1 2 2.3, 2 1 2.3)`
 
 Input: `POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))`
 
-Output: `POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))`
+Output: `POLYGON Z((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))`
 
 Input: `LINESTRING EMPTY`
 
