@@ -964,6 +964,11 @@ class dataFrameAPITestScala extends TestBaseScala {
       val actual = df.take(1)(0).getInt(0)
       val expected = 3
       assert(expected == actual)
+
+      val lineDfDefaultValue = sparkSession.sql("SELECT ST_Force3D(ST_GeomFromWKT('LINESTRING (0 1, 1 0, 2 0)')) AS geom")
+      val dfDefaultValue = lineDfDefaultValue.select(ST_NDims("geom"))
+      val actualDefaultValue = dfDefaultValue.take(1)(0).getInt(0)
+      assert(expected == actualDefaultValue)
     }
   }
 }
