@@ -702,8 +702,18 @@ public class FunctionTest extends TestBase{
     @Test
     public void testForce3D() {
         Integer expectedDims = 3;
-        Table pointTable = tableEnv.sqlQuery("SELECT ST_Force3D(ST_GeomFromWKT('LINESTRING(0 1, 1 0, 2 0)')) " +
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_Force3D(ST_GeomFromWKT('LINESTRING(0 1, 1 0, 2 0)'), 1.2) " +
                                                 "AS " + polygonColNames[0]);
+        pointTable = pointTable.select(call(Functions.ST_NDims.class.getSimpleName(), $(polygonColNames[0])));
+        Integer actual = (Integer) first(pointTable).getField(0);
+        assertEquals(expectedDims, actual);
+    }
+
+    @Test
+    public void testForce3DDefaultValue() {
+        Integer expectedDims = 3;
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_Force3D(ST_GeomFromWKT('LINESTRING(0 1, 1 0, 2 0)')) " +
+                "AS " + polygonColNames[0]);
         pointTable = pointTable.select(call(Functions.ST_NDims.class.getSimpleName(), $(polygonColNames[0])));
         Integer actual = (Integer) first(pointTable).getField(0);
         assertEquals(expectedDims, actual);
