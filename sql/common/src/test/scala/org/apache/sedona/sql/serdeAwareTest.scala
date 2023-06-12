@@ -20,7 +20,7 @@
 package org.apache.sedona.sql
 
 import org.apache.sedona.common.geometrySerde.GeometrySerializer
-import org.apache.sedona.common.raster.Constructors.fromArcInfoAsciiGrid
+import org.apache.sedona.common.raster.RasterConstructors.fromArcInfoAsciiGrid
 import org.apache.sedona.common.raster.Serde
 import org.apache.spark.sql.catalyst.expressions.Literal
 import org.apache.spark.sql.sedona_sql.expressions.{ST_Buffer, ST_GeomFromText, ST_Point, ST_Union}

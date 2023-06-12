@@ -383,5 +383,58 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val binaryDf = rasterDf.selectExpr("RS_FromArcInfoAsciiGrid(arc) as raster", "RS_FromArcInfoAsciiGrid(arc2) as raster2")
       assertEquals(rasterDf.count(), binaryDf.count())
     }
+
+    it("Passed RS_Metadata") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df.selectExpr("RS_Metadata(RS_FromGeoTiff(content))").first().getSeq(0)
+      df.selectExpr("RS_Metadata(RS_FromGeoTiff(content))").show(false)
+      assertEquals(10, result.length)
+      assertEquals(512.0, result(2), 0.001)
+      assertEquals(517.0, result(3), 0.001)
+      assertEquals(1.0, result(9), 0.001)
+    }
+
+    it("Passed RS_MakeEmptyRaster") {
+      val widthInPixel = 10
+      val heightInPixel = 10
+      val upperLeftX = 0.0
+      val upperLeftY = 0.0
+      val cellSize = 1.0
+      val numBands = 2
+      sparkSession.sql("SELECT RS_MakeEmptyRaster(10, 10, 0.0, 0.0, 1.0, 2)").show()
+      // Test with numBands
+      var result = sparkSession.sql(s"SELECT RS_Metadata(RS_MakeEmptyRaster($widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize, $numBands))").first().getSeq(0)
+      assertEquals(numBands, result(9), 0.001)
+      // Test without numBands
+      result = sparkSession.sql(s"SELECT RS_Metadata(RS_MakeEmptyRaster($widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize))").first().getSeq(0)
+      assertEquals(1, result(9), 0.001)
+    }
+
+    it("Passed RS_BandAsArray") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val metadata = df.selectExpr("RS_Metadata(RS_FromGeoTiff(content))").first().getSeq(0)
+      val width = metadata(2).asInstanceOf[Double].toInt
+      val height = metadata(3).asInstanceOf[Double].toInt
+      val result = df.selectExpr("RS_BandAsArray(RS_FromGeoTiff(content), 1)").first().getSeq(0)
+      assertEquals(width * height, result.length)
+      val resultOutOfBound = df.selectExpr("RS_BandAsArray(RS_FromGeoTiff(content), 100)").first().isNullAt(0)
+      assertEquals(true, resultOutOfBound)
+    }
+
+    it("Passed RS_AddBandFromArray") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster", "RS_MultiplyFactor(RS_BandAsArray(RS_FromGeoTiff(content), 1), 2) as band")
+      val bandNewExpected:Seq[Double] = df.selectExpr("band").first().getSeq(0)
+      val bandNewActual:Seq[Double] = df.selectExpr("RS_BandAsArray(RS_AddBandFromArray(raster, band, 1), 1)").first().getSeq(0)
+      df.selectExpr("RS_BandAsArray(RS_AddBandFromArray(raster, band, 1), 1) as band").show()
+      for (i <- bandNewExpected.indices) {
+        // The band value needs to be mod 256 because the ColorModel will mod 256.
+        assertEquals(bandNewExpected(i)%256, bandNewActual(i), 0.001)
+      }
+      // Test with out of bound band index. It should fail.
+      intercept[Exception] {
+        df.selectExpr("RS_BandAsArray(RS_AddBandFromArray(raster, band, 100), 1)").collect()
+      }
+    }
   }
 }

@@ -21,7 +21,7 @@ import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Before;
 import org.opengis.parameter.GeneralParameterValue;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -35,13 +35,21 @@ public class RasterTestBase {
 
     @Before
     public void setup() throws IOException {
-        oneBandRaster = Constructors.fromArcInfoAsciiGrid(arc.getBytes(StandardCharsets.UTF_8));
+        oneBandRaster = RasterConstructors.fromArcInfoAsciiGrid(arc.getBytes(StandardCharsets.UTF_8));
         multiBandRaster = createMultibandRaster();
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         new GeoTiffWriter(bos).write(multiBandRaster, new GeneralParameterValue[]{});
         geoTiff = bos.toByteArray();
     }
 
+    GridCoverage2D createEmptyRaster(int numBands) {
+        int widthInPixel = 4;
+        int heightInPixel = 5;
+        double upperLeftX = 101;
+        double upperLeftY = 102;
+        double cellSize = 2;
+        return RasterConstructors.makeEmptyRaster(widthInPixel, heightInPixel, upperLeftX, upperLeftY, cellSize, numBands);
+    }
     GridCoverage2D createMultibandRaster() throws IOException {
         GridCoverageFactory factory = new GridCoverageFactory();
         BufferedImage image = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB);

@@ -47,7 +47,56 @@ var df = spark.read.format("binaryFile").load("/some/path/*.tiff")
 df = df.withColumn("raster", f.expr("RS_FromGeoTiff(content)"))
 ```
 
+### RS_MakeEmptyRaster
+
+Introduction: Returns an empty raster geometry.Every band in the raster is initialized to `0.0`.
+
+Format: `RS_MakeEmptyRaster(width: Int, height: Int, upperleftX: Double, upperleftY: Double, cellSize:Double, numBands:Int)`
+
+Since: `v1.4.1`
+
+* Width: The width of the raster in pixels.
+* Height: The height of the raster in pixels.
+* UpperleftX: The X coordinate of the upper left corner of the raster, in terms of the CRS units.
+* UpperleftY: The Y coordinate of the upper left corner of the raster, in terms of the CRS units.
+* CellSize: The size of the cells in the raster, in terms of the CRS units.
+* NumBands (optional): The number of bands in the raster. If not specified, the raster will have a single band.
+
+SQL example 1 (with 2 bands):
+
+```sql
+SELECT RS_MakeEmptyRaster(10, 10, 0.0, 0.0, 1.0, 2) as raster
+```
+
+Output:
+```
++--------------------------------------------+
+|rs_makeemptyraster(10, 10, 0.0, 0.0, 1.0, 2)|
++--------------------------------------------+
+|                        GridCoverage2D["g...|
++--------------------------------------------+
+```
+
+SQL example 2 (number of bands not specified, default to 1 band):
+
+```sql
+SELECT RS_MakeEmptyRaster(10, 10, 0.0, 0.0, 1.0) as raster
+```
+
+Output:
+```
++--------------------------------------------+
+|rs_makeemptyraster(10, 10, 0.0, 0.0, 1.0, 2)|
++--------------------------------------------+
+|                        GridCoverage2D["g...|
++--------------------------------------------+
+```
+
+
 ## Load GeoTiff to Array[Double] format
+
+!!!warning
+	This function has been deprecated since v1.4.1. Please use `RS_FromGeoTiff` instead and `binaryFile` data source to read GeoTiff files.
 
 The `geotiff` loader of Sedona is a Spark built-in data source. It can read a single geotiff image or a number of geotiff images into a DataFrame. Each geotiff is a row in the resulting DataFrame and stored in an array of Double type format.
 

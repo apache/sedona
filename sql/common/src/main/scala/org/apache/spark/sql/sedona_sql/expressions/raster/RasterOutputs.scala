@@ -18,10 +18,10 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
-import org.apache.sedona.common.raster.Outputs
+import org.apache.sedona.common.raster.RasterOutputs
 import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.expressions.{Expression, Literal}
 import org.apache.spark.sql.sedona_sql.expressions.raster.implicits.RasterInputExpressionEnhancer
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
@@ -36,10 +36,10 @@ case class RS_AsGeoTiff(inputExpressions: Seq[Expression]) extends Expression wi
     if (raster == null) return null
     // If there are more than one input expressions, the additional ones are used as parameters
     if (inputExpressions.length > 1) {
-      Outputs.asGeoTiff(raster, inputExpressions(1).eval(input).asInstanceOf[UTF8String].toString, inputExpressions(2).eval(input).toString.toFloat)
+      RasterOutputs.asGeoTiff(raster, inputExpressions(1).eval(input).asInstanceOf[UTF8String].toString, inputExpressions(2).eval(input).toString.toFloat)
     }
     else {
-      Outputs.asGeoTiff(raster, null, -1)
+      RasterOutputs.asGeoTiff(raster, null, -1)
     }
   }
 
@@ -61,10 +61,10 @@ case class RS_AsArcGrid(inputExpressions: Seq[Expression]) extends Expression wi
     if (raster == null) return null
     // If there are more than one input expressions, the additional ones are used as parameters
     if (inputExpressions.length > 1) {
-      Outputs.asArcGrid(raster, inputExpressions(1).eval(input).asInstanceOf[Int])
+      RasterOutputs.asArcGrid(raster, inputExpressions(1).eval(input).asInstanceOf[Int])
     }
     else {
-      Outputs.asArcGrid(raster, -1)
+      RasterOutputs.asArcGrid(raster, -1)
     }
   }
 

@@ -21,15 +21,16 @@ import org.opengis.referencing.FactoryException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-public class ConstructorsTest extends RasterTestBase {
+public class RasterConstructorsTest
+        extends RasterTestBase {
 
     @Test
     public void fromArcInfoAsciiGrid() throws IOException, FactoryException {
-        GridCoverage2D gridCoverage2D = Constructors.fromArcInfoAsciiGrid(arc.getBytes(StandardCharsets.UTF_8));
+        GridCoverage2D gridCoverage2D = RasterConstructors.fromArcInfoAsciiGrid(arc.getBytes(StandardCharsets.UTF_8));
 
-        Geometry envelope = Functions.envelope(gridCoverage2D);
+        Geometry envelope = RasterAccessors.envelope(gridCoverage2D);
         assertEquals(3600, envelope.getArea(), 0.1);
         assertEquals(378922d + 30, envelope.getCentroid().getX(), 0.1);
         assertEquals(4072345d + 30, envelope.getCentroid().getY(), 0.1);
@@ -41,9 +42,9 @@ public class ConstructorsTest extends RasterTestBase {
 
     @Test
     public void fromGeoTiff() throws IOException, FactoryException {
-        GridCoverage2D gridCoverage2D = Constructors.fromGeoTiff(geoTiff);
+        GridCoverage2D gridCoverage2D = RasterConstructors.fromGeoTiff(geoTiff);
 
-        Geometry envelope = Functions.envelope(gridCoverage2D);
+        Geometry envelope = RasterAccessors.envelope(gridCoverage2D);
         assertEquals(100, envelope.getArea(), 0.1);
         assertEquals(5, envelope.getCentroid().getX(), 0.1);
         assertEquals(5, envelope.getCentroid().getY(), 0.1);
@@ -51,5 +52,31 @@ public class ConstructorsTest extends RasterTestBase {
         assertEquals(10, gridCoverage2D.getRenderedImage().getTileWidth());
         assertEquals(10d, gridCoverage2D.getRenderedImage().getData().getPixel(5, 5, (double[])null)[0], 0.1);
         assertEquals(4, gridCoverage2D.getNumSampleDimensions());
+    }
+
+    @Test
+    public void makeEmptyRaster() throws FactoryException {
+        double upperLeftX = 0;
+        double upperLeftY = 0;
+        int widthInPixel = 1;
+        int heightInPixel = 2;
+        double pixelSize = 2;
+
+        GridCoverage2D gridCoverage2D = RasterConstructors.makeEmptyRaster(widthInPixel, heightInPixel, upperLeftX, upperLeftY, pixelSize);
+        Geometry envelope = RasterAccessors.envelope(gridCoverage2D);
+        assertEquals(upperLeftX, envelope.getEnvelopeInternal().getMinX(), 0.001);
+        assertEquals(upperLeftX + widthInPixel * pixelSize, envelope.getEnvelopeInternal().getMaxX(), 0.001);
+        assertEquals(upperLeftY - heightInPixel * pixelSize, envelope.getEnvelopeInternal().getMinY(), 0.001);
+        assertEquals(upperLeftY, envelope.getEnvelopeInternal().getMaxY(), 0.001);
+
+        assertEquals("POLYGON ((0 -4, 0 0, 2 0, 2 -4, 0 -4))", envelope.toString());
+        double expectedWidthInDegree = pixelSize * widthInPixel;
+        double expectedHeightInDegree = pixelSize * heightInPixel;
+
+        assertEquals(expectedWidthInDegree * expectedHeightInDegree, envelope.getArea(), 0.001);
+        assertEquals(heightInPixel, gridCoverage2D.getRenderedImage().getTileHeight());
+        assertEquals(widthInPixel, gridCoverage2D.getRenderedImage().getTileWidth());
+        assertEquals(0d, gridCoverage2D.getRenderedImage().getData().getPixel(0, 0, (double[])null)[0], 0.001);
+        assertEquals(1, gridCoverage2D.getNumSampleDimensions());
     }
 }

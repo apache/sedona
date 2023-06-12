@@ -33,7 +33,7 @@ import javax.imageio.ImageWriteParam;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class Outputs
+public class RasterOutputs
 {
     public static byte[] asGeoTiff(GridCoverage2D raster, String compressionType, float compressionQuality) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
