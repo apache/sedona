@@ -17,10 +17,12 @@ import com.google.common.geometry.S2CellId;
 import com.google.common.math.DoubleMath;
 import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
+import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.common.utils.S2Utils;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.WKTReader;
+import org.locationtech.jts.io.WKTWriter;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -53,6 +55,14 @@ public class FunctionsTest {
         Coordinate[] coords = new Coordinate[(int)(coordValues.length / 2)];
         for (int i = 0; i < coordValues.length; i += 2) {
             coords[(int)(i / 2)] = new Coordinate(coordValues[i], coordValues[i+1]);
+        }
+        return coords;
+    }
+
+    private Coordinate[] coordArray3d(double... coordValues) {
+        Coordinate[] coords = new Coordinate[(int)(coordValues.length / 3)];
+        for (int i = 0; i < coordValues.length; i += 3) {
+            coords[(int)(i / 3)] = new Coordinate(coordValues[i], coordValues[i+1], coordValues[i+2]);
         }
         return coords;
     }
@@ -581,4 +591,61 @@ public class FunctionsTest {
         Exception e = assertThrows(IllegalArgumentException.class, () -> Functions.numPoints(polygon));
         assertEquals(expected, e.getMessage());
     }
+
+    @Test
+    public void force3DObject2D() {
+        int expectedDims = 3;
+        LineString line = GEOMETRY_FACTORY.createLineString(coordArray(0, 1, 1, 0, 2, 0));
+        LineString expectedLine = GEOMETRY_FACTORY.createLineString(coordArray3d(0, 1, 1.1, 1, 0, 1.1, 2, 0, 1.1));
+        Geometry forcedLine = Functions.force3D(line, 1.1);
+        WKTWriter wktWriter = new WKTWriter(GeomUtils.getDimension(expectedLine));
+        assertEquals(wktWriter.write(expectedLine), wktWriter.write(forcedLine));
+        assertEquals(expectedDims, Functions.nDims(forcedLine));
+    }
+
+    @Test
+    public void force3DObject2DDefaultValue() {
+        int expectedDims = 3;
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 90, 0, 0));
+        Polygon expectedPolygon = GEOMETRY_FACTORY.createPolygon(coordArray3d(0, 0, 0, 0, 90, 0, 0, 0, 0));
+        Geometry forcedPolygon = Functions.force3D(polygon);
+        WKTWriter wktWriter = new WKTWriter(GeomUtils.getDimension(expectedPolygon));
+        assertEquals(wktWriter.write(expectedPolygon), wktWriter.write(forcedPolygon));
+        assertEquals(expectedDims, Functions.nDims(forcedPolygon));
+    }
+
+    @Test
+    public void force3DObject3D() {
+        int expectedDims = 3;
+        LineString line3D = GEOMETRY_FACTORY.createLineString(coordArray3d(0, 1, 1, 1, 2, 1, 1, 2, 2));
+        Geometry forcedLine3D = Functions.force3D(line3D, 2.0);
+        WKTWriter wktWriter = new WKTWriter(GeomUtils.getDimension(line3D));
+        assertEquals(wktWriter.write(line3D), wktWriter.write(forcedLine3D));
+        assertEquals(expectedDims, Functions.nDims(forcedLine3D));
+    }
+
+    @Test
+    public void force3DObject3DDefaultValue() {
+        int expectedDims = 3;
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray3d(0, 0, 0, 90, 0, 0, 0, 0, 0));
+        Geometry forcedPolygon = Functions.force3D(polygon);
+        WKTWriter wktWriter = new WKTWriter(GeomUtils.getDimension(polygon));
+        assertEquals(wktWriter.write(polygon), wktWriter.write(forcedPolygon));
+        assertEquals(expectedDims, Functions.nDims(forcedPolygon));
+    }
+
+    @Test
+    public void force3DEmptyObject() {
+        LineString emptyLine = GEOMETRY_FACTORY.createLineString();
+        Geometry forcedEmptyLine = Functions.force3D(emptyLine, 1.2);
+        assertEquals(emptyLine.isEmpty(), forcedEmptyLine.isEmpty());
+    }
+
+    @Test
+    public void force3DEmptyObjectDefaultValue() {
+        LineString emptyLine = GEOMETRY_FACTORY.createLineString();
+        Geometry forcedEmptyLine = Functions.force3D(emptyLine);
+        assertEquals(emptyLine.isEmpty(), forcedEmptyLine.isEmpty());
+    }
+
 }

@@ -988,3 +988,11 @@ case class ST_NumPoints(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_Force3D(inputExpressions: Seq[Expression])
+  extends InferredBinaryExpression(Functions.force3D) with FoldableExpression {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
