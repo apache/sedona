@@ -421,18 +421,13 @@ public class GeomUtils {
     }
 
 
-    public static Geometry get3DGeom(Geometry geometry, double zValue, boolean addDefaultZValue) {
+    public static Geometry get3DGeom(Geometry geometry, double zValue) {
         Coordinate[] coordinates = geometry.getCoordinates();
         if (coordinates.length == 0) return geometry;
-
         boolean is3d = !Double.isNaN(coordinates[0].z);
         for(int i = 0; i < coordinates.length; i++) {
             if(!is3d) {
-                if (addDefaultZValue) {
-                    coordinates[i].setZ(0.0);
-                }else {
-                    coordinates[i].setZ(zValue);
-                }
+                coordinates[i].setZ(zValue);
             }
         }
         geometry.geometryChanged();

@@ -1931,7 +1931,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     )
     for (((geom), expectedResult) <- geomTestCases) {
       val df = sparkSession.sql(s"SELECT ST_AsText(ST_Force3D(ST_GeomFromWKT($geom), 1)) AS geom, " + s"$expectedResult")
-      val dfDefaultValue = sparkSession.sql(s"SELECT ST_AsText(ST_Force3D(ST_GeomFromWKT($geom), 0.0)) AS geom, " + s"$expectedResult")
+      val dfDefaultValue = sparkSession.sql(s"SELECT ST_AsText(ST_Force3D(ST_GeomFromWKT($geom))) AS geom, " + s"$expectedResult")
       val actual = df.take(1)(0).get(0).asInstanceOf[String]
       val expected = df.take(1)(0).get(1).asInstanceOf[GenericRowWithSchema].get(0).asInstanceOf[String]
       val actualDefaultValue = dfDefaultValue.take(1)(0).get(0).asInstanceOf[String]
