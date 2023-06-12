@@ -85,6 +85,7 @@ test_configurations = [
     (stf.ST_ExteriorRing, ("geom",), "triangle_geom", "", "LINESTRING (0 0, 1 0, 1 1, 0 0)"),
     (stf.ST_FlipCoordinates, ("point",), "point_geom", "", "POINT (1 0)"),
     (stf.ST_Force_2D, ("point",), "point_geom", "", "POINT (0 1)"),
+    (stf.ST_Force3D, ("point", 1), "point_geom", "", "POINT Z (0 1 1)"),
     (stf.ST_GeometricMedian, ("multipoint",), "multipoint_geom", "", "POINT (22.500002656424286 21.250001168173426)"),
     (stf.ST_GeometryN, ("geom", 0), "multipoint", "", "POINT (0 0)"),
     (stf.ST_GeometryType, ("point",), "point_geom", "", "ST_Point"),
@@ -111,6 +112,7 @@ test_configurations = [
     (stf.ST_NPoints, ("line",), "linestring_geom", "", 6),
     (stf.ST_NumGeometries, ("geom",), "multipoint", "", 2),
     (stf.ST_NumInteriorRings, ("geom",), "geom_with_hole", "", 1),
+    (stf.ST_NumPoints, ("line",), "linestring_geom", "", 6),
     (stf.ST_PointN, ("line", 2), "linestring_geom", "", "POINT (1 0)"),
     (stf.ST_PointOnSurface, ("line",), "linestring_geom", "", "POINT (2 0)"),
     (stf.ST_PrecisionReduce, ("geom", 1), "precision_reduce_point", "", "POINT (0.1 0.2)"),
@@ -135,6 +137,7 @@ test_configurations = [
     (stf.ST_YMax, ("geom",), "triangle_geom", "", 1.0),
     (stf.ST_YMin, ("geom",), "triangle_geom", "", 0.0),
     (stf.ST_Z, ("b",), "two_points", "", 4.0),
+    (stf.ST_NumPoints, ("line",), "linestring_geom", "", 6),
 
     # predicates
     (stp.ST_Contains, ("geom", lambda: f.expr("ST_Point(0.5, 0.25)")), "triangle_geom", "", True),

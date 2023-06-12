@@ -845,6 +845,22 @@ public class Functions {
         return coordinates;
     }
 
+    public static int numPoints(Geometry geometry) throws Exception {
+        String geometryType = geometry.getGeometryType();
+        if (!(Geometry.TYPENAME_LINESTRING.equalsIgnoreCase(geometryType))) {
+            throw new IllegalArgumentException("Unsupported geometry type: " + geometryType + ", only LineString geometry is supported.");
+        }
+        return geometry.getNumPoints();
+    }
+
+    public static Geometry force3D(Geometry geometry, double zValue) {
+        return GeomUtils.get3DGeom(geometry, zValue);
+    }
+
+    public static Geometry force3D(Geometry geometry) {
+       return GeomUtils.get3DGeom(geometry, 0.0);
+    }
+
     public static Geometry geometricMedian(Geometry geometry, double tolerance, int maxIter, boolean failIfNotConverged) throws Exception {
         String geometryType = geometry.getGeometryType();
         if(!(Geometry.TYPENAME_POINT.equals(geometryType) || Geometry.TYPENAME_MULTIPOINT.equals(geometryType))) {

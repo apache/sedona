@@ -301,4 +301,16 @@ object st_functions extends DataFrameAPI {
   def ST_LengthSpheroid(a: Column): Column = wrapExpression[ST_LengthSpheroid](a)
 
   def ST_LengthSpheroid(a: String): Column = wrapExpression[ST_LengthSpheroid](a)
+
+  def ST_NumPoints(geometry: Column): Column = wrapExpression[ST_NumPoints](geometry)
+
+  def ST_NumPoints(geometry: String): Column = wrapExpression[ST_NumPoints](geometry)
+
+  def ST_Force3D(geometry: Column): Column = wrapExpression[ST_Force3D](geometry, 0.0)
+
+  def ST_Force3D(geometry: String): Column = wrapExpression[ST_Force3D](geometry, 0.0)
+
+  def ST_Force3D(geometry: Column, zValue: Column): Column = wrapExpression[ST_Force3D](geometry, zValue)
+
+  def ST_Force3D(geometry: String, zValue: Double): Column = wrapExpression[ST_Force3D](geometry, zValue)
 }

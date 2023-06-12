@@ -108,6 +108,8 @@ __all__ = [
     "ST_Z",
     "ST_ZMax",
     "ST_ZMin",
+    "ST_NumPoints",
+    "ST_Force3D"
 ]
 
 
@@ -1231,3 +1233,23 @@ def ST_ZMin(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_ZMin", geometry)
+
+def ST_NumPoints(geometry: ColumnOrName) -> Column:
+    """Return the number of points in a LineString
+    :param geometry: Geometry column to get number of points from.
+    :type geometry: ColumnOrName
+    :return: Number of points in a LineString as an integer column
+    :rtype: Column
+    """
+    return _call_st_function("ST_NumPoints", geometry)
+
+
+def ST_Force3D(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
+    """
+    Return a geometry with a 3D coordinate of value 'zValue' forced upon it. No change happens if the geometry is already 3D
+    :param zValue: Optional value of z coordinate to be potentially added, default value is 0.0
+    :param geometry: Geometry column to make 3D
+    :return: 3D geometry with either already present z coordinate if any, or zcoordinate with given zValue
+    """
+    args = (geometry, zValue)
+    return _call_st_function("ST_Force3D", args)
