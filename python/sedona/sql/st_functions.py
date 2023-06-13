@@ -109,7 +109,8 @@ __all__ = [
     "ST_ZMax",
     "ST_ZMin",
     "ST_NumPoints",
-    "ST_Force3D"
+    "ST_Force3D",
+    "ST_NRings"
 ]
 
 
@@ -1253,3 +1254,11 @@ def ST_Force3D(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, floa
     """
     args = (geometry, zValue)
     return _call_st_function("ST_Force3D", args)
+
+def ST_NRings(geometry: ColumnOrName) -> Column:
+    """
+    Returns the total number of rings in a Polygon or MultiPolygon. Compared to ST_NumInteriorRings, ST_NRings takes exterior rings into account as well.
+    :param geometry: Geometry column to calculate rings for
+    :return: Number of exterior rings + interior rings (if any) for the given Polygon or MultiPolygon
+    """
+    return _call_st_function("ST_NRings", geometry)

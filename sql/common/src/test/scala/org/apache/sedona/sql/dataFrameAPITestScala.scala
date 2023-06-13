@@ -970,5 +970,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       val actualGeomDefaultValue = lineDfDefaultValue.select(ST_Force3D("geom")).take(1)(0).get(0).asInstanceOf[Geometry]
       assertEquals(expectedGeomDefaultValue, wktWriter.write(actualGeomDefaultValue))
     }
+
+    it("Passed ST_NRings") {
+      val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))') AS geom")
+      val expected = 1
+      val df = polyDf.select(ST_NRings("geom"))
+      val actual = df.take(1)(0).getInt(0)
+      assert(expected == actual)
+    }
   }
 }

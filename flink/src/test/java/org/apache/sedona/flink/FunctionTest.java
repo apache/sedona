@@ -719,4 +719,12 @@ public class FunctionTest extends TestBase{
         assertEquals(expectedDims, actual);
     }
 
+    @Test
+    public void testNRings() {
+        Integer expected = 1;
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_NRings(ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))'))");
+        Integer actual =  (Integer) first(pointTable).getField(0);
+        assertEquals(expected, actual);
+    }
+
 }

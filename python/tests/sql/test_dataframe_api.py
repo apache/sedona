@@ -110,6 +110,7 @@ test_configurations = [
     (stf.ST_Multi, ("point",), "point_geom", "", "MULTIPOINT (0 1)"),
     (stf.ST_Normalize, ("geom",), "triangle_geom", "", "POLYGON ((0 0, 1 1, 1 0, 0 0))"),
     (stf.ST_NPoints, ("line",), "linestring_geom", "", 6),
+    (stf.ST_NRings, ("geom",), "square_geom", "", 1),
     (stf.ST_NumGeometries, ("geom",), "multipoint", "", 2),
     (stf.ST_NumInteriorRings, ("geom",), "geom_with_hole", "", 1),
     (stf.ST_NumPoints, ("line",), "linestring_geom", "", 6),
@@ -137,7 +138,6 @@ test_configurations = [
     (stf.ST_YMax, ("geom",), "triangle_geom", "", 1.0),
     (stf.ST_YMin, ("geom",), "triangle_geom", "", 0.0),
     (stf.ST_Z, ("b",), "two_points", "", 4.0),
-    (stf.ST_NumPoints, ("line",), "linestring_geom", "", 6),
 
     # predicates
     (stp.ST_Contains, ("geom", lambda: f.expr("ST_Point(0.5, 0.25)")), "triangle_geom", "", True),
@@ -387,6 +387,8 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))') AS a, ST_GeomFromWKT('POLYGON ((1 0, 2 0, 2 1, 1 1, 1 0))') AS b")
         elif request.param == "line_crossing_poly":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 2 1)') AS line, ST_GeomFromWKT('POLYGON ((1 0, 2 0, 2 2, 1 2, 1 0))') AS poly")
+        elif request.param == "square_geom":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))') AS geom")
         raise ValueError(f"Invalid base_df name passed: {request.param}")
 
     def _id_test_configuration(val):
