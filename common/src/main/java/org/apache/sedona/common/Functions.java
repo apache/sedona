@@ -881,6 +881,38 @@ public class Functions {
         return numRings;
     }
 
+    public static Geometry translate(Geometry geometry, double deltaX, double deltaY, double deltaZ) {
+        if (!geometry.isEmpty()) {
+            if (geometry instanceof GeometryCollection) {
+                GeometryCollection geometryCollection = (GeometryCollection) geometry;
+                int geometriesSize = geometryCollection.getNumGeometries();
+                for (int i = 0; i < geometriesSize; i++) {
+                    Geometry currGeometry = geometryCollection.getGeometryN(i);
+                    GeomUtils.translateGeom(currGeometry, deltaX, deltaY, deltaZ);
+                }
+            }else {
+                GeomUtils.translateGeom(geometry, deltaX, deltaY, deltaZ);
+            }
+        }
+        return geometry;
+    }
+
+    public static Geometry translate(Geometry geometry, double deltaX, double deltaY) {
+        if (!geometry.isEmpty()) {
+            if (geometry instanceof GeometryCollection) {
+                GeometryCollection geometryCollection = (GeometryCollection) geometry;
+                int geometriesSize = geometryCollection.getNumGeometries();
+                for (int i = 0; i < geometriesSize; i++) {
+                    Geometry currGeometry = geometryCollection.getGeometryN(i);
+                    GeomUtils.translateGeom(currGeometry, deltaX, deltaY, 0.0);
+                }
+            }else {
+                GeomUtils.translateGeom(geometry, deltaX, deltaY, 0.0);
+            }
+        }
+        return geometry;
+    }
+
     public static Geometry geometricMedian(Geometry geometry, double tolerance, int maxIter, boolean failIfNotConverged) throws Exception {
         String geometryType = geometry.getGeometryType();
         if(!(Geometry.TYPENAME_POINT.equals(geometryType) || Geometry.TYPENAME_MULTIPOINT.equals(geometryType))) {

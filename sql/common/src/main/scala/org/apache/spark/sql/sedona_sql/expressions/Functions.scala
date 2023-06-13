@@ -1003,3 +1003,10 @@ case class ST_NRings(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_Translate(inputExpressions: Seq[Expression])
+  extends InferredQuarternaryExpression(Functions.translate) with FoldableExpression {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+

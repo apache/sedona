@@ -110,7 +110,8 @@ __all__ = [
     "ST_ZMin",
     "ST_NumPoints",
     "ST_Force3D",
-    "ST_NRings"
+    "ST_NRings",
+    "ST_Translate"
 ]
 
 
@@ -1234,7 +1235,7 @@ def ST_ZMin(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_ZMin", geometry)
-
+@validate_argument_types
 def ST_NumPoints(geometry: ColumnOrName) -> Column:
     """Return the number of points in a LineString
     :param geometry: Geometry column to get number of points from.
@@ -1244,7 +1245,7 @@ def ST_NumPoints(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_NumPoints", geometry)
 
-
+@validate_argument_types
 def ST_Force3D(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
     """
     Return a geometry with a 3D coordinate of value 'zValue' forced upon it. No change happens if the geometry is already 3D
@@ -1255,6 +1256,7 @@ def ST_Force3D(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, floa
     args = (geometry, zValue)
     return _call_st_function("ST_Force3D", args)
 
+@validate_argument_types
 def ST_NRings(geometry: ColumnOrName) -> Column:
     """
     Returns the total number of rings in a Polygon or MultiPolygon. Compared to ST_NumInteriorRings, ST_NRings takes exterior rings into account as well.
@@ -1262,3 +1264,16 @@ def ST_NRings(geometry: ColumnOrName) -> Column:
     :return: Number of exterior rings + interior rings (if any) for the given Polygon or MultiPolygon
     """
     return _call_st_function("ST_NRings", geometry)
+@validate_argument_types
+def ST_Translate(geometry: ColumnOrName, deltaX: Union[ColumnOrName, float], deltaY: Union[ColumnOrName, float], deltaZ: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
+    """
+    Returns the geometry with x, y and z (if present) coordinates offset by given deltaX, deltaY, and deltaZ values.
+    :param geometry: Geometry column whose coordinates are to be translated.
+    :param deltaX: value by which to offset X coordinate.
+    :param deltaY: value by which to offset Y coordinate.
+    :param deltaZ: value by which to offset Z coordinate (if present).
+    :return: The input geometry with its coordinates translated.
+    """
+    args = (geometry, deltaX, deltaY, deltaZ)
+    return _call_st_function("ST_Translate", args)
+

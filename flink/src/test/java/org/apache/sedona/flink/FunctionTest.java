@@ -727,4 +727,13 @@ public class FunctionTest extends TestBase{
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void testTranslate() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_Translate(ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))'), 2, 5)" + "AS " + polygonColNames[0]);
+        polyTable = polyTable.select(call(Functions.ST_AsText.class.getSimpleName(), $(polygonColNames[0])));
+        String expected = "POLYGON ((3 5, 3 6, 4 6, 4 5, 3 5))";
+        String actual = (String) first(polyTable).getField(0);
+        assertEquals(expected, actual);
+    }
+
 }
