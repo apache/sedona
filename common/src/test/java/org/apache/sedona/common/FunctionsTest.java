@@ -24,6 +24,7 @@ import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
 
+import javax.sound.sampled.Line;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -646,6 +647,88 @@ public class FunctionsTest {
         LineString emptyLine = GEOMETRY_FACTORY.createLineString();
         Geometry forcedEmptyLine = Functions.force3D(emptyLine);
         assertEquals(emptyLine.isEmpty(), forcedEmptyLine.isEmpty());
+    }
+
+    @Test
+    public void nRingsPolygonOnlyExternal() throws Exception {
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
+        Integer expected = 1;
+        Integer actual = Functions.nRings(polygon);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void nRingsPolygonWithHoles() throws Exception {
+        LinearRing shell = GEOMETRY_FACTORY.createLinearRing(coordArray(1, 0, 1, 6, 6, 6, 6, 0, 1, 0));
+        LinearRing[] holes = new LinearRing[] {GEOMETRY_FACTORY.createLinearRing(coordArray(2, 1, 2, 2, 3, 2, 3, 1, 2, 1)),
+                                                GEOMETRY_FACTORY.createLinearRing(coordArray(4, 1, 4, 2, 5, 2, 5, 1, 4, 1))};
+        Polygon polygonWithHoles = GEOMETRY_FACTORY.createPolygon(shell, holes);
+        Integer expected = 3;
+        Integer actual = Functions.nRings(polygonWithHoles);
+        assertEquals(expected, actual);
+    }
+
+    @Test public void nRingsPolygonEmpty() throws Exception {
+        Polygon emptyPolygon = GEOMETRY_FACTORY.createPolygon();
+        Integer expected = 0;
+        Integer actual = Functions.nRings(emptyPolygon);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void nRingsMultiPolygonOnlyExternal() throws Exception {
+        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0)),
+                                                                                        GEOMETRY_FACTORY.createPolygon(coordArray(5, 0, 5, 1, 7, 1, 7, 0, 5, 0))});
+        Integer expected = 2;
+        Integer actual = Functions.nRings(multiPolygon);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void nRingsMultiPolygonOnlyWithHoles() throws Exception {
+        LinearRing shell1 = GEOMETRY_FACTORY.createLinearRing(coordArray(1, 0, 1, 6, 6, 6, 6, 0, 1, 0));
+        LinearRing[] holes1 = new LinearRing[] {GEOMETRY_FACTORY.createLinearRing(coordArray(2, 1, 2, 2, 3, 2, 3, 1, 2, 1)),
+                GEOMETRY_FACTORY.createLinearRing(coordArray(4, 1, 4, 2, 5, 2, 5, 1, 4, 1))};
+        Polygon polygonWithHoles1 = GEOMETRY_FACTORY.createPolygon(shell1, holes1);
+        LinearRing shell2 = GEOMETRY_FACTORY.createLinearRing(coordArray(10, 0, 10, 6, 16, 6, 16, 0, 10, 0));
+        LinearRing[] holes2 = new LinearRing[] {GEOMETRY_FACTORY.createLinearRing(coordArray(12, 1, 12, 2, 13, 2, 13, 1, 12, 1)),
+                GEOMETRY_FACTORY.createLinearRing(coordArray(14, 1, 14, 2, 15, 2, 15, 1, 14, 1))};
+        Polygon polygonWithHoles2 = GEOMETRY_FACTORY.createPolygon(shell2, holes2);
+        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[]{polygonWithHoles1, polygonWithHoles2});
+        Integer expected = 6;
+        Integer actual = Functions.nRings(multiPolygon);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void nRingsMultiPolygonEmpty() throws Exception {
+        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {GEOMETRY_FACTORY.createPolygon(),
+                GEOMETRY_FACTORY.createPolygon()});
+        Integer expected = 0;
+        Integer actual = Functions.nRings(multiPolygon);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void nRingsMultiPolygonMixed() throws Exception {
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
+        LinearRing shell = GEOMETRY_FACTORY.createLinearRing(coordArray(1, 0, 1, 6, 6, 6, 6, 0, 1, 0));
+        LinearRing[] holes = new LinearRing[] {GEOMETRY_FACTORY.createLinearRing(coordArray(2, 1, 2, 2, 3, 2, 3, 1, 2, 1)),
+                GEOMETRY_FACTORY.createLinearRing(coordArray(4, 1, 4, 2, 5, 2, 5, 1, 4, 1))};
+        Polygon polygonWithHoles = GEOMETRY_FACTORY.createPolygon(shell, holes);
+        Polygon emptyPolygon = GEOMETRY_FACTORY.createPolygon();
+        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon, polygonWithHoles, emptyPolygon});
+        Integer expected = 4;
+        Integer actual = Functions.nRings(multiPolygon);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void nRingsUnsupported() {
+        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray3d(0, 1, 1, 1, 2, 1, 1, 2, 2));
+        String expected = "Unsupported geometry type: " + "LineString" + ", only Polygon or MultiPolygon geometries are supported.";
+        Exception e = assertThrows(IllegalArgumentException.class, () -> Functions.nRings(lineString));
+        assertEquals(expected, e.getMessage());
     }
 
 }

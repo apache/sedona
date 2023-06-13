@@ -861,6 +861,26 @@ public class Functions {
        return GeomUtils.get3DGeom(geometry, 0.0);
     }
 
+    public static Integer nRings(Geometry geometry) throws Exception {
+        String geometryType = geometry.getGeometryType();
+        if (!(geometry instanceof Polygon || geometry instanceof MultiPolygon)) {
+            throw new IllegalArgumentException("Unsupported geometry type: " + geometryType + ", only Polygon or MultiPolygon geometries are supported.");
+        }
+        int numRings = 0;
+        if (geometry instanceof Polygon) {
+            Polygon polygon = (Polygon) geometry;
+            numRings = GeomUtils.getPolygonNumRings(polygon);
+        }else {
+            MultiPolygon multiPolygon = (MultiPolygon) geometry;
+            int numPolygons = multiPolygon.getNumGeometries();
+            for (int i = 0; i < numPolygons; i++) {
+                Polygon polygon = (Polygon) multiPolygon.getGeometryN(i);
+                numRings += GeomUtils.getPolygonNumRings(polygon);
+            }
+        }
+        return numRings;
+    }
+
     public static Geometry geometricMedian(Geometry geometry, double tolerance, int maxIter, boolean failIfNotConverged) throws Exception {
         String geometryType = geometry.getGeometryType();
         if(!(Geometry.TYPENAME_POINT.equals(geometryType) || Geometry.TYPENAME_MULTIPOINT.equals(geometryType))) {

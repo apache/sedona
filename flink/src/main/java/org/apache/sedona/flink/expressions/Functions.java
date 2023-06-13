@@ -599,4 +599,12 @@ public class Functions {
         }
     }
 
+    public static class ST_NRings extends ScalarFunction {
+        @DataTypeHint(value = "Integer")
+        public int eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) throws Exception {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.nRings(geom);
+        }
+    }
+
 }

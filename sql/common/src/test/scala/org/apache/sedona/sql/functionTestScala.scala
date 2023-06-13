@@ -1940,4 +1940,18 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assertEquals(expectedDefaultValue, actualDefaultValue);
     }
   }
+
+  it("should pass ST_NRings") {
+    val geomTestCases = Map(
+      ("'POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))'") -> 1,
+      ("'MULTIPOLYGON (((1 0, 1 6, 6 6, 6 0, 1 0), (2 1, 2 2, 3 2, 3 1, 2 1)), ((10 0, 10 6, 16 6, 16 0, 10 0), (12 1, 12 2, 13 2, 13 1, 12 1)))'") -> 4,
+      ("'POLYGON EMPTY'") -> 0
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val df = sparkSession.sql(s"SELECT ST_NRings(ST_GeomFromWKT($geom)), " + s"$expectedResult")
+      val actual = df.take(1)(0).get(0).asInstanceOf[Int]
+      val expected = df.take(1)(0).get(1).asInstanceOf[java.lang.Integer].intValue()
+      assertEquals(expected, actual)
+    }
+  }
 }

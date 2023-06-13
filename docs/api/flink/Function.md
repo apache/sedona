@@ -703,13 +703,46 @@ SELECT ST_NDims(ST_GeomFromEWKT('POINT(1 1 2)'))
 
 Output: `3`
 
-Spark SQL example with x,y coordinate:
+Example with x,y coordinate:
 
 ```sql
 SELECT ST_NDims(ST_GeomFromText('POINT(1 1)'))
 ```
 
 Output: `2`
+
+## ST_NRings
+
+Introduction: Returns the number of rings in a Polygon or MultiPolygon. Contrary to ST_NumInteriorRings, 
+this function also takes into account the number of  exterior rings.
+
+This function returns 0 for an empty Polygon or MultiPolygon.
+If the geometry is not a Polygon or MultiPolygon, an IllegalArgument Exception is thrown.
+
+Format: `ST_NRings(geom: geometry)`
+
+Since: `1.4.1`
+
+
+Examples:
+
+Input: `POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))`
+
+Output: `1`
+
+Input: `'MULTIPOLYGON (((1 0, 1 6, 6 6, 6 0, 1 0), (2 1, 2 2, 3 2, 3 1, 2 1)), ((10 0, 10 6, 16 6, 16 0, 10 0), (12 1, 12 2, 13 2, 13 1, 12 1)))'`
+
+Output: `4`
+
+Input: `'POLYGON EMPTY'`
+
+Output: `0`
+
+Input: `'LINESTRING (1 0, 1 1, 2 1)'`
+
+Output: `Unsupported geometry type: LineString, only Polygon or MultiPolygon geometries are supported.`
+
+
 
 ## ST_NumGeometries
 
@@ -945,13 +978,13 @@ Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional
 
 Since: `v1.2.0`
 
-Spark SQL example (simple):
+Example (simple):
 ```sql
 SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857') 
 FROM polygondf
 ```
 
-Spark SQL example (with optional parameters):
+Example (with optional parameters):
 ```sql
 SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857', false)
 FROM polygondf

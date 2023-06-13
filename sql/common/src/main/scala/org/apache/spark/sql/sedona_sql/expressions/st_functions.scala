@@ -313,4 +313,8 @@ object st_functions extends DataFrameAPI {
   def ST_Force3D(geometry: Column, zValue: Column): Column = wrapExpression[ST_Force3D](geometry, zValue)
 
   def ST_Force3D(geometry: String, zValue: Double): Column = wrapExpression[ST_Force3D](geometry, zValue)
+
+  def ST_NRings(geometry: Column): Column = wrapExpression[ST_NRings](geometry)
+
+  def ST_NRings(geometry: String): Column = wrapExpression[ST_NRings](geometry)
 }

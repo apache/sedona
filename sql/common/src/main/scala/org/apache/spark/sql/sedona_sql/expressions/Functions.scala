@@ -996,3 +996,10 @@ case class ST_Force3D(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_NRings(inputExpressions: Seq[Expression])
+  extends InferredUnaryExpression(Functions.nRings) with FoldableExpression {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+

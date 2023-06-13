@@ -433,4 +433,13 @@ public class GeomUtils {
         geometry.geometryChanged();
         return geometry;
     }
+
+    public static int getPolygonNumRings(Polygon polygon) {
+        LinearRing shell = polygon.getExteriorRing();
+        if (shell == null || shell.isEmpty()) {
+            return 0;
+        }else {
+            return 1 + polygon.getNumInteriorRing();
+        }
+    }
 }
