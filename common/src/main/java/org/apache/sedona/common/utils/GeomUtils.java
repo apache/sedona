@@ -447,7 +447,7 @@ public class GeomUtils {
         }
     }
 
-    public static Geometry translateGeom(Geometry geometry, double deltaX, double deltaY, double deltaZ) {
+    public static void translateGeom(Geometry geometry, double deltaX, double deltaY, double deltaZ) {
         Coordinate[] coordinates = geometry.getCoordinates();
         for (int i = 0; i < coordinates.length; i++) {
             Coordinate currCoordinate = coordinates[i];
@@ -460,6 +460,5 @@ public class GeomUtils {
         if (deltaX != 0 || deltaY != 0 || deltaZ != 0) {
             geometry.geometryChanged();
         }
-        return geometry;
     }
 }
