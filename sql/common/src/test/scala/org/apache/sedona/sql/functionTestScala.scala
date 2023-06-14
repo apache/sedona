@@ -1959,7 +1959,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     val geomTestCases = Map(
       ("'POINT (1 1 1)'") -> ("'POINT Z(2 2 2)'", "'POINT Z(2 2 1)'"),
       ("'POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))'") -> ("'POLYGON ((2 1, 2 2, 3 2, 3 1, 2 1))'", "'POLYGON ((2 1, 2 2, 3 2, 3 1, 2 1))'"),
-      ("'LINESTRING EMPTY'") -> ("'LINESTRING EMPTY'", "'LINESTRING EMPTY'")
+      ("'LINESTRING EMPTY'") -> ("'LINESTRING EMPTY'", "'LINESTRING EMPTY'"),
+      ("'GEOMETRYCOLLECTION (MULTIPOLYGON (((1 0, 1 1, 2 1, 2 0, 1 0)), ((1 2, 3 4, 3 5, 1 2))))'") -> ("'GEOMETRYCOLLECTION (MULTIPOLYGON (((2 1, 2 2, 3 2, 3 1, 2 1)), ((2 3, 4 5, 4 6, 2 3))))'", "'GEOMETRYCOLLECTION (MULTIPOLYGON (((2 1, 2 2, 3 2, 3 1, 2 1)), ((2 3, 4 5, 4 6, 2 3))))'")
     )
     for (((geom), expectedResult) <- geomTestCases) {
       val df = sparkSession.sql(s"SELECT ST_AsText(ST_Translate(ST_GeomFromWKT($geom), 1, 1, 1)) AS geom, " + s"$expectedResult")

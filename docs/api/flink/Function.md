@@ -1000,7 +1000,7 @@ If the geometry is 2D, and a deltaZ parameter is specified, no change is done to
 
 If the geometry is empty, no change is done to it.
 
-If a geometry collection is given, all geometries of the collection are individually translated.
+If the given geometry contains sub-geometries (GEOMETRY COLLECTION, MULTI POLYGON/LINE/POINT), all underlying geometries are individually translated.
 
 Format: `ST_Translate(geometry: geometry, deltaX: deltaX, deltaY: deltaY, deltaZ: deltaZ)`
 
@@ -1008,9 +1008,9 @@ Since: `1.4.1`
 
 Example: 
 
-Input: `ST_Translate(GEOMETRYCOLLECTION(POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0)), POINT(1, 1, 1), LINESTRING EMPTY), 2, 2, 3)`
+Input: `ST_Translate(GEOMETRYCOLLECTION(MULTIPOLYGON (((1 0, 1 1, 2 1, 2 0, 1 0)), ((1 2, 3 4, 3 5, 1 2))), POINT(1, 1, 1), LINESTRING EMPTY), 2, 2, 3)`
 
-Output: `GEOMETRYCOLLECTION(POLYGON ((3 2, 3 3, 4 3, 4 2, 3 2)), POINT(3, 3, 4), LINESTRING EMPTY)`
+Output: `GEOMETRYCOLLECTION(MULTIPOLYGON (((3 2, 3 3, 4 3, 4 2, 3 2)), ((3 4, 5 6, 5 7, 3 4))), POINT(3, 3, 4), LINESTRING EMPTY)`
 
 Input: `ST_Translate(POINT(1, 3, 2), 1, 2)`
 

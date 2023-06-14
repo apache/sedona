@@ -650,6 +650,46 @@ public class FunctionsTest {
     }
 
     @Test
+    public void force3DHybridGeomCollection() {
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
+        Polygon polygon3D = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 1, 1, 2, 2, 2, 3, 3, 3, 1, 1, 1));
+        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon3D, polygon});
+        Point point3D = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 1));
+        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 1, 2));
+        LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
+        Geometry geomCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {multiPolygon, point3D, emptyLineString, lineString})});
+        Polygon expectedPolygon3D = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 2, 1, 1, 2, 2, 1, 2, 2, 0, 2, 1, 0, 2));
+        LineString expectedLineString3D = GEOMETRY_FACTORY.createLineString(coordArray3d(1, 0, 2, 1, 1, 2, 1, 2, 2));
+        Geometry actualGeometryCollection = Functions.force3D(geomCollection, 2);
+        WKTWriter wktWriter3D = new WKTWriter(3);
+        assertEquals(wktWriter3D.write(polygon3D), wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(0).getGeometryN(0)));
+        assertEquals(wktWriter3D.write(expectedPolygon3D), wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(0).getGeometryN(1)));
+        assertEquals(wktWriter3D.write(point3D), wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(1)));
+        assertEquals(emptyLineString.toText(), actualGeometryCollection.getGeometryN(0).getGeometryN(2).toText());
+        assertEquals(wktWriter3D.write(expectedLineString3D), wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(3)));
+    }
+
+    @Test
+    public void force3DHybridGeomCollectionDefaultValue() {
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
+        Polygon polygon3D = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 1, 1, 2, 2, 2, 3, 3, 3, 1, 1, 1));
+        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon3D, polygon});
+        Point point3D = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 1));
+        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 1, 2));
+        LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
+        Geometry geomCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {multiPolygon, point3D, emptyLineString, lineString})});
+        Polygon expectedPolygon3D = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 0, 1, 1, 0, 2, 1, 0, 2, 0, 0, 1, 0, 0));
+        LineString expectedLineString3D = GEOMETRY_FACTORY.createLineString(coordArray3d(1, 0, 0, 1, 1, 0, 1, 2, 0));
+        Geometry actualGeometryCollection = Functions.force3D(geomCollection);
+        WKTWriter wktWriter3D = new WKTWriter(3);
+        assertEquals(wktWriter3D.write(polygon3D), wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(0).getGeometryN(0)));
+        assertEquals(wktWriter3D.write(expectedPolygon3D), wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(0).getGeometryN(1)));
+        assertEquals(wktWriter3D.write(point3D), wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(1)));
+        assertEquals(emptyLineString.toText(), actualGeometryCollection.getGeometryN(0).getGeometryN(2).toText());
+        assertEquals(wktWriter3D.write(expectedLineString3D), wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(3)));
+    }
+
+    @Test
     public void nRingsPolygonOnlyExternal() throws Exception {
         Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
         Integer expected = 1;
@@ -782,36 +822,39 @@ public class FunctionsTest {
     @Test
     public void translateHybridGeomCollectionNoDeltaZ() {
         Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
+        Polygon polygon3D = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 1, 2, 0, 2, 2, 1, 2, 1, 0, 1));
+        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon3D, polygon});
         Point point3D = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 1));
         LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
-        Geometry geomCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {polygon, point3D, emptyLineString});
+        Geometry geomCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {multiPolygon, point3D, emptyLineString})});
         Polygon expectedPolygon = GEOMETRY_FACTORY.createPolygon(coordArray(2, 1, 2, 2, 3, 2, 3, 1, 2, 1));
+        Polygon expectedPolygon3D = GEOMETRY_FACTORY.createPolygon(coordArray3d(2, 1, 1, 3, 1, 2, 3, 2, 2, 2, 1, 1));
         Point expectedPoint3D = GEOMETRY_FACTORY.createPoint(new Coordinate(2, 2, 1));
         WKTWriter wktWriter3D = new WKTWriter(3);
         GeometryCollection actualGeometry = (GeometryCollection) Functions.translate(geomCollection, 1, 1);
-
-        assertEquals(expectedPolygon.toText(), actualGeometry.getGeometryN(0).toText());
-        assertEquals(wktWriter3D.write(expectedPoint3D), wktWriter3D.write(actualGeometry.getGeometryN(1)));
-        assertEquals(emptyLineString.toText(), actualGeometry.getGeometryN(2).toText());
+        assertEquals(wktWriter3D.write(expectedPolygon3D), wktWriter3D.write(actualGeometry.getGeometryN(0).getGeometryN(0).getGeometryN(0)));
+        assertEquals(expectedPolygon.toText(), actualGeometry.getGeometryN(0).getGeometryN(0).getGeometryN(1).toText());
+        assertEquals(wktWriter3D.write(expectedPoint3D), wktWriter3D.write(actualGeometry.getGeometryN(0).getGeometryN(1)));
+        assertEquals(emptyLineString.toText(), actualGeometry.getGeometryN(0).getGeometryN(2).toText());
     }
 
     @Test
     public void translateHybridGeomCollectionDeltaZ() {
         Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
+        Polygon polygon3D = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 1, 2, 0, 2, 2, 1, 2, 1, 0, 1));
+        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon3D, polygon});
         Point point3D = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 1));
         LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
-        Geometry geomCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {polygon, point3D, emptyLineString});
+        Geometry geomCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {multiPolygon, point3D, emptyLineString})});
         Polygon expectedPolygon = GEOMETRY_FACTORY.createPolygon(coordArray(2, 1, 2, 2, 3, 2, 3, 1, 2, 1));
+        Polygon expectedPolygon3D = GEOMETRY_FACTORY.createPolygon(coordArray3d(2, 1, 2, 3, 1, 3, 3, 2, 3, 2, 1, 2));
         Point expectedPoint3D = GEOMETRY_FACTORY.createPoint(new Coordinate(2, 2, 2));
         WKTWriter wktWriter3D = new WKTWriter(3);
         GeometryCollection actualGeometry = (GeometryCollection) Functions.translate(geomCollection, 1, 1, 1);
 
-        assertEquals(expectedPolygon.toText(), actualGeometry.getGeometryN(0).toText());
-        assertEquals(wktWriter3D.write(expectedPoint3D), wktWriter3D.write(actualGeometry.getGeometryN(1)));
-        assertEquals(emptyLineString.toText(), actualGeometry.getGeometryN(2).toText());
+        assertEquals(wktWriter3D.write(expectedPolygon3D), wktWriter3D.write(actualGeometry.getGeometryN(0).getGeometryN(0).getGeometryN(0)));
+        assertEquals(expectedPolygon.toText(), actualGeometry.getGeometryN(0).getGeometryN(0).getGeometryN(1).toText());
+        assertEquals(wktWriter3D.write(expectedPoint3D), wktWriter3D.write(actualGeometry.getGeometryN(0).getGeometryN(1)));
+        assertEquals(emptyLineString.toText(), actualGeometry.getGeometryN(0).getGeometryN(2).toText());
     }
-
-
-
-
 }
