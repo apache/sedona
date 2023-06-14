@@ -20,6 +20,7 @@ import org.geotools.geometry.Envelope2D;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Before;
 import org.opengis.parameter.GeneralParameterValue;
+import org.opengis.referencing.FactoryException;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -42,13 +43,15 @@ public class RasterTestBase {
         geoTiff = bos.toByteArray();
     }
 
-    GridCoverage2D createEmptyRaster(int numBands) {
+    GridCoverage2D createEmptyRaster(int numBands)
+            throws FactoryException
+    {
         int widthInPixel = 4;
         int heightInPixel = 5;
         double upperLeftX = 101;
         double upperLeftY = 102;
         double cellSize = 2;
-        return RasterConstructors.makeEmptyRaster(widthInPixel, heightInPixel, upperLeftX, upperLeftY, cellSize, numBands);
+        return RasterConstructors.makeEmptyRaster(numBands, widthInPixel, heightInPixel, upperLeftX, upperLeftY, cellSize);
     }
     GridCoverage2D createMultibandRaster() throws IOException {
         GridCoverageFactory factory = new GridCoverageFactory();

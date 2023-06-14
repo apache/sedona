@@ -59,8 +59,9 @@ public class RasterAccessorsTest extends RasterTestBase
         int widthInPixel = 3;
         int heightInPixel = 4;
         double pixelSize = 5;
+        int numBands = 1;
 
-        GridCoverage2D gridCoverage2D = RasterConstructors.makeEmptyRaster(widthInPixel, heightInPixel, upperLeftX, upperLeftY, pixelSize);
+        GridCoverage2D gridCoverage2D = RasterConstructors.makeEmptyRaster(numBands, widthInPixel, heightInPixel, upperLeftX, upperLeftY, pixelSize);
         double[] metadata = RasterAccessors.metadata(gridCoverage2D);
         assertEquals(upperLeftX, metadata[0], 0.1d);
         assertEquals(upperLeftY, metadata[1], 0.1d);
@@ -71,7 +72,7 @@ public class RasterAccessorsTest extends RasterTestBase
         assertEquals(0, metadata[6], 0.1d);
         assertEquals(0, metadata[7], 0.1d);
         assertEquals(0, metadata[8], 0.1d);
-        assertEquals(1, metadata[9], 0.1d);
+        assertEquals(numBands, metadata[9], 0.1d);
         assertEquals(10, metadata.length);
 
         upperLeftX = 5;
@@ -79,9 +80,9 @@ public class RasterAccessorsTest extends RasterTestBase
         widthInPixel = 7;
         heightInPixel = 8;
         pixelSize = 9;
-        int numBands = 10;
+        numBands = 10;
 
-        gridCoverage2D = RasterConstructors.makeEmptyRaster(widthInPixel, heightInPixel, upperLeftX, upperLeftY, pixelSize, numBands);
+        gridCoverage2D = RasterConstructors.makeEmptyRaster(numBands, widthInPixel, heightInPixel, upperLeftX, upperLeftY, pixelSize);
 
         metadata = RasterAccessors.metadata(gridCoverage2D);
 

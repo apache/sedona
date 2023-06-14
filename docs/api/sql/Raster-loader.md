@@ -49,49 +49,63 @@ df = df.withColumn("raster", f.expr("RS_FromGeoTiff(content)"))
 
 ### RS_MakeEmptyRaster
 
-Introduction: Returns an empty raster geometry.Every band in the raster is initialized to `0.0`.
-
-Format: `RS_MakeEmptyRaster(width: Int, height: Int, upperleftX: Double, upperleftY: Double, cellSize:Double, numBands:Int)`
+Introduction: Returns an empty raster geometry. Every band in the raster is initialized to `0.0`.
 
 Since: `v1.4.1`
 
+Format: `RS_MakeEmptyRaster(numBands:Int, width: Int, height: Int, upperleftX: Double, upperleftY: Double, cellSize:Double)`
+
+* NumBands: The number of bands in the raster. If not specified, the raster will have a single band.
 * Width: The width of the raster in pixels.
 * Height: The height of the raster in pixels.
 * UpperleftX: The X coordinate of the upper left corner of the raster, in terms of the CRS units.
 * UpperleftY: The Y coordinate of the upper left corner of the raster, in terms of the CRS units.
-* CellSize: The size of the cells in the raster, in terms of the CRS units.
-* NumBands (optional): The number of bands in the raster. If not specified, the raster will have a single band.
+* Cell Size (pixel size): The size of the cells in the raster, in terms of the CRS units.
+
+It uses the default Cartesian coordinate system.
+
+Format: `RS_MakeEmptyRaster(numBands:Int, width: Int, height: Int, upperleftX: Double, upperleftY: Double, scaleX:Double, scaleY:Double, skewX:Double, skewY:Double, srid: Int)`
+
+* NumBands: The number of bands in the raster. If not specified, the raster will have a single band.
+* Width: The width of the raster in pixels.
+* Height: The height of the raster in pixels.
+* UpperleftX: The X coordinate of the upper left corner of the raster, in terms of the CRS units.
+* UpperleftY: The Y coordinate of the upper left corner of the raster, in terms of the CRS units.
+* ScaleX (pixel size on X): The size of the cells on the X axis, in terms of the CRS units.
+* ScaleY (pixel size on Y): The size of the cells on the Y axis, in terms of the CRS units.
+* SkewX: The skew of the raster on the X axis, in terms of the CRS units.
+* SkewY: The skew of the raster on the Y axis, in terms of the CRS units.
+* SRID: The SRID of the raster. Use 0 if you want to use the default Cartesian coordinate system. Use 4326 if you want to use WGS84.
 
 SQL example 1 (with 2 bands):
 
 ```sql
-SELECT RS_MakeEmptyRaster(10, 10, 0.0, 0.0, 1.0, 2) as raster
+SELECT RS_MakeEmptyRaster(2, 10, 10, 0.0, 0.0, 1.0) as raster
 ```
 
 Output:
 ```
 +--------------------------------------------+
-|rs_makeemptyraster(10, 10, 0.0, 0.0, 1.0, 2)|
+|rs_makeemptyraster(2, 10, 10, 0.0, 0.0, 1.0)|
 +--------------------------------------------+
 |                        GridCoverage2D["g...|
 +--------------------------------------------+
 ```
 
-SQL example 2 (number of bands not specified, default to 1 band):
+SQL example 1 (with 2 bands, scale, skew, and SRID):
 
 ```sql
-SELECT RS_MakeEmptyRaster(10, 10, 0.0, 0.0, 1.0) as raster
+SELECT RS_MakeEmptyRaster(2, 10, 10, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 4326) as raster
 ```
 
 Output:
 ```
-+--------------------------------------------+
-|rs_makeemptyraster(10, 10, 0.0, 0.0, 1.0, 2)|
-+--------------------------------------------+
-|                        GridCoverage2D["g...|
-+--------------------------------------------+
++--------------------------------------------------------------+
+|rs_makeemptyraster(2, 10, 10, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0)|
++--------------------------------------------------------------+
+|                                          GridCoverage2D["g...|
++--------------------------------------------------------------+
 ```
-
 
 ## Load GeoTiff to Array[Double] format
 

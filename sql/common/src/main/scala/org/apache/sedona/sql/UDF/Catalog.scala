@@ -178,7 +178,7 @@ object Catalog {
     function[RS_BandAsArray](),
     function[RS_FromArcInfoAsciiGrid](),
     function[RS_FromGeoTiff](),
-    function[RS_MakeEmptyRaster](1),
+    function[RS_MakeEmptyRaster](java.lang.Integer.MAX_VALUE, 0.0, 0.0, 0),
     function[RS_Envelope](),
     function[RS_NumBands](),
     function[RS_Metadata](),

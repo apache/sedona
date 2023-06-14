@@ -118,13 +118,16 @@ public class MapAlgebraTest extends RasterTestBase
     }
 
     @Test
-    public void testBandAsArray() {
+    public void testBandAsArray()
+            throws FactoryException
+    {
         int widthInPixel = 10;
         int heightInPixel = 10;
         double upperLeftX = 0;
         double upperLeftY = 0;
         double cellSize = 1;
-        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(widthInPixel, heightInPixel, upperLeftX, upperLeftY, cellSize);
+        int numbBands = 1;
+        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(numbBands, widthInPixel, heightInPixel, upperLeftX, upperLeftY, cellSize);
         // Out of bound index should return null
         double[] band = MapAlgebra.bandAsArray(raster, 0);
         assertNull(band);

@@ -61,8 +61,9 @@ public class RasterConstructorsTest
         int widthInPixel = 1;
         int heightInPixel = 2;
         double pixelSize = 2;
+        int numBands = 1;
 
-        GridCoverage2D gridCoverage2D = RasterConstructors.makeEmptyRaster(widthInPixel, heightInPixel, upperLeftX, upperLeftY, pixelSize);
+        GridCoverage2D gridCoverage2D = RasterConstructors.makeEmptyRaster(numBands, widthInPixel, heightInPixel, upperLeftX, upperLeftY, pixelSize);
         Geometry envelope = RasterAccessors.envelope(gridCoverage2D);
         assertEquals(upperLeftX, envelope.getEnvelopeInternal().getMinX(), 0.001);
         assertEquals(upperLeftX + widthInPixel * pixelSize, envelope.getEnvelopeInternal().getMaxX(), 0.001);
@@ -78,5 +79,13 @@ public class RasterConstructorsTest
         assertEquals(widthInPixel, gridCoverage2D.getRenderedImage().getTileWidth());
         assertEquals(0d, gridCoverage2D.getRenderedImage().getData().getPixel(0, 0, (double[])null)[0], 0.001);
         assertEquals(1, gridCoverage2D.getNumSampleDimensions());
+
+        gridCoverage2D = RasterConstructors.makeEmptyRaster(numBands, widthInPixel, heightInPixel, upperLeftX, upperLeftY, pixelSize, pixelSize + 1, 0, 0, 0);
+        envelope = RasterAccessors.envelope(gridCoverage2D);
+        assertEquals(upperLeftX, envelope.getEnvelopeInternal().getMinX(), 0.001);
+        assertEquals(upperLeftX + widthInPixel * pixelSize, envelope.getEnvelopeInternal().getMaxX(), 0.001);
+        assertEquals(upperLeftY - heightInPixel * (pixelSize + 1), envelope.getEnvelopeInternal().getMinY(), 0.001);
+        assertEquals(upperLeftY, envelope.getEnvelopeInternal().getMaxY(), 0.001);
+
     }
 }
