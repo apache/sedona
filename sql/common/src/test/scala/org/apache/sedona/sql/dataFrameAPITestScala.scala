@@ -978,5 +978,21 @@ class dataFrameAPITestScala extends TestBaseScala {
       val actual = df.take(1)(0).getInt(0)
       assert(expected == actual)
     }
+
+    it("Passed ST_Translate") {
+      val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((1 0 1, 1 1 1, 2 1 1, 2 0 1, 1 0 1))') AS geom")
+      val df = polyDf.select(ST_Translate("geom", 2, 3, 1))
+      val wktWriter3D = new WKTWriter(3);
+      val actualGeom = df.take(1)(0).get(0).asInstanceOf[Geometry]
+      val actual = wktWriter3D.write(actualGeom)
+      val expected = "POLYGON Z((3 3 2, 3 4 2, 4 4 2, 4 3 2, 3 3 2))"
+      assert(expected == actual)
+
+      val dfDefaultValue = polyDf.select(ST_Translate("geom", 2, 3))
+      val actualGeomDefaultValue = dfDefaultValue.take(1)(0).get(0).asInstanceOf[Geometry]
+      val actualDefaultValue = wktWriter3D.write(actualGeomDefaultValue)
+      val expectedDefaultValue = "POLYGON Z((3 3 1, 3 4 1, 4 4 1, 4 3 1, 3 3 1))"
+      assert(expectedDefaultValue == actualDefaultValue)
+    }
   }
 }

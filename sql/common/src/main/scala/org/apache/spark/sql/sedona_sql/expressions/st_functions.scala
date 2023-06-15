@@ -317,4 +317,14 @@ object st_functions extends DataFrameAPI {
   def ST_NRings(geometry: Column): Column = wrapExpression[ST_NRings](geometry)
 
   def ST_NRings(geometry: String): Column = wrapExpression[ST_NRings](geometry)
+
+  def ST_Translate(geometry: Column, deltaX: Column, deltaY: Column, deltaZ: Column): Column = wrapExpression[ST_Translate](geometry, deltaX, deltaY, deltaZ)
+
+  def ST_Translate(geometry: String, deltaX: Double, deltaY: Double, deltaZ: Double): Column = wrapExpression[ST_Translate](geometry, deltaX, deltaY, deltaZ)
+
+  def ST_Translate(geometry: Column, deltaX: Column, deltaY: Column): Column = wrapExpression[ST_Translate](geometry, deltaX, deltaY, 0.0)
+
+  def ST_Translate(geometry: String, deltaX: Double, deltaY: Double): Column = wrapExpression[ST_Translate](geometry, deltaX, deltaY, 0.0)
+
+
 }

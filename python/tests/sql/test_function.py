@@ -1092,3 +1092,9 @@ class TestPredicateJoin(TestBase):
         actual = actualDf.selectExpr("ST_NRings(geom)").take(1)[0][0]
         assert expected == actual
 
+    def test_translate(self):
+        expected = "POLYGON ((3 5, 3 6, 4 6, 4 5, 3 5))"
+        actualDf = self.spark.sql("SELECT ST_Translate(ST_GeomFromText('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))'), 2, 5) AS geom")
+        actual = actualDf.selectExpr("ST_AsText(geom)").take(1)[0][0]
+        assert expected == actual
+

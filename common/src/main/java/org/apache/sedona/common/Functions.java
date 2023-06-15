@@ -835,9 +835,10 @@ public class Functions {
         Coordinate[] points = geometry.getCoordinates();
         if(points.length == 0)
             return points;
-        boolean is3d = !Double.isNaN(points[0].z);
+
         Coordinate[] coordinates = new Coordinate[points.length];
         for(int i = 0; i < points.length; i++) {
+            boolean is3d = !Double.isNaN(points[i].z);
             coordinates[i] = points[i].copy();
             if(!is3d)
                 coordinates[i].z = 0.0;
@@ -879,6 +880,20 @@ public class Functions {
             }
         }
         return numRings;
+    }
+
+    public static Geometry translate(Geometry geometry, double deltaX, double deltaY, double deltaZ) {
+        if (!geometry.isEmpty()) {
+            GeomUtils.translateGeom(geometry, deltaX, deltaY, deltaZ);
+        }
+        return geometry;
+    }
+
+    public static Geometry translate(Geometry geometry, double deltaX, double deltaY) {
+        if (!geometry.isEmpty()) {
+            GeomUtils.translateGeom(geometry, deltaX, deltaY, 0.0);
+        }
+        return geometry;
     }
 
     public static Geometry geometricMedian(Geometry geometry, double tolerance, int maxIter, boolean failIfNotConverged) throws Exception {

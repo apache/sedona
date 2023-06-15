@@ -97,7 +97,8 @@ public class Catalog {
                 new Functions.ST_GeometricMedian(),
                 new Functions.ST_NumPoints(),
                 new Functions.ST_Force3D(),
-                new Functions.ST_NRings()
+                new Functions.ST_NRings(),
+                new Functions.ST_Translate(),
         };
     }
 
