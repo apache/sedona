@@ -41,6 +41,18 @@
         <module>spark-${spark.compat.version}</module>
     </modules>
 
+    <!-- Add non-default submodules when running `mvn release:prepare
+         -Penable-all-submodules`, so that project versions of all submodules
+         will be substituted -->
+    <profiles>
+        <profile>
+            <id>enable-all-submodules</id>
+            <modules>
+                <module>spark-3.4</module>
+            </modules>
+        </profile>
+    </profiles>
+
     <dependencyManagement>
         <dependencies>
             <dependency>

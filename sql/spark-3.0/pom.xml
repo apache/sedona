@@ -25,7 +25,7 @@
         <version>1.4.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-	<artifactId>sedona-sql-${spark.compat.version}_${scala.compat.version}</artifactId>
+	<artifactId>sedona-sql-3.0_${scala.compat.version}</artifactId>
 
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>A cluster computing system for processing large-scale spatial data: SQL API for Spark 3.0 - 3.3.</description>
