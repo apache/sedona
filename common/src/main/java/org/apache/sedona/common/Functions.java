@@ -946,4 +946,38 @@ public class Functions {
         return geometricMedian(geometry, DEFAULT_TOLERANCE, DEFAULT_MAX_ITER, false);
     }
 
+    public static LineString boundingDiagonal(Geometry geometry) {
+        if (geometry.isEmpty()) {
+            return GEOMETRY_FACTORY.createLineString();
+        }else {
+            Double startX = null, startY = null, startZ = null, endX = null, endY = null, endZ = null;
+            boolean is3d = Double.isNaN(geometry.getCoordinate().z);
+            Coordinate[] coordinates = geometry.getCoordinates();
+            for (Coordinate currCoordinate : coordinates) {
+                Double geomX = currCoordinate.getX(), geomY = currCoordinate.getY();
+                startX = startX == null ? currCoordinate.getX() : Math.min(startX, currCoordinate.getX());
+                startY = startY == null ? currCoordinate.getY() : Math.min(startY, currCoordinate.getY());
+
+                endX = endX == null ? currCoordinate.getX() : Math.max(endX, currCoordinate.getX());
+                endY = endY == null ? currCoordinate.getY() : Math.max(endY, currCoordinate.getY());
+
+                if (is3d) {
+                    Double geomZ = currCoordinate.getZ();
+                    startZ = startZ == null ? currCoordinate.getZ() : Math.min(startZ, currCoordinate.getZ());
+                    endZ = endZ == null ? currCoordinate.getZ() : Math.max(endZ, currCoordinate.getZ());
+                }
+            }
+            Coordinate startCoordinate;
+            Coordinate endCoordinate;
+            if (is3d) {
+                startCoordinate = new Coordinate(startX, startY, startZ);
+                endCoordinate = new Coordinate(endX, endY, endZ);
+            }else {
+                startCoordinate = new Coordinate(startX, startY);
+                endCoordinate = new Coordinate(endX, endY);
+            }
+            return GEOMETRY_FACTORY.createLineString(new Coordinate[] {startCoordinate, endCoordinate});
+        }
+    }
+
 }
