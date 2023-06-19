@@ -1010,3 +1010,10 @@ case class ST_Translate(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_Affine(inputExpressions: Seq[Expression])
+  extends InferredNaryExpression(Functions.affine) with FoldableExpression {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+

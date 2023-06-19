@@ -111,7 +111,8 @@ __all__ = [
     "ST_NumPoints",
     "ST_Force3D",
     "ST_NRings",
-    "ST_Translate"
+    "ST_Translate",
+    "ST_Affine"
 ]
 
 
@@ -1276,4 +1277,33 @@ def ST_Translate(geometry: ColumnOrName, deltaX: Union[ColumnOrName, float], del
     """
     args = (geometry, deltaX, deltaY, deltaZ)
     return _call_st_function("ST_Translate", args)
+
+@validate_argument_types
+def ST_Affine(geometry: ColumnOrName, a: Union[ColumnOrName, float], b: Union[ColumnOrName, float], d: Union[ColumnOrName, float],
+                e: Union[ColumnOrName, float], xOff: Union[ColumnOrName, float], yOff: Union[ColumnOrName, float], c: Optional[Union[ColumnOrName, float]] = 0.0, f: Optional[Union[ColumnOrName, float]] = 0.0,
+                g: Optional[Union[ColumnOrName, float]] = 0.0, h: Optional[Union[ColumnOrName, float]] = 0.0,
+                i: Optional[Union[ColumnOrName, float]] = 0.0,  zOff: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
+    """
+    Apply a 3D/2D affine tranformation to the given geometry
+    x = a * x + b * y + c * z + xOff | x = a * x + b * y + xOff
+    y = d * x + e * y + f * z + yOff | y = d * x + e * y + yOff
+    z = g * x + h * y + i * z + zOff
+    :param geometry: Geometry to apply affine transformation to
+    :param a:
+    :param b:
+    :param c: Default 0.0
+    :param d:
+    :param e:
+    :param f: Default 0.0
+    :param g: Default 0.0
+    :param h: Default 0.0
+    :param i: Default 0.0
+    :param xOff:
+    :param yOff:
+    :param zOff: Default 0.0
+    :return: Geometry with affine transformation applied
+    """
+    args = (geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)
+    return _call_st_function("ST_Affine", args)
+
 

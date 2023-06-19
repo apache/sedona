@@ -326,5 +326,16 @@ object st_functions extends DataFrameAPI {
 
   def ST_Translate(geometry: String, deltaX: Double, deltaY: Double): Column = wrapExpression[ST_Translate](geometry, deltaX, deltaY, 0.0)
 
+  def ST_Affine(geometry: Column, a: Column, b: Column, d: Column, e: Column, xOff: Column, yOff: Column, c: Column, f: Column, g: Column, h: Column, i: Column, zOff: Column): Column =
+    wrapExpression[ST_Affine](geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)
+
+  def ST_Affine(geometry: String, a: Double, b: Double, d: Double, e: Double, xOff: Double, yOff: Double, c: Double, f: Double, g: Double, h: Double, i: Double, zOff: Double): Column =
+    wrapExpression[ST_Affine](geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)
+
+  def ST_Affine(geometry: Column, a: Column, b: Column, d: Column, e: Column, xOff: Column, yOff: Column) =
+    wrapExpression[ST_Affine](geometry, a, b, d, e, xOff, yOff, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+
+  def ST_Affine(geometry: String, a: Double, b: Double, d: Double, e: Double, xOff: Double, yOff: Double) =
+    wrapExpression[ST_Affine](geometry, a, b, d, e, xOff, yOff, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
 }
