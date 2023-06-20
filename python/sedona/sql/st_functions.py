@@ -108,6 +108,10 @@ __all__ = [
     "ST_Z",
     "ST_ZMax",
     "ST_ZMin",
+    "ST_NumPoints",
+    "ST_Force3D",
+    "ST_NRings",
+    "ST_Translate"
 ]
 
 
@@ -424,14 +428,14 @@ def ST_DistanceSpheroid(a: ColumnOrName, b: ColumnOrName) -> Column:
     return _call_st_function("ST_DistanceSpheroid", (a, b))
 
 @validate_argument_types
-def ST_DistanceSphere(a: ColumnOrName, b: ColumnOrName, radius: Optional[Union[ColumnOrName, float]] = 6378137.0) -> Column:
+def ST_DistanceSphere(a: ColumnOrName, b: ColumnOrName, radius: Optional[Union[ColumnOrName, float]] = 6371008.0) -> Column:
     """Calculate the haversine/great-circle distance between two geometry columns using a given radius.
 
     :param a: Geometry column to use in the calculation.
     :type a: ColumnOrName
     :param b: Other geometry column to use in the calculation.
     :type b: ColumnOrName
-    :param radius: Radius of the sphere, defaults to 6378137.0
+    :param radius: Radius of the sphere, defaults to 6371008.0
     :type radius: Optional[Union[ColumnOrName, float]], optional
     :return: Two-dimensional haversine/great-circle distance between a and b as a double column. Unit is meter.
     :rtype: Column
@@ -1231,3 +1235,45 @@ def ST_ZMin(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_ZMin", geometry)
+@validate_argument_types
+def ST_NumPoints(geometry: ColumnOrName) -> Column:
+    """Return the number of points in a LineString
+    :param geometry: Geometry column to get number of points from.
+    :type geometry: ColumnOrName
+    :return: Number of points in a LineString as an integer column
+    :rtype: Column
+    """
+    return _call_st_function("ST_NumPoints", geometry)
+
+@validate_argument_types
+def ST_Force3D(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
+    """
+    Return a geometry with a 3D coordinate of value 'zValue' forced upon it. No change happens if the geometry is already 3D
+    :param zValue: Optional value of z coordinate to be potentially added, default value is 0.0
+    :param geometry: Geometry column to make 3D
+    :return: 3D geometry with either already present z coordinate if any, or zcoordinate with given zValue
+    """
+    args = (geometry, zValue)
+    return _call_st_function("ST_Force3D", args)
+
+@validate_argument_types
+def ST_NRings(geometry: ColumnOrName) -> Column:
+    """
+    Returns the total number of rings in a Polygon or MultiPolygon. Compared to ST_NumInteriorRings, ST_NRings takes exterior rings into account as well.
+    :param geometry: Geometry column to calculate rings for
+    :return: Number of exterior rings + interior rings (if any) for the given Polygon or MultiPolygon
+    """
+    return _call_st_function("ST_NRings", geometry)
+@validate_argument_types
+def ST_Translate(geometry: ColumnOrName, deltaX: Union[ColumnOrName, float], deltaY: Union[ColumnOrName, float], deltaZ: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
+    """
+    Returns the geometry with x, y and z (if present) coordinates offset by given deltaX, deltaY, and deltaZ values.
+    :param geometry: Geometry column whose coordinates are to be translated.
+    :param deltaX: value by which to offset X coordinate.
+    :param deltaY: value by which to offset Y coordinate.
+    :param deltaZ: value by which to offset Z coordinate (if present).
+    :return: The input geometry with its coordinates translated.
+    """
+    args = (geometry, deltaX, deltaY, deltaZ)
+    return _call_st_function("ST_Translate", args)
+

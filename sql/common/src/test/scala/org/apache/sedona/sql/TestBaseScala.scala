@@ -20,10 +20,9 @@ package org.apache.sedona.sql
 
 import com.google.common.math.DoubleMath
 import org.apache.log4j.{Level, Logger}
-import org.apache.sedona.core.serde.SedonaKryoRegistrator
-import org.apache.sedona.sql.utils.SedonaSQLRegistrator
-import org.apache.spark.serializer.KryoSerializer
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.sedona.common.sphere.{Haversine, Spheroid}
+import org.apache.sedona.spark.SedonaContext
+import org.apache.spark.sql.DataFrame
 import org.locationtech.jts.geom.{CoordinateSequence, CoordinateSequenceComparator}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
@@ -35,8 +34,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   Logger.getLogger("org.apache.sedona.core").setLevel(Level.WARN)
 
   val warehouseLocation = System.getProperty("user.dir") + "/target/"
-  val sparkSession = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
-    config("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName).
+  val sparkSession = SedonaContext.builder().
     master("local[*]").appName("sedonasqlScalaTest")
     .config("spark.sql.warehouse.dir", warehouseLocation)
     // We need to be explicit about broadcasting in tests.
@@ -69,7 +67,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   val spatialJoinRightInputLocation: String = resourceFolder + "spatial-join-query-window.tsv"
 
   override def beforeAll(): Unit = {
-    SedonaSQLRegistrator.registerAll(sparkSession)
+    SedonaContext.create(sparkSession)
   }
 
   override def afterAll(): Unit = {
@@ -95,6 +93,28 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
       }
       0
     }
+  }
+
+  protected def bruteForceDistanceJoinCountSpheroid(sampleCount:Int, distance: Double): Int = {
+    val input = buildPointDf.limit(sampleCount).collect()
+    input.map(row => {
+      val point1 = row.getAs[org.locationtech.jts.geom.Point](0)
+      input.map(row => {
+        val point2 = row.getAs[org.locationtech.jts.geom.Point](0)
+        if (Spheroid.distance(point1, point2) <= distance) 1 else 0
+      }).sum
+    }).sum
+  }
+
+  protected def bruteForceDistanceJoinCountSphere(sampleCount: Int, distance: Double): Int = {
+    val input = buildPointDf.limit(sampleCount).collect()
+    input.map(row => {
+      val point1 = row.getAs[org.locationtech.jts.geom.Point](0)
+      input.map(row => {
+        val point2 = row.getAs[org.locationtech.jts.geom.Point](0)
+        if (Haversine.distance(point1, point2) <= distance) 1 else 0
+      }).sum
+    }).sum
   }
 
 }

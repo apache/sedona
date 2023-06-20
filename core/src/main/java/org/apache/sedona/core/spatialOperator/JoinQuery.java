@@ -549,12 +549,14 @@ public class JoinQuery
         if (joinParams.useIndex) {
             if (rightRDD.indexedRDD != null) {
                 final RightIndexLookupJudgement judgement =
-                        new RightIndexLookupJudgement(joinParams.spatialPredicate);
+                        new RightIndexLookupJudgement(joinParams.spatialPredicate,
+                                buildCount, streamCount, resultCount, candidateCount);
                 joinResult = leftRDD.spatialPartitionedRDD.zipPartitions(rightRDD.indexedRDD, judgement);
             }
             else if (leftRDD.indexedRDD != null) {
                 final LeftIndexLookupJudgement judgement =
-                        new LeftIndexLookupJudgement(joinParams.spatialPredicate);
+                        new LeftIndexLookupJudgement(joinParams.spatialPredicate,
+                                buildCount, streamCount, resultCount, candidateCount);
                 joinResult = leftRDD.indexedRDD.zipPartitions(rightRDD.spatialPartitionedRDD, judgement);
             }
             else {
@@ -569,7 +571,8 @@ public class JoinQuery
             }
         }
         else {
-            NestedLoopJudgement judgement = new NestedLoopJudgement(joinParams.spatialPredicate);
+            NestedLoopJudgement judgement = new NestedLoopJudgement(joinParams.spatialPredicate,
+                    buildCount, streamCount, resultCount, candidateCount);
             joinResult = rightRDD.spatialPartitionedRDD.zipPartitions(leftRDD.spatialPartitionedRDD, judgement);
         }
 

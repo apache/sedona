@@ -285,8 +285,8 @@ object st_functions extends DataFrameAPI {
   def ST_GeometricMedian(geometry: Column, tolerance: Column, maxIter: Column, failIfNotConverged: Column): Column = wrapExpression[ST_GeometricMedian](geometry, tolerance, maxIter, failIfNotConverged)
   def ST_GeometricMedian(geometry: String, tolerance: Double, maxIter: Int, failIfNotConverged: Boolean): Column = wrapExpression[ST_GeometricMedian](geometry, tolerance, maxIter, failIfNotConverged)
 
-  def ST_DistanceSphere(a: Column, b: Column): Column = wrapExpression[ST_DistanceSphere](a, b, 6378137.0)
-  def ST_DistanceSphere(a: String, b: String): Column = wrapExpression[ST_DistanceSphere](a, b, 6378137.0)
+  def ST_DistanceSphere(a: Column, b: Column): Column = wrapExpression[ST_DistanceSphere](a, b, 6371008.0)
+  def ST_DistanceSphere(a: String, b: String): Column = wrapExpression[ST_DistanceSphere](a, b, 6371008.0)
   def ST_DistanceSphere(a: Column, b: Column, c: Column): Column = wrapExpression[ST_DistanceSphere](a, b, c)
   def ST_DistanceSphere(a: String, b: String, c: Double): Column = wrapExpression[ST_DistanceSphere](a, b, c)
 
@@ -301,4 +301,30 @@ object st_functions extends DataFrameAPI {
   def ST_LengthSpheroid(a: Column): Column = wrapExpression[ST_LengthSpheroid](a)
 
   def ST_LengthSpheroid(a: String): Column = wrapExpression[ST_LengthSpheroid](a)
+
+  def ST_NumPoints(geometry: Column): Column = wrapExpression[ST_NumPoints](geometry)
+
+  def ST_NumPoints(geometry: String): Column = wrapExpression[ST_NumPoints](geometry)
+
+  def ST_Force3D(geometry: Column): Column = wrapExpression[ST_Force3D](geometry, 0.0)
+
+  def ST_Force3D(geometry: String): Column = wrapExpression[ST_Force3D](geometry, 0.0)
+
+  def ST_Force3D(geometry: Column, zValue: Column): Column = wrapExpression[ST_Force3D](geometry, zValue)
+
+  def ST_Force3D(geometry: String, zValue: Double): Column = wrapExpression[ST_Force3D](geometry, zValue)
+
+  def ST_NRings(geometry: Column): Column = wrapExpression[ST_NRings](geometry)
+
+  def ST_NRings(geometry: String): Column = wrapExpression[ST_NRings](geometry)
+
+  def ST_Translate(geometry: Column, deltaX: Column, deltaY: Column, deltaZ: Column): Column = wrapExpression[ST_Translate](geometry, deltaX, deltaY, deltaZ)
+
+  def ST_Translate(geometry: String, deltaX: Double, deltaY: Double, deltaZ: Double): Column = wrapExpression[ST_Translate](geometry, deltaX, deltaY, deltaZ)
+
+  def ST_Translate(geometry: Column, deltaX: Column, deltaY: Column): Column = wrapExpression[ST_Translate](geometry, deltaX, deltaY, 0.0)
+
+  def ST_Translate(geometry: String, deltaX: Double, deltaY: Double): Column = wrapExpression[ST_Translate](geometry, deltaX, deltaY, 0.0)
+
+
 }

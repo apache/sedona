@@ -22,9 +22,19 @@ EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode
 StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
 ```
 
-## Register SedonaSQL
+## Initiate SedonaContext
 
 Add the following line after your `StreamExecutionEnvironment` and `StreamTableEnvironment` declaration
+
+==Sedona >= 1.4.1==
+
+```java
+StreamTableEnvironment sedona = SedonaContext.create(env, tableEnv);
+```
+
+==Sedona <1.4.1==
+
+The following method has been deprecated since Sedona 1.4.1. Please use the method above to create your SedonaContext.
 
 ```java
 SedonaFlinkRegistrator.registerType(env);
@@ -63,8 +73,8 @@ Assume you have a Flink Table `tbl` like this:
 You can create a Table with a Geometry type column as follows:
 
 ```java
-tableEnv.createTemporaryView("myTable", tbl)
-Table geomTbl = tableEnv.sqlQuery("SELECT ST_GeomFromWKT(geom_polygon) as geom_polygon, name_polygon FROM myTable")
+sedona.createTemporaryView("myTable", tbl)
+Table geomTbl = sedona.sqlQuery("SELECT ST_GeomFromWKT(geom_polygon) as geom_polygon, name_polygon FROM myTable")
 geomTbl.execute().print()
 ```
 
@@ -115,7 +125,7 @@ Sedona doesn't control the coordinate unit (degree-based or meter-based) of all 
 To convert Coordinate Reference System of the Geometry column created before, use the following code:
 
 ```java
-Table geomTbl3857 = tableEnv.sqlQuery("SELECT ST_Transform(countyshape, "epsg:4326", "epsg:3857") AS geom_polygon, name_polygon FROM myTable")
+Table geomTbl3857 = sedona.sqlQuery("SELECT ST_Transform(countyshape, "epsg:4326", "epsg:3857") AS geom_polygon, name_polygon FROM myTable")
 geomTbl3857.execute().print()
 ```
 
@@ -176,7 +186,7 @@ Use ==ST_Contains==, ==ST_Intersects== and so on to run a range query over a sin
 The following example finds all counties that are within the given polygon:
 
 ```java
-geomTable = tableEnv.sqlQuery(
+geomTable = sedona.sqlQuery(
   "
     SELECT *
     FROM spatialdf
@@ -195,7 +205,7 @@ Use ==ST_Distance== to calculate the distance and rank the distance.
 The following code returns the 5 nearest neighbor of the given polygon.
 
 ```java
-geomTable = tableEnv.sqlQuery(
+geomTable = sedona.sqlQuery(
   "
     SELECT countyname, ST_Distance(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), newcountyshape) AS distance
     FROM geomTable
@@ -308,7 +318,7 @@ Since the coordinates are in the longitude and latitude system, so the unit of `
 Use TableEnv's toDataStream function
 
 ```java
-DataStream<Row> geomStream = tableEnv.toDataStream(geomTable)
+DataStream<Row> geomStream = sedona.toDataStream(geomTable)
 ```
 
 ### Retrieve Geometries
@@ -473,5 +483,5 @@ DataStream<Row> geomStream = text.map(new MapFunction<String, Row>() {
 
 Use TableEnv's fromDataStream function, with two column names `geom` and `geom_name`.
 ```java
-Table geomTable = tableEnv.fromDataStream(geomStream, "geom", "geom_name")
+Table geomTable = sedona.fromDataStream(geomStream, "geom", "geom_name")
 ```

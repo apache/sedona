@@ -1074,3 +1074,27 @@ class TestPredicateJoin(TestBase):
         # test null case
         cell_ids = self.spark.sql("select ST_S2CellIDs(null, 6)").take(1)[0][0]
         assert cell_ids is None
+
+    def test_st_numPoints(self):
+        actual = self.spark.sql("SELECT ST_NumPoints(ST_GeomFromText('LINESTRING(0 1, 1 0, 2 0)'))").take(1)[0][0]
+        expected = 3
+        assert expected == actual
+
+    def test_force3D(self):
+        expected = 3
+        actualDf = self.spark.sql("SELECT ST_Force3D(ST_GeomFromText('LINESTRING(0 1, 1 0, 2 0)'), 1.1) AS geom")
+        actual = actualDf.selectExpr("ST_NDims(geom)").take(1)[0][0]
+        assert expected == actual
+
+    def test_nRings(self):
+        expected = 1
+        actualDf = self.spark.sql("SELECT ST_GeomFromText('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))') AS geom")
+        actual = actualDf.selectExpr("ST_NRings(geom)").take(1)[0][0]
+        assert expected == actual
+
+    def test_translate(self):
+        expected = "POLYGON ((3 5, 3 6, 4 6, 4 5, 3 5))"
+        actualDf = self.spark.sql("SELECT ST_Translate(ST_GeomFromText('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))'), 2, 5) AS geom")
+        actual = actualDf.selectExpr("ST_AsText(geom)").take(1)[0][0]
+        assert expected == actual
+

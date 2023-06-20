@@ -6,7 +6,7 @@
 ## Compile Scala / Java source code
 Sedona Scala/Java code is a project with multiple modules. Each module is a Scala/Java mixed project which is managed by Apache Maven 3.
 
-* Make sure your Linux/Mac machine has Java 1.8, Apache Maven 3.3.1+, and Python3. The compilation of Sedona is not tested on Windows machine.
+* Make sure your Linux/Mac machine has Java 1.8, Apache Maven 3.3.1+, and Python3.7+. The compilation of Sedona is not tested on Windows machine.
 
 To compile all modules, please make sure you are in the root folder of all modules. Then enter the following command in the terminal:
 
@@ -66,9 +66,7 @@ User can specify `-Dspark` and `-Dscala` command line options to compile with di
 Sedona uses GitHub action to automatically generate jars per commit. You can go [here](https://github.com/apache/sedona/actions/workflows/java.yml) and download the jars by clicking the commit's ==Artifacts== tag.
 
 ## Run Python test
-
 1. Set up the environment variable SPARK_HOME and PYTHONPATH
-
 For example,
 ```
 export SPARK_HOME=$PWD/spark-3.0.1-bin-hadoop2.7
@@ -76,7 +74,7 @@ export PYTHONPATH=$SPARK_HOME/python
 ```
 2. Compile the Sedona Scala and Java code with `-Dgeotools` and then copy the ==sedona-spark-shaded-{{ sedona.current_version }}.jar== to ==SPARK_HOME/jars/== folder.
 ```
-cp spark-shaded/target/sedona-spark-shaded-xxx.jar SPARK_HOME/jars/
+cp spark-shaded/target/sedona-spark-shaded-xxx.jar $SPARK_HOME/jars/
 ```
 3. Install the following libraries
 ```
@@ -86,6 +84,7 @@ sudo pip3 install -U wheel
 sudo pip3 install -U virtualenvwrapper
 sudo pip3 install -U pipenv
 ```
+Homebrew can be used to install libgeos-dev in macOS: `brew install geos`
 4. Set up pipenv to the desired Python version: 3.7, 3.8, or 3.9
 ```
 cd python
@@ -94,9 +93,11 @@ pipenv --python 3.7
 5. Install the PySpark version and other dependency
 ```
 cd python
-pipenv install pyspark==3.0.1
+pipenv install pyspark
 pipenv install --dev
 ```
+`pipenv install pyspark` install the latest version of pyspark.
+In order to remain consistent with installed spark version, use `pipenv install pyspark==<spark_version>`
 6. Run the Python tests
 ```
 cd python

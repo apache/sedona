@@ -27,6 +27,7 @@ import org.apache.spark.sql.sedona_sql.expressions.st_functions._
 import org.apache.spark.sql.sedona_sql.expressions.st_predicates._
 import org.apache.spark.sql.sedona_sql.expressions.st_aggregates._
 import org.junit.Assert.assertEquals
+import org.locationtech.jts.io.WKTWriter
 
 import scala.collection.mutable
 
@@ -917,11 +918,12 @@ class dataFrameAPITestScala extends TestBaseScala {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT (0 0)') AS geom1, ST_GeomFromWKT('POINT (0 90)') AS geom2")
       var df = baseDf.select(ST_DistanceSphere("geom1", "geom2"))
       var actualResult = df.take(1)(0).getDouble(0)
-      val expectedResult = 10018754.171394622
+      var expectedResult = 1.00075559643809E7
       assert(actualResult == expectedResult)
 
       df = baseDf.select(ST_DistanceSphere("geom1", "geom2", 6378137.0))
       actualResult = df.take(1)(0).getDouble(0)
+      expectedResult = 1.0018754171394622E7
       assertEquals(expectedResult, actualResult, 0.1)
     }
 
@@ -947,6 +949,50 @@ class dataFrameAPITestScala extends TestBaseScala {
       val actualResult = df.take(1)(0).getDouble(0)
       val expectedResult = 10018754.171394622
       assertEquals(expectedResult, actualResult, 0.1)
+    }
+
+    it("Passed ST_NumPoints") {
+      val lineDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 1, 1 0, 2 0)') AS geom")
+      val df = lineDf.select(ST_NumPoints("geom"))
+      val actualResult = df.take(1)(0).getInt(0)
+      val expectedResult = 3
+      assert(actualResult == expectedResult)
+    }
+
+    it("Passed ST_Force3D") {
+      val lineDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 1, 1 0, 2 0)') AS geom")
+      val expectedGeom = "LINESTRING Z(0 1 2.3, 1 0 2.3, 2 0 2.3)"
+      val expectedGeomDefaultValue = "LINESTRING Z(0 1 0, 1 0 0, 2 0 0)"
+      val wktWriter = new WKTWriter(3)
+      val forcedGeom = lineDf.select(ST_Force3D("geom", 2.3)).take(1)(0).get(0).asInstanceOf[Geometry]
+      assertEquals(expectedGeom, wktWriter.write(forcedGeom))
+      val lineDfDefaultValue = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 1, 1 0, 2 0)') AS geom")
+      val actualGeomDefaultValue = lineDfDefaultValue.select(ST_Force3D("geom")).take(1)(0).get(0).asInstanceOf[Geometry]
+      assertEquals(expectedGeomDefaultValue, wktWriter.write(actualGeomDefaultValue))
+    }
+
+    it("Passed ST_NRings") {
+      val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))') AS geom")
+      val expected = 1
+      val df = polyDf.select(ST_NRings("geom"))
+      val actual = df.take(1)(0).getInt(0)
+      assert(expected == actual)
+    }
+
+    it("Passed ST_Translate") {
+      val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((1 0 1, 1 1 1, 2 1 1, 2 0 1, 1 0 1))') AS geom")
+      val df = polyDf.select(ST_Translate("geom", 2, 3, 1))
+      val wktWriter3D = new WKTWriter(3);
+      val actualGeom = df.take(1)(0).get(0).asInstanceOf[Geometry]
+      val actual = wktWriter3D.write(actualGeom)
+      val expected = "POLYGON Z((3 3 2, 3 4 2, 4 4 2, 4 3 2, 3 3 2))"
+      assert(expected == actual)
+
+      val dfDefaultValue = polyDf.select(ST_Translate("geom", 2, 3))
+      val actualGeomDefaultValue = dfDefaultValue.take(1)(0).get(0).asInstanceOf[Geometry]
+      val actualDefaultValue = wktWriter3D.write(actualGeomDefaultValue)
+      val expectedDefaultValue = "POLYGON Z((3 3 1, 3 4 1, 4 4 1, 4 3 1, 3 3 1))"
+      assert(expectedDefaultValue == actualDefaultValue)
     }
   }
 }

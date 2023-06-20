@@ -16,9 +16,10 @@
 #  under the License.
 
 import attr
-from pyspark.sql import SparkSession
 from py4j.java_gateway import java_import
+from pyspark.sql import SparkSession
 
+from sedona.core.jvm.config import deprecated
 from sedona.register.java_libs import SedonaJvmLib
 from sedona.utils.prep import assign_all
 
@@ -30,6 +31,7 @@ jvm_import = str
 class SedonaRegistrator:
 
     @classmethod
+    @deprecated("Deprecated since 1.4.1, use SedonaContext.create() instead.")
     def registerAll(cls, spark: SparkSession) -> bool:
         """
         This is the core of whole package, It uses py4j to run wrapper which takes existing SparkSession
@@ -44,9 +46,9 @@ class SedonaRegistrator:
         return True
 
     @classmethod
+    @deprecated("Deprecated since 1.4.1, use SedonaContext.create() instead.")
     def register(cls, spark: SparkSession):
         return spark._jvm.SedonaSQLRegistrator.registerAll(spark._jsparkSession)
-
 
 class PackageImporter:
 

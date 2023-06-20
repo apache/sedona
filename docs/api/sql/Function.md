@@ -51,7 +51,7 @@ FROM polygondf
 
 ## ST_AreaSpheroid
 
-Introduction: Return the geodesic area of A using WGS84 spheroid. Unit is meter. Works better for large geometries (country level) compared to `ST_Area` + `ST_Transform`. It is equivalent to PostGIS `ST_Area(geography, use_spheroid=true)` function and produces nearly identical results.
+Introduction: Return the geodesic area of A using WGS84 spheroid. Unit is square meter. Works better for large geometries (country level) compared to `ST_Area` + `ST_Transform`. It is equivalent to PostGIS `ST_Area(geography, use_spheroid=true)` function and produces nearly identical results.
 
 Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lat/lon== order. You can use ==ST_FlipCoordinates== to swap lat and lon.
 
@@ -416,7 +416,7 @@ FROM polygondf
 
 ## ST_DistanceSphere
 
-Introduction: Return the haversine / great-circle distance of A using a given earth radius (default radius: 6378137.0). Unit is meter. Works better for large geometries (country level) compared to `ST_Distance` + `ST_Transform`. It is equivalent to PostGIS `ST_Distance(geography, use_spheroid=false)` and `ST_DistanceSphere` function and produces nearly identical results. It provides faster but less accurate result compared to `ST_DistanceSpheroid`.
+Introduction: Return the haversine / great-circle distance of A using a given earth radius (default radius: 6371008.0). Unit is meter. Compared to `ST_Distance` + `ST_Transform`, it works better for datasets that cover large regions such as continents or the entire planet. It is equivalent to PostGIS `ST_Distance(geography, use_spheroid=false)` and `ST_DistanceSphere` function and produces nearly identical results. It provides faster but less accurate result compared to `ST_DistanceSpheroid`.
 
 Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lat/lon== order. You can use ==ST_FlipCoordinates== to swap lat and lon. For non-point data, we first take the centroids of both geometries and then compute the distance.
 
@@ -429,7 +429,7 @@ Spark SQL example 1:
 SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'))
 ```
 
-Output: `544405.4459192449`
+Output: `543796.9506134904`
 
 Spark SQL example 2:
 ```sql
@@ -441,7 +441,7 @@ Output: `544405.4459192449`
 
 ## ST_DistanceSpheroid
 
-Introduction: Return the geodesic distance of A using WGS84 spheroid. Unit is meter. Works better for large geometries (country level) compared to `ST_Distance` + `ST_Transform`. It is equivalent to PostGIS `ST_Distance(geography, use_spheroid=true)` and `ST_DistanceSpheroid` function and produces nearly identical results. It provides slower but more accurate result compared to `ST_DistanceSphere`.
+Introduction: Return the geodesic distance of A using WGS84 spheroid. Unit is meter. Compared to `ST_Distance` + `ST_Transform`, it works better for datasets that cover large regions such as continents or the entire planet. It is equivalent to PostGIS `ST_Distance(geography, use_spheroid=true)` and `ST_DistanceSpheroid` function and produces nearly identical results. It provides slower but more accurate result compared to `ST_DistanceSphere`.
 
 Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lat/lon== order. You can use ==ST_FlipCoordinates== to swap lat and lon. For non-point data, we first take the centroids of both geometries and then compute the distance.
 
@@ -575,6 +575,49 @@ Result:
 |POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))                   |
 +---------------------------------------------------------------+
 ```
+
+## ST_Force3D
+Introduction: Forces the geometry into a 3-dimensional model so that all output representations will have X, Y and Z coordinates.
+An optionally given zValue is tacked onto the geometry if the geometry is 2-dimensional. Default value of zValue is 0.0
+If the given geometry is 3-dimensional, no change is performed on it.
+If the given geometry is empty, no change is performed on it.
+
+!!!Note
+    Example output is after calling ST_AsText() on returned geometry, which adds Z for in the WKT for 3D geometries
+
+Format: `ST_Force3D(geometry, zValue)`
+
+Since: `1.4.1`
+
+Spark SQL Example:
+
+```sql
+SELECT ST_Force3D(geometry) AS geom
+```
+
+Input: `LINESTRING(0 1, 1 2, 2 1)`
+
+Output: `LINESTRING Z(0 1 0, 1 2 0, 2 1 0)`
+
+Input: `POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))`
+
+Output: `POLYGON Z((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))`
+
+```sql
+SELECT ST_Force3D(geometry, 2.3) AS geom
+```
+
+Input: `LINESTRING(0 1, 1 2, 2 1)`
+
+Output: `LINESTRING Z(0 1 2.3, 1 2 2.3, 2 1 2.3)`
+
+Input: `POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))`
+
+Output: `POLYGON Z((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))`
+
+Input: `LINESTRING EMPTY`
+
+Output: `LINESTRING EMPTY`
 
 ## ST_GeoHash
 
@@ -1065,6 +1108,37 @@ SELECT ST_NPoints(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_NRings
+
+Introduction: Returns the number of rings in a Polygon or MultiPolygon. Contrary to ST_NumInteriorRings,
+this function also takes into account the number of  exterior rings.
+
+This function returns 0 for an empty Polygon or MultiPolygon.
+If the geometry is not a Polygon or MultiPolygon, an IllegalArgument Exception is thrown.
+
+Format: `ST_NRings(geom: geometry)`
+
+Since: `1.4.1`
+
+
+Examples:
+
+Input: `POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))`
+
+Output: `1`
+
+Input: `'MULTIPOLYGON (((1 0, 1 6, 6 6, 6 0, 1 0), (2 1, 2 2, 3 2, 3 1, 2 1)), ((10 0, 10 6, 16 6, 16 0, 10 0), (12 1, 12 2, 13 2, 13 1, 12 1)))'`
+
+Output: `4`
+
+Input: `'POLYGON EMPTY'`
+
+Output: `0`
+
+Input: `'LINESTRING (1 0, 1 1, 2 1)'`
+
+Output: `Unsupported geometry type: LineString, only Polygon or MultiPolygon geometries are supported.`
+
 ## ST_NumGeometries
 
 Introduction: Returns the number of Geometries. If geometry is a GEOMETRYCOLLECTION (or MULTI*) return the number of geometries, for single geometries will return 1.
@@ -1092,6 +1166,26 @@ SELECT ST_NumInteriorRings(ST_GeomFromText('POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), 
 ```
 
 Output: `1`
+
+## ST_NumPoints
+Introduction: Returns number of points in a LineString
+
+!!!note
+    If any other geometry is provided as an argument, an IllegalArgumentException is thrown.
+    Example:
+    `SELECT ST_NumPoints(ST_GeomFromWKT('MULTIPOINT ((0 0), (1 1), (0 1), (2 2))'))`
+
+    Output: `IllegalArgumentException: Unsupported geometry type: MultiPoint, only LineString geometry is supported.`
+Format: `ST_NumPoints(geom: geometry)`
+
+Since: `v1.4.1`
+
+Spark SQL example:
+```sql
+SELECT ST_NumPoints(ST_GeomFromText('LINESTRING(0 1, 1 0, 2 0)'))
+```
+
+Output: `3`
 
 ## ST_PointN
 
@@ -1503,6 +1597,29 @@ FROM polygondf
 
 !!!note
 	The detailed EPSG information can be searched on [EPSG.io](https://epsg.io/).
+
+
+## ST_Translate
+Introduction: Returns the input geometry with its X, Y and Z coordinates (if present in the geometry) translated by deltaX, deltaY and deltaZ (if specified)
+
+If the geometry is 2D, and a deltaZ parameter is specified, no change is done to the Z coordinate of the geometry and the resultant geometry is also 2D.
+
+If the geometry is empty, no change is done to it. 
+If the given geometry contains sub-geometries (GEOMETRY COLLECTION, MULTI POLYGON/LINE/POINT), all underlying geometries are individually translated.
+
+Format: `ST_Translate(geometry: geometry, deltaX: deltaX, deltaY: deltaY, deltaZ: deltaZ)`
+
+Since: `1.4.1`
+
+Example:
+
+Input: `ST_Translate(GEOMETRYCOLLECTION(MULTIPOLYGON (((1 0, 1 1, 2 1, 2 0, 1 0)), ((1 2, 3 4, 3 5, 1 2))), POINT(1, 1, 1), LINESTRING EMPTY), 2, 2, 3)`
+
+Output: `GEOMETRYCOLLECTION(MULTIPOLYGON (((3 2, 3 3, 4 3, 4 2, 3 2)), ((3 4, 5 6, 5 7, 3 4))), POINT(3, 3, 4), LINESTRING EMPTY)`
+
+Input: `ST_Translate(POINT(1, 3, 2), 1, 2)`
+
+Output: `POINT(2, 5, 2)`
 
 ## ST_Union
 

@@ -167,6 +167,9 @@ The newly created DataFrame can be written to disk again but must be under a dif
 
 ## Write Array[Double] to GeoTiff files
 
+!!!warning
+	This function has been deprecated since v1.4.1. Please use `RS_AsGeoTiff` instead and `raster` data source to write GeoTiff files.
+
 Introduction: You can write a GeoTiff dataframe as GeoTiff images using the spark `write` feature with the format `geotiff`. The geotiff raster column needs to be an array of double type data.
 
 Since: `v1.2.1`

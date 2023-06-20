@@ -175,7 +175,7 @@ public class FunctionTest extends TestBase{
     public void testDistanceSphere() {
         Table tbl = tableEnv.sqlQuery(
                 "SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'))");
-        Double expected = 544405.4459192449;
+        Double expected = 543796.9506134904;
         Double actual = (Double) first(tbl).getField(0);
         assertEquals(expected, actual, 0.1);
     }
@@ -689,6 +689,51 @@ public class FunctionTest extends TestBase{
         Geometry actual = (Geometry) first(pointTable).getField(0);
         assertEquals(String.format("expected: %s was %s", expected.toText(), actual != null ? actual.toText() : "null"),
                 0, expected.compareTo(actual, COORDINATE_SEQUENCE_COMPARATOR));
+    }
+
+    @Test
+    public void testNumPoints() {
+        Integer expected = 3;
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_NumPoints(ST_GeomFromWKT('LINESTRING(0 1, 1 0, 2 0)'))");
+        Integer actual =  (Integer) first(pointTable).getField(0);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testForce3D() {
+        Integer expectedDims = 3;
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_Force3D(ST_GeomFromWKT('LINESTRING(0 1, 1 0, 2 0)'), 1.2) " +
+                                                "AS " + polygonColNames[0]);
+        pointTable = pointTable.select(call(Functions.ST_NDims.class.getSimpleName(), $(polygonColNames[0])));
+        Integer actual = (Integer) first(pointTable).getField(0);
+        assertEquals(expectedDims, actual);
+    }
+
+    @Test
+    public void testForce3DDefaultValue() {
+        Integer expectedDims = 3;
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_Force3D(ST_GeomFromWKT('LINESTRING(0 1, 1 0, 2 0)')) " +
+                "AS " + polygonColNames[0]);
+        pointTable = pointTable.select(call(Functions.ST_NDims.class.getSimpleName(), $(polygonColNames[0])));
+        Integer actual = (Integer) first(pointTable).getField(0);
+        assertEquals(expectedDims, actual);
+    }
+
+    @Test
+    public void testNRings() {
+        Integer expected = 1;
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_NRings(ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))'))");
+        Integer actual =  (Integer) first(pointTable).getField(0);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testTranslate() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_Translate(ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))'), 2, 5)" + "AS " + polygonColNames[0]);
+        polyTable = polyTable.select(call(Functions.ST_AsText.class.getSimpleName(), $(polygonColNames[0])));
+        String expected = "POLYGON ((3 5, 3 6, 4 6, 4 5, 3 5))";
+        String actual = (String) first(polyTable).getField(0);
+        assertEquals(expected, actual);
     }
 
 }

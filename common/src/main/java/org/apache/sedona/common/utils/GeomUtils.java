@@ -14,6 +14,8 @@
 package org.apache.sedona.common.utils;
 
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 
 import org.locationtech.jts.geom.CoordinateSequence;
@@ -25,8 +27,10 @@ import org.locationtech.jts.io.WKTWriter;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
 
+import java.awt.*;
 import java.nio.ByteOrder;
 import java.util.*;
+import java.util.List;
 
 import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 
@@ -418,5 +422,43 @@ public class GeomUtils {
             geometries[i] = geom.getGeometryN(i);
         }
         return geometries;
+    }
+
+
+    public static Geometry get3DGeom(Geometry geometry, double zValue) {
+        Coordinate[] coordinates = geometry.getCoordinates();
+        if (coordinates.length == 0) return geometry;
+        for(int i = 0; i < coordinates.length; i++) {
+            boolean is3d = !Double.isNaN(coordinates[i].z);
+            if(!is3d) {
+                coordinates[i].setZ(zValue);
+            }
+        }
+        geometry.geometryChanged();
+        return geometry;
+    }
+
+    public static int getPolygonNumRings(Polygon polygon) {
+        LinearRing shell = polygon.getExteriorRing();
+        if (shell == null || shell.isEmpty()) {
+            return 0;
+        }else {
+            return 1 + polygon.getNumInteriorRing();
+        }
+    }
+
+    public static void translateGeom(Geometry geometry, double deltaX, double deltaY, double deltaZ) {
+        Coordinate[] coordinates = geometry.getCoordinates();
+        for (int i = 0; i < coordinates.length; i++) {
+            Coordinate currCoordinate = coordinates[i];
+            currCoordinate.setX(currCoordinate.getX() + deltaX);
+            currCoordinate.setY(currCoordinate.getY() + deltaY);
+            if (!Double.isNaN(currCoordinate.z)) {
+                currCoordinate.setZ(currCoordinate.getZ() + deltaZ);
+            }
+        }
+        if (deltaX != 0 || deltaY != 0 || deltaZ != 0) {
+            geometry.geometryChanged();
+        }
     }
 }

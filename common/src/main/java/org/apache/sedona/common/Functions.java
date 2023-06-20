@@ -835,14 +835,65 @@ public class Functions {
         Coordinate[] points = geometry.getCoordinates();
         if(points.length == 0)
             return points;
-        boolean is3d = !Double.isNaN(points[0].z);
+
         Coordinate[] coordinates = new Coordinate[points.length];
         for(int i = 0; i < points.length; i++) {
+            boolean is3d = !Double.isNaN(points[i].z);
             coordinates[i] = points[i].copy();
             if(!is3d)
                 coordinates[i].z = 0.0;
         }
         return coordinates;
+    }
+
+    public static int numPoints(Geometry geometry) throws Exception {
+        String geometryType = geometry.getGeometryType();
+        if (!(Geometry.TYPENAME_LINESTRING.equalsIgnoreCase(geometryType))) {
+            throw new IllegalArgumentException("Unsupported geometry type: " + geometryType + ", only LineString geometry is supported.");
+        }
+        return geometry.getNumPoints();
+    }
+
+    public static Geometry force3D(Geometry geometry, double zValue) {
+        return GeomUtils.get3DGeom(geometry, zValue);
+    }
+
+    public static Geometry force3D(Geometry geometry) {
+       return GeomUtils.get3DGeom(geometry, 0.0);
+    }
+
+    public static Integer nRings(Geometry geometry) throws Exception {
+        String geometryType = geometry.getGeometryType();
+        if (!(geometry instanceof Polygon || geometry instanceof MultiPolygon)) {
+            throw new IllegalArgumentException("Unsupported geometry type: " + geometryType + ", only Polygon or MultiPolygon geometries are supported.");
+        }
+        int numRings = 0;
+        if (geometry instanceof Polygon) {
+            Polygon polygon = (Polygon) geometry;
+            numRings = GeomUtils.getPolygonNumRings(polygon);
+        }else {
+            MultiPolygon multiPolygon = (MultiPolygon) geometry;
+            int numPolygons = multiPolygon.getNumGeometries();
+            for (int i = 0; i < numPolygons; i++) {
+                Polygon polygon = (Polygon) multiPolygon.getGeometryN(i);
+                numRings += GeomUtils.getPolygonNumRings(polygon);
+            }
+        }
+        return numRings;
+    }
+
+    public static Geometry translate(Geometry geometry, double deltaX, double deltaY, double deltaZ) {
+        if (!geometry.isEmpty()) {
+            GeomUtils.translateGeom(geometry, deltaX, deltaY, deltaZ);
+        }
+        return geometry;
+    }
+
+    public static Geometry translate(Geometry geometry, double deltaX, double deltaY) {
+        if (!geometry.isEmpty()) {
+            GeomUtils.translateGeom(geometry, deltaX, deltaY, 0.0);
+        }
+        return geometry;
     }
 
     public static Geometry geometricMedian(Geometry geometry, double tolerance, int maxIter, boolean failIfNotConverged) throws Exception {

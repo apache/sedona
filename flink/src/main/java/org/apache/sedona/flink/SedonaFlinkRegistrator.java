@@ -26,6 +26,10 @@ import java.util.Arrays;
 
 public class SedonaFlinkRegistrator {
 
+    /**
+     * @deprecated use {@link SedonaContext#create(StreamExecutionEnvironment, StreamTableEnvironment)}
+     */
+    @Deprecated
     public static void registerFunc(StreamTableEnvironment tblEnv) {
         Arrays.stream(Catalog.getFuncs()).forEach(
                 func -> tblEnv.createTemporarySystemFunction(func.getClass().getSimpleName(), func)
@@ -34,7 +38,10 @@ public class SedonaFlinkRegistrator {
                 func -> tblEnv.createTemporarySystemFunction(func.getClass().getSimpleName(), func)
         );
     }
-
+    /**
+     * @deprecated use {@link SedonaContext#create(StreamExecutionEnvironment, StreamTableEnvironment)}
+     */
+    @Deprecated
     public static void registerType(StreamExecutionEnvironment env) {
         GeometrySerde serializer = new GeometrySerde();
         SpatialIndexSerde indexSerializer = new SpatialIndexSerde(serializer);
