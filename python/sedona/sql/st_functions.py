@@ -111,7 +111,8 @@ __all__ = [
     "ST_NumPoints",
     "ST_Force3D",
     "ST_NRings",
-    "ST_Translate"
+    "ST_Translate",
+    "ST_BoundingDiagonal"
 ]
 
 
@@ -1277,3 +1278,13 @@ def ST_Translate(geometry: ColumnOrName, deltaX: Union[ColumnOrName, float], del
     args = (geometry, deltaX, deltaY, deltaZ)
     return _call_st_function("ST_Translate", args)
 
+@validate_argument_types
+def ST_BoundingDiagonal(geometry: ColumnOrName) -> Column:
+    """
+    Returns a LineString with the min/max values of each dimension of the bounding box of the given geometry as its
+    start/end coordinates.
+    :param geometry: Geometry to return bounding diagonal of.
+    :return: LineString spanning min and max values of each dimension of the given geometry
+    """
+
+    return _call_st_function("ST_BoundingDiagonal", geometry)

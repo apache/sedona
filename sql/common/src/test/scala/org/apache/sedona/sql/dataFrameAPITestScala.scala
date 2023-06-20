@@ -994,5 +994,14 @@ class dataFrameAPITestScala extends TestBaseScala {
       val expectedDefaultValue = "POLYGON Z((3 3 1, 3 4 1, 4 4 1, 4 3 1, 3 3 1))"
       assert(expectedDefaultValue == actualDefaultValue)
     }
+
+    it("Passed ST_BoundingDiagonal") {
+      val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((1 0 1, 2 3 2, 5 0 1, 5 2 9, 1 0 1))') AS geom")
+      val df = polyDf.select(ST_BoundingDiagonal("geom"))
+      val wKTWriter = new WKTWriter(3);
+      val expected = "LINESTRING Z(1 0 1, 5 3 9)"
+      val actual = wKTWriter.write(df.take(1)(0).get(0).asInstanceOf[Geometry])
+      assertEquals(expected, actual)
+    }
   }
 }

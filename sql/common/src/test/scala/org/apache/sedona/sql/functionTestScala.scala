@@ -1973,4 +1973,18 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assertEquals(expectedDefaultValue, actualDefaultValue)
     }
   }
+
+  it ("should pass ST_BoundingDiagonal") {
+    val geomTestCases = Map (
+      ("'POINT (10 10)'")-> "'LINESTRING (10 10, 10 10)'",
+      ("'POLYGON ((1 1 1, 4 4 4, 0 9 3, 0 9 9, 1 1 1))'") -> "'LINESTRING Z(0 1 1, 4 9 9)'",
+      ("'GEOMETRYCOLLECTION (MULTIPOLYGON (((1 1, 1 -1, 2 2, 2 9, 9 1, 1 1)), ((5 5, 4 4, 2 2 , 5 5))), POINT (-1 0))'") -> "'LINESTRING (-1 -1, 9 9)'"
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val df = sparkSession.sql(s"SELECT ST_AsText(ST_BoundingDiagonal(ST_GeomFromWKT($geom))) AS geom, " + s"$expectedResult")
+      val actual = df.take(1)(0).get(0).asInstanceOf[String]
+      val expected = df.take(1)(0).get(1).asInstanceOf[String]
+      assertEquals(expected, actual)
+    }
+  }
 }

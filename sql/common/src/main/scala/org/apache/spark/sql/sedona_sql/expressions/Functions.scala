@@ -1010,3 +1010,9 @@ case class ST_Translate(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_BoundingDiagonal(inputExpressions: Seq[Expression])
+  extends InferredUnaryExpression(Functions.boundingDiagonal) with FoldableExpression {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
