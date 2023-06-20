@@ -1973,16 +1973,4 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assertEquals(expectedDefaultValue, actualDefaultValue)
     }
   }
-
-  it ("should pass ST_Affine") {
-    val geomTestCases = Map (
-      ("'POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))'")-> "'POLYGON Z((2 3 1, 4 5 1, 7 8 2 ,2 3 1))'"
-    )
-    for (((geom), expectedResult) <- geomTestCases) {
-      val df = sparkSession.sql(s"SELECT ST_AsText(ST_Affine(ST_GeomFromWKT($geom), 1, 2, 1, 2, 1, 2)) AS geom, " + s"$expectedResult")
-      val actual = df.take(1)(0).get(0).asInstanceOf[String]
-      val expected = df.take(1)(0).get(1).asInstanceOf[String]
-      assertEquals(expected, actual)
-    }
-  }
 }

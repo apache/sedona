@@ -994,21 +994,5 @@ class dataFrameAPITestScala extends TestBaseScala {
       val expectedDefaultValue = "POLYGON Z((3 3 1, 3 4 1, 4 4 1, 4 3 1, 3 3 1))"
       assert(expectedDefaultValue == actualDefaultValue)
     }
-
-    it("Passed ST_Affine") {
-      val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((2 3 1, 4 5 1, 7 8 2, 2 3 1))') AS geom")
-      //val df = polyDf.select(ST_Affine("geom", 1, 2, 3, 4, 1, 2, 3, 4, 1, 4, 2, 1));
-      val dfDefaultValue = polyDf.select(ST_Affine("geom", 1, 2, 1, 2, 1, 2))
-      val wKTWriter3D = new WKTWriter(3);
-      //val actualGeom = df.take(1)(0).get(0).asInstanceOf[Geometry]
-      val actualGeomDefaultValue = dfDefaultValue.take(1)(0).get(0).asInstanceOf[Geometry]
-      //val actual = wKTWriter3D.write(actualGeom)
-      val expected = "POLYGON Z((12 24 17, 18 38 27, 30 63 44, 12 24 17))"
-      val actualDefaultValue = wKTWriter3D.write(actualGeomDefaultValue)
-      val expectedDefaultValue = "POLYGON Z((9 10 1, 15 16 1, 24 25 2, 9 10 1))"
-      //assertEquals(expected, actual)
-      assertEquals(expectedDefaultValue, actualDefaultValue)
-
-    }
   }
 }

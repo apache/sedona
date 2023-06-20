@@ -27,6 +27,7 @@ import org.locationtech.jts.io.WKTWriter;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
 
+import java.awt.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.List;
@@ -459,22 +460,5 @@ public class GeomUtils {
         if (deltaX != 0 || deltaY != 0 || deltaZ != 0) {
             geometry.geometryChanged();
         }
-    }
-
-    public static void affineGeom(Geometry geometry, double a, double b, double d, double e, double xOff, double yOff, double c,
-                                  double f, double g, double h, double i, double zOff, boolean set3d) {
-        Coordinate[] coordinates = geometry.getCoordinates();
-        for (Coordinate currCoordinate: coordinates) {
-            double x = currCoordinate.getX(), y = currCoordinate.getY(), z = Double.isNaN(currCoordinate.getZ()) ? 0 : currCoordinate.getZ();
-            double newX = a * x + b * y + c * z + xOff;
-            double newY = d * x + e * y + f * z + yOff;
-            currCoordinate.setX(newX);
-            currCoordinate.setY(newY);
-            if (set3d && !Double.isNaN(currCoordinate.getZ())) {
-                double newZ = g * x + h * y + i * z + zOff;
-                currCoordinate.setZ(newZ);
-            }
-        }
-        geometry.geometryChanged();
     }
 }

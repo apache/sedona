@@ -24,6 +24,7 @@ import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
 
+import javax.sound.sampled.Line;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -856,93 +857,4 @@ public class FunctionsTest {
         assertEquals(wktWriter3D.write(expectedPoint3D), wktWriter3D.write(actualGeometry.getGeometryN(0).getGeometryN(1)));
         assertEquals(emptyLineString.toText(), actualGeometry.getGeometryN(0).getGeometryN(2).toText());
     }
-
-    @Test
-    public void affineEmpty3D() {
-        LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
-        String expected = emptyLineString.toText();
-        String actual = Functions.affine(emptyLineString, 1, 1, 2, 3, 5, 6, 2, 3, 4, 4, 5, 6).toText();
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void affineEmpty2D() {
-        LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
-        String expected = emptyLineString.toText();
-        String actual = Functions.affine(emptyLineString, 1, 2, 3, 4, 1, 2).toText();
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void affine3DGeom2D() {
-        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 1, 2));
-        String expected = GEOMETRY_FACTORY.createLineString(coordArray(6, 18, 7, 11, 8, 14)).toText();
-        String actual = Functions.affine(lineString, 1, 1, 2, 3, 5, 6, 2, 3, 4, 4, 5, 6).toText();
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void affine3DGeom3D() {
-        WKTWriter wktWriter = new WKTWriter(3);
-//        2 3 1, 4 5 1, 7 8 2 ,2 3 1
-        Polygon polygon3D = GEOMETRY_FACTORY.createPolygon(coordArray3d(2, 3, 1, 4, 5, 1, 7, 8, 2, 2, 3, 1));
-
-        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray3d(1, 0, 1, 1, 1, 2, 1, 2, 2));
-        String expected = wktWriter.write(GEOMETRY_FACTORY.createLineString(coordArray3d(8, 11, 15, 11, 17, 24, 12, 20, 28)));
-        String actual = wktWriter.write(Functions.affine(lineString, 1, 1, 2, 3, 5, 6, 2, 3, 4, 4, 5, 6));
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void affine3DHybridGeomCollection() {
-        Point point3D = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 1));
-        Polygon polygon1 = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 2, 1, 1, 2, 2, 1, 2, 2, 0, 2, 1, 0, 2));
-        Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 1, 1, 1, 1, 2, 2, 2, 1, 0, 1));
-        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon1, polygon2});
-        Geometry geomCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {point3D, multiPolygon})});
-        Geometry actualGeomCollection = Functions.affine(geomCollection, 1, 2, 1, 2, 1, 2, 3, 3, 1, 2, 3, 3);
-        WKTWriter wktWriter3D = new WKTWriter(3);
-        Point expectedPoint3D = GEOMETRY_FACTORY.createPoint(new Coordinate(7, 8, 9));
-        Polygon expectedPolygon1 = GEOMETRY_FACTORY.createPolygon(coordArray3d(8, 9, 10, 10, 11, 12, 11, 12, 13, 9, 10, 11, 8, 9, 10));
-        Polygon expectedPolygon2 = GEOMETRY_FACTORY.createPolygon(coordArray3d(5, 6, 7, 7, 8, 9, 13, 14, 15, 5, 6, 7));
-        assertEquals(wktWriter3D.write(expectedPoint3D), wktWriter3D.write(actualGeomCollection.getGeometryN(0).getGeometryN(0)));
-        assertEquals(wktWriter3D.write(expectedPolygon1), wktWriter3D.write(actualGeomCollection.getGeometryN(0).getGeometryN(1).getGeometryN(0)));
-        assertEquals(wktWriter3D.write(expectedPolygon2), wktWriter3D.write(actualGeomCollection.getGeometryN(0).getGeometryN(1).getGeometryN(1)));
-
-    }
-
-    @Test
-    public void affine2DGeom3D() {
-        //1 0 1, 1 1 1, 2 2 2, 1 0 1
-        WKTWriter wktWriter = new WKTWriter(3);
-        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray3d(1, 0, 1, 1, 1, 2, 1, 2, 2));
-        String expected = wktWriter.write(GEOMETRY_FACTORY.createLineString(coordArray3d(6, 8, 1, 7, 11, 2, 8, 14, 2)));
-        String actual = wktWriter.write(Functions.affine(lineString, 1, 1, 2, 3, 5, 6));
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void affine2DGeom2D() {
-        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 1, 2));
-        String expected = GEOMETRY_FACTORY.createLineString(coordArray(6, 8, 7, 11, 8, 14)).toText();
-        String actual = Functions.affine(lineString, 1, 1, 2, 3, 5, 6).toText();
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void affine2DHybridGeomCollection() {
-        Point point3D = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
-        Polygon polygon1 = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
-        Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray(3, 4, 3, 5, 3, 7, 10, 7, 3, 4));
-        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon1, polygon2});
-        Geometry geomCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {point3D, multiPolygon})});
-        Geometry actualGeomCollection = Functions.affine(geomCollection, 1, 2, 1, 2, 1, 2);
-        Point expectedPoint3D = GEOMETRY_FACTORY.createPoint(new Coordinate(4, 5));
-        Polygon expectedPolygon1 = GEOMETRY_FACTORY.createPolygon(coordArray(2, 3, 4, 5, 5, 6, 3, 4, 2, 3));
-        Polygon expectedPolygon2 = GEOMETRY_FACTORY.createPolygon(coordArray(12, 13, 14, 15, 18, 19, 25, 26, 12, 13));
-        assertEquals(expectedPoint3D.toText(), actualGeomCollection.getGeometryN(0).getGeometryN(0).toText());
-        assertEquals(expectedPolygon1.toText(), actualGeomCollection.getGeometryN(0).getGeometryN(1).getGeometryN(0).toText());
-        assertEquals(expectedPolygon2.toText(), actualGeomCollection.getGeometryN(0).getGeometryN(1).getGeometryN(1).toText());
-    }
-
 }

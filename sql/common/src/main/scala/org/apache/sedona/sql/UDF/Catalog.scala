@@ -151,7 +151,6 @@ object Catalog {
     function[ST_Force3D](0.0),
     function[ST_NRings](),
     function[ST_Translate](0.0),
-    function[ST_Affine](0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
     // Expression for rasters
     function[RS_NormalizedDifference](),
     function[RS_Mean](),
