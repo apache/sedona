@@ -409,14 +409,16 @@ Then submit to CRAN using this [web form](https://xmpalantir.wu.ac.at/cransubmit
 
 ### Generate Javadoc and Scaladoc
 
-* Javadoc: Use Intellij IDEA to generate Javadoc for `core` and `viz` module, output them to `docs/api/javadoc`; or run the following script:
+Run the following script to build Javadoc and Scaladoc of sedona modules and move them to docs/api/javadoc directory.
+
 ```bash
 #!/bin/bash
+
 mvn -q clean install -DskipTests
 mv core/target/apidocs docs/api/javadoc/core
 mv viz/target/apidocs docs/api/javadoc/viz
+mv sql/common/target/site/scaladocs docs/api/javadoc/sql
 ```
-* Scaladoc: Run `scaladoc -d docs/api/javadoc/sql/ sql/common/src/main/scala/org/apache/sedona/sql/utils/*.scala`
 
 Please do not commit these generated docs to Sedona GitHub.
 
