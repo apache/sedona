@@ -9,7 +9,7 @@ This page is for Sedona PMC to publish Sedona releases.
 
 1. In your local Sedona Git repo under master branch, run
 ```bash
-echo "#!/bin/bash" > create-release.sh
+echo '#!/bin/bash' > create-release.sh
 chmod 777 create-release.sh
 ```
 2. Use your favourite GUI text editor to open `create-release.sh`.
@@ -61,8 +61,6 @@ Make sure the Sedona version in the following files are {{ sedona_create_release
 ```bash
 #!/bin/bash
 
-source ~/.bashrc
-
 git checkout master
 git pull
 
@@ -71,20 +69,31 @@ rm -f pom.xml.*
 
 echo "*****Step 1. Stage the Release Candidate to GitHub."
 
-mvn -q -B clean release:prepare -Dtag={{ sedona_create_release.current_git_tag }} -DreleaseVersion={{ sedona_create_release.current_version }} -DdevelopmentVersion={{ sedona_create_release.current_snapshot }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests"
-
-rm -f release.*
-rm -f pom.xml.*
+mvn -q -B clean release:prepare -Dtag={{ sedona_create_release.current_git_tag }} -DreleaseVersion={{ sedona_create_release.current_version }} -DdevelopmentVersion={{ sedona_create_release.current_snapshot }} -Dresume=false -Penable-all-submodules -Darguments="-DskipTests"
+mvn -q -B release:clean -Penable-all-submodules
 
 echo "Now the releases are staged. A tag and two commits have been created on Sedona GitHub repo"
 
 echo "*****Step 2: Upload the Release Candidate to https://repository.apache.org."
 
 # For Spark 3.0 and Scala 2.12
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.12"
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.0 -Dscala=2.12" -Dspark=3.0 -Dscala=2.12
 
 # For Spark 3.0 and Scala 2.13
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.13"
+## Note that we use maven-release-plugin 2.3.2 instead of more recent version (e.g., 3.0.1) to get rid of a bug of maven-release-plugin,
+## which prevent us from cloning git repo with user specified -Dtag=<tag>.
+## Please refer to https://issues.apache.org/jira/browse/MRELEASE-933 and https://issues.apache.org/jira/browse/SCM-729 for details.
+##
+## Please also note that system properties `-Dspark` and `-Dscala` has to be specified both for release:perform and the actual build parameters
+## in `-Darguments`, because the build profiles activated for release:perform task will also affect the actual build task. It is safer to specify
+## these system properties for both tasks.
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.0 -Dscala=2.13" -Dspark=3.0 -Dscala=2.13
+
+# For Spark 3.4 and Scala 2.12
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.4 -Dscala=2.12" -Dspark=3.4 -Dscala=2.12
+
+# For Spark 3.4 and Scala 2.13
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.4 -Dscala=2.13" -Dspark=3.4 -Dscala=2.13
 
 echo "*****Step 3: Upload Release Candidate on ASF SVN: https://dist.apache.org/repos/dist/dev/sedona"
 
@@ -108,19 +117,33 @@ echo "Compiling the source code..."
 
 mkdir apache-sedona-{{ sedona_create_release.current_version }}-bin
 
-cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dscala=2.12 && cd ..
+cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dspark=3.0 -Dscala=2.12 && cd ..
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/common/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/core/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
-cp apache-sedona-{{ sedona_create_release.current_version }}-src/sql/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/sql/spark-3.0/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/viz/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/python-adapter/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/spark-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/flink/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/flink-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 
-cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dscala=2.13 && cd ..
+cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dspark=3.0 -Dscala=2.13 && cd ..
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/core/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
-cp apache-sedona-{{ sedona_create_release.current_version }}-src/sql/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/sql/spark-3.0/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/viz/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/python-adapter/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/spark-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+
+cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dspark=3.4 -Dscala=2.12 && cd ..
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/core/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/sql/spark-3.4/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/viz/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/python-adapter/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/spark-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+
+cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dspark=3.4 -Dscala=2.13 && cd ..
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/core/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/sql/spark-3.4/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/viz/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/python-adapter/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/spark-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
@@ -312,95 +335,6 @@ rm apache-sedona-{{ sedona_create_release.current_version }}-src.tar.gz.sha512
 rm apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz
 rm apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.asc
 rm apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz.sha512
-
-echo "Re-staging releases to https://repository.apache.org"
-
-# For Spark 3.0 and Scala 2.12
-
-git pull
-
-git checkout -b {{ sedona_create_release.current_git_tag }} {{ sedona_create_release.current_git_tag }}
-
-mvn versions:set -DnewVersion={{ sedona_create_release.current_version }}-SNAPSHOT
-
-git add -A
-
-git commit -m "tmp SNAPSHOT pom"
-
-mvn clean release:prepare -DautoVersionSubmodules=true -DdryRun=true -Dresume=false -Darguments="-DskipTests" -Dtag={{ sedona_create_release.current_git_tag }} -DreleaseVersion={{ sedona_create_release.current_version }} -DdevelopmentVersion={{ sedona_create_release.next_version }}
-
-mvn versions:set -DnewVersion={{ sedona_create_release.current_version }}
-
-git add -A
-
-git commit -m "revert back to the correct pom"
-
-mvn clean release:perform -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests"
-
-rm -f release.*
-rm -f pom.xml.*
-
-# For Spark 3.0 and Scala 2.13
-
-mvn versions:set -DnewVersion={{ sedona_create_release.current_version }}-SNAPSHOT
-
-git add -A
-
-git commit -m "tmp SNAPSHOT pom"
-
-mvn clean release:prepare -DautoVersionSubmodules=true -DdryRun=true -Dresume=false -Darguments="-DskipTests -Dscala=2.13" -Dtag={{ sedona_create_release.current_git_tag }} -DreleaseVersion={{ sedona_create_release.current_version }} -DdevelopmentVersion={{ sedona_create_release.next_version }}
-
-mvn versions:set -DnewVersion={{ sedona_create_release.current_version }}
-
-git add -A
-
-git commit -m "revert back to the correct pom"
-
-mvn clean release:perform -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.13"
-
-rm -f release.*
-rm -f pom.xml.*
-
-git add -A
-
-git commit -m "cleanup the branch"
-
-git checkout master
-
-git branch -d {{ sedona_create_release.current_git_tag }}
-```
-
-### Fix signature issues
-
-Please find the Sedona staging id on https://repository.apache.org under `staging repository`.
-
-Then run the following script. Replace `admin`, `admind123` with your Apache ID username and Apache ID password. Replace `stagingid` with the correct id.
-
-```bash
-#!/bin/bash
-username=admin
-password=admin123
-stagingid=1027
-
-artifacts=(parent core-3.0_2.12 core-3.0_2.13 sql-3.0_2.12 sql-3.0_2.13 viz-3.0_2.12 viz-3.0_2.13 python-adapter-3.0_2.12 python-adapter-3.0_2.13 common flink_2.12 spark-shaded-3.0_2.12 spark-shaded-3.0_2.13 flink-shaded_2.12)
-filenames=(.pom .jar -javadoc.jar)
-
-echo "Re-uploading signatures to fix *failureMessage Invalid Signature*"
-for artifact in "${artifacts[@]}"; do
-	for filename in "${filenames[@]}"; do
-	if [ $artifact -eq 'parent' && $filename -ne '.pom' ]
-    then
-       continue
-    fi
-	wget https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-$artifact/{{ sedona_create_release.current_version }}/sedona-${artifact}-{{ sedona_create_release.current_version }}${filename}
-	gpg -ab sedona-${artifact}-{{ sedona_create_release.current_version }}${filename}
-	curl -v -u $username:$password --upload-file sedona-${artifact}-{{ sedona_create_release.current_version }}${filename}.asc https://repository.apache.org/service/local/repositories/orgapachesedona-$stagingid/content/org/apache/sedona/sedona-${artifact}/{{ sedona_create_release.current_version }}/sedona-${artifact}-{{ sedona_create_release.current_version }}${filename}.asc
-   done
-done
-
-rm *.pom
-rm *.jar
-rm *.asc
 ```
 
 ### Manually close and release the package
@@ -408,6 +342,31 @@ rm *.asc
 1. Click `Close` on the Sedona staging repo on https://repository.apache.org under `staging repository`
 2. Once the staging repo is closed, click `Release` on this repo.
 
+**NOTICE**: The staging repo will be automatically dropped after 3 days without closing. If you find the staging repo being dropped, you can re-stage the release using the following script.
+
+```bash
+#!/bin/bash
+
+echo "Re-staging releases to https://repository.apache.org"
+
+git checkout master
+git pull
+
+rm -f release.*
+rm -f pom.xml.*
+
+# For Spark 3.0 and Scala 2.12
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.0 -Dscala=2.12" -Dspark=3.0 -Dscala=2.12
+
+# For Spark 3.0 and Scala 2.13
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.0 -Dscala=2.13" -Dspark=3.0 -Dscala=2.13
+
+# For Spark 3.4 and Scala 2.12
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.4 -Dscala=2.12" -Dspark=3.4 -Dscala=2.12
+
+# For Spark 3.4 and Scala 2.13
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.4 -Dscala=2.13" -Dspark=3.4 -Dscala=2.13
+```
 
 ## 9. Release Sedona Python and Zeppelin
 
@@ -450,8 +409,16 @@ Then submit to CRAN using this [web form](https://xmpalantir.wu.ac.at/cransubmit
 
 ### Generate Javadoc and Scaladoc
 
-* Javadoc: Use Intelij IDEA to generate Javadoc for `core` and `viz` module, output them to `docs/api/javadoc`
-* Scaladoc: Run `scaladoc -d docs/api/javadoc/sql/ sql/src/main/scala/org/apache/sedona/sql/utils/*.scala`
+Run the following script to build Javadoc and Scaladoc of sedona modules and move them to docs/api/javadoc directory.
+
+```bash
+#!/bin/bash
+
+mvn -q clean install -DskipTests
+mv core/target/apidocs docs/api/javadoc/core
+mv viz/target/apidocs docs/api/javadoc/viz
+mv sql/common/target/site/scaladocs docs/api/javadoc/sql
+```
 
 Please do not commit these generated docs to Sedona GitHub.
 

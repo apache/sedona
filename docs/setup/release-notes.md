@@ -4,6 +4,117 @@
 !!!danger
 	Sedona Python currently only works with Shapely 1.x. If you use GeoPandas, please use <= GeoPandas `0.11.1`. GeoPandas > 0.11.1 will automatically install Shapely 2.0. If you use Shapely, please use <= `1.8.4`.
 
+## Sedona 1.4.1
+
+Sedona 1.4.1 is compiled against, Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
+
+### Highlights
+
+* [X] **Sedona Spark** More raster functions and bridge RasterUDT and Map Algebra operators. See [Raster based operators](../../api/sql/Raster-operators/#raster-based-operators) and [Raster to Map Algebra operators](../../api/sql/Raster-operators/#raster-to-map-algebra-operators).
+* [X] **Sedona Spark & Flink** Added geodesic / geography functions:
+    * ST_DistanceSphere
+    * ST_DistanceSpheroid
+    * ST_AreaSpheroid
+    * ST_LengthSpheroid
+* [X] **Sedona Spark & Flink** Introduced `SedonaContext` to unify Sedona entry points.
+* [X] **Sedona Spark** Support Spark 3.4.
+* [X] **Sedona Spark** Added a number of new ST functions.
+* [X] **Zeppelin** Zeppelin helium plugin supports ploting geometries like linestring, polygon.
+
+### API change
+
+* **Sedona Spark & Flink** Introduced a new entry point called SedonaContext to unify all Sedona entry points in different compute engines and deprecate old Sedona register entry points. Users no longer have to register Sedona kryo serializer and import many tedious Python classes.
+    * **Sedona Spark**:
+        * Scala:
+        ```scala
+        import org.apache.sedona.spark.SedonaContext
+        val sedona = SedonaContext.create(SedonaContext.builder().master("local[*]").getOrCreate())
+        sedona.sql("SELECT ST_GeomFromWKT(XXX) FROM")
+        ```
+        * Python:
+        ```python
+        from sedona.spark import *
+
+        config = SedonaContext.builder().\
+           config('spark.jars.packages',
+               'org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.4.1,'
+               'org.datasyslab:geotools-wrapper:1.4.0-28.2'). \
+           getOrCreate()
+        sedona = SedonaContext.create(config)
+        sedona.sql("SELECT ST_GeomFromWKT(XXX) FROM")
+        ```
+    * **Sedona Flink**:
+    ```java
+    import org.apache.sedona.flink.SedonaContext
+    StreamTableEnvironment sedona = SedonaContext.create(env, tableEnv);
+    sedona.sqlQuery("SELECT ST_GeomFromWKT(XXX) FROM")
+    ```
+
+### Bug
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-266'>SEDONA-266</a>] -         RS_Values throws UnsupportedOperationException for shuffled point arrays
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-267'>SEDONA-267</a>] -         Cannot pip install apache-sedona 1.4.0 from source distribution
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-273'>SEDONA-273</a>] -         Set a upper bound for Shapely, Pandas and GeoPandas
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-277'>SEDONA-277</a>] -         Sedona spark artifacts for scala 2.13 do not have proper POMs
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-283'>SEDONA-283</a>] -         Artifacts were deployed twice when running mvn clean deploy
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-284'>SEDONA-284</a>] -         Property values in dependency deduced POMs for shaded modules were not substituted
+</li>
+</ul>
+
+### New Feature
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-196'>SEDONA-196</a>] -         Add ST_Force3D to Sedona
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-239'>SEDONA-239</a>] -         Implement ST_NumPoints
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-264'>SEDONA-264</a>] -         zeppelin helium plugin supports ploting geometry like linestring, polygon
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-280'>SEDONA-280</a>] -         Add ST_GeometricMedian
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-281'>SEDONA-281</a>] -         Support geodesic / geography functions
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-286'>SEDONA-286</a>] -         Support optimized distance join on ST_DistanceSpheroid and ST_DistanceSphere
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-287'>SEDONA-287</a>] -         Use SedonaContext to unify Sedona entry points
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-292'>SEDONA-292</a>] -         Bridge Sedona Raster and Map Algebra operators
+</li>
+</ul>
+
+### Improvement
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-167'>SEDONA-167</a>] -         Add __pycache__ to Python .gitignore
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-265'>SEDONA-265</a>] -         Migrate all ST functions to Sedona Inferred Expressions
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-269'>SEDONA-269</a>] -         Add data source for writing binary files
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-270'>SEDONA-270</a>] -         Remove redundant serialization for rasters
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-271'>SEDONA-271</a>] -         Add raster function RS_SRID
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-274'>SEDONA-274</a>] -         Move all ST function logics to Sedona common
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-275'>SEDONA-275</a>] -         Add raster function RS_SetSRID
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-276'>SEDONA-276</a>] -         Add support for Spark 3.4
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-279'>SEDONA-279</a>] -         Sedona-Flink should not depend on Sedona-Spark modules
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-282'>SEDONA-282</a>] -         R – Add raster write function
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-290'>SEDONA-290</a>] -         RDD Spatial Joins should follow the iterator model
+</li>
+</ul>
+
 ## Sedona 1.4.0
 
 Sedona 1.4.0 is compiled against, Spark 3.3 / Flink 1.12, Java 8.
