@@ -15,7 +15,6 @@ package org.apache.sedona.common;
 
 import com.google.common.geometry.S2CellId;
 import com.google.common.math.DoubleMath;
-import com.sun.org.apache.xpath.internal.operations.Mult;
 import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.utils.GeomUtils;
@@ -24,8 +23,6 @@ import org.junit.Test;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
-
-import javax.sound.sampled.Line;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;

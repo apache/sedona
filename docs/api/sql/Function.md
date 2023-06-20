@@ -211,7 +211,7 @@ If a single vertex (POINT) is provided, the returned LineString has both the sta
 
 Format: `ST_BoundingDiagonal(geom: geometry)`
 
-Since: `v1.4.1`
+Since: `v1.5.0`
 
 Spark SQL Example:
 ```sql
