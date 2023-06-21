@@ -155,6 +155,11 @@ public class FunctionTest extends TestBase{
 
 
     @Test
+    public void testDimension(){
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_Dimension('GEOMETRYCOLLECTION(LINESTRING(1 1,0 0),POINT(0 0))')");
+        assertEquals(2, first(pointTable).getField(0));
+    }
+    @Test
     public void testDistance() {
         Table pointTable = createPointTable(testDataSize);
         pointTable = pointTable.select(call(Functions.ST_Distance.class.getSimpleName(), $(pointColNames[0])
