@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.apache.sedona</groupId>
         <artifactId>sedona-sql-parent-${spark.compat.version}_${scala.compat.version}</artifactId>
-        <version>1.4.1-SNAPSHOT</version>
+        <version>1.4.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 	<artifactId>sedona-sql-3.0_${scala.compat.version}</artifactId>
