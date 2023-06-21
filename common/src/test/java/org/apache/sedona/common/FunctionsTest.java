@@ -268,6 +268,21 @@ public class FunctionsTest {
         assertNull(actualResult);
     }
 
+    @Test
+    public void dimensionSingleGeometry() {
+        Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 2));
+        assert Functions.dimension(point) == 0;
+
+        Geometry lineString = GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 1.5, 1.5));
+        assert Functions.dimension(lineString) == 1;
+
+        Geometry polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0));
+        assert  Functions.dimension(polygon) == 2;
+
+        GeometryCollection geometryCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[]{point, lineString, polygon});
+        assert Functions.dimension(geometryCollection) == 2;
+    }
+
     private static boolean intersects(Set<?> s1, Set<?> s2) {
         Set<?> copy = new HashSet<>(s1);
         copy.retainAll(s2);
