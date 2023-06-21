@@ -16,23 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
-import org.apache.sedona.common.geometrySerde.GeometrySerializer
-import org.apache.sedona.common.raster.{Functions, Serde}
+import org.apache.sedona.common.raster.{MapAlgebra, Serde}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression}
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
-import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, RasterUDT}
+import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
+import org.apache.spark.sql.sedona_sql.expressions.raster.implicits.RasterInputExpressionEnhancer
 import org.apache.spark.sql.sedona_sql.expressions.{SerdeAware, UserDataGeneratator}
-import org.apache.spark.sql.sedona_sql.expressions.implicits._
-import org.apache.spark.sql.sedona_sql.expressions.raster.implicits._
 import org.apache.spark.sql.types._
 import org.geotools.coverage.grid.GridCoverage2D
-
-
 
 /// Calculate Normalized Difference between two bands
 case class RS_NormalizedDifference(inputExpressions: Seq[Expression])
@@ -328,7 +323,7 @@ case class RS_Count(inputExpressions: Seq[Expression])
 
   override def nullable: Boolean = false
 
-  override def eval(inputRow: InternalRow): Any = {    
+  override def eval(inputRow: InternalRow): Any = {
     val band = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
     val target = inputExpressions(1).eval(inputRow).asInstanceOf[Decimal].toDouble
     findCount(band, target)
@@ -810,67 +805,13 @@ case class RS_Append(inputExpressions: Seq[Expression])
   }
 }
 
-case class RS_Envelope(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback with ExpectsInputTypes {
-  override def nullable: Boolean = true
+case class RS_AddBandFromArray(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback
+  with ExpectsInputTypes with SerdeAware {
 
-  override def eval(input: InternalRow): Any = {
-    val raster = inputExpressions(0).toRaster(input)
-    if (raster == null) {
-      null
-    } else {
-      Functions.envelope(raster).toGenericArrayData
-    }
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-
-  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT)
-}
-
-case class RS_NumBands(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback with ExpectsInputTypes {
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val raster = inputExpressions(0).toRaster(input)
-    if (raster == null) {
-      null
-    } else {
-      Functions.numBands(raster)
-    }
-  }
-
-  override def dataType: DataType = IntegerType
-
-  override def children: Seq[Expression] = inputExpressions
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-
-  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT)
-}
-
-case class RS_SetSRID(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback with ExpectsInputTypes with SerdeAware {
   override def nullable: Boolean = true
 
   override def eval(input: InternalRow): Any = {
     Option(evalWithoutSerialization(input)).map(Serde.serialize).orNull
-  }
-
-  override def evalWithoutSerialization(input: InternalRow): GridCoverage2D = {
-    val raster = inputExpressions(0).toRaster(input)
-    val srid = inputExpressions(1).eval(input).asInstanceOf[Int]
-    if (raster == null) {
-      null
-    } else {
-      Functions.setSrid(raster, srid)
-    }
   }
 
   override def dataType: DataType = RasterUDT
@@ -881,83 +822,44 @@ case class RS_SetSRID(inputExpressions: Seq[Expression]) extends Expression with
     copy(inputExpressions = newChildren)
   }
 
-  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, IntegerType)
+  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, ArrayType, IntegerType)
+
+  override def evalWithoutSerialization(input: InternalRow): GridCoverage2D = {
+    val raster = inputExpressions(0).toRaster(input)
+    if (raster == null) {
+      return null
+    }
+    val band = inputExpressions(1).eval(input).asInstanceOf[ArrayData].toDoubleArray()
+    val bandIndex = inputExpressions(2).eval(input).asInstanceOf[Int]
+    MapAlgebra.addBandFromArray(raster, band, bandIndex)
+  }
 }
 
-case class RS_SRID(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback with ExpectsInputTypes {
+case class RS_BandAsArray(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback
+  with ExpectsInputTypes {
+
   override def nullable: Boolean = true
 
   override def eval(input: InternalRow): Any = {
     val raster = inputExpressions(0).toRaster(input)
     if (raster == null) {
-      null
-    } else {
-      Functions.srid(raster)
+      return null
     }
-  }
-
-  override def dataType: DataType = IntegerType
-
-  override def children: Seq[Expression] = inputExpressions
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-
-  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT)
-}
-
-case class RS_Value(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback with ExpectsInputTypes {
-
-  override def nullable: Boolean = true
-
-  override def dataType: DataType = DoubleType
-
-  override def eval(input: InternalRow): Any = {
-    val raster = inputExpressions.head.toRaster(input)
-    val geom = inputExpressions(1).toGeometry(input)
-    val band = inputExpressions(2).eval(input).asInstanceOf[Int]
-    if (raster == null || geom == null) {
-      null
-    } else {
-      Functions.value(raster, geom, band)
+    val bandIndex = inputExpressions(1).eval(input).asInstanceOf[Int]
+    val band = MapAlgebra.bandAsArray(raster, bandIndex)
+    if (band == null) {
+      return null
     }
+    new GenericArrayData(band)
   }
-
-  override def children: Seq[Expression] = inputExpressions
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-
-  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, GeometryUDT, IntegerType)
-}
-
-case class RS_Values(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback with ExpectsInputTypes {
-
-  override def nullable: Boolean = true
 
   override def dataType: DataType = ArrayType(DoubleType)
 
-  override def eval(input: InternalRow): Any = {
-    val raster = inputExpressions(0).toRaster(input)
-    val serializedGeometries = inputExpressions(1).eval(input).asInstanceOf[ArrayData]
-    val band = inputExpressions(2).eval(input).asInstanceOf[Int]
-    if (raster == null || serializedGeometries == null) {
-      null
-    } else {
-      val geometries = (0 until serializedGeometries.numElements()).map {
-        i => Option(serializedGeometries.getBinary(i)).map(GeometrySerializer.deserialize).orNull
-      }
-      new GenericArrayData(Functions.values(raster, java.util.Arrays.asList(geometries:_*), band).toArray)
-    }
-  }
-
   override def children: Seq[Expression] = inputExpressions
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 
-  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, ArrayType(GeometryUDT), IntegerType)
+  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, IntegerType)
 }

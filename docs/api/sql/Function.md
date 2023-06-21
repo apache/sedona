@@ -1567,6 +1567,29 @@ FROM polygondf
 !!!note
 	The detailed EPSG information can be searched on [EPSG.io](https://epsg.io/).
 
+
+## ST_Translate
+Introduction: Returns the input geometry with its X, Y and Z coordinates (if present in the geometry) translated by deltaX, deltaY and deltaZ (if specified)
+
+If the geometry is 2D, and a deltaZ parameter is specified, no change is done to the Z coordinate of the geometry and the resultant geometry is also 2D.
+
+If the geometry is empty, no change is done to it. 
+If the given geometry contains sub-geometries (GEOMETRY COLLECTION, MULTI POLYGON/LINE/POINT), all underlying geometries are individually translated.
+
+Format: `ST_Translate(geometry: geometry, deltaX: deltaX, deltaY: deltaY, deltaZ: deltaZ)`
+
+Since: `1.4.1`
+
+Example:
+
+Input: `ST_Translate(GEOMETRYCOLLECTION(MULTIPOLYGON (((1 0, 1 1, 2 1, 2 0, 1 0)), ((1 2, 3 4, 3 5, 1 2))), POINT(1, 1, 1), LINESTRING EMPTY), 2, 2, 3)`
+
+Output: `GEOMETRYCOLLECTION(MULTIPOLYGON (((3 2, 3 3, 4 3, 4 2, 3 2)), ((3 4, 5 6, 5 7, 3 4))), POINT(3, 3, 4), LINESTRING EMPTY)`
+
+Input: `ST_Translate(POINT(1, 3, 2), 1, 2)`
+
+Output: `POINT(2, 5, 2)`
+
 ## ST_Union
 
 Introduction: Return the union of geometry A and B

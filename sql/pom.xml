@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.apache.sedona</groupId>
         <artifactId>sedona-parent</artifactId>
-        <version>1.4.1-SNAPSHOT</version>
+        <version>1.5.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 	<artifactId>sedona-sql-parent-${spark.compat.version}_${scala.compat.version}</artifactId>
@@ -40,6 +40,18 @@
         <module>common</module>
         <module>spark-${spark.compat.version}</module>
     </modules>
+
+    <!-- Add non-default submodules when running `mvn release:prepare
+         -Penable-all-submodules`, so that project versions of all submodules
+         will be substituted -->
+    <profiles>
+        <profile>
+            <id>enable-all-submodules</id>
+            <modules>
+                <module>spark-3.4</module>
+            </modules>
+        </profile>
+    </profiles>
 
     <dependencyManagement>
         <dependencies>

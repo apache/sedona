@@ -26,64 +26,45 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class FunctionsTest extends RasterTestBase {
 
     @Test
-    public void envelope() throws FactoryException {
-        Geometry envelope = Functions.envelope(oneBandRaster);
-        assertEquals(3600.0d, envelope.getArea(), 0.1d);
-        assertEquals(378922.0d + 30.0d, envelope.getCentroid().getX(), 0.1d);
-        assertEquals(4072345.0d + 30.0d, envelope.getCentroid().getY(), 0.1d);
-
-        assertEquals(4326, Functions.envelope(multiBandRaster).getSRID());
-    }
-
-    @Test
-    public void testNumBands() {
-        assertEquals(1, Functions.numBands(oneBandRaster));
-        assertEquals(4, Functions.numBands(multiBandRaster));
-    }
-
-    @Test
     public void testSetSrid() throws FactoryException {
-        assertEquals(0, Functions.srid(oneBandRaster));
-        assertEquals(4326, Functions.srid(multiBandRaster));
+        assertEquals(0, RasterAccessors.srid(oneBandRaster));
+        assertEquals(4326, RasterAccessors.srid(multiBandRaster));
 
-        GridCoverage2D oneBandRasterWithUpdatedSrid = Functions.setSrid(oneBandRaster, 4326);
-        assertEquals(4326, Functions.srid(oneBandRasterWithUpdatedSrid));
-        assertEquals(4326, Functions.envelope(oneBandRasterWithUpdatedSrid).getSRID());
-        assertTrue(Functions.envelope(oneBandRasterWithUpdatedSrid).equalsTopo(Functions.envelope(oneBandRaster)));
+        GridCoverage2D oneBandRasterWithUpdatedSrid = RasterEditors.setSrid(oneBandRaster, 4326);
+        assertEquals(4326, RasterAccessors.srid(oneBandRasterWithUpdatedSrid));
+        assertEquals(4326, RasterAccessors.envelope(oneBandRasterWithUpdatedSrid).getSRID());
+        assertTrue(RasterAccessors.envelope(oneBandRasterWithUpdatedSrid).equalsTopo(RasterAccessors.envelope(oneBandRaster)));
 
-        GridCoverage2D multiBandRasterWithUpdatedSrid = Functions.setSrid(multiBandRaster, 0);
-        assertEquals(0 , Functions.srid(multiBandRasterWithUpdatedSrid));
-    }
-
-    @Test
-    public void testSrid() throws FactoryException {
-        assertEquals(0, Functions.srid(oneBandRaster));
-        assertEquals(4326, Functions.srid(multiBandRaster));
+        GridCoverage2D multiBandRasterWithUpdatedSrid = RasterEditors.setSrid(multiBandRaster, 0);
+        assertEquals(0 , RasterAccessors.srid(multiBandRasterWithUpdatedSrid));
     }
 
     @Test
     public void value() throws TransformException {
-        assertNull("Points outside of the envelope should return null.", Functions.value(oneBandRaster, point(1, 1), 1));
-        assertNull("Invalid band should return null.", Functions.value(oneBandRaster, point(378923, 4072346), 0));
-        assertNull("Invalid band should return null.", Functions.value(oneBandRaster, point(378923, 4072346), 2));
+        assertNull("Points outside of the envelope should return null.", PixelFunctions.value(oneBandRaster, point(1, 1), 1));
+        assertNull("Invalid band should return null.", PixelFunctions.value(oneBandRaster, point(378923, 4072346), 0));
+        assertNull("Invalid band should return null.", PixelFunctions.value(oneBandRaster, point(378923, 4072346), 2));
 
-        Double value = Functions.value(oneBandRaster, point(378923, 4072346), 1);
+        Double value = PixelFunctions.value(oneBandRaster, point(378923, 4072346), 1);
         assertNotNull(value);
         assertEquals(2.0d, value, 0.1d);
 
-        assertNull("Null should be returned for no data values.", Functions.value(oneBandRaster, point(378923, 4072376), 1));
+        assertNull("Null should be returned for no data values.", PixelFunctions.value(oneBandRaster, point(378923, 4072376), 1));
     }
 
     @Test
     public void valueWithMultibandRaster() throws TransformException {
         // Multiband raster
-        assertEquals(9d, Functions.value(multiBandRaster, point(4.5d,4.5d), 3), 0.1d);
-        assertEquals(255d, Functions.value(multiBandRaster, point(4.5d,4.5d), 4), 0.1d);
+        assertEquals(9d, PixelFunctions.value(multiBandRaster, point(4.5d,4.5d), 3), 0.1d);
+        assertEquals(255d, PixelFunctions.value(multiBandRaster, point(4.5d,4.5d), 4), 0.1d);
     }
 
     @Test
@@ -91,19 +72,19 @@ public class FunctionsTest extends RasterTestBase {
         // The function 'value' is implemented using 'values'.
         // These test only cover bits not already covered by tests for 'value'
         List<Geometry> points = Arrays.asList(new Geometry[]{point(378923, 4072346), point(378924, 4072346)});
-        List<Double> values = Functions.values(oneBandRaster, points, 1);
+        List<Double> values = PixelFunctions.values(oneBandRaster, points, 1);
         assertEquals(2, values.size());
         assertTrue(values.stream().allMatch(Objects::nonNull));
 
-        values = Functions.values(oneBandRaster, points, 0);
+        values = PixelFunctions.values(oneBandRaster, points, 0);
         assertEquals(2, values.size());
         assertTrue("All values should be null for invalid band index.", values.stream().allMatch(Objects::isNull));
 
-        values = Functions.values(oneBandRaster, points, 2);
+        values = PixelFunctions.values(oneBandRaster, points, 2);
         assertEquals(2, values.size());
         assertTrue("All values should be null for invalid band index.", values.stream().allMatch(Objects::isNull));
 
-        values = Functions.values(oneBandRaster, Arrays.asList(new Geometry[]{point(378923, 4072346), null}), 1);
+        values = PixelFunctions.values(oneBandRaster, Arrays.asList(new Geometry[]{point(378923, 4072346), null}), 1);
         assertEquals(2, values.size());
         assertNull("Null geometries should return null values.", values.get(1));
     }

@@ -1,4 +1,4 @@
-## RasterUDT based operators
+## Raster based operators
 
 ### RS_Envelope
 
@@ -15,6 +15,39 @@ SELECT RS_Envelope(raster) FROM raster_table
 Output:
 ```
 POLYGON((0 0,20 0,20 60,0 60,0 0))
+```
+
+### RS_MetaData
+
+Introduction: Returns the metadata of the raster as an array of double. The array contains the following values:
+
+- 0: upper left x coordinate of the raster, in terms of CRS units (the minimum x coordinate)
+- 1: upper left y coordinate of the raster, in terms of CRS units (the maximum y coordinate)
+- 2: width of the raster, in terms of pixels
+- 3: height of the raster, in terms of pixels
+- 4: width of a pixel, in terms of CRS units (scaleX)
+- 5: height of a pixel, in terms of CRS units (scaleY)
+- 6: skew in x direction (rotation x)
+- 7: skew in y direction (rotation y)
+- 8: srid of the raster
+- 9: number of bands
+
+Format: `RS_MetaData (raster: Raster)`
+
+Since: `v1.4.1`
+
+SQL example:
+```sql
+SELECT RS_MetaData(raster) FROM raster_table
+```
+
+Output:
+```
++-----------------------------------------------------------------------------------------------------------------------+
+|rs_metadata(raster)                                                                                                    |
++-----------------------------------------------------------------------------------------------------------------------+
+|[-1.3095817809482181E7, 4021262.7487925636, 512.0, 517.0, 72.32861272132695, -72.32861272132695, 0.0, 0.0, 3857.0, 1.0]|
++-----------------------------------------------------------------------------------------------------------------------+
 ```
 
 ### RS_NumBands
@@ -35,7 +68,7 @@ Output:
 4
 ```
 
-## RS_SetSRID
+### RS_SetSRID
 
 Introduction: Sets the spatial reference system identifier (SRID) of the raster geometry.
 
@@ -143,7 +176,67 @@ Output:
 ```
 
 
-## Array[Double] based operators
+## Raster to Map Algebra operators
+
+To bridge the gap between the raster and map algebra worlds, the following operators are provided. These operators convert a raster to a map algebra object. The map algebra object can then be used with the map algebra operators described in the next section.
+
+### RS_BandAsArray
+
+Introduction: Extract a band from a raster as an array of doubles.
+
+Format: `RS_BandAsArray (raster: Raster, bandIndex: Int)`.
+
+Since: `v1.4.1`
+
+BandIndex is 1-based and must be between 1 and RS_NumBands(raster). It returns null if the bandIndex is out of range or the raster is null.
+
+SQL example:
+```sql
+SELECT RS_BandAsArray(raster, 1) FROM raster_table
+```
+
+Output:
+
+```
++--------------------+
+|                band|
++--------------------+
+|[0.0, 0.0, 0.0, 0...|
++--------------------+
+```
+
+### RS_AddBandFromArray
+
+Introduction: Add a band to a raster from an array of doubles.
+
+Format: `RS_AddBandFromArray (raster: Raster, band: Array[Double], bandIndex:Int)`.
+
+Since: `v1.4.1`
+
+The bandIndex is 1-based and must be between 1 and RS_NumBands(raster) + 1. It throws an exception if the bandIndex is out of range or the raster is null.
+
+When the bandIndex is RS_NumBands(raster) + 1, it appends the band to the end of the raster. Otherwise, it replaces the existing band at the bandIndex.
+
+Note that: `bandIndex == RS_NumBands(raster) + 1` is an experimental feature and might not lead to the loss of raster metadata and properties such as color models.
+
+SQL example:
+
+```sql
+SELECT RS_AddBandFromArray(raster, RS_MultiplyFactor(RS_BandAsArray(RS_FromGeoTiff(content), 1), 2), 1) AS raster FROM raster_table
+```
+
+Output:
+```
++--------------------+
+|              raster|
++--------------------+
+|GridCoverage2D["g...|
++--------------------+
+```
+
+## Map Algebra operators
+
+Map algebra operators work on a single band of a raster. Each band is represented as an array of doubles. The operators return an array of doubles.
 
 ### RS_Add
 
@@ -167,6 +260,8 @@ Introduction: Appends a new band to the end of Geotiff image data and returns th
 Format: `RS_Append(data: Array[Double], newBand: Array[Double], nBands: Int)`
 
 Since: `v1.2.1`
+
+Deprecated since: `v1.4.1`
 
 Spark SQL example:
 ```scala
