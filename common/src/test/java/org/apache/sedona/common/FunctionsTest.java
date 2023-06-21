@@ -861,7 +861,7 @@ public class FunctionsTest {
     public void affineEmpty3D() {
         LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
         String expected = emptyLineString.toText();
-        String actual = Functions.affine(emptyLineString, 1, 1, 2, 3, 5, 6, 2, 3, 4, 4, 5, 6).toText();
+        String actual = Functions.affine(emptyLineString, 1.0, 1.0, 2.0, 3.0, 5.0, 6.0, 2.0, 3.0, 4.0, 4.0, 5.0, 6.0).toText();
         assertEquals(expected, actual);
     }
 
@@ -869,27 +869,26 @@ public class FunctionsTest {
     public void affineEmpty2D() {
         LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
         String expected = emptyLineString.toText();
-        String actual = Functions.affine(emptyLineString, 1, 2, 3, 4, 1, 2).toText();
+        String actual = Functions.affine(emptyLineString, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0).toText();
         assertEquals(expected, actual);
     }
 
-    @Test
+   @Test
     public void affine3DGeom2D() {
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 1, 2));
-        String expected = GEOMETRY_FACTORY.createLineString(coordArray(6, 18, 7, 11, 8, 14)).toText();
-        String actual = Functions.affine(lineString, 1, 1, 2, 3, 5, 6, 2, 3, 4, 4, 5, 6).toText();
+        String expected = GEOMETRY_FACTORY.createLineString(coordArray(6, 8, 7, 11, 8, 14)).toText();
+        String actual = Functions.affine(lineString, 1.0, 1.0, 2.0, 3.0, 5.0, 6.0, 2.0, 3.0, 4.0, 4.0, 5.0, 6.0).toText();
         assertEquals(expected, actual);
     }
 
     @Test
     public void affine3DGeom3D() {
         WKTWriter wktWriter = new WKTWriter(3);
-//        2 3 1, 4 5 1, 7 8 2 ,2 3 1
         Polygon polygon3D = GEOMETRY_FACTORY.createPolygon(coordArray3d(2, 3, 1, 4, 5, 1, 7, 8, 2, 2, 3, 1));
 
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray3d(1, 0, 1, 1, 1, 2, 1, 2, 2));
         String expected = wktWriter.write(GEOMETRY_FACTORY.createLineString(coordArray3d(8, 11, 15, 11, 17, 24, 12, 20, 28)));
-        String actual = wktWriter.write(Functions.affine(lineString, 1, 1, 2, 3, 5, 6, 2, 3, 4, 4, 5, 6));
+        String actual = wktWriter.write(Functions.affine(lineString, 1.0, 1.0, 2.0, 3.0, 5.0, 6.0, 2.0, 3.0, 4.0, 4.0, 5.0, 6.0));
         assertEquals(expected, actual);
     }
 
@@ -900,7 +899,7 @@ public class FunctionsTest {
         Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 1, 1, 1, 1, 2, 2, 2, 1, 0, 1));
         MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon1, polygon2});
         Geometry geomCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {point3D, multiPolygon})});
-        Geometry actualGeomCollection = Functions.affine(geomCollection, 1, 2, 1, 2, 1, 2, 3, 3, 1, 2, 3, 3);
+        Geometry actualGeomCollection = Functions.affine(geomCollection, 1.0, 2.0, 1.0, 2.0, 1.0, 2.0, 3.0, 3.0, 1.0, 2.0, 3.0, 3.0);
         WKTWriter wktWriter3D = new WKTWriter(3);
         Point expectedPoint3D = GEOMETRY_FACTORY.createPoint(new Coordinate(7, 8, 9));
         Polygon expectedPolygon1 = GEOMETRY_FACTORY.createPolygon(coordArray3d(8, 9, 10, 10, 11, 12, 11, 12, 13, 9, 10, 11, 8, 9, 10));
@@ -915,9 +914,10 @@ public class FunctionsTest {
     public void affine2DGeom3D() {
         //1 0 1, 1 1 1, 2 2 2, 1 0 1
         WKTWriter wktWriter = new WKTWriter(3);
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 1, 1, 1, 1, 2, 2, 2, 1, 0, 1));
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray3d(1, 0, 1, 1, 1, 2, 1, 2, 2));
         String expected = wktWriter.write(GEOMETRY_FACTORY.createLineString(coordArray3d(6, 8, 1, 7, 11, 2, 8, 14, 2)));
-        String actual = wktWriter.write(Functions.affine(lineString, 1, 1, 2, 3, 5, 6));
+        String actual = wktWriter.write(Functions.affine(lineString, 1d, 1d, 2d, 3d, 5d, 6d));
         assertEquals(expected, actual);
     }
 
@@ -925,7 +925,7 @@ public class FunctionsTest {
     public void affine2DGeom2D() {
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 1, 2));
         String expected = GEOMETRY_FACTORY.createLineString(coordArray(6, 8, 7, 11, 8, 14)).toText();
-        String actual = Functions.affine(lineString, 1, 1, 2, 3, 5, 6).toText();
+        String actual = Functions.affine(lineString, 1.0, 1.0, 2.0, 3.0, 5.0, 6.0).toText();
         assertEquals(expected, actual);
     }
 
@@ -936,7 +936,7 @@ public class FunctionsTest {
         Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray(3, 4, 3, 5, 3, 7, 10, 7, 3, 4));
         MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon1, polygon2});
         Geometry geomCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {point3D, multiPolygon})});
-        Geometry actualGeomCollection = Functions.affine(geomCollection, 1, 2, 1, 2, 1, 2);
+        Geometry actualGeomCollection = Functions.affine(geomCollection, 1.0, 2.0, 1.0, 2.0, 1.0, 2.0);
         Point expectedPoint3D = GEOMETRY_FACTORY.createPoint(new Coordinate(4, 5));
         Polygon expectedPolygon1 = GEOMETRY_FACTORY.createPolygon(coordArray(2, 3, 4, 5, 5, 6, 3, 4, 2, 3));
         Polygon expectedPolygon2 = GEOMETRY_FACTORY.createPolygon(coordArray(12, 13, 14, 15, 18, 19, 25, 26, 12, 13));

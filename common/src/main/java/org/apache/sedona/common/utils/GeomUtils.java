@@ -461,16 +461,19 @@ public class GeomUtils {
         }
     }
 
-    public static void affineGeom(Geometry geometry, double a, double b, double d, double e, double xOff, double yOff, double c,
-                                  double f, double g, double h, double i, double zOff, boolean set3d) {
+    public static void affineGeom(Geometry geometry, Double a, Double b, Double d, Double e, Double xOff, Double yOff, Double c,
+                                  Double f, Double g, Double h, Double i, Double zOff) {
         Coordinate[] coordinates = geometry.getCoordinates();
         for (Coordinate currCoordinate: coordinates) {
             double x = currCoordinate.getX(), y = currCoordinate.getY(), z = Double.isNaN(currCoordinate.getZ()) ? 0 : currCoordinate.getZ();
-            double newX = a * x + b * y + c * z + xOff;
-            double newY = d * x + e * y + f * z + yOff;
+            double newX = a * x + b * y + xOff;
+            if (c != null) newX += c * z;
+            double newY = d * x + e * y + yOff;
+            if (f != null) newY += f * z;
             currCoordinate.setX(newX);
             currCoordinate.setY(newY);
-            if (set3d && !Double.isNaN(currCoordinate.getZ())) {
+
+            if (g != null && h != null && i != null && !Double.isNaN(currCoordinate.getZ())) {
                 double newZ = g * x + h * y + i * z + zOff;
                 currCoordinate.setZ(newZ);
             }

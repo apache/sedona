@@ -373,7 +373,7 @@ abstract class InferredNaryExpression[A1: InferrableType, A2: InferrableType, A3
                                            implicit val a5Tag: TypeTag[A5], implicit val a6Tag: TypeTag[A6], implicit val a7Tag: TypeTag[A7],
                                            implicit val a8Tag: TypeTag[A8], implicit val a9Tag: TypeTag[A9], implicit val a10Tag: TypeTag[A10],
                                            implicit val a11Tag: TypeTag[A11], implicit val a12Tag: TypeTag[A12], implicit val a13Tag: TypeTag[A13], implicit val rTag: TypeTag[R])
-  extends Expression with ImplicitCastInputTypes with CodegenFallback with Serializable with SerdeAware {
+  extends Expression with ImplicitCastInputTypes with CodegenFallback with Serializable {
 
   import InferredTypes._
 
@@ -423,34 +423,7 @@ abstract class InferredNaryExpression[A1: InferrableType, A2: InferrableType, A3
     val thirteenth = extractThirteenth(input)
 
     if (first != null && second != null && third != null && fourth != null &&
-      fifth != null & sixth != null & seventh != null & eighth != null &&
-      ninth != null & tenth != null & eleventh != null & twelfth != null &&
-      thirteenth != null) {
-      serialize(f(first, second, third, fourth, fifth, sixth, seventh, eighth, ninth, tenth, eleventh, twelfth, thirteenth))
-    } else {
-      null
-    }
-  }
-
-  override def evalWithoutSerialization(input: InternalRow): Any = {
-    val first = extractFirst(input)
-    val second = extractSecond(input)
-    val third = extractThird(input)
-    val fourth = extractFourth(input)
-    val fifth = extractFifth(input)
-    val sixth = extractSixth(input)
-    val seventh = extractSeventh(input)
-    val eighth = extractEighth(input)
-    val ninth = extractNinth(input)
-    val tenth = extractTenth(input)
-    val eleventh = extractEleventh(input)
-    val twelfth = extractTwelfth(input)
-    val thirteenth = extractThirteenth(input)
-
-    if (first != null && second != null && third != null && fourth != null &&
-      fifth != null & sixth != null & seventh != null & eighth != null &&
-      ninth != null & tenth != null & eleventh != null & twelfth != null &&
-      thirteenth != null) {
+      fifth != null & sixth != null & seventh != null) {
       serialize(f(first, second, third, fourth, fifth, sixth, seventh, eighth, ninth, tenth, eleventh, twelfth, thirteenth))
     } else {
       null

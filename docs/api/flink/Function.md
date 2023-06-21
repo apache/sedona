@@ -36,6 +36,67 @@ LINESTRING(0 0, 21 52, 1 1, 1 0)
 LINESTRING(0 0, 1 1, 1 0, 21 52)
 ```
 
+## ST_Affine
+
+Introduction: Apply an affine transformation to the given geometry.
+
+ST_Affine has 2 overloaded signatures: 
+
+`ST_Affine(geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)` 
+
+`ST_Affine(geometry, a, b, d, e, xOff, yOff)`
+
+
+Based on the invoked function, the following transformation is applied: 
+
+`x = a * x + b * y + c * z + xOff OR x = a * x + b * y + xOff`
+
+`y = d * x + e * y + f * z + yOff OR y = d * x + e * y + yOff`
+
+`z = g * x + f * y + i * z + zOff OR z = g * x + f * y + zOff`
+
+If the given geometry is empty, the result is also empty. 
+
+Format: `ST_Affine(geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)`  
+Format: `ST_Affine(geometry, a, b, d, e, xOff, yOff)`
+
+Since: `1.5.0`
+
+Example:
+
+```sql
+ST_Affine(geometry, 1, 2, 4, 1, 1, 2, 3, 2, 5, 4, 8, 3)
+```
+
+Input: `LINESTRING EMPTY`
+
+Output: `LINESTRING EMPTY`
+
+Input: `POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))`
+
+Output: `POLYGON Z((5 8 16, 7 9 20, 13 16 37, 5 8 16))`
+
+Input: `POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0), (1 0.5, 1 0.75, 1.5 0.75, 1.5 0.5, 1 0.5))`
+
+Output: `POLYGON ((2 6, 4 7, 5 11, 3 10, 2 6), (3 6.5, 3.5 6.75, 4 8.75, 3.5 8.5, 3 6.5))`
+
+
+```sql
+ST_Affine(geometry, 1, 2, 1, 2, 1, 2)
+```
+
+Input: `POLYGON EMPTY`
+
+Output: `POLYGON EMPTY`
+
+Input: `GEOMETRYCOLLECTION (MULTIPOLYGON (((1 0, 1 1, 2 1, 2 0, 1 0), (1 0.5, 1 0.75, 1.5 0.75, 1.5 0.5, 1 0.5)), ((5 0, 5 5, 7 5, 7 0, 5 0))), POINT (10 10))`
+
+Output: `GEOMETRYCOLLECTION (MULTIPOLYGON (((2 3, 4 5, 5 6, 3 4, 2 3), (3 4, 3.5 4.5, 4 5, 3.5 4.5, 3 4)), ((6 7, 16 17, 18 19, 8 9, 6 7))), POINT (31 32))`
+
+Input: `POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))`
+
+Output: `POLYGON Z((2 3 1, 4 5 1, 7 8 2, 2 3 1))`
+
 ## ST_Area
 
 Introduction: Return the area of A

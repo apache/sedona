@@ -112,7 +112,7 @@ __all__ = [
     "ST_Force3D",
     "ST_NRings",
     "ST_Translate",
-    "ST_Affine"
+    "ST_Affine",
 ]
 
 
@@ -1280,9 +1280,9 @@ def ST_Translate(geometry: ColumnOrName, deltaX: Union[ColumnOrName, float], del
 
 @validate_argument_types
 def ST_Affine(geometry: ColumnOrName, a: Union[ColumnOrName, float], b: Union[ColumnOrName, float], d: Union[ColumnOrName, float],
-                e: Union[ColumnOrName, float], xOff: Union[ColumnOrName, float], yOff: Union[ColumnOrName, float], c: Optional[Union[ColumnOrName, float]] = 0.0, f: Optional[Union[ColumnOrName, float]] = 0.0,
-                g: Optional[Union[ColumnOrName, float]] = 0.0, h: Optional[Union[ColumnOrName, float]] = 0.0,
-                i: Optional[Union[ColumnOrName, float]] = 0.0,  zOff: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
+                e: Union[ColumnOrName, float], xOff: Union[ColumnOrName, float], yOff: Union[ColumnOrName, float], c: Optional[Union[ColumnOrName, float]] = None, f: Optional[Union[ColumnOrName, float]] = None,
+                g: Optional[Union[ColumnOrName, float]] = None, h: Optional[Union[ColumnOrName, float]] = None,
+                i: Optional[Union[ColumnOrName, float]] = None,  zOff: Optional[Union[ColumnOrName, float]] = None) -> Column:
     """
     Apply a 3D/2D affine tranformation to the given geometry
     x = a * x + b * y + c * z + xOff | x = a * x + b * y + xOff
@@ -1303,7 +1303,7 @@ def ST_Affine(geometry: ColumnOrName, a: Union[ColumnOrName, float], b: Union[Co
     :param zOff: Default 0.0
     :return: Geometry with affine transformation applied
     """
-    args = (geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)
+    args = (geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)
     return _call_st_function("ST_Affine", args)
 
 
