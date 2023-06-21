@@ -89,6 +89,7 @@ public class Functions {
         }
     }
     public static class ST_Dimension extends ScalarFunction {
+        //TODO: fix Geometry dimension
 //        @DataTypeHint("Integer")
 //        public Integer eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
 //            Geometry geom = (Geometry) o;
