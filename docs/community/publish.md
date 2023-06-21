@@ -225,8 +225,6 @@ Checklist:
 
 [ ] Checksums and PGP signatures are valid.
 
-[ ] DISCLAIMER is included.
-
 [ ] Source code artifacts have correct names matching the current release.
 
 For a detailed checklist  please refer to:
