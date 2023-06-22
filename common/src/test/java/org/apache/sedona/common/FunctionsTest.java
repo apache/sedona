@@ -292,7 +292,7 @@ public class FunctionsTest {
 
         GeometryCollection emptyGeometryCollection = GEOMETRY_FACTORY.createGeometryCollection();
         assert Functions.dimension(emptyGeometryCollection) == 0;
-        
+
         GeometryCollection geometryCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[]{point, lineString, polygon});
         assert Functions.dimension(geometryCollection) == 2;
 

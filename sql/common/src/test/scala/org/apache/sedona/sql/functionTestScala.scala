@@ -149,7 +149,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       val test5 = sparkSession.sql("select ST_Dimension(ST_GeomFromWKT('GEOMETRYCOLLECTION(LINESTRING(1 1,0 0),POINT(0 0))'))")
       assert(test5.take(1)(0).get(0).asInstanceOf[Int] == 1)
       val test6 = sparkSession.sql("select ST_Dimension(ST_GeomFromWKT('GEOMETRYCOLLECTION(MULTIPOLYGON(((0 0, 0 1, 1 1, 1 0, 0 0)), ((2 2, 2 3, 3 3, 3 2, 2 2))), MULTIPOINT(6 6, 7 7, 8 8))'))")
-      assert(test6.take(1)(0).get(0).asInstanceOf[Int] == 1)
+      assert(test6.take(1)(0).get(0).asInstanceOf[Int] == 2)
     }
     it("Passed ST_Distance") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)

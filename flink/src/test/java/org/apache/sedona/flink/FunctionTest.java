@@ -156,10 +156,12 @@ public class FunctionTest extends TestBase{
 
     @Test
     public void testDimension(){
-        Table pointTable = tableEnv.sqlQuery("SELECT ST_Dimension('GEOMETRYCOLLECTION(LINESTRING(1 1,0 0), POINT(0 0))')");
-        assertEquals(1, first(pointTable).getField(0));
+        Table pointTable = tableEnv.sqlQuery(
+                        "SELECT ST_Dimension(ST_GeomFromWKT('GEOMETRYCOLLECTION EMPTY'))");
+        assertEquals(0, first(pointTable).getField(0));
 
-        pointTable = tableEnv.sqlQuery("SELECT ST_Dimension('GEOMETRYCOLLECTION(MULTILINESTRING((0 0, 1 1, 2 2), (3 3, 4 4, 5 5)), MULTIPOLYGON(((0 0, 0 1, 1 1, 1 0, 0 0)), ((2 2, 2 3, 3 3, 3 2, 2 2))), MULTIPOINT(6 6, 7 7, 8 8))')");
+        pointTable = tableEnv.sqlQuery(
+                "SELECT ST_Dimension(ST_GeomFromWKT('GEOMETRYCOLLECTION(MULTIPOLYGON(((0 0, 0 1, 1 1, 1 0, 0 0)), ((2 2, 2 3, 3 3, 3 2, 2 2))), MULTIPOINT(6 6, 7 7, 8 8))'))");
         assertEquals(2, first(pointTable).getField(0));
     }
     @Test
