@@ -554,10 +554,6 @@ public class Functions {
         return new GeometrySplitter(GEOMETRY_FACTORY).split(input, blade);
     }
 
-    public static Integer dimension(GeometryCollection geometries) {
-        return geometries.getDimension();
-    }
-
     public static Integer dimension(Geometry geometry) {
         return geometry.getDimension();
     }
