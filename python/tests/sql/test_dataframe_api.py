@@ -392,7 +392,7 @@ class TestDataFrameAPI(TestBase):
         elif request.param == "square_geom":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))') AS geom")
         elif request.param == "geometry_geom_collection":
-            return TestDataFrameAPI.spark.sql("SELECT ST_Dimension('GEOMETRYCOLLECTION(LINESTRING(1 1,0 0),POINT(0 0))');")
+            return TestDataFrameAPI.spark.sql("SELECT ST_Dimension('GEOMETRYCOLLECTION(LINESTRING(1 1,0 0),POINT(0 0))') AS geom")
         raise ValueError(f"Invalid base_df name passed: {request.param}")
 
     def _id_test_configuration(val):
