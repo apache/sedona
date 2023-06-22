@@ -88,22 +88,15 @@ public class Functions {
             return org.apache.sedona.common.Functions.envelope(geom);
         }
     }
-    public static class ST_Dimension extends ScalarFunction {
-        //TODO: fix Geometry dimension
-//        @DataTypeHint("Integer")
-//        public Integer eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
-//            Geometry geom = (Geometry) o;
-//            return org.apache.sedona.common.Functions.dimension(geom);
-//        }
 
+    public static class ST_Dimension extends ScalarFunction {
         @DataTypeHint("Integer")
-        public Integer eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.GeometryCollection.class) Object o) {
-            GeometryCollection geom = (GeometryCollection) o;
+        public Integer eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.dimension(geom);
         }
 
     }
-
 
     public static class ST_Distance extends ScalarFunction {
         @DataTypeHint("Double")
