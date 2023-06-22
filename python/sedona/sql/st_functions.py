@@ -111,7 +111,8 @@ __all__ = [
     "ST_NumPoints",
     "ST_Force3D",
     "ST_NRings",
-    "ST_Translate"
+    "ST_Translate",
+    "ST_FrechetDistance"
 ]
 
 
@@ -1277,3 +1278,14 @@ def ST_Translate(geometry: ColumnOrName, deltaX: Union[ColumnOrName, float], del
     args = (geometry, deltaX, deltaY, deltaZ)
     return _call_st_function("ST_Translate", args)
 
+def ST_FrechetDistance(g1: ColumnOrName, g2: ColumnOrName) -> Column:
+    """
+    Computes discrete frechet distance between the two geometries.
+    If any of the geometry is empty, ST_FrechetDistance returns 0
+    :param g1:
+    :param g2:
+    :return: Computed Discrete Frechet Distance between g1 and g2
+    """
+
+    args = (g1, g2)
+    return _call_st_function("ST_FrechetDistance", args)

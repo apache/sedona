@@ -435,6 +435,26 @@ Input: `LINESTRING EMPTY`
 
 Output: `LINESTRING EMPTY`
 
+## ST_FrechetDistance
+
+Introduction: Computes and returns discrete [Frechet Distance](https://en.wikipedia.org/wiki/Fr%C3%A9chet_distance) between the given two geometrie,
+based on [Computing Discrete Frechet Distance](http://www.kr.tuwien.ac.at/staff/eiter/et-archive/cdtr9464.pdf)
+
+If any of the geometries is empty, returns 0.0
+
+Format: `ST_FrechetDistance(g1: geomtry, g2: geometry)`
+
+Since: `1.5.0`
+
+Example:
+```sql
+SELECT ST_FrechetDistance(g1, g2)
+```
+
+Input: `g1: POINT (0 1), g2: LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)`
+
+Output: `5.0990195135927845`
+
 ## ST_GeoHash
 
 Introduction: Returns GeoHash of the geometry with given precision

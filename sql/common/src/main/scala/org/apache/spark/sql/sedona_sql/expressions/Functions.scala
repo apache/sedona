@@ -1010,3 +1010,10 @@ case class ST_Translate(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_FrechetDistance(inputExpressions: Seq[Expression])
+  extends InferredBinaryExpression(Functions.frechetDistance) with FoldableExpression {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+

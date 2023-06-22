@@ -1098,3 +1098,10 @@ class TestPredicateJoin(TestBase):
         actual = actualDf.selectExpr("ST_AsText(geom)").take(1)[0][0]
         assert expected == actual
 
+    def test_frechetDistance(self):
+        expected = 5.0990195135927845
+        actual_df = self.spark.sql("SELECT ST_FrechetDistance(ST_GeomFromText('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, "
+                                   "5 0)'), ST_GeomFromText('POINT (0 1)'))")
+        actual = actual_df.take(1)[0][0]
+        assert expected == actual
+

@@ -86,6 +86,7 @@ test_configurations = [
     (stf.ST_FlipCoordinates, ("point",), "point_geom", "", "POINT (1 0)"),
     (stf.ST_Force_2D, ("point",), "point_geom", "", "POINT (0 1)"),
     (stf.ST_Force3D, ("point", 1.0), "point_geom", "", "POINT Z (0 1 1)"),
+    (stf.ST_FrechetDistance, ("point", "line",), "point_and_line", "", 5.0990195135927845),
     (stf.ST_GeometricMedian, ("multipoint",), "multipoint_geom", "", "POINT (22.500002656424286 21.250001168173426)"),
     (stf.ST_GeometryN, ("geom", 0), "multipoint", "", "POINT (0 0)"),
     (stf.ST_GeometryType, ("point",), "point_geom", "", "ST_Point"),
@@ -390,6 +391,8 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 2 1)') AS line, ST_GeomFromWKT('POLYGON ((1 0, 2 0, 2 2, 1 2, 1 0))') AS poly")
         elif request.param == "square_geom":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))') AS geom")
+        elif request.param == "point_and_line":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POINT (0.0 1.0)') AS point, ST_GeomFromWKT('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)') AS line")
         raise ValueError(f"Invalid base_df name passed: {request.param}")
 
     def _id_test_configuration(val):

@@ -326,5 +326,8 @@ object st_functions extends DataFrameAPI {
 
   def ST_Translate(geometry: String, deltaX: Double, deltaY: Double): Column = wrapExpression[ST_Translate](geometry, deltaX, deltaY, 0.0)
 
+  def ST_FrechetDistance(g1: Column, g2: Column): Column = wrapExpression[ST_FrechetDistance](g1, g2)
+
+  def ST_FrechetDistance(g1: String, g2: String): Column = wrapExpression[ST_FrechetDistance](g1, g2)
 
 }

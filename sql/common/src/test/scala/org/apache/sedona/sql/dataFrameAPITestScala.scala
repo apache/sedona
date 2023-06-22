@@ -994,5 +994,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       val expectedDefaultValue = "POLYGON Z((3 3 1, 3 4 1, 4 4 1, 4 3 1, 3 3 1))"
       assert(expectedDefaultValue == actualDefaultValue)
     }
+
+    it("Passed ST_FrechetDistance") {
+      val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT (1 2)') as g1, ST_GeomFromWKT('POINT (100 230)') as g2")
+      val df = polyDf.select(ST_FrechetDistance("g1", "g2"))
+      val expected = 248.5658866377283
+      val actual = df.take(1)(0).get(0).asInstanceOf[Double]
+      assertEquals(expected, actual, 1e-9)
+    }
   }
 }

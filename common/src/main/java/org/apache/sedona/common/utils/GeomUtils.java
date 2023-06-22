@@ -463,6 +463,7 @@ public class GeomUtils {
     }
 
     public static double getFrechetDistance(Geometry g1, Geometry g2) {
+        if (g1.isEmpty() || g2.isEmpty()) return 0.0;
         return DiscreteFrechetDistance.distance(g1, g2);
     }
 }

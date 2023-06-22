@@ -1973,4 +1973,19 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assertEquals(expectedDefaultValue, actualDefaultValue)
     }
   }
+
+  it ("should pass ST_FrechetDistance") {
+    val geomTestCases = Map (
+      ("'POINT (1 2)'", "'POINT (10 10)'") -> 12.041594578792296d,
+      ("'LINESTRING (0 0, 100 0)'", "'LINESTRING (0 0, 50 50, 100 0)'") -> 70.7106781186548d
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val g1 = geom._1
+      val g2 = geom._2
+      val df = sparkSession.sql(s"SELECT ST_FrechetDistance(ST_GeomFromWKT($g1), ST_GeomFromWKT($g2))")
+      val actual = df.take(1)(0).get(0).asInstanceOf[Double]
+      val expected = expectedResult
+      assertEquals(expected, actual, 1e-9)
+    }
+  }
 }

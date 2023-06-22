@@ -736,4 +736,13 @@ public class FunctionTest extends TestBase{
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void testFrechet() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (1 2)') AS g1, ST_GeomFromWKT('POINT (10 10)') as g2");
+        polyTable = polyTable.select(call(Functions.ST_FrechetDistance.class.getSimpleName(), $("g1"), $("g2")));
+        Double expected =  12.041594578792296;
+        Double actual = (Double) first(polyTable).getField(0);
+        assertEquals(expected, actual);
+    }
+
 }
