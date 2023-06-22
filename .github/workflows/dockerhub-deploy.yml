@@ -29,7 +29,7 @@ jobs:
           context: .
           file: docker/base-jdk.dockerfile
           tags: kartikeyhadiya/base-jdk:latest
-          push: false
+          push: ${{ github.event_name != 'pull_request' }}
   
   spark-base-jupyterlab:
 
@@ -66,17 +66,18 @@ jobs:
       - name: Sets env vars for image_tag
         run: |
           IMAGE_TAG=${{ steps.branch-name.outputs.tag }}
-          ! [ "$IMAGE_TAG" ] && IMAGE_TAG=latest
-          echo "DOCKER_IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          ! [[ "$IMAGE_TAG" ]] && IMAGE_TAG=${{ steps.branch-name.outputs.current_branch }}
+          [[ "$IMAGE_TAG" =~ ^(master|main)$ ]] && IMAGE_TAG=latest
+          image=`echo ${{ matrix.image }} | cut -d '/' -f 2`
+          [[ ${{ matrix.image }} == "spark-base" ]] && tag=3.3.2 || tag=$IMAGE_TAG
+          echo "DOCKER_IMAGE_TAG=kartikeyhadiya/$image:$tag" >> $GITHUB_ENV
 
       - name: Build and push image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: docker/${{ matrix.image }}.dockerfile
-          tags: 
-            - kartikeyhadiya/${{ echo matrix.image | cut -d '/' -f 2 }}:${{ [ matrix.image == "spark-base" ] && 3.3.2 || env.DOCKER_IMAGE_TAG }}
-            - kartikeyhadiya/${{ echo matrix.image | cut -d '/' -f 2 }}:${{ [ matrix.image == "spark-base" ] && 3.3.2 || latest }}
+          tags: ${{ env.DOCKER_IMAGE_TAG }}
           push: ${{ github.event_name != 'pull_request' }}
 
   master_worker:
@@ -105,7 +106,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       - name: Build and push image
         uses: docker/build-push-action@v4
