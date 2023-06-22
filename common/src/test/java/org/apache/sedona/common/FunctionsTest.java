@@ -269,18 +269,35 @@ public class FunctionsTest {
     }
 
     @Test
-    public void dimensionSingleGeometry() {
-        Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 2));
+    public void dimensionGeometry() {
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 2));
         assert Functions.dimension(point) == 0;
 
-        Geometry lineString = GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 1.5, 1.5));
+        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 1.5, 1.5));
         assert Functions.dimension(lineString) == 1;
 
-        Geometry polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0));
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0));
         assert  Functions.dimension(polygon) == 2;
 
+        MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0.0, 0.0, 1.0, 1.0));
+        assert Functions.dimension(multiPoint) == 0;
+
+        LineString lineString2 = GEOMETRY_FACTORY.createLineString(coordArray(1.0, 1.0, 2.0, 2.0));
+        MultiLineString multiLineString = GEOMETRY_FACTORY.createMultiLineString(new LineString[]{lineString, lineString2});
+        assert Functions.dimension(multiLineString) == 1;
+
+        Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray(0.0, 0.0, 2.0, 2.0, 1.0, 0.0, 0.0, 0.0));
+        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[]{polygon, polygon2});
+        assert Functions.dimension(multiPolygon) == 2;
+
+        GeometryCollection emptyGeometryCollection = GEOMETRY_FACTORY.createGeometryCollection();
+        assert Functions.dimension(emptyGeometryCollection) == 0;
+        
         GeometryCollection geometryCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[]{point, lineString, polygon});
         assert Functions.dimension(geometryCollection) == 2;
+
+        GeometryCollection geometryCollection2 = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[]{multiPoint, multiLineString});
+        assert Functions.dimension(geometryCollection2) == 1;
     }
 
     private static boolean intersects(Set<?> s1, Set<?> s2) {

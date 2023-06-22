@@ -555,7 +555,12 @@ public class Functions {
     }
 
     public static Integer dimension(Geometry geometry) {
-        return geometry.getDimension();
+        Integer dimension = geometry.getDimension();
+        // unknown dimension such as an empty GEOMETRYCOLLECTION
+        if (dimension < 0) {
+            dimension = 0;
+        }
+        return dimension;
     }
 
     /**
