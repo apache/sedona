@@ -1,0 +1,116 @@
+name: Deploy to Docker Hub
+on: [push, pull_request, workflow_dispatch]
+jobs:
+
+  base-jdk:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check Out Repo 
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: docker/base-jdk.dockerfile
+          tags: kartikeyhadiya/base-jdk:latest
+          push: false
+  
+  spark-base-jupyterlab:
+
+    runs-on: ubuntu-latest
+
+    needs: base-jdk
+
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [spark-base, spark-sedona-jupyterlab/sedona_jupyterlab]
+
+    steps:
+      - name: Check Out Repo 
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      
+      - name: Get branch names
+        id: branch-name
+        uses: tj-actions/branch-names@v7
+
+      - name: Sets env vars for image_tag
+        run: |
+          IMAGE_TAG=${{ steps.branch-name.outputs.tag }}
+          ! [ "$IMAGE_TAG" ] && IMAGE_TAG=latest
+          echo "DOCKER_IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Build and push image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: docker/${{ matrix.image }}.dockerfile
+          tags: 
+            - kartikeyhadiya/${{ echo matrix.image | cut -d '/' -f 2 }}:${{ [ matrix.image == "spark-base" ] && 3.3.2 || env.DOCKER_IMAGE_TAG }}
+            - kartikeyhadiya/${{ echo matrix.image | cut -d '/' -f 2 }}:${{ [ matrix.image == "spark-base" ] && 3.3.2 || latest }}
+          push: ${{ github.event_name != 'pull_request' }}
+
+  master_worker:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [spark-master, spark-worker]
+
+    needs: spark-base-jupyterlab
+    steps:
+    
+      - name: Check Out Repo 
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: docker/${{ matrix.image }}.dockerfile
+          tags: kartikeyhadiya/${{ matrix.image }}:3.3.2
+          push: ${{ github.event_name != 'pull_request' }}

@@ -18,26 +18,22 @@
 version: "3.9"
 volumes:
   shared-workspace:
-    name: "shared-workspace"
     driver: local
+    name: shared-workspace
+  spark_volume:
 services:
   spark-master:
-    image: spark-master
-    build: 
-      context: .
-      dockerfile: spark-master.dockerfile
+    image: kartikeyhadiya/spark-master
     container_name: spark-master
     ports:
       - 8080:8080
       - 7077:7077
     volumes:
       - shared-workspace:/opt/workspace
+      - spark_volume:/opt/spark
       - ../../binder:/opt/workspace/examples:rw
   spark-worker-1:
-    image: spark-worker
-    build: 
-      context: .
-      dockerfile: spark-worker.dockerfile
+    image: kartikeyhadiya/spark-worker
     container_name: spark-worker-1
     environment:
       - SPARK_WORKER_CORES=1
@@ -50,10 +46,7 @@ services:
     depends_on:
       - spark-master
   spark-worker-2:
-    image: spark-worker
-    build: 
-      context: .
-      dockerfile: spark-worker.dockerfile
+    image: kartikeyhadiya/spark-worker
     container_name: spark-worker-2
     environment:
       - SPARK_WORKER_CORES=1
@@ -66,15 +59,13 @@ services:
     depends_on:
       - spark-master
   jupyterlab:
-    image: sedona_jupyterlab:1.4.0
-    build: 
-      context: .
-      dockerfile: jupyterlab.dockerfile
-    container_name: jupyterlab
+    image: kartikeyhadiya/sedona_jupyterlab
+    container_name: sedona_jupyterlab
     ports:
       - 8888:8888
     volumes:
       - shared-workspace:/opt/workspace
+      - spark_volume:/opt/spark
       - ../../binder:/opt/workspace/examples:rw
     depends_on:
       - spark-master

@@ -580,7 +580,7 @@
       "properties": {
         "SPARK_HOME": {
           "name": "SPARK_HOME",
-          "value": "/opt/zeppelin/spark",
+          "value": "/opt/spark",
           "type": "string",
           "description": "Location of spark distribution"
         }
@@ -602,6 +602,8 @@
       "option": {
         "remote": true,
         "port": -1,
+        "perNote": "shared",
+        "perUser": "shared",
         "isExistingProcess": false,
         "setPermission": false,
         "owners": [],
@@ -1000,7 +1002,7 @@
       "properties": {
         "SPARK_HOME": {
           "name": "SPARK_HOME",
-          "value": "/opt/zeppelin/spark",
+          "value": "/opt/spark",
           "type": "string",
           "description": "Location of spark distribution"
         },
@@ -1024,7 +1026,7 @@
         },
         "spark.driver.cores": {
           "name": "spark.driver.cores",
-          "value": "2",
+          "value": "1",
           "type": "number",
           "description": "Number of cores to use for the driver process, only in cluster mode."
         },
@@ -1036,13 +1038,13 @@
         },
         "spark.executor.cores": {
           "name": "spark.executor.cores",
-          "value": "2",
+          "value": "1",
           "type": "number",
           "description": "The number of cores to use on each executor"
         },
         "spark.executor.memory": {
           "name": "spark.executor.memory",
-          "value": "1g",
+          "value": "2g",
           "type": "string",
           "description": "Executor memory per worker instance. ex) 512m, 32g"
         },
@@ -1096,7 +1098,7 @@
         },
         "zeppelin.spark.enableSupportedVersionCheck": {
           "name": "zeppelin.spark.enableSupportedVersionCheck",
-          "value": true,
+          "value": false,
           "type": "checkbox",
           "description": "Whether checking supported spark version. Developer only setting, not for production use"
         },
@@ -1207,6 +1209,16 @@
           "value": true,
           "type": "checkbox",
           "description": "Show short types instead of full, e.g. List\u003cString\u003e or kotlin.collections.List\u003ckotlin.String\u003e"
+        },
+        "JAVA_HOME": {
+          "name": "JAVA_HOME",
+          "value": "/usr/lib/jvm/java-8-openjdk-amd64",
+          "type": "textarea"
+        },
+        "spark.sql.view.maxNestedViewDepth": {
+          "name": "spark.sql.view.maxNestedViewDepth",
+          "value": "5000",
+          "type": "textarea"
         }
       },
       "status": "READY",
@@ -1302,21 +1314,21 @@
       ],
       "dependencies": [
         {
-          "groupArtifactVersion": "/opt/zeppelin/spark/jars/sedona-viz-3.0_2.12-1.3.1-incubating.jar",
+          "groupArtifactVersion": "/opt/spark/jars/sedona-core-3.0_2.12-1.3.1-incubating.jar",
           "local": false,
           "exclusions": []
         },
         {
-          "groupArtifactVersion": "/opt/zeppelin/spark/jars/sedona-python-adapter-3.0_2.12-1.3.1-incubating.jar",
+          "groupArtifactVersion": "/opt/spark/jars/sedona-viz-3.0_2.12-1.3.1-incubating.jar",
           "local": false
         },
         {
-          "groupArtifactVersion": "/opt/zeppelin/spark/jars/geotools-wrapper-1.3.0-27.2.jar",
+          "groupArtifactVersion": "/opt/spark/jars/sedona-sql-3.0_2.12-1.3.1-incubating.jar",
           "local": false,
           "exclusions": []
         },
         {
-          "groupArtifactVersion": "",
+          "groupArtifactVersion": "/opt/spark/jars/geotools-wrapper-1.3.0-27.2.jar",
           "local": false
         }
       ],
@@ -1724,7 +1736,7 @@
       "properties": {
         "zeppelin.python": {
           "name": "zeppelin.python",
-          "value": "python",
+          "value": "python3",
           "type": "string",
           "description": "Python binary executable path. It is set to python by default.(assume python is in your $PATH)"
         },
@@ -1812,6 +1824,8 @@
       "option": {
         "remote": true,
         "port": -1,
+        "perNote": "shared",
+        "perUser": "shared",
         "isExistingProcess": false,
         "setPermission": false,
         "owners": [],
@@ -3127,6 +3141,25 @@
       "url": "https://repo1.maven.org/maven2/",
       "host": "repo1.maven.org",
       "protocol": "https",
+      "releasePolicy": {
+        "enabled": true,
+        "updatePolicy": "daily",
+        "checksumPolicy": "warn"
+      },
+      "snapshotPolicy": {
+        "enabled": true,
+        "updatePolicy": "daily",
+        "checksumPolicy": "warn"
+      },
+      "mirroredRepositories": [],
+      "repositoryManager": false
+    },
+    {
+      "id": "local",
+      "type": "default",
+      "url": "file:///root/.m2/repository",
+      "host": "",
+      "protocol": "file",
       "releasePolicy": {
         "enabled": true,
         "updatePolicy": "daily",
