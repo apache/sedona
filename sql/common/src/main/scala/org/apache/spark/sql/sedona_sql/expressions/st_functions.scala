@@ -90,6 +90,9 @@ object st_functions extends DataFrameAPI {
   def ST_Difference(a: Column, b: Column): Column = wrapExpression[ST_Difference](a, b)
   def ST_Difference(a: String, b: String): Column = wrapExpression[ST_Difference](a, b)
 
+  def ST_Dimension(geometry: Column): Column = wrapExpression[ST_Dimension](geometry)
+  def ST_Dimension(geometry: String): Column = wrapExpression[ST_Dimension](geometry)
+
   def ST_Distance(a: Column, b: Column): Column = wrapExpression[ST_Distance](a, b)
   def ST_Distance(a: String, b: String): Column = wrapExpression[ST_Distance](a, b)
 
