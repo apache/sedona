@@ -406,11 +406,19 @@ Introduction: Return the topological dimension of this Geometry object, which mu
 
 Format: `ST_Dimension (A:geometry), ST_Dimension (C:geometrycolletion), `
 
-Since: `v1.0.0`
+Since: `v1.5.0`
 
-Spark SQL example:
+Example:
 ```sql
 SELECT ST_Dimension('GEOMETRYCOLLECTION(LINESTRING(1 1,0 0),POINT(0 0))');
+```
+
+Result:
+
+```
+ST_Dimension
+-----------
+1
 ```
 
 
