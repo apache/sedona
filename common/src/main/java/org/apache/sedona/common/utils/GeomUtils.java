@@ -26,6 +26,7 @@ import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTWriter;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
+import org.locationtech.jts.algorithm.distance.DiscreteFrechetDistance;
 
 import java.awt.*;
 import java.nio.ByteOrder;
@@ -424,7 +425,6 @@ public class GeomUtils {
         return geometries;
     }
 
-
     public static Geometry get3DGeom(Geometry geometry, double zValue) {
         Coordinate[] coordinates = geometry.getCoordinates();
         if (coordinates.length == 0) return geometry;
@@ -460,5 +460,9 @@ public class GeomUtils {
         if (deltaX != 0 || deltaY != 0 || deltaZ != 0) {
             geometry.geometryChanged();
         }
+    }
+
+    public static double getFrechetDistance(Geometry g1, Geometry g2) {
+        return DiscreteFrechetDistance.distance(g1, g2);
     }
 }
