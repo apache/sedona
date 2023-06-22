@@ -333,4 +333,14 @@ object st_functions extends DataFrameAPI {
   def ST_BoundingDiagonal(geometry: String) =
     wrapExpression[ST_BoundingDiagonal](geometry)
 
+  def ST_HausdorffDistance(g1: Column, g2: Column) = wrapExpression[ST_HausdorffDistance](g1, g2, -1)
+
+  def ST_HausdorffDistance(g1: String, g2: String) = wrapExpression[ST_HausdorffDistance](g1, g2, -1);
+
+  def ST_HausdorffDistance(g1: Column, g2: Column, densityFrac: Column) = wrapExpression[ST_HausdorffDistance](g1, g2, densityFrac);
+
+  def ST_HausdorffDistance(g1: String, g2: String, densityFrac: Double) = wrapExpression[ST_HausdorffDistance](g1, g2, densityFrac);
+
+
+
 }

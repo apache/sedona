@@ -100,6 +100,7 @@ public class Catalog {
                 new Functions.ST_NRings(),
                 new Functions.ST_Translate(),
                 new Functions.ST_BoundingDiagonal(),
+                new Functions.ST_HausdorffDistance(),
         };
     }
 

@@ -1987,4 +1987,25 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assertEquals(expected, actual)
     }
   }
+
+  it ("should pass ST_HausdorffDistance") {
+    val geomTestCases = Map (
+      ("'LINESTRING (1 2, 1 5, 2 6, 1 2)'", "'POINT (10 34)'", 0.34) -> (33.24154027718932, 33.24154027718932),
+      ("'LINESTRING (1 0, 1 1, 2 1, 2 0, 1 0)'", "'POINT EMPTY'", 0.23) -> (0.0, 0.0),
+      ("'POLYGON ((1 2, 2 1, 2 0, 4 1, 1 2))'", "'MULTIPOINT ((1 0), (40 10), (-10 -40))'", 0.0001) -> (41.7612260356422, 41.7612260356422)
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val geom1 = geom._1
+      val geom2 = geom._2
+      val densityFrac = geom._3
+      val df = sparkSession.sql(s"SELECT ST_HausdorffDistance(ST_GeomFromWKT($geom1), ST_GeomFromWKT($geom2), $densityFrac) AS dist")
+      val dfDefaultValue = sparkSession.sql(s"SELECT ST_HausdorffDistance(ST_GeomFromWKT($geom1), ST_GeomFromWKT($geom2)) as dist")
+      val actual = df.take(1)(0).get(0).asInstanceOf[Double]
+      val actualDefaultValue = dfDefaultValue.take(1)(0).get(0).asInstanceOf[Double]
+      val expected = expectedResult._1
+      val expectedDefaultValue = expectedResult._2
+      assert(expected == actual)
+      assert(expectedDefaultValue == actualDefaultValue)
+    }
+  }
 }
