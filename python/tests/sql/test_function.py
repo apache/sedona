@@ -1118,5 +1118,3 @@ class TestPredicateJoin(TestBase):
         actual_default = actual_df_default.take(1)[0][0]
         assert expected == actual
         assert expected == actual_default
-
-

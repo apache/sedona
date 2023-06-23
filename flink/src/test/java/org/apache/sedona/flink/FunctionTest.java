@@ -757,5 +757,4 @@ public class FunctionTest extends TestBase{
         assertEquals(expected, actual);
         assertEquals(expectedDefault, actualDefault);
     }
-
 }

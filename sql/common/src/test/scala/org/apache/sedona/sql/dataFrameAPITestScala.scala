@@ -1015,5 +1015,6 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(expected == actual)
       assert(expected == actualDefaultValue)
     }
+    
   }
 }

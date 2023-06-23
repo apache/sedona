@@ -24,8 +24,6 @@ import org.junit.Test;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
-
-import javax.sound.sampled.Line;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -918,7 +916,7 @@ public class FunctionsTest {
         String actual = Functions.boundingDiagonal(point).toText();
         assertEquals(expected, actual);
     }
-
+  
     @Test
     public void hausdorffDistanceDefaultGeom2D() throws Exception {
         Polygon polygon1 = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 1, 1, 1, 2, 2, 1, 5, 2, 0, 1, 1, 0, 1));
@@ -988,5 +986,4 @@ public class FunctionsTest {
         Double actual = Functions.hausdorffDistance(polygon, emptyLineString);
         assertEquals(expected, actual);
     }
-
 }

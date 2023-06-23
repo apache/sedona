@@ -341,6 +341,4 @@ object st_functions extends DataFrameAPI {
 
   def ST_HausdorffDistance(g1: String, g2: String, densityFrac: Double) = wrapExpression[ST_HausdorffDistance](g1, g2, densityFrac);
 
-
-
 }
