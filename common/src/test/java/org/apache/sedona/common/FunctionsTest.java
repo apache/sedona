@@ -23,8 +23,6 @@ import org.junit.Test;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
-
-import javax.sound.sampled.Line;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -856,5 +854,65 @@ public class FunctionsTest {
         assertEquals(expectedPolygon.toText(), actualGeometry.getGeometryN(0).getGeometryN(0).getGeometryN(1).toText());
         assertEquals(wktWriter3D.write(expectedPoint3D), wktWriter3D.write(actualGeometry.getGeometryN(0).getGeometryN(1)));
         assertEquals(emptyLineString.toText(), actualGeometry.getGeometryN(0).getGeometryN(2).toText());
+    }
+    @Test
+    public void boundingDiagonalGeom2D() {
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 2, 2, 0, 1, 0));
+        String expected = "LINESTRING (1 0, 2 2)";
+        String actual = Functions.boundingDiagonal(polygon).toText();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void boundingDiagonalGeom3D() {
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 1, 3, 2, 2, 2, 4, 5, 1, 1, 1, 1, 0, 1));
+        WKTWriter wktWriter = new WKTWriter(3);
+        String expected = "LINESTRING Z(1 0 1, 3 4 5)";
+        String actual = wktWriter.write(Functions.boundingDiagonal(polygon));
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void boundingDiagonalGeomEmpty() {
+        LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
+        String expected = "LINESTRING EMPTY";
+        String actual = Functions.boundingDiagonal(emptyLineString).toText();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void boundingDiagonalGeomCollection2D() {
+        //      ("'GEOMETRYCOLLECTION (MULTIPOLYGON (((1 1, 1 -1, 2 2, 2 9, 9 1, 1 1)), ((5 5, 4 4, 2 2 , 5 5))), POINT (-1 0))'") -> "'LINESTRING (-1 -1, 9 9)'"
+        Polygon polygon1 = GEOMETRY_FACTORY.createPolygon(coordArray(1, 1, 1, -1, 2, 2, 2, 9, 9, 1, 1, 1));
+        Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray(5, 5, 4, 4, 2, 2, 5, 5));
+        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon1, polygon2});
+        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(2, 2, 3, 3));
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(-1, 0));
+        Geometry geometryCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {multiPolygon, lineString, point});
+        String expected = "LINESTRING (-1 -1, 9 9)";
+        String actual = Functions.boundingDiagonal(geometryCollection).toText();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void boundingDiagonalGeomCollection3D() {
+        Polygon polygon1 = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 1, 4, 1, -1, 6, 2, 2, 4, 2, 9, 4, 9, 1, 0, 1, 1, 4));
+        Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray3d(5, 5, 1, 4, 4, 1, 2, 2, 2, 5, 5, 1));
+        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon1, polygon2});
+        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray3d(2, 2, 9, 3, 3, -5));
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(-1, 9, 1));
+        Geometry geometryCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {multiPolygon, lineString, point});
+        String expected = "LINESTRING Z(-1 -1 -5, 9 9 9)";
+        WKTWriter wktWriter = new WKTWriter(3);
+        String actual = wktWriter.write(Functions.boundingDiagonal(geometryCollection));
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void boundingDiagonalSingleVertex() {
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(10, 5));
+        String expected = "LINESTRING (10 5, 10 5)";
+        String actual = Functions.boundingDiagonal(point).toText();
+        assertEquals(expected, actual);
     }
 }

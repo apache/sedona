@@ -203,6 +203,33 @@ SELECT ST_Boundary(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
 
 Output: `LINESTRING (1 1, 0 0, -1 1, 1 1)`
 
+## ST_BoundingDiagonal
+
+Introduction: Returns a linestring spanning minimum and maximum values of each dimension of the given geometry's coordinates as its start and end point respectively.
+If an empty geometry is provided, the returned LineString is also empty.
+If a single vertex (POINT) is provided, the returned LineString has both the start and end points same as the points coordinates
+
+Format: `ST_BoundingDiagonal(geom: geometry)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+```sql
+SELECT ST_BoundingDiagonal(ST_GeomFromWKT(geom))
+```
+
+Input: `POLYGON ((1 1 1, 3 3 3, 0 1 4, 4 4 0, 1 1 1))`
+
+Output: `LINESTRING Z(0 1 1, 4 4 4)`
+
+Input: `POINT (10 10)`
+
+Output: `LINESTRING (10 10, 10 10)`
+
+Input: `GEOMETRYCOLLECTION(POLYGON ((5 5 5, -1 2 3, -1 -1 0, 5 5 5)), POINT (10 3 3))`
+
+Output: `LINESTRING Z(-1 -1 0, 10 5 5)`
+
 ## ST_Buffer
 
 Introduction: Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance.

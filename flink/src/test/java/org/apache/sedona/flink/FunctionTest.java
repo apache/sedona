@@ -736,4 +736,13 @@ public class FunctionTest extends TestBase{
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void testBoundingDiagonal() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_BoundingDiagonal(ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))'))" +" AS " + polygonColNames[0]);
+        polyTable = polyTable.select(call(Functions.ST_AsText.class.getSimpleName(), $(polygonColNames[0])));
+        String expected = "LINESTRING (1 0, 2 1)";
+        String actual = (String) first(polyTable).getField(0);
+        assertEquals(expected, actual);
+    }
+
 }
