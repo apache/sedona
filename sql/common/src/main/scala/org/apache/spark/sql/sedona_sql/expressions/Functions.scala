@@ -1010,11 +1010,6 @@ case class ST_Translate(inputExpressions: Seq[Expression])
   }
 }
 
-/**
- * Return the topological dimension of this Geometry object
- *
- * @param inputExpressions
- */
 case class ST_Dimension(inputExpressions: Seq[Expression])
   extends InferredUnaryExpression(Functions.dimension) with FoldableExpression {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -1022,3 +1017,9 @@ case class ST_Dimension(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_BoundingDiagonal(inputExpressions: Seq[Expression])
+  extends InferredUnaryExpression(Functions.boundingDiagonal) with FoldableExpression {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

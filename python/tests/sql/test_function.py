@@ -1098,3 +1098,9 @@ class TestPredicateJoin(TestBase):
         actual = actualDf.selectExpr("ST_AsText(geom)").take(1)[0][0]
         assert expected == actual
 
+    def test_boundingDiagonal(self):
+        expected = "LINESTRING (1 0, 2 1)"
+        actual_df = self.spark.sql("SELECT ST_BoundingDiagonal(ST_GeomFromText('POLYGON ((1 0, 1 1, 2 1, 2 0, "
+                                   "1 0))')) AS geom")
+        actual = actual_df.selectExpr("ST_AsText(geom)").take(1)[0][0]
+        assert expected == actual
