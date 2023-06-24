@@ -745,4 +745,14 @@ public class FunctionTest extends TestBase{
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void testAngle() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_Angle(ST_GeomFromWKT('LINESTRING (0 0, 1 1)'), ST_GeomFromWKT('LINESTRING (0 0, 3 2)'))" + " AS " + polygonColNames[0]);
+        polyTable = polyTable.select(call(Functions.ST_Degrees.class.getSimpleName(), $(polygonColNames[0])));
+        Double expected = 11.309932474020195;
+        Double actual = (Double) first(polyTable).getField(0);
+        assertEquals(expected, actual, 1e-9);
+
+    }
+
 }
