@@ -153,7 +153,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       }
     }
 
-    it("Passed DT_Dimension with GeometryCollection"){
+    it("Passed DT_Dimension with GeometryCollection") {
       val geomTestCases = Map(
         ("'GEOMETRYCOLLECTION EMPTY'") -> "0",
         ("'GEOMETRYCOLLECTION(LINESTRING(1 1,0 0),POINT(0 0))'") -> "1",
