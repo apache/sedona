@@ -142,7 +142,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         ("'POINT (51.3168 -0.56)'") -> "0",
         ("'LineString (0 0, 0 90)'") -> "1",
         ("'POLYGON((0 0,0 5,5 0,0 0))'") -> "2",
-        ("'MULTILINESTRING((0 0, 0 5, 5 0, 0 0))'") -> "1",
+        ("'MULTILINESTRING((0 0, 0 5, 5 0, 0 0))'") -> "1"
       )
       for ((geom, expectedResult) <- geomTestCases) {
         val df = sparkSession.sql(s"SELECT ST_Dimension(ST_GeomFromWKT($geom)), " +
@@ -157,7 +157,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       val geomTestCases = Map(
         ("'GEOMETRYCOLLECTION EMPTY'") -> "0",
         ("'GEOMETRYCOLLECTION(LINESTRING(1 1,0 0),POINT(0 0))'") -> "1",
-        ("'GEOMETRYCOLLECTION(MULTIPOLYGON(((0 0, 0 1, 1 1, 1 0, 0 0)), ((2 2, 2 3, 3 3, 3 2, 2 2))), MULTIPOINT(6 6, 7 7, 8 8))'") -> "2",
+        ("'GEOMETRYCOLLECTION(MULTIPOLYGON(((0 0, 0 1, 1 1, 1 0, 0 0)), ((2 2, 2 3, 3 3, 3 2, 2 2))), MULTIPOINT(6 6, 7 7, 8 8))'") -> "2"
       )
       for ((geom, expectedResult) <- geomTestCases) {
         val df = sparkSession.sql(s"SELECT ST_Dimension(ST_GeomFromWKT($geom)), " +
