@@ -330,4 +330,10 @@ object st_functions extends DataFrameAPI {
   def ST_Translate(geometry: String, deltaX: Double, deltaY: Double): Column = wrapExpression[ST_Translate](geometry, deltaX, deltaY, 0.0)
 
 
+  def ST_BoundingDiagonal(geometry: Column) =
+    wrapExpression[ST_BoundingDiagonal](geometry)
+
+  def ST_BoundingDiagonal(geometry: String) =
+    wrapExpression[ST_BoundingDiagonal](geometry)
+
 }
