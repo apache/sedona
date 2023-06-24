@@ -15,6 +15,7 @@ package org.apache.sedona.common;
 
 import com.google.common.geometry.S2CellId;
 import com.google.common.math.DoubleMath;
+import com.sun.org.apache.xpath.internal.operations.Mult;
 import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.utils.GeomUtils;
@@ -989,6 +990,76 @@ public class FunctionsTest {
         Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(10, 5));
         String expected = "LINESTRING (10 5, 10 5)";
         String actual = Functions.boundingDiagonal(point).toText();
+        assertEquals(expected, actual);
+    }
+  
+    @Test
+    public void hausdorffDistanceDefaultGeom2D() throws Exception {
+        Polygon polygon1 = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 1, 1, 1, 2, 2, 1, 5, 2, 0, 1, 1, 0, 1));
+        Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray3d(4, 0, 4, 6, 1, 4, 6, 4, 9, 6, 1, 3, 4, 0, 4));
+        Double expected = 5.0;
+        Double actual = Functions.hausdorffDistance(polygon1, polygon2);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void hausdorffDistanceGeom2D() throws Exception {
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(10, 34));
+        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1, 2, 1, 5, 2, 6, 1, 2));
+        Double expected = 33.24154027718932;
+        Double actual = Functions.hausdorffDistance(point, lineString, 0.33);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void hausdorffDistanceInvalidDensityFrac() throws Exception {
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(10, 34));
+        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1, 2, 1, 5, 2, 6, 1, 2));
+        Exception e = assertThrows(IllegalArgumentException.class, () -> Functions.hausdorffDistance(point, lineString, 3));
+        String expected = "Fraction is not in range (0.0 - 1.0]";
+        String actual = e.getMessage();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void hausdorffDistanceDefaultGeomCollection() throws Exception {
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 2, 2, 1, 2, 0, 4, 1, 1, 2));
+        Geometry point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 0));
+        Geometry point2 = GEOMETRY_FACTORY.createPoint(new Coordinate(40, 10));
+        Geometry point3 = GEOMETRY_FACTORY.createPoint(new Coordinate(-10, -40));
+        GeometryCollection multiPoint = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {point1, point2, point3});
+        Double actual = Functions.hausdorffDistance(polygon, multiPoint);
+        Double expected = 41.7612260356422;
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void hausdorffDistanceGeomCollection() throws Exception {
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 2, 2, 1, 2, 0, 4, 1, 1, 2));
+        LineString lineString1 = GEOMETRY_FACTORY.createLineString(coordArray(1, 1, 2, 1, 4, 4, 5, 5));
+        LineString lineString2 = GEOMETRY_FACTORY.createLineString(coordArray(10, 10, 11, 11, 12, 12, 14, 14));
+        LineString lineString3 = GEOMETRY_FACTORY.createLineString(coordArray(-11, -20, -11, -21, -15, -19));
+        MultiLineString multiLineString = GEOMETRY_FACTORY.createMultiLineString(new LineString[] {lineString1, lineString2, lineString3});
+        Double actual = Functions.hausdorffDistance(polygon, multiLineString, 0.0000001);
+        Double expected = 25.495097567963924;
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void hausdorffDistanceEmptyGeom() throws Exception {
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 2, 2, 1, 2, 0, 4, 1, 1, 2));
+        LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
+        Double expected = 0.0;
+        Double actual = Functions.hausdorffDistance(polygon, emptyLineString, 0.00001);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void hausdorffDistanceDefaultEmptyGeom() throws Exception {
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 2, 2, 1, 2, 0, 4, 1, 1, 2));
+        LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
+        Double expected = 0.0;
+        Double actual = Functions.hausdorffDistance(polygon, emptyLineString);
         assertEquals(expected, actual);
     }
 }

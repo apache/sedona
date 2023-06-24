@@ -554,6 +554,46 @@ SELECT ST_GeometryN(ST_GeomFromText('MULTIPOINT((1 2), (3 4), (5 6), (8 9))'), 1
 
 Output: `POINT (3 4)`
 
+## ST_HausdorffDistance
+
+Introduction: Returns a discretized (and hence approximate) [Hausdorff distance](https://en.wikipedia.org/wiki/Hausdorff_distance) between the given 2 geometries. 
+Optionally, a densityFraction parameter can be specified, which gives more accurate results by densifying segments before computing hausdorff distance between them.
+Each segment is broken down into equal-length subsegments whose ratio with segment length is closest to the given density fraction.
+
+Hence, the lower the densityFrac value, the more accurate is the computed hausdorff distance, and the more time it takes to compute it.
+
+If any of the geometry is empty, 0.0 is returned.
+
+
+!!!Note
+    Accepted range of densityFrac is (0.0, 1.0], if any other value is provided, ST_HausdorffDistance throws an IllegalArgumentException
+
+
+!!!Note
+    Even though the function accepts 3D geometry, the z ordinate is ignored and the computed hausdorff distance is equivalent to the geometries not having the z ordinate.
+
+Format: `ST_HausdorffDistance(g1: geometry, g2: geometry, densityFrac)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_HausdorffDistance(g1, g2, 0.1)
+```
+
+Input: `g1: POINT (0.0 1.0), g2: LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)`
+
+Output: `5.0990195135927845`
+
+```sql
+SELECT ST_HausdorffDistance(ST_GeomFromText(), ST_GeomFromText())
+```
+
+Input: `g1: POLYGON Z((1 0 1, 1 1 2, 2 1 5, 2 0 1, 1 0 1)), g2: POLYGON Z((4 0 4, 6 1 4, 6 4 9, 6 1 3, 4 0 4))`
+
+Output: `5.0`
+
+
 ## ST_InteriorRingN
 
 Introduction: Returns the Nth interior linestring ring of the polygon geometry. Returns NULL if the geometry is not a polygon or the given N is out of range

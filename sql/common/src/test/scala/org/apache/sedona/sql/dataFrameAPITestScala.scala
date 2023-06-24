@@ -1011,5 +1011,18 @@ class dataFrameAPITestScala extends TestBaseScala {
       val actual = wKTWriter.write(df.take(1)(0).get(0).asInstanceOf[Geometry])
       assertEquals(expected, actual)
     }
+
+    it("Passed ST_HausdorffDistance") {
+      val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((1 2, 2 1, 2 0, 4 1, 1 2))') AS g1, " +
+             "ST_GeomFromWKT('MULTILINESTRING ((1 1, 2 1, 4 4, 5 5), (10 10, 11 11, 12 12, 14 14), (-11 -20, -11 -21, -15 -19))') AS g2")
+      val df = polyDf.select(ST_HausdorffDistance("g1", "g2", 0.05))
+      val dfDefaultValue = polyDf.select(ST_HausdorffDistance("g1", "g2"))
+      val expected = 25.495097567963924
+      val actual = df.take(1)(0).get(0).asInstanceOf[Double]
+      val actualDefaultValue = dfDefaultValue.take(1)(0).get(0).asInstanceOf[Double]
+      assert(expected == actual)
+      assert(expected == actualDefaultValue)
+    }
+    
   }
 }

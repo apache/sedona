@@ -1299,3 +1299,16 @@ def ST_BoundingDiagonal(geometry: ColumnOrName) -> Column:
     """
 
     return _call_st_function("ST_BoundingDiagonal", geometry)
+
+@validate_argument_types
+def ST_HausdorffDistance(g1: ColumnOrName, g2: ColumnOrName, densityFrac: Optional[Union[ColumnOrName, float]] = -1) -> Column:
+    """
+    Returns discretized (and hence approximate) hausdorff distance between two given geometries.
+    Optionally, a distance fraction can also be provided which decreases the gap between actual and discretized hausforff distance
+    :param g1:
+    :param g2:
+    :param densityFrac: Optional
+    :return:
+    """
+    args = (g1, g2, densityFrac)
+    return _call_st_function("ST_HausdorffDistance", args)

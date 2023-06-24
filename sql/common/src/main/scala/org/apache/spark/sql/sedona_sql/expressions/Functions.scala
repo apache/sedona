@@ -1023,3 +1023,10 @@ case class ST_BoundingDiagonal(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+case class ST_HausdorffDistance(inputExpressions: Seq[Expression])
+  extends InferredTernaryExpression(Functions.hausdorffDistance) with FoldableExpression {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
