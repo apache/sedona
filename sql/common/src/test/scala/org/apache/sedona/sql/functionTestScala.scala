@@ -137,20 +137,31 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(functionDf.count() > 0);
     }
 
-    it("Passed ST_Dimension") {
+    it("Passed ST_Dimension with Geometry") {
       val test1 = sparkSession.sql("select ST_Dimension(ST_GeomFromWKT('POINT(1 2)'))")
       assert(test1.take(1)(0).get(0).asInstanceOf[Int] == 0)
+
       val test2 = sparkSession.sql("select ST_Dimension(ST_GeomFromWKT('LINESTRING(1 2, 3 4)'))")
       assert(test2.take(1)(0).get(0).asInstanceOf[Int] == 1)
+
       val test3 = sparkSession.sql("select ST_Dimension(ST_GeomFromWKT('POLYGON((0 0,0 5,5 0,0 0))'))")
       assert(test3.take(1)(0).get(0).asInstanceOf[Int] == 2)
-      val test4 = sparkSession.sql("select ST_Dimension(ST_GeomFromWKT('GEOMETRYCOLLECTION EMPTY'))")
-      assert(test4.take(1)(0).get(0).asInstanceOf[Int] == 0)
-      val test5 = sparkSession.sql("select ST_Dimension(ST_GeomFromWKT('GEOMETRYCOLLECTION(LINESTRING(1 1,0 0),POINT(0 0))'))")
-      assert(test5.take(1)(0).get(0).asInstanceOf[Int] == 1)
-      val test6 = sparkSession.sql("select ST_Dimension(ST_GeomFromWKT('GEOMETRYCOLLECTION(MULTIPOLYGON(((0 0, 0 1, 1 1, 1 0, 0 0)), ((2 2, 2 3, 3 3, 3 2, 2 2))), MULTIPOINT(6 6, 7 7, 8 8))'))")
-      assert(test6.take(1)(0).get(0).asInstanceOf[Int] == 2)
+
+      val test4 = sparkSession.sql("select ST_Dimension(ST_GeomFromWKT('MULTILINESTRING((0 0, 0 5, 5 0, 0 0))'))")
+      assert(test4.take(1)(0).get(0).asInstanceOf[Int] == 1)
     }
+
+    it("Passed DT_Dimension with GeometryCollection"){
+      val test1 = sparkSession.sql("select ST_Dimension(ST_GeomFromWKT('GEOMETRYCOLLECTION EMPTY'))")
+      assert(test1.take(1)(0).get(0).asInstanceOf[Int] == 0)
+
+      val test2 = sparkSession.sql("select ST_Dimension(ST_GeomFromWKT('GEOMETRYCOLLECTION(LINESTRING(1 1,0 0),POINT(0 0))'))")
+      assert(test2.take(1)(0).get(0).asInstanceOf[Int] == 1)
+
+      val test3 = sparkSession.sql("select ST_Dimension(ST_GeomFromWKT('GEOMETRYCOLLECTION(MULTIPOLYGON(((0 0, 0 1, 1 1, 1 0, 0 0)), ((2 2, 2 3, 3 3, 3 2, 2 2))), MULTIPOINT(6 6, 7 7, 8 8))'))")
+      assert(test3.take(1)(0).get(0).asInstanceOf[Int] == 2)
+    }
+
     it("Passed ST_Distance") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
