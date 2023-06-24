@@ -1,0 +1,518 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+          <title>sedona-sql documentation  - org.apache.spark.sql.sedona_sql.strategy.join</title>
+          <meta name="description" content="sedona - sql documentation - org.apache.spark.sql.sedona sql.strategy.join" />
+          <meta name="keywords" content="sedona sql documentation org.apache.spark.sql.sedona sql.strategy.join" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      
+      <link href="../../../../../../../lib/index.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../../../../lib/jquery.min.js"></script>
+      <script type="text/javascript" src="../../../../../../../lib/jquery.panzoom.min.js"></script>
+      <script type="text/javascript" src="../../../../../../../lib/jquery.mousewheel.min.js"></script>
+      <script type="text/javascript" src="../../../../../../../lib/index.js"></script>
+      <script type="text/javascript" src="../../../../../../../index.js"></script>
+      <script type="text/javascript" src="../../../../../../../lib/scheduler.js"></script>
+      <script type="text/javascript" src="../../../../../../../lib/template.js"></script>
+      
+      <script type="text/javascript">
+        /* this variable can be used by the JS to determine the path to the root document */
+        var toRoot = '../../../../../../../';
+      </script>
+    
+        </head>
+        <body>
+      <div id="search">
+        <span id="doc-title">sedona-sql documentation<span id="doc-version"></span></span>
+        <span class="close-results"><span class="left">&lt;</span> Back</span>
+        <div id="textfilter">
+          <span class="input">
+            <input autocapitalize="none" placeholder="Search" id="index-input" type="text" accesskey="/" />
+            <i class="clear material-icons"></i>
+            <i id="search-icon" class="material-icons"></i>
+          </span>
+        </div>
+    </div>
+      <div id="search-results">
+        <div id="search-progress">
+          <div id="progress-fill"></div>
+        </div>
+        <div id="results-content">
+          <div id="entity-results"></div>
+          <div id="member-results"></div>
+        </div>
+      </div>
+      <div id="content-scroll-container" style="-webkit-overflow-scrolling: touch;">
+        <div id="content-container" style="-webkit-overflow-scrolling: touch;">
+          <div id="subpackage-spacer">
+            <div id="packages">
+              <h1>Packages</h1>
+              <ul>
+                <li name="_root_.root" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_root_"></a><a id="root:_root_"></a>
+      <span class="permalink">
+      <a href="../../../../../../../index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../../../../index.html"><span class="name">root</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="_root_.org" visbl="pub" class="indented1 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="org"></a><a id="org:org"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../../../index.html"><span class="name">org</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="org.apache" visbl="pub" class="indented2 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apache"></a><a id="apache:apache"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../../index.html"><span class="name">apache</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../../index.html" class="extype" name="org">org</a></dd></dl></div>
+    </li><li name="org.apache.spark" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="spark"></a><a id="spark:spark"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../index.html"><span class="name">spark</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../index.html" class="extype" name="org.apache">apache</a></dd></dl></div>
+    </li><li name="org.apache.spark.sql" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sql"></a><a id="sql:sql"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../index.html"><span class="name">sql</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../index.html" class="extype" name="org.apache.spark">spark</a></dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sedona_sql"></a><a id="sedona_sql:sedona_sql"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../index.html"><span class="name">sedona_sql</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="org.apache.spark.sql">sql</a></dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy" visbl="pub" class="indented6 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="strategy"></a><a id="strategy:strategy"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../index.html"><span class="name">strategy</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="org.apache.spark.sql.sedona_sql">sedona_sql</a></dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join" visbl="pub" class="indented7 current" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="join"></a><a id="join:join"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">join</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy">strategy</a></dd></dl></div>
+    </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="class" href="BroadcastIndexJoinExec.html" title=""></a>
+                        <a href="BroadcastIndexJoinExec.html" title="">BroadcastIndexJoinExec</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="class" href="DistanceJoinExec.html" title="Distance joins requires matching geometries to be in the same partition, despite not necessarily overlapping."></a>
+                        <a href="DistanceJoinExec.html" title="Distance joins requires matching geometries to be in the same partition, despite not necessarily overlapping.">DistanceJoinExec</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="class" href="JoinQueryDetection.html" title=""></a>
+                        <a href="JoinQueryDetection.html" title="">JoinQueryDetection</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="class" href="JoinQueryDetector.html" title="Plans RangeJoinExec for inner joins on spatial relationships ST_Contains(a, b) and ST_Intersects(a, b)."></a>
+                        <a href="JoinQueryDetector.html" title="Plans RangeJoinExec for inner joins on spatial relationships ST_Contains(a, b) and ST_Intersects(a, b).">JoinQueryDetector</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="trait" href="JoinSide.html" title=""></a>
+                        <a href="JoinSide.html" title="">JoinSide</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="object" href="LeftSide$.html" title=""></a>
+                        <a href="LeftSide$.html" title="">LeftSide</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="class" href="RangeJoinExec.html" title="ST_Contains(left, right) - left contains right or ST_Intersects(left, right) - left and right intersect"></a>
+                        <a href="RangeJoinExec.html" title="ST_Contains(left, right) - left contains right or ST_Intersects(left, right) - left and right intersect">RangeJoinExec</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="object" href="RightSide$.html" title=""></a>
+                        <a href="RightSide$.html" title="">RightSide</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="class" href="SpatialIndexExec.html" title=""></a>
+                        <a href="SpatialIndexExec.html" title="">SpatialIndexExec</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="trait" href="TraitJoinQueryBase.html" title=""></a>
+                        <a href="TraitJoinQueryBase.html" title="">TraitJoinQueryBase</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="trait" href="TraitJoinQueryExec.html" title=""></a>
+                        <a href="TraitJoinQueryExec.html" title="">TraitJoinQueryExec</a>
+                      </li>
+              </ul>
+            </div>
+          </div>
+          <div id="content">
+            <body class="package value">
+      <div id="definition">
+        <div class="big-circle package">p</div>
+        <p id="owner"><a href="../../../../../../index.html" class="extype" name="org">org</a>.<a href="../../../../../index.html" class="extype" name="org.apache">apache</a>.<a href="../../../../index.html" class="extype" name="org.apache.spark">spark</a>.<a href="../../../index.html" class="extype" name="org.apache.spark.sql">sql</a>.<a href="../../index.html" class="extype" name="org.apache.spark.sql.sedona_sql">sedona_sql</a>.<a href="../index.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy">strategy</a></p>
+        <h1>join<span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span></h1>
+        
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">join</span>
+      </span>
+      </h4>
+
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div class="toggle"></div>
+        <div id="memberfilter">
+          <i class="material-icons arrow"></i>
+          <span class="input">
+            <input id="mbrsel-input" placeholder="Filter all members" type="text" accesskey="/" />
+          </span>
+          <i class="clear material-icons"></i>
+        </div>
+        <div id="filterby">
+          <div id="order">
+            <span class="filtertype">Ordering</span>
+            <ol>
+              
+              <li class="alpha in"><span>Alphabetic</span></li>
+              
+            </ol>
+          </div>
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="org.apache.spark.sql.sedona_sql.strategy.join.BroadcastIndexJoinExec" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BroadcastIndexJoinExecextendsSparkPlanwithSedonaBinaryExecNodewithTraitJoinQueryBasewithLoggingwithProductwithSerializable"></a><a id="BroadcastIndexJoinExec:BroadcastIndexJoinExec"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/BroadcastIndexJoinExec.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="BroadcastIndexJoinExec.html"><span class="name">BroadcastIndexJoinExec</span></a><span class="params">(<span name="left">left: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="right">right: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="streamShape">streamShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="indexBuildSide">indexBuildSide: <a href="JoinSide.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide">JoinSide</a></span>, <span name="windowJoinSide">windowJoinSide: <a href="JoinSide.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide">JoinSide</a></span>, <span name="joinType">joinType: <span class="extype" name="org.apache.spark.sql.catalyst.plans.JoinType">JoinType</span></span>, <span name="spatialPredicate">spatialPredicate: <span class="extype" name="org.apache.sedona.core.spatialOperator.SpatialPredicate">SpatialPredicate</span></span>, <span name="extraCondition">extraCondition: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>, <span name="distance">distance: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span> with <a href="../../execution/SedonaBinaryExecNode.html" class="extype" name="org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode">SedonaBinaryExecNode</a> with <a href="TraitJoinQueryBase.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase">TraitJoinQueryBase</a> with <span class="extype" name="org.apache.spark.internal.Logging">Logging</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.DistanceJoinExec" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="DistanceJoinExecextendsSparkPlanwithSedonaBinaryExecNodewithTraitJoinQueryExecwithLoggingwithProductwithSerializable"></a><a id="DistanceJoinExec:DistanceJoinExec"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/DistanceJoinExec.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Distance joins requires matching geometries to be in the same partition, despite not necessarily overlapping." href="DistanceJoinExec.html"><span class="name">DistanceJoinExec</span></a><span class="params">(<span name="left">left: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="right">right: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="leftShape">leftShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="rightShape">rightShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="distance">distance: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="distanceBoundToLeft">distanceBoundToLeft: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="spatialPredicate">spatialPredicate: <span class="extype" name="org.apache.sedona.core.spatialOperator.SpatialPredicate">SpatialPredicate</span></span>, <span name="isGeography">isGeography: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="extraCondition">extraCondition: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span> with <a href="../../execution/SedonaBinaryExecNode.html" class="extype" name="org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode">SedonaBinaryExecNode</a> with <a href="TraitJoinQueryExec.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryExec">TraitJoinQueryExec</a> with <span class="extype" name="org.apache.spark.internal.Logging">Logging</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Distance joins requires matching geometries to be in the same partition, despite not necessarily overlapping.</p><div class="fullcomment"><div class="comment cmt"><p>Distance joins requires matching geometries to be in the same partition, despite not necessarily overlapping.
+To create an overlap and guarantee matching geometries end up in the same partition, the left geometry is expanded
+before partitioning. It's the logical equivalent of:</p><p>select * from a join b on ST_Distance(a.geom, b.geom) &lt;= 1</p><p>becomes</p><p>select * from a join b on ST_Intersects(ST_Envelope(ST_Buffer(a.geom, 1)), b.geom) and ST_Distance(a.geom, b.geom) &lt;= 1
+</p></div><dl class="paramcmts block"><dt class="param">left</dt><dd class="cmt"><p>left side of the join</p></dd><dt class="param">right</dt><dd class="cmt"><p>right side of the join</p></dd><dt class="param">leftShape</dt><dd class="cmt"><p>expression for the first argument of spatialPredicate</p></dd><dt class="param">rightShape</dt><dd class="cmt"><p>expression for the second argument of spatialPredicate</p></dd><dt class="param">distance</dt><dd class="cmt"><p>- ST_Distance(left, right) &lt;= distance. Distance can be literal or a computation over 'left' or 'right'.</p></dd><dt class="param">distanceBoundToLeft</dt><dd class="cmt"><p>whether distance expression references attributes from left relation or right relation</p></dd><dt class="param">spatialPredicate</dt><dd class="cmt"><p>spatial predicate as join condition</p></dd><dt class="param">extraCondition</dt><dd class="cmt"><p>extra join condition other than spatialPredicate</p></dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.JoinQueryDetection" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="JoinQueryDetectionextendsProductwithSerializable"></a><a id="JoinQueryDetection:JoinQueryDetection"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinQueryDetection.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="JoinQueryDetection.html"><span class="name">JoinQueryDetection</span></a><span class="params">(<span name="left">left: <span class="extype" name="org.apache.spark.sql.catalyst.plans.logical.LogicalPlan">LogicalPlan</span></span>, <span name="right">right: <span class="extype" name="org.apache.spark.sql.catalyst.plans.logical.LogicalPlan">LogicalPlan</span></span>, <span name="leftShape">leftShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="rightShape">rightShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="spatialPredicate">spatialPredicate: <span class="extype" name="org.apache.sedona.core.spatialOperator.SpatialPredicate">SpatialPredicate</span></span>, <span name="isGeography">isGeography: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="extraCondition">extraCondition: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>, <span name="distance">distance: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.JoinQueryDetector" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="JoinQueryDetectorextendsorg.apache.spark.sql.Strategy"></a><a id="JoinQueryDetector:JoinQueryDetector"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinQueryDetector.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Plans RangeJoinExec for inner joins on spatial relationships ST_Contains(a, b) and ST_Intersects(a, b)." href="JoinQueryDetector.html"><span class="name">JoinQueryDetector</span></a><span class="result"> extends <a href="../../../index.html#Strategy=org.apache.spark.sql.execution.SparkStrategy" class="extmbr" name="org.apache.spark.sql.Strategy">Strategy</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Plans <code>RangeJoinExec</code> for inner joins on spatial relationships ST_Contains(a, b)
+and ST_Intersects(a, b).</p><div class="fullcomment"><div class="comment cmt"><p>Plans <code>RangeJoinExec</code> for inner joins on spatial relationships ST_Contains(a, b)
+and ST_Intersects(a, b).</p><p>Plans <code>DistanceJoinExec</code> for inner joins on spatial relationship ST_Distance(a, b) &lt; r.</p><p>Plans <code>BroadcastIndexJoinExec</code> for inner joins on spatial relationships with a broadcast hint.
+</p></div></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="JoinSideextendsAnyRef"></a><a id="JoinSide:JoinSide"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinSide.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="JoinSide.html"><span class="name">JoinSide</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.RangeJoinExec" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="RangeJoinExecextendsSparkPlanwithSedonaBinaryExecNodewithTraitJoinQueryExecwithLoggingwithProductwithSerializable"></a><a id="RangeJoinExec:RangeJoinExec"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/RangeJoinExec.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="ST_Contains(left, right) - left contains right or ST_Intersects(left, right) - left and right intersect" href="RangeJoinExec.html"><span class="name">RangeJoinExec</span></a><span class="params">(<span name="left">left: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="right">right: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="leftShape">leftShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="rightShape">rightShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="spatialPredicate">spatialPredicate: <span class="extype" name="org.apache.sedona.core.spatialOperator.SpatialPredicate">SpatialPredicate</span></span>, <span name="extraCondition">extraCondition: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span> with <a href="../../execution/SedonaBinaryExecNode.html" class="extype" name="org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode">SedonaBinaryExecNode</a> with <a href="TraitJoinQueryExec.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryExec">TraitJoinQueryExec</a> with <span class="extype" name="org.apache.spark.internal.Logging">Logging</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">ST_Contains(left, right) - left contains right
+or
+ST_Intersects(left, right) - left and right intersect
+</p><div class="fullcomment"><div class="comment cmt"><p>ST_Contains(left, right) - left contains right
+or
+ST_Intersects(left, right) - left and right intersect
+</p></div><dl class="paramcmts block"><dt class="param">left</dt><dd class="cmt"><p>left side of the join</p></dd><dt class="param">right</dt><dd class="cmt"><p>right side of the join</p></dd><dt class="param">leftShape</dt><dd class="cmt"><p>expression for the first argument of spatialPredicate</p></dd><dt class="param">rightShape</dt><dd class="cmt"><p>expression for the second argument of spatialPredicate</p></dd><dt class="param">spatialPredicate</dt><dd class="cmt"><p>spatial predicate as join condition</p></dd><dt class="param">extraCondition</dt><dd class="cmt"><p>extra join condition other than spatialPredicate</p></dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.SpatialIndexExec" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SpatialIndexExecextendsSparkPlanwithSedonaUnaryExecNodewithTraitJoinQueryBasewithLoggingwithProductwithSerializable"></a><a id="SpatialIndexExec:SpatialIndexExec"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/SpatialIndexExec.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="SpatialIndexExec.html"><span class="name">SpatialIndexExec</span></a><span class="params">(<span name="child">child: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="shape">shape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="indexType">indexType: <span class="extype" name="org.apache.sedona.core.enums.IndexType">IndexType</span></span>, <span name="isGeography">isGeography: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="distance">distance: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span> with <a href="../../execution/SedonaUnaryExecNode.html" class="extype" name="org.apache.spark.sql.sedona_sql.execution.SedonaUnaryExecNode">SedonaUnaryExecNode</a> with <a href="TraitJoinQueryBase.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase">TraitJoinQueryBase</a> with <span class="extype" name="org.apache.spark.internal.Logging">Logging</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TraitJoinQueryBaseextendsAnyRef"></a><a id="TraitJoinQueryBase:TraitJoinQueryBase"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryBase.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="TraitJoinQueryBase.html"><span class="name">TraitJoinQueryBase</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryExec" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TraitJoinQueryExecextendsTraitJoinQueryBase"></a><a id="TraitJoinQueryExec:TraitJoinQueryExec"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryExec.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="TraitJoinQueryExec.html"><span class="name">TraitJoinQueryExec</span></a><span class="result"> extends <a href="TraitJoinQueryBase.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase">TraitJoinQueryBase</a></span>
+      </span>
+      
+      
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members">
+              <h3>Value Members</h3>
+              <ol>
+                <li name="org.apache.spark.sql.sedona_sql.strategy.join.LeftSide" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="LeftSide"></a><a id="LeftSide:LeftSide"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/LeftSide$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="LeftSide$.html"><span class="name">LeftSide</span></a><span class="result"> extends <a href="JoinSide.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide">JoinSide</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.RightSide" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RightSide"></a><a id="RightSide:RightSide"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/RightSide$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="RightSide$.html"><span class="name">RightSide</span></a><span class="result"> extends <a href="JoinSide.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide">JoinSide</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li>
+              </ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+    </body>
+          </div>
+        </div>
+      </div>
+    </body>
+      </html>
