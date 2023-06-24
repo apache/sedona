@@ -52,6 +52,10 @@ test_configurations = [
     (stf.ST_3DDistance, ("a", "b"), "two_points", "", 5.0),
     (stf.ST_AddPoint, ("line", lambda: f.expr("ST_Point(1.0, 1.0)")), "linestring_geom", "", "LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0, 1 1)"),
     (stf.ST_AddPoint, ("line", lambda: f.expr("ST_Point(1.0, 1.0)"), 1), "linestring_geom", "", "LINESTRING (0 0, 1 1, 1 0, 2 0, 3 0, 4 0, 5 0)"),
+    (stf.ST_Angle, ("p1", "p2", "p3", "p4", ), "four_points", "", 0.4048917862850834),
+    (stf.ST_Angle, ("p1", "p2", "p3",), "three_points", "", 0.19739555984988078),
+    (stf.ST_Angle, ("line1", "line2"), "two_lines", "", 0.19739555984988078),
+    (stf.ST_Degrees, ("angleRad",), "two_lines_angle_rad", "", 11.309932474020213),
     (stf.ST_Area, ("geom",), "triangle_geom", "", 0.5),
     (stf.ST_AreaSpheroid, ("point",), "point_geom", "", 0.0),
     (stf.ST_AsBinary, ("point",), "point_geom", "", "01010000000000000000000000000000000000f03f"),
@@ -391,6 +395,14 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 2 1)') AS line, ST_GeomFromWKT('POLYGON ((1 0, 2 0, 2 2, 1 2, 1 0))') AS poly")
         elif request.param == "square_geom":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))') AS geom")
+        elif request.param == "four_points":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POINT (0 0)') AS p1, ST_GeomFromWKT('POINT (1 1)') AS p2, ST_GeomFromWKT('POINT (1 0)') AS p3, ST_GeomFromWKT('POINT (6 2)') AS p4")
+        elif request.param == "three_points":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POINT (1 1)') AS p1, ST_GeomFromWKT('POINT (0 0)') AS p2, ST_GeomFromWKT('POINT (3 2)') AS p3")
+        elif request.param == "two_lines":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 1)') AS line1, ST_GeomFromWKT('LINESTRING (0 0, 3 2)') AS line2")
+        elif request.param == "two_lines_angle_rad":
+            return TestDataFrameAPI.spark.sql("SELECT ST_Angle(ST_GeomFromWKT('LINESTRING (0 0, 1 1)'), ST_GeomFromWKT('LINESTRING (0 0, 3 2)')) AS angleRad")
         raise ValueError(f"Invalid base_df name passed: {request.param}")
 
     def _id_test_configuration(val):

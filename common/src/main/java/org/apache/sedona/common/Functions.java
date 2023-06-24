@@ -935,8 +935,6 @@ public class Functions {
         if (geometry.isEmpty()) {
             return GEOMETRY_FACTORY.createLineString();
         }else {
-            //Envelope envelope = geometry.getEnvelopeInternal();
-           // if (envelope.isNull()) return GEOMETRY_FACTORY.createLineString();
             Double startX = null, startY = null, startZ = null,
                     endX = null, endY = null, endZ = null;
             boolean is3d = !Double.isNaN(geometry.getCoordinate().z);
@@ -963,6 +961,34 @@ public class Functions {
             }
             return GEOMETRY_FACTORY.createLineString(new Coordinate[] {startCoordinate, endCoordinate});
         }
+    }
+
+    public static double angle(Geometry point1, Geometry point2, Geometry point3, Geometry point4) throws IllegalArgumentException {
+        if (point3 == null && point4 == null) return Functions.angle(point1, point2);
+        else if (point4 == null) return Functions.angle(point1, point2, point3);
+        if (GeomUtils.isAnyGeomEmpty(point1, point2, point3, point4)) throw new IllegalArgumentException("ST_Angle cannot support empty geometries.");
+        if (!(point1 instanceof Point && point2 instanceof Point && point3 instanceof Point && point4 instanceof Point)) throw new IllegalArgumentException("ST_Angle supports either only POINT or only LINESTRING geometries.");
+        return GeomUtils.calcAngle(point1.getCoordinate(), point2.getCoordinate(), point3.getCoordinate(), point4.getCoordinate());
+    }
+
+    public static double angle(Geometry point1, Geometry point2, Geometry point3) throws IllegalArgumentException {
+        if (GeomUtils.isAnyGeomEmpty(point1, point2, point3)) throw new IllegalArgumentException("ST_Angle cannot support empty geometries.");
+        if (!(point1 instanceof Point && point2 instanceof Point && point3 instanceof Point)) throw new IllegalArgumentException("ST_Angle supports either only POINT or only LINESTRING geometries.");
+        return GeomUtils.calcAngle(point2.getCoordinate(), point1.getCoordinate(), point2.getCoordinate(), point3.getCoordinate());
+    }
+
+    public static double angle(Geometry line1, Geometry line2) throws IllegalArgumentException {
+        if (GeomUtils.isAnyGeomEmpty(line1, line2)) throw new IllegalArgumentException("ST_Angle cannot support empty geometries.");
+        if (!(line1 instanceof LineString && line2 instanceof LineString)) throw new IllegalArgumentException("ST_Angle supports either only POINT or only LINESTRING geometries.");
+        Coordinate[] startEndLine1 = GeomUtils.getStartEndCoordinates(line1);
+        Coordinate[] startEndLine2 = GeomUtils.getStartEndCoordinates(line2);
+        assert startEndLine1 != null;
+        assert startEndLine2 != null;
+        return GeomUtils.calcAngle(startEndLine1[0], startEndLine1[1], startEndLine2[0], startEndLine2[1]);
+    }
+
+    public static double degrees(double angleInRadian) {
+        return GeomUtils.toDegrees(angleInRadian);
     }
 
 }

@@ -23,6 +23,7 @@ import org.apache.commons.codec.binary.Hex
 import org.apache.sedona.sql.implicits._
 import org.apache.spark.sql.catalyst.expressions.{GenericRow, GenericRowWithSchema}
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.sedona_sql.expressions.ST_Degrees
 import org.apache.spark.sql.{DataFrame, Row}
 import org.geotools.referencing.CRS
 import org.junit.Assert.assertEquals
@@ -1976,7 +1977,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
   it ("should pass ST_BoundingDiagonal") {
     val geomTestCases = Map (
-      ("'POINT (10 10)'")-> "'LINESTRING (10 10, 10 10)'",
+      ("'POINT (10 10)'") -> "'LINESTRING (10 10, 10 10)'",
       ("'POLYGON ((1 1 1, 4 4 4, 0 9 3, 0 9 9, 1 1 1))'") -> "'LINESTRING Z(0 1 1, 4 9 9)'",
       ("'GEOMETRYCOLLECTION (MULTIPOLYGON (((1 1, 1 -1, 2 2, 2 9, 9 1, 1 1)), ((5 5, 4 4, 2 2 , 5 5))), POINT (-1 0))'") -> "'LINESTRING (-1 -1, 9 9)'"
     )
@@ -1987,4 +1988,66 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assertEquals(expected, actual)
     }
   }
+
+  it ("should pass ST_Angle - 4 points") {
+    val geomTestCases = Map (
+      ("'POINT (0 0)'", "'POINT (1 1)'", "'POINT (1 0)'", "'POINT (6 2)'") -> (0.4048917862850834, 23.198590513648185)
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val p1 = geom._1
+      val p2 = geom._2
+      val p3 = geom._3
+      val p4 = geom._4
+      val df = sparkSession.sql(s"SELECT ST_Angle(ST_GeomFromWKT($p1), ST_GeomFromWKT($p2), ST_GeomFromWKT($p3), ST_GeomFromWKT($p4)) AS angleInRadian")
+      val expectedRadian = expectedResult._1
+      val expectedDegrees = expectedResult._2
+
+      val actualRadian = df.take(1)(0).get(0).asInstanceOf[Double]
+      val actualDegrees = df.selectExpr("ST_Degrees(angleInRadian)").take(1)(0).get(0).asInstanceOf[Double]
+
+      assertEquals(expectedRadian, actualRadian, 1e-9)
+      assertEquals(expectedDegrees, actualDegrees, 1e-9)
+    }
+  }
+
+  it ("should pass ST_Angle - 3 points") {
+    val geomTestCases = Map(
+      ("'POINT (1 1)'", "'POINT (0 0)'", "'POINT (3 2)'") -> (0.19739555984988044, 11.309932474020195)
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val p1 = geom._1
+      val p2 = geom._2
+      val p3 = geom._3
+      val df = sparkSession.sql(s"SELECT ST_Angle(ST_GeomFromWKT($p1), ST_GeomFromWKT($p2), ST_GeomFromWKT($p3)) AS angleInRadian")
+      val expectedRadian = expectedResult._1
+      val expectedDegrees = expectedResult._2
+
+      val actualRadian = df.take(1)(0).get(0).asInstanceOf[Double]
+      val actualDegrees = df.selectExpr("ST_Degrees(angleInRadian)").take(1)(0).get(0).asInstanceOf[Double]
+
+      assertEquals(expectedRadian, actualRadian, 1e-9)
+      assertEquals(expectedDegrees, actualDegrees, 1e-9)
+    }
+  }
+
+  it ("should pass ST_Angle - 2 lines") {
+    val geomTestCases = Map(
+      ("'LINESTRING (0 0, 1 1)'", "'LINESTRING (0 0, 3 2)'") -> (0.19739555984988044, 11.309932474020195)
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val p1 = geom._1
+      val p2 = geom._2
+
+      val df = sparkSession.sql(s"SELECT ST_Angle(ST_GeomFromWKT($p1), ST_GeomFromWKT($p2)) AS angleInRadian")
+      val expectedRadian = expectedResult._1
+      val expectedDegrees = expectedResult._2
+
+      val actualRadian = df.take(1)(0).get(0).asInstanceOf[Double]
+      val actualDegrees = df.selectExpr("ST_Degrees(angleInRadian)").take(1)(0).get(0).asInstanceOf[Double]
+
+      assertEquals(expectedRadian, actualRadian, 1e-9)
+      assertEquals(expectedDegrees, actualDegrees, 1e-9)
+    }
+  }
+
 }

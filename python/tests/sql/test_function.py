@@ -1104,3 +1104,12 @@ class TestPredicateJoin(TestBase):
                                    "1 0))')) AS geom")
         actual = actual_df.selectExpr("ST_AsText(geom)").take(1)[0][0]
         assert expected == actual
+
+    def test_angle(self):
+        expectedDegrees = 11.309932474020195
+        expectedRad = 0.19739555984988044
+        actual_df = self.spark.sql("SELECT ST_Angle(ST_GeomFromText('LINESTRING (0 0, 1 1)'), ST_GeomFromText('LINESTRING (0 0, 3 2)')) AS angleRad")
+        actualRad = actual_df.take(1)[0][0]
+        actualDegrees = actual_df.selectExpr("ST_Degrees(angleRad)").take(1)[0][0]
+        assert math.isclose(expectedRad, actualRad, rel_tol=1e-9)
+        assert math.isclose(expectedDegrees, actualDegrees, rel_tol=1e-9)

@@ -1016,3 +1016,20 @@ case class ST_BoundingDiagonal(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+case class ST_Angle(inputExpressions: Seq[Expression])
+  extends InferredQuarternaryExpression(Functions.angle) with FoldableExpression {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+
+  override def allowRightNullNum: Int = 2
+}
+
+case class ST_Degrees(inputExpressions: Seq[Expression])
+  extends InferredUnaryExpression(Functions.degrees) with FoldableExpression {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+

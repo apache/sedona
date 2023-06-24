@@ -343,6 +343,8 @@ abstract class InferredQuarternaryExpression[A1: InferrableType, A2: InferrableT
 
   override def nullable: Boolean = true
 
+  def allowRightNullNum: Int = 0
+
   override def dataType = inferSparkType[R]
 
   lazy val extractFirst = buildExtractor[A1](inputExpressions(0))
@@ -357,9 +359,10 @@ abstract class InferredQuarternaryExpression[A1: InferrableType, A2: InferrableT
     val second = extractSecond(input)
     val third = extractThird(input)
     val forth = extractForth(input)
-    if (first != null && second != null && third != null && forth != null) {
+    if (first != null && second != null && (third != null || allowRightNullNum >= 2) && (forth != null || allowRightNullNum >= 1)) {
       serialize(f(first, second, third, forth))
-    } else {
+    }
+    else {
       null
     }
   }

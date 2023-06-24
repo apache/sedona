@@ -915,4 +915,113 @@ public class FunctionsTest {
         String actual = Functions.boundingDiagonal(point).toText();
         assertEquals(expected, actual);
     }
+
+    @Test
+    public void angleFourPoints() {
+        Point start1 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+        Point end1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
+        Point start2 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 0));
+        Point end2 = GEOMETRY_FACTORY.createPoint(new Coordinate(6, 2));
+
+        double expected = 0.4048917862850834;
+        double expectedDegrees = 23.198590513648185;
+        double reverseExpectedDegrees = 336.8014094863518;
+        double reverseExpected = 5.878293520894503;
+
+        double actualPointsFour = Functions.angle(start1, end1, start2, end2);
+        double actualPointsFourDegrees = Functions.degrees(actualPointsFour);
+        double actualPointsFourReverse = Functions.angle(start2, end2, start1, end1);
+        double actualPointsFourReverseDegrees = Functions.degrees(actualPointsFourReverse);
+
+        assertEquals(expected, actualPointsFour, 1e-9);
+        assertEquals(expectedDegrees, actualPointsFourDegrees, 1e-9);
+        assertEquals(reverseExpected, actualPointsFourReverse, 1e-9);
+        assertEquals(reverseExpectedDegrees, actualPointsFourReverseDegrees, 1e-9);
+    }
+
+    @Test
+    public void angleFourPoints3D() {
+        Point start1 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0, 4));
+        Point end1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 5));
+        Point start2 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 0, 9));
+        Point end2 = GEOMETRY_FACTORY.createPoint(new Coordinate(6, 2, 2));
+
+        double expected = 0.4048917862850834;
+        double expectedDegrees = 23.198590513648185;
+        double reverseExpectedDegrees = 336.8014094863518;
+        double reverseExpected = 5.878293520894503;
+
+        double actualPointsFour = Functions.angle(start1, end1, start2, end2);
+        double actualPointsFourDegrees = Functions.degrees(actualPointsFour);
+        double actualPointsFourReverse = Functions.angle(start2, end2, start1, end1);
+        double actualPointsFourReverseDegrees = Functions.degrees(actualPointsFourReverse);
+
+        assertEquals(expected, actualPointsFour, 1e-9);
+        assertEquals(expectedDegrees, actualPointsFourDegrees, 1e-9);
+        assertEquals(reverseExpected, actualPointsFourReverse, 1e-9);
+        assertEquals(reverseExpectedDegrees, actualPointsFourReverseDegrees, 1e-9);
+    }
+
+
+
+    @Test
+    public void angleThreePoints() {
+        Point point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
+        Point point2 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+        Point point3 = GEOMETRY_FACTORY.createPoint(new Coordinate(3, 2));
+
+        double expected = 0.19739555984988044;
+        double expectedDegrees = 11.309932474020195;
+
+
+        double actualPointsThree = Functions.angle(point1, point2, point3);
+        double actualPointsThreeDegrees = Functions.degrees(actualPointsThree);
+
+        assertEquals(expected, actualPointsThree, 1e-9);
+        assertEquals(expectedDegrees, actualPointsThreeDegrees, 1e-9);
+
+    }
+
+    @Test
+    public void angleTwoLineStrings() {
+        LineString lineString1 = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 1, 1));
+        LineString lineString2 = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 3, 2));
+
+        double expected = 0.19739555984988044;
+        double expectedDegrees = 11.309932474020195;
+        double reverseExpected = 6.085789747329706;
+        double reverseExpectedDegrees = 348.69006752597977;
+
+        double actualLineString = Functions.angle(lineString1, lineString2);
+        double actualLineStringReverse = Functions.angle(lineString2, lineString1);
+        double actualLineStringDegrees = Functions.degrees(actualLineString);
+        double actualLineStringReverseDegrees = Functions.degrees(actualLineStringReverse);
+
+        assertEquals(expected, actualLineString, 1e-9);
+        assertEquals(reverseExpected, actualLineStringReverse, 1e-9);
+        assertEquals(expectedDegrees, actualLineStringDegrees, 1e-9);
+        assertEquals(reverseExpectedDegrees, actualLineStringReverseDegrees, 1e-9);
+    }
+
+    @Test
+    public void angleInvalidEmptyGeom() {
+        Point point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(3, 5));
+        Point point2 = GEOMETRY_FACTORY.createPoint();
+        Point point3 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> Functions.angle(point1, point2, point3));
+        assertEquals("ST_Angle cannot support empty geometries.", e.getMessage());
+    }
+
+    @Test
+    public void angleInvalidUnsupportedGeom() {
+        Point point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(3, 5));
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
+        Point point3 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> Functions.angle(point1, polygon, point3));
+        assertEquals("ST_Angle supports either only POINT or only LINESTRING geometries.", e.getMessage());
+    }
+
+
 }
