@@ -1006,7 +1006,7 @@ case class ST_Translate(inputExpressions: Seq[Expression])
 }
 
 case class ST_Dimension(inputExpressions: Seq[Expression])
-  extends InferredUnaryExpression(Functions.dimension) with FoldableExpression {
+  extends InferredExpression(Functions.dimension _) with FoldableExpression {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
