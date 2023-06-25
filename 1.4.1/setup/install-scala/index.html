@@ -2478,12 +2478,12 @@ Please refer to <a href="../maven-coordinates/">Sedona Maven Central coordinates
 <ul>
 <li>
 <p>Local mode: test Sedona without setting up a cluster
-<div class="highlight"><pre><span></span><code>./bin/spark-shell --packages org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.4.0,org.apache.sedona:sedona-viz-3.0_2.12:1.4.0,org.datasyslab:geotools-wrapper:1.4.0-28.2
+<div class="highlight"><pre><span></span><code>./bin/spark-shell --packages org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.4.1,org.apache.sedona:sedona-viz-3.0_2.12:1.4.1,org.datasyslab:geotools-wrapper:1.4.0-28.2
 </code></pre></div></p>
 </li>
 <li>
 <p>Cluster mode: you need to specify Spark Master IP
-<div class="highlight"><pre><span></span><code>./bin/spark-shell --master spark://localhost:7077 --packages org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.4.0,org.apache.sedona:sedona-viz-3.0_2.12:1.4.0,org.datasyslab:geotools-wrapper:1.4.0-28.2
+<div class="highlight"><pre><span></span><code>./bin/spark-shell --master spark://localhost:7077 --packages org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.4.1,org.apache.sedona:sedona-viz-3.0_2.12:1.4.1,org.datasyslab:geotools-wrapper:1.4.0-28.2
 </code></pre></div></p>
 </li>
 </ul>
@@ -2505,16 +2505,16 @@ Please refer to <a href="../maven-coordinates/">Sedona Maven Central coordinates
 <p>Run Spark shell with <code>--jars</code> option.
 <div class="highlight"><pre><span></span><code>./bin/spark-shell --jars /Path/To/SedonaJars.jar
 </code></pre></div>
-If you are using Spark 3.0 to 3.3, please use jars with filenames containing <code>3.0</code>, such as <code>sedona-spark-shaded-3.0_2.12-1.4.0</code>; If you are using Spark 3.4 or higher versions, please use jars with Spark major.minor versions in the filename, such as <code>sedona-spark-shaded-3.4_2.12-1.4.0</code>.</p>
+If you are using Spark 3.0 to 3.3, please use jars with filenames containing <code>3.0</code>, such as <code>sedona-spark-shaded-3.0_2.12-1.4.1</code>; If you are using Spark 3.4 or higher versions, please use jars with Spark major.minor versions in the filename, such as <code>sedona-spark-shaded-3.4_2.12-1.4.1</code>.</p>
 <ul>
 <li>
 <p>Local mode: test Sedona without setting up a cluster
-<div class="highlight"><pre><span></span><code>./bin/spark-shell --jars /path/to/sedona-spark-shaded-3.0_2.12-1.4.0.jar,/path/to/sedona-viz-3.0_2.12-1.4.0.jar,/path/to/geotools-wrapper-1.4.0-28.2.jar
+<div class="highlight"><pre><span></span><code>./bin/spark-shell --jars /path/to/sedona-spark-shaded-3.0_2.12-1.4.1.jar,/path/to/sedona-viz-3.0_2.12-1.4.1.jar,/path/to/geotools-wrapper-1.4.0-28.2.jar
 </code></pre></div></p>
 </li>
 <li>
 <p>Cluster mode: you need to specify Spark Master IP
-<div class="highlight"><pre><span></span><code>./bin/spark-shell --master spark://localhost:7077 --jars /path/to/sedona-spark-shaded-3.0_2.12-1.4.0.jar,/path/to/sedona-viz-3.0_2.12-1.4.0.jar,/path/to/geotools-wrapper-1.4.0-28.2.jar
+<div class="highlight"><pre><span></span><code>./bin/spark-shell --master spark://localhost:7077 --jars /path/to/sedona-spark-shaded-3.0_2.12-1.4.1.jar,/path/to/sedona-viz-3.0_2.12-1.4.1.jar,/path/to/geotools-wrapper-1.4.0-28.2.jar
 </code></pre></div></p>
 </li>
 </ul>

@@ -2489,7 +2489,7 @@
 </ul>
 <h2 id="install-sedona-from-the-web-ui">Install Sedona from the web UI<a class="headerlink" href="#install-sedona-from-the-web-ui" title="Permanent link">&para;</a></h2>
 <p>1) From the Libraries tab install from Maven Coordinates
-    <div class="highlight"><pre><span></span><code>org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.4.0
+    <div class="highlight"><pre><span></span><code>org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.4.1
 org.datasyslab:geotools-wrapper:1.4.0-28.2
 </code></pre></div></p>
 <p>2) For enabling python support, from the Libraries tab install from PyPI
@@ -2516,14 +2516,14 @@ spark.kryo.registrator org.apache.sedona.core.serde.SedonaKryoRegistrator
 <p>Download the Sedona jars to a DBFS location. You can do that manually via UI or from a notebook by executing this code in a cell:</p>
 <div class="highlight"><pre><span></span><code>%sh<span class="w"> </span>
 <span class="c1"># Create JAR directory for Sedona</span>
-mkdir<span class="w"> </span>-p<span class="w"> </span>/dbfs/FileStore/jars/sedona/1.4.0
+mkdir<span class="w"> </span>-p<span class="w"> </span>/dbfs/FileStore/jars/sedona/1.4.1
 
 <span class="c1"># Download the dependencies from Maven into DBFS</span>
-curl<span class="w"> </span>-o<span class="w"> </span>/dbfs/FileStore/jars/sedona/1.4.0/geotools-wrapper-1.4.0-28.2.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.4.0-28.2/geotools-wrapper-1.4.0-28.2.jar&quot;</span>
+curl<span class="w"> </span>-o<span class="w"> </span>/dbfs/FileStore/jars/sedona/1.4.1/geotools-wrapper-1.4.0-28.2.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.4.0-28.2/geotools-wrapper-1.4.0-28.2.jar&quot;</span>
 
-curl<span class="w"> </span>-o<span class="w"> </span>/dbfs/FileStore/jars/sedona/1.4.0/sedona-spark-shaded-3.0_2.12-1.4.0.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.0_2.12/1.4.0/sedona-spark-shaded-3.0_2.12-1.4.0.jar&quot;</span>
+curl<span class="w"> </span>-o<span class="w"> </span>/dbfs/FileStore/jars/sedona/1.4.1/sedona-spark-shaded-3.0_2.12-1.4.1.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.0_2.12/1.4.1/sedona-spark-shaded-3.0_2.12-1.4.1.jar&quot;</span>
 
-curl<span class="w"> </span>-o<span class="w"> </span>/dbfs/FileStore/jars/sedona/1.4.0/sedona-viz-3.0_2.12-1.4.0.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-viz-3.0_2.12/1.4.0/sedona-viz-3.0_2.12-1.4.0.jar&quot;</span>
+curl<span class="w"> </span>-o<span class="w"> </span>/dbfs/FileStore/jars/sedona/1.4.1/sedona-viz-3.0_2.12-1.4.1.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-viz-3.0_2.12/1.4.1/sedona-viz-3.0_2.12-1.4.1.jar&quot;</span>
 </code></pre></div>
 <p>Create an init script in DBFS that loads the Sedona jars into the cluster's default jar directory. You can create that from any notebook by running: </p>
 <div class="highlight"><pre><span></span><code>%sh<span class="w"> </span>
@@ -2542,7 +2542,7 @@ cat<span class="w"> </span>&gt;<span class="w"> </span>/dbfs/FileStore/sedona/se
 <span class="s"># On cluster startup, this script will copy the Sedona jars to the cluster&#39;s default jar directory.</span>
 <span class="s"># In order to activate Sedona functions, remember to add to your spark configuration the Sedona extensions: &quot;spark.sql.extensions org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions&quot;</span>
 
-<span class="s">cp /dbfs/FileStore/jars/sedona/1.4.0/*.jar /databricks/jars</span>
+<span class="s">cp /dbfs/FileStore/jars/sedona/1.4.1/*.jar /databricks/jars</span>
 
 <span class="s">EOF</span>
 </code></pre></div>

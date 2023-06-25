@@ -2869,11 +2869,11 @@ If you use SedonaViz together with SedonaSQL, please add the following line afte
 
 <span class="n">config</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span> <span class="o">.</span>\
     <span class="n">config</span><span class="p">(</span><span class="s1">&#39;spark.jars.packages&#39;</span><span class="p">,</span>
-           <span class="s1">&#39;org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.4.0,&#39;</span>
+           <span class="s1">&#39;org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.4.1,&#39;</span>
            <span class="s1">&#39;org.datasyslab:geotools-wrapper:1.4.0-28.2&#39;</span><span class="p">)</span><span class="o">.</span> \
     <span class="n">getOrCreate</span><span class="p">()</span>
 </code></pre></div>
-If you are using Spark versions &gt;= 3.4, please replace the <code>3.0</code> in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as <code>sedona-spark-shaded-3.4_2.12:1.4.0</code>.</p>
+If you are using Spark versions &gt;= 3.4, please replace the <code>3.0</code> in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as <code>sedona-spark-shaded-3.4_2.12:1.4.1</code>.</p>
 </div>
 </div>
 </div>
@@ -2916,11 +2916,11 @@ If you use SedonaViz together with SedonaSQL, please use the following two lines
     <span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.serializer&quot;</span><span class="p">,</span> <span class="n">KryoSerializer</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span><span class="o">.</span> \
     <span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.kryo.registrator&quot;</span><span class="p">,</span> <span class="n">SedonaKryoRegistrator</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span><span class="o">.</span> \
     <span class="n">config</span><span class="p">(</span><span class="s1">&#39;spark.jars.packages&#39;</span><span class="p">,</span>
-           <span class="s1">&#39;org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.4.0,&#39;</span>
+           <span class="s1">&#39;org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.4.1,&#39;</span>
            <span class="s1">&#39;org.datasyslab:geotools-wrapper:1.4.0-28.2&#39;</span><span class="p">)</span><span class="o">.</span> \
     <span class="n">getOrCreate</span><span class="p">()</span>
 </code></pre></div>
-If you are using Spark versions &gt;= 3.4, please replace the <code>3.0</code> in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as <code>sedona-spark-shaded-3.4_2.12:1.4.0</code>.</p>
+If you are using Spark versions &gt;= 3.4, please replace the <code>3.0</code> in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as <code>sedona-spark-shaded-3.4_2.12:1.4.1</code>.</p>
 </div>
 </div>
 </div>

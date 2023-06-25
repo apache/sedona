@@ -2439,8 +2439,8 @@ python3<span class="w"> </span>setup.py<span class="w"> </span>install
 <h3 id="prepare-sedona-spark-shaded-jar">Prepare sedona-spark-shaded jar<a class="headerlink" href="#prepare-sedona-spark-shaded-jar" title="Permanent link">&para;</a></h3>
 <p>Sedona Python needs one additional jar file called <code>sedona-spark-shaded</code> to work properly. Please make sure you use the correct version for Spark and Scala.</p>
 <ul>
-<li>For Spark 3.0 to 3.3 and Scala 2.12, it is called <code>sedona-spark-shaded-3.0_2.12-1.4.0.jar</code></li>
-<li>For Spark 3.4+ and Scala 2.12, it is called <code>sedona-spark-shaded-3.4_2.12-1.4.0.jar</code>. If you are using Spark versions higher than 3.4, please replace the <code>3.4</code> in artifact names with the corresponding major.minor version numbers.</li>
+<li>For Spark 3.0 to 3.3 and Scala 2.12, it is called <code>sedona-spark-shaded-3.0_2.12-1.4.1.jar</code></li>
+<li>For Spark 3.4+ and Scala 2.12, it is called <code>sedona-spark-shaded-3.4_2.12-1.4.1.jar</code>. If you are using Spark versions higher than 3.4, please replace the <code>3.4</code> in artifact names with the corresponding major.minor version numbers.</li>
 </ul>
 <p>You can get it using one of the following methods:</p>
 <ol>
@@ -2456,7 +2456,7 @@ python3<span class="w"> </span>setup.py<span class="w"> </span>install
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.spark</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="n">config</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span><span class="o">.</span> \
     <span class="n">config</span><span class="p">(</span><span class="s1">&#39;spark.jars.packages&#39;</span><span class="p">,</span>
-           <span class="s1">&#39;org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.4.0,&#39;</span>
+           <span class="s1">&#39;org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.4.1,&#39;</span>
            <span class="s1">&#39;org.datasyslab:geotools-wrapper:1.4.0-28.2&#39;</span><span class="p">)</span><span class="o">.</span> \
     <span class="n">getOrCreate</span><span class="p">()</span>
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
@@ -2472,7 +2472,7 @@ python3<span class="w"> </span>setup.py<span class="w"> </span>install
     <span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.serializer&quot;</span><span class="p">,</span> <span class="n">KryoSerializer</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span><span class="o">.</span> \
     <span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.kryo.registrator&quot;</span><span class="p">,</span> <span class="n">SedonaKryoRegistrator</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span><span class="o">.</span> \
     <span class="n">config</span><span class="p">(</span><span class="s1">&#39;spark.jars.packages&#39;</span><span class="p">,</span>
-           <span class="s1">&#39;org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.4.0,&#39;</span>
+           <span class="s1">&#39;org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.4.1,&#39;</span>
            <span class="s1">&#39;org.datasyslab:geotools-wrapper:1.4.0-28.2&#39;</span><span class="p">)</span><span class="o">.</span> \
     <span class="n">getOrCreate</span><span class="p">()</span>
 <span class="n">SedonaRegistrator</span><span class="o">.</span><span class="n">registerAll</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
