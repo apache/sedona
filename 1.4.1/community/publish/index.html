@@ -3130,6 +3130,7 @@ R<span class="w"> </span>CMD<span class="w"> </span>check<span class="w"> </span
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 
 mvn<span class="w"> </span>-q<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DskipTests
+rm<span class="w"> </span>-rf<span class="w"> </span>docs/api/javadoc<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>mkdir<span class="w"> </span>docs/api/javadoc
 mv<span class="w"> </span>core/target/apidocs<span class="w"> </span>docs/api/javadoc/core
 mv<span class="w"> </span>viz/target/apidocs<span class="w"> </span>docs/api/javadoc/viz
 mv<span class="w"> </span>sql/common/target/site/scaladocs<span class="w"> </span>docs/api/javadoc/sql
@@ -3153,7 +3154,7 @@ mv<span class="w"> </span>sql/common/target/site/scaladocs<span class="w"> </spa
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 20, 2023 21:38:48</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 24, 2023 12:33:08</span>
       
     
   </small>
