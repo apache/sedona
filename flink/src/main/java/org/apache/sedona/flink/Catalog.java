@@ -43,6 +43,7 @@ public class Catalog {
                 new Functions.ST_Buffer(),
                 new Functions.ST_ConcaveHull(),
                 new Functions.ST_Envelope(),
+                new Functions.ST_Dimension(),
                 new Functions.ST_Distance(),
                 new Functions.ST_DistanceSphere(),
                 new Functions.ST_DistanceSpheroid(),

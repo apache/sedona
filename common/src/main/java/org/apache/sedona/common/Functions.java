@@ -555,6 +555,14 @@ public class Functions {
         return new GeometrySplitter(GEOMETRY_FACTORY).split(input, blade);
     }
 
+    public static Integer dimension(Geometry geometry) {
+        Integer dimension = geometry.getDimension();
+        // unknown dimension such as an empty GEOMETRYCOLLECTION
+        if (dimension < 0) {
+            dimension = 0;
+        }
+        return dimension;
+    }
 
     /**
      * get the coordinates of a geometry and transform to Google s2 cell id

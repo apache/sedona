@@ -45,6 +45,7 @@ __all__ = [
     "ST_ConcaveHull",
     "ST_ConvexHull",
     "ST_Difference",
+    "ST_Dimension",
     "ST_Distance",
     "ST_DistanceSphere",
     "ST_DistanceSpheroid",
@@ -385,6 +386,16 @@ def ST_ConvexHull(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_ConvexHull", geometry)
 
+@validate_argument_types
+def ST_Dimension(geometry: ColumnOrName):
+    """Calculate the inherent dimension of a geometry column.
+
+    :param geometry: Geometry column to calculate the dimension for.
+    :type geometry: ColumnOrName
+    :return: Dimension of geometry as an integer column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_Dimension", geometry)
 
 @validate_argument_types
 def ST_Difference(a: ColumnOrName, b: ColumnOrName) -> Column:

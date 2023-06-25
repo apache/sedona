@@ -155,6 +155,16 @@ public class FunctionTest extends TestBase{
 
 
     @Test
+    public void testDimension(){
+        Table pointTable = tableEnv.sqlQuery(
+                        "SELECT ST_Dimension(ST_GeomFromWKT('GEOMETRYCOLLECTION EMPTY'))");
+        assertEquals(0, first(pointTable).getField(0));
+
+        pointTable = tableEnv.sqlQuery(
+                "SELECT ST_Dimension(ST_GeomFromWKT('GEOMETRYCOLLECTION(MULTIPOLYGON(((0 0, 0 1, 1 1, 1 0, 0 0)), ((2 2, 2 3, 3 3, 3 2, 2 2))), MULTIPOINT(6 6, 7 7, 8 8))'))");
+        assertEquals(2, first(pointTable).getField(0));
+    }
+    @Test
     public void testDistance() {
         Table pointTable = createPointTable(testDataSize);
         pointTable = pointTable.select(call(Functions.ST_Distance.class.getSimpleName(), $(pointColNames[0])

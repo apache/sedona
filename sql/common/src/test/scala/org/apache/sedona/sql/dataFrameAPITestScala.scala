@@ -231,6 +231,14 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_Dimension") {
+      val polygonDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))') AS geom")
+      val df = polygonDf.select(ST_Dimension("geom"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Int]
+      val expectedResult = 2
+      assert(actualResult == expectedResult)
+    }
+
     it("Passed ST_Distance") {
       val pointDf = sparkSession.sql("SELECT ST_Point(0.0, 0.0) AS a, ST_Point(1.0, 0.0) as b")
       val df = pointDf.select(ST_Distance("a", "b"))

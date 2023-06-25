@@ -267,6 +267,82 @@ public class FunctionsTest {
         assertNull(actualResult);
     }
 
+    @Test
+    public void dimensionGeometry2D() {
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 2));
+        Integer actualResult = Functions.dimension(point);
+        Integer expectedResult = 0;
+        assertEquals(actualResult, expectedResult);
+
+        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 1.5, 1.5));
+        actualResult = Functions.dimension(lineString);
+        expectedResult = 1;
+        assertEquals(actualResult, expectedResult);
+
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0));
+        actualResult = Functions.dimension(polygon);
+        expectedResult = 2;
+        assertEquals(actualResult, expectedResult);
+
+        MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0.0, 0.0, 1.0, 1.0));
+        actualResult = Functions.dimension(multiPoint);
+        expectedResult = 0;
+        assertEquals(actualResult, expectedResult);
+
+        LineString lineString2 = GEOMETRY_FACTORY.createLineString(coordArray(1.0, 1.0, 2.0, 2.0));
+        MultiLineString multiLineString = GEOMETRY_FACTORY
+                .createMultiLineString(new LineString[] { lineString, lineString2 });
+        actualResult = Functions.dimension(multiLineString);
+        expectedResult = 1;
+        assertEquals(actualResult, expectedResult);
+
+        Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray(0.0, 0.0, 2.0, 2.0, 1.0, 0.0, 0.0, 0.0));
+        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] { polygon, polygon2 });
+        actualResult = Functions.dimension(multiPolygon);
+        expectedResult = 2;
+        assertEquals(actualResult, expectedResult);
+    }
+
+    @Test
+    public void dimensionGeometry3D() {
+        Point point3D = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 1));
+        Integer actualResult = Functions.dimension(point3D);
+        Integer expectedResult = 0;
+        assertEquals(actualResult, expectedResult);
+
+        LineString lineString3D = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 1, 2));
+        actualResult = Functions.dimension(lineString3D);
+        expectedResult = 1;
+        assertEquals(actualResult, expectedResult);
+
+        Polygon polygon3D = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 1, 1, 2, 2, 2, 3, 3, 3, 1, 1, 1));
+        actualResult = Functions.dimension(polygon3D);
+        expectedResult = 2;
+        assertEquals(actualResult, expectedResult);
+    }
+
+    @Test
+    public void dimensionGeometryCollection() {
+        Geometry[] geometry = new Geometry[] {
+                GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 1.5, 1.5)),
+                GEOMETRY_FACTORY.createPolygon(coordArray(0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0))
+        };
+        GeometryCollection geometryCollection = GEOMETRY_FACTORY.createGeometryCollection(geometry);
+
+        Integer actualResult = Functions.dimension(geometryCollection);
+        Integer expectedResult = 2;
+        assertEquals(actualResult, expectedResult);
+    }
+
+    @Test
+    public void dimensionGeometryEmpty() {
+        GeometryCollection emptyGeometryCollection = GEOMETRY_FACTORY.createGeometryCollection();
+
+        Integer actualResult = Functions.dimension(emptyGeometryCollection);
+        Integer expectedResult = 0;
+        assertEquals(actualResult, expectedResult);
+    }
+
     private static boolean intersects(Set<?> s1, Set<?> s2) {
         Set<?> copy = new HashSet<>(s1);
         copy.retainAll(s2);

@@ -54,6 +54,7 @@ object Catalog {
     function[ST_Within](),
     function[ST_Covers](),
     function[ST_CoveredBy](),
+    function[ST_Dimension](),
     function[ST_Disjoint](),
     function[ST_Distance](),
     function[ST_3DDistance](),
