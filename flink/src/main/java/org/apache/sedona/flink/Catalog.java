@@ -16,6 +16,8 @@ package org.apache.sedona.flink;
 import org.apache.flink.table.functions.UserDefinedFunction;
 import org.apache.sedona.flink.expressions.*;
 
+import scala.Function;
+
 public class Catalog {
     public static UserDefinedFunction[] getFuncs() {
         return new UserDefinedFunction[]{
@@ -36,6 +38,7 @@ public class Catalog {
                 new Constructors.ST_GeomFromKML(),
                 new Constructors.ST_MPolyFromText(),
                 new Constructors.ST_MLineFromText(),
+                new Functions.GeometryType(),
                 new Functions.ST_Area(),
                 new Functions.ST_AreaSpheroid(),
                 new Functions.ST_Azimuth(),

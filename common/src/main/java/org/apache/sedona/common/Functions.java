@@ -594,6 +594,10 @@ public class Functions {
         return "ST_" + geometry.getGeometryType();
     }
 
+    public static String geometryTypeWithoutST(Geometry geometry) {
+        return geometry.getGeometryType().toUpperCase();
+    }
+
     public static Geometry startPoint(Geometry geometry) {
         if (geometry instanceof LineString) {
             LineString line = (LineString) geometry;

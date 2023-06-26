@@ -1079,6 +1079,13 @@ public class FunctionsTest {
     }
 
     @Test
+    public void geometryTypeWithoutST() {
+        String expected = "POINT";
+        String actual = Functions.geometryTypeWithoutST(GEOMETRY_FACTORY.createPoint(new Coordinate(10, 5)));
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void hausdorffDistanceDefaultGeom2D() throws Exception {
         Polygon polygon1 = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 1, 1, 1, 2, 2, 1, 5, 2, 0, 1, 1, 0, 1));
         Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray3d(4, 0, 4, 6, 1, 4, 6, 4, 9, 6, 1, 3, 4, 0, 4));
