@@ -65,6 +65,7 @@ test_configurations = [
     (stf.ST_Boundary, ("geom",), "triangle_geom", "", "LINESTRING (0 0, 1 0, 1 1, 0 0)"),
     (stf.ST_Buffer, ("point", 1.0), "point_geom", "ST_PrecisionReduce(geom, 2)", "POLYGON ((0.98 0.8, 0.92 0.62, 0.83 0.44, 0.71 0.29, 0.56 0.17, 0.38 0.08, 0.2 0.02, 0 0, -0.2 0.02, -0.38 0.08, -0.56 0.17, -0.71 0.29, -0.83 0.44, -0.92 0.62, -0.98 0.8, -1 1, -0.98 1.2, -0.92 1.38, -0.83 1.56, -0.71 1.71, -0.56 1.83, -0.38 1.92, -0.2 1.98, 0 2, 0.2 1.98, 0.38 1.92, 0.56 1.83, 0.71 1.71, 0.83 1.56, 0.92 1.38, 0.98 1.2, 1 1, 0.98 0.8))"),
     (stf.ST_BuildArea, ("geom",), "multiline_geom", "ST_Normalize(geom)", "POLYGON ((0 0, 1 1, 1 0, 0 0))"),
+    (stf.ST_BoundingDiagonal, ("geom",), "square_geom", "ST_BoundingDiagonal(geom)", "LINESTRING (1 0, 2 1)"),
     (stf.ST_Centroid, ("geom",), "triangle_geom", "ST_PrecisionReduce(geom, 2)", "POINT (0.67 0.33)"),
     (stf.ST_Collect, (lambda: f.expr("array(a, b)"),), "two_points", "", "MULTIPOINT Z (0 0 0, 3 0 4)"),
     (stf.ST_Collect, ("a", "b"), "two_points", "", "MULTIPOINT Z (0 0 0, 3 0 4)"),
@@ -74,6 +75,7 @@ test_configurations = [
     (stf.ST_ConcaveHull, ("geom", 1.0, True), "triangle_geom", "", "POLYGON ((1 1, 1 0, 0 0, 1 1))"),
     (stf.ST_ConvexHull, ("geom",), "triangle_geom", "", "POLYGON ((0 0, 1 1, 1 0, 0 0))"),
     (stf.ST_Difference, ("a", "b"), "overlapping_polys", "", "POLYGON ((1 0, 0 0, 0 1, 1 1, 1 0))"),
+    (stf.ST_Dimension, ("geom",), "geometry_geom_collection", "", 1),
     (stf.ST_Distance, ("a", "b"), "two_points", "", 3.0),
     (stf.ST_DistanceSpheroid, ("point", "point"), "point_geom", "", 0.0),
     (stf.ST_DistanceSphere, ("point", "point"), "point_geom", "", 0.0),
@@ -90,6 +92,7 @@ test_configurations = [
     (stf.ST_GeometricMedian, ("multipoint",), "multipoint_geom", "", "POINT (22.500002656424286 21.250001168173426)"),
     (stf.ST_GeometryN, ("geom", 0), "multipoint", "", "POINT (0 0)"),
     (stf.ST_GeometryType, ("point",), "point_geom", "", "ST_Point"),
+    (stf.ST_HausdorffDistance, ("point", "line",), "point_and_line", "", 5.0990195135927845),
     (stf.ST_InteriorRingN, ("geom", 0), "geom_with_hole", "", "LINESTRING (1 1, 2 2, 2 1, 1 1)"),
     (stf.ST_Intersection, ("a", "b"), "overlapping_polys", "", "POLYGON ((2 0, 1 0, 1 1, 2 1, 2 0))"),
     (stf.ST_IsClosed, ("geom",), "closed_linestring_geom", "", True),
@@ -391,6 +394,8 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 2 1)') AS line, ST_GeomFromWKT('POLYGON ((1 0, 2 0, 2 2, 1 2, 1 0))') AS poly")
         elif request.param == "square_geom":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))') AS geom")
+        elif request.param == "geometry_geom_collection":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION(POINT(1 1), LINESTRING(0 0, 1 1, 2 2))') AS geom")
         elif request.param == "point_and_line":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POINT (0.0 1.0)') AS point, ST_GeomFromWKT('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)') AS line")
         raise ValueError(f"Invalid base_df name passed: {request.param}")

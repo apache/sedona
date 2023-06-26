@@ -27,6 +27,7 @@ import org.locationtech.jts.io.WKTWriter;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
 import org.locationtech.jts.algorithm.distance.DiscreteFrechetDistance;
+import org.locationtech.jts.algorithm.distance.DiscreteHausdorffDistance;
 
 import java.awt.*;
 import java.nio.ByteOrder;
@@ -465,5 +466,14 @@ public class GeomUtils {
     public static double getFrechetDistance(Geometry g1, Geometry g2) {
         if (g1.isEmpty() || g2.isEmpty()) return 0.0;
         return DiscreteFrechetDistance.distance(g1, g2);
+    }
+
+    public static Double getHausdorffDistance(Geometry g1, Geometry g2, double densityFrac) throws Exception {
+        if (g1.isEmpty() || g2.isEmpty()) return 0.0;
+        DiscreteHausdorffDistance hausdorffDistanceObj = new DiscreteHausdorffDistance(g1, g2);
+        if (densityFrac != -1) {
+            hausdorffDistanceObj.setDensifyFraction(densityFrac);
+        }
+        return hausdorffDistanceObj.distance();
     }
 }

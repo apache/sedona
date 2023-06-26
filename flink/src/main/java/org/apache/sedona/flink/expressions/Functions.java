@@ -17,6 +17,7 @@ import org.apache.calcite.runtime.Geometries;
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.functions.ScalarFunction;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
@@ -86,6 +87,15 @@ public class Functions {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.envelope(geom);
         }
+    }
+
+    public static class ST_Dimension extends ScalarFunction {
+        @DataTypeHint("Integer")
+        public Integer eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.dimension(geom);
+        }
+
     }
 
     public static class ST_Distance extends ScalarFunction {
@@ -632,4 +642,30 @@ public class Functions {
         }
     }
 
+    public static class ST_BoundingDiagonal extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.boundingDiagonal(geometry);
+        }
+    }
+
+    public static class ST_HausdorffDistance extends ScalarFunction {
+        @DataTypeHint("Double")
+        public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object g1,
+                           @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object g2,
+                           @DataTypeHint("Double") Double densityFrac) throws Exception {
+            Geometry geom1 = (Geometry) g1;
+            Geometry geom2 = (Geometry) g2;
+            return org.apache.sedona.common.Functions.hausdorffDistance(geom1, geom2, densityFrac);
+        }
+
+        @DataTypeHint("Double")
+        public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object g1,
+                           @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object g2) throws Exception {
+            Geometry geom1 = (Geometry) g1;
+            Geometry geom2 = (Geometry) g2;
+            return org.apache.sedona.common.Functions.hausdorffDistance(geom1, geom2);
+        }
+    }
 }

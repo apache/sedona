@@ -54,6 +54,7 @@ object Catalog {
     function[ST_Within](),
     function[ST_Covers](),
     function[ST_CoveredBy](),
+    function[ST_Dimension](),
     function[ST_Disjoint](),
     function[ST_Distance](),
     function[ST_3DDistance](),
@@ -152,6 +153,8 @@ object Catalog {
     function[ST_NRings](),
     function[ST_Translate](0.0),
     function[ST_FrechetDistance](),
+    function[ST_BoundingDiagonal](),
+    function[ST_HausdorffDistance](-1),
     // Expression for rasters
     function[RS_NormalizedDifference](),
     function[RS_Mean](),

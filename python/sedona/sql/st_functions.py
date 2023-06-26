@@ -45,6 +45,7 @@ __all__ = [
     "ST_ConcaveHull",
     "ST_ConvexHull",
     "ST_Difference",
+    "ST_Dimension",
     "ST_Distance",
     "ST_DistanceSphere",
     "ST_DistanceSpheroid",
@@ -113,6 +114,7 @@ __all__ = [
     "ST_NRings",
     "ST_Translate",
     "ST_FrechetDistance"
+    "ST_BoundingDiagonal"
 ]
 
 
@@ -385,6 +387,16 @@ def ST_ConvexHull(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_ConvexHull", geometry)
 
+@validate_argument_types
+def ST_Dimension(geometry: ColumnOrName):
+    """Calculate the inherent dimension of a geometry column.
+
+    :param geometry: Geometry column to calculate the dimension for.
+    :type geometry: ColumnOrName
+    :return: Dimension of geometry as an integer column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_Dimension", geometry)
 
 @validate_argument_types
 def ST_Difference(a: ColumnOrName, b: ColumnOrName) -> Column:
@@ -1289,3 +1301,27 @@ def ST_FrechetDistance(g1: ColumnOrName, g2: ColumnOrName) -> Column:
 
     args = (g1, g2)
     return _call_st_function("ST_FrechetDistance", args)
+
+@validate_argument_types
+def ST_BoundingDiagonal(geometry: ColumnOrName) -> Column:
+    """
+    Returns a LineString with the min/max values of each dimension of the bounding box of the given geometry as its
+    start/end coordinates.
+    :param geometry: Geometry to return bounding diagonal of.
+    :return: LineString spanning min and max values of each dimension of the given geometry
+    """
+
+    return _call_st_function("ST_BoundingDiagonal", geometry)
+
+@validate_argument_types
+def ST_HausdorffDistance(g1: ColumnOrName, g2: ColumnOrName, densityFrac: Optional[Union[ColumnOrName, float]] = -1) -> Column:
+    """
+    Returns discretized (and hence approximate) hausdorff distance between two given geometries.
+    Optionally, a distance fraction can also be provided which decreases the gap between actual and discretized hausforff distance
+    :param g1:
+    :param g2:
+    :param densityFrac: Optional
+    :return:
+    """
+    args = (g1, g2, densityFrac)
+    return _call_st_function("ST_HausdorffDistance", args)

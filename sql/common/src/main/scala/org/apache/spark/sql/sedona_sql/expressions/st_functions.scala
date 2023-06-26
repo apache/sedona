@@ -90,6 +90,9 @@ object st_functions extends DataFrameAPI {
   def ST_Difference(a: Column, b: Column): Column = wrapExpression[ST_Difference](a, b)
   def ST_Difference(a: String, b: String): Column = wrapExpression[ST_Difference](a, b)
 
+  def ST_Dimension(geometry: Column): Column = wrapExpression[ST_Dimension](geometry)
+  def ST_Dimension(geometry: String): Column = wrapExpression[ST_Dimension](geometry)
+
   def ST_Distance(a: Column, b: Column): Column = wrapExpression[ST_Distance](a, b)
   def ST_Distance(a: String, b: String): Column = wrapExpression[ST_Distance](a, b)
 
@@ -329,5 +332,19 @@ object st_functions extends DataFrameAPI {
   def ST_FrechetDistance(g1: Column, g2: Column): Column = wrapExpression[ST_FrechetDistance](g1, g2)
 
   def ST_FrechetDistance(g1: String, g2: String): Column = wrapExpression[ST_FrechetDistance](g1, g2)
+
+  def ST_BoundingDiagonal(geometry: Column) =
+    wrapExpression[ST_BoundingDiagonal](geometry)
+
+  def ST_BoundingDiagonal(geometry: String) =
+    wrapExpression[ST_BoundingDiagonal](geometry)
+
+  def ST_HausdorffDistance(g1: Column, g2: Column) = wrapExpression[ST_HausdorffDistance](g1, g2, -1)
+
+  def ST_HausdorffDistance(g1: String, g2: String) = wrapExpression[ST_HausdorffDistance](g1, g2, -1);
+
+  def ST_HausdorffDistance(g1: Column, g2: Column, densityFrac: Column) = wrapExpression[ST_HausdorffDistance](g1, g2, densityFrac);
+
+  def ST_HausdorffDistance(g1: String, g2: String, densityFrac: Double) = wrapExpression[ST_HausdorffDistance](g1, g2, densityFrac);
 
 }
