@@ -1005,13 +1005,19 @@ case class ST_Translate(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_Affine(inputExpressions: Seq[Expression])
+  extends InferredExpression(InferrableFunction.allowSixRightNull(Functions.affine _)) with FoldableExpression {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_Dimension(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.dimension _) with FoldableExpression {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
-
 case class ST_BoundingDiagonal(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.boundingDiagonal _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {

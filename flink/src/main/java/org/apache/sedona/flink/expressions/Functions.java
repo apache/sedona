@@ -13,7 +13,6 @@
  */
 package org.apache.sedona.flink.expressions;
 
-import org.apache.calcite.runtime.Geometries;
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.functions.ScalarFunction;
 import org.locationtech.jts.geom.Geometry;
@@ -631,6 +630,26 @@ public class Functions {
             Geometry geometry = (Geometry) o;
             return org.apache.sedona.common.Functions.translate(geometry, deltaX, deltaY, deltaZ);
         }
+    }
+
+    public static class ST_Affine extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object o, @DataTypeHint("Double") Double a,
+                             @DataTypeHint("Double") Double b, @DataTypeHint("Double") Double d, @DataTypeHint("Double") Double e, @DataTypeHint("Double") Double xOff, @DataTypeHint("Double") Double yOff, @DataTypeHint("Double") Double c,
+                             @DataTypeHint("Double") Double f, @DataTypeHint("Double") Double g, @DataTypeHint("Double") Double h, @DataTypeHint("Double") Double i,
+                             @DataTypeHint("Double") Double zOff) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.affine(geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint("Double") Double a,
+                             @DataTypeHint("Double") Double b,  @DataTypeHint("Double") Double d, @DataTypeHint("Double") Double e,
+                             @DataTypeHint("Double") Double xOff, @DataTypeHint("Double") Double yOff) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.affine(geometry, a, b, d, e, xOff, yOff);
+        }
+
     }
 
     public static class ST_BoundingDiagonal extends ScalarFunction {

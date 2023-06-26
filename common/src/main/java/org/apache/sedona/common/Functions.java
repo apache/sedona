@@ -905,6 +905,21 @@ public class Functions {
         return geometry;
     }
 
+    public static Geometry affine(Geometry geometry, Double a, Double b, Double d, Double e, Double xOff, Double yOff, Double c,
+                                  Double f, Double g, Double h, Double i, Double zOff) {
+        if (!geometry.isEmpty()) {
+            GeomUtils.affineGeom(geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff);
+        }
+        return geometry;
+    }
+
+    public static Geometry affine(Geometry geometry, Double a, Double b, Double d, Double e, Double xOff, Double yOff) {
+        if (!geometry.isEmpty()) {
+            GeomUtils.affineGeom(geometry, a, b, d, e, xOff, yOff, null, null, null, null, null, null);
+        }
+        return geometry;
+    }
+
     public static Geometry geometricMedian(Geometry geometry, double tolerance, int maxIter, boolean failIfNotConverged) throws Exception {
         String geometryType = geometry.getGeometryType();
         if(!(Geometry.TYPENAME_POINT.equals(geometryType) || Geometry.TYPENAME_MULTIPOINT.equals(geometryType))) {
