@@ -254,11 +254,11 @@ public class FunctionTest extends TestBase{
     public void testGeometryType() {
         Table pointTable = tableEnv.sqlQuery(
                         "SELECT GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))");
-        assertEquals(0, first(pointTable).getField(0));
+        assertEquals("LINESTRING", first(pointTable).getField(0));
 
-        // pointTable = tableEnv.sqlQuery(
-        //         "SELECT ST_Dimension(ST_GeomFromWKT('GEOMETRYCOLLECTION(MULTIPOLYGON(((0 0, 0 1, 1 1, 1 0, 0 0)), ((2 2, 2 3, 3 3, 3 2, 2 2))), MULTIPOINT(6 6, 7 7, 8 8))'))");
-        // assertEquals(2, first(pointTable).getField(0));
+        pointTable = tableEnv.sqlQuery(
+                "SELECT GeometryType(ST_GeomFromWKT('POINTM(0 0)'))");
+        assertEquals("POINTM", first(pointTable).getField(0));
     }
 
     @Test
