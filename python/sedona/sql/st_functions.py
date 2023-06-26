@@ -113,7 +113,6 @@ __all__ = [
     "ST_Force3D",
     "ST_NRings",
     "ST_Translate",
-    "ST_BoundingDiagonal",
     "ST_Angle",
     "ST_Degrees",
     "ST_FrechetDistance",
