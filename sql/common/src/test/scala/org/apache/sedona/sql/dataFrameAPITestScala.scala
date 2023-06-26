@@ -1009,6 +1009,7 @@ class dataFrameAPITestScala extends TestBaseScala {
       val expected = 248.5658866377283
       val actual = df.take(1)(0).get(0).asInstanceOf[Double]
       assertEquals(expected, actual, 1e-9)
+    }
 
     it("Passed ST_Affine") {
       val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((2 3 1, 4 5 1, 7 8 2, 2 3 1))') AS geom")

@@ -2006,7 +2006,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
   }
 
   it ("should pass ST_FrechetDistance") {
-    val geomTestCases = Map (
+    val geomTestCases = Map(
       ("'POINT (1 2)'", "'POINT (10 10)'") -> 12.041594578792296d,
       ("'LINESTRING (0 0, 100 0)'", "'LINESTRING (0 0, 50 50, 100 0)'") -> 70.7106781186548d
     )
@@ -2017,6 +2017,9 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       val actual = df.take(1)(0).get(0).asInstanceOf[Double]
       val expected = expectedResult
       assertEquals(expected, actual, 1e-9)
+
+    }
+  }
 
   it ("should pass ST_Affine") {
     val geomTestCases = Map (
