@@ -1079,9 +1079,9 @@ public class FunctionsTest {
     }
 
     @Test
-    public void geometryTypeWithoutST() {
+    public void geometryTypeWithMeasured() {
         String expected = "POINT";
-        String actual = Functions.geometryTypeWithoutST(GEOMETRY_FACTORY.createPoint(new Coordinate(10, 5)));
+        String actual = Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createPoint(new Coordinate(10, 5)));
         assertEquals(expected, actual);
     }
 

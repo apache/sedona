@@ -1034,7 +1034,7 @@ case class ST_HausdorffDistance(inputExpressions: Seq[Expression])
 }
 
 case class GeometryType(inputExpressions: Seq[Expression])
-  extends InferredExpression(Functions.geometryTypeWithoutST _) with FoldableExpression {
+  extends InferredExpression(Functions.geometryTypeWithMeasured _) with FoldableExpression {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

@@ -257,7 +257,7 @@ public class FunctionTest extends TestBase{
         assertEquals("LINESTRING", first(pointTable).getField(0));
 
         pointTable = tableEnv.sqlQuery(
-                "SELECT GeometryType(ST_GeomFromWKT('POINTM(0 0)'))");
+                "SELECT GeometryType(ST_GeomFromText('POINTM(2.0 3.5 10.2)'))");
         assertEquals("POINTM", first(pointTable).getField(0));
     }
 

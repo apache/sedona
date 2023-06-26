@@ -489,4 +489,11 @@ public class GeomUtils {
         }
         return hausdorffDistanceObj.distance();
     }
+
+    public static Boolean isMeasuredGeometry(Geometry geom) {
+        Coordinate[] coordinates = geom.getCoordinates();
+        GeometryFactory geometryFactory = new GeometryFactory();
+        CoordinateSequence sequence = geometryFactory.getCoordinateSequenceFactory().create(coordinates);
+        return sequence.getDimension() > 2 && sequence.getMeasures() > 0;
+    }
 }
