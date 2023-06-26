@@ -918,10 +918,10 @@ public class FunctionsTest {
     public void translateHybridGeomCollectionDeltaZ() {
         Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
         Polygon polygon3D = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 1, 2, 0, 2, 2, 1, 2, 1, 0, 1));
-        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon3D, polygon});
+        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[]{polygon3D, polygon});
         Point point3D = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 1));
         LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
-        Geometry geomCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {multiPolygon, point3D, emptyLineString})});
+        Geometry geomCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[]{GEOMETRY_FACTORY.createGeometryCollection(new Geometry[]{multiPolygon, point3D, emptyLineString})});
         Polygon expectedPolygon = GEOMETRY_FACTORY.createPolygon(coordArray(2, 3, 2, 4, 3, 4, 3, 3, 2, 3));
         Polygon expectedPolygon3D = GEOMETRY_FACTORY.createPolygon(coordArray3d(2, 3, 6, 3, 3, 7, 3, 4, 7, 2, 3, 6));
         Point expectedPoint3D = GEOMETRY_FACTORY.createPoint(new Coordinate(2, 4, 6));
@@ -932,6 +932,45 @@ public class FunctionsTest {
         assertEquals(expectedPolygon.toText(), actualGeometry.getGeometryN(0).getGeometryN(0).getGeometryN(1).toText());
         assertEquals(wktWriter3D.write(expectedPoint3D), wktWriter3D.write(actualGeometry.getGeometryN(0).getGeometryN(1)));
         assertEquals(emptyLineString.toText(), actualGeometry.getGeometryN(0).getGeometryN(2).toText());
+    }
+
+    @Test
+    public void testFrechetGeom2D() {
+        LineString lineString1 = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 100, 0));
+        LineString lineString2 = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 50, 50, 100, 0));
+        double expected = 70.7106781186548;
+        double actual = Functions.frechetDistance(lineString1, lineString2);
+        assertEquals(expected, actual, 1e-9);
+    }
+
+    @Test
+    public void testFrechetGeom3D() {
+        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray3d(1, 0, 1, 2, 2, 2, 3, 3, 3));
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 0, 1, 1, 1, 2, 1, 1, 1, 0, 0));
+        double expected = 3.605551275463989;
+        double actual = Functions.frechetDistance(lineString, polygon);
+        assertEquals(expected, actual, 1e-9);
+    }
+
+    @Test
+    public void testFrechetGeomCollection() {
+        Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 2));
+        Geometry lineString1 = GEOMETRY_FACTORY.createLineString(coordArray(2, 2, 3, 3, 4, 4));
+        Geometry lineString2 = GEOMETRY_FACTORY.createLineString(coordArray(-1, -1, -4, -4, -10, -10));
+        Geometry geometryCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {point, lineString1, lineString2});
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
+        double expected = 14.866068747318506;
+        double actual = Functions.frechetDistance(polygon, geometryCollection);
+        assertEquals(expected, actual, 1e-9);
+    }
+
+    @Test
+    public void testFrechetGeomEmpty() {
+        Polygon p1 = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
+        LineString emptyPoint = GEOMETRY_FACTORY.createLineString();
+        double expected = 0.0;
+        double actual = Functions.frechetDistance(p1, emptyPoint);
+        assertEquals(expected, actual, 1e-9);
     }
 
     @Test

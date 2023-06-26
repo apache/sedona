@@ -747,6 +747,14 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testFrechet() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (1 2)') AS g1, ST_GeomFromWKT('POINT (10 10)') as g2");
+        polyTable = polyTable.select(call(Functions.ST_FrechetDistance.class.getSimpleName(), $("g1"), $("g2")));
+        Double expected =  12.041594578792296;
+        Double actual = (Double) first(polyTable).getField(0);
+        assertEquals(expected, actual);
+    }
+
     public void testBoundingDiagonal() {
         Table polyTable = tableEnv.sqlQuery("SELECT ST_BoundingDiagonal(ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))'))" +" AS " + polygonColNames[0]);
         polyTable = polyTable.select(call(Functions.ST_AsText.class.getSimpleName(), $(polygonColNames[0])));

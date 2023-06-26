@@ -955,6 +955,10 @@ public class Functions {
         return geometricMedian(geometry, DEFAULT_TOLERANCE, DEFAULT_MAX_ITER, false);
     }
 
+    public static double frechetDistance(Geometry g1, Geometry g2) {
+        return GeomUtils.getFrechetDistance(g1, g2);
+    }
+
     public static Geometry boundingDiagonal(Geometry geometry) {
         if (geometry.isEmpty()) {
             return GEOMETRY_FACTORY.createLineString();

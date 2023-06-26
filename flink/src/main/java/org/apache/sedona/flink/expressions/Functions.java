@@ -581,7 +581,16 @@ public class Functions {
             Geometry geometry = (Geometry) o;
             return org.apache.sedona.common.Functions.geometricMedian(geometry, tolerance, maxIter, failIfNotConverged);
         }
+    }
 
+    public static class ST_FrechetDistance extends ScalarFunction {
+        @DataTypeHint("Double")
+        public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object g1,
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object g2) {
+            Geometry geom1 = (Geometry) g1;
+            Geometry geom2 = (Geometry) g2;
+            return org.apache.sedona.common.Functions.frechetDistance(geom1, geom2);
+        }
     }
 
     public static class ST_NumPoints extends ScalarFunction {
