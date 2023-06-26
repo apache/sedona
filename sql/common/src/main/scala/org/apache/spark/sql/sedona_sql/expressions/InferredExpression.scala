@@ -274,7 +274,7 @@ object InferrableFunction {
         val arg2 = extractor2(input)
         val arg3 = extractor3(input)
         val arg4 = extractor4(input)
-        if (arg1 != null && arg2 != null && arg3 != null && arg4 != null) {
+        if (arg1 != null && arg2 != null) {
           func(arg1, arg2, arg3, arg4)
         } else {
           null
