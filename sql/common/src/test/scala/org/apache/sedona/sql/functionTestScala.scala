@@ -2062,4 +2062,19 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
   }
   
+  it ("should pass GeometryType") {
+    val geomTestCases = Map (
+      ("'POINT (51.3168 -0.56)'") -> "POINT",
+      ("'LineString (0 0, 0 90)'") -> "LineString",
+      ("'POLYGON((0 0,0 5,5 0,0 0))'") -> "POLYGON",
+    )
+    for ((geom, expectedResult) <- geomTestCases) {
+        val df = sparkSession.sql(s"SELECT GeometryType(ST_GeomFromWKT($geom)), " +
+          s"$expectedResult")
+        val actual = df.take(1)(0).get(0).asInstanceOf[String]
+        val expected = df.take(1)(0).get(1).asInstanceOf[String]
+        assertEquals(expected, actual)
+    }
+  }
+
 }

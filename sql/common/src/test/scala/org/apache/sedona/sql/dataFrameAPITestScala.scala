@@ -1038,5 +1038,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(expected == actual)
       assert(expected == actualDefaultValue)
     }
+
+    it("Passed GeometryType") {
+      val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((1 2, 2 1, 2 0, 4 1, 1 2))') AS geom")
+      val df = polyDf.select(ST_GeometryType("geom"))
+      val expected = "POLYGON"
+      val actual = df.take(1)(0).get(0).asInstanceOf[String]
+      assert(expected == actual)
+    }
   }
 }
