@@ -45,6 +45,7 @@ __all__ = [
     "ST_ConcaveHull",
     "ST_ConvexHull",
     "ST_Difference",
+    "ST_Dimension",
     "ST_Distance",
     "ST_DistanceSphere",
     "ST_DistanceSpheroid",
@@ -115,6 +116,9 @@ __all__ = [
     "ST_BoundingDiagonal",
     "ST_Angle",
     "ST_Degrees",
+    "ST_FrechetDistance",
+    "ST_Affine",
+    "ST_BoundingDiagonal"
 ]
 
 
@@ -387,6 +391,16 @@ def ST_ConvexHull(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_ConvexHull", geometry)
 
+@validate_argument_types
+def ST_Dimension(geometry: ColumnOrName):
+    """Calculate the inherent dimension of a geometry column.
+
+    :param geometry: Geometry column to calculate the dimension for.
+    :type geometry: ColumnOrName
+    :return: Dimension of geometry as an integer column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_Dimension", geometry)
 
 @validate_argument_types
 def ST_Difference(a: ColumnOrName, b: ColumnOrName) -> Column:
@@ -1280,7 +1294,47 @@ def ST_Translate(geometry: ColumnOrName, deltaX: Union[ColumnOrName, float], del
     args = (geometry, deltaX, deltaY, deltaZ)
     return _call_st_function("ST_Translate", args)
 
+def ST_FrechetDistance(g1: ColumnOrName, g2: ColumnOrName) -> Column:
+    """
+    Computes discrete frechet distance between the two geometries.
+    If any of the geometry is empty, ST_FrechetDistance returns 0
+    :param g1:
+    :param g2:
+    :return: Computed Discrete Frechet Distance between g1 and g2
+    """
+
+    args = (g1, g2)
+    return _call_st_function("ST_FrechetDistance", args)
+
 @validate_argument_types
+def ST_Affine(geometry: ColumnOrName, a: Union[ColumnOrName, float], b: Union[ColumnOrName, float], d: Union[ColumnOrName, float],
+                e: Union[ColumnOrName, float], xOff: Union[ColumnOrName, float], yOff: Union[ColumnOrName, float], c: Optional[Union[ColumnOrName, float]] = None, f: Optional[Union[ColumnOrName, float]] = None,
+                g: Optional[Union[ColumnOrName, float]] = None, h: Optional[Union[ColumnOrName, float]] = None,
+                i: Optional[Union[ColumnOrName, float]] = None,  zOff: Optional[Union[ColumnOrName, float]] = None) -> Column:
+    """
+    Apply a 3D/2D affine tranformation to the given geometry
+    x = a * x + b * y + c * z + xOff | x = a * x + b * y + xOff
+    y = d * x + e * y + f * z + yOff | y = d * x + e * y + yOff
+    z = g * x + h * y + i * z + zOff
+    :param geometry: Geometry to apply affine transformation to
+    :param a:
+    :param b:
+    :param c: Default 0.0
+    :param d:
+    :param e:
+    :param f: Default 0.0
+    :param g: Default 0.0
+    :param h: Default 0.0
+    :param i: Default 0.0
+    :param xOff:
+    :param yOff:
+    :param zOff: Default 0.0
+    :return: Geometry with affine transformation applied
+    """
+    args = (geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)
+    return _call_st_function("ST_Affine", args)
+
+
 def ST_BoundingDiagonal(geometry: ColumnOrName) -> Column:
     """
     Returns a LineString with the min/max values of each dimension of the bounding box of the given geometry as its
@@ -1315,4 +1369,21 @@ def ST_Angle(g1: ColumnOrName, g2: ColumnOrName, g3: Optional[ColumnOrName] = No
 
 @validate_argument_types
 def ST_Degrees(angleInRadian: Union[ColumnOrName, float]) -> Column:
+    """
+    Converts a given angle from radian to degrees
+    :param angleInRadian: Angle in Radian
+    :return: Angle in Degrees
+    """
     return _call_st_function("ST_Degrees", angleInRadian)
+@validate_argument_types
+def ST_HausdorffDistance(g1: ColumnOrName, g2: ColumnOrName, densityFrac: Optional[Union[ColumnOrName, float]] = -1) -> Column:
+    """
+    Returns discretized (and hence approximate) hausdorff distance between two given geometries.
+    Optionally, a distance fraction can also be provided which decreases the gap between actual and discretized hausforff distance
+    :param g1:
+    :param g2:
+    :param densityFrac: Optional
+    :return:
+    """
+    args = (g1, g2, densityFrac)
+    return _call_st_function("ST_HausdorffDistance", args)

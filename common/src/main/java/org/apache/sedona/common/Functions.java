@@ -36,6 +36,7 @@ import org.locationtech.jts.operation.valid.IsSimpleOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
+import org.locationtech.jts.algorithm.distance.DiscreteHausdorffDistance;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -554,6 +555,14 @@ public class Functions {
         return new GeometrySplitter(GEOMETRY_FACTORY).split(input, blade);
     }
 
+    public static Integer dimension(Geometry geometry) {
+        Integer dimension = geometry.getDimension();
+        // unknown dimension such as an empty GEOMETRYCOLLECTION
+        if (dimension < 0) {
+            dimension = 0;
+        }
+        return dimension;
+    }
 
     /**
      * get the coordinates of a geometry and transform to Google s2 cell id
@@ -896,6 +905,21 @@ public class Functions {
         return geometry;
     }
 
+    public static Geometry affine(Geometry geometry, Double a, Double b, Double d, Double e, Double xOff, Double yOff, Double c,
+                                  Double f, Double g, Double h, Double i, Double zOff) {
+        if (!geometry.isEmpty()) {
+            GeomUtils.affineGeom(geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff);
+        }
+        return geometry;
+    }
+
+    public static Geometry affine(Geometry geometry, Double a, Double b, Double d, Double e, Double xOff, Double yOff) {
+        if (!geometry.isEmpty()) {
+            GeomUtils.affineGeom(geometry, a, b, d, e, xOff, yOff, null, null, null, null, null, null);
+        }
+        return geometry;
+    }
+
     public static Geometry geometricMedian(Geometry geometry, double tolerance, int maxIter, boolean failIfNotConverged) throws Exception {
         String geometryType = geometry.getGeometryType();
         if(!(Geometry.TYPENAME_POINT.equals(geometryType) || Geometry.TYPENAME_MULTIPOINT.equals(geometryType))) {
@@ -929,6 +953,10 @@ public class Functions {
 
     public static Geometry geometricMedian(Geometry geometry) throws Exception {
         return geometricMedian(geometry, DEFAULT_TOLERANCE, DEFAULT_MAX_ITER, false);
+    }
+
+    public static double frechetDistance(Geometry g1, Geometry g2) {
+        return GeomUtils.getFrechetDistance(g1, g2);
     }
 
     public static Geometry boundingDiagonal(Geometry geometry) {
@@ -991,4 +1019,11 @@ public class Functions {
         return GeomUtils.toDegrees(angleInRadian);
     }
 
+    public static Double hausdorffDistance(Geometry g1, Geometry g2, double densityFrac) throws Exception {
+        return GeomUtils.getHausdorffDistance(g1, g2, densityFrac);
+    }
+
+    public static Double hausdorffDistance(Geometry g1, Geometry g2) throws Exception{
+        return GeomUtils.getHausdorffDistance(g1, g2, -1);
+    }
 }

@@ -36,6 +36,67 @@ LINESTRING(0 0, 21 52, 1 1, 1 0)
 LINESTRING(0 0, 1 1, 1 0, 21 52)
 ```
 
+## ST_Affine
+
+Introduction: Apply an affine transformation to the given geometry.
+
+ST_Affine has 2 overloaded signatures: 
+
+`ST_Affine(geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)` 
+
+`ST_Affine(geometry, a, b, d, e, xOff, yOff)`
+
+
+Based on the invoked function, the following transformation is applied: 
+
+`x = a * x + b * y + c * z + xOff OR x = a * x + b * y + xOff`
+
+`y = d * x + e * y + f * z + yOff OR y = d * x + e * y + yOff`
+
+`z = g * x + f * y + i * z + zOff OR z = g * x + f * y + zOff`
+
+If the given geometry is empty, the result is also empty. 
+
+Format: `ST_Affine(geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)`  
+Format: `ST_Affine(geometry, a, b, d, e, xOff, yOff)`
+
+Since: `1.5.0`
+
+Example:
+
+```sql
+ST_Affine(geometry, 1, 2, 4, 1, 1, 2, 3, 2, 5, 4, 8, 3)
+```
+
+Input: `LINESTRING EMPTY`
+
+Output: `LINESTRING EMPTY`
+
+Input: `POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))`
+
+Output: `POLYGON Z((5 8 16, 7 9 20, 13 16 37, 5 8 16))`
+
+Input: `POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0), (1 0.5, 1 0.75, 1.5 0.75, 1.5 0.5, 1 0.5))`
+
+Output: `POLYGON ((2 6, 4 7, 5 11, 3 10, 2 6), (3 6.5, 3.5 6.75, 4 8.75, 3.5 8.5, 3 6.5))`
+
+
+```sql
+ST_Affine(geometry, 1, 2, 1, 2, 1, 2)
+```
+
+Input: `POLYGON EMPTY`
+
+Output: `POLYGON EMPTY`
+
+Input: `GEOMETRYCOLLECTION (MULTIPOLYGON (((1 0, 1 1, 2 1, 2 0, 1 0), (1 0.5, 1 0.75, 1.5 0.75, 1.5 0.5, 1 0.5)), ((5 0, 5 5, 7 5, 7 0, 5 0))), POINT (10 10))`
+
+Output: `GEOMETRYCOLLECTION (MULTIPOLYGON (((2 3, 4 5, 5 6, 3 4, 2 3), (3 4, 3.5 4.5, 4 5, 3.5 4.5, 3 4)), ((6 7, 16 17, 18 19, 8 9, 6 7))), POINT (31 32))`
+
+Input: `POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))`
+
+Output: `POLYGON Z((2 3 1, 4 5 1, 7 8 2, 2 3 1))`
+
 ## ST_Angle
 
 Introduction: Compute and return the angle between two vectors represented by the provided points or linestrings.
@@ -52,21 +113,21 @@ Computes the angle formed by vectors represented by point2 - point1 and point2 -
 Computes the angle formed by vectors S1 - E1 and S2 - E2, where S and E denote start and end points respectively
 
 !!!Note
-    If any other geometry type is provided, ST_Angle throws an IllegalArgumentException.
-    Additionally, if any of the provided geometry is empty, ST_Angle throws an IllegalArgumentException.
+If any other geometry type is provided, ST_Angle throws an IllegalArgumentException.
+Additionally, if any of the provided geometry is empty, ST_Angle throws an IllegalArgumentException.
 
 !!!Note
-    If a 3D geometry is provided, ST_Angle computes the angle ignoring the z ordinate, equivalent to calling ST_Angle for corresponding 2D geometries.
+If a 3D geometry is provided, ST_Angle computes the angle ignoring the z ordinate, equivalent to calling ST_Angle for corresponding 2D geometries.
 
 !!!Tip
-    ST_Angle returns the angle in radian between 0 and 2\Pi. To convert the angle to degrees, use [ST_Degrees](./#st_degrees).
+ST_Angle returns the angle in radian between 0 and 2\Pi. To convert the angle to degrees, use [ST_Degrees](./#st_degrees).
 
 
 Format: `ST_Angle(p1, p2, p3, p4) | ST_Angle(p1, p2, p3) | ST_Angle(line1, line2)`
 
 Since: `1.5.0`
 
-Example: 
+Example:
 
 ```sql
 ST_Angle(p1, p2, p3, p4)
@@ -357,6 +418,27 @@ Input: `Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))`
 
 Output: `POLYGON ((1 2, 2 2, 3 2, 5 0, 4 0, 1 0, 0 0, 1 2))`
 
+## ST_Dimension
+
+Introduction: Return the topological dimension of this Geometry object, which must be less than or equal to the coordinate dimension. OGC SPEC s2.1.1.1 - returns 0 for POINT, 1 for LINESTRING, 2 for POLYGON, and the largest dimension of the components of a GEOMETRYCOLLECTION. If the dimension is unknown (e.g. for an empty GEOMETRYCOLLECTION) 0 is returned.
+
+Format: `ST_Dimension (A:geometry), ST_Dimension (C:geometrycollection), `
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_Dimension('GEOMETRYCOLLECTION(LINESTRING(1 1,0 0),POINT(0 0))');
+```
+
+Result:
+
+```
+ST_Dimension
+-----------
+1
+```
+
 ## ST_Distance
 
 Introduction: Return the Euclidean distance between A and B
@@ -546,6 +628,26 @@ Input: `LINESTRING EMPTY`
 
 Output: `LINESTRING EMPTY`
 
+## ST_FrechetDistance
+
+Introduction: Computes and returns discrete [Frechet Distance](https://en.wikipedia.org/wiki/Fr%C3%A9chet_distance) between the given two geometrie,
+based on [Computing Discrete Frechet Distance](http://www.kr.tuwien.ac.at/staff/eiter/et-archive/cdtr9464.pdf)
+
+If any of the geometries is empty, returns 0.0
+
+Format: `ST_FrechetDistance(g1: geomtry, g2: geometry)`
+
+Since: `1.5.0`
+
+Example:
+```sql
+SELECT ST_FrechetDistance(g1, g2)
+```
+
+Input: `g1: POINT (0 1), g2: LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)`
+
+Output: `5.0990195135927845`
+
 ## ST_GeoHash
 
 Introduction: Returns GeoHash of the geometry with given precision
@@ -616,6 +718,46 @@ SELECT ST_GeometryN(ST_GeomFromText('MULTIPOINT((1 2), (3 4), (5 6), (8 9))'), 1
 ```
 
 Output: `POINT (3 4)`
+
+## ST_HausdorffDistance
+
+Introduction: Returns a discretized (and hence approximate) [Hausdorff distance](https://en.wikipedia.org/wiki/Hausdorff_distance) between the given 2 geometries. 
+Optionally, a densityFraction parameter can be specified, which gives more accurate results by densifying segments before computing hausdorff distance between them.
+Each segment is broken down into equal-length subsegments whose ratio with segment length is closest to the given density fraction.
+
+Hence, the lower the densityFrac value, the more accurate is the computed hausdorff distance, and the more time it takes to compute it.
+
+If any of the geometry is empty, 0.0 is returned.
+
+
+!!!Note
+    Accepted range of densityFrac is (0.0, 1.0], if any other value is provided, ST_HausdorffDistance throws an IllegalArgumentException
+
+
+!!!Note
+    Even though the function accepts 3D geometry, the z ordinate is ignored and the computed hausdorff distance is equivalent to the geometries not having the z ordinate.
+
+Format: `ST_HausdorffDistance(g1: geometry, g2: geometry, densityFrac)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_HausdorffDistance(g1, g2, 0.1)
+```
+
+Input: `g1: POINT (0.0 1.0), g2: LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)`
+
+Output: `5.0990195135927845`
+
+```sql
+SELECT ST_HausdorffDistance(ST_GeomFromText(), ST_GeomFromText())
+```
+
+Input: `g1: POLYGON Z((1 0 1, 1 1 2, 2 1 5, 2 0 1, 1 0 1)), g2: POLYGON Z((4 0 4, 6 1 4, 6 4 9, 6 1 3, 4 0 4))`
+
+Output: `5.0`
+
 
 ## ST_InteriorRingN
 

@@ -86,6 +86,8 @@ Sedona 1.4.1 is compiled against, Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-292'>SEDONA-292</a>] -         Bridge Sedona Raster and Map Algebra operators
 </li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-297'>SEDONA-297</a>] -         Implement ST_NRings
+</li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-302'>SEDONA-302</a>] -         Implement ST_Translate
 </li>
 </ul>

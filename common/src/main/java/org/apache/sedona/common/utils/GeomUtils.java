@@ -27,8 +27,9 @@ import org.locationtech.jts.io.WKTWriter;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
 import org.locationtech.jts.algorithm.Angle;
+import org.locationtech.jts.algorithm.distance.DiscreteFrechetDistance;
+import org.locationtech.jts.algorithm.distance.DiscreteHausdorffDistance;
 
-import java.awt.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.List;
@@ -425,7 +426,6 @@ public class GeomUtils {
         return geometries;
     }
 
-
     public static Geometry get3DGeom(Geometry geometry, double zValue) {
         Coordinate[] coordinates = geometry.getCoordinates();
         if (coordinates.length == 0) return geometry;
@@ -493,5 +493,39 @@ public class GeomUtils {
 
     public static double toDegrees(double angleInRadian) {
         return Angle.toDegrees(angleInRadian);
+    }
+
+    public static void affineGeom(Geometry geometry, Double a, Double b, Double d, Double e, Double xOff, Double yOff, Double c,
+                                  Double f, Double g, Double h, Double i, Double zOff) {
+        Coordinate[] coordinates = geometry.getCoordinates();
+        for (Coordinate currCoordinate : coordinates) {
+            double x = currCoordinate.getX(), y = currCoordinate.getY(), z = Double.isNaN(currCoordinate.getZ()) ? 0 : currCoordinate.getZ();
+            double newX = a * x + b * y + xOff;
+            if (c != null) newX += c * z;
+            double newY = d * x + e * y + yOff;
+            if (f != null) newY += f * z;
+            currCoordinate.setX(newX);
+            currCoordinate.setY(newY);
+
+            if (g != null && h != null && i != null && !Double.isNaN(currCoordinate.getZ())) {
+                double newZ = g * x + h * y + i * z + zOff;
+                currCoordinate.setZ(newZ);
+            }
+        }
+        geometry.geometryChanged();
+    }
+
+    public static double getFrechetDistance(Geometry g1, Geometry g2) {
+        if (g1.isEmpty() || g2.isEmpty()) return 0.0;
+        return DiscreteFrechetDistance.distance(g1, g2);
+    }
+
+    public static Double getHausdorffDistance(Geometry g1, Geometry g2, double densityFrac) throws Exception {
+        if (g1.isEmpty() || g2.isEmpty()) return 0.0;
+        DiscreteHausdorffDistance hausdorffDistanceObj = new DiscreteHausdorffDistance(g1, g2);
+        if (densityFrac != -1) {
+            hausdorffDistanceObj.setDensifyFraction(densityFrac);
+        }
+        return hausdorffDistanceObj.distance();
     }
 }
