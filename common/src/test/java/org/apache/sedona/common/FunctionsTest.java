@@ -15,6 +15,7 @@ package org.apache.sedona.common;
 
 import com.google.common.geometry.S2CellId;
 import com.google.common.math.DoubleMath;
+import com.sun.org.apache.xpath.internal.operations.Mult;
 import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.utils.GeomUtils;
@@ -265,6 +266,82 @@ public class FunctionsTest {
         Geometry actualResult = Functions.split(geometryCollection, lineString);
 
         assertNull(actualResult);
+    }
+
+    @Test
+    public void dimensionGeometry2D() {
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 2));
+        Integer actualResult = Functions.dimension(point);
+        Integer expectedResult = 0;
+        assertEquals(actualResult, expectedResult);
+
+        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 1.5, 1.5));
+        actualResult = Functions.dimension(lineString);
+        expectedResult = 1;
+        assertEquals(actualResult, expectedResult);
+
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0));
+        actualResult = Functions.dimension(polygon);
+        expectedResult = 2;
+        assertEquals(actualResult, expectedResult);
+
+        MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0.0, 0.0, 1.0, 1.0));
+        actualResult = Functions.dimension(multiPoint);
+        expectedResult = 0;
+        assertEquals(actualResult, expectedResult);
+
+        LineString lineString2 = GEOMETRY_FACTORY.createLineString(coordArray(1.0, 1.0, 2.0, 2.0));
+        MultiLineString multiLineString = GEOMETRY_FACTORY
+                .createMultiLineString(new LineString[] { lineString, lineString2 });
+        actualResult = Functions.dimension(multiLineString);
+        expectedResult = 1;
+        assertEquals(actualResult, expectedResult);
+
+        Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray(0.0, 0.0, 2.0, 2.0, 1.0, 0.0, 0.0, 0.0));
+        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] { polygon, polygon2 });
+        actualResult = Functions.dimension(multiPolygon);
+        expectedResult = 2;
+        assertEquals(actualResult, expectedResult);
+    }
+
+    @Test
+    public void dimensionGeometry3D() {
+        Point point3D = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 1));
+        Integer actualResult = Functions.dimension(point3D);
+        Integer expectedResult = 0;
+        assertEquals(actualResult, expectedResult);
+
+        LineString lineString3D = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 1, 2));
+        actualResult = Functions.dimension(lineString3D);
+        expectedResult = 1;
+        assertEquals(actualResult, expectedResult);
+
+        Polygon polygon3D = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 1, 1, 2, 2, 2, 3, 3, 3, 1, 1, 1));
+        actualResult = Functions.dimension(polygon3D);
+        expectedResult = 2;
+        assertEquals(actualResult, expectedResult);
+    }
+
+    @Test
+    public void dimensionGeometryCollection() {
+        Geometry[] geometry = new Geometry[] {
+                GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 1.5, 1.5)),
+                GEOMETRY_FACTORY.createPolygon(coordArray(0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0))
+        };
+        GeometryCollection geometryCollection = GEOMETRY_FACTORY.createGeometryCollection(geometry);
+
+        Integer actualResult = Functions.dimension(geometryCollection);
+        Integer expectedResult = 2;
+        assertEquals(actualResult, expectedResult);
+    }
+
+    @Test
+    public void dimensionGeometryEmpty() {
+        GeometryCollection emptyGeometryCollection = GEOMETRY_FACTORY.createGeometryCollection();
+
+        Integer actualResult = Functions.dimension(emptyGeometryCollection);
+        Integer expectedResult = 0;
+        assertEquals(actualResult, expectedResult);
     }
 
     private static boolean intersects(Set<?> s1, Set<?> s2) {
@@ -858,6 +935,66 @@ public class FunctionsTest {
     }
 
     @Test
+    public void boundingDiagonalGeom2D() {
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 2, 2, 0, 1, 0));
+        String expected = "LINESTRING (1 0, 2 2)";
+        String actual = Functions.boundingDiagonal(polygon).toText();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void boundingDiagonalGeom3D() {
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 1, 3, 2, 2, 2, 4, 5, 1, 1, 1, 1, 0, 1));
+        WKTWriter wktWriter = new WKTWriter(3);
+        String expected = "LINESTRING Z(1 0 1, 3 4 5)";
+        String actual = wktWriter.write(Functions.boundingDiagonal(polygon));
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void boundingDiagonalGeomEmpty() {
+        LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
+        String expected = "LINESTRING EMPTY";
+        String actual = Functions.boundingDiagonal(emptyLineString).toText();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void boundingDiagonalGeomCollection2D() {
+        Polygon polygon1 = GEOMETRY_FACTORY.createPolygon(coordArray(1, 1, 1, -1, 2, 2, 2, 9, 9, 1, 1, 1));
+        Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray(5, 5, 4, 4, 2, 2, 5, 5));
+        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon1, polygon2});
+        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(2, 2, 3, 3));
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(-1, 0));
+        Geometry geometryCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {multiPolygon, lineString, point});
+        String expected = "LINESTRING (-1 -1, 9 9)";
+        String actual = Functions.boundingDiagonal(geometryCollection).toText();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void boundingDiagonalGeomCollection3D() {
+        Polygon polygon1 = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 1, 4, 1, -1, 6, 2, 2, 4, 2, 9, 4, 9, 1, 0, 1, 1, 4));
+        Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray3d(5, 5, 1, 4, 4, 1, 2, 2, 2, 5, 5, 1));
+        MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon1, polygon2});
+        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray3d(2, 2, 9, 3, 3, -5));
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(-1, 9, 1));
+        Geometry geometryCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {multiPolygon, lineString, point});
+        String expected = "LINESTRING Z(-1 -1 -5, 9 9 9)";
+        WKTWriter wktWriter = new WKTWriter(3);
+        String actual = wktWriter.write(Functions.boundingDiagonal(geometryCollection));
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void boundingDiagonalSingleVertex() {
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(10, 5));
+        String expected = "LINESTRING (10 5, 10 5)";
+        String actual = Functions.boundingDiagonal(point).toText();
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void affineEmpty3D() {
         LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
         String expected = emptyLineString.toText();
@@ -884,8 +1021,6 @@ public class FunctionsTest {
     @Test
     public void affine3DGeom3D() {
         WKTWriter wktWriter = new WKTWriter(3);
-        Polygon polygon3D = GEOMETRY_FACTORY.createPolygon(coordArray3d(2, 3, 1, 4, 5, 1, 7, 8, 2, 2, 3, 1));
-
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray3d(1, 0, 1, 1, 1, 2, 1, 2, 2));
         String expected = wktWriter.write(GEOMETRY_FACTORY.createLineString(coordArray3d(8, 11, 15, 11, 17, 24, 12, 20, 28)));
         String actual = wktWriter.write(Functions.affine(lineString, 1.0, 1.0, 2.0, 3.0, 5.0, 6.0, 2.0, 3.0, 4.0, 4.0, 5.0, 6.0));
@@ -907,19 +1042,17 @@ public class FunctionsTest {
         assertEquals(wktWriter3D.write(expectedPoint3D), wktWriter3D.write(actualGeomCollection.getGeometryN(0).getGeometryN(0)));
         assertEquals(wktWriter3D.write(expectedPolygon1), wktWriter3D.write(actualGeomCollection.getGeometryN(0).getGeometryN(1).getGeometryN(0)));
         assertEquals(wktWriter3D.write(expectedPolygon2), wktWriter3D.write(actualGeomCollection.getGeometryN(0).getGeometryN(1).getGeometryN(1)));
-
     }
 
     @Test
     public void affine2DGeom3D() {
-        //1 0 1, 1 1 1, 2 2 2, 1 0 1
         WKTWriter wktWriter = new WKTWriter(3);
-        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 1, 1, 1, 1, 2, 2, 2, 1, 0, 1));
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray3d(1, 0, 1, 1, 1, 2, 1, 2, 2));
         String expected = wktWriter.write(GEOMETRY_FACTORY.createLineString(coordArray3d(6, 8, 1, 7, 11, 2, 8, 14, 2)));
         String actual = wktWriter.write(Functions.affine(lineString, 1d, 1d, 2d, 3d, 5d, 6d));
         assertEquals(expected, actual);
     }
+
 
     @Test
     public void affine2DGeom2D() {
@@ -945,4 +1078,73 @@ public class FunctionsTest {
         assertEquals(expectedPolygon2.toText(), actualGeomCollection.getGeometryN(0).getGeometryN(1).getGeometryN(1).toText());
     }
 
+    @Test
+    public void hausdorffDistanceDefaultGeom2D() throws Exception {
+        Polygon polygon1 = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 1, 1, 1, 2, 2, 1, 5, 2, 0, 1, 1, 0, 1));
+        Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray3d(4, 0, 4, 6, 1, 4, 6, 4, 9, 6, 1, 3, 4, 0, 4));
+        Double expected = 5.0;
+        Double actual = Functions.hausdorffDistance(polygon1, polygon2);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void hausdorffDistanceGeom2D() throws Exception {
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(10, 34));
+        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1, 2, 1, 5, 2, 6, 1, 2));
+        Double expected = 33.24154027718932;
+        Double actual = Functions.hausdorffDistance(point, lineString, 0.33);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void hausdorffDistanceInvalidDensityFrac() throws Exception {
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(10, 34));
+        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1, 2, 1, 5, 2, 6, 1, 2));
+        Exception e = assertThrows(IllegalArgumentException.class, () -> Functions.hausdorffDistance(point, lineString, 3));
+        String expected = "Fraction is not in range (0.0 - 1.0]";
+        String actual = e.getMessage();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void hausdorffDistanceDefaultGeomCollection() throws Exception {
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 2, 2, 1, 2, 0, 4, 1, 1, 2));
+        Geometry point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 0));
+        Geometry point2 = GEOMETRY_FACTORY.createPoint(new Coordinate(40, 10));
+        Geometry point3 = GEOMETRY_FACTORY.createPoint(new Coordinate(-10, -40));
+        GeometryCollection multiPoint = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {point1, point2, point3});
+        Double actual = Functions.hausdorffDistance(polygon, multiPoint);
+        Double expected = 41.7612260356422;
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void hausdorffDistanceGeomCollection() throws Exception {
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 2, 2, 1, 2, 0, 4, 1, 1, 2));
+        LineString lineString1 = GEOMETRY_FACTORY.createLineString(coordArray(1, 1, 2, 1, 4, 4, 5, 5));
+        LineString lineString2 = GEOMETRY_FACTORY.createLineString(coordArray(10, 10, 11, 11, 12, 12, 14, 14));
+        LineString lineString3 = GEOMETRY_FACTORY.createLineString(coordArray(-11, -20, -11, -21, -15, -19));
+        MultiLineString multiLineString = GEOMETRY_FACTORY.createMultiLineString(new LineString[] {lineString1, lineString2, lineString3});
+        Double actual = Functions.hausdorffDistance(polygon, multiLineString, 0.0000001);
+        Double expected = 25.495097567963924;
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void hausdorffDistanceEmptyGeom() throws Exception {
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 2, 2, 1, 2, 0, 4, 1, 1, 2));
+        LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
+        Double expected = 0.0;
+        Double actual = Functions.hausdorffDistance(polygon, emptyLineString, 0.00001);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void hausdorffDistanceDefaultEmptyGeom() throws Exception {
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 2, 2, 1, 2, 0, 4, 1, 1, 2));
+        LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
+        Double expected = 0.0;
+        Double actual = Functions.hausdorffDistance(polygon, emptyLineString);
+        assertEquals(expected, actual);
+    }
 }

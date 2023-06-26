@@ -36,6 +36,7 @@ import org.locationtech.jts.operation.valid.IsSimpleOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
+import org.locationtech.jts.algorithm.distance.DiscreteHausdorffDistance;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -554,6 +555,14 @@ public class Functions {
         return new GeometrySplitter(GEOMETRY_FACTORY).split(input, blade);
     }
 
+    public static Integer dimension(Geometry geometry) {
+        Integer dimension = geometry.getDimension();
+        // unknown dimension such as an empty GEOMETRYCOLLECTION
+        if (dimension < 0) {
+            dimension = 0;
+        }
+        return dimension;
+    }
 
     /**
      * get the coordinates of a geometry and transform to Google s2 cell id
@@ -946,4 +955,45 @@ public class Functions {
         return geometricMedian(geometry, DEFAULT_TOLERANCE, DEFAULT_MAX_ITER, false);
     }
 
+    public static Geometry boundingDiagonal(Geometry geometry) {
+        if (geometry.isEmpty()) {
+            return GEOMETRY_FACTORY.createLineString();
+        }else {
+            //Envelope envelope = geometry.getEnvelopeInternal();
+           // if (envelope.isNull()) return GEOMETRY_FACTORY.createLineString();
+            Double startX = null, startY = null, startZ = null,
+                    endX = null, endY = null, endZ = null;
+            boolean is3d = !Double.isNaN(geometry.getCoordinate().z);
+            for (Coordinate currCoordinate : geometry.getCoordinates()) {
+                startX = startX == null ? currCoordinate.getX() : Math.min(startX, currCoordinate.getX());
+                startY = startY == null ? currCoordinate.getY() : Math.min(startY, currCoordinate.getY());
+
+                endX = endX == null ? currCoordinate.getX() : Math.max(endX, currCoordinate.getX());
+                endY = endY == null ? currCoordinate.getY() : Math.max(endY, currCoordinate.getY());
+                if (is3d) {
+                    Double geomZ = currCoordinate.getZ();
+                    startZ = startZ == null ? currCoordinate.getZ() : Math.min(startZ, currCoordinate.getZ());
+                    endZ = endZ == null ? currCoordinate.getZ() : Math.max(endZ, currCoordinate.getZ());
+                }
+            }
+            Coordinate startCoordinate;
+            Coordinate endCoordinate;
+            if (is3d) {
+                startCoordinate = new Coordinate(startX, startY, startZ);
+                endCoordinate = new Coordinate(endX, endY, endZ);
+            }else {
+                startCoordinate = new Coordinate(startX, startY);
+                endCoordinate = new Coordinate(endX, endY);
+            }
+            return GEOMETRY_FACTORY.createLineString(new Coordinate[] {startCoordinate, endCoordinate});
+        }
+    }
+
+    public static Double hausdorffDistance(Geometry g1, Geometry g2, double densityFrac) throws Exception {
+        return GeomUtils.getHausdorffDistance(g1, g2, densityFrac);
+    }
+
+    public static Double hausdorffDistance(Geometry g1, Geometry g2) throws Exception{
+        return GeomUtils.getHausdorffDistance(g1, g2, -1);
+    }
 }

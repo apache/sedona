@@ -265,6 +265,33 @@ SELECT ST_Boundary(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
 
 Output: `LINESTRING (1 1, 0 0, -1 1, 1 1)`
 
+## ST_BoundingDiagonal
+
+Introduction: Returns a linestring spanning minimum and maximum values of each dimension of the given geometry's coordinates as its start and end point respectively.
+If an empty geometry is provided, the returned LineString is also empty.
+If a single vertex (POINT) is provided, the returned LineString has both the start and end points same as the points coordinates
+
+Format: `ST_BoundingDiagonal(geom: geometry)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+```sql
+SELECT ST_BoundingDiagonal(ST_GeomFromWKT(geom))
+```
+
+Input: `POLYGON ((1 1 1, 3 3 3, 0 1 4, 4 4 0, 1 1 1))`
+
+Output: `LINESTRING Z(0 1 1, 4 4 4)`
+
+Input: `POINT (10 10)`
+
+Output: `LINESTRING (10 10, 10 10)`
+
+Input: `GEOMETRYCOLLECTION(POLYGON ((5 5 5, -1 2 3, -1 -1 0, 5 5 5)), POINT (10 3 3))`
+
+Output: `LINESTRING Z(-1 -1 0, 10 5 5)`
+
 ## ST_Buffer
 
 Introduction: Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance.
@@ -461,6 +488,28 @@ Result:
 ```
 POLYGON ((0 -3, -3 -3, -3 3, 0 3, 0 -3))
 ```
+
+## ST_Dimension
+
+Introduction: Return the topological dimension of this Geometry object, which must be less than or equal to the coordinate dimension. OGC SPEC s2.1.1.1 - returns 0 for POINT, 1 for LINESTRING, 2 for POLYGON, and the largest dimension of the components of a GEOMETRYCOLLECTION. If the dimension is unknown (e.g. for an empty GEOMETRYCOLLECTION) 0 is returned.
+
+Format: `ST_Dimension (A:geometry), ST_Dimension (C:geometrycollection), `
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_Dimension('GEOMETRYCOLLECTION(LINESTRING(1 1,0 0),POINT(0 0))');
+```
+
+Result:
+
+```
+ST_Dimension
+-----------
+1
+```
+
 
 ## ST_Distance
 
@@ -765,6 +814,44 @@ Spark SQL example:
 SELECT ST_GeometryType(polygondf.countyshape)
 FROM polygondf
 ```
+
+## ST_HausdorffDistance
+
+Introduction: Returns a discretized (and hence approximate) [Hausdorff distance](https://en.wikipedia.org/wiki/Hausdorff_distance) between the given 2 geometries.
+Optionally, a densityFraction parameter can be specified, which gives more accurate results by densifying segments before computing hausdorff distance between them.
+Each segment is broken down into equal-length subsegments whose ratio with segment length is closest to the given density fraction.
+
+Hence, the lower the densityFrac value, the more accurate is the computed hausdorff distance, and the more time it takes to compute it.
+
+If any of the geometry is empty, 0.0 is returned.
+
+!!!Note
+    Accepted range of densityFrac is (0.0, 1.0], if any other value is provided, ST_HausdorffDistance throws an IllegalArgumentException
+
+
+!!!Note
+    Even though the function accepts 3D geometry, the z ordinate is ignored and the computed hausdorff distance is equivalent to the geometries not having the z ordinate.
+
+Format: `ST_HausdorffDistance(g1: geometry, g2: geometry, densityFrac)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_HausdorffDistance(g1, g2, 0.1)
+```
+
+Input: `g1: POINT (0.0 1.0), g2: LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)`
+
+Output: `5.0990195135927845`
+
+```sql
+SELECT ST_HausdorffDistance(ST_GeomFromText(), ST_GeomFromText())
+```
+
+Input: `g1: POLYGON Z((1 0 1, 1 1 2, 2 1 5, 2 0 1, 1 0 1)), g2: POLYGON Z((4 0 4, 6 1 4, 6 4 9, 6 1 3, 4 0 4))`
+
+Output: `5.0`
 
 ## ST_InteriorRingN
 

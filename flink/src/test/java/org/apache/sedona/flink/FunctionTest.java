@@ -155,6 +155,16 @@ public class FunctionTest extends TestBase{
 
 
     @Test
+    public void testDimension(){
+        Table pointTable = tableEnv.sqlQuery(
+                        "SELECT ST_Dimension(ST_GeomFromWKT('GEOMETRYCOLLECTION EMPTY'))");
+        assertEquals(0, first(pointTable).getField(0));
+
+        pointTable = tableEnv.sqlQuery(
+                "SELECT ST_Dimension(ST_GeomFromWKT('GEOMETRYCOLLECTION(MULTIPOLYGON(((0 0, 0 1, 1 1, 1 0, 0 0)), ((2 2, 2 3, 3 3, 3 2, 2 2))), MULTIPOINT(6 6, 7 7, 8 8))'))");
+        assertEquals(2, first(pointTable).getField(0));
+    }
+    @Test
     public void testDistance() {
         Table pointTable = createPointTable(testDataSize);
         pointTable = pointTable.select(call(Functions.ST_Distance.class.getSimpleName(), $(pointColNames[0])
@@ -736,4 +746,25 @@ public class FunctionTest extends TestBase{
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void testBoundingDiagonal() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_BoundingDiagonal(ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))'))" +" AS " + polygonColNames[0]);
+        polyTable = polyTable.select(call(Functions.ST_AsText.class.getSimpleName(), $(polygonColNames[0])));
+        String expected = "LINESTRING (1 0, 2 1)";
+        String actual = (String) first(polyTable).getField(0);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testHausdorffDistance() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (0.0 1.0)') AS g1, ST_GeomFromWKT('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)') AS g2");
+        Table actualTable = polyTable.select(call(Functions.ST_HausdorffDistance.class.getSimpleName(), $("g1"), $("g2"), 0.4));
+        Table actualTableDefault = polyTable.select(call(Functions.ST_HausdorffDistance.class.getSimpleName(), $("g1"), $("g2")));
+        Double expected = 5.0990195135927845;
+        Double expectedDefault = 5.0990195135927845;
+        Double actual = (Double) first(actualTable).getField(0);
+        Double actualDefault = (Double) first(actualTableDefault).getField(0);
+        assertEquals(expected, actual);
+        assertEquals(expectedDefault, actualDefault);
+    }
 }

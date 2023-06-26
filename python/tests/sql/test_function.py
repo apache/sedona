@@ -1135,3 +1135,23 @@ class TestPredicateJoin(TestBase):
                                    "1, 2, 1, 2) AS geom")
         actual = actual_df.selectExpr("ST_AsText(geom)").take(1)[0][0]
         assert expected == actual
+    def test_boundingDiagonal(self):
+        expected = "LINESTRING (1 0, 2 1)"
+        actual_df = self.spark.sql("SELECT ST_BoundingDiagonal(ST_GeomFromText('POLYGON ((1 0, 1 1, 2 1, 2 0, "
+                                   "1 0))')) AS geom")
+        actual = actual_df.selectExpr("ST_AsText(geom)").take(1)[0][0]
+        assert expected == actual
+
+    def test_hausdorffDistance(self):
+        expected = 5.0
+        actual_df = self.spark.sql("SELECT ST_HausdorffDistance(ST_GeomFromText('POLYGON ((1 0 1, 1 1 2, 2 1 5, "
+                                   "2 0 1, 1 0 1))'), ST_GeomFromText('POLYGON ((4 0 4, 6 1 4, 6 4 9, 6 1 3, "
+                                   "4 0 4))'), 0.5)")
+        actual_df_default = self.spark.sql("SELECT ST_HausdorffDistance(ST_GeomFromText('POLYGON ((1 0 1, 1 1 2, "
+                                           "2 1 5, "
+                                           "2 0 1, 1 0 1))'), ST_GeomFromText('POLYGON ((4 0 4, 6 1 4, 6 4 9, 6 1 3, "
+                                           "4 0 4))'))")
+        actual = actual_df.take(1)[0][0]
+        actual_default = actual_df_default.take(1)[0][0]
+        assert expected == actual
+        assert expected == actual_default

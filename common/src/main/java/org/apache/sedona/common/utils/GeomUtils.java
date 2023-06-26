@@ -26,6 +26,7 @@ import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTWriter;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
+import org.locationtech.jts.algorithm.distance.DiscreteHausdorffDistance;
 
 import java.nio.ByteOrder;
 import java.util.*;
@@ -460,11 +461,10 @@ public class GeomUtils {
             geometry.geometryChanged();
         }
     }
-
     public static void affineGeom(Geometry geometry, Double a, Double b, Double d, Double e, Double xOff, Double yOff, Double c,
                                   Double f, Double g, Double h, Double i, Double zOff) {
         Coordinate[] coordinates = geometry.getCoordinates();
-        for (Coordinate currCoordinate: coordinates) {
+        for (Coordinate currCoordinate : coordinates) {
             double x = currCoordinate.getX(), y = currCoordinate.getY(), z = Double.isNaN(currCoordinate.getZ()) ? 0 : currCoordinate.getZ();
             double newX = a * x + b * y + xOff;
             if (c != null) newX += c * z;
@@ -479,5 +479,14 @@ public class GeomUtils {
             }
         }
         geometry.geometryChanged();
+    }
+
+    public static Double getHausdorffDistance(Geometry g1, Geometry g2, double densityFrac) throws Exception {
+        if (g1.isEmpty() || g2.isEmpty()) return 0.0;
+        DiscreteHausdorffDistance hausdorffDistanceObj = new DiscreteHausdorffDistance(g1, g2);
+        if (densityFrac != -1) {
+            hausdorffDistanceObj.setDensifyFraction(densityFrac);
+        }
+        return hausdorffDistanceObj.distance();
     }
 }
