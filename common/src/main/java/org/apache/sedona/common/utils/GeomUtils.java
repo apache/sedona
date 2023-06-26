@@ -29,7 +29,6 @@ import org.locationtech.jts.operation.union.UnaryUnionOp;
 import org.locationtech.jts.algorithm.distance.DiscreteFrechetDistance;
 import org.locationtech.jts.algorithm.distance.DiscreteHausdorffDistance;
 
-import java.awt.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.List;
@@ -461,6 +460,25 @@ public class GeomUtils {
         if (deltaX != 0 || deltaY != 0 || deltaZ != 0) {
             geometry.geometryChanged();
         }
+    }
+    public static void affineGeom(Geometry geometry, Double a, Double b, Double d, Double e, Double xOff, Double yOff, Double c,
+                                  Double f, Double g, Double h, Double i, Double zOff) {
+        Coordinate[] coordinates = geometry.getCoordinates();
+        for (Coordinate currCoordinate : coordinates) {
+            double x = currCoordinate.getX(), y = currCoordinate.getY(), z = Double.isNaN(currCoordinate.getZ()) ? 0 : currCoordinate.getZ();
+            double newX = a * x + b * y + xOff;
+            if (c != null) newX += c * z;
+            double newY = d * x + e * y + yOff;
+            if (f != null) newY += f * z;
+            currCoordinate.setX(newX);
+            currCoordinate.setY(newY);
+
+            if (g != null && h != null && i != null && !Double.isNaN(currCoordinate.getZ())) {
+                double newZ = g * x + h * y + i * z + zOff;
+                currCoordinate.setZ(newZ);
+            }
+        }
+        geometry.geometryChanged();
     }
 
     public static double getFrechetDistance(Geometry g1, Geometry g2) {

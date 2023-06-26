@@ -113,7 +113,8 @@ __all__ = [
     "ST_Force3D",
     "ST_NRings",
     "ST_Translate",
-    "ST_FrechetDistance"
+    "ST_FrechetDistance",
+    "ST_Affine",
     "ST_BoundingDiagonal"
 ]
 
@@ -1303,6 +1304,34 @@ def ST_FrechetDistance(g1: ColumnOrName, g2: ColumnOrName) -> Column:
     return _call_st_function("ST_FrechetDistance", args)
 
 @validate_argument_types
+def ST_Affine(geometry: ColumnOrName, a: Union[ColumnOrName, float], b: Union[ColumnOrName, float], d: Union[ColumnOrName, float],
+                e: Union[ColumnOrName, float], xOff: Union[ColumnOrName, float], yOff: Union[ColumnOrName, float], c: Optional[Union[ColumnOrName, float]] = None, f: Optional[Union[ColumnOrName, float]] = None,
+                g: Optional[Union[ColumnOrName, float]] = None, h: Optional[Union[ColumnOrName, float]] = None,
+                i: Optional[Union[ColumnOrName, float]] = None,  zOff: Optional[Union[ColumnOrName, float]] = None) -> Column:
+    """
+    Apply a 3D/2D affine tranformation to the given geometry
+    x = a * x + b * y + c * z + xOff | x = a * x + b * y + xOff
+    y = d * x + e * y + f * z + yOff | y = d * x + e * y + yOff
+    z = g * x + h * y + i * z + zOff
+    :param geometry: Geometry to apply affine transformation to
+    :param a:
+    :param b:
+    :param c: Default 0.0
+    :param d:
+    :param e:
+    :param f: Default 0.0
+    :param g: Default 0.0
+    :param h: Default 0.0
+    :param i: Default 0.0
+    :param xOff:
+    :param yOff:
+    :param zOff: Default 0.0
+    :return: Geometry with affine transformation applied
+    """
+    args = (geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)
+    return _call_st_function("ST_Affine", args)
+
+
 def ST_BoundingDiagonal(geometry: ColumnOrName) -> Column:
     """
     Returns a LineString with the min/max values of each dimension of the bounding box of the given geometry as its
