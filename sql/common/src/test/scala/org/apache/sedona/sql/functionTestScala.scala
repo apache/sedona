@@ -2066,7 +2066,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     val geomTestCases = Map (
       ("'POINT (51.3168 -0.56)'") -> "POINT",
       ("'LineString (0 0, 0 90)'") -> "LineString",
-      ("'POLYGON((0 0,0 5,5 0,0 0))'") -> "POLYGON",
+      ("'POLYGON((0 0,0 5,5 0,0 0))'") -> "POLYGON"
     )
     for ((geom, expectedResult) <- geomTestCases) {
         val df = sparkSession.sql(s"SELECT GeometryType(ST_GeomFromWKT($geom)), " +

@@ -1083,6 +1083,27 @@ public class FunctionsTest {
         String expected = "POINT";
         String actual = Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createPoint(new Coordinate(10, 5)));
         assertEquals(expected, actual);
+        
+        // Create a point with measure value
+        CoordinateXYM coords = new CoordinateXYM(2, 3, 4);
+        Point measuredPoint = new GeometryFactory().createPoint(coords);
+        String expected2 = "POINTM";
+        String actual2 = Functions.geometryTypeWithMeasured(measuredPoint);
+        assertEquals(expected2, actual2);
+
+        // Create a linestring with measure value
+        CoordinateXYM[] coordsLineString = new CoordinateXYM[] {new CoordinateXYM(1, 2, 3), new CoordinateXYM(4, 5, 6)};
+        LineString measuredLineString = new GeometryFactory().createLineString(coordsLineString);
+        String expected3 = "LINESTRINGM";
+        String actual3 = Functions.geometryTypeWithMeasured(measuredLineString);
+        assertEquals(expected3, actual3);
+
+        // Create a polygon with measure value
+        CoordinateXYM[] coordsPolygon = new CoordinateXYM[] {new CoordinateXYM(0, 0, 0), new CoordinateXYM(1, 1, 0), new CoordinateXYM(0, 1, 0), new CoordinateXYM(0, 0, 0)};
+        Polygon measuredPolygon = new GeometryFactory().createPolygon(coordsPolygon);
+        String expected4 = "POLYGONM";
+        String actual4 = Functions.geometryTypeWithMeasured(measuredPolygon);
+        assertEquals(expected4, actual4);
     }
 
     @Test
