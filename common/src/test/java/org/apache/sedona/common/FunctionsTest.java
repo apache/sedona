@@ -1118,6 +1118,90 @@ public class FunctionsTest {
     }
 
     @Test
+    public void geometryTypeWithMeasured2D() {
+        String expected1 = "POINT";
+        String actual1 = Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createPoint(new Coordinate(10, 5)));
+        assertEquals(expected1, actual1);
+        
+        // Create a point with measure value
+        CoordinateXYM coords = new CoordinateXYM(2, 3, 4);
+        Point measuredPoint = GEOMETRY_FACTORY.createPoint(coords);
+        String expected2 = "POINTM";
+        String actual2 = Functions.geometryTypeWithMeasured(measuredPoint);
+        assertEquals(expected2, actual2);
+
+        // Create a linestring with measure value
+        CoordinateXYM[] coordsLineString = new CoordinateXYM[] {new CoordinateXYM(1, 2, 3), new CoordinateXYM(4, 5, 6)};
+        LineString measuredLineString = GEOMETRY_FACTORY.createLineString(coordsLineString);
+        String expected3 = "LINESTRINGM";
+        String actual3 = Functions.geometryTypeWithMeasured(measuredLineString);
+        assertEquals(expected3, actual3);
+
+        // Create a polygon with measure value
+        CoordinateXYM[] coordsPolygon = new CoordinateXYM[] {new CoordinateXYM(0, 0, 0), new CoordinateXYM(1, 1, 0), new CoordinateXYM(0, 1, 0), new CoordinateXYM(0, 0, 0)};
+        Polygon measuredPolygon = GEOMETRY_FACTORY.createPolygon(coordsPolygon);
+        String expected4 = "POLYGONM";
+        String actual4 = Functions.geometryTypeWithMeasured(measuredPolygon);
+        assertEquals(expected4, actual4);
+    }
+
+    @Test
+    public void geometryTypeWithMeasured3D() {
+        String expected1 = "POINT";
+        String actual1 = Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createPoint(new Coordinate(10, 5, 1)));
+        assertEquals(expected1, actual1);
+        
+        // Create a point with measure value
+        CoordinateXYZM coordsPoint = new CoordinateXYZM(2, 3, 4, 0);
+        Point measuredPoint = GEOMETRY_FACTORY.createPoint(coordsPoint);
+        String expected2 = "POINTM";
+        String actual2 = Functions.geometryTypeWithMeasured(measuredPoint);
+        assertEquals(expected2, actual2);
+
+        // Create a linestring with measure value
+        CoordinateXYZM[] coordsLineString = new CoordinateXYZM[] {new CoordinateXYZM(1, 2, 3, 0), new CoordinateXYZM(4, 5, 6, 0)};
+        LineString measuredLineString = GEOMETRY_FACTORY.createLineString(coordsLineString);
+        String expected3 = "LINESTRINGM";
+        String actual3 = Functions.geometryTypeWithMeasured(measuredLineString);
+        assertEquals(expected3, actual3);
+
+        // Create a polygon with measure value
+        CoordinateXYZM[] coordsPolygon = new CoordinateXYZM[] {new CoordinateXYZM(0, 0, 0, 0), new CoordinateXYZM(1, 1, 0, 0), new CoordinateXYZM(0, 1, 0, 0), new CoordinateXYZM(0, 0, 0, 0)};
+        Polygon measuredPolygon = GEOMETRY_FACTORY.createPolygon(coordsPolygon);
+        String expected4 = "POLYGONM";
+        String actual4 = Functions.geometryTypeWithMeasured(measuredPolygon);
+        assertEquals(expected4, actual4);
+    }
+
+    @Test
+    public void geometryTypeWithMeasuredCollection() {
+        String expected1 = "GEOMETRYCOLLECTION";
+        String actual1 = Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {GEOMETRY_FACTORY.createPoint(new Coordinate(10, 5))}));
+        assertEquals(expected1, actual1);
+        
+        // Create a geometrycollection with measure value
+        CoordinateXYM coords = new CoordinateXYM(2, 3, 4);
+        Point measuredPoint = GEOMETRY_FACTORY.createPoint(coords);
+        String expected2 = "GEOMETRYCOLLECTIONM";
+        String actual2 = Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {measuredPoint}));
+        assertEquals(expected2, actual2);
+
+        // Create a geometrycollection with measure value
+        CoordinateXYM[] coordsLineString = new CoordinateXYM[] {new CoordinateXYM(1, 2, 3), new CoordinateXYM(4, 5, 6)};
+        LineString measuredLineString = GEOMETRY_FACTORY.createLineString(coordsLineString);
+        String expected3 = "GEOMETRYCOLLECTIONM";
+        String actual3 = Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {measuredLineString}));
+        assertEquals(expected3, actual3);
+
+        // Create a geometrycollection with measure value
+        CoordinateXYM[] coordsPolygon = new CoordinateXYM[] {new CoordinateXYM(0, 0, 0), new CoordinateXYM(1, 1, 0), new CoordinateXYM(0, 1, 0), new CoordinateXYM(0, 0, 0)};
+        Polygon measuredPolygon = GEOMETRY_FACTORY.createPolygon(coordsPolygon);
+        String expected4 = "GEOMETRYCOLLECTIONM";
+        String actual4 = Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {measuredPolygon}));
+        assertEquals(expected4, actual4);
+    }
+
+    @Test
     public void hausdorffDistanceDefaultGeom2D() throws Exception {
         Polygon polygon1 = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 1, 1, 1, 2, 2, 1, 5, 2, 0, 1, 1, 0, 1));
         Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray3d(4, 0, 4, 6, 1, 4, 6, 4, 9, 6, 1, 3, 4, 0, 4));

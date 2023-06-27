@@ -594,6 +594,14 @@ public class Functions {
         return "ST_" + geometry.getGeometryType();
     }
 
+    public static String geometryTypeWithMeasured(Geometry geometry) {
+        String geometryType = geometry.getGeometryType().toUpperCase();
+        if (GeomUtils.isMeasuredGeometry(geometry)) {
+            geometryType += "M";
+        }
+        return geometryType;
+    }
+
     public static Geometry startPoint(Geometry geometry) {
         if (geometry instanceof LineString) {
             LineString line = (LineString) geometry;

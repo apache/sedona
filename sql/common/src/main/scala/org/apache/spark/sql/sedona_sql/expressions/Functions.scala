@@ -1025,6 +1025,7 @@ case class ST_Dimension(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
 case class ST_BoundingDiagonal(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.boundingDiagonal _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -1034,6 +1035,13 @@ case class ST_BoundingDiagonal(inputExpressions: Seq[Expression])
 
 case class ST_HausdorffDistance(inputExpressions: Seq[Expression])
   extends InferredExpression(inferrableFunction3(Functions.hausdorffDistance)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class GeometryType(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.geometryTypeWithMeasured _) with FoldableExpression {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

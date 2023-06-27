@@ -153,7 +153,6 @@ public class FunctionTest extends TestBase{
 
     }
 
-
     @Test
     public void testDimension(){
         Table pointTable = tableEnv.sqlQuery(
@@ -164,6 +163,7 @@ public class FunctionTest extends TestBase{
                 "SELECT ST_Dimension(ST_GeomFromWKT('GEOMETRYCOLLECTION(MULTIPOLYGON(((0 0, 0 1, 1 1, 1 0, 0 0)), ((2 2, 2 3, 3 3, 3 2, 2 2))), MULTIPOINT(6 6, 7 7, 8 8))'))");
         assertEquals(2, first(pointTable).getField(0));
     }
+
     @Test
     public void testDistance() {
         Table pointTable = createPointTable(testDataSize);
@@ -248,6 +248,17 @@ public class FunctionTest extends TestBase{
                 call("ST_GeoHash", $(pointColNames[0]), 5)
         );
         assertEquals(first(pointTable).getField(0), "s0000");
+    }
+
+    @Test
+    public void testGeometryType() {
+        Table pointTable = tableEnv.sqlQuery(
+                        "SELECT GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))");
+        assertEquals("LINESTRING", first(pointTable).getField(0));
+
+        pointTable = tableEnv.sqlQuery(
+                "SELECT GeometryType(ST_GeomFromText('POINTM(2.0 3.5 10.2)'))");
+        assertEquals("POINTM", first(pointTable).getField(0));
     }
 
     @Test
