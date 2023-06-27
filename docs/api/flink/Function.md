@@ -1,6 +1,6 @@
 ## GeometryType
 
-Introduction: Returns the type of the geometry as a string. Eg: 'LINESTRING', 'POLYGON', 'MULTIPOINT', etc.
+Introduction: Returns the type of the geometry as a string. Eg: 'LINESTRING', 'POLYGON', 'MULTIPOINT', etc. This function also indicates if the geometry is measured, by returning a string of the form 'POINTM'.
 
 Format: `GeometryType (A:geometry)`
 
@@ -18,6 +18,18 @@ Result:
  geometrytype
 --------------
  LINESTRING
+```
+
+```sql
+SELECT GeometryType(ST_GeomFromText('POINTM(0 0 1)'));
+```
+
+Result:
+
+```
+ geometrytype
+--------------
+ POINTM
 ```
 
 ## ST_3DDistance

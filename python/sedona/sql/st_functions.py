@@ -124,6 +124,7 @@ _call_st_function = partial(call_sedona_function, "st_functions")
 @validate_argument_types
 def GeometryType(geometry: ColumnOrName):
     """Return the type of the geometry as a string.
+    This function also indicates if the geometry is measured, by returning a string of the form 'POINTM'.
 
     :param geometry: Geometry column to calculate the dimension for.
     :type geometry: ColumnOrName

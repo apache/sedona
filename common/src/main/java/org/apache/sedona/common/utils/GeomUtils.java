@@ -14,13 +14,7 @@
 package org.apache.sedona.common.utils;
 
 import org.locationtech.jts.geom.*;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
-
-import org.locationtech.jts.geom.CoordinateSequence;
-import org.locationtech.jts.geom.CoordinateSequenceFilter;
-import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTWriter;
@@ -30,7 +24,6 @@ import org.locationtech.jts.algorithm.distance.DiscreteHausdorffDistance;
 
 import java.nio.ByteOrder;
 import java.util.*;
-import java.util.List;
 
 import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 
@@ -491,9 +484,7 @@ public class GeomUtils {
     }
 
     public static Boolean isMeasuredGeometry(Geometry geom) {
-        Coordinate[] coordinates = geom.getCoordinates();
-        GeometryFactory geometryFactory = new GeometryFactory();
-        CoordinateSequence sequence = geometryFactory.getCoordinateSequenceFactory().create(coordinates);
-        return sequence.getDimension() > 2 && sequence.getMeasures() > 0;
+        Coordinate coordinate = geom.getCoordinate();
+        return !Double.isNaN(coordinate.getM());
     }
 }
