@@ -1041,7 +1041,7 @@ case class ST_HausdorffDistance(inputExpressions: Seq[Expression])
 }
 
 case class ST_Angle(inputExpressions: Seq[Expression])
-  extends InferredExpression(inferrableFunction4(Functions.angle _)) with FoldableExpression {
+  extends InferredExpression(inferrableFunction4(Functions.angle _), inferrableFunction3(Functions.angle _), inferrableFunction2(Functions.angle _)) with FoldableExpression {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

@@ -156,7 +156,7 @@ object Catalog {
     function[ST_FrechetDistance](),
     function[ST_Affine](),
     function[ST_BoundingDiagonal](),
-    function[ST_Angle](null, null),
+    function[ST_Angle](),
     function[ST_Degrees](),
     function[ST_HausdorffDistance](-1),
     // Expression for rasters
