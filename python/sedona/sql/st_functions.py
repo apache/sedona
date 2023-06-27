@@ -24,6 +24,7 @@ from sedona.sql.dataframe_api import call_sedona_function, ColumnOrName, ColumnO
 
 
 __all__ = [
+    "GeometryType",
     "ST_3DDistance",
     "ST_AddPoint",
     "ST_Area",
@@ -113,6 +114,7 @@ __all__ = [
     "ST_Force3D",
     "ST_NRings",
     "ST_Translate",
+    "ST_FrechetDistance",
     "ST_Affine",
     "ST_BoundingDiagonal"
 ]
@@ -120,6 +122,17 @@ __all__ = [
 
 _call_st_function = partial(call_sedona_function, "st_functions")
 
+@validate_argument_types
+def GeometryType(geometry: ColumnOrName):
+    """Return the type of the geometry as a string.
+    This function also indicates if the geometry is measured, by returning a string of the form 'POINTM'.
+
+    :param geometry: Geometry column to calculate the dimension for.
+    :type geometry: ColumnOrName
+    :return: Type of geometry as a string column.
+    :rtype: Column
+    """
+    return _call_st_function("GeometryType", geometry)
 
 @validate_argument_types
 def ST_3DDistance(a: ColumnOrName, b: ColumnOrName) -> Column:
@@ -1289,6 +1302,18 @@ def ST_Translate(geometry: ColumnOrName, deltaX: Union[ColumnOrName, float], del
     """
     args = (geometry, deltaX, deltaY, deltaZ)
     return _call_st_function("ST_Translate", args)
+
+def ST_FrechetDistance(g1: ColumnOrName, g2: ColumnOrName) -> Column:
+    """
+    Computes discrete frechet distance between the two geometries.
+    If any of the geometry is empty, ST_FrechetDistance returns 0
+    :param g1:
+    :param g2:
+    :return: Computed Discrete Frechet Distance between g1 and g2
+    """
+
+    args = (g1, g2)
+    return _call_st_function("ST_FrechetDistance", args)
 
 @validate_argument_types
 def ST_Affine(geometry: ColumnOrName, a: Union[ColumnOrName, float], b: Union[ColumnOrName, float], d: Union[ColumnOrName, float],

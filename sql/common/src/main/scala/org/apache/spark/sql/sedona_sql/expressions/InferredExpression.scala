@@ -34,22 +34,36 @@ import scala.reflect.runtime.universe.typeOf
 
 /**
  * This is the base class for wrapping Java/Scala functions as a catalyst expression in Spark SQL.
- * @param f The function to be wrapped. Subclasses can simply pass a function to this constructor,
+ * @param fSeq The functions to be wrapped. Subclasses can simply pass a function to this constructor,
  *          and the function will be converted to [[InferrableFunction]] by [[InferrableFunctionConverter]]
  *          automatically.
  */
-abstract class InferredExpression(f: InferrableFunction)
+abstract class InferredExpression(fSeq: InferrableFunction *)
   extends Expression with ImplicitCastInputTypes with SerdeAware with CodegenFallback with FoldableExpression
     with Serializable {
+
   def inputExpressions: Seq[Expression]
+
+  lazy val f: InferrableFunction = fSeq match {
+    // If there is only one function, simply use it and let org.apache.sedona.sql.UDF.Catalog handle default arguments.
+    case Seq(f) => f
+    // If there are multiple overloaded functions, find the one with the same number of arguments as the input
+    // expressions. Please note that the Catalog won't be able to handle default arguments in this case. We'll
+    // move default argument handling from Catalog to this class in the future.
+    case _ => fSeq.find(f => f.sparkInputTypes.size == inputExpressions.size) match {
+        case Some(f) => f
+        case None => throw new IllegalArgumentException(s"No overloaded function ${getClass.getName} has ${inputExpressions.size} arguments")
+      }
+  }
+
   override def children: Seq[Expression] = inputExpressions
   override def toString: String = s" **${getClass.getName}**  "
   override def nullable: Boolean = true
   override def inputTypes: Seq[AbstractDataType] = f.sparkInputTypes
   override def dataType: DataType = f.sparkReturnType
 
-  private val argExtractors: Array[InternalRow => Any] = f.buildExtractors(inputExpressions)
-  private val evaluator: InternalRow => Any = f.evaluatorBuilder(argExtractors)
+  private lazy val argExtractors: Array[InternalRow => Any] = f.buildExtractors(inputExpressions)
+  private lazy val evaluator: InternalRow => Any = f.evaluatorBuilder(argExtractors)
 
   override def eval(input: InternalRow): Any = f.serializer(evaluator(input))
   override def evalWithoutSerialization(input: InternalRow): Any = evaluator(input)

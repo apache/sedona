@@ -14,23 +14,17 @@
 package org.apache.sedona.common.utils;
 
 import org.locationtech.jts.geom.*;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
-
-import org.locationtech.jts.geom.CoordinateSequence;
-import org.locationtech.jts.geom.CoordinateSequenceFilter;
-import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTWriter;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
+import org.locationtech.jts.algorithm.distance.DiscreteFrechetDistance;
 import org.locationtech.jts.algorithm.distance.DiscreteHausdorffDistance;
 
 import java.nio.ByteOrder;
 import java.util.*;
-import java.util.List;
 
 import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 
@@ -424,7 +418,6 @@ public class GeomUtils {
         return geometries;
     }
 
-
     public static Geometry get3DGeom(Geometry geometry, double zValue) {
         Coordinate[] coordinates = geometry.getCoordinates();
         if (coordinates.length == 0) return geometry;
@@ -481,6 +474,11 @@ public class GeomUtils {
         geometry.geometryChanged();
     }
 
+    public static double getFrechetDistance(Geometry g1, Geometry g2) {
+        if (g1.isEmpty() || g2.isEmpty()) return 0.0;
+        return DiscreteFrechetDistance.distance(g1, g2);
+    }
+
     public static Double getHausdorffDistance(Geometry g1, Geometry g2, double densityFrac) throws Exception {
         if (g1.isEmpty() || g2.isEmpty()) return 0.0;
         DiscreteHausdorffDistance hausdorffDistanceObj = new DiscreteHausdorffDistance(g1, g2);
@@ -488,5 +486,10 @@ public class GeomUtils {
             hausdorffDistanceObj.setDensifyFraction(densityFrac);
         }
         return hausdorffDistanceObj.distance();
+    }
+
+    public static Boolean isMeasuredGeometry(Geometry geom) {
+        Coordinate coordinate = geom.getCoordinate();
+        return !Double.isNaN(coordinate.getM());
     }
 }
