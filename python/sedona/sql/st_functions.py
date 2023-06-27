@@ -1374,8 +1374,13 @@ def ST_Angle(g1: ColumnOrName, g2: ColumnOrName, g3: Optional[ColumnOrName] = No
     :param g4: Point or None
     :return: Returns the computed angle
     """
-
-    args = (g1, g2, g3, g4)
+    args = (g1, g2)
+    if g3 is not None:
+        if g4 is not None:
+            args = (g1, g2, g3, g4)
+        else:
+            args = (g1, g2, g3)
+    # args = (g1, g2, g3, g4)
     return _call_st_function("ST_Angle", args)
 
 @validate_argument_types
