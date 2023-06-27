@@ -594,6 +594,14 @@ public class Functions {
         return "ST_" + geometry.getGeometryType();
     }
 
+    public static String geometryTypeWithMeasured(Geometry geometry) {
+        String geometryType = geometry.getGeometryType().toUpperCase();
+        if (GeomUtils.isMeasuredGeometry(geometry)) {
+            geometryType += "M";
+        }
+        return geometryType;
+    }
+
     public static Geometry startPoint(Geometry geometry) {
         if (geometry instanceof LineString) {
             LineString line = (LineString) geometry;
@@ -905,15 +913,15 @@ public class Functions {
         return geometry;
     }
 
-    public static Geometry affine(Geometry geometry, Double a, Double b, Double d, Double e, Double xOff, Double yOff, Double c,
-                                  Double f, Double g, Double h, Double i, Double zOff) {
+    public static Geometry affine(Geometry geometry, double a, double b, double d, double e, double xOff, double yOff, double c,
+                                  double f, double g, double h, double i, double zOff) {
         if (!geometry.isEmpty()) {
             GeomUtils.affineGeom(geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff);
         }
         return geometry;
     }
 
-    public static Geometry affine(Geometry geometry, Double a, Double b, Double d, Double e, Double xOff, Double yOff) {
+    public static Geometry affine(Geometry geometry, double a, double b, double d, double e, double xOff, double yOff) {
         if (!geometry.isEmpty()) {
             GeomUtils.affineGeom(geometry, a, b, d, e, xOff, yOff, null, null, null, null, null, null);
         }

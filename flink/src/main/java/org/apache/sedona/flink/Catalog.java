@@ -36,6 +36,7 @@ public class Catalog {
                 new Constructors.ST_GeomFromKML(),
                 new Constructors.ST_MPolyFromText(),
                 new Constructors.ST_MLineFromText(),
+                new Functions.GeometryType(),
                 new Functions.ST_Area(),
                 new Functions.ST_AreaSpheroid(),
                 new Functions.ST_Azimuth(),

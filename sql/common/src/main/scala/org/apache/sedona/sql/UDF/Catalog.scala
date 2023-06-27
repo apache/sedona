@@ -36,6 +36,7 @@ object Catalog {
 
   val expressions: Seq[FunctionDescription] = Seq(
     // Expression for vectors
+    function[GeometryType](),
     function[ST_PointFromText](),
     function[ST_PolygonFromText](),
     function[ST_LineStringFromText](),
@@ -153,7 +154,7 @@ object Catalog {
     function[ST_NRings](),
     function[ST_Translate](0.0),
     function[ST_FrechetDistance](),
-    function[ST_Affine](null, null, null, null, null, null),
+    function[ST_Affine](),
     function[ST_BoundingDiagonal](),
     function[ST_Angle](null, null),
     function[ST_Degrees](),
