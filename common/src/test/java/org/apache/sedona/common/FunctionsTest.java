@@ -15,7 +15,6 @@ package org.apache.sedona.common;
 
 import com.google.common.geometry.S2CellId;
 import com.google.common.math.DoubleMath;
-import com.sun.org.apache.xpath.internal.operations.Mult;
 import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.utils.GeomUtils;
@@ -1037,7 +1036,7 @@ public class FunctionsTest {
     public void affineEmpty3D() {
         LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
         String expected = emptyLineString.toText();
-        String actual = Functions.affine(emptyLineString, 1.0, 1.0, 2.0, 3.0, 5.0, 6.0, 2.0, 3.0, 4.0, 4.0, 5.0, 6.0).toText();
+        String actual = Functions.affine(emptyLineString, 1.0, 1.0, 4.0, 2.0, 2.0, 4.0, 5.0, 5.0, 6.0, 3.0, 3.0, 6.0).toText();
         assertEquals(expected, actual);
     }
 
@@ -1052,8 +1051,8 @@ public class FunctionsTest {
    @Test
     public void affine3DGeom2D() {
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 1, 2));
-        String expected = GEOMETRY_FACTORY.createLineString(coordArray(6, 8, 7, 11, 8, 14)).toText();
-        String actual = Functions.affine(lineString, 1.0, 1.0, 2.0, 3.0, 5.0, 6.0, 2.0, 3.0, 4.0, 4.0, 5.0, 6.0).toText();
+        String expected = GEOMETRY_FACTORY.createLineString(coordArray(4, 5, 5, 7, 6, 9)).toText();
+        String actual = Functions.affine(lineString, 1.0, 1.0, 4.0, 2.0, 2.0, 4.0, 5.0, 5.0, 6.0, 3.0, 3.0, 6.0).toText();
         assertEquals(expected, actual);
     }
 
@@ -1061,8 +1060,8 @@ public class FunctionsTest {
     public void affine3DGeom3D() {
         WKTWriter wktWriter = new WKTWriter(3);
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray3d(1, 0, 1, 1, 1, 2, 1, 2, 2));
-        String expected = wktWriter.write(GEOMETRY_FACTORY.createLineString(coordArray3d(8, 11, 15, 11, 17, 24, 12, 20, 28)));
-        String actual = wktWriter.write(Functions.affine(lineString, 1.0, 1.0, 2.0, 3.0, 5.0, 6.0, 2.0, 3.0, 4.0, 4.0, 5.0, 6.0));
+        String expected = wktWriter.write(GEOMETRY_FACTORY.createLineString(coordArray3d(8, 9, 17, 13, 15, 28, 14, 17, 33)));
+        String actual = wktWriter.write(Functions.affine(lineString, 1.0, 1.0, 4.0, 2.0, 2.0, 4.0, 5.0, 5.0, 6.0, 3.0, 3.0, 6.0));
         assertEquals(expected, actual);
     }
 
@@ -1073,11 +1072,11 @@ public class FunctionsTest {
         Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 1, 1, 1, 1, 2, 2, 2, 1, 0, 1));
         MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon1, polygon2});
         Geometry geomCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {point3D, multiPolygon})});
-        Geometry actualGeomCollection = Functions.affine(geomCollection, 1.0, 2.0, 1.0, 2.0, 1.0, 2.0, 3.0, 3.0, 1.0, 2.0, 3.0, 3.0);
+        Geometry actualGeomCollection = Functions.affine(geomCollection, 1.0, 2.0, 1.0, 3.0, 1.0, 2.0, 3.0, 1.0, 2.0, 2.0, 3.0, 3.0);
         WKTWriter wktWriter3D = new WKTWriter(3);
-        Point expectedPoint3D = GEOMETRY_FACTORY.createPoint(new Coordinate(7, 8, 9));
-        Polygon expectedPolygon1 = GEOMETRY_FACTORY.createPolygon(coordArray3d(8, 9, 10, 10, 11, 12, 11, 12, 13, 9, 10, 11, 8, 9, 10));
-        Polygon expectedPolygon2 = GEOMETRY_FACTORY.createPolygon(coordArray3d(5, 6, 7, 7, 8, 9, 13, 14, 15, 5, 6, 7));
+        Point expectedPoint3D = GEOMETRY_FACTORY.createPoint(new Coordinate(6, 9, 9));
+        Polygon expectedPolygon1 = GEOMETRY_FACTORY.createPolygon(coordArray3d(5, 10, 10,7, 11, 11, 8, 14, 14, 6, 13, 13, 5, 10, 10));
+        Polygon expectedPolygon2 = GEOMETRY_FACTORY.createPolygon(coordArray3d(4, 8, 8, 6, 9, 9, 10, 15, 15, 4, 8, 8));
         assertEquals(wktWriter3D.write(expectedPoint3D), wktWriter3D.write(actualGeomCollection.getGeometryN(0).getGeometryN(0)));
         assertEquals(wktWriter3D.write(expectedPolygon1), wktWriter3D.write(actualGeomCollection.getGeometryN(0).getGeometryN(1).getGeometryN(0)));
         assertEquals(wktWriter3D.write(expectedPolygon2), wktWriter3D.write(actualGeomCollection.getGeometryN(0).getGeometryN(1).getGeometryN(1)));
