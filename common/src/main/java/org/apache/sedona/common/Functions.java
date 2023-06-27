@@ -555,6 +555,14 @@ public class Functions {
         return new GeometrySplitter(GEOMETRY_FACTORY).split(input, blade);
     }
 
+    public static Integer dimension(Geometry geometry) {
+        Integer dimension = geometry.getDimension();
+        // unknown dimension such as an empty GEOMETRYCOLLECTION
+        if (dimension < 0) {
+            dimension = 0;
+        }
+        return dimension;
+    }
 
     /**
      * get the coordinates of a geometry and transform to Google s2 cell id
@@ -584,6 +592,14 @@ public class Functions {
 
     public static String geometryType(Geometry geometry) {
         return "ST_" + geometry.getGeometryType();
+    }
+
+    public static String geometryTypeWithMeasured(Geometry geometry) {
+        String geometryType = geometry.getGeometryType().toUpperCase();
+        if (GeomUtils.isMeasuredGeometry(geometry)) {
+            geometryType += "M";
+        }
+        return geometryType;
     }
 
     public static Geometry startPoint(Geometry geometry) {
@@ -897,6 +913,21 @@ public class Functions {
         return geometry;
     }
 
+    public static Geometry affine(Geometry geometry, double a, double b, double d, double e, double xOff, double yOff, double c,
+                                  double f, double g, double h, double i, double zOff) {
+        if (!geometry.isEmpty()) {
+            GeomUtils.affineGeom(geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff);
+        }
+        return geometry;
+    }
+
+    public static Geometry affine(Geometry geometry, double a, double b, double d, double e, double xOff, double yOff) {
+        if (!geometry.isEmpty()) {
+            GeomUtils.affineGeom(geometry, a, b, d, e, xOff, yOff, null, null, null, null, null, null);
+        }
+        return geometry;
+    }
+
     public static Geometry geometricMedian(Geometry geometry, double tolerance, int maxIter, boolean failIfNotConverged) throws Exception {
         String geometryType = geometry.getGeometryType();
         if(!(Geometry.TYPENAME_POINT.equals(geometryType) || Geometry.TYPENAME_MULTIPOINT.equals(geometryType))) {
@@ -930,6 +961,10 @@ public class Functions {
 
     public static Geometry geometricMedian(Geometry geometry) throws Exception {
         return geometricMedian(geometry, DEFAULT_TOLERANCE, DEFAULT_MAX_ITER, false);
+    }
+
+    public static double frechetDistance(Geometry g1, Geometry g2) {
+        return GeomUtils.getFrechetDistance(g1, g2);
     }
 
     public static Geometry boundingDiagonal(Geometry geometry) {

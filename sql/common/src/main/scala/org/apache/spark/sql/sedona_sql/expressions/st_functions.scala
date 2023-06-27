@@ -23,6 +23,9 @@ import org.apache.spark.sql.sedona_sql.expressions.collect.{ST_Collect}
 import org.locationtech.jts.operation.buffer.BufferParameters
 
 object st_functions extends DataFrameAPI {
+  def GeometryType(geometry: Column): Column = wrapExpression[GeometryType](geometry)
+  def GeometryType(geometry: String): Column = wrapExpression[GeometryType](geometry)
+
   def ST_3DDistance(a: Column, b: Column): Column = wrapExpression[ST_3DDistance](a, b)
   def ST_3DDistance(a: String, b: String): Column = wrapExpression[ST_3DDistance](a, b)
 
@@ -89,6 +92,9 @@ object st_functions extends DataFrameAPI {
 
   def ST_Difference(a: Column, b: Column): Column = wrapExpression[ST_Difference](a, b)
   def ST_Difference(a: String, b: String): Column = wrapExpression[ST_Difference](a, b)
+
+  def ST_Dimension(geometry: Column): Column = wrapExpression[ST_Dimension](geometry)
+  def ST_Dimension(geometry: String): Column = wrapExpression[ST_Dimension](geometry)
 
   def ST_Distance(a: Column, b: Column): Column = wrapExpression[ST_Distance](a, b)
   def ST_Distance(a: String, b: String): Column = wrapExpression[ST_Distance](a, b)
@@ -326,6 +332,20 @@ object st_functions extends DataFrameAPI {
 
   def ST_Translate(geometry: String, deltaX: Double, deltaY: Double): Column = wrapExpression[ST_Translate](geometry, deltaX, deltaY, 0.0)
 
+  def ST_FrechetDistance(g1: Column, g2: Column): Column = wrapExpression[ST_FrechetDistance](g1, g2)
+
+  def ST_FrechetDistance(g1: String, g2: String): Column = wrapExpression[ST_FrechetDistance](g1, g2)
+  def ST_Affine(geometry: Column, a: Column, b: Column, d: Column, e: Column, xOff: Column, yOff: Column, c: Column, f: Column, g: Column, h: Column, i: Column, zOff: Column): Column =
+    wrapExpression[ST_Affine](geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)
+
+  def ST_Affine(geometry: String, a: Double, b: Double, d: Double, e: Double, xOff: Double, yOff: Double, c: Double, f: Double, g: Double, h: Double, i: Double, zOff: Double): Column =
+    wrapExpression[ST_Affine](geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)
+
+  def ST_Affine(geometry: Column, a: Column, b: Column, d: Column, e: Column, xOff: Column, yOff: Column) =
+    wrapExpression[ST_Affine](geometry, a, b, d, e, xOff, yOff)
+
+  def ST_Affine(geometry: String, a: Double, b: Double, d: Double, e: Double, xOff: Double, yOff: Double) =
+    wrapExpression[ST_Affine](geometry, a, b, d, e, xOff, yOff)
 
   def ST_BoundingDiagonal(geometry: Column) =
     wrapExpression[ST_BoundingDiagonal](geometry)
