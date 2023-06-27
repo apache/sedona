@@ -23,8 +23,8 @@ import org.apache.spark.sql.sedona_sql.expressions.collect.{ST_Collect}
 import org.locationtech.jts.operation.buffer.BufferParameters
 
 object st_functions extends DataFrameAPI {
-  def GeometryType(a: Column, b: Column): Column = wrapExpression[GeometryType](a, b)
-  def GeometryType(a: String, b: String): Column = wrapExpression[GeometryType](a, b)
+  def GeometryType(geometry: Column): Column = wrapExpression[GeometryType](geometry)
+  def GeometryType(geometry: String): Column = wrapExpression[GeometryType](geometry)
 
   def ST_3DDistance(a: Column, b: Column): Column = wrapExpression[ST_3DDistance](a, b)
   def ST_3DDistance(a: String, b: String): Column = wrapExpression[ST_3DDistance](a, b)
