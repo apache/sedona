@@ -1013,7 +1013,7 @@ class dataFrameAPITestScala extends TestBaseScala {
 
     it("Passed ST_Affine") {
       val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((2 3 1, 4 5 1, 7 8 2, 2 3 1))') AS geom")
-      val df = polyDf.select(ST_Affine("geom", 1, 2, 3, 4, 1, 2, 3, 4, 1, 4, 2, 1));
+      val df = polyDf.select(ST_Affine("geom", 1, 2, 3, 3, 4, 4, 1, 4, 2, 1, 2, 1));
       val dfDefaultValue = polyDf.select(ST_Affine("geom", 1, 2, 1, 2, 1, 2))
       val wKTWriter3D = new WKTWriter(3);
       val actualGeom = df.take(1)(0).get(0).asInstanceOf[Geometry]

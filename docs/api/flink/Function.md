@@ -76,7 +76,7 @@ Introduction: Apply an affine transformation to the given geometry.
 
 ST_Affine has 2 overloaded signatures: 
 
-`ST_Affine(geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)` 
+`ST_Affine(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)` 
 
 `ST_Affine(geometry, a, b, d, e, xOff, yOff)`
 
@@ -91,12 +91,12 @@ Based on the invoked function, the following transformation is applied:
 
 If the given geometry is empty, the result is also empty. 
 
-Format: `ST_Affine(geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)`  
+Format: `ST_Affine(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)`  
 Format: `ST_Affine(geometry, a, b, d, e, xOff, yOff)`
 
 Since: `1.5.0`
 
-Example:
+Examples:
 
 ```sql
 ST_Affine(geometry, 1, 2, 4, 1, 1, 2, 3, 2, 5, 4, 8, 3)
@@ -108,11 +108,11 @@ Output: `LINESTRING EMPTY`
 
 Input: `POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))`
 
-Output: `POLYGON Z((5 8 16, 7 9 20, 13 16 37, 5 8 16))`
+Output: `POLYGON Z((9 11 11, 11 12 13, 18 16 23, 9 11 11))`
 
 Input: `POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0), (1 0.5, 1 0.75, 1.5 0.75, 1.5 0.5, 1 0.5))`
 
-Output: `POLYGON ((2 6, 4 7, 5 11, 3 10, 2 6), (3 6.5, 3.5 6.75, 4 8.75, 3.5 8.5, 3 6.5))`
+Output: `POLYGON((5 9, 7 10, 8 11, 6 10, 5 9), (6 9.5, 6.5 9.75, 7 10.25, 6.5 10, 6 9.5))`
 
 
 ```sql

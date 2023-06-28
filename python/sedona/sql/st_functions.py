@@ -1342,7 +1342,9 @@ def ST_Affine(geometry: ColumnOrName, a: Union[ColumnOrName, float], b: Union[Co
     :param zOff: Default 0.0
     :return: Geometry with affine transformation applied
     """
-    args = (geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)
+    args = (geometry, a, b, d, e, xOff, yOff)
+    if not [x for x in (c, f, g, h, i, zOff) if x is None]:
+        args = (geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)
     return _call_st_function("ST_Affine", args)
 
 
@@ -1403,3 +1405,4 @@ def ST_HausdorffDistance(g1: ColumnOrName, g2: ColumnOrName, densityFrac: Option
     """
     args = (g1, g2, densityFrac)
     return _call_st_function("ST_HausdorffDistance", args)
+

@@ -2023,10 +2023,10 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
   it ("should pass ST_Affine") {
     val geomTestCases = Map (
-      ("'POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))'")-> ("'POLYGON Z((5 8 16, 7 9 20, 13 16 37, 5 8 16))'", "'POLYGON Z((2 3 1, 4 5 1, 7 8 2, 2 3 1))'"),
+      ("'POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))'")-> ("'POLYGON Z((9 11 11, 11 12 13, 18 16 23, 9 11 11))'", "'POLYGON Z((2 3 1, 4 5 1, 7 8 2, 2 3 1))'"),
       ("'LINESTRING EMPTY'") -> ("'LINESTRING EMPTY'", "'LINESTRING EMPTY'"),
       ("'GEOMETRYCOLLECTION (MULTIPOLYGON (((1 0, 1 1, 2 1, 2 0, 1 0), (1 0.5, 1 0.75, 1.5 0.75, 1.5 0.5, 1 0.5)), ((5 0, 5 5, 7 5, 7 0, 5 0))), POINT (10 10))'")->
-                                                    ("'GEOMETRYCOLLECTION (MULTIPOLYGON (((2 6, 4 7, 5 11, 3 10, 2 6), (3 6.5, 3.5 6.75, 4 8.75, 3.5 8.5, 3 6.5)), ((6 22, 16 27, 18 35, 8 30, 6 22))), POINT (31 52))'",
+                                                    ("'GEOMETRYCOLLECTION (MULTIPOLYGON (((5 9, 7 10, 8 11, 6 10, 5 9), (6 9.5, 6.5 9.75, 7 10.25, 6.5 10, 6 9.5)), ((9 13, 19 18, 21 20, 11 15, 9 13))), POINT (34 28))'",
                                                     "'GEOMETRYCOLLECTION (MULTIPOLYGON (((2 3, 4 5, 5 6, 3 4, 2 3), (3 4, 3.5 4.5, 4 5, 3.5 4.5, 3 4)), ((6 7, 16 17, 18 19, 8 9, 6 7))), POINT (31 32))'")
     )
     for (((geom), expectedResult) <- geomTestCases) {

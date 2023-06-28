@@ -488,8 +488,10 @@ public class GeomUtils {
         return Angle.toDegrees(angleInRadian);
     }
 
-    public static void affineGeom(Geometry geometry, Double a, Double b, Double d, Double e, Double xOff, Double yOff, Double c,
-                                  Double f, Double g, Double h, Double i, Double zOff) {
+
+    public static void affineGeom(Geometry geometry, Double a, Double b, Double c, Double d, Double e, Double f, Double g, Double h, Double i, Double xOff, Double yOff,
+                                  Double zOff) {
+
         Coordinate[] coordinates = geometry.getCoordinates();
         for (Coordinate currCoordinate : coordinates) {
             double x = currCoordinate.getX(), y = currCoordinate.getY(), z = Double.isNaN(currCoordinate.getZ()) ? 0 : currCoordinate.getZ();
