@@ -89,7 +89,7 @@ public class FunctionTest extends TestBase{
         Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (160 40)') AS g1, ST_GeomFromWKT('POINT (10 10)') as g2");
         table = table.select(call(Functions.ST_ClosestPoint.class.getSimpleName(), $("g1"), $("g2")));
         Geometry result = (Geometry) first(table).getField(0);
-        assertEquals("POINT(160 40)", result.toString());
+        assertEquals("POINT (160 40)", result.toString());
     }   
 
     @Test

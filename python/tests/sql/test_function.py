@@ -900,9 +900,9 @@ class TestPredicateJoin(TestBase):
             assert wkt == expected_wkt
 
     def test_st_closest_point(self):
-        expected = "'POINT (0 1)'"
-        actual_df = self.spark.sql("select ST_AsText(ST_ClosestPoint('POINT (0 1)', "
-                                   "'LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)'))")
+        expected = "POINT (0 1)"
+        actual_df = self.spark.sql("select ST_AsText(ST_ClosestPoint(ST_GeomFromText('POINT (0 1)'), "
+                                   "ST_GeomFromText('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)')))")
         actual = actual_df.take(1)[0][0]
         assert expected == actual
 

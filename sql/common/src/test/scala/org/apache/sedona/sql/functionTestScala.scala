@@ -1914,14 +1914,14 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
   it("should pass ST_ClosestPoint") {
     val geomTestCases = Map(
-      ("'POINT (160 40)'", "'LINESTRING (10 30, 50 50, 30 110, 70 90, 180 140, 130 190)'") -> "'POINT (160 40)'",
-      ("'LINESTRING (0 0, 100 0)'", "'LINESTRING (0 0, 50 50, 100 0)'") -> "'POINT (0 0)'"
+      ("'POINT (160 40)'", "'LINESTRING (10 30, 50 50, 30 110, 70 90, 180 140, 130 190)'") -> "POINT (160 40)",
+      ("'LINESTRING (0 0, 100 0)'", "'LINESTRING (0 0, 50 50, 100 0)'") -> "POINT (0 0)"
     )
     for (((geom), expectedResult) <- geomTestCases) {
       val g1 = geom._1
       val g2 = geom._2
       val df = sparkSession.sql(s"SELECT ST_ClosestPoint(ST_GeomFromWKT($g1), ST_GeomFromWKT($g2))")
-      val actual = df.take(1)(0).get(0).asInstanceOf[String]
+      val actual = df.take(1)(0).get(0).asInstanceOf[Geometry].toText
       val expected = expectedResult
       assertEquals(expected, actual)
 
