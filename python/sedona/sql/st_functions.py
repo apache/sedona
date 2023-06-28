@@ -43,6 +43,7 @@ __all__ = [
     "ST_Centroid",
     "ST_Collect",
     "ST_CollectionExtract",
+    "ST_ClosestPoint",
     "ST_ConcaveHull",
     "ST_ConvexHull",
     "ST_Difference",
@@ -371,6 +372,21 @@ def ST_CollectionExtract(collection: ColumnOrName, geom_type: Optional[Union[Col
     """
     args = (collection,) if geom_type is None else (collection, geom_type)
     return _call_st_function("ST_CollectionExtract", args)
+
+
+@validate_argument_types
+def ST_ClosestPoint(a: ColumnOrName, b: ColumnOrName) -> Column:
+    """Returns the 2-dimensional point on geom1 that is closest to geom2. 
+    This is the first point of the shortest line between the geometries.
+
+    :param a: Geometry column to use in the calculation.
+    :type a: ColumnOrName
+    :param b: Geometry column to use in the calculation.
+    :type b: ColumnOrName
+    :return: the 2-dimensional point on a that is closest to b.
+    :rtype: Column
+    """
+    return _call_st_function("ST_ClosestPoint", (a, b))
 
 
 @validate_argument_types
