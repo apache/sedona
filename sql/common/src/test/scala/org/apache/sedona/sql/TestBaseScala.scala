@@ -21,7 +21,7 @@ package org.apache.sedona.sql
 import com.google.common.math.DoubleMath
 import org.apache.log4j.{Level, Logger}
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
-import org.apache.sedona.common.Functions.hausdorffDistance
+import org.apache.sedona.common.Functions.{hausdorffDistance, frechetDistance}
 import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.sql.DataFrame
 import org.locationtech.jts.geom.{CoordinateSequence, CoordinateSequenceComparator}
@@ -136,6 +136,21 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
           else
             if (hausdorffDistance(point, polygon, densityFrac) < distance) 1 else 0
         }
+      }).sum
+    }).sum
+  }
+
+  protected def bruteForceDistanceJoinFrechet(sampleCount: Int, distance: Double, intersects: Boolean): Int = {
+    val inputPolygon = buildPolygonDf.limit(sampleCount).collect()
+    val inputPoint = buildPointDf.limit(sampleCount).collect()
+    inputPoint.map(row => {
+      val point = row.getAs[org.locationtech.jts.geom.Point](0)
+      inputPolygon.map(row => {
+        val polygon = row.getAs[org.locationtech.jts.geom.Polygon](0)
+        if (intersects)
+          if (frechetDistance(point, polygon) <= distance) 1 else 0
+        else
+          if (frechetDistance(point, polygon) < distance) 1 else 0
       }).sum
     }).sum
   }

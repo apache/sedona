@@ -387,6 +387,24 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       assert(distanceJoinDF.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size == 1)
       assert(distanceJoinDF.count() == expected)
     }
+
+    it("Passed ST_FrechetDistance <= distance") {
+      val sampleCount = 200
+      val distance = 2.0
+      val polygonDf = buildPolygonDf.limit(sampleCount).repartition(3)
+      val pointDf = buildPointDf.limit(sampleCount).repartition(5)
+      val expected = bruteForceDistanceJoinFrechet(sampleCount, distance, true)
+
+      var distanceJoinDF = pointDf.alias("pointDf").join(
+        broadcast(polygonDf).alias("polygonDF"), expr(s"ST_FrechetDistance(pointDf.pointshape, polygonDf.polygonshape) <= $distance"))
+      assert(distanceJoinDF.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size == 1)
+      assert(distanceJoinDF.count() == expected)
+
+      distanceJoinDF = broadcast(pointDf).alias("pointDf").join(polygonDf.alias("polygonDf"), expr(s"ST_FrechetDistance(pointDf.pointshape, polygonDf.polygonshape) <= $distance"))
+
+      assert(distanceJoinDF.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size == 1)
+      assert(distanceJoinDF.count() == expected)
+    }
   }
 
   describe("Sedona-SQL Broadcast Index Join Test for left semi joins") {

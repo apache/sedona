@@ -439,5 +439,26 @@ class predicateJoinTestScala extends TestBaseScala {
         assert(distanceDefaultIntersectsDF.count() == expectedDefaultNoIntersects)
       })
     }
+
+    it("Passed ST_FrechetDistance in a spatial join") {
+      val sampleCount = 200
+      val distanceCandidates = Seq(1, 2)
+      val inputPoint = buildPointDf.limit(sampleCount).repartition(5)
+      val inputPolygon = buildPolygonDf.limit(sampleCount).repartition(3)
+
+      distanceCandidates.foreach(distance => {
+        // <= distance
+        val expectedIntersects = bruteForceDistanceJoinFrechet(sampleCount, distance, true)
+        val distanceDefaultIntersectsDF = inputPoint.alias("pointDF").join(inputPolygon.alias("polygonDF"), expr(s"ST_FrechetDistance(pointDF.pointshape, polygonDF.polygonshape) <= $distance"))
+        assert(distanceDefaultIntersectsDF.queryExecution.sparkPlan.collect { case p: DistanceJoinExec => p }.size === 1)
+        assert(distanceDefaultIntersectsDF.count() == expectedIntersects)
+
+        // < distance
+        val expectedNoIntersects = bruteForceDistanceJoinFrechet(sampleCount, distance, false)
+        val distanceDefaultNoIntersectsDF = inputPoint.alias("pointDF").join(inputPolygon.alias("polygonDF"), expr(s"ST_FrechetDistance(pointDF.pointshape, polygonDF.polygonshape) <= $distance"))
+        assert(distanceDefaultNoIntersectsDF.queryExecution.sparkPlan.collect { case p: DistanceJoinExec => p }.size === 1)
+        assert(distanceDefaultIntersectsDF.count() == expectedNoIntersects)
+      })
+    }
   }
 }
