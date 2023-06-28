@@ -36,7 +36,6 @@ import org.locationtech.jts.operation.valid.IsSimpleOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
-import org.locationtech.jts.algorithm.distance.DiscreteHausdorffDistance;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -913,17 +912,17 @@ public class Functions {
         return geometry;
     }
 
-    public static Geometry affine(Geometry geometry, double a, double b, double d, double e, double xOff, double yOff, double c,
-                                  double f, double g, double h, double i, double zOff) {
+    public static Geometry affine(Geometry geometry, double a, double b, double c, double d, double e, double f, double g, double h, double i, double xOff, double yOff,
+                                  double zOff) {
         if (!geometry.isEmpty()) {
-            GeomUtils.affineGeom(geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff);
+            GeomUtils.affineGeom(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff);
         }
         return geometry;
     }
 
     public static Geometry affine(Geometry geometry, double a, double b, double d, double e, double xOff, double yOff) {
         if (!geometry.isEmpty()) {
-            GeomUtils.affineGeom(geometry, a, b, d, e, xOff, yOff, null, null, null, null, null, null);
+            GeomUtils.affineGeom(geometry, a, b, null, d, e, null, null, null, null, xOff, yOff, null);
         }
         return geometry;
     }
