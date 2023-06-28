@@ -30,7 +30,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 public class FunctionsTest {
     public static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
@@ -1198,6 +1197,31 @@ public class FunctionsTest {
         String expected4 = "GEOMETRYCOLLECTIONM";
         String actual4 = Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {measuredPolygon}));
         assertEquals(expected4, actual4);
+    }
+
+    @Test
+    public void closestPoint() {
+        Point point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
+        LineString lineString1 = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
+        String expected1 = "POINT (1 1)";
+        String actual1 = Functions.closestPoint(point1, lineString1).toText();
+        assertEquals(expected1, actual1);
+
+        Point point2 = GEOMETRY_FACTORY.createPoint(new Coordinate(160, 40));
+        LineString lineString2 = GEOMETRY_FACTORY.createLineString(coordArray(10, 30, 50, 50, 30, 110, 70, 90, 180, 140, 130, 190));
+        String expected2 = "POINT (160 40)";
+        String actual2 = Functions.closestPoint(point2, lineString2).toText();
+        assertEquals(expected2, actual2);
+        Point expectedPoint3 = GEOMETRY_FACTORY.createPoint(new Coordinate(125.75342465753425, 115.34246575342466));
+        Double expected3 = Functions.closestPoint(lineString2, point2).distance(expectedPoint3);
+        assertEquals(expected3, 0, 1e-3);
+
+        Point point4 = GEOMETRY_FACTORY.createPoint(new Coordinate(80, 160));
+        Polygon polygonA = GEOMETRY_FACTORY.createPolygon(coordArray(190, 150, 20, 10, 160, 70, 190, 150));
+        Geometry polygonB = Functions.buffer(point4, 30);
+        Point expectedPoint4 = GEOMETRY_FACTORY.createPoint(new Coordinate(131.59149149528952, 101.89887534906197));
+        Double expected4 = Functions.closestPoint(polygonA, polygonB).distance(expectedPoint4);
+        assertEquals(expected4, 0, 1e-6);
     }
 
     @Test

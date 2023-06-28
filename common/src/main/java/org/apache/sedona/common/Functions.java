@@ -30,6 +30,7 @@ import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.io.gml2.GMLWriter;
 import org.locationtech.jts.io.kml.KMLWriter;
 import org.locationtech.jts.linearref.LengthIndexedLine;
+import org.locationtech.jts.operation.distance.DistanceOp;
 import org.locationtech.jts.operation.distance3d.Distance3DOp;
 import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.locationtech.jts.operation.valid.IsSimpleOp;
@@ -445,6 +446,12 @@ public class Functions {
             coordinates.add(c);
         }
         return GEOMETRY_FACTORY.createLineString(coordinates.toArray(new Coordinate[0]));
+    }
+
+    public static Geometry closestPoint(Geometry left, Geometry right) {
+        DistanceOp distanceOp = new DistanceOp(left, right);
+        Coordinate[] closestPoints = distanceOp.nearestPoints();
+        return GEOMETRY_FACTORY.createPoint(closestPoints[0]);
     }
 
     public static Geometry concaveHull(Geometry geometry, double pctConvex, boolean allowHoles){
