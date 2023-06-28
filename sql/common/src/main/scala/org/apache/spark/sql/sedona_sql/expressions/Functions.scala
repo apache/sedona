@@ -31,6 +31,8 @@ import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom._
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 
+import java.lang
+
 /**
   * Return the distance between two geometries.
   *
@@ -1013,7 +1015,7 @@ case class ST_FrechetDistance(inputExpressions: Seq[Expression])
 }
 
 case class ST_Affine(inputExpressions: Seq[Expression])
-  extends InferredExpression(InferrableFunction.allowSixRightNull(Functions.affine _)) with FoldableExpression {
+  extends InferredExpression(inferrableFunction13(Functions.affine), inferrableFunction7(Functions.affine)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
@@ -1025,6 +1027,7 @@ case class ST_Dimension(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
 case class ST_BoundingDiagonal(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.boundingDiagonal _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -1033,8 +1036,16 @@ case class ST_BoundingDiagonal(inputExpressions: Seq[Expression])
 }
 
 case class ST_HausdorffDistance(inputExpressions: Seq[Expression])
-  extends InferredExpression(inferrableFunction3(Functions.hausdorffDistance)) {
+  extends InferredExpression(inferrableFunction3(Functions.hausdorffDistance), inferrableFunction2(Functions.hausdorffDistance)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
+
+case class GeometryType(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.geometryTypeWithMeasured _) with FoldableExpression {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+

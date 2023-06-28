@@ -14,13 +14,7 @@
 package org.apache.sedona.common.utils;
 
 import org.locationtech.jts.geom.*;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
-
-import org.locationtech.jts.geom.CoordinateSequence;
-import org.locationtech.jts.geom.CoordinateSequenceFilter;
-import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTWriter;
@@ -31,7 +25,6 @@ import org.locationtech.jts.algorithm.distance.DiscreteHausdorffDistance;
 
 import java.nio.ByteOrder;
 import java.util.*;
-import java.util.List;
 
 import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 
@@ -461,8 +454,8 @@ public class GeomUtils {
             geometry.geometryChanged();
         }
     }
-    public static void affineGeom(Geometry geometry, Double a, Double b, Double d, Double e, Double xOff, Double yOff, Double c,
-                                  Double f, Double g, Double h, Double i, Double zOff) {
+    public static void affineGeom(Geometry geometry, Double a, Double b, Double c, Double d, Double e, Double f, Double g, Double h, Double i, Double xOff, Double yOff,
+                                  Double zOff) {
         Coordinate[] coordinates = geometry.getCoordinates();
         for (Coordinate currCoordinate : coordinates) {
             double x = currCoordinate.getX(), y = currCoordinate.getY(), z = Double.isNaN(currCoordinate.getZ()) ? 0 : currCoordinate.getZ();
@@ -493,5 +486,10 @@ public class GeomUtils {
             hausdorffDistanceObj.setDensifyFraction(densityFrac);
         }
         return hausdorffDistanceObj.distance();
+    }
+
+    public static Boolean isMeasuredGeometry(Geometry geom) {
+        Coordinate coordinate = geom.getCoordinate();
+        return !Double.isNaN(coordinate.getM());
     }
 }

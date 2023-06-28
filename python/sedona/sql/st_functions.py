@@ -24,6 +24,7 @@ from sedona.sql.dataframe_api import call_sedona_function, ColumnOrName, ColumnO
 
 
 __all__ = [
+    "GeometryType",
     "ST_3DDistance",
     "ST_AddPoint",
     "ST_Area",
@@ -121,6 +122,17 @@ __all__ = [
 
 _call_st_function = partial(call_sedona_function, "st_functions")
 
+@validate_argument_types
+def GeometryType(geometry: ColumnOrName):
+    """Return the type of the geometry as a string.
+    This function also indicates if the geometry is measured, by returning a string of the form 'POINTM'.
+
+    :param geometry: Geometry column to calculate the dimension for.
+    :type geometry: ColumnOrName
+    :return: Type of geometry as a string column.
+    :rtype: Column
+    """
+    return _call_st_function("GeometryType", geometry)
 
 @validate_argument_types
 def ST_3DDistance(a: ColumnOrName, b: ColumnOrName) -> Column:
@@ -1328,7 +1340,9 @@ def ST_Affine(geometry: ColumnOrName, a: Union[ColumnOrName, float], b: Union[Co
     :param zOff: Default 0.0
     :return: Geometry with affine transformation applied
     """
-    args = (geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)
+    args = (geometry, a, b, d, e, xOff, yOff)
+    if not [x for x in (c, f, g, h, i, zOff) if x is None]:
+        args = (geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)
     return _call_st_function("ST_Affine", args)
 
 
@@ -1354,3 +1368,4 @@ def ST_HausdorffDistance(g1: ColumnOrName, g2: ColumnOrName, densityFrac: Option
     """
     args = (g1, g2, densityFrac)
     return _call_st_function("ST_HausdorffDistance", args)
+

@@ -16,11 +16,18 @@ package org.apache.sedona.flink.expressions;
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.functions.ScalarFunction;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryCollection;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 public class Functions {
+    public static class GeometryType extends ScalarFunction {
+        @DataTypeHint("String")
+        public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.geometryTypeWithMeasured(geom);
+        }
+    }
+
     public static class ST_Area extends ScalarFunction {
         @DataTypeHint("Double")
         public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
@@ -644,11 +651,10 @@ public class Functions {
     public static class ST_Affine extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object o, @DataTypeHint("Double") Double a,
-                             @DataTypeHint("Double") Double b, @DataTypeHint("Double") Double d, @DataTypeHint("Double") Double e, @DataTypeHint("Double") Double xOff, @DataTypeHint("Double") Double yOff, @DataTypeHint("Double") Double c,
-                             @DataTypeHint("Double") Double f, @DataTypeHint("Double") Double g, @DataTypeHint("Double") Double h, @DataTypeHint("Double") Double i,
+                             @DataTypeHint("Double") Double b, @DataTypeHint("Double") Double c, @DataTypeHint("Double") Double d, @DataTypeHint("Double") Double e, @DataTypeHint("Double") Double f, @DataTypeHint("Double") Double g, @DataTypeHint("Double") Double h, @DataTypeHint("Double") Double i, @DataTypeHint("Double") Double xOff, @DataTypeHint("Double") Double yOff,
                              @DataTypeHint("Double") Double zOff) {
             Geometry geometry = (Geometry) o;
-            return org.apache.sedona.common.Functions.affine(geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff);
+            return org.apache.sedona.common.Functions.affine(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff);
         }
 
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
