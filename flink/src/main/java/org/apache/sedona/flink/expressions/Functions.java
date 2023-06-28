@@ -71,6 +71,16 @@ public class Functions {
         }
     }
 
+    public static class ST_ClosestPoint extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object g1,
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object g2) {
+            Geometry geom1 = (Geometry) g1;
+            Geometry geom2 = (Geometry) g2;
+            return org.apache.sedona.common.Functions.closestPoint(geom1, geom2);
+        }
+    }
+
     public static class ST_ConcaveHull extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,

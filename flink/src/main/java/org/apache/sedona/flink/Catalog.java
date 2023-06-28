@@ -42,6 +42,7 @@ public class Catalog {
                 new Functions.ST_Azimuth(),
                 new Functions.ST_Boundary(),
                 new Functions.ST_Buffer(),
+                new Functions.ST_ClosestPoint(),
                 new Functions.ST_ConcaveHull(),
                 new Functions.ST_Envelope(),
                 new Functions.ST_Dimension(),

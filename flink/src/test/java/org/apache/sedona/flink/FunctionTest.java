@@ -85,6 +85,14 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testClosestPoint() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (160 40)') AS g1, ST_GeomFromWKT('POINT (10 10)') as g2");
+        table = table.select(call(Functions.ST_ClosestPoint.class.getSimpleName(), $("g1"), $("g2")));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("POINT(160 40)", result.toString());
+    }   
+
+    @Test
     public void testConcaveHull() {
         Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))') as geom");
         Table concaveHullPolygonTable = polygonTable.select(call(Functions.ST_ConcaveHull.class.getSimpleName(), $("geom"), 1.0, true));
