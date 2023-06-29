@@ -147,14 +147,14 @@ Computes the angle formed by vectors represented by point2 - point1 and point2 -
 Computes the angle formed by vectors S1 - E1 and S2 - E2, where S and E denote start and end points respectively
 
 !!!Note
-If any other geometry type is provided, ST_Angle throws an IllegalArgumentException.
-Additionally, if any of the provided geometry is empty, ST_Angle throws an IllegalArgumentException.
+    If any other geometry type is provided, ST_Angle throws an IllegalArgumentException.
+    Additionally, if any of the provided geometry is empty, ST_Angle throws an IllegalArgumentException.
 
 !!!Note
-If a 3D geometry is provided, ST_Angle computes the angle ignoring the z ordinate, equivalent to calling ST_Angle for corresponding 2D geometries.
+    If a 3D geometry is provided, ST_Angle computes the angle ignoring the z ordinate, equivalent to calling ST_Angle for corresponding 2D geometries.
 
 !!!Tip
-ST_Angle returns the angle in radian between 0 and 2\Pi. To convert the angle to degrees, use [ST_Degrees](./#st_degrees).
+    ST_Angle returns the angle in radian between 0 and 2\Pi. To convert the angle to degrees, use [ST_Degrees](./#st_degrees).
 
 
 Format: `ST_Angle(p1, p2, p3, p4) | ST_Angle(p1, p2, p3) | ST_Angle(line1, line2)`
