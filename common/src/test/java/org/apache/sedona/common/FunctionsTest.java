@@ -309,7 +309,7 @@ public class FunctionsTest {
         Integer expectedResult = 0;
         assertEquals(actualResult, expectedResult);
 
-        LineString lineString3D = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 1, 2));
+        LineString lineString3D = GEOMETRY_FACTORY.createLineString(coordArray3d(1, 0, 1, 1, 1, 2));
         actualResult = Functions.dimension(lineString3D);
         expectedResult = 1;
         assertEquals(actualResult, expectedResult);
@@ -1214,7 +1214,7 @@ public class FunctionsTest {
         assertEquals(expected2, actual2);
         Point expectedPoint3 = GEOMETRY_FACTORY.createPoint(new Coordinate(125.75342465753425, 115.34246575342466));
         Double expected3 = Functions.closestPoint(lineString2, point2).distance(expectedPoint3);
-        assertEquals(expected3, 0, 1e-3);
+        assertEquals(expected3, 0, 1e-6);
 
         Point point4 = GEOMETRY_FACTORY.createPoint(new Coordinate(80, 160));
         Polygon polygonA = GEOMETRY_FACTORY.createPolygon(coordArray(190, 150, 20, 10, 160, 70, 190, 150));
@@ -1222,6 +1222,49 @@ public class FunctionsTest {
         Point expectedPoint4 = GEOMETRY_FACTORY.createPoint(new Coordinate(131.59149149528952, 101.89887534906197));
         Double expected4 = Functions.closestPoint(polygonA, polygonB).distance(expectedPoint4);
         assertEquals(expected4, 0, 1e-6);
+    }
+
+    @Test
+    public void closestPoint3d() {
+        // One of the object is 3D
+        Point point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1,10000));
+        LineString lineString1 = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
+        String expected1 = "POINT (1 1)";
+        String actual1 = Functions.closestPoint(point1, lineString1).toText();
+        assertEquals(expected1, actual1);
+
+        // Both of the object are 3D
+        LineString lineString3D = GEOMETRY_FACTORY.createLineString(coordArray3d(1, 0, 100, 1, 1, 20, 2, 1, 40, 2, 0, 60, 1, 0, 70));
+        String expected2 = "POINT (1 1)";
+        String actual2 = Functions.closestPoint(point1, lineString3D).toText();
+        assertEquals(expected2, actual2);
+    }
+
+    @Test
+    public void closestPointGeomtryCollection() {
+        LineString line = GEOMETRY_FACTORY.createLineString(coordArray(2, 0, 0, 2));
+        Geometry[] geometry = new Geometry[] {
+                GEOMETRY_FACTORY.createLineString(coordArray(2, 0, 2, 1)),
+                GEOMETRY_FACTORY.createPolygon(coordArray(0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0))
+        };
+        GeometryCollection geometryCollection = GEOMETRY_FACTORY.createGeometryCollection(geometry);
+        String actual1 = Functions.closestPoint(line, geometryCollection).toText();
+        String expected1 = "POINT (2 0)";
+        assertEquals(actual1 ,expected1);
+    }
+
+    @Test
+    public void closestPointEmpty() {
+        // One of the object is empty
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
+        LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
+        Geometry actual = Functions.closestPoint(point, emptyLineString);
+        assertNull(actual);
+
+        // Both objects are empty
+        Polygon emptyPolygon = GEOMETRY_FACTORY.createPolygon();
+        Geometry actual2 = Functions.closestPoint(emptyPolygon, emptyLineString);
+        assertNull(actual2);
     }
 
     @Test

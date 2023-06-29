@@ -450,8 +450,13 @@ public class Functions {
 
     public static Geometry closestPoint(Geometry left, Geometry right) {
         DistanceOp distanceOp = new DistanceOp(left, right);
-        Coordinate[] closestPoints = distanceOp.nearestPoints();
-        return GEOMETRY_FACTORY.createPoint(closestPoints[0]);
+        try {
+            Coordinate[] closestPoints = distanceOp.nearestPoints();
+            return GEOMETRY_FACTORY.createPoint(closestPoints[0]);
+        }
+        catch (Exception e) {
+            return null;
+        }
     }
 
     public static Geometry concaveHull(Geometry geometry, double pctConvex, boolean allowHoles){
