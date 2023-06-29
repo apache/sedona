@@ -422,7 +422,7 @@ class predicateJoinTestScala extends TestBaseScala {
 
         //DensityFrac specified, < distance
         val expectedDensityNoIntersect = bruteForceDistanceJoinHausdorff(sampleCount, distance, densityFrac, false)
-        val distanceDensityNoIntersectDF = inputPoint.alias("pointDF").join(inputPolygon.alias("polygonDF"), expr(s"ST_HausdorffDistance(pointDF.pointshape, polygonDF.polygonshape, $densityFrac) <= $distance"))
+        val distanceDensityNoIntersectDF = inputPoint.alias("pointDF").join(inputPolygon.alias("polygonDF"), expr(s"ST_HausdorffDistance(pointDF.pointshape, polygonDF.polygonshape, $densityFrac) < $distance"))
         assert(distanceDensityNoIntersectDF.queryExecution.sparkPlan.collect { case p: DistanceJoinExec => p }.size === 1)
         assert(distanceDensityNoIntersectDF.count() == expectedDensityNoIntersect)
 
@@ -434,7 +434,7 @@ class predicateJoinTestScala extends TestBaseScala {
 
         //DensityFrac not specified, < distance
         val expectedDefaultNoIntersects = bruteForceDistanceJoinHausdorff(sampleCount, distance, 0.0, false)
-        val distanceDefaultNoIntersectsDF = inputPoint.alias("pointDF").join(inputPolygon.alias("polygonDF"), expr(s"ST_HausdorffDistance(pointDF.pointshape, polygonDF.polygonshape, $densityFrac) <= $distance"))
+        val distanceDefaultNoIntersectsDF = inputPoint.alias("pointDF").join(inputPolygon.alias("polygonDF"), expr(s"ST_HausdorffDistance(pointDF.pointshape, polygonDF.polygonshape, $densityFrac) < $distance"))
         assert(distanceDefaultNoIntersectsDF.queryExecution.sparkPlan.collect { case p: DistanceJoinExec => p }.size === 1)
         assert(distanceDefaultIntersectsDF.count() == expectedDefaultNoIntersects)
       })
