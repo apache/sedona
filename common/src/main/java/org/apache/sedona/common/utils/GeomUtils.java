@@ -20,6 +20,7 @@ import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTWriter;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
+import org.locationtech.jts.algorithm.Angle;
 import org.locationtech.jts.algorithm.distance.DiscreteFrechetDistance;
 import org.locationtech.jts.algorithm.distance.DiscreteHausdorffDistance;
 
@@ -454,8 +455,43 @@ public class GeomUtils {
             geometry.geometryChanged();
         }
     }
+
+    public static boolean isAnyGeomEmpty(Geometry... geometries) {
+        for (Geometry geometry: geometries) {
+            if (geometry != null)
+                if (geometry.isEmpty())
+                    return true;
+        }
+        return false;
+    }
+
+    public static Coordinate[] getStartEndCoordinates(Geometry line) {
+        if (line.getNumPoints() < 2) return null;
+        Coordinate[] coordinates = line.getCoordinates();
+        return new Coordinate[] {coordinates[0], coordinates[coordinates.length - 1]};
+    }
+
+    public static double calcAngle(Coordinate start1, Coordinate end1, Coordinate start2, Coordinate end2) {
+        double angle1 = normalizeAngle(Angle.angle(start1, end1));
+        double angle2 = normalizeAngle(Angle.angle(start2, end2));
+        return normalizeAngle(angle1 - angle2);
+    }
+
+    private static double normalizeAngle(double angle) {
+        if (angle < 0) {
+            return 2 * Math.PI - Math.abs(angle);
+        }
+        return angle;
+    }
+
+    public static double toDegrees(double angleInRadian) {
+        return Angle.toDegrees(angleInRadian);
+    }
+
+
     public static void affineGeom(Geometry geometry, Double a, Double b, Double c, Double d, Double e, Double f, Double g, Double h, Double i, Double xOff, Double yOff,
                                   Double zOff) {
+
         Coordinate[] coordinates = geometry.getCoordinates();
         for (Coordinate currCoordinate : coordinates) {
             double x = currCoordinate.getX(), y = currCoordinate.getY(), z = Double.isNaN(currCoordinate.getZ()) ? 0 : currCoordinate.getZ();

@@ -114,6 +114,8 @@ __all__ = [
     "ST_Force3D",
     "ST_NRings",
     "ST_Translate",
+    "ST_Angle",
+    "ST_Degrees",
     "ST_FrechetDistance",
     "ST_Affine",
     "ST_BoundingDiagonal"
@@ -1356,6 +1358,41 @@ def ST_BoundingDiagonal(geometry: ColumnOrName) -> Column:
 
     return _call_st_function("ST_BoundingDiagonal", geometry)
 
+
+@validate_argument_types
+def ST_Angle(g1: ColumnOrName, g2: ColumnOrName, g3: Optional[ColumnOrName] = None, g4: Optional[ColumnOrName] = None) -> Column:
+    """
+    Returns the computed angle between vectors formed by given geometries in radian. Range of result is between 0 and 2 * pi.
+    3 Variants:
+        Angle(Point1, Point2, Point3, Point4)
+            Computes angle formed by vectors formed by Point1-Point2 and Point3-Point4
+        Angle(Point1, Point2, Point3)
+            Computes angle formed by angle Point1-Point2-Point3
+        Angle(Line1, Line2)
+            Computes angle between vectors formed by S1-E1 and S2-E2, where S and E are start and endpoints.
+    :param g1: Point or Line
+    :param g2: Point or Line
+    :param g3: Point or None
+    :param g4: Point or None
+    :return: Returns the computed angle
+    """
+    args = (g1, g2)
+    if g3 is not None:
+        if g4 is not None:
+            args = (g1, g2, g3, g4)
+        else:
+            args = (g1, g2, g3)
+    # args = (g1, g2, g3, g4)
+    return _call_st_function("ST_Angle", args)
+
+@validate_argument_types
+def ST_Degrees(angleInRadian: Union[ColumnOrName, float]) -> Column:
+    """
+    Converts a given angle from radian to degrees
+    :param angleInRadian: Angle in Radian
+    :return: Angle in Degrees
+    """
+    return _call_st_function("ST_Degrees", angleInRadian)
 @validate_argument_types
 def ST_HausdorffDistance(g1: ColumnOrName, g2: ColumnOrName, densityFrac: Optional[Union[ColumnOrName, float]] = -1) -> Column:
     """
