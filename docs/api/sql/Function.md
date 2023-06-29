@@ -383,7 +383,8 @@ FROM polygondf
 
 ## ST_ClosestPoint
 
-Introduction: Returns the 2-dimensional point on geom1 that is closest to geom2. This is the first point of the shortest line between the geometries.
+Introduction: Returns the 2-dimensional point on geom1 that is closest to geom2. This is the first point of the shortest line between the geometries. If using 3D geometries, the Z coordinates will be ignored. If you have a 3D Geometry, you may prefer to use ST_3DClosestPoint.
+
 
 Format: `ST_ClosestPoint(g1: geomtry, g2: geometry)`
 
