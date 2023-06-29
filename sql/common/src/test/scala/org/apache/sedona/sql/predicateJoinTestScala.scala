@@ -407,7 +407,7 @@ class predicateJoinTestScala extends TestBaseScala {
 
     it("Passed ST_HausdorffDistance in a spatial join") {
       val sampleCount = 100
-      val distanceCandidates = Seq(1, 2)
+      val distanceCandidates = Seq(1, 2, 5, 10)
       val densityFrac = 0.6
       val inputPoint = buildPointDf.limit(sampleCount).repartition(5)
       val inputPolygon = buildPolygonDf.limit(sampleCount).repartition(3)
